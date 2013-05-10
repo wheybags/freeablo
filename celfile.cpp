@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
@@ -13,11 +14,11 @@
 
 struct colour
 {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
 
-    colour(unsigned char _r, unsigned char _g, unsigned char _b)
+    colour(uint8_t _r, uint8_t _g, uint8_t _b)
     {
         r = _r; g = _g; b = _b;
     }
@@ -49,116 +50,12 @@ void setpixel(SDL_Surface* screen, int x, int y, colour c)
     setpixel_real(screen, x*2+1, y*2+1, c);
 }
 
-int main(int argc, char** argv){
-    std::string pal_filename;
-    if(argc == 3)
-        pal_filename = argv[2];
-    else
-        pal_filename = "diablo.pal";
-
-
-    FILE * pFile;
-
-    pFile = fopen(argv[1], "rb");
-
-    unsigned int num_frames;
-    num_frames = 99999;
-
-    fread(&num_frames, 4, 1, pFile);
-    std::cout << ftell(pFile) << ": Num frames: " << num_frames << std::endl;
-    
-    unsigned int frame_offsets[num_frames+1];
-
-    for(int i = 0; i < num_frames; i++){
-            fread(&frame_offsets[i], 4, 1, pFile);
-            std::cout << ftell(pFile) << ": offset " << i << ": " << frame_offsets[i] << std::endl;
-    }
-
-    unsigned int end_offset;
-    fread(&end_offset, 4, 1, pFile);
-    std::cout << ftell(pFile) << ": end offset: " << end_offset << std::endl;
-    frame_offsets[num_frames] = end_offset;
-
-
-    int frame0_size = frame_offsets[1] - frame_offsets[0];
-    std::cout << std::endl << "frame 0 size: " << frame0_size << std::endl;
-
-    unsigned char frame0[frame0_size];
-    fread(&frame0[0], 1, 2, pFile);
-
-    Uint16 offset;
-    
-    bool from_header;
-
-    // we have a header
-    if(frame0[0] == 10)
-    {
-        fread(&offset, 2, 1, pFile);
-        std::cout << offset << std::endl;
-    
-        fread(&frame0[4], 1, frame0_size-4, pFile);
-
-        from_header = true;
-    }
-    else
-    {
-        fread(&frame0[2], 1, frame0_size-2, pFile);
-        from_header = false;
-    }
-
-    //int offset = frame0[2] + (frame0[1] << 8);
-    //std::cout << (int)frame0[2] << " " << (int)frame0[3] << " " << offset <<  std::endl;
-
-
-    /*unsigned int pixels = 0;
-
-
-    for(int i = 0; i < frame0_size; i++){
-        unsigned int c = frame0[i];
-        
-        // Regular command
-        if((16 < c) && (c <= 127)){
-            std::cout << i << ": regular: " << c << std::endl;;
-            i+= c-1;
-            pixels += c;
-        }
-
-        // Transparency command
-        else if(128 <= c){
-            std::cout << i << ": transparency: " << c << " " << (256 - c) << std::endl;
-            pixels += 256 - c;
-        }
-       
-        // Block command 
-        else if(c <= 16){
-            
-            unsigned int x;
-            //x = frame0[i+1] << 8;
-            //x |=frame0[i+2];
-            x = frame0[i+1];
-            std::cout << i << ": block: " << c  << " " << x  <<" "<< (unsigned int) frame0[i+2]<< std::endl;;
-            if(c == 0){
-                //std::cout << "ERROR" << std::endl;
-                //return 1;
-                continue;
-            }
-            
-            i += c;
-        }
-        else{
-            std::cout << "NOTHING" << std::endl;
-        }
-    }
-
-    std::cout << "pixels: " << ((float)pixels) / 96.0 << std::endl;
-*/
-
+void get_pal(std::string pal_filename, colour* pal)
+{
     FILE * pal_file;
 
     pal_file = fopen(pal_filename.c_str(), "rb");
     
-    colour pal[256];
-
     for(int i = 0; i < 256; i++)
     {
             fread(&pal[i].r, 1, 1, pal_file);
@@ -166,9 +63,147 @@ int main(int argc, char** argv){
             fread(&pal[i].b, 1, 1, pal_file);
     }
 
-    //std::cout << (int)(pal[255].r) << " " << (int)(pal[255].g) << " " << (int)(pal[255].b) << std::endl;
+    fclose(pal_file);
+}
+
+size_t get_num_frames(FILE* cel_file)
+{
+    size_t num_frames;
     
-    std::vector<colour> raw_image;
+    fread(&num_frames, 4, 1, cel_file);
+    std::cout << ftell(cel_file) << ": Num frames: " << num_frames << std::endl;
+
+    return num_frames;
+}
+
+void get_frame_offsets(FILE* cel_file, uint32_t* frame_offsets, size_t num_frames)
+{
+    for(int i = 0; i < num_frames; i++){
+            fread(&frame_offsets[i], 4, 1, cel_file);
+            std::cout << ftell(cel_file) << ": offset " << i << ": " << frame_offsets[i] << std::endl;
+    }
+
+    fread(&frame_offsets[num_frames], 4, 1, cel_file);
+    std::cout << ftell(cel_file) << ": end offset: " << frame_offsets[num_frames] << std::endl;
+}
+
+void fix_image(std::vector<colour>& raw_image, size_t width)
+{
+    for(int i = 0; i < raw_image.size()/2; i++)
+    {
+        colour tmp = raw_image[i];
+        raw_image[i] = raw_image[raw_image.size() - i];
+        raw_image[raw_image.size() - i] = tmp;
+    }
+
+    for(int i = 0; i < raw_image.size(); i++)
+    {
+        int x = i%width;
+        if(x < width/2)
+        {
+            colour tmp = raw_image[i];
+            raw_image[i] = raw_image[(i-x+width) - x];
+            raw_image[(i-x+width) - x] = tmp;
+        }
+    }
+}
+
+void print_cel(unsigned char* frame, int size)
+{
+    for(int i = 0; i < size; i++)
+    {
+        std::cout << i << ": " << (unsigned int) frame[i] << std::endl;
+    }
+}
+
+void fill_t(size_t pixels, std::vector<colour>& raw_image)
+{
+    for(int px = 0; px < pixels; px++)
+        raw_image.push_back(colour(255, 255, 255));
+}
+
+void decode_less_than(unsigned char* frame, colour* pal, std::vector<colour>& raw_image)
+{
+    int line;
+    int i = 0;
+
+    for(line = 0; line < 8; line++)
+    {
+        i += 2;
+
+        int xdraw = line*4 +2;
+        int xoffs = 32 - xdraw;
+
+        std::cout << "\tdraw: " << xdraw << std::endl;
+
+           
+        for(int px = xoffs; px < 32; px++)
+        {
+                raw_image.push_back(pal[frame[i]]);
+                i++;
+        }
+        
+        fill_t(xoffs, raw_image);
+
+        
+        xdraw = line*4 +4;
+        xoffs = 32 - xdraw;
+
+        std::cout << "\tdraw: " << xdraw << std::endl;
+
+        
+        for(int px = xoffs; px < 32; px++)
+        {
+                raw_image.push_back(pal[frame[i]]);
+                i++;
+        }
+        
+        fill_t(xoffs, raw_image);
+        
+       
+        std::cout << "len: " << raw_image.size() << std::endl;
+    }
+    
+    for(; line < 16; line++)
+    {
+        i += 2;
+
+        int xdraw = (15-line)*4 +2;
+        int xoffs = 32 - xdraw;
+
+        std::cout << "\tdraw2: " << xdraw << std::endl;
+
+           
+        for(int px = xoffs; px < 32; px++)
+        {
+                raw_image.push_back(pal[frame[i]]);
+                i++;
+        }
+        
+        fill_t(xoffs, raw_image);
+
+        
+        xdraw = (15-line)*4;
+        xoffs = 32 - xdraw;
+
+        std::cout << "\tdraw2: " << xdraw << std::endl;
+
+        
+        for(int px = xoffs; px < 32; px++)
+        {
+                raw_image.push_back(pal[frame[i]]);
+                i++;
+        }
+        
+        fill_t(xoffs, raw_image);
+        
+       
+        std::cout << "len2: " << raw_image.size() << std::endl;
+    }
+}
+
+size_t transparent_decode(unsigned char* frame, size_t frame_size, size_t width_override, bool from_header, uint16_t offset, colour* pal, std::vector<colour>& raw_image)
+{
 
     bool first = true;
     
@@ -180,14 +215,15 @@ int main(int argc, char** argv){
     bool reg_done = false;
 
     int tmp_pixels;
-    
-    for(int i = 0; i < frame0_size; i++){
+
+
+    for(int i = 0; i < frame_size; i++){
 
         tmp_pixels = 0;
 
         int temp = i;
 
-        unsigned int c = frame0[i];
+        unsigned int c = frame[i];
  
         if(!reg_done)
         {
@@ -207,10 +243,11 @@ int main(int argc, char** argv){
             std::cout << i << " regular: " << c << std::endl;
 
             for(int j = 1; j < c+1; j++){
-                raw_image.push_back(pal[frame0[i+j]]);
-                /*raw_image.push_back(pal[frame0[i+j]].r);
-                raw_image.push_back(pal[frame0[i+j]].g);
-                raw_image.push_back(pal[frame0[i+j]].b);*/
+                //std::cout << "asasas" << std::endl;
+                raw_image.push_back(pal[frame[i+j]]);
+                /*raw_image.push_back(pal[frame[i+j]].r);
+                raw_image.push_back(pal[frame[i+j]].g);
+                raw_image.push_back(pal[frame[i+j]].b);*/
             }
             
             tmp_pixels += c;
@@ -226,7 +263,7 @@ int main(int argc, char** argv){
                 /*raw_image.push_back(255);
                 raw_image.push_back(255);
                 raw_image.push_back(255);*/
-                raw_image.push_back(colour(255, 255, 255));
+                raw_image.push_back(colour(255, 0, 255));
             }
 
             tmp_pixels += run;
@@ -237,18 +274,19 @@ int main(int argc, char** argv){
 
             std::cout << i << " block: " << c << std::endl;
             
-            if(first){
-                //std::cout << (int)frame0[i+1] << " " << (int)frame0[i+2] << std::endl;
+            //if(c == 10 && i == 0){ i += 10; }
+            if(first && from_header){
+                std::cout << (int)frame[i+1] << " " << (int)frame[i+2] << std::endl;
                 first = false;
                 i += c;
                 continue;
             }
 
             for(int j = 1; j < c+1; j++){
-                raw_image.push_back(pal[frame0[i+j]]);
-                /*raw_image.push_back(pal[frame0[i+j]].r);
-                raw_image.push_back(pal[frame0[i+j]].g);
-                raw_image.push_back(pal[frame0[i+j]].b);*/
+                raw_image.push_back(pal[frame[i+j]]);
+                /*raw_image.push_back(pal[frame[i+j]].r);
+                raw_image.push_back(pal[frame[i+j]].g);
+                raw_image.push_back(pal[frame[i+j]].b);*/
             }
             
             tmp_pixels += c;
@@ -256,7 +294,7 @@ int main(int argc, char** argv){
             
         }
 
-        if(temp == offset)
+        if(temp == offset && from_header)
             width_header = pixels / 31;
         else
             pixels += tmp_pixels;
@@ -265,63 +303,159 @@ int main(int argc, char** argv){
 
 
     }
-    
+
     if(from_header)
         width = width_header;
     else
         width = width_reg;
     
-    if(width > 640) width = 99; // should never be bigger than 640 unless we fail to detect width, so fallback to random value 
+    // should never be zero,  bigger than 640 unless we fail to detect width, so fallback to random value 
+    if(width > 640) width = 32;
+    if(width < 10) width = 32; 
+
+    if(width_override)
+        width = width_override;
+
+
+    return width;
+}
+
+size_t decode_raw_32(unsigned char* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+{
+
+    for(int i = 0; i < frame_size; i++)
+    {
+        raw_image.push_back(pal[frame[i]]);
+    }
+
+    return 32;
+}
+
+
+
+size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t frame_num, std::vector<colour>& raw_image, size_t width_override = 0)
+{
+    int frame_size = frame_offsets[frame_num+1] - frame_offsets[frame_num];
+    std::cout << std::endl << "frame 0 size: " << frame_size << std::endl;
+
+
+    fseek(cel_file, frame_offsets[frame_num], SEEK_SET);
+
+    unsigned char frame[frame_size];
+    /*fread(&frame[0], 1, 2, cel_file);
+
+    uint16_t offset;
+    
+    bool from_header;
+
+    // we have a header
+    if(frame[0] == 10)
+    {
+        //fread(&offset, 2, 1, cel_file);
+        //std::cout << offset << std::endl;
+    
+        //fread(&frame[4], 1, frame_size-4, cel_file);
+
+        from_header = true;
+    }
+    else
+    {
+        //fread(&frame[2], 1, frame_size-2, cel_file);
+        from_header = false;
+    }*/
+
+    fseek(cel_file, frame_offsets[frame_num], SEEK_SET);
+    fread(&frame[0], 1, frame_size, cel_file);
+
+  
+     //std::cout << (int)(pal[255].r) << " " << (int)(pal[255].g) << " " << (int)(pal[255].b) << std::endl;
+    
+    //std::vector<colour> raw_image;
+    
+    // Make sure we're not concatenating onto some other image 
+    raw_image.clear();
+    
+
+    //print_cel(frame, frame_size);
+    
+    std::cout << std::endl;
    
-    std::cout << "WIDTH_reg: " << width_reg << std::endl;
-
-
-    for(int i = 0; i < raw_image.size()/2; i++)
+    int width;
+    
+    if(frame[0] == 0)
     {
-        colour tmp = raw_image[i];
-        raw_image[i] = raw_image[raw_image.size() - i];
-        raw_image[raw_image.size() - i] = tmp;
+        width = 32;
+        decode_less_than(frame, pal, raw_image);
     }
-
-    for(int i = 0; i < raw_image.size(); i++)
+    else
     {
+        uint16_t offset;
+        bool from_header = false;
+
+        if(frame[0] == 10)
+        {
+            from_header = true;
+            fseek(cel_file, frame_offsets[frame_num]+2, SEEK_SET);
+            fread(&offset, 2, 1, cel_file);
+        }
+
+        width = transparent_decode(frame, frame_size, width_override, from_header, offset, pal, raw_image);
         
-        int x = i%width;
-        if(x < width/2)
+        
+        if(raw_image.size() % width != 0) // It's a fully opaque raw frame, width 32, from a level tileset
         {
-            colour tmp = raw_image[i];
-            raw_image[i] = raw_image[(i-x+width) - x];
-            raw_image[(i-x+width) - x] = tmp;
+            raw_image.clear();
+            width =  decode_raw_32(frame, frame_size, pal, raw_image);
         }
+        
+        fix_image(raw_image, width);
+
     }
+    
+  
+    std::cout << "WIDTH used: " << width << std::endl;
 
-    //std::reverse(raw_image.begin(), raw_image.end());
-/*
-    int x = 0, y = 0;
-    for(int i = 0; i < raw_image.size(); i += 1)
-    {
-        //char tmp = raw_image[raw_image.size()-i];
-        //raw_image[raw_image.size()-i] = raw_image[i];
-        //raw_image[i] = tmp;
-                
-        //for(int j = 0; j < 3; j++)
-        {
-            // x,y = width -x, (raw_image.size() / width) -y;
-            
 
-            //char tmp = raw_image[(((y*width)+x)*3)+j];
-            //raw_image[((y*width)+x)*3] = raw_image[(raw_image.size()-(((y*width)+x)*3))+j];
-            //raw_image[(raw_image.size()-(((y*width)+x)*3))+j] = tmp;
-        }
+    return width;
+}
 
-        x++;
-        if(x >= width){
-            x = 0;
-            y++;
-        }
-    }
-*/
+
+    
+int main(int argc, char** argv){
+    std::string pal_filename;
+    size_t frame_num;
+    if(argc >= 3)
+        pal_filename = argv[2];
+    else
+        pal_filename = "diablo.pal";
+    
+    if(argc >= 4)
+        frame_num = atoi(argv[3]);
+    
+    //size_t frame_num = 210;
+    
+    colour pal[256];
+    get_pal(pal_filename, pal); 
+
+
+    FILE * cel_file;
+    cel_file = fopen(argv[1], "rb");
+
+    size_t num_frames = get_num_frames(cel_file);
+    
+    uint32_t frame_offsets[num_frames+1];
+    get_frame_offsets(cel_file, frame_offsets, num_frames);
+
+
+    std::vector<colour> raw_image;
+    size_t width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image);
+
     std::cout << width << std::endl; 
+
+
+
+
+
 
     SDL_Surface *screen;
     SDL_Event event;
@@ -350,6 +484,14 @@ int main(int argc, char** argv){
 
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.sym){
+                        case SDLK_UP:
+                            if(frame_num == num_frames-1) break;
+                            frame_num++;
+                            break;
+                        case SDLK_DOWN:
+                            if(frame_num == 0) break;
+                            frame_num--;
+                            break;
                         case SDLK_LEFT:
                             width--;
                             break;
@@ -357,6 +499,8 @@ int main(int argc, char** argv){
                             width++;
                             break;
                     } 
+                    get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, width);
+                    std::cout << "frame: " << frame_num << "/" << num_frames << std::endl;
                     std::cout << width << std::endl;
             }
         }
@@ -367,7 +511,7 @@ int main(int argc, char** argv){
             if(SDL_LockSurface(screen) < 0); continue;
         }
 
-        SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 0)); 
+        SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 255)); 
         
         int x = 0, y = 0;
         for(int i = 0; i < raw_image.size(); i++)
@@ -385,11 +529,12 @@ int main(int argc, char** argv){
 
         
         
-
+        /*
         for(int j = 0; j < 256; j++)
         {
             setpixel(screen, j, 0, pal[j]);
         }
+        */
 
         
         if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
