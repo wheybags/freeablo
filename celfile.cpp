@@ -122,7 +122,42 @@ void fill_t(size_t pixels, std::vector<colour>& raw_image)
         raw_image.push_back(colour(255, 255, 255));
 }
 
-void decode_less_than(unsigned char* frame, colour* pal, std::vector<colour>& raw_image)
+
+bool less_than_first(unsigned char* frame, size_t frame_size)
+{
+    return frame_size >= 256 &&
+    frame[  0] == 0 && frame[  1] == 0 &&
+    frame[  8] == 0 && frame[  9] == 0 &&
+    frame[ 24] == 0 && frame[ 25] == 0 &&
+    frame[ 48] == 0 && frame[ 49] == 0 &&
+    frame[ 80] == 0 && frame[ 81] == 0 &&
+    frame[120] == 0 && frame[121] == 0 &&
+    frame[168] == 0 && frame[169] == 0 &&
+    frame[224] == 0 && frame[225] == 0;
+}
+
+bool less_than_second(unsigned char* frame, size_t frame_size)
+{
+    return frame_size >= 530 &&
+    frame[288] == 0 && frame[289] == 0 &&
+    frame[348] == 0 && frame[349] == 0 &&
+    frame[400] == 0 && frame[401] == 0 &&
+    frame[444] == 0 && frame[445] == 0 &&
+    frame[480] == 0 && frame[481] == 0 &&
+    frame[508] == 0 && frame[509] == 0 &&
+    frame[528] == 0 && frame[529] == 0;
+}
+
+bool is_less_than(unsigned char* frame, size_t frame_size)
+{
+    return less_than_first(frame, frame_size);
+}
+
+
+
+
+
+void decode_less_than(unsigned char* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
 {
     int line;
     int i = 0;
@@ -137,13 +172,14 @@ void decode_less_than(unsigned char* frame, colour* pal, std::vector<colour>& ra
         std::cout << "\tdraw: " << xdraw << std::endl;
 
            
+        fill_t(xoffs, raw_image);
         for(int px = xoffs; px < 32; px++)
         {
+                std::cout << i << std::endl;
                 raw_image.push_back(pal[frame[i]]);
                 i++;
         }
         
-        fill_t(xoffs, raw_image);
 
         
         xdraw = line*4 +4;
@@ -152,54 +188,63 @@ void decode_less_than(unsigned char* frame, colour* pal, std::vector<colour>& ra
         std::cout << "\tdraw: " << xdraw << std::endl;
 
         
+        fill_t(xoffs, raw_image);
         for(int px = xoffs; px < 32; px++)
         {
                 raw_image.push_back(pal[frame[i]]);
                 i++;
         }
         
-        fill_t(xoffs, raw_image);
         
        
         std::cout << "len: " << raw_image.size() << std::endl;
     }
     
-    for(; line < 16; line++)
+    if(less_than_second(frame, frame_size))
     {
-        i += 2;
+        for(; line < 16; line++)
+        {
+            i += 2;
 
-        int xdraw = (15-line)*4 +2;
-        int xoffs = 32 - xdraw;
+            int xdraw = (15-line)*4 +2;
+            int xoffs = 32 - xdraw;
 
-        std::cout << "\tdraw2: " << xdraw << std::endl;
+            std::cout << "\tdraw2: " << xdraw << std::endl;
 
+            fill_t(xoffs, raw_image);
+               
+            for(int px = xoffs; px < 32; px++)
+            {
+                    raw_image.push_back(pal[frame[i]]);
+                    i++;
+            }
+            
+
+            
+            xdraw = (15-line)*4;
+            xoffs = 32 - xdraw;
+
+            std::cout << "\tdraw2: " << xdraw << std::endl;
+
+            
+            fill_t(xoffs, raw_image);
+            for(int px = xoffs; px < 32; px++)
+            {
+                    raw_image.push_back(pal[frame[i]]);
+                    i++;
+            }
+            
+            
            
-        for(int px = xoffs; px < 32; px++)
-        {
-                raw_image.push_back(pal[frame[i]]);
-                i++;
+            std::cout << "len2: " << raw_image.size() << std::endl;
         }
-        
-        fill_t(xoffs, raw_image);
-
-        
-        xdraw = (15-line)*4;
-        xoffs = 32 - xdraw;
-
-        std::cout << "\tdraw2: " << xdraw << std::endl;
-
-        
-        for(int px = xoffs; px < 32; px++)
-        {
-                raw_image.push_back(pal[frame[i]]);
-                i++;
-        }
-        
-        fill_t(xoffs, raw_image);
-        
-       
-        std::cout << "len2: " << raw_image.size() << std::endl;
     }
+    else
+    {
+        for(int i = 256; i < frame_size; i++)
+            raw_image.push_back(pal[frame[i]]);
+    }
+
 }
 
 size_t transparent_decode(unsigned char* frame, size_t frame_size, size_t width_override, bool from_header, uint16_t offset, colour* pal, std::vector<colour>& raw_image)
@@ -331,8 +376,6 @@ size_t decode_raw_32(unsigned char* frame, size_t frame_size, colour* pal, std::
     return 32;
 }
 
-
-
 size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t frame_num, std::vector<colour>& raw_image, size_t width_override = 0)
 {
     int frame_size = frame_offsets[frame_num+1] - frame_offsets[frame_num];
@@ -376,22 +419,23 @@ size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t fr
     raw_image.clear();
     
 
-    //print_cel(frame, frame_size);
+    print_cel(frame, frame_size);
     
     std::cout << std::endl;
    
     int width;
     
-    if(frame[0] == 0)
+    if(is_less_than(frame, frame_size))
     {
         width = 32;
-        decode_less_than(frame, pal, raw_image);
+        decode_less_than(frame, frame_size, pal, raw_image);
     }
     else
     {
         uint16_t offset;
         bool from_header = false;
-
+        
+        // The frame has a header which we can use to determine width
         if(frame[0] == 10)
         {
             from_header = true;
@@ -408,10 +452,10 @@ size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t fr
             width =  decode_raw_32(frame, frame_size, pal, raw_image);
         }
         
-        fix_image(raw_image, width);
 
     }
     
+    fix_image(raw_image, width);
   
     std::cout << "WIDTH used: " << width << std::endl;
 
