@@ -159,14 +159,14 @@ bool is_less_than(unsigned char* frame, size_t frame_size)
 
 void decode_less_than(unsigned char* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
 {
-    int line;
+    int segment;
     int i = 0;
 
-    for(line = 0; line < 8; line++)
+    for(segment = 0; segment < 8; segment++)
     {
         i += 2;
 
-        int xdraw = line*4 +2;
+        int xdraw = segment*4 +2;
         int xoffs = 32 - xdraw;
 
         std::cout << "\tdraw: " << xdraw << std::endl;
@@ -175,14 +175,13 @@ void decode_less_than(unsigned char* frame, size_t frame_size, colour* pal, std:
         fill_t(xoffs, raw_image);
         for(int px = xoffs; px < 32; px++)
         {
-                std::cout << i << std::endl;
                 raw_image.push_back(pal[frame[i]]);
                 i++;
         }
         
 
         
-        xdraw = line*4 +4;
+        xdraw = segment*4 +4;
         xoffs = 32 - xdraw;
 
         std::cout << "\tdraw: " << xdraw << std::endl;
@@ -202,11 +201,11 @@ void decode_less_than(unsigned char* frame, size_t frame_size, colour* pal, std:
     
     if(less_than_second(frame, frame_size))
     {
-        for(; line < 16; line++)
+        for(; segment < 16; segment++)
         {
             i += 2;
 
-            int xdraw = (15-line)*4 +2;
+            int xdraw = (15-segment)*4 +2;
             int xoffs = 32 - xdraw;
 
             std::cout << "\tdraw2: " << xdraw << std::endl;
@@ -221,7 +220,7 @@ void decode_less_than(unsigned char* frame, size_t frame_size, colour* pal, std:
             
 
             
-            xdraw = (15-line)*4;
+            xdraw = (15-segment)*4;
             xoffs = 32 - xdraw;
 
             std::cout << "\tdraw2: " << xdraw << std::endl;
@@ -246,6 +245,62 @@ void decode_less_than(unsigned char* frame, size_t frame_size, colour* pal, std:
     }
 
 }
+
+int32_t transparent_width(unsigned char* frame, size_t frame_size, bool from_header, uint16_t offset)
+{
+
+    if(from_header)
+    {
+        int width_header = 0; 
+        
+        for(int i = 11; i < frame_size; i++){
+            
+            if(i == offset && from_header)
+            {
+                width_header = width_header/31;
+                break;
+            }
+            // Regular command
+            if(frame[i] <= 127){
+                width_header += frame[i];
+                i += frame[i];
+            }
+
+            // Transparency command
+            else if(128 <= frame[i]){
+                width_header += 256 - frame[i];
+            }
+        }
+
+        return width_header;
+    }
+
+    else
+    {
+        int width_reg = 0;
+        
+        for(int i = 0; i < frame_size; i++){
+
+            // Regular command
+            if(frame[i] <= 127){
+                width_reg += frame[i];
+                i += frame[i];
+            }
+
+            // Transparency command
+            else if(128 <= frame[i]){
+                width_reg += 256 - frame[i];
+            }
+
+            if(frame[i] != 127)
+                break;
+
+        }
+
+        return width_reg;
+    }
+}
+
 
 size_t transparent_decode(unsigned char* frame, size_t frame_size, size_t width_override, bool from_header, uint16_t offset, colour* pal, std::vector<colour>& raw_image)
 {
@@ -445,6 +500,8 @@ size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t fr
 
         width = transparent_decode(frame, frame_size, width_override, from_header, offset, pal, raw_image);
         
+        std::cout << "w: " << transparent_width(frame, frame_size, from_header, offset) << std::endl;
+        
         
         if(raw_image.size() % width != 0) // It's a fully opaque raw frame, width 32, from a level tileset
         {
@@ -543,7 +600,7 @@ int main(int argc, char** argv){
                             width++;
                             break;
                     } 
-                    get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, width);
+                    width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image);
                     std::cout << "frame: " << frame_num << "/" << num_frames << std::endl;
                     std::cout << width << std::endl;
             }
