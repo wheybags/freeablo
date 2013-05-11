@@ -451,13 +451,13 @@ bool normal_decode(uint8_t* frame, size_t frame_size, size_t width, bool from_he
         i = 11;
     else
         i = 0;
-     
+    
     for(; i < frame_size; i++){
- 
+
         // Regular command
         if(frame[i] <= 127)
         {
-            //std::cout << i << " regular: " << (int)frame[i] << std::endl;
+            std::cout << i << " regular: " << (int)frame[i] << std::endl;
             
             // Just push the number of pixels specified by the command
             for(size_t j = 1; j < frame[i]+1; j++)
@@ -469,12 +469,13 @@ bool normal_decode(uint8_t* frame, size_t frame_size, size_t width, bool from_he
         // Transparency command
         else if(128 <= frame[i])
         {
-            //std::cout << i << " transparency: " << (int)frame[i] << " " << (256 - frame[i]) << std::endl;
+            std::cout << i << " transparency: " << (int)frame[i] << " " << (256 - frame[i]) << std::endl;
             
             // Push (256 - command value) transparent pixels
             for(size_t j = 0; j < 256-frame[i]; j++)
                 raw_image.push_back(colour(255, 0, 255));
         }
+
     }
 
     return true;
@@ -491,89 +492,61 @@ size_t decode_raw_32(uint8_t* frame, size_t frame_size, colour* pal, std::vector
     return 32;
 }
 
-size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t frame_num, std::vector<colour>& raw_image, size_t width_override = 0)
+size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t frame_num, std::vector<colour>& raw_image, bool is_tile_cel = false, size_t width_override = 0)
 {
-    int frame_size = frame_offsets[frame_num+1] - frame_offsets[frame_num];
+    size_t frame_size = frame_offsets[frame_num+1] - frame_offsets[frame_num];
     std::cout << std::endl << "frame 0 size: " << frame_size << std::endl;
 
+    
 
-    fseek(cel_file, frame_offsets[frame_num], SEEK_SET);
-
+    // Load frame data
     uint8_t frame[frame_size];
-    /*fread(&frame[0], 1, 2, cel_file);
-
-    uint16_t offset;
-    
-    bool from_header;
-
-    // we have a header
-    if(frame[0] == 10)
-    {
-        //fread(&offset, 2, 1, cel_file);
-        //std::cout << offset << std::endl;
-    
-        //fread(&frame[4], 1, frame_size-4, cel_file);
-
-        from_header = true;
-    }
-    else
-    {
-        //fread(&frame[2], 1, frame_size-2, cel_file);
-        from_header = false;
-    }*/
-
     fseek(cel_file, frame_offsets[frame_num], SEEK_SET);
     fread(&frame[0], 1, frame_size, cel_file);
 
-  
-     //std::cout << (int)(pal[255].r) << " " << (int)(pal[255].g) << " " << (int)(pal[255].b) << std::endl;
-    
-    //std::vector<colour> raw_image;
-    
     // Make sure we're not concatenating onto some other image 
     raw_image.clear();
     
 
-    print_cel(frame, frame_size);
-    
-    std::cout << std::endl;
+    //print_cel(frame, frame_size);
+    //std::cout << std::endl;
    
-    int width;
+    size_t width;
     
-    if(is_less_than(frame, frame_size))
-    {
+    if(is_tile_cel)
         width = 32;
+
+    if(is_tile_cel && is_less_than(frame, frame_size))
         decode_less_than(frame, frame_size, pal, raw_image);
-    }
-    else if(is_greater_than(frame, frame_size))
-    {
-        width = 32;
+    
+    else if(is_tile_cel && is_greater_than(frame, frame_size))
         decode_greater_than(frame, frame_size, pal, raw_image);
-        std::cout << "greater_than" << std::endl;
-    }
+    
     else
     {
         uint16_t offset;
         bool from_header = false;
         
-        // The frame has a header which we can use to determine width
-        if(frame[0] == 10)
-        {
-            from_header = true;
-            fseek(cel_file, frame_offsets[frame_num]+2, SEEK_SET);
-            fread(&offset, 2, 1, cel_file);
+        // Tile cel frames never have headers 
+        if(!is_tile_cel)
+        { 
+            // The frame has a header which we can use to determine width
+            if(frame[0] == 10)
+            {
+                from_header = true;
+                fseek(cel_file, frame_offsets[frame_num]+2, SEEK_SET);
+                fread(&offset, 2, 1, cel_file);
+            }
+            
+            width = normal_width(frame, frame_size, from_header, offset);
         }
-
-        width = normal_width(frame, frame_size, from_header, offset);
+        
         normal_decode(frame, frame_size, width, from_header, pal, raw_image);
         
-        //std::cout << "w: " << normal_width(frame, frame_size, from_header, offset) << std::endl;
-        
-        
-        if(true) // It's a fully opaque raw frame, width 32, from a level tileset
+        if(is_tile_cel && raw_image.size() != 32*32) // It's a fully opaque raw frame, width 32, from a level tileset
         {
             raw_image.clear();
-            width =  decode_raw_32(frame, frame_size, pal, raw_image);
+            decode_raw_32(frame, frame_size, pal, raw_image);
         }
         
 
@@ -587,7 +560,19 @@ size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t fr
     return width;
 }
 
-
+bool ends_with(const std::string& full, const std::string& end)
+{
+    return end.size() <= full.size() && full.substr(full.size() - end.size(), end.size()) == end;
+}
+bool is_tile_cel(const std::string& file_name)
+{
+    return 
+    ends_with(file_name, "l1.cel") ||
+    ends_with(file_name, "l2.cel") ||
+    ends_with(file_name, "l3.cel") ||
+    ends_with(file_name, "l4.cel") ||
+    ends_with(file_name, "town.cel");
+}
     
 int main(int argc, char** argv){
     std::string pal_filename;
@@ -615,8 +600,13 @@ int main(int argc, char** argv){
     get_frame_offsets(cel_file, frame_offsets, num_frames);
 
 
+
+    std::string file_name = argv[1];
+    bool tile_cel = is_tile_cel(file_name);
+
+
     std::vector<colour> raw_image;
-    size_t width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image);
+    size_t width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, tile_cel);
 
     std::cout << width << std::endl; 
 
@@ -667,7 +657,7 @@ int main(int argc, char** argv){
                             width++;
                             break;
                     } 
-                    width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image);
+                    width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, tile_cel);
                     std::cout << "frame: " << frame_num << "/" << num_frames << std::endl;
                     std::cout << width << std::endl;
             }
