@@ -108,7 +108,7 @@ void fix_image(std::vector<colour>& raw_image, size_t width)
     }
 }
 
-void print_cel(unsigned char* frame, int size)
+void print_cel(uint8_t* frame, int size)
 {
     for(int i = 0; i < size; i++)
     {
@@ -123,9 +123,135 @@ void fill_t(size_t pixels, std::vector<colour>& raw_image)
 }
 
 
-bool less_than_first(unsigned char* frame, size_t frame_size)
+bool greater_than_first(uint8_t* frame, size_t frame_size)
 {
-    return frame_size >= 256 &&
+    return frame_size >= 196 &&
+    frame[  2] == 0 && frame[  3] == 0 &&
+    frame[ 14] == 0 && frame[ 15] == 0 &&
+    frame[ 34] == 0 && frame[ 35] == 0 &&
+    frame[ 62] == 0 && frame[ 63] == 0 &&
+    frame[ 98] == 0 && frame[ 99] == 0 &&
+    frame[142] == 0 && frame[143] == 0 &&
+    frame[194] == 0 && frame[195] == 0;
+}
+
+bool greater_than_second(uint8_t* frame, size_t frame_size)
+{
+    return frame_size >= 196 &&
+    frame[254] == 0 && frame[255] == 0 &&
+    frame[318] == 0 && frame[319] == 0 &&
+    frame[374] == 0 && frame[375] == 0 &&
+    frame[422] == 0 && frame[423] == 0 &&
+    frame[462] == 0 && frame[463] == 0 &&
+    frame[494] == 0 && frame[495] == 0 &&
+    frame[518] == 0 && frame[519] == 0 &&
+    frame[534] == 0 && frame[535] == 0;
+}
+
+bool is_greater_than(uint8_t* frame, size_t frame_size)
+{
+    return greater_than_first(frame, frame_size);
+}
+
+void decode_greater_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+{
+    int segment;
+    int i = 0;
+
+    raw_image.push_back(pal[frame[i]]);
+    i++;
+    raw_image.push_back(pal[frame[i]]);
+    i++;
+   
+    fill_t(30, raw_image);
+
+    for(segment = 0; segment < 7; segment++)
+    {
+        i += 2;
+
+        int xdraw = (segment+1)*4;
+        int xoffs = 0;
+
+        std::cout << "\tdraw: " << xdraw << std::endl;
+
+        int px; 
+        for(px = xoffs; px < xdraw; px++)
+        {
+                raw_image.push_back(pal[frame[i]]);
+                i++;
+        }
+        fill_t(32-xdraw, raw_image);
+        
+
+        
+        xdraw = (segment+1)*4 +2;
+        xoffs = 0;
+
+        std::cout << "\tdraw: " << xdraw << std::endl;
+
+        
+        for(px = xoffs; px < xdraw; px++)
+        {
+                raw_image.push_back(pal[frame[i]]);
+                i++;
+        }
+        fill_t(32-xdraw, raw_image);
+        
+        
+       
+        std::cout << "len: " << raw_image.size() << std::endl;
+    }
+    
+    if(greater_than_second(frame, frame_size))
+    {
+        for(; segment < 15; segment++)
+        {
+            i += 2;
+
+            int xdraw = (15-segment)*4;
+            int xoffs = 0;
+
+            std::cout << "\tdraw: " << xdraw << std::endl;
+
+            int px; 
+            for(px = xoffs; px < xdraw; px++)
+            {
+                    raw_image.push_back(pal[frame[i]]);
+                    i++;
+            }
+            fill_t(32-xdraw, raw_image);
+            
+
+            
+            xdraw = ((15-segment)*4) -2;
+            xoffs = 0;
+
+            std::cout << "\tdraw: " << xdraw << std::endl;
+
+            
+            for(px = xoffs; px < xdraw; px++)
+            {
+                    raw_image.push_back(pal[frame[i]]);
+                    i++;
+            }
+            fill_t(32-xdraw, raw_image);
+            
+            
+           
+            std::cout << "len: " << raw_image.size() << std::endl;
+        }
+    }
+    else
+    {
+        for(int i = 256; i < frame_size; i++)
+            raw_image.push_back(pal[frame[i]]);
+    }
+
+}
+
+bool less_than_first(uint8_t* frame, size_t frame_size)
+{
+    return frame_size >= 226 &&
     frame[  0] == 0 && frame[  1] == 0 &&
     frame[  8] == 0 && frame[  9] == 0 &&
     frame[ 24] == 0 && frame[ 25] == 0 &&
@@ -136,7 +262,7 @@ bool less_than_first(unsigned char* frame, size_t frame_size)
     frame[224] == 0 && frame[225] == 0;
 }
 
-bool less_than_second(unsigned char* frame, size_t frame_size)
+bool less_than_second(uint8_t* frame, size_t frame_size)
 {
     return frame_size >= 530 &&
     frame[288] == 0 && frame[289] == 0 &&
@@ -148,7 +274,7 @@ bool less_than_second(unsigned char* frame, size_t frame_size)
     frame[528] == 0 && frame[529] == 0;
 }
 
-bool is_less_than(unsigned char* frame, size_t frame_size)
+bool is_less_than(uint8_t* frame, size_t frame_size)
 {
     return less_than_first(frame, frame_size);
 }
@@ -157,7 +283,7 @@ bool is_less_than(unsigned char* frame, size_t frame_size)
 
 
 
-void decode_less_than(unsigned char* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+void decode_less_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
 {
     int segment;
     int i = 0;
@@ -246,14 +372,18 @@ void decode_less_than(unsigned char* frame, size_t frame_size, colour* pal, std:
 
 }
 
-int32_t transparent_width(unsigned char* frame, size_t frame_size, bool from_header, uint16_t offset)
+int32_t normal_width(uint8_t* frame, size_t frame_size, bool from_header, uint16_t offset)
 {
-
+    
+    // If we have a header, we know that offset points to the start of the 32nd line.
+    // So, when we reach that point, we will have produced 31 lines of pixels, so we 
+    // can divide the number of pixels we have passed at this point by 31, to get the 
+    // width.
     if(from_header)
     {
-        int width_header = 0; 
+        int32_t width_header = 0; 
         
-        for(int i = 11; i < frame_size; i++){
+        for(size_t i = 11; i < frame_size; i++){
             
             if(i == offset && from_header)
             {
@@ -274,12 +404,22 @@ int32_t transparent_width(unsigned char* frame, size_t frame_size, bool from_hea
 
         return width_header;
     }
-
+    
+    // If we do not have a header we probably (definitely?) don't have any transparency.
+    // The maximum stretch of opaque pixels following a command byte is 127.
+    // Since commands can't wrap over lines (it seems), if the width is shorter than 127,
+    // the first (command) byte will indicate an entire line, so it's value is the width.
+    // If the width is larger than 127, it will be some sequence of 127 byte long stretches,
+    // followed by some other value to bring it to the end of a line (presuming the width is
+    // not divisible by 127).
+    // So, for all image except those whose width is divisible by 127, we can determine width
+    // by looping through control bits, adding 127 each time, until we find some value which
+    // is not 127, then add that to the 127-total and that is our width.
     else
     {
-        int width_reg = 0;
+        int32_t width_reg = 0;
         
-        for(int i = 0; i < frame_size; i++){
+        for(size_t i = 0; i < frame_size; i++){
 
             // Regular command
             if(frame[i] <= 127){
@@ -287,7 +427,7 @@ int32_t transparent_width(unsigned char* frame, size_t frame_size, bool from_hea
                 i += frame[i];
             }
 
-            // Transparency command
+            // Transparency command - who knows, it might be possible
             else if(128 <= frame[i]){
                 width_reg += 256 - frame[i];
             }
@@ -302,125 +442,45 @@ int32_t transparent_width(unsigned char* frame, size_t frame_size, bool from_hea
 }
 
 
-size_t transparent_decode(unsigned char* frame, size_t frame_size, size_t width_override, bool from_header, uint16_t offset, colour* pal, std::vector<colour>& raw_image)
+bool normal_decode(uint8_t* frame, size_t frame_size, size_t width, bool from_header, colour* pal, std::vector<colour>& raw_image)
 {
+    size_t i;
 
-    bool first = true;
-    
-    //int x = 0, y = 0;
-
-    int width_header, width_reg = 0, width = 99;
-    int pixels = 0;
-
-    bool reg_done = false;
-
-    int tmp_pixels;
-
-
-    for(int i = 0; i < frame_size; i++){
-
-        tmp_pixels = 0;
-
-        int temp = i;
-
-        unsigned int c = frame[i];
+    // Skip the header if it exists
+    if(from_header)
+        i = 11;
+    else
+        i = 0;
+     
+    for(; i < frame_size; i++){
  
-        if(!reg_done)
-        {
-            if(128 <= c)
-                width_reg += 256 - c;
-            else
-                width_reg += c;
-            if(c != 127)
-                reg_done = true;
-        }
-            
-            
-             
         // Regular command
-        if((16 < c) && (c <= 127)){
-
-            std::cout << i << " regular: " << c << std::endl;
-
-            for(int j = 1; j < c+1; j++){
-                //std::cout << "asasas" << std::endl;
-                raw_image.push_back(pal[frame[i+j]]);
-                /*raw_image.push_back(pal[frame[i+j]].r);
-                raw_image.push_back(pal[frame[i+j]].g);
-                raw_image.push_back(pal[frame[i+j]].b);*/
-            }
+        if(frame[i] <= 127)
+        {
+            //std::cout << i << " regular: " << (int)frame[i] << std::endl;
             
-            tmp_pixels += c;
-            i+= c;
+            // Just push the number of pixels specified by the command
+            for(size_t j = 1; j < frame[i]+1; j++)
+                raw_image.push_back(pal[frame[i+j]]);
+            
+            i+= frame[i];
         }
 
         // Transparency command
-        else if(128 <= c){
-
-            std::cout << i << " transparency: " << c << " " << (256 - c) << std::endl;
-            int run = 256 -c;
-            for(int j = 0; j < run; j++){
-                /*raw_image.push_back(255);
-                raw_image.push_back(255);
-                raw_image.push_back(255);*/
+        else if(128 <= frame[i])
+        {
+            //std::cout << i << " transparency: " << (int)frame[i] << " " << (256 - frame[i]) << std::endl;
+            
+            // Push (256 - command value) transparent pixels
+            for(size_t j = 0; j < 256-frame[i]; j++)
                 raw_image.push_back(colour(255, 0, 255));
-            }
-
-            tmp_pixels += run;
         }
-       
-        // Block command 
-        else if(c <= 16){
-
-            std::cout << i << " block: " << c << std::endl;
-            
-            //if(c == 10 && i == 0){ i += 10; }
-            if(first && from_header){
-                std::cout << (int)frame[i+1] << " " << (int)frame[i+2] << std::endl;
-                first = false;
-                i += c;
-                continue;
-            }
-
-            for(int j = 1; j < c+1; j++){
-                raw_image.push_back(pal[frame[i+j]]);
-                /*raw_image.push_back(pal[frame[i+j]].r);
-                raw_image.push_back(pal[frame[i+j]].g);
-                raw_image.push_back(pal[frame[i+j]].b);*/
-            }
-            
-            tmp_pixels += c;
-            i += c;
-            
-        }
-
-        if(temp == offset && from_header)
-            width_header = pixels / 31;
-        else
-            pixels += tmp_pixels;
-
-        std::cout << "\t\tpixels: " << pixels << std::endl;
-
-
     }
 
-    if(from_header)
-        width = width_header;
-    else
-        width = width_reg;
-    
-    // should never be zero,  bigger than 640 unless we fail to detect width, so fallback to random value 
-    if(width > 640) width = 32;
-    if(width < 10) width = 32; 
-
-    if(width_override)
-        width = width_override;
-
-
-    return width;
+    return true;
 }
 
-size_t decode_raw_32(unsigned char* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+size_t decode_raw_32(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
 {
 
     for(int i = 0; i < frame_size; i++)
@@ -439,7 +499,7 @@ size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t fr
 
     fseek(cel_file, frame_offsets[frame_num], SEEK_SET);
 
-    unsigned char frame[frame_size];
+    uint8_t frame[frame_size];
     /*fread(&frame[0], 1, 2, cel_file);
 
     uint16_t offset;
@@ -485,6 +545,12 @@ size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t fr
         width = 32;
         decode_less_than(frame, frame_size, pal, raw_image);
     }
+    else if(is_greater_than(frame, frame_size))
+    {
+        width = 32;
+        decode_greater_than(frame, frame_size, pal, raw_image);
+        std::cout << "greater_than" << std::endl;
+    }
     else
     {
         uint16_t offset;
@@ -498,12 +564,13 @@ size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t fr
             fread(&offset, 2, 1, cel_file);
         }
 
-        width = transparent_decode(frame, frame_size, width_override, from_header, offset, pal, raw_image);
+        width = normal_width(frame, frame_size, from_header, offset);
+        normal_decode(frame, frame_size, width, from_header, pal, raw_image);
         
-        std::cout << "w: " << transparent_width(frame, frame_size, from_header, offset) << std::endl;
+        //std::cout << "w: " << normal_width(frame, frame_size, from_header, offset) << std::endl;
         
         
-        if(raw_image.size() % width != 0) // It's a fully opaque raw frame, width 32, from a level tileset
+        if(true) // It's a fully opaque raw frame, width 32, from a level tileset
         {
             raw_image.clear();
             width =  decode_raw_32(frame, frame_size, pal, raw_image);
