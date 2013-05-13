@@ -7,48 +7,9 @@
 #include <vector>
 #include <algorithm>
 
-#define WIDTH 1280
-#define HEIGHT 960
-#define BPP 4
-#define DEPTH 32
 
-struct colour
-{
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
+#include "celfile.h"
 
-    colour(uint8_t _r, uint8_t _g, uint8_t _b)
-    {
-        r = _r; g = _g; b = _b;
-    }
-
-    colour(){}
-};
-
-void setpixel_real(SDL_Surface *screen, int x, int y, colour c)
-{
-    y = y*screen->pitch/BPP;
-
-    Uint32 *pixmem32;
-    Uint32 colour;  
- 
-    colour = SDL_MapRGB( screen->format, c.r, c.g, c.b );
-  
-    pixmem32 = (Uint32*) screen->pixels  + y + x;
-    *pixmem32 = colour;
-}
-
-void setpixel(SDL_Surface* screen, int x, int y, colour c)
-{
-    //setpixel_real(screen, x, y, c);
-    //return;
-
-    setpixel_real(screen, x*2, y*2, c);
-    setpixel_real(screen, x*2+1, y*2, c);
-    setpixel_real(screen, x*2, y*2+1, c);
-    setpixel_real(screen, x*2+1, y*2+1, c);
-}
 
 void get_pal(std::string pal_filename, colour* pal)
 {
@@ -68,7 +29,7 @@ void get_pal(std::string pal_filename, colour* pal)
 
 size_t get_num_frames(FILE* cel_file)
 {
-    size_t num_frames;
+    uint32_t num_frames;
     
     fread(&num_frames, 4, 1, cel_file);
     std::cout << ftell(cel_file) << ": Num frames: " << num_frames << std::endl;
@@ -119,7 +80,7 @@ void print_cel(uint8_t* frame, int size)
 void fill_t(size_t pixels, std::vector<colour>& raw_image)
 {
     for(int px = 0; px < pixels; px++)
-        raw_image.push_back(colour(255, 255, 255));
+        raw_image.push_back(colour(255, 255, 255, false));
 }
 
 
@@ -473,7 +434,7 @@ bool normal_decode(uint8_t* frame, size_t frame_size, size_t width, bool from_he
             
             // Push (256 - command value) transparent pixels
             for(size_t j = 0; j < 256-frame[i]; j++)
-                raw_image.push_back(colour(255, 0, 255));
+                raw_image.push_back(colour(255, 0, 255, false));
         }
 
     }
@@ -492,7 +453,7 @@ size_t decode_raw_32(uint8_t* frame, size_t frame_size, colour* pal, std::vector
     return 32;
 }
 
-size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t frame_num, std::vector<colour>& raw_image, bool is_tile_cel = false, size_t width_override = 0)
+size_t Cel_file::get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t frame_num, std::vector<colour>& raw_image, bool is_tile_cel, size_t width_override)
 {
     size_t frame_size = frame_offsets[frame_num+1] - frame_offsets[frame_num];
     std::cout << std::endl << "frame 0 size: " << frame_size << std::endl;
@@ -560,10 +521,25 @@ size_t get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t fr
     return width;
 }
 
+
+//size_t Cel_file::get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t frame_num, std::vector<colour>& raw_image, bool is_tile_cel, size_t width_override)
+size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
+{
+    return get_frame(mFile, mPal, mFrame_offsets, frame_num, raw_image, mIs_tile_cel);
+}
+
 bool ends_with(const std::string& full, const std::string& end)
 {
     return end.size() <= full.size() && full.substr(full.size() - end.size(), end.size()) == end;
 }
+
+std::string replace_end(const std::string& old_end, const std::string& new_end, const std::string& original)
+{
+    std::string retval = original.substr(0, original.size() - old_end.size());
+    retval.append(new_end);
+    return retval;
+}
+
 bool is_tile_cel(const std::string& file_name)
 {
     return 
@@ -573,131 +549,38 @@ bool is_tile_cel(const std::string& file_name)
     ends_with(file_name, "l4.cel") ||
     ends_with(file_name, "town.cel");
 }
-    
-int main(int argc, char** argv){
+
+size_t Cel_file::get_num_frames()
+{
+    return mNum_frames;
+}
+
+void get_pallette(std::string filename, colour* pal)
+{
     std::string pal_filename;
-    size_t frame_num;
-    if(argc >= 3)
-        pal_filename = argv[2];
+    if(ends_with(filename, "l1.cel"))
+        pal_filename = replace_end("l1.cel", "l1.pal", filename);
     else
         pal_filename = "diablo.pal";
-    
-    if(argc >= 4)
-        frame_num = atoi(argv[3]);
-    
-    //size_t frame_num = 210;
-    
-    colour pal[256];
-    get_pal(pal_filename, pal); 
-
-
-    FILE * cel_file;
-    cel_file = fopen(argv[1], "rb");
-
-    size_t num_frames = get_num_frames(cel_file);
-    
-    uint32_t frame_offsets[num_frames+1];
-    get_frame_offsets(cel_file, frame_offsets, num_frames);
-
-
-
-    std::string file_name = argv[1];
-    bool tile_cel = is_tile_cel(file_name);
-
-
-    std::vector<colour> raw_image;
-    size_t width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, tile_cel);
-
-    std::cout << width << std::endl; 
-
-
-
-
-
-
-    SDL_Surface *screen;
-    SDL_Event event;
-  
-    int h=0; 
-  
-    if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
-   
-    if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE)))
-    {
-        SDL_Quit();
-        return 1;
-    }
-
 
     
-    bool quit = false;
-    while(!quit)
-    {
-        while(SDL_PollEvent(&event)){
-            switch (event.type) 
-            {
-                case SDL_QUIT:
-	                quit = true;
-	                break;
-
-                case SDL_KEYDOWN:
-                    switch(event.key.keysym.sym){
-                        case SDLK_UP:
-                            if(frame_num == num_frames-1) break;
-                            frame_num++;
-                            break;
-                        case SDLK_DOWN:
-                            if(frame_num == 0) break;
-                            frame_num--;
-                            break;
-                        case SDLK_LEFT:
-                            width--;
-                            break;
-                        case SDLK_RIGHT:
-                            width++;
-                            break;
-                    } 
-                    width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, tile_cel);
-                    std::cout << "frame: " << frame_num << "/" << num_frames << std::endl;
-                    std::cout << width << std::endl;
-            }
-        }
-
-        
-        if(SDL_MUSTLOCK(screen)) 
-        {
-            if(SDL_LockSurface(screen) < 0); continue;
-        }
-
-        SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 255)); 
-        
-        int x = 0, y = 0;
-        for(int i = 0; i < raw_image.size(); i++)
-        {
-
-            setpixel(screen, x, y, raw_image[i]);
-            
-            x++;
-            if(x >= width){
-                x = 0;
-                y++;
-            }
-        }
-
-
-        
-        
-        /*
-        for(int j = 0; j < 256; j++)
-        {
-            setpixel(screen, j, 0, pal[j]);
-        }
-        */
-
-        
-        if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-      
-        SDL_Flip(screen); 
-        //while(1);
-    }
+    return get_pal(pal_filename, pal);
 }
+
+Cel_file::Cel_file(std::string filename)
+{
+    mFile = fopen(filename.c_str(), "rb");
+
+    mPal = new colour[256];
+    //get_pal("diablo.pal", mPal);
+    get_pallette(filename, mPal);
+
+    mNum_frames = ::get_num_frames(mFile);
+
+    mFrame_offsets = new uint32_t[mNum_frames+1]; 
+    get_frame_offsets(mFile, mFrame_offsets, mNum_frames);
+    
+    mIs_tile_cel = is_tile_cel(filename);
+}
+
+
