@@ -9,6 +9,7 @@
 
 
 #include "celfile.h"
+#include "cel_frame.h"
 
 
 
@@ -78,10 +79,10 @@ int main(int argc, char** argv){
 
     //std::cout << width << std::endl; 
 
-    
+    size_t width; 
 
     Cel_file cel(argv[1]);
-    size_t width = cel.get_frame(frame_num, raw_image);
+    Cel_frame frame = cel[frame_num];
 
 
 
@@ -127,8 +128,9 @@ int main(int argc, char** argv){
                             width++;
                             break;
                     } 
-                    width = cel.get_frame(frame_num, raw_image);
+                    //width = cel.get_frame(frame_num, raw_image);
                     //width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, tile_cel);
+                    frame = cel[frame_num];
                     std::cout << "frame: " << frame_num << "/" << cel.get_num_frames() << std::endl;
                     std::cout << width << std::endl;
             }
@@ -142,7 +144,7 @@ int main(int argc, char** argv){
 
         SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 255)); 
         
-        int x = 0, y = 0;
+        /*int x = 0, y = 0;
         for(int i = 0; i < raw_image.size(); i++)
         {
 
@@ -152,6 +154,15 @@ int main(int argc, char** argv){
             if(x >= width){
                 x = 0;
                 y++;
+            }
+        }*/
+        
+        for(int x = 0; x < frame.width; x++)
+        {
+            for(int y = 0; y < frame.height; y++)
+            {
+                //if(frame[x][y].visible)
+                    setpixel(screen, x, y, frame[x][y]);
             }
         }
 

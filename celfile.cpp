@@ -9,6 +9,7 @@
 
 
 #include "celfile.h"
+#include "cel_frame.h"
 
 
 void get_pal(std::string pal_filename, colour* pal)
@@ -27,28 +28,32 @@ void get_pal(std::string pal_filename, colour* pal)
     fclose(pal_file);
 }
 
-size_t get_num_frames(FILE* cel_file)
+size_t Cel_file::read_num_frames()
 {
+    fseek(mFile, 0, SEEK_SET);
+
     uint32_t num_frames;
     
-    fread(&num_frames, 4, 1, cel_file);
-    std::cout << ftell(cel_file) << ": Num frames: " << num_frames << std::endl;
+    fread(&num_frames, 4, 1, mFile);
+    std::cout << ftell(mFile) << ": Num frames: " << num_frames << std::endl;
 
     return num_frames;
 }
 
-void get_frame_offsets(FILE* cel_file, uint32_t* frame_offsets, size_t num_frames)
+void Cel_file::read_frame_offsets()
 {
-    for(int i = 0; i < num_frames; i++){
-            fread(&frame_offsets[i], 4, 1, cel_file);
-            std::cout << ftell(cel_file) << ": offset " << i << ": " << frame_offsets[i] << std::endl;
+    fseek(mFile, 4, SEEK_SET);
+
+    for(size_t i = 0; i < mNum_frames; i++){
+            fread(&mFrame_offsets[i], 4, 1, mFile);
+            //std::cout << ftell(mFile) << ": offset " << i << ": " << mFrame_offsets[i] << std::endl;
     }
 
-    fread(&frame_offsets[num_frames], 4, 1, cel_file);
-    std::cout << ftell(cel_file) << ": end offset: " << frame_offsets[num_frames] << std::endl;
+    fread(&mFrame_offsets[mNum_frames], 4, 1, mFile);
+    std::cout << ftell(mFile) << ": end offset: " << mFrame_offsets[mNum_frames] << std::endl;
 }
 
-void fix_image(std::vector<colour>& raw_image, size_t width)
+void Cel_file::fix_image(std::vector<colour>& raw_image, size_t width)
 {
     for(int i = 0; i < raw_image.size()/2; i++)
     {
@@ -84,7 +89,7 @@ void fill_t(size_t pixels, std::vector<colour>& raw_image)
 }
 
 
-bool greater_than_first(uint8_t* frame, size_t frame_size)
+bool Cel_file::greater_than_first(uint8_t* frame, size_t frame_size)
 {
     return frame_size >= 196 &&
     frame[  2] == 0 && frame[  3] == 0 &&
@@ -96,7 +101,7 @@ bool greater_than_first(uint8_t* frame, size_t frame_size)
     frame[194] == 0 && frame[195] == 0;
 }
 
-bool greater_than_second(uint8_t* frame, size_t frame_size)
+bool Cel_file::greater_than_second(uint8_t* frame, size_t frame_size)
 {
     return frame_size >= 196 &&
     frame[254] == 0 && frame[255] == 0 &&
@@ -109,22 +114,24 @@ bool greater_than_second(uint8_t* frame, size_t frame_size)
     frame[534] == 0 && frame[535] == 0;
 }
 
-bool is_greater_than(uint8_t* frame, size_t frame_size)
+bool Cel_file::is_greater_than(uint8_t* frame, size_t frame_size)
 {
     return greater_than_first(frame, frame_size);
 }
 
-void decode_greater_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+void Cel_file::decode_greater_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
 {
     int segment;
     int i = 0;
+
+
 
     raw_image.push_back(pal[frame[i]]);
     i++;
     raw_image.push_back(pal[frame[i]]);
     i++;
+    fill_t(30, raw_image); // finish off the first line
    
-    fill_t(30, raw_image);
 
     for(segment = 0; segment < 7; segment++)
     {
@@ -201,12 +208,16 @@ void decode_greater_than(uint8_t* frame, size_t frame_size, colour* pal, std::ve
            
             std::cout << "len: " << raw_image.size() << std::endl;
         }
+
+        fill_t(32, raw_image); // last transparent line
     }
     else
     {
         for(int i = 256; i < frame_size; i++)
             raw_image.push_back(pal[frame[i]]);
     }
+
+    std::cout << "GT" << raw_image.size() << std::endl;
 
 }
 
@@ -453,17 +464,24 @@ size_t decode_raw_32(uint8_t* frame, size_t frame_size, colour* pal, std::vector
     return 32;
 }
 
-size_t Cel_file::get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t frame_num, std::vector<colour>& raw_image, bool is_tile_cel, size_t width_override)
+Cel_frame Cel_file::operator[] (size_t index)
 {
-    size_t frame_size = frame_offsets[frame_num+1] - frame_offsets[frame_num];
+    Cel_frame frame;
+    frame.width = get_frame(index, frame.raw_image);
+    frame.height = frame.raw_image.size() / frame.width;
+    return frame;
+}
+size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
+{
+    size_t frame_size = mFrame_offsets[frame_num+1] - mFrame_offsets[frame_num];
     std::cout << std::endl << "frame 0 size: " << frame_size << std::endl;
 
     
 
     // Load frame data
     uint8_t frame[frame_size];
-    fseek(cel_file, frame_offsets[frame_num], SEEK_SET);
-    fread(&frame[0], 1, frame_size, cel_file);
+    fseek(mFile, mFrame_offsets[frame_num], SEEK_SET);
+    fread(&frame[0], 1, frame_size, mFile);
 
     // Make sure we're not concatenating onto some other image 
     raw_image.clear();
@@ -474,14 +492,14 @@ size_t Cel_file::get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets,
    
     size_t width;
     
-    if(is_tile_cel)
+    if(mIs_tile_cel)
         width = 32;
 
-    if(is_tile_cel && is_less_than(frame, frame_size))
-        decode_less_than(frame, frame_size, pal, raw_image);
+    if(mIs_tile_cel && is_less_than(frame, frame_size))
+        decode_less_than(frame, frame_size, mPal, raw_image);
     
-    else if(is_tile_cel && is_greater_than(frame, frame_size))
-        decode_greater_than(frame, frame_size, pal, raw_image);
+    else if(mIs_tile_cel && is_greater_than(frame, frame_size))
+        decode_greater_than(frame, frame_size, mPal, raw_image);
     
     else
     {
@@ -489,25 +507,25 @@ size_t Cel_file::get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets,
         bool from_header = false;
         
         // Tile cel frames never have headers 
-        if(!is_tile_cel)
+        if(!mIs_tile_cel)
         { 
             // The frame has a header which we can use to determine width
             if(frame[0] == 10)
             {
                 from_header = true;
-                fseek(cel_file, frame_offsets[frame_num]+2, SEEK_SET);
-                fread(&offset, 2, 1, cel_file);
+                fseek(mFile, mFrame_offsets[frame_num]+2, SEEK_SET);
+                fread(&offset, 2, 1, mFile);
             }
             
             width = normal_width(frame, frame_size, from_header, offset);
         }
         
-        normal_decode(frame, frame_size, width, from_header, pal, raw_image);
+        normal_decode(frame, frame_size, width, from_header, mPal, raw_image);
         
-        if(is_tile_cel && raw_image.size() != 32*32) // It's a fully opaque raw frame, width 32, from a level tileset
+        if(mIs_tile_cel && raw_image.size() != 32*32) // It's a fully opaque raw frame, width 32, from a level tileset
         {
             raw_image.clear();
-            decode_raw_32(frame, frame_size, pal, raw_image);
+            decode_raw_32(frame, frame_size, mPal, raw_image);
         }
         
 
@@ -519,13 +537,6 @@ size_t Cel_file::get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets,
 
 
     return width;
-}
-
-
-//size_t Cel_file::get_frame(FILE* cel_file, colour* pal, uint32_t* frame_offsets, size_t frame_num, std::vector<colour>& raw_image, bool is_tile_cel, size_t width_override)
-size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
-{
-    return get_frame(mFile, mPal, mFrame_offsets, frame_num, raw_image, mIs_tile_cel);
 }
 
 bool ends_with(const std::string& full, const std::string& end)
@@ -575,10 +586,11 @@ Cel_file::Cel_file(std::string filename)
     //get_pal("diablo.pal", mPal);
     get_pallette(filename, mPal);
 
-    mNum_frames = ::get_num_frames(mFile);
+    mNum_frames = read_num_frames();
 
     mFrame_offsets = new uint32_t[mNum_frames+1]; 
-    get_frame_offsets(mFile, mFrame_offsets, mNum_frames);
+    //get_frame_offsets(mFile, mFrame_offsets, mNum_frames);
+    read_frame_offsets();
     
     mIs_tile_cel = is_tile_cel(filename);
 }
