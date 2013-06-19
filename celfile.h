@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <map>
 
 class Cel_frame;
 
@@ -27,13 +28,15 @@ class Cel_file
     public:
         Cel_file(std::string filename);
         
-        size_t get_frame(size_t frame_num, std::vector<colour>& raw_image);
 
         size_t get_num_frames();
 
-        Cel_frame operator[] (size_t index);
+        Cel_frame& operator[] (size_t index);
 
     private:
+        size_t get_frame(size_t frame_num, std::vector<colour>& raw_image);
+
+
         size_t read_num_frames();
         void read_frame_offsets();
         
@@ -56,6 +59,8 @@ class Cel_file
         uint32_t* mFrame_offsets;
 
         bool mIs_tile_cel;
+        
+        std::map<size_t, Cel_frame> mCache;
 };
 
 void get_pal(std::string pal_filename, colour* pal);

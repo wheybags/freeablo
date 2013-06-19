@@ -464,13 +464,21 @@ size_t decode_raw_32(uint8_t* frame, size_t frame_size, colour* pal, std::vector
     return 32;
 }
 
-Cel_frame Cel_file::operator[] (size_t index)
+Cel_frame& Cel_file::operator[] (size_t index)
 {
+    if(mCache.count(index))
+        return mCache[index];
+
+
     Cel_frame frame;
     frame.width = get_frame(index, frame.raw_image);
     frame.height = frame.raw_image.size() / frame.width;
-    return frame;
+
+    mCache[index] = frame;
+
+    return mCache[index];
 }
+
 size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
 {
     size_t frame_size = mFrame_offsets[frame_num+1] - mFrame_offsets[frame_num];
