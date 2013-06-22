@@ -11,7 +11,7 @@ class TilFile
 {
     public:
         TilFile(const std::string&);
-        const TilBlock& operator[] (size_t index);
+        const TilBlock& operator[] (size_t index) const;
         size_t size();
 
     private:

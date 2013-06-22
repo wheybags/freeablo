@@ -22,7 +22,7 @@ TilFile::TilFile(const std::string& filename)
     fclose(tFile);
 }
 
-const TilBlock& TilFile::operator[] (size_t index)
+const TilBlock& TilFile::operator[] (size_t index) const
 {
     return mBlocks[index];
 }

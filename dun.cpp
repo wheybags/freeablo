@@ -9,7 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
-
+#include <map>
 
 #include "celfile.h"
 #include "cel_frame.h"
@@ -131,21 +131,45 @@ void setpixel(SDL_Surface* s, int x, int y, colour c)
     setpixel_real(s, x*2+1, y*2+1, c);
 }
 
-void draw_at(SDL_Surface* s, int start_x, int y, const Cel_frame& frame)
+void draw_at(SDL_Surface* s, int start_x, int start_y, const Cel_frame& frame)
 {
-        for(int x = 0; x < frame.width; x++)
+    for(int x = 0; x < frame.width; x++)
+    {
+        for(int y = 0; y < frame.height; y++)
         {
-            for(int y = 0; y < frame.height; y++)
-            {
-                if(frame[x][y].visible)
-                    setpixel(s, start_x+x, y, frame[x][y]);
-            }
+            if(frame[x][y].visible)
+                setpixel(s, start_x+x, start_y+y, frame[x][y]);
         }
+    }
 }
 
 SDL_Surface* screen;
 
 SDL_Surface** tileset = NULL;
+
+SDL_Surface* create_transparent_surface(size_t width, size_t height)
+{
+     SDL_Surface* s; 
+    
+    // SDL y u do dis
+    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        s = SDL_CreateRGBSurface(SDL_HWSURFACE, width, height, DEPTH, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+    #else
+        s = SDL_CreateRGBSurface(SDL_HWSURFACE, width, height, DEPTH, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+    #endif
+
+    /*s = SDL_CreateRGBSurface(SDL_HWSURFACE, width, height, screen->format->BitsPerPixel,
+    screen->format->Rmask,
+            screen->format->Gmask,
+                    screen->format->Bmask,
+                            screen->format->Amask
+                            );
+*/
+    SDL_FillRect(s, NULL, SDL_MapRGBA(s->format, 0, 0, 0, 0)); 
+
+    return s;
+}
+
 
 SDL_Surface* get_sprite(Cel_file& f, size_t index)
 {
@@ -164,18 +188,7 @@ SDL_Surface* get_sprite(Cel_file& f, size_t index)
     
     Cel_frame frame = f[index];
 
-    SDL_PixelFormat* fmt = screen->format;
-    
-    SDL_Surface* s; 
-
-    // SDL y u do dis
-    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        s = SDL_CreateRGBSurface(SDL_HWSURFACE | SDL_SRCALPHA, frame.width, frame.height, DEPTH, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
-    #else
-        s = SDL_CreateRGBSurface(SDL_HWSURFACE | SDL_SRCALPHA, frame.width, frame.height, DEPTH, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
-    #endif
-
-    SDL_FillRect(s, NULL, SDL_MapRGBA(s->format, 0, 0, 0, 0)); 
+    SDL_Surface* s = create_transparent_surface(frame.width, frame.height);
 
     draw_at(s, 0, 0, frame);
 
@@ -194,32 +207,109 @@ void draw_surface(SDL_Surface* s, int x, int y)
     }
 }
 
-
+void blit(SDL_Surface* from, SDL_Surface* to, int x, int y)
+{
+    SDL_Rect rcDest = { x, y, 0, 0 };
+    SDL_BlitSurface (from , NULL, to, &rcDest );
+}
 
 int x_base = WIDTH/2, y_base = 0;
 
-void draw_min_tile(Cel_file& f, int x, int y, int16_t l, int16_t r, int row)
+void draw_min_tile(SDL_Surface* s, Cel_file& f, int x, int y, int16_t l, int16_t r)
 {
     if(l != -1)
-        draw_surface(get_sprite(f, l), x_base+x+ 0, y_base+y+row*32);
+        draw_at(s, x, y, f[l]);
+        //blit(get_sprite(f, l), s, x+ 0, y);
     if(r != -1)
-        draw_surface(get_sprite(f, r), x_base+x+32, y_base+y+row*32);
+        draw_at(s, x+32, y, f[r]);
+        //blit(get_sprite(f, r), s, x+32, y);
 }
 
-void draw_min_pillar(int x, int y, const MinPillar& pillar, Cel_file tileset)
+void draw_min_pillar(SDL_Surface* s, int x, int y, const MinPillar& pillar, Cel_file& tileset)
 {
+    // Each iteration draw one row of the min
     for(int i = 0; i < 16; i+=2)
     {
-        draw_min_tile(tileset, x, y, (pillar[i]&0x0FFF)-1, (pillar[i+1]&0x0FFF)-1, i/2);
+        int16_t l = (pillar[i]&0x0FFF)-1;
+        int16_t r = (pillar[i+1]&0x0FFF)-1;
+        
+        draw_min_tile(s, tileset, x, y, l, r);
+    
+        y += 32; // down 32 each row
+
+        //std::cout << i << " " << l << " " << r << std::endl;
     }
 }
 
-void draw_til_block(int x, int y, const TilBlock& block, const MinFile& min, Cel_file tileset)
+int blits;
+std::map<size_t, SDL_Surface*> tilCache;
+
+void draw_til_block(SDL_Surface* to, int x, int y, const TilFile& til, size_t index, const MinFile& min, Cel_file& tileset)
 {
-    draw_min_pillar(x+32, y+ 0, min[block[0]], tileset);
-    draw_min_pillar(x+ 0, y+16, min[block[2]], tileset);
-    draw_min_pillar(x+64, y+16, min[block[1]], tileset);
-    draw_min_pillar(x+32, y+32, min[block[3]], tileset);
+    //x += x_base;
+    //y += y_base;
+    
+    //if(x < screen->w && x+128 > 0 && y < screen->h && y+288 > 0)
+    {
+        SDL_Surface* s;
+
+        if(tilCache.count(index))
+            s = tilCache[index];
+
+        else
+        {
+            s = create_transparent_surface(128, 288);
+
+            draw_min_pillar(s, 32,  0, min[til[index][0]], tileset);
+            draw_min_pillar(s,  0, 16, min[til[index][2]], tileset);
+            draw_min_pillar(s, 64, 16, min[til[index][1]], tileset);
+            draw_min_pillar(s, 32, 32, min[til[index][3]], tileset);
+
+            tilCache[index] = s;
+        }
+        
+        blit(s, to, x, y);
+        blits++;
+    }
+}
+
+SDL_Surface* level = NULL;
+void draw_level(int width, int height, uint16_t* tiles, Cel_file town, MinFile min, TilFile til)
+{
+
+    if(level == NULL)
+    {
+        level = SDL_CreateRGBSurface(SDL_HWSURFACE, ((width+height))*64, ((width+height))*32 + 224, screen->format->BitsPerPixel,
+                                              screen->format->Rmask,
+                                              screen->format->Gmask,
+                                              screen->format->Bmask,
+                                              screen->format->Amask);
+
+        int x_shift = height*64 - 64;
+        int y_shift = 0;
+        
+        int x = 0;
+        int y = 0;
+        for(int i = 0; y < width; i++)
+        {
+            if(tiles[i] != 0)
+            {
+                draw_til_block(level, (y*(-64)) + 64*x + x_shift, (y*32) + 32*x + y_shift, til, tiles[i]-1, min, town);
+            }
+            
+            x++;
+
+            if(x == height)
+            {
+                //break;
+                //std::cout << "asdasdasdasdasdasdasdasdasd" << std::endl;
+                y++;
+                x = 0;
+            }
+        }
+    }
+
+    blit(level, screen, x_base, y_base);
 }
 
 
@@ -273,7 +363,7 @@ int main(int argc, char** argv)
   
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
    
-    if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_SWSURFACE | SDL_DOUBLEBUF)))
+    if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE | SDL_DOUBLEBUF)))
     {
         SDL_Quit();
         return 1;
@@ -400,32 +490,22 @@ int main(int argc, char** argv)
         x_base += lr;
         y_base += ud; 
      
-        SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 255)); 
+        //SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 255)); 
 
         //draw_til_block(0, 0, til[tiles[0]-1], min, town);
         //draw_til_block(64, 32, til[tiles[1]-1], min, town);
         
-        int x = 0;
-        int y = 0;
-        for(int i = 0; y < height; i++)
-        {
-            if(tiles[i] != 0)
-                draw_til_block((y*(-64)) + 64*x, (y*32) + 32*x, til[tiles[i]-1], min, town);
-            
-            x++;
+        blits = 0;
 
-            if(x == 25)
-            {
-                //std::cout << "asdasdasdasdasdasdasdasdasd" << std::endl;
-                y++;
-                x = 0;
-            }
-        }
+        
+
+        //draw_til_block(0, 0, til, current, min, town);
         
         //draw_til_block(-64, 32, til[tiles[25]-1], min, town);
 
 
       
+        draw_level(width, height, tiles, town, min, til);
         
         
         /*
@@ -444,7 +524,7 @@ int main(int argc, char** argv)
         fpsthink();
 
         std::stringstream s;
-        s << "FPS: " << std::setw(3) << std::setfill('0') << (int)framespersecond;
+        s << "FPS: " << std::setw(3) << std::setfill('0') << (int)framespersecond << ", blits: " << blits;
 
         SDL_WM_SetCaption(s.str().c_str(), 0);
     }
