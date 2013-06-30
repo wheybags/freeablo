@@ -28,7 +28,7 @@ const TilBlock& TilFile::operator[] (size_t index) const
 }
 
 
-size_t TilFile::size()
+size_t TilFile::size() const
 {
     return mBlocks.size();
 }

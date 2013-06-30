@@ -69,7 +69,7 @@ bool less_than_second(uint8_t* frame, size_t frame_size);
 bool is_less_than(uint8_t* frame, size_t frame_size);
 void decode_less_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image);
 int32_t normal_width(uint8_t* frame, size_t frame_size, bool from_header, uint16_t offset);
-bool normal_decode(uint8_t* frame, size_t frame_size, size_t width, bool from_header, colour* pal, std::vector<colour>& raw_image);
+void normal_decode(uint8_t* frame, size_t frame_size, size_t width, bool from_header, colour* pal, std::vector<colour>& raw_image);
 size_t decode_raw_32(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image);
 
 

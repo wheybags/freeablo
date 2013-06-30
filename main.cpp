@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 #include <SDL/SDL_image.h>
 #include <iostream>
 #include <iomanip>
@@ -16,12 +17,19 @@
 
 #include "min.h"
 #include "til.h"
+#include "dun_file.h"
 
 
 #define WIDTH 1280
 #define HEIGHT 960
 #define BPP 4
 #define DEPTH 32
+
+
+#include <sstream>
+
+#define SSTR( x ) dynamic_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
 
 
 // How many frames time values to keep
@@ -218,11 +226,37 @@ int x_base = WIDTH/2, y_base = 0;
 void draw_min_tile(SDL_Surface* s, Cel_file& f, int x, int y, int16_t l, int16_t r)
 {
     if(l != -1)
+    {
         draw_at(s, x, y, f[l]);
-        //blit(get_sprite(f, l), s, x+ 0, y);
+        
+        #ifdef CEL_DEBUG
+            TTF_Font* font = TTF_OpenFont("FreeMonoBold.ttf", 8);
+            SDL_Color foregroundColor = { 0, 0, 0 }; 
+            SDL_Color backgroundColor = { 255, 255, 255 };
+            SDL_Surface* textSurface = TTF_RenderText_Shaded(font, SSTR(l).c_str(), foregroundColor, backgroundColor);
+           
+            blit(textSurface, s, x, y);
+
+            SDL_FreeSurface(textSurface);
+            TTF_CloseFont(font);
+        #endif
+    }
     if(r != -1)
+    {
         draw_at(s, x+32, y, f[r]);
-        //blit(get_sprite(f, r), s, x+32, y);
+
+        #ifdef CEL_DEBUG
+            TTF_Font* font = TTF_OpenFont("FreeMonoBold.ttf", 8);
+            SDL_Color foregroundColor = { 255, 0, 0 }; 
+            SDL_Color backgroundColor = { 255, 255, 255 };
+            SDL_Surface* textSurface = TTF_RenderText_Shaded(font, SSTR(r).c_str(), foregroundColor, backgroundColor);
+           
+            blit(textSurface, s, x+32, y);
+
+            SDL_FreeSurface(textSurface);
+            TTF_CloseFont(font);
+       #endif
+    }
 }
 
 void draw_min_pillar(SDL_Surface* s, int x, int y, const MinPillar& pillar, Cel_file& tileset)
@@ -241,7 +275,6 @@ void draw_min_pillar(SDL_Surface* s, int x, int y, const MinPillar& pillar, Cel_
     }
 }
 
-int blits;
 std::map<size_t, SDL_Surface*> tilCache;
 
 void draw_til_block(SDL_Surface* to, int x, int y, const TilFile& til, size_t index, const MinFile& min, Cel_file& tileset)
@@ -259,108 +292,70 @@ void draw_til_block(SDL_Surface* to, int x, int y, const TilFile& til, size_t in
         else
         {
             s = create_transparent_surface(128, 288);
-
-            draw_min_pillar(s, 32,  0, min[til[index][0]], tileset);
-            draw_min_pillar(s,  0, 16, min[til[index][2]], tileset);
-            draw_min_pillar(s, 64, 16, min[til[index][1]], tileset);
-            draw_min_pillar(s, 32, 32, min[til[index][3]], tileset);
+            
+            if(index < til.size())
+            {
+                draw_min_pillar(s, 32,  0, min
+                    [til
+                    [index]
+                    [0]],
+                     tileset);
+                draw_min_pillar(s,  0, 16, min[til[index][2]], tileset);
+                draw_min_pillar(s, 64, 16, min[til[index][1]], tileset);
+                draw_min_pillar(s, 32, 32, min[til[index][3]], tileset);
+            }
+            else
+            {
+                std::cout << "ERR" <<std::endl;
+            }
 
             tilCache[index] = s;
         }
         
         blit(s, to, x, y);
-        blits++;
     }
 }
 
+
+
 SDL_Surface* level = NULL;
-void draw_level(int width, int height, uint16_t* tiles, Cel_file town, MinFile min, TilFile til)
+void draw_level(DunFile dun, Cel_file town, MinFile min, TilFile til)
 {
 
     if(level == NULL)
     {
-        level = SDL_CreateRGBSurface(SDL_HWSURFACE, ((width+height))*64, ((width+height))*32 + 224, screen->format->BitsPerPixel,
+        level = SDL_CreateRGBSurface(SDL_HWSURFACE, ((dun.mWidth+dun.mHeight))*64, ((dun.mWidth+dun.mHeight))*32 + 224, screen->format->BitsPerPixel,
                                               screen->format->Rmask,
                                               screen->format->Gmask,
                                               screen->format->Bmask,
                                               screen->format->Amask);
 
-        int x_shift = height*64 - 64;
-        int y_shift = 0;
-        
-        int x = 0;
-        int y = 0;
-        for(int i = 0; y < width; i++)
-        {
-            if(tiles[i] != 0)
-            {
-                draw_til_block(level, (y*(-64)) + 64*x + x_shift, (y*32) + 32*x + y_shift, til, tiles[i]-1, min, town);
-            }
-            
-            x++;
+        int x_shift = dun.mHeight*64 - 64;
 
-            if(x == height)
+        for(int x = 0; x < dun.mHeight; x++)
+        {
+            for(int y = 0; y < dun.mWidth; y++)
             {
-                //break;
-                //std::cout << "asdasdasdasdasdasdasdasdasd" << std::endl;
-                y++;
-                x = 0;
+                if(dun[x][y] != 0)
+                    draw_til_block(level, (y*(-64)) + 64*x + x_shift, (y*32) + 32*x, til, dun[x][y]-1, min, town);
             }
         }
-    }
 
+
+    }
+   
+    
     blit(level, screen, x_base, y_base);
 }
 
 
 int main(int argc, char** argv)
 {
-
-    FILE * f;
-
-    f = fopen(argv[1], "rb");
-    
-
-    uint16_t width;
-    fread(&width, 2, 1, f);
-    uint16_t height;
-    fread(&height, 2, 1, f);
-    
-    std::cerr << width*height << std::endl;
-    uint16_t tiles[width*height];
-    fread(&tiles[0], 2, width*height, f);
-
-    for(size_t i = 0; i < width*height; i++)
-    {
-        //std::cout << i << " " << tiles[i] << std::endl;
-    }
-    
-    fclose(f);
-
-    /*colour pal[256];
-    get_pal("../../diabdat.mpq/levels/towndata/town.pal", pal);
-    
-    FILE * cel_file;
-    cel_file = fopen("../../diabdat.mpq/levels/towndata/town.cel", "rb");
-    size_t num_frames = get_num_frames(cel_file);
-    uint32_t frame_offsets[num_frames+1];
-    get_frame_offsets(cel_file, frame_offsets, num_frames);
-    */
-    
-    std::vector<colour> raw_image;
-    //bool tile_cel = true;
-    //size_t frame_num = 0;
-
-
-    
-    
-    
-    
-    //SDL_Surface *screen;
     SDL_Event event;
   
     int h=0; 
   
+    TTF_Init();
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
    
     if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE | SDL_DOUBLEBUF)))
@@ -369,57 +364,13 @@ int main(int argc, char** argv)
         return 1;
     }
     
-    //width = 32;
 
-    std::vector<colour> frame2;
     Cel_file town("../../diabdat.mpq/levels/towndata/town.cel");
-
-    //town.get_frame(124, raw_image); 
-    
-    //town.get_frame(125, frame2); 
-
-   // draw_at(screen, 10, 10, raw_image, width);
-    //draw_at(screen, 42, 11, frame2, width);
-    //draw_at(screen, 42, 26, raw_image, width);
-    
-    //SDL_Surface* s = get_sprite(town, 124);
-
-    
-    /*draw_tile(town, 124, 125, 0, 0);
-    draw_tile(town, 124, 125, 1, 0);
-    draw_tile(town, 124, 125, 2, 0);
-    draw_tile(town, 124, 125, 2, 1);*/
-    
-    /* 
-    int x = 0, y = 0;
-    for(size_t i = 0; i < width*height; i+= 2)
-    {
-        draw_tile(town, tiles[i], tiles[i+1], x, y);
-        
-        x++;
-        if(x == width)
-        {
-            x = 0;
-            y++;
-        }
-
-    }*/
- 
-    /*FILE* minF = fopen("../../diabdat.mpq/levels/towndata/town.min", "rb");
-    //fseek(min, 0, SEEK_END);
-    uint16_t min[16];
-    fread(&min, 2, 16, minF);
-
-    std::cout << (min[0] & 0x0FFF)-1 << std::endl;
-    //draw_tile(town, min[2], min[3], 0, 1);
-    //draw_min_tile(town, 124, 125, 0);
-    //draw_min_tile(town, 125, -1, 1);*/
-
     MinFile min("../../diabdat.mpq/levels/towndata/town.min");
-    size_t current = 113;
-
     TilFile til("../../diabdat.mpq/levels/towndata/town.til");
+    DunFile dun(argv[1]);
 
+    
     int lr = 0;
     int ud = 0;
 
@@ -437,12 +388,6 @@ int main(int argc, char** argv)
 
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.sym){
-                        case SDLK_UP:
-                            current++;
-                            break;
-                        case SDLK_DOWN:
-                            current--;
-                            break;
                         case SDLK_w:
                             ud--;
                             break;
@@ -478,7 +423,6 @@ int main(int argc, char** argv)
 
 
             }
-           //width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, tile_cel);
         }
 
         
@@ -490,42 +434,20 @@ int main(int argc, char** argv)
         x_base += lr;
         y_base += ud; 
      
-        //SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 255)); 
-
-        //draw_til_block(0, 0, til[tiles[0]-1], min, town);
-        //draw_til_block(64, 32, til[tiles[1]-1], min, town);
+        draw_level(dun, town, min, til);
+        SDL_Delay(1);
         
-        blits = 0;
-
-        
-
-        //draw_til_block(0, 0, til, current, min, town);
-        
-        //draw_til_block(-64, 32, til[tiles[25]-1], min, town);
-
-
-      
-        draw_level(width, height, tiles, town, min, til);
-        
-        
-        /*
-        for(int j = 0; j < 256; j++)
-        {
-            setpixel(screen, j, 0, pal[j]);
-        }
-        */
-
         
         if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
       
         SDL_Flip(screen); 
-        //while(1);
         
         fpsthink();
 
         std::stringstream s;
-        s << "FPS: " << std::setw(3) << std::setfill('0') << (int)framespersecond << ", blits: " << blits;
+        s << "FPS: " << std::setw(3) << std::setfill('0') << (int)framespersecond;
 
         SDL_WM_SetCaption(s.str().c_str(), 0);
     }
+    TTF_Quit();
 }

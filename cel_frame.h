@@ -9,25 +9,25 @@ class Cel_file;
 
 class Cel_frame
 {
-    class Helper
+    class Cel_Frame_Helper
     {
         private:
             const Cel_frame& parent;
             size_t x;
         public:    
-            Helper(const Cel_frame& _p, size_t _x) : parent(_p), x(_x) {}
+            Cel_Frame_Helper(const Cel_frame& _p, size_t _x) : parent(_p), x(_x) {}
             
-            const colour& operator[](size_t y){return parent.raw_image[x + y*parent.width];}
+            const colour& operator[](size_t y){return parent.raw_image[x + (parent.height-1-y)*parent.width];}
     };
 
     public:
         size_t width;
         size_t height;
         
-        Helper operator[] (size_t x) const { return Helper(*this, x); }
+        Cel_Frame_Helper operator[] (size_t x) const { return Cel_Frame_Helper(*this, x); }
 
     private:
-        friend class Helper;
+        friend class Cel_Frame_Helper;
         friend class Cel_file;
         
         std::vector<colour> raw_image;

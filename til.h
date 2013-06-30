@@ -12,7 +12,7 @@ class TilFile
     public:
         TilFile(const std::string&);
         const TilBlock& operator[] (size_t index) const;
-        size_t size();
+        size_t size() const;
 
     private:
         std::vector<TilBlock> mBlocks;
