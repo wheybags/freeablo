@@ -332,9 +332,9 @@ void draw_level(DunFile dun, Cel_file town, MinFile min, TilFile til)
 
         int x_shift = dun.mHeight*64 - 64;
 
-        for(int x = 0; x < dun.mHeight; x++)
+        for(int x = 0; x < dun.mWidth; x++)
         {
-            for(int y = 0; y < dun.mWidth; y++)
+            for(int y = 0; y < dun.mHeight; y++)
             {
                 if(dun[x][y] != 0)
                     draw_til_block(level, (y*(-64)) + 64*x + x_shift, (y*32) + 32*x, til, dun[x][y]-1, min, town);
