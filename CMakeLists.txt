@@ -5,7 +5,9 @@ project (Freeablo)
 
 
 Find_Package ( SDL REQUIRED )
+include_directories(${SDL_INCLUDE_DIR})
 Find_Package ( SDL_ttf REQUIRED )
+include_directories(${SDL_TTF_INCLUDE_DIRS})
 
 # Workaround for the non-working REQUIRED flag
 if ( NOT SDL_FOUND )
@@ -23,7 +25,6 @@ add_subdirectory (components)
 link_libraries (
    ${SDL_LIBRARY}
    ${SDLTTF_LIBRARY}
-   SDLmain
 )
 
 add_executable(freeablo dun_file.cpp  main.cpp  min.cpp  til.cpp)

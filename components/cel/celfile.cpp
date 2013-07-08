@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <string>
 
 
 #include "celfile.h"
@@ -549,7 +548,8 @@ size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
     
 
     // Load frame data
-    uint8_t frame[frame_size];
+	uint8_t* frame = new uint8_t[frame_size];
+    //uint8_t frame[frame_size];
     fseek(mFile, mFrame_offsets[frame_num], SEEK_SET);
     fread(frame, 1, frame_size, mFile);
 

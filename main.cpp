@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_ttf.h>
-#include <SDL/SDL_image.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
+//#include <SDL_image.h>
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -364,16 +364,22 @@ int main(int argc, char** argv)
         return 1;
     }
     
+	// TODO fix this dirty hack with boost::filesystem
+	#if defined(WIN32) || defined(_WIN32) 
+		#define SEP "\\" 
+	#else 
+		#define SEP "/"  
+	#endif 
 
-    Cel_file town("../../diabdat.mpq/levels/towndata/town.cel");
-    MinFile min("../../diabdat.mpq/levels/towndata/town.min");
-    TilFile til("../../diabdat.mpq/levels/towndata/town.til");
+    Cel_file town("diabdat.mpq"SEP"levels"SEP"towndata"SEP"town.cel");
+    MinFile min("diabdat.mpq"SEP"levels"SEP"towndata"SEP"town.min");
+    TilFile til("diabdat.mpq"SEP"levels"SEP"towndata"SEP"town.til");
     //DunFile dun(argv[1]);
 
-    DunFile sector1("../../diabdat.mpq/levels/towndata/sector1s.dun");
-    DunFile sector2("../../diabdat.mpq/levels/towndata/sector2s.dun");
-    DunFile sector3("../../diabdat.mpq/levels/towndata/sector3s.dun");
-    DunFile sector4("../../diabdat.mpq/levels/towndata/sector4s.dun");
+    DunFile sector1("diabdat.mpq"SEP"levels"SEP"towndata"SEP"sector1s.dun");
+    DunFile sector2("diabdat.mpq"SEP"levels"SEP"towndata"SEP"sector2s.dun");
+    DunFile sector3("diabdat.mpq"SEP"levels"SEP"towndata"SEP"sector3s.dun");
+    DunFile sector4("diabdat.mpq"SEP"levels"SEP"towndata"SEP"sector4s.dun");
 
     DunFile dun = getTown(sector1, sector2, sector3, sector4);
 
