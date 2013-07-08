@@ -368,8 +368,17 @@ int main(int argc, char** argv)
     Cel_file town("../../diabdat.mpq/levels/towndata/town.cel");
     MinFile min("../../diabdat.mpq/levels/towndata/town.min");
     TilFile til("../../diabdat.mpq/levels/towndata/town.til");
-    DunFile dun(argv[1]);
+    //DunFile dun(argv[1]);
 
+    DunFile sector1("../../diabdat.mpq/levels/towndata/sector1s.dun");
+    DunFile sector2("../../diabdat.mpq/levels/towndata/sector2s.dun");
+    DunFile sector3("../../diabdat.mpq/levels/towndata/sector3s.dun");
+    DunFile sector4("../../diabdat.mpq/levels/towndata/sector4s.dun");
+
+    DunFile dun = getTown(sector1, sector2, sector3, sector4);
+
+
+    //DunFile dun("../../diabdat.mpq/levels/towndata/sector1s.dun");
     
     int lr = 0;
     int ud = 0;
@@ -434,6 +443,7 @@ int main(int argc, char** argv)
         x_base += lr;
         y_base += ud; 
      
+        SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 255)); 
         draw_level(dun, town, min, til);
         SDL_Delay(1);
         
