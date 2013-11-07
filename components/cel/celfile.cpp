@@ -12,12 +12,9 @@
 
 
 
-Cel_file::Cel_file(std::string filename)
+Cel_file::Cel_file(std::string filename) : mPal(get_pallette(filename))
 {
     mFile = fopen(filename.c_str(), "rb");
-
-    mPal = new colour[256];
-    get_pallette(filename, mPal);
 
     mFrame_offsets.resize(read_num_frames()+1); // +1 so we can put in the end offset, too
     read_frame_offsets();
@@ -180,7 +177,7 @@ bool Cel_file::is_greater_than(const std::vector<uint8_t>& frame)
     return greater_than_first(frame);
 }
 
-void Cel_file::drawRow(int row, int lastRow, int& framePos, const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image, bool lessThan)
+void Cel_file::drawRow(int row, int lastRow, int& framePos, const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image, bool lessThan)
 {
     for(; row < lastRow; row++)
     {
@@ -219,7 +216,7 @@ void Cel_file::drawRow(int row, int lastRow, int& framePos, const std::vector<ui
     }
 }
 
-void Cel_file::decode_greater_less_than(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image, bool lessThan)
+void Cel_file::decode_greater_less_than(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image, bool lessThan)
 {
     #ifdef CEL_DEBUG
         std::cout << (lessThan ? "Less" : "Greater") << " than" << std::endl;
@@ -246,12 +243,12 @@ void Cel_file::decode_greater_less_than(const std::vector<uint8_t>& frame, colou
 
 }
 
-void Cel_file::decode_greater_than(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image)
+void Cel_file::decode_greater_than(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image)
 {
     decode_greater_less_than(frame, pal, raw_image, false);
 }
 
-void Cel_file::decode_less_than(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image)
+void Cel_file::decode_less_than(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image)
 {
     decode_greater_less_than(frame, pal, raw_image, true);
 }
@@ -286,22 +283,6 @@ bool Cel_file::less_than_second(const std::vector<uint8_t>& frame)
 bool Cel_file::is_less_than(const std::vector<uint8_t>& frame)
 {
     return less_than_first(frame);
-}
-
-void Cel_file::get_pal(std::string pal_filename, colour* pal)
-{
-    FILE * pal_file;
-
-    pal_file = fopen(pal_filename.c_str(), "rb");
-    
-    for(int i = 0; i < 256; i++)
-    {
-            fread(&pal[i].r, 1, 1, pal_file);
-            fread(&pal[i].g, 1, 1, pal_file);
-            fread(&pal[i].b, 1, 1, pal_file);
-    }
-
-    fclose(pal_file);
 }
 
 void Cel_file::fill_t(size_t pixels, std::vector<colour>& raw_image)
@@ -379,7 +360,7 @@ int32_t Cel_file::normal_width(const std::vector<uint8_t>& frame, bool from_head
     }
 }
 
-void Cel_file::normal_decode(const std::vector<uint8_t>& frame, size_t width, bool from_header, colour* pal, std::vector<colour>& raw_image)
+void Cel_file::normal_decode(const std::vector<uint8_t>& frame, size_t width, bool from_header, Pal pal, std::vector<colour>& raw_image)
 {
     #ifdef CEL_DEBUG
         std::cout << "NORMAL_DECODE" << std::endl;
@@ -436,7 +417,7 @@ void Cel_file::normal_decode(const std::vector<uint8_t>& frame, size_t width, bo
     }
 }
 
-size_t Cel_file::decode_raw_32(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image)
+size_t Cel_file::decode_raw_32(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image)
 {
 
     for(int i = 0; i < frame.size(); i++)
@@ -469,7 +450,7 @@ bool Cel_file::is_tile_cel(const std::string& file_name)
     ends_with(file_name, "town.cel");
 }
 
-void Cel_file::get_pallette(std::string filename, colour* pal)
+Pal Cel_file::get_pallette(std::string filename)
 {
     std::string pal_filename;
     if(ends_with(filename, "l1.cel"))
@@ -478,5 +459,5 @@ void Cel_file::get_pallette(std::string filename, colour* pal)
         pal_filename = "diablo.pal";
 
     
-    return get_pal(pal_filename, pal);
+    return Pal(pal_filename);
 }

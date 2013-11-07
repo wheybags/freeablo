@@ -7,8 +7,8 @@
 #include <algorithm>
 
 
-#include "celfile.h"
-#include "cel_frame.h"
+#include "components/cel/celfile.h"
+#include "components/cel/cel_frame.h"
 
 
 

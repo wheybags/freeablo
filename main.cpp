@@ -12,8 +12,8 @@
 #include <sstream>
 #include <map>
 
-#include "celfile.h"
-#include "cel_frame.h"
+#include "components/cel/celfile.h"
+#include "components/cel/cel_frame.h"
 
 #include "min.h"
 #include "til.h"

@@ -26,8 +26,6 @@ endif ( NOT SDLTTF_FOUND )
 add_subdirectory (components) 
 
 include_directories (
-    "${PROJECT_SOURCE_DIR}/components/cel"
-
     ${SDL_INCLUDE_DIR}
     ${SDL_TTF_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
