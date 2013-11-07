@@ -67,8 +67,6 @@ class Cel_file
 
         FILE * mFile;
         
-        std::vector<colour> mRaw_image;
-        
         colour* mPal;
         
         std::vector<uint32_t> mFrame_offsets;

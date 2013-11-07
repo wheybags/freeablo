@@ -70,10 +70,6 @@ size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
     // Make sure we're not concatenating onto some other image 
     raw_image.clear();
     
-
-    //print_cel(frame, frame_size);
-    //std::cout << std::endl;
-   
     size_t width;
     
     if(mIs_tile_cel)
@@ -147,10 +143,8 @@ void Cel_file::read_frame_offsets()
 {
     fseek(mFile, 4, SEEK_SET);
 
-    for(size_t i = 0; i < num_frames(); i++){
+    for(size_t i = 0; i < num_frames(); i++)
             fread(&mFrame_offsets[i], 4, 1, mFile);
-            //std::cout << ftell(mFile) << ": offset " << i << ": " << mFrame_offsets[i] << std::endl;
-    }
 
     fread(&mFrame_offsets[num_frames()], 4, 1, mFile);
 
