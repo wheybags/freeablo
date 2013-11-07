@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL.h>
 #include <iostream>
 #include <vector>
 #include <algorithm>

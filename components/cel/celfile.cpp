@@ -216,14 +216,12 @@ void Cel_file::decode_greater_than(uint8_t* frame, size_t frame_size, colour* pa
         i += 2;
 
         int xdraw = (segment+1)*4;
-        int xoffs = 0;
         
         #ifdef CEL_DEBUG
             std::cout << "\tdraw: " << xdraw << std::endl;
         #endif
 
-        int px; 
-        for(px = xoffs; px < xdraw; px++)
+        for(int px = 0; px < xdraw; px++)
         {
                 raw_image.push_back(pal[frame[i]]);
                 i++;
@@ -233,13 +231,12 @@ void Cel_file::decode_greater_than(uint8_t* frame, size_t frame_size, colour* pa
 
         
         xdraw = (segment+1)*4 +2;
-        xoffs = 0;
 
         #ifdef CEL_DEBUG
             std::cout << "\tdraw: " << xdraw << std::endl;
         #endif
         
-        for(px = xoffs; px < xdraw; px++)
+        for(int px = 0; px < xdraw; px++)
         {
                 raw_image.push_back(pal[frame[i]]);
                 i++;

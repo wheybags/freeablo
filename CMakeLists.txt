@@ -37,8 +37,16 @@ link_libraries (
    ${SDL_LIBRARY}
    ${SDLTTF_LIBRARY}
    ${Boost_LIBRARIES}
+   Cel
 )
 
-add_executable(freeablo dun_file.cpp  main.cpp  min.cpp  til.cpp)
-target_link_libraries(freeablo Cel)
+SET( FILES
+    dun_file.cpp
+    min.cpp
+    til.cpp
+)
+
+add_executable(freeablo main.cpp ${FILES})
+add_executable(view view.cpp ${FILES})
+
 
