@@ -29,7 +29,7 @@ class Cel_file
         Cel_file(std::string filename);
         
 
-        size_t get_num_frames();
+        size_t num_frames();
 
         Cel_frame& operator[] (size_t index);
 
@@ -71,8 +71,7 @@ class Cel_file
         
         colour* mPal;
         
-        size_t mNum_frames;
-        uint32_t* mFrame_offsets;
+        std::vector<uint32_t> mFrame_offsets;
 
         bool mIs_tile_cel;
         

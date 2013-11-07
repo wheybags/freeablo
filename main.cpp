@@ -186,7 +186,7 @@ SDL_Surface* get_sprite(Cel_file& f, size_t index)
 {
     if(tileset == NULL)
     {
-        size_t size = f.get_num_frames();
+        size_t size = f.num_frames();
 
         tileset = new SDL_Surface*[size];
         

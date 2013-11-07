@@ -17,21 +17,17 @@ Cel_file::Cel_file(std::string filename)
     mFile = fopen(filename.c_str(), "rb");
 
     mPal = new colour[256];
-    //get_pal("diablo.pal", mPal);
     get_pallette(filename, mPal);
 
-    mNum_frames = read_num_frames();
-
-    mFrame_offsets = new uint32_t[mNum_frames+1]; 
-    //get_frame_offsets(mFile, mFrame_offsets, mNum_frames);
+    mFrame_offsets.resize(read_num_frames()+1); // +1 so we can put in the end offset, too
     read_frame_offsets();
     
     mIs_tile_cel = is_tile_cel(filename);
 }
 
-size_t Cel_file::get_num_frames()
+size_t Cel_file::num_frames()
 {
-    return mNum_frames;
+    return mFrame_offsets.size() -1;
 }
 
 Cel_frame& Cel_file::operator[] (size_t index)
@@ -151,15 +147,15 @@ void Cel_file::read_frame_offsets()
 {
     fseek(mFile, 4, SEEK_SET);
 
-    for(size_t i = 0; i < mNum_frames; i++){
+    for(size_t i = 0; i < num_frames(); i++){
             fread(&mFrame_offsets[i], 4, 1, mFile);
             //std::cout << ftell(mFile) << ": offset " << i << ": " << mFrame_offsets[i] << std::endl;
     }
 
-    fread(&mFrame_offsets[mNum_frames], 4, 1, mFile);
+    fread(&mFrame_offsets[num_frames()], 4, 1, mFile);
 
     #ifdef CEL_DEBUG
-        std::cout << ftell(mFile) << ": end offset: " << mFrame_offsets[mNum_frames] << std::endl;
+        std::cout << ftell(mFile) << ": end offset: " << mFrame_offsets[num_frames()] << std::endl;
     #endif
 }
 

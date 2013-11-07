@@ -113,7 +113,7 @@ int main(int argc, char** argv){
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.sym){
                         case SDLK_UP:
-                            if(frame_num == cel.get_num_frames()-1) break;
+                            if(frame_num == cel.num_frames()-1) break;
                             frame_num++;
                             break;
                         case SDLK_DOWN:
@@ -130,7 +130,7 @@ int main(int argc, char** argv){
                     //width = cel.get_frame(frame_num, raw_image);
                     //width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, tile_cel);
                     frame = cel[frame_num];
-                    std::cout << "frame: " << frame_num << "/" << cel.get_num_frames() << std::endl;
+                    std::cout << "frame: " << frame_num << "/" << cel.num_frames() << std::endl;
                     std::cout << width << std::endl;
             }
         }
