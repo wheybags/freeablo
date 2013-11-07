@@ -53,19 +53,16 @@ Cel_frame& Cel_file::operator[] (size_t index)
 
 size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
 {
-    size_t frame_size = mFrame_offsets[frame_num+1] - mFrame_offsets[frame_num];
+    
+	std::vector<uint8_t> frame(mFrame_offsets[frame_num+1] - mFrame_offsets[frame_num]);
 
     #ifdef CEL_DEBUG
-        std::cout << std::endl << "frame 0 size: " << frame_size << std::endl;
+        std::cout << std::endl << "frame 0 size: " << frame.size() << std::endl;
     #endif
 
-    
-
     // Load frame data
-	uint8_t* frame = new uint8_t[frame_size];
-    //uint8_t frame[frame_size];
     fseek(mFile, mFrame_offsets[frame_num], SEEK_SET);
-    fread(frame, 1, frame_size, mFile);
+    fread(&frame[0], 1, frame.size(), mFile);
 
     // Make sure we're not concatenating onto some other image 
     raw_image.clear();
@@ -75,11 +72,11 @@ size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
     if(mIs_tile_cel)
         width = 32;
 
-    if(mIs_tile_cel && is_less_than(frame, frame_size))
-        decode_less_than(frame, frame_size, mPal, raw_image);
+    if(mIs_tile_cel && is_less_than(frame))
+        decode_less_than(frame, mPal, raw_image);
     
-    else if(mIs_tile_cel && is_greater_than(frame, frame_size))
-        decode_greater_than(frame, frame_size, mPal, raw_image);
+    else if(mIs_tile_cel && is_greater_than(frame))
+        decode_greater_than(frame, mPal, raw_image);
     
     else
     {
@@ -97,20 +94,20 @@ size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
                 fread(&offset, 2, 1, mFile);
             }
             
-            width = normal_width(frame, frame_size, from_header, offset);
+            width = normal_width(frame, from_header, offset);
         }
         
-        normal_decode(frame, frame_size, width, from_header, mPal, raw_image);
+        normal_decode(frame, width, from_header, mPal, raw_image);
         
         #ifdef CEL_DEBUG
-            std::cout << raw_image.size() << " " << frame_size << std::endl;
+            std::cout << raw_image.size() << " " << frame.size() << std::endl;
         #endif
         
-        if(mIs_tile_cel && frame_size == 1024 && frame_num != 2593) // It's a fully opaque raw frame, width 32, from a level tileset
-        //if(mIs_tile_cel && raw_image.size() < frame_size ) // It's a fully opaque raw frame, width 32, from a level tileset
+        if(mIs_tile_cel && frame.size() == 1024 && frame_num != 2593) // It's a fully opaque raw frame, width 32, from a level tileset
+        //if(mIs_tile_cel && raw_image.size() < frame.size() ) // It's a fully opaque raw frame, width 32, from a level tileset
         {
             raw_image.clear();
-            decode_raw_32(frame, frame_size, mPal, raw_image);
+            decode_raw_32(frame, mPal, raw_image);
         }
         
 
@@ -153,9 +150,9 @@ void Cel_file::read_frame_offsets()
     #endif
 }
 
-bool Cel_file::greater_than_first(uint8_t* frame, size_t frame_size)
+bool Cel_file::greater_than_first(const std::vector<uint8_t>& frame)
 {
-    return frame_size >= 196 &&
+    return frame.size() >= 196 &&
     frame[  2] == 0 && frame[  3] == 0 &&
     frame[ 14] == 0 && frame[ 15] == 0 &&
     frame[ 34] == 0 && frame[ 35] == 0 &&
@@ -165,9 +162,9 @@ bool Cel_file::greater_than_first(uint8_t* frame, size_t frame_size)
     frame[194] == 0 && frame[195] == 0;
 }
 
-bool Cel_file::greater_than_second(uint8_t* frame, size_t frame_size)
+bool Cel_file::greater_than_second(const std::vector<uint8_t>& frame)
 {
-    return frame_size >= 196 &&
+    return frame.size() >= 196 &&
     frame[254] == 0 && frame[255] == 0 &&
     frame[318] == 0 && frame[319] == 0 &&
     frame[374] == 0 && frame[375] == 0 &&
@@ -178,12 +175,12 @@ bool Cel_file::greater_than_second(uint8_t* frame, size_t frame_size)
     frame[534] == 0 && frame[535] == 0;
 }
 
-bool Cel_file::is_greater_than(uint8_t* frame, size_t frame_size)
+bool Cel_file::is_greater_than(const std::vector<uint8_t>& frame)
 {
-    return greater_than_first(frame, frame_size);
+    return greater_than_first(frame);
 }
 
-void Cel_file::drawRow(int row, int lastRow, int& framePos, uint8_t* frame, colour* pal, std::vector<colour>& raw_image, bool lessThan)
+void Cel_file::drawRow(int row, int lastRow, int& framePos, const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image, bool lessThan)
 {
     for(; row < lastRow; row++)
     {
@@ -222,7 +219,7 @@ void Cel_file::drawRow(int row, int lastRow, int& framePos, uint8_t* frame, colo
     }
 }
 
-void Cel_file::decode_greater_less_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image, bool lessThan)
+void Cel_file::decode_greater_less_than(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image, bool lessThan)
 {
     #ifdef CEL_DEBUG
         std::cout << (lessThan ? "Less" : "Greater") << " than" << std::endl;
@@ -233,13 +230,13 @@ void Cel_file::decode_greater_less_than(uint8_t* frame, size_t frame_size, colou
     drawRow(0, 15, framePos, frame, pal, raw_image, lessThan);
 
     
-    if((lessThan && less_than_second(frame, frame_size)) || (!lessThan && greater_than_second(frame, frame_size)))
+    if((lessThan && less_than_second(frame)) || (!lessThan && greater_than_second(frame)))
     {
         drawRow(16, 33, framePos, frame, pal, raw_image, lessThan);
     }
     else
     {
-        for(framePos = 256; framePos < frame_size; framePos++)
+        for(framePos = 256; framePos < frame.size(); framePos++)
             raw_image.push_back(pal[frame[framePos]]);
     }
     
@@ -249,21 +246,21 @@ void Cel_file::decode_greater_less_than(uint8_t* frame, size_t frame_size, colou
 
 }
 
-void Cel_file::decode_greater_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+void Cel_file::decode_greater_than(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image)
 {
-    decode_greater_less_than(frame, frame_size, pal, raw_image, false);
+    decode_greater_less_than(frame, pal, raw_image, false);
 }
 
-void Cel_file::decode_less_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+void Cel_file::decode_less_than(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image)
 {
-    decode_greater_less_than(frame, frame_size, pal, raw_image, true);
+    decode_greater_less_than(frame, pal, raw_image, true);
 }
 
 
 
-bool Cel_file::less_than_first(uint8_t* frame, size_t frame_size)
+bool Cel_file::less_than_first(const std::vector<uint8_t>& frame)
 {
-    return frame_size >= 226 &&
+    return frame.size() >= 226 &&
     frame[  0] == 0 && frame[  1] == 0 &&
     frame[  8] == 0 && frame[  9] == 0 &&
     frame[ 24] == 0 && frame[ 25] == 0 &&
@@ -274,9 +271,9 @@ bool Cel_file::less_than_first(uint8_t* frame, size_t frame_size)
     frame[224] == 0 && frame[225] == 0;
 }
 
-bool Cel_file::less_than_second(uint8_t* frame, size_t frame_size)
+bool Cel_file::less_than_second(const std::vector<uint8_t>& frame)
 {
-    return frame_size >= 530 &&
+    return frame.size() >= 530 &&
     frame[288] == 0 && frame[289] == 0 &&
     frame[348] == 0 && frame[349] == 0 &&
     frame[400] == 0 && frame[401] == 0 &&
@@ -286,9 +283,9 @@ bool Cel_file::less_than_second(uint8_t* frame, size_t frame_size)
     frame[528] == 0 && frame[529] == 0;
 }
 
-bool Cel_file::is_less_than(uint8_t* frame, size_t frame_size)
+bool Cel_file::is_less_than(const std::vector<uint8_t>& frame)
 {
-    return less_than_first(frame, frame_size);
+    return less_than_first(frame);
 }
 
 void Cel_file::get_pal(std::string pal_filename, colour* pal)
@@ -313,7 +310,7 @@ void Cel_file::fill_t(size_t pixels, std::vector<colour>& raw_image)
         raw_image.push_back(colour(255, 255, 255, false));
 }
 
-int32_t Cel_file::normal_width(uint8_t* frame, size_t frame_size, bool from_header, uint16_t offset)
+int32_t Cel_file::normal_width(const std::vector<uint8_t>& frame, bool from_header, uint16_t offset)
 {
     
     // If we have a header, we know that offset points to the start of the 32nd line.
@@ -324,7 +321,7 @@ int32_t Cel_file::normal_width(uint8_t* frame, size_t frame_size, bool from_head
     {
         int32_t width_header = 0; 
         
-        for(size_t i = 11; i < frame_size; i++){
+        for(size_t i = 11; i < frame.size(); i++){
             
             if(i == offset && from_header)
             {
@@ -360,7 +357,7 @@ int32_t Cel_file::normal_width(uint8_t* frame, size_t frame_size, bool from_head
     {
         int32_t width_reg = 0;
         
-        for(size_t i = 0; i < frame_size; i++){
+        for(size_t i = 0; i < frame.size(); i++){
 
             // Regular command
             if(frame[i] <= 127){
@@ -382,7 +379,7 @@ int32_t Cel_file::normal_width(uint8_t* frame, size_t frame_size, bool from_head
     }
 }
 
-void Cel_file::normal_decode(uint8_t* frame, size_t frame_size, size_t width, bool from_header, colour* pal, std::vector<colour>& raw_image)
+void Cel_file::normal_decode(const std::vector<uint8_t>& frame, size_t width, bool from_header, colour* pal, std::vector<colour>& raw_image)
 {
     #ifdef CEL_DEBUG
         std::cout << "NORMAL_DECODE" << std::endl;
@@ -396,7 +393,7 @@ void Cel_file::normal_decode(uint8_t* frame, size_t frame_size, size_t width, bo
     else
         i = 0;
     
-    for(; i < frame_size; i++)
+    for(; i < frame.size(); i++)
     {
         // Regular command
         if(frame[i] <= 127)
@@ -407,20 +404,20 @@ void Cel_file::normal_decode(uint8_t* frame, size_t frame_size, size_t width, bo
             
             size_t j;
             // Just push the number of pixels specified by the command
-            for(j = 1; j < frame[i]+1 && i+j < frame_size; j++)
+            for(j = 1; j < frame[i]+1 && i+j < frame.size(); j++)
             {
                 int index = i+j;
                 uint8_t f = frame[index];
                 
-                if(index > frame_size-1)
-                    std::cout << "invalid read from f " << index << " " << frame_size << std::endl;
+                if(index > frame.size()-1)
+                    std::cout << "invalid read from f " << index << " " << frame.size() << std::endl;
 
                 colour col = pal[f];
 
                 raw_image.push_back(col);
             }
-            //if(i+j >= frame_size)
-            //    std::cout << "----- " << i << " " << j << " " << i+j << " " << frame_size << std::endl;
+            //if(i+j >= frame.size())
+            //    std::cout << "----- " << i << " " << j << " " << i+j << " " << frame.size() << std::endl;
             
             i+= frame[i];
         }
@@ -439,10 +436,10 @@ void Cel_file::normal_decode(uint8_t* frame, size_t frame_size, size_t width, bo
     }
 }
 
-size_t Cel_file::decode_raw_32(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+size_t Cel_file::decode_raw_32(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image)
 {
 
-    for(int i = 0; i < frame_size; i++)
+    for(int i = 0; i < frame.size(); i++)
     {
         raw_image.push_back(pal[frame[i]]);
     }

@@ -39,27 +39,27 @@ class Cel_file
         size_t read_num_frames();
         void read_frame_offsets();
         
-        static bool greater_than_first(uint8_t* frame, size_t frame_size);
-        static bool greater_than_second(uint8_t* frame, size_t frame_size);
-        static bool is_greater_than(uint8_t* frame, size_t frame_size);
+        static bool greater_than_first(const std::vector<uint8_t>& frame);
+        static bool greater_than_second(const std::vector<uint8_t>& frame);
+        static bool is_greater_than(const std::vector<uint8_t>& frame);
         
-        void drawRow(int row, int end, int& i, uint8_t* frame, colour* pal, std::vector<colour>& raw_image, bool lessThan);
+        void drawRow(int row, int end, int& i, const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image, bool lessThan);
 
-        void decode_greater_less_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image, bool lessThan);
+        void decode_greater_less_than(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image, bool lessThan);
 
-        void decode_greater_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image);
+        void decode_greater_than(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image);
 
-        bool less_than_first(uint8_t* frame, size_t frame_size);
-        bool less_than_second(uint8_t* frame, size_t frame_size);
-        bool is_less_than(uint8_t* frame, size_t frame_size);
+        bool less_than_first(const std::vector<uint8_t>& frame);
+        bool less_than_second(const std::vector<uint8_t>& frame);
+        bool is_less_than(const std::vector<uint8_t>& frame);
 
-        void decode_less_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image);
+        void decode_less_than(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image);
 
         void get_pal(std::string pal_filename, colour* pal);
         void fill_t(size_t pixels, std::vector<colour>& raw_image);
-        int32_t normal_width(uint8_t* frame, size_t frame_size, bool from_header, uint16_t offset);
-        void normal_decode(uint8_t* frame, size_t frame_size, size_t width, bool from_header, colour* pal, std::vector<colour>& raw_image);
-        size_t decode_raw_32(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image);
+        int32_t normal_width(const std::vector<uint8_t>& frame, bool from_header, uint16_t offset);
+        void normal_decode(const std::vector<uint8_t>& frame, size_t width, bool from_header, colour* pal, std::vector<colour>& raw_image);
+        size_t decode_raw_32(const std::vector<uint8_t>& frame, colour* pal, std::vector<colour>& raw_image);
         bool ends_with(const std::string& full, const std::string& end);
         std::string replace_end(const std::string& old_end, const std::string& new_end, const std::string& original);
         bool is_tile_cel(const std::string& file_name);
@@ -75,9 +75,5 @@ class Cel_file
         
         std::map<size_t, Cel_frame> mCache;
 };
-
-/*
-size_t decode_raw_32(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image);
-*/
 
 #endif
