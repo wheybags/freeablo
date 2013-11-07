@@ -3,17 +3,19 @@
 
 #include "dun_file.h"
 
+#include <faio/faio.h>
+
 DunFile::DunFile(const std::string& filename)
 {
-    FILE* f = fopen(filename.c_str(), "rb");
+    FAIO::FAFile* f = FAIO::FAfopen(filename.c_str(), "rb");
     
-    fread(&mWidth, 2, 1, f);
-    fread(&mHeight, 2, 1, f);
+    FAIO::FAfread(&mWidth, 2, 1, f);
+    FAIO::FAfread(&mHeight, 2, 1, f);
    
     mBlocks.resize(mWidth*mHeight);
-    fread(&mBlocks[0], 2, mWidth*mHeight, f);
+    FAIO::FAfread(&mBlocks[0], 2, mWidth*mHeight, f);
 
-    fclose(f);
+    FAIO::FAfclose(f);
 
     std::cout << "w: " << mWidth << ", h: " << mHeight << std::endl;
 }

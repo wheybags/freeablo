@@ -23,25 +23,31 @@ if ( NOT SDLTTF_FOUND )
     message ( FATAL_ERROR "SDL_ttf not found!" )
 endif ( NOT SDLTTF_FOUND )
 
-add_subdirectory (components) 
 
 include_directories (
     ${SDL_INCLUDE_DIR}
     ${SDL_TTF_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
+    "${PROJECT_SOURCE_DIR}/components/"
 )
 
+add_subdirectory (components) 
+
 link_libraries (
-   ${SDL_LIBRARY}
-   ${SDLTTF_LIBRARY}
-   ${Boost_LIBRARIES}
-   Cel
+    ${SDL_LIBRARY}
+    ${SDLTTF_LIBRARY}
+    ${Boost_LIBRARIES}
+    Cel
+    FAIO
 )
 
 SET( FILES
     dun_file.cpp
     min.cpp
     til.cpp
+    dun_file.h  
+    min.h  
+    til.h
 )
 
 add_executable(freeablo main.cpp ${FILES})

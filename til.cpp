@@ -2,24 +2,26 @@
 
 #include <stdio.h>
 
+#include <faio/faio.h>
+
 TilFile::TilFile(const std::string& filename)
 {
-    FILE* tFile = fopen(filename.c_str(), "rb");
+    FAIO::FAFile* tFile = FAIO::FAfopen(filename.c_str(), "rb");
     
-    fseek(tFile, 0, SEEK_END);
-    size_t numBlocks = ftell(tFile)/4; 
+    FAIO::FAfseek(tFile, 0, SEEK_END);
+    size_t numBlocks = FAIO::FAftell(tFile)/4; 
     
-    fseek(tFile, 0, SEEK_SET);
+    FAIO::FAfseek(tFile, 0, SEEK_SET);
  
     TilBlock tmp(4);
     
     for(size_t i = 0; i < numBlocks; i++)
     {
-        fread(&tmp[0], 2, 4, tFile);
+        FAIO::FAfread(&tmp[0], 2, 4, tFile);
         mBlocks.push_back(tmp);
     }
 
-    fclose(tFile);
+    FAIO::FAfclose(tFile);
 }
 
 const TilBlock& TilFile::operator[] (size_t index) const

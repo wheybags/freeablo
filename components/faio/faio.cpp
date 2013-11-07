@@ -33,4 +33,23 @@ namespace FAIO
                 return fclose(stream->data.plainFile);
         }
     }
+
+    int FAfseek (FAFile* stream, size_t offset, int origin)
+    {
+        switch(stream->mode)
+        {
+            case FAFile::PlainFile:
+                return fseek(stream->data.plainFile, offset, origin);
+        }
+    }
+
+    size_t FAftell(FAFile* stream)
+    {
+        switch(stream->mode)
+        {
+            case FAFile::PlainFile:
+                return ftell(stream->data.plainFile);
+        }
+    }
+
 }

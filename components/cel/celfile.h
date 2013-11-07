@@ -9,6 +9,11 @@
 
 class Cel_frame;
 
+namespace FAIO
+{
+    class FAFile;
+}
+
 class Cel_file
 {
     public:
@@ -50,7 +55,7 @@ class Cel_file
         bool is_tile_cel(const std::string& file_name);
         Pal get_pallette(std::string filename);
 
-        FILE * mFile;
+        FAIO::FAFile* mFile;
         
         Pal mPal;
         

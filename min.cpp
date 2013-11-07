@@ -3,24 +3,26 @@
 #include <stdio.h>
 #include <iostream>
 
+#include <faio/faio.h>
+
 MinFile::MinFile(const std::string& filename)
 {
 
-    FILE* minF = fopen(filename.c_str(), "rb");
-    fseek(minF, 0, SEEK_END);
-    size_t numPillars = ftell(minF)/16; 
+    FAIO::FAFile* minF = FAIO::FAfopen(filename.c_str(), "rb");
+    FAIO::FAfseek(minF, 0, SEEK_END);
+    size_t numPillars = FAIO::FAftell(minF)/16; 
     
-    fseek(minF, 0, SEEK_SET);
+    FAIO::FAfseek(minF, 0, SEEK_SET);
     
     MinPillar temp(16);
     
     for(size_t i = 0; i < numPillars; i++)
     {
-        fread(&temp[0], 2, 16, minF);
+        FAIO::FAfread(&temp[0], 2, 16, minF);
         mPillars.push_back(temp);
     }
     
-    fclose(minF);
+    FAIO::FAfclose(minF);
 }
      
 const MinPillar& MinFile::operator[] (size_t index) const

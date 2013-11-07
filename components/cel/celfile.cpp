@@ -10,11 +10,12 @@
 #include "celfile.h"
 #include "cel_frame.h"
 
+#include <faio/faio.h>
 
 
 Cel_file::Cel_file(std::string filename) : mPal(get_pallette(filename))
 {
-    mFile = fopen(filename.c_str(), "rb");
+    mFile = FAIO::FAfopen(filename.c_str(), "rb");
 
     mFrame_offsets.resize(read_num_frames()+1); // +1 so we can put in the end offset, too
     read_frame_offsets();
@@ -58,8 +59,8 @@ size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
     #endif
 
     // Load frame data
-    fseek(mFile, mFrame_offsets[frame_num], SEEK_SET);
-    fread(&frame[0], 1, frame.size(), mFile);
+    FAIO::FAfseek(mFile, mFrame_offsets[frame_num], SEEK_SET);
+    FAIO::FAfread(&frame[0], 1, frame.size(), mFile);
 
     // Make sure we're not concatenating onto some other image 
     raw_image.clear();
@@ -87,8 +88,8 @@ size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
             if(frame[0] == 10)
             {
                 from_header = true;
-                fseek(mFile, mFrame_offsets[frame_num]+2, SEEK_SET);
-                fread(&offset, 2, 1, mFile);
+                FAIO::FAfseek(mFile, mFrame_offsets[frame_num]+2, SEEK_SET);
+                FAIO::FAfread(&offset, 2, 1, mFile);
             }
             
             width = normal_width(frame, from_header, offset);
@@ -120,11 +121,11 @@ size_t Cel_file::get_frame(size_t frame_num, std::vector<colour>& raw_image)
 
 size_t Cel_file::read_num_frames()
 {
-    fseek(mFile, 0, SEEK_SET);
+    FAIO::FAfseek(mFile, 0, SEEK_SET);
 
     uint32_t num_frames;
     
-    fread(&num_frames, 4, 1, mFile);
+    FAIO::FAfread(&num_frames, 4, 1, mFile);
 
     #ifdef CEL_DEBUG
         std::cout << ftell(mFile) << ": Num frames: " << num_frames << std::endl;
@@ -135,12 +136,12 @@ size_t Cel_file::read_num_frames()
 
 void Cel_file::read_frame_offsets()
 {
-    fseek(mFile, 4, SEEK_SET);
+    FAIO::FAfseek(mFile, 4, SEEK_SET);
 
     for(size_t i = 0; i < num_frames(); i++)
-            fread(&mFrame_offsets[i], 4, 1, mFile);
+        FAIO::FAfread(&mFrame_offsets[i], 4, 1, mFile);
 
-    fread(&mFrame_offsets[num_frames()], 4, 1, mFile);
+    FAIO::FAfread(&mFrame_offsets[num_frames()], 4, 1, mFile);
 
     #ifdef CEL_DEBUG
         std::cout << ftell(mFile) << ": end offset: " << mFrame_offsets[num_frames()] << std::endl;

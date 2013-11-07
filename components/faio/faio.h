@@ -23,6 +23,8 @@ namespace FAIO
     FAFile* FAfopen(const std::string& filename, const std::string& mode);
     size_t FAfread(void * ptr, size_t size, size_t count, FAFile* stream);
     int FAfclose(FAFile* stream); 
+    int FAfseek (FAFile* stream, size_t offset, int origin);
+    size_t FAftell(FAFile* stream);
 
 }
 
