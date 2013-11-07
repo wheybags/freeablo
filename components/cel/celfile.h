@@ -43,6 +43,10 @@ class Cel_file
         static bool greater_than_second(uint8_t* frame, size_t frame_size);
         static bool is_greater_than(uint8_t* frame, size_t frame_size);
         
+        void drawRow(int row, int end, int& i, uint8_t* frame, colour* pal, std::vector<colour>& raw_image, bool lessThan);
+
+        void decode_greater_less_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image, bool lessThan);
+
         void decode_greater_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image);
 
         bool less_than_first(uint8_t* frame, size_t frame_size);

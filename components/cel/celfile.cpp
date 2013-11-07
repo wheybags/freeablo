@@ -193,120 +193,83 @@ bool Cel_file::is_greater_than(uint8_t* frame, size_t frame_size)
     return greater_than_first(frame, frame_size);
 }
 
-void Cel_file::decode_greater_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+void Cel_file::drawRow(int row, int lastRow, int& framePos, uint8_t* frame, colour* pal, std::vector<colour>& raw_image, bool lessThan)
 {
-    #ifdef CEL_DEBUG
-        std::cout << "Greater than" << std::endl;
-    #endif
-
-    int segment;
-    int i = 0;
-
-
-
-    raw_image.push_back(pal[frame[i]]);
-    i++;
-    raw_image.push_back(pal[frame[i]]);
-    i++;
-    fill_t(30, raw_image); // finish off the first line
-   
-
-    for(segment = 0; segment < 7; segment++)
+    for(; row < lastRow; row++)
     {
-        i += 2;
-
-        int xdraw = (segment+1)*4;
+        // Skip markers - for less than, when on the first half of the image (row < 16), all even rows will start with a pair of marker bits
+        // for the second half of the image (row >= 16), all odd rows will start with a pair of marker bits.
+        // The inverse is true of greater than images.
+        if( (lessThan && ((row < 16 && row % 2 == 0) || (row >= 16 && row % 2 != 0))) ||
+           (!lessThan && ((row < 16 && row % 2 != 0) || (row >= 16 && row % 2 == 0))))
+            framePos += 2;
+        
+        int toDraw;
+        if(row < 16)
+            toDraw = 2 + (row * 2);
+        else
+            toDraw = 32 - ((row - 16) * 2);
         
         #ifdef CEL_DEBUG
-            std::cout << "\tdraw: " << xdraw << std::endl;
+            std::cout << "\trow: " << row << ", draw: " << toDraw << std::endl;
         #endif
 
-        for(int px = 0; px < xdraw; px++)
-        {
-                raw_image.push_back(pal[frame[i]]);
-                i++;
-        }
-        fill_t(32-xdraw, raw_image);
-        
+        if(lessThan)
+            fill_t(32-toDraw, raw_image);
 
-        
-        xdraw = (segment+1)*4 +2;
-
-        #ifdef CEL_DEBUG
-            std::cout << "\tdraw: " << xdraw << std::endl;
-        #endif
-        
-        for(int px = 0; px < xdraw; px++)
+        for(int px = 0; px < toDraw; px++)
         {
-                raw_image.push_back(pal[frame[i]]);
-                i++;
+                raw_image.push_back(pal[frame[framePos]]);
+                framePos++;
         }
-        fill_t(32-xdraw, raw_image);
+
+        if(!lessThan)
+            fill_t(32-toDraw, raw_image);
         
-        
-       
         #ifdef CEL_DEBUG
             std::cout << "len: " << raw_image.size() << std::endl;
         #endif
     }
+}
+
+void Cel_file::decode_greater_less_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image, bool lessThan)
+{
+    #ifdef CEL_DEBUG
+        std::cout << (lessThan ? "Less" : "Greater") << " than" << std::endl;
+    #endif
+
+    int framePos = 0;
     
-    if(greater_than_second(frame, frame_size))
+    drawRow(0, 15, framePos, frame, pal, raw_image, lessThan);
+
+    
+    if((lessThan && less_than_second(frame, frame_size)) || (!lessThan && greater_than_second(frame, frame_size)))
     {
-        for(; segment < 15; segment++)
-        {
-            i += 2;
-
-            int xdraw = (15-segment)*4;
-            int xoffs = 0;
-
-            #ifdef CEL_DEBUG
-                std::cout << "\tdraw: " << xdraw << std::endl;
-            #endif
-
-            int px; 
-            for(px = xoffs; px < xdraw; px++)
-            {
-                    raw_image.push_back(pal[frame[i]]);
-                    i++;
-            }
-            fill_t(32-xdraw, raw_image);
-            
-
-            
-            xdraw = ((15-segment)*4) -2;
-            xoffs = 0;
-
-            #ifdef CEL_DEBUG
-                std::cout << "\tdraw: " << xdraw << std::endl;
-            #endif
-
-            
-            for(px = xoffs; px < xdraw; px++)
-            {
-                    raw_image.push_back(pal[frame[i]]);
-                    i++;
-            }
-            fill_t(32-xdraw, raw_image);
-            
-            
-            #ifdef CEL_DEBUG 
-                std::cout << "len: " << raw_image.size() << std::endl;
-            #endif
-        }
-
-        fill_t(32, raw_image); // last transparent line
+        drawRow(16, 33, framePos, frame, pal, raw_image, lessThan);
     }
     else
     {
-        for(int i = 256; i < frame_size; i++)
-            raw_image.push_back(pal[frame[i]]);
+        for(framePos = 256; framePos < frame_size; framePos++)
+            raw_image.push_back(pal[frame[framePos]]);
     }
     
     #ifdef CEL_DEBUG
-        std::cout << "GT" << raw_image.size() << std::endl;
+        std::cout << (lessThan ? "LT" : "GT") << raw_image.size() << std::endl;
     #endif
 
 }
+
+void Cel_file::decode_greater_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+{
+    decode_greater_less_than(frame, frame_size, pal, raw_image, false);
+}
+
+void Cel_file::decode_less_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
+{
+    decode_greater_less_than(frame, frame_size, pal, raw_image, true);
+}
+
+
 
 bool Cel_file::less_than_first(uint8_t* frame, size_t frame_size)
 {
@@ -336,108 +299,6 @@ bool Cel_file::less_than_second(uint8_t* frame, size_t frame_size)
 bool Cel_file::is_less_than(uint8_t* frame, size_t frame_size)
 {
     return less_than_first(frame, frame_size);
-}
-
-void Cel_file::decode_less_than(uint8_t* frame, size_t frame_size, colour* pal, std::vector<colour>& raw_image)
-{
-    #ifdef CEL_DEBUG
-        std::cout << "Less Than" << std::endl;
-    #endif
-
-    int segment;
-    int i = 0;
-
-    for(segment = 0; segment < 8; segment++)
-    {
-        i += 2;
-
-        int xdraw = segment*4 +2;
-        int xoffs = 32 - xdraw;
-        
-        #ifdef CEL_DEBUG
-            std::cout << "\tdraw: " << xdraw << std::endl;
-            std::cout << "\toff: " << xoffs << std::endl;
-        #endif
-
-           
-        fill_t(xoffs, raw_image);
-        for(int px = xoffs; px < 32; px++)
-        {
-                raw_image.push_back(pal[frame[i]]);
-                i++;
-        }
-        
-
-        
-        xdraw = segment*4 +4;
-        xoffs = 32 - xdraw;
-
-        #ifdef CEL_DEBUG
-            std::cout << "\tdraw: " << xdraw << std::endl;
-        #endif
-
-        
-        fill_t(xoffs, raw_image);
-        for(int px = xoffs; px < 32; px++)
-        {
-                raw_image.push_back(pal[frame[i]]);
-                i++;
-        }
-        
-        #ifdef CEL_DEBUG
-            std::cout << "len: " << raw_image.size() << std::endl;
-        #endif
-    }
-    
-    if(less_than_second(frame, frame_size))
-    {
-        for(; segment < 16; segment++)
-        {
-            i += 2;
-
-            int xdraw = (15-segment)*4 +2;
-            int xoffs = 32 - xdraw;
-
-            #ifdef CEL_DEBUG
-                std::cout << "\tdraw2: " << xdraw << std::endl;
-            #endif
-
-            fill_t(xoffs, raw_image);
-               
-            for(int px = xoffs; px < 32; px++)
-            {
-                    raw_image.push_back(pal[frame[i]]);
-                    i++;
-            }
-            
-
-            
-            xdraw = (15-segment)*4;
-            xoffs = 32 - xdraw;
-        
-            #ifdef CEL_DEBUG
-                std::cout << "\tdraw2: " << xdraw << std::endl;
-            #endif
-
-            
-            fill_t(xoffs, raw_image);
-            for(int px = xoffs; px < 32; px++)
-            {
-                    raw_image.push_back(pal[frame[i]]);
-                    i++;
-            }
-            
-            #ifdef CEL_DEBUG
-                std::cout << "len2: " << raw_image.size() << std::endl;
-            #endif
-        }
-    }
-    else
-    {
-        for(int i = 256; i < frame_size; i++)
-            raw_image.push_back(pal[frame[i]]);
-    }
-
 }
 
 void Cel_file::get_pal(std::string pal_filename, colour* pal)
