@@ -128,7 +128,7 @@ size_t Cel_file::read_num_frames()
     FAIO::FAfread(&num_frames, 4, 1, mFile);
 
     #ifdef CEL_DEBUG
-        std::cout << ftell(mFile) << ": Num frames: " << num_frames << std::endl;
+        std::cout << ": Num frames: " << num_frames << std::endl;
     #endif
 
     return num_frames;
@@ -144,7 +144,7 @@ void Cel_file::read_frame_offsets()
     FAIO::FAfread(&mFrame_offsets[num_frames()], 4, 1, mFile);
 
     #ifdef CEL_DEBUG
-        std::cout << ftell(mFile) << ": end offset: " << mFrame_offsets[num_frames()] << std::endl;
+        std::cout << ": end offset: " << mFrame_offsets[num_frames()] << std::endl;
     #endif
 }
 
@@ -457,7 +457,7 @@ Pal Cel_file::get_pallette(std::string filename)
     if(ends_with(filename, "l1.cel"))
         pal_filename = replace_end("l1.cel", "l1.pal", filename);
     else
-        pal_filename = "diablo.pal";
+        pal_filename = "levels/towndata/town.pal";
 
     
     return Pal(pal_filename);

@@ -8,8 +8,7 @@ TilFile::TilFile(const std::string& filename)
 {
     FAIO::FAFile* tFile = FAIO::FAfopen(filename.c_str(), "rb");
     
-    FAIO::FAfseek(tFile, 0, SEEK_END);
-    size_t numBlocks = FAIO::FAftell(tFile)/4; 
+    size_t numBlocks = FAIO::FAsize(tFile)/4; 
     
     FAIO::FAfseek(tFile, 0, SEEK_SET);
  

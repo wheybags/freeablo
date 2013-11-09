@@ -367,14 +367,14 @@ int main(int argc, char** argv)
         return 1;
     }
     
-    Cel_file town((bfs::path("diabdat.mpq")/"levels"/"towndata"/"town.cel").string());
-    MinFile min((bfs::path("diabdat.mpq")/"levels"/"towndata"/"town.min").string());
-    TilFile til((bfs::path("diabdat.mpq")/"levels"/"towndata"/"town.til").string());
+    Cel_file town("levels/towndata/town.cel");
+    MinFile min("levels/towndata/town.min");
+    TilFile til("levels/towndata/town.til");
 
-    DunFile sector1((bfs::path("diabdat.mpq")/"levels"/"towndata"/"sector1s.dun").string());
-    DunFile sector2((bfs::path("diabdat.mpq")/"levels"/"towndata"/"sector2s.dun").string());
-    DunFile sector3((bfs::path("diabdat.mpq")/"levels"/"towndata"/"sector3s.dun").string());
-    DunFile sector4((bfs::path("diabdat.mpq")/"levels"/"towndata"/"sector4s.dun").string());
+    DunFile sector1("levels/towndata/sector1s.dun");
+    DunFile sector2("levels/towndata/sector2s.dun");
+    DunFile sector3("levels/towndata/sector3s.dun");
+    DunFile sector4("levels/towndata/sector4s.dun");
 
     DunFile dun = getTown(sector1, sector2, sector3, sector4);
 

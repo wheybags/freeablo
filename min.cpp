@@ -9,8 +9,7 @@ MinFile::MinFile(const std::string& filename)
 {
 
     FAIO::FAFile* minF = FAIO::FAfopen(filename.c_str(), "rb");
-    FAIO::FAfseek(minF, 0, SEEK_END);
-    size_t numPillars = FAIO::FAftell(minF)/16; 
+    size_t numPillars = FAIO::FAsize(minF)/16; 
     
     FAIO::FAfseek(minF, 0, SEEK_SET);
     
