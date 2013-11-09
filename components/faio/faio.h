@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string>
 
-#include <StormLib.h>
 
 // The functions in this header are designed to behave roughly like the normal fopen, fread family.
 // The difference is, if FAfopen is called on a file that doesn't exist, it will try to use StormLib
@@ -23,7 +22,7 @@ namespace FAIO
                     FILE* file;
                     std::string* filename;
                 } plainFile;
-                HANDLE mpqFile;
+                void* mpqFile; // This is a pointer to a StormLib HANDLE type, I jist didn't want to #include StormLib here
             } data;
         
             enum FAFileMode

@@ -47,8 +47,9 @@ namespace FAIO
             }
             
             FAFile* file = new FAFile();
+            file->data.mpqFile = malloc(sizeof(HANDLE));
 
-            if(!SFileOpenFileEx(diabdat, getStormLibPath(path).c_str(), 0, &(file->data.mpqFile)))
+            if(!SFileOpenFileEx(diabdat, getStormLibPath(path).c_str(), 0, (HANDLE*)file->data.mpqFile))
             {
                 std::cout << "Failed to open " << filename << " in DIABDAT.MPQ";
                 delete file;
@@ -83,7 +84,7 @@ namespace FAIO
             
             case FAFile::MPQFile:
                 DWORD dwBytes = 1;
-                SFileReadFile(stream->data.mpqFile, ptr, size*count, &dwBytes, NULL);
+                SFileReadFile(*((HANDLE*)stream->data.mpqFile), ptr, size*count, &dwBytes, NULL);
 
                 return dwBytes;
         }
@@ -91,6 +92,8 @@ namespace FAIO
     
     int FAfclose(FAFile* stream)
     {
+        int retval = 0;
+
         switch(stream->mode)
         {
             case FAFile::PlainFile:
@@ -98,13 +101,16 @@ namespace FAIO
                 return fclose(stream->data.plainFile.file);
 
             case FAFile::MPQFile:
-                if(SFileCloseFile(stream->data.mpqFile) != 0)
-                    return EOF;
-                else
-                    return 0;
+                int res = SFileCloseFile(*((HANDLE*)stream->data.mpqFile));
+                free(stream->data.mpqFile);
+
+                if(res != 0)
+                    retval = EOF;
         }
 
         delete stream;
+
+        return retval;
     }
 
     int FAfseek (FAFile* stream, size_t offset, int origin)
@@ -135,7 +141,7 @@ namespace FAIO
                         return 1; // error, incorrect origin
                 }
 
-                SFileSetFilePointer(stream->data.mpqFile, offset, NULL, moveMethod);
+                SFileSetFilePointer(*((HANDLE*)stream->data.mpqFile), offset, NULL, moveMethod);
                 int nError = ERROR_SUCCESS;
                 nError = GetLastError();
 
@@ -151,7 +157,7 @@ namespace FAIO
                 return bfs::file_size(*(stream->data.plainFile.filename));
 
             case FAFile::MPQFile:
-                return SFileGetFileSize(stream->data.mpqFile, NULL);
+                return SFileGetFileSize(*((HANDLE*)stream->data.mpqFile), NULL);
         }
     }
 }
