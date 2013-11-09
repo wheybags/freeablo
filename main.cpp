@@ -322,7 +322,7 @@ void draw_til_block(SDL_Surface* to, int x, int y, const TilFile& til, size_t in
 
 
 SDL_Surface* level = NULL;
-void draw_level(DunFile dun, Cel_file town, MinFile min, TilFile til)
+void draw_level(DunFile dun, Cel_file& town, MinFile min, TilFile til)
 {
 
     if(level == NULL)
@@ -344,7 +344,12 @@ void draw_level(DunFile dun, Cel_file town, MinFile min, TilFile til)
             }
         }
 
+        for(std::map<size_t, SDL_Surface*>::iterator it = tilCache.begin(); it != tilCache.end(); ++it)
+        {
+            SDL_FreeSurface((*it).second);
+        }
 
+        tilCache.clear();
     }
    
     

@@ -18,6 +18,7 @@ class Cel_file
 {
     public:
         Cel_file(std::string filename);
+        ~Cel_file();
         
 
         size_t num_frames();

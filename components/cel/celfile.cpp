@@ -23,6 +23,11 @@ Cel_file::Cel_file(std::string filename) : mPal(get_pallette(filename))
     mIs_tile_cel = is_tile_cel(filename);
 }
 
+Cel_file::~Cel_file()
+{
+    FAIO::FAfclose(mFile);
+}
+
 size_t Cel_file::num_frames()
 {
     return mFrame_offsets.size() -1;
