@@ -6,7 +6,7 @@
 
 TilFile::TilFile(const std::string& filename)
 {
-    FAIO::FAFile* tFile = FAIO::FAfopen(filename.c_str(), "rb");
+    FAIO::FAFile* tFile = FAIO::FAfopen(filename);
     
     size_t numBlocks = FAIO::FAsize(tFile)/4; 
     

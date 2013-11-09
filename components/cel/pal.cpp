@@ -10,7 +10,7 @@ Pal::Pal(std::string filename)
 
     FAIO::FAFile * pal_file;
 
-    pal_file = FAIO::FAfopen(filename.c_str(), "rb");
+    pal_file = FAIO::FAfopen(filename);
     
     for(int i = 0; i < 256; i++)
     {

@@ -7,7 +7,7 @@
 
 DunFile::DunFile(const std::string& filename)
 {
-    FAIO::FAFile* f = FAIO::FAfopen(filename.c_str(), "rb");
+    FAIO::FAFile* f = FAIO::FAfopen(filename);
     
     FAIO::FAfread(&mWidth, 2, 1, f);
     FAIO::FAfread(&mHeight, 2, 1, f);

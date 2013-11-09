@@ -34,14 +34,14 @@ namespace FAIO
 
             FAFile();
 
-            friend FAFile* FAfopen(const std::string& filename, const std::string& mode);
+            friend FAFile* FAfopen(const std::string& filename);
             friend size_t FAfread(void * ptr, size_t size, size_t count, FAFile* stream);
             friend int FAfclose(FAFile* stream); 
             friend int FAfseek (FAFile* stream, size_t offset, int origin);
             friend size_t FAsize(FAFile* stream);
     };
     
-    FAFile* FAfopen(const std::string& filename, const std::string& mode);
+    FAFile* FAfopen(const std::string& filename);
     size_t FAfread(void * ptr, size_t size, size_t count, FAFile* stream);
     int FAfclose(FAFile* stream); 
     int FAfseek (FAFile* stream, size_t offset, int origin);

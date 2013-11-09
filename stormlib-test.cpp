@@ -10,7 +10,7 @@
 int main(int argc, char** argv)
 {
 
-    FAIO::FAFile* file = FAIO::FAfopen(argv[1], "r");
+    FAIO::FAFile* file = FAIO::FAfopen(argv[1]);
     FILE* output = fopen(argv[2], "w");
     
     int read = 1;

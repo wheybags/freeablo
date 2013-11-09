@@ -15,7 +15,7 @@
 
 Cel_file::Cel_file(std::string filename) : mPal(get_pallette(filename))
 {
-    mFile = FAIO::FAfopen(filename.c_str(), "rb");
+    mFile = FAIO::FAfopen(filename);
 
     mFrame_offsets.resize(read_num_frames()+1); // +1 so we can put in the end offset, too
     read_frame_offsets();

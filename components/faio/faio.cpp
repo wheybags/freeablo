@@ -9,7 +9,7 @@ namespace FAIO
 {
     FAFile::FAFile(){}
 
-    // StormLib needs paths wil windows style \'s
+    // StormLib needs paths with windows style \'s
     std::string getStormLibPath(const bfs::path& path)
     {
         std::string retval = "";
@@ -28,7 +28,7 @@ namespace FAIO
 
     HANDLE diabdat = NULL;
 
-    FAFile* FAfopen(const std::string& filename, const std::string& mode)
+    FAFile* FAfopen(const std::string& filename)
     {
         bfs::path path(filename);
         path.make_preferred();
@@ -61,7 +61,7 @@ namespace FAIO
         }
         else
         {
-            FILE* plainFile = fopen(filename.c_str(), mode.c_str());
+            FILE* plainFile = fopen(filename.c_str(), "rb");
             if(plainFile == NULL)
                 return NULL;
 
