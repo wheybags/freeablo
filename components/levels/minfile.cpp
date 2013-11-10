@@ -1,4 +1,4 @@
-#include "min.h"
+#include "minfile.h"
 
 #include <stdio.h>
 #include <iostream>

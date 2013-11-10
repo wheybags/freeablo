@@ -7,8 +7,8 @@
 #include <algorithm>
 
 
-#include "components/cel/celfile.h"
-#include "components/cel/cel_frame.h"
+#include <cel/celfile.h>
+#include <cel/celframe.h>
 
 
 
@@ -80,8 +80,8 @@ int main(int argc, char** argv){
 
     size_t width; 
 
-    Cel_file cel(argv[1]);
-    Cel_frame frame = cel[frame_num];
+    CelFile cel(argv[1]);
+    CelFrame frame = cel[frame_num];
 
 
 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 
-#include "dun_file.h"
+#include "dunfile.h"
 
 #include <faio/faio.h>
 

@@ -7,23 +7,23 @@
 
 #include "pal.h"
 
-class Cel_frame;
+class CelFrame;
 
 namespace FAIO
 {
     class FAFile;
 }
 
-class Cel_file
+class CelFile
 {
     public:
-        Cel_file(std::string filename);
-        ~Cel_file();
+        CelFile(std::string filename);
+        ~CelFile();
         
 
         size_t num_frames();
 
-        Cel_frame& operator[] (size_t index);
+        CelFrame& operator[] (size_t index);
 
     private:
         size_t get_frame(size_t frame_num, std::vector<colour>& raw_image);
@@ -64,7 +64,7 @@ class Cel_file
 
         bool mIs_tile_cel;
         
-        std::map<size_t, Cel_frame> mCache;
+        std::map<size_t, CelFrame> mCache;
 };
 
 #endif

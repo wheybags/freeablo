@@ -1,4 +1,4 @@
-#include "til.h"
+#include "tilfile.h"
 
 #include <stdio.h>
 
