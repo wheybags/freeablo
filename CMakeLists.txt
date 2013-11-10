@@ -59,7 +59,8 @@ link_libraries (
     StormLib
 )
 
-add_executable(freeablo main.cpp)
-add_executable(view view.cpp)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(stormlib-test stormlib-test.cpp)
+add_subdirectory(apps/freeablo)
+add_subdirectory(apps/celview)
+add_subdirectory(apps/mpqtool)
