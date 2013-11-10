@@ -12,12 +12,12 @@
 #include <sstream>
 #include <map>
 
-#include "components/cel/celfile.h"
-#include "components/cel/cel_frame.h"
+#include <cel/celfile.h>
+#include <cel/cel_frame.h>
 
-#include "min.h"
-#include "til.h"
-#include "dun_file.h"
+#include <levels/min.h>
+#include <levels/til.h>
+#include <levels/dun_file.h>
 
 
 #define WIDTH 1280

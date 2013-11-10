@@ -55,19 +55,11 @@ link_libraries (
     ${BZIP2_LIBRARIES}
     Cel
     FAIO
+    Levels
     StormLib
 )
 
-SET( FILES
-    dun_file.cpp
-    min.cpp
-    til.cpp
-    dun_file.h  
-    min.h  
-    til.h
-)
-
-add_executable(freeablo main.cpp ${FILES})
-add_executable(view view.cpp ${FILES})
+add_executable(freeablo main.cpp)
+add_executable(view view.cpp)
 
 add_executable(stormlib-test stormlib-test.cpp)
