@@ -265,7 +265,7 @@ void draw_min_tile(SDL_Surface* s, CelFile& f, int x, int y, int16_t l, int16_t 
 void draw_min_pillar(SDL_Surface* s, int x, int y, const MinPillar& pillar, CelFile& tileset)
 {
     // Each iteration draw one row of the min
-    for(int i = 0; i < 16; i+=2)
+    for(int i = 0; i < pillar.size(); i+=2)
     {
         int16_t l = (pillar[i]&0x0FFF)-1;
         int16_t r = (pillar[i+1]&0x0FFF)-1;
@@ -319,7 +319,7 @@ void draw_til_block(SDL_Surface* to, int x, int y, const TilFile& til, size_t in
     }
 }
 
-
+int tmpindex = 0;
 
 SDL_Surface* level = NULL;
 void draw_level(DunFile dun, CelFile& town, MinFile min, TilFile til)
@@ -353,6 +353,8 @@ void draw_level(DunFile dun, CelFile& town, MinFile min, TilFile til)
     }
    
     
+    //draw_til_block(screen, 0, 0, til, tmpindex, min, town);
+    //draw_min_pillar(screen,  0, 0, min[tmpindex], town);
     blit(level, screen, x_base, y_base);
 }
 
@@ -372,7 +374,7 @@ int main(int argc, char** argv)
         return 1;
     }
     
-    CelFile town("levels/towndata/town.cel");
+    /*CelFile town("levels/towndata/town.cel");
     MinFile min("levels/towndata/town.min");
     TilFile til("levels/towndata/town.til");
 
@@ -382,7 +384,11 @@ int main(int argc, char** argv)
     DunFile sector4("levels/towndata/sector4s.dun");
 
     DunFile dun = getTown(sector1, sector2, sector3, sector4);
-
+    */
+    CelFile town("levels/l1data/l1.cel");
+    MinFile min("levels/l1data/l1.min");
+    TilFile til("levels/l1data/l1.til");
+    DunFile dun("levels/l1data/sklkng1.dun");
     
     int lr = 0;
     int ud = 0;
@@ -413,6 +419,13 @@ int main(int argc, char** argv)
                         case SDLK_d:
                             lr++;
                             break;
+                        case SDLK_p:
+                            tmpindex++;
+                            break;
+                        case SDLK_o:
+                            tmpindex--;
+                            break;
+
 
                     }
                     break;

@@ -56,6 +56,7 @@ link_libraries (
     Cel
     FAIO
     Levels
+    Misc
     StormLib
 )
 

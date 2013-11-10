@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include <iostream>
 #include <vector>
@@ -11,6 +12,7 @@
 #include "celframe.h"
 
 #include <faio/faio.h>
+#include <misc/stringops.h>
 
 
 CelFile::CelFile(std::string filename) : mPal(get_pallette(filename))
@@ -35,6 +37,9 @@ size_t CelFile::num_frames()
 
 CelFrame& CelFile::operator[] (size_t index)
 {
+    assert(index < num_frames());
+    assert(index >= 0);
+
     if(mCache.count(index))
         return mCache[index];
 
@@ -434,33 +439,21 @@ size_t CelFile::decode_raw_32(const std::vector<uint8_t>& frame, Pal pal, std::v
     return 32;
 }
 
-bool CelFile::ends_with(const std::string& full, const std::string& end)
-{
-    return end.size() <= full.size() && full.substr(full.size() - end.size(), end.size()) == end;
-}
-
-std::string CelFile::replace_end(const std::string& old_end, const std::string& new_end, const std::string& original)
-{
-    std::string retval = original.substr(0, original.size() - old_end.size());
-    retval.append(new_end);
-    return retval;
-}
-
 bool CelFile::is_tile_cel(const std::string& file_name)
 {
     return 
-    ends_with(file_name, "l1.cel") ||
-    ends_with(file_name, "l2.cel") ||
-    ends_with(file_name, "l3.cel") ||
-    ends_with(file_name, "l4.cel") ||
-    ends_with(file_name, "town.cel");
+    Misc::StringUtils::endsWith(file_name, "l1.cel") ||
+    Misc::StringUtils::endsWith(file_name, "l2.cel") ||
+    Misc::StringUtils::endsWith(file_name, "l3.cel") ||
+    Misc::StringUtils::endsWith(file_name, "l4.cel") ||
+    Misc::StringUtils::endsWith(file_name, "town.cel");
 }
 
 Pal CelFile::get_pallette(std::string filename)
 {
     std::string pal_filename;
-    if(ends_with(filename, "l1.cel"))
-        pal_filename = replace_end("l1.cel", "l1.pal", filename);
+    if(Misc::StringUtils::endsWith(filename, "l1.cel"))
+        pal_filename = Misc::StringUtils::replaceEnd("l1.cel", "l1.pal", filename);
     else
         pal_filename = "levels/towndata/town.pal";
 

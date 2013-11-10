@@ -51,8 +51,6 @@ class CelFile
         int32_t normal_width(const std::vector<uint8_t>& frame, bool from_header, uint16_t offset);
         void normal_decode(const std::vector<uint8_t>& frame, size_t width, bool from_header, Pal pal, std::vector<colour>& raw_image);
         size_t decode_raw_32(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image);
-        bool ends_with(const std::string& full, const std::string& end);
-        std::string replace_end(const std::string& old_end, const std::string& new_end, const std::string& original);
         bool is_tile_cel(const std::string& file_name);
         Pal get_pallette(std::string filename);
 
