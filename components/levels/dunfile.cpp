@@ -22,6 +22,13 @@ DunFile::DunFile(const std::string& filename)
 
 DunFile::DunFile(size_t width, size_t height)
 {
+    resize(width, height);
+}
+
+DunFile::DunFile() {}
+
+void DunFile::resize(size_t width, size_t height)
+{
     mWidth = width;
     mHeight = height;
     mBlocks.resize(mWidth*mHeight, 0);    

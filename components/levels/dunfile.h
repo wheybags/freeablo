@@ -31,9 +31,12 @@ class DunFile
         int16_t mHeight;
 
         std::vector<int16_t> mBlocks;
-
-    private:
+    
+    //TODO: sort this out
+    //private:
+        DunFile();
         DunFile(size_t width, size_t height);
+        void resize(size_t width, size_t height);
         int16_t& at(size_t x, size_t y) { return mBlocks[x+y*mWidth]; }
         const int16_t& at(size_t x, size_t y) const { return mBlocks[x+y*mWidth]; }
         friend DunFile getTown(const DunFile& sector1, const DunFile& sector2, const DunFile& sector3, const DunFile& sector4);

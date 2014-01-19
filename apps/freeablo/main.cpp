@@ -19,6 +19,8 @@
 #include <levels/tilfile.h>
 #include <levels/dunfile.h>
 
+#include "level/levelgen.h"
+
 
 #define WIDTH 1280
 #define HEIGHT 960
@@ -388,7 +390,9 @@ int main(int argc, char** argv)
     CelFile town("levels/l1data/l1.cel");
     MinFile min("levels/l1data/l1.min");
     TilFile til("levels/l1data/l1.til");
-    DunFile dun("levels/l1data/sklkng1.dun");
+   // DunFile dun(argv[1]);
+    DunFile dun;
+    Freeablo::generate(100, 100, dun);
     
     int lr = 0;
     int ud = 0;
@@ -462,6 +466,7 @@ int main(int argc, char** argv)
      
         SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 255)); 
         draw_level(dun, town, min, til);
+        draw_til_block(screen, 0, 0, til, tmpindex, min, town);
         SDL_Delay(1);
         
         
@@ -472,7 +477,7 @@ int main(int argc, char** argv)
         fpsthink();
 
         std::stringstream s;
-        s << "FPS: " << std::setw(3) << std::setfill('0') << (int)framespersecond;
+        s << argv[1] << " FPS: " << std::setw(3) << std::setfill('0') << (int)framespersecond << " " << tmpindex+1;
 
         SDL_WM_SetCaption(s.str().c_str(), 0);
     }
