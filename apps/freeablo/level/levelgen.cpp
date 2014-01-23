@@ -74,6 +74,42 @@ namespace Freeablo
             }
         }
     }
+    
+    // Deletes unnecessary wall parts (any that do not border the outside)
+    void cleanup(DunFile& level)
+    {
+        for(size_t x = 0; x < level.mWidth; x++)
+        {
+            for(size_t y = 0; y < level.mHeight; y++)
+            {
+                if(level.at(x, y) != wall)
+                    continue;
+
+                bool border = false;
+
+                for(int32_t xoffs = -1; xoffs < 2; xoffs++)
+                {
+                    for(int32_t yoffs = -1; yoffs < 2; yoffs++)
+                    {
+                        int32_t testX = xoffs + x;
+                        int32_t testY = yoffs + y;
+                        
+                        if(testX < 0 || testX >= level.mWidth || testY < 0 || testY >= level.mHeight || level.at(testX, testY) == blank)
+                        {
+                            border = true;
+                            goto done;
+                        }
+                    }
+                }
+                done:
+                
+                if(!border)
+                    level.at(x, y) = floor;
+            }
+        }
+    }
+
+
 
     // Taken from http://stackoverflow.com/questions/2509679/how-to-generate-a-random-number-from-within-a-range
     // Would like a semi-open interval [min, max)
@@ -165,6 +201,7 @@ namespace Freeablo
 
     void generate(size_t width, size_t height, DunFile& level)
     {
+
         level.resize(width, height);
         
         // Initialise whole dungeon to ground
@@ -227,5 +264,7 @@ namespace Freeablo
 
             rooms.erase(rooms.begin());
         }
+
+        cleanup(level);
     }
 }
