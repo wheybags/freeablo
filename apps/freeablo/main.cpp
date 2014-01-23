@@ -352,6 +352,8 @@ void draw_level(DunFile dun, CelFile& town, MinFile min, TilFile til)
         }
 
         tilCache.clear();
+
+        SDL_SaveBMP(level, "test.bmp");
     }
    
     
