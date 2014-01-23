@@ -30,16 +30,23 @@ namespace Freeablo
             }
     };
 
-    /*enum WallType
+    enum DunTile
     {
-        xWall = 2,
-        yWall = 1,
-        bottomCorner = 3,
-        rightCorner = 7,
-        leftCorner = 6,
-        topCorner = 4,
-        floor = 13
-    };*/
+        dunXWall = 2,
+        dunOutsideXWall = 19,
+        dunYWall = 1,
+        dunOutsideYWall = 18,
+        dunBottomCorner = 3,
+        dunOutsideBottomCorner = 20,
+        dunRightCorner = 6,
+        dunOutsideRightCorner = 23,
+        dunLeftCorner = 7,
+        dunOutsideLeftCorner = 24,
+        dunTopCorner = 4,
+        dunOutsideTopCorner = 21,
+        dunFloor = 13,
+        dunBlank = 22
+    };
 
     enum Basic
     {
@@ -198,13 +205,14 @@ namespace Freeablo
 
         }
     }
-
-    void generate(size_t width, size_t height, DunFile& level)
+    
+    // Generates a flat map (no information about wall direction, etc)
+    void generateTmp(size_t width, size_t height, DunFile& level)
     {
 
         level.resize(width, height);
         
-        // Initialise whole dungeon to ground
+        // Initialise whole dungeon to blank
         for(size_t x = 0; x < width; x++)
             for(size_t y = 0; y < height; y++)
                 level.at(x, y) = blank;
@@ -266,5 +274,118 @@ namespace Freeablo
         }
 
         cleanup(level);
+    }
+
+    size_t getXY(int32_t x, int32_t y, const DunFile& level)
+    {
+        if(x < 0 || x >= level.mWidth || y < 0 || y >= level.mHeight)
+            return 0;
+        
+        return level.at(x, y);
+    }
+
+    void setPoint(int32_t x, int32_t y, int val, const DunFile& tmpLevel,  DunFile& level)
+    {
+        int newVal = val;
+        switch(val)
+        {
+            case dunXWall:
+            {   
+                if(getXY(x, y+1, tmpLevel) == blank)
+                    newVal = dunOutsideXWall;
+                break;
+            }
+
+            case dunYWall:
+            {
+                if(getXY(x+1, y, tmpLevel) == blank)
+                    newVal = dunOutsideYWall;
+                break;
+            }
+
+            case dunBottomCorner:
+            {
+                if(getXY(x+1, y+1, tmpLevel) == blank || getXY(x+1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank)
+                    newVal = dunOutsideBottomCorner;
+                break;
+            }
+
+            case dunTopCorner:
+            {
+                if(getXY(x+1, y+1, tmpLevel) == blank)
+                    newVal = dunOutsideTopCorner;
+                break;
+            }
+
+            case dunRightCorner:
+            {
+                if(getXY(x+1, y-1, tmpLevel) == blank  || getXY(x+1, y, tmpLevel) == blank || getXY(x, y-1, tmpLevel) == blank)
+                    newVal = dunOutsideRightCorner;
+                break;
+            }
+
+            case dunLeftCorner:
+            {
+                if(getXY(x-1, y+1, tmpLevel) == blank  || getXY(x-1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank)
+                    newVal = dunOutsideLeftCorner;
+                break;
+            }
+
+            default: {}
+        }
+
+        level.at(x, y) = newVal;
+    }
+    
+    void generate(size_t width, size_t height, DunFile& level)
+    {
+        DunFile tmpLevel;
+        generateTmp(width, height, tmpLevel);
+
+        level.resize(width, height);
+        
+        // Fill in isometric information (wall direction, etc), using flat tmpLevel as a base
+        for(int32_t x = 0; x < width; x++)
+        {
+            for(int32_t y = 0; y < height; y++)
+            {
+                if(tmpLevel.at(x, y) == wall)
+                {
+                    if(getXY(x+1, y, tmpLevel) == wall)
+                    {
+                        if(getXY(x, y+1, tmpLevel) == wall)
+                            setPoint(x, y, dunTopCorner, tmpLevel, level);
+                        else
+                        {
+                            if(getXY(x, y-1, tmpLevel) == wall)
+                                setPoint(x, y, dunLeftCorner, tmpLevel, level);
+                            else
+                                setPoint(x, y, dunXWall, tmpLevel, level);
+                        }
+                    }
+                    else if(getXY(x-1, y, tmpLevel) == wall)
+                    {
+                        if(getXY(x, y-1, tmpLevel) == wall)
+                            setPoint(x, y, dunBottomCorner, tmpLevel, level);
+                        else
+                        {
+                            if(getXY(x, y+1, tmpLevel) == wall)
+                                setPoint(x, y, dunRightCorner, tmpLevel, level);
+                            else
+                                setPoint(x, y, dunXWall, tmpLevel, level);
+                        }
+                    }
+                    else if(getXY(x, y+1, tmpLevel) == wall)
+                        setPoint(x, y, dunYWall, tmpLevel, level);
+                }
+                else
+                {
+                    if(tmpLevel.at(x, y) == blank)
+                        level.at(x, y) = dunBlank;
+                    else
+                        level.at(x, y) = dunFloor;
+                }
+            }
+        }
     }
 }
