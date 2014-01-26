@@ -6,6 +6,10 @@
 #include <algorithm>
 #include <iostream>
 
+#include <cmath>
+
+#include "random.h"
+
 
 namespace Freeablo
 {
@@ -19,14 +23,24 @@ namespace Freeablo
 
             Room(size_t _xPos, size_t _yPos, size_t _width, size_t _height): xPos(_xPos), yPos(_yPos), width(_width), height(_height) {}
 
-            bool intersects(const Room& other)
+            bool intersects(const Room& other) const
             {
-                return !(xPos > other.xPos + other.width || xPos + width < other.xPos || yPos > other.yPos + other.height || yPos + height < other.yPos);
+                return !(yPos+height <= other.yPos+1 || yPos >= other.yPos+other.height-1 || xPos+width <= other.xPos+1 || xPos >= other.xPos+other.width-1);
             }
 
-            size_t area()
+            std::pair<int32_t, int32_t> centre() const
+            {
+                return std::pair<int32_t, int32_t>(xPos + (width/2), yPos + (height/2));
+            }
+
+            size_t area() const
             {
                 return width*height;
+            }
+
+            size_t distance(const Room& other) const
+            {
+                return sqrt((centre().first - other.centre().first)*(centre().first - other.centre().first) + (centre().second - other.centre().second)*(centre().second - other.centre().second));
             }
     };
 
@@ -53,90 +67,22 @@ namespace Freeablo
         wall = 64,
         door = 72,
         floor = 13,
-        blank = 104
+        blank = 104,
+        
+        realRoom = 64,
+        corridoor = 13
     };
 
-    void drawRoom(size_t xPos, size_t yPos, size_t width, size_t height, DunFile& level)
-    {
-        // Draw x oriented walls
-        for(size_t x = 0; x < width; x++)
-        {
-            level.at(x + xPos, yPos) = wall;
-            level.at(x + xPos, height-1 + yPos) = wall;
-        }
+    int roomArea = 30;
 
-        // Draw y oriented walls
-        for(size_t y = 0; y < height; y++)
+    void drawRoom(const Room& room, Basic fill, DunFile& level)
+    {
+        for(size_t x = 0; x < room.width; x++)
         {
-            level.at(xPos, y + yPos) = wall;
-            level.at(width-1 + xPos, y + yPos) = wall;
-        }
-        
-        // Fill ground
-        for(size_t x = 1; x  < width-1; x++)
-        {
-            for(size_t y = 1; y < height-1; y++)
-            {
-                level.at(x + xPos, y + yPos) = floor;
-            }
+            for(size_t y = 0; y < room.height; y++)
+                level.at(x + room.xPos, y + room.yPos) = fill;
         }
     }
-    
-    // Deletes unnecessary wall parts (any that do not border the outside)
-    void cleanup(DunFile& level)
-    {
-        for(size_t x = 0; x < level.mWidth; x++)
-        {
-            for(size_t y = 0; y < level.mHeight; y++)
-            {
-                if(level.at(x, y) != wall)
-                    continue;
-
-                bool border = false;
-
-                for(int32_t xoffs = -1; xoffs < 2; xoffs++)
-                {
-                    for(int32_t yoffs = -1; yoffs < 2; yoffs++)
-                    {
-                        int32_t testX = xoffs + x;
-                        int32_t testY = yoffs + y;
-                        
-                        if(testX < 0 || testX >= level.mWidth || testY < 0 || testY >= level.mHeight || level.at(testX, testY) == blank)
-                        {
-                            border = true;
-                            goto done;
-                        }
-                    }
-                }
-                done:
-                
-                if(!border)
-                    level.at(x, y) = floor;
-            }
-        }
-    }
-
-
-
-    // Taken from http://stackoverflow.com/questions/2509679/how-to-generate-a-random-number-from-within-a-range
-    // Would like a semi-open interval [min, max)
-    int randomInRange (unsigned int min, unsigned int max)
-    {
-        int base_random = rand(); // in [0, RAND_MAX]
-        if (RAND_MAX == base_random) 
-            return randomInRange(min, max);
-        // now guaranteed to be in [0, RAND_MAX)
-        int range       = max - min,
-            remainder   = RAND_MAX % range,
-            bucket      = RAND_MAX / range;
-
-        // There are range buckets, plus one smaller interval within remainder of RAND_MAX 
-        if (base_random < RAND_MAX - remainder)
-            return min + base_random/bucket;
-        else
-            return randomInRange (min, max);
-    }
-
     
     // Ensures that two points are connected by inserting an l-shaped corridoor
     // TODO: Tidy
@@ -205,11 +151,230 @@ namespace Freeablo
 
         }
     }
+   
+    // Move room in direction specified by normalised vector, making sure to keep within
+    // grid of size width * height
+    void moveRoom(Room& room, const std::pair<float, float>& vector, size_t width, size_t height)
+    {
+        if(vector.first == 0 && vector.second == 0)
+            return;
+
+        float angle = (std::atan2(vector.second, vector.first) / M_PI) * 180.0;
+
+        if(angle < 0)
+            angle = 360 + angle;
+        
+        int32_t xMove;
+        int32_t yMove;
+
+        if(angle <= 22.5 && angle >= 337.5)
+        {
+            xMove = 1;
+            yMove = 0;
+        }
+        else if(angle <= 67.5 && angle >= 22.5)
+        {
+            xMove = 1;
+            yMove = 1;
+        }
+        else if(angle <= 112.5 && angle >= 67.5)
+        {
+            xMove = 0;
+            yMove = 1;
+        }
+        else if(angle <= 157.5 && angle >= 112.5)
+        {
+            xMove = -1;
+            yMove = 1;
+        }
+        else if(angle <= 202.5 && angle >= 157.5)
+        {
+            xMove = -1;
+            yMove = 0;
+        }
+        else if(angle <= 247.5 && angle >= 202.5)
+        {
+            xMove = -1;
+            yMove = -1;
+        }
+        else if(angle <= 292.5 && angle >= 247.5)
+        {
+            xMove = 0;
+            yMove = -1;
+        }
+        else if(angle <= 337.5 && angle >= 292.5)
+        {
+            xMove = 1;
+            yMove = -1;
+        }
+
+        int32_t newX = room.xPos + xMove;
+        int32_t newY = room.yPos + yMove;
+        
+        // Make sure not to move outside map
+        if(newX >= 0 && newY >= 0 && newX+room.width < width && newY+room.height < height)
+        {
+            room.xPos = newX;
+            room.yPos = newY;
+        }
+    }
+
+    void normalise(std::pair<float, float>& vector)
+    {
+        float magnitude = sqrt(vector.first*vector.first + vector.second*vector.second);
+        vector.first /= (float)magnitude;
+        vector.second /= (float)magnitude;
+    }
+    
+    // Removes the room overlapping the largest number of rooms repeatedly,
+    // until there are no overlaps
+    void removeOverlaps(std::vector<Room>& rooms)
+    {
+        bool overlap = true;
+
+        while(overlap)
+        {
+            overlap = false;
+
+            int32_t maxIndex = -1;
+            size_t maxNeighbourCount = 0;
+
+            for(int i = 0; i < rooms.size(); i++)
+            {
+                size_t neighbourCount = 0;
+
+                for(int j = 0; j < rooms.size(); j++)
+                {
+                    if(i != j && rooms[i].intersects(rooms[j]))
+                    {
+                        neighbourCount++;
+                        overlap = true;
+                    }
+                }
+                
+                if(neighbourCount > maxNeighbourCount)
+                {
+                    maxIndex = i;
+                    maxNeighbourCount = neighbourCount;
+                }
+            }
+
+            if(maxIndex > -1)
+                rooms.erase(rooms.begin() + maxIndex);
+        }
+    }
+
+    void separate(std::vector<Room>& rooms, size_t width, size_t height)
+    {
+        bool overlap = true;
+
+        int its = 0;
+
+        while(its < 400 && overlap)
+        {
+            its++;
+
+            overlap = false;
+
+            for(size_t i = 0; i < rooms.size(); i++)
+            {
+                std::pair<float, float> vector(0, 0);
+
+                std::pair<int32_t, int32_t> currentCentre = rooms[i].centre();
+                
+                size_t neighbourCount = 0;
+
+                for(size_t j = 0; j < rooms.size(); j++)
+                {
+                    if(i == j)
+                        continue;
+                    
+                    bool intersects = rooms[i].intersects(rooms[j]);
+
+                    overlap = overlap || intersects;
+
+                    if(intersects)
+                    {
+                        std::pair<int32_t, int32_t> centre = rooms[j].centre();
+
+                        if(centre.first == currentCentre.first && centre.second == currentCentre.second)
+                        {
+                            vector.first = rand();
+                            vector.second = rand();
+                            neighbourCount++;
+                            continue;
+                        }
+                        
+                        std::pair<float, float> iToJ (centre.first - currentCentre.first, centre.second - currentCentre.second);
+                        normalise(iToJ);
+
+                        vector.first += iToJ.first * rooms[i].distance(rooms[j]);
+                        vector.second += iToJ.second * rooms[i].distance(rooms[j]);
+
+                        neighbourCount++;
+                    }
+                }
+
+                if(neighbourCount == 0)
+                    continue;
+               
+                vector.first /= (float)neighbourCount;
+                vector.second /= (float)neighbourCount;
+
+                normalise(vector);
+                
+                // invert
+                vector.first *= -1;
+                vector.second *= -1;
+                
+                moveRoom(rooms[i], vector, width, height);
+            }
+
+        }
+        
+        if(overlap)
+            removeOverlaps(rooms);    
+    }
+
+    
+    void generateRooms(std::vector<Room>& rooms, size_t width, size_t height)
+    {
+        srand(50); // TODO: Fix constant
+
+        size_t maxDimension = 10;
+
+        size_t placed = 0;
+
+        int rSquared = 15*15;
+
+        int centreX = width/2;
+        int centreY = height/2;
+
+        while(placed < 150)
+        {
+            Room newRoom(randomInRange(0, width-4), randomInRange(0, height-4), 0, 0);
+
+            if(((centreX-newRoom.centre().first)*(centreX-newRoom.centre().first) + (centreY-newRoom.centre().second)*(centreY-newRoom.centre().second)) > rSquared)
+                continue;
+            
+            newRoom.width = normRand(4, std::min(width-newRoom.xPos, maxDimension));
+            newRoom.height = normRand(4, std::min(height-newRoom.yPos, maxDimension));
+            
+            float ratio = ((float)newRoom.width) / ((float)newRoom.height);
+
+            if(ratio < 0.5 || ratio > 2.0)
+                continue;
+
+            placed++;
+            rooms.push_back(newRoom);
+        }
+
+        separate(rooms, width, height);
+    }
     
     // Generates a flat map (no information about wall direction, etc)
     void generateTmp(size_t width, size_t height, DunFile& level)
     {
-
         level.resize(width, height);
         
         // Initialise whole dungeon to blank
@@ -217,63 +382,14 @@ namespace Freeablo
             for(size_t y = 0; y < height; y++)
                 level.at(x, y) = blank;
 
-        srand(50); // TODO: Fix constant
-
         std::vector<Room> rooms;
-        size_t total_area = 0;
-        size_t its = 0;
+        generateRooms(rooms, width, height);
 
-        size_t maxDimension = 20;
-
-        // Fill dungeon with disconnected rooms, attempting to fill half the total area
-        while(total_area < (width*height)/2 && its < 20)
+        for(int i = 0; i < rooms.size(); i++)
         {
-            its++;
-
-            Room newRoom(randomInRange(0, width-4), randomInRange(0, height-4), 0, 0);
-            
-            newRoom.width = randomInRange(4, std::min(width-newRoom.xPos, maxDimension));
-            newRoom.height = randomInRange(4, std::min(height-newRoom.yPos, maxDimension));
-            
-            float ratio = ((float)newRoom.width) / ((float)newRoom.height);
-
-            if(ratio < 0.5 || ratio > 2.0)
-                continue;
-
-            bool intersects = false;
-
-            for(size_t i = 0; i < rooms.size(); i++)
-                intersects = intersects || newRoom.intersects(rooms[i]);
-
-            if(!intersects)
-            {
-                rooms.push_back(newRoom);
-                drawRoom(newRoom.xPos, newRoom.yPos, newRoom.width, newRoom.height, level);
-                total_area += newRoom.area();
-                its = 0;
-            }
+            if(rooms[i].area() > roomArea)
+                drawRoom(rooms[i], realRoom, level);
         }
-        
-        std::vector<Room> connected;
-        connected.push_back(rooms[1]);
-        rooms.erase(rooms.begin() + 1);
-
-        while(!rooms.empty())
-        {
-            int a = 0, b = randomInRange(0, connected.size());
-
-            size_t ax = rooms[a].xPos + (rooms[a].width/2);
-            size_t ay = rooms[a].yPos + (rooms[a].height/2);
-            
-            size_t bx = connected[b].xPos + (connected[b].width/2);
-            size_t by = connected[b].yPos + (connected[b].height/2);
-            
-            connect(ax, ay, bx, by, level);
-
-            rooms.erase(rooms.begin());
-        }
-
-        cleanup(level);
     }
 
     size_t getXY(int32_t x, int32_t y, const DunFile& level)
@@ -342,7 +458,10 @@ namespace Freeablo
         DunFile tmpLevel;
         generateTmp(width, height, tmpLevel);
 
-        level.resize(width, height);
+        level.mBlocks = tmpLevel.mBlocks;
+        level.mHeight = tmpLevel.mHeight;
+        level.mWidth = tmpLevel.mWidth;
+        /*level.resize(width, height);
         
         // Fill in isometric information (wall direction, etc), using flat tmpLevel as a base
         for(int32_t x = 0; x < width; x++)
@@ -386,6 +505,6 @@ namespace Freeablo
                         level.at(x, y) = dunFloor;
                 }
             }
-        }
+        }*/
     }
 }
