@@ -167,7 +167,7 @@ namespace Freeablo
         int32_t xMove;
         int32_t yMove;
 
-        if(angle <= 22.5 && angle >= 337.5)
+        if((angle <= 22.5 && angle >= 0.0) || (angle <= 360.0 && angle >= 337.5))
         {
             xMove = 1;
             yMove = 0;
@@ -315,7 +315,7 @@ namespace Freeablo
                     }
                 }
 
-                if(neighbourCount == 0)
+                if(vector.first == 0 && vector.second == 0)
                     continue;
                
                 vector.first /= (float)neighbourCount;
