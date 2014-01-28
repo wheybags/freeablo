@@ -194,7 +194,7 @@ namespace Freeablo
         int32_t newY = room.yPos + yMove;
         
         // Make sure not to move outside map
-        if(newX >= 0 && newY >= 0 && newX+room.width < width && newY+room.height < height)
+        if(newX >= 1 && newY >= 1 && newX+room.width < width-1 && newY+room.height < height-1)
         {
             room.xPos = newX;
             room.yPos = newY;
