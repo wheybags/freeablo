@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -20,6 +21,7 @@
 #include <levels/dunfile.h>
 
 #include "level/levelgen.h"
+#include "level/random.h"
 
 
 #define WIDTH 1280
@@ -394,6 +396,8 @@ int main(int argc, char** argv)
     TilFile til("levels/l1data/l1.til");
    // DunFile dun(argv[1]);
     DunFile dun;
+
+    Freeablo::FAsrand(time(NULL));
     Freeablo::generate(100, 100, dun);
     
     int lr = 0;
