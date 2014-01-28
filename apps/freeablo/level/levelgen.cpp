@@ -9,7 +9,7 @@
 #include <cmath>
 
 #include "random.h"
-
+#include "mst.h"
 
 namespace Freeablo
 {
@@ -59,7 +59,9 @@ namespace Freeablo
         dunTopCorner = 4,
         dunOutsideTopCorner = 21,
         dunFloor = 13,
-        dunBlank = 22
+        dunBlank = 22,
+        dunXWallEnd = 17,
+        dunYWallEnd = 16
     };
 
     enum Basic
@@ -68,85 +70,65 @@ namespace Freeablo
         door = 72,
         floor = 13,
         blank = 104,
-        
-        realRoom = 64,
-        corridoor = 13
     };
 
-    int roomArea = 30;
-
-    void drawRoom(const Room& room, Basic fill, DunFile& level)
+    void fillRoom(const Room& room, DunFile& level)
     {
         for(size_t x = 0; x < room.width; x++)
         {
             for(size_t y = 0; y < room.height; y++)
-                level.at(x + room.xPos, y + room.yPos) = fill;
+            {
+                level.at(x + room.xPos, y + room.yPos) = floor;
+            }
+        }
+    }
+
+    void drawCorridoorSegment(const Room& room, const std::vector<Room>& corridoorRooms, DunFile& level)
+    {
+        fillRoom(room, level);
+
+        for(size_t i = 0; i < corridoorRooms.size(); i++)
+        {
+            if(room.intersects(corridoorRooms[i]))
+                fillRoom(corridoorRooms[i], level);
         }
     }
     
-    // Ensures that two points are connected by inserting an l-shaped corridoor
-    // TODO: Tidy
-    void connect(size_t ax, size_t ay, size_t bx, size_t by, DunFile& level)
+    // Ensures that two points are connected by inserting an l-shaped corridoor,
+    // also draws any rooms in rooms vector that the corridoor intersects
+    void connect(const Room& a, const Room& b, const std::vector<Room>& rooms, DunFile& level)
     {
-        size_t x = ax, y = ay;
+        size_t ax = a.centre().first;
+        size_t ay = a.centre().second;
 
-        bool inside = true;
-
-        bool onX = true;
-
-        while(x != bx || y != by)
+        size_t bx = b.centre().first;
+        size_t by = b.centre().second;
+        
+        if(bx != ax)
         {
-            if(onX)
+            if(bx > ax)
             {
-                if(x > bx)
-                    x--;
-                else if(x < bx)
-                    x++;
-
-                if(x == bx)
-                    onX = false;
+                Room x(ax, ay-1, bx-ax, 3);
+                drawCorridoorSegment(x, rooms, level);
             }
             else
             {
-                if(y > by)
-                    y--;
-                else
-                    y++;
+                Room x(bx, ay-1, ax-bx, 3); 
+                drawCorridoorSegment(x, rooms, level);
             }
-
-            if(level[x][y] != blank)
-                inside = true;
+        }
+        if(by != ay)
+        {
+            if(by > ay)
+            {
+                Room y(bx-1, ay, 3, by-ay);
+                drawCorridoorSegment(y, rooms, level);
+            }
             else
-                inside = false; 
-            
-            if(level[x][y] == wall)
             {
-                for(int32_t xoffs = -1; xoffs < 2; xoffs++)
-                {
-                    for(int32_t yoffs = -1; yoffs < 2; yoffs++)
-                    {
-                        int32_t testX = xoffs + x;
-                        int32_t testY = yoffs + y;
-                        
-                        if(testX < 0 || testX >= level.mWidth || testY < 0 || testY >= level.mHeight)
-                            continue;
-                        
-                        if(level.at(testX, testY) == blank)
-                            level.at(testX, testY) = wall;
-                         
-                    }
-                }
-            }
-
-            level.at(x, y) = floor;
-            
-            if(!inside)
-            {
-                if(onX)
-                {
-                    level.at(x, y+1) = wall;
-                    level.at(x, y-1) = wall;
-                }
+                Room y(bx-1, by, 3, ay-by+2);
+                drawCorridoorSegment(y, rooms, level);
+                
             }
 
         }
@@ -158,7 +140,7 @@ namespace Freeablo
     {
         if(vector.first == 0 && vector.second == 0)
             return;
-
+        
         float angle = (std::atan2(vector.second, vector.first) / M_PI) * 180.0;
 
         if(angle < 0)
@@ -263,7 +245,10 @@ namespace Freeablo
                 rooms.erase(rooms.begin() + maxIndex);
         }
     }
-
+    
+    // Separate rooms so they don't overlap, using flocking ai
+    // based on the algorithm described here: 
+    // http://gamedevelopment.tutsplus.com/tutorials/the-three-simple-rules-of-flocking-behaviors-alignment-cohesion-and-separation--gamedev-3444
     void separate(std::vector<Room>& rooms, size_t width, size_t height)
     {
         bool overlap = true;
@@ -299,8 +284,8 @@ namespace Freeablo
 
                         if(centre.first == currentCentre.first && centre.second == currentCentre.second)
                         {
-                            vector.first = rand();
-                            vector.second = rand();
+                            vector.first = randomInRange(0, 10);
+                            vector.second = randomInRange(0, 10);
                             neighbourCount++;
                             continue;
                         }
@@ -336,11 +321,8 @@ namespace Freeablo
             removeOverlaps(rooms);    
     }
 
-    
     void generateRooms(std::vector<Room>& rooms, size_t width, size_t height)
     {
-        srand(50); // TODO: Fix constant
-
         size_t maxDimension = 10;
 
         size_t placed = 0;
@@ -371,8 +353,97 @@ namespace Freeablo
 
         separate(rooms, width, height);
     }
+
+    void drawRoom(const Room& room, DunFile& level)
+    {
+        // Draw x oriented walls
+        for(size_t x = 0; x < room.width; x++)
+        {
+            level.at(x + room.xPos, room.yPos) = wall;
+            level.at(x + room.xPos, room.height-1 + room.yPos) = wall;
+        }
+
+        // Draw y oriented walls
+        for(size_t y = 0; y < room.height; y++)
+        {
+            level.at(room.xPos, y + room.yPos) = wall;
+            level.at(room.width-1 + room.xPos, y + room.yPos) = wall;
+        }
+        
+        // Fill ground
+        for(size_t x = 1; x < room.width-1; x++)
+        {
+            for(size_t y = 1; y < room.height-1; y++)
+            {
+                level.at(x + room.xPos, y + room.yPos) = floor;
+            }
+        }
+    }
+    
+    // Get the value at (x,y) in level, or zero if it is an invalid position
+    size_t getXY(int32_t x, int32_t y, const DunFile& level)
+    {
+        if(x < 0 || x >= level.mWidth || y < 0 || y >= level.mHeight)
+            return 0;
+        
+        return level.at(x, y);
+    }
+    
+    // Returns true if the tile at (x,y) in level borders any tile of the value tile,
+    // false otherwise
+    bool borders(size_t x, size_t y, Basic tile, const DunFile& level)
+    {
+        for(int32_t xoffs = -1; xoffs < 2; xoffs++)
+        {
+            for(int32_t yoffs = -1; yoffs < 2; yoffs++)
+            {
+                int32_t testX = xoffs + x;
+                int32_t testY = yoffs + y;
+                
+                if(getXY(testX, testY, level) == tile)
+                    return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    // Remove double walls, as the tileset does not allow for them
+    void cleanup(DunFile& level)
+    {
+        std::vector<std::pair<size_t, size_t> > toFix;
+
+        for(int32_t x = 0; x < level.mWidth; x++)
+        {
+            for(int32_t y = 0; y < level.mHeight; y++)
+            {
+                if(level.at(x, y) != wall || borders(x, y, blank, level))
+                    continue;
+                
+                if(level.at(x, y-1) == wall && level.at(x+1, y-1) == wall && level.at(x+1, y) == wall)
+                    toFix.push_back(std::pair<size_t, size_t>(x, y));
+            }
+        }
+
+        for(size_t i = 0; i < toFix.size(); i++)
+            level.at(toFix[i].first, toFix[i].second) = floor;
+    }
+    
+    #define ROOMAREA 30
     
     // Generates a flat map (no information about wall direction, etc)
+    // Uses the tinykeep level generation algorithm, described here:
+    // http://www.reddit.com/r/gamedev/comments/1dlwc4/procedural_dungeon_generation_algorithm_explained/
+    // The basic algorithm is as follows:
+    //     1. Generate a bunch of rooms in a radius around the centre of the map, with rooms weighted 
+    //        towards being small more often than large.
+    //     2. Use separation steering to spread them out until they no longer overlap.
+    //     3. Split the rooms into two types, real rooms, and corridoor rooms, where real rooms are rooms
+    //        with an area above a certain threshold, and corridoor rooms are the rest.
+    //     4. Construct a minimum spanning tree which connects all the rooms together, then add in some
+    //        extra edges to allow for some loops.
+    //     5. Connect the rooms according to the graph from the last step with l shaped corridoors, and 
+    //        also draw any corridoor rooms that the corridoors overlap as part of the corridoor.
     void generateTmp(size_t width, size_t height, DunFile& level)
     {
         level.resize(width, height);
@@ -383,21 +454,70 @@ namespace Freeablo
                 level.at(x, y) = blank;
 
         std::vector<Room> rooms;
+        std::vector<Room> corridoorRooms;
         generateRooms(rooms, width, height);
-
-        for(int i = 0; i < rooms.size(); i++)
-        {
-            if(rooms[i].area() > roomArea)
-                drawRoom(rooms[i], realRoom, level);
-        }
-    }
-
-    size_t getXY(int32_t x, int32_t y, const DunFile& level)
-    {
-        if(x < 0 || x >= level.mWidth || y < 0 || y >= level.mHeight)
-            return 0;
         
-        return level.at(x, y);
+        // Split rooms into real rooms, and corridoor rooms
+        for(size_t i = 0; i < rooms.size(); i++)
+        {
+            if(rooms[i].area() < ROOMAREA)
+            {
+                corridoorRooms.push_back(rooms[i]);
+                rooms.erase(rooms.begin()+i);
+                i--;
+            }
+        }
+        
+        // Create graph with edge from each room to each other room
+        std::vector<std::vector<size_t> > graph(rooms.size());
+        for(size_t i = 0; i < rooms.size(); i++)
+        {
+            graph[i].resize(rooms.size());
+
+            for(size_t j = 0; j < rooms.size(); j++)
+                graph[i][j] = rooms[i].distance(rooms[j]);
+        }
+
+        // Create Minimum spanning tree of above graph, and connect rooms according to edges
+        std::vector<size_t> parent;
+        minimumSpanningTree(graph, parent);
+        for(size_t i = 1; i < rooms.size(); i++)
+            connect(rooms[parent[i]], rooms[i], corridoorRooms, level);
+        
+        // Add in an extra 15% of the number of rooms random connections to create some loops
+        int fifteenPercent = (((float)rooms.size())/100.0)*15.0;
+        for(size_t i = 0; i < fifteenPercent; i++)
+        {
+            size_t a, b;
+            
+            do
+            {
+                a = randomInRange(0, rooms.size()-1);
+                b = randomInRange(0, rooms.size()-1);
+            }
+            while(a == b || parent[a] == b || parent[b] == a);
+            
+            connect(rooms[a], rooms[b], corridoorRooms, level);
+        }
+
+        // Draw rooms on top of corridoors
+        for(int i = 0; i < rooms.size(); i++)
+            drawRoom(rooms[i], level);
+        
+        // Bound corridoors with walls
+        for(size_t x = 0; x < width; x++)
+        {
+            for(size_t y = 0; y < height; y++)
+            {
+                if(getXY(x, y, level) == blank)
+                {
+                    if(borders(x, y, floor, level))
+                        level.at(x, y) = wall;
+                }
+            }
+        }
+        
+        cleanup(level); 
     }
 
     void setPoint(int32_t x, int32_t y, int val, const DunFile& tmpLevel,  DunFile& level)
@@ -409,6 +529,10 @@ namespace Freeablo
             {   
                 if(getXY(x, y+1, tmpLevel) == blank)
                     newVal = dunOutsideXWall;
+                else if(getXY(x+1, y, tmpLevel) == floor)
+                    newVal = dunXWallEnd;
+                else if(getXY(x-1, y, tmpLevel) == floor)
+                    newVal = dunLeftCorner;
                 break;
             }
 
@@ -416,13 +540,24 @@ namespace Freeablo
             {
                 if(getXY(x+1, y, tmpLevel) == blank)
                     newVal = dunOutsideYWall;
+                else if(getXY(x, y+1, tmpLevel) == floor)
+                    newVal = dunYWallEnd;
+                else if(getXY(x, y-1, tmpLevel) == floor)
+                    newVal = dunRightCorner;
                 break;
             }
 
             case dunBottomCorner:
             {
                 if(getXY(x+1, y+1, tmpLevel) == blank || getXY(x+1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank)
-                    newVal = dunOutsideBottomCorner;
+                {
+                    if(getXY(x, y+1, tmpLevel) == wall)
+                        newVal = dunOutsideYWall;
+                    else
+                        newVal = dunOutsideBottomCorner;
+                }
+                else if(getXY(x, y+1, tmpLevel) == wall)
+                    newVal = dunYWall;
                 break;
             }
 
@@ -458,10 +593,7 @@ namespace Freeablo
         DunFile tmpLevel;
         generateTmp(width, height, tmpLevel);
 
-        level.mBlocks = tmpLevel.mBlocks;
-        level.mHeight = tmpLevel.mHeight;
-        level.mWidth = tmpLevel.mWidth;
-        /*level.resize(width, height);
+        level.resize(width, height);
         
         // Fill in isometric information (wall direction, etc), using flat tmpLevel as a base
         for(int32_t x = 0; x < width; x++)
@@ -494,8 +626,10 @@ namespace Freeablo
                                 setPoint(x, y, dunXWall, tmpLevel, level);
                         }
                     }
-                    else if(getXY(x, y+1, tmpLevel) == wall)
+                    else
+                    {
                         setPoint(x, y, dunYWall, tmpLevel, level);
+                    }
                 }
                 else
                 {
@@ -505,6 +639,6 @@ namespace Freeablo
                         level.at(x, y) = dunFloor;
                 }
             }
-        }*/
+        }
     }
 }
