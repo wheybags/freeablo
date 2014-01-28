@@ -327,16 +327,19 @@ namespace Freeablo
 
         size_t placed = 0;
 
-        int rSquared = 15*15;
+        size_t centreX = width/2;
+        size_t centreY = height/2;
+       
+        // The following two are based on the fact that 150 rooms in a radius of
+        // 15 looks good on an 85*75 map 
+        size_t numRooms = std::min(width, height)*(150.0/75.0);
+        size_t radius = std::min(width, height)*(15.0/75.0);
 
-        int centreX = width/2;
-        int centreY = height/2;
-
-        while(placed < 150)
+        while(placed < numRooms)
         {
             Room newRoom(randomInRange(0, width-4), randomInRange(0, height-4), 0, 0);
 
-            if(((centreX-newRoom.centre().first)*(centreX-newRoom.centre().first) + (centreY-newRoom.centre().second)*(centreY-newRoom.centre().second)) > rSquared)
+            if(((centreX-newRoom.centre().first)*(centreX-newRoom.centre().first) + (centreY-newRoom.centre().second)*(centreY-newRoom.centre().second)) > radius*radius)
                 continue;
             
             newRoom.width = normRand(4, std::min(width-newRoom.xPos, maxDimension));
