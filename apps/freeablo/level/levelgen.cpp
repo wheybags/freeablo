@@ -420,13 +420,27 @@ namespace Freeablo
                 if(level.at(x, y) != wall || borders(x, y, blank, level))
                     continue;
                 
-                if(level.at(x, y-1) == wall && level.at(x+1, y-1) == wall && level.at(x+1, y) == wall)
+                // This expression is a bit of a monster, take my word for it that it finds double walls :P
+                if((level.at(x, y-1) == wall && (((level.at(x+1, y-1) == wall && level.at(x+1, y) == wall)) ||
+                                                  (level.at(x-1, y-1) == wall && level.at(x-1, y) == wall))   ) 
+                    ||
+                   (level.at(x, y+1) == wall && (((level.at(x+1, y+1) == wall && level.at(x+1, y) == wall)) ||
+                                                  (level.at(x-1, y+1) == wall && level.at(x-1, y) == wall))   ))
+                {
                     toFix.push_back(std::pair<size_t, size_t>(x, y));
+                }
             }
         }
 
         for(size_t i = 0; i < toFix.size(); i++)
             level.at(toFix[i].first, toFix[i].second) = floor;
+        
+        // Remove any isolated wall blocks which may have been created by removing double walls 
+        for(int32_t x = 0; x < level.mWidth; x++)
+            for(int32_t y = 0; y < level.mHeight; y++)
+                if(level.at(x, y) == wall && getXY(x+1, y, level) != wall && getXY(x-1, y, level) != wall &&
+                                             getXY(x, y+1, level) != wall && getXY(x, y-1, level) != wall)
+                    level.at(x, y) = floor;
     }
     
     #define ROOMAREA 30
