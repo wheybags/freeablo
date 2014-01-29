@@ -61,13 +61,15 @@ namespace Freeablo
         dunFloor = 13,
         dunBlank = 22,
         dunXWallEnd = 17,
-        dunYWallEnd = 16
+        dunYWallEnd = 16,
+        dunXDoor = 26,
+        dunYDoor = 25
     };
 
     enum Basic
     {
         wall = 64,
-        door = 72,
+        door = 47,
         floor = 13,
         blank = 104,
     };
@@ -441,6 +443,82 @@ namespace Freeablo
                     level.at(x, y) = floor;
     }
     
+    // Helper function for adding doors
+    // Iterates over all blocks on a wall, and adds doors where necessary, looking at what is in the direction
+    // indicated by add (1 or -1) to determine if a door is needed
+    void doorAddHelper(DunFile& level, int32_t otherCoord, int32_t add, size_t start, size_t end, bool xAxis)
+    {
+        std::vector<std::pair<size_t, size_t> > region;
+        bool connected = false;
+        bool hole = false;
+
+        for(size_t i = start; i < end; i++)
+        {
+            if((xAxis && (getXY(i, otherCoord, level) == floor || getXY(i, otherCoord, level) == door)) || 
+              (!xAxis && (getXY(otherCoord, i, level) == floor || getXY(otherCoord, i, level) == door)))
+            {
+                hole = true;
+            }
+            else if((xAxis && getXY(i, otherCoord+add, level) != floor) ||
+                   (!xAxis && getXY(otherCoord+add, i, level) != floor)) 
+            {
+                if(hole)
+                    region.resize(0);
+                hole = false;
+            }
+
+            if(!hole)
+            {
+                if((xAxis && getXY(i, otherCoord+add, level) == floor) ||
+                  (!xAxis && getXY(otherCoord+add, i, level) == floor))
+                {
+                    if(!connected)
+                    {
+                        if(region.size() > 0)
+                            level.at(region[region.size()/2].first, region[region.size()/2].second) = door;
+                        
+                        region.resize(0);
+                        connected = true;
+                    }
+                    
+                    if(xAxis) 
+                    {
+                        if(getXY(i-1, otherCoord, level) == wall && getXY(i+1, otherCoord, level) == wall)
+                            region.push_back(std::pair<size_t, size_t>(i, otherCoord));
+                    }
+                    else
+                    {
+                        if(getXY(otherCoord, i-1, level) == wall && getXY(otherCoord, i+1, level) == wall)
+                            region.push_back(std::pair<size_t, size_t>(otherCoord, i));
+                    }
+                }
+                else
+                {
+                    connected = false;
+                }
+            }
+        }
+
+        if(!hole && region.size() > 0)
+            level.at(region[region.size()/2].first, region[region.size()/2].second) = door;
+    }
+    
+    void addDoors(DunFile& level, const std::vector<Room>& rooms)
+    {
+        for(size_t i = 0; i < rooms.size(); i++)
+        {
+            // Top x wall
+            doorAddHelper(level, rooms[i].yPos,                   -1, rooms[i].xPos+1, rooms[i].xPos + rooms[i].width -1,  true); 
+            // Bottom x wall
+            doorAddHelper(level, rooms[i].yPos+rooms[i].height-1, +1, rooms[i].xPos+1, rooms[i].xPos + rooms[i].width -1,  true); 
+            
+            // Left y wall
+            doorAddHelper(level, rooms[i].xPos,                   -1, rooms[i].yPos+1, rooms[i].yPos + rooms[i].height -1, false); 
+            // Right y wall
+            doorAddHelper(level, rooms[i].xPos+rooms[i].width-1,  +1, rooms[i].yPos+1, rooms[i].yPos + rooms[i].height -1, false); 
+        }
+    }
+
     #define ROOMAREA 30
     
     // Generates a flat map (no information about wall direction, etc)
@@ -530,8 +608,14 @@ namespace Freeablo
         }
         
         cleanup(level); 
+        addDoors(level, rooms);
     }
 
+    bool isWall(size_t x, size_t y, const DunFile& level)
+    {
+        return getXY(x, y, level) == wall || getXY(x, y, level) == door;
+    }
+ 
     void setPoint(int32_t x, int32_t y, int val, const DunFile& tmpLevel,  DunFile& level)
     {
         int newVal = val;
@@ -539,7 +623,9 @@ namespace Freeablo
         {
             case dunXWall:
             {   
-                if(getXY(x, y+1, tmpLevel) == blank)
+                if(getXY(x, y, tmpLevel) == door)
+                    newVal = dunXDoor;
+                else if(getXY(x, y+1, tmpLevel) == blank)
                     newVal = dunOutsideXWall;
                 else if(getXY(x+1, y, tmpLevel) == floor)
                     newVal = dunXWallEnd;
@@ -549,8 +635,10 @@ namespace Freeablo
             }
 
             case dunYWall:
-            {
-                if(getXY(x+1, y, tmpLevel) == blank)
+            {   
+                if(getXY(x, y, tmpLevel) == door)
+                    newVal = dunYDoor;
+                else if(getXY(x+1, y, tmpLevel) == blank)
                     newVal = dunOutsideYWall;
                 else if(getXY(x, y+1, tmpLevel) == floor)
                     newVal = dunYWallEnd;
@@ -563,12 +651,12 @@ namespace Freeablo
             {
                 if(getXY(x+1, y+1, tmpLevel) == blank || getXY(x+1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank)
                 {
-                    if(getXY(x, y+1, tmpLevel) == wall)
+                    if(isWall(x, y+1, tmpLevel))
                         newVal = dunOutsideYWall;
                     else
                         newVal = dunOutsideBottomCorner;
                 }
-                else if(getXY(x, y+1, tmpLevel) == wall)
+                else if(isWall(x, y+1, tmpLevel))
                     newVal = dunYWall;
                 break;
             }
@@ -599,7 +687,7 @@ namespace Freeablo
 
         level.at(x, y) = newVal;
     }
-    
+   
     void generate(size_t width, size_t height, DunFile& level)
     {
         DunFile tmpLevel;
@@ -612,27 +700,27 @@ namespace Freeablo
         {
             for(int32_t y = 0; y < height; y++)
             {
-                if(tmpLevel.at(x, y) == wall)
+                if(isWall(x, y, tmpLevel))
                 {
-                    if(getXY(x+1, y, tmpLevel) == wall)
+                    if(isWall(x+1, y, tmpLevel))
                     {
-                        if(getXY(x, y+1, tmpLevel) == wall)
+                        if(isWall(x, y+1, tmpLevel))
                             setPoint(x, y, dunTopCorner, tmpLevel, level);
                         else
                         {
-                            if(getXY(x, y-1, tmpLevel) == wall)
+                            if(isWall(x, y-1, tmpLevel))
                                 setPoint(x, y, dunLeftCorner, tmpLevel, level);
                             else
                                 setPoint(x, y, dunXWall, tmpLevel, level);
                         }
                     }
-                    else if(getXY(x-1, y, tmpLevel) == wall)
+                    else if(isWall(x-1, y, tmpLevel))
                     {
-                        if(getXY(x, y-1, tmpLevel) == wall)
+                        if(isWall(x, y-1, tmpLevel))
                             setPoint(x, y, dunBottomCorner, tmpLevel, level);
                         else
                         {
-                            if(getXY(x, y+1, tmpLevel) == wall)
+                            if(isWall(x, y+1, tmpLevel))
                                 setPoint(x, y, dunRightCorner, tmpLevel, level);
                             else
                                 setPoint(x, y, dunXWall, tmpLevel, level);
