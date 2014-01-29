@@ -414,8 +414,6 @@ namespace Freeablo
     // Remove double walls, as the tileset does not allow for them
     void cleanup(DunFile& level)
     {
-        std::vector<std::pair<size_t, size_t> > toFix;
-
         for(int32_t x = 0; x < level.mWidth; x++)
         {
             for(int32_t y = 0; y < level.mHeight; y++)
@@ -430,14 +428,11 @@ namespace Freeablo
                    (level.at(x, y+1) == wall && (((level.at(x+1, y+1) == wall && level.at(x+1, y) == wall)) ||
                                                   (level.at(x-1, y+1) == wall && level.at(x-1, y) == wall))   ))
                 {
-                    toFix.push_back(std::pair<size_t, size_t>(x, y));
+                    level.at(x, y) = floor;
                 }
             }
         }
 
-        for(size_t i = 0; i < toFix.size(); i++)
-            level.at(toFix[i].first, toFix[i].second) = floor;
-        
         // Remove any isolated wall blocks which may have been created by removing double walls 
         for(int32_t x = 0; x < level.mWidth; x++)
             for(int32_t y = 0; y < level.mHeight; y++)
