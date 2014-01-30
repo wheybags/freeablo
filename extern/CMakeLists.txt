@@ -1,12 +1,14 @@
 
 add_definitions(-D__SYS_ZLIB -D__SYS_BZLIB -D_7ZIP_ST)
 
-AUX_SOURCE_DIRECTORY(StormLib/src StormFiles) 
+AUX_SOURCE_DIRECTORY(StormLib/src StormFiles)
 AUX_SOURCE_DIRECTORY(StormLib/src/libtomcrypt/src/hashes/ StormFiles)
 AUX_SOURCE_DIRECTORY(StormLib/src/libtomcrypt/src/headers/ StormFiles)
 AUX_SOURCE_DIRECTORY(StormLib/src/libtomcrypt/src/math/ StormFiles)
 AUX_SOURCE_DIRECTORY(StormLib/src/libtomcrypt/src/misc/ StormFiles)
+AUX_SOURCE_DIRECTORY(StormLib/src/libtomcrypt/src/pk/asn1 StormFiles)
 AUX_SOURCE_DIRECTORY(StormLib/src/libtomcrypt/src/pk/ecc StormFiles)
+AUX_SOURCE_DIRECTORY(StormLib/src/libtomcrypt/src/pk/pkcs1 StormFiles)
 AUX_SOURCE_DIRECTORY(StormLib/src/libtomcrypt/src/pk/rsa StormFiles)
 AUX_SOURCE_DIRECTORY(StormLib/src/libtommath StormFiles)
 SET(StormFiles ${StormFiles} StormLib/src/huffman/huff)
