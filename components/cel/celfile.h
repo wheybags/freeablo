@@ -18,18 +18,15 @@ class CelFile
 {
     public:
         CelFile(std::string filename);
-        ~CelFile();
-        
 
         size_t num_frames();
 
         CelFrame& operator[] (size_t index);
 
     private:
-        size_t get_frame(size_t frame_num, std::vector<colour>& raw_image);
+        size_t get_frame(const std::vector<uint8_t>& frame, std::vector<colour>& raw_image);
 
-        size_t read_num_frames();
-        void read_frame_offsets();
+        void readFrames(FAIO::FAFile* file);
         
         static bool greater_than_first(const std::vector<uint8_t>& frame);
         static bool greater_than_second(const std::vector<uint8_t>& frame);
@@ -54,11 +51,9 @@ class CelFile
         bool is_tile_cel(const std::string& file_name);
         Pal get_pallette(std::string filename);
 
-        FAIO::FAFile* mFile;
-        
         Pal mPal;
-        
-        std::vector<uint32_t> mFrame_offsets;
+
+        std::vector<std::vector<uint8_t> > mFrames;
 
         bool mIs_tile_cel;
         
