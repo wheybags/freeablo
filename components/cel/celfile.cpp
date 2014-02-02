@@ -18,7 +18,32 @@
 CelFile::CelFile(std::string filename) : mPal(get_pallette(filename))
 {
     FAIO::FAFile* file = FAIO::FAfopen(filename);
-    readFrames(file);
+
+    uint32_t first;
+    FAIO::FAfread(&first, 4, 1, file);
+    
+    // If the first uint16_t in the file is 32,
+    // then it is a cel archive, containing 8 cels,
+    // each of which is a collection of frames 
+    // representing an animation of an object at 
+    // one of the eight possible rotations.
+    // This is a side effect of cel archives containing
+    // a header liek the normal cel header pointing to
+    // each of the cels it contains, and there always being
+    // 8 cels in each cel archive, so 8*4=32, the start
+    // of the first cel
+    if(first == 32)
+    {
+        FAIO::FAfseek(file, 32, SEEK_SET);
+        for(size_t i = 0; i < 8; i++)
+            readFrames(file);
+    }
+    else
+    {
+        FAIO::FAfseek(file, 0, SEEK_SET);
+        readFrames(file);
+    }
+
     FAIO::FAfclose(file);
     
     mIs_tile_cel = is_tile_cel(filename);
