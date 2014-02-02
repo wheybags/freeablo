@@ -17,22 +17,41 @@
 
 CelFile::CelFile(std::string filename) : mPal(get_pallette(filename))
 {
-    mFile = FAIO::FAfopen(filename);
+    FAIO::FAFile* file = FAIO::FAfopen(filename);
 
-    mFrame_offsets.resize(read_num_frames()+1); // +1 so we can put in the end offset, too
-    read_frame_offsets();
+    uint32_t first;
+    FAIO::FAfread(&first, 4, 1, file);
+    
+    // If the first uint16_t in the file is 32,
+    // then it is a cel archive, containing 8 cels,
+    // each of which is a collection of frames 
+    // representing an animation of an object at 
+    // one of the eight possible rotations.
+    // This is a side effect of cel archives containing
+    // a header liek the normal cel header pointing to
+    // each of the cels it contains, and there always being
+    // 8 cels in each cel archive, so 8*4=32, the start
+    // of the first cel
+    if(first == 32)
+    {
+        FAIO::FAfseek(file, 32, SEEK_SET);
+        for(size_t i = 0; i < 8; i++)
+            readFrames(file);
+    }
+    else
+    {
+        FAIO::FAfseek(file, 0, SEEK_SET);
+        readFrames(file);
+    }
+
+    FAIO::FAfclose(file);
     
     mIs_tile_cel = is_tile_cel(filename);
 }
 
-CelFile::~CelFile()
-{
-    FAIO::FAfclose(mFile);
-}
-
 size_t CelFile::num_frames()
 {
-    return mFrame_offsets.size() -1;
+    return mFrames.size();
 }
 
 CelFrame& CelFile::operator[] (size_t index)
@@ -47,7 +66,9 @@ CelFrame& CelFile::operator[] (size_t index)
     CelFrame frame;
     std::vector<colour> raw_image;
     frame.raw_image = raw_image;
-    frame.width = get_frame(index, frame.raw_image);
+
+    frame.width = get_frame(mFrames[index], frame.raw_image);
+
     frame.height = frame.raw_image.size() / frame.width;
 
     mCache[index] = frame;
@@ -59,19 +80,8 @@ CelFrame& CelFile::operator[] (size_t index)
     return mCache[index];
 }
 
-size_t CelFile::get_frame(size_t frame_num, std::vector<colour>& raw_image)
+size_t CelFile::get_frame(const std::vector<uint8_t>& frame, std::vector<colour>& raw_image)
 {
-    
-	std::vector<uint8_t> frame(mFrame_offsets[frame_num+1] - mFrame_offsets[frame_num]);
-
-    #ifdef CEL_DEBUG
-        std::cout << std::endl << "frame 0 size: " << frame.size() << std::endl;
-    #endif
-
-    // Load frame data
-    FAIO::FAfseek(mFile, mFrame_offsets[frame_num], SEEK_SET);
-    FAIO::FAfread(&frame[0], 1, frame.size(), mFile);
-
     // Make sure we're not concatenating onto some other image 
     raw_image.clear();
     
@@ -88,7 +98,7 @@ size_t CelFile::get_frame(size_t frame_num, std::vector<colour>& raw_image)
     
     else
     {
-        uint16_t offset;
+        uint16_t offset = 0;
         bool from_header = false;
         
         // Tile cel frames never have headers 
@@ -98,8 +108,7 @@ size_t CelFile::get_frame(size_t frame_num, std::vector<colour>& raw_image)
             if(frame[0] == 10)
             {
                 from_header = true;
-                FAIO::FAfseek(mFile, mFrame_offsets[frame_num]+2, SEEK_SET);
-                FAIO::FAfread(&offset, 2, 1, mFile);
+                offset = (uint16_t) (frame[3] << 8 | frame[2]);
             }
             
             width = normal_width(frame, from_header, offset);
@@ -111,7 +120,7 @@ size_t CelFile::get_frame(size_t frame_num, std::vector<colour>& raw_image)
             std::cout << raw_image.size() << " " << frame.size() << std::endl;
         #endif
         
-        if(mIs_tile_cel && frame.size() == 1024 && frame_num != 2593) // It's a fully opaque raw frame, width 32, from a level tileset
+        if(mIs_tile_cel && frame.size() == 1024 /*&& frame_num != 2593*/) // It's a fully opaque raw frame, width 32, from a level tileset
         //if(mIs_tile_cel && raw_image.size() < frame.size() ) // It's a fully opaque raw frame, width 32, from a level tileset
         {
             raw_image.clear();
@@ -129,33 +138,24 @@ size_t CelFile::get_frame(size_t frame_num, std::vector<colour>& raw_image)
     return width;
 }
 
-size_t CelFile::read_num_frames()
+void CelFile::readFrames(FAIO::FAFile* file)
 {
-    FAIO::FAfseek(mFile, 0, SEEK_SET);
+    uint32_t numFrames;
 
-    uint32_t num_frames;
-    
-    FAIO::FAfread(&num_frames, 4, 1, mFile);
+    FAIO::FAfread(&numFrames, 4, 1, file);
 
-    #ifdef CEL_DEBUG
-        std::cout << ": Num frames: " << num_frames << std::endl;
-    #endif
+    std::vector<uint32_t> frameOffsets(numFrames+1);
 
-    return num_frames;
-}
+    for(size_t i = 0; i < numFrames; i++)
+        FAIO::FAfread(&frameOffsets[i], 4, 1, file);
 
-void CelFile::read_frame_offsets()
-{
-    FAIO::FAfseek(mFile, 4, SEEK_SET);
+    FAIO::FAfread(&frameOffsets[numFrames], 4, 1, file);
 
-    for(size_t i = 0; i < num_frames(); i++)
-        FAIO::FAfread(&mFrame_offsets[i], 4, 1, mFile);
-
-    FAIO::FAfread(&mFrame_offsets[num_frames()], 4, 1, mFile);
-
-    #ifdef CEL_DEBUG
-        std::cout << ": end offset: " << mFrame_offsets[num_frames()] << std::endl;
-    #endif
+    for(size_t i = 0; i < numFrames; i++)
+    {
+        mFrames.push_back(std::vector<uint8_t>(frameOffsets[i+1]-frameOffsets[i]));
+        FAIO::FAfread(&mFrames[mFrames.size()-1][0], 1, frameOffsets[i+1]-frameOffsets[i], file);
+    }
 }
 
 bool CelFile::greater_than_first(const std::vector<uint8_t>& frame)
