@@ -81,6 +81,11 @@ public:
         return end.size() <= full.size() && full.substr(full.size() - end.size(), end.size()) == end;
     }
 
+    static bool ciEndsWith(const std::string& full, const std::string& end)
+    {
+        return endsWith(lowerCase(full), lowerCase(end));
+    }
+
     static std::string replaceEnd(const std::string& old_end, const std::string& new_end, const std::string& original)
     {
         std::string retval = original.substr(0, original.size() - old_end.size());
