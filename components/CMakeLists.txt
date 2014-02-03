@@ -1,4 +1,10 @@
-add_library(Cel cel/celfile.cpp cel/celfile.h  cel/celframe.h cel/pal.cpp cel/pal.h)
+add_library(Cel 
+    cel/celfile.cpp cel/celfile.h  
+    cel/celframe.h 
+    cel/pal.cpp cel/pal.h 
+    cel/tiledecoding.cpp cel/tiledecoding.h 
+    cel/celdecoding.cpp cel/celdecoding.h
+    cel/cl2decoding.cpp cel/cl2decoding.h)
 
 add_library(FAIO faio/faio.cpp faio/faio.h)
 

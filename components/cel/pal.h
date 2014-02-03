@@ -5,19 +5,19 @@
 #include <vector>
 #include <string>
 
-struct colour
+struct Colour
 {
     uint8_t r;
     uint8_t g;
     uint8_t b;
     bool visible;
 
-    colour(uint8_t _r, uint8_t _g, uint8_t _b, bool _visible)
+    Colour(uint8_t _r, uint8_t _g, uint8_t _b, bool _visible)
     {
         r = _r; g = _g; b = _b; visible = _visible;
     }
 
-    colour(){ visible = true; }
+    Colour(){ visible = true; }
 };
 
 
@@ -26,10 +26,10 @@ class Pal
     public:
         Pal(std::string filename);
         
-        colour& operator[](size_t index);
+        const Colour& operator[](size_t index) const;
 
     private:
-        std::vector<colour> contents;
+        std::vector<Colour> contents;
 };
 
 #endif

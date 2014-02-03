@@ -8,6 +8,7 @@
 #include "pal.h"
 
 class CelFrame;
+class Pal;
 
 namespace FAIO
 {
@@ -19,46 +20,23 @@ class CelFile
     public:
         CelFile(std::string filename);
 
-        size_t num_frames();
+        size_t numFrames();
 
         CelFrame& operator[] (size_t index);
 
     private:
-        size_t get_frame(const std::vector<uint8_t>& frame, std::vector<colour>& raw_image);
+        size_t getFrame(const std::vector<uint8_t>& frame, std::vector<Colour>& rawImage);
 
         void readNormalFrames(FAIO::FAFile* file);
         void readCl2ArchiveFrames(FAIO::FAFile* file);
-        
-        static bool greater_than_first(const std::vector<uint8_t>& frame);
-        static bool greater_than_second(const std::vector<uint8_t>& frame);
-        static bool is_greater_than(const std::vector<uint8_t>& frame);
-        
-        void drawRow(int row, int end, int& i, const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image, bool lessThan);
-
-        void decode_greater_less_than(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image, bool lessThan);
-
-        void decode_greater_than(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image);
-
-        bool less_than_first(const std::vector<uint8_t>& frame);
-        bool less_than_second(const std::vector<uint8_t>& frame);
-        bool is_less_than(const std::vector<uint8_t>& frame);
-
-        void decode_less_than(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image);
-
-        void fill_t(size_t pixels, std::vector<colour>& raw_image);
-        int32_t cl2Width(const std::vector<uint8_t>& frame, uint16_t offset);
-        int32_t normal_width(const std::vector<uint8_t>& frame, bool from_header, uint16_t offset);
-        void normal_decode(const std::vector<uint8_t>& frame, size_t width, bool from_header, Pal pal, std::vector<colour>& raw_image);
-        void cl2Decode(const std::vector<uint8_t>& frame, Pal& pal, std::vector<colour>& raw_image);
-        size_t decode_raw_32(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image);
-        bool is_tile_cel(const std::string& file_name);
-        Pal get_pallette(std::string filename);
+               
+        Pal getPallette(std::string filename);
 
         Pal mPal;
 
         std::vector<std::vector<uint8_t> > mFrames;
 
-        bool mIs_tile_cel;
+        bool mIsTileCel;
         bool mIsCl2;
 
         std::map<size_t, CelFrame> mCache;

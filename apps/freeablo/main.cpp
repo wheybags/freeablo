@@ -122,20 +122,20 @@ void fpsthink() {
 }
 
 
-void setpixel_real(SDL_Surface *s, int x, int y, colour c)
+void setpixel_real(SDL_Surface *s, int x, int y, Colour c)
 {
     y = y*s->pitch/BPP;
 
     Uint32 *pixmem32;
-    Uint32 colour;  
+    Uint32 Colour;  
  
-    colour = SDL_MapRGB( s->format, c.r, c.g, c.b );
+    Colour = SDL_MapRGB( s->format, c.r, c.g, c.b );
   
     pixmem32 = (Uint32*) s->pixels  + y + x;
-    *pixmem32 = colour;
+    *pixmem32 = Colour;
 }
 
-void setpixel(SDL_Surface* s, int x, int y, colour c)
+void setpixel(SDL_Surface* s, int x, int y, Colour c)
 {
     setpixel_real(s, x, y, c);
     return;
@@ -190,7 +190,7 @@ SDL_Surface* get_sprite(CelFile& f, size_t index)
 {
     if(tileset == NULL)
     {
-        size_t size = f.num_frames();
+        size_t size = f.numFrames();
 
         tileset = new SDL_Surface*[size];
         

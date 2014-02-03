@@ -22,7 +22,7 @@ Pal::Pal(std::string filename)
     FAIO::FAfclose(pal_file);
 }
 
-colour& Pal::operator[](size_t index)
+const Colour& Pal::operator[](size_t index) const
 {
     return contents[index];
 }

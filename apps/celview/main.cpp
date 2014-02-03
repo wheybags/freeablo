@@ -18,20 +18,20 @@
 #define BPP 4
 #define DEPTH 32
 
-void setpixel_real(SDL_Surface *screen, int x, int y, colour c)
+void setpixel_real(SDL_Surface *screen, int x, int y, Colour c)
 {
     y = y*screen->pitch/BPP;
 
     Uint32 *pixmem32;
-    Uint32 colour;  
+    Uint32 Colour;  
  
-    colour = SDL_MapRGB( screen->format, c.r, c.g, c.b );
+    Colour = SDL_MapRGB( screen->format, c.r, c.g, c.b );
   
     pixmem32 = (Uint32*) screen->pixels  + y + x;
-    *pixmem32 = colour;
+    *pixmem32 = Colour;
 }
 
-void setpixel(SDL_Surface* screen, int x, int y, colour c)
+void setpixel(SDL_Surface* screen, int x, int y, Colour c)
 {
     //setpixel_real(screen, x, y, c);
     //return;
@@ -55,17 +55,17 @@ int main(int argc, char** argv){
     /*
     //size_t frame_num = 210;
     
-    colour pal[256];
+    Colour pal[256];
     get_pal(pal_filename, pal); 
 
 
     FILE * cel_file;
     cel_file = fopen(argv[1], "rb");
 
-    size_t num_frames = get_num_frames(cel_file);
+    size_t numFrames = get_numFrames(cel_file);
     
-    uint32_t frame_offsets[num_frames+1];
-    get_frame_offsets(cel_file, frame_offsets, num_frames);
+    uint32_t frame_offsets[numFrames+1];
+    get_frame_offsets(cel_file, frame_offsets, numFrames);
 
 
 
@@ -73,7 +73,7 @@ int main(int argc, char** argv){
     bool tile_cel = is_tile_cel(file_name);
 */
 
-    std::vector<colour> raw_image;
+    std::vector<Colour> raw_image;
     //size_t width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, tile_cel);
 
     //std::cout << width << std::endl; 
@@ -113,7 +113,7 @@ int main(int argc, char** argv){
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.sym){
                         case SDLK_UP:
-                            if(frame_num == cel.num_frames()-1) break;
+                            if(frame_num == cel.numFrames()-1) break;
                             frame_num++;
                             break;
                         case SDLK_DOWN:
@@ -130,7 +130,7 @@ int main(int argc, char** argv){
                     //width = cel.get_frame(frame_num, raw_image);
                     //width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, tile_cel);
                     frame = cel[frame_num];
-                    std::cout << "frame: " << frame_num << "/" << cel.num_frames() << std::endl;
+                    std::cout << "frame: " << frame_num << "/" << cel.numFrames() << std::endl;
                     std::cout << width << std::endl;
             }
         }

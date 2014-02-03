@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <vector>
 
-class colour;
+class Colour;
 class CelFile;
 
 class CelFrame
@@ -17,7 +17,7 @@ class CelFrame
         public:    
             Cel_Frame_Helper(const CelFrame& _p, size_t _x) : parent(_p), x(_x) {}
             
-            const colour& operator[](size_t y){return parent.raw_image[x + (parent.height-1-y)*parent.width];}
+            const Colour& operator[](size_t y){return parent.rawImage[x + (parent.height-1-y)*parent.width];}
     };
 
     public:
@@ -30,7 +30,7 @@ class CelFrame
         friend class Cel_Frame_Helper;
         friend class CelFile;
         
-        std::vector<colour> raw_image;
+        std::vector<Colour> rawImage;
 };
 
 #endif
