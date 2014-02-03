@@ -4,25 +4,28 @@
 
 #include <faio/faio.h>
 
-Pal::Pal(std::string filename)
+namespace Cel
 {
-    contents.resize(256);
-
-    FAIO::FAFile * pal_file;
-
-    pal_file = FAIO::FAfopen(filename);
-    
-    for(int i = 0; i < 256; i++)
+    Pal::Pal(std::string filename)
     {
-            FAIO::FAfread(&contents[i].r, 1, 1, pal_file);
-            FAIO::FAfread(&contents[i].g, 1, 1, pal_file);
-            FAIO::FAfread(&contents[i].b, 1, 1, pal_file);
+        contents.resize(256);
+
+        FAIO::FAFile * pal_file;
+
+        pal_file = FAIO::FAfopen(filename);
+        
+        for(int i = 0; i < 256; i++)
+        {
+                FAIO::FAfread(&contents[i].r, 1, 1, pal_file);
+                FAIO::FAfread(&contents[i].g, 1, 1, pal_file);
+                FAIO::FAfread(&contents[i].b, 1, 1, pal_file);
+        }
+
+        FAIO::FAfclose(pal_file);
     }
 
-    FAIO::FAfclose(pal_file);
-}
-
-const Colour& Pal::operator[](size_t index) const
-{
-    return contents[index];
+    const Colour& Pal::operator[](size_t index) const
+    {
+        return contents[index];
+    }
 }

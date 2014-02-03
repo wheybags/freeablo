@@ -11,7 +11,7 @@
 #include "random.h"
 #include "mst.h"
 
-namespace Freeablo
+namespace FALevelGen
 {
     class Room
     {
@@ -74,7 +74,7 @@ namespace Freeablo
         blank = 104,
     };
 
-    void fillRoom(const Room& room, DunFile& level)
+    void fillRoom(const Room& room, Level::DunFile& level)
     {
         for(size_t x = 0; x < room.width; x++)
         {
@@ -85,7 +85,7 @@ namespace Freeablo
         }
     }
 
-    void drawCorridoorSegment(const Room& room, const std::vector<Room>& corridoorRooms, DunFile& level)
+    void drawCorridoorSegment(const Room& room, const std::vector<Room>& corridoorRooms, Level::DunFile& level)
     {
         fillRoom(room, level);
 
@@ -98,7 +98,7 @@ namespace Freeablo
     
     // Ensures that two points are connected by inserting an l-shaped corridoor,
     // also draws any rooms in rooms vector that the corridoor intersects
-    void connect(const Room& a, const Room& b, const std::vector<Room>& rooms, DunFile& level)
+    void connect(const Room& a, const Room& b, const std::vector<Room>& rooms, Level::DunFile& level)
     {
         size_t ax = a.centre().first;
         size_t ay = a.centre().second;
@@ -359,7 +359,7 @@ namespace Freeablo
         separate(rooms, width, height);
     }
 
-    void drawRoom(const Room& room, DunFile& level)
+    void drawRoom(const Room& room, Level::DunFile& level)
     {
         // Draw x oriented walls
         for(size_t x = 0; x < room.width; x++)
@@ -386,7 +386,7 @@ namespace Freeablo
     }
     
     // Get the value at (x,y) in level, or zero if it is an invalid position
-    size_t getXY(int32_t x, int32_t y, const DunFile& level)
+    size_t getXY(int32_t x, int32_t y, const Level::DunFile& level)
     {
         if(x < 0 || x >= level.mWidth || y < 0 || y >= level.mHeight)
             return 0;
@@ -396,7 +396,7 @@ namespace Freeablo
     
     // Returns true if the tile at (x,y) in level borders any tile of the value tile,
     // false otherwise
-    bool borders(size_t x, size_t y, Basic tile, const DunFile& level)
+    bool borders(size_t x, size_t y, Basic tile, const Level::DunFile& level)
     {
         for(int32_t xoffs = -1; xoffs < 2; xoffs++)
         {
@@ -414,7 +414,7 @@ namespace Freeablo
     }
     
     // Remove double walls, as the tileset does not allow for them
-    void cleanup(DunFile& level)
+    void cleanup(Level::DunFile& level)
     {
         for(int32_t x = 0; x < level.mWidth; x++)
         {
@@ -446,7 +446,7 @@ namespace Freeablo
     // Helper function for adding doors
     // Iterates over all blocks on a wall, and adds doors where necessary, looking at what is in the direction
     // indicated by add (1 or -1) to determine if a door is needed
-    void doorAddHelper(DunFile& level, int32_t otherCoord, int32_t add, size_t start, size_t end, bool xAxis)
+    void doorAddHelper(Level::DunFile& level, int32_t otherCoord, int32_t add, size_t start, size_t end, bool xAxis)
     {
         std::vector<std::pair<size_t, size_t> > region;
         bool connected = false;
@@ -503,7 +503,7 @@ namespace Freeablo
             level.at(region[region.size()/2].first, region[region.size()/2].second) = door;
     }
     
-    void addDoors(DunFile& level, const std::vector<Room>& rooms)
+    void addDoors(Level::DunFile& level, const std::vector<Room>& rooms)
     {
         for(size_t i = 0; i < rooms.size(); i++)
         {
@@ -534,7 +534,7 @@ namespace Freeablo
     //        extra edges to allow for some loops.
     //     5. Connect the rooms according to the graph from the last step with l shaped corridoors, and 
     //        also draw any corridoor rooms that the corridoors overlap as part of the corridoor.
-    void generateTmp(size_t width, size_t height, DunFile& level)
+    void generateTmp(size_t width, size_t height, Level::DunFile& level)
     {
         level.resize(width, height);
         
@@ -611,12 +611,12 @@ namespace Freeablo
         addDoors(level, rooms);
     }
 
-    bool isWall(size_t x, size_t y, const DunFile& level)
+    bool isWall(size_t x, size_t y, const Level::DunFile& level)
     {
         return getXY(x, y, level) == wall || getXY(x, y, level) == door;
     }
  
-    void setPoint(int32_t x, int32_t y, int val, const DunFile& tmpLevel,  DunFile& level)
+    void setPoint(int32_t x, int32_t y, int val, const Level::DunFile& tmpLevel,  Level::DunFile& level)
     {
         int newVal = val;
         switch(val)
@@ -688,9 +688,9 @@ namespace Freeablo
         level.at(x, y) = newVal;
     }
    
-    void generate(size_t width, size_t height, DunFile& level)
+    void generate(size_t width, size_t height, Level::DunFile& level)
     {
-        DunFile tmpLevel;
+        Level::DunFile tmpLevel;
         generateTmp(width, height, tmpLevel);
 
         level.resize(width, height);

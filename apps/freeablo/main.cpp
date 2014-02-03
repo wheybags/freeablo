@@ -16,12 +16,12 @@
 #include <cel/celfile.h>
 #include <cel/celframe.h>
 
-#include <levels/minfile.h>
-#include <levels/tilfile.h>
-#include <levels/dunfile.h>
+#include <level/minfile.h>
+#include <level/tilfile.h>
+#include <level/dunfile.h>
 
-#include "level/levelgen.h"
-#include "level/random.h"
+#include "falevelgen/levelgen.h"
+#include "falevelgen/random.h"
 
 
 #define WIDTH 1280
@@ -122,20 +122,20 @@ void fpsthink() {
 }
 
 
-void setpixel_real(SDL_Surface *s, int x, int y, Colour c)
+void setpixel_real(SDL_Surface *s, int x, int y, Cel::Colour c)
 {
     y = y*s->pitch/BPP;
 
     Uint32 *pixmem32;
-    Uint32 Colour;  
+    Uint32 colour;  
  
-    Colour = SDL_MapRGB( s->format, c.r, c.g, c.b );
+    colour = SDL_MapRGB( s->format, c.r, c.g, c.b );
   
     pixmem32 = (Uint32*) s->pixels  + y + x;
-    *pixmem32 = Colour;
+    *pixmem32 = colour;
 }
 
-void setpixel(SDL_Surface* s, int x, int y, Colour c)
+void setpixel(SDL_Surface* s, int x, int y, Cel::Colour c)
 {
     setpixel_real(s, x, y, c);
     return;
@@ -146,7 +146,7 @@ void setpixel(SDL_Surface* s, int x, int y, Colour c)
     setpixel_real(s, x*2+1, y*2+1, c);
 }
 
-void draw_at(SDL_Surface* s, int start_x, int start_y, const CelFrame& frame)
+void draw_at(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)
 {
     for(int x = 0; x < frame.width; x++)
     {
@@ -186,7 +186,7 @@ SDL_Surface* create_transparent_surface(size_t width, size_t height)
 }
 
 
-SDL_Surface* get_sprite(CelFile& f, size_t index)
+SDL_Surface* get_sprite(Cel::CelFile& f, size_t index)
 {
     if(tileset == NULL)
     {
@@ -201,7 +201,7 @@ SDL_Surface* get_sprite(CelFile& f, size_t index)
     if(tileset[index] != NULL)
         return tileset[index];
     
-    CelFrame frame = f[index];
+    Cel::CelFrame frame = f[index];
 
     SDL_Surface* s = create_transparent_surface(frame.width, frame.height);
 
@@ -230,7 +230,7 @@ void blit(SDL_Surface* from, SDL_Surface* to, int x, int y)
 
 int x_base = WIDTH/2, y_base = 0;
 
-void draw_min_tile(SDL_Surface* s, CelFile& f, int x, int y, int16_t l, int16_t r)
+void draw_min_tile(SDL_Surface* s, Cel::CelFile& f, int x, int y, int16_t l, int16_t r)
 {
     if(l != -1)
     {
@@ -266,7 +266,7 @@ void draw_min_tile(SDL_Surface* s, CelFile& f, int x, int y, int16_t l, int16_t 
     }
 }
 
-void draw_min_pillar(SDL_Surface* s, int x, int y, const MinPillar& pillar, CelFile& tileset)
+void draw_min_pillar(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset)
 {
     // Each iteration draw one row of the min
     for(int i = 0; i < pillar.size(); i+=2)
@@ -284,7 +284,7 @@ void draw_min_pillar(SDL_Surface* s, int x, int y, const MinPillar& pillar, CelF
 
 std::map<size_t, SDL_Surface*> tilCache;
 
-void draw_til_block(SDL_Surface* to, int x, int y, const TilFile& til, size_t index, const MinFile& min, CelFile& tileset)
+void draw_til_block(SDL_Surface* to, int x, int y, const Level::TilFile& til, size_t index, const Level::MinFile& min, Cel::CelFile& tileset)
 {
     //x += x_base;
     //y += y_base;
@@ -326,7 +326,7 @@ void draw_til_block(SDL_Surface* to, int x, int y, const TilFile& til, size_t in
 int tmpindex = 0;
 
 SDL_Surface* level = NULL;
-void draw_level(DunFile dun, CelFile& town, MinFile min, TilFile til)
+void draw_level(Level::DunFile dun, Cel::CelFile& town, Level::MinFile min, Level::TilFile til)
 {
 
     if(level == NULL)
@@ -380,25 +380,25 @@ int main(int argc, char** argv)
         return 1;
     }
     
-    /*CelFile town("levels/towndata/town.cel");
-    MinFile min("levels/towndata/town.min");
-    TilFile til("levels/towndata/town.til");
+    /*Cel::CelFile town("levels/towndata/town.cel");
+    Level::MinFile min("levels/towndata/town.min");
+    Level::TilFile til("levels/towndata/town.til");
 
-    DunFile sector1("levels/towndata/sector1s.dun");
-    DunFile sector2("levels/towndata/sector2s.dun");
-    DunFile sector3("levels/towndata/sector3s.dun");
-    DunFile sector4("levels/towndata/sector4s.dun");
+    Level::DunFile sector1("levels/towndata/sector1s.dun");
+    Level::DunFile sector2("levels/towndata/sector2s.dun");
+    Level::DunFile sector3("levels/towndata/sector3s.dun");
+    Level::DunFile sector4("levels/towndata/sector4s.dun");
 
-    DunFile dun = getTown(sector1, sector2, sector3, sector4);
+    Level::DunFile dun = getTown(sector1, sector2, sector3, sector4);
     */
-    CelFile town("levels/l1data/l1.cel");
-    MinFile min("levels/l1data/l1.min");
-    TilFile til("levels/l1data/l1.til");
-   // DunFile dun(argv[1]);
-    DunFile dun;
+    Cel::CelFile town("levels/l1data/l1.cel");
+    Level::MinFile min("levels/l1data/l1.min");
+    Level::TilFile til("levels/l1data/l1.til");
+   // Level::DunFile dun(argv[1]);
+    Level::DunFile dun;
 
-    Freeablo::FAsrand(time(NULL));
-    Freeablo::generate(100, 100, dun);
+    FALevelGen::FAsrand(time(NULL));
+    FALevelGen::generate(100, 100, dun);
     
     int lr = 0;
     int ud = 0;

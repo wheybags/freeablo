@@ -18,20 +18,20 @@
 #define BPP 4
 #define DEPTH 32
 
-void setpixel_real(SDL_Surface *screen, int x, int y, Colour c)
+void setpixel_real(SDL_Surface *screen, int x, int y, Cel::Colour c)
 {
     y = y*screen->pitch/BPP;
 
     Uint32 *pixmem32;
-    Uint32 Colour;  
+    Uint32 colour;  
  
-    Colour = SDL_MapRGB( screen->format, c.r, c.g, c.b );
+    colour = SDL_MapRGB( screen->format, c.r, c.g, c.b );
   
     pixmem32 = (Uint32*) screen->pixels  + y + x;
-    *pixmem32 = Colour;
+    *pixmem32 = colour;
 }
 
-void setpixel(SDL_Surface* screen, int x, int y, Colour c)
+void setpixel(SDL_Surface* screen, int x, int y, Cel::Colour c)
 {
     //setpixel_real(screen, x, y, c);
     //return;
@@ -55,7 +55,7 @@ int main(int argc, char** argv){
     /*
     //size_t frame_num = 210;
     
-    Colour pal[256];
+    Cel::Colour pal[256];
     get_pal(pal_filename, pal); 
 
 
@@ -73,15 +73,15 @@ int main(int argc, char** argv){
     bool tile_cel = is_tile_cel(file_name);
 */
 
-    std::vector<Colour> raw_image;
+    std::vector<Cel::Colour> raw_image;
     //size_t width = get_frame(cel_file, pal, frame_offsets, frame_num, raw_image, tile_cel);
 
     //std::cout << width << std::endl; 
 
     size_t width; 
 
-    CelFile cel(argv[1]);
-    CelFrame frame = cel[frame_num];
+    Cel::CelFile cel(argv[1]);
+    Cel::CelFrame frame = cel[frame_num];
 
 
 

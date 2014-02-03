@@ -1,6 +1,6 @@
 #include "mst.h"
 
-namespace Freeablo
+namespace FALevelGen
 {
     #ifndef SIZE_T_MAX
         #define SIZE_T_MAX ((size_t) -1)

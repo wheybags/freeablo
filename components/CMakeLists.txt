@@ -8,7 +8,7 @@ add_library(Cel
 
 add_library(FAIO faio/faio.cpp faio/faio.h)
 
-add_library(Levels levels/dunfile.cpp  levels/dunfile.h  levels/minfile.cpp  levels/minfile.h  levels/tilfile.cpp  levels/tilfile.h)
+add_library(Levels level/dunfile.cpp  level/dunfile.h  level/minfile.cpp  level/minfile.h  level/tilfile.cpp  level/tilfile.h)
 
 add_library(Misc misc/stringops.h)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)

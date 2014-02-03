@@ -1,1 +1,1 @@
-add_executable(freeablo main.cpp level/levelgen.h level/levelgen.cpp level/random.cpp level/random.h level/mst.cpp level/mst.h)
+add_executable(freeablo main.cpp falevelgen/levelgen.h falevelgen/levelgen.cpp falevelgen/random.cpp falevelgen/random.h falevelgen/mst.cpp falevelgen/mst.h)

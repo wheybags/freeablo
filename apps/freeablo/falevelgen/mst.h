@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstddef>
 
-namespace Freeablo
+namespace FALevelGen
 {
     void minimumSpanningTree(const std::vector<std::vector<size_t> >& graph, std::vector<size_t>& parent);
 }

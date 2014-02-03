@@ -1,7 +1,7 @@
 #include <boost/random.hpp>
 #include <boost/random/normal_distribution.hpp>
 
-namespace Freeablo
+namespace FALevelGen
 {
     boost::mt19937 rng;
 

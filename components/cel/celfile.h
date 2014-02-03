@@ -7,39 +7,42 @@
 
 #include "pal.h"
 
-class CelFrame;
-class Pal;
 
 namespace FAIO
 {
     class FAFile;
 }
 
-class CelFile
+namespace Cel
 {
-    public:
-        CelFile(std::string filename);
+    class CelFrame;
 
-        size_t numFrames();
+    class CelFile
+    {
+        public:
+            CelFile(std::string filename);
 
-        CelFrame& operator[] (size_t index);
+            size_t numFrames();
 
-    private:
-        size_t getFrame(const std::vector<uint8_t>& frame, std::vector<Colour>& rawImage);
+            CelFrame& operator[] (size_t index);
 
-        void readNormalFrames(FAIO::FAFile* file);
-        void readCl2ArchiveFrames(FAIO::FAFile* file);
-               
-        Pal getPallette(std::string filename);
+        private:
+            size_t getFrame(const std::vector<uint8_t>& frame, std::vector<Colour>& rawImage);
 
-        Pal mPal;
+            void readNormalFrames(FAIO::FAFile* file);
+            void readCl2ArchiveFrames(FAIO::FAFile* file);
+                   
+            Pal getPallette(std::string filename);
 
-        std::vector<std::vector<uint8_t> > mFrames;
+            Pal mPal;
 
-        bool mIsTileCel;
-        bool mIsCl2;
+            std::vector<std::vector<uint8_t> > mFrames;
 
-        std::map<size_t, CelFrame> mCache;
-};
+            bool mIsTileCel;
+            bool mIsCl2;
+
+            std::map<size_t, CelFrame> mCache;
+    };
+}
 
 #endif

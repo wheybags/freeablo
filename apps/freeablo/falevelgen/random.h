@@ -1,7 +1,7 @@
 #ifndef FA_RANDOM_H
 #define FA_RANDOM_H
 
-namespace Freeablo
+namespace FALevelGen
 {
     void FAsrand(int seed);
     int normRand(int min, int max);
