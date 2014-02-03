@@ -19,6 +19,8 @@ CelFile::CelFile(std::string filename) : mPal(get_pallette(filename))
 {
     FAIO::FAFile* file = FAIO::FAfopen(filename);
 
+    mIsCl2 = Misc::StringUtils::ciEndsWith(filename, "cl2");
+
     uint32_t first;
     FAIO::FAfread(&first, 4, 1, file);
     
@@ -34,20 +36,29 @@ CelFile::CelFile(std::string filename) : mPal(get_pallette(filename))
     // of the first cel
     if(first == 32)
     {
-        FAIO::FAfseek(file, 32, SEEK_SET);
-        for(size_t i = 0; i < 8; i++)
-            readFrames(file);
+        if(mIsCl2)
+        {
+            readCl2ArchiveFrames(file);
+        }
+        else
+        {
+            FAIO::FAfseek(file, 32, SEEK_SET);
+            for(size_t i = 0; i < 8; i++)
+                readNormalFrames(file);
+        }
     }
     else
     {
         FAIO::FAfseek(file, 0, SEEK_SET);
-        readFrames(file);
+        readNormalFrames(file);
     }
+
 
     FAIO::FAfclose(file);
     
     mIs_tile_cel = is_tile_cel(filename);
 }
+
 
 size_t CelFile::num_frames()
 {
@@ -84,9 +95,16 @@ size_t CelFile::get_frame(const std::vector<uint8_t>& frame, std::vector<colour>
 {
     // Make sure we're not concatenating onto some other image 
     raw_image.clear();
-    
+
+    if(mIsCl2)
+    {
+        uint16_t offset = (uint16_t) (frame[3] << 8 | frame[2]);
+        cl2Decode(frame, mPal, raw_image);
+        return cl2Width(frame, offset);
+    }
+
     size_t width;
-    
+
     if(mIs_tile_cel)
         width = 32;
 
@@ -113,7 +131,7 @@ size_t CelFile::get_frame(const std::vector<uint8_t>& frame, std::vector<colour>
             
             width = normal_width(frame, from_header, offset);
         }
-        
+
         normal_decode(frame, width, from_header, mPal, raw_image);
         
         #ifdef CEL_DEBUG
@@ -138,13 +156,50 @@ size_t CelFile::get_frame(const std::vector<uint8_t>& frame, std::vector<colour>
     return width;
 }
 
-void CelFile::readFrames(FAIO::FAFile* file)
+void CelFile::readCl2ArchiveFrames(FAIO::FAFile* file)
+{
+    FAIO::FAfseek(file, 0, SEEK_SET);
+    
+    std::vector<uint32_t> headerOffsets(8);
+    FAIO::FAfread(&headerOffsets[0], 4, 8, file);
+
+
+    for(size_t i = 0; i < 8; i++)
+    {
+        FAIO::FAfseek(file, headerOffsets[i], SEEK_SET);
+
+        uint32_t numFrames;
+
+        FAIO::FAfread(&numFrames, 4, 1, file);
+
+        std::vector<uint32_t> frameOffsets(numFrames+1);
+
+
+        for(size_t i = 0; i < numFrames; i++)
+            FAIO::FAfread(&frameOffsets[i], 4, 1, file);
+
+        FAIO::FAfread(&frameOffsets[numFrames], 4, 1, file);
+
+
+        FAIO::FAfseek(file, headerOffsets[i]+ frameOffsets[0], SEEK_SET);
+        
+        for(size_t i = 0; i < numFrames; i++)
+        {
+            mFrames.push_back(std::vector<uint8_t>(frameOffsets[i+1]-frameOffsets[i]));
+            FAIO::FAfread(&mFrames[mFrames.size()-1][0], 1, frameOffsets[i+1]-frameOffsets[i], file);
+        }
+
+    }
+}
+
+void CelFile::readNormalFrames(FAIO::FAFile* file)
 {
     uint32_t numFrames;
 
     FAIO::FAfread(&numFrames, 4, 1, file);
 
     std::vector<uint32_t> frameOffsets(numFrames+1);
+
 
     for(size_t i = 0; i < numFrames; i++)
         FAIO::FAfread(&frameOffsets[i], 4, 1, file);
@@ -302,6 +357,45 @@ void CelFile::fill_t(size_t pixels, std::vector<colour>& raw_image)
         raw_image.push_back(colour(255, 255, 255, false));
 }
 
+int32_t CelFile::cl2Width(const std::vector<uint8_t>& frame, uint16_t offset)
+{
+    int pixels = 0;
+
+    size_t i = 10; // CL2 frames always have headers
+
+    for(; i < frame.size(); i++)
+    {
+        if(i == offset)
+            return pixels / 32;
+
+        // Color command
+        if(frame[i] > 127)
+        {
+            uint8_t val = 256 - frame[i];
+           
+            // Regular command
+            if(val <= 65)
+            {
+                pixels += val;
+                i+= val;
+            }
+
+            // RLE (run length encoded) colour command
+            else
+            {
+                pixels += val-65; 
+                i += 1;
+            }
+        }
+
+        // Transparency command
+        else
+        {
+            pixels += frame[i];
+        }
+    }
+}
+
 int32_t CelFile::normal_width(const std::vector<uint8_t>& frame, bool from_header, uint16_t offset)
 {
     
@@ -414,6 +508,7 @@ void CelFile::normal_decode(const std::vector<uint8_t>& frame, size_t width, boo
             i+= frame[i];
         }
 
+
         // Transparency command
         else if(128 <= frame[i])
         {
@@ -423,6 +518,74 @@ void CelFile::normal_decode(const std::vector<uint8_t>& frame, size_t width, boo
             
             // Push (256 - command value) transparent pixels
             for(size_t j = 0; j < 256-frame[i]; j++)
+                raw_image.push_back(colour(255, 0, 255, false));
+        }
+    }
+}
+
+void CelFile::cl2Decode(const std::vector<uint8_t>& frame, Pal& pal, std::vector<colour>& raw_image)
+{
+    #ifdef CEL_DEBUG
+        std::cout << "CL2 DECODE" << std::endl;
+    #endif
+
+    size_t i = 10; // CL2 frames always have headers
+
+    for(; i < frame.size(); i++)
+    {
+        // Color command
+        if(frame[i] > 127)
+        {
+            uint8_t val = 256 - frame[i];
+           
+            // Regular command
+            if(val <= 65)
+            {
+                #ifdef CEL_DEBUG
+                    std::cout << i << " regular: " << (int)val << std::endl;
+                #endif
+
+                size_t j;
+                // Just push the number of pixels specified by the command
+                for(j = 1; j < val+1 && i+j < frame.size(); j++)
+                {
+                    int index = i+j;
+                    uint8_t f = frame[index];
+                    
+                    if(index > frame.size()-1)
+                        std::cout << "invalid read from f " << index << " " << frame.size() << std::endl;
+
+                    colour col = pal[f];
+
+                    raw_image.push_back(col);
+                }
+                
+                i+= val;
+            }
+
+            // RLE (run length encoded) colour command
+            else
+            {
+                #ifdef CEL_DEBUG
+                    std::cout << "RLE colour: " << (int)val-65 << std::endl;
+                #endif
+
+                for(int j = 0; j < val-65; j++)
+                    raw_image.push_back(pal[frame[i+1]]);
+                
+                i += 1;
+            }
+        }
+
+        // Transparency command
+        else
+        {
+            #ifdef CEL_DEBUG
+                std::cout << i << " transparency: " << (int)frame[i] <<  std::endl;
+            #endif
+            
+            // Push transparent pixels
+            for(size_t j = 0; j < frame[i]; j++)
                 raw_image.push_back(colour(255, 0, 255, false));
         }
     }
