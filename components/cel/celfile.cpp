@@ -305,19 +305,19 @@ void CelFile::fill_t(size_t pixels, std::vector<colour>& raw_image)
 int32_t CelFile::normal_width(const std::vector<uint8_t>& frame, bool from_header, uint16_t offset)
 {
     
-    // If we have a header, we know that offset points to the start of the 32nd line.
-    // So, when we reach that point, we will have produced 31 lines of pixels, so we 
-    // can divide the number of pixels we have passed at this point by 31, to get the 
+    // If we have a header, we know that offset points to the end of the 32nd line.
+    // So, when we reach that point, we will have produced 32 lines of pixels, so we 
+    // can divide the number of pixels we have passed at this point by 32, to get the 
     // width.
     if(from_header)
     {
         int32_t width_header = 0; 
         
-        for(size_t i = 11; i < frame.size(); i++){
+        for(size_t i = 10; i < frame.size(); i++){
             
             if(i == offset && from_header)
             {
-                width_header = width_header/31;
+                width_header = width_header/32;
                 break;
             }
             // Regular command
@@ -381,7 +381,7 @@ void CelFile::normal_decode(const std::vector<uint8_t>& frame, size_t width, boo
 
     // Skip the header if it exists
     if(from_header)
-        i = 11;
+        i = 10;
     else
         i = 0;
     
