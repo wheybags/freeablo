@@ -26,7 +26,8 @@ class CelFile
     private:
         size_t get_frame(const std::vector<uint8_t>& frame, std::vector<colour>& raw_image);
 
-        void readFrames(FAIO::FAFile* file);
+        void readNormalFrames(FAIO::FAFile* file);
+        void readCl2ArchiveFrames(FAIO::FAFile* file);
         
         static bool greater_than_first(const std::vector<uint8_t>& frame);
         static bool greater_than_second(const std::vector<uint8_t>& frame);
@@ -45,8 +46,10 @@ class CelFile
         void decode_less_than(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image);
 
         void fill_t(size_t pixels, std::vector<colour>& raw_image);
+        int32_t cl2Width(const std::vector<uint8_t>& frame, uint16_t offset);
         int32_t normal_width(const std::vector<uint8_t>& frame, bool from_header, uint16_t offset);
         void normal_decode(const std::vector<uint8_t>& frame, size_t width, bool from_header, Pal pal, std::vector<colour>& raw_image);
+        void cl2Decode(const std::vector<uint8_t>& frame, Pal& pal, std::vector<colour>& raw_image);
         size_t decode_raw_32(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image);
         bool is_tile_cel(const std::string& file_name);
         Pal get_pallette(std::string filename);
@@ -56,7 +59,8 @@ class CelFile
         std::vector<std::vector<uint8_t> > mFrames;
 
         bool mIs_tile_cel;
-        
+        bool mIsCl2;
+
         std::map<size_t, CelFrame> mCache;
 };
 
