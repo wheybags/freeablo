@@ -13,7 +13,7 @@ Find_Package ( BZip2 REQUIRED )
 if(WIN32)
 	set(Boost_USE_STATIC_LIBS   ON)
 endif()
-find_package(Boost COMPONENTS filesystem system random REQUIRED)
+find_package(Boost COMPONENTS filesystem system random thread REQUIRED)
 
 
 
@@ -57,6 +57,8 @@ link_libraries (
     FAIO
     Levels
     Misc
+    Render
+    Input
     StormLib
 )
 

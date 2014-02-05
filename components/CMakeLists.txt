@@ -7,8 +7,19 @@ add_library(Cel
     cel/cl2decoding.cpp cel/cl2decoding.h)
 
 add_library(FAIO faio/faio.cpp faio/faio.h)
+target_link_libraries(FAIO StormLib)
 
 add_library(Levels level/dunfile.cpp  level/dunfile.h  level/minfile.cpp  level/minfile.h  level/tilfile.cpp  level/tilfile.h)
+target_link_libraries(Levels FAIO)
 
 add_library(Misc misc/stringops.h)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
+
+add_library(Render
+    render/render.h
+    render/sdlbackend.cpp)
+target_link_libraries(Render Cel Levels)
+
+add_library(Input
+    input/inputmanager.h
+    input/sdlbackend.cpp)
