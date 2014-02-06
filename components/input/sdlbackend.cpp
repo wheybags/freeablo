@@ -5,11 +5,13 @@
 namespace Input
 {
     InputManager::InputManager(boost::function<void(Key)> _keyPress, boost::function<void(Key)> _keyRelease): 
-        mKeyPress(_keyPress), mKeyRelease(_keyRelease), mThread(boost::bind(&InputManager::inputLoop, this)), mDone(false){}
+        mKeyPress(_keyPress), mKeyRelease(_keyRelease), mThread(new boost::thread(boost::bind(&InputManager::inputLoop, this))), mDone(false){}
 
     InputManager::~InputManager()
     {
         mDone = true;
+        mThread->join();
+        delete mThread;
     }
 
     #define CASE(val) case SDLK_##val: key = KEY_##val; break; 

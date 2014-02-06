@@ -20,8 +20,8 @@ namespace Input
             boost::function<void(Key)> mKeyPress;
             boost::function<void(Key)> mKeyRelease;
 
-            boost::thread mThread;
             bool mDone;
+            boost::thread mThread;
 
     };
 }
