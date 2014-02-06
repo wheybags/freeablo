@@ -21,7 +21,7 @@ namespace Input
             boost::function<void(Key)> mKeyRelease;
 
             bool mDone;
-            boost::thread mThread;
+            boost::thread* mThread;
 
     };
 }

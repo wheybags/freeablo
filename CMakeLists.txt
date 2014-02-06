@@ -13,7 +13,7 @@ Find_Package ( BZip2 REQUIRED )
 if(WIN32)
 	set(Boost_USE_STATIC_LIBS   ON)
 endif()
-find_package(Boost COMPONENTS filesystem system random thread REQUIRED)
+find_package(Boost COMPONENTS chrono date_time filesystem system random thread REQUIRED)
 
 
 

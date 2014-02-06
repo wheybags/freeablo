@@ -8,8 +8,13 @@
 #include "falevelgen/levelgen.h"
 #include "falevelgen/random.h"
 
+#include "farender/renderer.h"
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 bool done = false;
 int lr = 0, ud = 0;
+    int32_t x_base = 0, y_base = 0;
 void keyPress(Input::Key key)
 {
     switch(key)
@@ -56,8 +61,10 @@ void keyRelease(Input::Key key)
 
 int main(int argc, char** argv)
 {
-    Render::init(); 
+    // Starts rendering thread
+    FARender::Renderer renderer;
 
+    // Starts input thread
     Input::InputManager input(&keyPress, &keyRelease);
 
     Level::MinFile min("levels/l1data/l1.min");
@@ -67,16 +74,31 @@ int main(int argc, char** argv)
     FALevelGen::FAsrand(time(NULL));
     FALevelGen::generate(100, 100, dun);
 
-    Render::setLevel("levels/l1data/l1.cel", dun, til, min);
-    
-    int32_t x_base = 100, y_base = 100;
+    renderer.setLevel(dun, 1);
 
+    boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
+    
+    // Main game logic loop
     while(!done)
     {
+        boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
+        
+        // loop approx 120 times per second (1sec = 1000msec, 1000/120 =~ 8)
+        while(now.time_of_day().total_milliseconds() - last.time_of_day().total_milliseconds() < 8)
+        {
+            boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+            now = boost::posix_time::microsec_clock::local_time();
+        }
+
+        last = now;
+
         x_base += lr;
         y_base += ud; 
+        
+        FARender::RenderState* state = renderer.getFreeState();
+        state->mX = x_base;
+        state->mY = y_base;
 
-        Render::drawLevel(x_base,y_base);
-        Render::draw();
+        renderer.setCurrentState(state);
     }
 }

@@ -1,6 +1,4 @@
-#ifdef CEL_DEBUG
-    #include <iostream>
-#endif
+#include <iostream>
 
 #include "cl2decoding.h"
 
