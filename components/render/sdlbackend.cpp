@@ -1,6 +1,7 @@
 #include "render.h"
 
 #include <iostream>
+#include <complex>
 
 #include <SDL.h>
 
@@ -219,6 +220,7 @@ namespace Render
     }
 
     SDL_Surface* level = NULL;
+    int32_t levelWidth, levelHeight;
 
     void setLevel(const std::string& tilesetPath, const Level::DunFile& dun, const Level::TilFile& til, const Level::MinFile& min)
     {
@@ -248,11 +250,24 @@ namespace Render
 
         tilCache.clear();
 
+        levelWidth = dun.mWidth;
+        levelHeight = dun.mHeight;
+
         SDL_SaveBMP(level, "test.bmp");
     }
 
-    void drawLevel(int32_t x, int32_t y)
+    void drawLevel(int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
+        int32_t xPx1 = -((y1*(-64)) + 64*x1 + levelWidth*64) +WIDTH/2;
+        int32_t yPx1 = -((y1*32) + (32*x1) +160) + HEIGHT/2;
+
+        int32_t xPx2 = -((y2*(-64)) + 64*x2 + levelWidth*64) +WIDTH/2;
+        int32_t yPx2 = -((y2*32) + (32*x2) +160) + HEIGHT/2;
+
+        int32_t x = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
+        int32_t y = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
+
+        //TODO clean up the magic numbers here, and elsewhere in this file
         blit(level, screen, x, y);
     }
 

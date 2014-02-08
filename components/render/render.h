@@ -23,7 +23,7 @@ namespace Render
     std::vector<Sprite> loadGroup(const std::string& path);
 
     void setLevel(const std::string& tilesetPath, const Level::DunFile& dun, const Level::TilFile& til, const Level::MinFile& min);
-    void drawLevel(int32_t x, int32_t y);
+    void drawLevel(int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
     void clear();
 }

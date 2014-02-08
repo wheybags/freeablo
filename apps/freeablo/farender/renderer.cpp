@@ -36,8 +36,6 @@ namespace FARender
 
         Render::setLevel("levels/l1data/l1.cel", dun, til, min);
         
-        mX = 0;
-        mY = 0;
         mLevelReady = true;
     }
     
@@ -69,7 +67,7 @@ namespace FARender
 
             if(mLevelReady && current && current->mMutex.try_lock())
             {
-                Render::drawLevel(current->mX, current->mY);
+                Render::drawLevel(current->mX1, current->mY1, current->mX2, current->mY2, current->mDist);
 
                 current->mMutex.unlock();
             }

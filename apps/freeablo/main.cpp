@@ -14,7 +14,6 @@
 
 bool done = false;
 int lr = 0, ud = 0;
-    int32_t x_base = 0, y_base = 0;
 void keyPress(Input::Key key)
 {
     switch(key)
@@ -78,6 +77,11 @@ int main(int argc, char** argv)
 
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
+    int32_t x = 0, y = 0;
+    int32_t dirX = 0, dirY = 0;
+    bool moving = false;
+    size_t dist = 0;
+     
     // Main game logic loop
     while(!done)
     {
@@ -92,12 +96,40 @@ int main(int argc, char** argv)
 
         last = now;
 
-        x_base += lr;
-        y_base += ud; 
-        
+        if(!moving)
+        {
+            dirX = lr;
+            dirY = ud;
+
+            if(dirX || dirY)
+            {
+                moving = true;
+                dist = 0;
+            }
+        }
+        // Smooth movement
+        else
+        {
+            dist += 2;
+            if(dist >= 100)
+            {
+                x = x + dirX;
+                y = y + dirY;
+                moving = false;
+                dirX = 0;
+                dirY = 0;
+                dist = 0;
+            }
+        }
+
         FARender::RenderState* state = renderer.getFreeState();
-        state->mX = x_base;
-        state->mY = y_base;
+        state->mX1 = x;
+        state->mY1 = y;
+
+        state->mX2 = x + dirX;
+        state->mY2 = y + dirY;
+
+        state->mDist = dist;
 
         renderer.setCurrentState(state);
     }

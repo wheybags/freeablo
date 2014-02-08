@@ -18,7 +18,9 @@ namespace FARender
 
         boost::mutex mMutex;
 
-        size_t mX, mY;
+        size_t mX1, mY1; // current position
+        size_t mX2, mY2; // position we are moving towards (same if still)
+        size_t mDist; // % of distance between pos1 and pos2 that we have travelled
 
         // some list of objects here later
     };
@@ -39,8 +41,6 @@ namespace FARender
             boost::thread* mThread;            
             bool mLevelReady; 
             bool mDone;
-
-            size_t mX, mY;
 
             RenderState mStates[3];
 
