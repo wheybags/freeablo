@@ -122,18 +122,16 @@ namespace Cel
             std::vector<uint32_t> frameOffsets(numFrames+1);
 
 
-            for(size_t i = 0; i < numFrames; i++)
-                FAIO::FAfread(&frameOffsets[i], 4, 1, file);
-
-            FAIO::FAfread(&frameOffsets[numFrames], 4, 1, file);
+            for(size_t j = 0; j <= numFrames; j++)
+                FAIO::FAfread(&frameOffsets[j], 4, 1, file);
 
 
             FAIO::FAfseek(file, headerOffsets[i]+ frameOffsets[0], SEEK_SET);
             
-            for(size_t i = 0; i < numFrames; i++)
+            for(size_t j = 0; j < numFrames; j++)
             {
-                mFrames.push_back(std::vector<uint8_t>(frameOffsets[i+1]-frameOffsets[i]));
-                FAIO::FAfread(&mFrames[mFrames.size()-1][0], 1, frameOffsets[i+1]-frameOffsets[i], file);
+                mFrames.push_back(std::vector<uint8_t>(frameOffsets[j+1]-frameOffsets[j]));
+                FAIO::FAfread(&mFrames[mFrames.size()-1][0], 1, frameOffsets[j+1]-frameOffsets[j], file);
             }
 
         }
