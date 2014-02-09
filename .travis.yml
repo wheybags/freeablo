@@ -1,23 +1,29 @@
 language: cpp
 compiler:
- - gcc
+- gcc
 branches:
   only:
-    - master
+  - master
 before_install:
- - pwd
- - git submodule update --init --recursive
- - sudo apt-get update -qq
- - sudo apt-get install -qq libboost1.48-all-dev libsdl1.2-dev libsdl-ttf2.0-dev zlib1g-dev libbz2-dev
+- pwd
+- git submodule update --init --recursive
+- sudo apt-get update -qq
+- sudo apt-get install -qq libboost1.48-all-dev libsdl1.2-dev libsdl-ttf2.0-dev zlib1g-dev
+  libbz2-dev doxygen
 before_script:
- - mkdir build
- - cd build
- - cmake ..
+- mkdir build
+- cd build
+- cmake ..
 script:
- - make -j4
+- make -j4
+after_success:
+./update-gh-pages.sh
 notifications:
   recipients:
-    - wheybags+travis.ci@wheybags.com
+  - wheybags+travis.ci@wheybags.com
   email:
     on_success: change
     on_failure: always
+env:
+  global:
+    secure: b9143BbjFmQvaxruDHiUy1sW4InyZGejs4S/xgb4W1fFTzea9EMpzjWgwospBI3NPpe6xadctdypL9UbzJMXfD0PAZ39FbMIgl56pFkoZv1G9vwLOjG6ka0wXT7Pr6yP2FHkIdrQWECvvc1shTFXU9Yeystl0ISPwgphWUlwFZU=
