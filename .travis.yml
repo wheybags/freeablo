@@ -1,0 +1,24 @@
+language: cpp
+compiler:
+ - gcc
+branches:
+  only:
+    - master
+before_install:
+ - pwd
+ - git submodule update --init --recursive
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq libboost-all-dev libsdl1.2-dev libsdl-ttf2.0-dev zlib1g-dev libbz2-dev
+before_script:
+ - cd -
+ - mkdir build
+ - cd build
+ - cmake ..
+script:
+ - make -j4
+notifications:
+  recipients:
+    - wheybags+travis.ci@wheybags.com
+  email:
+    on_success: change
+    on_failure: always
