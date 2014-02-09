@@ -22,3 +22,6 @@ add_library(StormLib
 ${StormFiles}
 )
 
+target_link_libraries(StormLib ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
+
+
