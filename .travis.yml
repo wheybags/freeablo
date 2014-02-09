@@ -16,7 +16,9 @@ before_script:
 - cmake ..
 script:
 - make -j4
-after_success: ./update-gh-pages.sh
+after_success: 
+- cd ..
+- ./update-gh-pages.sh
 notifications:
   recipients:
   - wheybags+travis.ci@wheybags.com
