@@ -7,6 +7,8 @@
 
 #include "farender/renderer.h"
 
+#include "faworld/world.h"
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
 
@@ -115,13 +117,10 @@ int main(int argc, char** argv)
     if(!renderer.setLevel(dun, level))
         return 1;
 
+    FAWorld::World world;
+
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
-    int32_t x = 0, y = 0;
-    int32_t dirX = 0, dirY = 0;
-    bool moving = false;
-    size_t dist = 0;
-     
     // Main game logic loop
     while(!done)
     {
@@ -135,41 +134,23 @@ int main(int argc, char** argv)
         }
 
         last = now;
+        
+        FAWorld::Player* player = world.getPlayer();
 
-        if(!moving)
+        if(player->mPos.mDist == 0)
         {
-            dirX = lr;
-            dirY = ud;
-
-            if(dirX || dirY)
+            if(lr || ud)
             {
-                moving = true;
-                dist = 0;
+                player->mPos.mNext.first = player->mPos.mCurrent.first + lr;
+                player->mPos.mNext.second = player->mPos.mCurrent.second + ud;
             }
         }
-        // Smooth movement
-        else
-        {
-            dist += 2;
-            if(dist >= 100)
-            {
-                x = x + dirX;
-                y = y + dirY;
-                moving = false;
-                dirX = 0;
-                dirY = 0;
-                dist = 0;
-            }
-        }
+
+        world.update();
 
         FARender::RenderState* state = renderer.getFreeState();
-        state->mX1 = x;
-        state->mY1 = y;
-
-        state->mX2 = x + dirX;
-        state->mY2 = y + dirY;
-
-        state->mDist = dist;
+        
+        state->mPos = player->mPos;
 
         renderer.setCurrentState(state);
     }

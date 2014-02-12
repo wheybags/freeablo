@@ -88,7 +88,8 @@ namespace FARender
 
             if(mLevelReady && current && current->mMutex.try_lock())
             {
-                Render::drawLevel(current->mX1, current->mY1, current->mX2, current->mY2, current->mDist);
+                Render::drawLevel(current->mPos.mCurrent.first, current->mPos.mCurrent.second, 
+                    current->mPos.mNext.first, current->mPos.mNext.second, current->mPos.mDist);
 
                 current->mMutex.unlock();
             }
