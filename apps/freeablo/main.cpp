@@ -1,9 +1,6 @@
-#include <level/minfile.h>
-#include <level/tilfile.h>
-#include <level/dunfile.h>
-
 #include <render/render.h>
 #include <input/inputmanager.h>
+#include <level/dunfile.h>
 
 #include "falevelgen/levelgen.h"
 #include "falevelgen/random.h"
@@ -11,6 +8,7 @@
 #include "farender/renderer.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/program_options.hpp>
 
 bool done = false;
 int lr = 0, ud = 0;
@@ -60,20 +58,62 @@ void keyRelease(Input::Key key)
 
 int main(int argc, char** argv)
 {
+    size_t level;
+
+    boost::program_options::options_description desc("Options");
+    desc.add_options()
+        ("help,h", "Print help")
+        ("level,l", boost::program_options::value<size_t>(&level)->default_value(0), "Level number to load (0-4)");
+
+    boost::program_options::variables_map vm; 
+    try 
+    { 
+        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+
+        if(vm.count("help"))
+        {
+            std::cout << desc << std::endl;
+            return 0;
+        }
+        
+        boost::program_options::notify(vm);
+
+        if(level > 4)
+            throw boost::program_options::validation_error(
+                boost::program_options::validation_error::invalid_option_value, "level");
+    }
+    catch(boost::program_options::error& e)
+    {
+        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+        std::cerr << desc << std::endl;
+        return 1;
+    }
+
     // Starts rendering thread
     FARender::Renderer renderer;
 
     // Starts input thread
     Input::InputManager input(&keyPress, &keyRelease);
 
-    Level::MinFile min("levels/l1data/l1.min");
-    Level::TilFile til("levels/l1data/l1.til");
     Level::DunFile dun;
+    
+    if(level > 0) 
+    {
+        FALevelGen::FAsrand(time(NULL));
+        FALevelGen::generate(100, 100, dun);
+    }
+    else
+    {
+        Level::DunFile sector1("levels/towndata/sector1s.dun");
+        Level::DunFile sector2("levels/towndata/sector2s.dun");
+        Level::DunFile sector3("levels/towndata/sector3s.dun");
+        Level::DunFile sector4("levels/towndata/sector4s.dun");
 
-    FALevelGen::FAsrand(time(NULL));
-    FALevelGen::generate(100, 100, dun);
+        dun = Level::DunFile::getTown(sector1, sector2, sector3, sector4);
+    }
 
-    renderer.setLevel(dun, 1);
+    if(!renderer.setLevel(dun, level))
+        return 1;
 
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
@@ -133,4 +173,6 @@ int main(int argc, char** argv)
 
         renderer.setCurrentState(state);
     }
+
+    return 0;
 }
