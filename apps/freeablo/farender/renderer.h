@@ -30,7 +30,7 @@ namespace FARender
         public:
             Renderer();
             ~Renderer();
-            void setLevel(const Level::DunFile& dun, size_t level);
+            bool setLevel(const Level::DunFile& dun, size_t level);
 
             RenderState* getFreeState(); // ooh ah up de ra
             void setCurrentState(RenderState* current);

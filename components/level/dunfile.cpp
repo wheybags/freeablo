@@ -36,7 +36,7 @@ namespace Level
         mBlocks.resize(mWidth*mHeight, 0);    
     }
 
-    DunFile getTown(const DunFile& sector1, const DunFile& sector2, const DunFile& sector3, const DunFile& sector4)
+    DunFile DunFile::getTown(const DunFile& sector1, const DunFile& sector2, const DunFile& sector3, const DunFile& sector4)
     {
         DunFile town(48, 48);
         
