@@ -4,7 +4,6 @@ namespace FAWorld
 {
     World::World()
     {
-        mPlayer = Player();
         mActors.push_back(&mPlayer);
     }
 
