@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     Render::init(); 
     Input::InputManager input(&keyPress, &keyRelease);
 
-    std::vector<Render::Sprite> cel = Render::loadGroup(argv[1]);
+    Render::SpriteGroup cel(argv[1]);
     max = cel.size();
 
     while(!done)

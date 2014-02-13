@@ -79,21 +79,17 @@ namespace Render
         }
     }
 
-    std::vector<Sprite> loadGroup(const std::string& path)
+    SpriteGroup::SpriteGroup(const std::string& path)
     {
         Cel::CelFile cel(path);
-        
-        std::vector<Sprite> sprites;
 
         for(size_t i = 0; i < cel.numFrames(); i++)
         {
             SDL_Surface* s = createTransparentSurface(cel[i].width, cel[i].height);
             drawFrame(s, 0, 0, cel[i]);
 
-            sprites.push_back(s);
+            mSprites.push_back(s);
         }
-
-        return sprites;
     }
 
     SDL_Surface** tileset = NULL;
