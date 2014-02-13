@@ -96,43 +96,13 @@ namespace Render
         return sprites;
     }
 
-
     SDL_Surface** tileset = NULL;
-
-    SDL_Surface* getSprite(Cel::CelFile& f, size_t index)
-    {
-        if(tileset == NULL)
-        {
-            size_t size = f.numFrames();
-
-            tileset = new SDL_Surface*[size];
-            
-            for(size_t i = 0; i < size; i++)
-                tileset[i] = NULL;
-        }
-        
-        if(tileset[index] != NULL)
-            return tileset[index];
-        
-        Cel::CelFrame frame = f[index];
-
-        SDL_Surface* s = createTransparentSurface(frame.width, frame.height);
-
-        drawFrame(s, 0, 0, frame);
-
-        
-        tileset[index] = s;
-
-        return s;
-    }
 
     void blit(SDL_Surface* from, SDL_Surface* to, int x, int y)
     {
         SDL_Rect rcDest = { x, y, 0, 0 };
         SDL_BlitSurface (from , NULL, to, &rcDest );
     }
-
-    int x_base = WIDTH/2, y_base = 0;
 
     void drawMinTile(SDL_Surface* s, Cel::CelFile& f, int x, int y, int16_t l, int16_t r)
     {
