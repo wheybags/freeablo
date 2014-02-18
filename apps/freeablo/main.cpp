@@ -152,6 +152,8 @@ int main(int argc, char** argv)
         
         state->mPos = player->mPos;
 
+        world.fillRenderState(state);
+
         renderer.setCurrentState(state);
     }
 

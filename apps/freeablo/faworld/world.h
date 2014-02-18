@@ -6,6 +6,11 @@
 #include "actor.h"
 #include "player.h"
 
+namespace FARender
+{
+    class RenderState;
+}
+
 namespace FAWorld
 {
     class World
@@ -14,6 +19,7 @@ namespace FAWorld
             World();
             void update();
             Player* getPlayer();
+            void fillRenderState(FARender::RenderState* state);
 
         private:
             std::vector<Actor*> mActors;

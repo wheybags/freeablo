@@ -1,5 +1,9 @@
 #include "world.h"
 
+#include <boost/tuple/tuple.hpp>
+
+#include "../farender/renderer.h"
+
 namespace FAWorld
 {
     World::World()
@@ -16,5 +20,13 @@ namespace FAWorld
     Player* World::getPlayer()
     {
         return &mPlayer;
+    }
+    
+    void World::fillRenderState(FARender::RenderState* state)
+    {
+        state->mObjects.clear();
+
+        for(size_t i = 0; i < mActors.size(); i++)
+            state->mObjects.push_back(boost::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->walkAnim, 0, mActors[i]->mPos));
     }
 }

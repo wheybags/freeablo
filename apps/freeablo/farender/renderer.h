@@ -7,6 +7,7 @@
 
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <render/render.h>
 
@@ -19,6 +20,8 @@ namespace Level
 
 namespace FARender
 {
+    typedef boost::shared_ptr<Render::SpriteGroup> FASpriteGroup;
+
     class RenderState
     {
         public:
@@ -26,11 +29,9 @@ namespace FARender
         boost::mutex mMutex;
 
         FAWorld::Position mPos;
-
-        // some list of objects here later
+        
+        std::vector<boost::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
     };
-
-    typedef boost::shared_ptr<Render::SpriteGroup> FASpriteGroup;
 
     class Renderer
     {
@@ -47,7 +48,7 @@ namespace FARender
             FASpriteGroup loadImage(const std::string& path);
 
         private:
-            static Renderer* mRenderer; //< Singleton instance
+            static Renderer* mRenderer; ///< Singleton instance
 
             void renderLoop();
             

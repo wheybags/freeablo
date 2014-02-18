@@ -118,6 +118,12 @@ namespace FARender
                 Render::drawLevel(current->mPos.mCurrent.first, current->mPos.mCurrent.second, 
                     current->mPos.mNext.first, current->mPos.mNext.second, current->mPos.mDist);
 
+                for(size_t i = 0; i < current->mObjects.size(); i++)
+                {
+                    Render::drawAt((*current->mObjects[i].get<0>().get())[current->mObjects[i].get<1>()], current->mObjects[i].get<2>().mCurrent.first, current->mObjects[i].get<2>().mCurrent.second,
+                        current->mObjects[i].get<2>().mNext.first, current->mObjects[i].get<2>().mNext.second, current->mObjects[i].get<2>().mDist);
+                }
+
                 current->mMutex.unlock();
             }
 
