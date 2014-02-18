@@ -1,17 +1,27 @@
 #include "renderer.h"
 
+#include <assert.h>
+
 #include <boost/thread.hpp>
 
 #include <level/dunfile.h>
 #include <level/tilfile.h>
 #include <level/minfile.h>
 
-#include <render/render.h>
-
 namespace FARender
 {
+    Renderer* Renderer::mRenderer = NULL;
+
+    Renderer* Renderer::get()
+    {
+        return mRenderer;
+    }
+
     Renderer::Renderer()
     {
+        assert(!mRenderer); // singleton, only one instance
+        mRenderer = this;
+
         mDone = false;
         mLevelReady = false;
 
@@ -78,6 +88,23 @@ namespace FARender
     {
         current->mMutex.unlock();
         mCurrent = current;
+    }
+
+    FASpriteGroup Renderer::loadImage(const std::string& path)
+    {
+        bool contains = mSpriteCache.find(path) != mSpriteCache.end();
+
+        if(contains)
+        {
+            FASpriteGroup cached = mSpriteCache[path].lock();
+            if(cached)
+                return cached;
+        }
+        
+        FASpriteGroup newSprite(new Render::SpriteGroup(path));
+        mSpriteCache[path] = boost::weak_ptr<Render::SpriteGroup>(newSprite);
+
+        return newSprite;
     }
 
     void Renderer::renderLoop()
