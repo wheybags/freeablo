@@ -9,6 +9,8 @@ namespace FAWorld
     class Position
     {
         public:
+            Position();
+
             void update(); ///< advances towards mNext
 
             std::pair<size_t, size_t> mCurrent; ///< where we are coming from
