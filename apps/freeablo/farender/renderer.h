@@ -3,7 +3,15 @@
 
 #include <stddef.h>
 
+#include <map>
+
 #include <boost/thread.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
+
+#include <render/render.h>
+
+#include "../faworld/position.h"
 
 namespace Level
 {
@@ -11,23 +19,26 @@ namespace Level
 }
 
 namespace FARender
-{
+{       
+    class CacheSpriteGroup;
+    typedef boost::shared_ptr<CacheSpriteGroup> FASpriteGroup;
+
     class RenderState
     {
         public:
 
         boost::mutex mMutex;
 
-        size_t mX1, mY1; // current position
-        size_t mX2, mY2; // position we are moving towards (same if still)
-        size_t mDist; // % of distance between pos1 and pos2 that we have travelled
-
-        // some list of objects here later
+        FAWorld::Position mPos;
+        
+        std::vector<boost::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
     };
 
     class Renderer
     {
         public:
+            static Renderer* get();
+            
             Renderer();
             ~Renderer();
             bool setLevel(const Level::DunFile& dun, size_t level);
@@ -35,7 +46,11 @@ namespace FARender
             RenderState* getFreeState(); // ooh ah up de ra
             void setCurrentState(RenderState* current);
 
+            FASpriteGroup loadImage(const std::string& path);
+
         private:
+            static Renderer* mRenderer; ///< Singleton instance
+
             void renderLoop();
             
             boost::thread* mThread;            
@@ -45,6 +60,25 @@ namespace FARender
             RenderState mStates[3];
 
             RenderState* mCurrent;
+
+            std::map<std::string, boost::weak_ptr<CacheSpriteGroup> > mSpriteCache;
+
+            friend class CacheSpriteGroup;
+    };
+
+    class CacheSpriteGroup
+    {
+        public:
+            CacheSpriteGroup(const std::string& path): mSpriteGroup(path) {}
+            
+            ~CacheSpriteGroup()
+            {
+                if(Renderer::get())
+                    Renderer::get()->mSpriteCache.erase(mPath);
+            }
+
+            Render::SpriteGroup mSpriteGroup; 
+            std::string mPath;
     };
 }
 

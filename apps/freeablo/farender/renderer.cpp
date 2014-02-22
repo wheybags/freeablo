@@ -1,17 +1,27 @@
 #include "renderer.h"
 
+#include <assert.h>
+
 #include <boost/thread.hpp>
 
 #include <level/dunfile.h>
 #include <level/tilfile.h>
 #include <level/minfile.h>
 
-#include <render/render.h>
-
 namespace FARender
 {
+    Renderer* Renderer::mRenderer = NULL;
+
+    Renderer* Renderer::get()
+    {
+        return mRenderer;
+    }
+
     Renderer::Renderer()
     {
+        assert(!mRenderer); // singleton, only one instance
+        mRenderer = this;
+
         mDone = false;
         mLevelReady = false;
 
@@ -24,6 +34,7 @@ namespace FARender
     
     Renderer::~Renderer()
     {
+        mRenderer = NULL;
         mDone = true;
         mThread->join();
         delete mThread;
@@ -80,6 +91,23 @@ namespace FARender
         mCurrent = current;
     }
 
+    FASpriteGroup Renderer::loadImage(const std::string& path)
+    {
+        bool contains = mSpriteCache.find(path) != mSpriteCache.end();
+
+        if(contains)
+        {
+            FASpriteGroup cached = mSpriteCache[path].lock();
+            if(cached)
+                return cached;
+        }
+        
+        FASpriteGroup newSprite(new CacheSpriteGroup(path));
+        mSpriteCache[path] = boost::weak_ptr<CacheSpriteGroup>(newSprite);
+
+        return newSprite;
+    }
+
     void Renderer::renderLoop()
     {
         while(!mDone)
@@ -88,7 +116,14 @@ namespace FARender
 
             if(mLevelReady && current && current->mMutex.try_lock())
             {
-                Render::drawLevel(current->mX1, current->mY1, current->mX2, current->mY2, current->mDist);
+                Render::drawLevel(current->mPos.mCurrent.first, current->mPos.mCurrent.second, 
+                    current->mPos.mNext.first, current->mPos.mNext.second, current->mPos.mDist);
+
+                for(size_t i = 0; i < current->mObjects.size(); i++)
+                {
+                    Render::drawAt((*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()], current->mObjects[i].get<2>().mCurrent.first, current->mObjects[i].get<2>().mCurrent.second,
+                        current->mObjects[i].get<2>().mNext.first, current->mObjects[i].get<2>().mNext.second, current->mObjects[i].get<2>().mDist);
+                }
 
                 current->mMutex.unlock();
             }

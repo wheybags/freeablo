@@ -9,4 +9,12 @@ add_executable(freeablo
     falevelgen/mst.h
     
     farender/renderer.cpp
-    farender/renderer.h)
+    farender/renderer.h
+    
+    faworld/actor.cpp
+    faworld/actor.h  
+    faworld/player.h  
+    faworld/position.h  
+    faworld/position.cpp
+    faworld/world.cpp  
+    faworld/world.h)
