@@ -92,6 +92,12 @@ namespace Render
         }
     }
 
+    SpriteGroup::~SpriteGroup()
+    {
+        for(size_t i = 0; i < mSprites.size(); i++)
+            SDL_FreeSurface((SDL_Surface*)mSprites[i]);
+    }
+    
     SDL_Surface** tileset = NULL;
 
     void blit(SDL_Surface* from, SDL_Surface* to, int x, int y)

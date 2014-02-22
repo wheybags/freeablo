@@ -25,7 +25,8 @@ namespace Render
     {
         public:
             SpriteGroup(const std::string& path);
-
+            ~SpriteGroup();
+            
             Sprite& operator[](size_t index)
             {
                 return mSprites[index];
