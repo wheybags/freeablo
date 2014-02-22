@@ -19,8 +19,9 @@ namespace Level
 }
 
 namespace FARender
-{
-    typedef boost::shared_ptr<Render::SpriteGroup> FASpriteGroup;
+{       
+    class CacheSpriteGroup;
+    typedef boost::shared_ptr<CacheSpriteGroup> FASpriteGroup;
 
     class RenderState
     {
@@ -60,7 +61,24 @@ namespace FARender
 
             RenderState* mCurrent;
 
-            std::map<std::string, boost::weak_ptr<Render::SpriteGroup> > mSpriteCache;
+            std::map<std::string, boost::weak_ptr<CacheSpriteGroup> > mSpriteCache;
+
+            friend class CacheSpriteGroup;
+    };
+
+    class CacheSpriteGroup
+    {
+        public:
+            CacheSpriteGroup(const std::string& path): mSpriteGroup(path) {}
+            
+            ~CacheSpriteGroup()
+            {
+                if(Renderer::get())
+                    Renderer::get()->mSpriteCache.erase(mPath);
+            }
+
+            Render::SpriteGroup mSpriteGroup; 
+            std::string mPath;
     };
 }
 
