@@ -126,8 +126,7 @@ int main(int argc, char** argv)
     {
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
         
-        // loop approx 120 times per second (1sec = 1000msec, 1000/120 =~ 8)
-        while(now.time_of_day().total_milliseconds() - last.time_of_day().total_milliseconds() < 8)
+        while(now.time_of_day().total_milliseconds() - last.time_of_day().total_milliseconds() < 1000/FAWorld::World::ticksPerSecond)
         {
             boost::this_thread::sleep(boost::posix_time::milliseconds(1));
             now = boost::posix_time::microsec_clock::local_time();
@@ -141,8 +140,90 @@ int main(int argc, char** argv)
         {
             if(lr || ud)
             {
-                player->mPos.mNext.first = player->mPos.mCurrent.first + lr;
-                player->mPos.mNext.second = player->mPos.mCurrent.second + ud;
+                player->mPos.mMoving = true;
+
+                switch(lr)
+                {
+                    case -1:
+                    {
+                        switch(ud)
+                        {
+                            case -1:
+                            {
+                                player->mPos.mDirection = 4;
+                                break;
+                            }
+
+                            case 0:
+                            {
+                                player->mPos.mDirection = 3;
+                                break;
+                            }
+
+                            case 1:
+                            {
+                                player->mPos.mDirection = 2;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    
+                    case 0:
+                    {
+                        switch(ud)
+                        {
+                            case -1:
+                            {
+                                player->mPos.mDirection = 5;
+                                break;
+                            }
+
+                            case 0:
+                            {
+                                player->mPos.mMoving = false;
+                                break;
+                            }
+                            
+                            case 1:
+                            {
+                                player->mPos.mDirection = 1;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+
+                    case 1:
+                    {
+                        switch(ud)
+                        {
+                            case -1:
+                            {
+                                player->mPos.mDirection = 6;
+                                break;
+                            }
+
+                            case 0:
+                            {
+                                player->mPos.mDirection = 7;
+                                break;
+                            }
+                            
+                            case 1:
+                            {
+                                player->mPos.mDirection = 0;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            else
+            {
+                player->mPos.mMoving = false;
             }
         }
 

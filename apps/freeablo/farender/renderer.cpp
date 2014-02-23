@@ -116,13 +116,13 @@ namespace FARender
 
             if(mLevelReady && current && current->mMutex.try_lock())
             {
-                Render::drawLevel(current->mPos.mCurrent.first, current->mPos.mCurrent.second, 
-                    current->mPos.mNext.first, current->mPos.mNext.second, current->mPos.mDist);
+                Render::drawLevel(current->mPos.current().first, current->mPos.current().second, 
+                    current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
 
                 for(size_t i = 0; i < current->mObjects.size(); i++)
                 {
-                    Render::drawAt((*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()], current->mObjects[i].get<2>().mCurrent.first, current->mObjects[i].get<2>().mCurrent.second,
-                        current->mObjects[i].get<2>().mNext.first, current->mObjects[i].get<2>().mNext.second, current->mObjects[i].get<2>().mDist);
+                    Render::drawAt((*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()], current->mObjects[i].get<2>().current().first, current->mObjects[i].get<2>().current().second,
+                        current->mObjects[i].get<2>().next().first, current->mObjects[i].get<2>().next().second, current->mObjects[i].get<2>().mDist);
                 }
 
                 current->mMutex.unlock();

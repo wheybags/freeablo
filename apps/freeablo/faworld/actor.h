@@ -11,11 +11,12 @@ namespace FAWorld
     {
         public:
             Actor(const std::string& walkAnimPath):
-                walkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)) {}
+                mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)), mFrame(0) {}
             void update();
             Position mPos;
         //private: //TODO: fix this
-            FARender::FASpriteGroup walkAnim;
+            FARender::FASpriteGroup mWalkAnim;
+            size_t mFrame;
     };
 }
 
