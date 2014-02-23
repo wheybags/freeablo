@@ -9,10 +9,10 @@ namespace Level
 {
     typedef std::vector<int16_t> MinPillar;
 
-    class MinFile
+    class Min
     {
         public:
-            MinFile(const std::string&);
+            Min(const std::string&);
             const MinPillar& operator[] (size_t index) const;
             size_t size();
 

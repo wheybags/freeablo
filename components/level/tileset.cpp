@@ -1,4 +1,4 @@
-#include "tilfile.h"
+#include "tileset.h"
 
 #include <stdio.h>
 
@@ -6,7 +6,7 @@
 
 namespace Level
 {
-    TilFile::TilFile(const std::string& filename)
+    TileSet::TileSet(const std::string& filename)
     {
         FAIO::FAFile* tFile = FAIO::FAfopen(filename);
         
@@ -25,13 +25,13 @@ namespace Level
         FAIO::FAfclose(tFile);
     }
 
-    const TilBlock& TilFile::operator[] (size_t index) const
+    const TilBlock& TileSet::operator[] (size_t index) const
     {
         return mBlocks[index];
     }
 
 
-    size_t TilFile::size() const
+    size_t TileSet::size() const
     {
         return mBlocks.size();
     }

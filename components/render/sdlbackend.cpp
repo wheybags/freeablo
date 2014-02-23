@@ -8,9 +8,9 @@
 #include "../cel/celfile.h"
 #include "../cel/celframe.h"
 
-#include "../level/minfile.h"
-#include "../level/tilfile.h"
-#include "../level/dunfile.h"
+#include "../level/min.h"
+#include "../level/tileset.h"
+#include "../level/dun.h"
 
 
 namespace Render
@@ -158,7 +158,7 @@ namespace Render
 
     std::map<size_t, SDL_Surface*> tilCache;
 
-    void drawTilBlock(SDL_Surface* to, int x, int y, const Level::TilFile& til, size_t index, const Level::MinFile& min, Cel::CelFile& tileset)
+    void drawTilBlock(SDL_Surface* to, int x, int y, const Level::TileSet& til, size_t index, const Level::Min& min, Cel::CelFile& tileset)
     {
         SDL_Surface* s;
 
@@ -194,7 +194,7 @@ namespace Render
     SDL_Surface* level = NULL;
     int32_t levelWidth, levelHeight;
 
-    void setLevel(const std::string& tilesetPath, const Level::DunFile& dun, const Level::TilFile& til, const Level::MinFile& min)
+    void setLevel(const std::string& tilesetPath, const Level::Dun& dun, const Level::TileSet& til, const Level::Min& min)
     {
         Cel::CelFile town(tilesetPath);
 
