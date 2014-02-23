@@ -12,11 +12,18 @@ namespace FAWorld
             Position();
 
             void update(); ///< advances towards mNext
-
-            std::pair<size_t, size_t> mCurrent; ///< where we are coming from
-            std::pair<size_t, size_t> mNext; ///< where we are going to
-
+            
+            std::pair<size_t, size_t> current(); ///< where we are coming from
+            std::pair<size_t, size_t> next(); ///< where we are going to
+            
             size_t mDist; ///< percentage of the way there
+
+            int32_t mDirection;
+            bool mMoving;
+        
+        private:
+            std::pair<size_t, size_t> mCurrent;
+
     };
 }
 

@@ -90,6 +90,8 @@ namespace Render
 
             mSprites.push_back(s);
         }
+
+        mAnimLength = cel.animLength();
     }
 
     SpriteGroup::~SpriteGroup()

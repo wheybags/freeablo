@@ -39,13 +39,13 @@ namespace Cel
         {
             if(mIsCl2)
             {
-                readCl2ArchiveFrames(file);
+                mAnimLength = readCl2ArchiveFrames(file);
             }
             else
             {
                 FAIO::FAfseek(file, 32, SEEK_SET);
                 for(size_t i = 0; i < 8; i++)
-                    readNormalFrames(file);
+                    mAnimLength = readNormalFrames(file);
             }
         }
         else
@@ -92,6 +92,11 @@ namespace Cel
         return mCache[index];
     }
 
+    size_t CelFile::animLength()
+    {
+        return mAnimLength;
+    }
+
     size_t CelFile::getFrame(const std::vector<uint8_t>& frame, std::vector<Colour>& rawImage)
     {
         if(mIsCl2)
@@ -103,19 +108,18 @@ namespace Cel
         return normalDecode(frame, mPal, rawImage);
     }
 
-    void CelFile::readCl2ArchiveFrames(FAIO::FAFile* file)
+    size_t CelFile::readCl2ArchiveFrames(FAIO::FAFile* file)
     {
         FAIO::FAfseek(file, 0, SEEK_SET);
         
         std::vector<uint32_t> headerOffsets(8);
         FAIO::FAfread(&headerOffsets[0], 4, 8, file);
-
+        
+        uint32_t numFrames;
 
         for(size_t i = 0; i < 8; i++)
         {
             FAIO::FAfseek(file, headerOffsets[i], SEEK_SET);
-
-            uint32_t numFrames;
 
             FAIO::FAfread(&numFrames, 4, 1, file);
 
@@ -133,11 +137,12 @@ namespace Cel
                 mFrames.push_back(std::vector<uint8_t>(frameOffsets[j+1]-frameOffsets[j]));
                 FAIO::FAfread(&mFrames[mFrames.size()-1][0], 1, frameOffsets[j+1]-frameOffsets[j], file);
             }
-
         }
+
+        return numFrames;
     }
 
-    void CelFile::readNormalFrames(FAIO::FAFile* file)
+    size_t CelFile::readNormalFrames(FAIO::FAFile* file)
     {
         uint32_t numFrames;
 
@@ -156,6 +161,8 @@ namespace Cel
             mFrames.push_back(std::vector<uint8_t>(frameOffsets[i+1]-frameOffsets[i]));
             FAIO::FAfread(&mFrames[mFrames.size()-1][0], 1, frameOffsets[i+1]-frameOffsets[i], file);
         }
+
+        return numFrames;
     }
 
     Pal CelFile::getPallette(std::string filename)

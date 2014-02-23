@@ -37,8 +37,14 @@ namespace Render
                 return mSprites.size();
             }
 
+            size_t animLength()
+            {   
+                return mAnimLength;
+            }
+
         private:
             std::vector<Sprite> mSprites;
+            size_t mAnimLength;
     };
 
     void setLevel(const std::string& tilesetPath, const Level::Dun& dun, const Level::TileSet& til, const Level::Min& min);
