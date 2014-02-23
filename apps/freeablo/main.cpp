@@ -140,7 +140,11 @@ int main(int argc, char** argv)
         {
             if(lr || ud)
             {
-                player->mPos.mMoving = true;
+                if(!player->mPos.mMoving)
+                {
+                    player->mPos.mMoving = true;
+                    player->setAnimation(FAWorld::AnimState::walk);
+                }
 
                 switch(lr)
                 {
@@ -221,9 +225,10 @@ int main(int argc, char** argv)
                 }
             }
 
-            else
+            else if(player->mPos.mMoving)
             {
                 player->mPos.mMoving = false;
+                player->setAnimation(FAWorld::AnimState::idle);
             }
         }
 

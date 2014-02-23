@@ -26,7 +26,7 @@ namespace FAWorld
             mActors[i]->update();
 
             if(advanceAnims)
-                mActors[i]->mFrame = (mActors[i]->mFrame + 1) % mActors[i]->mWalkAnim.get()->mSpriteGroup.animLength();
+                mActors[i]->mFrame = (mActors[i]->mFrame + 1) % mActors[i]->getCurrentAnim().get()->mSpriteGroup.animLength();
         }
     }
 
@@ -45,10 +45,10 @@ namespace FAWorld
 
             if(mActors[i]->mPos.mDirection != -1)
             {
-                frame += mActors[i]->mPos.mDirection * 8;
+                frame += mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim().get()->mSpriteGroup.animLength();
             }
 
-            state->mObjects.push_back(boost::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->mWalkAnim, frame, mActors[i]->mPos));
+            state->mObjects.push_back(boost::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
         }
     }
 }
