@@ -8,9 +8,9 @@
 
 namespace Level
 {
-    class DunFile;
-    class TilFile;
-    class MinFile;
+    class Dun;
+    class TileSet;
+    class Min;
 }
 
 namespace Render
@@ -41,7 +41,7 @@ namespace Render
             std::vector<Sprite> mSprites;
     };
 
-    void setLevel(const std::string& tilesetPath, const Level::DunFile& dun, const Level::TilFile& til, const Level::MinFile& min);
+    void setLevel(const std::string& tilesetPath, const Level::Dun& dun, const Level::TileSet& til, const Level::Min& min);
     void drawLevel(int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
     void drawAt(const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 

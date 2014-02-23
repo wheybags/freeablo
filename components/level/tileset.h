@@ -9,10 +9,10 @@ namespace Level
 {
     typedef std::vector<int16_t> TilBlock;
 
-    class TilFile
+    class TileSet
     {
         public:
-            TilFile(const std::string&);
+            TileSet(const std::string&);
             const TilBlock& operator[] (size_t index) const;
             size_t size() const;
 

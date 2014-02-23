@@ -1,4 +1,4 @@
-#include "minfile.h"
+#include "min.h"
 
 #include <stdio.h>
 #include <iostream>
@@ -8,7 +8,7 @@
 
 namespace Level
 {
-    MinFile::MinFile(const std::string& filename)
+    Min::Min(const std::string& filename)
     {
 
         FAIO::FAFile* minF = FAIO::FAfopen(filename);
@@ -35,12 +35,12 @@ namespace Level
         FAIO::FAfclose(minF);
     }
          
-    const MinPillar& MinFile::operator[] (size_t index) const
+    const MinPillar& Min::operator[] (size_t index) const
     {
         return mPillars[index];
     }
 
-    size_t MinFile::size()
+    size_t Min::size()
     {
         return mPillars.size();
     }

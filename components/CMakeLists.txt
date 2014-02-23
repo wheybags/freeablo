@@ -9,7 +9,13 @@ add_library(Cel
 add_library(FAIO faio/faio.cpp faio/faio.h)
 target_link_libraries(FAIO StormLib ${Boost_LIBRARIES})
 
-add_library(Levels level/dunfile.cpp  level/dunfile.h  level/minfile.cpp  level/minfile.h  level/tilfile.cpp  level/tilfile.h)
+add_library(Levels 
+    level/dun.cpp  
+    level/dun.h
+    level/min.cpp  
+    level/min.h  
+    level/tileset.cpp  
+    level/tileset.h)
 target_link_libraries(Levels FAIO)
 
 add_library(Misc misc/stringops.h)

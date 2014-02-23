@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <iostream>
 
-#include "dunfile.h"
+#include "dun.h"
 
 #include <faio/faio.h>
 
 namespace Level
 {
-    DunFile::DunFile(const std::string& filename)
+    Dun::Dun(const std::string& filename)
     {
         FAIO::FAFile* f = FAIO::FAfopen(filename);
         
@@ -22,23 +22,23 @@ namespace Level
         std::cout << "w: " << mWidth << ", h: " << mHeight << std::endl;
     }
 
-    DunFile::DunFile(size_t width, size_t height)
+    Dun::Dun(size_t width, size_t height)
     {
         resize(width, height);
     }
 
-    DunFile::DunFile() {}
+    Dun::Dun() {}
 
-    void DunFile::resize(size_t width, size_t height)
+    void Dun::resize(size_t width, size_t height)
     {
         mWidth = width;
         mHeight = height;
         mBlocks.resize(mWidth*mHeight, 0);    
     }
 
-    DunFile DunFile::getTown(const DunFile& sector1, const DunFile& sector2, const DunFile& sector3, const DunFile& sector4)
+    Dun Dun::getTown(const Dun& sector1, const Dun& sector2, const Dun& sector3, const Dun& sector4)
     {
-        DunFile town(48, 48);
+        Dun town(48, 48);
         
         for(size_t x = 0; x < sector3.mWidth; x++)
         {
