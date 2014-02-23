@@ -26,7 +26,7 @@ namespace FAWorld
             mActors[i]->update();
 
             if(advanceAnims)
-                mActors[i]->mFrame = (mActors[i]->mFrame + 1) % 8;
+                mActors[i]->mFrame = (mActors[i]->mFrame + 1) % mActors[i]->mWalkAnim.get()->mSpriteGroup.animLength();
         }
     }
 
