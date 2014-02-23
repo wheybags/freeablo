@@ -232,13 +232,14 @@ namespace Render
 
     void drawLevel(int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
-        int32_t xPx1 = -((y1*(-64)) + 64*x1 + levelWidth*64) +WIDTH/2;
-        int32_t yPx1 = -((y1*32) + (32*x1) +160) + HEIGHT/2;
+        clear();
+        int16_t xPx1 = -((y1*(-32)) + 32*x1 + levelWidth*64) +WIDTH/2;
+        int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
 
-        int32_t xPx2 = -((y2*(-64)) + 64*x2 + levelWidth*64) +WIDTH/2;
-        int32_t yPx2 = -((y2*32) + (32*x2) +160) + HEIGHT/2;
+        int16_t xPx2 = -((y2*(-32)) + 32*x2 + levelWidth*64) +WIDTH/2;
+        int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
 
-        int32_t x = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
+        int16_t x = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
         int32_t y = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
 
         //TODO clean up the magic numbers here, and elsewhere in this file
@@ -250,11 +251,11 @@ namespace Render
     
     void drawAt(const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
-        int32_t xPx1 = ((y1*(-64)) + 64*x1 + levelWidth*64) + levelX -((SDL_Surface*)sprite)->w/2;
-        int32_t yPx1 = ((y1*32) + (32*x1) +160) + levelY;
+        int32_t xPx1 = ((y1*(-32)) + 32*x1 + levelWidth*64) + levelX -((SDL_Surface*)sprite)->w/2;
+        int32_t yPx1 = ((y1*16) + (16*x1) +160) + levelY;
 
-        int32_t xPx2 = ((y2*(-64)) + 64*x2 + levelWidth*64) + levelX -((SDL_Surface*)sprite)->w/2;
-        int32_t yPx2 = ((y2*32) + (32*x2) +160) + levelY;
+        int32_t xPx2 = ((y2*(-32)) + 32*x2 + levelWidth*64) + levelX -((SDL_Surface*)sprite)->w/2;
+        int32_t yPx2 = ((y2*16) + (16*x2) +160) + levelY;
 
         int32_t x = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
         int32_t y = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
