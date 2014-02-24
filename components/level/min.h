@@ -7,7 +7,19 @@
 
 namespace Level
 {
-    typedef std::vector<int16_t> MinPillar;
+    class MinPillar
+    {
+        public:
+            size_t size() const;
+            int16_t operator[] (size_t index) const;
+            bool passable() const; ///< Checks if any above ground blocks are non-empty
+        
+        private:
+            MinPillar(std::vector<int16_t> data);
+            std::vector<int16_t> mData;
+
+            friend class Min;
+    };
 
     class Min
     {

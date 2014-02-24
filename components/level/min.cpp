@@ -8,6 +8,27 @@
 
 namespace Level
 {
+    MinPillar::MinPillar(std::vector<int16_t> data): mData(data) {}
+
+    size_t MinPillar::size() const
+    {
+        return mData.size();
+    }
+
+    int16_t MinPillar::operator[] (size_t index) const
+    {
+        return mData[index];
+    }
+
+    bool MinPillar::passable() const
+    {
+        for(size_t i = 0; i < mData.size() - 2; i++)
+            if(mData[i] & 0x0FFF)
+                return false;
+        
+        return true;
+    }
+    
     Min::Min(const std::string& filename)
     {
 
@@ -24,12 +45,12 @@ namespace Level
         
         FAIO::FAfseek(minF, 0, SEEK_SET);
         
-        MinPillar temp(minSize);
+        std::vector<int16_t> temp(minSize);
         
         for(size_t i = 0; i < numPillars; i++)
         {
             FAIO::FAfread(&temp[0], 2, minSize, minF);
-            mPillars.push_back(temp);
+            mPillars.push_back(MinPillar(temp));
         }
         
         FAIO::FAfclose(minF);
