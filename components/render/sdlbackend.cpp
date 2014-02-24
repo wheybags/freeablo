@@ -146,6 +146,10 @@ namespace Render
 
     void drawMinPillar(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset)
     {
+        // compensate for maps using 5-row min files
+        if(pillar.size() == 10)
+            y += 3*32;
+
         // Each iteration draw one row of the min
         for(int i = 0; i < pillar.size(); i+=2)
         {

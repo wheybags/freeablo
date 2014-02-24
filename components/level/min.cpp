@@ -24,7 +24,7 @@ namespace Level
         
         FAIO::FAfseek(minF, 0, SEEK_SET);
         
-        MinPillar temp(16);
+        MinPillar temp(minSize);
         
         for(size_t i = 0; i < numPillars; i++)
         {
