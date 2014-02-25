@@ -69,9 +69,9 @@ namespace Render
 
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)
     {
-        for(int x = 0; x < frame.width; x++)
+        for(int x = 0; x < frame.mWidth; x++)
         {
-            for(int y = 0; y < frame.height; y++)
+            for(int y = 0; y < frame.mHeight; y++)
             {
                 if(frame[x][y].visible)
                     setpixel(s, start_x+x, start_y+y, frame[x][y]);
@@ -85,7 +85,7 @@ namespace Render
 
         for(size_t i = 0; i < cel.numFrames(); i++)
         {
-            SDL_Surface* s = createTransparentSurface(cel[i].width, cel[i].height);
+            SDL_Surface* s = createTransparentSurface(cel[i].mWidth, cel[i].mHeight);
             drawFrame(s, 0, 0, cel[i]);
 
             mSprites.push_back(s);
@@ -204,17 +204,17 @@ namespace Render
     {
         Cel::CelFile town(tilesetPath);
 
-        level = SDL_CreateRGBSurface(SDL_HWSURFACE, ((dun.mWidth+dun.mHeight))*64, ((dun.mWidth+dun.mHeight))*32 + 224, screen->format->BitsPerPixel,
+        level = SDL_CreateRGBSurface(SDL_HWSURFACE, ((dun.width()+dun.height()))*64, ((dun.width()+dun.height()))*32 + 224, screen->format->BitsPerPixel,
                                               screen->format->Rmask,
                                               screen->format->Gmask,
                                               screen->format->Bmask,
                                               screen->format->Amask);
 
-        int x_shift = dun.mHeight*64 - 64;
+        int x_shift = dun.height()*64 - 64;
 
-        for(int x = 0; x < dun.mWidth; x++)
+        for(int x = 0; x < dun.width(); x++)
         {
-            for(int y = 0; y < dun.mHeight; y++)
+            for(int y = 0; y < dun.height(); y++)
             {
                 if(dun[x][y] != 0)
                     drawTilBlock(level, (y*(-64)) + 64*x + x_shift, (y*32) + 32*x, til, dun[x][y]-1, min, town);
@@ -228,8 +228,8 @@ namespace Render
 
         tilCache.clear();
 
-        levelWidth = dun.mWidth;
-        levelHeight = dun.mHeight;
+        levelWidth = dun.width();
+        levelHeight = dun.height();
 
         SDL_SaveBMP(level, "test.bmp");
     }

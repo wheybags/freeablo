@@ -80,7 +80,7 @@ namespace FALevelGen
         {
             for(size_t y = 0; y < room.height; y++)
             {
-                level.at(x + room.xPos, y + room.yPos) = floor;
+                level[x + room.xPos][y + room.yPos] = floor;
             }
         }
     }
@@ -364,15 +364,15 @@ namespace FALevelGen
         // Draw x oriented walls
         for(size_t x = 0; x < room.width; x++)
         {
-            level.at(x + room.xPos, room.yPos) = wall;
-            level.at(x + room.xPos, room.height-1 + room.yPos) = wall;
+            level[x + room.xPos][room.yPos] = wall;
+            level[x + room.xPos][room.height-1 + room.yPos] = wall;
         }
 
         // Draw y oriented walls
         for(size_t y = 0; y < room.height; y++)
         {
-            level.at(room.xPos, y + room.yPos) = wall;
-            level.at(room.width-1 + room.xPos, y + room.yPos) = wall;
+            level[room.xPos][y + room.yPos] = wall;
+            level[room.width-1 + room.xPos][y + room.yPos] = wall;
         }
         
         // Fill ground
@@ -380,7 +380,7 @@ namespace FALevelGen
         {
             for(size_t y = 1; y < room.height-1; y++)
             {
-                level.at(x + room.xPos, y + room.yPos) = floor;
+                level[x + room.xPos][y + room.yPos] = floor;
             }
         }
     }
@@ -388,10 +388,10 @@ namespace FALevelGen
     // Get the value at (x,y) in level, or zero if it is an invalid position
     size_t getXY(int32_t x, int32_t y, const Level::Dun& level)
     {
-        if(x < 0 || x >= level.mWidth || y < 0 || y >= level.mHeight)
+        if(x < 0 || x >= level.width() || y < 0 || y >= level.height())
             return 0;
         
-        return level.at(x, y);
+        return level[x][y];
     }
     
     // Returns true if the tile at (x,y) in level borders any tile of the value tile,
@@ -416,31 +416,31 @@ namespace FALevelGen
     // Remove double walls, as the tileset does not allow for them
     void cleanup(Level::Dun& level)
     {
-        for(int32_t x = 0; x < level.mWidth; x++)
+        for(int32_t x = 0; x < level.width(); x++)
         {
-            for(int32_t y = 0; y < level.mHeight; y++)
+            for(int32_t y = 0; y < level.height(); y++)
             {
-                if(level.at(x, y) != wall || borders(x, y, blank, level))
+                if(level[x][y] != wall || borders(x, y, blank, level))
                     continue;
                 
                 // This expression is a bit of a monster, take my word for it that it finds double walls :P
-                if((level.at(x, y-1) == wall && (((level.at(x+1, y-1) == wall && level.at(x+1, y) == wall)) ||
-                                                  (level.at(x-1, y-1) == wall && level.at(x-1, y) == wall))   ) 
+                if((level[x][y-1] == wall && (((level[x+1][y-1] == wall && level[x+1][y] == wall)) ||
+                                                  (level[x-1][y-1] == wall && level[x-1][y] == wall))   ) 
                     ||
-                   (level.at(x, y+1) == wall && (((level.at(x+1, y+1) == wall && level.at(x+1, y) == wall)) ||
-                                                  (level.at(x-1, y+1) == wall && level.at(x-1, y) == wall))   ))
+                   (level[x][y+1] == wall && (((level[x+1][y+1] == wall && level[x+1][y] == wall)) ||
+                                                  (level[x-1][y+1] == wall && level[x-1][y] == wall))   ))
                 {
-                    level.at(x, y) = floor;
+                    level[x][y] = floor;
                 }
             }
         }
 
         // Remove any isolated wall blocks which may have been created by removing double walls 
-        for(int32_t x = 0; x < level.mWidth; x++)
-            for(int32_t y = 0; y < level.mHeight; y++)
-                if(level.at(x, y) == wall && getXY(x+1, y, level) != wall && getXY(x-1, y, level) != wall &&
+        for(int32_t x = 0; x < level.width(); x++)
+            for(int32_t y = 0; y < level.height(); y++)
+                if(level[x][y] == wall && getXY(x+1, y, level) != wall && getXY(x-1, y, level) != wall &&
                                              getXY(x, y+1, level) != wall && getXY(x, y-1, level) != wall)
-                    level.at(x, y) = floor;
+                    level[x][y] = floor;
     }
     
     // Helper function for adding doors
@@ -475,7 +475,7 @@ namespace FALevelGen
                     if(!connected)
                     {
                         if(region.size() > 0)
-                            level.at(region[region.size()/2].first, region[region.size()/2].second) = door;
+                            level[region[region.size()/2].first][region[region.size()/2].second] = door;
                         
                         region.resize(0);
                         connected = true;
@@ -500,7 +500,7 @@ namespace FALevelGen
         }
 
         if(!hole && region.size() > 0)
-            level.at(region[region.size()/2].first, region[region.size()/2].second) = door;
+            level[region[region.size()/2].first][region[region.size()/2].second] = door;
     }
     
     void addDoors(Level::Dun& level, const std::vector<Room>& rooms)
@@ -534,14 +534,14 @@ namespace FALevelGen
     //        extra edges to allow for some loops.
     //     5. Connect the rooms according to the graph from the last step with l shaped corridoors, and 
     //        also draw any corridoor rooms that the corridoors overlap as part of the corridoor.
-    void generateTmp(size_t width, size_t height, Level::Dun& level)
+    Level::Dun generateTmp(size_t width, size_t height)
     {
-        level.resize(width, height);
+        Level::Dun level(width, height);
         
         // Initialise whole dungeon to blank
         for(size_t x = 0; x < width; x++)
             for(size_t y = 0; y < height; y++)
-                level.at(x, y) = blank;
+                level[x][y] = blank;
 
         std::vector<Room> rooms;
         std::vector<Room> corridoorRooms;
@@ -602,13 +602,15 @@ namespace FALevelGen
                 if(getXY(x, y, level) == blank)
                 {
                     if(borders(x, y, floor, level))
-                        level.at(x, y) = wall;
+                        level[x][y] = wall;
                 }
             }
         }
         
         cleanup(level); 
         addDoors(level, rooms);
+
+        return level;
     }
 
     bool isWall(size_t x, size_t y, const Level::Dun& level)
@@ -685,15 +687,14 @@ namespace FALevelGen
             default: {}
         }
 
-        level.at(x, y) = newVal;
+        level[x][y] = newVal;
     }
    
-    void generate(size_t width, size_t height, Level::Dun& level)
+    Level::Dun generate(size_t width, size_t height)
     {
-        Level::Dun tmpLevel;
-        generateTmp(width, height, tmpLevel);
+        Level::Dun tmpLevel = generateTmp(width, height);
 
-        level.resize(width, height);
+        Level::Dun level(width, height);
         
         // Fill in isometric information (wall direction, etc), using flat tmpLevel as a base
         for(int32_t x = 0; x < width; x++)
@@ -733,12 +734,14 @@ namespace FALevelGen
                 }
                 else
                 {
-                    if(tmpLevel.at(x, y) == blank)
-                        level.at(x, y) = dunBlank;
+                    if(tmpLevel[x][y] == blank)
+                        level[x][y] = dunBlank;
                     else
-                        level.at(x, y) = dunFloor;
+                        level[x][y] = dunFloor;
                 }
             }
         }
+
+        return level;
     }
 }

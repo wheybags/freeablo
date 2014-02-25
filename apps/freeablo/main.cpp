@@ -102,7 +102,7 @@ int main(int argc, char** argv)
     if(level > 0) 
     {
         FALevelGen::FAsrand(time(NULL));
-        FALevelGen::generate(100, 100, dun);
+        dun = FALevelGen::generate(100, 100);
     }
     else
     {

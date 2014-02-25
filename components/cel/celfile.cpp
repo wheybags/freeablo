@@ -77,11 +77,11 @@ namespace Cel
 
         CelFrame frame;
         std::vector<Colour> rawImage;
-        frame.rawImage = rawImage;
+        frame.mRawImage = rawImage;
 
-        frame.width = getFrame(mFrames[index], frame.rawImage);
+        frame.mWidth = getFrame(mFrames[index], frame.mRawImage);
 
-        frame.height = frame.rawImage.size() / frame.width;
+        frame.mHeight = frame.mRawImage.size() / frame.mWidth;
 
         mCache[index] = frame;
         
