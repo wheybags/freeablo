@@ -4,9 +4,7 @@
 
 #include <boost/thread.hpp>
 
-#include <level/dun.h>
-#include <level/tileset.h>
-#include <level/min.h>
+#include <level/level.h>
 
 namespace FARender
 {
@@ -40,22 +38,18 @@ namespace FARender
         delete mThread;
     }
         
-    bool Renderer::setLevel(const Level::Dun& dun, size_t level)
+    bool Renderer::setLevel(const Level::Level& map, size_t level)
     {
         switch(level)
         {
             case 0:
             {
-                Render::setLevel("levels/towndata/town.cel", dun, 
-                    Level::TileSet("levels/towndata/town.til"),
-                    Level::Min("levels/towndata/town.min"));
+                Render::setLevel(map, "levels/towndata/town.cel");
                 break;
             }
             case 1:
             {
-                Render::setLevel("levels/l1data/l1.cel", dun, 
-                    Level::TileSet("levels/l1data/l1.til"),
-                    Level::Min("levels/l1data/l1.min"));
+                Render::setLevel(map, "levels/l1data/l1.cel");
                 break;
             }
             case 2:

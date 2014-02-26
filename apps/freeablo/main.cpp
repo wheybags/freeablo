@@ -1,6 +1,6 @@
 #include <render/render.h>
 #include <input/inputmanager.h>
-#include <level/dun.h>
+#include <level/level.h>
 
 #include "falevelgen/levelgen.h"
 #include "falevelgen/random.h"
@@ -58,14 +58,32 @@ void keyRelease(Input::Key key)
     }
 }
 
+Level::Level getLevel(size_t levelNum)
+{
+    if(levelNum > 0) 
+    {
+        FALevelGen::FAsrand(time(NULL));
+        return Level::Level(FALevelGen::generate(100, 100), "levels/l1data/l1.til", "levels/l1data/l1.min");
+    }
+    else
+    {
+        Level::Dun sector1("levels/towndata/sector1s.dun");
+        Level::Dun sector2("levels/towndata/sector2s.dun");
+        Level::Dun sector3("levels/towndata/sector3s.dun");
+        Level::Dun sector4("levels/towndata/sector4s.dun");
+
+        return Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", "levels/towndata/town.min");
+    }
+}
+
 int main(int argc, char** argv)
 {
-    size_t level;
+    size_t levelNum;
 
     boost::program_options::options_description desc("Options");
     desc.add_options()
         ("help,h", "Print help")
-        ("level,l", boost::program_options::value<size_t>(&level)->default_value(0), "Level number to load (0-4)");
+        ("level,l", boost::program_options::value<size_t>(&levelNum)->default_value(0), "Level number to load (0-4)");
 
     boost::program_options::variables_map vm; 
     try 
@@ -80,7 +98,7 @@ int main(int argc, char** argv)
         
         boost::program_options::notify(vm);
 
-        if(level > 4)
+        if(levelNum > 4)
             throw boost::program_options::validation_error(
                 boost::program_options::validation_error::invalid_option_value, "level");
     }
@@ -97,24 +115,9 @@ int main(int argc, char** argv)
     // Starts input thread
     Input::InputManager input(&keyPress, &keyRelease);
 
-    Level::Dun dun;
-    
-    if(level > 0) 
-    {
-        FALevelGen::FAsrand(time(NULL));
-        dun = FALevelGen::generate(100, 100);
-    }
-    else
-    {
-        Level::Dun sector1("levels/towndata/sector1s.dun");
-        Level::Dun sector2("levels/towndata/sector2s.dun");
-        Level::Dun sector3("levels/towndata/sector3s.dun");
-        Level::Dun sector4("levels/towndata/sector4s.dun");
+    Level::Level level = getLevel(levelNum);
 
-        dun = Level::Dun::getTown(sector1, sector2, sector3, sector4);
-    }
-
-    if(!renderer.setLevel(dun, level))
+    if(!renderer.setLevel(level, levelNum))
         return 1;
 
     FAWorld::World world;

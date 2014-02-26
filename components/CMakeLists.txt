@@ -15,7 +15,9 @@ add_library(Levels
     level/min.cpp  
     level/min.h  
     level/tileset.cpp  
-    level/tileset.h)
+    level/tileset.h
+    level/level.h
+    level/level.cpp)
 target_link_libraries(Levels FAIO)
 
 add_library(Misc 

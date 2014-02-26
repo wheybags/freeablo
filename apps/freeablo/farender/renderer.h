@@ -15,7 +15,7 @@
 
 namespace Level
 {
-    class Dun;
+    class Level;
 }
 
 namespace FARender
@@ -41,7 +41,7 @@ namespace FARender
             
             Renderer();
             ~Renderer();
-            bool setLevel(const Level::Dun& dun, size_t level);
+            bool setLevel(const Level::Level& dun, size_t level);
 
             RenderState* getFreeState(); // ooh ah up de ra
             void setCurrentState(RenderState* current);

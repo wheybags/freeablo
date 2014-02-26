@@ -19,6 +19,7 @@ namespace Level
             std::vector<int16_t> mData;
 
             friend class Min;
+            friend class Level;
     };
 
     class Min
