@@ -3,7 +3,7 @@
 namespace FAWorld
 {
     Position::Position(): mDist(0), mCurrent(std::make_pair(0,0)),
-         mDirection(-1) {}
+         mDirection(-1), mMoving(false) {}
 
     void Position::update()
     {
