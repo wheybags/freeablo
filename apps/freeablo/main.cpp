@@ -14,6 +14,7 @@
 
 bool done = false;
 int lr = 0, ud = 0;
+bool noclip = true;
 void keyPress(Input::Key key)
 {
     switch(key)
@@ -32,6 +33,9 @@ void keyPress(Input::Key key)
             break;
         case Input::KEY_q:
             done = true;
+            break;
+        case Input::KEY_n:
+            noclip = !noclip;
             break;
         default:
             break;
@@ -233,6 +237,12 @@ int main(int argc, char** argv)
                 player->mPos.mMoving = false;
                 player->setAnimation(FAWorld::AnimState::idle);
             }
+        }
+
+        if(!noclip && !level[player->mPos.next().first][player->mPos.next().second].passable())
+        {
+            player->mPos.mMoving = false;
+            player->setAnimation(FAWorld::AnimState::idle);
         }
 
         world.update();

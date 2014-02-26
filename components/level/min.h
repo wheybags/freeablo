@@ -12,7 +12,7 @@ namespace Level
         public:
             size_t size() const;
             int16_t operator[] (size_t index) const;
-            bool passable() const; ///< Checks if any above ground blocks are non-empty
+            bool passable() const; ///< Checks if any above ground blocks are non-empty, does not work properly for town
         
         private:
             MinPillar(std::vector<int16_t> data);
