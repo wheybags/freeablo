@@ -1,6 +1,6 @@
 add_library(Cel 
     cel/celfile.cpp cel/celfile.h  
-    cel/celframe.h 
+    cel/celframe.h cel/celframe.cpp
     cel/pal.cpp cel/pal.h 
     cel/tiledecoding.cpp cel/tiledecoding.h 
     cel/celdecoding.cpp cel/celdecoding.h
@@ -15,10 +15,14 @@ add_library(Levels
     level/min.cpp  
     level/min.h  
     level/tileset.cpp  
-    level/tileset.h)
+    level/tileset.h
+    level/level.h
+    level/level.cpp)
 target_link_libraries(Levels FAIO)
 
-add_library(Misc misc/stringops.h)
+add_library(Misc 
+    misc/stringops.h
+    misc/helper2d.h)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(Render

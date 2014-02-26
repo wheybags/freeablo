@@ -11,8 +11,11 @@ namespace Level
     {
         FAIO::FAFile* f = FAIO::FAfopen(filename);
         
-        FAIO::FAfread(&mWidth, 2, 1, f);
-        FAIO::FAfread(&mHeight, 2, 1, f);
+        int16_t temp;        
+        FAIO::FAfread(&temp, 2, 1, f);
+        mWidth = temp;
+        FAIO::FAfread(&temp, 2, 1, f);
+        mHeight = temp;
        
         mBlocks.resize(mWidth*mHeight);
         FAIO::FAfread(&mBlocks[0], 2, mWidth*mHeight, f);
@@ -44,7 +47,7 @@ namespace Level
         {
             for(size_t y = 0; y < sector3.mHeight; y++)
             {
-                town.at(0+x, 23+y) = sector3[x][y];
+                town[0+x][23+y] = sector3[x][y];
             }
         }
 
@@ -52,7 +55,7 @@ namespace Level
         {
             for(size_t y = 0; y < sector4.mHeight; y++)
             {
-                town.at(0+x, 0+y) = sector4[x][y];
+                town[0+x][0+y] = sector4[x][y];
             }
         }
 
@@ -60,7 +63,7 @@ namespace Level
         {
             for(size_t y = 0; y < sector1.mHeight; y++)
             {
-                town.at(23+x, 23+y) = sector1[x][y];
+                town[23+x][23+y] = sector1[x][y];
             }
         }
 
@@ -68,10 +71,40 @@ namespace Level
         {
             for(size_t y = 0; y < sector2.mHeight; y++)
             {
-                town.at(23+x, 0+y) = sector2[x][y];
+                town[23+x][0+y] = sector2[x][y];
             }
         }
 
         return town;
+    }
+
+    int16_t& get(size_t x, size_t y, Dun& dun)
+    {
+        return dun.mBlocks[x+y*dun.width()];
+    }
+
+    const int16_t& get(size_t x, size_t y, const Dun& dun)
+    {
+        return dun.mBlocks[x+y*dun.width()];
+    }
+
+    Misc::Helper2D<Dun, int16_t&> Dun::operator[] (size_t x)
+    {
+        return Misc::Helper2D<Dun, int16_t&>(*this, x, get);
+    }
+
+    Misc::Helper2D<const Dun, const int16_t&> Dun::operator[] (size_t x) const
+    {
+        return Misc::Helper2D<const Dun, const int16_t&>(*this, x, get);
+    }
+
+    size_t Dun::width() const
+    {
+        return mWidth;
+    }
+
+    size_t Dun::height() const
+    {
+        return mHeight;
     }
 }
