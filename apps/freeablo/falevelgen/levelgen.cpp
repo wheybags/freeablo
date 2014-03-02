@@ -28,6 +28,33 @@ namespace FALevelGen
                 return !(yPos+height <= other.yPos+1 || yPos >= other.yPos+other.height-1 || xPos+width <= other.xPos+1 || xPos >= other.xPos+other.width-1);
             }
 
+            bool onBorder(size_t xCoord, size_t yCoord)
+            {
+                // Draw x oriented walls
+                for(size_t x = 0; x < width; x++)
+                {
+                    if((xCoord == x + xPos && yCoord == yPos) ||
+                       (xCoord == x + xPos && yCoord == height-1 + yPos))
+                        return true; 
+                    //level[x + room.xPos][room.yPos] = wall;
+                    //level[x + room.xPos][room.height-1 + room.yPos] = wall;
+                }
+
+                // Draw y oriented walls
+                for(size_t y = 0; y < height; y++)
+                {
+                    if((xCoord == xPos && yCoord == y + yPos) ||
+                       (xCoord == width-1 + xPos && yCoord == y + yPos))
+                        return true; 
+
+
+                    //level[room.xPos][y + room.yPos] = wall;
+                    //level[room.width-1 + room.xPos][y + room.yPos] = wall;
+                }
+
+                return false;
+            }
+
             std::pair<int32_t, int32_t> centre() const
             {
                 return std::pair<int32_t, int32_t>(xPos + (width/2), yPos + (height/2));
@@ -414,7 +441,7 @@ namespace FALevelGen
     }
     
     // Remove double walls, as the tileset does not allow for them
-    void cleanup(Level::Dun& level)
+    void cleanup(Level::Dun& level, std::vector<Room>& rooms)
     {
         for(int32_t x = 0; x < level.width(); x++)
         {
@@ -431,6 +458,32 @@ namespace FALevelGen
                                                   (level[x-1][y+1] == wall && level[x-1][y] == wall))   ))
                 {
                     level[x][y] = floor;
+
+                    for(size_t i = 0; i < rooms.size(); i++)
+                    {
+                        if(rooms[i].onBorder(x,y))
+                        {
+                            // Draw x oriented walls
+                            for(size_t x = 0; x < rooms[i].width; x++)
+                            {
+                                if(!borders(x + rooms[i].xPos, rooms[i].yPos, blank, level))
+                                    level[x + rooms[i].xPos][rooms[i].yPos] = floor;
+                                if(!borders(x + rooms[i].xPos, rooms[i].height-1 + rooms[i].yPos, blank, level))
+                                    level[x + rooms[i].xPos][rooms[i].height-1 + rooms[i].yPos] = floor;
+                            }
+
+                            // Draw y oriented walls
+                            for(size_t y = 0; y < rooms[i].height; y++)
+                            {
+                                if(!borders(rooms[i].xPos, y + rooms[i].yPos, blank, level))
+                                    level[rooms[i].xPos][y + rooms[i].yPos] = floor;
+                                if(!borders(rooms[i].width-1 + rooms[i].xPos, y + rooms[i].yPos, blank, level))
+                                    level[rooms[i].width-1 + rooms[i].xPos][y + rooms[i].yPos] = floor;
+                            }
+
+                            rooms.erase(rooms.begin() + i);
+                        }
+                    }
                 }
             }
         }
@@ -607,7 +660,7 @@ namespace FALevelGen
             }
         }
         
-        cleanup(level); 
+        cleanup(level, rooms); 
         addDoors(level, rooms);
 
         return level;
