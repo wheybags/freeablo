@@ -46,12 +46,20 @@ namespace FAIO
                 return NULL;
             }
             
+            std::string stormPath = getStormLibPath(path);
+
+            if(!SFileHasFile(diabdat, stormPath.c_str()))
+            {
+                std::cerr << "File " << path << " not found" << std::endl;
+                return NULL;
+            }
+            
             FAFile* file = new FAFile();
             file->data.mpqFile = malloc(sizeof(HANDLE));
 
-            if(!SFileOpenFileEx(diabdat, getStormLibPath(path).c_str(), 0, (HANDLE*)file->data.mpqFile))
+            if(!SFileOpenFileEx(diabdat, stormPath.c_str(), 0, (HANDLE*)file->data.mpqFile))
             {
-                std::cout << "Failed to open " << filename << " in DIABDAT.MPQ";
+                std::cerr << "Failed to open " << filename << " in DIABDAT.MPQ";
                 delete file;
                 return NULL;
             }
