@@ -4,12 +4,13 @@
 
 #include <vector>
 #include <algorithm>
-#include <iostream>
+#include <sstream>
 
 #include <cmath>
 
 #include "random.h"
 #include "mst.h"
+#include "tileset.h"
 
 namespace FALevelGen
 {
@@ -69,28 +70,6 @@ namespace FALevelGen
             {
                 return sqrt((centre().first - other.centre().first)*(centre().first - other.centre().first) + (centre().second - other.centre().second)*(centre().second - other.centre().second));
             }
-    };
-
-    enum DunTile
-    {
-        dunXWall = 2,
-        dunOutsideXWall = 19,
-        dunYWall = 1,
-        dunOutsideYWall = 18,
-        dunBottomCorner = 3,
-        dunOutsideBottomCorner = 20,
-        dunRightCorner = 6,
-        dunOutsideRightCorner = 23,
-        dunLeftCorner = 7,
-        dunOutsideLeftCorner = 24,
-        dunTopCorner = 4,
-        dunOutsideTopCorner = 21,
-        dunFloor = 13,
-        dunBlank = 22,
-        dunXWallEnd = 17,
-        dunYWallEnd = 16,
-        dunXDoor = 26,
-        dunYDoor = 25
     };
 
     enum Basic
@@ -671,83 +650,77 @@ namespace FALevelGen
         return getXY(x, y, level) == wall || getXY(x, y, level) == door;
     }
  
-    void setPoint(int32_t x, int32_t y, int val, const Level::Dun& tmpLevel,  Level::Dun& level)
+    void setPoint(int32_t x, int32_t y, int val, const Level::Dun& tmpLevel,  Level::Dun& level, const TileSet& tileset)
     {
         int newVal = val;
-        switch(val)
+
+        if(val == tileset.xWall)
+        {   
+            if(getXY(x, y, tmpLevel) == door)
+                newVal = tileset.xDoor;
+            else if(getXY(x, y+1, tmpLevel) == blank)
+                newVal = tileset.outsideXWall;
+            else if(getXY(x+1, y, tmpLevel) == floor)
+                newVal = tileset.xWallEnd;
+            else if(getXY(x-1, y, tmpLevel) == floor)
+                newVal = tileset.leftCorner;
+        }
+
+        else if(val == tileset.yWall)
+        {   
+            if(getXY(x, y, tmpLevel) == door)
+                newVal = tileset.yDoor;
+            else if(getXY(x+1, y, tmpLevel) == blank)
+                newVal = tileset.outsideYWall;
+            else if(getXY(x, y+1, tmpLevel) == floor)
+                newVal = tileset.yWallEnd;
+            else if(getXY(x, y-1, tmpLevel) == floor)
+                newVal = tileset.rightCorner;
+        }
+
+        else if(val == tileset.bottomCorner)
         {
-            case dunXWall:
-            {   
-                if(getXY(x, y, tmpLevel) == door)
-                    newVal = dunXDoor;
-                else if(getXY(x, y+1, tmpLevel) == blank)
-                    newVal = dunOutsideXWall;
-                else if(getXY(x+1, y, tmpLevel) == floor)
-                    newVal = dunXWallEnd;
-                else if(getXY(x-1, y, tmpLevel) == floor)
-                    newVal = dunLeftCorner;
-                break;
-            }
-
-            case dunYWall:
-            {   
-                if(getXY(x, y, tmpLevel) == door)
-                    newVal = dunYDoor;
-                else if(getXY(x+1, y, tmpLevel) == blank)
-                    newVal = dunOutsideYWall;
-                else if(getXY(x, y+1, tmpLevel) == floor)
-                    newVal = dunYWallEnd;
-                else if(getXY(x, y-1, tmpLevel) == floor)
-                    newVal = dunRightCorner;
-                break;
-            }
-
-            case dunBottomCorner:
+            if(getXY(x+1, y+1, tmpLevel) == blank || getXY(x+1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank)
             {
-                if(getXY(x+1, y+1, tmpLevel) == blank || getXY(x+1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank)
-                {
-                    if(isWall(x, y+1, tmpLevel))
-                        newVal = dunOutsideYWall;
-                    else
-                        newVal = dunOutsideBottomCorner;
-                }
-                else if(isWall(x, y+1, tmpLevel))
-                    newVal = dunYWall;
-                break;
+                if(isWall(x, y+1, tmpLevel))
+                    newVal = tileset.outsideYWall;
+                else
+                    newVal = tileset.outsideBottomCorner;
             }
+            else if(isWall(x, y+1, tmpLevel))
+                newVal = tileset.yWall;
+        }
 
-            case dunTopCorner:
-            {
-                if(getXY(x+1, y+1, tmpLevel) == blank)
-                    newVal = dunOutsideTopCorner;
-                break;
-            }
+        else if(val == tileset.topCorner)
+        {
+            if(getXY(x+1, y+1, tmpLevel) == blank)
+                newVal = tileset.outsideTopCorner;
+        }
 
-            case dunRightCorner:
-            {
-                if(getXY(x+1, y-1, tmpLevel) == blank  || getXY(x+1, y, tmpLevel) == blank || getXY(x, y-1, tmpLevel) == blank)
-                    newVal = dunOutsideRightCorner;
-                break;
-            }
+        else if(val == tileset.rightCorner)
+        {
+            if(getXY(x+1, y-1, tmpLevel) == blank  || getXY(x+1, y, tmpLevel) == blank || getXY(x, y-1, tmpLevel) == blank)
+                newVal = tileset.outsideRightCorner;
+        }
 
-            case dunLeftCorner:
-            {
-                if(getXY(x-1, y+1, tmpLevel) == blank  || getXY(x-1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank)
-                    newVal = dunOutsideLeftCorner;
-                break;
-            }
-
-            default: {}
+        else if(val == tileset.leftCorner)
+        {
+            if(getXY(x-1, y+1, tmpLevel) == blank  || getXY(x-1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank)
+                newVal = tileset.outsideLeftCorner;
         }
 
         level[x][y] = newVal;
     }
    
-    Level::Dun generate(size_t width, size_t height)
+    Level::Dun generate(size_t width, size_t height, size_t levelNum)
     {
         Level::Dun tmpLevel = generateTmp(width, height);
 
         Level::Dun level(width, height);
+
+        std::stringstream ss; ss << "resources/tilesets/l" << levelNum << ".ini";
+
+        TileSet tileset(ss.str());
         
         // Fill in isometric information (wall direction, etc), using flat tmpLevel as a base
         for(int32_t x = 0; x < width; x++)
@@ -759,41 +732,51 @@ namespace FALevelGen
                     if(isWall(x+1, y, tmpLevel))
                     {
                         if(isWall(x, y+1, tmpLevel))
-                            setPoint(x, y, dunTopCorner, tmpLevel, level);
+                            setPoint(x, y, tileset.topCorner, tmpLevel, level, tileset);
                         else
                         {
                             if(isWall(x, y-1, tmpLevel))
-                                setPoint(x, y, dunLeftCorner, tmpLevel, level);
+                                setPoint(x, y, tileset.leftCorner, tmpLevel, level, tileset);
                             else
-                                setPoint(x, y, dunXWall, tmpLevel, level);
+                                setPoint(x, y, tileset.xWall, tmpLevel, level, tileset);
                         }
                     }
                     else if(isWall(x-1, y, tmpLevel))
                     {
                         if(isWall(x, y-1, tmpLevel))
-                            setPoint(x, y, dunBottomCorner, tmpLevel, level);
+                            setPoint(x, y, tileset.bottomCorner, tmpLevel, level, tileset);
                         else
                         {
                             if(isWall(x, y+1, tmpLevel))
-                                setPoint(x, y, dunRightCorner, tmpLevel, level);
+                                setPoint(x, y, tileset.rightCorner, tmpLevel, level, tileset);
                             else
-                                setPoint(x, y, dunXWall, tmpLevel, level);
+                                setPoint(x, y, tileset.xWall, tmpLevel, level, tileset);
                         }
                     }
                     else
                     {
-                        setPoint(x, y, dunYWall, tmpLevel, level);
+                        setPoint(x, y, tileset.yWall, tmpLevel, level, tileset);
                     }
                 }
                 else
                 {
                     if(tmpLevel[x][y] == blank)
-                        level[x][y] = dunBlank;
+                        level[x][y] = tileset.blank;
                     else
-                        level[x][y] = dunFloor;
+                        level[x][y] = tileset.floor;
                 }
             }
         }
+        
+        // Add in some random aesthetic variation
+        for(int32_t x = 0; x < width; x++)
+        {
+            for(int32_t y = 0; y < height; y++)
+            {
+                level[x][y] = tileset.getRandomTile(level[x][y]);
+            }
+        }
+ 
 
         return level;
     }

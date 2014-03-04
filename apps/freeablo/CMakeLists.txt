@@ -7,6 +7,8 @@ add_executable(freeablo
     falevelgen/random.h 
     falevelgen/mst.cpp 
     falevelgen/mst.h
+    falevelgen/tileset.cpp
+    falevelgen/tileset.h
     
     farender/renderer.cpp
     farender/renderer.h

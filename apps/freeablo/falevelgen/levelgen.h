@@ -6,7 +6,7 @@
 namespace FALevelGen
 {
   
-    Level::Dun generate(size_t width, size_t height);
+    Level::Dun generate(size_t width, size_t height, size_t levelNum);
 
 }
 
