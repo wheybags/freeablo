@@ -24,7 +24,9 @@ add_library(Misc
     misc/stringops.h
     misc/helper2d.h
     misc/md5.h
-    misc/md5.c)
+    misc/md5.c
+    misc/fareadini.h
+    misc/fareadini.cpp)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(Render
