@@ -3,6 +3,11 @@
 
 #include <stdlib.h>
 #include <string>
+#include <map>
+#include <vector>
+#include <utility>
+
+#include <boost/property_tree/ptree.hpp>
 
 namespace FALevelGen
 {
@@ -29,7 +34,14 @@ namespace FALevelGen
             size_t yWallEnd;
             size_t xDoor;
             size_t yDoor;
+
+            size_t getRandomTile(size_t tile);
         
+        private:
+            std::map<size_t, std::pair<std::vector<std::pair<size_t, size_t> >, size_t> > mAlternatives;
+
+            void fillTile(size_t tile, boost::property_tree::ptree& pt, const std::string& str);
+
     };
 
 }

@@ -767,6 +767,16 @@ namespace FALevelGen
                 }
             }
         }
+        
+        // Add in some random aesthetic variation
+        for(int32_t x = 0; x < width; x++)
+        {
+            for(int32_t y = 0; y < height; y++)
+            {
+                level[x][y] = tileset.getRandomTile(level[x][y]);
+            }
+        }
+ 
 
         return level;
     }
