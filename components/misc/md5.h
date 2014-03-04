@@ -1,3 +1,5 @@
+// Slightly modified for freeablo
+
 /*
   Copyright (C) 1999 Aladdin Enterprises.  All rights reserved.
 
@@ -42,6 +44,8 @@
 #ifndef md5_INCLUDED
 #  define md5_INCLUDED
 
+namespace Misc
+{
 /*
  * This code has some adaptations for the Ghostscript environment, but it
  * will compile and run correctly in any environment with 8-bit chars and
@@ -60,10 +64,10 @@ typedef struct md5_state_s {
     md5_byte_t buf[64];		/* accumulate block */
 } md5_state_t;
 
-#ifdef __cplusplus
-extern "C" 
-{
-#endif
+//#ifdef __cplusplus
+//extern "C" 
+//{
+//#endif
 
 /* Initialize the algorithm. */
 #ifdef P1
@@ -86,8 +90,8 @@ void md5_finish(P2(md5_state_t *pms, md5_byte_t digest[16]));
 void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
 #endif
 
-#ifdef __cplusplus
-}  /* end extern "C" */
-#endif
-
+//#ifdef __cplusplus
+//}  /* end extern "C" */
+//#endif
+}
 #endif /* md5_INCLUDED */

@@ -1,3 +1,5 @@
+// Slightly modified for freeablo
+
 /*
   Copyright (C) 1999 Aladdin Enterprises.  All rights reserved.
 
@@ -94,6 +96,10 @@ main()
     return 0;
 }
 #endif
+
+namespace Misc
+{
+
 /*
  * End of T computation program.
  */
@@ -389,4 +395,5 @@ md5_finish(md5_state_t *pms, md5_byte_t digest[16])
     md5_append(pms, data, 8);
     for (i = 0; i < 16; ++i)
 	digest[i] = (md5_byte_t)(pms->abcd[i >> 2] >> ((i & 3) << 3));
+}
 }
