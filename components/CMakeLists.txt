@@ -22,7 +22,9 @@ target_link_libraries(Levels FAIO)
 
 add_library(Misc 
     misc/stringops.h
-    misc/helper2d.h)
+    misc/helper2d.h
+    misc/md5.h
+    misc/md5.c)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(Render
