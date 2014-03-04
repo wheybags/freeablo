@@ -24,5 +24,6 @@ namespace Misc
         bpt::read_ini(s, pt);
 
         delete[] str;
+        FAIO::FAfclose(file);
     }
 }
