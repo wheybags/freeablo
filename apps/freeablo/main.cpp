@@ -67,7 +67,7 @@ Level::Level getLevel(size_t levelNum)
     if(levelNum > 0) 
     {
         FALevelGen::FAsrand(time(NULL));
-        return Level::Level(FALevelGen::generate(100, 100), "levels/l1data/l1.til", "levels/l1data/l1.min");
+        return Level::Level(FALevelGen::generate(100, 100, levelNum), "levels/l1data/l1.til", "levels/l1data/l1.min");
     }
     else
     {
