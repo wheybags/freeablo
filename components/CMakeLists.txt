@@ -37,3 +37,10 @@ target_link_libraries(Render Cel Levels ${SDL_LIBRARY})
 add_library(Input
     input/inputmanager.h
     input/sdlbackend.cpp)
+
+add_library(DiabloExe
+    diabloexe/diabloexe.h
+    diabloexe/diabloexe.cpp
+    diabloexe/monster.h
+    diabloexe/monster.cpp)
+target_link_libraries(DiabloExe ${Boost_Libraries} Misc)

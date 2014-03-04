@@ -59,6 +59,7 @@ link_libraries (
     Misc
     Render
     Input
+    DiabloExe
     StormLib
 )
 
