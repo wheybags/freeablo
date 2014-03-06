@@ -14,7 +14,7 @@ namespace Level
         size_t xPos;
         size_t yPos;
     };
-    
+
     class Level;
 
     class MinPillar

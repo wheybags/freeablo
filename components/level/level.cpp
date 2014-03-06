@@ -84,11 +84,6 @@ namespace Level
         return mMonsters;
     }
 
-
-
-
-
-
     MinPillar::MinPillar(const std::vector<int16_t>& data, bool passable): mData(data), mPassable(passable) {}
 
     size_t MinPillar::size() const
