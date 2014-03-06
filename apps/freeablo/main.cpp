@@ -67,7 +67,7 @@ Level::Level getLevel(size_t levelNum)
     if(levelNum > 0) 
     {
         FALevelGen::FAsrand(time(NULL));
-        return Level::Level(FALevelGen::generate(100, 100, levelNum), "levels/l1data/l1.til", "levels/l1data/l1.min");
+        return Level::Level(FALevelGen::generate(100, 100, levelNum), "levels/l1data/l1.til", "levels/l1data/l1.min", "levels/l1data/l1.sol");
     }
     else
     {
@@ -76,7 +76,7 @@ Level::Level getLevel(size_t levelNum)
         Level::Dun sector3("levels/towndata/sector3s.dun");
         Level::Dun sector4("levels/towndata/sector4s.dun");
 
-        return Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", "levels/towndata/town.min");
+        return Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", "levels/towndata/town.min", "levels/towndata/town.sol");
     }
 }
 
