@@ -10,6 +10,7 @@ namespace FAWorld
     {
         public:
             Position();
+            Position(size_t x, size_t y);
 
             void update(); ///< advances towards mNext
             

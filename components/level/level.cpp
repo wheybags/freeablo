@@ -73,6 +73,21 @@ namespace Level
     {
         return mDun.height()*2;
     }
+    
+    const std::vector<Monster>& Level::getMonsters() const
+    {
+        return mMonsters;
+    }
+
+    std::vector<Monster>& Level::getMonsters()
+    {
+        return mMonsters;
+    }
+
+
+
+
+
 
     MinPillar::MinPillar(const std::vector<int16_t>& data, bool passable): mData(data), mPassable(passable) {}
 

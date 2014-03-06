@@ -711,8 +711,26 @@ namespace FALevelGen
 
         level[x][y] = newVal;
     }
-   
-    Level::Dun generate(size_t width, size_t height, size_t levelNum)
+    
+    void placeMonsters(Level::Level& level)
+    {
+        std::vector<Level::Monster>& monsters = level.getMonsters();
+        
+        for(size_t i = 0; i < (level.height() + level.width())/2; i++)
+        {
+            Level::Monster m;
+            do
+            {
+                m.xPos = randomInRange(1, level.width()-1);
+                m.yPos = randomInRange(1, level.height()-1);
+            }
+            while(!level[m.xPos][m.yPos].passable());
+
+            monsters.push_back(m);
+        }
+    }
+ 
+    Level::Level generate(size_t width, size_t height, size_t levelNum)
     {
         Level::Dun tmpLevel = generateTmp(width, height);
 
@@ -776,8 +794,10 @@ namespace FALevelGen
                 level[x][y] = tileset.getRandomTile(level[x][y]);
             }
         }
- 
-
-        return level;
+        
+        Level::Level retval(level, "levels/l1data/l1.til", "levels/l1data/l1.min", "levels/l1data/l1.sol");
+        placeMonsters(retval); 
+        
+        return retval;
     }
 }

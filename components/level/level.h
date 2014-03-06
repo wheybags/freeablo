@@ -8,6 +8,13 @@
 
 namespace Level
 {
+    struct Monster
+    {
+        //std::string name;
+        size_t xPos;
+        size_t yPos;
+    };
+    
     class Level;
 
     class MinPillar
@@ -38,12 +45,17 @@ namespace Level
             size_t width() const;
             size_t height() const;
 
+            const std::vector<Monster>& getMonsters() const;
+            std::vector<Monster>& getMonsters();
+
         private:
             Dun mDun;
             TileSet mTil;
             Min mMin;
             Sol mSol;
 
+            std::vector<Monster> mMonsters;
+            
             static std::vector<int16_t> mEmpty;
 
             friend const MinPillar get(size_t x, size_t y, const Level& level);

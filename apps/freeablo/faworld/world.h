@@ -6,6 +6,8 @@
 #include "actor.h"
 #include "player.h"
 
+#include <level/level.h>
+
 namespace FARender
 {
     class RenderState;
@@ -17,6 +19,9 @@ namespace FAWorld
     {
         public:
             World();
+            ~World();
+
+            void setLevel(const Level::Level& level);
             void update();
             Player* getPlayer();
             void fillRenderState(FARender::RenderState* state);
@@ -25,7 +30,7 @@ namespace FAWorld
 
         private:
             std::vector<Actor*> mActors;
-            Player mPlayer;
+            Player* mPlayer;
             size_t mTicksSinceLastAnimUpdate;
     };
 }

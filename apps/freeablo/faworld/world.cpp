@@ -8,8 +8,23 @@ namespace FAWorld
 {
     World::World()
     {
-        mActors.push_back(&mPlayer);
+        mPlayer = new Player();
+        mActors.push_back(mPlayer);
         mTicksSinceLastAnimUpdate = 0;
+    }
+
+    World::~World()
+    {
+        for(size_t i = 0; i < mActors.size(); i++)
+            delete mActors[i];
+    }
+    
+    void World::setLevel(const Level::Level& level)
+    {
+        const std::vector<Level::Monster>& monsters = level.getMonsters();
+
+        for(size_t i = 0; i < monsters.size(); i++)
+            mActors.push_back(new Actor("monsters/zombie/zombiew.cl2", "monsters/zombie/zombien.cl2", Position(monsters[i].xPos, monsters[i].yPos)));
     }
 
     void World::update()
@@ -32,7 +47,7 @@ namespace FAWorld
 
     Player* World::getPlayer()
     {
-        return &mPlayer;
+        return mPlayer;
     }
     
     void World::fillRenderState(FARender::RenderState* state)
