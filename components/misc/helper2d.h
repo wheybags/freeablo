@@ -16,7 +16,7 @@ namespace Misc
             size_t x;
             Retval (*func)(size_t, size_t, From&); 
         public:    
-            Helper2D(From& _p, size_t _x, const Retval& (*_func)(size_t, size_t, From&)) : parent(_p), x(_x), func(_func) {}
+            Helper2D(From& _p, size_t _x, Retval (*_func)(size_t, size_t, From&)) : parent(_p), x(_x), func(_func) {}
             
             Retval operator[](size_t y){ return func(x, y, parent); }
     };
