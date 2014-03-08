@@ -1,15 +1,34 @@
 #include "world.h"
 
+#include <diabloexe/diabloexe.h>
+
 #include <boost/tuple/tuple.hpp>
 
 #include "../farender/renderer.h"
+
+#include "monster.h"
 
 namespace FAWorld
 {
     World::World()
     {
-        mActors.push_back(&mPlayer);
+        mPlayer = new Player();
+        mActors.push_back(mPlayer);
         mTicksSinceLastAnimUpdate = 0;
+    }
+
+    World::~World()
+    {
+        for(size_t i = 0; i < mActors.size(); i++)
+            delete mActors[i];
+    }
+    
+    void World::setLevel(const Level::Level& level, DiabloExe::DiabloExe& exe)
+    {
+        const std::vector<Level::Monster>& monsters = level.getMonsters();
+
+        for(size_t i = 0; i < monsters.size(); i++)
+            mActors.push_back(new Monster(exe.getMonster(monsters[i].name), Position(monsters[i].xPos, monsters[i].yPos)));
     }
 
     void World::update()
@@ -32,7 +51,7 @@ namespace FAWorld
 
     Player* World::getPlayer()
     {
-        return &mPlayer;
+        return mPlayer;
     }
     
     void World::fillRenderState(FARender::RenderState* state)

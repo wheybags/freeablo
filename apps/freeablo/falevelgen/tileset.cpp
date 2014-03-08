@@ -3,9 +3,8 @@
 #include <sstream>
 #include <algorithm>
 
-#include <boost/property_tree/ini_parser.hpp>
-
 #include <faio/faio.h>
+#include <misc/fareadini.h>
 
 #include "random.h"
 
@@ -15,21 +14,8 @@ namespace FALevelGen
 
     TileSet::TileSet(const std::string& path)
     {
-        FAIO::FAFile* file = FAIO::FAfopen(path);
-
-        size_t size = FAIO::FAsize(file);
-        char* str = new char[size+1];
-
-        FAIO::FAfread(str, 1, size, file);
-        str[size] = '\0';
-
-        std::stringstream s;
-        s << str;
-
         bpt::ptree pt;
-        bpt::read_ini(s, pt);
-
-        delete[] str;
+        Misc::readIni(path, pt);
 
         xWall = pt.get<size_t>("Basic.xWall");
         fillTile(xWall, pt, "XWall");

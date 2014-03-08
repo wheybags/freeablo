@@ -12,6 +12,8 @@
 #include "mst.h"
 #include "tileset.h"
 
+#include <diabloexe/diabloexe.h>
+
 namespace FALevelGen
 {
     class Room
@@ -711,8 +713,30 @@ namespace FALevelGen
 
         level[x][y] = newVal;
     }
-   
-    Level::Dun generate(size_t width, size_t height, size_t levelNum)
+    
+    void placeMonsters(Level::Level& level, const DiabloExe::DiabloExe& exe, size_t levelNum)
+    {
+        std::vector<Level::Monster>& monsters = level.getMonsters();
+        
+        std::vector<const DiabloExe::Monster*> possibleMonsters = exe.getMonstersInLevel(levelNum);
+        
+        for(size_t i = 0; i < (level.height() + level.width())/2; i++)
+        {
+            Level::Monster m;
+            do
+            {
+                m.xPos = randomInRange(1, level.width()-1);
+                m.yPos = randomInRange(1, level.height()-1);
+            }
+            while(!level[m.xPos][m.yPos].passable());
+
+            m.name = possibleMonsters[randomInRange(0, possibleMonsters.size()-1)]->monsterName;
+
+            monsters.push_back(m);
+        }
+    }
+ 
+    Level::Level generate(size_t width, size_t height, size_t levelNum, const DiabloExe::DiabloExe& exe)
     {
         Level::Dun tmpLevel = generateTmp(width, height);
 
@@ -776,8 +800,10 @@ namespace FALevelGen
                 level[x][y] = tileset.getRandomTile(level[x][y]);
             }
         }
- 
-
-        return level;
+        
+        Level::Level retval(level, "levels/l1data/l1.til", "levels/l1data/l1.min", "levels/l1data/l1.sol");
+        placeMonsters(retval, exe, levelNum); 
+        
+        return retval;
     }
 }

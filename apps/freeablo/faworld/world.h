@@ -6,9 +6,16 @@
 #include "actor.h"
 #include "player.h"
 
+#include <level/level.h>
+
 namespace FARender
 {
     class RenderState;
+}
+
+namespace DiabloExe
+{
+    class DiabloExe;
 }
 
 namespace FAWorld
@@ -17,6 +24,9 @@ namespace FAWorld
     {
         public:
             World();
+            ~World();
+
+            void setLevel(const Level::Level& level, DiabloExe::DiabloExe& exe);
             void update();
             Player* getPlayer();
             void fillRenderState(FARender::RenderState* state);
@@ -25,7 +35,7 @@ namespace FAWorld
 
         private:
             std::vector<Actor*> mActors;
-            Player mPlayer;
+            Player* mPlayer;
             size_t mTicksSinceLastAnimUpdate;
     };
 }

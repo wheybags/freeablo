@@ -59,6 +59,7 @@ link_libraries (
     Misc
     Render
     Input
+    DiabloExe
     StormLib
 )
 
@@ -67,3 +68,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_subdirectory(apps/freeablo)
 add_subdirectory(apps/celview)
 add_subdirectory(apps/mpqtool)
+add_subdirectory(apps/exedump)
