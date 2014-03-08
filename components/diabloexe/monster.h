@@ -87,7 +87,7 @@ namespace DiabloExe
             
             uint32_t exp;
 
-            std::string dump();
+            std::string dump() const;
 
             Monster() {} 
 

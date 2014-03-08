@@ -116,18 +116,19 @@ namespace DiabloExe
             FAIO::FAfseek(exe, ptr-codeOffset, SEEK_SET);
             char c;
 
-            do
+            FAIO::FAfread(&c, 1, 1, exe);
+
+            while(c != '\0')
             {
-                FAIO::FAfread(&c, 1, 1, exe);
                 retval += c;
+                FAIO::FAfread(&c, 1, 1, exe);
             }
-            while(c != '\0');
         }
 
         return retval;
     }
 
-    std::string Monster::dump()
+    std::string Monster::dump() const
     {
         std::stringstream ss;
         ss << "{" << std::endl
