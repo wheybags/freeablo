@@ -92,16 +92,23 @@ namespace DiabloExe
             FAIO::FAfseek(exe, monsterOffset + 128*i, SEEK_SET);
 
             Monster tmp(exe, codeOffset);
-            monsters[tmp.monsterName] = tmp;
+            mMonsters[tmp.monsterName] = tmp;
         }
     }
 
-    std::string DiabloExe::dump()
+    const Monster& DiabloExe::getMonster(const std::string& name) const
+    {
+        return mMonsters.find(name)->second;
+    }
+
+    std::string DiabloExe::dump() const
     {
         std::stringstream ss;
 
-        for(std::map<std::string, Monster>::iterator it = monsters.begin(); it != monsters.end(); ++it)
+        for(std::map<std::string, Monster>::const_iterator it = mMonsters.begin(); it != mMonsters.end(); ++it)
+        {
             ss << it->second.dump();
+        }
 
         return ss.str();
     }

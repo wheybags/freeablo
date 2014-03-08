@@ -17,9 +17,9 @@ namespace DiabloExe
         public:
             DiabloExe();
 
-            std::map<std::string, Monster> monsters;
+            const Monster& getMonster(const std::string& name) const;
 
-            std::string dump();
+            std::string dump() const;
 
         private:
             std::string getMD5();
@@ -28,6 +28,7 @@ namespace DiabloExe
             void loadMonsters(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
             
             std::string mVersion;
+            std::map<std::string, Monster> mMonsters;
     };
 }
 
