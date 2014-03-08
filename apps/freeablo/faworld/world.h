@@ -13,6 +13,11 @@ namespace FARender
     class RenderState;
 }
 
+namespace DiabloExe
+{
+    class DiabloExe;
+}
+
 namespace FAWorld
 {
     class World
@@ -21,7 +26,7 @@ namespace FAWorld
             World();
             ~World();
 
-            void setLevel(const Level::Level& level);
+            void setLevel(const Level::Level& level, DiabloExe::DiabloExe& exe);
             void update();
             Player* getPlayer();
             void fillRenderState(FARender::RenderState* state);

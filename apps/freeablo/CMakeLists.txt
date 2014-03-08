@@ -14,7 +14,9 @@ add_executable(freeablo
     farender/renderer.h
     
     faworld/actor.cpp
-    faworld/actor.h  
+    faworld/actor.h 
+    faworld/monster.h
+    faworld/monster.cpp 
     faworld/player.h  
     faworld/position.h  
     faworld/position.cpp

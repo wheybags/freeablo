@@ -726,6 +726,8 @@ namespace FALevelGen
             }
             while(!level[m.xPos][m.yPos].passable());
 
+            m.name = "Zombie";
+
             monsters.push_back(m);
         }
     }

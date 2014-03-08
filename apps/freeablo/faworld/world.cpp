@@ -1,8 +1,12 @@
 #include "world.h"
 
+#include <diabloexe/diabloexe.h>
+
 #include <boost/tuple/tuple.hpp>
 
 #include "../farender/renderer.h"
+
+#include "monster.h"
 
 namespace FAWorld
 {
@@ -19,12 +23,12 @@ namespace FAWorld
             delete mActors[i];
     }
     
-    void World::setLevel(const Level::Level& level)
+    void World::setLevel(const Level::Level& level, DiabloExe::DiabloExe& exe)
     {
         const std::vector<Level::Monster>& monsters = level.getMonsters();
 
         for(size_t i = 0; i < monsters.size(); i++)
-            mActors.push_back(new Actor("monsters/zombie/zombiew.cl2", "monsters/zombie/zombien.cl2", Position(monsters[i].xPos, monsters[i].yPos)));
+            mActors.push_back(new Monster(exe.getMonster(monsters[i].name), Position(monsters[i].xPos, monsters[i].yPos)));
     }
 
     void World::update()

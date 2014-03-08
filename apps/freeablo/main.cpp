@@ -1,6 +1,7 @@
 #include <render/render.h>
 #include <input/inputmanager.h>
 #include <level/level.h>
+#include <diabloexe/diabloexe.h>
 
 #include "falevelgen/levelgen.h"
 #include "falevelgen/random.h"
@@ -119,13 +120,16 @@ int main(int argc, char** argv)
     // Starts input thread
     Input::InputManager input(&keyPress, &keyRelease);
 
+
+    DiabloExe::DiabloExe exe;
+
     Level::Level level = getLevel(levelNum);
 
     if(!renderer.setLevel(level, levelNum))
         return 1;
 
     FAWorld::World world;
-    world.setLevel(level);
+    world.setLevel(level, exe);
 
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     

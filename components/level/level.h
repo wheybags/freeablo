@@ -10,7 +10,7 @@ namespace Level
 {
     struct Monster
     {
-        //std::string name;
+        std::string name;
         size_t xPos;
         size_t yPos;
     };
