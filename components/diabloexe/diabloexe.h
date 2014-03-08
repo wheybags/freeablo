@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -18,6 +19,7 @@ namespace DiabloExe
             DiabloExe();
 
             const Monster& getMonster(const std::string& name) const;
+            std::vector<const Monster*> getMonstersInLevel(size_t levelNum) const;
 
             std::string dump() const;
 

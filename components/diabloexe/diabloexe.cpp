@@ -101,6 +101,19 @@ namespace DiabloExe
         return mMonsters.find(name)->second;
     }
 
+    std::vector<const Monster*> DiabloExe::getMonstersInLevel(size_t levelNum) const
+    {
+        std::vector<const Monster*> retval;
+
+        for(std::map<std::string, Monster>::const_iterator it = mMonsters.begin(); it != mMonsters.end(); ++it)
+        {
+            if(levelNum >= it->second.minDunLevel && levelNum <= it->second.maxDunLevel)
+                retval.push_back(&(it->second));
+        }
+
+        return retval;
+    }
+
     std::string DiabloExe::dump() const
     {
         std::stringstream ss;

@@ -63,12 +63,12 @@ void keyRelease(Input::Key key)
     }
 }
 
-Level::Level getLevel(size_t levelNum)
+Level::Level getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
 {
     if(levelNum > 0) 
     {
         FALevelGen::FAsrand(time(NULL));
-        return FALevelGen::generate(100, 100, levelNum);
+        return FALevelGen::generate(100, 100, levelNum, exe);
     }
     else
     {
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
 
     DiabloExe::DiabloExe exe;
 
-    Level::Level level = getLevel(levelNum);
+    Level::Level level = getLevel(levelNum, exe);
 
     if(!renderer.setLevel(level, levelNum))
         return 1;
