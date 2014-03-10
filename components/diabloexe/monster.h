@@ -94,12 +94,6 @@ namespace DiabloExe
         private:
             Monster(FAIO::FAFile* exe, size_t codeOffset);
 
-            static uint32_t load32(FAIO::FAFile* exe);
-            static uint16_t load16(FAIO::FAFile* exe);
-            static uint8_t load8(FAIO::FAFile* exe);
-
-            static std::string loadString(FAIO::FAFile* exe, int32_t ptr, size_t codeOffset);
-
             friend class DiabloExe;
     };
 }
