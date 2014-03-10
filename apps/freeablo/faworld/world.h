@@ -27,6 +27,8 @@ namespace FAWorld
             ~World();
 
             void setLevel(const Level::Level& level, DiabloExe::DiabloExe& exe);
+            void addNpcs(const DiabloExe::DiabloExe& exe);
+
             void update();
             Player* getPlayer();
             void fillRenderState(FARender::RenderState* state);

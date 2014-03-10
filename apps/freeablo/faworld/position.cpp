@@ -3,10 +3,13 @@
 namespace FAWorld
 {
     Position::Position(): mDist(0), mCurrent(std::make_pair(0,0)),
-        mDirection(-1), mMoving(false) {}
+        mDirection(0), mMoving(false) {}
 
     Position::Position(size_t x, size_t y): mDist(0), mCurrent(std::make_pair(x,y)),
-        mDirection(-1), mMoving(false) {}
+        mDirection(0), mMoving(false) {}
+
+    Position::Position(size_t x, size_t y, size_t direction): mDist(0), mCurrent(std::make_pair(x,y)),
+        mDirection(direction), mMoving(false) {}
 
     void Position::update()
     {

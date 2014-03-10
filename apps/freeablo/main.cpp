@@ -131,6 +131,9 @@ int main(int argc, char** argv)
     FAWorld::World world;
     world.setLevel(level, exe);
 
+    if(levelNum == 0)
+        world.addNpcs(exe);
+
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     // Main game logic loop

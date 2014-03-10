@@ -11,6 +11,7 @@ namespace FAWorld
         public:
             Position();
             Position(size_t x, size_t y);
+            Position(size_t x, size_t y, size_t direction);
 
             void update(); ///< advances towards mNext
             

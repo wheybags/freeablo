@@ -10,6 +10,7 @@
 #include <faio/faio.h>
 
 #include "monster.h"
+#include "npc.h"
 
 namespace DiabloExe
 {
@@ -21,6 +22,9 @@ namespace DiabloExe
             const Monster& getMonster(const std::string& name) const;
             std::vector<const Monster*> getMonstersInLevel(size_t levelNum) const;
 
+            const Npc& getNpc(const std::string& name) const;
+            std::vector<const Npc*> getNpcs() const;
+
             std::string dump() const;
 
         private:
@@ -28,9 +32,11 @@ namespace DiabloExe
             std::string getVersion();
 
             void loadMonsters(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
+            void loadNpcs(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
             
             std::string mVersion;
             std::map<std::string, Monster> mMonsters;
+            std::map<std::string, Npc> mNpcs;
     };
 }
 

@@ -2,8 +2,9 @@
 #define FAIO_H
 
 #include <stdio.h>
-#include <string>
+#include <stdint.h>
 
+#include <string>
 
 // The functions in this header are designed to behave roughly like the normal fopen, fread family.
 // The difference is, if FAfopen is called on a file that doesn't exist, it will try to use StormLib
@@ -46,6 +47,10 @@ namespace FAIO
     int FAfseek (FAFile* stream, size_t offset, int origin);
     size_t FAsize(FAFile* stream);
 
+    uint32_t read32(FAFile* file);
+    uint16_t read16(FAFile* file);
+    uint8_t read8(FAFile* file);
+    std::string readCString(FAFile* file, size_t ptr);
 }
 
 #endif 

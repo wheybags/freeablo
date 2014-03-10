@@ -168,4 +168,46 @@ namespace FAIO
                 return SFileGetFileSize(*((HANDLE*)stream->data.mpqFile), NULL);
         }
     }
+
+    uint32_t read32(FAFile* file)
+    {
+        uint32_t tmp;
+        FAfread(&tmp, 4, 1, file);
+        return tmp;
+    }
+
+    uint16_t read16(FAFile* file)
+    {
+        uint16_t tmp;
+        FAfread(&tmp, 2, 1, file);
+        return tmp;
+    }
+
+    uint8_t read8(FAFile* file)
+    {
+        uint8_t tmp;
+        FAfread(&tmp, 1, 1, file);
+        return tmp;
+    }
+
+    std::string readCString(FAFile* file, size_t ptr)
+    {
+        std::string retval = "";
+        
+        if(ptr)
+        {
+            FAfseek(file, ptr, SEEK_SET);
+            char c;
+
+            FAfread(&c, 1, 1, file);
+
+            while(c != '\0')
+            {
+                retval += c;
+                FAfread(&c, 1, 1, file);
+            }
+        }
+
+        return retval;
+    }
 }

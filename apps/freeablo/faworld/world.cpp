@@ -31,6 +31,14 @@ namespace FAWorld
             mActors.push_back(new Monster(exe.getMonster(monsters[i].name), Position(monsters[i].xPos, monsters[i].yPos)));
     }
 
+    void World::addNpcs(const DiabloExe::DiabloExe& exe)
+    {
+        const std::vector<const DiabloExe::Npc*> npcs = exe.getNpcs();
+
+        for(size_t i = 0; i < npcs.size(); i++)
+            mActors.push_back(new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation)));
+    }
+
     void World::update()
     {
         mTicksSinceLastAnimUpdate++;
@@ -60,13 +68,7 @@ namespace FAWorld
 
         for(size_t i = 0; i < mActors.size(); i++)
         {
-            size_t frame = mActors[i]->mFrame;
-
-            if(mActors[i]->mPos.mDirection != -1)
-            {
-                frame += mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim().get()->mSpriteGroup.animLength();
-            }
-
+            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim().get()->mSpriteGroup.animLength();
             state->mObjects.push_back(boost::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
         }
     }
