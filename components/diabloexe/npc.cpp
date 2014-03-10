@@ -4,7 +4,7 @@
 
 namespace DiabloExe
 {
-    Npc::Npc(FAIO::FAFile* exe, size_t nameAdr, size_t celAdr, size_t xAdr, size_t yAdr)
+    Npc::Npc(FAIO::FAFile* exe, size_t nameAdr, size_t celAdr, size_t xAdr, size_t yAdr, size_t _rotation)
     {
         name = FAIO::readCString(exe, nameAdr);
         celPath = FAIO::readCString(exe, celAdr);
@@ -14,6 +14,8 @@ namespace DiabloExe
 
         FAIO::FAfseek(exe, yAdr, SEEK_SET);
         FAIO::FAfread(&y, 1, 1, exe);
+
+        rotation = _rotation;
     }
     
     std::string Npc::dump() const

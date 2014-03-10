@@ -36,7 +36,7 @@ namespace FAWorld
         const std::vector<const DiabloExe::Npc*> npcs = exe.getNpcs();
 
         for(size_t i = 0; i < npcs.size(); i++)
-            mActors.push_back(new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y)));
+            mActors.push_back(new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation)));
     }
 
     void World::update()

@@ -106,7 +106,7 @@ namespace DiabloExe
             {
                 mNpcs[it->first.substr(3, it->first.size()-3)] =
                     Npc(exe, it->second.get<size_t>("name"), it->second.get<size_t>("cel"),
-                        it->second.get<size_t>("x"), it->second.get<size_t>("y"));
+                        it->second.get<size_t>("x"), it->second.get<size_t>("y"), it->second.get("rotation", 0));
             }
         }
     }
