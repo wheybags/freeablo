@@ -31,6 +31,14 @@ namespace FAWorld
             mActors.push_back(new Monster(exe.getMonster(monsters[i].name), Position(monsters[i].xPos, monsters[i].yPos)));
     }
 
+    void World::addNpcs(const DiabloExe::DiabloExe& exe)
+    {
+        const std::vector<const DiabloExe::Npc*> npcs = exe.getNpcs();
+
+        for(size_t i = 0; i < npcs.size(); i++)
+            mActors.push_back(new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y)));
+    }
+
     void World::update()
     {
         mTicksSinceLastAnimUpdate++;
