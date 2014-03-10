@@ -51,7 +51,7 @@ namespace Cel
         else
         {
             FAIO::FAfseek(file, 0, SEEK_SET);
-            readNormalFrames(file);
+            mAnimLength = readNormalFrames(file);
         }
 
 
