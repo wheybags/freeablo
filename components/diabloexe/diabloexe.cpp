@@ -7,6 +7,7 @@
 
 #include <misc/fareadini.h>
 #include <misc/md5.h>
+#include <misc/stringops.h>
 
 namespace DiabloExe
 {
@@ -21,6 +22,7 @@ namespace DiabloExe
         
         FAIO::FAFile* exe = FAIO::FAfopen("Diablo.exe");
         loadMonsters(exe, pt);                        
+        loadNpcs(exe, pt);
 
         FAIO::FAfclose(exe);
     }
@@ -95,6 +97,19 @@ namespace DiabloExe
             mMonsters[tmp.monsterName] = tmp;
         }
     }
+    
+    void DiabloExe::loadNpcs(FAIO::FAFile* exe, boost::property_tree::ptree& pt)
+    {
+        for(bpt::ptree::const_iterator it = pt.begin(); it != pt.end(); ++it)
+        {
+            if(Misc::StringUtils::startsWith(it->first, "NPC"))
+            {
+                mNpcs[it->first.substr(3, it->first.size()-3)] =
+                    Npc(exe, it->second.get<size_t>("name"), it->second.get<size_t>("cel"),
+                        it->second.get<size_t>("x"), it->second.get<size_t>("y"));
+            }
+        }
+    }
 
     const Monster& DiabloExe::getMonster(const std::string& name) const
     {
@@ -114,13 +129,35 @@ namespace DiabloExe
         return retval;
     }
 
+    const Npc& DiabloExe::getNpc(const std::string& name) const
+    {
+        return mNpcs.find(name)->second;
+    }
+
+    std::vector<const Npc*> DiabloExe::getNpcs() const
+    {
+        std::vector<const Npc*> retval;
+
+        for(std::map<std::string, Npc>::const_iterator it = mNpcs.begin(); it != mNpcs.end(); ++it)
+            retval.push_back(&(it->second));
+
+        return retval;
+    }
+
     std::string DiabloExe::dump() const
     {
         std::stringstream ss;
-
+        
+        ss << "Monsters:" << std::endl;
         for(std::map<std::string, Monster>::const_iterator it = mMonsters.begin(); it != mMonsters.end(); ++it)
         {
             ss << it->second.dump();
+        }
+        
+        ss << "Npcs:" << std::endl;
+        for(std::map<std::string, Npc>::const_iterator it = mNpcs.begin(); it != mNpcs.end(); ++it)
+        {
+            ss << it->first << std::endl << it->second.dump();
         }
 
         return ss.str();

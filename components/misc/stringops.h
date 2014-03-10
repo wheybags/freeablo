@@ -86,6 +86,16 @@ public:
         return endsWith(lowerCase(full), lowerCase(end));
     }
 
+    static bool startsWith(const std::string& full, const std::string& start)
+    {
+        return start.size() <= full.size() && full.substr(0, start.size()) == start;
+    }
+
+    static bool ciStartsWith(const std::string& full, const std::string& start)
+    {
+        return startsWith(lowerCase(full), lowerCase(start));
+    }
+
     static std::string replaceEnd(const std::string& old_end, const std::string& new_end, const std::string& original)
     {
         std::string retval = original.substr(0, original.size() - old_end.size());
