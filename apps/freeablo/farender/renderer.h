@@ -56,12 +56,13 @@ namespace FARender
             void renderLoop();
             
             boost::thread* mThread;            
-            bool mLevelReady; 
+            Render::RenderLevel* mLevel;
             bool mDone;
 
             RenderState mStates[3];
 
             RenderState* mCurrent;
+
 
             std::map<std::string, boost::weak_ptr<CacheSpriteGroup> > mSpriteCache;
 

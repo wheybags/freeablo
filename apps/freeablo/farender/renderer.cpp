@@ -21,7 +21,7 @@ namespace FARender
         mRenderer = this;
 
         mDone = false;
-        mLevelReady = false;
+        mLevel = NULL;
 
         mCurrent = NULL;
 
@@ -36,6 +36,7 @@ namespace FARender
         mDone = true;
         mThread->join();
         delete mThread;
+        delete mLevel;
     }
         
     bool Renderer::setLevel(const Level::Level& map, size_t level)
@@ -44,12 +45,12 @@ namespace FARender
         {
             case 0:
             {
-                Render::setLevel(map, "levels/towndata/town.cel");
+                mLevel = Render::setLevel(map, "levels/towndata/town.cel");
                 break;
             }
             case 1:
             {
-                Render::setLevel(map, "levels/l1data/l1.cel");
+                mLevel = Render::setLevel(map, "levels/l1data/l1.cel");
                 break;
             }
             case 2:
@@ -61,7 +62,6 @@ namespace FARender
             }
         }
         
-        mLevelReady = true;
         return true;
     }
     
@@ -108,14 +108,14 @@ namespace FARender
         {
             RenderState* current = mCurrent;
 
-            if(mLevelReady && current && current->mMutex.try_lock())
+            if(mLevel && current && current->mMutex.try_lock())
             {
-                Render::drawLevel(current->mPos.current().first, current->mPos.current().second, 
+                Render::drawLevel(mLevel, current->mPos.current().first, current->mPos.current().second, 
                     current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
 
                 for(size_t i = 0; i < current->mObjects.size(); i++)
                 {
-                    Render::drawAt((*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()], current->mObjects[i].get<2>().current().first, current->mObjects[i].get<2>().current().second,
+                    Render::drawAt(mLevel, (*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()], current->mObjects[i].get<2>().current().first, current->mObjects[i].get<2>().current().second,
                         current->mObjects[i].get<2>().next().first, current->mObjects[i].get<2>().next().second, current->mObjects[i].get<2>().mDist);
                 }
 
