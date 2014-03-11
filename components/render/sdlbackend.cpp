@@ -22,6 +22,8 @@ namespace Render
     
     void init()
     {
+        SDL_Init(SDL_INIT_VIDEO);
+        atexit(SDL_Quit);
         screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE | SDL_DOUBLEBUF);
     }
 
