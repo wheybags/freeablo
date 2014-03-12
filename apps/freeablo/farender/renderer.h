@@ -43,7 +43,7 @@ namespace FARender
             
             Renderer();
             ~Renderer();
-            bool setLevel(const Level::Level& dun, size_t level);
+            void setLevel(const Level::Level& level);
 
             RenderState* getFreeState(); // ooh ah up de ra
             void setCurrentState(RenderState* current);
@@ -56,13 +56,14 @@ namespace FARender
             void renderLoop();
             
             boost::thread* mThread;            
+
+            size_t mRenderReady;
             Render::RenderLevel* mLevel;
             bool mDone;
 
             RenderState mStates[3];
 
             RenderState* mCurrent;
-
 
             std::map<std::string, boost::weak_ptr<CacheSpriteGroup> > mSpriteCache;
 
@@ -76,8 +77,16 @@ namespace FARender
             
             ~CacheSpriteGroup()
             {
-                if(Renderer::get())
-                    Renderer::get()->mSpriteCache.erase(mPath);
+                Renderer* r = Renderer::get();
+                if(r)
+                {
+                    r->mRenderReady = 1;
+                    while(r->mRenderReady != 2){} // wait until the render thread is definitely done
+
+                        r->mSpriteCache.erase(mPath);
+
+                    r->mRenderReady = 0;
+                }
             }
 
             Render::SpriteGroup mSpriteGroup; 

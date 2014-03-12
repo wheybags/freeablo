@@ -4,11 +4,13 @@
 
 namespace Level
 {
-    Level::Level(const std::string& dunPath, const std::string& tilPath, const std::string& minPath, const std::string& solPath):
-        mDun(dunPath), mTil(tilPath), mMin(minPath), mSol(solPath) {} 
+    Level::Level(const std::string& dunPath, const std::string& tilPath, 
+        const std::string& minPath, const std::string& solPath, const std::string& tileSetPath):
+            mDun(dunPath), mTil(tilPath), mMin(minPath), mSol(solPath), mTileSetPath(tileSetPath) {} 
      
-    Level::Level(const Dun& dun, const std::string& tilPath, const std::string& minPath, const std::string& solPath):
-        mDun(dun), mTil(tilPath), mMin(minPath), mSol(solPath) {}
+    Level::Level(const Dun& dun, const std::string& tilPath,
+        const std::string& minPath, const std::string& solPath, const std::string& tileSetPath):
+        mDun(dun), mTil(tilPath), mMin(minPath), mSol(solPath), mTileSetPath(tileSetPath) {}
 
     std::vector<int16_t> Level::mEmpty(16);
 
@@ -72,6 +74,11 @@ namespace Level
     size_t Level::height() const
     {
         return mDun.height()*2;
+    }
+
+    const std::string& Level::getTileSetPath() const
+    {
+        return mTileSetPath;
     }
     
     const std::vector<Monster>& Level::getMonsters() const

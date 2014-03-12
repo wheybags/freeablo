@@ -736,7 +736,7 @@ namespace FALevelGen
         }
     }
  
-    Level::Level generate(size_t width, size_t height, size_t levelNum, const DiabloExe::DiabloExe& exe)
+    Level::Level* generate(size_t width, size_t height, size_t levelNum, const DiabloExe::DiabloExe& exe, const std::string& celPath)
     {
         Level::Dun tmpLevel = generateTmp(width, height);
 
@@ -801,8 +801,8 @@ namespace FALevelGen
             }
         }
         
-        Level::Level retval(level, "levels/l1data/l1.til", "levels/l1data/l1.min", "levels/l1data/l1.sol");
-        placeMonsters(retval, exe, levelNum); 
+        Level::Level* retval = new Level::Level(level, "levels/l1data/l1.til", "levels/l1data/l1.min", "levels/l1data/l1.sol", celPath);
+        placeMonsters(*retval, exe, levelNum); 
         
         return retval;
     }

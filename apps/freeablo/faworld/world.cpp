@@ -23,7 +23,7 @@ namespace FAWorld
             delete mActors[i];
     }
     
-    void World::setLevel(const Level::Level& level, DiabloExe::DiabloExe& exe)
+    void World::setLevel(const Level::Level& level, const DiabloExe::DiabloExe& exe)
     {
         const std::vector<Level::Monster>& monsters = level.getMonsters();
 
@@ -37,6 +37,18 @@ namespace FAWorld
 
         for(size_t i = 0; i < npcs.size(); i++)
             mActors.push_back(new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation)));
+    }
+
+    void World::clear()
+    {
+        for(size_t i = 0; i < mActors.size(); i++)
+        {
+            if(mActors[i] != mPlayer)
+                delete mActors[i];
+        }
+
+        mActors.clear();
+        mActors.push_back(mPlayer);
     }
 
     void World::update()

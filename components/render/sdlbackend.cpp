@@ -160,9 +160,9 @@ namespace Render
         }
     }
 
-    RenderLevel* setLevel(const Level::Level& level, const std::string& tilesetPath)
+    RenderLevel* setLevel(const Level::Level& level)
     {
-        Cel::CelFile town(tilesetPath);
+        Cel::CelFile town(level.getTileSetPath());
         
         RenderLevel* retval = new RenderLevel();
 

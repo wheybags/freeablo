@@ -37,13 +37,17 @@ namespace Level
     class Level
     {
         public:
-            Level(const std::string& dunPath, const std::string& tilPath, const std::string& minPath, const std::string& solPath);
-            Level(const Dun& dun, const std::string& tilPath, const std::string& minPath, const std::string& solPath);
+            Level(const std::string& dunPath, const std::string& tilPath, 
+                const std::string& minPath, const std::string& solPath, const std::string& tileSetPath);
+            Level(const Dun& dun, const std::string& tilPath, 
+                const std::string& minPath, const std::string& solPath, const std::string& tileSetPath);
 
             Misc::Helper2D<const Level, const MinPillar> operator[] (size_t x) const;
 
             size_t width() const;
             size_t height() const;
+
+            const std::string& getTileSetPath() const;
 
             const std::vector<Monster>& getMonsters() const;
             std::vector<Monster>& getMonsters();
@@ -53,6 +57,7 @@ namespace Level
             TileSet mTil;
             Min mMin;
             Sol mSol;
+            std::string mTileSetPath; ///< path to cel file for level
 
             std::vector<Monster> mMonsters;
             
