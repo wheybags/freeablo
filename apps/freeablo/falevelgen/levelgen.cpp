@@ -76,7 +76,8 @@ namespace FALevelGen
 
     enum Basic
     {
-        wall = 64,
+        wall = 135,
+        upStairs = 64,
         door = 47,
         floor = 13,
         blank = 104,
@@ -553,6 +554,25 @@ namespace FALevelGen
         }
     }
 
+    bool placeUpStairs(Level::Dun& level, const std::vector<Room>& rooms)
+    {
+        for(size_t i = 0; i < rooms.size(); i++)
+        {
+            size_t baseX = rooms[i].xPos + (rooms[i].width/2);
+            size_t baseY = rooms[i].yPos;
+            
+            if(level[baseX-1][baseY-1] == blank && level[baseX][baseY-1] == blank && level[baseX+1][baseY-1] == blank &&
+               level[baseX-1][baseY] == wall && level[baseX][baseY] == wall && level[baseX+1][baseY] == wall &&
+               level[baseX-1][baseY+1] == floor && level[baseX][baseY+1] == floor && level[baseX+1][baseY+1] == floor)
+            {
+                level[baseX][baseY] = upStairs;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     #define ROOMAREA 30
     
     // Generates a flat map (no information about wall direction, etc)
@@ -643,13 +663,17 @@ namespace FALevelGen
         
         cleanup(level, rooms); 
         addDoors(level, rooms);
+        
+        // Make sure we always place stairs
+        if(!placeUpStairs(level, rooms))
+            return generateTmp(width, height);
 
         return level;
     }
 
     bool isWall(size_t x, size_t y, const Level::Dun& level)
     {
-        return getXY(x, y, level) == wall || getXY(x, y, level) == door;
+        return getXY(x, y, level) == wall || getXY(x, y, level) == door || getXY(x, y, level) == upStairs;
     }
  
     void setPoint(int32_t x, int32_t y, int val, const Level::Dun& tmpLevel,  Level::Dun& level, const TileSet& tileset)
@@ -660,6 +684,8 @@ namespace FALevelGen
         {   
             if(getXY(x, y, tmpLevel) == door)
                 newVal = tileset.xDoor;
+            else if(getXY(x, y, tmpLevel) == upStairs)
+                newVal = upStairs;
             else if(getXY(x, y+1, tmpLevel) == blank)
                 newVal = tileset.outsideXWall;
             else if(getXY(x+1, y, tmpLevel) == floor)
@@ -797,7 +823,24 @@ namespace FALevelGen
         {
             for(int32_t y = 0; y < height; y++)
             {
-                level[x][y] = tileset.getRandomTile(level[x][y]);
+                if(level[x][y] == upStairs)
+                {
+                    level[x-1][y-1] = tileset.upStairs1;
+                    level[x][y-1] = tileset.upStairs2;
+                    level[x+1][y-1] = tileset.upStairs3;
+
+                    level[x-1][y] = tileset.upStairs4;
+                    level[x][y] = tileset.upStairs5;
+                    level[x+1][y] = tileset.upStairs6;
+
+                    level[x-1][y+1] = tileset.upStairs7;
+                    level[x][y+1] = tileset.upStairs8;
+                    level[x+1][y+1] = tileset.upStairs9;
+                }
+                else
+                {
+                    level[x][y] = tileset.getRandomTile(level[x][y]);
+                }
             }
         }
         
