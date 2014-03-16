@@ -21,7 +21,8 @@ namespace FARender
         mRenderer = this;
 
         mDone = false;
-        mLevelReady = false;
+        mRenderReady = 1;
+        mLevel = NULL;
 
         mCurrent = NULL;
 
@@ -36,33 +37,18 @@ namespace FARender
         mDone = true;
         mThread->join();
         delete mThread;
+        delete mLevel;
     }
         
-    bool Renderer::setLevel(const Level::Level& map, size_t level)
+    void Renderer::setLevel(const Level::Level& level)
     {
-        switch(level)
-        {
-            case 0:
-            {
-                Render::setLevel(map, "levels/towndata/town.cel");
-                break;
-            }
-            case 1:
-            {
-                Render::setLevel(map, "levels/l1data/l1.cel");
-                break;
-            }
-            case 2:
-            case 3:
-            case 4:
-            {
-                std::cerr << "level " << level << " not yet implemented" << std::endl;
-                return false;
-            }
-        }
-        
-        mLevelReady = true;
-        return true;
+        mRenderReady = 1;
+        while(mRenderReady != 2){} // wait until the render thread is definitely done
+
+        delete mLevel;
+        mLevel = Render::setLevel(level);
+
+        mRenderReady = 0;
     }
     
     RenderState* Renderer::getFreeState()
@@ -108,14 +94,17 @@ namespace FARender
         {
             RenderState* current = mCurrent;
 
-            if(mLevelReady && current && current->mMutex.try_lock())
+            if(mRenderReady == 1)
+                mRenderReady = 2;
+
+            if(mRenderReady == 0 && current && current->mMutex.try_lock())
             {
-                Render::drawLevel(current->mPos.current().first, current->mPos.current().second, 
+                Render::drawLevel(mLevel, current->mPos.current().first, current->mPos.current().second, 
                     current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
 
                 for(size_t i = 0; i < current->mObjects.size(); i++)
                 {
-                    Render::drawAt((*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()], current->mObjects[i].get<2>().current().first, current->mObjects[i].get<2>().current().second,
+                    Render::drawAt(mLevel, (*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()], current->mObjects[i].get<2>().current().first, current->mObjects[i].get<2>().current().second,
                         current->mObjects[i].get<2>().next().first, current->mObjects[i].get<2>().next().second, current->mObjects[i].get<2>().mDist);
                 }
 

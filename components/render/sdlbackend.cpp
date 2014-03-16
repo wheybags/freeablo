@@ -22,6 +22,8 @@ namespace Render
     
     void init()
     {
+        SDL_Init(SDL_INIT_VIDEO);
+        atexit(SDL_Quit);
         screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE | SDL_DOUBLEBUF);
     }
 
@@ -98,8 +100,6 @@ namespace Render
             SDL_FreeSurface((SDL_Surface*)mSprites[i]);
     }
     
-    SDL_Surface** tileset = NULL;
-
     void blit(SDL_Surface* from, SDL_Surface* to, int x, int y)
     {
         SDL_Rect rcDest = { x, y, 0, 0 };
@@ -160,14 +160,13 @@ namespace Render
         }
     }
 
-    SDL_Surface* levelSprite = NULL;
-    int32_t levelWidth, levelHeight;
-
-    void setLevel(const Level::Level& level, const std::string& tilesetPath)
+    RenderLevel* setLevel(const Level::Level& level)
     {
-        Cel::CelFile town(tilesetPath);
+        Cel::CelFile town(level.getTileSetPath());
+        
+        RenderLevel* retval = new RenderLevel();
 
-        levelSprite = SDL_CreateRGBSurface(SDL_HWSURFACE, ((level.width()+level.height()))*32, ((level.width()+level.height()))*16 + 224, screen->format->BitsPerPixel,
+        retval->levelSprite = SDL_CreateRGBSurface(SDL_HWSURFACE, ((level.width()+level.height()))*32, ((level.width()+level.height()))*16 + 224, screen->format->BitsPerPixel,
                                               screen->format->Rmask,
                                               screen->format->Gmask,
                                               screen->format->Bmask,
@@ -177,44 +176,40 @@ namespace Render
         {
             for(size_t y = 0; y < level.height(); y++)
             {
-                drawMinPillar(levelSprite, (y*(-32)) + 32*x + level.height()*32-32, (y*16) + 16*x, level[x][y], town);
+                drawMinPillar((SDL_Surface*)retval->levelSprite, (y*(-32)) + 32*x + level.height()*32-32, (y*16) + 16*x, level[x][y], town);
             }
         }
 
-        levelWidth = level.width();
-        levelHeight = level.height();
+        SDL_SaveBMP((SDL_Surface*)retval->levelSprite, "test.bmp");//TODO: should probably get rid of this at some point, useful for now
 
-        SDL_SaveBMP(levelSprite, "test.bmp");
+        retval->levelWidth = level.width();
+        retval->levelHeight = level.height();
+
+        return retval;
     }
     
-    int32_t levelX, levelY;
-
-    void drawLevel(int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
-        clear();
-        int16_t xPx1 = -((y1*(-32)) + 32*x1 + levelWidth*32) +WIDTH/2;
+        int16_t xPx1 = -((y1*(-32)) + 32*x1 + level->levelWidth*32) +WIDTH/2;
         int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
 
-        int16_t xPx2 = -((y2*(-32)) + 32*x2 + levelWidth*32) +WIDTH/2;
+        int16_t xPx2 = -((y2*(-32)) + 32*x2 + level->levelWidth*32) +WIDTH/2;
         int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
 
-        int16_t x = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
-        int32_t y = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
+        level->levelX = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
+        level->levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
 
         //TODO clean up the magic numbers here, and elsewhere in this file
-        blit(levelSprite, screen, x, y);
-
-        levelX = x;
-        levelY = y;
+        blit((SDL_Surface*)level->levelSprite, screen, level->levelX, level->levelY);
     }
     
-    void drawAt(const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
-        int32_t xPx1 = ((y1*(-32)) + 32*x1 + levelWidth*32) + levelX -((SDL_Surface*)sprite)->w/2;
-        int32_t yPx1 = ((y1*16) + (16*x1) +160) + levelY;
+        int32_t xPx1 = ((y1*(-32)) + 32*x1 + level->levelWidth*32) + level->levelX -((SDL_Surface*)sprite)->w/2;
+        int32_t yPx1 = ((y1*16) + (16*x1) +160) + level->levelY;
 
-        int32_t xPx2 = ((y2*(-32)) + 32*x2 + levelWidth*32) + levelX -((SDL_Surface*)sprite)->w/2;
-        int32_t yPx2 = ((y2*16) + (16*x2) +160) + levelY;
+        int32_t xPx2 = ((y2*(-32)) + 32*x2 + level->levelWidth*32) + level->levelX -((SDL_Surface*)sprite)->w/2;
+        int32_t yPx2 = ((y2*16) + (16*x2) +160) + level->levelY;
 
         int32_t x = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
         int32_t y = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
@@ -225,5 +220,10 @@ namespace Render
     void clear()
     {
         SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 255)); 
+    }
+
+    RenderLevel::~RenderLevel()
+    {
+        SDL_FreeSurface((SDL_Surface*)levelSprite);
     }
 }

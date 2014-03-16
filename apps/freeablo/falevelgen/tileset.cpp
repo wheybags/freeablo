@@ -70,6 +70,23 @@ namespace FALevelGen
 
         yDoor = pt.get<size_t>("Basic.yDoor");
         fillTile(yDoor, pt, "YDoor");
+
+        upStairs1 = pt.get<size_t>("Basic.upStairs1");
+        upStairs2 = pt.get<size_t>("Basic.upStairs2");
+        upStairs3 = pt.get<size_t>("Basic.upStairs3");
+
+        upStairs4 = pt.get<size_t>("Basic.upStairs4");
+        upStairs5 = pt.get<size_t>("Basic.upStairs5");
+        upStairs6 = pt.get<size_t>("Basic.upStairs6");
+
+        upStairs7 = pt.get<size_t>("Basic.upStairs7");
+        upStairs8 = pt.get<size_t>("Basic.upStairs8");
+        upStairs9 = pt.get<size_t>("Basic.upStairs9");
+        
+        downStairs1 = pt.get<size_t>("Basic.downStairs1");
+        downStairs2 = pt.get<size_t>("Basic.downStairs2");
+        downStairs3 = pt.get<size_t>("Basic.downStairs3");
+        downStairs4 = pt.get<size_t>("Basic.downStairs4");
     }
     
     void TileSet::fillTile(size_t tile, bpt::ptree& pt, const std::string& str)
@@ -100,6 +117,9 @@ namespace FALevelGen
     
     size_t TileSet::getRandomTile(size_t tile)
     {
+        if(mAlternatives.find(tile) == mAlternatives.end())
+            return tile;
+
         std::vector<std::pair<size_t, size_t> >& tileVec = mAlternatives[tile].first;
         size_t normPercent = mAlternatives[tile].second;
 

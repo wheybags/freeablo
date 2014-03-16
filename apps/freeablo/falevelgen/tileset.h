@@ -35,6 +35,23 @@ namespace FALevelGen
             size_t xDoor;
             size_t yDoor;
 
+            size_t upStairs1;
+            size_t upStairs2;
+            size_t upStairs3;
+
+            size_t upStairs4;
+            size_t upStairs5;
+            size_t upStairs6;
+
+            size_t upStairs7;
+            size_t upStairs8;
+            size_t upStairs9;
+
+            size_t downStairs1;
+            size_t downStairs2;
+            size_t downStairs3;
+            size_t downStairs4;
+
             size_t getRandomTile(size_t tile);
         
         private:

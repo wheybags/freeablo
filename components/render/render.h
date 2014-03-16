@@ -45,9 +45,26 @@ namespace Render
             size_t mAnimLength;
     };
 
-    void setLevel(const Level::Level& level, const std::string& tilesetPath);
-    void drawLevel(int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
-    void drawAt(const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    struct RenderLevel
+    {
+        public:
+            ~RenderLevel();
+
+        private:
+            Sprite levelSprite;
+            int32_t levelHeight;
+            int32_t levelWidth;
+            int32_t levelX;
+            int32_t levelY;
+
+            friend RenderLevel* setLevel(const Level::Level& level);
+            friend void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+            friend void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    };
+
+    RenderLevel* setLevel(const Level::Level& level);
+    void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
     void clear();
 }
