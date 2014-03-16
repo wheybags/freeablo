@@ -176,6 +176,9 @@ int main(int argc, char** argv)
     
     FAWorld::Player* player = world.getPlayer();
 
+    if(levelNum == 0)
+        player->mPos = FAWorld::Position(75, 68);
+
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     // Main game logic loop
