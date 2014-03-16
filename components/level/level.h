@@ -6,6 +6,8 @@
 #include "dun.h"
 #include "sol.h"
 
+#include <utility>
+
 namespace Level
 {
     struct Monster
@@ -37,15 +39,20 @@ namespace Level
     class Level
     {
         public:
-            Level(const std::string& dunPath, const std::string& tilPath, 
-                const std::string& minPath, const std::string& solPath, const std::string& tileSetPath);
-            Level(const Dun& dun, const std::string& tilPath, 
-                const std::string& minPath, const std::string& solPath, const std::string& tileSetPath);
+            Level(const std::string& dunPath, const std::string& tilPath, const std::string& minPath, 
+                const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs, 
+                const std::pair<size_t,size_t>& upStairs);
+            Level(const Dun& dun, const std::string& tilPath, const std::string& minPath, 
+                const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
+                const std::pair<size_t,size_t>& upStairs);
 
             Misc::Helper2D<const Level, const MinPillar> operator[] (size_t x) const;
 
             size_t width() const;
             size_t height() const;
+
+            const std::pair<size_t,size_t>& upStairsPos() const;
+            const std::pair<size_t,size_t>& downStairsPos() const;
 
             const std::string& getTileSetPath() const;
 
@@ -58,6 +65,9 @@ namespace Level
             Min mMin;
             Sol mSol;
             std::string mTileSetPath; ///< path to cel file for level
+
+            std::pair<size_t,size_t> mUpStairs;
+            std::pair<size_t,size_t> mDownStairs;
 
             std::vector<Monster> mMonsters;
             

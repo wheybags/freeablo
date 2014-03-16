@@ -91,7 +91,7 @@ Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
             Level::Dun sector4("levels/towndata/sector4s.dun");
 
             return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", 
-                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel");
+                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(0,0));
 
             break;
         }
@@ -173,6 +173,8 @@ int main(int argc, char** argv)
         levels[currentLevel] = level;
         setLevel(levelNum, exe, world, renderer, *level);
     }
+    
+    FAWorld::Player* player = world.getPlayer();
 
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
@@ -190,7 +192,12 @@ int main(int argc, char** argv)
                     levels[currentLevel] = getLevel(currentLevel == 0 ? 0 : 1, exe);
 
                 level = levels[currentLevel];
-
+                
+                if(changeLevel == -1)
+                    player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
+                else
+                    player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+                
                 setLevel(currentLevel, exe, world, renderer, *level);
             }
             
@@ -206,8 +213,6 @@ int main(int argc, char** argv)
         }
 
         last = now;
-        
-        FAWorld::Player* player = world.getPlayer();
 
         if(player->mPos.mDist == 0)
         {

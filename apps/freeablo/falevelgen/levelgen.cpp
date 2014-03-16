@@ -842,6 +842,9 @@ namespace FALevelGen
                 }
             }
         }
+
+        std::pair<size_t, size_t> downStairsPoint;
+        std::pair<size_t, size_t> upStairsPoint;
         
         // Add in some random aesthetic variation
         for(int32_t x = 0; x < width; x++)
@@ -861,6 +864,8 @@ namespace FALevelGen
                     level[x-1][y+1] = tileset.upStairs7;
                     level[x][y+1] = tileset.upStairs8;
                     level[x+1][y+1] = tileset.upStairs9;
+
+                    upStairsPoint = std::make_pair(x*2,y*2);
                 }
                 else if(level[x][y] == downStairs)
                 {
@@ -869,6 +874,8 @@ namespace FALevelGen
                     
                     level[x][y-1] = tileset.downStairs3;
                     level[x+1][y-1] = tileset.downStairs4;
+
+                    downStairsPoint = std::make_pair(x*2,y*2);
                 }
                 else
                 {
@@ -877,7 +884,7 @@ namespace FALevelGen
             }
         }
         
-        Level::Level* retval = new Level::Level(level, "levels/l1data/l1.til", "levels/l1data/l1.min", "levels/l1data/l1.sol", celPath);
+        Level::Level* retval = new Level::Level(level, "levels/l1data/l1.til", "levels/l1data/l1.min", "levels/l1data/l1.sol", celPath, downStairsPoint, upStairsPoint);
         placeMonsters(*retval, exe, levelNum); 
         
         return retval;
