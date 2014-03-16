@@ -82,6 +82,11 @@ namespace FALevelGen
         upStairs7 = pt.get<size_t>("Basic.upStairs7");
         upStairs8 = pt.get<size_t>("Basic.upStairs8");
         upStairs9 = pt.get<size_t>("Basic.upStairs9");
+        
+        downStairs1 = pt.get<size_t>("Basic.downStairs1");
+        downStairs2 = pt.get<size_t>("Basic.downStairs2");
+        downStairs3 = pt.get<size_t>("Basic.downStairs3");
+        downStairs4 = pt.get<size_t>("Basic.downStairs4");
     }
     
     void TileSet::fillTile(size_t tile, bpt::ptree& pt, const std::string& str)

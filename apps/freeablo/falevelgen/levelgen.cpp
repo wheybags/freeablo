@@ -78,6 +78,7 @@ namespace FALevelGen
     {
         wall = 135,
         upStairs = 64,
+        downStairs = 59,
         door = 47,
         floor = 13,
         blank = 104,
@@ -573,6 +574,24 @@ namespace FALevelGen
         return false;
     }
 
+    bool placeDownStairs(Level::Dun& level, const std::vector<Room>& rooms)
+    {
+        for(size_t i = rooms.size()-1; i != 0; i--)
+        {
+            if(rooms[i].width >= 6 && rooms[i].height >= 6)
+            {
+                size_t baseX = rooms[i].centre().first;
+                size_t baseY = rooms[i].centre().second;
+
+                level[baseX][baseY] = downStairs;
+                
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     #define ROOMAREA 30
     
     // Generates a flat map (no information about wall direction, etc)
@@ -665,7 +684,7 @@ namespace FALevelGen
         addDoors(level, rooms);
         
         // Make sure we always place stairs
-        if(!placeUpStairs(level, rooms))
+        if(!(placeUpStairs(level, rooms) && placeDownStairs(level, rooms)))
             return generateTmp(width, height);
 
         return level;
@@ -735,6 +754,12 @@ namespace FALevelGen
         {
             if(getXY(x-1, y+1, tmpLevel) == blank  || getXY(x-1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank)
                 newVal = tileset.outsideLeftCorner;
+        }
+
+        else if(val == tileset.floor)
+        {
+            if(getXY(x, y, tmpLevel) == downStairs)
+                newVal = downStairs;
         }
 
         level[x][y] = newVal;
@@ -813,7 +838,7 @@ namespace FALevelGen
                     if(tmpLevel[x][y] == blank)
                         level[x][y] = tileset.blank;
                     else
-                        level[x][y] = tileset.floor;
+                        setPoint(x, y, tileset.floor, tmpLevel, level, tileset);
                 }
             }
         }
@@ -836,6 +861,14 @@ namespace FALevelGen
                     level[x-1][y+1] = tileset.upStairs7;
                     level[x][y+1] = tileset.upStairs8;
                     level[x+1][y+1] = tileset.upStairs9;
+                }
+                else if(level[x][y] == downStairs)
+                {
+                    level[x][y] = tileset.downStairs1;
+                    level[x+1][y] = tileset.downStairs2;
+                    
+                    level[x][y-1] = tileset.downStairs3;
+                    level[x+1][y-1] = tileset.downStairs4;
                 }
                 else
                 {
