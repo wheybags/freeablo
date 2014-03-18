@@ -150,7 +150,6 @@ int main(int argc, char** argv)
     // Starts rendering thread
     FARender::Renderer renderer;
 
-    // Starts input thread
     Input::InputManager input(&keyPress, &keyRelease);
 
     DiabloExe::DiabloExe exe;
@@ -184,6 +183,8 @@ int main(int argc, char** argv)
     // Main game logic loop
     while(!done)
     {
+        input.poll();
+
         if(changeLevel)
         {
             int32_t tmp = currentLevel + changeLevel;

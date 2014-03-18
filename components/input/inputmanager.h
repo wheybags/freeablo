@@ -14,17 +14,12 @@ namespace Input
     {
         public:
             InputManager(boost::function<void(Key)> keyPress, boost::function<void(Key)> keyRelease);
-            ~InputManager();
 
-            void inputLoop();
+            void poll();
 
         private:
             boost::function<void(Key)> mKeyPress;
             boost::function<void(Key)> mKeyRelease;
-
-            bool mDone;
-            boost::thread* mThread;
-
     };
 }
 

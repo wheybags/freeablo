@@ -5,14 +5,7 @@
 namespace Input
 {
     InputManager::InputManager(boost::function<void(Key)> _keyPress, boost::function<void(Key)> _keyRelease): 
-        mKeyPress(_keyPress), mKeyRelease(_keyRelease), mThread(new boost::thread(boost::bind(&InputManager::inputLoop, this))), mDone(false){}
-
-    InputManager::~InputManager()
-    {
-        mDone = true;
-        mThread->join();
-        delete mThread;
-    }
+        mKeyPress(_keyPress), mKeyRelease(_keyRelease) {}
 
     #define CASE(val) case SDLK_##val: key = KEY_##val; break; 
 
@@ -175,35 +168,32 @@ namespace Input
 
     }
 
-    void InputManager::inputLoop()
+    void InputManager::poll()
     {
         SDL_Event event;
 
-        while(!mDone)
+        while(SDL_PollEvent(&event))
         {
-            while(SDL_PollEvent(&event))
+            switch (event.type) 
             {
-                switch (event.type) 
+                case SDL_KEYDOWN:
                 {
-                    case SDL_KEYDOWN:
-                    {
-                        Key key = getKey(event.key.keysym.sym);
-                        if(key != KEY_UNDEF)
-                            mKeyPress(key);
-                        break;
-                    }
-                    case SDL_KEYUP:
-                    {
-                        Key key = getKey(event.key.keysym.sym);
-                        if(key != KEY_UNDEF)
-                            mKeyRelease(key);
-                        break;
-                    }
+                    Key key = getKey(event.key.keysym.sym);
+                    if(key != KEY_UNDEF)
+                        mKeyPress(key);
+                    break;
+                }
+                case SDL_KEYUP:
+                {
+                    Key key = getKey(event.key.keysym.sym);
+                    if(key != KEY_UNDEF)
+                        mKeyRelease(key);
+                    break;
+                }
 
-                    default:
-                    {
-                        break;
-                    }
+                default:
+                {
+                    break;
                 }
             }
         }
