@@ -28,14 +28,10 @@ void keyPress(Input::Key key)
     std::cout << "frame " << celIndex+1 << "/" << max << std::endl;
 }
 
-void keyRelease(Input::Key key)
-{
-}
-
 int main(int argc, char** argv)
 {
     Render::init(); 
-    Input::InputManager input(&keyPress, &keyRelease);
+    Input::InputManager input(&keyPress, NULL);
 
     Render::SpriteGroup cel(argv[1]);
     max = cel.size();

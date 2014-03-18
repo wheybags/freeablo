@@ -4,8 +4,18 @@
 
 namespace Input
 {
+    void doNothing(Key k){}
+
+    boost::function<void(Key)> getFunc(boost::function<void(Key)> f)
+    {
+        if(f)
+            return f;
+
+        return &doNothing;
+    }
+
     InputManager::InputManager(boost::function<void(Key)> _keyPress, boost::function<void(Key)> _keyRelease): 
-        mKeyPress(_keyPress), mKeyRelease(_keyRelease) {}
+        mKeyPress(getFunc(_keyPress)), mKeyRelease(getFunc(_keyRelease)) {}
 
     #define CASE(val) case SDLK_##val: key = KEY_##val; break; 
 
