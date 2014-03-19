@@ -150,8 +150,6 @@ int main(int argc, char** argv)
     // Starts rendering thread
     FARender::Renderer renderer;
 
-    Input::InputManager input(&keyPress, &keyRelease);
-
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
 
@@ -179,6 +177,8 @@ int main(int argc, char** argv)
         player->mPos = FAWorld::Position(75, 68);
 
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
+    
+    Input::InputManager input(&keyPress, &keyRelease, NULL, NULL, NULL);
     
     // Main game logic loop
     while(!done)

@@ -31,7 +31,7 @@ void keyPress(Input::Key key)
 int main(int argc, char** argv)
 {
     Render::init(); 
-    Input::InputManager input(&keyPress, NULL);
+    Input::InputManager input(&keyPress, NULL, NULL, NULL, NULL);
 
     Render::SpriteGroup cel(argv[1]);
     max = cel.size();

@@ -4,18 +4,25 @@
 
 namespace Input
 {
-    void doNothing(Key k){}
+    void doNothing_keyPress(Key k){}
+    void doNothing_keyRelease(Key k){}
+    void doNothing_mouseClick(uint32_t x, uint32_t y, Key k){}
+    void doNothing_mouseRelease(uint32_t x, uint32_t y, Key k){}
+    void doNothing_mouseMove(uint32_t x, uint32_t y){}
+    
+    #define getFunc(f) f ? f : doNothing_##f
 
-    boost::function<void(Key)> getFunc(boost::function<void(Key)> f)
-    {
-        if(f)
-            return f;
-
-        return &doNothing;
-    }
-
-    InputManager::InputManager(boost::function<void(Key)> _keyPress, boost::function<void(Key)> _keyRelease): 
-        mKeyPress(getFunc(_keyPress)), mKeyRelease(getFunc(_keyRelease)) {}
+    InputManager::InputManager(boost::function<void(Key)> keyPress, boost::function<void(Key)> keyRelease,
+        boost::function<void(uint32_t, uint32_t, Key)> mouseClick,
+        boost::function<void(uint32_t, uint32_t, Key)> mouseRelease,
+        boost::function<void(uint32_t, uint32_t)> mouseMove):
+            
+            mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
+            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)) 
+            {
+                SDL_Event event;
+                while(SDL_PollEvent(&event)) {} // clear event queue
+            }
 
     #define CASE(val) case SDLK_##val: key = KEY_##val; break; 
 
@@ -178,6 +185,21 @@ namespace Input
 
     }
 
+    Key getMouseKey(int sdlk)
+    {
+        switch(sdlk)
+        {
+            case SDL_BUTTON_LEFT:
+                return KEY_LEFT_MOUSE;
+            case SDL_BUTTON_RIGHT:
+                return KEY_RIGHT_MOUSE;
+            case SDL_BUTTON_MIDDLE:
+                return KEY_MIDDLE_MOUSE;
+            default:
+                return KEY_UNDEF;
+        }
+    }
+
     void InputManager::poll()
     {
         SDL_Event event;
@@ -198,6 +220,32 @@ namespace Input
                     Key key = getKey(event.key.keysym.sym);
                     if(key != KEY_UNDEF)
                         mKeyRelease(key);
+                    break;
+                }
+
+                case SDL_MOUSEBUTTONDOWN:
+                {
+                    Key key = getMouseKey(event.button.button);
+
+                    if(key != KEY_UNDEF)
+                        mMouseClick(event.button.x, event.button.y, key);
+                    
+                    break;
+                }
+
+                case SDL_MOUSEBUTTONUP:
+                {
+                    Key key = getMouseKey(event.button.button);
+
+                    if(key != KEY_UNDEF)
+                        mMouseRelease(event.button.x, event.button.y, key);
+                    
+                    break;
+                }
+
+                case SDL_MOUSEMOTION:
+                {
+                    mMouseMove(event.motion.x, event.motion.y);
                     break;
                 }
 

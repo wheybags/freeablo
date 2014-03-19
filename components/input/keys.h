@@ -148,7 +148,11 @@ namespace Input
         KEY_EURO = 321,
         KEY_UNDO = 322,
 
-        KEY_UNDEF = 324
+        KEY_UNDEF = 324,
+
+        KEY_LEFT_MOUSE = 400,
+        KEY_RIGHT_MOUSE = 401,
+        KEY_MIDDLE_MOUSE = 402
     };
 }
 
