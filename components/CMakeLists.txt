@@ -28,7 +28,9 @@ add_library(Misc
     misc/md5.h
     misc/md5.cpp
     misc/fareadini.h
-    misc/fareadini.cpp)
+    misc/fareadini.cpp
+    misc/misc.h
+    misc/misc.cpp)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(Render

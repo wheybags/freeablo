@@ -50,6 +50,8 @@ namespace FARender
 
             FASpriteGroup loadImage(const std::string& path);
 
+            std::pair<size_t, size_t> getClickedTile(size_t x, size_t y);
+
         private:
             static Renderer* mRenderer; ///< Singleton instance
 

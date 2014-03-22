@@ -2,6 +2,7 @@
 #include <input/inputmanager.h>
 #include <level/level.h>
 #include <diabloexe/diabloexe.h>
+#include <misc/misc.h>
 
 #include "falevelgen/levelgen.h"
 #include "falevelgen/random.h"
@@ -14,25 +15,12 @@
 #include <boost/program_options.hpp>
 
 bool done = false;
-int lr = 0, ud = 0;
 bool noclip = true;
 int changeLevel = 0;
 void keyPress(Input::Key key)
 {
     switch(key)
     {
-        case Input::KEY_w:
-            ud--;
-            break;
-        case Input::KEY_s:
-            ud++;
-            break;
-        case Input::KEY_a:
-            lr--;
-            break;
-        case Input::KEY_d:
-            lr++;
-            break;
         case Input::KEY_q:
             done = true;
             break;
@@ -49,25 +37,29 @@ void keyPress(Input::Key key)
             break;
     }
 }
-void keyRelease(Input::Key key)
+
+size_t xClick = 0, yClick = 0;
+bool click = false;
+void mouseClick(size_t x, size_t y, Input::Key key)
 {
-    switch(key)
+    if(key == Input::KEY_LEFT_MOUSE)
     {
-        case Input::KEY_w:
-            ud++;
-            break;
-        case Input::KEY_s:
-            ud--;
-            break;
-        case Input::KEY_a:
-            lr++;
-            break;
-        case Input::KEY_d:
-            lr--;
-            break;
-        default:
-            break;
+        xClick = x;
+        yClick = y;
+        click = true;
     }
+}
+
+void mouseRelease(size_t x, size_t y, Input::Key key)
+{
+    if(key == Input::KEY_LEFT_MOUSE)
+        click = false;
+}
+
+void mouseMove(size_t x, size_t y)
+{
+    xClick = x;
+    yClick = y;
 }
 
 void setLevel(size_t levelNum, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, const Level::Level& level)
@@ -150,9 +142,6 @@ int main(int argc, char** argv)
     // Starts rendering thread
     FARender::Renderer renderer;
 
-    // Starts input thread
-    Input::InputManager input(&keyPress, &keyRelease);
-
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
 
@@ -181,9 +170,18 @@ int main(int argc, char** argv)
 
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
+    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove);
+    
+    std::pair<size_t, size_t> destination = player->mPos.current();
+    
     // Main game logic loop
     while(!done)
     {
+        if(click)
+            destination = renderer.getClickedTile(xClick, yClick);
+
+        input.poll();
+
         if(changeLevel)
         {
             int32_t tmp = currentLevel + changeLevel;
@@ -202,6 +200,7 @@ int main(int argc, char** argv)
                     player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
                 
                 setLevel(currentLevel, exe, world, renderer, *level);
+
             }
             
             changeLevel = 0;
@@ -217,100 +216,25 @@ int main(int argc, char** argv)
 
         last = now;
 
-        if(player->mPos.mDist == 0)
+        if(player->mPos.current() != destination)
         {
-            if(lr || ud)
+            if(player->mPos.mDist == 0)
             {
+                std::pair<float, float> vector = Misc::getVec(player->mPos.current(), destination);
+
                 if(!player->mPos.mMoving)
                 {
                     player->mPos.mMoving = true;
                     player->setAnimation(FAWorld::AnimState::walk);
                 }
 
-                switch(lr)
-                {
-                    case -1:
-                    {
-                        switch(ud)
-                        {
-                            case -1:
-                            {
-                                player->mPos.mDirection = 4;
-                                break;
-                            }
-
-                            case 0:
-                            {
-                                player->mPos.mDirection = 3;
-                                break;
-                            }
-
-                            case 1:
-                            {
-                                player->mPos.mDirection = 2;
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    
-                    case 0:
-                    {
-                        switch(ud)
-                        {
-                            case -1:
-                            {
-                                player->mPos.mDirection = 5;
-                                break;
-                            }
-
-                            case 0:
-                            {
-                                player->mPos.mMoving = false;
-                                break;
-                            }
-                            
-                            case 1:
-                            {
-                                player->mPos.mDirection = 1;
-                                break;
-                            }
-                        }
-                        break;
-                    }
-
-                    case 1:
-                    {
-                        switch(ud)
-                        {
-                            case -1:
-                            {
-                                player->mPos.mDirection = 6;
-                                break;
-                            }
-
-                            case 0:
-                            {
-                                player->mPos.mDirection = 7;
-                                break;
-                            }
-                            
-                            case 1:
-                            {
-                                player->mPos.mDirection = 0;
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
+                player->mPos.mDirection = Misc::getVecDir(vector);
             }
-
-            else if(player->mPos.mMoving)
-            {
-                player->mPos.mMoving = false;
-                player->setAnimation(FAWorld::AnimState::idle);
-            }
+        }
+        else if(player->mPos.mMoving)
+        {
+            player->mPos.mMoving = false;
+            player->setAnimation(FAWorld::AnimState::idle);
         }
 
         if(!noclip && !(*level)[player->mPos.next().first][player->mPos.next().second].passable())

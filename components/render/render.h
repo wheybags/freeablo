@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <string>
+#include <utility>
 
 namespace Level
 {
@@ -60,11 +61,14 @@ namespace Render
             friend RenderLevel* setLevel(const Level::Level& level);
             friend void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
             friend void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+            friend std::pair<size_t, size_t> getClickedTile(RenderLevel* level, size_t x, size_t y);
     };
 
     RenderLevel* setLevel(const Level::Level& level);
     void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
     void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    
+    std::pair<size_t, size_t> getClickedTile(RenderLevel* level, size_t x, size_t y);
 
     void clear();
 }

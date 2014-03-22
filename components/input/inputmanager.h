@@ -13,18 +13,19 @@ namespace Input
     class InputManager
     {
         public:
-            InputManager(boost::function<void(Key)> keyPress, boost::function<void(Key)> keyRelease);
-            ~InputManager();
+            InputManager(boost::function<void(Key)> keyPress, boost::function<void(Key)> keyRelease,
+                boost::function<void(uint32_t, uint32_t, Key)> mouseClick,
+                boost::function<void(uint32_t, uint32_t, Key)> mouseRelease,
+                boost::function<void(uint32_t, uint32_t)> mouseMove);
 
-            void inputLoop();
+            void poll();
 
         private:
             boost::function<void(Key)> mKeyPress;
             boost::function<void(Key)> mKeyRelease;
-
-            bool mDone;
-            boost::thread* mThread;
-
+            boost::function<void(uint32_t, uint32_t, Key)> mMouseClick;
+            boost::function<void(uint32_t, uint32_t, Key)> mMouseRelease;
+            boost::function<void(uint32_t, uint32_t)> mMouseMove;
     };
 }
 

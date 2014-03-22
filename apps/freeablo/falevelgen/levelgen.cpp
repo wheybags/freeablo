@@ -14,6 +14,8 @@
 
 #include <diabloexe/diabloexe.h>
 
+#include <misc/misc.h>
+
 namespace FALevelGen
 {
     class Room
@@ -150,61 +152,73 @@ namespace FALevelGen
     // grid of size width * height
     void moveRoom(Room& room, const std::pair<float, float>& vector, size_t width, size_t height)
     {
-        if(vector.first == 0 && vector.second == 0)
-            return;
+        int32_t xMove, yMove;
+
+        switch(Misc::getVecDir(vector))
+        {
+            case -1:
+            {
+                xMove = 0;
+                yMove = 0;
+                break;
+            }
+            case 0:
+            {
+                xMove = 1;
+                yMove = 1;
+                break;
+            }
+            case 1:
+            {
+                xMove = 0;
+                yMove = 1;
+                break;
+            }
+            case 2:
+            {
+                xMove = -1;
+                yMove = 1;
+                break;
+            }
+            case 3:
+            {
+                xMove = -1;
+                yMove = 0;
+                break;
+            }
+            case 4:
+            {
+                xMove = -1;
+                yMove = -1;
+                break;
+            }
+            case 5:
+            {
+                xMove = 0;
+                yMove = -1;
+                break;
+            }
+            case 6:
+            {
+                xMove = 1;
+                yMove = -1;
+                break;
+            }
+            case 7:
+            {
+                xMove = 1;
+                yMove = 0;
+                break;
+            }
+            default:
+            {
+                assert(false); // This should never happen
+            }
+        }
         
-        float angle = (std::atan2(vector.second, vector.first) / M_PI) * 180.0;
-
-        if(angle < 0)
-            angle = 360 + angle;
-        
-        int32_t xMove;
-        int32_t yMove;
-
-        if((angle <= 22.5 && angle >= 0.0) || (angle <= 360.0 && angle >= 337.5))
-        {
-            xMove = 1;
-            yMove = 0;
-        }
-        else if(angle <= 67.5 && angle >= 22.5)
-        {
-            xMove = 1;
-            yMove = 1;
-        }
-        else if(angle <= 112.5 && angle >= 67.5)
-        {
-            xMove = 0;
-            yMove = 1;
-        }
-        else if(angle <= 157.5 && angle >= 112.5)
-        {
-            xMove = -1;
-            yMove = 1;
-        }
-        else if(angle <= 202.5 && angle >= 157.5)
-        {
-            xMove = -1;
-            yMove = 0;
-        }
-        else if(angle <= 247.5 && angle >= 202.5)
-        {
-            xMove = -1;
-            yMove = -1;
-        }
-        else if(angle <= 292.5 && angle >= 247.5)
-        {
-            xMove = 0;
-            yMove = -1;
-        }
-        else if(angle <= 337.5 && angle >= 292.5)
-        {
-            xMove = 1;
-            yMove = -1;
-        }
-
         int32_t newX = room.xPos + xMove;
         int32_t newY = room.yPos + yMove;
-        
+
         // Make sure not to move outside map
         if(newX >= 1 && newY >= 1 && newX+room.width < width-1 && newY+room.height < height-1)
         {
@@ -302,7 +316,7 @@ namespace FALevelGen
                             continue;
                         }
                         
-                        std::pair<float, float> iToJ (centre.first - currentCentre.first, centre.second - currentCentre.second);
+                        std::pair<float, float> iToJ = Misc::getVec(currentCentre, centre);
                         normalise(iToJ);
 
                         vector.first += iToJ.first * rooms[i].distance(rooms[j]);
