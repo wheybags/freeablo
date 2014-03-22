@@ -87,6 +87,11 @@ namespace FARender
 
         return newSprite;
     }
+    
+    std::pair<size_t, size_t> Renderer::getClickedTile(size_t x, size_t y)
+    {
+        return Render::getClickedTile(mLevel, x, y);
+    }
 
     void Renderer::renderLoop()
     {

@@ -216,6 +216,61 @@ namespace Render
 
         drawAt(sprite, x, y);
     }
+    
+    std::pair<size_t, size_t> getClickedTile(RenderLevel* level, size_t x, size_t y)
+    {
+        // Position on the map in pixels
+        int32_t flatX = x - level->levelX;
+        int32_t flatY = y - level->levelY;
+
+        // position on the map divided into 32x16 flat blocks
+        // every second one of these blocks is centred on an isometric
+        // block centre, the others are centred on isometric block corners
+        int32_t flatGridX = (flatX+16) / 32;
+        int32_t flatGridY = (flatY+8) / 16;
+        
+        // origin position (in flat grid coords) for the first line (isometric y = 0)
+        int32_t flatOriginPosX = level->levelHeight;
+        int32_t flatOriginPosY = 15;
+
+        // when a flat grid box is clicked that does not centre on an isometric block, work out which
+        // isometric quadrant of that box was clicked, then adjust flatGridPos accordingly
+        if((flatGridX % 2 == 1 && flatGridY % 2 == 1) || (flatGridX % 2 == 0 && flatGridY % 2 == 0))
+        {
+            
+            // origin of current flat grid box
+            int32_t baseX = 32*flatGridX - 16;
+            int32_t baseY = 16*flatGridY - 8;
+            
+            // position within grid box
+            int32_t blockPosX = flatX - baseX;
+            int32_t blockPosY = flatY - baseY;
+
+            if(blockPosY*2 > blockPosX)
+            {
+                if(blockPosX < (15-blockPosY)*2)
+                    flatGridX--;
+                else
+                    flatGridY++;
+            }
+            else
+            {
+                if(blockPosX < (15-blockPosY)*2)
+                    flatGridY--;
+                else
+                    flatGridX++;
+            }
+        }
+        
+        // flatOrigin adjusted for the current y value
+        int32_t lineOriginPosX = flatOriginPosX + ((flatGridX - flatOriginPosX) - (flatGridY - flatOriginPosY))/2;
+        int32_t lineOriginPosY = flatOriginPosY - (-(flatGridX - flatOriginPosX) -( flatGridY - flatOriginPosY))/2;
+
+        int32_t isoPosX = flatGridX - lineOriginPosX;
+        int32_t isoPosY = flatGridY - lineOriginPosY;
+
+        return std::make_pair(isoPosX, isoPosY);
+    }
 
     void clear()
     {
