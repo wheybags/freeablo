@@ -35,12 +35,12 @@ SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(Render
     render/render.h
-    render/sdlbackend.cpp)
+    render/sdl2backend.cpp)
 target_link_libraries(Render Cel Levels ${SDL_LIBRARY})
 
 add_library(Input
     input/inputmanager.h
-    input/sdlbackend.cpp)
+    input/sdl2backend.cpp)
 
 add_library(DiabloExe
     diabloexe/diabloexe.h

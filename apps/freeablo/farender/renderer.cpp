@@ -6,6 +6,8 @@
 
 #include <level/level.h>
 
+#include <input/inputmanager.h>
+
 namespace FARender
 {
     Renderer* Renderer::mRenderer = NULL;
@@ -21,34 +23,31 @@ namespace FARender
         mRenderer = this;
 
         mDone = false;
-        mRenderReady = 1;
+        mRenderReady = 99;
         mLevel = NULL;
 
         mCurrent = NULL;
-
-        Render::init();
-
-        mThread = new boost::thread(boost::bind(&Renderer::renderLoop, this));
+        renderLoop();
+        //mThread = new boost::thread(boost::bind(&Renderer::renderLoop, this));
     }
     
     Renderer::~Renderer()
     {
         mRenderer = NULL;
-        mDone = true;
-        mThread->join();
-        delete mThread;
         delete mLevel;
+        Render::quit();
+    }
+
+    void Renderer::stop()
+    {
+        mDone = true;
     }
         
     void Renderer::setLevel(const Level::Level& level)
     {
+        mThreadCommunicationTmp = (void*)&level;
         mRenderReady = 1;
-        while(mRenderReady != 2){} // wait until the render thread is definitely done
-
-        delete mLevel;
-        mLevel = Render::setLevel(level);
-
-        mRenderReady = 0;
+        while(mRenderReady != 0){} // wait until the render thread is done loading the new level
     }
     
     RenderState* Renderer::getFreeState()
@@ -61,7 +60,7 @@ namespace FARender
                     return &mStates[i];
             }
         }
-            
+
         return NULL;
     }
 
@@ -70,8 +69,19 @@ namespace FARender
         current->mMutex.unlock();
         mCurrent = current;
     }
-
+    
     FASpriteGroup Renderer::loadImage(const std::string& path)
+    {
+        mThreadCommunicationTmp = (void*)&path;
+        mRenderReady = 2;
+        while(mRenderReady != 0) {}
+
+        FASpriteGroup tmp = *(FASpriteGroup*)mThreadCommunicationTmp;
+        delete (FASpriteGroup*)mThreadCommunicationTmp;
+        return tmp;
+    }
+
+    FASpriteGroup Renderer::loadImageImp(const std::string& path)
     {
         bool contains = mSpriteCache.find(path) != mSpriteCache.end();
 
@@ -93,14 +103,47 @@ namespace FARender
         return Render::getClickedTile(mLevel, x, y);
     }
 
+    void Renderer::destroySprite(Render::SpriteGroup* s)
+    {
+        mThreadCommunicationTmp = (void*)s;
+        mRenderReady = 5;
+        while(mRenderReady != 0);
+    }
+
     void Renderer::renderLoop()
     {
+        Render::init();
+
         while(!mDone)
         {
+            Input::InputManager::get()->poll();
+             
             RenderState* current = mCurrent;
 
             if(mRenderReady == 1)
-                mRenderReady = 2;
+            {
+                delete mLevel;
+                mLevel = Render::setLevel(*(Level::Level*)mThreadCommunicationTmp);
+                mRenderReady = 0;
+            }
+
+            else if(mRenderReady == 2)
+            {
+                FASpriteGroup* tmp = new FASpriteGroup((CacheSpriteGroup*)NULL);
+                *tmp = loadImageImp(*(std::string*)mThreadCommunicationTmp);
+                mThreadCommunicationTmp = (void*)tmp;
+                mRenderReady = 0;
+            }
+
+            else if(mRenderReady == 3)
+                mRenderReady++;
+
+            else if(mRenderReady == 5)
+            {
+                Render::SpriteGroup* s = (Render::SpriteGroup*)mThreadCommunicationTmp;
+                s->destroy();
+                mRenderReady = 0;
+            }
 
             if(mRenderReady == 0 && current && current->mMutex.try_lock())
             {
@@ -117,6 +160,12 @@ namespace FARender
             }
 
             Render::draw();
+        }
+        
+        // destroy all remaining sprites here, otherwise they would be destoyed in the game thread, which would not work 
+        for(std::map<std::string, boost::weak_ptr<CacheSpriteGroup> >::iterator it = mSpriteCache.begin(); it != mSpriteCache.end(); ++it)
+        {
+            it->second.lock().get()->destroy();
         }
     }
 }

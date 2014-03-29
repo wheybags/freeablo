@@ -43,6 +43,9 @@ namespace FARender
             
             Renderer();
             ~Renderer();
+
+            void stop();
+
             void setLevel(const Level::Level& level);
 
             RenderState* getFreeState(); // ooh ah up de ra
@@ -53,6 +56,10 @@ namespace FARender
             std::pair<size_t, size_t> getClickedTile(size_t x, size_t y);
 
         private:
+            FASpriteGroup loadImageImp(const std::string& path);
+            
+            void destroySprite(Render::SpriteGroup* s);
+            
             static Renderer* mRenderer; ///< Singleton instance
 
             void renderLoop();
@@ -60,6 +67,8 @@ namespace FARender
             boost::thread* mThread;            
 
             size_t mRenderReady;
+
+            void* mThreadCommunicationTmp;
             Render::RenderLevel* mLevel;
             bool mDone;
 
@@ -80,15 +89,22 @@ namespace FARender
             ~CacheSpriteGroup()
             {
                 Renderer* r = Renderer::get();
-                if(r)
+                if(r && !r->mDone)
                 {
-                    r->mRenderReady = 1;
-                    while(r->mRenderReady != 2){} // wait until the render thread is definitely done
+                    r->mRenderReady = 3;
+                    while(r->mRenderReady != 4){} // wait until the render thread is definitely done
 
-                        r->mSpriteCache.erase(mPath);
+                    r->mSpriteCache.erase(mPath);
 
                     r->mRenderReady = 0;
+
+                    r->destroySprite(&mSpriteGroup); // destroy the sprite in the rendering thread
                 }
+            }
+
+            void destroy()
+            {
+                mSpriteGroup.destroy();
             }
 
             Render::SpriteGroup mSpriteGroup; 

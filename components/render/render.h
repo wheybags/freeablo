@@ -15,6 +15,8 @@ namespace Level
 namespace Render
 {
     void init(); 
+    void quit(); 
+    
     void draw();
 
     typedef void* Sprite;
@@ -24,7 +26,7 @@ namespace Render
     {
         public:
             SpriteGroup(const std::string& path);
-            ~SpriteGroup();
+            void destroy();
             
             Sprite& operator[](size_t index)
             {

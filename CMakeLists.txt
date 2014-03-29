@@ -2,10 +2,11 @@ cmake_minimum_required (VERSION 2.6)
 
 project (Freeablo)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-
-Find_Package ( SDL REQUIRED )
-Find_Package ( SDL_ttf REQUIRED )
+#Find_Package ( SDL REQUIRED )
+#Find_Package ( SDL_ttf REQUIRED )
+Find_Package ( SDL2 REQUIRED )
 Find_Package ( ZLIB REQUIRED )
 Find_Package ( BZip2 REQUIRED )
 
@@ -17,13 +18,13 @@ find_package(Boost COMPONENTS chrono date_time filesystem system random thread p
 
 
 
-if ( NOT SDL_FOUND )
-    message ( FATAL_ERROR "SDL not found!" )
-endif ( NOT SDL_FOUND )
+if ( NOT SDL2_FOUND )
+    message ( FATAL_ERROR "SDL2 not found!" )
+endif ( NOT SDL2_FOUND )
 
-if ( NOT SDLTTF_FOUND )
-    message ( FATAL_ERROR "SDL_ttf not found!" )
-endif ( NOT SDLTTF_FOUND )
+#if ( NOT SDLTTF_FOUND )
+#    message ( FATAL_ERROR "SDL_ttf not found!" )
+#endif ( NOT SDLTTF_FOUND )
 
 if ( NOT ZLIB_FOUND )
     message ( FATAL_ERROR "ZLIB not found!" )
@@ -35,8 +36,8 @@ endif ( NOT BZIP2_FOUND )
 
 
 include_directories (
-    ${SDL_INCLUDE_DIR}
-    ${SDL_TTF_INCLUDE_DIRS}
+    ${SDL2_INCLUDE_DIR}
+    #${SDL_TTF_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIRS}
     ${BZIP2_INCLUDE_DIRS}
@@ -48,8 +49,8 @@ add_subdirectory (components)
 add_subdirectory (extern) 
 
 link_libraries (
-    ${SDL_LIBRARY}
-    ${SDLTTF_LIBRARY}
+    ${SDL2_LIBRARY}
+    #${SDLTTF_LIBRARY}
     ${Boost_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${BZIP2_LIBRARIES}
