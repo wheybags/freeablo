@@ -13,7 +13,7 @@ before_install:
 before_script:
 - mkdir build
 - cd build
-- cmake ..
+- cmake .. -DUSE_SDL2=NO
 script:
 - make -j4
 after_success: 
