@@ -48,6 +48,8 @@ namespace Render
             size_t mAnimLength;
     };
 
+    void spriteSize(const Sprite& sprite, size_t& w, size_t& h);
+
     struct RenderLevel
     {
         public:

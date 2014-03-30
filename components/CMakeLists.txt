@@ -34,7 +34,7 @@ add_library(Misc
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 
 
-set(RenderFiles render/render.h)
+set(RenderFiles render/render.h render/sdlcommon.cpp)
 if(USE_SDL2)
     set(RenderFiles ${RenderFiles} render/sdl2backend.cpp)
 else()
