@@ -37,6 +37,12 @@ namespace Render
         SDL_DestroyWindow(screen);
         SDL_Quit();
     }
+    
+
+    void draw()
+    {
+        SDL_RenderPresent(renderer);
+    }
 
     void drawAt(SDL_Texture* sprite, size_t x, size_t y)
     {
@@ -86,11 +92,6 @@ namespace Render
         pixmem32 = (Uint32*) s->pixels  + y + x;
         *pixmem32 = colour;
     }
-    
-    void draw()
-    {
-        SDL_RenderPresent(renderer);
-    }
 
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)
     {
@@ -134,7 +135,7 @@ namespace Render
     {
         if(l != -1)
             drawFrame(s, x, y, f[l]);
-            
+
         if(r != -1)
             drawFrame(s, x+32, y, f[r]);
     }

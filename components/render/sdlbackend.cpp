@@ -23,8 +23,12 @@ namespace Render
     void init()
     {
         SDL_Init(SDL_INIT_VIDEO);
-        atexit(SDL_Quit);
         screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE | SDL_DOUBLEBUF);
+    }
+
+    void quit()
+    {
+        SDL_Quit();
     }
 
     void draw()
@@ -32,10 +36,20 @@ namespace Render
         SDL_Flip(screen); 
     }
 
-    void drawAt(const Sprite& sprite, size_t x, size_t y)
+    void drawAt(SDL_Surface* sprite, size_t x, size_t y)
     {
         SDL_Rect rcDest = { x, y, 0, 0 };
-        SDL_BlitSurface ((SDL_Surface*)sprite , NULL, screen, &rcDest );
+        SDL_BlitSurface (sprite , NULL, screen, &rcDest );
+    }
+    
+void drawAt(const Sprite& sprite, size_t x, size_t y)
+    {
+        drawAt((SDL_Surface*)sprite, x, y);
+    }
+
+    void clearTransparentSurface(SDL_Surface* s)
+    {
+        SDL_FillRect(s, NULL, SDL_MapRGBA(s->format, 0, 0, 0, 0)); 
     }
 
     SDL_Surface* createTransparentSurface(size_t width, size_t height)
@@ -49,7 +63,7 @@ namespace Render
             s = SDL_CreateRGBSurface(SDL_HWSURFACE, width, height, DEPTH, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
         #endif
 
-        SDL_FillRect(s, NULL, SDL_MapRGBA(s->format, 0, 0, 0, 0)); 
+        clearTransparentSurface(s);
 
         return s;
     }
@@ -94,52 +108,19 @@ namespace Render
         mAnimLength = cel.animLength();
     }
 
-    SpriteGroup::~SpriteGroup()
+    void SpriteGroup::destroy()
     {
         for(size_t i = 0; i < mSprites.size(); i++)
             SDL_FreeSurface((SDL_Surface*)mSprites[i]);
-    }
-    
-    void blit(SDL_Surface* from, SDL_Surface* to, int x, int y)
-    {
-        SDL_Rect rcDest = { x, y, 0, 0 };
-        SDL_BlitSurface (from , NULL, to, &rcDest );
     }
 
     void drawMinTile(SDL_Surface* s, Cel::CelFile& f, int x, int y, int16_t l, int16_t r)
     {
         if(l != -1)
-        {
             drawFrame(s, x, y, f[l]);
-            
-            #ifdef CEL_DEBUG
-                /*TTF_Font* font = TTF_OpenFont("FreeMonoBold.ttf", 8);
-                SDL_Color foregroundColor = { 0, 0, 0 }; 
-                SDL_Color backgroundColor = { 255, 255, 255 };
-                SDL_Surface* textSurface = TTF_RenderText_Shaded(font, SSTR(l).c_str(), foregroundColor, backgroundColor);
-               
-                blit(textSurface, s, x, y);
 
-                SDL_FreeSurface(textSurface);
-                TTF_CloseFont(font);*/
-            #endif
-        }
         if(r != -1)
-        {
             drawFrame(s, x+32, y, f[r]);
-
-            #ifdef CEL_DEBUG
-                /*TTF_Font* font = TTF_OpenFont("FreeMonoBold.ttf", 8);
-                SDL_Color foregroundColor = { 255, 0, 0 }; 
-                SDL_Color backgroundColor = { 255, 255, 255 };
-                SDL_Surface* textSurface = TTF_RenderText_Shaded(font, SSTR(r).c_str(), foregroundColor, backgroundColor);
-               
-                blit(textSurface, s, x+32, y);
-
-                SDL_FreeSurface(textSurface);
-                TTF_CloseFont(font);*/
-           #endif
-        }
     }
 
     void drawMinPillar(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset)
@@ -200,7 +181,7 @@ namespace Render
         level->levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
 
         //TODO clean up the magic numbers here, and elsewhere in this file
-        blit((SDL_Surface*)level->levelSprite, screen, level->levelX, level->levelY);
+        drawAt(level->levelSprite, level->levelX, level->levelY);
     }
     
     void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
