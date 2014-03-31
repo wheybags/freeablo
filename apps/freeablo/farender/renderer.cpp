@@ -23,12 +23,11 @@ namespace FARender
         mRenderer = this;
 
         mDone = false;
-        mRenderReady = 99;
+        mRenderThreadState = stopped;
         mLevel = NULL;
 
         mCurrent = NULL;
         renderLoop();
-        //mThread = new boost::thread(boost::bind(&Renderer::renderLoop, this));
     }
     
     Renderer::~Renderer()
@@ -46,8 +45,8 @@ namespace FARender
     void Renderer::setLevel(const Level::Level& level)
     {
         mThreadCommunicationTmp = (void*)&level;
-        mRenderReady = 1;
-        while(mRenderReady != 0){} // wait until the render thread is done loading the new level
+        mRenderThreadState = levelChange;
+        while(mRenderThreadState != running){} // wait until the render thread is done loading the new level
     }
     
     RenderState* Renderer::getFreeState()
@@ -73,8 +72,8 @@ namespace FARender
     FASpriteGroup Renderer::loadImage(const std::string& path)
     {
         mThreadCommunicationTmp = (void*)&path;
-        mRenderReady = 2;
-        while(mRenderReady != 0) {}
+        mRenderThreadState = loadSprite;
+        while(mRenderThreadState != running) {}
 
         FASpriteGroup tmp = *(FASpriteGroup*)mThreadCommunicationTmp;
         delete (FASpriteGroup*)mThreadCommunicationTmp;
@@ -106,8 +105,8 @@ namespace FARender
     void Renderer::destroySprite(Render::SpriteGroup* s)
     {
         mThreadCommunicationTmp = (void*)s;
-        mRenderReady = 5;
-        while(mRenderReady != 0);
+        mRenderThreadState = spriteDestroy;
+        while(mRenderThreadState != running);
     }
 
     void Renderer::renderLoop()
@@ -120,32 +119,34 @@ namespace FARender
              
             RenderState* current = mCurrent;
 
-            if(mRenderReady == 1)
+            if(mRenderThreadState == levelChange)
             {
                 delete mLevel;
                 mLevel = Render::setLevel(*(Level::Level*)mThreadCommunicationTmp);
-                mRenderReady = 0;
+                mRenderThreadState = running;
             }
 
-            else if(mRenderReady == 2)
+            else if(mRenderThreadState == loadSprite)
             {
                 FASpriteGroup* tmp = new FASpriteGroup((CacheSpriteGroup*)NULL);
                 *tmp = loadImageImp(*(std::string*)mThreadCommunicationTmp);
                 mThreadCommunicationTmp = (void*)tmp;
-                mRenderReady = 0;
+                mRenderThreadState = running;
             }
 
-            else if(mRenderReady == 3)
-                mRenderReady++;
+            else if(mRenderThreadState == pause)
+            {
+                mRenderThreadState = stopped;
+            }
 
-            else if(mRenderReady == 5)
+            else if(mRenderThreadState == spriteDestroy)
             {
                 Render::SpriteGroup* s = (Render::SpriteGroup*)mThreadCommunicationTmp;
                 s->destroy();
-                mRenderReady = 0;
+                mRenderThreadState = running;
             }
 
-            if(mRenderReady == 0 && current && current->mMutex.try_lock())
+            if(mRenderThreadState == running && current && current->mMutex.try_lock())
             {
                 Render::drawLevel(mLevel, current->mPos.current().first, current->mPos.current().second, 
                     current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);

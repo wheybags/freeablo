@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 
+#include <boost/atomic.hpp>
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -35,6 +36,17 @@ namespace FARender
         
         std::vector<boost::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
     };
+
+    enum RenderThreadState
+    {
+        running,
+        levelChange,
+        loadSprite,
+        pause,
+        spriteDestroy,
+        stopped
+    };
+
 
     class Renderer
     {
@@ -66,7 +78,7 @@ namespace FARender
             
             boost::thread* mThread;            
 
-            size_t mRenderReady;
+            boost::atomic<RenderThreadState> mRenderThreadState;
 
             void* mThreadCommunicationTmp;
             Render::RenderLevel* mLevel;
@@ -91,12 +103,12 @@ namespace FARender
                 Renderer* r = Renderer::get();
                 if(r && !r->mDone)
                 {
-                    r->mRenderReady = 3;
-                    while(r->mRenderReady != 4){} // wait until the render thread is definitely done
+                    r->mRenderThreadState = pause;
+                    while(r->mRenderThreadState != stopped){} // wait until the render thread is definitely done
 
                     r->mSpriteCache.erase(mPath);
 
-                    r->mRenderReady = 0;
+                    r->mRenderThreadState = running;
 
                     r->destroySprite(&mSpriteGroup); // destroy the sprite in the rendering thread
                 }
