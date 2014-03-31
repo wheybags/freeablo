@@ -96,7 +96,7 @@ namespace FARender
     class CacheSpriteGroup
     {
         public:
-            CacheSpriteGroup(const std::string& path): mSpriteGroup(path) {}
+            CacheSpriteGroup(const std::string& path): mSpriteGroup(path), mPath(path) {}
             
             ~CacheSpriteGroup()
             {
