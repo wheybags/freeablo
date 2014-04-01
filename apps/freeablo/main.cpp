@@ -105,9 +105,26 @@ Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
 
     return NULL;
 }
+int realmain(int argc, char** argv);
 
+bool renderDone = false;
 int main(int argc, char** argv)
 {
+    boost::thread mainThread(boost::bind(&realmain, argc, argv));
+    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove);
+    FARender::Renderer renderer;
+    renderDone = true;
+
+    mainThread.join();
+}
+
+int realmain(int argc, char** argv)
+{
+    while(!FARender::Renderer::get()) {}
+
+    FARender::Renderer& renderer = *FARender::Renderer::get();
+    Input::InputManager& input = *Input::InputManager::get();
+
     size_t levelNum;
 
     boost::program_options::options_description desc("Options");
@@ -139,8 +156,6 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    // Starts rendering thread
-    FARender::Renderer renderer;
 
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
@@ -170,8 +185,6 @@ int main(int argc, char** argv)
 
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
-    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove);
-    
     std::pair<size_t, size_t> destination = player->mPos.current();
     
     // Main game logic loop
@@ -180,7 +193,7 @@ int main(int argc, char** argv)
         if(click)
             destination = renderer.getClickedTile(xClick, yClick);
 
-        input.poll();
+        input.processInput();
 
         if(changeLevel)
         {
@@ -244,7 +257,7 @@ int main(int argc, char** argv)
         }
 
         world.update();
-
+        
         FARender::RenderState* state = renderer.getFreeState();
         
         state->mPos = player->mPos;
@@ -254,8 +267,12 @@ int main(int argc, char** argv)
         renderer.setCurrentState(state);
     }
 
+    renderer.stop();
+
     for(size_t i = 0; i < levels.size(); i++)
         delete levels[i];
+    
 
+    while(!renderDone) {} // have to wait until the renderer stops before destroying all our locals
     return 0;
 }

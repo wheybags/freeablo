@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 
+#include <boost/atomic.hpp>
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -36,6 +37,17 @@ namespace FARender
         std::vector<boost::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
     };
 
+    enum RenderThreadState
+    {
+        running,
+        levelChange,
+        loadSprite,
+        pause,
+        spriteDestroy,
+        stopped
+    };
+
+
     class Renderer
     {
         public:
@@ -43,6 +55,9 @@ namespace FARender
             
             Renderer();
             ~Renderer();
+
+            void stop();
+
             void setLevel(const Level::Level& level);
 
             RenderState* getFreeState(); // ooh ah up de ra
@@ -53,13 +68,19 @@ namespace FARender
             std::pair<size_t, size_t> getClickedTile(size_t x, size_t y);
 
         private:
+            FASpriteGroup loadImageImp(const std::string& path);
+            
+            void destroySprite(Render::SpriteGroup* s);
+            
             static Renderer* mRenderer; ///< Singleton instance
 
             void renderLoop();
             
             boost::thread* mThread;            
 
-            size_t mRenderReady;
+            boost::atomic<RenderThreadState> mRenderThreadState;
+
+            void* mThreadCommunicationTmp;
             Render::RenderLevel* mLevel;
             bool mDone;
 
@@ -75,20 +96,27 @@ namespace FARender
     class CacheSpriteGroup
     {
         public:
-            CacheSpriteGroup(const std::string& path): mSpriteGroup(path) {}
+            CacheSpriteGroup(const std::string& path): mSpriteGroup(path), mPath(path) {}
             
             ~CacheSpriteGroup()
             {
                 Renderer* r = Renderer::get();
-                if(r)
+                if(r && !r->mDone)
                 {
-                    r->mRenderReady = 1;
-                    while(r->mRenderReady != 2){} // wait until the render thread is definitely done
+                    r->mRenderThreadState = pause;
+                    while(r->mRenderThreadState != stopped){} // wait until the render thread is definitely done
 
-                        r->mSpriteCache.erase(mPath);
+                    r->mSpriteCache.erase(mPath);
 
-                    r->mRenderReady = 0;
+                    r->mRenderThreadState = running;
+
+                    r->destroySprite(&mSpriteGroup); // destroy the sprite in the rendering thread
                 }
+            }
+
+            void destroy()
+            {
+                mSpriteGroup.destroy();
             }
 
             Render::SpriteGroup mSpriteGroup; 

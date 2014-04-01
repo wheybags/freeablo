@@ -4,6 +4,8 @@
 
 namespace Input
 {
+    InputManager* InputManager::instance = NULL;
+
     void doNothing_keyPress(Key k){}
     void doNothing_keyRelease(Key k){}
     void doNothing_mouseClick(uint32_t x, uint32_t y, Key k){}
@@ -18,10 +20,10 @@ namespace Input
         boost::function<void(uint32_t, uint32_t)> mouseMove):
             
             mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
-            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)) 
+            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)), mQueue(500)
             {
-                SDL_Event event;
-                while(SDL_PollEvent(&event)) {} // clear event queue
+                assert(!instance);
+                instance = this;
             }
 
     #define CASE(val) case SDLK_##val: key = KEY_##val; break; 
@@ -105,16 +107,6 @@ namespace Input
             CASE(z);
             CASE(DELETE);
 
-            CASE(KP0);
-            CASE(KP1);
-            CASE(KP2);
-            CASE(KP3);
-            CASE(KP4);
-            CASE(KP5);
-            CASE(KP6);
-            CASE(KP7);
-            CASE(KP8);
-            CASE(KP9);
             CASE(KP_PERIOD);
             CASE(KP_DIVIDE);
             CASE(KP_MULTIPLY);
@@ -149,30 +141,58 @@ namespace Input
             CASE(F14);
             CASE(F15);
 
-            CASE(NUMLOCK);
             CASE(CAPSLOCK);
-            CASE(SCROLLOCK);
             CASE(RSHIFT);
             CASE(LSHIFT);
             CASE(RCTRL);
             CASE(LCTRL);
             CASE(RALT);
             CASE(LALT);
-            CASE(RMETA);
-            CASE(LMETA);
-            CASE(LSUPER);
-            CASE(RSUPER);
             CASE(MODE);
-            CASE(COMPOSE);
 
-            CASE(HELP);
-            CASE(PRINT);
-            CASE(SYSREQ);
-            CASE(BREAK);
             CASE(MENU);
             CASE(POWER);
-            CASE(EURO);
             CASE(UNDO);
+
+            #if SDL_MAJOR_VERSION == 2 
+                case SDLK_KP_0: key = KEY_KP0; break;
+                case SDLK_KP_1: key = KEY_KP1; break;
+                case SDLK_KP_2: key = KEY_KP2; break;
+                case SDLK_KP_3: key = KEY_KP3; break;
+                case SDLK_KP_4: key = KEY_KP4; break;
+                case SDLK_KP_5: key = KEY_KP5; break;
+                case SDLK_KP_6: key = KEY_KP6; break;
+                case SDLK_KP_7: key = KEY_KP7; break;
+                case SDLK_KP_8: key = KEY_KP8; break;
+                case SDLK_KP_9: key = KEY_KP9; break;
+
+                case SDLK_NUMLOCKCLEAR: key = KEY_NUMLOCK; break;
+                case SDLK_SCROLLLOCK: key = KEY_SCROLLOCK; break;
+
+                case SDLK_RGUI: key = KEY_RSUPER; break;
+                case SDLK_LGUI: key = KEY_LSUPER; break;
+
+                case SDLK_PRINTSCREEN: key = KEY_PRINT; break;
+            #else
+                CASE(KP0);
+                CASE(KP1);
+                CASE(KP2);
+                CASE(KP3);
+                CASE(KP4);
+                CASE(KP5);
+                CASE(KP6);
+                CASE(KP7);
+                CASE(KP8);
+                CASE(KP9);
+
+                CASE(NUMLOCK);
+                CASE(SCROLLOCK);
+
+                CASE(LSUPER);
+                CASE(RSUPER);
+
+                CASE(PRINT);
+            #endif
 
             default:
             {
@@ -199,25 +219,71 @@ namespace Input
                 return KEY_UNDEF;
         }
     }
-
+    
     void InputManager::poll()
     {
         SDL_Event event;
+        
+        Event e;
 
         while(SDL_PollEvent(&event))
+        {   
+            e.type = event.type;
+
+            switch (event.type) 
+            {
+                case SDL_KEYDOWN:
+                case SDL_KEYUP:
+                {
+                    e.vals.key = event.key.keysym.sym;
+                    break;
+                }
+
+                case SDL_MOUSEBUTTONDOWN:
+                case SDL_MOUSEBUTTONUP:
+                {
+                    e.vals.mouseButton.key = event.button.button;
+                    e.vals.mouseButton.x = event.button.x;
+                    e.vals.mouseButton.y = event.button.y;
+                    break;
+                }
+
+                case SDL_MOUSEMOTION:
+                {
+                    e.vals.mouseMove.x = event.motion.x;
+                    e.vals.mouseMove.y = event.motion.y;
+                    break;
+                }
+
+                default:
+                {
+                    break;
+                }
+            }
+
+            while(!mQueue.push(e)) {} // push, or wait until buffer not full, then push
+        }
+    }
+
+    
+    void InputManager::processInput()
+    {
+        Event event;
+
+        while(mQueue.pop(event))
         {
             switch (event.type) 
             {
                 case SDL_KEYDOWN:
                 {
-                    Key key = getKey(event.key.keysym.sym);
+                    Key key = getKey(event.vals.key);
                     if(key != KEY_UNDEF)
                         mKeyPress(key);
                     break;
                 }
                 case SDL_KEYUP:
                 {
-                    Key key = getKey(event.key.keysym.sym);
+                    Key key = getKey(event.vals.key);
                     if(key != KEY_UNDEF)
                         mKeyRelease(key);
                     break;
@@ -225,27 +291,27 @@ namespace Input
 
                 case SDL_MOUSEBUTTONDOWN:
                 {
-                    Key key = getMouseKey(event.button.button);
+                    Key key = getMouseKey(event.vals.mouseButton.key);
 
                     if(key != KEY_UNDEF)
-                        mMouseClick(event.button.x, event.button.y, key);
+                        mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
                     
                     break;
                 }
 
                 case SDL_MOUSEBUTTONUP:
                 {
-                    Key key = getMouseKey(event.button.button);
+                    Key key = getMouseKey(event.vals.mouseButton.key);
 
                     if(key != KEY_UNDEF)
-                        mMouseRelease(event.button.x, event.button.y, key);
+                        mMouseRelease(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
                     
                     break;
                 }
 
                 case SDL_MOUSEMOTION:
                 {
-                    mMouseMove(event.motion.x, event.motion.y);
+                    mMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y);
                     break;
                 }
 
@@ -255,5 +321,10 @@ namespace Input
                 }
             }
         }
+    }
+
+    InputManager* InputManager::get()
+    {
+        return instance;
     }
 }

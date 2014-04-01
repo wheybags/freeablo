@@ -33,14 +33,21 @@ add_library(Misc
     misc/misc.cpp)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 
-add_library(Render
-    render/render.h
-    render/sdlbackend.cpp)
+
+set(RenderFiles render/render.h render/sdlcommon.cpp)
+if(USE_SDL2)
+    set(RenderFiles ${RenderFiles} render/sdl2backend.cpp)
+else()
+    set(RenderFiles ${RenderFiles} render/sdlbackend.cpp)
+endif()
+
+add_library(Render ${RenderFiles})
 target_link_libraries(Render Cel Levels ${SDL_LIBRARY})
+
 
 add_library(Input
     input/inputmanager.h
-    input/sdlbackend.cpp)
+    input/sdlcommon.cpp)
 
 add_library(DiabloExe
     diabloexe/diabloexe.h

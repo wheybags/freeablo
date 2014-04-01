@@ -17,49 +17,67 @@ namespace Render
     #define HEIGHT 960
     #define DEPTH 32
 
-    SDL_Surface* screen;
+    SDL_Window* screen;
+    SDL_Renderer* renderer;
     
     void init()
     {
         SDL_Init(SDL_INIT_VIDEO);
-        screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE | SDL_DOUBLEBUF);
+        SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, 0, &screen, &renderer);
+
+        
+        if(screen == NULL)
+            printf("Could not create window: %s\n", SDL_GetError());
     }
 
     void quit()
     {
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(screen);
         SDL_Quit();
     }
+    
 
     void draw()
     {
-        SDL_Flip(screen); 
+        SDL_RenderPresent(renderer);
     }
 
-    void drawAt(SDL_Surface* sprite, size_t x, size_t y)
+    void drawAt(SDL_Texture* sprite, size_t x, size_t y)
     {
-        SDL_Rect rcDest = { x, y, 0, 0 };
-        SDL_BlitSurface (sprite , NULL, screen, &rcDest );
+        int width, height;
+        SDL_QueryTexture(sprite, NULL, NULL, &width, &height);
+
+        SDL_Rect dest = { x, y, width, height };
+        
+        SDL_RenderCopy(renderer, sprite, NULL, &dest);
     }
     
-void drawAt(const Sprite& sprite, size_t x, size_t y)
+    void drawAt(const Sprite& sprite, size_t x, size_t y)
     {
-        drawAt((SDL_Surface*)sprite, x, y);
+        drawAt((SDL_Texture*)sprite, x, y);
     }
 
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
     SDL_Surface* createTransparentSurface(size_t width, size_t height);
+    void clearTransparentSurface(SDL_Surface* s);
 
     SpriteGroup::SpriteGroup(const std::string& path)
     {
         Cel::CelFile cel(path);
+        
+        SDL_Surface* s = createTransparentSurface(cel[0].mWidth, cel[0].mHeight);
 
         for(size_t i = 0; i < cel.numFrames(); i++)
         {
-            SDL_Surface* s = createTransparentSurface(cel[i].mWidth, cel[i].mHeight);
             drawFrame(s, 0, 0, cel[i]);
 
-            mSprites.push_back(s);
+            mSprites.push_back(SDL_CreateTextureFromSurface(renderer, s));
+
+            clearTransparentSurface(s);
         }
+
+        SDL_FreeSurface(s);
 
         mAnimLength = cel.animLength();
     }
@@ -67,7 +85,7 @@ void drawAt(const Sprite& sprite, size_t x, size_t y)
     void SpriteGroup::destroy()
     {
         for(size_t i = 0; i < mSprites.size(); i++)
-            SDL_FreeSurface((SDL_Surface*)mSprites[i]);
+            SDL_DestroyTexture((SDL_Texture*)mSprites[i]);
     }
 	
     void drawMinPillar(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
@@ -78,22 +96,21 @@ void drawAt(const Sprite& sprite, size_t x, size_t y)
         
         RenderLevel* retval = new RenderLevel();
 
-        retval->levelSprite = SDL_CreateRGBSurface(SDL_HWSURFACE, ((level.width()+level.height()))*32, ((level.width()+level.height()))*16 + 224, screen->format->BitsPerPixel,
-                                              screen->format->Rmask,
-                                              screen->format->Gmask,
-                                              screen->format->Bmask,
-                                              screen->format->Amask);
+        SDL_Surface* levelSprite = createTransparentSurface(((level.width()+level.height()))*32, ((level.width()+level.height()))*16 + 224);
 
         for(size_t x = 0; x < level.width(); x++)
         {
             for(size_t y = 0; y < level.height(); y++)
             {
-                drawMinPillar((SDL_Surface*)retval->levelSprite, (y*(-32)) + 32*x + level.height()*32-32, (y*16) + 16*x, level[x][y], town);
+                drawMinPillar(levelSprite, (y*(-32)) + 32*x + level.height()*32-32, (y*16) + 16*x, level[x][y], town);
             }
         }
 
-        SDL_SaveBMP((SDL_Surface*)retval->levelSprite, "test.bmp");//TODO: should probably get rid of this at some point, useful for now
+        SDL_SaveBMP(levelSprite, "test.bmp");//TODO: should probably get rid of this at some point, useful for now
 
+        retval->levelSprite = SDL_CreateTextureFromSurface(renderer, levelSprite);
+        SDL_FreeSurface(levelSprite);
+        
         retval->levelWidth = level.width();
         retval->levelHeight = level.height();
 
@@ -117,17 +134,20 @@ void drawAt(const Sprite& sprite, size_t x, size_t y)
 
     void spriteSize(const Sprite& sprite, size_t& w, size_t& h)
     {
-        w = ((SDL_Surface*)sprite)->w;
-        h = ((SDL_Surface*)sprite)->h;
+        int tmpW, tmpH;
+        SDL_QueryTexture((SDL_Texture*)sprite, NULL, NULL, &tmpW, &tmpH);
+        w = tmpW;
+        h = tmpH;
     }
 
     void clear()
     {
-        SDL_FillRect(screen,NULL, SDL_MapRGB( screen->format, 0, 0, 255)); 
+         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+         SDL_RenderClear(renderer);
     }
 
     RenderLevel::~RenderLevel()
     {
-        SDL_FreeSurface((SDL_Surface*)levelSprite);
+        SDL_DestroyTexture((SDL_Texture*)levelSprite);
     }
 }
