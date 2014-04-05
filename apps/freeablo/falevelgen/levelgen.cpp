@@ -898,7 +898,7 @@ namespace FALevelGen
             }
         }
         
-        Level::Level* retval = new Level::Level(level, "levels/l1data/l1.til", "levels/l1data/l1.min", "levels/l1data/l1.sol", celPath, downStairsPoint, upStairsPoint);
+        Level::Level* retval = new Level::Level(level, "levels/l1data/l1.til", "levels/l1data/l1.min", "levels/l1data/l1.sol", celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap());
         placeMonsters(*retval, exe, levelNum); 
         
         return retval;

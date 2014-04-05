@@ -12,7 +12,7 @@ namespace Level
         public:
             Min(const std::string&);
             const std::vector<int16_t>& operator[] (size_t index) const;
-            size_t size();
+            size_t size() const;
 
         private:
             std::vector<std::vector<int16_t> > mPillars;

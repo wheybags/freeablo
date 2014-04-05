@@ -100,18 +100,12 @@ namespace Render
 
         SDL_Surface* newPillar = createTransparentSurface(64, 256);
         
-        for(size_t x = 0; x < level.width(); x++)
+        for(size_t i = 0; i < level.minSize(); i++)
         {
-            for(size_t y = 0; y < level.height(); y++)
-            {
-                if(retval->minPillars.find(retval->level->operator[](x)[y].index()) == retval->minPillars.end())
-                {
-                    clearTransparentSurface(newPillar);
-                    drawMinPillar(newPillar, 0, 0, level[x][y], town);
+            clearTransparentSurface(newPillar);
+            drawMinPillar(newPillar, 0, 0, level.minPillar(i), town);
 
-                    retval->minPillars[level[x][y].index()] = SDL_CreateTextureFromSurface(renderer, newPillar);
-                }
-            }
+            retval->minPillars[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
         }
 
         SDL_FreeSurface(newPillar);

@@ -7,6 +7,7 @@
 #include "sol.h"
 
 #include <utility>
+#include <map>
 
 namespace Level
 {
@@ -46,9 +47,14 @@ namespace Level
                 const std::pair<size_t,size_t>& upStairs);
             Level(const Dun& dun, const std::string& tilPath, const std::string& minPath, 
                 const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-                const std::pair<size_t,size_t>& upStairs);
+                const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap);
 
             Misc::Helper2D<const Level, const MinPillar> operator[] (size_t x) const;
+
+            void activate(size_t x, size_t y);
+
+            size_t minSize() const;
+            const MinPillar minPillar(int32_t i) const;
 
             size_t width() const;
             size_t height() const;
@@ -67,6 +73,8 @@ namespace Level
             Min mMin;
             Sol mSol;
             std::string mTileSetPath; ///< path to cel file for level
+
+            std::map<size_t, size_t> mDoorMap; ///< Map from closed door indices to open door indices + vice-versa
 
             std::pair<size_t,size_t> mUpStairs;
             std::pair<size_t,size_t> mDownStairs;

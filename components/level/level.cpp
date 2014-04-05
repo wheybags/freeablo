@@ -12,9 +12,9 @@ namespace Level
      
     Level::Level(const Dun& dun, const std::string& tilPath, const std::string& minPath,
         const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-        const std::pair<size_t,size_t>& upStairs):
+        const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap):
         mDun(dun), mTil(tilPath), mMin(minPath), mSol(solPath), mTileSetPath(tileSetPath),
-        mUpStairs(upStairs), mDownStairs(downStairs) {}
+        mUpStairs(upStairs), mDownStairs(downStairs), mDoorMap(doorMap) {}
 
     std::vector<int16_t> Level::mEmpty(16);
 
@@ -68,6 +68,35 @@ namespace Level
     Misc::Helper2D<const Level, const MinPillar> Level::operator[] (size_t x) const
     {
         return Misc::Helper2D<const Level, const MinPillar>(*this, x, get);
+    }
+            
+    void Level::activate(size_t x, size_t y)
+    {
+        size_t xDunIndex = x;
+        if((xDunIndex % 2) != 0)
+            xDunIndex--;
+        xDunIndex /= 2;
+
+        size_t yDunIndex = y;
+        if((yDunIndex % 2) != 0)
+            yDunIndex--;
+        yDunIndex /= 2;
+
+        size_t index = mDun[xDunIndex][yDunIndex]; 
+        
+        // open doors when clicked on
+        if(mDoorMap.find(index) != mDoorMap.end())
+            mDun[xDunIndex][yDunIndex] = mDoorMap[index];
+    }
+    
+    size_t Level::minSize() const
+    {
+        return mMin.size();
+    }
+
+    const MinPillar Level::minPillar(int32_t i) const
+    {
+        return MinPillar(mMin[i], mSol.passable(i), i);
     }
 
     size_t Level::width() const

@@ -53,11 +53,16 @@ namespace FALevelGen
             size_t downStairs4;
 
             size_t getRandomTile(size_t tile);
+            std::map<size_t, size_t> getDoorMap();
         
         private:
             std::map<size_t, std::pair<std::vector<std::pair<size_t, size_t> >, size_t> > mAlternatives;
 
+            std::map<size_t, size_t> mDoorMap;
+
             void fillTile(size_t tile, boost::property_tree::ptree& pt, const std::string& str);
+
+            void loadDoorMap(boost::property_tree::ptree& pt);
 
     };
 

@@ -39,6 +39,7 @@ void keyPress(Input::Key key)
 }
 
 size_t xClick = 0, yClick = 0;
+bool mouseDown = false;
 bool click = false;
 void mouseClick(size_t x, size_t y, Input::Key key)
 {
@@ -46,6 +47,7 @@ void mouseClick(size_t x, size_t y, Input::Key key)
     {
         xClick = x;
         yClick = y;
+        mouseDown = true;
         click = true;
     }
 }
@@ -53,7 +55,7 @@ void mouseClick(size_t x, size_t y, Input::Key key)
 void mouseRelease(size_t x, size_t y, Input::Key key)
 {
     if(key == Input::KEY_LEFT_MOUSE)
-        click = false;
+        mouseDown = false;
 }
 
 void mouseMove(size_t x, size_t y)
@@ -83,7 +85,7 @@ Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
             Level::Dun sector4("levels/towndata/sector4s.dun");
 
             return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", 
-                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(0,0));
+                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(0,0), std::map<size_t, size_t>());
 
             break;
         }
@@ -192,8 +194,14 @@ int realmain(int argc, char** argv)
     // Main game logic loop
     while(!done)
     {
-        if(click)
+        if(mouseDown)
+        {
             destination = renderer.getClickedTile(xClick, yClick);
+            if(click)
+                level->activate(destination.first, destination.second);
+
+            click = false;
+        }
 
         input.processInput();
 
