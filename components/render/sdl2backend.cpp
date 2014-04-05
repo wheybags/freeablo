@@ -96,42 +96,32 @@ namespace Render
         
         RenderLevel* retval = new RenderLevel();
 
-        SDL_Surface* levelSprite = createTransparentSurface(((level.width()+level.height()))*32, ((level.width()+level.height()))*16 + 224);
+        retval->level = &level;
 
+        SDL_Surface* newPillar = createTransparentSurface(64, 256);
+        
         for(size_t x = 0; x < level.width(); x++)
         {
             for(size_t y = 0; y < level.height(); y++)
             {
-                drawMinPillar(levelSprite, (y*(-32)) + 32*x + level.height()*32-32, (y*16) + 16*x, level[x][y], town);
+                if(retval->minPillars.find(retval->level->operator[](x)[y].index()) == retval->minPillars.end())
+                {
+                    clearTransparentSurface(newPillar);
+                    drawMinPillar(newPillar, 0, 0, level[x][y], town);
+
+                    retval->minPillars[level[x][y].index()] = SDL_CreateTextureFromSurface(renderer, newPillar);
+                }
             }
         }
 
-        SDL_SaveBMP(levelSprite, "test.bmp");//TODO: should probably get rid of this at some point, useful for now
+        SDL_FreeSurface(newPillar);
 
-        retval->levelSprite = SDL_CreateTextureFromSurface(renderer, levelSprite);
-        SDL_FreeSurface(levelSprite);
-        
         retval->levelWidth = level.width();
         retval->levelHeight = level.height();
 
         return retval;
     }
     
-    void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
-    {
-        int16_t xPx1 = -((y1*(-32)) + 32*x1 + level->levelWidth*32) +WIDTH/2;
-        int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
-
-        int16_t xPx2 = -((y2*(-32)) + 32*x2 + level->levelWidth*32) +WIDTH/2;
-        int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
-
-        level->levelX = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
-        level->levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
-
-        //TODO clean up the magic numbers here, and elsewhere in this file
-        drawAt(level->levelSprite, level->levelX, level->levelY);
-    }
-
     void spriteSize(const Sprite& sprite, size_t& w, size_t& h)
     {
         int tmpW, tmpH;
@@ -148,6 +138,7 @@ namespace Render
 
     RenderLevel::~RenderLevel()
     {
-        SDL_DestroyTexture((SDL_Texture*)levelSprite);
+        for(std::map<int32_t, Sprite>::iterator it = minPillars.begin(); it != minPillars.end(); ++it)
+            SDL_DestroyTexture((SDL_Texture*)it->second);
     }
 }

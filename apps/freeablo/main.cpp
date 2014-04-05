@@ -269,12 +269,12 @@ int realmain(int argc, char** argv)
         renderer.setCurrentState(state);
     }
 
-    renderer.stop();
+    renderer.stop();    
+
+    while(!renderDone) {} // have to wait until the renderer stops before destroying all our locals
 
     for(size_t i = 0; i < levels.size(); i++)
         delete levels[i];
-    
 
-    while(!renderDone) {} // have to wait until the renderer stops before destroying all our locals
     return 0;
 }

@@ -41,7 +41,7 @@ namespace Render
         SDL_BlitSurface (sprite , NULL, screen, &rcDest );
     }
     
-void drawAt(const Sprite& sprite, size_t x, size_t y)
+    void drawAt(const Sprite& sprite, size_t x, size_t y)
     {
         drawAt((SDL_Surface*)sprite, x, y);
     }
@@ -78,21 +78,21 @@ void drawAt(const Sprite& sprite, size_t x, size_t y)
         
         RenderLevel* retval = new RenderLevel();
 
-        retval->levelSprite = SDL_CreateRGBSurface(SDL_HWSURFACE, ((level.width()+level.height()))*32, ((level.width()+level.height()))*16 + 224, screen->format->BitsPerPixel,
-                                              screen->format->Rmask,
-                                              screen->format->Gmask,
-                                              screen->format->Bmask,
-                                              screen->format->Amask);
+        retval->level = &level;
 
         for(size_t x = 0; x < level.width(); x++)
         {
             for(size_t y = 0; y < level.height(); y++)
             {
-                drawMinPillar((SDL_Surface*)retval->levelSprite, (y*(-32)) + 32*x + level.height()*32-32, (y*16) + 16*x, level[x][y], town);
+                if(retval->minPillars.find(retval->level->operator[](x)[y].index()) == retval->minPillars.end())
+                {
+                    SDL_Surface* newPillar = createTransparentSurface(64, 256);
+                    drawMinPillar(newPillar, 0, 0, level[x][y], town);
+
+                    retval->minPillars[level[x][y].index()] = newPillar;
+                }
             }
         }
-
-        SDL_SaveBMP((SDL_Surface*)retval->levelSprite, "test.bmp");//TODO: should probably get rid of this at some point, useful for now
 
         retval->levelWidth = level.width();
         retval->levelHeight = level.height();
@@ -100,21 +100,6 @@ void drawAt(const Sprite& sprite, size_t x, size_t y)
         return retval;
     }
     
-    void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
-    {
-        int16_t xPx1 = -((y1*(-32)) + 32*x1 + level->levelWidth*32) +WIDTH/2;
-        int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
-
-        int16_t xPx2 = -((y2*(-32)) + 32*x2 + level->levelWidth*32) +WIDTH/2;
-        int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
-
-        level->levelX = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
-        level->levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
-
-        //TODO clean up the magic numbers here, and elsewhere in this file
-        drawAt(level->levelSprite, level->levelX, level->levelY);
-    }
-
     void spriteSize(const Sprite& sprite, size_t& w, size_t& h)
     {
         w = ((SDL_Surface*)sprite)->w;
@@ -128,6 +113,7 @@ void drawAt(const Sprite& sprite, size_t x, size_t y)
 
     RenderLevel::~RenderLevel()
     {
-        SDL_FreeSurface((SDL_Surface*)levelSprite);
+        for(std::map<int32_t, Sprite>::iterator it = minPillars.begin(); it != minPillars.end(); ++it)
+            SDL_FreeSurface((SDL_Surface*)it->second);
     }
 }

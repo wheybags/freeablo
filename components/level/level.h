@@ -25,12 +25,14 @@ namespace Level
             size_t size() const;
             int16_t operator[] (size_t index) const;
             bool passable() const;
+            int32_t index() const;
         
         private:
-            MinPillar(const std::vector<int16_t>& data, bool passable);
+            MinPillar(const std::vector<int16_t>& data, bool passable, int32_t index);
             const std::vector<int16_t>& mData;
             
             bool mPassable;
+            int32_t mIndex;
 
             friend class Level;
             friend const MinPillar get(size_t x, size_t y, const Level& level);

@@ -58,11 +58,11 @@ namespace Level
         int32_t dunIndex = level.mDun[xDunIndex][yDunIndex]-1;
 
         if(dunIndex == -1)
-            return MinPillar(Level::mEmpty, 0);
+            return MinPillar(Level::mEmpty, 0, -1);
 
         size_t minIndex = level.mTil[dunIndex][tilIndex];
         
-        return MinPillar(level.mMin[minIndex], level.mSol.passable(minIndex));
+        return MinPillar(level.mMin[minIndex], level.mSol.passable(minIndex), minIndex);
     }
 
     Misc::Helper2D<const Level, const MinPillar> Level::operator[] (size_t x) const
@@ -105,7 +105,7 @@ namespace Level
         return mMonsters;
     }
 
-    MinPillar::MinPillar(const std::vector<int16_t>& data, bool passable): mData(data), mPassable(passable) {}
+    MinPillar::MinPillar(const std::vector<int16_t>& data, bool passable, int32_t index): mData(data), mPassable(passable), mIndex(index) {}
 
     size_t MinPillar::size() const
     {
@@ -121,5 +121,9 @@ namespace Level
     {
         return mPassable;
     }
-    
+
+    int32_t MinPillar::index() const
+    {
+        return mIndex;
+    }
 }
