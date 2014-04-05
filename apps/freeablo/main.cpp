@@ -182,6 +182,8 @@ int realmain(int argc, char** argv)
 
     if(levelNum == 0)
         player->mPos = FAWorld::Position(75, 68);
+    else
+        player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
