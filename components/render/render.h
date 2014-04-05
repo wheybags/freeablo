@@ -7,6 +7,9 @@
 #include <string>
 #include <utility>
 
+#include <cel/celfile.h>
+#include <cel/celframe.h>
+
 namespace Level
 {
     class Level;
@@ -56,7 +59,8 @@ namespace Render
             ~RenderLevel();
 
         private:
-            Sprite levelSprite;
+            const Level::Level* level;
+            std::map<int32_t, Sprite> minPillars;
             int32_t levelHeight;
             int32_t levelWidth;
             int32_t levelX;

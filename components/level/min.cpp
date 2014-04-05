@@ -39,7 +39,7 @@ namespace Level
         return mPillars[index];
     }
 
-    size_t Min::size()
+    size_t Min::size() const
     {
         return mPillars.size();
     }

@@ -87,6 +87,8 @@ namespace FALevelGen
         downStairs2 = pt.get<size_t>("Basic.downStairs2");
         downStairs3 = pt.get<size_t>("Basic.downStairs3");
         downStairs4 = pt.get<size_t>("Basic.downStairs4");
+
+        loadDoorMap(pt);
     }
     
     void TileSet::fillTile(size_t tile, bpt::ptree& pt, const std::string& str)
@@ -139,5 +141,27 @@ namespace FALevelGen
             random -= tileVec[i].second;
         
         return tileVec[i].first;
+    }
+
+    std::map<size_t, size_t> TileSet::getDoorMap()
+    {
+        return mDoorMap;
+    }
+    
+    void TileSet::loadDoorMap(bpt::ptree& pt)
+    {
+        bpt::ptree::assoc_iterator doorMapIt = pt.find("DoorMap");
+
+        for(bpt::ptree::const_iterator key = doorMapIt->second.begin(); key != doorMapIt->second.end(); ++key)
+        {
+            std::stringstream buffer(key->first);
+            size_t first;
+            buffer >> first;
+
+            size_t second = key->second.get_value<size_t>();
+
+            mDoorMap[first] = second;
+            mDoorMap[second] = first;
+        }
     }
 }

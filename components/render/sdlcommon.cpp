@@ -162,4 +162,32 @@ namespace Render
 
         return std::make_pair(isoPosX, isoPosY);
     }
+
+    void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    {
+        int16_t xPx1 = -((y1*(-32)) + 32*x1 + level->levelWidth*32) +WIDTH/2;
+        int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
+
+        int16_t xPx2 = -((y2*(-32)) + 32*x2 + level->levelWidth*32) +WIDTH/2;
+        int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
+
+        level->levelX = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
+        level->levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
+
+        //TODO clean up the magic numbers here, and elsewhere in this file
+        
+        for(size_t x = 0; x < level->level->width(); x++)
+        {
+            for(size_t y = 0; y < level->level->height(); y++)
+            {
+                int32_t xCoord = (y*(-32)) + 32*x + level->level->height()*32-32 +level->levelX;
+                int32_t yCoord = (y*16) + 16*x + level->levelY;
+
+                if(xCoord >= -64 && xCoord <=  WIDTH  && yCoord >= -256 && yCoord <= HEIGHT && level->minPillars.find(level->level->operator[](x)[y].index()) != level->minPillars.end())
+                {
+                    drawAt(level->minPillars[level->level->operator[](x)[y].index()], xCoord, yCoord);
+                }
+            }
+        }
+    }
 }
