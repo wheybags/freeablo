@@ -5,7 +5,8 @@ namespace bfs = boost::filesystem;
 
 // We don't want warnings from StormLibs headers
 #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wc++11-extensions"
+    #pragma GCC diagnostic ignored "-Wpedantic"
+    #pragma GCC diagnostic ignored "-Wlong-long"
     #include <StormLib.h>
 #pragma GCC diagnostic pop
 
@@ -100,6 +101,7 @@ namespace FAIO
 
                 return dwBytes;
         }
+        return 0;
     }
     
     int FAfclose(FAFile* stream)
@@ -159,6 +161,8 @@ namespace FAIO
 
                 return nError != ERROR_SUCCESS;
         }
+
+        return 0;
     }
 
     size_t FAsize(FAFile* stream)
@@ -171,6 +175,8 @@ namespace FAIO
             case FAFile::MPQFile:
                 return SFileGetFileSize(*((HANDLE*)stream->data.mpqFile), NULL);
         }
+
+        return 0; 
     }
 
     uint32_t read32(FAFile* file)
