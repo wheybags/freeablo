@@ -8,7 +8,7 @@
 
 namespace Cel
 {
-    class Colour;
+    struct Colour;
     class CelFile;
 
     class CelFrame

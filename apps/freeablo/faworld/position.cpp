@@ -2,14 +2,15 @@
 
 namespace FAWorld
 {
-    Position::Position(): mDist(0), mCurrent(std::make_pair(0,0)),
-        mDirection(0), mMoving(false) {}
+    Position::Position(): mDist(0), mDirection(0),
+        mMoving(false), mCurrent(std::make_pair(0,0)) {}
 
-    Position::Position(size_t x, size_t y): mDist(0), mCurrent(std::make_pair(x,y)),
-        mDirection(0), mMoving(false) {}
+    Position::Position(size_t x, size_t y): mDist(0), mDirection(0), 
+        mMoving(false), mCurrent(std::make_pair(x,y)) {}
 
-    Position::Position(size_t x, size_t y, size_t direction): mDist(0), mCurrent(std::make_pair(x,y)),
-        mDirection(direction), mMoving(false) {}
+    Position::Position(size_t x, size_t y, size_t direction): mDist(0), 
+        mDirection(direction), mMoving(false),
+        mCurrent(std::make_pair(x,y)) {}
 
     void Position::update()
     {

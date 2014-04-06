@@ -3,7 +3,11 @@
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
-#include <StormLib.h>
+// We don't want warnings from StormLibs headers
+#pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wc++11-extensions"
+    #include <StormLib.h>
+#pragma GCC diagnostic pop
 
 namespace FAIO
 {

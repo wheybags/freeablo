@@ -24,4 +24,8 @@ ${StormFiles}
 
 target_link_libraries(StormLib ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
 
+# ignore warnings in stormlib
+if(UNIX)
+    set_target_properties(StormLib PROPERTIES COMPILE_FLAGS "-w")
+endif()
 

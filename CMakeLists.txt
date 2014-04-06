@@ -43,6 +43,12 @@ if ( NOT BZIP2_FOUND )
     message ( FATAL_ERROR "BZip2 not found!" )
 endif ()
 
+if(UNIX)
+    set(FA_COMPILER_FLAGS "-Wall -pedantic -Wextra")
+else()
+    set(FA_COMPILER_FLAGS "")
+endif()
+
 
 include_directories (
     ${SDL_INCLUDE_DIR}

@@ -83,7 +83,7 @@ namespace FALevelGen
         downStairs = 59,
         door = 47,
         floor = 13,
-        blank = 104,
+        blank = 104
     };
 
     void fillRoom(const Room& room, Level::Dun& level)
@@ -247,11 +247,11 @@ namespace FALevelGen
             int32_t maxIndex = -1;
             size_t maxNeighbourCount = 0;
 
-            for(int i = 0; i < rooms.size(); i++)
+            for(size_t i = 0; i < rooms.size(); i++)
             {
                 size_t neighbourCount = 0;
 
-                for(int j = 0; j < rooms.size(); j++)
+                for(size_t j = 0; j < rooms.size(); j++)
                 {
                     if(i != j && rooms[i].intersects(rooms[j]))
                     {
@@ -412,7 +412,7 @@ namespace FALevelGen
     // Get the value at (x,y) in level, or zero if it is an invalid position
     size_t getXY(int32_t x, int32_t y, const Level::Dun& level)
     {
-        if(x < 0 || x >= level.width() || y < 0 || y >= level.height())
+        if(x < 0 || x >= (int32_t)level.width() || y < 0 || y >= (int32_t)level.height())
             return 0;
         
         return level[x][y];
@@ -440,9 +440,9 @@ namespace FALevelGen
     // Remove double walls, as the tileset does not allow for them
     void cleanup(Level::Dun& level, std::vector<Room>& rooms)
     {
-        for(int32_t x = 0; x < level.width(); x++)
+        for(int32_t x = 0; x < (int32_t)level.width(); x++)
         {
-            for(int32_t y = 0; y < level.height(); y++)
+            for(int32_t y = 0; y < (int32_t)level.height(); y++)
             {
                 if(level[x][y] != wall || borders(x, y, blank, level))
                     continue;
@@ -486,8 +486,8 @@ namespace FALevelGen
         }
 
         // Remove any isolated wall blocks which may have been created by removing double walls 
-        for(int32_t x = 0; x < level.width(); x++)
-            for(int32_t y = 0; y < level.height(); y++)
+        for(int32_t x = 0; x < (int32_t)level.width(); x++)
+            for(int32_t y = 0; y < (int32_t)level.height(); y++)
                 if(level[x][y] == wall && getXY(x+1, y, level) != wall && getXY(x-1, y, level) != wall &&
                                              getXY(x, y+1, level) != wall && getXY(x, y-1, level) != wall)
                     level[x][y] = floor;
@@ -662,7 +662,7 @@ namespace FALevelGen
             connect(rooms[parent[i]], rooms[i], corridoorRooms, level);
         
         // Add in an extra 15% of the number of rooms random connections to create some loops
-        int fifteenPercent = (((float)rooms.size())/100.0)*15.0;
+        size_t fifteenPercent = (((float)rooms.size())/100.0)*15.0;
         for(size_t i = 0; i < fifteenPercent; i++)
         {
             size_t a, b;
@@ -678,7 +678,7 @@ namespace FALevelGen
         }
 
         // Draw rooms on top of corridoors
-        for(int i = 0; i < rooms.size(); i++)
+        for(size_t i = 0; i < rooms.size(); i++)
             drawRoom(rooms[i], level);
         
         // Bound corridoors with walls
@@ -709,9 +709,9 @@ namespace FALevelGen
         return getXY(x, y, level) == wall || getXY(x, y, level) == door || getXY(x, y, level) == upStairs;
     }
  
-    void setPoint(int32_t x, int32_t y, int val, const Level::Dun& tmpLevel,  Level::Dun& level, const TileSet& tileset)
+    void setPoint(int32_t x, int32_t y, size_t val, const Level::Dun& tmpLevel,  Level::Dun& level, const TileSet& tileset)
     {
-        int newVal = val;
+        size_t newVal = val;
 
         if(val == tileset.xWall)
         {   
@@ -812,9 +812,9 @@ namespace FALevelGen
         TileSet tileset(ss.str());
         
         // Fill in isometric information (wall direction, etc), using flat tmpLevel as a base
-        for(int32_t x = 0; x < width; x++)
+        for(int32_t x = 0; x < (int32_t)width; x++)
         {
-            for(int32_t y = 0; y < height; y++)
+            for(int32_t y = 0; y < (int32_t)height; y++)
             {
                 if(isWall(x, y, tmpLevel))
                 {
@@ -861,9 +861,9 @@ namespace FALevelGen
         std::pair<size_t, size_t> upStairsPoint;
         
         // Add in some random aesthetic variation
-        for(int32_t x = 0; x < width; x++)
+        for(int32_t x = 0; x < (int32_t)width; x++)
         {
-            for(int32_t y = 0; y < height; y++)
+            for(int32_t y = 0; y < (int32_t)height; y++)
             {
                 if(level[x][y] == upStairs)
                 {

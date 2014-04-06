@@ -76,8 +76,6 @@ namespace FARender
 
             void renderLoop();
             
-            boost::thread* mThread;            
-
             boost::atomic<RenderThreadState> mRenderThreadState;
 
             void* mThreadCommunicationTmp;

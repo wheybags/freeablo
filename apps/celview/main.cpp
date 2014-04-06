@@ -28,7 +28,7 @@ void keyPress(Input::Key key)
     std::cout << "frame " << celIndex+1 << "/" << max << std::endl;
 }
 
-int main(int argc, char** argv)
+int main(int, char** argv)
 {
     Render::init(); 
     Input::InputManager input(&keyPress, NULL, NULL, NULL, NULL);

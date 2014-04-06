@@ -5,7 +5,7 @@
 
 namespace DiabloExe
 {
-    class Monster;
+    struct Monster;
 }
 
 namespace FAWorld

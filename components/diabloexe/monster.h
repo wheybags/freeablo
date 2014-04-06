@@ -8,7 +8,7 @@
 
 namespace FAIO
 {
-    class FAFile;
+    struct FAFile;
 }
 
 namespace DiabloExe

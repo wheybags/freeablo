@@ -54,9 +54,9 @@ namespace Render
 
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)
     {
-        for(int x = 0; x < frame.mWidth; x++)
+        for(size_t x = 0; x < frame.mWidth; x++)
         {
-            for(int y = 0; y < frame.mHeight; y++)
+            for(size_t y = 0; y < frame.mHeight; y++)
             {
                 if(frame[x][y].visible)
                     setpixel(s, start_x+x, start_y+y, frame[x][y]);
@@ -80,7 +80,7 @@ namespace Render
             y += 3*32;
 
         // Each iteration draw one row of the min
-        for(int i = 0; i < pillar.size(); i+=2)
+        for(size_t i = 0; i < pillar.size(); i+=2)
         {
             int16_t l = (pillar[i]&0x0FFF)-1;
             int16_t r = (pillar[i+1]&0x0FFF)-1;

@@ -36,7 +36,6 @@ namespace DiabloExe
         
         Misc::md5_state_t state;
         Misc::md5_byte_t digest[16];
-        int di;
 
         md5_init(&state);
         md5_append(&state, buff, size);

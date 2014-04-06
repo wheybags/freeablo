@@ -52,7 +52,7 @@ void mouseClick(size_t x, size_t y, Input::Key key)
     }
 }
 
-void mouseRelease(size_t x, size_t y, Input::Key key)
+void mouseRelease(size_t, size_t, Input::Key key)
 {
     if(key == Input::KEY_LEFT_MOUSE)
         mouseDown = false;
@@ -208,7 +208,7 @@ int realmain(int argc, char** argv)
         if(changeLevel)
         {
             int32_t tmp = currentLevel + changeLevel;
-            if(tmp >= 0 && tmp < levels.size())
+            if(tmp >= 0 && tmp < (int32_t)levels.size())
             {
                 currentLevel = tmp;
 
@@ -231,7 +231,7 @@ int realmain(int argc, char** argv)
 
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
         
-        while(now.time_of_day().total_milliseconds() - last.time_of_day().total_milliseconds() < 1000/FAWorld::World::ticksPerSecond)
+        while((size_t)(now.time_of_day().total_milliseconds() - last.time_of_day().total_milliseconds()) < 1000/FAWorld::World::ticksPerSecond)
         {
             boost::this_thread::sleep(boost::posix_time::milliseconds(1));
             now = boost::posix_time::microsec_clock::local_time();

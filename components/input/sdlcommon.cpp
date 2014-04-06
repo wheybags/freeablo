@@ -6,11 +6,11 @@ namespace Input
 {
     InputManager* InputManager::instance = NULL;
 
-    void doNothing_keyPress(Key k){}
-    void doNothing_keyRelease(Key k){}
-    void doNothing_mouseClick(uint32_t x, uint32_t y, Key k){}
-    void doNothing_mouseRelease(uint32_t x, uint32_t y, Key k){}
-    void doNothing_mouseMove(uint32_t x, uint32_t y){}
+    void doNothing_keyPress(Key){}
+    void doNothing_keyRelease(Key){}
+    void doNothing_mouseClick(uint32_t, uint32_t, Key){}
+    void doNothing_mouseRelease(uint32_t, uint32_t, Key){}
+    void doNothing_mouseMove(uint32_t, uint32_t){}
     
     #define getFunc(f) f ? f : doNothing_##f
 
@@ -19,8 +19,8 @@ namespace Input
         boost::function<void(uint32_t, uint32_t, Key)> mouseRelease,
         boost::function<void(uint32_t, uint32_t)> mouseMove):
             
-            mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
-            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)), mQueue(500)
+            mQueue(500), mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
+            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove))
             {
                 assert(!instance);
                 instance = this;

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-int main(int argc, char** argv)
+int main(int, char**)
 {
     DiabloExe::DiabloExe exe;
     std::cout << exe.dump();

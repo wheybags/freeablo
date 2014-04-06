@@ -20,11 +20,11 @@ namespace FAWorld
     {
         public:
             Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos):
+                mPos(pos),
                 mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)), 
                 mIdleAnim(FARender::Renderer::get()->loadImage(idleAnimPath)), 
-                mAnimState(AnimState::idle), 
                 mFrame(0),
-                mPos(pos) {}
+                mAnimState(AnimState::idle) {}
             void update();
 
             FARender::FASpriteGroup getCurrentAnim();
