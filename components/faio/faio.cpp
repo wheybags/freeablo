@@ -1,5 +1,7 @@
 #include "faio.h"
 
+#include <iostream>
+
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
