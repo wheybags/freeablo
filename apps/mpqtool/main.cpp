@@ -7,7 +7,7 @@
 
 #include <faio/faio.h>
 
-int main(int argc, char** argv)
+int main(int, char** argv)
 {
 
     FAIO::FAFile* file = FAIO::FAfopen(argv[1]);

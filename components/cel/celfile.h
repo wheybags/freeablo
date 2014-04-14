@@ -7,64 +7,46 @@
 
 #include "pal.h"
 
-class Cel_frame;
 
 namespace FAIO
 {
-    class FAFile;
+    struct FAFile;
 }
 
-class Cel_file
+namespace Cel
 {
-    public:
-        Cel_file(std::string filename);
-        ~Cel_file();
-        
+    class CelFrame;
 
-        size_t num_frames();
+    class CelFile
+    {
+        public:
+            CelFile(std::string filename);
 
-        Cel_frame& operator[] (size_t index);
+            size_t numFrames();
 
-    private:
-        size_t get_frame(size_t frame_num, std::vector<colour>& raw_image);
+            CelFrame& operator[] (size_t index);
 
-        size_t read_num_frames();
-        void read_frame_offsets();
-        
-        static bool greater_than_first(const std::vector<uint8_t>& frame);
-        static bool greater_than_second(const std::vector<uint8_t>& frame);
-        static bool is_greater_than(const std::vector<uint8_t>& frame);
-        
-        void drawRow(int row, int end, int& i, const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image, bool lessThan);
+            size_t animLength(); ///< if normal cel file, returns same as numFrames(), for an archive, the number of frames in each subcel
 
-        void decode_greater_less_than(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image, bool lessThan);
+        private:
+            size_t getFrame(const std::vector<uint8_t>& frame, std::vector<Colour>& rawImage);
 
-        void decode_greater_than(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image);
+            size_t readNormalFrames(FAIO::FAFile* file);
+            size_t readCl2ArchiveFrames(FAIO::FAFile* file);
+                   
+            Pal getPallette(std::string filename);
 
-        bool less_than_first(const std::vector<uint8_t>& frame);
-        bool less_than_second(const std::vector<uint8_t>& frame);
-        bool is_less_than(const std::vector<uint8_t>& frame);
+            Pal mPal;
 
-        void decode_less_than(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image);
+            std::vector<std::vector<uint8_t> > mFrames;
 
-        void fill_t(size_t pixels, std::vector<colour>& raw_image);
-        int32_t normal_width(const std::vector<uint8_t>& frame, bool from_header, uint16_t offset);
-        void normal_decode(const std::vector<uint8_t>& frame, size_t width, bool from_header, Pal pal, std::vector<colour>& raw_image);
-        size_t decode_raw_32(const std::vector<uint8_t>& frame, Pal pal, std::vector<colour>& raw_image);
-        bool ends_with(const std::string& full, const std::string& end);
-        std::string replace_end(const std::string& old_end, const std::string& new_end, const std::string& original);
-        bool is_tile_cel(const std::string& file_name);
-        Pal get_pallette(std::string filename);
+            bool mIsTileCel;
+            bool mIsCl2;
 
-        FAIO::FAFile* mFile;
-        
-        Pal mPal;
-        
-        std::vector<uint32_t> mFrame_offsets;
+            std::map<size_t, CelFrame> mCache;
 
-        bool mIs_tile_cel;
-        
-        std::map<size_t, Cel_frame> mCache;
-};
+            size_t mAnimLength;
+    };
+}
 
 #endif

@@ -5,7 +5,12 @@
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
-#include <StormLib.h>
+// We don't want warnings from StormLibs headers
+#pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
+    #pragma GCC diagnostic ignored "-Wlong-long"
+    #include <StormLib.h>
+#pragma GCC diagnostic pop
 
 namespace FAIO
 {
@@ -48,12 +53,20 @@ namespace FAIO
                 return NULL;
             }
             
+            std::string stormPath = getStormLibPath(path);
+
+            if(!SFileHasFile(diabdat, stormPath.c_str()))
+            {
+                std::cerr << "File " << path << " not found" << std::endl;
+                return NULL;
+            }
+            
             FAFile* file = new FAFile();
             file->data.mpqFile = malloc(sizeof(HANDLE));
 
-            if(!SFileOpenFileEx(diabdat, getStormLibPath(path).c_str(), 0, (HANDLE*)file->data.mpqFile))
+            if(!SFileOpenFileEx(diabdat, stormPath.c_str(), 0, (HANDLE*)file->data.mpqFile))
             {
-                std::cout << "Failed to open " << filename << " in DIABDAT.MPQ";
+                std::cerr << "Failed to open " << filename << " in DIABDAT.MPQ";
                 delete file;
                 return NULL;
             }
@@ -90,6 +103,7 @@ namespace FAIO
 
                 return dwBytes;
         }
+        return 0;
     }
     
     int FAfclose(FAFile* stream)
@@ -149,6 +163,8 @@ namespace FAIO
 
                 return nError != ERROR_SUCCESS;
         }
+
+        return 0;
     }
 
     size_t FAsize(FAFile* stream)
@@ -161,5 +177,49 @@ namespace FAIO
             case FAFile::MPQFile:
                 return SFileGetFileSize(*((HANDLE*)stream->data.mpqFile), NULL);
         }
+
+        return 0; 
+    }
+
+    uint32_t read32(FAFile* file)
+    {
+        uint32_t tmp;
+        FAfread(&tmp, 4, 1, file);
+        return tmp;
+    }
+
+    uint16_t read16(FAFile* file)
+    {
+        uint16_t tmp;
+        FAfread(&tmp, 2, 1, file);
+        return tmp;
+    }
+
+    uint8_t read8(FAFile* file)
+    {
+        uint8_t tmp;
+        FAfread(&tmp, 1, 1, file);
+        return tmp;
+    }
+
+    std::string readCString(FAFile* file, size_t ptr)
+    {
+        std::string retval = "";
+        
+        if(ptr)
+        {
+            FAfseek(file, ptr, SEEK_SET);
+            char c;
+
+            FAfread(&c, 1, 1, file);
+
+            while(c != '\0')
+            {
+                retval += c;
+                FAfread(&c, 1, 1, file);
+            }
+        }
+
+        return retval;
     }
 }
