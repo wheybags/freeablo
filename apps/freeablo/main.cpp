@@ -254,7 +254,7 @@ int realmain(int argc, char** argv)
                 player->mPos.mDirection = Misc::getVecDir(vector);
             }
         }
-        else if(player->mPos.mMoving)
+        else if(player->mPos.mMoving && player->mPos.mDist == 0)
         {
             player->mPos.mMoving = false;
             player->setAnimation(FAWorld::AnimState::idle);
