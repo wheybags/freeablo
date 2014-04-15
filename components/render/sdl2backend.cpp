@@ -13,8 +13,8 @@
 
 namespace Render
 {
-    #define WIDTH 1280
-    #define HEIGHT 960
+    int32_t WIDTH = 1280;
+    int32_t HEIGHT = 960;
     #define DEPTH 32
 
     SDL_Window* screen;
@@ -23,20 +23,24 @@ namespace Render
     void init()
     {
         SDL_Init(SDL_INIT_VIDEO);
-        SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, 0, &screen, &renderer);
-
+        SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, SDL_WINDOW_RESIZABLE, &screen, &renderer);
         
         if(screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
     }
-
+	
     void quit()
     {
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
         SDL_Quit();
     }
-    
+
+    void resize(size_t w, size_t h)
+    {
+        WIDTH = w;
+        HEIGHT = h;
+    }
 
     void draw()
     {

@@ -5,11 +5,6 @@
 #include <cel/celframe.h>
 #include <level/level.h>
 
-    #define WIDTH 1280
-    #define HEIGHT 960
-    #define BPP 4
-    #define DEPTH 32
-
 #ifdef SDL_HWSURFACE
     #define SURFACE_FLAGS SDL_HWSURFACE
 #else
@@ -18,6 +13,11 @@
 
 namespace Render
 {
+	extern int32_t WIDTH;
+	extern int32_t HEIGHT;
+    #define BPP 4
+    #define DEPTH 32
+
     void clearTransparentSurface(SDL_Surface* s)
     {
         SDL_FillRect(s, NULL, SDL_MapRGBA(s->format, 0, 0, 0, 0)); 

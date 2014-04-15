@@ -2,6 +2,8 @@
 
 #include <SDL.h>
 
+#include <render/render.h>
+
 namespace Input
 {
     InputManager* InputManager::instance = NULL;
@@ -254,6 +256,21 @@ namespace Input
                     e.vals.mouseMove.y = event.motion.y;
                     break;
                 }
+				
+				#if SDL_MAJOR_VERSION == 2
+				case SDL_WINDOWEVENT:
+				{
+					if(event.window.event == SDL_WINDOWEVENT_RESIZED)
+						Render::resize(event.window.data1, event.window.data2);
+
+					break;
+				}
+				#else
+				case SDL_VIDEORESIZE:
+				{
+					Render::resize(event.resize.w, event.resize.h);
+				}
+				#endif
 
                 default:
                 {

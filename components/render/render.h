@@ -19,6 +19,8 @@ namespace Render
 {
     void init(); 
     void quit(); 
+
+	void resize(size_t w, size_t h);
     
     void draw();
 

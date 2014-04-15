@@ -13,8 +13,8 @@
 
 namespace Render
 {
-    #define WIDTH 1280
-    #define HEIGHT 960
+    int32_t WIDTH = 1280;
+    int32_t HEIGHT = 960;
     #define DEPTH 32
 
     SDL_Surface* screen;
@@ -22,12 +22,19 @@ namespace Render
     void init()
     {
         SDL_Init(SDL_INIT_VIDEO);
-        screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE | SDL_DOUBLEBUF);
+        screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_RESIZABLE);
     }
 
     void quit()
     {
         SDL_Quit();
+    }
+
+    void resize(size_t w, size_t h)
+    {
+        WIDTH = w;
+        HEIGHT = h;
+        screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_RESIZABLE);
     }
 
     void draw()
