@@ -100,7 +100,7 @@ namespace Render
 
         SDL_Surface* newPillar = createTransparentSurface(64, 256);
         
-        for(size_t i = 0; i < level.minSize(); i++)
+        for(size_t i = 0; i < level.minSize()-1; i++)
         {
             clearTransparentSurface(newPillar);
             drawMinPillar(newPillar, 0, 0, level.minPillar(i), town);

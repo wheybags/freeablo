@@ -17,7 +17,14 @@ namespace Level
 
     bool Sol::passable(size_t index) const
     {
-        return !(mData[index] & 0x01);
+        if(index >= size())
+            return 0;
+        else
+            return !(mData[index] & 0x01);
     }
 
+    size_t Sol::size() const
+    {
+        return mData.size();
+    }
 }

@@ -14,6 +14,8 @@ namespace Level
             Sol(const std::string& path);
             
             bool passable(size_t index) const;
+
+            size_t size() const;
         
         private:
             std::vector<uint8_t> mData;
