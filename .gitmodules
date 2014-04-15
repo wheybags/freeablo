@@ -1,3 +1,0 @@
-[submodule "extern/StormLib"]
-	path = extern/StormLib
-	url = https://github.com/stormlib/StormLib.git
