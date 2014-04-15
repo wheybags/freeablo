@@ -109,7 +109,7 @@ Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
 }
 int realmain(int argc, char** argv);
 
-bool renderDone = false;
+volatile bool renderDone = false;
 int main(int argc, char** argv)
 {
     boost::thread mainThread(boost::bind(&realmain, argc, argv));
