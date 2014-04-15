@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <stdlib.h>
+#include <stdint.h>
 
 namespace FAWorld
 {

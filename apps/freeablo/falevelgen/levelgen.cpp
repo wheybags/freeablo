@@ -72,7 +72,7 @@ namespace FALevelGen
 
             size_t distance(const Room& other) const
             {
-                return sqrt((centre().first - other.centre().first)*(centre().first - other.centre().first) + (centre().second - other.centre().second)*(centre().second - other.centre().second));
+                return sqrt((float)((centre().first - other.centre().first)*(centre().first - other.centre().first) + (centre().second - other.centre().second)*(centre().second - other.centre().second)));
             }
     };
 

@@ -8,7 +8,7 @@ add_library(Cel
 
 add_library(FAIO faio/faio.cpp faio/faio.h)
 target_link_libraries(FAIO StormLib ${Boost_LIBRARIES})
-set_target_properties(FAIO PROPERTIES COMPILE_FLAGS ${FA_COMPILER_FLAGS})
+set_target_properties(FAIO PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Levels 
     level/dun.cpp  
@@ -22,7 +22,7 @@ add_library(Levels
     level/sol.cpp
     level/sol.h)
 target_link_libraries(Levels FAIO)
-set_target_properties(Levels PROPERTIES COMPILE_FLAGS ${FA_COMPILER_FLAGS})
+set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Misc 
     misc/stringops.h
@@ -34,7 +34,7 @@ add_library(Misc
     misc/misc.h
     misc/misc.cpp)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
-set_target_properties(Misc PROPERTIES COMPILE_FLAGS ${FA_COMPILER_FLAGS})
+set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 
 set(RenderFiles render/render.h render/sdlcommon.cpp)
@@ -46,12 +46,12 @@ endif()
 
 add_library(Render ${RenderFiles})
 target_link_libraries(Render Cel Levels ${SDL_LIBRARY})
-set_target_properties(Render PROPERTIES COMPILE_FLAGS ${FA_COMPILER_FLAGS})
+set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
     input/inputmanager.h
     input/sdlcommon.cpp)
-set_target_properties(Input PROPERTIES COMPILE_FLAGS ${FA_COMPILER_FLAGS})
+set_target_properties(Input PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(DiabloExe
     diabloexe/diabloexe.h
@@ -61,4 +61,4 @@ add_library(DiabloExe
     diabloexe/npc.h
     diabloexe/npc.cpp)
 target_link_libraries(DiabloExe ${Boost_Libraries} Misc)
-set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS ${FA_COMPILER_FLAGS})
+set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

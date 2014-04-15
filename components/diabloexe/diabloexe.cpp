@@ -4,6 +4,7 @@
 
 #include <iomanip>
 #include <sstream>
+#include <iostream>
 
 #include <misc/fareadini.h>
 #include <misc/md5.h>

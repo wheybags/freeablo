@@ -22,4 +22,4 @@ add_executable(freeablo
     faworld/position.cpp
     faworld/world.cpp  
     faworld/world.h)
-set_target_properties(freeablo PROPERTIES COMPILE_FLAGS ${FA_COMPILER_FLAGS})
+set_target_properties(freeablo PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

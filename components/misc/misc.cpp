@@ -2,6 +2,10 @@
 
 #include <cmath>
 
+#ifndef M_PI
+    #define M_PI 3.142
+#endif
+
 namespace Misc
 {
     int32_t getVecDir(const std::pair<float, float>& vector)

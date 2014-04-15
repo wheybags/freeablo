@@ -19,36 +19,31 @@ else()
     Find_Package ( SDL REQUIRED )
 endif()
 
-
-#Find_Package ( ZLIB REQUIRED )
-#Find_Package ( BZip2 REQUIRED )
-
-
 if(WIN32)
 	set(Boost_USE_STATIC_LIBS   ON)
+else()
+    Find_Package ( ZLIB REQUIRED )
+    Find_Package ( BZip2 REQUIRED )
+    
+    if ( NOT ZLIB_FOUND )
+        message ( FATAL_ERROR "ZLIB not found!" )
+    endif ()
+    if ( NOT BZIP2_FOUND )
+        message ( FATAL_ERROR "BZip2 not found!" )
+    endif ()
 endif()
-find_package(Boost COMPONENTS chrono date_time filesystem system random thread program_options REQUIRED)
 
+find_package(Boost COMPONENTS chrono date_time filesystem system random thread program_options atomic REQUIRED)
 
 if ( NOT SDL_FOUND )
     message ( FATAL_ERROR "SDL not found!" )
 endif ()
-
-
-#if ( NOT ZLIB_FOUND )
-#    message ( FATAL_ERROR "ZLIB not found!" )
-#endif ()
-
-#if ( NOT BZIP2_FOUND )
-#    message ( FATAL_ERROR "BZip2 not found!" )
-#endif ()
 
 if(UNIX)
     set(FA_COMPILER_FLAGS "-Wall -pedantic -Wextra")
 else()
     set(FA_COMPILER_FLAGS "")
 endif()
-
 
 include_directories (
     ${SDL_INCLUDE_DIR}
