@@ -52,7 +52,7 @@ Please feel free to submit bug reports on the github issue tracker at https://gi
 
 
 #Changelog
-##v1.0
+##v0.1
 - CEL / CL2 decoding
 - Level rendering
 - Level Generation
