@@ -52,7 +52,7 @@ namespace Render
         int width, height;
         SDL_QueryTexture(sprite, NULL, NULL, &width, &height);
 
-        SDL_Rect dest = { x, y, width, height };
+        SDL_Rect dest = { int(x), int(y), width, height };
         
         SDL_RenderCopy(renderer, sprite, NULL, &dest);
     }
