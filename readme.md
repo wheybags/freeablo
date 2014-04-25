@@ -6,6 +6,8 @@ As it is just an engine, you will need the original data files to play the game.
 Currently, you can run around town, players and npcs animate, and you can go down into the first few levels of the dungeon (which is randomly generated).
 This is just a base for a game so far, so if you can help, please see the contributing section below!
 
+There is a website at http://freeablo.org
+
 #Installation
 Build the engine yourself (instructions below), or grab a prebuilt binary for your platform from https://github.com/wheybags/freeablo/releases
 Copy DIABDAT.MPQ and Diablo.exe from your diablo install into the folder with the freeablo executable. (NOTE: only version 1.09 of diablo is currently supported, so please patch to that version)
