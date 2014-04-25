@@ -77,7 +77,8 @@ namespace Render
             SDL_FreeSurface((SDL_Surface*)mSprites[i]);
     }
 	
-    void drawMinPillar(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
+    void drawMinPillarTop(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
+    void drawMinPillarBase(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
     
     RenderLevel* setLevel(const Level::Level& level)
     {
@@ -87,18 +88,15 @@ namespace Render
 
         retval->level = &level;
 
-        for(size_t x = 0; x < level.width(); x++)
+        for(size_t i = 0; i < level.minSize()-1; i++)
         {
-            for(size_t y = 0; y < level.height(); y++)
-            {
-                if(retval->minPillars.find(retval->level->operator[](x)[y].index()) == retval->minPillars.end())
-                {
                     SDL_Surface* newPillar = createTransparentSurface(64, 256);
-                    drawMinPillar(newPillar, 0, 0, level[x][y], town);
+                    drawMinPillarTop(newPillar, 0, 0, level.minPillar(i), town);
+                    retval->minTops[i] = newPillar;
 
-                    retval->minPillars[level[x][y].index()] = newPillar;
-                }
-            }
+                    newPillar = createTransparentSurface(64, 256);
+                    drawMinPillarBase(newPillar, 0, 0, level.minPillar(i), town);
+                    retval->minBottoms[i] = newPillar;
         }
 
         retval->levelWidth = level.width();
@@ -120,7 +118,10 @@ namespace Render
 
     RenderLevel::~RenderLevel()
     {
-        for(std::map<int32_t, Sprite>::iterator it = minPillars.begin(); it != minPillars.end(); ++it)
+        for(std::map<int32_t, Sprite>::iterator it = minTops.begin(); it != minTops.end(); ++it)
+            SDL_FreeSurface((SDL_Surface*)it->second);
+
+        for(std::map<int32_t, Sprite>::iterator it = minBottoms.begin(); it != minBottoms.end(); ++it)
             SDL_FreeSurface((SDL_Surface*)it->second);
     }
 }

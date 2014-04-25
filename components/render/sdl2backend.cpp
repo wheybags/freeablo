@@ -92,7 +92,8 @@ namespace Render
             SDL_DestroyTexture((SDL_Texture*)mSprites[i]);
     }
 	
-    void drawMinPillar(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
+    void drawMinPillarTop(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
+    void drawMinPillarBase(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
     
     RenderLevel* setLevel(const Level::Level& level)
     {
@@ -107,9 +108,12 @@ namespace Render
         for(size_t i = 0; i < level.minSize()-1; i++)
         {
             clearTransparentSurface(newPillar);
-            drawMinPillar(newPillar, 0, 0, level.minPillar(i), town);
+            drawMinPillarTop(newPillar, 0, 0, level.minPillar(i), town);
+            retval->minTops[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
 
-            retval->minPillars[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
+            clearTransparentSurface(newPillar);
+            drawMinPillarBase(newPillar, 0, 0, level.minPillar(i), town);
+            retval->minBottoms[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
         }
 
         SDL_FreeSurface(newPillar);
@@ -136,7 +140,10 @@ namespace Render
 
     RenderLevel::~RenderLevel()
     {
-        for(std::map<int32_t, Sprite>::iterator it = minPillars.begin(); it != minPillars.end(); ++it)
+        for(std::map<int32_t, Sprite>::iterator it = minTops.begin(); it != minTops.end(); ++it)
+            SDL_DestroyTexture((SDL_Texture*)it->second);
+
+        for(std::map<int32_t, Sprite>::iterator it = minBottoms.begin(); it != minBottoms.end(); ++it)
             SDL_DestroyTexture((SDL_Texture*)it->second);
     }
 }
