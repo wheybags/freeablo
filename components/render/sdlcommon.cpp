@@ -73,14 +73,28 @@ namespace Render
             drawFrame(s, x+32, y, f[r]);
     }
 
-    void drawMinPillar(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset)
+    void drawMinPillar(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset, bool top)
     {
         // compensate for maps using 5-row min files
         if(pillar.size() == 10)
             y += 3*32;
 
+        size_t i, lim;
+
+        if(top)
+        {
+            i = 0;
+            lim = pillar.size() - 2;
+        }
+        else
+        {
+            i = pillar.size() - 2;
+            lim = pillar.size();
+            y += i*16;
+        }
+
         // Each iteration draw one row of the min
-        for(size_t i = 0; i < pillar.size(); i+=2)
+        for(; i < lim; i+=2)
         {
             int16_t l = (pillar[i]&0x0FFF)-1;
             int16_t r = (pillar[i+1]&0x0FFF)-1;
@@ -89,6 +103,16 @@ namespace Render
         
             y += 32; // down 32 each row
         }
+    }
+
+    void drawMinPillarTop(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset)
+    {
+        drawMinPillar(s, x, y, pillar, tileset, true);
+    }
+
+    void drawMinPillarBase(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset)
+    {
+        drawMinPillar(s, x, y, pillar, tileset, false);
     }
 
     void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
@@ -163,7 +187,20 @@ namespace Render
         return std::make_pair(isoPosX, isoPosY);
     }
 
-    void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    void drawLevelHelper(RenderLevel* level, std::map<int32_t, Sprite>& minMap, int32_t x, int32_t y)
+    {
+        if(x < level->level->width() && y < level->level->height())
+        {
+            size_t index = level->level->operator[](x)[y].index();
+            int32_t xCoord = (y*(-32)) + 32*x + level->level->height()*32-32 +level->levelX;
+            int32_t yCoord = (y*16) + 16*x + level->levelY;
+
+            if(xCoord >= -64 && xCoord <=  WIDTH  && yCoord >= -256 && yCoord <= HEIGHT && minMap.find(index) != minMap.end())
+                drawAt(minMap[index], xCoord, yCoord);
+        }
+    }
+
+    void drawLevel(RenderLevel* level, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
         int16_t xPx1 = -((y1*(-32)) + 32*x1 + level->levelWidth*32) +WIDTH/2;
         int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
@@ -180,13 +217,18 @@ namespace Render
         {
             for(size_t y = 0; y < level->level->height(); y++)
             {
-                int32_t xCoord = (y*(-32)) + 32*x + level->level->height()*32-32 +level->levelX;
-                int32_t yCoord = (y*16) + 16*x + level->levelY;
+                drawLevelHelper(level, level->minBottoms, x+1, y+1);
+            }
+        }
 
-                if(xCoord >= -64 && xCoord <=  WIDTH  && yCoord >= -256 && yCoord <= HEIGHT && level->minPillars.find(level->level->operator[](x)[y].index()) != level->minPillars.end())
-                {
-                    drawAt(level->minPillars[level->level->operator[](x)[y].index()], xCoord, yCoord);
-                }
+        for(size_t x = 0; x < level->level->width(); x++)
+        {
+            for(size_t y = 0; y < level->level->height(); y++)
+            {
+                if(objs[x][y].sprite)
+                    drawAt(level, objs[x][y].sprite, x, y, objs[x][y].x2, objs[x][y].y2, objs[x][y].dist);
+
+                drawLevelHelper(level, level->minTops, x, y);
             }
         }
     }

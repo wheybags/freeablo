@@ -10,6 +10,13 @@
 #include <cel/celfile.h>
 #include <cel/celframe.h>
 
+namespace Render
+{
+    typedef void* Sprite;
+}
+
+#include "levelobjects.h"
+
 namespace Level
 {
     class Level;
@@ -24,7 +31,6 @@ namespace Render
     
     void draw();
 
-    typedef void* Sprite;
     void drawAt(const Sprite& sprite, size_t x, size_t y); 
 
     class SpriteGroup
@@ -55,6 +61,8 @@ namespace Render
 
     void spriteSize(const Sprite& sprite, size_t& w, size_t& h);
 
+
+
     struct RenderLevel
     {
         public:
@@ -62,20 +70,22 @@ namespace Render
 
         private:
             const Level::Level* level;
-            std::map<int32_t, Sprite> minPillars;
+            std::map<int32_t, Sprite> minTops;
+            std::map<int32_t, Sprite> minBottoms;
             int32_t levelHeight;
             int32_t levelWidth;
             int32_t levelX;
             int32_t levelY;
 
             friend RenderLevel* setLevel(const Level::Level& level);
-            friend void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+            friend void drawLevel(RenderLevel* level, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+            friend void drawLevelHelper(RenderLevel* level, std::map<int32_t, Sprite>& minMap, int32_t x, int32_t y);
             friend void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
             friend std::pair<size_t, size_t> getClickedTile(RenderLevel* level, size_t x, size_t y);
     };
 
     RenderLevel* setLevel(const Level::Level& level);
-    void drawLevel(RenderLevel* level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    void drawLevel(RenderLevel* level, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
     void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
     
     std::pair<size_t, size_t> getClickedTile(RenderLevel* level, size_t x, size_t y);

@@ -37,7 +37,7 @@ SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 
-set(RenderFiles render/render.h render/sdlcommon.cpp)
+set(RenderFiles render/render.h render/sdlcommon.cpp render/levelobjects.cpp render/levelobjects.h)
 if(USE_SDL2)
     set(RenderFiles ${RenderFiles} render/sdl2backend.cpp)
 else()
