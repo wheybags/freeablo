@@ -29,7 +29,8 @@ The above will all be made configurable at some point.
 If you are using windows, please see https://github.com/wheybags/freeablo-windows-build/tree/master for instructions on building with Visual Studio 2010
 
 ##Linux/Unix
-freeablo uses cmake, and depends on boost >= 1.54, and SDL 1 or 2, so make sure to have those installed.
+freeablo uses cmake, and depends on boost >= 1.54, libbz2, zlib, and SDL 1 or 2, so make sure to have those installed.
+Please note that performance for the SDL1 backend is quite bad (Iget around 10fps, compared to about 600 with SDL2).
 
 Get the source:
 
