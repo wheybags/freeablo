@@ -51,6 +51,7 @@ namespace FAIO
     uint16_t read16(FAFile* file);
     uint8_t read8(FAFile* file);
     std::string readCString(FAFile* file, size_t ptr);
+    std::string getMPQFileName();
 }
 
 #endif 

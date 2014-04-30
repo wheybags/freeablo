@@ -1,8 +1,10 @@
 #include "faio.h"
 
 #include <iostream>
-
+#include "dirent.h"
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+
 namespace bfs = boost::filesystem;
 
 // We don't want warnings from StormLibs headers
@@ -15,6 +17,8 @@ namespace bfs = boost::filesystem;
 namespace FAIO
 {
     FAFile::FAFile(){}
+
+    const std::string __S_DIABDAT_MPQ = "DIABDAT.MPQ";
 
     // StormLib needs paths with windows style \'s
     std::string getStormLibPath(const bfs::path& path)
@@ -43,13 +47,13 @@ namespace FAIO
         if(!bfs::exists(filename))
         {
             int nError = ERROR_SUCCESS;
-
-            if(diabdat == NULL && !SFileOpenArchive("DIABDAT.MPQ", 0, 0, &diabdat))
+            
+            if(diabdat == NULL && !SFileOpenArchive(getMPQFileName().c_str(), 0, 0, &diabdat))
                 nError = GetLastError();
 
             if(nError != ERROR_SUCCESS)
             {
-                std::cerr << "Failed to open DIABDAT.MPQ" << std::endl;
+                std::cerr << "Failed to open " << __S_DIABDAT_MPQ << std::endl;
                 return NULL;
             }
             
@@ -66,7 +70,7 @@ namespace FAIO
 
             if(!SFileOpenFileEx(diabdat, stormPath.c_str(), 0, (HANDLE*)file->data.mpqFile))
             {
-                std::cerr << "Failed to open " << filename << " in DIABDAT.MPQ";
+                std::cerr << "Failed to open " << filename << " in " << __S_DIABDAT_MPQ;
                 delete file;
                 return NULL;
             }
@@ -221,5 +225,24 @@ namespace FAIO
         }
 
         return retval;
+    }
+
+    std::string getMPQFileName()
+    {
+        DIR *dir;
+        struct dirent *ent;
+        if ((dir = opendir (".")) != NULL) 
+        {
+            while ((ent = readdir (dir)) != NULL)
+            {
+                if (boost::iequals(ent->d_name, __S_DIABDAT_MPQ))
+                {
+                    closedir(dir);
+                    return ent->d_name;
+                }
+            }
+            closedir (dir);
+        }
+        return ""; 
     }
 }
