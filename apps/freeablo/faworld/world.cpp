@@ -8,8 +8,22 @@
 
 #include "monster.h"
 
+//Andrettin: added the includes below to be able to read the NPCs.ini file
+#include <stdint.h>
+
+#include <iomanip>
+#include <sstream>
+#include <iostream>
+
+#include <misc/fareadini.h>
+#include <misc/md5.h>
+#include <misc/stringops.h>
+
 namespace FAWorld
 {
+    //Andrettin: added this here as part of the process of reading the NPCs.ini file
+    namespace bpt = boost::property_tree;
+
     World::World()
     {
         mPlayer = new Player();
@@ -22,7 +36,7 @@ namespace FAWorld
         for(size_t i = 0; i < mActors.size(); i++)
             delete mActors[i];
     }
-    
+
     void World::setLevel(const Level::Level& level, const DiabloExe::DiabloExe& exe)
     {
         const std::vector<Level::Monster>& monsters = level.getMonsters();
@@ -33,10 +47,22 @@ namespace FAWorld
 
     void World::addNpcs(const DiabloExe::DiabloExe& exe)
     {
-        const std::vector<const DiabloExe::Npc*> npcs = exe.getNpcs();
+	    const std::vector<const DiabloExe::Npc*> npcs = exe.getNpcs();
 
-        for(size_t i = 0; i < npcs.size(); i++)
-            mActors.push_back(new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation)));
+	    for(size_t i = 0; i < npcs.size(); i++)
+	    {
+		    mActors.push_back(new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation)));
+	    }
+
+    	bpt::ptree pt;
+	    Misc::readIni("resources/NPCs.ini", pt);
+	    for(bpt::ptree::const_iterator it = pt.begin(); it != pt.end(); ++it)
+	    {
+		    if(Misc::StringUtils::startsWith(it->first, "NPC"))
+			{
+				mActors.push_back(new Actor(it->second.get<std::string>("cel"), it->second.get<std::string>("cel"), Position(it->second.get<int>("x"), it->second.get<int>("y"), 0)));
+			}
+		}
     }
 
     void World::clear()
@@ -73,7 +99,7 @@ namespace FAWorld
     {
         return mPlayer;
     }
-    
+
     void World::fillRenderState(FARender::RenderState* state)
     {
         state->mObjects.clear();
