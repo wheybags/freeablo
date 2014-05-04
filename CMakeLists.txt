@@ -52,6 +52,11 @@ include_directories (
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
 )
 
+# allow the user to specify extra include dirs on the command line
+if(CLI_INCLUDE_DIRS)
+	include_directories(${CLI_INCLUDE_DIRS})
+endif()
+
 add_subdirectory (extern) 
 
 link_libraries(StormLib)
