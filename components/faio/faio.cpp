@@ -237,8 +237,9 @@ namespace FAIO
             {
                 if (boost::iequals(ent->d_name, __S_DIABDAT_MPQ))
                 {
+                    std::string str(ent->d_name);
                     closedir(dir);
-                    return ent->d_name;
+                    return str;
                 }
             }
             closedir (dir);
