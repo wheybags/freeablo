@@ -1,7 +1,6 @@
 #include "faio.h"
 
 #include <iostream>
-#include "dirent.h"
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -18,7 +17,7 @@ namespace FAIO
 {
     FAFile::FAFile(){}
 
-    const std::string __S_DIABDAT_MPQ = "DIABDAT.MPQ";
+    const std::string DIABDAT_MPQ = "DIABDAT.MPQ";
 
     // StormLib needs paths with windows style \'s
     std::string getStormLibPath(const bfs::path& path)
@@ -53,7 +52,7 @@ namespace FAIO
 
             if(nError != ERROR_SUCCESS)
             {
-                std::cerr << "Failed to open " << __S_DIABDAT_MPQ << std::endl;
+                std::cerr << "Failed to open " << DIABDAT_MPQ << std::endl;
                 return NULL;
             }
             
@@ -70,7 +69,7 @@ namespace FAIO
 
             if(!SFileOpenFileEx(diabdat, stormPath.c_str(), 0, (HANDLE*)file->data.mpqFile))
             {
-                std::cerr << "Failed to open " << filename << " in " << __S_DIABDAT_MPQ;
+                std::cerr << "Failed to open " << filename << " in " << DIABDAT_MPQ;
                 delete file;
                 return NULL;
             }
@@ -229,21 +228,19 @@ namespace FAIO
 
     std::string getMPQFileName()
     {
-        DIR *dir;
-        struct dirent *ent;
-        if ((dir = opendir (".")) != NULL) 
-        {
-            while ((ent = readdir (dir)) != NULL)
-            {
-                if (boost::iequals(ent->d_name, __S_DIABDAT_MPQ))
-                {
-                    std::string str(ent->d_name);
-                    closedir(dir);
-                    return str;
-                }
-            }
-            closedir (dir);
-        }
-        return ""; 
+		bfs::directory_iterator end;
+		for(bfs::directory_iterator entry(".") ; entry != end; entry++) 
+		{
+			if (!bfs::is_directory(*entry))
+			{
+				if(boost::iequals(entry->path().leaf().generic_string(), DIABDAT_MPQ))
+				{
+					return entry->path().leaf().generic_string();
+				}
+			}
+		}
+
+		std::cout << "Failed to find " << DIABDAT_MPQ << " in current directory" << std::endl;
+		return "";
     }
 }
