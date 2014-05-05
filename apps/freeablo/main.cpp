@@ -14,6 +14,8 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
 
+namespace bpo = boost::program_options;
+
 bool done = false;
 bool noclip = true;
 int changeLevel = 0;
@@ -107,12 +109,69 @@ Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
 
     return NULL;
 }
-int realmain(int argc, char** argv);
+
+/**
+ * @brief Handle parsing of command line arguments and configuration file options.
+ * @return True if no problems occurred and execution should continue.
+ */
+bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
+{
+    boost::program_options::options_description desc("Options");
+
+    desc.add_options()
+        ("help,h", "Print help")
+        ("level,l", bpo::value<size_t>()->default_value(0), "Level number to load (0-4)");
+
+    try 
+    { 
+        bpo::store(bpo::parse_command_line(argc, argv, desc), variables);
+
+        if(variables.count("help"))
+        {
+            std::cout << desc << std::endl;
+            return false;
+        }
+        
+        bpo::notify(variables);
+
+        const size_t levelNum = variables["level"].as<size_t>();
+        if(levelNum > 4)
+            throw bpo::validation_error(
+                bpo::validation_error::invalid_option_value, "level");
+    }
+    catch(bpo::error& e)
+    {
+        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+        std::cerr << desc << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+void run(const bpo::variables_map& variables);
+void runGameLoop(const bpo::variables_map& variables);
 
 volatile bool renderDone = false;
+
+/**
+ * @brief Main entry point.
+ */
 int main(int argc, char** argv)
 {
-    boost::thread mainThread(boost::bind(&realmain, argc, argv));
+    boost::program_options::variables_map variables;
+
+    if (parseOptions(argc, argv, variables))
+    {
+        run(variables);
+    }
+
+    return 0;
+}
+
+void run(const bpo::variables_map& variables)
+{
+    boost::thread mainThread(boost::bind(&runGameLoop, &variables));
     Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove);
     FARender::Renderer renderer;
     renderDone = true;
@@ -120,44 +179,12 @@ int main(int argc, char** argv)
     mainThread.join();
 }
 
-int realmain(int argc, char** argv)
+void runGameLoop(const bpo::variables_map& variables)
 {
     while(!FARender::Renderer::get()) {}
 
     FARender::Renderer& renderer = *FARender::Renderer::get();
     Input::InputManager& input = *Input::InputManager::get();
-
-    size_t levelNum;
-
-    boost::program_options::options_description desc("Options");
-    desc.add_options()
-        ("help,h", "Print help")
-        ("level,l", boost::program_options::value<size_t>(&levelNum)->default_value(0), "Level number to load (0-4)");
-
-    boost::program_options::variables_map vm; 
-    try 
-    { 
-        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-
-        if(vm.count("help"))
-        {
-            std::cout << desc << std::endl;
-            return 0;
-        }
-        
-        boost::program_options::notify(vm);
-
-        if(levelNum > 4)
-            throw boost::program_options::validation_error(
-                boost::program_options::validation_error::invalid_option_value, "level");
-    }
-    catch(boost::program_options::error& e)
-    {
-        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
-        std::cerr << desc << std::endl;
-        return 1;
-    }
-
 
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
@@ -166,23 +193,23 @@ int realmain(int argc, char** argv)
 
     std::vector<Level::Level*> levels(5);
 
-    size_t currentLevel = levelNum;
+    size_t currentLevel = variables["level"].as<size_t>();
 
     Level::Level* level;
 
-    if(!(level = getLevel(levelNum, exe)))
+    if(!(level = getLevel(currentLevel, exe)))
     {
         done = true;
     }
     else
     {
         levels[currentLevel] = level;
-        setLevel(levelNum, exe, world, renderer, *level);
+        setLevel(currentLevel, exe, world, renderer, *level);
     }
     
     FAWorld::Player* player = world.getPlayer();
 
-    if(levelNum == 0)
+    if(currentLevel == 0)
         player->mPos = FAWorld::Position(75, 68);
     else
         player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
@@ -283,6 +310,4 @@ int realmain(int argc, char** argv)
 
     for(size_t i = 0; i < levels.size(); i++)
         delete levels[i];
-
-    return 0;
 }
