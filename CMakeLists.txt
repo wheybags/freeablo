@@ -13,10 +13,18 @@ if(USE_SDL2)
     set(SDL_FOUND ${SDL2_FOUND})
     set(SDL_LIBRARY ${SDL2_LIBRARY})
     set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
+
+    Find_Package(SDL2_image REQUIRED)
+    set(SDLIMAGE_FOUND ${SDL2IMAGE_FOUND})
+    set(SDLIMAGE_LIBRARY ${SDL2IMAGE_LIBRARY})
+    set(SDLIMAGE_INCLUDE_DIR ${SDL2IMAGE_INCLUDE_DIR})
+
+
 else()
     message(STATUS "Using SDL1")
 
     Find_Package ( SDL REQUIRED )
+    Find_Package (SDL_image REQUIRED)
 endif()
 
 if(WIN32)
@@ -65,6 +73,7 @@ add_subdirectory (components)
 
 link_libraries (
     ${SDL_LIBRARY}
+    ${SDLIMAGE_LIBRARY}
     ${Boost_LIBRARIES}
     Cel
     FAIO
