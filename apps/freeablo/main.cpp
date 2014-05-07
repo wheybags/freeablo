@@ -183,7 +183,7 @@ bool loadSettings(StartupSettings& settings)
     // User settings - handle first to give priority over default settings.
     try
     {
-        std::ifstream settingsFile(settingsUserPath);
+        std::ifstream settingsFile(settingsUserPath.c_str());
 
         bpo::store(
             bpo::parse_config_file(settingsFile, desc, allowUnregisteredOptions),
@@ -205,7 +205,7 @@ bool loadSettings(StartupSettings& settings)
             return false;
         }
 
-        std::ifstream settingsFile(settingsDefaultPath);
+        std::ifstream settingsFile(settingsDefaultPath.c_str());
 
         bpo::store(
             bpo::parse_config_file(settingsFile, desc, allowUnregisteredOptions),
