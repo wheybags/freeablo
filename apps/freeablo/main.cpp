@@ -257,7 +257,8 @@ void run(const bpo::variables_map& variables)
 
     boost::thread mainThread(boost::bind(&runGameLoop, &variables));
     Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove);
-    FARender::Renderer renderer;
+
+    FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
     renderDone = true;
 
     mainThread.join();

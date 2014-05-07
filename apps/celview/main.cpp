@@ -30,7 +30,11 @@ void keyPress(Input::Key key)
 
 int main(int, char** argv)
 {
-    Render::init(); 
+    Render::RenderSettings settings;
+    settings.windowWidth = 1280;
+    settings.windowHeight = 960;
+    Render::init(settings);
+
     Input::InputManager input(&keyPress, NULL, NULL, NULL, NULL);
 
     Render::SpriteGroup cel(argv[1]);

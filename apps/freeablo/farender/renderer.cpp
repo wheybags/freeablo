@@ -17,16 +17,24 @@ namespace FARender
         return mRenderer;
     }
 
-    Renderer::Renderer()
+    Renderer::Renderer(int32_t windowWidth, int32_t windowHeight)
+        :mRenderThreadState(stopped)
+        ,mLevel(NULL)
+        ,mDone(false)
+        ,mCurrent(NULL)
     {
         assert(!mRenderer); // singleton, only one instance
         mRenderer = this;
 
-        mDone = false;
-        mRenderThreadState = stopped;
-        mLevel = NULL;
+        // Render initialization.
+        {
+            Render::RenderSettings settings;
+            settings.windowWidth = windowWidth;
+            settings.windowHeight = windowHeight;
 
-        mCurrent = NULL;
+            Render::init(settings);
+        }
+
         renderLoop();
     }
     
@@ -111,8 +119,6 @@ namespace FARender
 
     void Renderer::renderLoop()
     {
-        Render::init();
-
         Render::LevelObjects objects;
 
         while(!mDone)

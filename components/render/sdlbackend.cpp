@@ -19,8 +19,11 @@ namespace Render
 
     SDL_Surface* screen;
     
-    void init()
+    void init(const RenderSettings& settings)
     {
+        WIDTH = settings.windowWidth;
+        HEIGHT = settings.windowHeight;
+
         SDL_Init(SDL_INIT_VIDEO);
         screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_RESIZABLE);
     }
