@@ -37,7 +37,18 @@ SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 
-set(RenderFiles render/render.h render/sdlcommon.cpp render/levelobjects.cpp render/levelobjects.h)
+set(RenderFiles 
+    render/render.h 
+    render/sdlcommon.cpp 
+    render/levelobjects.cpp 
+    render/levelobjects.h
+    render/rocketglue/RenderInterfaceSDL2.cpp  
+    render/rocketglue/RenderInterfaceSDL2.h 
+    render/rocketglue/SystemInterfaceSDL2.cpp
+    render/rocketglue/SystemInterfaceSDL2.h
+    render/rocketglue/ShellFileInterface.h
+    render/rocketglue/ShellFileInterface.cpp
+)
 if(USE_SDL2)
     set(RenderFiles ${RenderFiles} render/sdl2backend.cpp)
 else()

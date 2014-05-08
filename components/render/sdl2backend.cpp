@@ -10,6 +10,12 @@
 
 #include "../level/level.h"
 
+#include <Rocket/Core.h>
+#include <Rocket/Core/Input.h>
+
+#include "rocketglue/ShellFileInterface.h"
+#include "rocketglue/SystemInterfaceSDL2.h"
+#include "rocketglue/RenderInterfaceSDL2.h"
 
 namespace Render
 {
@@ -18,17 +24,72 @@ namespace Render
 
     SDL_Window* screen;
     SDL_Renderer* renderer;
+
+    RocketSDL2Renderer* Renderer;
+    RocketSDL2SystemInterface* SystemInterface;
+    ShellFileInterface* FileInterface;
+    Rocket::Core::Context* Context;
     
     void init(const RenderSettings& settings)
     {
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
 
-        SDL_Init(SDL_INIT_VIDEO);
-        SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, SDL_WINDOW_RESIZABLE, &screen, &renderer);
-        
+        SDL_Init( SDL_INIT_VIDEO );
+        screen = SDL_CreateWindow("LibRocket SDL2 test", 20, 20, WIDTH, HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         if(screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
+
+
+        SDL_GLContext glcontext = SDL_GL_CreateContext(screen);
+        int oglIdx = -1;
+        int nRD = SDL_GetNumRenderDrivers();
+        for(int i=0; i<nRD; i++)
+        {
+            SDL_RendererInfo info;
+            if(!SDL_GetRenderDriverInfo(i, &info))
+            {
+                if(!strcmp(info.name, "opengl"))
+                {
+                    oglIdx = i;
+                }
+            }
+        }
+        renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+        GLenum err = glewInit();
+
+        if(err != GLEW_OK)
+            fprintf(stderr, "GLEW ERROR: %s\n", glewGetErrorString(err));
+
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        glMatrixMode(GL_PROJECTION|GL_MODELVIEW);
+        glLoadIdentity();
+        glOrtho(0, WIDTH, HEIGHT, 0, 0, 1);
+    }
+
+    Rocket::Core::Context* initGui()
+    {
+        Renderer = new RocketSDL2Renderer(renderer, screen);
+        SystemInterface = new RocketSDL2SystemInterface();
+        FileInterface = new ShellFileInterface("assets/");
+
+        Rocket::Core::SetFileInterface(FileInterface);
+        Rocket::Core::SetRenderInterface(Renderer);
+        Rocket::Core::SetSystemInterface(SystemInterface);
+
+        if(!Rocket::Core::Initialise())
+            fprintf(stderr, "couldn't initialise rocket!");
+
+        Rocket::Core::FontDatabase::LoadFontFace("Delicious-Bold.otf");
+        Rocket::Core::FontDatabase::LoadFontFace("Delicious-BoldItalic.otf");
+        Rocket::Core::FontDatabase::LoadFontFace("Delicious-Italic.otf");
+        Rocket::Core::FontDatabase::LoadFontFace("Delicious-Roman.otf");
+
+        Context = Rocket::Core::CreateContext("default",
+            Rocket::Core::Vector2i(640, 480));
+
+        return Context;
     }
 	
     void quit()
@@ -42,6 +103,12 @@ namespace Render
     {
         WIDTH = w;
         HEIGHT = h;
+    }
+
+    void drawGui()
+    {
+        Context->Update();
+        Context->Render();
     }
 
     void draw()

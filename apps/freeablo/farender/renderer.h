@@ -42,6 +42,7 @@ namespace FARender
         running,
         levelChange,
         loadSprite,
+        loadRocket,
         pause,
         spriteDestroy,
         stopped
@@ -67,6 +68,10 @@ namespace FARender
 
             std::pair<size_t, size_t> getClickedTile(size_t x, size_t y);
 
+            Rocket::Core::Context* getRocketContext();
+
+            void displayMenu(const std::string& path);
+
         private:
             FASpriteGroup loadImageImp(const std::string& path);
             
@@ -85,6 +90,8 @@ namespace FARender
             RenderState mStates[3];
 
             RenderState* mCurrent;
+
+            Rocket::Core::Context* mRocketContext;
 
             std::map<std::string, boost::weak_ptr<CacheSpriteGroup> > mSpriteCache;
 

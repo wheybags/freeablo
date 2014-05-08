@@ -110,6 +110,18 @@ namespace FARender
         return Render::getClickedTile(mLevel, x, y);
     }
 
+    Rocket::Core::Context* Renderer::getRocketContext()
+    {
+        return mRocketContext;
+    }
+
+    void Renderer::displayMenu(const std::string& path)
+    {
+        mThreadCommunicationTmp = (void*)&path;
+        mRenderThreadState = loadRocket;
+        while(mRenderThreadState != running) {}
+    }
+
     void Renderer::destroySprite(Render::SpriteGroup* s)
     {
         mThreadCommunicationTmp = (void*)s;
@@ -119,6 +131,7 @@ namespace FARender
 
     void Renderer::renderLoop()
     {
+        mRocketContext = Render::initGui();
         Render::LevelObjects objects;
 
         while(!mDone)
@@ -143,6 +156,15 @@ namespace FARender
                 FASpriteGroup* tmp = new FASpriteGroup((CacheSpriteGroup*)NULL);
                 *tmp = loadImageImp(*(std::string*)mThreadCommunicationTmp);
                 mThreadCommunicationTmp = (void*)tmp;
+                mRenderThreadState = running;
+            }
+
+            else if(mRenderThreadState == loadRocket)
+            {
+                Rocket::Core::ElementDocument *Document = mRocketContext->LoadDocument((*(std::string*)mThreadCommunicationTmp).c_str());
+                Document->Show();
+                Document->RemoveReference();
+ 
                 mRenderThreadState = running;
             }
 
@@ -186,7 +208,8 @@ namespace FARender
 
                 current->mMutex.unlock();
             }
-
+            
+            Render::drawGui();
             Render::draw();
         }
         
