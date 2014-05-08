@@ -47,7 +47,7 @@ namespace FAIO
         {
             int nError = ERROR_SUCCESS;
             
-            if(diabdat == NULL && !SFileOpenArchive(getMPQFileName().c_str(), 0, 0, &diabdat))
+            if(diabdat == NULL && !SFileOpenArchive(getMPQFileName().c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat))
                 nError = GetLastError();
 
             if(nError != ERROR_SUCCESS)
