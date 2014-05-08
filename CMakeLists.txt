@@ -27,6 +27,9 @@ else()
     Find_Package (SDL_image REQUIRED)
 endif()
 
+Find_Package(OpenGL REQUIRED)
+Find_Package(GLEW REQUIRED)
+
 if(WIN32)
 	set(Boost_USE_STATIC_LIBS   ON)
 else()
@@ -55,6 +58,9 @@ endif()
 
 include_directories (
     ${SDL_INCLUDE_DIR}
+    ${SDLIMAGE_INCLUDE_DIR}
+    ${OPENGL_INCLUDE_DIRS}
+    ${GLEW_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
     "${PROJECT_SOURCE_DIR}/components/"
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
@@ -67,6 +73,10 @@ endif()
 
 add_subdirectory (extern) 
 
+include_directories(
+    ${ROCKET_INCLUDE_DIR}
+)   
+
 link_libraries(StormLib)
 
 add_subdirectory (components) 
@@ -74,6 +84,9 @@ add_subdirectory (components)
 link_libraries (
     ${SDL_LIBRARY}
     ${SDLIMAGE_LIBRARY}
+    ${OPENGL_LIBRARY}
+    ${GLEW_LIBRARY}
+    ${ROCKET_LIBRARIES}
     ${Boost_LIBRARIES}
     Cel
     FAIO
