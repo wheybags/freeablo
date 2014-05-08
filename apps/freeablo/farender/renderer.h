@@ -53,7 +53,7 @@ namespace FARender
         public:
             static Renderer* get();
             
-            Renderer();
+            Renderer(int32_t windowWidth, int32_t windowHeight);
             ~Renderer();
 
             void stop();

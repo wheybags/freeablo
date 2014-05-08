@@ -2,3 +2,4 @@
 *.swo
 CMakeLists.txt.user
 html/
+resources/settings-user.ini

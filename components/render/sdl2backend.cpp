@@ -15,13 +15,15 @@ namespace Render
 {
     int32_t WIDTH = 1280;
     int32_t HEIGHT = 960;
-    #define DEPTH 32
 
     SDL_Window* screen;
     SDL_Renderer* renderer;
     
-    void init()
+    void init(const RenderSettings& settings)
     {
+        WIDTH = settings.windowWidth;
+        HEIGHT = settings.windowHeight;
+
         SDL_Init(SDL_INIT_VIDEO);
         SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, SDL_WINDOW_RESIZABLE, &screen, &renderer);
         

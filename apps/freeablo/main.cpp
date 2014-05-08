@@ -13,8 +13,12 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/filesystem.hpp>
+#include <fstream>
 
 namespace bpo = boost::program_options;
+namespace bfs = boost::filesystem;
 
 bool done = false;
 bool noclip = true;
@@ -111,7 +115,7 @@ Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
 }
 
 /**
- * @brief Handle parsing of command line arguments and configuration file options.
+ * @brief Handle parsing of command line arguments.
  * @return True if no problems occurred and execution should continue.
  */
 bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
@@ -149,6 +153,82 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
     return true;
 }
 
+/**
+ * @brief Holds startup settings read from settings files.
+ */
+struct StartupSettings
+{
+    size_t resolutionWidth;
+    size_t resolutionHeight;
+};
+
+/**
+ * @brief Load and parse settings files.
+ */
+bool loadSettings(StartupSettings& settings)
+{
+    // TODO: handling of application paths via FAIO interface
+    const std::string settingsDefaultPath = "resources/settings-default.ini";
+    const std::string settingsUserPath = "resources/settings-user.ini";
+
+    bpo::variables_map variables;
+    bpo::options_description desc("Settings");
+
+    desc.add_options()
+        ("Display.resolutionWidth", bpo::value<size_t>())
+        ("Display.resolutionHeight", bpo::value<size_t>());
+
+    const bool allowUnregisteredOptions = true;
+
+    // User settings - handle first to give priority over default settings.
+    try
+    {
+        std::ifstream settingsFile(settingsUserPath.c_str());
+
+        bpo::store(
+            bpo::parse_config_file(settingsFile, desc, allowUnregisteredOptions),
+            variables);
+    }
+    catch(bpo::error& e)
+    {
+        std::cerr << "Unable to process settings file \"" + settingsUserPath + "\"." << std::endl;
+        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+        return false;
+    }
+
+    // Default settings.
+    try
+    {
+        if (!bfs::exists(settingsDefaultPath))
+        {
+            std::cerr << "Default settings file not found. Please verify that \"" + settingsDefaultPath + "\" exists." << std::endl;
+            return false;
+        }
+
+        std::ifstream settingsFile(settingsDefaultPath.c_str());
+
+        bpo::store(
+            bpo::parse_config_file(settingsFile, desc, allowUnregisteredOptions),
+            variables);
+
+        bpo::notify(variables);
+
+        // Parameter parsing.
+        {
+            settings.resolutionWidth = variables["Display.resolutionWidth"].as<size_t>();
+            settings.resolutionHeight = variables["Display.resolutionHeight"].as<size_t>();
+        }
+    }
+    catch(bpo::error& e)
+    {
+        std::cerr << "Unable to process settings file \"" + settingsDefaultPath + "\"." << std::endl;
+        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 void run(const bpo::variables_map& variables);
 void runGameLoop(const bpo::variables_map& variables);
 
@@ -171,9 +251,14 @@ int main(int argc, char** argv)
 
 void run(const bpo::variables_map& variables)
 {
+    StartupSettings settings;
+    if (!loadSettings(settings))
+        return;
+
     boost::thread mainThread(boost::bind(&runGameLoop, &variables));
     Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove);
-    FARender::Renderer renderer;
+
+    FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
     renderDone = true;
 
     mainThread.join();

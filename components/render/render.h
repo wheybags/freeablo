@@ -24,7 +24,16 @@ namespace Level
 
 namespace Render
 {
-    void init(); 
+    /**
+     * @brief Render settings for initialization.
+     */
+    struct RenderSettings
+    {
+        int32_t windowWidth;
+        int32_t windowHeight;
+    };
+
+    void init(const RenderSettings& settings); 
     void quit(); 
 
 	void resize(size_t w, size_t h);
