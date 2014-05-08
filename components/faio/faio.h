@@ -38,6 +38,7 @@ namespace FAIO
             friend size_t FAfread(void * ptr, size_t size, size_t count, FAFile* stream);
             friend int FAfclose(FAFile* stream); 
             friend int FAfseek (FAFile* stream, size_t offset, int origin);
+            friend size_t FAftell(FAFile* stream);
             friend size_t FAsize(FAFile* stream);
     };
     
@@ -45,6 +46,7 @@ namespace FAIO
     size_t FAfread(void * ptr, size_t size, size_t count, FAFile* stream);
     int FAfclose(FAFile* stream); 
     int FAfseek (FAFile* stream, size_t offset, int origin);
+    size_t FAftell(FAFile* stream);
     size_t FAsize(FAFile* stream);
 
     uint32_t read32(FAFile* file);

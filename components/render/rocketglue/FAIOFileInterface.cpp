@@ -25,40 +25,40 @@
  *
  */
 
-#ifndef SHELLFILEINTERFACE_H
-#define SHELLFILEINTERFACE_H
+#include "FAIOFileInterface.h"
+#include <faio/faio.h>
 
-#include <Rocket/Core/String.h>
-#include <Rocket/Core/FileInterface.h>
-
-/**
-	Rocket file interface for the shell examples.
-	@author Lloyd Weehuizen
- */
-
-class ShellFileInterface : public Rocket::Core::FileInterface
+FAIOFileInterface::~FAIOFileInterface()
 {
-public:
-	ShellFileInterface(const Rocket::Core::String& root);
-	virtual ~ShellFileInterface();
+}
 
-	/// Opens a file.		
-	virtual Rocket::Core::FileHandle Open(const Rocket::Core::String& path);
+// Opens a file.
+Rocket::Core::FileHandle FAIOFileInterface::Open(const Rocket::Core::String& path)
+{
+	FAIO::FAFile* fp = FAIO::FAfopen(path.CString());
+    return (Rocket::Core::FileHandle) fp;
+}
 
-	/// Closes a previously opened file.		
-	virtual void Close(Rocket::Core::FileHandle file);
+// Closes a previously opened file.
+void FAIOFileInterface::Close(Rocket::Core::FileHandle file)
+{
+	FAIO::FAfclose((FAIO::FAFile*) file);
+}
 
-	/// Reads data from a previously opened file.		
-	virtual size_t Read(void* buffer, size_t size, Rocket::Core::FileHandle file);
+// Reads data from a previously opened file.
+size_t FAIOFileInterface::Read(void* buffer, size_t size, Rocket::Core::FileHandle file)
+{
+	return FAIO::FAfread(buffer, 1, size, (FAIO::FAFile*) file);
+}
 
-	/// Seeks to a point in a previously opened file.		
-	virtual bool Seek(Rocket::Core::FileHandle file, long offset, int origin);
+// Seeks to a point in a previously opened file.
+bool FAIOFileInterface::Seek(Rocket::Core::FileHandle file, long offset, int origin)
+{
+	return FAIO::FAfseek((FAIO::FAFile*) file, offset, origin) == 0;
+}
 
-	/// Returns the current position of the file pointer.		
-	virtual size_t Tell(Rocket::Core::FileHandle file);
-
-private:
-	Rocket::Core::String root;
-};
-
-#endif
+// Returns the current position of the file pointer.
+size_t FAIOFileInterface::Tell(Rocket::Core::FileHandle file)
+{
+	return FAIO::FAftell((FAIO::FAFile*) file);
+}

@@ -46,8 +46,8 @@ set(RenderFiles
     render/rocketglue/RenderInterfaceSDL2.h 
     render/rocketglue/SystemInterfaceSDL2.cpp
     render/rocketglue/SystemInterfaceSDL2.h
-    render/rocketglue/ShellFileInterface.h
-    render/rocketglue/ShellFileInterface.cpp
+    render/rocketglue/FAIOFileInterface.h
+    render/rocketglue/FAIOFileInterface.cpp
 )
 if(USE_SDL2)
     set(RenderFiles ${RenderFiles} render/sdl2backend.cpp)

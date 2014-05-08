@@ -170,6 +170,21 @@ namespace FAIO
         return 0;
     }
 
+    size_t FAftell(FAFile* stream)
+    {
+        switch(stream->mode)
+        {
+            case FAFile::PlainFile:
+                return ftell(stream->data.plainFile.file);
+
+            case FAFile::MPQFile:
+                return SFileSetFilePointer(*((HANDLE*)stream->data.mpqFile), 0, NULL, FILE_CURRENT);
+
+            default:
+                return 0;
+        }
+    }
+
     size_t FAsize(FAFile* stream)
     {
         switch(stream->mode)

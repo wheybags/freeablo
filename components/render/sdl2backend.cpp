@@ -13,7 +13,7 @@
 #include <Rocket/Core.h>
 #include <Rocket/Core/Input.h>
 
-#include "rocketglue/ShellFileInterface.h"
+#include "rocketglue/FAIOFileInterface.h"
 #include "rocketglue/SystemInterfaceSDL2.h"
 #include "rocketglue/RenderInterfaceSDL2.h"
 
@@ -27,7 +27,7 @@ namespace Render
 
     RocketSDL2Renderer* Renderer;
     RocketSDL2SystemInterface* SystemInterface;
-    ShellFileInterface* FileInterface;
+    FAIOFileInterface* FileInterface;
     Rocket::Core::Context* Context;
     
     void init(const RenderSettings& settings)
@@ -72,7 +72,7 @@ namespace Render
     {
         Renderer = new RocketSDL2Renderer(renderer, screen);
         SystemInterface = new RocketSDL2SystemInterface();
-        FileInterface = new ShellFileInterface("assets/");
+        FileInterface = new FAIOFileInterface();
 
         Rocket::Core::SetFileInterface(FileInterface);
         Rocket::Core::SetRenderInterface(Renderer);
