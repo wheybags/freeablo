@@ -69,6 +69,8 @@ namespace FARender
             std::pair<size_t, size_t> getClickedTile(size_t x, size_t y);
 
             Rocket::Core::Context* getRocketContext();
+            void lockGui();
+            void unlockGui();
 
             void displayMenu(const std::string& path);
 
@@ -92,6 +94,7 @@ namespace FARender
             RenderState* mCurrent;
 
             Rocket::Core::Context* mRocketContext;
+            boost::mutex mGuiLock;
 
             std::map<std::string, boost::weak_ptr<CacheSpriteGroup> > mSpriteCache;
 

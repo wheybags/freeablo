@@ -306,6 +306,10 @@ void runGameLoop(const bpo::variables_map& variables)
     // Main game logic loop
     while(!done)
     {
+        renderer.lockGui();
+        renderer.getRocketContext()->Update();
+        renderer.unlockGui();
+
         if(mouseDown)
         {
             destination = renderer.getClickedTile(xClick, yClick);

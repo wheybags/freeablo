@@ -105,10 +105,15 @@ namespace Render
         HEIGHT = h;
     }
 
+    void updateGuiBuffer()
+    {
+        Renderer->clearDrawBuffer();
+        Context->Render();
+    }
+
     void drawGui()
     {
-        Context->Update();
-        Context->Render();
+        Renderer->drawBuffer();
     }
 
     void draw()

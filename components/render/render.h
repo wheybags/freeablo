@@ -42,6 +42,7 @@ namespace Render
 
 	void resize(size_t w, size_t h);
    
+    void updateGuiBuffer();
     void drawGui(); 
     void draw();
 

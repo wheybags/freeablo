@@ -39,8 +39,40 @@
 
 class RocketSDL2Renderer : public Rocket::Core::RenderInterface
 {
+   
+    struct drawCommand
+    {
+        enum
+        {
+            Draw,
+            EnableScissor,
+            SetScissor
+        } mode;
+
+        struct
+        {
+            std::vector<Rocket::Core::Vertex> vertices;
+            std::vector<int> indices;
+            Rocket::Core::TextureHandle texture;
+            Rocket::Core::Vector2f translation;
+        } draw;
+        
+        struct
+        {
+            int x;
+            int y;
+            int width;
+            int height;
+        } setScissor;
+
+        bool enableScissor;
+    };
+
+
 public:
 	RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen);
+    void drawBuffer();
+    void clearDrawBuffer();
 
 	/// Called by Rocket when it wants to render geometry that it does not wish to optimise.
 	virtual void RenderGeometry(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation);
@@ -58,8 +90,14 @@ public:
 	virtual void ReleaseTexture(Rocket::Core::TextureHandle texture_handle);
 
 private:
+    void RenderGeometryImp(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation);
+	void EnableScissorRegionImp(bool enable);
+	void SetScissorRegionImp(int x, int y, int width, int height);
+
     SDL_Renderer* mRenderer;
     SDL_Window* mScreen;
+
+    std::vector<drawCommand> mDrawBuffer;
 };
 
 #endif

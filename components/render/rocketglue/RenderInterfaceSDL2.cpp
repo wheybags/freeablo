@@ -40,8 +40,50 @@ RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* scree
     mScreen = screen;
 }
 
-// Called by Rocket when it wants to render geometry that it does not wish to optimise.
 void RocketSDL2Renderer::RenderGeometry(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation)
+{
+    drawCommand tmp;
+    
+    for(size_t i = 0; i < num_vertices; i++)
+        tmp.draw.vertices.push_back(vertices[i]);
+
+    for(size_t i = 0; i < num_indices; i++)
+        tmp.draw.indices.push_back(indices[i]);
+
+    tmp.draw.texture = texture;
+    tmp.draw.translation = translation;
+
+    tmp.mode = drawCommand::Draw;
+
+    mDrawBuffer.push_back(tmp);
+}
+
+void RocketSDL2Renderer::drawBuffer()
+{
+    for(size_t i = 0; i < mDrawBuffer.size(); i++)
+    {
+        switch(mDrawBuffer[i].mode)
+        {
+            case drawCommand::Draw:
+                RenderGeometryImp(&(mDrawBuffer[i].draw.vertices[0]), mDrawBuffer[i].draw.vertices.size(), &(mDrawBuffer[i].draw.indices[0]), mDrawBuffer[i].draw.indices.size(), mDrawBuffer[i].draw.texture, mDrawBuffer[i].draw.translation);
+                break;
+            case drawCommand::EnableScissor:
+                EnableScissorRegionImp(mDrawBuffer[i].enableScissor);
+                break;
+            case drawCommand::SetScissor:
+	            SetScissorRegionImp(mDrawBuffer[i].setScissor.x, mDrawBuffer[i].setScissor.y, mDrawBuffer[i].setScissor.width, mDrawBuffer[i].setScissor.height);
+                break;
+        }
+    }
+}
+
+void RocketSDL2Renderer::clearDrawBuffer()
+{
+    mDrawBuffer.clear();
+}
+
+// Called by Rocket when it wants to render geometry that it does not wish to optimise.
+void RocketSDL2Renderer::RenderGeometryImp(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation)
 {
     // SDL uses shaders that we need to disable here  
     glUseProgramObjectARB(0);
@@ -101,6 +143,15 @@ void RocketSDL2Renderer::RenderGeometry(Rocket::Core::Vertex* vertices, int num_
 // Called by Rocket when it wants to enable or disable scissoring to clip content.		
 void RocketSDL2Renderer::EnableScissorRegion(bool enable)
 {
+    drawCommand tmp;
+    tmp.mode = drawCommand::EnableScissor;
+    tmp.enableScissor = enable;
+
+    mDrawBuffer.push_back(tmp);
+}
+
+void RocketSDL2Renderer::EnableScissorRegionImp(bool enable)
+{
     if (enable)
         glEnable(GL_SCISSOR_TEST);
     else
@@ -109,6 +160,19 @@ void RocketSDL2Renderer::EnableScissorRegion(bool enable)
 
 // Called by Rocket when it wants to change the scissor region.		
 void RocketSDL2Renderer::SetScissorRegion(int x, int y, int width, int height)
+{
+    drawCommand tmp;
+    tmp.mode = drawCommand::SetScissor;
+    
+    tmp.setScissor.x = x;
+    tmp.setScissor.y = y;
+    tmp.setScissor.width = width;
+    tmp.setScissor.height = height;
+
+    mDrawBuffer.push_back(tmp);
+}
+
+void RocketSDL2Renderer::SetScissorRegionImp(int x, int y, int width, int height)
 {
     int w_width, w_height;
     SDL_GetWindowSize(mScreen, &w_width, &w_height);

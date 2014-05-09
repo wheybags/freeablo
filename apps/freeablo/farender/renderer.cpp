@@ -115,6 +115,16 @@ namespace FARender
         return mRocketContext;
     }
 
+    void Renderer::lockGui()
+    {
+        mGuiLock.lock();
+    }
+
+    void Renderer::unlockGui()
+    {
+        mGuiLock.unlock();
+    }
+
     void Renderer::displayMenu(const std::string& path)
     {
         mThreadCommunicationTmp = (void*)&path;
@@ -207,9 +217,16 @@ namespace FARender
                     current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
 
                 current->mMutex.unlock();
+
+                if(mGuiLock.try_lock())
+                {
+                    Render::updateGuiBuffer();
+                    mGuiLock.unlock();
+                }
+
+                Render::drawGui();
             }
             
-            Render::drawGui();
             Render::draw();
         }
         
