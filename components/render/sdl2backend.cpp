@@ -55,12 +55,8 @@ namespace Render
                 }
             }
         }
-        renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-        GLenum err = glewInit();
-
-        if(err != GLEW_OK)
-            fprintf(stderr, "GLEW ERROR: %s\n", glewGetErrorString(err));
+		renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         glMatrixMode(GL_PROJECTION|GL_MODELVIEW);
