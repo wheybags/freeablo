@@ -30,7 +30,7 @@
 #include <Rocket/Core/RenderInterface.h>
 
 #include <SDL.h>
-#include <GL/glew.h>
+#include <SDL_opengl.h>
 
 #if !(SDL_VIDEO_RENDER_OGL)
     #error "Only the opengl sdl backend is supported. To add support for others, see http://mdqinc.com/blog/2013/01/integrating-librocket-with-sdl-2/"
@@ -96,6 +96,7 @@ private:
 
     SDL_Renderer* mRenderer;
     SDL_Window* mScreen;
+	PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
 
     std::vector<drawCommand> mDrawBuffer;
 };
