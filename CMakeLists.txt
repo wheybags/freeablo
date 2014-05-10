@@ -82,7 +82,7 @@ add_subdirectory (components)
 link_libraries (
     ${SDL_LIBRARY}
     ${SDLIMAGE_LIBRARY}
-    ${OPENGL_LIBRARY}
+    ${OPENGL_LIBRARIES}
     ${ROCKET_LIBRARIES}
     ${Boost_LIBRARIES}
     Cel

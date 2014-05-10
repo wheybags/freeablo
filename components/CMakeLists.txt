@@ -56,7 +56,7 @@ else()
 endif()
 
 add_library(Render ${RenderFiles})
-target_link_libraries(Render Cel Levels ${SDL_LIBRARY})
+target_link_libraries(Render Cel Levels ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${OPENGL_LIBRARIES})
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
