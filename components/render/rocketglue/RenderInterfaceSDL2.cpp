@@ -38,9 +38,14 @@ RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* scree
 {
     mRenderer = renderer;
     mScreen = screen;
+    
+    #ifdef WIN32
+        glUseProgramObjectARB = static_cast<PFNGLUSEPROGRAMOBJECTARBPROC>(SDL_GL_GetProcAddress("glUseProgramObjectARB"));
+    #else
+        glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)(SDL_GL_GetProcAddress("glUseProgramObjectARB"));
+    #endif
 
-	glUseProgramObjectARB = static_cast<PFNGLUSEPROGRAMOBJECTARBPROC>(SDL_GL_GetProcAddress("glUseProgramObjectARB"));
-	ROCKET_ASSERT(glUseProgramObjectARB != NULL);
+    ROCKET_ASSERT(glUseProgramObjectARB != NULL);
 }
 
 void RocketSDL2Renderer::RenderGeometry(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation)

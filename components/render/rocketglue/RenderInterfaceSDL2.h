@@ -96,7 +96,7 @@ private:
 
     SDL_Renderer* mRenderer;
     SDL_Window* mScreen;
-	PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
+    PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
 
     std::vector<drawCommand> mDrawBuffer;
 };
