@@ -28,6 +28,10 @@
 #include <Rocket/Core/Core.h>
 #include <SDL_image.h>
 
+#include <misc/stringops.h>
+#include <cel/celfile.h>
+#include <cel/celframe.h>
+
 #include "RenderInterfaceSDL2.h"
 
 #if !(SDL_VIDEO_RENDER_OGL)
@@ -187,23 +191,15 @@ void RocketSDL2Renderer::SetScissorRegionImp(int x, int y, int width, int height
     glScissor(x, w_height - (y + height), width, height);
 }
 
+namespace Render
+{
+    SDL_Surface* createTransparentSurface(size_t width, size_t height);
+    void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
+}
+
 // Called by Rocket when a texture is required by the library.		
 bool RocketSDL2Renderer::LoadTexture(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
 {
-
-    Rocket::Core::FileInterface* file_interface = Rocket::Core::GetFileInterface();
-    Rocket::Core::FileHandle file_handle = file_interface->Open(source);
-    if (!file_handle)
-        return false;
-
-    file_interface->Seek(file_handle, 0, SEEK_END);
-    size_t buffer_size = file_interface->Tell(file_handle);
-    file_interface->Seek(file_handle, 0, SEEK_SET);
-
-    char* buffer = new char[buffer_size];
-    file_interface->Read(buffer, buffer_size, file_handle);
-    file_interface->Close(file_handle);
-
     size_t i;
     for(i = source.Length() - 1; i > 0; i--)
     {
@@ -213,7 +209,31 @@ bool RocketSDL2Renderer::LoadTexture(Rocket::Core::TextureHandle& texture_handle
 
     Rocket::Core::String extension = source.Substring(i+1, source.Length()-i);
 
-    SDL_Surface* surface = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.CString());
+    SDL_Surface* surface = NULL;
+
+    if(Misc::StringUtils::ciEqual(extension.CString(), "cel") || Misc::StringUtils::ciEqual(extension.CString(), "cl2"))
+    {
+        Cel::CelFile cel(source.CString());
+        surface = Render::createTransparentSurface(cel[0].mWidth, cel[0].mHeight);
+        Render::drawFrame(surface, 0, 0, cel[0]);
+    }
+    else
+    {
+        Rocket::Core::FileInterface* file_interface = Rocket::Core::GetFileInterface();
+        Rocket::Core::FileHandle file_handle = file_interface->Open(source);
+        if (!file_handle)
+            return false;
+
+        file_interface->Seek(file_handle, 0, SEEK_END);
+        size_t buffer_size = file_interface->Tell(file_handle);
+        file_interface->Seek(file_handle, 0, SEEK_SET);
+
+        char* buffer = new char[buffer_size];
+        file_interface->Read(buffer, buffer_size, file_handle);
+        file_interface->Close(file_handle);
+        
+        surface = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.CString());
+    }
 
     if (surface) {
         SDL_Texture *texture = SDL_CreateTextureFromSurface(mRenderer, surface);
