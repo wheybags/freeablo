@@ -11,6 +11,8 @@
 
 #include "faworld/world.h"
 
+#include "fagui/guimanager.h"
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -270,6 +272,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     FARender::Renderer& renderer = *FARender::Renderer::get();
     Input::InputManager& input = *Input::InputManager::get();
+    FAGui::GuiManager guiManager;
 
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
@@ -306,9 +309,7 @@ void runGameLoop(const bpo::variables_map& variables)
     // Main game logic loop
     while(!done)
     {
-        renderer.lockGui();
-        renderer.getRocketContext()->Update();
-        renderer.unlockGui();
+        guiManager.update();
 
         if(mouseDown)
         {
@@ -392,7 +393,8 @@ void runGameLoop(const bpo::variables_map& variables)
 
         renderer.setCurrentState(state);
     }
-
+    
+    guiManager.destroy();
     renderer.stop();    
 
     while(!renderDone) {} // have to wait until the renderer stops before destroying all our locals

@@ -43,6 +43,7 @@ namespace FARender
         levelChange,
         loadSprite,
         loadRocket,
+        unLoadRocket,
         pause,
         spriteDestroy,
         stopped
@@ -72,7 +73,8 @@ namespace FARender
             void lockGui();
             void unlockGui();
 
-            void displayMenu(const std::string& path);
+            Rocket::Core::ElementDocument* loadRocketDocument(const std::string& path);
+            void unLoadRocketDocument(Rocket::Core::ElementDocument* doc);
 
         private:
             FASpriteGroup loadImageImp(const std::string& path);
