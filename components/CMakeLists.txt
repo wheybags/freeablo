@@ -39,7 +39,6 @@ set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 set(RenderFiles 
     render/render.h 
-    render/sdlcommon.cpp 
     render/levelobjects.cpp 
     render/levelobjects.h
     render/rocketglue/RenderInterfaceSDL2.cpp  
@@ -48,20 +47,15 @@ set(RenderFiles
     render/rocketglue/SystemInterfaceSDL2.h
     render/rocketglue/FAIOFileInterface.h
     render/rocketglue/FAIOFileInterface.cpp
+    render/sdl2backend.cpp
 )
-if(USE_SDL2)
-    set(RenderFiles ${RenderFiles} render/sdl2backend.cpp)
-else()
-    set(RenderFiles ${RenderFiles} render/sdlbackend.cpp)
-endif()
-
 add_library(Render ${RenderFiles})
-target_link_libraries(Render Cel Levels ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${OPENGL_LIBRARIES})
+target_link_libraries(Render Cel Levels ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${OPENGL_LIBRARIES})
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
     input/inputmanager.h
-    input/sdlcommon.cpp)
+    input/sdl2backend.cpp)
 set_target_properties(Input PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(DiabloExe

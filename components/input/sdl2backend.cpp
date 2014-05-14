@@ -156,46 +156,25 @@ namespace Input
             CASE(POWER);
             CASE(UNDO);
 
-            #if SDL_MAJOR_VERSION == 2 
-                case SDLK_KP_0: key = KEY_KP0; break;
-                case SDLK_KP_1: key = KEY_KP1; break;
-                case SDLK_KP_2: key = KEY_KP2; break;
-                case SDLK_KP_3: key = KEY_KP3; break;
-                case SDLK_KP_4: key = KEY_KP4; break;
-                case SDLK_KP_5: key = KEY_KP5; break;
-                case SDLK_KP_6: key = KEY_KP6; break;
-                case SDLK_KP_7: key = KEY_KP7; break;
-                case SDLK_KP_8: key = KEY_KP8; break;
-                case SDLK_KP_9: key = KEY_KP9; break;
+            case SDLK_KP_0: key = KEY_KP0; break;
+            case SDLK_KP_1: key = KEY_KP1; break;
+            case SDLK_KP_2: key = KEY_KP2; break;
+            case SDLK_KP_3: key = KEY_KP3; break;
+            case SDLK_KP_4: key = KEY_KP4; break;
+            case SDLK_KP_5: key = KEY_KP5; break;
+            case SDLK_KP_6: key = KEY_KP6; break;
+            case SDLK_KP_7: key = KEY_KP7; break;
+            case SDLK_KP_8: key = KEY_KP8; break;
+            case SDLK_KP_9: key = KEY_KP9; break;
 
-                case SDLK_NUMLOCKCLEAR: key = KEY_NUMLOCK; break;
-                case SDLK_SCROLLLOCK: key = KEY_SCROLLOCK; break;
+            case SDLK_NUMLOCKCLEAR: key = KEY_NUMLOCK; break;
+            case SDLK_SCROLLLOCK: key = KEY_SCROLLOCK; break;
 
-                case SDLK_RGUI: key = KEY_RSUPER; break;
-                case SDLK_LGUI: key = KEY_LSUPER; break;
+            case SDLK_RGUI: key = KEY_RSUPER; break;
+            case SDLK_LGUI: key = KEY_LSUPER; break;
 
-                case SDLK_PRINTSCREEN: key = KEY_PRINT; break;
-            #else
-                CASE(KP0);
-                CASE(KP1);
-                CASE(KP2);
-                CASE(KP3);
-                CASE(KP4);
-                CASE(KP5);
-                CASE(KP6);
-                CASE(KP7);
-                CASE(KP8);
-                CASE(KP9);
-
-                CASE(NUMLOCK);
-                CASE(SCROLLOCK);
-
-                CASE(LSUPER);
-                CASE(RSUPER);
-
-                CASE(PRINT);
-            #endif
-
+            case SDLK_PRINTSCREEN: key = KEY_PRINT; break;
+         
             default:
             {
                 key = KEY_UNDEF;
@@ -257,7 +236,6 @@ namespace Input
                     break;
                 }
 				
-				#if SDL_MAJOR_VERSION == 2
 				case SDL_WINDOWEVENT:
 				{
 					if(event.window.event == SDL_WINDOWEVENT_RESIZED)
@@ -265,12 +243,6 @@ namespace Input
 
 					break;
 				}
-				#else
-				case SDL_VIDEORESIZE:
-				{
-					Render::resize(event.resize.w, event.resize.h);
-				}
-				#endif
 
                 default:
                 {
