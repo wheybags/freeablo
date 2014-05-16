@@ -22,9 +22,9 @@ namespace FARender
         ,mLevel(NULL)
         ,mDone(false)
         ,mCurrent(NULL)
+        ,mRocketContext(NULL)
     {
         assert(!mRenderer); // singleton, only one instance
-        mRenderer = this;
 
         // Render initialization.
         {
@@ -33,6 +33,9 @@ namespace FARender
             settings.windowHeight = windowHeight;
 
             Render::init(settings);
+            mRocketContext = Render::initGui();
+
+            mRenderer = this;
         }
 
         renderLoop();
@@ -150,8 +153,9 @@ namespace FARender
 
     void Renderer::renderLoop()
     {
-        mRocketContext = Render::initGui();
         Render::LevelObjects objects;
+
+        while(!Input::InputManager::get()) {}
 
         while(!mDone)
         {

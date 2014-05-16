@@ -258,7 +258,6 @@ void run(const bpo::variables_map& variables)
         return;
 
     boost::thread mainThread(boost::bind(&runGameLoop, &variables));
-    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove);
 
     FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
     renderDone = true;
@@ -271,7 +270,7 @@ void runGameLoop(const bpo::variables_map& variables)
     while(!FARender::Renderer::get()) {}
 
     FARender::Renderer& renderer = *FARender::Renderer::get();
-    Input::InputManager& input = *Input::InputManager::get();
+    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
     FAGui::GuiManager guiManager;
 
     DiabloExe::DiabloExe exe;
@@ -309,8 +308,6 @@ void runGameLoop(const bpo::variables_map& variables)
     // Main game logic loop
     while(!done)
     {
-        guiManager.update();
-
         if(mouseDown)
         {
             destination = renderer.getClickedTile(xClick, yClick);
@@ -320,7 +317,9 @@ void runGameLoop(const bpo::variables_map& variables)
             click = false;
         }
 
+        renderer.lockGui();
         input.processInput();
+        renderer.unlockGui();
 
         if(changeLevel)
         {
@@ -385,6 +384,8 @@ void runGameLoop(const bpo::variables_map& variables)
 
         world.update();
         
+        guiManager.update();
+
         FARender::RenderState* state = renderer.getFreeState();
         
         state->mPos = player->mPos;

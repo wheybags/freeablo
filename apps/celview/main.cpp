@@ -35,7 +35,7 @@ int main(int, char** argv)
     settings.windowHeight = 960;
     Render::init(settings);
 
-    Input::InputManager input(&keyPress, NULL, NULL, NULL, NULL);
+    Input::InputManager input(&keyPress, NULL, NULL, NULL, NULL, NULL);
 
     Render::SpriteGroup cel(argv[1]);
     max = cel.size();
