@@ -29,8 +29,7 @@ The above will all be made configurable at some point.
 If you are using windows, please see https://github.com/wheybags/freeablo-windows-build/tree/master for instructions on building with Visual Studio 2010
 
 ##Linux/Unix
-freeablo uses cmake, and depends on boost >= 1.54, libbz2, zlib, and SDL 1 or 2, so make sure to have those installed.
-Please note that performance for the SDL1 backend is quite bad (I get around 10fps, compared to about 600 with SDL2).
+freeablo uses cmake, and depends on boost >= 1.54, libbz2, zlib, and SDL2, so make sure to have those installed.
 
 Get the source:
 
@@ -56,8 +55,10 @@ symlink the resources folder:
 $ ln -s ../freeablo/resources
 ```
 
-call cmake: ```cmake ../freeablo```
-(if you want to use SDL1, use ```cmake ../freeablo -DUSE_SDL2=OFF```)
+call cmake: 
+```
+$ cmake ../freeablo
+```
 
 Now you're ready to go, cmake has generated a makefile, just run make to compile
 

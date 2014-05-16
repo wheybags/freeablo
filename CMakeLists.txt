@@ -4,20 +4,9 @@ project (Freeablo)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-option(USE_SDL2 "use SDL2 instead of SDL1" ON)
-
-if(USE_SDL2)
-    message(STATUS "Using SDL2")
-    
-    Find_Package ( SDL2 REQUIRED )
-    set(SDL_FOUND ${SDL2_FOUND})
-    set(SDL_LIBRARY ${SDL2_LIBRARY})
-    set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
-else()
-    message(STATUS "Using SDL1")
-
-    Find_Package ( SDL REQUIRED )
-endif()
+Find_Package(SDL2 REQUIRED)
+Find_Package(SDL2_image REQUIRED)
+Find_Package(OpenGL REQUIRED)
 
 if(WIN32)
 	set(Boost_USE_STATIC_LIBS   ON)
@@ -35,8 +24,8 @@ endif()
 
 find_package(Boost COMPONENTS chrono date_time filesystem system random thread program_options atomic REQUIRED)
 
-if ( NOT SDL_FOUND )
-    message ( FATAL_ERROR "SDL not found!" )
+if ( NOT SDL2_FOUND )
+    message ( FATAL_ERROR "SDL2 not found!" )
 endif ()
 
 if(UNIX)
@@ -46,7 +35,9 @@ else()
 endif()
 
 include_directories (
-    ${SDL_INCLUDE_DIR}
+    ${SDL2_INCLUDE_DIR}
+    ${SDL2IMAGE_INCLUDE_DIR}
+    ${OPENGL_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
     "${PROJECT_SOURCE_DIR}/components/"
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
@@ -59,12 +50,19 @@ endif()
 
 add_subdirectory (extern) 
 
+include_directories(
+    ${ROCKET_INCLUDE_DIR}
+)   
+
 link_libraries(StormLib)
 
 add_subdirectory (components) 
 
 link_libraries (
-    ${SDL_LIBRARY}
+    ${SDL2_LIBRARY}
+    ${SDL2IMAGE_LIBRARY}
+    ${OPENGL_LIBRARIES}
+    ${ROCKET_LIBRARIES}
     ${Boost_LIBRARIES}
     Cel
     FAIO

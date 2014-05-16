@@ -21,5 +21,9 @@ add_executable(freeablo
     faworld/position.h  
     faworld/position.cpp
     faworld/world.cpp  
-    faworld/world.h)
+    faworld/world.h
+    
+    fagui/guimanager.h
+    fagui/guimanager.cpp
+)
 set_target_properties(freeablo PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

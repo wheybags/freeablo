@@ -10,6 +10,10 @@
 #include <cel/celfile.h>
 #include <cel/celframe.h>
 
+#include <misc/disablewarn.h>
+    #include <Rocket/Core.h>
+#include <misc/enablewarn.h>
+
 namespace Render
 {
     typedef void* Sprite;
@@ -34,10 +38,14 @@ namespace Render
     };
 
     void init(const RenderSettings& settings); 
+    Rocket::Core::Context* initGui();
+
     void quit(); 
 
 	void resize(size_t w, size_t h);
-    
+   
+    void updateGuiBuffer();
+    void drawGui(); 
     void draw();
 
     void drawAt(const Sprite& sprite, size_t x, size_t y); 

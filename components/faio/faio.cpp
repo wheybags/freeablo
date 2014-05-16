@@ -6,12 +6,11 @@
 
 namespace bfs = boost::filesystem;
 
+
 // We don't want warnings from StormLibs headers
-#pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wpedantic"
-    #pragma GCC diagnostic ignored "-Wlong-long"
+#include <misc/disablewarn.h>
     #include <StormLib.h>
-#pragma GCC diagnostic pop
+#include <misc/enablewarn.h>
 
 namespace FAIO
 {
@@ -168,6 +167,21 @@ namespace FAIO
         }
 
         return 0;
+    }
+
+    size_t FAftell(FAFile* stream)
+    {
+        switch(stream->mode)
+        {
+            case FAFile::PlainFile:
+                return ftell(stream->data.plainFile.file);
+
+            case FAFile::MPQFile:
+                return SFileSetFilePointer(*((HANDLE*)stream->data.mpqFile), 0, NULL, FILE_CURRENT);
+
+            default:
+                return 0;
+        }
     }
 
     size_t FAsize(FAFile* stream)

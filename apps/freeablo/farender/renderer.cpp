@@ -22,9 +22,9 @@ namespace FARender
         ,mLevel(NULL)
         ,mDone(false)
         ,mCurrent(NULL)
+        ,mRocketContext(NULL)
     {
         assert(!mRenderer); // singleton, only one instance
-        mRenderer = this;
 
         // Render initialization.
         {
@@ -33,6 +33,9 @@ namespace FARender
             settings.windowHeight = windowHeight;
 
             Render::init(settings);
+            mRocketContext = Render::initGui();
+
+            mRenderer = this;
         }
 
         renderLoop();
@@ -110,6 +113,37 @@ namespace FARender
         return Render::getClickedTile(mLevel, x, y);
     }
 
+    Rocket::Core::Context* Renderer::getRocketContext()
+    {
+        return mRocketContext;
+    }
+
+    void Renderer::lockGui()
+    {
+        mGuiLock.lock();
+    }
+
+    void Renderer::unlockGui()
+    {
+        mGuiLock.unlock();
+    }
+
+    Rocket::Core::ElementDocument* Renderer::loadRocketDocument(const std::string& path)
+    {
+        mThreadCommunicationTmp = (void*)&path;
+        mRenderThreadState = loadRocket;
+        while(mRenderThreadState != running) {}
+
+        return (Rocket::Core::ElementDocument*) mThreadCommunicationTmp;
+    }
+
+    void Renderer::unLoadRocketDocument(Rocket::Core::ElementDocument* doc)
+    {
+        mThreadCommunicationTmp = (void*)doc;
+        mRenderThreadState = unLoadRocket;
+        while(mRenderThreadState != running) {}
+    }
+
     void Renderer::destroySprite(Render::SpriteGroup* s)
     {
         mThreadCommunicationTmp = (void*)s;
@@ -120,6 +154,8 @@ namespace FARender
     void Renderer::renderLoop()
     {
         Render::LevelObjects objects;
+
+        while(!Input::InputManager::get()) {}
 
         while(!mDone)
         {
@@ -143,6 +179,21 @@ namespace FARender
                 FASpriteGroup* tmp = new FASpriteGroup((CacheSpriteGroup*)NULL);
                 *tmp = loadImageImp(*(std::string*)mThreadCommunicationTmp);
                 mThreadCommunicationTmp = (void*)tmp;
+                mRenderThreadState = running;
+            }
+
+            else if(mRenderThreadState == loadRocket)
+            {
+                Rocket::Core::ElementDocument* document = mRocketContext->LoadDocument((*(std::string*)mThreadCommunicationTmp).c_str());
+                mThreadCommunicationTmp = (void*)document;
+                mRenderThreadState = running;
+            }
+
+            else if(mRenderThreadState == unLoadRocket)
+            {
+                Rocket::Core::ElementDocument* document = (Rocket::Core::ElementDocument*)mThreadCommunicationTmp;
+                document->RemoveReference();
+                document->Close();
                 mRenderThreadState = running;
             }
 
@@ -185,8 +236,16 @@ namespace FARender
                     current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
 
                 current->mMutex.unlock();
-            }
 
+                if(mGuiLock.try_lock())
+                {
+                    Render::updateGuiBuffer();
+                    mGuiLock.unlock();
+                }
+
+                Render::drawGui();
+            }
+            
             Render::draw();
         }
         

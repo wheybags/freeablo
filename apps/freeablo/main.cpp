@@ -11,6 +11,8 @@
 
 #include "faworld/world.h"
 
+#include "fagui/guimanager.h"
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -256,7 +258,6 @@ void run(const bpo::variables_map& variables)
         return;
 
     boost::thread mainThread(boost::bind(&runGameLoop, &variables));
-    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove);
 
     FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
     renderDone = true;
@@ -269,7 +270,8 @@ void runGameLoop(const bpo::variables_map& variables)
     while(!FARender::Renderer::get()) {}
 
     FARender::Renderer& renderer = *FARender::Renderer::get();
-    Input::InputManager& input = *Input::InputManager::get();
+    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
+    FAGui::GuiManager guiManager;
 
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
@@ -315,7 +317,9 @@ void runGameLoop(const bpo::variables_map& variables)
             click = false;
         }
 
+        renderer.lockGui();
         input.processInput();
+        renderer.unlockGui();
 
         if(changeLevel)
         {
@@ -380,6 +384,8 @@ void runGameLoop(const bpo::variables_map& variables)
 
         world.update();
         
+        guiManager.update();
+
         FARender::RenderState* state = renderer.getFreeState();
         
         state->mPos = player->mPos;
@@ -388,7 +394,8 @@ void runGameLoop(const bpo::variables_map& variables)
 
         renderer.setCurrentState(state);
     }
-
+    
+    guiManager.destroy();
     renderer.stop();    
 
     while(!renderDone) {} // have to wait until the renderer stops before destroying all our locals
