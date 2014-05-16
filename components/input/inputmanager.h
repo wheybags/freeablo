@@ -6,7 +6,9 @@
 #include <boost/function.hpp>
 #include <boost/lockfree/queue.hpp>
 
-#include <Rocket/Core.h>
+#include <misc/disablewarn.h>
+    #include <Rocket/Core.h>
+#include <misc/enablewarn.h>
 
 #include "keys.h"
 

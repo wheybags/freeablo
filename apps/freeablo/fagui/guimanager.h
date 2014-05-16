@@ -1,5 +1,8 @@
 #include <string>
-#include <Rocket/Core.h>
+
+#include <misc/disablewarn.h>
+    #include <Rocket/Core.h>
+#include <misc/enablewarn.h>
 
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H

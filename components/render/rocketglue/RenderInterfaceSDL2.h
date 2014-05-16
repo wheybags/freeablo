@@ -27,7 +27,9 @@
 #ifndef RENDERINTERFACESDL2_H
 #define RENDERINTERFACESDL2_H
 
-#include <Rocket/Core/RenderInterface.h>
+#include <misc/disablewarn.h>
+    #include <Rocket/Core/RenderInterface.h>
+#include <misc/enablewarn.h>
 
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -99,6 +101,16 @@ private:
     PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
 
     std::vector<drawCommand> mDrawBuffer;
+
+    void getGLFunc()
+    {
+        #ifdef WIN32
+            glUseProgramObjectARB = static_cast<PFNGLUSEPROGRAMOBJECTARBPROC>(SDL_GL_GetProcAddress("glUseProgramObjectARB"));
+        #else
+            #pragma GCC system_header // this was the only way I could silence the warning :(
+            glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)(SDL_GL_GetProcAddress("glUseProgramObjectARB"));
+        #endif
+    }
 };
 
 #endif

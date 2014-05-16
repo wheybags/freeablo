@@ -25,7 +25,10 @@
  *
  */
 
-#include <Rocket/Core/Core.h>
+#include <misc/disablewarn.h>
+    #include <Rocket/Core/Core.h>
+#include <misc/enablewarn.h>
+
 #include <SDL_image.h>
 
 #include <misc/stringops.h>
@@ -42,13 +45,9 @@ RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* scree
 {
     mRenderer = renderer;
     mScreen = screen;
-    
-    #ifdef WIN32
-        glUseProgramObjectARB = static_cast<PFNGLUSEPROGRAMOBJECTARBPROC>(SDL_GL_GetProcAddress("glUseProgramObjectARB"));
-    #else
-        glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)(SDL_GL_GetProcAddress("glUseProgramObjectARB"));
-    #endif
 
+    getGLFunc();
+    
     ROCKET_ASSERT(glUseProgramObjectARB != NULL);
 }
 
@@ -56,10 +55,10 @@ void RocketSDL2Renderer::RenderGeometry(Rocket::Core::Vertex* vertices, int num_
 {
     drawCommand tmp;
     
-    for(size_t i = 0; i < num_vertices; i++)
+    for(int i = 0; i < num_vertices; i++)
         tmp.draw.vertices.push_back(vertices[i]);
 
-    for(size_t i = 0; i < num_indices; i++)
+    for(int i = 0; i < num_indices; i++)
         tmp.draw.indices.push_back(indices[i]);
 
     tmp.draw.texture = texture;

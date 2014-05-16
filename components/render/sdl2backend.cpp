@@ -41,7 +41,7 @@ namespace Render
             printf("Could not create window: %s\n", SDL_GetError());
 
 
-        SDL_GLContext glcontext = SDL_GL_CreateContext(screen);
+        SDL_GL_CreateContext(screen);
         int oglIdx = -1;
         int nRD = SDL_GetNumRenderDrivers();
         for(int i=0; i<nRD; i++)
@@ -391,7 +391,7 @@ namespace Render
 
     void drawLevelHelper(RenderLevel* level, std::map<int32_t, Sprite>& minMap, int32_t x, int32_t y)
     {
-        if(x < level->level->width() && y < level->level->height())
+        if((size_t)x < level->level->width() && (size_t)y < level->level->height())
         {
             size_t index = level->level->operator[](x)[y].index();
             int32_t xCoord = (y*(-32)) + 32*x + level->level->height()*32-32 +level->levelX;

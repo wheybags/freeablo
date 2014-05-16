@@ -24,7 +24,11 @@
  * THE SOFTWARE.
  *
  */
-#include <Rocket/Core.h>
+
+#include <misc/disablewarn.h>
+    #include <Rocket/Core.h>
+#include <misc/enablewarn.h>
+
 #include "SystemInterfaceSDL2.h"
 
 float RocketSDL2SystemInterface::GetElapsedTime()

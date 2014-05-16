@@ -10,7 +10,9 @@
 #include <cel/celfile.h>
 #include <cel/celframe.h>
 
-#include <Rocket/Core.h>
+#include <misc/disablewarn.h>
+    #include <Rocket/Core.h>
+#include <misc/enablewarn.h>
 
 namespace Render
 {

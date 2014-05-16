@@ -32,7 +32,10 @@ add_library(Misc
     misc/fareadini.h
     misc/fareadini.cpp
     misc/misc.h
-    misc/misc.cpp)
+    misc/misc.cpp
+    misc/disablewarn.h
+    misc/enablewarn.h
+)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

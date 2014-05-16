@@ -28,8 +28,10 @@
 #ifndef SHELLFILEINTERFACE_H
 #define SHELLFILEINTERFACE_H
 
-#include <Rocket/Core/String.h>
-#include <Rocket/Core/FileInterface.h>
+#include <misc/disablewarn.h>
+    #include <Rocket/Core/String.h>
+    #include <Rocket/Core/FileInterface.h>
+#include <misc/enablewarn.h>
 
 /**
 	Rocket file interface for the shell examples.
