@@ -86,7 +86,7 @@ namespace Cel
         mCache[index] = frame;
         
         #ifdef CEL_DEBUG
-            std::cout << "w: " << frame.width << ", h: " << frame.height << std::endl;
+            std::cout << "w: " << frame.mWidth << ", h: " << frame.mHeight << std::endl;
         #endif
 
         return mCache[index];
