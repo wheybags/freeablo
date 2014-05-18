@@ -47,27 +47,56 @@ namespace Cel
         // So, for all image except those whose width is divisible by 127, we can determine width
         // by looping through control bits, adding 127 each time, until we find some value which
         // is not 127, then add that to the 127-total and that is our width.
+        //
+        // The above is the basic idea, but there is also a bunch of crap added in to maybe deal
+        // with frames that don't quite fit the criteria.
         else
         {
             int32_t widthRegular = 0;
+            bool hasTrans = false;
+
+            uint8_t lastVal = 0;
+            uint8_t lastTransVal = 0;
             
             for(size_t i = 0; i < frame.size(); i++){
                 uint8_t val = frame[i];
 
+
                 // Regular command
-                if(val <= 127){
+                if(val <= 127)
+                {
                     widthRegular += val;
                     i += val;
+                    
+                    // Workaround for frames that start with a few px, then trans for the rest of the line
+                    if(128 <= frame[i+1])
+                        hasTrans = true;
                 }
 
-                // Transparency command - who knows, it might be possible
-                else if(128 <= val){
+                else if(128 <= val)
+                {
+                    
+                    // Workaround for frames that start trans, then a few px of colour at the end
+                    if(val == lastTransVal && lastVal <= 127 && lastVal == frame[i+1])
+                        break;
+
                     widthRegular += 256 - val;
+                    
+                    // Workaround - presumes all headerless frames first lines start transparent, then go colour,
+                    // then go transparent again, at which point they hit the end of the line, or if the first two
+                    // commands are both transparency commands, that the image starts with a fully transparent line
+                    if((hasTrans || 128 <= frame[i+1]) && val != 128)
+                        break;
+
+                    hasTrans = true;
+
+                    lastTransVal = val;
                 }
 
-                if(val != 127)
+                if(val != 127 && !hasTrans)
                     break;
 
+                lastVal = val;
             }
 
             return widthRegular;
