@@ -52,19 +52,20 @@ namespace Cel
             int32_t widthRegular = 0;
             
             for(size_t i = 0; i < frame.size(); i++){
+                uint8_t val = frame[i];
 
                 // Regular command
-                if(frame[i] <= 127){
-                    widthRegular += frame[i];
-                    i += frame[i];
+                if(val <= 127){
+                    widthRegular += val;
+                    i += val;
                 }
 
                 // Transparency command - who knows, it might be possible
-                else if(128 <= frame[i]){
-                    widthRegular += 256 - frame[i];
+                else if(128 <= val){
+                    widthRegular += 256 - val;
                 }
 
-                if(frame[i] != 127)
+                if(val != 127)
                     break;
 
             }
