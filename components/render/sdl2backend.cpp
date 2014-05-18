@@ -83,7 +83,7 @@ namespace Render
         Rocket::Core::FontDatabase::LoadFontFace("Delicious-Roman.otf");
 
         Context = Rocket::Core::CreateContext("default",
-            Rocket::Core::Vector2i(640, 480));
+            Rocket::Core::Vector2i(WIDTH, HEIGHT));
 
         return Context;
     }
@@ -95,14 +95,22 @@ namespace Render
         SDL_Quit();
     }
 
+    bool resized = false;
+
     void resize(size_t w, size_t h)
     {
         WIDTH = w;
         HEIGHT = h;
+        resized = true;
     }
 
     void updateGuiBuffer()
     {
+        if(resized)
+        {
+            Context->SetDimensions(Rocket::Core::Vector2i(WIDTH, HEIGHT));
+            resized = false;
+        }
         Renderer->clearDrawBuffer();
         Context->Render();
     }

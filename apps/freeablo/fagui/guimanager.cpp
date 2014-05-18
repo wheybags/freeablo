@@ -31,6 +31,11 @@ namespace FAGui
         mDocs.push_back(doc);
     }
     
+    void GuiManager::showGameBottomMenu()
+    {
+        display("resources/gui/bottommenu.rml");
+    }
+    
     void GuiManager::remove(Rocket::Core::ElementDocument* doc)
     {
         FARender::Renderer::get()->unLoadRocketDocument(doc);

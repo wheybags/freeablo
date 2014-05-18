@@ -304,6 +304,8 @@ void runGameLoop(const bpo::variables_map& variables)
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     std::pair<size_t, size_t> destination = player->mPos.current();
+
+    guiManager.showGameBottomMenu();
     
     // Main game logic loop
     while(!done)

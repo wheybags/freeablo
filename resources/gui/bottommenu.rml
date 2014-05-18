@@ -1,0 +1,17 @@
+<rml>
+	<head>
+		<style>
+			body
+			{
+	            font-family: Delicious;
+                text-align: center;
+                bottom: 0px;
+			}
+			
+		</style>
+	</head>
+
+	<body>
+	    <img src="/ctrlpan/panel8.cel"></img>
+	</body>
+</rml>

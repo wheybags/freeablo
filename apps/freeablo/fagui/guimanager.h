@@ -18,6 +18,8 @@ namespace FAGui
 
             void display(const std::string& path);
 
+            void showGameBottomMenu();
+
         private:
             void remove(Rocket::Core::ElementDocument* doc);
 
