@@ -7,11 +7,25 @@
                 text-align: center;
                 bottom: 0px;
 			}
-			
+
+            div.buttonDiv
+            {
+                position: absolute;
+                bottom: 144px;
+            }
 		</style>
+
+        <link type="text/rcss" href="bottommenu_buttons.rcss"/>
 	</head>
 
 	<body>
+        <div class="buttonDiv"><button id="charBut" onclick="print 'char clicked'"></button></div>
+        <div class="buttonDiv"><button id="questBut" onclick="print 'quest clicked'"></button></div>
+        <div class="buttonDiv"><button id="mapBut" onclick="print 'map clicked'"></button></div>
+        <div class="buttonDiv"><button id="menuBut" onclick="print 'menu clicked'"></button></div>
+        <div class="buttonDiv"><button id="invBut" onclick="print 'inv clicked'"></button></div>
+        <div class="buttonDiv"><button id="spellBut" onclick="print 'spell clicked'"></button></div>
+        <br/>
 	    <img src="/ctrlpan/panel8.cel"></img>
 	</body>
 </rml>
