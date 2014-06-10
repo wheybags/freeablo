@@ -17,6 +17,9 @@
 #include "rocketglue/SystemInterfaceSDL2.h"
 #include "rocketglue/RenderInterfaceSDL2.h"
 
+#include <Rocket/Core/Python/Python.h>
+
+
 namespace Render
 {
     int32_t WIDTH = 1280;
@@ -64,8 +67,26 @@ namespace Render
         glOrtho(0, WIDTH, HEIGHT, 0, 0, 1);
     }
 
+    bool import(const std::string& name)
+    {
+        PyObject* module = PyImport_ImportModule(name.c_str());
+        if (!module)
+        {
+            PyErr_Print();
+            return false;
+        }
+
+        Py_DECREF(module);
+        return true;
+    }
+
     Rocket::Core::Context* initGui()
     {
+        Py_Initialize();
+
+        // Pull in the Rocket Python module.
+        import("rocket");
+
         Renderer = new RocketSDL2Renderer(renderer, screen);
         SystemInterface = new RocketSDL2SystemInterface();
         FileInterface = new FAIOFileInterface();
