@@ -37,6 +37,8 @@
 
 #include "RenderInterfaceSDL2.h"
 
+#include <sstream>
+
 #if !(SDL_VIDEO_RENDER_OGL)
     #error "Only the opengl sdl backend is supported. To add support for others, see http://mdqinc.com/blog/2013/01/integrating-librocket-with-sdl-2/"
 #endif
@@ -199,27 +201,46 @@ namespace Render
 // Called by Rocket when a texture is required by the library.		
 bool RocketSDL2Renderer::LoadTextureImp(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
 {
-    size_t i;
-    for(i = source.Length() - 1; i > 0; i--)
+
+    // Extract the filepath and index from source
+    // cel file paths can specify which image to use, eg "/ctrlpan/panel8bu.cel:5" for the 5th frame
+    std::istringstream ss(source.CString());
+    size_t celIndex = 0;
+    std::string sourcePath;
+    std::getline(ss, sourcePath, ':');
+
+    std::string tmp;
+    if(std::getline(ss, tmp, ':'))
     {
-        if(source[i] == '.')
+            std::istringstream ss(tmp);
+            ss >> celIndex;
+    }
+
+
+    size_t i;
+    for(i = sourcePath.length() - 1; i > 0; i--)
+    {
+        if(sourcePath[i] == '.')
             break;
     }
 
-    Rocket::Core::String extension = source.Substring(i+1, source.Length()-i);
+    std::string extension = sourcePath.substr(i+1, sourcePath.length()-i);
 
     SDL_Surface* surface = NULL;
 
-    if(Misc::StringUtils::ciEqual(extension.CString(), "cel") || Misc::StringUtils::ciEqual(extension.CString(), "cl2"))
+    if(Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
     {
-        Cel::CelFile cel(source.CString());
-        surface = Render::createTransparentSurface(cel[0].mWidth, cel[0].mHeight);
-        Render::drawFrame(surface, 0, 0, cel[0]);
+        Cel::CelFile cel(sourcePath);
+        surface = Render::createTransparentSurface(cel[celIndex].mWidth, cel[celIndex].mHeight);
+        Render::drawFrame(surface, 0, 0, cel[celIndex]);
     }
     else
     {
+        if(tmp != "")   // no indices on normal files
+            return false; 
+
         Rocket::Core::FileInterface* file_interface = Rocket::Core::GetFileInterface();
-        Rocket::Core::FileHandle file_handle = file_interface->Open(source);
+        Rocket::Core::FileHandle file_handle = file_interface->Open(sourcePath.c_str());
         if (!file_handle)
             return false;
 
@@ -231,7 +252,7 @@ bool RocketSDL2Renderer::LoadTextureImp(Rocket::Core::TextureHandle& texture_han
         file_interface->Read(buffer, buffer_size, file_handle);
         file_interface->Close(file_handle);
         
-        surface = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.CString());
+        surface = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.c_str());
     }
 
     if (surface) {
