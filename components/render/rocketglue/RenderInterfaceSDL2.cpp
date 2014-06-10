@@ -41,7 +41,11 @@
     #error "Only the opengl sdl backend is supported. To add support for others, see http://mdqinc.com/blog/2013/01/integrating-librocket-with-sdl-2/"
 #endif
 
-RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen)
+RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen, 
+        boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
+        boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
+        boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc) :
+            mLoadTextureFunc(loadTextureFunc), mGenerateTextureFunc(generateTextureFunc), mReleaseTextureFunc(releaseTextureFunc)
 {
     mRenderer = renderer;
     mScreen = screen;
@@ -197,7 +201,7 @@ namespace Render
 }
 
 // Called by Rocket when a texture is required by the library.		
-bool RocketSDL2Renderer::LoadTexture(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
+bool RocketSDL2Renderer::LoadTextureImp(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
 {
     size_t i;
     for(i = source.Length() - 1; i > 0; i--)
@@ -253,8 +257,14 @@ bool RocketSDL2Renderer::LoadTexture(Rocket::Core::TextureHandle& texture_handle
     return false;
 }
 
+bool RocketSDL2Renderer::LoadTexture(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
+{
+    return mLoadTextureFunc(texture_handle, texture_dimensions, source);
+}
+
+
 // Called by Rocket when a texture is required to be built from an internally-generated sequence of pixels.
-bool RocketSDL2Renderer::GenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+bool RocketSDL2Renderer::GenerateTextureImp(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
 {
     #if SDL_BYTEORDER == SDL_BIG_ENDIAN
         Uint32 rmask = 0xff000000;
@@ -276,8 +286,18 @@ bool RocketSDL2Renderer::GenerateTexture(Rocket::Core::TextureHandle& texture_ha
     return true;
 }
 
+bool RocketSDL2Renderer::GenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+{
+    return mGenerateTextureFunc(texture_handle, source, source_dimensions);
+}
+
 // Called by Rocket when a loaded texture is no longer required.		
-void RocketSDL2Renderer::ReleaseTexture(Rocket::Core::TextureHandle texture_handle)
+void RocketSDL2Renderer::ReleaseTextureImp(Rocket::Core::TextureHandle texture_handle)
 {
     SDL_DestroyTexture((SDL_Texture*) texture_handle);
+}
+
+void RocketSDL2Renderer::ReleaseTexture(Rocket::Core::TextureHandle texture_handle)
+{
+    mReleaseTextureFunc(texture_handle);
 }

@@ -19,7 +19,6 @@
 
 #include <Rocket/Core/Python/Python.h>
 
-
 namespace Render
 {
     int32_t WIDTH = 1280;
@@ -80,14 +79,16 @@ namespace Render
         return true;
     }
 
-    Rocket::Core::Context* initGui()
+    Rocket::Core::Context* initGui(boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
+                                   boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
+                                   boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc)
     {
         Py_Initialize();
 
         // Pull in the Rocket Python module.
         import("rocket");
 
-        Renderer = new RocketSDL2Renderer(renderer, screen);
+        Renderer = new RocketSDL2Renderer(renderer, screen, loadTextureFunc, generateTextureFunc, releaseTextureFunc);
         SystemInterface = new RocketSDL2SystemInterface();
         FileInterface = new FAIOFileInterface();
 
@@ -139,6 +140,21 @@ namespace Render
     void drawGui()
     {
         Renderer->drawBuffer();
+    }
+    
+    bool guiLoadImage(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
+    {
+        return Renderer->LoadTextureImp(texture_handle, texture_dimensions, source);
+    }
+
+	bool guiGenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+    {
+        return Renderer->GenerateTextureImp(texture_handle, source, source_dimensions);
+    }
+    
+    void guiReleaseTexture(Rocket::Core::TextureHandle texture_handle)
+    {
+        return Renderer->ReleaseTextureImp(texture_handle);
     }
 
     void draw()

@@ -22,7 +22,7 @@ namespace FAGui
     void GuiManager::display(const std::string& path)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
-        Rocket::Core::ElementDocument* doc = renderer->loadRocketDocument(path);
+        Rocket::Core::ElementDocument* doc = renderer->getRocketContext()->LoadDocument(path.c_str());
         
         renderer->lockGui();
         doc->Show();
@@ -38,6 +38,7 @@ namespace FAGui
     
     void GuiManager::remove(Rocket::Core::ElementDocument* doc)
     {
-        FARender::Renderer::get()->unLoadRocketDocument(doc);
+        doc->RemoveReference();
+        doc->Close();
     }
 }

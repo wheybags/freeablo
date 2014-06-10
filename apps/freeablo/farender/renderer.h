@@ -39,11 +39,12 @@ namespace FARender
 
     enum RenderThreadState
     {
+        guiLoadTexture,
+        guiGenerateTexture,
+        guiReleaseTexture,
         running,
         levelChange,
         loadSprite,
-        loadRocket,
-        unLoadRocket,
         pause,
         spriteDestroy,
         stopped
@@ -76,7 +77,13 @@ namespace FARender
             Rocket::Core::ElementDocument* loadRocketDocument(const std::string& path);
             void unLoadRocketDocument(Rocket::Core::ElementDocument* doc);
 
+
+            bool loadGuiTextureFunc(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&);
+            bool generateGuiTextureFunc(Rocket::Core::TextureHandle&, const Rocket::Core::byte* source, const Rocket::Core::Vector2i&);
+            void releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle);
+            
         private:
+
             FASpriteGroup loadImageImp(const std::string& path);
             
             void destroySprite(Render::SpriteGroup* s);
