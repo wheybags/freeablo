@@ -319,9 +319,7 @@ void runGameLoop(const bpo::variables_map& variables)
             click = false;
         }
 
-        renderer.lockGui();
         input.processInput();
-        renderer.unlockGui();
 
         if(changeLevel)
         {
@@ -393,6 +391,8 @@ void runGameLoop(const bpo::variables_map& variables)
         state->mPos = player->mPos;
 
         world.fillRenderState(state);
+
+        Render::updateGuiBuffer(state->guiDrawBuffer);
 
         renderer.setCurrentState(state);
     }

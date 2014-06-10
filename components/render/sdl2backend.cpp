@@ -126,20 +126,21 @@ namespace Render
         resized = true;
     }
 
-    void updateGuiBuffer()
+    void updateGuiBuffer(std::vector<drawCommand>& buffer)
     {
         if(resized)
         {
             Context->SetDimensions(Rocket::Core::Vector2i(WIDTH, HEIGHT));
             resized = false;
         }
-        Renderer->clearDrawBuffer();
+        buffer.clear();
+        Renderer->mDrawBuffer = &buffer;
         Context->Render();
     }
 
-    void drawGui()
+    void drawGui(std::vector<drawCommand>& buffer)
     {
-        Renderer->drawBuffer();
+        Renderer->drawBuffer(buffer);
     }
     
     bool guiLoadImage(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)

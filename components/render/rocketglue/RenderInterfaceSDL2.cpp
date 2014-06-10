@@ -70,32 +70,28 @@ void RocketSDL2Renderer::RenderGeometry(Rocket::Core::Vertex* vertices, int num_
 
     tmp.mode = drawCommand::Draw;
 
-    mDrawBuffer.push_back(tmp);
+    mDrawBuffer->push_back(tmp);
 }
 
-void RocketSDL2Renderer::drawBuffer()
+void RocketSDL2Renderer::drawBuffer(std::vector<drawCommand>& buffer)
 {
-    for(size_t i = 0; i < mDrawBuffer.size(); i++)
+    for(size_t i = 0; i < buffer.size(); i++)
     {
-        switch(mDrawBuffer[i].mode)
+        switch(buffer[i].mode)
         {
             case drawCommand::Draw:
-                RenderGeometryImp(&(mDrawBuffer[i].draw.vertices[0]), mDrawBuffer[i].draw.vertices.size(), &(mDrawBuffer[i].draw.indices[0]), mDrawBuffer[i].draw.indices.size(), mDrawBuffer[i].draw.texture, mDrawBuffer[i].draw.translation);
+                RenderGeometryImp(&(buffer[i].draw.vertices[0]), buffer[i].draw.vertices.size(), &(buffer[i].draw.indices[0]), buffer[i].draw.indices.size(), buffer[i].draw.texture, buffer[i].draw.translation);
                 break;
             case drawCommand::EnableScissor:
-                EnableScissorRegionImp(mDrawBuffer[i].enableScissor);
+                EnableScissorRegionImp(buffer[i].enableScissor);
                 break;
             case drawCommand::SetScissor:
-	            SetScissorRegionImp(mDrawBuffer[i].setScissor.x, mDrawBuffer[i].setScissor.y, mDrawBuffer[i].setScissor.width, mDrawBuffer[i].setScissor.height);
+	            SetScissorRegionImp(buffer[i].setScissor.x, buffer[i].setScissor.y, buffer[i].setScissor.width, buffer[i].setScissor.height);
                 break;
         }
     }
 }
 
-void RocketSDL2Renderer::clearDrawBuffer()
-{
-    mDrawBuffer.clear();
-}
 
 // Called by Rocket when it wants to render geometry that it does not wish to optimise.
 void RocketSDL2Renderer::RenderGeometryImp(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation)
@@ -162,7 +158,7 @@ void RocketSDL2Renderer::EnableScissorRegion(bool enable)
     tmp.mode = drawCommand::EnableScissor;
     tmp.enableScissor = enable;
 
-    mDrawBuffer.push_back(tmp);
+    mDrawBuffer->push_back(tmp);
 }
 
 void RocketSDL2Renderer::EnableScissorRegionImp(bool enable)
@@ -184,7 +180,7 @@ void RocketSDL2Renderer::SetScissorRegion(int x, int y, int width, int height)
     tmp.setScissor.width = width;
     tmp.setScissor.height = height;
 
-    mDrawBuffer.push_back(tmp);
+    mDrawBuffer->push_back(tmp);
 }
 
 void RocketSDL2Renderer::SetScissorRegionImp(int x, int y, int width, int height)

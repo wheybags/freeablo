@@ -35,6 +35,8 @@ namespace FARender
         FAWorld::Position mPos;
         
         std::vector<boost::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
+
+        std::vector<drawCommand> guiDrawBuffer;
     };
 
     enum RenderThreadState
@@ -71,12 +73,6 @@ namespace FARender
             std::pair<size_t, size_t> getClickedTile(size_t x, size_t y);
 
             Rocket::Core::Context* getRocketContext();
-            void lockGui();
-            void unlockGui();
-
-            Rocket::Core::ElementDocument* loadRocketDocument(const std::string& path);
-            void unLoadRocketDocument(Rocket::Core::ElementDocument* doc);
-
 
             bool loadGuiTextureFunc(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&);
             bool generateGuiTextureFunc(Rocket::Core::TextureHandle&, const Rocket::Core::byte* source, const Rocket::Core::Vector2i&);
@@ -103,7 +99,6 @@ namespace FARender
             RenderState* mCurrent;
 
             Rocket::Core::Context* mRocketContext;
-            boost::mutex mGuiLock;
 
             std::map<std::string, boost::weak_ptr<CacheSpriteGroup> > mSpriteCache;
 

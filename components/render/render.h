@@ -16,6 +16,8 @@
     #include <Rocket/Core.h>
 #include <misc/enablewarn.h>
 
+#include "rocketglue/RenderInterfaceSDL2.h"
+
 namespace Render
 {
     typedef void* Sprite;
@@ -48,8 +50,8 @@ namespace Render
 
 	void resize(size_t w, size_t h);
    
-    void updateGuiBuffer();
-    void drawGui(); 
+    void updateGuiBuffer(std::vector<drawCommand>& buffer);
+    void drawGui(std::vector<drawCommand>& buffer); 
     
     bool guiLoadImage(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
 	bool guiGenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions);

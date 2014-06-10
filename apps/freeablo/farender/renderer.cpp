@@ -16,7 +16,6 @@ namespace FARender
     {
         return mRenderer;
     }
-
     struct LoadGuiTextureStruct
     {
         Rocket::Core::TextureHandle* texture_handle;
@@ -172,16 +171,6 @@ namespace FARender
         return mRocketContext;
     }
 
-    void Renderer::lockGui()
-    {
-        mGuiLock.lock();
-    }
-
-    void Renderer::unlockGui()
-    {
-        mGuiLock.unlock();
-    }
-
     void Renderer::destroySprite(Render::SpriteGroup* s)
     {
         mThreadCommunicationTmp = (void*)s;
@@ -278,15 +267,9 @@ namespace FARender
                 Render::drawLevel(mLevel, objects, current->mPos.current().first, current->mPos.current().second,
                     current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
 
+                Render::drawGui(current->guiDrawBuffer);
+
                 current->mMutex.unlock();
-
-                if(mGuiLock.try_lock())
-                {
-                    Render::updateGuiBuffer();
-                    mGuiLock.unlock();
-                }
-
-                Render::drawGui();
             }
             
             Render::draw();
