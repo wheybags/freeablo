@@ -53,7 +53,7 @@ set(RenderFiles
     render/sdl2backend.cpp
 )
 add_library(Render ${RenderFiles})
-target_link_libraries(Render Cel Levels ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${OPENGL_LIBRARIES})
+target_link_libraries(Render Cel Levels ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${OPENGL_LIBRARIES} ${ROCKET_LIBRARIES} ${PYTHON_LIBRARIES})
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
