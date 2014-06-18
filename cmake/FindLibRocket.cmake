@@ -1,6 +1,7 @@
 FIND_PATH(ROCKET_INCLUDE_DIR Rocket/Core.h
   HINTS
   PATHS
+  $ENV{ROCKET_ROOT}/include
   ~/Library/Frameworks
   /Library/Frameworks
   /usr/local
@@ -17,6 +18,7 @@ FIND_LIBRARY(ROCKET_CONTROLS
   HINTS
   PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
   PATHS
+  $ENV{ROCKET_ROOT}
   ~/Library/Frameworks
   /Library/Frameworks
   /usr/local
@@ -30,6 +32,7 @@ FIND_LIBRARY(ROCKET_CONTROLS
 FIND_LIBRARY(ROCKET_CORE
   RocketCore
   HINTS
+  $ENV{ROCKET_ROOT}
   PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
   PATHS
   ~/Library/Frameworks
@@ -47,6 +50,7 @@ FIND_LIBRARY(ROCKET_DEBUGGER
   HINTS
   PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
   PATHS
+  $ENV{ROCKET_ROOT}
   ~/Library/Frameworks
   /Library/Frameworks
   /usr/local

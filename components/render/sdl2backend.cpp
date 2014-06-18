@@ -83,7 +83,14 @@ namespace Render
                                    boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
                                    boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc)
     {
+        #ifdef WIN32
+            Py_SetPythonHome("Python27");
+        #endif
         Py_Initialize();
+
+        #ifdef WIN32
+            PyRun_SimpleString("import sys\nsys.path.append('.')");
+        #endif
 
         // Pull in the Rocket Python module.
         import("rocket");

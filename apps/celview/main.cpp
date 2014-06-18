@@ -49,4 +49,6 @@ int main(int, char** argv)
         Render::drawAt(cel[celIndex], 0, 0);
         Render::draw();
     }
+
+    return 0;
 }
