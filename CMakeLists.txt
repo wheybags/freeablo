@@ -4,12 +4,17 @@ project (Freeablo)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
+if(APPLE)
+    set(CMAKE_EXE_LINKER_FLAGS "/usr/local/lib/libtomcrypt.a")
+    set(FREETYPE_INCLUDE_DIRS "/usr/local/Cellar/freetype/2.5.3_1/include/freetype2")
+endif()
+
 Find_Package(SDL2 REQUIRED)
 Find_Package(SDL2_image REQUIRED)
 Find_Package(OpenGL REQUIRED)
 
 if(WIN32)
-	set(Boost_USE_STATIC_LIBS   ON)
+    set(Boost_USE_STATIC_LIBS   ON)
 else()
     Find_Package ( ZLIB REQUIRED )
     Find_Package ( BZip2 REQUIRED )
@@ -45,7 +50,7 @@ include_directories (
 
 # allow the user to specify extra include dirs on the command line
 if(CLI_INCLUDE_DIRS)
-	include_directories(${CLI_INCLUDE_DIRS})
+    include_directories(${CLI_INCLUDE_DIRS})
 endif()
 
 add_subdirectory (extern) 
