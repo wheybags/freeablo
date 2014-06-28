@@ -28,8 +28,14 @@ The above will all be made configurable at some point.
 ## Windows
 If you are using windows, please see https://github.com/wheybags/freeablo-windows-build/tree/master for instructions on building with Visual Studio 2010
 
-##Linux/Unix
-freeablo uses cmake, and depends on boost >= 1.54, libbz2, zlib, and SDL2, so make sure to have those installed.
+## OSX
+```
+brew install boost lbzip2 zlib sdl2 freetype libtomcrypt
+```
+and continue on with the Linux/Unix section
+
+## Linux/Unix
+freeablo uses cmake, and depends on boost >= 1.54, libbz2, zlib, SDL2, and freetype so make sure to have those installed.
 
 Get the source:
 
