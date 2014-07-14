@@ -16,9 +16,9 @@ namespace Input
 {
     enum Modifier
     {
-        MOD_CTRL = 1,
-        MOD_ALT = 2,
-        MOD_SHIFT = 4
+        FAMOD_CTRL = 1,
+        FAMOD_ALT = 2,
+        FAMOD_SHIFT = 4
     };
 
     class InputManager

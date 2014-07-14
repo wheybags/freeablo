@@ -37,11 +37,17 @@
 
 #include "RenderInterfaceSDL2.h"
 
+#include <sstream>
+
 #if !(SDL_VIDEO_RENDER_OGL)
     #error "Only the opengl sdl backend is supported. To add support for others, see http://mdqinc.com/blog/2013/01/integrating-librocket-with-sdl-2/"
 #endif
 
-RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen)
+RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen, 
+        boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
+        boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
+        boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc) :
+            mLoadTextureFunc(loadTextureFunc), mGenerateTextureFunc(generateTextureFunc), mReleaseTextureFunc(releaseTextureFunc)
 {
     mRenderer = renderer;
     mScreen = screen;
@@ -66,32 +72,28 @@ void RocketSDL2Renderer::RenderGeometry(Rocket::Core::Vertex* vertices, int num_
 
     tmp.mode = drawCommand::Draw;
 
-    mDrawBuffer.push_back(tmp);
+    mDrawBuffer->push_back(tmp);
 }
 
-void RocketSDL2Renderer::drawBuffer()
+void RocketSDL2Renderer::drawBuffer(std::vector<drawCommand>& buffer)
 {
-    for(size_t i = 0; i < mDrawBuffer.size(); i++)
+    for(size_t i = 0; i < buffer.size(); i++)
     {
-        switch(mDrawBuffer[i].mode)
+        switch(buffer[i].mode)
         {
             case drawCommand::Draw:
-                RenderGeometryImp(&(mDrawBuffer[i].draw.vertices[0]), mDrawBuffer[i].draw.vertices.size(), &(mDrawBuffer[i].draw.indices[0]), mDrawBuffer[i].draw.indices.size(), mDrawBuffer[i].draw.texture, mDrawBuffer[i].draw.translation);
+                RenderGeometryImp(&(buffer[i].draw.vertices[0]), buffer[i].draw.vertices.size(), &(buffer[i].draw.indices[0]), buffer[i].draw.indices.size(), buffer[i].draw.texture, buffer[i].draw.translation);
                 break;
             case drawCommand::EnableScissor:
-                EnableScissorRegionImp(mDrawBuffer[i].enableScissor);
+                EnableScissorRegionImp(buffer[i].enableScissor);
                 break;
             case drawCommand::SetScissor:
-	            SetScissorRegionImp(mDrawBuffer[i].setScissor.x, mDrawBuffer[i].setScissor.y, mDrawBuffer[i].setScissor.width, mDrawBuffer[i].setScissor.height);
+	            SetScissorRegionImp(buffer[i].setScissor.x, buffer[i].setScissor.y, buffer[i].setScissor.width, buffer[i].setScissor.height);
                 break;
         }
     }
 }
 
-void RocketSDL2Renderer::clearDrawBuffer()
-{
-    mDrawBuffer.clear();
-}
 
 // Called by Rocket when it wants to render geometry that it does not wish to optimise.
 void RocketSDL2Renderer::RenderGeometryImp(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation)
@@ -158,7 +160,7 @@ void RocketSDL2Renderer::EnableScissorRegion(bool enable)
     tmp.mode = drawCommand::EnableScissor;
     tmp.enableScissor = enable;
 
-    mDrawBuffer.push_back(tmp);
+    mDrawBuffer->push_back(tmp);
 }
 
 void RocketSDL2Renderer::EnableScissorRegionImp(bool enable)
@@ -180,7 +182,7 @@ void RocketSDL2Renderer::SetScissorRegion(int x, int y, int width, int height)
     tmp.setScissor.width = width;
     tmp.setScissor.height = height;
 
-    mDrawBuffer.push_back(tmp);
+    mDrawBuffer->push_back(tmp);
 }
 
 void RocketSDL2Renderer::SetScissorRegionImp(int x, int y, int width, int height)
@@ -197,29 +199,48 @@ namespace Render
 }
 
 // Called by Rocket when a texture is required by the library.		
-bool RocketSDL2Renderer::LoadTexture(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
+bool RocketSDL2Renderer::LoadTextureImp(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
 {
-    size_t i;
-    for(i = source.Length() - 1; i > 0; i--)
+
+    // Extract the filepath and index from source
+    // cel file paths can specify which image to use, eg "/ctrlpan/panel8bu.cel:5" for the 5th frame
+    std::istringstream ss(source.CString());
+    size_t celIndex = 0;
+    std::string sourcePath;
+    std::getline(ss, sourcePath, ':');
+
+    std::string tmp;
+    if(std::getline(ss, tmp, ':'))
     {
-        if(source[i] == '.')
+            std::istringstream ss(tmp);
+            ss >> celIndex;
+    }
+
+
+    size_t i;
+    for(i = sourcePath.length() - 1; i > 0; i--)
+    {
+        if(sourcePath[i] == '.')
             break;
     }
 
-    Rocket::Core::String extension = source.Substring(i+1, source.Length()-i);
+    std::string extension = sourcePath.substr(i+1, sourcePath.length()-i);
 
     SDL_Surface* surface = NULL;
 
-    if(Misc::StringUtils::ciEqual(extension.CString(), "cel") || Misc::StringUtils::ciEqual(extension.CString(), "cl2"))
+    if(Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
     {
-        Cel::CelFile cel(source.CString());
-        surface = Render::createTransparentSurface(cel[0].mWidth, cel[0].mHeight);
-        Render::drawFrame(surface, 0, 0, cel[0]);
+        Cel::CelFile cel(sourcePath);
+        surface = Render::createTransparentSurface(cel[celIndex].mWidth, cel[celIndex].mHeight);
+        Render::drawFrame(surface, 0, 0, cel[celIndex]);
     }
     else
     {
+        if(tmp != "")   // no indices on normal files
+            return false; 
+
         Rocket::Core::FileInterface* file_interface = Rocket::Core::GetFileInterface();
-        Rocket::Core::FileHandle file_handle = file_interface->Open(source);
+        Rocket::Core::FileHandle file_handle = file_interface->Open(sourcePath.c_str());
         if (!file_handle)
             return false;
 
@@ -231,7 +252,7 @@ bool RocketSDL2Renderer::LoadTexture(Rocket::Core::TextureHandle& texture_handle
         file_interface->Read(buffer, buffer_size, file_handle);
         file_interface->Close(file_handle);
         
-        surface = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.CString());
+        surface = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.c_str());
     }
 
     if (surface) {
@@ -253,8 +274,14 @@ bool RocketSDL2Renderer::LoadTexture(Rocket::Core::TextureHandle& texture_handle
     return false;
 }
 
+bool RocketSDL2Renderer::LoadTexture(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
+{
+    return mLoadTextureFunc(texture_handle, texture_dimensions, source);
+}
+
+
 // Called by Rocket when a texture is required to be built from an internally-generated sequence of pixels.
-bool RocketSDL2Renderer::GenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+bool RocketSDL2Renderer::GenerateTextureImp(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
 {
     #if SDL_BYTEORDER == SDL_BIG_ENDIAN
         Uint32 rmask = 0xff000000;
@@ -276,8 +303,18 @@ bool RocketSDL2Renderer::GenerateTexture(Rocket::Core::TextureHandle& texture_ha
     return true;
 }
 
+bool RocketSDL2Renderer::GenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+{
+    return mGenerateTextureFunc(texture_handle, source, source_dimensions);
+}
+
 // Called by Rocket when a loaded texture is no longer required.		
-void RocketSDL2Renderer::ReleaseTexture(Rocket::Core::TextureHandle texture_handle)
+void RocketSDL2Renderer::ReleaseTextureImp(Rocket::Core::TextureHandle texture_handle)
 {
     SDL_DestroyTexture((SDL_Texture*) texture_handle);
+}
+
+void RocketSDL2Renderer::ReleaseTexture(Rocket::Core::TextureHandle texture_handle)
+{
+    mReleaseTextureFunc(texture_handle);
 }

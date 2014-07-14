@@ -14,25 +14,26 @@ namespace FAGui
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
 
-        renderer->lockGui();
         renderer->getRocketContext()->Update();
-        renderer->unlockGui();
     }
     
     void GuiManager::display(const std::string& path)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
-        Rocket::Core::ElementDocument* doc = renderer->loadRocketDocument(path);
+        Rocket::Core::ElementDocument* doc = renderer->getRocketContext()->LoadDocument(path.c_str());
         
-        renderer->lockGui();
         doc->Show();
-        renderer->unlockGui();
-
         mDocs.push_back(doc);
+    }
+    
+    void GuiManager::showGameBottomMenu()
+    {
+        display("resources/gui/bottommenu.rml");
     }
     
     void GuiManager::remove(Rocket::Core::ElementDocument* doc)
     {
-        FARender::Renderer::get()->unLoadRocketDocument(doc);
+        doc->RemoveReference();
+        doc->Close();
     }
 }

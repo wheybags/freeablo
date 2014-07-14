@@ -260,13 +260,13 @@ namespace Input
 
 
         if(sdlMods & KMOD_CTRL)
-            mods |= MOD_CTRL;
+            mods |= FAMOD_CTRL;
 
         if(sdlMods & KMOD_SHIFT)
-            mods |= MOD_SHIFT;
+            mods |= FAMOD_SHIFT;
 
         if(sdlMods & KMOD_ALT)
-            mods |= MOD_ALT;
+            mods |= FAMOD_ALT;
 
         mModifiers = mods;
     }
@@ -290,13 +290,13 @@ namespace Input
     {
         int retval = 0;
 
-        if(mods & MOD_CTRL)
+        if(mods & FAMOD_CTRL)
             retval |= Rocket::Core::Input::KM_CTRL;
 
-        if(mods & MOD_SHIFT)
+        if(mods & FAMOD_SHIFT)
             retval |= Rocket::Core::Input::KM_SHIFT;
 
-        if(mods & MOD_ALT)
+        if(mods & FAMOD_ALT)
             retval |= Rocket::Core::Input::KM_ALT;
 
         return retval;

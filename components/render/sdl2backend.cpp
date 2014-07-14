@@ -17,6 +17,8 @@
 #include "rocketglue/SystemInterfaceSDL2.h"
 #include "rocketglue/RenderInterfaceSDL2.h"
 
+#include <Rocket/Core/Python/Python.h>
+
 namespace Render
 {
     int32_t WIDTH = 1280;
@@ -64,9 +66,36 @@ namespace Render
         glOrtho(0, WIDTH, HEIGHT, 0, 0, 1);
     }
 
-    Rocket::Core::Context* initGui()
+    bool import(const std::string& name)
     {
-        Renderer = new RocketSDL2Renderer(renderer, screen);
+        PyObject* module = PyImport_ImportModule(name.c_str());
+        if (!module)
+        {
+            PyErr_Print();
+            return false;
+        }
+
+        Py_DECREF(module);
+        return true;
+    }
+
+    Rocket::Core::Context* initGui(boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
+                                   boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
+                                   boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc)
+    {
+        #ifdef WIN32
+            Py_SetPythonHome("Python27");
+        #endif
+        Py_Initialize();
+
+        #ifdef WIN32
+            PyRun_SimpleString("import sys\nsys.path.append('.')");
+        #endif
+
+        // Pull in the Rocket Python module.
+        import("rocket");
+
+        Renderer = new RocketSDL2Renderer(renderer, screen, loadTextureFunc, generateTextureFunc, releaseTextureFunc);
         SystemInterface = new RocketSDL2SystemInterface();
         FileInterface = new FAIOFileInterface();
 
@@ -83,7 +112,7 @@ namespace Render
         Rocket::Core::FontDatabase::LoadFontFace("Delicious-Roman.otf");
 
         Context = Rocket::Core::CreateContext("default",
-            Rocket::Core::Vector2i(640, 480));
+            Rocket::Core::Vector2i(WIDTH, HEIGHT));
 
         return Context;
     }
@@ -95,21 +124,45 @@ namespace Render
         SDL_Quit();
     }
 
+    bool resized = false;
+
     void resize(size_t w, size_t h)
     {
         WIDTH = w;
         HEIGHT = h;
+        resized = true;
     }
 
-    void updateGuiBuffer()
+    void updateGuiBuffer(std::vector<drawCommand>& buffer)
     {
-        Renderer->clearDrawBuffer();
+        if(resized)
+        {
+            Context->SetDimensions(Rocket::Core::Vector2i(WIDTH, HEIGHT));
+            resized = false;
+        }
+        buffer.clear();
+        Renderer->mDrawBuffer = &buffer;
         Context->Render();
     }
 
-    void drawGui()
+    void drawGui(std::vector<drawCommand>& buffer)
     {
-        Renderer->drawBuffer();
+        Renderer->drawBuffer(buffer);
+    }
+    
+    bool guiLoadImage(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
+    {
+        return Renderer->LoadTextureImp(texture_handle, texture_dimensions, source);
+    }
+
+	bool guiGenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+    {
+        return Renderer->GenerateTextureImp(texture_handle, source, source_dimensions);
+    }
+    
+    void guiReleaseTexture(Rocket::Core::TextureHandle texture_handle)
+    {
+        return Renderer->ReleaseTextureImp(texture_handle);
     }
 
     void draw()

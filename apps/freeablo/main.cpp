@@ -304,6 +304,8 @@ void runGameLoop(const bpo::variables_map& variables)
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     std::pair<size_t, size_t> destination = player->mPos.current();
+
+    guiManager.showGameBottomMenu();
     
     // Main game logic loop
     while(!done)
@@ -317,9 +319,7 @@ void runGameLoop(const bpo::variables_map& variables)
             click = false;
         }
 
-        renderer.lockGui();
         input.processInput();
-        renderer.unlockGui();
 
         if(changeLevel)
         {
@@ -391,6 +391,8 @@ void runGameLoop(const bpo::variables_map& variables)
         state->mPos = player->mPos;
 
         world.fillRenderState(state);
+
+        Render::updateGuiBuffer(state->guiDrawBuffer);
 
         renderer.setCurrentState(state);
     }

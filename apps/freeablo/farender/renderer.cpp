@@ -16,6 +16,59 @@ namespace FARender
     {
         return mRenderer;
     }
+    struct LoadGuiTextureStruct
+    {
+        Rocket::Core::TextureHandle* texture_handle;
+        Rocket::Core::Vector2i* texture_dimensions;
+        const Rocket::Core::String* source;
+    };
+
+    bool Renderer::loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
+    {   
+        LoadGuiTextureStruct* st = new LoadGuiTextureStruct();
+        st->texture_handle = &texture_handle;
+        st->texture_dimensions = &texture_dimensions;
+        st->source = &source;
+
+        mThreadCommunicationTmp = (void*) st;
+        mRenderThreadState = guiLoadTexture;
+        while(mRenderThreadState != running) {}
+
+        delete st;
+
+        return (bool) mThreadCommunicationTmp;;
+    }
+
+    struct GenerateGuiTextureStruct
+    {
+        Rocket::Core::TextureHandle* texture_handle;
+        const Rocket::Core::byte* source;
+        const Rocket::Core::Vector2i* source_dimensions;
+    };
+
+    bool Renderer::generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+    {
+        GenerateGuiTextureStruct* st = new GenerateGuiTextureStruct();
+        st->texture_handle = &texture_handle;
+        st->source = source;
+        st->source_dimensions = &source_dimensions;
+
+        mThreadCommunicationTmp = (void*) st;
+        mRenderThreadState = guiGenerateTexture;
+        while(mRenderThreadState != running) {}
+        
+        delete st;
+
+        return (bool) mThreadCommunicationTmp;
+    }
+    
+    void Renderer::releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle)
+    {
+        mThreadCommunicationTmp = (void*) &texture_handle;
+
+        mRenderThreadState = guiReleaseTexture;
+        while(mRenderThreadState != running) {}
+    }                              
 
     Renderer::Renderer(int32_t windowWidth, int32_t windowHeight)
         :mRenderThreadState(stopped)
@@ -33,7 +86,7 @@ namespace FARender
             settings.windowHeight = windowHeight;
 
             Render::init(settings);
-            mRocketContext = Render::initGui();
+            mRocketContext = Render::initGui(boost::bind(&Renderer::loadGuiTextureFunc, this, _1, _2, _3), boost::bind(&Renderer::generateGuiTextureFunc, this, _1, _2, _3), boost::bind(&Renderer::releaseGuiTextureFunc, this, _1));
 
             mRenderer = this;
         }
@@ -118,32 +171,6 @@ namespace FARender
         return mRocketContext;
     }
 
-    void Renderer::lockGui()
-    {
-        mGuiLock.lock();
-    }
-
-    void Renderer::unlockGui()
-    {
-        mGuiLock.unlock();
-    }
-
-    Rocket::Core::ElementDocument* Renderer::loadRocketDocument(const std::string& path)
-    {
-        mThreadCommunicationTmp = (void*)&path;
-        mRenderThreadState = loadRocket;
-        while(mRenderThreadState != running) {}
-
-        return (Rocket::Core::ElementDocument*) mThreadCommunicationTmp;
-    }
-
-    void Renderer::unLoadRocketDocument(Rocket::Core::ElementDocument* doc)
-    {
-        mThreadCommunicationTmp = (void*)doc;
-        mRenderThreadState = unLoadRocket;
-        while(mRenderThreadState != running) {}
-    }
-
     void Renderer::destroySprite(Render::SpriteGroup* s)
     {
         mThreadCommunicationTmp = (void*)s;
@@ -182,18 +209,23 @@ namespace FARender
                 mRenderThreadState = running;
             }
 
-            else if(mRenderThreadState == loadRocket)
+            else if(mRenderThreadState == guiLoadTexture)
             {
-                Rocket::Core::ElementDocument* document = mRocketContext->LoadDocument((*(std::string*)mThreadCommunicationTmp).c_str());
-                mThreadCommunicationTmp = (void*)document;
+                LoadGuiTextureStruct* st = (LoadGuiTextureStruct*) mThreadCommunicationTmp;
+                mThreadCommunicationTmp = (void*) Render::guiLoadImage(*(st->texture_handle), *(st->texture_dimensions), *(st->source));
                 mRenderThreadState = running;
             }
 
-            else if(mRenderThreadState == unLoadRocket)
+            else if(mRenderThreadState == guiGenerateTexture)
             {
-                Rocket::Core::ElementDocument* document = (Rocket::Core::ElementDocument*)mThreadCommunicationTmp;
-                document->RemoveReference();
-                document->Close();
+                GenerateGuiTextureStruct* st = (GenerateGuiTextureStruct*) mThreadCommunicationTmp;
+                mThreadCommunicationTmp = (void*) Render::guiGenerateTexture(*(st->texture_handle), st->source, *(st->source_dimensions));
+                mRenderThreadState = running;
+            }
+
+            else if(mRenderThreadState == guiReleaseTexture)
+            {
+                Render::guiReleaseTexture(*((Rocket::Core::TextureHandle*)mThreadCommunicationTmp));
                 mRenderThreadState = running;
             }
 
@@ -235,15 +267,9 @@ namespace FARender
                 Render::drawLevel(mLevel, objects, current->mPos.current().first, current->mPos.current().second,
                     current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
 
+                Render::drawGui(current->guiDrawBuffer);
+
                 current->mMutex.unlock();
-
-                if(mGuiLock.try_lock())
-                {
-                    Render::updateGuiBuffer();
-                    mGuiLock.unlock();
-                }
-
-                Render::drawGui();
             }
             
             Render::draw();

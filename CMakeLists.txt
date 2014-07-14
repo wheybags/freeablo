@@ -13,6 +13,9 @@ Find_Package(SDL2 REQUIRED)
 Find_Package(SDL2_image REQUIRED)
 Find_Package(OpenGL REQUIRED)
 
+Find_Package(PythonLibs 2 REQUIRED)
+find_package(LibRocket REQUIRED)
+
 if(WIN32)
     set(Boost_USE_STATIC_LIBS   ON)
 else()
@@ -27,7 +30,7 @@ else()
     endif ()
 endif()
 
-find_package(Boost COMPONENTS chrono date_time filesystem system random thread program_options atomic REQUIRED)
+find_package(Boost COMPONENTS chrono date_time filesystem system random thread program_options atomic python REQUIRED)
 
 if ( NOT SDL2_FOUND )
     message ( FATAL_ERROR "SDL2 not found!" )
@@ -44,6 +47,8 @@ include_directories (
     ${SDL2IMAGE_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
+    ${PYTHON_INCLUDE_DIR}
+    ${ROCKET_INCLUDE_DIR}
     "${PROJECT_SOURCE_DIR}/components/"
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
 )
@@ -55,10 +60,6 @@ endif()
 
 add_subdirectory (extern) 
 
-include_directories(
-    ${ROCKET_INCLUDE_DIR}
-)   
-
 link_libraries(StormLib)
 
 add_subdirectory (components) 
@@ -68,6 +69,7 @@ link_libraries (
     ${SDL2IMAGE_LIBRARY}
     ${OPENGL_LIBRARIES}
     ${ROCKET_LIBRARIES}
+    ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     Cel
     FAIO

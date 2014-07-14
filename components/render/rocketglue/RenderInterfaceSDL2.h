@@ -34,47 +34,50 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
+#include <boost/function.hpp>
+
 #if !(SDL_VIDEO_RENDER_OGL)
     #error "Only the opengl sdl backend is supported. To add support for others, see http://mdqinc.com/blog/2013/01/integrating-librocket-with-sdl-2/"
 #endif
 
+struct drawCommand
+{
+    enum
+    {
+        Draw,
+        EnableScissor,
+        SetScissor
+    } mode;
+
+    struct
+    {
+        std::vector<Rocket::Core::Vertex> vertices;
+        std::vector<int> indices;
+        Rocket::Core::TextureHandle texture;
+        Rocket::Core::Vector2f translation;
+    } draw;
+    
+    struct
+    {
+        int x;
+        int y;
+        int width;
+        int height;
+    } setScissor;
+
+    bool enableScissor;
+};
 
 class RocketSDL2Renderer : public Rocket::Core::RenderInterface
 {
    
-    struct drawCommand
-    {
-        enum
-        {
-            Draw,
-            EnableScissor,
-            SetScissor
-        } mode;
-
-        struct
-        {
-            std::vector<Rocket::Core::Vertex> vertices;
-            std::vector<int> indices;
-            Rocket::Core::TextureHandle texture;
-            Rocket::Core::Vector2f translation;
-        } draw;
-        
-        struct
-        {
-            int x;
-            int y;
-            int width;
-            int height;
-        } setScissor;
-
-        bool enableScissor;
-    };
-
-
 public:
-	RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen);
-    void drawBuffer();
-    void clearDrawBuffer();
+	RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen, 
+        boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
+        boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
+        boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc);
+
+    void drawBuffer(std::vector<drawCommand>& buffer);
 
 	/// Called by Rocket when it wants to render geometry that it does not wish to optimise.
 	virtual void RenderGeometry(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation);
@@ -86,21 +89,29 @@ public:
 
 	/// Called by Rocket when a texture is required by the library.
 	virtual bool LoadTexture(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
+    bool LoadTextureImp(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
 	/// Called by Rocket when a texture is required to be built from an internally-generated sequence of pixels.
 	virtual bool GenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions);
+	bool GenerateTextureImp(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions);
 	/// Called by Rocket when a loaded texture is no longer required.
 	virtual void ReleaseTexture(Rocket::Core::TextureHandle texture_handle);
+    void ReleaseTextureImp(Rocket::Core::TextureHandle texture_handle);
+    
+    std::vector<drawCommand>* mDrawBuffer;
 
 private:
     void RenderGeometryImp(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation);
 	void EnableScissorRegionImp(bool enable);
 	void SetScissorRegionImp(int x, int y, int width, int height);
 
+    boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> mLoadTextureFunc;
+    boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> mGenerateTextureFunc;
+    boost::function<void(Rocket::Core::TextureHandle)> mReleaseTextureFunc;
+
     SDL_Renderer* mRenderer;
     SDL_Window* mScreen;
     PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
 
-    std::vector<drawCommand> mDrawBuffer;
 
     void getGLFunc()
     {

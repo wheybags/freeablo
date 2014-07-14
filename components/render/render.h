@@ -7,12 +7,16 @@
 #include <string>
 #include <utility>
 
+#include <boost/function.hpp>
+
 #include <cel/celfile.h>
 #include <cel/celframe.h>
 
 #include <misc/disablewarn.h>
     #include <Rocket/Core.h>
 #include <misc/enablewarn.h>
+
+#include "rocketglue/RenderInterfaceSDL2.h"
 
 namespace Render
 {
@@ -38,14 +42,21 @@ namespace Render
     };
 
     void init(const RenderSettings& settings); 
-    Rocket::Core::Context* initGui();
+    Rocket::Core::Context* initGui(boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
+                                   boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
+                                   boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc);
 
     void quit(); 
 
 	void resize(size_t w, size_t h);
    
-    void updateGuiBuffer();
-    void drawGui(); 
+    void updateGuiBuffer(std::vector<drawCommand>& buffer);
+    void drawGui(std::vector<drawCommand>& buffer); 
+    
+    bool guiLoadImage(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
+	bool guiGenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions);
+    void guiReleaseTexture(Rocket::Core::TextureHandle texture_handle);
+
     void draw();
 
     void drawAt(const Sprite& sprite, size_t x, size_t y); 
