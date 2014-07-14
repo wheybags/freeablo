@@ -16,6 +16,24 @@
 		</style>
 
         <link type="text/rcss" href="bottommenu_buttons.rcss"/>
+
+        <script>
+import rocket
+context = rocket.contexts['default']
+
+
+invHandle = [context.LoadDocument('resources/gui/inventory.rml'), False]
+
+def toggleDoc(doc):
+    if doc[1]:
+        doc[0].Hide()
+        doc[1] = False
+    else:
+        doc[0].Show()
+        doc[1] = True
+
+        </script>
+
 	</head>
 
 	<body>
@@ -23,7 +41,7 @@
         <div class="buttonDiv"><button id="questBut" onclick="print 'quest clicked'"></button></div>
         <div class="buttonDiv"><button id="mapBut" onclick="print 'map clicked'"></button></div>
         <div class="buttonDiv"><button id="menuBut" onclick="print 'menu clicked'"></button></div>
-        <div class="buttonDiv"><button id="invBut" onclick="print 'inv clicked'"></button></div>
+        <div class="buttonDiv"><button id="invBut" onclick="toggleDoc(invHandle)"></button></div>
         <div class="buttonDiv"><button id="spellBut" onclick="print 'spell clicked'"></button></div>
         <br/>
 	    <img src="/ctrlpan/panel8.cel"></img>
