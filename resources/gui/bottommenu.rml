@@ -1,19 +1,19 @@
 <rml>
-	<head>
-		<style>
-			body
-			{
-	            font-family: Delicious;
+    <head>
+        <style>
+            body
+            {
+                font-family: Delicious;
                 text-align: center;
                 bottom: 0px;
-			}
+            }
 
             div.buttonDiv
             {
                 position: absolute;
                 bottom: 144px;
             }
-		</style>
+        </style>
 
         <link type="text/rcss" href="bottommenu_buttons.rcss"/>
 
@@ -34,9 +34,9 @@ def toggleDoc(doc):
 
         </script>
 
-	</head>
+    </head>
 
-	<body>
+    <body>
         <div class="buttonDiv"><button id="charBut" onclick="print 'char clicked'"></button></div>
         <div class="buttonDiv"><button id="questBut" onclick="print 'quest clicked'"></button></div>
         <div class="buttonDiv"><button id="mapBut" onclick="print 'map clicked'"></button></div>
@@ -44,6 +44,6 @@ def toggleDoc(doc):
         <div class="buttonDiv"><button id="invBut" onclick="toggleDoc(invHandle)"></button></div>
         <div class="buttonDiv"><button id="spellBut" onclick="print 'spell clicked'"></button></div>
         <br/>
-	    <img src="/ctrlpan/panel8.cel"></img>
-	</body>
+        <img src="/ctrlpan/panel8.cel"></img>
+    </body>
 </rml>
