@@ -1,0 +1,22 @@
+<rml>
+    <head>
+        <style>
+            body
+            {
+                top: 50%;
+                left: 0px;
+            }
+            #inventory
+            {
+                position: fixed;
+                top: -175px;
+                
+            }
+        </style>
+
+    </head>
+
+    <body>
+        <div id="inventory"><img src="/data/char.cel"></img></div>
+    </body>
+</rml>

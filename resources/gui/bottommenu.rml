@@ -23,6 +23,7 @@ context = rocket.contexts['default']
 
 
 invHandle = [context.LoadDocument('resources/gui/inventory.rml'), False]
+charHandle = [context.LoadDocument('resources/gui/character.rml'), False]
 
 def toggleDoc(doc):
     if doc[1]:
@@ -37,7 +38,7 @@ def toggleDoc(doc):
     </head>
 
     <body>
-        <div class="buttonDiv"><button id="charBut" onclick="print 'char clicked'"></button></div>
+        <div class="buttonDiv"><button id="charBut" onclick="toggleDoc(charHandle)"></button></div>
         <div class="buttonDiv"><button id="questBut" onclick="print 'quest clicked'"></button></div>
         <div class="buttonDiv"><button id="mapBut" onclick="print 'map clicked'"></button></div>
         <div class="buttonDiv"><button id="menuBut" onclick="print 'menu clicked'"></button></div>
