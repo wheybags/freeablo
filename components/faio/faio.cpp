@@ -101,7 +101,8 @@ namespace FAIO
             
             case FAFile::MPQFile:
                 DWORD dwBytes = 1;
-                SFileReadFile(*((HANDLE*)stream->data.mpqFile), ptr, size*count, &dwBytes, NULL);
+                if(!SFileReadFile(*((HANDLE*)stream->data.mpqFile), ptr, size*count, &dwBytes, NULL))
+                    std::cout << "Error reading from file" << std::endl;
 
                 return dwBytes;
         }

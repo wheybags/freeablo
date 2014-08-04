@@ -10,7 +10,7 @@ namespace Level
     {
         FAIO::FAFile* tFile = FAIO::FAfopen(filename);
         
-        size_t numBlocks = FAIO::FAsize(tFile)/4; 
+        size_t numBlocks = FAIO::FAsize(tFile)/(4*2);
         
         FAIO::FAfseek(tFile, 0, SEEK_SET);
      
