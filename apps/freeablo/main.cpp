@@ -23,6 +23,7 @@ namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 
 bool done = false;
+bool paused = false;
 bool noclip = true;
 int changeLevel = 0;
 void keyPress(Input::Key key)
@@ -318,7 +319,7 @@ void runGameLoop(const bpo::variables_map& variables)
             click = false;
         }
 
-        input.processInput();
+        input.processInput(paused);
 
         if(changeLevel)
         {
@@ -380,8 +381,9 @@ void runGameLoop(const bpo::variables_map& variables)
             player->mPos.mMoving = false;
             player->setAnimation(FAWorld::AnimState::idle);
         }
-
-        world.update();
+        
+        if(!paused)
+            world.update();
         
         FAGui::updateGui();
 

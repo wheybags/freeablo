@@ -19,6 +19,7 @@
 
         <script>
 import rocket
+import freeablo
 context = rocket.contexts['default']
 
 
@@ -46,7 +47,8 @@ def pause():
 
     global paused
     paused = True
-
+    
+    freeablo.pause()
 
 def unpause():
     doc.Show()
@@ -62,6 +64,8 @@ def unpause():
 
     global paused
     paused = False
+
+    freeablo.unpause()
     
 def toggleDoc(doc):
     if doc[1]:

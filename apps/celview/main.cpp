@@ -43,7 +43,7 @@ int main(int, char** argv)
     while(!done)
     {
         input.poll();
-        input.processInput();
+        input.processInput(false);
 
         Render::clear();
         Render::drawAt(cel[celIndex], 0, 0);
