@@ -1,0 +1,155 @@
+<rml>
+    <head>
+        <style>
+            body
+            {
+                font-family: Delicious;
+                font-size: 24;
+                text-align: center;
+                top: 50%;
+            }
+
+            div#menuContainer
+            {
+                position: absolute;
+                top: -200px;
+            }
+
+            span#smlogo
+            {
+                icon-decorator: image;
+                icon-image-src: /ui_art/smlogo.pcx;
+                icon-image-t-end: 154px;
+                
+                display: inline-block;
+                width: 390px;
+                height: 154px;
+            }
+
+            img.pentagon
+            {
+                position: relative;
+                top: 16px;
+            }
+
+        </style>
+
+        <script>
+
+import rocket
+from itertools import count
+import freeablo
+
+numRows = 0
+current = 0
+
+doc = None
+
+def getPent(idNum, left):
+    return doc.GetElementById('pent' + ('a' if left else 'b')  + '%02d' % idNum)
+
+def onLoad(document):
+    global numRows
+    global doc
+    doc = document
+
+    for i in count():
+        pent = getPent(i, True)
+
+        if not pent:
+            break
+
+        numRows += 1
+        pent.style.visibility = "hidden"
+        pent = getPent(i, False)
+        pent.style.visibility = "hidden"
+    
+    getPent(current, True).style.visibility = "visible"
+    getPent(current, False).style.visibility = "visible"
+
+
+def setActivePent(pentNum):
+    if pentNum >= numRows:
+        pentNum = 0
+    elif pentNum < 0:
+        pentNum = numRows - 1
+
+    global current
+
+    getPent(current, True).style.visibility = "hidden"
+    getPent(current, False).style.visibility = "hidden"
+    
+    current = pentNum
+    
+    getPent(current, True).style.visibility = "visible"
+    getPent(current, False).style.visibility = "visible"
+
+def nullAction():
+    pass
+
+actions = [ 
+            nullAction, # SAVE
+            nullAction, # OPTIONS
+            nullAction, # NEW GAME
+            nullAction, # LOAD GAME
+            freeablo.quit
+          ]
+
+def onKeyDown(event, document):
+    global current
+
+    if event.parameters['key_identifier'] == rocket.key_identifier.DOWN:
+        setActivePent(current + 1)
+    elif event.parameters['key_identifier'] == rocket.key_identifier.UP:
+        setActivePent(current - 1)
+    elif event.parameters['key_identifier'] == rocket.key_identifier.RETURN:
+        actions[current]()
+    else:
+        document.baseKeyDown(event, document)
+ 
+
+
+        </script>
+    </head>
+
+    <body onkeydown="onKeyDown(event, document)" onload="onLoad(document)">
+        <div id="menuContainer">
+            <span id="smlogo"></span> <br/>
+            
+            <span onmouseover="setActivePent(0)" onclick="actions[0]()">
+                <img class="pentagon" id="penta00" src="/data/PentSpin.cel"/>
+                SAVE GAME (placeholder)    
+                <img class="pentagon" id="pentb00" src="/data/PentSpin.cel"/> 
+            </span>
+            <br/>
+            
+            <span onmouseover="setActivePent(1)" onclick="actions[1]()">
+                <img class="pentagon" id="penta01" src="/data/PentSpin.cel"/> 
+                OPTIONS (placeholder)      
+                <img class="pentagon" id="pentb01" src="/data/PentSpin.cel"/> 
+            </span>
+            <br/>
+            
+            <span onmouseover="setActivePent(2)" onclick="actions[2]()">
+                <img class="pentagon" id="penta02" src="/data/PentSpin.cel"/> 
+                NEW GAME (placeholder)     
+                <img class="pentagon" id="pentb02" src="/data/PentSpin.cel"/> 
+            </span>
+            <br/>
+            
+            <span onmouseover="setActivePent(3)" onclick="actions[3]()">
+                <img class="pentagon" id="penta03" src="/data/PentSpin.cel"/> 
+                LOAD GAME (placeholder)    
+                <img class="pentagon" id="pentb03" src="/data/PentSpin.cel"/> 
+            </span>
+            <br/>
+            
+            <span onmouseover="setActivePent(4)" onclick="actions[4]()">
+                <img class="pentagon" id="penta04" src="/data/PentSpin.cel"/> 
+                QUIT
+                <img class="pentagon" id="pentb04" src="/data/PentSpin.cel"/> 
+            </span>
+            <br/>
+        </div>
+    </body>
+</rml>

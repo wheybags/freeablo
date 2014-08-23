@@ -30,7 +30,7 @@ namespace Input
                 boost::function<void(uint32_t, uint32_t)> mouseMove,
                 Rocket::Core::Context* context);
 
-            void processInput();
+            void processInput(bool paused);
             void poll();
 
             uint32_t getModifiers();

@@ -19,12 +19,54 @@
 
         <script>
 import rocket
+import freeablo
 context = rocket.contexts['default']
 
 
 invHandle = [context.LoadDocument('resources/gui/inventory.rml'), False]
 charHandle = [context.LoadDocument('resources/gui/character.rml'), False]
 
+pauseHandle = [context.LoadDocument('resources/gui/pausemenu.rml'), False]
+
+docs = [invHandle, charHandle, pauseHandle]
+
+doc = None
+pauseHiddenDocs = []
+paused = False
+
+def pause():
+    doc.Hide()
+
+    for handle in docs:
+        if handle != pauseHandle:
+            if handle[1]:
+                toggleDoc(handle)
+                pauseHiddenDocs.append(handle)
+
+    toggleDoc(pauseHandle)
+
+    global paused
+    paused = True
+    
+    freeablo.pause()
+
+def unpause():
+    doc.Show()
+
+    global pauseHiddenDocs
+
+    for handle in pauseHiddenDocs:
+        toggleDoc(handle)
+
+    pauseHiddenDocs = []
+
+    toggleDoc(pauseHandle)
+
+    global paused
+    paused = False
+
+    freeablo.unpause()
+    
 def toggleDoc(doc):
     if doc[1]:
         doc[0].Hide()
@@ -33,11 +75,32 @@ def toggleDoc(doc):
         doc[0].Show()
         doc[1] = True
 
+
+def onKeyDown(event, document):
+    if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
+        if paused:
+            unpause()
+        else:
+            pause()
+
+def onLoad(document):
+    global doc
+    global paused
+
+    doc = document
+
+    def baseKeyDown(event, callingDocument):
+        onKeyDown(event, doc)
+
+    for d in docs:
+        d[0].baseKeyDown = baseKeyDown
+
+
         </script>
 
     </head>
 
-    <body>
+    <body onkeydown="onKeyDown(event, document)" onload="onLoad(document)">
         <div class="buttonDiv"><button id="charBut" onclick="toggleDoc(charHandle)"></button></div>
         <div class="buttonDiv"><button id="questBut" onclick="print 'quest clicked'"></button></div>
         <div class="buttonDiv"><button id="mapBut" onclick="print 'map clicked'"></button></div>

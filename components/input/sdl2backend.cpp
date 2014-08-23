@@ -638,6 +638,9 @@ namespace Input
             case SDLK_RSUPER:
                 return KI_RWIN;
                 break;*/
+            case SDLK_ESCAPE:
+                return KI_ESCAPE;
+                break;
             default:
                 return KI_UNKNOWN;
                 break;
@@ -649,7 +652,7 @@ namespace Input
         return mModifiers;
     }
     
-    void InputManager::processInput()
+    void InputManager::processInput(bool paused)
     {
         Event event;
 
@@ -662,7 +665,8 @@ namespace Input
                     Key key = getKey(event.vals.key);
                     if(key != KEY_UNDEF)
                     {
-                        mKeyPress(key);
+                        if(!paused)
+                            mKeyPress(key);
                         if(mContext)
                             mContext->ProcessKeyDown(rocketTranslateKey(event.vals.key), getRocketModifiers(mModifiers));
                     }
@@ -673,7 +677,8 @@ namespace Input
                     Key key = getKey(event.vals.key);
                     if(key != KEY_UNDEF)
                     {
-                        mKeyRelease(key);
+                        if(!paused)
+                            mKeyRelease(key);
                         if(mContext)
                             mContext->ProcessKeyUp(rocketTranslateKey(event.vals.key), getRocketModifiers(mModifiers));
                     }
@@ -686,7 +691,8 @@ namespace Input
 
                     if(key != KEY_UNDEF)
                     {
-                        mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
+                        if(!paused)
+                            mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
                         if(mContext)
                             mContext->ProcessMouseButtonDown(rocketTranslateMouse(key), getRocketModifiers(mModifiers));
                     }
@@ -700,7 +706,8 @@ namespace Input
 
                     if(key != KEY_UNDEF)
                     {
-                        mMouseRelease(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
+                        if(!paused)
+                            mMouseRelease(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
                         if(mContext)
                             mContext->ProcessMouseButtonUp(rocketTranslateMouse(key), getRocketModifiers(mModifiers));
                     }
@@ -710,7 +717,8 @@ namespace Input
 
                 case SDL_MOUSEMOTION:
                 {
-                    mMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y);
+                    if(!paused)
+                        mMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y);
                     if(mContext)
                         mContext->ProcessMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y, getRocketModifiers(mModifiers));
                     break;

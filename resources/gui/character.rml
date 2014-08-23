@@ -14,9 +14,16 @@
             }
         </style>
 
+        <script>
+
+def onKeyDown(event, document):
+    document.baseKeyDown(event, document)
+       
+        </script>
+
     </head>
 
-    <body>
+    <body onKeyDown="onKeyDown(event, document)">
         <div id="inventory"><img src="/data/char.cel"></img></div>
     </body>
 </rml>
