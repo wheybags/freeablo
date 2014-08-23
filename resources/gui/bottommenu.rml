@@ -73,8 +73,7 @@ def toggleDoc(doc):
 
 
 def onKeyDown(event, document):
-    print event.parameters['key_identifier']
-    if event.parameters['key_identifier'] == rocket.key_identifier.P:
+    if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
         if paused:
             unpause()
         else:

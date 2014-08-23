@@ -1,39 +1,49 @@
 #include "guimanager.h"
 
+#include <misc/disablewarn.h>
+    #include <Rocket/Core.h>
+#include <misc/enablewarn.h>
+
+
+
 #include "../farender/renderer.h"
+
+#include <iostream>
+#include <boost/python.hpp>
+
+extern bool done; // TODO: handle this better
 
 namespace FAGui
 {
-    void GuiManager::destroy()
+    void quitGame()
     {
-        for(size_t i = 0; i < mDocs.size(); i++)
-            remove(mDocs[i]);
+        done = true;
     }
 
-    void GuiManager::update()
+    BOOST_PYTHON_MODULE(freeablo)
+    {
+        boost::python::def("quit", &quitGame);
+    }
+
+    void initGui()
+    {
+        initfreeablo();
+
+        FARender::Renderer* renderer = FARender::Renderer::get();
+        Rocket::Core::ElementDocument* doc = renderer->getRocketContext()->LoadDocument("resources/gui/bottommenu.rml");
+        doc->Show();
+    }
+
+    void updateGui()
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
 
         renderer->getRocketContext()->Update();
     }
-    
-    void GuiManager::display(const std::string& path)
+
+    void destroyGui()
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
-        Rocket::Core::ElementDocument* doc = renderer->getRocketContext()->LoadDocument(path.c_str());
-        
-        doc->Show();
-        mDocs.push_back(doc);
-    }
-    
-    void GuiManager::showGameBottomMenu()
-    {
-        display("resources/gui/bottommenu.rml");
-    }
-    
-    void GuiManager::remove(Rocket::Core::ElementDocument* doc)
-    {
-        doc->RemoveReference();
-        doc->Close();
+        renderer->getRocketContext()->UnloadAllDocuments();
     }
 }

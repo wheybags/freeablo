@@ -15,11 +15,13 @@ Copy DIABDAT.MPQ and Diablo.exe from your diablo install into the folder with th
 #Controls
 Mouse to walk around, just like the original, and click on doors to open them.
 
-Up and Down arrow keys will move up / down through dungeon levels.
+o and p keys will move up / down through dungeon levels.
 
 n will turn on collision (player will not be able to walk through walls).
 
 q to quit
+
+esc to open pause menu
 
 The above will all be made configurable at some point.
 

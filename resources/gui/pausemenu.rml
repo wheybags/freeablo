@@ -38,6 +38,7 @@
 
 import rocket
 from itertools import count
+import freeablo
 
 numRows = 0
 current = 0
@@ -83,16 +84,26 @@ def setActivePent(pentNum):
     getPent(current, True).style.visibility = "visible"
     getPent(current, False).style.visibility = "visible"
 
-    
+def nullAction():
+    pass
 
+actions = [ 
+            nullAction, # SAVE
+            nullAction, # OPTIONS
+            nullAction, # NEW GAME
+            nullAction, # LOAD GAME
+            freeablo.quit
+          ]
 
 def onKeyDown(event, document):
     global current
 
-    if event.parameters['key_identifier'] == rocket.key_identifier.K:
+    if event.parameters['key_identifier'] == rocket.key_identifier.DOWN:
         setActivePent(current + 1)
-    elif event.parameters['key_identifier'] == rocket.key_identifier.I:
+    elif event.parameters['key_identifier'] == rocket.key_identifier.UP:
         setActivePent(current - 1)
+    elif event.parameters['key_identifier'] == rocket.key_identifier.RETURN:
+        actions[current]()
     else:
         document.baseKeyDown(event, document)
  
@@ -105,37 +116,37 @@ def onKeyDown(event, document):
         <div id="menuContainer">
             <span id="smlogo"></span> <br/>
             
-            <span onmouseover="setActivePent(0)">
+            <span onmouseover="setActivePent(0)" onclick="actions[0]()">
                 <img class="pentagon" id="penta00" src="/data/PentSpin.cel"/>
                 SAVE GAME (placeholder)    
                 <img class="pentagon" id="pentb00" src="/data/PentSpin.cel"/> 
             </span>
             <br/>
             
-            <span onmouseover="setActivePent(1)">
+            <span onmouseover="setActivePent(1)" onclick="actions[1]()">
                 <img class="pentagon" id="penta01" src="/data/PentSpin.cel"/> 
                 OPTIONS (placeholder)      
                 <img class="pentagon" id="pentb01" src="/data/PentSpin.cel"/> 
             </span>
             <br/>
             
-            <span onmouseover="setActivePent(2)">
+            <span onmouseover="setActivePent(2)" onclick="actions[2]()">
                 <img class="pentagon" id="penta02" src="/data/PentSpin.cel"/> 
                 NEW GAME (placeholder)     
                 <img class="pentagon" id="pentb02" src="/data/PentSpin.cel"/> 
             </span>
             <br/>
             
-            <span onmouseover="setActivePent(3)">
+            <span onmouseover="setActivePent(3)" onclick="actions[3]()">
                 <img class="pentagon" id="penta03" src="/data/PentSpin.cel"/> 
                 LOAD GAME (placeholder)    
                 <img class="pentagon" id="pentb03" src="/data/PentSpin.cel"/> 
             </span>
             <br/>
             
-            <span onmouseover="setActivePent(4)">
+            <span onmouseover="setActivePent(4)" onclick="actions[4]()">
                 <img class="pentagon" id="penta04" src="/data/PentSpin.cel"/> 
-                QUIT (placeholder)         
+                QUIT
                 <img class="pentagon" id="pentb04" src="/data/PentSpin.cel"/> 
             </span>
             <br/>

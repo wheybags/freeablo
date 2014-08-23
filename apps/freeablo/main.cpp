@@ -35,10 +35,10 @@ void keyPress(Input::Key key)
         case Input::KEY_n:
             noclip = !noclip;
             break;
-        case Input::KEY_DOWN:
+        case Input::KEY_p:
             changeLevel = 1;
             break;
-        case Input::KEY_UP:
+        case Input::KEY_o:
             changeLevel = -1;
             break;
         default:
@@ -271,7 +271,6 @@ void runGameLoop(const bpo::variables_map& variables)
 
     FARender::Renderer& renderer = *FARender::Renderer::get();
     Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
-    FAGui::GuiManager guiManager;
 
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
@@ -305,7 +304,7 @@ void runGameLoop(const bpo::variables_map& variables)
     
     std::pair<size_t, size_t> destination = player->mPos.current();
 
-    guiManager.showGameBottomMenu();
+    FAGui::initGui();
     
     // Main game logic loop
     while(!done)
@@ -384,7 +383,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
         world.update();
         
-        guiManager.update();
+        FAGui::updateGui();
 
         FARender::RenderState* state = renderer.getFreeState();
         
@@ -397,7 +396,7 @@ void runGameLoop(const bpo::variables_map& variables)
         renderer.setCurrentState(state);
     }
     
-    guiManager.destroy();
+    FAGui::destroyGui();
     renderer.stop();    
 
     while(!renderDone) {} // have to wait until the renderer stops before destroying all our locals

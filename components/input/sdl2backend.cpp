@@ -638,6 +638,9 @@ namespace Input
             case SDLK_RSUPER:
                 return KI_RWIN;
                 break;*/
+            case SDLK_ESCAPE:
+                return KI_ESCAPE;
+                break;
             default:
                 return KI_UNKNOWN;
                 break;
