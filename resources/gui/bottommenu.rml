@@ -3,7 +3,7 @@
         <style>
             body
             {
-                font-family: Delicious;
+                font-family: FreeMono;
                 text-align: center;
                 bottom: 0px;
             }

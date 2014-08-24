@@ -106,10 +106,10 @@ namespace Render
         if(!Rocket::Core::Initialise())
             fprintf(stderr, "couldn't initialise rocket!");
 
-        Rocket::Core::FontDatabase::LoadFontFace("Delicious-Bold.otf");
-        Rocket::Core::FontDatabase::LoadFontFace("Delicious-BoldItalic.otf");
-        Rocket::Core::FontDatabase::LoadFontFace("Delicious-Italic.otf");
-        Rocket::Core::FontDatabase::LoadFontFace("Delicious-Roman.otf");
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoBoldOblique.ttf");
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoBold.ttf");
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoOblique.ttf");
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMono.ttf");
 
         Context = Rocket::Core::CreateContext("default",
             Rocket::Core::Vector2i(WIDTH, HEIGHT));
