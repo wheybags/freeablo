@@ -4,15 +4,27 @@
 
 namespace Cel
 {
-    int32_t normalWidth(const std::vector<uint8_t>& frame, bool fromHeader, uint16_t offset)
+    int32_t normalWidth(const std::vector<uint8_t>& frame, size_t frameNum, bool fromHeader, uint16_t offset)
     {
-        
         // If we have a header, we know that offset points to the end of the 32nd line.
         // So, when we reach that point, we will have produced 32 lines of pixels, so we 
         // can divide the number of pixels we have passed at this point by 32, to get the 
         // width.
         if(fromHeader)
         {
+            // Workaround for objcurs.cel, the only cel file containing frames with a header whose offset is zero
+            if(offset == 0)
+            {
+                if(frameNum == 0)
+                    return 33;
+                else if(frameNum > 0 && frameNum <10)
+                    return 32;
+                else if(frameNum == 10)
+                    return 23;
+                else if(frameNum > 10 && frameNum < 86)
+                    return 28;
+            }
+
             int32_t widthHeader = 0; 
             
             for(size_t i = 10; i < frame.size(); i++){
@@ -104,7 +116,7 @@ namespace Cel
     }
 
 
-    int32_t normalDecode(const std::vector<uint8_t>& frame, const Pal& pal, std::vector<Colour>& rawImage, bool tileCel)
+    int32_t normalDecode(const std::vector<uint8_t>& frame, size_t frameNum, const Pal& pal, std::vector<Colour>& rawImage, bool tileCel)
     {
         #ifdef CEL_DEBUG
             std::cout << "NORMAL DECODE" << std::endl;
@@ -164,6 +176,6 @@ namespace Cel
             }
         }
 
-        return normalWidth(frame, fromHeader, offset);
+        return normalWidth(frame, frameNum, fromHeader, offset);
     }
 }
