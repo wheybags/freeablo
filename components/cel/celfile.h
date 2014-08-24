@@ -29,7 +29,7 @@ namespace Cel
             size_t animLength(); ///< if normal cel file, returns same as numFrames(), for an archive, the number of frames in each subcel
 
         private:
-            size_t getFrame(const std::vector<uint8_t>& frame, std::vector<Colour>& rawImage);
+            size_t getFrame(const std::vector<uint8_t>& frame, size_t frameNum, std::vector<Colour>& rawImage);
 
             size_t readNormalFrames(FAIO::FAFile* file);
             size_t readCl2ArchiveFrames(FAIO::FAFile* file);

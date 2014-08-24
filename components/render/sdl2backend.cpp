@@ -193,18 +193,16 @@ namespace Render
     {
         Cel::CelFile cel(path);
         
-        SDL_Surface* s = createTransparentSurface(cel[0].mWidth, cel[0].mHeight);
-
         for(size_t i = 0; i < cel.numFrames(); i++)
         {
+            SDL_Surface* s = createTransparentSurface(cel[i].mWidth, cel[i].mHeight);
             drawFrame(s, 0, 0, cel[i]);
 
             mSprites.push_back(SDL_CreateTextureFromSurface(renderer, s));
 
-            clearTransparentSurface(s);
+            SDL_FreeSurface(s);
         }
 
-        SDL_FreeSurface(s);
 
         mAnimLength = cel.animLength();
     }
