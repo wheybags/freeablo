@@ -47,7 +47,8 @@ libRocket installation:
 $ git clone https://github.com/libRocket/libRocket.git
 $ cd libRocket
 $ mkdir buildDir
-$ cmake ../Build
+$ cd buildDir
+$ cmake ../Build -DBUILD_PYTHON_BINDINGS=On
 $ make
 $ sudo make install
 ```
