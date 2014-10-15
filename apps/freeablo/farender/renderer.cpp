@@ -106,11 +106,19 @@ namespace FARender
         mDone = true;
     }
         
-    void Renderer::setLevel(const Level::Level& level)
+    void Renderer::setLevel(const Level::Level* level)
     {
-        mThreadCommunicationTmp = (void*)&level;
-        mRenderThreadState = levelChange;
-        while(mRenderThreadState != running){} // wait until the render thread is done loading the new level
+        if(level)
+        {
+            mThreadCommunicationTmp = (void*)level;
+            mRenderThreadState = levelChange;
+            while(mRenderThreadState != running){} // wait until the render thread is done loading the new level
+        }
+        else // no level, just start drawing gui
+        {
+            mLevel = NULL;
+            mRenderThreadState = running;
+        }
     }
     
     RenderState* Renderer::getFreeState()
@@ -243,29 +251,31 @@ namespace FARender
 
             if(mRenderThreadState == running && current && current->mMutex.try_lock())
             {
-
                 
-                for(size_t x = 0; x < objects.width(); x++)
+                if(mLevel)
                 {
-                    for(size_t y = 0; y < objects.height(); y++)
+                    for(size_t x = 0; x < objects.width(); x++)
                     {
-                        objects[x][y].sprite = NULL;
+                        for(size_t y = 0; y < objects.height(); y++)
+                        {
+                            objects[x][y].sprite = NULL;
+                        }
                     }
+
+                    for(size_t i = 0; i < current->mObjects.size(); i++)
+                    {
+                        size_t x = current->mObjects[i].get<2>().current().first;
+                        size_t y = current->mObjects[i].get<2>().current().second;
+
+                        objects[x][y].sprite = (*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()];
+                        objects[x][y].x2 = current->mObjects[i].get<2>().next().first;
+                        objects[x][y].y2 = current->mObjects[i].get<2>().next().second;
+                        objects[x][y].dist = current->mObjects[i].get<2>().mDist;
+                    }
+
+                    Render::drawLevel(mLevel, objects, current->mPos.current().first, current->mPos.current().second,
+                        current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
                 }
-
-                for(size_t i = 0; i < current->mObjects.size(); i++)
-                {
-                    size_t x = current->mObjects[i].get<2>().current().first;
-                    size_t y = current->mObjects[i].get<2>().current().second;
-
-                    objects[x][y].sprite = (*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()];
-                    objects[x][y].x2 = current->mObjects[i].get<2>().next().first;
-                    objects[x][y].y2 = current->mObjects[i].get<2>().next().second;
-                    objects[x][y].dist = current->mObjects[i].get<2>().mDist;
-                }
-
-                Render::drawLevel(mLevel, objects, current->mPos.current().first, current->mPos.current().second,
-                    current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
 
                 Render::drawGui(current->guiDrawBuffer);
 

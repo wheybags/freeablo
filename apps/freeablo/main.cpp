@@ -73,13 +73,13 @@ void mouseMove(size_t x, size_t y)
     yClick = y;
 }
 
-void setLevel(size_t levelNum, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, const Level::Level& level)
+void setLevel(size_t levelNum, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, const Level::Level* level)
 {
     world.clear();
     if(levelNum == 0)
         world.addNpcs(exe);
     renderer.setLevel(level);
-    world.setLevel(level, exe);
+    world.setLevel(*level, exe);
 }
 
 Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
@@ -94,7 +94,7 @@ Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
             Level::Dun sector4("levels/towndata/sector4s.dun");
 
             return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", 
-                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(0,0), std::map<size_t, size_t>());
+                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
 
             break;
         }
@@ -127,7 +127,8 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 
     desc.add_options()
         ("help,h", "Print help")
-        ("level,l", bpo::value<size_t>()->default_value(0), "Level number to load (0-4)");
+        // -1 represents the main menu
+        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-4)");
 
     try 
     { 
@@ -141,7 +142,7 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
         
         bpo::notify(variables);
 
-        const size_t levelNum = variables["level"].as<size_t>();
+        const int32_t levelNum = variables["level"].as<int32_t>();
         if(levelNum > 4)
             throw bpo::validation_error(
                 bpo::validation_error::invalid_option_value, "level");
@@ -280,70 +281,46 @@ void runGameLoop(const bpo::variables_map& variables)
 
     std::vector<Level::Level*> levels(5);
 
-    size_t currentLevel = variables["level"].as<size_t>();
+    int32_t currentLevel = variables["level"].as<int32_t>();
 
-    Level::Level* level;
-
-    if(!(level = getLevel(currentLevel, exe)))
-    {
-        done = true;
-    }
-    else
-    {
-        levels[currentLevel] = level;
-        setLevel(currentLevel, exe, world, renderer, *level);
-    }
+    Level::Level* level = NULL;
     
     FAWorld::Player* player = world.getPlayer();
-
-    if(currentLevel == 0)
-        player->mPos = FAWorld::Position(75, 68);
-    else
+    FAGui::initGui();
+    
+    // -1 represents the main menu
+    if(currentLevel != -1)
+    {
+        if(!(level = getLevel(currentLevel, exe)))
+        {
+            done = true;
+        }
+        else
+        {
+            levels[currentLevel] = level;
+            setLevel(currentLevel, exe, world, renderer, level);
+        }
+        
         player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 
+        FAGui::showIngameGui();
+    }
+    else
+    {
+        renderer.setLevel(NULL);
+        paused = true;
+        FAGui::showMainMenu();
+    }
+    
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     std::pair<size_t, size_t> destination = player->mPos.current();
 
-    FAGui::initGui();
     
     // Main game logic loop
     while(!done)
     {
-        if(mouseDown)
-        {
-            destination = renderer.getClickedTile(xClick, yClick);
-            if(click)
-                level->activate(destination.first, destination.second);
-
-            click = false;
-        }
-
         input.processInput(paused);
-
-        if(changeLevel)
-        {
-            int32_t tmp = currentLevel + changeLevel;
-            if(tmp >= 0 && tmp < (int32_t)levels.size())
-            {
-                currentLevel = tmp;
-
-                if(levels[currentLevel] == NULL)
-                    levels[currentLevel] = getLevel(currentLevel == 0 ? 0 : 1, exe);
-
-                level = levels[currentLevel];
-                
-                if(changeLevel == -1)
-                    player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
-                else
-                    player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
-                
-                setLevel(currentLevel, exe, world, renderer, *level);
-
-            }
-            
-            changeLevel = 0;
-        }
 
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
         
@@ -355,36 +332,74 @@ void runGameLoop(const bpo::variables_map& variables)
 
         last = now;
 
-        if(player->mPos.current() != destination)
-        {
-            if(player->mPos.mDist == 0)
-            {
-                std::pair<float, float> vector = Misc::getVec(player->mPos.current(), destination);
-
-                if(!player->mPos.mMoving)
-                {
-                    player->mPos.mMoving = true;
-                    player->setAnimation(FAWorld::AnimState::walk);
-                }
-
-                player->mPos.mDirection = Misc::getVecDir(vector);
-            }
-        }
-        else if(player->mPos.mMoving && player->mPos.mDist == 0)
-        {
-            player->mPos.mMoving = false;
-            player->setAnimation(FAWorld::AnimState::idle);
-        }
-
-        if(!noclip && !(*level)[player->mPos.next().first][player->mPos.next().second].passable())
-        {
-            player->mPos.mMoving = false;
-            player->setAnimation(FAWorld::AnimState::idle);
-        }
         
         if(!paused)
+        {
+            if(mouseDown)
+            {
+                destination = renderer.getClickedTile(xClick, yClick);
+                if(click)
+                    level->activate(destination.first, destination.second);
+
+                click = false;
+            }
+
+            if(changeLevel)
+            {
+                int32_t tmp = currentLevel + changeLevel;
+                if(tmp >= 0 && tmp < (int32_t)levels.size())
+                {
+                    currentLevel = tmp;
+
+                    if(levels[currentLevel] == NULL)
+                        levels[currentLevel] = getLevel(currentLevel == 0 ? 0 : 1, exe);
+
+                    level = levels[currentLevel];
+                    
+                    if(changeLevel == -1)
+                        player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
+                    else
+                        player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+
+                    destination = player->mPos.current();
+                    
+                    setLevel(currentLevel, exe, world, renderer, level);
+
+                }
+                
+                changeLevel = 0;
+            }
+ 
+            if(player->mPos.current() != destination)
+            {
+                if(player->mPos.mDist == 0)
+                {
+                    std::pair<float, float> vector = Misc::getVec(player->mPos.current(), destination);
+
+                    if(!player->mPos.mMoving)
+                    {
+                        player->mPos.mMoving = true;
+                        player->setAnimation(FAWorld::AnimState::walk);
+                    }
+
+                    player->mPos.mDirection = Misc::getVecDir(vector);
+                }
+            }
+            else if(player->mPos.mMoving && player->mPos.mDist == 0)
+            {
+                player->mPos.mMoving = false;
+                player->setAnimation(FAWorld::AnimState::idle);
+            }
+
+            if(!noclip && !(*level)[player->mPos.next().first][player->mPos.next().second].passable())
+            {
+                player->mPos.mMoving = false;
+                player->setAnimation(FAWorld::AnimState::idle);
+            }
+            
             world.update();
-        
+        }
+            
         FAGui::updateGui();
 
         FARender::RenderState* state = renderer.getFreeState();
