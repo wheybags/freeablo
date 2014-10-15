@@ -24,7 +24,7 @@ namespace bfs = boost::filesystem;
 
 bool done = false;
 bool paused = false;
-bool noclip = true;
+bool noclip = false;
 int changeLevel = 0;
 void keyPress(Input::Key key)
 {
