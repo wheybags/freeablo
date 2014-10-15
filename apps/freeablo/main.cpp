@@ -419,5 +419,8 @@ void runGameLoop(const bpo::variables_map& variables)
     while(!renderDone) {} // have to wait until the renderer stops before destroying all our locals
 
     for(size_t i = 0; i < levels.size(); i++)
-        delete levels[i];
+    {
+        if(levels[i])
+            delete levels[i];
+    }
 }
