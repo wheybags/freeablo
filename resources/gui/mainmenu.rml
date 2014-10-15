@@ -6,6 +6,13 @@
                 font-family: FreeMono;
                 font-size: 24;
                 text-align: center;
+                background-color: black;
+                height: 100%;
+            }
+
+            div#topContainer
+            {
+                position:absolute;
                 top: 50%;
             }
 
@@ -40,36 +47,37 @@ import rocket
 import freeablo
 from menu import Menu
 
-pauseMenu = None
+mainMenu = None
 
 def onLoad(document):
     entries = [ 
-        {"text": 'SAVE GAME (placeholder)'},
-        {"text": 'OPTIONS (placeholder)'},
-        {"text": 'NEW GAME (placeholder)'},
-        {"text": 'LOAD GAME (placeholder)'},
-        {"text": 'QUIT', "strFunc": 'freeablo.quit', "func": freeablo.quit}
+        {"text": 'Single Player', "strFunc": 'freeablo.startGame', "func": freeablo.startGame},
+        {"text": 'Multi Player (placeholder)'},
+        {"text": 'Replay Intro (placeholder)'},
+        {"text": 'Show Credits (placeholder)'},
+        {"text": 'Exit Freeablo', "strFunc": 'freeablo.quit', "func": freeablo.quit}
     ]
 
     fmtSelected = '<img class="pentagon" src="/data/PentSpin.cel"/> %s <img class="pentagon" src="/data/PentSpin.cel"/>'
     fmtNotSelected = '<img style="visibility: hidden;" class="pentagon" src="/data/PentSpin.cel"/> %s <img style="visibility: hidden;" class="pentagon" src="/data/PentSpin.cel"/>'
     
-    global pauseMenu
-    pauseMenu = Menu(document, 'pauseMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
+    global mainMenu
+    mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
  
  
 def onKeyDown(event, document):    
-    if not pauseMenu.onKeyDown(event):
-        document.baseKeyDown(event, document)
+    mainMenu.onKeyDown(event)
 
         </script>
     </head>
 
     <body onkeydown="onKeyDown(event, document)" onload="onLoad(document)">
-        <div id="menuContainer">
-            <span id="smlogo"></span> <br/>
-            
-            <div id="innerMenuContainer"></div> 
+        <div id="topContainer">
+            <div id="menuContainer">
+                <span id="smlogo"></span> <br/>
+                
+                <div id="innerMenuContainer"></div> 
+            </div>
         </div>
     </body>
 </rml>

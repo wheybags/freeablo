@@ -63,7 +63,7 @@ namespace FARender
 
             void stop();
 
-            void setLevel(const Level::Level& level);
+            void setLevel(const Level::Level* level);
 
             RenderState* getFreeState(); // ooh ah up de ra
             void setCurrentState(RenderState* current);
