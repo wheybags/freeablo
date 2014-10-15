@@ -91,6 +91,9 @@ namespace Render
         #ifdef WIN32
             PyRun_SimpleString("import sys\nsys.path.append('.')");
         #endif
+        
+        // add our python libs to path
+        PyRun_SimpleString("import sys\nsys.path.append('./resources/python')");
 
         // Pull in the Rocket Python module.
         import("rocket");
