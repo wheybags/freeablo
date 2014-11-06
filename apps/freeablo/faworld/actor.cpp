@@ -14,7 +14,7 @@ namespace FAWorld
             case AnimState::walk:
                 return mWalkAnim;
 
-            case AnimState::idle:
+            default: // AnimState::idle:
                 return mIdleAnim;
         }
     }

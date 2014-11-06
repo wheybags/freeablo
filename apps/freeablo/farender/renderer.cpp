@@ -16,17 +16,81 @@ namespace FARender
     {
         return mRenderer;
     }
+    struct LoadGuiTextureStruct
+    {
+        Rocket::Core::TextureHandle* texture_handle;
+        Rocket::Core::Vector2i* texture_dimensions;
+        const Rocket::Core::String* source;
+    };
 
-    Renderer::Renderer()
+    bool Renderer::loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
+    {   
+        LoadGuiTextureStruct* st = new LoadGuiTextureStruct();
+        st->texture_handle = &texture_handle;
+        st->texture_dimensions = &texture_dimensions;
+        st->source = &source;
+
+        mThreadCommunicationTmp = (void*) st;
+        mRenderThreadState = guiLoadTexture;
+        while(mRenderThreadState != running) {}
+
+        delete st;
+
+        return (bool) mThreadCommunicationTmp;;
+    }
+
+    struct GenerateGuiTextureStruct
+    {
+        Rocket::Core::TextureHandle* texture_handle;
+        const Rocket::Core::byte* source;
+        const Rocket::Core::Vector2i* source_dimensions;
+    };
+
+    bool Renderer::generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+    {
+        GenerateGuiTextureStruct* st = new GenerateGuiTextureStruct();
+        st->texture_handle = &texture_handle;
+        st->source = source;
+        st->source_dimensions = &source_dimensions;
+
+        mThreadCommunicationTmp = (void*) st;
+        mRenderThreadState = guiGenerateTexture;
+        while(mRenderThreadState != running) {}
+        
+        delete st;
+
+        return (bool) mThreadCommunicationTmp;
+    }
+    
+    void Renderer::releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle)
+    {
+        mThreadCommunicationTmp = (void*) &texture_handle;
+
+        mRenderThreadState = guiReleaseTexture;
+        while(mRenderThreadState != running) {}
+    }                              
+
+    Renderer::Renderer(int32_t windowWidth, int32_t windowHeight)
+        :mRenderThreadState(stopped)
+        ,mLevel(NULL)
+        ,mDone(false)
+        ,mCurrent(NULL)
+        ,mRocketContext(NULL)
     {
         assert(!mRenderer); // singleton, only one instance
-        mRenderer = this;
 
-        mDone = false;
-        mRenderThreadState = stopped;
-        mLevel = NULL;
+        // Render initialization.
+        {
+            Render::RenderSettings settings;
+            settings.windowWidth = windowWidth;
+            settings.windowHeight = windowHeight;
 
-        mCurrent = NULL;
+            Render::init(settings);
+            mRocketContext = Render::initGui(boost::bind(&Renderer::loadGuiTextureFunc, this, _1, _2, _3), boost::bind(&Renderer::generateGuiTextureFunc, this, _1, _2, _3), boost::bind(&Renderer::releaseGuiTextureFunc, this, _1));
+
+            mRenderer = this;
+        }
+
         renderLoop();
     }
     
@@ -42,11 +106,19 @@ namespace FARender
         mDone = true;
     }
         
-    void Renderer::setLevel(const Level::Level& level)
+    void Renderer::setLevel(const Level::Level* level)
     {
-        mThreadCommunicationTmp = (void*)&level;
-        mRenderThreadState = levelChange;
-        while(mRenderThreadState != running){} // wait until the render thread is done loading the new level
+        if(level)
+        {
+            mThreadCommunicationTmp = (void*)level;
+            mRenderThreadState = levelChange;
+            while(mRenderThreadState != running){} // wait until the render thread is done loading the new level
+        }
+        else // no level, just start drawing gui
+        {
+            mLevel = NULL;
+            mRenderThreadState = running;
+        }
     }
     
     RenderState* Renderer::getFreeState()
@@ -102,6 +174,11 @@ namespace FARender
         return Render::getClickedTile(mLevel, x, y);
     }
 
+    Rocket::Core::Context* Renderer::getRocketContext()
+    {
+        return mRocketContext;
+    }
+
     void Renderer::destroySprite(Render::SpriteGroup* s)
     {
         mThreadCommunicationTmp = (void*)s;
@@ -111,7 +188,9 @@ namespace FARender
 
     void Renderer::renderLoop()
     {
-        Render::init();
+        Render::LevelObjects objects;
+
+        while(!Input::InputManager::get()) {}
 
         while(!mDone)
         {
@@ -122,7 +201,11 @@ namespace FARender
             if(mRenderThreadState == levelChange)
             {
                 delete mLevel;
-                mLevel = Render::setLevel(*(Level::Level*)mThreadCommunicationTmp);
+                Level::Level* level = (Level::Level*)mThreadCommunicationTmp;
+
+                mLevel = Render::setLevel(*level);
+                objects.resize(level->width(), level->height());
+
                 mRenderThreadState = running;
             }
 
@@ -131,6 +214,26 @@ namespace FARender
                 FASpriteGroup* tmp = new FASpriteGroup((CacheSpriteGroup*)NULL);
                 *tmp = loadImageImp(*(std::string*)mThreadCommunicationTmp);
                 mThreadCommunicationTmp = (void*)tmp;
+                mRenderThreadState = running;
+            }
+
+            else if(mRenderThreadState == guiLoadTexture)
+            {
+                LoadGuiTextureStruct* st = (LoadGuiTextureStruct*) mThreadCommunicationTmp;
+                mThreadCommunicationTmp = (void*) Render::guiLoadImage(*(st->texture_handle), *(st->texture_dimensions), *(st->source));
+                mRenderThreadState = running;
+            }
+
+            else if(mRenderThreadState == guiGenerateTexture)
+            {
+                GenerateGuiTextureStruct* st = (GenerateGuiTextureStruct*) mThreadCommunicationTmp;
+                mThreadCommunicationTmp = (void*) Render::guiGenerateTexture(*(st->texture_handle), st->source, *(st->source_dimensions));
+                mRenderThreadState = running;
+            }
+
+            else if(mRenderThreadState == guiReleaseTexture)
+            {
+                Render::guiReleaseTexture(*((Rocket::Core::TextureHandle*)mThreadCommunicationTmp));
                 mRenderThreadState = running;
             }
 
@@ -148,18 +251,37 @@ namespace FARender
 
             if(mRenderThreadState == running && current && current->mMutex.try_lock())
             {
-                Render::drawLevel(mLevel, current->mPos.current().first, current->mPos.current().second, 
-                    current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
-
-                for(size_t i = 0; i < current->mObjects.size(); i++)
+                
+                if(mLevel)
                 {
-                    Render::drawAt(mLevel, (*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()], current->mObjects[i].get<2>().current().first, current->mObjects[i].get<2>().current().second,
-                        current->mObjects[i].get<2>().next().first, current->mObjects[i].get<2>().next().second, current->mObjects[i].get<2>().mDist);
+                    for(size_t x = 0; x < objects.width(); x++)
+                    {
+                        for(size_t y = 0; y < objects.height(); y++)
+                        {
+                            objects[x][y].sprite = NULL;
+                        }
+                    }
+
+                    for(size_t i = 0; i < current->mObjects.size(); i++)
+                    {
+                        size_t x = current->mObjects[i].get<2>().current().first;
+                        size_t y = current->mObjects[i].get<2>().current().second;
+
+                        objects[x][y].sprite = (*current->mObjects[i].get<0>().get()).mSpriteGroup[current->mObjects[i].get<1>()];
+                        objects[x][y].x2 = current->mObjects[i].get<2>().next().first;
+                        objects[x][y].y2 = current->mObjects[i].get<2>().next().second;
+                        objects[x][y].dist = current->mObjects[i].get<2>().mDist;
+                    }
+
+                    Render::drawLevel(mLevel, objects, current->mPos.current().first, current->mPos.current().second,
+                        current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
                 }
+
+                Render::drawGui(current->guiDrawBuffer);
 
                 current->mMutex.unlock();
             }
-
+            
             Render::draw();
         }
         

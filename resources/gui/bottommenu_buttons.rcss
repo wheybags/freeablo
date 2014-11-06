@@ -1,0 +1,143 @@
+button#charBut
+{
+    display: inline-block;
+
+    width: 78px;
+    height: 25px;
+
+    background-decorator: image;
+    background-image: /ctrlpan/panel8.cel 6px 22px 84px 47px;
+    
+    position: relative;
+    left: -275px;
+    top: 47px;
+}
+button#charBut:active
+{
+    width: 71;
+    height: 19;
+
+    left: -276px;
+    top: 45px;
+    background-image: /ctrlpan/panel8bu.cel:0;
+}
+
+button#questBut
+{
+    display: inline-block;
+
+    width: 78px;
+    height: 25px;
+
+    background-decorator: image;
+    background-image: /ctrlpan/panel8.cel 6px 48px 84px 73px;
+    
+    position: relative;
+    left: -275px;
+    top: 73px;
+}
+button#questBut:active
+{
+    width: 71;
+    height: 19;
+
+    left: -276px;
+    top: 71px;
+    background-image: /ctrlpan/panel8bu.cel:1;
+}
+
+button#mapBut
+{
+    display: inline-block;
+
+    width: 78px;
+    height: 25px;
+
+    background-decorator: image;
+    background-image: /ctrlpan/panel8.cel 6px 88px 84px 113px;
+    
+    position: relative;
+    left: -275px;
+    top: 113px;
+}
+button#mapBut:active
+{
+    width: 71;
+    height: 19;
+
+    left: -276px;
+    top: 111px;
+    background-image: /ctrlpan/panel8bu.cel:2;
+}
+
+button#menuBut
+{
+    display: inline-block;
+
+    width: 78px;
+    height: 25px;
+
+    background-decorator: image;
+    background-image: /ctrlpan/panel8.cel 6px 114px 84px 139px;
+    
+    position: relative;
+    left: -275px;
+    top: 139px;
+}
+button#menuBut:active
+{
+    width: 71;
+    height: 19;
+
+    left: -276px;
+    top: 137px;
+    background-image: /ctrlpan/panel8bu.cel:3;
+} 
+
+button#invBut
+{
+    display: inline-block;
+
+    width: 78px;
+    height: 25px;
+
+    background-decorator: image;
+    background-image: /ctrlpan/panel8.cel 556px 22px 634px 47px;
+    
+    position: relative;
+    left: 275px;
+    top: 47px;
+}
+button#invBut:active
+{
+    width: 71;
+    height: 19;
+
+    left: 276px;
+    top: 45px;
+    background-image: /ctrlpan/panel8bu.cel:4;
+}
+
+button#spellBut
+{
+    display: inline-block;
+
+    width: 78px;
+    height: 25px;
+
+    background-decorator: image;
+    background-image: /ctrlpan/panel8.cel 556px 48px 634px 73px;
+    
+    position: relative;
+    left: 275px;
+    top: 73px;
+}
+button#spellBut:active
+{
+    width: 71;
+    height: 19;
+
+    left: 276px;
+    top: 71px;
+    background-image: /ctrlpan/panel8bu.cel:5;
+}

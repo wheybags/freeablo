@@ -1,20 +1,22 @@
 #include "faio.h"
 
 #include <iostream>
-
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+
 namespace bfs = boost::filesystem;
 
+
 // We don't want warnings from StormLibs headers
-#pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wpedantic"
-    #pragma GCC diagnostic ignored "-Wlong-long"
+#include <misc/disablewarn.h>
     #include <StormLib.h>
-#pragma GCC diagnostic pop
+#include <misc/enablewarn.h>
 
 namespace FAIO
 {
     FAFile::FAFile(){}
+
+    const std::string DIABDAT_MPQ = "DIABDAT.MPQ";
 
     // StormLib needs paths with windows style \'s
     std::string getStormLibPath(const bfs::path& path)
@@ -43,13 +45,13 @@ namespace FAIO
         if(!bfs::exists(filename))
         {
             int nError = ERROR_SUCCESS;
-
-            if(diabdat == NULL && !SFileOpenArchive("DIABDAT.MPQ", 0, 0, &diabdat))
+            
+            if(diabdat == NULL && !SFileOpenArchive(getMPQFileName().c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat))
                 nError = GetLastError();
 
             if(nError != ERROR_SUCCESS)
             {
-                std::cerr << "Failed to open DIABDAT.MPQ" << std::endl;
+                std::cerr << "Failed to open " << DIABDAT_MPQ << std::endl;
                 return NULL;
             }
             
@@ -66,7 +68,7 @@ namespace FAIO
 
             if(!SFileOpenFileEx(diabdat, stormPath.c_str(), 0, (HANDLE*)file->data.mpqFile))
             {
-                std::cerr << "Failed to open " << filename << " in DIABDAT.MPQ";
+                std::cerr << "Failed to open " << filename << " in " << DIABDAT_MPQ;
                 delete file;
                 return NULL;
             }
@@ -99,7 +101,8 @@ namespace FAIO
             
             case FAFile::MPQFile:
                 DWORD dwBytes = 1;
-                SFileReadFile(*((HANDLE*)stream->data.mpqFile), ptr, size*count, &dwBytes, NULL);
+                if(!SFileReadFile(*((HANDLE*)stream->data.mpqFile), ptr, size*count, &dwBytes, NULL))
+                    std::cout << "Error reading from file" << std::endl;
 
                 return dwBytes;
         }
@@ -167,6 +170,21 @@ namespace FAIO
         return 0;
     }
 
+    size_t FAftell(FAFile* stream)
+    {
+        switch(stream->mode)
+        {
+            case FAFile::PlainFile:
+                return ftell(stream->data.plainFile.file);
+
+            case FAFile::MPQFile:
+                return SFileSetFilePointer(*((HANDLE*)stream->data.mpqFile), 0, NULL, FILE_CURRENT);
+
+            default:
+                return 0;
+        }
+    }
+
     size_t FAsize(FAFile* stream)
     {
         switch(stream->mode)
@@ -221,5 +239,23 @@ namespace FAIO
         }
 
         return retval;
+    }
+
+    std::string getMPQFileName()
+    {
+		bfs::directory_iterator end;
+		for(bfs::directory_iterator entry(".") ; entry != end; entry++) 
+		{
+			if (!bfs::is_directory(*entry))
+			{
+				if(boost::iequals(entry->path().leaf().generic_string(), DIABDAT_MPQ))
+				{
+					return entry->path().leaf().generic_string();
+				}
+			}
+		}
+
+		std::cout << "Failed to find " << DIABDAT_MPQ << " in current directory" << std::endl;
+		return "";
     }
 }

@@ -1,0 +1,29 @@
+<rml>
+    <head>
+        <style>
+            body
+            {
+                top: 50%;
+                left: 0px;
+            }
+            #inventory
+            {
+                position: fixed;
+                top: -175px;
+                
+            }
+        </style>
+
+        <script>
+
+def onKeyDown(event, document):
+    document.baseKeyDown(event, document)
+       
+        </script>
+
+    </head>
+
+    <body onKeyDown="onKeyDown(event, document)">
+        <div id="inventory"><img src="/data/char.cel"></img></div>
+    </body>
+</rml>

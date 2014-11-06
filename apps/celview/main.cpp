@@ -30,8 +30,12 @@ void keyPress(Input::Key key)
 
 int main(int, char** argv)
 {
-    Render::init(); 
-    Input::InputManager input(&keyPress, NULL, NULL, NULL, NULL);
+    Render::RenderSettings settings;
+    settings.windowWidth = 1280;
+    settings.windowHeight = 960;
+    Render::init(settings);
+
+    Input::InputManager input(&keyPress, NULL, NULL, NULL, NULL, NULL);
 
     Render::SpriteGroup cel(argv[1]);
     max = cel.size();
@@ -39,10 +43,12 @@ int main(int, char** argv)
     while(!done)
     {
         input.poll();
-        input.processInput();
+        input.processInput(false);
 
         Render::clear();
         Render::drawAt(cel[celIndex], 0, 0);
         Render::draw();
     }
+
+    return 0;
 }

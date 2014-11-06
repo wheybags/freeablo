@@ -4,15 +4,27 @@
 
 namespace Cel
 {
-    int32_t normalWidth(const std::vector<uint8_t>& frame, bool fromHeader, uint16_t offset)
+    int32_t normalWidth(const std::vector<uint8_t>& frame, size_t frameNum, bool fromHeader, uint16_t offset)
     {
-        
         // If we have a header, we know that offset points to the end of the 32nd line.
         // So, when we reach that point, we will have produced 32 lines of pixels, so we 
         // can divide the number of pixels we have passed at this point by 32, to get the 
         // width.
         if(fromHeader)
         {
+            // Workaround for objcurs.cel, the only cel file containing frames with a header whose offset is zero
+            if(offset == 0)
+            {
+                if(frameNum == 0)
+                    return 33;
+                else if(frameNum > 0 && frameNum <10)
+                    return 32;
+                else if(frameNum == 10)
+                    return 23;
+                else if(frameNum > 10 && frameNum < 86)
+                    return 28;
+            }
+
             int32_t widthHeader = 0; 
             
             for(size_t i = 10; i < frame.size(); i++){
@@ -47,26 +59,56 @@ namespace Cel
         // So, for all image except those whose width is divisible by 127, we can determine width
         // by looping through control bits, adding 127 each time, until we find some value which
         // is not 127, then add that to the 127-total and that is our width.
+        //
+        // The above is the basic idea, but there is also a bunch of crap added in to maybe deal
+        // with frames that don't quite fit the criteria.
         else
         {
             int32_t widthRegular = 0;
+            bool hasTrans = false;
+
+            uint8_t lastVal = 0;
+            uint8_t lastTransVal = 0;
             
             for(size_t i = 0; i < frame.size(); i++){
+                uint8_t val = frame[i];
+
 
                 // Regular command
-                if(frame[i] <= 127){
-                    widthRegular += frame[i];
-                    i += frame[i];
+                if(val <= 127)
+                {
+                    widthRegular += val;
+                    i += val;
+                    
+                    // Workaround for frames that start with a few px, then trans for the rest of the line
+                    if(128 <= frame[i+1])
+                        hasTrans = true;
                 }
 
-                // Transparency command - who knows, it might be possible
-                else if(128 <= frame[i]){
-                    widthRegular += 256 - frame[i];
+                else if(128 <= val)
+                {
+                    
+                    // Workaround for frames that start trans, then a few px of colour at the end
+                    if(val == lastTransVal && lastVal <= 127 && lastVal == frame[i+1])
+                        break;
+
+                    widthRegular += 256 - val;
+                    
+                    // Workaround - presumes all headerless frames first lines start transparent, then go colour,
+                    // then go transparent again, at which point they hit the end of the line, or if the first two
+                    // commands are both transparency commands, that the image starts with a fully transparent line
+                    if((hasTrans || 128 <= frame[i+1]) && val != 128)
+                        break;
+
+                    hasTrans = true;
+
+                    lastTransVal = val;
                 }
 
-                if(frame[i] != 127)
+                if(val != 127 && !hasTrans)
                     break;
 
+                lastVal = val;
             }
 
             return widthRegular;
@@ -74,7 +116,7 @@ namespace Cel
     }
 
 
-    int32_t normalDecode(const std::vector<uint8_t>& frame, const Pal& pal, std::vector<Colour>& rawImage, bool tileCel)
+    int32_t normalDecode(const std::vector<uint8_t>& frame, size_t frameNum, const Pal& pal, std::vector<Colour>& rawImage, bool tileCel)
     {
         #ifdef CEL_DEBUG
             std::cout << "NORMAL DECODE" << std::endl;
@@ -134,6 +176,6 @@ namespace Cel
             }
         }
 
-        return normalWidth(frame, fromHeader, offset);
+        return normalWidth(frame, frameNum, fromHeader, offset);
     }
 }

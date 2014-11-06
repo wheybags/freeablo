@@ -79,14 +79,14 @@ namespace Cel
         std::vector<Colour> rawImage;
         frame.mRawImage = rawImage;
 
-        frame.mWidth = getFrame(mFrames[index], frame.mRawImage);
+        frame.mWidth = getFrame(mFrames[index], index, frame.mRawImage);
 
         frame.mHeight = frame.mRawImage.size() / frame.mWidth;
 
         mCache[index] = frame;
         
         #ifdef CEL_DEBUG
-            std::cout << "w: " << frame.width << ", h: " << frame.height << std::endl;
+            std::cout << "w: " << frame.mWidth << ", h: " << frame.mHeight << std::endl;
         #endif
 
         return mCache[index];
@@ -97,7 +97,7 @@ namespace Cel
         return mAnimLength;
     }
 
-    size_t CelFile::getFrame(const std::vector<uint8_t>& frame, std::vector<Colour>& rawImage)
+    size_t CelFile::getFrame(const std::vector<uint8_t>& frame, size_t frameNum, std::vector<Colour>& rawImage)
     {
         if(mIsCl2)
             return cl2Decode(frame, mPal, rawImage);
@@ -105,7 +105,7 @@ namespace Cel
         if(mIsTileCel)
             return decodeTileFrame(frame, mPal, rawImage);
 
-        return normalDecode(frame, mPal, rawImage);
+        return normalDecode(frame, frameNum, mPal, rawImage);
     }
 
     size_t CelFile::readCl2ArchiveFrames(FAIO::FAFile* file)

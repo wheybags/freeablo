@@ -7,15 +7,20 @@ branches:
 before_install:
 - pwd
 - git submodule update --init --recursive
+- echo yes | sudo apt-add-repository ppa:zoogie/sdl2-snapshots
 - echo yes | sudo apt-add-repository ppa:boost-latest/ppa
 - sudo apt-get update -qq
-- sudo apt-get install -qq libboost1.54-all-dev libsdl1.2-dev libsdl-ttf2.0-dev zlib1g-dev
-  libbz2-dev doxygen
+- sudo apt-get install -qq libboost1.54-all-dev libsdl2-dev libsdl2-image-dev libsdl-ttf2.0-dev zlib1g-dev
+  libbz2-dev doxygen libfreetype6-dev libpython2.7
+- wget http://wheybags.netsoc.ie/pkg/librocket_1.3-1_amd64.deb
+- sudo dpkg -i librocket_1.3-1_amd64.deb
+- wget http://wheybags.netsoc.ie/pkg/librocket-dev_1.3-1_amd64.deb
+- sudo dpkg -i librocket-dev_1.3-1_amd64.deb
 
 before_script:
 - mkdir build
 - cd build
-- cmake ../ -DUSE_SDL2=NO
+- cmake ../ 
 script:
 - make -j4
 after_success: 

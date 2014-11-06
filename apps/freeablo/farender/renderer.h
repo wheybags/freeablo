@@ -35,10 +35,15 @@ namespace FARender
         FAWorld::Position mPos;
         
         std::vector<boost::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
+
+        std::vector<drawCommand> guiDrawBuffer;
     };
 
     enum RenderThreadState
     {
+        guiLoadTexture,
+        guiGenerateTexture,
+        guiReleaseTexture,
         running,
         levelChange,
         loadSprite,
@@ -53,12 +58,12 @@ namespace FARender
         public:
             static Renderer* get();
             
-            Renderer();
+            Renderer(int32_t windowWidth, int32_t windowHeight);
             ~Renderer();
 
             void stop();
 
-            void setLevel(const Level::Level& level);
+            void setLevel(const Level::Level* level);
 
             RenderState* getFreeState(); // ooh ah up de ra
             void setCurrentState(RenderState* current);
@@ -67,7 +72,14 @@ namespace FARender
 
             std::pair<size_t, size_t> getClickedTile(size_t x, size_t y);
 
+            Rocket::Core::Context* getRocketContext();
+
+            bool loadGuiTextureFunc(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&);
+            bool generateGuiTextureFunc(Rocket::Core::TextureHandle&, const Rocket::Core::byte* source, const Rocket::Core::Vector2i&);
+            void releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle);
+            
         private:
+
             FASpriteGroup loadImageImp(const std::string& path);
             
             void destroySprite(Render::SpriteGroup* s);
@@ -85,6 +97,8 @@ namespace FARender
             RenderState mStates[3];
 
             RenderState* mCurrent;
+
+            Rocket::Core::Context* mRocketContext;
 
             std::map<std::string, boost::weak_ptr<CacheSpriteGroup> > mSpriteCache;
 

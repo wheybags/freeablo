@@ -11,11 +11,20 @@
 
 #include "faworld/world.h"
 
+#include "fagui/guimanager.h"
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/filesystem.hpp>
+#include <fstream>
+
+namespace bpo = boost::program_options;
+namespace bfs = boost::filesystem;
 
 bool done = false;
-bool noclip = true;
+bool paused = false;
+bool noclip = false;
 int changeLevel = 0;
 void keyPress(Input::Key key)
 {
@@ -27,10 +36,10 @@ void keyPress(Input::Key key)
         case Input::KEY_n:
             noclip = !noclip;
             break;
-        case Input::KEY_DOWN:
+        case Input::KEY_p:
             changeLevel = 1;
             break;
-        case Input::KEY_UP:
+        case Input::KEY_o:
             changeLevel = -1;
             break;
         default:
@@ -64,13 +73,13 @@ void mouseMove(size_t x, size_t y)
     yClick = y;
 }
 
-void setLevel(size_t levelNum, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, const Level::Level& level)
+void setLevel(size_t levelNum, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, const Level::Level* level)
 {
     world.clear();
     if(levelNum == 0)
         world.addNpcs(exe);
     renderer.setLevel(level);
-    world.setLevel(level, exe);
+    world.setLevel(*level, exe);
 }
 
 Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
@@ -85,7 +94,7 @@ Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
             Level::Dun sector4("levels/towndata/sector4s.dun");
 
             return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", 
-                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(0,0), std::map<size_t, size_t>());
+                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
 
             break;
         }
@@ -107,57 +116,163 @@ Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
 
     return NULL;
 }
-int realmain(int argc, char** argv);
+
+/**
+ * @brief Handle parsing of command line arguments.
+ * @return True if no problems occurred and execution should continue.
+ */
+bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
+{
+    boost::program_options::options_description desc("Options");
+
+    desc.add_options()
+        ("help,h", "Print help")
+        // -1 represents the main menu
+        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-4)");
+
+    try 
+    { 
+        bpo::store(bpo::parse_command_line(argc, argv, desc), variables);
+
+        if(variables.count("help"))
+        {
+            std::cout << desc << std::endl;
+            return false;
+        }
+        
+        bpo::notify(variables);
+
+        const int32_t levelNum = variables["level"].as<int32_t>();
+        if(levelNum > 4)
+            throw bpo::validation_error(
+                bpo::validation_error::invalid_option_value, "level");
+    }
+    catch(bpo::error& e)
+    {
+        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+        std::cerr << desc << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Holds startup settings read from settings files.
+ */
+struct StartupSettings
+{
+    size_t resolutionWidth;
+    size_t resolutionHeight;
+};
+
+/**
+ * @brief Load and parse settings files.
+ */
+bool loadSettings(StartupSettings& settings)
+{
+    // TODO: handling of application paths via FAIO interface
+    const std::string settingsDefaultPath = "resources/settings-default.ini";
+    const std::string settingsUserPath = "resources/settings-user.ini";
+
+    bpo::variables_map variables;
+    bpo::options_description desc("Settings");
+
+    desc.add_options()
+        ("Display.resolutionWidth", bpo::value<size_t>())
+        ("Display.resolutionHeight", bpo::value<size_t>());
+
+    const bool allowUnregisteredOptions = true;
+
+    // User settings - handle first to give priority over default settings.
+    try
+    {
+        std::ifstream settingsFile(settingsUserPath.c_str());
+
+        bpo::store(
+            bpo::parse_config_file(settingsFile, desc, allowUnregisteredOptions),
+            variables);
+    }
+    catch(bpo::error& e)
+    {
+        std::cerr << "Unable to process settings file \"" + settingsUserPath + "\"." << std::endl;
+        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+        return false;
+    }
+
+    // Default settings.
+    try
+    {
+        if (!bfs::exists(settingsDefaultPath))
+        {
+            std::cerr << "Default settings file not found. Please verify that \"" + settingsDefaultPath + "\" exists." << std::endl;
+            return false;
+        }
+
+        std::ifstream settingsFile(settingsDefaultPath.c_str());
+
+        bpo::store(
+            bpo::parse_config_file(settingsFile, desc, allowUnregisteredOptions),
+            variables);
+
+        bpo::notify(variables);
+
+        // Parameter parsing.
+        {
+            settings.resolutionWidth = variables["Display.resolutionWidth"].as<size_t>();
+            settings.resolutionHeight = variables["Display.resolutionHeight"].as<size_t>();
+        }
+    }
+    catch(bpo::error& e)
+    {
+        std::cerr << "Unable to process settings file \"" + settingsDefaultPath + "\"." << std::endl;
+        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+void run(const bpo::variables_map& variables);
+void runGameLoop(const bpo::variables_map& variables);
 
 volatile bool renderDone = false;
+
+/**
+ * @brief Main entry point.
+ */
 int main(int argc, char** argv)
 {
-    boost::thread mainThread(boost::bind(&realmain, argc, argv));
-    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove);
-    FARender::Renderer renderer;
+    boost::program_options::variables_map variables;
+
+    if (parseOptions(argc, argv, variables))
+    {
+        run(variables);
+    }
+
+    return 0;
+}
+
+void run(const bpo::variables_map& variables)
+{
+    StartupSettings settings;
+    if (!loadSettings(settings))
+        return;
+
+    boost::thread mainThread(boost::bind(&runGameLoop, &variables));
+
+    FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
     renderDone = true;
 
     mainThread.join();
 }
 
-int realmain(int argc, char** argv)
+void runGameLoop(const bpo::variables_map& variables)
 {
     while(!FARender::Renderer::get()) {}
 
     FARender::Renderer& renderer = *FARender::Renderer::get();
-    Input::InputManager& input = *Input::InputManager::get();
-
-    size_t levelNum;
-
-    boost::program_options::options_description desc("Options");
-    desc.add_options()
-        ("help,h", "Print help")
-        ("level,l", boost::program_options::value<size_t>(&levelNum)->default_value(0), "Level number to load (0-4)");
-
-    boost::program_options::variables_map vm; 
-    try 
-    { 
-        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-
-        if(vm.count("help"))
-        {
-            std::cout << desc << std::endl;
-            return 0;
-        }
-        
-        boost::program_options::notify(vm);
-
-        if(levelNum > 4)
-            throw boost::program_options::validation_error(
-                boost::program_options::validation_error::invalid_option_value, "level");
-    }
-    catch(boost::program_options::error& e)
-    {
-        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
-        std::cerr << desc << std::endl;
-        return 1;
-    }
-
+    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
 
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
@@ -166,68 +281,46 @@ int realmain(int argc, char** argv)
 
     std::vector<Level::Level*> levels(5);
 
-    size_t currentLevel = levelNum;
+    int32_t currentLevel = variables["level"].as<int32_t>();
 
-    Level::Level* level;
-
-    if(!(level = getLevel(levelNum, exe)))
-    {
-        done = true;
-    }
-    else
-    {
-        levels[currentLevel] = level;
-        setLevel(levelNum, exe, world, renderer, *level);
-    }
+    Level::Level* level = NULL;
     
     FAWorld::Player* player = world.getPlayer();
-
-    if(levelNum == 0)
-        player->mPos = FAWorld::Position(75, 68);
-    else
+    FAGui::initGui();
+    
+    // -1 represents the main menu
+    if(currentLevel != -1)
+    {
+        if(!(level = getLevel(currentLevel, exe)))
+        {
+            done = true;
+        }
+        else
+        {
+            levels[currentLevel] = level;
+            setLevel(currentLevel, exe, world, renderer, level);
+        }
+        
         player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 
+        FAGui::showIngameGui();
+    }
+    else
+    {
+        renderer.setLevel(NULL);
+        paused = true;
+        FAGui::showMainMenu();
+    }
+    
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     std::pair<size_t, size_t> destination = player->mPos.current();
+
     
     // Main game logic loop
     while(!done)
     {
-        if(mouseDown)
-        {
-            destination = renderer.getClickedTile(xClick, yClick);
-            if(click)
-                level->activate(destination.first, destination.second);
-
-            click = false;
-        }
-
-        input.processInput();
-
-        if(changeLevel)
-        {
-            int32_t tmp = currentLevel + changeLevel;
-            if(tmp >= 0 && tmp < (int32_t)levels.size())
-            {
-                currentLevel = tmp;
-
-                if(levels[currentLevel] == NULL)
-                    levels[currentLevel] = getLevel(currentLevel == 0 ? 0 : 1, exe);
-
-                level = levels[currentLevel];
-                
-                if(changeLevel == -1)
-                    player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
-                else
-                    player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
-                
-                setLevel(currentLevel, exe, world, renderer, *level);
-
-            }
-            
-            changeLevel = 0;
-        }
+        input.processInput(paused);
 
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
         
@@ -239,50 +332,95 @@ int realmain(int argc, char** argv)
 
         last = now;
 
-        if(player->mPos.current() != destination)
-        {
-            if(player->mPos.mDist == 0)
-            {
-                std::pair<float, float> vector = Misc::getVec(player->mPos.current(), destination);
-
-                if(!player->mPos.mMoving)
-                {
-                    player->mPos.mMoving = true;
-                    player->setAnimation(FAWorld::AnimState::walk);
-                }
-
-                player->mPos.mDirection = Misc::getVecDir(vector);
-            }
-        }
-        else if(player->mPos.mMoving && player->mPos.mDist == 0)
-        {
-            player->mPos.mMoving = false;
-            player->setAnimation(FAWorld::AnimState::idle);
-        }
-
-        if(!noclip && !(*level)[player->mPos.next().first][player->mPos.next().second].passable())
-        {
-            player->mPos.mMoving = false;
-            player->setAnimation(FAWorld::AnimState::idle);
-        }
-
-        world.update();
         
+        if(!paused)
+        {
+            if(mouseDown)
+            {
+                destination = renderer.getClickedTile(xClick, yClick);
+                if(click)
+                    level->activate(destination.first, destination.second);
+
+                click = false;
+            }
+
+            if(changeLevel)
+            {
+                int32_t tmp = currentLevel + changeLevel;
+                if(tmp >= 0 && tmp < (int32_t)levels.size())
+                {
+                    currentLevel = tmp;
+
+                    if(levels[currentLevel] == NULL)
+                        levels[currentLevel] = getLevel(currentLevel == 0 ? 0 : 1, exe);
+
+                    level = levels[currentLevel];
+                    
+                    if(changeLevel == -1)
+                        player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
+                    else
+                        player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+
+                    destination = player->mPos.current();
+                    
+                    setLevel(currentLevel, exe, world, renderer, level);
+
+                }
+                
+                changeLevel = 0;
+            }
+ 
+            if(player->mPos.current() != destination)
+            {
+                if(player->mPos.mDist == 0)
+                {
+                    std::pair<float, float> vector = Misc::getVec(player->mPos.current(), destination);
+
+                    if(!player->mPos.mMoving)
+                    {
+                        player->mPos.mMoving = true;
+                        player->setAnimation(FAWorld::AnimState::walk);
+                    }
+
+                    player->mPos.mDirection = Misc::getVecDir(vector);
+                }
+            }
+            else if(player->mPos.mMoving && player->mPos.mDist == 0)
+            {
+                player->mPos.mMoving = false;
+                player->setAnimation(FAWorld::AnimState::idle);
+            }
+
+            if(!noclip && !(*level)[player->mPos.next().first][player->mPos.next().second].passable())
+            {
+                player->mPos.mMoving = false;
+                player->setAnimation(FAWorld::AnimState::idle);
+            }
+            
+            world.update();
+        }
+            
+        FAGui::updateGui();
+
         FARender::RenderState* state = renderer.getFreeState();
         
         state->mPos = player->mPos;
 
         world.fillRenderState(state);
 
+        Render::updateGuiBuffer(state->guiDrawBuffer);
+
         renderer.setCurrentState(state);
     }
-
+    
+    FAGui::destroyGui();
     renderer.stop();    
 
     while(!renderDone) {} // have to wait until the renderer stops before destroying all our locals
 
     for(size_t i = 0; i < levels.size(); i++)
-        delete levels[i];
-
-    return 0;
+    {
+        if(levels[i])
+            delete levels[i];
+    }
 }

@@ -6,20 +6,34 @@
 #include <boost/function.hpp>
 #include <boost/lockfree/queue.hpp>
 
+#include <misc/disablewarn.h>
+    #include <Rocket/Core.h>
+#include <misc/enablewarn.h>
+
 #include "keys.h"
 
 namespace Input
 {
+    enum Modifier
+    {
+        FAMOD_CTRL = 1,
+        FAMOD_ALT = 2,
+        FAMOD_SHIFT = 4
+    };
+
     class InputManager
     {
         public:
             InputManager(boost::function<void(Key)> keyPress, boost::function<void(Key)> keyRelease,
                 boost::function<void(uint32_t, uint32_t, Key)> mouseClick,
                 boost::function<void(uint32_t, uint32_t, Key)> mouseRelease,
-                boost::function<void(uint32_t, uint32_t)> mouseMove);
+                boost::function<void(uint32_t, uint32_t)> mouseMove,
+                Rocket::Core::Context* context);
 
-            void processInput();
+            void processInput(bool paused);
             void poll();
+
+            uint32_t getModifiers();
 
             static InputManager* get();
 
@@ -57,7 +71,11 @@ namespace Input
             boost::function<void(uint32_t, uint32_t, Key)> mMouseRelease;
             boost::function<void(uint32_t, uint32_t)> mMouseMove;
 
+            Rocket::Core::Context* mContext;
+
             static InputManager* instance;
+
+            uint32_t mModifiers;
     };
 }
 

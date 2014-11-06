@@ -8,7 +8,7 @@
 
 namespace Cel
 {
-    int32_t normalDecode(const std::vector<uint8_t>& frame, const Pal& pal, std::vector<Colour>& raw_image, bool tileCel = false);
+    int32_t normalDecode(const std::vector<uint8_t>& frame, size_t frameNum, const Pal& pal, std::vector<Colour>& raw_image, bool tileCel = false);
 }
 
 #endif

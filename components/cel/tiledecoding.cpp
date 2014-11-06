@@ -183,7 +183,7 @@ namespace Cel
         else if(isGreaterThan(frame))
             decodeGreaterThan(frame, pal, rawImage);
         else
-            normalDecode(frame, pal, rawImage, true);
+            normalDecode(frame, 0, pal, rawImage, true); // pass zero as frameNum because it's only used for width calculation and width of tile frames is always 32
 
         return 32;
     }

@@ -4,23 +4,20 @@ project (Freeablo)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-option(USE_SDL2 "use SDL2 instead of SDL1" ON)
-
-if(USE_SDL2)
-    message(STATUS "Using SDL2")
-    
-    Find_Package ( SDL2 REQUIRED )
-    set(SDL_FOUND ${SDL2_FOUND})
-    set(SDL_LIBRARY ${SDL2_LIBRARY})
-    set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
-else()
-    message(STATUS "Using SDL1")
-
-    Find_Package ( SDL REQUIRED )
+if(APPLE)
+    set(CMAKE_EXE_LINKER_FLAGS "/usr/local/lib/libtomcrypt.a")
+    set(FREETYPE_INCLUDE_DIRS "/usr/local/Cellar/freetype/2.5.3_1/include/freetype2")
 endif()
 
+Find_Package(SDL2 REQUIRED)
+Find_Package(SDL2_image REQUIRED)
+Find_Package(OpenGL REQUIRED)
+
+Find_Package(PythonLibs 2 REQUIRED)
+find_package(LibRocket REQUIRED)
+
 if(WIN32)
-	set(Boost_USE_STATIC_LIBS   ON)
+    set(Boost_USE_STATIC_LIBS   ON)
 else()
     Find_Package ( ZLIB REQUIRED )
     Find_Package ( BZip2 REQUIRED )
@@ -33,10 +30,10 @@ else()
     endif ()
 endif()
 
-find_package(Boost COMPONENTS chrono date_time filesystem system random thread program_options atomic REQUIRED)
+find_package(Boost COMPONENTS chrono date_time filesystem system random thread program_options atomic python REQUIRED)
 
-if ( NOT SDL_FOUND )
-    message ( FATAL_ERROR "SDL not found!" )
+if ( NOT SDL2_FOUND )
+    message ( FATAL_ERROR "SDL2 not found!" )
 endif ()
 
 if(UNIX)
@@ -46,11 +43,20 @@ else()
 endif()
 
 include_directories (
-    ${SDL_INCLUDE_DIR}
+    ${SDL2_INCLUDE_DIR}
+    ${SDL2IMAGE_INCLUDE_DIR}
+    ${OPENGL_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
+    ${PYTHON_INCLUDE_DIR}
+    ${ROCKET_INCLUDE_DIR}
     "${PROJECT_SOURCE_DIR}/components/"
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
 )
+
+# allow the user to specify extra include dirs on the command line
+if(CLI_INCLUDE_DIRS)
+    include_directories(${CLI_INCLUDE_DIRS})
+endif()
 
 add_subdirectory (extern) 
 
@@ -59,7 +65,11 @@ link_libraries(StormLib)
 add_subdirectory (components) 
 
 link_libraries (
-    ${SDL_LIBRARY}
+    ${SDL2_LIBRARY}
+    ${SDL2IMAGE_LIBRARY}
+    ${OPENGL_LIBRARIES}
+    ${ROCKET_LIBRARIES}
+    ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     Cel
     FAIO

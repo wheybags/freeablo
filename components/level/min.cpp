@@ -19,7 +19,7 @@ namespace Level
         else
             minSize = 10;
 
-        size_t numPillars = FAIO::FAsize(minF)/minSize; 
+        size_t numPillars = FAIO::FAsize(minF)/(minSize*2);
         
         FAIO::FAfseek(minF, 0, SEEK_SET);
         

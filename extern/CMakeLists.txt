@@ -1,4 +1,5 @@
-
+# stormlib
+############################
 if(NOT WIN32)
     add_definitions(-D__SYS_ZLIB -D__SYS_BZLIB -D_7ZIP_ST)
     Find_Package ( ZLIB REQUIRED )
@@ -53,4 +54,3 @@ target_link_libraries(StormLib ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
 if(UNIX)
     set_target_properties(StormLib PROPERTIES COMPILE_FLAGS "-w")
 endif()
-
