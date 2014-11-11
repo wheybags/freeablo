@@ -73,13 +73,14 @@ void mouseMove(size_t x, size_t y)
     yClick = y;
 }
 
-void setLevel(size_t levelNum, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, const Level::Level* level)
+void setLevel(size_t levelNum, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, Level::Level* level)
 {
     world.clear();
-    if(levelNum == 0)
-        world.addNpcs(exe);
     renderer.setLevel(level);
     world.setLevel(*level, exe);
+
+    if(levelNum == 0)
+        world.addNpcs(exe);
 }
 
 Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
@@ -391,9 +392,13 @@ void runGameLoop(const bpo::variables_map& variables)
                 player->setAnimation(FAWorld::AnimState::idle);
             }
 
-            if(!noclip && !(*level)[player->mPos.next().first][player->mPos.next().second].passable())
+            FAWorld::Actor* actorAtNext = world.getActorAt(player->mPos.next().first, player->mPos.next().second);
+            
+            if(!noclip && (!(*level)[player->mPos.next().first][player->mPos.next().second].passable() || 
+               (actorAtNext != NULL && actorAtNext != player)))
             {
                 player->mPos.mMoving = false;
+                destination = player->mPos.current();
                 player->setAnimation(FAWorld::AnimState::idle);
             }
             
