@@ -48,7 +48,7 @@ $ git clone https://github.com/libRocket/libRocket.git
 $ cd libRocket
 $ mkdir buildDir
 $ cd buildDir
-$ cmake ../Build -DBUILD_PYTHON_BINDINGS=On
+$ cmake ../Build -DBUILD_PYTHON_BINDINGS=On -DCMAKE_INSTALL_PREFIX:PATH=/usr
 $ make
 $ sudo make install
 ```
