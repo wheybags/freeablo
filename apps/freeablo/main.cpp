@@ -19,31 +19,40 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 
+#include <misc/fareadini.h>
+#include <boost/property_tree/ptree.hpp>
+
 namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
+namespace bpt = boost::property_tree;
 
 bool done = false;
 bool paused = false;
 bool noclip = false;
 int changeLevel = 0;
+
+int quit_key;
+int noclip_key;
+int changelvldwn_key;
+int changelvlup_key;
+
 void keyPress(Input::Key key)
 {
-    switch(key)
+    if (key == quit_key)
     {
-        case Input::KEY_q:
-            done = true;
-            break;
-        case Input::KEY_n:
-            noclip = !noclip;
-            break;
-        case Input::KEY_p:
-            changeLevel = 1;
-            break;
-        case Input::KEY_o:
-            changeLevel = -1;
-            break;
-        default:
-            break;
+        done = true;
+    }
+    else if (key == noclip_key)
+    {
+        noclip = !noclip;
+    }
+    else if (key == changelvldwn_key)
+    {
+        changeLevel = 1;
+    }
+    else if (key == changelvlup_key)
+    {
+        changeLevel = -1;
     }
 }
 
@@ -316,6 +325,14 @@ void runGameLoop(const bpo::variables_map& variables)
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     std::pair<size_t, size_t> destination = player->mPos.current();
+    
+    bpt::ptree hotkeypt;
+    Misc::readIni("resources/hotkeys.ini", hotkeypt);
+    
+    quit_key = hotkeypt.get<int>("Hotkeys.quit");
+    noclip_key = hotkeypt.get<int>("Hotkeys.noclip");
+    changelvldwn_key = hotkeypt.get<int>("Hotkeys.changelvldwn");
+    changelvlup_key = hotkeypt.get<int>("Hotkeys.changelvlup");
 
     
     // Main game logic loop
