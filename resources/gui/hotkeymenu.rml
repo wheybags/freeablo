@@ -42,48 +42,63 @@ from menu import Menu
 
 context = rocket.contexts['default']
 doc = None
-pauseMenu = None
-paused = False
+hotkeyMenu = None
+hotkeySet = [None, False]
+newHotkey = None
 
 def onLoad(document):
-    document.id = "pausemenu"
     global doc
     doc = document
-    
+
     entries = [ 
-        {"text": 'SAVE GAME (placeholder)'},
-        {"text": 'LOAD GAME (placeholder)'},
-        {"text": 'NEW GAME (placeholder)'},
-        {"text": 'OPTIONS (placeholder)'},
-        {"text": 'HOTKEYS', "strFunc": "showHotkeys", "func": showHotkeys},
-        {"text": 'QUIT', "strFunc": 'freeablo.quit', "func": freeablo.quit}
+        {"text": 'Quit = Q', "strFunc": "setHotkey", "func": setHotkey},
+        {"text": 'Noclip = (placeholder)'},
+        {"text": 'Change Level Up = (placeholder)'},
+        {"text": 'Change Level Down (placeholder)'},
+        {"text": 'Previous', "strFunc": "showPause", "func": showPause}
     ]
 
     fmtSelected = '<img class="pentagon" src="/data/PentSpin.cel"/> %s <img class="pentagon" src="/data/PentSpin.cel"/>'
     fmtNotSelected = '<img style="visibility: hidden;" class="pentagon" src="/data/PentSpin.cel"/> %s <img style="visibility: hidden;" class="pentagon" src="/data/PentSpin.cel"/>'
     
-    global pauseMenu
-    pauseMenu = Menu(document, 'pauseMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
+    global hotkeyMenu
+    hotkeyMenu = Menu(document, 'hotkeyMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
  
  
-def onKeyDown(event, document):    
-    if not pauseMenu.onKeyDown(event):
-        document.baseKeyDown(event, document)
+def onKeyDown(event, document):
+    global newHotkey
 
-def showHotkeys():
-    doc.Hide()
-    hotkeys = context.LoadDocument('resources/gui/hotkeymenu.rml')
-    hotkeys.Show()
-    print("is_shown", hotkeys.is_shown)
+    hotkeyMenu.onKeyDown(event)
+    if hotkeySet[1]:
+        newHotkey = event.parameters['key_identifier']
+        print(hotkeySet, newHotkey)
+        
+        
+
+def showPause():
+    global doc
+    global context
+
+    doc.Close()
+    pausemenu = context.documents["pausemenu"]
+    pausemenu.Show()
+
+def setHotkey():
+    global hotkeySet
+    
+    hotkeySet[0] = "quit"
+    hotkeySet[1] = True
 
         </script>
     </head>
 
     <body onkeydown="onKeyDown(event, document)" onload="onLoad(document)">
-        <div id="menuContainer">
-            <span id="smlogo"></span> <br/>
-            
-            <div id="innerMenuContainer"></div> 
+        <div id="topContainer">
+            <div id="menuContainer">
+                <span id="smlogo"></span> <br/>
+                
+                <div id="innerMenuContainer"></div> 
+            </div>
         </div>
     </body>
 </rml>
