@@ -38,7 +38,7 @@ namespace FAGui
         paused = false;
         showIngameGui();
     }
-
+    
     BOOST_PYTHON_MODULE(freeablo)
     {
         boost::python::def("quit", &quitGame);
@@ -49,12 +49,14 @@ namespace FAGui
     
     Rocket::Core::ElementDocument* ingameUi = NULL;
     Rocket::Core::ElementDocument* mainMenu = NULL;
+    Rocket::Core::ElementDocument* pausemenu = NULL;
     void initGui()
     {
         initfreeablo();
         FARender::Renderer* renderer = FARender::Renderer::get();
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/bottommenu.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
+        pausemenu = renderer->getRocketContext()->LoadDocument("resources/gui/pausemenu.rml");
     }
 
     void showIngameGui()
@@ -67,6 +69,11 @@ namespace FAGui
     {
         ingameUi->Hide();
         mainMenu->Show();
+    }
+    
+    void showPauseMenu()
+    {
+        pausemenu->Show();
     }
     
     void updateGui()

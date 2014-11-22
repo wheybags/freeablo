@@ -10,6 +10,7 @@ namespace FAGui
     void showMainMenu();
     void updateGui();
     void destroyGui();
+    void showPauseMenu();
 }
 
 #endif

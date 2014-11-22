@@ -77,13 +77,15 @@ def toggleDoc(doc):
 
 
 def onKeyDown(event, document):
-    if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
-        if paused:
-            unpause()
-        else:
-            pause()
+    pass
+    #if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
+        #if paused:
+            #unpause()
+        #else:
+            #pause()
 
 def onLoad(document):
+    document.id = "bottommenu"
     global doc
     global paused
 

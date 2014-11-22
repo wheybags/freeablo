@@ -16,6 +16,9 @@
 
         <script>
 
+def onLoad(document):
+    document.id = "characterscreen"
+
 def onKeyDown(event, document):
     document.baseKeyDown(event, document)
        
