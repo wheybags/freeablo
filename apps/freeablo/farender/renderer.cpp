@@ -5,8 +5,8 @@
 #include <boost/thread.hpp>
 
 #include <level/level.h>
-
 #include <input/inputmanager.h>
+#include <audio/audio.h>
 
 namespace FARender
 {
@@ -87,6 +87,7 @@ namespace FARender
 
             Render::init(settings);
             mRocketContext = Render::initGui(boost::bind(&Renderer::loadGuiTextureFunc, this, _1, _2, _3), boost::bind(&Renderer::generateGuiTextureFunc, this, _1, _2, _3), boost::bind(&Renderer::releaseGuiTextureFunc, this, _1));
+            Audio::init();
 
             mRenderer = this;
         }
@@ -152,6 +153,13 @@ namespace FARender
         return tmp;
     }
 
+    void Renderer::playMusic(const std::string& path)
+    {
+        mThreadCommunicationTmp = (void*)&path;
+        mRenderThreadState = musicPlay;
+        while(mRenderThreadState != running) {}
+    }
+
     FASpriteGroup Renderer::loadImageImp(const std::string& path)
     {
         bool contains = mSpriteCache.find(path) != mSpriteCache.end();
@@ -189,9 +197,10 @@ namespace FARender
     void Renderer::renderLoop()
     {
         Render::LevelObjects objects;
+        Audio::Music* music = NULL;
 
         while(!Input::InputManager::get()) {}
-
+        
         while(!mDone)
         {
             Input::InputManager::get()->poll();
@@ -246,6 +255,16 @@ namespace FARender
             {
                 Render::SpriteGroup* s = (Render::SpriteGroup*)mThreadCommunicationTmp;
                 s->destroy();
+                mRenderThreadState = running;
+            }
+
+            else if(mRenderThreadState == musicPlay)
+            {
+                if(music != NULL)
+                    Audio::freeMusic(music);
+                
+                music = Audio::loadMusic(*((std::string*)mThreadCommunicationTmp));
+                Audio::playMusic(music);
                 mRenderThreadState = running;
             }
 

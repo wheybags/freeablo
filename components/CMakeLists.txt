@@ -70,3 +70,10 @@ add_library(DiabloExe
     diabloexe/npc.cpp)
 target_link_libraries(DiabloExe ${Boost_Libraries} Misc)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_library(Audio
+    audio/audio.h
+    audio/sdl2backend.cpp
+)
+target_link_libraries(Audio ${SDL2MIXER_LIBRARY})
+set_target_properties(Audio PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
