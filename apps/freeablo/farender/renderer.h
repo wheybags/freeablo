@@ -49,7 +49,8 @@ namespace FARender
         loadSprite,
         pause,
         spriteDestroy,
-        stopped
+        stopped,
+        musicPlay
     };
 
 
@@ -77,6 +78,8 @@ namespace FARender
             bool loadGuiTextureFunc(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&);
             bool generateGuiTextureFunc(Rocket::Core::TextureHandle&, const Rocket::Core::byte* source, const Rocket::Core::Vector2i&);
             void releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle);
+            
+            void playMusic(const std::string& path);
             
         private:
 

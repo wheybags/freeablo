@@ -11,6 +11,7 @@ endif()
 
 Find_Package(SDL2 REQUIRED)
 Find_Package(SDL2_image REQUIRED)
+Find_Package(SDL2_mixer REQUIRED)
 Find_Package(OpenGL REQUIRED)
 
 Find_Package(PythonLibs 2 REQUIRED)
@@ -45,6 +46,7 @@ endif()
 include_directories (
     ${SDL2_INCLUDE_DIR}
     ${SDL2IMAGE_INCLUDE_DIR}
+    ${SDL2MIXER_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIR}
@@ -67,6 +69,7 @@ add_subdirectory (components)
 link_libraries (
     ${SDL2_LIBRARY}
     ${SDL2IMAGE_LIBRARY}
+    ${SDL2MIXER_LIBRARY}
     ${OPENGL_LIBRARIES}
     ${ROCKET_LIBRARIES}
     ${PYTHON_LIBRARIES}
@@ -79,6 +82,7 @@ link_libraries (
     Input
     DiabloExe
     StormLib
+    Audio
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

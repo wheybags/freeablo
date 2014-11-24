@@ -37,7 +37,7 @@ namespace Render
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
 
-        SDL_Init( SDL_INIT_VIDEO );
+        SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
         screen = SDL_CreateWindow("LibRocket SDL2 test", 20, 20, WIDTH, HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         if(screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
