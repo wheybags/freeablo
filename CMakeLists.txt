@@ -17,9 +17,11 @@ Find_Package(OpenGL REQUIRED)
 Find_Package(PythonLibs 2 REQUIRED)
 find_package(LibRocket REQUIRED)
 
-if(WIN32)
-    set(Boost_USE_STATIC_LIBS   ON)
-else()
+if(Boost_USE_STATIC_LIBS)
+    add_definitions(-DBOOST_PYTHON_STATIC_LIB)
+endif()
+
+if(NOT WIN32)
     Find_Package ( ZLIB REQUIRED )
     Find_Package ( BZip2 REQUIRED )
     
