@@ -11,7 +11,7 @@ namespace DiabloExe
 namespace FALevelGen
 {
   
-    Level::Level* generate(size_t width, size_t height, size_t levelNum, const DiabloExe::DiabloExe& exe, const std::string& celPath);
+    Level::Level* generate(size_t width, size_t height, size_t dLvl, const DiabloExe::DiabloExe& exe);
 
 }
 

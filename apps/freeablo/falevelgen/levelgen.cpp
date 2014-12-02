@@ -569,21 +569,44 @@ namespace FALevelGen
         }
     }
 
-    bool placeUpStairs(Level::Dun& level, const std::vector<Room>& rooms)
+    bool placeUpStairs(Level::Dun& level, const std::vector<Room>& rooms, size_t levelNum)
     {
-        for(size_t i = 0; i < rooms.size(); i++)
+        if(levelNum == 1)
         {
-            size_t baseX = rooms[i].xPos + (rooms[i].width/2);
-            size_t baseY = rooms[i].yPos;
-            
-            if(level[baseX-1][baseY-1] == blank && level[baseX][baseY-1] == blank && level[baseX+1][baseY-1] == blank &&
-               level[baseX-1][baseY] == wall && level[baseX][baseY] == wall && level[baseX+1][baseY] == wall &&
-               level[baseX-1][baseY+1] == floor && level[baseX][baseY+1] == floor && level[baseX+1][baseY+1] == floor)
+            for(size_t i = 0; i < rooms.size(); i++)
             {
-                level[baseX][baseY] = upStairs;
-                return true;
+                size_t baseX = rooms[i].xPos + (rooms[i].width/2);
+                size_t baseY = rooms[i].yPos;
+                
+                // on a wall       
+                if(level[baseX-1][baseY-1] == blank && level[baseX][baseY-1] == blank && level[baseX+1][baseY-1] == blank &&
+                   level[baseX-1][baseY] == wall && level[baseX][baseY] == wall && level[baseX+1][baseY] == wall &&
+                   level[baseX-1][baseY+1] == floor && level[baseX][baseY+1] == floor && level[baseX+1][baseY+1] == floor)
+                {
+                    level[baseX][baseY] = upStairs;
+                    return true;
+                }
             }
         }
+        else
+        {
+            for(size_t i = 0; i < rooms.size(); i++)
+            {
+                if(rooms[i].width >= 6 && rooms[i].height >= 6)
+                {
+                    size_t baseX = rooms[i].centre().first;
+                    size_t baseY = rooms[i].centre().second;
+
+                    if(level[baseX][baseY] != floor)
+                        continue;
+
+                    level[baseX][baseY] = upStairs;
+                    
+                    return true;
+                }
+            }
+        }
+            
 
         return false;
     }
@@ -596,6 +619,9 @@ namespace FALevelGen
             {
                 size_t baseX = rooms[i].centre().first;
                 size_t baseY = rooms[i].centre().second;
+
+                if(level[baseX][baseY] != floor)
+                        continue;
 
                 level[baseX][baseY] = downStairs;
                 
@@ -621,7 +647,7 @@ namespace FALevelGen
     //        extra edges to allow for some loops.
     //     5. Connect the rooms according to the graph from the last step with l shaped corridoors, and 
     //        also draw any corridoor rooms that the corridoors overlap as part of the corridoor.
-    Level::Dun generateTmp(size_t width, size_t height)
+    Level::Dun generateTmp(size_t width, size_t height, size_t levelNum)
     {
         Level::Dun level(width, height);
         
@@ -698,8 +724,8 @@ namespace FALevelGen
         addDoors(level, rooms);
         
         // Make sure we always place stairs
-        if(!(placeUpStairs(level, rooms) && placeDownStairs(level, rooms)))
-            return generateTmp(width, height);
+        if(!(placeUpStairs(level, rooms, levelNum) && placeDownStairs(level, rooms)))
+            return generateTmp(width, height, levelNum);
 
         return level;
     }
@@ -770,20 +796,14 @@ namespace FALevelGen
                 newVal = tileset.outsideLeftCorner;
         }
 
-        else if(val == tileset.floor)
-        {
-            if(getXY(x, y, tmpLevel) == downStairs)
-                newVal = downStairs;
-        }
-
         level[x][y] = newVal;
     }
     
-    void placeMonsters(Level::Level& level, const DiabloExe::DiabloExe& exe, size_t levelNum)
+    void placeMonsters(Level::Level& level, const DiabloExe::DiabloExe& exe, size_t dLvl)
     {
         std::vector<Level::Monster>& monsters = level.getMonsters();
         
-        std::vector<const DiabloExe::Monster*> possibleMonsters = exe.getMonstersInLevel(levelNum);
+        std::vector<const DiabloExe::Monster*> possibleMonsters = exe.getMonstersInLevel(dLvl);
         
         for(size_t i = 0; i < (level.height() + level.width())/2; i++)
         {
@@ -801,21 +821,28 @@ namespace FALevelGen
         }
     }
  
-    Level::Level* generate(size_t width, size_t height, size_t levelNum, const DiabloExe::DiabloExe& exe, const std::string& celPath)
+    Level::Level* generate(size_t width, size_t height, size_t dLvl, const DiabloExe::DiabloExe& exe)
     {
-        Level::Dun tmpLevel = generateTmp(width, height);
+        size_t levelNum = ((dLvl-1) / 4) + 1;
+
+        Level::Dun tmpLevel = generateTmp(width, height, levelNum);
 
         Level::Dun level(width, height);
 
         std::stringstream ss; ss << "resources/tilesets/l" << levelNum << ".ini";
-
         TileSet tileset(ss.str());
-        
+         
         // Fill in isometric information (wall direction, etc), using flat tmpLevel as a base
         for(int32_t x = 0; x < (int32_t)width; x++)
         {
             for(int32_t y = 0; y < (int32_t)height; y++)
             {
+                if(tmpLevel[x][y] == upStairs || tmpLevel[x][y] == downStairs)
+                {
+                    level[x][y] = tmpLevel[x][y];
+                    continue;
+                }
+
                 if(isWall(x, y, tmpLevel))
                 {
                     if(isWall(x+1, y, tmpLevel))
@@ -852,7 +879,7 @@ namespace FALevelGen
                     if(tmpLevel[x][y] == blank)
                         level[x][y] = tileset.blank;
                     else
-                        setPoint(x, y, tileset.floor, tmpLevel, level, tileset);
+                        level[x][y] = tileset.floor;
                 }
             }
         }
@@ -883,11 +910,17 @@ namespace FALevelGen
                 }
                 else if(level[x][y] == downStairs)
                 {
-                    level[x][y] = tileset.downStairs1;
-                    level[x+1][y] = tileset.downStairs2;
-                    
-                    level[x][y-1] = tileset.downStairs3;
-                    level[x+1][y-1] = tileset.downStairs4;
+                    level[x-1][y-1] = tileset.downStairs1;
+                    level[x][y-1] = tileset.downStairs2;
+                    level[x+1][y-1] = tileset.downStairs3;
+
+                    level[x-1][y] = tileset.downStairs4;
+                    level[x][y] = tileset.downStairs5;
+                    level[x+1][y] = tileset.downStairs6;
+
+                    level[x-1][y+1] = tileset.downStairs7;
+                    level[x][y+1] = tileset.downStairs8;
+                    level[x+1][y+1] = tileset.downStairs9;
 
                     downStairsPoint = std::make_pair(x*2,y*2);
                 }
@@ -898,8 +931,20 @@ namespace FALevelGen
             }
         }
         
-        Level::Level* retval = new Level::Level(level, "levels/l1data/l1.til", "levels/l1data/l1.min", "levels/l1data/l1.sol", celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap());
-        placeMonsters(*retval, exe, levelNum); 
+        ss.str(""); ss << "levels/l" << levelNum << "data/l" << levelNum << ".cel";
+        std::string celPath = ss.str();
+
+        ss.str(""); ss << "levels/l" << levelNum << "data/l" << levelNum << ".til";
+        std::string tilPath = ss.str();
+
+        ss.str(""); ss << "levels/l" << levelNum << "data/l" << levelNum << ".min";
+        std::string minPath = ss.str();
+
+        ss.str(""); ss << "levels/l" << levelNum << "data/l" << levelNum << ".sol";
+        std::string solPath = ss.str();
+                
+        Level::Level* retval = new Level::Level(level, tilPath, minPath, solPath, celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap());
+        placeMonsters(*retval, exe, dLvl); 
         
         return retval;
     }
