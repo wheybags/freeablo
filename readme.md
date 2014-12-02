@@ -32,14 +32,18 @@ If you are using windows, please see https://github.com/wheybags/freeablo-window
 
 =======
 ## OSX
+First install Xcode, and brew, of course.
 ```
-brew install boost lbzip2 zlib sdl2 freetype libtomcrypt
+$ brew install boost boost-python lbzip2 zlib sdl2 sdl2_image freetype libtomcrypt --universal cmake
+$ brew tap wheybags/homebrew-librocket
+$ brew install --HEAD librocket
+# here it will possibly print a message about python module path settings, follow its instructions
 ```
-and continue on with the Linux/Unix section
+and continue on with the Linux/Unix section (ignore the librocket instructions).
 
 ##Linux/Unix
 freeablo uses cmake, and depends on boost >= 1.54, libbz2, zlib, and SDL2, sdl2_image, and libRocket, so make sure to have those installed.
-libRocket (http://github.com/libRocket/libRocket) isn't packaged in most distros, so you'll have to install it from source (this isn't very hard)
+libRocket (http://github.com/libRocket/libRocket) isn't packaged in most distros, so you'll have to install it from source (this isn't very hard).
 
 libRocket installation:
 
@@ -70,6 +74,7 @@ or download from [https://github.com/wheybags/freeablo/releases](https://github.
 make a build directory:
 
 ```
+$ cd ..
 $ mkdir build
 $ cd build
 ```
@@ -95,6 +100,22 @@ Please feel free to submit bug reports on the github issue tracker at https://gi
 
 
 #Changelog
+##v0.2
+- Bugfix - MPQ filename case sensitivity #78, #76
+- Bugfix - Deadlock on caertain command line args
+- Bugfix - Player-npc clipping #97
+- Bugfix - Reading freed memory in FAIO 6f098b1
+- Config File parsing #81
+- LibRocket Gui framework #82, #86
+- Improved CEL rendering #85, #91
+- Inventory and char menu placeholders #86
+- Pause menu #90
+- Main menu #94
+- Keybinding configuration framework #98
+- Music #99
+- SDL1 support removed d4da725
+- Dungeon level 2 generation #93
+
 ##v0.1
 - CEL / CL2 decoding
 - Level rendering
