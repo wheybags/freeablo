@@ -50,7 +50,14 @@ namespace FALevelGen
             size_t downStairs1;
             size_t downStairs2;
             size_t downStairs3;
+
             size_t downStairs4;
+            size_t downStairs5;
+            size_t downStairs6;
+
+            size_t downStairs7;
+            size_t downStairs8;
+            size_t downStairs9;
 
             size_t getRandomTile(size_t tile);
             std::map<size_t, size_t> getDoorMap();

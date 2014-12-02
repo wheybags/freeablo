@@ -86,7 +86,14 @@ namespace FALevelGen
         downStairs1 = pt.get<size_t>("Basic.downStairs1");
         downStairs2 = pt.get<size_t>("Basic.downStairs2");
         downStairs3 = pt.get<size_t>("Basic.downStairs3");
+
         downStairs4 = pt.get<size_t>("Basic.downStairs4");
+        downStairs5 = pt.get<size_t>("Basic.downStairs5");
+        downStairs6 = pt.get<size_t>("Basic.downStairs6");
+
+        downStairs7 = pt.get<size_t>("Basic.downStairs7");
+        downStairs8 = pt.get<size_t>("Basic.downStairs8");
+        downStairs9 = pt.get<size_t>("Basic.downStairs9");
 
         loadDoorMap(pt);
     }
