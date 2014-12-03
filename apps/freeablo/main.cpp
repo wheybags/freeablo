@@ -35,6 +35,7 @@ int quit_key;
 int noclip_key;
 int changelvldwn_key;
 int changelvlup_key;
+int pausemenu_key;
 
 void keyPress(Input::Key key)
 {
@@ -53,6 +54,10 @@ void keyPress(Input::Key key)
     else if (key == changelvlup_key)
     {
         changeLevel = -1;
+    }
+    else if (key == pausemenu_key)
+    {
+        FAGui::showPauseMenu();
     }
 }
 
@@ -357,7 +362,7 @@ void runGameLoop(const bpo::variables_map& variables)
     noclip_key = hotkeypt.get<int>("Hotkeys.noclip");
     changelvldwn_key = hotkeypt.get<int>("Hotkeys.changelvldwn");
     changelvlup_key = hotkeypt.get<int>("Hotkeys.changelvlup");
-
+    pausemenu_key = hotkeypt.get<int>("Hotkeys.pausemenu");
     
     // Main game logic loop
     while(!done)

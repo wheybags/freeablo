@@ -40,14 +40,21 @@ import rocket
 import freeablo
 from menu import Menu
 
+context = rocket.contexts['default']
+doc = None
 pauseMenu = None
+paused = False
 
 def onLoad(document):
+    document.id = "pausemenu"
+    global doc
+    doc = document
+    
     entries = [ 
         {"text": 'SAVE GAME (placeholder)'},
-        {"text": 'OPTIONS (placeholder)'},
-        {"text": 'NEW GAME (placeholder)'},
         {"text": 'LOAD GAME (placeholder)'},
+        {"text": 'NEW GAME (placeholder)'},
+        {"text": 'OPTIONS (placeholder)'},
         {"text": 'QUIT', "strFunc": 'freeablo.quit', "func": freeablo.quit}
     ]
 
@@ -58,9 +65,18 @@ def onLoad(document):
     pauseMenu = Menu(document, 'pauseMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
  
  
-def onKeyDown(event, document):    
-    if not pauseMenu.onKeyDown(event):
-        document.baseKeyDown(event, document)
+def onKeyDown(event, document):
+    if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
+        global paused
+        if paused:
+            paused = False
+            freeablo.unpause()
+            document.Hide()
+            context.documents["bottommenu"].Show()
+        else:
+            paused = True
+            freeablo.pause()
+            context.documents["bottommenu"].Hide()
 
         </script>
     </head>
