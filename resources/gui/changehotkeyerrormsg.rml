@@ -1,0 +1,60 @@
+<rml>
+    <head>
+        <style>
+            body
+            {
+                font-family: FreeMono;
+                font-size: 24;
+                text-align: center;
+                background-color: rgba(255 ,0,0,255);
+                height: 100%;
+                width: 100%;
+                #height: 25%;
+                #width: 25%;
+                #left: 37%;
+                #top: 37%;
+            }
+
+            div#topContainer
+            {
+                position:absolute;
+                top: 50%;
+            }
+
+            div#menuContainer
+            {
+                position: absolute;
+                top: -50px;
+            }
+
+        </style>
+
+        <script>
+
+import time
+
+def onLoad(document):
+    document.id = "changehotkeyerrormsg"
+    container = document.GetElementById('innerMenuContainer')
+    container.inner_rml = '<span id="menuEntry0"></span><br/>'
+    elem = container
+    elem.inner_rml = "Error: Key Sequence Already Assigned"
+
+def onKeyUp(event, document):
+    time.sleep(2)
+    document.Close()
+
+        </script>
+    </head>
+
+    <body onload="onLoad(document)"
+          onkeyup="onKeyUp(event, document)">
+        <div id="topContainer">
+            <div id="menuContainer">
+                <span id="smlogo"></span> <br/>
+                
+                <div id="innerMenuContainer"></div> 
+            </div>
+        </div>
+    </body>
+</rml>

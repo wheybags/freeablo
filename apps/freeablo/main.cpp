@@ -31,29 +31,96 @@ bool paused = false;
 bool noclip = false;
 int changeLevel = 0;
 
-int quit_key;
-int noclip_key;
-int changelvldwn_key;
-int changelvlup_key;
+int hotkey [5];
+
+int quit_key [5];
+int noclip_key [5];
+int changelvldwn_key [5];
+int changelvlup_key [5];
+
+bpt::ptree hotkeypt;
 
 void keyPress(Input::Key key)
 {
-    if (key == quit_key)
+    switch(key)
+    {
+        case Input::KEY_RSHIFT: hotkey[1] = 1; return;
+        case Input::KEY_LSHIFT: hotkey[1] = 1; return;
+        case Input::KEY_RCTRL: hotkey[2] = 1; return;
+        case Input::KEY_LCTRL: hotkey[2] = 1; return;
+        case Input::KEY_RALT: hotkey[3] = 1; return;
+        case Input::KEY_LALT: hotkey[3] = 1; return;
+        case Input::KEY_RSUPER: hotkey[4] = 1; return;
+        case Input::KEY_LSUPER: hotkey[4] = 1; return;
+        default:
+            {
+                hotkey[0] = key;
+                break;
+            }
+    }
+    
+    int check = 0;
+    
+    while(check<5)
+    {
+        //std::cout << "key " << hotkey[check] << " " << changelvldwn_key[check] << std::endl;
+        check++;
+    }
+    check = 0;
+    
+    while(check<5 && hotkey[check]==quit_key[check])
+    {
+        //std::cout << "key " << quit_key[check] << std::endl;
+        check++;
+    }
+    if (check == 5)
     {
         done = true;
+        return;
     }
-    else if (key == noclip_key)
+    check = 0;
+    
+    while(check<5 && hotkey[check]==noclip_key[check])
+    {
+        check++;
+    }
+    if (check == 5)
     {
         noclip = !noclip;
+        return;
     }
-    else if (key == changelvldwn_key)
+    check = 0;
+
+    while(check<5 && hotkey[check]==changelvlup_key[check])
     {
-        changeLevel = 1;
+        check++;
     }
-    else if (key == changelvlup_key)
+    if (check == 5)
     {
         changeLevel = -1;
+        return;
     }
+    check = 0;
+    
+    while(check<5 && hotkey[check]==changelvldwn_key[check])
+    {
+        check++;
+    }
+    if (check == 5)
+    {
+        changeLevel = 1;
+        return;
+    }
+    check = 0;
+}
+
+void keyRelease(Input::Key key)
+{
+    hotkey[0] = 0;
+    hotkey[1] = 0;
+    hotkey[2] = 0;
+    hotkey[3] = 0;
+    hotkey[4] = 0;
 }
 
 size_t xClick = 0, yClick = 0;
@@ -82,38 +149,49 @@ void mouseMove(size_t x, size_t y)
     yClick = y;
 }
 
-void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, Level::Level* level)
+void setLevel(size_t levelNum, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, Level::Level* level)
 {
     world.clear();
     renderer.setLevel(level);
     world.setLevel(*level, exe);
 
-    if(dLvl == 0)
+    if(levelNum == 0)
         world.addNpcs(exe);
 }
 
-Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
+Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
 {  
-    if(dLvl == 0)
+    switch(levelNum)
     {
-        Level::Dun sector1("levels/towndata/sector1s.dun");
-        Level::Dun sector2("levels/towndata/sector2s.dun");
-        Level::Dun sector3("levels/towndata/sector3s.dun");
-        Level::Dun sector4("levels/towndata/sector4s.dun");
+        case 0:
+        {
+            Level::Dun sector1("levels/towndata/sector1s.dun");
+            Level::Dun sector2("levels/towndata/sector2s.dun");
+            Level::Dun sector3("levels/towndata/sector3s.dun");
+            Level::Dun sector4("levels/towndata/sector4s.dun");
 
-        return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", 
-            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
+            return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", 
+                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
+
+            break;
+        }
+
+        case 1:
+        {
+            return FALevelGen::generate(100, 100, levelNum, exe, "levels/l1data/l1.cel");
+            break;
+        }
+
+        case 2:
+        case 3:
+        case 4:
+        {
+            std::cerr << "level not supported yet" << std::endl;
+            break;
+        }
     }
-    else if(dLvl < 9)
-    {
-        return FALevelGen::generate(100, 100, dLvl, exe);
-    }
-    else
-    {
-        std::cerr << "level not supported yet" << std::endl;
-        exit(1);
-        return NULL;
-    }
+
+    return NULL;
 }
 
 /**
@@ -127,7 +205,7 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
     desc.add_options()
         ("help,h", "Print help")
         // -1 represents the main menu
-        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)");
+        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-4)");
 
     try 
     { 
@@ -141,8 +219,8 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
         
         bpo::notify(variables);
 
-        const int32_t dLvl = variables["level"].as<int32_t>();
-        if(dLvl > 16)
+        const int32_t levelNum = variables["level"].as<int32_t>();
+        if(levelNum > 4)
             throw bpo::validation_error(
                 bpo::validation_error::invalid_option_value, "level");
     }
@@ -232,38 +310,6 @@ bool loadSettings(StartupSettings& settings)
     return true;
 }
 
-void playLevelMusic(int32_t currentLevel, FARender::Renderer& renderer)
-{
-    switch(currentLevel)
-    {
-        case 0:
-        {
-            renderer.playMusic("music/dtowne.wav");
-            break;
-        }
-        case 1: case 2: case 3: case 4:
-        {
-            renderer.playMusic("music/dlvla.wav");
-            break;
-        }
-        case 5: case 6: case 7: case 8:
-        {
-            renderer.playMusic("music/dlvlb.wav");
-            break;
-        }
-        case 9: case 10: case 11: case 12:
-        {
-            renderer.playMusic("music/dlvlc.wav");
-            break;
-        }
-        case 13: case 14: case 15: case 16:
-        {
-            renderer.playMusic("music/dlvld.wav");
-            break;
-        }
-    }
-}
-
 void run(const bpo::variables_map& variables);
 void runGameLoop(const bpo::variables_map& variables);
 
@@ -303,14 +349,14 @@ void runGameLoop(const bpo::variables_map& variables)
     while(!FARender::Renderer::get()) {}
 
     FARender::Renderer& renderer = *FARender::Renderer::get();
-    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
+    Input::InputManager input(&keyPress, &keyRelease, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
 
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
 
     FALevelGen::FAsrand(time(NULL));
 
-    std::vector<Level::Level*> levels(9);
+    std::vector<Level::Level*> levels(5);
 
     int32_t currentLevel = variables["level"].as<int32_t>();
 
@@ -335,29 +381,43 @@ void runGameLoop(const bpo::variables_map& variables)
         player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 
         FAGui::showIngameGui();
-
-        playLevelMusic(currentLevel, renderer);
     }
     else
     {
         renderer.setLevel(NULL);
         paused = true;
         FAGui::showMainMenu();
-        renderer.playMusic("music/dintro.wav");
     }
     
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     std::pair<size_t, size_t> destination = player->mPos.current();
     
-    bpt::ptree hotkeypt;
     Misc::readIni("resources/hotkeys.ini", hotkeypt);
     
-    quit_key = hotkeypt.get<int>("Hotkeys.quit");
-    noclip_key = hotkeypt.get<int>("Hotkeys.noclip");
-    changelvldwn_key = hotkeypt.get<int>("Hotkeys.changelvldwn");
-    changelvlup_key = hotkeypt.get<int>("Hotkeys.changelvlup");
-
+    quit_key[0] = hotkeypt.get<int>("Quit.key");
+    quit_key[1] = hotkeypt.get<int>("Quit.shift");
+    quit_key[2] = hotkeypt.get<int>("Quit.ctrl");
+    quit_key[3] = hotkeypt.get<int>("Quit.alt");
+    quit_key[4] = hotkeypt.get<int>("Quit.super");
+    
+    noclip_key[0] = hotkeypt.get<int>("Noclip.key");
+    noclip_key[1] = hotkeypt.get<int>("Noclip.shift");
+    noclip_key[2] = hotkeypt.get<int>("Noclip.ctrl");
+    noclip_key[3] = hotkeypt.get<int>("Noclip.alt");
+    noclip_key[4] = hotkeypt.get<int>("Noclip.super");
+    
+    changelvlup_key[0] = hotkeypt.get<int>("Changelvlup.key");
+    changelvlup_key[1] = hotkeypt.get<int>("Changelvlup.shift");
+    changelvlup_key[2] = hotkeypt.get<int>("Changelvlup.ctrl");
+    changelvlup_key[3] = hotkeypt.get<int>("Changelvlup.alt");
+    changelvlup_key[4] = hotkeypt.get<int>("Changelvlup.super");
+    
+    changelvldwn_key[0] = hotkeypt.get<int>("Changelvldwn.key");
+    changelvldwn_key[1] = hotkeypt.get<int>("Changelvldwn.shift");
+    changelvldwn_key[2] = hotkeypt.get<int>("Changelvldwn.ctrl");
+    changelvldwn_key[3] = hotkeypt.get<int>("Changelvldwn.alt");
+    changelvldwn_key[4] = hotkeypt.get<int>("Changelvldwn.super");
     
     // Main game logic loop
     while(!done)
@@ -394,7 +454,7 @@ void runGameLoop(const bpo::variables_map& variables)
                     currentLevel = tmp;
 
                     if(levels[currentLevel] == NULL)
-                        levels[currentLevel] = getLevel(currentLevel, exe);
+                        levels[currentLevel] = getLevel(currentLevel == 0 ? 0 : 1, exe);
 
                     level = levels[currentLevel];
                     
@@ -407,7 +467,6 @@ void runGameLoop(const bpo::variables_map& variables)
                     
                     setLevel(currentLevel, exe, world, renderer, level);
 
-                    playLevelMusic(currentLevel, renderer);
                 }
                 
                 changeLevel = 0;

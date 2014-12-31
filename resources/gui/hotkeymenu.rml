@@ -43,18 +43,21 @@ from menu import Menu
 context = rocket.contexts['default']
 doc = None
 hotkeyMenu = None
-hotkeySet = [None, False]
-newHotkey = None
+#hotkeySet = [None, False]
+#newHotkey = None
 
 def onLoad(document):
+    document.id = "hotkeymenu"
     global doc
     doc = document
 
+    hotkeynames = freeablo.getHotkeyNames()
+
     entries = [ 
-        {"text": 'Quit = Q', "strFunc": "setHotkey", "func": setHotkey},
-        {"text": 'Noclip = (placeholder)'},
-        {"text": 'Change Level Up = (placeholder)'},
-        {"text": 'Change Level Down (placeholder)'},
+        {"text": 'Quit = {0}'.format(hotkeynames[0]), "strFunc": "changeHotkey", "func": changeHotkey, "args": "'quit'"},
+        {"text": 'Noclip = {0}'.format(hotkeynames[1]), "strFunc": "changeHotkey", "func": changeHotkey, "args": "'noclip'"},
+        {"text": 'Change Level Up = {0}'.format(hotkeynames[2]), "strFunc": "changeHotkey", "func": changeHotkey, "args": "'changelvlup'"},
+        {"text": 'Change Level Down = {0}'.format(hotkeynames[3]), "strFunc": "changeHotkey", "func": changeHotkey, "args": "'changelvldwn'"},
         {"text": 'Previous', "strFunc": "showPause", "func": showPause}
     ]
 
@@ -65,15 +68,20 @@ def onLoad(document):
     hotkeyMenu = Menu(document, 'hotkeyMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
  
  
-def onKeyDown(event, document):
-    global newHotkey
+#def onKeyDown(event, document):
+    #global newHotkey
 
-    hotkeyMenu.onKeyDown(event)
-    if hotkeySet[1]:
-        newHotkey = event.parameters['key_identifier']
-        print(hotkeySet, newHotkey)
+    #hotkeyMenu.onKeyDown(event)
+    #if hotkeySet[1]:
+        #newHotkey = event.parameters['key_identifier']
+        #print(hotkeySet, newHotkey)
         
-        
+def changeHotkey(func):
+    global doc
+    doc.Close()
+    changeHotkey = context.LoadDocument('resources/gui/changehotkey.rml')
+    changeHotkey.func = func
+    changeHotkey.Show()       
 
 def showPause():
     global doc
@@ -83,11 +91,11 @@ def showPause():
     pausemenu = context.documents["pausemenu"]
     pausemenu.Show()
 
-def setHotkey():
-    global hotkeySet
+#def setHotkey():
+    #global hotkeySet
     
-    hotkeySet[0] = "quit"
-    hotkeySet[1] = True
+    #hotkeySet[0] = "quit"
+    #hotkeySet[1] = True
 
         </script>
     </head>

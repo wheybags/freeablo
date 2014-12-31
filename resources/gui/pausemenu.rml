@@ -52,9 +52,9 @@ def onLoad(document):
     
     entries = [ 
         {"text": 'SAVE GAME (placeholder)'},
-        {"text": 'LOAD GAME (placeholder)'},
-        {"text": 'NEW GAME (placeholder)'},
         {"text": 'OPTIONS (placeholder)'},
+        {"text": 'NEW GAME (placeholder)'},
+        {"text": 'LOAD GAME (placeholder)'},
         {"text": 'HOTKEYS', "strFunc": "showHotkeys", "func": showHotkeys},
         {"text": 'QUIT', "strFunc": 'freeablo.quit', "func": freeablo.quit}
     ]
@@ -74,7 +74,6 @@ def showHotkeys():
     doc.Hide()
     hotkeys = context.LoadDocument('resources/gui/hotkeymenu.rml')
     hotkeys.Show()
-    print("is_shown", hotkeys.is_shown)
 
         </script>
     </head>
