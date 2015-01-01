@@ -149,49 +149,38 @@ void mouseMove(size_t x, size_t y)
     yClick = y;
 }
 
-void setLevel(size_t levelNum, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, Level::Level* level)
+void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, Level::Level* level)
 {
     world.clear();
     renderer.setLevel(level);
     world.setLevel(*level, exe);
 
-    if(levelNum == 0)
+    if(dLvl == 0)
         world.addNpcs(exe);
 }
 
-Level::Level* getLevel(size_t levelNum, const DiabloExe::DiabloExe& exe)
+Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
 {  
-    switch(levelNum)
+    if(dLvl == 0)
     {
-        case 0:
-        {
-            Level::Dun sector1("levels/towndata/sector1s.dun");
-            Level::Dun sector2("levels/towndata/sector2s.dun");
-            Level::Dun sector3("levels/towndata/sector3s.dun");
-            Level::Dun sector4("levels/towndata/sector4s.dun");
+        Level::Dun sector1("levels/towndata/sector1s.dun");
+        Level::Dun sector2("levels/towndata/sector2s.dun");
+        Level::Dun sector3("levels/towndata/sector3s.dun");
+        Level::Dun sector4("levels/towndata/sector4s.dun");
 
-            return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", 
-                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
-
-            break;
-        }
-
-        case 1:
-        {
-            return FALevelGen::generate(100, 100, levelNum, exe, "levels/l1data/l1.cel");
-            break;
-        }
-
-        case 2:
-        case 3:
-        case 4:
-        {
-            std::cerr << "level not supported yet" << std::endl;
-            break;
-        }
+        return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", 
+            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
     }
-
-    return NULL;
+    else if(dLvl < 9)
+    {
+        return FALevelGen::generate(100, 100, dLvl, exe);
+    }
+    else
+    {
+        std::cerr << "level not supported yet" << std::endl;
+        exit(1);
+        return NULL;
+    }
 }
 
 /**
@@ -205,7 +194,7 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
     desc.add_options()
         ("help,h", "Print help")
         // -1 represents the main menu
-        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-4)");
+        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)");
 
     try 
     { 
@@ -219,8 +208,8 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
         
         bpo::notify(variables);
 
-        const int32_t levelNum = variables["level"].as<int32_t>();
-        if(levelNum > 4)
+        const int32_t dLvl = variables["level"].as<int32_t>();
+        if(dLvl > 16)
             throw bpo::validation_error(
                 bpo::validation_error::invalid_option_value, "level");
     }
@@ -310,6 +299,38 @@ bool loadSettings(StartupSettings& settings)
     return true;
 }
 
+void playLevelMusic(int32_t currentLevel, FARender::Renderer& renderer)
+{
+    switch(currentLevel)
+    {
+        case 0:
+        {
+            renderer.playMusic("music/dtowne.wav");
+            break;
+        }
+        case 1: case 2: case 3: case 4:
+        {
+            renderer.playMusic("music/dlvla.wav");
+            break;
+        }
+        case 5: case 6: case 7: case 8:
+        {
+            renderer.playMusic("music/dlvlb.wav");
+            break;
+        }
+        case 9: case 10: case 11: case 12:
+        {
+            renderer.playMusic("music/dlvlc.wav");
+            break;
+        }
+        case 13: case 14: case 15: case 16:
+        {
+            renderer.playMusic("music/dlvld.wav");
+            break;
+        }
+    }
+}
+
 void run(const bpo::variables_map& variables);
 void runGameLoop(const bpo::variables_map& variables);
 
@@ -356,7 +377,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     FALevelGen::FAsrand(time(NULL));
 
-    std::vector<Level::Level*> levels(5);
+    std::vector<Level::Level*> levels(9);
 
     int32_t currentLevel = variables["level"].as<int32_t>();
 
@@ -381,12 +402,15 @@ void runGameLoop(const bpo::variables_map& variables)
         player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 
         FAGui::showIngameGui();
+
+        playLevelMusic(currentLevel, renderer);
     }
     else
     {
         renderer.setLevel(NULL);
         paused = true;
         FAGui::showMainMenu();
+        renderer.playMusic("music/dintro.wav");
     }
     
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
@@ -454,7 +478,7 @@ void runGameLoop(const bpo::variables_map& variables)
                     currentLevel = tmp;
 
                     if(levels[currentLevel] == NULL)
-                        levels[currentLevel] = getLevel(currentLevel == 0 ? 0 : 1, exe);
+                        levels[currentLevel] = getLevel(currentLevel, exe);
 
                     level = levels[currentLevel];
                     
@@ -467,6 +491,7 @@ void runGameLoop(const bpo::variables_map& variables)
                     
                     setLevel(currentLevel, exe, world, renderer, level);
 
+                    playLevelMusic(currentLevel, renderer);
                 }
                 
                 changeLevel = 0;
