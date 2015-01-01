@@ -12,6 +12,8 @@ add_executable(freeablo
     
     farender/renderer.cpp
     farender/renderer.h
+    farender/spritecache.cpp
+    farender/spritecache.h
     
     faworld/actor.cpp
     faworld/actor.h 
@@ -25,5 +27,8 @@ add_executable(freeablo
     
     fagui/guimanager.h
     fagui/guimanager.cpp
+
+    engine/threadmanager.h
+    engine/threadmanager.cpp
 )
 set_target_properties(freeablo PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

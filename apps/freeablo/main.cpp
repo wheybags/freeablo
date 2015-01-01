@@ -4,6 +4,8 @@
 #include <diabloexe/diabloexe.h>
 #include <misc/misc.h>
 
+#include "engine/threadmanager.h"
+
 #include "falevelgen/levelgen.h"
 #include "falevelgen/random.h"
 
@@ -232,33 +234,33 @@ bool loadSettings(StartupSettings& settings)
     return true;
 }
 
-void playLevelMusic(int32_t currentLevel, FARender::Renderer& renderer)
+void playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager)
 {
     switch(currentLevel)
     {
         case 0:
         {
-            renderer.playMusic("music/dtowne.wav");
+            threadManager.playMusic("music/dtowne.wav");
             break;
         }
         case 1: case 2: case 3: case 4:
         {
-            renderer.playMusic("music/dlvla.wav");
+            threadManager.playMusic("music/dlvla.wav");
             break;
         }
         case 5: case 6: case 7: case 8:
         {
-            renderer.playMusic("music/dlvlb.wav");
+            threadManager.playMusic("music/dlvlb.wav");
             break;
         }
         case 9: case 10: case 11: case 12:
         {
-            renderer.playMusic("music/dlvlc.wav");
+            threadManager.playMusic("music/dlvlc.wav");
             break;
         }
         case 13: case 14: case 15: case 16:
         {
-            renderer.playMusic("music/dlvld.wav");
+            threadManager.playMusic("music/dlvld.wav");
             break;
         }
     }
@@ -292,7 +294,9 @@ void run(const bpo::variables_map& variables)
 
     boost::thread mainThread(boost::bind(&runGameLoop, &variables));
 
+    Engine::ThreadManager threadManager;
     FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
+    threadManager.run();
     renderDone = true;
 
     mainThread.join();
@@ -304,6 +308,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     FARender::Renderer& renderer = *FARender::Renderer::get();
     Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
+    Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
 
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
@@ -336,14 +341,14 @@ void runGameLoop(const bpo::variables_map& variables)
 
         FAGui::showIngameGui();
 
-        playLevelMusic(currentLevel, renderer);
+        playLevelMusic(currentLevel, threadManager);
     }
     else
     {
         renderer.setLevel(NULL);
         paused = true;
         FAGui::showMainMenu();
-        renderer.playMusic("music/dintro.wav");
+        threadManager.playMusic("music/dintro.wav");
     }
     
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
@@ -407,7 +412,7 @@ void runGameLoop(const bpo::variables_map& variables)
                     
                     setLevel(currentLevel, exe, world, renderer, level);
 
-                    playLevelMusic(currentLevel, renderer);
+                    playLevelMusic(currentLevel, threadManager);
                 }
                 
                 changeLevel = 0;

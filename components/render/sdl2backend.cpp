@@ -456,7 +456,7 @@ namespace Render
         }
     }
 
-    void drawLevel(RenderLevel* level, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    void drawLevel(RenderLevel* level, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
         int16_t xPx1 = -((y1*(-32)) + 32*x1 + level->levelWidth*32) +WIDTH/2;
         int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
@@ -481,8 +481,8 @@ namespace Render
         {
             for(size_t y = 0; y < level->level->height(); y++)
             {
-                if(objs[x][y].sprite)
-                    drawAt(level, objs[x][y].sprite, x, y, objs[x][y].x2, objs[x][y].y2, objs[x][y].dist);
+                if(objs[x][y].valid)
+                    drawAt(level, cache->get(objs[x][y].spriteCacheIndex)->operator[](objs[x][y].spriteFrame), x, y, objs[x][y].x2, objs[x][y].y2, objs[x][y].dist);
 
                 drawLevelHelper(level, level->minTops, x, y);
             }

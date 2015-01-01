@@ -87,6 +87,12 @@ namespace Render
             size_t mAnimLength;
     };
 
+    class SpriteCacheBase
+    {
+        public:
+            virtual SpriteGroup* get(size_t key) = 0;
+    };
+
     void spriteSize(const Sprite& sprite, size_t& w, size_t& h);
 
 
@@ -106,14 +112,14 @@ namespace Render
             int32_t levelY;
 
             friend RenderLevel* setLevel(const Level::Level& level);
-            friend void drawLevel(RenderLevel* level, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+            friend void drawLevel(RenderLevel* level, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
             friend void drawLevelHelper(RenderLevel* level, std::map<int32_t, Sprite>& minMap, int32_t x, int32_t y);
             friend void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
             friend std::pair<size_t, size_t> getClickedTile(RenderLevel* level, size_t x, size_t y);
     };
 
     RenderLevel* setLevel(const Level::Level& level);
-    void drawLevel(RenderLevel* level, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    void drawLevel(RenderLevel* level, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
     void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
     
     std::pair<size_t, size_t> getClickedTile(RenderLevel* level, size_t x, size_t y);
