@@ -1,6 +1,7 @@
 #include "audio.h"
 
 #include <iostream>
+#include <utility>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -27,18 +28,21 @@ namespace Audio
         FAIO::FAfclose(f);
 
         SDL_RWops *rw = SDL_RWFromMem(buffer, len); 
-        Music* mus = (Music*)Mix_LoadMUS_RW(rw, 1);
 
+        Music* mus = (Music*) new std::pair<Mix_Music*, uint8_t*>(Mix_LoadMUS_RW(rw, 0), buffer);
         return mus;
     }
 
     void freeMusic(Music* mus)
     {
-        Mix_FreeMusic((Mix_Music*)mus);
+        std::pair<Mix_Music*, uint8_t*>* data = (std::pair<Mix_Music*, uint8_t*>*)mus;
+        Mix_FreeMusic(data->first);
+        delete data->second; // workaround for the freesrc param of Mix_LoadMus in loadMusic above apparently just not working
+        delete data;
     }
 
     void playMusic(Music* mus)
     {
-        Mix_PlayMusic((Mix_Music*)mus, -1);
+        Mix_PlayMusic(((std::pair<Mix_Music*, uint8_t*>*)mus)->first, -1);
     }
 }
