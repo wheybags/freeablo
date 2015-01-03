@@ -1,6 +1,5 @@
 #include "threadmanager.h"
 
-#include <audio/audio.h>
 #include <input/inputmanager.h>
 
 #include "../farender/renderer.h"
@@ -26,8 +25,9 @@ namespace Engine
         const Rocket::Core::Vector2i* source_dimensions;
     };
 
-    ThreadManager::ThreadManager():
-        mThreadState(stopped)
+    ThreadManager::ThreadManager()
+        :mThreadState(stopped)
+        ,mMusic(NULL)
     {
         mThreadManager = this;
     }
@@ -43,23 +43,15 @@ namespace Engine
 
         FARender::Renderer* renderer = FARender::Renderer::get();
 
-        Audio::Music* music = NULL;
+        Message msg;
 
         while(true)
         {
+            while(mQueue.pop(msg))
+                handleMessage(msg);
+
             switch(mThreadState)
             {
-                case musicPlay:
-                {
-                    if(music != NULL)
-                        Audio::freeMusic(music);
-
-                    music = Audio::loadMusic(*((std::string*)mThreadCommunicationTmp));
-                    Audio::playMusic(music);
-                    mThreadState = running;
-                    break;
-                }
-
                 case guiLoadTexture:
                 {
                     LoadGuiTextureArgs* args = (LoadGuiTextureArgs*) mThreadCommunicationTmp;
@@ -97,8 +89,7 @@ namespace Engine
                     break;
                 }
 
-                case running:
-                case stopped:
+                default:
                 {
                     break;
                 }
@@ -116,9 +107,11 @@ namespace Engine
 
     void ThreadManager::playMusic(const std::string& path)
     {
-        mThreadCommunicationTmp = (void*)&path;
-        mThreadState = musicPlay;
-        while(mThreadState != running) {}
+        Message msg;
+        msg.type = musicPlay;
+        msg.data.musicPath = new std::string(path);
+
+        mQueue.push(msg);
     }
 
     bool ThreadManager::loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
@@ -162,5 +155,28 @@ namespace Engine
         mThreadCommunicationTmp = (void*)level;
         mThreadState = levelChange;
         while(mThreadState != running){}
+    }
+
+    void ThreadManager::handleMessage(const Message& message)
+    {
+        switch(message.type)
+        {
+            case musicPlay:
+            {
+                if(mMusic != NULL)
+                    Audio::freeMusic(mMusic);
+
+                mMusic = Audio::loadMusic(*message.data.musicPath);
+                delete message.data.musicPath;
+
+                Audio::playMusic(mMusic);
+                break;
+            }
+
+            default:
+            {
+                break;
+            }
+        }
     }
 }

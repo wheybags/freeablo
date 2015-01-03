@@ -3,10 +3,12 @@
 
 #include <string>
 #include <boost/atomic.hpp>
+#include <boost/lockfree/spsc_queue.hpp>
 
 #include <Rocket/Core.h>
 
 #include <level/level.h>
+#include <audio/audio.h>
 
 namespace Engine
 {
@@ -19,6 +21,16 @@ namespace Engine
         levelChange,
         stopped,
         musicPlay
+    };
+
+    struct Message
+    {
+        ThreadState type;
+
+        union
+        {
+            std::string* musicPath;
+        } data;
     };
 
     class ThreadManager
@@ -43,6 +55,10 @@ namespace Engine
 
             boost::atomic<ThreadState> mThreadState;
             void* mThreadCommunicationTmp;
+
+            boost::lockfree::spsc_queue<Message, boost::lockfree::capacity<100> > mQueue;
+            void handleMessage(const Message& message);
+            Audio::Music* mMusic;
     };
 }
 
