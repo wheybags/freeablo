@@ -1,12 +1,16 @@
 #include "spritecache.h"
 
+#include <assert.h>
+
+#include <sstream>
+
 #include <cel/celfile.h>
 
 
 namespace FARender
 {
     SpriteCache::SpriteCache(size_t size)
-        :mNextCacheIndex(0)
+        :mNextCacheIndex(1)
         ,mCurrentSize(0)
         ,mMaxSize(size)
     {}
@@ -25,6 +29,23 @@ namespace FARender
         return mStrToCache[path];
     }
 
+    FASpriteGroup SpriteCache::getTileset(const std::string& celPath, const std::string& minPath, bool top)
+    {
+        std::stringstream ss;
+        ss << celPath << ":::" << minPath << ":::" << top;
+        std::string key = ss.str();
+
+        if(!mStrToTilesetCache.count(key))
+        {
+            FASpriteGroup newCacheEntry(0, mNextCacheIndex);
+            mStrToTilesetCache[key] = newCacheEntry;
+            mCacheToTilesetPath[mNextCacheIndex] = TilesetPath(celPath, minPath, top);
+            mNextCacheIndex++;
+        }
+
+        return mStrToTilesetCache[key];
+    }
+
     Render::SpriteGroup* SpriteCache::get(size_t index)
     {
         if(!mCache.count(index))
@@ -32,37 +53,77 @@ namespace FARender
             if(mCurrentSize >= mMaxSize)
                 evict();
 
-            //TODO: replace mCacheToStr[index] with map.at(), to guarantee thread safety (once we switch to c++11)
-            // until then, it is safe in practice.
-            Render::SpriteGroup* newSprite = new Render::SpriteGroup(mCacheToStr[index]);
+            Render::SpriteGroup* newSprite = NULL;
+
+            if(mCacheToStr.count(index))
+            {
+                //TODO: replace mCacheToStr[index] with map.at(), to guarantee thread safety (once we switch to c++11)
+                // until then, it is safe in practice.
+                newSprite = new Render::SpriteGroup(mCacheToStr[index]);
+            }
+            else if(mCacheToTilesetPath.count(index))
+            {
+                TilesetPath p = mCacheToTilesetPath[index]; //TODO: same as above
+                newSprite = Render::loadTilesetSprite(p.celPath, p.minPath, p.top);
+            }
+            else
+            {
+                std::cerr << "ERROR INVALID SPRITE CACHE REQUEST " << index << std::endl;
+            }
+
             mUsedList.push_front(index);
-            mCache[index] = std::pair<Render::SpriteGroup*, std::list<size_t>::iterator>(newSprite, mUsedList.begin());
+            mCache[index] = CacheEntry(newSprite, mUsedList.begin(), false);
             mCurrentSize++;
         }
         else
         {
-            mUsedList.erase(mCache[index].second);
-            mUsedList.push_front(index);
-            mCache[index].second = mUsedList.begin();
+            moveToFront(index);
         }
 
-        return mCache[index].first;
+        return mCache[index].sprite;
+    }
+
+    void SpriteCache::moveToFront(size_t index)
+    {
+        mUsedList.erase(mCache[index].it);
+        mUsedList.push_front(index);
+        mCache[index].it = mUsedList.begin();
+    }
+
+    void SpriteCache::setImmortal(size_t index, bool immortal)
+    {
+        get(index);
+        mCache[index].immortal = immortal;
     }
 
     void SpriteCache::evict()
     {
-        std::pair<Render::SpriteGroup*, std::list<size_t>::iterator> toEvict = mCache[mUsedList.back()];
-        toEvict.first->destroy();
-        delete toEvict.first;
+        std::list<size_t>::reverse_iterator it;
 
-        mCache.erase(mUsedList.back());
-        mUsedList.pop_back();
+        for(it = mUsedList.rbegin(); it != mUsedList.rend(); it++)
+        {
+            if(!mCache[*it].immortal)
+                break;
+        }
+
+        assert(it != mUsedList.rend() && "no evictable slots found. This should never happen");
+
+        CacheEntry toEvict = mCache[*it];
+
+        toEvict.sprite->destroy();
+        delete toEvict.sprite;
+
+        mCache.erase(*it);
+        mUsedList.erase(--(it.base()));
         mCurrentSize--;
     }
 
     void SpriteCache::clear()
     {
-        while(mCurrentSize)
-            evict();
+        for(std::list<size_t>::iterator it = mUsedList.begin(); it != mUsedList.end(); it++)
+        {
+            mCache[*it].sprite->destroy();
+            delete mCache[*it].sprite;
+        }
     }
 }

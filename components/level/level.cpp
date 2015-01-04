@@ -14,7 +14,7 @@ namespace Level
         const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
         const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap):
         mDun(dun), mTil(tilPath), mMin(minPath), mSol(solPath), mTileSetPath(tileSetPath),
-        mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs) {}
+        mMinPath(minPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs) {}
 
     std::vector<int16_t> Level::mEmpty(16);
 
@@ -123,7 +123,12 @@ namespace Level
     {
         return mTileSetPath;
     }
-    
+
+    const std::string& Level::getMinPath() const
+    {
+        return mMinPath;
+    }
+
     const std::vector<Monster>& Level::getMonsters() const
     {
         return mMonsters;

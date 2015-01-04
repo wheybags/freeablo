@@ -21,6 +21,16 @@ namespace Level
 
 namespace FARender
 {       
+
+    class Renderer;
+    class Tileset
+    {
+        private:
+            FASpriteGroup minTops;
+            FASpriteGroup minBottoms;
+            friend class Renderer;
+    };
+
     class RenderState
     {
         public:
@@ -32,6 +42,10 @@ namespace FARender
         std::vector<boost::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
 
         std::vector<drawCommand> guiDrawBuffer;
+
+        Tileset tileset;
+
+        Level::Level* level;
     };
 
     class Renderer
@@ -43,16 +57,15 @@ namespace FARender
             ~Renderer();
 
             void stop();
-            
-            void setLevel(Render::RenderLevel* renderLevel, const Level::Level* level);
-            void setLevel(const Level::Level* level);
+
+            Tileset getTileset(const Level::Level& level);
 
             RenderState* getFreeState(); // ooh ah up de ra
             void setCurrentState(RenderState* current);
 
             FASpriteGroup loadImage(const std::string& path);
 
-            std::pair<size_t, size_t> getClickedTile(size_t x, size_t y);
+            std::pair<size_t, size_t> getClickedTile(size_t x, size_t y, const Level::Level& level, const FAWorld::Position& screenPos);
 
             Rocket::Core::Context* getRocketContext();
 
@@ -67,8 +80,6 @@ namespace FARender
             
             static Renderer* mRenderer; ///< Singleton instance
 
-
-            Render::RenderLevel* mLevel;
             bool mDone;
             Render::LevelObjects mLevelObjects;
 

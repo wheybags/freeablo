@@ -75,20 +75,6 @@ namespace Engine
                     break;
                 }
 
-                case levelChange:
-                {
-                    Level::Level* level = (Level::Level*)mThreadCommunicationTmp;
-
-                    if(level)
-                    {
-                        Render::RenderLevel* renderLevel = Render::setLevel(*level);
-                        renderer->setLevel(renderLevel, level);
-                    }
-
-                    mThreadState = running;
-                    break;
-                }
-
                 default:
                 {
                     break;
@@ -148,13 +134,6 @@ namespace Engine
 
         mThreadState = guiReleaseTexture;
         while(mThreadState != running) {}
-    }
-
-    void ThreadManager::setLevel(const Level::Level* level)
-    {
-        mThreadCommunicationTmp = (void*)level;
-        mThreadState = levelChange;
-        while(mThreadState != running){}
     }
 
     void ThreadManager::handleMessage(const Message& message)

@@ -84,10 +84,9 @@ void mouseMove(size_t x, size_t y)
     yClick = y;
 }
 
-void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, Level::Level* level)
+void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world, Level::Level* level)
 {
     world.clear();
-    renderer.setLevel(level);
     world.setLevel(*level, exe);
 
     if(dLvl == 0)
@@ -320,6 +319,7 @@ void runGameLoop(const bpo::variables_map& variables)
     int32_t currentLevel = variables["level"].as<int32_t>();
 
     Level::Level* level = NULL;
+    FARender::Tileset tileset;
     
     FAWorld::Player* player = world.getPlayer();
     FAGui::initGui();
@@ -333,8 +333,9 @@ void runGameLoop(const bpo::variables_map& variables)
         }
         else
         {
+            tileset = renderer.getTileset(*level);
             levels[currentLevel] = level;
-            setLevel(currentLevel, exe, world, renderer, level);
+            setLevel(currentLevel, exe, world, level);
         }
         
         player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
@@ -345,7 +346,6 @@ void runGameLoop(const bpo::variables_map& variables)
     }
     else
     {
-        renderer.setLevel(NULL);
         paused = true;
         FAGui::showMainMenu();
         threadManager.playMusic("music/dintro.wav");
@@ -384,7 +384,7 @@ void runGameLoop(const bpo::variables_map& variables)
         {
             if(mouseDown)
             {
-                destination = renderer.getClickedTile(xClick, yClick);
+                destination = renderer.getClickedTile(xClick, yClick, *level, player->mPos);
                 if(click)
                     level->activate(destination.first, destination.second);
 
@@ -410,8 +410,8 @@ void runGameLoop(const bpo::variables_map& variables)
 
                     destination = player->mPos.current();
                     
-                    setLevel(currentLevel, exe, world, renderer, level);
-
+                    setLevel(currentLevel, exe, world, level);
+                    tileset = renderer.getTileset(*level);
                     playLevelMusic(currentLevel, threadManager);
                 }
                 
@@ -457,6 +457,8 @@ void runGameLoop(const bpo::variables_map& variables)
         FARender::RenderState* state = renderer.getFreeState();
         
         state->mPos = player->mPos;
+        state->tileset = tileset;
+        state->level = level;
 
         world.fillRenderState(state);
 

@@ -21,8 +21,7 @@ namespace FARender
                                   
 
     Renderer::Renderer(int32_t windowWidth, int32_t windowHeight)
-        :mLevel(NULL)
-        ,mDone(false)
+        :mDone(false)
         ,mCurrent(NULL)
         ,mRocketContext(NULL)
         ,mCache(1024)
@@ -50,8 +49,6 @@ namespace FARender
     Renderer::~Renderer()
     {
         mRenderer = NULL;
-        if(mLevel)
-            delete mLevel;
         Render::quit();
     }
 
@@ -60,17 +57,12 @@ namespace FARender
         mDone = true;
     }
 
-    void Renderer::setLevel(Render::RenderLevel* renderLevel, const Level::Level* level)
+    Tileset Renderer::getTileset(const Level::Level& level)
     {
-        if(mLevel)
-            delete mLevel;
-        mLevel = renderLevel;
-        mLevelObjects.resize(level->width(), level->height());
-    }
-
-    void Renderer::setLevel(const Level::Level* level)
-    {
-        Engine::ThreadManager::get()->setLevel(level);
+        Tileset tileset;
+        tileset.minTops = mCache.getTileset(level.getTileSetPath(), level.getMinPath(), true);
+        tileset.minBottoms = mCache.getTileset(level.getTileSetPath(), level.getMinPath(), false);
+        return tileset;
     }
 
     RenderState* Renderer::getFreeState()
@@ -98,9 +90,9 @@ namespace FARender
         return mCache.get(path);
     }
 
-    std::pair<size_t, size_t> Renderer::getClickedTile(size_t x, size_t y)
+    std::pair<size_t, size_t> Renderer::getClickedTile(size_t x, size_t y, const Level::Level& level, const FAWorld::Position& screenPos)
     {
-        return Render::getClickedTile(mLevel, x, y);
+        return Render::getClickedTile(level, x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
     }
 
     Rocket::Core::Context* Renderer::getRocketContext()
@@ -118,8 +110,11 @@ namespace FARender
         if(current && current->mMutex.try_lock())
         {
             
-            if(mLevel)
+            if(current->level)
             {
+                if(mLevelObjects.width() != current->level->width() || mLevelObjects.height() != current->level->height())
+                    mLevelObjects.resize(current->level->width(), current->level->height());
+
                 for(size_t x = 0; x < mLevelObjects.width(); x++)
                 {
                     for(size_t y = 0; y < mLevelObjects.height(); y++)
@@ -141,7 +136,7 @@ namespace FARender
                     mLevelObjects[x][y].dist = current->mObjects[i].get<2>().mDist;
                 }
 
-                Render::drawLevel(mLevel, &mCache, mLevelObjects, current->mPos.current().first, current->mPos.current().second,
+                Render::drawLevel(*current->level, current->tileset.minTops.spriteCacheIndex, current->tileset.minBottoms.spriteCacheIndex, &mCache, mLevelObjects, current->mPos.current().first, current->mPos.current().second,
                     current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
             }
 

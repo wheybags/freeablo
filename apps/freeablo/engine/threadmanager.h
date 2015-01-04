@@ -18,7 +18,6 @@ namespace Engine
         guiGenerateTexture,
         guiReleaseTexture,
         running,
-        levelChange,
         stopped,
         musicPlay
     };
@@ -48,7 +47,6 @@ namespace Engine
             bool loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
             bool generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions);
             void releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle);
-            void setLevel(const Level::Level* level);
 
         private:
             static ThreadManager* mThreadManager; ///< Singleton instance

@@ -63,6 +63,7 @@ namespace Level
             const std::pair<size_t,size_t>& downStairsPos() const;
 
             const std::string& getTileSetPath() const;
+            const std::string& getMinPath() const;
 
             const std::vector<Monster>& getMonsters() const;
             std::vector<Monster>& getMonsters();
@@ -73,6 +74,7 @@ namespace Level
             Min mMin;
             Sol mSol;
             std::string mTileSetPath; ///< path to cel file for level
+            std::string mMinPath; ///< path to min file for level
 
             std::map<size_t, size_t> mDoorMap; ///< Map from closed door indices to open door indices + vice-versa
 

@@ -216,36 +216,33 @@ namespace Render
             SDL_DestroyTexture((SDL_Texture*)mSprites[i]);
     }
 	
-    void drawMinPillarTop(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
-    void drawMinPillarBase(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
+    void drawMinPillarTop(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
+    void drawMinPillarBase(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
     
-    RenderLevel* setLevel(const Level::Level& level)
+    SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top)
     {
-        Cel::CelFile town(level.getTileSetPath());
-        
-        RenderLevel* retval = new RenderLevel();
-
-        retval->level = &level;
+        Cel::CelFile cel(celPath);
+        Level::Min min(minPath);
 
         SDL_Surface* newPillar = createTransparentSurface(64, 256);
-        
-        for(size_t i = 0; i < level.minSize()-1; i++)
+
+        std::vector<Sprite> newMin(min.size()-1);
+
+        for(size_t i = 0; i < min.size()-1; i++)
         {
             clearTransparentSurface(newPillar);
-            drawMinPillarTop(newPillar, 0, 0, level.minPillar(i), town);
-            retval->minTops[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
 
-            clearTransparentSurface(newPillar);
-            drawMinPillarBase(newPillar, 0, 0, level.minPillar(i), town);
-            retval->minBottoms[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
+            if(top)
+                drawMinPillarTop(newPillar, 0, 0, min[i], cel);
+            else
+                drawMinPillarBase(newPillar, 0, 0, min[i], cel);
+
+            newMin[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
         }
 
         SDL_FreeSurface(newPillar);
 
-        retval->levelWidth = level.width();
-        retval->levelHeight = level.height();
-
-        return retval;
+        return new SpriteGroup(newMin);
     }
     
     void spriteSize(const Sprite& sprite, size_t& w, size_t& h)
@@ -260,15 +257,6 @@ namespace Render
     {
          SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
          SDL_RenderClear(renderer);
-    }
-
-    RenderLevel::~RenderLevel()
-    {
-        for(std::map<int32_t, Sprite>::iterator it = minTops.begin(); it != minTops.end(); ++it)
-            SDL_DestroyTexture((SDL_Texture*)it->second);
-
-        for(std::map<int32_t, Sprite>::iterator it = minBottoms.begin(); it != minBottoms.end(); ++it)
-            SDL_DestroyTexture((SDL_Texture*)it->second);
     }
 
     #define BPP 4
@@ -329,7 +317,7 @@ namespace Render
             drawFrame(s, x+32, y, f[r]);
     }
 
-    void drawMinPillar(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset, bool top)
+    void drawMinPillar(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset, bool top)
     {
         // compensate for maps using 5-row min files
         if(pillar.size() == 10)
@@ -361,26 +349,26 @@ namespace Render
         }
     }
 
-    void drawMinPillarTop(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset)
+    void drawMinPillarTop(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset)
     {
         drawMinPillar(s, x, y, pillar, tileset, true);
     }
 
-    void drawMinPillarBase(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset)
+    void drawMinPillarBase(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset)
     {
         drawMinPillar(s, x, y, pillar, tileset, false);
     }
 
-    void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    void drawAt(const Level::Level& level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist, int32_t levelX, int32_t levelY)
     {
         size_t w, h;
         spriteSize(sprite, w, h);
 
-        int32_t xPx1 = ((y1*(-32)) + 32*x1 + level->levelWidth*32) + level->levelX - w/2;
-        int32_t yPx1 = ((y1*16) + (16*x1) +160) + level->levelY;
+        int32_t xPx1 = ((y1*(-32)) + 32*x1 + level.width()*32) + levelX - w/2;
+        int32_t yPx1 = ((y1*16) + (16*x1) +160) + levelY;
 
-        int32_t xPx2 = ((y2*(-32)) + 32*x2 + level->levelWidth*32) + level->levelX - w/2;
-        int32_t yPx2 = ((y2*16) + (16*x2) +160) + level->levelY;
+        int32_t xPx2 = ((y2*(-32)) + 32*x2 + level.width()*32) + levelX - w/2;
+        int32_t yPx2 = ((y2*16) + (16*x2) +160) + levelY;
 
         int32_t x = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
         int32_t y = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
@@ -388,11 +376,26 @@ namespace Render
         drawAt(sprite, x, y);
     }
 
-    std::pair<size_t, size_t> getClickedTile(RenderLevel* level, size_t x, size_t y)
+    void getMapScreenCoords(const Level::Level& level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist, int32_t& levelX, int32_t& levelY)
     {
+        int16_t xPx1 = -((y1*(-32)) + 32*x1 + level.width()*32) +WIDTH/2;
+        int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
+
+        int16_t xPx2 = -((y2*(-32)) + 32*x2 + level.width()*32) +WIDTH/2;
+        int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
+
+        levelX = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
+        levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
+    }
+
+    std::pair<size_t, size_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    {
+        int32_t levelX, levelY;
+        getMapScreenCoords(level, x1, y1, x2, y2, dist, levelX, levelY);
+
         // Position on the map in pixels
-        int32_t flatX = x - level->levelX;
-        int32_t flatY = y - level->levelY;
+        int32_t flatX = x - levelX;
+        int32_t flatY = y - levelY;
 
         // position on the map divided into 32x16 flat blocks
         // every second one of these blocks is centred on an isometric
@@ -401,7 +404,7 @@ namespace Render
         int32_t flatGridY = (flatY+8) / 16;
         
         // origin position (in flat grid coords) for the first line (isometric y = 0)
-        int32_t flatOriginPosX = level->levelHeight;
+        int32_t flatOriginPosX = level.height();
         int32_t flatOriginPosY = 15;
 
         // when a flat grid box is clicked that does not centre on an isometric block, work out which
@@ -443,48 +446,47 @@ namespace Render
         return std::make_pair(isoPosX, isoPosY);
     }
 
-    void drawLevelHelper(RenderLevel* level, std::map<int32_t, Sprite>& minMap, int32_t x, int32_t y)
+    void drawLevelHelper(const Level::Level& level, SpriteGroup& minSprites, int32_t x, int32_t y, int32_t levelX, int32_t levelY)
     {
-        if((size_t)x < level->level->width() && (size_t)y < level->level->height())
+        if((size_t)x < level.width() && (size_t)y < level.height())
         {
-            size_t index = level->level->operator[](x)[y].index();
-            int32_t xCoord = (y*(-32)) + 32*x + level->level->height()*32-32 +level->levelX;
-            int32_t yCoord = (y*16) + 16*x + level->levelY;
+            size_t index = level[x][y].index();
+            int32_t xCoord = (y*(-32)) + 32*x + level.height()*32-32 + levelX;
+            int32_t yCoord = (y*16) + 16*x + levelY;
 
-            if(xCoord >= -64 && xCoord <=  WIDTH  && yCoord >= -256 && yCoord <= HEIGHT && minMap.find(index) != minMap.end())
-                drawAt(minMap[index], xCoord, yCoord);
+            if(xCoord >= -64 && xCoord <=  WIDTH  && yCoord >= -256 && yCoord <= HEIGHT && index < minSprites.size())
+                drawAt(minSprites[index], xCoord, yCoord);
         }
     }
 
-    void drawLevel(RenderLevel* level, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
-        int16_t xPx1 = -((y1*(-32)) + 32*x1 + level->levelWidth*32) +WIDTH/2;
-        int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
-
-        int16_t xPx2 = -((y2*(-32)) + 32*x2 + level->levelWidth*32) +WIDTH/2;
-        int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
-
-        level->levelX = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
-        level->levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
+        int32_t levelX, levelY;
+        getMapScreenCoords(level, x1, y1, x2, y2, dist, levelX, levelY);
 
         //TODO clean up the magic numbers here, and elsewhere in this file
-        
-        for(size_t x = 0; x < level->level->width(); x++)
+
+        SpriteGroup* minBottoms = cache->get(minBottomsHandle);
+
+        for(size_t x = 0; x < level.width(); x++)
         {
-            for(size_t y = 0; y < level->level->height(); y++)
+            for(size_t y = 0; y < level.height(); y++)
             {
-                drawLevelHelper(level, level->minBottoms, x+1, y+1);
+                drawLevelHelper(level, *minBottoms, x+1, y+1, levelX, levelY);
             }
         }
 
-        for(size_t x = 0; x < level->level->width(); x++)
+        SpriteGroup* minTops = cache->get(minTopsHandle);
+        cache->setImmortal(minTopsHandle, true);
+
+        for(size_t x = 0; x < level.width(); x++)
         {
-            for(size_t y = 0; y < level->level->height(); y++)
+            for(size_t y = 0; y < level.height(); y++)
             {
                 if(objs[x][y].valid)
-                    drawAt(level, cache->get(objs[x][y].spriteCacheIndex)->operator[](objs[x][y].spriteFrame), x, y, objs[x][y].x2, objs[x][y].y2, objs[x][y].dist);
+                    drawAt(level, cache->get(objs[x][y].spriteCacheIndex)->operator[](objs[x][y].spriteFrame), x, y, objs[x][y].x2, objs[x][y].y2, objs[x][y].dist, levelX, levelY);
 
-                drawLevelHelper(level, level->minTops, x, y);
+                drawLevelHelper(level, *minTops, x, y, levelX, levelY);
             }
         }
     }
