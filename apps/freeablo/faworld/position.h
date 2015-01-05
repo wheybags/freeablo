@@ -16,8 +16,8 @@ namespace FAWorld
 
             void update(); ///< advances towards mNext
             
-            std::pair<size_t, size_t> current(); ///< where we are coming from
-            std::pair<size_t, size_t> next(); ///< where we are going to
+            std::pair<size_t, size_t> current() const; ///< where we are coming from
+            std::pair<size_t, size_t> next() const; ///< where we are going to
             
             size_t mDist; ///< percentage of the way there
 

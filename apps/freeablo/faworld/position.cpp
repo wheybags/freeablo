@@ -26,12 +26,12 @@ namespace FAWorld
         }
     }
 
-    std::pair<size_t, size_t> Position::current()
+    std::pair<size_t, size_t> Position::current() const
     {
         return mCurrent;
     }
 
-    std::pair<size_t, size_t> Position::next()
+    std::pair<size_t, size_t> Position::next() const
     {
         if(!mMoving)
             return mCurrent;
