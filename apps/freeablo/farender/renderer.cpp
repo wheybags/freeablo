@@ -24,7 +24,7 @@ namespace FARender
         :mDone(false)
         ,mCurrent(NULL)
         ,mRocketContext(NULL)
-        ,mCache(1024)
+        ,mSpriteManager(1024)
     {
         assert(!mRenderer); // singleton, only one instance
 
@@ -36,16 +36,67 @@ namespace FARender
 
             Render::init(settings);
             
-            Engine::ThreadManager* threadManager = Engine::ThreadManager::get();
-            mRocketContext = Render::initGui(boost::bind(&Engine::ThreadManager::loadGuiTextureFunc, threadManager, _1, _2, _3),
-                                             boost::bind(&Engine::ThreadManager::generateGuiTextureFunc, threadManager, _1, _2, _3),
-                                             boost::bind(&Engine::ThreadManager::releaseGuiTextureFunc, threadManager, _1));
+            mRocketContext = Render::initGui(boost::bind(&Renderer::loadGuiTextureFunc, this, _1, _2, _3),
+                                             boost::bind(&Renderer::generateGuiTextureFunc, this, _1, _2, _3),
+                                             boost::bind(&Renderer::releaseGuiTextureFunc, this, _1));
             Audio::init();
 
             mRenderer = this;
         }
     }
-    
+
+    bool Renderer::loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
+    {
+        // Extract the filepath and index from source
+        // cel file paths can specify which image to use, eg "/ctrlpan/panel8bu.cel:5" for the 5th frame
+        std::istringstream ss(source.CString());
+        size_t celIndex = 0;
+        std::string sourcePath;
+        std::getline(ss, sourcePath, ':');
+
+        std::string tmp;
+        if(std::getline(ss, tmp, ':'))
+        {
+                std::istringstream ss(tmp);
+                ss >> celIndex;
+        }
+
+        FASpriteGroup sprite = mSpriteManager.get(sourcePath);
+
+        Render::RocketFATex* tex = new Render::RocketFATex();
+        tex->spriteIndex = sprite.spriteCacheIndex;
+        tex->index = celIndex;
+        tex->needsImmortal = false;
+
+        texture_dimensions.x = sprite.width;
+        texture_dimensions.y = sprite.height;
+
+        texture_handle = (Rocket::Core::TextureHandle) tex;
+        return true;
+    }
+
+    bool Renderer::generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+    {
+        FASpriteGroup sprite = mSpriteManager.getFromRaw(source, source_dimensions.x, source_dimensions.y);
+        Render::RocketFATex* tex = new Render::RocketFATex();
+        tex->spriteIndex = sprite.spriteCacheIndex;
+        tex->index = 0;
+        tex->needsImmortal = true;
+
+        texture_handle = (Rocket::Core::TextureHandle) tex;
+        return true;
+    }
+
+    void Renderer::releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle)
+    {
+        Render::RocketFATex* tex = (Render::RocketFATex*)texture_handle;
+
+        if(tex->needsImmortal)
+            mSpriteManager.setImmortal(tex->spriteIndex, false);
+
+        delete tex;
+    }
+
     Renderer::~Renderer()
     {
         mRenderer = NULL;
@@ -60,8 +111,8 @@ namespace FARender
     Tileset Renderer::getTileset(const Level::Level& level)
     {
         Tileset tileset;
-        tileset.minTops = mCache.getTileset(level.getTileSetPath(), level.getMinPath(), true);
-        tileset.minBottoms = mCache.getTileset(level.getTileSetPath(), level.getMinPath(), false);
+        tileset.minTops = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), true);
+        tileset.minBottoms = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), false);
         return tileset;
     }
 
@@ -87,7 +138,7 @@ namespace FARender
     
     FASpriteGroup Renderer::loadImage(const std::string& path)
     {
-        return mCache.get(path);
+        return mSpriteManager.get(path);
     }
 
     std::pair<size_t, size_t> Renderer::getClickedTile(size_t x, size_t y, const Level::Level& level, const FAWorld::Position& screenPos)
@@ -136,11 +187,11 @@ namespace FARender
                     mLevelObjects[x][y].dist = current->mObjects[i].get<2>().mDist;
                 }
 
-                Render::drawLevel(*current->level, current->tileset.minTops.spriteCacheIndex, current->tileset.minBottoms.spriteCacheIndex, &mCache, mLevelObjects, current->mPos.current().first, current->mPos.current().second,
+                Render::drawLevel(*current->level, current->tileset.minTops.spriteCacheIndex, current->tileset.minBottoms.spriteCacheIndex, &mSpriteManager, mLevelObjects, current->mPos.current().first, current->mPos.current().second,
                     current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
             }
 
-            Render::drawGui(current->guiDrawBuffer);
+            Render::drawGui(current->guiDrawBuffer, &mSpriteManager);
 
             current->mMutex.unlock();
         }
@@ -152,6 +203,6 @@ namespace FARender
 
     void Renderer::cleanup()
     {
-        mCache.clear();
+        mSpriteManager.clear();
     }
 }

@@ -2,23 +2,14 @@
 #define THREAD_MANAGER_H
 
 #include <string>
-#include <boost/atomic.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
 
-#include <Rocket/Core.h>
-
-#include <level/level.h>
 #include <audio/audio.h>
 
 namespace Engine
 {
     enum ThreadState
     {
-        guiLoadTexture,
-        guiGenerateTexture,
-        guiReleaseTexture,
-        running,
-        stopped,
         musicPlay
     };
 
@@ -44,15 +35,8 @@ namespace Engine
 
             void playMusic(const std::string& path);
 
-            bool loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
-            bool generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions);
-            void releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle);
-
         private:
             static ThreadManager* mThreadManager; ///< Singleton instance
-
-            boost::atomic<ThreadState> mThreadState;
-            void* mThreadCommunicationTmp;
 
             boost::lockfree::spsc_queue<Message, boost::lockfree::capacity<100> > mQueue;
             void handleMessage(const Message& message);

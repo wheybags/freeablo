@@ -12,7 +12,7 @@
 
 #include "../faworld/position.h"
 
-#include "spritecache.h"
+#include "spritemanager.h"
 
 namespace Level
 {
@@ -41,7 +41,7 @@ namespace FARender
         
         std::vector<boost::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
 
-        std::vector<drawCommand> guiDrawBuffer;
+        std::vector<DrawCommand> guiDrawBuffer;
 
         Tileset tileset;
 
@@ -73,11 +73,10 @@ namespace FARender
             void cleanup(); ///< To be called only by Engine::ThreadManager
             
         private:
+            bool loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
+            bool generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions);
+            void releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle);
 
-            FASpriteGroup loadImageImp(const std::string& path);
-            
-            void destroySprite(Render::SpriteGroup* s);
-            
             static Renderer* mRenderer; ///< Singleton instance
 
             bool mDone;
@@ -89,7 +88,7 @@ namespace FARender
 
             Rocket::Core::Context* mRocketContext;
 
-            SpriteCache mCache;
+            SpriteManager mSpriteManager;
     };
 }
 

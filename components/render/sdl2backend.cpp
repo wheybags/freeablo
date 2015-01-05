@@ -4,11 +4,14 @@
 #include <complex>
 
 #include <SDL.h>
+#include <SDL_image.h>
 
 #include "../cel/celfile.h"
 #include "../cel/celframe.h"
 
 #include "../level/level.h"
+#include <misc/stringops.h>
+#include <faio/faio.h>
 
 #include <Rocket/Core.h>
 #include <Rocket/Core/Input.h>
@@ -136,7 +139,7 @@ namespace Render
         resized = true;
     }
 
-    void updateGuiBuffer(std::vector<drawCommand>& buffer)
+    void updateGuiBuffer(std::vector<DrawCommand>& buffer)
     {
         if(resized)
         {
@@ -148,25 +151,121 @@ namespace Render
         Context->Render();
     }
 
-    void drawGui(std::vector<drawCommand>& buffer)
+    void drawGui(std::vector<DrawCommand>& buffer, SpriteCacheBase* cache)
     {
-        Renderer->drawBuffer(buffer);
-    }
-    
-    bool guiLoadImage(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
-    {
-        return Renderer->LoadTextureImp(texture_handle, texture_dimensions, source);
+        Renderer->drawBuffer(buffer, cache);
     }
 
-	bool guiGenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+    SDL_Surface* loadNonCelImage(const std::string& sourcePath, const std::string& extension)
     {
-        return Renderer->GenerateTextureImp(texture_handle, source, source_dimensions);
+        FAIO::FAFile* file_handle = FAIO::FAfopen(sourcePath);
+        if (!file_handle)
+            return NULL;
+
+        size_t buffer_size = FAIO::FAsize(file_handle);
+
+        char* buffer = new char[buffer_size];
+        FAIO::FAfread(buffer, 1, buffer_size, file_handle);
+        FAIO::FAfclose(file_handle);
+
+        return IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.c_str());
     }
-    
-    void guiReleaseTexture(Rocket::Core::TextureHandle texture_handle)
+
+    std::string getImageExtension(const std::string& path)
     {
-        return Renderer->ReleaseTextureImp(texture_handle);
+        size_t i;
+        for(i = path.length() - 1; i > 0; i--)
+        {
+            if(path[i] == '.')
+                break;
+        }
+
+        return path.substr(i+1, path.length()-i);
     }
+
+
+    bool getImageInfo(const std::string& path, size_t& width, size_t& height, size_t& animLength, int32_t celIndex)
+    {
+        //TODO: get better image decoders that allow you to peek image dimensions without loading full image
+
+        std::string extension = getImageExtension(path);
+
+        if(Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
+        {
+            Cel::CelFile cel(path);
+            width = cel[celIndex].mWidth;
+            height = cel[celIndex].mHeight;
+            animLength = cel.animLength();
+        }
+        else
+        {
+            if(celIndex != 0)   // no indices on normal files
+                return false; 
+
+            SDL_Surface* surface = loadNonCelImage(path, extension);
+
+            if(surface)
+            {
+                width = surface->w;
+                height = surface->h;
+                animLength = 1;
+
+                SDL_FreeSurface(surface);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    SpriteGroup* loadSprite(const std::string& path)
+    {
+        std::string extension = getImageExtension(path);
+
+        if(Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
+        {
+            return new SpriteGroup(path);
+        }
+        else
+        {
+            std::vector<Sprite> vec(1);
+
+            SDL_Surface* tmp = loadNonCelImage(path, extension);
+            SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, tmp);
+
+            vec[0] = (Sprite)tex;
+
+            return new SpriteGroup(vec);
+        }
+    }
+
+    SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height)
+    {
+        #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+            Uint32 rmask = 0xff000000;
+            Uint32 gmask = 0x00ff0000;
+            Uint32 bmask = 0x0000ff00;
+            Uint32 amask = 0x000000ff;
+        #else
+            Uint32 rmask = 0x000000ff;
+            Uint32 gmask = 0x0000ff00;
+            Uint32 bmask = 0x00ff0000;
+            Uint32 amask = 0xff000000;
+        #endif
+
+        SDL_Surface *surface = SDL_CreateRGBSurfaceFrom ((void*) source, width, height, 32, width*4, rmask, gmask, bmask, amask);
+        SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+        SDL_FreeSurface(surface);
+
+        std::vector<Sprite> vec(1);
+        vec[0] = (Sprite)tex;
+        return new SpriteGroup(vec);
+    }
+
 
     void draw()
     {
@@ -484,7 +583,10 @@ namespace Render
             for(size_t y = 0; y < level.height(); y++)
             {
                 if(objs[x][y].valid)
-                    drawAt(level, cache->get(objs[x][y].spriteCacheIndex)->operator[](objs[x][y].spriteFrame), x, y, objs[x][y].x2, objs[x][y].y2, objs[x][y].dist, levelX, levelY);
+                {
+                    LevelObject o = objs[x][y];
+                    drawAt(level, cache->get(objs[x][y].spriteCacheIndex)->operator[](o.spriteFrame), x, y, objs[x][y].x2, objs[x][y].y2, objs[x][y].dist, levelX, levelY);
+                }
 
                 drawLevelHelper(level, *minTops, x, y, levelX, levelY);
             }

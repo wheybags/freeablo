@@ -14,6 +14,8 @@ add_executable(freeablo
     farender/renderer.h
     farender/spritecache.cpp
     farender/spritecache.h
+    farender/spritemanager.cpp
+    farender/spritemanager.h
     
     faworld/actor.cpp
     faworld/actor.h 

@@ -12,22 +12,8 @@ namespace Engine
         return mThreadManager;
     }
 
-    struct LoadGuiTextureArgs ///< args struct for thread communication
-    {
-        Rocket::Core::TextureHandle* texture_handle;
-        Rocket::Core::Vector2i* texture_dimensions;
-        const Rocket::Core::String* source;
-    };
-    struct GenerateGuiTextureArgs ///< args struct for thread communication
-    {
-        Rocket::Core::TextureHandle* texture_handle;
-        const Rocket::Core::byte* source;
-        const Rocket::Core::Vector2i* source_dimensions;
-    };
-
     ThreadManager::ThreadManager()
-        :mThreadState(stopped)
-        ,mMusic(NULL)
+        :mMusic(NULL)
     {
         mThreadManager = this;
     }
@@ -50,37 +36,6 @@ namespace Engine
             while(mQueue.pop(msg))
                 handleMessage(msg);
 
-            switch(mThreadState)
-            {
-                case guiLoadTexture:
-                {
-                    LoadGuiTextureArgs* args = (LoadGuiTextureArgs*) mThreadCommunicationTmp;
-                    mThreadCommunicationTmp = (void*) Render::guiLoadImage(*(args->texture_handle), *(args->texture_dimensions), *(args->source));
-                    mThreadState = running;
-                    break;
-                }
-
-                case guiGenerateTexture:
-                {
-                    GenerateGuiTextureArgs* args = (GenerateGuiTextureArgs*) mThreadCommunicationTmp;
-                    mThreadCommunicationTmp = (void*) Render::guiGenerateTexture(*(args->texture_handle), args->source, *(args->source_dimensions));
-                    mThreadState = running;
-                    break;
-                }
-
-                case guiReleaseTexture:
-                {
-                    Render::guiReleaseTexture(*((Rocket::Core::TextureHandle*)mThreadCommunicationTmp));
-                    mThreadState = running;
-                    break;
-                }
-
-                default:
-                {
-                    break;
-                }
-            }
-
             inputManager->poll();
 
             if(!renderer->renderFrame())
@@ -98,42 +53,6 @@ namespace Engine
         msg.data.musicPath = new std::string(path);
 
         mQueue.push(msg);
-    }
-
-    bool ThreadManager::loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
-    {
-        LoadGuiTextureArgs args;
-        args.texture_handle = &texture_handle;
-        args.texture_dimensions = &texture_dimensions;
-        args.source = &source;
-
-        mThreadCommunicationTmp = (void*) &args;
-        mThreadState = guiLoadTexture;
-        while(mThreadState != running) {}
-
-        return (bool) mThreadCommunicationTmp;
-    }
-
-    bool ThreadManager::generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
-    {
-        GenerateGuiTextureArgs args;
-        args.texture_handle = &texture_handle;
-        args.source = source;
-        args.source_dimensions = &source_dimensions;
-
-        mThreadCommunicationTmp = (void*) &args;
-        mThreadState = guiGenerateTexture;
-        while(mThreadState != running) {}
-
-        return (bool) mThreadCommunicationTmp;
-    }
-
-    void ThreadManager::releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle)
-    {
-        mThreadCommunicationTmp = (void*) &texture_handle;
-
-        mThreadState = guiReleaseTexture;
-        while(mThreadState != running) {}
     }
 
     void ThreadManager::handleMessage(const Message& message)
