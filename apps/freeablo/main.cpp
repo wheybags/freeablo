@@ -291,10 +291,13 @@ void run(const bpo::variables_map& variables)
     if (!loadSettings(settings))
         return;
 
-    boost::thread mainThread(boost::bind(&runGameLoop, &variables));
 
     Engine::ThreadManager threadManager;
     FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
+    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
+
+    boost::thread mainThread(boost::bind(&runGameLoop, &variables));
+
     threadManager.run();
     renderDone = true;
 
@@ -303,10 +306,8 @@ void run(const bpo::variables_map& variables)
 
 void runGameLoop(const bpo::variables_map& variables)
 {
-    while(!FARender::Renderer::get()) {}
-
     FARender::Renderer& renderer = *FARender::Renderer::get();
-    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
+    Input::InputManager& input = *Input::InputManager::get();
     Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
 
     DiabloExe::DiabloExe exe;
@@ -373,7 +374,7 @@ void runGameLoop(const bpo::variables_map& variables)
         
         while((size_t)(now.time_of_day().total_milliseconds() - last.time_of_day().total_milliseconds()) < 1000/FAWorld::World::ticksPerSecond)
         {
-            boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+            boost::this_thread::yield();
             now = boost::posix_time::microsec_clock::local_time();
         }
 

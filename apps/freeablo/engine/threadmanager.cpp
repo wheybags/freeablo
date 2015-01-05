@@ -24,9 +24,7 @@ namespace Engine
 
     void ThreadManager::run()
     {
-        while(!Input::InputManager::get()) {}
         Input::InputManager* inputManager = Input::InputManager::get();
-
         FARender::Renderer* renderer = FARender::Renderer::get();
 
         Message msg;
