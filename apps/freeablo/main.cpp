@@ -471,8 +471,6 @@ void runGameLoop(const bpo::variables_map& variables)
     FAGui::destroyGui();
     renderer.stop();    
 
-    while(!renderDone) {} // have to wait until the renderer stops before destroying all our locals
-
     for(size_t i = 0; i < levels.size(); i++)
     {
         if(levels[i])
