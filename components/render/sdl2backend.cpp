@@ -139,15 +139,18 @@ namespace Render
         resized = true;
     }
 
-    void updateGuiBuffer(std::vector<DrawCommand>& buffer)
+    void updateGuiBuffer(std::vector<DrawCommand>* buffer)
     {
         if(resized)
         {
             Context->SetDimensions(Rocket::Core::Vector2i(WIDTH, HEIGHT));
             resized = false;
         }
-        buffer.clear();
-        Renderer->mDrawBuffer = &buffer;
+
+        if(buffer)
+            buffer->clear();
+
+        Renderer->mDrawBuffer = buffer;
         Context->Render();
     }
 

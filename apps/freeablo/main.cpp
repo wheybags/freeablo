@@ -19,6 +19,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
 #include <fstream>
 
 #include <misc/fareadini.h>
@@ -456,14 +457,21 @@ void runGameLoop(const bpo::variables_map& variables)
         FAGui::updateGui();
 
         FARender::RenderState* state = renderer.getFreeState();
-        
-        state->mPos = player->mPos;
-        state->tileset = tileset;
-        state->level = level;
 
-        world.fillRenderState(state);
+        if(state)
+        {
+            state->mPos = player->mPos;
+            state->tileset = tileset;
+            state->level = level;
 
-        Render::updateGuiBuffer(state->guiDrawBuffer);
+            world.fillRenderState(state);
+
+            Render::updateGuiBuffer(&state->guiDrawBuffer);
+        }
+        else
+        {
+            Render::updateGuiBuffer(NULL);
+        }
 
         renderer.setCurrentState(state);
     }

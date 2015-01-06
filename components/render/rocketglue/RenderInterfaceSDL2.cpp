@@ -59,20 +59,23 @@ RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* scree
 
 void RocketSDL2Renderer::RenderGeometry(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation)
 {
-    DrawCommand tmp;
-    
-    for(int i = 0; i < num_vertices; i++)
-        tmp.draw.vertices.push_back(vertices[i]);
+    if(mDrawBuffer)
+    {
+        DrawCommand tmp;
 
-    for(int i = 0; i < num_indices; i++)
-        tmp.draw.indices.push_back(indices[i]);
+        for(int i = 0; i < num_vertices; i++)
+            tmp.draw.vertices.push_back(vertices[i]);
 
-    tmp.draw.texture = texture;
-    tmp.draw.translation = translation;
+        for(int i = 0; i < num_indices; i++)
+            tmp.draw.indices.push_back(indices[i]);
 
-    tmp.mode = DrawCommand::Draw;
+        tmp.draw.texture = texture;
+        tmp.draw.translation = translation;
 
-    mDrawBuffer->push_back(tmp);
+        tmp.mode = DrawCommand::Draw;
+
+        mDrawBuffer->push_back(tmp);
+    }
 }
 
 void RocketSDL2Renderer::drawBuffer(std::vector<DrawCommand>& buffer, Render::SpriteCacheBase* cache)
@@ -158,11 +161,14 @@ void RocketSDL2Renderer::RenderGeometryImp(Rocket::Core::Vertex* vertices, int n
 // Called by Rocket when it wants to enable or disable scissoring to clip content.		
 void RocketSDL2Renderer::EnableScissorRegion(bool enable)
 {
-    DrawCommand tmp;
-    tmp.mode = DrawCommand::EnableScissor;
-    tmp.enableScissor = enable;
+    if(mDrawBuffer)
+    {
+        DrawCommand tmp;
+        tmp.mode = DrawCommand::EnableScissor;
+        tmp.enableScissor = enable;
 
-    mDrawBuffer->push_back(tmp);
+        mDrawBuffer->push_back(tmp);
+    }
 }
 
 void RocketSDL2Renderer::EnableScissorRegionImp(bool enable)
@@ -176,15 +182,18 @@ void RocketSDL2Renderer::EnableScissorRegionImp(bool enable)
 // Called by Rocket when it wants to change the scissor region.		
 void RocketSDL2Renderer::SetScissorRegion(int x, int y, int width, int height)
 {
-    DrawCommand tmp;
-    tmp.mode = DrawCommand::SetScissor;
-    
-    tmp.setScissor.x = x;
-    tmp.setScissor.y = y;
-    tmp.setScissor.width = width;
-    tmp.setScissor.height = height;
+    if(mDrawBuffer)
+    {
+        DrawCommand tmp;
+        tmp.mode = DrawCommand::SetScissor;
 
-    mDrawBuffer->push_back(tmp);
+        tmp.setScissor.x = x;
+        tmp.setScissor.y = y;
+        tmp.setScissor.width = width;
+        tmp.setScissor.height = height;
+
+        mDrawBuffer->push_back(tmp);
+    }
 }
 
 void RocketSDL2Renderer::SetScissorRegionImp(int x, int y, int width, int height)
