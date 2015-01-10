@@ -39,6 +39,22 @@ namespace FAIO
 
     HANDLE diabdat = NULL;
 
+    void init()
+    {
+        int nError = ERROR_SUCCESS;
+
+        if(!SFileOpenArchive(getMPQFileName().c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat))
+            nError = GetLastError();
+
+        if(nError != ERROR_SUCCESS)
+            std::cerr << "Failed to open " << DIABDAT_MPQ << std::endl;
+    }
+
+    void quit()
+    {
+        SFileCloseArchive(diabdat);
+    }
+
     FAFile* FAfopen(const std::string& filename)
     {
         bfs::path path(filename);
@@ -47,17 +63,6 @@ namespace FAIO
         if(!bfs::exists(filename))
         {
             boost::mutex::scoped_lock lock(m);
-            int nError = ERROR_SUCCESS;
-            
-            if(diabdat == NULL && !SFileOpenArchive(getMPQFileName().c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat))
-                nError = GetLastError();
-
-            if(nError != ERROR_SUCCESS)
-            {
-                std::cerr << "Failed to open " << DIABDAT_MPQ << std::endl;
-                return NULL;
-            }
-            
             std::string stormPath = getStormLibPath(path);
 
             if(!SFileHasFile(diabdat, stormPath.c_str()))

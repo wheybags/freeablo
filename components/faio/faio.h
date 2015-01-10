@@ -41,7 +41,10 @@ namespace FAIO
             friend size_t FAftell(FAFile* stream);
             friend size_t FAsize(FAFile* stream);
     };
-    
+
+    void init();
+    void quit();
+
     FAFile* FAfopen(const std::string& filename);
     size_t FAfread(void * ptr, size_t size, size_t count, FAFile* stream);
     int FAfclose(FAFile* stream); 

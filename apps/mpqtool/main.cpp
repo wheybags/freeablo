@@ -9,6 +9,7 @@
 
 int main(int, char** argv)
 {
+    FAIO::init();
 
     FAIO::FAFile* file = FAIO::FAfopen(argv[1]);
     FILE* output = fopen(argv[2], "w");
@@ -24,5 +25,6 @@ int main(int, char** argv)
 
     fclose(output);
 
+    FAIO::quit();
     return 0;
 }

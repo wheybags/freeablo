@@ -276,6 +276,8 @@ volatile bool renderDone = false;
  */
 int main(int argc, char** argv)
 {
+    FAIO::init();
+
     boost::program_options::variables_map variables;
 
     if (parseOptions(argc, argv, variables))
@@ -283,6 +285,7 @@ int main(int argc, char** argv)
         run(variables);
     }
 
+    FAIO::quit();
     return 0;
 }
 
