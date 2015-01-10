@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace bfs = boost::filesystem;
@@ -17,6 +18,7 @@ namespace FAIO
     FAFile::FAFile(){}
 
     const std::string DIABDAT_MPQ = "DIABDAT.MPQ";
+    boost::mutex m;
 
     // StormLib needs paths with windows style \'s
     std::string getStormLibPath(const bfs::path& path)
@@ -44,6 +46,7 @@ namespace FAIO
 
         if(!bfs::exists(filename))
         {
+            boost::mutex::scoped_lock lock(m);
             int nError = ERROR_SUCCESS;
             
             if(diabdat == NULL && !SFileOpenArchive(getMPQFileName().c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat))
@@ -100,11 +103,15 @@ namespace FAIO
                 return fread(ptr, size, count, stream->data.plainFile.file);
             
             case FAFile::MPQFile:
+            {
+                boost::mutex::scoped_lock lock(m);
+
                 DWORD dwBytes = 1;
                 if(!SFileReadFile(*((HANDLE*)stream->data.mpqFile), ptr, size*count, &dwBytes, NULL))
                     std::cout << "Error reading from file" << std::endl;
 
                 return dwBytes;
+            }
         }
         return 0;
     }
@@ -120,11 +127,15 @@ namespace FAIO
                 return fclose(stream->data.plainFile.file);
 
             case FAFile::MPQFile:
+            {
+                boost::mutex::scoped_lock lock(m);
+
                 int res = SFileCloseFile(*((HANDLE*)stream->data.mpqFile));
                 free(stream->data.mpqFile);
 
                 if(res != 0)
                     retval = EOF;
+            }
         }
 
         delete stream;
@@ -140,6 +151,8 @@ namespace FAIO
                 return fseek(stream->data.plainFile.file, offset, origin);
             
             case FAFile::MPQFile:
+            {
+                boost::mutex::scoped_lock lock(m);
                 DWORD moveMethod;
                 
                 switch(origin)
@@ -165,6 +178,7 @@ namespace FAIO
                 nError = GetLastError();
 
                 return nError != ERROR_SUCCESS;
+            }
         }
 
         return 0;
@@ -178,7 +192,10 @@ namespace FAIO
                 return ftell(stream->data.plainFile.file);
 
             case FAFile::MPQFile:
+            {
+                boost::mutex::scoped_lock lock(m);
                 return SFileSetFilePointer(*((HANDLE*)stream->data.mpqFile), 0, NULL, FILE_CURRENT);
+            }
 
             default:
                 return 0;
@@ -193,7 +210,10 @@ namespace FAIO
                 return bfs::file_size(*(stream->data.plainFile.filename));
 
             case FAFile::MPQFile:
+            {
+                boost::mutex::scoped_lock lock(m);
                 return SFileGetFileSize(*((HANDLE*)stream->data.mpqFile), NULL);
+            }
         }
 
         return 0; 
