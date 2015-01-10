@@ -22,7 +22,7 @@ namespace Input
         boost::function<void(uint32_t, uint32_t)> mouseMove,
         Rocket::Core::Context* context):
             
-            mQueue(500), mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
+            mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
             mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)), mContext(context), mModifiers(0)
             {
                 assert(!instance);
