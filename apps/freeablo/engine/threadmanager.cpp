@@ -21,6 +21,8 @@ namespace Engine
 
     ThreadManager::~ThreadManager()
     {
+        if(mMusic)
+            Audio::freeMusic(mMusic);
     }
 
     void ThreadManager::run()

@@ -38,8 +38,6 @@ namespace FARender
             mRocketContext = Render::initGui(boost::bind(&Renderer::loadGuiTextureFunc, this, _1, _2, _3),
                                              boost::bind(&Renderer::generateGuiTextureFunc, this, _1, _2, _3),
                                              boost::bind(&Renderer::releaseGuiTextureFunc, this, _1));
-            Audio::init();
-
             mRenderer = this;
         }
     }
