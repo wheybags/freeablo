@@ -128,8 +128,11 @@ namespace FAIO
         switch(stream->mode)
         {
             case FAFile::PlainFile:
+            {
                 delete stream->data.plainFile.filename;
-                return fclose(stream->data.plainFile.file);
+                retval = fclose(stream->data.plainFile.file);
+                break;
+            }
 
             case FAFile::MPQFile:
             {
@@ -140,6 +143,8 @@ namespace FAIO
 
                 if(res != 0)
                     retval = EOF;
+
+                break;
             }
         }
 
