@@ -187,7 +187,10 @@ namespace Render
         FAIO::FAfread(buffer, 1, buffer_size, file_handle);
         FAIO::FAfclose(file_handle);
 
-        return IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.c_str());
+        SDL_Surface* s = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.c_str());
+        delete[] buffer;
+
+        return s;
     }
 
     std::string getImageExtension(const std::string& path)
@@ -254,6 +257,7 @@ namespace Render
 
             SDL_Surface* tmp = loadNonCelImage(path, extension);
             SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, tmp);
+            SDL_FreeSurface(tmp);
 
             vec[0] = (Sprite)tex;
 
