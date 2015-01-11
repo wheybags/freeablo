@@ -59,7 +59,8 @@ namespace Render
 
 	void resize(size_t w, size_t h);
    
-    void updateGuiBuffer(std::vector<DrawCommand>& buffer);
+    void updateGuiBuffer(std::vector<DrawCommand>* buffer);
+    void quitGui();
     void drawGui(std::vector<DrawCommand>& buffer, SpriteCacheBase* cache);
 
     bool getImageInfo(const std::string& path, size_t& width, size_t& height, size_t& animLength, int32_t celIndex=0);

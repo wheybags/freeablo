@@ -22,7 +22,6 @@ namespace FARender
 
     Renderer::Renderer(int32_t windowWidth, int32_t windowHeight)
         :mDone(false)
-        ,mCurrent(NULL)
         ,mRocketContext(NULL)
         ,mSpriteManager(1024)
     {
@@ -39,8 +38,6 @@ namespace FARender
             mRocketContext = Render::initGui(boost::bind(&Renderer::loadGuiTextureFunc, this, _1, _2, _3),
                                              boost::bind(&Renderer::generateGuiTextureFunc, this, _1, _2, _3),
                                              boost::bind(&Renderer::releaseGuiTextureFunc, this, _1));
-            Audio::init();
-
             mRenderer = this;
         }
     }
@@ -100,6 +97,7 @@ namespace FARender
     Renderer::~Renderer()
     {
         mRenderer = NULL;
+        Render::quitGui();
         Render::quit();
     }
 
@@ -118,12 +116,12 @@ namespace FARender
 
     RenderState* Renderer::getFreeState()
     {
-        while(true)
+        for(size_t i = 0; i < 3; i++)
         {
-            for(size_t i = 0; i < 3; i++)
+            if(mStates[i].ready)
             {
-                if(&mStates[i] != mCurrent && mStates[i].mMutex.try_lock())
-                    return &mStates[i];
+                mStates[i].ready = false;
+                return &mStates[i];
             }
         }
 
@@ -132,8 +130,7 @@ namespace FARender
 
     void Renderer::setCurrentState(RenderState* current)
     {
-        current->mMutex.unlock();
-        mCurrent = current;
+        Engine::ThreadManager::get()->sendRenderState(current);
     }
     
     FASpriteGroup Renderer::loadImage(const std::string& path)
@@ -151,20 +148,18 @@ namespace FARender
         return mRocketContext;
     }
 
-    bool Renderer::renderFrame()
+    bool Renderer::renderFrame(RenderState* state)
     {
         if(mDone)
             return false;
 
-        RenderState* current = mCurrent;
-
-        if(current && current->mMutex.try_lock())
+        if(state)
         {
             
-            if(current->level)
+            if(state->level)
             {
-                if(mLevelObjects.width() != current->level->width() || mLevelObjects.height() != current->level->height())
-                    mLevelObjects.resize(current->level->width(), current->level->height());
+                if(mLevelObjects.width() != state->level->width() || mLevelObjects.height() != state->level->height())
+                    mLevelObjects.resize(state->level->width(), state->level->height());
 
                 for(size_t x = 0; x < mLevelObjects.width(); x++)
                 {
@@ -174,26 +169,24 @@ namespace FARender
                     }
                 }
 
-                for(size_t i = 0; i < current->mObjects.size(); i++)
+                for(size_t i = 0; i < state->mObjects.size(); i++)
                 {
-                    size_t x = current->mObjects[i].get<2>().current().first;
-                    size_t y = current->mObjects[i].get<2>().current().second;
+                    size_t x = state->mObjects[i].get<2>().current().first;
+                    size_t y = state->mObjects[i].get<2>().current().second;
 
                     mLevelObjects[x][y].valid = true;
-                    mLevelObjects[x][y].spriteCacheIndex = current->mObjects[i].get<0>().spriteCacheIndex;
-                    mLevelObjects[x][y].spriteFrame = current->mObjects[i].get<1>();
-                    mLevelObjects[x][y].x2 = current->mObjects[i].get<2>().next().first;
-                    mLevelObjects[x][y].y2 = current->mObjects[i].get<2>().next().second;
-                    mLevelObjects[x][y].dist = current->mObjects[i].get<2>().mDist;
+                    mLevelObjects[x][y].spriteCacheIndex = state->mObjects[i].get<0>().spriteCacheIndex;
+                    mLevelObjects[x][y].spriteFrame = state->mObjects[i].get<1>();
+                    mLevelObjects[x][y].x2 = state->mObjects[i].get<2>().next().first;
+                    mLevelObjects[x][y].y2 = state->mObjects[i].get<2>().next().second;
+                    mLevelObjects[x][y].dist = state->mObjects[i].get<2>().mDist;
                 }
 
-                Render::drawLevel(*current->level, current->tileset.minTops.spriteCacheIndex, current->tileset.minBottoms.spriteCacheIndex, &mSpriteManager, mLevelObjects, current->mPos.current().first, current->mPos.current().second,
-                    current->mPos.next().first, current->mPos.next().second, current->mPos.mDist);
+                Render::drawLevel(*state->level, state->tileset.minTops.spriteCacheIndex, state->tileset.minBottoms.spriteCacheIndex, &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,
+                    state->mPos.next().first, state->mPos.next().second, state->mPos.mDist);
             }
 
-            Render::drawGui(current->guiDrawBuffer, &mSpriteManager);
-
-            current->mMutex.unlock();
+            Render::drawGui(state->guiDrawBuffer, &mSpriteManager);
         }
         
         Render::draw();

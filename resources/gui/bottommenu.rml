@@ -20,13 +20,18 @@
         <script>
 import rocket
 import freeablo
-context = rocket.contexts['default']
 
+def loadDocs():
+    context = rocket.contexts['default']
 
-invHandle = [context.LoadDocument('resources/gui/inventory.rml'), False]
-charHandle = [context.LoadDocument('resources/gui/character.rml'), False]
+    global invHandle
+    invHandle = [context.LoadDocument('resources/gui/inventory.rml'), False]
+    global charHandle
+    charHandle = [context.LoadDocument('resources/gui/character.rml'), False]
+    global pauseHandle
+    pauseHandle = [context.LoadDocument('resources/gui/pausemenu.rml'), False]
 
-pauseHandle = [context.LoadDocument('resources/gui/pausemenu.rml'), False]
+loadDocs()
 
 docs = [invHandle, charHandle, pauseHandle]
 

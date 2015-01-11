@@ -6,7 +6,8 @@
 
 #include <map>
 
-#include <boost/thread.hpp>
+#include <boost/atomic.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <render/render.h>
 
@@ -35,7 +36,7 @@ namespace FARender
     {
         public:
 
-        boost::mutex mMutex;
+        boost::atomic<bool> ready;
 
         FAWorld::Position mPos;
         
@@ -46,6 +47,8 @@ namespace FARender
         Tileset tileset;
 
         Level::Level* level;
+
+        RenderState():ready(true) {}
     };
 
     class Renderer
@@ -69,7 +72,7 @@ namespace FARender
 
             Rocket::Core::Context* getRocketContext();
 
-            bool renderFrame(); ///< To be called only by Engine::ThreadManager
+            bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
             void cleanup(); ///< To be called only by Engine::ThreadManager
             
         private:
@@ -79,12 +82,10 @@ namespace FARender
 
             static Renderer* mRenderer; ///< Singleton instance
 
-            bool mDone;
+            boost::atomic<bool> mDone;
             Render::LevelObjects mLevelObjects;
 
             RenderState mStates[3];
-
-            RenderState* mCurrent;
 
             Rocket::Core::Context* mRocketContext;
 

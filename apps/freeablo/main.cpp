@@ -19,6 +19,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
 #include <fstream>
 
 #include <misc/fareadini.h>
@@ -275,6 +276,8 @@ volatile bool renderDone = false;
  */
 int main(int argc, char** argv)
 {
+    FAIO::init();
+
     boost::program_options::variables_map variables;
 
     if (parseOptions(argc, argv, variables))
@@ -282,6 +285,7 @@ int main(int argc, char** argv)
         run(variables);
     }
 
+    FAIO::quit();
     return 0;
 }
 
@@ -294,6 +298,8 @@ void run(const bpo::variables_map& variables)
 
     Engine::ThreadManager threadManager;
     FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
+    Audio::init();
+
     Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
 
     boost::thread mainThread(boost::bind(&runGameLoop, &variables));
@@ -302,6 +308,8 @@ void run(const bpo::variables_map& variables)
     renderDone = true;
 
     mainThread.join();
+
+    Audio::quit();
 }
 
 void runGameLoop(const bpo::variables_map& variables)
@@ -456,19 +464,25 @@ void runGameLoop(const bpo::variables_map& variables)
         FAGui::updateGui();
 
         FARender::RenderState* state = renderer.getFreeState();
-        
-        state->mPos = player->mPos;
-        state->tileset = tileset;
-        state->level = level;
 
-        world.fillRenderState(state);
+        if(state)
+        {
+            state->mPos = player->mPos;
+            state->tileset = tileset;
+            state->level = level;
 
-        Render::updateGuiBuffer(state->guiDrawBuffer);
+            world.fillRenderState(state);
+
+            Render::updateGuiBuffer(&state->guiDrawBuffer);
+        }
+        else
+        {
+            Render::updateGuiBuffer(NULL);
+        }
 
         renderer.setCurrentState(state);
     }
     
-    FAGui::destroyGui();
     renderer.stop();    
 
     for(size_t i = 0; i < levels.size(); i++)

@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include <boost/function.hpp>
-#include <boost/lockfree/queue.hpp>
+#include <boost/lockfree/spsc_queue.hpp>
 
 #include <misc/disablewarn.h>
     #include <Rocket/Core.h>
@@ -64,7 +64,7 @@ namespace Input
                 } vals;
             };
 
-            boost::lockfree::queue<Event> mQueue;
+            boost::lockfree::spsc_queue<Event, boost::lockfree::capacity<500> > mQueue;
             boost::function<void(Key)> mKeyPress;
             boost::function<void(Key)> mKeyRelease;
             boost::function<void(uint32_t, uint32_t, Key)> mMouseClick;

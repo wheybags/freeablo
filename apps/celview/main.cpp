@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <faio/faio.h>
 #include <render/render.h>
 #include <input/inputmanager.h>
 
@@ -30,6 +31,7 @@ void keyPress(Input::Key key)
 
 int main(int, char** argv)
 {
+    FAIO::init();
     Render::RenderSettings settings;
     settings.windowWidth = 1280;
     settings.windowHeight = 960;
@@ -50,5 +52,6 @@ int main(int, char** argv)
         Render::draw();
     }
 
+    FAIO::quit();
     return 0;
 }

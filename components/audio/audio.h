@@ -6,6 +6,7 @@
 namespace Audio
 {
     void init();
+    void quit();
     
     typedef void Music;
     Music* loadMusic(const std::string& path);
