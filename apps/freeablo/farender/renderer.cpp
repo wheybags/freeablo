@@ -99,6 +99,7 @@ namespace FARender
     Renderer::~Renderer()
     {
         mRenderer = NULL;
+        Render::quitGui();
         Render::quit();
     }
 

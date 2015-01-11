@@ -122,6 +122,22 @@ namespace Render
 
         return Context;
     }
+
+    void quitGui()
+    {
+        Context->UnloadAllDocuments();
+
+        Context->RemoveReference();
+
+        Rocket::Core::Shutdown();
+        Py_Finalize();
+
+        delete Renderer;
+        delete FileInterface;
+        delete SystemInterface;
+    }
+
+
 	
     void quit()
     {

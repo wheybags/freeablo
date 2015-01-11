@@ -479,7 +479,6 @@ void runGameLoop(const bpo::variables_map& variables)
         renderer.setCurrentState(state);
     }
     
-    FAGui::destroyGui();
     renderer.stop();    
 
     for(size_t i = 0; i < levels.size(); i++)

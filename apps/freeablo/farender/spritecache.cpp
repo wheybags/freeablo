@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include <sstream>
+#include <iostream>
 
 #include <cel/celfile.h>
 

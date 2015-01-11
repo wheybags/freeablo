@@ -75,10 +75,4 @@ namespace FAGui
 
         renderer->getRocketContext()->Update();
     }
-
-    void destroyGui()
-    {
-        FARender::Renderer* renderer = FARender::Renderer::get();
-        renderer->getRocketContext()->UnloadAllDocuments();
-    }
 }
