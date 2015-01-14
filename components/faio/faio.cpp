@@ -52,7 +52,10 @@ namespace FAIO
 
     void quit()
     {
-        SFileCloseArchive(diabdat);
+        if (NULL != diabdat)
+        {
+            SFileCloseArchive(diabdat);
+        }
     }
 
     FAFile* FAfopen(const std::string& filename)
