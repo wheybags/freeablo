@@ -42,7 +42,7 @@ namespace FAIO
             friend size_t FAsize(FAFile* stream);
     };
 
-    void init();
+    bool init();
     void quit();
 
     FAFile* FAfopen(const std::string& filename);

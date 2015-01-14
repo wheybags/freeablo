@@ -276,7 +276,10 @@ volatile bool renderDone = false;
  */
 int main(int argc, char** argv)
 {
-    FAIO::init();
+    if (!FAIO::init())
+    {
+        return EXIT_FAILURE;
+    }
 
     boost::program_options::variables_map variables;
 
