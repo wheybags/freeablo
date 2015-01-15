@@ -322,6 +322,12 @@ void runGameLoop(const bpo::variables_map& variables)
     Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
 
     DiabloExe::DiabloExe exe;
+
+    if (!exe.isLoaded())
+    {
+        return;
+    }
+
     FAWorld::World world;
 
     FALevelGen::FAsrand(time(NULL));
