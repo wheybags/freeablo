@@ -221,7 +221,11 @@ namespace Render
         return true;
     }
 
-    SpriteGroup* loadSprite(const std::string& path)
+    Cel::Colour getPixel(SDL_Surface* s, int x, int y);
+    void setpixel(SDL_Surface *s, int x, int y, Cel::Colour c);
+    SDL_Surface* createTransparentSurface(size_t width, size_t height);
+
+    SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB)
     {
         std::string extension = getImageExtension(path);
 
@@ -234,6 +238,26 @@ namespace Render
             std::vector<Sprite> vec(1);
 
             SDL_Surface* tmp = loadNonCelImage(path, extension);
+
+            if(hasTrans)
+            {
+                SDL_Surface* src = tmp;
+                tmp = createTransparentSurface(src->w, src->h);
+
+                for(int x = 0; x < src->w; x++)
+                {
+                    for(int y = 0; y < src->h; y++)
+                    {
+                        Cel::Colour px = getPixel(src, x, y);
+                        if(!(px.r == transR && px.g == transG && px.b == transB))
+                        {
+                            setpixel(tmp, x, y, px);
+                        }
+                    }
+                }
+                SDL_FreeSurface(src);
+            }
+
             SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, tmp);
 
             vec[0] = (Sprite)tex;
@@ -288,7 +312,6 @@ namespace Render
     }
 
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
-    SDL_Surface* createTransparentSurface(size_t width, size_t height);
     void clearTransparentSurface(SDL_Surface* s);
 
     SpriteGroup::SpriteGroup(const std::string& path)
@@ -393,6 +416,44 @@ namespace Render
       
         pixmem32 = (Uint32*) s->pixels  + y + x;
         *pixmem32 = colour;
+    }
+
+    Cel::Colour getPixel(SDL_Surface* s, int x, int y)
+    {
+        Uint32 pix;
+
+        int bpp = s->format->BytesPerPixel;
+        // Here p is the address to the pixel we want to retrieve
+        Uint8 *p = (Uint8 *)s->pixels + y * s->pitch + x * bpp;
+
+        switch(bpp) {
+            case 1:
+                pix = *p;
+                break;
+
+            case 2:
+                pix = *(Uint16 *)p;
+                break;
+
+            case 3:
+                if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+                    pix = p[0] << 16 | p[1] << 8 | p[2];
+                else
+                    pix = p[0] | p[1] << 8 | p[2] << 16;
+                break;
+
+            case 4:
+                pix = *(Uint32 *)p;
+                break;
+
+            default:
+                pix = 0;
+        }
+
+        Uint8 r, g, b, a;
+        SDL_GetRGBA(pix, s->format, &r, &g, &b, &a);
+
+        return Cel::Colour(r, g, b, 255-a);
     }
 
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)

@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <cel/celfile.h>
+#include <misc/stringops.h>
 
 
 namespace FARender
@@ -22,7 +23,7 @@ namespace FARender
             FASpriteGroup newCacheEntry;
             size_t cacheIndex = newUniqueIndex();
             newCacheEntry.spriteCacheIndex = cacheIndex;
-            Render::getImageInfo(path, newCacheEntry.width, newCacheEntry.height, newCacheEntry.animLength, 0);
+            Render::getImageInfo(Misc::StringUtils::split(path, '&')[0], newCacheEntry.width, newCacheEntry.height, newCacheEntry.animLength, 0);
 
             mStrToCache[path] = newCacheEntry;
             mCacheToStr[cacheIndex] = path;
@@ -78,7 +79,36 @@ namespace FARender
             {
                 //TODO: replace mCacheToStr[index] with map.at(), to guarantee thread safety (once we switch to c++11)
                 // until then, it is safe in practice.
-                newSprite = Render::loadSprite(mCacheToStr[index]);
+                std::string cachePath = mCacheToStr[index];
+
+                std::vector<std::string> components = Misc::StringUtils::split(cachePath, '&');
+                std::string sourcePath = components[0];
+                bool hasTrans = false;
+                size_t r,g,b;
+
+                for(size_t i = 1; i < components.size(); i++)
+                {
+                    std::vector<std::string> pair = Misc::StringUtils::split(components[i], '=');
+
+                    if(pair[0] == "trans")
+                    {
+                        std::vector<std::string> rgbStr = Misc::StringUtils::split(pair[1], ',');
+
+                        hasTrans = true;
+
+                        std::istringstream rss(rgbStr[0]);
+                        rss >> r;
+
+                        std::istringstream gss(rgbStr[1]);
+                        gss >> g;
+
+                        std::istringstream bss(rgbStr[2]);
+                        bss >> b;
+
+                    }
+                }
+
+                newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b);
             }
             else if(mCacheToTilesetPath.count(index))
             {

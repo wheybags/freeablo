@@ -7,6 +7,7 @@
 #include <level/level.h>
 #include <input/inputmanager.h>
 #include <audio/audio.h>
+#include <misc/stringops.h>
 
 #include "../engine/threadmanager.h"
 
@@ -47,18 +48,31 @@ namespace FARender
 
     bool Renderer::loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
     {
-        // Extract the filepath and index from source
-        // cel file paths can specify which image to use, eg "/ctrlpan/panel8bu.cel:5" for the 5th frame
-        std::istringstream ss(source.CString());
-        size_t celIndex = 0;
-        std::string sourcePath;
-        std::getline(ss, sourcePath, ':');
+        std::vector<std::string> components = Misc::StringUtils::split(std::string(source.CString()), '&');
 
-        std::string tmp;
-        if(std::getline(ss, tmp, ':'))
+        size_t celIndex = 0;
+        std::string sourcePath = components[0];
+
+        for(size_t i = 1; i < components.size(); i++)
         {
-                std::istringstream ss(tmp);
-                ss >> celIndex;
+            std::vector<std::string> pair = Misc::StringUtils::split(components[i], '=');
+
+            if(pair.size() != 2)
+            {
+                std::cerr << "Invalid image filename param " << components[i] << std::endl;
+                continue;
+            }
+
+            if(pair[0] == "frame")
+            {
+                std::istringstream ss2(pair[1]);
+                ss2 >> celIndex;
+            }
+            else if(pair[0] == "trans")
+            {
+                // forward trans params on to be dealt with later in SpriteCache
+                sourcePath += std::string("&") + components[i];
+            }
         }
 
         FASpriteGroup sprite = mSpriteManager.get(sourcePath);
