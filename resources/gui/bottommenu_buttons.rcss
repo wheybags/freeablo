@@ -19,7 +19,7 @@ button#charBut:active
 
     left: -276px;
     top: 45px;
-    background-image: /ctrlpan/panel8bu.cel:0;
+    background-image: /ctrlpan/panel8bu.cel&frame=0;
 }
 
 button#questBut
@@ -43,7 +43,7 @@ button#questBut:active
 
     left: -276px;
     top: 71px;
-    background-image: /ctrlpan/panel8bu.cel:1;
+    background-image: /ctrlpan/panel8bu.cel&frame=1;
 }
 
 button#mapBut
@@ -67,7 +67,7 @@ button#mapBut:active
 
     left: -276px;
     top: 111px;
-    background-image: /ctrlpan/panel8bu.cel:2;
+    background-image: /ctrlpan/panel8bu.cel&frame=2;
 }
 
 button#menuBut
@@ -91,7 +91,7 @@ button#menuBut:active
 
     left: -276px;
     top: 137px;
-    background-image: /ctrlpan/panel8bu.cel:3;
+    background-image: /ctrlpan/panel8bu.cel&frame=3;
 } 
 
 button#invBut
@@ -115,7 +115,7 @@ button#invBut:active
 
     left: 276px;
     top: 45px;
-    background-image: /ctrlpan/panel8bu.cel:4;
+    background-image: /ctrlpan/panel8bu.cel&frame=4;
 }
 
 button#spellBut
@@ -139,5 +139,5 @@ button#spellBut:active
 
     left: 276px;
     top: 71px;
-    background-image: /ctrlpan/panel8bu.cel:5;
+    background-image: /ctrlpan/panel8bu.cel&frame=5;
 }
