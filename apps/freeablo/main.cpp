@@ -325,6 +325,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     if (!exe.isLoaded())
     {
+        renderer.stop();
         return;
     }
 
