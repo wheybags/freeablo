@@ -27,6 +27,8 @@ namespace DiabloExe
 
             std::string dump() const;
 
+            bool isLoaded() const;
+
         private:
             std::string getMD5();
             std::string getVersion();

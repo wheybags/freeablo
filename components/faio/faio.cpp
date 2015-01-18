@@ -39,20 +39,24 @@ namespace FAIO
 
     HANDLE diabdat = NULL;
 
-    void init()
+    bool init()
     {
-        int nError = ERROR_SUCCESS;
+        const bool success = SFileOpenArchive(getMPQFileName().c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat);
 
-        if(!SFileOpenArchive(getMPQFileName().c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat))
-            nError = GetLastError();
+        if (!success)
+        {
+            std::cerr << "Failed to open " << DIABDAT_MPQ << " with error " << GetLastError() << std::endl;
+        }
 
-        if(nError != ERROR_SUCCESS)
-            std::cerr << "Failed to open " << DIABDAT_MPQ << std::endl;
+        return success;
     }
 
     void quit()
     {
-        SFileCloseArchive(diabdat);
+        if (NULL != diabdat)
+        {
+            SFileCloseArchive(diabdat);
+        }
     }
 
     FAFile* FAfopen(const std::string& filename)

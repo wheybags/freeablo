@@ -276,7 +276,10 @@ volatile bool renderDone = false;
  */
 int main(int argc, char** argv)
 {
-    FAIO::init();
+    if (!FAIO::init())
+    {
+        return EXIT_FAILURE;
+    }
 
     boost::program_options::variables_map variables;
 
@@ -319,6 +322,13 @@ void runGameLoop(const bpo::variables_map& variables)
     Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
 
     DiabloExe::DiabloExe exe;
+
+    if (!exe.isLoaded())
+    {
+        renderer.stop();
+        return;
+    }
+
     FAWorld::World world;
 
     FALevelGen::FAsrand(time(NULL));
