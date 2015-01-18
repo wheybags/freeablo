@@ -25,7 +25,7 @@
             span#smlogo
             {
                 icon-decorator: image;
-                icon-image-src: /ui_art/smlogo.pcx;
+                icon-image-src: /ui_art/smlogo.pcx&trans=0,255,0;
                 icon-image-t-end: 154px;
                 
                 display: inline-block;
