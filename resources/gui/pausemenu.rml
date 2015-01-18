@@ -40,6 +40,8 @@ import rocket
 import freeablo
 from menu import Menu
 
+import docmanage
+
 pauseMenu = None
 
 def onLoad(document):
@@ -60,7 +62,7 @@ def onLoad(document):
  
 def onKeyDown(event, document):    
     if not pauseMenu.onKeyDown(event):
-        document.baseKeyDown(event, document)
+        docmanage.manager.onKeyDown(event)
 
         </script>
     </head>

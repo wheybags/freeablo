@@ -8,17 +8,18 @@ button#charBut
     background-decorator: image;
     background-image: /ctrlpan/panel8.cel 6px 22px 84px 47px;
     
-    position: relative;
-    left: -275px;
-    top: 47px;
+    position: absolute;
+    left: 6px;
+    top: 22px;
 }
 button#charBut:active
 {
     width: 71;
     height: 19;
 
-    left: -276px;
-    top: 45px;
+    position: absolute;
+    left:10px;
+    top: 25px;
     background-image: /ctrlpan/panel8bu.cel&frame=0;
 }
 
@@ -32,17 +33,18 @@ button#questBut
     background-decorator: image;
     background-image: /ctrlpan/panel8.cel 6px 48px 84px 73px;
     
-    position: relative;
-    left: -275px;
-    top: 73px;
+    position: absolute;
+    left: 6px;
+    top: 48px;
 }
 button#questBut:active
 {
     width: 71;
     height: 19;
 
-    left: -276px;
-    top: 71px;
+    position: absolute;
+    left: 10px;
+    top: 51;
     background-image: /ctrlpan/panel8bu.cel&frame=1;
 }
 
@@ -55,18 +57,18 @@ button#mapBut
 
     background-decorator: image;
     background-image: /ctrlpan/panel8.cel 6px 88px 84px 113px;
-    
-    position: relative;
-    left: -275px;
-    top: 113px;
+
+    position: absolute;
+    left: 6px;
+    top: 88px;
 }
 button#mapBut:active
 {
     width: 71;
     height: 19;
 
-    left: -276px;
-    top: 111px;
+    left: 10px;
+    top: 91px;
     background-image: /ctrlpan/panel8bu.cel&frame=2;
 }
 
@@ -79,18 +81,19 @@ button#menuBut
 
     background-decorator: image;
     background-image: /ctrlpan/panel8.cel 6px 114px 84px 139px;
-    
-    position: relative;
-    left: -275px;
-    top: 139px;
+
+    position: absolute;
+    left: 6px;
+    top: 114px;
 }
 button#menuBut:active
 {
     width: 71;
     height: 19;
 
-    left: -276px;
-    top: 137px;
+    position: absolute;
+    left: 10px;
+    top: 117px;
     background-image: /ctrlpan/panel8bu.cel&frame=3;
 } 
 
@@ -103,18 +106,19 @@ button#invBut
 
     background-decorator: image;
     background-image: /ctrlpan/panel8.cel 556px 22px 634px 47px;
-    
-    position: relative;
-    left: 275px;
-    top: 47px;
+
+    position: absolute;
+    top: 22px;
+    left: 556px;
 }
 button#invBut:active
 {
     width: 71;
     height: 19;
 
-    left: 276px;
-    top: 45px;
+    position: absolute;
+    top: 25px;
+    left: 560px;
     background-image: /ctrlpan/panel8bu.cel&frame=4;
 }
 
@@ -127,17 +131,18 @@ button#spellBut
 
     background-decorator: image;
     background-image: /ctrlpan/panel8.cel 556px 48px 634px 73px;
-    
-    position: relative;
-    left: 275px;
-    top: 73px;
+
+    position: absolute;
+    top: 48px;
+    left: 556px;
 }
 button#spellBut:active
 {
     width: 71;
     height: 19;
 
-    left: 276px;
-    top: 71px;
+    position: absolute;
+    top: 51px;
+    left: 560px;
     background-image: /ctrlpan/panel8bu.cel&frame=5;
 }

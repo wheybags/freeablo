@@ -53,7 +53,7 @@ namespace FAGui
     {
         initfreeablo();
         FARender::Renderer* renderer = FARender::Renderer::get();
-        ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/bottommenu.rml");
+        ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
     }
 
@@ -61,6 +61,9 @@ namespace FAGui
     {
         mainMenu->Hide();
         ingameUi->Show();
+        ingameUi->PushToBack(); // base.rml is an empty sheet that covers the whole screen for
+                                // detecting clicks outside the gui, push it to back so it doesn't
+                                // block clicks on the real gui.
     }
 
     void showMainMenu()

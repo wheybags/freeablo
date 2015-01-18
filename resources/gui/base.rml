@@ -1,0 +1,24 @@
+<rml>
+    <head>
+        <style>
+            body
+            {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+        <script>
+import docmanage
+
+def onLoad(document):
+    docmanage.init()
+
+    bottomMenuHandle = "resources/gui/bottommenu.rml"
+    docmanage.manager.loadDoc(bottomMenuHandle)
+    docmanage.manager.showDoc(bottomMenuHandle)
+        </script>
+    </head>
+
+    <body onload="onLoad(event)" onmousedown="document.PushToBack(); docmanage.manager.bodyClicked()">
+    </body>
+</rml>
