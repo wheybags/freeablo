@@ -22,6 +22,8 @@
 #include <misc/fareadini.h>
 #include <boost/property_tree/ptree.hpp>
 
+#include <input/hotkey.h>
+
 namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 namespace bpt = boost::property_tree;
@@ -31,12 +33,14 @@ bool paused = false;
 bool noclip = false;
 int changeLevel = 0;
 
-int hotkey [5];
+Input::Hotkey hotkey;
 
-int quit_key [5];
-int noclip_key [5];
-int changelvldwn_key [5];
-int changelvlup_key [5];
+Input::InputManager *inputmanager;
+
+Input::Hotkey quit_key;
+Input::Hotkey noclip_key;
+Input::Hotkey changelvldwn_key;
+Input::Hotkey changelvlup_key;
 
 bpt::ptree hotkeypt;
 
@@ -44,83 +48,55 @@ void keyPress(Input::Key key)
 {
     switch(key)
     {
-        case Input::KEY_RSHIFT: hotkey[1] = 1; return;
-        case Input::KEY_LSHIFT: hotkey[1] = 1; return;
-        case Input::KEY_RCTRL: hotkey[2] = 1; return;
-        case Input::KEY_LCTRL: hotkey[2] = 1; return;
-        case Input::KEY_RALT: hotkey[3] = 1; return;
-        case Input::KEY_LALT: hotkey[3] = 1; return;
-        case Input::KEY_RSUPER: hotkey[4] = 1; return;
-        case Input::KEY_LSUPER: hotkey[4] = 1; return;
+        case Input::KEY_RSHIFT:;
+        case Input::KEY_LSHIFT: hotkey.shift = true; return;
+        case Input::KEY_RCTRL:;
+        case Input::KEY_LCTRL: hotkey.ctrl = true; return;
+        case Input::KEY_RALT:;
+        case Input::KEY_LALT: hotkey.alt = true; return;
+        case Input::KEY_RSUPER:;
+        case Input::KEY_LSUPER: hotkey.super = true; return;
         default:
             {
-                hotkey[0] = key;
+                hotkey.key = key;
+                uint32_t modifiers = inputmanager->getModifiers();
+                std::cout << "modifiers = " << modifiers << std::endl;
                 break;
             }
     }
     
-    int check = 0;
-    
-    while(check<5)
-    {
-        //std::cout << "key " << hotkey[check] << " " << changelvldwn_key[check] << std::endl;
-        check++;
-    }
-    check = 0;
-    
-    while(check<5 && hotkey[check]==quit_key[check])
-    {
-        //std::cout << "key " << quit_key[check] << std::endl;
-        check++;
-    }
-    if (check == 5)
+    if (hotkey == quit_key)
     {
         done = true;
         return;
     }
-    check = 0;
     
-    while(check<5 && hotkey[check]==noclip_key[check])
-    {
-        check++;
-    }
-    if (check == 5)
+    if (hotkey == noclip_key)
     {
         noclip = !noclip;
         return;
     }
-    check = 0;
-
-    while(check<5 && hotkey[check]==changelvlup_key[check])
-    {
-        check++;
-    }
-    if (check == 5)
+    
+    if (hotkey == changelvlup_key)
     {
         changeLevel = -1;
         return;
     }
-    check = 0;
     
-    while(check<5 && hotkey[check]==changelvldwn_key[check])
-    {
-        check++;
-    }
-    if (check == 5)
+    if (hotkey == changelvldwn_key)
     {
         changeLevel = 1;
         return;
     }
-    check = 0;
 }
 
 void keyRelease(Input::Key key)
 {
-    hotkey[0] = 0;
-    hotkey[1] = 0;
-    hotkey[2] = 0;
-    hotkey[3] = 0;
-    hotkey[4] = 0;
+    hotkey.key = 0;
+    hotkey.shift = false;
+    hotkey.ctrl = false;
+    hotkey.alt = false;
+    hotkey.super = false;
 }
 
 size_t xClick = 0, yClick = 0;
@@ -371,6 +347,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     FARender::Renderer& renderer = *FARender::Renderer::get();
     Input::InputManager input(&keyPress, &keyRelease, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
+    inputmanager = &input;
 
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
@@ -419,29 +396,11 @@ void runGameLoop(const bpo::variables_map& variables)
     
     Misc::readIni("resources/hotkeys.ini", hotkeypt);
     
-    quit_key[0] = hotkeypt.get<int>("Quit.key");
-    quit_key[1] = hotkeypt.get<int>("Quit.shift");
-    quit_key[2] = hotkeypt.get<int>("Quit.ctrl");
-    quit_key[3] = hotkeypt.get<int>("Quit.alt");
-    quit_key[4] = hotkeypt.get<int>("Quit.super");
-    
-    noclip_key[0] = hotkeypt.get<int>("Noclip.key");
-    noclip_key[1] = hotkeypt.get<int>("Noclip.shift");
-    noclip_key[2] = hotkeypt.get<int>("Noclip.ctrl");
-    noclip_key[3] = hotkeypt.get<int>("Noclip.alt");
-    noclip_key[4] = hotkeypt.get<int>("Noclip.super");
-    
-    changelvlup_key[0] = hotkeypt.get<int>("Changelvlup.key");
-    changelvlup_key[1] = hotkeypt.get<int>("Changelvlup.shift");
-    changelvlup_key[2] = hotkeypt.get<int>("Changelvlup.ctrl");
-    changelvlup_key[3] = hotkeypt.get<int>("Changelvlup.alt");
-    changelvlup_key[4] = hotkeypt.get<int>("Changelvlup.super");
-    
-    changelvldwn_key[0] = hotkeypt.get<int>("Changelvldwn.key");
-    changelvldwn_key[1] = hotkeypt.get<int>("Changelvldwn.shift");
-    changelvldwn_key[2] = hotkeypt.get<int>("Changelvldwn.ctrl");
-    changelvldwn_key[3] = hotkeypt.get<int>("Changelvldwn.alt");
-    changelvldwn_key[4] = hotkeypt.get<int>("Changelvldwn.super");
+    quit_key = Input::Hotkey("Quit", hotkeypt);
+    noclip_key = Input::Hotkey("Noclip", hotkeypt);
+    changelvlup_key = Input::Hotkey("Changelvlup", hotkeypt);
+    changelvldwn_key = Input::Hotkey("Changelvldwn", hotkeypt);
+    //Input::inithotkey();
     
     // Main game logic loop
     while(!done)

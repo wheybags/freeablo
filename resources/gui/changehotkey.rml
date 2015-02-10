@@ -30,10 +30,14 @@
         </style>
 
         <script>
-
 import time
 import rocket
 import freeablo
+try:
+    import hotkey
+    worked = True
+except:
+    print("Error: could not import hotkey")
 from menu import Menu
 
 context = rocket.contexts['default']
@@ -47,7 +51,6 @@ modifiers = [rk.RSHIFT, rk.LSHIFT,
              rk.RWIN, rk.LWIN, 175]
 
 def onLoad(document):
-    keys = rocket.key_identifier
     document.id = "changehotkey"
     global doc
     doc = document
@@ -56,6 +59,11 @@ def onLoad(document):
     container.inner_rml = '<span id="menuEntry0"></span><br/>'
     elem = container
     elem.inner_rml = "Press A Key"
+    
+    #keytest = hotkey.Hotkey()
+    
+    #keytest.key = 52
+    #print(keytest.key)
  
 def onKeyDown(event, document):    
     global newHotkey
@@ -66,17 +74,17 @@ def onKeyDown(event, document):
 
     print(event.parameters['key_identifier'])
     
+    if event.parameters['key_identifier'] == rk.ESCAPE:
+        doc.Close()
+        hotkeymenu = context.LoadDocument('resources/gui/hotkeymenu.rml')
+        hotkeymenu.Show()
+        return
+    
     if event.parameters['key_identifier'] in [rk.CAPITAL, rk.NUMLOCK, rk.SCROLL, rk.PAUSE, rk.RETURN, rk.NUMPADENTER]:
         return
 
     oldHotkeys = freeablo.getHotkeys()
     #print(oldHotkeys)
-    
-    if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
-        doc.Close()
-        hotkeymenu = context.LoadDocument('resources/gui/hotkeymenu.rml')
-        hotkeymenu.Show()
-        return
 
     if not newHotkey:
         newHotkey.append(doc.func)

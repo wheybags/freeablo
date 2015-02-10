@@ -10,20 +10,21 @@
 
 #include <iostream>
 #include <boost/python.hpp>
-#include <input/common.cpp>
+#include <input/common.h>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
-//#include <vector>
+#include "input/hotkey.h"
 
 extern bool done; // TODO: handle this better
 extern bool paused; // TODO: handle this better
 extern int changeLevel; // TODO: handle this better
-extern int quit_key[]; // TODO: handle this better
-extern int noclip_key[]; // TODO: handle this better
-extern int changelvldwn_key[]; // TODO: handle this better
-extern int changelvlup_key[]; // TODO: handle this better
+
+extern Input::Hotkey quit_key; // TODO: handle this better
+extern Input::Hotkey noclip_key; // TODO: handle this better
+extern Input::Hotkey changelvldwn_key; // TODO: handle this better
+extern Input::Hotkey changelvlup_key; // TODO: handle this better
 
 namespace bpt = boost::property_tree;
 
@@ -67,99 +68,47 @@ namespace FAGui
     boost::python::list getHotkeys()
     {
         boost::python::list hotkeys;
-        boost::python::list quit;
-        boost::python::list noclip;
-        boost::python::list changelvlup;
-        boost::python::list changelvldwn;
-        
-        quit.append(Input::convertAsciiToRocketKey(quit_key[0]));
-        noclip.append(Input::convertAsciiToRocketKey(noclip_key[0]));
-        changelvlup.append(Input::convertAsciiToRocketKey(changelvlup_key[0]));
-        changelvldwn.append(Input::convertAsciiToRocketKey(changelvldwn_key[0]));
-        
-        for (int i=1; i<5; i++)
-        {
-            
-            quit.append(quit_key[i]);
-            noclip.append(noclip_key[i]);
-            changelvlup.append(changelvlup_key[i]);
-            changelvldwn.append(changelvldwn_key[i]);
-        }
+        Input::Hotkey pquit_key = quit_key;
+        Input::Hotkey pnoclip_key = noclip_key;
+        Input::Hotkey pchangelvlup_key = changelvlup_key;
+        Input::Hotkey pchangelvldwn_key = changelvldwn_key;
 
-        hotkeys.append(quit);
-        hotkeys.append(noclip);
-        hotkeys.append(changelvlup);
-        hotkeys.append(changelvldwn);
+        pquit_key.key = Input::convertAsciiToRocketKey(quit_key.key);
+        pnoclip_key.key = Input::convertAsciiToRocketKey(noclip_key.key);
+        pchangelvlup_key.key = Input::convertAsciiToRocketKey(changelvlup_key.key);
+        pchangelvldwn_key.key = Input::convertAsciiToRocketKey(changelvldwn_key.key);
+        
+        hotkeys.append(pquit_key);
+        hotkeys.append(pnoclip_key);
+        hotkeys.append(pchangelvlup_key);
+        hotkeys.append(pchangelvldwn_key);
         
         return hotkeys;
     }
     
-    void setHotkey(boost::python::list hotkey)
+    void setHotkey(std::string function, Input::Hotkey hotkey)
     {
-        std::string function = boost::python::extract<std::string>(hotkey[0]);
-        boost::python::list pykeys = boost::python::extract<boost::python::list>(hotkey[1]);
-        int keys [5];
-        
-        boost::python::ssize_t n = boost::python::len(pykeys);
-        for(boost::python::ssize_t i=0;i<n;i++) 
-        {
-            keys[i] = boost::python::extract<int>(pykeys[i]);
-            //std::cout  << keys[i] << std::endl;
-        }
-        keys[0] = Input::convertRocketKeyToAscii(keys[0]);
-        //std::cout  << keys[0] << std::endl;
+        hotkey.key = Input::convertRocketKeyToAscii(hotkey.key);
          
         if (function == "quit")
         {
-            for (int i=0; i<5; i++)
-            {
-                quit_key[i] = keys[i];
-            }
-            hotkeypt.put("Quit.key", quit_key[0]);
-            hotkeypt.put("Quit.shift", quit_key[1]);
-            hotkeypt.put("Quit.ctrl", quit_key[2]);
-            hotkeypt.put("Quit.alt", quit_key[3]);
-            hotkeypt.put("Quit.super", quit_key[4]);
-            bpt::write_ini("resources/hotkeys.ini", hotkeypt);
+            quit_key = hotkey;
+            quit_key.save("Quit", hotkeypt);
         }
         if (function == "noclip")
         {
-            for (int i=0; i<5; i++)
-            {
-                noclip_key[i] = keys[i];
-            }
-            hotkeypt.put("Noclip.key", noclip_key[0]);
-            hotkeypt.put("Noclip.shift", noclip_key[1]);
-            hotkeypt.put("Noclip.ctrl", noclip_key[2]);
-            hotkeypt.put("Noclip.alt", noclip_key[3]);
-            hotkeypt.put("Noclip.super", noclip_key[4]);
-            bpt::write_ini("resources/hotkeys.ini", hotkeypt);
+            noclip_key = hotkey;
+            noclip_key.save("Noclip", hotkeypt);
         }
         if (function == "changelvlup")
         {
-            for (int i=0; i<5 ; i++)
-            {
-                changelvlup_key[i] = keys[i];
-            }
-            hotkeypt.put("Changelvlup.key", changelvlup_key[0]);
-            hotkeypt.put("Changelvlup.shift", changelvlup_key[1]);
-            hotkeypt.put("Changelvlup.ctrl", changelvlup_key[2]);
-            hotkeypt.put("Changelvlup.alt", changelvlup_key[3]);
-            hotkeypt.put("Changelvlup.super", changelvlup_key[4]);
-            bpt::write_ini("resources/hotkeys.ini", hotkeypt);
+            changelvlup_key = hotkey;
+            changelvlup_key.save("Changelvlup", hotkeypt);
         }
         if (function == "changelvldwn")
         {
-            for (int i=0; i<5; i++)
-            {
-                changelvldwn_key[i] = keys[i];
-            }
-            hotkeypt.put("Changelvldwn.key", changelvldwn_key[0]);
-            hotkeypt.put("Changelvldwn.shift", changelvldwn_key[1]);
-            hotkeypt.put("Changelvldwn.ctrl", changelvldwn_key[2]);
-            hotkeypt.put("Changelvldwn.alt", changelvldwn_key[3]);
-            hotkeypt.put("Changelvldwn.super", changelvldwn_key[4]);
-            bpt::write_ini("resources/hotkeys.ini", hotkeypt);
+            changelvldwn_key = hotkey;
+            changelvldwn_key.save("Changelvldwn", hotkeypt);
         }
     }
 
@@ -179,6 +128,7 @@ namespace FAGui
     void initGui()
     {
         initfreeablo();
+        Input::inithotkey();
         FARender::Renderer* renderer = FARender::Renderer::get();
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/bottommenu.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");

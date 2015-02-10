@@ -1,252 +1,10 @@
 #include <Rocket/Core/Input.h>
 #include <boost/python.hpp>
 #include <cctype>
-#include "keys.h"
-//#include "common.h"
-
-namespace rci = Rocket::Core::Input;
-
-/* namespace Input
-{
-    
-    Key convertRocketKey(int rocketk)
-    {
-        Key key;
-        
-        switch(rocketk) 
-        {
-            case rci::KI_BACK: key = KEY_BACKSPACE; break;
-            case rci::KI_TAB: key = KEY_TAB; break;
-            case rci::KI_CLEAR: key = KEY_CLEAR; break;
-            case rci::KI_RETURN: key = KEY_RETURN; break;
-            case rci::KI_PAUSE: key = KEY_PAUSE; break;
-            case rci::KI_ESCAPE: key = KEY_ESCAPE; break;
-            case rci::KI_SPACE: key = KEY_SPACE; break;
-            case rci::KI_OEM_8: KEY_QUOTEDBL
-            case rci::KEY_HASH KEY_HASH
-            case rci::KEY_DOLLAR KEY_DOLLAR 
-            case rci::KEY_AMPERSAND KEY_AMPERSAND
-            case rci::KEY_QUOTE KEY_QUOTE
-            case rci::KEY_LEFTPAREN KEY_LEFTPAREN
-            case rci::KEY_RIGHTPAREN KEY_RIGHTPAREN
-            case rci::KEY_ASTERISK KEY_ASTERISK
-                    
-            case rci::KI_SPACE: key = KEY_SPACE; break;
-            case rci::KI_0: key = KEY_0; break;
-            case rci::KI_1: key = KEY_1; break;
-            case rci::KI_2: key = KEY_2; break;
-            case rci::KI_3: key = KEY_3; break;
-            case rci::KI_4: key = KEY_4; break;
-            case rci::KI_5: key = KEY_5; break;
-            case rci::KI_6: key = KEY_6; break;
-            case rci::KI_7: key = KEY_7; break;
-            case rci::KI_8: key = KEY_8; break;
-            case rci::KI_9: key = KEY_9; break;
-            
-            case rci::KI_A: key = KEY_a; break;
-            case rci::KI_B: key = KEY_b; break;
-            case rci::KI_C: key = KEY_c; break;
-            case rci::KI_D: key = KEY_d; break;
-            case rci::KI_E: key = KEY_e; break;
-            case rci::KI_F: key = KEY_f; break;
-            case rci::KI_G: key = KEY_g; break;
-            case rci::KI_H: key = KEY_h; break;
-            case rci::KI_I: key = KEY_i; break;
-            case rci::KI_J: key = KEY_j; break;
-            case rci::KI_K: key = KEY_k; break;
-            case rci::KI_L: key = KEY_l; break;
-            case rci::KI_M: key = KEY_m; break;
-            case rci::KI_N: key = KEY_n; break;
-            case rci::KI_O: key = KEY_o; break;
-            case rci::KI_P: key = KEY_p; break;
-            case rci::KI_Q: key = KEY_q; break;
-            case rci::KI_R: key = KEY_r; break;
-            case rci::KI_S: key = KEY_s; break;
-            case rci::KI_T: key = KEY_t; break;
-            case rci::KI_U: key = KEY_u; break;
-            case rci::KI_V: key = KEY_v; break;
-            case rci::KI_W: key = KEY_w; break;
-            case rci::KI_X: key = KEY_x; break;
-            case rci::KI_Y: key = KEY_y; break;
-            case rci::KI_Z: key = KEY_z; break;
-            
-            case rci::KI_OEM_1: key = KEY_SEMICOLON
-            case rci::KI_OEM_PLUS: key = KEY_PLUS
-            case rci::KI_OEM_COMMA: key = KEY_COMMA 
-            case rci::KI_OEM_MINUS: key = KEY_MINUS 
-            case rci::KI_OEM_PERIODK: key = KEY_PERIOD
-            case rci::KI_OEM_2: key = KEY_QUESTION
-            case rci::KI_OEM_3: key = 	
-
-            case rci::KI_OEM_4: key =  
-            case rci::KI_OEM_5: key =  
-            case rci::KI_OEM_6: key =  		
-            case rci::KI_OEM_7: key =  
-            case rci::KI_OEM_8: key =  
-
-            case rci::KI_OEM_102: key = 	
-: key = 
-            case rci::KI_NUMPAD0: key = 
-            case rci::KI_NUMPAD1: key = 
-            case rci::KI_NUMPAD2: key = 
-            case rci::KI_NUMPAD3: key = 
-            case rci::KI_NUMPAD4: key = 
-            case rci::KI_NUMPAD5: key = 
-            case rci::KI_NUMPAD6: key = 
-            case rci::KI_NUMPAD7: key = 
-            case rci::KI_NUMPAD8: key = 
-            case rci::KI_NUMPAD9: key = 
-            case rci::KI_NUMPADENTER: key = 
-            case rci::KI_MULTIPLY: key = 
-            case rci::KI_ADD: key = 		
-            case rci::KI_SEPARATOR: key = 
-            case rci::KI_SUBTRACT: key = 
-            case rci::KI_DECIMAL: key = 
-            case rci::KI_DIVIDE: key = 	
-
-            case rci::KI_OEM_NEC_EQUAL: key = 		
-
-            case rci::KI_BACK: key = 			
-            case rci::KI_TAB: key = 			
-
-            case rci::KI_CLEAR: key = 
-            case rci::KI_RETURN: key = 
-
-            case rci::KI_PAUSE: key = 
-            case rci::KI_CAPITAL: key = 			
-
-            case rci::KI_KANA = 75,				
-            case rci::KI_HANGUL = 76,			
-            case rci::KI_JUNJA = 77,			
-            case rci::KI_FINAL = 78,			
-            case rci::KI_HANJA = 79,			
-            case rci::KI_KANJI = 80,			
-
-            case rci::KI_ESCAPE = 81,			
-
-            case rci::KI_CONVERT = 82,			
-            case rci::KI_NONCONVERT = 83,			
-            case rci::KI_ACCEPT = 84,			
-            case rci::KI_MODECHANGE = 85,			
-
-            case rci::KI_PRIOR = 86,			
-            case rci::KI_NEXT = 87,				
-            case rci::KI_END = 88,
-            case rci::KI_HOME = 89,
-            case rci::KI_LEFT = 90,				
-            case rci::KI_UP = 91,				
-            case rci::KI_RIGHT = 92,			
-            case rci::KI_DOWN = 93,				
-            case rci::KI_SELECT = 94,
-            case rci::KI_PRINT = 95,
-            case rci::KI_EXECUTE = 96,
-            case rci::KI_SNAPSHOT = 97,			
-            case rci::KI_INSERT = 98,
-            case rci::KI_DELETE = 99,
-            case rci::KI_HELP = 100,
-
-            case rci::KI_LWIN = 101,			
-            case rci::KI_RWIN = 102,			
-            case rci::KI_APPS = 103,			
-
-            case rci::KI_POWER = 104,
-            case rci::KI_SLEEP = 105,
-            case rci::KI_WAKE = 106,
-
-            case rci::KI_F1 = 107,
-            case rci::KI_F2 = 108,
-            case rci::KI_F3 = 109,
-            case rci::KI_F4 = 110,
-            case rci::KI_F5 = 111,
-            case rci::KI_F6 = 112,
-            case rci::KI_F7 = 113,
-            case rci::KI_F8 = 114,
-            case rci::KI_F9 = 115,
-            case rci::KI_F10 = 116,
-            case rci::KI_F11 = 117,
-            case rci::KI_F12 = 118,
-            case rci::KI_F13 = 119,
-            case rci::KI_F14 = 120,
-            case rci::KI_F15 = 121,
-            case rci::KI_F16 = 122,
-            case rci::KI_F17 = 123,
-            case rci::KI_F18 = 124,
-            case rci::KI_F19 = 125,
-            case rci::KI_F20 = 126,
-            case rci::KI_F21 = 127,
-            case rci::KI_F22 = 128,
-            case rci::KI_F23 = 129,
-            case rci::KI_F24 = 130,
-
-            case rci::KI_NUMLOCK = 131,		
-            case rci::KI_SCROLL = 132,		
-
-            case rci::KI_OEM_FJ_JISHO = 133,	
-            case rci::KI_OEM_FJ_MASSHOU = 134,	
-            case rci::KI_OEM_FJ_TOUROKU = 135,	
-            case rci::KI_OEM_FJ_LOYA = 136,		
-            case rci::KI_OEM_FJ_ROYA = 137,		
-
-            case rci::KI_LSHIFT = 138,
-            case rci::KI_RSHIFT = 139,
-            case rci::KI_LCONTROL = 140,
-            case rci::KI_RCONTROL = 141,
-            case rci::KI_LMENU = 142,
-            case rci::KI_RMENU = 143,
-
-            case rci::KI_BROWSER_BACK = 144,
-            case rci::KI_BROWSER_FORWARD = 145,
-            case rci::KI_BROWSER_REFRESH = 146,
-            case rci::KI_BROWSER_STOP = 147,
-            case rci::KI_BROWSER_SEARCH = 148,
-            case rci::KI_BROWSER_FAVORITES = 149,
-            case rci::KI_BROWSER_HOME = 150,
-
-            case rci::KI_VOLUME_MUTE = 151,
-            case rci::KI_VOLUME_DOWN = 152,
-            case rci::KI_VOLUME_UP = 153,
-            case rci::KI_MEDIA_NEXT_TRACK = 154,
-            case rci::KI_MEDIA_PREV_TRACK = 155,
-            case rci::KI_MEDIA_STOP = 156,
-            case rci::KI_MEDIA_PLAY_PAUSE = 157,
-            case rci::KI_LAUNCH_MAIL = 158,
-            case rci::KI_LAUNCH_MEDIA_SELECT = 159,
-            case rci::KI_LAUNCH_APP1 = 160,
-            case rci::KI_LAUNCH_APP2 = 161,
-
-            case rci::KI_OEM_AX = 162,
-            case rci::KI_ICO_HELP = 163,
-            case rci::KI_ICO_00 = 164,
-
-            case rci::KI_PROCESSKEY = 165,		
-
-            case rci::KI_ICO_CLEAR = 166,
-
-            case rci::KI_ATTN = 167,
-            case rci::KI_CRSEL = 168,
-            case rci::KI_EXSEL = 169,
-            case rci::KI_EREOF = 170,
-            case rci::KI_PLAY = 171,
-            case rci::KI_ZOOM = 172,
-            case rci::KI_PA1 = 173,
-            case rci::KI_OEM_CLEAR = 174,
-
-            case rci::KI_LMETA = 175,
-            case rci::KI_RMETA = 176
-            default:
-            {
-                key = KEY_UNDEF;
-                break;
-            }
-        }
-    }
-}*/
+#include "common.h"
 
 namespace Input
 {
-    #define RTACASE2(val1, val2) case rci::KI_##val1: key = KEY_##val2; break
-    #define RTACASE(val) case rci::KI_##val: key = KEY_##val; break;
-
     Key convertRocketKeyToAscii(int rocketk)
     {
         Key key;
@@ -380,14 +138,11 @@ namespace Input
 
     }
     
-    #define ATRCASE2(val1, val2) case KEY_##val1: key = rci::KI_##val2; break;
-    #define ATRCASE(val) case KEY_##val: key = rci::KI_##val; break;
-    
-    int convertAsciiToRocketKey(int rocketk)
+    int convertAsciiToRocketKey(int asciik)
     {
         int key;
         
-        switch(rocketk)
+        switch(asciik)
         {
             ATRCASE2(BACKSPACE, BACK);
             ATRCASE(TAB);
@@ -516,27 +271,27 @@ namespace Input
 
     }
     
-    std::string getHotkeyName(int key [])
+    std::string getHotkeyName(Hotkey key)
     {
         std::string hotkeyname;
-        if (key[1])
+        if (key.shift)
         {
             hotkeyname += "SHIFT + ";
         }
-        if (key[2])
+        if (key.ctrl)
         {
             hotkeyname += "CTRL + ";
         }
-        if (key[3])
+        if (key.alt)
         {
             hotkeyname += "ALT + ";
         }
-        if (key[4])
+        if (key.super)
         {
             hotkeyname += "META + ";
         }
         
-        switch(key[0])
+        switch(key.key)
         {
             case Input::KEY_F1: hotkeyname += "F1"; break;
             case Input::KEY_F2: hotkeyname += "F2"; break;
@@ -589,7 +344,7 @@ namespace Input
             
             default:
             {
-               hotkeyname += std::toupper(char(key[0])); 
+               hotkeyname += std::toupper(char(key.key)); 
             }
         }
         
