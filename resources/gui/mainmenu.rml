@@ -24,10 +24,10 @@
 
             span#smlogo
             {
-                icon-decorator: image;
-                icon-image-src: /ui_art/smlogo.pcx&trans=0,255,0;
-                icon-image-t-end: 154px;
-                
+                icon-decorator: faanim;
+                icon-animfile: /ui_art/smlogo.pcx&trans=0,255,0&vanim=154;
+                icon-playtime: 0.8;
+
                 display: inline-block;
                 width: 390px;
                 height: 154px;
