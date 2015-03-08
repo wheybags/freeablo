@@ -65,9 +65,9 @@ namespace FARender
                 std::istringstream ss2(pair[1]);
                 ss2 >> celIndex;
             }
-            else if(pair[0] == "trans")
+            else
             {
-                // forward trans params on to be dealt with later in SpriteCache
+                // forward other params on to be dealt with later in SpriteCache
                 sourcePath += std::string("&") + components[i];
             }
         }

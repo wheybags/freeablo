@@ -24,7 +24,30 @@ namespace FARender
             FASpriteGroup newCacheEntry;
             size_t cacheIndex = newUniqueIndex();
             newCacheEntry.spriteCacheIndex = cacheIndex;
-            Render::getImageInfo(Misc::StringUtils::split(path, '&')[0], newCacheEntry.width, newCacheEntry.height, newCacheEntry.animLength, 0);
+
+            std::vector<std::string> components = Misc::StringUtils::split(path, '&');
+
+            Render::getImageInfo(components[0], newCacheEntry.width, newCacheEntry.height, newCacheEntry.animLength, 0);
+
+            for(size_t i = 1; i < components.size(); i++)
+            {
+                std::vector<std::string> pair = Misc::StringUtils::split(components[i], '=');
+
+                if(pair[0] == "vanim")
+                {
+                    std::istringstream vanimss(pair[1]);
+
+                    size_t vAnim;
+                    vanimss >> vAnim;
+
+                    newCacheEntry.animLength = (newCacheEntry.height / vAnim);
+                    if(newCacheEntry.height % vAnim != 0)
+                        newCacheEntry.animLength++;
+
+                    newCacheEntry.height = vAnim;
+                }
+            }
+
 
             mStrToCache[path] = newCacheEntry;
             mCacheToStr[cacheIndex] = path;
@@ -84,6 +107,8 @@ namespace FARender
 
                 std::vector<std::string> components = Misc::StringUtils::split(cachePath, '&');
                 std::string sourcePath = components[0];
+
+                size_t vAnim = 0;
                 bool hasTrans = false;
                 size_t r,g,b;
 
@@ -105,11 +130,19 @@ namespace FARender
 
                         std::istringstream bss(rgbStr[2]);
                         bss >> b;
+                    }
+                    else if(pair[0] == "vanim")
+                    {
+                        std::istringstream vanimss(pair[1]);
 
+                        vanimss >> vAnim;
                     }
                 }
 
-                newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b);
+                if(vAnim != 0)
+                    newSprite = Render::loadVanimSprite(sourcePath, vAnim, hasTrans, r, g, b);
+                else
+                    newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b);
             }
             else if(mCacheToTilesetPath.count(index))
             {
