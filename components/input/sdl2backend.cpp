@@ -4,6 +4,10 @@
 
 #include <render/render.h>
 
+#include <boost/python.hpp>
+
+#include <iostream>
+
 namespace Input
 {
     InputManager* InputManager::instance = NULL;
@@ -16,6 +20,16 @@ namespace Input
     
     #define getFunc(f) f ? f : doNothing_##f
 
+    void baseClickedHelper()
+    {
+        InputManager::get()->rocketBaseClicked();
+    }
+
+    BOOST_PYTHON_MODULE(freeablo_input)
+    {
+        boost::python::def("baseClicked", &baseClickedHelper);
+    }
+
     InputManager::InputManager(boost::function<void(Key)> keyPress, boost::function<void(Key)> keyRelease,
         boost::function<void(uint32_t, uint32_t, Key)> mouseClick,
         boost::function<void(uint32_t, uint32_t, Key)> mouseRelease,
@@ -27,6 +41,8 @@ namespace Input
             {
                 assert(!instance);
                 instance = this;
+
+                initfreeablo_input();
             }
 
     #define CASE(val) case SDLK_##val: key = KEY_##val; break; 
@@ -651,7 +667,12 @@ namespace Input
     {
         return mModifiers;
     }
-    
+
+    void InputManager::rocketBaseClicked()
+    {
+        mBaseWasClicked = true;
+    }
+
     void InputManager::processInput(bool paused)
     {
         Event event;
@@ -691,10 +712,19 @@ namespace Input
 
                     if(key != KEY_UNDEF)
                     {
-                        if(!paused)
-                            mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
                         if(mContext)
+                        {
+                            mBaseWasClicked = false;
                             mContext->ProcessMouseButtonDown(rocketTranslateMouse(key), getRocketModifiers(mModifiers));
+
+                            if(mBaseWasClicked && !paused)
+                                mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
+                        }
+                        else
+                        {
+                            if(!paused)
+                                mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
+                        }
                     }
                     
                     break;

@@ -6,6 +6,17 @@
                 font-family: FreeMono;
                 text-align: center;
                 bottom: 0px;
+                width: 100%;
+            }
+
+            span#container
+            {
+                display: inline-block;
+                text-align: left;
+                height: 144;
+                width: 640;
+                background-decorator: image;
+                background-image: /ctrlpan/panel8.cel;
             }
 
             div.buttonDiv
@@ -18,101 +29,25 @@
         <link type="text/rcss" href="bottommenu_buttons.rcss"/>
 
         <script>
-import rocket
-import freeablo
+import docmanage
 
-def loadDocs():
-    context = rocket.contexts['default']
+invHandle = "resources/gui/inventory.rml"
+charHandle = "resources/gui/character.rml"
 
-    global invHandle
-    invHandle = [context.LoadDocument('resources/gui/inventory.rml'), False]
-    global charHandle
-    charHandle = [context.LoadDocument('resources/gui/character.rml'), False]
-    global pauseHandle
-    pauseHandle = [context.LoadDocument('resources/gui/pausemenu.rml'), False]
-
-loadDocs()
-
-docs = [invHandle, charHandle, pauseHandle]
-
-doc = None
-pauseHiddenDocs = []
-paused = False
-
-def pause():
-    doc.Hide()
-
-    for handle in docs:
-        if handle != pauseHandle:
-            if handle[1]:
-                toggleDoc(handle)
-                pauseHiddenDocs.append(handle)
-
-    toggleDoc(pauseHandle)
-
-    global paused
-    paused = True
-    
-    freeablo.pause()
-
-def unpause():
-    doc.Show()
-
-    global pauseHiddenDocs
-
-    for handle in pauseHiddenDocs:
-        toggleDoc(handle)
-
-    pauseHiddenDocs = []
-
-    toggleDoc(pauseHandle)
-
-    global paused
-    paused = False
-
-    freeablo.unpause()
-    
-def toggleDoc(doc):
-    if doc[1]:
-        doc[0].Hide()
-        doc[1] = False
-    else:
-        doc[0].Show()
-        doc[1] = True
-
-
-def onKeyDown(event, document):
-    if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
-        if paused:
-            unpause()
-        else:
-            pause()
-
-def onLoad(document):
-    global doc
-    global paused
-
-    doc = document
-
-    def baseKeyDown(event, callingDocument):
-        onKeyDown(event, doc)
-
-    for d in docs:
-        d[0].baseKeyDown = baseKeyDown
-
-
+docmanage.manager.loadDoc(invHandle)
+docmanage.manager.loadDoc(charHandle)
         </script>
 
     </head>
 
-    <body onkeydown="onKeyDown(event, document)" onload="onLoad(document)">
-        <div class="buttonDiv"><button id="charBut" onclick="toggleDoc(charHandle)"></button></div>
-        <div class="buttonDiv"><button id="questBut" onclick="print 'quest clicked'"></button></div>
-        <div class="buttonDiv"><button id="mapBut" onclick="print 'map clicked'"></button></div>
-        <div class="buttonDiv"><button id="menuBut" onclick="print 'menu clicked'"></button></div>
-        <div class="buttonDiv"><button id="invBut" onclick="toggleDoc(invHandle)"></button></div>
-        <div class="buttonDiv"><button id="spellBut" onclick="print 'spell clicked'"></button></div>
-        <br/>
-        <img src="/ctrlpan/panel8.cel"></img>
+    <body onkeydown="docmanage.manager.onKeyDown(event)" onmousedown="docmanage.manager.bodyClicked()">
+        <span id="container" onmousedown="docmanage.manager.guiClicked()">
+            <button id="charBut" onclick="docmanage.manager.toggleDoc(charHandle)"></button>
+            <button id="questBut" onclick="print 'quest clicked'"></button>
+            <button id="mapBut" onclick="print 'map clicked'"></button>
+            <button id="menuBut" onclick="print 'menu clicked'"></button>
+            <button id="invBut" onclick="docmanage.manager.toggleDoc(invHandle)"></button>
+            <button id="spellBut" onclick="print 'spell clicked'"></button>
+        </span>
     </body>
 </rml>

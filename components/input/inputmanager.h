@@ -38,6 +38,11 @@ namespace Input
             static InputManager* get();
 
         private:
+            void rocketBaseClicked(); ///< called by libRocket when it receives a click that doesn't hit any gui elements
+            bool mBaseWasClicked;
+
+            friend void baseClickedHelper();
+
             
             ///< Basically a copy of the subset of SDL_Event that we actually use
             struct Event

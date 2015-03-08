@@ -4,26 +4,29 @@
             body
             {
                 top: 50%;
-                left: 0px;
             }
-            #inventory
+
+            span#container
             {
+                display: inline-block;
+                text-align: left;
+                height: 352;
+                width: 320;
+                background-decorator: image;
+                background-image: /data/char.cel;
+
                 position: fixed;
                 top: -175px;
-                
             }
         </style>
 
         <script>
-
-def onKeyDown(event, document):
-    document.baseKeyDown(event, document)
-       
+import docmanage
         </script>
 
     </head>
 
-    <body onKeyDown="onKeyDown(event, document)">
-        <div id="inventory"><img src="/data/char.cel"></img></div>
+    <body onKeyDown="docmanage.manager.onKeyDown(event)" onmousedown="docmanage.manager.bodyClicked()">
+        <span id="container" onmousedown="docmanage.manager.guiClicked()"></span>
     </body>
 </rml>
