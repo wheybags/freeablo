@@ -28,7 +28,6 @@ class DocManager(object):
         handle["doc"].Show()
         handle["visible"] = True
 
-
     def hideDoc(self, docpath):
         handle = self.docs[docpath]
         handle["doc"].Hide()
@@ -61,6 +60,8 @@ class DocManager(object):
 
         for docpath in self.pauseHiddenDocs:
             self.toggleDoc(docpath)
+
+        self.pauseHiddenDocs = []
 
         self.paused = False
         freeablo.unpause()
