@@ -26,10 +26,17 @@
                 height: 154px;
             }
 
-            img.pentagon
+            span.pentagon
             {
+                icon-decorator: faanim;
+                icon-playtime: 0.3;
+                icon-animfile: /data/PentSpin.cel;
+
                 position: relative;
+                display: inline-block;
                 top: 16px;
+                width: 48px;
+                height: 48px;
             }
 
         </style>
@@ -53,8 +60,8 @@ def onLoad(document):
         {"text": 'QUIT', "strFunc": 'freeablo.quit', "func": freeablo.quit}
     ]
 
-    fmtSelected = '<img class="pentagon" src="/data/PentSpin.cel"/> %s <img class="pentagon" src="/data/PentSpin.cel"/>'
-    fmtNotSelected = '<img style="visibility: hidden;" class="pentagon" src="/data/PentSpin.cel"/> %s <img style="visibility: hidden;" class="pentagon" src="/data/PentSpin.cel"/>'
+    fmtSelected = '<span class="pentagon" src="/data/PentSpin.cel"/> %s <span class="pentagon" src="/data/PentSpin.cel"/>'
+    fmtNotSelected = '<span style="visibility: hidden;" class="pentagon"/> %s <span style="visibility: hidden;" class="pentagon"/>'
     
     global pauseMenu
     pauseMenu = Menu(document, 'pauseMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)

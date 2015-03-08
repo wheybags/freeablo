@@ -75,6 +75,7 @@ namespace FARender
         FASpriteGroup sprite = mSpriteManager.get(sourcePath);
 
         Render::RocketFATex* tex = new Render::RocketFATex();
+        tex->animLength = sprite.animLength;
         tex->spriteIndex = sprite.spriteCacheIndex;
         tex->index = celIndex;
         tex->needsImmortal = false;
