@@ -4,7 +4,7 @@
     #include <Rocket/Core.h>
 #include <misc/enablewarn.h>
 
-
+#include "animateddecoratorinstancer.h"
 
 #include "../farender/renderer.h"
 
@@ -52,7 +52,12 @@ namespace FAGui
     void initGui()
     {
         initfreeablo();
+
         FARender::Renderer* renderer = FARender::Renderer::get();
+
+        Rocket::Core::DecoratorInstancer* animInstancer = Rocket::Core::Factory::RegisterDecoratorInstancer("faanim", (Rocket::Core::DecoratorInstancer*)new AnimatedDecoratorInstancer(renderer->getRocketContext()->GetRenderInterface()));
+        animInstancer->RemoveReference();
+
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/bottommenu.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
     }

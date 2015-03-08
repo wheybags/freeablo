@@ -16,4 +16,6 @@ namespace Misc
     }
 }
 
+#define UNUSED_PARAM(x) (void)(x)
+
 #endif

@@ -100,6 +100,7 @@ namespace Render
 
     struct RocketFATex
     {
+        size_t animLength;
         size_t spriteIndex;
         size_t index;
         bool needsImmortal;
