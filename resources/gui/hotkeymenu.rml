@@ -43,8 +43,6 @@ from menu import Menu
 context = rocket.contexts['default']
 doc = None
 hotkeyMenu = None
-#hotkeySet = [None, False]
-#newHotkey = None
 
 def onLoad(document):
     document.id = "hotkeymenu"
@@ -68,13 +66,11 @@ def onLoad(document):
     hotkeyMenu = Menu(document, 'hotkeyMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
  
  
-#def onKeyDown(event, document):
-    #global newHotkey
-
-    #hotkeyMenu.onKeyDown(event)
-    #if hotkeySet[1]:
-        #newHotkey = event.parameters['key_identifier']
-        #print(hotkeySet, newHotkey)
+def onKeyDown(event, document):
+    if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
+        showPause()
+    else:
+        hotkeyMenu.onKeyDown(event)
         
 def changeHotkey(func):
     global doc
@@ -90,12 +86,6 @@ def showPause():
     doc.Close()
     pausemenu = context.documents["pausemenu"]
     pausemenu.Show()
-
-#def setHotkey():
-    #global hotkeySet
-    
-    #hotkeySet[0] = "quit"
-    #hotkeySet[1] = True
 
         </script>
     </head>

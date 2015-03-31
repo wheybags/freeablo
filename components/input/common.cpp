@@ -123,9 +123,6 @@ namespace Input
 
             RTACASE(NUMLOCK);
             RTACASE2(SCROLL, SCROLLOCK);
-
-            RTACASE2(RMETA, RSUPER);
-            RTACASE2(LMETA, LSUPER);
          
             default:
             {
@@ -256,9 +253,6 @@ namespace Input
 
             ATRCASE(NUMLOCK);
             ATRCASE2(SCROLLOCK, SCROLL);
-
-            ATRCASE2(RSUPER, RMETA);
-            ATRCASE2(LSUPER, LMETA);
          
             default:
             {
@@ -285,10 +279,6 @@ namespace Input
         if (key.alt)
         {
             hotkeyname += "ALT + ";
-        }
-        if (key.super)
-        {
-            hotkeyname += "META + ";
         }
         
         switch(key.key)

@@ -68,7 +68,8 @@ class Menu(object):
         elif event.parameters['key_identifier'] == rocket.key_identifier.RETURN:
             currentEntry = self.entries[self.current]
             if("func" in currentEntry):
-                currentEntry["func"]()
+                currentEntry["func"](currentEntry["args"]) if "args" in currentEntry \
+                else currentEntry["func"]()
             return True
 
         return False

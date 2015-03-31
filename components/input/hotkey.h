@@ -11,13 +11,14 @@ namespace Input
     {
         public:
             int key;
-            bool shift, ctrl, alt, super;
+            bool shift, ctrl, alt;
 
             Hotkey();
             Hotkey(const char *name, bpt::ptree hotkeypt);
-            Hotkey(int nkey, bool nshift, bool nctrl, bool nalt, bool nsuper);
+            Hotkey(int nkey, bool nshift, bool nctrl, bool nalt);
             bool operator==(const Hotkey &other);
             void save(const char *name, bpt::ptree hotkeypt);
+            static void initpythonwrapper();
     };
 }
 

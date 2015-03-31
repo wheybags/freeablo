@@ -33,8 +33,6 @@ bool paused = false;
 bool noclip = false;
 int changeLevel = 0;
 
-Input::Hotkey hotkey;
-
 Input::InputManager *inputmanager;
 
 Input::Hotkey quit_key;
@@ -49,20 +47,34 @@ void keyPress(Input::Key key)
     switch(key)
     {
         case Input::KEY_RSHIFT:;
-        case Input::KEY_LSHIFT: hotkey.shift = true; return;
+        case Input::KEY_LSHIFT:;
         case Input::KEY_RCTRL:;
-        case Input::KEY_LCTRL: hotkey.ctrl = true; return;
+        case Input::KEY_LCTRL:;
         case Input::KEY_RALT:;
-        case Input::KEY_LALT: hotkey.alt = true; return;
+        case Input::KEY_LALT:;
         case Input::KEY_RSUPER:;
-        case Input::KEY_LSUPER: hotkey.super = true; return;
+        case Input::KEY_LSUPER: return;
         default:
             {
-                hotkey.key = key;
-                uint32_t modifiers = inputmanager->getModifiers();
-                std::cout << "modifiers = " << modifiers << std::endl;
                 break;
             }
+    }
+    
+    Input::Hotkey hotkey;
+    hotkey.key = key;
+    
+    uint32_t modifiers = inputmanager->getModifiers();
+    
+    switch(modifiers)
+    {
+        case 0: break;
+        case 1: hotkey.ctrl = true; break;
+        case 2: hotkey.alt = true; break;
+        case 3: hotkey.ctrl = true; hotkey.alt = true; break;
+        case 4: hotkey.shift = true; break;
+        case 5: hotkey.ctrl = true; hotkey.shift = true; break;
+        case 6: hotkey.alt = true; hotkey.shift = true; break;
+        case 7: hotkey.ctrl = true; hotkey.alt = true; hotkey.shift = true; break;
     }
     
     if (hotkey == quit_key)
@@ -88,15 +100,6 @@ void keyPress(Input::Key key)
         changeLevel = 1;
         return;
     }
-}
-
-void keyRelease(Input::Key key)
-{
-    hotkey.key = 0;
-    hotkey.shift = false;
-    hotkey.ctrl = false;
-    hotkey.alt = false;
-    hotkey.super = false;
 }
 
 size_t xClick = 0, yClick = 0;
@@ -346,7 +349,7 @@ void runGameLoop(const bpo::variables_map& variables)
     while(!FARender::Renderer::get()) {}
 
     FARender::Renderer& renderer = *FARender::Renderer::get();
-    Input::InputManager input(&keyPress, &keyRelease, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
+    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
     inputmanager = &input;
 
     DiabloExe::DiabloExe exe;
@@ -400,7 +403,6 @@ void runGameLoop(const bpo::variables_map& variables)
     noclip_key = Input::Hotkey("Noclip", hotkeypt);
     changelvlup_key = Input::Hotkey("Changelvlup", hotkeypt);
     changelvldwn_key = Input::Hotkey("Changelvldwn", hotkeypt);
-    //Input::inithotkey();
     
     // Main game logic loop
     while(!done)

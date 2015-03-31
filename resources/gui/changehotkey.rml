@@ -33,46 +33,34 @@
 import time
 import rocket
 import freeablo
-try:
-    import hotkey
-    worked = True
-except:
-    print("Error: could not import hotkey")
+import hotkey
 from menu import Menu
 
 context = rocket.contexts['default']
 rk = rocket.key_identifier
 doc = None
-keys = [0, 0, 0, 0, 0]
-newHotkey = []
 modifiers = [rk.RSHIFT, rk.LSHIFT,
              rk.RCONTROL, rk.LCONTROL,
              rk.RMENU, rk.LMENU,
              rk.RWIN, rk.LWIN, 175]
+             
+newHotkey = hotkey.Hotkey()
 
 def onLoad(document):
     document.id = "changehotkey"
     global doc
     doc = document
-    doc.func = None
+    doc.func = ""
     container = document.GetElementById('innerMenuContainer')
     container.inner_rml = '<span id="menuEntry0"></span><br/>'
     elem = container
     elem.inner_rml = "Press A Key"
-    
-    #keytest = hotkey.Hotkey()
-    
-    #keytest.key = 52
-    #print(keytest.key)
  
 def onKeyDown(event, document):    
     global newHotkey
-    global keys
     global doc
     global modifiers
     global rk
-
-    print(event.parameters['key_identifier'])
     
     if event.parameters['key_identifier'] == rk.ESCAPE:
         doc.Close()
@@ -84,70 +72,50 @@ def onKeyDown(event, document):
         return
 
     oldHotkeys = freeablo.getHotkeys()
-    #print(oldHotkeys)
+    if event.parameters['key_identifier'] in modifiers:
+        if event.parameters['key_identifier'] == modifiers[0] or \
+           event.parameters['key_identifier'] == modifiers[1]:
+                newHotkey.shift = True
+        if event.parameters['key_identifier'] == modifiers[2] or \
+           event.parameters['key_identifier'] == modifiers[3]:
+                newHotkey.ctrl = True
+        if event.parameters['key_identifier'] == modifiers[4] or \
+           event.parameters['key_identifier'] == modifiers[5]:
+                newHotkey.alt = True
+        if event.parameters['key_identifier'] == modifiers[6] or \
+           event.parameters['key_identifier'] == modifiers[7] or \
+           event.parameters['key_identifier'] == modifiers[8]:
+                return
+    else:
+        newHotkey.key = event.parameters['key_identifier']
+        
+        for oldHotkey in oldHotkeys:
+            if oldHotkey == newHotkey:
+                    errormsg = context.LoadDocument('resources/gui/changehotkeyerrormsg.rml')
+                    errormsg.Show()
+                    return 
 
-    if not newHotkey:
-        newHotkey.append(doc.func)
-
-    if doc.func:
-        if event.parameters['key_identifier'] in modifiers:
-            if not event.parameters['key_identifier'] in keys:
-                if event.parameters['key_identifier'] == modifiers[0] or \
-                   event.parameters['key_identifier'] == modifiers[1]:
-                    keys[1] = 1
-                if event.parameters['key_identifier'] == modifiers[2] or \
-                   event.parameters['key_identifier'] == modifiers[3]:
-                    keys[2] = 1
-                if event.parameters['key_identifier'] == modifiers[4] or \
-                   event.parameters['key_identifier'] == modifiers[5]:
-                    keys[3] = 1
-                if event.parameters['key_identifier'] == modifiers[6] or \
-                   event.parameters['key_identifier'] == modifiers[7] or \
-                   event.parameters['key_identifier'] == modifiers[8]:
-                    keys[4] = 1
-        else:
-            if not event.parameters['key_identifier'] in keys:
-                 keys[0] = event.parameters['key_identifier']
-                 newHotkey.append(keys)
-                 print(newHotkey)
-            #print(newHotkey)
-            if newHotkey[1] in oldHotkeys:
-                #doc.Hide()
-                errormsg = context.LoadDocument('resources/gui/changehotkeyerrormsg.rml')
-                errormsg.Show()
-                return 
-
-            freeablo.setHotkey(newHotkey) 
-            doc.Close()
-            #hotkeymenu = context.documents["hotkeymenu"]
-            #hotkeymenu.Close()
-            hotkeymenu = context.LoadDocument('resources/gui/hotkeymenu.rml')
-            hotkeymenu.Show()
+        doc.func = doc.func[1:-1] if doc.func[0] == "'" else doc.func
+        freeablo.setHotkey(doc.func, [newHotkey.key, newHotkey.shift, newHotkey.ctrl, newHotkey.alt]) 
+        newHotkey = None
+        doc.Close()
+        hotkeymenu = context.LoadDocument('resources/gui/hotkeymenu.rml')
+        hotkeymenu.Show()
 
 def onKeyUp(event, document):
     global newHotkey
-    global keys
-    #global doc
     global modifiers
 
     if event.parameters['key_identifier'] in modifiers:
         if event.parameters['key_identifier'] == modifiers[0] or \
            event.parameters['key_identifier'] == modifiers[1]:
-            keys[1] = 0
+                newHotkey.shift = False
         if event.parameters['key_identifier'] == modifiers[2] or \
            event.parameters['key_identifier'] == modifiers[3]:
-            keys[2] = 0
+                newHotkey.ctrl = False
         if event.parameters['key_identifier'] == modifiers[4] or \
            event.parameters['key_identifier'] == modifiers[5]:
-            keys[3] = 0
-        if event.parameters['key_identifier'] == modifiers[6] or \
-           event.parameters['key_identifier'] == modifiers[7] or \
-           event.parameters['key_identifier'] == modifiers[8]:
-            keys[4] = 0
-    #else:
-        #keys.remove(event.parameters['key_identifier'])
-
-    #print(newHotkey)
+                newHotkey.alt = False
 
 def showHotkeys():
     global doc

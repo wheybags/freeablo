@@ -86,9 +86,13 @@ namespace FAGui
         return hotkeys;
     }
     
-    void setHotkey(std::string function, Input::Hotkey hotkey)
+    void setHotkey(std::string function, boost::python::list pyhotkey)
     {
-        hotkey.key = Input::convertRocketKeyToAscii(hotkey.key);
+        Input::Hotkey hotkey;
+        hotkey.key = Input::convertRocketKeyToAscii(boost::python::extract<int>(pyhotkey[0]));
+        hotkey.shift = boost::python::extract<bool>(pyhotkey[1]);
+        hotkey.ctrl = boost::python::extract<bool>(pyhotkey[2]);
+        hotkey.alt = boost::python::extract<bool>(pyhotkey[3]);
          
         if (function == "quit")
         {
@@ -128,7 +132,7 @@ namespace FAGui
     void initGui()
     {
         initfreeablo();
-        Input::inithotkey();
+        Input::Hotkey::initpythonwrapper();
         FARender::Renderer* renderer = FARender::Renderer::get();
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/bottommenu.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");

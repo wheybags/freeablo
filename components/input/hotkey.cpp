@@ -6,7 +6,13 @@
 
 namespace Input
 {
-    Hotkey::Hotkey(){}
+    Hotkey::Hotkey()
+    {
+        key = 0;
+        shift = false;
+        ctrl = false;
+        alt = false;
+    }
 
     Hotkey::Hotkey(const char *name, bpt::ptree hotkeypt)
     {
@@ -16,21 +22,19 @@ namespace Input
         shift = hotkeypt.get<int>(sname + ".shift");
         ctrl = hotkeypt.get<int>(sname + ".ctrl");
         alt = hotkeypt.get<int>(sname + ".alt");
-        super = hotkeypt.get<int>(sname + ".super");
     }
     
-    Hotkey::Hotkey(int nkey, bool nshift, bool nctrl, bool nalt, bool nsuper)
+    Hotkey::Hotkey(int nkey, bool nshift, bool nctrl, bool nalt)
     {
         key = nkey;
         shift = nshift;
         ctrl = nctrl;
         alt = nalt;
-        super = nsuper;
     }
 
     bool Hotkey::operator==(const Hotkey &other)
     {
-         if (key == other.key && shift == other.shift && ctrl == other.ctrl && alt == other.alt && super == other.super)
+         if (key == other.key && shift == other.shift && ctrl == other.ctrl && alt == other.alt)
          {
              return true;
          }
@@ -45,10 +49,9 @@ namespace Input
         std::string sname = name;
 
         hotkeypt.put(sname + ".key", key);
-        hotkeypt.put(sname + ".shift", shift);
-        hotkeypt.put(sname + ".ctrl", ctrl);
-        hotkeypt.put(sname + ".alt", alt);
-        hotkeypt.put(sname + ".super", super);
+        hotkeypt.put(sname + ".shift", int(shift));
+        hotkeypt.put(sname + ".ctrl", int(ctrl));
+        hotkeypt.put(sname + ".alt", int(alt));
         bpt::write_ini("resources/hotkeys.ini", hotkeypt);
     }
     
@@ -56,14 +59,18 @@ namespace Input
     {
         boost::python::class_<Hotkey>("Hotkey")
             .def(boost::python::init<const char *, bpt::ptree>())
-            .def(boost::python::init<int, bool, bool, bool, bool>())
-            .def(boost::python::self == boost::python::self)
+            .def(boost::python::init<int, bool, bool, bool>())
+            .def("__eq__", &Hotkey::operator==)
             .def("save", &Hotkey::save)
             .def_readwrite("key", &Hotkey::key)
             .def_readwrite("shift", &Hotkey::shift)
             .def_readwrite("ctrl", &Hotkey::ctrl)
-            .def_readwrite("alt", &Hotkey::alt)
-            .def_readwrite("super", &Hotkey::super);
+            .def_readwrite("alt", &Hotkey::alt);
+    }
+    
+    void Hotkey::initpythonwrapper()
+    {
+        inithotkey();
     }
     
 }
