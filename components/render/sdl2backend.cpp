@@ -4,11 +4,14 @@
 #include <complex>
 
 #include <SDL.h>
+#include <SDL_image.h>
 
 #include "../cel/celfile.h"
 #include "../cel/celframe.h"
 
 #include "../level/level.h"
+#include <misc/stringops.h>
+#include <faio/faio.h>
 
 #include <Rocket/Core.h>
 #include <Rocket/Core/Input.h>
@@ -119,6 +122,22 @@ namespace Render
 
         return Context;
     }
+
+    void quitGui()
+    {
+        Context->UnloadAllDocuments();
+
+        Context->RemoveReference();
+
+        Rocket::Core::Shutdown();
+        Py_Finalize();
+
+        delete Renderer;
+        delete FileInterface;
+        delete SystemInterface;
+    }
+
+
 	
     void quit()
     {
@@ -136,37 +155,207 @@ namespace Render
         resized = true;
     }
 
-    void updateGuiBuffer(std::vector<drawCommand>& buffer)
+    void updateGuiBuffer(std::vector<DrawCommand>* buffer)
     {
         if(resized)
         {
             Context->SetDimensions(Rocket::Core::Vector2i(WIDTH, HEIGHT));
             resized = false;
         }
-        buffer.clear();
-        Renderer->mDrawBuffer = &buffer;
+
+        if(buffer)
+            buffer->clear();
+
+        Renderer->mDrawBuffer = buffer;
         Context->Render();
     }
 
-    void drawGui(std::vector<drawCommand>& buffer)
+    void drawGui(std::vector<DrawCommand>& buffer, SpriteCacheBase* cache)
     {
-        Renderer->drawBuffer(buffer);
-    }
-    
-    bool guiLoadImage(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source)
-    {
-        return Renderer->LoadTextureImp(texture_handle, texture_dimensions, source);
+        Renderer->drawBuffer(buffer, cache);
     }
 
-	bool guiGenerateTexture(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
+    SDL_Surface* loadNonCelImage(const std::string& sourcePath, const std::string& extension)
     {
-        return Renderer->GenerateTextureImp(texture_handle, source, source_dimensions);
+        FAIO::FAFile* file_handle = FAIO::FAfopen(sourcePath);
+        if (!file_handle)
+            return NULL;
+
+        size_t buffer_size = FAIO::FAsize(file_handle);
+
+        char* buffer = new char[buffer_size];
+        FAIO::FAfread(buffer, 1, buffer_size, file_handle);
+        FAIO::FAfclose(file_handle);
+
+        SDL_Surface* s = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.c_str());
+        delete[] buffer;
+
+        return s;
     }
-    
-    void guiReleaseTexture(Rocket::Core::TextureHandle texture_handle)
+
+    std::string getImageExtension(const std::string& path)
     {
-        return Renderer->ReleaseTextureImp(texture_handle);
+        size_t i;
+        for(i = path.length() - 1; i > 0; i--)
+        {
+            if(path[i] == '.')
+                break;
+        }
+
+        return path.substr(i+1, path.length()-i);
     }
+
+
+    bool getImageInfo(const std::string& path, size_t& width, size_t& height, size_t& animLength, int32_t celIndex)
+    {
+        //TODO: get better image decoders that allow you to peek image dimensions without loading full image
+
+        std::string extension = getImageExtension(path);
+
+        if(Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
+        {
+            Cel::CelFile cel(path);
+            width = cel[celIndex].mWidth;
+            height = cel[celIndex].mHeight;
+            animLength = cel.animLength();
+        }
+        else
+        {
+            if(celIndex != 0)   // no indices on normal files
+                return false; 
+
+            SDL_Surface* surface = loadNonCelImage(path, extension);
+
+            if(surface)
+            {
+                width = surface->w;
+                height = surface->h;
+                animLength = 1;
+
+                SDL_FreeSurface(surface);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    Cel::Colour getPixel(SDL_Surface* s, int x, int y);
+    void setpixel(SDL_Surface *s, int x, int y, Cel::Colour c);
+    SDL_Surface* createTransparentSurface(size_t width, size_t height);
+
+    SDL_Surface* loadNonCelImageTrans(const std::string& path, const std::string& extension, bool hasTrans, size_t transR, size_t transG, size_t transB)
+    {
+        SDL_Surface* tmp = loadNonCelImage(path, extension);
+
+        if(hasTrans)
+        {
+            SDL_Surface* src = tmp;
+            tmp = createTransparentSurface(src->w, src->h);
+
+            for(int x = 0; x < src->w; x++)
+            {
+                for(int y = 0; y < src->h; y++)
+                {
+                    Cel::Colour px = getPixel(src, x, y);
+                    if(!(px.r == transR && px.g == transG && px.b == transB))
+                    {
+                        setpixel(tmp, x, y, px);
+                    }
+                }
+            }
+            SDL_FreeSurface(src);
+        }
+
+        return tmp;
+    }
+
+    SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB)
+    {
+        std::string extension = getImageExtension(path);
+
+        if(Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
+        {
+            return new SpriteGroup(path);
+        }
+        else
+        {
+            SDL_Surface* tmp = loadNonCelImageTrans(path, extension, hasTrans, transR, transG, transB);
+            SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, tmp);
+            SDL_FreeSurface(tmp);
+
+            std::vector<Sprite> vec(1);
+            vec[0] = (Sprite)tex;
+
+            return new SpriteGroup(vec);
+        }
+    }
+
+    void clearTransparentSurface(SDL_Surface* s);
+
+    SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB)
+    {
+        std::string extension = getImageExtension(path);
+        SDL_Surface* original = loadNonCelImageTrans(path, extension, hasTrans, transR, transG, transB);
+
+        SDL_Surface* tmp = createTransparentSurface(original->w, vAnim);
+
+        std::cout << original->w;
+
+        std::vector<Sprite> vec;
+
+        for(size_t srcY = 0; srcY < (size_t)original->h-1; srcY += vAnim)
+        {
+            for(size_t x = 0; x < (size_t)original->w; x++)
+            {
+                for(size_t y = 0; y < vAnim; y++)
+                {
+                    if(srcY + y < (size_t)original->h)
+                    {
+                        Cel::Colour px = getPixel(original, x, srcY + y);
+                        setpixel(tmp, x, y, px);
+                    }
+                }
+            }
+
+            vec.push_back((Sprite)SDL_CreateTextureFromSurface(renderer, tmp));
+
+            clearTransparentSurface(tmp);
+        }
+
+        SDL_FreeSurface(original);
+        SDL_FreeSurface(tmp);
+
+        return new SpriteGroup(vec);
+    }
+
+    SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height)
+    {
+        #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+            Uint32 rmask = 0xff000000;
+            Uint32 gmask = 0x00ff0000;
+            Uint32 bmask = 0x0000ff00;
+            Uint32 amask = 0x000000ff;
+        #else
+            Uint32 rmask = 0x000000ff;
+            Uint32 gmask = 0x0000ff00;
+            Uint32 bmask = 0x00ff0000;
+            Uint32 amask = 0xff000000;
+        #endif
+
+        SDL_Surface *surface = SDL_CreateRGBSurfaceFrom ((void*) source, width, height, 32, width*4, rmask, gmask, bmask, amask);
+        SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+        SDL_FreeSurface(surface);
+
+        std::vector<Sprite> vec(1);
+        vec[0] = (Sprite)tex;
+        return new SpriteGroup(vec);
+    }
+
 
     void draw()
     {
@@ -189,8 +378,6 @@ namespace Render
     }
 
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
-    SDL_Surface* createTransparentSurface(size_t width, size_t height);
-    void clearTransparentSurface(SDL_Surface* s);
 
     SpriteGroup::SpriteGroup(const std::string& path)
     {
@@ -216,36 +403,33 @@ namespace Render
             SDL_DestroyTexture((SDL_Texture*)mSprites[i]);
     }
 	
-    void drawMinPillarTop(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
-    void drawMinPillarBase(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset);
+    void drawMinPillarTop(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
+    void drawMinPillarBase(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
     
-    RenderLevel* setLevel(const Level::Level& level)
+    SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top)
     {
-        Cel::CelFile town(level.getTileSetPath());
-        
-        RenderLevel* retval = new RenderLevel();
-
-        retval->level = &level;
+        Cel::CelFile cel(celPath);
+        Level::Min min(minPath);
 
         SDL_Surface* newPillar = createTransparentSurface(64, 256);
-        
-        for(size_t i = 0; i < level.minSize()-1; i++)
+
+        std::vector<Sprite> newMin(min.size()-1);
+
+        for(size_t i = 0; i < min.size()-1; i++)
         {
             clearTransparentSurface(newPillar);
-            drawMinPillarTop(newPillar, 0, 0, level.minPillar(i), town);
-            retval->minTops[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
 
-            clearTransparentSurface(newPillar);
-            drawMinPillarBase(newPillar, 0, 0, level.minPillar(i), town);
-            retval->minBottoms[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
+            if(top)
+                drawMinPillarTop(newPillar, 0, 0, min[i], cel);
+            else
+                drawMinPillarBase(newPillar, 0, 0, min[i], cel);
+
+            newMin[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
         }
 
         SDL_FreeSurface(newPillar);
 
-        retval->levelWidth = level.width();
-        retval->levelHeight = level.height();
-
-        return retval;
+        return new SpriteGroup(newMin);
     }
     
     void spriteSize(const Sprite& sprite, size_t& w, size_t& h)
@@ -260,15 +444,6 @@ namespace Render
     {
          SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
          SDL_RenderClear(renderer);
-    }
-
-    RenderLevel::~RenderLevel()
-    {
-        for(std::map<int32_t, Sprite>::iterator it = minTops.begin(); it != minTops.end(); ++it)
-            SDL_DestroyTexture((SDL_Texture*)it->second);
-
-        for(std::map<int32_t, Sprite>::iterator it = minBottoms.begin(); it != minBottoms.end(); ++it)
-            SDL_DestroyTexture((SDL_Texture*)it->second);
     }
 
     #define BPP 4
@@ -295,17 +470,77 @@ namespace Render
         return s;
     }
 
-    void setpixel(SDL_Surface *s, int x, int y, Cel::Colour c)
+    void setpixel(SDL_Surface *surface, int x, int y, Cel::Colour c)
     {
-        y = y*s->pitch/BPP;
+        Uint32 pixel = SDL_MapRGBA(surface->format, c.r, c.g, c.b, ((int)c.visible)*255);
 
-        Uint32 *pixmem32;
-        Uint32 colour;  
-     
-        colour = SDL_MapRGB( s->format, c.r, c.g, c.b );
-      
-        pixmem32 = (Uint32*) s->pixels  + y + x;
-        *pixmem32 = colour;
+        int bpp = surface->format->BytesPerPixel;
+        // Here p is the address to the pixel we want to set
+        Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+
+        switch(bpp) {
+        case 1:
+            *p = pixel;
+            break;
+
+        case 2:
+            *(Uint16 *)p = pixel;
+            break;
+
+        case 3:
+            if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+                p[0] = (pixel >> 16) & 0xff;
+                p[1] = (pixel >> 8) & 0xff;
+                p[2] = pixel & 0xff;
+            } else {
+                p[0] = pixel & 0xff;
+                p[1] = (pixel >> 8) & 0xff;
+                p[2] = (pixel >> 16) & 0xff;
+            }
+            break;
+
+        case 4:
+            *(Uint32 *)p = pixel;
+            break;
+        }
+    }
+
+    Cel::Colour getPixel(SDL_Surface* s, int x, int y)
+    {
+        Uint32 pix;
+
+        int bpp = s->format->BytesPerPixel;
+        // Here p is the address to the pixel we want to retrieve
+        Uint8 *p = (Uint8 *)s->pixels + y * s->pitch + x * bpp;
+
+        switch(bpp) {
+            case 1:
+                pix = *p;
+                break;
+
+            case 2:
+                pix = *(Uint16 *)p;
+                break;
+
+            case 3:
+                if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+                    pix = p[0] << 16 | p[1] << 8 | p[2];
+                else
+                    pix = p[0] | p[1] << 8 | p[2] << 16;
+                break;
+
+            case 4:
+                pix = *(Uint32 *)p;
+                break;
+
+            default:
+                pix = 0;
+        }
+
+        Uint8 r, g, b, a;
+        SDL_GetRGBA(pix, s->format, &r, &g, &b, &a);
+
+        return Cel::Colour(r, g, b, a == 255);
     }
 
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)
@@ -329,7 +564,7 @@ namespace Render
             drawFrame(s, x+32, y, f[r]);
     }
 
-    void drawMinPillar(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset, bool top)
+    void drawMinPillar(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset, bool top)
     {
         // compensate for maps using 5-row min files
         if(pillar.size() == 10)
@@ -361,26 +596,26 @@ namespace Render
         }
     }
 
-    void drawMinPillarTop(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset)
+    void drawMinPillarTop(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset)
     {
         drawMinPillar(s, x, y, pillar, tileset, true);
     }
 
-    void drawMinPillarBase(SDL_Surface* s, int x, int y, const Level::MinPillar& pillar, Cel::CelFile& tileset)
+    void drawMinPillarBase(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset)
     {
         drawMinPillar(s, x, y, pillar, tileset, false);
     }
 
-    void drawAt(RenderLevel* level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    void drawAt(const Level::Level& level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist, int32_t levelX, int32_t levelY)
     {
         size_t w, h;
         spriteSize(sprite, w, h);
 
-        int32_t xPx1 = ((y1*(-32)) + 32*x1 + level->levelWidth*32) + level->levelX - w/2;
-        int32_t yPx1 = ((y1*16) + (16*x1) +160) + level->levelY;
+        int32_t xPx1 = ((y1*(-32)) + 32*x1 + level.width()*32) + levelX - w/2;
+        int32_t yPx1 = ((y1*16) + (16*x1) +160) + levelY;
 
-        int32_t xPx2 = ((y2*(-32)) + 32*x2 + level->levelWidth*32) + level->levelX - w/2;
-        int32_t yPx2 = ((y2*16) + (16*x2) +160) + level->levelY;
+        int32_t xPx2 = ((y2*(-32)) + 32*x2 + level.width()*32) + levelX - w/2;
+        int32_t yPx2 = ((y2*16) + (16*x2) +160) + levelY;
 
         int32_t x = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
         int32_t y = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
@@ -388,11 +623,26 @@ namespace Render
         drawAt(sprite, x, y);
     }
 
-    std::pair<size_t, size_t> getClickedTile(RenderLevel* level, size_t x, size_t y)
+    void getMapScreenCoords(const Level::Level& level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist, int32_t& levelX, int32_t& levelY)
     {
+        int16_t xPx1 = -((y1*(-32)) + 32*x1 + level.width()*32) +WIDTH/2;
+        int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
+
+        int16_t xPx2 = -((y2*(-32)) + 32*x2 + level.width()*32) +WIDTH/2;
+        int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
+
+        levelX = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
+        levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
+    }
+
+    std::pair<size_t, size_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    {
+        int32_t levelX, levelY;
+        getMapScreenCoords(level, x1, y1, x2, y2, dist, levelX, levelY);
+
         // Position on the map in pixels
-        int32_t flatX = x - level->levelX;
-        int32_t flatY = y - level->levelY;
+        int32_t flatX = x - levelX;
+        int32_t flatY = y - levelY;
 
         // position on the map divided into 32x16 flat blocks
         // every second one of these blocks is centred on an isometric
@@ -401,7 +651,7 @@ namespace Render
         int32_t flatGridY = (flatY+8) / 16;
         
         // origin position (in flat grid coords) for the first line (isometric y = 0)
-        int32_t flatOriginPosX = level->levelHeight;
+        int32_t flatOriginPosX = level.height();
         int32_t flatOriginPosY = 15;
 
         // when a flat grid box is clicked that does not centre on an isometric block, work out which
@@ -443,48 +693,50 @@ namespace Render
         return std::make_pair(isoPosX, isoPosY);
     }
 
-    void drawLevelHelper(RenderLevel* level, std::map<int32_t, Sprite>& minMap, int32_t x, int32_t y)
+    void drawLevelHelper(const Level::Level& level, SpriteGroup& minSprites, int32_t x, int32_t y, int32_t levelX, int32_t levelY)
     {
-        if((size_t)x < level->level->width() && (size_t)y < level->level->height())
+        if((size_t)x < level.width() && (size_t)y < level.height())
         {
-            size_t index = level->level->operator[](x)[y].index();
-            int32_t xCoord = (y*(-32)) + 32*x + level->level->height()*32-32 +level->levelX;
-            int32_t yCoord = (y*16) + 16*x + level->levelY;
+            size_t index = level[x][y].index();
+            int32_t xCoord = (y*(-32)) + 32*x + level.height()*32-32 + levelX;
+            int32_t yCoord = (y*16) + 16*x + levelY;
 
-            if(xCoord >= -64 && xCoord <=  WIDTH  && yCoord >= -256 && yCoord <= HEIGHT && minMap.find(index) != minMap.end())
-                drawAt(minMap[index], xCoord, yCoord);
+            if(xCoord >= -64 && xCoord <=  WIDTH  && yCoord >= -256 && yCoord <= HEIGHT && index < minSprites.size())
+                drawAt(minSprites[index], xCoord, yCoord);
         }
     }
 
-    void drawLevel(RenderLevel* level, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
-        int16_t xPx1 = -((y1*(-32)) + 32*x1 + level->levelWidth*32) +WIDTH/2;
-        int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
-
-        int16_t xPx2 = -((y2*(-32)) + 32*x2 + level->levelWidth*32) +WIDTH/2;
-        int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
-
-        level->levelX = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
-        level->levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
+        int32_t levelX, levelY;
+        getMapScreenCoords(level, x1, y1, x2, y2, dist, levelX, levelY);
 
         //TODO clean up the magic numbers here, and elsewhere in this file
-        
-        for(size_t x = 0; x < level->level->width(); x++)
+
+        SpriteGroup* minBottoms = cache->get(minBottomsHandle);
+
+        for(size_t x = 0; x < level.width(); x++)
         {
-            for(size_t y = 0; y < level->level->height(); y++)
+            for(size_t y = 0; y < level.height(); y++)
             {
-                drawLevelHelper(level, level->minBottoms, x+1, y+1);
+                drawLevelHelper(level, *minBottoms, x+1, y+1, levelX, levelY);
             }
         }
 
-        for(size_t x = 0; x < level->level->width(); x++)
-        {
-            for(size_t y = 0; y < level->level->height(); y++)
-            {
-                if(objs[x][y].sprite)
-                    drawAt(level, objs[x][y].sprite, x, y, objs[x][y].x2, objs[x][y].y2, objs[x][y].dist);
+        SpriteGroup* minTops = cache->get(minTopsHandle);
+        cache->setImmortal(minTopsHandle, true);
 
-                drawLevelHelper(level, level->minTops, x, y);
+        for(size_t x = 0; x < level.width(); x++)
+        {
+            for(size_t y = 0; y < level.height(); y++)
+            {
+                if(objs[x][y].valid)
+                {
+                    LevelObject o = objs[x][y];
+                    drawAt(level, cache->get(objs[x][y].spriteCacheIndex)->operator[](o.spriteFrame), x, y, objs[x][y].x2, objs[x][y].y2, objs[x][y].dist, levelX, levelY);
+                }
+
+                drawLevelHelper(level, *minTops, x, y, levelX, levelY);
             }
         }
     }

@@ -9,7 +9,6 @@ namespace FAGui
     void showIngameGui();
     void showMainMenu();
     void updateGui();
-    void destroyGui();
 }
 
 #endif

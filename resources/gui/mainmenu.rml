@@ -24,19 +24,26 @@
 
             span#smlogo
             {
-                icon-decorator: image;
-                icon-image-src: /ui_art/smlogo.pcx;
-                icon-image-t-end: 154px;
-                
+                icon-decorator: faanim;
+                icon-animfile: /ui_art/smlogo.pcx&trans=0,255,0&vanim=154;
+                icon-playtime: 0.8;
+
                 display: inline-block;
                 width: 390px;
                 height: 154px;
             }
 
-            img.pentagon
+            span.pentagon
             {
+                icon-decorator: faanim;
+                icon-playtime: 0.3;
+                icon-animfile: /data/PentSpin.cel;
+
                 position: relative;
+                display: inline-block;
                 top: 16px;
+                width: 48px;
+                height: 48px;
             }
 
         </style>
@@ -58,8 +65,8 @@ def onLoad(document):
         {"text": 'Exit Freeablo', "strFunc": 'freeablo.quit', "func": freeablo.quit}
     ]
 
-    fmtSelected = '<img class="pentagon" src="/data/PentSpin.cel"/> %s <img class="pentagon" src="/data/PentSpin.cel"/>'
-    fmtNotSelected = '<img style="visibility: hidden;" class="pentagon" src="/data/PentSpin.cel"/> %s <img style="visibility: hidden;" class="pentagon" src="/data/PentSpin.cel"/>'
+    fmtSelected = '<span class="pentagon"/> %s <span class="pentagon"/>'
+    fmtNotSelected = '<span style="visibility: hidden;" class="pentagon"/> %s <span style="visibility: hidden;" class="pentagon"/>'
     
     global mainMenu
     mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)

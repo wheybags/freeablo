@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include <boost/function.hpp>
-#include <boost/lockfree/queue.hpp>
+#include <boost/lockfree/spsc_queue.hpp>
 
 #include <misc/disablewarn.h>
 #include <Rocket/Core.h>
@@ -38,6 +38,11 @@ namespace Input
             static InputManager* get();
 
         private:
+            void rocketBaseClicked(); ///< called by libRocket when it receives a click that doesn't hit any gui elements
+            bool mBaseWasClicked;
+
+            friend void baseClickedHelper();
+
             
             ///< Basically a copy of the subset of SDL_Event that we actually use
             struct Event
@@ -64,7 +69,7 @@ namespace Input
                 } vals;
             };
 
-            boost::lockfree::queue<Event> mQueue;
+            boost::lockfree::spsc_queue<Event, boost::lockfree::capacity<500> > mQueue;
             boost::function<void(Key)> mKeyPress;
             boost::function<void(Key)> mKeyRelease;
             boost::function<void(uint32_t, uint32_t, Key)> mMouseClick;

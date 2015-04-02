@@ -17,11 +17,20 @@ namespace DiabloExe
     DiabloExe::DiabloExe()
     {
         mVersion = getVersion();
+        if (mVersion.empty())
+        {
+            return;
+        }
 
         bpt::ptree pt;
         Misc::readIni("resources/exeversions/" + mVersion + ".ini", pt);
         
         FAIO::FAFile* exe = FAIO::FAfopen("Diablo.exe");
+        if (NULL == exe)
+        {
+            return;
+        }
+
         loadMonsters(exe, pt);                        
         loadNpcs(exe, pt);
 
@@ -31,6 +40,11 @@ namespace DiabloExe
     std::string DiabloExe::getMD5()
     {
         FAIO::FAFile* dexe = FAIO::FAfopen("Diablo.exe");
+        if (NULL == dexe)
+        {
+            return std::string();
+        }
+
         size_t size = FAIO::FAsize(dexe);
         Misc::md5_byte_t* buff = new Misc::md5_byte_t[size];
         FAIO::FAfread(buff, sizeof(Misc::md5_byte_t), size, dexe);
@@ -59,6 +73,10 @@ namespace DiabloExe
         Misc::readIni("resources/exeversions/versions.ini", pt);
 
         std::string exeMD5 = getMD5();
+        if (exeMD5.empty())
+        {
+            return std::string();
+        }
 
         std::string version = "";
 
@@ -161,5 +179,10 @@ namespace DiabloExe
         }
 
         return ss.str();
+    }
+
+    bool DiabloExe::isLoaded() const
+    {
+        return !mMonsters.empty() && !mNpcs.empty();
     }
 }

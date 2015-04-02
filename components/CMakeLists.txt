@@ -50,6 +50,7 @@ set(RenderFiles
     render/rocketglue/SystemInterfaceSDL2.h
     render/rocketglue/FAIOFileInterface.h
     render/rocketglue/FAIOFileInterface.cpp
+    render/rocketglue/drawcommand.h
     render/sdl2backend.cpp
 )
 add_library(Render ${RenderFiles})

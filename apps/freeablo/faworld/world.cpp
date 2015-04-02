@@ -86,7 +86,7 @@ namespace FAWorld
             mActors[i]->update();
 
             if(advanceAnims)
-                mActors[i]->mFrame = (mActors[i]->mFrame + 1) % mActors[i]->getCurrentAnim().get()->mSpriteGroup.animLength();
+                mActors[i]->mFrame = (mActors[i]->mFrame + 1) % mActors[i]->getCurrentAnim().animLength;
             
             actorMapInsert(mActors[i]);    
         }
@@ -116,7 +116,7 @@ namespace FAWorld
 
         for(size_t i = 0; i < mActors.size(); i++)
         {
-            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim().get()->mSpriteGroup.animLength();
+            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim().animLength;
             state->mObjects.push_back(boost::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
         }
     }

@@ -2,19 +2,18 @@
 #define FA_RENDERER_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include <map>
 
-#include <stdint.h>
-
 #include <boost/atomic.hpp>
-#include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <render/render.h>
 
 #include "../faworld/position.h"
+
+#include "spritemanager.h"
 
 namespace Level
 {
@@ -23,36 +22,34 @@ namespace Level
 
 namespace FARender
 {       
-    class CacheSpriteGroup;
-    typedef boost::shared_ptr<CacheSpriteGroup> FASpriteGroup;
+
+    class Renderer;
+    class Tileset
+    {
+        private:
+            FASpriteGroup minTops;
+            FASpriteGroup minBottoms;
+            friend class Renderer;
+    };
 
     class RenderState
     {
         public:
 
-        boost::mutex mMutex;
+        boost::atomic<bool> ready;
 
         FAWorld::Position mPos;
         
         std::vector<boost::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
 
-        std::vector<drawCommand> guiDrawBuffer;
-    };
+        std::vector<DrawCommand> guiDrawBuffer;
 
-    enum RenderThreadState
-    {
-        guiLoadTexture,
-        guiGenerateTexture,
-        guiReleaseTexture,
-        running,
-        levelChange,
-        loadSprite,
-        pause,
-        spriteDestroy,
-        stopped,
-        musicPlay
-    };
+        Tileset tileset;
 
+        Level::Level* level;
+
+        RenderState():ready(true) {}
+    };
 
     class Renderer
     {
@@ -64,78 +61,35 @@ namespace FARender
 
             void stop();
 
-            void setLevel(const Level::Level* level);
+            Tileset getTileset(const Level::Level& level);
 
             RenderState* getFreeState(); // ooh ah up de ra
             void setCurrentState(RenderState* current);
 
             FASpriteGroup loadImage(const std::string& path);
 
-            std::pair<size_t, size_t> getClickedTile(size_t x, size_t y);
+            std::pair<size_t, size_t> getClickedTile(size_t x, size_t y, const Level::Level& level, const FAWorld::Position& screenPos);
 
             Rocket::Core::Context* getRocketContext();
 
-            bool loadGuiTextureFunc(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&);
-            bool generateGuiTextureFunc(Rocket::Core::TextureHandle&, const Rocket::Core::byte* source, const Rocket::Core::Vector2i&);
-            void releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle);
-            
-            void playMusic(const std::string& path);
+            bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
+            void cleanup(); ///< To be called only by Engine::ThreadManager
             
         private:
+            bool loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
+            bool generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions);
+            void releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle);
 
-            FASpriteGroup loadImageImp(const std::string& path);
-            
-            void destroySprite(Render::SpriteGroup* s);
-            
             static Renderer* mRenderer; ///< Singleton instance
 
-            void renderLoop();
-            
-            boost::atomic<RenderThreadState> mRenderThreadState;
-
-            void* mThreadCommunicationTmp;
-            Render::RenderLevel* mLevel;
-            bool mDone;
+            boost::atomic<bool> mDone;
+            Render::LevelObjects mLevelObjects;
 
             RenderState mStates[3];
 
-            RenderState* mCurrent;
-
             Rocket::Core::Context* mRocketContext;
 
-            std::map<std::string, boost::weak_ptr<CacheSpriteGroup> > mSpriteCache;
-
-            friend class CacheSpriteGroup;
-    };
-
-    class CacheSpriteGroup
-    {
-        public:
-            CacheSpriteGroup(const std::string& path): mSpriteGroup(path), mPath(path) {}
-            
-            ~CacheSpriteGroup()
-            {
-                Renderer* r = Renderer::get();
-                if(r && !r->mDone)
-                {
-                    r->mRenderThreadState = pause;
-                    while(r->mRenderThreadState != stopped){} // wait until the render thread is definitely done
-
-                    r->mSpriteCache.erase(mPath);
-
-                    r->mRenderThreadState = running;
-
-                    r->destroySprite(&mSpriteGroup); // destroy the sprite in the rendering thread
-                }
-            }
-
-            void destroy()
-            {
-                mSpriteGroup.destroy();
-            }
-
-            Render::SpriteGroup mSpriteGroup; 
-            std::string mPath;
+            SpriteManager mSpriteManager;
     };
 }
 

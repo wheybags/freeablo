@@ -4,6 +4,8 @@
 #include <diabloexe/diabloexe.h>
 #include <misc/misc.h>
 
+#include "engine/threadmanager.h"
+
 #include "falevelgen/levelgen.h"
 #include "falevelgen/random.h"
 
@@ -17,6 +19,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
 #include <fstream>
 
 #include <misc/fareadini.h>
@@ -128,10 +131,9 @@ void mouseMove(size_t x, size_t y)
     yClick = y;
 }
 
-void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world, FARender::Renderer& renderer, Level::Level* level)
+void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world, Level::Level* level)
 {
     world.clear();
-    renderer.setLevel(level);
     world.setLevel(*level, exe);
 
     if(dLvl == 0)
@@ -278,33 +280,33 @@ bool loadSettings(StartupSettings& settings)
     return true;
 }
 
-void playLevelMusic(int32_t currentLevel, FARender::Renderer& renderer)
+void playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager)
 {
     switch(currentLevel)
     {
         case 0:
         {
-            renderer.playMusic("music/dtowne.wav");
+            threadManager.playMusic("music/dtowne.wav");
             break;
         }
         case 1: case 2: case 3: case 4:
         {
-            renderer.playMusic("music/dlvla.wav");
+            threadManager.playMusic("music/dlvla.wav");
             break;
         }
         case 5: case 6: case 7: case 8:
         {
-            renderer.playMusic("music/dlvlb.wav");
+            threadManager.playMusic("music/dlvlb.wav");
             break;
         }
         case 9: case 10: case 11: case 12:
         {
-            renderer.playMusic("music/dlvlc.wav");
+            threadManager.playMusic("music/dlvlc.wav");
             break;
         }
         case 13: case 14: case 15: case 16:
         {
-            renderer.playMusic("music/dlvld.wav");
+            threadManager.playMusic("music/dlvld.wav");
             break;
         }
     }
@@ -320,6 +322,11 @@ volatile bool renderDone = false;
  */
 int main(int argc, char** argv)
 {
+    if (!FAIO::init())
+    {
+        return EXIT_FAILURE;
+    }
+
     boost::program_options::variables_map variables;
 
     if (parseOptions(argc, argv, variables))
@@ -327,6 +334,7 @@ int main(int argc, char** argv)
         run(variables);
     }
 
+    FAIO::quit();
     return 0;
 }
 
@@ -336,23 +344,37 @@ void run(const bpo::variables_map& variables)
     if (!loadSettings(settings))
         return;
 
+
+    Engine::ThreadManager threadManager;
+    FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
+    Audio::init();
+
+    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
+
     boost::thread mainThread(boost::bind(&runGameLoop, &variables));
 
-    FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
+    threadManager.run();
     renderDone = true;
 
     mainThread.join();
+
+    Audio::quit();
 }
 
 void runGameLoop(const bpo::variables_map& variables)
 {
-    while(!FARender::Renderer::get()) {}
-
     FARender::Renderer& renderer = *FARender::Renderer::get();
-    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
-    inputmanager = &input;
+    Input::InputManager& input = *Input::InputManager::get();
+    Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
 
     DiabloExe::DiabloExe exe;
+
+    if (!exe.isLoaded())
+    {
+        renderer.stop();
+        return;
+    }
+
     FAWorld::World world;
 
     FALevelGen::FAsrand(time(NULL));
@@ -362,6 +384,7 @@ void runGameLoop(const bpo::variables_map& variables)
     int32_t currentLevel = variables["level"].as<int32_t>();
 
     Level::Level* level = NULL;
+    FARender::Tileset tileset;
     
     FAWorld::Player* player = world.getPlayer();
     FAGui::initGui();
@@ -375,28 +398,29 @@ void runGameLoop(const bpo::variables_map& variables)
         }
         else
         {
+            tileset = renderer.getTileset(*level);
             levels[currentLevel] = level;
-            setLevel(currentLevel, exe, world, renderer, level);
+            setLevel(currentLevel, exe, world, level);
         }
         
         player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 
         FAGui::showIngameGui();
 
-        playLevelMusic(currentLevel, renderer);
+        playLevelMusic(currentLevel, threadManager);
     }
     else
     {
-        renderer.setLevel(NULL);
         paused = true;
         FAGui::showMainMenu();
-        renderer.playMusic("music/dintro.wav");
+        threadManager.playMusic("music/dintro.wav");
     }
     
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     std::pair<size_t, size_t> destination = player->mPos.current();
     
+    bpt::ptree hotkeypt;
     Misc::readIni("resources/hotkeys.ini", hotkeypt);
     
     quit_key = Input::Hotkey("Quit", hotkeypt);
@@ -413,7 +437,7 @@ void runGameLoop(const bpo::variables_map& variables)
         
         while((size_t)(now.time_of_day().total_milliseconds() - last.time_of_day().total_milliseconds()) < 1000/FAWorld::World::ticksPerSecond)
         {
-            boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+            boost::this_thread::yield();
             now = boost::posix_time::microsec_clock::local_time();
         }
 
@@ -424,7 +448,7 @@ void runGameLoop(const bpo::variables_map& variables)
         {
             if(mouseDown)
             {
-                destination = renderer.getClickedTile(xClick, yClick);
+                destination = renderer.getClickedTile(xClick, yClick, *level, player->mPos);
                 if(click)
                     level->activate(destination.first, destination.second);
 
@@ -450,9 +474,9 @@ void runGameLoop(const bpo::variables_map& variables)
 
                     destination = player->mPos.current();
                     
-                    setLevel(currentLevel, exe, world, renderer, level);
-
-                    playLevelMusic(currentLevel, renderer);
+                    setLevel(currentLevel, exe, world, level);
+                    tileset = renderer.getTileset(*level);
+                    playLevelMusic(currentLevel, threadManager);
                 }
                 
                 changeLevel = 0;
@@ -495,20 +519,26 @@ void runGameLoop(const bpo::variables_map& variables)
         FAGui::updateGui();
 
         FARender::RenderState* state = renderer.getFreeState();
-        
-        state->mPos = player->mPos;
 
-        world.fillRenderState(state);
+        if(state)
+        {
+            state->mPos = player->mPos;
+            state->tileset = tileset;
+            state->level = level;
 
-        Render::updateGuiBuffer(state->guiDrawBuffer);
+            world.fillRenderState(state);
+
+            Render::updateGuiBuffer(&state->guiDrawBuffer);
+        }
+        else
+        {
+            Render::updateGuiBuffer(NULL);
+        }
 
         renderer.setCurrentState(state);
     }
     
-    FAGui::destroyGui();
     renderer.stop();    
-
-    while(!renderDone) {} // have to wait until the renderer stops before destroying all our locals
 
     for(size_t i = 0; i < levels.size(); i++)
     {
