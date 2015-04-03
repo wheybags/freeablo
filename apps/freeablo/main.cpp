@@ -36,8 +36,6 @@ bool paused = false;
 bool noclip = false;
 int changeLevel = 0;
 
-Input::InputManager *inputmanager;
-
 Input::Hotkey quit_key;
 Input::Hotkey noclip_key;
 Input::Hotkey changelvldwn_key;
@@ -65,8 +63,9 @@ void keyPress(Input::Key key)
     
     Input::Hotkey hotkey;
     hotkey.key = key;
+    Input::InputManager& input = *Input::InputManager::get();
     
-    uint32_t modifiers = inputmanager->getModifiers();
+    uint32_t modifiers = input.getModifiers();
     
     switch(modifiers)
     {
