@@ -6,6 +6,8 @@
                 font-family: FreeMono;
                 font-size: 24;
                 text-align: center;
+                height: 100%;
+                width: 100%;
             }
 
             div#topContainer
@@ -38,7 +40,6 @@ import rocket
 import freeablo
 import hotkey
 import docmanage
-from menu import Menu
 
 rk = rocket.key_identifier
 modifiers = [rk.RSHIFT, rk.LSHIFT,
@@ -61,10 +62,10 @@ def onKeyDown(event, document):
     global rk
     
     changeHotkey = docmanage.manager.getDoc("resources/gui/changehotkey.rml")
-    
     if event.parameters['key_identifier'] == rk.ESCAPE:
         docmanage.manager.closeDoc("resources/gui/changehotkey.rml")
-        docmanage.manager.toggleDoc("resources/gui/hotkeymenu.rml")
+        docmanage.manager.showDoc("resources/gui/hotkeymenu.rml")
+        
         return
     
     if event.parameters['key_identifier'] in [rk.CAPITAL, rk.NUMLOCK, rk.SCROLL, rk.PAUSE, rk.RETURN, rk.NUMPADENTER]:
@@ -90,9 +91,9 @@ def onKeyDown(event, document):
         
         for oldHotkey in oldHotkeys:
             if oldHotkey == newHotkey:
-                    docmanage.manager.loadDoc("resources/gui/changehotkeyerrormsg.rml")
-                    docmanage.manager.showDoc("resources/gui/changehotkeyerrormsg.rml")
-                    return 
+                docmanage.manager.loadDoc("resources/gui/changehotkeyerrormsg.rml")
+                docmanage.manager.showDoc("resources/gui/changehotkeyerrormsg.rml")
+                return 
 
         changeHotkey.func = changeHotkey.func[1:-1] if changeHotkey.func[0] == "'" else changeHotkey.func
         freeablo.setHotkey(changeHotkey.func, [newHotkey.key, newHotkey.shift, newHotkey.ctrl, newHotkey.alt]) 
@@ -119,7 +120,7 @@ def onKeyUp(event, document):
 
     <body onkeydown="onKeyDown(event, document)"
           onkeyup="onKeyUp(event, document)"
-           onload="onLoad(document)">
+          onload="onLoad(document)">
         <div id="topContainer">
             <span id="smlogo"></span> <br/>
             <div id="innerTopContainer"></div> 

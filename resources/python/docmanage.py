@@ -21,7 +21,6 @@ class DocManager(object):
         self.docs = {}
         self.paused = False
         self.pauseHiddenDocs = []
-        #self.pauseHandle = context.LoadDocument('resources/gui/pausemenu.rml')
         self.pauseHandle = "resources/gui/pausemenu.rml"
         self.loadDoc(self.pauseHandle)
 
@@ -42,9 +41,10 @@ class DocManager(object):
             self.showDoc(docpath)
 
     def loadDoc(self, docpath):
-        context = rocket.contexts['default']
-        newHandle = {"doc": context.LoadDocument(docpath), "visible": False}
-        self.docs[docpath] = newHandle
+        if not docpath in self.docs:
+            context = rocket.contexts['default']
+            newHandle = {"doc": context.LoadDocument(docpath), "visible": False}
+            self.docs[docpath] = newHandle
         
     def reloadDoc(self, docpath):
         self.closeDoc(docpath)

@@ -79,7 +79,8 @@ def changeHotkey(func):
     changeHotkey = docmanage.manager.getDoc("resources/gui/changehotkey.rml")
     changeHotkey.func = func
     docmanage.manager.hideDoc("resources/gui/hotkeymenu.rml")
-    docmanage.manager.showDoc("resources/gui/changehotkey.rml")  
+    docmanage.manager.showDoc("resources/gui/changehotkey.rml")
+        
 
 def showPause():
     docmanage.manager.closeDoc("resources/gui/hotkeymenu.rml")

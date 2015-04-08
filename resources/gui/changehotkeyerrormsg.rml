@@ -6,6 +6,8 @@
                 font-family: FreeMono;
                 font-size: 24;
                 text-align: center;
+                height: 100%;
+                width: 100%;
             }
 
             div#topContainer
@@ -35,21 +37,15 @@ def onLoad(document):
     elem = container
     elem.inner_rml = "Error: Key Sequence Already Assigned"
     startTime = time.time()
-    
-def onKeyDown(event, document):
-    if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
-        docmanage.manager.closeDoc("resources/gui/changehotkeyerrormsg.rml")
         
 def onKeyUp(event, document):
-    while time.time() < startTime + 2:
+    while time.time() < startTime + 1:
         time.sleep(0.1)
     docmanage.manager.closeDoc("resources/gui/changehotkeyerrormsg.rml")
         </script>
     </head>
 
-    <body onload="onLoad(document)"
-          onkeydown="onKeyDown(event, document)"
-          onkeyup="onKeyUp(event, document)">
+    <body onkeyup="onKeyUp(event, document)" onload="onLoad(document)">
         <div id="topContainer">
             <div id="innerTopContainer"></div> 
         </div>
