@@ -45,20 +45,12 @@
 
 import rocket
 import freeablo
+import docmanage
 from menu import Menu
 
-import docmanage
-
-context = rocket.contexts['default']
-doc = None
 pauseMenu = None
-paused = False
 
 def onLoad(document):
-    document.id = "pausemenu"
-    global doc
-    doc = document
-    
     entries = [ 
         {"text": 'SAVE GAME (placeholder)'},
         {"text": 'OPTIONS (placeholder)'},
@@ -80,9 +72,9 @@ def onKeyDown(event, document):
         docmanage.manager.onKeyDown(event)
 
 def showHotkeys():
-    doc.Hide()
-    hotkeys = context.LoadDocument('resources/gui/hotkeymenu.rml')
-    hotkeys.Show()
+    docmanage.manager.loadDoc("resources/gui/hotkeymenu.rml")
+    docmanage.manager.hideDoc("resources/gui/pausemenu.rml")
+    docmanage.manager.showDoc("resources/gui/hotkeymenu.rml")
 
         </script>
     </head>

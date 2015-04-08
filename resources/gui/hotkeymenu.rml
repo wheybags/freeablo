@@ -17,19 +17,26 @@
 
             span#smlogo
             {
-                icon-decorator: image;
-                icon-image-src: /ui_art/smlogo.pcx;
-                icon-image-t-end: 154px;
-                
+                icon-decorator: faanim;
+                icon-animfile: /ui_art/smlogo.pcx&trans=0,255,0&vanim=154;
+                icon-playtime: 0.8;
+
                 display: inline-block;
                 width: 390px;
                 height: 154px;
             }
 
-            img.pentagon
+            span.pentagon
             {
+                icon-decorator: faanim;
+                icon-playtime: 0.3;
+                icon-animfile: /data/PentSpin.cel;
+
                 position: relative;
+                display: inline-block;
                 top: 16px;
+                width: 48px;
+                height: 48px;
             }
 
         </style>
@@ -38,17 +45,12 @@
 
 import rocket
 import freeablo
+import docmanage
 from menu import Menu
 
-context = rocket.contexts['default']
-doc = None
 hotkeyMenu = None
 
 def onLoad(document):
-    document.id = "hotkeymenu"
-    global doc
-    doc = document
-
     hotkeynames = freeablo.getHotkeyNames()
 
     entries = [ 
@@ -59,8 +61,8 @@ def onLoad(document):
         {"text": 'Previous', "strFunc": "showPause", "func": showPause}
     ]
 
-    fmtSelected = '<img class="pentagon" src="/data/PentSpin.cel"/> %s <img class="pentagon" src="/data/PentSpin.cel"/>'
-    fmtNotSelected = '<img style="visibility: hidden;" class="pentagon" src="/data/PentSpin.cel"/> %s <img style="visibility: hidden;" class="pentagon" src="/data/PentSpin.cel"/>'
+    fmtSelected = '<span class="pentagon" src="/data/PentSpin.cel"/> %s <span class="pentagon" src="/data/PentSpin.cel"/>'
+    fmtNotSelected = '<span style="visibility: hidden;" class="pentagon"/> %s <span style="visibility: hidden;" class="pentagon"/>'
     
     global hotkeyMenu
     hotkeyMenu = Menu(document, 'hotkeyMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
@@ -73,19 +75,15 @@ def onKeyDown(event, document):
         hotkeyMenu.onKeyDown(event)
         
 def changeHotkey(func):
-    global doc
-    doc.Close()
-    changeHotkey = context.LoadDocument('resources/gui/changehotkey.rml')
+    docmanage.manager.loadDoc("resources/gui/changehotkey.rml")
+    changeHotkey = docmanage.manager.getDoc("resources/gui/changehotkey.rml")
     changeHotkey.func = func
-    changeHotkey.Show()       
+    docmanage.manager.hideDoc("resources/gui/hotkeymenu.rml")
+    docmanage.manager.showDoc("resources/gui/changehotkey.rml")  
 
 def showPause():
-    global doc
-    global context
-
-    doc.Close()
-    pausemenu = context.documents["pausemenu"]
-    pausemenu.Show()
+    docmanage.manager.closeDoc("resources/gui/hotkeymenu.rml")
+    docmanage.manager.showDoc("resources/gui/pausemenu.rml")
 
         </script>
     </head>

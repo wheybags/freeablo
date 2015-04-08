@@ -6,39 +6,41 @@
                 font-family: FreeMono;
                 font-size: 24;
                 text-align: center;
-                background-color: rgba(0,0,0,255);
-                height: 100%;
-                width: 100%;
-                #height: 25%;
-                #width: 25%;
-                #left: 37%;
-                #top: 37%;
             }
 
             div#topContainer
             {
-                position:absolute;
-                top: 50%;
+                position: absolute;
+                top: 280px;
             }
+            
+            span#smlogo
+            {
+                icon-decorator: faanim;
+                icon-animfile: /ui_art/smlogo.pcx&trans=0,255,0&vanim=154;
+                icon-playtime: 0.8;
 
-            div#menuContainer
+                display: inline-block;
+                width: 390px;
+                height: 154px;
+            }
+            
+            div#innerTopContainer
             {
                 position: absolute;
-                top: -50px;
+                top: 200px;
             }
 
         </style>
 
         <script>
-import time
 import rocket
 import freeablo
 import hotkey
+import docmanage
 from menu import Menu
 
-context = rocket.contexts['default']
 rk = rocket.key_identifier
-doc = None
 modifiers = [rk.RSHIFT, rk.LSHIFT,
              rk.RCONTROL, rk.LCONTROL,
              rk.RMENU, rk.LMENU,
@@ -47,25 +49,22 @@ modifiers = [rk.RSHIFT, rk.LSHIFT,
 newHotkey = hotkey.Hotkey()
 
 def onLoad(document):
-    document.id = "changehotkey"
-    global doc
-    doc = document
-    doc.func = ""
-    container = document.GetElementById('innerMenuContainer')
+    document.func = ""
+    container = document.GetElementById('innerTopContainer')
     container.inner_rml = '<span id="menuEntry0"></span><br/>'
     elem = container
     elem.inner_rml = "Press A Key"
  
 def onKeyDown(event, document):    
     global newHotkey
-    global doc
     global modifiers
     global rk
     
+    changeHotkey = docmanage.manager.getDoc("resources/gui/changehotkey.rml")
+    
     if event.parameters['key_identifier'] == rk.ESCAPE:
-        doc.Close()
-        hotkeymenu = context.LoadDocument('resources/gui/hotkeymenu.rml')
-        hotkeymenu.Show()
+        docmanage.manager.closeDoc("resources/gui/changehotkey.rml")
+        docmanage.manager.toggleDoc("resources/gui/hotkeymenu.rml")
         return
     
     if event.parameters['key_identifier'] in [rk.CAPITAL, rk.NUMLOCK, rk.SCROLL, rk.PAUSE, rk.RETURN, rk.NUMPADENTER]:
@@ -91,16 +90,15 @@ def onKeyDown(event, document):
         
         for oldHotkey in oldHotkeys:
             if oldHotkey == newHotkey:
-                    errormsg = context.LoadDocument('resources/gui/changehotkeyerrormsg.rml')
-                    errormsg.Show()
+                    docmanage.manager.loadDoc("resources/gui/changehotkeyerrormsg.rml")
+                    docmanage.manager.showDoc("resources/gui/changehotkeyerrormsg.rml")
                     return 
 
-        doc.func = doc.func[1:-1] if doc.func[0] == "'" else doc.func
-        freeablo.setHotkey(doc.func, [newHotkey.key, newHotkey.shift, newHotkey.ctrl, newHotkey.alt]) 
-        newHotkey = None
-        doc.Close()
-        hotkeymenu = context.LoadDocument('resources/gui/hotkeymenu.rml')
-        hotkeymenu.Show()
+        changeHotkey.func = changeHotkey.func[1:-1] if changeHotkey.func[0] == "'" else changeHotkey.func
+        freeablo.setHotkey(changeHotkey.func, [newHotkey.key, newHotkey.shift, newHotkey.ctrl, newHotkey.alt]) 
+        docmanage.manager.closeDoc("resources/gui/changehotkey.rml")
+        docmanage.manager.reloadDoc("resources/gui/hotkeymenu.rml")
+        docmanage.manager.showDoc("resources/gui/hotkeymenu.rml")
 
 def onKeyUp(event, document):
     global newHotkey
@@ -115,12 +113,7 @@ def onKeyUp(event, document):
                 newHotkey.ctrl = False
         if event.parameters['key_identifier'] == modifiers[4] or \
            event.parameters['key_identifier'] == modifiers[5]:
-                newHotkey.alt = False
-
-def showHotkeys():
-    global doc
-    doc.Close()
-
+                newHotkey.alt = False 
         </script>
     </head>
 
@@ -128,11 +121,8 @@ def showHotkeys():
           onkeyup="onKeyUp(event, document)"
            onload="onLoad(document)">
         <div id="topContainer">
-            <div id="menuContainer">
-                <span id="smlogo"></span> <br/>
-                
-                <div id="innerMenuContainer"></div> 
-            </div>
+            <span id="smlogo"></span> <br/>
+            <div id="innerTopContainer"></div> 
         </div>
     </body>
 </rml>

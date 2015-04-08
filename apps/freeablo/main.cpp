@@ -54,7 +54,9 @@ void keyPress(Input::Key key)
         case Input::KEY_RALT:;
         case Input::KEY_LALT:;
         case Input::KEY_RSUPER:;
-        case Input::KEY_LSUPER: return;
+        case Input::KEY_LSUPER:;
+        case Input::KEY_NUMLOCK:;
+        case Input::KEY_SCROLLOCK: return;
         default:
             {
                 break;
@@ -419,9 +421,9 @@ void runGameLoop(const bpo::variables_map& variables)
     
     std::pair<size_t, size_t> destination = player->mPos.current();
     
-    bpt::ptree hotkeypt;
+    //bpt::ptree hotkeypt;
     Misc::readIni("resources/hotkeys.ini", hotkeypt);
-    
+        
     quit_key = Input::Hotkey("Quit", hotkeypt);
     noclip_key = Input::Hotkey("Noclip", hotkeypt);
     changelvlup_key = Input::Hotkey("Changelvlup", hotkeypt);

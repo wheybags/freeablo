@@ -93,7 +93,9 @@ namespace FAGui
         hotkey.shift = boost::python::extract<bool>(pyhotkey[1]);
         hotkey.ctrl = boost::python::extract<bool>(pyhotkey[2]);
         hotkey.alt = boost::python::extract<bool>(pyhotkey[3]);
-         
+        
+        bpt::write_ini("resources/hotkeys.ini", hotkeypt);
+        
         if (function == "quit")
         {
             quit_key = hotkey;

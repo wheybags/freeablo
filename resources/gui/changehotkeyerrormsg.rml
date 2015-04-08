@@ -6,55 +6,52 @@
                 font-family: FreeMono;
                 font-size: 24;
                 text-align: center;
-                background-color: rgba(255 ,0,0,255);
-                height: 100%;
-                width: 100%;
-                #height: 25%;
-                #width: 25%;
-                #left: 37%;
-                #top: 37%;
             }
 
             div#topContainer
             {
-                position:absolute;
-                top: 50%;
+                position: absolute;
+                top: 280px;
             }
-
-            div#menuContainer
+            
+            div#innerTopContainer
             {
                 position: absolute;
-                top: -50px;
+                top: 250px;
             }
 
         </style>
 
         <script>
 
+import rocket
 import time
+import docmanage
 
 def onLoad(document):
-    document.id = "changehotkeyerrormsg"
-    container = document.GetElementById('innerMenuContainer')
+    global startTime
+    container = document.GetElementById('innerTopContainer')
     container.inner_rml = '<span id="menuEntry0"></span><br/>'
     elem = container
     elem.inner_rml = "Error: Key Sequence Already Assigned"
-
+    startTime = time.time()
+    
+def onKeyDown(event, document):
+    if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
+        docmanage.manager.closeDoc("resources/gui/changehotkeyerrormsg.rml")
+        
 def onKeyUp(event, document):
-    time.sleep(2)
-    document.Close()
-
+    while time.time() < startTime + 2:
+        time.sleep(0.1)
+    docmanage.manager.closeDoc("resources/gui/changehotkeyerrormsg.rml")
         </script>
     </head>
 
     <body onload="onLoad(document)"
+          onkeydown="onKeyDown(event, document)"
           onkeyup="onKeyUp(event, document)">
         <div id="topContainer">
-            <div id="menuContainer">
-                <span id="smlogo"></span> <br/>
-                
-                <div id="innerMenuContainer"></div> 
-            </div>
+            <div id="innerTopContainer"></div> 
         </div>
     </body>
 </rml>
