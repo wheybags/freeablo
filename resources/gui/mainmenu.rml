@@ -46,6 +46,16 @@
                 height: 48px;
             }
 
+            div#version
+            {
+                icon-decorator: fatext;
+                icon-text: Freeablo v1.0;
+                icon-size: 24;
+                icon-style: gray;
+
+                margin-left: -500px;
+            }
+
             span#mainmenulogo
             {
                 width: 640px;
@@ -97,6 +107,9 @@ def onKeyDown(event, document):
                 <span id="smlogo"></span> <br/>
                 
                 <div id="innerMenuContainer"></div> 
+                <br/>
+                <br/>
+                <div id="version"></div>
             </div>
         </div>
     </body>
