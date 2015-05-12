@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.11)
 
 project (Freeablo)
 
@@ -15,7 +15,9 @@ Find_Package(SDL2_mixer REQUIRED)
 Find_Package(OpenGL REQUIRED)
 
 Find_Package(PythonLibs 2 REQUIRED)
-find_package(LibRocket REQUIRED)
+Find_package(LibRocket REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Core REQUIRED)
 
 if(Boost_USE_STATIC_LIBS)
     add_definitions(-DBOOST_PYTHON_STATIC_LIB)
@@ -53,8 +55,10 @@ include_directories (
     ${Boost_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIR}
     ${ROCKET_INCLUDE_DIR}
+    ${Qt5Widgets_INCLUDE_DIRS}
     "${PROJECT_SOURCE_DIR}/components/"
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
+
 )
 
 # allow the user to specify extra include dirs on the command line
@@ -76,6 +80,7 @@ link_libraries (
     ${ROCKET_LIBRARIES}
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${Qt5Widgets_LIBRARIES}
     Cel
     FAIO
     Levels
@@ -85,6 +90,7 @@ link_libraries (
     DiabloExe
     StormLib
     Audio
+    Settings
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
@@ -93,3 +99,4 @@ add_subdirectory(apps/freeablo)
 add_subdirectory(apps/celview)
 add_subdirectory(apps/mpqtool)
 add_subdirectory(apps/exedump)
+add_subdirectory(apps/launcher)
