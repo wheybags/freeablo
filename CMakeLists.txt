@@ -19,6 +19,10 @@ Find_package(LibRocket REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core REQUIRED)
 
+if (Qt5_POSITION_INDEPENDENT_CODE)
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
 if(Boost_USE_STATIC_LIBS)
     add_definitions(-DBOOST_PYTHON_STATIC_LIB)
 endif()
