@@ -36,5 +36,8 @@ add_executable(freeablo
 
     engine/threadmanager.h
     engine/threadmanager.cpp
+
+    faaudio/audiomanager.h
+    faaudio/audiomanager.cpp
 )
 set_target_properties(freeablo PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

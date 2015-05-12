@@ -1,4 +1,5 @@
 import rocket
+import freeablo
 
 class Menu(object):
     """
@@ -32,7 +33,7 @@ class Menu(object):
         menuHtmlStr = ""
         for i, val in enumerate(self.entries):
             onclick = (val["strFunc"]+"()") if "strFunc" in val else ""
-            entryStr = '<span id="menuEntry%05d" onmouseover="%s.setSelected(%05d)" onclick="%s">' % (i, selfName, i, onclick)
+            entryStr = '<span id="menuEntry%05d" onmouseover="%s.setSelected(%05d)" onclick="%s.activate()">' % (i, selfName, i, selfName)
             entryStr += self.fmtNotSelected % val["text"]
             entryStr += '</span><br/>'
             menuHtmlStr += entryStr
@@ -40,22 +41,33 @@ class Menu(object):
         container = self.doc.GetElementById(containerId)
         container.inner_rml = menuHtmlStr
 
-        self.current = 0
-        self.setSelected(0)
+        self.current = -1
+        self.setSelected(0, False)
 
     def getEntryElement(self, num):
         return self.doc.GetElementById('menuEntry%05d' % num)
 
-    def setSelected(self, num):
-        self.setNotSelected(self.current)
+    def setSelected(self, num, playSound=True):
+        if self.current != num:
+            if playSound:
+                freeablo.playSound("sfx/items/titlemov.wav")
 
-        elem = self.getEntryElement(num)
-        elem.inner_rml = self.fmtSelected % self.entries[num]["text"]
-        self.current = num
+            if self.current != -1:
+                self.setNotSelected(self.current)
+
+            elem = self.getEntryElement(num)
+            elem.inner_rml = self.fmtSelected % self.entries[num]["text"]
+            self.current = num
     
     def setNotSelected(self, num):
         elem = self.getEntryElement(num)
         elem.inner_rml = self.fmtNotSelected % self.entries[num]["text"]
+
+    def activate(self):
+        freeablo.playSound("sfx/items/titlslct.wav")
+        currentEntry = self.entries[self.current]
+        if("func" in currentEntry):
+            currentEntry["func"]()
 
     def onKeyDown(self, event):
         if event.parameters['key_identifier'] == rocket.key_identifier.DOWN:
@@ -65,9 +77,7 @@ class Menu(object):
             self.setSelected((self.current - 1) % len(self.entries))
             return True
         elif event.parameters['key_identifier'] == rocket.key_identifier.RETURN:
-            currentEntry = self.entries[self.current]
-            if("func" in currentEntry):
-                currentEntry["func"]()
+            self.activate()
             return True
 
         return False

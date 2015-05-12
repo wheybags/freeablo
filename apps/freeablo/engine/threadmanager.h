@@ -4,7 +4,7 @@
 #include <string>
 #include <boost/lockfree/spsc_queue.hpp>
 
-#include <audio/audio.h>
+#include "../faaudio/audiomanager.h"
 
 namespace FARender
 {
@@ -16,6 +16,7 @@ namespace Engine
     enum ThreadState
     {
         musicPlay,
+        soundPlay,
         renderState
     };
 
@@ -26,6 +27,7 @@ namespace Engine
         union
         {
             std::string* musicPath;
+            std::string* soundPath;
             FARender::RenderState* renderState;
         } data;
     };
@@ -36,11 +38,11 @@ namespace Engine
             static ThreadManager* get();
 
             ThreadManager();
-            ~ThreadManager();
 
             void run();
 
             void playMusic(const std::string& path);
+            void playSound(const std::string& path);
             void sendRenderState(FARender::RenderState* state);
 
         private:
@@ -48,8 +50,9 @@ namespace Engine
 
             boost::lockfree::spsc_queue<Message, boost::lockfree::capacity<100> > mQueue;
             void handleMessage(const Message& message);
-            Audio::Music* mMusic;
             FARender::RenderState* mRenderState;
+
+            FAAudio::AudioManager audioManager;
     };
 }
 

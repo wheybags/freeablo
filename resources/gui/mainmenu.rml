@@ -58,11 +58,11 @@ mainMenu = None
 
 def onLoad(document):
     entries = [ 
-        {"text": 'Single Player', "strFunc": 'freeablo.startGame', "func": freeablo.startGame},
+        {"text": 'Single Player', "func": freeablo.startGame},
         {"text": 'Multi Player (placeholder)'},
         {"text": 'Replay Intro (placeholder)'},
         {"text": 'Show Credits (placeholder)'},
-        {"text": 'Exit Freeablo', "strFunc": 'freeablo.quit', "func": freeablo.quit}
+        {"text": 'Exit Freeablo', "func": freeablo.quit}
     ]
 
     fmtSelected = '<span class="pentagon"/> %s <span class="pentagon"/>'

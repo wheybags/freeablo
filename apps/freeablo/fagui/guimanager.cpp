@@ -7,6 +7,7 @@
 #include "animateddecoratorinstancer.h"
 
 #include "../farender/renderer.h"
+#include "../engine/threadmanager.h"
 
 #include <iostream>
 #include <boost/python.hpp>
@@ -39,12 +40,18 @@ namespace FAGui
         showIngameGui();
     }
 
+    void playSound(const std::string& path)
+    {
+        Engine::ThreadManager::get()->playSound(path);
+    }
+
     BOOST_PYTHON_MODULE(freeablo)
     {
         boost::python::def("quit", &quitGame);
         boost::python::def("pause", &pauseGame);
         boost::python::def("unpause", &unpauseGame);
         boost::python::def("startGame", &startGame);
+        boost::python::def("playSound", &playSound);
     }
     
     Rocket::Core::ElementDocument* ingameUi = NULL;
