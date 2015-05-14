@@ -42,14 +42,12 @@ bool ProcessInvoker::startProcess(const QString &name, const QStringList &argume
     mArguments = arguments;
 
     QString path(name);
-#ifdef Q_OS_WIN
-    path.append(QLatin1String(".exe"));
-#elif defined(Q_OS_MAC)
     QDir dir(QCoreApplication::applicationDirPath());
     path = dir.absoluteFilePath(name);
-#else
-    path.prepend(QLatin1String("./"));
-#endif
+
+    #ifdef Q_OS_WIN
+        path.append(QLatin1String(".exe"));
+    #endif
 
     QFileInfo info(path);
 
