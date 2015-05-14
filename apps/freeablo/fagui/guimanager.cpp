@@ -5,6 +5,7 @@
 #include <misc/enablewarn.h>
 
 #include "animateddecoratorinstancer.h"
+#include "textdecoratorinstancer.h"
 
 #include "../farender/renderer.h"
 #include "../engine/threadmanager.h"
@@ -64,6 +65,9 @@ namespace FAGui
 
         Rocket::Core::DecoratorInstancer* animInstancer = Rocket::Core::Factory::RegisterDecoratorInstancer("faanim", (Rocket::Core::DecoratorInstancer*)new AnimatedDecoratorInstancer(renderer->getRocketContext()->GetRenderInterface()));
         animInstancer->RemoveReference();
+
+        Rocket::Core::DecoratorInstancer* textInstancer = Rocket::Core::Factory::RegisterDecoratorInstancer("fatext", (Rocket::Core::DecoratorInstancer*)new TextDecoratorInstancer(renderer->getRocketContext()->GetRenderInterface()));
+        textInstancer->RemoveReference();
 
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
