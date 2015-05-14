@@ -18,6 +18,16 @@ namespace Level
 
     std::vector<int16_t> Level::mEmpty(16);
 
+    bool Level::isStairs(size_t x, size_t y) const
+    {
+        if(mDownStairs.first == x && mDownStairs.second == y)
+            return true;
+        if(mUpStairs.first == x && mUpStairs.second == y)
+            return true;
+
+        return false;
+    }
+
     const MinPillar get(size_t x, size_t y, const Level& level)
     {
         size_t xDunIndex = x;
