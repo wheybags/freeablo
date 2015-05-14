@@ -78,3 +78,10 @@ add_library(Audio
 )
 target_link_libraries(Audio ${SDL2MIXER_LIBRARY})
 set_target_properties(Audio PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_library(Settings
+    settings/settings.h
+    settings/settings.cpp
+)
+target_link_libraries(Settings ${Boost_Libraries})
+set_target_properties(Settings PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
