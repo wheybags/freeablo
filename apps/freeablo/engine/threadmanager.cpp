@@ -87,7 +87,7 @@ namespace Engine
             case soundPlay:
             {
                 audioManager.play(*message.data.soundPath);
-                delete message.data.musicPath;
+                delete message.data.soundPath;
                 break;
             }
 
