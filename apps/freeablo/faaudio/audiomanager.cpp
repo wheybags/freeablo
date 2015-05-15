@@ -76,7 +76,8 @@ namespace FAAudio
         }
 
         int channel = Audio::playSound(mCache[path].sound);
-        mPlaying[channel] = path;
+        if(channel >= 0)
+            mPlaying[channel] = path;
     }
 
     void AudioManager::playMusic(const std::string& path)
