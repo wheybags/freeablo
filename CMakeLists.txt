@@ -89,7 +89,6 @@ link_libraries (
     ${Qt5Widgets_LIBRARIES}
     ${FFMPEG_LIBRARIES}
     swresample
-    swscale
     Cel
     FAIO
     Levels

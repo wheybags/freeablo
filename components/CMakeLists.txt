@@ -90,5 +90,5 @@ add_library(Video
     video/video.h
     video/video.cpp
 )
-target_link_libraries(Video ${FFMPEG_LIBRARIES} swscale swresample)
+target_link_libraries(Video ${FFMPEG_LIBRARIES} swresample)
 set_target_properties(Video PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
