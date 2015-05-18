@@ -294,6 +294,32 @@ namespace Render
         }
     }
 
+    Sprite loadVideoFrame(uint8_t* data[], int * linesize, size_t width, size_t height)
+    {
+        SDL_Surface* surface = createTransparentSurface(width, height);
+
+        for(size_t y = 0; y < height; y++)
+        {
+            uint8_t * ptr = data[0]+y*linesize[0];
+
+            for(size_t x = 0; x < width; x++)
+            {
+                Cel::Colour px;
+                px.r = ptr[0];
+                px.g = ptr[1];
+                px.b = ptr[2];
+                setpixel(surface, x, y, px);
+
+                ptr += 3;
+            }
+        }
+
+        Sprite sprite = (Sprite)SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+        return sprite;
+
+    }
+
     void clearTransparentSurface(SDL_Surface* s);
 
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB)
@@ -355,7 +381,6 @@ namespace Render
         vec[0] = (Sprite)tex;
         return new SpriteGroup(vec);
     }
-
 
     void draw()
     {

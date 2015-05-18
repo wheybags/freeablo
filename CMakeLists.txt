@@ -18,6 +18,7 @@ Find_Package(PythonLibs 2 REQUIRED)
 Find_package(LibRocket REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core REQUIRED)
+find_package(FFMPEG REQUIRED)
 
 if (Qt5_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -39,7 +40,7 @@ if(NOT WIN32)
     endif ()
 endif()
 
-find_package(Boost COMPONENTS chrono date_time filesystem system random thread program_options atomic python REQUIRED)
+find_package(Boost COMPONENTS chrono date_time filesystem system random thread program_options atomic python timer REQUIRED)
 
 if ( NOT SDL2_FOUND )
     message ( FATAL_ERROR "SDL2 not found!" )
@@ -60,6 +61,7 @@ include_directories (
     ${PYTHON_INCLUDE_DIR}
     ${ROCKET_INCLUDE_DIR}
     ${Qt5Widgets_INCLUDE_DIRS}
+    ${FFMPEG_INCLUDE_DIRS}
     "${PROJECT_SOURCE_DIR}/components/"
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
 
@@ -85,6 +87,9 @@ link_libraries (
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Qt5Widgets_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
+    swresample
+    swscale
     Cel
     FAIO
     Levels
@@ -95,6 +100,7 @@ link_libraries (
     StormLib
     Audio
     Settings
+    Video
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
@@ -104,3 +110,4 @@ add_subdirectory(apps/celview)
 add_subdirectory(apps/mpqtool)
 add_subdirectory(apps/exedump)
 add_subdirectory(apps/launcher)
+add_subdirectory(apps/videoplayer)
