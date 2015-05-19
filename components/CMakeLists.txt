@@ -85,3 +85,10 @@ add_library(Settings
 )
 target_link_libraries(Settings ${Boost_Libraries})
 set_target_properties(Settings PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_library(Video
+    video/video.h
+    video/video.cpp
+)
+target_link_libraries(Video ${FFMPEG_LIBRARIES} swresample)
+set_target_properties(Video PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
