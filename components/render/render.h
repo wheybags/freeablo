@@ -67,10 +67,11 @@ namespace Render
     SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height);
+    Sprite loadVideoFrame(uint8_t* data[], int * linesize, size_t width, size_t height);
 
     void draw();
 
-    void drawAt(const Sprite& sprite, size_t x, size_t y); 
+    void drawAt(const Sprite& sprite, size_t x, size_t y);
 
     class SpriteGroup
     {
