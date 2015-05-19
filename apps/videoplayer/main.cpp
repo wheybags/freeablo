@@ -15,16 +15,16 @@ int main(int, char** argv)
     FAIO::init();
 
     Render::RenderSettings settings;
-    settings.windowWidth = 1280;
-    settings.windowHeight = 960;
+    settings.windowWidth = 640;
+    settings.windowHeight = 480;
     Render::init(settings);
 
     Video::Video::init();
 
     vector<string> filenames;
+    filenames.push_back("gendata/loopdend.smk");
     filenames.push_back("gendata/logo.smk");
     filenames.push_back("gendata/fbutch3.smk");
-    filenames.push_back("gendata/loopdend.smk");
     filenames.push_back("gendata/fprst3.smk");
     filenames.push_back("gendata/doom.smk");
     filenames.push_back("gendata/diabvic3.smk");
@@ -38,21 +38,25 @@ int main(int, char** argv)
 
     while(!done)
     {
-        Video::Video video;
+        Video::Video video(600, 300);
         video.load(filenames[currentVideo]);
         video.start();
 
         while(video.isPlaying())
         {
             Render::clear();
-            Render::drawAt(video.currentFrame(), 0, 160);
+            Render::drawAt(video.currentFrame(), settings.windowWidth / 2 - video.width() / 2, settings.windowHeight / 2 - video.height() / 2);
             Render::draw();
         }
 
         if(++currentVideo >= numVideos)
+        {
             currentVideo = 0;
+            done = true;
+        }
     }
 
+    Video::Video::close();
     FAIO::quit();
     return 0;
 }

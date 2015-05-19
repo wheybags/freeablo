@@ -11,17 +11,19 @@
 
 
 class AVFrame;
+class AVFormatContext;
+class AVCodec;
 
 namespace Video
 {
-
 class Video
 {
 public:
 
     static bool init();
+    static void close();
 
-    Video();
+    Video(unsigned int width = 0, unsigned int height = 0);
     ~Video();
 
     bool load(const std::string& filename);
@@ -31,11 +33,21 @@ public:
     bool isPlaying();
     Render::Sprite& currentFrame();
 
+    inline unsigned int width() const { return mWidth; }
+    inline unsigned int height() const { return mHeight; }
+
 private:
+
+    static const int BUFFER_SIZE;
+    static AVCodec * sCodec;
+    static AVFrame * sFrame;
+    static AVFrame * sFrameRGB;
 
     std::string mFilename;
     std::vector<Render::Sprite> mSprites;
 
+    unsigned int mWidth;
+    unsigned int mHeight;
     int mCurrentFrame;
     int mNumFrames;
     boost::timer::cpu_timer mTimer;

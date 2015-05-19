@@ -13,10 +13,20 @@ extern "C" {
 namespace Video
 {
 
+AVCodec * Video::sCodec;
+AVFrame * Video::sFrame;
+AVFrame * Video::sFrameRGB;
+const int Video::BUFFER_SIZE = 8192;
+
+
 bool Video::init()
 {
     av_register_all();
     avcodec_register_all();
+
+    Video::sCodec       = avcodec_find_decoder(AV_CODEC_ID_SMACKVIDEO);
+    Video::sFrame       = av_frame_alloc();
+    Video::sFrameRGB    = av_frame_alloc();
 
     return true;
 }
@@ -53,8 +63,11 @@ static int readFunction(void* opaque, uint8_t* buf, int buf_size) {
     return bytes;
 }
 
-Video::Video()
-    : mCurrentFrame(-1),
+Video::Video(unsigned int width, unsigned int height)
+    :
+      mWidth(width),
+      mHeight(height),
+      mCurrentFrame(-1),
       mNumFrames(0)
 {
 }
@@ -64,31 +77,41 @@ Video::~Video()
     int size = mSprites.size();
     for(int i = 0 ; i < size; i++)
     {
-        SDL_DestroyTexture((SDL_Texture*)mSprites[i]);
+        SDL_DestroyTexture(reinterpret_cast<SDL_Texture*>(mSprites[i]));
     }
 }
 
 bool Video::load(const std::string& filename)
 {
     mFilename = filename;
+    mNumFrames = 0;
 
-    FAIO::FAFile * videoFile;
+    int                 videoStream = -1;
+    unsigned char*      buffer;
+    FAIO::FAFile *      videoFile;
+    AVIOContext*        avioContext;
+    AVCodecContext*     codecContextOrig;
+    AVCodecContext*     codecContext;
+    AVFormatContext*    formatContext;
 
     // Open video file
 
     videoFile = FAIO::FAfopen(filename);
-    unsigned char* buffer = reinterpret_cast<unsigned char*>(av_malloc(8192));
+    if(videoFile == NULL)
+    {
+        return false;
+    }
 
-    AVFormatContext * formatContext = avformat_alloc_context();
-    AVIOContext* avioContext = avio_alloc_context(buffer, 8192, 0, reinterpret_cast<void*>(static_cast<FAIO::FAFile*>(videoFile)), &readFunction, NULL, NULL);
-    formatContext->pb = avioContext;
+    buffer              = reinterpret_cast<unsigned char*>(av_malloc(BUFFER_SIZE));
+    avioContext         = avio_alloc_context(buffer, BUFFER_SIZE, 0, reinterpret_cast<void*>(static_cast<FAIO::FAFile*>(videoFile)), &readFunction, NULL, NULL);
+    formatContext       = avformat_alloc_context();
+    formatContext->pb   = avioContext;
 
     avformat_open_input(&formatContext, "", NULL, 0);
     avformat_find_stream_info(formatContext, NULL);
     //av_dump_format(formatContext, 0, "", 0);
 
     // Find the first video stream
-    int videoStream = -1;
     for(unsigned int i = 0; i < formatContext->nb_streams; i++)
     {
         if(formatContext->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
@@ -99,18 +122,20 @@ bool Video::load(const std::string& filename)
     }
 
     // Get codec context
-    AVCodecContext *codecContext = formatContext->streams[videoStream]->codec;
+    codecContextOrig    = formatContext->streams[videoStream]->codec;
+    codecContext        = avcodec_alloc_context3(NULL);
+    avcodec_copy_context(codecContext, codecContextOrig);
 
-    // Find the decoder for the video stream
-    AVCodec * codec = avcodec_find_decoder(codecContext->codec_id);
-    if(codec==NULL)
-    {
-        return false;
-    }
+    if(mWidth == 0)
+        mWidth = codecContext->width;
+    if(mHeight == 0)
+        mHeight = codecContext->height;
 
     // Open codec
-    if(avcodec_open2(codecContext, codec, 0)<0)
+    if(avcodec_open2(codecContext, sCodec, 0) < 0)
     {
+        av_free(avioContext);
+        av_free(buffer);
         return false;
     }
 
@@ -118,8 +143,8 @@ bool Video::load(const std::string& filename)
     swsContext = sws_getContext(codecContext->width,
         codecContext->height,
         codecContext->pix_fmt,
-        codecContext->width,
-        codecContext->height,
+        mWidth,
+        mHeight,
         PIX_FMT_RGB24,
         SWS_BILINEAR,
         NULL,
@@ -127,32 +152,29 @@ bool Video::load(const std::string& filename)
         NULL
     );
 
-    AVFrame *frame = av_frame_alloc();
-    AVFrame *frameRGB = av_frame_alloc();
-    AVPacket packet;
-    int frameFinished;
+    AVPacket    packet;
+    int         frameFinished;
+    int         numBytes;
+    uint8_t *   bufferRGB;
 
-    // Determine required buffer size and allocate buffer
-    int numBytes = avpicture_get_size(PIX_FMT_RGB32, codecContext->width, codecContext->height);
-    uint8_t *bufferRGB = NULL;
-    bufferRGB = (uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
+    numBytes        = avpicture_get_size(PIX_FMT_RGB32, mWidth, mHeight);
+    bufferRGB       = (uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
 
-    avpicture_fill((AVPicture *)frameRGB, bufferRGB, PIX_FMT_RGB32, codecContext->width, codecContext->height);
+    avpicture_fill((AVPicture *)sFrameRGB, bufferRGB, PIX_FMT_RGB32, mWidth, mHeight);
 
-    mNumFrames = 0;
     while(av_read_frame(formatContext, &packet) >= 0)
     {
         // Is this a packet from the video stream?
         if(packet.stream_index==videoStream)
         {
             // Decode video frame
-            avcodec_decode_video2(codecContext,frame,&frameFinished,&packet);
+            avcodec_decode_video2(codecContext,sFrame,&frameFinished,&packet);
 
             // Did we get a video frame?
             if(frameFinished)
             {
-                sws_scale(swsContext ,frame->data,frame->linesize,0, codecContext->height, frameRGB->data, frameRGB->linesize);
-                mSprites.push_back(Render::loadVideoFrame(frameRGB->data, frameRGB->linesize, codecContext->width, codecContext->height));
+                sws_scale(swsContext ,sFrame->data,sFrame->linesize,0, codecContext->height, sFrameRGB->data, sFrameRGB->linesize);
+                mSprites.push_back(Render::loadVideoFrame(sFrameRGB->data, sFrameRGB->linesize, mWidth, mHeight));
                 ++mNumFrames;
 
                 //Save frame on disk example
@@ -164,23 +186,23 @@ bool Video::load(const std::string& filename)
         av_free_packet(&packet);
     }
 
-    // av_free sometimes crashes (?)
-
     av_free(bufferRGB);
-    av_free(buffer);
-    av_free(frame);
-    av_free(frameRGB);
 
-    // When _close functions are enabled after loading 3rd or 4th movie application crashes o_O.
-
-    //avcodec_close(codecContext);
-    //avformat_close_input(&formatContext);
-    //avformat_free_context(formatContext);
-    //av_free(avioContext);
+    avformat_close_input(&formatContext);
+    avformat_free_context(formatContext);
+    avcodec_close(codecContextOrig);
+    avcodec_close(codecContext);
+    av_free(avioContext);
 
     FAIO::FAfclose(videoFile);
 
     return true;
+}
+
+void Video::close()
+{
+    av_free(sFrame);
+    av_free(sFrameRGB);
 }
 
 void Video::start()
