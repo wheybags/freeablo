@@ -15,8 +15,8 @@ int main(int, char** argv)
     FAIO::init();
 
     Render::RenderSettings settings;
-    settings.windowWidth = 640;
-    settings.windowHeight = 480;
+    settings.windowWidth = 1280;
+    settings.windowHeight = 720;
     Render::init(settings);
 
     Video::Video::init();
@@ -38,8 +38,8 @@ int main(int, char** argv)
 
     while(!done)
     {
-        Video::Video video(600, 300);
-        video.load(filenames[currentVideo]);
+        Video::Video video;
+        video.load(filenames[currentVideo], settings.windowWidth, settings.windowHeight);
         video.start();
 
         while(video.isPlaying())
@@ -48,6 +48,8 @@ int main(int, char** argv)
             Render::drawAt(video.currentFrame(), settings.windowWidth / 2 - video.width() / 2, settings.windowHeight / 2 - video.height() / 2);
             Render::draw();
         }
+
+        video.stop();
 
         if(++currentVideo >= numVideos)
         {

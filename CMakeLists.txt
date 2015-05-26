@@ -87,8 +87,6 @@ link_libraries (
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Qt5Widgets_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
-    swresample
     Cel
     FAIO
     Levels
