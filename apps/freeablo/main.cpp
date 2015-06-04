@@ -348,7 +348,6 @@ void run(const bpo::variables_map& variables)
 
     Engine::ThreadManager threadManager;
     FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
-    Audio::init();
 
     Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
 
@@ -358,8 +357,6 @@ void run(const bpo::variables_map& variables)
     renderDone = true;
 
     mainThread.join();
-
-    Audio::quit();
 }
 
 void runGameLoop(const bpo::variables_map& variables)

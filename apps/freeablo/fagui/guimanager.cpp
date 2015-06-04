@@ -7,6 +7,7 @@
 #include "animateddecoratorinstancer.h"
 
 #include "../farender/renderer.h"
+#include "../engine/threadmanager.h"
 
 #include <iostream>
 #include <boost/python.hpp>
@@ -52,6 +53,11 @@ namespace FAGui
         changeLevel = 1;
         paused = false;
         showIngameGui();
+    }
+
+    void playSound(const std::string& path)
+    {
+        Engine::ThreadManager::get()->playSound(path);
     }
     
     boost::python::list getHotkeyNames()
@@ -124,6 +130,7 @@ namespace FAGui
         boost::python::def("pause", &pauseGame);
         boost::python::def("unpause", &unpauseGame);
         boost::python::def("startGame", &startGame);
+        boost::python::def("playSound", &playSound);
         boost::python::def("getHotkeyNames", &getHotkeyNames);
         boost::python::def("getHotkeys", &getHotkeys);
         boost::python::def("setHotkey", &setHotkey);

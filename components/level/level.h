@@ -68,6 +68,8 @@ namespace Level
             const std::vector<Monster>& getMonsters() const;
             std::vector<Monster>& getMonsters();
 
+            bool isStairs(size_t, size_t) const;
+
         private:
             Dun mDun;
             TileSet mTil;

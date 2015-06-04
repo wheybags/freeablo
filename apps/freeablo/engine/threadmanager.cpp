@@ -13,16 +13,10 @@ namespace Engine
     }
 
     ThreadManager::ThreadManager()
-        :mMusic(NULL)
-        ,mRenderState(NULL)
+        :mRenderState(NULL)
+        ,audioManager(50, 100)
     {
         mThreadManager = this;
-    }
-
-    ThreadManager::~ThreadManager()
-    {
-        if(mMusic)
-            Audio::freeMusic(mMusic);
     }
 
     void ThreadManager::run()
@@ -61,6 +55,15 @@ namespace Engine
         mQueue.push(msg);
     }
 
+    void ThreadManager::playSound(const std::string& path)
+    {
+        Message msg;
+        msg.type = soundPlay;
+        msg.data.soundPath = new std::string(path);
+
+        mQueue.push(msg);
+    }
+
     void ThreadManager::sendRenderState(FARender::RenderState* state)
     {
         Message msg;
@@ -76,15 +79,18 @@ namespace Engine
         {
             case musicPlay:
             {
-                if(mMusic != NULL)
-                    Audio::freeMusic(mMusic);
-
-                mMusic = Audio::loadMusic(*message.data.musicPath);
+                audioManager.playMusic(*message.data.musicPath);
                 delete message.data.musicPath;
-
-                Audio::playMusic(mMusic);
                 break;
             }
+
+            case soundPlay:
+            {
+                audioManager.play(*message.data.soundPath);
+                delete message.data.soundPath;
+                break;
+            }
+
             case renderState:
             {
                 if(mRenderState)

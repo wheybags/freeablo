@@ -45,8 +45,9 @@
 
 import rocket
 import freeablo
-import docmanage
 from menu import Menu
+
+import docmanage
 
 pauseMenu = None
 
@@ -57,7 +58,7 @@ def onLoad(document):
         {"text": 'NEW GAME (placeholder)'},
         {"text": 'LOAD GAME (placeholder)'},
         {"text": 'HOTKEYS', "strFunc": "showHotkeys", "func": showHotkeys},
-        {"text": 'QUIT', "strFunc": 'freeablo.quit', "func": freeablo.quit}
+        {"text": 'QUIT', "func": freeablo.quit}
     ]
 
     fmtSelected = '<span class="pentagon" src="/data/PentSpin.cel"/> %s <span class="pentagon" src="/data/PentSpin.cel"/>'
