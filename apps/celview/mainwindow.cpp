@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
 	mDiabdat(NULL)
 {
-    ui->setupUi(this);
+	ui->setupUi(this);
 	this->setWindowTitle("Celview");
 	connect(ui->listView, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(itemDoubleClicked(QListWidgetItem * )));
 	connect(&mRenderTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
 	closeMPQ();
-    delete ui;
+	delete ui;
 }
 
 void MainWindow::initRender()
@@ -46,12 +46,12 @@ void MainWindow::itemDoubleClicked(QListWidgetItem* item)
 
 void MainWindow::on_actionExit_triggered()
 {
-    this->close();
+	this->close();
 }
 
 void MainWindow::on_selectMPQ_clicked()
 {
-    QString tmpFilename = QFileDialog::getOpenFileName(this, tr("Open MPQ"), ".", tr("MPQ Files (*.mpq)"));
+	QString tmpFilename = QFileDialog::getOpenFileName(this, tr("Open MPQ"), ".", tr("MPQ Files (*.mpq)"));
 	if (!tmpFilename.isEmpty())
 	{
 		mFilename = tmpFilename;

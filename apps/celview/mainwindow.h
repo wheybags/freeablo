@@ -19,11 +19,11 @@ class MainWindow;
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+	explicit MainWindow(QWidget *parent = 0);
+	~MainWindow();
 
 private:
 	void initRender();
@@ -35,9 +35,9 @@ private:
 
 private slots:
 
-    void on_actionExit_triggered();
+	void on_actionExit_triggered();
 
-    void on_selectMPQ_clicked();
+	void on_selectMPQ_clicked();
 
 	void on_selectFileList_clicked();
 
@@ -56,7 +56,7 @@ private:
 	QSharedPointer<Render::SpriteGroup> mCurrentCel;
 	Render::RenderSettings mSettings;
 	QTimer mRenderTimer;
-    Ui::MainWindow *ui;
+	Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H
