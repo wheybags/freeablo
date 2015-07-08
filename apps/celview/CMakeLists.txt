@@ -7,7 +7,7 @@ include_directories (
     ${SDL2_INCLUDE_DIR})
 
 link_libraries (
-	StormLib
+    StormLib
     ${SDL2_LIBRARY})
 
 add_executable(celview

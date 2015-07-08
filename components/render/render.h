@@ -58,7 +58,7 @@ namespace Render
     void quit(); 
 
 	void resize(size_t w, size_t h);
-   
+    RenderSettings getWindowSize();
     void updateGuiBuffer(std::vector<DrawCommand>* buffer);
     void quitGui();
     void drawGui(std::vector<DrawCommand>& buffer, SpriteCacheBase* cache);
@@ -94,6 +94,9 @@ namespace Render
                 return mAnimLength;
             }
 
+			static void toPng(const std::string& celPath, const std::string& pngPath);
+
+
         private:
             std::vector<Sprite> mSprites;
             size_t mAnimLength;
@@ -114,7 +117,7 @@ namespace Render
     
     std::pair<size_t, size_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
-    void clear();
+    void clear(int r = 0, int g = 0, int b = 255);
 }
 
 #endif

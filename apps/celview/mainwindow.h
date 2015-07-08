@@ -5,6 +5,8 @@
 #include <QListWidgetItem>
 #include <QTimer>
 #include <QSharedPointer>
+#include <QSettings>
+#include <QColor>
 
 #include <misc/disablewarn.h>
 #include <StormLib.h>
@@ -19,44 +21,64 @@ class MainWindow;
 
 class MainWindow : public QMainWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = 0);
-	~MainWindow();
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
 
 private:
-	void initRender();
-	bool openMPQ();
-	void closeMPQ();
-	void listFiles();
-	void listFilesDetails(QString extension, QStringList & list);
-	bool fileExists(QString path);
+    void initRender();
+    void loadSettings();
+    void saveSettings();
+    bool openMPQ();
+    void closeMPQ();
+    void listFiles();
+    void listFilesDetails(QString extension, QStringList & list);
+    bool fileExists(QString path);
 
 private slots:
 
-	void on_actionExit_triggered();
+    void on_actionExit_triggered();
 
-	void on_selectMPQ_clicked();
+    void on_selectMPQ_clicked();
 
-	void on_selectFileList_clicked();
+    void on_selectFileList_clicked();
 
-	void on_openButton_clicked();
+    void on_openButton_clicked();
 
-	void itemDoubleClicked(QListWidgetItem *);
+    void on_leftButton_clicked();
 
-	void updateRender();
+    void on_rightButton_clicked();
+
+    void on_startStopButton_clicked();
+
+    void on_currentFrame_textEdited(const QString &);
+
+    void on_actionSet_background_color_2_triggered();
+
+	void on_actionExport_CEL_CL2_to_PNG_triggered();
+
+	void on_actionExport_all_CEL_CL2_to_PNG_triggered();
+
+    void itemDoubleClicked(QListWidgetItem *);
+
+    void updateRender();
 
 private:
-	HANDLE mDiabdat ;
-	QString mFilename;
-	QString mListfile;
-	QString mCurrentCelFilename;
-	int mCurrentFrame;
-	QSharedPointer<Render::SpriteGroup> mCurrentCel;
-	Render::RenderSettings mSettings;
-	QTimer mRenderTimer;
-	Ui::MainWindow *ui;
+    HANDLE mDiabdat ;
+    QString mFilename;
+    QString mListfile;
+    QString mCurrentCelFilename;
+    const QString mSettingsFile;
+    QColor mBackgroundColor;
+    QSettings mSettings;
+    int mCurrentFrame;
+    QSharedPointer<Render::SpriteGroup> mCurrentCel;
+    Render::RenderSettings mRenderSettings;
+    QTimer mRenderTimer;
+    bool mIsAnimation;
+    Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H

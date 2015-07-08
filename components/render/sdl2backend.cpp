@@ -11,6 +11,7 @@
 
 #include "../level/level.h"
 #include <misc/stringops.h>
+#include <misc/savePNG.h>
 #include <faio/faio.h>
 
 #include <Rocket/Core.h>
@@ -153,6 +154,13 @@ namespace Render
         WIDTH = w;
         HEIGHT = h;
         resized = true;
+    }
+
+    RenderSettings getWindowSize()
+    {
+        RenderSettings settings;
+        SDL_GetWindowSize(screen, &settings.windowWidth, &settings.windowHeight);
+        return settings;
     }
 
     void updateGuiBuffer(std::vector<DrawCommand>* buffer)
@@ -397,6 +405,40 @@ namespace Render
         mAnimLength = cel.animLength();
     }
 
+	void SpriteGroup::toPng(const std::string& celPath, const std::string& pngPath)
+	{
+		Cel::CelFile cel(celPath);
+
+		size_t numFrames = cel.animLength();
+		if(numFrames == 0)
+			return;
+
+		int sumWidth = 0;
+		int maxHeight = 0;
+		for(size_t i = 0; i < numFrames; i++)
+		{
+			sumWidth += cel[i].mWidth;
+			if(cel[i].mHeight > maxHeight) maxHeight = cel[i].mHeight;
+		}
+
+		if(sumWidth == 0)
+			return;
+
+		SDL_Surface* s = createTransparentSurface(sumWidth, maxHeight);
+		unsigned int x = 0;
+		unsigned int dx = 0;
+		for(size_t i = 0; i < numFrames; i++)
+		{
+			drawFrame(s, x, 0, cel[i]);
+			dx = cel[i].mWidth;
+			x += dx;
+        }
+
+		SDL_SavePNG(s,pngPath.c_str());
+
+	    SDL_FreeSurface(s);
+	}
+
     void SpriteGroup::destroy()
     {
         for(size_t i = 0; i < mSprites.size(); i++)
@@ -440,9 +482,9 @@ namespace Render
         h = tmpH;
     }
 
-    void clear()
+    void clear(int r, int g, int b)
     {
-         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+         SDL_SetRenderDrawColor(renderer, r, g, b, 255);
          SDL_RenderClear(renderer);
     }
 

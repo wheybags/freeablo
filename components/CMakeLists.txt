@@ -35,6 +35,8 @@ add_library(Misc
     misc/misc.cpp
     misc/disablewarn.h
     misc/enablewarn.h
+    misc/savePNG.h
+    misc/savePNG.cpp
 )
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
