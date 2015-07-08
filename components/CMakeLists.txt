@@ -38,6 +38,7 @@ add_library(Misc
     misc/savePNG.h
     misc/savePNG.cpp
 )
+target_link_libraries(Misc ${PNG_LIBRARY})
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
