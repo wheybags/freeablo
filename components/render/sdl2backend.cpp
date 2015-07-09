@@ -139,7 +139,7 @@ namespace Render
     }
 
 
-	
+    
     void quit()
     {
         SDL_DestroyRenderer(renderer);
@@ -405,46 +405,46 @@ namespace Render
         mAnimLength = cel.animLength();
     }
 
-	void SpriteGroup::toPng(const std::string& celPath, const std::string& pngPath)
-	{
-		Cel::CelFile cel(celPath);
+    void SpriteGroup::toPng(const std::string& celPath, const std::string& pngPath)
+    {
+        Cel::CelFile cel(celPath);
 
-		size_t numFrames = cel.animLength();
-		if(numFrames == 0)
-			return;
+        size_t numFrames = cel.animLength();
+        if(numFrames == 0)
+            return;
 
-		int sumWidth = 0;
-		int maxHeight = 0;
-		for(size_t i = 0; i < numFrames; i++)
-		{
-			sumWidth += cel[i].mWidth;
-			if(cel[i].mHeight > maxHeight) maxHeight = cel[i].mHeight;
-		}
-
-		if(sumWidth == 0)
-			return;
-
-		SDL_Surface* s = createTransparentSurface(sumWidth, maxHeight);
-		unsigned int x = 0;
-		unsigned int dx = 0;
-		for(size_t i = 0; i < numFrames; i++)
-		{
-			drawFrame(s, x, 0, cel[i]);
-			dx = cel[i].mWidth;
-			x += dx;
+        int sumWidth = 0;
+        int maxHeight = 0;
+        for(size_t i = 0; i < numFrames; i++)
+        {
+            sumWidth += cel[i].mWidth;
+            if(cel[i].mHeight > maxHeight) maxHeight = cel[i].mHeight;
         }
 
-		SDL_SavePNG(s,pngPath.c_str());
+        if(sumWidth == 0)
+            return;
 
-	    SDL_FreeSurface(s);
-	}
+        SDL_Surface* s = createTransparentSurface(sumWidth, maxHeight);
+        unsigned int x = 0;
+        unsigned int dx = 0;
+        for(size_t i = 0; i < numFrames; i++)
+        {
+            drawFrame(s, x, 0, cel[i]);
+            dx = cel[i].mWidth;
+            x += dx;
+        }
+
+        SDL_SavePNG(s,pngPath.c_str());
+
+        SDL_FreeSurface(s);
+    }
 
     void SpriteGroup::destroy()
     {
         for(size_t i = 0; i < mSprites.size(); i++)
             SDL_DestroyTexture((SDL_Texture*)mSprites[i]);
     }
-	
+    
     void drawMinPillarTop(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
     void drawMinPillarBase(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
     

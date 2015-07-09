@@ -57,7 +57,7 @@ namespace Render
 
     void quit(); 
 
-	void resize(size_t w, size_t h);
+    void resize(size_t w, size_t h);
     RenderSettings getWindowSize();
     void updateGuiBuffer(std::vector<DrawCommand>* buffer);
     void quitGui();
@@ -94,7 +94,7 @@ namespace Render
                 return mAnimLength;
             }
 
-			static void toPng(const std::string& celPath, const std::string& pngPath);
+            static void toPng(const std::string& celPath, const std::string& pngPath);
 
 
         private:

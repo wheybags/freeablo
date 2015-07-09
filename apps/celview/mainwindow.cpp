@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     mDiabdat(NULL),
     mIsAnimation(false),
-	mSettingsFile(QApplication::applicationDirPath() + "/celview.ini"),
+    mSettingsFile(QApplication::applicationDirPath() + "/celview.ini"),
     mSettings(mSettingsFile, QSettings::IniFormat)
 {
     ui->setupUi(this);
@@ -80,8 +80,8 @@ void MainWindow::itemDoubleClicked(QListWidgetItem* item)
     mRenderTimer.stop();
     mCurrentCelFilename = ui->listView->currentItem()->text();
     mCurrentCel = QSharedPointer<Render::SpriteGroup>(new Render::SpriteGroup(mCurrentCelFilename.toStdString().c_str()));
-	if(mCurrentCel->size() == 0)
-		QMessageBox::critical(0,"Error","CEL/CL2 file can't be loaded");
+    if(mCurrentCel->size() == 0)
+        QMessageBox::critical(0,"Error","CEL/CL2 file can't be loaded");
 
     mCurrentFrame = 0;
     ui->numFramesLabel->setText(QString("Number of frames: ") + QString::number(mCurrentCel->size()));
@@ -164,53 +164,53 @@ void MainWindow::on_rightButton_clicked()
 
 void MainWindow::on_actionExport_CEL_CL2_to_PNG_triggered()
 {
-	if(mDiabdat == NULL)
-	{
-		QMessageBox::critical(0, "Error", "Open MPQ archive!");
-		return;
-	}
+    if(mDiabdat == NULL)
+    {
+        QMessageBox::critical(0, "Error", "Open MPQ archive!");
+        return;
+    }
 
-	if(mCurrentCelFilename.isEmpty())
-	{
-		QMessageBox::critical(0, "Error", "Open CEL/CL2 file!");
-		return;
-	}
+    if(mCurrentCelFilename.isEmpty())
+    {
+        QMessageBox::critical(0, "Error", "Open CEL/CL2 file!");
+        return;
+    }
 
-	QString tmpFilename = QFileDialog::getSaveFileName(this, tr("Save CEL/CL2 as PNG"), ".", tr("PNG Files (*.png)"));
+    QString tmpFilename = QFileDialog::getSaveFileName(this, tr("Save CEL/CL2 as PNG"), ".", tr("PNG Files (*.png)"));
     if (!tmpFilename.isEmpty())
     {
-		Render::SpriteGroup::toPng(mCurrentCelFilename.toStdString(), tmpFilename.toStdString());   
-		QMessageBox::information(0, "Success", "Export complete!");
+        Render::SpriteGroup::toPng(mCurrentCelFilename.toStdString(), tmpFilename.toStdString());   
+        QMessageBox::information(0, "Success", "Export complete!");
     }
 }
 
 void MainWindow::on_actionExport_all_CEL_CL2_to_PNG_triggered()
 {
-	if(mDiabdat == NULL)
-	{
-		QMessageBox::critical(0, "Error", "Open MPQ archive!");
-		return;
-	}
+    if(mDiabdat == NULL)
+    {
+        QMessageBox::critical(0, "Error", "Open MPQ archive!");
+        return;
+    }
 
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"",QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
-	if(!dir.isEmpty())
-	{
-		int count = ui->listView->count();
-		for(int i = 0 ; i < count ; i++)
-		{
-			QString pathInMPQ = ui->listView->item(i)->text();
-			QString modifiedPathInMPQ = pathInMPQ;
-			modifiedPathInMPQ = modifiedPathInMPQ.replace('\\', '_').replace('/','_').replace(".cel", ".png").replace(".cl2",".png");
-			
-			std::string stdModifiedPathInMPQ = modifiedPathInMPQ.toStdString();
-			std::string path = pathInMPQ.toStdString();
-			std::string target = dir.toStdString() + "/" + stdModifiedPathInMPQ;
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"",QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
+    if(!dir.isEmpty())
+    {
+        int count = ui->listView->count();
+        for(int i = 0 ; i < count ; i++)
+        {
+            QString pathInMPQ = ui->listView->item(i)->text();
+            QString modifiedPathInMPQ = pathInMPQ;
+            modifiedPathInMPQ = modifiedPathInMPQ.replace('\\', '_').replace('/','_').replace(".cel", ".png").replace(".cl2",".png");
+            
+            std::string stdModifiedPathInMPQ = modifiedPathInMPQ.toStdString();
+            std::string path = pathInMPQ.toStdString();
+            std::string target = dir.toStdString() + "/" + stdModifiedPathInMPQ;
 
-			Render::SpriteGroup::toPng(path, target);  
-		}
+            Render::SpriteGroup::toPng(path, target);  
+        }
 
-		QMessageBox::information(0, "Success", "Export complete!");
-	}
+        QMessageBox::information(0, "Success", "Export complete!");
+    }
 }
 
 void MainWindow::on_startStopButton_clicked()
@@ -232,18 +232,18 @@ void MainWindow::on_currentFrame_textEdited(const QString &arg1)
 
 void MainWindow::updateRender()
 {
-	int size = mCurrentCel->size();
+    int size = mCurrentCel->size();
 
     if (mIsAnimation)
     {
         mCurrentFrame = ++mCurrentFrame % size;
         ui->currentFrame->setText(QString::number(mCurrentFrame));
-	}
+    }
 
     Render::clear(mBackgroundColor.red(), mBackgroundColor.green(), mBackgroundColor.blue());
 
-	if(mCurrentCel->size() > 0)
-		Render::drawAt((*mCurrentCel)[mCurrentFrame], 0, 0);
+    if(mCurrentCel->size() > 0)
+        Render::drawAt((*mCurrentCel)[mCurrentFrame], 0, 0);
     Render::draw();
 }
 

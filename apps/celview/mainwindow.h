@@ -57,9 +57,9 @@ private slots:
 
     void on_actionSet_background_color_2_triggered();
 
-	void on_actionExport_CEL_CL2_to_PNG_triggered();
+    void on_actionExport_CEL_CL2_to_PNG_triggered();
 
-	void on_actionExport_all_CEL_CL2_to_PNG_triggered();
+    void on_actionExport_all_CEL_CL2_to_PNG_triggered();
 
     void itemDoubleClicked(QListWidgetItem *);
 
