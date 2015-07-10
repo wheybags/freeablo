@@ -14,19 +14,22 @@
                 width: 320;
                 background-decorator: image;
                 background-image: /data/char.cel;
-
+                drag:clone;
                 position: fixed;
                 top: -175px;
             }
         </style>
 
         <script>
-import docmanage
+import draggable
+instance = draggable.DraggableWidget(document, 0, 100)
         </script>
 
     </head>
 
-    <body onKeyDown="docmanage.manager.onKeyDown(event)" onmousedown="docmanage.manager.bodyClicked()">
-        <span id="container" onmousedown="docmanage.manager.guiClicked()"></span>
+    <body onKeyDown="instance.onKeyDown(event)"
+    onmousedown="instance.bodyClicked()"
+    ondrag="instance.onDrag(event)">
+        <span id="container" onmousedown="instance.guiMouseDown()"></span>
     </body>
 </rml>

@@ -2,18 +2,11 @@ import rocket
 import freeablo
 import freeablo_input
 from collections import namedtuple
-
+from singleton import Singleton
 class DocManager(object):
+#    __metaclass__ = Singleton
 
     def __init__(self):
-        test = None
-        try:
-            test = manager
-        except Exception:
-            pass
-
-        if test:
-            raise Exception("DocManager is a singleton, access the one instance via docmanage.manager")
 
         context = rocket.contexts['default']
 
@@ -91,6 +84,7 @@ class DocManager(object):
         self.guiWasClicked = False
 
     def guiClicked(self):
+	
         self.guiWasClicked = True
 
 
