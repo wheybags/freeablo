@@ -33,9 +33,12 @@ import docmanage
 
 invHandle = "resources/gui/inventory.rml"
 charHandle = "resources/gui/character.rml"
-
+spellsHandle = "resources/gui/spells.rml"
+questHandle = "resources/gui/quest.rml"
 docmanage.manager.loadDoc(invHandle)
 docmanage.manager.loadDoc(charHandle)
+docmanage.manager.loadDoc(spellsHandle)
+docmanage.manager.loadDoc(questHandle)
         </script>
 
     </head>
@@ -43,11 +46,11 @@ docmanage.manager.loadDoc(charHandle)
     <body onkeydown="docmanage.manager.onKeyDown(event)" onmousedown="docmanage.manager.bodyClicked()">
         <span id="container" onmousedown="docmanage.manager.guiClicked()">
             <button id="charBut" onclick="docmanage.manager.toggleDoc(charHandle)"></button>
-            <button id="questBut" onclick="print 'quest clicked'"></button>
+            <button id="questBut" onclick="docmanage.manager.toggleDoc(questHandle)"></button>
             <button id="mapBut" onclick="print 'map clicked'"></button>
-            <button id="menuBut" onclick="print 'menu clicked'"></button>
+            <button id="menuBut" onclick="docmanage.manager.pause()"></button>
             <button id="invBut" onclick="docmanage.manager.toggleDoc(invHandle)"></button>
-            <button id="spellBut" onclick="print 'spell clicked'"></button>
+            <button id="spellBut" onclick="docmanage.manager.toggleDoc(spellsHandle)"></button>
         </span>
     </body>
 </rml>
