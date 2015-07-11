@@ -15,6 +15,8 @@ endif()
 Find_Package(SDL2 REQUIRED)
 Find_Package(SDL2_image REQUIRED)
 Find_Package(SDL2_mixer REQUIRED)
+Find_Package(ZLIB REQUIRED)
+find_package(PNG REQUIRED)
 Find_Package(OpenGL REQUIRED)
 
 Find_Package(PythonLibs 2 REQUIRED)
@@ -59,6 +61,7 @@ include_directories (
     ${SDL2IMAGE_INCLUDE_DIR}
     ${SDL2MIXER_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIRS}
+    ${PNG_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIR}
     ${ROCKET_INCLUDE_DIR}
@@ -83,6 +86,7 @@ link_libraries (
     ${SDL2_LIBRARY}
     ${SDL2IMAGE_LIBRARY}
     ${SDL2MIXER_LIBRARY}
+    ${PNG_LIBRARY}
     ${OPENGL_LIBRARIES}
     ${ROCKET_LIBRARIES}
     ${PYTHON_LIBRARIES}

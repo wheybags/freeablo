@@ -81,7 +81,7 @@ namespace Cel
                     i += val;
                     
                     // Workaround for frames that start with a few px, then trans for the rest of the line
-                    if(128 <= frame[i+1])
+                    if(i+1 >= frame.size() || 128 <= frame[i+1])
                         hasTrans = true;
                 }
 
