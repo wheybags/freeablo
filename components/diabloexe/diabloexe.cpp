@@ -33,7 +33,8 @@ namespace DiabloExe
 
         loadMonsters(exe, pt);                        
         loadNpcs(exe, pt);
-
+        loadBaseItems(exe, pt);
+        loadPreficies(exe, pt);
         FAIO::FAfclose(exe);
     }
 
@@ -129,6 +130,35 @@ namespace DiabloExe
         }
     }
 
+    void DiabloExe::loadBaseItems(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
+    {
+        size_t itemOffset = pt.get<size_t>("BaseItems.itemOffset");
+        size_t codeOffset = pt.get<size_t>("BaseItems.codeOffset");
+        size_t count = pt.get<size_t>("BaseItems.count");
+        for(size_t i=0; i < count; i++)
+        {
+            FAIO::FAfseek(exe, itemOffset + 76*i, SEEK_SET);
+            BaseItem tmp(exe, codeOffset);
+            mBaseItems[tmp.itemName] = tmp;
+
+        }
+
+    }
+    void DiabloExe::loadPreficies(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
+    {
+        size_t prefixOffset = pt.get<size_t>("Preficies.prefixOffset");
+        size_t codeOffset = pt.get<size_t>("Preficies.codeOffset");
+        size_t count = pt.get<size_t>("Preficies.count");
+        for(size_t i=0; i < count; i++)
+        {
+            FAIO::FAfseek(exe, prefixOffset + 48*i, SEEK_SET);
+            Prefix tmp(exe, codeOffset);
+            mPrefices[tmp.prefixName] = tmp;
+
+        }
+
+    }
+
     const Monster& DiabloExe::getMonster(const std::string& name) const
     {
         return mMonsters.find(name)->second;
@@ -166,14 +196,26 @@ namespace DiabloExe
     {
         std::stringstream ss;
         
-        ss << "Monsters:" << std::endl;
+        ss << "Monsters: " << mMonsters.size() << std::endl;
         for(std::map<std::string, Monster>::const_iterator it = mMonsters.begin(); it != mMonsters.end(); ++it)
         {
             ss << it->second.dump();
         }
         
-        ss << "Npcs:" << std::endl;
+        ss << "Npcs: " << mNpcs.size() << std::endl;
         for(std::map<std::string, Npc>::const_iterator it = mNpcs.begin(); it != mNpcs.end(); ++it)
+        {
+            ss << it->first << std::endl << it->second.dump();
+        }
+
+        ss << "Items: "<< mBaseItems.size() << std::endl;
+        for(std::map<std::string, BaseItem>::const_iterator it = mBaseItems.begin(); it != mBaseItems.end(); ++it)
+        {
+            ss << it->first << std::endl << it->second.dump();
+        }
+
+        ss << "Prefices: " << mPrefices.size() << std::endl;
+        for(std::map<std::string, Prefix>::const_iterator it = mPrefices.begin(); it != mPrefices.end(); ++it)
         {
             ss << it->first << std::endl << it->second.dump();
         }

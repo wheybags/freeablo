@@ -71,7 +71,11 @@ add_library(DiabloExe
     diabloexe/monster.h
     diabloexe/monster.cpp
     diabloexe/npc.h
-    diabloexe/npc.cpp)
+    diabloexe/npc.cpp
+    diabloexe/baseitem.cpp
+    diabloexe/baseitem.h
+    diabloexe/prefix.cpp
+    diabloexe/prefix.h)
 target_link_libraries(DiabloExe ${Boost_Libraries} Misc)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

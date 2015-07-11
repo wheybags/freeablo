@@ -2,7 +2,7 @@
 from docmanage import DocManager
 import inspect
 import pprint
-class DraggableWidget:
+class DraggableWidget(object):
     def __init__(self, document, xoffset, yoffset):
         self.document = document
         self.xoffset = xoffset
@@ -14,6 +14,7 @@ class DraggableWidget:
         my = event.parameters['mouse_y']
         event.current_element.style.left= str(mx+self.xoffset)
         event.current_element.style.top = str(my+self.yoffset)
+        event.StopPropagation()
         #print " (%s, %s)" % (event.current_element.style.left,
         #    event.current_element.style.top)
 
@@ -24,9 +25,12 @@ class DraggableWidget:
         #    print attr[0]
 
     def bodyMouseDown(self, event):
-
         print "bodyMouseDown called: %s" % (event.current_element)
         #for attr in inspect.getmembers(event):
         #    print "%s : %s" % (attr[0], attr[1])
+
     def bodyKeyDown(self, event):
         print "bodyKeyDown called: %s" % (event.current_element)
+
+    def socketMouseDown(self, event):
+        print "socketMouseDown called: %s" % (event.current_element.tag_name)

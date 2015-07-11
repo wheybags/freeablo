@@ -11,6 +11,8 @@
 
 #include "monster.h"
 #include "npc.h"
+#include "baseitem.h"
+#include "prefix.h"
 
 namespace DiabloExe
 {
@@ -35,10 +37,13 @@ namespace DiabloExe
 
             void loadMonsters(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
             void loadNpcs(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
-            
+            void loadBaseItems(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
+            void loadPreficies(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
             std::string mVersion;
             std::map<std::string, Monster> mMonsters;
             std::map<std::string, Npc> mNpcs;
+            std::map<std::string, BaseItem> mBaseItems;
+            std::map<std::string, Prefix> mPrefices;
     };
 }
 

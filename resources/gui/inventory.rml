@@ -18,6 +18,55 @@
                 top: -175px;
                 right: 0px;
                 drag:clone;
+                z-index: 0;
+            }
+            div.inventory
+            {
+                /*background-color: red;*/
+                position: fixed;
+                left: 16px;
+                top: 222px;
+                height:116px;
+                width:292px;
+                display: inline-block;
+
+                z-index: 1;
+
+            }
+
+            div.item
+            {
+                height: 30px;
+                width: 30px;
+                z-index: 3;
+                position: relative;
+                drag: clone;
+                background-decorator: image;
+            }
+
+            div.inv-item-socket
+            {
+                /*background-color: red;*/
+                position: relative;
+                display: inline-block;
+                background-decorator: image;
+                background-image: /data/inv/objcurs.cel&trans=0,255,0&frame=20;
+                top: 0px;
+                left: 1px;
+                width:  29;
+                height: 29;
+                z-index: 2;
+                border-style: solid;
+                border: 200px;
+                border-color: transparent;
+            }
+
+            div#inv-item-socket0
+            {
+                /*background-color: red;*/
+
+
+
             }
         </style>
 
@@ -30,6 +79,50 @@ instance = draggable.DraggableWidget(document, 0, -500)
 
     <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" >
         <span id="container" onmousedown="instance.guiMouseDown(event)"
-                             onDrag="instance.onDrag(event)"></span>
+                             onDrag="instance.onDrag(event)">
+        <div class="inventory">
+
+                             <div class="inv-item-socket" id="inv-item-socket0"></div>
+                             <div class="inv-item-socket" id="inv-item-socket1"></div>
+                             <div class="inv-item-socket" id="inv-item-socket2"></div>
+                             <div class="inv-item-socket" id="inv-item-socket3"></div>
+                             <div class="inv-item-socket" id="inv-item-socket4"></div>
+                             <div class="inv-item-socket" id="inv-item-socket5"></div>
+                             <div class="inv-item-socket" id="inv-item-socket6"></div>
+                             <div class="inv-item-socket" id="inv-item-socket7"></div>
+                             <div class="inv-item-socket" id="inv-item-socket8"></div>
+                             <div class="inv-item-socket" id="inv-item-socket9"></div>
+                             <div class="inv-item-socket" id="inv-item-socket10"></div>
+                             <div class="inv-item-socket" id="inv-item-socket11"></div>
+                             <div class="inv-item-socket" id="inv-item-socket12"></div>
+                             <div class="inv-item-socket" id="inv-item-socket13"></div>
+                             <div class="inv-item-socket" id="inv-item-socket14"></div>
+                             <div class="inv-item-socket" id="inv-item-socket15"></div>
+                             <div class="inv-item-socket" id="inv-item-socket16"></div>
+                             <div class="inv-item-socket" id="inv-item-socket17"></div>
+                             <div class="inv-item-socket" id="inv-item-socket18"></div>
+                             <div class="inv-item-socket" id="inv-item-socket19"></div>
+                             <div class="inv-item-socket" id="inv-item-socket20"></div>
+                             <div class="inv-item-socket" id="inv-item-socket21"></div>
+                             <div class="inv-item-socket" id="inv-item-socket22"></div>
+                             <div class="inv-item-socket" id="inv-item-socket23"></div>
+                             <div class="inv-item-socket" id="inv-item-socket24"></div>
+                             <div class="inv-item-socket" id="inv-item-socket25"></div>
+                             <div class="inv-item-socket" id="inv-item-socket26"></div>
+                             <div class="inv-item-socket" id="inv-item-socket27"></div>
+                             <div class="inv-item-socket" id="inv-item-socket28"></div>
+                             <div class="inv-item-socket" id="inv-item-socket29"></div>
+                             <div class="inv-item-socket" id="inv-item-socket30"></div>
+                             <div class="inv-item-socket" id="inv-item-socket31"></div>
+                             <div class="inv-item-socket" id="inv-item-socket32"></div>
+                             <div class="inv-item-socket" id="inv-item-socket33"></div>
+                             <div class="inv-item-socket" id="inv-item-socket34"></div>
+                             <div class="inv-item-socket" id="inv-item-socket35"></div>
+                             <div class="inv-item-socket" id="inv-item-socket36"></div>
+                             <div class="inv-item-socket" id="inv-item-socket37"></div>
+                             <div class="inv-item-socket" id="inv-item-socket38"></div>
+                             <div class="inv-item-socket" id="inv-item-socket39"></div>
+                             </div>
+           </span>
     </body>
 </rml>
