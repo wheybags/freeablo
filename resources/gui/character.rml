@@ -28,8 +28,8 @@ instance = draggable.DraggableWidget(document, 0, 100)
     </head>
 
     <body onKeyDown="instance.onKeyDown(event)"
-    onmousedown="instance.bodyClicked()"
+    onmousedown="instance.bodyMouseDown(event)"
     ondrag="instance.onDrag(event)">
-        <span id="container" onmousedown="instance.guiMouseDown()"></span>
+        <span id="container" onmousedown="instance.guiMouseDown(event)"></span>
     </body>
 </rml>
