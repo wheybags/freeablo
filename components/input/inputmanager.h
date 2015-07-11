@@ -7,7 +7,7 @@
 #include <boost/lockfree/spsc_queue.hpp>
 
 #include <misc/disablewarn.h>
-    #include <Rocket/Core.h>
+#include <Rocket/Core.h>
 #include <misc/enablewarn.h>
 
 #include "keys.h"

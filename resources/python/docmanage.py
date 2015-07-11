@@ -21,7 +21,8 @@ class DocManager(object):
         self.docs = {}
         self.paused = False
         self.pauseHiddenDocs = []
-        self.pauseHandle = context.LoadDocument('resources/gui/pausemenu.rml')
+        self.pauseHandle = "resources/gui/pausemenu.rml"
+        self.loadDoc(self.pauseHandle)
 
     def showDoc(self, docpath):
         handle = self.docs[docpath]
@@ -40,9 +41,23 @@ class DocManager(object):
             self.showDoc(docpath)
 
     def loadDoc(self, docpath):
-        context = rocket.contexts['default']
-        newHandle = {"doc": context.LoadDocument(docpath), "visible": False}
-        self.docs[docpath] = newHandle
+        if not docpath in self.docs:
+            context = rocket.contexts['default']
+            newHandle = {"doc": context.LoadDocument(docpath), "visible": False}
+            self.docs[docpath] = newHandle
+        
+    def reloadDoc(self, docpath):
+        self.closeDoc(docpath)
+        self.loadDoc(docpath)
+        
+    def getDoc(self, docpath):
+        handle = self.docs[docpath]
+        return handle["doc"]
+    
+    def closeDoc(self, docpath):
+        handle = self.docs[docpath]
+        handle["doc"].Close()
+        del self.docs[docpath]
 
     def pause(self):
         for docpath in self.docs:
@@ -52,11 +67,11 @@ class DocManager(object):
                 self.pauseHiddenDocs.append(docpath)
 
         self.paused = True
-        self.pauseHandle.Show()
+        self.toggleDoc(self.pauseHandle)
         freeablo.pause()
 
     def unpause(self):
-        self.pauseHandle.Hide()
+        self.toggleDoc(self.pauseHandle)
 
         for docpath in self.pauseHiddenDocs:
             self.toggleDoc(docpath)

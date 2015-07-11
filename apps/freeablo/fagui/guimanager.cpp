@@ -11,10 +11,25 @@
 
 #include <iostream>
 #include <boost/python.hpp>
+#include <input/common.h>
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+
+#include "input/hotkey.h"
 
 extern bool done; // TODO: handle this better
 extern bool paused; // TODO: handle this better
 extern int changeLevel; // TODO: handle this better
+
+extern Input::Hotkey quit_key; // TODO: handle this better
+extern Input::Hotkey noclip_key; // TODO: handle this better
+extern Input::Hotkey changelvldwn_key; // TODO: handle this better
+extern Input::Hotkey changelvlup_key; // TODO: handle this better
+
+namespace bpt = boost::property_tree;
+
+extern bpt::ptree hotkeypt;
 
 namespace FAGui
 {
@@ -44,6 +59,70 @@ namespace FAGui
     {
         Engine::ThreadManager::get()->playSound(path);
     }
+    
+    boost::python::list getHotkeyNames()
+    {
+        boost::python::list hotkeynames;
+        
+        hotkeynames.append(Input::getHotkeyName(quit_key));
+        hotkeynames.append(Input::getHotkeyName(noclip_key));
+        hotkeynames.append(Input::getHotkeyName(changelvlup_key));
+        hotkeynames.append(Input::getHotkeyName(changelvldwn_key));
+        return hotkeynames;
+    }
+    
+    boost::python::list getHotkeys()
+    {
+        boost::python::list hotkeys;
+        Input::Hotkey pquit_key = quit_key;
+        Input::Hotkey pnoclip_key = noclip_key;
+        Input::Hotkey pchangelvlup_key = changelvlup_key;
+        Input::Hotkey pchangelvldwn_key = changelvldwn_key;
+
+        pquit_key.key = Input::convertAsciiToRocketKey(quit_key.key);
+        pnoclip_key.key = Input::convertAsciiToRocketKey(noclip_key.key);
+        pchangelvlup_key.key = Input::convertAsciiToRocketKey(changelvlup_key.key);
+        pchangelvldwn_key.key = Input::convertAsciiToRocketKey(changelvldwn_key.key);
+        
+        hotkeys.append(pquit_key);
+        hotkeys.append(pnoclip_key);
+        hotkeys.append(pchangelvlup_key);
+        hotkeys.append(pchangelvldwn_key);
+        
+        return hotkeys;
+    }
+    
+    void setHotkey(std::string function, boost::python::list pyhotkey)
+    {
+        Input::Hotkey hotkey;
+        hotkey.key = Input::convertRocketKeyToAscii(boost::python::extract<int>(pyhotkey[0]));
+        hotkey.shift = boost::python::extract<bool>(pyhotkey[1]);
+        hotkey.ctrl = boost::python::extract<bool>(pyhotkey[2]);
+        hotkey.alt = boost::python::extract<bool>(pyhotkey[3]);
+        
+        bpt::write_ini("resources/hotkeys.ini", hotkeypt);
+        
+        if (function == "quit")
+        {
+            quit_key = hotkey;
+            quit_key.save("Quit", hotkeypt);
+        }
+        if (function == "noclip")
+        {
+            noclip_key = hotkey;
+            noclip_key.save("Noclip", hotkeypt);
+        }
+        if (function == "changelvlup")
+        {
+            changelvlup_key = hotkey;
+            changelvlup_key.save("Changelvlup", hotkeypt);
+        }
+        if (function == "changelvldwn")
+        {
+            changelvldwn_key = hotkey;
+            changelvldwn_key.save("Changelvldwn", hotkeypt);
+        }
+    }
 
     BOOST_PYTHON_MODULE(freeablo)
     {
@@ -52,6 +131,9 @@ namespace FAGui
         boost::python::def("unpause", &unpauseGame);
         boost::python::def("startGame", &startGame);
         boost::python::def("playSound", &playSound);
+        boost::python::def("getHotkeyNames", &getHotkeyNames);
+        boost::python::def("getHotkeys", &getHotkeys);
+        boost::python::def("setHotkey", &setHotkey);
     }
     
     Rocket::Core::ElementDocument* ingameUi = NULL;
@@ -59,6 +141,7 @@ namespace FAGui
     void initGui()
     {
         initfreeablo();
+        Input::Hotkey::initpythonwrapper();
 
         FARender::Renderer* renderer = FARender::Renderer::get();
 

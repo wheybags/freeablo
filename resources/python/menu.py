@@ -32,7 +32,8 @@ class Menu(object):
 
         menuHtmlStr = ""
         for i, val in enumerate(self.entries):
-            onclick = (val["strFunc"]+"()") if "strFunc" in val else ""
+            args = val["args"] if "args" in val else ""
+            onclick = (val["strFunc"]+"({0})").format(args) if "strFunc" in val else ""
             entryStr = '<span id="menuEntry%05d" onmouseover="%s.setSelected(%05d)" onclick="%s.activate()">' % (i, selfName, i, selfName)
             entryStr += self.fmtNotSelected % val["text"]
             entryStr += '</span><br/>'
@@ -67,7 +68,8 @@ class Menu(object):
         freeablo.playSound("sfx/items/titlslct.wav")
         currentEntry = self.entries[self.current]
         if("func" in currentEntry):
-            currentEntry["func"]()
+            currentEntry["func"](currentEntry["args"]) if "args" in currentEntry \
+                else currentEntry["func"]()
 
     def onKeyDown(self, event):
         if event.parameters['key_identifier'] == rocket.key_identifier.DOWN:

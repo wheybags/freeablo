@@ -61,7 +61,12 @@ target_link_libraries(Render Cel Levels ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${O
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
+    input/common.cpp
+    input/common.h
+    input/hotkey.cpp
+    input/hotkey.h
     input/inputmanager.h
+    input/keys.h
     input/sdl2backend.cpp)
 set_target_properties(Input PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

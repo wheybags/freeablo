@@ -25,6 +25,8 @@
 #include <misc/fareadini.h>
 #include <boost/property_tree/ptree.hpp>
 
+#include <input/hotkey.h>
+
 namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 namespace bpt = boost::property_tree;
@@ -34,28 +36,73 @@ bool paused = false;
 bool noclip = false;
 int changeLevel = 0;
 
-int quit_key;
-int noclip_key;
-int changelvldwn_key;
-int changelvlup_key;
+Input::Hotkey quit_key;
+Input::Hotkey noclip_key;
+Input::Hotkey changelvldwn_key;
+Input::Hotkey changelvlup_key;
+
+bpt::ptree hotkeypt;
 
 void keyPress(Input::Key key)
 {
-    if (key == quit_key)
+    switch(key)
+    {
+        case Input::KEY_RSHIFT:;
+        case Input::KEY_LSHIFT:;
+        case Input::KEY_RCTRL:;
+        case Input::KEY_LCTRL:;
+        case Input::KEY_RALT:;
+        case Input::KEY_LALT:;
+        case Input::KEY_RSUPER:;
+        case Input::KEY_LSUPER:;
+        case Input::KEY_NUMLOCK:;
+        case Input::KEY_SCROLLOCK: return;
+        default:
+            {
+                break;
+            }
+    }
+    
+    Input::Hotkey hotkey;
+    hotkey.key = key;
+    Input::InputManager& input = *Input::InputManager::get();
+    
+    uint32_t modifiers = input.getModifiers();
+    
+    switch(modifiers)
+    {
+        case 0: break;
+        case 1: hotkey.ctrl = true; break;
+        case 2: hotkey.alt = true; break;
+        case 3: hotkey.ctrl = true; hotkey.alt = true; break;
+        case 4: hotkey.shift = true; break;
+        case 5: hotkey.ctrl = true; hotkey.shift = true; break;
+        case 6: hotkey.alt = true; hotkey.shift = true; break;
+        case 7: hotkey.ctrl = true; hotkey.alt = true; hotkey.shift = true; break;
+    }
+    
+    if (hotkey == quit_key)
     {
         done = true;
+        return;
     }
-    else if (key == noclip_key)
+    
+    if (hotkey == noclip_key)
     {
         noclip = !noclip;
+        return;
     }
-    else if (key == changelvldwn_key)
-    {
-        changeLevel = 1;
-    }
-    else if (key == changelvlup_key)
+    
+    if (hotkey == changelvlup_key)
     {
         changeLevel = -1;
+        return;
+    }
+    
+    if (hotkey == changelvldwn_key)
+    {
+        changeLevel = 1;
+        return;
     }
 }
 
@@ -371,14 +418,13 @@ void runGameLoop(const bpo::variables_map& variables)
     
     std::pair<size_t, size_t> destination = player->mPos.current();
     
-    bpt::ptree hotkeypt;
+    //bpt::ptree hotkeypt;
     Misc::readIni("resources/hotkeys.ini", hotkeypt);
-    
-    quit_key = hotkeypt.get<int>("Hotkeys.quit");
-    noclip_key = hotkeypt.get<int>("Hotkeys.noclip");
-    changelvldwn_key = hotkeypt.get<int>("Hotkeys.changelvldwn");
-    changelvlup_key = hotkeypt.get<int>("Hotkeys.changelvlup");
-
+        
+    quit_key = Input::Hotkey("Quit", hotkeypt);
+    noclip_key = Input::Hotkey("Noclip", hotkeypt);
+    changelvlup_key = Input::Hotkey("Changelvlup", hotkeypt);
+    changelvldwn_key = Input::Hotkey("Changelvldwn", hotkeypt);
     
     // Main game logic loop
     while(!done)
