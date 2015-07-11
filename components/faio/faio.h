@@ -42,7 +42,7 @@ namespace FAIO
             friend size_t FAsize(FAFile* stream);
     };
 
-    bool init();
+    bool init(const std::string pathMPQ = "DIABDAT.MPQ");
     void quit();
 
     FAFile* FAfopen(const std::string& filename);
