@@ -6,7 +6,17 @@ namespace FAWorld
     {
         mPos.update(); 
     }
-    
+    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos):
+        mPos(pos),
+        mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)),
+        mIdleAnim(FARender::Renderer::get()->loadImage(idleAnimPath)),
+        mFrame(0),
+        mAnimState(AnimState::idle)
+    {
+        inventory = inventory.testInv();
+
+    }
+
     FARender::FASpriteGroup Actor::getCurrentAnim()
     {
         switch(mAnimState)

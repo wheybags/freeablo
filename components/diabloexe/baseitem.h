@@ -1,5 +1,5 @@
-#ifndef ITEM_H
-#define ITEM_H
+#ifndef BASEITEM_H
+#define BASEITEM_H
 #include <stdint.h>
 
 #include <string>

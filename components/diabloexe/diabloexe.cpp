@@ -164,6 +164,12 @@ namespace DiabloExe
         return mMonsters.find(name)->second;
     }
 
+    const BaseItem& DiabloExe::getItem(const std::string &name) const
+    {
+        return mBaseItems.find(name)->second;
+
+    }
+
     std::vector<const Monster*> DiabloExe::getMonstersInLevel(size_t levelNum) const
     {
         std::vector<const Monster*> retval;

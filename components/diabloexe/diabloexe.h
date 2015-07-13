@@ -27,6 +27,8 @@ namespace DiabloExe
             const Npc& getNpc(const std::string& name) const;
             std::vector<const Npc*> getNpcs() const;
 
+            const BaseItem& getItem(const std::string& name) const;
+
             std::string dump() const;
 
             bool isLoaded() const;
