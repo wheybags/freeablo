@@ -98,7 +98,7 @@ namespace FAWorld
 
 
                     }
-                    else if(ringSlot) //ringSlot=0 => right hand ring
+                    else //ringSlot=1 => right hand ring
                     {
                         if(&this->rightRing == &emptyItem) return true;
 
@@ -179,7 +179,7 @@ namespace FAWorld
                                                 break;
 
                                             }
-                                            if(!brokeLoop && k==this->rightHand.sizeY && l==this->rightHand.sizeX)
+                                            if(!brokeLoop && k==this->rightHand.sizeY-1 && l==this->rightHand.sizeX-1)
                                             {
                                                 putItem(this->rightHand, eqTOINV, i, j);
                                                 return;
@@ -211,7 +211,7 @@ namespace FAWorld
                         if(&this->leftRing == &emptyItem)
                             this->leftRing = item;
                     }
-                    if(ringSlot)
+                    else
                     {
                         if(&this->rightRing == &emptyItem)
                             this->rightRing = item;
