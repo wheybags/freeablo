@@ -170,7 +170,7 @@ namespace FAWorld
                                     bool brokeLoop=false;
                                     for(uint8_t k=0;k<this->rightHand.sizeY;k++)
                                     {
-                                        for(uint8_t l=0;l<this->rightHand.sizeY;l++)
+                                        for(uint8_t l=0;l<this->rightHand.sizeX;l++)
                                         {
                                             brokeLoop=false;
                                             if(&inventoryBox[k][l] != &emptyItem)
