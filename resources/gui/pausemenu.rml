@@ -57,6 +57,7 @@ def onLoad(document):
         {"text": 'OPTIONS (placeholder)'},
         {"text": 'NEW GAME (placeholder)'},
         {"text": 'LOAD GAME (placeholder)'},
+        {"text": 'HOTKEYS', "strFunc": "showHotkeys", "func": showHotkeys},
         {"text": 'QUIT', "func": freeablo.quit}
     ]
 
@@ -70,6 +71,11 @@ def onLoad(document):
 def onKeyDown(event, document):    
     if not pauseMenu.onKeyDown(event):
         docmanage.manager.onKeyDown(event)
+
+def showHotkeys():
+    docmanage.manager.loadDoc("resources/gui/hotkeymenu.rml")
+    docmanage.manager.hideDoc("resources/gui/pausemenu.rml")
+    docmanage.manager.showDoc("resources/gui/hotkeymenu.rml")
 
         </script>
     </head>
