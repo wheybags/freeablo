@@ -60,45 +60,45 @@ namespace FAWorld
         gold->mSizeX=1;
         gold->mSizeY=1;
         inv->putItem(gold, eqINV, eqFLOOR, 0, 0);
-        inv->putItem(gold, eqINV, eqFLOOR, 1, 0);
-        inv->putItem(gold, eqINV, eqFLOOR, 2, 0);
-        inv->putItem(gold, eqINV, eqFLOOR, 3, 0);
-        inv->putItem(gold, eqINV, eqFLOOR, 4, 0);
-        inv->putItem(gold, eqINV, eqFLOOR, 5, 0);
-        inv->putItem(gold, eqINV, eqFLOOR, 6, 0);
-        inv->putItem(gold, eqINV, eqFLOOR, 7, 0);
-        inv->putItem(gold, eqINV, eqFLOOR, 8, 0);
-        inv->putItem(gold, eqINV, eqFLOOR, 9, 0);
         inv->putItem(gold, eqINV, eqFLOOR, 0, 1);
-        inv->putItem(gold, eqINV, eqFLOOR, 1, 1);
-        //inv->putItem(gold, eqINV, eqFLOOR, 2, 1);
-        //inv->putItem(gold, eqINV, eqFLOOR, 3, 1);
-        //inv->putItem(gold, eqINV, eqFLOOR, 4, 1);
-        inv->putItem(gold, eqINV, eqFLOOR, 5, 1);
-        inv->putItem(gold, eqINV, eqFLOOR, 6, 1);
-        inv->putItem(gold, eqINV, eqFLOOR, 7, 1);
-        inv->putItem(gold, eqINV, eqFLOOR, 8, 1);
-        inv->putItem(gold, eqINV, eqFLOOR, 9, 1);
         inv->putItem(gold, eqINV, eqFLOOR, 0, 2);
-        inv->putItem(gold, eqINV, eqFLOOR, 1, 2);
-        //inv->putItem(gold, eqINV, eqFLOOR, 2, 2);
-        //inv->putItem(gold, eqINV, eqFLOOR, 3, 2);
-        //inv->putItem(gold, eqINV, eqFLOOR, 4, 2);
-        inv->putItem(gold, eqINV, eqFLOOR, 5, 2);
-        inv->putItem(gold, eqINV, eqFLOOR, 6, 2);
-        inv->putItem(gold, eqINV, eqFLOOR, 7, 2);
-        //inv->putItem(gold, eqINV, eqFLOOR, 8, 2);
-        //inv->putItem(gold, eqINV, eqFLOOR, 9, 2);
         inv->putItem(gold, eqINV, eqFLOOR, 0, 3);
-        inv->putItem(gold, eqINV, eqFLOOR, 1, 3);
+        inv->putItem(gold, eqINV, eqFLOOR, 0, 4);
+        inv->putItem(gold, eqINV, eqFLOOR, 0, 5);
+        inv->putItem(gold, eqINV, eqFLOOR, 0, 6);
+        inv->putItem(gold, eqINV, eqFLOOR, 0, 7);
+        inv->putItem(gold, eqINV, eqFLOOR, 0, 8);
+        inv->putItem(gold, eqINV, eqFLOOR, 0, 9);
+        inv->putItem(gold, eqINV, eqFLOOR, 1, 0);
+        inv->putItem(gold, eqINV, eqFLOOR, 1, 1);
+        //inv->putItem(gold, eqINV, eqFLOOR, 1, 2);
+        //inv->putItem(gold, eqINV, eqFLOOR, 1, 3);
+        //inv->putItem(gold, eqINV, eqFLOOR, 1, 4);
+        inv->putItem(gold, eqINV, eqFLOOR, 1, 5);
+        inv->putItem(gold, eqINV, eqFLOOR, 1, 6);
+        inv->putItem(gold, eqINV, eqFLOOR, 1, 7);
+        inv->putItem(gold, eqINV, eqFLOOR, 1, 8);
+        inv->putItem(gold, eqINV, eqFLOOR, 1, 9);
+        inv->putItem(gold, eqINV, eqFLOOR, 2, 0);
+        inv->putItem(gold, eqINV, eqFLOOR, 2, 1);
+        //inv->putItem(gold, eqINV, eqFLOOR, 2, 2);
         //inv->putItem(gold, eqINV, eqFLOOR, 2, 3);
+        //inv->putItem(gold, eqINV, eqFLOOR, 2, 4);
+        inv->putItem(gold, eqINV, eqFLOOR, 2, 5);
+        inv->putItem(gold, eqINV, eqFLOOR, 2, 6);
+        inv->putItem(gold, eqINV, eqFLOOR, 2, 7);
+        //inv->putItem(gold, eqINV, eqFLOOR, 2, 8);
+        //inv->putItem(gold, eqINV, eqFLOOR, 2, 9);
+        inv->putItem(gold, eqINV, eqFLOOR, 3, 0);
+        inv->putItem(gold, eqINV, eqFLOOR, 3, 1);
+        //inv->putItem(gold, eqINV, eqFLOOR, 3, 2);
         //inv->putItem(gold, eqINV, eqFLOOR, 3, 3);
-        inv->putItem(gold, eqINV, eqFLOOR, 4, 3);
-        inv->putItem(gold, eqINV, eqFLOOR, 5, 3);
-        inv->putItem(gold, eqINV, eqFLOOR, 6, 3);
-        inv->putItem(gold, eqINV, eqFLOOR, 7, 3);
-        //inv->putItem(gold, eqINV, eqFLOOR, 8, 3);
-        //inv->putItem(gold, eqINV, eqFLOOR, 9, 3);
+        //inv->putItem(gold, eqINV, eqFLOOR, 3, 4);
+        inv->putItem(gold, eqINV, eqFLOOR, 3, 5);
+        inv->putItem(gold, eqINV, eqFLOOR, 3, 6);
+        inv->putItem(gold, eqINV, eqFLOOR, 3, 7);
+        //inv->putItem(gold, eqINV, eqFLOOR, 3, 8);
+        //inv->putItem(gold, eqINV, eqFLOOR, 3, 9);
         Item * bow = new Item();
         Item * buckler = new Item();
         buckler->mEmpty=false;
@@ -123,8 +123,8 @@ namespace FAWorld
     bool Inventory::canPlaceItem(
             Item * item,
             equipLoc equipType,
-            uint8_t x,
             uint8_t y,
+            uint8_t x,
             uint8_t beltX,
             equipLoc hand ,
             equipLoc ringSlot)
@@ -215,7 +215,6 @@ namespace FAWorld
 
                                 if(!mInventoryBox[i][j]->isEmpty())
                                 {
-                                    //std::cout <<"slot occupied " << (size_t)x << "," << (size_t)y << std::endl;
                                     return false;
                                 }
                             }
@@ -254,13 +253,13 @@ namespace FAWorld
     void Inventory::putItem(Item* item,
                             equipLoc equipType,
                             equipLoc from,
-                            uint8_t x,
                             uint8_t y,
+                            uint8_t x,
                             uint8_t beltX,
                             equipLoc hand,
                             equipLoc ringSlot)
     {
-      if(canPlaceItem(item, equipType, x, y, beltX, hand, ringSlot))
+      if(canPlaceItem(item, equipType, y, x, beltX, hand, ringSlot))
         {
             switch(equipType)
             {
@@ -287,63 +286,29 @@ namespace FAWorld
                     if(!this->mRightHand->isEmpty())
                     {
                         this->mLeftHand = item;
-                        //std::cout <<"remove0\n";
-                        bool foundItem=false;
                         bool foundSpace=false;
                         uint8_t auto_fit_x=255, auto_fit_y=255;
-                        for(uint8_t i=0;i<4/*-(this->mRightHand->mSizeX)*/;i++)
+                        for(uint8_t i=0;i<4;i++)
                         {
-
-                            for(uint8_t j=0;j<10/*-(this->mRightHand->mSizeY)*/;j++)
+                            for(uint8_t j=0;j<10;j++)
                             {
-                                foundItem=false;
-
                                 if(foundSpace)
                                     break;
                                 if(mInventoryBox[i][j]->isEmpty())
                                 {
                                     if(i+this->mRightHand->mSizeY < 5 && j+this->mRightHand->mSizeX < 11)
                                     {
-                                        for(uint8_t k=i;k<i+this->mRightHand->mSizeY;k++)
+                                        if(fitsAt(this->mRightHand,i,j))
                                         {
-                                            for(uint8_t l=j;l<j+this->mRightHand->mSizeX;l++)
-                                            {
-
-                                                std::cout <<"[4th Loop] State:[i][j][k][l]::["<<(size_t)i
-                                                         <<"]["
-                                                        <<(size_t)j
-                                                       <<"]["
-                                                      <<(size_t)k
-                                                     <<"]["
-                                                    <<(size_t)l
-                                                   <<"]"
-                                                  <<std::endl;
-
-                                                if(foundItem)
-                                                    break;
-                                                if(!mInventoryBox[k][l]->isEmpty())
-                                                {
-                                                    foundItem = true;
-
-                                                }
-                                                if(l==(j + this->mRightHand->mSizeX-1) &&
-                                                        k==(i + this->mRightHand->mSizeY-1) &&
-                                                        !foundItem)
-                                                {
-                                                    auto_fit_x = j;
-                                                    auto_fit_y = i;
-                                                    foundSpace = true;
-
-                                                }
-
-                                            }
+                                            auto_fit_x=j;
+                                            auto_fit_y=i;
+                                            foundSpace=true;
+                                            break;
                                         }
-                                   }
-
+                                    }
                                 }
                                 else
                                 {
-                                    std::cout<<"[2nd Loop] Found item at: [i][j]::["<<(size_t)i <<"][" << (size_t)j<<"]"<< ", skipping." << std::endl;
                                     continue;
                                 }
 
@@ -351,8 +316,7 @@ namespace FAWorld
                         }
                         if(auto_fit_x !=255)
                         {
-                            std::cout <<"found space\n";
-                            putItem(this->mRightHand, eqINV, eqRIGHTHAND, auto_fit_x, auto_fit_y);
+                            putItem(this->mRightHand, eqINV, eqRIGHTHAND, auto_fit_y, auto_fit_x);
                             this->mRightHand = item;
                             return;
                         }
@@ -372,13 +336,11 @@ namespace FAWorld
 
                 case eqBODY:
                     this->mBody = item;
-                    //std::cout <<"remove1\n";
                     removeItem(item, from, item->mInvX, item->mInvY, item->mBeltX);
                     break;
 
                 case eqHEAD:
                     this->mHead = item;
-                    //std::cout <<"remove2\n";
                     removeItem(item, from, item->mInvX, item->mInvY, item->mBeltX);
                     break;
 
@@ -388,7 +350,6 @@ namespace FAWorld
                         if(this->mLeftRing->isEmpty())
                         {
                             this->mLeftRing = item;
-                            //std::cout <<"remove3\n";
                             removeItem(item, from, item->mInvX, item->mInvY, item->mBeltX);
                         }
                     }
@@ -397,7 +358,6 @@ namespace FAWorld
                         if(this->mRightRing->isEmpty())
                         {
                             this->mRightRing = item;
-                            //std::cout <<"remove4\n";
                             removeItem(item, from, item->mInvX, item->mInvY, item->mBeltX);
 
                         }
@@ -418,21 +378,16 @@ namespace FAWorld
                     {
                         for(uint8_t j=0;j<item->mSizeX;j++)
                         {
-//                            std::cout <<"[i][j]::"<<"["<<(size_t)i<<"]["<<(size_t)j<<"]"<<std::endl;
-                            //std::cout <<"remove5\n";
                             removeItem(item, from, item->mInvX, item->mInvY, item->mBeltX);
-//                            std::cout << "item: " << (size_t)item<< std::endl;
                             item->mInvX=x;
                             item->mInvY=y;
                             mInventoryBox[y+i][x+j] = item;
-//                            std::cout << "made it to " << __LINE__ << std::endl;
 
 
                         }
                     }
                     break;
                 case eqBELT:
-                    //std::cout <<"remove6\n";
                     removeItem(item, from, item->mInvX, item->mInvY, item->mBeltX);
                     item->mBeltX=beltX;
                     this->mBelt[beltX]=item;
@@ -445,7 +400,6 @@ namespace FAWorld
         else
         {
         }
-//       std::cout << "Reached end of putItem.. returning" << std::endl;
     }
     void Inventory::removeItem(
                                Item* item,
@@ -454,7 +408,6 @@ namespace FAWorld
                                uint8_t y,
                                uint8_t beltX)
     {
-        //std::cout << "removeItem called\n";
         switch(from)
         {
             case eqLEFTHAND:
@@ -493,14 +446,12 @@ namespace FAWorld
                 break;
 
             case eqINV:
-               // std::cout << "correct case: "<< (size_t)x <<", " << (size_t)y <<"\n";
 
                 for(uint8_t i=y;i<=y+(item->mSizeY-1);i++)
                 {
                     for(uint8_t j=x;j<=x+(item->mSizeX-1);j++)
                     {
                         mInventoryBox[i][j] = new Item();
-                        //std::cout <<"removing item\n";
 
                     }
                 }
@@ -554,10 +505,8 @@ namespace FAWorld
         std::stringstream ss;
         for(uint8_t i=0;i<4;i++)
         {
-            //std::cout<<"------------------------------------------" << std::endl;
             for(uint8_t j=0;j<10;j++)
             {
-//                std::cout << "[i][j]::["<<(size_t)i << "]["<<(size_t)j <<"]" << std::endl;
                 ss << "| "<< mInventoryBox[i][j]->mItem.itemName<< ",\t";
 
             }
@@ -567,7 +516,6 @@ namespace FAWorld
 
 
         }
-//        std::cout << "made it here: " << __LINE__ << std::endl;
         size_t len = ss.str().length()/2;
         std::string tops = "";
         tops.append(len,'-');
@@ -580,6 +528,13 @@ namespace FAWorld
         std::cout << "mLeftRing: " << mLeftRing->mItem.itemName << std::endl;
         std::cout << "mRightRing: " << mRightRing->mItem.itemName << std::endl;
         std::cout << "mCursorHeld: " << mCursorHeld->mItem.itemName << std::endl;
+        std::stringstream printbelt;
+        printbelt <<  "mBelt: ";
+        for(size_t i=0; i<8; i++)
+        {
+            printbelt << mBelt[i]->mItem.itemName << ", ";
+        }
+        std::cout << printbelt.str() << std::endl;
     }
 
 
