@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-from docmanage import DocManager
 import inspect
-import pprint
 class DraggableWidget(object):
     def __init__(self, document, xoffset, yoffset):
         self.document = document

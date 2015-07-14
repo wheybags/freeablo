@@ -4,7 +4,7 @@ import freeablo_input
 from collections import namedtuple
 from singleton import Singleton
 class DocManager(object):
-#    __metaclass__ = Singleton
+    __metaclass__ = Singleton
 
     def __init__(self):
 

@@ -8,17 +8,21 @@ namespace FAWorld
     class Item
         {
         public:
-            Item(){};
+            bool inline isEmpty(){return mEmpty;}
+            Item():mEmpty(true)
+            {}
 
         private:
-            DiabloExe::BaseItem item;
-            DiabloExe::Prefix prefix;
-            uint8_t sizeX;
-            uint8_t sizeY;
-            uint8_t invX;
-            uint8_t invY;
+            DiabloExe::BaseItem mItem;
+            DiabloExe::Prefix mPrefix;
+            uint8_t mSizeX;
+            uint8_t mSizeY;
+            uint8_t mInvX;
+            uint8_t mInvY;
+            uint8_t mBeltX;
+            bool mEmpty;
 
         friend class Inventory;
-        }const static emptyItem;
+        };
 }
 #endif // ITEM_H

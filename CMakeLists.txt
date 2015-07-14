@@ -48,7 +48,7 @@ if ( NOT SDL2_FOUND )
 endif ()
 
 if(UNIX)
-    set(FA_COMPILER_FLAGS "-Wall -pedantic -Wextra")
+    set(FA_COMPILER_FLAGS "-Wall -pedantic -Wextra -g")
 else()
     set(FA_COMPILER_FLAGS "")
 endif()
