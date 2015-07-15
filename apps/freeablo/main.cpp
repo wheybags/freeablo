@@ -13,6 +13,8 @@
 
 #include "faworld/world.h"
 
+#include "faworld/itemmanager.h"
+
 #include "fagui/guimanager.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -372,7 +374,8 @@ void runGameLoop(const bpo::variables_map& variables)
         renderer.stop();
         return;
     }
-
+    FAWorld::ItemManager * itemManager = FAWorld::ItemManager::getItemManager(&exe);
+    itemManager->dump();
     FAWorld::World world;
 
     FALevelGen::FAsrand(time(NULL));

@@ -169,6 +169,11 @@ namespace DiabloExe
         return mBaseItems.find(name)->second;
 
     }
+    std::map<std::string, BaseItem> DiabloExe::getItemMap() const
+    {
+        return mBaseItems;
+
+    }
 
     std::vector<const Monster*> DiabloExe::getMonstersInLevel(size_t levelNum) const
     {
@@ -231,6 +236,6 @@ namespace DiabloExe
 
     bool DiabloExe::isLoaded() const
     {
-        return !mMonsters.empty() && !mNpcs.empty();
+        return !mMonsters.empty() && !mNpcs.empty() && !mBaseItems.empty() && !mPrefices.empty();
     }
 }

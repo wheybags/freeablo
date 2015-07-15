@@ -2,10 +2,12 @@
 #define INVENTORY_H
 #include <stdint.h>
 #include "item.h"
-
+#include <diabloexe/diabloexe.h>
+#include <boost/tuple/tuple.hpp>
 namespace FAWorld
 {
     class Actor;
+    //class Item;
     class Inventory
     {
     public:
@@ -46,11 +48,9 @@ namespace FAWorld
         ~Inventory();
         bool canPlaceItem(Item *item,
                 equipLoc equipType,
-                uint8_t x=0,
                 uint8_t y=0,
-                uint8_t beltX=0,
-                equipLoc hand=eqLEFTHAND,
-                equipLoc ringSlot=eqLEFTRING);
+                uint8_t x=0,
+                uint8_t beltX=0);
         bool fitsAt(Item * item, uint8_t y, uint8_t x);
 
 
@@ -66,8 +66,10 @@ namespace FAWorld
                      uint8_t y=0,
                      uint8_t x=0,
                      uint8_t beltX=0,
-                     equipLoc hand=eqLEFTHAND,
-                     equipLoc ringSlot=eqLEFTRING);
+                     boost::tuple<size_t, size_t, size_t> * floorPosition=NULL
+                     );
+
+
 
         void removeItem(Item *item, equipLoc from,
                         uint8_t x=0,

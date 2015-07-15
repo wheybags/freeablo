@@ -77,4 +77,4 @@ namespace DiabloExe
 
 
 
-#endif // ITEM_H
+#endif // BASEITEM_H

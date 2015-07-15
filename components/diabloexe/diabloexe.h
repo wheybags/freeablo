@@ -28,6 +28,7 @@ namespace DiabloExe
             std::vector<const Npc*> getNpcs() const;
 
             const BaseItem& getItem(const std::string& name) const;
+            std::map<std::string, BaseItem> getItemMap() const;
 
             std::string dump() const;
 
