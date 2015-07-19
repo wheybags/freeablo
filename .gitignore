@@ -6,4 +6,4 @@ html/
 resources/settings-user.ini
 *.o
 *.make
-*.cmake
+*CMakeFiles*
