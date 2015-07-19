@@ -9,7 +9,6 @@ namespace DiabloExe
     Prefix::Prefix(FAIO::FAFile *exe, size_t codeOffset)
     {
         uint32_t prefixNameTemp = FAIO::read32(exe);
-        prefixName     = FAIO::readCString(exe, prefixNameTemp - codeOffset);
         minEffect      = FAIO::read32(exe);
         maxEffect      = FAIO::read32(exe);
         qualLevel      = FAIO::read32(exe);
@@ -26,7 +25,7 @@ namespace DiabloExe
         minGold    = FAIO::read32(exe);
         maxGold    = FAIO::read32(exe);
         multiplier = FAIO::read32(exe);
-
+        prefixName     = FAIO::readCString(exe, prefixNameTemp - codeOffset);
 
 
 
@@ -48,7 +47,7 @@ namespace DiabloExe
         << "\tcursed: " << (size_t)cursed << "," << std::endl
         << "\tminGold: " << (size_t)minGold << "," << std::endl
         << "\tmaxGold: " << (size_t)maxGold << "," << std::endl
-        << "\tmultiplier" << (size_t)multiplier << "," << std::endl
+        << "\tmultiplier: " << (size_t)multiplier << "," << std::endl
         << "}" << std::endl;
 
         return ss.str();

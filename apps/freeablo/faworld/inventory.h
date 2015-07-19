@@ -1,92 +1,49 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 #include <stdint.h>
-#include "item.h"
+#include <level/item.h>
 #include <diabloexe/diabloexe.h>
 #include <boost/tuple/tuple.hpp>
 namespace FAWorld
 {
     class Actor;
-    //class Item;
+    //classLevel::Item;
     class Inventory
     {
     public:
-        typedef enum{eqONEHAND=1,
-                    eqTWOHAND=2,
-                    eqBODY=3,
-                    eqHEAD=4,
-                    eqRING=5,
-                    eqAMULET=6,
-                    eqUNEQUIP=7,
-                    eqINV=8,
-                    eqBELT=9,
-                    eqFLOOR=10,
-                    eqCURSOR=11,
-                    eqRIGHTHAND=12,
-                    eqLEFTHAND=13,
-                    eqRIGHTRING=14,
-                    eqLEFTRING=15} equipLoc;
-
-        typedef enum{itWEAPON=1,
-                     itARMOUR=2,
-                     itPOT=3,
-                     itGOLD=4,
-                     itNOVELTY=5}itemType;
-
-    private:
-        Item*** mInventoryBox;
-        Item** mBelt;
-        Item* mHead;
-        Item* mBody;
-        Item* mLeftRing;
-        Item* mRightRing;
-        Item* mAmulet;
-        Item* mLeftHand;
-        Item* mRightHand;
-        Item* mCursorHeld;
         Inventory();
         ~Inventory();
-        bool canPlaceItem(Item *item,
-                equipLoc equipType,
+
+
+        Inventory * testInv();
+        void putItem(Level::Item item,
+                     Level::Item::equipLoc equipType,
+                     Level::Item::equipLoc from,
+                     uint8_t y=0,
+                     uint8_t x=0,
+                     uint8_t beltX=0);
+       Level::Item getItemAt(Level::Item::equipLoc type, uint8_t y=0, uint8_t x=0, uint8_t beltX=0);
+    private:
+       Level::Item mInventoryBox[4][10];
+       Level::Item mBelt[8];
+       Level::Item mHead;
+       Level::Item mBody;
+       Level::Item mLeftRing;
+       Level::Item mRightRing;
+       Level::Item mAmulet;
+       Level::Item mLeftHand;
+       Level::Item mRightHand;
+       Level::Item mCursorHeld;
+        bool canPlaceItem(Level::Item item,
+                Level::Item::equipLoc equipType,
                 uint8_t y=0,
                 uint8_t x=0,
                 uint8_t beltX=0);
-        bool fitsAt(Item * item, uint8_t y, uint8_t x);
-
-
-
-
-
-
-    public:
-        Inventory * testInv();
-        void putItem(Item * item,
-                     equipLoc equipType,
-                     equipLoc from,
-                     uint8_t y=0,
-                     uint8_t x=0,
-                     uint8_t beltX=0,
-                     boost::tuple<size_t, size_t, size_t> * floorPosition=NULL
-                     );
-
-
-
-        void removeItem(Item *item, equipLoc from,
-                        uint8_t x=0,
-                        uint8_t y=0,
-                        uint8_t beltX=0);
+        bool fitsAt(Level::Item item, uint8_t y, uint8_t x);
+        void removeItem(Level::Item item, Level::Item::equipLoc from, uint8_t beltX=0, uint8_t invY=0, uint8_t invX=0);
         void dump();
-
-
-
-
     friend class Actor;
-
-
-
     };
-
-
 }
 
 #endif // INVENTORY_H

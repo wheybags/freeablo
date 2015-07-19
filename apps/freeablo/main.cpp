@@ -13,7 +13,7 @@
 
 #include "faworld/world.h"
 
-#include "faworld/itemmanager.h"
+#include <level/itemmanager.h>
 
 #include "fagui/guimanager.h"
 
@@ -152,7 +152,7 @@ Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
         Level::Dun sector3("levels/towndata/sector3s.dun");
         Level::Dun sector4("levels/towndata/sector4s.dun");
 
-        return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", 
+        return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
             "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
     }
     else if(dLvl < 9)
@@ -374,8 +374,12 @@ void runGameLoop(const bpo::variables_map& variables)
         renderer.stop();
         return;
     }
-    FAWorld::ItemManager * itemManager = FAWorld::ItemManager::getItemManager(&exe);
-    itemManager->dump();
+    Level::ItemManager itemManager;
+
+    itemManager.loadItems(&exe);
+
+    itemManager.dumpBaseItems();
+//    itemManager->dumpLevel::ItemPositions();
     FAWorld::World world;
 
     FALevelGen::FAsrand(time(NULL));
@@ -388,7 +392,8 @@ void runGameLoop(const bpo::variables_map& variables)
     FARender::Tileset tileset;
     
     FAWorld::Player* player = world.getPlayer();
-    FAGui::initGui();
+
+    FAGui::initGui(player->inventory);
     
     // -1 represents the main menu
     if(currentLevel != -1)

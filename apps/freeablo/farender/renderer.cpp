@@ -48,7 +48,11 @@ namespace FARender
         std::vector<std::string> components = Misc::StringUtils::split(std::string(source.CString()), '&');
 
         size_t celIndex = 0;
+
+        if(components.size() == 0)
+            return false;
         std::string sourcePath = components[0];
+
 
         for(size_t i = 1; i < components.size(); i++)
         {

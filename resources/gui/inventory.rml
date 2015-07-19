@@ -17,7 +17,6 @@
                 position: fixed;
                 top: -175px;
                 right: 0px;
-                drag:clone;
                 z-index: 0;
             }
             div.inventory
@@ -36,12 +35,15 @@
 
             div.item
             {
-                height: 30px;
-                width: 30px;
+                display: inline-block;
+                /*background-color:red;*/
+                height: 29px;
+                width: 29px;
                 z-index: 3;
                 position: relative;
                 drag: clone;
                 background-decorator: image;
+                background-image: /data/inv/objcurs.cel&frame=25;
             }
 
             div.inv-item-socket
@@ -49,8 +51,8 @@
                 /*background-color: red;*/
                 position: relative;
                 display: inline-block;
-                background-decorator: image;
-                background-image: /data/inv/objcurs.cel&trans=0,255,0&frame=20;
+                /*background-decorator: image;
+                background-image: /data/inv/objcurs.cel&trans=0,255,0&frame=20;*/
                 top: 0px;
                 left: 1px;
                 width:  29;
@@ -80,7 +82,7 @@ instance = draggable.DraggableWidget(document, 0, -500)
     <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" >
         <span id="container" onmousedown="instance.guiMouseDown(event)"
                              onDrag="instance.onDrag(event)">
-        <div class="inventory">
+        <div class="inventory" id="inventory">
 
                              <div class="inv-item-socket" id="inv-item-socket0"></div>
                              <div class="inv-item-socket" id="inv-item-socket1"></div>

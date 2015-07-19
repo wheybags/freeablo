@@ -8,11 +8,12 @@
 
 #include "../farender/renderer.h"
 #include "../engine/threadmanager.h"
+#include "../faworld/inventory.h"
 
 #include <iostream>
 #include <boost/python.hpp>
 #include <input/common.h>
-
+#include <sstream>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
@@ -33,6 +34,8 @@ extern bpt::ptree hotkeypt;
 
 namespace FAGui
 {
+    FAWorld::Inventory* inventory;
+
     void quitGame()
     {
         done = true;
@@ -123,6 +126,39 @@ namespace FAGui
             changelvldwn_key.save("Changelvldwn", hotkeypt);
         }
     }
+    boost::python::list inventoryRML()
+    {
+        boost::python::list list;
+
+        for(uint8_t i=0;i<=3;i++)
+        {
+            for(uint8_t j=0;j<=9;j++)
+            {
+                Level::Item boxitem = inventory->getItemAt(Level::Item::eqINV, i, j);
+
+                if(!boxitem.isEmpty())
+                {                   
+                    boost::python::list attrList;
+                    attrList.append(boxitem.mItem.graphicValue);
+                    attrList.append(boxitem.isEmpty());
+                    list.append(attrList);
+
+                }
+                else
+                {
+                    boost::python::list attrList;
+                    attrList.append(0);
+                    attrList.append(true);
+                    list.append(attrList);
+
+
+                }
+
+            }
+        }
+        return list;
+
+    }
 
     BOOST_PYTHON_MODULE(freeablo)
     {
@@ -134,12 +170,19 @@ namespace FAGui
         boost::python::def("getHotkeyNames", &getHotkeyNames);
         boost::python::def("getHotkeys", &getHotkeys);
         boost::python::def("setHotkey", &setHotkey);
+       // boost::python::class_<FAWorld::Inventory>("Inventory")
+        boost::python::def("getItemBox", &inventoryRML);
+
+
+
+
     }
     
     Rocket::Core::ElementDocument* ingameUi = NULL;
     Rocket::Core::ElementDocument* mainMenu = NULL;
-    void initGui()
+    void initGui(FAWorld::Inventory & playerInventory)
     {
+        inventory = &playerInventory;
         initfreeablo();
         Input::Hotkey::initpythonwrapper();
 

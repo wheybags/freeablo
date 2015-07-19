@@ -18,16 +18,13 @@ namespace DiabloExe
         uint8_t itemType;
         uint8_t equipLoc;
 
-        uint8_t unknown0;
-        uint8_t unknown1;
+        uint16_t unknown0;
 
         uint32_t graphicValue;
 
         uint8_t itemCode;
         uint8_t uniqCode;
-
-        uint8_t unknown2;
-        uint8_t unknown3;
+        uint16_t unknown1;
 
         std::string itemName;
         std::string itemSecondName;

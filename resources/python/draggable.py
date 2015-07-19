@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import inspect
+import freeablo
 class DraggableWidget(object):
     def __init__(self, document, xoffset, yoffset):
         self.document = document
@@ -24,8 +25,23 @@ class DraggableWidget(object):
 
     def bodyMouseDown(self, event):
         print "bodyMouseDown called: %s" % (event.current_element)
-        #for attr in inspect.getmembers(event):
+
+        for i,item in enumerate(freeablo.getItemBox()):
+
+            parent = self.document.GetElementById("inv-item-socket" + str(i))
+            element = self.document.CreateElement("div")
+            if item[1] is False:
+                element.SetAttribute("class", "item")
+                #element.style.backgroundImage = "/data/inv/objcurs.cel;" #+str(11 + item[0]);
+                #element.style.display = "inline-block"
+                #element.style.backgroundDecorator = "image;"
+            else:
+                element.style.display = "inline-block;"
+
+            parent.AppendChild(element)
+        #for attr in inspect.getmembers(element.style):
         #    print "%s : %s" % (attr[0], attr[1])
+        #print freeablo.getItemBox()
 
     def bodyKeyDown(self, event):
         print "bodyKeyDown called: %s" % (event.current_element)

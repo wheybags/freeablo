@@ -139,6 +139,8 @@ namespace DiabloExe
         {
             FAIO::FAfseek(exe, itemOffset + 76*i, SEEK_SET);
             BaseItem tmp(exe, codeOffset);
+            if(tmp.useOnce > 1)
+                continue;
             mBaseItems[tmp.itemName] = tmp;
 
         }

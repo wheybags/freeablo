@@ -26,12 +26,8 @@ add_executable(freeablo
     faworld/position.cpp
     faworld/world.cpp  
     faworld/world.h
-	faworld/item.cpp
-	faworld/item.h
     faworld/inventory.h
 	faworld/inventory.cpp
-	faworld/itemmanager.cpp
-	faworld/itemmanager.h
     
     fagui/guimanager.h
     fagui/guimanager.cpp
