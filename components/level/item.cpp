@@ -38,6 +38,7 @@ Item::Item(DiabloExe::BaseItem item, size_t id)
     mEmpty = false;
     mBaseId = id;
     mUniqueId = 0;
+    mIsReal = true;
 
     if(mItem.itemType != itGOLD)
     {
@@ -62,7 +63,11 @@ std::string Item::getName() const
     return this->mItem.itemName;
 
 }
+std::pair<uint8_t, uint8_t> Item::getInvSize() const
+{
+    return std::pair<uint8_t, uint8_t>(mSizeY, mSizeX);
 
+}
 void Item::setUniqueId(uint32_t mUniqueId)
 {
     this->mUniqueId = mUniqueId;

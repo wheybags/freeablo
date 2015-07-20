@@ -18,6 +18,7 @@
                 top: -175px;
                 right: 0px;
                 z-index: 0;
+                drag:drag;
             }
             div.inventory
             {
@@ -37,13 +38,13 @@
             {
                 display: inline-block;
                 /*background-color:red;*/
-                height: 29px;
-                width: 29px;
-                z-index: 3;
+                height: 28px;
+                width: 28px;
+                z-index: 100;
+                opacity: 1.0;
                 position: relative;
-                drag: clone;
                 background-decorator: image;
-                background-image: /data/inv/objcurs.cel&frame=25;
+                background-image: /data/inv/objcurs.cel&frame=144;
             }
 
             div.inv-item-socket
@@ -55,12 +56,15 @@
                 background-image: /data/inv/objcurs.cel&trans=0,255,0&frame=20;*/
                 top: 0px;
                 left: 1px;
-                width:  29;
-                height: 29;
+                width:  29px;
+                height: 29px;
                 z-index: 2;
                 border-style: solid;
                 border: 200px;
                 border-color: transparent;
+                border: 1px;
+                opacity: .5;
+
             }
 
             div#inv-item-socket0
@@ -84,46 +88,46 @@ instance = draggable.DraggableWidget(document, 0, -500)
                              onDrag="instance.onDrag(event)">
         <div class="inventory" id="inventory">
 
-                             <div class="inv-item-socket" id="inv-item-socket0"></div>
-                             <div class="inv-item-socket" id="inv-item-socket1"></div>
-                             <div class="inv-item-socket" id="inv-item-socket2"></div>
-                             <div class="inv-item-socket" id="inv-item-socket3"></div>
-                             <div class="inv-item-socket" id="inv-item-socket4"></div>
-                             <div class="inv-item-socket" id="inv-item-socket5"></div>
-                             <div class="inv-item-socket" id="inv-item-socket6"></div>
-                             <div class="inv-item-socket" id="inv-item-socket7"></div>
-                             <div class="inv-item-socket" id="inv-item-socket8"></div>
-                             <div class="inv-item-socket" id="inv-item-socket9"></div>
-                             <div class="inv-item-socket" id="inv-item-socket10"></div>
-                             <div class="inv-item-socket" id="inv-item-socket11"></div>
-                             <div class="inv-item-socket" id="inv-item-socket12"></div>
-                             <div class="inv-item-socket" id="inv-item-socket13"></div>
-                             <div class="inv-item-socket" id="inv-item-socket14"></div>
-                             <div class="inv-item-socket" id="inv-item-socket15"></div>
-                             <div class="inv-item-socket" id="inv-item-socket16"></div>
-                             <div class="inv-item-socket" id="inv-item-socket17"></div>
-                             <div class="inv-item-socket" id="inv-item-socket18"></div>
-                             <div class="inv-item-socket" id="inv-item-socket19"></div>
-                             <div class="inv-item-socket" id="inv-item-socket20"></div>
-                             <div class="inv-item-socket" id="inv-item-socket21"></div>
-                             <div class="inv-item-socket" id="inv-item-socket22"></div>
-                             <div class="inv-item-socket" id="inv-item-socket23"></div>
-                             <div class="inv-item-socket" id="inv-item-socket24"></div>
-                             <div class="inv-item-socket" id="inv-item-socket25"></div>
-                             <div class="inv-item-socket" id="inv-item-socket26"></div>
-                             <div class="inv-item-socket" id="inv-item-socket27"></div>
-                             <div class="inv-item-socket" id="inv-item-socket28"></div>
-                             <div class="inv-item-socket" id="inv-item-socket29"></div>
-                             <div class="inv-item-socket" id="inv-item-socket30"></div>
-                             <div class="inv-item-socket" id="inv-item-socket31"></div>
-                             <div class="inv-item-socket" id="inv-item-socket32"></div>
-                             <div class="inv-item-socket" id="inv-item-socket33"></div>
-                             <div class="inv-item-socket" id="inv-item-socket34"></div>
-                             <div class="inv-item-socket" id="inv-item-socket35"></div>
-                             <div class="inv-item-socket" id="inv-item-socket36"></div>
-                             <div class="inv-item-socket" id="inv-item-socket37"></div>
-                             <div class="inv-item-socket" id="inv-item-socket38"></div>
-                             <div class="inv-item-socket" id="inv-item-socket39"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket0"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket1"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket2"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket3"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket4"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket5"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket6"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket7"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket8"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket9"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket10"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket11"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket12"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket13"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket14"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket15"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket16"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket17"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket18"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket19"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket20"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket21"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket22"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket23"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket24"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket25"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket26"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket27"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket28"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket29"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket30"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket31"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket32"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket33"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket34"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket35"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket36"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket37"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket38"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket39"></div>
                              </div>
            </span>
     </body>

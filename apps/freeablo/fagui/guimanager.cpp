@@ -141,6 +141,9 @@ namespace FAGui
                     boost::python::list attrList;
                     attrList.append(boxitem.mItem.graphicValue);
                     attrList.append(boxitem.isEmpty());
+                    attrList.append(boxitem.getInvSize().first);
+                    attrList.append(boxitem.getInvSize().second);
+                    attrList.append(boxitem.mIsReal);
                     list.append(attrList);
 
                 }

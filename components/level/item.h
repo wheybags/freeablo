@@ -29,10 +29,12 @@ namespace Level
             void setCount(uint32_t count);
             uint32_t getCount() const;
             bool operator==(const Item rhs) const;
+            std::pair<uint8_t, uint8_t> getInvSize() const;
             DiabloExe::BaseItem mItem;
             uint8_t mInvY;
             uint8_t mInvX;
             uint8_t mBeltX;
+            bool mIsReal;
             typedef enum{eqONEHAND=1,
                         eqTWOHAND=2,
                         eqBODY=3,
