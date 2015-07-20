@@ -6,6 +6,21 @@ class DraggableWidget(object):
         self.document = document
         self.xoffset = xoffset
         self.yoffset = yoffset
+    def onLoad(self, event):
+
+        for i,item in enumerate(freeablo.getItemBox()):
+
+            parent = self.document.GetElementById("inv-item-socket" + str(i))
+            element = self.document.CreateElement("div")
+            if item[1] is False:
+                element.SetAttribute("class", "item")
+                #element.style.backgroundImage = "/data/inv/objcurs.cel;" #+str(11 + item[0]);
+                #element.style.display = "inline-block"
+                #element.style.backgroundDecorator = "image;"
+            else:
+                element.style.display = "inline-block;"
+
+            parent.AppendChild(element)
 
     def onDrag(self, event):
 
@@ -26,19 +41,6 @@ class DraggableWidget(object):
     def bodyMouseDown(self, event):
         print "bodyMouseDown called: %s" % (event.current_element)
 
-        for i,item in enumerate(freeablo.getItemBox()):
-
-            parent = self.document.GetElementById("inv-item-socket" + str(i))
-            element = self.document.CreateElement("div")
-            if item[1] is False:
-                element.SetAttribute("class", "item")
-                #element.style.backgroundImage = "/data/inv/objcurs.cel;" #+str(11 + item[0]);
-                #element.style.display = "inline-block"
-                #element.style.backgroundDecorator = "image;"
-            else:
-                element.style.display = "inline-block;"
-
-            parent.AppendChild(element)
         #for attr in inspect.getmembers(element.style):
         #    print "%s : %s" % (attr[0], attr[1])
         #print freeablo.getItemBox()

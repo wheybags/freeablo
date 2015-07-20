@@ -28,15 +28,15 @@ Inventory *Inventory::testInv()
     Level::Item bow  = itemManager.getBaseItem(24);
     Level::Item buckler = itemManager.getBaseItem(16);
     Level::Item ring = itemManager.getBaseItem(32);
-
+    inv->putItem(itemManager.getBaseItem(24), Level::Item::eqINV, Level::Item::eqFLOOR);
     //inv->putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
-   inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
+    //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
+    //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
     //inv->putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
 //    std::cout << mInventoryBox[0][0].mItem.itemName << std::endl;
     //inv.putItem(gold, Level::Item::eqINV, Level::Item::eqINV, 0, 1);
 //    std::cout << mInventoryBox[0][1].getName() <<'\0' << std::endl;
-
+/*
     inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
     inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 3);
     inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 4);
@@ -74,10 +74,10 @@ Inventory *Inventory::testInv()
     inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 6);
     inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 7);
     inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 8);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 9);
-    inv->putItem(buckler, Level::Item::eqRIGHTHAND, Level::Item::eqFLOOR, 0, 0, 0);
-    inv->putItem(ring, Level::Item::eqRIGHTRING, Level::Item::eqFLOOR, 1, 1);
-    inv->putItem(bow, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR, 1, 1);
+    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 9);*/
+    //inv->putItem(buckler, Level::Item::eqRIGHTHAND, Level::Item::eqFLOOR, 0, 0, 0);
+    //inv->putItem(ring, Level::Item::eqRIGHTRING, Level::Item::eqFLOOR, 1, 1);
+    //inv->putItem(bow, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR, 1, 1);
 
     inv->dump();
 

@@ -79,7 +79,7 @@ instance = draggable.DraggableWidget(document, 0, -500)
 
     </head>
 
-    <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" >
+    <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
         <span id="container" onmousedown="instance.guiMouseDown(event)"
                              onDrag="instance.onDrag(event)">
         <div class="inventory" id="inventory">

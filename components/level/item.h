@@ -2,6 +2,7 @@
 #define ITEM_H
 #include <diabloexe/baseitem.h>
 #include <diabloexe/prefix.h>
+#include <render/render.h>
 //#include "inventory.h"
 namespace FAWorld
 {
@@ -56,6 +57,7 @@ namespace Level
 
 
         private:
+            static Cel::CelFile * mObjcurs;
             DiabloExe::Prefix mPrefix;
             uint8_t mSizeX;
             uint8_t mSizeY;
@@ -64,6 +66,7 @@ namespace Level
             uint32_t mCount;
             uint32_t mMaxCount;
             bool mEmpty;
+            static bool mObjcursLoaded;
 
         };
 }

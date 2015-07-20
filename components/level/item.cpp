@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../apps/freeablo/faworld/inventory.h"
 #include "itemmanager.h"
-#include <render/render.h>
 namespace Level
 
 {
@@ -25,75 +24,37 @@ Item::~Item()
     itemManager->removeItem(*this);
 
 }*/
-
+Cel::CelFile * Item::mObjcurs;
+bool Item::mObjcursLoaded=false;
 Item::Item(DiabloExe::BaseItem item, size_t id)
 {
     //Render::SpriteGroup test("data/inv/objcurs.cel");
+    if(!mObjcursLoaded)
+    {
+        mObjcurs = new Cel::CelFile("data/inv/objcurs.cel");
+        mObjcursLoaded = true;
+    }
     mItem = item;
     mEmpty = false;
     mBaseId = id;
     mUniqueId = 0;
 
-    switch(item.itemType)
+    if(mItem.itemType != itGOLD)
     {
-    case itWEAPON:
-        if(item.equipLoc == eqONEHAND)
-        {
-            mSizeY = 3;
-            mSizeX = 1;
-            mMaxCount = 1;
-            mCount=1;
-        }
-        else if(item.equipLoc == eqTWOHAND)
-        {
-            mSizeY = 3;
-            mSizeX = 2;
-            mMaxCount = 1;
-            mCount=1;
-        }
-        break;
-    case itARMOUR:
-        if(
-                item.equipLoc == eqONEHAND ||
-                item.equipLoc == eqHEAD
-                )
-        {
-            mSizeY = 2;
-            mSizeX = 2;
-            mMaxCount = 1;
-            mCount=1;
-
-        }
-
-        else if(item.equipLoc == eqBODY)
-        {
-            mSizeY = 3;
-            mSizeX = 2;
-            mMaxCount = 1;
-            mCount=1;
-
-        }
-        break;
-    case itPOT:
-        mSizeY = 1;
-        mSizeX = 1;
+        mItem.graphicValue +=11;
+        Cel::CelFrame frame = (*mObjcurs)[mItem.graphicValue];
+        mSizeX = frame.mWidth/28;
+        mSizeY = frame.mHeight/28;
         mMaxCount = 1;
         mCount=1;
-        break;
-    case itGOLD:
-        mSizeX = 1;
-        mSizeY = 1;
-        mMaxCount=5000;
-        break;
-    case itNOVELTY:
-        mSizeX = 1;
-        mSizeY = 1;
-        mMaxCount=1;
-        mCount = 1;
-        break;
-
-
     }
+    else
+    {
+        mSizeX=1;
+        mSizeY=1;
+        mMaxCount=5000;
+    }
+
 }
 std::string Item::getName() const
 {
