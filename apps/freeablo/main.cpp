@@ -155,7 +155,7 @@ Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
         return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
             "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
     }
-    else if(dLvl < 9)
+    else if(dLvl < 13)
     {
         return FALevelGen::generate(100, 100, dLvl, exe);
     }
@@ -384,7 +384,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     FALevelGen::FAsrand(time(NULL));
 
-    std::vector<Level::Level*> levels(9);
+    std::vector<Level::Level*> levels(13);
 
     int32_t currentLevel = variables["level"].as<int32_t>();
 
