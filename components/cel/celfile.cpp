@@ -125,17 +125,36 @@ namespace Cel
 
             std::vector<uint32_t> frameOffsets(numFrames+1);
 
+            bool error = false;
 
             for(size_t j = 0; j <= numFrames; j++)
-                FAIO::FAfread(&frameOffsets[j], 4, 1, file);
+            {
+                int success = FAIO::FAfread(&frameOffsets[j], 4, 1, file);
 
+                // Dirty hack to prevent further loading cl2 
+                // that can't be loaded because we don't know how.
+                if(!success)
+                {
+                    error = true;
+                    numFrames = 0;
+                    break;
+                }
+            }
+
+            if(error)
+                break;
 
             FAIO::FAfseek(file, headerOffsets[i]+ frameOffsets[0], SEEK_SET);
             
             for(size_t j = 0; j < numFrames; j++)
             {
-                mFrames.push_back(std::vector<uint8_t>(frameOffsets[j+1]-frameOffsets[j]));
-                FAIO::FAfread(&mFrames[mFrames.size()-1][0], 1, frameOffsets[j+1]-frameOffsets[j], file);
+                int diff = frameOffsets[j+1]-frameOffsets[j];
+
+                if(diff > 0)
+                {
+                    mFrames.push_back(std::vector<uint8_t>(diff));
+                    FAIO::FAfread(&mFrames[mFrames.size()-1][0], 1, diff, file);
+                }
             }
         }
 
@@ -168,12 +187,14 @@ namespace Cel
     Pal CelFile::getPallette(std::string filename)
     {
         std::string palFilename;
-        if(Misc::StringUtils::endsWith(filename, "l1.cel"))
+        if(Misc::StringUtils::startsWith(filename, "levels") && Misc::StringUtils::endsWith(filename, "l1.cel"))
             palFilename = Misc::StringUtils::replaceEnd("l1.cel", "l1.pal", filename);
-        else if(Misc::StringUtils::endsWith(filename, "l2.cel"))
+        else if (Misc::StringUtils::startsWith(filename, "levels") && Misc::StringUtils::endsWith(filename, "l2.cel"))
             palFilename = Misc::StringUtils::replaceEnd("l2.cel", "l2.pal", filename);
         else if(Misc::StringUtils::endsWith(filename, "l3.cel"))
             palFilename = Misc::StringUtils::replaceEnd("l3.cel", "l3.pal", filename);
+        else if (Misc::StringUtils::startsWith(Misc::StringUtils::lowerCase(filename), "gendata"))
+            palFilename = Misc::StringUtils::replaceEnd(".cel", ".pal", filename);
         else
             palFilename = "levels/towndata/town.pal";
 

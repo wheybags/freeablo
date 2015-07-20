@@ -39,13 +39,13 @@ namespace FAIO
 
     HANDLE diabdat = NULL;
 
-    bool init()
+	bool init(const std::string pathMPQ)
     {
-        const bool success = SFileOpenArchive(getMPQFileName().c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat);
+		const bool success = SFileOpenArchive(pathMPQ.c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat);
 
         if (!success)
         {
-            std::cerr << "Failed to open " << DIABDAT_MPQ << " with error " << GetLastError() << std::endl;
+			std::cerr << "Failed to open " << pathMPQ.c_str() << " with error " << GetLastError() << std::endl;
         }
 
         return success;
