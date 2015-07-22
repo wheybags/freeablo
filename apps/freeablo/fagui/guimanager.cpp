@@ -128,14 +128,15 @@ void setHotkey(std::string function, boost::python::list pyhotkey)
 }
 
 
-bool placeItem(uint32_t fromY,
+void placeItem(uint32_t to,
+               uint32_t from,
+               uint32_t fromY,
                uint32_t fromX,
-               uint32_t to,
-               uint32_t toY=0,
-               uint32_t toX=0)
+               uint32_t toY,
+               uint32_t toX)
 {
     if(fromX >= 10 || fromY >=4 || toX>=10 || toY>=4)
-        return false;
+        return;
     Level::Item item = inventory->getItemAt(
                 Level::Item::eqINV,
                 fromY,
@@ -152,22 +153,31 @@ bool placeItem(uint32_t fromY,
     }
     if(to == Level::Item::eqCURSOR)
     {
-        if(inventory->getItemAt(Level::Item::eqCURSOR).isEmpty())
+        switch(from)
         {
+        case Level::Item::eqINV:
+            if(inventory->getItemAt(Level::Item::eqCURSOR).isEmpty())
+            {
+                inventory->putItem(item, Level::Item::eqCURSOR, Level::Item::eqINV, fromY, fromX);
 
+                return;
+            }
+            else
+                return;
+            break;
+        case Level::Item::eqLEFTHAND:
+            item = inventory->getItemAt(Level::Item::eqLEFTHAND);
+            inventory->putItem(item, Level::Item::eqCURSOR, Level::Item::eqLEFTHAND , toY, toX);
+            //inventory->dump();
 
-            inventory->putItem(item,
-                               Level::Item::eqCURSOR,
-                               Level::Item::eqINV,
-                               fromY,
-                               fromX);
-            return true;
+            break;
+        default:
+            break;
         }
-        else
-            return false;
     }
     else if(to == Level::Item::eqINV)
     {
+
 
         item = inventory->getItemAt(Level::Item::eqCURSOR);
         inventory->putItem(
@@ -176,11 +186,20 @@ bool placeItem(uint32_t fromY,
                     Level::Item::eqCURSOR,
                     toY,
                     toX);
-        return true;
+        return;
 
 
     }
-    return false;
+    else if(to == Level::Item::eqLEFTHAND)
+    {
+
+        item = inventory->getItemAt(Level::Item::eqCURSOR);
+        inventory->putItem(item, Level::Item::eqLEFTHAND, Level::Item::eqCURSOR, toY, toX);
+        //inventory->dump();
+        return;
+
+    }
+    return;
 }
 
 boost::python::dict updateInventory()
@@ -195,8 +214,6 @@ boost::python::dict updateInventory()
     Level::Item leftRing = inventory->getItemAt(Level::Item::eqLEFTRING);
     Level::Item rightRing = inventory->getItemAt(Level::Item::eqRIGHTRING);
     Level::Item body = inventory->getItemAt(Level::Item::eqBODY);
-
-
 
     dict["cursor"] = cursorDict;
 
@@ -294,7 +311,6 @@ boost::python::dict updateInventory()
     amuletDict["cornerX"] = amulet.getCornerCoords().first;
     amuletDict["cornerY"] = amulet.getCornerCoords().second;
 
-
     boost::python::list inventoryList, beltList;
     dict["inventoryBox"] = inventoryList;
     for(uint8_t i=0;i<4;i++)
@@ -342,13 +358,7 @@ boost::python::dict updateInventory()
         beltList.append(beltDict);
     }
     dict["belt"] = beltList;
-
-
-
     return dict;
-
-
-
 }
 
 BOOST_PYTHON_MODULE(freeablo)
@@ -364,10 +374,6 @@ BOOST_PYTHON_MODULE(freeablo)
     // boost::python::class_<FAWorld::Inventory>("Inventory")
     boost::python::def("updateInventory", &updateInventory);
     boost::python::def("placeItem", &placeItem);
-
-
-
-
 }
 
 Rocket::Core::ElementDocument* ingameUi = NULL;

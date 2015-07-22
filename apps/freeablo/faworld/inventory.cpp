@@ -34,10 +34,12 @@ Inventory *Inventory::testInv()
     //gold.setCount(10);
     Level::Item bow  = itemManager.getBaseItem(24);
     Level::Item bow2  = itemManager.getBaseItem(24);
+    Level::Item bow3  = itemManager.getBaseItem(24);
     Level::Item buckler = itemManager.getBaseItem(16);
     Level::Item ring = itemManager.getBaseItem(32);
     inv->putItem(bow, Level::Item::eqINV, Level::Item::eqFLOOR);
     inv->putItem(bow2, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
+    inv->putItem(bow3, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR);
     //inv->putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
     //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
     //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
@@ -243,6 +245,7 @@ void Inventory::putItem(Level::Item &item,
             if(item.mItem.equipLoc == Level::Item::eqONEHAND)
             {
                 this->mLeftHand=item;
+
                 removeItem(item, from, beltX);
             }
             else if(item.mItem.equipLoc == Level::Item::eqTWOHAND)
@@ -282,6 +285,7 @@ void Inventory::putItem(Level::Item &item,
                     if(auto_fit_x !=255)
                     {
                         putItem(this->mRightHand, Level::Item::eqINV, Level::Item::eqRIGHTHAND, auto_fit_y, auto_fit_x);
+                        removeItem(item, from, beltX, y, x);
                         this->mRightHand = item;
                         return;
                     }
@@ -296,6 +300,8 @@ void Inventory::putItem(Level::Item &item,
                 {
                     this->mLeftHand = item;
                     this->mRightHand = item;
+                    removeItem(item, from, beltX, y, x);
+
                 }
 
             }
@@ -388,9 +394,6 @@ void Inventory::putItem(Level::Item &item,
                         mInventoryBox[i][j].mCornerY=y;
                         mInventoryBox[i][j].mIsReal=false;
                     }
-
-
-
                 }
             }
             removeItem(item, from, beltX, y, x);
@@ -451,18 +454,27 @@ void Inventory::removeItem(
     switch(from)
     {
     case Level::Item::eqLEFTHAND:
-        this->mLeftHand = Level::Item();
+        if(item.mItem.equipLoc == Level::Item::eqTWOHAND)
+        {
+            mRightHand=Level::Item();
+        }
+        mLeftHand = Level::Item();
         break;
 
     case Level::Item::eqRIGHTHAND:
-        this->mRightHand=Level::Item();
+        if(item.mItem.equipLoc == Level::Item::eqTWOHAND)
+        {
+
+            mLeftHand=Level::Item();
+        }
+        mRightHand=Level::Item();
         break;
 
     case Level::Item::eqLEFTRING:
-        this->mLeftRing=Level::Item();
+        mLeftRing=Level::Item();
         break;
     case Level::Item::eqRIGHTRING:
-        this->mRightRing =Level::Item();
+        mRightRing =Level::Item();
         break;
 
     case Level::Item::eqBELT:
@@ -493,8 +505,6 @@ void Inventory::removeItem(
                 mInventoryBox[i][j] = Level::Item();
                 mInventoryBox[i][j].mInvY=i;
                 mInventoryBox[i][j].mInvX=j;
-
-
             }
         }
         break;
@@ -505,11 +515,6 @@ void Inventory::removeItem(
     case Level::Item::eqFLOOR:
     default:
         return;
-
-
-
-
-
     }
 
 }
@@ -584,6 +589,4 @@ void Inventory::dump()
     }
     std::cout << printbelt.str() << std::endl;
 }
-
-
 }

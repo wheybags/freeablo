@@ -12,9 +12,18 @@ Item::Item()
     mBaseId = 0;
     mUniqueId=0;
     mMaxCount=0;
+    mInvX=0;
+    mInvY=0;
+    mSizeX=0;
+    mSizeY=0;
+    mCornerX=0;
+    mCornerY=0;
+    mIsReal=false;
 }
 Item::~Item()
 {
+
+
 
 }
 
@@ -39,7 +48,8 @@ Item::Item(DiabloExe::BaseItem item, size_t id)
     mBaseId = id;
     mUniqueId = 0;
     mIsReal = true;
-
+    mInvX=0;
+    mInvY=0;
 
     if(mItem.itemType != itGOLD)
     {

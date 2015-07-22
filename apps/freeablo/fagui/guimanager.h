@@ -9,6 +9,12 @@ namespace FAGui
     void showIngameGui();
     void showMainMenu();
     void updateGui();
+    void placeItem(uint32_t to,
+                   uint32_t from,
+                   uint32_t fromY=0,
+                   uint32_t fromX=0,
+                   uint32_t toY=0,
+                   uint32_t toX=0);
 }
 
 #endif
