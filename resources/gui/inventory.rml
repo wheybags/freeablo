@@ -65,6 +65,59 @@
                 left: 249px;
             }
 
+            div.ring-equip-socket
+            {
+                /*background-color: red;*/
+                position: fixed;
+                top: 178px;
+                height:28px;
+                width: 28px;
+                display: inline-block;
+                z-index: 1;
+            }
+            div.head-equip-socket
+            {
+                /*background-color: red;*/
+                position: fixed;
+                top: 3px;
+                left: 133px;
+                height:56px;
+                width: 56px;
+                display: inline-block;
+                z-index: 1;
+            }
+            div.body-equip-socket
+            {
+                /*background-color: red;*/
+                position: fixed;
+                top: 75px;
+                left: 133px;
+                height:84px;
+                width: 56px;
+                display: inline-block;
+                z-index: 1;
+            }
+            div.amulet-equip-socket
+            {
+                /*background-color: red;*/
+                position: fixed;
+                top: 32px;
+                left: 205px;
+                height:28px;
+                width: 28px;
+                display: inline-block;
+                z-index: 1;
+            }
+            div#leftRing
+            {
+                left: 47px;
+            }
+            div#rightRing
+            {
+                left: 248px;
+            }
+
+
 
             div.inv-item-socket
             {
@@ -98,6 +151,11 @@ instance = draggable.DraggableWidget(document, 0, -500)
                              onDrag="instance.onDrag(event)">
         <div onclick="instance.onWeaponClick(event)" id="leftHand" class="hand-equip-socket"> </div>
         <div onclick="instance.onWeaponClick(event)" id="rightHand" class="hand-equip-socket"> </div>
+        <div onclick="instance.onRingClick(event)" id="leftRing" class="ring-equip-socket"> </div>
+        <div onclick="instance.onRingClick(event)" id="rightRing" class="ring-equip-socket"> </div>
+        <div id="head"   onclick="instance.onHeadClick(event)" class="head-equip-socket"> </div>
+        <div id="amulet" onclick="instance.onAmuletClick(event)" class="amulet-equip-socket"> </div>
+        <div id="body"   onclick="instance.onBodyClick(event)" class="body-equip-socket"> </div>
         <div class="inventory" id="inventory">
 
                              <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket0"></div>

@@ -37,9 +37,18 @@ Inventory *Inventory::testInv()
     Level::Item bow3  = itemManager.getBaseItem(24);
     Level::Item buckler = itemManager.getBaseItem(16);
     Level::Item ring = itemManager.getBaseItem(32);
+    Level::Item cap = itemManager.getBaseItem(17);
+    Level::Item plate = itemManager.getBaseItem(13);
+    Level::Item amulet = itemManager.getBaseItem(68);
+    Level::Item ring2 = itemManager.getBaseItem(32);
     inv->putItem(bow, Level::Item::eqINV, Level::Item::eqFLOOR);
     inv->putItem(bow2, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
     inv->putItem(bow3, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR);
+    inv->putItem(ring, Level::Item::eqINV, Level::Item::eqFLOOR, 3, 0);
+    inv->putItem(ring2, Level::Item::eqINV, Level::Item::eqFLOOR, 3, 1);
+    inv->putItem(cap, Level::Item::eqHEAD, Level::Item::eqFLOOR, 3, 0);
+    inv->putItem(plate, Level::Item::eqBODY, Level::Item::eqFLOOR, 3, 0);
+    inv->putItem(amulet, Level::Item::eqAMULET, Level::Item::eqFLOOR, 3, 0);
     //inv->putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
     //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
     //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
@@ -171,7 +180,9 @@ bool Inventory::canPlaceItem(
 
     case Level::Item::eqAMULET:
         if(item.mItem.equipLoc == Level::Item::eqAMULET && this->mAmulet.isEmpty())
+        {
             return true;
+        }
         break;
         /*
              * When putting an item in the inventory we must check if it will fit!
@@ -332,13 +343,13 @@ void Inventory::putItem(Level::Item &item,
             removeItem(item, from, beltX);
             break;
         case Level::Item::eqRIGHTRING:
-
             mRightRing = item;
             removeItem(item, from, beltX);
             break;
 
         case Level::Item::eqAMULET:
             mAmulet = item;
+            removeItem(item, from, beltX);
             break;
 
             /*
@@ -407,6 +418,7 @@ void Inventory::putItem(Level::Item &item,
             break;
         case Level::Item::eqCURSOR:
             mCursorHeld = item;
+
 
             removeItem(item, from, beltX, y, x);
             break;

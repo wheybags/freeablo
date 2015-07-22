@@ -15,6 +15,11 @@ class DraggableWidget(object):
         inventory_element = self.document.GetElementById("inventory")
         self.document.GetElementById("rightHand").inner_rml=""
         self.document.GetElementById("leftHand").inner_rml=""
+        self.document.GetElementById("rightRing").inner_rml=""
+        self.document.GetElementById("leftRing").inner_rml=""
+        self.document.GetElementById("body").inner_rml=""
+        self.document.GetElementById("head").inner_rml=""
+        self.document.GetElementById("amulet").inner_rml=""
 
 
         for child in inventory_element.child_nodes:
@@ -29,8 +34,8 @@ class DraggableWidget(object):
 
         if leftHandItem["empty"] is False:
             leftHand.SetAttribute("empty", "false")
-            leftHand.style.width = "53px"
-            leftHand.style.height = "83px"
+            leftHand.style.width = "56px"
+            leftHand.style.height = "84px"
 
         else:
             leftHand.style.width = "0"
@@ -45,14 +50,94 @@ class DraggableWidget(object):
 
         if rightHandItem["empty"] is False:
             rightHand.SetAttribute("empty", "false")
-            rightHand.style.width = "53px"
-            rightHand.style.height = "83px"
+            rightHand.style.width = "56px"
+            rightHand.style.height = "84px"
 
         else:
             rightHand.style.width = "0"
             rightHand.style.height = "0"
             rightHand.SetAttribute("empty", "true")
         rightHandContainer.AppendChild(rightHand)
+
+        bodyItem = inventory["body"]
+        bodyContainer = self.document.GetElementById("body")
+        body = self.document.CreateElement("div")
+        body.SetAttribute("class", "item")
+
+        if bodyItem["empty"] is False:
+            body.SetAttribute("empty", "false")
+            body.style.width = "53px"
+            body.style.height = "83px"
+
+        else:
+            body.style.width = "0"
+            body.style.height = "0"
+            body.SetAttribute("empty", "true")
+        bodyContainer.AppendChild(body)
+
+        headItem = inventory["head"]
+        headContainer = self.document.GetElementById("head")
+        head = self.document.CreateElement("div")
+        head.SetAttribute("class", "item")
+
+        if headItem["empty"] is False:
+            head.SetAttribute("empty", "false")
+            head.style.width = "56px"
+            head.style.height = "56px"
+
+        else:
+            head.style.width = "0"
+            head.style.height = "0"
+            head.SetAttribute("empty", "true")
+        headContainer.AppendChild(head)
+
+        amuletItem = inventory["amulet"]
+        amuletContainer = self.document.GetElementById("amulet")
+        amulet = self.document.CreateElement("div")
+        amulet.SetAttribute("class", "item")
+
+        if amuletItem["empty"] is False:
+            amulet.SetAttribute("empty", "false")
+            amulet.style.width = "28px"
+            amulet.style.height = "28px"
+
+        else:
+            amulet.style.width = "0"
+            amulet.style.height = "0"
+            amulet.SetAttribute("empty", "true")
+        amuletContainer.AppendChild(amulet)
+
+        leftRingItem = inventory["leftRing"]
+        leftRingContainer = self.document.GetElementById("leftRing")
+        leftRing = self.document.CreateElement("div")
+        leftRing.SetAttribute("class", "item")
+
+        if leftRingItem["empty"] is False:
+            leftRing.SetAttribute("empty", "false")
+            leftRing.style.width = "28px"
+            leftRing.style.height = "28px"
+
+        else:
+            leftRing.style.width = "0"
+            leftRing.style.height = "0"
+            leftRing.SetAttribute("empty", "true")
+        leftRingContainer.AppendChild(leftRing)
+
+        rightRingItem = inventory["rightRing"]
+        rightRingContainer = self.document.GetElementById("rightRing")
+        rightRing = self.document.CreateElement("div")
+        rightRing.SetAttribute("class", "item")
+
+        if rightRingItem["empty"] is False:
+            rightRing.SetAttribute("empty", "false")
+            rightRing.style.width = "28px"
+            rightRing.style.height = "28px"
+
+        else:
+            rightRing.style.width = "0"
+            rightRing.style.height = "0"
+            rightRing.SetAttribute("empty", "true")
+        rightRingContainer.AppendChild(rightRing)
 
         global cursor
         cursorItem = inventory["cursor"]
@@ -104,12 +189,8 @@ class DraggableWidget(object):
         if cursor.GetAttribute("empty") == "false":
             mx = event.parameters["mouse_x"]
             my = event.parameters["mouse_y"]
-
             cursor.style.top=str(my - self.yoffset)
             cursor.style.left=str(mx - self.xoffset)
-            #print "(%s, %s)" %  (cursor.style.top, cursor.style.left)
-            #print cursor.parent_node.inner_rml
-
     def onDrag(self, event):
         mx = event.parameters['mouse_x']
         my = event.parameters['mouse_y']
@@ -126,14 +207,67 @@ class DraggableWidget(object):
     def bodyKeyDown(self, event):
         pass
 
-    def onWeaponClick(self, event):
+    def onHeadClick(self, event):
         global cursor
         slot = event.current_element.child_nodes[0]
         if cursor.GetAttribute("empty") == "true" and slot.GetAttribute("empty") == "false":
-            freeablo.placeItem(10, 12, 0, 0, 0, 0)
+            freeablo.placeItem(10, 4, 0, 0, 0, 0)
             self.updateInventory(event)
         elif cursor.GetAttribute("empty") == "false" and slot.GetAttribute("empty") == "true":
-                freeablo.placeItem(12, 10, 0, 0, 0, 0)
+            freeablo.placeItem(4, 10, 0, 0, 0, 0)
+            self.updateInventory(event)
+
+    def onAmuletClick(self, event):
+        global cursor
+        slot = event.current_element.child_nodes[0]
+        if cursor.GetAttribute("empty") == "true" and slot.GetAttribute("empty") == "false":
+            freeablo.placeItem(10, 6, 0, 0, 0, 0)
+            self.updateInventory(event)
+        elif cursor.GetAttribute("empty") == "false" and slot.GetAttribute("empty") == "true":
+            freeablo.placeItem(6, 10, 0, 0, 0, 0)
+            self.updateInventory(event)
+
+    def onBodyClick(self, event):
+        global cursor
+        slot = event.current_element.child_nodes[0]
+        if cursor.GetAttribute("empty") == "true" and slot.GetAttribute("empty") == "false":
+            freeablo.placeItem(10, 3, 0, 0, 0, 0)
+            self.updateInventory(event)
+        elif cursor.GetAttribute("empty") == "false" and slot.GetAttribute("empty") == "true":
+            freeablo.placeItem(3, 10, 0, 0, 0, 0)
+            self.updateInventory(event)
+
+
+
+    def onRingClick(self, event):
+        global cursor
+        slot = event.current_element.child_nodes[0]
+        if event.current_element.GetAttribute("id") =="leftRing":
+            to=14
+        else:
+            to=13
+        if cursor.GetAttribute("empty") == "true" and slot.GetAttribute("empty") == "false":
+            freeablo.placeItem(10, to, 0, 0, 0, 0)
+            self.updateInventory(event)
+        elif cursor.GetAttribute("empty") == "false" and slot.GetAttribute("empty") == "true":
+                freeablo.placeItem(to, 10, 0, 0, 0, 0)
+                self.updateInventory(event)
+
+    def onWeaponClick(self, event):
+        global cursor
+        slot = event.current_element.child_nodes[0]
+        if event.current_element.GetAttribute("id") == "leftHand":
+            to=12
+        else:
+            to=11
+
+        #cursor -> weapon slot
+        if cursor.GetAttribute("empty") == "true" and slot.GetAttribute("empty") == "false":
+            freeablo.placeItem(10, to, 0, 0, 0, 0)
+            self.updateInventory(event)
+        #weapon slot -> cursor
+        elif cursor.GetAttribute("empty") == "false" and slot.GetAttribute("empty") == "true":
+                freeablo.placeItem(to, 10, 0, 0, 0, 0)
                 self.updateInventory(event)
 
 

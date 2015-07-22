@@ -128,8 +128,8 @@ void setHotkey(std::string function, boost::python::list pyhotkey)
 }
 
 
-void placeItem(uint32_t to,
-               uint32_t from,
+void placeItem(uint32_t toPara,
+               uint32_t fromPara,
                uint32_t fromY,
                uint32_t fromX,
                uint32_t toY,
@@ -137,8 +137,10 @@ void placeItem(uint32_t to,
 {
     if(fromX >= 10 || fromY >=4 || toX>=10 || toY>=4)
         return;
+    Level::Item::equipLoc to   = static_cast<Level::Item::equipLoc>(toPara);
+    Level::Item::equipLoc from = static_cast<Level::Item::equipLoc>(fromPara);
     Level::Item item = inventory->getItemAt(
-                Level::Item::eqINV,
+                from,
                 fromY,
                 fromX);
     if(!item.isReal() && !item.isEmpty())
@@ -153,50 +155,42 @@ void placeItem(uint32_t to,
     }
     if(to == Level::Item::eqCURSOR)
     {
-        switch(from)
-        {
-        case Level::Item::eqINV:
+
             if(inventory->getItemAt(Level::Item::eqCURSOR).isEmpty())
             {
-                inventory->putItem(item, Level::Item::eqCURSOR, Level::Item::eqINV, fromY, fromX);
 
-                return;
+                inventory->putItem(item, Level::Item::eqCURSOR, from, fromY, fromX);
+
             }
-            else
-                return;
-            break;
-        case Level::Item::eqLEFTHAND:
-            item = inventory->getItemAt(Level::Item::eqLEFTHAND);
-            inventory->putItem(item, Level::Item::eqCURSOR, Level::Item::eqLEFTHAND , toY, toX);
-            //inventory->dump();
 
-            break;
-        default:
-            break;
-        }
     }
+
     else if(to == Level::Item::eqINV)
     {
 
-
         item = inventory->getItemAt(Level::Item::eqCURSOR);
-        inventory->putItem(
-                    item,
-                    Level::Item::eqINV,
-                    Level::Item::eqCURSOR,
-                    toY,
-                    toX);
-        return;
-
+        inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX);
 
     }
-    else if(to == Level::Item::eqLEFTHAND)
+    else if(to == Level::Item::eqLEFTHAND || to == Level::Item::eqRIGHTHAND)
     {
 
         item = inventory->getItemAt(Level::Item::eqCURSOR);
-        inventory->putItem(item, Level::Item::eqLEFTHAND, Level::Item::eqCURSOR, toY, toX);
-        //inventory->dump();
-        return;
+        inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX);
+
+
+    }
+    else if(to == Level::Item::eqLEFTRING || to == Level::Item::eqRIGHTRING)
+    {
+        item = inventory->getItemAt(Level::Item::eqCURSOR);
+        inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX);
+
+
+    }
+    else
+    {
+        item = inventory->getItemAt(from, fromY, fromX);
+        inventory->putItem(item, to, from, toY, toX);
 
     }
     return;
