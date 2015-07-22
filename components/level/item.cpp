@@ -40,6 +40,7 @@ Item::Item(DiabloExe::BaseItem item, size_t id)
     mUniqueId = 0;
     mIsReal = true;
 
+
     if(mItem.itemType != itGOLD)
     {
         mItem.graphicValue +=11;
@@ -57,6 +58,10 @@ Item::Item(DiabloExe::BaseItem item, size_t id)
     }
 
 }
+bool Item::isReal() const
+{
+    return mIsReal;
+}
 std::string Item::getName() const
 {
 
@@ -65,8 +70,17 @@ std::string Item::getName() const
 }
 std::pair<uint8_t, uint8_t> Item::getInvSize() const
 {
-    return std::pair<uint8_t, uint8_t>(mSizeY, mSizeX);
+    return std::pair<uint8_t, uint8_t>(mSizeX, mSizeY);
 
+}
+std::pair<uint8_t, uint8_t> Item::getInvCoords() const
+{
+    return std::pair<uint8_t, uint8_t>(mInvX, mInvY);
+
+}
+std::pair<uint8_t, uint8_t> Item::getCornerCoords() const
+{
+    return std::pair<uint8_t, uint8_t>(mCornerX, mCornerY);
 }
 void Item::setUniqueId(uint32_t mUniqueId)
 {

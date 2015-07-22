@@ -1,0 +1,18 @@
+<rml>
+    <style>
+    div.cursor
+    {
+        position: relative;
+        display: inline-block;
+        background-decorator: image;
+        background-image: /data/inv/objcurs.cel&frame=144;
+        z-index: 200;
+
+    }
+    </style>
+    <body>
+    </body>
+
+
+
+</rml>

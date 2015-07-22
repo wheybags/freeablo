@@ -13,16 +13,17 @@ namespace FAWorld
     public:
         Inventory();
         ~Inventory();
+        void dump();
 
 
         Inventory * testInv();
-        void putItem(Level::Item item,
+        void putItem(Level::Item &item,
                      Level::Item::equipLoc equipType,
                      Level::Item::equipLoc from,
                      uint8_t y=0,
                      uint8_t x=0,
                      uint8_t beltX=0);
-       Level::Item getItemAt(Level::Item::equipLoc type, uint8_t y=0, uint8_t x=0, uint8_t beltX=0);
+       Level::Item& getItemAt(Level::Item::equipLoc type, uint8_t y=0, uint8_t x=0, uint8_t beltX=0);
     private:
        Level::Item mInventoryBox[4][10];
        Level::Item mBelt[8];
@@ -40,8 +41,7 @@ namespace FAWorld
                 uint8_t x=0,
                 uint8_t beltX=0);
         bool fitsAt(Level::Item item, uint8_t y, uint8_t x);
-        void removeItem(Level::Item item, Level::Item::equipLoc from, uint8_t beltX=0, uint8_t invY=0, uint8_t invX=0);
-        void dump();
+        void removeItem(Level::Item &item, Level::Item::equipLoc from, uint8_t beltX=0, uint8_t invY=0, uint8_t invX=0);
     friend class Actor;
     };
 }

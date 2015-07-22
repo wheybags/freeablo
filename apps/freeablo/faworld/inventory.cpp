@@ -8,8 +8,16 @@ namespace FAWorld
 {
 Inventory::Inventory()
 {
+    for(uint8_t i=0;i<4;i++)
+    {
 
+        for(uint8_t j=0;j<10;j++)
+        {
+            mInventoryBox[i][j].mInvX=j;
+            mInventoryBox[i][j].mInvY=i;
 
+        }
+    }
 }
 Inventory::~Inventory()
 {
@@ -23,19 +31,18 @@ Inventory *Inventory::testInv()
     Level::ItemManager itemManager;
     while(!itemManager.mIsLoaded);
     Level::Item gold = itemManager.getBaseItem(39);
-
     //gold.setCount(10);
     Level::Item bow  = itemManager.getBaseItem(24);
+    Level::Item bow2  = itemManager.getBaseItem(24);
     Level::Item buckler = itemManager.getBaseItem(16);
     Level::Item ring = itemManager.getBaseItem(32);
-    inv->putItem(itemManager.getBaseItem(24), Level::Item::eqINV, Level::Item::eqFLOOR);
+    inv->putItem(bow, Level::Item::eqINV, Level::Item::eqFLOOR);
+    inv->putItem(bow2, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
     //inv->putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
     //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
     //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
     //inv->putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
-    //    std::cout << mInventoryBox[0][0].mItem.itemName << std::endl;
     //inv.putItem(gold, Level::Item::eqINV, Level::Item::eqINV, 0, 1);
-    //    std::cout << mInventoryBox[0][1].getName() <<'\0' << std::endl;
     /*
     inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
     inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 3);
@@ -169,13 +176,18 @@ bool Inventory::canPlaceItem(
              * */
 
     case Level::Item::eqINV:
-        if(x <= 9 && y <=3)
+        if(x < 10 && y < 4)
         {
+            if(!((x + item.mSizeX-1 < 10) && (y + item.mSizeY-1) < 4))
+            {
+                return false;
+
+            }
             if(mInventoryBox[y][x].isEmpty())
             {
-                for(uint8_t i=y;i < item.mSizeY; ++i)
+                for(uint8_t i=y;i < y+item.mSizeY; ++i)
                 {
-                    for(uint8_t j=x; j < item.mSizeX;++j)
+                    for(uint8_t j=x; j < x+item.mSizeX;++j)
                     {
 
                         if(!mInventoryBox[i][j].isEmpty())
@@ -203,7 +215,7 @@ bool Inventory::canPlaceItem(
     case Level::Item::eqFLOOR:
         return true;
     case Level::Item::eqCURSOR:
-        return !this->mCursorHeld.isEmpty();
+        return this->mCursorHeld.isEmpty();
     default:
         return false;
 
@@ -213,13 +225,16 @@ bool Inventory::canPlaceItem(
     return false;
 }
 //TODO: When stats have implemented add checks for requirements to wear/wield items
-void Inventory::putItem(Level::Item item,
+void Inventory::putItem(Level::Item &item,
                         Level::Item::equipLoc equipType,
                         Level::Item::equipLoc from,
                         uint8_t y,
                         uint8_t x,
                         uint8_t beltX)
 {
+
+
+
     if(canPlaceItem(item, equipType, y, x, beltX))
     {
         switch(equipType)
@@ -325,6 +340,7 @@ void Inventory::putItem(Level::Item item,
                  * a reference to the item in the corresponding entry in mInventoryBox.
                 */
         case Level::Item::eqINV:
+
             if(item.mMaxCount > 1)
             {
                 for(uint8_t i=0;i<4;i++)
@@ -335,6 +351,7 @@ void Inventory::putItem(Level::Item item,
                         {
                             mInventoryBox[i][j].mCount+=item.mCount;
                             removeItem(item, from, item.mInvX, item.mInvY, item.mBeltX);
+
                             return;
                         }
                         else if(mInventoryBox[i][j] == item)
@@ -348,17 +365,27 @@ void Inventory::putItem(Level::Item item,
                     }
                 }
             }
+
             for(uint8_t i=y;i<y+item.mSizeY;i++)
             {
                 for(uint8_t j=x;j<x+item.mSizeX;j++)
                 {
+
                     mInventoryBox[i][j] = item;
                     if(i==y && j==x)
                     {
+                        mInventoryBox[i][j].mInvX=j;
+                        mInventoryBox[i][j].mInvY=i;
+                        mInventoryBox[i][j].mCornerX=x;
+                        mInventoryBox[i][j].mCornerY=y;
                         mInventoryBox[i][j].mIsReal=true;
                     }
                     else
                     {
+                        mInventoryBox[i][j].mInvX=j;
+                        mInventoryBox[i][j].mInvY=i;
+                        mInventoryBox[i][j].mCornerX=x;
+                        mInventoryBox[i][j].mCornerY=y;
                         mInventoryBox[i][j].mIsReal=false;
                     }
 
@@ -366,7 +393,6 @@ void Inventory::putItem(Level::Item item,
 
                 }
             }
-
             removeItem(item, from, beltX, y, x);
             break;
         case Level::Item::eqBELT:
@@ -376,39 +402,47 @@ void Inventory::putItem(Level::Item item,
             break;
         case Level::Item::eqFLOOR:
             break;
+        case Level::Item::eqCURSOR:
+            mCursorHeld = item;
 
+            removeItem(item, from, beltX, y, x);
+            break;
         default:
             return;
 
         }
     }
+    else
+    {
+
+    }
 }
-Level::Item Inventory::getItemAt(Level::Item::equipLoc type, uint8_t y, uint8_t x, uint8_t beltX)
+Level::Item& Inventory::getItemAt(Level::Item::equipLoc type, uint8_t y, uint8_t x, uint8_t beltX)
 {
 
-    Level::Item item;
 
     switch(type)
     {
-    case Level::Item::eqLEFTHAND: item=mLeftHand; break;
-    case Level::Item::eqLEFTRING: item=mLeftRing; break;
-    case Level::Item::eqRIGHTHAND: item=mRightHand; break;
-    case Level::Item::eqRIGHTRING: item=mRightRing; break;
-    case Level::Item::eqBODY: item=mBody; break;
-    case Level::Item::eqHEAD: item=mHead; break;
-    case Level::Item::eqAMULET: item=mAmulet; break;
-    case Level::Item::eqINV: item=mInventoryBox[y][x]; break;
-    case Level::Item::eqBELT: item=mBelt[beltX]; break;
+    case Level::Item::eqLEFTHAND: return mLeftHand;
+    case Level::Item::eqLEFTRING: return mLeftRing;
+    case Level::Item::eqRIGHTHAND: return mRightHand;
+    case Level::Item::eqRIGHTRING: return mRightRing;
+    case Level::Item::eqBODY: return mBody;
+    case Level::Item::eqHEAD: return mHead;
+    case Level::Item::eqAMULET: return mAmulet;
+    case Level::Item::eqINV: return mInventoryBox[y][x];
+    case Level::Item::eqBELT: return mBelt[beltX];
+    case Level::Item::eqCURSOR: return mCursorHeld;
     default: break;
 
     }
 
-
-    return item;
+    Level::Item empty;
+    return empty;
 }
 
 void Inventory::removeItem(
-        Level::Item item,
+        Level::Item& item,
         Level::Item::equipLoc from,
         uint8_t beltX,
         uint8_t invY,
@@ -452,11 +486,14 @@ void Inventory::removeItem(
         break;
 
     case Level::Item::eqINV:
-        for(uint8_t i=invY;i < invY+item.mSizeY-1;i++)
+        for(uint8_t i=invY;i < invY+item.mSizeY;i++)
         {
             for(uint8_t j=invX;j < invX+item.mSizeX;j++)
             {
                 mInventoryBox[i][j] = Level::Item();
+                mInventoryBox[i][j].mInvY=i;
+                mInventoryBox[i][j].mInvX=j;
+
 
             }
         }
@@ -512,7 +549,10 @@ void Inventory::dump()
     {
         for(uint8_t j=0;j<10;j++)
         {
-            ss << "| "<< mInventoryBox[i][j].mItem.itemName;
+            if(mInventoryBox[i][j].isEmpty())
+                ss << "| (empty)";
+            else
+                ss << "| "<< mInventoryBox[i][j].mItem.itemName;
             if(mInventoryBox[i][j].mCount > 1)
                 ss << "("<<+mInventoryBox[i][j].mCount << ")";
             ss << "   ";

@@ -9,16 +9,21 @@
         </style>
         <script>
 import docmanage
-
+import draggable
+instance = draggable.DraggableWidget(document, -1675, -650)
 def onLoad(document):
     docmanage.init()
-
+    cursorHandle     = "resources/gui/cursor.rml"
     bottomMenuHandle = "resources/gui/bottommenu.rml"
+    docmanage.manager.loadDoc(cursorHandle)
+    docmanage.manager.showDoc(cursorHandle)
     docmanage.manager.loadDoc(bottomMenuHandle)
     docmanage.manager.showDoc(bottomMenuHandle)
+
         </script>
     </head>
 
-    <body onkeydown="docmanage.manager.onKeyDown(event)" onload="onLoad(event)" onmousedown="document.PushToBack(); docmanage.manager.bodyClicked()">
+
+    <body onMouseMove="instance.onMouseMove(event)" onkeydown="docmanage.manager.onKeyDown(event)" onload="onLoad(event)" onmousedown="document.PushToBack(); docmanage.manager.bodyClicked()">
     </body>
 </rml>

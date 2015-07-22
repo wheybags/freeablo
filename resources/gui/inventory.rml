@@ -40,9 +40,9 @@
                 /*background-color:red;*/
                 height: 28px;
                 width: 28px;
-                z-index: 100;
+                z-index: 5;
                 opacity: 1.0;
-                position: relative;
+                position: absolute;
                 background-decorator: image;
                 background-image: /data/inv/objcurs.cel&frame=144;
             }
@@ -83,7 +83,7 @@ instance = draggable.DraggableWidget(document, 0, -500)
 
     </head>
 
-    <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
+    <body onMouseMove="instance.onMouseMove(event)" onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
         <span id="container" onmousedown="instance.guiMouseDown(event)"
                              onDrag="instance.onDrag(event)">
         <div class="inventory" id="inventory">

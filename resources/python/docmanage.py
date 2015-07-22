@@ -8,7 +8,7 @@ class DocManager(object):
 
     def __init__(self):
 
-        context = rocket.contexts['default']
+        self.context = rocket.contexts['default']
 
         self.guiWasClicked = False
         self.docs = {}
@@ -34,9 +34,9 @@ class DocManager(object):
             self.showDoc(docpath)
 
     def loadDoc(self, docpath):
+        print "loading doc... " + docpath
         if not docpath in self.docs:
-            context = rocket.contexts['default']
-            newHandle = {"doc": context.LoadDocument(docpath), "visible": False}
+            newHandle = {"doc": self.context.LoadDocument(docpath), "visible": False}
             self.docs[docpath] = newHandle
         
     def reloadDoc(self, docpath):
