@@ -85,7 +85,7 @@ namespace FARender
             boost::atomic<bool> mDone;
             Render::LevelObjects mLevelObjects;
 
-            RenderState mStates[3];
+            RenderState mStates[15];
 
             Rocket::Core::Context* mRocketContext;
 

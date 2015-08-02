@@ -35,11 +35,6 @@ namespace Engine
 
             if(!renderer->renderFrame(mRenderState))
                 break;
-
-            if(mRenderState)
-                mRenderState->ready = true;
-
-            mRenderState = NULL;
         }
 
         renderer->cleanup();
@@ -93,7 +88,7 @@ namespace Engine
 
             case renderState:
             {
-                if(mRenderState)
+				if (mRenderState && mRenderState != message.data.renderState)
                     mRenderState->ready = true;
 
                 mRenderState = message.data.renderState;
