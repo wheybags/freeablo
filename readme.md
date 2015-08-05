@@ -3,8 +3,9 @@ Hello my friend, stay a while and listen!
 freeablo is a modern cross platform reimplementation of the game engine used in Diablo 1.
 As it is just an engine, you will need the original data files to play the game.
 
-Currently, you can run around town, players and npcs animate, and you can go down into the first few levels of the dungeon (which is randomly generated).
+Currently, you can run around town, players and npcs animate, and you can go down into the first few levels of the dungeon (which is randomly generated), and a couple of other things.
 This is just a base for a game so far, so if you can help, please see the contributing section below!
+
 
 There is a website at http://freeablo.org
 
@@ -28,7 +29,7 @@ The above will all be made configurable at some point.
 #Compilation
 
 ## Windows
-If you are using windows, please see https://github.com/wheybags/freeablo-windows-build/tree/master for instructions on building with Visual Studio 2010
+If you are using windows, please see https://github.com/wheybags/freeablo-windows-build/tree/master for instructions on building with Visual Studio 2013
 
 =======
 ## OSX
@@ -100,6 +101,20 @@ Please feel free to submit bug reports on the github issue tracker at https://gi
 
 
 #Changelog
+##v0.3
+- Bugfix - monsters spawn on level stairs #112
+- Threading refactor #107
+- Hotkey selection GUI #106
+- level 3 dungeon generation #103
+- UI chroma key transparency #96
+- UI animation #95
+- Bugfix - gui clicks register as movement clicks #88
+- Initial version of launcher #33
+- sound #26
+- better celview gui #134
+- Bugfix - music memory leak #111
+- Bugfix - exit when DIABDAT.MPQ not found #114, #115
+
 ##v0.2
 - Bugfix - MPQ filename case sensitivity #78, #76
 - Bugfix - Deadlock on caertain command line args
