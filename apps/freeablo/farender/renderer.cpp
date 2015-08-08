@@ -135,7 +135,7 @@ namespace FARender
 
     RenderState* Renderer::getFreeState()
     {
-        for(size_t i = 0; i < 3; i++)
+        for(size_t i = 0; i < 15; i++)
         {
             if(mStates[i].ready)
             {
