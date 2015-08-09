@@ -18,9 +18,12 @@
 
 #include "rocketglue/drawcommand.h"
 
+#include <SDL.h>
 namespace Render
 {
     typedef void* Sprite;
+    typedef SDL_Cursor * FACursor;
+    typedef SDL_Surface * FASurface;
 }
 
 #include "levelobjects.h"
@@ -64,6 +67,7 @@ namespace Render
     void drawGui(std::vector<DrawCommand>& buffer, SpriteCacheBase* cache);
 
     bool getImageInfo(const std::string& path, size_t& width, size_t& height, size_t& animLength, int32_t celIndex=0);
+    void setCursor(std::string path, FACursor& cursor, FASurface& s);
     SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height);

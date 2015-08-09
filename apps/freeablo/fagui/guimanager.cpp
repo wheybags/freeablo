@@ -3,7 +3,7 @@
 #include <misc/disablewarn.h>
 #include <Rocket/Core.h>
 #include <misc/enablewarn.h>
-
+#include <render/render.h>
 #include "animateddecoratorinstancer.h"
 
 #include "../farender/renderer.h"
@@ -160,6 +160,9 @@ void placeItem(uint32_t toPara,
             {
 
                 inventory->putItem(item, Level::Item::eqCURSOR, from, fromY, fromX);
+                Render::FACursor c;
+                Render::FASurface s;
+                Render::setCursor("", c, s);
 
             }
 

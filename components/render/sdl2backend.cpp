@@ -339,6 +339,26 @@ namespace Render
 
         return new SpriteGroup(vec);
     }
+    void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
+
+    void setCursor(std::string path, FACursor& cursor, FASurface& s)
+    {
+        if (path == "")
+        {
+
+        }
+       Cel::CelFrame cursorSprite = Cel::CelFile("data/inv/objcurs.cel")[129];
+       std::cout <<cursorSprite.mWidth <<"x" << cursorSprite.mHeight << std::endl ;
+
+
+       s = createTransparentSurface(cursorSprite.mWidth, cursorSprite.mHeight);
+       drawFrame(s, 0, 0, cursorSprite);
+       cursor = SDL_CreateColorCursor(s, 0, 0);
+       SDL_SetCursor(cursor);
+
+
+
+    }
 
     SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height)
     {
@@ -368,6 +388,7 @@ namespace Render
     void draw()
     {
         SDL_RenderPresent(renderer);
+        //SDL_SetCursor(NULL);
     }
 
     void drawAt(SDL_Texture* sprite, size_t x, size_t y)
@@ -385,7 +406,6 @@ namespace Render
         drawAt((SDL_Texture*)sprite, x, y);
     }
 
-    void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
 
     SpriteGroup::SpriteGroup(const std::string& path)
     {

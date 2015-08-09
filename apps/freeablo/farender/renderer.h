@@ -48,6 +48,10 @@ namespace FARender
 
         Level::Level* level;
 
+        Render::FASurface mCursorSurface;
+
+        Render::FACursor mCurrentCursor;
+
         RenderState():ready(true) {}
     };
 
@@ -72,8 +76,11 @@ namespace FARender
 
             Rocket::Core::Context* getRocketContext();
 
+            void setCursor(std::string path, uint32_t frame);
+
             bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
             void cleanup(); ///< To be called only by Engine::ThreadManager
+
             
         private:
             bool loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
