@@ -72,7 +72,7 @@ namespace FALevelGen
 
             size_t distance(const Room& other) const
             {
-                return sqrt((float)((centre().first - other.centre().first)*(centre().first - other.centre().first) + (centre().second - other.centre().second)*(centre().second - other.centre().second)));
+                return (size_t)sqrt((float)((centre().first - other.centre().first)*(centre().first - other.centre().first) + (centre().second - other.centre().second)*(centre().second - other.centre().second)));
             }
     };
 
@@ -313,8 +313,8 @@ namespace FALevelGen
 
                         if(centre.first == currentCentre.first && centre.second == currentCentre.second)
                         {
-                            vector.first = randomInRange(0, 10);
-                            vector.second = randomInRange(0, 10);
+                            vector.first = (float)randomInRange(0, 10);
+                            vector.second = (float)randomInRange(0, 10);
                             neighbourCount++;
                             continue;
                         }
@@ -361,8 +361,8 @@ namespace FALevelGen
        
         // The following two are based on the fact that 150 rooms in a radius of
         // 15 looks good on an 85*75 map 
-        size_t numRooms = std::min(width, height)*(150.0/75.0);
-        size_t radius = std::min(width, height)*(15.0/75.0);
+        size_t numRooms = (size_t)(std::min(width, height)*(150.0/75.0));
+        size_t radius = (size_t)(std::min(width, height)*(15.0/75.0));
 
         while(placed < numRooms)
         {
@@ -790,7 +790,7 @@ namespace FALevelGen
             connect(rooms[parent[i]], rooms[i], corridoorRooms, level);
         
         // Add in an extra 15% of the number of rooms random connections to create some loops
-        size_t fifteenPercent = (((float)rooms.size())/100.0)*15.0;
+        size_t fifteenPercent = (size_t)((((float)rooms.size())/100.0)*15.0);
         for(size_t i = 0; i < fifteenPercent; i++)
         {
             size_t a, b;
@@ -842,8 +842,10 @@ namespace FALevelGen
     void setPoint(int32_t x, int32_t y, size_t val, const Level::Dun& tmpLevel,  Level::Dun& level, const TileSet& tileset, int wallOffset, bool isInsideWall)
     {
         size_t newVal = val;
+        int compareVal = (int)val;
+        (void)(tileset);
 
-        if(val == TileSetEnum::xWall+wallOffset)
+        if(compareVal == TileSetEnum::xWall+wallOffset)
         {   
             if(getXY(x, y, tmpLevel) == door && isInsideWall)
                 newVal = TileSetEnum::xDoor;
@@ -861,7 +863,7 @@ namespace FALevelGen
                 newVal = TileSetEnum::insideXWallEndBack;
         }
 
-        else if(val == TileSetEnum::yWall+wallOffset)
+        else if(compareVal == TileSetEnum::yWall+wallOffset)
         {   
             if(getXY(x, y, tmpLevel) == door && isInsideWall)
                 newVal = TileSetEnum::yDoor;
@@ -873,7 +875,7 @@ namespace FALevelGen
                 newVal = TileSetEnum::insideYWallEndBack;
         }
 
-        else if(val == TileSetEnum::bottomCorner+wallOffset)
+        else if(compareVal == TileSetEnum::bottomCorner+wallOffset)
         {
             if(!isInsideWall && (getXY(x+1, y+1, tmpLevel) == blank || getXY(x+1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank))
             {
@@ -931,9 +933,9 @@ namespace FALevelGen
 
     void fillIsometric(Level::Dun& tmpLevel, Level::Dun& level, TileSet& tileset, bool ignoreNotWall, int wallOffset, bool isInsideWall)
     {
-        for(int32_t x = 0; x < tmpLevel.width(); x++)
+        for(uint32_t x = 0; x < tmpLevel.width(); x++)
         {
-            for(int32_t y = 0; y < tmpLevel.height(); y++)
+            for(uint32_t y = 0; y < tmpLevel.height(); y++)
             {
                 if(tmpLevel[x][y] == upStairs)
                 {

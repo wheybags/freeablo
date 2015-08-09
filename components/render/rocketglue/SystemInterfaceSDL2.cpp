@@ -33,7 +33,7 @@
 
 float RocketSDL2SystemInterface::GetElapsedTime()
 {
-	return (float)SDL_GetTicks() / 1000.0;
+    return (float)((double)SDL_GetTicks() / 1000.0);
 }
 
 bool RocketSDL2SystemInterface::LogMessage(Rocket::Core::Log::Type type, const Rocket::Core::String& message)

@@ -221,7 +221,7 @@ namespace FAIO
         switch(stream->mode)
         {
             case FAFile::PlainFile:
-                return bfs::file_size(*(stream->data.plainFile.filename));
+                return (size_t)bfs::file_size(*(stream->data.plainFile.filename));
 
             case FAFile::MPQFile:
             {

@@ -69,12 +69,12 @@ namespace Cel
 
                     size_t j;
                     // Just push the number of pixels specified by the command
-                    for(j = 1; j < val+1 && i+j < frame.size(); j++)
+                    for(j = 1; j < (unsigned int)(val+1) && i+j < frame.size(); j++)
                     {
                         int index = i+j;
                         uint8_t f = frame[index];
                         
-                        if(index > frame.size()-1)
+                        if(index > (int)(frame.size()-1))
                             std::cout << "invalid read from f " << index << " " << frame.size() << std::endl;
 
                         Colour col = pal[f];

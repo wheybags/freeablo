@@ -66,19 +66,20 @@ private slots:
     void updateRender();
 
 private:
+    Ui::MainWindow *ui;
     HANDLE mDiabdat ;
+    bool mIsAnimation;
+    const QString mSettingsFile;
+    QSettings mSettings;
     QString mFilename;
     QString mListfile;
     QString mCurrentCelFilename;
-    const QString mSettingsFile;
     QColor mBackgroundColor;
-    QSettings mSettings;
     int mCurrentFrame;
     QSharedPointer<Render::SpriteGroup> mCurrentCel;
     Render::RenderSettings mRenderSettings;
     QTimer mRenderTimer;
-    bool mIsAnimation;
-    Ui::MainWindow *ui;
+
 };
 
 #endif // MAINWINDOW_H

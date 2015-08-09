@@ -375,7 +375,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     FAWorld::World world;
 
-    FALevelGen::FAsrand(time(NULL));
+    FALevelGen::FAsrand((int)time(NULL));
 
     std::vector<Level::Level*> levels(13);
 

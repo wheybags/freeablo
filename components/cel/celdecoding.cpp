@@ -146,12 +146,12 @@ namespace Cel
                 
                 size_t j;
                 // Just push the number of pixels specified by the command
-                for(j = 1; j < frame[i]+1 && i+j < frame.size(); j++)
+                for(j = 1; j < (unsigned int)(frame[i]+1) && i+j < frame.size(); j++)
                 {
                     int index = i+j;
                     uint8_t f = frame[index];
                     
-                    if(index > frame.size()-1)
+                    if(index > (int)(frame.size()-1))
                         std::cout << "invalid read from f " << index << " " << frame.size() << std::endl;
 
                     Colour col = pal[f];
@@ -171,7 +171,7 @@ namespace Cel
                 #endif
                 
                 // Push (256 - command value) transparent pixels
-                for(size_t j = 0; j < 256-frame[i]; j++)
+                for(size_t j = 0; j < (unsigned int)(256-frame[i]); j++)
                     rawImage.push_back(Colour(255, 0, 255, false));
             }
         }

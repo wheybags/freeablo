@@ -418,7 +418,8 @@ namespace Render
         for(size_t i = 0; i < numFrames; i++)
         {
             sumWidth += cel[i].mWidth;
-            if(cel[i].mHeight > maxHeight) maxHeight = cel[i].mHeight;
+            if(cel[i].mHeight > (unsigned int)maxHeight)
+                maxHeight = cel[i].mHeight;
         }
 
         if(sumWidth == 0)
@@ -659,22 +660,22 @@ namespace Render
         int32_t xPx2 = ((y2*(-32)) + 32*x2 + level.width()*32) + levelX - w/2;
         int32_t yPx2 = ((y2*16) + (16*x2) +160) + levelY;
 
-        int32_t x = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
-        int32_t y = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
+        int32_t x = xPx1 + int32_t((((float)(xPx2-xPx1))/100.0)*(float)dist);
+        int32_t y = yPx1 + int32_t((((float)(yPx2-yPx1))/100.0)*(float)dist);
 
         drawAt(sprite, x, y);
     }
 
     void getMapScreenCoords(const Level::Level& level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist, int32_t& levelX, int32_t& levelY)
     {
-        int16_t xPx1 = -((y1*(-32)) + 32*x1 + level.width()*32) +WIDTH/2;
+        int16_t xPx1 = -((y1*(-32)) + 32*x1 + (int)level.width()*32) +WIDTH/2;
         int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
 
-        int16_t xPx2 = -((y2*(-32)) + 32*x2 + level.width()*32) +WIDTH/2;
+        int16_t xPx2 = -((y2*(-32)) + 32*x2 + (int)level.width()*32) +WIDTH/2;
         int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
 
-        levelX = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
-        levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
+        levelX = xPx1 + int32_t((((float)(xPx2-xPx1))/100.0)*(float)dist);
+        levelY = yPx1 + int32_t((((float)(yPx2-yPx1))/100.0)*(float)dist);
     }
 
     std::pair<size_t, size_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
