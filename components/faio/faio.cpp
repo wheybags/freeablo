@@ -260,20 +260,30 @@ namespace FAIO
         
         if(ptr)
         {
-            FAfseek(file, ptr, SEEK_SET);
+            int asdf = FAfseek(file, ptr, SEEK_SET);
             char c;
 
-            FAfread(&c, 1, 1, file);
+			size_t bytesRead = FAfread(&c, 1, 1, file);
 
-            while(c != '\0')
+			volatile size_t asd = 0;
+
+            while(c != '\0' && bytesRead)
             {
                 retval += c;
-                FAfread(&c, 1, 1, file);
+                bytesRead = FAfread(&c, 1, 1, file);
             }
         }
 
         return retval;
     }
+
+	std::string readCStringFromWin32Binary(FAFile* file, size_t ptr, size_t offset)
+	{
+		if (ptr)
+			return readCString(file, ptr - offset);
+
+		return "";
+	}
 
     std::string getMPQFileName()
     {

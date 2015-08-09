@@ -113,7 +113,18 @@ namespace DiabloExe
             FAIO::FAfseek(exe, monsterOffset + 128*i, SEEK_SET);
 
             Monster tmp(exe, codeOffset);
-            mMonsters[tmp.monsterName] = tmp;
+
+            if(mMonsters.find(tmp.monsterName) != mMonsters.end())
+            {
+                size_t i;
+                for(i = 1; mMonsters.find(tmp.monsterName + "_" + std::to_string(i)) != mMonsters.end(); i++);
+
+                mMonsters[tmp.monsterName + "_" + std::to_string(i)] = tmp;
+            }
+            else
+            {
+                mMonsters[tmp.monsterName] = tmp;
+            }
         }
     }
     
@@ -139,13 +150,24 @@ namespace DiabloExe
         {
             FAIO::FAfseek(exe, itemOffset + 76*i, SEEK_SET);
             BaseItem tmp(exe, codeOffset);
-            if(tmp.useOnce > 1)
+            
+            if(tmp.useOnce > 1 || tmp.itemName == "")
                 continue;
-            mBaseItems[tmp.itemName] = tmp;
 
+            if(mBaseItems.find(tmp.itemName) != mBaseItems.end())
+            {
+                size_t i;
+                for(i = 1; mBaseItems.find(tmp.itemName + "_" + std::to_string(i)) != mBaseItems.end(); i++);
+
+                mBaseItems[tmp.itemName + "_" + std::to_string(i)] = tmp;
+            }
+            else
+            {
+                mBaseItems[tmp.itemName] = tmp;
+            }
         }
-
     }
+
     void DiabloExe::loadPreficies(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
     {
         size_t prefixOffset = pt.get<size_t>("Preficies.prefixOffset");
@@ -155,10 +177,19 @@ namespace DiabloExe
         {
             FAIO::FAfseek(exe, prefixOffset + 48*i, SEEK_SET);
             Prefix tmp(exe, codeOffset);
-            mPrefices[tmp.prefixName] = tmp;
 
+            if(mPrefices.find(tmp.prefixName) != mPrefices.end())
+            {
+                size_t i;
+                for(i = 1; mPrefices.find(tmp.prefixName + "_" + std::to_string(i)) != mPrefices.end(); i++);
+
+                mPrefices[tmp.prefixName + "_" + std::to_string(i)] = tmp;
+            }
+            else
+            {
+                mPrefices[tmp.prefixName] = tmp;
+            }
         }
-
     }
 
     const Monster& DiabloExe::getMonster(const std::string& name) const
