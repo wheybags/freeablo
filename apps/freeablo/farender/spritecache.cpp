@@ -110,7 +110,7 @@ namespace FARender
 
                 size_t vAnim = 0;
                 bool hasTrans = false;
-                size_t r,g,b;
+                size_t r=0,g=0,b=0;
 
                 for(size_t i = 1; i < components.size(); i++)
                 {

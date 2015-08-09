@@ -25,7 +25,7 @@ namespace DiabloExe
         minGold    = FAIO::read32(exe);
         maxGold    = FAIO::read32(exe);
         multiplier = FAIO::read32(exe);
-        prefixName     = FAIO::readCString(exe, prefixNameTemp - codeOffset);
+        prefixName     = FAIO::readCStringFromWin32Binary(exe, prefixNameTemp, codeOffset);
 
 
 

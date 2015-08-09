@@ -1,6 +1,9 @@
 #include "itemmanager.h"
 #include <sstream>
 #include <boost/bind.hpp>
+
+#include <iostream>
+
 namespace Level
 {
 bool ItemManager::mIsLoaded = false;

@@ -45,10 +45,10 @@ namespace DiabloExe
         price1 = FAIO::read32(exe);
         price2 = FAIO::read32(exe);
 
-        itemName = FAIO::readCString(exe, tempName-codeOffset);
+        itemName = FAIO::readCStringFromWin32Binary(exe, tempName, codeOffset);
         if(tempSecondName)
         {
-            itemSecondName = FAIO::readCString(exe, tempSecondName-codeOffset);
+            itemSecondName = FAIO::readCStringFromWin32Binary(exe, tempSecondName, codeOffset);
         }
         else
         {
