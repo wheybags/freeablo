@@ -341,13 +341,16 @@ namespace Render
     }
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
 
-    void setCursor(std::string path, FACursor& cursor, FASurface& s)
+    void setCursor(std::string path, FACursor cursor, FASurface s, uint32_t frame)
     {
-        if (path == "")
+        if (path.empty())
         {
-
+            SDL_FreeCursor(cursor);
+            cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+            SDL_SetCursor(cursor);
+            return;
         }
-       Cel::CelFrame cursorSprite = Cel::CelFile("data/inv/objcurs.cel")[129];
+       Cel::CelFrame cursorSprite = Cel::CelFile(path)[frame];
        std::cout <<cursorSprite.mWidth <<"x" << cursorSprite.mHeight << std::endl ;
 
 

@@ -17,6 +17,7 @@ namespace Engine
     {
         musicPlay,
         soundPlay,
+        setCursor,
         renderState
     };
 

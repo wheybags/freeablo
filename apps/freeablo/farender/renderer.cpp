@@ -212,8 +212,9 @@ namespace FARender
 
         return true;
     }
-    void setCursor(std::string path, uint32_t frame)
+    void Renderer::setCursor(std::string path, uint32_t frame)
     {
+
 
     }
 

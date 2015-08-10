@@ -162,7 +162,7 @@ void placeItem(uint32_t toPara,
                 inventory->putItem(item, Level::Item::eqCURSOR, from, fromY, fromX);
                 Render::FACursor c;
                 Render::FASurface s;
-                Render::setCursor("", c, s);
+                Render::setCursor("data/inv/objcurs.cel", c, s, 129);
 
             }
 
@@ -173,6 +173,9 @@ void placeItem(uint32_t toPara,
 
         item = inventory->getItemAt(Level::Item::eqCURSOR);
         inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX);
+        Render::FACursor c;
+        Render::FASurface s;
+        Render::setCursor("", c, s, 0);
 
     }
     else if(to == Level::Item::eqLEFTHAND || to == Level::Item::eqRIGHTHAND)
