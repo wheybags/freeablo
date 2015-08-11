@@ -531,7 +531,9 @@ void runGameLoop(const bpo::variables_map& variables)
             state->mPos = player->mPos;
             state->tileset = tileset;
             state->level = level;
-
+            state->mCursorSpritePath = FAGui::cursorPath;
+            state->mCursorFrame = FAGui::cursorFrame;
+            renderer.setCurrentState(state);
             world.fillRenderState(state);
 
             Render::updateGuiBuffer(&state->guiDrawBuffer);
@@ -541,7 +543,7 @@ void runGameLoop(const bpo::variables_map& variables)
             Render::updateGuiBuffer(NULL);
         }
 
-        renderer.setCurrentState(state);
+
     }
     
     renderer.stop();    

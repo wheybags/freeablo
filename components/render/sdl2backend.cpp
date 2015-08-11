@@ -9,6 +9,8 @@
 #include "../cel/celfile.h"
 #include "../cel/celframe.h"
 
+
+
 #include "../level/level.h"
 #include <misc/stringops.h>
 #include <misc/savePNG.h>
@@ -341,23 +343,17 @@ namespace Render
     }
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
 
-    void setCursor(std::string path, FACursor cursor, FASurface s, uint32_t frame)
+    void drawCursor(Sprite s)
     {
-        if (path.empty())
+        if(s == NULL)
         {
-            SDL_FreeCursor(cursor);
-            cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-            SDL_SetCursor(cursor);
+
             return;
         }
-       Cel::CelFrame cursorSprite = Cel::CelFile(path)[frame];
-       std::cout <<cursorSprite.mWidth <<"x" << cursorSprite.mHeight << std::endl ;
 
-
-       s = createTransparentSurface(cursorSprite.mWidth, cursorSprite.mHeight);
-       drawFrame(s, 0, 0, cursorSprite);
-       cursor = SDL_CreateColorCursor(s, 0, 0);
-       SDL_SetCursor(cursor);
+       int x,y;
+       SDL_GetMouseState(&x,&y);
+       drawAt(s, x, y);
 
 
 

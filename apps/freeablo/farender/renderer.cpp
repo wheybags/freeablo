@@ -206,15 +206,28 @@ namespace FARender
             }
 
             Render::drawGui(state->guiDrawBuffer, &mSpriteManager);
+            Renderer::setCursor(state);
         }
         
         Render::draw();
 
         return true;
     }
-    void Renderer::setCursor(std::string path, uint32_t frame)
+    void Renderer::setCursor(RenderState * State)
     {
+        if(!State->mCursorSpritePath.empty())
+        {
 
+            State->level;
+            State->mCursorSprite = mSpriteManager.get(mSpriteManager.get(State->mCursorSpritePath).spriteCacheIndex)->operator [](State->mCursorFrame);
+            Render::drawCursor(State->mCursorSprite);
+        }
+        else
+        {
+            Render::drawCursor(NULL);
+
+        }
+        return;
 
     }
 

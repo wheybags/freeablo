@@ -103,7 +103,7 @@ namespace FARender
             {
                 //TODO: replace mCacheToStr[index] with map.at(), to guarantee thread safety (once we switch to c++11)
                 // until then, it is safe in practice.
-                std::string cachePath = mCacheToStr[index];
+                std::string cachePath = mCacheToStr.at(index);
 
                 std::vector<std::string> components = Misc::StringUtils::split(cachePath, '&');
                 std::string sourcePath = components[0];
@@ -168,7 +168,7 @@ namespace FARender
 
     void SpriteCache::moveToFront(size_t index)
     {
-        mUsedList.erase(mCache[index].it);
+        mUsedList.erase(mCache.at(index).it);
         mUsedList.push_front(index);
         mCache[index].it = mUsedList.begin();
     }

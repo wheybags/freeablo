@@ -48,9 +48,11 @@ namespace FARender
 
         Level::Level* level;
 
-        Render::FASurface mCursorSurface;
+        Render::Sprite mCursorSprite;
 
-        Render::FACursor mCurrentCursor;
+        std::string mCursorSpritePath;
+
+        uint32_t mCursorFrame;
 
         RenderState():ready(true) {}
     };
@@ -76,7 +78,7 @@ namespace FARender
 
             Rocket::Core::Context* getRocketContext();
 
-            void setCursor(std::string path, uint32_t frame);
+            void setCursor(RenderState *State);
 
             bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
             void cleanup(); ///< To be called only by Engine::ThreadManager

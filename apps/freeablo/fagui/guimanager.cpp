@@ -3,7 +3,6 @@
 #include <misc/disablewarn.h>
 #include <Rocket/Core.h>
 #include <misc/enablewarn.h>
-#include <render/render.h>
 #include "animateddecoratorinstancer.h"
 
 #include "../farender/renderer.h"
@@ -35,7 +34,6 @@ extern bpt::ptree hotkeypt;
 namespace FAGui
 {
 FAWorld::Inventory* inventory;
-
 void quitGame()
 {
     done = true;
@@ -160,9 +158,8 @@ void placeItem(uint32_t toPara,
             {
 
                 inventory->putItem(item, Level::Item::eqCURSOR, from, fromY, fromX);
-                Render::FACursor c;
-                Render::FASurface s;
-                Render::setCursor("data/inv/objcurs.cel", c, s, 129);
+                FAGui::cursorPath= "data/inv/objcurs.cel";
+                FAGui::cursorFrame = 129;
 
             }
 
@@ -173,9 +170,7 @@ void placeItem(uint32_t toPara,
 
         item = inventory->getItemAt(Level::Item::eqCURSOR);
         inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX);
-        Render::FACursor c;
-        Render::FASurface s;
-        Render::setCursor("", c, s, 0);
+        cursorPath = "";
 
     }
     else if(to == Level::Item::eqLEFTHAND || to == Level::Item::eqRIGHTHAND)

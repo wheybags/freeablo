@@ -17,7 +17,6 @@ namespace Engine
     {
         musicPlay,
         soundPlay,
-        setCursor,
         renderState
     };
 
@@ -45,6 +44,7 @@ namespace Engine
             void playMusic(const std::string& path);
             void playSound(const std::string& path);
             void sendRenderState(FARender::RenderState* state);
+
 
         private:
             static ThreadManager* mThreadManager; ///< Singleton instance
