@@ -30,17 +30,17 @@ Inventory *Inventory::testInv()
     Inventory * inv = new Inventory;
     Level::ItemManager itemManager;
     while(!itemManager.mIsLoaded);
-    Level::Item gold = itemManager.getBaseItem(39);
+    Level::Item gold = itemManager.getBaseItem(43);
     //gold.setCount(10);
-    Level::Item bow  = itemManager.getBaseItem(24);
-    Level::Item bow2  = itemManager.getBaseItem(24);
-    Level::Item bow3  = itemManager.getBaseItem(24);
-    Level::Item buckler = itemManager.getBaseItem(16);
-    Level::Item ring = itemManager.getBaseItem(32);
-    Level::Item cap = itemManager.getBaseItem(17);
-    Level::Item plate = itemManager.getBaseItem(13);
-    Level::Item amulet = itemManager.getBaseItem(68);
-    Level::Item ring2 = itemManager.getBaseItem(32);
+    Level::Item bow  = itemManager.getBaseItem(28);
+    Level::Item bow2  = itemManager.getBaseItem(28);
+    Level::Item bow3  = itemManager.getBaseItem(28);
+    Level::Item buckler = itemManager.getBaseItem(18);
+    Level::Item ring = itemManager.getBaseItem(36);
+    Level::Item cap = itemManager.getBaseItem(20);
+    Level::Item plate = itemManager.getBaseItem(15);
+    Level::Item amulet = itemManager.getBaseItem(72);
+    Level::Item ring2 = itemManager.getBaseItem(36);
     inv->putItem(bow, Level::Item::eqINV, Level::Item::eqFLOOR);
     inv->putItem(bow2, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
     inv->putItem(bow3, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR);
@@ -238,7 +238,7 @@ bool Inventory::canPlaceItem(
     return false;
 }
 //TODO: When stats have implemented add checks for requirements to wear/wield items
-void Inventory::putItem(Level::Item &item,
+bool Inventory::putItem(Level::Item &item,
                         Level::Item::equipLoc equipType,
                         Level::Item::equipLoc from,
                         uint8_t y,
@@ -298,7 +298,7 @@ void Inventory::putItem(Level::Item &item,
                         putItem(this->mRightHand, Level::Item::eqINV, Level::Item::eqRIGHTHAND, auto_fit_y, auto_fit_x);
                         removeItem(item, from, beltX, y, x);
                         this->mRightHand = item;
-                        return;
+                        return true;
                     }
                     else
                     {
@@ -369,7 +369,7 @@ void Inventory::putItem(Level::Item &item,
                             mInventoryBox[i][j].mCount+=item.mCount;
                             removeItem(item, from, item.mInvX, item.mInvY, item.mBeltX);
 
-                            return;
+                            return true;
                         }
                         else if(mInventoryBox[i][j] == item)
                         {
@@ -423,14 +423,15 @@ void Inventory::putItem(Level::Item &item,
             removeItem(item, from, beltX, y, x);
             break;
         default:
-            return;
+            return false;
 
         }
     }
     else
     {
-
+        return false;
     }
+    return true;
 }
 Level::Item& Inventory::getItemAt(Level::Item::equipLoc type, uint8_t y, uint8_t x, uint8_t beltX)
 {

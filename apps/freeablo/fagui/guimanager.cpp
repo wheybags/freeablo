@@ -8,7 +8,7 @@
 #include "../farender/renderer.h"
 #include "../engine/threadmanager.h"
 #include "../faworld/inventory.h"
-
+//#include <render/re
 #include <iostream>
 #include <boost/python.hpp>
 #include <input/common.h>
@@ -33,6 +33,8 @@ extern bpt::ptree hotkeypt;
 
 namespace FAGui
 {
+std::string cursorPath;
+uint32_t cursorFrame;
 FAWorld::Inventory* inventory;
 void quitGame()
 {
@@ -158,8 +160,9 @@ void placeItem(uint32_t toPara,
             {
 
                 inventory->putItem(item, Level::Item::eqCURSOR, from, fromY, fromX);
-                FAGui::cursorPath= "data/inv/objcurs.cel";
-                FAGui::cursorFrame = 129;
+
+                cursorPath = "data/inv/objcurs.cel";
+                cursorFrame = item.mItem.graphicValue;
 
             }
 
@@ -169,29 +172,30 @@ void placeItem(uint32_t toPara,
     {
 
         item = inventory->getItemAt(Level::Item::eqCURSOR);
-        inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX);
-        cursorPath = "";
+        if(inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+            cursorPath = "";
 
     }
     else if(to == Level::Item::eqLEFTHAND || to == Level::Item::eqRIGHTHAND)
     {
 
         item = inventory->getItemAt(Level::Item::eqCURSOR);
-        inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX);
-
+        if(inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+            cursorPath = "";
 
     }
     else if(to == Level::Item::eqLEFTRING || to == Level::Item::eqRIGHTRING)
     {
         item = inventory->getItemAt(Level::Item::eqCURSOR);
-        inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX);
-
+        if (inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+                cursorPath = "";
 
     }
     else
     {
         item = inventory->getItemAt(from, fromY, fromX);
-        inventory->putItem(item, to, from, toY, toX);
+        if(inventory->putItem(item, to, from, toY, toX))
+            cursorPath = "";
 
     }
     return;

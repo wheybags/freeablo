@@ -345,15 +345,24 @@ namespace Render
 
     void drawCursor(Sprite s)
     {
+
         if(s == NULL)
         {
 
-            return;
+            SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW));
+            SDL_ShowCursor(1);
+
         }
 
-       int x,y;
-       SDL_GetMouseState(&x,&y);
-       drawAt(s, x, y);
+        else
+        {
+            SDL_ShowCursor(0);
+            int x,y;
+            SDL_GetMouseState(&x,&y);
+            drawAt(s, x, y);
+
+        }
+        return;
 
 
 
@@ -387,7 +396,6 @@ namespace Render
     void draw()
     {
         SDL_RenderPresent(renderer);
-        //SDL_SetCursor(NULL);
     }
 
     void drawAt(SDL_Texture* sprite, size_t x, size_t y)
@@ -432,8 +440,8 @@ namespace Render
         if(numFrames == 0)
             return;
 
-        int sumWidth = 0;
-        int maxHeight = 0;
+        size_t sumWidth = 0;
+        size_t maxHeight = 0;
         for(size_t i = 0; i < numFrames; i++)
         {
             sumWidth += cel[i].mWidth;

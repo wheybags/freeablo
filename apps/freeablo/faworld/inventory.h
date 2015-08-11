@@ -17,7 +17,7 @@ namespace FAWorld
 
 
         Inventory * testInv();
-        void putItem(Level::Item &item,
+        bool putItem(Level::Item &item,
                      Level::Item::equipLoc equipType,
                      Level::Item::equipLoc from,
                      uint8_t y=0,

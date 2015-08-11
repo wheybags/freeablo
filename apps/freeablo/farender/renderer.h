@@ -50,9 +50,10 @@ namespace FARender
 
         Render::Sprite mCursorSprite;
 
-        std::string mCursorSpritePath;
+        FASpriteGroup mCursorSpritePtr;
 
         uint32_t mCursorFrame;
+        std::string mCursorSpritePath;
 
         RenderState():ready(true) {}
     };

@@ -157,7 +157,7 @@ class DraggableWidget(object):
             element.SetAttribute("InvY", str(item["invY"]))
             if item["empty"] is False:
                 element.SetAttribute("class", "item")
-                #element.style.backgroundImage = "/data/inv/objcurs.cel&frame=" +str(11 + item["graphic"]);
+                element.style.backgroundImage = "/data/inv/objcurs.cel&frame=" +str(item["graphic"]);
                 #element.style.display = "inline-block"
                 element.SetAttribute("onClick", "instance.onItemClick(event)")
                 element.SetAttribute("SizeX", str(item["sizeX"]))

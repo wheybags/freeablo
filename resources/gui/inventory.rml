@@ -44,7 +44,18 @@
                 opacity: 1.0;
                 position: absolute;
                 background-decorator: image;
-                background-image: /data/inv/objcurs.cel&frame=144;
+                /*background-image: /data/inv/objcurs.cel&frame=144;*/
+            }
+            div.workaround
+            {
+                display: inline-block;
+                background-image: /data/inv/objcurs.cel&frame=144
+                background-decorator: image;
+
+                height: 100px;
+                width: 100px;
+                z-index: 1;
+                position: absolute;
             }
             div.hand-equip-socket
             {
@@ -200,5 +211,6 @@ instance = draggable.DraggableWidget(document, 0, -500)
                              <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket39"></div>
                              </div>
            </span>
+           <div class="workaround"></div>
     </body>
 </rml>

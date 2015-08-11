@@ -533,9 +533,9 @@ void runGameLoop(const bpo::variables_map& variables)
             state->level = level;
             state->mCursorSpritePath = FAGui::cursorPath;
             state->mCursorFrame = FAGui::cursorFrame;
+            //state->mCursorSpritePtr =
             renderer.setCurrentState(state);
             world.fillRenderState(state);
-
             Render::updateGuiBuffer(&state->guiDrawBuffer);
         }
         else

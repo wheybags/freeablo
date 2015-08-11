@@ -215,17 +215,15 @@ namespace FARender
     }
     void Renderer::setCursor(RenderState * State)
     {
+
         if(!State->mCursorSpritePath.empty())
         {
-
-            State->level;
             State->mCursorSprite = mSpriteManager.get(mSpriteManager.get(State->mCursorSpritePath).spriteCacheIndex)->operator [](State->mCursorFrame);
             Render::drawCursor(State->mCursorSprite);
         }
         else
         {
             Render::drawCursor(NULL);
-
         }
         return;
 

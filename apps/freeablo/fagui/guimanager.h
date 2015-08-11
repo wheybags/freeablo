@@ -15,12 +15,8 @@ namespace FAGui
                    uint32_t fromX=0,
                    uint32_t toY=0,
                    uint32_t toX=0);
-
-    /* This is used to give the main function
-     * the path of the new cursor and the frame
-       it requires*/
-    static std::string cursorPath;
-    static uint32_t cursorFrame;
+    extern std::string cursorPath;
+    extern uint32_t cursorFrame;
 }
 
 #endif
