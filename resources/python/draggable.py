@@ -162,7 +162,7 @@ class DraggableWidget(object):
                 element.SetAttribute("onClick", "instance.onItemClick(event)")
                 element.SetAttribute("SizeX", str(item["sizeX"]))
                 element.SetAttribute("SizeY", str(item["sizeY"]))
-                element.style.backgroundDecorator = "image;"
+                #element.style.backgroundDecorator = "image;"
                 element.style.width = str(28*item["sizeX"])
                 element.style.height = str(28*item["sizeY"])
                 element.SetAttribute("CornerX", str(item["cornerX"]))

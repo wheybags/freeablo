@@ -97,7 +97,6 @@ Inventory *Inventory::testInv()
     //inv->putItem(ring, Level::Item::eqRIGHTRING, Level::Item::eqFLOOR, 1, 1);
     //inv->putItem(bow, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR, 1, 1);
 
-    inv->dump();
 
     return inv;
 
@@ -319,6 +318,20 @@ bool Inventory::putItem(Level::Item &item,
             break;
         case Level::Item::eqRIGHTHAND:
             this->mRightHand=item;
+            if(item.mItem.equipLoc == Level::Item::eqTWOHAND)
+            {
+                if(this->mLeftHand.isEmpty())
+                {
+                    this->mLeftHand=item;
+
+                }
+                else
+                {
+                    return putItem(item, Level::Item::eqLEFTHAND, from);
+
+                }
+
+            }
             removeItem(item, from, beltX);
             break;
             /*
