@@ -133,8 +133,10 @@ void placeItem(uint32_t toPara,
                uint32_t fromY,
                uint32_t fromX,
                uint32_t toY,
-               uint32_t toX)
+               uint32_t toX,
+               uint32_t beltX)
 {
+
     if(fromX >= 10 || fromY >=4 || toX>=10 || toY>=4)
         return;
     Level::Item::equipLoc to   = static_cast<Level::Item::equipLoc>(toPara);
@@ -142,7 +144,9 @@ void placeItem(uint32_t toPara,
     Level::Item item = inventory->getItemAt(
                 from,
                 fromY,
-                fromX);
+                fromX, beltX);
+    if(item.isEmpty())
+        return;
     if(!item.isReal() && !item.isEmpty())
     {
         item = inventory->getItemAt(
@@ -159,10 +163,22 @@ void placeItem(uint32_t toPara,
             if(inventory->getItemAt(Level::Item::eqCURSOR).isEmpty())
             {
 
-                inventory->putItem(item, Level::Item::eqCURSOR, from, fromY, fromX);
+                if(inventory->putItem(item, Level::Item::eqCURSOR, from, fromY, fromX, beltX))
+                {
 
-                cursorPath = "data/inv/objcurs.cel";
-                cursorFrame = item.mItem.graphicValue;
+                    if(item.mItem.graphicValue > 179)
+                    {
+
+                        cursorPath = "";
+                        cursorFrame = 0;
+                    }
+                    else
+                    {
+                        cursorPath = "data/inv/objcurs.cel";
+                        cursorFrame = item.mItem.graphicValue;
+
+                    }
+                }
 
             }
 
@@ -173,7 +189,10 @@ void placeItem(uint32_t toPara,
 
         item = inventory->getItemAt(Level::Item::eqCURSOR);
         if(inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+        {
             cursorPath = "";
+            cursorFrame = 0;
+        }
 
     }
     else if(to == Level::Item::eqLEFTHAND || to == Level::Item::eqRIGHTHAND)
@@ -181,21 +200,33 @@ void placeItem(uint32_t toPara,
 
         item = inventory->getItemAt(Level::Item::eqCURSOR);
         if(inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+        {
             cursorPath = "";
+            cursorFrame = 0;
+        }
 
     }
     else if(to == Level::Item::eqLEFTRING || to == Level::Item::eqRIGHTRING)
     {
         item = inventory->getItemAt(Level::Item::eqCURSOR);
         if (inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX))
-                cursorPath = "";
+        {
+            cursorPath = "";
+            cursorFrame = 0;
+        }
 
     }
+
     else
     {
+
         item = inventory->getItemAt(from, fromY, fromX);
-        if(inventory->putItem(item, to, from, toY, toX))
+        if(inventory->putItem(item, to, from, toY, toX, beltX))
+        {
             cursorPath = "";
+            cursorFrame = 0;
+
+        }
 
     }
     return;
@@ -345,15 +376,26 @@ boost::python::dict updateInventory()
     {
         boost::python::dict beltDict;
         beltItem = inventory->getItemAt(Level::Item::eqBELT, 0, 0, i);
-        beltDict["graphic"] = beltItem.mItem.graphicValue;
-        beltDict["empty"] = true;
-        beltDict["invX"] = beltItem.getInvCoords().first;
-        beltDict["invY"] = beltItem.getInvCoords().second;
-        beltDict["real"] = beltItem.isReal();
-        beltDict["sizeX"] = beltItem.getInvSize().first;
-        beltDict["sizeY"] = beltItem.getInvSize().second;
-        beltDict["cornerX"] = beltItem.getCornerCoords().first;
-        beltDict["cornerY"] = beltItem.getCornerCoords().second;
+        if(!beltItem.isEmpty())
+        {
+            beltDict["graphic"] = beltItem.mItem.graphicValue;
+            beltDict["empty"] = false;
+            beltDict["invX"] = beltItem.getInvCoords().first;
+            beltDict["invY"] = beltItem.getInvCoords().second;
+            beltDict["real"] = beltItem.isReal();
+            beltDict["sizeX"] = beltItem.getInvSize().first;
+            beltDict["sizeY"] = beltItem.getInvSize().second;
+            beltDict["cornerX"] = beltItem.getCornerCoords().first;
+            beltDict["cornerY"] = beltItem.getCornerCoords().second;
+        }
+        else
+        {
+            beltDict["graphic"] = 0;
+            beltDict["empty"] = true;
+            beltDict["real"] = false;
+            beltDict["invX"] = beltItem.getInvCoords().first;
+            beltDict["invY"] = beltItem.getInvCoords().second;
+        }
         beltList.append(beltDict);
     }
     dict["belt"] = beltList;

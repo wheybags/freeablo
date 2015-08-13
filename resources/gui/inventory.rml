@@ -41,22 +41,11 @@
                 height: 28px;
                 width: 28px;
                 z-index: 5;
-                opacity: 1.0;
                 position: absolute;
                 background-decorator: image;
                 /*background-image: /data/inv/objcurs.cel&frame=144;*/
             }
-            div.workaround
-            {
-                display: inline-block;
-                background-image: /data/inv/objcurs.cel&frame=144
-                background-decorator: image;
 
-                height: 100px;
-                width: 100px;
-                z-index: 1;
-                position: absolute;
-            }
             div.hand-equip-socket
             {
                 /*background-color: red;*/
@@ -103,8 +92,8 @@
                 position: fixed;
                 top: 75px;
                 left: 133px;
-                height:84px;
-                width: 56px;
+                height:87px;
+                width: 58px;
                 display: inline-block;
                 z-index: 1;
             }
@@ -141,11 +130,8 @@
                 width:  29px;
                 height: 29px;
                 z-index: 2;
-                border-style: solid;
-                border: 200px;
-                border-color: transparent;
-                border: 1px;
-                opacity: .5;
+
+
 
             }
         </style>
@@ -157,7 +143,7 @@ instance = draggable.DraggableWidget(document, 0, -500)
 
     </head>
 
-    <body onMouseMove="instance.onMouseMove(event)" onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
+    <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
         <span id="container" onmousedown="instance.guiMouseDown(event)"
                              onDrag="instance.onDrag(event)">
         <div onclick="instance.onWeaponClick(event)" id="leftHand" class="hand-equip-socket"> </div>
@@ -211,6 +197,6 @@ instance = draggable.DraggableWidget(document, 0, -500)
                              <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket39"></div>
                              </div>
            </span>
-           <div class="workaround"></div>
+
     </body>
 </rml>

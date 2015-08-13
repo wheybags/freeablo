@@ -66,8 +66,8 @@ class DraggableWidget(object):
 
         if bodyItem["empty"] is False:
             body.SetAttribute("empty", "false")
-            body.style.width = "53px"
-            body.style.height = "83px"
+            body.style.width = "57px"
+            body.style.height = "87px"
 
         else:
             body.style.width = "0"
@@ -140,15 +140,9 @@ class DraggableWidget(object):
         rightRingContainer.AppendChild(rightRing)
 
         global cursor
+
         cursorItem = inventory["cursor"]
-        if cursorItem["empty"] is False:
-            cursor.SetAttribute("empty", "false")
-            cursor.style.width = str(28*cursorItem["sizeX"])
-            cursor.style.height = str(28*cursorItem["sizeY"])
-            cursor.SetAttribute("InvX", str(cursorItem["invX"]))
-            cursor.SetAttribute("InvY", str(cursorItem["invY"]))
-        else:
-            cursor.SetAttribute("empty", "true")
+        cursor = cursorItem["empty"]
         inventoryBox = inventory["inventoryBox"]
         for i, item in enumerate(inventoryBox):
             parent = self.document.GetElementById("inv-item-socket" + str(i))
@@ -174,23 +168,49 @@ class DraggableWidget(object):
                     element.SetAttribute("real", "false")
             parent.AppendChild(element)
 
-    def onLoad(self, event):
-        global cursor
 
-        cursorDoc = docmanage.manager.getDoc("resources/gui/cursor.rml")
-        cursorDoc.PullToFront()
-        cursor = cursorDoc.CreateElement("div")
-        cursor.SetAttribute("class", "cursor")
-        cursorDoc.AppendChild(cursor)
+
+    def onLoad(self, event):
         self.updateInventory(event)
 
-    def onMouseMove(self, event):
+    def onLoadBelt(self, event):
+        self.updateBelt(event)
+
+    def updateBelt(self, event):
+        beltParent = self.document.GetElementById("beltContainer")
+
+        for child in beltParent.child_nodes:
+            child.inner_rml=""
+
+        inventory = freeablo.updateInventory()
         global cursor
-        if cursor.GetAttribute("empty") == "false":
-            mx = event.parameters["mouse_x"]
-            my = event.parameters["mouse_y"]
-            cursor.style.top=str(my - self.yoffset)
-            cursor.style.left=str(mx - self.xoffset)
+        cursor = inventory["cursor"]["empty"]
+        for i, item in enumerate(inventory["belt"]):
+            parent = self.document.GetElementById("belt" + str(i))
+
+            element = self.document.CreateElement("div")
+            element.SetAttribute("InvX", str(item["invX"]))
+            element.SetAttribute("InvY", str(item["invY"]))
+            element.SetAttribute("BeltX", str(i))
+            element.SetAttribute("empty", "false")
+            element.SetAttribute("class", "beltItem")
+            if item["empty"] is False:
+
+                element.style.backgroundImage = "/data/inv/objcurs.cel&frame=" +str(item["graphic"]);
+                element.style.width = "29px"
+                element.style.height = "29px"
+                #element.style.backgroundDecorator= "image";
+            else:
+                element.SetAttribute("empty", "true")
+                element.style.width="0px"
+                element.style.height="0px"
+            parent.AppendChild(element)
+
+
+
+
+
+
     def onDrag(self, event):
         mx = event.parameters['mouse_x']
         my = event.parameters['mouse_y']
@@ -210,31 +230,31 @@ class DraggableWidget(object):
     def onHeadClick(self, event):
         global cursor
         slot = event.current_element.child_nodes[0]
-        if cursor.GetAttribute("empty") == "true" and slot.GetAttribute("empty") == "false":
-            freeablo.placeItem(10, 4, 0, 0, 0, 0)
+        if cursor is True and slot.GetAttribute("empty") == "false":
+            freeablo.placeItem(10, 4, 0, 0, 0, 0, 0)
             self.updateInventory(event)
-        elif cursor.GetAttribute("empty") == "false" and slot.GetAttribute("empty") == "true":
-            freeablo.placeItem(4, 10, 0, 0, 0, 0)
+        elif cursor is False and slot.GetAttribute("empty") == "true":
+            freeablo.placeItem(4, 10, 0, 0, 0, 0, 0)
             self.updateInventory(event)
 
     def onAmuletClick(self, event):
         global cursor
         slot = event.current_element.child_nodes[0]
-        if cursor.GetAttribute("empty") == "true" and slot.GetAttribute("empty") == "false":
-            freeablo.placeItem(10, 6, 0, 0, 0, 0)
+        if cursor is True and slot.GetAttribute("empty") == "false":
+            freeablo.placeItem(10, 6, 0, 0, 0, 0, 0)
             self.updateInventory(event)
-        elif cursor.GetAttribute("empty") == "false" and slot.GetAttribute("empty") == "true":
-            freeablo.placeItem(6, 10, 0, 0, 0, 0)
+        elif cursor is False and slot.GetAttribute("empty") == "true":
+            freeablo.placeItem(6, 10, 0, 0, 0, 0, 0)
             self.updateInventory(event)
 
     def onBodyClick(self, event):
         global cursor
         slot = event.current_element.child_nodes[0]
-        if cursor.GetAttribute("empty") == "true" and slot.GetAttribute("empty") == "false":
-            freeablo.placeItem(10, 3, 0, 0, 0, 0)
+        if cursor is True and slot.GetAttribute("empty") == "false":
+            freeablo.placeItem(10, 3, 0, 0, 0, 0, 0)
             self.updateInventory(event)
-        elif cursor.GetAttribute("empty") == "false" and slot.GetAttribute("empty") == "true":
-            freeablo.placeItem(3, 10, 0, 0, 0, 0)
+        elif cursor is False and slot.GetAttribute("empty") == "true":
+            freeablo.placeItem(3, 10, 0, 0, 0, 0, 0)
             self.updateInventory(event)
 
 
@@ -246,11 +266,11 @@ class DraggableWidget(object):
             to=14
         else:
             to=13
-        if cursor.GetAttribute("empty") == "true" and slot.GetAttribute("empty") == "false":
-            freeablo.placeItem(10, to, 0, 0, 0, 0)
+        if cursor is True and slot.GetAttribute("empty") == "false":
+            freeablo.placeItem(10, to, 0, 0, 0, 0, 0)
             self.updateInventory(event)
-        elif cursor.GetAttribute("empty") == "false" and slot.GetAttribute("empty") == "true":
-                freeablo.placeItem(to, 10, 0, 0, 0, 0)
+        elif cursor is False and slot.GetAttribute("empty") == "true":
+                freeablo.placeItem(to, 10, 0, 0, 0, 0, 0)
                 self.updateInventory(event)
 
     def onWeaponClick(self, event):
@@ -262,28 +282,40 @@ class DraggableWidget(object):
             to=11
 
         #cursor -> weapon slot
-        if cursor.GetAttribute("empty") == "true" and slot.GetAttribute("empty") == "false":
-            freeablo.placeItem(10, to, 0, 0, 0, 0)
+        if cursor is True and slot.GetAttribute("empty") == "false":
+            freeablo.placeItem(10, to, 0, 0, 0, 0, 0)
             self.updateInventory(event)
         #weapon slot -> cursor
-        elif cursor.GetAttribute("empty") == "false" and slot.GetAttribute("empty") == "true":
-                freeablo.placeItem(to, 10, 0, 0, 0, 0)
+        elif cursor is False and slot.GetAttribute("empty") == "true":
+                freeablo.placeItem(to, 10, 0, 0, 0, 0, 0)
                 self.updateInventory(event)
+
+    def onBeltClick(self, event):
+        global cursor
+        element = event.current_element.child_nodes[0]
+
+        beltx = int(element.GetAttribute("BeltX"))
+        if cursor is True and element.GetAttribute("empty") == "false":
+            freeablo.placeItem(10, 8, 0, 0, 0, 0, beltx)
+        elif cursor is False and element.GetAttribute("empty") =="true":            
+            freeablo.placeItem(8, 10, 0, 0, 0, 0, beltx)
+            cursor = True
+        self.updateBelt(event)
 
 
     def socketMouseDown(self, event):
         global cursor
-        if cursor.GetAttribute("empty") == "true" and event.current_element.child_nodes[0].GetAttribute("class") == "item":
-            invCoords = (int(event.current_element.child_nodes[0].GetAttribute("InvX")), int(event.current_element.child_nodes[0].GetAttribute("InvY")))
-            freeablo.placeItem(10, 0, invCoords[1], invCoords[0], invCoords[1], invCoords[0])
+        if cursor is True and event.current_element.child_nodes[0].GetAttribute("class") == "item":
+            y, x = (int(event.current_element.child_nodes[0].GetAttribute("InvX")), int(event.current_element.child_nodes[0].GetAttribute("InvY")))
+            freeablo.placeItem(10, 0, x, y, x, y, 0)
 
 
-        elif cursor.GetAttribute("empty") == "false" and event.current_element.child_nodes[0].GetAttribute("class") != "item":
+        elif cursor is False and event.current_element.child_nodes[0].GetAttribute("class") != "item":
 
-            invCoords = (int(event.current_element.child_nodes[0].GetAttribute("InvX")), int(event.current_element.child_nodes[0].GetAttribute("InvY")))
-            cursorCoords = (int(cursor.GetAttribute("InvX")), int(cursor.GetAttribute("InvY")))
-            freeablo.placeItem(0, 10, cursorCoords[1], cursorCoords[0], invCoords[1], invCoords[0])
-            cursor.SetAttribute("empty", "true")
+            x, y = (int(event.current_element.child_nodes[0].GetAttribute("InvX")), int(event.current_element.child_nodes[0].GetAttribute("InvY")))
+
+            freeablo.placeItem(0, 10, 0, 0, y, x, 0)
+            cursor = True
         self.updateInventory(event)
         event.StopPropagation()
 

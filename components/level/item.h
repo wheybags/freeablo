@@ -28,6 +28,7 @@ public:
     uint32_t getUniqueId() const;
     void setCount(uint32_t count);
     uint32_t getCount() const;
+    uint8_t getBeltX() const;
     bool operator==(const Item rhs) const;
     bool isReal() const;
     std::pair<uint8_t, uint8_t> getInvSize() const;

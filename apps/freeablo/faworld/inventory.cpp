@@ -41,6 +41,7 @@ Inventory *Inventory::testInv()
     Level::Item plate = itemManager.getBaseItem(15);
     Level::Item amulet = itemManager.getBaseItem(72);
     Level::Item ring2 = itemManager.getBaseItem(36);
+    Level::Item elixir = itemManager.getBaseItem(32);
     inv->putItem(bow, Level::Item::eqINV, Level::Item::eqFLOOR);
     inv->putItem(bow2, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
     inv->putItem(bow3, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR);
@@ -49,6 +50,7 @@ Inventory *Inventory::testInv()
     inv->putItem(cap, Level::Item::eqHEAD, Level::Item::eqFLOOR, 3, 0);
     inv->putItem(plate, Level::Item::eqBODY, Level::Item::eqFLOOR, 3, 0);
     inv->putItem(amulet, Level::Item::eqAMULET, Level::Item::eqFLOOR, 3, 0);
+    inv->putItem(elixir, Level::Item::eqBELT, Level::Item::eqFLOOR, 0, 0, 1);
     //inv->putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
     //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
     //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
@@ -96,7 +98,7 @@ Inventory *Inventory::testInv()
     //inv->putItem(buckler, Level::Item::eqRIGHTHAND, Level::Item::eqFLOOR, 0, 0, 0);
     //inv->putItem(ring, Level::Item::eqRIGHTRING, Level::Item::eqFLOOR, 1, 1);
     //inv->putItem(bow, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR, 1, 1);
-
+//    inv->dump();
 
     return inv;
 
@@ -430,6 +432,7 @@ bool Inventory::putItem(Level::Item &item,
         case Level::Item::eqFLOOR:
             break;
         case Level::Item::eqCURSOR:
+
             mCursorHeld = item;
 
 

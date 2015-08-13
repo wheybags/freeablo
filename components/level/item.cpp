@@ -117,5 +117,10 @@ bool Item::operator ==(const Item rhs) const
 
     return this->mUniqueId == rhs.mUniqueId;
 }
+uint8_t Item::getBeltX() const
+{
+    return mBeltX;
+
+}
 
 }

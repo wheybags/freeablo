@@ -24,6 +24,6 @@ def onLoad(document):
     </head>
 
 
-    <body onMouseMove="instance.onMouseMove(event)" onkeydown="docmanage.manager.onKeyDown(event)" onload="onLoad(event)" onmousedown="document.PushToBack(); docmanage.manager.bodyClicked()">
+    <body onkeydown="docmanage.manager.onKeyDown(event)" onload="onLoad(event)" onmousedown="document.PushToBack(); docmanage.manager.bodyClicked()">
     </body>
 </rml>
