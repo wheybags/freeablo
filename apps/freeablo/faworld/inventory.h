@@ -7,7 +7,7 @@
 namespace FAWorld
 {
     class Actor;
-    //classLevel::Item;
+
     class Inventory
     {
     public:

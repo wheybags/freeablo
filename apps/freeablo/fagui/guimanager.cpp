@@ -8,7 +8,7 @@
 #include "../farender/renderer.h"
 #include "../engine/threadmanager.h"
 #include "../faworld/inventory.h"
-//#include <render/re
+
 #include <iostream>
 #include <boost/python.hpp>
 #include <input/common.h>
@@ -412,14 +412,14 @@ BOOST_PYTHON_MODULE(freeablo)
     boost::python::def("getHotkeyNames", &getHotkeyNames);
     boost::python::def("getHotkeys", &getHotkeys);
     boost::python::def("setHotkey", &setHotkey);
-    // boost::python::class_<FAWorld::Inventory>("Inventory")
+
     boost::python::def("updateInventory", &updateInventory);
     boost::python::def("placeItem", &placeItem);
 }
 
 Rocket::Core::ElementDocument* ingameUi = NULL;
 Rocket::Core::ElementDocument* mainMenu = NULL;
-//    Rocket::Core::ElementDocument* cursor   = NULL;
+
 void initGui(FAWorld::Inventory & playerInventory)
 {
     inventory = &playerInventory;
@@ -433,7 +433,7 @@ void initGui(FAWorld::Inventory & playerInventory)
 
     ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
     mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
-    //        cursor   = renderer->getRocketContext()->LoadDocument("resources/gui/cursor.rml");
+
 }
 
 void showIngameGui()

@@ -8,6 +8,7 @@
 #include <diabloexe/diabloexe.h>
 namespace Level
 {
+
     class ItemPosition
     {
     public:

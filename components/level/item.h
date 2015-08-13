@@ -3,14 +3,14 @@
 #include <diabloexe/baseitem.h>
 #include <diabloexe/prefix.h>
 #include <render/render.h>
-//#include "inventory.h"
+
 namespace FAWorld
 {
 class Inventory;
 }
 namespace Level
 {
-//class Inventory;
+
 
 
 class ItemPosition;

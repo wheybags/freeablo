@@ -27,17 +27,12 @@ Item::~Item()
 
 }
 
-/*Item::~Item()
-{
-    ItemManager * itemManager = ItemManager::get();
-    itemManager->removeItem(*this);
 
-}*/
 Cel::CelFile * Item::mObjcurs;
 bool Item::mObjcursLoaded=false;
 Item::Item(DiabloExe::BaseItem item, size_t id)
 {
-    //Render::SpriteGroup test("data/inv/objcurs.cel");
+
     if(!mObjcursLoaded)
     {
         mObjcurs = new Cel::CelFile("data/inv/objcurs.cel");
