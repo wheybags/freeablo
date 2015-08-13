@@ -25,7 +25,6 @@ namespace FAGui
         {
             std::ostringstream ss;
             ss << imgSrc << "&frame=" << i;
-
             mFrames.push_back(LoadTexture(ss.str().c_str(), ""));
         }
 

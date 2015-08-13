@@ -78,6 +78,17 @@ public:
         return toLower(out);
     }
     
+    static bool containsNonPrint(const std::string & s)
+    {
+        for(uint32_t i=0; i < s.length(); i++)
+        {
+            if(!isprint(s[i]))
+                return true;
+
+        }
+        return false;
+    }
+
     static bool endsWith(const std::string& full, const std::string& end)
     {
         return end.size() <= full.size() && full.substr(full.size() - end.size(), end.size()) == end;

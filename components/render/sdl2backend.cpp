@@ -9,6 +9,8 @@
 #include "../cel/celfile.h"
 #include "../cel/celframe.h"
 
+
+
 #include "../level/level.h"
 #include <misc/stringops.h>
 #include <misc/savePNG.h>
@@ -339,6 +341,32 @@ namespace Render
 
         return new SpriteGroup(vec);
     }
+    void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
+
+    void drawCursor(Sprite s)
+    {
+
+        if(s == NULL)
+        {
+
+            SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW));
+            SDL_ShowCursor(1);
+
+        }
+
+        else
+        {
+            SDL_ShowCursor(0);
+            int x,y;
+            SDL_GetMouseState(&x,&y);
+            drawAt(s, x, y);
+
+        }
+        return;
+
+
+
+    }
 
     SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height)
     {
@@ -385,7 +413,6 @@ namespace Render
         drawAt((SDL_Texture*)sprite, x, y);
     }
 
-    void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
 
     SpriteGroup::SpriteGroup(const std::string& path)
     {
@@ -413,8 +440,8 @@ namespace Render
         if(numFrames == 0)
             return;
 
-        int sumWidth = 0;
-        int maxHeight = 0;
+        size_t sumWidth = 0;
+        size_t maxHeight = 0;
         for(size_t i = 0; i < numFrames; i++)
         {
             sumWidth += cel[i].mWidth;

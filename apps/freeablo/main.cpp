@@ -13,6 +13,8 @@
 
 #include "faworld/world.h"
 
+#include <level/itemmanager.h>
+
 #include "fagui/guimanager.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -150,7 +152,7 @@ Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
         Level::Dun sector3("levels/towndata/sector3s.dun");
         Level::Dun sector4("levels/towndata/sector4s.dun");
 
-        return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til", 
+        return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
             "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
     }
     else if(dLvl < 13)
@@ -372,6 +374,10 @@ void runGameLoop(const bpo::variables_map& variables)
         renderer.stop();
         return;
     }
+    Level::ItemManager itemManager;
+
+    itemManager.loadItems(&exe);
+
 
     FAWorld::World world;
 
@@ -385,7 +391,8 @@ void runGameLoop(const bpo::variables_map& variables)
     FARender::Tileset tileset;
     
     FAWorld::Player* player = world.getPlayer();
-    FAGui::initGui();
+
+    FAGui::initGui(player->mInventory);
     
     // -1 represents the main menu
     if(currentLevel != -1)
@@ -429,6 +436,7 @@ void runGameLoop(const bpo::variables_map& variables)
     // Main game logic loop
     while(!done)
     {
+
         input.processInput(paused);
 
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
@@ -523,17 +531,27 @@ void runGameLoop(const bpo::variables_map& variables)
             state->mPos = player->mPos;
             state->tileset = tileset;
             state->level = level;
+            if(!FAGui::cursorPath.empty())
+                state->mCursorEmpty = false;
+            else
+                state->mCursorEmpty = true;
+            state->mCursorFrame = FAGui::cursorFrame;
+            state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");//.operator [](FAGui::cursorFrame);
+
+
+
+            //state->mCursorSpritePtr =
 
             world.fillRenderState(state);
-
             Render::updateGuiBuffer(&state->guiDrawBuffer);
         }
         else
         {
             Render::updateGuiBuffer(NULL);
         }
-
         renderer.setCurrentState(state);
+
+
     }
     
     renderer.stop();    

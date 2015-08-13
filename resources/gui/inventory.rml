@@ -14,20 +14,189 @@
                 width: 320;
                 background-decorator: image;
                 background-image: /data/inv/inv.cel;
-
                 position: fixed;
                 top: -175px;
                 right: 0px;
+                z-index: 0;
+                drag:drag;
+            }
+            div.inventory
+            {
+                /*background-color: red;*/
+                position: fixed;
+                left: 16px;
+                top: 222px;
+                height:116px;
+                width:292px;
+                display: inline-block;
+
+                z-index: 1;
+
+            }
+
+            div.item
+            {
+                display: inline-block;
+                /*background-color:red;*/
+                height: 28px;
+                width: 28px;
+                z-index: 5;
+                position: absolute;
+                background-decorator: image;
+                /*background-image: /data/inv/objcurs.cel&frame=144;*/
+            }
+
+            div.hand-equip-socket
+            {
+                /*background-color: red;*/
+                position: fixed;
+                top: 75px;
+                height:84px;
+                width: 56px;
+                display: inline-block;
+                z-index: 1;
+            }
+            div#leftHand
+            {
+                left: 18px;
+            }
+            div#rightHand
+            {
+                left: 249px;
+            }
+
+            div.ring-equip-socket
+            {
+                /*background-color: red;*/
+                position: fixed;
+                top: 178px;
+                height:28px;
+                width: 28px;
+                display: inline-block;
+                z-index: 1;
+            }
+            div.head-equip-socket
+            {
+                /*background-color: red;*/
+                position: fixed;
+                top: 3px;
+                left: 133px;
+                height:56px;
+                width: 56px;
+                display: inline-block;
+                z-index: 1;
+            }
+            div.body-equip-socket
+            {
+                /*background-color: red;*/
+                position: fixed;
+                top: 75px;
+                left: 133px;
+                height:87px;
+                width: 58px;
+                display: inline-block;
+                z-index: 1;
+            }
+            div.amulet-equip-socket
+            {
+                /*background-color: red;*/
+                position: fixed;
+                top: 32px;
+                left: 205px;
+                height:28px;
+                width: 28px;
+                display: inline-block;
+                z-index: 1;
+            }
+            div#leftRing
+            {
+                left: 47px;
+            }
+            div#rightRing
+            {
+                left: 248px;
+            }
+
+
+
+            div.inv-item-socket
+            {
+                position: relative;
+                display: inline-block;
+                /*background-decorator: image;
+                background-image: /data/inv/objcurs.cel&trans=0,255,0&frame=20;*/
+                top: 0px;
+                left: 1px;
+                width:  29px;
+                height: 29px;
+                z-index: 2;
+
+
+
             }
         </style>
 
         <script>
-import docmanage
+import draggable
+instance = draggable.DraggableWidget(document, 0, -500)
         </script>
 
     </head>
 
-    <body onKeyDown="docmanage.manager.onKeyDown(event)" onmousedown="docmanage.manager.bodyClicked()">
-        <span id="container" onmousedown="docmanage.manager.guiClicked()"></span>
+    <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
+        <span id="container" onmousedown="instance.guiMouseDown(event)"
+                             onDrag="instance.onDrag(event)">
+        <div onclick="instance.onWeaponClick(event)" id="leftHand" class="hand-equip-socket"> </div>
+        <div onclick="instance.onWeaponClick(event)" id="rightHand" class="hand-equip-socket"> </div>
+        <div onclick="instance.onRingClick(event)" id="leftRing" class="ring-equip-socket"> </div>
+        <div onclick="instance.onRingClick(event)" id="rightRing" class="ring-equip-socket"> </div>
+        <div id="head"   onclick="instance.onHeadClick(event)" class="head-equip-socket"> </div>
+        <div id="amulet" onclick="instance.onAmuletClick(event)" class="amulet-equip-socket"> </div>
+        <div id="body"   onclick="instance.onBodyClick(event)" class="body-equip-socket"> </div>
+        <div class="inventory" id="inventory">
+
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket0"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket1"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket2"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket3"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket4"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket5"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket6"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket7"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket8"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket9"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket10"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket11"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket12"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket13"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket14"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket15"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket16"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket17"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket18"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket19"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket20"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket21"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket22"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket23"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket24"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket25"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket26"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket27"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket28"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket29"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket30"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket31"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket32"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket33"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket34"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket35"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket36"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket37"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket38"></div>
+                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket39"></div>
+                             </div>
+           </span>
+
     </body>
 </rml>

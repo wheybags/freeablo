@@ -13,23 +13,23 @@
                 height: 352;
                 width: 320;
                 background-decorator: image;
-                background-image: /data/char.cel;
-                drag:clone;
+                background-image: /data/spellbk.cel;
                 position: fixed;
                 top: -175px;
+                right: 0px;
+                drag:clone;
             }
         </style>
 
         <script>
 import draggable
-instance = draggable.DraggableWidget(document, 0, 100)
+instance = draggable.DraggableWidget(document, 0, -500)
         </script>
 
     </head>
 
-    <body onKeyDown="instance.onKeyDown(event)"
-    onmousedown="instance.bodyMouseDown(event)"
-    ondrag="instance.onDrag(event)">
-        <span id="container" onmousedown="instance.guiMouseDown(event)"></span>
+    <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" >
+        <span id="container" onmousedown="instance.guiMouseDown(event)"
+                             onDrag="instance.onDrag(event)"></span>
     </body>
 </rml>
