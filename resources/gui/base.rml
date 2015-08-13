@@ -15,8 +15,7 @@ def onLoad(document):
     docmanage.init()
 
     bottomMenuHandle = "resources/gui/bottommenu.rml"
-    docmanage.manager.loadDoc(cursorHandle)
-    docmanage.manager.showDoc(cursorHandle)
+
     docmanage.manager.loadDoc(bottomMenuHandle)
     docmanage.manager.showDoc(bottomMenuHandle)
 
