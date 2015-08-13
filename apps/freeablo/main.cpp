@@ -217,10 +217,13 @@ struct StartupSettings
 bool loadSettings(StartupSettings& startupSettings)
 {
     Settings::Settings settings;
-    settings.loadUserSettings();
+    if(!settings.loadUserSettings())
+        return false;
 
     startupSettings.resolutionWidth = settings.get<size_t>("Display","resolutionWidth");
     startupSettings.resolutionHeight = settings.get<size_t>("Display","resolutionHeight");
+
+    return true;
 }
 
 void playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager)
