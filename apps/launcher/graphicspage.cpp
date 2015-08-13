@@ -37,13 +37,13 @@ bool GraphicsPage::loadSettings()
     if(!setupSDL())
         return false;
 
-    if (QString::fromStdString(mSettings.get<std::string>("Display.fullscreen")) == QLatin1String("true"))
+    if (QString::fromStdString(mSettings.get<std::string>("Display", "fullscreen")) == QLatin1String("true"))
         ui->fullscreenCheckBox->setCheckState(Qt::Checked);
 
-    QString width = QString::fromStdString(mSettings.get<std::string>("Display.resolutionWidth"));
-    QString height = QString::fromStdString(mSettings.get<std::string>("Display.resolutionHeight"));
+    QString width = QString::fromStdString(mSettings.get<std::string>("Display", "resolutionWidth"));
+    QString height = QString::fromStdString(mSettings.get<std::string>("Display", "resolutionHeight"));
     QString resolution = width + QString(" x ") + height;
-    QString screen = QString::fromStdString(mSettings.get<std::string>("Display.screen"));
+    QString screen = QString::fromStdString(mSettings.get<std::string>("Display", "screen"));
 
     ui->displayComboBox->setCurrentIndex(screen.toInt());
     int resIndex = ui->resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
@@ -57,17 +57,17 @@ bool GraphicsPage::loadSettings()
 
 void GraphicsPage::saveSettings()
 {
-    ui->fullscreenCheckBox->checkState() ? mSettings.set<std::string>("Display.fullscreen", "true") :
-                                           mSettings.set<const char*>("Display.fullscreen", "false");
+    ui->fullscreenCheckBox->checkState() ? mSettings.set<std::string>("Display", "fullscreen", "true") :
+                                           mSettings.set<const char*>("Display", "fullscreen", "false");
 
     QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
 
     if (resolutionRe.exactMatch(ui->resolutionComboBox->currentText().simplified())) {
-        mSettings.set<std::string>("Display.resolutionWidth", resolutionRe.cap(1).toStdString());
-        mSettings.set<std::string>("Display.resolutionHeight", resolutionRe.cap(2).toStdString());
+        mSettings.set<std::string>("Display", "resolutionWidth", resolutionRe.cap(1).toStdString());
+        mSettings.set<std::string>("Display", "resolutionHeight", resolutionRe.cap(2).toStdString());
     }
 
-    mSettings.set<std::string>("Display.screen",  QString::number(ui->displayComboBox->currentIndex()).toStdString());
+    mSettings.set<std::string>("Display", "screen",  QString::number(ui->displayComboBox->currentIndex()).toStdString());
 }
 
 bool GraphicsPage::setupSDL()

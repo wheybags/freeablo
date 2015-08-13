@@ -13,9 +13,6 @@
 #include <boost/python.hpp>
 #include <input/common.h>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-
 #include "input/hotkey.h"
 
 extern bool done; // TODO: handle this better
@@ -26,10 +23,6 @@ extern Input::Hotkey quit_key; // TODO: handle this better
 extern Input::Hotkey noclip_key; // TODO: handle this better
 extern Input::Hotkey changelvldwn_key; // TODO: handle this better
 extern Input::Hotkey changelvlup_key; // TODO: handle this better
-
-namespace bpt = boost::property_tree;
-
-extern bpt::ptree hotkeypt;
 
 namespace FAGui
 {
@@ -100,27 +93,25 @@ namespace FAGui
         hotkey.ctrl = boost::python::extract<bool>(pyhotkey[2]);
         hotkey.alt = boost::python::extract<bool>(pyhotkey[3]);
         
-        bpt::write_ini("resources/hotkeys.ini", hotkeypt);
-        
         if (function == "quit")
         {
             quit_key = hotkey;
-            quit_key.save("Quit", hotkeypt);
+            quit_key.save("Quit");
         }
         if (function == "noclip")
         {
             noclip_key = hotkey;
-            noclip_key.save("Noclip", hotkeypt);
+            noclip_key.save("Noclip");
         }
         if (function == "changelvlup")
         {
             changelvlup_key = hotkey;
-            changelvlup_key.save("Changelvlup", hotkeypt);
+            changelvlup_key.save("Changelvlup");
         }
         if (function == "changelvldwn")
         {
             changelvldwn_key = hotkey;
-            changelvldwn_key.save("Changelvldwn", hotkeypt);
+            changelvldwn_key.save("Changelvldwn");
         }
     }
 

@@ -6,7 +6,6 @@
 #include <sstream>
 #include <iostream>
 
-#include <misc/fareadini.h>
 #include <misc/md5.h>
 #include <misc/stringops.h>
 
@@ -22,8 +21,11 @@ namespace DiabloExe
             return;
         }
 
-        bpt::ptree pt;
-        Misc::readIni("resources/exeversions/" + mVersion + ".ini", pt);
+        if(!mSettings.loadFromFile("resources/exeversions/" + mVersion + ".ini"))
+        {
+            std::cout << "Cannot load settings file.";
+            return;
+        }
         
         FAIO::FAFile* exe = FAIO::FAfopen("Diablo.exe");
         if (NULL == exe)
@@ -31,8 +33,8 @@ namespace DiabloExe
             return;
         }
 
-        loadMonsters(exe, pt);                        
-        loadNpcs(exe, pt);
+        loadMonsters(exe);
+        loadNpcs(exe);
 
         FAIO::FAfclose(exe);
     }
@@ -69,22 +71,23 @@ namespace DiabloExe
 
     std::string DiabloExe::getVersion()
     {
-        bpt::ptree pt;
-        Misc::readIni("resources/exeversions/versions.ini", pt);
-
         std::string exeMD5 = getMD5();
         if (exeMD5.empty())
         {
             return std::string();
         }
 
+        Settings::Settings settings;
         std::string version = "";
+        settings.loadFromFile("resources/exeversions/versions.ini");
+        Settings::Container sections = settings.getSections();
 
-        for(bpt::ptree::const_iterator it = pt.begin(); it != pt.end(); ++it)
+        for(Settings::Container::iterator it = sections.begin(); it != sections.end(); ++it)
         {
-            if(it->second.get_value<std::string>() == exeMD5)
+            std::string temporaryVersion = settings.get<std::string>("",*it);
+            if(temporaryVersion == exeMD5)
             {
-                version = it->first;
+                version = *it;
                 break;
             }
         }
@@ -101,11 +104,11 @@ namespace DiabloExe
         return version;
     }
 
-    void DiabloExe::loadMonsters(FAIO::FAFile* exe, bpt::ptree& pt)
+    void DiabloExe::loadMonsters(FAIO::FAFile* exe)
     {
-        size_t monsterOffset = pt.get<size_t>("Monsters.monsterOffset"); 
-        size_t codeOffset = pt.get<size_t>("Monsters.codeOffset"); 
-        size_t count = pt.get<size_t>("Monsters.count");
+        size_t monsterOffset = mSettings.get<size_t>("Monsters", "monsterOffset");
+        size_t codeOffset = mSettings.get<size_t>("Monsters", "codeOffset");
+        size_t count = mSettings.get<size_t>("Monsters", "count");
 
         for(size_t i = 0; i < count; i++)
         {
@@ -116,15 +119,20 @@ namespace DiabloExe
         }
     }
     
-    void DiabloExe::loadNpcs(FAIO::FAFile* exe, boost::property_tree::ptree& pt)
+    void DiabloExe::loadNpcs(FAIO::FAFile* exe)
     {
-        for(bpt::ptree::const_iterator it = pt.begin(); it != pt.end(); ++it)
+        Settings::Container sections = mSettings.getSections();
+
+        for(Settings::Container::const_iterator it = sections.begin(); it != sections.end(); ++it)
         {
-            if(Misc::StringUtils::startsWith(it->first, "NPC"))
+            std::string name = *it;
+            std::string section = name;
+
+            if(Misc::StringUtils::startsWith(name, "NPC"))
             {
-                mNpcs[it->first.substr(3, it->first.size()-3)] =
-                    Npc(exe, it->second.get<size_t>("name"), it->second.get<size_t>("cel"),
-                        it->second.get<size_t>("x"), it->second.get<size_t>("y"), it->second.get("rotation", 0));
+                mNpcs[name.substr(3, name.size()-3)] =
+                    Npc(exe, mSettings.get<size_t>(section, "name"), mSettings.get<size_t>(section, "cel"),
+                        mSettings.get<size_t>(section, "x"), mSettings.get<size_t>(section, "y"), mSettings.get<size_t>(section, "rotation", 0));
             }
         }
     }

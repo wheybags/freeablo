@@ -22,8 +22,7 @@
 #include <boost/thread.hpp>
 #include <fstream>
 
-#include <misc/fareadini.h>
-#include <boost/property_tree/ptree.hpp>
+#include <settings/settings.h>
 
 #include <input/hotkey.h>
 
@@ -40,8 +39,6 @@ Input::Hotkey quit_key;
 Input::Hotkey noclip_key;
 Input::Hotkey changelvldwn_key;
 Input::Hotkey changelvlup_key;
-
-bpt::ptree hotkeypt;
 
 void keyPress(Input::Key key)
 {
@@ -417,14 +414,11 @@ void runGameLoop(const bpo::variables_map& variables)
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     std::pair<size_t, size_t> destination = player->mPos.current();
-    
-    //bpt::ptree hotkeypt;
-    Misc::readIni("resources/hotkeys.ini", hotkeypt);
-        
-    quit_key = Input::Hotkey("Quit", hotkeypt);
-    noclip_key = Input::Hotkey("Noclip", hotkeypt);
-    changelvlup_key = Input::Hotkey("Changelvlup", hotkeypt);
-    changelvldwn_key = Input::Hotkey("Changelvldwn", hotkeypt);
+            
+    quit_key = Input::Hotkey("Quit");
+    noclip_key = Input::Hotkey("Noclip");
+    changelvlup_key = Input::Hotkey("Changelvlup");
+    changelvldwn_key = Input::Hotkey("Changelvldwn");
     
     // Main game logic loop
     while(!done)

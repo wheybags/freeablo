@@ -6,8 +6,7 @@
 #include <map>
 #include <vector>
 #include <utility>
-
-#include <boost/property_tree/ptree.hpp>
+#include <settings/settings.h>
 
 namespace FALevelGen
 {
@@ -186,9 +185,9 @@ namespace FALevelGen
 
             std::map<size_t, size_t> mDoorMap;
 
-            void fillTile(size_t tile, boost::property_tree::ptree& pt, const std::string& str);
+            void fillTile(size_t tile, Settings::Settings & settings, const std::string& str);
 
-            void loadDoorMap(boost::property_tree::ptree& pt);
+            void loadDoorMap(Settings::Settings & settings);
     };
 
 }

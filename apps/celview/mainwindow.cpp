@@ -15,9 +15,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     mDiabdat(NULL),
     mIsAnimation(false),
-    mSettingsFile(QApplication::applicationDirPath() + "/celview.ini"),
-    mSettings(mSettingsFile, QSettings::IniFormat)
+    mSettingsFile(QApplication::applicationDirPath() + "/celview.ini")
 {
+    mSettings.loadFromFile(mSettingsFile.toStdString());
     ui->setupUi(this);
     this->setWindowTitle("Celview");
     connect(ui->listView, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(itemDoubleClicked(QListWidgetItem * )));
@@ -46,11 +46,11 @@ void MainWindow::initRender()
 
 void MainWindow::loadSettings()
 {
-    mFilename = mSettings.value("filename", "DIABLO.MPQ").toString();
-    mListfile = mSettings.value("listfile", "Diablo I").toString();
-    mRenderSettings.windowWidth = mSettings.value("windowWidth", "800").toInt();
-    mRenderSettings.windowHeight = mSettings.value("windowHeight", "600").toInt();
-    mBackgroundColor = QColor(mSettings.value("backgroundColor", "#0000FF").toString());
+    mFilename = QString::fromStdString(mSettings.get<std::string>("General", "filename", "DIABLO.MPQ"));
+    mListfile = QString::fromStdString(mSettings.get<std::string>("General", "listfile", "Diablo I"));
+    mRenderSettings.windowWidth = mSettings.get<int>("General", "windowWidth", 800);
+    mRenderSettings.windowHeight = mSettings.get<int>("General", "windowHeight", 600);
+    mBackgroundColor = QColor(QString::fromStdString(mSettings.get<std::string>("General", "backgroundColor", "#0000FF")));
 
     ui->lineEdit->setText(mFilename);
     ui->lineEdit_2->setText(mListfile);
@@ -63,19 +63,19 @@ void MainWindow::loadSettings()
 
 void MainWindow::saveSettings()
 {
-    mSettings.setValue("filename", mFilename);
-    mSettings.setValue("listfile", mListfile);
+    mSettings.set<std::string>("General", "filename", mFilename.toStdString());
+    mSettings.set<std::string>("General", "listfile", mListfile.toStdString());
 
     Render::RenderSettings windowSize = Render::getWindowSize();
 
-    mSettings.setValue("windowWidth", windowSize.windowWidth);
-    mSettings.setValue("windowHeight", windowSize.windowHeight);
+    mSettings.set<int>("General", "windowWidth", windowSize.windowWidth);
+    mSettings.set<int>("General", "windowHeight", windowSize.windowHeight);
 
-    mSettings.setValue("backgroundColor", mBackgroundColor.name());
-    mSettings.sync();
+    mSettings.set<std::string>("General", "backgroundColor", mBackgroundColor.name().toStdString());
+    mSettings.save();
 }
 
-void MainWindow::itemDoubleClicked(QListWidgetItem* item)
+void MainWindow::itemDoubleClicked(QListWidgetItem* /*item*/)
 {
     mRenderTimer.stop();
     mCurrentCelFilename = ui->listView->currentItem()->text();

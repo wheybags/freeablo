@@ -1,5 +1,5 @@
 #include "hotkey.h"
-#include <boost/property_tree/ini_parser.hpp>
+#include <settings/settings.h>
 #include <boost/python.hpp>
 #include <string>
 
@@ -14,14 +14,17 @@ namespace Input
         alt = false;
     }
 
-    Hotkey::Hotkey(const char *name, bpt::ptree hotkeypt)
+    Hotkey::Hotkey(const char *name)
     {
         std::string sname = name;
 
-        key = hotkeypt.get<int>(sname + ".key");
-        shift = hotkeypt.get<int>(sname + ".shift");
-        ctrl = hotkeypt.get<int>(sname + ".ctrl");
-        alt = hotkeypt.get<int>(sname + ".alt");
+        Settings::Settings hotkeySettings;
+        hotkeySettings.loadFromFile("resources/hotkeys.ini");
+
+        key = hotkeySettings.get<int>(sname, "key");
+        shift = hotkeySettings.get<int>(sname, "shift");
+        ctrl = hotkeySettings.get<int>(sname, "ctrl");
+        alt = hotkeySettings.get<int>(sname, "alt");
     }
     
     Hotkey::Hotkey(int nkey, bool nshift, bool nctrl, bool nalt)
@@ -44,21 +47,24 @@ namespace Input
          }
     }
 
-    void Hotkey::save(const char *name, bpt::ptree hotkeypt)
+    void Hotkey::save(const char *name)
     {
         std::string sname = name;
 
-        hotkeypt.put(sname + ".key", key);
-        hotkeypt.put(sname + ".shift", int(shift));
-        hotkeypt.put(sname + ".ctrl", int(ctrl));
-        hotkeypt.put(sname + ".alt", int(alt));
-        bpt::write_ini("resources/hotkeys.ini", hotkeypt);
+        Settings::Settings hotkeySettings;
+        hotkeySettings.loadFromFile("resources/hotkeys.ini");
+
+        hotkeySettings.set<int>(sname, "key", key);
+        hotkeySettings.set<int>(sname, "shift", int(shift));
+        hotkeySettings.set<int>(sname, "ctrl", int(ctrl));
+        hotkeySettings.set<int>(sname, "alt", int(alt));
+        hotkeySettings.save();
     }
     
     BOOST_PYTHON_MODULE(hotkey)
     {
         boost::python::class_<Hotkey>("Hotkey")
-            .def(boost::python::init<const char *, bpt::ptree>())
+            .def(boost::python::init<const char *>())
             .def(boost::python::init<int, bool, bool, bool>())
             .def("__eq__", &Hotkey::operator==)
             .def("save", &Hotkey::save)

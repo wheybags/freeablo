@@ -5,8 +5,7 @@
 #include <map>
 #include <vector>
 
-#include <boost/property_tree/ptree.hpp>
-
+#include <settings/settings.h>
 #include <faio/faio.h>
 
 #include "monster.h"
@@ -33,9 +32,10 @@ namespace DiabloExe
             std::string getMD5();
             std::string getVersion();
 
-            void loadMonsters(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
-            void loadNpcs(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
+            void loadMonsters(FAIO::FAFile* exe);
+            void loadNpcs(FAIO::FAFile* exe);
             
+            Settings::Settings mSettings;
             std::string mVersion;
             std::map<std::string, Monster> mMonsters;
             std::map<std::string, Npc> mNpcs;
