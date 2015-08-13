@@ -2,7 +2,9 @@
 #define ITEM_H
 #include <diabloexe/baseitem.h>
 #include <diabloexe/prefix.h>
-#include <render/render.h>
+#include <cel/celfile.h>
+#include <cel/celframe.h>
+
 
 namespace FAWorld
 {
