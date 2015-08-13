@@ -83,6 +83,8 @@ add_library(DiabloExe
     diabloexe/npc.cpp
     diabloexe/baseitem.cpp
     diabloexe/baseitem.h
+	diabloexe/uniqueitem.cpp
+	diabloexe/uniqueitem.h
     diabloexe/prefix.cpp
     diabloexe/prefix.h)
 target_link_libraries(DiabloExe ${Boost_Libraries} Misc)

@@ -34,6 +34,7 @@ namespace DiabloExe
         loadMonsters(exe, pt);                        
         loadNpcs(exe, pt);
         loadBaseItems(exe, pt);
+        loadUniqueItems(exe, pt);
         loadPreficies(exe, pt);
         FAIO::FAfclose(exe);
     }
@@ -167,6 +168,61 @@ namespace DiabloExe
             }
         }
     }
+    void DiabloExe::loadUniqueItems(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
+    {
+        size_t itemOffset = pt.get<size_t>("UniqueItems.uniqueItemOffset");
+        size_t codeOffset = pt.get<size_t>("UniqueItems.codeOffset");
+        size_t count = pt.get<size_t>("UniqueItems.count");
+        for(size_t i=0; i < count; i++)
+        {
+            FAIO::FAfseek(exe, itemOffset + 76*i, SEEK_SET);
+            UniqueItem tmp(exe, codeOffset);
+            if
+                    (
+                    tmp.mEffect0 > 79 ||
+                    tmp.mEffect1 > 79 ||
+                    tmp.mEffect2 > 79 ||
+                    tmp.mEffect3 > 79 ||
+                    tmp.mEffect4 > 79 ||
+                    tmp.mEffect5 > 79
+                    )
+                continue;
+            if (tmp.mItemType == 0 || tmp.mItemType > 68)
+                continue;
+            uint32_t maxRange = 50000;
+            if
+                    (
+                     tmp.mMaxRange0 > maxRange ||
+                     tmp.mMaxRange1 > maxRange ||
+                     tmp.mMaxRange2 > maxRange ||
+                     tmp.mMaxRange3 > maxRange ||
+                     tmp.mMaxRange4 > maxRange ||
+                     tmp.mMaxRange5 > maxRange ||
+                     tmp.mMinRange0 > maxRange ||
+                     tmp.mMinRange1 > maxRange ||
+                     tmp.mMinRange2 > maxRange ||
+                     tmp.mMinRange3 > maxRange ||
+                     tmp.mMinRange4 > maxRange ||
+                     tmp.mMinRange5 > maxRange
+                     )
+                continue;
+
+
+
+
+            if(mUniqueItems.find(tmp.mName) != mUniqueItems.end())
+            {
+                size_t i;
+                for(i = 1; mUniqueItems.find(tmp.mName + "_" + std::to_string(i)) != mUniqueItems.end(); i++);
+
+                mUniqueItems[tmp.mName + "_" + std::to_string(i)] = tmp;
+            }
+            else
+            {
+                mUniqueItems[tmp.mName] = tmp;
+            }
+        }
+    }
 
     void DiabloExe::loadPreficies(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
     {
@@ -255,8 +311,14 @@ namespace DiabloExe
             ss << it->first << std::endl << it->second.dump();
         }
 
-        ss << "Items: "<< mBaseItems.size() << std::endl;
+        ss << "Base Items: "<< mBaseItems.size() << std::endl;
         for(std::map<std::string, BaseItem>::const_iterator it = mBaseItems.begin(); it != mBaseItems.end(); ++it)
+        {
+            ss << it->first << std::endl << it->second.dump();
+        }
+
+        ss << "Unique Items: "<< mUniqueItems.size() << std::endl;
+        for(std::map<std::string, UniqueItem>::const_iterator it = mUniqueItems.begin(); it != mUniqueItems.end(); ++it)
         {
             ss << it->first << std::endl << it->second.dump();
         }
