@@ -71,7 +71,7 @@ namespace Cel
 
     void fillTransparent(size_t pixels, std::vector<Colour>& rawImage)
     {
-        for(int px = 0; px < pixels; px++)
+        for(unsigned int px = 0; px < pixels; px++)
             rawImage.push_back(Colour(255, 255, 255, false));
     }
 
@@ -131,7 +131,7 @@ namespace Cel
         }
         else
         {
-            for(framePos = 256; framePos < frame.size(); framePos++)
+            for(framePos = 256; framePos < (int)frame.size(); framePos++)
                 rawImage.push_back(pal[frame[framePos]]);
         }
         
@@ -154,7 +154,7 @@ namespace Cel
     size_t decodeRaw32(const std::vector<uint8_t>& frame, const Pal& pal, std::vector<Colour>& rawImage)
     {
 
-        for(int i = 0; i < frame.size(); i++)
+        for(unsigned int i = 0; i < frame.size(); i++)
         {
             rawImage.push_back(pal[frame[i]]);
         }

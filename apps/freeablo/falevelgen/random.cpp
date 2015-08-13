@@ -20,7 +20,7 @@ namespace FALevelGen
         
         do
         {
-            result = varNor();
+            result = (int)varNor();
         }
         while(result < min || result > max);
 

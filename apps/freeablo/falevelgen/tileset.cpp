@@ -293,6 +293,8 @@ namespace FALevelGen
             case TileSetEnum::joinXBottomCorner: return joinXBottomCorner;
             case TileSetEnum::joinBottomCorner: return joinBottomCorner;
             case TileSetEnum::joinYBottomCorner: return joinYBottomCorner;
+
+            default: return val;
         }
 
         return val;

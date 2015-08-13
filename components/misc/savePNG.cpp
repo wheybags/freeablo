@@ -27,6 +27,7 @@
 /* libpng callbacks */
 static void png_error_SDL(png_structp ctx, png_const_charp str)
 {
+    (void)(ctx);
     SDL_SetError("libpng: %s\n", str);
 }
 static void png_write_SDL(png_structp png_ptr, png_bytep data, png_size_t length)
@@ -38,7 +39,7 @@ static void png_write_SDL(png_structp png_ptr, png_bytep data, png_size_t length
 SDL_Surface *SDL_PNGFormatAlpha(SDL_Surface *src)
 {
     SDL_Surface *surf;
-    SDL_Rect rect = { 0 };
+    SDL_Rect rect = { 0, 0, 0, 0 };
 
     /* NO-OP for images < 32bpp and 32bpp images that already have Alpha channel */
     if (src->format->BitsPerPixel <= 24 || src->format->Amask) {

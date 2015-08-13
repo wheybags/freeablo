@@ -16,7 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mDiabdat(NULL),
     mIsAnimation(false),
     mSettingsFile(QApplication::applicationDirPath() + "/celview.ini"),
-    mSettings(mSettingsFile, QSettings::IniFormat)
+    mSettings(mSettingsFile, QSettings::IniFormat),
+    mCurrentFrame(0)
 {
     ui->setupUi(this);
     this->setWindowTitle("Celview");
@@ -75,7 +76,7 @@ void MainWindow::saveSettings()
     mSettings.sync();
 }
 
-void MainWindow::itemDoubleClicked(QListWidgetItem* item)
+void MainWindow::itemDoubleClicked(QListWidgetItem* /*item*/)
 {
     mRenderTimer.stop();
     mCurrentCelFilename = ui->listView->currentItem()->text();
@@ -236,7 +237,8 @@ void MainWindow::updateRender()
 
     if (mIsAnimation)
     {
-        mCurrentFrame = ++mCurrentFrame % size;
+        ++mCurrentFrame;
+        mCurrentFrame =  mCurrentFrame % size;
         ui->currentFrame->setText(QString::number(mCurrentFrame));
     }
 

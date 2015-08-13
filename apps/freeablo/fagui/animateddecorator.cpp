@@ -40,13 +40,13 @@ namespace FAGui
         vertex.position = Rocket::Core::Vector2f(0, 0);
         vertex.tex_coord = Rocket::Core::Vector2f(0, 0);
         vertices.push_back(vertex);
-        vertex.position = Rocket::Core::Vector2f(0, texDimensions.y);
+        vertex.position = Rocket::Core::Vector2f(0, (float)texDimensions.y);
         vertex.tex_coord = Rocket::Core::Vector2f(0, 1);
         vertices.push_back(vertex);
-        vertex.position = Rocket::Core::Vector2f(texDimensions.x, texDimensions.y);
+        vertex.position = Rocket::Core::Vector2f((float)texDimensions.x, (float)texDimensions.y);
         vertex.tex_coord = Rocket::Core::Vector2f(1, 1);
         vertices.push_back(vertex);
-        vertex.position = Rocket::Core::Vector2f(texDimensions.x, 0);
+        vertex.position = Rocket::Core::Vector2f((float)texDimensions.x, 0);
         vertex.tex_coord = Rocket::Core::Vector2f(1, 0);
         vertices.push_back(vertex);
 
