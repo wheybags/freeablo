@@ -140,7 +140,6 @@ class DraggableWidget(object):
         rightRingContainer.AppendChild(rightRing)
 
         global cursor
-
         cursorItem = inventory["cursor"]
         cursor = cursorItem["empty"]
         inventoryBox = inventory["inventoryBox"]
@@ -167,8 +166,6 @@ class DraggableWidget(object):
                     element.style.display = "none"
                     element.SetAttribute("real", "false")
             parent.AppendChild(element)
-
-
 
     def onLoad(self, event):
         self.updateInventory(event)

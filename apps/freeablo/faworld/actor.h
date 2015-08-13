@@ -26,7 +26,7 @@ namespace FAWorld
             void setAnimation(AnimState::AnimState state);
 
             Position mPos;
-            Inventory inventory;
+            Inventory mInventory;
         //private: //TODO: fix this
             FARender::FASpriteGroup mWalkAnim;
             FARender::FASpriteGroup mIdleAnim;

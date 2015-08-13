@@ -378,8 +378,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     itemManager.loadItems(&exe);
 
-    itemManager.dumpBaseItems();
-//    itemManager->dumpLevel::ItemPositions();
+
     FAWorld::World world;
 
     FALevelGen::FAsrand(time(NULL));
@@ -393,7 +392,7 @@ void runGameLoop(const bpo::variables_map& variables)
     
     FAWorld::Player* player = world.getPlayer();
 
-    FAGui::initGui(player->inventory);
+    FAGui::initGui(player->mInventory);
     
     // -1 represents the main menu
     if(currentLevel != -1)

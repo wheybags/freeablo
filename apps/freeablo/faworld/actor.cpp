@@ -13,7 +13,7 @@ namespace FAWorld
         mFrame(0),
         mAnimState(AnimState::idle)
     {
-        inventory = *inventory.testInv();
+        mInventory = mInventory.testInv(mInventory);
 
     }
 

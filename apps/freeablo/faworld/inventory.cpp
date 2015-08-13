@@ -23,11 +23,11 @@ Inventory::~Inventory()
 {
 }
 
-Inventory *Inventory::testInv()
+Inventory Inventory::testInv(Inventory& inv)
 {
 
 
-    Inventory * inv = new Inventory;
+
     Level::ItemManager itemManager;
     while(!itemManager.mIsLoaded);
     Level::Item gold = itemManager.getBaseItem(43);
@@ -42,63 +42,63 @@ Inventory *Inventory::testInv()
     Level::Item amulet = itemManager.getBaseItem(72);
     Level::Item ring2 = itemManager.getBaseItem(36);
     Level::Item elixir = itemManager.getBaseItem(32);
-    inv->putItem(bow, Level::Item::eqINV, Level::Item::eqFLOOR);
-    inv->putItem(bow2, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
-    inv->putItem(bow3, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR);
-    inv->putItem(ring, Level::Item::eqINV, Level::Item::eqFLOOR, 3, 0);
-    inv->putItem(ring2, Level::Item::eqINV, Level::Item::eqFLOOR, 3, 1);
-    inv->putItem(cap, Level::Item::eqHEAD, Level::Item::eqFLOOR, 3, 0);
-    inv->putItem(plate, Level::Item::eqBODY, Level::Item::eqFLOOR, 3, 0);
-    inv->putItem(amulet, Level::Item::eqAMULET, Level::Item::eqFLOOR, 3, 0);
-    inv->putItem(elixir, Level::Item::eqBELT, Level::Item::eqFLOOR, 0, 0, 1);
-    //inv->putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
-    //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
-    //inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
-    //inv->putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
+    inv.putItem(bow, Level::Item::eqINV, Level::Item::eqFLOOR);
+    inv.putItem(bow2, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
+    inv.putItem(bow3, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR);
+    inv.putItem(ring, Level::Item::eqINV, Level::Item::eqFLOOR, 3, 0);
+    inv.putItem(ring2, Level::Item::eqINV, Level::Item::eqFLOOR, 3, 1);
+    inv.putItem(cap, Level::Item::eqHEAD, Level::Item::eqFLOOR, 3, 0);
+    inv.putItem(plate, Level::Item::eqBODY, Level::Item::eqFLOOR, 3, 0);
+    inv.putItem(amulet, Level::Item::eqAMULET, Level::Item::eqFLOOR, 3, 0);
+    inv.putItem(elixir, Level::Item::eqBELT, Level::Item::eqFLOOR, 0, 0, 1);
+    //inv.putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
+    //inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 0);
+    //inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
+    //inv.putItem(gold, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 1);
     //inv.putItem(gold, Level::Item::eqINV, Level::Item::eqINV, 0, 1);
     /*
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 3);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 4);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 5);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 6);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 7);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 8);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 9);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 0);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 1);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 2);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 3);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 4);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 5);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 6);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 7);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 8);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 9);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 0);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 1);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 2);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 3);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 4);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 5);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 6);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 7);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 8);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 9);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 0);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 1);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 2);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 3);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 4);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 5);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 6);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 7);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 8);
-    inv->putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 9);*/
-    //inv->putItem(buckler, Level::Item::eqRIGHTHAND, Level::Item::eqFLOOR, 0, 0, 0);
-    //inv->putItem(ring, Level::Item::eqRIGHTRING, Level::Item::eqFLOOR, 1, 1);
-    //inv->putItem(bow, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR, 1, 1);
-//    inv->dump();
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 3);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 4);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 5);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 6);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 7);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 8);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 0, 9);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 0);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 1);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 2);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 3);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 4);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 5);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 6);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 7);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 8);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 1, 9);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 0);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 1);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 2);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 3);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 4);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 5);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 6);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 7);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 8);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 2, 9);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 0);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 1);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 2);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 3);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 4);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 5);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 6);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 7);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 8);
+    inv.putItem(itemManager.getBaseItem(32), Level::Item::eqINV, Level::Item::eqFLOOR, 3, 9);*/
+    //inv.putItem(buckler, Level::Item::eqRIGHTHAND, Level::Item::eqFLOOR, 0, 0, 0);
+    //inv.putItem(ring, Level::Item::eqRIGHTRING, Level::Item::eqFLOOR, 1, 1);
+    //inv.putItem(bow, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR, 1, 1);
+//    inv.dump();
 
     return inv;
 
