@@ -436,6 +436,7 @@ void runGameLoop(const bpo::variables_map& variables)
     // Main game logic loop
     while(!done)
     {
+
         input.processInput(paused);
 
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
@@ -530,10 +531,17 @@ void runGameLoop(const bpo::variables_map& variables)
             state->mPos = player->mPos;
             state->tileset = tileset;
             state->level = level;
-            state->mCursorSpritePath = FAGui::cursorPath;
+            if(!FAGui::cursorPath.empty())
+                state->mCursorEmpty = false;
+            else
+                state->mCursorEmpty = true;
             state->mCursorFrame = FAGui::cursorFrame;
+            state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");//.operator [](FAGui::cursorFrame);
+
+
+
             //state->mCursorSpritePtr =
-            renderer.setCurrentState(state);
+
             world.fillRenderState(state);
             Render::updateGuiBuffer(&state->guiDrawBuffer);
         }
@@ -541,6 +549,7 @@ void runGameLoop(const bpo::variables_map& variables)
         {
             Render::updateGuiBuffer(NULL);
         }
+        renderer.setCurrentState(state);
 
 
     }

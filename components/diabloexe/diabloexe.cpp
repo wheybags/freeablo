@@ -154,7 +154,10 @@ namespace DiabloExe
             
             if(tmp.useOnce > 1 || tmp.itemName == "")
                 continue;
-
+            if(Misc::StringUtils::containsNonPrint(tmp.itemName))
+                continue;
+            if(Misc::StringUtils::containsNonPrint(tmp.itemSecondName))
+                continue;
             if(mBaseItems.find(tmp.itemName) != mBaseItems.end())
             {
                 size_t i;
@@ -205,6 +208,9 @@ namespace DiabloExe
                      tmp.mMinRange4 > maxRange ||
                      tmp.mMinRange5 > maxRange
                      )
+                continue;
+
+            if(Misc::StringUtils::containsNonPrint(tmp.mName))
                 continue;
 
 

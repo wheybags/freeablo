@@ -216,10 +216,10 @@ namespace FARender
     void Renderer::setCursor(RenderState * State)
     {
 
-        if(!State->mCursorSpritePath.empty())
+        if(!State->mCursorEmpty)
         {
-            State->mCursorSprite = mSpriteManager.get(mSpriteManager.get(State->mCursorSpritePath).spriteCacheIndex)->operator [](State->mCursorFrame);
-            Render::drawCursor(State->mCursorSprite);
+            Render::Sprite sprite = mSpriteManager.get(State->mCursorSpriteGroup.spriteCacheIndex)->operator [](State->mCursorFrame);
+            Render::drawCursor(sprite);
         }
         else
         {

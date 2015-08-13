@@ -48,12 +48,10 @@ namespace FARender
 
         Level::Level* level;
 
-        Render::Sprite mCursorSprite;
-
-        FASpriteGroup mCursorSpritePtr;
-
+        FASpriteGroup mCursorSpriteGroup;
         uint32_t mCursorFrame;
-        std::string mCursorSpritePath;
+
+        bool mCursorEmpty;
 
         RenderState():ready(true) {}
     };
