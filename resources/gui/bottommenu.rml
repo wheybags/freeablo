@@ -55,6 +55,7 @@
         </style>
 
         <link type="text/rcss" href="bottommenu_buttons.rcss"/>
+        <link type="text/rcss" href="item_graphics.rcss"/>
 
         <script>
 import docmanage

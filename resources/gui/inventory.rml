@@ -1,5 +1,6 @@
 <rml>
     <head>
+        <link type="text/rcss" href="item_graphics.rcss"/>
         <style>
             body
             {
@@ -102,7 +103,7 @@
                 /*background-color: red;*/
                 position: fixed;
                 top: 32px;
-                left: 205px;
+                left: 200px;
                 height:28px;
                 width: 28px;
                 display: inline-block;
