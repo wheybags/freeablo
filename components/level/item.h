@@ -10,10 +10,9 @@ namespace FAWorld
 {
 class Inventory;
 }
+
 namespace Level
 {
-
-
 
 class ItemPosition;
 class Item

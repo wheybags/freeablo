@@ -4,7 +4,6 @@
 #include "item.h"
 #include <map>
 #include <stdint.h>
-#include <boost/tuple/tuple.hpp>
 #include <diabloexe/diabloexe.h>
 namespace Level
 {
@@ -12,42 +11,27 @@ namespace Level
     class ItemPosition
     {
     public:
-        ItemPosition(Item::equipLoc invType,
-                     std::pair<size_t,size_t> *floorPosition,
-                     std::pair<uint8_t, uint8_t> *invPosition,
-                     uint8_t beltPosition);
-        Item::equipLoc getInventoryType() const;
-        std::pair<size_t,size_t> *getFloorPosition() const;
-        uint8_t getBeltPosition() const;
-        std::pair<uint8_t, uint8_t> *getInvPosition() const;
-
-        void setInventoryType(Item::equipLoc type);
-        void setFloorPosition(std::pair<size_t,size_t> * pos);
-        void setBeltPosition(uint8_t x);
-        void setInvPosition(std::pair<uint8_t, uint8_t> * pos);
+        ItemPosition(){};
+        ItemPosition(std::pair<size_t, size_t> floorPosition);
+        void setFloorPosition(std::pair<size_t,size_t> pos);
+        std::pair<size_t, size_t> getFloorPosition() const;
         bool operator < (const ItemPosition rhs) const;
         bool operator==(const ItemPosition rhs) const;
-    private:
-        Item::equipLoc mInventoryType;
-        std::pair<size_t,size_t> * mFloorPosition;
-        std::pair<uint8_t, uint8_t> * mInvPosition;
-        uint8_t mBeltPosition;
+    private:        
+        std::pair<size_t,size_t> mFloorPosition;
     };
+
+
+
 
     class ItemManager
     {
     public:
         void loadItems(DiabloExe::DiabloExe * exe);
         static bool mIsLoaded;
-        void addItem(Item &item, Item::equipLoc invType, std::pair<size_t,size_t> *floorPosition, std::pair<uint8_t, uint8_t> *invPosition, uint8_t beltPosition, uint32_t count=0);
+        void addItem(Item &item, std::pair<size_t, size_t> floorPosition, uint32_t count);
         Item getBaseItem(uint8_t id) const;
-        void putItem(
-                Item item,
-                Item::equipLoc to,
-                Item::equipLoc from,
-                std::pair<uint8_t, uint8_t> * invPosition,
-                uint8_t beltX,
-                std::pair<size_t,size_t> * floorPosition);
+        void putItemOnFloor(Item& item, std::pair<size_t, size_t> floor_pos);
 
         void dumpBaseItems() const;
         void dumpItemPositions();

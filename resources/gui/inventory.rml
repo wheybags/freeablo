@@ -23,7 +23,6 @@
             }
             div.inventory
             {
-                /*background-color: red;*/
                 position: fixed;
                 left: 16px;
                 top: 222px;
@@ -38,18 +37,15 @@
             div.item
             {
                 display: inline-block;
-                /*background-color:red;*/
                 height: 28px;
                 width: 28px;
                 z-index: 5;
                 position: absolute;
                 background-decorator: image;
-                /*background-image: /data/inv/objcurs.cel&frame=144;*/
             }
 
             div.hand-equip-socket
             {
-                /*background-color: red;*/
                 position: fixed;
                 top: 75px;
                 height:84px;
@@ -68,7 +64,6 @@
 
             div.ring-equip-socket
             {
-                /*background-color: red;*/
                 position: fixed;
                 top: 178px;
                 height:28px;
@@ -78,7 +73,6 @@
             }
             div.head-equip-socket
             {
-                /*background-color: red;*/
                 position: fixed;
                 top: 3px;
                 left: 133px;
@@ -89,7 +83,6 @@
             }
             div.body-equip-socket
             {
-                /*background-color: red;*/
                 position: fixed;
                 top: 75px;
                 left: 133px;
@@ -100,7 +93,6 @@
             }
             div.amulet-equip-socket
             {
-                /*background-color: red;*/
                 position: fixed;
                 top: 32px;
                 left: 200px;
@@ -124,8 +116,6 @@
             {
                 position: relative;
                 display: inline-block;
-                /*background-decorator: image;
-                background-image: /data/inv/objcurs.cel&trans=0,255,0&frame=20;*/
                 top: 0px;
                 left: 1px;
                 width:  29px;
@@ -198,6 +188,5 @@ instance = draggable.DraggableWidget(document, 0, -500)
                              <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket39"></div>
                              </div>
            </span>
-
     </body>
 </rml>
