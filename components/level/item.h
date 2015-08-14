@@ -13,6 +13,41 @@ class Inventory;
 
 namespace Level
 {
+template <class property_type>
+class GenericProperty
+{
+    public:
+        GenericProperty();
+        virtual void operator=(const GenericProperty& rhs)
+        {
+            set(rhs.get());
+        }
+
+        virtual property_type get()
+        {
+            return mProperty;
+        }
+
+        virtual void set(property_type property)
+        {
+            mProperty = property;
+        }
+
+    private:
+        property_type mProperty;
+};
+
+class GenericRPGStats;
+
+template <class item_property_type, class id_type>
+class GenericItem
+{
+    public:
+        GenericItem(item_property_type item, id_type id);
+
+        virtual void operator=(const GenericItem& rhs) = 0;
+        virtual bool operator==(const GenericItem& rhs) = 0;
+};
 
 class ItemPosition;
 class Item

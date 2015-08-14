@@ -22,6 +22,19 @@ namespace Level
     };
 
 
+    template<class item_class, class item_property_type, class hash_type, class id_type>
+    class GenericItemManager
+    {
+        public:
+
+        private:
+            static id_type lastUnique;
+            static std::map<id_type, item_class> mRegisteredItems;
+            std::map<hash_type, item_class> mItemPositionMap;
+
+
+
+    };
 
 
     class ItemManager
