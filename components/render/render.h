@@ -51,7 +51,9 @@ namespace Render
             virtual void setImmortal(size_t index, bool immortal) = 0;
     };
 
-
+    const int BPP = 4;
+    const int DEPTH = 32;
+    const int VIDEO_BUFFER_SIZE = 3;
 
     void init(const RenderSettings& settings); 
     Rocket::Core::Context* initGui(boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
@@ -70,11 +72,13 @@ namespace Render
     void drawCursor(Sprite s);
     SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height);
+    SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height);  
+    Sprite getVideoBufferFrame(unsigned int);
+    void copyVideoFrameToBuffer(unsigned int index, uint8_t* data[], int * linesize, size_t width, size_t height);
 
     void draw();
+    void drawAt(const Sprite& sprite, size_t x, size_t y);
 
-    void drawAt(const Sprite& sprite, size_t x, size_t y); 
 
     class SpriteGroup
     {

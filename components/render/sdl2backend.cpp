@@ -37,17 +37,26 @@ namespace Render
     RocketSDL2SystemInterface* SystemInterface;
     FAIOFileInterface* FileInterface;
     Rocket::Core::Context* Context;
+    Sprite videoBuffer[VIDEO_BUFFER_SIZE];
     
+    void initWindow();
+    void initVideoBuffer();
+
     void init(const RenderSettings& settings)
     {
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
 
+        initWindow();
+        initVideoBuffer();
+    }
+
+    void initWindow()
+    {
         SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
         screen = SDL_CreateWindow("LibRocket SDL2 test", 20, 20, WIDTH, HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         if(screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
-
 
         SDL_GL_CreateContext(screen);
         int oglIdx = -1;
@@ -70,6 +79,22 @@ namespace Render
         glMatrixMode(GL_PROJECTION|GL_MODELVIEW);
         glLoadIdentity();
         glOrtho(0, WIDTH, HEIGHT, 0, 0, 1);
+    }
+
+    void initVideoBuffer()
+    {
+        SDL_Surface * surface = SDL_CreateRGBSurface(0, WIDTH, HEIGHT, DEPTH, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+        SDL_FillRect(surface, NULL, SDL_MapRGBA(surface->format, 0, 0, 0, 0));
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        for(int i = 0 ; i < VIDEO_BUFFER_SIZE; i++)
+        {
+            SDL_Texture * texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
+            SDL_UpdateTexture(texture, NULL, surface->pixels, BPP*WIDTH);
+            SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+            videoBuffer[i] = (Sprite)texture;
+        }
+        SDL_FreeSurface(surface);
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
     }
 
     bool import(const std::string& name)
@@ -144,6 +169,10 @@ namespace Render
     
     void quit()
     {
+        // Destroy video buffer
+        for(int i = 0 ; i < VIDEO_BUFFER_SIZE; i++)
+            SDL_DestroyTexture((SDL_Texture*)videoBuffer[i]);
+
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
         SDL_Quit();
@@ -183,6 +212,11 @@ namespace Render
     void drawGui(std::vector<DrawCommand>& buffer, SpriteCacheBase* cache)
     {
         Renderer->drawBuffer(buffer, cache);
+    }
+
+    Sprite getVideoBufferFrame(unsigned int position)
+    {
+        return videoBuffer[position];
     }
 
     SDL_Surface* loadNonCelImage(const std::string& sourcePath, const std::string& extension)
@@ -304,6 +338,31 @@ namespace Render
         }
     }
 
+    void copyVideoFrameToBuffer(unsigned int index, uint8_t* data[], int * linesize, size_t width, size_t height)
+    {
+        SDL_Texture * texture = (SDL_Texture*)videoBuffer[index];
+        void * pixels;
+        SDL_Rect rect;
+        rect.x = 0;
+        rect.y = 0;
+        rect.w = width;
+        rect.h = height;
+
+        int pitch = Render::BPP;
+        SDL_LockTexture(texture, &rect, &pixels, &pitch);
+
+        unsigned int factor = linesize[0] / width;
+        for(unsigned int y = 0 ; y < height; y++)
+        {
+            uint8_t * ptr  = (uint8_t*)pixels + y*pitch + 1;
+            uint8_t * ptrData = data[0] + y*width*factor;
+
+            memcpy(ptr, ptrData, pitch);
+        }
+
+        SDL_UnlockTexture(texture);
+    }
+
     void clearTransparentSurface(SDL_Surface* s);
 
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB)
@@ -391,7 +450,6 @@ namespace Render
         vec[0] = (Sprite)tex;
         return new SpriteGroup(vec);
     }
-
 
     void draw()
     {
@@ -515,8 +573,7 @@ namespace Render
          SDL_RenderClear(renderer);
     }
 
-    #define BPP 4
-    #define DEPTH 32
+
 
     void clearTransparentSurface(SDL_Surface* s)
     {
