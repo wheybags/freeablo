@@ -6,15 +6,15 @@ namespace Level
 {
     Level::Level(const std::string& dunPath, const std::string& tilPath, const std::string& minPath,
          const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-         const std::pair<size_t,size_t>& upStairs):
+         const std::pair<size_t,size_t>& upStairs, BaseItemManager* itemManager):
             mDun(dunPath), mTil(tilPath), mMin(minPath), mSol(solPath), mTileSetPath(tileSetPath),
-            mUpStairs(upStairs), mDownStairs(downStairs) {} 
+            mUpStairs(upStairs), mDownStairs(downStairs), mItemManager(itemManager) {}
      
     Level::Level(const Dun& dun, const std::string& tilPath, const std::string& minPath,
         const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-        const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap):
+        const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap, BaseItemManager* itemManager):
         mDun(dun), mTil(tilPath), mMin(minPath), mSol(solPath), mTileSetPath(tileSetPath),
-        mMinPath(minPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs) {}
+        mMinPath(minPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs), mItemManager(itemManager) {}
 
     std::vector<int16_t> Level::mEmpty(16);
 

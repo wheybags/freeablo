@@ -139,9 +139,9 @@ void placeItem(uint32_t toPara,
 
     if(fromX >= 10 || fromY >=4 || toX>=10 || toY>=4)
         return;
-    Level::Item::equipLoc to   = static_cast<Level::Item::equipLoc>(toPara);
-    Level::Item::equipLoc from = static_cast<Level::Item::equipLoc>(fromPara);
-    Level::Item item = inventory->getItemAt(
+    FAWorld::Item::equipLoc to   = static_cast<FAWorld::Item::equipLoc>(toPara);
+    FAWorld::Item::equipLoc from = static_cast<FAWorld::Item::equipLoc>(fromPara);
+    FAWorld::Item item = inventory->getItemAt(
                 from,
                 fromY,
                 fromX, beltX);
@@ -150,20 +150,20 @@ void placeItem(uint32_t toPara,
     if(!item.isReal() && !item.isEmpty())
     {
         item = inventory->getItemAt(
-                    Level::Item::eqINV,
+                    FAWorld::Item::eqINV,
                     item.getCornerCoords().second,
                     item.getCornerCoords().first);
 
         fromX = item.getInvCoords().first;
         fromY = item.getInvCoords().second;
     }
-    if(to == Level::Item::eqCURSOR)
+    if(to == FAWorld::Item::eqCURSOR)
     {
 
-            if(inventory->getItemAt(Level::Item::eqCURSOR).isEmpty())
+            if(inventory->getItemAt(FAWorld::Item::eqCURSOR).isEmpty())
             {
 
-                if(inventory->putItem(item, Level::Item::eqCURSOR, from, fromY, fromX, beltX))
+                if(inventory->putItem(item, FAWorld::Item::eqCURSOR, from, fromY, fromX, beltX))
                 {
 
                     if(item.mItem.graphicValue > 179)
@@ -184,32 +184,32 @@ void placeItem(uint32_t toPara,
 
     }
 
-    else if(to == Level::Item::eqINV)
+    else if(to == FAWorld::Item::eqINV)
     {
 
-        item = inventory->getItemAt(Level::Item::eqCURSOR);
-        if(inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+        item = inventory->getItemAt(FAWorld::Item::eqCURSOR);
+        if(inventory->putItem(item, to, FAWorld::Item::eqCURSOR, toY, toX))
         {
             cursorPath = "";
             cursorFrame = 0;
         }
 
     }
-    else if(to == Level::Item::eqLEFTHAND || to == Level::Item::eqRIGHTHAND)
+    else if(to == FAWorld::Item::eqLEFTHAND || to == FAWorld::Item::eqRIGHTHAND)
     {
 
-        item = inventory->getItemAt(Level::Item::eqCURSOR);
-        if(inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+        item = inventory->getItemAt(FAWorld::Item::eqCURSOR);
+        if(inventory->putItem(item, to, FAWorld::Item::eqCURSOR, toY, toX))
         {
             cursorPath = "";
             cursorFrame = 0;
         }
 
     }
-    else if(to == Level::Item::eqLEFTRING || to == Level::Item::eqRIGHTRING)
+    else if(to == FAWorld::Item::eqLEFTRING || to == FAWorld::Item::eqRIGHTRING)
     {
-        item = inventory->getItemAt(Level::Item::eqCURSOR);
-        if (inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+        item = inventory->getItemAt(FAWorld::Item::eqCURSOR);
+        if (inventory->putItem(item, to, FAWorld::Item::eqCURSOR, toY, toX))
         {
             cursorPath = "";
             cursorFrame = 0;
@@ -236,14 +236,14 @@ boost::python::dict updateInventory()
 {
     boost::python::dict dict, cursorDict, headDict, amuletDict, leftHandDict, rightHandDict, leftRingDict, rightRingDict, bodyDict, itemDict;
 
-    Level::Item cursor = inventory->getItemAt(Level::Item::eqCURSOR);
-    Level::Item head = inventory->getItemAt(Level::Item::eqHEAD);
-    Level::Item amulet = inventory->getItemAt(Level::Item::eqAMULET);
-    Level::Item leftHand = inventory->getItemAt(Level::Item::eqLEFTHAND);
-    Level::Item rightHand = inventory->getItemAt(Level::Item::eqRIGHTHAND);
-    Level::Item leftRing = inventory->getItemAt(Level::Item::eqLEFTRING);
-    Level::Item rightRing = inventory->getItemAt(Level::Item::eqRIGHTRING);
-    Level::Item body = inventory->getItemAt(Level::Item::eqBODY);
+    FAWorld::Item cursor = inventory->getItemAt(FAWorld::Item::eqCURSOR);
+    FAWorld::Item head = inventory->getItemAt(FAWorld::Item::eqHEAD);
+    FAWorld::Item amulet = inventory->getItemAt(FAWorld::Item::eqAMULET);
+    FAWorld::Item leftHand = inventory->getItemAt(FAWorld::Item::eqLEFTHAND);
+    FAWorld::Item rightHand = inventory->getItemAt(FAWorld::Item::eqRIGHTHAND);
+    FAWorld::Item leftRing = inventory->getItemAt(FAWorld::Item::eqLEFTRING);
+    FAWorld::Item rightRing = inventory->getItemAt(FAWorld::Item::eqRIGHTRING);
+    FAWorld::Item body = inventory->getItemAt(FAWorld::Item::eqBODY);
 
     dict["cursor"] = cursorDict;
 
@@ -348,7 +348,7 @@ boost::python::dict updateInventory()
         for(uint8_t j=0;j<10;j++)
         {
             boost::python::dict itemDict;
-            Level::Item item = inventory->getItemAt(Level::Item::eqINV, i, j);
+            FAWorld::Item item = inventory->getItemAt(FAWorld::Item::eqINV, i, j);
             if(!item.isEmpty())
             {
                 itemDict["graphic"] = item.mItem.graphicValue;
@@ -371,11 +371,11 @@ boost::python::dict updateInventory()
             inventoryList.append(itemDict);
         }
     }
-    Level::Item beltItem;
+    FAWorld::Item beltItem;
     for(uint8_t i=0;i<8;i++)
     {
         boost::python::dict beltDict;
-        beltItem = inventory->getItemAt(Level::Item::eqBELT, 0, 0, i);
+        beltItem = inventory->getItemAt(FAWorld::Item::eqBELT, 0, 0, i);
         if(!beltItem.isEmpty())
         {
             beltDict["graphic"] = beltItem.mItem.graphicValue;

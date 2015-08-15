@@ -21,10 +21,8 @@ add_library(Levels
     level/level.cpp
     level/sol.cpp
     level/sol.h
-	level/itemmanager.cpp
-	level/itemmanager.h
-	level/item.cpp
-	level/item.h)
+	level/baseitemmanager.h
+	level/baseproperty.h)
 target_link_libraries(Levels FAIO DiabloExe)
 set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

@@ -1,6 +1,6 @@
 #include "item.h"
 #include "itemmanager.h"
-namespace Level
+namespace FAWorld
 {
 Item::Item()
 {

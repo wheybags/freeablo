@@ -5,7 +5,7 @@
 #include "tileset.h"
 #include "dun.h"
 #include "sol.h"
-#include "itemmanager.h"
+#include "baseitemmanager.h"
 #include <utility>
 #include <map>
 
@@ -42,12 +42,12 @@ namespace Level
     class Level
     {
         public:
-            Level(const std::string& dunPath, const std::string& tilPath, const std::string& minPath, 
-                const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs, 
-                const std::pair<size_t,size_t>& upStairs);
+            Level(const std::string& dunPath, const std::string& tilPath, const std::string& minPath,
+                const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
+                const std::pair<size_t,size_t>& upStairs, BaseItemManager *itemManager);
             Level(const Dun& dun, const std::string& tilPath, const std::string& minPath, 
                 const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-                const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap);
+                const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap, BaseItemManager* itemManager);
 
             Misc::Helper2D<const Level, const MinPillar> operator[] (size_t x) const;
 
@@ -84,7 +84,7 @@ namespace Level
             std::pair<size_t,size_t> mDownStairs;
 
             std::vector<Monster> mMonsters;
-            ItemManager itemManager;
+            BaseItemManager * mItemManager;
             static std::vector<int16_t> mEmpty;
 //            FAWorld::Level::ItemManager mLevel::Items;
             friend const MinPillar get(size_t x, size_t y, const Level& level);

@@ -11,7 +11,7 @@ namespace DiabloExe
 namespace FALevelGen
 {
   
-    Level::Level* generate(size_t width, size_t height, size_t dLvl, const DiabloExe::DiabloExe& exe);
+    Level::Level* generate(size_t width, size_t height, size_t dLvl, const DiabloExe::DiabloExe& exe, Level::BaseItemManager* itemManager);
 
 }
 

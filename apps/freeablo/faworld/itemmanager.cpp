@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-namespace Level
+namespace FAWorld
 {
 bool ItemManager::mIsLoaded = false;
 std::map<uint8_t, Item> ItemManager::mRegisteredItems;

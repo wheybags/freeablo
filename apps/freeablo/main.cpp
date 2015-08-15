@@ -13,7 +13,7 @@
 
 #include "faworld/world.h"
 
-#include <level/itemmanager.h>
+#include "faworld/itemmanager.h"
 
 #include "fagui/guimanager.h"
 
@@ -143,7 +143,7 @@ void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& worl
         world.addNpcs(exe);
 }
 
-Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
+Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, Level::BaseItemManager* itemManager)
 {  
     if(dLvl == 0)
     {
@@ -153,11 +153,12 @@ Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
         Level::Dun sector4("levels/towndata/sector4s.dun");
 
         return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
-            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
+                                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
+                                std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>(), itemManager );
     }
     else if(dLvl < 13)
     {
-        return FALevelGen::generate(100, 100, dLvl, exe);
+        return FALevelGen::generate(100, 100, dLvl, exe, itemManager);
     }
     else
     {
@@ -374,7 +375,7 @@ void runGameLoop(const bpo::variables_map& variables)
         renderer.stop();
         return;
     }
-    Level::ItemManager itemManager;
+    FAWorld::ItemManager itemManager;
 
     itemManager.loadItems(&exe);
 
@@ -397,7 +398,7 @@ void runGameLoop(const bpo::variables_map& variables)
     // -1 represents the main menu
     if(currentLevel != -1)
     {
-        if(!(level = getLevel(currentLevel, exe)))
+        if(!(level = getLevel(currentLevel, exe, &itemManager)))
         {
             done = true;
         }
@@ -469,7 +470,7 @@ void runGameLoop(const bpo::variables_map& variables)
                     currentLevel = tmp;
 
                     if(levels[currentLevel] == NULL)
-                        levels[currentLevel] = getLevel(currentLevel, exe);
+                        levels[currentLevel] = getLevel(currentLevel, exe, &itemManager);
 
                     level = levels[currentLevel];
                     

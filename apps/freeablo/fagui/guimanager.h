@@ -1,5 +1,5 @@
 #include <string>
-#include <level/itemmanager.h>
+#include "../faworld/itemmanager.h"
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H
 

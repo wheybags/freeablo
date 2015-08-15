@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include "inventory.h"
-#include <level/itemmanager.h>
+#include "itemmanager.h"
 namespace FAWorld
 {
 Inventory::Inventory()
@@ -28,37 +28,37 @@ Inventory Inventory::testInv(Inventory& inv)
 
 
 
-    Level::ItemManager itemManager;
+    ItemManager itemManager;
     while(!itemManager.mIsLoaded);
-    Level::Item gold = itemManager.getBaseItem(43);
+    Item gold = itemManager.getBaseItem(43);
 
-    Level::Item bow  = itemManager.getBaseItem(28);
-    Level::Item bow2  = itemManager.getBaseItem(28);
-    Level::Item bow3  = itemManager.getBaseItem(28);
-    Level::Item buckler = itemManager.getBaseItem(18);
-    Level::Item ring = itemManager.getBaseItem(36);
-    Level::Item cap = itemManager.getBaseItem(20);
-    Level::Item plate = itemManager.getBaseItem(15);
-    Level::Item amulet = itemManager.getBaseItem(72);
-    Level::Item ring2 = itemManager.getBaseItem(36);
-    Level::Item elixir = itemManager.getBaseItem(32);
-    inv.putItem(bow, Level::Item::eqINV, Level::Item::eqFLOOR);
-    inv.putItem(bow2, Level::Item::eqINV, Level::Item::eqFLOOR, 0, 2);
-    inv.putItem(bow3, Level::Item::eqLEFTHAND, Level::Item::eqFLOOR);
-    inv.putItem(ring, Level::Item::eqINV, Level::Item::eqFLOOR, 3, 0);
-    inv.putItem(ring2, Level::Item::eqINV, Level::Item::eqFLOOR, 3, 1);
-    inv.putItem(cap, Level::Item::eqHEAD, Level::Item::eqFLOOR, 3, 0);
-    inv.putItem(plate, Level::Item::eqBODY, Level::Item::eqFLOOR, 3, 0);
-    inv.putItem(amulet, Level::Item::eqAMULET, Level::Item::eqFLOOR, 3, 0);
-    inv.putItem(elixir, Level::Item::eqBELT, Level::Item::eqFLOOR, 0, 0, 1);
+    Item bow  = itemManager.getBaseItem(28);
+    Item bow2  = itemManager.getBaseItem(28);
+    Item bow3  = itemManager.getBaseItem(28);
+    Item buckler = itemManager.getBaseItem(18);
+    Item ring = itemManager.getBaseItem(36);
+    Item cap = itemManager.getBaseItem(20);
+    Item plate = itemManager.getBaseItem(15);
+    Item amulet = itemManager.getBaseItem(72);
+    Item ring2 = itemManager.getBaseItem(36);
+    Item elixir = itemManager.getBaseItem(32);
+    inv.putItem(bow, Item::eqINV, Item::eqFLOOR);
+    inv.putItem(bow2, Item::eqINV, Item::eqFLOOR, 0, 2);
+    inv.putItem(bow3, Item::eqLEFTHAND, Item::eqFLOOR);
+    inv.putItem(ring, Item::eqINV, Item::eqFLOOR, 3, 0);
+    inv.putItem(ring2, Item::eqINV, Item::eqFLOOR, 3, 1);
+    inv.putItem(cap, Item::eqHEAD, Item::eqFLOOR, 3, 0);
+    inv.putItem(plate, Item::eqBODY, Item::eqFLOOR, 3, 0);
+    inv.putItem(amulet, Item::eqAMULET, Item::eqFLOOR, 3, 0);
+    inv.putItem(elixir, Item::eqBELT, Item::eqFLOOR, 0, 0, 1);
 
     return inv;
 
 }
 
 bool Inventory::canPlaceItem(
-        Level::Item  item,
-        Level::Item::equipLoc equipType,
+        Item  item,
+        Item::equipLoc equipType,
         uint8_t y,
         uint8_t x,
         uint8_t beltX)
@@ -71,8 +71,8 @@ bool Inventory::canPlaceItem(
              * armour in the game.
              *
              * */
-    case Level::Item::eqLEFTHAND:
-        if(item.mItem.equipLoc == Level::Item::eqONEHAND)
+    case Item::eqLEFTHAND:
+        if(item.mItem.equipLoc == Item::eqONEHAND)
         {
             if(this->mLeftHand.isEmpty())
             {
@@ -83,14 +83,14 @@ bool Inventory::canPlaceItem(
                     return true;
             }
         }
-        else if(item.mItem.equipLoc == Level::Item::eqTWOHAND)
+        else if(item.mItem.equipLoc == Item::eqTWOHAND)
         {
-            if(item.mItem.equipLoc == Level::Item::eqTWOHAND && this->mLeftHand.isEmpty())
+            if(item.mItem.equipLoc == Item::eqTWOHAND && this->mLeftHand.isEmpty())
                 return true;
 
         }
         break;
-    case Level::Item::eqRIGHTHAND:
+    case Item::eqRIGHTHAND:
         if(this->mRightHand.isEmpty())
         {
             if(this->mLeftHand.isEmpty())
@@ -100,39 +100,39 @@ bool Inventory::canPlaceItem(
                 return true;
         }
 
-        else if(item.mItem.equipLoc == Level::Item::eqTWOHAND)
+        else if(item.mItem.equipLoc == Item::eqTWOHAND)
         {
-            if(item.mItem.equipLoc == Level::Item::eqTWOHAND && this->mLeftHand.isEmpty())
+            if(item.mItem.equipLoc == Item::eqTWOHAND && this->mLeftHand.isEmpty())
                 return true;
 
         }
         break;
-    case Level::Item::eqBODY:
-        if(item.mItem.equipLoc == Level::Item::eqBODY && this->mBody.isEmpty())
+    case Item::eqBODY:
+        if(item.mItem.equipLoc == Item::eqBODY && this->mBody.isEmpty())
             return true;
         break;
 
-    case Level::Item::eqHEAD:
-        if(item.mItem.equipLoc == Level::Item::eqHEAD && this->mHead.isEmpty())
+    case Item::eqHEAD:
+        if(item.mItem.equipLoc == Item::eqHEAD && this->mHead.isEmpty())
             return true;
         break;
 
-    case Level::Item::eqLEFTRING:
-        if(item.mItem.equipLoc == Level::Item::eqRING)
+    case Item::eqLEFTRING:
+        if(item.mItem.equipLoc == Item::eqRING)
         {
             if(this->mLeftRing.isEmpty()) return true;
         }
         break;
-    case Level::Item::eqRIGHTRING:
+    case Item::eqRIGHTRING:
 
-        if(item.mItem.equipLoc == Level::Item::eqRING)
+        if(item.mItem.equipLoc == Item::eqRING)
         {
             if(this->mRightRing.isEmpty()) return true;
         }
         break;
 
-    case Level::Item::eqAMULET:
-        if(item.mItem.equipLoc == Level::Item::eqAMULET && this->mAmulet.isEmpty())
+    case Item::eqAMULET:
+        if(item.mItem.equipLoc == Item::eqAMULET && this->mAmulet.isEmpty())
         {
             return true;
         }
@@ -141,7 +141,7 @@ bool Inventory::canPlaceItem(
              * When putting an item in the inventory we must check if it will fit!
              * */
 
-    case Level::Item::eqINV:
+    case Item::eqINV:
         if(x < 10 && y < 4)
         {
             if(!((x + item.mSizeX-1 < 10) && (y + item.mSizeY-1) < 4))
@@ -168,8 +168,8 @@ bool Inventory::canPlaceItem(
 
         }
         break;
-    case Level::Item::eqBELT:
-        if(item.mItem.equipLoc == Level::Item::eqUNEQUIP && item.mItem.itemType == Level::Item::itPOT)
+    case Item::eqBELT:
+        if(item.mItem.equipLoc == Item::eqUNEQUIP && item.mItem.itemType == Item::itPOT)
         {
             if(beltX <= 7)
             {
@@ -178,9 +178,9 @@ bool Inventory::canPlaceItem(
 
         }
         break;
-    case Level::Item::eqFLOOR:
+    case Item::eqFLOOR:
         return true;
-    case Level::Item::eqCURSOR:
+    case Item::eqCURSOR:
         return this->mCursorHeld.isEmpty();
     default:
         return false;
@@ -191,9 +191,9 @@ bool Inventory::canPlaceItem(
     return false;
 }
 //TODO: When stats have implemented add checks for requirements to wear/wield items
-bool Inventory::putItem(Level::Item &item,
-                        Level::Item::equipLoc equipType,
-                        Level::Item::equipLoc from,
+bool Inventory::putItem(Item &item,
+                        Item::equipLoc equipType,
+                        Item::equipLoc from,
                         uint8_t y,
                         uint8_t x,
                         uint8_t beltX)
@@ -205,14 +205,14 @@ bool Inventory::putItem(Level::Item &item,
     {
         switch(equipType)
         {
-        case Level::Item::eqLEFTHAND:
-            if(item.mItem.equipLoc == Level::Item::eqONEHAND)
+        case Item::eqLEFTHAND:
+            if(item.mItem.equipLoc == Item::eqONEHAND)
             {
                 this->mLeftHand=item;
 
                 removeItem(item, from, beltX);
             }
-            else if(item.mItem.equipLoc == Level::Item::eqTWOHAND)
+            else if(item.mItem.equipLoc == Item::eqTWOHAND)
             {
 
                 if(!this->mRightHand.isEmpty())
@@ -248,7 +248,7 @@ bool Inventory::putItem(Level::Item &item,
                     }
                     if(auto_fit_x !=255)
                     {
-                        putItem(this->mRightHand, Level::Item::eqINV, Level::Item::eqRIGHTHAND, auto_fit_y, auto_fit_x);
+                        putItem(this->mRightHand, Item::eqINV, Item::eqRIGHTHAND, auto_fit_y, auto_fit_x);
                         removeItem(item, from, beltX, y, x);
                         this->mRightHand = item;
                         return true;
@@ -270,9 +270,9 @@ bool Inventory::putItem(Level::Item &item,
 
             }
             break;
-        case Level::Item::eqRIGHTHAND:
+        case Item::eqRIGHTHAND:
             this->mRightHand=item;
-            if(item.mItem.equipLoc == Level::Item::eqTWOHAND)
+            if(item.mItem.equipLoc == Item::eqTWOHAND)
             {
                 if(this->mLeftHand.isEmpty())
                 {
@@ -281,7 +281,7 @@ bool Inventory::putItem(Level::Item &item,
                 }
                 else
                 {
-                    return putItem(item, Level::Item::eqLEFTHAND, from);
+                    return putItem(item, Item::eqLEFTHAND, from);
 
                 }
 
@@ -295,26 +295,26 @@ bool Inventory::putItem(Level::Item &item,
                  * it to you to sort out for yourself.
                  * */
 
-        case Level::Item::eqBODY:
+        case Item::eqBODY:
             mBody = item;
             removeItem(item, from, beltX);
             break;
 
-        case Level::Item::eqHEAD:
+        case Item::eqHEAD:
             mHead = item;
             removeItem(item, from, beltX);
             break;
 
-        case Level::Item::eqLEFTRING:
+        case Item::eqLEFTRING:
             mLeftRing = item;
             removeItem(item, from, beltX);
             break;
-        case Level::Item::eqRIGHTRING:
+        case Item::eqRIGHTRING:
             mRightRing = item;
             removeItem(item, from, beltX);
             break;
 
-        case Level::Item::eqAMULET:
+        case Item::eqAMULET:
             mAmulet = item;
             removeItem(item, from, beltX);
             break;
@@ -323,7 +323,7 @@ bool Inventory::putItem(Level::Item &item,
                  * For every space the item takes up in the inventory we leave
                  * a reference to the item in the corresponding entry in mInventoryBox.
                 */
-        case Level::Item::eqINV:
+        case Item::eqINV:
 
             if(item.mMaxCount > 1)
             {
@@ -343,7 +343,7 @@ bool Inventory::putItem(Level::Item &item,
                             item.mInvX = x;
                             item.mInvY = y;
                             mInventoryBox[y][x] = item;
-                            mInventoryBox[i][j] = Level::Item();
+                            mInventoryBox[i][j] = Item();
                             break;
                         }
                     }
@@ -376,14 +376,14 @@ bool Inventory::putItem(Level::Item &item,
             }
             removeItem(item, from, beltX, y, x);
             break;
-        case Level::Item::eqBELT:
+        case Item::eqBELT:
             item.mBeltX = beltX;
             removeItem(item, from, beltX);
             this->mBelt[beltX]=item;
             break;
-        case Level::Item::eqFLOOR:
+        case Item::eqFLOOR:
             break;
-        case Level::Item::eqCURSOR:
+        case Item::eqCURSOR:
 
             mCursorHeld = item;
 
@@ -401,105 +401,105 @@ bool Inventory::putItem(Level::Item &item,
     }
     return true;
 }
-Level::Item& Inventory::getItemAt(Level::Item::equipLoc type, uint8_t y, uint8_t x, uint8_t beltX)
+Item& Inventory::getItemAt(Item::equipLoc type, uint8_t y, uint8_t x, uint8_t beltX)
 {
 
 
     switch(type)
     {
-    case Level::Item::eqLEFTHAND: return mLeftHand;
-    case Level::Item::eqLEFTRING: return mLeftRing;
-    case Level::Item::eqRIGHTHAND: return mRightHand;
-    case Level::Item::eqRIGHTRING: return mRightRing;
-    case Level::Item::eqBODY: return mBody;
-    case Level::Item::eqHEAD: return mHead;
-    case Level::Item::eqAMULET: return mAmulet;
-    case Level::Item::eqINV: return mInventoryBox[y][x];
-    case Level::Item::eqBELT: return mBelt[beltX];
-    case Level::Item::eqCURSOR: return mCursorHeld;
+    case Item::eqLEFTHAND: return mLeftHand;
+    case Item::eqLEFTRING: return mLeftRing;
+    case Item::eqRIGHTHAND: return mRightHand;
+    case Item::eqRIGHTRING: return mRightRing;
+    case Item::eqBODY: return mBody;
+    case Item::eqHEAD: return mHead;
+    case Item::eqAMULET: return mAmulet;
+    case Item::eqINV: return mInventoryBox[y][x];
+    case Item::eqBELT: return mBelt[beltX];
+    case Item::eqCURSOR: return mCursorHeld;
     default: break;
 
     }
 
-    Level::Item empty;
+    Item empty;
     return empty;
 }
 
 void Inventory::removeItem(
-        Level::Item& item,
-        Level::Item::equipLoc from,
+        Item& item,
+        Item::equipLoc from,
         uint8_t beltX,
         uint8_t invY,
         uint8_t invX)
 {
     switch(from)
     {
-    case Level::Item::eqLEFTHAND:
-        if(item.mItem.equipLoc == Level::Item::eqTWOHAND)
+    case Item::eqLEFTHAND:
+        if(item.mItem.equipLoc == Item::eqTWOHAND)
         {
-            mRightHand=Level::Item();
+            mRightHand=Item();
         }
-        mLeftHand = Level::Item();
+        mLeftHand = Item();
         break;
 
-    case Level::Item::eqRIGHTHAND:
-        if(item.mItem.equipLoc == Level::Item::eqTWOHAND)
+    case Item::eqRIGHTHAND:
+        if(item.mItem.equipLoc == Item::eqTWOHAND)
         {
 
-            mLeftHand=Level::Item();
+            mLeftHand=Item();
         }
-        mRightHand=Level::Item();
+        mRightHand=Item();
         break;
 
-    case Level::Item::eqLEFTRING:
-        mLeftRing=Level::Item();
+    case Item::eqLEFTRING:
+        mLeftRing=Item();
         break;
-    case Level::Item::eqRIGHTRING:
-        mRightRing =Level::Item();
-        break;
-
-    case Level::Item::eqBELT:
-        mBelt[beltX] =Level::Item();
+    case Item::eqRIGHTRING:
+        mRightRing =Item();
         break;
 
-    case Level::Item::eqCURSOR:
-        mCursorHeld = Level::Item();
+    case Item::eqBELT:
+        mBelt[beltX] =Item();
         break;
 
-    case Level::Item::eqAMULET:
-        mAmulet = Level::Item();
+    case Item::eqCURSOR:
+        mCursorHeld = Item();
         break;
 
-    case Level::Item::eqHEAD:
-        mHead = Level::Item();
+    case Item::eqAMULET:
+        mAmulet = Item();
         break;
 
-    case Level::Item::eqBODY:
-        mBody = Level::Item();
+    case Item::eqHEAD:
+        mHead = Item();
         break;
 
-    case Level::Item::eqINV:
+    case Item::eqBODY:
+        mBody = Item();
+        break;
+
+    case Item::eqINV:
         for(uint8_t i=invY;i < invY+item.mSizeY;i++)
         {
             for(uint8_t j=invX;j < invX+item.mSizeX;j++)
             {
-                mInventoryBox[i][j] = Level::Item();
+                mInventoryBox[i][j] = Item();
                 mInventoryBox[i][j].mInvY=i;
                 mInventoryBox[i][j].mInvX=j;
             }
         }
         break;
 
-    case Level::Item::eqONEHAND:
-    case Level::Item::eqTWOHAND:
-    case Level::Item::eqUNEQUIP:
-    case Level::Item::eqFLOOR:
+    case Item::eqONEHAND:
+    case Item::eqTWOHAND:
+    case Item::eqUNEQUIP:
+    case Item::eqFLOOR:
     default:
         return;
     }
 
 }
-bool Inventory::fitsAt(Level::Item item, uint8_t y, uint8_t x)
+bool Inventory::fitsAt(Item item, uint8_t y, uint8_t x)
 {
     bool foundItem=false;
 

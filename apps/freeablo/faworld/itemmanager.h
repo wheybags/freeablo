@@ -5,9 +5,9 @@
 #include <map>
 #include <stdint.h>
 #include <diabloexe/diabloexe.h>
-namespace Level
+#include <level/baseitemmanager.h>
+namespace FAWorld
 {
-
     class ItemPosition
     {
     public:
@@ -21,23 +21,7 @@ namespace Level
         std::pair<size_t,size_t> mFloorPosition;
     };
 
-
-    template<class item_class, class item_property_type, class hash_type, class id_type>
-    class GenericItemManager
-    {
-        public:
-
-        private:
-            static id_type lastUnique;
-            static std::map<id_type, item_class> mRegisteredItems;
-            std::map<hash_type, item_class> mItemPositionMap;
-
-
-
-    };
-
-
-    class ItemManager
+    class ItemManager : public Level::BaseItemManager
     {
     public:
         void loadItems(DiabloExe::DiabloExe * exe);
@@ -51,16 +35,11 @@ namespace Level
         void removeItem(Item item);
         static uint32_t getUniqueItemCode();
         ItemManager();
-
     private:
         static uint32_t lastUnique;
         std::map<ItemPosition, Item> mItemPositionMap;
         static std::map<uint8_t, Item> mRegisteredItems;
-
     };
-
-
-
 }
 
 
