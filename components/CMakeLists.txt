@@ -17,14 +17,16 @@ add_library(Levels
     level/min.h  
     level/tileset.cpp  
     level/tileset.h
+    level/findpath.cpp
+    level/findpath.h
     level/level.h
     level/level.cpp
     level/sol.cpp
     level/sol.h
-	level/itemmanager.cpp
-	level/itemmanager.h
-	level/item.cpp
-	level/item.h)
+    level/itemmanager.cpp
+    level/itemmanager.h
+    level/item.cpp
+    level/item.h)
 target_link_libraries(Levels FAIO DiabloExe)
 set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
