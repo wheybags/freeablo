@@ -16,6 +16,8 @@ add_library(Levels
     level/min.h  
     level/tileset.cpp  
     level/tileset.h
+    level/findpath.cpp
+    level/findpath.h
     level/level.h
     level/level.cpp
     level/sol.cpp
