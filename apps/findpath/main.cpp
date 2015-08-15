@@ -9,6 +9,10 @@
 #include <queue>
 #include <iomanip>
 #include <algorithm>
+#include <chrono>
+
+using namespace std::chrono;
+using namespace std;
 
 namespace Level
 {
@@ -89,7 +93,7 @@ namespace Level
 
 using namespace Level;
 
-std::ostream& operator<<(std::ostream& os, FindPath::Location & location )
+ostream& operator<<(ostream& os, FindPath::Location & location )
 {
     os << "(" << location.first << "," << location.second << ")";
     return os;
@@ -107,10 +111,10 @@ void drawPath(Level::Level& graph, int field_width,
             FindPath::Location id;
             id.first = x;
             id.second = y;
-            std::cout << std::left << std::setw(field_width);
+            cout << left << setw(field_width);
             if (!graph.isPassable(x,y))
             {
-                std::cout << string(field_width, '#');
+                cout << string(field_width, '#');
             }
             else if (point_to != 0 && point_to->count(id))
             {
@@ -118,26 +122,26 @@ void drawPath(Level::Level& graph, int field_width,
                 x2 = (*point_to)[id].first;
                 y2 = (*point_to)[id].second;
 
-                if (x2 == x + 1) { std::cout << "\u2192 "; }
-                else if (x2 == x - 1) { std::cout << "\u2190 "; }
-                else if (y2 == y + 1) { std::cout << "\u2193 "; }
-                else if (y2 == y - 1) { std::cout << "\u2191 "; }
-                else { std::cout << "* "; }
+                if (x2 == x + 1) { cout << "\u2192 "; }
+                else if (x2 == x - 1) { cout << "\u2190 "; }
+                else if (y2 == y + 1) { cout << "\u2193 "; }
+                else if (y2 == y - 1) { cout << "\u2191 "; }
+                else { cout << "* "; }
             }
             else if (distances != 0 && distances->count(id))
             {
-                std::cout << (*distances)[id];
+                cout << (*distances)[id];
             }
             else if (path != 0 && find(path->begin(), path->end(), id) != path->end())
             {
-                std::cout << '@';
+                cout << '@';
             }
             else
             {
-                std::cout << '.';
+                cout << '.';
             }
         }
-        std::cout << std::endl;
+        cout << endl;
     }
 }
 
@@ -147,11 +151,11 @@ int main()
     FindPath findPath(level);
 
     FindPath::Location start,goal;
-    std::vector<FindPath::Location> path;
+    vector<FindPath::Location> path;
 
     int caseId = 1;
-    std::cout << "Select case ID [1-6]";
-    std::cin >> caseId;
+    cout << "Select case ID [1-6]";
+    cin >> caseId;
 
     switch(caseId)
     {
@@ -184,8 +188,16 @@ int main()
         break;
     }
 
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
     path = findPath.find(start, goal);
+
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+
     drawPath(*level,2,0,0,&path);
+
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    cout << "Duration: " << duration << " us" << endl;
 
 
     delete level;
