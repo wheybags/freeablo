@@ -1,7 +1,5 @@
 #include "itemmanager.h"
 #include <sstream>
-#include <boost/bind.hpp>
-
 #include <iostream>
 
 namespace Level
@@ -100,8 +98,10 @@ void ItemManager::putItem(Item item,
     std::map<ItemPosition, Item>::const_iterator it = std::find_if(
                 mItemPositionMap.begin(),
                 mItemPositionMap.end(),
-                boost::bind(&std::map<ItemPosition, Item>::value_type::second, _1) == item
-                );
+                [&](const std::pair<ItemPosition, Item> & pair)->bool {
+                    return pair.second == item;
+                });
+
     ItemPosition pos = it->first;
     if(it== mItemPositionMap.end())
     switch(from)
@@ -164,8 +164,10 @@ void ItemManager::removeItem(Item item)
     std::map<ItemPosition, Item>::const_iterator it = std::find_if(
                 mItemPositionMap.begin(),
                 mItemPositionMap.end(),
-                boost::bind(&std::map<ItemPosition, Item >::value_type::second, _1) == item
-                );
+                [&](const std::pair<ItemPosition, Item> & pair)->bool {
+                    return pair.second == item;
+                }
+    );
 
     if(it != mItemPositionMap.end())
     {

@@ -4,8 +4,8 @@
 #include "item.h"
 #include <map>
 #include <stdint.h>
-#include <boost/tuple/tuple.hpp>
 #include <diabloexe/diabloexe.h>
+
 namespace Level
 {
 
