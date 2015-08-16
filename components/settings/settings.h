@@ -22,7 +22,6 @@ public:
     Settings();
     bool loadUserSettings();
     bool loadFromFile(const std::string & path);
-    bool loadFromFAFile(const std::string & path);
     bool save();
 
     bool isSectionExists(const std::string & section);

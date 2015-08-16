@@ -83,41 +83,6 @@ bool Settings::loadFromFile(const std::string & path)
     return true;
 }
 
-bool Settings::loadFromFAFile(const std::string & path)
-{
-    clearSettings();
-
-    mMode = FA_FILE;
-
-    FAIO::FAFile* file = FAIO::FAfopen(path);
-    if(!file)
-        return false;
-
-    size_t size = FAIO::FAsize(file);
-    char* str = new char[size+1];
-
-    FAIO::FAfread(str, 1, size, file);
-    str[size] = '\0';
-
-    std::stringstream s;
-    s << str;
-
-    try
-    {
-        boost::property_tree::ini_parser::read_ini(s, mUserPropertyTree);
-    }
-    catch(std::exception & e)
-    {
-        std::cout << "Loading INI exception: " << e.what() << std::endl;
-        return false;
-    }
-
-    delete[] str;
-    FAIO::FAfclose(file);
-
-    return true;
-}
-
 void Settings::createFile(const std::string & path)
 {
     std::ofstream file(path.c_str());
