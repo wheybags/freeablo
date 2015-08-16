@@ -14,6 +14,7 @@
 #include "actor.h"
 #include "player.h"
 #include "gamelevel.h"
+#include "findpath.h"
 
 namespace FAWorld
 {
@@ -22,12 +23,12 @@ namespace FAWorld
     World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
     {
         assert(singletonInstance == nullptr);
-        singletonInstance = this;        
+        singletonInstance = this;
     }
 
     World::~World()
     {
-        for(auto& pair : mLevels)
+        for (auto& pair : mLevels)
             delete pair.second;
     }
 
@@ -38,7 +39,7 @@ namespace FAWorld
 
     void World::notify(Engine::KeyboardInputAction action)
     {
-        if(action == Engine::CHANGE_LEVEL_UP || action == Engine::CHANGE_LEVEL_DOWN)
+        if (action == Engine::CHANGE_LEVEL_UP || action == Engine::CHANGE_LEVEL_DOWN)
         {
             changeLevel(action == Engine::CHANGE_LEVEL_UP);
         }
@@ -46,15 +47,15 @@ namespace FAWorld
 
     void World::notify(Engine::MouseInputAction action, Engine::Point mousePosition)
     {
-        if(action == Engine::MOUSE_RELEASE)
+        if (action == Engine::MOUSE_RELEASE)
         {
             stopPlayerActions();
         }
-        else if(action == Engine::MOUSE_CLICK)
+        else if (action == Engine::MOUSE_CLICK)
         {
             onMouseClick(mousePosition);
         }
-        else if(action == Engine::MOUSE_DOWN)
+        else if (action == Engine::MOUSE_DOWN)
         {
             onMouseDown(mousePosition);
         }
@@ -67,15 +68,15 @@ namespace FAWorld
         Level::Dun sector3("levels/towndata/sector3s.dun");
         Level::Dun sector4("levels/towndata/sector4s.dun");
 
-        Level::Level townLevelBase( Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
-                                    "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
-                                    std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>(), -1, 1);
+        Level::Level townLevelBase(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
+            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
+            std::make_pair(25, 29), std::make_pair(75, 68), std::map<size_t, size_t>(), -1, 1);
 
         std::vector<Actor*> townActors;
 
         const std::vector<const DiabloExe::Npc*> npcs = mDiabloExe.getNpcs();
 
-        for(size_t i = 0; i < npcs.size(); i++)
+        for (size_t i = 0; i < npcs.size(); i++)
         {
             Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
             actor->setCanTalk(true);
@@ -87,9 +88,9 @@ namespace FAWorld
         mLevels[0] = tmp;
 
 
-        for(int32_t i = 1; i < 17; i++)
+        for (int32_t i = 1; i < 17; i++)
         {
-            mLevels[i] = FALevelGen::generate(100, 100, i, mDiabloExe, i-1, i+1);
+            mLevels[i] = FALevelGen::generate(100, 100, i, mDiabloExe, i - 1, i + 1);
         }
     }
 
@@ -102,10 +103,10 @@ namespace FAWorld
     {
         return mCurrentPlayer->getLevel()->getLevelIndex();
     }
-    
+
     void World::setLevel(size_t level)
     {
-        if(level >= mLevels.size() || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == level))
+        if (level >= mLevels.size() || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == level))
             return;
 
         mCurrentPlayer->setLevel(mLevels[level]);
@@ -115,36 +116,36 @@ namespace FAWorld
     void World::playLevelMusic(size_t level)
     {
         auto threadManager = Engine::ThreadManager::get();
-        switch(level)
+        switch (level)
         {
-            case 0:
-            {
-                threadManager->playMusic("music/dtowne.wav");
-                break;
-            }
-            case 1: case 2: case 3: case 4:
-            {
-                threadManager->playMusic("music/dlvla.wav");
-                break;
-            }
-            case 5: case 6: case 7: case 8:
-            {
-                threadManager->playMusic("music/dlvlb.wav");
-                break;
-            }
-            case 9: case 10: case 11: case 12:
-            {
-                threadManager->playMusic("music/dlvlc.wav");
-                break;
-            }
-            case 13: case 14: case 15: case 16:
-            {
-                threadManager->playMusic("music/dlvld.wav");
-                break;
-            }
-            default:
-                std::cout << "Wrong level " << level << std::endl;
-                break;
+        case 0:
+        {
+            threadManager->playMusic("music/dtowne.wav");
+            break;
+        }
+        case 1: case 2: case 3: case 4:
+        {
+            threadManager->playMusic("music/dlvla.wav");
+            break;
+        }
+        case 5: case 6: case 7: case 8:
+        {
+            threadManager->playMusic("music/dlvlb.wav");
+            break;
+        }
+        case 9: case 10: case 11: case 12:
+        {
+            threadManager->playMusic("music/dlvlc.wav");
+            break;
+        }
+        case 13: case 14: case 15: case 16:
+        {
+            threadManager->playMusic("music/dlvld.wav");
+            break;
+        }
+        default:
+            std::cout << "Wrong level " << level << std::endl;
+            break;
         }
     }
 
@@ -166,15 +167,15 @@ namespace FAWorld
     void World::update(bool noclip)
     {
         mTicksPassed++;
-        
+
         std::set<GameLevel*> done;
-        
+
         // only update levels that have players on them
-        for(auto& player : mPlayers)
+        for (auto& player : mPlayers)
         {
             GameLevel* level = player->getLevel();
-            
-            if(level && !done.count(level))
+
+            if (level && !done.count(level))
             {
                 done.insert(level);
                 level->update(noclip, mTicksPassed);
@@ -204,17 +205,17 @@ namespace FAWorld
 
     void World::fillRenderState(FARender::RenderState* state)
     {
-        if(getCurrentLevel())
+        if (getCurrentLevel())
             getCurrentLevel()->fillRenderState(state);
     }
 
     Actor* World::getActorById(int32_t id)
     {
-        for(auto levelPair : mLevels)
+        for (auto levelPair : mLevels)
         {
             auto actor = levelPair.second->getActorById(id);
 
-            if(actor)
+            if (actor)
                 return actor;
         }
 
@@ -223,14 +224,14 @@ namespace FAWorld
 
     void World::getAllActors(std::vector<Actor*>& actors)
     {
-        for(auto pair : mLevels)
+        for (auto pair : mLevels)
             pair.second->getActors(actors);
     }
 
     void World::changeLevel(bool up)
     {
         size_t nextLevelIndex;
-        if(up)
+        if (up)
             nextLevelIndex = getCurrentLevel()->getPreviousLevel();
         else
             nextLevelIndex = getCurrentLevel()->getNextLevel();
@@ -240,7 +241,7 @@ namespace FAWorld
         GameLevel* level = getCurrentLevel();
         Player* player = getCurrentPlayer();
 
-        if(up)
+        if (up)
             player->mPos = Position(level->downStairsPos().first, level->downStairsPos().second);
         else
             player->mPos = Position(level->upStairsPos().first, level->upStairsPos().second);
@@ -267,6 +268,10 @@ namespace FAWorld
         auto level = getCurrentLevel();
         std::pair<int32_t, int32_t>& destination = player->destination();
         destination = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, *level, player->mPos);
+        //find path and save in the position value
+
+        auto findedPath = FindPath::get(level)->find(player->destination(), destination);
+        //TODO: change it.
         mDestination = destination;
     }
 

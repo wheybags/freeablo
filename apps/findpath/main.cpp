@@ -1,4 +1,5 @@
-#include <level/findpath.h>
+#include "../../freeablo/apps/freeablo/faworld/findpath.h"
+#include "../../freeablo/apps/freeablo/faworld/gamelevel.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,13 +11,14 @@
 #include <iomanip>
 #include <algorithm>
 #include <chrono>
+#include <string>
 
 using namespace std::chrono;
 using namespace std;
 
-namespace Level
+namespace FAWorld
 {
-    class LevelImpl : public Level
+    class LevelImpl : public GameLevelImpl
     {
 
     public:
@@ -29,12 +31,12 @@ namespace Level
             //drawMap();
         }
 
-        size_t width()
+        size_t width() const
         {
             return MAP_SIZE;
         }
 
-        size_t height()
+        size_t height() const
         {
             return MAP_SIZE;
         }
@@ -91,7 +93,7 @@ namespace Level
     };
 }
 
-using namespace Level;
+using namespace FAWorld;
 
 ostream& operator<<(ostream& os, FindPath::Location & location )
 {
@@ -99,7 +101,7 @@ ostream& operator<<(ostream& os, FindPath::Location & location )
     return os;
 }
 
-void drawPath(Level::Level& graph, int field_width,
+void drawPath(::GameLevel::GameLevelImpl& graph, int field_width,
                unordered_map<FindPath::Location, int>* distances=0,
                unordered_map<FindPath::Location, FindPath::Location>* point_to=0,
                vector<FindPath::Location>* path=0)
@@ -147,7 +149,8 @@ void drawPath(Level::Level& graph, int field_width,
 
 int main()
 {
-    Level::Level * level = new LevelImpl();
+    using namespace FAWorld;
+    FAWorld::LevelImpl * level = new LevelImpl();
     FindPath findPath(level);
 
     FindPath::Location start,goal;

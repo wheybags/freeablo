@@ -43,6 +43,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/netobject.cpp
     faworld/gamelevel.cpp
     faworld/gamelevel.h
+    faworld/findpath.h
+    faworld/findpath.cpp
     
     fagui/guimanager.h
     fagui/guimanager.cpp

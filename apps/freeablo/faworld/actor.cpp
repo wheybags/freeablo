@@ -13,27 +13,27 @@ namespace FAWorld
 {
     STATIC_HANDLE_NET_OBJECT_IN_IMPL(Actor)
 
-    void Actor::update(bool noclip, size_t ticksPassed)
+        void Actor::update(bool noclip, size_t ticksPassed)
     {
-        if(mLevel)
+        if (mLevel)
         {
             size_t animDivisor = mAnimTimeMap[getAnimState()];
-            if(animDivisor == 0)
+            if (animDivisor == 0)
             {
                 animDivisor = FAWorld::World::getTicksInPeriod(0.1);
             }
-            bool advanceAnims  = !(ticksPassed % (World::ticksPerSecond/animDivisor));
+            bool advanceAnims = !(ticksPassed % (World::ticksPerSecond / animDivisor));
 
-            if(advanceAnims)
+            if (advanceAnims)
             {
                 auto currentAnim = getCurrentAnim();
 
-                if(mAnimPlaying)
+                if (mAnimPlaying)
                 {
-                    if(mFrame < currentAnim->getAnimLength())
+                    if (mFrame < currentAnim->getAnimLength())
                         mFrame++;
 
-                    if(mFrame >= currentAnim->getAnimLength())
+                    if (mFrame >= currentAnim->getAnimLength())
                     {
                         if (currentAnim == mAttackAnim)
                             isAttacking = false;
@@ -43,56 +43,55 @@ namespace FAWorld
                     }
                 }
                 else {
-                    if(!isDead())
+                    if (!isDead())
                         mFrame = (mFrame + 1) % currentAnim->getAnimLength();
-                    else if(mFrame < currentAnim->getAnimLength() -1)
+                    else if (mFrame < currentAnim->getAnimLength() - 1)
                         mFrame++;
                 }
 
-                #ifndef NDEBUG
-                    assert(mFrame < getCurrentAnim()->getAnimLength());
-                #endif
+#ifndef NDEBUG
+                assert(mFrame < getCurrentAnim()->getAnimLength());
+#endif
             }
 
-            if(mPos.current() != mDestination)
+            if (mPos.current() != mDestination)
             {
                 std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
                 Actor * actor;
                 actor = World::get()->getActorAt(mDestination.first, mDestination.second);
                 if (canIAttack(actor))
                 {
-                        mPos.mDirection = Misc::getVecDir(vector);
-                        mPos.update();
-                        mPos.mDist = 0;
+                    mPos.mDirection = Misc::getVecDir(vector);
+                    mPos.update();
+                    mPos.mDist = 0;
 
-                        attack(actor);
+                    attack(actor);
                 }
-                else if(canTalkTo(actor))
+                else if (canTalkTo(actor))
                 {
                     mPos.mDist = 0;
 
                     talk(actor);
                 }
-                else if(mPos.mDist == 0 && !mAnimPlaying)
+                else if (mPos.mDist == 0 && !mAnimPlaying)
                 {
-
                     auto nextPos = Position(mPos.current().first, mPos.current().second, Misc::getVecDir(vector));
                     nextPos.mMoving = true;
                     World& world = *World::get();
 
                     FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.next().first, nextPos.next().second);
 
-                    if((noclip || (mLevel->getTile(nextPos.next().first, nextPos.next().second).passable() &&
-                                                       (actorAtNext == NULL || actorAtNext == this))) && !mAnimPlaying)
+                    if ((noclip || (mLevel->getTile(nextPos.next().first, nextPos.next().second).passable() &&
+                        (actorAtNext == NULL || actorAtNext == this))) && !mAnimPlaying)
                     {
-                        if(!mPos.mMoving && !mAnimPlaying)
+                        if (!mPos.mMoving && !mAnimPlaying)
                         {
                             mPos.mMoving = true;
                             setAnimation(AnimState::walk);
                         }
                     }
 
-                    else if(!mAnimPlaying)
+                    else if (!mAnimPlaying)
                     {
                         mPos.mMoving = false;
                         mDestination = mPos.current();
@@ -102,7 +101,7 @@ namespace FAWorld
                     mPos.mDirection = Misc::getVecDir(vector);
                 }
             }
-            else if(mPos.mMoving && mPos.mDist == 0 && !mAnimPlaying)
+            else if (mPos.mMoving && mPos.mDist == 0 && !mAnimPlaying)
             {
                 mPos.mMoving = false;
                 setAnimation(AnimState::idle);
@@ -114,8 +113,24 @@ namespace FAWorld
             else if (!mIsDead && mPos.mMoving && !mAnimPlaying && mAnimState != AnimState::walk)
                 setAnimation(AnimState::walk);
 
-            if(!mAnimPlaying)
+            if (!mAnimPlaying) {
+                /*
+                 //TODO: to support shift + mouse click operation or the skill casted,we may need more logic.
+                static vector<FindPath::Location> path;
+                if (path.size() && path.back() != destination)
+                {
+                    FindPath findPath(level);
+                    path = std::move(findPath.find(player->destination(), destination));
+                    std::cout << "====path size: %d====" << path.size();
+                }
+                else
+                {
+
+                }
+                */
+
                 mPos.update();
+            }
         }
     }
 
@@ -126,13 +141,13 @@ namespace FAWorld
     }
 
     Actor::Actor(
-            const std::string& walkAnimPath,
-            const std::string& idleAnimPath,
-            const Position& pos,
-            const std::string& dieAnimPath
-            ):
+        const std::string& walkAnimPath,
+        const std::string& idleAnimPath,
+        const Position& pos,
+        const std::string& dieAnimPath
+    ) :
         mPos(pos),
-        mFrame(0),        
+        mFrame(0),
         mIsEnemy(false),
         mAnimState(AnimState::idle)
     {
@@ -154,7 +169,7 @@ namespace FAWorld
 
     Actor::~Actor()
     {
-        if(mStats != nullptr)
+        if (mStats != nullptr)
             delete mStats;
     }
 
@@ -211,43 +226,43 @@ namespace FAWorld
     FARender::FASpriteGroup* Actor::getCurrentAnim()
     {
         FARender::FASpriteGroup* retval;
-        
-        switch(mAnimState)
-        {
-            case AnimState::walk:
-                retval = mWalkAnim;
-                break;
 
-            case AnimState::idle:
-                retval = mIdleAnim;
-                break;
-                
-            case AnimState::attack:
-                retval = mAttackAnim;
-                break;
-            
-            case AnimState::dead:
-                retval = mDieAnim;
-                break;
-                
-            case AnimState::hit:
-                retval = mHitAnim;
-                break;
-            
-            default:
-                retval = mIdleAnim;
-                break;
-        }
-        
-        if(!retval || !retval->isValid())
+        switch (mAnimState)
+        {
+        case AnimState::walk:
+            retval = mWalkAnim;
+            break;
+
+        case AnimState::idle:
             retval = mIdleAnim;
-        
+            break;
+
+        case AnimState::attack:
+            retval = mAttackAnim;
+            break;
+
+        case AnimState::dead:
+            retval = mDieAnim;
+            break;
+
+        case AnimState::hit:
+            retval = mHitAnim;
+            break;
+
+        default:
+            retval = mIdleAnim;
+            break;
+        }
+
+        if (!retval || !retval->isValid())
+            retval = mIdleAnim;
+
         return retval;
     }
 
     void Actor::setAnimation(AnimState::AnimState state, bool reset)
     {
-        if(mAnimState != state || reset)
+        if (mAnimState != state || reset)
         {
             mAnimState = state;
             mFrame = 0;
@@ -256,9 +271,9 @@ namespace FAWorld
 
     void Actor::setLevel(GameLevel* level)
     {
-        if(!mLevel || mLevel->getLevelIndex() != level->getLevelIndex())
+        if (!mLevel || mLevel->getLevelIndex() != level->getLevelIndex())
         {
-            if(mLevel)
+            if (mLevel)
                 mLevel->removeActor(this);
 
             mLevel = level;
@@ -273,22 +288,22 @@ namespace FAWorld
 
     bool Actor::canIAttack(Actor * actor)
     {
-        if(actor == nullptr)
+        if (actor == nullptr)
             return false;
 
-        if(this == actor)
+        if (this == actor)
             return false;
 
-        if(!actor->isEnemy())
+        if (!actor->isEnemy())
             return false;
 
-        if(actor->isDead())
+        if (actor->isDead())
             return false;
 
-        if(mPos.distanceFrom(actor->mPos) >= 2)
+        if (mPos.distanceFrom(actor->mPos) >= 2)
             return false;
 
-        if(isAttacking)
+        if (isAttacking)
             return false;
 
         return true;
@@ -296,19 +311,19 @@ namespace FAWorld
 
     bool Actor::canTalkTo(Actor * actor)
     {
-        if(actor == nullptr)
+        if (actor == nullptr)
             return false;
 
-        if(this == actor)
+        if (this == actor)
             return false;
 
-        if(mPos.distanceFrom(actor->mPos) >= 2)
+        if (mPos.distanceFrom(actor->mPos) >= 2)
             return false;
 
-        if(!actor->canTalk())
+        if (!actor->canTalk())
             return false;
 
-        if(isTalking)
+        if (isTalking)
             return false;
 
         return true;
