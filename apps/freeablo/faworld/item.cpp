@@ -1,5 +1,6 @@
 #include "item.h"
 #include "itemmanager.h"
+#include <iostream>
 namespace FAWorld
 {
 Item::Item()
@@ -28,7 +29,7 @@ Item::~Item()
 
 Cel::CelFile * Item::mObjcurs;
 bool Item::mObjcursLoaded=false;
-Item::Item(DiabloExe::BaseItem item, size_t id)
+Item::Item(DiabloExe::BaseItem item, size_t id, DiabloExe::Affix* affix, bool isIdentified)
 {
 
     if(!mObjcursLoaded)
@@ -36,7 +37,8 @@ Item::Item(DiabloExe::BaseItem item, size_t id)
         mObjcurs = new Cel::CelFile("data/inv/objcurs.cel");
         mObjcursLoaded = true;
     }
-    mItem = item;
+
+    mIsUnique = false;
     mEmpty = false;
     mBaseId = id;
     mUniqueId = 0;
@@ -44,10 +46,40 @@ Item::Item(DiabloExe::BaseItem item, size_t id)
     mInvX=0;
     mInvY=0;
 
-    if(mItem.itemType != itGOLD)
+    mActiveTrigger = item.activTrigger;
+
+    mType = static_cast<itemType>(item.itemType);
+    mEquipLoc = static_cast<equipLoc>(item.equipLoc);
+    mGraphicValue = item.graphicValue;
+
+    mCode = item.itemCode;
+    mUniqCode = item.uniqCode;
+    mName = item.itemName;
+    mSecondName = item.itemSecondName;
+    mQualityLevel = item.qualityLevel;
+    mDurability = item.durability;
+    mMinAttackDamage = item.minAttackDamage;
+    mMaxAttackDamage = item.maxAttackDamage;
+    mMinArmourClass = item.minArmourClass;
+    mMaxArmourClass = item.maxArmourClass;
+
+    mReqStr = item.reqStr;
+    mReqMagic = item.reqMagic;
+    mReqDex = item.reqDex;
+    mReqVit = item.reqVit;
+
+    mSpecialEffect = item.specialEffect;
+    mMagicCode = item.magicCode;
+    mSpellCode = item.spellCode;
+    mUseOnce  = item.useOnce;
+    mBuyPrice = item.price1;
+    mSellPrice= item.price2;
+
+    if(mType != itGOLD)
     {
-        mItem.graphicValue +=11;
-        Cel::CelFrame frame = (*mObjcurs)[mItem.graphicValue];
+
+        mGraphicValue +=11;
+        Cel::CelFrame frame = (*mObjcurs)[mGraphicValue];
         mSizeX = frame.mWidth/28;
         mSizeY = frame.mHeight/28;
         mMaxCount = 1;
@@ -60,7 +92,68 @@ Item::Item(DiabloExe::BaseItem item, size_t id)
         mMaxCount=5000;
     }
 
+    if(affix != NULL)
+    {
+        mIsMagic   = true;
+        mEffect0   = affix->mEffect;
+        mMaxRange0 = affix->mMaxEffect;
+        mMinRange0 = affix->mMinEffect;
+        mIsIdentified = isIdentified;
+
+
+
+    }
+
 }
+Item::Item(const DiabloExe::UniqueItem & item, size_t id)
+{
+    ItemManager itemManager;
+
+    DiabloExe::BaseItem& baseItem = itemManager.getBaseItemByUniqueCode(item.mItemType);
+
+
+
+
+
+    Item base = Item(baseItem, id);
+    *this = base;
+    mIsUnique = true;
+    mIsMagic = false;
+    mSellPrice = item.mGoldValue;
+    mBuyPrice = item.mGoldValue;
+    mQualityLevel = item.mQualityLevel;
+
+    mEffect0 = item.mEffect0;
+    mMinRange0 = item.mMinRange0;
+    mMaxRange0 = item.mMaxRange0;
+
+    mEffect1 = item.mEffect1;
+    mMinRange1 = item.mMinRange1;
+    mMaxRange1 = item.mMaxRange1;
+
+    mEffect2 = item.mEffect2;
+    mMinRange2 = item.mMinRange2;
+    mMaxRange2 = item.mMaxRange2;
+
+    mEffect3 = item.mEffect3;
+    mMinRange3 = item.mMinRange3;
+    mMaxRange3 = item.mMaxRange3;
+
+    mEffect4 = item.mEffect4;
+    mMinRange4 = item.mMinRange4;
+    mMaxRange4 = item.mMaxRange4;
+
+    mEffect5 = item.mEffect5;
+    mMinRange5 = item.mMinRange5;
+    mMaxRange5 = item.mMaxRange5;
+
+
+
+
+
+
+}
+
 bool Item::isReal() const
 {
     return mIsReal;
@@ -68,7 +161,7 @@ bool Item::isReal() const
 std::string Item::getName() const
 {
 
-    return this->mItem.itemName;
+    return this->mName;
 
 }
 std::pair<uint8_t, uint8_t> Item::getInvSize() const
@@ -85,6 +178,167 @@ std::pair<uint8_t, uint8_t> Item::getCornerCoords() const
 {
     return std::pair<uint8_t, uint8_t>(mCornerX, mCornerY);
 }
+uint32_t Item::getActiveTrigger() const
+{
+    return mActiveTrigger;
+}
+uint8_t Item::getReqStr() const
+{
+    return mReqStr;
+}
+uint8_t Item::getReqMagic() const
+{
+    return mReqMagic;
+}
+
+uint8_t Item::getReqDex() const
+{
+    return mReqDex;
+}
+
+uint8_t Item::getReqVit() const
+{
+    return mReqVit;
+}
+
+uint32_t Item::getSpecialEffect() const
+{
+    return mSpecialEffect;
+}
+
+uint32_t Item::getMagicCode() const
+{
+    return mMagicCode;
+}
+
+uint32_t Item::getSpellCode() const
+{
+    return mSpellCode;
+}
+
+uint32_t Item::getUseOnce() const
+{
+    return mUseOnce;
+}
+
+uint32_t Item::getBuyPrice() const
+{
+    return mBuyPrice;
+}
+uint32_t Item::getSellPrice() const
+{
+    return mSellPrice;
+}
+
+uint32_t Item::getEffect0() const
+{
+    return mEffect0;
+}
+
+uint32_t Item::getMinRange0() const
+{
+    return mMinRange0;
+}
+
+uint32_t Item::getMaxRange0() const
+{
+    return mMaxRange0;
+}
+
+uint32_t Item::getEffect1() const
+{
+    return mEffect1;
+}
+
+uint32_t Item::getMinRange1() const
+{
+    return mMinRange1;
+}
+
+uint32_t Item::getMaxRange1() const
+{
+    return mMaxRange1;
+}
+
+uint32_t Item::getEffect2() const
+{
+    return mEffect2;
+}
+
+uint32_t Item::getMinRange2() const
+{
+    return mMinRange2;
+}
+
+uint32_t Item::getMaxRange2() const
+{
+    return mMaxRange2;
+}
+
+uint32_t Item::getEffect3() const
+{
+    return mEffect3;
+}
+
+uint32_t Item::getMinRange3() const
+{
+    return mMinRange3;
+}
+
+uint32_t Item::getMaxRange3() const
+{
+    return mMaxRange3;
+}
+
+uint32_t Item::getEffect4() const
+{
+    return mEffect4;
+}
+
+uint32_t Item::getMinRange4() const
+{
+    return mMinRange4;
+}
+
+uint32_t Item::getMaxRange4() const
+{
+    return mMaxRange4;
+}
+
+uint32_t Item::getEffect5() const
+{
+    return mEffect5;
+}
+
+uint32_t Item::getMinRange5() const
+{
+    return mMinRange5;
+}
+
+uint32_t Item::getMaxRange5() const
+{
+    return mMaxRange5;
+}
+
+uint8_t Item::getCode() const
+{
+    return mCode;
+}
+
+Item::equipLoc Item::getEquipLoc() const
+{
+    return mEquipLoc;
+}
+
+Item::itemType Item::getType() const
+{
+    return mType;
+}
+uint32_t Item::getGraphicValue() const
+{
+    return mGraphicValue;
+}
+
 void Item::setUniqueId(uint32_t mUniqueId)
 {
     this->mUniqueId = mUniqueId;

@@ -19,7 +19,7 @@ namespace DiabloExe
 
         uint8_t mQualityLevel;
 
-        uint16_t mNumAttr;
+        uint16_t mNumEffects;
 
         uint32_t mGoldValue;
 

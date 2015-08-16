@@ -331,10 +331,16 @@ namespace DiabloExe
         return mBaseItems.find(name)->second;
 
     }
+
     std::map<std::string, BaseItem> DiabloExe::getItemMap() const
     {
         return mBaseItems;
 
+    }
+
+    const std::map<std::string, UniqueItem> & DiabloExe::getUniqueItemMap() const
+    {
+        return mUniqueItems;
     }
 
     const CharacterStats DiabloExe::getCharacterStat(std::string character) const

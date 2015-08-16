@@ -30,6 +30,7 @@ namespace DiabloExe
 
             const BaseItem& getItem(const std::string& name) const;
             std::map<std::string, BaseItem> getItemMap() const;
+            const std::map<std::string, UniqueItem> & getUniqueItemMap() const;
             const CharacterStats getCharacterStat(std::string character) const;
 
             std::string dump() const;

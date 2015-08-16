@@ -166,7 +166,7 @@ void placeItem(uint32_t toPara,
                 if(inventory->putItem(item, FAWorld::Item::eqCURSOR, from, fromY, fromX, beltX))
                 {
 
-                    if(item.mItem.graphicValue > 179)
+                    if(item.getGraphicValue() > 179)
                     {
 
                         cursorPath = "";
@@ -175,7 +175,7 @@ void placeItem(uint32_t toPara,
                     else
                     {
                         cursorPath = "data/inv/objcurs.cel";
-                        cursorFrame = item.mItem.graphicValue;
+                        cursorFrame = item.getGraphicValue();
 
                     }
                 }
@@ -247,7 +247,7 @@ boost::python::dict updateInventory()
 
     dict["cursor"] = cursorDict;
 
-    cursorDict["graphic"] = cursor.mItem.graphicValue;
+    cursorDict["graphic"] = cursor.getGraphicValue();
     cursorDict["empty"] = cursor.isEmpty();
     cursorDict["invX"] = cursor.getInvCoords().first;
     cursorDict["invY"] = cursor.getInvCoords().second;
@@ -259,7 +259,7 @@ boost::python::dict updateInventory()
 
     dict["head"] = headDict;
 
-    headDict["graphic"] = head.mItem.graphicValue;
+    headDict["graphic"] = head.getGraphicValue();
     headDict["empty"] = head.isEmpty();
     headDict["invX"] = head.getInvCoords().first;
     headDict["invY"] = head.getInvCoords().second;
@@ -271,7 +271,7 @@ boost::python::dict updateInventory()
 
     dict["body"] = bodyDict;
 
-    bodyDict["graphic"] = body.mItem.graphicValue;
+    bodyDict["graphic"] = body.getGraphicValue();
     bodyDict["empty"] = body.isEmpty();
     bodyDict["invX"] = body.getInvCoords().first;
     bodyDict["invY"] = body.getInvCoords().second;
@@ -283,7 +283,7 @@ boost::python::dict updateInventory()
 
     dict["leftHand"] = leftHandDict;
 
-    leftHandDict["graphic"] = leftHand.mItem.graphicValue;
+    leftHandDict["graphic"] = leftHand.getGraphicValue();
     leftHandDict["empty"] = leftHand.isEmpty();
     leftHandDict["invX"] = leftHand.getInvCoords().first;
     leftHandDict["invY"] = leftHand.getInvCoords().second;
@@ -295,7 +295,7 @@ boost::python::dict updateInventory()
 
     dict["rightHand"] = rightHandDict;
 
-    rightHandDict["graphic"] = rightHand.mItem.graphicValue;
+    rightHandDict["graphic"] = rightHand.getGraphicValue();
     rightHandDict["empty"] = rightHand.isEmpty();
     rightHandDict["invX"] = rightHand.getInvCoords().first;
     rightHandDict["invY"] = rightHand.getInvCoords().second;
@@ -307,7 +307,7 @@ boost::python::dict updateInventory()
 
     dict["leftRing"] = leftRingDict;
 
-    leftRingDict["graphic"] = leftRing.mItem.graphicValue;
+    leftRingDict["graphic"] = leftRing.getGraphicValue();
     leftRingDict["empty"] = leftRing.isEmpty();
     leftRingDict["invX"] = leftRing.getInvCoords().first;
     leftRingDict["invY"] = leftRing.getInvCoords().second;
@@ -319,7 +319,7 @@ boost::python::dict updateInventory()
 
     dict["rightRing"] = rightRingDict;
 
-    rightRingDict["graphic"] = rightRing.mItem.graphicValue;
+    rightRingDict["graphic"] = rightRing.getGraphicValue();
     rightRingDict["empty"] = rightRing.isEmpty();
     rightRingDict["invX"] = rightRing.getInvCoords().first;
     rightRingDict["invY"] = rightRing.getInvCoords().second;
@@ -331,7 +331,7 @@ boost::python::dict updateInventory()
 
     dict["amulet"] = amuletDict;
 
-    amuletDict["graphic"] = amulet.mItem.graphicValue;
+    amuletDict["graphic"] = amulet.getGraphicValue();
     amuletDict["empty"] = amulet.isEmpty();
     amuletDict["invX"] = amulet.getInvCoords().first;
     amuletDict["invY"] = amulet.getInvCoords().second;
@@ -351,7 +351,7 @@ boost::python::dict updateInventory()
             FAWorld::Item item = inventory->getItemAt(FAWorld::Item::eqINV, i, j);
             if(!item.isEmpty())
             {
-                itemDict["graphic"] = item.mItem.graphicValue;
+                itemDict["graphic"] = item.getGraphicValue();
                 itemDict["empty"] = false;
                 itemDict["invX"] = item.getInvCoords().first;
                 itemDict["invY"] = item.getInvCoords().second;
@@ -378,7 +378,7 @@ boost::python::dict updateInventory()
         beltItem = inventory->getItemAt(FAWorld::Item::eqBELT, 0, 0, i);
         if(!beltItem.isEmpty())
         {
-            beltDict["graphic"] = beltItem.mItem.graphicValue;
+            beltDict["graphic"] = beltItem.getGraphicValue();
             beltDict["empty"] = false;
             beltDict["invX"] = beltItem.getInvCoords().first;
             beltDict["invY"] = beltItem.getInvCoords().second;

@@ -32,16 +32,16 @@ Inventory Inventory::testInv(Inventory& inv)
     while(!itemManager.mIsLoaded);
     Item gold = itemManager.getBaseItem(43);
 
-    Item bow  = itemManager.getBaseItem(26);
-    Item bow2  = itemManager.getBaseItem(26);
-    Item bow3  = itemManager.getBaseItem(26);
-    Item buckler = itemManager.getBaseItem(16);
-    Item ring = itemManager.getBaseItem(33);
-    Item cap = itemManager.getBaseItem(18);
-    Item plate = itemManager.getBaseItem(13);
-    Item amulet = itemManager.getBaseItem(66);
-    Item ring2 = itemManager.getBaseItem(33);
-    Item elixir = itemManager.getBaseItem(29);
+    Item bow  = itemManager.getBaseItem(28);
+    Item bow2  = itemManager.getBaseItem(28);
+    Item bow3  = itemManager.getBaseItem(28);
+    Item buckler = itemManager.getBaseItem(18);
+    Item ring = itemManager.getBaseItem(36);
+    Item cap = itemManager.getBaseItem(20);
+    Item plate = itemManager.getBaseItem(15);
+    Item amulet = itemManager.getBaseItem(72);
+    Item ring2 = itemManager.getBaseItem(36);
+    Item elixir = itemManager.getBaseItem(32);
     inv.putItem(bow, Item::eqINV, Item::eqFLOOR);
     inv.putItem(bow2, Item::eqINV, Item::eqFLOOR, 0, 2);
     inv.putItem(bow3, Item::eqLEFTHAND, Item::eqFLOOR);
@@ -72,20 +72,20 @@ bool Inventory::canPlaceItem(
              *
              * */
     case Item::eqLEFTHAND:
-        if(item.mItem.equipLoc == Item::eqONEHAND)
+        if(item.getEquipLoc() == Item::eqONEHAND)
         {
             if(this->mLeftHand.isEmpty())
             {
                 if(this->mRightHand.isEmpty())
                     return true;
 
-                else if(this->mRightHand.mItem.itemType != item.mItem.itemType)
+                else if(this->mRightHand.getType() != item.getType())
                     return true;
             }
         }
-        else if(item.mItem.equipLoc == Item::eqTWOHAND)
+        else if(item.getEquipLoc() == Item::eqTWOHAND)
         {
-            if(item.mItem.equipLoc == Item::eqTWOHAND && this->mLeftHand.isEmpty())
+            if(item.getEquipLoc() == Item::eqTWOHAND && this->mLeftHand.isEmpty())
                 return true;
 
         }
@@ -96,43 +96,43 @@ bool Inventory::canPlaceItem(
             if(this->mLeftHand.isEmpty())
                 return true;
 
-            else if(this->mLeftHand.mItem.itemType != item.mItem.itemType)
+            else if(this->mLeftHand.getType() != item.getType())
                 return true;
         }
 
-        else if(item.mItem.equipLoc == Item::eqTWOHAND)
+        else if(item.getEquipLoc() == Item::eqTWOHAND)
         {
-            if(item.mItem.equipLoc == Item::eqTWOHAND && this->mLeftHand.isEmpty())
+            if(item.getEquipLoc() == Item::eqTWOHAND && this->mLeftHand.isEmpty())
                 return true;
 
         }
         break;
     case Item::eqBODY:
-        if(item.mItem.equipLoc == Item::eqBODY && this->mBody.isEmpty())
+        if(item.getEquipLoc() == Item::eqBODY && this->mBody.isEmpty())
             return true;
         break;
 
     case Item::eqHEAD:
-        if(item.mItem.equipLoc == Item::eqHEAD && this->mHead.isEmpty())
+        if(item.getEquipLoc() == Item::eqHEAD && this->mHead.isEmpty())
             return true;
         break;
 
     case Item::eqLEFTRING:
-        if(item.mItem.equipLoc == Item::eqRING)
+        if(item.getEquipLoc() == Item::eqRING)
         {
             if(this->mLeftRing.isEmpty()) return true;
         }
         break;
     case Item::eqRIGHTRING:
 
-        if(item.mItem.equipLoc == Item::eqRING)
+        if(item.getEquipLoc() == Item::eqRING)
         {
             if(this->mRightRing.isEmpty()) return true;
         }
         break;
 
     case Item::eqAMULET:
-        if(item.mItem.equipLoc == Item::eqAMULET && this->mAmulet.isEmpty())
+        if(item.getEquipLoc() == Item::eqAMULET && this->mAmulet.isEmpty())
         {
             return true;
         }
@@ -169,7 +169,7 @@ bool Inventory::canPlaceItem(
         }
         break;
     case Item::eqBELT:
-        if(item.mItem.equipLoc == Item::eqUNEQUIP && item.mItem.itemType == Item::itPOT)
+        if(item.getEquipLoc() == Item::eqUNEQUIP && item.getType() == Item::itPOT)
         {
             if(beltX <= 7)
             {
@@ -206,13 +206,13 @@ bool Inventory::putItem(Item &item,
         switch(equipType)
         {
         case Item::eqLEFTHAND:
-            if(item.mItem.equipLoc == Item::eqONEHAND)
+            if(item.getEquipLoc() == Item::eqONEHAND)
             {
                 this->mLeftHand=item;
 
                 removeItem(item, from, beltX);
             }
-            else if(item.mItem.equipLoc == Item::eqTWOHAND)
+            else if(item.getEquipLoc() == Item::eqTWOHAND)
             {
 
                 if(!this->mRightHand.isEmpty())
@@ -272,7 +272,7 @@ bool Inventory::putItem(Item &item,
             break;
         case Item::eqRIGHTHAND:
             this->mRightHand=item;
-            if(item.mItem.equipLoc == Item::eqTWOHAND)
+            if(item.getEquipLoc() == Item::eqTWOHAND)
             {
                 if(this->mLeftHand.isEmpty())
                 {
@@ -435,7 +435,7 @@ void Inventory::removeItem(
     switch(from)
     {
     case Item::eqLEFTHAND:
-        if(item.mItem.equipLoc == Item::eqTWOHAND)
+        if(item.getEquipLoc() == Item::eqTWOHAND)
         {
             mRightHand=Item();
         }
@@ -443,7 +443,7 @@ void Inventory::removeItem(
         break;
 
     case Item::eqRIGHTHAND:
-        if(item.mItem.equipLoc == Item::eqTWOHAND)
+        if(item.getEquipLoc() == Item::eqTWOHAND)
         {
 
             mLeftHand=Item();
@@ -538,7 +538,7 @@ void Inventory::dump()
             if(mInventoryBox[i][j].isEmpty())
                 ss << "| (empty)";
             else
-                ss << "| "<< mInventoryBox[i][j].mItem.itemName;
+                ss << "| "<< mInventoryBox[i][j].getName();
             if(mInventoryBox[i][j].mCount > 1)
                 ss << "("<<+mInventoryBox[i][j].mCount << ")";
             ss << "   ";
@@ -554,19 +554,19 @@ void Inventory::dump()
     std::string tops = "";
     tops.append(len,'-');
     std::cout << tops << std::endl << ss.str() << tops << std::endl;
-    std::cout << "head: " << mHead.mItem.itemName << std::endl;
-    std::cout << "mBody: " << mBody.mItem.itemName << std::endl;
-    std::cout << "mAmulet: " << mAmulet.mItem.itemName << std::endl;
-    std::cout << "mRightHand: " << mRightHand.mItem.itemName << std::endl;
-    std::cout << "mLeftHand: " << mLeftHand.mItem.itemName << std::endl;
-    std::cout << "mLeftRing: " << mLeftRing.mItem.itemName << std::endl;
-    std::cout << "mRightRing: " << mRightRing.mItem.itemName << std::endl;
-    std::cout << "mCursorHeld: " << mCursorHeld.mItem.itemName << std::endl;
+    std::cout << "head: " << mHead.getName() << std::endl;
+    std::cout << "mBody: " << mBody.getName() << std::endl;
+    std::cout << "mAmulet: " << mAmulet.getName() << std::endl;
+    std::cout << "mRightHand: " << mRightHand.getName() << std::endl;
+    std::cout << "mLeftHand: " << mLeftHand.getName() << std::endl;
+    std::cout << "mLeftRing: " << mLeftRing.getName() << std::endl;
+    std::cout << "mRightRing: " << mRightRing.getName() << std::endl;
+    std::cout << "mCursorHeld: " << mCursorHeld.getName() << std::endl;
     std::stringstream printbelt;
     printbelt <<  "mBelt: ";
     for(size_t i=0; i<8; i++)
     {
-        printbelt << mBelt[i].mItem.itemName << ", ";
+        printbelt << mBelt[i].getName() << ", ";
     }
     std::cout << printbelt.str() << std::endl;
 }

@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <diabloexe/diabloexe.h>
 #include <level/baseitemmanager.h>
+#include <boost/program_options.hpp>
+void runGameLoop(const boost::program_options::variables_map& variables);
 namespace FAWorld
 {
     class ItemPosition
@@ -24,10 +26,10 @@ namespace FAWorld
     class ItemManager : public Level::BaseItemManager
     {
     public:
-        void loadItems(DiabloExe::DiabloExe * exe);
         static bool mIsLoaded;
         void addItem(Item &item, std::pair<size_t, size_t> floorPosition, uint32_t count);
         Item getBaseItem(uint8_t id) const;
+        DiabloExe::BaseItem &getBaseItemByUniqueCode(uint8_t uniqCode);
         void putItemOnFloor(Item& item, std::pair<size_t, size_t> floor_pos);
 
         void dumpBaseItems() const;
@@ -36,9 +38,13 @@ namespace FAWorld
         static uint32_t getUniqueItemCode();
         ItemManager();
     private:
-        static uint32_t lastUnique;
+        void loadItems(DiabloExe::DiabloExe * exe);
+        void loadUniqueItems(DiabloExe::DiabloExe * exe);
         std::map<ItemPosition, Item> mItemPositionMap;
         static std::map<uint8_t, Item> mRegisteredItems;
+        static std::map<uint32_t, DiabloExe::BaseItem> mUniqueCodeToBaseItem;
+        static uint32_t lastUnique;
+        friend void ::runGameLoop(const boost::program_options::variables_map& variables);
     };
 }
 

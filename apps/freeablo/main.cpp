@@ -379,6 +379,10 @@ void runGameLoop(const bpo::variables_map& variables)
 
     itemManager.loadItems(&exe);
 
+    itemManager.loadUniqueItems(&exe);
+
+    itemManager.dumpBaseItems();
+
 
     FAWorld::World world;
 
@@ -390,7 +394,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     Level::Level* level = NULL;
     FARender::Tileset tileset;
-    
+
     FAWorld::Player* player = world.getPlayer();
 
     FAGui::initGui(player->mInventory);

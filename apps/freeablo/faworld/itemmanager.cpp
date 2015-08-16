@@ -8,6 +8,7 @@ namespace FAWorld
 {
 bool ItemManager::mIsLoaded = false;
 std::map<uint8_t, Item> ItemManager::mRegisteredItems;
+std::map<uint32_t, DiabloExe::BaseItem> ItemManager::mUniqueCodeToBaseItem;
 uint32_t ItemManager::lastUnique=0;
 ItemManager::ItemManager()
 {
@@ -26,14 +27,32 @@ void ItemManager::loadItems(DiabloExe::DiabloExe * exe)
     if(!mIsLoaded && exe != NULL)
     {
         std::map<std::string, DiabloExe::BaseItem> itemMap = exe->getItemMap();
-
         for(std::map<std::string, DiabloExe::BaseItem>::const_iterator it = itemMap.begin();it !=itemMap.end();++it)
         {
             this->mRegisteredItems[this->mRegisteredItems.size()] = Item(it->second, mRegisteredItems.size());
+            if(it->second.uniqCode !=0)
+                this->mUniqueCodeToBaseItem[it->second.uniqCode] = it->second;
+
+        }
+
+    }
+}
+
+void ItemManager::loadUniqueItems(DiabloExe::DiabloExe * exe)
+{
+    if(!mIsLoaded && exe != NULL)
+    {
+        const std::map<std::string, DiabloExe::UniqueItem>& uniqueItemMap = exe->getUniqueItemMap();
+        for(std::map<std::string, DiabloExe::UniqueItem>::const_iterator it = uniqueItemMap.begin();it !=uniqueItemMap.end();++it)
+        {
+            this->mRegisteredItems[this->mRegisteredItems.size()] = Item(it->second, mRegisteredItems.size());
+
+
 
         }
         mIsLoaded=true;
     }
+
 }
 
 void ItemManager::addItem(Item &item, std::pair<size_t, size_t> floorPosition, uint32_t count)
@@ -84,6 +103,14 @@ Item ItemManager::getBaseItem(uint8_t id) const
     search.setUniqueId(uniqueId);
     return search;
 }
+
+DiabloExe::BaseItem & ItemManager::getBaseItemByUniqueCode(uint8_t uniqCode)
+{
+    return mUniqueCodeToBaseItem.find(uniqCode)->second;
+
+
+}
+
 void ItemManager::putItemOnFloor(Item& item, std::pair<size_t, size_t> floor_pos)
 {
 
