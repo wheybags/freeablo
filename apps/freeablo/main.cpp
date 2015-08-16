@@ -143,7 +143,7 @@ void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& worl
         world.addNpcs(exe);
 }
 
-Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, Level::BaseItemManager* itemManager)
+Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
 {  
     if(dLvl == 0)
     {
@@ -154,11 +154,11 @@ Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, Level::Base
 
         return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
                                 "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
-                                std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>(), itemManager );
+                                std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
     }
     else if(dLvl < 13)
     {
-        return FALevelGen::generate(100, 100, dLvl, exe, itemManager);
+        return FALevelGen::generate(100, 100, dLvl, exe);
     }
     else
     {
@@ -398,7 +398,7 @@ void runGameLoop(const bpo::variables_map& variables)
     // -1 represents the main menu
     if(currentLevel != -1)
     {
-        if(!(level = getLevel(currentLevel, exe, &itemManager)))
+        if(!(level = getLevel(currentLevel, exe)))
         {
             done = true;
         }
@@ -470,7 +470,7 @@ void runGameLoop(const bpo::variables_map& variables)
                     currentLevel = tmp;
 
                     if(levels[currentLevel] == NULL)
-                        levels[currentLevel] = getLevel(currentLevel, exe, &itemManager);
+                        levels[currentLevel] = getLevel(currentLevel, exe);
 
                     level = levels[currentLevel];
                     

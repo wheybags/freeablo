@@ -1115,7 +1115,7 @@ namespace FALevelGen
     }
 
  
-    Level::Level* generate(size_t width, size_t height, size_t dLvl, const DiabloExe::DiabloExe& exe, Level::BaseItemManager* itemManager)
+    Level::Level* generate(size_t width, size_t height, size_t dLvl, const DiabloExe::DiabloExe& exe)
     {
         size_t levelNum = ((dLvl-1) / 4) + 1;
 
@@ -1198,7 +1198,7 @@ namespace FALevelGen
         ss.str(""); ss << "levels/l" << levelNum << "data/l" << levelNum << ".sol";
         std::string solPath = ss.str();
                 
-        Level::Level* retval = new Level::Level(level, tilPath, minPath, solPath, celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap(), itemManager);
+        Level::Level* retval = new Level::Level(level, tilPath, minPath, solPath, celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap());
         placeMonsters(*retval, exe, dLvl);
         
         return retval;

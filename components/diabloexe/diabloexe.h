@@ -14,7 +14,7 @@
 #include "baseitem.h"
 #include "prefix.h"
 #include "uniqueitem.h"
-
+#include "characterstats.h"
 namespace DiabloExe
 {
     class DiabloExe
@@ -35,6 +35,8 @@ namespace DiabloExe
 
             bool isLoaded() const;
 
+            uint32_t swapEndian(uint32_t arg);
+
         private:
             std::string getMD5();
             std::string getVersion();
@@ -44,12 +46,14 @@ namespace DiabloExe
             void loadBaseItems(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
             void loadUniqueItems(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
             void loadPreficies(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
+            void loadCharacterStats(FAIO::FAFile * exe, boost::property_tree::ptree& pt);
             std::string mVersion;
             std::map<std::string, Monster> mMonsters;
             std::map<std::string, Npc> mNpcs;
             std::map<std::string, BaseItem> mBaseItems;
             std::map<std::string, UniqueItem> mUniqueItems;
             std::map<std::string, Prefix> mPrefices;
+            std::map<std::string, CharacterStats> mCharacters;
     };
 }
 

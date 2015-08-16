@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <sstream>
 #include <iostream>
-
+#include <byteswap.h>
 #include <misc/fareadini.h>
 #include <misc/md5.h>
 #include <misc/stringops.h>
@@ -33,10 +33,20 @@ namespace DiabloExe
 
         loadMonsters(exe, pt);                        
         loadNpcs(exe, pt);
+        loadCharacterStats(exe, pt);
         loadBaseItems(exe, pt);
         loadUniqueItems(exe, pt);
         loadPreficies(exe, pt);
+
         FAIO::FAfclose(exe);
+    }
+
+    uint32_t DiabloExe::swapEndian(uint32_t arg)
+    {
+
+         arg = ((arg << 8) & 0xFF00FF00) | ((arg >> 8) & 0xFF00FF );
+         return (arg << 16) | (arg >> 16);
+
     }
 
     std::string DiabloExe::getMD5()
@@ -178,7 +188,7 @@ namespace DiabloExe
         size_t count = pt.get<size_t>("UniqueItems.count");
         for(size_t i=0; i < count; i++)
         {
-            FAIO::FAfseek(exe, itemOffset + 76*i, SEEK_SET);
+            FAIO::FAfseek(exe, itemOffset + 84*i, SEEK_SET);
             UniqueItem tmp(exe, codeOffset);
             if
                     (
@@ -254,6 +264,61 @@ namespace DiabloExe
         }
     }
 
+    void DiabloExe::loadCharacterStats(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
+    {
+        size_t startingStatsOffset = pt.get<size_t>("CharacterStats.startingStatsOffset");
+        size_t maxStatsOffset = pt.get<size_t>("CharacterStats.maxStatsOffset");
+        size_t blockingBonusOffset = pt.get<size_t>("CharacterStats.blockingBonusOffset");
+        CharacterStats warrior, rogue, sorcerer;
+
+        FAIO::FAfseek(exe, startingStatsOffset-6, SEEK_SET);
+
+        warrior.mStrength   = swapEndian(FAIO::read32(exe));
+        rogue.mStrength     = swapEndian(FAIO::read32(exe));
+        sorcerer.mStrength  = swapEndian(FAIO::read32(exe));
+
+        warrior.mMagic      = swapEndian(FAIO::read32(exe));
+        rogue.mMagic        = swapEndian(FAIO::read32(exe));
+        sorcerer.mMagic     = swapEndian(FAIO::read32(exe));
+
+        warrior.mDexterity  = swapEndian(FAIO::read32(exe));
+        rogue.mDexterity    = swapEndian(FAIO::read32(exe));
+        sorcerer.mDexterity = swapEndian(FAIO::read32(exe));
+
+        warrior.mVitality   = swapEndian(FAIO::read32(exe));
+        rogue.mVitality     = swapEndian(FAIO::read32(exe));
+        sorcerer.mVitality  = swapEndian(FAIO::read32(exe));
+
+        FAIO::FAfseek(exe, SEEK_SET, blockingBonusOffset);
+
+        warrior.mBlockingBonus  = swapEndian(FAIO::read32(exe));
+        rogue.mBlockingBonus    = swapEndian(FAIO::read32(exe));
+        sorcerer.mBlockingBonus = swapEndian(FAIO::read32(exe));
+
+        FAIO::FAfseek(exe, maxStatsOffset, SEEK_SET);
+
+        warrior.mMaxStrength   = FAIO::read32(exe);
+        rogue.mMaxStrength     = FAIO::read32(exe);
+        sorcerer.mMaxStrength  = FAIO::read32(exe);
+
+
+        warrior.mMaxMagic      = FAIO::read32(exe);
+        rogue.mMaxMagic        = FAIO::read32(exe);
+        rogue.mMaxDexterity    = FAIO::read32(exe);
+
+        warrior.mMaxDexterity  = FAIO::read32(exe);
+        sorcerer.mMaxMagic     = FAIO::read32(exe);
+        sorcerer.mMaxDexterity = FAIO::read32(exe);
+
+        warrior.mMaxVitality   = FAIO::read32(exe);
+        rogue.mMaxVitality     = FAIO::read32(exe);
+        sorcerer.mMaxVitality  = FAIO::read32(exe);
+
+        mCharacters["Warrior"]  = warrior;
+        mCharacters["Rogue"]    = rogue;
+        mCharacters["Sorcerer"] = sorcerer;
+    }
+
     const Monster& DiabloExe::getMonster(const std::string& name) const
     {
         return mMonsters.find(name)->second;
@@ -316,6 +381,15 @@ namespace DiabloExe
         {
             ss << it->first << std::endl << it->second.dump();
         }
+
+        ss << "Character Stats: " << mCharacters.size() << std::endl
+           << "Warrior" << std::endl
+           << mCharacters.at("Warrior").dump()
+           << "Rogue" << std::endl
+           << mCharacters.at("Rogue").dump()
+           << "Sorcerer" << std::endl
+           << mCharacters.at("Sorcerer").dump();
+
 
         ss << "Base Items: "<< mBaseItems.size() << std::endl;
         for(std::map<std::string, BaseItem>::const_iterator it = mBaseItems.begin(); it != mBaseItems.end(); ++it)

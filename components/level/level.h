@@ -44,10 +44,10 @@ namespace Level
         public:
             Level(const std::string& dunPath, const std::string& tilPath, const std::string& minPath,
                 const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-                const std::pair<size_t,size_t>& upStairs, BaseItemManager *itemManager);
+                const std::pair<size_t,size_t>& upStairs);
             Level(const Dun& dun, const std::string& tilPath, const std::string& minPath, 
                 const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-                const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap, BaseItemManager* itemManager);
+                const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap);
 
             Misc::Helper2D<const Level, const MinPillar> operator[] (size_t x) const;
 
@@ -86,7 +86,6 @@ namespace Level
             std::vector<Monster> mMonsters;
             BaseItemManager * mItemManager;
             static std::vector<int16_t> mEmpty;
-//            FAWorld::Level::ItemManager mLevel::Items;
             friend const MinPillar get(size_t x, size_t y, const Level& level);
     };
 }
