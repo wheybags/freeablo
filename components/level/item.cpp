@@ -1,8 +1,6 @@
 #include "item.h"
-#include "../apps/freeablo/faworld/inventory.h"
 #include "itemmanager.h"
 namespace Level
-
 {
 Item::Item()
 {

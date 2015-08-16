@@ -36,16 +36,11 @@ void ItemManager::loadItems(DiabloExe::DiabloExe * exe)
     }
 }
 
-void ItemManager::addItem(Item &item,
-                          Item::equipLoc invType,
-                          std::pair<size_t,size_t> * floorPosition,
-                          std::pair<uint8_t, uint8_t> * invPosition,
-                          uint8_t beltPosition,
-                          uint32_t count)
+void ItemManager::addItem(Item &item, std::pair<size_t, size_t> floorPosition, uint32_t count)
 {
     item.setCount(count);
-    ItemPosition temp =ItemPosition(invType, floorPosition, invPosition, beltPosition);
-    this->mItemPositionMap[temp]=item;
+    ItemPosition temp = ItemPosition(floorPosition);
+    mItemPositionMap[temp]=item;
 
     return;
 
@@ -89,12 +84,7 @@ Item ItemManager::getBaseItem(uint8_t id) const
     search.setUniqueId(uniqueId);
     return search;
 }
-void ItemManager::putItem(Item item,
-                          Item::equipLoc to,
-                          Item::equipLoc from,
-                          std::pair<uint8_t, uint8_t> * invPosition,
-                          uint8_t beltX,
-                          std::pair<size_t, size_t> * floorPosition)
+void ItemManager::putItemOnFloor(Item& item, std::pair<size_t, size_t> floor_pos)
 {
 
     std::map<ItemPosition, Item>::const_iterator it = std::find_if(
@@ -103,57 +93,20 @@ void ItemManager::putItem(Item item,
                 boost::bind(&std::map<ItemPosition, Item>::value_type::second, _1) == item
                 );
     ItemPosition pos = it->first;
-    if(it== mItemPositionMap.end())
-    switch(from)
+    if(it != mItemPositionMap.end())
     {
-    case Item::eqINV:
-        if(to == Item::eqFLOOR)
-        {
-            pos.setFloorPosition(floorPosition);
-            pos.setInventoryType(Item::eqFLOOR);
-        }
-        break;
-    case Item::eqFLOOR:
-        pos.setInvPosition(invPosition);
-        pos.setInventoryType(to);
-        break;
-    case Item::eqBELT:
-        pos.setInventoryType(to);
-        pos.setBeltPosition(beltX);
-        break;
-    case Item::eqBODY:
-
-        pos.setInventoryType(to);
-        break;
-    case Item::eqRIGHTHAND:
-
-        pos.setInventoryType(to);
-        break;
-    case Item::eqLEFTHAND:
-
-        pos.setInventoryType(to);
-        break;
-    case Item::eqRIGHTRING:
-
-        pos.setInventoryType(to);
-        break;
-    case Item::eqAMULET:
-
-        pos.setInventoryType(to);
-        break;
-
-        break;
-    case Item::eqCURSOR:
-
-        pos.setInventoryType(to);
-        break;
-
-    case Item::eqRING:
-    case Item::eqONEHAND:
-    case Item::eqTWOHAND:
-    default:
-        return;
+        pos.setFloorPosition(floor_pos);
     }
+    else
+    {
+        ItemPosition new_pos;
+        new_pos.setFloorPosition(floor_pos);
+        mItemPositionMap[new_pos] = item;
+
+    }
+    return;
+
+
 
 
 }
@@ -178,58 +131,22 @@ void ItemManager::removeItem(Item item)
 
 }
 
-Item::equipLoc ItemPosition::getInventoryType() const
-{
-    return this->mInventoryType;
 
-}
-
-void ItemPosition::setInventoryType(Item::equipLoc type)
-{
-    this->mInventoryType=type;
-}
-
-std::pair<size_t,size_t> * ItemPosition::getFloorPosition() const
+std::pair<size_t,size_t> ItemPosition::getFloorPosition() const
 {
     return this->mFloorPosition;
 
 }
 
-void ItemPosition::setFloorPosition(std::pair<size_t,size_t> * pos)
+void ItemPosition::setFloorPosition(std::pair<size_t,size_t> pos)
 {
     this->mFloorPosition = pos;
 }
 
-std::pair<uint8_t, uint8_t> * ItemPosition::getInvPosition() const
-{
-    return this->mInvPosition;
-}
 
-void ItemPosition::setInvPosition(std::pair<uint8_t, uint8_t> * pos)
+ItemPosition::ItemPosition(std::pair<size_t,size_t> floorPosition)
 {
-    this->mInvPosition = pos;;
-}
-
-uint8_t ItemPosition::getBeltPosition() const
-{
-    return this->mBeltPosition;
-}
-
-void ItemPosition::setBeltPosition(uint8_t x)
-{
-    this->mBeltPosition = x;
-}
-
-ItemPosition::ItemPosition(Item::equipLoc invType,
-                           std::pair<size_t,size_t> * floorPosition,
-                           std::pair<uint8_t, uint8_t> * invPosition,
-                           uint8_t beltPosition)
-{
-    this->mInventoryType = invType;
     this->mFloorPosition = floorPosition;
-    this->mInvPosition = invPosition;
-    this->mBeltPosition = beltPosition;
-
 }
 
 bool ItemPosition::operator<(const ItemPosition rhs) const
@@ -240,9 +157,7 @@ bool ItemPosition::operator<(const ItemPosition rhs) const
 
 bool ItemPosition::operator ==(const ItemPosition rhs) const
 {
-    if(mInventoryType != rhs.mInventoryType)
-        return false;
-    if((mInvPosition != rhs.mInvPosition) || (mFloorPosition != rhs.mFloorPosition) || (mBeltPosition != rhs.mBeltPosition))
+    if(mFloorPosition != rhs.mFloorPosition)
         return false;
 
     return true;
