@@ -11,16 +11,14 @@
 #include <queue>
 #include <iomanip>
 #include <algorithm>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
-
+#include <unordered_map>
+#include <unordered_set>
+#include <functional>
 
 
 using namespace std;
-using namespace tr1;
 
 namespace std {
-namespace tr1 {
 
     template <>
     struct hash<pair<int,int> > {
@@ -31,7 +29,6 @@ namespace tr1 {
             return x * 1812433253 + y;
         }
     };
-}
 }
 
 template<typename T, typename Number=size_t>

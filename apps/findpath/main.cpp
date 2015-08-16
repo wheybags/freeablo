@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <chrono>
+#include <string>
 
 using namespace std::chrono;
 using namespace std;
@@ -99,7 +100,7 @@ ostream& operator<<(ostream& os, FindPath::Location & location )
     return os;
 }
 
-void drawPath(Level::Level& graph, int field_width,
+void drawPath(::Level::Level& graph, int field_width,
                unordered_map<FindPath::Location, int>* distances=0,
                unordered_map<FindPath::Location, FindPath::Location>* point_to=0,
                vector<FindPath::Location>* path=0)
@@ -147,7 +148,7 @@ void drawPath(Level::Level& graph, int field_width,
 
 int main()
 {
-    Level::Level * level = new LevelImpl();
+    ::Level::Level * level = new LevelImpl();
     FindPath findPath(level);
 
     FindPath::Location start,goal;
