@@ -32,9 +32,12 @@ namespace FAWorld
 
             uint32_t getStrength() const{return mStrenght;}
             uint32_t getMaxStrength() const{return mMaxStrength;}
+
+
+
+            void setActor(Actor * actor){mActor = actor;}
             //ActorStats(){}
-            ActorStats(Actor * actor,
-                       uint32_t strength,
+            ActorStats(uint32_t strength,
                        uint32_t maxStrength,
                        uint32_t magic,
                        uint32_t maxMagic,
@@ -46,6 +49,7 @@ namespace FAWorld
                 mLevel(1),
                 mLevelPoints(0),
                 mExp(0),
+                mExpToNextLevel(2000),
                 mVitality(vitality),
                 mMaxVitality(maxVitality),
                 mMagic(magic),
@@ -54,8 +58,8 @@ namespace FAWorld
                 mMaxDexterity(maxDexterity),
                 mStrenght(strength),
                 mMaxStrength(maxStrength),
-                mBlockingBonus(blocking),
-                mActor(actor)
+                mBlockingBonus(blocking)
+
             {
                 recalculateDerivedStats();
             }
@@ -87,6 +91,7 @@ namespace FAWorld
                     }
                     mLevelPoints--;
                     mLevel++;
+                    mExpToNextLevel = mExpForLevel[mLevel-1];
                     recalculateDerivedStats();
                     return true;
                 }
@@ -96,9 +101,10 @@ namespace FAWorld
                 }
             }
 
-            virtual void recalculateDerivedStats() = 0;
+            virtual void recalculateDerivedStats(){}
 
         protected:
+            const uint32_t mExpForLevel[50] = {2000,2620,3420,4449,5769,7454,9597,12313,15742,20055,25460,32207,40597,49392,82581,110411,147123,195379,258585,341073,448341,587327,766756,997549,1293323,1670973,2151378,2760218,3528939,4495869,5707505,7219994,9100803,11430609,14305407,17838843,22164762,27439976,33847210,41598222,50937022,62143167,75535020,91472909,110362065,132655203,158854605,190228390,227798497,272788700};
             uint32_t mLevel;
             uint32_t mLevelPoints;
             uint32_t mExp;

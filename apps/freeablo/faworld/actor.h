@@ -3,6 +3,7 @@
 
 #include "position.h"
 #include "inventory.h"
+#include "actorstats.hpp"
 #include "../farender/renderer.h"
 
 namespace FAWorld
@@ -19,21 +20,24 @@ namespace FAWorld
     class Actor
     {
         public:
-            Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos);
+            Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos, ActorStats * stats=NULL);
             void update();
 
             FARender::FASpriteGroup getCurrentAnim();
             void setAnimation(AnimState::AnimState state);
 
-            Position mPos;
-            Inventory mInventory;
+            Position mPos;            
         //private: //TODO: fix this
             FARender::FASpriteGroup mWalkAnim;
             FARender::FASpriteGroup mIdleAnim;
             size_t mFrame;
+            Inventory mInventory;
+
 
 
         private:
+
+            ActorStats * mStats;
             AnimState::AnimState mAnimState;
 
     };

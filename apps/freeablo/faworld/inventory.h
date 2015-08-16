@@ -17,6 +17,7 @@ namespace FAWorld
 
 
         Inventory testInv(Inventory & inv);
+        void collectEffects();
         bool putItem(Item &item,
                      Item::equipLoc equipType,
                      Item::equipLoc from,
@@ -25,6 +26,7 @@ namespace FAWorld
                      uint8_t beltX=0);
        Item& getItemAt(Item::equipLoc type, uint8_t y=0, uint8_t x=0, uint8_t beltX=0);
     private:
+
        Item mInventoryBox[4][10];
        Item mBelt[8];
        Item mHead;
@@ -35,7 +37,8 @@ namespace FAWorld
        Item mLeftHand;
        Item mRightHand;
        Item mCursorHeld;
-       std::map<uint32_t, std::pair<Item::ItemEffect, uint32_t>> mItemEffects;
+       std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> mItemEffects;
+
        bool canPlaceItem(Item item,
                          Item::equipLoc equipType,
                          uint8_t y=0,
@@ -44,6 +47,7 @@ namespace FAWorld
        bool fitsAt(Item item, uint8_t y, uint8_t x);
        void removeItem(Item &item, Item::equipLoc from, uint8_t beltX=0, uint8_t invY=0, uint8_t invX=0);
     friend class Actor;
+
     };
 }
 

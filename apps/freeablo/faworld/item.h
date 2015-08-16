@@ -6,6 +6,7 @@
 #include <cel/celfile.h>
 #include <cel/celframe.h>
 #include <vector>
+#include <tuple>
 namespace FAWorld
 {
 class Inventory;
@@ -99,8 +100,8 @@ public:
     bool inline isEmpty(){return mEmpty;}
     Item();
     ~Item();
-    Item(DiabloExe::BaseItem item, size_t id, DiabloExe::Affix *affix=NULL, bool isIdentified=true);
-    Item(const DiabloExe::UniqueItem &item, size_t id);
+    Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix *affix=NULL, bool isIdentified=true);
+    Item(const DiabloExe::UniqueItem &item, uint32_t id);
     std::string getName() const;
     void setUniqueId(uint32_t mUniqueId);
     uint32_t getUniqueId() const;
@@ -176,7 +177,7 @@ public:
 
 private:
     static Cel::CelFile * mObjcurs;
-    std::vector<std::pair<ItemEffect, uint32_t>> mEffects;
+    std::vector<std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>> mEffects;
     DiabloExe::Affix mAffix;
 
     uint32_t mActiveTrigger;
@@ -190,6 +191,7 @@ private:
     std::string mSecondName;
     uint32_t mQualityLevel;
     uint32_t mDurability;
+    uint32_t mCurrentDurability;
     uint32_t mMinAttackDamage;
     uint32_t mMaxAttackDamage;
     uint32_t mMinArmourClass;
@@ -206,6 +208,8 @@ private:
     uint32_t mUseOnce;
     uint32_t mBuyPrice;
     uint32_t mSellPrice;
+
+    uint8_t mNumEffects;
 
     uint32_t mEffect0;
     uint32_t mMinRange0;
@@ -230,6 +234,8 @@ private:
     uint32_t mEffect5;
     uint32_t mMinRange5;
     uint32_t mMaxRange5;
+
+
 
     uint8_t mBaseId;
     uint32_t mUniqueId;

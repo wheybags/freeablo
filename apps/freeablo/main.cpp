@@ -15,6 +15,8 @@
 
 #include "faworld/itemmanager.h"
 
+#include "faworld/characterstats.h"
+
 #include "fagui/guimanager.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -383,8 +385,22 @@ void runGameLoop(const bpo::variables_map& variables)
 
     itemManager.dumpBaseItems();
 
+    DiabloExe::CharacterStats warrior = exe.getCharacterStat("Warrior");
 
-    FAWorld::World world;
+    FAWorld::WarriorStats stats(
+                warrior.mStrength,
+                warrior.mMaxStrength,
+                warrior.mMagic,
+                warrior.mMaxMagic,
+                warrior.mDexterity,
+                warrior.mMaxDexterity,
+                warrior.mVitality,
+                warrior.mMaxVitality,
+                warrior.mBlockingBonus);
+
+    FAWorld::World world(&stats);
+
+    stats.setActor(world.getPlayer());
 
     FALevelGen::FAsrand(time(NULL));
 

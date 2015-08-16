@@ -29,7 +29,7 @@ Item::~Item()
 
 Cel::CelFile * Item::mObjcurs;
 bool Item::mObjcursLoaded=false;
-Item::Item(DiabloExe::BaseItem item, size_t id, DiabloExe::Affix* affix, bool isIdentified)
+Item::Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix, bool isIdentified)
 {
 
     if(!mObjcursLoaded)
@@ -58,6 +58,7 @@ Item::Item(DiabloExe::BaseItem item, size_t id, DiabloExe::Affix* affix, bool is
     mSecondName = item.itemSecondName;
     mQualityLevel = item.qualityLevel;
     mDurability = item.durability;
+    mCurrentDurability = mDurability;
     mMinAttackDamage = item.minAttackDamage;
     mMaxAttackDamage = item.maxAttackDamage;
     mMinArmourClass = item.minArmourClass;
@@ -94,6 +95,7 @@ Item::Item(DiabloExe::BaseItem item, size_t id, DiabloExe::Affix* affix, bool is
 
     if(affix != NULL)
     {
+        mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect0), mMaxRange0, mMinRange0, id));
         mIsMagic   = true;
         mEffect0   = affix->mEffect;
         mMaxRange0 = affix->mMaxEffect;
@@ -105,15 +107,11 @@ Item::Item(DiabloExe::BaseItem item, size_t id, DiabloExe::Affix* affix, bool is
     }
 
 }
-Item::Item(const DiabloExe::UniqueItem & item, size_t id)
+Item::Item(const DiabloExe::UniqueItem & item, uint32_t id)
 {
     ItemManager itemManager;
 
     DiabloExe::BaseItem& baseItem = itemManager.getBaseItemByUniqueCode(item.mItemType);
-
-
-
-
 
     Item base = Item(baseItem, id);
     *this = base;
@@ -146,10 +144,12 @@ Item::Item(const DiabloExe::UniqueItem & item, size_t id)
     mEffect5 = item.mEffect5;
     mMinRange5 = item.mMinRange5;
     mMaxRange5 = item.mMaxRange5;
-
-
-
-
+    mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect0), mMaxRange0, mMinRange0, id));
+    mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect1), mMaxRange1, mMinRange1, id));
+    mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect2), mMaxRange2, mMinRange2, id));
+    mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect3), mMaxRange3, mMinRange3, id));
+    mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect4), mMaxRange4, mMinRange4, id));
+    mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect5), mMaxRange5, mMinRange5, id));
 
 
 }

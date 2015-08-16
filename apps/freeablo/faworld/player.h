@@ -10,7 +10,7 @@ namespace FAWorld
     class Player: public Actor
     {
         public:
-            Player(): Actor("plrgfx/warrior/wls/wlswl.cl2", "plrgfx/warrior/wls/wlsst.cl2", Position(0,0)) {}
+            Player(ActorStats * stats): Actor("plrgfx/warrior/wls/wlswl.cl2", "plrgfx/warrior/wls/wlsst.cl2", Position(0,0), stats) {}
     };
 }
 

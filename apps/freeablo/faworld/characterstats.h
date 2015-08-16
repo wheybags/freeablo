@@ -1,27 +1,51 @@
-#ifndef CHARACTERSTATS_H
-#define CHARACTERSTATS_H
+#ifndef DIABLOCHARACTERSTATS_H
+#define DIABLOCHARACTERSTATS_H
 #include "actorstats.hpp"
 namespace FAWorld
 {
+    class Inventory;
 
-    class WarriorStats : ActorStats
+    class WarriorStats : public ActorStats
     {
-    private:
+    public:
+        WarriorStats(uint32_t strength,
+                     uint32_t maxStrength,
+                     uint32_t magic,
+                     uint32_t maxMagic,
+                     uint32_t dexterity,
+                     uint32_t maxDexterity,
+                     uint32_t vitality,
+                     uint32_t maxVitality,
+                     uint32_t blocking) : ActorStats(
+                                              strength,
+                                              maxStrength,
+                                              magic,
+                                              maxMagic,
+                                              dexterity,
+                                              maxDexterity,
+                                              vitality,
+                                              maxVitality,
+                                              blocking){}
+    private:        
         void recalculateDerivedStats() final;
+        friend class Inventory;
 
     };
 
-    class RogueStats : ActorStats
+    class RogueStats : public ActorStats
     {
     private:
         void recalculateDerivedStats() final;
+        friend class Inventory;
 
     };
 
-    class SorcererStats : ActorStats
+    class SorcererStats : public ActorStats
     {
     private:
+
         void recalculateDerivedStats() final;
+        friend class Inventory;
 
     };
 }

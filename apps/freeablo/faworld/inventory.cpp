@@ -251,6 +251,7 @@ bool Inventory::putItem(Item &item,
                         putItem(this->mRightHand, Item::eqINV, Item::eqRIGHTHAND, auto_fit_y, auto_fit_x);
                         removeItem(item, from, beltX, y, x);
                         this->mRightHand = item;
+                        collectEffects();
                         return true;
                     }
                     else
@@ -335,7 +336,7 @@ bool Inventory::putItem(Item &item,
                         {
                             mInventoryBox[i][j].mCount+=item.mCount;
                             removeItem(item, from, item.mInvX, item.mInvY, item.mBeltX);
-
+                            collectEffects();
                             return true;
                         }
                         else if(mInventoryBox[i][j] == item)
@@ -399,6 +400,7 @@ bool Inventory::putItem(Item &item,
     {
         return false;
     }
+    collectEffects();
     return true;
 }
 Item& Inventory::getItemAt(Item::equipLoc type, uint8_t y, uint8_t x, uint8_t beltX)
@@ -570,4 +572,16 @@ void Inventory::dump()
     }
     std::cout << printbelt.str() << std::endl;
 }
+    void Inventory::collectEffects()
+    {
+        mItemEffects.clear();
+        mItemEffects.insert(mItemEffects.end(), mHead.mEffects.begin(), mHead.mEffects.end());
+        mItemEffects.insert(mItemEffects.end(), mBody.mEffects.begin(), mBody.mEffects.end());
+        mItemEffects.insert(mItemEffects.end(), mAmulet.mEffects.begin(), mAmulet.mEffects.end());
+        mItemEffects.insert(mItemEffects.end(), mRightRing.mEffects.begin(), mRightRing.mEffects.end());
+        mItemEffects.insert(mItemEffects.end(), mLeftRing.mEffects.begin(), mLeftRing.mEffects.end());
+        mItemEffects.insert(mItemEffects.end(), mLeftHand.mEffects.begin(), mLeftHand.mEffects.end());
+        if(!(mLeftHand == mRightHand))
+            mItemEffects.insert(mItemEffects.end(), mRightHand.mEffects.begin(), mRightHand.mEffects.end());
+    }
 }

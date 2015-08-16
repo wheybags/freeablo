@@ -23,7 +23,7 @@ namespace FAWorld
     class World
     {
         public:
-            World();
+            World(ActorStats *stats);
             ~World();
 
             void setLevel(Level::Level& level, const DiabloExe::DiabloExe& exe);

@@ -6,13 +6,15 @@ namespace FAWorld
     {
         mPos.update(); 
     }
-    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos):
+    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos, ActorStats * stats):
         mPos(pos),
         mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)),
         mIdleAnim(FARender::Renderer::get()->loadImage(idleAnimPath)),
         mFrame(0),
+        mStats(stats),
         mAnimState(AnimState::idle)
     {
+
         mInventory = mInventory.testInv(mInventory);
 
     }
