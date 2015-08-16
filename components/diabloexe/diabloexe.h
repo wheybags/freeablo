@@ -12,7 +12,7 @@
 #include "monster.h"
 #include "npc.h"
 #include "baseitem.h"
-#include "prefix.h"
+#include "affix.h"
 #include "uniqueitem.h"
 #include "characterstats.h"
 namespace DiabloExe
@@ -30,6 +30,7 @@ namespace DiabloExe
 
             const BaseItem& getItem(const std::string& name) const;
             std::map<std::string, BaseItem> getItemMap() const;
+            const CharacterStats getCharacterStat(std::string character) const;
 
             std::string dump() const;
 
@@ -45,14 +46,15 @@ namespace DiabloExe
             void loadNpcs(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
             void loadBaseItems(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
             void loadUniqueItems(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
-            void loadPreficies(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
+            void loadAffixes(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
             void loadCharacterStats(FAIO::FAFile * exe, boost::property_tree::ptree& pt);
+
             std::string mVersion;
             std::map<std::string, Monster> mMonsters;
             std::map<std::string, Npc> mNpcs;
             std::map<std::string, BaseItem> mBaseItems;
             std::map<std::string, UniqueItem> mUniqueItems;
-            std::map<std::string, Prefix> mPrefices;
+            std::map<std::string, Affix> mAffixes;
             std::map<std::string, CharacterStats> mCharacters;
     };
 }

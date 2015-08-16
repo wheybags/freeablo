@@ -32,6 +32,9 @@ add_executable(freeablo
 	faworld/item.cpp
 	faworld/itemmanager.h
 	faworld/itemmanager.cpp
+	faworld/actorstats.hpp
+	faworld/characterstats.h
+	faworld/characterstats.cpp
     
     fagui/guimanager.h
     fagui/guimanager.cpp

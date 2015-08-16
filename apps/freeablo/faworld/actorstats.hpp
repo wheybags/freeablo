@@ -1,6 +1,7 @@
-#ifndef STATS_H
-#define STATS_H
-
+#ifndef ACTORSTATS_H
+#define ACTORSTATS_H
+#include <stdint.h>
+#include <vector>
 namespace FAWorld
 {
     class Actor;
@@ -15,7 +16,6 @@ namespace FAWorld
                 Vitality
             } BasicStat;
 
-
             uint32_t getLevel() const{return mLevel;}
             uint32_t getLevelPoints() const{return mLevelPoints;}
             uint32_t getExp() const{return mExp;}
@@ -25,14 +25,14 @@ namespace FAWorld
             uint32_t getMaxVitality() const{return mMaxVitality;}
 
             uint32_t getMagic() const{return mMagic;}
-            uint32_t getMaxMagic() const{returm mMaxMagic;}
+            uint32_t getMaxMagic() const{return mMaxMagic;}
 
             uint32_t getDexterity() const{return mDexterity;}
             uint32_t getMaxDexterity() const{return mMaxDexterity;}
 
             uint32_t getStrength() const{return mStrenght;}
             uint32_t getMaxStrength() const{return mMaxStrength;}
-            ActorStats(){}
+            //ActorStats(){}
             ActorStats(Actor * actor,
                        uint32_t strength,
                        uint32_t maxStrength,
@@ -42,24 +42,22 @@ namespace FAWorld
                        uint32_t maxDexterity,
                        uint32_t vitality,
                        uint32_t maxVitality,
-                       uint32_t blocking)
+                       uint32_t blocking) :
+                mLevel(1),
+                mLevelPoints(0),
+                mExp(0),
+                mVitality(vitality),
+                mMaxVitality(maxVitality),
+                mMagic(magic),
+                mMaxMagic(maxMagic),
+                mDexterity(dexterity),
+                mMaxDexterity(maxDexterity),
+                mStrenght(strength),
+                mMaxStrength(maxStrength),
+                mBlockingBonus(blocking),
+                mActor(actor)
             {
-                mActor = actor;
-
-                mStrenght = strength;
-                mMaxStrength = maxStrength;
-
-                mMagic = magic;
-                mMaxMagic = maxMagic;
-
-                mDexterity = dexterity;
-                mMaxDexterity = maxDexterity;
-
-                mVitality = vitality;
-                mMaxVitality = maxVitality;
-
-                mBlockingBonus = blocking;
-
+                recalculateDerivedStats();
             }
 
             bool levelUp(BasicStat statModified)
@@ -98,8 +96,9 @@ namespace FAWorld
                 }
             }
 
-        private:
             virtual void recalculateDerivedStats() = 0;
+
+        protected:
             uint32_t mLevel;
             uint32_t mLevelPoints;
             uint32_t mExp;
@@ -123,16 +122,20 @@ namespace FAWorld
 
             uint32_t mMana;
 
+            uint32_t mResistanceFire;
+            uint32_t mResistanceLightning;
+            uint32_t mResistanceMagic;
+            uint32_t mResistanceAll;
             uint32_t mChanceToHit;
             uint32_t mArmourClass;
             uint32_t mManaShield;
             uint32_t mDamageDone;
             uint32_t mAttackSpeed;
-            unsigned double mWalkSpeed;
+            double mWalkSpeed;
             Actor * mActor;
     };
 }
 
 
 
-#endif STATS_H
+#endif //ACTORSTATS_H

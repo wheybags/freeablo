@@ -85,8 +85,8 @@ add_library(DiabloExe
 	diabloexe/uniqueitem.h
 	diabloexe/characterstats.h
 	diabloexe/characterstats.cpp
-    diabloexe/prefix.cpp
-    diabloexe/prefix.h)
+    diabloexe/affix.cpp
+    diabloexe/affix.h)
 target_link_libraries(DiabloExe ${Boost_Libraries} Misc)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

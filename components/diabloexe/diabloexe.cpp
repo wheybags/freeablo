@@ -5,7 +5,6 @@
 #include <iomanip>
 #include <sstream>
 #include <iostream>
-#include <byteswap.h>
 #include <misc/fareadini.h>
 #include <misc/md5.h>
 #include <misc/stringops.h>
@@ -36,7 +35,7 @@ namespace DiabloExe
         loadCharacterStats(exe, pt);
         loadBaseItems(exe, pt);
         loadUniqueItems(exe, pt);
-        loadPreficies(exe, pt);
+        loadAffixes(exe, pt);
 
         FAIO::FAfclose(exe);
     }
@@ -240,26 +239,29 @@ namespace DiabloExe
         }
     }
 
-    void DiabloExe::loadPreficies(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
+    void DiabloExe::loadAffixes(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
     {
-        size_t prefixOffset = pt.get<size_t>("Preficies.prefixOffset");
-        size_t codeOffset = pt.get<size_t>("Preficies.codeOffset");
-        size_t count = pt.get<size_t>("Preficies.count");
+        size_t affixOffset = pt.get<size_t>("Affix.affixOffset");
+        size_t codeOffset = pt.get<size_t>("Affix.codeOffset");
+        size_t count = pt.get<size_t>("Affix.count");
         for(size_t i=0; i < count; i++)
         {
-            FAIO::FAfseek(exe, prefixOffset + 48*i, SEEK_SET);
-            Prefix tmp(exe, codeOffset);
-
-            if(mPrefices.find(tmp.prefixName) != mPrefices.end())
+            FAIO::FAfseek(exe, affixOffset + 48*i, SEEK_SET);
+            Affix tmp(exe, codeOffset);
+            if(Misc::StringUtils::containsNonPrint(tmp.mName))
+                continue;
+            if(tmp.mName.empty())
+                continue;
+            if(mAffixes.find(tmp.mName) != mAffixes.end())
             {
                 size_t i;
-                for(i = 1; mPrefices.find(tmp.prefixName + "_" + std::to_string(i)) != mPrefices.end(); i++);
+                for(i = 1; mAffixes.find(tmp.mName + "_" + std::to_string(i)) != mAffixes.end(); i++);
 
-                mPrefices[tmp.prefixName + "_" + std::to_string(i)] = tmp;
+                mAffixes[tmp.mName + "_" + std::to_string(i)] = tmp;
             }
             else
             {
-                mPrefices[tmp.prefixName] = tmp;
+                mAffixes[tmp.mName] = tmp;
             }
         }
     }
@@ -335,6 +337,12 @@ namespace DiabloExe
 
     }
 
+    const CharacterStats DiabloExe::getCharacterStat(std::string character) const
+    {
+        return mCharacters.at(character);
+
+    }
+
     std::vector<const Monster*> DiabloExe::getMonstersInLevel(size_t levelNum) const
     {
         std::vector<const Monster*> retval;
@@ -403,8 +411,8 @@ namespace DiabloExe
             ss << it->first << std::endl << it->second.dump();
         }
 
-        ss << "Prefices: " << mPrefices.size() << std::endl;
-        for(std::map<std::string, Prefix>::const_iterator it = mPrefices.begin(); it != mPrefices.end(); ++it)
+        ss << "Affixes: " << mAffixes.size() << std::endl;
+        for(std::map<std::string, Affix>::const_iterator it = mAffixes.begin(); it != mAffixes.end(); ++it)
         {
             ss << it->first << std::endl << it->second.dump();
         }
@@ -414,6 +422,6 @@ namespace DiabloExe
 
     bool DiabloExe::isLoaded() const
     {
-        return !mMonsters.empty() && !mNpcs.empty() && !mBaseItems.empty() && !mPrefices.empty();
+        return !mMonsters.empty() && !mNpcs.empty() && !mBaseItems.empty() && !mAffixes.empty();
     }
 }

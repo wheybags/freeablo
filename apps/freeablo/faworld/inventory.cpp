@@ -32,16 +32,16 @@ Inventory Inventory::testInv(Inventory& inv)
     while(!itemManager.mIsLoaded);
     Item gold = itemManager.getBaseItem(43);
 
-    Item bow  = itemManager.getBaseItem(28);
-    Item bow2  = itemManager.getBaseItem(28);
-    Item bow3  = itemManager.getBaseItem(28);
-    Item buckler = itemManager.getBaseItem(18);
-    Item ring = itemManager.getBaseItem(36);
-    Item cap = itemManager.getBaseItem(20);
-    Item plate = itemManager.getBaseItem(15);
-    Item amulet = itemManager.getBaseItem(72);
-    Item ring2 = itemManager.getBaseItem(36);
-    Item elixir = itemManager.getBaseItem(32);
+    Item bow  = itemManager.getBaseItem(26);
+    Item bow2  = itemManager.getBaseItem(26);
+    Item bow3  = itemManager.getBaseItem(26);
+    Item buckler = itemManager.getBaseItem(16);
+    Item ring = itemManager.getBaseItem(33);
+    Item cap = itemManager.getBaseItem(18);
+    Item plate = itemManager.getBaseItem(13);
+    Item amulet = itemManager.getBaseItem(66);
+    Item ring2 = itemManager.getBaseItem(33);
+    Item elixir = itemManager.getBaseItem(29);
     inv.putItem(bow, Item::eqINV, Item::eqFLOOR);
     inv.putItem(bow2, Item::eqINV, Item::eqFLOOR, 0, 2);
     inv.putItem(bow3, Item::eqLEFTHAND, Item::eqFLOOR);
