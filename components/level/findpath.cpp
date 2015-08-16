@@ -54,12 +54,10 @@ vector<FindPath::Location> FindPath::neighbors(Location location)
 
 int FindPath::heuristic(FindPath::Location a, FindPath::Location b)
 {
-    int x1, y1, x2, y2;
-    x1 = a.first;
-    y1 = a.second;
-    x2 = b.first;
-    y2 = b.second;
-    return abs(x1 - x2) + abs(y1 - y2);
+    int dx = abs(b.first - a.first);
+    int dy = abs(b.second - a.second);
+
+    return dx + dy;
 }
 
 bool FindPath::AStarSearch(
@@ -132,12 +130,12 @@ FindPath::Location FindPath::findClosesPointToGoal(FindPath::Location start, Fin
         int tmpX = abs(it->first.first - goal.first);
         int tmpY = abs(it->first.second- goal.second);
 
-        if(tmpX*tmpX + tmpY*tmpY < minDistance)
+        int distance = tmpX*tmpX + tmpY*tmpY;
+        if(distance < minDistance)
         {
-            minDistance = tmpX*tmpX + tmpY*tmpY;
+            minDistance = distance;
             result = it->first;
         }
-
     }
 
     return result;
