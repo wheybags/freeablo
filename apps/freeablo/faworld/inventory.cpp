@@ -4,10 +4,12 @@
 #include <sstream>
 #include "inventory.h"
 #include "itemmanager.h"
+#include "player.h"
 namespace FAWorld
 {
-Inventory::Inventory()
+Inventory::Inventory(Actor * actor)
 {
+    mActor = actor;
     for(uint8_t i=0;i<4;i++)
     {
 
@@ -19,19 +21,13 @@ Inventory::Inventory()
         }
     }
 }
-Inventory::~Inventory()
-{
-}
 
 Inventory Inventory::testInv(Inventory& inv)
 {
 
-
-
     ItemManager itemManager;
     while(!itemManager.mIsLoaded);
     Item gold = itemManager.getBaseItem(43);
-
     Item bow  = itemManager.getBaseItem(28);
     Item bow2  = itemManager.getBaseItem(28);
     Item bow3  = itemManager.getBaseItem(28);
@@ -56,6 +52,21 @@ Inventory Inventory::testInv(Inventory& inv)
 
 }
 
+bool Inventory::checkStatsRequirement(Item& item)
+{
+
+    if(mActor->mStats != NULL)
+        if(!(mActor->mStats->getStrength() >= item.getReqStr() &&
+             mActor->mStats->getDexterity()>= item.getReqDex() &&
+             mActor->mStats->getMagic() >= item.getReqMagic()  &&
+             mActor->mStats->getVitality() >= item.getReqVit()))
+            return false;
+        else
+            return true;
+    else
+        return true;
+}
+
 bool Inventory::canPlaceItem(
         Item  item,
         Item::equipLoc equipType,
@@ -72,6 +83,9 @@ bool Inventory::canPlaceItem(
              *
              * */
     case Item::eqLEFTHAND:
+        if(!checkStatsRequirement(item))
+            return false;
+
         if(item.getEquipLoc() == Item::eqONEHAND)
         {
             if(this->mLeftHand.isEmpty())
@@ -91,6 +105,8 @@ bool Inventory::canPlaceItem(
         }
         break;
     case Item::eqRIGHTHAND:
+        if(!checkStatsRequirement(item))
+            return false;
         if(this->mRightHand.isEmpty())
         {
             if(this->mLeftHand.isEmpty())
@@ -108,23 +124,30 @@ bool Inventory::canPlaceItem(
         }
         break;
     case Item::eqBODY:
+        if(!checkStatsRequirement(item))
+            return false;
         if(item.getEquipLoc() == Item::eqBODY && this->mBody.isEmpty())
             return true;
         break;
 
     case Item::eqHEAD:
+        if(!checkStatsRequirement(item))
+            return false;
         if(item.getEquipLoc() == Item::eqHEAD && this->mHead.isEmpty())
             return true;
         break;
 
     case Item::eqLEFTRING:
+        if(!checkStatsRequirement(item))
+            return false;
         if(item.getEquipLoc() == Item::eqRING)
         {
             if(this->mLeftRing.isEmpty()) return true;
         }
         break;
     case Item::eqRIGHTRING:
-
+        if(!checkStatsRequirement(item))
+            return false;
         if(item.getEquipLoc() == Item::eqRING)
         {
             if(this->mRightRing.isEmpty()) return true;
@@ -132,6 +155,8 @@ bool Inventory::canPlaceItem(
         break;
 
     case Item::eqAMULET:
+        if(!checkStatsRequirement(item))
+            return false;
         if(item.getEquipLoc() == Item::eqAMULET && this->mAmulet.isEmpty())
         {
             return true;
@@ -575,6 +600,20 @@ void Inventory::dump()
     void Inventory::collectEffects()
     {
         mItemEffects.clear();
+        mArmourClassTotal=0;
+        mAttackDamageTotal=0;
+        mArmourClassTotal += mHead.mArmourClass;
+        mAttackDamageTotal+= mHead.mAttackDamage;
+        mArmourClassTotal += mBody.mArmourClass;
+        mAttackDamageTotal+= mBody.mAttackDamage;
+        mArmourClassTotal += mAmulet.mArmourClass;
+        mAttackDamageTotal+= mAmulet.mAttackDamage;
+        mArmourClassTotal += mRightRing.mArmourClass;
+        mAttackDamageTotal+= mRightRing.mAttackDamage;
+        mArmourClassTotal += mLeftRing.mArmourClass;
+        mAttackDamageTotal+= mLeftRing.mAttackDamage;
+        mArmourClassTotal += mLeftHand.mArmourClass;
+        mAttackDamageTotal+= mLeftHand.mAttackDamage;
         mItemEffects.insert(mItemEffects.end(), mHead.mEffects.begin(), mHead.mEffects.end());
         mItemEffects.insert(mItemEffects.end(), mBody.mEffects.begin(), mBody.mEffects.end());
         mItemEffects.insert(mItemEffects.end(), mAmulet.mEffects.begin(), mAmulet.mEffects.end());
@@ -582,6 +621,12 @@ void Inventory::dump()
         mItemEffects.insert(mItemEffects.end(), mLeftRing.mEffects.begin(), mLeftRing.mEffects.end());
         mItemEffects.insert(mItemEffects.end(), mLeftHand.mEffects.begin(), mLeftHand.mEffects.end());
         if(!(mLeftHand == mRightHand))
+        {
             mItemEffects.insert(mItemEffects.end(), mRightHand.mEffects.begin(), mRightHand.mEffects.end());
+            mArmourClassTotal += mRightHand.mArmourClass;
+            mAttackDamageTotal+= mRightHand.mAttackDamage;
+        }
+        if(mActor->mStats != NULL)
+            mActor->mStats->recalculateDerivedStats();;
     }
 }

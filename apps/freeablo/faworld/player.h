@@ -11,6 +11,7 @@ namespace FAWorld
     {
         public:
             Player(ActorStats * stats): Actor("plrgfx/warrior/wls/wlswl.cl2", "plrgfx/warrior/wls/wlsst.cl2", Position(0,0), stats) {}
+        friend class Inventory;
     };
 }
 

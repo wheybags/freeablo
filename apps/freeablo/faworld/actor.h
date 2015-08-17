@@ -8,6 +8,7 @@
 
 namespace FAWorld
 {
+
     namespace AnimState
     {
         enum AnimState
@@ -36,7 +37,7 @@ namespace FAWorld
 
 
         private:
-
+            friend class Inventory;
             ActorStats * mStats;
             AnimState::AnimState mAnimState;
 

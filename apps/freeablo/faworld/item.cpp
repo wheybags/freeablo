@@ -1,6 +1,7 @@
 #include "item.h"
 #include "itemmanager.h"
 #include <iostream>
+#include "../falevelgen/random.h"
 namespace FAWorld
 {
 Item::Item()
@@ -59,11 +60,15 @@ Item::Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix, bool 
     mQualityLevel = item.qualityLevel;
     mDurability = item.durability;
     mCurrentDurability = mDurability;
+
     mMinAttackDamage = item.minAttackDamage;
     mMaxAttackDamage = item.maxAttackDamage;
+    mAttackDamage = FALevelGen::randomInRange(mMinAttackDamage,
+                                              mMaxAttackDamage);
     mMinArmourClass = item.minArmourClass;
     mMaxArmourClass = item.maxArmourClass;
-
+    mArmourClass = FALevelGen::randomInRange(mMinArmourClass,
+                                             mMaxArmourClass);
     mReqStr = item.reqStr;
     mReqMagic = item.reqMagic;
     mReqDex = item.reqDex;

@@ -192,10 +192,14 @@ private:
     uint32_t mQualityLevel;
     uint32_t mDurability;
     uint32_t mCurrentDurability;
+
     uint32_t mMinAttackDamage;
     uint32_t mMaxAttackDamage;
+    uint32_t mAttackDamage;
+
     uint32_t mMinArmourClass;
     uint32_t mMaxArmourClass;
+    uint32_t mArmourClass;
 
     uint8_t  mReqStr;
     uint8_t  mReqMagic;
@@ -214,26 +218,32 @@ private:
     uint32_t mEffect0;
     uint32_t mMinRange0;
     uint32_t mMaxRange0;
+    uint32_t mRange0;
 
     uint32_t mEffect1;
     uint32_t mMinRange1;
     uint32_t mMaxRange1;
+    uint32_t mRange1;
 
     uint32_t mEffect2;
     uint32_t mMinRange2;
     uint32_t mMaxRange2;
+    uint32_t mRange2;
 
     uint32_t mEffect3;
     uint32_t mMinRange3;
     uint32_t mMaxRange3;
+    uint32_t mRange3;
 
     uint32_t mEffect4;
     uint32_t mMinRange4;
     uint32_t mMaxRange4;
+    uint32_t mRange4;
 
     uint32_t mEffect5;
     uint32_t mMinRange5;
     uint32_t mMaxRange5;
+    uint32_t mRange5;
 
 
 

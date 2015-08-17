@@ -33,10 +33,8 @@ namespace FAWorld
             uint32_t getStrength() const{return mStrenght;}
             uint32_t getMaxStrength() const{return mMaxStrength;}
 
-
-
             void setActor(Actor * actor){mActor = actor;}
-            //ActorStats(){}
+
             ActorStats(uint32_t strength,
                        uint32_t maxStrength,
                        uint32_t magic,

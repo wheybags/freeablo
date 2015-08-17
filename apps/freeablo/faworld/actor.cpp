@@ -11,6 +11,7 @@ namespace FAWorld
         mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)),
         mIdleAnim(FARender::Renderer::get()->loadImage(idleAnimPath)),
         mFrame(0),
+        mInventory(this),
         mStats(stats),
         mAnimState(AnimState::idle)
     {
