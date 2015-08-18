@@ -4,6 +4,7 @@
 #include "position.h"
 #include "inventory.h"
 #include "../farender/renderer.h"
+#include "../fasavegame/savegame.h"
 
 namespace FAWorld
 {
@@ -32,6 +33,24 @@ namespace FAWorld
             FARender::FASpriteGroup mIdleAnim;
             size_t mFrame;
 
+        protected:
+
+            friend class boost::serialization::access;
+
+            template<class Archive>
+            void save(Archive & ar, const unsigned int version) const
+            {
+                ar & this->mPos;
+            }
+
+            template<class Archive>
+            void load(Archive & ar, const unsigned int version)
+            {
+                ar & this->mPos;
+                mAnimState = AnimState::idle;
+            }
+
+            BOOST_SERIALIZATION_SPLIT_MEMBER()
 
         private:
             AnimState::AnimState mAnimState;
