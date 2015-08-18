@@ -48,7 +48,11 @@ namespace FARender
         std::vector<std::string> components = Misc::StringUtils::split(std::string(source.CString()), '&');
 
         size_t celIndex = 0;
+
+        if(components.size() == 0)
+            return false;
         std::string sourcePath = components[0];
+
 
         for(size_t i = 1; i < components.size(); i++)
         {
@@ -202,11 +206,27 @@ namespace FARender
             }
 
             Render::drawGui(state->guiDrawBuffer, &mSpriteManager);
+            Renderer::setCursor(state);
         }
         
         Render::draw();
 
         return true;
+    }
+    void Renderer::setCursor(RenderState * State)
+    {
+
+        if(!State->mCursorEmpty)
+        {
+            Render::Sprite sprite = mSpriteManager.get(State->mCursorSpriteGroup.spriteCacheIndex)->operator [](State->mCursorFrame);
+            Render::drawCursor(sprite);
+        }
+        else
+        {
+            Render::drawCursor(NULL);
+        }
+        return;
+
     }
 
     void Renderer::cleanup()

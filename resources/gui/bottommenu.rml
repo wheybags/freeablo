@@ -18,7 +18,35 @@
                 background-decorator: image;
                 background-image: /ctrlpan/panel8.cel;
             }
+            span.beltContainer
+            {
+                width: 232px;
+                height: 29px;
+                display: inline-block;
+                left: 205px;
+                top: 21px;
+                position: absolute;
+            }
+            div.beltSocket
+            {
 
+
+                width: 29px;
+                height: 29px;
+                display: inline-block;
+
+
+            }
+            div.beltItem
+            {
+
+                background-decorator: image;
+                width: 29px;
+                height: 29px;
+                display: inline-block;
+
+
+            }
             div.buttonDiv
             {
                 position: absolute;
@@ -27,27 +55,42 @@
         </style>
 
         <link type="text/rcss" href="bottommenu_buttons.rcss"/>
+        <link type="text/rcss" href="item_graphics.rcss"/>
 
         <script>
 import docmanage
-
+import draggable
+instance = draggable.DraggableWidget(document, 0, 0)
 invHandle = "resources/gui/inventory.rml"
 charHandle = "resources/gui/character.rml"
-
+spellsHandle = "resources/gui/spells.rml"
+questHandle = "resources/gui/quest.rml"
 docmanage.manager.loadDoc(invHandle)
 docmanage.manager.loadDoc(charHandle)
+docmanage.manager.loadDoc(spellsHandle)
+docmanage.manager.loadDoc(questHandle)
         </script>
 
     </head>
 
-    <body onkeydown="docmanage.manager.onKeyDown(event)" onmousedown="docmanage.manager.bodyClicked()">
+    <body onLoad="instance.onLoadBelt(event)" onkeydown="docmanage.manager.onKeyDown(event)" onmousedown="docmanage.manager.bodyClicked()">
         <span id="container" onmousedown="docmanage.manager.guiClicked()">
+        <span class="beltContainer" id="beltContainer">
+        <div class="beltSocket" id="belt0" onclick="instance.onBeltClick(event)"></div>
+        <div class="beltSocket" id="belt1" onclick="instance.onBeltClick(event)"></div>
+        <div class="beltSocket" id="belt2" onclick="instance.onBeltClick(event)"></div>
+        <div class="beltSocket" id="belt3" onclick="instance.onBeltClick(event)"></div>
+        <div class="beltSocket" id="belt4" onclick="instance.onBeltClick(event)"></div>
+        <div class="beltSocket" id="belt5" onclick="instance.onBeltClick(event)"></div>
+        <div class="beltSocket" id="belt6" onclick="instance.onBeltClick(event)"></div>
+        <div class="beltSocket" id="belt7" onclick="instance.onBeltClick(event)"></div>
+        </span>
             <button id="charBut" onclick="docmanage.manager.toggleDoc(charHandle)"></button>
-            <button id="questBut" onclick="print 'quest clicked'"></button>
+            <button id="questBut" onclick="docmanage.manager.toggleDoc(questHandle)"></button>
             <button id="mapBut" onclick="print 'map clicked'"></button>
-            <button id="menuBut" onclick="print 'menu clicked'"></button>
+            <button id="menuBut" onclick="docmanage.manager.pause()"></button>
             <button id="invBut" onclick="docmanage.manager.toggleDoc(invHandle)"></button>
-            <button id="spellBut" onclick="print 'spell clicked'"></button>
+            <button id="spellBut" onclick="docmanage.manager.toggleDoc(spellsHandle)"></button>
         </span>
     </body>
 </rml>

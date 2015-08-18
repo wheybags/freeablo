@@ -20,8 +20,12 @@ add_library(Levels
     level/level.h
     level/level.cpp
     level/sol.cpp
-    level/sol.h)
-target_link_libraries(Levels FAIO)
+    level/sol.h
+	level/itemmanager.cpp
+	level/itemmanager.h
+	level/item.cpp
+	level/item.h)
+target_link_libraries(Levels FAIO DiabloExe)
 set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Misc 
@@ -74,7 +78,13 @@ add_library(DiabloExe
     diabloexe/monster.h
     diabloexe/monster.cpp
     diabloexe/npc.h
-    diabloexe/npc.cpp)
+    diabloexe/npc.cpp
+    diabloexe/baseitem.cpp
+    diabloexe/baseitem.h
+	diabloexe/uniqueitem.cpp
+	diabloexe/uniqueitem.h
+    diabloexe/prefix.cpp
+    diabloexe/prefix.h)
 target_link_libraries(DiabloExe ${Boost_Libraries} Misc)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

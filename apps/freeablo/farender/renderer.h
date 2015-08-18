@@ -48,6 +48,11 @@ namespace FARender
 
         Level::Level* level;
 
+        FASpriteGroup mCursorSpriteGroup;
+        uint32_t mCursorFrame;
+
+        bool mCursorEmpty;
+
         RenderState():ready(true) {}
     };
 
@@ -72,8 +77,11 @@ namespace FARender
 
             Rocket::Core::Context* getRocketContext();
 
+            void setCursor(RenderState *State);
+
             bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
             void cleanup(); ///< To be called only by Engine::ThreadManager
+
             
         private:
             bool loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);

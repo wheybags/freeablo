@@ -80,10 +80,10 @@ namespace DiabloExe
 
         exp = FAIO::read32(exe);
 
-        cl2Path = FAIO::readCString(exe, cl2Tmp-codeOffset);
-        soundPath = FAIO::readCString(exe, soundTmp-codeOffset);
-        trnPath = FAIO::readCString(exe, trnTmp-codeOffset);
-        monsterName = FAIO::readCString(exe, nameTmp-codeOffset);
+        cl2Path = FAIO::readCStringFromWin32Binary(exe, cl2Tmp, codeOffset);
+        soundPath = FAIO::readCStringFromWin32Binary(exe, soundTmp, codeOffset);
+        trnPath = FAIO::readCStringFromWin32Binary(exe, trnTmp, codeOffset);
+        monsterName = FAIO::readCStringFromWin32Binary(exe, nameTmp, codeOffset);
     } 
     
     std::string Monster::dump() const

@@ -68,6 +68,8 @@ namespace Engine
         mQueue.push(msg);
     }
 
+
+
     void ThreadManager::handleMessage(const Message& message)
     {
         switch(message.type)
@@ -94,6 +96,7 @@ namespace Engine
                 mRenderState = message.data.renderState;
                 break;
             }
+
         }
     }
 }
