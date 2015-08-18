@@ -34,8 +34,12 @@ class DraggableWidget(object):
 
         if leftHandItem["empty"] is False:
             leftHand.SetAttribute("empty", "false")
-            leftHand.style.width = "56px"
-            leftHand.style.height = "84px"
+            leftHand.style.width  = str(28 * leftHandItem["sizeX"]) + "px"
+            leftHand.style.height = str(28 * leftHandItem["sizeY"]) + "px"
+            if leftHandItem["sizeX"] == 1:
+                leftHand.style.left = str(int(leftHand.style.left)+10) + "px"
+            if leftHandItem["sizeY"] == 2:
+                leftHand.style.top = str(int(leftHand.style.top)+14) + "px"
             leftHand.SetAttribute("class", "itemGraphic" + str(leftHandItem["graphic"]))
 
         else:
@@ -50,8 +54,12 @@ class DraggableWidget(object):
 
         if rightHandItem["empty"] is False:
             rightHand.SetAttribute("empty", "false")
-            rightHand.style.width = "56px"
-            rightHand.style.height = "84px"
+            rightHand.style.width = str(28 * rightHandItem["sizeX"]) + "px"
+            rightHand.style.height = str(28 * rightHandItem["sizeY"]) + "px"
+            if rightHandItem["sizeX"] == 1:
+                rightHand.style.left = str(int(rightHand.style.left)+10) + "px"
+            if rightHandItem["sizeY"] == 2:
+                rightHand.style.top = str(int(rightHand.style.top)+14) + "px"
             rightHand.SetAttribute("class", "itemGraphic" + str(rightHandItem["graphic"]))
 
         else:
@@ -168,6 +176,7 @@ class DraggableWidget(object):
             parent.AppendChild(element)
 
     def onLoad(self, event):
+        self.document.GetElementById("container").SetAttribute("class", freeablo.getInvClass())
         self.updateInventory(event)
 
     def onLoadBelt(self, event):

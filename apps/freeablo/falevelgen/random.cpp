@@ -29,8 +29,9 @@ namespace FALevelGen
 
     int randomInRange (unsigned int min, unsigned int max)
     {
-        boost::uniform_int<> range(min, max);
+        boost::uniform_int<> range(min, max);        
         boost::variate_generator<boost::mt19937&, boost::uniform_int<> > varRange(rng, range);
+
         
         return varRange();
     }

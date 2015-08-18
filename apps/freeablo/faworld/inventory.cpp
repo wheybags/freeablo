@@ -9,6 +9,8 @@ namespace FAWorld
 {
 Inventory::Inventory(Actor * actor)
 {
+    mAttackDamageTotal=0;
+    mArmourClassTotal=0;
     mActor = actor;
     for(uint8_t i=0;i<4;i++)
     {
@@ -21,35 +23,22 @@ Inventory::Inventory(Actor * actor)
         }
     }
 }
+std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> & Inventory::getTotalEffects()
+{
+    return mItemEffects;
+}
 
-Inventory Inventory::testInv(Inventory& inv)
+uint32_t Inventory::getTotalArmourClass()
+{
+    return mArmourClassTotal;
+    if(mActor == NULL)
+        return 0;
+}
+
+uint32_t Inventory::getTotalAttackDamage()
 {
 
-    ItemManager itemManager;
-    while(!itemManager.mIsLoaded);
-    Item gold = itemManager.getBaseItem(43);
-    Item bow  = itemManager.getBaseItem(28);
-    Item bow2  = itemManager.getBaseItem(28);
-    Item bow3  = itemManager.getBaseItem(28);
-    Item buckler = itemManager.getBaseItem(18);
-    Item ring = itemManager.getBaseItem(36);
-    Item cap = itemManager.getBaseItem(20);
-    Item plate = itemManager.getBaseItem(15);
-    Item amulet = itemManager.getBaseItem(72);
-    Item ring2 = itemManager.getBaseItem(36);
-    Item elixir = itemManager.getBaseItem(32);
-    inv.putItem(bow, Item::eqINV, Item::eqFLOOR);
-    inv.putItem(bow2, Item::eqINV, Item::eqFLOOR, 0, 2);
-    inv.putItem(bow3, Item::eqLEFTHAND, Item::eqFLOOR);
-    inv.putItem(ring, Item::eqINV, Item::eqFLOOR, 3, 0);
-    inv.putItem(ring2, Item::eqINV, Item::eqFLOOR, 3, 1);
-    inv.putItem(cap, Item::eqHEAD, Item::eqFLOOR, 3, 0);
-    inv.putItem(plate, Item::eqBODY, Item::eqFLOOR, 3, 0);
-    inv.putItem(amulet, Item::eqAMULET, Item::eqFLOOR, 3, 0);
-    inv.putItem(elixir, Item::eqBELT, Item::eqFLOOR, 0, 0, 1);
-
-    return inv;
-
+    return mAttackDamageTotal;
 }
 
 bool Inventory::checkStatsRequirement(Item& item)
@@ -180,17 +169,14 @@ bool Inventory::canPlaceItem(
                 {
                     for(uint8_t j=x; j < x+item.mSizeX;++j)
                     {
-
                         if(!mInventoryBox[i][j].isEmpty())
                         {
                             return false;
                         }
                     }
-
                 }
                 return true;
             }
-
         }
         break;
     case Item::eqBELT:
@@ -209,10 +195,7 @@ bool Inventory::canPlaceItem(
         return this->mCursorHeld.isEmpty();
     default:
         return false;
-
-
     }
-
     return false;
 }
 //TODO: When stats have implemented add checks for requirements to wear/wield items
@@ -221,10 +204,8 @@ bool Inventory::putItem(Item &item,
                         Item::equipLoc from,
                         uint8_t y,
                         uint8_t x,
-                        uint8_t beltX)
+                        uint8_t beltX, bool recalculateStats)
 {
-
-
 
     if(canPlaceItem(item, equipType, y, x, beltX))
     {
@@ -276,7 +257,8 @@ bool Inventory::putItem(Item &item,
                         putItem(this->mRightHand, Item::eqINV, Item::eqRIGHTHAND, auto_fit_y, auto_fit_x);
                         removeItem(item, from, beltX, y, x);
                         this->mRightHand = item;
-                        collectEffects();
+                        if(recalculateStats)
+                            collectEffects();
                         return true;
                     }
                     else
@@ -360,8 +342,19 @@ bool Inventory::putItem(Item &item,
                         if((mInventoryBox[i][j].mBaseId == item.mBaseId) && (mInventoryBox[i][j].mCount+item.mCount) <=item.mMaxCount && (mInventoryBox[i][j].mUniqueId != item.mUniqueId))
                         {
                             mInventoryBox[i][j].mCount+=item.mCount;
+
+                            if(mInventoryBox[i][j].mCount < 1000)
+                                mInventoryBox[i][j].mGraphicValue = 15;
+
+                            else if (mInventoryBox[i][j].mCount > 1000 && mInventoryBox[i][j].mCount < 2500)
+                                mInventoryBox[i][j].mGraphicValue=16;
+
+                            else
+                                mInventoryBox[i][j].mGraphicValue=17;
                             removeItem(item, from, item.mInvX, item.mInvY, item.mBeltX);
-                            collectEffects();
+
+                            if(recalculateStats)
+                                collectEffects();
                             return true;
                         }
                         else if(mInventoryBox[i][j] == item)
@@ -425,7 +418,8 @@ bool Inventory::putItem(Item &item,
     {
         return false;
     }
-    collectEffects();
+    if(recalculateStats)
+        collectEffects();
     return true;
 }
 Item& Inventory::getItemAt(Item::equipLoc type, uint8_t y, uint8_t x, uint8_t beltX)
@@ -448,8 +442,8 @@ Item& Inventory::getItemAt(Item::equipLoc type, uint8_t y, uint8_t x, uint8_t be
 
     }
 
-    Item empty;
-    return empty;
+
+    return Item::empty;
 }
 
 void Inventory::removeItem(
@@ -599,21 +593,45 @@ void Inventory::dump()
 }
     void Inventory::collectEffects()
     {
+        if(mActor == NULL)
+            return;
         mItemEffects.clear();
         mArmourClassTotal=0;
         mAttackDamageTotal=0;
-        mArmourClassTotal += mHead.mArmourClass;
-        mAttackDamageTotal+= mHead.mAttackDamage;
-        mArmourClassTotal += mBody.mArmourClass;
-        mAttackDamageTotal+= mBody.mAttackDamage;
-        mArmourClassTotal += mAmulet.mArmourClass;
-        mAttackDamageTotal+= mAmulet.mAttackDamage;
-        mArmourClassTotal += mRightRing.mArmourClass;
-        mAttackDamageTotal+= mRightRing.mAttackDamage;
-        mArmourClassTotal += mLeftRing.mArmourClass;
-        mAttackDamageTotal+= mLeftRing.mAttackDamage;
-        mArmourClassTotal += mLeftHand.mArmourClass;
-        mAttackDamageTotal+= mLeftHand.mAttackDamage;
+        if(!mHead.isEmpty())
+        {
+            mArmourClassTotal += mHead.mArmourClass;
+            mAttackDamageTotal+= mHead.mAttackDamage;
+        }
+
+        if(!mBody.isEmpty())
+        {
+            mArmourClassTotal += mBody.mArmourClass;
+            mAttackDamageTotal+= mBody.mAttackDamage;
+        }
+
+        if(!mAmulet.isEmpty())
+        {
+            mArmourClassTotal += mAmulet.mArmourClass;
+            mAttackDamageTotal+= mAmulet.mAttackDamage;
+        }
+
+        if(!mRightRing.isEmpty())
+        {
+            mArmourClassTotal += mRightRing.mArmourClass;
+            mAttackDamageTotal+= mRightRing.mAttackDamage;
+        }
+
+        if(!mLeftRing.isEmpty())
+        {
+            mArmourClassTotal += mLeftRing.mArmourClass;
+            mAttackDamageTotal+= mLeftRing.mAttackDamage;
+        }
+        if(!mLeftHand.isEmpty())
+        {
+            mArmourClassTotal += mLeftHand.mArmourClass;
+            mAttackDamageTotal+= mLeftHand.mAttackDamage;
+        }
         mItemEffects.insert(mItemEffects.end(), mHead.mEffects.begin(), mHead.mEffects.end());
         mItemEffects.insert(mItemEffects.end(), mBody.mEffects.begin(), mBody.mEffects.end());
         mItemEffects.insert(mItemEffects.end(), mAmulet.mEffects.begin(), mAmulet.mEffects.end());
@@ -623,8 +641,11 @@ void Inventory::dump()
         if(!(mLeftHand == mRightHand))
         {
             mItemEffects.insert(mItemEffects.end(), mRightHand.mEffects.begin(), mRightHand.mEffects.end());
-            mArmourClassTotal += mRightHand.mArmourClass;
-            mAttackDamageTotal+= mRightHand.mAttackDamage;
+            if(!mRightHand.isEmpty())
+            {
+                mArmourClassTotal += mRightHand.mArmourClass;
+                mAttackDamageTotal+= mRightHand.mAttackDamage;
+            }
         }
         if(mActor->mStats != NULL)
             mActor->mStats->recalculateDerivedStats();;

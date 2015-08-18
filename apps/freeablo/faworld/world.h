@@ -23,7 +23,7 @@ namespace FAWorld
     class World
     {
         public:
-            World(ActorStats *stats);
+            World();
             ~World();
 
             void setLevel(Level::Level& level, const DiabloExe::DiabloExe& exe);
@@ -36,7 +36,7 @@ namespace FAWorld
             void update();
             Player* getPlayer();
             void fillRenderState(FARender::RenderState* state);
-
+            void setStatsObject(ActorStats *stats);
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
 
         private:

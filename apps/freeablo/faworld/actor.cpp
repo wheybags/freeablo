@@ -6,18 +6,24 @@ namespace FAWorld
     {
         mPos.update(); 
     }
-    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos, ActorStats * stats):
+    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos):
         mPos(pos),
         mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)),
         mIdleAnim(FARender::Renderer::get()->loadImage(idleAnimPath)),
         mFrame(0),
-        mInventory(this),
-        mStats(stats),
+        mInventory(this),        
         mAnimState(AnimState::idle)
     {
+    }
 
-        mInventory = mInventory.testInv(mInventory);
+    void Actor::setWalkAnimation(const std::string path)
+    {
+        mWalkAnim = FARender::Renderer::get()->loadImage(path);
+    }
 
+    void Actor::setIdleAnimation(const std::string path)
+    {
+        mIdleAnim = FARender::Renderer::get()->loadImage(path);
     }
 
     FARender::FASpriteGroup Actor::getCurrentAnim()
@@ -31,7 +37,12 @@ namespace FAWorld
                 return mIdleAnim;
         }
     }
-    
+    void Actor::setStats(ActorStats * stats)
+    {
+        mStats = stats;
+
+    }
+
     void Actor::setAnimation(AnimState::AnimState state)
     {
         mAnimState = state;

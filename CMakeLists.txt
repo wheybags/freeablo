@@ -48,7 +48,7 @@ if ( NOT SDL2_FOUND )
 endif ()
 
 if(UNIX)
-    set(FA_COMPILER_FLAGS "-Wall -pedantic -Wextra -g -std=c++11")
+    set(FA_COMPILER_FLAGS "-Wall -pedantic -Wextra -g -std=c++11 -O0")
 else()
     set(FA_COMPILER_FLAGS "")
 endif()

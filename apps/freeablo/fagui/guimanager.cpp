@@ -127,6 +127,10 @@ void setHotkey(std::string function, boost::python::list pyhotkey)
     }
 }
 
+std::string getInvClass()
+{
+    return invClass;
+}
 
 void placeItem(uint32_t toPara,
                uint32_t fromPara,
@@ -412,17 +416,18 @@ BOOST_PYTHON_MODULE(freeablo)
     boost::python::def("getHotkeyNames", &getHotkeyNames);
     boost::python::def("getHotkeys", &getHotkeys);
     boost::python::def("setHotkey", &setHotkey);
-
     boost::python::def("updateInventory", &updateInventory);
     boost::python::def("placeItem", &placeItem);
+    boost::python::def("getInvClass", &getInvClass);
 }
 
 Rocket::Core::ElementDocument* ingameUi = NULL;
 Rocket::Core::ElementDocument* mainMenu = NULL;
 
-void initGui(FAWorld::Inventory & playerInventory)
+void initGui(FAWorld::Inventory & playerInventory, std::string invclass)
 {
     inventory = &playerInventory;
+    invClass = invclass;
     initfreeablo();
     Input::Hotkey::initpythonwrapper();
 

@@ -30,15 +30,18 @@ public:
         IncPercentResistLightning,
         IncPercentResistMagic,
         IncPercentResistAll,
+        Unknown6,
+        Unknown7,
         ModSpellLevel,
         IncCharges,
         IncFireDamage,
         IncLightningDamage,
+        Unknown8,
         IncStrength,
         DecStrength,
         IncMagic,
         DecMagic,
-        IntDexterity,
+        IncDexterity,
         DecDexterity,
         IncVitality,
         DecVitality,
@@ -174,6 +177,7 @@ public:
     equipLoc getEquipLoc() const;
     itemType getType() const;
     uint32_t getGraphicValue() const;
+    static Item empty;
 
 private:
     static Cel::CelFile * mObjcurs;

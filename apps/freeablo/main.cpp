@@ -181,7 +181,8 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
     desc.add_options()
         ("help,h", "Print help")
         // -1 represents the main menu
-        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)");
+        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)")
+        ("character,c", bpo::value<std::string>()->default_value(("Warrior")), "Character: Warrior, Rogue or Sorcerer");
 
     try 
     { 
@@ -199,6 +200,12 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
         if(dLvl > 16)
             throw bpo::validation_error(
                 bpo::validation_error::invalid_option_value, "level");
+
+        const std::string character = variables["character"].as<std::string>();
+
+        if(character != "Warrior" && character != "Rogue" && character != "Sorcerer")
+            throw bpo::validation_error(bpo::validation_error::invalid_option_value, "character");
+
     }
     catch(bpo::error& e)
     {
@@ -377,6 +384,7 @@ void runGameLoop(const bpo::variables_map& variables)
         renderer.stop();
         return;
     }
+    FALevelGen::FAsrand(time(NULL));
     FAWorld::ItemManager itemManager;
 
     itemManager.loadItems(&exe);
@@ -385,35 +393,163 @@ void runGameLoop(const bpo::variables_map& variables)
 
     itemManager.dumpBaseItems();
 
-    DiabloExe::CharacterStats warrior = exe.getCharacterStat("Warrior");
+    itemManager.dumpUniqueItems();
+    std::string character = variables["character"].as<std::string>();
 
-    FAWorld::WarriorStats stats(
-                warrior.mStrength,
-                warrior.mMaxStrength,
-                warrior.mMagic,
-                warrior.mMaxMagic,
-                warrior.mDexterity,
-                warrior.mMaxDexterity,
-                warrior.mVitality,
-                warrior.mMaxVitality,
-                warrior.mBlockingBonus);
 
-    FAWorld::World world(&stats);
+    DiabloExe::CharacterStats char_stats = exe.getCharacterStat(character);;
 
-    stats.setActor(world.getPlayer());
+    FAWorld::ActorStats * stats;
+    FAWorld::World world;
+    FAWorld::Player* player = world.getPlayer();
 
-    FALevelGen::FAsrand(time(NULL));
+    if(character == "Warrior")
+    {
+        stats = new FAWorld::WarriorStats(
+                    char_stats.mStrength,
+                    char_stats.mMaxStrength,
+                    char_stats.mMagic,
+                    char_stats.mMaxMagic,
+                    char_stats.mDexterity,
+                    char_stats.mMaxDexterity,
+                    char_stats.mVitality,
+                    char_stats.mMaxVitality,
+                    char_stats.mBlockingBonus);
+        FAWorld::Item item = itemManager.getBaseItem(125) ;
+        player->mInventory.putItem(
+                    item,
+                    FAWorld::Item::eqLEFTHAND,
+                    FAWorld::Item::eqFLOOR,
+                    0, 0, 0, false);
+        item = itemManager.getBaseItem(18);
+        player->mInventory.putItem(
+                    item,
+                    FAWorld::Item::eqRIGHTHAND,
+                    FAWorld::Item::eqFLOOR,
+                    0, 0, 0, false);
+        item = itemManager.getBaseItem(26);
+
+        player->mInventory.putItem(
+                    item,
+                    FAWorld::Item::eqINV,
+                    FAWorld::Item::eqFLOOR,
+                    0, 0, 0, false);
+        item = itemManager.getBaseItem(43);
+        item.setCount(100);
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqINV,
+                                   FAWorld::Item::eqFLOOR,
+                                   3, 0, 0, false);
+        item = itemManager.getBaseItem(79);
+
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqBELT,
+                                   FAWorld::Item::eqFLOOR,
+                                   0, 0, 0, false);
+
+        item = itemManager.getBaseItem(79);
+
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqBELT,
+                                   FAWorld::Item::eqFLOOR,
+                                   0, 0, 1, false);
+        player->setIdleAnimation("plrgfx/warrior/wld/wldst.cl2");
+        player->setWalkAnimation("plrgfx/warrior/wld/wldwl.cl2");
+
+    }
+
+    else if(character == "Rogue")
+    {
+        stats = new FAWorld::RogueStats(
+                    char_stats.mStrength,
+                    char_stats.mMaxStrength,
+                    char_stats.mMagic,
+                    char_stats.mMaxMagic,
+                    char_stats.mDexterity,
+                    char_stats.mMaxDexterity,
+                    char_stats.mVitality,
+                    char_stats.mMaxVitality,
+                    char_stats.mBlockingBonus);
+        FAWorld::Item item = itemManager.getBaseItem(121);
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqLEFTHAND,
+                                   FAWorld::Item::eqFLOOR,
+                                   0, 0, 0, false);
+        item = itemManager.getBaseItem(43);
+        item.setCount(100);
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqINV,
+                                   FAWorld::Item::eqFLOOR,
+                                   3, 0, 0,false);
+        item = itemManager.getBaseItem(79);
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqBELT,
+                                   FAWorld::Item::eqFLOOR,
+                                   0, 0, 0, false);
+        item = itemManager.getBaseItem(79);
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqBELT,
+                                   FAWorld::Item::eqFLOOR,
+                                   0, 0, 1, false);
+        player->setIdleAnimation("plrgfx/rogue/rlb/rlbst.cl2");
+        player->setWalkAnimation("plrgfx/rogue/rlb/rlbwl.cl2");
+
+    }
+    else
+    {
+        stats = new FAWorld::SorcererStats(
+                    char_stats.mStrength,
+                    char_stats.mMaxStrength,
+                    char_stats.mMagic,
+                    char_stats.mMaxMagic,
+                    char_stats.mDexterity,
+                    char_stats.mMaxDexterity,
+                    char_stats.mVitality,
+                    char_stats.mMaxVitality,
+                    char_stats.mBlockingBonus);
+        FAWorld::Item item = itemManager.getBaseItem(124);
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqLEFTHAND,
+                                   FAWorld::Item::eqFLOOR,
+                                   0, 0, 0, false);
+        item = itemManager.getBaseItem(43);
+        item.setCount(100);
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqINV,
+                                   FAWorld::Item::eqFLOOR,
+                                   3, 0, 0, false);
+        item = itemManager.getBaseItem(81);
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqBELT,
+                                   FAWorld::Item::eqFLOOR,
+                                   0, 0, 0, false);
+        item = itemManager.getBaseItem(81);
+        player->mInventory.putItem(item,
+                                   FAWorld::Item::eqBELT,
+                                   FAWorld::Item::eqBELT,
+                                   0, 0, 1, false);
+
+        player->setIdleAnimation("plrgfx/sorceror/slt/sltst.cl2");
+        player->setWalkAnimation("plrgfx/sorceror/slt/sltwl.cl2");
+    }
+
+
+    world.setStatsObject(stats);
+    stats->setActor(world.getPlayer());
+    stats->recalculateDerivedStats();
+
 
     std::vector<Level::Level*> levels(13);
 
     int32_t currentLevel = variables["level"].as<int32_t>();
 
+
     Level::Level* level = NULL;
     FARender::Tileset tileset;
 
-    FAWorld::Player* player = world.getPlayer();
 
-    FAGui::initGui(player->mInventory);
+
+    FAGui::initGui(player->mInventory, character);
     
     // -1 represents the main menu
     if(currentLevel != -1)

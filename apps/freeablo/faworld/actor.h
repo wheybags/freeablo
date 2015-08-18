@@ -21,11 +21,15 @@ namespace FAWorld
     class Actor
     {
         public:
-            Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos, ActorStats * stats=NULL);
+            Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos);
             void update();
+
+            void setStats(ActorStats* stats);
 
             FARender::FASpriteGroup getCurrentAnim();
             void setAnimation(AnimState::AnimState state);
+            void setWalkAnimation(const std::string path);
+            void setIdleAnimation(const std::string path);
 
             Position mPos;            
         //private: //TODO: fix this

@@ -10,12 +10,18 @@
 
 namespace FAWorld
 {
-    World::World(ActorStats * stats)
+    World::World()
     {
-        mPlayer = new Player(stats);
+        mPlayer = new Player();
         mActors.push_back(mPlayer);
         mTicksSinceLastAnimUpdate = 0;
         mLevel = NULL;
+    }
+
+    void World::setStatsObject(ActorStats *stats)
+    {
+        mPlayer->setStats(stats);
+
     }
 
     World::~World()
