@@ -33,7 +33,6 @@ namespace FAWorld
 
         mLevel = &level;
 
-        mActorMap2D.resize(level.width()*level.height());
         actorMapClear();
 
         // insert actors into 2d map
@@ -55,7 +54,7 @@ namespace FAWorld
 
     Actor* World::getActorAt(size_t x, size_t y)
     {
-        return mActorMap2D[(y*mLevel->width())+x];
+        return mActorMap2D[std::pair<size_t, size_t>(x, y)];
     }
 
     void World::clear()
@@ -94,15 +93,14 @@ namespace FAWorld
 
     void World::actorMapClear()
     {
-        for(size_t i = 0; i < mActorMap2D.size(); i++)
-            mActorMap2D[i] = NULL;
+        mActorMap2D.clear();
     }
 
     void World::actorMapInsert(Actor* actor)
     {
-        mActorMap2D[actor->mPos.current().second*mLevel->width()+actor->mPos.current().first] = actor;
+        mActorMap2D[actor->mPos.current()] = actor;
         if(actor->mPos.mMoving)
-            mActorMap2D[actor->mPos.next().second*mLevel->width()+actor->mPos.next().first] = actor;
+            mActorMap2D[actor->mPos.next()] = actor;
     }
 
     Player* World::getPlayer()

@@ -2,11 +2,14 @@
 #define WORLD_H
 
 #include <vector>
+#include <map>
+#include <utility>
 
 #include "actor.h"
 #include "player.h"
 
 #include <level/level.h>
+
 
 namespace FARender
 {
@@ -46,9 +49,8 @@ namespace FAWorld
             std::vector<Actor*> mActors;
 
             Level::Level* mLevel;
-            std::vector<Actor*> mActorMap2D; ///< 2d array of same size as current level, containing all actors at their
-                                             ///< positions. Contains NULL where no Actor is present.
-                                             ///< Where an actor straddles two squares, they shall be placed in both.
+            std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Contains NULL where no Actor is present.
+                                                                        ///< Where an actor straddles two squares, they shall be placed in both.
             Player* mPlayer;
             size_t mTicksSinceLastAnimUpdate;
     };

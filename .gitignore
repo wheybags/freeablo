@@ -7,3 +7,4 @@ resources/settings-user.ini
 *.o
 *.make
 *CMakeFiles*
+build/
