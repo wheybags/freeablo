@@ -17,11 +17,11 @@
 
 #include "fagui/guimanager.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
+#include <chrono>
+#include <thread>
 #include <fstream>
 
 #include <settings/settings.h>
@@ -31,6 +31,7 @@
 namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 namespace bpt = boost::property_tree;
+using namespace std::chrono;
 
 bool done = false;
 bool paused = false;
@@ -298,7 +299,7 @@ void run(const bpo::variables_map& variables)
 
     Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
 
-    boost::thread mainThread(boost::bind(&runGameLoop, &variables));
+    std::thread mainThread(std::bind(&runGameLoop, &variables));
 
     threadManager.run();
     renderDone = true;
@@ -366,7 +367,7 @@ void runGameLoop(const bpo::variables_map& variables)
         threadManager.playMusic("music/dintro.wav");
     }
     
-    boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
+    auto last = system_clock::now();
     
     std::pair<size_t, size_t> destination = player->mPos.current();
             
@@ -381,12 +382,12 @@ void runGameLoop(const bpo::variables_map& variables)
 
         input.processInput(paused);
 
-        boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
-        
-        while((size_t)(now.time_of_day().total_milliseconds() - last.time_of_day().total_milliseconds()) < 1000/FAWorld::World::ticksPerSecond)
+        auto now = system_clock::now();
+
+        while(duration_cast<milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count() < 1000/FAWorld::World::ticksPerSecond)
         {
-            boost::this_thread::yield();
-            now = boost::posix_time::microsec_clock::local_time();
+            std::this_thread::yield();
+            now = system_clock::now();
         }
 
         last = now;

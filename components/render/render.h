@@ -7,7 +7,7 @@
 #include <string>
 #include <utility>
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <cel/celfile.h>
 #include <cel/celframe.h>
@@ -54,9 +54,9 @@ namespace Render
 
 
     void init(const RenderSettings& settings); 
-    Rocket::Core::Context* initGui(boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
-                                   boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
-                                   boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc);
+    Rocket::Core::Context* initGui(std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
+                                   std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
+                                   std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc);
 
     void quit(); 
 

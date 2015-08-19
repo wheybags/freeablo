@@ -2,8 +2,8 @@
 #define INPUT_H
 
 #include <stdint.h>
+#include <functional>
 
-#include <boost/function.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
 
 #include <misc/disablewarn.h>
@@ -24,10 +24,10 @@ namespace Input
     class InputManager
     {
         public:
-            InputManager(boost::function<void(Key)> keyPress, boost::function<void(Key)> keyRelease,
-                boost::function<void(uint32_t, uint32_t, Key)> mouseClick,
-                boost::function<void(uint32_t, uint32_t, Key)> mouseRelease,
-                boost::function<void(uint32_t, uint32_t)> mouseMove,
+            InputManager(std::function<void(Key)> keyPress, std::function<void(Key)> keyRelease,
+                std::function<void(uint32_t, uint32_t, Key)> mouseClick,
+                std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
+                std::function<void(uint32_t, uint32_t)> mouseMove,
                 Rocket::Core::Context* context);
 
             void processInput(bool paused);
@@ -70,11 +70,11 @@ namespace Input
             };
 
             boost::lockfree::spsc_queue<Event, boost::lockfree::capacity<500> > mQueue;
-            boost::function<void(Key)> mKeyPress;
-            boost::function<void(Key)> mKeyRelease;
-            boost::function<void(uint32_t, uint32_t, Key)> mMouseClick;
-            boost::function<void(uint32_t, uint32_t, Key)> mMouseRelease;
-            boost::function<void(uint32_t, uint32_t)> mMouseMove;
+            std::function<void(Key)> mKeyPress;
+            std::function<void(Key)> mKeyRelease;
+            std::function<void(uint32_t, uint32_t, Key)> mMouseClick;
+            std::function<void(uint32_t, uint32_t, Key)> mMouseRelease;
+            std::function<void(uint32_t, uint32_t)> mMouseMove;
 
             Rocket::Core::Context* mContext;
 

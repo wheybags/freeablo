@@ -30,10 +30,10 @@ namespace Input
         boost::python::def("baseClicked", &baseClickedHelper);
     }
 
-    InputManager::InputManager(boost::function<void(Key)> keyPress, boost::function<void(Key)> keyRelease,
-        boost::function<void(uint32_t, uint32_t, Key)> mouseClick,
-        boost::function<void(uint32_t, uint32_t, Key)> mouseRelease,
-        boost::function<void(uint32_t, uint32_t)> mouseMove,
+    InputManager::InputManager(std::function<void(Key)> keyPress, std::function<void(Key)> keyRelease,
+        std::function<void(uint32_t, uint32_t, Key)> mouseClick,
+        std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
+        std::function<void(uint32_t, uint32_t)> mouseMove,
         Rocket::Core::Context* context):
             
             mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
