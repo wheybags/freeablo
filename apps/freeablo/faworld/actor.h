@@ -5,6 +5,7 @@
 #include "inventory.h"
 #include "actorstats.hpp"
 #include "../farender/renderer.h"
+#include "../fasavegame/savegame.h"
 
 namespace FAWorld
 {
@@ -39,6 +40,24 @@ namespace FAWorld
             Inventory mInventory;
 
 
+        protected:
+
+            friend class boost::serialization::access;
+
+            template<class Archive>
+            void save(Archive & ar, const unsigned int version) const
+            {
+                ar & this->mPos;
+            }
+
+            template<class Archive>
+            void load(Archive & ar, const unsigned int version)
+            {
+                ar & this->mPos;
+                mAnimState = AnimState::idle;
+            }
+
+            BOOST_SERIALIZATION_SPLIT_MEMBER()
 
         private:
             friend class Inventory;

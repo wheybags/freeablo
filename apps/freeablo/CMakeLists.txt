@@ -37,7 +37,7 @@ add_executable(freeablo
 	faworld/characterstats.h
 	faworld/characterstats.cpp
     
-    fagui/guimanager.h
+	fagui/guimanager.h
     fagui/guimanager.cpp
     fagui/animateddecorator.h
     fagui/animateddecorator.cpp
@@ -49,5 +49,10 @@ add_executable(freeablo
 
     faaudio/audiomanager.h
     faaudio/audiomanager.cpp
+
+    fasavegame/savegame.h
+    fasavegame/savegamemanager.h
+    fasavegame/savegamemanager.cpp
+
 )
 set_target_properties(freeablo PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

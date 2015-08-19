@@ -53,10 +53,10 @@ pauseMenu = None
 
 def onLoad(document):
     entries = [ 
-        {"text": 'SAVE GAME (placeholder)'},
+        {"text": 'SAVE GAME', "func": saveGame},
         {"text": 'OPTIONS (placeholder)'},
         {"text": 'NEW GAME (placeholder)'},
-        {"text": 'LOAD GAME (placeholder)'},
+        {"text": 'LOAD GAME', "func": loadGame},
         {"text": 'HOTKEYS', "strFunc": "showHotkeys", "func": showHotkeys},
         {"text": 'QUIT', "func": freeablo.quit}
     ]
@@ -76,6 +76,15 @@ def showHotkeys():
     docmanage.manager.loadDoc("resources/gui/hotkeymenu.rml")
     docmanage.manager.hideDoc("resources/gui/pausemenu.rml")
     docmanage.manager.showDoc("resources/gui/hotkeymenu.rml")
+
+def saveGame():
+    docmanage.manager.unpause()
+    freeablo.saveGame()
+
+def loadGame():
+    docmanage.manager.unpause()
+    freeablo.loadGame()
+    
 
         </script>
     </head>

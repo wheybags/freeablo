@@ -19,6 +19,8 @@
 
 #include "fagui/guimanager.h"
 
+#include "fasavegame/savegamemanager.h"
+
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/filesystem.hpp>
@@ -40,7 +42,10 @@ using namespace std::chrono;
 bool done = false;
 bool paused = false;
 bool noclip = false;
+bool saveGameNow = false;
+bool loadGameNow = false;
 int changeLevel = 0;
+int currentLevel = 0;
 
 Input::Hotkey quit_key;
 Input::Hotkey noclip_key;
@@ -461,7 +466,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     std::vector<Level::Level*> levels(13);
 
-    int32_t currentLevel = variables["level"].as<int32_t>();
+    currentLevel = variables["level"].as<int32_t>();
 
 
     Level::Level* level = NULL;
@@ -526,6 +531,24 @@ void runGameLoop(const bpo::variables_map& variables)
         
         if(!paused)
         {
+            if(saveGameNow)
+            {
+                FASaveGame::SaveGameManager manager(&world);
+                manager.save();
+
+                saveGameNow = false;
+            }
+
+            if(loadGameNow)
+            {
+                FASaveGame::SaveGameManager manager(&world);
+                manager.load();
+
+                destination = player->mPos.current();
+
+                loadGameNow = false;
+            }
+
             if(mouseDown)
             {
                 destination = renderer.getClickedTile(xClick, yClick, *level, player->mPos);

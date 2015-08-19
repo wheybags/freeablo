@@ -20,6 +20,8 @@
 extern bool done; // TODO: handle this better
 extern bool paused; // TODO: handle this better
 extern int changeLevel; // TODO: handle this better
+extern bool saveGameNow; // TODO: handle this better
+extern bool loadGameNow; // TODO: handle this better
 
 extern Input::Hotkey quit_key; // TODO: handle this better
 extern Input::Hotkey noclip_key; // TODO: handle this better
@@ -51,6 +53,16 @@ void startGame()
     changeLevel = 1;
     paused = false;
     showIngameGui();
+}
+
+void saveGame()
+{
+    saveGameNow = true;
+}
+
+void loadGame()
+{
+    loadGameNow = true;
 }
 
 void playSound(const std::string& path)
@@ -409,6 +421,8 @@ BOOST_PYTHON_MODULE(freeablo)
     boost::python::def("getHotkeyNames", &getHotkeyNames);
     boost::python::def("getHotkeys", &getHotkeys);
     boost::python::def("setHotkey", &setHotkey);
+    boost::python::def("saveGame", &saveGame);
+    boost::python::def("loadGame", &loadGame);
     boost::python::def("updateInventory", &updateInventory);
     boost::python::def("placeItem", &placeItem);
     boost::python::def("getInvClass", &getInvClass);
