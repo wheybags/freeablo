@@ -16,16 +16,11 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
+#include "../engine/input.h"
+
 #include "input/hotkey.h"
 
-extern bool done; // TODO: handle this better
-extern bool paused; // TODO: handle this better
-extern int changeLevel; // TODO: handle this better
 
-extern Input::Hotkey quit_key; // TODO: handle this better
-extern Input::Hotkey noclip_key; // TODO: handle this better
-extern Input::Hotkey changelvldwn_key; // TODO: handle this better
-extern Input::Hotkey changelvlup_key; // TODO: handle this better
 
 namespace bpt = boost::property_tree;
 
@@ -38,23 +33,23 @@ uint32_t cursorFrame;
 FAWorld::Inventory* inventory;
 void quitGame()
 {
-    done = true;
+    Engine::done = true;
 }
 
 void pauseGame()
 {
-    paused = true;
+    Engine::paused = true;
 }
 
 void unpauseGame()
 {
-    paused = false;
+    Engine::paused = false;
 }
 
 void startGame()
 {
-    changeLevel = 1;
-    paused = false;
+    Engine::changeLevel = 1;
+    Engine::paused = false;
     showIngameGui();
 }
 
@@ -67,25 +62,25 @@ boost::python::list getHotkeyNames()
 {
     boost::python::list hotkeynames;
 
-    hotkeynames.append(Input::getHotkeyName(quit_key));
-    hotkeynames.append(Input::getHotkeyName(noclip_key));
-    hotkeynames.append(Input::getHotkeyName(changelvlup_key));
-    hotkeynames.append(Input::getHotkeyName(changelvldwn_key));
+    hotkeynames.append(Input::getHotkeyName(Engine::quit_key));
+    hotkeynames.append(Input::getHotkeyName(Engine::noclip_key));
+    hotkeynames.append(Input::getHotkeyName(Engine::changelvlup_key));
+    hotkeynames.append(Input::getHotkeyName(Engine::changelvldwn_key));
     return hotkeynames;
 }
 
 boost::python::list getHotkeys()
 {
     boost::python::list hotkeys;
-    Input::Hotkey pquit_key = quit_key;
-    Input::Hotkey pnoclip_key = noclip_key;
-    Input::Hotkey pchangelvlup_key = changelvlup_key;
-    Input::Hotkey pchangelvldwn_key = changelvldwn_key;
+    Input::Hotkey pquit_key = Engine::quit_key;
+    Input::Hotkey pnoclip_key = Engine::noclip_key;
+    Input::Hotkey pchangelvlup_key = Engine::changelvlup_key;
+    Input::Hotkey pchangelvldwn_key = Engine::changelvldwn_key;
 
-    pquit_key.key = Input::convertAsciiToRocketKey(quit_key.key);
-    pnoclip_key.key = Input::convertAsciiToRocketKey(noclip_key.key);
-    pchangelvlup_key.key = Input::convertAsciiToRocketKey(changelvlup_key.key);
-    pchangelvldwn_key.key = Input::convertAsciiToRocketKey(changelvldwn_key.key);
+    pquit_key.key = Input::convertAsciiToRocketKey(Engine::quit_key.key);
+    pnoclip_key.key = Input::convertAsciiToRocketKey(Engine::noclip_key.key);
+    pchangelvlup_key.key = Input::convertAsciiToRocketKey(Engine::changelvlup_key.key);
+    pchangelvldwn_key.key = Input::convertAsciiToRocketKey(Engine::changelvldwn_key.key);
 
     hotkeys.append(pquit_key);
     hotkeys.append(pnoclip_key);
@@ -107,23 +102,23 @@ void setHotkey(std::string function, boost::python::list pyhotkey)
 
     if (function == "quit")
     {
-        quit_key = hotkey;
-        quit_key.save("Quit", hotkeypt);
+        Engine::quit_key = hotkey;
+        Engine::quit_key.save("Quit", hotkeypt);
     }
     if (function == "noclip")
     {
-        noclip_key = hotkey;
-        noclip_key.save("Noclip", hotkeypt);
+        Engine::noclip_key = hotkey;
+        Engine::noclip_key.save("Noclip", hotkeypt);
     }
     if (function == "changelvlup")
     {
-        changelvlup_key = hotkey;
-        changelvlup_key.save("Changelvlup", hotkeypt);
+        Engine::changelvlup_key = hotkey;
+        Engine::changelvlup_key.save("Changelvlup", hotkeypt);
     }
     if (function == "changelvldwn")
     {
-        changelvldwn_key = hotkey;
-        changelvldwn_key.save("Changelvldwn", hotkeypt);
+        Engine::changelvldwn_key = hotkey;
+        Engine::changelvldwn_key.save("Changelvldwn", hotkeypt);
     }
 }
 

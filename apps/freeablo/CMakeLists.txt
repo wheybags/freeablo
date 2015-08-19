@@ -38,6 +38,8 @@ add_executable(freeablo
 
     engine/threadmanager.h
     engine/threadmanager.cpp
+    engine/input.h
+    engine/input.cpp
 
     faaudio/audiomanager.h
     faaudio/audiomanager.cpp

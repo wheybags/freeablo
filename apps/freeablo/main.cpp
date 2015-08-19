@@ -17,6 +17,8 @@
 
 #include "fagui/guimanager.h"
 
+#include "engine/input.h"
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -33,106 +35,7 @@ namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 namespace bpt = boost::property_tree;
 
-bool done = false;
-bool paused = false;
-bool noclip = false;
-int changeLevel = 0;
-
-Input::Hotkey quit_key;
-Input::Hotkey noclip_key;
-Input::Hotkey changelvldwn_key;
-Input::Hotkey changelvlup_key;
-
 bpt::ptree hotkeypt;
-
-void keyPress(Input::Key key)
-{
-    switch(key)
-    {
-        case Input::KEY_RSHIFT:;
-        case Input::KEY_LSHIFT:;
-        case Input::KEY_RCTRL:;
-        case Input::KEY_LCTRL:;
-        case Input::KEY_RALT:;
-        case Input::KEY_LALT:;
-        case Input::KEY_RSUPER:;
-        case Input::KEY_LSUPER:;
-        case Input::KEY_NUMLOCK:;
-        case Input::KEY_SCROLLOCK: return;
-        default:
-            {
-                break;
-            }
-    }
-    
-    Input::Hotkey hotkey;
-    hotkey.key = key;
-    Input::InputManager& input = *Input::InputManager::get();
-    
-    uint32_t modifiers = input.getModifiers();
-    
-    switch(modifiers)
-    {
-        case 0: break;
-        case 1: hotkey.ctrl = true; break;
-        case 2: hotkey.alt = true; break;
-        case 3: hotkey.ctrl = true; hotkey.alt = true; break;
-        case 4: hotkey.shift = true; break;
-        case 5: hotkey.ctrl = true; hotkey.shift = true; break;
-        case 6: hotkey.alt = true; hotkey.shift = true; break;
-        case 7: hotkey.ctrl = true; hotkey.alt = true; hotkey.shift = true; break;
-    }
-    
-    if (hotkey == quit_key)
-    {
-        done = true;
-        return;
-    }
-    
-    if (hotkey == noclip_key)
-    {
-        noclip = !noclip;
-        return;
-    }
-    
-    if (hotkey == changelvlup_key)
-    {
-        changeLevel = -1;
-        return;
-    }
-    
-    if (hotkey == changelvldwn_key)
-    {
-        changeLevel = 1;
-        return;
-    }
-}
-
-size_t xClick = 0, yClick = 0;
-bool mouseDown = false;
-bool click = false;
-void mouseClick(size_t x, size_t y, Input::Key key)
-{
-    if(key == Input::KEY_LEFT_MOUSE)
-    {
-        xClick = x;
-        yClick = y;
-        mouseDown = true;
-        click = true;
-    }
-}
-
-void mouseRelease(size_t, size_t, Input::Key key)
-{
-    if(key == Input::KEY_LEFT_MOUSE)
-        mouseDown = false;
-}
-
-void mouseMove(size_t x, size_t y)
-{
-    xClick = x;
-    yClick = y;
-}
 
 void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world, Level::Level* level)
 {
@@ -351,7 +254,7 @@ void run(const bpo::variables_map& variables)
     Engine::ThreadManager threadManager;
     FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
 
-    Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
+    Input::InputManager input(&Engine::keyPress, NULL, &Engine::mouseClick, &Engine::mouseRelease, &Engine::mouseMove, renderer.getRocketContext());
 
     boost::thread mainThread(boost::bind(&runGameLoop, &variables));
 
@@ -399,7 +302,7 @@ void runGameLoop(const bpo::variables_map& variables)
     {
         if(!(level = getLevel(currentLevel, exe)))
         {
-            done = true;
+            Engine::done = true;
         }
         else
         {
@@ -416,7 +319,7 @@ void runGameLoop(const bpo::variables_map& variables)
     }
     else
     {
-        paused = true;
+        Engine::paused = true;
         FAGui::showMainMenu();
         threadManager.playMusic("music/dintro.wav");
     }
@@ -428,16 +331,16 @@ void runGameLoop(const bpo::variables_map& variables)
     //bpt::ptree hotkeypt;
     Misc::readIni("resources/hotkeys.ini", hotkeypt);
         
-    quit_key = Input::Hotkey("Quit", hotkeypt);
-    noclip_key = Input::Hotkey("Noclip", hotkeypt);
-    changelvlup_key = Input::Hotkey("Changelvlup", hotkeypt);
-    changelvldwn_key = Input::Hotkey("Changelvldwn", hotkeypt);
+    Engine::quit_key = Input::Hotkey("Quit", hotkeypt);
+    Engine::noclip_key = Input::Hotkey("Noclip", hotkeypt);
+    Engine::changelvlup_key = Input::Hotkey("Changelvlup", hotkeypt);
+    Engine::changelvldwn_key = Input::Hotkey("Changelvldwn", hotkeypt);
     
     // Main game logic loop
-    while(!done)
+    while(!Engine::done)
     {
 
-        input.processInput(paused);
+        input.processInput(Engine::paused);
 
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
         
@@ -450,20 +353,20 @@ void runGameLoop(const bpo::variables_map& variables)
         last = now;
 
         
-        if(!paused)
+        if(!Engine::paused)
         {
-            if(mouseDown)
+            if(Engine::mouseDown)
             {
-                destination = renderer.getClickedTile(xClick, yClick, *level, player->mPos);
-                if(click)
+                destination = renderer.getClickedTile(Engine::xClick, Engine::yClick, *level, player->mPos);
+                if(Engine::click)
                     level->activate(destination.first, destination.second);
 
-                click = false;
+                Engine::click = false;
             }
 
-            if(changeLevel)
+            if(Engine::changeLevel)
             {
-                int32_t tmp = currentLevel + changeLevel;
+                int32_t tmp = currentLevel + Engine::changeLevel;
                 if(tmp >= 0 && tmp < (int32_t)levels.size())
                 {
                     currentLevel = tmp;
@@ -473,7 +376,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
                     level = levels[currentLevel];
                     
-                    if(changeLevel == -1)
+                    if(Engine::changeLevel == -1)
                         player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
                     else
                         player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
@@ -485,7 +388,7 @@ void runGameLoop(const bpo::variables_map& variables)
                     playLevelMusic(currentLevel, threadManager);
                 }
                 
-                changeLevel = 0;
+                Engine::changeLevel = 0;
             }
  
             if(player->mPos.current() != destination)
@@ -511,7 +414,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
             FAWorld::Actor* actorAtNext = world.getActorAt(player->mPos.next().first, player->mPos.next().second);
             
-            if(!noclip && (!(*level)[player->mPos.next().first][player->mPos.next().second].passable() || 
+            if(!Engine::noclip && (!(*level)[player->mPos.next().first][player->mPos.next().second].passable() ||
                (actorAtNext != NULL && actorAtNext != player)))
             {
                 player->mPos.mMoving = false;
