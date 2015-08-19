@@ -238,6 +238,12 @@ namespace DiabloExe
             }
         }
     }
+    boost::property_tree::ptree DiabloExe::currentVersionSettings()
+    {
+        boost::property_tree::ptree pt;
+        Misc::readIni("resources/exeversions/" + getVersion() + ".ini", pt);
+        return pt;
+    }
 
     void DiabloExe::loadAffixes(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
     {
@@ -271,54 +277,115 @@ namespace DiabloExe
         size_t startingStatsOffset = pt.get<size_t>("CharacterStats.startingStatsOffset");
         size_t maxStatsOffset = pt.get<size_t>("CharacterStats.maxStatsOffset");
         size_t blockingBonusOffset = pt.get<size_t>("CharacterStats.blockingBonusOffset");
-        CharacterStats warrior, rogue, sorcerer;
+        size_t framesetOffset = pt.get<size_t>("CharacterStats.framesetOffset");
+        size_t expPerLevelOffset = pt.get<size_t>("CharacterStats.expPerLevelOffset");
+        size_t levelCount = pt.get<size_t>("CharacterStats.maxLevel");
+        std::string meleeCharacterName = pt.get<std::string>("CharacterStats.meleeCharacterName");
+        std::string rangerCharacterName = pt.get<std::string>("CharacterStats.rangerCharacterName");
+        std::string mageCharacterName = pt.get<std::string>("CharacterStats.mageCharacterName");
+        CharacterStats meleeCharacter, rangerCharacter, mageCharacter;
 
-        FAIO::FAfseek(exe, startingStatsOffset-6, SEEK_SET);
+        FAIO::FAfseek(exe, framesetOffset, SEEK_SET);
 
-        warrior.mStrength   = swapEndian(FAIO::read32(exe));
-        rogue.mStrength     = swapEndian(FAIO::read32(exe));
-        sorcerer.mStrength  = swapEndian(FAIO::read32(exe));
+        meleeCharacter.mIdleInDungeonFrameset = FAIO::read8(exe);
+        rangerCharacter.mIdleInDungeonFrameset = FAIO::read8(exe);
+        mageCharacter.mIdleInDungeonFrameset = FAIO::read8(exe);
 
-        warrior.mMagic      = swapEndian(FAIO::read32(exe));
-        rogue.mMagic        = swapEndian(FAIO::read32(exe));
-        sorcerer.mMagic     = swapEndian(FAIO::read32(exe));
+        meleeCharacter.mAttackFrameset = FAIO::read8(exe);
+        rangerCharacter.mAttackFrameset = FAIO::read8(exe);
+        mageCharacter.mAttackFrameset = FAIO::read8(exe);
 
-        warrior.mDexterity  = swapEndian(FAIO::read32(exe));
-        rogue.mDexterity    = swapEndian(FAIO::read32(exe));
-        sorcerer.mDexterity = swapEndian(FAIO::read32(exe));
+        meleeCharacter.mWalkInDungeonFrameset = FAIO::read8(exe);
+        rangerCharacter.mWalkInDungeonFrameset = FAIO::read8(exe);
+        mageCharacter.mWalkInDungeonFrameset = FAIO::read8(exe);
 
-        warrior.mVitality   = swapEndian(FAIO::read32(exe));
-        rogue.mVitality     = swapEndian(FAIO::read32(exe));
-        sorcerer.mVitality  = swapEndian(FAIO::read32(exe));
+        meleeCharacter.mBlockingSpeed = FAIO::read8(exe);
+        rangerCharacter.mBlockingSpeed = FAIO::read8(exe);
+        mageCharacter.mBlockingSpeed = FAIO::read8(exe);
+
+        meleeCharacter.mDeathFrameset = FAIO::read8(exe);
+        rangerCharacter.mDeathFrameset = FAIO::read8(exe);
+        mageCharacter.mDeathFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mMagicCastFrameset = FAIO::read8(exe);
+        rangerCharacter.mMagicCastFrameset = FAIO::read8(exe);
+        mageCharacter.mMagicCastFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mHitRecoverySpeed = FAIO::read8(exe);
+        rangerCharacter.mHitRecoverySpeed = FAIO::read8(exe);
+        mageCharacter.mHitRecoverySpeed = FAIO::read8(exe);
+
+        meleeCharacter.mIdleInTownFrameset = FAIO::read8(exe);
+        rangerCharacter.mIdleInTownFrameset = FAIO::read8(exe);
+        mageCharacter.mIdleInTownFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mWalkInTownFrameset = FAIO::read8(exe);
+        rangerCharacter.mWalkInTownFrameset = FAIO::read8(exe);
+        mageCharacter.mWalkInTownFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mSingleHandedAttackSpeed = FAIO::read8(exe);
+        rangerCharacter.mSingleHandedAttackSpeed = FAIO::read8(exe);
+        mageCharacter.mSingleHandedAttackSpeed = FAIO::read8(exe);
+
+        meleeCharacter.mSpellCastSpeed = FAIO::read8(exe);
+        rangerCharacter.mSpellCastSpeed = FAIO::read8(exe);
+        mageCharacter.mSpellCastSpeed = FAIO::read8(exe);
+
+        FAIO::FAfseek(exe, startingStatsOffset, SEEK_SET);
+
+        meleeCharacter.mStrength   = swapEndian(FAIO::read32(exe));
+        rangerCharacter.mStrength     = swapEndian(FAIO::read32(exe));
+        mageCharacter.mStrength  = swapEndian(FAIO::read32(exe));
+
+        meleeCharacter.mMagic      = swapEndian(FAIO::read32(exe));
+        rangerCharacter.mMagic        = swapEndian(FAIO::read32(exe));
+        mageCharacter.mMagic     = swapEndian(FAIO::read32(exe));
+
+        meleeCharacter.mDexterity  = swapEndian(FAIO::read32(exe));
+        rangerCharacter.mDexterity    = swapEndian(FAIO::read32(exe));
+        mageCharacter.mDexterity = swapEndian(FAIO::read32(exe));
+
+        meleeCharacter.mVitality   = swapEndian(FAIO::read32(exe));
+        rangerCharacter.mVitality     = swapEndian(FAIO::read32(exe));
+        mageCharacter.mVitality  = swapEndian(FAIO::read32(exe));
 
         FAIO::FAfseek(exe, SEEK_SET, blockingBonusOffset);
 
-        warrior.mBlockingBonus  = swapEndian(FAIO::read32(exe));
-        rogue.mBlockingBonus    = swapEndian(FAIO::read32(exe));
-        sorcerer.mBlockingBonus = swapEndian(FAIO::read32(exe));
+        meleeCharacter.mBlockingBonus  = swapEndian(FAIO::read32(exe));
+        rangerCharacter.mBlockingBonus    = swapEndian(FAIO::read32(exe));
+        mageCharacter.mBlockingBonus = swapEndian(FAIO::read32(exe));
 
         FAIO::FAfseek(exe, maxStatsOffset, SEEK_SET);
 
-        warrior.mMaxStrength   = FAIO::read32(exe);
-        rogue.mMaxStrength     = FAIO::read32(exe);
-        sorcerer.mMaxStrength  = FAIO::read32(exe);
+        meleeCharacter.mMaxStrength   = FAIO::read32(exe);
+        rangerCharacter.mMaxStrength     = FAIO::read32(exe);
+        mageCharacter.mMaxStrength  = FAIO::read32(exe);
 
 
-        warrior.mMaxMagic      = FAIO::read32(exe);
-        rogue.mMaxMagic        = FAIO::read32(exe);
-        rogue.mMaxDexterity    = FAIO::read32(exe);
+        meleeCharacter.mMaxMagic      = FAIO::read32(exe);
+        rangerCharacter.mMaxMagic        = FAIO::read32(exe);
+        rangerCharacter.mMaxDexterity    = FAIO::read32(exe);
 
-        warrior.mMaxDexterity  = FAIO::read32(exe);
-        sorcerer.mMaxMagic     = FAIO::read32(exe);
-        sorcerer.mMaxDexterity = FAIO::read32(exe);
+        meleeCharacter.mMaxDexterity  = FAIO::read32(exe);
+        mageCharacter.mMaxMagic     = FAIO::read32(exe);
+        mageCharacter.mMaxDexterity = FAIO::read32(exe);
 
-        warrior.mMaxVitality   = FAIO::read32(exe);
-        rogue.mMaxVitality     = FAIO::read32(exe);
-        sorcerer.mMaxVitality  = FAIO::read32(exe);
+        meleeCharacter.mMaxVitality   = FAIO::read32(exe);
+        rangerCharacter.mMaxVitality     = FAIO::read32(exe);
+        mageCharacter.mMaxVitality  = FAIO::read32(exe);
+        FAIO::FAfseek(exe, expPerLevelOffset, SEEK_SET);
 
-        mCharacters["Warrior"]  = warrior;
-        mCharacters["Rogue"]    = rogue;
-        mCharacters["Sorcerer"] = sorcerer;
+        for(uint32_t i=0;i < levelCount; i++)
+        {
+            uint32_t readLevelData = FAIO::read32(exe);
+            meleeCharacter.mNextLevelExp.push_back(readLevelData);
+            rangerCharacter.mNextLevelExp.push_back(readLevelData);
+            mageCharacter.mNextLevelExp.push_back(readLevelData);
+        }
+
+        mCharacters[meleeCharacterName]  = meleeCharacter;
+        mCharacters[rangerCharacterName]    = rangerCharacter;
+        mCharacters[mageCharacterName] = mageCharacter;
     }
 
     const Monster& DiabloExe::getMonster(const std::string& name) const

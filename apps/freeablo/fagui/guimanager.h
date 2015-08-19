@@ -5,7 +5,7 @@
 
 namespace FAGui
 {
-    void initGui(FAWorld::Inventory &playerInventory, std::string invclass);
+    void initGui(FAWorld::Inventory &playerInventory, std::string& invclass);
     void showIngameGui();
     void showMainMenu();
     void updateGui();

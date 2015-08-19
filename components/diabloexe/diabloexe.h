@@ -39,9 +39,11 @@ namespace DiabloExe
 
             uint32_t swapEndian(uint32_t arg);
 
+            static boost::property_tree::ptree currentVersionSettings();
+
         private:
-            std::string getMD5();
-            std::string getVersion();
+            static std::string getMD5();
+            static std::string getVersion();
 
             void loadMonsters(FAIO::FAFile* exe, boost::property_tree::ptree& pt);
             void loadNpcs(FAIO::FAFile* exe, boost::property_tree::ptree& pt);

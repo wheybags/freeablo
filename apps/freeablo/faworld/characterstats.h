@@ -5,54 +5,27 @@ namespace FAWorld
 {
     class Inventory;
 
-    class WarriorStats : public ActorStats
+    class MeleeStats : public ActorStats
     {
     public:
-        WarriorStats(uint32_t strength,
-                     uint32_t maxStrength,
-                     uint32_t magic,
-                     uint32_t maxMagic,
-                     uint32_t dexterity,
-                     uint32_t maxDexterity,
-                     uint32_t vitality,
-                     uint32_t maxVitality,
-                     uint32_t blocking) : ActorStats(
-                                              strength,
-                                              maxStrength,
-                                              magic,
-                                              maxMagic,
-                                              dexterity,
-                                              maxDexterity,
-                                              vitality,
-                                              maxVitality,
-                                              blocking){}
+        MeleeStats(DiabloExe::CharacterStats stats) : ActorStats(stats)
+        {
+            mHP = 2*mVitality + 2*mLevel+18;
+            mCurrentHP = mHP;
+            mMana = mMagic + mLevel -1;
+
+
+        }
         void recalculateDerivedStats() final;
     private:
         friend class Inventory;
 
     };
 
-    class RogueStats : public ActorStats
+    class RangerStats : public ActorStats
     {
         public:
-            RogueStats(uint32_t strength,
-                       uint32_t maxStrength,
-                       uint32_t magic,
-                       uint32_t maxMagic,
-                       uint32_t dexterity,
-                       uint32_t maxDexterity,
-                       uint32_t vitality,
-                       uint32_t maxVitality,
-                       uint32_t blocking) : ActorStats(
-                                                strength,
-                                                maxStrength,
-                                                magic,
-                                                maxMagic,
-                                                dexterity,
-                                                maxDexterity,
-                                                vitality,
-                                                maxVitality,
-                                                blocking){}
+            RangerStats(DiabloExe::CharacterStats stats) : ActorStats(stats){}
 
 
         private:
@@ -61,27 +34,10 @@ namespace FAWorld
 
     };
 
-    class SorcererStats : public ActorStats
+    class MageStats : public ActorStats
     {
         public:
-            SorcererStats(uint32_t strength,
-                        uint32_t maxStrength,
-                        uint32_t magic,
-                        uint32_t maxMagic,
-                        uint32_t dexterity,
-                        uint32_t maxDexterity,
-                        uint32_t vitality,
-                        uint32_t maxVitality,
-                        uint32_t blocking) : ActorStats(
-                                                strength,
-                                                maxStrength,
-                                                magic,
-                                                maxMagic,
-                                                dexterity,
-                                                maxDexterity,
-                                                vitality,
-                                                maxVitality,
-                                                blocking){}
+            MageStats(DiabloExe::CharacterStats stats) : ActorStats(stats){}
         private:
 
             void recalculateDerivedStats() final;

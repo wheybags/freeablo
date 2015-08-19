@@ -23,6 +23,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <boost/thread.hpp>
 #include <fstream>
 
@@ -177,12 +178,17 @@ Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
 bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 {
     boost::program_options::options_description desc("Options");
+    bpt::ptree characterNames = DiabloExe::DiabloExe::currentVersionSettings();
+    std::string meleeName = characterNames.get<std::string>("CharacterStats.meleeCharacterName");
+    std::string rangerName = characterNames.get<std::string>("CharacterStats.rangerCharacterName");
+    std::string mageName = characterNames.get<std::string>("CharacterStats.mageCharacterName");
+    std::string characterSelectHelpMessage = (boost::format("Character: %1%, %2% or %3%") % meleeName % rangerName % mageName).str();
 
     desc.add_options()
         ("help,h", "Print help")
         // -1 represents the main menu
         ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)")
-        ("character,c", bpo::value<std::string>()->default_value(("Warrior")), "Character: Warrior, Rogue or Sorcerer");
+        ("character,c", bpo::value<std::string>()->default_value((meleeName)), characterSelectHelpMessage.c_str());
 
     try 
     { 
@@ -203,7 +209,7 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 
         const std::string character = variables["character"].as<std::string>();
 
-        if(character != "Warrior" && character != "Rogue" && character != "Sorcerer")
+        if(character != meleeName && character != rangerName && character != mageName)
             throw bpo::validation_error(bpo::validation_error::invalid_option_value, "character");
 
     }
@@ -373,6 +379,10 @@ void run(const bpo::variables_map& variables)
 
 void runGameLoop(const bpo::variables_map& variables)
 {
+    bpt::ptree characterNames = DiabloExe::DiabloExe::currentVersionSettings();
+    std::string meleeName = characterNames.get<std::string>("CharacterStats.meleeCharacterName");
+    std::string rangerName = characterNames.get<std::string>("CharacterStats.rangerCharacterName");
+    std::string mageName = characterNames.get<std::string>("CharacterStats.mageCharacterName");
     FARender::Renderer& renderer = *FARender::Renderer::get();
     Input::InputManager& input = *Input::InputManager::get();
     Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
@@ -403,18 +413,9 @@ void runGameLoop(const bpo::variables_map& variables)
     FAWorld::World world;
     FAWorld::Player* player = world.getPlayer();
 
-    if(character == "Warrior")
+    if(character == meleeName)
     {
-        stats = new FAWorld::WarriorStats(
-                    char_stats.mStrength,
-                    char_stats.mMaxStrength,
-                    char_stats.mMagic,
-                    char_stats.mMaxMagic,
-                    char_stats.mDexterity,
-                    char_stats.mMaxDexterity,
-                    char_stats.mVitality,
-                    char_stats.mMaxVitality,
-                    char_stats.mBlockingBonus);
+        stats = new FAWorld::MeleeStats(char_stats);
         FAWorld::Item item = itemManager.getBaseItem(125) ;
         player->mInventory.putItem(
                     item,
@@ -458,18 +459,9 @@ void runGameLoop(const bpo::variables_map& variables)
 
     }
 
-    else if(character == "Rogue")
+    else if(character == rangerName)
     {
-        stats = new FAWorld::RogueStats(
-                    char_stats.mStrength,
-                    char_stats.mMaxStrength,
-                    char_stats.mMagic,
-                    char_stats.mMaxMagic,
-                    char_stats.mDexterity,
-                    char_stats.mMaxDexterity,
-                    char_stats.mVitality,
-                    char_stats.mMaxVitality,
-                    char_stats.mBlockingBonus);
+        stats = new FAWorld::RangerStats(char_stats);
         FAWorld::Item item = itemManager.getBaseItem(121);
         player->mInventory.putItem(item,
                                    FAWorld::Item::eqLEFTHAND,
@@ -497,16 +489,7 @@ void runGameLoop(const bpo::variables_map& variables)
     }
     else
     {
-        stats = new FAWorld::SorcererStats(
-                    char_stats.mStrength,
-                    char_stats.mMaxStrength,
-                    char_stats.mMagic,
-                    char_stats.mMaxMagic,
-                    char_stats.mDexterity,
-                    char_stats.mMaxDexterity,
-                    char_stats.mVitality,
-                    char_stats.mMaxVitality,
-                    char_stats.mBlockingBonus);
+        stats = new FAWorld::MageStats(char_stats);
         FAWorld::Item item = itemManager.getBaseItem(124);
         player->mInventory.putItem(item,
                                    FAWorld::Item::eqLEFTHAND,
@@ -616,6 +599,11 @@ void runGameLoop(const bpo::variables_map& variables)
                     level->activate(destination.first, destination.second);
 
                 click = false;
+                FAWorld::Actor* npc = world.getActorAt(destination.first, destination.second);
+                if(npc != NULL)
+                    player->Attack(npc);
+
+
             }
 
             if(changeLevel)
@@ -647,6 +635,7 @@ void runGameLoop(const bpo::variables_map& variables)
  
             if(player->mPos.current() != destination)
             {
+
                 if(player->mPos.mDist == 0)
                 {
                     std::pair<float, float> vector = Misc::getVec(player->mPos.current(), destination);
@@ -667,12 +656,13 @@ void runGameLoop(const bpo::variables_map& variables)
             }
 
             FAWorld::Actor* actorAtNext = world.getActorAt(player->mPos.next().first, player->mPos.next().second);
+
             
             if(!noclip && (!(*level)[player->mPos.next().first][player->mPos.next().second].passable() || 
                (actorAtNext != NULL && actorAtNext != player)))
             {
                 player->mPos.mMoving = false;
-                destination = player->mPos.current();
+                destination = player->mPos.current();                
                 player->setAnimation(FAWorld::AnimState::idle);
             }
             

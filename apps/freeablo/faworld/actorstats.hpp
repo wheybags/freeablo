@@ -2,6 +2,7 @@
 #define ACTORSTATS_H
 #include <stdint.h>
 #include <vector>
+#include <diabloexe/diabloexe.h>
 namespace FAWorld
 {
     class Actor;
@@ -35,28 +36,20 @@ namespace FAWorld
 
             void setActor(Actor * actor){mActor = actor;}
 
-            ActorStats(uint32_t strength,
-                       uint32_t maxStrength,
-                       uint32_t magic,
-                       uint32_t maxMagic,
-                       uint32_t dexterity,
-                       uint32_t maxDexterity,
-                       uint32_t vitality,
-                       uint32_t maxVitality,
-                       uint32_t blocking) :
+            ActorStats(DiabloExe::CharacterStats stats) :
                 mLevel(1),
                 mLevelPoints(0),
                 mExp(0),
                 mExpToNextLevel(2000),
-                mStartingVitality(vitality),
-                mMaxVitality(maxVitality),
-                mStartingMagic(magic),
-                mMaxMagic(maxMagic),
-                mStartingDexterity(dexterity),
-                mMaxDexterity(maxDexterity),
-                mStartingStrength(strength),
-                mMaxStrength(maxStrength),
-                mBlockingBonus(blocking)
+                mStartingVitality(stats.mVitality),
+                mMaxVitality(stats.mMaxVitality),
+                mStartingMagic(stats.mMagic),
+                mMaxMagic(stats.mMaxMagic),
+                mStartingDexterity(stats.mDexterity),
+                mMaxDexterity(stats.mMaxDexterity),
+                mStartingStrength(stats.mStrength),
+                mMaxStrength(stats.mMaxStrength),
+                mBlockingBonus(stats.mBlockingBonus)
 
             {
                 mVitality = mStartingVitality;
@@ -110,8 +103,10 @@ namespace FAWorld
             virtual void clearDerivedStats()
             {
                 mHP=0;
+                mCurrentHP=0;
 
                 mMana=0;
+                mCurrentMana=0;
                 mStrength=0;
                 mVitality=0;
                 mDexterity=0;
@@ -168,7 +163,7 @@ namespace FAWorld
 
             uint32_t mBlockingBonus;
 
-            uint32_t mHP=0;
+
 
             uint32_t mSpentLevelsOnStrength=0;
             uint32_t mSpentLevelsOnMagic=0;
@@ -177,6 +172,9 @@ namespace FAWorld
 
 
             uint32_t mMana=0;
+            uint32_t mCurrentMana=0;
+            uint32_t mHP=0;
+            uint32_t mCurrentHP=0;
             uint32_t mBonusStrength=0;
             uint32_t mBonusMagic=0;
             uint32_t mBonusDexterity=0;

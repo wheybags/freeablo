@@ -104,6 +104,7 @@
             }
             div#leftRing
             {
+
                 left: 47px;
             }
             div#rightRing

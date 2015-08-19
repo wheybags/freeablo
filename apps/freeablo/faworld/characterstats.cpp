@@ -3,7 +3,7 @@
 #include "../falevelgen/random.h"
 namespace FAWorld
 {
-void WarriorStats::recalculateDerivedStats()
+void MeleeStats::recalculateDerivedStats()
 {
     clearDerivedStats();
 
@@ -358,12 +358,12 @@ void WarriorStats::recalculateDerivedStats()
     return;
 }
 
-void RogueStats::recalculateDerivedStats()
+void RangerStats::recalculateDerivedStats()
 {
 
 }
 
-void SorcererStats::recalculateDerivedStats()
+void MageStats::recalculateDerivedStats()
 {
 
 }

@@ -424,7 +424,7 @@ BOOST_PYTHON_MODULE(freeablo)
 Rocket::Core::ElementDocument* ingameUi = NULL;
 Rocket::Core::ElementDocument* mainMenu = NULL;
 
-void initGui(FAWorld::Inventory & playerInventory, std::string invclass)
+void initGui(FAWorld::Inventory & playerInventory, std::string &invclass)
 {
     inventory = &playerInventory;
     invClass = invclass;
