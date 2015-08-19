@@ -5,14 +5,12 @@
 #include <iomanip>
 #include <sstream>
 #include <iostream>
-#include <misc/fareadini.h>
+
 #include <misc/md5.h>
 #include <misc/stringops.h>
 
 namespace DiabloExe
 {
-    namespace bpt = boost::property_tree;
-
     DiabloExe::DiabloExe()
     {
         mVersion = getVersion();
@@ -21,8 +19,11 @@ namespace DiabloExe
             return;
         }
 
-        bpt::ptree pt;
-        Misc::readIni("resources/exeversions/" + mVersion + ".ini", pt);
+        if(!mSettings.loadFromFile("resources/exeversions/" + mVersion + ".ini"))
+        {
+            std::cout << "Cannot load settings file.";
+            return;
+        }
         
         FAIO::FAFile* exe = FAIO::FAfopen("Diablo.exe");
         if (NULL == exe)
@@ -30,12 +31,12 @@ namespace DiabloExe
             return;
         }
 
-        loadMonsters(exe, pt);                        
-        loadNpcs(exe, pt);
-        loadCharacterStats(exe, pt);
-        loadBaseItems(exe, pt);
-        loadUniqueItems(exe, pt);
-        loadAffixes(exe, pt);
+        loadMonsters(exe);
+        loadNpcs(exe);
+        loadCharacterStats(exe);
+        loadBaseItems(exe);
+        loadUniqueItems(exe);
+        loadAffixes(exe);
 
         FAIO::FAfclose(exe);
     }
@@ -80,22 +81,23 @@ namespace DiabloExe
 
     std::string DiabloExe::getVersion()
     {
-        bpt::ptree pt;
-        Misc::readIni("resources/exeversions/versions.ini", pt);
-
         std::string exeMD5 = getMD5();
         if (exeMD5.empty())
         {
             return std::string();
         }
 
+        Settings::Settings settings;
         std::string version = "";
+        settings.loadFromFile("resources/exeversions/versions.ini");
+        Settings::Container sections = settings.getSections();
 
-        for(bpt::ptree::const_iterator it = pt.begin(); it != pt.end(); ++it)
+        for(Settings::Container::iterator it = sections.begin(); it != sections.end(); ++it)
         {
-            if(it->second.get_value<std::string>() == exeMD5)
+            std::string temporaryVersion = settings.get<std::string>("",*it);
+            if(temporaryVersion == exeMD5)
             {
-                version = it->first;
+                version = *it;
                 break;
             }
         }
@@ -112,11 +114,11 @@ namespace DiabloExe
         return version;
     }
 
-    void DiabloExe::loadMonsters(FAIO::FAFile* exe, bpt::ptree& pt)
+    void DiabloExe::loadMonsters(FAIO::FAFile* exe)
     {
-        size_t monsterOffset = pt.get<size_t>("Monsters.monsterOffset"); 
-        size_t codeOffset = pt.get<size_t>("Monsters.codeOffset"); 
-        size_t count = pt.get<size_t>("Monsters.count");
+        size_t monsterOffset = mSettings.get<size_t>("Monsters", "monsterOffset");
+        size_t codeOffset = mSettings.get<size_t>("Monsters", "codeOffset");
+        size_t count = mSettings.get<size_t>("Monsters", "count");
 
         for(size_t i = 0; i < count; i++)
         {
@@ -138,24 +140,30 @@ namespace DiabloExe
         }
     }
     
-    void DiabloExe::loadNpcs(FAIO::FAFile* exe, boost::property_tree::ptree& pt)
+    void DiabloExe::loadNpcs(FAIO::FAFile* exe)
     {
-        for(bpt::ptree::const_iterator it = pt.begin(); it != pt.end(); ++it)
+        Settings::Container sections = mSettings.getSections();
+
+        for(Settings::Container::const_iterator it = sections.begin(); it != sections.end(); ++it)
         {
-            if(Misc::StringUtils::startsWith(it->first, "NPC"))
+            std::string name = *it;
+            std::string section = name;
+
+            if(Misc::StringUtils::startsWith(name, "NPC"))
             {
-                mNpcs[it->first.substr(3, it->first.size()-3)] =
-                    Npc(exe, it->second.get<size_t>("name"), it->second.get<size_t>("cel"),
-                        it->second.get<size_t>("x"), it->second.get<size_t>("y"), it->second.get("rotation", 0));
+                mNpcs[name.substr(3, name.size()-3)] =
+                    Npc(exe, mSettings.get<size_t>(section, "name"), mSettings.get<size_t>(section, "cel"),
+                        mSettings.get<size_t>(section, "x"), mSettings.get<size_t>(section, "y"), mSettings.get<size_t>(section, "rotation", 0));
             }
         }
     }
 
-    void DiabloExe::loadBaseItems(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
+    void DiabloExe::loadBaseItems(FAIO::FAFile *exe)
     {
-        size_t itemOffset = pt.get<size_t>("BaseItems.itemOffset");
-        size_t codeOffset = pt.get<size_t>("BaseItems.codeOffset");
-        size_t count = pt.get<size_t>("BaseItems.count");
+        size_t itemOffset = mSettings.get<size_t>("BaseItems","itemOffset");
+        size_t codeOffset = mSettings.get<size_t>("BaseItems","codeOffset");
+        size_t count = mSettings.get<size_t>("BaseItems","count");
+
         for(size_t i=0; i < count; i++)
         {
             FAIO::FAfseek(exe, itemOffset + 76*i, SEEK_SET);
@@ -180,11 +188,12 @@ namespace DiabloExe
             }
         }
     }
-    void DiabloExe::loadUniqueItems(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
+    void DiabloExe::loadUniqueItems(FAIO::FAFile *exe)
     {
-        size_t itemOffset = pt.get<size_t>("UniqueItems.uniqueItemOffset");
-        size_t codeOffset = pt.get<size_t>("UniqueItems.codeOffset");
-        size_t count = pt.get<size_t>("UniqueItems.count");
+        size_t itemOffset = mSettings.get<size_t>("UniqueItems","uniqueItemOffset");
+        size_t codeOffset = mSettings.get<size_t>("UniqueItems","codeOffset");
+        size_t count = mSettings.get<size_t>("UniqueItems","count");
+
         for(size_t i=0; i < count; i++)
         {
             FAIO::FAfseek(exe, itemOffset + 84*i, SEEK_SET);
@@ -238,18 +247,14 @@ namespace DiabloExe
             }
         }
     }
-    boost::property_tree::ptree DiabloExe::currentVersionSettings()
-    {
-        boost::property_tree::ptree pt;
-        Misc::readIni("resources/exeversions/" + getVersion() + ".ini", pt);
-        return pt;
-    }
 
-    void DiabloExe::loadAffixes(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
+    void DiabloExe::loadAffixes(FAIO::FAFile *exe)
     {
-        size_t affixOffset = pt.get<size_t>("Affix.affixOffset");
-        size_t codeOffset = pt.get<size_t>("Affix.codeOffset");
-        size_t count = pt.get<size_t>("Affix.count");
+        size_t affixOffset = mSettings.get<size_t>("Affix","affixOffset");
+        size_t codeOffset = mSettings.get<size_t>("Affix","codeOffset");
+        size_t count = mSettings.get<size_t>("Affix","count");
+
+
         for(size_t i=0; i < count; i++)
         {
             FAIO::FAfseek(exe, affixOffset + 48*i, SEEK_SET);
@@ -272,17 +277,14 @@ namespace DiabloExe
         }
     }
 
-    void DiabloExe::loadCharacterStats(FAIO::FAFile *exe, boost::property_tree::ptree &pt)
+    void DiabloExe::loadCharacterStats(FAIO::FAFile *exe)
     {
-        size_t startingStatsOffset = pt.get<size_t>("CharacterStats.startingStatsOffset");
-        size_t maxStatsOffset = pt.get<size_t>("CharacterStats.maxStatsOffset");
-        size_t blockingBonusOffset = pt.get<size_t>("CharacterStats.blockingBonusOffset");
-        size_t framesetOffset = pt.get<size_t>("CharacterStats.framesetOffset");
-        size_t expPerLevelOffset = pt.get<size_t>("CharacterStats.expPerLevelOffset");
-        size_t levelCount = pt.get<size_t>("CharacterStats.maxLevel");
-        std::string meleeCharacterName = pt.get<std::string>("CharacterStats.meleeCharacterName");
-        std::string rangerCharacterName = pt.get<std::string>("CharacterStats.rangerCharacterName");
-        std::string mageCharacterName = pt.get<std::string>("CharacterStats.mageCharacterName");
+        size_t startingStatsOffset = mSettings.get<size_t>("CharacterStats", "startingStatsOffset");
+        size_t maxStatsOffset = mSettings.get<size_t>("CharacterStats", "maxStatsOffset");
+        size_t blockingBonusOffset = mSettings.get<size_t>("CharacterStats", "blockingBonusOffset");
+        size_t framesetOffset = mSettings.get<size_t>("CharacterStats", "framesetOffset");
+        size_t expPerLevelOffset = mSettings.get<size_t>("CharacterStats", "expPerLevelOffset");
+        size_t levelCount = mSettings.get<size_t>("CharacterStats", "maxLevel");
         CharacterStats meleeCharacter, rangerCharacter, mageCharacter;
 
         FAIO::FAfseek(exe, framesetOffset, SEEK_SET);
@@ -383,9 +385,9 @@ namespace DiabloExe
             mageCharacter.mNextLevelExp.push_back(readLevelData);
         }
 
-        mCharacters[meleeCharacterName]  = meleeCharacter;
-        mCharacters[rangerCharacterName]    = rangerCharacter;
-        mCharacters[mageCharacterName] = mageCharacter;
+        mCharacters["Warrior"]  = meleeCharacter;
+        mCharacters["Rogue"]    = rangerCharacter;
+        mCharacters["Sorcerer"] = mageCharacter;
     }
 
     const Monster& DiabloExe::getMonster(const std::string& name) const

@@ -17,8 +17,8 @@ PlayPage::PlayPage(Ui::MainWindow *ui, Settings::Settings & settings)
 
 bool PlayPage::loadSettings()
 {
-    QString exe = QString::fromStdString(mSettings.get<std::string>("Game.PathEXE"));
-    QString mpq = QString::fromStdString(mSettings.get<std::string>("Game.PathMPQ"));
+    QString exe = QString::fromStdString(mSettings.get<std::string>("Game", "PathEXE"));
+    QString mpq = QString::fromStdString(mSettings.get<std::string>("Game", "PathMPQ"));
 
     ui->lineDiabloExe->setText(exe);
     ui->lineDiabdatMPQ->setText(mpq);
@@ -28,8 +28,8 @@ bool PlayPage::loadSettings()
 
 void PlayPage::saveSettings()
 {
-    mSettings.set<std::string>("Game.PathEXE", ui->lineDiabloExe->text().toStdString());
-    mSettings.set<std::string>("Game.PathMPQ", ui->lineDiabdatMPQ->text().toStdString());
+    mSettings.set<std::string>("Game", "PathEXE", ui->lineDiabloExe->text().toStdString());
+    mSettings.set<std::string>("Game", "PathMPQ", ui->lineDiabdatMPQ->text().toStdString());
 }
 
 bool PlayPage::hasMaster() const

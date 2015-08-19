@@ -31,8 +31,6 @@ add_library(Misc
     misc/helper2d.h
     misc/md5.h
     misc/md5.cpp
-    misc/fareadini.h
-    misc/fareadini.cpp
     misc/misc.h
     misc/misc.cpp
     misc/disablewarn.h

@@ -27,8 +27,7 @@
 #include <boost/thread.hpp>
 #include <fstream>
 
-#include <misc/fareadini.h>
-#include <boost/property_tree/ptree.hpp>
+#include <settings/settings.h>
 
 #include <input/hotkey.h>
 
@@ -45,8 +44,6 @@ Input::Hotkey quit_key;
 Input::Hotkey noclip_key;
 Input::Hotkey changelvldwn_key;
 Input::Hotkey changelvlup_key;
-
-bpt::ptree hotkeypt;
 
 void keyPress(Input::Key key)
 {
@@ -178,17 +175,11 @@ Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
 bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 {
     boost::program_options::options_description desc("Options");
-    bpt::ptree characterNames = DiabloExe::DiabloExe::currentVersionSettings();
-    std::string meleeName = characterNames.get<std::string>("CharacterStats.meleeCharacterName");
-    std::string rangerName = characterNames.get<std::string>("CharacterStats.rangerCharacterName");
-    std::string mageName = characterNames.get<std::string>("CharacterStats.mageCharacterName");
-    std::string characterSelectHelpMessage = (boost::format("Character: %1%, %2% or %3%") % meleeName % rangerName % mageName).str();
-
     desc.add_options()
         ("help,h", "Print help")
         // -1 represents the main menu
         ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)")
-        ("character,c", bpo::value<std::string>()->default_value((meleeName)), characterSelectHelpMessage.c_str());
+        ("character,c", bpo::value<std::string>()->default_value("Warrior"), "Choose Warrior, Rogue or Sorcerer");
 
     try 
     { 
@@ -209,7 +200,7 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 
         const std::string character = variables["character"].as<std::string>();
 
-        if(character != meleeName && character != rangerName && character != mageName)
+        if(character != "Warrior" && character != "Rogue" && character != "Sorcerer")
             throw bpo::validation_error(bpo::validation_error::invalid_option_value, "character");
 
     }
@@ -235,66 +226,14 @@ struct StartupSettings
 /**
  * @brief Load and parse settings files.
  */
-bool loadSettings(StartupSettings& settings)
+bool loadSettings(StartupSettings& startupSettings)
 {
-    // TODO: handling of application paths via FAIO interface
-    const std::string settingsDefaultPath = "resources/settings-default.ini";
-    const std::string settingsUserPath = "resources/settings-user.ini";
-
-    bpo::variables_map variables;
-    bpo::options_description desc("Settings");
-
-    desc.add_options()
-        ("Display.resolutionWidth", bpo::value<size_t>())
-        ("Display.resolutionHeight", bpo::value<size_t>());
-
-    const bool allowUnregisteredOptions = true;
-
-    // User settings - handle first to give priority over default settings.
-    try
-    {
-        std::ifstream settingsFile(settingsUserPath.c_str());
-
-        bpo::store(
-            bpo::parse_config_file(settingsFile, desc, allowUnregisteredOptions),
-            variables);
-    }
-    catch(bpo::error& e)
-    {
-        std::cerr << "Unable to process settings file \"" + settingsUserPath + "\"." << std::endl;
-        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+    Settings::Settings settings;
+    if(!settings.loadUserSettings())
         return false;
-    }
 
-    // Default settings.
-    try
-    {
-        if (!bfs::exists(settingsDefaultPath))
-        {
-            std::cerr << "Default settings file not found. Please verify that \"" + settingsDefaultPath + "\" exists." << std::endl;
-            return false;
-        }
-
-        std::ifstream settingsFile(settingsDefaultPath.c_str());
-
-        bpo::store(
-            bpo::parse_config_file(settingsFile, desc, allowUnregisteredOptions),
-            variables);
-
-        bpo::notify(variables);
-
-        // Parameter parsing.
-        {
-            settings.resolutionWidth = variables["Display.resolutionWidth"].as<size_t>();
-            settings.resolutionHeight = variables["Display.resolutionHeight"].as<size_t>();
-        }
-    }
-    catch(bpo::error& e)
-    {
-        std::cerr << "Unable to process settings file \"" + settingsDefaultPath + "\"." << std::endl;
-        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
-        return false;
-    }
+    startupSettings.resolutionWidth = settings.get<size_t>("Display","resolutionWidth");
+    startupSettings.resolutionHeight = settings.get<size_t>("Display","resolutionHeight");
 
     return true;
 }
@@ -379,10 +318,6 @@ void run(const bpo::variables_map& variables)
 
 void runGameLoop(const bpo::variables_map& variables)
 {
-    bpt::ptree characterNames = DiabloExe::DiabloExe::currentVersionSettings();
-    std::string meleeName = characterNames.get<std::string>("CharacterStats.meleeCharacterName");
-    std::string rangerName = characterNames.get<std::string>("CharacterStats.rangerCharacterName");
-    std::string mageName = characterNames.get<std::string>("CharacterStats.mageCharacterName");
     FARender::Renderer& renderer = *FARender::Renderer::get();
     Input::InputManager& input = *Input::InputManager::get();
     Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
@@ -413,7 +348,7 @@ void runGameLoop(const bpo::variables_map& variables)
     FAWorld::World world;
     FAWorld::Player* player = world.getPlayer();
 
-    if(character == meleeName)
+    if(character == "Warrior")
     {
         stats = new FAWorld::MeleeStats(char_stats);
         FAWorld::Item item = itemManager.getBaseItem(125) ;
@@ -459,7 +394,7 @@ void runGameLoop(const bpo::variables_map& variables)
 
     }
 
-    else if(character == rangerName)
+    else if(character == "Rogue")
     {
         stats = new FAWorld::RangerStats(char_stats);
         FAWorld::Item item = itemManager.getBaseItem(121);
@@ -564,14 +499,11 @@ void runGameLoop(const bpo::variables_map& variables)
     boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
     
     std::pair<size_t, size_t> destination = player->mPos.current();
-    
-    //bpt::ptree hotkeypt;
-    Misc::readIni("resources/hotkeys.ini", hotkeypt);
-        
-    quit_key = Input::Hotkey("Quit", hotkeypt);
-    noclip_key = Input::Hotkey("Noclip", hotkeypt);
-    changelvlup_key = Input::Hotkey("Changelvlup", hotkeypt);
-    changelvldwn_key = Input::Hotkey("Changelvldwn", hotkeypt);
+            
+    quit_key = Input::Hotkey("Quit");
+    noclip_key = Input::Hotkey("Noclip");
+    changelvlup_key = Input::Hotkey("Changelvlup");
+    changelvldwn_key = Input::Hotkey("Changelvldwn");
     
     // Main game logic loop
     while(!done)

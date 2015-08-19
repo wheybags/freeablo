@@ -14,7 +14,6 @@
 #include <input/common.h>
 #include <sstream>
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
 
 #include "input/hotkey.h"
 
@@ -26,10 +25,6 @@ extern Input::Hotkey quit_key; // TODO: handle this better
 extern Input::Hotkey noclip_key; // TODO: handle this better
 extern Input::Hotkey changelvldwn_key; // TODO: handle this better
 extern Input::Hotkey changelvlup_key; // TODO: handle this better
-
-namespace bpt = boost::property_tree;
-
-extern bpt::ptree hotkeypt;
 
 namespace FAGui
 {
@@ -103,27 +98,25 @@ void setHotkey(std::string function, boost::python::list pyhotkey)
     hotkey.ctrl = boost::python::extract<bool>(pyhotkey[2]);
     hotkey.alt = boost::python::extract<bool>(pyhotkey[3]);
 
-    bpt::write_ini("resources/hotkeys.ini", hotkeypt);
-
     if (function == "quit")
     {
         quit_key = hotkey;
-        quit_key.save("Quit", hotkeypt);
+        quit_key.save("Quit");
     }
     if (function == "noclip")
     {
         noclip_key = hotkey;
-        noclip_key.save("Noclip", hotkeypt);
+        noclip_key.save("Noclip");
     }
     if (function == "changelvlup")
     {
         changelvlup_key = hotkey;
-        changelvlup_key.save("Changelvlup", hotkeypt);
+        changelvlup_key.save("Changelvlup");
     }
     if (function == "changelvldwn")
     {
         changelvldwn_key = hotkey;
-        changelvldwn_key.save("Changelvldwn", hotkeypt);
+        changelvldwn_key.save("Changelvldwn");
     }
 }
 
@@ -191,8 +184,10 @@ void placeItem(uint32_t toPara,
     else if(to == FAWorld::Item::eqINV)
     {
 
+
         item = inventory->getItemAt(FAWorld::Item::eqCURSOR);
         if(inventory->putItem(item, to, FAWorld::Item::eqCURSOR, toY, toX))
+
         {
             cursorPath = "";
             cursorFrame = 0;
@@ -220,7 +215,6 @@ void placeItem(uint32_t toPara,
         }
 
     }
-
     else
     {
 
@@ -229,7 +223,6 @@ void placeItem(uint32_t toPara,
         {
             cursorPath = "";
             cursorFrame = 0;
-
         }
 
     }

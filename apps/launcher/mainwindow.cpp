@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->playButton, SIGNAL(clicked(bool)), this, SLOT(play()));
 
 
-    mSettings.loadSettings();
+    mSettings.loadUserSettings();
     mPlayPage = QSharedPointer<PlayPage>(new PlayPage(ui, mSettings));
     mGraphicsPage = QSharedPointer<GraphicsPage>(new GraphicsPage(ui, mSettings));
 
@@ -136,7 +136,7 @@ bool MainWindow::writeSettings()
         return false;
     }
 
-    return mSettings.saveSettingsToFile();
+    return mSettings.save();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
