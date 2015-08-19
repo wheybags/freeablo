@@ -1,10 +1,6 @@
 #ifndef HOTKEY_H
 #define	HOTKEY_H
 
-#include <boost/property_tree/ptree.hpp>
-
-namespace bpt = boost::property_tree;
-
 namespace Input
 {
     class Hotkey
@@ -14,10 +10,10 @@ namespace Input
             bool shift, ctrl, alt;
 
             Hotkey();
-            Hotkey(const char *name, bpt::ptree hotkeypt);
+            Hotkey(const char *name);
             Hotkey(int nkey, bool nshift, bool nctrl, bool nalt);
             bool operator==(const Hotkey &other);
-            void save(const char *name, bpt::ptree hotkeypt);
+            void save(const char *name);
             static void initpythonwrapper();
     };
 }

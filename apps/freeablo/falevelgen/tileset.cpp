@@ -4,173 +4,174 @@
 #include <algorithm>
 
 #include <faio/faio.h>
-#include <misc/fareadini.h>
+#include <settings/settings.h>
 
 #include "random.h"
 
 namespace FALevelGen
 {
-    namespace bpt = boost::property_tree;
-
     TileSet::TileSet(const std::string& path)
     {
-        bpt::ptree pt;
-        Misc::readIni(path, pt);
+        Settings::Settings settings;
+        settings.loadFromFile(path);
 
-        xWall = pt.get<size_t>("Basic.xWall");
-        fillTile(xWall, pt, "XWall");
+        xWall = settings.get<size_t>("Basic","xWall");
+        fillTile(xWall, settings, "XWall");
         
-        outsideXWall = pt.get<size_t>("Basic.outsideXWall");
-        fillTile(outsideXWall, pt, "outsideXWall");
+        outsideXWall = settings.get<size_t>("Basic","outsideXWall");
+        fillTile(outsideXWall, settings, "outsideXWall");
 
-        yWall = pt.get<size_t>("Basic.yWall");
-        fillTile(yWall, pt, "YWall");
+        yWall = settings.get<size_t>("Basic","yWall");
+        fillTile(yWall, settings, "YWall");
 
-        outsideYWall = pt.get<size_t>("Basic.outsideYWall");
-        fillTile(outsideYWall, pt, "OutsideYWall");
+        outsideYWall = settings.get<size_t>("Basic","outsideYWall");
+        fillTile(outsideYWall, settings, "OutsideYWall");
 
-        bottomCorner = pt.get<size_t>("Basic.bottomCorner");
-        fillTile(bottomCorner, pt, "BottomCorner");
+        bottomCorner = settings.get<size_t>("Basic","bottomCorner");
+        fillTile(bottomCorner, settings, "BottomCorner");
 
-        outsideBottomCorner = pt.get<size_t>("Basic.outsideBottomCorner");
-        fillTile(outsideBottomCorner, pt, "OutsideBottomCorner");
+        outsideBottomCorner = settings.get<size_t>("Basic","outsideBottomCorner");
+        fillTile(outsideBottomCorner, settings, "OutsideBottomCorner");
 
-        rightCorner = pt.get<size_t>("Basic.rightCorner");
-        fillTile(rightCorner, pt, "RightCorner");
+        rightCorner = settings.get<size_t>("Basic","rightCorner");
+        fillTile(rightCorner, settings, "RightCorner");
 
-        outsideRightCorner = pt.get<size_t>("Basic.outsideRightCorner");
-        fillTile(outsideRightCorner, pt, "OutsideRightCorner");
+        outsideRightCorner = settings.get<size_t>("Basic","outsideRightCorner");
+        fillTile(outsideRightCorner, settings, "OutsideRightCorner");
 
-        leftCorner = pt.get<size_t>("Basic.leftCorner");
-        fillTile(leftCorner, pt, "LeftCorner");
+        leftCorner = settings.get<size_t>("Basic","leftCorner");
+        fillTile(leftCorner, settings, "LeftCorner");
 
-        outsideLeftCorner = pt.get<size_t>("Basic.outsideLeftCorner");
-        fillTile(outsideLeftCorner, pt, "OutsideLeftCorner");
+        outsideLeftCorner = settings.get<size_t>("Basic","outsideLeftCorner");
+        fillTile(outsideLeftCorner, settings, "OutsideLeftCorner");
 
-        topCorner = pt.get<size_t>("Basic.topCorner");
-        fillTile(topCorner, pt, "TopCorner");
+        topCorner = settings.get<size_t>("Basic","topCorner");
+        fillTile(topCorner, settings, "TopCorner");
 
-        outsideTopCorner = pt.get<size_t>("Basic.outsideTopCorner");
-        fillTile(outsideTopCorner, pt, "OutsideTopCorner");
+        outsideTopCorner = settings.get<size_t>("Basic","outsideTopCorner");
+        fillTile(outsideTopCorner, settings, "OutsideTopCorner");
 
-        floor = pt.get<size_t>("Basic.floor");
-        fillTile(floor, pt, "Floor");
+        floor = settings.get<size_t>("Basic","floor");
+        fillTile(floor, settings, "Floor");
 
-        blank = pt.get<size_t>("Basic.blank");
-        fillTile(blank, pt, "Blank");
+        blank = settings.get<size_t>("Basic","blank");
+        fillTile(blank, settings, "Blank");
 
-        xDoor = pt.get<size_t>("Basic.xDoor");
-        fillTile(xDoor, pt, "XDoor");
+        xDoor = settings.get<size_t>("Basic","xDoor");
+        fillTile(xDoor, settings, "XDoor");
 
-        yDoor = pt.get<size_t>("Basic.yDoor");
-        fillTile(yDoor, pt, "YDoor");
+        yDoor = settings.get<size_t>("Basic","yDoor");
+        fillTile(yDoor, settings, "YDoor");
 
-        insideXWall = pt.get<size_t>("Basic.insideXWall");
-        fillTile(insideXWall, pt, "InsideXWall");
-        insideXWallEnd = pt.get<size_t>("Basic.insideXWallEnd");
-        fillTile(insideXWallEnd, pt, "InsideXWallEnd");
-        insideXWallEndBack = pt.get<size_t>("Basic.insideXWallEndBack");
-        fillTile(insideXWallEndBack, pt, "InsideXWallEndBack");
-        insideYWall = pt.get<size_t>("Basic.insideYWall");
-        fillTile(insideYWall, pt, "InsideYWall");
-        insideYWallEnd = pt.get<size_t>("Basic.insideYWallEnd");
-        fillTile(insideYWallEnd, pt, "InsideYWallEnd");
-        insideYWallEndBack = pt.get<size_t>("Basic.insideYWallEndBack");
-        fillTile(insideYWallEndBack, pt, "InsideYWallEndBack");
-        insideLeftCorner = pt.get<size_t>("Basic.insideLeftCorner");
-        fillTile(insideLeftCorner, pt, "InsideLeftCorner");
-        insideRightCorner = pt.get<size_t>("Basic.insideRightCorner");
-        fillTile(insideRightCorner, pt, "InsideRightCorner");
-        insideBottomCorner = pt.get<size_t>("Basic.insideBottomCorner");
-        fillTile(insideBottomCorner, pt, "InsideBottomCorner");
-        insideTopCorner = pt.get<size_t>("Basic.insideTopCorner");
-        fillTile(insideTopCorner, pt, "InsideTopCorner");
+        insideXWall = settings.get<size_t>("Basic","insideXWall");
+        fillTile(insideXWall, settings, "InsideXWall");
+        insideXWallEnd = settings.get<size_t>("Basic","insideXWallEnd");
+        fillTile(insideXWallEnd, settings, "InsideXWallEnd");
+        insideXWallEndBack = settings.get<size_t>("Basic","insideXWallEndBack");
+        fillTile(insideXWallEndBack, settings, "InsideXWallEndBack");
+        insideYWall = settings.get<size_t>("Basic","insideYWall");
+        fillTile(insideYWall, settings, "InsideYWall");
+        insideYWallEnd = settings.get<size_t>("Basic","insideYWallEnd");
+        fillTile(insideYWallEnd, settings, "InsideYWallEnd");
+        insideYWallEndBack = settings.get<size_t>("Basic","insideYWallEndBack");
+        fillTile(insideYWallEndBack, settings, "InsideYWallEndBack");
+        insideLeftCorner = settings.get<size_t>("Basic","insideLeftCorner");
+        fillTile(insideLeftCorner, settings, "InsideLeftCorner");
+        insideRightCorner = settings.get<size_t>("Basic","insideRightCorner");
+        fillTile(insideRightCorner, settings, "InsideRightCorner");
+        insideBottomCorner = settings.get<size_t>("Basic","insideBottomCorner");
+        fillTile(insideBottomCorner, settings, "InsideBottomCorner");
+        insideTopCorner = settings.get<size_t>("Basic","insideTopCorner");
+        fillTile(insideTopCorner, settings, "InsideTopCorner");
 
-        joinY = pt.get<size_t>("Basic.joinY");
-        fillTile(joinY, pt, "JoinY");
-        joinYRightCorner = pt.get<size_t>("Basic.joinYRightCorner");
-        fillTile(joinYRightCorner, pt, "JoinYRightCorner");
-        joinRightCorner = pt.get<size_t>("Basic.joinRightCorner");
-        fillTile(joinRightCorner, pt, "JoinRightCorner");
-        joinOutXRightCorner = pt.get<size_t>("Basic.joinOutXRightCorner");
-        fillTile(joinOutXRightCorner, pt, "JoinOutXRightCorner");
-        joinOutX = pt.get<size_t>("Basic.joinOutX");
-        fillTile(joinOutX, pt, "JoinOutX");
-        joinOutXTopCorner = pt.get<size_t>("Basic.joinOutXTopCorner");
-        fillTile(joinOutXTopCorner, pt, "JoinOutXTopCorner");
-        joinTopCorner = pt.get<size_t>("Basic.joinTopCorner");
-        fillTile(joinTopCorner, pt, "JoinTopCorner");
-        joinOutYTopCorner = pt.get<size_t>("Basic.joinOutYTopCorner");
-        fillTile(joinOutYTopCorner, pt, "JoinOutYTopCorner");
-        joinOutY = pt.get<size_t>("Basic.joinOutY");
-        fillTile(joinOutY, pt, "JoinOutY");
-        joinOutYLeftCorner = pt.get<size_t>("Basic.joinOutYLeftCorner");
-        fillTile(joinOutYLeftCorner, pt, "JoinOutYLeftCorner");
-        joinLeftCorner = pt.get<size_t>("Basic.joinLeftCorner");
-        fillTile(joinLeftCorner, pt, "JoinLeftCorner");
-        joinXLeftCorner = pt.get<size_t>("Basic.joinXLeftCorner");
-        fillTile(joinXLeftCorner, pt, "JoinXLeftCorner");
-        joinX = pt.get<size_t>("Basic.joinX");
-        fillTile(joinX, pt, "JoinX");
-        joinXBottomCorner = pt.get<size_t>("Basic.joinXBottomCorner");
-        fillTile(joinXBottomCorner, pt, "JoinXBottomCorner");
-        joinBottomCorner = pt.get<size_t>("Basic.joinBottomCorner");
-        fillTile(joinBottomCorner, pt, "JoinBottomCorner");
-        joinYBottomCorner = pt.get<size_t>("Basic.joinYBottomCorner");
-        fillTile(joinYBottomCorner, pt, "JoinYBottomCorner");
+        joinY = settings.get<size_t>("Basic","joinY");
+        fillTile(joinY, settings, "JoinY");
+        joinYRightCorner = settings.get<size_t>("Basic","joinYRightCorner");
+        fillTile(joinYRightCorner, settings, "JoinYRightCorner");
+        joinRightCorner = settings.get<size_t>("Basic","joinRightCorner");
+        fillTile(joinRightCorner, settings, "JoinRightCorner");
+        joinOutXRightCorner = settings.get<size_t>("Basic","joinOutXRightCorner");
+        fillTile(joinOutXRightCorner, settings, "JoinOutXRightCorner");
+        joinOutX = settings.get<size_t>("Basic","joinOutX");
+        fillTile(joinOutX, settings, "JoinOutX");
+        joinOutXTopCorner = settings.get<size_t>("Basic","joinOutXTopCorner");
+        fillTile(joinOutXTopCorner, settings, "JoinOutXTopCorner");
+        joinTopCorner = settings.get<size_t>("Basic","joinTopCorner");
+        fillTile(joinTopCorner, settings, "JoinTopCorner");
+        joinOutYTopCorner = settings.get<size_t>("Basic","joinOutYTopCorner");
+        fillTile(joinOutYTopCorner, settings, "JoinOutYTopCorner");
+        joinOutY = settings.get<size_t>("Basic","joinOutY");
+        fillTile(joinOutY, settings, "JoinOutY");
+        joinOutYLeftCorner = settings.get<size_t>("Basic","joinOutYLeftCorner");
+        fillTile(joinOutYLeftCorner, settings, "JoinOutYLeftCorner");
+        joinLeftCorner = settings.get<size_t>("Basic","joinLeftCorner");
+        fillTile(joinLeftCorner, settings, "JoinLeftCorner");
+        joinXLeftCorner = settings.get<size_t>("Basic","joinXLeftCorner");
+        fillTile(joinXLeftCorner, settings, "JoinXLeftCorner");
+        joinX = settings.get<size_t>("Basic","joinX");
+        fillTile(joinX, settings, "JoinX");
+        joinXBottomCorner = settings.get<size_t>("Basic","joinXBottomCorner");
+        fillTile(joinXBottomCorner, settings, "JoinXBottomCorner");
+        joinBottomCorner = settings.get<size_t>("Basic","joinBottomCorner");
+        fillTile(joinBottomCorner, settings, "JoinBottomCorner");
+        joinYBottomCorner = settings.get<size_t>("Basic","joinYBottomCorner");
+        fillTile(joinYBottomCorner, settings, "JoinYBottomCorner");
 
 
-        upStairs1 = pt.get<size_t>("Basic.upStairs1");
-        upStairs2 = pt.get<size_t>("Basic.upStairs2");
-        upStairs3 = pt.get<size_t>("Basic.upStairs3");
+        upStairs1 = settings.get<size_t>("Basic","upStairs1");
+        upStairs2 = settings.get<size_t>("Basic","upStairs2");
+        upStairs3 = settings.get<size_t>("Basic","upStairs3");
 
-        upStairs4 = pt.get<size_t>("Basic.upStairs4");
-        upStairs5 = pt.get<size_t>("Basic.upStairs5");
-        upStairs6 = pt.get<size_t>("Basic.upStairs6");
+        upStairs4 = settings.get<size_t>("Basic","upStairs4");
+        upStairs5 = settings.get<size_t>("Basic","upStairs5");
+        upStairs6 = settings.get<size_t>("Basic","upStairs6");
 
-        upStairs7 = pt.get<size_t>("Basic.upStairs7");
-        upStairs8 = pt.get<size_t>("Basic.upStairs8");
-        upStairs9 = pt.get<size_t>("Basic.upStairs9");
+        upStairs7 = settings.get<size_t>("Basic","upStairs7");
+        upStairs8 = settings.get<size_t>("Basic","upStairs8");
+        upStairs9 = settings.get<size_t>("Basic","upStairs9");
         
-        downStairs1 = pt.get<size_t>("Basic.downStairs1");
-        downStairs2 = pt.get<size_t>("Basic.downStairs2");
-        downStairs3 = pt.get<size_t>("Basic.downStairs3");
+        downStairs1 = settings.get<size_t>("Basic","downStairs1");
+        downStairs2 = settings.get<size_t>("Basic","downStairs2");
+        downStairs3 = settings.get<size_t>("Basic","downStairs3");
 
-        downStairs4 = pt.get<size_t>("Basic.downStairs4");
-        downStairs5 = pt.get<size_t>("Basic.downStairs5");
-        downStairs6 = pt.get<size_t>("Basic.downStairs6");
+        downStairs4 = settings.get<size_t>("Basic","downStairs4");
+        downStairs5 = settings.get<size_t>("Basic","downStairs5");
+        downStairs6 = settings.get<size_t>("Basic","downStairs6");
 
-        downStairs7 = pt.get<size_t>("Basic.downStairs7");
-        downStairs8 = pt.get<size_t>("Basic.downStairs8");
-        downStairs9 = pt.get<size_t>("Basic.downStairs9");
+        downStairs7 = settings.get<size_t>("Basic","downStairs7");
+        downStairs8 = settings.get<size_t>("Basic","downStairs8");
+        downStairs9 = settings.get<size_t>("Basic","downStairs9");
 
-        loadDoorMap(pt);
+        loadDoorMap(settings);
     }
     
-    void TileSet::fillTile(size_t tile, bpt::ptree& pt, const std::string& str)
+    void TileSet::fillTile(size_t tile, Settings::Settings & settings, const std::string& section)
     {
         std::vector<std::pair<size_t, size_t> > tileVec;
         size_t normPercent = 100;
-        bpt::ptree::assoc_iterator tileIt = pt.find(str); 
 
-        if(tileIt != pt.not_found())
+        if(settings.isSectionExists(section))
         {
-            for(bpt::ptree::const_iterator key = tileIt->second.begin(); key != tileIt->second.end(); ++key)
-            {
-                if(key->first != "normal")
-                {
-                    std::stringstream buffer(key->first);
-                    size_t first;
-                    buffer >> first;
+            Settings::Container properties = settings.getPropertiesInSection(section);
+            size_t size = properties.size();
 
-                    tileVec.push_back(std::pair<size_t, size_t>(first, key->second.get_value<size_t>()));
+            for(size_t i = 0 ; i < size ; i++)
+            {
+                if(properties[i] != "normal")
+                {
+                    std::stringstream buffer(properties[i]);
+                    size_t propertyAsSizeT;
+                    buffer >> propertyAsSizeT;
+
+                    size_t value = settings.get<size_t>(section, properties[i]);
+                    tileVec.push_back(std::pair<size_t, size_t>(propertyAsSizeT, value));
                 }
             }
-            normPercent = tileIt->second.get<size_t>("normal");
+
+            normPercent = settings.get<size_t>(section, "normal");
         }
 
         mAlternatives[tile] = std::pair<std::vector<std::pair<size_t, size_t> >, size_t>(tileVec, normPercent);
-
     }
     
     size_t TileSet::getRandomTile(size_t tile)
@@ -204,20 +205,20 @@ namespace FALevelGen
         return mDoorMap;
     }
     
-    void TileSet::loadDoorMap(bpt::ptree& pt)
+    void TileSet::loadDoorMap(Settings::Settings & settings)
     {
-        bpt::ptree::assoc_iterator doorMapIt = pt.find("DoorMap");
+        Settings::Container properties = settings.getPropertiesInSection("DoorMap");
 
-        for(bpt::ptree::const_iterator key = doorMapIt->second.begin(); key != doorMapIt->second.end(); ++key)
+        for(Settings::Container::const_iterator it = properties.begin(); it != properties.end(); ++it)
         {
-            std::stringstream buffer(key->first);
-            size_t first;
-            buffer >> first;
+            std::stringstream buffer(*it);
+            size_t propertyAsSizeT;
+            buffer >> propertyAsSizeT;
 
-            size_t second = key->second.get_value<size_t>();
+            size_t value = settings.get<size_t>("DoorMap", *it);
 
-            mDoorMap[first] = second;
-            mDoorMap[second] = first;
+            mDoorMap[propertyAsSizeT] = value;
+            mDoorMap[value] = propertyAsSizeT;
         }
     }
 

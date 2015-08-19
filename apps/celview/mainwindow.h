@@ -5,13 +5,13 @@
 #include <QListWidgetItem>
 #include <QTimer>
 #include <QSharedPointer>
-#include <QSettings>
 #include <QColor>
 
 #include <misc/disablewarn.h>
 #include <StormLib.h>
 #include <misc/enablewarn.h>
 
+#include <settings/settings.h>
 #include <faio/faio.h>
 #include <render/render.h>
 
@@ -66,19 +66,19 @@ private slots:
     void updateRender();
 
 private:
+    Ui::MainWindow *ui;
     HANDLE mDiabdat ;
+    bool mIsAnimation;
     QString mFilename;
     QString mListfile;
     QString mCurrentCelFilename;
     const QString mSettingsFile;
     QColor mBackgroundColor;
-    QSettings mSettings;
+    Settings::Settings mSettings;
     int mCurrentFrame;
     QSharedPointer<Render::SpriteGroup> mCurrentCel;
     Render::RenderSettings mRenderSettings;
     QTimer mRenderTimer;
-    bool mIsAnimation;
-    Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H
