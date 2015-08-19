@@ -1,8 +1,8 @@
 #include "faio.h"
 
 #include <iostream>
+#include <mutex>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace bfs = boost::filesystem;
@@ -18,7 +18,7 @@ namespace FAIO
     FAFile::FAFile(){}
 
     const std::string DIABDAT_MPQ = "DIABDAT.MPQ";
-    boost::mutex m;
+    std::mutex m;
 
     // StormLib needs paths with windows style \'s
     std::string getStormLibPath(const bfs::path& path)
@@ -66,7 +66,7 @@ namespace FAIO
 
         if(!bfs::exists(filename))
         {
-            boost::mutex::scoped_lock lock(m);
+            std::lock_guard<std::mutex> lock(m);
             std::string stormPath = getStormLibPath(path);
 
             if(!SFileHasFile(diabdat, stormPath.c_str()))
@@ -113,7 +113,7 @@ namespace FAIO
             
             case FAFile::MPQFile:
             {
-                boost::mutex::scoped_lock lock(m);
+                std::lock_guard<std::mutex> lock(m);
 
                 DWORD dwBytes = 1;
                 if(!SFileReadFile(*((HANDLE*)stream->data.mpqFile), ptr, size*count, &dwBytes, NULL))
@@ -140,7 +140,7 @@ namespace FAIO
 
             case FAFile::MPQFile:
             {
-                boost::mutex::scoped_lock lock(m);
+                std::lock_guard<std::mutex> lock(m);
 
                 int res = SFileCloseFile(*((HANDLE*)stream->data.mpqFile));
                 free(stream->data.mpqFile);
@@ -166,7 +166,7 @@ namespace FAIO
             
             case FAFile::MPQFile:
             {
-                boost::mutex::scoped_lock lock(m);
+                std::lock_guard<std::mutex> lock(m);
                 DWORD moveMethod;
                 
                 switch(origin)
@@ -207,7 +207,7 @@ namespace FAIO
 
             case FAFile::MPQFile:
             {
-                boost::mutex::scoped_lock lock(m);
+                std::lock_guard<std::mutex> lock(m);
                 return SFileSetFilePointer(*((HANDLE*)stream->data.mpqFile), 0, NULL, FILE_CURRENT);
             }
 
@@ -225,7 +225,7 @@ namespace FAIO
 
             case FAFile::MPQFile:
             {
-                boost::mutex::scoped_lock lock(m);
+                std::lock_guard<std::mutex> lock(m);
                 return SFileGetFileSize(*((HANDLE*)stream->data.mpqFile), NULL);
             }
         }

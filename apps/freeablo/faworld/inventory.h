@@ -1,9 +1,11 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
+
 #include <stdint.h>
 #include "item.h"
 #include <diabloexe/diabloexe.h>
 #include <map>
+
 namespace FAWorld
 {
 

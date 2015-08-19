@@ -9,6 +9,7 @@
 #include <boost/program_options.hpp>
 void runGameLoop(const boost::program_options::variables_map& variables);
 namespace FAWorld
+
 {
     class ItemPosition
     {

@@ -1,9 +1,9 @@
-#include <boost/random.hpp>
-#include <boost/random/normal_distribution.hpp>
+#include <random>
+#include <functional>
 
 namespace FALevelGen
 {
-    boost::mt19937 rng;
+    std::mt19937 rng;
 
     void FAsrand(int seed)
     {
@@ -12,15 +12,12 @@ namespace FALevelGen
     
     int normRand(int min, int max)
     {
-        boost::normal_distribution<> nd(min, (float)(max-min)/3.5);
+        std::normal_distribution<> nd(min, (float)(max-min)/3.5);
 
-        boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > varNor(rng, nd);
-        
         int result;
-        
         do
         {
-            result = varNor();
+            result = nd(rng);
         }
         while(result < min || result > max);
 
@@ -29,10 +26,8 @@ namespace FALevelGen
 
     int randomInRange (unsigned int min, unsigned int max)
     {
-        boost::uniform_int<> range(min, max);        
-        boost::variate_generator<boost::mt19937&, boost::uniform_int<> > varRange(rng, range);
-
-        
-        return varRange();
+        std::uniform_int_distribution<> range(min, max);
+        int result = range(rng);
+        return result;
     }
 }
