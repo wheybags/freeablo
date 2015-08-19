@@ -14,17 +14,12 @@
 #include <input/common.h>
 #include <sstream>
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
 
 #include "../engine/input.h"
 
 #include "input/hotkey.h"
 
 
-
-namespace bpt = boost::property_tree;
-
-extern bpt::ptree hotkeypt;
 
 namespace FAGui
 {
@@ -98,27 +93,25 @@ void setHotkey(std::string function, boost::python::list pyhotkey)
     hotkey.ctrl = boost::python::extract<bool>(pyhotkey[2]);
     hotkey.alt = boost::python::extract<bool>(pyhotkey[3]);
 
-    bpt::write_ini("resources/hotkeys.ini", hotkeypt);
-
     if (function == "quit")
     {
         Engine::quit_key = hotkey;
-        Engine::quit_key.save("Quit", hotkeypt);
+        Engine::quit_key.save("Quit");
     }
     if (function == "noclip")
     {
         Engine::noclip_key = hotkey;
-        Engine::noclip_key.save("Noclip", hotkeypt);
+        Engine::noclip_key.save("Noclip");
     }
     if (function == "changelvlup")
     {
         Engine::changelvlup_key = hotkey;
-        Engine::changelvlup_key.save("Changelvlup", hotkeypt);
+        Engine::changelvlup_key.save("Changelvlup");
     }
     if (function == "changelvldwn")
     {
         Engine::changelvldwn_key = hotkey;
-        Engine::changelvldwn_key.save("Changelvldwn", hotkeypt);
+        Engine::changelvldwn_key.save("Changelvldwn");
     }
 }
 
@@ -181,7 +174,6 @@ void placeItem(uint32_t toPara,
 
     else if(to == Level::Item::eqINV)
     {
-
         item = inventory->getItemAt(Level::Item::eqCURSOR);
         if(inventory->putItem(item, to, Level::Item::eqCURSOR, toY, toX))
         {
@@ -211,7 +203,6 @@ void placeItem(uint32_t toPara,
         }
 
     }
-
     else
     {
 
@@ -220,7 +211,6 @@ void placeItem(uint32_t toPara,
         {
             cursorPath = "";
             cursorFrame = 0;
-
         }
 
     }
