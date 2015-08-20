@@ -556,9 +556,9 @@ void runGameLoop(const bpo::variables_map& variables)
                     level->activate(destination.first, destination.second);
 
                 click = false;
-                FAWorld::Actor* npc = world.getActorAt(destination.first, destination.second);
-                if(npc != NULL)
-                    player->Attack(npc);
+                //FAWorld::Actor* npc = world.getActorAt(destination.first, destination.second);
+                //if(npc != NULL)
+
 
 
             }

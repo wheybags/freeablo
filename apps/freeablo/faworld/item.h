@@ -7,6 +7,7 @@
 #include <cel/celframe.h>
 #include <vector>
 #include <tuple>
+
 namespace FAWorld
 {
 class Inventory;

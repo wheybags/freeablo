@@ -3,12 +3,13 @@
 
 #include "position.h"
 #include "inventory.h"
-#include "actorstats.hpp"
+
 #include "../farender/renderer.h"
 #include "../fasavegame/savegame.h"
 
 namespace FAWorld
 {
+    class ActorStats;
 
     namespace AnimState
     {

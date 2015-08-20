@@ -9,6 +9,7 @@
 namespace FAWorld
 {
 
+
     class Actor;
 
     class Inventory
