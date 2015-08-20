@@ -398,33 +398,33 @@ namespace FAWorld
 
             bool levelUp(BasicStat statModified)
             {
-                if(mLevelPoints >= 1)
+                mLevelPointsToSpend=5;
+                mLevelPoints--;
+                mLevel++;
+                mExpToNextLevel = mExpForLevel[mLevel-1];
+                recalculateDerivedStats();
+                return true;
+            }
+
+            bool spendLevelUpPoint(BasicStat stat)
+            {
+                if(mLevelPointsToSpend>0)
                 {
-                    switch(statModified)
+                    switch(stat)
                     {
                         case Strength:
-                            mSpentLevelsOnStrength+=1;
+                            mSpentLevelsOnStrength++;
                             break;
-
                         case Magic:
-                            mSpentLevelsOnMagic+=1;
+                            mSpentLevelsOnMagic++;
                             break;
-
                         case Dexterity:
-                            mSpentLevelsOnDexterity+=1;
+                            mSpentLevelsOnDexterity++;
                             break;
-
                         case Vitality:
-                            mSpentLevelsOnVitality+=1;
+                            mSpentLevelsOnVitality++;
                             break;
-
-                        default:
-                            return false;
                     }
-                    mLevelPoints--;
-                    mLevel++;
-                    mExpToNextLevel = mExpForLevel[mLevel-1];
-                    recalculateDerivedStats();
                     return true;
                 }
                 else
@@ -532,6 +532,7 @@ namespace FAWorld
             double mWalkSpeed=0.4;
             double mSwingSpeed=0.0;
             double mHitRecovery=0.0;
+            uint8_t mLevelPointsToSpend;
             Actor * mActor;
     };
 }
