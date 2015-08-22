@@ -217,6 +217,8 @@ struct StartupSettings
 {
     size_t resolutionWidth;
     size_t resolutionHeight;
+    std::string pathEXE;
+    std::string pathMPQ;
 };
 
 /**
@@ -228,6 +230,8 @@ bool loadSettings(StartupSettings& startupSettings)
     if(!settings.loadUserSettings())
         return false;
 
+    startupSettings.pathMPQ = settings.get<std::string>("Game","PathMPQ");
+    startupSettings.pathEXE = settings.get<std::string>("Game","PathEXE");
     startupSettings.resolutionWidth = settings.get<size_t>("Display","resolutionWidth");
     startupSettings.resolutionHeight = settings.get<size_t>("Display","resolutionHeight");
 
@@ -266,8 +270,8 @@ void playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager)
     }
 }
 
-void run(const bpo::variables_map& variables);
-void runGameLoop(const bpo::variables_map& variables);
+void run(const bpo::variables_map& variables, StartupSettings& settings);
+void runGameLoop(const bpo::variables_map& variables, StartupSettings& settings);
 
 volatile bool renderDone = false;
 
@@ -276,7 +280,10 @@ volatile bool renderDone = false;
  */
 int main(int argc, char** argv)
 {
-    if (!FAIO::init())
+    StartupSettings settings;
+    loadSettings(settings);
+
+    if (!FAIO::init(settings.pathMPQ))
     {
         return EXIT_FAILURE;
     }
@@ -285,26 +292,21 @@ int main(int argc, char** argv)
 
     if (parseOptions(argc, argv, variables))
     {
-        run(variables);
+        run(variables, settings);
     }
 
     FAIO::quit();
     return 0;
 }
 
-void run(const bpo::variables_map& variables)
+void run(const bpo::variables_map& variables, StartupSettings& settings)
 {
-    StartupSettings settings;
-    if (!loadSettings(settings))
-        return;
-
-
     Engine::ThreadManager threadManager;
     FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
 
     Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
 
-    std::thread mainThread(std::bind(&runGameLoop, &variables));
+    std::thread mainThread(std::bind(&runGameLoop, &variables, settings));
 
     threadManager.run();
     renderDone = true;
@@ -312,13 +314,13 @@ void run(const bpo::variables_map& variables)
     mainThread.join();
 }
 
-void runGameLoop(const bpo::variables_map& variables)
+void runGameLoop(const bpo::variables_map& variables, StartupSettings& settings)
 {
     FARender::Renderer& renderer = *FARender::Renderer::get();
     Input::InputManager& input = *Input::InputManager::get();
     Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
 
-    DiabloExe::DiabloExe exe;
+    DiabloExe::DiabloExe exe(settings.pathEXE);
 
     if (!exe.isLoaded())
     {

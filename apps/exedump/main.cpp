@@ -6,9 +6,15 @@
 
 int main(int, char**)
 {
-    FAIO::init();
+    Settings::Settings settings;
+    settings.loadUserSettings();
 
-    DiabloExe::DiabloExe exe;
+    std::string pathEXE = settings.get<std::string>("Game", "PathEXE");
+    std::string pathMPQ = settings.get<std::string>("Game", "PathMPQ");
+
+    FAIO::init(pathMPQ);
+
+    DiabloExe::DiabloExe exe(pathEXE);
     std::cout << exe.dump();
 
     FAIO::quit();
