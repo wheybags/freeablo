@@ -299,6 +299,7 @@ namespace Engine
         }
 
         renderer.stop();
+        renderer.waitUntilDone();
 
         for(size_t i = 0; i < levels.size(); i++)
         {
