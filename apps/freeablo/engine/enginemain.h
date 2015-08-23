@@ -26,8 +26,8 @@ namespace Engine
     {
         public:
         //private:
-            void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world, Level::Level* level);
-            Level::Level* getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe);
+            void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world);
+            std::vector<Level::Level> getLevels(const DiabloExe::DiabloExe& exe);
             void playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager);
 
             void run(const boost::program_options::variables_map& variables);

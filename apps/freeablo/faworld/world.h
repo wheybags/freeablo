@@ -26,11 +26,14 @@ namespace FAWorld
     class World
     {
         public:
-            World();
+            World(const DiabloExe::DiabloExe& exe);
             ~World();
 
-            void setLevel(Level::Level& level, const DiabloExe::DiabloExe& exe);
-            void addNpcs(const DiabloExe::DiabloExe& exe);
+            void generateLevels();
+
+            Level::Level* getCurrentLevel();
+            void setLevel(size_t levelnum);
+            void addNpcs();
 
             Actor* getActorAt(size_t x, size_t y);
 
@@ -48,11 +51,14 @@ namespace FAWorld
 
             std::vector<Actor*> mActors;
 
-            Level::Level* mLevel;
+            std::vector<Level::Level> mLevels;
+            Level::Level* mCurrentLevel;
             std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Contains NULL where no Actor is present.
                                                                         ///< Where an actor straddles two squares, they shall be placed in both.
             Player* mPlayer;
             size_t mTicksSinceLastAnimUpdate;
+
+            const DiabloExe::DiabloExe& mDiabloExe;
     };
 }
 

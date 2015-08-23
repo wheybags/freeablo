@@ -56,9 +56,8 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
         bpo::notify(variables);
 
         const int32_t dLvl = variables["level"].as<int32_t>();
-        if(dLvl > 16)
-            throw bpo::validation_error(
-                bpo::validation_error::invalid_option_value, "level");
+        if(dLvl > 12)
+            throw bpo::error("level > 12 not implemented");
     }
     catch(bpo::error& e)
     {

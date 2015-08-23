@@ -22,38 +22,25 @@ namespace Engine
 {
     volatile bool renderDone = false;
 
-
-    void EngineMain::setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world, Level::Level* level)
+    std::vector<Level::Level> EngineMain::getLevels(const DiabloExe::DiabloExe& exe)
     {
-        world.clear();
-        world.setLevel(*level, exe);
+        std::vector<Level::Level> levels;
 
-        if(dLvl == 0)
-            world.addNpcs(exe);
-    }
+        Level::Dun sector1("levels/towndata/sector1s.dun");
+        Level::Dun sector2("levels/towndata/sector2s.dun");
+        Level::Dun sector3("levels/towndata/sector3s.dun");
+        Level::Dun sector4("levels/towndata/sector4s.dun");
 
-    Level::Level* EngineMain::getLevel(size_t dLvl, const DiabloExe::DiabloExe& exe)
-    {
-        if(dLvl == 0)
-        {
-            Level::Dun sector1("levels/towndata/sector1s.dun");
-            Level::Dun sector2("levels/towndata/sector2s.dun");
-            Level::Dun sector3("levels/towndata/sector3s.dun");
-            Level::Dun sector4("levels/towndata/sector4s.dun");
+        levels.push_back(Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
+            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>()));
 
-            return new Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
-                "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>());
-        }
-        else if(dLvl < 13)
+
+        for(size_t i = 1; i < 13; i++)
         {
-            return FALevelGen::generate(100, 100, dLvl, exe);
+            levels.push_back(FALevelGen::generate(100, 100, i, exe));
         }
-        else
-        {
-            std::cerr << "level not supported yet" << std::endl;
-            exit(1);
-            return NULL;
-        }
+
+        return levels;
     }
 
 
@@ -114,6 +101,8 @@ namespace Engine
 
     void EngineMain::runGameLoop(const bpo::variables_map& variables)
     {
+        FALevelGen::FAsrand(time(NULL));
+
         FARender::Renderer& renderer = *FARender::Renderer::get();
         Input::InputManager& input = *Input::InputManager::get();
         Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
@@ -130,15 +119,12 @@ namespace Engine
         itemManager.loadItems(&exe);
 
 
-        FAWorld::World world;
+        FAWorld::World world(exe);
+        world.generateLevels();
 
-        FALevelGen::FAsrand(time(NULL));
-
-        std::vector<Level::Level*> levels(13);
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 
-        Level::Level* level = NULL;
         FARender::Tileset tileset;
 
         FAWorld::Player* player = world.getPlayer();
@@ -148,18 +134,11 @@ namespace Engine
         // -1 represents the main menu
         if(currentLevel != -1)
         {
-            if(!(level = getLevel(currentLevel, exe)))
-            {
-                Engine::done = true;
-            }
-            else
-            {
-                tileset = renderer.getTileset(*level);
-                levels[currentLevel] = level;
-                setLevel(currentLevel, exe, world, level);
-            }
+            world.setLevel(currentLevel);
+            Level::Level& level = *world.getCurrentLevel();
+            tileset = renderer.getTileset(level);
 
-            player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+            player->mPos = FAWorld::Position(level.upStairsPos().first, level.upStairsPos().second);
 
             FAGui::showIngameGui();
 
@@ -184,7 +163,7 @@ namespace Engine
         // Main game logic loop
         while(!Engine::done)
         {
-
+            Level::Level* level = world.getCurrentLevel();
             input.processInput(Engine::paused);
 
             boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
@@ -196,7 +175,6 @@ namespace Engine
             }
 
             last = now;
-
 
             if(!Engine::paused)
             {
@@ -212,14 +190,11 @@ namespace Engine
                 if(Engine::changeLevel)
                 {
                     int32_t tmp = currentLevel + Engine::changeLevel;
-                    if(tmp >= 0 && tmp < (int32_t)levels.size())
+                    if(tmp >= 0 && tmp < 13)//(int32_t)levels.size())
                     {
                         currentLevel = tmp;
-
-                        if(levels[currentLevel] == NULL)
-                            levels[currentLevel] = getLevel(currentLevel, exe);
-
-                        level = levels[currentLevel];
+                        world.setLevel(currentLevel);
+                        level = world.getCurrentLevel();
 
                         if(Engine::changeLevel == -1)
                             player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
@@ -228,7 +203,6 @@ namespace Engine
 
                         destination = player->mPos.current();
 
-                        setLevel(currentLevel, exe, world, level);
                         tileset = renderer.getTileset(*level);
                         playLevelMusic(currentLevel, threadManager);
                     }
@@ -300,11 +274,5 @@ namespace Engine
 
         renderer.stop();
         renderer.waitUntilDone();
-
-        for(size_t i = 0; i < levels.size(); i++)
-        {
-            if(levels[i])
-                delete levels[i];
-        }
     }
 }

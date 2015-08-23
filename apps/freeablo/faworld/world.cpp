@@ -5,17 +5,18 @@
 #include <boost/tuple/tuple.hpp>
 
 #include "../farender/renderer.h"
+#include "../falevelgen/levelgen.h"
 
 #include "monster.h"
 
 namespace FAWorld
 {
-    World::World()
+    World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
     {
         mPlayer = new Player();
         mActors.push_back(mPlayer);
         mTicksSinceLastAnimUpdate = 0;
-        mLevel = NULL;
+        mCurrentLevel = NULL;
     }
 
     World::~World()
@@ -23,26 +24,53 @@ namespace FAWorld
         for(size_t i = 0; i < mActors.size(); i++)
             delete mActors[i];
     }
-    
-    void World::setLevel(Level::Level& level, const DiabloExe::DiabloExe& exe)
+
+    void World::generateLevels()
     {
-        const std::vector<Level::Monster>& monsters = level.getMonsters();
+        Level::Dun sector1("levels/towndata/sector1s.dun");
+        Level::Dun sector2("levels/towndata/sector2s.dun");
+        Level::Dun sector3("levels/towndata/sector3s.dun");
+        Level::Dun sector4("levels/towndata/sector4s.dun");
+
+        mLevels.push_back(Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
+            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>()));
+
+
+        for(size_t i = 1; i < 13; i++)
+        {
+            mLevels.push_back(FALevelGen::generate(100, 100, i, mDiabloExe));
+        }
+    }
+
+    Level::Level* World::getCurrentLevel()
+    {
+        return mCurrentLevel;
+    }
+    
+    void World::setLevel(size_t levelNum)
+    {
+        clear();
+
+        mCurrentLevel = &mLevels[levelNum];
+
+        const std::vector<Level::Monster>& monsters = mCurrentLevel->getMonsters();
 
         for(size_t i = 0; i < monsters.size(); i++)
-            mActors.push_back(new Monster(exe.getMonster(monsters[i].name), Position(monsters[i].xPos, monsters[i].yPos)));
-
-        mLevel = &level;
+            mActors.push_back(new Monster(mDiabloExe.getMonster(monsters[i].name), Position(monsters[i].xPos, monsters[i].yPos)));
 
         actorMapClear();
 
         // insert actors into 2d map
         for(size_t i = 0; i < mActors.size(); i++)
-            actorMapInsert(mActors[i]);    
+            actorMapInsert(mActors[i]);
+
+        if(levelNum == 0)
+            addNpcs();
     }
 
-    void World::addNpcs(const DiabloExe::DiabloExe& exe)
+    void World::addNpcs()
     {
-        const std::vector<const DiabloExe::Npc*> npcs = exe.getNpcs();
+        const std::vector<const DiabloExe::Npc*> npcs = mDiabloExe.getNpcs();
 
         for(size_t i = 0; i < npcs.size(); i++)
         {
