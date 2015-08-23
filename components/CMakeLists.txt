@@ -101,3 +101,12 @@ add_library(Settings
 )
 target_link_libraries(Settings ${Boost_Libraries})
 set_target_properties(Settings PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_library(Script
+    script/scriptcontext.h
+    script/scriptcontext.cpp
+    script/commandtranslator.h
+    script/commandtranslator.cpp
+)
+target_link_libraries(Script ${Boost_Libraries}  ${PYTHON_LIBRARIES})
+set_target_properties(Script PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

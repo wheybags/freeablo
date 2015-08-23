@@ -35,6 +35,10 @@ add_executable(freeablo
     fagui/animateddecorator.cpp
     fagui/animateddecoratorinstancer.h
     fagui/animateddecoratorinstancer.cpp
+    fagui/console.h
+    fagui/console.cpp
+    fagui/commandhistory.h
+    fagui/commandhistory.cpp
 
     engine/threadmanager.h
     engine/threadmanager.cpp
