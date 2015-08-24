@@ -60,7 +60,7 @@ namespace FARender
         public:
             static Renderer* get();
             
-            Renderer(int32_t windowWidth, int32_t windowHeight);
+            Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen);
             ~Renderer();
 
             void stop();
