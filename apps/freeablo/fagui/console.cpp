@@ -1,5 +1,8 @@
 #include "console.h"
 
+#include <boost/algorithm/string/find.hpp>
+#include <algorithm>
+
 namespace FAGui
 {
 
@@ -15,8 +18,8 @@ namespace FAGui
         mInput = (Rocket::Controls::ElementFormControlInput*)mDoc->GetElementById("input");
         mInput->AddEventListener("keydown", this);
 
-        for(int i = 0 ; i < MAX_VISIBLE_COMMANDS ; i++)
-            insertCommandToHistory("");
+        //for(int i = 0 ; i < MAX_VISIBLE_COMMANDS ; i++)
+        //    insertCommandToHistory("");
     }
 
     void Console::toggle()
@@ -74,13 +77,13 @@ namespace FAGui
         std::string result = scriptContext.exec(command);
 
         if(!result.empty())
-            insertCommandToVisibleArea(result);
+            insertOutputToVisibleArea(result);
     }
 
     void Console::insertCommandToHistory(const std::string& command)
     {
         insertCommandToContainers(command);
-        removeFirstVisibleCommandIfFull();
+        removeVisibleCommandsIfFull();
     }
 
     void Console::insertCommandToContainers(const std::string& command)
@@ -90,29 +93,45 @@ namespace FAGui
             mCommandHistory.push(command);
         }
 
-        insertCommandToVisibleArea(command);
+        insertCommandToVisibleArea(command,true);
     }
 
-    void Console::insertCommandToVisibleArea(const std::string& command)
+    void Console::insertCommandToVisibleArea(const std::string& command, bool addNewLine)
     {
-        Rocket::Core::Element * span = mDoc->CreateElement("span");
-        Rocket::Core::ElementText * text = mDoc->CreateTextNode(command.c_str());
-        span->AppendChild(text);
-        mDoc->GetElementById("console")->AppendChild(span);
+        std::string oldValue = mDoc->GetElementById("console")->GetAttribute< Rocket::Core::String >("value", "").CString();
+        std::string newValue = std::string(oldValue) + command + (addNewLine ? "\n" : "");
 
+        mDoc->GetElementById("console")->SetAttribute<const char*>("value", newValue.c_str());
         mVisibleCommands.push(command);
-        mVisibleCommandsElements.push(span);
 
-        removeFirstVisibleCommandIfFull();
+        removeVisibleCommandsIfFull();
     }
 
-    void Console::removeFirstVisibleCommandIfFull()
+    void Console::insertOutputToVisibleArea(const std::string &command)
     {
-        if(mVisibleCommands.size() > MAX_VISIBLE_COMMANDS)
+        insertCommandToVisibleArea(command, false);
+    }
+
+    void Console::removeVisibleCommandsIfFull()
+    {
+        std::string oldValue = mDoc->GetElementById("console")->GetAttribute< Rocket::Core::String >("value", "").CString();
+        size_t n = std::count(oldValue.begin(), oldValue.end(), '\n');
+        size_t nRowsToRemove = n - MAX_VISIBLE_COMMANDS;
+
+        if(n > MAX_VISIBLE_COMMANDS)
         {
-            mVisibleCommands.pop();
-            mDoc->GetElementById("console")->RemoveChild(mVisibleCommandsElements.front());
-            mVisibleCommandsElements.pop();
+            size_t cnt = 0;
+            size_t i = 0;
+            while(i < oldValue.size() && cnt < nRowsToRemove)
+            {
+                i++;
+                if(oldValue[i] == '\n')
+                    cnt++;
+            }
+
+            std::string newValue = std::string(oldValue.begin() + i, oldValue.end());
+
+            mDoc->GetElementById("console")->SetAttribute<const char*>("value", newValue.c_str());
         }
     }
 

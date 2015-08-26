@@ -16,7 +16,7 @@
                 display:block;
             }
 
-            .console
+            #console
             {
                 color: white;
                 display:block;
@@ -41,8 +41,10 @@ import docmanage
 
     <body onkeydown="docmanage.manager.onKeyDown(event)">
         <div style="position:absolute; left: 10px;" onmousedown="document.GetElementById('input').Focus();">
-            <div class="console" id="console">
-            </div>
+            <form disabled=1>            
+                <textarea disabled=1 id="console" rows=36 cols=2000 ></textarea>
+            </form>
+
             <div style="display:block;">
                 <span style="position:absolute; top:580px;">>>> </span>
                 <form style="position:absolute; top:580px; left: 30px;">	    

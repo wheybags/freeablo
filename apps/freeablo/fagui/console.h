@@ -32,8 +32,9 @@ private:
     void submitCommand();
     void insertCommandToHistory(const std::string & value);
     void insertCommandToContainers(const std::string &command);
-    void insertCommandToVisibleArea(const std::string& command);
-    void removeFirstVisibleCommandIfFull();
+    void insertCommandToVisibleArea(const std::string& command, bool addNewLine);
+    void insertOutputToVisibleArea(const std::string& command);
+    void removeVisibleCommandsIfFull();
     void setInput(const std::string & value);
     std::string getInput();
 
