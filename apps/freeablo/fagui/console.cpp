@@ -17,9 +17,6 @@ namespace FAGui
         mDoc = ctx->LoadDocument("resources/gui/console.rml");
         mInput = (Rocket::Controls::ElementFormControlInput*)mDoc->GetElementById("input");
         mInput->AddEventListener("keydown", this);
-
-        //for(int i = 0 ; i < MAX_VISIBLE_COMMANDS ; i++)
-        //    insertCommandToHistory("");
     }
 
     void Console::toggle()
