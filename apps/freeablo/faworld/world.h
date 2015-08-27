@@ -29,6 +29,8 @@ namespace FAWorld
             World(const DiabloExe::DiabloExe& exe);
             ~World();
 
+            static World* get();
+
             void generateLevels();
 
             Level::Level* getCurrentLevel();

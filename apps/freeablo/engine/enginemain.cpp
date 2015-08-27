@@ -6,6 +6,7 @@
 #include "../falevelgen/levelgen.h"
 #include "../falevelgen/random.h"
 #include "../fagui/guimanager.h"
+#include "../faaudio/audiomanager.h"
 #include "threadmanager.h"
 #include "input.h"
 
@@ -22,60 +23,11 @@ namespace Engine
 {
     volatile bool renderDone = false;
 
-    std::vector<Level::Level> EngineMain::getLevels(const DiabloExe::DiabloExe& exe)
+    EngineMain::~EngineMain()
     {
-        std::vector<Level::Level> levels;
-
-        Level::Dun sector1("levels/towndata/sector1s.dun");
-        Level::Dun sector2("levels/towndata/sector2s.dun");
-        Level::Dun sector3("levels/towndata/sector3s.dun");
-        Level::Dun sector4("levels/towndata/sector4s.dun");
-
-        levels.push_back(Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
-            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>()));
-
-
-        for(size_t i = 1; i < 13; i++)
-        {
-            levels.push_back(FALevelGen::generate(100, 100, i, exe));
-        }
-
-        return levels;
+        if(mInputManager != NULL)
+            delete mInputManager;
     }
-
-
-    void EngineMain::playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager)
-    {
-        switch(currentLevel)
-        {
-            case 0:
-            {
-                threadManager.playMusic("music/dtowne.wav");
-                break;
-            }
-            case 1: case 2: case 3: case 4:
-            {
-                threadManager.playMusic("music/dlvla.wav");
-                break;
-            }
-            case 5: case 6: case 7: case 8:
-            {
-                threadManager.playMusic("music/dlvlb.wav");
-                break;
-            }
-            case 9: case 10: case 11: case 12:
-            {
-                threadManager.playMusic("music/dlvlc.wav");
-                break;
-            }
-            case 13: case 14: case 15: case 16:
-            {
-                threadManager.playMusic("music/dlvld.wav");
-                break;
-            }
-        }
-    }
-
 
     void EngineMain::run(const bpo::variables_map& variables)
     {
@@ -89,7 +41,7 @@ namespace Engine
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(resolutionWidth, resolutionHeight);
 
-        Input::InputManager input(&Engine::keyPress, NULL, &Engine::mouseClick, &Engine::mouseRelease, &Engine::mouseMove, renderer.getRocketContext());
+        mInputManager = new EngineInputManager();
 
         boost::thread mainThread(boost::bind(&EngineMain::runGameLoop, this, &variables));
 
@@ -125,8 +77,6 @@ namespace Engine
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 
-        FARender::Tileset tileset;
-
         FAWorld::Player* player = world.getPlayer();
 
         FAGui::initGui(player->mInventory);
@@ -136,13 +86,10 @@ namespace Engine
         {
             world.setLevel(currentLevel);
             Level::Level& level = *world.getCurrentLevel();
-            tileset = renderer.getTileset(level);
 
             player->mPos = FAWorld::Position(level.upStairsPos().first, level.upStairsPos().second);
 
             FAGui::showIngameGui();
-
-            playLevelMusic(currentLevel, threadManager);
         }
         else
         {
@@ -153,8 +100,6 @@ namespace Engine
 
         boost::posix_time::ptime last = boost::posix_time::microsec_clock::local_time();
 
-        std::pair<size_t, size_t> destination = player->mPos.current();
-
         Engine::quit_key = Input::Hotkey("Quit");
         Engine::noclip_key = Input::Hotkey("Noclip");
         Engine::changelvlup_key = Input::Hotkey("Changelvlup");
@@ -163,8 +108,9 @@ namespace Engine
         // Main game logic loop
         while(!Engine::done)
         {
-            Level::Level* level = world.getCurrentLevel();
-            input.processInput(Engine::paused);
+            mInputManager->update(Engine::paused);
+
+            std::pair<size_t, size_t>& destination = player->destination();
 
             boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
 
@@ -176,6 +122,8 @@ namespace Engine
 
             last = now;
 
+            Level::Level* level = world.getCurrentLevel();
+
             if(!Engine::paused)
             {
                 if(Engine::mouseDown)
@@ -185,29 +133,6 @@ namespace Engine
                         level->activate(destination.first, destination.second);
 
                     Engine::click = false;
-                }
-
-                if(Engine::changeLevel)
-                {
-                    int32_t tmp = currentLevel + Engine::changeLevel;
-                    if(tmp >= 0 && tmp < 13)//(int32_t)levels.size())
-                    {
-                        currentLevel = tmp;
-                        world.setLevel(currentLevel);
-                        level = world.getCurrentLevel();
-
-                        if(Engine::changeLevel == -1)
-                            player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
-                        else
-                            player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
-
-                        destination = player->mPos.current();
-
-                        tileset = renderer.getTileset(*level);
-                        playLevelMusic(currentLevel, threadManager);
-                    }
-
-                    Engine::changeLevel = 0;
                 }
 
                 if(player->mPos.current() != destination)
@@ -251,7 +176,9 @@ namespace Engine
             if(state)
             {
                 state->mPos = player->mPos;
-                state->tileset = tileset;
+                if(level != NULL)
+                    state->tileset = renderer.getTileset(*level);;
+
                 state->level = level;
                 if(!FAGui::cursorPath.empty())
                     state->mCursorEmpty = false;

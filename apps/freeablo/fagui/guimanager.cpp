@@ -16,6 +16,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "../engine/input.h"
+#include "../faworld/world.h"
 
 #include "input/hotkey.h"
 
@@ -43,7 +44,13 @@ void unpauseGame()
 
 void startGame()
 {
-    Engine::changeLevel = 1;
+    auto world = FAWorld::World::get();
+    world->setLevel(0);
+    auto level = world->getCurrentLevel();
+    auto player = world->getPlayer();
+
+    player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+
     Engine::paused = false;
     showIngameGui();
 }

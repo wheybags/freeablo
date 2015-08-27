@@ -6,13 +6,20 @@
 
 #include "../farender/renderer.h"
 #include "../falevelgen/levelgen.h"
+#include "../faaudio/audiomanager.h"
+#include "../engine/threadmanager.h"
 
 #include "monster.h"
 
 namespace FAWorld
 {
+    World* singletonInstance = NULL;
+
     World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
     {
+        assert(singletonInstance == NULL);
+        singletonInstance = this;
+
         mPlayer = new Player();
         mActors.push_back(mPlayer);
         mTicksSinceLastAnimUpdate = 0;
@@ -25,6 +32,11 @@ namespace FAWorld
             delete mActors[i];
     }
 
+    World* World::get()
+    {
+        return singletonInstance;
+    }
+
     void World::generateLevels()
     {
         Level::Dun sector1("levels/towndata/sector1s.dun");
@@ -33,12 +45,12 @@ namespace FAWorld
         Level::Dun sector4("levels/towndata/sector4s.dun");
 
         mLevels.push_back(Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
-            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>()));
+            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>(), -1, 1));
 
 
-        for(size_t i = 1; i < 13; i++)
+        for(int32_t i = 1; i < 13; i++)
         {
-            mLevels.push_back(FALevelGen::generate(100, 100, i, mDiabloExe));
+            mLevels.push_back(FALevelGen::generate(100, 100, i, mDiabloExe, i-1, i+1));
         }
     }
 
@@ -49,6 +61,9 @@ namespace FAWorld
     
     void World::setLevel(size_t levelNum)
     {
+        if(levelNum >= mLevels.size() || levelNum < 0)
+            return;
+
         clear();
 
         mCurrentLevel = &mLevels[levelNum];
@@ -66,6 +81,8 @@ namespace FAWorld
 
         if(levelNum == 0)
             addNpcs();
+
+        FAAudio::AudioManager::playLevelMusic(levelNum, *Engine::ThreadManager::get());
     }
 
     void World::addNpcs()

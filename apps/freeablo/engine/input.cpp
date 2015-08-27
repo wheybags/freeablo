@@ -1,11 +1,15 @@
 #include "input.h"
 
+#include <boost/bind.hpp>
+
+#include "../farender/renderer.h"
+#include "../faworld/world.h"
+
 namespace Engine
 {
     bool done = false;
     bool paused = false;
     bool noclip = false;
-    int changeLevel = 0;
 
     size_t xClick = 0, yClick = 0;
     bool mouseDown = false;
@@ -16,7 +20,16 @@ namespace Engine
     Input::Hotkey changelvldwn_key;
     Input::Hotkey changelvlup_key;
 
-    void keyPress(Input::Key key)
+    EngineInputManager::EngineInputManager():
+        mInput( boost::bind(&EngineInputManager::keyPress,this, _1),
+                NULL,
+                boost::bind(&EngineInputManager::mouseClick, this, _1, _2, _3),
+                boost::bind(&EngineInputManager::mouseRelease, this, _1, _2, _3),
+                boost::bind(&EngineInputManager::mouseMove, this, _1, _2),
+                FARender::Renderer::get()->getRocketContext())
+    { }
+
+    void EngineInputManager::keyPress(Input::Key key)
     {
         switch(key)
         {
@@ -57,29 +70,36 @@ namespace Engine
         if (hotkey == quit_key)
         {
             done = true;
-            return;
         }
-
-        if (hotkey == noclip_key)
+        else if (hotkey == noclip_key)
         {
             noclip = !noclip;
-            return;
         }
-
-        if (hotkey == changelvlup_key)
+        else if (hotkey == changelvlup_key || hotkey == changelvldwn_key)
         {
-            changeLevel = -1;
-            return;
-        }
+            FAWorld::World* world = FAWorld::World::get();
+            size_t nextLevelIndex;
+            if(hotkey == changelvlup_key)
+                nextLevelIndex = world->getCurrentLevel()->getPreviousLevel();
+            else
+                nextLevelIndex = world->getCurrentLevel()->getNextLevel();
 
-        if (hotkey == changelvldwn_key)
-        {
-            changeLevel = 1;
-            return;
+            world->setLevel(nextLevelIndex);
+
+            Level::Level* level = world->getCurrentLevel();
+            FAWorld::Player* player = world->getPlayer();
+
+            if(hotkey == changelvlup_key)
+                player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
+            else
+                player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+
+
+            player->destination() = player->mPos.current();
         }
     }
 
-    void mouseClick(size_t x, size_t y, Input::Key key)
+    void EngineInputManager::mouseClick(size_t x, size_t y, Input::Key key)
     {
         if(key == Input::KEY_LEFT_MOUSE)
         {
@@ -90,15 +110,20 @@ namespace Engine
         }
     }
 
-    void mouseRelease(size_t, size_t, Input::Key key)
+    void EngineInputManager::mouseRelease(size_t, size_t, Input::Key key)
     {
         if(key == Input::KEY_LEFT_MOUSE)
             mouseDown = false;
     }
 
-    void mouseMove(size_t x, size_t y)
+    void EngineInputManager::mouseMove(size_t x, size_t y)
     {
         xClick = x;
         yClick = y;
+    }
+
+    void EngineInputManager::update(bool paused)
+    {
+        mInput.processInput(paused);
     }
 }

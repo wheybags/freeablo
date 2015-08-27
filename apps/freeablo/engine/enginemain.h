@@ -20,18 +20,19 @@ namespace DiabloExe
 
 namespace Engine
 {
-    class ThreadManager;
+    class EngineInputManager;
 
     class EngineMain
     {
         public:
-        //private:
-            void setLevel(size_t dLvl, const DiabloExe::DiabloExe& exe, FAWorld::World& world);
-            std::vector<Level::Level> getLevels(const DiabloExe::DiabloExe& exe);
-            void playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager);
+            ~EngineMain();
 
             void run(const boost::program_options::variables_map& variables);
+
+        private:
             void runGameLoop(const boost::program_options::variables_map& variables);
+
+            EngineInputManager* mInputManager = NULL;
     };
 }
 
