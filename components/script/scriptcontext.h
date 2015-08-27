@@ -12,6 +12,7 @@ class ScriptContext
 {
 public:
     static ScriptContext & getInstance();
+    CommandTranslator & getTranslator() { return mCommandTranslator; }
     std::string exec(const std::string& command);
 
 private:

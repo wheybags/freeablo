@@ -37,6 +37,9 @@ private:
     void removeVisibleCommandsIfFull();
     void setInput(const std::string & value);
     std::string getInput();
+    void setConsoleOutput(const std::string & value);
+    std::string getConsoleOutput();
+
 
     void showPreviousCommandInInput();
     void showNextCommandInInput();

@@ -9,13 +9,9 @@ namespace Script
 
 using namespace boost;
 
-CommandTranslator::CommandTranslator()
+void CommandTranslator::addTranslation(const std::string & key, const std::string & value)
 {
-    mTranslationMap["quit"] = "freeablo.quit";
-    mTranslationMap["pause"] = "freeablo.pause";
-    mTranslationMap["unpause"] = "freeablo.unpause";
-    mTranslationMap["save"] = "freeablo.saveGame";
-    mTranslationMap["load"] = "freeablo.loadGame";
+    mTranslationMap[key] = value;
 }
 
 std::string CommandTranslator::translate(const std::string & command)

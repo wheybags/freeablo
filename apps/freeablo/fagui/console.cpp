@@ -17,6 +17,13 @@ namespace FAGui
         mDoc = ctx->LoadDocument("resources/gui/console.rml");
         mInput = (Rocket::Controls::ElementFormControlInput*)mDoc->GetElementById("input");
         mInput->AddEventListener("keydown", this);
+
+        Script::ScriptContext & scriptContext = Script::ScriptContext::getInstance();
+        scriptContext.getTranslator().addTranslation("quit","freeablo.quit");
+        scriptContext.getTranslator().addTranslation("pause","freeablo.pause");
+        scriptContext.getTranslator().addTranslation("unpause","freeablo.unpause");
+        scriptContext.getTranslator().addTranslation("save","freeablo.saveGame");
+        scriptContext.getTranslator().addTranslation("load","freeablo.loadGame");
     }
 
     void Console::toggle()
@@ -98,7 +105,7 @@ namespace FAGui
         std::string oldValue = mDoc->GetElementById("console")->GetAttribute< Rocket::Core::String >("value", "").CString();
         std::string newValue = std::string(oldValue) + command + (addNewLine ? "\n" : "");
 
-        mDoc->GetElementById("console")->SetAttribute<const char*>("value", newValue.c_str());
+        setConsoleOutput(newValue);
         mVisibleCommands.push(command);
 
         removeVisibleCommandsIfFull();
@@ -111,24 +118,24 @@ namespace FAGui
 
     void Console::removeVisibleCommandsIfFull()
     {
-        std::string oldValue = mDoc->GetElementById("console")->GetAttribute< Rocket::Core::String >("value", "").CString();
+        std::string oldValue = getConsoleOutput();
         size_t n = std::count(oldValue.begin(), oldValue.end(), '\n');
         size_t nRowsToRemove = n - MAX_VISIBLE_COMMANDS;
 
         if(n > MAX_VISIBLE_COMMANDS)
         {
-            size_t cnt = 0;
+            size_t counter = 0;
             size_t i = 0;
-            while(i < oldValue.size() && cnt < nRowsToRemove)
+            size_t size = oldValue.size();
+            while(i < size && counter < nRowsToRemove)
             {
                 i++;
                 if(oldValue[i] == '\n')
-                    cnt++;
+                    counter++;
             }
 
             std::string newValue = std::string(oldValue.begin() + i, oldValue.end());
-
-            mDoc->GetElementById("console")->SetAttribute<const char*>("value", newValue.c_str());
+            setConsoleOutput(newValue);
         }
     }
 
@@ -140,6 +147,16 @@ namespace FAGui
     std::string Console::getInput()
     {
         return mInput->GetValue().CString();
+    }
+
+    void Console::setConsoleOutput(const std::string & value)
+    {
+        mDoc->GetElementById("console")->SetAttribute<const char*>("value", value.c_str());
+    }
+
+    std::string Console::getConsoleOutput()
+    {
+        return mDoc->GetElementById("console")->GetAttribute< Rocket::Core::String >("value", "").CString();
     }
 
     void Console::showPreviousCommandInInput()

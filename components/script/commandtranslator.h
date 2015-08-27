@@ -10,7 +10,7 @@ namespace Script
 class CommandTranslator
 {
 public:
-    CommandTranslator();
+    void addTranslation(const std::string & key, const std::string & value);
     std::string translate(const std::string & command);
 
 private:
