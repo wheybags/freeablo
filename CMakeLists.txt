@@ -99,6 +99,7 @@ link_libraries (
     StormLib
     Audio
     Settings
+    Script
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

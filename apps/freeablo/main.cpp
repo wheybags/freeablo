@@ -30,6 +30,8 @@
 
 #include <input/hotkey.h>
 
+#include "fagui/console.h"
+
 namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 namespace bpt = boost::property_tree;
@@ -42,14 +44,18 @@ bool saveGameNow = false;
 bool loadGameNow = false;
 int changeLevel = 0;
 int currentLevel = 0;
+bool toggleConsole = false;
 
 Input::Hotkey quit_key;
 Input::Hotkey noclip_key;
 Input::Hotkey changelvldwn_key;
 Input::Hotkey changelvlup_key;
+Input::Hotkey toggleconsole_key;
 
 void keyPress(Input::Key key)
 {
+    static FAGui::Console & console = FAGui::Console::getInstance(0);
+
     switch(key)
     {
         case Input::KEY_RSHIFT:;
@@ -85,6 +91,15 @@ void keyPress(Input::Key key)
         case 6: hotkey.alt = true; hotkey.shift = true; break;
         case 7: hotkey.ctrl = true; hotkey.alt = true; hotkey.shift = true; break;
     }
+
+    if(hotkey == toggleconsole_key)
+    {
+        toggleConsole = true;
+        return;
+    }
+
+    if(console.isVisible())
+        return;
     
     if (hotkey == quit_key)
     {
@@ -382,7 +397,8 @@ void runGameLoop(const bpo::variables_map& variables, StartupSettings& settings)
     noclip_key = Input::Hotkey("Noclip");
     changelvlup_key = Input::Hotkey("Changelvlup");
     changelvldwn_key = Input::Hotkey("Changelvldwn");
-    
+    toggleconsole_key = Input::Hotkey("ToggleConsole");
+    FAGui::Console & console = FAGui::Console::getInstance(renderer.getRocketContext());
     // Main game logic loop
     while(!done)
     {
@@ -398,6 +414,12 @@ void runGameLoop(const bpo::variables_map& variables, StartupSettings& settings)
         }
 
         last = now;
+
+        if(toggleConsole)
+        {
+            console.toggle();
+            toggleConsole = false;
+        }
 
         
         if(!paused)
