@@ -234,6 +234,7 @@ struct StartupSettings
     size_t resolutionHeight;
     std::string pathEXE;
     std::string pathMPQ;
+    bool fullscreen;
 };
 
 /**
@@ -249,6 +250,7 @@ bool loadSettings(StartupSettings& startupSettings)
     startupSettings.pathEXE = settings.get<std::string>("Game","PathEXE");
     startupSettings.resolutionWidth = settings.get<size_t>("Display","resolutionWidth");
     startupSettings.resolutionHeight = settings.get<size_t>("Display","resolutionHeight");
+    startupSettings.fullscreen = settings.get<bool>("Display","fullscreen");
 
     return true;
 }
@@ -317,7 +319,7 @@ int main(int argc, char** argv)
 void run(const bpo::variables_map& variables, StartupSettings& settings)
 {
     Engine::ThreadManager threadManager;
-    FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight);
+    FARender::Renderer renderer(settings.resolutionWidth, settings.resolutionHeight, settings.fullscreen);
 
     Input::InputManager input(&keyPress, NULL, &mouseClick, &mouseRelease, &mouseMove, renderer.getRocketContext());
 

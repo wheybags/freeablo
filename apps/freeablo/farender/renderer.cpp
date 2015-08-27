@@ -22,7 +22,7 @@ namespace FARender
     }
                                   
 
-    Renderer::Renderer(int32_t windowWidth, int32_t windowHeight)
+    Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen)
         :mDone(false)
         ,mRocketContext(NULL)
         ,mSpriteManager(1024)
@@ -34,6 +34,7 @@ namespace FARender
             Render::RenderSettings settings;
             settings.windowWidth = windowWidth;
             settings.windowHeight = windowHeight;
+            settings.fullscreen = fullscreen;
 
             Render::init(settings);
             
