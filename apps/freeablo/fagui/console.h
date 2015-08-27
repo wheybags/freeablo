@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "commandhistory.h"
+#include "autocomplete.h"
 #include <script/scriptcontext.h>
 
 namespace FAGui
@@ -43,6 +44,7 @@ private:
 
     void showPreviousCommandInInput();
     void showNextCommandInInput();
+    void autoComplete();
 
     static const int MAX_VISIBLE_COMMANDS = 36;
 
@@ -52,6 +54,8 @@ private:
     std::queue<std::string> mVisibleCommands;
     std::queue<Rocket::Core::Element*> mVisibleCommandsElements;
     CommandHistory mCommandHistory;
+    AutoComplete mAutoComplete;
+    std::string mLastPrefix;
 };
 
 }

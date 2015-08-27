@@ -737,7 +737,7 @@ namespace Input
 
                             // Hack for moving cursor on the end of the text in input in librocket
                             // Default behaviour sets cursor on the start of input
-                            if(event.vals.key == SDLK_UP)
+                            if(event.vals.key == SDLK_UP || event.vals.key == SDLK_TAB)
                             {
                                 mContext->ProcessKeyDown(rocketTranslateKey(SDLK_END), getRocketModifiers(mModifiers));
                             }
