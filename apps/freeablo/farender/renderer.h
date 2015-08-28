@@ -7,9 +7,8 @@
 #include <map>
 #include <condition_variable>
 #include <mutex>
-
-#include <boost/atomic.hpp>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
+#include <atomic>
 
 #include <render/render.h>
 
@@ -39,11 +38,11 @@ namespace FARender
     {
         public:
 
-        boost::atomic<bool> ready;
+        std::atomic_bool ready;
 
         FAWorld::Position mPos;
-        
-        std::vector<boost::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
+
+        std::vector<std::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
 
         std::vector<DrawCommand> guiDrawBuffer;
 
@@ -64,7 +63,7 @@ namespace FARender
         public:
             static Renderer* get();
             
-            Renderer(int32_t windowWidth, int32_t windowHeight);
+            Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen);
             ~Renderer();
 
             void stop();
@@ -94,7 +93,7 @@ namespace FARender
 
             static Renderer* mRenderer; ///< Singleton instance
 
-            boost::atomic<bool> mDone;
+            std::atomic_bool mDone;
             Render::LevelObjects mLevelObjects;
 
             RenderState mStates[15];

@@ -1,9 +1,10 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
+
 #include <stdint.h>
 #include <level/item.h>
 #include <diabloexe/diabloexe.h>
-#include <boost/tuple/tuple.hpp>
+
 namespace FAWorld
 {
     class Actor;

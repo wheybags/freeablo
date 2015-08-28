@@ -4,6 +4,8 @@
 
 #include "../farender/renderer.h"
 #include "../faworld/world.h"
+#include "../fagui/console.h"
+#include "../farender/renderer.h"
 
 namespace Engine
 {
@@ -19,6 +21,7 @@ namespace Engine
     Input::Hotkey noclip_key;
     Input::Hotkey changelvldwn_key;
     Input::Hotkey changelvlup_key;
+    Input::Hotkey toggleconsole_key;
 
     EngineInputManager::EngineInputManager():
         mInput( boost::bind(&EngineInputManager::keyPress,this, _1),
@@ -67,35 +70,44 @@ namespace Engine
             case 7: hotkey.ctrl = true; hotkey.alt = true; hotkey.shift = true; break;
         }
 
-        if (hotkey == quit_key)
+        FAGui::Console & console = FAGui::Console::getInstance(FARender::Renderer::get()->getRocketContext());
+
+        if(hotkey == toggleconsole_key)
         {
-            done = true;
+            mToggleConsole = true;;
         }
-        else if (hotkey == noclip_key)
+        else if(!console.isVisible())
         {
-            noclip = !noclip;
-        }
-        else if (hotkey == changelvlup_key || hotkey == changelvldwn_key)
-        {
-            FAWorld::World* world = FAWorld::World::get();
-            size_t nextLevelIndex;
-            if(hotkey == changelvlup_key)
-                nextLevelIndex = world->getCurrentLevel()->getPreviousLevel();
-            else
-                nextLevelIndex = world->getCurrentLevel()->getNextLevel();
+            if (hotkey == quit_key)
+            {
+                done = true;
+            }
+            else if (hotkey == noclip_key)
+            {
+                noclip = !noclip;
+            }
+            else if (hotkey == changelvlup_key || hotkey == changelvldwn_key)
+            {
+                FAWorld::World* world = FAWorld::World::get();
+                size_t nextLevelIndex;
+                if(hotkey == changelvlup_key)
+                    nextLevelIndex = world->getCurrentLevel()->getPreviousLevel();
+                else
+                    nextLevelIndex = world->getCurrentLevel()->getNextLevel();
 
-            world->setLevel(nextLevelIndex);
+                world->setLevel(nextLevelIndex);
 
-            Level::Level* level = world->getCurrentLevel();
-            FAWorld::Player* player = world->getPlayer();
+                Level::Level* level = world->getCurrentLevel();
+                FAWorld::Player* player = world->getPlayer();
 
-            if(hotkey == changelvlup_key)
-                player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
-            else
-                player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+                if(hotkey == changelvlup_key)
+                    player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
+                else
+                    player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 
 
-            player->destination() = player->mPos.current();
+                player->destination() = player->mPos.current();
+            }
         }
     }
 
@@ -125,5 +137,12 @@ namespace Engine
     void EngineInputManager::update(bool paused)
     {
         mInput.processInput(paused);
+
+        if(mToggleConsole)
+        {
+            FAGui::Console & console = FAGui::Console::getInstance(FARender::Renderer::get()->getRocketContext());
+            console.toggle();
+            mToggleConsole = false;
+        }
     }
 }

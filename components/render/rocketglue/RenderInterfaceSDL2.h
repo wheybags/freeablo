@@ -34,7 +34,7 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <render/render.h>
 
@@ -49,9 +49,9 @@ class RocketSDL2Renderer : public Rocket::Core::RenderInterface
    
 public:
 	RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen, 
-        boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
-        boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
-        boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc);
+        std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
+        std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
+        std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc);
 
     void drawBuffer(std::vector<DrawCommand>& buffer, Render::SpriteCacheBase* cache);
 
@@ -80,9 +80,9 @@ private:
 	void EnableScissorRegionImp(bool enable);
 	void SetScissorRegionImp(int x, int y, int width, int height);
 
-    boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> mLoadTextureFunc;
-    boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> mGenerateTextureFunc;
-    boost::function<void(Rocket::Core::TextureHandle)> mReleaseTextureFunc;
+    std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> mLoadTextureFunc;
+    std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> mGenerateTextureFunc;
+    std::function<void(Rocket::Core::TextureHandle)> mReleaseTextureFunc;
 
     SDL_Renderer* mRenderer;
     SDL_Window* mScreen;

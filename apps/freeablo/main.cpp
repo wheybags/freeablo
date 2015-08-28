@@ -1,36 +1,12 @@
-#include <render/render.h>
-#include <input/inputmanager.h>
-#include <level/level.h>
-#include <diabloexe/diabloexe.h>
-#include <misc/misc.h>
+#include <iostream>
 
-#include "engine/threadmanager.h"
-#include "engine/input.h"
-#include "engine/enginemain.h"
-
-#include "falevelgen/levelgen.h"
-#include "falevelgen/random.h"
-
-#include "farender/renderer.h"
-
-#include "faworld/world.h"
-
-#include <level/itemmanager.h>
-
-#include "fagui/guimanager.h"
-
-
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
-#include <fstream>
 
 #include <settings/settings.h>
+#include <faio/faio.h>
 
-#include <input/hotkey.h>
-
+#include "engine/enginemain.h"
 
 namespace bpo = boost::program_options;
 
@@ -72,7 +48,11 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 
 int main(int argc, char** argv)
 {
-    if (!FAIO::init())
+    Settings::Settings settings;
+    if(!settings.loadUserSettings())
+        return EXIT_FAILURE;
+
+    if (!FAIO::init(settings.get<std::string>("Game","PathMPQ")))
     {
         return EXIT_FAILURE;
     }

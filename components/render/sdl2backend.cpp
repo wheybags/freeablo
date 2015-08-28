@@ -42,9 +42,19 @@ namespace Render
     {
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
+        int flags = SDL_WINDOW_OPENGL;
+
+        if (settings.fullscreen)
+        {
+            flags |= SDL_WINDOW_FULLSCREEN;
+        }
+        else
+        {
+            flags |= SDL_WINDOW_RESIZABLE;
+        }
 
         SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-        screen = SDL_CreateWindow("LibRocket SDL2 test", 20, 20, WIDTH, HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+        screen = SDL_CreateWindow("LibRocket SDL2 test", 20, 20, WIDTH, HEIGHT, flags);
         if(screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
 
@@ -85,9 +95,9 @@ namespace Render
         return true;
     }
 
-    Rocket::Core::Context* initGui(boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
-                                   boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
-                                   boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc)
+    Rocket::Core::Context* initGui(std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
+                                   std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
+                                   std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc)
     {
         #ifdef WIN32
             Py_SetPythonHome("Python27");

@@ -44,9 +44,9 @@
 #endif
 
 RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen, 
-        boost::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
-        boost::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
-        boost::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc) :
+        std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
+        std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
+        std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc) :
             mLoadTextureFunc(loadTextureFunc), mGenerateTextureFunc(generateTextureFunc), mReleaseTextureFunc(releaseTextureFunc)
 {
     mRenderer = renderer;

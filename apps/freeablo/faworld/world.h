@@ -34,6 +34,8 @@ namespace FAWorld
             void generateLevels();
 
             Level::Level* getCurrentLevel();
+            size_t getCurrentLevelIndex();
+
             void setLevel(size_t levelnum);
             void addNpcs();
 
@@ -55,6 +57,7 @@ namespace FAWorld
 
             std::vector<Level::Level> mLevels;
             Level::Level* mCurrentLevel;
+            size_t mCurrentLevelIndex;
             std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Contains NULL where no Actor is present.
                                                                         ///< Where an actor straddles two squares, they shall be placed in both.
             Player* mPlayer;

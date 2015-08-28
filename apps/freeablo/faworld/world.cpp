@@ -1,14 +1,11 @@
 #include "world.h"
 
+#include <tuple>
 #include <diabloexe/diabloexe.h>
-
-#include <boost/tuple/tuple.hpp>
-
 #include "../farender/renderer.h"
 #include "../falevelgen/levelgen.h"
 #include "../faaudio/audiomanager.h"
 #include "../engine/threadmanager.h"
-
 #include "monster.h"
 
 namespace FAWorld
@@ -58,6 +55,11 @@ namespace FAWorld
     {
         return mCurrentLevel;
     }
+
+    size_t World::getCurrentLevelIndex()
+    {
+        return mCurrentLevelIndex;
+    }
     
     void World::setLevel(size_t levelNum)
     {
@@ -67,6 +69,7 @@ namespace FAWorld
         clear();
 
         mCurrentLevel = &mLevels[levelNum];
+        mCurrentLevelIndex = levelNum;
 
         const std::vector<Level::Monster>& monsters = mCurrentLevel->getMonsters();
 
@@ -160,7 +163,7 @@ namespace FAWorld
         for(size_t i = 0; i < mActors.size(); i++)
         {
             size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim().animLength;
-            state->mObjects.push_back(boost::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
+            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
         }
     }
 }

@@ -1,13 +1,14 @@
 #include "renderer.h"
 
 #include <assert.h>
-
-#include <boost/thread.hpp>
+#include <thread>
 
 #include <level/level.h>
 #include <input/inputmanager.h>
 #include <audio/audio.h>
 #include <misc/stringops.h>
+#include <functional>
+#include <iostream>
 
 #include "../engine/threadmanager.h"
 
@@ -21,7 +22,7 @@ namespace FARender
     }
                                   
 
-    Renderer::Renderer(int32_t windowWidth, int32_t windowHeight)
+    Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen)
         :mDone(false)
         ,mRocketContext(NULL)
         ,mSpriteManager(1024)
@@ -33,12 +34,13 @@ namespace FARender
             Render::RenderSettings settings;
             settings.windowWidth = windowWidth;
             settings.windowHeight = windowHeight;
+            settings.fullscreen = fullscreen;
 
             Render::init(settings);
             
-            mRocketContext = Render::initGui(boost::bind(&Renderer::loadGuiTextureFunc, this, _1, _2, _3),
-                                             boost::bind(&Renderer::generateGuiTextureFunc, this, _1, _2, _3),
-                                             boost::bind(&Renderer::releaseGuiTextureFunc, this, _1));
+            mRocketContext = Render::initGui(std::bind(&Renderer::loadGuiTextureFunc, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+                                             std::bind(&Renderer::generateGuiTextureFunc, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+                                             std::bind(&Renderer::releaseGuiTextureFunc, this, std::placeholders::_1));
             mRenderer = this;
         }
     }
@@ -204,15 +206,17 @@ namespace FARender
 
                 for(size_t i = 0; i < state->mObjects.size(); i++)
                 {
-                    size_t x = state->mObjects[i].get<2>().current().first;
-                    size_t y = state->mObjects[i].get<2>().current().second;
+                    FAWorld::Position & position = std::get<2>(state->mObjects[i]);
+
+                    size_t x = position.current().first;
+                    size_t y = position.current().second;
 
                     mLevelObjects[x][y].valid = true;
-                    mLevelObjects[x][y].spriteCacheIndex = state->mObjects[i].get<0>().spriteCacheIndex;
-                    mLevelObjects[x][y].spriteFrame = state->mObjects[i].get<1>();
-                    mLevelObjects[x][y].x2 = state->mObjects[i].get<2>().next().first;
-                    mLevelObjects[x][y].y2 = state->mObjects[i].get<2>().next().second;
-                    mLevelObjects[x][y].dist = state->mObjects[i].get<2>().mDist;
+                    mLevelObjects[x][y].spriteCacheIndex = std::get<0>(state->mObjects[i]).spriteCacheIndex;
+                    mLevelObjects[x][y].spriteFrame = std::get<1>(state->mObjects[i]);
+                    mLevelObjects[x][y].x2 = position.next().first;
+                    mLevelObjects[x][y].y2 = position.next().second;
+                    mLevelObjects[x][y].dist = position.mDist;
                 }
 
                 Render::drawLevel(*state->level, state->tileset.minTops.spriteCacheIndex, state->tileset.minBottoms.spriteCacheIndex, &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,

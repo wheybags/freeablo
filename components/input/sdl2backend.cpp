@@ -30,10 +30,10 @@ namespace Input
         boost::python::def("baseClicked", &baseClickedHelper);
     }
 
-    InputManager::InputManager(boost::function<void(Key)> keyPress, boost::function<void(Key)> keyRelease,
-        boost::function<void(uint32_t, uint32_t, Key)> mouseClick,
-        boost::function<void(uint32_t, uint32_t, Key)> mouseRelease,
-        boost::function<void(uint32_t, uint32_t)> mouseMove,
+    InputManager::InputManager(std::function<void(Key)> keyPress, std::function<void(Key)> keyRelease,
+        std::function<void(uint32_t, uint32_t, Key)> mouseClick,
+        std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
+        std::function<void(uint32_t, uint32_t)> mouseMove,
         Rocket::Core::Context* context):
             
             mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
@@ -316,6 +316,41 @@ namespace Input
             retval |= Rocket::Core::Input::KM_ALT;
 
         return retval;
+    }
+
+    int32_t consoleTranslateKey(int32_t key, uint32_t mods)
+    {
+        static const int32_t ASCII_OFFSET = 32;
+
+        if(mods & FAMOD_SHIFT)
+        {
+            switch(key)
+            {
+                case SDLK_0: key = SDLK_RIGHTPAREN; break;
+                case SDLK_1: key = SDLK_EXCLAIM; break;
+                case SDLK_2: key = SDLK_AT; break;
+                case SDLK_3: key = SDLK_HASH; break;
+                case SDLK_4: key = SDLK_DOLLAR; break;
+                case SDLK_5: key = SDLK_PERCENT; break;
+                case SDLK_6: key = SDLK_CARET; break;
+                case SDLK_7: key = SDLK_AMPERSAND; break;
+                case SDLK_8: key = SDLK_ASTERISK; break;
+                case SDLK_9: key = SDLK_LEFTPAREN; break;
+                case SDLK_MINUS: key = SDLK_UNDERSCORE; break;
+                case SDLK_EQUALS: key = SDLK_PLUS; break;
+                case SDLK_SEMICOLON: key = SDLK_COLON; break;
+                case SDLK_COMMA: key = SDLK_LESS; break;
+                case SDLK_STOP: key = SDLK_GREATER; break;
+                case SDLK_QUOTE: key = SDLK_QUOTEDBL; break;
+                case SDLK_SLASH: key = SDLK_QUESTION; break;
+                default: break;
+            }
+
+            if(key >= SDLK_a && key <= SDLK_z)
+                key -= ASCII_OFFSET;
+        }
+
+        return key;
     }
 
     Rocket::Core::Input::KeyIdentifier rocketTranslateKey(int sdlkey)
@@ -688,8 +723,25 @@ namespace Input
                     {
                         if(!paused)
                             mKeyPress(key);
+
                         if(mContext)
+                        {
+                            if(event.vals.key >= 32 && event.vals.key <= 255)
+                            {
+                                // How to convert properly event.vals.key + mModifier to lower/uppercase/chars like !@#$%^...?
+                                int32_t consoleKey = consoleTranslateKey(event.vals.key, mModifiers);
+                                mContext->ProcessTextInput(consoleKey);
+                            }
+
                             mContext->ProcessKeyDown(rocketTranslateKey(event.vals.key), getRocketModifiers(mModifiers));
+
+                            // Hack for moving cursor on the end of the text in input in librocket
+                            // Default behaviour sets cursor on the start of input
+                            if(event.vals.key == SDLK_UP || event.vals.key == SDLK_TAB)
+                            {
+                                mContext->ProcessKeyDown(rocketTranslateKey(SDLK_END), getRocketModifiers(mModifiers));
+                            }
+                        }
                     }
                     break;
                 }

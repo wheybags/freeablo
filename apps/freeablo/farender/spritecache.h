@@ -7,8 +7,7 @@
 #include <string>
 #include <list>
 #include <utility>
-
-#include <boost/atomic.hpp>
+#include <atomic>
 
 #include <render/render.h>
 
@@ -106,7 +105,7 @@ namespace FARender
             std::map<size_t, CacheEntry> mCache;
             std::list<size_t> mUsedList;
 
-            boost::atomic<size_t> mNextCacheIndex;
+            std::atomic<size_t> mNextCacheIndex;
 
             size_t mCurrentSize;
             size_t mMaxSize;

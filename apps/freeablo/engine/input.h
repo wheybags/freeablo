@@ -23,6 +23,7 @@ namespace Engine
     extern Input::Hotkey noclip_key;
     extern Input::Hotkey changelvldwn_key;
     extern Input::Hotkey changelvlup_key;
+    extern Input::Hotkey toggleconsole_key;
 
     class EngineInputManager
     {
@@ -37,6 +38,8 @@ namespace Engine
             void mouseMove(size_t x, size_t y);
 
             Input::InputManager mInput;
+
+            bool mToggleConsole = false;
     };
 }
 

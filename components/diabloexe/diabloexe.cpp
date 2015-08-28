@@ -11,9 +11,9 @@
 
 namespace DiabloExe
 {
-    DiabloExe::DiabloExe()
+    DiabloExe::DiabloExe(const std::string& pathEXE)
     {
-        mVersion = getVersion();
+        mVersion = getVersion(pathEXE);
         if (mVersion.empty())
         {
             return;
@@ -25,7 +25,7 @@ namespace DiabloExe
             return;
         }
         
-        FAIO::FAFile* exe = FAIO::FAfopen("Diablo.exe");
+        FAIO::FAFile* exe = FAIO::FAfopen(pathEXE);
         if (NULL == exe)
         {
             return;
@@ -40,9 +40,9 @@ namespace DiabloExe
         FAIO::FAfclose(exe);
     }
 
-    std::string DiabloExe::getMD5()
+    std::string DiabloExe::getMD5(const std::string& pathEXE)
     {
-        FAIO::FAFile* dexe = FAIO::FAfopen("Diablo.exe");
+        FAIO::FAFile* dexe = FAIO::FAfopen(pathEXE);
         if (NULL == dexe)
         {
             return std::string();
@@ -70,9 +70,9 @@ namespace DiabloExe
         return s.str();
     }
 
-    std::string DiabloExe::getVersion()
+    std::string DiabloExe::getVersion(const std::string& pathEXE)
     {
-        std::string exeMD5 = getMD5();
+        std::string exeMD5 = getMD5(pathEXE);
         if (exeMD5.empty())
         {
             return std::string();

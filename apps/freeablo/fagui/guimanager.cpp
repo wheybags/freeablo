@@ -8,6 +8,9 @@
 #include "../farender/renderer.h"
 #include "../engine/threadmanager.h"
 #include "../faworld/inventory.h"
+#include "../engine/input.h"
+#include "../faworld/world.h"
+#include "../fasavegame/savegamemanager.h"
 
 #include <iostream>
 #include <boost/python.hpp>
@@ -15,12 +18,7 @@
 #include <sstream>
 #include <boost/property_tree/ptree.hpp>
 
-#include "../engine/input.h"
-#include "../faworld/world.h"
-
-#include "input/hotkey.h"
-
-
+#include <input/hotkey.h>
 
 namespace FAGui
 {
@@ -53,6 +51,18 @@ void startGame()
 
     Engine::paused = false;
     showIngameGui();
+}
+
+void saveGame()
+{
+    FASaveGame::SaveGameManager manager(FAWorld::World::get());
+    manager.save();
+}
+
+void loadGame()
+{
+     FASaveGame::SaveGameManager manager(FAWorld::World::get());
+     manager.load();
 }
 
 void playSound(const std::string& path)
@@ -404,6 +414,8 @@ BOOST_PYTHON_MODULE(freeablo)
     boost::python::def("getHotkeyNames", &getHotkeyNames);
     boost::python::def("getHotkeys", &getHotkeys);
     boost::python::def("setHotkey", &setHotkey);
+    boost::python::def("saveGame", &saveGame);
+    boost::python::def("loadGame", &loadGame);
 
     boost::python::def("updateInventory", &updateInventory);
     boost::python::def("placeItem", &placeItem);

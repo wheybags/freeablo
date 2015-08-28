@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "../fasavegame/savegame.h"
+
 namespace FAWorld
 {
     class Position
@@ -26,6 +28,27 @@ namespace FAWorld
         
         private:
             std::pair<size_t, size_t> mCurrent;
+
+            template<class Archive>
+            void save(Archive & ar, const unsigned int version) const
+            {
+                ar << mDirection;
+                ar << mCurrent;
+            }
+
+            template<class Archive>
+            void load(Archive & ar, const unsigned int version)
+            {
+                ar >> mDirection;
+                ar >> mCurrent;
+                mMoving = false;
+                mDist = 0;
+            }
+
+
+            friend class boost::serialization::access;
+
+            BOOST_SERIALIZATION_SPLIT_MEMBER()
 
     };
 }

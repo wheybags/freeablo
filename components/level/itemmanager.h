@@ -5,6 +5,7 @@
 #include <map>
 #include <stdint.h>
 #include <diabloexe/diabloexe.h>
+
 namespace Level
 {
 

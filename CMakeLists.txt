@@ -41,7 +41,7 @@ if(NOT WIN32)
     endif ()
 endif()
 
-find_package(Boost COMPONENTS chrono date_time filesystem system random thread program_options atomic python REQUIRED)
+find_package(Boost COMPONENTS filesystem serialization system program_options python REQUIRED)
 
 if ( NOT SDL2_FOUND )
     message ( FATAL_ERROR "SDL2 not found!" )
@@ -99,6 +99,7 @@ link_libraries (
     StormLib
     Audio
     Settings
+    Script
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
