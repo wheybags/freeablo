@@ -1350,3 +1350,22 @@ div.itemGraphic179
     background-decorator: image;
     background-image: /data/inv/objcurs.cel&frame=179;
 }
+span.Warrior
+{
+    background-decorator: image;
+    background-image: /data/inv/inv.cel;
+}
+
+span.Rogue
+{
+    background-decorator: image;
+    background-image: /data/inv/inv_rog.cel;
+
+}
+
+span.Sorcerer
+{
+    background-decorator: image;
+    background-image: /data/inv/inv_sor.cel;
+
+}

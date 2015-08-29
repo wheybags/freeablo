@@ -11,7 +11,7 @@ namespace DiabloExe
 
         mQualityLevel = FAIO::read8(exe);
 
-        mNumAttr = FAIO::read16(exe);
+        mNumEffects = FAIO::read16(exe);
 
         mGoldValue = FAIO::read32(exe);
 
@@ -51,7 +51,7 @@ namespace DiabloExe
            << "\tmName: "         << mName << "," << std::endl
            << "\tmItemType: "     << +mItemType << "," << std::endl
            << "\tmQualityLevel: " << +mQualityLevel << "," << std::endl
-           << "\tmNumAttr: "      << +mNumAttr << "," << std::endl
+           << "\tmNumEffects: "      << +mNumEffects << "," << std::endl
            << "\tmGoldValue: "    << +mGoldValue << "," << std::endl
            << "\tmEffect0: "      << +mEffect0 << "," << std::endl
            << "\tmMinRange0: "    << +mMinRange0 << "," << std::endl

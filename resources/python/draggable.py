@@ -33,12 +33,18 @@ class DraggableWidget(object):
 
 
         if leftHandItem["empty"] is False:
+            leftHandContainer.style.background_color="#A3191950"
             leftHand.SetAttribute("empty", "false")
-            leftHand.style.width = "56px"
-            leftHand.style.height = "84px"
+            leftHand.style.width  = str(28 * leftHandItem["sizeX"]) + "px"
+            leftHand.style.height = str(28 * leftHandItem["sizeY"]) + "px"
+            if leftHandItem["sizeX"] == 1:
+                leftHand.style.left = str(int(leftHand.style.left)+10) + "px"
+            if leftHandItem["sizeY"] == 2:
+                leftHand.style.top = str(int(leftHand.style.top)+14) + "px"
             leftHand.SetAttribute("class", "itemGraphic" + str(leftHandItem["graphic"]))
 
         else:
+            leftHandContainer.style.background_color="#00000000"
             leftHand.style.width = "0"
             leftHand.style.height = "0"
             leftHand.SetAttribute("empty", "true")
@@ -49,12 +55,18 @@ class DraggableWidget(object):
         rightHand = self.document.CreateElement("div")
 
         if rightHandItem["empty"] is False:
+            rightHandContainer.style.background_color="#A3191950"
             rightHand.SetAttribute("empty", "false")
-            rightHand.style.width = "56px"
-            rightHand.style.height = "84px"
+            rightHand.style.width = str(28 * rightHandItem["sizeX"]) + "px"
+            rightHand.style.height = str(28 * rightHandItem["sizeY"]) + "px"            
+            if rightHandItem["sizeX"] == 1:
+                rightHand.style.left = str(int(rightHand.style.left)+10) + "px"
+            if rightHandItem["sizeY"] == 2:
+                rightHand.style.top = str(int(rightHand.style.top)+14) + "px"
             rightHand.SetAttribute("class", "itemGraphic" + str(rightHandItem["graphic"]))
 
         else:
+            rightHandContainer.style.background_color="#00000000"
             rightHand.style.width = "0"
             rightHand.style.height = "0"
             rightHand.SetAttribute("empty", "true")
@@ -66,6 +78,7 @@ class DraggableWidget(object):
 
 
         if bodyItem["empty"] is False:
+            bodyContainer.style.background_color="#A3191950"
             body.SetAttribute("empty", "false")
             body.style.width = "57px"
             body.style.height = "87px"
@@ -73,6 +86,7 @@ class DraggableWidget(object):
 
 
         else:
+            bodyContainer.style.background_color="#00000000"
             body.style.width = "0"
             body.style.height = "0"
             body.SetAttribute("empty", "true")
@@ -83,12 +97,14 @@ class DraggableWidget(object):
         head = self.document.CreateElement("div")
 
         if headItem["empty"] is False:
+            headContainer.style.background_color="#A3191950"
             head.SetAttribute("empty", "false")
             head.style.width = "56px"
             head.style.height = "56px"
             head.SetAttribute("class", "itemGraphic" + str(headItem["graphic"]))
 
         else:
+            headContainer.style.background_color="#00000000"
             head.style.width = "0"
             head.style.height = "0"
             head.SetAttribute("empty", "true")
@@ -99,12 +115,14 @@ class DraggableWidget(object):
         amulet = self.document.CreateElement("div")
 
         if amuletItem["empty"] is False:
+            amuletContainer.style.background_color="#A3191950"
             amulet.SetAttribute("empty", "false")
             amulet.style.width = "28px"
             amulet.style.height = "28px"
             amulet.SetAttribute("class", "itemGraphic" + str(amuletItem["graphic"]))
 
         else:
+            amuletContainer.style.background_color="#00000000"
             amulet.style.width = "0"
             amulet.style.height = "0"
             amulet.SetAttribute("empty", "true")
@@ -115,12 +133,14 @@ class DraggableWidget(object):
         leftRing = self.document.CreateElement("div")
 
         if leftRingItem["empty"] is False:
+            leftRingContainer.style.background_color="#A3191950"
             leftRing.SetAttribute("empty", "false")
             leftRing.style.width = "28px"
             leftRing.style.height = "28px"
             leftRing.SetAttribute("class", "itemGraphic" + str(leftRingItem["graphic"]))
 
         else:
+            leftRingContainer.style.background_color="#00000000"
             leftRing.style.width = "0"
             leftRing.style.height = "0"
             leftRing.SetAttribute("empty", "true")
@@ -131,12 +151,14 @@ class DraggableWidget(object):
         rightRing = self.document.CreateElement("div")
 
         if rightRingItem["empty"] is False:
+            rightRingContainer.style.background_color="#A3191950"
             rightRing.SetAttribute("empty", "false")
             rightRing.style.width = "28px"
             rightRing.style.height = "28px"
             rightRing.SetAttribute("class", "itemGraphic" + str(rightRingItem["graphic"]))
 
         else:
+            rightRingContainer.style.background_color="#00000000"
             rightRing.style.width = "0"
             rightRing.style.height = "0"
             rightRing.SetAttribute("empty", "true")
@@ -152,6 +174,7 @@ class DraggableWidget(object):
             element.SetAttribute("InvX", str(item["invX"]))
             element.SetAttribute("InvY", str(item["invY"]))
             if item["empty"] is False:
+                parent.style.background_color="#A3191950"
                 element.SetAttribute("class", "itemGraphic"+str(item["graphic"]))
                 element.SetAttribute("SizeX", str(item["sizeX"]))
                 element.SetAttribute("SizeY", str(item["sizeY"]))
@@ -161,13 +184,16 @@ class DraggableWidget(object):
                 element.SetAttribute("CornerY", str(item["cornerY"]))
                 if item["real"] is True:
                     element.SetAttribute("real", "true")
-                else:
+                else:                    
                     element.style.display = "none"
                     element.SetAttribute("real", "false")
+            else:
+                parent.style.background_color="#00000000"
 
             parent.AppendChild(element)
 
     def onLoad(self, event):
+        self.document.GetElementById("container").SetAttribute("class", freeablo.getInvClass())
         self.updateInventory(event)
 
     def onLoadBelt(self, event):
@@ -184,18 +210,19 @@ class DraggableWidget(object):
         cursor = inventory["cursor"]["empty"]
         for i, item in enumerate(inventory["belt"]):
             parent = self.document.GetElementById("belt" + str(i))
-
             element = self.document.CreateElement("div")
             element.SetAttribute("InvX", str(item["invX"]))
             element.SetAttribute("InvY", str(item["invY"]))
             element.SetAttribute("BeltX", str(i))
             element.SetAttribute("empty", "false")
             element.SetAttribute("class", "beltItem")
-            if item["empty"] is False:             
+            if item["empty"] is False:
+                parent.style.background_color="#A3191950"
                 element.SetAttribute("class", "itemGraphic" + str(item["graphic"]));
                 element.style.width = "28px"
                 element.style.height = "28px"
             else:
+                parent.style.background_color="#00000000"
                 element.SetAttribute("empty", "true")
                 element.style.width="0px"
                 element.style.height="0px"

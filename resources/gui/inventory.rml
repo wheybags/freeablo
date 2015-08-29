@@ -14,7 +14,6 @@
                 height: 352;
                 width: 320;
                 background-decorator: image;
-                background-image: /data/inv/inv.cel;
                 position: fixed;
                 top: -175px;
                 right: 0px;
@@ -52,6 +51,7 @@
                 width: 56px;
                 display: inline-block;
                 z-index: 1;
+
             }
             div#leftHand
             {
@@ -80,6 +80,7 @@
                 width: 56px;
                 display: inline-block;
                 z-index: 1;
+
             }
             div.body-equip-socket
             {
@@ -103,6 +104,7 @@
             }
             div#leftRing
             {
+
                 left: 47px;
             }
             div#rightRing

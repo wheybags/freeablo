@@ -7,6 +7,8 @@
 namespace DiabloExe
 {
 
+    BaseItem::BaseItem(){}
+
     BaseItem::BaseItem(FAIO::FAFile *exe, size_t codeOffset)
     {
         activTrigger = FAIO::read32(exe);
@@ -52,7 +54,8 @@ namespace DiabloExe
         }
         else
         {
-            itemSecondName = "";
+
+            itemSecondName = std::string();
         }
 
     }

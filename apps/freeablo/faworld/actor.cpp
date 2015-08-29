@@ -50,10 +50,20 @@ namespace FAWorld
         mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)),
         mIdleAnim(FARender::Renderer::get()->loadImage(idleAnimPath)),
         mFrame(0),
+        mInventory(this),        
         mAnimState(AnimState::idle)
     {
-        mInventory = mInventory.testInv(mInventory);
         mDestination = mPos.current();
+    }
+
+    void Actor::setWalkAnimation(const std::string path)
+    {
+        mWalkAnim = FARender::Renderer::get()->loadImage(path);
+    }
+
+    void Actor::setIdleAnimation(const std::string path)
+    {
+        mIdleAnim = FARender::Renderer::get()->loadImage(path);
     }
 
     FARender::FASpriteGroup Actor::getCurrentAnim()
@@ -67,7 +77,12 @@ namespace FAWorld
                 return mIdleAnim;
         }
     }
-    
+    void Actor::setStats(ActorStats * stats)
+    {
+        mStats = stats;
+
+    }
+
     void Actor::setAnimation(AnimState::AnimState state)
     {
         if(mAnimState != state)

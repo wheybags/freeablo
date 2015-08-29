@@ -23,6 +23,12 @@ namespace FAWorld
         mCurrentLevel = NULL;
     }
 
+    void World::setStatsObject(ActorStats *stats)
+    {
+        mPlayer->setStats(stats);
+
+    }
+
     World::~World()
     {
         for(size_t i = 0; i < mActors.size(); i++)

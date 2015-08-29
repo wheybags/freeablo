@@ -50,7 +50,9 @@ void MainWindow::loadSettings()
     mListfile = QString::fromStdString(mSettings.get<std::string>("General", "listfile", "Diablo I"));
     mRenderSettings.windowWidth = mSettings.get<int>("General", "windowWidth", 800);
     mRenderSettings.windowHeight = mSettings.get<int>("General", "windowHeight", 600);
+
     mBackgroundColor = QColor(QString::fromStdString(mSettings.get<std::string>("General", "backgroundColor", "#0000FF")));
+    mRenderSettings.fullscreen = mSettings.get<bool>("General", "fullscreen", false);
 
     ui->lineEdit->setText(mFilename);
     ui->lineEdit_2->setText(mListfile);

@@ -9,15 +9,14 @@
 #include "engine/enginemain.h"
 
 namespace bpo = boost::program_options;
-
 bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 {
     boost::program_options::options_description desc("Options");
-
     desc.add_options()
         ("help,h", "Print help")
         // -1 represents the main menu
-        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)");
+        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)")
+        ("character,c", bpo::value<std::string>()->default_value("Warrior"), "Choose Warrior, Rogue or Sorcerer");
 
     try
     {
@@ -32,6 +31,7 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
         bpo::notify(variables);
 
         const int32_t dLvl = variables["level"].as<int32_t>();
+
         if(dLvl > 12)
             throw bpo::error("level > 12 not implemented");
     }
@@ -60,6 +60,7 @@ int main(int argc, char** argv)
     boost::program_options::variables_map variables;
 
     Engine::EngineMain engine;
+
 
     int retval = EXIT_SUCCESS;
 

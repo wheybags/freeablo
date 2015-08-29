@@ -8,6 +8,7 @@ namespace Level
         const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
         const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap, size_t previous, size_t next):
         mDun(dun), mTil(tilPath), mMin(minPath), mSol(solPath), mTileSetPath(tileSetPath),
+
         mMinPath(minPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs),
         mPrevious(previous), mNext(next){}
 

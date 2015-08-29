@@ -5,7 +5,7 @@
 #include "tileset.h"
 #include "dun.h"
 #include "sol.h"
-#include "itemmanager.h"
+#include "baseitemmanager.h"
 #include <utility>
 #include <map>
 
@@ -91,9 +91,8 @@ namespace Level
             std::pair<size_t,size_t> mDownStairs;
 
             std::vector<Monster> mMonsters;
-            ItemManager itemManager;
+            BaseItemManager * mItemManager;
             static std::vector<int16_t> mEmpty;
-//            FAWorld::Level::ItemManager mLevel::Items;
             friend const MinPillar get(size_t x, size_t y, const Level& level);
 
             int32_t mPrevious; ///< index of previous level

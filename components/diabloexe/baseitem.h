@@ -10,7 +10,7 @@
 
 namespace DiabloExe
 {
-    struct BaseItem
+    class BaseItem
     {
     public:
         uint32_t activTrigger;
@@ -48,7 +48,7 @@ namespace DiabloExe
         uint32_t price2;
 
         std::string dump() const;
-        BaseItem(){}
+        BaseItem();
 
     private:
         BaseItem(FAIO::FAFile* exe, size_t codeOffset);

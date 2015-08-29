@@ -31,6 +31,11 @@ namespace FAGui
         mEngine.unPause();
     }
 
+    std::string FAPythonFuncs::getInvClass()
+    {
+        return FAGui::GuiManager::invClass;
+    }
+
     void FAPythonFuncs::startGame()
     {
         auto world = FAWorld::World::get();
@@ -141,9 +146,9 @@ namespace FAGui
 
         if(fromX >= 10 || fromY >=4 || toX>=10 || toY>=4)
             return;
-        Level::Item::equipLoc to   = static_cast<Level::Item::equipLoc>(toPara);
-        Level::Item::equipLoc from = static_cast<Level::Item::equipLoc>(fromPara);
-        Level::Item item = mPlayerInv.getItemAt(
+        FAWorld::Item::equipLoc to   = static_cast<FAWorld::Item::equipLoc>(toPara);
+        FAWorld::Item::equipLoc from = static_cast<FAWorld::Item::equipLoc>(fromPara);
+        FAWorld::Item item = mPlayerInv.getItemAt(
                     from,
                     fromY,
                     fromX, beltX);
@@ -152,23 +157,23 @@ namespace FAGui
         if(!item.isReal() && !item.isEmpty())
         {
             item = mPlayerInv.getItemAt(
-                        Level::Item::eqINV,
+                        FAWorld::Item::eqINV,
                         item.getCornerCoords().second,
                         item.getCornerCoords().first);
 
             fromX = item.getInvCoords().first;
             fromY = item.getInvCoords().second;
         }
-        if(to == Level::Item::eqCURSOR)
+        if(to == FAWorld::Item::eqCURSOR)
         {
 
-                if(mPlayerInv.getItemAt(Level::Item::eqCURSOR).isEmpty())
+                if(mPlayerInv.getItemAt(FAWorld::Item::eqCURSOR).isEmpty())
                 {
 
-                    if(mPlayerInv.putItem(item, Level::Item::eqCURSOR, from, fromY, fromX, beltX))
+                    if(mPlayerInv.putItem(item, FAWorld::Item::eqCURSOR, from, fromY, fromX, beltX))
                     {
 
-                        if(item.mItem.graphicValue > 179)
+                        if(item.getGraphicValue() > 179)
                         {
 
                             cursorPath = "";
@@ -177,7 +182,7 @@ namespace FAGui
                         else
                         {
                             cursorPath = "data/inv/objcurs.cel";
-                            cursorFrame = item.mItem.graphicValue;
+                            cursorFrame = item.getGraphicValue();
 
                         }
                     }
@@ -186,31 +191,31 @@ namespace FAGui
 
         }
 
-        else if(to == Level::Item::eqINV)
+        else if(to == FAWorld::Item::eqINV)
         {
-            item = mPlayerInv.getItemAt(Level::Item::eqCURSOR);
-            if(mPlayerInv.putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+            item = mPlayerInv.getItemAt(FAWorld::Item::eqCURSOR);
+            if(mPlayerInv.putItem(item, to, FAWorld::Item::eqCURSOR, toY, toX))
             {
                 cursorPath = "";
                 cursorFrame = 0;
             }
 
         }
-        else if(to == Level::Item::eqLEFTHAND || to == Level::Item::eqRIGHTHAND)
+        else if(to == FAWorld::Item::eqLEFTHAND || to == FAWorld::Item::eqRIGHTHAND)
         {
 
-            item = mPlayerInv.getItemAt(Level::Item::eqCURSOR);
-            if(mPlayerInv.putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+            item = mPlayerInv.getItemAt(FAWorld::Item::eqCURSOR);
+            if(mPlayerInv.putItem(item, to, FAWorld::Item::eqCURSOR, toY, toX))
             {
                 cursorPath = "";
                 cursorFrame = 0;
             }
 
         }
-        else if(to == Level::Item::eqLEFTRING || to == Level::Item::eqRIGHTRING)
+        else if(to == FAWorld::Item::eqLEFTRING || to == FAWorld::Item::eqRIGHTRING)
         {
-            item = mPlayerInv.getItemAt(Level::Item::eqCURSOR);
-            if (mPlayerInv.putItem(item, to, Level::Item::eqCURSOR, toY, toX))
+            item = mPlayerInv.getItemAt(FAWorld::Item::eqCURSOR);
+            if (mPlayerInv.putItem(item, to, FAWorld::Item::eqCURSOR, toY, toX))
             {
                 cursorPath = "";
                 cursorFrame = 0;
@@ -235,18 +240,18 @@ namespace FAGui
     {
         boost::python::dict dict, cursorDict, headDict, amuletDict, leftHandDict, rightHandDict, leftRingDict, rightRingDict, bodyDict, itemDict;
 
-        Level::Item cursor = mPlayerInv.getItemAt(Level::Item::eqCURSOR);
-        Level::Item head = mPlayerInv.getItemAt(Level::Item::eqHEAD);
-        Level::Item amulet = mPlayerInv.getItemAt(Level::Item::eqAMULET);
-        Level::Item leftHand = mPlayerInv.getItemAt(Level::Item::eqLEFTHAND);
-        Level::Item rightHand = mPlayerInv.getItemAt(Level::Item::eqRIGHTHAND);
-        Level::Item leftRing = mPlayerInv.getItemAt(Level::Item::eqLEFTRING);
-        Level::Item rightRing = mPlayerInv.getItemAt(Level::Item::eqRIGHTRING);
-        Level::Item body = mPlayerInv.getItemAt(Level::Item::eqBODY);
+        FAWorld::Item cursor = mPlayerInv.getItemAt(FAWorld::Item::eqCURSOR);
+        FAWorld::Item head = mPlayerInv.getItemAt(FAWorld::Item::eqHEAD);
+        FAWorld::Item amulet = mPlayerInv.getItemAt(FAWorld::Item::eqAMULET);
+        FAWorld::Item leftHand = mPlayerInv.getItemAt(FAWorld::Item::eqLEFTHAND);
+        FAWorld::Item rightHand = mPlayerInv.getItemAt(FAWorld::Item::eqRIGHTHAND);
+        FAWorld::Item leftRing = mPlayerInv.getItemAt(FAWorld::Item::eqLEFTRING);
+        FAWorld::Item rightRing = mPlayerInv.getItemAt(FAWorld::Item::eqRIGHTRING);
+        FAWorld::Item body = mPlayerInv.getItemAt(FAWorld::Item::eqBODY);
 
         dict["cursor"] = cursorDict;
 
-        cursorDict["graphic"] = cursor.mItem.graphicValue;
+        cursorDict["graphic"] = cursor.getGraphicValue();
         cursorDict["empty"] = cursor.isEmpty();
         cursorDict["invX"] = cursor.getInvCoords().first;
         cursorDict["invY"] = cursor.getInvCoords().second;
@@ -258,7 +263,7 @@ namespace FAGui
 
         dict["head"] = headDict;
 
-        headDict["graphic"] = head.mItem.graphicValue;
+        headDict["graphic"] = head.getGraphicValue();
         headDict["empty"] = head.isEmpty();
         headDict["invX"] = head.getInvCoords().first;
         headDict["invY"] = head.getInvCoords().second;
@@ -270,7 +275,7 @@ namespace FAGui
 
         dict["body"] = bodyDict;
 
-        bodyDict["graphic"] = body.mItem.graphicValue;
+        bodyDict["graphic"] = body.getGraphicValue();
         bodyDict["empty"] = body.isEmpty();
         bodyDict["invX"] = body.getInvCoords().first;
         bodyDict["invY"] = body.getInvCoords().second;
@@ -282,7 +287,7 @@ namespace FAGui
 
         dict["leftHand"] = leftHandDict;
 
-        leftHandDict["graphic"] = leftHand.mItem.graphicValue;
+        leftHandDict["graphic"] = leftHand.getGraphicValue();
         leftHandDict["empty"] = leftHand.isEmpty();
         leftHandDict["invX"] = leftHand.getInvCoords().first;
         leftHandDict["invY"] = leftHand.getInvCoords().second;
@@ -294,7 +299,7 @@ namespace FAGui
 
         dict["rightHand"] = rightHandDict;
 
-        rightHandDict["graphic"] = rightHand.mItem.graphicValue;
+        rightHandDict["graphic"] = rightHand.getGraphicValue();
         rightHandDict["empty"] = rightHand.isEmpty();
         rightHandDict["invX"] = rightHand.getInvCoords().first;
         rightHandDict["invY"] = rightHand.getInvCoords().second;
@@ -306,7 +311,7 @@ namespace FAGui
 
         dict["leftRing"] = leftRingDict;
 
-        leftRingDict["graphic"] = leftRing.mItem.graphicValue;
+        leftRingDict["graphic"] = leftRing.getGraphicValue();
         leftRingDict["empty"] = leftRing.isEmpty();
         leftRingDict["invX"] = leftRing.getInvCoords().first;
         leftRingDict["invY"] = leftRing.getInvCoords().second;
@@ -318,7 +323,7 @@ namespace FAGui
 
         dict["rightRing"] = rightRingDict;
 
-        rightRingDict["graphic"] = rightRing.mItem.graphicValue;
+        rightRingDict["graphic"] = rightRing.getGraphicValue();
         rightRingDict["empty"] = rightRing.isEmpty();
         rightRingDict["invX"] = rightRing.getInvCoords().first;
         rightRingDict["invY"] = rightRing.getInvCoords().second;
@@ -330,7 +335,7 @@ namespace FAGui
 
         dict["amulet"] = amuletDict;
 
-        amuletDict["graphic"] = amulet.mItem.graphicValue;
+        amuletDict["graphic"] = amulet.getGraphicValue();
         amuletDict["empty"] = amulet.isEmpty();
         amuletDict["invX"] = amulet.getInvCoords().first;
         amuletDict["invY"] = amulet.getInvCoords().second;
@@ -347,10 +352,10 @@ namespace FAGui
             for(uint8_t j=0;j<10;j++)
             {
                 boost::python::dict itemDict;
-                Level::Item item = mPlayerInv.getItemAt(Level::Item::eqINV, i, j);
+                FAWorld::Item item = mPlayerInv.getItemAt(FAWorld::Item::eqINV, i, j);
                 if(!item.isEmpty())
                 {
-                    itemDict["graphic"] = item.mItem.graphicValue;
+                    itemDict["graphic"] = item.getGraphicValue();
                     itemDict["empty"] = false;
                     itemDict["invX"] = item.getInvCoords().first;
                     itemDict["invY"] = item.getInvCoords().second;
@@ -370,14 +375,14 @@ namespace FAGui
                 inventoryList.append(itemDict);
             }
         }
-        Level::Item beltItem;
+        FAWorld::Item beltItem;
         for(uint8_t i=0;i<8;i++)
         {
             boost::python::dict beltDict;
-            beltItem = mPlayerInv.getItemAt(Level::Item::eqBELT, 0, 0, i);
+            beltItem = mPlayerInv.getItemAt(FAWorld::Item::eqBELT, 0, 0, i);
             if(!beltItem.isEmpty())
             {
-                beltDict["graphic"] = beltItem.mItem.graphicValue;
+                beltDict["graphic"] = beltItem.getGraphicValue();
                 beltDict["empty"] = false;
                 beltDict["invX"] = beltItem.getInvCoords().first;
                 beltDict["invY"] = beltItem.getInvCoords().second;
@@ -414,7 +419,7 @@ namespace FAGui
         boost::python::def("setHotkey", +[](std::string function, boost::python::list pyhotkey){funcs->setHotkey(function, pyhotkey);});
         boost::python::def("saveGame", +[](){funcs->saveGame();});
         boost::python::def("loadGame", +[](){funcs->loadGame();});
-
+        boost::python::def("getInvClass", +[](){return funcs->getInvClass();});
         boost::python::def("updateInventory", +[](){return funcs->updateInventory();});
         boost::python::def("placeItem", +[](uint32_t toPara, uint32_t fromPara, uint32_t fromY,
                                             uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX)

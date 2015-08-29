@@ -33,11 +33,21 @@ namespace DiabloExe
 
         loadMonsters(exe);
         loadNpcs(exe);
+        loadCharacterStats(exe);
         loadBaseItems(exe);
         loadUniqueItems(exe);
-        loadPreficies(exe);
+        loadAffixes(exe);
 
         FAIO::FAfclose(exe);
+    }
+
+
+    uint32_t DiabloExe::swapEndian(uint32_t arg)
+    {
+
+         arg = ((arg << 8) & 0xFF00FF00) | ((arg >> 8) & 0xFF00FF );
+         return (arg << 16) | (arg >> 16);
+
     }
 
     std::string DiabloExe::getMD5(const std::string& pathEXE)
@@ -187,7 +197,7 @@ namespace DiabloExe
 
         for(size_t i=0; i < count; i++)
         {
-            FAIO::FAfseek(exe, itemOffset + 76*i, SEEK_SET);
+            FAIO::FAfseek(exe, itemOffset + 84*i, SEEK_SET);
             UniqueItem tmp(exe, codeOffset);
             if
                     (
@@ -239,29 +249,146 @@ namespace DiabloExe
         }
     }
 
-    void DiabloExe::loadPreficies(FAIO::FAFile *exe)
+    void DiabloExe::loadAffixes(FAIO::FAFile *exe)
     {
-        size_t prefixOffset = mSettings.get<size_t>("Preficies","prefixOffset");
-        size_t codeOffset = mSettings.get<size_t>("Preficies","codeOffset");
-        size_t count = mSettings.get<size_t>("Preficies","count");
+        size_t affixOffset = mSettings.get<size_t>("Affix","affixOffset");
+        size_t codeOffset = mSettings.get<size_t>("Affix","codeOffset");
+        size_t count = mSettings.get<size_t>("Affix","count");
+
 
         for(size_t i=0; i < count; i++)
         {
-            FAIO::FAfseek(exe, prefixOffset + 48*i, SEEK_SET);
-            Prefix tmp(exe, codeOffset);
-
-            if(mPrefices.find(tmp.prefixName) != mPrefices.end())
+            FAIO::FAfseek(exe, affixOffset + 48*i, SEEK_SET);
+            Affix tmp(exe, codeOffset);
+            if(Misc::StringUtils::containsNonPrint(tmp.mName))
+                continue;
+            if(tmp.mName.empty())
+                continue;
+            if(mAffixes.find(tmp.mName) != mAffixes.end())
             {
                 size_t i;
-                for(i = 1; mPrefices.find(tmp.prefixName + "_" + std::to_string(i)) != mPrefices.end(); i++);
+                for(i = 1; mAffixes.find(tmp.mName + "_" + std::to_string(i)) != mAffixes.end(); i++);
 
-                mPrefices[tmp.prefixName + "_" + std::to_string(i)] = tmp;
+                mAffixes[tmp.mName + "_" + std::to_string(i)] = tmp;
             }
             else
             {
-                mPrefices[tmp.prefixName] = tmp;
+                mAffixes[tmp.mName] = tmp;
             }
         }
+    }
+
+    void DiabloExe::loadCharacterStats(FAIO::FAFile *exe)
+    {
+        size_t startingStatsOffset = mSettings.get<size_t>("CharacterStats", "startingStatsOffset");
+        size_t maxStatsOffset = mSettings.get<size_t>("CharacterStats", "maxStatsOffset");
+        size_t blockingBonusOffset = mSettings.get<size_t>("CharacterStats", "blockingBonusOffset");
+        size_t framesetOffset = mSettings.get<size_t>("CharacterStats", "framesetOffset");
+        size_t expPerLevelOffset = mSettings.get<size_t>("CharacterStats", "expPerLevelOffset");
+        size_t levelCount = mSettings.get<size_t>("CharacterStats", "maxLevel");
+        CharacterStats meleeCharacter, rangerCharacter, mageCharacter;
+
+        FAIO::FAfseek(exe, framesetOffset, SEEK_SET);
+
+        meleeCharacter.mIdleInDungeonFrameset = FAIO::read8(exe);
+        rangerCharacter.mIdleInDungeonFrameset = FAIO::read8(exe);
+        mageCharacter.mIdleInDungeonFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mAttackFrameset = FAIO::read8(exe);
+        rangerCharacter.mAttackFrameset = FAIO::read8(exe);
+        mageCharacter.mAttackFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mWalkInDungeonFrameset = FAIO::read8(exe);
+        rangerCharacter.mWalkInDungeonFrameset = FAIO::read8(exe);
+        mageCharacter.mWalkInDungeonFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mBlockingSpeed = FAIO::read8(exe);
+        rangerCharacter.mBlockingSpeed = FAIO::read8(exe);
+        mageCharacter.mBlockingSpeed = FAIO::read8(exe);
+
+        meleeCharacter.mDeathFrameset = FAIO::read8(exe);
+        rangerCharacter.mDeathFrameset = FAIO::read8(exe);
+        mageCharacter.mDeathFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mMagicCastFrameset = FAIO::read8(exe);
+        rangerCharacter.mMagicCastFrameset = FAIO::read8(exe);
+        mageCharacter.mMagicCastFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mHitRecoverySpeed = FAIO::read8(exe);
+        rangerCharacter.mHitRecoverySpeed = FAIO::read8(exe);
+        mageCharacter.mHitRecoverySpeed = FAIO::read8(exe);
+
+        meleeCharacter.mIdleInTownFrameset = FAIO::read8(exe);
+        rangerCharacter.mIdleInTownFrameset = FAIO::read8(exe);
+        mageCharacter.mIdleInTownFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mWalkInTownFrameset = FAIO::read8(exe);
+        rangerCharacter.mWalkInTownFrameset = FAIO::read8(exe);
+        mageCharacter.mWalkInTownFrameset = FAIO::read8(exe);
+
+        meleeCharacter.mSingleHandedAttackSpeed = FAIO::read8(exe);
+        rangerCharacter.mSingleHandedAttackSpeed = FAIO::read8(exe);
+        mageCharacter.mSingleHandedAttackSpeed = FAIO::read8(exe);
+
+        meleeCharacter.mSpellCastSpeed = FAIO::read8(exe);
+        rangerCharacter.mSpellCastSpeed = FAIO::read8(exe);
+        mageCharacter.mSpellCastSpeed = FAIO::read8(exe);
+
+        FAIO::FAfseek(exe, startingStatsOffset, SEEK_SET);
+
+        meleeCharacter.mStrength   = swapEndian(FAIO::read32(exe));
+        rangerCharacter.mStrength     = swapEndian(FAIO::read32(exe));
+        mageCharacter.mStrength  = swapEndian(FAIO::read32(exe));
+
+        meleeCharacter.mMagic      = swapEndian(FAIO::read32(exe));
+        rangerCharacter.mMagic        = swapEndian(FAIO::read32(exe));
+        mageCharacter.mMagic     = swapEndian(FAIO::read32(exe));
+
+        meleeCharacter.mDexterity  = swapEndian(FAIO::read32(exe));
+        rangerCharacter.mDexterity    = swapEndian(FAIO::read32(exe));
+        mageCharacter.mDexterity = swapEndian(FAIO::read32(exe));
+
+        meleeCharacter.mVitality   = swapEndian(FAIO::read32(exe));
+        rangerCharacter.mVitality     = swapEndian(FAIO::read32(exe));
+        mageCharacter.mVitality  = swapEndian(FAIO::read32(exe));
+
+        FAIO::FAfseek(exe, SEEK_SET, blockingBonusOffset);
+
+        meleeCharacter.mBlockingBonus  = swapEndian(FAIO::read32(exe));
+        rangerCharacter.mBlockingBonus    = swapEndian(FAIO::read32(exe));
+        mageCharacter.mBlockingBonus = swapEndian(FAIO::read32(exe));
+
+        FAIO::FAfseek(exe, maxStatsOffset, SEEK_SET);
+
+        meleeCharacter.mMaxStrength   = FAIO::read32(exe);
+        rangerCharacter.mMaxStrength     = FAIO::read32(exe);
+        mageCharacter.mMaxStrength  = FAIO::read32(exe);
+
+
+        meleeCharacter.mMaxMagic      = FAIO::read32(exe);
+        rangerCharacter.mMaxMagic        = FAIO::read32(exe);
+        rangerCharacter.mMaxDexterity    = FAIO::read32(exe);
+
+        meleeCharacter.mMaxDexterity  = FAIO::read32(exe);
+        mageCharacter.mMaxMagic     = FAIO::read32(exe);
+        mageCharacter.mMaxDexterity = FAIO::read32(exe);
+
+        meleeCharacter.mMaxVitality   = FAIO::read32(exe);
+        rangerCharacter.mMaxVitality     = FAIO::read32(exe);
+        mageCharacter.mMaxVitality  = FAIO::read32(exe);
+        FAIO::FAfseek(exe, expPerLevelOffset, SEEK_SET);
+
+        for(uint32_t i=0;i < levelCount; i++)
+        {
+            uint32_t readLevelData = FAIO::read32(exe);
+            meleeCharacter.mNextLevelExp.push_back(readLevelData);
+            rangerCharacter.mNextLevelExp.push_back(readLevelData);
+            mageCharacter.mNextLevelExp.push_back(readLevelData);
+        }
+
+        mCharacters["Warrior"]  = meleeCharacter;
+        mCharacters["Rogue"]    = rangerCharacter;
+        mCharacters["Sorcerer"] = mageCharacter;
     }
 
     const Monster& DiabloExe::getMonster(const std::string& name) const
@@ -274,9 +401,21 @@ namespace DiabloExe
         return mBaseItems.find(name)->second;
 
     }
+
     std::map<std::string, BaseItem> DiabloExe::getItemMap() const
     {
         return mBaseItems;
+
+    }
+
+    const std::map<std::string, UniqueItem> & DiabloExe::getUniqueItemMap() const
+    {
+        return mUniqueItems;
+    }
+
+    const CharacterStats DiabloExe::getCharacterStat(std::string character) const
+    {
+        return mCharacters.at(character);
 
     }
 
@@ -327,6 +466,15 @@ namespace DiabloExe
             ss << it->first << std::endl << it->second.dump();
         }
 
+        ss << "Character Stats: " << mCharacters.size() << std::endl
+           << "Warrior" << std::endl
+           << mCharacters.at("Warrior").dump()
+           << "Rogue" << std::endl
+           << mCharacters.at("Rogue").dump()
+           << "Sorcerer" << std::endl
+           << mCharacters.at("Sorcerer").dump();
+
+
         ss << "Base Items: "<< mBaseItems.size() << std::endl;
         for(std::map<std::string, BaseItem>::const_iterator it = mBaseItems.begin(); it != mBaseItems.end(); ++it)
         {
@@ -339,8 +487,8 @@ namespace DiabloExe
             ss << it->first << std::endl << it->second.dump();
         }
 
-        ss << "Prefices: " << mPrefices.size() << std::endl;
-        for(std::map<std::string, Prefix>::const_iterator it = mPrefices.begin(); it != mPrefices.end(); ++it)
+        ss << "Affixes: " << mAffixes.size() << std::endl;
+        for(std::map<std::string, Affix>::const_iterator it = mAffixes.begin(); it != mAffixes.end(); ++it)
         {
             ss << it->first << std::endl << it->second.dump();
         }
@@ -350,6 +498,6 @@ namespace DiabloExe
 
     bool DiabloExe::isLoaded() const
     {
-        return !mMonsters.empty() && !mNpcs.empty() && !mBaseItems.empty() && !mPrefices.empty();
+        return !mMonsters.empty() && !mNpcs.empty() && !mBaseItems.empty() && !mAffixes.empty();
     }
 }

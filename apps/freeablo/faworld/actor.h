@@ -3,11 +3,14 @@
 
 #include "position.h"
 #include "inventory.h"
+
 #include "../farender/renderer.h"
 #include "../fasavegame/savegame.h"
 
 namespace FAWorld
 {
+    class ActorStats;
+
     namespace AnimState
     {
         enum AnimState
@@ -23,15 +26,20 @@ namespace FAWorld
             Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos);
             void update(bool noclip);
 
+            void setStats(ActorStats* stats);
+
             FARender::FASpriteGroup getCurrentAnim();
             void setAnimation(AnimState::AnimState state);
+            void setWalkAnimation(const std::string path);
+            void setIdleAnimation(const std::string path);
 
-            Position mPos;
-            Inventory mInventory;
+            Position mPos;            
         //private: //TODO: fix this
             FARender::FASpriteGroup mWalkAnim;
             FARender::FASpriteGroup mIdleAnim;
             size_t mFrame;
+            Inventory mInventory;
+
 
             std::pair<size_t, size_t> mDestination;
 
@@ -65,6 +73,8 @@ namespace FAWorld
             BOOST_SERIALIZATION_SPLIT_MEMBER()
 
         private:
+            friend class Inventory;
+            ActorStats * mStats = NULL;
             AnimState::AnimState mAnimState;
 
     };

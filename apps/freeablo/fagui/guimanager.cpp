@@ -13,13 +13,20 @@ namespace FAGui
     Rocket::Core::ElementDocument* ingameUi = NULL;
     Rocket::Core::ElementDocument* mainMenu = NULL;
 
-    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine) : mPythonFuncs(playerInventory, *this, engine)
+    std::string GuiManager::invClass;
+
+    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass) : mPythonFuncs(playerInventory, *this, engine)
     {
+
+        this->invClass = invClass;
         initPython(mPythonFuncs);
+
 
         Input::Hotkey::initpythonwrapper();
 
+
         FARender::Renderer* renderer = FARender::Renderer::get();
+
 
         Rocket::Core::DecoratorInstancer* animInstancer = Rocket::Core::Factory::RegisterDecoratorInstancer("faanim", (Rocket::Core::DecoratorInstancer*)new AnimatedDecoratorInstancer(renderer->getRocketContext()->GetRenderInterface()));
         animInstancer->RemoveReference();
@@ -38,11 +45,13 @@ namespace FAGui
         // block clicks on the real gui.
     }
 
+
     void GuiManager::showMainMenu()
     {
         ingameUi->Hide();
         mainMenu->Show();
     }
+
 
     void GuiManager::updateGui()
     {

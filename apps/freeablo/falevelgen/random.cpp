@@ -28,7 +28,6 @@ namespace FALevelGen
     {
         std::uniform_int_distribution<> range(min, max);
         int result = range(rng);
-
         return result;
     }
 }

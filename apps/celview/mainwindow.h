@@ -74,6 +74,7 @@ private:
     QString mCurrentCelFilename;
     const QString mSettingsFile;
     QColor mBackgroundColor;
+    bool mFullscreen;
     Settings::Settings mSettings;
     int mCurrentFrame;
     QSharedPointer<Render::SpriteGroup> mCurrentCel;
