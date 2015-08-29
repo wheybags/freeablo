@@ -13,10 +13,6 @@ namespace Engine
 {
     class EngineMain;
 
-    extern size_t xClick, yClick;
-    extern bool mouseDown;
-    extern bool click;
-
     extern Input::Hotkey quit_key;
     extern Input::Hotkey noclip_key;
     extern Input::Hotkey changelvldwn_key;
@@ -39,6 +35,10 @@ namespace Engine
 
             bool mToggleConsole = false;
             EngineMain& mEngine;
+
+            size_t mXClick = 0, mYClick = 0;
+            bool mMouseDown = false;
+            bool mClick = false;
     };
 }
 

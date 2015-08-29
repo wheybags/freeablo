@@ -10,10 +10,6 @@
 
 namespace Engine
 {
-    size_t xClick = 0, yClick = 0;
-    bool mouseDown = false;
-    bool click = false;
-
     Input::Hotkey quit_key;
     Input::Hotkey noclip_key;
     Input::Hotkey changelvldwn_key;
@@ -113,23 +109,23 @@ namespace Engine
     {
         if(key == Input::KEY_LEFT_MOUSE)
         {
-            xClick = x;
-            yClick = y;
-            mouseDown = true;
-            click = true;
+            mXClick = x;
+            mYClick = y;
+            mMouseDown = true;
+            mClick = true;
         }
     }
 
     void EngineInputManager::mouseRelease(size_t, size_t, Input::Key key)
     {
         if(key == Input::KEY_LEFT_MOUSE)
-            mouseDown = false;
+            mMouseDown = false;
     }
 
     void EngineInputManager::mouseMove(size_t x, size_t y)
     {
-        xClick = x;
-        yClick = y;
+        mXClick = x;
+        mYClick = y;
     }
 
     void EngineInputManager::update(bool paused)
@@ -141,6 +137,21 @@ namespace Engine
             FAGui::Console & console = FAGui::Console::getInstance(FARender::Renderer::get()->getRocketContext());
             console.toggle();
             mToggleConsole = false;
+        }
+
+        if(!paused && mMouseDown)
+        {
+            auto world = FAWorld::World::get();
+            auto player = world->getPlayer();
+            auto level = world->getCurrentLevel();
+
+            std::pair<size_t, size_t>& destination = player->destination();
+
+            destination = FARender::Renderer::get()->getClickedTile(mXClick, mYClick, *level, player->mPos);
+            if(mClick)
+                level->activate(destination.first, destination.second);
+
+            mClick = false;
         }
     }
 }

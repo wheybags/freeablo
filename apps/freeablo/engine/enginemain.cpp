@@ -110,10 +110,6 @@ namespace Engine
         // Main game logic loop
         while(!mDone)
         {
-            mInputManager->update(mPaused);
-
-            std::pair<size_t, size_t>& destination = player->destination();
-
             auto now = std::chrono::system_clock::now();
 
             while(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count() < 1000/FAWorld::World::ticksPerSecond)
@@ -124,26 +120,14 @@ namespace Engine
 
             last = now;
 
-            Level::Level* level = world.getCurrentLevel();
+            mInputManager->update(mPaused);
 
             if(!mPaused)
-            {
-                if(Engine::mouseDown)
-                {
-                    destination = renderer.getClickedTile(Engine::xClick, Engine::yClick, *level, player->mPos);
-                    if(Engine::click)
-                        level->activate(destination.first, destination.second);
-
-                    Engine::click = false;
-                }
-
-
-
                 world.update(mNoclip);
-            }
 
             guiManager.updateGui();
 
+            Level::Level* level = world.getCurrentLevel();
             FARender::RenderState* state = renderer.getFreeState();
 
             if(state)
