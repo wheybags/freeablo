@@ -137,38 +137,9 @@ namespace Engine
                     Engine::click = false;
                 }
 
-                if(player->mPos.current() != destination)
-                {
-                    if(player->mPos.mDist == 0)
-                    {
-                        std::pair<float, float> vector = Misc::getVec(player->mPos.current(), destination);
 
-                        if(!player->mPos.mMoving)
-                        {
-                            player->mPos.mMoving = true;
-                            player->setAnimation(FAWorld::AnimState::walk);
-                        }
 
-                        player->mPos.mDirection = Misc::getVecDir(vector);
-                    }
-                }
-                else if(player->mPos.mMoving && player->mPos.mDist == 0)
-                {
-                    player->mPos.mMoving = false;
-                    player->setAnimation(FAWorld::AnimState::idle);
-                }
-
-                FAWorld::Actor* actorAtNext = world.getActorAt(player->mPos.next().first, player->mPos.next().second);
-
-                if(!mNoclip && (!(*level)[player->mPos.next().first][player->mPos.next().second].passable() ||
-                   (actorAtNext != NULL && actorAtNext != player)))
-                {
-                    player->mPos.mMoving = false;
-                    destination = player->mPos.current();
-                    player->setAnimation(FAWorld::AnimState::idle);
-                }
-
-                world.update();
+                world.update(mNoclip);
             }
 
             guiManager.updateGui();

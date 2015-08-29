@@ -117,7 +117,7 @@ namespace FAWorld
         mActors.push_back(mPlayer);
     }
 
-    void World::update()
+    void World::update(bool noclip)
     {
         mTicksSinceLastAnimUpdate++;
 
@@ -125,23 +125,22 @@ namespace FAWorld
 
         if(advanceAnims)
             mTicksSinceLastAnimUpdate = 0;
-        
-        actorMapClear();
-                
+                        
         for(size_t i = 0; i < mActors.size(); i++)
         {
-            mActors[i]->update();
+            actorMapRemove(mActors[i]);
+
+            mActors[i]->update(noclip);
 
             if(advanceAnims)
                 mActors[i]->mFrame = (mActors[i]->mFrame + 1) % mActors[i]->getCurrentAnim().animLength;
             
             actorMapInsert(mActors[i]);    
         }
-    }
 
-    void World::actorMapClear()
-    {
-        mActorMap2D.clear();
+        actorMapClear();
+        for(size_t i = 0; i < mActors.size(); i++)
+            actorMapInsert(mActors[i]);
     }
 
     void World::actorMapInsert(Actor* actor)
@@ -149,6 +148,19 @@ namespace FAWorld
         mActorMap2D[actor->mPos.current()] = actor;
         if(actor->mPos.mMoving)
             mActorMap2D[actor->mPos.next()] = actor;
+    }
+
+    void World::actorMapRemove(Actor* actor)
+    {
+        if(mActorMap2D[actor->mPos.current()] == actor)
+            mActorMap2D.erase(actor->mPos.current());
+        if(actor->mPos.mMoving && mActorMap2D[actor->mPos.next()] == actor)
+            mActorMap2D.erase(actor->mPos.next());
+    }
+
+    void World::actorMapClear()
+    {
+        mActorMap2D.clear();
     }
 
     Player* World::getPlayer()

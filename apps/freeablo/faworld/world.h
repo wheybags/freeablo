@@ -43,7 +43,7 @@ namespace FAWorld
 
             void clear();
 
-            void update();
+            void update(bool noclip);
             Player* getPlayer();
             void fillRenderState(FARender::RenderState* state);
 
@@ -51,6 +51,7 @@ namespace FAWorld
 
         private:
             void actorMapInsert(Actor* actor); ///< insert actor into 2d map for collision
+            void actorMapRemove(Actor* actor);
             void actorMapClear();
 
             std::vector<Actor*> mActors;
