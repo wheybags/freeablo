@@ -61,6 +61,9 @@ namespace FAWorld
        bool checkStatsRequirement(Item& item);
        bool fitsAt(Item item, uint8_t y, uint8_t x);
        void removeItem(Item &item, Item::equipLoc from, uint8_t beltX=0, uint8_t invY=0, uint8_t invX=0);
+       static const uint8_t GOLD_PILE_MIN=15;
+       static const uint8_t GOLD_PILE_MID=16;
+       static const uint8_t GOLD_PILE_MAX=17;
     friend class Actor;
 
     };

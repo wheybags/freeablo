@@ -197,7 +197,7 @@ private:
     uint32_t mQualityLevel;
     uint32_t mDurability;
     uint32_t mCurrentDurability;
-    bool isIndistructible;
+    bool mIsIndestructible;
 
     uint32_t mMinAttackDamage;
     uint32_t mMaxAttackDamage;

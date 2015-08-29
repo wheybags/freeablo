@@ -345,13 +345,13 @@ bool Inventory::putItem(Item &item,
                             mInventoryBox[i][j].mCount+=item.mCount;
 
                             if(mInventoryBox[i][j].mCount < 1000)
-                                mInventoryBox[i][j].mGraphicValue = 15;
+                                mInventoryBox[i][j].mGraphicValue=GOLD_PILE_MIN;
 
                             else if (mInventoryBox[i][j].mCount > 1000 && mInventoryBox[i][j].mCount < 2500)
-                                mInventoryBox[i][j].mGraphicValue=16;
+                                mInventoryBox[i][j].mGraphicValue=GOLD_PILE_MID;
 
                             else
-                                mInventoryBox[i][j].mGraphicValue=17;
+                                mInventoryBox[i][j].mGraphicValue=GOLD_PILE_MAX;
                             removeItem(item, from, item.mInvX, item.mInvY, item.mBeltX);
 
                             if(recalculateStats)

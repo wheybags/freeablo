@@ -10,6 +10,7 @@
 
 namespace DiabloExe
 {
+    //Affix -- Part of a word or phrase can be before or after the object Prefix for before Suffix for afterwords.
     struct Affix
     {
     public:

@@ -74,7 +74,7 @@ namespace FAWorld
 
         private:
             friend class Inventory;
-            ActorStats * mStats;
+            ActorStats * mStats = NULL;
             AnimState::AnimState mAnimState;
 
     };
