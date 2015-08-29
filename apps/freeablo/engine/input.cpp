@@ -24,7 +24,13 @@ namespace Engine
                 boost::bind(&EngineInputManager::mouseMove, this, _1, _2),
                 FARender::Renderer::get()->getRocketContext()),
         mEngine(engine)
-    { }
+    {
+        quit_key = Input::Hotkey("Quit");
+        noclip_key = Input::Hotkey("Noclip");
+        changelvlup_key = Input::Hotkey("Changelvlup");
+        changelvldwn_key = Input::Hotkey("Changelvldwn");
+        toggleconsole_key = Input::Hotkey("ToggleConsole");
+    }
 
     void EngineInputManager::keyPress(Input::Key key)
     {

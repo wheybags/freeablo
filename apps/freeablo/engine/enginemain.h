@@ -34,6 +34,11 @@ namespace Engine
             void unPause();
             void toggleNoclip();
 
+            EngineInputManager* getInputManager()
+            {
+                return mInputManager;
+            }
+
         private:
             void runGameLoop(const boost::program_options::variables_map& variables);
 

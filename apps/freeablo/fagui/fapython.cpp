@@ -65,25 +65,29 @@ namespace FAGui
     {
         boost::python::list hotkeynames;
 
-        hotkeynames.append(Input::getHotkeyName(Engine::quit_key));
-        hotkeynames.append(Input::getHotkeyName(Engine::noclip_key));
-        hotkeynames.append(Input::getHotkeyName(Engine::changelvlup_key));
-        hotkeynames.append(Input::getHotkeyName(Engine::changelvldwn_key));
+        Engine::EngineInputManager* inputManager = mEngine.getInputManager();
+
+        hotkeynames.append(Input::getHotkeyName(inputManager->quit_key));
+        hotkeynames.append(Input::getHotkeyName(inputManager->noclip_key));
+        hotkeynames.append(Input::getHotkeyName(inputManager->changelvlup_key));
+        hotkeynames.append(Input::getHotkeyName(inputManager->changelvldwn_key));
         return hotkeynames;
     }
 
     boost::python::list FAPythonFuncs::getHotkeys()
     {
-        boost::python::list hotkeys;
-        Input::Hotkey pquit_key = Engine::quit_key;
-        Input::Hotkey pnoclip_key = Engine::noclip_key;
-        Input::Hotkey pchangelvlup_key = Engine::changelvlup_key;
-        Input::Hotkey pchangelvldwn_key = Engine::changelvldwn_key;
+        auto inputManager = mEngine.getInputManager();
 
-        pquit_key.key = Input::convertAsciiToRocketKey(Engine::quit_key.key);
-        pnoclip_key.key = Input::convertAsciiToRocketKey(Engine::noclip_key.key);
-        pchangelvlup_key.key = Input::convertAsciiToRocketKey(Engine::changelvlup_key.key);
-        pchangelvldwn_key.key = Input::convertAsciiToRocketKey(Engine::changelvldwn_key.key);
+        boost::python::list hotkeys;
+        Input::Hotkey pquit_key = inputManager->quit_key;
+        Input::Hotkey pnoclip_key = inputManager->noclip_key;
+        Input::Hotkey pchangelvlup_key = inputManager->changelvlup_key;
+        Input::Hotkey pchangelvldwn_key = inputManager->changelvldwn_key;
+
+        pquit_key.key = Input::convertAsciiToRocketKey(inputManager->quit_key.key);
+        pnoclip_key.key = Input::convertAsciiToRocketKey(inputManager->noclip_key.key);
+        pchangelvlup_key.key = Input::convertAsciiToRocketKey(inputManager->changelvlup_key.key);
+        pchangelvldwn_key.key = Input::convertAsciiToRocketKey(inputManager->changelvldwn_key.key);
 
         hotkeys.append(pquit_key);
         hotkeys.append(pnoclip_key);
@@ -101,25 +105,27 @@ namespace FAGui
         hotkey.ctrl = boost::python::extract<bool>(pyhotkey[2]);
         hotkey.alt = boost::python::extract<bool>(pyhotkey[3]);
 
+        auto inputManager = mEngine.getInputManager();
+
         if (function == "quit")
         {
-            Engine::quit_key = hotkey;
-            Engine::quit_key.save("Quit");
+            inputManager->quit_key = hotkey;
+            inputManager->quit_key.save("Quit");
         }
         if (function == "noclip")
         {
-            Engine::noclip_key = hotkey;
-            Engine::noclip_key.save("Noclip");
+            inputManager->noclip_key = hotkey;
+            inputManager->noclip_key.save("Noclip");
         }
         if (function == "changelvlup")
         {
-            Engine::changelvlup_key = hotkey;
-            Engine::changelvlup_key.save("Changelvlup");
+            inputManager->changelvlup_key = hotkey;
+            inputManager->changelvlup_key.save("Changelvlup");
         }
         if (function == "changelvldwn")
         {
-            Engine::changelvldwn_key = hotkey;
-            Engine::changelvldwn_key.save("Changelvldwn");
+            inputManager->changelvldwn_key = hotkey;
+            inputManager->changelvldwn_key.save("Changelvldwn");
         }
     }
 

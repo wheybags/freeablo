@@ -101,12 +101,6 @@ namespace Engine
 
         auto last = std::chrono::system_clock::now();
 
-        Engine::quit_key = Input::Hotkey("Quit");
-        Engine::noclip_key = Input::Hotkey("Noclip");
-        Engine::changelvlup_key = Input::Hotkey("Changelvlup");
-        Engine::changelvldwn_key = Input::Hotkey("Changelvldwn");
-        Engine::toggleconsole_key = Input::Hotkey("ToggleConsole");
-
         // Main game logic loop
         while(!mDone)
         {
