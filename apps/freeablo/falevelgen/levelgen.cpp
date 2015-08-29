@@ -839,11 +839,11 @@ namespace FALevelGen
         return getXY(x, y, tmpLevel) == floor || getXY(x, y, tmpLevel) == door;
     }
  
-    void setPoint(int32_t x, int32_t y, size_t val, const Level::Dun& tmpLevel,  Level::Dun& level, const TileSet& tileset, int wallOffset, bool isInsideWall)
+    void setPoint(int32_t x, int32_t y, size_t val, const Level::Dun& tmpLevel,  Level::Dun& level, int32_t wallOffset, bool isInsideWall)
     {
         size_t newVal = val;
 
-        if(val == TileSetEnum::xWall+wallOffset)
+        if(val == (size_t)TileSetEnum::xWall+wallOffset)
         {   
             if(getXY(x, y, tmpLevel) == door && isInsideWall)
                 newVal = TileSetEnum::xDoor;
@@ -861,7 +861,7 @@ namespace FALevelGen
                 newVal = TileSetEnum::insideXWallEndBack;
         }
 
-        else if(val == TileSetEnum::yWall+wallOffset)
+        else if(val == (size_t)TileSetEnum::yWall+wallOffset)
         {   
             if(getXY(x, y, tmpLevel) == door && isInsideWall)
                 newVal = TileSetEnum::yDoor;
@@ -873,7 +873,7 @@ namespace FALevelGen
                 newVal = TileSetEnum::insideYWallEndBack;
         }
 
-        else if(val == TileSetEnum::bottomCorner+wallOffset)
+        else if(val == (size_t)TileSetEnum::bottomCorner+wallOffset)
         {
             if(!isInsideWall && (getXY(x+1, y+1, tmpLevel) == blank || getXY(x+1, y, tmpLevel) == blank || getXY(x, y+1, tmpLevel) == blank))
             {
@@ -929,11 +929,11 @@ namespace FALevelGen
         }
     }
 
-    void fillIsometric(Level::Dun& tmpLevel, Level::Dun& level, TileSet& tileset, bool ignoreNotWall, int wallOffset, bool isInsideWall)
+    void fillIsometric(Level::Dun& tmpLevel, Level::Dun& level, bool ignoreNotWall, int wallOffset, bool isInsideWall)
     {
-        for(int32_t x = 0; x < tmpLevel.width(); x++)
+        for(int32_t x = 0; x < (int32_t)tmpLevel.width(); x++)
         {
-            for(int32_t y = 0; y < tmpLevel.height(); y++)
+            for(int32_t y = 0; y < (int32_t)tmpLevel.height(); y++)
             {
                 if(tmpLevel[x][y] == upStairs)
                 {
@@ -951,30 +951,27 @@ namespace FALevelGen
                     if(isWall(x+1, y, tmpLevel, isInsideWall))
                     {
                         if(isWall(x, y+1, tmpLevel, isInsideWall))
-                            setPoint(x, y, TileSetEnum::topCorner+wallOffset, tmpLevel, level, tileset, wallOffset, isInsideWall);
+                            setPoint(x, y, TileSetEnum::topCorner+wallOffset, tmpLevel, level, wallOffset, isInsideWall);
                         else
                         {
-                            //if(isWall(x, y-1, tmpLevel, insideWall))
-                            //    setPoint(x, y, TileSetEnum::leftCorner+wallOffset, tmpLevel, level, tileset, wallOffset, isInsideWall);
-                            //else
-                                setPoint(x, y, TileSetEnum::xWall+wallOffset, tmpLevel, level, tileset, wallOffset, isInsideWall);
+                           setPoint(x, y, TileSetEnum::xWall+wallOffset, tmpLevel, level, wallOffset, isInsideWall);
                         }
                     }
                     else if(isWall(x-1, y, tmpLevel, isInsideWall))
                     {
                         if(isWall(x, y-1, tmpLevel, isInsideWall))
-                            setPoint(x, y, TileSetEnum::bottomCorner+wallOffset, tmpLevel, level, tileset, wallOffset, isInsideWall);
+                            setPoint(x, y, TileSetEnum::bottomCorner+wallOffset, tmpLevel, level, wallOffset, isInsideWall);
                         else
                         {
                             if(isWall(x, y+1, tmpLevel, isInsideWall))
-                                setPoint(x, y, TileSetEnum::rightCorner+wallOffset, tmpLevel, level, tileset, wallOffset, isInsideWall);
+                                setPoint(x, y, TileSetEnum::rightCorner+wallOffset, tmpLevel, level, wallOffset, isInsideWall);
                             else
-                                setPoint(x, y, TileSetEnum::xWall+wallOffset, tmpLevel, level, tileset, wallOffset, isInsideWall);
+                                setPoint(x, y, TileSetEnum::xWall+wallOffset, tmpLevel, level, wallOffset, isInsideWall);
                         }
                     }
                     else
                     {
-                        setPoint(x, y, TileSetEnum::yWall+wallOffset, tmpLevel, level, tileset, wallOffset, isInsideWall);
+                        setPoint(x, y, TileSetEnum::yWall+wallOffset, tmpLevel, level, wallOffset, isInsideWall);
                     }
                 }
                 else if(!ignoreNotWall)
@@ -1126,64 +1123,77 @@ namespace FALevelGen
         std::stringstream ss; ss << "resources/tilesets/l" << levelNum << ".ini";
         TileSet tileset(ss.str());
 
-        fillIsometric(tmpLevel, level, tileset, false, 0, false);
-        fillIsometric(tmpLevel, level, tileset, true, TileSetEnum::insideXWall, true);
+        fillIsometric(tmpLevel, level, false, 0, false);
+        fillIsometric(tmpLevel, level, true, TileSetEnum::insideXWall, true);
 
         connectWalls(level);
 
-        for(int32_t x = 0; x < (int32_t)width; x++)
-        {
-            for(int32_t y = 0; y < (int32_t)height; y++)
-            {
-                level[x][y] = tileset.convert(((TileSetEnum::TileSetEnum)level[x][y]));
-            }
-        }
-
         std::pair<size_t, size_t> downStairsPoint;
         std::pair<size_t, size_t> upStairsPoint;
-        
-        // Add in some random aesthetic variation
+
         for(int32_t x = 0; x < (int32_t)width; x++)
         {
             for(int32_t y = 0; y < (int32_t)height; y++)
             {
                 if(level[x][y] == TileSetEnum::upStairs)
                 {
-                    level[x-1][y-1] = tileset.upStairs1;
-                    level[x][y-1] = tileset.upStairs2;
-                    level[x+1][y-1] = tileset.upStairs3;
-
-                    level[x-1][y] = tileset.upStairs4;
-                    level[x][y] = tileset.upStairs5;
-                    level[x+1][y] = tileset.upStairs6;
-
-                    level[x-1][y+1] = tileset.upStairs7;
-                    level[x][y+1] = tileset.upStairs8;
-                    level[x+1][y+1] = tileset.upStairs9;
-
                     upStairsPoint = std::make_pair(x*2,y*2);
+                    level[x][y] = TileSetEnum::floor;
                 }
                 else if(level[x][y] == TileSetEnum::downStairs)
                 {
-                    level[x-1][y-1] = tileset.downStairs1;
-                    level[x][y-1] = tileset.downStairs2;
-                    level[x+1][y-1] = tileset.downStairs3;
-
-                    level[x-1][y] = tileset.downStairs4;
-                    level[x][y] = tileset.downStairs5;
-                    level[x+1][y] = tileset.downStairs6;
-
-                    level[x-1][y+1] = tileset.downStairs7;
-                    level[x][y+1] = tileset.downStairs8;
-                    level[x+1][y+1] = tileset.downStairs9;
-
                     downStairsPoint = std::make_pair(x*2,y*2);
+                    level[x][y] = TileSetEnum::floor;
                 }
                 else
+                    level[x][y] = tileset.convert(((TileSetEnum::TileSetEnum)level[x][y]));
+            }
+        }
+        
+        // Add in some random aesthetic variation
+        for(int32_t x = 0; x < (int32_t)width; x++)
+        {
+            for(int32_t y = 0; y < (int32_t)height; y++)
+            {
+                //else
                 {
                     level[x][y] = tileset.getRandomTile(level[x][y]);
                 }
             }
+        }
+
+        // place up stairs
+        {
+            size_t x = upStairsPoint.first / 2, y = upStairsPoint.second / 2;
+
+            level[x-1][y-1] = tileset.upStairs1;
+            level[x][y-1] = tileset.upStairs2;
+            level[x+1][y-1] = tileset.upStairs3;
+
+            level[x-1][y] = tileset.upStairs4;
+            level[x][y] = tileset.upStairs5;
+            level[x+1][y] = tileset.upStairs6;
+
+            level[x-1][y+1] = tileset.upStairs7;
+            level[x][y+1] = tileset.upStairs8;
+            level[x+1][y+1] = tileset.upStairs9;
+        }
+
+        // place down stairs
+        {
+            size_t x = downStairsPoint.first / 2, y = downStairsPoint.second / 2;
+
+            level[x-1][y-1] = tileset.downStairs1;
+            level[x][y-1] = tileset.downStairs2;
+            level[x+1][y-1] = tileset.downStairs3;
+
+            level[x-1][y] = tileset.downStairs4;
+            level[x][y] = tileset.downStairs5;
+            level[x+1][y] = tileset.downStairs6;
+
+            level[x-1][y+1] = tileset.downStairs7;
+            level[x][y+1] = tileset.downStairs8;
+            level[x+1][y+1] = tileset.downStairs9;
         }
         
         ss.str(""); ss << "levels/l" << levelNum << "data/l" << levelNum << ".cel";

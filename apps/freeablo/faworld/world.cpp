@@ -67,9 +67,9 @@ namespace FAWorld
         return mCurrentLevelIndex;
     }
     
-    void World::setLevel(size_t levelNum)
+    void World::setLevel(int32_t levelNum)
     {
-        if(levelNum >= mLevels.size() || levelNum < 0)
+        if(levelNum >= (int32_t)mLevels.size() || levelNum < 0)
             return;
 
         clear();
