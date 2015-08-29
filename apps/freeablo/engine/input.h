@@ -13,7 +13,6 @@ namespace Engine
 {
     class EngineMain;
 
-    extern bool paused;
     extern bool noclip;
 
     extern size_t xClick, yClick;

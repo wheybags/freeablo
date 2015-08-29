@@ -94,7 +94,7 @@ namespace Engine
         }
         else
         {
-            Engine::paused = true;
+            pause();
             guiManager.showMainMenu();
             threadManager.playMusic("music/dintro.wav");
         }
@@ -110,7 +110,7 @@ namespace Engine
         // Main game logic loop
         while(!mDone)
         {
-            mInputManager->update(Engine::paused);
+            mInputManager->update(mPaused);
 
             std::pair<size_t, size_t>& destination = player->destination();
 
@@ -126,7 +126,7 @@ namespace Engine
 
             Level::Level* level = world.getCurrentLevel();
 
-            if(!Engine::paused)
+            if(!mPaused)
             {
                 if(Engine::mouseDown)
                 {
@@ -208,5 +208,15 @@ namespace Engine
     void EngineMain::stop()
     {
         mDone = true;
+    }
+
+    void EngineMain::pause()
+    {
+        mPaused = true;
+    }
+
+    void EngineMain::unPause()
+    {
+        mPaused = false;
     }
 }

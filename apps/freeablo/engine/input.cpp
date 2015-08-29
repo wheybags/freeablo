@@ -10,7 +10,6 @@
 
 namespace Engine
 {
-    bool paused = false;
     bool noclip = false;
 
     size_t xClick = 0, yClick = 0;

@@ -23,12 +23,12 @@ namespace FAGui
 
     void FAPythonFuncs::pauseGame()
     {
-        Engine::paused = true;
+        mEngine.pause();
     }
 
     void FAPythonFuncs::unpauseGame()
     {
-        Engine::paused = false;
+        mEngine.unPause();
     }
 
     void FAPythonFuncs::startGame()
@@ -40,7 +40,7 @@ namespace FAGui
 
         player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 
-        Engine::paused = false;
+        mEngine.unPause();
         mGuiManager.showIngameGui();
     }
 
