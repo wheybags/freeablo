@@ -5,10 +5,6 @@
 
 #include <settings/settings.h>
 
-extern int32_t currentLevel;
-extern int32_t changeLevel;
-
-
 namespace FASaveGame
 {
 
@@ -27,14 +23,15 @@ void SaveGameManager::save()
     }
 
     OutputStream output(saveGameFile);
-    output << currentLevel;
+    size_t level = mWorld->getCurrentLevelIndex();
+    output << level;
     output << *player;
 }
 
 bool SaveGameManager::load()
 {
     FAWorld::Player * player = mWorld->getPlayer();
-    int tmpChangeLevel;
+    size_t tmpLevel;
 
     std::ifstream saveGameFile(getSaveGamePath());
     if(!saveGameFile.good())
@@ -43,10 +40,10 @@ bool SaveGameManager::load()
     }
 
     InputStream input(saveGameFile);
-    input >> tmpChangeLevel;
+    input >> tmpLevel;
     input >> *player;
 
-    changeLevel = tmpChangeLevel - currentLevel;
+    mWorld->setLevel(tmpLevel);
     return true;
 }
 

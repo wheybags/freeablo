@@ -16,7 +16,7 @@ Copy DIABDAT.MPQ and Diablo.exe from your diablo install into the folder with th
 #Controls
 Mouse to walk around, just like the original, and click on doors to open them.
 
-o and p keys will move up / down through dungeon levels.
+PgUp and PgDn keys will move up / down through dungeon levels.
 
 n will turn off collision (player will be able to walk through walls).
 

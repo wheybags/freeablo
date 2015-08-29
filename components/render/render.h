@@ -42,6 +42,7 @@ namespace Render
     {
         int32_t windowWidth;
         int32_t windowHeight;
+        bool fullscreen;
     };
 
     class SpriteCacheBase

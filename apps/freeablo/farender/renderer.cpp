@@ -22,7 +22,7 @@ namespace FARender
     }
                                   
 
-    Renderer::Renderer(int32_t windowWidth, int32_t windowHeight)
+    Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen)
         :mDone(false)
         ,mRocketContext(NULL)
         ,mSpriteManager(1024)
@@ -34,6 +34,7 @@ namespace FARender
             Render::RenderSettings settings;
             settings.windowWidth = windowWidth;
             settings.windowHeight = windowHeight;
+            settings.fullscreen = fullscreen;
 
             Render::init(settings);
             
@@ -168,10 +169,24 @@ namespace FARender
         return mRocketContext;
     }
 
+    void Renderer::waitUntilDone()
+    {
+        std::unique_lock<std::mutex> lk(mDoneMutex);
+        if(!mAlreadyExited)
+            mDoneCV.wait(lk);
+    }
+
     bool Renderer::renderFrame(RenderState* state)
     {
         if(mDone)
+        {
+            {
+                std::unique_lock<std::mutex> lk(mDoneMutex);
+                mAlreadyExited = true;
+            }
+            mDoneCV.notify_one();
             return false;
+        }
 
         if(state)
         {

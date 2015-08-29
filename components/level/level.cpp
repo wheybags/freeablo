@@ -4,17 +4,13 @@
 
 namespace Level
 {
-    Level::Level(const std::string& dunPath, const std::string& tilPath, const std::string& minPath,
-         const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-         const std::pair<size_t,size_t>& upStairs):
-            mDun(dunPath), mTil(tilPath), mMin(minPath), mSol(solPath), mTileSetPath(tileSetPath),
-            mUpStairs(upStairs), mDownStairs(downStairs){}
-     
     Level::Level(const Dun& dun, const std::string& tilPath, const std::string& minPath,
         const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-        const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap):
+        const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap, size_t previous, size_t next):
         mDun(dun), mTil(tilPath), mMin(minPath), mSol(solPath), mTileSetPath(tileSetPath),
-        mMinPath(minPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs){}
+
+        mMinPath(minPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs),
+        mPrevious(previous), mNext(next){}
 
     std::vector<int16_t> Level::mEmpty(16);
 

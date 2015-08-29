@@ -24,7 +24,7 @@ namespace FAWorld
     {
         public:
             Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos);
-            void update();
+            void update(bool noclip);
 
             void setStats(ActorStats* stats);
 
@@ -41,6 +41,13 @@ namespace FAWorld
             Inventory mInventory;
 
 
+            std::pair<size_t, size_t> mDestination;
+
+            std::pair<size_t, size_t>& destination()
+            {
+                return mDestination;
+            }
+
         protected:
 
             friend class boost::serialization::access;
@@ -49,13 +56,18 @@ namespace FAWorld
             void save(Archive & ar, const unsigned int version) const
             {
                 ar & this->mPos;
+                ar & this->mFrame;
+                ar & this->mAnimState;
+                ar & this->mDestination;
             }
 
             template<class Archive>
             void load(Archive & ar, const unsigned int version)
             {
                 ar & this->mPos;
-                mAnimState = AnimState::idle;
+                ar & this->mFrame;
+                ar & this->mAnimState;
+                ar & this->mDestination;
             }
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()

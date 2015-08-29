@@ -7,10 +7,15 @@
 #include <diabloexe/diabloexe.h>
 #include <level/baseitemmanager.h>
 #include <boost/program_options.hpp>
-void runGameLoop(const boost::program_options::variables_map& variables);
+
+namespace Engine
+{
+    class EngineMain;
+}
 namespace FAWorld
 
 {
+
     class ItemPosition
     {
     public:
@@ -47,7 +52,8 @@ namespace FAWorld
         static std::map<uint8_t, Item> mUniqueItems;
         static std::map<uint32_t, DiabloExe::BaseItem> mUniqueCodeToBaseItem;
         static uint32_t lastUnique;
-        friend void ::runGameLoop(const boost::program_options::variables_map& variables);
+        friend class Engine::EngineMain;
+
     };
 }
 

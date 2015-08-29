@@ -19,7 +19,7 @@ namespace DiabloExe
     class DiabloExe
     {
         public:
-            DiabloExe();
+            DiabloExe(const std::string& pathEXE = "Diablo.exe");
 
             const Monster& getMonster(const std::string& name) const;
             std::vector<const Monster*> getMonstersInLevel(size_t levelNum) const;
@@ -41,8 +41,8 @@ namespace DiabloExe
 
 
         private:
-            std::string getMD5();
-            std::string getVersion();
+            std::string getMD5(const std::string& pathEXE);
+            std::string getVersion(const std::string& pathEXE);
 
 
             void loadMonsters(FAIO::FAFile* exe);

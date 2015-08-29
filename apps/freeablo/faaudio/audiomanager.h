@@ -10,6 +10,11 @@
 
 #include <audio/audio.h>
 
+namespace Engine
+{
+    class ThreadManager;
+}
+
 namespace FAAudio
 {
     struct CacheEntry
@@ -31,6 +36,8 @@ namespace FAAudio
 
             void play(std::string path);
             void playMusic(const std::string& path);
+
+            static void playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager);
 
         private:
             std::vector<std::string> mPlaying;

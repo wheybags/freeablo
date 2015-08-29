@@ -42,12 +42,9 @@ namespace Level
     class Level
     {
         public:
-            Level(const std::string& dunPath, const std::string& tilPath, const std::string& minPath,
-                const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-                const std::pair<size_t,size_t>& upStairs);
             Level(const Dun& dun, const std::string& tilPath, const std::string& minPath, 
                 const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
-                const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap);
+                const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap, size_t previous, size_t next);
 
             Misc::Helper2D<const Level, const MinPillar> operator[] (size_t x) const;
 
@@ -70,6 +67,16 @@ namespace Level
 
             bool isStairs(size_t, size_t) const;
 
+            int32_t getNextLevel() const
+            {
+                return mNext;
+            }
+
+            int32_t getPreviousLevel() const
+            {
+                return mPrevious;
+            }
+
         private:
             Dun mDun;
             TileSet mTil;
@@ -87,6 +94,9 @@ namespace Level
             BaseItemManager * mItemManager;
             static std::vector<int16_t> mEmpty;
             friend const MinPillar get(size_t x, size_t y, const Level& level);
+
+            int32_t mPrevious; ///< index of previous level
+            int32_t mNext; ///< index of next level
     };
 }
 
