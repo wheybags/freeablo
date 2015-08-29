@@ -2,11 +2,14 @@
 #define WORLD_H
 
 #include <vector>
+#include <map>
+#include <utility>
 
 #include "actor.h"
 #include "player.h"
 
 #include <level/level.h>
+
 
 namespace FARender
 {
@@ -23,17 +26,24 @@ namespace FAWorld
     class World
     {
         public:
-            World();
+            World(const DiabloExe::DiabloExe& exe);
             ~World();
 
-            void setLevel(Level::Level& level, const DiabloExe::DiabloExe& exe);
-            void addNpcs(const DiabloExe::DiabloExe& exe);
+            static World* get();
+
+            void generateLevels();
+
+            Level::Level* getCurrentLevel();
+            size_t getCurrentLevelIndex();
+
+            void setLevel(size_t levelnum);
+            void addNpcs();
 
             Actor* getActorAt(size_t x, size_t y);
 
             void clear();
 
-            void update();
+            void update(bool noclip);
             Player* getPlayer();
             void fillRenderState(FARender::RenderState* state);
 
@@ -41,16 +51,20 @@ namespace FAWorld
 
         private:
             void actorMapInsert(Actor* actor); ///< insert actor into 2d map for collision
+            void actorMapRemove(Actor* actor);
             void actorMapClear();
 
             std::vector<Actor*> mActors;
 
-            Level::Level* mLevel;
-            std::vector<Actor*> mActorMap2D; ///< 2d array of same size as current level, containing all actors at their
-                                             ///< positions. Contains NULL where no Actor is present.
-                                             ///< Where an actor straddles two squares, they shall be placed in both.
+            std::vector<Level::Level> mLevels;
+            Level::Level* mCurrentLevel;
+            size_t mCurrentLevelIndex;
+            std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Contains NULL where no Actor is present.
+                                                                        ///< Where an actor straddles two squares, they shall be placed in both.
             Player* mPlayer;
             size_t mTicksSinceLastAnimUpdate;
+
+            const DiabloExe::DiabloExe& mDiabloExe;
     };
 }
 

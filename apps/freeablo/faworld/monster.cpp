@@ -13,7 +13,7 @@ namespace FAWorld
     std::string Monster::getWalkCl2(const DiabloExe::Monster& monster)
     {
         boost::format fmt(monster.cl2Path);
-        fmt % 'n';
+        fmt % 'w';
 
         return fmt.str();
     }

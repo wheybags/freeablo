@@ -5,6 +5,8 @@
 #include <stdint.h>
 
 #include <map>
+#include <condition_variable>
+#include <mutex>
 #include <tuple>
 #include <atomic>
 
@@ -13,6 +15,7 @@
 #include "../faworld/position.h"
 
 #include "spritemanager.h"
+
 
 namespace Level
 {
@@ -64,6 +67,7 @@ namespace FARender
             ~Renderer();
 
             void stop();
+            void waitUntilDone();
 
             Tileset getTileset(const Level::Level& level);
 
@@ -97,6 +101,10 @@ namespace FARender
             Rocket::Core::Context* mRocketContext;
 
             SpriteManager mSpriteManager;
+
+            volatile bool mAlreadyExited = false;
+            std::mutex mDoneMutex;
+            std::condition_variable mDoneCV;
     };
 }
 

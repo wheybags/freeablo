@@ -41,9 +41,15 @@ add_executable(freeablo
     fagui/commandhistory.cpp
     fagui/autocomplete.h
     fagui/autocomplete.cpp
+    fagui/fapython.cpp
+    fagui/fapython.h
 
     engine/threadmanager.h
     engine/threadmanager.cpp
+    engine/input.h
+    engine/input.cpp
+    engine/enginemain.h
+    engine/enginemain.cpp
 
     faaudio/audiomanager.h
     faaudio/audiomanager.cpp

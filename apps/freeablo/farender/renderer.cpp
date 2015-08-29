@@ -169,10 +169,24 @@ namespace FARender
         return mRocketContext;
     }
 
+    void Renderer::waitUntilDone()
+    {
+        std::unique_lock<std::mutex> lk(mDoneMutex);
+        if(!mAlreadyExited)
+            mDoneCV.wait(lk);
+    }
+
     bool Renderer::renderFrame(RenderState* state)
     {
         if(mDone)
+        {
+            {
+                std::unique_lock<std::mutex> lk(mDoneMutex);
+                mAlreadyExited = true;
+            }
+            mDoneCV.notify_one();
             return false;
+        }
 
         if(state)
         {
