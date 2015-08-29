@@ -260,12 +260,10 @@ namespace FAIO
         
         if(ptr)
         {
-            int asdf = FAfseek(file, ptr, SEEK_SET);
+            FAfseek(file, ptr, SEEK_SET);
             char c;
 
 			size_t bytesRead = FAfread(&c, 1, 1, file);
-
-			volatile size_t asd = 0;
 
             while(c != '\0' && bytesRead)
             {

@@ -26,7 +26,7 @@ before_install:
 before_script:
 - mkdir build
 - cd build
-- cmake ../ 
+- cmake ../ -DCMAKE_CXX_FLAGS="-Werror"
 script:
 - make
 after_success: 

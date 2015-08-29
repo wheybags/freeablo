@@ -7,6 +7,8 @@
 
 #include "../fasavegame/savegame.h"
 
+#include <misc/misc.h>
+
 namespace FAWorld
 {
     class Position
@@ -32,6 +34,8 @@ namespace FAWorld
             template<class Archive>
             void save(Archive & ar, const unsigned int version) const
             {
+                UNUSED_PARAM(version);
+
                 ar << mDirection;
                 ar << mCurrent;
             }
@@ -39,6 +43,8 @@ namespace FAWorld
             template<class Archive>
             void load(Archive & ar, const unsigned int version)
             {
+                UNUSED_PARAM(version);
+
                 ar >> mDirection;
                 ar >> mCurrent;
                 mMoving = false;

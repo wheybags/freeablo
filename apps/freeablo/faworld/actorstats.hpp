@@ -398,6 +398,7 @@ namespace FAWorld
 
             bool levelUp(BasicStat statModified)
             {
+                UNUSED_PARAM(statModified);
                 mLevelPointsToSpend=5;
                 mLevelPoints--;
                 mLevel++;
