@@ -32,6 +32,7 @@ namespace Engine
             void stop();
             void pause();
             void unPause();
+            void toggleNoclip();
 
         private:
             void runGameLoop(const boost::program_options::variables_map& variables);
@@ -39,6 +40,7 @@ namespace Engine
             EngineInputManager* mInputManager = NULL;
             bool mDone = false;
             bool mPaused = false;
+            bool mNoclip = false;
     };
 }
 

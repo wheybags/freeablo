@@ -13,8 +13,6 @@ namespace Engine
 {
     class EngineMain;
 
-    extern bool noclip;
-
     extern size_t xClick, yClick;
     extern bool mouseDown;
     extern bool click;

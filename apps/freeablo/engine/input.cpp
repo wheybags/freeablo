@@ -10,8 +10,6 @@
 
 namespace Engine
 {
-    bool noclip = false;
-
     size_t xClick = 0, yClick = 0;
     bool mouseDown = false;
     bool click = false;
@@ -84,7 +82,7 @@ namespace Engine
             }
             else if (hotkey == noclip_key)
             {
-                noclip = !noclip;
+                mEngine.toggleNoclip();
             }
             else if (hotkey == changelvlup_key || hotkey == changelvldwn_key)
             {

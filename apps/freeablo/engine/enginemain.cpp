@@ -160,7 +160,7 @@ namespace Engine
 
                 FAWorld::Actor* actorAtNext = world.getActorAt(player->mPos.next().first, player->mPos.next().second);
 
-                if(!Engine::noclip && (!(*level)[player->mPos.next().first][player->mPos.next().second].passable() ||
+                if(!mNoclip && (!(*level)[player->mPos.next().first][player->mPos.next().second].passable() ||
                    (actorAtNext != NULL && actorAtNext != player)))
                 {
                     player->mPos.mMoving = false;
@@ -218,5 +218,10 @@ namespace Engine
     void EngineMain::unPause()
     {
         mPaused = false;
+    }
+
+    void EngineMain::toggleNoclip()
+    {
+        mNoclip = !mNoclip;
     }
 }
