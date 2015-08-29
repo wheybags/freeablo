@@ -11,7 +11,8 @@ namespace FAWorld
 
 namespace Engine
 {
-    extern bool done;
+    class EngineMain;
+
     extern bool paused;
     extern bool noclip;
 
@@ -28,7 +29,7 @@ namespace Engine
     class EngineInputManager
     {
         public:
-            EngineInputManager();
+            EngineInputManager(EngineMain& engine);
             void update(bool paused);
 
         private:
@@ -40,6 +41,7 @@ namespace Engine
             Input::InputManager mInput;
 
             bool mToggleConsole = false;
+            EngineMain& mEngine;
     };
 }
 

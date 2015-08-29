@@ -6,10 +6,10 @@
 #include "../faworld/world.h"
 #include "../fagui/console.h"
 #include "../farender/renderer.h"
+#include "enginemain.h"
 
 namespace Engine
 {
-    bool done = false;
     bool paused = false;
     bool noclip = false;
 
@@ -23,13 +23,14 @@ namespace Engine
     Input::Hotkey changelvlup_key;
     Input::Hotkey toggleconsole_key;
 
-    EngineInputManager::EngineInputManager():
+    EngineInputManager::EngineInputManager(EngineMain& engine):
         mInput( boost::bind(&EngineInputManager::keyPress,this, _1),
                 NULL,
                 boost::bind(&EngineInputManager::mouseClick, this, _1, _2, _3),
                 boost::bind(&EngineInputManager::mouseRelease, this, _1, _2, _3),
                 boost::bind(&EngineInputManager::mouseMove, this, _1, _2),
-                FARender::Renderer::get()->getRocketContext())
+                FARender::Renderer::get()->getRocketContext()),
+        mEngine(engine)
     { }
 
     void EngineInputManager::keyPress(Input::Key key)
@@ -80,7 +81,7 @@ namespace Engine
         {
             if (hotkey == quit_key)
             {
-                done = true;
+                mEngine.stop();
             }
             else if (hotkey == noclip_key)
             {

@@ -1,21 +1,25 @@
-#include <string>
-#include <level/itemmanager.h>
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H
 
+#include <string>
+
+#include <level/itemmanager.h>
+
+#include "fapython.h"
+
 namespace FAGui
 {
-    void initGui(FAWorld::Inventory &playerInventory);
-    void showIngameGui();
-    void showMainMenu();
-    void updateGui();
-    void placeItem(uint32_t toPara,
-                   uint32_t fromPara,
-                   uint32_t fromY=0,
-                   uint32_t fromX=0,
-                   uint32_t toY=0,
-                   uint32_t toX=0,
-                   uint32_t beltX=0);
+    class GuiManager
+    {
+        public:
+        GuiManager(FAWorld::Inventory &playerInventory, Engine::EngineMain& engine);
+        void showIngameGui();
+        void showMainMenu();
+        void updateGui();
+
+        FAPythonFuncs mPythonFuncs;
+    };
+
     extern std::string cursorPath;
     extern uint32_t cursorFrame;
 }

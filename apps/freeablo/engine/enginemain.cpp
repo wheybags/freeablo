@@ -42,7 +42,7 @@ namespace Engine
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen);
 
-        mInputManager = new EngineInputManager();
+        mInputManager = new EngineInputManager(*this);
 
         std::thread mainThread(boost::bind(&EngineMain::runGameLoop, this, &variables));
 
@@ -80,7 +80,7 @@ namespace Engine
 
         FAWorld::Player* player = world.getPlayer();
 
-        FAGui::initGui(player->mInventory);
+        FAGui::GuiManager guiManager(player->mInventory, *this);
 
         // -1 represents the main menu
         if(currentLevel != -1)
@@ -90,12 +90,12 @@ namespace Engine
 
             player->mPos = FAWorld::Position(level.upStairsPos().first, level.upStairsPos().second);
 
-            FAGui::showIngameGui();
+            guiManager.showIngameGui();
         }
         else
         {
             Engine::paused = true;
-            FAGui::showMainMenu();
+            guiManager.showMainMenu();
             threadManager.playMusic("music/dintro.wav");
         }
 
@@ -108,7 +108,7 @@ namespace Engine
         Engine::toggleconsole_key = Input::Hotkey("ToggleConsole");
 
         // Main game logic loop
-        while(!Engine::done)
+        while(!mDone)
         {
             mInputManager->update(Engine::paused);
 
@@ -171,7 +171,7 @@ namespace Engine
                 world.update();
             }
 
-            FAGui::updateGui();
+            guiManager.updateGui();
 
             FARender::RenderState* state = renderer.getFreeState();
 
@@ -203,5 +203,10 @@ namespace Engine
 
         renderer.stop();
         renderer.waitUntilDone();
+    }
+
+    void EngineMain::stop()
+    {
+        mDone = true;
     }
 }

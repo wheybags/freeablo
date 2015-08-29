@@ -29,10 +29,13 @@ namespace Engine
 
             void run(const boost::program_options::variables_map& variables);
 
+            void stop();
+
         private:
             void runGameLoop(const boost::program_options::variables_map& variables);
 
             EngineInputManager* mInputManager = NULL;
+            bool mDone = false;
     };
 }
 
