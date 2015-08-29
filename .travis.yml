@@ -28,7 +28,7 @@ before_script:
 - cd build
 - cmake ../ 
 script:
-- make -j4
+- make
 after_success: 
 - cd ..
 - ./update-gh-pages.sh
