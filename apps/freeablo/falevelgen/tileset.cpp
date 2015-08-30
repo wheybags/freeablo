@@ -294,8 +294,13 @@ namespace FALevelGen
             case TileSetEnum::joinXBottomCorner: return joinXBottomCorner;
             case TileSetEnum::joinBottomCorner: return joinBottomCorner;
             case TileSetEnum::joinYBottomCorner: return joinYBottomCorner;
+
+            // these two just used internally in levelgen.cpp, not loaded from a file like the rest
+            case TileSetEnum::upStairs: break;
+            case TileSetEnum::downStairs: break;
         }
 
+        assert(false && "tried to convert invalid tile");
         return val;
     }
 }

@@ -97,7 +97,7 @@ bool ProcessInvoker::startProcess(const QString &name, const QStringList &argume
 
 }
 
-void ProcessInvoker::processError(QProcess::ProcessError error)
+void ProcessInvoker::processError()
 {
     QMessageBox msgBox;
     msgBox.setWindowTitle(tr("Error running executable"));

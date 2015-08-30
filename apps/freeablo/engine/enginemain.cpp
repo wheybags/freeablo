@@ -58,7 +58,6 @@ namespace Engine
         FALevelGen::FAsrand(time(NULL));
 
         FARender::Renderer& renderer = *FARender::Renderer::get();
-        Input::InputManager& input = *Input::InputManager::get();
         Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
         std::string character = variables["character"].as<std::string>() ;
         DiabloExe::DiabloExe exe;
@@ -217,7 +216,7 @@ namespace Engine
         {
             auto now = std::chrono::system_clock::now();
 
-            while(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count() < 1000/FAWorld::World::ticksPerSecond)
+            while(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count() < (int64_t)(1000/FAWorld::World::ticksPerSecond))
             {
                 std::this_thread::yield();
                 now = std::chrono::system_clock::now();

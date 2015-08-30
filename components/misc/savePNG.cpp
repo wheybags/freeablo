@@ -4,6 +4,9 @@
 * This code is free software, available under zlib/libpng license.
 * http://www.libpng.org/pub/png/src/libpng-LICENSE.txt
 */
+
+#include <misc/disablewarn.h> // don't want warnings for third party files
+
 #include <SDL.h>
 #include <png.h>
 

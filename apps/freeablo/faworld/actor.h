@@ -7,6 +7,8 @@
 #include "../farender/renderer.h"
 #include "../fasavegame/savegame.h"
 
+#include <misc/misc.h>
+
 namespace FAWorld
 {
     class ActorStats;
@@ -61,6 +63,8 @@ namespace FAWorld
             template<class Archive>
             void save(Archive & ar, const unsigned int version) const
             {
+                UNUSED_PARAM(version);
+
                 ar & this->mPos;
                 ar & this->mFrame;
                 ar & this->mAnimState;
@@ -70,6 +74,8 @@ namespace FAWorld
             template<class Archive>
             void load(Archive & ar, const unsigned int version)
             {
+                UNUSED_PARAM(version);
+
                 ar & this->mPos;
                 ar & this->mFrame;
                 ar & this->mAnimState;

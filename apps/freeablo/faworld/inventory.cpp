@@ -423,6 +423,7 @@ bool Inventory::putItem(Item &item,
         collectEffects();
     return true;
 }
+
 Item& Inventory::getItemAt(Item::equipLoc type, uint8_t y, uint8_t x, uint8_t beltX)
 {
 
@@ -442,7 +443,6 @@ Item& Inventory::getItemAt(Item::equipLoc type, uint8_t y, uint8_t x, uint8_t be
     default: break;
 
     }
-
 
     return Item::empty;
 }

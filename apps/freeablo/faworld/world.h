@@ -36,7 +36,7 @@ namespace FAWorld
             Level::Level* getCurrentLevel();
             size_t getCurrentLevelIndex();
 
-            void setLevel(size_t levelnum);
+            void setLevel(int32_t levelnum);
             void addNpcs();
 
             Actor* getActorAt(size_t x, size_t y);

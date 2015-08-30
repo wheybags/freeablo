@@ -238,7 +238,7 @@ void MainWindow::updateRender()
 
     if (mIsAnimation)
     {
-        mCurrentFrame = ++mCurrentFrame % size;
+        mCurrentFrame = (mCurrentFrame+1) % size;
         ui->currentFrame->setText(QString::number(mCurrentFrame));
     }
 
