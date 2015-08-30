@@ -1,11 +1,12 @@
 #include "actor.h"
 
 #include <misc/misc.h>
-
+#include "actorstats.hpp"
 #include "world.h"
-
+#include "../engine/threadmanager.h"
 namespace FAWorld
 {
+
     void Actor::update(bool noclip)
     {
         if(mPos.current() != mDestination)
@@ -45,6 +46,36 @@ namespace FAWorld
 
         mPos.update(); 
     }
+    bool Actor::attack(Actor *enemy)
+    {
+        if(enemy->mStats != NULL && enemy != this)
+        {
+            if(mPos.distanceFrom(enemy->mPos) <= 2)
+            {
+                    //setAnimation(AnimState::attackMelee);
+                    Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne("sfx/misc/swing2.wav", "sfx/misc/swing.wav"));
+                    enemy->mStats->takeDamage(mStats->getMeleeDamage());
+                    if(enemy->mStats->getCurrentHP() ==0)
+                        enemy->die();
+                    return true;
+
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+        return false;
+
+
+    }
+
+    void Actor::setWorld(World *world)
+    {
+        mWorld = world;
+    }
+
+
     Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos):
         mPos(pos),
         mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)),
@@ -65,6 +96,12 @@ namespace FAWorld
     {
         mIdleAnim = FARender::Renderer::get()->loadImage(path);
     }
+
+    void Actor::die()
+    {
+        mWorld->deleteActorFromWorld(this);
+    }
+
 
     FARender::FASpriteGroup Actor::getCurrentAnim()
     {

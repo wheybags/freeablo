@@ -40,6 +40,14 @@ namespace FAWorld
         return singletonInstance;
     }
 
+    void World::deleteActorFromWorld(Actor * dead)
+    {
+        mActorMap2D[dead->mPos.current()] = NULL;
+        mActors.erase(std::remove(mActors.begin(), mActors.end(), dead));
+        delete dead;
+
+    }
+
     void World::generateLevels()
     {
         Level::Dun sector1("levels/towndata/sector1s.dun");

@@ -10,6 +10,7 @@
 namespace FAWorld
 {
     class ActorStats;
+    class World;
 
     namespace AnimState
     {
@@ -33,12 +34,15 @@ namespace FAWorld
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);
 
+            bool attack(Actor * enemy);
             Position mPos;            
         //private: //TODO: fix this
             FARender::FASpriteGroup mWalkAnim;
             FARender::FASpriteGroup mIdleAnim;
             size_t mFrame;
             Inventory mInventory;
+            void setWorld(World *world);
+            void die();
 
 
             std::pair<size_t, size_t> mDestination;
@@ -49,6 +53,8 @@ namespace FAWorld
             }
 
         protected:
+
+            World * mWorld;
 
             friend class boost::serialization::access;
 

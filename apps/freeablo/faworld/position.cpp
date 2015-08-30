@@ -31,6 +31,12 @@ namespace FAWorld
         return mCurrent;
     }
 
+    double Position::distanceFrom(Position B)
+    {
+        return sqrt(pow(mCurrent.first - B.mCurrent.first, 2) + pow(mCurrent.second - B.mCurrent.second, 2));
+
+    }
+
     std::pair<size_t, size_t> Position::next() const
     {
         if(!mMoving)

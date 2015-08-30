@@ -43,6 +43,8 @@ namespace FAWorld
 
             void clear();
 
+            void deleteActorFromWorld(Actor * dead);
+
             void update(bool noclip);
             Player* getPlayer();
             void fillRenderState(FARender::RenderState* state);

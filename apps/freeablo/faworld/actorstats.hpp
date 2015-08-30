@@ -39,6 +39,8 @@ namespace FAWorld
             uint32_t getStrength() const{return mStrength;}
             uint32_t getMaxStrength() const{return mMaxStrength;}
 
+            uint32_t getCurrentHP(){return mCurrentHP;}
+
             void setActor(Actor * actor){mActor = actor;}
 
             ActorStats(DiabloExe::CharacterStats stats) :
@@ -434,6 +436,23 @@ namespace FAWorld
             }
 
             virtual void recalculateDerivedStats(){}
+
+            virtual void takeDamage(double amount)
+            {
+                mCurrentHP -= amount;
+
+            }
+
+            virtual double getMeleeDamage()
+            {
+                return mDamageDoneMelee;
+            }
+
+            double getAttackSpeed()
+            {
+                return mAttackSpeed;
+            }
+
 
         protected:
             const std::vector<uint32_t> mExpForLevel;

@@ -4,7 +4,7 @@
 #include <utility>
 #include <stdlib.h>
 #include <stdint.h>
-
+#include <cmath>
 #include "../fasavegame/savegame.h"
 
 namespace FAWorld
@@ -25,6 +25,8 @@ namespace FAWorld
 
             int32_t mDirection;
             bool mMoving;
+            double distanceFrom(Position B);
+
         
         private:
             std::pair<size_t, size_t> mCurrent;
