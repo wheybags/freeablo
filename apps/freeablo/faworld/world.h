@@ -46,8 +46,9 @@ namespace FAWorld
             void update(bool noclip);
 
             Player* getCurrentPlayer();
-            void addPlayer(Player* player);
+            void addPlayer(uint32_t id, Player* player);
             Player* getPlayer(size_t id);
+            void setCurrentPlayerId(uint32_t id);
 
             void fillRenderState(FARender::RenderState* state);
             void setStatsObject(ActorStats *stats);
@@ -66,7 +67,7 @@ namespace FAWorld
             std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Contains NULL where no Actor is present.
                                                                         ///< Where an actor straddles two squares, they shall be placed in both.
             Player* mCurrentPlayer;
-            std::vector<Player*> mPlayers;
+            std::map<uint32_t, Player*> mPlayers;
 
             size_t mTicksSinceLastAnimUpdate;
 

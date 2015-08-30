@@ -19,7 +19,6 @@ namespace FAWorld
 
         mCurrentPlayer = new Player();
         mActors.push_back(mCurrentPlayer);
-        mPlayers.push_back(mCurrentPlayer);
 
         mTicksSinceLastAnimUpdate = 0;
         mCurrentLevel = NULL;
@@ -178,16 +177,24 @@ namespace FAWorld
 
     Player* World::getPlayer(size_t id)
     {
-        return mPlayers[1];
+        if(mPlayers.find(id) != mPlayers.end())
+            return mPlayers[id];
+        else
+            return NULL;
     }
 
-    void World::addPlayer(Player *player)
+    void World::addPlayer(uint32_t id, Player *player)
     {
-        mPlayers.push_back(player);
+        mPlayers[id] = player;
         mActors.push_back(player);
         actorMapInsert(player);
     }
-    
+
+    void World::setCurrentPlayerId(uint32_t id)
+    {
+        mPlayers[id] = mCurrentPlayer;
+    }
+
     void World::fillRenderState(FARender::RenderState* state)
     {
         state->mObjects.clear();
