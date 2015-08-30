@@ -5,7 +5,7 @@
 #include "inventory.h"
 #include "itemmanager.h"
 #include "player.h"
-#include "actorstats.hpp"
+#include "actorstats.h"
 namespace FAWorld
 {
 Inventory::Inventory(Actor * actor)

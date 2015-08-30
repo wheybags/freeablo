@@ -1,6 +1,6 @@
 #ifndef DIABLOCHARACTERSTATS_H
 #define DIABLOCHARACTERSTATS_H
-#include "actorstats.hpp"
+#include "actorstats.h"
 namespace FAWorld
 {
     class Inventory;
