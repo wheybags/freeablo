@@ -20,6 +20,7 @@ Find_Package(PythonLibs 2 REQUIRED)
 Find_package(LibRocket REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core REQUIRED)
+find_package(Enet REQUIRED)
 
 if (Qt5_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -63,6 +64,7 @@ include_directories (
     ${PYTHON_INCLUDE_DIR}
     ${ROCKET_INCLUDE_DIR}
     ${Qt5Widgets_INCLUDE_DIRS}
+    ${ENET_INCLUDE_DIR}
     "${PROJECT_SOURCE_DIR}/components/"
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
 
@@ -89,6 +91,7 @@ link_libraries (
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Qt5Widgets_LIBRARIES}
+    ${ENET_LIBRARY}
     Cel
     FAIO
     Levels

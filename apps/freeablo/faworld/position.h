@@ -6,12 +6,13 @@
 #include <stdint.h>
 
 #include "../fasavegame/savegame.h"
+#include "netobject.h"
 
 #include <misc/misc.h>
 
 namespace FAWorld
 {
-    class Position
+    class Position : public NetObject
     {
         public:
             Position();
@@ -27,6 +28,10 @@ namespace FAWorld
 
             int32_t mDirection;
             bool mMoving;
+
+            virtual size_t getSize();
+            virtual size_t writeTo(ENetPacket *packet, size_t start);
+            virtual size_t readFrom(ENetPacket *packet, size_t start);
         
         private:
             std::pair<size_t, size_t> mCurrent;

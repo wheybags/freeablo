@@ -36,6 +36,7 @@ add_executable(freeablo
 	faworld/actorstats.hpp
 	faworld/characterstats.h
 	faworld/characterstats.cpp
+    faworld/netobject.h
     
 	fagui/guimanager.h
     fagui/guimanager.cpp
@@ -58,6 +59,8 @@ add_executable(freeablo
     engine/input.cpp
     engine/enginemain.h
     engine/enginemain.cpp
+    engine/netmanager.cpp
+    engine/netmanager.h
 
     faaudio/audiomanager.h
     faaudio/audiomanager.cpp

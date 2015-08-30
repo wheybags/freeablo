@@ -9,13 +9,17 @@
 #include "../falevelgen/random.h"
 #include "../fagui/guimanager.h"
 #include "../faaudio/audiomanager.h"
-#include "threadmanager.h"
-#include "input.h"
 #include "../faworld/itemmanager.h"
 #include "../faworld/characterstats.h"
+#include "threadmanager.h"
+#include "input.h"
+#include "netmanager.h"
+
+
 #include <misc/misc.h>
 #include <input/inputmanager.h>
 
+#include <enet/enet.h>
 
 namespace bpo = boost::program_options;
 
@@ -208,9 +212,15 @@ namespace Engine
 
         auto last = std::chrono::system_clock::now();
 
+        bool isServer = variables["mode"].as<std::string>() == "server";
+
+        NetManager netManager(isServer);
+
         // Main game logic loop
         while(!mDone)
         {
+            netManager.update();
+
             auto now = std::chrono::system_clock::now();
 
             while(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count() < (int64_t)(1000/FAWorld::World::ticksPerSecond))
@@ -253,8 +263,6 @@ namespace Engine
                 Render::updateGuiBuffer(NULL);
             }
             renderer.setCurrentState(state);
-
-
         }
 
         renderer.stop();
