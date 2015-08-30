@@ -24,6 +24,7 @@ class DraggableWidget(object):
 
         for child in inventory_element.child_nodes:
             child.inner_rml = ""
+            child.style.background_color="#00000000"
         inventory = freeablo.updateInventory()
 
         leftHandItem = inventory["leftHand"]
@@ -173,18 +174,20 @@ class DraggableWidget(object):
             element = self.document.CreateElement("div")
             element.SetAttribute("InvX", str(item["invX"]))
             element.SetAttribute("InvY", str(item["invY"]))
-            if item["empty"] is False:
-                parent.style.background_color="#A3191950"
+            if item["empty"] is False:                
                 element.SetAttribute("class", "itemGraphic"+str(item["graphic"]))
                 element.SetAttribute("SizeX", str(item["sizeX"]))
                 element.SetAttribute("SizeY", str(item["sizeY"]))
+                element.style.background_color="#A3191950"
                 element.style.width = str(28*item["sizeX"])
                 element.style.height = str(28*item["sizeY"])
                 element.SetAttribute("CornerX", str(item["cornerX"]))
                 element.SetAttribute("CornerY", str(item["cornerY"]))
                 if item["real"] is True:
+
                     element.SetAttribute("real", "true")
-                else:                    
+                else:
+
                     element.style.display = "none"
                     element.SetAttribute("real", "false")
             else:
