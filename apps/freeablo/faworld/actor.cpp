@@ -1,9 +1,10 @@
 #include "actor.h"
 
 #include <misc/misc.h>
-#include "actorstats.hpp"
+#include "actorstats.h"
 #include "world.h"
 #include "../engine/threadmanager.h"
+#include "../falevelgen/random.h"
 namespace FAWorld
 {
 
