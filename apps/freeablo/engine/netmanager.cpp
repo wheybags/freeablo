@@ -35,6 +35,13 @@ namespace Engine
                 std::cout << "connection failed" << std::endl;
             }
         }
+
+        FAWorld::World& world = *FAWorld::World::get();
+        FAWorld::Player* newPlayer = new FAWorld::Player();
+        newPlayer->mPos = FAWorld::Position(76, 68);
+        newPlayer->destination() = newPlayer->mPos.current();
+
+        world.addPlayer(newPlayer);
     }
 
     NetManager::~NetManager()
@@ -63,22 +70,75 @@ namespace Engine
 
                 case ENET_EVENT_TYPE_RECEIVE:
                 {
-                    if(!mIsServer)
-                        world.getPlayer()->readFrom(event.packet, 0);
+                    if(mIsServer)
+                        readClientPacket(event.packet);
+                    else
+                        readServerPacket(event.packet);
 
-                    enet_packet_destroy(event.packet);
                     break;
                 }
             }
         }
 
-        if(mIsServer && mPeer)
+        if(mPeer)
         {
-            ENetPacket* packet = enet_packet_create(NULL, world.getPlayer()->getSize(), 0);
-            world.getPlayer()->writeTo(packet, 0);
-            enet_peer_send(mPeer, 0, packet);
+            if(mIsServer)
+                sendServerPacket();
+            else
+                sendClientPacket();
         }
 
         enet_host_flush(mHost);
+    }
+
+    void NetManager::sendServerPacket()
+    {
+        FAWorld::World& world = *FAWorld::World::get();
+
+        ENetPacket* packet = enet_packet_create(NULL, world.getCurrentPlayer()->getSize()*2, 0);
+
+        size_t position = 0;
+        position = world.getCurrentPlayer()->writeTo(packet, position);
+        position = world.getPlayer(1)->writeTo(packet, position);
+
+        enet_peer_send(mPeer, 0, packet);
+    }
+
+    struct ClientPacket
+    {
+        size_t destX;
+        size_t destY;
+    };
+
+    void NetManager::sendClientPacket()
+    {
+        ENetPacket* packet = enet_packet_create(NULL, sizeof(ClientPacket), 0);
+
+        auto player = FAWorld::World::get()->getCurrentPlayer();
+
+        ClientPacket* data = (ClientPacket*)packet->data;
+        data->destX = player->destination().first;
+        data->destY = player->destination().second;
+
+        enet_peer_send(mPeer, 0, packet);
+    }
+
+    void NetManager::readServerPacket(ENetPacket* packet)
+    {
+        FAWorld::World& world = *FAWorld::World::get();
+
+        size_t position = 0;
+        position = world.getPlayer(1)->readFrom(packet, position);
+        position = world.getCurrentPlayer()->readFrom(packet, position);
+    }
+
+    void NetManager::readClientPacket(ENetPacket* packet)
+    {
+        ClientPacket* data = (ClientPacket*)packet->data;
+
+        auto player = FAWorld::World::get()->getPlayer(1);
+
+        player->destination().first = data->destX;
+        player->destination().second = data->destY;
     }
 }

@@ -44,7 +44,11 @@ namespace FAWorld
             void clear();
 
             void update(bool noclip);
-            Player* getPlayer();
+
+            Player* getCurrentPlayer();
+            void addPlayer(Player* player);
+            Player* getPlayer(size_t id);
+
             void fillRenderState(FARender::RenderState* state);
             void setStatsObject(ActorStats *stats);
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
@@ -61,7 +65,9 @@ namespace FAWorld
             size_t mCurrentLevelIndex;
             std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Contains NULL where no Actor is present.
                                                                         ///< Where an actor straddles two squares, they shall be placed in both.
-            Player* mPlayer;
+            Player* mCurrentPlayer;
+            std::vector<Player*> mPlayers;
+
             size_t mTicksSinceLastAnimUpdate;
 
             const DiabloExe::DiabloExe& mDiabloExe;

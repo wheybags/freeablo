@@ -125,8 +125,14 @@ namespace FAWorld
         ActorNetData* data = (ActorNetData*)(packet->data + start);
         mFrame = data->frame;
         mAnimState = (AnimState::AnimState)data->animState;
-        mDestination.first = data->destX;
-        mDestination.second = data->destY;
+
+        // don't want to read destination for our player object,
+        // we keep track of our own destination
+        if(World::get()->getCurrentPlayer() != this)
+        {
+            mDestination.first = data->destX;
+            mDestination.second = data->destY;
+        }
 
         return start + sizeof(ActorNetData);
     }

@@ -17,15 +17,17 @@ namespace FAWorld
         assert(singletonInstance == NULL);
         singletonInstance = this;
 
-        mPlayer = new Player();
-        mActors.push_back(mPlayer);
+        mCurrentPlayer = new Player();
+        mActors.push_back(mCurrentPlayer);
+        mPlayers.push_back(mCurrentPlayer);
+
         mTicksSinceLastAnimUpdate = 0;
         mCurrentLevel = NULL;
     }
 
     void World::setStatsObject(ActorStats *stats)
     {
-        mPlayer->setStats(stats);
+        mCurrentPlayer->setStats(stats);
 
     }
 
@@ -115,12 +117,12 @@ namespace FAWorld
     {
         for(size_t i = 0; i < mActors.size(); i++)
         {
-            if(mActors[i] != mPlayer)
+            if(mActors[i] != mCurrentPlayer)
                 delete mActors[i];
         }
 
         mActors.clear();
-        mActors.push_back(mPlayer);
+        mActors.push_back(mCurrentPlayer);
     }
 
     void World::update(bool noclip)
@@ -169,9 +171,21 @@ namespace FAWorld
         mActorMap2D.clear();
     }
 
-    Player* World::getPlayer()
+    Player* World::getCurrentPlayer()
     {
-        return mPlayer;
+        return mCurrentPlayer;
+    }
+
+    Player* World::getPlayer(size_t id)
+    {
+        return mPlayers[1];
+    }
+
+    void World::addPlayer(Player *player)
+    {
+        mPlayers.push_back(player);
+        mActors.push_back(player);
+        actorMapInsert(player);
     }
     
     void World::fillRenderState(FARender::RenderState* state)

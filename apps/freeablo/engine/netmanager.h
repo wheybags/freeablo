@@ -14,6 +14,12 @@ namespace Engine
             void update();
 
         private:
+            void sendServerPacket();
+            void sendClientPacket();
+
+            void readServerPacket(ENetPacket* packet);
+            void readClientPacket(ENetPacket* packet);
+
             bool mIsServer;
 
             ENetPeer* mPeer = NULL;
