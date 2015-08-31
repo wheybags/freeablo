@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <vector>
 #include <diabloexe/diabloexe.h>
+#include <diabloexe/monster.h>
 #include "actor.h"
 
 
@@ -63,6 +64,8 @@ namespace FAWorld
                 mDexterity = mStartingDexterity;
                 recalculateDerivedStats();
             }
+            ActorStats(const DiabloExe::Monster & monsterStat);
+
             virtual void processEffects();
             virtual void printStats();
             bool levelUp(BasicStat statModified);
@@ -140,6 +143,8 @@ namespace FAWorld
             double mWalkSpeed=0.4;
             double mSwingSpeed=0.0;
             double mHitRecovery=0.0;
+            double mSecondAttackDamageDone=0.0;
+            uint32_t mMonsterType;
             uint8_t mLevelPointsToSpend;
             Actor * mActor;
     };

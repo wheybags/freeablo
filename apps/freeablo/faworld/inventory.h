@@ -34,6 +34,11 @@ namespace FAWorld
        uint32_t getTotalAttackDamage();
        uint32_t getTotalArmourClass();
        std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>>& getTotalEffects();
+       bool canPlaceItem(Item item,
+                         Item::equipLoc equipType,
+                         uint8_t y=0,
+                         uint8_t x=0,
+                         uint8_t beltX=0);
     private:
 
        Item mInventoryBox[4][10];
@@ -50,14 +55,6 @@ namespace FAWorld
        uint32_t mAttackDamageTotal;
        Actor * mActor;
        std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> mItemEffects;
-
-
-       bool canPlaceItem(Item item,
-                         Item::equipLoc equipType,
-                         uint8_t y=0,
-                         uint8_t x=0,
-                         uint8_t beltX=0);
-
        bool checkStatsRequirement(Item& item);
        bool fitsAt(Item item, uint8_t y, uint8_t x);
        void removeItem(Item &item, Item::equipLoc from, uint8_t beltX=0, uint8_t invY=0, uint8_t invX=0);

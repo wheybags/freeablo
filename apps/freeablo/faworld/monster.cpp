@@ -6,8 +6,8 @@
 
 namespace FAWorld
 {
-    Monster::Monster(const DiabloExe::Monster& monster, Position pos):
-        Actor(getWalkCl2(monster), getIdleCl2(monster), pos)
+    Monster::Monster(const DiabloExe::Monster& monster, Position pos, ActorStats *stats):
+        Actor(getWalkCl2(monster), getIdleCl2(monster), pos, stats)
     {}
 
     std::string Monster::getWalkCl2(const DiabloExe::Monster& monster)

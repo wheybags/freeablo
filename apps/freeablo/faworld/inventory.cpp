@@ -180,12 +180,15 @@ bool Inventory::canPlaceItem(
             }
         }
         break;
-    case Item::eqBELT:
+    case Item::eqBELT:        
         if(item.getEquipLoc() == Item::eqUNEQUIP && item.getType() == Item::itPOT)
         {
             if(beltX <= 7)
             {
-                if(mBelt[beltX].isEmpty()) return true;
+                if(mBelt[beltX].isEmpty())
+                {
+                    return true;
+                }
             }
 
         }

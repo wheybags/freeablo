@@ -6,6 +6,7 @@
 #include "../falevelgen/levelgen.h"
 #include "../faaudio/audiomanager.h"
 #include "../engine/threadmanager.h"
+#include "actorstats.h"
 #include "monster.h"
 
 namespace FAWorld
@@ -42,7 +43,7 @@ namespace FAWorld
 
     void World::deleteActorFromWorld(Actor * dead)
     {
-        mActorMap2D[dead->mPos.current()] = NULL;
+        mActorMap2D[dead->mPos.current()] = nullptr;
         mActors.erase(std::remove(mActors.begin(), mActors.end(), dead));
         delete dead;
 
@@ -88,7 +89,14 @@ namespace FAWorld
         const std::vector<Level::Monster>& monsters = mCurrentLevel->getMonsters();
 
         for(size_t i = 0; i < monsters.size(); i++)
-            mActors.push_back(new Monster(mDiabloExe.getMonster(monsters[i].name), Position(monsters[i].xPos, monsters[i].yPos)));
+        {
+            DiabloExe::Monster monster =  mDiabloExe.getMonster(monsters[i].name);
+            ActorStats * stats = new ActorStats(monster);
+
+            Monster * monsterObj = new Monster(monster, Position(monsters[i].xPos, monsters[i].yPos), stats);
+            stats->setActor(monsterObj);
+            mActors.push_back(monsterObj);
+        }
 
         actorMapClear();
 

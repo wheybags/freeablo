@@ -12,6 +12,10 @@ namespace FAWorld
     {
         if(mPos.current() != mDestination)
         {
+            Actor * enemy;
+            enemy = World::get()->getActorAt(mDestination.first, mDestination.second);
+            if (enemy != nullptr && mPos.distanceFrom(enemy->mPos) < 2)
+                    attack(enemy);
             if(mPos.mDist == 0)
             {
                 std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
@@ -49,12 +53,13 @@ namespace FAWorld
     }
     bool Actor::attack(Actor *enemy)
     {
+        printf("dist = %f: ", mPos.distanceFrom(enemy->mPos));
         if(enemy->mStats != NULL && enemy != this)
         {
             if(mPos.distanceFrom(enemy->mPos) <= 2)
             {
                     //setAnimation(AnimState::attackMelee);
-                    Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne("sfx/misc/swing2.wav", "sfx/misc/swing.wav"));
+                    Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
                     enemy->mStats->takeDamage(mStats->getMeleeDamage());
                     if(enemy->mStats->getCurrentHP() ==0)
                         enemy->die();
@@ -71,18 +76,13 @@ namespace FAWorld
 
     }
 
-    void Actor::setWorld(World *world)
-    {
-        mWorld = world;
-    }
-
-
-    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos):
+    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos, ActorStats* stats):
         mPos(pos),
         mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)),
         mIdleAnim(FARender::Renderer::get()->loadImage(idleAnimPath)),
         mFrame(0),
-        mInventory(this),        
+        mInventory(this),
+        mStats(stats),
         mAnimState(AnimState::idle)
     {
         mDestination = mPos.current();
@@ -100,7 +100,7 @@ namespace FAWorld
 
     void Actor::die()
     {
-        mWorld->deleteActorFromWorld(this);
+        World::get()->deleteActorFromWorld(this);
     }
 
 

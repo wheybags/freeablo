@@ -40,7 +40,8 @@ namespace FAGui
             void placeItem(uint32_t toPara, uint32_t fromPara, uint32_t fromY, uint32_t fromX,
                            uint32_t toY, uint32_t toX, uint32_t beltX);
             boost::python::dict updateInventory();
-
+            bool canPlace(uint32_t toPara, uint32_t fromPara, uint32_t fromY, uint32_t fromX,
+                          uint32_t toY, uint32_t toX, uint32_t beltX);
             std::string getInvClass();
 
             friend void init_module_freeablo();

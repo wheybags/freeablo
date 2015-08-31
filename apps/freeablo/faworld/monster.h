@@ -13,7 +13,7 @@ namespace FAWorld
     class Monster: public Actor
     {
         public:
-            Monster(const DiabloExe::Monster& monster, Position pos);
+            Monster(const DiabloExe::Monster& monster, Position pos, ActorStats * stats=nullptr);
 
         private:
             std::string getWalkCl2(const DiabloExe::Monster& monster);

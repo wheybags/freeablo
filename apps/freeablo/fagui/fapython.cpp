@@ -31,6 +31,15 @@ namespace FAGui
         mEngine.unPause();
     }
 
+    bool FAPythonFuncs::canPlace(uint32_t toPara, uint32_t fromPara, uint32_t fromY, uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX)
+    {
+        FAWorld::Item::equipLoc to   = static_cast<FAWorld::Item::equipLoc>(toPara);
+        FAWorld::Item::equipLoc from = static_cast<FAWorld::Item::equipLoc>(fromPara);
+
+        FAWorld::Item item = mPlayerInv.getItemAt(from, fromY, fromX, beltX);
+        return mPlayerInv.canPlaceItem(item, to, toY, toX, beltX);
+    }
+
     std::string FAPythonFuncs::getInvClass()
     {
         return FAGui::GuiManager::invClass;
@@ -421,6 +430,8 @@ namespace FAGui
         boost::python::def("loadGame", +[](){funcs->loadGame();});
         boost::python::def("getInvClass", +[](){return funcs->getInvClass();});
         boost::python::def("updateInventory", +[](){return funcs->updateInventory();});
+        boost::python::def("canPlaceItem", +[](uint32_t toPara, uint32_t fromPara, uint32_t fromY,
+                           uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX){return funcs->canPlace(toPara, fromPara, fromY, fromX, toY, toX, beltX);});
         boost::python::def("placeItem", +[](uint32_t toPara, uint32_t fromPara, uint32_t fromY,
                                             uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX)
                                             { funcs->placeItem(toPara, fromPara, fromY, fromX, toY, toX, beltX); });

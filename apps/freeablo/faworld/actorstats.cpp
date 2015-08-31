@@ -3,6 +3,18 @@
 #include "item.h"
 namespace FAWorld
 {
+
+    ActorStats::ActorStats(const DiabloExe::Monster &monsterStat)
+        : mMaxVitality(0), mMaxMagic(0),
+          mMaxDexterity(0), mMaxStrength(0)
+    {
+        mHP = FALevelGen::randomInRange(monsterStat.minHp, monsterStat.maxHp);
+        mCurrentHP = mHP;
+        mDamageDoneMelee = FALevelGen::randomInRange(monsterStat.minDamage, monsterStat.maxDamage);
+        mSecondAttackDamageDone = FALevelGen::randomInRange(monsterStat.maxDamageSecond, monsterStat.maxDamageSecond);
+        mMonsterType = monsterStat.type;
+        mArmourClass = monsterStat.armourClass;
+    }
     void ActorStats::processEffects()
     {
         std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> effects = mActor->mInventory.getTotalEffects();

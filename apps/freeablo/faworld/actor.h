@@ -26,7 +26,7 @@ namespace FAWorld
     class Actor
     {
         public:
-            Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos);
+            Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos, ActorStats* stats=nullptr);
             void update(bool noclip);
 
             void setStats(ActorStats* stats);
@@ -43,7 +43,6 @@ namespace FAWorld
             FARender::FASpriteGroup mIdleAnim;
             size_t mFrame;
             Inventory mInventory;
-            void setWorld(World *world);
             void die();
 
 
@@ -55,8 +54,6 @@ namespace FAWorld
             }
 
         protected:
-
-            World * mWorld;
 
             friend class boost::serialization::access;
 

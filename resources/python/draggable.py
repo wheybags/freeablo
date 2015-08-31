@@ -166,6 +166,7 @@ class DraggableWidget(object):
         rightRingContainer.AppendChild(rightRing)
 
         global cursor
+        global cursorItem
         cursorItem = inventory["cursor"]
         cursor = cursorItem["empty"]
         inventoryBox = inventory["inventoryBox"]
@@ -191,6 +192,7 @@ class DraggableWidget(object):
                     element.style.display = "none"
                     element.SetAttribute("real", "false")
             else:
+                element.SetAttribute("empty", "true")
                 parent.style.background_color="#00000000"
 
             parent.AppendChild(element)
@@ -202,15 +204,58 @@ class DraggableWidget(object):
     def onLoadBelt(self, event):
         self.updateBelt(event)
 
+    def socketMouseOver(self, event):
+        element = event.current_element
+
+        if cursor is False:
+            current_id  = int(element.GetAttribute("id").split("inv-item-socket")[1])
+
+            if current_id >= 10:
+                current_x = int(str(current_id)[1])
+                current_y = int(str(current_id)[0])
+            else:
+                current_x = int(str(current_id)[0])
+                current_y = 0
+
+            if current_y + cursorItem["sizeY"] -1 > 3 or current_x + cursorItem["sizeX"] -1 > 9:
+                return
+            if freeablo.canPlaceItem(0, 10, 0, 0, int(element.child_nodes[0].GetAttribute("InvY")), int(element.child_nodes[0].GetAttribute("InvX")), 0):
+                for y in range(current_y, current_y + cursorItem["sizeY"]):
+                    for x in range(current_x, current_x + cursorItem["sizeX"]):
+                        element = self.document.GetElementById("inv-item-socket" + str(y*10 + x))
+                        element.style.background_color = "#A3191950"
+    def onBeltMouseOver(self, event):
+        element = event.current_element
+        current_id = int(element.GetAttribute("id").split("belt")[1])
+        if not cursor:
+            if freeablo.canPlaceItem(8, 10, 0, 0, 0, 0, current_id) is True:
+                element.style.background_color = "#A3191950"
+
+    def onBeltMouseOut(self, event):
+        current_id = int(event.current_element.GetAttribute("id").split("belt")[1])
+        if not cursor:
+            if freeablo.canPlaceItem(8, 10, 0, 0, 0, 0, current_id) is True:
+
+
+                event.current_element.style.background_color = "#00000000"
+
+
+    def socketMouseOut(self, event):
+        #element = event.current_element
+        for i in range(40):
+            element = self.document.GetElementById("inv-item-socket" + str(i))
+            element.style.background_color = "#00000000"
+
     def updateBelt(self, event):
         beltParent = self.document.GetElementById("beltContainer")
 
         for child in beltParent.child_nodes:
             child.inner_rml=""
-
         inventory = freeablo.updateInventory()
+        global cursorItem
         global cursor
         cursor = inventory["cursor"]["empty"]
+        cursorItem = inventory["cursor"]
         for i, item in enumerate(inventory["belt"]):
             parent = self.document.GetElementById("belt" + str(i))
             element = self.document.CreateElement("div")

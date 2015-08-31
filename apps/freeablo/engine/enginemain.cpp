@@ -72,8 +72,6 @@ namespace Engine
         FAWorld::World world(exe);
         FAWorld::Player* player = world.getPlayer();
 
-        player->setWorld(&world);
-
         world.generateLevels();
         FAWorld::ActorStats * stats;
         DiabloExe::CharacterStats char_stats = exe.getCharacterStat(character);;
