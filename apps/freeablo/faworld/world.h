@@ -64,9 +64,11 @@ namespace FAWorld
             std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Contains NULL where no Actor is present.
                                                                         ///< Where an actor straddles two squares, they shall be placed in both.
             Player* mPlayer;
-            size_t mTicksSinceLastAnimUpdate;
+            size_t mTicksSinceLastAnimUpdate=0;
+            size_t mTicksInSecond=0;
 
             const DiabloExe::DiabloExe& mDiabloExe;
+            friend class Actor;
     };
 }
 

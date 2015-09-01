@@ -9,12 +9,12 @@ namespace FAWorld
 {
 
     void Actor::update(bool noclip)
-    {
+    {        
         if(mPos.current() != mDestination)
         {
             Actor * enemy;
             enemy = World::get()->getActorAt(mDestination.first, mDestination.second);
-            if (enemy != nullptr && mPos.distanceFrom(enemy->mPos) < 2)
+            if (enemy != nullptr && mPos.distanceFrom(enemy->mPos) < 2 && this != enemy && !isAttacking)
                     attack(enemy);
             if(mPos.mDist == 0)
             {
@@ -51,41 +51,40 @@ namespace FAWorld
 
         mPos.update(); 
     }
-    bool Actor::attack(Actor *enemy)
-    {
-        printf("dist = %f: ", mPos.distanceFrom(enemy->mPos));
-        if(enemy->mStats != NULL && enemy != this)
-        {
-            if(mPos.distanceFrom(enemy->mPos) <= 2)
-            {
-                    //setAnimation(AnimState::attackMelee);
-                    Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-                    enemy->mStats->takeDamage(mStats->getMeleeDamage());
-                    if(enemy->mStats->getCurrentHP() ==0)
-                        enemy->die();
-                    return true;
-
-            }
-            else
-                return false;
-        }
-        else
-            return false;
-        return false;
 
 
-    }
-
-    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos, ActorStats* stats):
+    Actor::Actor(
+            const std::string& walkAnimPath,
+            const std::string& idleAnimPath,
+            const Position& pos,
+            const std::string& dieAnimPath,
+            ActorStats* stats,
+            const std::string& soundPath):
         mPos(pos),
         mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)),
         mIdleAnim(FARender::Renderer::get()->loadImage(idleAnimPath)),
         mFrame(0),
         mInventory(this),
+        mSoundPath(soundPath),
         mStats(stats),
         mAnimState(AnimState::idle)
     {
+        if (!dieAnimPath.empty())
+        {
+            mDieAnim = FARender::Renderer::get()->loadImage(dieAnimPath);
+        }
         mDestination = mPos.current();
+    }
+
+    void Actor::takeDamage(double amount)
+    {
+        mStats->takeDamage(amount);
+
+    }
+
+    uint32_t Actor::getCurrentHP()
+    {
+        return mStats->getCurrentHP();
     }
 
     void Actor::setWalkAnimation(const std::string path)
@@ -100,9 +99,16 @@ namespace FAWorld
 
     void Actor::die()
     {
-        World::get()->deleteActorFromWorld(this);
+        setAnimation(AnimState::dead);
+        mIsDead = true;
+        Engine::ThreadManager::get()->playSound(getDieWav());
+        //World::get()->deleteActorFromWorld(this);
     }
 
+    bool Actor::isDead()
+    {
+        return mIsDead;
+    }
 
     FARender::FASpriteGroup Actor::getCurrentAnim()
     {
@@ -111,8 +117,15 @@ namespace FAWorld
             case AnimState::walk:
                 return mWalkAnim;
 
-            default: // AnimState::idle:
+            case AnimState::idle:
                 return mIdleAnim;
+
+            case AnimState::dead:
+                return mDieAnim;
+
+            default:
+                return mIdleAnim;
+
         }
     }
     void Actor::setStats(ActorStats * stats)

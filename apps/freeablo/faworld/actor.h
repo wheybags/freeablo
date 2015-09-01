@@ -19,31 +19,53 @@ namespace FAWorld
         enum AnimState
         {
             walk,
-            idle
+            idle,
+            dead
         };
     }
 
     class Actor
     {
         public:
-            Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos, ActorStats* stats=nullptr);
+            Actor(const std::string& walkAnimPath,
+                  const std::string& idleAnimPath,
+                  const Position& pos,
+                  const std::string& dieAnimPath="",
+                  ActorStats* stats=nullptr,
+                  const std::string& soundPath="");
             void update(bool noclip);
 
             void setStats(ActorStats* stats);
+
+            virtual ~Actor() = default;
+
+            virtual std::string getDieWav(){return "";}
+
+            virtual void takeDamage(double amount);
+
+            virtual uint32_t getCurrentHP();
+
+            bool isAttacking;
 
             FARender::FASpriteGroup getCurrentAnim();
             void setAnimation(AnimState::AnimState state);
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);
 
-            bool attack(Actor * enemy);
+            virtual bool attack(Actor * enemy)
+            {
+                UNUSED_PARAM(enemy);
+               return false;
+            }
             Position mPos;            
         //private: //TODO: fix this
             FARender::FASpriteGroup mWalkAnim;
             FARender::FASpriteGroup mIdleAnim;
+            FARender::FASpriteGroup mDieAnim;
+
             size_t mFrame;
             Inventory mInventory;
-            void die();
+            virtual void die();
 
 
             std::pair<size_t, size_t> mDestination;
@@ -52,9 +74,11 @@ namespace FAWorld
             {
                 return mDestination;
             }
+            bool isDead();
 
         protected:
-
+            std::string mSoundPath;
+            bool mIsDead;
             friend class boost::serialization::access;
 
             template<class Archive>
@@ -80,10 +104,10 @@ namespace FAWorld
             }
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+            ActorStats * mStats=nullptr;
         private:
             friend class Inventory;
-            ActorStats * mStats = NULL;
+
             AnimState::AnimState mAnimState;
 
     };

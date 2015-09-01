@@ -29,7 +29,6 @@ namespace DiabloExe
         uint32_t mVitality;
 
         uint32_t mBlockingBonus;
-
         uint32_t mMaxStrength;
         uint32_t mMaxMagic;
         uint32_t mMaxDexterity;

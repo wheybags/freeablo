@@ -387,7 +387,7 @@ namespace FAWorld
         mArmourClass=0;
         mManaShield=0;
         mDamageDone=0;
-        mAttackSpeed=0;
+        //mAttackSpeed=0;
         mDamageDoneBow=0;
         mDamageDoneMelee=0;
         mBonusStrength=0;
@@ -413,9 +413,14 @@ namespace FAWorld
         return mDamageDoneMelee;
     }
 
-    double ActorStats::getAttackSpeed()
+    uint8_t ActorStats::getAttackSpeed()
     {
         return mAttackSpeed;
+    } 
+
+    uint8_t ActorStats::getAttackFrameset()
+    {
+        return mAttackFrameset;
     }
 
 

@@ -139,13 +139,13 @@ instance = draggable.DraggableWidget(document, 0, -500)
     <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
         <span id="container" onmousedown="instance.guiMouseDown(event)"
                              onDrag="instance.onDrag(event)">
-        <div onclick="instance.onWeaponClick(event)" id="leftHand" class="hand-equip-socket"> </div>
-        <div onclick="instance.onWeaponClick(event)" id="rightHand" class="hand-equip-socket"> </div>
-        <div onclick="instance.onRingClick(event)" id="leftRing" class="ring-equip-socket"> </div>
-        <div onclick="instance.onRingClick(event)" id="rightRing" class="ring-equip-socket"> </div>
-        <div id="head"   onclick="instance.onHeadClick(event)" class="head-equip-socket"> </div>
-        <div id="amulet" onclick="instance.onAmuletClick(event)" class="amulet-equip-socket"> </div>
-        <div id="body"   onclick="instance.onBodyClick(event)" class="body-equip-socket"> </div>
+        <div id="leftHand"  onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onWeaponClick(event)" class="hand-equip-socket"> </div>
+        <div id="rightHand" onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onWeaponClick(event)"  class="hand-equip-socket"> </div>
+        <div id="leftRing"  onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onRingClick(event)"  class="ring-equip-socket"> </div>
+        <div id="rightRing" onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onRingClick(event)" class="ring-equip-socket"> </div>
+        <div id="head"      onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onHeadClick(event)" class="head-equip-socket"> </div>
+        <div id="amulet"    onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onAmuletClick(event)" class="amulet-equip-socket"> </div>
+        <div id="body"      onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onBodyClick(event)" class="body-equip-socket"> </div>
         <div class="inventory" id="inventory">
 
                              <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket0"></div>

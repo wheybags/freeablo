@@ -224,6 +224,12 @@ class DraggableWidget(object):
                     for x in range(current_x, current_x + cursorItem["sizeX"]):
                         element = self.document.GetElementById("inv-item-socket" + str(y*10 + x))
                         element.style.background_color = "#A3191950"
+    def socketMouseOut(self, event):
+        #element = event.current_element
+        for i in range(40):
+            element = self.document.GetElementById("inv-item-socket" + str(i))
+            element.style.background_color = "#00000000"
+
     def onBeltMouseOver(self, event):
         element = event.current_element
         current_id = int(element.GetAttribute("id").split("belt")[1])
@@ -239,12 +245,30 @@ class DraggableWidget(object):
 
                 event.current_element.style.background_color = "#00000000"
 
+    def onEquipMouseOver(self, event):
+        if not cursor:
+            equip = event.current_element.GetAttribute("id")
+            to = 0
+            if equip == "leftHand":
+                to=12
+            elif equip == "rightHand":
+                to=11
+            elif equip == "rightRing":
+                to=13
+            elif equip == "leftRing":
+                to=14
+            elif equip == "head":
+                to=4
+            elif equip == "amulet":
+                to=6
+            elif equip == "body":
+                to=3
+            if freeablo.canPlaceItem(to, 10, 0, 0, 0, 0, 0) is True:
+                event.current_element.style.background_color="#A3191950"
 
-    def socketMouseOut(self, event):
-        #element = event.current_element
-        for i in range(40):
-            element = self.document.GetElementById("inv-item-socket" + str(i))
-            element.style.background_color = "#00000000"
+    def onEquipMouseOut(self, event):
+        if not cursor:
+            event.current_element.style.background_color = "#00000000"
 
     def updateBelt(self, event):
         beltParent = self.document.GetElementById("beltContainer")

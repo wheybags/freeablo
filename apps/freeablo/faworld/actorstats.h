@@ -55,7 +55,9 @@ namespace FAWorld
                 mMaxDexterity(stats.mMaxDexterity),
                 mStartingStrength(stats.mStrength),
                 mMaxStrength(stats.mMaxStrength),
-                mBlockingBonus(stats.mBlockingBonus)
+                mBlockingBonus(stats.mBlockingBonus),
+                mAttackFrameset(stats.mAttackFrameset),
+                mAttackSpeed(stats.mSingleHandedAttackSpeed)
 
             {
                 mVitality = mStartingVitality;
@@ -72,7 +74,8 @@ namespace FAWorld
             bool spendLevelUpPoint(BasicStat stat);
             virtual void takeDamage(double amount);
             virtual double getMeleeDamage();
-            virtual double getAttackSpeed();
+            virtual uint8_t getAttackSpeed();
+            virtual uint8_t getAttackFrameset();
             virtual uint32_t getCurrentHP();
             virtual void recalculateDerivedStats(){}
 
@@ -132,7 +135,7 @@ namespace FAWorld
             double mArmourClass=0;
             double mManaShield=0;
             double mDamageDone=0;
-            double mAttackSpeed=0;
+            uint8_t mAttackSpeed;
             double mDamageDoneBow=0;
             double mDamageDoneMelee=0;
             int32_t  mDamageTakenMultiplier=0;

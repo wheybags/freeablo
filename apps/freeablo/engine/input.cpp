@@ -126,6 +126,12 @@ namespace Engine
     {
         if(key == Input::KEY_LEFT_MOUSE)
             mMouseDown = false;
+        if(FAWorld::World::get()->getPlayer()->isAttacking)
+        {
+            FAWorld::World::get()->getPlayer()->isAttacking = false;
+
+
+        }
     }
 
     void EngineInputManager::mouseMove(size_t x, size_t y)

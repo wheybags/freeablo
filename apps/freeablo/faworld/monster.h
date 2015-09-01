@@ -14,10 +14,14 @@ namespace FAWorld
     {
         public:
             Monster(const DiabloExe::Monster& monster, Position pos, ActorStats * stats=nullptr);
+            std::string getDieWav();
+
+
 
         private:
             std::string getWalkCl2(const DiabloExe::Monster& monster);
             std::string getIdleCl2(const DiabloExe::Monster& monster);
+            std::string getDieCl2(const DiabloExe::Monster & monster);
     };
 }
 

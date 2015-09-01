@@ -140,9 +140,11 @@ namespace FAWorld
     }
 
     void World::update(bool noclip)
-    {
+    {        
         mTicksSinceLastAnimUpdate++;
-
+        mTicksInSecond++;
+        if(mTicksInSecond == 125)
+            mTicksInSecond=0;
         bool advanceAnims = mTicksSinceLastAnimUpdate >= (float)ticksPerSecond*0.1;
 
         if(advanceAnims)
@@ -155,7 +157,13 @@ namespace FAWorld
             mActors[i]->update(noclip);
 
             if(advanceAnims)
-                mActors[i]->mFrame = (mActors[i]->mFrame + 1) % mActors[i]->getCurrentAnim().animLength;
+            {
+                if(!mActors[i]->isDead())
+                    mActors[i]->mFrame = (mActors[i]->mFrame + 1) % mActors[i]->getCurrentAnim().animLength;
+                else if(mActors[i]->mFrame < mActors[i]->getCurrentAnim().animLength-1)
+                    mActors[i]->mFrame++;
+            }
+
             
             actorMapInsert(mActors[i]);    
         }
