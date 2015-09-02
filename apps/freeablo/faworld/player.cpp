@@ -6,20 +6,25 @@
 
 namespace FAWorld
 {
-    Player::Player() : Actor("plrgfx/warrior/wls/wlswl.cl2", "plrgfx/warrior/wls/wlsst.cl2", Position(0,0))
+    Player::Player() : Actor()
     {
 
     }
     bool Player::attack(Actor *enemy)
     {
+        mStats->printStats();
         if(enemy->isDead())
             return false;
-        isAttacking = true;
-        //setAnimation(AnimState::attackMelee);
+        isAttacking = true;        
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-        enemy->takeDamage(mStats->getMeleeDamage());
-        if(enemy->getCurrentHP() == 0)
+        enemy->takeDamage((uint32_t)mStats->getMeleeDamage());
+        if(enemy->getCurrentHP() <= 0)
             enemy->die();
+        else
+            printf("HP: %u\n",  enemy->getCurrentHP());
+        setAnimation(AnimState::meleeAttack, true);
+        mAnimPlaying = true;
+        mAnimStep = 2.25;
         return true;
     }
 

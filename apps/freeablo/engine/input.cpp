@@ -129,8 +129,6 @@ namespace Engine
         if(FAWorld::World::get()->getPlayer()->isAttacking)
         {
             FAWorld::World::get()->getPlayer()->isAttacking = false;
-
-
         }
     }
 
@@ -143,7 +141,6 @@ namespace Engine
     void EngineInputManager::update(bool paused)
     {
         mInput.processInput(paused);
-
         if(mToggleConsole)
         {
             FAGui::Console & console = FAGui::Console::getInstance(FARender::Renderer::get()->getRocketContext());
@@ -153,6 +150,7 @@ namespace Engine
 
         if(!paused && mMouseDown)
         {
+
             auto world = FAWorld::World::get();
             auto player = world->getPlayer();
             auto level = world->getCurrentLevel();
@@ -160,7 +158,7 @@ namespace Engine
             std::pair<size_t, size_t>& destination = player->destination();
 
             destination = FARender::Renderer::get()->getClickedTile(mXClick, mYClick, *level, player->mPos);
-            if(mClick)
+            if(mClick )
                 level->activate(destination.first, destination.second);
 
             mClick = false;

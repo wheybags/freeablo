@@ -9,7 +9,7 @@
 namespace FAWorld
 {
     Monster::Monster(const DiabloExe::Monster& monster, Position pos, ActorStats *stats):
-        Actor(getWalkCl2(monster), getIdleCl2(monster), pos, getDieCl2(monster), stats, monster.soundPath)
+        Actor(getWalkCl2(monster), getIdleCl2(monster), pos, getDieCl2(monster), stats, monster.soundPath), mAnimPath(monster.cl2Path)
     {}
 
     std::string Monster::getWalkCl2(const DiabloExe::Monster& monster)
@@ -59,5 +59,28 @@ namespace FAWorld
             fmt % 'h';
             return (fmt % FALevelGen::randomInRange(1, 2)).str();
         }
+    }
+
+    FARender::FASpriteGroup Monster::getCurrentAnim()
+    {
+        boost::format fmt(mAnimPath);
+        switch(mAnimState)
+        {
+            case AnimState::walk:
+                return FARender::Renderer::get()->loadImage((fmt % 'w').str());
+
+            case AnimState::idle:
+                return FARender::Renderer::get()->loadImage((fmt % 'n').str());
+
+            case AnimState::dead:
+                return FARender::Renderer::get()->loadImage((fmt % 'd').str());
+
+            case AnimState::hit:
+                return FARender::Renderer::get()->loadImage((fmt % 'h').str());
+
+            default:
+                return FARender::Renderer::get()->loadImage((fmt % 'n').str());
+        }
+
     }
 }

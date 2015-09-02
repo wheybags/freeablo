@@ -20,18 +20,20 @@ namespace FAWorld
         {
             walk,
             idle,
-            dead
+            meleeAttack,
+            dead,
+            hit
         };
     }
     class ActorAnimState
     {
         public:
-            ActorAnimState(){};
+            ActorAnimState(){}
             ActorAnimState(const std::string &className, const std::string &armourCode, const std::string &weaponCode, bool inDungeon=false);
             void setWeapon(std::string weaponCode);
             void setArmour(std::string armourCode);
             void setClass(std::string className);
-            void setDungeon(bool isDungeon);
+            void setDungeon(bool isDungeon);            
             std::string getStateString();
             std::string getAnimPath(AnimState::AnimState animState);
         private:
@@ -47,9 +49,9 @@ namespace FAWorld
     class Actor
     {
         public:
-            Actor(const std::string& walkAnimPath,
-                  const std::string& idleAnimPath,
-                  const Position& pos,
+            Actor(const std::string& walkAnimPath="",
+                  const std::string& idleAnimPath="",
+                  const Position& pos = Position(0,0),
                   const std::string& dieAnimPath="",
                   ActorStats* stats=nullptr,
                   const std::string& soundPath="");
@@ -58,34 +60,31 @@ namespace FAWorld
             virtual ~Actor() = default;
             virtual std::string getDieWav(){return "";}
             virtual std::string getHitWav(){return "";}
-            virtual void setSpriteClass(std::string className){ UNUSED_PARAM(className);}
+            virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}
             virtual void takeDamage(double amount);
-            virtual uint32_t getCurrentHP();
+            virtual int32_t getCurrentHP();
             bool isAttacking;
-
+            bool mAnimPlaying = false;
+            double mAnimStep = 1;
             virtual FARender::FASpriteGroup getCurrentAnim();
-            void setAnimation(AnimState::AnimState state);
+            void setAnimation(AnimState::AnimState state, bool reset=false);
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);
 
             virtual bool attack(Actor * enemy)
             {
                 UNUSED_PARAM(enemy);
-               return false;
+                return false;
             }
             Position mPos;            
         //private: //TODO: fix this
             FARender::FASpriteGroup mWalkAnim;
             FARender::FASpriteGroup mIdleAnim;
             FARender::FASpriteGroup mDieAnim;
-
-            size_t mFrame;
+            double mFrame;
             Inventory mInventory;
             virtual void die();
-
-
             std::pair<size_t, size_t> mDestination;
-
             std::pair<size_t, size_t>& destination()
             {
                 return mDestination;
@@ -95,7 +94,8 @@ namespace FAWorld
 
         protected:
             std::string mSoundPath;
-            bool mIsDead;
+            std::string mAnimPath;
+            bool mIsDead = false;
             friend class boost::serialization::access;
 
             template<class Archive>
@@ -125,9 +125,7 @@ namespace FAWorld
             AnimState::AnimState mAnimState;
         private:
             friend class Inventory;
-
-
-
+            friend class World;
     };
 }
 

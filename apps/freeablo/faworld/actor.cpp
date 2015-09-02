@@ -10,47 +10,62 @@ namespace FAWorld
 {
 
     void Actor::update(bool noclip)
-    {        
+    {
+
         if(mPos.current() != mDestination)
         {
+            std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
             Actor * enemy;
             enemy = World::get()->getActorAt(mDestination.first, mDestination.second);
-            if (enemy != nullptr && mPos.distanceFrom(enemy->mPos) < 2 && this != enemy && !isAttacking)
+            if (enemy != nullptr && mPos.distanceFrom(enemy->mPos) < 2 && this != enemy && !isAttacking && !enemy->isDead())
+            {             
+                    mPos.mDirection = Misc::getVecDir(vector);                    
+                    mPos.update();
+                    mPos.mDist = 0;
+
                     attack(enemy);
-            if(mPos.mDist == 0)
+            }
+            else if(mPos.mDist == 0 && !mAnimPlaying)
             {
-                std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
+
                 auto nextPos = Position(mPos.current().first, mPos.current().second, Misc::getVecDir(vector));
                 nextPos.mMoving = true;
                 World& world = *World::get();
-                FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.next().first, nextPos.next().second);
-
-                if(noclip || ((*world.getCurrentLevel())[nextPos.next().first][nextPos.next().second].passable() &&
-                                                   (actorAtNext == NULL || actorAtNext == this)))
+                Actor* actorAtNext = world.getActorAt(nextPos.next().first, nextPos.next().second);
+                if((noclip || ((*world.getCurrentLevel())[nextPos.next().first][nextPos.next().second].passable() &&
+                                                   (actorAtNext == NULL || actorAtNext == this)))&& !mAnimPlaying)
                 {
-                    if(!mPos.mMoving)
+                    if(!mPos.mMoving && !mAnimPlaying)
                     {
                         mPos.mMoving = true;
-                        setAnimation(FAWorld::AnimState::walk);
+                        setAnimation(AnimState::walk);                        
                     }
                 }
-                else
+
+                else if(!mAnimPlaying)
                 {
                     mPos.mMoving = false;
                     mDestination = mPos.current();
-                    setAnimation(FAWorld::AnimState::idle);
-                }
+                    setAnimation(AnimState::idle);
 
+                }
                 mPos.mDirection = Misc::getVecDir(vector);
             }
         }
-        else if(mPos.mMoving && mPos.mDist == 0)
+        else if(mPos.mMoving && mPos.mDist == 0 && !mAnimPlaying)
         {
             mPos.mMoving = false;
-            setAnimation(FAWorld::AnimState::idle);
+            setAnimation(AnimState::idle);
+
         }
 
-        mPos.update(); 
+        if (!mIsDead && !mPos.mMoving && !mAnimPlaying && mAnimState != AnimState::idle)
+            setAnimation(AnimState::idle);
+        else if (!mIsDead && mPos.mMoving && !mAnimPlaying && mAnimState != AnimState::walk)
+            setAnimation(AnimState::walk);
+
+        if(!mAnimPlaying)
+            mPos.update();
     }
 
 
@@ -62,8 +77,6 @@ namespace FAWorld
             ActorStats* stats,
             const std::string& soundPath):
         mPos(pos),
-        mWalkAnim(FARender::Renderer::get()->loadImage(walkAnimPath)),
-        mIdleAnim(FARender::Renderer::get()->loadImage(idleAnimPath)),
         mFrame(0),
         mInventory(this),
         mSoundPath(soundPath),
@@ -74,6 +87,11 @@ namespace FAWorld
         {
             mDieAnim = FARender::Renderer::get()->loadImage(dieAnimPath);
         }
+
+        if (!walkAnimPath.empty())
+            mWalkAnim = FARender::Renderer::get()->loadImage(walkAnimPath);
+        if (!idleAnimPath.empty())
+            mIdleAnim = FARender::Renderer::get()->loadImage(idleAnimPath);
         mDestination = mPos.current();
     }
 
@@ -81,10 +99,9 @@ namespace FAWorld
     {
         mStats->takeDamage(amount);
         Engine::ThreadManager::get()->playSound(getHitWav());
-
     }
 
-    uint32_t Actor::getCurrentHP()
+    int32_t Actor::getCurrentHP()
     {
         return mStats->getCurrentHP();
     }
@@ -114,7 +131,6 @@ namespace FAWorld
 
     FARender::FASpriteGroup Actor::getCurrentAnim()
     {
-
         switch(mAnimState)
         {
             case AnimState::walk:
@@ -128,19 +144,17 @@ namespace FAWorld
 
             default:
                 return mIdleAnim;
-
         }
     }
 
     void Actor::setStats(ActorStats * stats)
     {
         mStats = stats;
-
     }
 
-    void Actor::setAnimation(AnimState::AnimState state)
+    void Actor::setAnimation(AnimState::AnimState state, bool reset)
     {
-        if(mAnimState != state)
+        if(mAnimState != state || reset)
         {
             mAnimState = state;
             mFrame = 0;
@@ -167,7 +181,7 @@ namespace FAWorld
     }
 
     void ActorAnimState::setWeapon(std::string weaponCode)
-    {
+    {        
         mWeaponCode = weaponCode;
         reconstructString();
     }
@@ -199,6 +213,8 @@ namespace FAWorld
                     return (*mFmt % "aw").str();
                 else
                     return (*mFmt % "wl").str();
+            case AnimState::meleeAttack:
+                return (*mFmt % "at").str();
 
             default:
             case AnimState::idle:

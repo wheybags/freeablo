@@ -397,14 +397,22 @@ namespace FAWorld
         mHasThieves=false;
     }
 
-    uint32_t ActorStats::getCurrentHP()
+    int32_t ActorStats::getCurrentHP()
     {
         return mCurrentHP;
     }
 
-    void ActorStats::takeDamage(double amount)
+    void ActorStats::takeDamage(int32_t amount)
     {
         mCurrentHP -= amount;
+        if (!(mCurrentHP <= 0))
+        {
+            mActor->setAnimation(AnimState::hit);
+            mActor->mAnimPlaying = true;
+        }
+        else
+            mActor->mAnimPlaying = false;
+
 
     }
 

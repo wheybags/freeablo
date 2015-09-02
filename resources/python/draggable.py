@@ -268,7 +268,24 @@ class DraggableWidget(object):
 
     def onEquipMouseOut(self, event):
         if not cursor:
-            event.current_element.style.background_color = "#00000000"
+            equip = event.current_element.GetAttribute("id")
+            to = 0
+            if equip == "leftHand":
+                to=12
+            elif equip == "rightHand":
+                to=11
+            elif equip == "rightRing":
+                to=13
+            elif equip == "leftRing":
+                to=14
+            elif equip == "head":
+                to=4
+            elif equip == "amulet":
+                to=6
+            elif equip == "body":
+                to=3
+            if freeablo.canPlaceItem(to, 10, 0, 0, 0, 0, 0) is True:
+                event.current_element.style.background_color = "#00000000"
 
     def updateBelt(self, event):
         beltParent = self.document.GetElementById("beltContainer")

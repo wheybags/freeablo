@@ -81,11 +81,17 @@ namespace FAWorld
         }
         else if((mLeftHand.isEmpty() && !mRightHand.isEmpty()) || (!mLeftHand.isEmpty() && mRightHand.isEmpty()))
         {
-            switch(mRightHand.getCode())
-            {
+            Item hand;
 
+            if(mRightHand.isEmpty())
+                hand = mLeftHand;
+            else
+                hand = mRightHand;
+
+            switch(hand.getCode())
+            {
                 case Item::icAxe:
-                    if(mRightHand.getEquipLoc() == Item::eqONEHAND)
+                    if(hand.getEquipLoc() == Item::eqONEHAND)
                         weapon = "s";
                     else
                         weapon = "a";
@@ -105,13 +111,17 @@ namespace FAWorld
 
                 case Item::icSword:
                     weapon = "s";
-                default:
+                    break;
+
+                default:                    
                     weapon = "n";
+                    break;
             }
+            printf("after switch: %s, %d\n", weapon.c_str(), hand.getCode() );
         }
 
         else if(!mLeftHand.isEmpty() && !mRightHand.isEmpty())
-        {
+        {            
             if((mLeftHand.getCode() == Item::icSword && mRightHand.getCode() == Item::icShield) || (mLeftHand.getCode() == Item::icShield && mRightHand.getCode() == Item::icSword))
                 weapon = "d";
 
@@ -120,7 +130,10 @@ namespace FAWorld
 
             else if(mLeftHand.getCode() == Item::icStave && mRightHand.getCode() == Item::icStave)
                 weapon = "t";
+            else if(mLeftHand.getCode() == Item::icBlunt || mRightHand.getCode() == Item::icBlunt)
+                weapon = "h";
         }
+
         mActor->mActorSpriteState.setWeapon(weapon);
         mActor->mActorSpriteState.setArmour(armour);
 

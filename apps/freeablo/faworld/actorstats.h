@@ -72,11 +72,11 @@ namespace FAWorld
             virtual void printStats();
             bool levelUp(BasicStat statModified);
             bool spendLevelUpPoint(BasicStat stat);
-            virtual void takeDamage(double amount);
+            virtual void takeDamage(int32_t amount);
             virtual double getMeleeDamage();
             virtual uint8_t getAttackSpeed();
             virtual uint8_t getAttackFrameset();
-            virtual uint32_t getCurrentHP();
+            virtual int32_t getCurrentHP();
             virtual void recalculateDerivedStats(){}
 
         protected:
@@ -115,7 +115,7 @@ namespace FAWorld
             uint32_t mMana=0;
             uint32_t mCurrentMana=0;
             uint32_t mHP=0;
-            uint32_t mCurrentHP=0;
+            int32_t mCurrentHP=0;
             uint32_t mBonusStrength=0;
             uint32_t mBonusMagic=0;
             uint32_t mBonusDexterity=0;

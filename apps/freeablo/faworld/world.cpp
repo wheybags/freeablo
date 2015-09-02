@@ -148,9 +148,12 @@ namespace FAWorld
     {        
         mTicksSinceLastAnimUpdate++;
         mTicksInSecond++;
-        if(mTicksInSecond == 125)
-            mTicksInSecond=0;
         bool advanceAnims = mTicksSinceLastAnimUpdate >= (float)ticksPerSecond*0.1;
+
+        /*if(!(mTicksInSecond % ticksPerSecond))
+            printf("playerState: %d, %d, %d, %d\n", mPlayer->mAnimPlaying, mPlayer->mPos.mMoving, mPlayer->mAnimState, mPlayer->isDead());*/
+
+
 
         if(advanceAnims)
             mTicksSinceLastAnimUpdate = 0;
@@ -163,12 +166,28 @@ namespace FAWorld
 
             if(advanceAnims)
             {
-                if(!mActors[i]->isDead())
-                    mActors[i]->mFrame = (mActors[i]->mFrame + 1) % mActors[i]->getCurrentAnim().animLength;
-                else if(mActors[i]->mFrame < mActors[i]->getCurrentAnim().animLength-1)
-                    mActors[i]->mFrame++;
-            }
 
+                if(!mActors[i]->mAnimPlaying && !mActors[i]->isDead())
+                {
+                    mActors[i]->mFrame = fmod((mActors[i]->mFrame + 1), (double)(mActors[i]->getCurrentAnim().animLength));
+                }
+
+                else if(mActors[i]->mAnimPlaying && mActors[i]->mFrame <= mActors[i]->getCurrentAnim().animLength-1)
+                {
+                    mActors[i]->mFrame+=mActors[i]->mAnimStep;
+                }
+
+                else if((mActors[i]->mAnimPlaying && mActors[i]->mFrame == mActors[i]->getCurrentAnim().animLength) || mActors[i]->mFrame + mActors[i]->mAnimStep > mActors[i]->getCurrentAnim().animLength)
+                {
+                    mActors[i]->mAnimPlaying = false;
+                    mPlayer->mAnimStep=1;
+                }
+
+                else if(!mActors[i]->mAnimPlaying && mActors[i]->mFrame < mActors[i]->getCurrentAnim().animLength-1)
+                {
+                    mActors[i]->mFrame++;
+                }
+            }
             
             actorMapInsert(mActors[i]);    
         }
