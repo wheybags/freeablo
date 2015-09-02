@@ -24,7 +24,7 @@ void MeleeStats::recalculateDerivedStats()
     mArmourClass += mActor->mInventory.getTotalArmourClass();
     mChanceToHitArrow += 10;
 
-    printStats();
+    //printStats();
 
 }
 

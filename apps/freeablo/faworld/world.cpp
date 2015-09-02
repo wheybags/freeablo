@@ -78,6 +78,11 @@ namespace FAWorld
     
     void World::setLevel(int32_t levelNum)
     {
+        if(levelNum != 0)
+            mPlayer->mActorSpriteState.setDungeon(true);
+        else
+            mPlayer->mActorSpriteState.setDungeon(false);
+
         if(levelNum >= (int32_t)mLevels.size() || levelNum < 0)
             return;
 

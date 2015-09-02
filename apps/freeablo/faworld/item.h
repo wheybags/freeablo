@@ -144,6 +144,22 @@ public:
                  itGOLD=4,
                  itNOVELTY=5}itemType;
 
+    typedef enum{
+        icOther,
+        icSword,
+        icAxe,
+        icBow,
+        icBlunt,
+        icShield,
+        icLightArmour,
+        icHelm,
+        icMidArmour,
+        icHeavyArmour,
+        icStave,
+        icGold,
+        icRing,
+        icAmulet
+    }itemCode;
 
     uint32_t getActiveTrigger() const;
     uint8_t getReqStr() const;
@@ -174,7 +190,7 @@ public:
     uint32_t getEffect5() const;
     uint32_t getMinRange5() const;
     uint32_t getMaxRange5() const;
-    uint8_t getCode() const;
+    itemCode getCode() const;
     equipLoc getEquipLoc() const;
     itemType getType() const;
     uint32_t getGraphicValue() const;
@@ -190,7 +206,7 @@ private:
     equipLoc mEquipLoc;
     uint32_t mGraphicValue;
 
-    uint8_t mCode;
+    itemCode mCode;
     uint8_t mUniqCode;
     std::string mName;
     std::string mSecondName;

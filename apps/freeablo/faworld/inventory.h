@@ -32,7 +32,8 @@ namespace FAWorld
                      bool recalculateStats=true);
        Item& getItemAt(Item::equipLoc type, uint8_t y=0, uint8_t x=0, uint8_t beltX=0);
        uint32_t getTotalAttackDamage();
-       uint32_t getTotalArmourClass();
+       uint32_t getTotalArmourClass();       
+       void setPlayerFormat();
        std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>>& getTotalEffects();
        bool canPlaceItem(Item item,
                          Item::equipLoc equipType,

@@ -1,6 +1,7 @@
 #include "actor.h"
 
 #include <misc/misc.h>
+
 #include "actorstats.h"
 #include "world.h"
 #include "../engine/threadmanager.h"
@@ -79,6 +80,7 @@ namespace FAWorld
     void Actor::takeDamage(double amount)
     {
         mStats->takeDamage(amount);
+        Engine::ThreadManager::get()->playSound(getHitWav());
 
     }
 
@@ -112,6 +114,7 @@ namespace FAWorld
 
     FARender::FASpriteGroup Actor::getCurrentAnim()
     {
+
         switch(mAnimState)
         {
             case AnimState::walk:
@@ -128,6 +131,7 @@ namespace FAWorld
 
         }
     }
+
     void Actor::setStats(ActorStats * stats)
     {
         mStats = stats;
@@ -140,6 +144,69 @@ namespace FAWorld
         {
             mAnimState = state;
             mFrame = 0;
+        }
+    }
+
+    void ActorAnimState::setClass(std::string className)
+    {
+        mClassName = className;
+        mClassCode = className[0];
+    }
+
+    void ActorAnimState::reconstructString()
+    {
+        mFmt = new boost::format("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
+        *mFmt % mClassName % mClassCode % mArmourCode % mWeaponCode % mClassCode % mArmourCode % mWeaponCode;
+    }
+
+    ActorAnimState::ActorAnimState(const std::string& className, const std::string& armourCode, const std::string& weaponCode, bool inDungeon)
+        :mClassName(className), mArmourCode(armourCode), mWeaponCode(weaponCode), mInDungeon(inDungeon)
+    {
+        mClassCode = mClassName[0];
+        reconstructString();
+    }
+
+    void ActorAnimState::setWeapon(std::string weaponCode)
+    {
+        mWeaponCode = weaponCode;
+        reconstructString();
+    }
+
+    void ActorAnimState::setArmour(std::string armourCode)
+    {
+        mArmourCode = armourCode;
+        reconstructString();
+    }
+
+    void ActorAnimState::setDungeon(bool isDungeon)
+    {
+        mInDungeon = isDungeon;
+    }
+
+    std::string ActorAnimState::getAnimPath(AnimState::AnimState animState)
+    {
+        reconstructString();
+        switch(animState)
+        {
+            case AnimState::dead:
+                setWeapon("n");
+
+                return (*mFmt % "dt").str();
+
+            case AnimState::walk:
+
+                if (mInDungeon)
+                    return (*mFmt % "aw").str();
+                else
+                    return (*mFmt % "wl").str();
+
+            default:
+            case AnimState::idle:
+
+                if (mInDungeon)
+                    return (*mFmt % "as").str();
+                else
+                    return (*mFmt % "st").str();
         }
     }
 }

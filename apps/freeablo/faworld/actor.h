@@ -6,7 +6,7 @@
 
 #include "../farender/renderer.h"
 #include "../fasavegame/savegame.h"
-
+#include <boost/format.hpp>
 #include <misc/misc.h>
 
 namespace FAWorld
@@ -23,6 +23,26 @@ namespace FAWorld
             dead
         };
     }
+    class ActorAnimState
+    {
+        public:
+            ActorAnimState(){};
+            ActorAnimState(const std::string &className, const std::string &armourCode, const std::string &weaponCode, bool inDungeon=false);
+            void setWeapon(std::string weaponCode);
+            void setArmour(std::string armourCode);
+            void setClass(std::string className);
+            void setDungeon(bool isDungeon);
+            std::string getStateString();
+            std::string getAnimPath(AnimState::AnimState animState);
+        private:
+            void reconstructString();
+            std::string mClassName;
+            std::string mClassCode;
+            std::string mArmourCode;
+            std::string mWeaponCode;
+            boost::format * mFmt;
+            bool mInDungeon = true;
+    };
 
     class Actor
     {
@@ -34,20 +54,16 @@ namespace FAWorld
                   ActorStats* stats=nullptr,
                   const std::string& soundPath="");
             void update(bool noclip);
-
             void setStats(ActorStats* stats);
-
             virtual ~Actor() = default;
-
             virtual std::string getDieWav(){return "";}
-
+            virtual std::string getHitWav(){return "";}
+            virtual void setSpriteClass(std::string className){ UNUSED_PARAM(className);}
             virtual void takeDamage(double amount);
-
             virtual uint32_t getCurrentHP();
-
             bool isAttacking;
 
-            FARender::FASpriteGroup getCurrentAnim();
+            virtual FARender::FASpriteGroup getCurrentAnim();
             void setAnimation(AnimState::AnimState state);
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);
@@ -75,6 +91,7 @@ namespace FAWorld
                 return mDestination;
             }
             bool isDead();
+            ActorAnimState mActorSpriteState;
 
         protected:
             std::string mSoundPath;
@@ -105,10 +122,11 @@ namespace FAWorld
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
             ActorStats * mStats=nullptr;
+            AnimState::AnimState mAnimState;
         private:
             friend class Inventory;
 
-            AnimState::AnimState mAnimState;
+
 
     };
 }
