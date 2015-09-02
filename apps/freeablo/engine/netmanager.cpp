@@ -65,7 +65,6 @@ namespace Engine
     void NetManager::update()
     {
         mTick++;
-        FAWorld::World& world = *FAWorld::World::get();
 
         ENetEvent event;
 
@@ -90,6 +89,11 @@ namespace Engine
                     else
                         readServerPacket(event);
 
+                    break;
+                }
+
+                default:
+                {
                     break;
                 }
             }
