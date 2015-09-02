@@ -2,6 +2,8 @@
 
 #include "../faworld/world.h"
 
+#include <boost/math/special_functions.hpp>
+
 namespace Engine
 {
     NetManager::NetManager(bool isServer)
@@ -62,6 +64,7 @@ namespace Engine
 
     void NetManager::update()
     {
+        mTick++;
         FAWorld::World& world = *FAWorld::World::get();
 
         ENetEvent event;
@@ -103,6 +106,7 @@ namespace Engine
     struct ServerPacketHeader
     {
         uint32_t numPlayers;
+        size_t tick;
     };
 
     void NetManager::sendServerPacket()
@@ -118,6 +122,7 @@ namespace Engine
         // write header
         ServerPacketHeader header;
         header.numPlayers = mClients.size() + 1;
+        header.tick = mTick;
         writeToPacket(packet, position, header);
 
         // write server player
@@ -162,19 +167,22 @@ namespace Engine
         ServerPacketHeader header;
         readFromPacket(event.packet, position, header);
 
-        for(size_t i = 0; i < header.numPlayers; i++)
+        if(header.tick > mLastServerTickProcessed)
         {
-            uint32_t playerId;
-            readFromPacket<uint32_t>(event.packet, position, playerId);
-
-            auto player = world.getPlayer(playerId);
-            if(player == NULL)
+            for(size_t i = 0; i < header.numPlayers; i++)
             {
-                spawnPlayer(playerId);
-                player = world.getPlayer(playerId);
-            }
+                uint32_t playerId;
+                readFromPacket<uint32_t>(event.packet, position, playerId);
 
-            position = player->readFrom(event.packet, position);
+                auto player = world.getPlayer(playerId);
+                if(player == NULL)
+                {
+                    spawnPlayer(playerId);
+                    player = world.getPlayer(playerId);
+                }
+
+                position = player->readFrom(event.packet, position);
+            }
         }
     }
 

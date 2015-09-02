@@ -64,6 +64,9 @@ namespace Engine
             std::vector<ENetPeer*> mClients;
             ENetHost* mHost = NULL;
             ENetAddress mAddress;
+
+            size_t mTick = 0;
+            size_t mLastServerTickProcessed = 0;
     };
 }
 

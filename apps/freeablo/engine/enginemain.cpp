@@ -219,8 +219,6 @@ namespace Engine
         // Main game logic loop
         while(!mDone)
         {
-            netManager.update();
-
             auto now = std::chrono::system_clock::now();
 
             while(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count() < (int64_t)(1000/FAWorld::World::ticksPerSecond))
@@ -235,6 +233,8 @@ namespace Engine
 
             if(!mPaused)
                 world.update(mNoclip);
+
+            netManager.update();
 
             guiManager.updateGui();
 
