@@ -22,7 +22,7 @@ namespace FAWorld
         };
     }
 
-    class Actor
+    class Actor : public NetObject
     {
         public:
             Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const Position& pos);
@@ -49,6 +49,10 @@ namespace FAWorld
             {
                 return mDestination;
             }
+
+            virtual size_t getSize();
+            virtual size_t writeTo(ENetPacket *packet, size_t start);
+            virtual size_t readFrom(ENetPacket *packet, size_t start);
 
         protected:
 

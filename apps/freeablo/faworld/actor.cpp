@@ -91,4 +91,49 @@ namespace FAWorld
             mFrame = 0;
         }
     }
+
+    struct ActorNetData
+    {
+        size_t frame;
+        uint8_t animState;
+        size_t destX;
+        size_t destY;
+    };
+
+    size_t Actor::getSize()
+    {
+        return mPos.getSize() + sizeof(ActorNetData);
+    }
+
+    size_t Actor::writeTo(ENetPacket *packet, size_t start)
+    {
+        start = mPos.writeTo(packet, start);
+
+        ActorNetData* data = (ActorNetData*)(packet->data + start);
+        data->frame = mFrame;
+        data->animState = mAnimState;
+        data->destX = mDestination.first;
+        data->destY = mDestination.second;
+
+        return start + sizeof(ActorNetData);
+    }
+
+    size_t Actor::readFrom(ENetPacket *packet, size_t start)
+    {
+        start = mPos.readFrom(packet, start);
+
+        ActorNetData* data = (ActorNetData*)(packet->data + start);
+        mFrame = data->frame;
+        mAnimState = (AnimState::AnimState)data->animState;
+
+        // don't want to read destination for our player object,
+        // we keep track of our own destination
+        if(World::get()->getCurrentPlayer() != this)
+        {
+            mDestination.first = data->destX;
+            mDestination.second = data->destY;
+        }
+
+        return start + sizeof(ActorNetData);
+    }
 }

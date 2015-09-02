@@ -261,7 +261,7 @@ namespace FAIO
         if(ptr)
         {
             FAfseek(file, ptr, SEEK_SET);
-            char c;
+            char c = 0;
 
 			size_t bytesRead = FAfread(&c, 1, 1, file);
 
