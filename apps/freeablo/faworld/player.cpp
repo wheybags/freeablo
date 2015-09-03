@@ -28,6 +28,7 @@ namespace FAWorld
 
     bool Player::attack(Player *enemy)
     {
+        UNUSED_PARAM(enemy);
         return false;
     }
 
