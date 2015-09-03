@@ -67,15 +67,19 @@ namespace FAWorld
         switch(mAnimState)
         {
             case AnimState::walk:
+                mAnimTimeMap[mAnimState] = 10;
                 return FARender::Renderer::get()->loadImage((fmt % 'w').str());
 
             case AnimState::idle:
+                mAnimTimeMap[mAnimState] = 10;
                 return FARender::Renderer::get()->loadImage((fmt % 'n').str());
 
             case AnimState::dead:
+                mAnimTimeMap[mAnimState] = 10;
                 return FARender::Renderer::get()->loadImage((fmt % 'd').str());
 
             case AnimState::hit:
+                mAnimTimeMap[mAnimState] = 10;
                 return FARender::Renderer::get()->loadImage((fmt % 'h').str());
 
             default:

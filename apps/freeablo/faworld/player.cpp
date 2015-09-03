@@ -12,8 +12,7 @@ namespace FAWorld
     }
     bool Player::attack(Actor *enemy)
     {
-        mStats->printStats();
-        if(enemy->isDead())
+        if(enemy->isDead() && enemy->mStats != nullptr)
             return false;
         isAttacking = true;        
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
@@ -22,9 +21,8 @@ namespace FAWorld
             enemy->die();
         else
             printf("HP: %u\n",  enemy->getCurrentHP());
-        setAnimation(AnimState::meleeAttack, true);
+        setAnimation(AnimState::attack, true);
         mAnimPlaying = true;
-        mAnimStep = 2.25;
         return true;
     }
 

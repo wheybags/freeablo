@@ -405,15 +405,6 @@ namespace FAWorld
     void ActorStats::takeDamage(int32_t amount)
     {
         mCurrentHP -= amount;
-        if (!(mCurrentHP <= 0))
-        {
-            mActor->setAnimation(AnimState::hit);
-            mActor->mAnimPlaying = true;
-        }
-        else
-            mActor->mAnimPlaying = false;
-
-
     }
 
     double ActorStats::getMeleeDamage()

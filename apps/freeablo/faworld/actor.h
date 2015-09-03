@@ -8,6 +8,7 @@
 #include "../fasavegame/savegame.h"
 #include <boost/format.hpp>
 #include <misc/misc.h>
+#include <map>
 
 namespace FAWorld
 {
@@ -20,15 +21,16 @@ namespace FAWorld
         {
             walk,
             idle,
-            meleeAttack,
+            attack,
             dead,
             hit
         };
     }
+    class Actor;
     class ActorAnimState
     {
         public:
-            ActorAnimState(){}
+            ActorAnimState(Actor * actor): mActor(actor) {}
             ActorAnimState(const std::string &className, const std::string &armourCode, const std::string &weaponCode, bool inDungeon=false);
             void setWeapon(std::string weaponCode);
             void setArmour(std::string armourCode);
@@ -38,6 +40,7 @@ namespace FAWorld
             std::string getAnimPath(AnimState::AnimState animState);
         private:
             void reconstructString();
+            Actor * mActor;
             std::string mClassName;
             std::string mClassCode;
             std::string mArmourCode;
@@ -64,12 +67,12 @@ namespace FAWorld
             virtual void takeDamage(double amount);
             virtual int32_t getCurrentHP();
             bool isAttacking;
-            bool mAnimPlaying = false;
-            double mAnimStep = 1;
+            bool mAnimPlaying = false;            
             virtual FARender::FASpriteGroup getCurrentAnim();
             void setAnimation(AnimState::AnimState state, bool reset=false);
             void setWalkAnimation(const std::string path);
-            void setIdleAnimation(const std::string path);
+            void setIdleAnimation(const std::string path);            
+            AnimState::AnimState getAnimState();
 
             virtual bool attack(Actor * enemy)
             {
@@ -81,7 +84,7 @@ namespace FAWorld
             FARender::FASpriteGroup mWalkAnim;
             FARender::FASpriteGroup mIdleAnim;
             FARender::FASpriteGroup mDieAnim;
-            double mFrame;
+            size_t mFrame;
             Inventory mInventory;
             virtual void die();
             std::pair<size_t, size_t> mDestination;
@@ -90,8 +93,9 @@ namespace FAWorld
                 return mDestination;
             }
             bool isDead();
-            ActorAnimState mActorSpriteState;
-
+            ActorAnimState mActorSpriteState = ActorAnimState(this);
+            std::map<AnimState::AnimState, size_t> mAnimTimeMap;
+            ActorStats * mStats=nullptr;
         protected:
             std::string mSoundPath;
             std::string mAnimPath;
@@ -121,11 +125,9 @@ namespace FAWorld
             }
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
-            ActorStats * mStats=nullptr;
             AnimState::AnimState mAnimState;
         private:
-            friend class Inventory;
-            friend class World;
+            friend class Inventory;            
     };
 }
 

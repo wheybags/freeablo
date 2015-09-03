@@ -21,7 +21,6 @@ namespace FAWorld
             {
                 mInventoryBox[i][j].mInvX=j;
                 mInventoryBox[i][j].mInvY=i;
-
             }
         }
     }
@@ -35,13 +34,11 @@ namespace FAWorld
 
     uint32_t Inventory::getTotalAttackDamage()
     {
-
         return mAttackDamageTotal;
     }
 
     bool Inventory::checkStatsRequirement(Item& item)
     {
-
         if(mActor->mStats != NULL)
             if(!(mActor->mStats->getStrength() >= item.getReqStr() &&
                  mActor->mStats->getDexterity()>= item.getReqDex() &&
@@ -57,24 +54,27 @@ namespace FAWorld
     void Inventory::setPlayerFormat()
     {
         std::string armour, weapon;
-
-
         switch(mBody.getCode())
         {
                case Item::icHeavyArmour:
-                armour="h";
-               break;
+               {
+                    armour="h";
+                    break;
+               }
 
                case Item::icMidArmour:
-                armour="m";
-               break;
+               {
+                    armour="m";
+                    break;
+               }
 
-               case Item::icLightArmour:
+               case Item::icLightArmour:               
                default:
-                armour="l";
-               break;
+               {
+                    armour="l";
+                    break;
+               }
         }
-
         if(mLeftHand.isEmpty() && mRightHand.isEmpty())
         {
             weapon = "n";
@@ -87,37 +87,47 @@ namespace FAWorld
                 hand = mLeftHand;
             else
                 hand = mRightHand;
-
             switch(hand.getCode())
             {
                 case Item::icAxe:
+                {
                     if(hand.getEquipLoc() == Item::eqONEHAND)
                         weapon = "s";
                     else
                         weapon = "a";
                     break;
+                }
 
                 case Item::icBlunt:
+                {
                     weapon = "m";
                     break;
+                }
 
                 case Item::icBow:
+                {
                     weapon = "b";
                     break;
+                }
 
                 case Item::icShield:
+                {
                     weapon = "u";
                     break;
+                }
 
                 case Item::icSword:
+                {
                     weapon = "s";
                     break;
+                }
 
-                default:                    
+                default:
+                {
                     weapon = "n";
                     break;
-            }
-            printf("after switch: %s, %d\n", weapon.c_str(), hand.getCode() );
+                }
+            }            
         }
 
         else if(!mLeftHand.isEmpty() && !mRightHand.isEmpty())
@@ -136,8 +146,6 @@ namespace FAWorld
 
         mActor->mActorSpriteState.setWeapon(weapon);
         mActor->mActorSpriteState.setArmour(armour);
-
-
     }
 
     bool Inventory::canPlaceItem(
@@ -155,7 +163,8 @@ namespace FAWorld
                  * armour in the game.
                  *
                  * */
-        case Item::eqLEFTHAND:
+          case Item::eqLEFTHAND:
+          {
             if(!checkStatsRequirement(item))
                 return false;
 
@@ -174,10 +183,12 @@ namespace FAWorld
             {
                 if(item.getEquipLoc() == Item::eqTWOHAND && this->mLeftHand.isEmpty())
                     return true;
-
             }
             break;
-        case Item::eqRIGHTHAND:
+          }
+
+          case Item::eqRIGHTHAND:
+          {
             if(!checkStatsRequirement(item))
                 return false;
             if(this->mRightHand.isEmpty())
@@ -193,95 +204,115 @@ namespace FAWorld
             {
                 if(item.getEquipLoc() == Item::eqTWOHAND && this->mLeftHand.isEmpty())
                     return true;
-
             }
             break;
-        case Item::eqBODY:
-            if(!checkStatsRequirement(item))
-                return false;
-            if(item.getEquipLoc() == Item::eqBODY && this->mBody.isEmpty())
-                return true;
-            break;
+          }
 
-        case Item::eqHEAD:
-            if(!checkStatsRequirement(item))
-                return false;
-            if(item.getEquipLoc() == Item::eqHEAD && this->mHead.isEmpty())
-                return true;
-            break;
-
-        case Item::eqLEFTRING:
-            if(!checkStatsRequirement(item))
-                return false;
-            if(item.getEquipLoc() == Item::eqRING)
-            {
-                if(this->mLeftRing.isEmpty()) return true;
-            }
-            break;
-        case Item::eqRIGHTRING:
-            if(!checkStatsRequirement(item))
-                return false;
-            if(item.getEquipLoc() == Item::eqRING)
-            {
-                if(this->mRightRing.isEmpty()) return true;
-            }
-            break;
-
-        case Item::eqAMULET:
-            if(!checkStatsRequirement(item))
-                return false;
-            if(item.getEquipLoc() == Item::eqAMULET && this->mAmulet.isEmpty())
-            {
-                return true;
-            }
-            break;
-            /*
-                 * When putting an item in the inventory we must check if it will fit!
-                 * */
-
-        case Item::eqINV:
-            if(x < 10 && y < 4)
-            {
-                if(!((x + item.mSizeX-1 < 10) && (y + item.mSizeY-1) < 4))
-                {
+          case Item::eqBODY:
+          {
+                if(!checkStatsRequirement(item))
                     return false;
+                if(item.getEquipLoc() == Item::eqBODY && this->mBody.isEmpty())
+                    return true;
+                break;
+          }
 
-                }
-                if(mInventoryBox[y][x].isEmpty())
+          case Item::eqHEAD:
+          {
+                if(!checkStatsRequirement(item))
+                    return false;
+                if(item.getEquipLoc() == Item::eqHEAD && this->mHead.isEmpty())
+                    return true;
+                break;
+           }
+
+           case Item::eqLEFTRING:
+           {
+                if(!checkStatsRequirement(item))
+                    return false;
+                if(item.getEquipLoc() == Item::eqRING)
                 {
-                    for(uint8_t i=y;i < y+item.mSizeY; ++i)
-                    {
-                        for(uint8_t j=x; j < x+item.mSizeX;++j)
-                        {
-                            if(!mInventoryBox[i][j].isEmpty())
-                            {
-                                return false;
-                            }
-                        }
-                    }
+                    if(this->mLeftRing.isEmpty()) return true;
+                }
+                break;
+            }
+
+            case Item::eqRIGHTRING:
+            {
+                if(!checkStatsRequirement(item))
+                    return false;
+                if(item.getEquipLoc() == Item::eqRING)
+                {
+                    if(this->mRightRing.isEmpty()) return true;
+                }
+                break;
+            }
+
+            case Item::eqAMULET:
+            {
+                if(!checkStatsRequirement(item))
+                    return false;
+                if(item.getEquipLoc() == Item::eqAMULET && this->mAmulet.isEmpty())
+                {
                     return true;
                 }
+                break;
+                /*
+                     * When putting an item in the inventory we must check if it will fit!
+                     * */
             }
-            break;
-        case Item::eqBELT:
-            if(item.getEquipLoc() == Item::eqUNEQUIP && item.getType() == Item::itPOT)
+
+            case Item::eqINV:
             {
-                if(beltX <= 7)
+                if(x < 10 && y < 4)
                 {
-                    if(mBelt[beltX].isEmpty())
+                    if(!((x + item.mSizeX-1 < 10) && (y + item.mSizeY-1) < 4))
                     {
+                        return false;
+                    }
+                    if(mInventoryBox[y][x].isEmpty())
+                    {
+                        for(uint8_t i=y;i < y+item.mSizeY; ++i)
+                        {
+                            for(uint8_t j=x; j < x+item.mSizeX;++j)
+                            {
+                                if(!mInventoryBox[i][j].isEmpty())
+                                {
+                                    return false;
+                                }
+                            }
+                        }
                         return true;
                     }
                 }
-
+                break;
             }
-            break;
-        case Item::eqFLOOR:
-            return true;
-        case Item::eqCURSOR:
-            return this->mCursorHeld.isEmpty();
-        default:
-            return false;
+            case Item::eqBELT:
+            {
+                if(item.getEquipLoc() == Item::eqUNEQUIP && item.getType() == Item::itPOT)
+                {
+                    if(beltX <= 7)
+                    {
+                        if(mBelt[beltX].isEmpty())
+                        {
+                            return true;
+                        }
+                    }
+                }
+                break;
+            }
+            case Item::eqFLOOR:
+            {
+                return true;
+            }
+            case Item::eqCURSOR:
+            {
+                return this->mCursorHeld.isEmpty();
+            }
+          default:
+          {
+                return false;
+          }
         }
         return false;
     }
@@ -367,6 +398,7 @@ namespace FAWorld
                 }
                 break;
             case Item::eqRIGHTHAND:
+            {
                 this->mRightHand=item;
                 if(item.getEquipLoc() == Item::eqTWOHAND)
                 {
@@ -384,6 +416,7 @@ namespace FAWorld
                 }
                 removeItem(item, from, beltX);
                 break;
+            }
                 /*
                      * When wielding a two-handed weapon the game will unload the right
                      * hand weapon if there is one. If there is space in your inventory
@@ -392,34 +425,46 @@ namespace FAWorld
                      * */
 
             case Item::eqBODY:
+            {
                 mBody = item;
                 removeItem(item, from, beltX);
                 break;
-
+            }
             case Item::eqHEAD:
+            {
                 mHead = item;
                 removeItem(item, from, beltX);
                 break;
+            }
 
             case Item::eqLEFTRING:
+            {
                 mLeftRing = item;
                 removeItem(item, from, beltX);
                 break;
+            }
+
             case Item::eqRIGHTRING:
+            {
                 mRightRing = item;
                 removeItem(item, from, beltX);
                 break;
+            }
 
             case Item::eqAMULET:
+            {
                 mAmulet = item;
                 removeItem(item, from, beltX);
                 break;
+
+            }
 
                 /*
                      * For every space the item takes up in the inventory we leave
                      * a reference to the item in the corresponding entry in mInventoryBox.
                     */
             case Item::eqINV:
+            {
 
                 if(item.mMaxCount > 1)
                 {
@@ -484,22 +529,32 @@ namespace FAWorld
                 }
                 removeItem(item, from, beltX, y, x);
                 break;
+            }
+
             case Item::eqBELT:
+            {
                 item.mBeltX = beltX;
                 removeItem(item, from, beltX);
                 this->mBelt[beltX]=item;
                 break;
+            }
+
             case Item::eqFLOOR:
+            {
                 break;
+            }
+
             case Item::eqCURSOR:
-
+            {
                 mCursorHeld = item;
-
-
                 removeItem(item, from, beltX, y, x);
                 break;
+            }
+
             default:
+            {
                 return false;
+            }
 
             }
         }
@@ -546,14 +601,17 @@ namespace FAWorld
         switch(from)
         {
         case Item::eqLEFTHAND:
+        {
             if(item.getEquipLoc() == Item::eqTWOHAND)
             {
                 mRightHand=Item();
             }
             mLeftHand = Item();
             break;
+        }
 
         case Item::eqRIGHTHAND:
+        {
             if(item.getEquipLoc() == Item::eqTWOHAND)
             {
 
@@ -561,35 +619,51 @@ namespace FAWorld
             }
             mRightHand=Item();
             break;
+        }
 
         case Item::eqLEFTRING:
+        {
             mLeftRing=Item();
             break;
+        }
         case Item::eqRIGHTRING:
+        {
             mRightRing =Item();
             break;
+        }
 
         case Item::eqBELT:
+        {
             mBelt[beltX] =Item();
             break;
+        }
 
         case Item::eqCURSOR:
+        {
             mCursorHeld = Item();
             break;
+        }
 
         case Item::eqAMULET:
+        {
             mAmulet = Item();
             break;
+        }
 
         case Item::eqHEAD:
+        {
             mHead = Item();
             break;
+        }
 
         case Item::eqBODY:
+        {
             mBody = Item();
             break;
+        }
 
         case Item::eqINV:
+        {
             for(uint8_t i=invY;i < invY+item.mSizeY;i++)
             {
                 for(uint8_t j=invX;j < invX+item.mSizeX;j++)
@@ -600,13 +674,17 @@ namespace FAWorld
                 }
             }
             break;
+        }
 
         case Item::eqONEHAND:
         case Item::eqTWOHAND:
         case Item::eqUNEQUIP:
         case Item::eqFLOOR:
         default:
+        {
             return;
+
+        }
         }
 
     }

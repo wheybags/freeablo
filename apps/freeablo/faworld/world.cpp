@@ -11,17 +11,17 @@
 
 namespace FAWorld
 {
-    World* singletonInstance = NULL;
+    World* singletonInstance = nullptr;
 
     World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
     {
-        assert(singletonInstance == NULL);
+        assert(singletonInstance == nullptr);
         singletonInstance = this;
 
         mPlayer = new Player();
         mActors.push_back(mPlayer);
         mTicksSinceLastAnimUpdate = 0;
-        mCurrentLevel = NULL;
+        mCurrentLevel = nullptr;
     }
 
     void World::setStatsObject(ActorStats *stats)
@@ -145,51 +145,49 @@ namespace FAWorld
     }
 
     void World::update(bool noclip)
-    {        
+    {
         mTicksSinceLastAnimUpdate++;
-        mTicksInSecond++;
-        bool advanceAnims = mTicksSinceLastAnimUpdate >= (float)ticksPerSecond*0.1;
+        mTicksPassed++;
 
-        /*if(!(mTicksInSecond % ticksPerSecond))
-            printf("playerState: %d, %d, %d, %d\n", mPlayer->mAnimPlaying, mPlayer->mPos.mMoving, mPlayer->mAnimState, mPlayer->isDead());*/
+        bool advanceAnims;
 
 
-
-        if(advanceAnims)
-            mTicksSinceLastAnimUpdate = 0;
                         
         for(size_t i = 0; i < mActors.size(); i++)
         {
+            Actor * actor = mActors[i];
+            size_t animDivisor =actor->mAnimTimeMap[actor->getAnimState()];
+            if(animDivisor == 0)
+            {
+                animDivisor=12;
+            }
+            advanceAnims  = !(mTicksPassed % (ticksPerSecond/animDivisor));
             actorMapRemove(mActors[i]);
-
-            mActors[i]->update(noclip);
-
+            actor->update(noclip);
             if(advanceAnims)
             {
 
-                if(!mActors[i]->mAnimPlaying && !mActors[i]->isDead())
+                if(!actor->mAnimPlaying && !actor->isDead())
                 {
-                    mActors[i]->mFrame = fmod((mActors[i]->mFrame + 1), (double)(mActors[i]->getCurrentAnim().animLength));
+                    actor->mFrame = fmod((actor->mFrame + 1), (double)(actor->getCurrentAnim().animLength));
                 }
 
-                else if(mActors[i]->mAnimPlaying && mActors[i]->mFrame <= mActors[i]->getCurrentAnim().animLength-1)
+                else if(actor->mAnimPlaying && actor->mFrame <= actor->getCurrentAnim().animLength-1)
                 {
-                    mActors[i]->mFrame+=mActors[i]->mAnimStep;
+                    actor->mFrame++;
                 }
 
-                else if((mActors[i]->mAnimPlaying && mActors[i]->mFrame == mActors[i]->getCurrentAnim().animLength) || mActors[i]->mFrame + mActors[i]->mAnimStep > mActors[i]->getCurrentAnim().animLength)
+                else if(actor->mAnimPlaying && actor->mFrame == actor->getCurrentAnim().animLength)
                 {
-                    mActors[i]->mAnimPlaying = false;
-                    mPlayer->mAnimStep=1;
+                    actor->mAnimPlaying = false;
                 }
 
-                else if(!mActors[i]->mAnimPlaying && mActors[i]->mFrame < mActors[i]->getCurrentAnim().animLength-1)
+                else if(!actor->mAnimPlaying && actor->mFrame < actor->getCurrentAnim().animLength-1)
                 {
-                    mActors[i]->mFrame++;
+                    actor->mFrame++;
                 }
-            }
-            
-            actorMapInsert(mActors[i]);    
+            }            
+            actorMapInsert(actor);
         }
 
         actorMapClear();

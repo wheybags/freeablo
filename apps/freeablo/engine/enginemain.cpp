@@ -185,9 +185,10 @@ namespace Engine
         }
 
 
-        world.setStatsObject(stats);
+        world.setStatsObject(stats);        
         stats->setActor(player);
         stats->recalculateDerivedStats();
+        player->mInventory.collectEffects();
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 

@@ -79,8 +79,8 @@ namespace FAWorld
         mPos(pos),
         mFrame(0),
         mInventory(this),
-        mSoundPath(soundPath),
         mStats(stats),
+        mSoundPath(soundPath),        
         mAnimState(AnimState::idle)
     {
         if (!dieAnimPath.empty())
@@ -98,7 +98,14 @@ namespace FAWorld
     void Actor::takeDamage(double amount)
     {
         mStats->takeDamage(amount);
-        Engine::ThreadManager::get()->playSound(getHitWav());
+        if (!(mStats->getCurrentHP() <= 0))
+        {
+            Engine::ThreadManager::get()->playSound(getHitWav());
+            setAnimation(AnimState::hit);
+            mAnimPlaying = true;
+        }
+        else
+            mAnimPlaying = false;
     }
 
     int32_t Actor::getCurrentHP()
@@ -129,17 +136,25 @@ namespace FAWorld
         return mIsDead;
     }
 
+    AnimState::AnimState Actor::getAnimState()
+    {
+        return mAnimState;
+    }
+
     FARender::FASpriteGroup Actor::getCurrentAnim()
     {
         switch(mAnimState)
         {
             case AnimState::walk:
+                mAnimTimeMap[mAnimState] = 10;
                 return mWalkAnim;
 
             case AnimState::idle:
+                mAnimTimeMap[mAnimState] = 10;
                 return mIdleAnim;
 
             case AnimState::dead:
+                mAnimTimeMap[mAnimState] = 10;
                 return mDieAnim;
 
             default:
@@ -203,22 +218,24 @@ namespace FAWorld
         switch(animState)
         {
             case AnimState::dead:
+                mActor->mAnimTimeMap[mActor->getAnimState()] = 10;
                 setWeapon("n");
 
                 return (*mFmt % "dt").str();
 
             case AnimState::walk:
-
+                mActor->mAnimTimeMap[mActor->getAnimState()] = 10;
                 if (mInDungeon)
                     return (*mFmt % "aw").str();
                 else
                     return (*mFmt % "wl").str();
-            case AnimState::meleeAttack:
+            case AnimState::attack:
+                mActor->mAnimTimeMap[mActor->getAnimState()] = 16;
                 return (*mFmt % "at").str();
 
             default:
             case AnimState::idle:
-
+                mActor->mAnimTimeMap[mActor->getAnimState()] = 10;
                 if (mInDungeon)
                     return (*mFmt % "as").str();
                 else
