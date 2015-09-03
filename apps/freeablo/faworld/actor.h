@@ -49,7 +49,7 @@ namespace FAWorld
             bool mInDungeon = true;
     };
 
-    class Actor
+    class Actor : public NetObject
     {
         public:
             Actor(const std::string& walkAnimPath="",
@@ -92,10 +92,15 @@ namespace FAWorld
             {
                 return mDestination;
             }
+
             bool isDead();
             ActorAnimState mActorSpriteState = ActorAnimState(this);
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
+            virtual size_t getSize();
+            virtual size_t writeTo(ENetPacket *packet, size_t start);
+            virtual size_t readFrom(ENetPacket *packet, size_t start);
+
         protected:
             std::string mSoundPath;
             std::string mAnimPath;

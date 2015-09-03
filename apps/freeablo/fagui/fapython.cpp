@@ -50,7 +50,7 @@ namespace FAGui
         auto world = FAWorld::World::get();
         world->setLevel(0);
         auto level = world->getCurrentLevel();
-        auto player = world->getPlayer();
+        auto player = world->getCurrentPlayer();
 
         player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 

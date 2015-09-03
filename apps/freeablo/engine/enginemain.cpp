@@ -9,13 +9,17 @@
 #include "../falevelgen/random.h"
 #include "../fagui/guimanager.h"
 #include "../faaudio/audiomanager.h"
-#include "threadmanager.h"
-#include "input.h"
 #include "../faworld/itemmanager.h"
 #include "../faworld/characterstats.h"
+#include "threadmanager.h"
+#include "input.h"
+#include "netmanager.h"
+
+
 #include <misc/misc.h>
 #include <input/inputmanager.h>
 
+#include <enet/enet.h>
 
 namespace bpo = boost::program_options;
 
@@ -70,8 +74,8 @@ namespace Engine
         FAWorld::ItemManager itemManager;
         itemManager.loadItems(&exe);
         FAWorld::World world(exe);
-        FAWorld::Player* player = world.getPlayer();
 
+        FAWorld::Player* player = world.getCurrentPlayer();
         world.generateLevels();
         FAWorld::ActorStats * stats;
         DiabloExe::CharacterStats char_stats = exe.getCharacterStat(character);
@@ -212,6 +216,10 @@ namespace Engine
 
         auto last = std::chrono::system_clock::now();
 
+        bool isServer = variables["mode"].as<std::string>() == "server";
+
+        NetManager netManager(isServer);
+
         // Main game logic loop
         while(!mDone)
         {
@@ -228,7 +236,8 @@ namespace Engine
 
             mInputManager->update(mPaused);            
             if(!mPaused)
-                world.update(mNoclip);            
+                world.update(mNoclip);
+            netManager.update();
             guiManager.updateGui();
 
             Level::Level* level = world.getCurrentLevel();
@@ -254,8 +263,6 @@ namespace Engine
 
             }
             renderer.setCurrentState(state);
-
-
         }
 
         renderer.stop();

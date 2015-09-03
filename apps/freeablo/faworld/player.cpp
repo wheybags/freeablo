@@ -26,6 +26,11 @@ namespace FAWorld
         return true;
     }
 
+    bool Player::attack(Player *enemy)
+    {
+        return false;
+    }
+
     void Player::setSpriteClass(std::string className)
     {
         mActorSpriteState.setClass(className);

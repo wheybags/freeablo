@@ -10,6 +10,7 @@ namespace FAWorld
             Player();
             void setSpriteClass(std::string className);
             bool attack(Actor * enemy);
+            bool attack(Player * enemy);
             FARender::FASpriteGroup getCurrentAnim();
         protected:
             std::string mAnimPathFormat = "plrgfx/%s";

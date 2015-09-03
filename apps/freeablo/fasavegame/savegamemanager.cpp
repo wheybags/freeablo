@@ -14,7 +14,7 @@ SaveGameManager::SaveGameManager(FAWorld::World * world):
 
 void SaveGameManager::save()
 {
-    FAWorld::Player * player = mWorld->getPlayer();
+    FAWorld::Player * player = mWorld->getCurrentPlayer();
 
     std::ofstream saveGameFile(getSaveGamePath());
     if(!saveGameFile.good())
@@ -30,7 +30,7 @@ void SaveGameManager::save()
 
 bool SaveGameManager::load()
 {
-    FAWorld::Player * player = mWorld->getPlayer();
+    FAWorld::Player * player = mWorld->getCurrentPlayer();
     size_t tmpLevel;
 
     std::ifstream saveGameFile(getSaveGamePath());

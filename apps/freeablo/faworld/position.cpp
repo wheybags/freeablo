@@ -106,4 +106,42 @@ namespace FAWorld
 
         return retval;
     }
+
+    struct PosNetData
+    {
+        size_t dist;
+        int32_t direction;
+        bool moving;
+        size_t currentX;
+        size_t currentY;
+    };
+
+    size_t Position::getSize()
+    {
+        return sizeof(PosNetData);
+    }
+
+    size_t Position::writeTo(ENetPacket *packet, size_t start)
+    {
+        PosNetData* data = (PosNetData*)(packet->data + start);
+        data->dist = mDist;
+        data->direction = mDirection;
+        data->moving = mMoving;
+        data->currentX = mCurrent.first;
+        data->currentY = mCurrent.second;
+
+        return start + getSize();
+    }
+
+    size_t Position::readFrom(ENetPacket *packet, size_t start)
+    {
+        PosNetData* data = (PosNetData*)(packet->data + start);
+        mDist = data->dist;
+        mDirection = data->direction;
+        mMoving = data->moving;
+        mCurrent.first = data->currentX;
+        mCurrent.second = data->currentY;
+
+        return start + getSize();
+    }
 }

@@ -98,7 +98,7 @@ namespace Engine
                 world->setLevel(nextLevelIndex);
 
                 Level::Level* level = world->getCurrentLevel();
-                FAWorld::Player* player = world->getPlayer();
+                FAWorld::Player* player = world->getCurrentPlayer();
 
                 if(hotkey == changelvlup_key)
                     player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
@@ -126,9 +126,9 @@ namespace Engine
     {
         if(key == Input::KEY_LEFT_MOUSE)
             mMouseDown = false;
-        if(FAWorld::World::get()->getPlayer()->isAttacking)
+        if(FAWorld::World::get()->getCurrentPlayer()->isAttacking)
         {
-            FAWorld::World::get()->getPlayer()->isAttacking = false;
+            FAWorld::World::get()->getCurrentPlayer()->isAttacking = false;
         }
     }
 
@@ -152,7 +152,7 @@ namespace Engine
         {
 
             auto world = FAWorld::World::get();
-            auto player = world->getPlayer();
+            auto player = world->getCurrentPlayer();
             auto level = world->getCurrentLevel();
 
             std::pair<size_t, size_t>& destination = player->destination();
