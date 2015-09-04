@@ -2,6 +2,7 @@
 #define PLAYER_H
 #include <boost/format.hpp>
 #include "actor.h"
+#include "monster.h"
 #include "inventory.h"
 namespace FAWorld
 {
@@ -11,7 +12,7 @@ namespace FAWorld
             Player();
             Inventory mInventory;
             void setSpriteClass(std::string className);
-            bool attack(Actor * enemy);
+            bool attack(Monster * enemy);
             bool attack(Player * enemy);
             FARender::FASpriteGroup getCurrentAnim();
             void updateSprite();

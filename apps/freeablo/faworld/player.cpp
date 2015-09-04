@@ -3,6 +3,7 @@
 #include "actorstats.h"
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
+#include <random>
 
 namespace FAWorld
 {
@@ -15,18 +16,32 @@ namespace FAWorld
 
 
     }
-    bool Player::attack(Actor *enemy)
+    bool Player::attack(Monster *enemy)
     {
-        if(enemy->isDead() && enemy->mStats != nullptr)
+        if(!(World::get()->getTicksPassed() % (size_t)(World::get()->secondsToTicks(mStats->getAttackSpeed() * 0.05))))
+        {
+            if(enemy->isDead() && enemy->mStats != nullptr)
+                return false;
+            isAttacking = true;
+            Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
+            setAnimation(AnimState::attack, true);
+            mAnimPlaying = true;
+            if(FALevelGen::percentageChance(mStats->getChanceToHitMelee()))
+            {
+                //Critical hit chance, %clvl. Do 200% damage
+                if(FALevelGen::percentageChance(mStats->getLevel()))
+                    enemy->takeDamage(mStats->getMeleeDamage()*2);
+                else
+                    enemy->takeDamage(mStats->getMeleeDamage());
+                if(enemy->getCurrentHP() <= 0)
+                    enemy->die();
+                return true;
+            }
+            else
+                return false;
+        }
+        else
             return false;
-        isAttacking = true;
-        Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-        enemy->takeDamage((uint32_t)mStats->getMeleeDamage());
-        if(enemy->getCurrentHP() <= 0)
-            enemy->die();
-        setAnimation(AnimState::attack, true);
-        mAnimPlaying = true;
-        return true;
     }
 
     bool Player::attack(Player *enemy)

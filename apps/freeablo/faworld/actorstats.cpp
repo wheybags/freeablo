@@ -14,6 +14,7 @@ namespace FAWorld
         mSecondAttackDamageDone = FALevelGen::randomInRange(monsterStat.maxDamageSecond, monsterStat.maxDamageSecond);
         mMonsterType = monsterStat.type;
         mArmourClass = monsterStat.armourClass;
+        mExpForKill = monsterStat.exp;
     }
 
     bool ActorStats::levelUp(BasicStat statModified)
@@ -108,6 +109,11 @@ namespace FAWorld
     int32_t ActorStats::getCurrentHP()
     {
         return mCurrentHP;
+    }
+
+    double ActorStats::getChanceToHitMelee()
+    {
+        return mChanceToHitMelee;
     }
 
     void ActorStats::takeDamage(int32_t amount)

@@ -116,6 +116,16 @@ namespace FAWorld
         FAAudio::AudioManager::playLevelMusic(levelNum, *Engine::ThreadManager::get());
     }
 
+    double World::secondsToTicks(double seconds)
+    {
+        return ticksPerSecond * seconds;
+    }
+
+    size_t World::getTicksPassed()
+    {
+        return mTicksPassed;
+    }
+
     void World::addNpcs()
     {
         const std::vector<const DiabloExe::Npc*> npcs = mDiabloExe.getNpcs();

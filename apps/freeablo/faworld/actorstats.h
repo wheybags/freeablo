@@ -67,7 +67,7 @@ namespace FAWorld
                 recalculateDerivedStats();
             }
             ActorStats(const DiabloExe::Monster & monsterStat);
-
+            double getChanceToHitMelee();
             virtual void printStats();
             bool levelUp(BasicStat statModified);
             bool spendLevelUpPoint(BasicStat stat);
@@ -134,6 +134,7 @@ namespace FAWorld
             double mArmourClass=0;
             double mManaShield=0;
             double mDamageDone=0;
+            uint32_t mExpForKill=0;
             uint8_t mAttackSpeed;
             double mDamageDoneBow=0;
             double mDamageDoneMelee=0;
