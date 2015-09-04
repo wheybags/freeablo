@@ -12,11 +12,8 @@ namespace FALevelGen
     template<typename T>
     T chooseOne(std::initializer_list<T> parameters)
     {
-        std::vector<T> choices;
-        choices.insert(choices.end(), parameters.begin(), parameters.end());
-        int n = randomInRange(0, choices.size()-1);
-
-        return choices[n];
+        int n = randomInRange(0, parameters.size()-1);
+        return *(parameters.begin() + n);
     }
 }
 
