@@ -21,11 +21,7 @@ namespace FAWorld
 
         private:
             std::string mAnimPath;
-
-            std::string getWalkCl2(const DiabloExe::Monster& monster);
-            std::string getIdleCl2(const DiabloExe::Monster& monster);
-            std::string getDieCl2(const DiabloExe::Monster & monster);
-
+            std::string mSoundPath;
 
     };
 }

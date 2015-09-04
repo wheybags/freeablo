@@ -8,14 +8,13 @@
 
 namespace FAWorld
 {
-
-
-    class Actor;
+    class Player;
+    class CharacterStatsBase;
 
     class Inventory
     {
     public:
-        Inventory(Actor * actor);
+        Inventory(Player * actor);
 
         void dump();
 
@@ -33,8 +32,7 @@ namespace FAWorld
        Item& getItemAt(Item::equipLoc type, uint8_t y=0, uint8_t x=0, uint8_t beltX=0);
        uint32_t getTotalAttackDamage();
        uint32_t getTotalArmourClass();       
-       void setPlayerFormat();
-       std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>>& getTotalEffects();
+       std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t> > & getTotalEffects();
        bool canPlaceItem(Item item,
                          Item::equipLoc equipType,
                          uint8_t y=0,
@@ -54,7 +52,7 @@ namespace FAWorld
        Item mCursorHeld;
        uint32_t mArmourClassTotal;
        uint32_t mAttackDamageTotal;
-       Actor * mActor;
+       Player * mActor;
        std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> mItemEffects;
        bool checkStatsRequirement(Item& item);
        bool fitsAt(Item item, uint8_t y, uint8_t x);
@@ -62,7 +60,8 @@ namespace FAWorld
        static const uint8_t GOLD_PILE_MIN=15;
        static const uint8_t GOLD_PILE_MID=16;
        static const uint8_t GOLD_PILE_MAX=17;
-    friend class Actor;
+    friend class Player;
+    friend class CharacterStatsBase;
 
     };
 }

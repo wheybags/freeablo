@@ -9,33 +9,12 @@
 namespace FAWorld
 {
     Monster::Monster(const DiabloExe::Monster& monster, Position pos, ActorStats *stats):
-        Actor(getWalkCl2(monster), getIdleCl2(monster), pos, getDieCl2(monster), stats, monster.soundPath), mAnimPath(monster.cl2Path)
-    {}
-
-    std::string Monster::getWalkCl2(const DiabloExe::Monster& monster)
+        Actor("", "", pos, "", stats), mAnimPath(monster.cl2Path), mSoundPath(monster.soundPath)
     {
-        boost::format fmt(monster.cl2Path);
-        fmt % 'w';
-
-        return fmt.str();
-    }
-    
-    std::string Monster::getIdleCl2(const DiabloExe::Monster& monster)
-    {
-        boost::format fmt(monster.cl2Path);
-        fmt % 'n';
-
-        return fmt.str();
-    }
-
-
-    std::string Monster::getDieCl2(const DiabloExe::Monster & monster)
-    {
-        boost::format fmt(monster.cl2Path);
-        fmt % 'd';
-
-        return fmt.str();
-
+        mAnimTimeMap[AnimState::dead] = 10;
+        mAnimTimeMap[AnimState::idle] = 10;
+        mAnimTimeMap[AnimState::dead] = 10;
+        mAnimTimeMap[AnimState::hit] = 10;
     }
 
     std::string Monster::getDieWav()
@@ -67,19 +46,15 @@ namespace FAWorld
         switch(mAnimState)
         {
             case AnimState::walk:
-                mAnimTimeMap[mAnimState] = 10;
                 return FARender::Renderer::get()->loadImage((fmt % 'w').str());
 
             case AnimState::idle:
-                mAnimTimeMap[mAnimState] = 10;
                 return FARender::Renderer::get()->loadImage((fmt % 'n').str());
 
             case AnimState::dead:
-                mAnimTimeMap[mAnimState] = 10;
                 return FARender::Renderer::get()->loadImage((fmt % 'd').str());
 
             case AnimState::hit:
-                mAnimTimeMap[mAnimState] = 10;
                 return FARender::Renderer::get()->loadImage((fmt % 'h').str());
 
             default:

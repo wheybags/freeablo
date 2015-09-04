@@ -2,7 +2,6 @@
 #define ACTOR_H
 
 #include "position.h"
-#include "inventory.h"
 
 #include "../farender/renderer.h"
 #include "../fasavegame/savegame.h"
@@ -25,30 +24,7 @@ namespace FAWorld
             dead,
             hit
         };
-    }
-    class Actor;
-    class ActorAnimState
-    {
-        public:
-            ActorAnimState(Actor * actor): mActor(actor) {}
-            ActorAnimState(const std::string &className, const std::string &armourCode, const std::string &weaponCode, bool inDungeon=false);
-            void setWeapon(std::string weaponCode);
-            void setArmour(std::string armourCode);
-            void setClass(std::string className);
-            void setDungeon(bool isDungeon);            
-            std::string getStateString();
-            std::string getAnimPath(AnimState::AnimState animState);
-        private:
-            void reconstructString();
-            Actor * mActor;
-            std::string mClassName;
-            std::string mClassCode;
-            std::string mArmourCode;
-            std::string mWeaponCode;
-            boost::format * mFmt;
-            bool mInDungeon = true;
-    };
-
+    }    
     class Actor : public NetObject
     {
         public:
@@ -56,8 +32,7 @@ namespace FAWorld
                   const std::string& idleAnimPath="",
                   const Position& pos = Position(0,0),
                   const std::string& dieAnimPath="",
-                  ActorStats* stats=nullptr,
-                  const std::string& soundPath="");
+                  ActorStats* stats=nullptr);
             void update(bool noclip);
             void setStats(ActorStats* stats);
             virtual ~Actor() = default;
@@ -66,8 +41,8 @@ namespace FAWorld
             virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}
             virtual void takeDamage(double amount);
             virtual int32_t getCurrentHP();
-            bool isAttacking;
-            bool mAnimPlaying = false;            
+            bool mAnimPlaying = false;
+            bool isAttacking = false;
             virtual FARender::FASpriteGroup getCurrentAnim();
             void setAnimation(AnimState::AnimState state, bool reset=false);
             void setWalkAnimation(const std::string path);
@@ -85,7 +60,6 @@ namespace FAWorld
             FARender::FASpriteGroup mIdleAnim;
             FARender::FASpriteGroup mDieAnim;
             size_t mFrame;
-            Inventory mInventory;
             virtual void die();
             std::pair<size_t, size_t> mDestination;
             std::pair<size_t, size_t>& destination()
@@ -93,8 +67,7 @@ namespace FAWorld
                 return mDestination;
             }
 
-            bool isDead();
-            ActorAnimState mActorSpriteState = ActorAnimState(this);
+            bool isDead();            
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
             virtual size_t getSize();
@@ -102,8 +75,6 @@ namespace FAWorld
             virtual size_t readFrom(ENetPacket *packet, size_t start);
 
         protected:
-            std::string mSoundPath;
-            std::string mAnimPath;
             bool mIsDead = false;
             friend class boost::serialization::access;
 
@@ -131,8 +102,6 @@ namespace FAWorld
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
             AnimState::AnimState mAnimState;
-        private:
-            friend class Inventory;            
     };
 }
 

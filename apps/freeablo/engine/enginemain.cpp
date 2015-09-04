@@ -84,7 +84,7 @@ namespace Engine
 
         if(character == "Warrior")
         {            
-            stats = new FAWorld::MeleeStats(char_stats);
+            stats = new FAWorld::MeleeStats(char_stats, player);
             FAWorld::Item item = itemManager.getBaseItem(125);
 
             player->mInventory.putItem(
@@ -132,7 +132,7 @@ namespace Engine
 
         else if(character == "Rogue")
         {
-            stats = new FAWorld::RangerStats(char_stats);
+            stats = new FAWorld::RangerStats(char_stats, player);
             FAWorld::Item item = itemManager.getBaseItem(121);
             player->mInventory.putItem(item,
                                        FAWorld::Item::eqLEFTHAND,
@@ -161,7 +161,7 @@ namespace Engine
         }
         else
         {
-            stats = new FAWorld::MageStats(char_stats);
+            stats = new FAWorld::MageStats(char_stats, player);
             FAWorld::Item item = itemManager.getBaseItem(124);
             player->mInventory.putItem(item,
                                        FAWorld::Item::eqLEFTHAND,
@@ -189,10 +189,11 @@ namespace Engine
         }
 
 
-        world.setStatsObject(stats);        
+        world.setStatsObject(stats);
         stats->setActor(player);
-        stats->recalculateDerivedStats();
         player->mInventory.collectEffects();
+        stats->recalculateDerivedStats();
+
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 

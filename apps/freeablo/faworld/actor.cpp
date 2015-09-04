@@ -74,13 +74,10 @@ namespace FAWorld
             const std::string& idleAnimPath,
             const Position& pos,
             const std::string& dieAnimPath,
-            ActorStats* stats,
-            const std::string& soundPath):
+            ActorStats* stats):
         mPos(pos),
-        mFrame(0),
-        mInventory(this),
+        mFrame(0),        
         mStats(stats),
-        mSoundPath(soundPath),        
         mAnimState(AnimState::idle)
     {
         if (!dieAnimPath.empty())
@@ -93,6 +90,10 @@ namespace FAWorld
         if (!idleAnimPath.empty())
             mIdleAnim = FARender::Renderer::get()->loadImage(idleAnimPath);
         mDestination = mPos.current();
+        mAnimTimeMap[AnimState::idle] = 10;
+        mAnimTimeMap[AnimState::walk] = 10;
+
+
     }
 
     void Actor::takeDamage(double amount)
@@ -146,17 +147,10 @@ namespace FAWorld
         switch(mAnimState)
         {
             case AnimState::walk:
-                mAnimTimeMap[mAnimState] = 10;
                 return mWalkAnim;
 
             case AnimState::idle:
-                mAnimTimeMap[mAnimState] = 10;
                 return mIdleAnim;
-
-            case AnimState::dead:
-                mAnimTimeMap[mAnimState] = 10;
-                return mDieAnim;
-
             default:
                 return mIdleAnim;
         }
@@ -176,72 +170,6 @@ namespace FAWorld
         }
     }
 
-    void ActorAnimState::setClass(std::string className)
-    {
-        mClassName = className;
-        mClassCode = className[0];
-    }
-
-    void ActorAnimState::reconstructString()
-    {
-        mFmt = new boost::format("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
-        *mFmt % mClassName % mClassCode % mArmourCode % mWeaponCode % mClassCode % mArmourCode % mWeaponCode;
-    }
-
-    ActorAnimState::ActorAnimState(const std::string& className, const std::string& armourCode, const std::string& weaponCode, bool inDungeon)
-        :mClassName(className), mArmourCode(armourCode), mWeaponCode(weaponCode), mInDungeon(inDungeon)
-    {
-        mClassCode = mClassName[0];
-        reconstructString();
-    }
-
-    void ActorAnimState::setWeapon(std::string weaponCode)
-    {        
-        mWeaponCode = weaponCode;
-        reconstructString();
-    }
-
-    void ActorAnimState::setArmour(std::string armourCode)
-    {
-        mArmourCode = armourCode;
-        reconstructString();
-    }
-
-    void ActorAnimState::setDungeon(bool isDungeon)
-    {
-        mInDungeon = isDungeon;
-    }
-
-    std::string ActorAnimState::getAnimPath(AnimState::AnimState animState)
-    {
-        reconstructString();
-        switch(animState)
-        {
-            case AnimState::dead:
-                mActor->mAnimTimeMap[mActor->getAnimState()] = 10;
-                setWeapon("n");
-
-                return (*mFmt % "dt").str();
-
-            case AnimState::walk:
-                mActor->mAnimTimeMap[mActor->getAnimState()] = 10;
-                if (mInDungeon)
-                    return (*mFmt % "aw").str();
-                else
-                    return (*mFmt % "wl").str();
-            case AnimState::attack:
-                mActor->mAnimTimeMap[mActor->getAnimState()] = 16;
-                return (*mFmt % "at").str();
-
-            default:
-            case AnimState::idle:
-                mActor->mAnimTimeMap[mActor->getAnimState()] = 10;
-                if (mInDungeon)
-                    return (*mFmt % "as").str();
-                else
-                    return (*mFmt % "st").str();
-        }
-    }
     struct ActorNetData
     {
         size_t frame;

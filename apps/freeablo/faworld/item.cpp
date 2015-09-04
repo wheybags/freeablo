@@ -169,6 +169,11 @@ Item::Item(const DiabloExe::UniqueItem & item, uint32_t id)
 
 }
 
+bool Item::isEmpty() const
+{
+    return mEmpty;
+}
+
 bool Item::isReal() const
 {
     return mIsReal;

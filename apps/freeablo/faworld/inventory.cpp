@@ -9,8 +9,9 @@
 #include <algorithm>
 namespace FAWorld
 {
-    Inventory::Inventory(Actor * actor)
+    Inventory::Inventory(Player *actor)
     {
+
         mAttackDamageTotal=0;
         mArmourClassTotal=0;
         mActor = actor;
@@ -49,103 +50,6 @@ namespace FAWorld
                 return true;
         else
             return true;
-    }
-
-    void Inventory::setPlayerFormat()
-    {
-        std::string armour, weapon;
-        switch(mBody.getCode())
-        {
-               case Item::icHeavyArmour:
-               {
-                    armour="h";
-                    break;
-               }
-
-               case Item::icMidArmour:
-               {
-                    armour="m";
-                    break;
-               }
-
-               case Item::icLightArmour:               
-               default:
-               {
-                    armour="l";
-                    break;
-               }
-        }
-        if(mLeftHand.isEmpty() && mRightHand.isEmpty())
-        {
-            weapon = "n";
-        }
-        else if((mLeftHand.isEmpty() && !mRightHand.isEmpty()) || (!mLeftHand.isEmpty() && mRightHand.isEmpty()))
-        {
-            Item hand;
-
-            if(mRightHand.isEmpty())
-                hand = mLeftHand;
-            else
-                hand = mRightHand;
-            switch(hand.getCode())
-            {
-                case Item::icAxe:
-                {
-                    if(hand.getEquipLoc() == Item::eqONEHAND)
-                        weapon = "s";
-                    else
-                        weapon = "a";
-                    break;
-                }
-
-                case Item::icBlunt:
-                {
-                    weapon = "m";
-                    break;
-                }
-
-                case Item::icBow:
-                {
-                    weapon = "b";
-                    break;
-                }
-
-                case Item::icShield:
-                {
-                    weapon = "u";
-                    break;
-                }
-
-                case Item::icSword:
-                {
-                    weapon = "s";
-                    break;
-                }
-
-                default:
-                {
-                    weapon = "n";
-                    break;
-                }
-            }            
-        }
-
-        else if(!mLeftHand.isEmpty() && !mRightHand.isEmpty())
-        {            
-            if((mLeftHand.getCode() == Item::icSword && mRightHand.getCode() == Item::icShield) || (mLeftHand.getCode() == Item::icShield && mRightHand.getCode() == Item::icSword))
-                weapon = "d";
-
-            else if(mLeftHand.getCode() == Item::icBow && mRightHand.getCode() == Item::icBow)
-                weapon = "b";
-
-            else if(mLeftHand.getCode() == Item::icStave && mRightHand.getCode() == Item::icStave)
-                weapon = "t";
-            else if(mLeftHand.getCode() == Item::icBlunt || mRightHand.getCode() == Item::icBlunt)
-                weapon = "h";
-        }
-
-        mActor->mActorSpriteState.setWeapon(weapon);
-        mActor->mActorSpriteState.setArmour(armour);
     }
 
     bool Inventory::canPlaceItem(
@@ -377,7 +281,6 @@ namespace FAWorld
                             this->mRightHand = item;
                             if(recalculateStats)
                                 collectEffects();
-                            setPlayerFormat();
                             return true;
                         }
                         else
@@ -488,7 +391,6 @@ namespace FAWorld
 
                                 if(recalculateStats)
                                     collectEffects();
-                                setPlayerFormat();
                                 return true;
                             }
                             else if(mInventoryBox[i][j] == item)
@@ -564,7 +466,6 @@ namespace FAWorld
         }
         if(recalculateStats)
             collectEffects();
-        setPlayerFormat();
         return true;
     }
 
@@ -819,7 +720,7 @@ namespace FAWorld
                 mActor->mStats->recalculateDerivedStats();;
         }
 
-    std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> &Inventory::getTotalEffects()
+    std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t> > &Inventory::getTotalEffects()
     {
 
         return mItemEffects;

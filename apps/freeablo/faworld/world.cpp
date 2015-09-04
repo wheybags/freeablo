@@ -80,9 +80,9 @@ namespace FAWorld
     void World::setLevel(int32_t levelNum)
     {
         if(levelNum != 0)
-            mCurrentPlayer->mActorSpriteState.setDungeon(true);
+            mCurrentPlayer->mInDungeon=true;
         else
-            mCurrentPlayer->mActorSpriteState.setDungeon(false);
+            mCurrentPlayer->mInDungeon=false;
 
         if(levelNum >= (int32_t)mLevels.size() || levelNum < 0)
             return;
@@ -100,7 +100,7 @@ namespace FAWorld
             ActorStats * stats = new ActorStats(monster);
 
             Monster * monsterObj = new Monster(monster, Position(monsters[i].xPos, monsters[i].yPos), stats);
-            stats->setActor(monsterObj);
+            //stats->setActor(monsterObj);
             mActors.push_back(monsterObj);
         }
 

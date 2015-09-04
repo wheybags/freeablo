@@ -61,14 +61,13 @@ namespace FAWorld
 
             {
                 mVitality = mStartingVitality;
-                mStrength = mStartingStrength;
-                mMagic    = mMagic;
+                mStrength = mStartingStrength;                
+                mMagic    = mStartingMagic;
                 mDexterity = mStartingDexterity;
                 recalculateDerivedStats();
             }
             ActorStats(const DiabloExe::Monster & monsterStat);
 
-            virtual void processEffects();
             virtual void printStats();
             bool levelUp(BasicStat statModified);
             bool spendLevelUpPoint(BasicStat stat);

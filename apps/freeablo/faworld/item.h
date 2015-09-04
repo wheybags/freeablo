@@ -101,7 +101,7 @@ public:
         DecArmourClass
     }ItemEffect;
 
-    bool inline isEmpty(){return mEmpty;}
+    bool isEmpty() const;
     Item();
     ~Item();
     Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix *affix=NULL, bool isIdentified=true);
