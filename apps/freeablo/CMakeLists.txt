@@ -22,24 +22,26 @@ add_executable(freeablo
     faworld/monster.h
     faworld/monster.cpp 
     faworld/player.h  
-	faworld/player.cpp
+    faworld/player.cpp
     faworld/position.h  
     faworld/position.cpp
     faworld/world.cpp  
     faworld/world.h
     faworld/inventory.h
-	faworld/inventory.cpp
-	faworld/item.h
-	faworld/item.cpp
-	faworld/itemmanager.h
-	faworld/itemmanager.cpp
-	faworld/actorstats.h
-	faworld/actorstats.cpp
-	faworld/characterstats.h
-	faworld/characterstats.cpp
+    faworld/inventory.cpp
+    faworld/item.h
+    faworld/item.cpp
+    faworld/itemmanager.h
+    faworld/itemmanager.cpp
+    faworld/actorstats.h
+    faworld/actorstats.cpp
+    faworld/characterstats.h
+    faworld/characterstats.cpp
     faworld/netobject.h
+    faworld/level.cpp
+    faworld/level.h
     
-	fagui/guimanager.h
+    fagui/guimanager.h
     fagui/guimanager.cpp
     fagui/animateddecorator.h
     fagui/animateddecorator.cpp

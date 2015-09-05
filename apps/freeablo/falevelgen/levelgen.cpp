@@ -1112,7 +1112,7 @@ namespace FALevelGen
     }
 
  
-    Level::Level generate(size_t width, size_t height, size_t dLvl, const DiabloExe::DiabloExe& exe, size_t previous, size_t next)
+    FAWorld::GameLevel generate(size_t width, size_t height, size_t dLvl, const DiabloExe::DiabloExe& exe, size_t previous, size_t next)
     {
         size_t levelNum = ((dLvl-1) / 4) + 1;
 
@@ -1211,6 +1211,6 @@ namespace FALevelGen
         Level::Level retval(level, tilPath, minPath, solPath, celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap(), previous, next);
         placeMonsters(retval, exe, dLvl);
         
-        return retval;
+        return FAWorld::GameLevel(retval);
     }
 }

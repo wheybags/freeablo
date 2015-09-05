@@ -204,7 +204,9 @@ namespace Engine
         if(currentLevel != -1)
         {
             world.setLevel(currentLevel);
-            Level::Level& level = *world.getCurrentLevel();            
+
+            FAWorld::GameLevel& level = *world.getCurrentLevel();
+
             player->mPos = FAWorld::Position(level.upStairsPos().first, level.upStairsPos().second);
             guiManager.showIngameGui();
         }
@@ -241,7 +243,7 @@ namespace Engine
             netManager.update();
             guiManager.updateGui();
 
-            Level::Level* level = world.getCurrentLevel();
+            FAWorld::GameLevel* level = world.getCurrentLevel();
             FARender::RenderState* state = renderer.getFreeState();
             if(state)
             {

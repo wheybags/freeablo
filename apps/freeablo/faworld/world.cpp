@@ -67,7 +67,7 @@ namespace FAWorld
         }
     }
 
-    Level::Level* World::getCurrentLevel()
+    GameLevel* World::getCurrentLevel()
     {
         return mCurrentLevel;
     }

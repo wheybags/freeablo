@@ -7,8 +7,7 @@
 
 #include "actor.h"
 #include "player.h"
-
-#include <level/level.h>
+#include "level.h"
 
 
 namespace FARender
@@ -33,7 +32,7 @@ namespace FAWorld
 
             void generateLevels();
 
-            Level::Level* getCurrentLevel();
+            GameLevel* getCurrentLevel();
             size_t getCurrentLevelIndex();
 
             void setLevel(int32_t levelnum);
@@ -63,8 +62,8 @@ namespace FAWorld
 
             std::vector<Actor*> mActors;
 
-            std::vector<Level::Level> mLevels;
-            Level::Level* mCurrentLevel;
+            std::vector<GameLevel> mLevels;
+            GameLevel* mCurrentLevel;
             size_t mCurrentLevelIndex;
             std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Contains NULL where no Actor is present.
                                                                         ///< Where an actor straddles two squares, they shall be placed in both.

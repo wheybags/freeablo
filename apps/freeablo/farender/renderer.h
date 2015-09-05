@@ -17,9 +17,9 @@
 #include "spritemanager.h"
 
 
-namespace Level
+namespace FAWorld
 {
-    class Level;
+    class GameLevel;
 }
 
 namespace FARender
@@ -48,7 +48,7 @@ namespace FARender
 
         Tileset tileset;
 
-        Level::Level* level;
+        FAWorld::GameLevel* level;
 
         FASpriteGroup mCursorSpriteGroup;
         uint32_t mCursorFrame;
@@ -69,14 +69,14 @@ namespace FARender
             void stop();
             void waitUntilDone();
 
-            Tileset getTileset(const Level::Level& level);
+            Tileset getTileset(const FAWorld::GameLevel& level);
 
             RenderState* getFreeState(); // ooh ah up de ra
             void setCurrentState(RenderState* current);
 
             FASpriteGroup loadImage(const std::string& path);
 
-            std::pair<size_t, size_t> getClickedTile(size_t x, size_t y, const Level::Level& level, const FAWorld::Position& screenPos);
+            std::pair<size_t, size_t> getClickedTile(size_t x, size_t y, const FAWorld::GameLevel& level, const FAWorld::Position& screenPos);
 
             Rocket::Core::Context* getRocketContext();
 

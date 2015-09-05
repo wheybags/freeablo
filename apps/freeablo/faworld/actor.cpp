@@ -31,9 +31,11 @@ namespace FAWorld
                 auto nextPos = Position(mPos.current().first, mPos.current().second, Misc::getVecDir(vector));
                 nextPos.mMoving = true;
                 World& world = *World::get();
-                Actor* actorAtNext = world.getActorAt(nextPos.next().first, nextPos.next().second);
-                if((noclip || ((*world.getCurrentLevel())[nextPos.next().first][nextPos.next().second].passable() &&
-                                                   (actorAtNext == NULL || actorAtNext == this)))&& !mAnimPlaying)
+
+                FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.next().first, nextPos.next().second);
+
+                if((noclip || (world.getCurrentLevel()->getTile(nextPos.next().first, nextPos.next().second).passable() &&
+                                                   (actorAtNext == NULL || actorAtNext == this))) && !mAnimPlaying)
                 {
                     if(!mPos.mMoving && !mAnimPlaying)
                     {
