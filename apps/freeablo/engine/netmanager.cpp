@@ -206,7 +206,7 @@ namespace Engine
         FAWorld::Player* newPlayer = new FAWorld::Player();
         newPlayer->mPos = FAWorld::Position(76, 68);
         newPlayer->destination() = newPlayer->mPos.current();
-
+        newPlayer->setSpriteClass("warrior");
         world.addPlayer(id, newPlayer);
     }
 }

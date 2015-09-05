@@ -54,7 +54,7 @@ Item::Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix, bool 
     mEquipLoc = static_cast<equipLoc>(item.equipLoc);
     mGraphicValue = item.graphicValue;
 
-    mCode = item.itemCode;
+    mCode = static_cast<itemCode>(item.itemCode);
     mUniqCode = item.uniqCode;
     mName = item.itemName;
     mSecondName = item.itemSecondName;
@@ -167,6 +167,11 @@ Item::Item(const DiabloExe::UniqueItem & item, uint32_t id)
         mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect5), mMaxRange5, mMinRange5, id));
 
 
+}
+
+bool Item::isEmpty() const
+{
+    return mEmpty;
 }
 
 bool Item::isReal() const
@@ -335,7 +340,7 @@ uint32_t Item::getMaxRange5() const
     return mMaxRange5;
 }
 
-uint8_t Item::getCode() const
+Item::itemCode Item::getCode() const
 {
     return mCode;
 }

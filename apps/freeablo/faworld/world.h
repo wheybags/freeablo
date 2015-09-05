@@ -43,6 +43,8 @@ namespace FAWorld
 
             void clear();
 
+            void deleteActorFromWorld(Actor * dead);
+
             void update(bool noclip);
 
             Player* getCurrentPlayer();
@@ -66,12 +68,13 @@ namespace FAWorld
             size_t mCurrentLevelIndex;
             std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Contains NULL where no Actor is present.
                                                                         ///< Where an actor straddles two squares, they shall be placed in both.
+
+            size_t mTicksSinceLastAnimUpdate=0;
+            size_t mTicksPassed=0;
             Player* mCurrentPlayer;
-            std::map<uint32_t, Player*> mPlayers;
-
-            size_t mTicksSinceLastAnimUpdate;
-
+            std::map<uint32_t, Player*> mPlayers;            
             const DiabloExe::DiabloExe& mDiabloExe;
+            friend class Actor;
     };
 }
 

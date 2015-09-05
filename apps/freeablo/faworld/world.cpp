@@ -6,22 +6,23 @@
 #include "../falevelgen/levelgen.h"
 #include "../faaudio/audiomanager.h"
 #include "../engine/threadmanager.h"
+#include "actorstats.h"
 #include "monster.h"
 
 namespace FAWorld
 {
-    World* singletonInstance = NULL;
+    World* singletonInstance = nullptr;
 
     World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
     {
-        assert(singletonInstance == NULL);
+        assert(singletonInstance == nullptr);
         singletonInstance = this;
 
         mCurrentPlayer = new Player();
         mActors.push_back(mCurrentPlayer);
 
         mTicksSinceLastAnimUpdate = 0;
-        mCurrentLevel = NULL;
+        mCurrentLevel = nullptr;
     }
 
     void World::setStatsObject(ActorStats *stats)
@@ -39,6 +40,14 @@ namespace FAWorld
     World* World::get()
     {
         return singletonInstance;
+    }
+
+    void World::deleteActorFromWorld(Actor * dead)
+    {
+        mActorMap2D[dead->mPos.current()] = nullptr;
+        mActors.erase(std::remove(mActors.begin(), mActors.end(), dead));
+        delete dead;
+
     }
 
     void World::generateLevels()
@@ -70,6 +79,11 @@ namespace FAWorld
     
     void World::setLevel(int32_t levelNum)
     {
+        if(levelNum != 0)
+            mCurrentPlayer->mInDungeon=true;
+        else
+            mCurrentPlayer->mInDungeon=false;
+
         if(levelNum >= (int32_t)mLevels.size() || levelNum < 0)
             return;
 
@@ -81,7 +95,14 @@ namespace FAWorld
         const std::vector<Level::Monster>& monsters = mCurrentLevel->getMonsters();
 
         for(size_t i = 0; i < monsters.size(); i++)
-            mActors.push_back(new Monster(mDiabloExe.getMonster(monsters[i].name), Position(monsters[i].xPos, monsters[i].yPos)));
+        {
+            DiabloExe::Monster monster =  mDiabloExe.getMonster(monsters[i].name);
+            ActorStats * stats = new ActorStats(monster);
+
+            Monster * monsterObj = new Monster(monster, Position(monsters[i].xPos, monsters[i].yPos), stats);
+            //stats->setActor(monsterObj);
+            mActors.push_back(monsterObj);
+        }
 
         actorMapClear();
 
@@ -127,22 +148,47 @@ namespace FAWorld
     void World::update(bool noclip)
     {
         mTicksSinceLastAnimUpdate++;
+        mTicksPassed++;
 
-        bool advanceAnims = mTicksSinceLastAnimUpdate >= (float)ticksPerSecond*0.1;
+        bool advanceAnims;
 
-        if(advanceAnims)
-            mTicksSinceLastAnimUpdate = 0;
+
                         
         for(size_t i = 0; i < mActors.size(); i++)
         {
+            Actor * actor = mActors[i];
+            size_t animDivisor =actor->mAnimTimeMap[actor->getAnimState()];
+            if(animDivisor == 0)
+            {
+                animDivisor=12;
+            }
+            advanceAnims  = !(mTicksPassed % (ticksPerSecond/animDivisor));
             actorMapRemove(mActors[i]);
-
-            mActors[i]->update(noclip);
-
+            actor->update(noclip);
             if(advanceAnims)
-                mActors[i]->mFrame = (mActors[i]->mFrame + 1) % mActors[i]->getCurrentAnim().animLength;
-            
-            actorMapInsert(mActors[i]);    
+            {
+
+                if(!actor->mAnimPlaying && !actor->isDead())
+                {
+                    actor->mFrame = fmod((actor->mFrame + 1), (double)(actor->getCurrentAnim().animLength));
+                }
+
+                else if(actor->mAnimPlaying && actor->mFrame <= actor->getCurrentAnim().animLength-1)
+                {
+                    actor->mFrame++;
+                }
+
+                else if(actor->mAnimPlaying && actor->mFrame == actor->getCurrentAnim().animLength)
+                {
+                    actor->mAnimPlaying = false;
+                }
+
+                else if(!actor->mAnimPlaying && actor->mFrame < actor->getCurrentAnim().animLength-1)
+                {
+                    actor->mFrame++;
+                }
+            }            
+            actorMapInsert(actor);
         }
 
         actorMapClear();

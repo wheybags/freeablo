@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <vector>
 #include <diabloexe/diabloexe.h>
+#include <diabloexe/monster.h>
 #include "actor.h"
 
 
@@ -54,19 +55,27 @@ namespace FAWorld
                 mMaxDexterity(stats.mMaxDexterity),
                 mStartingStrength(stats.mStrength),
                 mMaxStrength(stats.mMaxStrength),
-                mBlockingBonus(stats.mBlockingBonus)
+                mBlockingBonus(stats.mBlockingBonus),
+                mAttackFrameset(stats.mAttackFrameset),
+                mAttackSpeed(stats.mSingleHandedAttackSpeed)
 
             {
                 mVitality = mStartingVitality;
-                mStrength = mStartingStrength;
-                mMagic    = mMagic;
+                mStrength = mStartingStrength;                
+                mMagic    = mStartingMagic;
                 mDexterity = mStartingDexterity;
                 recalculateDerivedStats();
             }
-            virtual void processEffects();
+            ActorStats(const DiabloExe::Monster & monsterStat);
+
             virtual void printStats();
             bool levelUp(BasicStat statModified);
             bool spendLevelUpPoint(BasicStat stat);
+            virtual void takeDamage(int32_t amount);
+            virtual double getMeleeDamage();
+            virtual uint8_t getAttackSpeed();
+            virtual uint8_t getAttackFrameset();
+            virtual int32_t getCurrentHP();
             virtual void recalculateDerivedStats(){}
 
         protected:
@@ -105,7 +114,7 @@ namespace FAWorld
             uint32_t mMana=0;
             uint32_t mCurrentMana=0;
             uint32_t mHP=0;
-            uint32_t mCurrentHP=0;
+            int32_t mCurrentHP=0;
             uint32_t mBonusStrength=0;
             uint32_t mBonusMagic=0;
             uint32_t mBonusDexterity=0;
@@ -125,7 +134,7 @@ namespace FAWorld
             double mArmourClass=0;
             double mManaShield=0;
             double mDamageDone=0;
-            double mAttackSpeed=0;
+            uint8_t mAttackSpeed;
             double mDamageDoneBow=0;
             double mDamageDoneMelee=0;
             int32_t  mDamageTakenMultiplier=0;
@@ -136,6 +145,8 @@ namespace FAWorld
             double mWalkSpeed=0.4;
             double mSwingSpeed=0.0;
             double mHitRecovery=0.0;
+            double mSecondAttackDamageDone=0.0;
+            uint32_t mMonsterType;
             uint8_t mLevelPointsToSpend;
             Actor * mActor;
     };

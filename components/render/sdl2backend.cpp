@@ -353,7 +353,7 @@ namespace Render
     }
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
 
-    void drawCursor(Sprite s)
+    void drawCursor(Sprite s, size_t w, size_t h)
     {
 
         if(s == NULL)
@@ -369,7 +369,7 @@ namespace Render
             SDL_ShowCursor(0);
             int x,y;
             SDL_GetMouseState(&x,&y);
-            drawAt(s, x, y);
+            drawAt(s, x-w/2, y-h/2);
 
         }
         return;

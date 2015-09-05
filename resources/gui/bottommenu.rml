@@ -76,14 +76,14 @@ docmanage.manager.loadDoc(questHandle)
     <body onLoad="instance.onLoadBelt(event)" onkeydown="docmanage.manager.onKeyDown(event)" onmousedown="docmanage.manager.bodyClicked()">
         <span id="container" onmousedown="docmanage.manager.guiClicked()">
         <span class="beltContainer" id="beltContainer">
-        <div class="beltSocket" id="belt0" onclick="instance.onBeltClick(event)"></div>
-        <div class="beltSocket" id="belt1" onclick="instance.onBeltClick(event)"></div>
-        <div class="beltSocket" id="belt2" onclick="instance.onBeltClick(event)"></div>
-        <div class="beltSocket" id="belt3" onclick="instance.onBeltClick(event)"></div>
-        <div class="beltSocket" id="belt4" onclick="instance.onBeltClick(event)"></div>
-        <div class="beltSocket" id="belt5" onclick="instance.onBeltClick(event)"></div>
-        <div class="beltSocket" id="belt6" onclick="instance.onBeltClick(event)"></div>
-        <div class="beltSocket" id="belt7" onclick="instance.onBeltClick(event)"></div>
+        <div class="beltSocket" id="belt0" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
+        <div class="beltSocket" id="belt1" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
+        <div class="beltSocket" id="belt2" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
+        <div class="beltSocket" id="belt3" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
+        <div class="beltSocket" id="belt4" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
+        <div class="beltSocket" id="belt5" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
+        <div class="beltSocket" id="belt6" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
+        <div class="beltSocket" id="belt7" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
         </span>
             <button id="charBut" onclick="docmanage.manager.toggleDoc(charHandle)"></button>
             <button id="questBut" onclick="docmanage.manager.toggleDoc(questHandle)"></button>

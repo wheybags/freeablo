@@ -139,55 +139,55 @@ instance = draggable.DraggableWidget(document, 0, -500)
     <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
         <span id="container" onmousedown="instance.guiMouseDown(event)"
                              onDrag="instance.onDrag(event)">
-        <div onclick="instance.onWeaponClick(event)" id="leftHand" class="hand-equip-socket"> </div>
-        <div onclick="instance.onWeaponClick(event)" id="rightHand" class="hand-equip-socket"> </div>
-        <div onclick="instance.onRingClick(event)" id="leftRing" class="ring-equip-socket"> </div>
-        <div onclick="instance.onRingClick(event)" id="rightRing" class="ring-equip-socket"> </div>
-        <div id="head"   onclick="instance.onHeadClick(event)" class="head-equip-socket"> </div>
-        <div id="amulet" onclick="instance.onAmuletClick(event)" class="amulet-equip-socket"> </div>
-        <div id="body"   onclick="instance.onBodyClick(event)" class="body-equip-socket"> </div>
+        <div id="leftHand"  onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onWeaponClick(event)" class="hand-equip-socket"> </div>
+        <div id="rightHand" onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onWeaponClick(event)"  class="hand-equip-socket"> </div>
+        <div id="leftRing"  onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onRingClick(event)"  class="ring-equip-socket"> </div>
+        <div id="rightRing" onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onRingClick(event)" class="ring-equip-socket"> </div>
+        <div id="head"      onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onHeadClick(event)" class="head-equip-socket"> </div>
+        <div id="amulet"    onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onAmuletClick(event)" class="amulet-equip-socket"> </div>
+        <div id="body"      onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onBodyClick(event)" class="body-equip-socket"> </div>
         <div class="inventory" id="inventory">
 
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket0"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket1"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket2"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket3"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket4"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket5"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket6"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket7"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket8"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket9"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket10"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket11"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket12"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket13"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket14"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket15"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket16"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket17"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket18"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket19"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket20"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket21"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket22"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket23"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket24"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket25"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket26"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket27"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket28"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket29"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket30"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket31"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket32"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket33"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket34"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket35"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket36"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket37"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket38"></div>
-                             <div class="inv-item-socket" onclick="instance.socketMouseDown(event)" id="inv-item-socket39"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket0"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket1"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket2"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket3"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket4"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket5"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket6"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket7"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket8"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket9"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket10"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket11"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket12"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket13"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket14"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket15"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket16"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket17"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket18"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket19"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket20"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket21"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket22"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket23"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket24"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket25"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket26"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket27"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket28"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket29"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket30"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket31"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket32"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket33"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket34"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket35"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket36"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket37"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket38"></div>
+                             <div class="inv-item-socket" onmouseout="instance.socketMouseOut(event)" onmouseover="instance.socketMouseOver(event)" onclick="instance.socketMouseDown(event)" id="inv-item-socket39"></div>
                              </div>
            </span>
     </body>

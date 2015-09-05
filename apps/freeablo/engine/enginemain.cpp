@@ -74,16 +74,19 @@ namespace Engine
         FAWorld::ItemManager itemManager;
         itemManager.loadItems(&exe);
         FAWorld::World world(exe);
+
         FAWorld::Player* player = world.getCurrentPlayer();
         world.generateLevels();
         FAWorld::ActorStats * stats;
-        DiabloExe::CharacterStats char_stats = exe.getCharacterStat(character);;
+        DiabloExe::CharacterStats char_stats = exe.getCharacterStat(character);
+
 
 
         if(character == "Warrior")
-        {
-            stats = new FAWorld::MeleeStats(char_stats);
-            FAWorld::Item item = itemManager.getBaseItem(125) ;
+        {            
+            stats = new FAWorld::MeleeStats(char_stats, player);
+            FAWorld::Item item = itemManager.getBaseItem(125);
+
             player->mInventory.putItem(
                         item,
                         FAWorld::Item::eqLEFTHAND,
@@ -121,6 +124,7 @@ namespace Engine
                                        FAWorld::Item::eqBELT,
                                        FAWorld::Item::eqFLOOR,
                                        0, 0, 1, false);
+            player->setSpriteClass("warrior");
             player->setIdleAnimation("plrgfx/warrior/wld/wldst.cl2");
             player->setWalkAnimation("plrgfx/warrior/wld/wldwl.cl2");
 
@@ -128,7 +132,7 @@ namespace Engine
 
         else if(character == "Rogue")
         {
-            stats = new FAWorld::RangerStats(char_stats);
+            stats = new FAWorld::RangerStats(char_stats, player);
             FAWorld::Item item = itemManager.getBaseItem(121);
             player->mInventory.putItem(item,
                                        FAWorld::Item::eqLEFTHAND,
@@ -150,13 +154,14 @@ namespace Engine
                                        FAWorld::Item::eqBELT,
                                        FAWorld::Item::eqFLOOR,
                                        0, 0, 1, false);
+            player->setSpriteClass("rogue");
             player->setIdleAnimation("plrgfx/rogue/rlb/rlbst.cl2");
             player->setWalkAnimation("plrgfx/rogue/rlb/rlbwl.cl2");
 
         }
         else
         {
-            stats = new FAWorld::MageStats(char_stats);
+            stats = new FAWorld::MageStats(char_stats, player);
             FAWorld::Item item = itemManager.getBaseItem(124);
             player->mInventory.putItem(item,
                                        FAWorld::Item::eqLEFTHAND,
@@ -178,7 +183,7 @@ namespace Engine
                                        FAWorld::Item::eqBELT,
                                        FAWorld::Item::eqBELT,
                                        0, 0, 1, false);
-
+            player->setSpriteClass("sorceror");
             player->setIdleAnimation("plrgfx/sorceror/slt/sltst.cl2");
             player->setWalkAnimation("plrgfx/sorceror/slt/sltwl.cl2");
         }
@@ -186,7 +191,9 @@ namespace Engine
 
         world.setStatsObject(stats);
         stats->setActor(player);
+        player->mInventory.collectEffects();
         stats->recalculateDerivedStats();
+
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 
@@ -197,10 +204,8 @@ namespace Engine
         if(currentLevel != -1)
         {
             world.setLevel(currentLevel);
-            Level::Level& level = *world.getCurrentLevel();
-
+            Level::Level& level = *world.getCurrentLevel();            
             player->mPos = FAWorld::Position(level.upStairsPos().first, level.upStairsPos().second);
-
             guiManager.showIngameGui();
         }
         else
@@ -227,40 +232,36 @@ namespace Engine
                 now = std::chrono::system_clock::now();
             }
 
+
             last = now;
 
-            mInputManager->update(mPaused);
-
+            mInputManager->update(mPaused);            
             if(!mPaused)
                 world.update(mNoclip);
-
             netManager.update();
-
             guiManager.updateGui();
 
             Level::Level* level = world.getCurrentLevel();
             FARender::RenderState* state = renderer.getFreeState();
-
             if(state)
             {
                 state->mPos = player->mPos;
                 if(level != NULL)
-                    state->tileset = renderer.getTileset(*level);;
-
+                    state->tileset = renderer.getTileset(*level);
                 state->level = level;
                 if(!FAGui::cursorPath.empty())
                     state->mCursorEmpty = false;
                 else
-                    state->mCursorEmpty = true;
+                    state->mCursorEmpty = true;                
                 state->mCursorFrame = FAGui::cursorFrame;
-                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
-
-                world.fillRenderState(state);
-                Render::updateGuiBuffer(&state->guiDrawBuffer);
+                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");                
+                world.fillRenderState(state);                
+                Render::updateGuiBuffer(&state->guiDrawBuffer);                
             }
             else
             {
                 Render::updateGuiBuffer(NULL);
+
             }
             renderer.setCurrentState(state);
         }
