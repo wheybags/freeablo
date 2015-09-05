@@ -117,7 +117,8 @@ namespace Engine
     {
         FAWorld::World& world = *FAWorld::World::get();
 
-        size_t bytesPerClient = world.getCurrentPlayer()->getSize() + sizeof(uint32_t); // the uint is for player id
+        world.getCurrentPlayer()->startWriting();
+        size_t bytesPerClient = world.getCurrentPlayer()->getWriteSize() + sizeof(uint32_t); // the uint is for player id
         size_t packetSize = sizeof(ServerPacketHeader) + bytesPerClient*(mClients.size() +1); // +1 for the local player
 
         ENetPacket* packet = enet_packet_create(NULL, packetSize, 0);
@@ -131,13 +132,14 @@ namespace Engine
 
         // write server player
         writeToPacket<uint32_t>(packet, position, SERVER_PLAYER_ID);
-        position = world.getCurrentPlayer()->writeTo(packet, position);
+        world.getCurrentPlayer()->writeTo(packet, position);
 
         // write all clients
         for(size_t i = 0; i < mClients.size(); i++)
         {
             writeToPacket<uint32_t>(packet, position, mClients[i]->connectID);
-            position = world.getPlayer(mClients[i]->connectID)->writeTo(packet, position);
+            world.getPlayer(mClients[i]->connectID)->startWriting();
+            world.getPlayer(mClients[i]->connectID)->writeTo(packet, position);
         }
 
         enet_host_broadcast(mHost, 0, packet);
@@ -185,7 +187,7 @@ namespace Engine
                     player = world.getPlayer(playerId);
                 }
 
-                position = player->readFrom(event.packet, position);
+                player->readFrom(event.packet, position);
             }
         }
     }

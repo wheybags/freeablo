@@ -26,9 +26,9 @@ namespace FAWorld
             int32_t mDirection;
             bool mMoving;
             double distanceFrom(Position B);
-            virtual size_t getSize();
-            virtual size_t writeTo(ENetPacket *packet, size_t start);
-            virtual size_t readFrom(ENetPacket *packet, size_t start);
+            virtual size_t getWriteSize();
+            virtual bool writeTo(ENetPacket *packet, size_t& position);
+            virtual bool readFrom(ENetPacket *packet, size_t& position);
 
         
         private:

@@ -5,7 +5,9 @@
 #include "actorstats.h"
 #include "world.h"
 #include "../engine/threadmanager.h"
+#include "../engine/netmanager.h"
 #include "../falevelgen/random.h"
+
 namespace FAWorld
 {
 
@@ -180,40 +182,48 @@ namespace FAWorld
         size_t destY;
     };
 
-    size_t Actor::getSize()
+    size_t Actor::getWriteSize()
     {
-        return mPos.getSize() + sizeof(ActorNetData);
+        return mPos.getWriteSize() + sizeof(ActorNetData);
     }
 
-    size_t Actor::writeTo(ENetPacket *packet, size_t start)
+    bool Actor::writeTo(ENetPacket *packet, size_t& position)
     {
-        start = mPos.writeTo(packet, start);
+        mPos.startSaving();
+        if(!mPos.writeTo(packet, position))
+            return false;
 
-        ActorNetData* data = (ActorNetData*)(packet->data + start);
-        data->frame = mFrame;
-        data->animState = mAnimState;
-        data->destX = mDestination.first;
-        data->destY = mDestination.second;
+        ActorNetData data;
+        data.frame = mFrame;
+        data.animState = mAnimState;
+        data.destX = mDestination.first;
+        data.destY = mDestination.second;
 
-        return start + sizeof(ActorNetData);
+        return Engine::writeToPacket(packet, position, data);
     }
 
-    size_t Actor::readFrom(ENetPacket *packet, size_t start)
+    bool Actor::readFrom(ENetPacket *packet, size_t& position)
     {
-        start = mPos.readFrom(packet, start);
+        if(!mPos.readFrom(packet, position))
+            return false;
 
-        ActorNetData* data = (ActorNetData*)(packet->data + start);
-        mFrame = data->frame;
-        mAnimState = (AnimState::AnimState)data->animState;
-
-        // don't want to read destination for our player object,
-        // we keep track of our own destination
-        if(World::get()->getCurrentPlayer() != this)
+        ActorNetData data;
+        if(Engine::readFromPacket(packet, position, data))
         {
-            mDestination.first = data->destX;
-            mDestination.second = data->destY;
+            mFrame = data.frame;
+            mAnimState = (AnimState::AnimState)data.animState;
+
+            // don't want to read destination for our player object,
+            // we keep track of our own destination
+            if(World::get()->getCurrentPlayer() != this)
+            {
+                mDestination.first = data.destX;
+                mDestination.second = data.destY;
+            }
+
+            return true;
         }
 
-        return start + sizeof(ActorNetData);
+        return false;
     }
 }
