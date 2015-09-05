@@ -3,6 +3,8 @@
 
 #include <level/level.h>
 
+#include "netobject.h"
+
 namespace FARender
 {
     class Renderer;
@@ -10,7 +12,7 @@ namespace FARender
 
 namespace FAWorld
 {
-    class GameLevel
+    class GameLevel : public NetObject
     {
         public:
             GameLevel(Level::Level level);
@@ -30,9 +32,15 @@ namespace FAWorld
             size_t getNextLevel();
             size_t getPreviousLevel();
 
+            virtual void startSaving();
+            virtual size_t getWriteSize();
+            virtual bool writeTo(ENetPacket* packet, size_t& position);
+            virtual bool readFrom(ENetPacket* packet, size_t& position);
 
         private:
             Level::Level mLevel;
+
+            std::string mDataSavingTmp;
 
             friend class FARender::Renderer;
     };

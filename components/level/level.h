@@ -9,6 +9,13 @@
 #include <utility>
 #include <map>
 
+#include <misc/misc.h>
+
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/split_member.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
+
 namespace Level
 {
     struct Monster
@@ -83,7 +90,9 @@ namespace Level
             Min mMin;
             Sol mSol;
             std::string mTileSetPath; ///< path to cel file for level
+            std::string mTilPath; ///< path to til file for level
             std::string mMinPath; ///< path to min file for level
+            std::string mSolPath; ///< path to sol file for this level
 
             std::map<size_t, size_t> mDoorMap; ///< Map from closed door indices to open door indices + vice-versa
 
@@ -97,6 +106,39 @@ namespace Level
 
             int32_t mPrevious; ///< index of previous level
             int32_t mNext; ///< index of next level
+
+            friend class boost::serialization::access;
+
+            template<class Archive>
+            void save(Archive& ar, const unsigned int version) const
+            {
+                UNUSED_PARAM(version);
+
+                ar & mDun;
+
+                ar & mTileSetPath & mTilPath & mMinPath & mSolPath;
+
+                ar & mDoorMap;
+                ar & mUpStairs & mDownStairs;
+                ar & mPrevious & mNext;
+            }
+
+            template<class Archive>
+            void load(Archive& ar, const unsigned int version)
+            {
+                UNUSED_PARAM(version);
+
+                ar & mDun;
+
+                ar & mTileSetPath & mTilPath & mMinPath & mSolPath;
+                mTil = TileSet(mTilPath); mMin = Min(mMinPath); mSol = Sol(mSolPath);
+
+                ar & mDoorMap;
+                ar & mUpStairs & mDownStairs;
+                ar & mPrevious & mNext;
+            }
+
+            BOOST_SERIALIZATION_SPLIT_MEMBER()
     };
 }
 

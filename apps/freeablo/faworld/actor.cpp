@@ -189,7 +189,7 @@ namespace FAWorld
 
     bool Actor::writeTo(ENetPacket *packet, size_t& position)
     {
-        mPos.startSaving();
+        mPos.startWriting();
         if(!mPos.writeTo(packet, position))
             return false;
 

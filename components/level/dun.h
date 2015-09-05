@@ -6,6 +6,9 @@
 #include <vector>
 
 #include <misc/helper2d.h>
+#include <misc/misc.h>
+
+#include <boost/serialization/access.hpp>
 
 namespace Level
 {
@@ -34,6 +37,17 @@ namespace Level
 
             friend const int16_t& get(size_t x, size_t y, const Dun& dun);
             friend int16_t& get(size_t x, size_t y, Dun& dun);
+
+            friend class boost::serialization::access;
+
+            template<class Archive>
+            void serialize(Archive& ar, unsigned int version)
+            {
+                UNUSED_PARAM(version);
+
+                ar & mBlocks;
+                ar & mWidth & mHeight;
+            }
     };
 }
 
