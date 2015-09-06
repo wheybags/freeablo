@@ -7,7 +7,7 @@
 
 #include "actor.h"
 #include "player.h"
-#include "level.h"
+#include "gamelevel.h"
 
 
 namespace FARender
@@ -26,7 +26,6 @@ namespace FAWorld
     {
         public:
             World(const DiabloExe::DiabloExe& exe);
-            ~World();
 
             static World* get();
 
@@ -36,13 +35,8 @@ namespace FAWorld
             size_t getCurrentLevelIndex();
 
             void setLevel(int32_t levelnum);
-            void addNpcs();
 
             Actor* getActorAt(size_t x, size_t y);
-
-            void clear();
-
-            void deleteActorFromWorld(Actor * dead);
 
             void update(bool noclip);
 
@@ -56,17 +50,9 @@ namespace FAWorld
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
 
         private:
-            void actorMapInsert(Actor* actor); ///< insert actor into 2d map for collision
-            void actorMapRemove(Actor* actor);
-            void actorMapClear();
-
-            std::vector<Actor*> mActors;
-
-            std::vector<GameLevel> mLevels;
+            std::vector<std::shared_ptr<GameLevel>> mLevels;
             GameLevel* mCurrentLevel;
             size_t mCurrentLevelIndex;
-            std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Contains NULL where no Actor is present.
-                                                                        ///< Where an actor straddles two squares, they shall be placed in both.
 
             size_t mTicksPassed=0;
             Player* mCurrentPlayer;

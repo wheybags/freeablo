@@ -18,13 +18,6 @@
 
 namespace Level
 {
-    struct Monster
-    {
-        std::string name;
-        size_t xPos;
-        size_t yPos;
-    };
-
     class Level;
 
     class MinPillar
@@ -69,9 +62,6 @@ namespace Level
             const std::string& getTileSetPath() const;
             const std::string& getMinPath() const;
 
-            const std::vector<Monster>& getMonsters() const;
-            std::vector<Monster>& getMonsters();
-
             bool isStairs(size_t, size_t) const;
 
             int32_t getNextLevel() const
@@ -99,7 +89,6 @@ namespace Level
             std::pair<size_t,size_t> mUpStairs;
             std::pair<size_t,size_t> mDownStairs;
 
-            std::vector<Monster> mMonsters;
             BaseItemManager * mItemManager;
             static std::vector<int16_t> mEmpty;
             friend const MinPillar get(size_t x, size_t y, const Level& level);

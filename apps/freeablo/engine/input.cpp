@@ -4,7 +4,7 @@
 
 #include "../farender/renderer.h"
 #include "../faworld/world.h"
-#include "../faworld/level.h"
+#include "../faworld/gamelevel.h"
 #include "../fagui/console.h"
 #include "../farender/renderer.h"
 #include "enginemain.h"

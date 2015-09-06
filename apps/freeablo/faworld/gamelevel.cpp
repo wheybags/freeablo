@@ -1,4 +1,4 @@
-#include "level.h"
+#include "gamelevel.h"
 
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -7,14 +7,22 @@
 
 #include "../engine/netmanager.h"
 
+#include <diabloexe/diabloexe.h>
+#include "monster.h"
+#include "world.h"
+#include "actorstats.h"
+
 namespace FAWorld
 {
-    GameLevel::GameLevel(Level::Level level) : mLevel(level)
-    { }
-
-    std::vector<Level::Monster>& GameLevel::getMonsters()
+    GameLevel::GameLevel(Level::Level level, std::vector<Actor*> actors) : mLevel(level), mActors(actors)
     {
-        return mLevel.getMonsters();
+        actorMapRefresh();
+    }
+
+    GameLevel::~GameLevel()
+    {
+        for(size_t i = 0; i < mActors.size(); i++)
+            delete mActors[i];
     }
 
     Level::MinPillar GameLevel::getTile(size_t x, size_t y)
@@ -114,5 +122,81 @@ namespace FAWorld
         }
 
         return false;
+    }
+
+    void GameLevel::update(bool noclip, size_t tick)
+    {
+        for(size_t i = 0; i < mActors.size(); i++)
+        {
+            Actor * actor = mActors[i];
+
+            actorMapRemove(actor);
+            actor->update(noclip, tick);
+            actorMapInsert(actor);
+        }
+
+        actorMapRefresh();
+    }
+
+    void GameLevel::actorMapInsert(Actor* actor)
+    {
+        mActorMap2D[actor->mPos.current()] = actor;
+        if(actor->mPos.mMoving)
+            mActorMap2D[actor->mPos.next()] = actor;
+    }
+
+    void GameLevel::actorMapRemove(Actor* actor)
+    {
+        if(mActorMap2D[actor->mPos.current()] == actor)
+            mActorMap2D.erase(actor->mPos.current());
+        if(actor->mPos.mMoving && mActorMap2D[actor->mPos.next()] == actor)
+            mActorMap2D.erase(actor->mPos.next());
+    }
+
+    void GameLevel::actorMapClear()
+    {
+        mActorMap2D.clear();
+    }
+
+    void GameLevel::actorMapRefresh()
+    {
+        actorMapClear();
+        for(size_t i = 0; i < mActors.size(); i++)
+            actorMapInsert(mActors[i]);
+    }
+
+    Actor* GameLevel::getActorAt(size_t x, size_t y)
+    {
+        return mActorMap2D[std::pair<size_t, size_t>(x, y)];
+    }
+
+    void GameLevel::addPlayer(Player *player)
+    {
+        mActors.push_back(player);
+        actorMapInsert(player);
+    }
+
+    void GameLevel::fillRenderState(FARender::RenderState* state)
+    {
+        state->mObjects.clear();
+
+        for(size_t i = 0; i < mActors.size(); i++)
+        {
+            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim().animLength;
+            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
+        }
+    }
+
+    void GameLevel::removeActor(Actor* actor)
+    {
+        for(auto i = mActors.begin(); i != mActors.end(); ++i)
+        {
+            if(*i == actor)
+            {
+                mActors.erase(i);
+                actorMapRemove(actor);
+                break;
+            }
+        }
     }
 }

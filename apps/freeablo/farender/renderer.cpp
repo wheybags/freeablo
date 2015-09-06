@@ -9,7 +9,7 @@
 #include <functional>
 #include <iostream>
 
-#include "../faworld/level.h"
+#include "../faworld/gamelevel.h"
 #include "../engine/threadmanager.h"
 
 namespace FARender

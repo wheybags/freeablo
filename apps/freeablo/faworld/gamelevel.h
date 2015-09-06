@@ -4,6 +4,7 @@
 #include <level/level.h>
 
 #include "netobject.h"
+#include "actor.h"
 
 namespace FARender
 {
@@ -12,12 +13,13 @@ namespace FARender
 
 namespace FAWorld
 {
+    class Player;
+
     class GameLevel : public NetObject
     {
         public:
-            GameLevel(Level::Level level);
-
-            std::vector<Level::Monster>& getMonsters();
+            GameLevel(Level::Level level, std::vector<Actor*> actors);
+            ~GameLevel();
 
             Level::MinPillar getTile(size_t x, size_t y);
 
@@ -37,8 +39,27 @@ namespace FAWorld
             virtual bool writeTo(ENetPacket* packet, size_t& position);
             virtual bool readFrom(ENetPacket* packet, size_t& position);
 
+            void update(bool noclip, size_t tick);
+
+            void actorMapInsert(Actor* actor);
+            void actorMapRemove(Actor* actor);
+            void actorMapClear();
+            void actorMapRefresh();
+
+            Actor* getActorAt(size_t x, size_t y);
+
+            void addPlayer(Player* player);
+
+            void fillRenderState(FARender::RenderState* state);
+
+            void removeActor(Actor* actor);
+
         private:
             Level::Level mLevel;
+
+            std::vector<Actor*> mActors;
+            std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
+                                                                        ///< Where an actor straddles two squares, they shall be placed in both.
 
             std::string mDataSavingTmp;
 

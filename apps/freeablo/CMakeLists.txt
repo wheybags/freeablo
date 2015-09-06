@@ -38,8 +38,8 @@ add_executable(freeablo
     faworld/characterstats.h
     faworld/characterstats.cpp
     faworld/netobject.h
-    faworld/level.cpp
-    faworld/level.h
+    faworld/gamelevel.cpp
+    faworld/gamelevel.h
     
     fagui/guimanager.h
     fagui/guimanager.cpp

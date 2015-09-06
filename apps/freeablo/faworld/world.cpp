@@ -19,7 +19,6 @@ namespace FAWorld
         singletonInstance = this;
 
         mCurrentPlayer = new Player();
-        mActors.push_back(mCurrentPlayer);
 
         mCurrentLevel = nullptr;
     }
@@ -27,26 +26,11 @@ namespace FAWorld
     void World::setStatsObject(ActorStats *stats)
     {
         mCurrentPlayer->setStats(stats);
-
-    }
-
-    World::~World()
-    {
-        for(size_t i = 0; i < mActors.size(); i++)
-            delete mActors[i];
     }
 
     World* World::get()
     {
         return singletonInstance;
-    }
-
-    void World::deleteActorFromWorld(Actor * dead)
-    {
-        mActorMap2D[dead->mPos.current()] = nullptr;
-        mActors.erase(std::remove(mActors.begin(), mActors.end(), dead));
-        delete dead;
-
     }
 
     void World::generateLevels()
@@ -56,13 +40,26 @@ namespace FAWorld
         Level::Dun sector3("levels/towndata/sector3s.dun");
         Level::Dun sector4("levels/towndata/sector4s.dun");
 
-        mLevels.push_back(Level::Level(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
-            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel", std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>(), -1, 1));
+        Level::Level townLevelBase( Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
+                                    "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
+                                    std::make_pair(25,29), std::make_pair(75,68), std::map<size_t, size_t>(), -1, 1);
+
+        std::vector<Actor*> townActors;
+
+        const std::vector<const DiabloExe::Npc*> npcs = mDiabloExe.getNpcs();
+
+        for(size_t i = 0; i < npcs.size(); i++)
+        {
+            Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
+            townActors.push_back(actor);
+        }
+
+        mLevels.push_back(std::shared_ptr<GameLevel>(new GameLevel(townLevelBase, townActors)));
 
 
         for(int32_t i = 1; i < 13; i++)
         {
-            mLevels.push_back(FALevelGen::generate(100, 100, i, mDiabloExe, i-1, i+1));
+            mLevels.push_back(std::move(FALevelGen::generate(100, 100, i, mDiabloExe, i-1, i+1)));
         }
     }
 
@@ -86,100 +83,28 @@ namespace FAWorld
         if(levelNum >= (int32_t)mLevels.size() || levelNum < 0)
             return;
 
-        clear();
+        if(mCurrentLevel)
+            mCurrentLevel->removeActor(mCurrentPlayer);
 
-        mCurrentLevel = &mLevels[levelNum];
+        mCurrentLevel = mLevels[levelNum].get();
         mCurrentLevelIndex = levelNum;
 
-        const std::vector<Level::Monster>& monsters = mCurrentLevel->getMonsters();
-
-        for(size_t i = 0; i < monsters.size(); i++)
-        {
-            DiabloExe::Monster monster =  mDiabloExe.getMonster(monsters[i].name);
-            ActorStats * stats = new ActorStats(monster);
-
-            Monster * monsterObj = new Monster(monster, Position(monsters[i].xPos, monsters[i].yPos), stats);
-            //stats->setActor(monsterObj);
-            mActors.push_back(monsterObj);
-        }
-
-        actorMapClear();
-
-        // insert actors into 2d map
-        for(size_t i = 0; i < mActors.size(); i++)
-            actorMapInsert(mActors[i]);
-
-        if(levelNum == 0)
-            addNpcs();
+        mCurrentLevel->addPlayer(mCurrentPlayer);
 
         FAAudio::AudioManager::playLevelMusic(levelNum, *Engine::ThreadManager::get());
     }
 
-    void World::addNpcs()
-    {
-        const std::vector<const DiabloExe::Npc*> npcs = mDiabloExe.getNpcs();
-
-        for(size_t i = 0; i < npcs.size(); i++)
-        {
-            Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
-            actorMapInsert(actor);
-            mActors.push_back(actor);
-        }
-    }
-
     Actor* World::getActorAt(size_t x, size_t y)
     {
-        return mActorMap2D[std::pair<size_t, size_t>(x, y)];
-    }
-
-    void World::clear()
-    {
-        for(size_t i = 0; i < mActors.size(); i++)
-        {
-            if(mActors[i] != mCurrentPlayer)
-                delete mActors[i];
-        }
-
-        mActors.clear();
-        mActors.push_back(mCurrentPlayer);
+        return getCurrentLevel()->getActorAt(x, y);
     }
 
     void World::update(bool noclip)
     {
         mTicksPassed++;
                         
-        for(size_t i = 0; i < mActors.size(); i++)
-        {
-            Actor * actor = mActors[i];
-
-            actorMapRemove(actor);
-            actor->update(noclip, mTicksPassed);
-            actorMapInsert(actor);
-        }
-
-        actorMapClear();
-        for(size_t i = 0; i < mActors.size(); i++)
-            actorMapInsert(mActors[i]);
-    }
-
-    void World::actorMapInsert(Actor* actor)
-    {
-        mActorMap2D[actor->mPos.current()] = actor;
-        if(actor->mPos.mMoving)
-            mActorMap2D[actor->mPos.next()] = actor;
-    }
-
-    void World::actorMapRemove(Actor* actor)
-    {
-        if(mActorMap2D[actor->mPos.current()] == actor)
-            mActorMap2D.erase(actor->mPos.current());
-        if(actor->mPos.mMoving && mActorMap2D[actor->mPos.next()] == actor)
-            mActorMap2D.erase(actor->mPos.next());
-    }
-
-    void World::actorMapClear()
-    {
-        mActorMap2D.clear();
+        if(getCurrentLevel())
+            getCurrentLevel()->update(noclip, mTicksPassed);
     }
 
     Player* World::getCurrentPlayer()
@@ -198,8 +123,8 @@ namespace FAWorld
     void World::addPlayer(uint32_t id, Player *player)
     {
         mPlayers[id] = player;
-        mActors.push_back(player);
-        actorMapInsert(player);
+
+        getCurrentLevel()->addPlayer(player);
     }
 
     void World::setCurrentPlayerId(uint32_t id)
@@ -209,12 +134,6 @@ namespace FAWorld
 
     void World::fillRenderState(FARender::RenderState* state)
     {
-        state->mObjects.clear();
-
-        for(size_t i = 0; i < mActors.size(); i++)
-        {
-            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim().animLength;
-            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
-        }
+        getCurrentLevel()->fillRenderState(state);
     }
 }

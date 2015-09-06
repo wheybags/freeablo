@@ -135,16 +135,6 @@ namespace Level
         return mMinPath;
     }
 
-    const std::vector<Monster>& Level::getMonsters() const
-    {
-        return mMonsters;
-    }
-
-    std::vector<Monster>& Level::getMonsters()
-    {
-        return mMonsters;
-    }
-
     MinPillar::MinPillar(const std::vector<int16_t>& data, bool passable, int32_t index): mData(data), mPassable(passable), mIndex(index) {}
 
     size_t MinPillar::size() const
