@@ -40,7 +40,7 @@ namespace Engine
             }
 
         private:
-            void runGameLoop(const boost::program_options::variables_map& variables);
+            void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);
 
             EngineInputManager* mInputManager = NULL;
             bool mDone = false;

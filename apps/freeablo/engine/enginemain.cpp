@@ -43,13 +43,18 @@ namespace Engine
         size_t resolutionWidth = settings.get<size_t>("Display","resolutionWidth");
         size_t resolutionHeight = settings.get<size_t>("Display","resolutionHeight");
         bool fullscreen = settings.get<size_t>("Display", "fullscreen");
+        std::string pathEXE = settings.get<std::string>("Game", "PathEXE");
+        if (pathEXE == "")
+        {
+            pathEXE = "Diablo.exe";
+        }
 
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen);
 
         mInputManager = new EngineInputManager(*this);
 
-        std::thread mainThread(boost::bind(&EngineMain::runGameLoop, this, &variables));
+        std::thread mainThread(boost::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
 
         threadManager.run();
         renderDone = true;
@@ -57,14 +62,14 @@ namespace Engine
         mainThread.join();
     }
 
-    void EngineMain::runGameLoop(const bpo::variables_map& variables)
+    void EngineMain::runGameLoop(const bpo::variables_map& variables, const std::string& pathEXE)
     {
         FALevelGen::FAsrand(time(NULL));
 
         FARender::Renderer& renderer = *FARender::Renderer::get();
         Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
         std::string character = variables["character"].as<std::string>() ;
-        DiabloExe::DiabloExe exe;
+        DiabloExe::DiabloExe exe(pathEXE);
 
         if (!exe.isLoaded())
         {
