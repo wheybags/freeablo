@@ -15,6 +15,11 @@ ItemManager::ItemManager()
 
 }
 
+ItemManager& ItemManager::get()
+{
+    static ItemManager instance;
+    return instance;
+}
 
 uint32_t ItemManager::getUniqueItemCode()
 {
