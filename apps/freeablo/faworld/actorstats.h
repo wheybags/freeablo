@@ -14,6 +14,8 @@ namespace FAWorld
     class ActorStats
     {
         public:
+            virtual ~ActorStats() {}
+
             typedef enum
             {
                 Strength,

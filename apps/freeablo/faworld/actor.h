@@ -36,7 +36,7 @@ namespace FAWorld
 
             void update(bool noclip, size_t ticksPassed);
             void setStats(ActorStats* stats);
-            virtual ~Actor() = default;
+            virtual ~Actor();
             virtual std::string getDieWav(){return "";}
             virtual std::string getHitWav(){return "";}
             virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}

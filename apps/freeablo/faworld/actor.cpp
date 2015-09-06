@@ -134,6 +134,12 @@ namespace FAWorld
 
     }
 
+    Actor::~Actor()
+    {
+        if(mStats != nullptr)
+            delete mStats;
+    }
+
     void Actor::takeDamage(double amount)
     {
         mStats->takeDamage(amount);
