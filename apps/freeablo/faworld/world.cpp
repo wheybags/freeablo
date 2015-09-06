@@ -21,7 +21,6 @@ namespace FAWorld
         mCurrentPlayer = new Player();
         mActors.push_back(mCurrentPlayer);
 
-        mTicksSinceLastAnimUpdate = 0;
         mCurrentLevel = nullptr;
     }
 
@@ -147,47 +146,14 @@ namespace FAWorld
 
     void World::update(bool noclip)
     {
-        mTicksSinceLastAnimUpdate++;
         mTicksPassed++;
-
-        bool advanceAnims;
-
-
                         
         for(size_t i = 0; i < mActors.size(); i++)
         {
             Actor * actor = mActors[i];
-            size_t animDivisor =actor->mAnimTimeMap[actor->getAnimState()];
-            if(animDivisor == 0)
-            {
-                animDivisor=12;
-            }
-            advanceAnims  = !(mTicksPassed % (ticksPerSecond/animDivisor));
-            actorMapRemove(mActors[i]);
-            actor->update(noclip);
-            if(advanceAnims)
-            {
 
-                if(!actor->mAnimPlaying && !actor->isDead())
-                {
-                    actor->mFrame = fmod((actor->mFrame + 1), (double)(actor->getCurrentAnim().animLength));
-                }
-
-                else if(actor->mAnimPlaying && actor->mFrame <= actor->getCurrentAnim().animLength-1)
-                {
-                    actor->mFrame++;
-                }
-
-                else if(actor->mAnimPlaying && actor->mFrame == actor->getCurrentAnim().animLength)
-                {
-                    actor->mAnimPlaying = false;
-                }
-
-                else if(!actor->mAnimPlaying && actor->mFrame < actor->getCurrentAnim().animLength-1)
-                {
-                    actor->mFrame++;
-                }
-            }            
+            actorMapRemove(actor);
+            actor->update(noclip, mTicksPassed);
             actorMapInsert(actor);
         }
 

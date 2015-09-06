@@ -11,8 +11,42 @@
 namespace FAWorld
 {
 
-    void Actor::update(bool noclip)
+    void Actor::update(bool noclip, size_t ticksPassed)
     {
+
+        size_t animDivisor = mAnimTimeMap[getAnimState()];
+        if(animDivisor == 0)
+        {
+            animDivisor=12;
+        }
+        bool advanceAnims  = !(ticksPassed % (World::ticksPerSecond/animDivisor));
+
+        //actorMapRemove(mActors[i]);
+        //actor->update(noclip);
+
+        if(advanceAnims)
+        {
+
+            if(!mAnimPlaying && !isDead())
+            {
+                mFrame = fmod((mFrame + 1), (double)(getCurrentAnim().animLength));
+            }
+
+            else if(mAnimPlaying && mFrame <= getCurrentAnim().animLength-1)
+            {
+                mFrame++;
+            }
+
+            else if(mAnimPlaying && mFrame == getCurrentAnim().animLength)
+            {
+                mAnimPlaying = false;
+            }
+
+            else if(!mAnimPlaying && mFrame < getCurrentAnim().animLength-1)
+            {
+                mFrame++;
+            }
+        }
 
         if(mPos.current() != mDestination)
         {

@@ -34,7 +34,7 @@ namespace FAWorld
                   const std::string& dieAnimPath="",
                   ActorStats* stats=nullptr);
 
-            void update(bool noclip);
+            void update(bool noclip, size_t ticksPassed);
             void setStats(ActorStats* stats);
             virtual ~Actor() = default;
             virtual std::string getDieWav(){return "";}
