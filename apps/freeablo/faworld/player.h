@@ -12,7 +12,7 @@ namespace FAWorld
             Player();
             Inventory mInventory;
             void setSpriteClass(std::string className);
-            bool attack(Monster * enemy);
+            bool attack(Actor * enemy);
             bool attack(Player * enemy);
             FARender::FASpriteGroup getCurrentAnim();
             void updateSprite();

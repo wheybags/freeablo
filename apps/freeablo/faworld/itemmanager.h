@@ -19,7 +19,7 @@ namespace FAWorld
     class ItemPosition
     {
     public:
-        ItemPosition(){};
+        ItemPosition(){}
         ItemPosition(std::pair<size_t, size_t> floorPosition);
         void setFloorPosition(std::pair<size_t,size_t> pos);
         std::pair<size_t, size_t> getFloorPosition() const;

@@ -16,7 +16,7 @@ namespace FAWorld
 
 
     }
-    bool Player::attack(Monster *enemy)
+    bool Player::attack(Actor *enemy)
     {
         if(!(World::get()->getTicksPassed() % (size_t)(World::get()->secondsToTicks(mStats->getAttackSpeed() * 0.05))))
         {
@@ -26,10 +26,13 @@ namespace FAWorld
             Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
             setAnimation(AnimState::attack, true);
             mAnimPlaying = true;
-            if(FALevelGen::percentageChance(mStats->getChanceToHitMelee()))
+            printf("Chance to hit enemy: %f\n",(mStats->getChanceToHitMelee() - enemy->mStats->getArmourClass()));
+            if(FALevelGen::percentageChance(mStats->getChanceToHitMelee() - enemy->mStats->getArmourClass()))
             {
                 //Critical hit chance, %clvl. Do 200% damage
-                if(FALevelGen::percentageChance(mStats->getLevel()))
+
+                printf("HP: %d\n", enemy->mStats->getCurrentHP());
+                if(FALevelGen::percentageChance(mStats->getLevel()) && mClassName=="warrior")
                     enemy->takeDamage(1*2);
                 else
                     enemy->takeDamage(1);
