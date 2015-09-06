@@ -30,9 +30,9 @@ namespace FAWorld
             {
                 //Critical hit chance, %clvl. Do 200% damage
                 if(FALevelGen::percentageChance(mStats->getLevel()))
-                    enemy->takeDamage(mStats->getMeleeDamage()*2);
+                    enemy->takeDamage(1*2);
                 else
-                    enemy->takeDamage(mStats->getMeleeDamage());
+                    enemy->takeDamage(1);
                 if(enemy->getCurrentHP() <= 0)
                     enemy->die();
                 return true;

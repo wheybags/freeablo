@@ -216,8 +216,7 @@ private:
     bool mIsIndestructible;
 
     uint32_t mMinAttackDamage;
-    uint32_t mMaxAttackDamage;
-    uint32_t mAttackDamage;
+    uint32_t mMaxAttackDamage;    
 
     uint32_t mMinArmourClass;
     uint32_t mMaxArmourClass;

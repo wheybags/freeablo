@@ -38,7 +38,7 @@ namespace FAWorld
 
             uint32_t getStrength() const{return mStrength;}
             uint32_t getMaxStrength() const{return mMaxStrength;}
-
+            virtual uint32_t getDamage() const{return 0;}
             void setActor(Actor * actor){mActor = actor;}
 
             ActorStats(DiabloExe::CharacterStats stats) :
@@ -72,7 +72,6 @@ namespace FAWorld
             bool levelUp(BasicStat statModified);
             bool spendLevelUpPoint(BasicStat stat);
             virtual void takeDamage(int32_t amount);
-            virtual double getMeleeDamage();
             virtual uint8_t getAttackSpeed();
             virtual uint8_t getAttackFrameset();
             virtual int32_t getCurrentHP();
@@ -133,11 +132,10 @@ namespace FAWorld
             double mBlockingChancePVP=0;
             double mArmourClass=0;
             double mManaShield=0;
-            double mDamageDone=0;
+
             uint32_t mExpForKill=0;
             uint8_t mAttackSpeed;
-            double mDamageDoneBow=0;
-            double mDamageDoneMelee=0;
+
             int32_t  mDamageTakenMultiplier=0;
             uint32_t mLightRadius = 0;
             bool mHasThieves=false;
@@ -146,7 +144,11 @@ namespace FAWorld
             double mWalkSpeed=0.4;
             double mSwingSpeed=0.0;
             double mHitRecovery=0.0;
-            double mSecondAttackDamageDone=0.0;
+            uint32_t mFirstAttackDamageMin = 0;
+            uint32_t mFirstAttackDamageMax = 0;
+            uint32_t mSecondAttackDamageMin= 0;
+            uint32_t mSecondAttackDamageMax= 0;
+
             uint32_t mMonsterType;
             uint8_t mLevelPointsToSpend;
             Actor * mActor;

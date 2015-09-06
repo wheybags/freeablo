@@ -30,8 +30,6 @@ namespace FAWorld
                      uint8_t beltX=0,
                      bool recalculateStats=true);
        Item& getItemAt(Item::equipLoc type, uint8_t y=0, uint8_t x=0, uint8_t beltX=0);
-       uint32_t getTotalAttackDamage();
-       uint32_t getTotalArmourClass();       
        std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t> > & getTotalEffects();
        bool canPlaceItem(Item item,
                          Item::equipLoc equipType,
@@ -50,8 +48,6 @@ namespace FAWorld
        Item mLeftHand;
        Item mRightHand;
        Item mCursorHeld;
-       uint32_t mArmourClassTotal;
-       uint32_t mAttackDamageTotal;
        Player * mActor;
        std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> mItemEffects;
        bool checkStatsRequirement(Item& item);

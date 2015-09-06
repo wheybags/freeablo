@@ -9,9 +9,7 @@ namespace FAWorld
           mMaxDexterity(0), mMaxStrength(0)
     {
         mHP = FALevelGen::randomInRange(monsterStat.minHp, monsterStat.maxHp);
-        mCurrentHP = mHP;
-        mDamageDoneMelee = FALevelGen::randomInRange(monsterStat.minDamage, monsterStat.maxDamage);
-        mSecondAttackDamageDone = FALevelGen::randomInRange(monsterStat.maxDamageSecond, monsterStat.maxDamageSecond);
+        mCurrentHP = mHP;        
         mMonsterType = monsterStat.type;
         mArmourClass = monsterStat.armourClass;
         mExpForKill = monsterStat.exp;
@@ -59,8 +57,6 @@ namespace FAWorld
     {
         printf("Level: %d\n", mLevel);
         printf("ExpToNextLevel: %d\n", mExpToNextLevel);
-        printf("MeleeDamage: %f\n", mDamageDoneMelee);
-        printf("BowDamage: %f\n", mDamageDoneBow);
         printf("Strength: %d\n", mStrength);
         printf("Magic: %d\n", mMagic);
         printf("Dexterity: %d\n", mDexterity);
@@ -95,10 +91,6 @@ namespace FAWorld
         mChanceToHitMagicVPlayer=0;
         mArmourClass=0;
         mManaShield=0;
-        mDamageDone=0;
-        //mAttackSpeed=0;
-        mDamageDoneBow=0;
-        mDamageDoneMelee=0;
         mBonusStrength=0;
         mBonusMagic=0;
         mBonusDexterity=0;
@@ -119,11 +111,6 @@ namespace FAWorld
     void ActorStats::takeDamage(int32_t amount)
     {
         mCurrentHP -= amount;
-    }
-
-    double ActorStats::getMeleeDamage()
-    {
-        return mDamageDoneMelee;
     }
 
     uint8_t ActorStats::getAttackSpeed()

@@ -64,8 +64,7 @@ Item::Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix, bool 
 
     mMinAttackDamage = item.minAttackDamage;
     mMaxAttackDamage = item.maxAttackDamage;
-    mAttackDamage = FALevelGen::randomInRange(mMinAttackDamage,
-                                              mMaxAttackDamage);
+
     mMinArmourClass = item.minArmourClass;
     mMaxArmourClass = item.maxArmourClass;
     mArmourClass = FALevelGen::randomInRange(mMinArmourClass,

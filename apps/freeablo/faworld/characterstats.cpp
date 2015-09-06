@@ -32,26 +32,18 @@ namespace FAWorld
                 break;
 
                 case Item::IncPercentDamageDone:
-                    mDamageDoneBow += range;
-                    mDamageDoneMelee += range;
                 break;
 
                 case Item::DecPercentDamageDone:
-                    mDamageDoneBow -= range;
-                    mDamageDoneMelee -= range;
                 break;
 
                 case Item::IncPercentDamageDoneChanceToHit:
-                    mDamageDoneBow += range;
-                    mDamageDoneMelee += range;
                     mChanceToHitCharacterScreen += range;
                     mChanceToHitMelee += range;
                     mChanceToHitArrow += range;
                 break;
 
                 case Item::DecPercentDamageDoneChanceToHit:
-                    mDamageDoneBow -= range;
-                    mDamageDoneMelee -= range;
                     mChanceToHitCharacterScreen -= range;
                     mChanceToHitMelee -= range;
                     mChanceToHitArrow -= range;
@@ -299,6 +291,12 @@ namespace FAWorld
         mChanceToHitMagic += 50 + mMagic;
     }
 
+    uint32_t CharacterStatsBase::getDamage()
+    {
+        return 0;
+
+    }
+
 
     void MeleeStats::recalculateDerivedStats()
     {
@@ -311,15 +309,10 @@ namespace FAWorld
         mVitality += mStartingVitality + mBonusVitality + mSpentLevelsOnVitality;
         mHP += 2*mVitality + 2*mBonusVitality + 2*mLevel + 18;
         mMana += mMagic + mLevel -1;
-        mArmourClass += mDexterity/5;
-        mDamageDoneBow += (mStrength * mLevel)/200;
-        mDamageDoneMelee += (mStrength * mLevel)/100.0;
         mBlockingChance += mBlockingBonus;
         mBlockingChancePVP += mBlockingBonus;
-        mBlockingChanceTrap += mDexterity + mBlockingBonus;
-        mDamageDoneMelee += mPlayer->mInventory.getTotalAttackDamage();
-        mDamageDoneBow   += mPlayer->mInventory.getTotalAttackDamage();
-        mArmourClass += mPlayer->mInventory.getTotalArmourClass();
+        mBlockingChanceTrap += mDexterity + mBlockingBonus;        
+
         mChanceToHitArrow += 10;
     }
 
@@ -334,15 +327,9 @@ namespace FAWorld
         mVitality += mStartingVitality + mSpentLevelsOnVitality;
         mHP += mVitality + 1.5*mBonusVitality + 2*mLevel + 23;
         mMana += mMagic + 1.5*mBonusMagic + 2*mLevel + 5;
-        mArmourClass += mDexterity/5;
-        mDamageDoneBow += ((mStrength + mDexterity) * mLevel)/100;
-        mDamageDoneMelee += ((mStrength + mDexterity) * mLevel)/200.0;
         mBlockingChance += mBlockingBonus;
         mBlockingChancePVP += mBlockingBonus;
         mBlockingChanceTrap += mDexterity + mBlockingBonus;
-        mDamageDoneMelee += mPlayer->mInventory.getTotalAttackDamage();
-        mDamageDoneBow   += mPlayer->mInventory.getTotalAttackDamage();
-        mArmourClass += mPlayer->mInventory.getTotalArmourClass();
         mChanceToHitArrow += 20;
     }
 
@@ -357,15 +344,9 @@ namespace FAWorld
         mVitality += mStartingVitality + mBonusVitality + mSpentLevelsOnVitality;
         mHP += mVitality + mBonusVitality + mLevel + 9;
         mMana += 2*mMagic + 2*mBonusMagic + 2*mLevel -2;
-        mArmourClass += mDexterity/5;
-        mDamageDoneBow += (mStrength * mLevel)/200;
-        mDamageDoneMelee += (mStrength * mLevel)/100.0;
         mBlockingChance += mBlockingBonus;
         mBlockingChancePVP += mBlockingBonus;
         mBlockingChanceTrap += mDexterity + mBlockingBonus;
-        mDamageDoneMelee += mPlayer->mInventory.getTotalAttackDamage();
-        mDamageDoneBow   += mPlayer->mInventory.getTotalAttackDamage();
-        mArmourClass += mPlayer->mInventory.getTotalArmourClass();
         mChanceToHitArrow += 10;
     }
 

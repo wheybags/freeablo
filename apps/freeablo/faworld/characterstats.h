@@ -12,6 +12,7 @@ namespace FAWorld
         public:
             CharacterStatsBase(DiabloExe::CharacterStats stats, Player * player) : ActorStats(stats), mPlayer(player){}
             virtual void processEffects();
+            virtual uint32_t getDamage();
 
         protected:
             Player * mPlayer;
