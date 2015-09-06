@@ -266,4 +266,18 @@ namespace FAWorld
 
         return false;
     }
+
+    void Actor::setLevel(GameLevel* level)
+    {
+        if(mLevel)
+            mLevel->removeActor(this);
+
+        mLevel = level;
+        mLevel->addActor(this);
+    }
+
+    GameLevel* Actor::getLevel()
+    {
+        return mLevel;
+    }
 }

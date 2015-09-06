@@ -14,7 +14,7 @@
 
 namespace FAWorld
 {
-    GameLevel::GameLevel(Level::Level level, std::vector<Actor*> actors) : mLevel(level), mActors(actors)
+    GameLevel::GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors) : mLevel(level), mLevelIndex(levelIndex), mActors(actors)
     {
         actorMapRefresh();
     }
@@ -170,10 +170,10 @@ namespace FAWorld
         return mActorMap2D[std::pair<size_t, size_t>(x, y)];
     }
 
-    void GameLevel::addPlayer(Player *player)
+    void GameLevel::addActor(Actor* actor)
     {
-        mActors.push_back(player);
-        actorMapInsert(player);
+        mActors.push_back(actor);
+        actorMapInsert(actor);
     }
 
     void GameLevel::fillRenderState(FARender::RenderState* state)

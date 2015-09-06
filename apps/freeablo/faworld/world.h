@@ -51,14 +51,11 @@ namespace FAWorld
 
         private:
             std::vector<std::shared_ptr<GameLevel>> mLevels;
-            GameLevel* mCurrentLevel;
-            size_t mCurrentLevelIndex;
 
             size_t mTicksPassed=0;
             Player* mCurrentPlayer;
             std::map<uint32_t, Player*> mPlayers;            
             const DiabloExe::DiabloExe& mDiabloExe;
-            friend class Actor;
     };
 }
 

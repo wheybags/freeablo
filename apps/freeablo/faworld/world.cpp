@@ -19,8 +19,6 @@ namespace FAWorld
         singletonInstance = this;
 
         mCurrentPlayer = new Player();
-
-        mCurrentLevel = nullptr;
     }
 
     void World::setStatsObject(ActorStats *stats)
@@ -54,7 +52,7 @@ namespace FAWorld
             townActors.push_back(actor);
         }
 
-        mLevels.push_back(std::shared_ptr<GameLevel>(new GameLevel(townLevelBase, townActors)));
+        mLevels.push_back(std::shared_ptr<GameLevel>(new GameLevel(townLevelBase, 0, townActors)));
 
 
         for(int32_t i = 1; i < 13; i++)
@@ -65,12 +63,12 @@ namespace FAWorld
 
     GameLevel* World::getCurrentLevel()
     {
-        return mCurrentLevel;
+        return mCurrentPlayer->getLevel();
     }
 
     size_t World::getCurrentLevelIndex()
     {
-        return mCurrentLevelIndex;
+        return mCurrentPlayer->getLevel()->getLevelIndex();
     }
     
     void World::setLevel(int32_t levelNum)
@@ -83,13 +81,7 @@ namespace FAWorld
         if(levelNum >= (int32_t)mLevels.size() || levelNum < 0)
             return;
 
-        if(mCurrentLevel)
-            mCurrentLevel->removeActor(mCurrentPlayer);
-
-        mCurrentLevel = mLevels[levelNum].get();
-        mCurrentLevelIndex = levelNum;
-
-        mCurrentLevel->addPlayer(mCurrentPlayer);
+        mCurrentPlayer->setLevel(mLevels[levelNum].get());
 
         FAAudio::AudioManager::playLevelMusic(levelNum, *Engine::ThreadManager::get());
     }
@@ -102,9 +94,10 @@ namespace FAWorld
     void World::update(bool noclip)
     {
         mTicksPassed++;
-                        
-        if(getCurrentLevel())
-            getCurrentLevel()->update(noclip, mTicksPassed);
+
+        // TODO: only update levels which have players on them
+        for(auto it = mLevels.begin(); it != mLevels.end(); ++it)
+            it->get()->update(noclip, mTicksPassed);
     }
 
     Player* World::getCurrentPlayer()
@@ -124,7 +117,7 @@ namespace FAWorld
     {
         mPlayers[id] = player;
 
-        getCurrentLevel()->addPlayer(player);
+        getCurrentLevel()->addActor(player);
     }
 
     void World::setCurrentPlayerId(uint32_t id)

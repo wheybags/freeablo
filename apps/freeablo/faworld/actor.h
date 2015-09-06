@@ -50,6 +50,9 @@ namespace FAWorld
             void setIdleAnimation(const std::string path);            
             AnimState::AnimState getAnimState();
 
+            void setLevel(GameLevel* level);
+            GameLevel* getLevel();
+
             virtual bool attack(Actor * enemy)
             {
                 UNUSED_PARAM(enemy);
@@ -76,6 +79,8 @@ namespace FAWorld
             virtual bool readFrom(ENetPacket *packet, size_t& position);
 
         protected:
+            GameLevel* mLevel = NULL;
+
             bool mIsDead = false;
             friend class boost::serialization::access;
 

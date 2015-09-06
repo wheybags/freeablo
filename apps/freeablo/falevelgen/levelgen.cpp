@@ -1217,6 +1217,6 @@ namespace FALevelGen
         std::vector<FAWorld::Actor*> actors;
         placeMonsters(retval, actors, exe, dLvl);
 
-        return std::shared_ptr<FAWorld::GameLevel>(new FAWorld::GameLevel(retval, actors));
+        return std::shared_ptr<FAWorld::GameLevel>(new FAWorld::GameLevel(retval, dLvl, actors));
     }
 }

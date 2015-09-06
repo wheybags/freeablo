@@ -18,7 +18,7 @@ namespace FAWorld
     class GameLevel : public NetObject
     {
         public:
-            GameLevel(Level::Level level, std::vector<Actor*> actors);
+            GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors);
             ~GameLevel();
 
             Level::MinPillar getTile(size_t x, size_t y);
@@ -48,14 +48,20 @@ namespace FAWorld
 
             Actor* getActorAt(size_t x, size_t y);
 
-            void addPlayer(Player* player);
+            void addActor(Actor* actor);
 
             void fillRenderState(FARender::RenderState* state);
 
             void removeActor(Actor* actor);
 
+            size_t getLevelIndex()
+            {
+                return mLevelIndex;
+            }
+
         private:
             Level::Level mLevel;
+            size_t mLevelIndex;
 
             std::vector<Actor*> mActors;
             std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
