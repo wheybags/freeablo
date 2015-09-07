@@ -6,7 +6,7 @@
 #include "../falevelgen/levelgen.h"
 #include "../faaudio/audiomanager.h"
 #include "../engine/threadmanager.h"
-#include "actorstats.h"
+#include "characterstats.h"
 #include "monster.h"
 
 namespace FAWorld
@@ -25,7 +25,7 @@ namespace FAWorld
         mCurrentLevel = nullptr;
     }
 
-    void World::setStatsObject(ActorStats *stats)
+    void World::setStatsObject(CharacterStatsBase *stats)
     {
         mCurrentPlayer->setStats(stats);
 

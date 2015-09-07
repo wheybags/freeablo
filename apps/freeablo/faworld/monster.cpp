@@ -9,7 +9,7 @@
 namespace FAWorld
 {
     Monster::Monster(const DiabloExe::Monster& monster, Position pos, ActorStats *stats):
-        Actor("", "", pos, "", stats), mAnimPath(monster.cl2Path), mSoundPath(monster.soundPath)
+        Actor("", "", pos, ""), mAnimPath(monster.cl2Path), mSoundPath(monster.soundPath)
     {
         mAnimTimeMap[AnimState::dead] = 10;
         mAnimTimeMap[AnimState::idle] = 10;
@@ -40,6 +40,11 @@ namespace FAWorld
         }
     }
 
+    void Monster::takeDamage(double amount)
+    {
+
+    }
+
     FARender::FASpriteGroup Monster::getCurrentAnim()
     {
         boost::format fmt(mAnimPath);
@@ -61,5 +66,13 @@ namespace FAWorld
                 return FARender::Renderer::get()->loadImage((fmt % 'n').str());
         }
 
+
+
+    }
+
+
+    int32_t Monster::getCurrentHP()
+    {
+        return 0;
     }
 }

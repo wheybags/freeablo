@@ -18,26 +18,27 @@ namespace FAWorld
     }
     bool Player::attack(Actor *enemy)
     {
+        Monster * monster_enemy = dynamic_cast<Monster*>(enemy);
         if(!(World::get()->getTicksPassed() % (size_t)(World::get()->secondsToTicks(mStats->getAttackSpeed() * 0.05))))
         {
-            if(enemy->isDead() && enemy->mStats != nullptr)
+            if(monster_enemy->isDead() && monster_enemy->mStats != nullptr)
                 return false;
             isAttacking = true;
             Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
             setAnimation(AnimState::attack, true);
             mAnimPlaying = true;
-            printf("Chance to hit enemy: %f\n",(mStats->getChanceToHitMelee() - enemy->mStats->getArmourClass()));
-            if(FALevelGen::percentageChance(mStats->getChanceToHitMelee() - enemy->mStats->getArmourClass()))
+            printf("Chance to hit monster_enemy: %f\n",(mStats->getChanceToHitMelee() - monster_enemy->mStats->getArmourClass()));
+            if(FALevelGen::percentageChance(mStats->getChanceToHitMelee() - monster_enemy->mStats->getArmourClass()))
             {
                 //Critical hit chance, %clvl. Do 200% damage
 
-                printf("HP: %d\n", enemy->mStats->getCurrentHP());
+                printf("HP: %d\n", monster_enemy->mStats->getCurrentHP());
                 if(FALevelGen::percentageChance(mStats->getLevel()) && mClassName=="warrior")
-                    enemy->takeDamage(1*2);
+                    monster_enemy->takeDamage(mStats->getDamage()*2);
                 else
-                    enemy->takeDamage(1);
-                if(enemy->getCurrentHP() <= 0)
-                    enemy->die();
+                    monster_enemy->takeDamage(mStats->getDamage());
+                if(monster_enemy->getCurrentHP() <= 0)
+                    monster_enemy->die();
                 return true;
             }
             else
@@ -45,6 +46,19 @@ namespace FAWorld
         }
         else
             return false;
+    }
+
+    void Player::takeDamage(double amount)
+    {
+        mStats->takeDamage(amount);
+        if (!(mStats->getCurrentHP() <= 0))
+        {
+            Engine::ThreadManager::get()->playSound(getHitWav());
+            setAnimation(AnimState::hit);
+            mAnimPlaying = true;
+        }
+        else
+            mAnimPlaying = false;
     }
 
     bool Player::attack(Player *enemy)

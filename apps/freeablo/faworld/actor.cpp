@@ -69,15 +69,12 @@ namespace FAWorld
     }
 
 
-    Actor::Actor(
-            const std::string& walkAnimPath,
+    Actor::Actor(const std::string& walkAnimPath,
             const std::string& idleAnimPath,
             const Position& pos,
-            const std::string& dieAnimPath,
-            ActorStats* stats):
+            const std::string& dieAnimPath):
         mPos(pos),
         mFrame(0),        
-        mStats(stats),
         mAnimState(AnimState::idle)
     {
         if (!dieAnimPath.empty())
@@ -94,24 +91,6 @@ namespace FAWorld
         mAnimTimeMap[AnimState::walk] = 10;
 
 
-    }
-
-    void Actor::takeDamage(double amount)
-    {
-        mStats->takeDamage(amount);
-        if (!(mStats->getCurrentHP() <= 0))
-        {
-            Engine::ThreadManager::get()->playSound(getHitWav());
-            setAnimation(AnimState::hit);
-            mAnimPlaying = true;
-        }
-        else
-            mAnimPlaying = false;
-    }
-
-    int32_t Actor::getCurrentHP()
-    {
-        return mStats->getCurrentHP();
     }
 
     void Actor::setWalkAnimation(const std::string path)
@@ -154,11 +133,6 @@ namespace FAWorld
             default:
                 return mIdleAnim;
         }
-    }
-
-    void Actor::setStats(ActorStats * stats)
-    {
-        mStats = stats;
     }
 
     void Actor::setAnimation(AnimState::AnimState state, bool reset)

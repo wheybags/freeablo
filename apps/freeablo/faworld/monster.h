@@ -2,7 +2,7 @@
 #define W_MONSTER_H
 
 #include "actor.h"
-
+#include "monsterstats.h"
 namespace DiabloExe
 {
     struct Monster;
@@ -17,6 +17,10 @@ namespace FAWorld
             std::string getDieWav();
             std::string getHitWav();
             FARender::FASpriteGroup getCurrentAnim();
+            MonsterStats * mStats;
+            int32_t getCurrentHP();
+            void takeDamage(double amount);
+
 
 
         private:

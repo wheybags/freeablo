@@ -4,6 +4,7 @@
 #include "actor.h"
 #include "monster.h"
 #include "inventory.h"
+#include "characterstats.h"
 namespace FAWorld
 {
     class Player: public Actor
@@ -16,7 +17,10 @@ namespace FAWorld
             bool attack(Player * enemy);
             FARender::FASpriteGroup getCurrentAnim();
             void updateSprite();
+            CharacterStatsBase * mStats=nullptr;
             bool mInDungeon = false;
+            void setStats(CharacterStatsBase * stats){mStats = stats;}
+            void takeDamage(double amount);
         private:
             std::string mClassName;
             std::string mClassCode;
