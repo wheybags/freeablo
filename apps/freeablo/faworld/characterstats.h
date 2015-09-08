@@ -60,8 +60,8 @@ namespace FAWorld
             uint32_t mStrength;
             double getArmourClass();
             void takeDamage(double amount);
-            virtual double getChanceToHitMelee(MonsterStats * enemy){return 0;}
-            virtual double getMeleeDamage(MonsterStats * enemy){return 0;}
+            virtual double getChanceToHitMelee(MonsterStats * enemy);
+            virtual double getMeleeDamage(MonsterStats * enemy){UNUSED_PARAM(enemy); return 0;}
             uint8_t getAttackSpeed(){return mAttackSpeed;}
             int32_t getCurrentHP(){return mCurrentHP;}
             virtual void recalculateDerivedStats(){}
@@ -135,7 +135,6 @@ namespace FAWorld
 
 
         }
-        virtual double getChanceToHitMelee(MonsterStats * enemy) final;
         virtual double getMeleeDamage(MonsterStats *enemy) final;
         void recalculateDerivedStats() final;
     private:
@@ -153,7 +152,7 @@ namespace FAWorld
                 mCurrentHP = mHP;
                 mMana = mMagic + 2*mLevel +5;
             }
-
+            virtual double getMeleeDamage(MonsterStats *enemy) final;
             void recalculateDerivedStats() final;
         private:
 
@@ -171,6 +170,7 @@ namespace FAWorld
                 mCurrentHP = mHP;
                 mMana = 2*mMagic + 2*mLevel -2;
             }
+            virtual double getMeleeDamage(MonsterStats *enemy) final;
             void recalculateDerivedStats() final;
         private:
             friend class Inventory;

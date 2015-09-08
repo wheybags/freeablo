@@ -98,7 +98,6 @@ namespace FAWorld
         {
             DiabloExe::Monster monster =  mDiabloExe.getMonster(monsters[i].name);
             MonsterStats * stats = new MonsterStats(monster);
-
             Monster * monsterObj = new Monster(monster, Position(monsters[i].xPos, monsters[i].yPos), stats);
             stats->setActor(monsterObj);
             mActors.push_back(monsterObj);

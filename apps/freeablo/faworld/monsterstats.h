@@ -31,29 +31,27 @@ namespace FAWorld
 
             uint32_t getLevel()
             {
-                return 0;
+                return mLevel;
             }
 
             void takeDamage(double amount);
+
             void setActor(Monster * actor)
             {
                 mMonster = actor;
-            }
+            }            
 
         private:
             int32_t mCurrentHP=0;
             uint32_t mHP=0;
             uint32_t mMinHP=0;
             uint32_t mMaxHP=0;
+            uint32_t mArmourClass=0;
+            uint32_t mLevel=0;
             uint32_t mFirstAttackDamageMin = 0;
             uint32_t mFirstAttackDamageMax = 0;
             uint32_t mSecondAttackDamageMin= 0;
             uint32_t mSecondAttackDamageMax= 0;
-            uint32_t mMonsterType=0;
-            uint32_t mArmourClass=0;
-
-
-
     };
 
 

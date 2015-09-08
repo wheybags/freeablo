@@ -8,14 +8,13 @@ namespace FAWorld
     {
         std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> effects;
         effects = mPlayer->mInventory.getTotalEffects();
-        printf("%lu -- size of effects\n", effects.size());
         for(std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>>::iterator it= effects.begin();it != effects.end(); ++it)
         {
             Item::ItemEffect effect;
             uint32_t minRange, maxRange, id;
             std::tie(effect, minRange, maxRange, id) = *it;
-            uint32_t range = 0;
-            range = FALevelGen::randomInRange(minRange, maxRange);
+            //uint32_t range = 0;
+            //range = FALevelGen::randomInRange(minRange, maxRange);
             switch(effect)
             {
                 case Item::IncPercentChanceToHit:
@@ -242,6 +241,7 @@ namespace FAWorld
     }
     void CharacterStatsBase::takeDamage(double amount)
     {
+        UNUSED_PARAM(amount);
 
     }
 
@@ -322,10 +322,13 @@ namespace FAWorld
             return 1;
     }
 
-    double MeleeStats::getChanceToHitMelee(MonsterStats * enemy)
+    double CharacterStatsBase::getChanceToHitMelee(MonsterStats * enemy)
     {
         double chance = (CHANCE_TO_HIT_BASE + (mDexterity + mBonusDexterity)/2
-                         + mLevel + WARRIOR_MELEE_HIT_CHANCE_BONUS) - enemy->getArmourClass();
+                         + mLevel) - enemy->getArmourClass();
+        if (mPlayer->getClassName() == "warrior")
+            chance += WARRIOR_MELEE_HIT_CHANCE_BONUS;
+
         if (chance < 5)
             chance=5;
         else if(chance > 95)
@@ -345,6 +348,29 @@ namespace FAWorld
         return finalDamage;
     }
 
+    double RangerStats::getMeleeDamage(MonsterStats *enemy)
+    {
+        double charDamage = (mStrength * mLevel)/200;
+        double itemDamage = getItemDamage();
+        double finalDamage = charDamage + itemDamage;
+        finalDamage *= getMonsterBonusDamage(enemy);
+        printf("finalDamage: %f\n", finalDamage);
+        return finalDamage;
+    }
+
+
+    double MageStats::getMeleeDamage(MonsterStats *enemy)
+    {
+        double charDamage = (mStrength * mLevel)/100;
+        double itemDamage = getItemDamage();
+        double finalDamage = charDamage + itemDamage;
+        finalDamage *= getMonsterBonusDamage(enemy);
+        if(FALevelGen::percentageChance(mLevel) && mPlayer->getClassName()=="warrior")
+            finalDamage*=2;
+        printf("finalDamage: %f\n", finalDamage);
+        return finalDamage;
+
+    }
 
 
     void MeleeStats::recalculateDerivedStats()

@@ -10,9 +10,10 @@ namespace FAWorld
 {
     Monster::Monster(const DiabloExe::Monster& monster, Position pos, MonsterStats *stats):
         Actor("", "", pos, ""),        
+        mStats(stats),
         mAnimPath(monster.cl2Path),
         mSoundPath(monster.soundPath),
-        mStats(stats), mName(monster.monsterName),
+        mName(monster.monsterName),
         mType(static_cast<monsterType>(monster.type))
 
 
@@ -52,8 +53,11 @@ namespace FAWorld
         if (!(mStats->getCurrentHP() <= 0))
         {
             Engine::ThreadManager::get()->playSound(getHitWav());
-            setAnimation(AnimState::hit);
-            mAnimPlaying = true;
+            if(amount > mStats->getLevel()+3)
+            {
+                setAnimation(AnimState::hit);
+                mAnimPlaying = true;
+            }
         }
         else
             mAnimPlaying = false;

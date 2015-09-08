@@ -7,18 +7,16 @@ namespace FAWorld
     MonsterStats::MonsterStats(const DiabloExe::Monster &monsterStat):
         mMinHP(monsterStat.minHp),
         mMaxHP(monsterStat.maxHp),
-        mArmourClass(monsterStat.armourClass)
+        mArmourClass(monsterStat.armourClass),
+        mLevel(monsterStat.level)
 
     {        
         mHP = FALevelGen::randomInRange(mMinHP, mMaxHP);
         mCurrentHP=mHP;
     }
 
-
     void MonsterStats::takeDamage(double amount)
     {
         mCurrentHP -= amount;
     }
-
-
 }
