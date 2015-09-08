@@ -240,23 +240,112 @@ namespace FAWorld
             }
         }
     }
-
-    uint32_t CharacterStatsBase::getDamage()
-    {
-        std::cout << __LINE__ << " here" << std::endl;
-        return 0;
-
-    }
-
-    double CharacterStatsBase::getChanceToHitMelee()
-    {
-        return 0;
-    }
-
     void CharacterStatsBase::takeDamage(double amount)
     {
 
     }
+
+    double CharacterStatsBase::getArmourClass()
+    {
+        return mArmourClass;
+    }
+
+    Item CharacterStatsBase::getCurrentWeapon()
+    {
+        Inventory& inv = mPlayer->mInventory;
+
+        Item item;
+
+        if(inv.getItemAt(Item::eqLEFTHAND).isEmpty() &&
+           inv.getItemAt(Item::eqRIGHTHAND).isEmpty())
+            item=Item::empty;
+
+        //One hand empty
+        else if((!inv.getItemAt(Item::eqLEFTHAND).isEmpty() &&
+                inv.getItemAt(Item::eqRIGHTHAND).isEmpty()) ||
+                (inv.getItemAt(Item::eqLEFTHAND).isEmpty() &&
+                !inv.getItemAt(Item::eqRIGHTHAND).isEmpty()))
+        {
+            Item hand;
+            if(inv.getItemAt(Item::eqLEFTHAND).isEmpty())
+                hand = inv.getItemAt(Item::eqLEFTHAND);
+            else
+                hand = inv.getItemAt(Item::eqRIGHTHAND);
+            item = hand;
+        }
+
+        else if(!inv.getItemAt(Item::eqLEFTHAND).isEmpty() &&
+                !inv.getItemAt(Item::eqRIGHTHAND).isEmpty())
+        {
+            //Duel wielding with one item (Cleaver/Axe)
+            if(inv.getItemAt(Item::eqLEFTHAND) == inv.getItemAt(Item::eqRIGHTHAND))
+            {
+                item = inv.getItemAt(Item::eqLEFTHAND);
+            }
+
+            //Duel wielding shield and other, take damage value from sword
+            else
+            {
+                if(!(inv.getItemAt(Item::eqLEFTHAND).getCode() == Item::icShield))
+                    item = inv.getItemAt(Item::eqLEFTHAND);
+                else
+                    item = inv.getItemAt(Item::eqRIGHTHAND);
+
+            }
+        }
+        return item;
+    }
+
+    double CharacterStatsBase::getItemDamage()
+    {
+        Item item = getCurrentWeapon();
+        if(!item.isEmpty())
+            return getCurrentWeapon().getAttackDamage();
+        else
+            return 1;
+    }
+
+    double CharacterStatsBase::getMonsterBonusDamage(MonsterStats *enemy)
+    {
+        mBonusAgainstDemons=false;
+        mBonusAgainstAnimal=false;
+        mBonusAgainstUndead=false;
+        Item item = getCurrentWeapon();
+
+        if(item.isAntiDemon() && enemy->mMonster->getType() == Monster::demon)
+            return 3;
+        else if(item.getCode() == Item::icBlunt && enemy->mMonster->getType() == Monster::undead)
+            return 2;
+        else if(item.getCode() == Item::icSword && enemy->mMonster->getType() == Monster::animal)
+            return 1.5;
+        else
+            return 1;
+    }
+
+    double MeleeStats::getChanceToHitMelee(MonsterStats * enemy)
+    {
+        double chance = (CHANCE_TO_HIT_BASE + (mDexterity + mBonusDexterity)/2
+                         + mLevel + WARRIOR_MELEE_HIT_CHANCE_BONUS) - enemy->getArmourClass();
+        if (chance < 5)
+            chance=5;
+        else if(chance > 95)
+            chance = 95;
+        return chance;
+    }
+
+    double MeleeStats::getMeleeDamage(MonsterStats *enemy)
+    {
+        double charDamage = (mStrength * mLevel)/100;
+        double itemDamage = getItemDamage();
+        double finalDamage = charDamage + itemDamage;
+        finalDamage *= getMonsterBonusDamage(enemy);
+        if(FALevelGen::percentageChance(mLevel) && mPlayer->getClassName()=="warrior")
+            finalDamage*=2;
+        printf("finalDamage: %f\n", finalDamage);
+        return finalDamage;
+    }
+
+
 
     void MeleeStats::recalculateDerivedStats()
     {

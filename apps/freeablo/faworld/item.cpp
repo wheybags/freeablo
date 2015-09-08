@@ -168,6 +168,12 @@ Item::Item(const DiabloExe::UniqueItem & item, uint32_t id)
 
 }
 
+uint32_t Item::getAttackDamage() const
+{
+    return FALevelGen::randomInRange(0, mMaxAttackDamage-mMinAttackDamage+1) + mMinAttackDamage;
+
+}
+
 bool Item::isEmpty() const
 {
     return mEmpty;

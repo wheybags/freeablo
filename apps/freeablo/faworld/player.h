@@ -21,6 +21,7 @@ namespace FAWorld
             bool mInDungeon = false;
             void setStats(CharacterStatsBase * stats){mStats = stats;}
             void takeDamage(double amount);
+            std::string getClassName();
         private:
             std::string mClassName;
             std::string mClassCode;

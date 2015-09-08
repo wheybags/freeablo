@@ -190,10 +190,12 @@ public:
     uint32_t getEffect5() const;
     uint32_t getMinRange5() const;
     uint32_t getMaxRange5() const;
+    uint32_t getAttackDamage() const;
     itemCode getCode() const;
     equipLoc getEquipLoc() const;
     itemType getType() const;
     uint32_t getGraphicValue() const;
+    bool isAntiDemon()const {return mIsAntiDemon;}
     static Item empty;
 
 private:
@@ -213,7 +215,9 @@ private:
     uint32_t mQualityLevel;
     uint32_t mDurability;
     uint32_t mCurrentDurability;
-    bool mIsIndestructible;
+
+    bool mIsIndestructible = false;
+    bool mIsAntiDemon = false;
 
     uint32_t mMinAttackDamage;
     uint32_t mMaxAttackDamage;    

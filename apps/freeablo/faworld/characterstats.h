@@ -1,7 +1,11 @@
 #ifndef DIABLOCHARACTERSTATS_H
 #define DIABLOCHARACTERSTATS_H
 #include "actorstats.h"
-
+#include "monsterstats.h"
+#include "item.h"
+//Stats Constants
+#define CHANCE_TO_HIT_BASE 50
+#define WARRIOR_MELEE_HIT_CHANCE_BONUS 20
 namespace FAWorld
 {
     class Inventory;
@@ -15,7 +19,7 @@ namespace FAWorld
                 mLevel(1),
                 mLevelPoints(0),
                 mExp(0),
-                mExpToNextLevel(2000),
+                mExpToNextLevel(mExpForLevel[0]),
                 mStartingVitality(stats.mVitality),
                 mMaxVitality(stats.mMaxVitality),
                 mStartingMagic(stats.mMagic),
@@ -37,7 +41,6 @@ namespace FAWorld
             }
 
             virtual void processEffects();
-            virtual uint32_t getDamage();
             uint32_t getLevel() const{return mLevel;}
             uint32_t getLevelPoints() const{return mLevelPoints;}
             uint32_t getExp() const{return mExp;}
@@ -55,13 +58,21 @@ namespace FAWorld
             uint32_t getStrength() const{return mStrength;}
             uint32_t getMaxStrength() const{return mMaxStrength;}
             uint32_t mStrength;
-            double getArmourClass(){return mArmourClass;}
+            double getArmourClass();
             void takeDamage(double amount);
-            double getChanceToHitMelee();
+            virtual double getChanceToHitMelee(MonsterStats * enemy){return 0;}
+            virtual double getMeleeDamage(MonsterStats * enemy){return 0;}
+            uint8_t getAttackSpeed(){return mAttackSpeed;}
+            int32_t getCurrentHP(){return mCurrentHP;}
+            virtual void recalculateDerivedStats(){}
+            virtual void clearDerivedStats(){}
+
 
 
         protected:
-
+            double getItemDamage();
+            double getMonsterBonusDamage(MonsterStats * enemy);
+            Item getCurrentWeapon();
             uint32_t mMagic;
             uint32_t mDexterity;
             uint32_t mVitality;
@@ -101,18 +112,14 @@ namespace FAWorld
             uint32_t mBonusDexterity=0;
             uint32_t mBonusVitality=0;
             double mArmourClass=0;
-            double mManaShield=0;
-
-            uint32_t mExpForKill=0;
+            double mManaShield=0;            
             uint8_t mAttackSpeed;
             int32_t  mDamageTakenMultiplier=0;
             uint32_t mLightRadius = 0;
             bool mHasThieves=false;
             bool mBonusAgainstDemons=false;
             bool mBonusAgainstUndead=false;
-            double mWalkSpeed=0.4;
-            double mSwingSpeed=0.0;
-            double mHitRecovery=0.0;
+            bool mBonusAgainstAnimal=false;
             Player * mPlayer;
 
     };
@@ -128,6 +135,8 @@ namespace FAWorld
 
 
         }
+        virtual double getChanceToHitMelee(MonsterStats * enemy) final;
+        virtual double getMeleeDamage(MonsterStats *enemy) final;
         void recalculateDerivedStats() final;
     private:
 

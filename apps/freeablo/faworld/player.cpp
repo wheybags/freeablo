@@ -27,16 +27,14 @@ namespace FAWorld
             Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
             setAnimation(AnimState::attack, true);
             mAnimPlaying = true;
-            printf("Chance to hit monster_enemy: %f\n",(mStats->getChanceToHitMelee() - monster_enemy->mStats->getArmourClass()));
-            if(FALevelGen::percentageChance(mStats->getChanceToHitMelee() - monster_enemy->mStats->getArmourClass()))
+            printf("Chance to hit monster_enemy: %f\n",(mStats->getChanceToHitMelee(monster_enemy->mStats)));
+            if(FALevelGen::percentageChance(mStats->getChanceToHitMelee(monster_enemy->mStats)))
             {
                 //Critical hit chance, %clvl. Do 200% damage
 
                 printf("HP: %d\n", monster_enemy->mStats->getCurrentHP());
-                if(FALevelGen::percentageChance(mStats->getLevel()) && mClassName=="warrior")
-                    monster_enemy->takeDamage(mStats->getDamage()*2);
-                else
-                    monster_enemy->takeDamage(mStats->getDamage());
+
+                monster_enemy->takeDamage(mStats->getMeleeDamage(monster_enemy->mStats));
                 if(monster_enemy->getCurrentHP() <= 0)
                     monster_enemy->die();
                 return true;
@@ -48,17 +46,9 @@ namespace FAWorld
             return false;
     }
 
-    void Player::takeDamage(double amount)
+    std::string Player::getClassName()
     {
-        mStats->takeDamage(amount);
-        if (!(mStats->getCurrentHP() <= 0))
-        {
-            Engine::ThreadManager::get()->playSound(getHitWav());
-            setAnimation(AnimState::hit);
-            mAnimPlaying = true;
-        }
-        else
-            mAnimPlaying = false;
+        return mClassName;
     }
 
     bool Player::attack(Player *enemy)

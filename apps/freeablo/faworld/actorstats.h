@@ -10,20 +10,10 @@
 
 namespace FAWorld
 {
-
     class ActorStats
     {
         public:
-
             ActorStats(){}
-
-            ActorStats(const DiabloExe::Monster & monsterStat);
-            virtual void recalculateDerivedStats(){}
-
-        protected:            
-            virtual void clearDerivedStats();
-
-
     };
 }
 
