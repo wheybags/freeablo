@@ -37,6 +37,8 @@ add_executable(freeablo
 	faworld/actorstats.cpp
 	faworld/characterstats.h
 	faworld/characterstats.cpp
+	faworld/monsterstats.h
+	faworld/monsterstats.cpp
     faworld/netobject.h
     
 	fagui/guimanager.h

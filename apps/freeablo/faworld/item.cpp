@@ -64,8 +64,7 @@ Item::Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix, bool 
 
     mMinAttackDamage = item.minAttackDamage;
     mMaxAttackDamage = item.maxAttackDamage;
-    mAttackDamage = FALevelGen::randomInRange(mMinAttackDamage,
-                                              mMaxAttackDamage);
+
     mMinArmourClass = item.minArmourClass;
     mMaxArmourClass = item.maxArmourClass;
     mArmourClass = FALevelGen::randomInRange(mMinArmourClass,
@@ -166,6 +165,28 @@ Item::Item(const DiabloExe::UniqueItem & item, uint32_t id)
     if(mMaxRange5 != 0 || mEffect5 != 0 || mMinRange5 != 0)
         mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect5), mMaxRange5, mMinRange5, id));
 
+
+    for(auto effect: mEffects)
+    {
+        switch(std::get<0>(effect))
+        {
+            case AntiDemon:
+                mIsAntiDemon=true;
+                mEffects.erase(std::remove(mEffects.begin(), mEffects.end(), effect));
+                break;
+
+            case Indestructible:
+                mIsIndestructible=true;
+                mEffects.erase(std::remove(mEffects.begin(), mEffects.end(), effect));
+            default:
+                break;
+        }
+    }
+}
+
+uint32_t Item::getAttackDamage() const
+{
+    return FALevelGen::randomInRange(0, mMaxAttackDamage-mMinAttackDamage+1) + mMinAttackDamage;
 
 }
 

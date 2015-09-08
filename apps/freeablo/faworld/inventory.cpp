@@ -11,9 +11,6 @@ namespace FAWorld
 {
     Inventory::Inventory(Player *actor)
     {
-
-        mAttackDamageTotal=0;
-        mArmourClassTotal=0;
         mActor = actor;
         for(uint8_t i=0;i<4;i++)
         {
@@ -24,18 +21,6 @@ namespace FAWorld
                 mInventoryBox[i][j].mInvY=i;
             }
         }
-    }
-
-    uint32_t Inventory::getTotalArmourClass()
-    {
-        return mArmourClassTotal;
-        if(mActor == NULL)
-            return 0;
-    }
-
-    uint32_t Inventory::getTotalAttackDamage()
-    {
-        return mAttackDamageTotal;
     }
 
     bool Inventory::checkStatsRequirement(Item& item)
@@ -665,42 +650,6 @@ namespace FAWorld
             if(mActor == NULL)
                 return;
             mItemEffects.clear();
-            mArmourClassTotal=0;
-            mAttackDamageTotal=0;
-            if(!mHead.isEmpty())
-            {
-                mArmourClassTotal += mHead.mArmourClass;
-                mAttackDamageTotal+= mHead.mAttackDamage;
-            }
-
-            if(!mBody.isEmpty())
-            {
-                mArmourClassTotal += mBody.mArmourClass;
-                mAttackDamageTotal+= mBody.mAttackDamage;
-            }
-
-            if(!mAmulet.isEmpty())
-            {
-                mArmourClassTotal += mAmulet.mArmourClass;
-                mAttackDamageTotal+= mAmulet.mAttackDamage;
-            }
-
-            if(!mRightRing.isEmpty())
-            {
-                mArmourClassTotal += mRightRing.mArmourClass;
-                mAttackDamageTotal+= mRightRing.mAttackDamage;
-            }
-
-            if(!mLeftRing.isEmpty())
-            {
-                mArmourClassTotal += mLeftRing.mArmourClass;
-                mAttackDamageTotal+= mLeftRing.mAttackDamage;
-            }
-            if(!mLeftHand.isEmpty())
-            {
-                mArmourClassTotal += mLeftHand.mArmourClass;
-                mAttackDamageTotal+= mLeftHand.mAttackDamage;
-            }
             mItemEffects.insert(mItemEffects.end(), mHead.mEffects.begin(), mHead.mEffects.end());
             mItemEffects.insert(mItemEffects.end(), mBody.mEffects.begin(), mBody.mEffects.end());
             mItemEffects.insert(mItemEffects.end(), mAmulet.mEffects.begin(), mAmulet.mEffects.end());
@@ -710,11 +659,6 @@ namespace FAWorld
             if(!(mLeftHand == mRightHand))
             {
                 mItemEffects.insert(mItemEffects.end(), mRightHand.mEffects.begin(), mRightHand.mEffects.end());
-                if(!mRightHand.isEmpty())
-                {
-                    mArmourClassTotal += mRightHand.mArmourClass;
-                    mAttackDamageTotal+= mRightHand.mAttackDamage;
-                }
             }
             if(mActor->mStats != NULL)
                 mActor->mStats->recalculateDerivedStats();;

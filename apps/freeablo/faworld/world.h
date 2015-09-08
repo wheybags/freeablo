@@ -51,9 +51,10 @@ namespace FAWorld
             void addPlayer(uint32_t id, Player* player);
             Player* getPlayer(size_t id);
             void setCurrentPlayerId(uint32_t id);
-
+            double secondsToTicks(double seconds);
+            size_t getTicksPassed();
             void fillRenderState(FARender::RenderState* state);
-            void setStatsObject(ActorStats *stats);
+            void setStatsObject(CharacterStatsBase *stats);
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
 
         private:

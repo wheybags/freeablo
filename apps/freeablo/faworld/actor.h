@@ -31,16 +31,12 @@ namespace FAWorld
             Actor(const std::string& walkAnimPath="",
                   const std::string& idleAnimPath="",
                   const Position& pos = Position(0,0),
-                  const std::string& dieAnimPath="",
-                  ActorStats* stats=nullptr);
+                  const std::string& dieAnimPath="");
             void update(bool noclip);
-            void setStats(ActorStats* stats);
             virtual ~Actor() = default;
             virtual std::string getDieWav(){return "";}
             virtual std::string getHitWav(){return "";}
             virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}
-            virtual void takeDamage(double amount);
-            virtual int32_t getCurrentHP();
             bool mAnimPlaying = false;
             bool isAttacking = false;
             virtual FARender::FASpriteGroup getCurrentAnim();
@@ -68,8 +64,7 @@ namespace FAWorld
             }
 
             bool isDead();            
-            std::map<AnimState::AnimState, size_t> mAnimTimeMap;
-            ActorStats * mStats=nullptr;
+            std::map<AnimState::AnimState, size_t> mAnimTimeMap;            
             virtual size_t getSize();
             virtual size_t writeTo(ENetPacket *packet, size_t start);
             virtual size_t readFrom(ENetPacket *packet, size_t start);

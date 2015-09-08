@@ -7,6 +7,7 @@ namespace FALevelGen
     void FAsrand(int seed);
     int normRand(int min, int max);
     int randomInRange (unsigned int min, unsigned int max);
+    bool percentageChance(double chance);
 
 
     template<typename T>
@@ -15,6 +16,8 @@ namespace FALevelGen
         int n = randomInRange(0, parameters.size()-1);
         return *(parameters.begin() + n);
     }
+
+
 }
 
 #endif

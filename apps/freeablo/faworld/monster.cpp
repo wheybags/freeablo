@@ -8,8 +8,15 @@
 
 namespace FAWorld
 {
-    Monster::Monster(const DiabloExe::Monster& monster, Position pos, ActorStats *stats):
-        Actor("", "", pos, "", stats), mAnimPath(monster.cl2Path), mSoundPath(monster.soundPath)
+    Monster::Monster(const DiabloExe::Monster& monster, Position pos, MonsterStats *stats):
+        Actor("", "", pos, ""),        
+        mStats(stats),
+        mAnimPath(monster.cl2Path),
+        mSoundPath(monster.soundPath),
+        mName(monster.monsterName),
+        mType(static_cast<monsterType>(monster.type))
+
+
     {
         mAnimTimeMap[AnimState::dead] = 10;
         mAnimTimeMap[AnimState::idle] = 10;
@@ -40,6 +47,27 @@ namespace FAWorld
         }
     }
 
+    void Monster::takeDamage(double amount)
+    {
+        mStats->takeDamage(amount);
+        if (!(mStats->getCurrentHP() <= 0))
+        {
+            Engine::ThreadManager::get()->playSound(getHitWav());
+            if(amount > mStats->getLevel()+3)
+            {
+                setAnimation(AnimState::hit);
+                mAnimPlaying = true;
+            }
+        }
+        else
+            mAnimPlaying = false;
+    }
+
+    std::string Monster::getName()
+    {
+        return mName;
+    }
+
     FARender::FASpriteGroup Monster::getCurrentAnim()
     {
         boost::format fmt(mAnimPath);
@@ -61,5 +89,13 @@ namespace FAWorld
                 return FARender::Renderer::get()->loadImage((fmt % 'n').str());
         }
 
+
+
+    }
+
+
+    int32_t Monster::getCurrentHP()
+    {
+        return mStats->getCurrentHP();
     }
 }

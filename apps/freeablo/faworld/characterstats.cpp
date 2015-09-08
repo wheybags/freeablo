@@ -6,81 +6,51 @@ namespace FAWorld
 
     void CharacterStatsBase::processEffects()
     {
-
         std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> effects;
         effects = mPlayer->mInventory.getTotalEffects();
-        printf("%lu -- size of effects\n", effects.size());
         for(std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>>::iterator it= effects.begin();it != effects.end(); ++it)
         {
             Item::ItemEffect effect;
             uint32_t minRange, maxRange, id;
             std::tie(effect, minRange, maxRange, id) = *it;
-            uint32_t range = 0;
-            range = FALevelGen::randomInRange(minRange, maxRange);
+            //uint32_t range = 0;
+            //range = FALevelGen::randomInRange(minRange, maxRange);
             switch(effect)
             {
                 case Item::IncPercentChanceToHit:
-                    mChanceToHitCharacterScreen += range;
-                    mChanceToHitMelee += range;
-                    mChanceToHitArrow += range;
                 break;
 
                 case Item::DecPercentChanceToHit:
-                    mChanceToHitCharacterScreen -= range;
-                    mChanceToHitMelee -= range;
-                    mChanceToHitArrow -= range;
                 break;
 
                 case Item::IncPercentDamageDone:
-                    mDamageDoneBow += range;
-                    mDamageDoneMelee += range;
                 break;
 
                 case Item::DecPercentDamageDone:
-                    mDamageDoneBow -= range;
-                    mDamageDoneMelee -= range;
                 break;
 
                 case Item::IncPercentDamageDoneChanceToHit:
-                    mDamageDoneBow += range;
-                    mDamageDoneMelee += range;
-                    mChanceToHitCharacterScreen += range;
-                    mChanceToHitMelee += range;
-                    mChanceToHitArrow += range;
                 break;
 
                 case Item::DecPercentDamageDoneChanceToHit:
-                    mDamageDoneBow -= range;
-                    mDamageDoneMelee -= range;
-                    mChanceToHitCharacterScreen -= range;
-                    mChanceToHitMelee -= range;
-                    mChanceToHitArrow -= range;
                 break;
 
                 case Item::IncPercentArmourClass:
-                    mArmourClass += range;
                 break;
 
                 case Item::DecPercentArmourClass:
-                    mArmourClass -= range;
                 break;
 
                 case Item::IncPercentResistFire:
-                    mResistanceFire += range;
                 break;
 
                 case Item::IncPercentResistLightning:
-                    mResistanceLightning += range;
                 break;
 
                 case Item::IncPercentResistMagic:
-                    mResistanceMagic += range;
                 break;
 
                 case Item::IncPercentResistAll:
-                    mResistanceLightning += range;
-                    mResistanceMagic += range;
-                    mResistanceFire += range;
                 break;
 
                 case Item::ModSpellLevel:
@@ -96,73 +66,51 @@ namespace FAWorld
                 break;
 
                 case Item::IncStrength:
-                    mBonusStrength += range;
                 break;
 
                 case Item::DecStrength:
-                    mBonusStrength -= range;
                 break;
 
                 case Item::IncMagic:
-                    mBonusMagic += range;
                 break;
 
                 case Item::DecMagic:
-                    mBonusMagic -= range;
                 break;
 
                 case Item::IncDexterity:
-                    mBonusDexterity += range;
                 break;
 
                 case Item::DecDexterity:
-                    mBonusDexterity -= range;
                 break;
 
                 case Item::IncVitality:
-                    mBonusVitality +=  range;
                 break;
 
                 case Item::DecVitality:
-                    mBonusVitality -= range;
                 break;
 
                 case Item::IncAllBasicStats:
-                    mBonusMagic += range;
-                    mBonusVitality += range;
-                    mBonusDexterity += range;
-                    mBonusStrength += range;
                 break;
 
                 case Item::DecAllBasicStats:
-                    mBonusMagic -= range;
-                    mBonusVitality -= range;
-                    mBonusDexterity -= range;
-                    mBonusStrength -= range;
                 break;
 
-                case Item::IncDamageTaken:
-                    mDamageTakenMultiplier += range;
+                case Item::IncDamageTaken:                    
                 break;
 
-                case Item::DecDamageTaken:
-                    mDamageTakenMultiplier -= range;
+                case Item::DecDamageTaken:                    
                 break;
 
-                case Item::IncHP:
-                    mHP += range;
+                case Item::IncHP:                    
                 break;
 
-                case Item::DecHP:
-                    mHP -= range;
+                case Item::DecHP:                    
                 break;
 
-                case Item::IncMana:
-                    mMana += range;
+                case Item::IncMana:                    
                 break;
 
-                case Item::DecMana:
-                    mMana -= range;
+                case Item::DecMana:                    
                 break;
 
                 case Item::IncPercentDurability:
@@ -175,11 +123,9 @@ namespace FAWorld
                 break;
 
                 case Item::IncLightRadius:
-                    mLightRadius += range;
                 break;
 
                 case Item::DecLightRadius:
-                    mLightRadius += range;
                 break;
 
                 case Item::Unknown0:
@@ -207,7 +153,6 @@ namespace FAWorld
                 break;
 
                 case Item::HalfTrapDamage:
-                    mHasThieves = true;
                 break;
 
                 case Item::Knockback:
@@ -293,10 +238,138 @@ namespace FAWorld
 
             }
         }
-        mChanceToHitCharacterScreen += 50 + mStartingDexterity/2;
-        mChanceToHitMelee += mChanceToHitCharacterScreen;
-        mChanceToHitArrow += mChanceToHitCharacterScreen + mDexterity/2 ;
-        mChanceToHitMagic += 50 + mMagic;
+    }
+    void CharacterStatsBase::takeDamage(double amount)
+    {
+        UNUSED_PARAM(amount);
+
+    }
+
+    double CharacterStatsBase::getArmourClass()
+    {
+        return mArmourClass;
+    }
+
+    Item CharacterStatsBase::getCurrentWeapon()
+    {
+        Inventory& inv = mPlayer->mInventory;
+
+        Item item;
+
+        if(inv.getItemAt(Item::eqLEFTHAND).isEmpty() &&
+           inv.getItemAt(Item::eqRIGHTHAND).isEmpty())
+            item=Item::empty;
+
+        //One hand empty
+        else if((!inv.getItemAt(Item::eqLEFTHAND).isEmpty() &&
+                inv.getItemAt(Item::eqRIGHTHAND).isEmpty()) ||
+                (inv.getItemAt(Item::eqLEFTHAND).isEmpty() &&
+                !inv.getItemAt(Item::eqRIGHTHAND).isEmpty()))
+        {
+            Item hand;
+            if(inv.getItemAt(Item::eqLEFTHAND).isEmpty())
+                hand = inv.getItemAt(Item::eqLEFTHAND);
+            else
+                hand = inv.getItemAt(Item::eqRIGHTHAND);
+            item = hand;
+        }
+
+        else if(!inv.getItemAt(Item::eqLEFTHAND).isEmpty() &&
+                !inv.getItemAt(Item::eqRIGHTHAND).isEmpty())
+        {
+            //Duel wielding with one item (Cleaver/Axe)
+            if(inv.getItemAt(Item::eqLEFTHAND) == inv.getItemAt(Item::eqRIGHTHAND))
+            {
+                item = inv.getItemAt(Item::eqLEFTHAND);
+            }
+
+            //Duel wielding shield and other, take damage value from sword
+            else
+            {
+                if(!(inv.getItemAt(Item::eqLEFTHAND).getCode() == Item::icShield))
+                    item = inv.getItemAt(Item::eqLEFTHAND);
+                else
+                    item = inv.getItemAt(Item::eqRIGHTHAND);
+
+            }
+        }
+        return item;
+    }
+
+    double CharacterStatsBase::getItemDamage()
+    {
+        Item item = getCurrentWeapon();
+        if(!item.isEmpty())
+            return getCurrentWeapon().getAttackDamage();
+        else
+            return 1;
+    }
+
+    double CharacterStatsBase::getMonsterBonusDamage(MonsterStats *enemy)
+    {
+        mBonusAgainstDemons=false;
+        mBonusAgainstAnimal=false;
+        mBonusAgainstUndead=false;
+        Item item = getCurrentWeapon();
+
+        if(item.isAntiDemon() && enemy->mMonster->getType() == Monster::demon)
+            return 3;
+        else if(item.getCode() == Item::icBlunt && enemy->mMonster->getType() == Monster::undead)
+            return 2;
+        else if(item.getCode() == Item::icSword && enemy->mMonster->getType() == Monster::animal)
+            return 1.5;
+        else
+            return 1;
+    }
+
+    double CharacterStatsBase::getChanceToHitMelee(MonsterStats * enemy)
+    {
+        double chance = (CHANCE_TO_HIT_BASE + (mDexterity + mBonusDexterity)/2
+                         + mLevel) - enemy->getArmourClass();
+        if (mPlayer->getClassName() == "warrior")
+            chance += WARRIOR_MELEE_HIT_CHANCE_BONUS;
+
+        if (chance < 5)
+            chance=5;
+        else if(chance > 95)
+            chance = 95;
+        return chance;
+    }
+
+    double MeleeStats::getMeleeDamage(MonsterStats *enemy)
+    {
+        double charDamage = (mStrength * mLevel)/100;
+        double itemDamage = getItemDamage();
+        double finalDamage = charDamage + itemDamage;
+        finalDamage *= getMonsterBonusDamage(enemy);
+        if(FALevelGen::percentageChance(mLevel) && mPlayer->getClassName()=="warrior")
+            finalDamage*=2;
+        printf("finalDamage: %f\n", finalDamage);
+        return finalDamage;
+    }
+
+    double RangerStats::getMeleeDamage(MonsterStats *enemy)
+    {
+        double charDamage = (mStrength * mLevel)/200;
+        double itemDamage = getItemDamage();
+        double finalDamage = charDamage + itemDamage;
+        finalDamage *= getMonsterBonusDamage(enemy);
+        printf("finalDamage: %f\n", finalDamage);
+        return finalDamage;
+    }
+
+
+    double MageStats::getMeleeDamage(MonsterStats *enemy)
+    {
+        double charDamage = (mStrength * mLevel)/100;
+        double itemDamage = getItemDamage();
+        double finalDamage = charDamage + itemDamage;
+        finalDamage *= getMonsterBonusDamage(enemy);
+        if(FALevelGen::percentageChance(mLevel) && mPlayer->getClassName()=="warrior")
+            finalDamage*=2;
+        printf("finalDamage: %f\n", finalDamage);
+        return finalDamage;
+
     }
 
 
@@ -304,23 +377,6 @@ namespace FAWorld
     {
         clearDerivedStats();
         processEffects();
-
-        mStrength += mStartingStrength + mBonusStrength + mSpentLevelsOnStrength;
-        mMagic += mStartingMagic + mBonusMagic + mSpentLevelsOnMagic;
-        mDexterity += mStartingDexterity + mBonusDexterity + mSpentLevelsOnDexterity;
-        mVitality += mStartingVitality + mBonusVitality + mSpentLevelsOnVitality;
-        mHP += 2*mVitality + 2*mBonusVitality + 2*mLevel + 18;
-        mMana += mMagic + mLevel -1;
-        mArmourClass += mDexterity/5;
-        mDamageDoneBow += (mStrength * mLevel)/200;
-        mDamageDoneMelee += (mStrength * mLevel)/100.0;
-        mBlockingChance += mBlockingBonus;
-        mBlockingChancePVP += mBlockingBonus;
-        mBlockingChanceTrap += mDexterity + mBlockingBonus;
-        mDamageDoneMelee += mPlayer->mInventory.getTotalAttackDamage();
-        mDamageDoneBow   += mPlayer->mInventory.getTotalAttackDamage();
-        mArmourClass += mPlayer->mInventory.getTotalArmourClass();
-        mChanceToHitArrow += 10;
     }
 
     void RangerStats::recalculateDerivedStats()
@@ -328,22 +384,6 @@ namespace FAWorld
         clearDerivedStats();
         processEffects();
 
-        mStrength += mStartingStrength  + mSpentLevelsOnStrength;
-        mMagic += mStartingMagic + mSpentLevelsOnMagic;
-        mDexterity += mStartingDexterity + mSpentLevelsOnDexterity;
-        mVitality += mStartingVitality + mSpentLevelsOnVitality;
-        mHP += mVitality + 1.5*mBonusVitality + 2*mLevel + 23;
-        mMana += mMagic + 1.5*mBonusMagic + 2*mLevel + 5;
-        mArmourClass += mDexterity/5;
-        mDamageDoneBow += ((mStrength + mDexterity) * mLevel)/100;
-        mDamageDoneMelee += ((mStrength + mDexterity) * mLevel)/200.0;
-        mBlockingChance += mBlockingBonus;
-        mBlockingChancePVP += mBlockingBonus;
-        mBlockingChanceTrap += mDexterity + mBlockingBonus;
-        mDamageDoneMelee += mPlayer->mInventory.getTotalAttackDamage();
-        mDamageDoneBow   += mPlayer->mInventory.getTotalAttackDamage();
-        mArmourClass += mPlayer->mInventory.getTotalArmourClass();
-        mChanceToHitArrow += 20;
     }
 
     void MageStats::recalculateDerivedStats()
@@ -351,22 +391,7 @@ namespace FAWorld
         clearDerivedStats();
         processEffects();
 
-        mStrength += mStartingStrength + mBonusStrength + mSpentLevelsOnStrength;
-        mMagic += mStartingMagic + mBonusMagic + mSpentLevelsOnMagic;
-        mDexterity += mStartingDexterity + mBonusDexterity + mSpentLevelsOnDexterity;
-        mVitality += mStartingVitality + mBonusVitality + mSpentLevelsOnVitality;
-        mHP += mVitality + mBonusVitality + mLevel + 9;
-        mMana += 2*mMagic + 2*mBonusMagic + 2*mLevel -2;
-        mArmourClass += mDexterity/5;
-        mDamageDoneBow += (mStrength * mLevel)/200;
-        mDamageDoneMelee += (mStrength * mLevel)/100.0;
-        mBlockingChance += mBlockingBonus;
-        mBlockingChancePVP += mBlockingBonus;
-        mBlockingChanceTrap += mDexterity + mBlockingBonus;
-        mDamageDoneMelee += mPlayer->mInventory.getTotalAttackDamage();
-        mDamageDoneBow   += mPlayer->mInventory.getTotalAttackDamage();
-        mArmourClass += mPlayer->mInventory.getTotalArmourClass();
-        mChanceToHitArrow += 10;
+
     }
 
 }

@@ -30,4 +30,10 @@ namespace FALevelGen
         int result = range(rng);
         return result;
     }
+
+    bool percentageChance(double chance)
+    {
+        std::bernoulli_distribution percent_chance(chance/100.0);
+        return percent_chance(rng);
+    }
 }

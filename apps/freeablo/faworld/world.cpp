@@ -6,7 +6,8 @@
 #include "../falevelgen/levelgen.h"
 #include "../faaudio/audiomanager.h"
 #include "../engine/threadmanager.h"
-#include "actorstats.h"
+#include "characterstats.h"
+#include "monsterstats.h"
 #include "monster.h"
 
 namespace FAWorld
@@ -25,10 +26,9 @@ namespace FAWorld
         mCurrentLevel = nullptr;
     }
 
-    void World::setStatsObject(ActorStats *stats)
+    void World::setStatsObject(CharacterStatsBase *stats)
     {
         mCurrentPlayer->setStats(stats);
-
     }
 
     World::~World()
@@ -97,10 +97,9 @@ namespace FAWorld
         for(size_t i = 0; i < monsters.size(); i++)
         {
             DiabloExe::Monster monster =  mDiabloExe.getMonster(monsters[i].name);
-            ActorStats * stats = new ActorStats(monster);
-
+            MonsterStats * stats = new MonsterStats(monster);
             Monster * monsterObj = new Monster(monster, Position(monsters[i].xPos, monsters[i].yPos), stats);
-            //stats->setActor(monsterObj);
+            stats->setActor(monsterObj);
             mActors.push_back(monsterObj);
         }
 
@@ -114,6 +113,16 @@ namespace FAWorld
             addNpcs();
 
         FAAudio::AudioManager::playLevelMusic(levelNum, *Engine::ThreadManager::get());
+    }
+
+    double World::secondsToTicks(double seconds)
+    {
+        return ticksPerSecond * seconds;
+    }
+
+    size_t World::getTicksPassed()
+    {
+        return mTicksPassed;
     }
 
     void World::addNpcs()

@@ -3,6 +3,7 @@
 #include "actorstats.h"
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
+#include <random>
 
 namespace FAWorld
 {
@@ -17,16 +18,37 @@ namespace FAWorld
     }
     bool Player::attack(Actor *enemy)
     {
-        if(enemy->isDead() && enemy->mStats != nullptr)
+        Monster * monster_enemy = dynamic_cast<Monster*>(enemy);
+        if(!(World::get()->getTicksPassed() % (size_t)(World::get()->secondsToTicks(mStats->getAttackSpeed() * 0.05))))
+        {
+            if(monster_enemy->isDead() && monster_enemy->mStats != nullptr)
+                return false;
+            isAttacking = true;
+            Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
+            setAnimation(AnimState::attack, true);
+            mAnimPlaying = true;
+            printf("Chance to hit monster_enemy: %f\n",(mStats->getChanceToHitMelee(monster_enemy->mStats)));
+            if(FALevelGen::percentageChance(mStats->getChanceToHitMelee(monster_enemy->mStats)))
+            {
+                //Critical hit chance, %clvl. Do 200% damage
+
+                printf("HP: %d\n", monster_enemy->mStats->getCurrentHP());
+
+                monster_enemy->takeDamage(mStats->getMeleeDamage(monster_enemy->mStats));
+                if(monster_enemy->getCurrentHP() <= 0)
+                    monster_enemy->die();
+                return true;
+            }
+            else
+                return false;
+        }
+        else
             return false;
-        isAttacking = true;
-        Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-        enemy->takeDamage((uint32_t)mStats->getMeleeDamage());
-        if(enemy->getCurrentHP() <= 0)
-            enemy->die();
-        setAnimation(AnimState::attack, true);
-        mAnimPlaying = true;
-        return true;
+    }
+
+    std::string Player::getClassName()
+    {
+        return mClassName;
     }
 
     bool Player::attack(Player *enemy)

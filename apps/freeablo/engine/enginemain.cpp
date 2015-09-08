@@ -77,7 +77,7 @@ namespace Engine
 
         FAWorld::Player* player = world.getCurrentPlayer();
         world.generateLevels();
-        FAWorld::ActorStats * stats;
+        FAWorld::CharacterStatsBase * stats;
         DiabloExe::CharacterStats char_stats = exe.getCharacterStat(character);
 
 
@@ -190,7 +190,6 @@ namespace Engine
 
 
         world.setStatsObject(stats);
-        stats->setActor(player);
         player->mInventory.collectEffects();
         stats->recalculateDerivedStats();
 
