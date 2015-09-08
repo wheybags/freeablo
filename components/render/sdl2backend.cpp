@@ -353,7 +353,7 @@ namespace Render
     }
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
 
-    void drawCursor(Sprite s, size_t h, size_t w)
+    void drawCursor(Sprite s, size_t w, size_t h)
     {
 
         if(s == NULL)

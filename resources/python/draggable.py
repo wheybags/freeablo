@@ -4,7 +4,12 @@ import freeablo
 screenX = 0
 screenY = 0
 class DraggableWidget(object):
-
+    """
+        The magic numbers used in the first argument of freeablo.putItem
+        are taken from the enum FAWorld::Item::equipLoc in apps/freeablo/faworld/item.h line 123.
+        Eventually a real boost::python interface will be made for FAWorld::Inventory and
+        FAWorld::Item.
+    """
     def __init__(self, document, xoffset, yoffset):
         self.document = document
         self.xoffset = xoffset
