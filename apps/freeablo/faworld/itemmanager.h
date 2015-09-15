@@ -32,7 +32,10 @@ namespace FAWorld
     class ItemManager : public Level::BaseItemManager
     {
     public:
-        static bool mIsLoaded;
+
+        static ItemManager& get();
+        void loadItems(DiabloExe::DiabloExe * exe);
+        void loadUniqueItems(DiabloExe::DiabloExe * exe);
         void addItem(Item &item, std::pair<size_t, size_t> floorPosition, uint32_t count);
         Item getBaseItem(uint8_t id) const;
         Item getUniqueItem(uint8_t id) const;
@@ -43,17 +46,19 @@ namespace FAWorld
         void dumpItemPositions();
         void removeItem(Item item);
         static uint32_t getUniqueItemCode();
-        ItemManager();
+
     private:
-        void loadItems(DiabloExe::DiabloExe * exe);
-        void loadUniqueItems(DiabloExe::DiabloExe * exe);
+
+        ItemManager();
+        ItemManager(const ItemManager&);
+        ~ItemManager() {}
+
         std::map<ItemPosition, Item> mItemPositionMap;
         static std::map<uint8_t, Item> mRegisteredItems;
         static std::map<uint8_t, Item> mUniqueItems;
-        static std::map<uint32_t, DiabloExe::BaseItem> mUniqueCodeToBaseItem;
+        static std::map<uint32_t, DiabloExe::BaseItem> mUniqueCodeToBaseItem;        
+        static bool mIsLoaded;
         static uint32_t lastUnique;
-        friend class Engine::EngineMain;
-
     };
 }
 

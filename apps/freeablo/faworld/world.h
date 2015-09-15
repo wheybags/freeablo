@@ -47,13 +47,13 @@ namespace FAWorld
 
             void update(bool noclip);
 
+            void addCurrentPlayer(Player * player);
             Player* getCurrentPlayer();
             void addPlayer(uint32_t id, Player* player);
             Player* getPlayer(size_t id);
             void setCurrentPlayerId(uint32_t id);
 
             void fillRenderState(FARender::RenderState* state);
-            void setStatsObject(ActorStats *stats);
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
 
         private:
