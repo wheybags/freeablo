@@ -22,6 +22,18 @@
                 top: -200px;
             }
 
+            div#menuBackground
+            {
+                background-decorator: image;
+                background-image: /ui_art/mainmenu.pcx;
+                position: absolute;
+                top: -200px;
+                width: 640px;
+                height: 480px;
+                left: 50%;
+                margin-left: -25%;
+            }
+
             span#smlogo
             {
                 icon-decorator: faanim;
@@ -86,9 +98,9 @@ def onKeyDown(event, document):
 
     <body onkeydown="onKeyDown(event, document)" onload="onLoad(document)">
         <div id="topContainer">
+            <div id="menuBackground"></div>
             <div id="menuContainer">
                 <span id="smlogo"></span> <br/>
-                
                 <div id="innerMenuContainer"></div> <br/>
                 <span id="version">Freeablo v0.3</span>
             </div>
