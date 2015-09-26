@@ -3,13 +3,13 @@
 #include <assert.h>
 #include <thread>
 
-#include <level/level.h>
 #include <input/inputmanager.h>
 #include <audio/audio.h>
 #include <misc/stringops.h>
 #include <functional>
 #include <iostream>
 
+#include "../faworld/gamelevel.h"
 #include "../engine/threadmanager.h"
 
 namespace FARender
@@ -127,8 +127,10 @@ namespace FARender
         mDone = true;
     }
 
-    Tileset Renderer::getTileset(const Level::Level& level)
+    Tileset Renderer::getTileset(const FAWorld::GameLevel& gameLevel)
     {
+        const Level::Level& level = gameLevel.mLevel;
+
         Tileset tileset;
         tileset.minTops = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), true);
         tileset.minBottoms = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), false);
@@ -159,9 +161,9 @@ namespace FARender
         return mSpriteManager.get(path);
     }
 
-    std::pair<size_t, size_t> Renderer::getClickedTile(size_t x, size_t y, const Level::Level& level, const FAWorld::Position& screenPos)
+    std::pair<size_t, size_t> Renderer::getClickedTile(size_t x, size_t y, const FAWorld::GameLevel& level, const FAWorld::Position& screenPos)
     {
-        return Render::getClickedTile(level, x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
+        return Render::getClickedTile(level.mLevel, x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
     }
 
     Rocket::Core::Context* Renderer::getRocketContext()
@@ -219,7 +221,7 @@ namespace FARender
                     mLevelObjects[x][y].dist = position.mDist;
                 }
 
-                Render::drawLevel(*state->level, state->tileset.minTops.spriteCacheIndex, state->tileset.minBottoms.spriteCacheIndex, &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,
+                Render::drawLevel(state->level->mLevel, state->tileset.minTops.spriteCacheIndex, state->tileset.minBottoms.spriteCacheIndex, &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,
                     state->mPos.next().first, state->mPos.next().second, state->mPos.mDist);
             }
 

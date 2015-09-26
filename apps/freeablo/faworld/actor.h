@@ -33,9 +33,10 @@ namespace FAWorld
                   const Position& pos = Position(0,0),
                   const std::string& dieAnimPath="",
                   ActorStats* stats=nullptr);
-            void update(bool noclip);
+
+            void update(bool noclip, size_t ticksPassed);
             void setStats(ActorStats* stats);
-            virtual ~Actor() = default;
+            virtual ~Actor();
             virtual std::string getDieWav(){return "";}
             virtual std::string getHitWav(){return "";}
             virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}
@@ -48,6 +49,9 @@ namespace FAWorld
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);            
             AnimState::AnimState getAnimState();
+
+            virtual void setLevel(GameLevel* level);
+            GameLevel* getLevel();
 
             virtual bool attack(Actor * enemy)
             {
@@ -70,11 +74,13 @@ namespace FAWorld
             bool isDead();            
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
-            virtual size_t getSize();
-            virtual size_t writeTo(ENetPacket *packet, size_t start);
-            virtual size_t readFrom(ENetPacket *packet, size_t start);
+            virtual size_t getWriteSize();
+            virtual bool writeTo(ENetPacket *packet, size_t& position);
+            virtual bool readFrom(ENetPacket *packet, size_t& position);
 
         protected:
+            GameLevel* mLevel = NULL;
+
             bool mIsDead = false;
             friend class boost::serialization::access;
 

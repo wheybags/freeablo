@@ -1,5 +1,7 @@
 #include "position.h"
 
+#include "../engine/netmanager.h"
+
 namespace FAWorld
 {
     Position::Position(): mDist(0), mDirection(0),
@@ -116,32 +118,38 @@ namespace FAWorld
         size_t currentY;
     };
 
-    size_t Position::getSize()
+    size_t Position::getWriteSize()
     {
         return sizeof(PosNetData);
     }
 
-    size_t Position::writeTo(ENetPacket *packet, size_t start)
+    bool Position::writeTo(ENetPacket *packet, size_t& position)
     {
-        PosNetData* data = (PosNetData*)(packet->data + start);
-        data->dist = mDist;
-        data->direction = mDirection;
-        data->moving = mMoving;
-        data->currentX = mCurrent.first;
-        data->currentY = mCurrent.second;
+        PosNetData data;
+        data.dist = mDist;
+        data.direction = mDirection;
+        data.moving = mMoving;
+        data.currentX = mCurrent.first;
+        data.currentY = mCurrent.second;
 
-        return start + getSize();
+        return Engine::writeToPacket(packet, position, data);
     }
 
-    size_t Position::readFrom(ENetPacket *packet, size_t start)
+    bool Position::readFrom(ENetPacket *packet, size_t& position)
     {
-        PosNetData* data = (PosNetData*)(packet->data + start);
-        mDist = data->dist;
-        mDirection = data->direction;
-        mMoving = data->moving;
-        mCurrent.first = data->currentX;
-        mCurrent.second = data->currentY;
+        PosNetData data;
 
-        return start + getSize();
+        if(Engine::readFromPacket(packet, position, data))
+        {
+            mDist = data.dist;
+            mDirection = data.direction;
+            mMoving = data.moving;
+            mCurrent.first = data.currentX;
+            mCurrent.second = data.currentY;
+
+            return true;
+        }
+
+        return false;
     }
 }

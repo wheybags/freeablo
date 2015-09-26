@@ -175,4 +175,14 @@ namespace FAWorld
         mWeaponCode = weapon;
         mArmourCode = armour;
     }
+
+    void Player::setLevel(GameLevel *level)
+    {
+        Actor::setLevel(level);
+
+        if(level->getLevelIndex() != 0)
+            mInDungeon=true;
+        else
+            mInDungeon=false;
+    }
 }

@@ -12,6 +12,7 @@ namespace Level
     {
         public:
             Sol(const std::string& path);
+            Sol() {}
             
             bool passable(size_t index) const;
 

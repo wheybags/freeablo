@@ -68,6 +68,13 @@ namespace Engine
 
         ENetEvent event;
 
+        // TODO: remove this block when we handle level switching properly
+        auto player = FAWorld::World::get()->getCurrentPlayer();
+        if(player->getLevel())
+            mLevelIndexTmp = player->getLevel()->getLevelIndex();
+        else
+            mLevelIndexTmp = -1;
+
         while(enet_host_service(mHost, &event, 0))
         {
             switch(event.type)
@@ -77,6 +84,8 @@ namespace Engine
                     if(mIsServer)
                     {
                         spawnPlayer(event.peer->connectID);
+                        sendLevel(0, event.peer);
+                        sendLevel(1, event.peer);
                         mClients.push_back(event.peer);
                     }
                     break;
@@ -117,8 +126,9 @@ namespace Engine
     {
         FAWorld::World& world = *FAWorld::World::get();
 
-        size_t bytesPerClient = world.getCurrentPlayer()->getSize() + sizeof(uint32_t); // the uint is for player id
-        size_t packetSize = sizeof(ServerPacketHeader) + bytesPerClient*(mClients.size() +1); // +1 for the local player
+        world.getCurrentPlayer()->startWriting();
+        size_t bytesPerClient = world.getCurrentPlayer()->getWriteSize() + sizeof(uint32_t); // the uint is for player id
+        size_t packetSize = (sizeof(ServerPacketHeader) + bytesPerClient*(mClients.size() +1)) ; // +1 for the local player
 
         ENetPacket* packet = enet_packet_create(NULL, packetSize, 0);
         size_t position = 0;
@@ -131,13 +141,18 @@ namespace Engine
 
         // write server player
         writeToPacket<uint32_t>(packet, position, SERVER_PLAYER_ID);
-        position = world.getCurrentPlayer()->writeTo(packet, position);
+
+        world.getCurrentPlayer()->writeTo(packet, position);
 
         // write all clients
         for(size_t i = 0; i < mClients.size(); i++)
         {
             writeToPacket<uint32_t>(packet, position, mClients[i]->connectID);
-            position = world.getPlayer(mClients[i]->connectID)->writeTo(packet, position);
+
+            FAWorld::Player* player = world.getPlayer(mClients[i]->connectID);
+
+            player->startWriting();
+            player->writeTo(packet, position);
         }
 
         enet_host_broadcast(mHost, 0, packet);
@@ -147,6 +162,7 @@ namespace Engine
     {
         size_t destX;
         size_t destY;
+        int32_t levelIndex; // TODO: don't just trust this data
     };
 
     void NetManager::sendClientPacket()
@@ -155,49 +171,98 @@ namespace Engine
 
         auto player = FAWorld::World::get()->getCurrentPlayer();
 
-        ClientPacket* data = (ClientPacket*)packet->data;
-        data->destX = player->destination().first;
-        data->destY = player->destination().second;
+        ClientPacket data;
+        data.destX = player->destination().first;
+        data.destY = player->destination().second;
+        data.levelIndex = mLevelIndexTmp;
 
-        enet_peer_send(mServerPeer, 0, packet);
+        size_t position = 0;
+        writeToPacket(packet, position, data);
+
+        enet_peer_send(mServerPeer, UNRELIABLE_CHANNEL_ID, packet);
     }
 
     void NetManager::readServerPacket(ENetEvent& event)
     {
-        FAWorld::World& world = *FAWorld::World::get();
-
-        size_t position = 0;
-
-        ServerPacketHeader header;
-        readFromPacket(event.packet, position, header);
-
-        if(header.tick > mLastServerTickProcessed)
+        if(event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
         {
-            for(size_t i = 0; i < header.numPlayers; i++)
+            readLevel(event.packet);
+            FAWorld::World::get()->setLevel(0);
+        }
+        else
+        {
+            FAWorld::World& world = *FAWorld::World::get();
+
+            size_t position = 0;
+
+            ServerPacketHeader header;
+            readFromPacket(event.packet, position, header);
+
+            if(header.tick > mLastServerTickProcessed)
             {
-                uint32_t playerId;
-                readFromPacket<uint32_t>(event.packet, position, playerId);
-
-                auto player = world.getPlayer(playerId);
-                if(player == NULL)
+                for(size_t i = 0; i < header.numPlayers; i++)
                 {
-                    spawnPlayer(playerId);
-                    player = world.getPlayer(playerId);
-                }
+                    uint32_t playerId;
+                    readFromPacket<uint32_t>(event.packet, position, playerId);
 
-                position = player->readFrom(event.packet, position);
+                    auto player = world.getPlayer(playerId);
+                    if(player == NULL)
+                    {
+                        spawnPlayer(playerId);
+                        player = world.getPlayer(playerId);
+                    }
+
+                    player->readFrom(event.packet, position);
+                }
             }
         }
     }
 
     void NetManager::readClientPacket(ENetEvent& event)
     {
-        ClientPacket* data = (ClientPacket*)event.packet->data;
+        ClientPacket data;
 
-        auto player = FAWorld::World::get()->getPlayer(event.peer->connectID);
+        size_t position = 0;
+        readFromPacket(event.packet, position, data);
 
-        player->destination().first = data->destX;
-        player->destination().second = data->destY;
+        auto world = FAWorld::World::get();
+
+        auto player = world->getPlayer(event.peer->connectID);
+
+        player->destination().first = data.destX;
+        player->destination().second = data.destY;
+
+        if(data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
+        {
+            auto level = world->getLevel(data.levelIndex);
+
+            if(player->getLevel() != NULL && data.levelIndex < (int32_t)player->getLevel()->getLevelIndex())
+                player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
+            else
+                player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+
+            player->setLevel(level);
+        }
+    }
+
+    void NetManager::sendLevel(size_t levelIndex, ENetPeer *peer)
+    {
+        FAWorld::GameLevel* level = FAWorld::World::get()->getLevel(levelIndex);
+        level->startWriting();
+        ENetPacket* packet = enet_packet_create(NULL, level->getWriteSize(), ENET_PACKET_FLAG_RELIABLE);
+        size_t position = 0;
+        level->writeTo(packet, position);
+
+        enet_peer_send(peer, RELIABLE_CHANNEL_ID, packet);
+    }
+
+    void NetManager::readLevel(ENetPacket *packet)
+    {
+        size_t position = 0;
+        FAWorld::GameLevel* level = FAWorld::GameLevel::fromPacket(packet, position);
+
+        if(level)
+            FAWorld::World::get()->insertLevel(level->getLevelIndex(), level);
     }
 
     void NetManager::spawnPlayer(uint32_t id)

@@ -4,6 +4,7 @@
 
 #include "../farender/renderer.h"
 #include "../faworld/world.h"
+#include "../faworld/gamelevel.h"
 #include "../fagui/console.h"
 #include "../farender/renderer.h"
 #include "enginemain.h"
@@ -97,7 +98,7 @@ namespace Engine
 
                 world->setLevel(nextLevelIndex);
 
-                Level::Level* level = world->getCurrentLevel();
+                FAWorld::GameLevel* level = world->getCurrentLevel();
                 FAWorld::Player* player = world->getCurrentPlayer();
 
                 if(hotkey == changelvlup_key)
