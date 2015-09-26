@@ -34,7 +34,7 @@ namespace FAWorld
             size_t getNextLevel();
             size_t getPreviousLevel();
 
-            virtual void startSaving();
+            virtual void startWriting();
             virtual size_t getWriteSize();
             virtual bool writeTo(ENetPacket* packet, size_t& position);
             virtual bool readFrom(ENetPacket* packet, size_t& position);
@@ -59,7 +59,11 @@ namespace FAWorld
                 return mLevelIndex;
             }
 
+            static GameLevel* fromPacket(ENetPacket* packet, size_t& position);
+
         private:
+            GameLevel() {}
+
             Level::Level mLevel;
             size_t mLevelIndex;
 

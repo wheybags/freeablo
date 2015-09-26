@@ -52,12 +52,12 @@ namespace FAWorld
             townActors.push_back(actor);
         }
 
-        mLevels.push_back(std::shared_ptr<GameLevel>(new GameLevel(townLevelBase, 0, townActors)));
+        mLevels[0] = std::shared_ptr<GameLevel>(new GameLevel(townLevelBase, 0, townActors));
 
 
         for(int32_t i = 1; i < 13; i++)
         {
-            mLevels.push_back(std::move(FALevelGen::generate(100, 100, i, mDiabloExe, i-1, i+1)));
+            mLevels[i] = FALevelGen::generate(100, 100, i, mDiabloExe, i-1, i+1);
         }
     }
 
@@ -73,17 +73,22 @@ namespace FAWorld
     
     void World::setLevel(int32_t levelNum)
     {
-        if(levelNum != 0)
-            mCurrentPlayer->mInDungeon=true;
-        else
-            mCurrentPlayer->mInDungeon=false;
-
-        if(levelNum >= (int32_t)mLevels.size() || levelNum < 0)
+        if(levelNum >= (int32_t)mLevels.size() || levelNum < 0 || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
             return;
 
         mCurrentPlayer->setLevel(mLevels[levelNum].get());
 
         FAAudio::AudioManager::playLevelMusic(levelNum, *Engine::ThreadManager::get());
+    }
+
+    GameLevel* World::getLevel(size_t levelNum)
+    {
+        return mLevels[levelNum].get();
+    }
+
+    void World::insertLevel(size_t levelNum, GameLevel *level)
+    {
+        mLevels[levelNum] = std::shared_ptr<GameLevel>(level);
     }
 
     Actor* World::getActorAt(size_t x, size_t y)
@@ -97,7 +102,7 @@ namespace FAWorld
 
         // TODO: only update levels which have players on them
         for(auto it = mLevels.begin(); it != mLevels.end(); ++it)
-            it->get()->update(noclip, mTicksPassed);
+            it->second.get()->update(noclip, mTicksPassed);
     }
 
     Player* World::getCurrentPlayer()
@@ -117,7 +122,8 @@ namespace FAWorld
     {
         mPlayers[id] = player;
 
-        getCurrentLevel()->addActor(player);
+        player->setLevel(getCurrentLevel());
+        //getCurrentLevel()->addActor(player);
     }
 
     void World::setCurrentPlayerId(uint32_t id)
@@ -127,6 +133,7 @@ namespace FAWorld
 
     void World::fillRenderState(FARender::RenderState* state)
     {
-        getCurrentLevel()->fillRenderState(state);
+        if(getCurrentLevel())
+            getCurrentLevel()->fillRenderState(state);
     }
 }

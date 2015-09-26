@@ -65,7 +65,7 @@ namespace FAWorld
         return mLevel.getPreviousLevel();
     }
 
-    void GameLevel::startSaving()
+    void GameLevel::startWriting()
     {
         mDataSavingTmp.clear();
         boost::iostreams::back_insert_device<std::string> inserter(mDataSavingTmp);
@@ -76,14 +76,24 @@ namespace FAWorld
         s.flush();
     }
 
+    struct GameLevelHeader
+    {
+        size_t levelIndex;
+        size_t contentLength;
+    };
+
     size_t GameLevel::getWriteSize()
     {
-        return mDataSavingTmp.length() + sizeof(size_t); // + 1 size_t for saving the content length
+        return sizeof(GameLevelHeader) + mDataSavingTmp.length();
     }
 
     bool GameLevel::writeTo(ENetPacket* packet, size_t& position)
     {
-        if(!Engine::writeToPacket<size_t>(packet, position, mDataSavingTmp.length()))
+        GameLevelHeader header;
+        header.levelIndex = mLevelIndex;
+        header.contentLength = mDataSavingTmp.length();
+
+        if(!Engine::writeToPacket(packet, position, header))
             return false;
 
         if((position + mDataSavingTmp.length()) <= packet->dataLength)
@@ -102,13 +112,15 @@ namespace FAWorld
 
     bool GameLevel::readFrom(ENetPacket* packet, size_t& position)
     {
-        size_t contentLength;
-        if(!Engine::readFromPacket<size_t>(packet, position, contentLength))
+        GameLevelHeader header;
+        if(!Engine::readFromPacket(packet, position, header))
             return false;
 
-        if(position + contentLength <= packet->dataLength)
+        mLevelIndex = header.levelIndex;
+
+        if(position + header.contentLength <= packet->dataLength)
         {
-            std::string strTmp(contentLength, '\0');
+            std::string strTmp(header.contentLength, '\0');
 
             for(size_t i = 0; i < strTmp.length(); i++)
                 strTmp[i] = packet->data[position++];
@@ -195,8 +207,21 @@ namespace FAWorld
             {
                 mActors.erase(i);
                 actorMapRemove(actor);
-                break;
+                return;
             }
         }
+        assert(false && "tried to remove actor that isn't in level");
+    }
+
+    GameLevel* GameLevel::fromPacket(ENetPacket *packet, size_t &position)
+    {
+        GameLevel* retval = new GameLevel();
+        if(!retval->readFrom(packet, position))
+        {
+            delete retval;
+            retval = NULL;
+        }
+
+        return retval;
     }
 }

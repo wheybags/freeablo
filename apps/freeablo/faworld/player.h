@@ -15,6 +15,9 @@ namespace FAWorld
             bool attack(Player * enemy);
             FARender::FASpriteGroup getCurrentAnim();
             void updateSprite();
+
+            virtual void setLevel(GameLevel* level);
+
             bool mInDungeon = false;
         private:
             std::string mClassName;

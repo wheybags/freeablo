@@ -50,7 +50,7 @@ namespace FAWorld
             void setIdleAnimation(const std::string path);            
             AnimState::AnimState getAnimState();
 
-            void setLevel(GameLevel* level);
+            virtual void setLevel(GameLevel* level);
             GameLevel* getLevel();
 
             virtual bool attack(Actor * enemy)

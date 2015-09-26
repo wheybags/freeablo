@@ -46,6 +46,8 @@ namespace Level
                 const std::string& solPath, const std::string& tileSetPath, const std::pair<size_t,size_t>& downStairs,
                 const std::pair<size_t,size_t>& upStairs, std::map<size_t, size_t> doorMap, size_t previous, size_t next);
 
+            Level() {}
+
             Misc::Helper2D<const Level, const MinPillar> operator[] (size_t x) const;
 
             void activate(size_t x, size_t y);

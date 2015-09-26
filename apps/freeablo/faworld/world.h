@@ -36,6 +36,9 @@ namespace FAWorld
 
             void setLevel(int32_t levelnum);
 
+            GameLevel* getLevel(size_t levelNum);
+            void insertLevel(size_t levelNum, GameLevel* level);
+
             Actor* getActorAt(size_t x, size_t y);
 
             void update(bool noclip);
@@ -50,7 +53,7 @@ namespace FAWorld
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
 
         private:
-            std::vector<std::shared_ptr<GameLevel>> mLevels;
+            std::map<size_t, std::shared_ptr<GameLevel>> mLevels;
 
             size_t mTicksPassed=0;
             Player* mCurrentPlayer;

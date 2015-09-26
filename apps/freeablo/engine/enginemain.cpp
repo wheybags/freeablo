@@ -76,7 +76,12 @@ namespace Engine
         FAWorld::World world(exe);
 
         FAWorld::Player* player = world.getCurrentPlayer();
-        world.generateLevels();
+
+        bool isServer = variables["mode"].as<std::string>() == "server";
+
+        if(isServer)
+            world.generateLevels();
+
         FAWorld::ActorStats * stats;
         DiabloExe::CharacterStats char_stats = exe.getCharacterStat(character);
 
@@ -201,7 +206,7 @@ namespace Engine
         FAGui::GuiManager guiManager(player->mInventory, *this, character);
 
         // -1 represents the main menu
-        if(currentLevel != -1)
+        if(currentLevel != -1 && isServer)
         {
             world.setLevel(currentLevel);
 
@@ -218,8 +223,6 @@ namespace Engine
         }
 
         auto last = std::chrono::system_clock::now();
-
-        bool isServer = variables["mode"].as<std::string>() == "server";
 
         NetManager netManager(isServer);
 

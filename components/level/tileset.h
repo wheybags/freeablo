@@ -13,6 +13,8 @@ namespace Level
     {
         public:
             TileSet(const std::string&);
+            TileSet() {}
+
             const TilBlock& operator[] (size_t index) const;
             size_t size() const;
 
