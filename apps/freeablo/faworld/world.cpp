@@ -66,7 +66,7 @@ namespace FAWorld
     
     void World::setLevel(int32_t levelNum)
     {
-        if(levelNum >= (int32_t)mLevels.size() || levelNum < 0 || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
+        if(levelNum >= (int32_t)mLevels.size() || levelNum < 0 || (mCurrentPlayer->getLevel() && (int32_t)mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
             return;
 
         mCurrentPlayer->setLevel(mLevels[levelNum].get());
@@ -106,7 +106,6 @@ namespace FAWorld
     void World::addCurrentPlayer(Player * player)
     {
         mCurrentPlayer = player;
-        //mActors.push_back(mCurrentPlayer);
     }
 
     Player* World::getPlayer(size_t id)

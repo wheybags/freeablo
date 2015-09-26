@@ -142,7 +142,6 @@ namespace Engine
         // write server player
         writeToPacket<uint32_t>(packet, position, SERVER_PLAYER_ID);
 
-        size_t bbb = world.getCurrentPlayer()->getWriteSize();
         world.getCurrentPlayer()->writeTo(packet, position);
 
         // write all clients
@@ -153,9 +152,7 @@ namespace Engine
             FAWorld::Player* player = world.getPlayer(mClients[i]->connectID);
 
             player->startWriting();
-            size_t qqq = player->getWriteSize();
-            bool a = player->writeTo(packet, position);
-            a = !a;
+            player->writeTo(packet, position);
         }
 
         enet_host_broadcast(mHost, 0, packet);
@@ -235,11 +232,11 @@ namespace Engine
         player->destination().first = data.destX;
         player->destination().second = data.destY;
 
-        if(data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != player->getLevel()->getLevelIndex()))
+        if(data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
         {
             auto level = world->getLevel(data.levelIndex);
 
-            if(player->getLevel() != NULL && data.levelIndex < player->getLevel()->getLevelIndex())
+            if(player->getLevel() != NULL && data.levelIndex < (int32_t)player->getLevel()->getLevelIndex())
                 player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
             else
                 player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
