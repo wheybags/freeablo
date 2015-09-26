@@ -16,14 +16,7 @@ namespace FAWorld
     World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
     {
         assert(singletonInstance == nullptr);
-        singletonInstance = this;
-
-        mCurrentPlayer = new Player();
-    }
-
-    void World::setStatsObject(ActorStats *stats)
-    {
-        mCurrentPlayer->setStats(stats);
+        singletonInstance = this;        
     }
 
     World* World::get()
@@ -108,6 +101,12 @@ namespace FAWorld
     Player* World::getCurrentPlayer()
     {
         return mCurrentPlayer;
+    }
+
+    void World::addCurrentPlayer(Player * player)
+    {
+        mCurrentPlayer = player;
+        //mActors.push_back(mCurrentPlayer);
     }
 
     Player* World::getPlayer(size_t id)

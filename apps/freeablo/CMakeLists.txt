@@ -23,6 +23,8 @@ add_executable(freeablo
     faworld/monster.cpp 
     faworld/player.h  
     faworld/player.cpp
+    faworld/playerfactory.h
+    faworld/playerfactory.cpp
     faworld/position.h  
     faworld/position.cpp
     faworld/world.cpp  

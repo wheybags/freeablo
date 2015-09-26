@@ -116,7 +116,7 @@ Item::Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix, bool 
 }
 Item::Item(const DiabloExe::UniqueItem & item, uint32_t id)
 {
-    ItemManager itemManager;
+    ItemManager& itemManager = ItemManager::get();
 
     DiabloExe::BaseItem& baseItem = itemManager.getBaseItemByUniqueCode(item.mItemType);
 
