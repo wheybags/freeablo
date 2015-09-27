@@ -58,7 +58,7 @@
     <char id="84" x="176" y="210" width="32" height="42" xoffset="0" yoffset="0" xadvance="32"/>
     <char id="85" x="220" y="210" width="35" height="42" xoffset="0" yoffset="0" xadvance="35"/>
     <char id="86" x="264" y="210" width="35" height="42" xoffset="0" yoffset="0" xadvance="35"/>
-    <char id="87" x="308" y="210" width="45" height="42" xoffset="0" yoffset="0" xadvance="45"/>
+    <char id="87" x="308" y="210" width="40" height="42" xoffset="0" yoffset="0" xadvance="40"/>
     <char id="88" x="352" y="210" width="33" height="42" xoffset="0" yoffset="0" xadvance="33"/>
     <char id="89" x="396" y="210" width="33" height="42" xoffset="0" yoffset="0" xadvance="33"/>
     <char id="90" x="440" y="210" width="26" height="42" xoffset="0" yoffset="0" xadvance="26"/>
