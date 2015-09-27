@@ -58,7 +58,7 @@
     <char id="84" x="160" y="210" width="32" height="42" xoffset="0" yoffset="0" xadvance="32"/>
     <char id="85" x="200" y="210" width="35" height="42" xoffset="0" yoffset="0" xadvance="35"/>
     <char id="86" x="240" y="210" width="35" height="42" xoffset="0" yoffset="0" xadvance="35"/>
-    <char id="87" x="280" y="210" width="45" height="42" xoffset="0" yoffset="0" xadvance="45"/>
+    <char id="87" x="280" y="210" width="40" height="42" xoffset="0" yoffset="0" xadvance="40"/>
     <char id="88" x="320" y="210" width="33" height="42" xoffset="0" yoffset="0" xadvance="33"/>
     <char id="89" x="360" y="210" width="33" height="42" xoffset="0" yoffset="0" xadvance="33"/>
     <char id="90" x="400" y="210" width="26" height="42" xoffset="0" yoffset="0" xadvance="26"/>
@@ -90,7 +90,7 @@
     <char id="116" x="160" y="294" width="27" height="42" xoffset="0" yoffset="0" xadvance="27"/>
     <char id="117" x="200" y="294" width="29" height="42" xoffset="0" yoffset="0" xadvance="29"/>
     <char id="118" x="240" y="294" width="30" height="42" xoffset="0" yoffset="0" xadvance="30"/>
-    <char id="119" x="280" y="294" width="37" height="42" xoffset="0" yoffset="0" xadvance="37"/>
+    <char id="119" x="280" y="294" width="35" height="42" xoffset="0" yoffset="0" xadvance="35"/>
     <char id="120" x="320" y="294" width="28" height="42" xoffset="0" yoffset="0" xadvance="28"/>
     <char id="121" x="360" y="294" width="28" height="42" xoffset="0" yoffset="0" xadvance="28"/>
     <char id="122" x="400" y="294" width="22" height="42" xoffset="0" yoffset="0" xadvance="22"/>
