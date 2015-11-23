@@ -131,7 +131,7 @@ Please feel free to submit bug reports on the github issue tracker at https://gi
 - SDL1 support removed d4da725
 - Dungeon level 2 generation #93
 
-##v0.1 [24 Apr 2015]
+##v0.1 [24 Apr 2014]
 - CEL / CL2 decoding
 - Level rendering
 - Level Generation
