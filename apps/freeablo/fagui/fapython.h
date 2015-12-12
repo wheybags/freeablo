@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <boost/python.hpp>
+#include <misc/boost_python.h>
 
 namespace FAWorld
 {

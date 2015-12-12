@@ -1,5 +1,5 @@
 #include <Rocket/Core/Input.h>
-#include <boost/python.hpp>
+#include <misc/boost_python.h>
 #include <cctype>
 #include "common.h"
 

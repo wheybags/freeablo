@@ -1,7 +1,7 @@
 #ifndef SCRIPTCONTEXT_H
 #define SCRIPTCONTEXT_H
 
-#include <boost/python.hpp>
+#include <misc/boost_python.h>
 #include <string>
 #include "commandtranslator.h"
 

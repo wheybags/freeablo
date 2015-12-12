@@ -1,6 +1,6 @@
 #include "hotkey.h"
 #include <settings/settings.h>
-#include <boost/python.hpp>
+#include <misc/boost_python.h>
 #include <string>
 
 

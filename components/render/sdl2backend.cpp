@@ -23,6 +23,7 @@
 #include "rocketglue/SystemInterfaceSDL2.h"
 #include "rocketglue/RenderInterfaceSDL2.h"
 
+#include <misc/boost_python.h>
 #include <Rocket/Core/Python/Python.h>
 
 namespace Render

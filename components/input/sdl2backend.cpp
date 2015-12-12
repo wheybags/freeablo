@@ -4,7 +4,7 @@
 
 #include <render/render.h>
 
-#include <boost/python.hpp>
+#include <misc/boost_python.h>
 
 #include <iostream>
 
