@@ -19,6 +19,12 @@ namespace FAWorld
         singletonInstance = this;        
     }
 
+    World::~World()
+    {
+        for(auto& pair : mLevels)
+            delete pair.second;
+    }
+
     World* World::get()
     {
         return singletonInstance;
@@ -45,7 +51,8 @@ namespace FAWorld
             townActors.push_back(actor);
         }
 
-        mLevels[0] = std::shared_ptr<GameLevel>(new GameLevel(townLevelBase, 0, townActors));
+        auto tmp = new GameLevel(townLevelBase, 0, townActors);
+        mLevels[0] = tmp;
 
 
         for(int32_t i = 1; i < 13; i++)
@@ -69,19 +76,19 @@ namespace FAWorld
         if(levelNum >= (int32_t)mLevels.size() || levelNum < 0 || (mCurrentPlayer->getLevel() && (int32_t)mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
             return;
 
-        mCurrentPlayer->setLevel(mLevels[levelNum].get());
+        mCurrentPlayer->setLevel(mLevels[levelNum]);
 
         FAAudio::AudioManager::playLevelMusic(levelNum, *Engine::ThreadManager::get());
     }
 
     GameLevel* World::getLevel(size_t levelNum)
     {
-        return mLevels[levelNum].get();
+        return mLevels[levelNum];
     }
 
     void World::insertLevel(size_t levelNum, GameLevel *level)
     {
-        mLevels[levelNum] = std::shared_ptr<GameLevel>(level);
+        mLevels[levelNum] = level;
     }
 
     Actor* World::getActorAt(size_t x, size_t y)
@@ -95,7 +102,7 @@ namespace FAWorld
 
         // TODO: only update levels which have players on them
         for(auto it = mLevels.begin(); it != mLevels.end(); ++it)
-            it->second.get()->update(noclip, mTicksPassed);
+            it->second->update(noclip, mTicksPassed);
     }
 
     Player* World::getCurrentPlayer()
