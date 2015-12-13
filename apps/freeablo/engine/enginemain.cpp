@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <thread>
-#include <chrono>
+#include <boost/asio.hpp>
 
 #include "../faworld/world.h"
 #include "../falevelgen/levelgen.h"
@@ -116,22 +116,14 @@ namespace Engine
             threadManager.playMusic("music/dintro.wav");
         }
 
-        auto last = std::chrono::system_clock::now();
+        boost::asio::io_service io;
 
         NetManager netManager(isServer);
 
         // Main game logic loop
         while(!mDone)
         {
-            auto now = std::chrono::system_clock::now();
-
-            while(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count() < (int64_t)(1000/FAWorld::World::ticksPerSecond))
-            {
-                std::this_thread::yield();
-                now = std::chrono::system_clock::now();
-            }
-
-            last = now;
+            boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000/FAWorld::World::ticksPerSecond));
 
             mInputManager->update(mPaused);
             if(!mPaused)
@@ -162,6 +154,13 @@ namespace Engine
 
             }
             renderer.setCurrentState(state);
+
+            long remainingTickTime = timer.expires_from_now().total_milliseconds();
+
+            if(remainingTickTime < 0)
+                std::cerr << "tick time exceeded" << std::endl;
+
+            timer.wait();
         }
 
         renderer.stop();
