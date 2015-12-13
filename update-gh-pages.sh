@@ -15,6 +15,9 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
   #using token clone gh-pages branch
   git clone --quiet --branch=gh-pages https://${GH_TOKEN}@github.com/wheybags/freeablo.git  gh-pages > /dev/null
+ 
+  # clear old files
+  find . -depth 1 ! -iname ".git" -exec rm -rf {} \;
 
   #go into diractory and copy data we're interested in to that directory
   cd gh-pages
