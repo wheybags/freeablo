@@ -126,6 +126,16 @@ namespace Render
         if(!Rocket::Core::Initialise())
             fprintf(stderr, "couldn't initialise rocket!");
 
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold16.fnt");
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold24.fnt");
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold30.fnt");
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold42.fnt");
+
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver16.fnt");
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver24.fnt");
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver30.fnt");
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver42.fnt");
+
         Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoBoldOblique.ttf");
         Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoBold.ttf");
         Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoOblique.ttf");
@@ -349,6 +359,59 @@ namespace Render
 
         SDL_FreeSurface(original);
         SDL_FreeSurface(tmp);
+
+        return new SpriteGroup(vec);
+    }
+
+    SpriteGroup* loadResizedSprite(const std::string& path, size_t width, size_t height, size_t tileWidth, size_t tileHeight, bool hasTrans, size_t transR, size_t transG, size_t transB)
+    {
+        std::string extension = getImageExtension(path);
+        SDL_Surface* original = loadNonCelImageTrans(path, extension, hasTrans, transR, transG, transB);
+        SDL_Surface* tmp = createTransparentSurface(width, height);
+
+        size_t srcX = 0;
+        size_t srcY = 0;
+        size_t dstX = 0;
+        size_t dstY = 0;
+
+        while(true)
+        {
+            for(size_t y = 0; y < tileHeight ; y += 1)
+            {
+                for(size_t x = 0; x < tileWidth ; x += 1)
+                {
+                    Cel::Colour px = getPixel(original, srcX + x, srcY + y);
+                    setpixel(tmp, dstX + x, dstY + y, px);
+                }
+            }
+
+            srcX += tileWidth;
+            if(srcX >= (size_t)original->w)
+            {
+                srcX = 0;
+                srcY += tileHeight;
+            }
+
+            if(srcY >= (size_t)original->h)
+                break;
+
+            dstX += tileWidth;
+            if(dstX >= width)
+            {
+                dstX = 0;
+                dstY += tileHeight;
+            }
+
+            if(dstY >= height)
+                break;
+        }
+
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, tmp);
+        SDL_FreeSurface(original);
+        SDL_FreeSurface(tmp);
+
+        std::vector<Sprite> vec(1);
+        vec[0] = (Sprite)tex;
 
         return new SpriteGroup(vec);
     }

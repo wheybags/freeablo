@@ -3,8 +3,7 @@
         <style>
             body
             {
-                font-family: FreeMono;
-                font-size: 24;
+                font-family: FreeabloGold42;
                 text-align: center;
                 top: 50%;
             }
@@ -18,12 +17,12 @@
             span#smlogo
             {
                 icon-decorator: faanim;
-                icon-animfile: /ui_art/smlogo.pcx&trans=0,255,0&vanim=154;
+                icon-animfile: /data/diabsmal.cel;
                 icon-playtime: 0.8;
 
                 display: inline-block;
-                width: 390px;
-                height: 154px;
+                width: 296px;
+                height: 100px;
             }
 
             span.pentagon

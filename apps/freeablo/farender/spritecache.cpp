@@ -110,6 +110,11 @@ namespace FARender
 
                 size_t vAnim = 0;
                 bool hasTrans = false;
+                bool resize = false;
+                size_t tileWidth = 0;
+                size_t tileHeight = 0;
+                size_t newWidth = 0;
+                size_t newHeight = 0;
                 size_t r=0,g=0,b=0;
 
                 for(size_t i = 1; i < components.size(); i++)
@@ -137,10 +142,34 @@ namespace FARender
 
                         vanimss >> vAnim;
                     }
+                    else if(pair[0] == "resize")
+                    {
+                        resize = true;
+
+                        std::vector<std::string> newSize = Misc::StringUtils::split(pair[1], 'x');
+
+                        std::istringstream wss(newSize[0]);
+                        wss >> newWidth;
+
+                        std::istringstream hss(newSize[1]);
+                        hss >> newHeight;
+                    }
+                    else if(pair[0] == "tileSize")
+                    {
+                        std::vector<std::string> tileSize = Misc::StringUtils::split(pair[1], 'x');
+
+                        std::istringstream wss(tileSize[0]);
+                        wss >> tileWidth;
+
+                        std::istringstream hss(tileSize[1]);
+                        hss >> tileHeight;
+                    }
                 }
 
                 if(vAnim != 0)
                     newSprite = Render::loadVanimSprite(sourcePath, vAnim, hasTrans, r, g, b);
+                else if(resize)
+                    newSprite = Render::loadResizedSprite(sourcePath, newWidth, newHeight, tileWidth, tileHeight, hasTrans, r, g, b);
                 else
                     newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b);
             }

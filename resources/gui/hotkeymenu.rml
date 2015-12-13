@@ -3,8 +3,7 @@
         <style>
             body
             {
-                font-family: FreeMono;
-                font-size: 24;
+                font-family: FreeabloGold42;
                 text-align: center;
                 top: 50%;
             }
