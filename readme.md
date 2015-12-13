@@ -101,7 +101,7 @@ Please feel free to submit bug reports on the github issue tracker at https://gi
 
 
 #Changelog
-##v0.3
+##v0.3 [5 Aug 2015]
 - Bugfix - monsters spawn on level stairs #112
 - Threading refactor #107
 - Hotkey selection GUI #106
@@ -115,7 +115,7 @@ Please feel free to submit bug reports on the github issue tracker at https://gi
 - Bugfix - music memory leak #111
 - Bugfix - exit when DIABDAT.MPQ not found #114, #115
 
-##v0.2
+##v0.2 [3 Dec 2014]
 - Bugfix - MPQ filename case sensitivity #78, #76
 - Bugfix - Deadlock on caertain command line args
 - Bugfix - Player-npc clipping #97
@@ -131,7 +131,7 @@ Please feel free to submit bug reports on the github issue tracker at https://gi
 - SDL1 support removed d4da725
 - Dungeon level 2 generation #93
 
-##v0.1
+##v0.1 [24 Apr 2014]
 - CEL / CL2 decoding
 - Level rendering
 - Level Generation
