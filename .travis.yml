@@ -17,7 +17,7 @@ before_install:
 - echo yes | sudo apt-add-repository ppa:ubuntu-sdk-team/ppa
 - sudo apt-get update -qq
 - sudo apt-get install -qq libboost1.54-all-dev libsdl2-dev libsdl2-image-dev libsdl-ttf2.0-dev zlib1g-dev
-  libbz2-dev doxygen libfreetype6-dev libpython2.7 libsdl2-mixer-dev cmake qtdeclarative5-dev libpng12-dev zlib1g-dev libenet-dev
+  libbz2-dev doxygen libfreetype6-dev libpython2.7 libsdl2-mixer-dev cmake qtdeclarative5-dev libpng12-dev zlib1g-dev libenet-dev graphviz
 - wget http://wheybags.netsoc.ie/pkg/librocket_1.3-1_amd64.deb
 - sudo dpkg -i librocket_1.3-1_amd64.deb
 - wget http://wheybags.netsoc.ie/pkg/librocket-dev_1.3-1_amd64.deb
