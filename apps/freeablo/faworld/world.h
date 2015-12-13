@@ -26,6 +26,7 @@ namespace FAWorld
     {
         public:
             World(const DiabloExe::DiabloExe& exe);
+            ~World();
 
             static World* get();
 
@@ -53,7 +54,7 @@ namespace FAWorld
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
 
         private:
-            std::map<size_t, std::shared_ptr<GameLevel>> mLevels;
+            std::map<size_t, GameLevel*> mLevels;
 
             size_t mTicksPassed=0;
             Player* mCurrentPlayer;
