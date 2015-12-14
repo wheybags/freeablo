@@ -158,7 +158,7 @@ namespace Engine
             long remainingTickTime = timer.expires_from_now().total_milliseconds();
 
             if(remainingTickTime < 0)
-                std::cerr << "tick time exceeded" << std::endl;
+                std::cerr << "tick time exceeded by " << -remainingTickTime << "ms" << std::endl;
 
             timer.wait();
         }
