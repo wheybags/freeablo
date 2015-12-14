@@ -778,11 +778,8 @@ namespace Render
         levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
     }
 
-    std::pair<size_t, size_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    std::pair<size_t, size_t> getTileFromScreenCoords(const Level::Level& level, size_t levelX, size_t levelY, size_t x, size_t y)
     {
-        int32_t levelX, levelY;
-        getMapScreenCoords(level, x1, y1, x2, y2, dist, levelX, levelY);
-
         // Position on the map in pixels
         int32_t flatX = x - levelX;
         int32_t flatY = y - levelY;
@@ -835,8 +832,17 @@ namespace Render
 
         return std::make_pair(isoPosX, isoPosY);
     }
+    
+    std::pair<size_t, size_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    {
+        int32_t levelX, levelY;
+        getMapScreenCoords(level, x1, y1, x2, y2, dist, levelX, levelY);
+        
+        return getTileFromScreenCoords(level, levelX, levelY, x, y);
+    }
+    
 
-    void drawLevelHelper(const Level::Level& level, SpriteGroup& minSprites, int32_t x, int32_t y, int32_t levelX, int32_t levelY)
+    bool drawLevelHelper(const Level::Level& level, SpriteGroup& minSprites, int32_t x, int32_t y, int32_t levelX, int32_t levelY)
     {
         if((size_t)x < level.width() && (size_t)y < level.height())
         {
@@ -844,9 +850,14 @@ namespace Render
             int32_t xCoord = (y*(-32)) + 32*x + level.height()*32-32 + levelX;
             int32_t yCoord = (y*16) + 16*x + levelY;
 
-            if(xCoord >= -64 && xCoord <=  WIDTH  && yCoord >= -256 && yCoord <= HEIGHT && index < minSprites.size())
+            if(xCoord <=  WIDTH && yCoord <= HEIGHT && index < minSprites.size())
+            {
                 drawAt(minSprites[index], xCoord, yCoord);
+                return true;
+            }
         }
+        
+        return false;
     }
 
     void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
@@ -857,30 +868,75 @@ namespace Render
         //TODO clean up the magic numbers here, and elsewhere in this file
 
         SpriteGroup* minBottoms = cache->get(minBottomsHandle);
-
-        for(size_t x = 0; x < level.width(); x++)
+        
+        
+        int32_t startX = WIDTH;
+        int32_t startY = -32;
+        
+        // draw the squares that are in view, starting at the top right of the screen, running
+        // in lines along the isometric x axis until they go off screen, with each line starting one
+        // to the left in screen space (x-1, y+1 in iso space)
+        // this loop draws the bottoms of the tiles, ie the ground, not including walls
+        while(startY < HEIGHT)
         {
-            for(size_t y = 0; y < level.height(); y++)
+            std::pair<size_t, size_t> tilePos = getTileFromScreenCoords(level, levelX, levelY, startX, startY);
+            
+            while(drawLevelHelper(level, *minBottoms, tilePos.first, tilePos.second, levelX, levelY))
+                tilePos.first++;
+            
+            if(startX > -64)
             {
-                drawLevelHelper(level, *minBottoms, x+1, y+1, levelX, levelY);
+                startX -= 64;
+                
+                if(startX < -64)
+                    startX = -64;
+            }
+            else
+            {
+                startY += 32;
             }
         }
-
+        
+        
+        startX = WIDTH;
+        startY = -256;
+        
         SpriteGroup* minTops = cache->get(minTopsHandle);
         cache->setImmortal(minTopsHandle, true);
-
-        for(size_t x = 0; x < level.width(); x++)
+        
+        // same as above, but for the above-gound parts (walls + actors)
+        // starts at -256 and finishes at +256 because the minTops are 256 px tall
+        // Note to people trying to improve perf: I tried rolling both loops into one,
+        // the stuff from this loop has to be drawn at y-1 of the stuff from the first loop (or maybe >1)
+        // but it's actually slower. My guess would be that the offset ruins the cache,
+        // so yeah, it's a copy pasted loop DRY blah blah blah
+        while(startY < HEIGHT + 256)
         {
-            for(size_t y = 0; y < level.height(); y++)
+            std::pair<size_t, size_t> tilePos = getTileFromScreenCoords(level, levelX, levelY, startX, startY);
+            
+            while(drawLevelHelper(level, *minTops, tilePos.first, tilePos.second, levelX, levelY))
             {
-                if(objs[x][y].valid)
+                if(objs[tilePos.first][tilePos.second].valid)
                 {
-                    LevelObject o = objs[x][y];
-                    drawAt(level, cache->get(objs[x][y].spriteCacheIndex)->operator[](o.spriteFrame), x, y, objs[x][y].x2, objs[x][y].y2, objs[x][y].dist, levelX, levelY);
+                    LevelObject o = objs[tilePos.first][tilePos.second];
+                    drawAt(level, cache->get(objs[tilePos.first][tilePos.second].spriteCacheIndex)->operator[](o.spriteFrame), tilePos.first, tilePos.second, objs[tilePos.first][tilePos.second].x2, objs[tilePos.first][tilePos.second].y2, objs[tilePos.first][tilePos.second].dist, levelX, levelY);
                 }
-
-                drawLevelHelper(level, *minTops, x, y, levelX, levelY);
+                
+                tilePos.first++;
+            }
+            
+            if(startX > -64)
+            {
+                startX -= 64;
+                
+                if(startX < -64)
+                    startX = -64;
+            }
+            else
+            {
+                startY += 32;
             }
         }
+        cache->setImmortal(minTopsHandle, false);
     }
 }
