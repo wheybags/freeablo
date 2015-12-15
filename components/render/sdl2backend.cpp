@@ -778,7 +778,7 @@ namespace Render
         levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
     }
 
-    std::pair<size_t, size_t> getTileFromScreenCoords(const Level::Level& level, size_t levelX, size_t levelY, size_t x, size_t y)
+    std::pair<int32_t, int32_t> getTileFromScreenCoords(const Level::Level& level, size_t levelX, size_t levelY, size_t x, size_t y)
     {
         // Position on the map in pixels
         int32_t flatX = x - levelX;
@@ -833,7 +833,7 @@ namespace Render
         return std::make_pair(isoPosX, isoPosY);
     }
     
-    std::pair<size_t, size_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    std::pair<int32_t, int32_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
         int32_t levelX, levelY;
         getMapScreenCoords(level, x1, y1, x2, y2, dist, levelX, levelY);
@@ -841,20 +841,29 @@ namespace Render
         return getTileFromScreenCoords(level, levelX, levelY, x, y);
     }
     
-
+    // returns: whether or not to keep drawing the current line (see where it's used for what I mean by "line"
     bool drawLevelHelper(const Level::Level& level, SpriteGroup& minSprites, int32_t x, int32_t y, int32_t levelX, int32_t levelY)
     {
+        // if the top left of our screen is on a negative coord (we're at the edge of the map)
+        // we want to continue the line, but we obviously don't want to draw tiles outside the map
+        if(x < 0)
+            return true;
+        
         if((size_t)x < level.width() && (size_t)y < level.height())
         {
             size_t index = level[x][y].index();
             int32_t xCoord = (y*(-32)) + 32*x + level.height()*32-32 + levelX;
             int32_t yCoord = (y*16) + 16*x + levelY;
 
-            if(xCoord <=  WIDTH && yCoord <= HEIGHT && index < minSprites.size())
+            if(xCoord <=  WIDTH && yCoord <= HEIGHT)
             {
-                drawAt(minSprites[index], xCoord, yCoord);
+                if(index < minSprites.size())
+                    drawAt(minSprites[index], xCoord, yCoord);
+                
                 return true;
             }
+            
+            return false;
         }
         
         return false;
@@ -879,7 +888,7 @@ namespace Render
         // this loop draws the bottoms of the tiles, ie the ground, not including walls
         while(startY < HEIGHT)
         {
-            std::pair<size_t, size_t> tilePos = getTileFromScreenCoords(level, levelX, levelY, startX, startY);
+            std::pair<int32_t, int32_t> tilePos = getTileFromScreenCoords(level, levelX, levelY, startX, startY);
             
             while(drawLevelHelper(level, *minBottoms, tilePos.first, tilePos.second, levelX, levelY))
                 tilePos.first++;
@@ -912,11 +921,11 @@ namespace Render
         // so yeah, it's a copy pasted loop DRY blah blah blah
         while(startY < HEIGHT + 256)
         {
-            std::pair<size_t, size_t> tilePos = getTileFromScreenCoords(level, levelX, levelY, startX, startY);
+            std::pair<int32_t, int32_t> tilePos = getTileFromScreenCoords(level, levelX, levelY, startX, startY);
             
             while(drawLevelHelper(level, *minTops, tilePos.first, tilePos.second, levelX, levelY))
             {
-                if(objs[tilePos.first][tilePos.second].valid)
+                if(tilePos.first >= 0 && tilePos.second >= 0 && objs[tilePos.first][tilePos.second].valid)
                 {
                     LevelObject o = objs[tilePos.first][tilePos.second];
                     drawAt(level, cache->get(objs[tilePos.first][tilePos.second].spriteCacheIndex)->operator[](o.spriteFrame), tilePos.first, tilePos.second, objs[tilePos.first][tilePos.second].x2, objs[tilePos.first][tilePos.second].y2, objs[tilePos.first][tilePos.second].dist, levelX, levelY);
