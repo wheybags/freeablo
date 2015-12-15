@@ -10,12 +10,13 @@
 
 namespace FAGui
 {   
+    Rocket::Core::ElementDocument* titleScreen = NULL;
     Rocket::Core::ElementDocument* ingameUi = NULL;
     Rocket::Core::ElementDocument* mainMenu = NULL;
 
     std::string GuiManager::invClass;
 
-    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass) : mPythonFuncs(playerInventory, *this, engine)
+    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass) : mPythonFuncs(playerInventory, *this, engine), mCurrentGuiType(TitleScreen)
     {
 
         this->invClass = invClass;
@@ -31,9 +32,18 @@ namespace FAGui
         Rocket::Core::DecoratorInstancer* animInstancer = Rocket::Core::Factory::RegisterDecoratorInstancer("faanim", (Rocket::Core::DecoratorInstancer*)new AnimatedDecoratorInstancer(renderer->getRocketContext()->GetRenderInterface()));
         animInstancer->RemoveReference();
 
+        titleScreen = renderer->getRocketContext()->LoadDocument("resources/gui/titlescreen.rml");
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
 
+    }
+
+    void GuiManager::showTitleScreen()
+    {
+        titleScreen->Show();
+        titleScreen->PullToFront();
+
+        mCurrentGuiType = TitleScreen;
     }
 
     void GuiManager::showIngameGui()
@@ -43,13 +53,23 @@ namespace FAGui
         ingameUi->PushToBack(); // base.rml is an empty sheet that covers the whole screen for
         // detecting clicks outside the gui, push it to back so it doesn't
         // block clicks on the real gui.
+
+        mCurrentGuiType = IngameMenu;
     }
 
 
     void GuiManager::showMainMenu()
     {
+        titleScreen->Hide();
         ingameUi->Hide();
         mainMenu->Show();
+
+        mCurrentGuiType = MainMenu;
+    }
+
+    GuiManager::GuiType GuiManager::currentGuiType() const
+    {
+        return mCurrentGuiType;
     }
 
 

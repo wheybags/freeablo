@@ -112,10 +112,10 @@ namespace Engine
         else
         {
             pause();
-            guiManager.showMainMenu();
-            threadManager.playMusic("music/dintro.wav");
+            guiManager.showTitleScreen();
         }
 
+        auto startTime = std::chrono::system_clock::now();
         auto last = std::chrono::system_clock::now();
 
         NetManager netManager(isServer);
@@ -135,7 +135,24 @@ namespace Engine
 
             mInputManager->update(mPaused);
             if(!mPaused)
+            {
                 world.update(mNoclip);
+            }
+            else
+            {
+                static const int WAIT_TIME = 7000;
+
+                if(guiManager.currentGuiType() == FAGui::GuiManager::TitleScreen)
+                {
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - startTime.time_since_epoch()).count();
+                    if(duration > WAIT_TIME)
+                    {
+                        guiManager.showMainMenu();
+                        threadManager.playMusic("music/dintro.wav");
+                    }
+                }
+            }
+
             netManager.update();
             guiManager.updateGui();
 
