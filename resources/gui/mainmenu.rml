@@ -77,6 +77,7 @@ mainMenu = None
 def onLoad(document):
     entries = [ 
         {"text": 'Single Player', "func": freeablo.startGame},
+        {"text": 'Single Player (choose class)', "func": freeablo.showChooseClassMenu},
         {"text": 'Multi Player (placeholder)'},
         {"text": 'Replay Intro (placeholder)'},
         {"text": 'Show Credits (placeholder)'},

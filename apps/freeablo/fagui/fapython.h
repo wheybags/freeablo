@@ -27,6 +27,8 @@ namespace FAGui
             {}
 
         protected:
+            void showMainMenu();
+            void showChooseClassMenu();
             void quitGame();
             void pauseGame();
             void unpauseGame();

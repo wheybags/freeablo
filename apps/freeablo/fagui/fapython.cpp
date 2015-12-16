@@ -16,6 +16,11 @@ namespace FAGui
     std::string cursorPath;
     uint32_t cursorFrame;
 
+    void FAPythonFuncs::showChooseClassMenu()
+    {
+        mGuiManager.showChooseClassMenu();
+    }
+
     void FAPythonFuncs::quitGame()
     {
         mEngine.stop();
@@ -43,6 +48,12 @@ namespace FAGui
     std::string FAPythonFuncs::getInvClass()
     {
         return FAGui::GuiManager::invClass;
+    }
+
+    void FAPythonFuncs::showMainMenu()
+    {
+        mGuiManager.showMainMenu();
+        Engine::ThreadManager::get()->playMusic("music/dintro.wav");
     }
 
     void FAPythonFuncs::startGame()
@@ -418,6 +429,8 @@ namespace FAGui
     FAPythonFuncs* funcs = NULL;
     BOOST_PYTHON_MODULE(freeablo)
     {
+        boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
+        boost::python::def("showChooseClassMenu", +[](){funcs->showChooseClassMenu();});
         boost::python::def("quit", +[](){funcs->quitGame();});
         boost::python::def("pause", +[](){funcs->pauseGame();});
         boost::python::def("unpause", +[](){funcs->unpauseGame();});
