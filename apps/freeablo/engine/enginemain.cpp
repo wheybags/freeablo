@@ -71,6 +71,10 @@ namespace Engine
         FARender::Renderer& renderer = *FARender::Renderer::get();
         Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();      
 
+        Settings::Settings settings;
+        if(!settings.loadUserSettings())
+            return;
+
         std::string characterClass = variables["character"].as<std::string>();
 
         DiabloExe::DiabloExe exe(pathEXE);
@@ -112,7 +116,16 @@ namespace Engine
         else
         {
             pause();
-            guiManager.showTitleScreen();
+            bool showTitleScreen = settings.get<bool>("Game", "showTitleScreen");
+            if(showTitleScreen)
+            {
+                guiManager.showTitleScreen();
+            }
+            else
+            {
+                guiManager.showMainMenu();
+                threadManager.playMusic("music/dintro.wav");
+            }
         }
 
         auto startTime = std::chrono::system_clock::now();
