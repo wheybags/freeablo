@@ -60,14 +60,15 @@ namespace FAGui
 
     void GuiManager::showChooseClassMenu()
     {
-        chooseClassMenu->Show();
+        enterNameMenu->Hide();
         mainMenu->Hide();
+        chooseClassMenu->Show();
     }
 
     void GuiManager::showEnterNameMenu()
     {
-        enterNameMenu->Show();
         chooseClassMenu->Hide();
+        enterNameMenu->Show();
     }
 
 

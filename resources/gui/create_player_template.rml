@@ -152,12 +152,19 @@
 
 import freeablo
 
-def onClick():
+def onOkClick():
     global currentMenu
     if currentMenu == 0:
         freeablo.showEnterNameMenu()
     else:
         freeablo.startGame()
+
+def onCancelClick():
+    global currentMenu
+    if currentMenu == 1:
+        freeablo.showChooseClassMenu()
+    else:
+        freeablo.showMainMenu()
 
         </script>
     </head>
@@ -186,8 +193,8 @@ def onClick():
                     <div class="chooseclass"></div>
                     <div id="buttons">
                         <div class="button_separator"></div>
-                        <div class="button" onclick="onClick()">OK</div>
-                        <div class="button" onclick="freeablo.showMainMenu()">Cancel</div>
+                        <div class="button" onclick="onOkClick()">OK</div>
+                        <div class="button" onclick="onCancelClick()">Cancel</div>
                         <div class="button_separator"></div>
                     </div>
                 </div>
