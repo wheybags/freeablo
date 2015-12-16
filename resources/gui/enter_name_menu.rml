@@ -4,16 +4,16 @@
 
         <script>
 
-currentMenu = 0
+currentMenu = 1
 
 def onLoad():
     global currentMenu
-    currentMenu = 0
+    currentMenu = 1
 
         </script>
     </head>
 
     <body template="create_player" onload="onLoad()">
-        Choose Class
+        Enter Name
     </body>
 </rml>

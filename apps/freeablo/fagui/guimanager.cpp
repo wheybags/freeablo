@@ -13,6 +13,7 @@ namespace FAGui
     Rocket::Core::ElementDocument* ingameUi = NULL;
     Rocket::Core::ElementDocument* mainMenu = NULL;
     Rocket::Core::ElementDocument* chooseClassMenu = NULL;
+    Rocket::Core::ElementDocument* enterNameMenu = NULL;
 
     std::string GuiManager::invClass;
 
@@ -35,11 +36,14 @@ namespace FAGui
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
         chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/choose_class_menu.rml");
+        enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/enter_name_menu.rml");
 
     }
 
     void GuiManager::showIngameGui()
     {
+        enterNameMenu->Hide();
+        chooseClassMenu->Hide();
         mainMenu->Hide();
         ingameUi->Show();
         ingameUi->PushToBack(); // base.rml is an empty sheet that covers the whole screen for
@@ -58,6 +62,12 @@ namespace FAGui
     {
         chooseClassMenu->Show();
         mainMenu->Hide();
+    }
+
+    void GuiManager::showEnterNameMenu()
+    {
+        enterNameMenu->Show();
+        chooseClassMenu->Hide();
     }
 
 
