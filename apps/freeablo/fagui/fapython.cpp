@@ -91,6 +91,11 @@ namespace FAGui
         Engine::ThreadManager::get()->playSound(path);
     }
 
+    void FAPythonFuncs::playClickButtonSound()
+    {
+        playSound("sfx/items/titlslct.wav");
+    }
+
     boost::python::list FAPythonFuncs::getHotkeyNames()
     {
         boost::python::list hotkeynames;
@@ -442,6 +447,7 @@ namespace FAGui
         boost::python::def("unpause", +[](){funcs->unpauseGame();});
         boost::python::def("startGame", +[](){funcs->startGame();});
         boost::python::def("playSound", +[](const std::string& path){funcs->playSound(path);});
+        boost::python::def("playClickButtonSound", +[](){funcs->playClickButtonSound();});
         boost::python::def("getHotkeyNames", +[](){return funcs->getHotkeyNames();});
         boost::python::def("getHotkeys", +[](){return funcs->getHotkeys();});
         boost::python::def("setHotkey", +[](std::string function, boost::python::list pyhotkey){funcs->setHotkey(function, pyhotkey);});

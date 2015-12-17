@@ -36,6 +36,7 @@ namespace FAGui
             void startGame();
             void saveGame();
             void loadGame();
+            void playClickButtonSound();
             void playSound(const std::string& path);
             boost::python::list getHotkeyNames();
             boost::python::list getHotkeys();

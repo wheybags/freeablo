@@ -65,7 +65,7 @@ class Menu(object):
         elem.inner_rml = self.fmtNotSelected % self.entries[num]["text"]
 
     def activate(self):
-        freeablo.playSound("sfx/items/titlslct.wav")
+        freeablo.playClickButtonSound()
         currentEntry = self.entries[self.current]
         if("func" in currentEntry):
             currentEntry["func"](currentEntry["args"]) if "args" in currentEntry \

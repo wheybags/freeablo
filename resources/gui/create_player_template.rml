@@ -154,6 +154,9 @@ import freeablo
 
 def onOkClick():
     global currentMenu
+
+    freeablo.playClickButtonSound()
+
     if currentMenu == 0:
         freeablo.showEnterNameMenu()
     else:
@@ -161,6 +164,9 @@ def onOkClick():
 
 def onCancelClick():
     global currentMenu
+
+    freeablo.playClickButtonSound()
+
     if currentMenu == 1:
         freeablo.showChooseClassMenu()
     else:
