@@ -10,6 +10,12 @@ def onLoad():
     global currentMenu
     currentMenu = 1
 
+    label = document.GetElementById("label")
+    label.inner_rml = 'Enter Name'
+
+    label = document.GetElementById("innerContent")
+    label.inner_rml = '<input type="text" id="name" />'
+
         </script>
     </head>
 

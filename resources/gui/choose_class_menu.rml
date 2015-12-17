@@ -1,19 +1,88 @@
 <rml>
     <head>
        <link type="text/template" href="create_player_template.rml"/>
+       <style>
 
-        <script>
+        span.pentagon
+        {
+            icon-decorator: faanim;
+            icon-animfile: /ui_art/focus.pcx&trans=0,255,0&vanim=30;
+            icon-playtime: 0.3;
+
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+        }
+
+       span.pentagon_separator
+       {
+           display: inline-block;
+           width: 30px;
+           height: 30px;
+       }
+
+       div.menuEntry
+       {
+           width: 369px;
+           height: 30px;
+           display: block;
+           text-align: center;
+           padding-bottom: 6px;
+       }
+
+       div.entryText
+       {
+           font-family: FreeabloGold24;
+           width: 309px;
+           height: 30px;
+           display: inline-block;
+           text-align: center;
+
+       }
+
+        div#innerContent
+        {
+            width: 369px;
+            display:block;
+            padding-top: 30px;
+        }
+
+
+        </style>
+
+<script>
+
+import rocket
+import freeablo
+from menu import Menu
 
 currentMenu = 0
+chooseClassMenu = None
 
-def onLoad():
+def onLoad(document):
+
     global currentMenu
     currentMenu = 0
 
-        </script>
+    entries = [
+        {"text": 'Warrior', "func": freeablo.showEnterNameMenu},
+        {"text": 'Rogue', "func": freeablo.showEnterNameMenu},
+        {"text": 'Sorcerer', "func": freeablo.showEnterNameMenu},
+    ]
+
+    fmtSelected = '<span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/>'
+    fmtNotSelected = '<span class="pentagon_separator"/><div class="entryText"> %s </div><span class="pentagon_separator"/>'
+
+    global chooseClassMenu
+    chooseClassMenu = Menu(document, 'chooseClassMenu', 'innerContent',  entries, fmtSelected, fmtNotSelected)
+
+    label = document.GetElementById("label")
+    label.inner_rml = 'Choose Class'
+
+</script>
     </head>
 
-    <body template="create_player" onload="onLoad()">
+    <body template="create_player" onload="onLoad(document)">
         Choose Class
     </body>
 </rml>

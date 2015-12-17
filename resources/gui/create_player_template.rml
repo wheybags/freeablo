@@ -55,7 +55,7 @@
                 text-align:left;
             }
 
-            div.separator
+            div.standard_separator
             {
                 display: inline-block;
                 width: 30px;
@@ -69,7 +69,7 @@
                 height: 256px;
             }
 
-            div.chooseclass_label
+            div#label
             {
                 display: block;
                 margin-top: -4px;
@@ -150,6 +150,7 @@
         </style>
         <script>
 
+import rocket
 import freeablo
 
 def onOkClick():
@@ -175,13 +176,12 @@ def onCancelClick():
         </script>
     </head>
 
-    <body>
-
+    <body onload="onLoad(document)">
         <img id="background" src="/ui_art/selhero.pcx">
             <div id="logo" ></div>
             <div id="newsingleplayerhero" >New Single Player Hero</div>
             <div id="container">
-                <div class="separator"></div>
+                <div class="standard_separator"></div>
                 <div id="left">
                     <div id="heros"></div>
                     <div class="left_separator"></div>
@@ -193,10 +193,12 @@ def onCancelClick():
                     <div class="left_parameter_label">Dexterity:</div><div class="left_parameter_value">20</div>
                     <div class="left_parameter_label">Vitality:</div><div class="left_parameter_value">25</div>
                 </div>
-                <div class="separator"></div>
+                <div class="standard_separator"></div>
                 <div id="right">
-                    <div class="chooseclass_label" id="content"></div>
-                    <div class="chooseclass"></div>
+                    <div id="label"></div>
+                    <div class="chooseclass" >
+                        <div id="innerContent"></div>
+                    </div>
                     <div id="buttons">
                         <div class="button_separator"></div>
                         <div class="button" onclick="onOkClick()">OK</div>
@@ -204,7 +206,7 @@ def onCancelClick():
                         <div class="button_separator"></div>
                     </div>
                 </div>
-                <div class="separator"></div>
+                <div class="standard_separator"></div>
             </div>
         </img>
     </body>
