@@ -18,20 +18,15 @@
 
             div#menuContainer
             {
-                position: absolute;
-                top: -200px;
+                width: 640px;
             }
 
-            div#menuBackground
+            img#background
             {
-                background-decorator: image;
-                background-image: /ui_art/mainmenu.pcx;
-                position: absolute;
-                top: -200px;
                 width: 640px;
                 height: 480px;
-                left: 50%;
-                margin-left: -25%;
+                display: block;
+                margin: auto;
             }
 
             span#smlogo
@@ -57,11 +52,38 @@
                 icon-playtime: 0.3;
                 icon-animfile: /data/PentSpin.cel;
 
-                position: relative;
                 display: inline-block;
-                top: 16px;
                 width: 48px;
                 height: 48px;
+            }
+
+            span.separator
+            {
+                display: inline-block;
+                width: 48px;
+                height: 48px;
+            }
+
+            div.menuEntry
+            {
+                width: 490px;
+                height: 48px;
+                display: block;
+                text-align: center;
+            }
+
+            div.entryText
+            {
+                width: 396px;
+                height: 48px;
+                display: inline-block;
+            }
+
+            div.vertical_separator
+            {
+                width: 100%;
+                height: 20px;
+                display:block;
             }
 
         </style>
@@ -77,15 +99,15 @@ mainMenu = None
 def onLoad(document):
     entries = [ 
         {"text": 'Single Player', "func": freeablo.startGame},
-        {"text": 'Single Player (choose class)', "func": freeablo.showChooseClassMenu},
-        {"text": 'Multi Player (placeholder)'},
-        {"text": 'Replay Intro (placeholder)'},
-        {"text": 'Show Credits (placeholder)'},
+        {"text": 'Single Player 2', "func": freeablo.showChooseClassMenu},
+        {"text": 'Multi Player'},
+        {"text": 'Replay Intro'},
+        {"text": 'Show Credits'},
         {"text": 'Exit Freeablo', "func": freeablo.quit}
     ]
 
-    fmtSelected = '<span class="pentagon"/> %s <span class="pentagon"/>'
-    fmtNotSelected = '<span style="visibility: hidden;" class="pentagon"/> %s <span style="visibility: hidden;" class="pentagon"/>'
+    fmtSelected = '<span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/>'
+    fmtNotSelected = '<span class="separator"/><div class="entryText"> %s </div><span class="separator"/>'
     
     global mainMenu
     mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
@@ -98,13 +120,15 @@ def onKeyDown(event, document):
     </head>
 
     <body onkeydown="onKeyDown(event, document)" onload="onLoad(document)">
-        <div id="topContainer">
-            <div id="menuBackground"></div>
-            <div id="menuContainer">
-                <span id="smlogo"></span> <br/>
-                <div id="innerMenuContainer"></div> <br/>
-                <span id="version">Freeablo v0.3</span>
-            </div>
-        </div>
+
+            <img id="background" src="/ui_art/mainmenu.pcx">
+                <div id="menuContainer">
+                    <span id="smlogo"></span>
+                    <div class="vertical_separator"></div>
+                    <div id="innerMenuContainer"></div> <br/>
+                    <span id="version">Freeablo v0.3</span>
+                </div>
+             </img>
+
     </body>
 </rml>

@@ -34,7 +34,7 @@ class Menu(object):
         for i, val in enumerate(self.entries):
             args = val["args"] if "args" in val else ""
             onclick = (val["strFunc"]+"({0})").format(args) if "strFunc" in val else ""
-            entryStr = '<span id="menuEntry%05d" onmouseover="%s.setSelected(%05d)" onclick="%s.activate()">' % (i, selfName, i, selfName)
+            entryStr = '<span class="menuEntry" id="menuEntry%05d" onmouseover="%s.setSelected(%05d)" onclick="%s.activate()">' % (i, selfName, i, selfName)
             entryStr += self.fmtNotSelected % val["text"]
             entryStr += '</span><br/>'
             menuHtmlStr += entryStr
