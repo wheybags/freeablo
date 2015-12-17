@@ -23,12 +23,9 @@ namespace FAGui
         this->invClass = invClass;
         initPython(mPythonFuncs);
 
-
         Input::Hotkey::initpythonwrapper();
 
-
         FARender::Renderer* renderer = FARender::Renderer::get();
-
 
         Rocket::Core::DecoratorInstancer* animInstancer = Rocket::Core::Factory::RegisterDecoratorInstancer("faanim", (Rocket::Core::DecoratorInstancer*)new AnimatedDecoratorInstancer(renderer->getRocketContext()->GetRenderInterface()));
         animInstancer->RemoveReference();
@@ -37,7 +34,6 @@ namespace FAGui
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
         chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/choose_class_menu.rml");
         enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/enter_name_menu.rml");
-
     }
 
     void GuiManager::showIngameGui()
@@ -65,12 +61,12 @@ namespace FAGui
         chooseClassMenu->Show();
     }
 
-    void GuiManager::showEnterNameMenu()
+    void GuiManager::showEnterNameMenu(int classNumber)
     {
         chooseClassMenu->Hide();
+        enterNameMenu->SetAttribute<int>("selectedClass", classNumber);
         enterNameMenu->Show();
     }
-
 
     void GuiManager::updateGui()
     {

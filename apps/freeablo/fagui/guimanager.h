@@ -16,7 +16,7 @@ namespace FAGui
         void showIngameGui();
         void showMainMenu();
         void showChooseClassMenu();
-        void showEnterNameMenu();
+        void showEnterNameMenu(int classNumber);
         void updateGui();
         static std::string invClass;
 

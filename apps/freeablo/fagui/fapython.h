@@ -29,7 +29,7 @@ namespace FAGui
         protected:
             void showMainMenu();
             void showChooseClassMenu();
-            void showEnterNameMenu();
+            void showEnterNameMenu(int classNumber);
             void quitGame();
             void pauseGame();
             void unpauseGame();

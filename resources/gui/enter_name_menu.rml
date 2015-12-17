@@ -4,11 +4,25 @@
 
         <script>
 
+from creator import Creator
+import rocket
+
 currentMenu = 1
 
-def onLoad():
+def onShow(document):
+
+    global characterCreator
+
+    selectedClass = int(document.GetAttribute("selectedClass"))
+    characterCreator.setClass(selectedClass)
+
+def onLoad(document):
+
     global currentMenu
     currentMenu = 1
+
+    global characterCreator
+    characterCreator = Creator(document)
 
     label = document.GetElementById("label")
     label.inner_rml = 'Enter Name'
@@ -16,10 +30,11 @@ def onLoad():
     label = document.GetElementById("innerContent")
     label.inner_rml = '<input type="text" id="name" />'
 
+
         </script>
     </head>
 
-    <body template="create_player" onload="onLoad()">
+    <body template="create_player" onload="onLoad(document)" onshow="onShow(document)">
         Enter Name
     </body>
 </rml>

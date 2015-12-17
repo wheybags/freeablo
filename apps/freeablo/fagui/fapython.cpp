@@ -56,9 +56,9 @@ namespace FAGui
         Engine::ThreadManager::get()->playMusic("music/dintro.wav");
     }
 
-    void FAPythonFuncs::showEnterNameMenu()
+    void FAPythonFuncs::showEnterNameMenu(int classNumber)
     {
-        mGuiManager.showEnterNameMenu();
+        mGuiManager.showEnterNameMenu(classNumber);
     }
 
     void FAPythonFuncs::startGame()
@@ -441,7 +441,7 @@ namespace FAGui
     {
         boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
         boost::python::def("showChooseClassMenu", +[](){funcs->showChooseClassMenu();});
-        boost::python::def("showEnterNameMenu", +[](){funcs->showEnterNameMenu();});
+        boost::python::def("showEnterNameMenu", +[](int classNumber){funcs->showEnterNameMenu(classNumber);});
         boost::python::def("quit", +[](){funcs->quitGame();});
         boost::python::def("pause", +[](){funcs->pauseGame();});
         boost::python::def("unpause", +[](){funcs->unpauseGame();});
