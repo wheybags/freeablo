@@ -7,7 +7,7 @@ class Menu(object):
     or clicked with the mouse. For an example of usage, see resources/gui/pausemenu.rml.
     """
 
-    def __init__(self, doc, selfName, containerId, entries, fmtSelected, fmtNotSelected):
+    def __init__(self, doc, selfName, containerId, entries, fmtSelected, fmtNotSelected, onSelect=None):
         """
         Arguments:
         doc -- The rocket.Document instance to operate on.
@@ -23,12 +23,14 @@ class Menu(object):
         fmtSelected -- The format for rml for entries when they are selected. Must contain %s somewhere, which
             will be replaced with entry.text for each entry.
         fmtNotSelected -- Same as above, but for unselected entries.
+        onSelect -- Callback function when user selects menu entry
         """
 
         self.doc = doc
         self.entries = entries
         self.fmtSelected = fmtSelected
         self.fmtNotSelected = fmtNotSelected
+        self.onSelect = onSelect
 
         menuHtmlStr = ""
         for i, val in enumerate(self.entries):
@@ -55,10 +57,13 @@ class Menu(object):
 
             if self.current != -1:
                 self.setNotSelected(self.current)
+                if self.onSelect != None:
+                    self.onSelect(self.doc, num)
 
             elem = self.getEntryElement(num)
             elem.inner_rml = self.fmtSelected % self.entries[num]["text"]
             self.current = num
+
     
     def setNotSelected(self, num):
         elem = self.getEntryElement(num)

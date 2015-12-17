@@ -59,6 +59,52 @@ from menu import Menu
 currentMenu = 0
 chooseClassMenu = None
 
+def onMenuEntrySelect(document, number):
+
+    warrior = document.GetElementById("heros_warrior")
+    rogue = document.GetElementById("heros_rogue")
+    sorcerer = document.GetElementById("heros_sorcerer")
+
+    strength = document.GetElementById("strength")
+    magic = document.GetElementById("magic")
+    dexterity = document.GetElementById("dexterity")
+    vitality = document.GetElementById("vitality")
+
+    # Hide all
+
+    classes = [warrior, rogue, sorcerer]
+    for c in classes:
+        c.style.height = "0px"
+        c.style.visibility = "hidden"
+
+    # Show one
+
+    stats = [ 0, 0, 0, 0]
+
+    selectedClass = None
+
+    if number == 0:
+        selectedClass = warrior
+        stats = [30, 10, 20, 25]
+
+    if number == 1:
+        selectedClass = rogue
+        stats = [20, 15, 30, 20]
+
+    if number == 2:
+        selectedClass = sorcerer
+        stats = [15, 35, 15, 20]
+
+    selectedClass.style.height = "74px"
+    selectedClass.style.visibility = "visible"
+
+    strength.inner_rml = str(stats[0])
+    magic.inner_rml = str(stats[1])
+    dexterity.inner_rml = str(stats[2])
+    vitality.inner_rml = str(stats[3])
+
+
+
 def onLoad(document):
 
     global currentMenu
@@ -74,10 +120,15 @@ def onLoad(document):
     fmtNotSelected = '<span class="pentagon_separator"/><div class="entryText"> %s </div><span class="pentagon_separator"/>'
 
     global chooseClassMenu
-    chooseClassMenu = Menu(document, 'chooseClassMenu', 'innerContent',  entries, fmtSelected, fmtNotSelected)
+    chooseClassMenu = Menu(document, 'chooseClassMenu', 'innerContent',  entries, fmtSelected, fmtNotSelected, onMenuEntrySelect)
 
     label = document.GetElementById("label")
     label.inner_rml = 'Choose Class'
+
+    heros = document.GetElementById("heros")
+    if heros != None:
+        heros.SetAttribute("background-image", "/ui_art/heros.pcx 0px 76px 180px 152px")
+
 
 </script>
     </head>

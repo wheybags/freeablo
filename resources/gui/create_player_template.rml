@@ -97,16 +97,31 @@
                 width: 18px;
             }
 
-            div#heros
+            div.heros
             {
                 width: 180px;
-                height: 76px;
+                height: 74px;
                 background-decorator: image;
-                background-image: /ui_art/heros.pcx 0px 0px 180px 76px;
+                /*background-image: /ui_art/heros.pcx 0px 0px 180px 76px;*/
                 overflow: hidden;
                 display:block;
                 margin-top: 1px;
 
+            }
+
+            div#heros_warrior
+            {
+                background-image: /ui_art/heros.pcx 0px 0px 180px 76px;
+            }
+
+            div#heros_rogue
+            {
+                background-image: /ui_art/heros.pcx 0px 77px 180px 150px;
+            }
+
+            div#heros_sorcerer
+            {
+                background-image: /ui_art/heros.pcx 0px 154px 180px 226px;
             }
 
             div.left_separator
@@ -173,25 +188,30 @@ def onCancelClick():
     else:
         freeablo.showMainMenu()
 
+def onKeyDown(event, document):
+    chooseClassMenu.onKeyDown(event)
+
         </script>
     </head>
 
-    <body onload="onLoad(document)">
+    <body onkeydown="onKeyDown(event, document)" onload="onLoad(document)">
         <img id="background" src="/ui_art/selhero.pcx">
             <div id="logo" ></div>
             <div id="newsingleplayerhero" >New Single Player Hero</div>
             <div id="container">
                 <div class="standard_separator"></div>
                 <div id="left">
-                    <div id="heros"></div>
+                    <div class="heros" id="heros_warrior"></div>
+                    <div class="heros" id="heros_rogue" style="height: 0px; visibility: hidden;"></div>
+                    <div class="heros" id="heros_sorcerer" style="height: 0px; visibility: hidden;"></div>
                     <div class="left_separator"></div>
                     <div class="left_separator_2"></div>
                     <div class="left_parameter_label">Level:</div><div class="left_parameter_value">1</div>
                     <div class="left_separator_3"></div>
-                    <div class="left_parameter_label">Strength:</div><div class="left_parameter_value">30</div>
-                    <div class="left_parameter_label">Magic:</div><div class="left_parameter_value">10</div>
-                    <div class="left_parameter_label">Dexterity:</div><div class="left_parameter_value">20</div>
-                    <div class="left_parameter_label">Vitality:</div><div class="left_parameter_value">25</div>
+                    <div class="left_parameter_label">Strength:</div><div class="left_parameter_value" id="strength">30</div>
+                    <div class="left_parameter_label">Magic:</div><div class="left_parameter_value" id="magic">10</div>
+                    <div class="left_parameter_label">Dexterity:</div><div class="left_parameter_value" id="dexterity">20</div>
+                    <div class="left_parameter_label">Vitality:</div><div class="left_parameter_value" id="vitality">25</div>
                 </div>
                 <div class="standard_separator"></div>
                 <div id="right">
