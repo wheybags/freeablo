@@ -4,21 +4,16 @@
             body
             {
                 font-family: FreeabloGold42;
-                font-size: 24;
+                font-size: 42;
                 text-align: center;
                 background-color: black;
                 height: 100%;
             }
 
-            div#topContainer
-            {
-                position:absolute;
-                top: 50%;
-            }
-
             div#menuContainer
             {
                 width: 640px;
+                display: block;
             }
 
             img#background
@@ -77,6 +72,8 @@
                 width: 396px;
                 height: 48px;
                 display: inline-block;
+                text-align: center;
+                padding-left: 24px;
             }
 
             div.vertical_separator
