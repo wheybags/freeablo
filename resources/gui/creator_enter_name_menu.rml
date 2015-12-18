@@ -47,13 +47,20 @@ def onLoad(document):
     content = document.GetElementById("innerContent")
     content.inner_rml = '<div class="vertical_separator" />\
                         <span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> \
-                            <input type="text" id="nick" /> \
+                            <input type="text" id="nick" onkeydown="onKeyDown(event, document)" /> \
                          </div><span class="pentagon"/><span class="pentagon_border_separator" />'
+
+def onKeyDown(event, document):
+    if event.parameters['key_identifier'] == rocket.key_identifier.RETURN:
+        onOkClick()
+        return True
+
+    return True
 
         </script>
     </head>
 
-    <body template="creator_player_stats_template" onload="onLoad(document)" onshow="onShow(document)">
+    <body template="creator_player_stats_template" onload="onLoad(document)" onshow="onShow(document)" onkeydown="onKeyDown(event, document)">
         Enter Name
     </body>
 </rml>
