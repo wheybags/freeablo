@@ -33,6 +33,8 @@ def onShow(document):
     selectedClass = int(document.GetAttribute("selectedClass"))
     characterCreator.setClass(selectedClass)
 
+    document.GetElementById("nick").value = ''
+
 def onLoad(document):
 
     global currentMenu
@@ -50,7 +52,13 @@ def onLoad(document):
                             <input type="text" id="nick" onkeydown="onKeyDown(event, document)" /> \
                          </div><span class="pentagon"/><span class="pentagon_border_separator" />'
 
-def onKeyDown(event, document):
+def onKeyDown(event = None, document = None):
+
+    if event == None:
+        return True
+    if document == None:
+        return True
+
     if event.parameters['key_identifier'] == rocket.key_identifier.RETURN:
         onOkClick()
         return True
