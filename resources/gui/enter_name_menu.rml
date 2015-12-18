@@ -1,8 +1,25 @@
 <rml>
     <head>
-       <link type="text/template" href="create_player_template.rml"/>
+        <link type="text/template" href="create_player_template.rml"/>
+        <link type="text/rcss" href="create_player_template.rcss"/>
 
-        <script>
+        <style>
+        #nick
+        {
+            font-family: FreeabloGold24;
+            width: 236px;
+            position: relative;
+            top: 5px;
+            left: 0px;
+        }
+        div.vertical_separator
+        {
+            height: 30px;
+            display:block;
+        }
+        </style>
+
+<script>
 
 from creator import Creator
 import rocket
@@ -27,9 +44,11 @@ def onLoad(document):
     label = document.GetElementById("label")
     label.inner_rml = 'Enter Name'
 
-    label = document.GetElementById("innerContent")
-    label.inner_rml = '<input type="text" id="name" />'
-
+    content = document.GetElementById("innerContent")
+    content.inner_rml = '<div class="vertical_separator" />\
+                        <span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> \
+                            <input type="text" id="nick" /> \
+                         </div><span class="pentagon"/><span class="pentagon_border_separator" />'
 
         </script>
     </head>

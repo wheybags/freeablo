@@ -1,53 +1,8 @@
 <rml>
     <head>
        <link type="text/template" href="create_player_template.rml"/>
+       <link type="text/rcss" href="create_player_template.rcss"/>
        <style>
-
-        span.pentagon
-        {
-            icon-decorator: faanim;
-            icon-animfile: /ui_art/focus.pcx&trans=0,255,0&vanim=30;
-            icon-playtime: 0.3;
-
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-        }
-
-       span.pentagon_separator
-       {
-           display: inline-block;
-           width: 30px;
-           height: 30px;
-       }
-
-       div.menuEntry
-       {
-           width: 369px;
-           height: 30px;
-           display: block;
-           text-align: center;
-           padding-bottom: 6px;
-       }
-
-       div.entryText
-       {
-           font-family: FreeabloGold24;
-           width: 309px;
-           height: 30px;
-           display: inline-block;
-           text-align: center;
-
-       }
-
-        div#innerContent
-        {
-            width: 369px;
-            display:block;
-            padding-top: 30px;
-        }
-
-
         </style>
 
 <script>
@@ -88,7 +43,7 @@ def onLoad(document):
         {"text": 'Sorcerer', "func": showEnterMenu},
     ]
 
-    fmtSelected = '<span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/>'
+    fmtSelected = '<span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/><span class="pentagon_border_separator" />'
     fmtNotSelected = '<span class="pentagon_separator"/><div class="entryText"> %s </div><span class="pentagon_separator"/>'
 
     global chooseClassMenu
