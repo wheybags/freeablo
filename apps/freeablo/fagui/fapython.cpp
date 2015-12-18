@@ -56,6 +56,11 @@ namespace FAGui
         Engine::ThreadManager::get()->playMusic("music/dintro.wav");
     }
 
+    void FAPythonFuncs::showSelectHeroMenu()
+    {
+        mGuiManager.showSelectHeroMenu();
+    }
+
     void FAPythonFuncs::showEnterNameMenu(int classNumber)
     {
         mGuiManager.showEnterNameMenu(classNumber);
@@ -445,6 +450,7 @@ namespace FAGui
     BOOST_PYTHON_MODULE(freeablo)
     {
         boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
+        boost::python::def("showSelectHeroMenu", +[](){funcs->showSelectHeroMenu();});
         boost::python::def("showChooseClassMenu", +[](){funcs->showChooseClassMenu();});
         boost::python::def("showEnterNameMenu", +[](int classNumber){funcs->showEnterNameMenu(classNumber);});
         boost::python::def("showInvalidNameMenu", +[](){funcs->showInvalidNameMenu();});

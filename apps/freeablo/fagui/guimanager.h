@@ -15,6 +15,7 @@ namespace FAGui
         GuiManager(FAWorld::Inventory &playerInventory, Engine::EngineMain& engine, std::string invClass);
         void showIngameGui();
         void showMainMenu();
+        void showSelectHeroMenu();
         void showChooseClassMenu();
         void showEnterNameMenu(int classNumber);
         void showInvalidNameMenu();

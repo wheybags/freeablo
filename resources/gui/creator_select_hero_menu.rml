@@ -1,0 +1,114 @@
+<rml>
+    <head>
+       <link type="text/template" href="creator_player_stats_template.rml"/>
+       <link type="text/rcss" href="creator_player_stats_template.rcss"/>
+       <style>
+
+       span.pentagon
+       {
+           icon-decorator: faanim;
+           icon-animfile: /ui_art/focus16.pcx&trans=0,255,0&vanim=20;
+           icon-playtime: 0.3;
+
+           display: inline-block;
+           width: 20px;
+           height: 20px;
+       }
+
+       span.pentagon_separator
+       {
+           display: inline-block;
+           width: 20px;
+           height: 20px;
+       }
+
+       span.pentagon_border_separator
+       {
+           display: inline-block;
+           width: 25px;
+           height: 20px;
+       }
+
+       div.menuEntry
+       {
+           width: 389px;
+           height: 20px;
+           display: block;
+           text-align: center;
+           padding-bottom: 6px;
+       }
+
+       div.entryText
+       {
+           font-family: FreeabloGold16;
+           width: 279px;
+           height: 20px;
+           display: inline-block;
+           text-align: center;
+       }
+
+       div#innerContent
+       {
+           padding-top:8px;
+       }
+       </style>
+<script>
+
+import rocket
+import freeablo
+from menu import Menu
+from creator import Creator
+
+chooseClassMenu = None
+characterCreator = None
+
+entries = []
+
+def onMenuEntrySelect(document, number):
+
+    global characterCreator
+    global entries
+
+    if number == len(entries) - 1:
+        characterCreator.setClass(-1)
+    else:
+        characterCreator.setClass(1)
+
+def onLoad(document):
+
+    global characterCreator
+    characterCreator = Creator(document)
+
+    global entries
+    entries = [
+        {"text": 'wheybags', "func": freeablo.startGame},
+        {"text": 'foo', "func": freeablo.startGame},
+        {"text": 'this is very very long name', "func": freeablo.startGame},
+        {"text": 'New Hero', "func": freeablo.showChooseClassMenu},
+    ]
+
+    fmtSelected = '<span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/><span class="pentagon_border_separator" />'
+    fmtNotSelected = '<span class="pentagon_separator"/><div class="entryText"> %s </div><span class="pentagon_separator"/>'
+
+    global chooseClassMenu
+    chooseClassMenu = Menu(document, 'chooseClassMenu', 'innerContent',  entries, fmtSelected, fmtNotSelected, onMenuEntrySelect)
+
+    label = document.GetElementById("label")
+    label.inner_rml = 'Select Hero'
+
+    heros = document.GetElementById("heros")
+    if heros != None:
+        heros.SetAttribute("background-image", "/ui_art/heros.pcx 0px 76px 180px 152px")
+
+def onShow(document):
+
+    characterCreator.currentMenu = 0
+    characterCreator.setClass(-1)
+
+</script>
+    </head>
+
+    <body template="creator_player_stats_template" onload="onLoad(document)" onshow="onShow(document)">
+        Choose Class
+    </body>
+</rml>

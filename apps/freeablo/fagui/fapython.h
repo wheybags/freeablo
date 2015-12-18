@@ -28,6 +28,7 @@ namespace FAGui
 
         protected:
             void showMainMenu();
+            void showSelectHeroMenu();
             void showChooseClassMenu();
             void showEnterNameMenu(int classNumber);
             void showInvalidNameMenu();

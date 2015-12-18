@@ -69,7 +69,7 @@ def onShow(document):
     global characterCreator
 
     characterCreator = Creator(document)
-    characterCreator.currentMenu = 2
+    characterCreator.currentMenu = 3
 
 </script>
     </head>

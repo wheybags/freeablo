@@ -69,6 +69,13 @@
                 background-image: /ui_art/heros.pcx 0px 154px 180px 226px;
             }
 
+            div#heros_new
+            {
+                background-image: /ui_art/heros.pcx 0px 228px 180px 304px;
+                position:relative;
+                top: -2px;
+            }
+
             div.left_separator
             {
                 width:180px;
@@ -127,9 +134,10 @@ def onKeyDown(event, document):
                     <div class="heros" id="heros_warrior"></div>
                     <div class="heros" id="heros_rogue" style="height: 0px; visibility: hidden;"></div>
                     <div class="heros" id="heros_sorcerer" style="height: 0px; visibility: hidden;"></div>
+                    <div class="heros" id="heros_new" style="height: 0px; visibility: hidden;"></div>
                     <div class="left_separator"></div>
                     <div class="left_separator_2"></div>
-                    <div class="left_parameter_label">Level:</div><div class="left_parameter_value">1</div>
+                    <div class="left_parameter_label">Level:</div><div class="left_parameter_value" id="level">1</div>
                     <div class="left_separator_3"></div>
                     <div class="left_parameter_label">Strength:</div><div class="left_parameter_value" id="strength">30</div>
                     <div class="left_parameter_label">Magic:</div><div class="left_parameter_value" id="magic">10</div>

@@ -15,6 +15,7 @@ namespace FAGui
     Rocket::Core::ElementDocument* chooseClassMenu = NULL;
     Rocket::Core::ElementDocument* enterNameMenu = NULL;
     Rocket::Core::ElementDocument* invalidNameMenu = NULL;
+    Rocket::Core::ElementDocument* selectHeroMenu = NULL;
 
     std::string GuiManager::invClass;
 
@@ -36,6 +37,7 @@ namespace FAGui
         chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_choose_class_menu.rml");
         enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_enter_name_menu.rml");
         invalidNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_invalid_name_menu.rml");
+        selectHeroMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_select_hero_menu.rml");
     }
 
     void GuiManager::showIngameGui()
@@ -53,6 +55,12 @@ namespace FAGui
         hideAllMenus();
         ingameUi->Hide();
         mainMenu->Show();
+    }
+
+    void GuiManager::showSelectHeroMenu()
+    {
+        hideAllMenus();
+        selectHeroMenu->Show();
     }
 
     void GuiManager::showChooseClassMenu()
@@ -87,5 +95,6 @@ namespace FAGui
         chooseClassMenu->Hide();
         invalidNameMenu->Hide();
         enterNameMenu->Hide();
+        selectHeroMenu->Hide();
     }
 }

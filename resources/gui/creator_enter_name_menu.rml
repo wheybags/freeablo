@@ -31,9 +31,8 @@ def onShow(document):
     global characterCreator
     characterCreator = Creator(document)
 
-    characterCreator.currentMenu = 1
-    characterCreator.selectedClass = int(document.GetAttribute("selectedClass"))
-    characterCreator.setClass(characterCreator.selectedClass)
+    characterCreator.currentMenu = 2
+    characterCreator.setClass(int(document.GetAttribute("selectedClass")))
 
     document.GetElementById("nick").value = ''
 

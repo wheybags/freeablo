@@ -14,8 +14,7 @@ characterCreator = None
 
 def onMenuEntrySelect(document, number):
 
-    characterCreator.selectedClass = number
-    characterCreator.setClass(characterCreator.selectedClass)
+    characterCreator.setClass(number)
 
 def onLoad(document):
 
@@ -43,7 +42,7 @@ def onLoad(document):
 
 def onShow(document):
 
-    characterCreator.currentMenu = 0
+    characterCreator.currentMenu = 1
 
 </script>
     </head>
