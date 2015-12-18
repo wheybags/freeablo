@@ -1,7 +1,36 @@
+import freeablo
+import rocket
+
 class Creator:
     
+    currentMenu = 0
+    selectedClass = 0
+
     def __init__(self, doc):
         self.doc = doc
+
+    def showEnterMenu(self):
+        freeablo.showEnterNameMenu(self.selectedClass)
+
+    def onOkClick(self):
+
+        freeablo.playClickButtonSound()
+
+        if self.currentMenu == 0:
+            self.showEnterMenu()
+        elif self.currentMenu == 1:
+            freeablo.showInvalidNameMenu()
+        else:
+            freeablo.startGame()
+
+    def onCancelClick(self):
+
+        freeablo.playClickButtonSound()
+
+        if self.currentMenu == 1:
+            freeablo.showChooseClassMenu()
+        else:
+            freeablo.showMainMenu()
         
     def setClass(self, classNumber):
 

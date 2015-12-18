@@ -47,3 +47,19 @@ div#innerContent
     display:block;
     padding-top: 30px;
 }
+
+
+div.button
+{
+    font-family: FreeabloGold30;
+    font-size: 24;
+    text-align: center;
+    display: inline-block;
+    width:165px;
+}
+
+div.button_separator
+{
+    display: inline-block;
+    width: 18px;
+}

@@ -21,27 +21,23 @@
 
 <script>
 
-from creator import Creator
+from creator import *
 import rocket
 
-currentMenu = 1
+characterCreator = None
 
 def onShow(document):
 
     global characterCreator
+    characterCreator = Creator(document)
 
-    selectedClass = int(document.GetAttribute("selectedClass"))
-    characterCreator.setClass(selectedClass)
+    characterCreator.currentMenu = 1
+    characterCreator.selectedClass = int(document.GetAttribute("selectedClass"))
+    characterCreator.setClass(characterCreator.selectedClass)
 
     document.GetElementById("nick").value = ''
 
 def onLoad(document):
-
-    global currentMenu
-    currentMenu = 1
-
-    global characterCreator
-    characterCreator = Creator(document)
 
     label = document.GetElementById("label")
     label.inner_rml = 'Enter Name'
@@ -54,13 +50,15 @@ def onLoad(document):
 
 def onKeyDown(event = None, document = None):
 
+    global characterCreator
+
     if event == None:
         return True
     if document == None:
         return True
 
     if event.parameters['key_identifier'] == rocket.key_identifier.RETURN:
-        onOkClick()
+        characterCreator.onOkClick()
         return True
 
     return True

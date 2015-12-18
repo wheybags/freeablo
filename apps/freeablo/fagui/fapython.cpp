@@ -61,6 +61,11 @@ namespace FAGui
         mGuiManager.showEnterNameMenu(classNumber);
     }
 
+    void FAPythonFuncs::showInvalidNameMenu()
+    {
+        mGuiManager.showInvalidNameMenu();
+    }
+
     void FAPythonFuncs::startGame()
     {
         auto world = FAWorld::World::get();
@@ -442,6 +447,7 @@ namespace FAGui
         boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
         boost::python::def("showChooseClassMenu", +[](){funcs->showChooseClassMenu();});
         boost::python::def("showEnterNameMenu", +[](int classNumber){funcs->showEnterNameMenu(classNumber);});
+        boost::python::def("showInvalidNameMenu", +[](){funcs->showInvalidNameMenu();});
         boost::python::def("quit", +[](){funcs->quitGame();});
         boost::python::def("pause", +[](){funcs->pauseGame();});
         boost::python::def("unpause", +[](){funcs->unpauseGame();});

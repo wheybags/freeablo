@@ -14,6 +14,7 @@ namespace FAGui
     Rocket::Core::ElementDocument* mainMenu = NULL;
     Rocket::Core::ElementDocument* chooseClassMenu = NULL;
     Rocket::Core::ElementDocument* enterNameMenu = NULL;
+    Rocket::Core::ElementDocument* invalidNameMenu = NULL;
 
     std::string GuiManager::invClass;
 
@@ -34,13 +35,12 @@ namespace FAGui
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
         chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_choose_class_menu.rml");
         enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_enter_name_menu.rml");
+        invalidNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_invalid_name_menu.rml");
     }
 
     void GuiManager::showIngameGui()
     {
-        enterNameMenu->Hide();
-        chooseClassMenu->Hide();
-        mainMenu->Hide();
+        hideAllMenus();
         ingameUi->Show();
         ingameUi->PushToBack(); // base.rml is an empty sheet that covers the whole screen for
         // detecting clicks outside the gui, push it to back so it doesn't
@@ -50,22 +50,28 @@ namespace FAGui
 
     void GuiManager::showMainMenu()
     {
+        hideAllMenus();
         ingameUi->Hide();
         mainMenu->Show();
     }
 
     void GuiManager::showChooseClassMenu()
     {
-        enterNameMenu->Hide();
-        mainMenu->Hide();
+        hideAllMenus();
         chooseClassMenu->Show();
     }
 
     void GuiManager::showEnterNameMenu(int classNumber)
     {
-        chooseClassMenu->Hide();
+        hideAllMenus();
         enterNameMenu->SetAttribute<int>("selectedClass", classNumber);
         enterNameMenu->Show();
+    }
+
+    void GuiManager::showInvalidNameMenu()
+    {
+        hideAllMenus();
+        invalidNameMenu->Show();
     }
 
     void GuiManager::updateGui()
@@ -73,5 +79,13 @@ namespace FAGui
         FARender::Renderer* renderer = FARender::Renderer::get();
 
         renderer->getRocketContext()->Update();
+    }
+
+    void GuiManager::hideAllMenus()
+    {
+        mainMenu->Hide();
+        chooseClassMenu->Hide();
+        invalidNameMenu->Hide();
+        enterNameMenu->Hide();
     }
 }

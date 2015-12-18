@@ -9,35 +9,23 @@ import freeablo
 from menu import Menu
 from creator import Creator
 
-currentMenu = 0
 chooseClassMenu = None
 characterCreator = None
-selectedClass = 0
 
 def onMenuEntrySelect(document, number):
 
-    global selectedClass
-    selectedClass = number
-
-    characterCreator.setClass(selectedClass)
-
-def showEnterMenu():
-    global selectedClass
-    freeablo.showEnterNameMenu(selectedClass)
-
+    characterCreator.selectedClass = number
+    characterCreator.setClass(characterCreator.selectedClass)
 
 def onLoad(document):
-
-    global currentMenu
-    currentMenu = 0
 
     global characterCreator
     characterCreator = Creator(document)
 
     entries = [
-        {"text": 'Warrior', "func": showEnterMenu},
-        {"text": 'Rogue', "func": showEnterMenu},
-        {"text": 'Sorcerer', "func": showEnterMenu},
+        {"text": 'Warrior', "func": characterCreator.showEnterMenu},
+        {"text": 'Rogue', "func": characterCreator.showEnterMenu},
+        {"text": 'Sorcerer', "func": characterCreator.showEnterMenu},
     ]
 
     fmtSelected = '<span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/><span class="pentagon_border_separator" />'
@@ -53,11 +41,14 @@ def onLoad(document):
     if heros != None:
         heros.SetAttribute("background-image", "/ui_art/heros.pcx 0px 76px 180px 152px")
 
+def onShow(document):
+
+    characterCreator.currentMenu = 0
 
 </script>
     </head>
 
-    <body template="creator_player_stats_template" onload="onLoad(document)">
+    <body template="creator_player_stats_template" onload="onLoad(document)" onshow="onShow(document)">
         Choose Class
     </body>
 </rml>

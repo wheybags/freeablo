@@ -17,10 +17,14 @@ namespace FAGui
         void showMainMenu();
         void showChooseClassMenu();
         void showEnterNameMenu(int classNumber);
+        void showInvalidNameMenu();
         void updateGui();
         static std::string invClass;
 
         FAPythonFuncs mPythonFuncs;
+
+    private:
+        void hideAllMenus();
     };
 
     extern std::string cursorPath;

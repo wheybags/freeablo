@@ -41,20 +41,6 @@
                 height: 178px;
             }
 
-            div.button
-            {
-                font-family: FreeabloGold30;
-                font-size: 24;
-                text-align: center;
-                display: inline-block;
-                width:165px;
-            }
-
-            div.button_separator
-            {
-                display: inline-block;
-                width: 18px;
-            }
 
             div.heros
             {
@@ -126,26 +112,9 @@
 
 import rocket
 import freeablo
+import creator
 
-def onOkClick():
-    global currentMenu
-
-    freeablo.playClickButtonSound()
-
-    if currentMenu == 0:
-        showEnterMenu()
-    else:
-        freeablo.startGame()
-
-def onCancelClick():
-    global currentMenu
-
-    freeablo.playClickButtonSound()
-
-    if currentMenu == 1:
-        freeablo.showChooseClassMenu()
-    else:
-        freeablo.showMainMenu()
+global characterCreator
 
 def onKeyDown(event, document):
     chooseClassMenu.onKeyDown(event)
@@ -175,8 +144,8 @@ def onKeyDown(event, document):
                     </div>
                     <div id="buttons">
                         <div class="button_separator"></div>
-                        <div class="button" onclick="onOkClick()">OK</div>
-                        <div class="button" onclick="onCancelClick()">Cancel</div>
+                        <div class="button" onclick="characterCreator.onOkClick()">OK</div>
+                        <div class="button" onclick="characterCreator.onCancelClick()">Cancel</div>
                         <div class="button_separator"></div>
                     </div>
                 </div>
