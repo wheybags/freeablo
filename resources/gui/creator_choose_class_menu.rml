@@ -1,10 +1,7 @@
 <rml>
     <head>
-       <link type="text/template" href="create_player_template.rml"/>
-       <link type="text/rcss" href="create_player_template.rcss"/>
-       <style>
-        </style>
-
+       <link type="text/template" href="creator_player_stats_template.rml"/>
+       <link type="text/rcss" href="creator_player_stats_template.rcss"/>
 <script>
 
 import rocket
@@ -60,7 +57,7 @@ def onLoad(document):
 </script>
     </head>
 
-    <body template="create_player" onload="onLoad(document)">
+    <body template="creator_player_stats_template" onload="onLoad(document)">
         Choose Class
     </body>
 </rml>

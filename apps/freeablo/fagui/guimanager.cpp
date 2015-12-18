@@ -32,8 +32,8 @@ namespace FAGui
 
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
-        chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/choose_class_menu.rml");
-        enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/enter_name_menu.rml");
+        chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_choose_class_menu.rml");
+        enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_enter_name_menu.rml");
     }
 
     void GuiManager::showIngameGui()

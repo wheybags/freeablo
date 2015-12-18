@@ -1,7 +1,7 @@
 <rml>
     <head>
-        <link type="text/template" href="create_player_template.rml"/>
-        <link type="text/rcss" href="create_player_template.rcss"/>
+        <link type="text/template" href="creator_player_stats_template.rml"/>
+        <link type="text/rcss" href="creator_player_stats_template.rcss"/>
 
         <style>
         #nick
@@ -53,7 +53,7 @@ def onLoad(document):
         </script>
     </head>
 
-    <body template="create_player" onload="onLoad(document)" onshow="onShow(document)">
+    <body template="creator_player_stats_template" onload="onLoad(document)" onshow="onShow(document)">
         Enter Name
     </body>
 </rml>
