@@ -24,15 +24,19 @@ namespace FAGui
         void showTitleScreen();
         void showIngameGui();
         void showMainMenu();
+        void showSelectHeroMenu();
+        void showChooseClassMenu();
+        void showEnterNameMenu(int classNumber);
+        void showInvalidNameMenu(int classNumber);
         void updateGui();
         GuiType currentGuiType() const;
         static std::string invClass;
 
         FAPythonFuncs mPythonFuncs;
 
-        private:
-            GuiType mCurrentGuiType;
-
+    private:
+        void hideAllMenus();
+        GuiType mCurrentGuiType;
     };
 
     extern std::string cursorPath;

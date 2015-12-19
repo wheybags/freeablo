@@ -28,12 +28,17 @@ namespace FAGui
 
         protected:
             void showMainMenu();
+            void showSelectHeroMenu();
+            void showChooseClassMenu();
+            void showEnterNameMenu(int classNumber);
+            void showInvalidNameMenu(int classNumber);
             void quitGame();
             void pauseGame();
             void unpauseGame();
             void startGame();
             void saveGame();
             void loadGame();
+            void playClickButtonSound();
             void playSound(const std::string& path);
             boost::python::list getHotkeyNames();
             boost::python::list getHotkeys();

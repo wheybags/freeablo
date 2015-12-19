@@ -7,7 +7,7 @@ class Menu(object):
     or clicked with the mouse. For an example of usage, see resources/gui/pausemenu.rml.
     """
 
-    def __init__(self, doc, selfName, containerId, entries, fmtSelected, fmtNotSelected):
+    def __init__(self, doc, selfName, containerId, entries, fmtSelected, fmtNotSelected, onSelect=None):
         """
         Arguments:
         doc -- The rocket.Document instance to operate on.
@@ -23,27 +23,43 @@ class Menu(object):
         fmtSelected -- The format for rml for entries when they are selected. Must contain %s somewhere, which
             will be replaced with entry.text for each entry.
         fmtNotSelected -- Same as above, but for unselected entries.
+        onSelect -- Callback function when user selects menu entry
         """
 
         self.doc = doc
         self.entries = entries
+        self.containerId = containerId
+        self.selfName = selfName
         self.fmtSelected = fmtSelected
         self.fmtNotSelected = fmtNotSelected
+        self.onSelect = onSelect
+
+        self.initMenu()
+
+    def initMenu(self):
 
         menuHtmlStr = ""
         for i, val in enumerate(self.entries):
             args = val["args"] if "args" in val else ""
             onclick = (val["strFunc"]+"({0})").format(args) if "strFunc" in val else ""
-            entryStr = '<span id="menuEntry%05d" onmouseover="%s.setSelected(%05d)" onclick="%s.activate()">' % (i, selfName, i, selfName)
+            entryStr = '<span class="menuEntry" id="menuEntry%05d" onmouseover="%s.setSelected(%05d)" onclick="%s.activate()">' % (i, self.selfName, i, self.selfName)
             entryStr += self.fmtNotSelected % val["text"]
             entryStr += '</span><br/>'
             menuHtmlStr += entryStr
 
-        container = self.doc.GetElementById(containerId)
+        container = self.doc.GetElementById(self.containerId)
         container.inner_rml = menuHtmlStr
 
         self.current = -1
         self.setSelected(0, False)
+
+    def deleteEntry(self, num):
+        if len(self.entries) > 1 and num != len(self.entries) - 1:
+            del self.entries[num]
+            self.initMenu()
+            if self.onSelect != None:
+                self.onSelect(self.doc, 0)
+
 
     def getEntryElement(self, num):
         return self.doc.GetElementById('menuEntry%05d' % num)
@@ -55,17 +71,20 @@ class Menu(object):
 
             if self.current != -1:
                 self.setNotSelected(self.current)
+                if self.onSelect != None:
+                    self.onSelect(self.doc, num)
 
             elem = self.getEntryElement(num)
             elem.inner_rml = self.fmtSelected % self.entries[num]["text"]
             self.current = num
+
     
     def setNotSelected(self, num):
         elem = self.getEntryElement(num)
         elem.inner_rml = self.fmtNotSelected % self.entries[num]["text"]
 
     def activate(self):
-        freeablo.playSound("sfx/items/titlslct.wav")
+        freeablo.playClickButtonSound()
         currentEntry = self.entries[self.current]
         if("func" in currentEntry):
             currentEntry["func"](currentEntry["args"]) if "args" in currentEntry \

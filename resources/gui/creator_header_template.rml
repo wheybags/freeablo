@@ -1,0 +1,24 @@
+<template name="creator_header_template" content="body">
+    <head>
+        <link type="text/rcss" href="creator_header_template.rcss"/>
+        <style>
+            body
+            {
+                background-color: black;
+                height: 100%;
+            }
+
+        </style>
+    </head>
+
+    <body >
+        <img class="background" src="/ui_art/selhero.pcx">
+            <div class="logo" ></div>
+            <div class="newsingleplayerhero" >New Single Player Hero</div>
+            <div id="container">
+                <div class="standard_separator"></div>
+                <div id="body"></div>
+            </div>
+        </img>
+    </body>
+</template>

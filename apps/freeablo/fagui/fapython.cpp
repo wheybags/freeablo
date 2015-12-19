@@ -16,6 +16,11 @@ namespace FAGui
     std::string cursorPath;
     uint32_t cursorFrame;
 
+    void FAPythonFuncs::showChooseClassMenu()
+    {
+        mGuiManager.showChooseClassMenu();
+    }
+
     void FAPythonFuncs::quitGame()
     {
         mEngine.stop();
@@ -51,6 +56,21 @@ namespace FAGui
         Engine::ThreadManager::get()->playMusic("music/dintro.wav");
     }
 
+    void FAPythonFuncs::showSelectHeroMenu()
+    {
+        mGuiManager.showSelectHeroMenu();
+    }
+
+    void FAPythonFuncs::showEnterNameMenu(int classNumber)
+    {
+        mGuiManager.showEnterNameMenu(classNumber);
+    }
+
+    void FAPythonFuncs::showInvalidNameMenu(int classNumber)
+    {
+        mGuiManager.showInvalidNameMenu(classNumber);
+    }
+
     void FAPythonFuncs::startGame()
     {
         auto world = FAWorld::World::get();
@@ -79,6 +99,11 @@ namespace FAGui
     void FAPythonFuncs::playSound(const std::string& path)
     {
         Engine::ThreadManager::get()->playSound(path);
+    }
+
+    void FAPythonFuncs::playClickButtonSound()
+    {
+        playSound("sfx/items/titlslct.wav");
     }
 
     boost::python::list FAPythonFuncs::getHotkeyNames()
@@ -425,11 +450,16 @@ namespace FAGui
     BOOST_PYTHON_MODULE(freeablo)
     {
         boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
+        boost::python::def("showSelectHeroMenu", +[](){funcs->showSelectHeroMenu();});
+        boost::python::def("showChooseClassMenu", +[](){funcs->showChooseClassMenu();});
+        boost::python::def("showEnterNameMenu", +[](int classNumber){funcs->showEnterNameMenu(classNumber);});
+        boost::python::def("showInvalidNameMenu", +[](int classNumber){funcs->showInvalidNameMenu(classNumber);});
         boost::python::def("quit", +[](){funcs->quitGame();});
         boost::python::def("pause", +[](){funcs->pauseGame();});
         boost::python::def("unpause", +[](){funcs->unpauseGame();});
         boost::python::def("startGame", +[](){funcs->startGame();});
         boost::python::def("playSound", +[](const std::string& path){funcs->playSound(path);});
+        boost::python::def("playClickButtonSound", +[](){funcs->playClickButtonSound();});
         boost::python::def("getHotkeyNames", +[](){return funcs->getHotkeyNames();});
         boost::python::def("getHotkeys", +[](){return funcs->getHotkeys();});
         boost::python::def("setHotkey", +[](std::string function, boost::python::list pyhotkey){funcs->setHotkey(function, pyhotkey);});

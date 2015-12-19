@@ -1,0 +1,57 @@
+<rml>
+    <head>
+       <link type="text/template" href="creator_player_stats_template.rml"/>
+       <link type="text/rcss" href="creator_player_stats_template.rcss"/>
+<script>
+
+import rocket
+import freeablo
+from menu import Menu
+from creator import Creator
+
+chooseClassMenu = None
+characterCreator = None
+
+def onMenuEntrySelect(document, number):
+
+    characterCreator.setClass(number)
+
+def onLoad(document):
+
+    global characterCreator
+    characterCreator = Creator(document)
+
+    entries = [
+        {"text": 'Warrior', "func": characterCreator.showEnterMenu},
+        {"text": 'Rogue', "func": characterCreator.showEnterMenu},
+        {"text": 'Sorcerer', "func": characterCreator.showEnterMenu},
+    ]
+
+    fmtSelected = '<span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/><span class="pentagon_border_separator" />'
+    fmtNotSelected = '<span class="pentagon_separator"/><div class="entryText"> %s </div><span class="pentagon_separator"/>'
+
+    global chooseClassMenu
+    chooseClassMenu = Menu(document, 'chooseClassMenu', 'innerContent',  entries, fmtSelected, fmtNotSelected, onMenuEntrySelect)
+
+    label = document.GetElementById("label")
+    label.inner_rml = 'Choose Class'
+
+    heros = document.GetElementById("heros")
+    if heros != None:
+        heros.SetAttribute("background-image", "/ui_art/heros.pcx 0px 76px 180px 152px")
+
+def onShow(document):
+
+    characterCreator.currentMenu = 1
+    document.GetElementById("buttons").style.display = "block"
+    document.GetElementById("three_buttons").style.display = "none"
+
+
+
+</script>
+    </head>
+
+    <body template="creator_player_stats_template" onload="onLoad(document)" onshow="onShow(document)">
+        Choose Class
+    </body>
+</rml>
