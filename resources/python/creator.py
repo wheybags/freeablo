@@ -6,8 +6,9 @@ class Creator:
     currentMenu = 0
     selectedClass = 0
 
-    def __init__(self, doc):
+    def __init__(self, doc, menu = None):
         self.doc = doc
+        self.menu = menu
 
     def showEnterMenu(self):
         freeablo.showEnterNameMenu(self.selectedClass)
@@ -24,6 +25,10 @@ class Creator:
             freeablo.showInvalidNameMenu()
         else:
             freeablo.startGame()
+
+    def onDeleteClick(self):
+        self.menu.deleteEntry(self.menu.current)
+
 
     def onCancelClick(self):
 
@@ -55,8 +60,7 @@ class Creator:
 
         classes = [new_hero, warrior, rogue, sorcerer]
         for c in classes:
-            c.style.height = "0px"
-            c.style.visibility = "hidden"
+            c.style.display = "none"
 
         # Show one
 
@@ -82,8 +86,7 @@ class Creator:
             myClass = sorcerer
             stats = [15, 35, 15, 20]
 
-        myClass.style.height = "74px"
-        myClass.style.visibility = "visible"
+        myClass.style.display = "block"
 
         level.inner_rml = str(level_value)
         strength.inner_rml = str(stats[0])

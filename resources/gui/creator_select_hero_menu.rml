@@ -71,13 +71,12 @@ def onMenuEntrySelect(document, number):
 
     if number == len(entries) - 1:
         characterCreator.setClass(-1)
+        document.GetElementById("delete").style.font_family = "FreeabloSilver30"
     else:
         characterCreator.setClass(1)
+        document.GetElementById("delete").style.font_family = "FreeabloGold30"
 
 def onLoad(document):
-
-    global characterCreator
-    characterCreator = Creator(document)
 
     global entries
     entries = [
@@ -93,6 +92,9 @@ def onLoad(document):
     global chooseClassMenu
     chooseClassMenu = Menu(document, 'chooseClassMenu', 'innerContent',  entries, fmtSelected, fmtNotSelected, onMenuEntrySelect)
 
+    global characterCreator
+    characterCreator = Creator(document, chooseClassMenu)
+
     label = document.GetElementById("label")
     label.inner_rml = 'Select Hero'
 
@@ -102,8 +104,14 @@ def onLoad(document):
 
 def onShow(document):
 
+    global chooseClassMenu
+
     characterCreator.currentMenu = 0
-    characterCreator.setClass(-1)
+
+    onMenuEntrySelect(document, chooseClassMenu.current)
+
+    document.GetElementById("buttons").style.display = "none"
+    document.GetElementById("three_buttons").style.display = "block"
 
 </script>
     </head>

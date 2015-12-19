@@ -43,6 +43,10 @@ def onLoad(document):
 def onShow(document):
 
     characterCreator.currentMenu = 1
+    document.GetElementById("buttons").style.display = "block"
+    document.GetElementById("three_buttons").style.display = "none"
+
+
 
 </script>
     </head>

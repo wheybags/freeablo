@@ -72,8 +72,6 @@
             div#heros_new
             {
                 background-image: /ui_art/heros.pcx 0px 228px 180px 304px;
-                position:relative;
-                top: -2px;
             }
 
             div.left_separator
@@ -131,10 +129,10 @@ def onKeyDown(event, document):
 
     <body template="creator_header_template" onkeydown="onKeyDown(event, document)">
                 <div id="left">
-                    <div class="heros" id="heros_warrior"></div>
-                    <div class="heros" id="heros_rogue" style="height: 0px; visibility: hidden;"></div>
-                    <div class="heros" id="heros_sorcerer" style="height: 0px; visibility: hidden;"></div>
-                    <div class="heros" id="heros_new" style="height: 0px; visibility: hidden;"></div>
+                    <div class="heros" id="heros_warrior" ></div>
+                    <div class="heros" id="heros_rogue" style="display:none;"></div>
+                    <div class="heros" id="heros_sorcerer" style="display:none;"></div>
+                    <div class="heros" id="heros_new" style="display:none;"></div>
                     <div class="left_separator"></div>
                     <div class="left_separator_2"></div>
                     <div class="left_parameter_label">Level:</div><div class="left_parameter_value" id="level">1</div>
@@ -155,6 +153,13 @@ def onKeyDown(event, document):
                         <div class="button" onclick="characterCreator.onOkClick()">OK</div>
                         <div class="button" onclick="characterCreator.onCancelClick()">Cancel</div>
                         <div class="button_separator"></div>
+                    </div>
+                    <div id="three_buttons" style="display:none;">
+                        <div class="three_button_separator"></div>
+                        <div class="three_button" onclick="characterCreator.onOkClick()">OK</div>
+                        <div class="three_button" onclick="characterCreator.onDeleteClick()" id="delete">Delete</div>
+                        <div class="three_button" onclick="characterCreator.onCancelClick()">Cancel</div>
+                        <div class="three_button_separator"></div>
                     </div>
                 </div>
                 <div class="standard_separator"></div>
