@@ -8,3 +8,4 @@ resources/settings-user.ini
 *.make
 *CMakeFiles*
 build/
+.DS_Store
