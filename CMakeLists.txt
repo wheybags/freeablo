@@ -50,25 +50,25 @@ endif ()
 
 if(UNIX)
     set(FA_COMPILER_FLAGS "-Wall -pedantic -Wextra -g -std=c++11")
+    SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 else()
     set(FA_COMPILER_FLAGS "")
 endif()
 
-include_directories (
+include_directories ( SYSTEM
     ${SDL2_INCLUDE_DIR}
     ${SDL2IMAGE_INCLUDE_DIR}
     ${SDL2MIXER_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIR}
     ${ROCKET_INCLUDE_DIR}
     ${Qt5Widgets_INCLUDE_DIRS}
     ${ENET_INCLUDE_DIR}
-    "${PROJECT_SOURCE_DIR}/components/"
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
-
 )
+
+include_directories("${PROJECT_SOURCE_DIR}/components/")
 
 # allow the user to specify extra include dirs on the command line
 if(CLI_INCLUDE_DIRS)
