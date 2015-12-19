@@ -91,7 +91,6 @@ namespace Level
             std::pair<size_t,size_t> mUpStairs;
             std::pair<size_t,size_t> mDownStairs;
 
-            BaseItemManager * mItemManager;
             static std::vector<int16_t> mEmpty;
             friend const MinPillar get(size_t x, size_t y, const Level& level);
 
