@@ -49,15 +49,15 @@ namespace FAWorld
             if(mPos.current() != mDestination)
             {
                 std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
-                Actor * enemy;
-                enemy = World::get()->getActorAt(mDestination.first, mDestination.second);
-                if (enemy != nullptr && mPos.distanceFrom(enemy->mPos) < 2 && this != enemy && !isAttacking && !enemy->isDead())
+                Actor * actor;
+                actor = World::get()->getActorAt(mDestination.first, mDestination.second);
+                if (canIAttack(actor))
                 {
                         mPos.mDirection = Misc::getVecDir(vector);
                         mPos.update();
                         mPos.mDist = 0;
 
-                        attack(enemy);
+                        attack(actor);
                 }
                 else if(mPos.mDist == 0 && !mAnimPlaying)
                 {
@@ -115,7 +115,8 @@ namespace FAWorld
         mPos(pos),
         mFrame(0),        
         mStats(stats),
-        mAnimState(AnimState::idle)
+        mAnimState(AnimState::idle),
+        mIsEnemy(false)
     {
         if (!dieAnimPath.empty())
         {
@@ -174,9 +175,14 @@ namespace FAWorld
         Engine::ThreadManager::get()->playSound(getDieWav());
     }
 
-    bool Actor::isDead()
+    bool Actor::isDead() const
     {
         return mIsDead;
+    }
+
+    bool Actor::isEnemy() const
+    {
+        return mIsEnemy;
     }
 
     AnimState::AnimState Actor::getAnimState()
@@ -288,5 +294,28 @@ namespace FAWorld
     GameLevel* Actor::getLevel()
     {
         return mLevel;
+    }
+
+    bool Actor::canIAttack(Actor * actor)
+    {
+        if(actor == nullptr)
+            return false;
+
+        if(this == actor)
+            return false;
+
+        if(!actor->isEnemy())
+            return false;
+
+        if(actor->isDead())
+            return false;
+
+        if(mPos.distanceFrom(actor->mPos) >= 2)
+            return false;
+
+        if(isAttacking)
+            return false;
+
+        return true;
     }
 }

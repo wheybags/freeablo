@@ -71,7 +71,8 @@ namespace FAWorld
                 return mDestination;
             }
 
-            bool isDead();            
+            bool isDead() const;
+            bool isEnemy() const;
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
             virtual size_t getWriteSize();
@@ -106,8 +107,11 @@ namespace FAWorld
                 ar & this->mDestination;
             }
 
+            bool canIAttack(Actor * actor);
+
             BOOST_SERIALIZATION_SPLIT_MEMBER()
             AnimState::AnimState mAnimState;
+            bool mIsEnemy;
     };
 }
 

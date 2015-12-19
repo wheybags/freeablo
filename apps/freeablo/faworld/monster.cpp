@@ -15,6 +15,7 @@ namespace FAWorld
         mAnimTimeMap[AnimState::idle] = 10;
         mAnimTimeMap[AnimState::dead] = 10;
         mAnimTimeMap[AnimState::hit] = 10;
+        mIsEnemy = true;
     }
 
     std::string Monster::getDieWav()
