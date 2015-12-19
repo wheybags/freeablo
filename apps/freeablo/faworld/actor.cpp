@@ -192,16 +192,39 @@ namespace FAWorld
 
     FARender::FASpriteGroup Actor::getCurrentAnim()
     {
+        FARender::FASpriteGroup retval;
+        
         switch(mAnimState)
         {
             case AnimState::walk:
-                return mWalkAnim;
+                retval = mWalkAnim;
+                break;
 
             case AnimState::idle:
-                return mIdleAnim;
+                retval = mIdleAnim;
+                break;
+                
+            case AnimState::attack:
+                retval = mAttackAnim;
+                break;
+            
+            case AnimState::dead:
+                retval = mDieAnim;
+                break;
+                
+            case AnimState::hit:
+                retval = mHitAnim;
+                break;
+            
             default:
-                return mIdleAnim;
+                retval = mIdleAnim;
+                break;
         }
+        
+        if(!retval.isValid())
+            retval = mIdleAnim;
+        
+        return retval;
     }
 
     void Actor::setStats(ActorStats * stats)

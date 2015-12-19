@@ -22,6 +22,11 @@ namespace FARender
             size_t width;
             size_t height;
             FASpriteGroup(): spriteCacheIndex(0) {}
+        
+            bool isValid()
+            {
+                return spriteCacheIndex != 0;
+            }
         private:
             size_t spriteCacheIndex;
             friend class Renderer;

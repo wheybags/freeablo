@@ -16,13 +16,10 @@ namespace FAWorld
             Monster(const DiabloExe::Monster& monster, Position pos, ActorStats * stats=nullptr);
             std::string getDieWav();
             std::string getHitWav();
-            FARender::FASpriteGroup getCurrentAnim();
-
 
         private:
             std::string mAnimPath;
             std::string mSoundPath;
-
     };
 }
 

@@ -99,10 +99,20 @@ namespace FAWorld
     void World::update(bool noclip)
     {
         mTicksPassed++;
-
-        // TODO: only update levels which have players on them
-        for(auto it = mLevels.begin(); it != mLevels.end(); ++it)
-            it->second->update(noclip, mTicksPassed);
+        
+        std::set<GameLevel*> done;
+        
+        // only update levels that have players on them
+        for(auto& pair : mPlayers)
+        {
+            GameLevel* level = pair.second->getLevel();
+            
+            if(!done.count(level))
+            {
+                done.insert(level);
+                level->update(noclip, mTicksPassed);
+            }
+        }
     }
 
     Player* World::getCurrentPlayer()

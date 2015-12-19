@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <thread>
-#include <chrono>
+#include <boost/asio.hpp>
 
 #include "../faworld/world.h"
 #include "../falevelgen/levelgen.h"
@@ -128,23 +128,15 @@ namespace Engine
             }
         }
 
+        boost::asio::io_service io;
         auto startTime = std::chrono::system_clock::now();
-        auto last = std::chrono::system_clock::now();
 
         NetManager netManager(isServer);
 
         // Main game logic loop
         while(!mDone)
         {
-            auto now = std::chrono::system_clock::now();
-
-            while(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count() < (int64_t)(1000/FAWorld::World::ticksPerSecond))
-            {
-                std::this_thread::yield();
-                now = std::chrono::system_clock::now();
-            }
-
-            last = now;
+            boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000/FAWorld::World::ticksPerSecond));
 
             mInputManager->update(mPaused);
             if(!mPaused)
@@ -157,7 +149,7 @@ namespace Engine
 
                 if(guiManager.currentGuiType() == FAGui::GuiManager::TitleScreen)
                 {
-                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - startTime.time_since_epoch()).count();
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch() - startTime.time_since_epoch()).count();
                     if(duration > WAIT_TIME)
                     {
                         guiManager.showMainMenu();
@@ -192,6 +184,13 @@ namespace Engine
 
             }
             renderer.setCurrentState(state);
+
+            long remainingTickTime = timer.expires_from_now().total_milliseconds();
+
+            if(remainingTickTime < 0)
+                std::cerr << "tick time exceeded by " << -remainingTickTime << "ms" << std::endl;
+
+            timer.wait();
         }
 
         renderer.stop();

@@ -63,6 +63,9 @@ namespace FAWorld
             FARender::FASpriteGroup mWalkAnim;
             FARender::FASpriteGroup mIdleAnim;
             FARender::FASpriteGroup mDieAnim;
+            FARender::FASpriteGroup mAttackAnim;
+            FARender::FASpriteGroup mHitAnim;
+        
             size_t mFrame;
             virtual void die();
             std::pair<size_t, size_t> mDestination;

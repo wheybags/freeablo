@@ -1,5 +1,7 @@
 #include "threadmanager.h"
 
+#include <chrono>
+
 #include <input/inputmanager.h>
 
 #include "../farender/renderer.h"
@@ -25,6 +27,9 @@ namespace Engine
         FARender::Renderer* renderer = FARender::Renderer::get();
 
         Message msg;
+        
+        auto last = std::chrono::system_clock::now();
+        size_t numFrames = 0;
 
         while(true)
         {
@@ -35,6 +40,18 @@ namespace Engine
 
             if(!renderer->renderFrame(mRenderState))
                 break;
+            
+            auto now = std::chrono::system_clock::now();
+            numFrames++;
+            
+            size_t dur = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count();
+            
+            if(dur >= 1000)
+            {
+                std::cout << "FPS: " << ((float)numFrames) / (((float)dur)/1000.0f) << std::endl;
+                numFrames = 0;
+                last = now;
+            }
         }
 
         renderer->cleanup();
