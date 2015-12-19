@@ -76,9 +76,10 @@ namespace FAGui
         enterNameMenu->Show();
     }
 
-    void GuiManager::showInvalidNameMenu()
+    void GuiManager::showInvalidNameMenu(int classNumber)
     {
         hideAllMenus();
+        invalidNameMenu->SetAttribute<int>("selectedClass", classNumber);
         invalidNameMenu->Show();
     }
 

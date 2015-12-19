@@ -31,7 +31,7 @@ namespace FAGui
             void showSelectHeroMenu();
             void showChooseClassMenu();
             void showEnterNameMenu(int classNumber);
-            void showInvalidNameMenu();
+            void showInvalidNameMenu(int classNumber);
             void quitGame();
             void pauseGame();
             void unpauseGame();

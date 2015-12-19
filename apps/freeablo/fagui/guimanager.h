@@ -18,7 +18,7 @@ namespace FAGui
         void showSelectHeroMenu();
         void showChooseClassMenu();
         void showEnterNameMenu(int classNumber);
-        void showInvalidNameMenu();
+        void showInvalidNameMenu(int classNumber);
         void updateGui();
         static std::string invClass;
 

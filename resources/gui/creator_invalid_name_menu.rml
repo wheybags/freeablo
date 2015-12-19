@@ -70,11 +70,27 @@ def onShow(document):
 
     characterCreator = Creator(document)
     characterCreator.currentMenu = 3
+    characterCreator.selectedClass = int(document.GetAttribute("selectedClass"))
+
+def onKeyDown(event = None, document = None):
+
+    global characterCreator
+
+    if event == None:
+        return True
+    if document == None:
+        return True
+
+    if event.parameters['key_identifier'] == rocket.key_identifier.RETURN:
+        characterCreator.onOkClick()
+        return True
+
+    return True
 
 </script>
     </head>
 
-    <body onshow="onShow(document)">
+    <body onshow="onShow(document)" onkeydown="onKeyDown(event, document)">
     <div class="background">
         <div class="logo"></div>
         <div class="newsingleplayerhero" >New Single Player Hero</div>

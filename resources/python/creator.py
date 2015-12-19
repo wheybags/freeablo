@@ -13,6 +13,9 @@ class Creator:
     def showEnterMenu(self):
         freeablo.showEnterNameMenu(self.selectedClass)
 
+    def showInvalidNameMenu(self):
+        freeablo.showInvalidNameMenu(self.selectedClass)
+
     def onOkClick(self):
 
         freeablo.playClickButtonSound()
@@ -22,7 +25,13 @@ class Creator:
         elif self.currentMenu == 1:
             self.showEnterMenu()
         elif self.currentMenu == 2:
-            freeablo.showInvalidNameMenu()
+            if self.doc.GetElementById("nick").value == "":
+                self.showInvalidNameMenu()
+            else:
+                freeablo.startGame()
+
+        elif self.currentMenu == 3:
+            self.showEnterMenu()
         else:
             freeablo.startGame()
 
