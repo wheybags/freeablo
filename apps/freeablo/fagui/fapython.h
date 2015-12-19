@@ -27,6 +27,7 @@ namespace FAGui
             {}
 
         protected:
+            void showMainMenu();
             void quitGame();
             void pauseGame();
             void unpauseGame();

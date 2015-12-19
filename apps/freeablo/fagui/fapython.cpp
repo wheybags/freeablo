@@ -45,6 +45,12 @@ namespace FAGui
         return FAGui::GuiManager::invClass;
     }
 
+    void FAPythonFuncs::showMainMenu()
+    {
+        mGuiManager.showMainMenu();
+        Engine::ThreadManager::get()->playMusic("music/dintro.wav");
+    }
+
     void FAPythonFuncs::startGame()
     {
         auto world = FAWorld::World::get();
@@ -418,6 +424,7 @@ namespace FAGui
     FAPythonFuncs* funcs = NULL;
     BOOST_PYTHON_MODULE(freeablo)
     {
+        boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
         boost::python::def("quit", +[](){funcs->quitGame();});
         boost::python::def("pause", +[](){funcs->pauseGame();});
         boost::python::def("unpause", +[](){funcs->unpauseGame();});

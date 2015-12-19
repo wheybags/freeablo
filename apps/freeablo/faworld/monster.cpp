@@ -16,12 +16,13 @@ namespace FAWorld
         mAnimTimeMap[AnimState::dead] = 10;
         mAnimTimeMap[AnimState::hit] = 10;
         
-        boost::format fmt(mAnimPath);
-    
+        boost::format fmt(mAnimPath); 
         mWalkAnim = FARender::Renderer::get()->loadImage((fmt % 'w').str());
         mIdleAnim = FARender::Renderer::get()->loadImage((fmt % 'n').str());
         mDieAnim =  FARender::Renderer::get()->loadImage((fmt % 'd').str());
         mHitAnim =  FARender::Renderer::get()->loadImage((fmt % 'h').str());
+
+        mIsEnemy = true;
     }
 
     std::string Monster::getDieWav()
