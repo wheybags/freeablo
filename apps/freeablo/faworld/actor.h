@@ -63,6 +63,9 @@ namespace FAWorld
             FARender::FASpriteGroup mWalkAnim;
             FARender::FASpriteGroup mIdleAnim;
             FARender::FASpriteGroup mDieAnim;
+            FARender::FASpriteGroup mAttackAnim;
+            FARender::FASpriteGroup mHitAnim;
+        
             size_t mFrame;
             virtual void die();
             std::pair<size_t, size_t> mDestination;
@@ -71,7 +74,8 @@ namespace FAWorld
                 return mDestination;
             }
 
-            bool isDead();            
+            bool isDead() const;
+            bool isEnemy() const;
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
             virtual size_t getWriteSize();
@@ -106,8 +110,11 @@ namespace FAWorld
                 ar & this->mDestination;
             }
 
+            bool canIAttack(Actor * actor);
+
             BOOST_SERIALIZATION_SPLIT_MEMBER()
             AnimState::AnimState mAnimState;
+            bool mIsEnemy;
     };
 }
 

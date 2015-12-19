@@ -10,6 +10,7 @@
 
 namespace FAGui
 {   
+    Rocket::Core::ElementDocument* titleScreen = NULL;
     Rocket::Core::ElementDocument* ingameUi = NULL;
     Rocket::Core::ElementDocument* mainMenu = NULL;
     Rocket::Core::ElementDocument* chooseClassMenu = NULL;
@@ -19,7 +20,7 @@ namespace FAGui
 
     std::string GuiManager::invClass;
 
-    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass) : mPythonFuncs(playerInventory, *this, engine)
+    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass) : mPythonFuncs(playerInventory, *this, engine), mCurrentGuiType(TitleScreen)
     {
 
         this->invClass = invClass;
@@ -32,12 +33,21 @@ namespace FAGui
         Rocket::Core::DecoratorInstancer* animInstancer = Rocket::Core::Factory::RegisterDecoratorInstancer("faanim", (Rocket::Core::DecoratorInstancer*)new AnimatedDecoratorInstancer(renderer->getRocketContext()->GetRenderInterface()));
         animInstancer->RemoveReference();
 
+        titleScreen = renderer->getRocketContext()->LoadDocument("resources/gui/titlescreen.rml");
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
         chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_choose_class_menu.rml");
         enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_enter_name_menu.rml");
         invalidNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_invalid_name_menu.rml");
         selectHeroMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_select_hero_menu.rml");
+    }
+
+    void GuiManager::showTitleScreen()
+    {
+        titleScreen->Show();
+        titleScreen->PullToFront();
+
+        mCurrentGuiType = TitleScreen;
     }
 
     void GuiManager::showIngameGui()
@@ -47,6 +57,8 @@ namespace FAGui
         ingameUi->PushToBack(); // base.rml is an empty sheet that covers the whole screen for
         // detecting clicks outside the gui, push it to back so it doesn't
         // block clicks on the real gui.
+
+        mCurrentGuiType = IngameMenu;
     }
 
 
@@ -55,6 +67,13 @@ namespace FAGui
         hideAllMenus();
         ingameUi->Hide();
         mainMenu->Show();
+
+        mCurrentGuiType = MainMenu;
+    }
+
+    GuiManager::GuiType GuiManager::currentGuiType() const
+    {
+        return mCurrentGuiType;
     }
 
     void GuiManager::showSelectHeroMenu()
@@ -92,6 +111,7 @@ namespace FAGui
 
     void GuiManager::hideAllMenus()
     {
+        titleScreen->Hide();
         mainMenu->Hide();
         chooseClassMenu->Hide();
         invalidNameMenu->Hide();
