@@ -24,26 +24,29 @@ namespace FAWorld
 
             if(advanceAnims)
             {
+                auto currentAnim = getCurrentAnim();
 
-                if(!mAnimPlaying && !isDead())
+                if(mAnimPlaying)
                 {
-                    mFrame = fmod((mFrame + 1), (double)(getCurrentAnim().animLength));
+                    if(mFrame < currentAnim.animLength)
+                        mFrame++;
+
+                    if(mFrame >= currentAnim.animLength)
+                    {
+                        mAnimPlaying = false;
+                        mFrame--;
+                    }
+                }
+                else {
+                    if(!isDead())
+                        mFrame = (mFrame + 1) % currentAnim.animLength;
+                    else if(mFrame < currentAnim.animLength -1)
+                        mFrame++;
                 }
 
-                else if(mAnimPlaying && mFrame <= getCurrentAnim().animLength-1)
-                {
-                    mFrame++;
-                }
-
-                else if(mAnimPlaying && mFrame == getCurrentAnim().animLength)
-                {
-                    mAnimPlaying = false;
-                }
-
-                else if(!mAnimPlaying && mFrame < getCurrentAnim().animLength-1)
-                {
-                    mFrame++;
-                }
+                #ifndef NDEBUG
+                    assert(mFrame < getCurrentAnim().animLength);
+                #endif
             }
 
             if(mPos.current() != mDestination)
