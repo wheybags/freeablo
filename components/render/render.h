@@ -2,6 +2,7 @@
 #define RENDER_H
 
 #include <stdint.h>
+#include <assert.h>
 
 #include <vector>
 #include <string>
@@ -87,6 +88,9 @@ namespace Render
             
             Sprite& operator[](size_t index)
             {
+                #ifndef NDEBUG
+                    assert(index < mSprites.size());
+                #endif
                 return mSprites[index];
             }
 
