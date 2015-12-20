@@ -79,6 +79,7 @@ namespace FAWorld
         s.flush();
     }
 
+    #pragma pack(1)
     struct GameLevelHeader
     {
         size_t levelIndex;

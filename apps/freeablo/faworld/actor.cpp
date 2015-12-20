@@ -244,6 +244,7 @@ namespace FAWorld
         }
     }
 
+    #pragma pack(1)
     struct ActorNetData
     {
         size_t frame;
