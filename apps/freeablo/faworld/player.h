@@ -14,16 +14,18 @@ namespace FAWorld
             bool attack(Actor * enemy);
             bool attack(Player * enemy);
             FARender::FASpriteGroup getCurrentAnim();
-            void updateSprite();
+            void updateSpriteFormatVars();
 
             virtual void setLevel(GameLevel* level);
 
-            bool mInDungeon = false;
         private:
-            std::string mClassName;
-            std::string mClassCode;
-            std::string mArmourCode;
-            std::string mWeaponCode;
+            // these "Fmt" vars are just used by getCurrentAnim
+            std::string mFmtClassName;
+            std::string mFmtClassCode;
+            std::string mFmtArmourCode;
+            std::string mFmtWeaponCode;
+            bool mFmtInDungeon = false;
+
         friend class Inventory;
     };
 }
