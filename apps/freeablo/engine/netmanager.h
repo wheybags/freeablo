@@ -5,6 +5,11 @@
 
 #include <enet/enet.h>
 
+namespace FAWorld
+{
+    class PlayerFactory;
+}
+
 namespace Engine
 {
     template <typename T>
@@ -42,12 +47,14 @@ namespace Engine
     class NetManager
     {
         public:
-            NetManager(bool isServer);
+            NetManager(bool isServer, const FAWorld::PlayerFactory& playerFactory);
             ~NetManager();
 
             void update();
 
         private:
+            const FAWorld::PlayerFactory& mPlayerFactory;
+
             const uint32_t SERVER_PLAYER_ID = 0;
             const uint8_t UNRELIABLE_CHANNEL_ID = 0;
             const uint8_t RELIABLE_CHANNEL_ID = 1;

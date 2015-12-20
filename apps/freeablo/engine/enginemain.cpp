@@ -131,7 +131,7 @@ namespace Engine
         boost::asio::io_service io;
         auto startTime = std::chrono::system_clock::now();
 
-        NetManager netManager(isServer);
+        NetManager netManager(isServer, playerFactory);
 
         // Main game logic loop
         while(!mDone)

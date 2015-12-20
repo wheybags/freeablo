@@ -1,12 +1,13 @@
 #include "netmanager.h"
 
 #include "../faworld/world.h"
+#include "../faworld/playerfactory.h"
 
 #include <boost/math/special_functions.hpp>
 
 namespace Engine
 {
-    NetManager::NetManager(bool isServer)
+    NetManager::NetManager(bool isServer, const FAWorld::PlayerFactory& playerFactory) : mPlayerFactory(playerFactory)
     {
         enet_initialize();
 
@@ -268,10 +269,9 @@ namespace Engine
     void NetManager::spawnPlayer(uint32_t id)
     {
         FAWorld::World& world = *FAWorld::World::get();
-        FAWorld::Player* newPlayer = new FAWorld::Player();
+        auto newPlayer = mPlayerFactory.create("Rogue");
         newPlayer->mPos = FAWorld::Position(76, 68);
         newPlayer->destination() = newPlayer->mPos.current();
-        newPlayer->setSpriteClass("warrior");
         world.addPlayer(id, newPlayer);
     }
 }
