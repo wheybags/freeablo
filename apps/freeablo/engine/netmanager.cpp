@@ -269,7 +269,7 @@ namespace Engine
     void NetManager::spawnPlayer(uint32_t id)
     {
         FAWorld::World& world = *FAWorld::World::get();
-        auto newPlayer = mPlayerFactory.create("Rogue");
+        auto newPlayer = mPlayerFactory.create("Warrior");
         newPlayer->mPos = FAWorld::Position(76, 68);
         newPlayer->destination() = newPlayer->mPos.current();
         world.addPlayer(id, newPlayer);
