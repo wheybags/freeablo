@@ -6,6 +6,7 @@
 
 #include "../farender/renderer.h"
 #include "animateddecoratorinstancer.h"
+#include "../engine/threadmanager.h"
 
 
 namespace FAGui
@@ -47,6 +48,7 @@ namespace FAGui
         titleScreen->Show();
         titleScreen->PullToFront();
 
+        mStartTime = std::chrono::system_clock::now();
         mCurrentGuiType = TitleScreen;
     }
 
@@ -64,6 +66,9 @@ namespace FAGui
 
     void GuiManager::showMainMenu()
     {
+        Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
+        threadManager.playMusic("music/dintro.wav");
+
         hideAllMenus();
         ingameUi->Hide();
         mainMenu->Show();
@@ -102,13 +107,6 @@ namespace FAGui
         invalidNameMenu->Show();
     }
 
-    void GuiManager::updateGui()
-    {
-        FARender::Renderer* renderer = FARender::Renderer::get();
-
-        renderer->getRocketContext()->Update();
-    }
-
     void GuiManager::hideAllMenus()
     {
         titleScreen->Hide();
@@ -117,5 +115,31 @@ namespace FAGui
         invalidNameMenu->Hide();
         enterNameMenu->Hide();
         selectHeroMenu->Hide();
+    }
+
+    void GuiManager::update(bool paused)
+    {
+        updateGui(paused);
+
+        FARender::Renderer* renderer = FARender::Renderer::get();
+
+        renderer->getRocketContext()->Update();
+    }
+
+    void GuiManager::updateGui(bool paused)
+    {
+        static const int WAIT_TIME = 7000;
+
+        if(paused)
+        {
+            if(currentGuiType() == FAGui::GuiManager::TitleScreen)
+            {
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch() - mStartTime.time_since_epoch()).count();
+                if(duration > WAIT_TIME)
+                {
+                    showMainMenu();
+                }
+            }
+        }
     }
 }

@@ -53,7 +53,6 @@ namespace FAGui
     void FAPythonFuncs::showMainMenu()
     {
         mGuiManager.showMainMenu();
-        Engine::ThreadManager::get()->playMusic("music/dintro.wav");
     }
 
     void FAPythonFuncs::showSelectHeroMenu()
