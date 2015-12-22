@@ -18,6 +18,7 @@ private:
     float mSpeed;
     bool mIsScrollBoxLoaded;
     Rocket::Core::Element* mScrollBox;
+    Rocket::Core::ElementScroll* mScroll;
 };
 }
 #endif

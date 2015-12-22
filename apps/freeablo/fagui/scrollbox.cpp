@@ -10,7 +10,9 @@ ScrollBox::ScrollBox(Rocket::Core::ElementDocument* document) :
     static const float DEFAULT_SPEED_VALUE = 0.0002f;
 
     mScrollBox = document->GetElementById("scrollbox");
-    if(mScrollBox)
+    mScroll = mScrollBox->GetElementScroll();
+
+    if(mScrollBox && mScroll)
     {
         mIsScrollBoxLoaded = true;
 
@@ -34,18 +36,13 @@ void ScrollBox::update()
         return;
     }
 
-    static const int MAGIC_INDEX = 2;
-
     mScrollBoxValue += mSpeed;
 
     Rocket::Core::Dictionary parameters;
     parameters.Set<float>("value", mScrollBoxValue);
 
-    auto child = mScrollBox->GetChild(MAGIC_INDEX);
-    if(child)
-    {
-        child->DispatchEvent("scrollchange", parameters, false);
-    }
+    auto verticalScroll = mScroll->GetScrollbar(Rocket::Core::ElementScroll::VERTICAL);
+    verticalScroll->DispatchEvent("scrollchange", parameters, false);
 }
 
 void ScrollBox::reset()
