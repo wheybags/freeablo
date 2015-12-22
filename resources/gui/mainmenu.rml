@@ -98,7 +98,7 @@ def onLoad(document):
         {"text": 'Single Player', "func": freeablo.showSelectHeroMenu},
         {"text": 'Multi Player'},
         {"text": 'Replay Intro'},
-        {"text": 'Show Credits'},
+        {"text": 'Show Credits', "func": freeablo.showCredits},
         {"text": 'Exit Freeablo', "func": freeablo.quit}
     ]
 

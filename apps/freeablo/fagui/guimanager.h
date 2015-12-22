@@ -10,6 +10,7 @@
 namespace FAGui
 {
 
+    class ScrollBox;
     class GuiManager
     {
         public:
@@ -18,6 +19,7 @@ namespace FAGui
         {
             TitleScreen,
             MainMenu,
+            Credits,
             IngameMenu
         };
 
@@ -25,6 +27,7 @@ namespace FAGui
         void showTitleScreen();
         void showIngameGui();
         void showMainMenu();
+        void showCredits();
         void showSelectHeroMenu();
         void showChooseClassMenu();
         void showEnterNameMenu(int classNumber);
@@ -40,6 +43,7 @@ namespace FAGui
         void hideAllMenus();
         GuiType mCurrentGuiType;
         std::chrono::system_clock::time_point mStartTime;
+        std::shared_ptr<ScrollBox> mCreditsScrollBox;
     };
 
     extern std::string cursorPath;

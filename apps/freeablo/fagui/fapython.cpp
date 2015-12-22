@@ -55,6 +55,11 @@ namespace FAGui
         mGuiManager.showMainMenu();
     }
 
+    void FAPythonFuncs::showCredits()
+    {
+        mGuiManager.showCredits();
+    }
+
     void FAPythonFuncs::showSelectHeroMenu()
     {
         mGuiManager.showSelectHeroMenu();
@@ -449,6 +454,7 @@ namespace FAGui
     BOOST_PYTHON_MODULE(freeablo)
     {
         boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
+        boost::python::def("showCredits", +[](){funcs->showCredits();});
         boost::python::def("showSelectHeroMenu", +[](){funcs->showSelectHeroMenu();});
         boost::python::def("showChooseClassMenu", +[](){funcs->showChooseClassMenu();});
         boost::python::def("showEnterNameMenu", +[](int classNumber){funcs->showEnterNameMenu(classNumber);});

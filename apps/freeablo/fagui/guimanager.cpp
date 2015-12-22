@@ -7,6 +7,7 @@
 #include "../farender/renderer.h"
 #include "animateddecoratorinstancer.h"
 #include "../engine/threadmanager.h"
+#include "scrollbox.h"
 
 
 namespace FAGui
@@ -14,6 +15,7 @@ namespace FAGui
     Rocket::Core::ElementDocument* titleScreen = NULL;
     Rocket::Core::ElementDocument* ingameUi = NULL;
     Rocket::Core::ElementDocument* mainMenu = NULL;
+    Rocket::Core::ElementDocument* credits = NULL;
     Rocket::Core::ElementDocument* chooseClassMenu = NULL;
     Rocket::Core::ElementDocument* enterNameMenu = NULL;
     Rocket::Core::ElementDocument* invalidNameMenu = NULL;
@@ -37,6 +39,7 @@ namespace FAGui
         titleScreen = renderer->getRocketContext()->LoadDocument("resources/gui/titlescreen.rml");
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
+        credits = renderer->getRocketContext()->LoadDocument("resources/gui/credits.rml");
         chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_choose_class_menu.rml");
         enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_enter_name_menu.rml");
         invalidNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_invalid_name_menu.rml");
@@ -74,6 +77,16 @@ namespace FAGui
         mainMenu->Show();
 
         mCurrentGuiType = MainMenu;
+    }
+
+    void GuiManager::showCredits()
+    {
+        mCreditsScrollBox = std::make_shared<ScrollBox>(credits);
+
+        hideAllMenus();
+        credits->Show();
+
+        mCurrentGuiType = Credits;
     }
 
     GuiManager::GuiType GuiManager::currentGuiType() const
@@ -128,14 +141,22 @@ namespace FAGui
 
     void GuiManager::updateGui(bool paused)
     {
-        static const int WAIT_TIME = 7000;
-
         if(paused)
         {
-            if(currentGuiType() == FAGui::GuiManager::TitleScreen)
+            if(currentGuiType() == TitleScreen)
             {
+                static const int WAIT_TIME = 7000;
+
                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch() - mStartTime.time_since_epoch()).count();
                 if(duration > WAIT_TIME)
+                {
+                    showMainMenu();
+                }
+            }
+            else if(currentGuiType() == Credits)
+            {
+                mCreditsScrollBox->update();
+                if(mCreditsScrollBox->isFinished())
                 {
                     showMainMenu();
                 }
