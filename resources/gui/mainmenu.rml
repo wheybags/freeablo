@@ -1,5 +1,6 @@
 <rml>
     <head>
+        <link type="text/rcss" href="fade.rcss"/>
         <style>
             body
             {
@@ -116,7 +117,7 @@ def onKeyDown(event, document):
     </head>
 
     <body onkeydown="onKeyDown(event, document)" onload="onLoad(document)">
-
+            <div id="fade"></div>
             <img id="background" src="/ui_art/mainmenu.pcx">
                 <div id="menuContainer">
                     <span id="smlogo"></span>

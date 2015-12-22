@@ -30,6 +30,7 @@ namespace FAGui
             void showMainMenu();
             void showCredits();
             void showSelectHeroMenu();
+            void showSelectHeroMenuNoFade();
             void showChooseClassMenu();
             void showEnterNameMenu(int classNumber);
             void showInvalidNameMenu(int classNumber);

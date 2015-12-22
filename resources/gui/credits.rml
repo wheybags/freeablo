@@ -1,5 +1,6 @@
 <rml>
 <head>
+<link type="text/rcss" href="fade.rcss"/>
 <style>
 
 body
@@ -59,6 +60,7 @@ def onClick(document):
 
 </head>
 <body onclick="onClick(document)">
+<div id="fade"></div>
 <img id="background" src="/ui_art/credits.pcx">
     <div id="scrollbox">
         <div id="vertical_scroll_separator"></div>

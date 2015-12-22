@@ -1,13 +1,17 @@
 #include "guimanager.h"
 
+#include <string>
+
 #include <Rocket/Core.h>
 
 #include <input/hotkey.h>
 
+#include "../faworld/world.h"
 #include "../farender/renderer.h"
 #include "animateddecoratorinstancer.h"
 #include "../engine/threadmanager.h"
 #include "scrollbox.h"
+
 
 
 namespace FAGui
@@ -51,6 +55,7 @@ namespace FAGui
         titleScreen->Show();
         titleScreen->PullToFront();
 
+        mFadeCurrentDocument = titleScreen;
         mStartTime = std::chrono::system_clock::now();
         mCurrentGuiType = TitleScreen;
     }
@@ -69,33 +74,67 @@ namespace FAGui
 
     void GuiManager::showMainMenu()
     {
+        startFadeOut(&GuiManager::showMainMenuCallback);
+    }
+
+    void GuiManager::showMainMenuCallback()
+    {
+        mFadeCurrentDocument = mainMenu;
+
         Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
         threadManager.playMusic("music/dintro.wav");
 
         hideAllMenus();
         ingameUi->Hide();
         mainMenu->Show();
+        startFadeIn(mainMenu);
 
         mCurrentGuiType = MainMenu;
     }
 
     void GuiManager::showCredits()
     {
+        startFadeOut(&GuiManager::showCreditsCallback);
+    }
+
+    void GuiManager::showCreditsCallback()
+    {
+        mFadeCurrentDocument = credits;
+
         mCreditsScrollBox = std::make_shared<ScrollBox>(credits);
 
         hideAllMenus();
         credits->Show();
+        startFadeIn(credits);
 
         mCurrentGuiType = Credits;
     }
 
-    GuiManager::GuiType GuiManager::currentGuiType() const
+    void GuiManager::showSelectHeroMenu(bool fade)
     {
-        return mCurrentGuiType;
+        if(fade)
+        {
+            startFadeOut(&GuiManager::showSelectHeroMenuCallback);
+        }
+        else
+        {
+            showSelectHeroMenuNoFadeCallback();
+        }
     }
 
-    void GuiManager::showSelectHeroMenu()
+    void GuiManager::showSelectHeroMenuCallback()
     {
+        mFadeCurrentDocument = selectHeroMenu;
+
+        hideAllMenus();
+        selectHeroMenu->Show();
+        startFadeIn(selectHeroMenu);
+    }
+
+    void GuiManager::showSelectHeroMenuNoFadeCallback()
+    {
+        mFadeCurrentDocument = selectHeroMenu;
+
         hideAllMenus();
         selectHeroMenu->Show();
     }
@@ -118,6 +157,11 @@ namespace FAGui
         hideAllMenus();
         invalidNameMenu->SetAttribute<int>("selectedClass", classNumber);
         invalidNameMenu->Show();
+    }
+
+    GuiManager::GuiType GuiManager::currentGuiType() const
+    {
+        return mCurrentGuiType;
     }
 
     void GuiManager::hideAllMenus()
@@ -151,6 +195,7 @@ namespace FAGui
                 if(duration > WAIT_TIME)
                 {
                     showMainMenu();
+                    mCurrentGuiType = Other;
                 }
             }
             else if(currentGuiType() == Credits)
@@ -161,6 +206,130 @@ namespace FAGui
                     showMainMenu();
                 }
             }
+
+            // Process event from queue
+
+            if(!mStateQueue.empty())
+            {
+                switch(mStateQueue.front())
+                {
+                    case FadeIn:
+                        updateFadeIn();
+                        break;
+                    case FadeOut:
+                        updateFadeOut();
+                        break;
+                }
+            }
+
         }
+    }
+
+    void GuiManager::startFadeIn(Rocket::Core::ElementDocument * document)
+    {
+        mFadeCurrentDocument = document;
+        mFadeValue = 255.0f;
+        mStateQueue.push(FadeIn);
+
+        showFadeElement();
+        computeFadeDelta();
+    }
+
+    void GuiManager::startFadeOut(std::function<void(GuiManager&)> callback)
+    {
+        mFadeValue = 0.0f;
+        mFadeOutCallback = callback;
+        mStateQueue.push(FadeOut);
+
+        showFadeElement();
+        computeFadeDelta();
+    }
+
+    void GuiManager::updateFadeIn()
+    {
+        if(mFadeValue <= 0.0f)
+        {
+            stopFadeIn();
+            return;
+        }
+
+        mFadeValue -= mFadeDelta;
+        auto element = mFadeCurrentDocument->GetElementById("fade");
+        if(element)
+        {
+            auto value = std::to_string(int(mFadeValue));
+            auto rgba = "rgba(0,0,0," + value + ")";
+            element->SetProperty("background-color", rgba.c_str() );
+        }
+    }
+
+    void GuiManager::updateFadeOut()
+    {
+        if(mFadeValue >= 255.0f || mFadeCurrentDocument == NULL)
+        {
+            stopFadeOut();
+            return;
+        }
+
+        mFadeValue += mFadeDelta;
+        auto element = mFadeCurrentDocument->GetElementById("fade");
+        if(element)
+        {
+            auto value = std::to_string(int(mFadeValue));
+            auto rgba = "rgba(0,0,0," + value + ")";
+            element->SetProperty("background-color", rgba.c_str() );
+        }
+    }
+
+    void GuiManager::stopFadeIn()
+    {
+        hideFadeElement();
+        mStateQueue.pop();
+    }
+
+    void GuiManager::stopFadeOut()
+    {
+        hideFadeElement();
+        mStateQueue.pop();
+        mFadeOutCallback(*this);
+    }
+
+    void GuiManager::hideFadeElement()
+    {
+        if(mFadeCurrentDocument)
+        {
+            auto element = mFadeCurrentDocument->GetElementById("fade");
+            if(element)
+            {
+                element->SetProperty("display", "none");
+            }
+        }
+    }
+
+    void GuiManager::showFadeElement()
+    {
+        if(mFadeCurrentDocument)
+        {
+            auto element = mFadeCurrentDocument->GetElementById("fade");
+            if(element)
+            {
+                element->SetProperty("display", "block");
+                element->SetProperty("background-color", "black");
+            }
+        }
+    }
+
+    void GuiManager::computeFadeDelta()
+    {
+        if(mFadeCurrentDocument)
+        {
+            auto element = mFadeCurrentDocument->GetElementById("fade");
+            if(element)
+            {
+                 float duration = element->GetProperty("duration")->Get<float>();
+                 mFadeDelta = 255.0f / FAWorld::World::ticksPerSecond / duration;
+            }
+        }
+
     }
 }
