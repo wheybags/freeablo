@@ -44,7 +44,7 @@ namespace FAWorld
             virtual int32_t getCurrentHP();
             bool mAnimPlaying = false;
             bool isAttacking = false;
-            virtual FARender::FASpriteGroup getCurrentAnim();
+            virtual FARender::FASpriteGroup* getCurrentAnim();
             void setAnimation(AnimState::AnimState state, bool reset=false);
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);            
@@ -60,11 +60,11 @@ namespace FAWorld
             }
             Position mPos;            
         //private: //TODO: fix this
-            FARender::FASpriteGroup mWalkAnim;
-            FARender::FASpriteGroup mIdleAnim;
-            FARender::FASpriteGroup mDieAnim;
-            FARender::FASpriteGroup mAttackAnim;
-            FARender::FASpriteGroup mHitAnim;
+            FARender::FASpriteGroup* mWalkAnim;
+            FARender::FASpriteGroup* mIdleAnim;
+            FARender::FASpriteGroup* mDieAnim;
+            FARender::FASpriteGroup* mAttackAnim;
+            FARender::FASpriteGroup* mHitAnim;
         
             size_t mFrame;
             virtual void die();

@@ -17,7 +17,7 @@ namespace FARender
         ,mMaxSize(size)
     {}
 
-    FASpriteGroup SpriteCache::get(const std::string& path)
+    FASpriteGroup* SpriteCache::get(const std::string& path)
     {
         if(!mStrToCache.count(path))
         {
@@ -53,10 +53,10 @@ namespace FARender
             mCacheToStr[cacheIndex] = path;
         }
 
-        return mStrToCache[path];
+        return &mStrToCache[path];
     }
 
-    FASpriteGroup SpriteCache::getTileset(const std::string& celPath, const std::string& minPath, bool top)
+    FASpriteGroup* SpriteCache::getTileset(const std::string& celPath, const std::string& minPath, bool top)
     {
         std::stringstream ss;
         ss << celPath << ":::" << minPath << ":::" << top;
@@ -71,7 +71,7 @@ namespace FARender
             mCacheToTilesetPath[cacheIndex] = TilesetPath(celPath, minPath, top);
         }
 
-        return mStrToTilesetCache[key];
+        return &mStrToTilesetCache[key];
     }
 
     size_t SpriteCache::newUniqueIndex()

@@ -78,16 +78,16 @@ namespace FARender
             }
         }
 
-        FASpriteGroup sprite = mSpriteManager.get(sourcePath);
+        FASpriteGroup* sprite = mSpriteManager.get(sourcePath);
 
         Render::RocketFATex* tex = new Render::RocketFATex();
-        tex->animLength = sprite.animLength;
-        tex->spriteIndex = sprite.spriteCacheIndex;
+        tex->animLength = sprite->animLength;
+        tex->spriteIndex = sprite->spriteCacheIndex;
         tex->index = celIndex;
         tex->needsImmortal = false;
 
-        texture_dimensions.x = sprite.width;
-        texture_dimensions.y = sprite.height;
+        texture_dimensions.x = sprite->width;
+        texture_dimensions.y = sprite->height;
 
         texture_handle = (Rocket::Core::TextureHandle) tex;
         return true;
@@ -95,9 +95,9 @@ namespace FARender
 
     bool Renderer::generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions)
     {
-        FASpriteGroup sprite = mSpriteManager.getFromRaw(source, source_dimensions.x, source_dimensions.y);
+        FASpriteGroup* sprite = mSpriteManager.getFromRaw(source, source_dimensions.x, source_dimensions.y);
         Render::RocketFATex* tex = new Render::RocketFATex();
-        tex->spriteIndex = sprite.spriteCacheIndex;
+        tex->spriteIndex = sprite->spriteCacheIndex;
         tex->index = 0;
         tex->needsImmortal = true;
 
@@ -156,7 +156,7 @@ namespace FARender
         Engine::ThreadManager::get()->sendRenderState(current);
     }
     
-    FASpriteGroup Renderer::loadImage(const std::string& path)
+    FASpriteGroup* Renderer::loadImage(const std::string& path)
     {
         return mSpriteManager.get(path);
     }
@@ -214,14 +214,14 @@ namespace FARender
                     size_t y = position.current().second;
 
                     mLevelObjects[x][y].valid = true;
-                    mLevelObjects[x][y].spriteCacheIndex = std::get<0>(state->mObjects[i]).spriteCacheIndex;
+                    mLevelObjects[x][y].spriteCacheIndex = std::get<0>(state->mObjects[i])->spriteCacheIndex;
                     mLevelObjects[x][y].spriteFrame = std::get<1>(state->mObjects[i]);
                     mLevelObjects[x][y].x2 = position.next().first;
                     mLevelObjects[x][y].y2 = position.next().second;
                     mLevelObjects[x][y].dist = position.mDist;
                 }
 
-                Render::drawLevel(state->level->mLevel, state->tileset.minTops.spriteCacheIndex, state->tileset.minBottoms.spriteCacheIndex, &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,
+                Render::drawLevel(state->level->mLevel, state->tileset.minTops->spriteCacheIndex, state->tileset.minBottoms->spriteCacheIndex, &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,
                     state->mPos.next().first, state->mPos.next().second, state->mPos.mDist);
             }
 
@@ -238,8 +238,8 @@ namespace FARender
 
         if(!State->mCursorEmpty)
         {
-            Render::Sprite sprite = mSpriteManager.get(State->mCursorSpriteGroup.spriteCacheIndex)->operator [](State->mCursorFrame);
-            Render::drawCursor(sprite, State->mCursorSpriteGroup.width, State->mCursorSpriteGroup.height);
+            Render::Sprite sprite = mSpriteManager.get(State->mCursorSpriteGroup->spriteCacheIndex)->operator [](State->mCursorFrame);
+            Render::drawCursor(sprite, State->mCursorSpriteGroup->width, State->mCursorSpriteGroup->height);
         }
         else
         {

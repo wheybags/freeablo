@@ -28,10 +28,10 @@ namespace FAWorld
 
                 if(mAnimPlaying)
                 {
-                    if(mFrame < currentAnim.animLength)
+                    if(mFrame < currentAnim->animLength)
                         mFrame++;
 
-                    if(mFrame >= currentAnim.animLength)
+                    if(mFrame >= currentAnim->animLength)
                     {
                         mAnimPlaying = false;
                         mFrame--;
@@ -39,13 +39,13 @@ namespace FAWorld
                 }
                 else {
                     if(!isDead())
-                        mFrame = (mFrame + 1) % currentAnim.animLength;
-                    else if(mFrame < currentAnim.animLength -1)
+                        mFrame = (mFrame + 1) % currentAnim->animLength;
+                    else if(mFrame < currentAnim->animLength -1)
                         mFrame++;
                 }
 
                 #ifndef NDEBUG
-                    assert(mFrame < getCurrentAnim().animLength);
+                    assert(mFrame < getCurrentAnim()->animLength);
                 #endif
             }
 
@@ -193,9 +193,9 @@ namespace FAWorld
         return mAnimState;
     }
 
-    FARender::FASpriteGroup Actor::getCurrentAnim()
+    FARender::FASpriteGroup* Actor::getCurrentAnim()
     {
-        FARender::FASpriteGroup retval;
+        FARender::FASpriteGroup* retval;
         
         switch(mAnimState)
         {
@@ -224,7 +224,7 @@ namespace FAWorld
                 break;
         }
         
-        if(!retval.isValid())
+        if(!retval->isValid())
             retval = mIdleAnim;
         
         return retval;

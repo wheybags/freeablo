@@ -41,7 +41,7 @@ namespace FAWorld
         mFmtClassCode = className[0];
     }
 
-    FARender::FASpriteGroup Player::getCurrentAnim()
+    FARender::FASpriteGroup* Player::getCurrentAnim()
     {       
         auto lastClassName = mFmtClassName;
         auto lastClassCode = mFmtClassCode;

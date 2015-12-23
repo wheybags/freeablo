@@ -198,8 +198,8 @@ namespace FAWorld
 
         for(size_t i = 0; i < mActors.size(); i++)
         {
-            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim().animLength;
-            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
+            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim()->animLength;
+            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
         }
     }
 

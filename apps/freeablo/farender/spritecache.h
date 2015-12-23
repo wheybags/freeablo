@@ -70,11 +70,11 @@ namespace FARender
         public:
             SpriteCache(size_t size);
 
-            FASpriteGroup get(const std::string& path); ///< To be called from the game thread
+            FASpriteGroup* get(const std::string& path); ///< To be called from the game thread
 
             /// Same as get(const std::string&), but for tileset sprites
             /// @brief To be called from the game thread
-            FASpriteGroup getTileset(const std::string& celPath, const std::string& minPath, bool top);
+            FASpriteGroup* getTileset(const std::string& celPath, const std::string& minPath, bool top);
 
             size_t newUniqueIndex(); ///< Can be called from any thread
 

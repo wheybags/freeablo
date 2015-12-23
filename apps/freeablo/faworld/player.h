@@ -13,7 +13,7 @@ namespace FAWorld
             void setSpriteClass(std::string className);
             bool attack(Actor * enemy);
             bool attack(Player * enemy);
-            FARender::FASpriteGroup getCurrentAnim();
+            FARender::FASpriteGroup* getCurrentAnim();
             void updateSpriteFormatVars();
 
             virtual void setLevel(GameLevel* level);
