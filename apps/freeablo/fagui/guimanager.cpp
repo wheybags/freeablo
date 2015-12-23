@@ -168,6 +168,7 @@ namespace FAGui
     {
         titleScreen->Hide();
         mainMenu->Hide();
+        credits->Hide();
         chooseClassMenu->Hide();
         invalidNameMenu->Hide();
         enterNameMenu->Hide();
