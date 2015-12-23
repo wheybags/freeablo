@@ -204,6 +204,7 @@ namespace FAGui
                 if(mCreditsScrollBox->isFinished())
                 {
                     showMainMenu();
+                    mCurrentGuiType = Other;
                 }
             }
 
