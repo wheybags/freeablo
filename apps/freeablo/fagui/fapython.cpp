@@ -53,12 +53,21 @@ namespace FAGui
     void FAPythonFuncs::showMainMenu()
     {
         mGuiManager.showMainMenu();
-        Engine::ThreadManager::get()->playMusic("music/dintro.wav");
+    }
+
+    void FAPythonFuncs::showCredits()
+    {
+        mGuiManager.showCredits();
     }
 
     void FAPythonFuncs::showSelectHeroMenu()
     {
-        mGuiManager.showSelectHeroMenu();
+        mGuiManager.showSelectHeroMenu(true);
+    }
+
+    void FAPythonFuncs::showSelectHeroMenuNoFade()
+    {
+        mGuiManager.showSelectHeroMenu(false);
     }
 
     void FAPythonFuncs::showEnterNameMenu(int classNumber)
@@ -450,7 +459,9 @@ namespace FAGui
     BOOST_PYTHON_MODULE(freeablo)
     {
         boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
+        boost::python::def("showCredits", +[](){funcs->showCredits();});
         boost::python::def("showSelectHeroMenu", +[](){funcs->showSelectHeroMenu();});
+        boost::python::def("showSelectHeroMenuNoFade", +[](){funcs->showSelectHeroMenuNoFade();});
         boost::python::def("showChooseClassMenu", +[](){funcs->showChooseClassMenu();});
         boost::python::def("showEnterNameMenu", +[](int classNumber){funcs->showEnterNameMenu(classNumber);});
         boost::python::def("showInvalidNameMenu", +[](int classNumber){funcs->showInvalidNameMenu(classNumber);});

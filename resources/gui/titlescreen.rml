@@ -1,5 +1,6 @@
 <rml>
     <head>
+    <link type="text/rcss" href="fade.rcss"/>
         <style>
             body
             {
@@ -40,8 +41,8 @@ import freeablo
     </head>
 
     <body onclick="freeablo.showMainMenu();">
+        <div id="fade"></div>
         <div>
-
             <img id="background" src="/ui_art/title.pcx">
                 <div id="animation" />
             </img>

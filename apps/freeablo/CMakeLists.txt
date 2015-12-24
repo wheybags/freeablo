@@ -51,6 +51,8 @@ add_executable(freeablo
     fagui/animateddecoratorinstancer.cpp
     fagui/console.h
     fagui/console.cpp
+    fagui/scrollbox.h
+    fagui/scrollbox.cpp
     fagui/commandhistory.h
     fagui/commandhistory.cpp
     fagui/autocomplete.h

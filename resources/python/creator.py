@@ -44,7 +44,7 @@ class Creator:
         freeablo.playClickButtonSound()
 
         if self.currentMenu == 1:
-            freeablo.showSelectHeroMenu()
+            freeablo.showSelectHeroMenuNoFade()
         elif self.currentMenu == 2:
             freeablo.showChooseClassMenu()
         else:
