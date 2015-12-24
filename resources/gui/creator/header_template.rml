@@ -16,7 +16,7 @@
         <div id="fade"></div>
         <img class="background" src="/ui_art/selhero.pcx">
             <div class="logo" ></div>
-            <div class="newsingleplayerhero" >New Single Player Hero</div>
+            <div class="newsingleplayerhero" id="newsingleplayerhero" >New Single Player Hero</div>
             <div id="container">
                 <div class="standard_separator"></div>
                 <div id="body"></div>

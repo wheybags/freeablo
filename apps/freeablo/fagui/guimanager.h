@@ -41,6 +41,7 @@ namespace FAGui
         void showCredits();
         void showSelectHeroMenu(bool fade);
         void showChooseClassMenu();
+        void showSaveFileExistsMenu(int classNumber);
         void showEnterNameMenu(int classNumber);
         void showInvalidNameMenu(int classNumber);
         void update(bool paused);

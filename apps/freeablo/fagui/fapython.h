@@ -34,6 +34,7 @@ namespace FAGui
             void showChooseClassMenu();
             void showEnterNameMenu(int classNumber);
             void showInvalidNameMenu(int classNumber);
+            void showSaveFileExistsMenu(int classNumber);
             void quitGame();
             void pauseGame();
             void unpauseGame();

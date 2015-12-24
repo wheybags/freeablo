@@ -64,38 +64,22 @@ characterCreator = None
 
 entries = []
 
-def onMenuEntrySelect(document, number):
-
-    global characterCreator
-    global entries
-
-    if number == len(entries) - 1:
-        characterCreator.setClass(-1)
-        document.GetElementById("delete").style.font_family = "FreeabloSilver30"
-    else:
-        characterCreator.setClass(1)
-        document.GetElementById("delete").style.font_family = "FreeabloGold30"
-
 def onLoad(document):
-
-    global characterCreator
-    characterCreator = Creator(document)
 
     global entries
     entries = [
-        {"text": 'wheybags', "func": characterCreator.showSaveFileExistsMenu},
-        {"text": 'no save file exists', "func": freeablo.startGame},
-        {"text": 'this is very very long name', "func": characterCreator.showSaveFileExistsMenu},
-        {"text": 'New Hero', "func": freeablo.showChooseClassMenu},
+        {"text": 'Load Game', "func": freeablo.startGame},
+        {"text": 'New Game', "func": freeablo.startGame},
     ]
 
     fmtSelected = '<span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/><span class="pentagon_border_separator" />'
     fmtNotSelected = '<span class="pentagon_separator"/><div class="entryText"> %s </div><span class="pentagon_separator"/>'
 
     global chooseClassMenu
-    chooseClassMenu = Menu(document, 'chooseClassMenu', 'innerContent',  entries, fmtSelected, fmtNotSelected, onMenuEntrySelect)
+    chooseClassMenu = Menu(document, 'chooseClassMenu', 'innerContent',  entries, fmtSelected, fmtNotSelected)
 
-    characterCreator.menu = chooseClassMenu
+    global characterCreator
+    characterCreator = Creator(document, chooseClassMenu)
 
     heros = document.GetElementById("heros")
     if heros != None:
@@ -103,17 +87,16 @@ def onLoad(document):
 
 def onShow(document):
 
-    global chooseClassMenu
+    global characterCreator
 
-    characterCreator.currentMenu = 0
+    characterCreator.currentMenu = 4
+    characterCreator.setClass(int(document.GetAttribute("selectedClass")))
 
-    onMenuEntrySelect(document, chooseClassMenu.current)
-
-    document.GetElementById("buttons").style.display = "none"
-    document.GetElementById("three_buttons").style.display = "block"
+    document.GetElementById("buttons").style.display = "block"
+    document.GetElementById("three_buttons").style.display = "none"
 
     label = document.GetElementById("label")
-    label.inner_rml = 'Select Hero'
+    label.inner_rml = 'Save File Exists'
 
     label = document.GetElementById("newsingleplayerhero")
     label.inner_rml = 'Single Player Characters'
@@ -122,6 +105,6 @@ def onShow(document):
     </head>
 
     <body template="player_stats_template" onload="onLoad(document)" onshow="onShow(document)" onkeydown="global characterCreator; global chooseClassMenu; characterCreator.onKeyDown(event); chooseClassMenu.onKeyDown(event);">
-        Choose Class
+        Save File Exists
     </body>
 </rml>

@@ -16,6 +16,9 @@ class Creator:
     def showInvalidNameMenu(self):
         freeablo.showInvalidNameMenu(self.selectedClass)
 
+    def showSaveFileExistsMenu(self):
+        freeablo.showSaveFileExistsMenu(self.selectedClass)
+
     def onOkClick(self):
 
         freeablo.playClickButtonSound()
@@ -32,10 +35,13 @@ class Creator:
 
         elif self.currentMenu == 3:
             self.showEnterMenu()
+        elif self.currentMenu == 4:
+            freeablo.startGame()
         else:
             freeablo.startGame()
 
     def onDeleteClick(self):
+        freeablo.playClickButtonSound()
         self.menu.deleteEntry(self.menu.current)
 
 
@@ -47,8 +53,18 @@ class Creator:
             freeablo.showSelectHeroMenuNoFade()
         elif self.currentMenu == 2:
             freeablo.showChooseClassMenu()
+        elif self.currentMenu == 3:
+            self.showEnterMenu()
+        elif self.currentMenu == 4:
+            freeablo.showSelectHeroMenuNoFade()
         else:
             freeablo.showMainMenu()
+
+    def onKeyDown(self, event):
+        if event.parameters['key_identifier'] == rocket.key_identifier.ESCAPE:
+            self.onCancelClick()
+        if event.parameters['key_identifier'] == rocket.key_identifier.RETURN:
+            self.onOkClick()
         
     def setClass(self, classNumber):
 

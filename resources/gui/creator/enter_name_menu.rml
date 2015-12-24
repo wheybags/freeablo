@@ -34,6 +34,9 @@ def onShow(document):
     characterCreator.currentMenu = 2
     characterCreator.setClass(int(document.GetAttribute("selectedClass")))
 
+    label = document.GetElementById("newsingleplayerhero")
+    label.inner_rml = 'New Single Player Hero'
+
     document.GetElementById("nick").value = ''
 
 def onLoad(document):
@@ -56,11 +59,7 @@ def onKeyDown(event = None, document = None):
     if document == None:
         return True
 
-    if event.parameters['key_identifier'] == rocket.key_identifier.RETURN:
-        characterCreator.onOkClick()
-        return True
-
-    return True
+    characterCreator.onKeyDown(event)
 
         </script>
     </head>

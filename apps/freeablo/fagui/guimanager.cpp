@@ -16,14 +16,7 @@
 
 namespace FAGui
 {   
-    Rocket::Core::ElementDocument* titleScreen = NULL;
-    Rocket::Core::ElementDocument* ingameUi = NULL;
-    Rocket::Core::ElementDocument* mainMenu = NULL;
-    Rocket::Core::ElementDocument* credits = NULL;
-    Rocket::Core::ElementDocument* chooseClassMenu = NULL;
-    Rocket::Core::ElementDocument* enterNameMenu = NULL;
-    Rocket::Core::ElementDocument* invalidNameMenu = NULL;
-    Rocket::Core::ElementDocument* selectHeroMenu = NULL;
+    std::map<std::string, Rocket::Core::ElementDocument*> menus;
 
     std::string GuiManager::invClass;
 
@@ -40,22 +33,23 @@ namespace FAGui
         Rocket::Core::DecoratorInstancer* animInstancer = Rocket::Core::Factory::RegisterDecoratorInstancer("faanim", (Rocket::Core::DecoratorInstancer*)new AnimatedDecoratorInstancer(renderer->getRocketContext()->GetRenderInterface()));
         animInstancer->RemoveReference();
 
-        titleScreen = renderer->getRocketContext()->LoadDocument("resources/gui/titlescreen.rml");
-        ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
-        mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
-        credits = renderer->getRocketContext()->LoadDocument("resources/gui/credits.rml");
-        chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator/choose_class_menu.rml");
-        enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator/enter_name_menu.rml");
-        invalidNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator/invalid_name_menu.rml");
-        selectHeroMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator/select_hero_menu.rml");
+        menus["titleScreen"] = renderer->getRocketContext()->LoadDocument("resources/gui/titlescreen.rml");
+        menus["ingameUi"] = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
+        menus["mainMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
+        menus["credits"] = renderer->getRocketContext()->LoadDocument("resources/gui/credits.rml");
+        menus["chooseClassMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/choose_class_menu.rml");
+        menus["enterNameMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/enter_name_menu.rml");
+        menus["invalidNameMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/invalid_name_menu.rml");
+        menus["selectHeroMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/select_hero_menu.rml");
+        menus["saveFileExistsMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/save_file_exists_menu.rml");
     }
 
     void GuiManager::showTitleScreen()
     {
-        titleScreen->Show();
-        titleScreen->PullToFront();
+        menus["titleScreen"]->Show();
+        menus["titleScreen"]->PullToFront();
 
-        mFadeCurrentDocument = titleScreen;
+        mFadeCurrentDocument = menus["titleScreen"];
         mStartTime = std::chrono::system_clock::now();
         mCurrentGuiType = TitleScreen;
     }
@@ -63,8 +57,8 @@ namespace FAGui
     void GuiManager::showIngameGui()
     {
         hideAllMenus();
-        ingameUi->Show();
-        ingameUi->PushToBack(); // base.rml is an empty sheet that covers the whole screen for
+        menus["ingameUi"]->Show();
+        menus["ingameUi"]->PushToBack(); // base.rml is an empty sheet that covers the whole screen for
         // detecting clicks outside the gui, push it to back so it doesn't
         // block clicks on the real gui.
 
@@ -79,15 +73,14 @@ namespace FAGui
 
     void GuiManager::showMainMenuCallback()
     {
-        mFadeCurrentDocument = mainMenu;
+        mFadeCurrentDocument = menus["mainMenu"];
 
         Engine::ThreadManager& threadManager = *Engine::ThreadManager::get();
         threadManager.playMusic("music/dintro.wav");
 
         hideAllMenus();
-        ingameUi->Hide();
-        mainMenu->Show();
-        startFadeIn(mainMenu);
+        menus["mainMenu"]->Show();
+        startFadeIn(menus["mainMenu"]);
 
         mCurrentGuiType = MainMenu;
     }
@@ -99,13 +92,13 @@ namespace FAGui
 
     void GuiManager::showCreditsCallback()
     {
-        mFadeCurrentDocument = credits;
+        mFadeCurrentDocument = menus["credits"];
 
-        mCreditsScrollBox = std::make_shared<ScrollBox>(credits);
+        mCreditsScrollBox = std::make_shared<ScrollBox>(menus["credits"]);
 
         hideAllMenus();
-        credits->Show();
-        startFadeIn(credits);
+        menus["credits"]->Show();
+        startFadeIn(menus["credits"]);
 
         mCurrentGuiType = Credits;
     }
@@ -124,39 +117,46 @@ namespace FAGui
 
     void GuiManager::showSelectHeroMenuCallback()
     {
-        mFadeCurrentDocument = selectHeroMenu;
+        mFadeCurrentDocument = menus["selectHeroMenu"];
 
         hideAllMenus();
-        selectHeroMenu->Show();
-        startFadeIn(selectHeroMenu);
+        menus["selectHeroMenu"]->Show();
+        startFadeIn(menus["selectHeroMenu"]);
     }
 
     void GuiManager::showSelectHeroMenuNoFadeCallback()
     {
-        mFadeCurrentDocument = selectHeroMenu;
+        mFadeCurrentDocument = menus["selectHeroMenu"];
 
         hideAllMenus();
-        selectHeroMenu->Show();
+        menus["selectHeroMenu"]->Show();
     }
 
     void GuiManager::showChooseClassMenu()
     {
         hideAllMenus();
-        chooseClassMenu->Show();
+        menus["chooseClassMenu"]->Show();
     }
 
     void GuiManager::showEnterNameMenu(int classNumber)
     {
         hideAllMenus();
-        enterNameMenu->SetAttribute<int>("selectedClass", classNumber);
-        enterNameMenu->Show();
+        menus["enterNameMenu"]->SetAttribute<int>("selectedClass", classNumber);
+        menus["enterNameMenu"]->Show();
     }
 
     void GuiManager::showInvalidNameMenu(int classNumber)
     {
         hideAllMenus();
-        invalidNameMenu->SetAttribute<int>("selectedClass", classNumber);
-        invalidNameMenu->Show();
+        menus["invalidNameMenu"]->SetAttribute<int>("selectedClass", classNumber);
+        menus["invalidNameMenu"]->Show();
+    }
+
+    void GuiManager::showSaveFileExistsMenu(int classNumber)
+    {
+        hideAllMenus();
+        menus["saveFileExistsMenu"]->SetAttribute<int>("selectedClass", classNumber);
+        menus["saveFileExistsMenu"]->Show();
     }
 
     GuiManager::GuiType GuiManager::currentGuiType() const
@@ -166,13 +166,11 @@ namespace FAGui
 
     void GuiManager::hideAllMenus()
     {
-        titleScreen->Hide();
-        mainMenu->Hide();
-        credits->Hide();
-        chooseClassMenu->Hide();
-        invalidNameMenu->Hide();
-        enterNameMenu->Hide();
-        selectHeroMenu->Hide();
+        auto it = menus.begin();
+        for(;it != menus.end(); it++)
+        {
+            it->second->Hide();
+        }
     }
 
     void GuiManager::update(bool paused)

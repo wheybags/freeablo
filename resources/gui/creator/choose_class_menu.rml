@@ -33,9 +33,6 @@ def onLoad(document):
     global chooseClassMenu
     chooseClassMenu = Menu(document, 'chooseClassMenu', 'innerContent',  entries, fmtSelected, fmtNotSelected, onMenuEntrySelect)
 
-    label = document.GetElementById("label")
-    label.inner_rml = 'Choose Class'
-
     heros = document.GetElementById("heros")
     if heros != None:
         heros.SetAttribute("background-image", "/ui_art/heros.pcx 0px 76px 180px 152px")
@@ -46,12 +43,18 @@ def onShow(document):
     document.GetElementById("buttons").style.display = "block"
     document.GetElementById("three_buttons").style.display = "none"
 
+    label = document.GetElementById("label")
+    label.inner_rml = 'Choose Class'
+
+    label = document.GetElementById("newsingleplayerhero")
+    label.inner_rml = 'New Single Player Hero'
+
 
 
 </script>
     </head>
 
-    <body template="player_stats_template" onload="onLoad(document)" onshow="onShow(document)">
+    <body template="player_stats_template" onload="onLoad(document)" onshow="onShow(document)" onkeydown="global characterCreator; global chooseClassMenu; characterCreator.onKeyDown(event); chooseClassMenu.onKeyDown(event);">
         Choose Class
     </body>
 </rml>
