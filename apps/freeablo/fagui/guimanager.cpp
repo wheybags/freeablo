@@ -58,6 +58,8 @@ namespace FAGui
         mFadeCurrentDocument = titleScreen;
         mStartTime = std::chrono::system_clock::now();
         mCurrentGuiType = TitleScreen;
+
+        startFadeIn(titleScreen);
     }
 
     void GuiManager::showIngameGui()
