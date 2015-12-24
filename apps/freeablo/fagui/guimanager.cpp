@@ -44,10 +44,10 @@ namespace FAGui
         ingameUi = renderer->getRocketContext()->LoadDocument("resources/gui/base.rml");
         mainMenu = renderer->getRocketContext()->LoadDocument("resources/gui/mainmenu.rml");
         credits = renderer->getRocketContext()->LoadDocument("resources/gui/credits.rml");
-        chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_choose_class_menu.rml");
-        enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_enter_name_menu.rml");
-        invalidNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_invalid_name_menu.rml");
-        selectHeroMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_select_hero_menu.rml");
+        chooseClassMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator/choose_class_menu.rml");
+        enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator/enter_name_menu.rml");
+        invalidNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator/invalid_name_menu.rml");
+        selectHeroMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator/select_hero_menu.rml");
     }
 
     void GuiManager::showTitleScreen()

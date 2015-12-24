@@ -1,7 +1,7 @@
 <rml>
     <head>
-        <link type="text/rcss" href="creator_header_template.rcss"/>
-        <link type="text/rcss" href="creator_player_stats_template.rcss"/>
+        <link type="text/rcss" href="header_template.rcss"/>
+        <link type="text/rcss" href="player_stats_template.rcss"/>
        <style>
        body
        {

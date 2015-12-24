@@ -1,7 +1,7 @@
 <rml>
     <head>
-        <link type="text/template" href="creator_player_stats_template.rml"/>
-        <link type="text/rcss" href="creator_player_stats_template.rcss"/>
+        <link type="text/template" href="player_stats_template.rml"/>
+        <link type="text/rcss" href="player_stats_template.rcss"/>
 
         <style>
         #nick
@@ -65,7 +65,7 @@ def onKeyDown(event = None, document = None):
         </script>
     </head>
 
-    <body template="creator_player_stats_template" onload="onLoad(document)" onshow="onShow(document)" onkeydown="onKeyDown(event, document)">
+    <body template="player_stats_template" onload="onLoad(document)" onshow="onShow(document)" onkeydown="onKeyDown(event, document)">
         Enter Name
     </body>
 </rml>
