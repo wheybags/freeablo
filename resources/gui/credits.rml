@@ -54,12 +54,17 @@ span.scroll_row
 import freeablo
 import rocket
 
+def onKeyDown(event, document):
+    key = event.parameters['key_identifier']
+    if key == rocket.key_identifier.RETURN or key == rocket.key_identifier.SPACE or key == rocket.key_identifier.ESCAPE:
+        freeablo.showMainMenu()
+
 def onClick(document):
     freeablo.showMainMenu()
 </script>
 
 </head>
-<body onclick="onClick(document)">
+<body onclick="onClick(document)" onkeydown="onKeyDown(event, document)">
 <div id="fade"></div>
 <img id="background" src="/ui_art/credits.pcx">
     <div id="scrollbox">
