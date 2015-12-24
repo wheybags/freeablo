@@ -2,12 +2,18 @@
 #define FA_NET_MANAGER_H
 
 #include <vector>
+#include <set>
 
 #include <enet/enet.h>
 
 namespace FAWorld
 {
     class PlayerFactory;
+}
+
+namespace FARender
+{
+    class FASpriteGroup;
 }
 
 namespace Engine
@@ -47,10 +53,14 @@ namespace Engine
     class NetManager
     {
         public:
+            static NetManager* get();
+
             NetManager(bool isServer, const FAWorld::PlayerFactory& playerFactory);
             ~NetManager();
 
             void update();
+
+            FARender::FASpriteGroup* getServerSprite(size_t index);
 
         private:
             const FAWorld::PlayerFactory& mPlayerFactory;
@@ -66,7 +76,11 @@ namespace Engine
             void readClientPacket(ENetEvent& event);
 
             void sendLevel(size_t levelIndex, ENetPeer* peer);
-            void readLevel(ENetPacket* packet);
+            void readLevel(ENetPacket* packet, size_t& position);
+
+            void sendSpriteRequest(ENetPeer* peer);
+            void readSpriteRequest(ENetPacket* packet, ENetPeer* peer, size_t& position);
+            void readSpriteResponse(ENetPacket* packet, size_t& position);
 
             void spawnPlayer(uint32_t id);
 
@@ -81,6 +95,9 @@ namespace Engine
             size_t mLastServerTickProcessed = 0;
 
             int32_t mLevelIndexTmp; // TODO: remove this when we fix mp level changing
+
+            std::set<size_t> mAlreadySentServerSprites;
+            std::set<size_t> mUnknownServerSprites;
     };
 }
 

@@ -21,17 +21,19 @@ namespace FARender
             size_t animLength;
             size_t width;
             size_t height;
-            FASpriteGroup(): spriteCacheIndex(0) {}
+            FASpriteGroup():
+                animLength(1),
+                width(1),
+                height(1),
+                spriteCacheIndex(0)
+            {}
         
             bool isValid()
             {
                 return spriteCacheIndex != 0;
             }
-        private:
+
             size_t spriteCacheIndex;
-            friend class Renderer;
-            friend class SpriteCache;
-            friend class SpriteManager;
     };
 
     struct TilesetPath
@@ -92,6 +94,9 @@ namespace FARender
             /// Used when we need to guarantee that a sprite will not be evicted for a period of time
             /// @brief To be called from the render thread
             void setImmortal(size_t index, bool immortal);
+
+            /// @brief To be called from the game thread
+            std::string getPathForIndex(size_t index);
 
             void clear(); //< To be called from the render thread
 

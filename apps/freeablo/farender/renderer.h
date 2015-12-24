@@ -58,6 +58,8 @@ namespace FARender
         RenderState():ready(true) {}
     };
 
+    FASpriteGroup* getDefaultSprite();
+
     class Renderer
     {
         public:
@@ -75,6 +77,9 @@ namespace FARender
             void setCurrentState(RenderState* current);
 
             FASpriteGroup* loadImage(const std::string& path);
+            FASpriteGroup* loadServerImage(size_t index);
+            void fillServerSprite(size_t index, const std::string& path);
+            std::string getPathForIndex(size_t index);
 
             std::pair<size_t, size_t> getClickedTile(size_t x, size_t y, const FAWorld::GameLevel& level, const FAWorld::Position& screenPos);
 

@@ -224,7 +224,7 @@ namespace FAWorld
                 break;
         }
         
-        if(!retval->isValid())
+        if(!retval || !retval->isValid())
             retval = mIdleAnim;
         
         return retval;
@@ -252,6 +252,12 @@ namespace FAWorld
         size_t destX;
         size_t destY;
         int32_t levelIndex;
+
+        size_t walkAnimIndex;
+        size_t idleAnimIndex;
+        size_t dieAnimIndex;
+        size_t attackAnimIndex;
+        size_t hitAnimIndex;
     };
 
     size_t Actor::getWriteSize()
@@ -270,6 +276,23 @@ namespace FAWorld
         data.animState = mAnimState;
         data.destX = mDestination.first;
         data.destY = mDestination.second;
+
+        data.walkAnimIndex = 0;
+        data.idleAnimIndex = 0;
+        data.dieAnimIndex = 0;
+        data.attackAnimIndex = 0;
+        data.hitAnimIndex = 0;
+
+        if(mWalkAnim)
+            data.walkAnimIndex = mWalkAnim->spriteCacheIndex;
+        if(mIdleAnim)
+            data.idleAnimIndex = mIdleAnim->spriteCacheIndex;
+        if(mDieAnim)
+            data.dieAnimIndex = mDieAnim->spriteCacheIndex;
+        if(mAttackAnim)
+            data.attackAnimIndex = mAttackAnim->spriteCacheIndex;
+        if(mHitAnim)
+            data.hitAnimIndex = mHitAnim->spriteCacheIndex;
 
         if(mLevel)
             data.levelIndex = mLevel->getLevelIndex();
@@ -299,6 +322,25 @@ namespace FAWorld
 
                 setLevel(World::get()->getLevel(data.levelIndex));
             }
+
+            mWalkAnim = FARender::getDefaultSprite();
+            mIdleAnim = FARender::getDefaultSprite();
+            mDieAnim = FARender::getDefaultSprite();
+            mAttackAnim = FARender::getDefaultSprite();
+            mHitAnim = FARender::getDefaultSprite();
+
+            auto netManager = Engine::NetManager::get();
+
+            if(data.walkAnimIndex)
+                mWalkAnim = netManager->getServerSprite(data.walkAnimIndex);
+            if(data.idleAnimIndex)
+                mIdleAnim = netManager->getServerSprite(data.idleAnimIndex);
+            if(data.dieAnimIndex)
+                mDieAnim = netManager->getServerSprite(data.dieAnimIndex);
+            if(data.attackAnimIndex)
+                mAttackAnim = netManager->getServerSprite(data.attackAnimIndex);
+            if(data.hitAnimIndex)
+                mHitAnim = netManager->getServerSprite(data.hitAnimIndex);
 
             return true;
         }

@@ -14,6 +14,12 @@
 
 namespace FARender
 {
+    FASpriteGroup defaultSprite;
+    FASpriteGroup* getDefaultSprite()
+    {
+        return &defaultSprite;
+    }
+
     Renderer* Renderer::mRenderer = NULL;
 
     Renderer* Renderer::get()
@@ -161,6 +167,21 @@ namespace FARender
         return mSpriteManager.get(path);
     }
 
+    FASpriteGroup* Renderer::loadServerImage(size_t index)
+    {
+        return mSpriteManager.getByServerSpriteIndex(index);
+    }
+
+    void Renderer::fillServerSprite(size_t index, const std::string& path)
+    {
+        mSpriteManager.fillServerSprite(index, path);
+    }
+
+    std::string Renderer::getPathForIndex(size_t index)
+    {
+        return mSpriteManager.getPathForIndex(index);
+    }
+
     std::pair<size_t, size_t> Renderer::getClickedTile(size_t x, size_t y, const FAWorld::GameLevel& level, const FAWorld::Position& screenPos)
     {
         return Render::getClickedTile(level.mLevel, x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
@@ -213,7 +234,7 @@ namespace FARender
                     size_t x = position.current().first;
                     size_t y = position.current().second;
 
-                    mLevelObjects[x][y].valid = true;
+                    mLevelObjects[x][y].valid = std::get<0>(state->mObjects[i])->isValid();
                     mLevelObjects[x][y].spriteCacheIndex = std::get<0>(state->mObjects[i])->spriteCacheIndex;
                     mLevelObjects[x][y].spriteFrame = std::get<1>(state->mObjects[i]);
                     mLevelObjects[x][y].x2 = position.next().first;

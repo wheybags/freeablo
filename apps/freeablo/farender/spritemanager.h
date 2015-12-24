@@ -25,6 +25,21 @@ namespace FARender
             FASpriteGroup* get(const std::string& path); ///< To be called from the game thread
             FASpriteGroup* getTileset(const std::string& celPath, const std::string& minPath, bool top); ///< To be called from the game thread
 
+            /// Will return a blank FASpriteGroup on first calling, that can be filled in with it's real source later,
+            /// with fillServerSprite. After it has been filled, all subsequent calls will return a valid FASpriteGroup
+            /// for the source it has been filled with.
+            /// @brief To be called from the game thread
+            FASpriteGroup* getByServerSpriteIndex(size_t index);
+
+            /// Used by NetManager on the server to get the paths to send to clients
+            /// for them to user with fillServerSprite
+            /// @brief To be called from the game thread
+            std::string getPathForIndex(size_t index);
+
+            /// See getByServerSpriteIndex above
+            /// @brief To be called from the game thread
+            void fillServerSprite(size_t serverIndex, const std::string& path);
+
             /// Like get(const std::string&), but for use directly with a pixel buffer
             /// @brief To be called from the game thread
             FASpriteGroup* getFromRaw(const uint8_t* source, size_t width, size_t height);
@@ -44,6 +59,7 @@ namespace FARender
 
             std::map<size_t, RawCacheTmp> mRawCache;
             std::vector<FASpriteGroup> mRawSpriteGroups;
+            std::map<size_t, FASpriteGroup> mServerSpriteMap;
     };
 }
 

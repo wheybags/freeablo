@@ -238,4 +238,9 @@ namespace FARender
             delete mCache[*it].sprite;
         }
     }
+
+    std::string SpriteCache::getPathForIndex(size_t index)
+    {
+        return mCacheToStr.at(index);
+    }
 }

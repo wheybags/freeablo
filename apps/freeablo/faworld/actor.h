@@ -60,11 +60,11 @@ namespace FAWorld
             }
             Position mPos;            
         //private: //TODO: fix this
-            FARender::FASpriteGroup* mWalkAnim;
-            FARender::FASpriteGroup* mIdleAnim;
-            FARender::FASpriteGroup* mDieAnim;
-            FARender::FASpriteGroup* mAttackAnim;
-            FARender::FASpriteGroup* mHitAnim;
+            FARender::FASpriteGroup* mWalkAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mIdleAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mDieAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mAttackAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mHitAnim = FARender::getDefaultSprite();
         
             size_t mFrame;
             virtual void die();

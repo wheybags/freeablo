@@ -16,6 +16,30 @@ namespace FARender
         return mCache.getTileset(celPath, minPath, top);
     }
 
+    FASpriteGroup* SpriteManager::getByServerSpriteIndex(size_t index)
+    {
+        if(!mServerSpriteMap.count(index))
+        {
+            FASpriteGroup newSprite;
+            mServerSpriteMap[index] = newSprite;
+        }
+
+        return &mServerSpriteMap[index];
+    }
+
+    std::string SpriteManager::getPathForIndex(size_t index)
+    {
+        return mCache.getPathForIndex(index);
+    }
+
+    void SpriteManager::fillServerSprite(size_t serverIndex, const std::string& path)
+    {
+        auto source = get(path);
+        auto dest = getByServerSpriteIndex(serverIndex);
+
+        *dest = *source;
+    }
+
     FASpriteGroup* SpriteManager::getFromRaw(const uint8_t* source, size_t width, size_t height)
     {
         size_t size = (width*4)*height;

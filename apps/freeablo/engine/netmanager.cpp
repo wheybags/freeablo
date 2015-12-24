@@ -7,8 +7,24 @@
 
 namespace Engine
 {
+    NetManager* singletonInstance = NULL;
+
+    NetManager* NetManager::get()
+    {
+        return singletonInstance;
+    }
+
+    enum ReliableMessageKind
+    {
+        Level = 100,
+        Sprite = 101
+    };
+
     NetManager::NetManager(bool isServer, const FAWorld::PlayerFactory& playerFactory) : mPlayerFactory(playerFactory)
     {
+        assert(singletonInstance == NULL);
+        singletonInstance = this;
+
         enet_initialize();
 
         mAddress.port = 6666;
@@ -117,6 +133,16 @@ namespace Engine
         enet_host_flush(mHost);
     }
 
+    FARender::FASpriteGroup* NetManager::getServerSprite(size_t index)
+    {
+        auto retval = FARender::Renderer::get()->loadServerImage(index);
+
+        if(!mAlreadySentServerSprites.count(index))
+            mUnknownServerSprites.insert(index);
+
+        return retval;
+    }
+
     struct ServerPacketHeader
     {
         uint32_t numPlayers;
@@ -181,14 +207,34 @@ namespace Engine
         writeToPacket(packet, position, data);
 
         enet_peer_send(mServerPeer, UNRELIABLE_CHANNEL_ID, packet);
+
+        if(mUnknownServerSprites.size())
+            sendSpriteRequest(mServerPeer);
     }
 
     void NetManager::readServerPacket(ENetEvent& event)
     {
         if(event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
         {
-            readLevel(event.packet);
-            FAWorld::World::get()->setLevel(0);
+            int32_t typeHeader;
+            size_t position = 0;
+            readFromPacket(event.packet, position, typeHeader);
+
+            switch(typeHeader)
+            {
+                case ReliableMessageKind::Level:
+                {
+                    readLevel(event.packet, position);
+                    FAWorld::World::get()->setLevel(0);
+                    break;
+                }
+
+                case ReliableMessageKind::Sprite:
+                {
+                    readSpriteResponse(event.packet, position);
+                    break;
+                }
+            }
         }
         else
         {
@@ -221,49 +267,174 @@ namespace Engine
 
     void NetManager::readClientPacket(ENetEvent& event)
     {
-        ClientPacket data;
-
-        size_t position = 0;
-        readFromPacket(event.packet, position, data);
-
-        auto world = FAWorld::World::get();
-
-        auto player = world->getPlayer(event.peer->connectID);
-
-        player->destination().first = data.destX;
-        player->destination().second = data.destY;
-
-        if(data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
+        if(event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
         {
-            auto level = world->getLevel(data.levelIndex);
+            int32_t typeHeader;
+            size_t position = 0;
+            readFromPacket(event.packet, position, typeHeader);
 
-            if(player->getLevel() != NULL && data.levelIndex < (int32_t)player->getLevel()->getLevelIndex())
-                player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
-            else
-                player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+            switch(typeHeader)
+            {
+                case ReliableMessageKind::Sprite:
+                {
+                    readSpriteRequest(event.packet, event.peer, position);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            ClientPacket data;
 
-            player->setLevel(level);
+            size_t position = 0;
+            readFromPacket(event.packet, position, data);
+
+            auto world = FAWorld::World::get();
+
+            auto player = world->getPlayer(event.peer->connectID);
+
+            player->destination().first = data.destX;
+            player->destination().second = data.destY;
+
+            if(data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
+            {
+                auto level = world->getLevel(data.levelIndex);
+
+                if(player->getLevel() != NULL && data.levelIndex < (int32_t)player->getLevel()->getLevelIndex())
+                    player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
+                else
+                    player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+
+                player->setLevel(level);
+            }
         }
     }
 
     void NetManager::sendLevel(size_t levelIndex, ENetPeer *peer)
     {
+        int32_t typeHeader = ReliableMessageKind::Level;
+
         FAWorld::GameLevel* level = FAWorld::World::get()->getLevel(levelIndex);
         level->startWriting();
-        ENetPacket* packet = enet_packet_create(NULL, level->getWriteSize(), ENET_PACKET_FLAG_RELIABLE);
+        ENetPacket* packet = enet_packet_create(NULL, level->getWriteSize() + sizeof(int32_t), ENET_PACKET_FLAG_RELIABLE);
         size_t position = 0;
+        writeToPacket(packet, position, typeHeader);
         level->writeTo(packet, position);
 
         enet_peer_send(peer, RELIABLE_CHANNEL_ID, packet);
     }
 
-    void NetManager::readLevel(ENetPacket *packet)
+    void NetManager::readLevel(ENetPacket *packet, size_t& position)
     {
-        size_t position = 0;
         FAWorld::GameLevel* level = FAWorld::GameLevel::fromPacket(packet, position);
 
         if(level)
             FAWorld::World::get()->insertLevel(level->getLevelIndex(), level);
+    }
+
+    void NetManager::sendSpriteRequest(ENetPeer* peer)
+    {
+        int32_t typeHeader = ReliableMessageKind::Sprite;
+        size_t numSprites = mUnknownServerSprites.size();
+
+        ENetPacket* packet = enet_packet_create(NULL, (numSprites+1) * sizeof(size_t) + sizeof(int32_t), ENET_PACKET_FLAG_RELIABLE);
+
+        size_t position = 0;
+        writeToPacket(packet, position, typeHeader);
+        writeToPacket(packet, position, numSprites);
+
+        for(size_t index : mUnknownServerSprites)
+        {
+            writeToPacket(packet, position, index);
+            mAlreadySentServerSprites.insert(index);
+        }
+
+        mUnknownServerSprites.clear();
+
+        enet_peer_send(peer, RELIABLE_CHANNEL_ID, packet);
+    }
+
+    void NetManager::readSpriteRequest(ENetPacket* packet, ENetPeer* peer, size_t& position)
+    {
+        size_t numSprites;
+        readFromPacket(packet, position, numSprites);
+
+        std::vector<size_t> requestedSprites(numSprites);
+
+        for(size_t i = 0; i < numSprites; i++)
+            readFromPacket(packet, position, requestedSprites[i]);
+
+        std::vector<std::string> paths(numSprites);
+
+        auto renderer = FARender::Renderer::get();
+
+        size_t size = 0;
+
+        for(size_t i = 0; i < numSprites; i++)
+        {
+            paths[i] = renderer->getPathForIndex(requestedSprites[i]);
+            size += paths[i].size();
+            size += 1; // null terminator
+        }
+
+        size += numSprites * sizeof(size_t);
+        size += sizeof(int32_t); // type header
+        size += sizeof(size_t); // numSprites count
+
+        int32_t typeHeader = ReliableMessageKind::Sprite;
+
+        ENetPacket* responsePacket = enet_packet_create(NULL, size, ENET_PACKET_FLAG_RELIABLE);
+        size_t writePosition = 0;
+
+        writeToPacket(responsePacket, writePosition, typeHeader);
+        writeToPacket(responsePacket, writePosition, numSprites);
+
+        for(size_t i = 0; i < numSprites; i++)
+        {
+            writeToPacket(responsePacket, writePosition, requestedSprites[i]);
+
+            std::string& path = paths[i];
+            char c;
+
+            for(size_t j = 0; j < path.size(); j++)
+            {
+                c = path[j];
+                writeToPacket(responsePacket, writePosition, c);
+            }
+
+            c = 0;
+            writeToPacket(responsePacket, writePosition, c);
+        }
+
+        enet_peer_send(peer, RELIABLE_CHANNEL_ID, responsePacket);
+    }
+
+    void NetManager::readSpriteResponse(ENetPacket* packet, size_t& position)
+    {
+        size_t numSprites;
+        readFromPacket(packet, position, numSprites);
+
+        auto renderer = FARender::Renderer::get();
+
+        for(size_t i = 0; i < numSprites; i++)
+        {
+            size_t index;
+            readFromPacket(packet, position, index);
+
+            std::string path;
+
+            char c = 0;
+
+            do
+            {
+                readFromPacket(packet, position, c);
+
+                if(c)
+                    path += c;
+            } while(c);
+
+            renderer->fillServerSprite(index, path);
+        }
     }
 
     void NetManager::spawnPlayer(uint32_t id)
