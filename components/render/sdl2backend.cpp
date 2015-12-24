@@ -438,12 +438,10 @@ namespace Render
         SDL_Surface* surface = createTransparentSurface(width, height);
 
         size_t x = 0;
-        size_t id = 65;
         for(size_t i = 0; i < cel.numFrames(); i++)
         {
             drawFrame(surface, x, 0, cel[i]);
             x += cel[i].mWidth;
-            id++;
         }
 
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surface);
