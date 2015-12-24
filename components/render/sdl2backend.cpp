@@ -126,6 +126,8 @@ namespace Render
         if(!Rocket::Core::Initialise())
             fprintf(stderr, "couldn't initialise rocket!");
 
+        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloWhite11.fnt");
+
         Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold16.fnt");
         Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold24.fnt");
         Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold30.fnt");
@@ -277,6 +279,7 @@ namespace Render
     Cel::Colour getPixel(SDL_Surface* s, int x, int y);
     void setpixel(SDL_Surface *s, int x, int y, Cel::Colour c);
     SDL_Surface* createTransparentSurface(size_t width, size_t height);
+    void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
 
     SDL_Surface* loadNonCelImageTrans(const std::string& path, const std::string& extension, bool hasTrans, size_t transR, size_t transG, size_t transB)
     {
@@ -415,17 +418,47 @@ namespace Render
 
         return new SpriteGroup(vec);
     }
-    void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
+
+    SpriteGroup* loadCelToSingleTexture(const std::string& path)
+    {
+        Cel::CelFile cel(path);
+
+        size_t width = 0;
+        size_t height = 0;
+
+        for(size_t i = 0; i < cel.numFrames(); i++)
+        {
+            width += cel[i].mWidth;
+            height = (cel[i].mHeight > height ? cel[i].mHeight : height);
+        }
+
+        assert(width > 0);
+        assert(height > 0);
+
+        SDL_Surface* surface = createTransparentSurface(width, height);
+
+        size_t x = 0;
+        for(size_t i = 0; i < cel.numFrames(); i++)
+        {
+            drawFrame(surface, x, 0, cel[i]);
+            x += cel[i].mWidth;
+        }
+
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+
+        std::vector<Sprite> vec(1);
+        vec[0] = (Sprite)tex;
+
+        return new SpriteGroup(vec);
+    }
 
     void drawCursor(Sprite s, size_t w, size_t h)
     {
-
         if(s == NULL)
         {
-
             SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW));
             SDL_ShowCursor(1);
-
         }
 
         else
@@ -434,12 +467,7 @@ namespace Render
             int x,y;
             SDL_GetMouseState(&x,&y);
             drawAt(s, x-w/2, y-h/2);
-
         }
-        return;
-
-
-
     }
 
     SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height)
