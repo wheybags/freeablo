@@ -18,9 +18,6 @@ namespace FARender
     class FASpriteGroup
     {
         public:
-            size_t animLength;
-            size_t width;
-            size_t height;
             FASpriteGroup():
                 animLength(1),
                 width(1),
@@ -33,7 +30,34 @@ namespace FARender
                 return spriteCacheIndex != 0;
             }
 
+            size_t getAnimLength()
+            {
+                return animLength;
+            }
+
+            size_t getWidth()
+            {
+                return width;
+            }
+
+            size_t getHeight()
+            {
+                return height;
+            }
+
+            size_t getCacheIndex()
+            {
+                return spriteCacheIndex;
+            }
+
+        private:
+            size_t animLength;
+            size_t width;
+            size_t height;
             size_t spriteCacheIndex;
+
+        friend class SpriteCache;
+        friend class SpriteManager;
     };
 
     struct TilesetPath

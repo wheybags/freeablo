@@ -28,10 +28,10 @@ namespace FAWorld
 
                 if(mAnimPlaying)
                 {
-                    if(mFrame < currentAnim->animLength)
+                    if(mFrame < currentAnim->getAnimLength())
                         mFrame++;
 
-                    if(mFrame >= currentAnim->animLength)
+                    if(mFrame >= currentAnim->getAnimLength())
                     {
                         mAnimPlaying = false;
                         mFrame--;
@@ -39,13 +39,13 @@ namespace FAWorld
                 }
                 else {
                     if(!isDead())
-                        mFrame = (mFrame + 1) % currentAnim->animLength;
-                    else if(mFrame < currentAnim->animLength -1)
+                        mFrame = (mFrame + 1) % currentAnim->getAnimLength();
+                    else if(mFrame < currentAnim->getAnimLength() -1)
                         mFrame++;
                 }
 
                 #ifndef NDEBUG
-                    assert(mFrame < getCurrentAnim()->animLength);
+                    assert(mFrame < getCurrentAnim()->getAnimLength());
                 #endif
             }
 
@@ -284,15 +284,15 @@ namespace FAWorld
         data.hitAnimIndex = 0;
 
         if(mWalkAnim)
-            data.walkAnimIndex = mWalkAnim->spriteCacheIndex;
+            data.walkAnimIndex = mWalkAnim->getCacheIndex();
         if(mIdleAnim)
-            data.idleAnimIndex = mIdleAnim->spriteCacheIndex;
+            data.idleAnimIndex = mIdleAnim->getCacheIndex();
         if(mDieAnim)
-            data.dieAnimIndex = mDieAnim->spriteCacheIndex;
+            data.dieAnimIndex = mDieAnim->getCacheIndex();
         if(mAttackAnim)
-            data.attackAnimIndex = mAttackAnim->spriteCacheIndex;
+            data.attackAnimIndex = mAttackAnim->getCacheIndex();
         if(mHitAnim)
-            data.hitAnimIndex = mHitAnim->spriteCacheIndex;
+            data.hitAnimIndex = mHitAnim->getCacheIndex();
 
         if(mLevel)
             data.levelIndex = mLevel->getLevelIndex();
