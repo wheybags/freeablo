@@ -71,6 +71,7 @@ namespace FARender
     {
         public:
             SpriteCache(size_t size);
+            ~SpriteCache();
 
             FASpriteGroup* get(const std::string& path); ///< To be called from the game thread
 
@@ -98,16 +99,20 @@ namespace FARender
             /// @brief To be called from the game thread
             std::string getPathForIndex(size_t index);
 
+            /// The only creation point for FASpriteGroups
+            /// @brief To be called from the game thread
+            FASpriteGroup* allocNewSpriteGroup();
+
             void clear(); //< To be called from the render thread
 
         private:
             void moveToFront(size_t index);
             void evict();
 
-            std::map<std::string, FASpriteGroup> mStrToCache;
+            std::map<std::string, FASpriteGroup*> mStrToCache;
             std::map<size_t, std::string> mCacheToStr;
 
-            std::map<std::string, FASpriteGroup> mStrToTilesetCache;
+            std::map<std::string, FASpriteGroup*> mStrToTilesetCache;
             std::map<size_t, TilesetPath> mCacheToTilesetPath;
 
             std::map<size_t, size_t> mCacheToSprite;
@@ -119,6 +124,10 @@ namespace FARender
 
             size_t mCurrentSize;
             size_t mMaxSize;
+
+            static constexpr size_t SPRITEGROUP_STORE_BLOCK_SIZE = 256;
+            std::vector<FASpriteGroup*> mSpriteGroupStore;
+            size_t mSpriteGroupCurrentBlockIndex = 0;
     };
 }
 

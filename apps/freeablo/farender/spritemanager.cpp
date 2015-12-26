@@ -20,11 +20,11 @@ namespace FARender
     {
         if(!mServerSpriteMap.count(index))
         {
-            FASpriteGroup newSprite;
+            FASpriteGroup* newSprite = mCache.allocNewSpriteGroup();
             mServerSpriteMap[index] = newSprite;
         }
 
-        return &mServerSpriteMap[index];
+        return mServerSpriteMap[index];
     }
 
     std::string SpriteManager::getPathForIndex(size_t index)
@@ -55,16 +55,16 @@ namespace FARender
 
         mRawCache[index] = rawTmp;
 
-        FASpriteGroup retval;
-        retval.spriteCacheIndex = index;
-        retval.animLength = 1;
-        retval.width = width;
-        retval.height = height;
+        FASpriteGroup* retval = mCache.allocNewSpriteGroup();
+        retval->spriteCacheIndex = index;
+        retval->animLength = 1;
+        retval->width = width;
+        retval->height = height;
 
         // put it in a member vector because we need to return a persistent pointer
         mRawSpriteGroups.push_back(retval);
 
-        return &mRawSpriteGroups[mRawSpriteGroups.size()-1];
+        return mRawSpriteGroups[mRawSpriteGroups.size()-1];
     }
 
     Render::SpriteGroup* SpriteManager::get(size_t index)

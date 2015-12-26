@@ -17,17 +17,23 @@ namespace FARender
         ,mMaxSize(size)
     {}
 
+    SpriteCache::~SpriteCache()
+    {
+        for(auto block : mSpriteGroupStore)
+            delete[] block;
+    }
+
     FASpriteGroup* SpriteCache::get(const std::string& path)
     {
         if(!mStrToCache.count(path))
         {
-            FASpriteGroup newCacheEntry;
+            FASpriteGroup* newCacheEntry = allocNewSpriteGroup();
             size_t cacheIndex = newUniqueIndex();
-            newCacheEntry.spriteCacheIndex = cacheIndex;
+            newCacheEntry->spriteCacheIndex = cacheIndex;
 
             std::vector<std::string> components = Misc::StringUtils::split(path, '&');
 
-            Render::getImageInfo(components[0], newCacheEntry.width, newCacheEntry.height, newCacheEntry.animLength, 0);
+            Render::getImageInfo(components[0], newCacheEntry->width, newCacheEntry->height, newCacheEntry->animLength, 0);
 
             for(size_t i = 1; i < components.size(); i++)
             {
@@ -40,11 +46,11 @@ namespace FARender
                     size_t vAnim;
                     vanimss >> vAnim;
 
-                    newCacheEntry.animLength = (newCacheEntry.height / vAnim);
-                    if(newCacheEntry.height % vAnim != 0)
-                        newCacheEntry.animLength++;
+                    newCacheEntry->animLength = (newCacheEntry->height / vAnim);
+                    if(newCacheEntry->height % vAnim != 0)
+                        newCacheEntry->animLength++;
 
-                    newCacheEntry.height = vAnim;
+                    newCacheEntry->height = vAnim;
                 }
             }
 
@@ -53,7 +59,7 @@ namespace FARender
             mCacheToStr[cacheIndex] = path;
         }
 
-        return &mStrToCache[path];
+        return mStrToCache[path];
     }
 
     FASpriteGroup* SpriteCache::getTileset(const std::string& celPath, const std::string& minPath, bool top)
@@ -64,14 +70,14 @@ namespace FARender
 
         if(!mStrToTilesetCache.count(key))
         {
-            FASpriteGroup newCacheEntry;
+            FASpriteGroup* newCacheEntry = allocNewSpriteGroup();
             size_t cacheIndex = newUniqueIndex();
-            newCacheEntry.spriteCacheIndex = cacheIndex;
+            newCacheEntry->spriteCacheIndex = cacheIndex;
             mStrToTilesetCache[key] = newCacheEntry;
             mCacheToTilesetPath[cacheIndex] = TilesetPath(celPath, minPath, top);
         }
 
-        return &mStrToTilesetCache[key];
+        return mStrToTilesetCache[key];
     }
 
     size_t SpriteCache::newUniqueIndex()
@@ -242,5 +248,19 @@ namespace FARender
     std::string SpriteCache::getPathForIndex(size_t index)
     {
         return mCacheToStr.at(index);
+    }
+
+    FASpriteGroup* SpriteCache::allocNewSpriteGroup()
+    {
+        if(mSpriteGroupCurrentBlockIndex == SPRITEGROUP_STORE_BLOCK_SIZE || mSpriteGroupStore.size() == 0)
+        {
+            mSpriteGroupStore.push_back(new FASpriteGroup[SPRITEGROUP_STORE_BLOCK_SIZE]);
+            mSpriteGroupCurrentBlockIndex = 0;
+        }
+
+        FASpriteGroup* retval = &(mSpriteGroupStore[mSpriteGroupStore.size()-1][mSpriteGroupCurrentBlockIndex]);
+        mSpriteGroupCurrentBlockIndex++;
+
+        return retval;
     }
 }

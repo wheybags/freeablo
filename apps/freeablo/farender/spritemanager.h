@@ -58,8 +58,8 @@ namespace FARender
             SpriteCache mCache;
 
             std::map<size_t, RawCacheTmp> mRawCache;
-            std::vector<FASpriteGroup> mRawSpriteGroups;
-            std::map<size_t, FASpriteGroup> mServerSpriteMap;
+            std::vector<FASpriteGroup*> mRawSpriteGroups;
+            std::map<size_t, FASpriteGroup*> mServerSpriteMap;
     };
 }
 
