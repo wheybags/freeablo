@@ -80,6 +80,11 @@ namespace FAGui
         mGuiManager.showInvalidNameMenu(classNumber);
     }
 
+    void FAPythonFuncs::showSaveFileExistsMenu(int classNumber)
+    {
+        mGuiManager.showSaveFileExistsMenu(classNumber);
+    }
+
     void FAPythonFuncs::startGame()
     {
         auto world = FAWorld::World::get();
@@ -465,6 +470,7 @@ namespace FAGui
         boost::python::def("showChooseClassMenu", +[](){funcs->showChooseClassMenu();});
         boost::python::def("showEnterNameMenu", +[](int classNumber){funcs->showEnterNameMenu(classNumber);});
         boost::python::def("showInvalidNameMenu", +[](int classNumber){funcs->showInvalidNameMenu(classNumber);});
+        boost::python::def("showSaveFileExistsMenu", +[](int classNumber){funcs->showSaveFileExistsMenu(classNumber);});
         boost::python::def("quit", +[](){funcs->quitGame();});
         boost::python::def("pause", +[](){funcs->pauseGame();});
         boost::python::def("unpause", +[](){funcs->unpauseGame();});
