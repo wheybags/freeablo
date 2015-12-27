@@ -1,6 +1,7 @@
-<template name="creator_header_template" content="body">
+<template name="header_template" content="body">
     <head>
-        <link type="text/rcss" href="creator_header_template.rcss"/>
+        <link type="text/rcss" href="header_template.rcss"/>
+        <link type="text/rcss" href="../fade.rcss"/>
         <style>
             body
             {
@@ -12,9 +13,10 @@
     </head>
 
     <body >
+        <div id="fade"></div>
         <img class="background" src="/ui_art/selhero.pcx">
             <div class="logo" ></div>
-            <div class="newsingleplayerhero" >New Single Player Hero</div>
+            <div class="newsingleplayerhero" id="newsingleplayerhero" >New Single Player Hero</div>
             <div id="container">
                 <div class="standard_separator"></div>
                 <div id="body"></div>

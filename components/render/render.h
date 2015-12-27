@@ -73,6 +73,7 @@ namespace Render
     SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadResizedSprite(const std::string& path, size_t width, size_t height, size_t tileWidth, size_t tileHeight,  bool hasTrans, size_t transR, size_t transG, size_t transB);
+    SpriteGroup* loadCelToSingleTexture(const std::string& path);
     SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height);
 
     void draw();

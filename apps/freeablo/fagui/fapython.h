@@ -28,10 +28,13 @@ namespace FAGui
 
         protected:
             void showMainMenu();
+            void showCredits();
             void showSelectHeroMenu();
+            void showSelectHeroMenuNoFade();
             void showChooseClassMenu();
             void showEnterNameMenu(int classNumber);
             void showInvalidNameMenu(int classNumber);
+            void showSaveFileExistsMenu(int classNumber);
             void quitGame();
             void pauseGame();
             void unpauseGame();

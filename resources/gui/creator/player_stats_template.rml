@@ -1,6 +1,6 @@
-<template name="creator_player_stats_template" content="innerContainer">
+<template name="player_stats_template" content="innerContainer">
     <head>
-        <link type="text/template" href="creator_header_template.rml"/>
+        <link type="text/template" href="header_template.rml"/>
         <style>
             body
             {
@@ -127,7 +127,7 @@ def onKeyDown(event, document):
         </script>
     </head>
 
-    <body template="creator_header_template" onkeydown="onKeyDown(event, document)">
+    <body template="header_template" onkeydown="onKeyDown(event, document)">
                 <div id="left">
                     <div class="heros" id="heros_warrior" ></div>
                     <div class="heros" id="heros_rogue" style="display:none;"></div>
