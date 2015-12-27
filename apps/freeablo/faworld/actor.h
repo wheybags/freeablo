@@ -44,6 +44,7 @@ namespace FAWorld
             virtual int32_t getCurrentHP();
             bool mAnimPlaying = false;
             bool isAttacking = false;
+            bool isTalking = false;
             virtual FARender::FASpriteGroup getCurrentAnim();
             void setAnimation(AnimState::AnimState state, bool reset=false);
             void setWalkAnimation(const std::string path);
@@ -58,6 +59,13 @@ namespace FAWorld
                 UNUSED_PARAM(enemy);
                 return false;
             }
+
+            virtual bool talk(Actor * actor)
+            {
+                UNUSED_PARAM(actor);
+                return false;
+            }
+
             Position mPos;            
         //private: //TODO: fix this
             FARender::FASpriteGroup mWalkAnim;
@@ -74,8 +82,13 @@ namespace FAWorld
                 return mDestination;
             }
 
+            bool isNpc() const;
             bool isDead() const;
             bool isEnemy() const;
+            std::string getId() const;
+            void setId(const std::string& id);
+            void setIsNpc(bool isNpc);
+
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
             virtual size_t getWriteSize();
@@ -85,7 +98,11 @@ namespace FAWorld
         protected:
             GameLevel* mLevel = NULL;
 
+            std::string mId;
             bool mIsDead = false;
+            bool mIsNpc = false;
+            bool mIsEnemy;
+
             friend class boost::serialization::access;
 
             template<class Archive>
@@ -111,10 +128,11 @@ namespace FAWorld
             }
 
             bool canIAttack(Actor * actor);
+            bool canTalkTo(Actor * actor);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
             AnimState::AnimState mAnimState;
-            bool mIsEnemy;
+
     };
 }
 

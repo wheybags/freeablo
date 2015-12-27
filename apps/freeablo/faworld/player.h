@@ -13,6 +13,7 @@ namespace FAWorld
             void setSpriteClass(std::string className);
             bool attack(Actor * enemy);
             bool attack(Player * enemy);
+            bool talk(Actor * actor);
             FARender::FASpriteGroup getCurrentAnim();
             void updateSprite();
 

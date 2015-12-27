@@ -1,0 +1,36 @@
+<rml>
+<head>
+<link type="text/template" href="dialogue.rml"/>
+<script>
+
+import rocket
+import freeablo
+from menu import Menu
+
+mainMenu = None
+
+def onLoad(document):
+    entries = [
+    {"text": 'Talk to Griswold', "func": freeablo.closeDialogue},
+    {"text": 'Buy basic items', "func": freeablo.closeDialogue},
+    {"text": 'Buy premium items', "func": freeablo.closeDialogue},
+    {"text": 'Sell items', "func": freeablo.closeDialogue},
+    {"text": 'Repair items', "func": freeablo.closeDialogue},
+    {"text": 'Leave the shop', "func": freeablo.closeDialogue},
+    ]
+
+    fmtSelected = '<span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/><span class="pentagon_border_separator" />'
+    fmtNotSelected = '<span class="pentagon_separator"/><div class="entryText"> %s </div><span class="pentagon_separator"/>'
+
+    global mainMenu
+    mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
+
+def onKeyDown(event, document):
+    mainMenu.onKeyDown(event)
+
+</script>
+</head>
+<body template="dialogue" onload="onLoad(document)" onkeydown="onKeyDown(event, document)">
+    Welcome to the<br/>blacksmith's shop
+</body>
+</rml>

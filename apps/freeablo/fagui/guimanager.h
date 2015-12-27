@@ -35,6 +35,10 @@ namespace FAGui
         };
 
         GuiManager(FAWorld::Inventory &playerInventory, Engine::EngineMain& engine, std::string invClass);
+
+        void openDialogue(const std::string& document);
+        void closeDialogue();
+        bool isDialogueOpened() const;
         void showTitleScreen();
         void showIngameGui();
         void showMainMenu();
@@ -79,6 +83,7 @@ namespace FAGui
         void updateGui(bool paused);
         void hideAllMenus();
 
+        Rocket::Core::ElementDocument * mDocument;
         std::function<void(GuiManager&)> mFadeOutCallback;
         float mFadeDelta;
         float mFadeValue;

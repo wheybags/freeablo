@@ -1,0 +1,79 @@
+body
+{
+    font-family: FreeabloGold16;
+    text-align: center;
+    width: 271px;
+    height: 303px;
+}
+
+div.box
+{
+    width: 271px;
+    display: block;
+}
+
+div#header
+{
+    height: 60px;
+    border: 1px solid black;
+}
+
+div#menuContainer
+{
+    width: 271px;
+    height: 303px;
+    display: block;
+}
+
+img#background
+{
+    width: 271px;
+    height: 303px;
+    display: block;
+    margin: auto;
+    background-color: rgba(0,0,0,150);
+}
+
+span.pentagon
+{
+   icon-decorator: faanim;
+   icon-animfile: /ui_art/focus16.pcx&trans=0,255,0&vanim=20;
+   icon-playtime: 0.3;
+
+   display: inline-block;
+   width: 20px;
+   height: 20px;
+}
+
+span.pentagon_separator
+{
+   display: inline-block;
+   width: 20px;
+   height: 20px;
+}
+
+span.pentagon_border_separator
+{
+   display: inline-block;
+   width: 25px;
+   height: 20px;
+}
+
+div.menuEntry
+{
+   width: 271px;
+   height: 20px;
+   display: block;
+   text-align: center;
+   padding-bottom: 6px;
+}
+
+div.entryText
+{
+   font-family: FreeabloGold16;
+   width: 181px;
+   height: 20px;
+   display: inline-block;
+   text-align: center;
+}
+

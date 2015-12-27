@@ -1,4 +1,4 @@
-#include "guimanager.h"
+﻿#include "guimanager.h"
 
 #include <string>
 
@@ -27,7 +27,10 @@ namespace FAGui
 
     std::string GuiManager::invClass;
 
-    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass) : mPythonFuncs(playerInventory, *this, engine), mCurrentGuiType(TitleScreen)
+    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass)
+        : mPythonFuncs(playerInventory, *this, engine),
+          mDocument(nullptr),
+          mCurrentGuiType(TitleScreen)
     {
 
         this->invClass = invClass;
@@ -48,6 +51,29 @@ namespace FAGui
         enterNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_enter_name_menu.rml");
         invalidNameMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_invalid_name_menu.rml");
         selectHeroMenu = renderer->getRocketContext()->LoadDocument("resources/gui/creator_select_hero_menu.rml");
+    }
+
+    void GuiManager::openDialogue(const std::string& document)
+    {
+        FARender::Renderer* renderer = FARender::Renderer::get();
+
+        if(mDocument != nullptr)
+            mDocument->Close();
+
+        mDocument = renderer->getRocketContext()->LoadDocument(document.c_str());
+        mDocument->Show();
+    }
+
+    void GuiManager::closeDialogue()
+    {
+        if(mDocument != nullptr)
+            mDocument->Close();
+        mDocument = nullptr;
+    }
+
+    bool GuiManager::isDialogueOpened() const
+    {
+        return mDocument != nullptr;
     }
 
     void GuiManager::showTitleScreen()

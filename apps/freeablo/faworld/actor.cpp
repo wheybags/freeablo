@@ -59,6 +59,12 @@ namespace FAWorld
 
                         attack(actor);
                 }
+                else if(canTalkTo(actor))
+                {
+                    mPos.mDist = 0;
+
+                    talk(actor);
+                }
                 else if(mPos.mDist == 0 && !mAnimPlaying)
                 {
 
@@ -115,8 +121,8 @@ namespace FAWorld
         mPos(pos),
         mFrame(0),        
         mStats(stats),
-        mAnimState(AnimState::idle),
-        mIsEnemy(false)
+        mIsEnemy(false),
+        mAnimState(AnimState::idle)
     {
         if (!dieAnimPath.empty())
         {
@@ -341,4 +347,45 @@ namespace FAWorld
 
         return true;
     }
+
+    bool Actor::canTalkTo(Actor * actor)
+    {
+        if(actor == nullptr)
+            return false;
+
+        if(this == actor)
+            return false;
+
+        if(mPos.distanceFrom(actor->mPos) >= 2)
+            return false;
+
+        if(!actor->isNpc())
+            return false;
+
+        if(isTalking)
+            return false;
+
+        return true;
+    }
+
+    void Actor::setIsNpc(bool isNpc)
+    {
+        mIsNpc = isNpc;
+    }
+
+    bool Actor::isNpc() const
+    {
+        return mIsNpc;
+    }
+
+    std::string Actor::getId() const
+    {
+        return mId;
+    }
+
+    void Actor::setId(const std::string& id)
+    {
+        mId = id;
+    }
+
 }

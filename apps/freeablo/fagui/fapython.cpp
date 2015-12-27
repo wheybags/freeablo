@@ -16,6 +16,16 @@ namespace FAGui
     std::string cursorPath;
     uint32_t cursorFrame;
 
+    void FAPythonFuncs::openDialogue(const char* document)
+    {
+        mGuiManager.openDialogue(document);
+    }
+
+    void FAPythonFuncs::closeDialogue()
+    {
+        mGuiManager.closeDialogue();
+    }
+
     void FAPythonFuncs::showChooseClassMenu()
     {
         mGuiManager.showChooseClassMenu();
@@ -458,6 +468,8 @@ namespace FAGui
     FAPythonFuncs* funcs = NULL;
     BOOST_PYTHON_MODULE(freeablo)
     {
+        boost::python::def("openDialogue", +[](const char* document){funcs->openDialogue(document);});
+        boost::python::def("closeDialogue", +[](){funcs->closeDialogue();});
         boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
         boost::python::def("showCredits", +[](){funcs->showCredits();});
         boost::python::def("showSelectHeroMenu", +[](){funcs->showSelectHeroMenu();});

@@ -27,6 +27,8 @@ namespace FAGui
             {}
 
         protected:
+            void openDialogue(const char* document);
+            void closeDialogue();
             void showMainMenu();
             void showCredits();
             void showSelectHeroMenu();

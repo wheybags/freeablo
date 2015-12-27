@@ -1,0 +1,15 @@
+<template name="dialogue" content="header">
+<head>
+<link type="text/rcss" href="dialogue.rcss"/>
+</head>
+<body>
+    <img id="background" src="/data/textbox2.cel">
+            <div class="box" id="header"></div>
+            <div class="box">Would you like to:</div>
+            <div id="menuContainer">
+                <div class="vertical_separator"></div>
+                <div id="innerMenuContainer"></div> <br/>
+            </div>
+    </img>
+</body>
+</template>
