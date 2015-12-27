@@ -53,7 +53,7 @@ namespace FAGui
         mStartTime = std::chrono::system_clock::now();
         mCurrentGuiType = TitleScreen;
 
-        startFadeIn(titleScreen);
+        startFadeIn(menus["titleScreen"]);
     }
 
     void GuiManager::showIngameGui()
