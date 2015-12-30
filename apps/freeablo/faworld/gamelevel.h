@@ -3,7 +3,6 @@
 
 #include <level/level.h>
 
-#include "netobject.h"
 #include "actor.h"
 
 namespace FARender
@@ -15,7 +14,7 @@ namespace FAWorld
 {
     class Player;
 
-    class GameLevel : public NetObject
+    class GameLevel
     {
         public:
             GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors);
@@ -33,11 +32,6 @@ namespace FAWorld
 
             size_t getNextLevel();
             size_t getPreviousLevel();
-
-            virtual void startWriting();
-            virtual size_t getWriteSize();
-            virtual bool writeTo(ENetPacket* packet, size_t& position);
-            virtual bool readFrom(ENetPacket* packet, size_t& position);
 
             void update(bool noclip, size_t tick);
 
@@ -59,6 +53,7 @@ namespace FAWorld
                 return mLevelIndex;
             }
 
+            void saveToPacket(ENetPacket* packet, size_t& position);
             static GameLevel* fromPacket(ENetPacket* packet, size_t& position);
 
             Actor* getActorById(size_t id);
@@ -72,9 +67,6 @@ namespace FAWorld
             std::vector<Actor*> mActors;
             std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
                                                                         ///< Where an actor straddles two squares, they shall be placed in both.
-
-            std::string mDataSavingTmp;
-
             friend class FARender::Renderer;
     };
 }

@@ -155,7 +155,6 @@ namespace Engine
     {
         FAWorld::World& world = *FAWorld::World::get();
 
-        world.getCurrentPlayer()->startWriting();
         size_t bytesPerClient = world.getCurrentPlayer()->getWriteSize() + sizeof(uint32_t); // the uint is for player id
         size_t packetSize = (sizeof(ServerPacketHeader) + bytesPerClient*(mClients.size() +1)) ; // +1 for the local player
 
@@ -177,10 +176,7 @@ namespace Engine
         for(auto pair : mServerPlayerList)
         {
             FAWorld::Player* player = pair.second;
-
             writeToPacket<size_t>(packet, position, player->getId());
-
-            player->startWriting();
             player->writeTo(packet, position);
         }
 
@@ -325,12 +321,12 @@ namespace Engine
     {
         int32_t typeHeader = ReliableMessageKind::Level;
 
-        FAWorld::GameLevel* level = FAWorld::World::get()->getLevel(levelIndex);
-        level->startWriting();
-        ENetPacket* packet = enet_packet_create(NULL, level->getWriteSize() + sizeof(int32_t), ENET_PACKET_FLAG_RELIABLE);
+        ENetPacket* packet = enet_packet_create(NULL, sizeof(int32_t), ENET_PACKET_FLAG_RELIABLE);
         size_t position = 0;
         writeToPacket(packet, position, typeHeader);
-        level->writeTo(packet, position);
+
+        FAWorld::GameLevel* level = FAWorld::World::get()->getLevel(levelIndex);
+        level->saveToPacket(packet, position);
 
         enet_peer_send(peer, RELIABLE_CHANNEL_ID, packet);
     }

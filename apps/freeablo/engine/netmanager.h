@@ -65,10 +65,10 @@ namespace Engine
             FARender::FASpriteGroup* getServerSprite(size_t index);
 
         private:
-            const FAWorld::PlayerFactory& mPlayerFactory;
+            static constexpr uint8_t UNRELIABLE_CHANNEL_ID = 0;
+            static constexpr uint8_t RELIABLE_CHANNEL_ID = 1;
 
-            const uint8_t UNRELIABLE_CHANNEL_ID = 0;
-            const uint8_t RELIABLE_CHANNEL_ID = 1;
+            const FAWorld::PlayerFactory& mPlayerFactory;
 
             void sendServerPacket();
             void sendClientPacket();
