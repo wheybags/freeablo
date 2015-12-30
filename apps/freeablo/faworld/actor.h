@@ -9,6 +9,11 @@
 #include <misc/misc.h>
 #include <map>
 
+namespace Engine
+{
+    class NetManager;
+}
+
 namespace FAWorld
 {
     class ActorStats;
@@ -49,6 +54,11 @@ namespace FAWorld
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);            
             AnimState::AnimState getAnimState();
+
+            size_t getId()
+            {
+                return mId;
+            }
 
             virtual void setLevel(GameLevel* level);
             GameLevel* getLevel();
@@ -115,6 +125,10 @@ namespace FAWorld
             BOOST_SERIALIZATION_SPLIT_MEMBER()
             AnimState::AnimState mAnimState;
             bool mIsEnemy;
+
+        private:
+            size_t mId;
+            friend class Engine::NetManager;
     };
 }
 

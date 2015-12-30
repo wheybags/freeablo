@@ -13,8 +13,14 @@ namespace FAWorld
         mAnimTimeMap[AnimState::attack] = 16;
         mAnimTimeMap[AnimState::idle] = 10;
 
-
+        FAWorld::World::get()->registerPlayer(this);
     }
+
+    Player::~Player()
+    {
+        FAWorld::World::get()->deregisterPlayer(this);
+    }
+
     bool Player::attack(Actor *enemy)
     {
         if(enemy->isDead() && enemy->mStats != nullptr)

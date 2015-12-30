@@ -61,6 +61,8 @@ namespace FAWorld
 
             static GameLevel* fromPacket(ENetPacket* packet, size_t& position);
 
+            Actor* getActorById(size_t id);
+
         private:
             GameLevel() {}
 

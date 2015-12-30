@@ -31,14 +31,10 @@ namespace Engine
 
         mIsServer = isServer;
 
-        FAWorld::World& world = *FAWorld::World::get();
-
         if(isServer)
         {
             mAddress.host = ENET_HOST_ANY;
             mHost = enet_host_create(&mAddress, 32, 2, 0, 0);
-
-            world.setCurrentPlayerId(SERVER_PLAYER_ID);
         }
         else
         {
@@ -57,8 +53,6 @@ namespace Engine
             {
                 std::cout << "connection failed" << std::endl;
             }
-
-            world.setCurrentPlayerId(mServerPeer->connectID);
         }
     }
 
@@ -100,10 +94,18 @@ namespace Engine
                 {
                     if(mIsServer)
                     {
-                        spawnPlayer(event.peer->connectID);
+                        auto player = spawnPlayer(-1);
+
+                        // send the client its player id
+                        auto packet = enet_packet_create(NULL, sizeof(size_t), ENET_PACKET_FLAG_RELIABLE);
+                        size_t position = 0;
+                        writeToPacket(packet, position, player->getId());
+                        enet_peer_send(event.peer, RELIABLE_CHANNEL_ID, packet);
+
                         sendLevel(0, event.peer);
                         sendLevel(1, event.peer);
                         mClients.push_back(event.peer);
+                        mServerPlayerList[event.peer->connectID] = player;
                     }
                     break;
                 }
@@ -167,16 +169,16 @@ namespace Engine
         writeToPacket(packet, position, header);
 
         // write server player
-        writeToPacket<uint32_t>(packet, position, SERVER_PLAYER_ID);
+        writeToPacket(packet, position, world.getCurrentPlayer()->getId());
 
         world.getCurrentPlayer()->writeTo(packet, position);
 
         // write all clients
-        for(size_t i = 0; i < mClients.size(); i++)
+        for(auto pair : mServerPlayerList)
         {
-            writeToPacket<uint32_t>(packet, position, mClients[i]->connectID);
+            FAWorld::Player* player = pair.second;
 
-            FAWorld::Player* player = world.getPlayer(mClients[i]->connectID);
+            writeToPacket<size_t>(packet, position, player->getId());
 
             player->startWriting();
             player->writeTo(packet, position);
@@ -216,8 +218,20 @@ namespace Engine
     {
         if(event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
         {
-            int32_t typeHeader;
             size_t position = 0;
+
+            if(mClientRecievedId == false)
+            {
+                mClientRecievedId = true;
+
+                size_t playerId;
+                readFromPacket(event.packet, position, playerId);
+
+                FAWorld::World::get()->getCurrentPlayer()->mId = playerId;
+
+                return;
+            }
+            int32_t typeHeader;
             readFromPacket(event.packet, position, typeHeader);
 
             switch(typeHeader)
@@ -249,15 +263,12 @@ namespace Engine
             {
                 for(size_t i = 0; i < header.numPlayers; i++)
                 {
-                    uint32_t playerId;
-                    readFromPacket<uint32_t>(event.packet, position, playerId);
+                    size_t playerId;
+                    readFromPacket(event.packet, position, playerId);
 
-                    auto player = world.getPlayer(playerId);
+                    auto player = dynamic_cast<FAWorld::Player*>(world.getActorById(playerId));
                     if(player == NULL)
-                    {
-                        spawnPlayer(playerId);
-                        player = world.getPlayer(playerId);
-                    }
+                        player = spawnPlayer(playerId);
 
                     player->readFrom(event.packet, position);
                 }
@@ -291,7 +302,7 @@ namespace Engine
 
             auto world = FAWorld::World::get();
 
-            auto player = world->getPlayer(event.peer->connectID);
+            auto player = mServerPlayerList[event.peer->connectID];
 
             player->destination().first = data.destX;
             player->destination().second = data.destY;
@@ -347,6 +358,8 @@ namespace Engine
         {
             writeToPacket(packet, position, index);
             mAlreadySentServerSprites.insert(index);
+
+            std::cout << "requesting " << index << std::endl;
         }
 
         mUnknownServerSprites.clear();
@@ -375,6 +388,9 @@ namespace Engine
             paths[i] = renderer->getPathForIndex(requestedSprites[i]);
             size += paths[i].size();
             size += 1; // null terminator
+
+            std::cout << "responding to: " << requestedSprites[i] << " " << paths[i] << std::endl;
+
         }
 
         size += numSprites * sizeof(size_t);
@@ -434,15 +450,20 @@ namespace Engine
             } while(c);
 
             renderer->fillServerSprite(index, path);
+
+            std::cout << "response recieved " << index << " " << path << std::endl;
         }
     }
 
-    void NetManager::spawnPlayer(uint32_t id)
+    FAWorld::Player* NetManager::spawnPlayer(int32_t id)
     {
-        FAWorld::World& world = *FAWorld::World::get();
         auto newPlayer = mPlayerFactory.create("Warrior");
         newPlayer->mPos = FAWorld::Position(76, 68);
         newPlayer->destination() = newPlayer->mPos.current();
-        world.addPlayer(id, newPlayer);
+
+        if(id != -1)
+            newPlayer->mId = id;
+
+        return newPlayer;
     }
 }

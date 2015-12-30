@@ -9,6 +9,7 @@ namespace FAWorld
     {
         public:
             Player();
+            virtual ~Player();
             Inventory mInventory;
             void setSpriteClass(std::string className);
             bool attack(Actor * enemy);

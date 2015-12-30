@@ -228,4 +228,15 @@ namespace FAWorld
 
         return retval;
     }
+
+    Actor* GameLevel::getActorById(size_t id)
+    {
+        for(auto actor : mActors)
+        {
+            if(actor->getId() == id)
+                return actor;
+        }
+
+        return NULL;
+    }
 }

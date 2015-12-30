@@ -3,12 +3,14 @@
 
 #include <vector>
 #include <set>
+#include <map>
 
 #include <enet/enet.h>
 
 namespace FAWorld
 {
     class PlayerFactory;
+    class Player;
 }
 
 namespace FARender
@@ -65,7 +67,6 @@ namespace Engine
         private:
             const FAWorld::PlayerFactory& mPlayerFactory;
 
-            const uint32_t SERVER_PLAYER_ID = 0;
             const uint8_t UNRELIABLE_CHANNEL_ID = 0;
             const uint8_t RELIABLE_CHANNEL_ID = 1;
 
@@ -82,12 +83,13 @@ namespace Engine
             void readSpriteRequest(ENetPacket* packet, ENetPeer* peer, size_t& position);
             void readSpriteResponse(ENetPacket* packet, size_t& position);
 
-            void spawnPlayer(uint32_t id);
+            FAWorld::Player* spawnPlayer(int32_t id);
 
             bool mIsServer;
 
             ENetPeer* mServerPeer = NULL;
             std::vector<ENetPeer*> mClients;
+            std::map<enet_uint32, FAWorld::Player*> mServerPlayerList;
             ENetHost* mHost = NULL;
             ENetAddress mAddress;
 
@@ -98,6 +100,8 @@ namespace Engine
 
             std::set<size_t> mAlreadySentServerSprites;
             std::set<size_t> mUnknownServerSprites;
+
+            bool mClientRecievedId = false;
     };
 }
 

@@ -108,6 +108,11 @@ namespace FAWorld
         }
     }
 
+    size_t nextId = 0;
+    size_t getNewId()
+    {
+        return nextId++;
+    }
 
     Actor::Actor(
             const std::string& walkAnimPath,
@@ -134,7 +139,7 @@ namespace FAWorld
         mAnimTimeMap[AnimState::idle] = 10;
         mAnimTimeMap[AnimState::walk] = 10;
 
-
+        mId = getNewId();
     }
 
     Actor::~Actor()
