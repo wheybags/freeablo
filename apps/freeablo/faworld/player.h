@@ -7,6 +7,8 @@ namespace FAWorld
 {
     class Player: public Actor
     {
+        STATIC_NET_OBJECT_SET_CLASS_ID(2)
+
         public:
             Player();
             virtual ~Player();
@@ -18,6 +20,11 @@ namespace FAWorld
             void updateSpriteFormatVars();
 
             virtual void setLevel(GameLevel* level);
+
+            virtual size_t getBasePriority()
+            {
+                return 1000;
+            }
 
         private:
             // these "Fmt" vars are just used by getCurrentAnim

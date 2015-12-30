@@ -6,6 +6,8 @@
 
 namespace FAWorld
 {
+    STATIC_HANDLE_NET_OBJECT(Player)
+
     Player::Player() : Actor(), mInventory(this)
     {
         mAnimTimeMap[AnimState::dead] = 10;

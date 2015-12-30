@@ -10,6 +10,7 @@
 
 namespace FAWorld
 {
+    STATIC_HANDLE_NET_OBJECT(Actor)
 
     void Actor::update(bool noclip, size_t ticksPassed)
     {

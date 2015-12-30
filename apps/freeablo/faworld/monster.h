@@ -12,8 +12,12 @@ namespace FAWorld
 {
     class Monster: public Actor
     {
+        STATIC_NET_OBJECT_SET_CLASS_ID(1)
+
         public:
+            Monster();
             Monster(const DiabloExe::Monster& monster, Position pos, ActorStats * stats=nullptr);
+            void init();
             std::string getDieWav();
             std::string getHitWav();
 
