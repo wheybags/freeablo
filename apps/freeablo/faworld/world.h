@@ -55,6 +55,8 @@ namespace FAWorld
 
             Actor* getActorById(size_t id);
 
+            void getAllActors(std::vector<Actor*>& actors);
+
         private:
             std::map<size_t, GameLevel*> mLevels;
 

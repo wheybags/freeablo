@@ -2,6 +2,7 @@
 
 #include "../faworld/world.h"
 #include "../faworld/playerfactory.h"
+#include "../faworld/monster.h"
 
 #include <boost/math/special_functions.hpp>
 
@@ -155,32 +156,51 @@ namespace Engine
     {
         FAWorld::World& world = *FAWorld::World::get();
 
-        size_t bytesPerClient = world.getCurrentPlayer()->getWriteSize() + sizeof(uint32_t); // the uint is for player id
-        size_t packetSize = (sizeof(ServerPacketHeader) + bytesPerClient*(mClients.size() +1)) ; // +1 for the local player
-
-        ENetPacket* packet = enet_packet_create(NULL, packetSize, 0);
+        size_t packetSize = 512;
+        ENetPacket* packet = enet_packet_create(NULL, packetSize, ENET_PACKET_FLAG_UNSEQUENCED);
         size_t position = 0;
 
         // write header
         ServerPacketHeader header;
-        header.numPlayers = mClients.size() + 1;
+        header.numPlayers = 0;
         header.tick = mTick;
         writeToPacket(packet, position, header);
 
-        // write server player
-        writeToPacket(packet, position, world.getCurrentPlayer()->getId());
+        std::vector<FAWorld::Actor*> allActors;
+        world.getAllActors(allActors);
 
-        world.getCurrentPlayer()->writeTo(packet, position);
-
-        // write all clients
-        for(auto pair : mServerPlayerList)
+        std::sort(allActors.begin(), allActors.end(), [](FAWorld::Actor* a, FAWorld::Actor* b) -> bool
         {
-            FAWorld::Player* player = pair.second;
-            writeToPacket<size_t>(packet, position, player->getId());
-            player->writeTo(packet, position);
+            return a->getPriority() > b->getPriority();
+        });
+
+        bool packetFull = false;
+        for(auto actor : allActors)
+        {
+            if(((bool)dynamic_cast<FAWorld::Monster*>(actor)))
+                continue;
+
+            if(!packetFull)
+            {
+                bool fits =
+                writeToPacket(packet, position, actor->getClassId()) &&
+                writeToPacket(packet, position, actor->getId()) &&
+                actor->writeTo(packet, position);
+
+                if(!fits)
+                    packetFull = true;
+                else
+                    header.numPlayers++;
+            }
+
+            actor->tickDone(!packetFull);
         }
 
-        enet_host_broadcast(mHost, 0, packet);
+        // rewrite packet header with correct object count
+        position = 0;
+        writeToPacket(packet, position, header);
+
+        enet_host_broadcast(mHost, UNRELIABLE_CHANNEL_ID, packet);
     }
 
     struct ClientPacket
@@ -259,14 +279,19 @@ namespace Engine
             {
                 for(size_t i = 0; i < header.numPlayers; i++)
                 {
-                    size_t playerId;
-                    readFromPacket(event.packet, position, playerId);
+                    int32_t classId;
+                    size_t actorId;
+                    readFromPacket(event.packet, position, classId);
+                    readFromPacket(event.packet, position, actorId);
 
-                    auto player = dynamic_cast<FAWorld::Player*>(world.getActorById(playerId));
-                    if(player == NULL)
-                        player = spawnPlayer(playerId);
+                    FAWorld::Actor* actor = world.getActorById(actorId);
+                    if(actor == NULL)
+                    {
+                        actor = dynamic_cast<FAWorld::Actor*>(FAWorld::NetObject::construct(classId));
+                        actor->mId = actorId;
+                    }
 
-                    player->readFrom(event.packet, position);
+                    actor->readFrom(event.packet, position);
                 }
             }
         }

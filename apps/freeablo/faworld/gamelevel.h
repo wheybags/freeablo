@@ -58,6 +58,8 @@ namespace FAWorld
 
             Actor* getActorById(size_t id);
 
+            void getActors(std::vector<Actor*>& actors);
+
         private:
             GameLevel() {}
 

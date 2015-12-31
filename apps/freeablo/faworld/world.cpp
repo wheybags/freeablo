@@ -153,4 +153,10 @@ namespace FAWorld
 
         return NULL;
     }
+
+    void World::getAllActors(std::vector<Actor*>& actors)
+    {
+        for(auto pair : mLevels)
+            pair.second->getActors(actors);
+    }
 }

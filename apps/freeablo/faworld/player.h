@@ -23,7 +23,7 @@ namespace FAWorld
 
             virtual size_t getBasePriority()
             {
-                return 1000;
+                return 10;
             }
 
         private:

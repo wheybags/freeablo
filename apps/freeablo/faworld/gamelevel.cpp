@@ -210,4 +210,9 @@ namespace FAWorld
 
         return NULL;
     }
+
+    void GameLevel::getActors(std::vector<Actor*>& actors)
+    {
+        actors.insert(actors.end(), mActors.begin(), mActors.end());
+    }
 }
