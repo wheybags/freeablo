@@ -24,7 +24,7 @@ namespace FAWorld
     // initialise it on first use but then that'd show up as a leak in valgrind and generally
     // just feels a bit nasty. We're unlikely to need more than this anyway, and if we ever do it's
     // trivial to increase it.
-    static constexpr size_t factoryTableSize = 20;
+    static constexpr int32_t factoryTableSize = 20;
     NetObject* (*factoryFuncTable[factoryTableSize])() = {NULL};
 
     void NetObject::registerNetObjectClass(int32_t classId, NetObject* (*factoryFunc)())
