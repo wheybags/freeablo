@@ -13,7 +13,6 @@
                 text-align: left;
                 height: 352;
                 width: 320;
-                background-decorator: image;
                 position: fixed;
                 top: -175px;
                 right: 0px;

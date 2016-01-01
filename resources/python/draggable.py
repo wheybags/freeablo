@@ -310,6 +310,7 @@ class DraggableWidget(object):
             element.SetAttribute("BeltX", str(i))
             element.SetAttribute("empty", "false")
             element.SetAttribute("class", "beltItem")
+
             if item["empty"] is False:
                 parent.style.background_color="#A3191950"
                 element.SetAttribute("class", "itemGraphic" + str(item["graphic"]));
@@ -317,6 +318,7 @@ class DraggableWidget(object):
                 element.style.height = "28px"
             else:
                 parent.style.background_color="#00000000"
+                element.SetAttribute("class", "itemGraphicEmpty");
                 element.SetAttribute("empty", "true")
                 element.style.width="0px"
                 element.style.height="0px"
