@@ -56,7 +56,7 @@ namespace FAWorld
             void saveToPacket(ENetPacket* packet, size_t& position);
             static GameLevel* fromPacket(ENetPacket* packet, size_t& position);
 
-            Actor* getActorById(size_t id);
+            Actor* getActorById(int32_t id);
 
             void getActors(std::vector<Actor*>& actors);
 

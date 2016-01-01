@@ -4,7 +4,7 @@
 
 namespace FARender
 {
-    SpriteManager::SpriteManager(size_t cacheSize): mCache(cacheSize) {}
+    SpriteManager::SpriteManager(uint32_t cacheSize): mCache(cacheSize) {}
 
     FASpriteGroup* SpriteManager::get(const std::string& path)
     {
@@ -16,7 +16,7 @@ namespace FARender
         return mCache.getTileset(celPath, minPath, top);
     }
 
-    FASpriteGroup* SpriteManager::getByServerSpriteIndex(size_t index)
+    FASpriteGroup* SpriteManager::getByServerSpriteIndex(uint32_t index)
     {
         if(!mServerSpriteMap.count(index))
         {
@@ -27,12 +27,12 @@ namespace FARender
         return mServerSpriteMap[index];
     }
 
-    std::string SpriteManager::getPathForIndex(size_t index)
+    std::string SpriteManager::getPathForIndex(uint32_t index)
     {
         return mCache.getPathForIndex(index);
     }
 
-    void SpriteManager::fillServerSprite(size_t serverIndex, const std::string& path)
+    void SpriteManager::fillServerSprite(uint32_t serverIndex, const std::string& path)
     {
         auto source = get(path);
         auto dest = getByServerSpriteIndex(serverIndex);
@@ -40,14 +40,14 @@ namespace FARender
         *dest = *source;
     }
 
-    FASpriteGroup* SpriteManager::getFromRaw(const uint8_t* source, size_t width, size_t height)
+    FASpriteGroup* SpriteManager::getFromRaw(const uint8_t* source, uint32_t width, uint32_t height)
     {
-        size_t size = (width*4)*height;
+        uint32_t size = (width*4)*height;
 
         uint8_t* buffer = new uint8_t[size];
         memcpy(buffer, source, size);
 
-        size_t index = mCache.newUniqueIndex();
+        uint32_t index = mCache.newUniqueIndex();
         RawCacheTmp rawTmp;
         rawTmp.buffer = buffer;
         rawTmp.width = width;
@@ -67,7 +67,7 @@ namespace FARender
         return mRawSpriteGroups[mRawSpriteGroups.size()-1];
     }
 
-    Render::SpriteGroup* SpriteManager::get(size_t index)
+    Render::SpriteGroup* SpriteManager::get(uint32_t index)
     {
         if(mRawCache.count(index))
         {
@@ -85,7 +85,7 @@ namespace FARender
         return mCache.get(index);
     }
 
-    void SpriteManager::setImmortal(size_t index, bool immortal)
+    void SpriteManager::setImmortal(uint32_t index, bool immortal)
     {
         mCache.setImmortal(index, immortal);
     }

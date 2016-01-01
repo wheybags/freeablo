@@ -30,31 +30,31 @@ namespace FARender
                 return spriteCacheIndex != 0;
             }
 
-            size_t getAnimLength()
+            uint32_t getAnimLength()
             {
                 return animLength;
             }
 
-            size_t getWidth()
+            uint32_t getWidth()
             {
                 return width;
             }
 
-            size_t getHeight()
+            uint32_t getHeight()
             {
                 return height;
             }
 
-            size_t getCacheIndex()
+            uint32_t getCacheIndex()
             {
                 return spriteCacheIndex;
             }
 
         private:
-            size_t animLength;
-            size_t width;
-            size_t height;
-            size_t spriteCacheIndex;
+            uint32_t animLength;
+            uint32_t width;
+            uint32_t height;
+            uint32_t spriteCacheIndex;
 
         friend class SpriteCache;
         friend class SpriteManager;
@@ -75,10 +75,10 @@ namespace FARender
     struct CacheEntry
     {
         Render::SpriteGroup* sprite;
-        std::list<size_t>::iterator it;
+        std::list<uint32_t>::iterator it;
         bool immortal;
 
-        CacheEntry(Render::SpriteGroup* _sprite, std::list<size_t>::iterator _it, bool _immortal)
+        CacheEntry(Render::SpriteGroup* _sprite, std::list<uint32_t>::iterator _it, bool _immortal)
             :sprite(_sprite), it(_it), immortal(_immortal) {}
 
         CacheEntry() {}
@@ -88,13 +88,13 @@ namespace FARender
     /// @brief Multithread sprite cache
     ///
     /// FASpriteGroup is returned from the get() functions used in the game thread, which do not actually do image loading.
-    /// get(size_t index) method is used to get a Render::SpriteGroup pointer in the render thread, actual image loading is done lazily here.
+    /// get(uint32_t index) method is used to get a Render::SpriteGroup pointer in the render thread, actual image loading is done lazily here.
     /// The index value comes from FASpriteGroup.spriteCacheIndex
     ///
     class SpriteCache
     {
         public:
-            SpriteCache(size_t size);
+            SpriteCache(uint32_t size);
             ~SpriteCache();
 
             FASpriteGroup* get(const std::string& path); ///< To be called from the game thread
@@ -103,25 +103,25 @@ namespace FARender
             /// @brief To be called from the game thread
             FASpriteGroup* getTileset(const std::string& celPath, const std::string& minPath, bool top);
 
-            size_t newUniqueIndex(); ///< Can be called from any thread
+            uint32_t newUniqueIndex(); ///< Can be called from any thread
 
             /// Directly inserts a sprite into the cache at the specified index.
             /// Does not touch any of the m*toCache members, so the only way to get a reference is to have one from before
             /// @brief To be called from the render thread
-            void directInsert(Render::SpriteGroup* sprite, size_t cacheIndex);
+            void directInsert(Render::SpriteGroup* sprite, uint32_t cacheIndex);
 
             /// Gets a Render::SpriteGroup* from the cache if it has been loaded before, otherwise load it,
             /// insert it into the cache, and then return it.
             ///
             /// @brief To be called from the render thread
-            Render::SpriteGroup* get(size_t index);
+            Render::SpriteGroup* get(uint32_t index);
 
             /// Used when we need to guarantee that a sprite will not be evicted for a period of time
             /// @brief To be called from the render thread
-            void setImmortal(size_t index, bool immortal);
+            void setImmortal(uint32_t index, bool immortal);
 
             /// @brief To be called from the game thread
-            std::string getPathForIndex(size_t index);
+            std::string getPathForIndex(uint32_t index);
 
             /// The only creation point for FASpriteGroups
             /// @brief To be called from the game thread
@@ -130,28 +130,28 @@ namespace FARender
             void clear(); //< To be called from the render thread
 
         private:
-            void moveToFront(size_t index);
+            void moveToFront(uint32_t index);
             void evict();
 
             std::map<std::string, FASpriteGroup*> mStrToCache;
-            std::map<size_t, std::string> mCacheToStr;
+            std::map<uint32_t, std::string> mCacheToStr;
 
             std::map<std::string, FASpriteGroup*> mStrToTilesetCache;
-            std::map<size_t, TilesetPath> mCacheToTilesetPath;
+            std::map<uint32_t, TilesetPath> mCacheToTilesetPath;
 
-            std::map<size_t, size_t> mCacheToSprite;
+            std::map<uint32_t, uint32_t> mCacheToSprite;
 
-            std::map<size_t, CacheEntry> mCache;
-            std::list<size_t> mUsedList;
+            std::map<uint32_t, CacheEntry> mCache;
+            std::list<uint32_t> mUsedList;
 
-            std::atomic<size_t> mNextCacheIndex;
+            std::atomic<uint32_t> mNextCacheIndex;
 
-            size_t mCurrentSize;
-            size_t mMaxSize;
+            uint32_t mCurrentSize;
+            uint32_t mMaxSize;
 
-            static constexpr size_t SPRITEGROUP_STORE_BLOCK_SIZE = 256;
+            static constexpr uint32_t SPRITEGROUP_STORE_BLOCK_SIZE = 256;
             std::vector<FASpriteGroup*> mSpriteGroupStore;
-            size_t mSpriteGroupCurrentBlockIndex = 0;
+            uint32_t mSpriteGroupCurrentBlockIndex = 0;
     };
 }
 

@@ -8,8 +8,8 @@ namespace FARender
     struct RawCacheTmp
     {
         uint8_t* buffer;
-        size_t width;
-        size_t height;
+        uint32_t width;
+        uint32_t height;
     };
 
     ///
@@ -20,7 +20,7 @@ namespace FARender
     class SpriteManager : public Render::SpriteCacheBase
     {
         public:
-            SpriteManager(size_t cacheSize);
+            SpriteManager(uint32_t cacheSize);
 
             FASpriteGroup* get(const std::string& path); ///< To be called from the game thread
             FASpriteGroup* getTileset(const std::string& celPath, const std::string& minPath, bool top); ///< To be called from the game thread
@@ -29,37 +29,37 @@ namespace FARender
             /// with fillServerSprite. After it has been filled, all subsequent calls will return a valid FASpriteGroup
             /// for the source it has been filled with.
             /// @brief To be called from the game thread
-            FASpriteGroup* getByServerSpriteIndex(size_t index);
+            FASpriteGroup* getByServerSpriteIndex(uint32_t index);
 
             /// Used by NetManager on the server to get the paths to send to clients
             /// for them to user with fillServerSprite
             /// @brief To be called from the game thread
-            std::string getPathForIndex(size_t index);
+            std::string getPathForIndex(uint32_t index);
 
             /// See getByServerSpriteIndex above
             /// @brief To be called from the game thread
-            void fillServerSprite(size_t serverIndex, const std::string& path);
+            void fillServerSprite(uint32_t serverIndex, const std::string& path);
 
             /// Like get(const std::string&), but for use directly with a pixel buffer
             /// @brief To be called from the game thread
-            FASpriteGroup* getFromRaw(const uint8_t* source, size_t width, size_t height);
+            FASpriteGroup* getFromRaw(const uint8_t* source, uint32_t width, uint32_t height);
 
-            /// Wrapper for SpriteCache::get(size_t, bool)
+            /// Wrapper for SpriteCache::get(uint32_t, bool)
             /// When loading a normal sprite reference, will just pass through, otherwise the reference is a raw load reference from getFromRaw above,
             /// so will load that and inject it into mCache with SpriteCache::directInsert
             /// @brief To be called from the render thread
-            Render::SpriteGroup* get(size_t index);
+            Render::SpriteGroup* get(uint32_t index);
 
-            void setImmortal(size_t index, bool immortal); ///< To be called from the render thread
+            void setImmortal(uint32_t index, bool immortal); ///< To be called from the render thread
 
             void clear(); ///< To be called from the render thread
 
        private:
             SpriteCache mCache;
 
-            std::map<size_t, RawCacheTmp> mRawCache;
+            std::map<uint32_t, RawCacheTmp> mRawCache;
             std::vector<FASpriteGroup*> mRawSpriteGroups;
-            std::map<size_t, FASpriteGroup*> mServerSpriteMap;
+            std::map<uint32_t, FASpriteGroup*> mServerSpriteMap;
     };
 }
 

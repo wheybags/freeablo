@@ -167,17 +167,17 @@ namespace FARender
         return mSpriteManager.get(path);
     }
 
-    FASpriteGroup* Renderer::loadServerImage(size_t index)
+    FASpriteGroup* Renderer::loadServerImage(uint32_t index)
     {
         return mSpriteManager.getByServerSpriteIndex(index);
     }
 
-    void Renderer::fillServerSprite(size_t index, const std::string& path)
+    void Renderer::fillServerSprite(uint32_t index, const std::string& path)
     {
         mSpriteManager.fillServerSprite(index, path);
     }
 
-    std::string Renderer::getPathForIndex(size_t index)
+    std::string Renderer::getPathForIndex(uint32_t index)
     {
         return mSpriteManager.getPathForIndex(index);
     }

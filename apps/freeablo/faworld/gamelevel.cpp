@@ -200,7 +200,7 @@ namespace FAWorld
         return retval;
     }
 
-    Actor* GameLevel::getActorById(size_t id)
+    Actor* GameLevel::getActorById(int32_t id)
     {
         for(auto actor : mActors)
         {
