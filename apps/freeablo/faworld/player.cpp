@@ -6,6 +6,8 @@
 
 namespace FAWorld
 {
+    STATIC_HANDLE_NET_OBJECT(Player)
+
     Player::Player() : Actor(), mInventory(this)
     {
         mAnimTimeMap[AnimState::dead] = 10;
@@ -13,8 +15,14 @@ namespace FAWorld
         mAnimTimeMap[AnimState::attack] = 16;
         mAnimTimeMap[AnimState::idle] = 10;
 
-
+        FAWorld::World::get()->registerPlayer(this);
     }
+
+    Player::~Player()
+    {
+        FAWorld::World::get()->deregisterPlayer(this);
+    }
+
     bool Player::attack(Actor *enemy)
     {
         if(enemy->isDead() && enemy->mStats != nullptr)
@@ -37,50 +45,59 @@ namespace FAWorld
 
     void Player::setSpriteClass(std::string className)
     {
-        mClassName = className;
-        mClassCode = className[0];
+        mFmtClassName = className;
+        mFmtClassCode = className[0];
     }
 
-    FARender::FASpriteGroup Player::getCurrentAnim()
-    {
-        updateSprite();
-        boost::format fmt("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
-        fmt % mClassName % mClassCode % mArmourCode % mWeaponCode % mClassCode % mArmourCode % mWeaponCode;
-        switch(mAnimState)
-        {
-            case AnimState::dead:
-            {
-                mWeaponCode = "n";
-                fmt % "dt";
-                break;
-            }
-            case AnimState::walk:
-            {
-                if (mInDungeon)
-                    fmt % "aw";
-                else
-                    fmt % "wl";
-                break;
-            }
-            case AnimState::attack:
-            {
-                fmt % "at";
-                break;
-            }
+    FARender::FASpriteGroup* Player::getCurrentAnim()
+    {       
+        auto lastClassName = mFmtClassName;
+        auto lastClassCode = mFmtClassCode;
+        auto lastArmourCode = mFmtArmourCode;
+        auto lastWeaponCode = mFmtWeaponCode;
+        auto lastInDungeon = mFmtInDungeon;
 
-            default:
-            case AnimState::idle:
+        updateSpriteFormatVars();
+
+        if( lastClassName   != mFmtClassName   ||
+            lastClassCode   != mFmtClassCode   ||
+            lastWeaponCode  != mFmtWeaponCode  ||
+            lastArmourCode  != mFmtArmourCode  ||
+            lastInDungeon   != mFmtInDungeon   )
+        {
+            auto helper = [&] (bool isDie = false)
             {
-                if (mInDungeon)
-                    fmt % "as";
-                else
-                    fmt % "st";
-                break;
+                std::string weapFormat = mFmtWeaponCode;
+
+                if(isDie)
+                    weapFormat = "n";
+
+                boost::format fmt("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
+                fmt % mFmtClassName % mFmtClassCode % mFmtArmourCode % weapFormat % mFmtClassCode % mFmtArmourCode % weapFormat;
+                return fmt;
+            };
+
+            auto renderer = FARender::Renderer::get();
+
+            mDieAnim = renderer->loadImage((helper(true) % "dt").str());
+            mAttackAnim = renderer->loadImage((helper() % "at").str());
+
+            if(mFmtInDungeon)
+            {
+                mWalkAnim = renderer->loadImage((helper() % "aw").str());
+                mIdleAnim = renderer->loadImage((helper() % "as").str());
+            }
+            else
+            {
+                mWalkAnim = renderer->loadImage((helper() % "wl").str());
+                mIdleAnim = renderer->loadImage((helper() % "st").str());
             }
         }
-        return FARender::Renderer::get()->loadImage(fmt.str());
+
+        return Actor::getCurrentAnim();
     }
-    void Player::updateSprite()
+
+    void Player::updateSpriteFormatVars()
     {
         std::string armour, weapon;
         switch(mInventory.mBody.getCode())
@@ -172,17 +189,17 @@ namespace FAWorld
             else if(mInventory.mLeftHand.getCode() == Item::icBlunt || mInventory.mRightHand.getCode() == Item::icBlunt)
                 weapon = "h";
         }
-        mWeaponCode = weapon;
-        mArmourCode = armour;
+        mFmtWeaponCode = weapon;
+        mFmtArmourCode = armour;
+
+        if(mLevel && mLevel->getLevelIndex() != 0)
+            mFmtInDungeon=true;
+        else
+            mFmtInDungeon=false;
     }
 
     void Player::setLevel(GameLevel *level)
     {
         Actor::setLevel(level);
-
-        if(level->getLevelIndex() != 0)
-            mInDungeon=true;
-        else
-            mInDungeon=false;
     }
 }

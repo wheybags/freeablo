@@ -68,77 +68,6 @@ namespace FAWorld
         return mLevel.getPreviousLevel();
     }
 
-    void GameLevel::startWriting()
-    {
-        mDataSavingTmp.clear();
-        boost::iostreams::back_insert_device<std::string> inserter(mDataSavingTmp);
-        boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
-        boost::archive::binary_oarchive oa(s);
-
-        oa & mLevel;
-        s.flush();
-    }
-
-    struct GameLevelHeader
-    {
-        size_t levelIndex;
-        size_t contentLength;
-    };
-
-    size_t GameLevel::getWriteSize()
-    {
-        return sizeof(GameLevelHeader) + mDataSavingTmp.length();
-    }
-
-    bool GameLevel::writeTo(ENetPacket* packet, size_t& position)
-    {
-        GameLevelHeader header;
-        header.levelIndex = mLevelIndex;
-        header.contentLength = mDataSavingTmp.length();
-
-        if(!Engine::writeToPacket(packet, position, header))
-            return false;
-
-        if((position + mDataSavingTmp.length()) <= packet->dataLength)
-        {
-            for(size_t i = 0; i < mDataSavingTmp.length(); i++)
-                packet->data[position++] = (uint8_t) mDataSavingTmp[i];
-
-            mDataSavingTmp.clear();
-            mDataSavingTmp.shrink_to_fit();
-
-            return true;
-        }
-
-        return false;
-    }
-
-    bool GameLevel::readFrom(ENetPacket* packet, size_t& position)
-    {
-        GameLevelHeader header;
-        if(!Engine::readFromPacket(packet, position, header))
-            return false;
-
-        mLevelIndex = header.levelIndex;
-
-        if(position + header.contentLength <= packet->dataLength)
-        {
-            std::string strTmp(header.contentLength, '\0');
-
-            for(size_t i = 0; i < strTmp.length(); i++)
-                strTmp[i] = packet->data[position++];
-
-            boost::iostreams::basic_array_source<char> device(strTmp.data(), strTmp.size());
-            boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s(device);
-            boost::archive::binary_iarchive ia(s);
-            ia & mLevel;
-
-            return true;
-        }
-
-        return false;
-    }
-
     void GameLevel::update(bool noclip, size_t tick)
     {
         for(size_t i = 0; i < mActors.size(); i++)
@@ -197,8 +126,8 @@ namespace FAWorld
 
         for(size_t i = 0; i < mActors.size(); i++)
         {
-            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim().animLength;
-            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
+            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim()->getAnimLength();
+            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
         }
     }
 
@@ -216,15 +145,74 @@ namespace FAWorld
         assert(false && "tried to remove actor that isn't in level");
     }
 
+    #pragma pack(1)
+    struct GameLevelHeader
+    {
+        size_t levelIndex;
+        size_t contentLength;
+    };
+
+    void GameLevel::saveToPacket(ENetPacket* packet, size_t& position)
+    {
+        // serialise mLevel into a binary string
+        std::string dataSavingTmp;
+        boost::iostreams::back_insert_device<std::string> inserter(dataSavingTmp);
+        boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
+        boost::archive::binary_oarchive oa(s);
+        oa & mLevel;
+        s.flush();
+
+        // write data to packet
+        GameLevelHeader header;
+        header.levelIndex = mLevelIndex;
+        header.contentLength = dataSavingTmp.length();
+
+        size_t requiredSize = position + sizeof(header) + header.contentLength;
+        if(packet->dataLength < requiredSize)
+            enet_packet_resize(packet, requiredSize);
+
+        Engine::writeToPacket(packet, position, header);
+
+        for(size_t i = 0; i < dataSavingTmp.length(); i++)
+            packet->data[position++] = (uint8_t) dataSavingTmp[i];
+    }
+
+
     GameLevel* GameLevel::fromPacket(ENetPacket *packet, size_t &position)
     {
         GameLevel* retval = new GameLevel();
-        if(!retval->readFrom(packet, position))
-        {
-            delete retval;
-            retval = NULL;
-        }
+
+        GameLevelHeader header;
+        Engine::readFromPacket(packet, position, header);
+
+        retval->mLevelIndex = header.levelIndex;
+
+        std::string strTmp(header.contentLength, '\0');
+
+        for(size_t i = 0; i < strTmp.length(); i++)
+            strTmp[i] = packet->data[position++];
+
+        boost::iostreams::basic_array_source<char> device(strTmp.data(), strTmp.size());
+        boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s(device);
+        boost::archive::binary_iarchive ia(s);
+        ia & retval->mLevel;
 
         return retval;
+    }
+
+    Actor* GameLevel::getActorById(size_t id)
+    {
+        for(auto actor : mActors)
+        {
+            if(actor->getId() == id)
+                return actor;
+        }
+
+        return NULL;
+    }
+
+    void GameLevel::getActors(std::vector<Actor*>& actors)
+    {
+        actors.insert(actors.end(), mActors.begin(), mActors.end());
     }
 }

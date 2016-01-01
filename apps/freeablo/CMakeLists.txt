@@ -40,6 +40,7 @@ add_executable(freeablo
     faworld/characterstats.h
     faworld/characterstats.cpp
     faworld/netobject.h
+    faworld/netobject.cpp
     faworld/gamelevel.cpp
     faworld/gamelevel.h
     

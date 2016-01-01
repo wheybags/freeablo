@@ -9,6 +9,11 @@
 #include <misc/misc.h>
 #include <map>
 
+namespace Engine
+{
+    class NetManager;
+}
+
 namespace FAWorld
 {
     class ActorStats;
@@ -27,6 +32,8 @@ namespace FAWorld
     }    
     class Actor : public NetObject
     {
+        STATIC_NET_OBJECT_SET_CLASS_ID(0)
+
         public:
             Actor(const std::string& walkAnimPath="",
                   const std::string& idleAnimPath="",
@@ -44,11 +51,16 @@ namespace FAWorld
             virtual int32_t getCurrentHP();
             bool mAnimPlaying = false;
             bool isAttacking = false;
-            virtual FARender::FASpriteGroup getCurrentAnim();
+            virtual FARender::FASpriteGroup* getCurrentAnim();
             void setAnimation(AnimState::AnimState state, bool reset=false);
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);            
             AnimState::AnimState getAnimState();
+
+            size_t getId()
+            {
+                return mId;
+            }
 
             virtual void setLevel(GameLevel* level);
             GameLevel* getLevel();
@@ -60,11 +72,11 @@ namespace FAWorld
             }
             Position mPos;            
         //private: //TODO: fix this
-            FARender::FASpriteGroup mWalkAnim;
-            FARender::FASpriteGroup mIdleAnim;
-            FARender::FASpriteGroup mDieAnim;
-            FARender::FASpriteGroup mAttackAnim;
-            FARender::FASpriteGroup mHitAnim;
+            FARender::FASpriteGroup* mWalkAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mIdleAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mDieAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mAttackAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mHitAnim = FARender::getDefaultSprite();
         
             size_t mFrame;
             virtual void die();
@@ -115,6 +127,10 @@ namespace FAWorld
             BOOST_SERIALIZATION_SPLIT_MEMBER()
             AnimState::AnimState mAnimState;
             bool mIsEnemy;
+
+        private:
+            size_t mId;
+            friend class Engine::NetManager;
     };
 }
 

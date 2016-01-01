@@ -6,17 +6,41 @@ namespace FARender
 {
     SpriteManager::SpriteManager(size_t cacheSize): mCache(cacheSize) {}
 
-    FASpriteGroup SpriteManager::get(const std::string& path)
+    FASpriteGroup* SpriteManager::get(const std::string& path)
     {
         return mCache.get(path);
     }
 
-    FASpriteGroup SpriteManager::getTileset(const std::string& celPath, const std::string& minPath, bool top)
+    FASpriteGroup* SpriteManager::getTileset(const std::string& celPath, const std::string& minPath, bool top)
     {
         return mCache.getTileset(celPath, minPath, top);
     }
 
-    FASpriteGroup SpriteManager::getFromRaw(const uint8_t* source, size_t width, size_t height)
+    FASpriteGroup* SpriteManager::getByServerSpriteIndex(size_t index)
+    {
+        if(!mServerSpriteMap.count(index))
+        {
+            FASpriteGroup* newSprite = mCache.allocNewSpriteGroup();
+            mServerSpriteMap[index] = newSprite;
+        }
+
+        return mServerSpriteMap[index];
+    }
+
+    std::string SpriteManager::getPathForIndex(size_t index)
+    {
+        return mCache.getPathForIndex(index);
+    }
+
+    void SpriteManager::fillServerSprite(size_t serverIndex, const std::string& path)
+    {
+        auto source = get(path);
+        auto dest = getByServerSpriteIndex(serverIndex);
+
+        *dest = *source;
+    }
+
+    FASpriteGroup* SpriteManager::getFromRaw(const uint8_t* source, size_t width, size_t height)
     {
         size_t size = (width*4)*height;
 
@@ -31,13 +55,16 @@ namespace FARender
 
         mRawCache[index] = rawTmp;
 
-        FASpriteGroup retval;
-        retval.spriteCacheIndex = index;
-        retval.animLength = 1;
-        retval.width = width;
-        retval.height = height;
+        FASpriteGroup* retval = mCache.allocNewSpriteGroup();
+        retval->spriteCacheIndex = index;
+        retval->animLength = 1;
+        retval->width = width;
+        retval->height = height;
 
-        return retval;
+        // put it in a member vector because we need to return a persistent pointer
+        mRawSpriteGroups.push_back(retval);
+
+        return mRawSpriteGroups[mRawSpriteGroups.size()-1];
     }
 
     Render::SpriteGroup* SpriteManager::get(size_t index)

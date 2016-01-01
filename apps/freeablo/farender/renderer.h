@@ -29,8 +29,8 @@ namespace FARender
     class Tileset
     {
         private:
-            FASpriteGroup minTops;
-            FASpriteGroup minBottoms;
+            FASpriteGroup* minTops;
+            FASpriteGroup* minBottoms;
             friend class Renderer;
     };
 
@@ -42,7 +42,7 @@ namespace FARender
 
         FAWorld::Position mPos;
 
-        std::vector<std::tuple<FASpriteGroup, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
+        std::vector<std::tuple<FASpriteGroup*, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
 
         std::vector<DrawCommand> guiDrawBuffer;
 
@@ -50,13 +50,15 @@ namespace FARender
 
         FAWorld::GameLevel* level;
 
-        FASpriteGroup mCursorSpriteGroup;
+        FASpriteGroup* mCursorSpriteGroup;
         uint32_t mCursorFrame;
 
         bool mCursorEmpty;
 
         RenderState():ready(true) {}
     };
+
+    FASpriteGroup* getDefaultSprite();
 
     class Renderer
     {
@@ -74,7 +76,10 @@ namespace FARender
             RenderState* getFreeState(); // ooh ah up de ra
             void setCurrentState(RenderState* current);
 
-            FASpriteGroup loadImage(const std::string& path);
+            FASpriteGroup* loadImage(const std::string& path);
+            FASpriteGroup* loadServerImage(size_t index);
+            void fillServerSprite(size_t index, const std::string& path);
+            std::string getPathForIndex(size_t index);
 
             std::pair<size_t, size_t> getClickedTile(size_t x, size_t y, const FAWorld::GameLevel& level, const FAWorld::Position& screenPos);
 

@@ -117,7 +117,17 @@ namespace FAIO
 
                 DWORD dwBytes = 1;
                 if(!SFileReadFile(*((HANDLE*)stream->data.mpqFile), ptr, size*count, &dwBytes, NULL))
-                    std::cout << "Error reading from file" << std::endl;
+                {
+                    int errorCode = GetLastError();
+
+                    // if the error code is ERROR_HANDLE_EOF, it's not really an error,
+                    // we just requested a read that goes over the end of the file.
+                    // The normal fread behaviour in this case is to truncate the read to fit within
+                    // the file, and return the actual number of bytes read, which we do,
+                    // so there is no need to print an error message.
+                    if(errorCode != ERROR_HANDLE_EOF)
+                        std::cout << "Error reading from file, error code: " << errorCode << std::endl;
+                }
 
                 return dwBytes;
             }

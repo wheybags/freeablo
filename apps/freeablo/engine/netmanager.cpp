@@ -1,27 +1,41 @@
 #include "netmanager.h"
 
 #include "../faworld/world.h"
+#include "../faworld/playerfactory.h"
+#include "../faworld/monster.h"
 
 #include <boost/math/special_functions.hpp>
 
 namespace Engine
 {
-    NetManager::NetManager(bool isServer)
+    NetManager* singletonInstance = NULL;
+
+    NetManager* NetManager::get()
     {
+        return singletonInstance;
+    }
+
+    enum ReliableMessageKind
+    {
+        Level = 100,
+        Sprite = 101
+    };
+
+    NetManager::NetManager(bool isServer, const FAWorld::PlayerFactory& playerFactory) : mPlayerFactory(playerFactory)
+    {
+        assert(singletonInstance == NULL);
+        singletonInstance = this;
+
         enet_initialize();
 
         mAddress.port = 6666;
 
         mIsServer = isServer;
 
-        FAWorld::World& world = *FAWorld::World::get();
-
         if(isServer)
         {
             mAddress.host = ENET_HOST_ANY;
             mHost = enet_host_create(&mAddress, 32, 2, 0, 0);
-
-            world.setCurrentPlayerId(SERVER_PLAYER_ID);
         }
         else
         {
@@ -40,8 +54,6 @@ namespace Engine
             {
                 std::cout << "connection failed" << std::endl;
             }
-
-            world.setCurrentPlayerId(mServerPeer->connectID);
         }
     }
 
@@ -83,10 +95,18 @@ namespace Engine
                 {
                     if(mIsServer)
                     {
-                        spawnPlayer(event.peer->connectID);
+                        auto player = spawnPlayer(-1);
+
+                        // send the client its player id
+                        auto packet = enet_packet_create(NULL, sizeof(size_t), ENET_PACKET_FLAG_RELIABLE);
+                        size_t position = 0;
+                        writeToPacket(packet, position, player->getId());
+                        enet_peer_send(event.peer, RELIABLE_CHANNEL_ID, packet);
+
                         sendLevel(0, event.peer);
                         sendLevel(1, event.peer);
                         mClients.push_back(event.peer);
+                        mServerPlayerList[event.peer->connectID] = player;
                     }
                     break;
                 }
@@ -116,6 +136,16 @@ namespace Engine
         enet_host_flush(mHost);
     }
 
+    FARender::FASpriteGroup* NetManager::getServerSprite(size_t index)
+    {
+        auto retval = FARender::Renderer::get()->loadServerImage(index);
+
+        if(!mAlreadySentServerSprites.count(index))
+            mUnknownServerSprites.insert(index);
+
+        return retval;
+    }
+
     struct ServerPacketHeader
     {
         uint32_t numPlayers;
@@ -126,36 +156,51 @@ namespace Engine
     {
         FAWorld::World& world = *FAWorld::World::get();
 
-        world.getCurrentPlayer()->startWriting();
-        size_t bytesPerClient = world.getCurrentPlayer()->getWriteSize() + sizeof(uint32_t); // the uint is for player id
-        size_t packetSize = (sizeof(ServerPacketHeader) + bytesPerClient*(mClients.size() +1)) ; // +1 for the local player
-
-        ENetPacket* packet = enet_packet_create(NULL, packetSize, 0);
+        size_t packetSize = 512;
+        ENetPacket* packet = enet_packet_create(NULL, packetSize, ENET_PACKET_FLAG_UNSEQUENCED);
         size_t position = 0;
 
         // write header
         ServerPacketHeader header;
-        header.numPlayers = mClients.size() + 1;
+        header.numPlayers = 0;
         header.tick = mTick;
         writeToPacket(packet, position, header);
 
-        // write server player
-        writeToPacket<uint32_t>(packet, position, SERVER_PLAYER_ID);
+        std::vector<FAWorld::Actor*> allActors;
+        world.getAllActors(allActors);
 
-        world.getCurrentPlayer()->writeTo(packet, position);
-
-        // write all clients
-        for(size_t i = 0; i < mClients.size(); i++)
+        std::sort(allActors.begin(), allActors.end(), [](FAWorld::Actor* a, FAWorld::Actor* b) -> bool
         {
-            writeToPacket<uint32_t>(packet, position, mClients[i]->connectID);
+            return a->getPriority() > b->getPriority();
+        });
 
-            FAWorld::Player* player = world.getPlayer(mClients[i]->connectID);
+        bool packetFull = false;
+        for(auto actor : allActors)
+        {
+            if(((bool)dynamic_cast<FAWorld::Monster*>(actor)))
+                continue;
 
-            player->startWriting();
-            player->writeTo(packet, position);
+            if(!packetFull)
+            {
+                bool fits =
+                writeToPacket(packet, position, actor->getClassId()) &&
+                writeToPacket(packet, position, actor->getId()) &&
+                actor->writeTo(packet, position);
+
+                if(!fits)
+                    packetFull = true;
+                else
+                    header.numPlayers++;
+            }
+
+            actor->tickDone(!packetFull);
         }
 
-        enet_host_broadcast(mHost, 0, packet);
+        // rewrite packet header with correct object count
+        position = 0;
+        writeToPacket(packet, position, header);
+
+        enet_host_broadcast(mHost, UNRELIABLE_CHANNEL_ID, packet);
     }
 
     struct ClientPacket
@@ -180,14 +225,46 @@ namespace Engine
         writeToPacket(packet, position, data);
 
         enet_peer_send(mServerPeer, UNRELIABLE_CHANNEL_ID, packet);
+
+        if(mUnknownServerSprites.size())
+            sendSpriteRequest(mServerPeer);
     }
 
     void NetManager::readServerPacket(ENetEvent& event)
     {
         if(event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
         {
-            readLevel(event.packet);
-            FAWorld::World::get()->setLevel(0);
+            size_t position = 0;
+
+            if(mClientRecievedId == false)
+            {
+                mClientRecievedId = true;
+
+                size_t playerId;
+                readFromPacket(event.packet, position, playerId);
+
+                FAWorld::World::get()->getCurrentPlayer()->mId = playerId;
+
+                return;
+            }
+            int32_t typeHeader;
+            readFromPacket(event.packet, position, typeHeader);
+
+            switch(typeHeader)
+            {
+                case ReliableMessageKind::Level:
+                {
+                    readLevel(event.packet, position);
+                    FAWorld::World::get()->setLevel(0);
+                    break;
+                }
+
+                case ReliableMessageKind::Sprite:
+                {
+                    readSpriteResponse(event.packet, position);
+                    break;
+                }
+            }
         }
         else
         {
@@ -202,17 +279,19 @@ namespace Engine
             {
                 for(size_t i = 0; i < header.numPlayers; i++)
                 {
-                    uint32_t playerId;
-                    readFromPacket<uint32_t>(event.packet, position, playerId);
+                    int32_t classId;
+                    size_t actorId;
+                    readFromPacket(event.packet, position, classId);
+                    readFromPacket(event.packet, position, actorId);
 
-                    auto player = world.getPlayer(playerId);
-                    if(player == NULL)
+                    FAWorld::Actor* actor = world.getActorById(actorId);
+                    if(actor == NULL)
                     {
-                        spawnPlayer(playerId);
-                        player = world.getPlayer(playerId);
+                        actor = dynamic_cast<FAWorld::Actor*>(FAWorld::NetObject::construct(classId));
+                        actor->mId = actorId;
                     }
 
-                    player->readFrom(event.packet, position);
+                    actor->readFrom(event.packet, position);
                 }
             }
         }
@@ -220,58 +299,192 @@ namespace Engine
 
     void NetManager::readClientPacket(ENetEvent& event)
     {
-        ClientPacket data;
-
-        size_t position = 0;
-        readFromPacket(event.packet, position, data);
-
-        auto world = FAWorld::World::get();
-
-        auto player = world->getPlayer(event.peer->connectID);
-
-        player->destination().first = data.destX;
-        player->destination().second = data.destY;
-
-        if(data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
+        if(event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
         {
-            auto level = world->getLevel(data.levelIndex);
+            int32_t typeHeader;
+            size_t position = 0;
+            readFromPacket(event.packet, position, typeHeader);
 
-            if(player->getLevel() != NULL && data.levelIndex < (int32_t)player->getLevel()->getLevelIndex())
-                player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
-            else
-                player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+            switch(typeHeader)
+            {
+                case ReliableMessageKind::Sprite:
+                {
+                    readSpriteRequest(event.packet, event.peer, position);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            ClientPacket data;
 
-            player->setLevel(level);
+            size_t position = 0;
+            readFromPacket(event.packet, position, data);
+
+            auto world = FAWorld::World::get();
+
+            auto player = mServerPlayerList[event.peer->connectID];
+
+            player->destination().first = data.destX;
+            player->destination().second = data.destY;
+
+            if(data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
+            {
+                auto level = world->getLevel(data.levelIndex);
+
+                if(player->getLevel() != NULL && data.levelIndex < (int32_t)player->getLevel()->getLevelIndex())
+                    player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
+                else
+                    player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
+
+                player->setLevel(level);
+            }
         }
     }
 
     void NetManager::sendLevel(size_t levelIndex, ENetPeer *peer)
     {
-        FAWorld::GameLevel* level = FAWorld::World::get()->getLevel(levelIndex);
-        level->startWriting();
-        ENetPacket* packet = enet_packet_create(NULL, level->getWriteSize(), ENET_PACKET_FLAG_RELIABLE);
+        int32_t typeHeader = ReliableMessageKind::Level;
+
+        ENetPacket* packet = enet_packet_create(NULL, sizeof(int32_t), ENET_PACKET_FLAG_RELIABLE);
         size_t position = 0;
-        level->writeTo(packet, position);
+        writeToPacket(packet, position, typeHeader);
+
+        FAWorld::GameLevel* level = FAWorld::World::get()->getLevel(levelIndex);
+        level->saveToPacket(packet, position);
 
         enet_peer_send(peer, RELIABLE_CHANNEL_ID, packet);
     }
 
-    void NetManager::readLevel(ENetPacket *packet)
+    void NetManager::readLevel(ENetPacket *packet, size_t& position)
     {
-        size_t position = 0;
         FAWorld::GameLevel* level = FAWorld::GameLevel::fromPacket(packet, position);
 
         if(level)
             FAWorld::World::get()->insertLevel(level->getLevelIndex(), level);
     }
 
-    void NetManager::spawnPlayer(uint32_t id)
+    void NetManager::sendSpriteRequest(ENetPeer* peer)
     {
-        FAWorld::World& world = *FAWorld::World::get();
-        FAWorld::Player* newPlayer = new FAWorld::Player();
+        int32_t typeHeader = ReliableMessageKind::Sprite;
+        size_t numSprites = mUnknownServerSprites.size();
+
+        ENetPacket* packet = enet_packet_create(NULL, (numSprites+1) * sizeof(size_t) + sizeof(int32_t), ENET_PACKET_FLAG_RELIABLE);
+
+        size_t position = 0;
+        writeToPacket(packet, position, typeHeader);
+        writeToPacket(packet, position, numSprites);
+
+        for(size_t index : mUnknownServerSprites)
+        {
+            writeToPacket(packet, position, index);
+            mAlreadySentServerSprites.insert(index);
+
+            std::cout << "requesting " << index << std::endl;
+        }
+
+        mUnknownServerSprites.clear();
+
+        enet_peer_send(peer, RELIABLE_CHANNEL_ID, packet);
+    }
+
+    void NetManager::readSpriteRequest(ENetPacket* packet, ENetPeer* peer, size_t& position)
+    {
+        size_t numSprites;
+        readFromPacket(packet, position, numSprites);
+
+        std::vector<size_t> requestedSprites(numSprites);
+
+        for(size_t i = 0; i < numSprites; i++)
+            readFromPacket(packet, position, requestedSprites[i]);
+
+        std::vector<std::string> paths(numSprites);
+
+        auto renderer = FARender::Renderer::get();
+
+        size_t size = 0;
+
+        for(size_t i = 0; i < numSprites; i++)
+        {
+            paths[i] = renderer->getPathForIndex(requestedSprites[i]);
+            size += paths[i].size();
+            size += 1; // null terminator
+
+            std::cout << "responding to: " << requestedSprites[i] << " " << paths[i] << std::endl;
+
+        }
+
+        size += numSprites * sizeof(size_t);
+        size += sizeof(int32_t); // type header
+        size += sizeof(size_t); // numSprites count
+
+        int32_t typeHeader = ReliableMessageKind::Sprite;
+
+        ENetPacket* responsePacket = enet_packet_create(NULL, size, ENET_PACKET_FLAG_RELIABLE);
+        size_t writePosition = 0;
+
+        writeToPacket(responsePacket, writePosition, typeHeader);
+        writeToPacket(responsePacket, writePosition, numSprites);
+
+        for(size_t i = 0; i < numSprites; i++)
+        {
+            writeToPacket(responsePacket, writePosition, requestedSprites[i]);
+
+            std::string& path = paths[i];
+            char c;
+
+            for(size_t j = 0; j < path.size(); j++)
+            {
+                c = path[j];
+                writeToPacket(responsePacket, writePosition, c);
+            }
+
+            c = 0;
+            writeToPacket(responsePacket, writePosition, c);
+        }
+
+        enet_peer_send(peer, RELIABLE_CHANNEL_ID, responsePacket);
+    }
+
+    void NetManager::readSpriteResponse(ENetPacket* packet, size_t& position)
+    {
+        size_t numSprites;
+        readFromPacket(packet, position, numSprites);
+
+        auto renderer = FARender::Renderer::get();
+
+        for(size_t i = 0; i < numSprites; i++)
+        {
+            size_t index;
+            readFromPacket(packet, position, index);
+
+            std::string path;
+
+            char c = 0;
+
+            do
+            {
+                readFromPacket(packet, position, c);
+
+                if(c)
+                    path += c;
+            } while(c);
+
+            renderer->fillServerSprite(index, path);
+
+            std::cout << "response recieved " << index << " " << path << std::endl;
+        }
+    }
+
+    FAWorld::Player* NetManager::spawnPlayer(int32_t id)
+    {
+        auto newPlayer = mPlayerFactory.create("Warrior");
         newPlayer->mPos = FAWorld::Position(76, 68);
         newPlayer->destination() = newPlayer->mPos.current();
-        newPlayer->setSpriteClass("warrior");
-        world.addPlayer(id, newPlayer);
+
+        if(id != -1)
+            newPlayer->mId = id;
+
+        return newPlayer;
     }
 }

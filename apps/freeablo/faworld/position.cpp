@@ -115,6 +115,7 @@ namespace FAWorld
         return retval;
     }
 
+    #pragma pack(1)
     struct PosNetData
     {
         size_t dist;
