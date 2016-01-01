@@ -28,7 +28,7 @@ namespace Launcher
         QStringList mArguments;
 
     private slots:
-        void processError();
+        void processError(QProcess::ProcessError error);
         void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
     };
