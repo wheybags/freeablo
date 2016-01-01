@@ -10,7 +10,7 @@
 
 namespace FAWorld
 {
-    STATIC_HANDLE_NET_OBJECT(Actor)
+    STATIC_HANDLE_NET_OBJECT_IN_IMPL(Actor)
 
     void Actor::update(bool noclip, size_t ticksPassed)
     {
@@ -253,17 +253,17 @@ namespace FAWorld
     #pragma pack(1)
     struct ActorNetData
     {
-        size_t frame;
+        int32_t frame;
         uint8_t animState;
-        size_t destX;
-        size_t destY;
+        int32_t destX;
+        int32_t destY;
         int32_t levelIndex;
 
-        size_t walkAnimIndex;
-        size_t idleAnimIndex;
-        size_t dieAnimIndex;
-        size_t attackAnimIndex;
-        size_t hitAnimIndex;
+        uint32_t walkAnimIndex;
+        uint32_t idleAnimIndex;
+        uint32_t dieAnimIndex;
+        uint32_t attackAnimIndex;
+        uint32_t hitAnimIndex;
     };
 
     size_t Actor::getWriteSize()

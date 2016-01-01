@@ -156,7 +156,7 @@ namespace Engine
             auto player = world->getCurrentPlayer();
             auto level = world->getCurrentLevel();
 
-            std::pair<size_t, size_t>& destination = player->destination();
+            std::pair<int32_t, int32_t>& destination = player->destination();
 
             destination = FARender::Renderer::get()->getClickedTile(mXClick, mYClick, *level, player->mPos);
             if(mClick )

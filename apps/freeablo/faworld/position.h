@@ -16,13 +16,13 @@ namespace FAWorld
     {
         public:
             Position();
-            Position(size_t x, size_t y);
-            Position(size_t x, size_t y, size_t direction);
+            Position(int32_t x, int32_t y);
+            Position(int32_t x, int32_t y, int32_t direction);
 
             void update(); ///< advances towards mNext
-            std::pair<size_t, size_t> current() const; ///< where we are coming from
-            std::pair<size_t, size_t> next() const; ///< where we are going to
-            size_t mDist; ///< percentage of the way there
+            std::pair<int32_t, int32_t> current() const; ///< where we are coming from
+            std::pair<int32_t, int32_t> next() const; ///< where we are going to
+            int32_t mDist; ///< percentage of the way there
             int32_t mDirection;
             bool mMoving;
             double distanceFrom(Position B);
@@ -32,7 +32,7 @@ namespace FAWorld
 
         
         private:
-            std::pair<size_t, size_t> mCurrent;
+            std::pair<int32_t, int32_t> mCurrent;
 
             template<class Archive>
             void save(Archive & ar, const unsigned int version) const

@@ -7,7 +7,7 @@ namespace FAWorld
 {
     class Player: public Actor
     {
-        STATIC_NET_OBJECT_SET_CLASS_ID(2)
+        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
 
         public:
             Player();

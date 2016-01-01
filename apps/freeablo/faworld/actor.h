@@ -32,7 +32,7 @@ namespace FAWorld
     }    
     class Actor : public NetObject
     {
-        STATIC_NET_OBJECT_SET_CLASS_ID(0)
+        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
 
         public:
             Actor(const std::string& walkAnimPath="",
@@ -57,7 +57,7 @@ namespace FAWorld
             void setIdleAnimation(const std::string path);            
             AnimState::AnimState getAnimState();
 
-            size_t getId()
+            int32_t getId()
             {
                 return mId;
             }
@@ -80,8 +80,8 @@ namespace FAWorld
         
             size_t mFrame;
             virtual void die();
-            std::pair<size_t, size_t> mDestination;
-            std::pair<size_t, size_t>& destination()
+            std::pair<int32_t, int32_t> mDestination;
+            std::pair<int32_t, int32_t>& destination()
             {
                 return mDestination;
             }
@@ -129,7 +129,7 @@ namespace FAWorld
             bool mIsEnemy;
 
         private:
-            size_t mId;
+            int32_t mId;
             friend class Engine::NetManager;
     };
 }

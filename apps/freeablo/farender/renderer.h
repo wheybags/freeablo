@@ -42,7 +42,7 @@ namespace FARender
 
         FAWorld::Position mPos;
 
-        std::vector<std::tuple<FASpriteGroup*, size_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
+        std::vector<std::tuple<FASpriteGroup*, uint32_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
 
         std::vector<DrawCommand> guiDrawBuffer;
 
@@ -77,9 +77,9 @@ namespace FARender
             void setCurrentState(RenderState* current);
 
             FASpriteGroup* loadImage(const std::string& path);
-            FASpriteGroup* loadServerImage(size_t index);
-            void fillServerSprite(size_t index, const std::string& path);
-            std::string getPathForIndex(size_t index);
+            FASpriteGroup* loadServerImage(uint32_t index);
+            void fillServerSprite(uint32_t index, const std::string& path);
+            std::string getPathForIndex(uint32_t index);
 
             std::pair<size_t, size_t> getClickedTile(size_t x, size_t y, const FAWorld::GameLevel& level, const FAWorld::Position& screenPos);
 

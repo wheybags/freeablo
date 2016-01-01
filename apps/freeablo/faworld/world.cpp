@@ -141,7 +141,7 @@ namespace FAWorld
             getCurrentLevel()->fillRenderState(state);
     }
 
-    Actor* World::getActorById(size_t id)
+    Actor* World::getActorById(int32_t id)
     {
         for(auto levelPair : mLevels)
         {

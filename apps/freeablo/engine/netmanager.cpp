@@ -280,7 +280,7 @@ namespace Engine
                 for(size_t i = 0; i < header.numPlayers; i++)
                 {
                     int32_t classId;
-                    size_t actorId;
+                    int32_t actorId;
                     readFromPacket(event.packet, position, classId);
                     readFromPacket(event.packet, position, actorId);
 

@@ -12,7 +12,7 @@ namespace FAWorld
 {
     class Monster: public Actor
     {
-        STATIC_NET_OBJECT_SET_CLASS_ID(1)
+        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
 
         public:
             Monster();
