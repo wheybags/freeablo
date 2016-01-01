@@ -8,7 +8,7 @@
 
 namespace FAWorld
 {
-    STATIC_HANDLE_NET_OBJECT(Monster)
+    STATIC_HANDLE_NET_OBJECT_IN_IMPL(Monster)
 
     void Monster::init()
     {

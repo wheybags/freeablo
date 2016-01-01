@@ -2,24 +2,27 @@
 #define FA_NET_OBJECT_H
 
 #include <enet/enet.h>
+#include <stdint.h>
 
 // put in implementation file for NetObject subclasses. Requires the below macro.
 // see registerNetObjectClass below
-#define STATIC_HANDLE_NET_OBJECT(className) \
+#define STATIC_HANDLE_NET_OBJECT_IN_IMPL(className) \
+    int32_t className::mClassIndirectId = -1; \
     NetObject* StaticInitialiseFunc##className() { return new className(); } \
     struct StaticInitialise##className \
     { \
         StaticInitialise##className() \
         { \
-            NetObject::registerNetObjectClass(className::StaticGetClassId(), StaticInitialiseFunc##className); \
+            className::mClassIndirectId = NetObject::registerNetObjectClass(#className, StaticInitialiseFunc##className); \
         } \
     } _StaticInitialise##className;
 
 // put in class defenition of NetObject subclasses
-#define STATIC_NET_OBJECT_SET_CLASS_ID(classId) \
+#define STATIC_HANDLE_NET_OBJECT_IN_CLASS() \
     public: \
-        static int32_t StaticGetClassId() { return classId; } \
-        virtual int32_t getClassId() { return StaticGetClassId(); }
+        static int32_t mClassIndirectId; \
+        virtual int32_t getClassId() { return ::FAWorld::NetObject::getClassIdFromIndirectId(mClassIndirectId); }
+
 
 namespace FAWorld
 {
@@ -70,8 +73,9 @@ namespace FAWorld
 
              /*!
               * \brief Registers a factory function for a NetObject subclass, so they can be constructed using just the id
+              * \return an indirect id that can be converted to a real id with getClassIdFromIndirectId()
               */
-             static void registerNetObjectClass(int32_t classId, NetObject* (*factoryFunc)());
+             static int32_t registerNetObjectClass(const char* typeName, NetObject* (*factoryFunc)());
 
              /*!
               * \brief construct a class instance of a NetObject subclass, using a classId previously
@@ -86,6 +90,12 @@ namespace FAWorld
               * registerNetObjectClass() above.
               */
              virtual int32_t getClassId();
+
+             /*!
+              * \param indirectId an indirect id from registerNetObjectClass()
+              * \return an id for use with construct()
+              */
+             static int32_t getClassIdFromIndirectId(int32_t indirectId);
 
 
         private:

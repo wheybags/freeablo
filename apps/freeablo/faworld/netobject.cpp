@@ -2,6 +2,10 @@
 
 #include <assert.h>
 
+#include <vector>
+#include <iostream>
+#include <algorithm>
+
 namespace FAWorld
 {
     void NetObject::tickDone(bool wasSent)
@@ -25,19 +29,53 @@ namespace FAWorld
     // just feels a bit nasty. We're unlikely to need more than this anyway, and if we ever do it's
     // trivial to increase it.
     static constexpr int32_t factoryTableSize = 20;
+
     NetObject* (*factoryFuncTable[factoryTableSize])() = {NULL};
+    const char* typeNames[factoryTableSize] = {NULL};
+    int32_t indirectionArray[factoryTableSize] = {0};
 
-    void NetObject::registerNetObjectClass(int32_t classId, NetObject* (*factoryFunc)())
+    int32_t current = 0;
+
+    int32_t NetObject::registerNetObjectClass(const char* typeName, NetObject* (*factoryFunc)())
     {
-        assert(classId < factoryTableSize && "NetObject is out of bounds");
-        assert(factoryFuncTable[classId] == NULL && "duplicate NetObject id");
+        int32_t classIndirectId = current;
+        current++;
 
-        factoryFuncTable[classId] = factoryFunc;
+        factoryFuncTable[classIndirectId] = factoryFunc;
+        typeNames[classIndirectId] = typeName;
+
+        std::vector<std::string> strs;
+        for(int32_t i = 0; i < current; i++)
+            strs.push_back(typeNames[i]);
+
+        std::sort(strs.begin(), strs.end());
+
+        for(int32_t i = 0; i < current; i++)
+        {
+            for(int32_t j = 0; j < current; j++)
+            {
+                if(strs[j] == typeNames[i])
+                    indirectionArray[i] = j;
+            }
+        }
+
+        return classIndirectId;
+    }
+
+    int32_t NetObject::getClassIdFromIndirectId(int32_t indirectId)
+    {
+        return indirectionArray[indirectId];
     }
 
     NetObject* NetObject::construct(int32_t classId)
     {
-        return factoryFuncTable[classId]();
+        for(int32_t i = 0; i < current; i++)
+        {
+            if(indirectionArray[i] == classId)
+                return factoryFuncTable[i]();
+        }
+
+        return NULL;
     }
 
     int32_t NetObject::getClassId()

@@ -32,7 +32,7 @@ namespace FAWorld
     }    
     class Actor : public NetObject
     {
-        STATIC_NET_OBJECT_SET_CLASS_ID(0)
+        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
 
         public:
             Actor(const std::string& walkAnimPath="",

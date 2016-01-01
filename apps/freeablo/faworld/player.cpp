@@ -6,7 +6,7 @@
 
 namespace FAWorld
 {
-    STATIC_HANDLE_NET_OBJECT(Player)
+    STATIC_HANDLE_NET_OBJECT_IN_IMPL(Player)
 
     Player::Player() : Actor(), mInventory(this)
     {
