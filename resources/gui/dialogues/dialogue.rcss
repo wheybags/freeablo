@@ -4,6 +4,9 @@ body
     text-align: center;
     width: 271px;
     height: 303px;
+    position: absolute;
+    top: 30px;
+    right: 30px;
 }
 
 div.box

@@ -359,7 +359,7 @@ namespace FAWorld
         if(mPos.distanceFrom(actor->mPos) >= 2)
             return false;
 
-        if(!actor->isNpc())
+        if(!actor->canTalk())
             return false;
 
         if(isTalking)
@@ -368,14 +368,14 @@ namespace FAWorld
         return true;
     }
 
-    void Actor::setIsNpc(bool isNpc)
+    void Actor::setCanTalk(bool canTalk)
     {
-        mIsNpc = isNpc;
+        mCanTalk = canTalk;
     }
 
-    bool Actor::isNpc() const
+    bool Actor::canTalk() const
     {
-        return mIsNpc;
+        return mCanTalk;
     }
 
     std::string Actor::getId() const

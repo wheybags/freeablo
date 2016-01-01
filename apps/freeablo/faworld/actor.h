@@ -82,12 +82,12 @@ namespace FAWorld
                 return mDestination;
             }
 
-            bool isNpc() const;
+            bool canTalk() const;
             bool isDead() const;
             bool isEnemy() const;
             std::string getId() const;
             void setId(const std::string& id);
-            void setIsNpc(bool isNpc);
+            void setCanTalk(bool canTalk);
 
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
@@ -100,7 +100,7 @@ namespace FAWorld
 
             std::string mId;
             bool mIsDead = false;
-            bool mIsNpc = false;
+            bool mCanTalk = false;
             bool mIsEnemy;
 
             friend class boost::serialization::access;
