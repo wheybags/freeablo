@@ -11,16 +11,16 @@ mainMenu = None
 
 def onLoad(document):
     entries = [
-    {"text": 'taik to griswoid', "func": freeablo.closeDialogue},
+    {"text": 'talk to griswold', "func": freeablo.closeDialogue},
     {"text": 'buy basic items', "func": freeablo.closeDialogue},
     {"text": 'buy premium items', "func": freeablo.closeDialogue},
-    {"text": 'seii items', "func": freeablo.closeDialogue},
+    {"text": 'sell items', "func": freeablo.closeDialogue},
     {"text": 'repair items', "func": freeablo.closeDialogue},
-    {"text": 'ieave the shop', "func": freeablo.closeDialogue},
+    {"text": 'leave the shop', "func": freeablo.closeDialogue},
     ]
 
-    fmtSelected = '<span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/><span class="pentagon_border_separator" />'
-    fmtNotSelected = '<span class="pentagon_separator"/><div class="entryText"> %s </div><span class="pentagon_separator"/>'
+    fmtSelected = '<span class="pentagon_left"/>%s<span class="pentagon_right"/>'
+    fmtNotSelected = '<span style="visibility: hidden;" class="pentagon_left"/>%s<span style="visibility: hidden;" class="pentagon_right"/>'
 
     global mainMenu
     mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
@@ -31,9 +31,9 @@ def onKeyDown(event, document):
 </script>
 </head>
 <body template="dialogue" onload="onLoad(document)" onkeydown="onKeyDown(event, document)">
-    <div class="horizontalSeparator_17"></div>
-    weicome to the
+    <div class="horizontalSeparator_21"></div>
+    <div class="box">welcome to the</div>
     <div class="horizontalSeparator_11"></div>
-    biacksmith's shop
+    <div class="box">blacksmith`s shop</div>
 </body>
 </rml>
