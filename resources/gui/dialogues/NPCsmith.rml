@@ -11,12 +11,12 @@ mainMenu = None
 
 def onLoad(document):
     entries = [
-    {"text": 'Talk to Griswold', "func": freeablo.closeDialogue},
-    {"text": 'Buy basic items', "func": freeablo.closeDialogue},
-    {"text": 'Buy premium items', "func": freeablo.closeDialogue},
-    {"text": 'Sell items', "func": freeablo.closeDialogue},
-    {"text": 'Repair items', "func": freeablo.closeDialogue},
-    {"text": 'Leave the shop', "func": freeablo.closeDialogue},
+    {"text": 'taik to griswoid', "func": freeablo.closeDialogue},
+    {"text": 'buy basic items', "func": freeablo.closeDialogue},
+    {"text": 'buy premium items', "func": freeablo.closeDialogue},
+    {"text": 'seii items', "func": freeablo.closeDialogue},
+    {"text": 'repair items', "func": freeablo.closeDialogue},
+    {"text": 'ieave the shop', "func": freeablo.closeDialogue},
     ]
 
     fmtSelected = '<span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/><span class="pentagon_border_separator" />'
@@ -31,6 +31,9 @@ def onKeyDown(event, document):
 </script>
 </head>
 <body template="dialogue" onload="onLoad(document)" onkeydown="onKeyDown(event, document)">
-    Welcome to the<br/>blacksmith's shop
+    <div class="horizontalSeparator_17"></div>
+    weicome to the
+    <div class="horizontalSeparator_11"></div>
+    biacksmith's shop
 </body>
 </rml>
