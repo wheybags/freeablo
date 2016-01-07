@@ -2,7 +2,7 @@
 <font>
   <info face="FreeabloWhite11" italic="0" size="11" bold="0" src="ctrlpan/smaltext.cel&convertToSingleTexture=true"/>
   <common lineHeight="11" base="9" scaleW="902" scaleH="11"/>
-  <chars count="68">
+  <chars count="69">
 	<char id="32" x="121" y="0" width="1" height="11" xoffset="0" yoffset="0" xadvance="9" />
 	<char id="33" x="720" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
 	<char id="34" x="564" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
@@ -15,15 +15,16 @@
 	<char id="41" x="525" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
 	<char id="42" x="785" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
 	<char id="43" x="499" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
-	<char id="45" x="473" y="0" width="7" height="11" xoffset="0" yoffset="0" xadvance="7" />
+    <char id="44" x="603" y="0" width="4" height="11" xoffset="0" yoffset="7" xadvance="4" />		
+    <char id="45" x="473" y="0" width="7" height="11" xoffset="0" yoffset="0" xadvance="7" />
 	<char id="46" x="681" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />	
 	<char id="47" x="694" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
-	<char id="48" x="460" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
+	<char id="48" x="460" y="0" width="11" height="11" xoffset="0" yoffset="0" xadvance="11" />
 	<char id="49" x="343" y="0" width="7" height="11" xoffset="0" yoffset="0" xadvance="7" />
 	<char id="50" x="356" y="0" width="9" height="11" xoffset="0" yoffset="0" xadvance="9" />
 	<char id="51" x="369" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
 	<char id="52" x="382" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
-	<char id="53" x="395" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
+	<char id="53" x="395" y="0" width="8" height="11" xoffset="0" yoffset="0" xadvance="8" />
 	<char id="54" x="408" y="0" width="8" height="11" xoffset="0" yoffset="0" xadvance="8" />
 	<char id="55" x="421" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
 	<char id="56" x="434" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
@@ -32,7 +33,7 @@
 	<char id="60" x="798" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
 	<char id="61" x="486" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />	
 	<char id="62" x="811" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />	
-	<char id="63" x="707" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />	
+	<char id="63" x="707" y="0" width="7" height="11" xoffset="0" yoffset="0" xadvance="7" />	
 	<char id="64" x="824" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
 	<char id="91" x="538" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
 	<char id="92" x="837" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
@@ -49,7 +50,7 @@
 	<char id="103" x="78" y="0" width="10" height="11" xoffset="0" yoffset="0" xadvance="10" />
 	<char id="104" x="91" y="0" width="9" height="11" xoffset="0" yoffset="0" xadvance="9" />
 	<char id="105" x="104" y="0" width="4" height="11" xoffset="0" yoffset="0" xadvance="4" />
-	<char id="106" x="117" y="0" width="13" height="11" xoffset="0" yoffset="0" xadvance="13" />
+	<char id="106" x="117" y="0" width="4" height="11" xoffset="0" yoffset="0" xadvance="4" />
 	<char id="107" x="130" y="0" width="9" height="11" xoffset="0" yoffset="0" xadvance="9" />
 	<char id="108" x="143" y="0" width="7" height="11" xoffset="0" yoffset="0" xadvance="7" />
 	<char id="109" x="161" y="0" width="12" height="11" xoffset="0" yoffset="0" xadvance="12" />

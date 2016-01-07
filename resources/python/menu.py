@@ -45,6 +45,7 @@ class Menu(object):
             entryStr = '<span class="menuEntry" id="menuEntry%05d" onmouseover="%s.setSelected(%05d)" onclick="%s.activate()" style="display:block;">' % (i, self.selfName, i, self.selfName)
             entryStr += self.fmtNotSelected % val["text"]
             entryStr += '</span>'
+            entryStr += '<span id="menuEntrySeparator%05d"></span>' % i
             menuHtmlStr += entryStr
 
         container = self.doc.GetElementById(self.containerId)

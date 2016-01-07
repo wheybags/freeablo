@@ -23,11 +23,13 @@ def talkTo(npcId):
         rml = DIALOGUE_PATH + "NPCstorytell.rml"
     elif npcId == 'NPCdrunk':
         openingSound = "sfx/Towners/Drunk27.wav"
+        rml = DIALOGUE_PATH + "NPCdrunk.rml"
     elif npcId == 'NPChealer':
         openingSound = "sfx/Towners/Healer37.wav"
         rml = DIALOGUE_PATH + "NPChealer.rml"
     elif npcId == 'NPCboy':
         openingSound = "sfx/Towners/Pegboy32.wav"
+        rml = DIALOGUE_PATH + "NPCboy.rml"
     elif npcId == 'NPCmaid':
         openingSound = "sfx/Towners/Bmaid31.wav"
         rml = DIALOGUE_PATH + "NPCmaid.rml"

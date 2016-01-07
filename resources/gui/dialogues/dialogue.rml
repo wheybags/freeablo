@@ -7,7 +7,7 @@
             <div class="box" id="header"></div>
             <div class="horizontalLine"></div>
             <div id="horizontalSeparator_top"></div>
-            <div class="box">would you like to:</div>
+            <div class="box" id="would_you_like_to">would you like to:</div>
             <div class="horizontalSeparator_20"></div>
             <div id="menuContainer">
                 <div class="vertical_separator"></div>
