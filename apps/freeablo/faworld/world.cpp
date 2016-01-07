@@ -49,7 +49,7 @@ namespace FAWorld
         {
             Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
             actor->setCanTalk(true);
-            actor->setId(npcs[i]->id);
+            actor->setActorId(npcs[i]->id);
             townActors.push_back(actor);
         }
 
@@ -105,11 +105,11 @@ namespace FAWorld
         std::set<GameLevel*> done;
         
         // only update levels that have players on them
-        for(auto& pair : mPlayers)
+        for(auto& player : mPlayers)
         {
-            GameLevel* level = pair.second->getLevel();
+            GameLevel* level = player->getLevel();
             
-            if(!done.count(level))
+            if(level && !done.count(level))
             {
                 done.insert(level);
                 level->update(noclip, mTicksPassed);
@@ -127,30 +127,38 @@ namespace FAWorld
         mCurrentPlayer = player;
     }
 
-    Player* World::getPlayer(size_t id)
+    void World::registerPlayer(Player *player)
     {
-        if(mPlayers.find(id) != mPlayers.end())
-            return mPlayers[id];
-        else
-            return NULL;
+        mPlayers.push_back(player);
     }
 
-    void World::addPlayer(uint32_t id, Player *player)
+    void World::deregisterPlayer(Player *player)
     {
-        mPlayers[id] = player;
-
-        player->setLevel(getCurrentLevel());
-        //getCurrentLevel()->addActor(player);
-    }
-
-    void World::setCurrentPlayerId(uint32_t id)
-    {
-        mPlayers[id] = mCurrentPlayer;
+        mPlayers.erase(std::find(mPlayers.begin(), mPlayers.end(), player));
     }
 
     void World::fillRenderState(FARender::RenderState* state)
     {
         if(getCurrentLevel())
             getCurrentLevel()->fillRenderState(state);
+    }
+
+    Actor* World::getActorById(int32_t id)
+    {
+        for(auto levelPair : mLevels)
+        {
+            auto actor = levelPair.second->getActorById(id);
+
+            if(actor)
+                return actor;
+        }
+
+        return NULL;
+    }
+
+    void World::getAllActors(std::vector<Actor*>& actors)
+    {
+        for(auto pair : mLevels)
+            pair.second->getActors(actors);
     }
 }

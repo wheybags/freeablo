@@ -8,21 +8,33 @@
 
 namespace FAWorld
 {
-    Monster::Monster(const DiabloExe::Monster& monster, Position pos, ActorStats *stats):
-        Actor("", "", pos, "", stats), mAnimPath(monster.cl2Path), mSoundPath(monster.soundPath)
+    STATIC_HANDLE_NET_OBJECT_IN_IMPL(Monster)
+
+    void Monster::init()
     {
         mAnimTimeMap[AnimState::dead] = 10;
         mAnimTimeMap[AnimState::idle] = 10;
         mAnimTimeMap[AnimState::dead] = 10;
         mAnimTimeMap[AnimState::hit] = 10;
-        
+
+        mIsEnemy = true;
+    }
+
+    Monster::Monster()
+    {
+        init();
+    }
+
+    Monster::Monster(const DiabloExe::Monster& monster, Position pos, ActorStats *stats):
+        Actor("", "", pos, "", stats), mAnimPath(monster.cl2Path), mSoundPath(monster.soundPath)
+    {
+        init();
+
         boost::format fmt(mAnimPath); 
         mWalkAnim = FARender::Renderer::get()->loadImage((fmt % 'w').str());
         mIdleAnim = FARender::Renderer::get()->loadImage((fmt % 'n').str());
         mDieAnim =  FARender::Renderer::get()->loadImage((fmt % 'd').str());
         mHitAnim =  FARender::Renderer::get()->loadImage((fmt % 'h').str());
-
-        mIsEnemy = true;
     }
 
     std::string Monster::getDieWav()

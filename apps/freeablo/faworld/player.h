@@ -7,24 +7,34 @@ namespace FAWorld
 {
     class Player: public Actor
     {
+        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
+
         public:
             Player();
+            virtual ~Player();
             Inventory mInventory;
             void setSpriteClass(std::string className);
             bool attack(Actor * enemy);
             bool attack(Player * enemy);
             bool talk(Actor * actor);
-            FARender::FASpriteGroup getCurrentAnim();
-            void updateSprite();
+            FARender::FASpriteGroup* getCurrentAnim();
+            void updateSpriteFormatVars();
 
             virtual void setLevel(GameLevel* level);
 
-            bool mInDungeon = false;
+            virtual size_t getBasePriority()
+            {
+                return 10;
+            }
+
         private:
-            std::string mClassName;
-            std::string mClassCode;
-            std::string mArmourCode;
-            std::string mWeaponCode;
+            // these "Fmt" vars are just used by getCurrentAnim
+            std::string mFmtClassName;
+            std::string mFmtClassCode;
+            std::string mFmtArmourCode;
+            std::string mFmtWeaponCode;
+            bool mFmtInDungeon = false;
+
         friend class Inventory;
     };
 }

@@ -10,6 +10,7 @@
 
 namespace FAWorld
 {
+    STATIC_HANDLE_NET_OBJECT_IN_IMPL(Actor)
 
     void Actor::update(bool noclip, size_t ticksPassed)
     {
@@ -24,26 +25,29 @@ namespace FAWorld
 
             if(advanceAnims)
             {
+                auto currentAnim = getCurrentAnim();
 
-                if(!mAnimPlaying && !isDead())
+                if(mAnimPlaying)
                 {
-                    mFrame = fmod((mFrame + 1), (double)(getCurrentAnim().animLength));
+                    if(mFrame < currentAnim->getAnimLength())
+                        mFrame++;
+
+                    if(mFrame >= currentAnim->getAnimLength())
+                    {
+                        mAnimPlaying = false;
+                        mFrame--;
+                    }
+                }
+                else {
+                    if(!isDead())
+                        mFrame = (mFrame + 1) % currentAnim->getAnimLength();
+                    else if(mFrame < currentAnim->getAnimLength() -1)
+                        mFrame++;
                 }
 
-                else if(mAnimPlaying && mFrame <= getCurrentAnim().animLength-1)
-                {
-                    mFrame++;
-                }
-
-                else if(mAnimPlaying && mFrame == getCurrentAnim().animLength)
-                {
-                    mAnimPlaying = false;
-                }
-
-                else if(!mAnimPlaying && mFrame < getCurrentAnim().animLength-1)
-                {
-                    mFrame++;
-                }
+                #ifndef NDEBUG
+                    assert(mFrame < getCurrentAnim()->getAnimLength());
+                #endif
             }
 
             if(mPos.current() != mDestination)
@@ -111,6 +115,11 @@ namespace FAWorld
         }
     }
 
+    size_t nextId = 0;
+    size_t getNewId()
+    {
+        return nextId++;
+    }
 
     Actor::Actor(
             const std::string& walkAnimPath,
@@ -137,7 +146,7 @@ namespace FAWorld
         mAnimTimeMap[AnimState::idle] = 10;
         mAnimTimeMap[AnimState::walk] = 10;
 
-
+        mId = getNewId();
     }
 
     Actor::~Actor()
@@ -196,9 +205,9 @@ namespace FAWorld
         return mAnimState;
     }
 
-    FARender::FASpriteGroup Actor::getCurrentAnim()
+    FARender::FASpriteGroup* Actor::getCurrentAnim()
     {
-        FARender::FASpriteGroup retval;
+        FARender::FASpriteGroup* retval;
         
         switch(mAnimState)
         {
@@ -227,7 +236,7 @@ namespace FAWorld
                 break;
         }
         
-        if(!retval.isValid())
+        if(!retval || !retval->isValid())
             retval = mIdleAnim;
         
         return retval;
@@ -247,13 +256,20 @@ namespace FAWorld
         }
     }
 
+    #pragma pack(1)
     struct ActorNetData
     {
-        size_t frame;
+        int32_t frame;
         uint8_t animState;
-        size_t destX;
-        size_t destY;
+        int32_t destX;
+        int32_t destY;
         int32_t levelIndex;
+
+        uint32_t walkAnimIndex;
+        uint32_t idleAnimIndex;
+        uint32_t dieAnimIndex;
+        uint32_t attackAnimIndex;
+        uint32_t hitAnimIndex;
     };
 
     size_t Actor::getWriteSize()
@@ -263,7 +279,6 @@ namespace FAWorld
 
     bool Actor::writeTo(ENetPacket *packet, size_t& position)
     {
-        mPos.startWriting();
         if(!mPos.writeTo(packet, position))
             return false;
 
@@ -272,6 +287,23 @@ namespace FAWorld
         data.animState = mAnimState;
         data.destX = mDestination.first;
         data.destY = mDestination.second;
+
+        data.walkAnimIndex = 0;
+        data.idleAnimIndex = 0;
+        data.dieAnimIndex = 0;
+        data.attackAnimIndex = 0;
+        data.hitAnimIndex = 0;
+
+        if(mWalkAnim)
+            data.walkAnimIndex = mWalkAnim->getCacheIndex();
+        if(mIdleAnim)
+            data.idleAnimIndex = mIdleAnim->getCacheIndex();
+        if(mDieAnim)
+            data.dieAnimIndex = mDieAnim->getCacheIndex();
+        if(mAttackAnim)
+            data.attackAnimIndex = mAttackAnim->getCacheIndex();
+        if(mHitAnim)
+            data.hitAnimIndex = mHitAnim->getCacheIndex();
 
         if(mLevel)
             data.levelIndex = mLevel->getLevelIndex();
@@ -301,6 +333,25 @@ namespace FAWorld
 
                 setLevel(World::get()->getLevel(data.levelIndex));
             }
+
+            mWalkAnim = FARender::getDefaultSprite();
+            mIdleAnim = FARender::getDefaultSprite();
+            mDieAnim = FARender::getDefaultSprite();
+            mAttackAnim = FARender::getDefaultSprite();
+            mHitAnim = FARender::getDefaultSprite();
+
+            auto netManager = Engine::NetManager::get();
+
+            if(data.walkAnimIndex)
+                mWalkAnim = netManager->getServerSprite(data.walkAnimIndex);
+            if(data.idleAnimIndex)
+                mIdleAnim = netManager->getServerSprite(data.idleAnimIndex);
+            if(data.dieAnimIndex)
+                mDieAnim = netManager->getServerSprite(data.dieAnimIndex);
+            if(data.attackAnimIndex)
+                mAttackAnim = netManager->getServerSprite(data.attackAnimIndex);
+            if(data.hitAnimIndex)
+                mHitAnim = netManager->getServerSprite(data.hitAnimIndex);
 
             return true;
         }
@@ -378,14 +429,13 @@ namespace FAWorld
         return mCanTalk;
     }
 
-    std::string Actor::getId() const
+    std::string Actor::getActorId() const
     {
-        return mId;
+        return mActorId;
     }
 
-    void Actor::setId(const std::string& id)
+    void Actor::setActorId(const std::string& id)
     {
-        mId = id;
+        mActorId = id;
     }
-
 }

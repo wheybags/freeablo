@@ -11,25 +11,31 @@
 
 namespace FARender
 {
-    SpriteCache::SpriteCache(size_t size)
+    SpriteCache::SpriteCache(uint32_t size)
         :mNextCacheIndex(1)
         ,mCurrentSize(0)
         ,mMaxSize(size)
     {}
 
-    FASpriteGroup SpriteCache::get(const std::string& path)
+    SpriteCache::~SpriteCache()
+    {
+        for(auto block : mSpriteGroupStore)
+            delete[] block;
+    }
+
+    FASpriteGroup* SpriteCache::get(const std::string& path)
     {
         if(!mStrToCache.count(path))
         {
-            FASpriteGroup newCacheEntry;
-            size_t cacheIndex = newUniqueIndex();
-            newCacheEntry.spriteCacheIndex = cacheIndex;
+            FASpriteGroup* newCacheEntry = allocNewSpriteGroup();
+            uint32_t cacheIndex = newUniqueIndex();
+            newCacheEntry->spriteCacheIndex = cacheIndex;
 
             std::vector<std::string> components = Misc::StringUtils::split(path, '&');
 
-            Render::getImageInfo(components[0], newCacheEntry.width, newCacheEntry.height, newCacheEntry.animLength, 0);
+            Render::getImageInfo(components[0], newCacheEntry->width, newCacheEntry->height, newCacheEntry->animLength, 0);
 
-            for(size_t i = 1; i < components.size(); i++)
+            for(uint32_t i = 1; i < components.size(); i++)
             {
                 std::vector<std::string> pair = Misc::StringUtils::split(components[i], '=');
 
@@ -37,14 +43,14 @@ namespace FARender
                 {
                     std::istringstream vanimss(pair[1]);
 
-                    size_t vAnim;
+                    uint32_t vAnim;
                     vanimss >> vAnim;
 
-                    newCacheEntry.animLength = (newCacheEntry.height / vAnim);
-                    if(newCacheEntry.height % vAnim != 0)
-                        newCacheEntry.animLength++;
+                    newCacheEntry->animLength = (newCacheEntry->height / vAnim);
+                    if(newCacheEntry->height % vAnim != 0)
+                        newCacheEntry->animLength++;
 
-                    newCacheEntry.height = vAnim;
+                    newCacheEntry->height = vAnim;
                 }
             }
 
@@ -56,7 +62,7 @@ namespace FARender
         return mStrToCache[path];
     }
 
-    FASpriteGroup SpriteCache::getTileset(const std::string& celPath, const std::string& minPath, bool top)
+    FASpriteGroup* SpriteCache::getTileset(const std::string& celPath, const std::string& minPath, bool top)
     {
         std::stringstream ss;
         ss << celPath << ":::" << minPath << ":::" << top;
@@ -64,9 +70,9 @@ namespace FARender
 
         if(!mStrToTilesetCache.count(key))
         {
-            FASpriteGroup newCacheEntry;
-            size_t cacheIndex = newUniqueIndex();
-            newCacheEntry.spriteCacheIndex = cacheIndex;
+            FASpriteGroup* newCacheEntry = allocNewSpriteGroup();
+            uint32_t cacheIndex = newUniqueIndex();
+            newCacheEntry->spriteCacheIndex = cacheIndex;
             mStrToTilesetCache[key] = newCacheEntry;
             mCacheToTilesetPath[cacheIndex] = TilesetPath(celPath, minPath, top);
         }
@@ -74,12 +80,12 @@ namespace FARender
         return mStrToTilesetCache[key];
     }
 
-    size_t SpriteCache::newUniqueIndex()
+    uint32_t SpriteCache::newUniqueIndex()
     {
         return mNextCacheIndex++;
     }
 
-    void SpriteCache::directInsert(Render::SpriteGroup* sprite, size_t cacheIndex)
+    void SpriteCache::directInsert(Render::SpriteGroup* sprite, uint32_t cacheIndex)
     {
         if(mCurrentSize >= mMaxSize)
                 evict();
@@ -90,7 +96,7 @@ namespace FARender
         mCurrentSize++;
     }
 
-    Render::SpriteGroup* SpriteCache::get(size_t index)
+    Render::SpriteGroup* SpriteCache::get(uint32_t index)
     {
         if(!mCache.count(index))
         {
@@ -108,17 +114,17 @@ namespace FARender
                 std::vector<std::string> components = Misc::StringUtils::split(cachePath, '&');
                 std::string sourcePath = components[0];
 
-                size_t vAnim = 0;
+                uint32_t vAnim = 0;
                 bool hasTrans = false;
                 bool resize = false;
                 bool convertToSingleTexture = false;
-                size_t tileWidth = 0;
-                size_t tileHeight = 0;
-                size_t newWidth = 0;
-                size_t newHeight = 0;
-                size_t r=0,g=0,b=0;
+                uint32_t tileWidth = 0;
+                uint32_t tileHeight = 0;
+                uint32_t newWidth = 0;
+                uint32_t newHeight = 0;
+                uint32_t r=0,g=0,b=0;
 
-                for(size_t i = 1; i < components.size(); i++)
+                for(uint32_t i = 1; i < components.size(); i++)
                 {
                     std::vector<std::string> pair = Misc::StringUtils::split(components[i], '=');
 
@@ -202,14 +208,14 @@ namespace FARender
         return mCache[index].sprite;
     }
 
-    void SpriteCache::moveToFront(size_t index)
+    void SpriteCache::moveToFront(uint32_t index)
     {
         mUsedList.erase(mCache.at(index).it);
         mUsedList.push_front(index);
         mCache[index].it = mUsedList.begin();
     }
 
-    void SpriteCache::setImmortal(size_t index, bool immortal)
+    void SpriteCache::setImmortal(uint32_t index, bool immortal)
     {
         get(index);
         mCache[index].immortal = immortal;
@@ -217,7 +223,7 @@ namespace FARender
 
     void SpriteCache::evict()
     {
-        std::list<size_t>::reverse_iterator it;
+        std::list<uint32_t>::reverse_iterator it;
 
         for(it = mUsedList.rbegin(); it != mUsedList.rend(); it++)
         {
@@ -239,10 +245,29 @@ namespace FARender
 
     void SpriteCache::clear()
     {
-        for(std::list<size_t>::iterator it = mUsedList.begin(); it != mUsedList.end(); it++)
+        for(std::list<uint32_t>::iterator it = mUsedList.begin(); it != mUsedList.end(); it++)
         {
             mCache[*it].sprite->destroy();
             delete mCache[*it].sprite;
         }
+    }
+
+    std::string SpriteCache::getPathForIndex(uint32_t index)
+    {
+        return mCacheToStr.at(index);
+    }
+
+    FASpriteGroup* SpriteCache::allocNewSpriteGroup()
+    {
+        if(mSpriteGroupCurrentBlockIndex == SPRITEGROUP_STORE_BLOCK_SIZE || mSpriteGroupStore.size() == 0)
+        {
+            mSpriteGroupStore.push_back(new FASpriteGroup[SPRITEGROUP_STORE_BLOCK_SIZE]);
+            mSpriteGroupCurrentBlockIndex = 0;
+        }
+
+        FASpriteGroup* retval = &(mSpriteGroupStore[mSpriteGroupStore.size()-1][mSpriteGroupCurrentBlockIndex]);
+        mSpriteGroupCurrentBlockIndex++;
+
+        return retval;
     }
 }

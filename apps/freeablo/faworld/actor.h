@@ -9,6 +9,11 @@
 #include <misc/misc.h>
 #include <map>
 
+namespace Engine
+{
+    class NetManager;
+}
+
 namespace FAWorld
 {
     class ActorStats;
@@ -27,6 +32,8 @@ namespace FAWorld
     }    
     class Actor : public NetObject
     {
+        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
+
         public:
             Actor(const std::string& walkAnimPath="",
                   const std::string& idleAnimPath="",
@@ -45,11 +52,16 @@ namespace FAWorld
             bool mAnimPlaying = false;
             bool isAttacking = false;
             bool isTalking = false;
-            virtual FARender::FASpriteGroup getCurrentAnim();
+            virtual FARender::FASpriteGroup* getCurrentAnim();
             void setAnimation(AnimState::AnimState state, bool reset=false);
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);            
             AnimState::AnimState getAnimState();
+
+            int32_t getId()
+            {
+                return mId;
+            }
 
             virtual void setLevel(GameLevel* level);
             GameLevel* getLevel();
@@ -68,16 +80,16 @@ namespace FAWorld
 
             Position mPos;            
         //private: //TODO: fix this
-            FARender::FASpriteGroup mWalkAnim;
-            FARender::FASpriteGroup mIdleAnim;
-            FARender::FASpriteGroup mDieAnim;
-            FARender::FASpriteGroup mAttackAnim;
-            FARender::FASpriteGroup mHitAnim;
+            FARender::FASpriteGroup* mWalkAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mIdleAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mDieAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mAttackAnim = FARender::getDefaultSprite();
+            FARender::FASpriteGroup* mHitAnim = FARender::getDefaultSprite();
         
             size_t mFrame;
             virtual void die();
-            std::pair<size_t, size_t> mDestination;
-            std::pair<size_t, size_t>& destination()
+            std::pair<int32_t, int32_t> mDestination;
+            std::pair<int32_t, int32_t>& destination()
             {
                 return mDestination;
             }
@@ -85,8 +97,8 @@ namespace FAWorld
             bool canTalk() const;
             bool isDead() const;
             bool isEnemy() const;
-            std::string getId() const;
-            void setId(const std::string& id);
+            std::string getActorId() const;
+            void setActorId(const std::string& id);
             void setCanTalk(bool canTalk);
 
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
@@ -98,7 +110,6 @@ namespace FAWorld
         protected:
             GameLevel* mLevel = NULL;
 
-            std::string mId;
             bool mIsDead = false;
             bool mCanTalk = false;
             bool mIsEnemy;
@@ -133,6 +144,10 @@ namespace FAWorld
             BOOST_SERIALIZATION_SPLIT_MEMBER()
             AnimState::AnimState mAnimState;
 
+        private:
+            std::string mActorId;
+            int32_t mId;
+            friend class Engine::NetManager;
     };
 }
 

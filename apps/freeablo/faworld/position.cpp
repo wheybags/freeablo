@@ -7,10 +7,10 @@ namespace FAWorld
     Position::Position(): mDist(0), mDirection(0),
         mMoving(false), mCurrent(std::make_pair(0,0)) {}
 
-    Position::Position(size_t x, size_t y): mDist(0), mDirection(0), 
+    Position::Position(int32_t x, int32_t y): mDist(0), mDirection(0),
         mMoving(false), mCurrent(std::make_pair(x,y)) {}
 
-    Position::Position(size_t x, size_t y, size_t direction): mDist(0), 
+    Position::Position(int32_t x, int32_t y, int32_t direction): mDist(0),
         mDirection(direction), mMoving(false),
         mCurrent(std::make_pair(x,y)) {}
 
@@ -28,7 +28,7 @@ namespace FAWorld
         }
     }
 
-    std::pair<size_t, size_t> Position::current() const
+    std::pair<int32_t, int32_t> Position::current() const
     {
         return mCurrent;
     }
@@ -45,12 +45,12 @@ namespace FAWorld
         return distance;
     }
 
-    std::pair<size_t, size_t> Position::next() const
+    std::pair<int32_t, int32_t> Position::next() const
     {
         if(!mMoving)
             return mCurrent;
         
-        std::pair<size_t, size_t> retval = mCurrent;
+        std::pair<int32_t, int32_t> retval = mCurrent;
 
         switch(mDirection)
         {
@@ -115,13 +115,14 @@ namespace FAWorld
         return retval;
     }
 
+    #pragma pack(1)
     struct PosNetData
     {
-        size_t dist;
+        int32_t dist;
         int32_t direction;
-        bool moving;
-        size_t currentX;
-        size_t currentY;
+        uint8_t moving;
+        int32_t currentX;
+        int32_t currentY;
     };
 
     size_t Position::getWriteSize()

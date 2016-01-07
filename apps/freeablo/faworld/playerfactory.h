@@ -13,21 +13,17 @@ class ActorStats;
 class PlayerFactory
 {
 public:
-    PlayerFactory(DiabloExe::DiabloExe & exe);
+    PlayerFactory(const DiabloExe::DiabloExe & exe);
 
-    Player* create(const std::string& playerClass);
+    Player* create(const std::string& playerClass) const;
 
 private:
 
-    void createWarrior();
-    void createRogue();
-    void createSorcerer();
+    ActorStats* createWarrior(Player* player, const DiabloExe::CharacterStats& charStats) const;
+    ActorStats* createRogue(Player* player, const DiabloExe::CharacterStats& charStats) const;
+    ActorStats* createSorcerer(Player* player, const DiabloExe::CharacterStats& charStats) const;
 
-    DiabloExe::DiabloExe & mExe;
-    Player * mPlayer;
-    DiabloExe::CharacterStats mCharStats;
-    FAWorld::ActorStats * mStats;
-
+    const DiabloExe::DiabloExe& mExe;
 };
 
 }

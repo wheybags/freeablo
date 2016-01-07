@@ -46,19 +46,23 @@ namespace FAWorld
 
             void addCurrentPlayer(Player * player);
             Player* getCurrentPlayer();
-            void addPlayer(uint32_t id, Player* player);
-            Player* getPlayer(size_t id);
-            void setCurrentPlayerId(uint32_t id);
+
+            void registerPlayer(Player* player);
+            void deregisterPlayer(Player* player);
 
             void fillRenderState(FARender::RenderState* state);
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
+
+            Actor* getActorById(int32_t id);
+
+            void getAllActors(std::vector<Actor*>& actors);
 
         private:
             std::map<size_t, GameLevel*> mLevels;
 
             size_t mTicksPassed=0;
             Player* mCurrentPlayer;
-            std::map<uint32_t, Player*> mPlayers;            
+            std::vector<Player*> mPlayers;
             const DiabloExe::DiabloExe& mDiabloExe;
     };
 }

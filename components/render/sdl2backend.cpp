@@ -239,7 +239,7 @@ namespace Render
     }
 
 
-    bool getImageInfo(const std::string& path, size_t& width, size_t& height, size_t& animLength, int32_t celIndex)
+    bool getImageInfo(const std::string& path, uint32_t& width, uint32_t& height, uint32_t& animLength, int32_t celIndex)
     {
         //TODO: get better image decoders that allow you to peek image dimensions without loading full image
 
