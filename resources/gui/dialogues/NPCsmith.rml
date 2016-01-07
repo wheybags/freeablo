@@ -1,10 +1,19 @@
 <rml>
 <head>
+<style>
+div#horizontalSeparator_top
+{
+    height: 17px;
+    width: 100%;
+    display:block;
+}
+</style>
 <link type="text/template" href="dialogue.rml"/>
 <script>
 
 import rocket
 import freeablo
+import dialogues
 from menu import Menu
 
 mainMenu = None
@@ -19,11 +28,9 @@ def onLoad(document):
     {"text": 'leave the shop', "func": freeablo.closeDialogue},
     ]
 
-    fmtSelected = '<span class="pentagon_left"/>%s<span class="pentagon_right"/>'
-    fmtNotSelected = '<span style="visibility: hidden;" class="pentagon_left"/>%s<span style="visibility: hidden;" class="pentagon_right"/>'
 
     global mainMenu
-    mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
+    mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, dialogues.entrySelected, dialogues.entryNotSelected)
 
 def onKeyDown(event, document):
     mainMenu.onKeyDown(event)

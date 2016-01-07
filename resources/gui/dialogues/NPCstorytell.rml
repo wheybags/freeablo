@@ -1,26 +1,38 @@
 <rml>
 <head>
 <link type="text/template" href="dialogue.rml"/>
+<style>
+span#menuEntry00001
+{
+    margin-bottom:31px;
+}
+
+div#horizontalSeparator_top
+{
+    height: 41px;
+    width: 100%;
+    display:block;
+}
+</style>
 <script>
+
 
 import rocket
 import freeablo
+import dialogues
 from menu import Menu
 
 mainMenu = None
 
 def onLoad(document):
     entries = [
-    {"text": 'Talk to Cain', "func": freeablo.closeDialogue},
-    {"text": 'Identify an item', "func": freeablo.closeDialogue},
-    {"text": 'Say Goodbye', "func": freeablo.closeDialogue},
+    {"text": 'talk to cain', "func": freeablo.closeDialogue},
+    {"text": 'identify an item', "func": freeablo.closeDialogue},
+    {"text": 'say goodbye', "func": freeablo.closeDialogue},
     ]
 
-    fmtSelected = '<span class="pentagon_border_separator" /><span class="pentagon"/><div class="entryText"> %s </div><span class="pentagon"/><span class="pentagon_border_separator" />'
-    fmtNotSelected = '<span class="pentagon_separator"/><div class="entryText"> %s </div><span class="pentagon_separator"/>'
-
     global mainMenu
-    mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, fmtSelected, fmtNotSelected)
+    mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, dialogues.entrySelected, dialogues.entryNotSelected)
 
 def onKeyDown(event, document):
     mainMenu.onKeyDown(event)
@@ -28,6 +40,7 @@ def onKeyDown(event, document):
 </script>
 </head>
 <body template="dialogue" onload="onLoad(document)" onkeydown="onKeyDown(event, document)">
-    The town Elder
+    <div class="horizontalSeparator_33"></div>
+    <div class="box">the town elder</div>
 </body>
 </rml>

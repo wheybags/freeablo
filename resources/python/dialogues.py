@@ -3,6 +3,11 @@
 
 import freeablo
 
+# Globals
+
+entrySelected = '<span class="pentagon_left"/>%s<span class="pentagon_right"/>'
+entryNotSelected = '<span style="visibility: hidden;" class="pentagon_left"/>%s<span style="visibility: hidden;" class="pentagon_right"/>'
+
 def talkTo(npcId):
 
     openingSound = ""

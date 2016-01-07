@@ -45,6 +45,14 @@ div.horizontalSeparator_20
     display:block;
 }
 
+div.horizontalSeparator_33
+{
+    height: 33px;
+    width: 100%;
+    display:block;
+}
+
+
 div#menuContainer
 {
     width: 271px;

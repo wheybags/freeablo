@@ -6,7 +6,7 @@
     <img id="background" src="/data/textbox2.cel">
             <div class="box" id="header"></div>
             <div class="horizontalLine"></div>
-            <div class="horizontalSeparator_17"></div>
+            <div id="horizontalSeparator_top"></div>
             <div class="box">would you like to:</div>
             <div class="horizontalSeparator_20"></div>
             <div id="menuContainer">
