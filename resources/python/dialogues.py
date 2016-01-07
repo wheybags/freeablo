@@ -2,6 +2,7 @@
 # depending on game progress
 
 import freeablo
+from random import randint
 
 # Globals
 
@@ -33,6 +34,13 @@ def talkTo(npcId):
     elif npcId == 'NPCmaid':
         openingSound = "sfx/Towners/Bmaid31.wav"
         rml = DIALOGUE_PATH + "NPCmaid.rml"
+    elif npcId == 'NPCwitch':
+        openingSound = "sfx/Towners/Witch38.wav"
+        rml = DIALOGUE_PATH + "NPCwitch.rml"
+    elif npcId.startswith('NPCcow'):
+        number = randint(1,2)
+        openingSound = "sfx/Towners/Cow" + str(number) + ".wav"
+      
 
 
     if openingSound != "":
