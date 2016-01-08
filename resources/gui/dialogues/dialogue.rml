@@ -4,14 +4,19 @@
 </head>
 <body>
     <img id="background" src="/data/textbox2.cel">
-            <div class="box" id="header"></div>
+            <div class="box" style="heigth: 73px;">
+                <div class="checker checker-header" id="header">
+                </div>
+            </div>
             <div class="horizontalLine"></div>
-            <div id="horizontalSeparator_top"></div>
-            <div class="box" id="would_you_like_to">would you like to:</div>
-            <div class="horizontalSeparator_20"></div>
-            <div id="menuContainer">
-                <div class="vertical_separator"></div>
-                <div id="innerMenuContainer"></div> <br/>
+            <div class="checker checker-content">
+                <div id="horizontalSeparator_top"></div>
+                <div class="box" id="would_you_like_to">would you like to:</div>
+                <div class="horizontalSeparator_20"></div>
+                <div id="menuContainer">
+                    <div class="vertical_separator"></div>
+                    <div id="innerMenuContainer"></div> <br/>
+                </div>
             </div>
     </img>
 </body>

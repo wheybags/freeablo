@@ -37,6 +37,8 @@ def talkTo(npcId):
     elif npcId == 'NPCwitch':
         openingSound = "sfx/Towners/Witch38.wav"
         rml = DIALOGUE_PATH + "NPCwitch.rml"
+    elif npcId == 'NPCtavern':
+        openingSound = "sfx/Towners/Tavown00.wav"
     elif npcId.startswith('NPCcow'):
         number = randint(1,2)
         openingSound = "sfx/Towners/Cow" + str(number) + ".wav"

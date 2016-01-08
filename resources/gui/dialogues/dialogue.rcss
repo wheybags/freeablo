@@ -6,6 +6,32 @@ body
     height: 303px;
 }
 
+div.checker
+{
+    width: 265px;
+    display:block;
+    background-decorator: tiled-box;
+    background-left-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
+    background-center-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
+    background-bottom-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
+    background-top-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
+    background-top-left-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
+    background-top-right-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
+    background-bottom-left-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
+    background-bottom-right-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
+}
+div.checker-header
+{
+    margin-left: 3px;
+    margin-top: 3px;
+}
+
+div.checker-content
+{
+    margin-left: 3px;
+    max-height: 222px;
+}
+
 div.box
 {
     width: 271px;
@@ -67,7 +93,6 @@ img#background
     display: block;
     margin: auto;
     margin-top: 60px;
-    background-color: rgba(0,0,0,150);
 }
 
 span.pentagon_left
