@@ -1,3 +1,11 @@
+div.itemGraphicEmpty
+{
+    display: inline-block;
+    z-index: 5;
+    position: absolute;
+    background-decorator: image;
+    background-image: /data/inv/objcurs.cel&frame=11;
+}
 div.itemGraphic11
 {
     display: inline-block;
