@@ -6,8 +6,8 @@ from random import randint
 
 # Globals
 
-entrySelected = '<span class="pentagon_left"/>%s<span class="pentagon_right"/>'
-entryNotSelected = '<span style="visibility: hidden;" class="pentagon_left"/>%s<span style="visibility: hidden;" class="pentagon_right"/>'
+ENTRY_SELECTED = '<span class="pentagon_left"/>%s<span class="pentagon_right"/>'
+ENTRY_NOT_SELECTED = '<span style="visibility: hidden;" class="pentagon_left"/>%s<span style="visibility: hidden;" class="pentagon_right"/>'
 DIALOGUE_PATH = "resources/gui/dialogues/"
 
 def openDialogue(rml, openingSound):

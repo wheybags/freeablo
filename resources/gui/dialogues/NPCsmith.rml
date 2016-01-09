@@ -30,7 +30,7 @@ def onLoad(document):
 
 
     global mainMenu
-    mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, dialogues.entrySelected, dialogues.entryNotSelected)
+    mainMenu = Menu(document, 'mainMenu', 'innerMenuContainer',  entries, dialogues.ENTRY_SELECTED, dialogues.ENTRY_NOT_SELECTED)
 
 def onKeyDown(event, document):
     mainMenu.onKeyDown(event)
