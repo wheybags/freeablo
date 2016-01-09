@@ -1,0 +1,31 @@
+<rml>
+<head>
+<link type="text/template" href="scrollbox.rml"/>
+<style>
+</style>
+<script>
+
+
+import rocket
+import freeablo
+import dialogues
+
+def closeScrollbox():
+    freeablo.stopSound()
+    freeablo.closeDialogueScrollbox()
+
+def onLoad(document):
+    pass
+
+def onKeyDown(event, document):
+    closeScrollbox()
+
+def onClick(event, document):
+    closeScrollbox()
+
+
+</script>
+</head>
+<body template="scrollbox" onload="onLoad(document)" onkeydown="onKeyDown(event, document)" onclick="onClick(event, document)">
+</body>
+</rml>

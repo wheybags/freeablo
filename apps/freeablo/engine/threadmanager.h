@@ -17,6 +17,7 @@ namespace Engine
     {
         musicPlay,
         soundPlay,
+        soundStop,
         renderState
     };
 
@@ -43,6 +44,7 @@ namespace Engine
 
             void playMusic(const std::string& path);
             void playSound(const std::string& path);
+            void stopSound();
             void sendRenderState(FARender::RenderState* state);
 
 

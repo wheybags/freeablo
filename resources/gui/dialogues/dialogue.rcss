@@ -2,8 +2,7 @@ body
 {
     font-family: FreeabloWhite11;
     text-align: center;
-    width: 100%;
-    height: 303px;
+
 }
 
 div.checker
@@ -92,7 +91,6 @@ img#background
     height: 303px;
     display: block;
     margin: auto;
-    margin-top: 60px;
 }
 
 span.pentagon_left

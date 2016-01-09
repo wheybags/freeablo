@@ -20,6 +20,7 @@ namespace Audio
     Sound* loadSound(const std::string& path);
     void freeSound(Sound* sound);
     int32_t playSound(Sound* sound);
+    void stopSound();
 
     bool channelPlaying(int32_t channel);
 }

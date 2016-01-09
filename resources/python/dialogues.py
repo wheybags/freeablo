@@ -8,48 +8,54 @@ from random import randint
 
 entrySelected = '<span class="pentagon_left"/>%s<span class="pentagon_right"/>'
 entryNotSelected = '<span style="visibility: hidden;" class="pentagon_left"/>%s<span style="visibility: hidden;" class="pentagon_right"/>'
+DIALOGUE_PATH = "resources/gui/dialogues/"
 
-def talkTo(npcId):
+def openDialogue(rml, openingSound):
 
-    openingSound = ""
-    rml = ""
+    global DIALOGUE_PATH
 
-    DIALOGUE_PATH = "resources/gui/dialogues/"
-
-    if npcId == 'NPCsmith':
-        openingSound = "sfx/Towners/Bsmith44.wav"
-        rml = DIALOGUE_PATH + "NPCsmith.rml"
-    elif npcId == 'NPCstorytell':
-        openingSound = "sfx/Towners/storyt25.wav"
-        rml = DIALOGUE_PATH + "NPCstorytell.rml"
-    elif npcId == 'NPCdrunk':
-        openingSound = "sfx/Towners/Drunk27.wav"
-        rml = DIALOGUE_PATH + "NPCdrunk.rml"
-    elif npcId == 'NPChealer':
-        openingSound = "sfx/Towners/Healer37.wav"
-        rml = DIALOGUE_PATH + "NPChealer.rml"
-    elif npcId == 'NPCboy':
-        openingSound = "sfx/Towners/Pegboy32.wav"
-        rml = DIALOGUE_PATH + "NPCboy.rml"
-    elif npcId == 'NPCmaid':
-        openingSound = "sfx/Towners/Bmaid31.wav"
-        rml = DIALOGUE_PATH + "NPCmaid.rml"
-    elif npcId == 'NPCwitch':
-        openingSound = "sfx/Towners/Witch38.wav"
-        rml = DIALOGUE_PATH + "NPCwitch.rml"
-    elif npcId == 'NPCtavern':
-        openingSound = "sfx/Towners/Tavown00.wav"
-    elif npcId.startswith('NPCcow'):
-        number = randint(1,2)
-        openingSound = "sfx/Towners/Cow" + str(number) + ".wav"
-      
-
+    freeablo.stopSound()
 
     if openingSound != "":
         freeablo.playSound(openingSound)
 
     if rml != "":
+        rml = DIALOGUE_PATH + rml
         freeablo.openDialogue(rml)
-    else:
-        print 'There is no RML for %s' % npcId
 
+def openScrollbox(rml, openingSound):
+
+    global DIALOGUE_PATH
+
+    freeablo.stopSound()
+
+    if openingSound != "":
+        freeablo.playSound(openingSound)
+
+    if rml != "":
+        rml = DIALOGUE_PATH + rml
+        freeablo.openDialogueScrollbox(rml)
+
+def talkTo(npcId):
+
+    print npcId
+
+    if npcId == 'NPCsmith':
+        openDialogue("NPCsmith.rml","sfx/Towners/Bsmith44.wav")
+    elif npcId == 'NPCstorytell':
+        openDialogue("NPCstorytell.rml","sfx/Towners/storyt25.wav")
+    elif npcId == 'NPCdrunk':
+        openDialogue("NPCdrunk.rml","sfx/Towners/Drunk27.wav")
+    elif npcId == 'NPChealer':
+        openDialogue("NPChealer.rml","sfx/Towners/Healer37.wav")
+    elif npcId == 'NPCboy':
+        openDialogue("NPCboy.rml","sfx/Towners/Pegboy32.wav")
+    elif npcId == 'NPCmaid':
+        openDialogue("NPCmaid.rml","sfx/Towners/Bmaid31.wav")
+    elif npcId == 'NPCwitch':
+        openDialogue("NPCwitch.rml","sfx/Towners/Witch38.wav")
+    elif npcId == 'NPCtavern':
+        openScrollbox("NPCtavern.rml", "sfx/Towners/Tavown00.wav")
+    elif npcId.startswith('NPCcow'):
+        number = randint(1,2)
+        openDialogue("", "sfx/Towners/Cow" + str(number) + ".wav")

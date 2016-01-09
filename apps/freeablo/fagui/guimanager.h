@@ -39,6 +39,9 @@ namespace FAGui
         void openDialogue(const std::string& document);
         void closeDialogue();
         bool isDialogueOpened() const;
+        void openDialogueScrollbox(const std::string& document);
+        void closeDialogueScrollbox();
+        bool isDialogueScrollboxOpened() const;
         void showTitleScreen();
         void showIngameGui();
         void showMainMenu();
@@ -93,6 +96,7 @@ namespace FAGui
         GuiType mCurrentGuiType;
         std::chrono::system_clock::time_point mStartTime;
         std::shared_ptr<ScrollBox> mCreditsScrollBox;
+        std::shared_ptr<ScrollBox> mDialogueScrollBox;
     };
 
     extern std::string cursorPath;

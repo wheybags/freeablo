@@ -76,6 +76,13 @@ namespace Engine
         mQueue.push(msg);
     }
 
+    void ThreadManager::stopSound()
+    {
+        Message msg;
+        msg.type = soundStop;
+        mQueue.push(msg);
+    }
+
     void ThreadManager::sendRenderState(FARender::RenderState* state)
     {
         Message msg;
@@ -102,6 +109,12 @@ namespace Engine
             {
                 audioManager.play(*message.data.soundPath);
                 delete message.data.soundPath;
+                break;
+            }
+
+            case soundStop:
+            {
+                audioManager.stopSound();
                 break;
             }
 

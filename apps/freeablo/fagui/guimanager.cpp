@@ -70,6 +70,23 @@ namespace FAGui
         return mDocument != nullptr;
     }
 
+    void GuiManager::openDialogueScrollbox(const std::string& document)
+    {
+        openDialogue(document);
+        mDialogueScrollBox = std::make_shared<ScrollBox>(mDocument);
+    }
+
+    void GuiManager::closeDialogueScrollbox()
+    {
+        mDialogueScrollBox = nullptr;
+        closeDialogue();
+    }
+
+    bool GuiManager::isDialogueScrollboxOpened() const
+    {
+        return isDialogueOpened();
+    }
+
     void GuiManager::showTitleScreen()
     {
         menus["titleScreen"]->Show();
@@ -250,6 +267,11 @@ namespace FAGui
                 }
             }
 
+        }
+
+        if(mDialogueScrollBox)
+        {
+            mDialogueScrollBox->update();
         }
     }
 
