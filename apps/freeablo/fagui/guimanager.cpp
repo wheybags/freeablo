@@ -272,6 +272,10 @@ namespace FAGui
         if(mDialogueScrollBox)
         {
             mDialogueScrollBox->update();
+            if(mDialogueScrollBox->isFinished())
+            {
+                closeDialogueScrollbox();
+            }
         }
     }
 
