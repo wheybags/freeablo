@@ -4,13 +4,13 @@
 </head>
 <body>
     <img id="background" src="/data/textbox.cel">
-        <div class="checker">
+        <img class="checker" src="/resources/checker.png&generateTiledTexture=585x298;">
             <div class="scrollbox" id="scrollbox">
                 <div id="vertical_scroll_separator"></div>
                 <div id="content"></div>
                 <div id="vertical_scroll_separator"></div>
             </div>
-        </div>
+        </img>
     </img>
 </body>
 </template>

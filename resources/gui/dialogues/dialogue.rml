@@ -4,12 +4,12 @@
 </head>
 <body>
     <img id="background" src="/data/textbox2.cel">
-            <div class="box" style="heigth: 73px;">
-                <div class="checker checker-header" id="header">
-                </div>
+            <div class="box" style="height: 73px;">
+                <img class="checker checker-header" id="header" src="/resources/checker.png&generateTiledTexture=265x73;">
+                </img>
             </div>
             <div class="horizontalLine"></div>
-            <div class="checker checker-content">
+            <img class="checker checker-content" src="/resources/checker.png&generateTiledTexture=265x222;">
                 <div id="horizontalSeparator_top"></div>
                 <div class="box" id="would_you_like_to">would you like to:</div>
                 <div class="horizontalSeparator_20"></div>
@@ -17,7 +17,7 @@
                     <div class="vertical_separator"></div>
                     <div id="innerMenuContainer"></div> <br/>
                 </div>
-            </div>
+            </img>
     </img>
 </body>
 </template>

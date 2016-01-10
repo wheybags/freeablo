@@ -5,27 +5,20 @@ body
 
 }
 
-div.checker
+img.checker
 {
     width: 265px;
     display:block;
-    background-decorator: tiled-box;
-    background-left-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
-    background-center-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
-    background-bottom-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
-    background-top-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
-    background-top-left-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
-    background-top-right-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
-    background-bottom-left-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
-    background-bottom-right-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
 }
-div.checker-header
+
+img.checker-header
 {
     margin-left: 3px;
     margin-top: 3px;
+    height: 73px;
 }
 
-div.checker-content
+img.checker-content
 {
     margin-left: 3px;
     max-height: 222px;

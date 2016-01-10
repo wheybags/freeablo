@@ -454,6 +454,40 @@ namespace Render
         return new SpriteGroup(vec);
     }
 
+    SpriteGroup* loadTiledTexture(const std::string& sourcePath, size_t width, size_t height, bool hasTrans, size_t transR, size_t transG, size_t transB)
+    {
+        std::string extension = getImageExtension(sourcePath);
+        SDL_Surface* tile = loadNonCelImageTrans(sourcePath, extension, hasTrans, transR, transG, transB);
+        SDL_Surface* texture = createTransparentSurface(width, height);
+
+        int dx = tile->w;
+        int dy = tile->h;
+
+        for(size_t y = 0 ; y < height ; y += dy )
+        {
+            for(size_t x = 0 ; x < width ; x += dx )
+            {
+                for(size_t sy = 0 ; sy < (size_t)tile->h && (y + sy) < height; sy++)
+                {
+                    for(size_t sx = 0 ; sx < (size_t)tile->w && (x + sx) < width ; sx++)
+                    {
+                        Cel::Colour px = getPixel(tile, sx, sy);
+                        setpixel(texture, x + sx, y + sy, px);
+                    }
+                }
+            }
+        }
+
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, texture);
+        SDL_FreeSurface(texture);
+        SDL_FreeSurface(tile);
+
+        std::vector<Sprite> vec(1);
+        vec[0] = (Sprite)tex;
+
+        return new SpriteGroup(vec);
+    }
+
     void drawCursor(Sprite s, size_t w, size_t h)
     {
         if(s == NULL)
