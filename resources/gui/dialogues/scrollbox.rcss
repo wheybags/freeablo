@@ -1,3 +1,8 @@
+body
+{
+    font-family: FreeabloGold22;
+}
+
 img#background
 {
     width: 591px;
@@ -30,17 +35,15 @@ div.checker
     background-bottom-right-image: /resources/checker.png repeat-truncate 0px 0px 2px 2px;
 }
 
-div#scrollbox
+div.scrollbox
 {
-    font-family: FreeMono;
-    min-width: 585px;
+    min-width: 562px;
     min-height: 297px;
     max-width: 585px;
     max-height: 297px;
+    margin-left: 23px;
 
     display:block;
-    speed: 0.0002;
-
     overflow: scroll;
 }
 
@@ -51,8 +54,8 @@ div#vertical_scroll_separator
     display: block;
 }
 
-span.scroll_row
+span.scrollbox_row
 {
     display:block;
-    margin-bottom: 30px;
+    margin-bottom: 12px;
 }
