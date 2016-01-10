@@ -57,5 +57,4 @@ div#vertical_scroll_separator
 span.scrollbox_row
 {
     display:block;
-    margin-bottom: 12px;
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <font>
   <info face="FreeabloGold22" italic="0" size="22" bold="0" src="/data/medtexts.cel&convertToSingleTexture=true" />
-  <common lineHeight="22" base="22" scaleW="1210" scaleH="22"/>
+  <common lineHeight="31" base="31" scaleW="1210" scaleH="22"/>
   <chars count="56">
       <char id="32" x="184" y="0" width="7" height="22" xoffset="0" yoffset="0" xadvance="7"/>
       <char id="33" x="792" y="0" width="7" height="22" xoffset="0" yoffset="0" xadvance="7"/>
