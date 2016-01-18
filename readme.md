@@ -35,7 +35,7 @@ If you are using windows, please see https://github.com/wheybags/freeablo-window
 ## OSX
 First install Xcode, and brew, of course.
 ```
-$ brew install boost boost-python lbzip2 zlib sdl2 sdl2_image freetype libtomcrypt --universal cmake
+$ brew install boost boost-python enet freetype libtomcrypt lbzip2 lzlib qt5 sdl2 sdl2_image sdl2_mixer --universal cmake
 $ brew tap wheybags/homebrew-librocket
 $ brew install --HEAD librocket
 # here it will possibly print a message about python module path settings, follow its instructions
