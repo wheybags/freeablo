@@ -121,13 +121,14 @@
         </style>
 
         <script>
+import docmanage
 import draggable
 instance = draggable.DraggableWidget(document, 0, 100)
         </script>
 
     </head>
 
-    <body onKeyDown="instance.onKeyDown(event)"
+    <body onKeyDown="docmanage.manager.onKeyDown(event)"
     onmousedown="instance.bodyMouseDown(event)"
     ondrag="instance.onDrag(event)">
         <span id="container" onmousedown="instance.guiMouseDown(event)">
