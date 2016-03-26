@@ -191,7 +191,7 @@ namespace Cel
             palFilename = Misc::StringUtils::replaceEnd("l1.cel", "l1.pal", filename);
         else if (Misc::StringUtils::startsWith(filename, "levels") && Misc::StringUtils::endsWith(filename, "l2.cel"))
             palFilename = Misc::StringUtils::replaceEnd("l2.cel", "l2.pal", filename);
-        else if(Misc::StringUtils::endsWith(filename, "l3.cel"))
+        else if(Misc::StringUtils::startsWith(filename, "levels") && Misc::StringUtils::endsWith(filename, "l3.cel"))
             palFilename = Misc::StringUtils::replaceEnd("l3.cel", "l3.pal", filename);
         else if (Misc::StringUtils::startsWith(Misc::StringUtils::lowerCase(filename), "gendata"))
             palFilename = Misc::StringUtils::replaceEnd(".cel", ".pal", filename);
