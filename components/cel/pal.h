@@ -12,7 +12,7 @@ namespace Cel
         uint8_t r;
         uint8_t g;
         uint8_t b;
-        bool visible;
+        uint8_t visible;
 
         Colour(uint8_t _r, uint8_t _g, uint8_t _b, bool _visible)
         {
