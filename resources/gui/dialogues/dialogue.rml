@@ -1,8 +1,11 @@
 <template name="dialogue" content="header">
 <head>
 <link type="text/rcss" href="dialogue.rcss"/>
+<script>
+import docmanage
+</script>
 </head>
-<body>
+<body onKeyDown="docmanage.manager.onKeyDown(event)" onmousedown="docmanage.manager.guiClicked()">
     <img id="background" src="/data/textbox2.cel">
             <div class="box" style="height: 73px;">
                 <img class="checker checker-header" id="header" src="/resources/checker.png&generateTiledTexture=265x73;">
