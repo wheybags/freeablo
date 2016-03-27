@@ -43,7 +43,7 @@ namespace Engine
 
         size_t resolutionWidth = settings.get<size_t>("Display","resolutionWidth");
         size_t resolutionHeight = settings.get<size_t>("Display","resolutionHeight");
-        bool fullscreen = settings.get<size_t>("Display", "fullscreen");
+        std::string fullscreen = settings.get<std::string>("Display", "fullscreen");
         std::string pathEXE = settings.get<std::string>("Game", "PathEXE");
         if (pathEXE == "")
         {
@@ -51,7 +51,7 @@ namespace Engine
         }
 
         Engine::ThreadManager threadManager;
-        FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen);
+        FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen == "true");
 
         mInputManager = new EngineInputManager(*this);
 
