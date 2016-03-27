@@ -45,6 +45,7 @@ namespace FAIO
     bool init(const std::string pathMPQ = "DIABDAT.MPQ");
     void quit();
 
+    bool exists(const std::string& filename);
     FAFile* FAfopen(const std::string& filename);
     size_t FAfread(void * ptr, size_t size, size_t count, FAFile* stream);
     int FAfclose(FAFile* stream); 

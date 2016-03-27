@@ -6,6 +6,7 @@
 #include <map>
 
 #include "pal.h"
+#include "celframe.h"
 
 
 namespace FAIO
@@ -15,8 +16,6 @@ namespace FAIO
 
 namespace Cel
 {
-    class CelFrame;
-
     class CelFile
     {
         public:
