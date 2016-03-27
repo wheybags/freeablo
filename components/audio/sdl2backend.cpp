@@ -82,6 +82,11 @@ namespace Audio
         return Mix_PlayChannel(-1, data->first, 0);
     }
 
+    void stopSound()
+    {
+        Mix_HaltChannel(-1);
+    }
+
     bool channelPlaying(int32_t channel)
     {
         return Mix_Playing(channel);

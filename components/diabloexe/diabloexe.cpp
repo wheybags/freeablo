@@ -153,7 +153,7 @@ namespace DiabloExe
             if(Misc::StringUtils::startsWith(name, "NPC"))
             {
                 mNpcs[name.substr(3, name.size()-3)] =
-                    Npc(exe, mSettings.get<size_t>(section, "name"), mSettings.get<size_t>(section, "cel"),
+                    Npc(exe, name, mSettings.get<size_t>(section, "name"), mSettings.get<size_t>(section, "cel"),
                         mSettings.get<size_t>(section, "x"), mSettings.get<size_t>(section, "y"), mSettings.get<size_t>(section, "rotation", 0));
             }
         }

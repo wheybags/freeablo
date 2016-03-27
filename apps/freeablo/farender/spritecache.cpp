@@ -118,6 +118,7 @@ namespace FARender
                 bool hasTrans = false;
                 bool resize = false;
                 bool convertToSingleTexture = false;
+                bool generateTiledTexture = false;
                 uint32_t tileWidth = 0;
                 uint32_t tileHeight = 0;
                 uint32_t newWidth = 0;
@@ -175,6 +176,18 @@ namespace FARender
                     {
                         convertToSingleTexture = true;
                     }
+                    else if(pair[0] == "generateTiledTexture")
+                    {
+                        generateTiledTexture = true;
+
+                        std::vector<std::string> size = Misc::StringUtils::split(pair[1], 'x');
+
+                        std::istringstream wss(size[0]);
+                        wss >> newWidth;
+
+                        std::istringstream hss(size[1]);
+                        hss >> newHeight;
+                    }
                 }
 
                 if(vAnim != 0)
@@ -183,6 +196,8 @@ namespace FARender
                     newSprite = Render::loadResizedSprite(sourcePath, newWidth, newHeight, tileWidth, tileHeight, hasTrans, r, g, b);
                 else if(convertToSingleTexture)
                     newSprite = Render::loadCelToSingleTexture(sourcePath);
+                else if(generateTiledTexture)
+                    newSprite = Render::loadTiledTexture(sourcePath, newWidth, newHeight, hasTrans, r, g, b);
                 else
                     newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b);
             }

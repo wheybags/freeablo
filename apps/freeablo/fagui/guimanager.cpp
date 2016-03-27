@@ -1,4 +1,4 @@
-#include "guimanager.h"
+﻿#include "guimanager.h"
 
 #include <string>
 
@@ -20,7 +20,10 @@ namespace FAGui
 
     std::string GuiManager::invClass;
 
-    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass) : mPythonFuncs(playerInventory, *this, engine), mCurrentGuiType(TitleScreen)
+    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass)
+        : mPythonFuncs(playerInventory, *this, engine),
+          mDocument(nullptr),
+          mCurrentGuiType(TitleScreen)
     {
 
         this->invClass = invClass;
@@ -42,6 +45,46 @@ namespace FAGui
         menus["invalidNameMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/invalid_name_menu.rml");
         menus["selectHeroMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/select_hero_menu.rml");
         menus["saveFileExistsMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/save_file_exists_menu.rml");
+    }
+
+    void GuiManager::openDialogue(const std::string& document)
+    {
+        FARender::Renderer* renderer = FARender::Renderer::get();
+
+        if(mDocument != nullptr)
+            mDocument->Close();
+
+        mDocument = renderer->getRocketContext()->LoadDocument(document.c_str());
+        mDocument->Show();
+    }
+
+    void GuiManager::closeDialogue()
+    {
+        if(mDocument != nullptr)
+            mDocument->Close();
+        mDocument = nullptr;
+    }
+
+    bool GuiManager::isDialogueOpened() const
+    {
+        return mDocument != nullptr;
+    }
+
+    void GuiManager::openDialogueScrollbox(const std::string& document)
+    {
+        openDialogue(document);
+        mDialogueScrollBox = std::make_shared<ScrollBox>(mDocument);
+    }
+
+    void GuiManager::closeDialogueScrollbox()
+    {
+        mDialogueScrollBox = nullptr;
+        closeDialogue();
+    }
+
+    bool GuiManager::isDialogueScrollboxOpened() const
+    {
+        return isDialogueOpened();
     }
 
     void GuiManager::showTitleScreen()
@@ -224,6 +267,15 @@ namespace FAGui
                 }
             }
 
+        }
+
+        if(mDialogueScrollBox)
+        {
+            mDialogueScrollBox->update();
+            if(mDialogueScrollBox->isFinished())
+            {
+                closeDialogueScrollbox();
+            }
         }
     }
 

@@ -8,6 +8,7 @@ namespace DiabloExe
     class Npc
     {
         public:
+            std::string id;
             std::string name;
             std::string celPath;
             uint8_t x;
@@ -19,7 +20,7 @@ namespace DiabloExe
             std::string dump() const;
 
        private:
-            Npc(FAIO::FAFile* exe, size_t nameAdr, size_t celAdr, size_t xAdr, size_t yAdr, size_t _rotation);
+            Npc(FAIO::FAFile* exe, const std::string& id, size_t nameAdr, size_t celAdr, size_t xAdr, size_t yAdr, size_t _rotation);
 
             friend class DiabloExe;
     };

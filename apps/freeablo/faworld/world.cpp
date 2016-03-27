@@ -48,6 +48,8 @@ namespace FAWorld
         for(size_t i = 0; i < npcs.size(); i++)
         {
             Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
+            actor->setCanTalk(true);
+            actor->setActorId(npcs[i]->id);
             townActors.push_back(actor);
         }
 

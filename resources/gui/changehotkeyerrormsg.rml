@@ -40,7 +40,7 @@ def onLoad(document):
 def onKeyUp(event, document):
     while time.time() < startTime + 1:
         time.sleep(0.1)
-    docmanage.manager.closeDoc("resources/gui/changehotkeyerrormsg.rml")
+    docmanage.manager.closeDoc(docmanage.manager.ChangeHotKeyErrorFile)
         </script>
     </head>
 
