@@ -29,6 +29,8 @@ if(FA_TESTS_ENABLED)
         target_include_directories("test_${test_name}" PRIVATE ${GTEST_INCLUDES})
         target_compile_definitions("test_${test_name}" PRIVATE TEST_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
         target_link_libraries("test_${test_name}" ${GTEST_LIBRARY} ${GTEST_MAINLIB} ${link_libs})
+        
+        set_target_properties("test_${test_name}" PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
         if(in_default)
             add_custom_target("FATEST_${test_name}" COMMAND "${CMAKE_BINARY_DIR}/test_${test_name}" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

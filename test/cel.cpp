@@ -59,7 +59,7 @@ std::vector<std::string> getCelsFromListfile(const std::string& path)
     std::vector<std::string> lines = Misc::StringUtils::split(str, '\n');
 
     std::vector<std::string> celFiles;
-    for(int i = 0; i < lines.size(); i++)
+    for(size_t i = 0; i < lines.size(); i++)
     {
         if(Misc::StringUtils::ciEndsWith(lines[i], ".cel") || Misc::StringUtils::ciEndsWith(lines[i], ".cl2"))
         {
@@ -168,7 +168,7 @@ void getBlizzconvHashes(const std::string& blizzconvBase, const std::string& lis
 
     std::ofstream out(destFile);
 
-    for(int i = 0; i < celPaths.size(); i++)
+    for(size_t i = 0; i < celPaths.size(); i++)
     {
         std::string path = Misc::StringUtils::replaceEnd(".cel", "", celPaths[i]);
         Misc::StringUtils::replace(path, "\\", "/"); // fukken windows path separators...
