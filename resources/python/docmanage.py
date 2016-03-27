@@ -6,6 +6,17 @@ from singleton import Singleton
 class DocManager(object):
     __metaclass__ = Singleton
 
+
+    PauseFile               = "resources/gui/pausemenu.rml"
+    InventoryFile           = "resources/gui/inventory.rml"
+    CharacterFile           = "resources/gui/character.rml"
+    SpellsFile              = "resources/gui/spells.rml"
+    QuestFile               = "resources/gui/quest.rml"
+    ChangeHotKeyFile        = "resources/gui/changehotkey.rml"
+    HotKeyMenuFile          = "resources/gui/hotkeymenu.rml"
+    ChangeHotKeyErrorFile   = "resources/gui/changehotkeyerrormsg.rml"
+
+
     def __init__(self):
 
         context = rocket.contexts['default']
@@ -14,7 +25,7 @@ class DocManager(object):
         self.docs = {}
         self.paused = False
         self.pauseHiddenDocs = []
-        self.pauseHandle = "resources/gui/pausemenu.rml"
+        self.pauseHandle = self.PauseFile
         self.loadDoc(self.pauseHandle)
 
     def showDoc(self, docpath):

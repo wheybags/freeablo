@@ -2,6 +2,7 @@
 # depending on game progress
 
 import freeablo
+import docmanage
 from random import randint
 
 # Globals
@@ -9,6 +10,13 @@ from random import randint
 ENTRY_SELECTED = '<span class="pentagon_left"/>%s<span class="pentagon_right"/>'
 ENTRY_NOT_SELECTED = '<span style="visibility: hidden;" class="pentagon_left"/>%s<span style="visibility: hidden;" class="pentagon_right"/>'
 DIALOGUE_PATH = "resources/gui/dialogues/"
+
+def closeOtherWindows():
+    docmanage.manager.hideDoc(docmanage.manager.PauseFile)
+    docmanage.manager.hideDoc(docmanage.manager.InventoryFile)
+    docmanage.manager.hideDoc(docmanage.manager.CharacterFile)
+    docmanage.manager.hideDoc(docmanage.manager.SpellsFile)
+    docmanage.manager.hideDoc(docmanage.manager.QuestFile)
 
 def openDialogue(rml, openingSound):
 
@@ -39,6 +47,8 @@ def openScrollbox(rml, openingSound):
 def talkTo(npcId):
 
     print npcId
+
+    closeOtherWindows()
 
     if npcId == 'NPCsmith':
         openDialogue("NPCsmith.rml","sfx/Towners/Bsmith44.wav")

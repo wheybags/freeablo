@@ -60,10 +60,10 @@ def onKeyDown(event, document):
     global modifiers
     global rk
     
-    changeHotkey = docmanage.manager.getDoc("resources/gui/changehotkey.rml")
+    changeHotkey = docmanage.manager.getDoc(docmanage.manager.ChangeHotKeyFile)
     if event.parameters['key_identifier'] == rk.ESCAPE:
-        docmanage.manager.closeDoc("resources/gui/changehotkey.rml")
-        docmanage.manager.showDoc("resources/gui/hotkeymenu.rml")
+        docmanage.manager.closeDoc(docmanage.manager.ChangeHotKeyFile)
+        docmanage.manager.showDoc(docmanage.manager.HotKeyMenuFile)
         
         return
     
@@ -90,15 +90,15 @@ def onKeyDown(event, document):
         
         for oldHotkey in oldHotkeys:
             if oldHotkey == newHotkey:
-                docmanage.manager.loadDoc("resources/gui/changehotkeyerrormsg.rml")
-                docmanage.manager.showDoc("resources/gui/changehotkeyerrormsg.rml")
+                docmanage.manager.loadDoc(docmanage.manager.ChangeHotKeyErrorFile)
+                docmanage.manager.showDoc(docmanage.manager.ChangeHotKeyErrorFile)
                 return 
 
         changeHotkey.func = changeHotkey.func[1:-1] if changeHotkey.func[0] == "'" else changeHotkey.func
         freeablo.setHotkey(changeHotkey.func, [newHotkey.key, newHotkey.shift, newHotkey.ctrl, newHotkey.alt]) 
-        docmanage.manager.closeDoc("resources/gui/changehotkey.rml")
-        docmanage.manager.reloadDoc("resources/gui/hotkeymenu.rml")
-        docmanage.manager.showDoc("resources/gui/hotkeymenu.rml")
+        docmanage.manager.closeDoc(docmanage.manager.ChangeHotKeyFile)
+        docmanage.manager.reloadDoc(docmanage.manager.HotKeyMenuFile)
+        docmanage.manager.showDoc(docmanage.manager.HotKeyMenuFile)
 
 def onKeyUp(event, document):
     global newHotkey
