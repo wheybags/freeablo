@@ -62,49 +62,49 @@
             div#name
             {
                 left: 16px;
-                top: 16px;
+                top: 20px;
                 width: 140px;
             }
 
             div#class
             {
                 left: 164px;
-                top: 16px;
+                top: 20px;
                 width: 140px;
             }
 
             div#level
             {
                 left: 60px;
-                top: 55px;
+                top: 59px;
                 width: 52px;
             }
 
             div#exp
             {
                 left: 210px;
-                top: 55px;
+                top: 59px;
                 width: 94px;
             }
 
             div#next_level
             {
                 left: 210px;
-                top: 83px;
+                top: 87px;
                 width: 94px;
             }
 
             div#gold
             {
                 left: 210px;
-                top: 132px;
+                top: 136px;
                 width: 94px;
             }
 
             div#left_container
             {
                 position: absolute;
-                top: 140px;
+                top: 144px;
                 left: 90px;
                 max-width: 100px;
             }
@@ -113,7 +113,7 @@
             {
                 position: absolute;
                 left: 252px;
-                top: 168px;
+                top: 172px;
                 max-width: 55px;
             }
 
@@ -131,8 +131,8 @@ instance = draggable.DraggableWidget(document, 0, 100)
     onmousedown="instance.bodyMouseDown(event)"
     ondrag="instance.onDrag(event)">
         <span id="container" onmousedown="instance.guiMouseDown(event)">
-            <div class="box" id="name">Hero name</div>
-            <div class="box" id="class">Warrior</div>
+            <div class="box" id="name">hero name</div>
+            <div class="box" id="class">warrior</div>
             <div class="box" id="level">1</div>
             <div class="box" id="exp">1000</div>
             <div class="box" id="next_level">1500</div>
