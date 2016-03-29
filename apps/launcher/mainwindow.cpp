@@ -53,14 +53,20 @@ void MainWindow::setupListWidget()
 
 void MainWindow::createIcons()
 {
+    QPixmap playPixmap("resources/play.png");
+    QIcon playIcon(playPixmap);
+
     QListWidgetItem *playButton = new QListWidgetItem(ui->listWidget);
-    playButton->setIcon(QIcon::fromTheme("video-display"));
+    playButton->setIcon(playIcon);
     playButton->setText(tr("Play"));
     playButton->setTextAlignment(Qt::AlignCenter);
     playButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
+    QPixmap graphicsPixmap("resources/play.png");
+    QIcon graphicsIcon(graphicsPixmap);
+
     QListWidgetItem *graphicsButton = new QListWidgetItem(ui->listWidget);
-    graphicsButton->setIcon(QIcon::fromTheme("video-display"));
+    graphicsButton->setIcon(graphicsIcon);
     graphicsButton->setText(tr("Graphics"));
     graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
