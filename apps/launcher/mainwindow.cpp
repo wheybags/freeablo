@@ -53,7 +53,7 @@ void MainWindow::setupListWidget()
 
 void MainWindow::createIcons()
 {
-    QPixmap playPixmap("resources/play.png");
+    QPixmap playPixmap("resources/launcher/play.png");
     QIcon playIcon(playPixmap);
 
     QListWidgetItem *playButton = new QListWidgetItem(ui->listWidget);
@@ -62,7 +62,7 @@ void MainWindow::createIcons()
     playButton->setTextAlignment(Qt::AlignCenter);
     playButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QPixmap graphicsPixmap("resources/play.png");
+    QPixmap graphicsPixmap("resources/launcher/graphics.png");
     QIcon graphicsIcon(graphicsPixmap);
 
     QListWidgetItem *graphicsButton = new QListWidgetItem(ui->listWidget);
