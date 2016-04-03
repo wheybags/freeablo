@@ -129,13 +129,14 @@
         </style>
 
         <script>
+import docmanage
 import draggable
 instance = draggable.DraggableWidget(document, 0, -500)
         </script>
 
     </head>
 
-    <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
+    <body onKeyDown="docmanage.manager.onKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
         <span id="container" onmousedown="instance.guiMouseDown(event)"
                              onDrag="instance.onDrag(event)">
         <div id="leftHand"  onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onWeaponClick(event)" class="hand-equip-socket"> </div>
