@@ -16,7 +16,7 @@
                 width: 320;
                 background-decorator: image;
                 background-image: /data/char.cel;
-                drag:clone;
+                drag:drag;
                 position: fixed;
                 top: -175px;
             }
