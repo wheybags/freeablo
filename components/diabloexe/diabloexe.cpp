@@ -422,11 +422,12 @@ namespace DiabloExe
     std::vector<const Monster*> DiabloExe::getMonstersInLevel(size_t levelNum) const
     {
         std::vector<const Monster*> retval;
-
+        
         for(std::map<std::string, Monster>::const_iterator it = mMonsters.begin(); it != mMonsters.end(); ++it)
         {
-            if(levelNum >= it->second.minDunLevel && levelNum <= it->second.maxDunLevel &&
-               it->second.monsterName != "Wyrm" && it->second.monsterName != "Cave Slug") // Exception, these monster's CEL files don't exist
+            if (levelNum >= it->second.minDunLevel && levelNum <= it->second.maxDunLevel &&
+                    it->second.monsterName != "Wyrm" && it->second.monsterName != "Cave Slug" &&
+                    it->second.monsterName != "Devil Wyrm" && it->second.monsterName != "Devourer") // Exception, these monster's CEL files don't exist
             {
                 retval.push_back(&(it->second));
             }
