@@ -57,7 +57,7 @@ namespace FAWorld
         mLevels[0] = tmp;
 
 
-        for(int32_t i = 1; i < 13; i++)
+        for(int32_t i = 1; i < 17; i++)
         {
             mLevels[i] = FALevelGen::generate(100, 100, i, mDiabloExe, i-1, i+1);
         }

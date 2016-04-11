@@ -581,7 +581,7 @@ namespace FALevelGen
     // Helper function for adding doors
     // Iterates over all blocks on a wall, and adds doors where necessary, looking at what is in the direction
     // indicated by add (1 or -1) to determine if a door is needed
-    void doorAddHelper(Level::Dun& level, int32_t otherCoord, int32_t add, size_t start, size_t end, bool xAxis)
+    void doorAddHelper(Level::Dun& level, int32_t otherCoord, int32_t add, size_t start, size_t end, bool xAxis, size_t levelNum)
     {
         std::vector<std::pair<size_t, size_t> > region;
         bool connected = false;
@@ -633,24 +633,24 @@ namespace FALevelGen
                 }
             }
         }
-
+        
         if(!hole && region.size() > 0)
-            level[region[region.size()/2].first][region[region.size()/2].second] = door;
+            level[region[region.size()/2].first][region[region.size()/2].second] = (levelNum == 4) ? floor : door;
     }
     
-    void addDoors(Level::Dun& level, const std::vector<Room>& rooms)
+    void addDoors(Level::Dun& level, const std::vector<Room>& rooms, size_t levelNum)
     {
         for(size_t i = 0; i < rooms.size(); i++)
         {
             // Top x wall
-            doorAddHelper(level, rooms[i].yPos,                   -1, rooms[i].xPos+1, rooms[i].xPos + rooms[i].width -1,  true); 
+            doorAddHelper(level, rooms[i].yPos,                   -1, rooms[i].xPos+1, rooms[i].xPos + rooms[i].width -1,  true, levelNum); 
             // Bottom x wall
-            doorAddHelper(level, rooms[i].yPos+rooms[i].height-1, +1, rooms[i].xPos+1, rooms[i].xPos + rooms[i].width -1,  true); 
+            doorAddHelper(level, rooms[i].yPos+rooms[i].height-1, +1, rooms[i].xPos+1, rooms[i].xPos + rooms[i].width -1,  true, levelNum); 
             
             // Left y wall
-            doorAddHelper(level, rooms[i].xPos,                   -1, rooms[i].yPos+1, rooms[i].yPos + rooms[i].height -1, false); 
+            doorAddHelper(level, rooms[i].xPos,                   -1, rooms[i].yPos+1, rooms[i].yPos + rooms[i].height -1, false, levelNum); 
             // Right y wall
-            doorAddHelper(level, rooms[i].xPos+rooms[i].width-1,  +1, rooms[i].yPos+1, rooms[i].yPos + rooms[i].height -1, false); 
+            doorAddHelper(level, rooms[i].xPos+rooms[i].width-1,  +1, rooms[i].yPos+1, rooms[i].yPos + rooms[i].height -1, false, levelNum); 
         }
     }
 
@@ -815,7 +815,7 @@ namespace FALevelGen
         addWalls(level);
 
         cleanup(level, rooms); 
-        addDoors(level, rooms);
+        addDoors(level, rooms, levelNum);
         
         // Make sure we always place stairs
         if(!(placeUpStairs(level, rooms, levelNum) && placeDownStairs(level, rooms, levelNum)))
