@@ -35,6 +35,7 @@ namespace FAAudio
             ~AudioManager();
 
             void play(std::string path);
+            void stopSound();
             void playMusic(const std::string& path);
 
             static void playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager);

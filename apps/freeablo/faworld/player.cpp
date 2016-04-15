@@ -3,6 +3,7 @@
 #include "actorstats.h"
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
+#include <boost/python.hpp>
 
 namespace FAWorld
 {
@@ -41,6 +42,28 @@ namespace FAWorld
     {
         UNUSED_PARAM(enemy);
         return false;
+    }
+
+    bool Player::talk(Actor * actor)
+    {
+        isTalking = true;
+
+        using namespace boost::python;
+
+        try
+        {
+            object module = import("dialogues");
+            object talkTo = module.attr("talkTo");
+
+            talkTo(actor->getActorId().c_str());
+        }
+        catch(...)
+        {
+                PyErr_Print();
+                PyErr_Clear();
+        }
+
+        return true;
     }
 
     void Player::setSpriteClass(std::string className)

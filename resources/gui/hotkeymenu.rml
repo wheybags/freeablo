@@ -74,16 +74,16 @@ def onKeyDown(event, document):
         hotkeyMenu.onKeyDown(event)
         
 def changeHotkey(func):
-    docmanage.manager.loadDoc("resources/gui/changehotkey.rml")
-    changeHotkey = docmanage.manager.getDoc("resources/gui/changehotkey.rml")
+    docmanage.manager.loadDoc(docmanage.manager.ChangeHotKeyFile)
+    changeHotkey = docmanage.manager.getDoc(docmanage.manager.ChangeHotKeyFile)
     changeHotkey.func = func
-    docmanage.manager.hideDoc("resources/gui/hotkeymenu.rml")
-    docmanage.manager.showDoc("resources/gui/changehotkey.rml")
+    docmanage.manager.hideDoc(docmanage.manager.HotKeyMenuFile)
+    docmanage.manager.showDoc(docmanage.manager.ChangeHotKeyFile)
         
 
 def showPause():
-    docmanage.manager.closeDoc("resources/gui/hotkeymenu.rml")
-    docmanage.manager.showDoc("resources/gui/pausemenu.rml")
+    docmanage.manager.closeDoc(docmanage.manager.HotKeyMenuFile)
+    docmanage.manager.showDoc(docmanage.manager.PauseFile)
 
         </script>
     </head>

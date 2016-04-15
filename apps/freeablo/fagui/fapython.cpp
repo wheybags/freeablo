@@ -16,6 +16,26 @@ namespace FAGui
     std::string cursorPath;
     uint32_t cursorFrame;
 
+    void FAPythonFuncs::openDialogue(const char* document)
+    {
+        mGuiManager.openDialogue(document);
+    }
+
+    void FAPythonFuncs::closeDialogue()
+    {
+        mGuiManager.closeDialogue();
+    }
+
+    void FAPythonFuncs::openDialogueScrollbox(const char* document)
+    {
+        mGuiManager.openDialogueScrollbox(document);
+    }
+
+    void FAPythonFuncs::closeDialogueScrollbox()
+    {
+        mGuiManager.closeDialogueScrollbox();
+    }
+
     void FAPythonFuncs::showChooseClassMenu()
     {
         mGuiManager.showChooseClassMenu();
@@ -113,6 +133,11 @@ namespace FAGui
     void FAPythonFuncs::playSound(const std::string& path)
     {
         Engine::ThreadManager::get()->playSound(path);
+    }
+
+    void FAPythonFuncs::stopSound()
+    {
+        Engine::ThreadManager::get()->stopSound();
     }
 
     void FAPythonFuncs::playClickButtonSound()
@@ -463,6 +488,10 @@ namespace FAGui
     FAPythonFuncs* funcs = NULL;
     BOOST_PYTHON_MODULE(freeablo)
     {
+        boost::python::def("openDialogue", +[](const char* document){funcs->openDialogue(document);});
+        boost::python::def("closeDialogue", +[](){funcs->closeDialogue();});
+        boost::python::def("openDialogueScrollbox", +[](const char* document){funcs->openDialogueScrollbox(document);});
+        boost::python::def("closeDialogueScrollbox", +[](){funcs->closeDialogueScrollbox();});
         boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
         boost::python::def("showCredits", +[](){funcs->showCredits();});
         boost::python::def("showSelectHeroMenu", +[](){funcs->showSelectHeroMenu();});
@@ -476,6 +505,7 @@ namespace FAGui
         boost::python::def("unpause", +[](){funcs->unpauseGame();});
         boost::python::def("startGame", +[](){funcs->startGame();});
         boost::python::def("playSound", +[](const std::string& path){funcs->playSound(path);});
+        boost::python::def("stopSound", +[](){funcs->stopSound();});
         boost::python::def("playClickButtonSound", +[](){funcs->playClickButtonSound();});
         boost::python::def("getHotkeyNames", +[](){return funcs->getHotkeyNames();});
         boost::python::def("getHotkeys", +[](){return funcs->getHotkeys();});

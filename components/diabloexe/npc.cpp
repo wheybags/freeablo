@@ -4,8 +4,9 @@
 
 namespace DiabloExe
 {
-    Npc::Npc(FAIO::FAFile* exe, size_t nameAdr, size_t celAdr, size_t xAdr, size_t yAdr, size_t _rotation)
+    Npc::Npc(FAIO::FAFile* exe, const std::string& npcId, size_t nameAdr, size_t celAdr, size_t xAdr, size_t yAdr, size_t _rotation)
     {
+        id = npcId;
         name = FAIO::readCString(exe, nameAdr);
         celPath = FAIO::readCString(exe, celAdr);
 

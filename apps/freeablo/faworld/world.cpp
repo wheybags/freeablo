@@ -48,6 +48,8 @@ namespace FAWorld
         for(size_t i = 0; i < npcs.size(); i++)
         {
             Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
+            actor->setCanTalk(true);
+            actor->setActorId(npcs[i]->id);
             townActors.push_back(actor);
         }
 
@@ -55,7 +57,7 @@ namespace FAWorld
         mLevels[0] = tmp;
 
 
-        for(int32_t i = 1; i < 13; i++)
+        for(int32_t i = 1; i < 17; i++)
         {
             mLevels[i] = FALevelGen::generate(100, 100, i, mDiabloExe, i-1, i+1);
         }

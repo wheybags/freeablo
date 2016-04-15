@@ -62,14 +62,10 @@
 import docmanage
 import draggable
 instance = draggable.DraggableWidget(document, 0, 0)
-invHandle = "resources/gui/inventory.rml"
-charHandle = "resources/gui/character.rml"
-spellsHandle = "resources/gui/spells.rml"
-questHandle = "resources/gui/quest.rml"
-docmanage.manager.loadDoc(invHandle)
-docmanage.manager.loadDoc(charHandle)
-docmanage.manager.loadDoc(spellsHandle)
-docmanage.manager.loadDoc(questHandle)
+docmanage.manager.loadDoc(docmanage.manager.InventoryFile)
+docmanage.manager.loadDoc(docmanage.manager.CharacterFile)
+docmanage.manager.loadDoc(docmanage.manager.SpellsFile)
+docmanage.manager.loadDoc(docmanage.manager.QuestFile)
         </script>
 
     </head>
@@ -86,12 +82,12 @@ docmanage.manager.loadDoc(questHandle)
         <div class="beltSocket" id="belt6" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
         <div class="beltSocket" id="belt7" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
         </span>
-            <button id="charBut" onclick="docmanage.manager.toggleDoc(charHandle)"></button>
-            <button id="questBut" onclick="docmanage.manager.toggleDoc(questHandle)"></button>
+            <button id="charBut" onclick="docmanage.manager.toggleDoc(docmanage.manager.CharacterFile)"></button>
+            <button id="questBut" onclick="docmanage.manager.toggleDoc(docmanage.manager.QuestFile)"></button>
             <button id="mapBut" onclick="print 'map clicked'"></button>
             <button id="menuBut" onclick="docmanage.manager.pause()"></button>
-            <button id="invBut" onclick="docmanage.manager.toggleDoc(invHandle)"></button>
-            <button id="spellBut" onclick="docmanage.manager.toggleDoc(spellsHandle)"></button>
+            <button id="invBut" onclick="docmanage.manager.toggleDoc(docmanage.manager.InventoryFile)"></button>
+            <button id="spellBut" onclick="docmanage.manager.toggleDoc(docmanage.manager.SpellsFile)"></button>
         </span>
     </body>
 </rml>

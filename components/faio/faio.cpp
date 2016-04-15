@@ -31,8 +31,6 @@ namespace FAIO
         }
         
         retval = retval.substr(0, retval.size()-1);
-
-        std::cout << retval << std::endl;
         
         return retval;
     }
@@ -57,6 +55,20 @@ namespace FAIO
         {
             SFileCloseArchive(diabdat);
         }
+    }
+
+    bool exists(const std::string& filename)
+    {
+        bfs::path path(filename);
+        path.make_preferred();
+
+        if(bfs::exists(filename))
+            return true;
+
+        std::lock_guard<std::mutex> lock(m);
+        std::string stormPath = getStormLibPath(path);
+
+        return SFileHasFile(diabdat, stormPath.c_str());
     }
 
     FAFile* FAfopen(const std::string& filename)

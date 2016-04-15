@@ -27,6 +27,10 @@ namespace FAGui
             {}
 
         protected:
+            void openDialogue(const char* document);
+            void closeDialogue();
+            void openDialogueScrollbox(const char* document);
+            void closeDialogueScrollbox();
             void showMainMenu();
             void showCredits();
             void showSelectHeroMenu();
@@ -43,6 +47,7 @@ namespace FAGui
             void loadGame();
             void playClickButtonSound();
             void playSound(const std::string& path);
+            void stopSound();
             boost::python::list getHotkeyNames();
             boost::python::list getHotkeys();
             void setHotkey(std::string function, boost::python::list pyhotkey);

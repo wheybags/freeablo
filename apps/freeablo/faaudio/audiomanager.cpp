@@ -82,6 +82,11 @@ namespace FAAudio
             mPlaying[channel] = path;
     }
 
+    void AudioManager::stopSound()
+    {
+        Audio::stopSound();
+    }
+
     void AudioManager::playMusic(const std::string& path)
     {
         if(mCurrentMusic != NULL)
