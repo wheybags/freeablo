@@ -3,7 +3,16 @@
         <style>
             body
             {
-                top: 50%;
+                position: fixed;
+                bottom: 480;
+            }
+            
+            div#draghandle
+            {
+                position: inherit;
+                display: block;
+                width: 320;
+                height: 10;
             }
 
             span#container
@@ -12,12 +21,10 @@
                 text-align: left;
                 height: 352;
                 width: 320;
+                position: fixed;
+                left: 56%;
                 background-decorator: image;
                 background-image: /data/spellbk.cel;
-                position: fixed;
-                top: -175px;
-                right: 0px;
-                drag:clone;
             }
         </style>
 
@@ -29,7 +36,10 @@ instance = draggable.DraggableWidget(document, 0, -500)
     </head>
 
     <body onKeyDown="instance.bodyKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" >
-        <span id="container" onmousedown="instance.guiMouseDown(event)"
-                             onDrag="instance.onDrag(event)"></span>
+        <span id="container" onmousedown="instance.guiMouseDown(event)">
+            <handle move_target="#document">
+                <div id="draghandle"/>
+            </handle>
+        </span>
     </body>
 </rml>

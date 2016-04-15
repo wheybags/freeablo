@@ -3,9 +3,18 @@
         <style>
             body
             {
-                top: 50%;
+                position: fixed;
+                bottom: 480;
                 font-family: FreeabloWhite11;
                 text-align: center;
+            }
+            
+            div#draghandle
+            {
+                position: inherit;
+                display: block;
+                width: 320;
+                height: 10;
             }
 
             span#container
@@ -14,11 +23,10 @@
                 text-align: left;
                 height: 352;
                 width: 320;
+                position: fixed;
+                right: 56%;
                 background-decorator: image;
                 background-image: /data/char.cel;
-                drag:drag;
-                position: fixed;
-                top: -175px;
             }
 
             div.box
@@ -128,9 +136,11 @@ instance = draggable.DraggableWidget(document, 0, 100)
     </head>
 
     <body onKeyDown="instance.onKeyDown(event)"
-    onmousedown="instance.bodyMouseDown(event)"
-    ondrag="instance.onDrag(event)">
+    onmousedown="instance.bodyMouseDown(event)">
         <span id="container" onmousedown="instance.guiMouseDown(event)">
+            <handle move_target="#document">
+                <div id="draghandle"/>
+            </handle>
             <div class="box" id="name">Hero name</div>
             <div class="box" id="class">Warrior</div>
             <div class="box" id="level">1</div>
