@@ -33,8 +33,8 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 
         const int32_t dLvl = variables["level"].as<int32_t>();
 
-        if(dLvl > 12)
-            throw bpo::error("level > 12 not implemented");
+        if(dLvl > 16)
+            throw bpo::error("There is no level after 16");
     }
     catch(bpo::error& e)
     {
