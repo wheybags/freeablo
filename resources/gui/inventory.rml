@@ -135,6 +135,7 @@
         </style>
 
         <script>
+import docmanage
 import draggable
 instance = draggable.DraggableWidget(document, 0, -500)
         </script>
