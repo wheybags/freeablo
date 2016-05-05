@@ -251,6 +251,7 @@ namespace FAWorld
 
     void World::onMouseClick(Engine::Point mousePosition)
     {
+        UNUSED_PARAM(mousePosition);
         auto level = getCurrentLevel();
         level->activate(mDestination.first, mDestination.second);
     }
