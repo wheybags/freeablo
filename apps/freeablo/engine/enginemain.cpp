@@ -103,6 +103,7 @@ namespace Engine
         player = playerFactory.create(characterClass);
         world.addCurrentPlayer(player);
         world.generateLevels();
+        mInputManager->registerKeyboardObserver(&world);
         mInputManager->registerMouseObserver(&world);
 
         int32_t currentLevel = variables["level"].as<int32_t>();

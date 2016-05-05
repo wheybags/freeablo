@@ -14,17 +14,17 @@ namespace Input
         alt = false;
     }
 
-    Hotkey::Hotkey(const char *name)
-    {
-        std::string sname = name;
+    Hotkey::Hotkey(const char *name) : Hotkey(std::string(name)) {}
 
+    Hotkey::Hotkey(const std::string& name)
+    {
         Settings::Settings hotkeySettings;
         hotkeySettings.loadFromFile("resources/hotkeys.ini");
 
-        key = hotkeySettings.get<int>(sname, "key");
-        shift = hotkeySettings.get<int>(sname, "shift");
-        ctrl = hotkeySettings.get<int>(sname, "ctrl");
-        alt = hotkeySettings.get<int>(sname, "alt");
+        key = hotkeySettings.get<int>(name, "key");
+        shift = hotkeySettings.get<int>(name, "shift");
+        ctrl = hotkeySettings.get<int>(name, "ctrl");
+        alt = hotkeySettings.get<int>(name, "alt");
     }
     
     Hotkey::Hotkey(int nkey, bool nshift, bool nctrl, bool nalt)

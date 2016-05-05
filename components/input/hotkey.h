@@ -12,6 +12,7 @@ namespace Input
 
             Hotkey();
             Hotkey(const char *name);
+            Hotkey(const std::string& name);
             Hotkey(int nkey, bool nshift, bool nctrl, bool nalt);
             std::string name() const;
             bool operator==(const Hotkey &other);
