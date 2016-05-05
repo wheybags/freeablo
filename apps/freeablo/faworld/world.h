@@ -35,10 +35,9 @@ namespace FAWorld
             GameLevel* getCurrentLevel();
             size_t getCurrentLevelIndex();
 
-            void setLevel(int32_t levelnum);
-
-            GameLevel* getLevel(size_t levelNum);
-            void insertLevel(size_t levelNum, GameLevel* level);
+            void setLevel(size_t level);
+            GameLevel* getLevel(size_t level);
+            void insertLevel(size_t level, GameLevel* gameLevel);
 
             Actor* getActorAt(size_t x, size_t y);
 
@@ -58,9 +57,10 @@ namespace FAWorld
             void getAllActors(std::vector<Actor*>& actors);
 
         private:
-            std::map<size_t, GameLevel*> mLevels;
+            void playLevelMusic(size_t level);
 
-            size_t mTicksPassed=0;
+            std::map<size_t, GameLevel*> mLevels;
+            size_t mTicksPassed = 0;
             Player* mCurrentPlayer;
             std::vector<Player*> mPlayers;
             const DiabloExe::DiabloExe& mDiabloExe;

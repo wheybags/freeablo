@@ -15,10 +15,10 @@ namespace Engine
 {
     enum ThreadState
     {
-        musicPlay,
-        soundPlay,
-        soundStop,
-        renderState
+        PLAY_MUSIC,
+        PLAY_SOUND,
+        STOP_SOUND,
+        RENDER_STATE
     };
 
     struct Message
@@ -37,25 +37,20 @@ namespace Engine
     {
         public:
             static ThreadManager* get();
-
             ThreadManager();
-
             void run();
-
             void playMusic(const std::string& path);
             void playSound(const std::string& path);
             void stopSound();
             void sendRenderState(FARender::RenderState* state);
 
-
         private:
-            static ThreadManager* mThreadManager; ///< Singleton instance
-
-            boost::lockfree::spsc_queue<Message, boost::lockfree::capacity<100> > mQueue;
             void handleMessage(const Message& message);
-            FARender::RenderState* mRenderState;
 
-            FAAudio::AudioManager audioManager;
+            static ThreadManager* mThreadManager; ///< Singleton instance
+            boost::lockfree::spsc_queue<Message, boost::lockfree::capacity<100> > mQueue;
+            FARender::RenderState* mRenderState;
+            FAAudio::AudioManager mAudioManager;
     };
 }
 

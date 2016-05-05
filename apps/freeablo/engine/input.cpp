@@ -26,11 +26,11 @@ namespace Engine
                 FARender::Renderer::get()->getRocketContext()),
         mEngine(engine)
     {
-        quit_key = Input::Hotkey("Quit");
-        noclip_key = Input::Hotkey("Noclip");
-        changelvlup_key = Input::Hotkey("Changelvlup");
-        changelvldwn_key = Input::Hotkey("Changelvldwn");
-        toggleconsole_key = Input::Hotkey("ToggleConsole");
+        mHotkeys[QUIT] = Input::Hotkey("Quit");
+        mHotkeys[NOCLIP] = Input::Hotkey("Noclip");
+        mHotkeys[CHANGE_LEVEL_UP] = Input::Hotkey("Changelvlup");
+        mHotkeys[CHANGE_LEVEL_DOWN] = Input::Hotkey("Changelvldwn");
+        mHotkeys[TOGGLE_CONSOLE] = Input::Hotkey("ToggleConsole");
     }
 
     void EngineInputManager::keyPress(Input::Key key)
@@ -73,25 +73,25 @@ namespace Engine
 
         FAGui::Console & console = FAGui::Console::getInstance(FARender::Renderer::get()->getRocketContext());
 
-        if(hotkey == toggleconsole_key)
+        if(hotkey == getHotkey(TOGGLE_CONSOLE))
         {
-            mToggleConsole = true;;
+            mToggleConsole = true;
         }
         else if(!console.isVisible())
         {
-            if (hotkey == quit_key)
+            if (hotkey == getHotkey(QUIT))
             {
                 mEngine.stop();
             }
-            else if (hotkey == noclip_key)
+            else if (hotkey == getHotkey(NOCLIP))
             {
                 mEngine.toggleNoclip();
             }
-            else if (hotkey == changelvlup_key || hotkey == changelvldwn_key)
+            else if (hotkey == getHotkey(CHANGE_LEVEL_UP) || hotkey == getHotkey(CHANGE_LEVEL_DOWN))
             {
                 FAWorld::World* world = FAWorld::World::get();
                 size_t nextLevelIndex;
-                if(hotkey == changelvlup_key)
+                if(hotkey == getHotkey(CHANGE_LEVEL_UP))
                     nextLevelIndex = world->getCurrentLevel()->getPreviousLevel();
                 else
                     nextLevelIndex = world->getCurrentLevel()->getNextLevel();
@@ -101,7 +101,7 @@ namespace Engine
                 FAWorld::GameLevel* level = world->getCurrentLevel();
                 FAWorld::Player* player = world->getCurrentPlayer();
 
-                if(hotkey == changelvlup_key)
+                if(hotkey == getHotkey(CHANGE_LEVEL_UP))
                     player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
                 else
                     player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
@@ -110,6 +110,29 @@ namespace Engine
                 player->destination() = player->mPos.current();
             }
         }
+    }
+
+    void EngineInputManager::setHotkey(Action action, Input::Hotkey hotkey)
+    {
+        auto actionAsString = actionToString(action);
+        mHotkeys[action] = hotkey;
+        mHotkeys[action].save(actionAsString.c_str());
+    }
+
+    Input::Hotkey EngineInputManager::getHotkey(Action action)
+    {
+        return mHotkeys[action];
+    }
+
+    std::vector<Input::Hotkey> EngineInputManager::getHotkeys()
+    {
+        std::vector<Input::Hotkey> hotkeys;
+
+        for(auto it = mHotkeys.begin(); it != mHotkeys.end(); it++) {
+            hotkeys.push_back(it->second);
+        }
+
+        return hotkeys;
     }
 
     void EngineInputManager::mouseClick(size_t x, size_t y, Input::Key key)
@@ -138,6 +161,35 @@ namespace Engine
         mYClick = y;
     }
 
+    std::string EngineInputManager::actionToString(Action action) const
+    {
+        std::string actionAsString;
+
+        switch(action)
+        {
+            case QUIT:
+                actionAsString = "Quit";
+                break;
+            case NOCLIP:
+                actionAsString = "Noclip";
+                break;
+            case CHANGE_LEVEL_UP:
+                actionAsString = "Changelvlup";
+                break;
+            case CHANGE_LEVEL_DOWN:
+                actionAsString = "Changelvldwn";
+                break;
+            case TOGGLE_CONSOLE:
+                actionAsString = "Toggle";
+                break;
+            default:
+                actionAsString = "Unknown";
+                break;
+        }
+
+        return actionAsString;
+    }
+
     void EngineInputManager::update(bool paused)
     {
         mInput.processInput(paused);
@@ -150,7 +202,6 @@ namespace Engine
 
         if(!paused && mMouseDown)
         {
-
             auto world = FAWorld::World::get();
             auto player = world->getCurrentPlayer();
             auto level = world->getCurrentLevel();

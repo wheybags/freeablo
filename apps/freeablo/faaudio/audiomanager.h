@@ -2,12 +2,10 @@
 #define AUDIO_MANAGER_H
 
 #include <stdint.h>
-
 #include <string>
 #include <vector>
 #include <map>
 #include <list>
-
 #include <audio/audio.h>
 
 namespace Engine
@@ -37,8 +35,6 @@ namespace FAAudio
             void play(std::string path);
             void stopSound();
             void playMusic(const std::string& path);
-
-            static void playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager);
 
         private:
             std::vector<std::string> mPlaying;

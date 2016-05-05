@@ -27,9 +27,7 @@ namespace FAGui
     {
 
         this->invClass = invClass;
-        initPython(mPythonFuncs);
-
-        Input::Hotkey::initpythonwrapper();
+        initializePython(mPythonFuncs);
 
         FARender::Renderer* renderer = FARender::Renderer::get();
 

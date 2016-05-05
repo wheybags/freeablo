@@ -73,24 +73,59 @@ namespace FAWorld
         return mCurrentPlayer->getLevel()->getLevelIndex();
     }
     
-    void World::setLevel(int32_t levelNum)
+    void World::setLevel(size_t level)
     {
-        if(levelNum >= (int32_t)mLevels.size() || levelNum < 0 || (mCurrentPlayer->getLevel() && (int32_t)mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
+        if(level >= mLevels.size() || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == level))
             return;
 
-        mCurrentPlayer->setLevel(mLevels[levelNum]);
-
-        FAAudio::AudioManager::playLevelMusic(levelNum, *Engine::ThreadManager::get());
+        mCurrentPlayer->setLevel(mLevels[level]);
+        playLevelMusic(level);
     }
 
-    GameLevel* World::getLevel(size_t levelNum)
+    void World::playLevelMusic(size_t level)
     {
-        return mLevels[levelNum];
+        auto threadManager = Engine::ThreadManager::get();
+        switch(level)
+        {
+            case 0:
+            {
+                threadManager->playMusic("music/dtowne.wav");
+                break;
+            }
+            case 1: case 2: case 3: case 4:
+            {
+                threadManager->playMusic("music/dlvla.wav");
+                break;
+            }
+            case 5: case 6: case 7: case 8:
+            {
+                threadManager->playMusic("music/dlvlb.wav");
+                break;
+            }
+            case 9: case 10: case 11: case 12:
+            {
+                threadManager->playMusic("music/dlvlc.wav");
+                break;
+            }
+            case 13: case 14: case 15: case 16:
+            {
+                threadManager->playMusic("music/dlvld.wav");
+                break;
+            }
+            default:
+                std::cout << "Wrong level " << level << std::endl;
+                break;
+        }
     }
 
-    void World::insertLevel(size_t levelNum, GameLevel *level)
+    GameLevel* World::getLevel(size_t level)
     {
-        mLevels[levelNum] = level;
+        return mLevels[level];
+    }
+
+    void World::insertLevel(size_t level, GameLevel *gameLevel)
+    {
+        mLevels[level] = gameLevel;
     }
 
     Actor* World::getActorAt(size_t x, size_t y)

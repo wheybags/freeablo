@@ -26,9 +26,7 @@ namespace Engine
     {
         public:
             ~EngineMain();
-
             void run(const boost::program_options::variables_map& variables);
-
             void stop();
             void pause();
             void unPause();
