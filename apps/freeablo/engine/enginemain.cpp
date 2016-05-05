@@ -29,10 +29,17 @@ namespace Engine
 {
     volatile bool renderDone = false;
 
+    EngineInputManager* EngineMain::mInputManager;
+
     EngineMain::~EngineMain()
     {
         if(mInputManager != NULL)
             delete mInputManager;
+    }
+
+    EngineInputManager* EngineMain::inputManager()
+    {
+        return mInputManager;
     }
 
     void EngineMain::run(const bpo::variables_map& variables)
@@ -53,7 +60,8 @@ namespace Engine
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen == "true");
 
-        mInputManager = new EngineInputManager(*this);
+        mInputManager = new EngineInputManager();
+        mInputManager->registerKeyboardObserver(this);
 
         std::thread mainThread(boost::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
 
@@ -87,9 +95,7 @@ namespace Engine
         FAWorld::World world(exe);
         FAWorld::PlayerFactory playerFactory(exe);
 
-
         bool isServer = variables["mode"].as<std::string>() == "server";
-
         if(isServer)
             world.generateLevels();
 
@@ -97,6 +103,7 @@ namespace Engine
         player = playerFactory.create(characterClass);
         world.addCurrentPlayer(player);
         world.generateLevels();
+        mInputManager->registerMouseObserver(&world);
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 
@@ -164,7 +171,6 @@ namespace Engine
             else
             {
                 Render::updateGuiBuffer(NULL);
-
             }
             renderer.setCurrentState(state);
 
@@ -178,6 +184,18 @@ namespace Engine
 
         renderer.stop();
         renderer.waitUntilDone();
+    }
+
+    void EngineMain::notify(KeyboardInputAction action)
+    {
+        if(action == QUIT)
+        {
+            stop();
+        }
+        else if(action == NOCLIP)
+        {
+            toggleNoclip();
+        }
     }
 
     void EngineMain::stop()

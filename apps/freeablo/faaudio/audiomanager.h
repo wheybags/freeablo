@@ -32,7 +32,7 @@ namespace FAAudio
             AudioManager(int32_t channelCount, size_t cacheSize);
             ~AudioManager();
 
-            void play(std::string path);
+            void playSound(const std::string& path);
             void stopSound();
             void playMusic(const std::string& path);
 
@@ -40,10 +40,8 @@ namespace FAAudio
             std::vector<std::string> mPlaying;
             std::map<std::string, CacheEntry> mCache;
             std::list<std::string> mUsedList;
-
             size_t mCacheSize;
             size_t mCount;
-
             Audio::Music* mCurrentMusic;
     };
 }

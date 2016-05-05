@@ -105,7 +105,7 @@ namespace Engine
 
             case PLAY_SOUND:
             {
-                mAudioManager.play(*message.data.soundPath);
+                mAudioManager.playSound(*message.data.soundPath);
                 delete message.data.soundPath;
                 break;
             }

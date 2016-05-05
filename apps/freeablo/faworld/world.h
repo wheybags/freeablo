@@ -8,6 +8,7 @@
 #include "actor.h"
 #include "player.h"
 #include "gamelevel.h"
+#include "../engine/inputobserverinterface.h"
 
 
 namespace FARender
@@ -22,16 +23,16 @@ namespace DiabloExe
 
 namespace FAWorld
 {
-    class World
+    class World : public Engine::KeyboardInputObserverInterface, public Engine::MouseInputObserverInterface
     {
         public:
             World(const DiabloExe::DiabloExe& exe);
             ~World();
 
             static World* get();
-
+            void notify(Engine::KeyboardInputAction action);
+            void notify(Engine::MouseInputAction action, Engine::Point mousePosition);
             void generateLevels();
-
             GameLevel* getCurrentLevel();
             size_t getCurrentLevelIndex();
 
@@ -58,12 +59,17 @@ namespace FAWorld
 
         private:
             void playLevelMusic(size_t level);
+            void changeLevel(bool up);
+            void stopPlayerActions();
+            void onMouseClick(Engine::Point mousePosition);
+            void onMouseDown(Engine::Point mousePosition);
 
             std::map<size_t, GameLevel*> mLevels;
             size_t mTicksPassed = 0;
             Player* mCurrentPlayer;
             std::vector<Player*> mPlayers;
             const DiabloExe::DiabloExe& mDiabloExe;
+            std::pair<int32_t, int32_t> mDestination;
     };
 }
 

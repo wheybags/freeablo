@@ -22,7 +22,7 @@ namespace FAAudio
         Audio::quit();
     }
 
-    void AudioManager::play(std::string path)
+    void AudioManager::playSound(const std::string& path)
     {
         if(mCache.find(path) == mCache.end())
         {

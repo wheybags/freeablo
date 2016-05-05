@@ -6,6 +6,7 @@
 #include <string>
 #include <input/hotkey.h>
 #include <input/inputmanager.h>
+#include "inputobserverinterface.h"
 
 namespace FAWorld
 {
@@ -19,36 +20,31 @@ namespace Engine
     class EngineInputManager
     {
         public:
-
-            enum Action {
-                QUIT,
-                NOCLIP,
-                CHANGE_LEVEL_DOWN,
-                CHANGE_LEVEL_UP,
-                TOGGLE_CONSOLE
-            };
-
-            EngineInputManager(EngineMain& engine);
+            EngineInputManager();
             void update(bool paused);
-            void setHotkey(Action action, Input::Hotkey hotkey);
-            Input::Hotkey getHotkey(Action action);
+            void setHotkey(KeyboardInputAction action, Input::Hotkey hotkey);
+            Input::Hotkey getHotkey(KeyboardInputAction action);
             std::vector<Input::Hotkey> getHotkeys();
+            void registerKeyboardObserver(KeyboardInputObserverInterface* observer);
+            void registerMouseObserver(MouseInputObserverInterface* observer);
 
         private:
             void keyPress(Input::Key key);
             void mouseClick(size_t x, size_t y, Input::Key key);
             void mouseRelease(size_t, size_t, Input::Key key);
             void mouseMove(size_t x, size_t y);
-            std::string actionToString(Action action) const;
+            std::string keyboardActionToString(KeyboardInputAction action) const;
+            void notifyKeyboardObservers(KeyboardInputAction action);
+            void notifyMouseObservers(MouseInputAction action, Point mousePosition);
 
             Input::InputManager mInput;
-            EngineMain& mEngine;
             bool mToggleConsole = false;
-            size_t mXClick = 0;
-            size_t mYClick = 0;
+            Point mMousePosition;
             bool mMouseDown = false;
             bool mClick = false;
-            std::map<Action,Input::Hotkey> mHotkeys;
+            std::map<KeyboardInputAction,Input::Hotkey> mHotkeys;
+            std::vector<KeyboardInputObserverInterface*> mKeyboardObservers;
+            std::vector<MouseInputObserverInterface*> mMouseObservers;
     };
 }
 

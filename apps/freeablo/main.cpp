@@ -58,13 +58,11 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    boost::program_options::variables_map variables;
-
     Engine::EngineMain engine;
-
 
     int retval = EXIT_SUCCESS;
 
+    boost::program_options::variables_map variables;
     if (parseOptions(argc, argv, variables))
         engine.run(variables);
     else

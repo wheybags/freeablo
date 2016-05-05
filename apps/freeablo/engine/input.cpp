@@ -1,36 +1,50 @@
-#include "input.h"
-
 #include <boost/bind.hpp>
-
+#include "input.h"
 #include "../farender/renderer.h"
-#include "../faworld/world.h"
-#include "../faworld/gamelevel.h"
 #include "../fagui/console.h"
-#include "../farender/renderer.h"
 #include "enginemain.h"
 
 namespace Engine
 {
-    Input::Hotkey quit_key;
-    Input::Hotkey noclip_key;
-    Input::Hotkey changelvldwn_key;
-    Input::Hotkey changelvlup_key;
-    Input::Hotkey toggleconsole_key;
-
-    EngineInputManager::EngineInputManager(EngineMain& engine):
+    EngineInputManager::EngineInputManager():
         mInput( boost::bind(&EngineInputManager::keyPress,this, _1),
                 NULL,
                 boost::bind(&EngineInputManager::mouseClick, this, _1, _2, _3),
                 boost::bind(&EngineInputManager::mouseRelease, this, _1, _2, _3),
                 boost::bind(&EngineInputManager::mouseMove, this, _1, _2),
-                FARender::Renderer::get()->getRocketContext()),
-        mEngine(engine)
+                FARender::Renderer::get()->getRocketContext())
     {
         mHotkeys[QUIT] = Input::Hotkey("Quit");
         mHotkeys[NOCLIP] = Input::Hotkey("Noclip");
         mHotkeys[CHANGE_LEVEL_UP] = Input::Hotkey("Changelvlup");
         mHotkeys[CHANGE_LEVEL_DOWN] = Input::Hotkey("Changelvldwn");
         mHotkeys[TOGGLE_CONSOLE] = Input::Hotkey("ToggleConsole");
+    }
+
+    void EngineInputManager::registerKeyboardObserver(KeyboardInputObserverInterface * observer)
+    {
+        mKeyboardObservers.push_back(observer);
+    }
+
+    void EngineInputManager::registerMouseObserver(MouseInputObserverInterface* observer)
+    {
+        mMouseObservers.push_back(observer);
+    }
+
+    void EngineInputManager::notifyKeyboardObservers(KeyboardInputAction action)
+    {
+        for(auto observer : mKeyboardObservers)
+        {
+            observer->notify(action);
+        }
+    }
+
+    void EngineInputManager::notifyMouseObservers(MouseInputAction action, Point mousePosition)
+    {
+        for(auto observer : mMouseObservers)
+        {
+            observer->notify(action, mousePosition);
+        }
     }
 
     void EngineInputManager::keyPress(Input::Key key)
@@ -81,45 +95,31 @@ namespace Engine
         {
             if (hotkey == getHotkey(QUIT))
             {
-                mEngine.stop();
+                notifyKeyboardObservers(QUIT);
             }
             else if (hotkey == getHotkey(NOCLIP))
             {
-                mEngine.toggleNoclip();
+                notifyKeyboardObservers(NOCLIP);
             }
-            else if (hotkey == getHotkey(CHANGE_LEVEL_UP) || hotkey == getHotkey(CHANGE_LEVEL_DOWN))
+            else if (hotkey == getHotkey(CHANGE_LEVEL_UP))
             {
-                FAWorld::World* world = FAWorld::World::get();
-                size_t nextLevelIndex;
-                if(hotkey == getHotkey(CHANGE_LEVEL_UP))
-                    nextLevelIndex = world->getCurrentLevel()->getPreviousLevel();
-                else
-                    nextLevelIndex = world->getCurrentLevel()->getNextLevel();
-
-                world->setLevel(nextLevelIndex);
-
-                FAWorld::GameLevel* level = world->getCurrentLevel();
-                FAWorld::Player* player = world->getCurrentPlayer();
-
-                if(hotkey == getHotkey(CHANGE_LEVEL_UP))
-                    player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
-                else
-                    player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
-
-
-                player->destination() = player->mPos.current();
+                notifyKeyboardObservers(CHANGE_LEVEL_UP);
+            }
+            else if (hotkey == getHotkey(CHANGE_LEVEL_DOWN))
+            {
+                notifyKeyboardObservers(CHANGE_LEVEL_DOWN);
             }
         }
     }
 
-    void EngineInputManager::setHotkey(Action action, Input::Hotkey hotkey)
+    void EngineInputManager::setHotkey(KeyboardInputAction action, Input::Hotkey hotkey)
     {
-        auto actionAsString = actionToString(action);
+        auto actionAsString = keyboardActionToString(action);
         mHotkeys[action] = hotkey;
         mHotkeys[action].save(actionAsString.c_str());
     }
 
-    Input::Hotkey EngineInputManager::getHotkey(Action action)
+    Input::Hotkey EngineInputManager::getHotkey(KeyboardInputAction action)
     {
         return mHotkeys[action];
     }
@@ -139,8 +139,7 @@ namespace Engine
     {
         if(key == Input::KEY_LEFT_MOUSE)
         {
-            mXClick = x;
-            mYClick = y;
+            mMousePosition = Point(x,y);
             mMouseDown = true;
             mClick = true;
         }
@@ -151,17 +150,15 @@ namespace Engine
         if(key == Input::KEY_LEFT_MOUSE)
             mMouseDown = false;
 
-        FAWorld::World::get()->getCurrentPlayer()->isAttacking = false;
-        FAWorld::World::get()->getCurrentPlayer()->isTalking = false;
+        notifyMouseObservers(MOUSE_RELEASE, mMousePosition);
     }
 
     void EngineInputManager::mouseMove(size_t x, size_t y)
     {
-        mXClick = x;
-        mYClick = y;
+        mMousePosition = Point(x,y);
     }
 
-    std::string EngineInputManager::actionToString(Action action) const
+    std::string EngineInputManager::keyboardActionToString(KeyboardInputAction action) const
     {
         std::string actionAsString;
 
@@ -202,15 +199,10 @@ namespace Engine
 
         if(!paused && mMouseDown)
         {
-            auto world = FAWorld::World::get();
-            auto player = world->getCurrentPlayer();
-            auto level = world->getCurrentLevel();
+            notifyMouseObservers(MOUSE_DOWN, mMousePosition);
 
-            std::pair<int32_t, int32_t>& destination = player->destination();
-
-            destination = FARender::Renderer::get()->getClickedTile(mXClick, mYClick, *level, player->mPos);
-            if(mClick )
-                level->activate(destination.first, destination.second);
+            if(mClick)
+                notifyMouseObservers(MOUSE_CLICK, mMousePosition);
 
             mClick = false;
         }

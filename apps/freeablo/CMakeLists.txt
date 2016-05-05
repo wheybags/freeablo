@@ -65,6 +65,7 @@ add_executable(freeablo
     engine/threadmanager.cpp
     engine/input.h
     engine/input.cpp
+    engine/inputobserverinterface.h
     engine/enginemain.h
     engine/enginemain.cpp
     engine/netmanager.cpp

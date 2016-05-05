@@ -149,7 +149,7 @@ namespace FAGui
     {
         boost::python::list hotkeyNames;
 
-        Engine::EngineInputManager* inputManager = mEngine.getInputManager();
+        Engine::EngineInputManager* inputManager = mEngine.inputManager();
         auto hotkeys = inputManager->getHotkeys();
 
         for(const auto& hotkey : hotkeys)
@@ -162,7 +162,7 @@ namespace FAGui
 
     boost::python::list FAPythonFuncs::getHotkeys()
     {
-        auto inputManager = mEngine.getInputManager();
+        auto inputManager = mEngine.inputManager();
 
         boost::python::list pythonHotkeys;
         auto hotkeys = inputManager->getHotkeys();
@@ -185,23 +185,23 @@ namespace FAGui
         hotkey.ctrl = boost::python::extract<bool>(pyhotkey[2]);
         hotkey.alt = boost::python::extract<bool>(pyhotkey[3]);
 
-        auto inputManager = mEngine.getInputManager();
+        auto inputManager = mEngine.inputManager();
 
         if (function == "quit")
         {
-            inputManager->setHotkey(Engine::EngineInputManager::QUIT, hotkey);
+            inputManager->setHotkey(Engine::QUIT, hotkey);
         }
         if (function == "noclip")
         {
-            inputManager->setHotkey(Engine::EngineInputManager::NOCLIP, hotkey);
+            inputManager->setHotkey(Engine::NOCLIP, hotkey);
         }
         if (function == "changelvlup")
         {
-            inputManager->setHotkey(Engine::EngineInputManager::CHANGE_LEVEL_UP, hotkey);
+            inputManager->setHotkey(Engine::CHANGE_LEVEL_UP, hotkey);
         }
         if (function == "changelvldwn")
         {
-            inputManager->setHotkey(Engine::EngineInputManager::CHANGE_LEVEL_DOWN, hotkey);
+            inputManager->setHotkey(Engine::CHANGE_LEVEL_DOWN, hotkey);
         }
     }
 
