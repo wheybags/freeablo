@@ -14,11 +14,11 @@ namespace Engine
                 boost::bind(&EngineInputManager::mouseMove, this, _1, _2),
                 FARender::Renderer::get()->getRocketContext())
     {
-        mHotkeys[QUIT] = Input::Hotkey("Quit");
-        mHotkeys[NOCLIP] = Input::Hotkey("Noclip");
-        mHotkeys[CHANGE_LEVEL_UP] = Input::Hotkey("Changelvlup");
-        mHotkeys[CHANGE_LEVEL_DOWN] = Input::Hotkey("Changelvldwn");
-        mHotkeys[TOGGLE_CONSOLE] = Input::Hotkey("ToggleConsole");
+        mHotkeys[QUIT] = Input::Hotkey(keyboardActionToString(QUIT));
+        mHotkeys[NOCLIP] = Input::Hotkey(keyboardActionToString(NOCLIP));
+        mHotkeys[CHANGE_LEVEL_UP] = Input::Hotkey(keyboardActionToString(CHANGE_LEVEL_UP));
+        mHotkeys[CHANGE_LEVEL_DOWN] = Input::Hotkey(keyboardActionToString(CHANGE_LEVEL_DOWN));
+        mHotkeys[TOGGLE_CONSOLE] = Input::Hotkey(keyboardActionToString(TOGGLE_CONSOLE));
     }
 
     void EngineInputManager::registerKeyboardObserver(KeyboardInputObserverInterface * observer)
@@ -177,7 +177,7 @@ namespace Engine
                 actionAsString = "Changelvldwn";
                 break;
             case TOGGLE_CONSOLE:
-                actionAsString = "Toggle";
+                actionAsString = "ToggleConsole";
                 break;
             default:
                 actionAsString = "Unknown";
