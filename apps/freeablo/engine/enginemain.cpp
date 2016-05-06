@@ -1,9 +1,10 @@
-#include "enginemain.h"
-
 #include <iostream>
 #include <thread>
+#include <functional>
 #include <boost/asio.hpp>
-
+#include <misc/misc.h>
+#include <input/inputmanager.h>
+#include <enet/enet.h>
 #include "../faworld/world.h"
 #include "../falevelgen/levelgen.h"
 #include "../falevelgen/random.h"
@@ -15,12 +16,7 @@
 #include "threadmanager.h"
 #include "input.h"
 #include "netmanager.h"
-
-
-#include <misc/misc.h>
-#include <input/inputmanager.h>
-
-#include <enet/enet.h>
+#include "enginemain.h"
 
 namespace bpo = boost::program_options;
 
@@ -63,7 +59,7 @@ namespace Engine
         mInputManager = new EngineInputManager();
         mInputManager->registerKeyboardObserver(this);
 
-        std::thread mainThread(boost::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
+        std::thread mainThread(std::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
 
         threadManager.run();
         renderDone = true;

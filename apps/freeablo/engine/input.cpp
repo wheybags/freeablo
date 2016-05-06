@@ -1,4 +1,4 @@
-#include <boost/bind.hpp>
+#include <functional>
 #include "input.h"
 #include "../farender/renderer.h"
 #include "../fagui/console.h"
@@ -6,12 +6,14 @@
 
 namespace Engine
 {
+    namespace ph = std::placeholders;
+
     EngineInputManager::EngineInputManager():
-        mInput( boost::bind(&EngineInputManager::keyPress,this, _1),
+        mInput( std::bind(&EngineInputManager::keyPress,this, ph::_1),
                 NULL,
-                boost::bind(&EngineInputManager::mouseClick, this, _1, _2, _3),
-                boost::bind(&EngineInputManager::mouseRelease, this, _1, _2, _3),
-                boost::bind(&EngineInputManager::mouseMove, this, _1, _2),
+                std::bind(&EngineInputManager::mouseClick, this, ph::_1, ph::_2, ph::_3),
+                std::bind(&EngineInputManager::mouseRelease, this, ph::_1, ph::_2, ph::_3),
+                std::bind(&EngineInputManager::mouseMove, this, ph::_1, ph::_2),
                 FARender::Renderer::get()->getRocketContext())
     {
         mHotkeys[QUIT] = Input::Hotkey(keyboardActionToString(QUIT));
