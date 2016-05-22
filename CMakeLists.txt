@@ -26,9 +26,7 @@ if (Qt5_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-if(Boost_USE_STATIC_LIBS)
-    add_definitions(-DBOOST_PYTHON_STATIC_LIB)
-endif()
+set(FA_COMPILER_FLAGS "")
 
 if(NOT WIN32)
     Find_Package ( ZLIB REQUIRED )
@@ -40,22 +38,23 @@ if(NOT WIN32)
     if ( NOT BZIP2_FOUND )
         message ( FATAL_ERROR "BZip2 not found!" )
     endif ()
+else()
+	add_definitions(-DNOMINMAX) # http://stackoverflow.com/questions/5004858/stdmin-gives-error
 endif()
 
-find_package(Boost COMPONENTS filesystem serialization system program_options python REQUIRED)
+find_package(Boost COMPONENTS filesystem serialization system program_options python date_time regex REQUIRED)
 
 if ( NOT SDL2_FOUND )
     message ( FATAL_ERROR "SDL2 not found!" )
 endif ()
 
 if(UNIX)
-    set(FA_COMPILER_FLAGS "-Wall -pedantic -Wextra -g -std=c++11")
+    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -g -std=c++11")
     SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
-else()
-    set(FA_COMPILER_FLAGS "")
 endif()
 
 include_directories ( SYSTEM
+    ${Boost_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIR}
     ${SDL2IMAGE_INCLUDE_DIR}
     ${SDL2MIXER_INCLUDE_DIR}
@@ -70,10 +69,15 @@ include_directories ( SYSTEM
 
 include_directories("${PROJECT_SOURCE_DIR}/components/")
 
-# allow the user to specify extra include dirs on the command line
+
+# allow the user to specify extra include dirs and defines on the command line
 if(CLI_INCLUDE_DIRS)
     include_directories(${CLI_INCLUDE_DIRS})
 endif()
+if(CLI_DEFINES)
+	add_definitions(${CLI_DEFINES})
+endif()
+
 
 add_subdirectory (extern) 
 
