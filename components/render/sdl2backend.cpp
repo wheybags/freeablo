@@ -103,10 +103,17 @@ namespace Render
         #ifdef WIN32
             Py_SetPythonHome("Python27");
         #endif
+
         Py_Initialize();
 
         #ifdef WIN32
             PyRun_SimpleString("import sys\nsys.path.append('.')");
+
+            #ifdef NDEBUG
+                PyRun_SimpleString("import sys\nsys.path.append('./Release')");
+            #else
+                PyRun_SimpleString("import sys\nsys.path.append('./Debug')");
+            #endif
         #endif
         
         // add our python libs to path

@@ -10,8 +10,8 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    QDir dir(QCoreApplication::applicationDirPath());
-    QDir::setCurrent(dir.absolutePath());
+    //QDir dir(QCoreApplication::applicationDirPath());
+    //QDir::setCurrent(dir.absolutePath());
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 

@@ -1,6 +1,7 @@
 #include "threadmanager.h"
 
 #include <chrono>
+#include <iostream>
 
 #include <input/inputmanager.h>
 

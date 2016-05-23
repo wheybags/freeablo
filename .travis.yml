@@ -14,7 +14,7 @@ before_install:
 - echo yes | sudo apt-add-repository ppa:zoogie/sdl2-snapshots
 - echo yes | sudo apt-add-repository ppa:boost-latest/ppa
 - echo yes | sudo apt-add-repository ppa:kalakris/cmake
-- echo yes | sudo apt-add-repository ppa:ubuntu-sdk-team/ppa
+- echo yes | sudo apt-add-repository ppa:canonical-qt5-edgers/ubuntu1204-qt5
 - sudo apt-get update -qq
 - sudo apt-get install -qq libboost1.54-all-dev libsdl2-dev libsdl2-image-dev libsdl-ttf2.0-dev zlib1g-dev
   libbz2-dev doxygen libfreetype6-dev libpython2.7 libsdl2-mixer-dev cmake qtdeclarative5-dev libpng12-dev zlib1g-dev libenet-dev graphviz

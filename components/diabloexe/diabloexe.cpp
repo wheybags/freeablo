@@ -352,7 +352,7 @@ namespace DiabloExe
         rangerCharacter.mVitality     = swapEndian(FAIO::read32(exe));
         mageCharacter.mVitality  = swapEndian(FAIO::read32(exe));
 
-        FAIO::FAfseek(exe, SEEK_SET, blockingBonusOffset);
+        FAIO::FAfseek(exe, blockingBonusOffset, SEEK_SET);
 
         meleeCharacter.mBlockingBonus  = swapEndian(FAIO::read32(exe));
         rangerCharacter.mBlockingBonus    = swapEndian(FAIO::read32(exe));

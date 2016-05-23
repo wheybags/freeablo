@@ -485,40 +485,83 @@ namespace FAGui
         return dict;
     }
 
+// horrible platform speceific bullshit to make boost::python::def accept a lamda as a parameter
+// if this makes you throw up in your mouth a little bit and you have a better solution PLEASE FIX THIS
+// for some reason, msvc won't handle the code that works for gcc or clang, and vice-versa, so in a moment of desparation I wrote this hideous monstrosity
+#ifdef WIN32
+}
+
+// crazy magic to make boost shut up and accept std::functions as arguments to boost::python::def http://stackoverflow.com/a/25281985
+namespace boost {
+    namespace python {
+        namespace detail {
+
+            template <class T, class... Args>
+            inline boost::mpl::vector<T, Args...> get_signature(std::function<T(Args...)>, void* = 0)
+            {
+                return boost::mpl::vector<T, Args...>();
+            }
+        }
+    }
+}
+
+namespace FAGui
+{
+
+
+// horrible macro for a horrible task - turns lambdas into std::functions and passes em to boost::python::def
+// eg: 
+//        DEF_FUNC("openDialogue", void, (const char* document), { funcs->openDialogue(document); });
+//        expands to:
+//        boost::python::def("openDialogue", std::function<void (const char* document)>([] (const char* document) { funcs->openDialogue(document); } ));
+//
+// why not use http://stackoverflow.com/a/30791447 ? because the +[] syntax generates a syntax error on msvc... (???)
+#define DEF_FUNC(name, ret_type, params, code) boost::python::def(name, std::function<ret_type params>([] params code ))
+
+#else // WIN32
+
+#define DEF_FUNC(name, ret_type, params, code) boost::python::def(name, +[] params code)
+
+#endif // WIN32
+
+
     FAPythonFuncs* funcs = NULL;
     BOOST_PYTHON_MODULE(freeablo)
     {
-        boost::python::def("openDialogue", +[](const char* document){funcs->openDialogue(document);});
-        boost::python::def("closeDialogue", +[](){funcs->closeDialogue();});
-        boost::python::def("openDialogueScrollbox", +[](const char* document){funcs->openDialogueScrollbox(document);});
-        boost::python::def("closeDialogueScrollbox", +[](){funcs->closeDialogueScrollbox();});
-        boost::python::def("showMainMenu", +[](){funcs->showMainMenu();});
-        boost::python::def("showCredits", +[](){funcs->showCredits();});
-        boost::python::def("showSelectHeroMenu", +[](){funcs->showSelectHeroMenu();});
-        boost::python::def("showSelectHeroMenuNoFade", +[](){funcs->showSelectHeroMenuNoFade();});
-        boost::python::def("showChooseClassMenu", +[](){funcs->showChooseClassMenu();});
-        boost::python::def("showEnterNameMenu", +[](int classNumber){funcs->showEnterNameMenu(classNumber);});
-        boost::python::def("showInvalidNameMenu", +[](int classNumber){funcs->showInvalidNameMenu(classNumber);});
-        boost::python::def("showSaveFileExistsMenu", +[](int classNumber){funcs->showSaveFileExistsMenu(classNumber);});
-        boost::python::def("quit", +[](){funcs->quitGame();});
-        boost::python::def("pause", +[](){funcs->pauseGame();});
-        boost::python::def("unpause", +[](){funcs->unpauseGame();});
-        boost::python::def("startGame", +[](){funcs->startGame();});
-        boost::python::def("playSound", +[](const std::string& path){funcs->playSound(path);});
-        boost::python::def("stopSound", +[](){funcs->stopSound();});
-        boost::python::def("playClickButtonSound", +[](){funcs->playClickButtonSound();});
-        boost::python::def("getHotkeyNames", +[](){return funcs->getHotkeyNames();});
-        boost::python::def("getHotkeys", +[](){return funcs->getHotkeys();});
-        boost::python::def("setHotkey", +[](std::string function, boost::python::list pyhotkey){funcs->setHotkey(function, pyhotkey);});
-        boost::python::def("saveGame", +[](){funcs->saveGame();});
-        boost::python::def("loadGame", +[](){funcs->loadGame();});
-        boost::python::def("getInvClass", +[](){return funcs->getInvClass();});
-        boost::python::def("updateInventory", +[](){return funcs->updateInventory();});
-        boost::python::def("canPlaceItem", +[](uint32_t toPara, uint32_t fromPara, uint32_t fromY,
-                           uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX){return funcs->canPlace(toPara, fromPara, fromY, fromX, toY, toX, beltX);});
-        boost::python::def("placeItem", +[](uint32_t toPara, uint32_t fromPara, uint32_t fromY,
-                                            uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX)
-                                            { funcs->placeItem(toPara, fromPara, fromY, fromX, toY, toX, beltX); });
+
+        DEF_FUNC("openDialogue",                void,                   (const char* document),                                 { funcs->openDialogue(document); }              );
+        DEF_FUNC("closeDialogue",               void,                   (void),                                                 { funcs->closeDialogue(); }                     );
+        DEF_FUNC("openDialogueScrollbox",       void,                   (const char* document),                                 { funcs->openDialogueScrollbox(document); }     );
+        DEF_FUNC("closeDialogueScrollbox",      void,                   (void),                                                 { funcs->closeDialogueScrollbox(); }            );
+        DEF_FUNC("showMainMenu",                void,                   (void),                                                 { funcs->showMainMenu(); }                      );
+        DEF_FUNC("showCredits",                 void,                   (void),                                                 { funcs->showCredits(); }                       );
+        DEF_FUNC("showSelectHeroMenu",          void,                   (void),                                                 { funcs->showSelectHeroMenu(); }                );
+        DEF_FUNC("showSelectHeroMenuNoFade",    void,                   (void),                                                 { funcs->showSelectHeroMenuNoFade(); }          );
+        DEF_FUNC("showChooseClassMenu",         void,                   (void),                                                 { funcs->showChooseClassMenu(); }               );
+        DEF_FUNC("showEnterNameMenu",           void,                   (int classNumber),                                      { funcs->showEnterNameMenu(classNumber); }      );
+        DEF_FUNC("showInvalidNameMenu",         void,                   (int classNumber),                                      { funcs->showInvalidNameMenu(classNumber); }    );
+        DEF_FUNC("showSaveFileExistsMenu",      void,                   (int classNumber),                                      { funcs->showSaveFileExistsMenu(classNumber); } );
+        DEF_FUNC("quit",                        void,                   (void),                                                 { funcs->quitGame(); }                          );
+        DEF_FUNC("pause",                       void,                   (void),                                                 { funcs->pauseGame(); }                         );
+        DEF_FUNC("unpause",                     void,                   (void),                                                 { funcs->unpauseGame(); }                       );
+        DEF_FUNC("startGame",                   void,                   (void),                                                 { funcs->startGame(); }                         );
+        DEF_FUNC("playSound",                   void,                   (const std::string& path),                              { funcs->playSound(path); }                     );
+        DEF_FUNC("stopSound",                   void,                   (void),                                                 { funcs->stopSound(); }                         );
+        DEF_FUNC("playClickButtonSound",        void,                   (void),                                                 { funcs->playClickButtonSound(); }              );
+        DEF_FUNC("getHotkeyNames",              boost::python::list,    (void),                                                 { return funcs->getHotkeyNames(); }             );
+        DEF_FUNC("getHotkeys",                  boost::python::list,    (void),                                                 { return funcs->getHotkeys(); }                 );
+        DEF_FUNC("setHotkey",                   void,                   (std::string function, boost::python::list pyhotkey),   { funcs->setHotkey(function, pyhotkey); }       );
+        DEF_FUNC("saveGame",                    void,                   (void),                                                 { funcs->saveGame(); }                          );
+        DEF_FUNC("loadGame",                    void,                   (void),                                                 { funcs->loadGame(); }                          );
+        DEF_FUNC("getInvClass",                 std::string,            (void),                                                 { return funcs->getInvClass(); }                );
+        DEF_FUNC("updateInventory",             boost::python::dict,    (void),                                                 { return funcs->updateInventory(); }            );
+        
+        // these handled separately because they're too long to align
+        DEF_FUNC("canPlaceItem",    bool, (uint32_t toPara, uint32_t fromPara, uint32_t fromY, uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX), 
+            { return funcs->canPlace(toPara, fromPara, fromY, fromX, toY, toX, beltX); }    );
+
+        DEF_FUNC("placeItem",       void, (uint32_t toPara, uint32_t fromPara, uint32_t fromY, uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX),
+            { funcs->placeItem(toPara, fromPara, fromY, fromX, toY, toX, beltX); }          );
     }
 
     void initPython(FAPythonFuncs& _funcs)
