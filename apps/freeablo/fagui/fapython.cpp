@@ -485,6 +485,10 @@ namespace FAGui
         return dict;
     }
 
+// horrible platform speceific bullshit to make boost::python::def accept a lamda as a parameter
+// if this makes you throw up in your mouth a little bit and you have a better solution PLEASE FIX THIS
+// for some reason, msvc won't handle the code that works for gcc or clang, and vice-versa, so in a moment of desparation I wrote this hideous monstrosity
+#ifdef WIN32
 }
 
 // crazy magic to make boost shut up and accept std::functions as arguments to boost::python::def http://stackoverflow.com/a/25281985
@@ -501,6 +505,10 @@ namespace boost {
     }
 }
 
+namespace FAGui
+{
+
+
 // horrible macro for a horrible task - turns lambdas into std::functions and passes em to boost::python::def
 // eg: 
 //        DEF_FUNC("openDialogue", void, (const char* document), { funcs->openDialogue(document); });
@@ -510,8 +518,13 @@ namespace boost {
 // why not use http://stackoverflow.com/a/30791447 ? because the +[] syntax generates a syntax error on msvc... (???)
 #define DEF_FUNC(name, ret_type, params, code) boost::python::def(name, std::function<ret_type params>([] params code ))
 
-namespace FAGui
-{
+#else // WIN32
+
+#define DEF_FUNC(name, ret_type, params, code) boost::python::def(name, +[] params code)
+
+#endif // WIN32
+
+
     FAPythonFuncs* funcs = NULL;
     BOOST_PYTHON_MODULE(freeablo)
     {
