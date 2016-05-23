@@ -7,6 +7,7 @@
                 text-align: center;
                 bottom: 0px;
                 width: 100%;
+                z-index: 0;
             }
 
             span#container

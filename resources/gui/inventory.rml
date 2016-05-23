@@ -4,7 +4,15 @@
         <style>
             body
             {
-                top: 50%;
+                position: fixed;
+                bottom: 480;
+            }
+            
+            div#draghandle
+            {
+                display: block;
+                width: 320;
+                height: 10;
             }
 
             span#container
@@ -14,10 +22,8 @@
                 height: 352;
                 width: 320;
                 position: fixed;
-                top: -175px;
-                right: 0px;
+                left: 56%;
                 z-index: 0;
-                drag:drag;
             }
             div.inventory
             {
@@ -137,8 +143,10 @@ instance = draggable.DraggableWidget(document, 0, -500)
     </head>
 
     <body onKeyDown="docmanage.manager.onKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" onload="instance.onLoad(event)" >
-        <span id="container" onmousedown="instance.guiMouseDown(event)"
-                             onDrag="instance.onDrag(event)">
+        <span id="container" onmousedown="instance.guiMouseDown(event)">
+            <handle move_target="#document">
+                <div id="draghandle"/>
+            </handle>
         <div id="leftHand"  onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onWeaponClick(event)" class="hand-equip-socket"> </div>
         <div id="rightHand" onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onWeaponClick(event)"  class="hand-equip-socket"> </div>
         <div id="leftRing"  onmouseout="instance.onEquipMouseOut(event)" onmouseover="instance.onEquipMouseOver(event)" onclick="instance.onRingClick(event)"  class="ring-equip-socket"> </div>

@@ -2,22 +2,28 @@
     <head>
         <style>
             body
+            {   
+                position: fixed;
+                bottom: 480;
+            }
+            
+            div#draghandle
             {
-                top: 50%;
+                display: block;
+                width: 320;
+                height: 10;
             }
 
             span#container
             {
                 display: inline-block;
-                text-align: left;
                 height: 352;
                 width: 320;
+                position: fixed;
+                right: 56%;
                 background-decorator: image;
                 background-image: /data/quest.cel;
-                position: fixed;
-                top: -175px;
-                right: 0px;
-                drag:clone;
+                
             }
         </style>
 
@@ -30,7 +36,10 @@ instance = draggable.DraggableWidget(document, 0, -500)
     </head>
 
     <body onKeyDown="docmanage.manager.onKeyDown(event)" onmousedown="instance.bodyMouseDown(event)" >
-        <span id="container" onmousedown="instance.guiMouseDown(event)"
-                             onDrag="instance.onDrag(event)"></span>
+        <span id="container" onmousedown="instance.guiMouseDown(event)">
+            <handle move_target="#document">
+                <div id="draghandle"/>
+            </handle>
+        </span>
     </body>
 </rml>

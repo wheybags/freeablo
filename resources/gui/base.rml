@@ -5,6 +5,7 @@
             {
                 width: 100%;
                 height: 100%;
+                z-index: -1;
             }
         </style>
         <script>
@@ -23,6 +24,6 @@ def onLoad(document):
     </head>
 
 
-    <body onkeydown="docmanage.manager.onKeyDown(event)" onload="onLoad(event)" onmousedown="document.PushToBack(); docmanage.manager.bodyClicked()">
+    <body onkeydown="docmanage.manager.onKeyDown(event)" onload="onLoad(event)" onmousedown="docmanage.manager.bodyClicked()">
     </body>
 </rml>
