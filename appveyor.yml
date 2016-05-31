@@ -1,0 +1,28 @@
+branches:
+  # whitelist
+  only:
+    - master
+
+# Operating system (build VM template)
+os: Visual Studio 2015
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  - git clone https://github.com/wheybags/freeablo-windows-build c:\projects\freeablo-windows-build-tmp
+  - xcopy c:\projects\freeablo-windows-build-tmp c:\projects\freeablo-windows-build /s /e /q
+
+
+# clone directory
+clone_folder: c:\projects\freeablo-windows-build\freeablo
+
+platform: x86
+configuration: Debug
+
+build:
+  project: c:\projects\freeablo-windows-build\build      # path to Visual Studio solution or project
+
+# scripts to run before build
+before_build:
+  - echo Running cmake...
+  - cd c:\projects\freeablo-windows-build
+  - cmake.bat
