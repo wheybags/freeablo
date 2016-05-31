@@ -53,14 +53,14 @@ bool PlayPage::hasMaster() const
 
 void PlayPage::browseExe()
 {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"),"", tr("Executable (*.exe)"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"),"", tr("Executable (*.exe *.EXE)"));
     if(filename != "")
         ui->lineDiabloExe->setText(filename);
 }
 
 void PlayPage::browseMPQ()
 {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"),"", tr("MPQ File (*.mpq)"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"),"", tr("MPQ File (*.mpq *.MPQ)"));
     if(filename != "")
         ui->lineDiabdatMPQ->setText(filename);
 }
