@@ -14,7 +14,6 @@
 #include "../faworld/characterstats.h"
 #include "../faworld/playerfactory.h"
 #include "threadmanager.h"
-#include "input.h"
 #include "netmanager.h"
 #include "enginemain.h"
 
@@ -25,17 +24,9 @@ namespace Engine
 {
     volatile bool renderDone = false;
 
-    EngineInputManager* EngineMain::mInputManager;
-
-    EngineMain::~EngineMain()
+    EngineInputManager& EngineMain::inputManager()
     {
-        if(mInputManager != NULL)
-            delete mInputManager;
-    }
-
-    EngineInputManager* EngineMain::inputManager()
-    {
-        return mInputManager;
+        return *(mInputManager.get());
     }
 
     void EngineMain::run(const bpo::variables_map& variables)
@@ -55,12 +46,9 @@ namespace Engine
 
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen == "true");
-
-        mInputManager = new EngineInputManager();
+        mInputManager = std::make_shared<EngineInputManager>();
         mInputManager->registerKeyboardObserver(this);
-
         std::thread mainThread(std::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
-
         threadManager.run();
         renderDone = true;
 

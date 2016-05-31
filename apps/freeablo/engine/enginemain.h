@@ -1,8 +1,8 @@
 #ifndef ENGINEMAIN_H
 #define ENGINEMAIN_H
-
+#include <memory>
 #include <boost/program_options.hpp>
-#include "input.h"
+#include "engineinputmanager.h"
 
 namespace Level
 {
@@ -24,8 +24,7 @@ namespace Engine
     class EngineMain : public KeyboardInputObserverInterface
     {
         public:
-            ~EngineMain();
-            static EngineInputManager* inputManager();
+            EngineInputManager& inputManager();
             void run(const boost::program_options::variables_map& variables);
             void stop();
             void pause();
@@ -36,7 +35,7 @@ namespace Engine
         private:
             void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);
 
-            static EngineInputManager* mInputManager;
+            std::shared_ptr<EngineInputManager> mInputManager;
             bool mDone = false;
             bool mPaused = false;
             bool mNoclip = false;

@@ -1,8 +1,7 @@
 #include <functional>
-#include "input.h"
 #include "../farender/renderer.h"
 #include "../fagui/console.h"
-#include "enginemain.h"
+#include "engineinputmanager.h"
 
 namespace Engine
 {

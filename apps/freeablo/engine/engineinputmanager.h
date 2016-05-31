@@ -29,6 +29,8 @@ namespace Engine
             void registerMouseObserver(MouseInputObserverInterface* observer);
 
         private:
+            EngineInputManager(const EngineInputManager&);
+            EngineInputManager& operator=(const EngineInputManager&);
             void keyPress(Input::Key key);
             void mouseClick(size_t x, size_t y, Input::Key key);
             void mouseRelease(size_t, size_t, Input::Key key);
