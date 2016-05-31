@@ -1,4 +1,5 @@
 #include <string>
+#include <cctype>
 #include <settings/settings.h>
 #include <misc/boost_python.h>
 #include "hotkey.h"

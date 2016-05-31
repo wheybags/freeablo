@@ -9,7 +9,8 @@ namespace Engine {
         NOCLIP,
         CHANGE_LEVEL_DOWN,
         CHANGE_LEVEL_UP,
-        TOGGLE_CONSOLE
+        TOGGLE_CONSOLE,
+        KEYBOARD_INPUT_ACTION_MAX
     };
 
     enum MouseInputAction

@@ -23,6 +23,7 @@ namespace Engine
 
     void ThreadManager::run()
     {
+        const int MAXIMUM_DURATION_IN_MS = 1000;
         Input::InputManager* inputManager = Input::InputManager::get();
         FARender::Renderer* renderer = FARender::Renderer::get();
 
@@ -46,9 +47,9 @@ namespace Engine
             
             size_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count();
             
-            if(duration >= 1000)
+            if(duration >= MAXIMUM_DURATION_IN_MS)
             {
-                std::cout << "FPS: " << ((float)numFrames) / (((float)duration)/1000.0f) << std::endl;
+                std::cout << "FPS: " << ((float)numFrames) / (((float)duration)/MAXIMUM_DURATION_IN_MS) << std::endl;
                 numFrames = 0;
                 last = now;
             }

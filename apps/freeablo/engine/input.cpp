@@ -16,11 +16,11 @@ namespace Engine
                 std::bind(&EngineInputManager::mouseMove, this, ph::_1, ph::_2),
                 FARender::Renderer::get()->getRocketContext())
     {
-        mHotkeys[QUIT] = Input::Hotkey(keyboardActionToString(QUIT));
-        mHotkeys[NOCLIP] = Input::Hotkey(keyboardActionToString(NOCLIP));
-        mHotkeys[CHANGE_LEVEL_UP] = Input::Hotkey(keyboardActionToString(CHANGE_LEVEL_UP));
-        mHotkeys[CHANGE_LEVEL_DOWN] = Input::Hotkey(keyboardActionToString(CHANGE_LEVEL_DOWN));
-        mHotkeys[TOGGLE_CONSOLE] = Input::Hotkey(keyboardActionToString(TOGGLE_CONSOLE));
+        for(int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
+        {
+            KeyboardInputAction keyAction = (KeyboardInputAction)action;
+            mHotkeys[keyAction] = Input::Hotkey(keyboardActionToString(keyAction));
+        }
     }
 
     void EngineInputManager::registerKeyboardObserver(KeyboardInputObserverInterface * observer)
@@ -93,23 +93,14 @@ namespace Engine
         {
             mToggleConsole = true;
         }
-        else if(!console.isVisible())
+        else if(console.isVisible() == false)
         {
-            if (hotkey == getHotkey(QUIT))
+            for(int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
             {
-                notifyKeyboardObservers(QUIT);
-            }
-            else if (hotkey == getHotkey(NOCLIP))
-            {
-                notifyKeyboardObservers(NOCLIP);
-            }
-            else if (hotkey == getHotkey(CHANGE_LEVEL_UP))
-            {
-                notifyKeyboardObservers(CHANGE_LEVEL_UP);
-            }
-            else if (hotkey == getHotkey(CHANGE_LEVEL_DOWN))
-            {
-                notifyKeyboardObservers(CHANGE_LEVEL_DOWN);
+                KeyboardInputAction keyAction = (KeyboardInputAction)action;
+                if (hotkey == getHotkey(keyAction)) {
+                    notifyKeyboardObservers(keyAction);
+                }
             }
         }
     }

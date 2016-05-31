@@ -1,5 +1,5 @@
 #include <tuple>
-#include "world.h"
+#include <iostream>
 #include <diabloexe/diabloexe.h>
 #include "../farender/renderer.h"
 #include "../falevelgen/levelgen.h"
@@ -8,6 +8,7 @@
 #include "../engine/enginemain.h"
 #include "actorstats.h"
 #include "monster.h"
+#include "world.h"
 
 namespace FAWorld
 {
