@@ -23,6 +23,7 @@ build:
 
 # scripts to run before build
 before_build:
+  - git submodule update --init
   - echo Running cmake...
   - cd c:\projects\freeablo-windows-build
   - cmake.bat
