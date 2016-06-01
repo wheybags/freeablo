@@ -19,7 +19,7 @@ platform: x86
 configuration: Debug
 
 build:
-  project: c:\projects\freeablo-windows-build\build      # path to Visual Studio solution or project
+  project: c:\projects\freeablo-windows-build\build\Freeablo.sln      # path to Visual Studio solution or project
 
 # scripts to run before build
 before_build:
