@@ -15,7 +15,7 @@ init:
 # clone directory
 clone_folder: c:\projects\freeablo-windows-build\freeablo
 
-platform: x86
+platform: Win32
 configuration: Debug
 
 build:
