@@ -140,7 +140,7 @@ namespace Cel
             repeat = 8;
 
             // Read header offsets
-            for(int i = 0; i < repeat ; i++)
+            for(uint32_t i = 0; i < repeat ; i++)
             {
                 uint32_t offset = 0;
                 FAIO::FAfread(&offset, 4, 1, file);
@@ -148,7 +148,7 @@ namespace Cel
             }
         }
 
-        for(int r = 0; r < repeat ; r++)
+        for(uint32_t r = 0; r < repeat ; r++)
         {
             // Offset file
             if(!headerOffsets.empty()) {
@@ -160,7 +160,7 @@ namespace Cel
 
             // Read frame offsets.
             std::vector<uint32_t> frameOffsets(frameCount+1);
-            for(int i = 0 ; i < frameCount + 1; i++)
+            for(uint32_t i = 0 ; i < frameCount + 1; i++)
             {
                 FAIO::FAfread(&frameOffsets[i], 4, 1, file);
             }
@@ -171,7 +171,7 @@ namespace Cel
             }
 
             // Read frame contents
-            for(int i = 0 ; i < frameCount ; i++)
+            for(uint32_t i = 0 ; i < frameCount ; i++)
             {
                 int64_t frameStart = int64_t(frameOffsets[i]) + mHeaderSize;
                 int64_t frameEnd = int64_t(frameOffsets[i+1]);
