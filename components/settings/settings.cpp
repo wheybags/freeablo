@@ -13,7 +13,6 @@ using namespace boost::property_tree;
 const std::string Settings::DEFAULT_PATH = "resources/settings-default.ini";
 const std::string Settings::USER_PATH = "resources/settings-user.ini";
 const std::string Settings::USER_DIR = "resources/";
-const char Settings::CONNECTOR = '/';
 
 Settings::Settings()
     : mMode(STANDARD_FILE)

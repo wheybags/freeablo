@@ -73,7 +73,7 @@ namespace Cel
         }
 
         Settings::Settings* settings = &mSettingsCel;
-        std::string celName = mCelName;
+        std::string celNameWithoutExtension = mCelName;
         std::string extension = "cel";
 
         if(Misc::StringUtils::ciEndsWith(mCelPath,"cl2")) {
@@ -82,19 +82,21 @@ namespace Cel
             mIsCl2 = true;
         }
 
+        size_t pos = celNameWithoutExtension.find_last_of(extension) - 3;
+        celNameWithoutExtension = celNameWithoutExtension.substr(0, pos);
+
         // If more than one image in cel
         // read configuration from first image
         // (temporary solution)
 
-        mImageCount = settings->get<int>(mCelName, "image_count");
+        mImageCount = settings->get<int>(celNameWithoutExtension, "image_count");
         if(mImageCount > 0) {
-            size_t pos = celName.find_last_of(extension) - 3;
-            celName = celName.substr(0, pos) + "0." + extension;
+            celNameWithoutExtension += "0";
         }
 
-        mFrameWidth = settings->get<int>(celName, "width");
-        mFrameHeight= settings->get<int>(celName, "height");
-        mHeaderSize = settings->get<int>(celName, "header_size", 0);
+        mFrameWidth = settings->get<int>(celNameWithoutExtension, "width");
+        mFrameHeight= settings->get<int>(celNameWithoutExtension, "height");
+        mHeaderSize = settings->get<int>(celNameWithoutExtension, "header_size", 0);
         mIsObjcursCel = mCelName == "objcurs.cel";
         mIsCharbutCel = mCelName == "charbut.cel";
     }

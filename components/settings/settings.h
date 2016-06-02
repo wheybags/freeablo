@@ -18,7 +18,6 @@ public:
     static const std::string DEFAULT_PATH;
     static const std::string USER_PATH;
     static const std::string USER_DIR;
-    static const char CONNECTOR;
 
     Settings();
     bool loadUserSettings();
@@ -32,14 +31,13 @@ public:
     template<class T>
     T get(const std::string & section, const std::string & name, T defaultValue = T())
     {
-        std::string connector = std::string(1, CONNECTOR);
+        std::string connector = ".";
         if(section.empty())
             connector = "";
 
         std::string fullName = section + connector + name;
 
-        boost::optional< T > child = mUserPropertyTree.get_optional<T>(
-                    boost::property_tree::ptree::path_type(fullName.c_str(), CONNECTOR) );
+        boost::optional< T > child = mUserPropertyTree.get_optional<T>( fullName.c_str() );
         if(!child)
         {
             T value;
@@ -61,14 +59,12 @@ public:
     template<class T>
     void set(const std::string & section, const std::string & name, T value)
     {
-        std::string connector = std::string(1, CONNECTOR);
+        std::string connector = ".";
         if(section.empty())
             connector = "";
 
         std::string fullName = section + connector + name;
-        mUserPropertyTree.put(
-                    boost::property_tree::ptree::path_type(fullName.c_str(), CONNECTOR),
-                    value);
+        mUserPropertyTree.put(fullName.c_str(), value);
     }
 
 private:
