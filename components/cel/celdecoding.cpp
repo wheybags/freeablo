@@ -11,7 +11,8 @@ namespace Cel
     Settings::Settings CelDecoder::mSettingsCl2;
 
     CelDecoder::CelDecoder(const std::string& celPath)
-        : mCelPath(celPath)
+        : mCelPath(celPath),
+          mAnimationLength(0)
     {
         readCelName();
         readConfiguration();
@@ -20,6 +21,16 @@ namespace Cel
 
     CelFrame& CelDecoder::operator [](size_t index) {
         return mCache[index];
+    }
+
+    size_t CelDecoder::numFrames() const
+    {
+        return mCache.size();
+    }
+
+    size_t CelDecoder::animationLength() const
+    {
+        return mAnimationLength;
     }
 
     void CelDecoder::readCelName()
@@ -61,19 +72,20 @@ namespace Cel
         }
 
         // If more than one image in cel
-        // read configuration from first subcel
+        // read configuration from first image
         // (temporary solution)
 
         mImageCount = settings->get<int>(mCelName, "image_count");
         if(mImageCount > 0) {
             size_t pos = celName.find_last_of(extension) - 3;
             celName = celName.substr(0, pos) + "0." + extension;
-            //Misc::StringUtils::replace(celName, "." + extension, "0." + extension);
         }
 
         mFrameWidth = settings->get<int>(celName, "width");
         mFrameHeight= settings->get<int>(celName, "height");
         mHeaderSize = settings->get<int>(celName, "header_size", 0);
+        mIsObjcursCel = mCelName == "objcurs.cel";
+        mIsCharbutCel = mCelName == "charbut.cel";
     }
 
     void CelDecoder::readPalette()
@@ -104,9 +116,6 @@ namespace Cel
 
     void CelDecoder::getFrames()
     {
-        if(Misc::StringUtils::endsWith(mCelName,"cl2"))
-            return;
-
         // Open CEL file.
 
         FAIO::FAFile* file = FAIO::FAfopen(mCelPath);
@@ -117,22 +126,35 @@ namespace Cel
         // Read first word.
         uint32_t frameCount = 0;
         uint32_t firstWord = 0;
-        uint32_t offset = 0;
         uint32_t repeat = 1;
         FAIO::FAfread(&firstWord, 4, 1, file);
 
+        std::vector<uint32_t> headerOffsets;
+
         // If firstWord == 32 then it is archive
-        // that contains 8 cels and offset size is 32
+        // that contains 8 cels and information about offsets in header.
+
+        FAIO::FAfseek(file, 0, SEEK_SET);
+
         if(firstWord == 32) {
             repeat = 8;
-            offset = 32;
-        }
 
-        // Offset file
-        FAIO::FAfseek(file, offset, SEEK_SET);
+            // Read header offsets
+            for(int i = 0; i < repeat ; i++)
+            {
+                uint32_t offset = 0;
+                FAIO::FAfread(&offset, 4, 1, file);
+                headerOffsets.push_back(offset);
+            }
+        }
 
         for(int r = 0; r < repeat ; r++)
         {
+            // Offset file
+            if(!headerOffsets.empty()) {
+                FAIO::FAfseek(file, headerOffsets[r], SEEK_SET);
+            }
+
             // Read frame count
             FAIO::FAfread(&frameCount, 4, 1, file);
 
@@ -143,10 +165,15 @@ namespace Cel
                 FAIO::FAfread(&frameOffsets[i], 4, 1, file);
             }
 
+            // Magic offset that fixes everything!
+            if(!headerOffsets.empty()) {
+                FAIO::FAfseek(file, headerOffsets[r] + frameOffsets[0], SEEK_SET);
+            }
+
             // Read frame contents
             for(int i = 0 ; i < frameCount ; i++)
             {
-                int64_t frameStart = int64_t(frameOffsets[i]);
+                int64_t frameStart = int64_t(frameOffsets[i]) + mHeaderSize;
                 int64_t frameEnd = int64_t(frameOffsets[i+1]);
                 int64_t frameSize = frameEnd - frameStart;
 
@@ -156,18 +183,27 @@ namespace Cel
 
                 mFrames.push_back(std::vector<uint8_t>(frameSize));
                 uint32_t idx = mFrames.size() - 1;
+                FAIO::FAfseek(file, mHeaderSize, SEEK_CUR);
                 FAIO::FAfread(&mFrames[idx][0], 1, frameSize, file);
             }
+
+            mAnimationLength = frameCount;
         }
 
         FAIO::FAfclose(file);
     }
 
     void CelDecoder::decodeFrames()
-    {
+    {        
         int frameNumber = 0;
         for(FrameBytesRef frame : mFrames) {
             auto decoder = getFrameDecoder(mCelName, frame, frameNumber);
+
+            if(mIsObjcursCel) {
+                setObjcursCelDimensions(frameNumber);
+            } else if(mIsCharbutCel) {
+                setCharbutCelDimensions(frameNumber);
+            }
 
             CelFrame celFrame;
             celFrame.mWidth = mFrameWidth;
@@ -208,6 +244,9 @@ namespace Cel
                     return &CelDecoder::decodeFrameType5;
                 }
             }
+        } else if(Misc::StringUtils::endsWith(celName,"cl2"))
+        {
+            return &CelDecoder::decodeFrameType6;
         }
 
         return &CelDecoder::decodeFrameType1;
@@ -383,6 +422,56 @@ namespace Cel
         decodeFrameType2or3(frame, pal, decodedFrame, true);
     }
 
+    // DecodeFrameType3 returns an image after decoding the frame in the following
+    // way:
+    //
+    //    1) Dump one line of 32 pixels at the time.
+    //       - The illustration below tells if a pixel is transparent or regular.
+    //       - Only regular and zero (transparent) pixels are explicitly stored in
+    //         the frame content. All other pixels of the illustration are
+    //         implicitly transparent.
+    //
+    // Below is an illustration of the 32x32 image, where a space represents an
+    // implicit transparent pixel, a '0' represents an explicit transparent pixel
+    // and an 'x' represents an explicit regular pixel.
+    //
+    //
+    //    +--------------------------------+
+    //    |                                |
+    //    |xx00                            |
+    //    |xxxx                            |
+    //    |xxxxxx00                        |
+    //    |xxxxxxxx                        |
+    //    |xxxxxxxxxx00                    |
+    //    |xxxxxxxxxxxx                    |
+    //    |xxxxxxxxxxxxxx00                |
+    //    |xxxxxxxxxxxxxxxx                |
+    //    |xxxxxxxxxxxxxxxxxx00            |
+    //    |xxxxxxxxxxxxxxxxxxxx            |
+    //    |xxxxxxxxxxxxxxxxxxxxxx00        |
+    //    |xxxxxxxxxxxxxxxxxxxxxxxx        |
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxx00    |
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxx    |
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx00|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx00|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxx    |
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxx00    |
+    //    |xxxxxxxxxxxxxxxxxxxxxxxx        |
+    //    |xxxxxxxxxxxxxxxxxxxxxx00        |
+    //    |xxxxxxxxxxxxxxxxxxxx            |
+    //    |xxxxxxxxxxxxxxxxxx00            |
+    //    |xxxxxxxxxxxxxxxx                |
+    //    |xxxxxxxxxxxxxx00                |
+    //    |xxxxxxxxxxxx                    |
+    //    |xxxxxxxxxx00                    |
+    //    |xxxxxxxx                        |
+    //    |xxxxxx00                        |
+    //    |xxxx                            |
+    //    |xx00                            |
+    //    +--------------------------------+
+    //
+    // Type3 corresponds to a 32x32 images of a right facing triangle.
     void CelDecoder::decodeFrameType3(const FrameBytesRef frame,
                                       const Pal& pal,
                                       std::vector<Colour>& decodedFrame)
@@ -390,7 +479,56 @@ namespace Cel
         decodeFrameType2or3(frame, pal, decodedFrame, false);
     }
 
-
+    // DecodeFrameType4 returns an image after decoding the frame in the following
+    // way:
+    //
+    //    1) Dump one line of 32 pixels at the time.
+    //       - The illustration below tells if a pixel is transparent or regular.
+    //       - Only regular and zero (transparent) pixels are explicitly stored in
+    //         the frame content. All other pixels of the illustration are
+    //         implicitly transparent.
+    //
+    // Below is an illustration of the 32x32 image, where a space represents an
+    // implicit transparent pixel, a '0' represents an explicit transparent pixel
+    // and an 'x' represents an explicit regular pixel.
+    //
+    //
+    //    +--------------------------------+
+    //    |                            00xx|
+    //    |                            xxxx|
+    //    |                        00xxxxxx|
+    //    |                        xxxxxxxx|
+    //    |                    00xxxxxxxxxx|
+    //    |                    xxxxxxxxxxxx|
+    //    |                00xxxxxxxxxxxxxx|
+    //    |                xxxxxxxxxxxxxxxx|
+    //    |            00xxxxxxxxxxxxxxxxxx|
+    //    |            xxxxxxxxxxxxxxxxxxxx|
+    //    |        00xxxxxxxxxxxxxxxxxxxxxx|
+    //    |        xxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |    00xxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |    xxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |00xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    +--------------------------------+
+    //
+    // Type4 corresponds to a 32x32 images of a left facing trapezoid.
     void CelDecoder::decodeFrameType4(const FrameBytesRef frame,
                                       const Pal& pal,
                                       std::vector<Colour>& decodedFrame)
@@ -398,7 +536,56 @@ namespace Cel
         decodeFrameType4or5(frame, pal, decodedFrame, true);
     }
 
-
+    // DecodeFrameType5 returns an image after decoding the frame in the following
+    // way:
+    //
+    //    1) Dump one line of 32 pixels at the time.
+    //       - The illustration below tells if a pixel is transparent or regular.
+    //       - Only regular and zero (transparent) pixels are explicitly stored in
+    //         the frame content. All other pixels of the illustration are
+    //         implicitly transparent.
+    //
+    // Below is an illustration of the 32x32 image, where a space represents an
+    // implicit transparent pixel, a '0' represents an explicit transparent pixel
+    // and an 'x' represents an explicit regular pixel.
+    //
+    //
+    //    +--------------------------------+
+    //    |xx00                            |
+    //    |xxxx                            |
+    //    |xxxxxx00                        |
+    //    |xxxxxxxx                        |
+    //    |xxxxxxxxxx00                    |
+    //    |xxxxxxxxxxxx                    |
+    //    |xxxxxxxxxxxxxx00                |
+    //    |xxxxxxxxxxxxxxxx                |
+    //    |xxxxxxxxxxxxxxxxxx00            |
+    //    |xxxxxxxxxxxxxxxxxxxx            |
+    //    |xxxxxxxxxxxxxxxxxxxxxx00        |
+    //    |xxxxxxxxxxxxxxxxxxxxxxxx        |
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxx00    |
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxx    |
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx00|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+    //    +--------------------------------+
+    //
+    // Type5 corresponds to a 32x32 images of a right facing trapezoid.
     void CelDecoder::decodeFrameType5(const FrameBytesRef frame,
                                       const Pal& pal,
                                       std::vector<Colour>& decodedFrame)
@@ -406,10 +593,62 @@ namespace Cel
         decodeFrameType4or5(frame, pal, decodedFrame, false);
     }
 
+    // DecodeFrameType6 returns an image after decoding the frame in the following
+    // way:
+    //
+    //    1) Read one byte (chunkSize).
+    //    2) If chunkSize is positive, set that many transparent pixels.
+    //    3) If chunkSize is negative, invert it's sign.
+    //       3a) If chunkSize is below or equal to 65, read that many bytes.
+    //          - Each byte read this way corresponds to a color index of the
+    //            palette.
+    //          - Set one regular pixel per byte, using the color index to locate
+    //            the color in the palette.
+    //       3b) If chunkSize is above 65, subtract 65 from it and read one byte.
+    //          - The byte read this way corresponds to a color index of the
+    //            palette.
+    //          - Set chunkSize regular pixels, using the color index to locate the
+    //            color in the palette.
+    //    4) goto 1 until EOF is reached.
+    //
+    // Type6 is the only type for CL2 images.
     void CelDecoder::decodeFrameType6(const FrameBytesRef frame,
                                       const Pal& pal,
                                       std::vector<Colour>& decodedFrame)
-    {}
+    {
+        size_t len = frame.size();
+        for(size_t pos = 0 ; pos < len ;)
+        {
+            int chunkSize = int(int8_t(frame[pos]));
+            pos++;
+            if (chunkSize >= 0) {
+                // Transparent pixels.
+                for (int i = 0; i < chunkSize; i++) {
+                    Colour color(0, 0, 0, false);
+                    decodedFrame.push_back(color);
+                }
+            } else {
+                chunkSize = -chunkSize;
+                if(chunkSize <= 65) {
+                    // Regular pixels.
+                    for (int i = 0; i < chunkSize; i++) {
+                        Colour color = pal[frame[pos]];
+                        decodedFrame.push_back(color);
+                        pos++;
+                    }
+                } else {
+                    chunkSize -= 65;
+                    // Run-length encoded pixels.
+                    Colour c = pal[frame[pos]];
+                    for (int i = 0; i < chunkSize; i++) {
+                        decodedFrame.push_back(c);
+                    }
+                    pos++;
+                }
+
+            }
+        }
+    }
 
     void CelDecoder::decodeFrameType2or3(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame, bool frameType2)
     {
@@ -441,7 +680,6 @@ namespace Cel
             lineNum++;
         }
     }
-
 
     void CelDecoder::decodeFrameType4or5(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame, bool frameType4)
     {
@@ -491,11 +729,11 @@ namespace Cel
 
         // Implicit transparent pixels.
         for (int i = decodeCount; i < 32; i++) {
-            decodedFrame.push_back(Colour(0,0,0,false));
+            decodedFrame.push_back(Colour(255,0,255,false));
         }
         // Explicit transparent pixels (zeroes).
         for (int i = 0; i < zeroCount; i++) {
-            decodedFrame.push_back(Colour(0,0,0,false));
+            decodedFrame.push_back(Colour(0,255,0,false));
         }
         // Explicit regular pixels.
         for (int i = zeroCount; i < decodeCount; i++) {
@@ -504,6 +742,10 @@ namespace Cel
         }
     }
 
+    // decodeLineTransparencyRight decodes a line of the frame, where regularCount
+    // represent the number of explicit regular pixels, zeroCount the number of
+    // explicit transparent pixels and the rest of the line is implicitly
+    // transparent. Each line is assumed to have a width of 32 pixels.
     void CelDecoder::decodeLineTransparencyRight(const uint8_t* framePtr,
                                                 const Pal& pal,
                                                 std::vector<Colour>& decodedFrame,
@@ -521,190 +763,67 @@ namespace Cel
 
         // Explicit transparent pixels (zeroes).
         for (int i = 0; i < zeroCount; i++) {
-            decodedFrame.push_back(Colour(0,0,0,false));
+            decodedFrame.push_back(Colour(0,0,255,false));
         }
 
         // Implicit transparent pixels.
-        for (int i = decodeCount; i < 32; i++) {
+        for (int i = decodeCount ; i < 32; i++) {
             decodedFrame.push_back(Colour(0,0,0,false));
         }
     }
 
-
-
-
-    int32_t normalWidth(const std::vector<uint8_t>& frame, size_t frameNum, bool fromHeader, uint16_t offset)
+    void CelDecoder::setObjcursCelDimensions(int frameNumber)
     {
-        // If we have a header, we know that offset points to the end of the 32nd line.
-        // So, when we reach that point, we will have produced 32 lines of pixels, so we 
-        // can divide the number of pixels we have passed at this point by 32, to get the 
-        // width.
-        if(fromHeader)
-        {
-            // Workaround for objcurs.cel, the only cel file containing frames with a header whose offset is zero
-            if(offset == 0)
-            {
-                if(frameNum == 0)
-                    return 33;
-                else if(frameNum > 0 && frameNum <10)
-                    return 32;
-                else if(frameNum == 10)
-                    return 23;
-                else if(frameNum > 10 && frameNum < 86)
-                    return 28;
-            }
+        mFrameWidth = 56;
+        mFrameHeight = 84;
 
-            int32_t widthHeader = 0; 
-            
-            for(size_t i = 10; i < frame.size(); i++){
-                
-                if(i == offset && fromHeader)
-                {
-                    widthHeader = widthHeader/32;
-                    break;
-                }
-                // Regular command
-                if(frame[i] <= 127){
-                    widthHeader += frame[i];
-                    i += frame[i];
-                }
-
-                // Transparency command
-                else if(128 <= frame[i]){
-                    widthHeader += 256 - frame[i];
-                }
-            }
-
-            return widthHeader;
+        // Width
+        if(frameNumber == 0) {
+            mFrameWidth = 33;
         }
-        
-        // If we do not have a header we probably (definitely?) don't have any transparency.
-        // The maximum stretch of opaque pixels following a command byte is 127.
-        // Since commands can't wrap over lines (it seems), if the width is shorter than 127,
-        // the first (command) byte will indicate an entire line, so it's value is the width.
-        // If the width is larger than 127, it will be some sequence of 127 byte long stretches,
-        // followed by some other value to bring it to the end of a line (presuming the width is
-        // not divisible by 127).
-        // So, for all image except those whose width is divisible by 127, we can determine width
-        // by looping through control bits, adding 127 each time, until we find some value which
-        // is not 127, then add that to the 127-total and that is our width.
-        //
-        // The above is the basic idea, but there is also a bunch of crap added in to maybe deal
-        // with frames that don't quite fit the criteria.
-        else
-        {
-            int32_t widthRegular = 0;
-            bool hasTrans = false;
+        else if(frameNumber > 0 && frameNumber <10) {
+            mFrameWidth = 32;
+        }
+        else if(frameNumber == 10) {
+            mFrameWidth = 23;
+        }
+        else if(frameNumber > 10 && frameNumber < 86) {
+            mFrameWidth = 28;
+        }
+        else if(frameNumber >= 86 && frameNumber < 111){
+            mFrameWidth = 56;
+        }
 
-            uint8_t lastVal = 0;
-            uint8_t lastTransVal = 0;
-            
-            for(size_t i = 0; i < frame.size(); i++){
-                uint8_t val = frame[i];
-
-
-                // Regular command
-                if(val <= 127)
-                {
-                    widthRegular += val;
-                    i += val;
-                    
-                    // Workaround for frames that start with a few px, then trans for the rest of the line
-                    if(i+1 >= frame.size() || 128 <= frame[i+1])
-                        hasTrans = true;
-                }
-
-                else if(128 <= val)
-                {
-                    
-                    // Workaround for frames that start trans, then a few px of colour at the end
-                    if(val == lastTransVal && lastVal <= 127 && lastVal == frame[i+1])
-                        break;
-
-                    widthRegular += 256 - val;
-                    
-                    // Workaround - presumes all headerless frames first lines start transparent, then go colour,
-                    // then go transparent again, at which point they hit the end of the line, or if the first two
-                    // commands are both transparency commands, that the image starts with a fully transparent line
-                    if((hasTrans || 128 <= frame[i+1]) && val != 128)
-                        break;
-
-                    hasTrans = true;
-
-                    lastTransVal = val;
-                }
-
-                if(val != 127 && !hasTrans)
-                    break;
-
-                lastVal = val;
-            }
-
-            return widthRegular;
+        // Height
+        if(frameNumber == 0) {
+            mFrameHeight = 29;
+        }
+        else if(frameNumber > 0 && frameNumber <10) {
+            mFrameHeight = 32;
+        }
+        else if(frameNumber == 10) {
+            mFrameHeight = 35;
+        }
+        else if(frameNumber >= 11 && frameNumber < 61) {
+            mFrameHeight = 28;
+        }
+        else if(frameNumber >= 61 && frameNumber < 67) {
+            mFrameHeight = 56;
+        }
+        else if(frameNumber >= 67 && frameNumber < 86) {
+            mFrameHeight = 84;
+        }
+        else if(frameNumber >= 86 && frameNumber < 111){
+            mFrameHeight = 56;
         }
     }
 
-
-    int32_t normalDecode(const std::vector<uint8_t>& frame, size_t frameNum, const Pal& pal, std::vector<Colour>& rawImage, bool tileCel)
+    void CelDecoder::setCharbutCelDimensions(int frameNumber)
     {
-        #ifdef CEL_DEBUG
-            std::cout << "NORMAL DECODE" << std::endl;
-        #endif 
-        
-        size_t i = 0;
+        mFrameWidth = 41;
 
-        uint16_t offset = 0;
-        bool fromHeader = false;
-        
-        // The frame has a header which we can use to determine width
-        if(!tileCel && frame[0] == 10)
-        {
-            fromHeader = true;
-            offset = (uint16_t) (frame[3] << 8 | frame[2]);
-            i = 10; // Skip the header
+        if(frameNumber == 0) {
+            mFrameWidth = 95;
         }
-     
-        for(; i < frame.size(); i++)
-        {
-            // Regular command
-            if(frame[i] <= 127)
-            {
-                #ifdef CEL_DEBUG
-                    std::cout << i << " regular: " << (int)frame[i] << std::endl;
-                #endif
-                
-                size_t j;
-                // Just push the number of pixels specified by the command
-                for(j = 1; j < frame[i]+1 && i+j < frame.size(); j++)
-                {
-                    int index = i+j;
-                    uint8_t f = frame[index];
-                    
-                    if(index > frame.size()-1)
-                        std::cout << "invalid read from f " << index << " " << frame.size() << std::endl;
-
-                    Colour col = pal[f];
-
-                    rawImage.push_back(col);
-                }
-                
-                i+= frame[i];
-            }
-
-
-            // Transparency command
-            else if(128 <= frame[i])
-            {
-                #ifdef CEL_DEBUG
-                    std::cout << i << " transparency: " << (int)frame[i] << " " << (256 - frame[i]) << std::endl;
-                #endif
-                
-                // Push (256 - command value) transparent pixels
-                for(size_t j = 0; j < 256-frame[i]; j++)
-                    rawImage.push_back(Colour(255, 0, 255, false));
-            }
-        }
-
-        return normalWidth(frame, frameNum, fromHeader, offset);
     }
 }

@@ -19,6 +19,8 @@ namespace Cel
         CelDecoder(const std::string& celPath);
         void decode();
         CelFrame& operator[](size_t index);
+        size_t numFrames() const;
+        size_t animationLength() const;
     private:
 
         typedef std::vector<uint8_t> FrameBytes;
@@ -56,7 +58,8 @@ namespace Cel
                                         std::vector<Colour>& decodedFrame,
                                         int,
                                         int);
-
+        void setObjcursCelDimensions(int frame);
+        void setCharbutCelDimensions(int frame);
 
         std::vector<FrameBytes> mFrames;
         std::map<size_t, CelFrame> mCache;
@@ -64,10 +67,13 @@ namespace Cel
         std::string mCelName;
         Pal mPal;
         bool mIsCl2;
+        bool mIsObjcursCel;
+        bool mIsCharbutCel;
         int mImageCount;
         int mFrameWidth;
         int mFrameHeight;
         int mHeaderSize;
+        size_t mAnimationLength;
         static Settings::Settings mSettingsCel;
         static Settings::Settings mSettingsCl2;
     };

@@ -19,7 +19,6 @@ namespace Cel
             
             Misc::Helper2D<const CelFrame, const Colour&> operator[] (size_t x) const;
             
-
         private:
             friend class CelFile;
             friend class CelDecoder;
