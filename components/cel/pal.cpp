@@ -1,8 +1,6 @@
-#include "pal.h"
-
 #include <stdio.h>
-
 #include <faio/faio.h>
+#include "pal.h"
 
 namespace Cel
 {

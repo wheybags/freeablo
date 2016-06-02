@@ -1,7 +1,5 @@
 #include "celframe.h"
 
-#include "pal.h"
-
 namespace Cel
 {
     const Colour& get(size_t x, size_t y, const CelFrame& frame)

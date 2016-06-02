@@ -1,9 +1,3 @@
-#include <assert.h>
-
-#ifdef CEL_DEBUG
-    #include <iostream>
-#endif
-
 #include <faio/faio.h>
 #include <misc/stringops.h>
 #include "celfile.h"

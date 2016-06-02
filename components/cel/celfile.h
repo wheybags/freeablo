@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <vector>
 #include <map>
-
 #include "pal.h"
 #include "celframe.h"
 #include "celdecoding.h"
