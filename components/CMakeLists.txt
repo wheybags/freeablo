@@ -2,7 +2,7 @@ add_library(Cel
     cel/celfile.cpp cel/celfile.h  
     cel/celframe.h cel/celframe.cpp
     cel/pal.cpp cel/pal.h  
-    cel/celdecoding.cpp cel/celdecoding.h)
+    cel/celdecoder.cpp cel/celdecoder.h)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(FAIO faio/faio.cpp faio/faio.h)

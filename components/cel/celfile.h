@@ -6,7 +6,7 @@
 #include <map>
 #include "pal.h"
 #include "celframe.h"
-#include "celdecoding.h"
+#include "celdecoder.h"
 
 
 namespace FAIO

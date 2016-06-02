@@ -3,7 +3,7 @@
 #include <functional>
 #include <misc/stringops.h>
 #include <faio/faio.h>
-#include "celdecoding.h"
+#include "celdecoder.h"
 
 namespace Cel
 {
