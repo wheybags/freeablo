@@ -22,6 +22,7 @@ namespace Cel
 
         private:
             friend class CelFile;
+            friend class CelDecoder;
             friend const Colour& get(size_t x, size_t y, const CelFrame& frame);
             
             std::vector<Colour> mRawImage;

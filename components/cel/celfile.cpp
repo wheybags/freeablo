@@ -16,8 +16,14 @@
 
 namespace Cel
 {
-    CelFile::CelFile(std::string filename) : mPal(getPallette(filename))
+    CelFile::CelFile(const std::string& filename) :
+        mPal(getPallette(filename)),
+        mDecoder(filename)
     {
+        std::cout << "Before..."  << filename << std::endl;
+        mDecoder.decode();
+        std::cout << "After..." << std::endl;
+
         FAIO::FAFile* file = FAIO::FAfopen(filename);
 
         mIsCl2 = Misc::StringUtils::ciEndsWith(filename, "cl2");
@@ -68,8 +74,9 @@ namespace Cel
 
     CelFrame& CelFile::operator[] (size_t index)
     {
+        return mDecoder[index];
+
         assert(index < numFrames());
-        assert(index >= 0);
 
         if(mCache.count(index))
             return mCache[index];

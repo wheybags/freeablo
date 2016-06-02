@@ -26,7 +26,8 @@ namespace Cel
     class Pal
     {
         public:
-            Pal(std::string filename);
+            Pal();
+            Pal(const std::string& filename);
             
             const Colour& operator[](size_t index) const;
 

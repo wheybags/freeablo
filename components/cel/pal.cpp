@@ -6,10 +6,13 @@
 
 namespace Cel
 {
-    Pal::Pal(std::string filename)
+    Pal::Pal()
     {
         contents.resize(256);
+    }
 
+    Pal::Pal(const std::string& filename) : Pal()
+    {
         FAIO::FAFile * pal_file;
 
         pal_file = FAIO::FAfopen(filename);

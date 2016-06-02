@@ -71,7 +71,7 @@ namespace Cel
 
     void fillTransparent(size_t pixels, std::vector<Colour>& rawImage)
     {
-        for(int px = 0; px < pixels; px++)
+        for(unsigned int px = 0; px < pixels; px++)
             rawImage.push_back(Colour(255, 255, 255, false));
     }
 

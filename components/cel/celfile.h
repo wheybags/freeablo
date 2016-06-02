@@ -7,6 +7,7 @@
 
 #include "pal.h"
 #include "celframe.h"
+#include "celdecoding.h"
 
 
 namespace FAIO
@@ -19,7 +20,7 @@ namespace Cel
     class CelFile
     {
         public:
-            CelFile(std::string filename);
+            CelFile(const std::string& filename);
 
             size_t numFrames();
 
@@ -45,6 +46,8 @@ namespace Cel
             std::map<size_t, CelFrame> mCache;
 
             size_t mAnimLength;
+
+            CelDecoder mDecoder;
     };
 }
 
