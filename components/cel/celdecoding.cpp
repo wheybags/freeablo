@@ -1,5 +1,6 @@
 #include <iostream>
 #include <set>
+#include <functional>
 #include <misc/stringops.h>
 #include <faio/faio.h>
 #include "celdecoding.h"
@@ -27,7 +28,14 @@ namespace Cel
             throw "Cel path is empty";
         }
 
-        auto celPathComponents = Misc::StringUtils::split(mCelPath, '\\');
+        std::vector<std::string> celPathComponents;
+
+        if(mCelPath.find_first_of('/') != std::string::npos) {
+            celPathComponents = Misc::StringUtils::split(mCelPath, '/');
+        } else {
+            celPathComponents = Misc::StringUtils::split(mCelPath, '\\');
+        }
+
         mCelName = celPathComponents[celPathComponents.size() - 1];
         mCelName = Misc::StringUtils::toLower(mCelName);
     }
@@ -165,29 +173,7 @@ namespace Cel
             celFrame.mWidth = mFrameWidth;
             celFrame.mHeight = mFrameHeight;
 
-            switch(decoder)
-            {
-                case DECODER_TYPE_0:
-                    decodeFrameType0(frame, mPal, celFrame.mRawImage);
-                    break;
-
-                case DECODER_TYPE_1:
-                    decodeFrameType1(frame, mPal, celFrame.mRawImage);
-                    break;
-
-                case DECODER_TYPE_2:
-                    decodeFrameType2(frame, mPal, celFrame.mRawImage);
-                    break;
-
-                case DECODER_TYPE_3:
-                    decodeFrameType3(frame, mPal, celFrame.mRawImage);
-                    break;
-
-                default:
-                    decodeFrameType1(frame, mPal, celFrame.mRawImage);
-                    std::cout << "Frame decoder " << decoder << " not implemented " << std::endl;
-                    break;
-            }
+            decoder(*this, frame, mPal, celFrame.mRawImage);
 
             mCache[frameNumber] = celFrame;
 
@@ -207,24 +193,24 @@ namespace Cel
             {
             case 0x400:
                 if(isType0(celName, frameNumber))
-                    return DECODER_TYPE_0;
+                    return &CelDecoder::decodeFrameType0;
                 break;
             case 0x220:
                 if(isType2or4(frame)) {
-                    return DECODER_TYPE_2;
+                    return &CelDecoder::decodeFrameType2;
                 } else if(isType3or5(frame)) {
-                    return DECODER_TYPE_3;
+                    return &CelDecoder::decodeFrameType3;
                 }
             case 0x320:
                 if(isType2or4(frame)) {
-                    return DECODER_TYPE_4;
+                    return &CelDecoder::decodeFrameType4;
                 } else if(isType3or5(frame)) {
-                    return DECODER_TYPE_5;
+                    return &CelDecoder::decodeFrameType5;
                 }
             }
         }
 
-        return DECODER_TYPE_1;
+        return &CelDecoder::decodeFrameType1;
     }
 
     // isType0 returns true if the image is a plain 32x32.
@@ -289,7 +275,7 @@ namespace Cel
     //
     // Type0 corresponds to a plain 32x32 images, with no transparency.
     //
-    void CelDecoder::decodeFrameType0(const std::vector<uint8_t>& frame,
+    void CelDecoder::decodeFrameType0(const FrameBytesRef frame,
                                       const Pal& pal,
                                       std::vector<Colour>& decodedFrame)
     {
@@ -314,7 +300,7 @@ namespace Cel
     //
     // Type1 corresponds to a regular CEL frame image of the specified dimensions.
     //
-    void CelDecoder::decodeFrameType1(const std::vector<uint8_t>& frame,
+    void CelDecoder::decodeFrameType1(const FrameBytesRef frame,
                                       const Pal& pal,
                                       std::vector<Colour>& decodedFrame)
     {
@@ -390,14 +376,58 @@ namespace Cel
     //
     // Type2 corresponds to a 32x32 images of a left facing triangle.
     //
-    void CelDecoder::decodeFrameType2(const std::vector<uint8_t>& frame,
+    void CelDecoder::decodeFrameType2(const FrameBytesRef frame,
                                       const Pal& pal,
                                       std::vector<Colour>& decodedFrame)
     {
+        decodeFrameType2or3(frame, pal, decodedFrame, true);
+    }
+
+    void CelDecoder::decodeFrameType3(const FrameBytesRef frame,
+                                      const Pal& pal,
+                                      std::vector<Colour>& decodedFrame)
+    {
+        decodeFrameType2or3(frame, pal, decodedFrame, false);
+    }
+
+
+    void CelDecoder::decodeFrameType4(const FrameBytesRef frame,
+                                      const Pal& pal,
+                                      std::vector<Colour>& decodedFrame)
+    {
+        decodeFrameType4or5(frame, pal, decodedFrame, true);
+    }
+
+
+    void CelDecoder::decodeFrameType5(const FrameBytesRef frame,
+                                      const Pal& pal,
+                                      std::vector<Colour>& decodedFrame)
+    {
+        decodeFrameType4or5(frame, pal, decodedFrame, false);
+    }
+
+    void CelDecoder::decodeFrameType6(const FrameBytesRef frame,
+                                      const Pal& pal,
+                                      std::vector<Colour>& decodedFrame)
+    {}
+
+    void CelDecoder::decodeFrameType2or3(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame, bool frameType2)
+    {
+        // Select line decoding function
+
+        auto decodeLineTransparency = &CelDecoder::decodeLineTransparencyRight;
+
+        if(frameType2) {
+            decodeLineTransparency = &CelDecoder::decodeLineTransparencyLeft;
+        }
+
+        // Decode
+
         static std::vector<int> decodeCounts =
             {0, 4, 4, 8, 8, 12, 12, 16, 16, 20, 20, 24, 24, 28, 28, 32, 32, 32, 28, 28, 24, 24, 20, 20, 16, 16, 12, 12, 8, 8, 4, 4};
 
         int lineNum = 0;
+        const uint8_t *framePtr = &frame[0];
         for(int decodeCount : decodeCounts)
         {
             int zeroCount = 0;
@@ -406,30 +436,41 @@ namespace Cel
             }
 
             int regularCount = decodeCount - zeroCount;
-            decodeLineTransparencyLeft(frame, pal, decodedFrame, regularCount, zeroCount);
-            //frame = frame[decodeCount:];
+            (this->*decodeLineTransparency)(framePtr, pal, decodedFrame, regularCount, zeroCount);
+            framePtr += decodeCount;
             lineNum++;
         }
     }
 
-    void CelDecoder::decodeFrameType3(const std::vector<uint8_t>& frame,
-                                      const Pal& pal,
-                                      std::vector<Colour>& decodedFrame)
-    {
-        static std::vector<int> decodeCounts =
-            {0, 4, 4, 8, 8, 12, 12, 16, 16, 20, 20, 24, 24, 28, 28, 32, 32, 32, 28, 28, 24, 24, 20, 20, 16, 16, 12, 12, 8, 8, 4, 4};
 
+    void CelDecoder::decodeFrameType4or5(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame, bool frameType4)
+    {
+        // Select line decoding function
+
+        auto decodeLineTransparency = &CelDecoder::decodeLineTransparencyRight;
+
+        if(frameType4) {
+            decodeLineTransparency = &CelDecoder::decodeLineTransparencyLeft;
+        }
+
+        // Decode
+
+        static std::vector<int> decodeCounts =
+            {4, 4, 8, 8, 12, 12, 16, 16, 20, 20, 24, 24, 28, 28, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32};
         int lineNum = 0;
+        const uint8_t *framePtr = &frame[0];
         for(int decodeCount : decodeCounts)
         {
+            static std::set<int> lineNumbers = { 0, 2, 4, 6, 8, 10, 12, 14 };
             int zeroCount = 0;
-            if(lineNum % 2 == 1) {
+
+            if(lineNumbers.find(lineNum) != lineNumbers.end()) {
                 zeroCount = 2;
             }
 
             int regularCount = decodeCount - zeroCount;
-            decodeLineTransparencyRight(frame, pal, decodedFrame, regularCount, zeroCount);
-            //frame = frame[decodeCount:];
+            (this->*decodeLineTransparency)(framePtr, pal, decodedFrame, regularCount, zeroCount);
+            framePtr += decodeCount;
             lineNum++;
         }
     }
@@ -439,7 +480,7 @@ namespace Cel
     // explicit transparent pixels and the rest of the line is implicitly
     // transparent. Each line is assumed to have a width of 32 pixels.
     //
-    void CelDecoder::decodeLineTransparencyLeft(const std::vector<uint8_t>& frame,
+    void CelDecoder::decodeLineTransparencyLeft(const uint8_t* framePtr,
                                                 const Pal& pal,
                                                 std::vector<Colour>& decodedFrame,
                                                 int regularCount,
@@ -458,12 +499,12 @@ namespace Cel
         }
         // Explicit regular pixels.
         for (int i = zeroCount; i < decodeCount; i++) {
-            Colour color = pal[frame[i]];
+            Colour color = pal[framePtr[i]];
             decodedFrame.push_back(color);
         }
     }
 
-    void CelDecoder::decodeLineTransparencyRight(const std::vector<uint8_t>& frame,
+    void CelDecoder::decodeLineTransparencyRight(const uint8_t* framePtr,
                                                 const Pal& pal,
                                                 std::vector<Colour>& decodedFrame,
                                                 int regularCount,
@@ -474,7 +515,7 @@ namespace Cel
 
         // Explicit regular pixels.
         for (int i = zeroCount; i < decodeCount; i++) {
-            Colour color = pal[frame[i]];
+            Colour color = pal[framePtr[i]];
             decodedFrame.push_back(color);
         }
 

@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <functional>
 #include <stdint.h>
 #include <settings/settings.h>
 #include "celframe.h"
@@ -22,17 +23,7 @@ namespace Cel
 
         typedef std::vector<uint8_t> FrameBytes;
         typedef FrameBytes& FrameBytesRef;
-
-        enum FrameDecoder
-        {
-            DECODER_TYPE_0,
-            DECODER_TYPE_1,
-            DECODER_TYPE_2,
-            DECODER_TYPE_3,
-            DECODER_TYPE_4,
-            DECODER_TYPE_5,
-            DECODER_TYPE_6
-        };
+        typedef std::function<void(CelDecoder&, const FrameBytesRef, const Pal&, std::vector<Colour>&)> FrameDecoder;
 
         void readConfiguration();
         void readCelName();
@@ -45,18 +36,22 @@ namespace Cel
         bool isType2or4(FrameBytesRef frame);
         bool isType3or5(FrameBytesRef frame);
 
-        void decodeFrameType0(const std::vector<uint8_t>& frame, const Pal& pal, std::vector<Colour>& decodedFrame);
-        void decodeFrameType1(const std::vector<uint8_t>& frame, const Pal& pal, std::vector<Colour>& decodedFrame);
-        void decodeFrameType2(const std::vector<uint8_t>& frame, const Pal& pal, std::vector<Colour>& decodedFrame);
-        void decodeFrameType3(const std::vector<uint8_t>& frame, const Pal& pal, std::vector<Colour>& decodedFrame);
-        void decodeFrameType4(const std::vector<uint8_t>& frame, const Pal& pal, std::vector<Colour>& decodedFrame);
+        void decodeFrameType0(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame);
+        void decodeFrameType1(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame);
+        void decodeFrameType2(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame);
+        void decodeFrameType3(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame);
+        void decodeFrameType4(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame);
+        void decodeFrameType5(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame);
+        void decodeFrameType6(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame);
+        void decodeFrameType2or3(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame, bool frameType2);
+        void decodeFrameType4or5(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame, bool frameType4);
 
-        void decodeLineTransparencyLeft(const std::vector<uint8_t>& frame,
+        void decodeLineTransparencyLeft(const uint8_t* framePtr,
                                         const Pal& pal,
                                         std::vector<Colour>& decodedFrame,
                                         int,
                                         int);
-        void decodeLineTransparencyRight(const std::vector<uint8_t>& frame,
+        void decodeLineTransparencyRight(const uint8_t* framePtr,
                                         const Pal& pal,
                                         std::vector<Colour>& decodedFrame,
                                         int,
