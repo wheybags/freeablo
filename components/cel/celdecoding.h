@@ -33,6 +33,7 @@ namespace Cel
 
         void getFrames();
         void decodeFrames();
+        void decodeFrame(size_t index, FrameBytesRef frame, CelFrame& celFrame);
         FrameDecoder getFrameDecoder(const std::string& celName, FrameBytesRef frame, int frameNumber);
         bool isType0(const std::string& celName, int frameNumber);
         bool isType2or4(FrameBytesRef frame);

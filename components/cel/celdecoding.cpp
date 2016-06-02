@@ -17,15 +17,26 @@ namespace Cel
         readCelName();
         readConfiguration();
         readPalette();
+        getFrames();
     }
 
     CelFrame& CelDecoder::operator [](size_t index) {
+
+        if(mCache.count(index)) {
+            return mCache[index];
+        }
+
+        auto& frame = mFrames[index];
+        CelFrame celFrame;
+        decodeFrame(index, frame, celFrame);
+        mCache[index] = celFrame;
+
         return mCache[index];
     }
 
     size_t CelDecoder::numFrames() const
     {
-        return mCache.size();
+        return mFrames.size();
     }
 
     size_t CelDecoder::animationLength() const
@@ -110,7 +121,6 @@ namespace Cel
 
     void CelDecoder::decode()
     {
-        getFrames();
         decodeFrames();
     }
 
@@ -197,24 +207,33 @@ namespace Cel
     {        
         int frameNumber = 0;
         for(FrameBytesRef frame : mFrames) {
-            auto decoder = getFrameDecoder(mCelName, frame, frameNumber);
 
-            if(mIsObjcursCel) {
-                setObjcursCelDimensions(frameNumber);
-            } else if(mIsCharbutCel) {
-                setCharbutCelDimensions(frameNumber);
+            if(mCache.count(frameNumber)) {
+                frameNumber++;
+                continue;
             }
 
             CelFrame celFrame;
-            celFrame.mWidth = mFrameWidth;
-            celFrame.mHeight = mFrameHeight;
-
-            decoder(*this, frame, mPal, celFrame.mRawImage);
-
+            decodeFrame(frameNumber, frame, celFrame);
             mCache[frameNumber] = celFrame;
 
             frameNumber++;
         }
+    }
+
+    void CelDecoder::decodeFrame(size_t index, FrameBytesRef frame, CelFrame& celFrame) {
+        auto decoder = getFrameDecoder(mCelName, frame, index);
+
+        if(mIsObjcursCel) {
+            setObjcursCelDimensions(index);
+        } else if(mIsCharbutCel) {
+            setCharbutCelDimensions(index);
+        }
+
+        celFrame.mWidth = mFrameWidth;
+        celFrame.mHeight = mFrameHeight;
+
+        decoder(*this, frame, mPal, celFrame.mRawImage);
     }
 
     CelDecoder::FrameDecoder CelDecoder::getFrameDecoder(const std::string& celName, FrameBytesRef frame, int frameNumber)

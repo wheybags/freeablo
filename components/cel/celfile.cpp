@@ -6,10 +6,7 @@ namespace Cel
 {
     CelFile::CelFile(const std::string& filename) :
         mDecoder(filename)
-    {
-        std::cout << filename << std::endl;
-        mDecoder.decode();
-    }
+    {}
 
     size_t CelFile::numFrames() const
     {
