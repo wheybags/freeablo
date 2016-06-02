@@ -65,7 +65,7 @@ namespace Cel
         std::string celName = mCelName;
         std::string extension = "cel";
 
-        if(Misc::StringUtils::endsWith(mCelPath,"cl2")) {
+        if(Misc::StringUtils::ciEndsWith(mCelPath,"cl2")) {
             settings = &mSettingsCl2;
             extension = "cl2";
             mIsCl2 = true;
