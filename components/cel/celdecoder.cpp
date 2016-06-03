@@ -741,7 +741,7 @@ namespace Cel
             (this->*decodeLineTransparency)(&framePtr, pal, decodedFrame, regularCount);
         }
 
-        for(int framePos = 256 ; framePos < frame.size() ; framePos++)
+        for(unsigned int framePos = 256 ; framePos < frame.size() ; framePos++)
         {
             Colour color = pal[frame[framePos]];
             decodedFrame.push_back(color);
