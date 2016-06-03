@@ -679,22 +679,34 @@ namespace Cel
 
         // Decode
 
-        static std::vector<int> decodeCounts =
-            {0, 4, 4, 8, 8, 12, 12, 16, 16, 20, 20, 24, 24, 28, 28, 32, 32, 32, 28, 28, 24, 24, 20, 20, 16, 16, 12, 12, 8, 8, 4, 4};
-
-        int lineNum = 0;
         const uint8_t *framePtr = &frame[0];
-        for(int decodeCount : decodeCounts)
+
+        for(int row = 0; row <= 32 ; row++)
         {
-            int zeroCount = 0;
-            if(lineNum % 2 == 1) {
-                zeroCount = 2;
+            if(row == 15)
+                row++;
+
+            if(frameType2) {
+                if( (row < 16 && row % 2 == 0) || (row >= 16 && row % 2 != 0) )  {
+                    framePtr += 2;
+                }
+            } else {
+                if( (row < 16 && row % 2 != 0) || (row >= 16 && row % 2 == 0) )  {
+                    framePtr += 2;
+                }
             }
 
-            int regularCount = decodeCount - zeroCount;
-            (this->*decodeLineTransparency)(framePtr, pal, decodedFrame, regularCount, zeroCount);
-            framePtr += decodeCount;
-            lineNum++;
+            int regularCount = 0;
+            if(row < 16)
+            {
+                regularCount = 2 + (row * 2);
+            }
+            else
+            {
+                regularCount = 32 - ((row - 16) * 2);
+            }
+
+            (this->*decodeLineTransparency)(&framePtr, pal, decodedFrame, regularCount);
         }
     }
 
@@ -710,84 +722,72 @@ namespace Cel
 
         // Decode
 
-        static std::vector<int> decodeCounts =
-            {4, 4, 8, 8, 12, 12, 16, 16, 20, 20, 24, 24, 28, 28, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32};
-        int lineNum = 0;
         const uint8_t *framePtr = &frame[0];
-        for(int decodeCount : decodeCounts)
-        {
-            static std::set<int> lineNumbers = { 0, 2, 4, 6, 8, 10, 12, 14 };
-            int zeroCount = 0;
 
-            if(lineNumbers.find(lineNum) != lineNumbers.end()) {
-                zeroCount = 2;
+        for(int row = 0; row < 15 ; row++)
+        {
+            if(frameType4) {
+                if(row % 2 == 0) {
+                    framePtr += 2;
+                }
+            } else {
+                if(row % 2 != 0) {
+                    framePtr += 2;
+                }
             }
 
-            int regularCount = decodeCount - zeroCount;
-            (this->*decodeLineTransparency)(framePtr, pal, decodedFrame, regularCount, zeroCount);
-            framePtr += decodeCount;
-            lineNum++;
-        }
-    }
+            int regularCount = 2 + (row * 2);
 
-    // decodeLineTransparencyLeft decodes a line of the frame, where regularCount
-    // represent the number of explicit regular pixels, zeroCount the number of
-    // explicit transparent pixels and the rest of the line is implicitly
-    // transparent. Each line is assumed to have a width of 32 pixels.
-    //
-    void CelDecoder::decodeLineTransparencyLeft(const uint8_t* framePtr,
-                                                const Pal& pal,
-                                                ColoursRef decodedFrame,
-                                                int regularCount,
-                                                int zeroCount)
-    {
-        // Total number of explicit pixels.
-        int decodeCount = zeroCount + regularCount;
+            (this->*decodeLineTransparency)(&framePtr, pal, decodedFrame, regularCount);
+        }
 
-        // Implicit transparent pixels.
-        for (int i = decodeCount; i < 32; i++) {
-            decodedFrame.push_back(Colour(255,0,255,false));
-        }
-        // Explicit transparent pixels (zeroes).
-        for (int i = 0; i < zeroCount; i++) {
-            decodedFrame.push_back(Colour(0,255,0,false));
-        }
-        // Explicit regular pixels.
-        for (int i = zeroCount; i < decodeCount; i++) {
-            Colour color = pal[framePtr[i]];
+        for(int framePos = 256 ; framePos < frame.size() ; framePos++)
+        {
+            Colour color = pal[frame[framePos]];
             decodedFrame.push_back(color);
         }
     }
 
-    // decodeLineTransparencyRight decodes a line of the frame, where regularCount
-    // represent the number of explicit regular pixels, zeroCount the number of
-    // explicit transparent pixels and the rest of the line is implicitly
-    // transparent. Each line is assumed to have a width of 32 pixels.
-    void CelDecoder::decodeLineTransparencyRight(const uint8_t* framePtr,
+    void CelDecoder::decodeLineTransparencyLeft(const uint8_t** framePtr,
                                                 const Pal& pal,
                                                 ColoursRef decodedFrame,
-                                                int regularCount,
-                                                int zeroCount)
+                                                int regularCount)
     {
-        // Total number of explicit pixels.
-        int decodeCount = zeroCount + regularCount;
-
-        // Explicit regular pixels.
-        for (int i = zeroCount; i < decodeCount; i++) {
-            Colour color = pal[framePtr[i]];
-            decodedFrame.push_back(color);
-        }
-
-        // Explicit transparent pixels (zeroes).
-        for (int i = 0; i < zeroCount; i++) {
-            decodedFrame.push_back(Colour(0,0,255,false));
-        }
+        int transparentCount = 32 - regularCount;
 
         // Implicit transparent pixels.
-        for (int i = decodeCount ; i < 32; i++) {
+        for (int i = 0; i < transparentCount; i++) {
+            decodedFrame.push_back(Colour(0,0,0,false));
+        }
+
+        // Explicit regular pixels.
+        for (int i = 0; i < regularCount; i++) {
+            Colour color = pal[(*framePtr)[0]];
+            decodedFrame.push_back(color);
+            (*framePtr)++;
+        }
+    }
+
+    void CelDecoder::decodeLineTransparencyRight(const uint8_t** framePtr,
+                                                const Pal& pal,
+                                                ColoursRef decodedFrame,
+                                                int regularCount)
+    {
+        int transparentCount = 32 - regularCount;
+
+        // Explicit regular pixels.
+        for (int i = 0; i < regularCount; i++) {
+            Colour color = pal[(*framePtr)[0]];
+            decodedFrame.push_back(color);
+            (*framePtr)++;
+        }
+
+        // Transparent pixels.
+        for (int i = 0 ; i < transparentCount; i++) {
             decodedFrame.push_back(Colour(0,0,0,false));
         }
     }
+
 
     void CelDecoder::setObjcursCelDimensions(int frameNumber)
     {

@@ -47,15 +47,13 @@ namespace Cel
         void decodeFrameType2or3(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType2);
         void decodeFrameType4or5(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType4);
 
-        void decodeLineTransparencyLeft(const uint8_t* framePtr,
+        void decodeLineTransparencyLeft(const uint8_t** framePtr,
                                         const Pal& pal,
                                         ColoursRef decodedFrame,
-                                        int,
                                         int);
-        void decodeLineTransparencyRight(const uint8_t* framePtr,
+        void decodeLineTransparencyRight(const uint8_t** framePtr,
                                         const Pal& pal,
                                         ColoursRef decodedFrame,
-                                        int,
                                         int);
         void setObjcursCelDimensions(int frame);
         void setCharbutCelDimensions(int frame);
