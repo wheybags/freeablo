@@ -123,7 +123,20 @@ namespace Cel
 
     void CelDecoder::decode()
     {
-        decodeFrames();
+        int frameNumber = 0;
+        for(FrameBytesRef frame : mFrames) {
+
+            if(mCache.count(frameNumber)) {
+                frameNumber++;
+                continue;
+            }
+
+            CelFrame celFrame;
+            decodeFrame(frameNumber, frame, celFrame);
+            mCache[frameNumber] = celFrame;
+
+            frameNumber++;
+        }
     }
 
     void CelDecoder::getFrames()
@@ -190,6 +203,7 @@ namespace Cel
                 int64_t frameSize = frameEnd - frameStart;
 
                 if(frameSize < 0) {
+                    FAIO::FAfclose(file);
                     return;
                 }
 
@@ -203,24 +217,6 @@ namespace Cel
         }
 
         FAIO::FAfclose(file);
-    }
-
-    void CelDecoder::decodeFrames()
-    {        
-        int frameNumber = 0;
-        for(FrameBytesRef frame : mFrames) {
-
-            if(mCache.count(frameNumber)) {
-                frameNumber++;
-                continue;
-            }
-
-            CelFrame celFrame;
-            decodeFrame(frameNumber, frame, celFrame);
-            mCache[frameNumber] = celFrame;
-
-            frameNumber++;
-        }
     }
 
     void CelDecoder::decodeFrame(size_t index, FrameBytesRef frame, CelFrame& celFrame) {
@@ -337,7 +333,7 @@ namespace Cel
     //
     void CelDecoder::decodeFrameType0(const FrameBytesRef frame,
                                       const Pal& pal,
-                                      std::vector<Colour>& decodedFrame)
+                                      ColoursRef decodedFrame)
     {
         size_t len = frame.size();
         for(size_t pos = 0 ; pos < len ; pos++)
@@ -362,7 +358,7 @@ namespace Cel
     //
     void CelDecoder::decodeFrameType1(const FrameBytesRef frame,
                                       const Pal& pal,
-                                      std::vector<Colour>& decodedFrame)
+                                      ColoursRef decodedFrame)
     {
         size_t len = frame.size();
         for(size_t pos = 0 ; pos < len ;)
@@ -438,7 +434,7 @@ namespace Cel
     //
     void CelDecoder::decodeFrameType2(const FrameBytesRef frame,
                                       const Pal& pal,
-                                      std::vector<Colour>& decodedFrame)
+                                      ColoursRef decodedFrame)
     {
         decodeFrameType2or3(frame, pal, decodedFrame, true);
     }
@@ -495,7 +491,7 @@ namespace Cel
     // Type3 corresponds to a 32x32 images of a right facing triangle.
     void CelDecoder::decodeFrameType3(const FrameBytesRef frame,
                                       const Pal& pal,
-                                      std::vector<Colour>& decodedFrame)
+                                      ColoursRef decodedFrame)
     {
         decodeFrameType2or3(frame, pal, decodedFrame, false);
     }
@@ -552,7 +548,7 @@ namespace Cel
     // Type4 corresponds to a 32x32 images of a left facing trapezoid.
     void CelDecoder::decodeFrameType4(const FrameBytesRef frame,
                                       const Pal& pal,
-                                      std::vector<Colour>& decodedFrame)
+                                      ColoursRef decodedFrame)
     {
         decodeFrameType4or5(frame, pal, decodedFrame, true);
     }
@@ -609,7 +605,7 @@ namespace Cel
     // Type5 corresponds to a 32x32 images of a right facing trapezoid.
     void CelDecoder::decodeFrameType5(const FrameBytesRef frame,
                                       const Pal& pal,
-                                      std::vector<Colour>& decodedFrame)
+                                      ColoursRef decodedFrame)
     {
         decodeFrameType4or5(frame, pal, decodedFrame, false);
     }
@@ -635,7 +631,7 @@ namespace Cel
     // Type6 is the only type for CL2 images.
     void CelDecoder::decodeFrameType6(const FrameBytesRef frame,
                                       const Pal& pal,
-                                      std::vector<Colour>& decodedFrame)
+                                      ColoursRef decodedFrame)
     {
         size_t len = frame.size();
         for(size_t pos = 0 ; pos < len ;)
@@ -671,7 +667,7 @@ namespace Cel
         }
     }
 
-    void CelDecoder::decodeFrameType2or3(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame, bool frameType2)
+    void CelDecoder::decodeFrameType2or3(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType2)
     {
         // Select line decoding function
 
@@ -702,7 +698,7 @@ namespace Cel
         }
     }
 
-    void CelDecoder::decodeFrameType4or5(const FrameBytesRef frame, const Pal& pal, std::vector<Colour>& decodedFrame, bool frameType4)
+    void CelDecoder::decodeFrameType4or5(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType4)
     {
         // Select line decoding function
 
@@ -741,7 +737,7 @@ namespace Cel
     //
     void CelDecoder::decodeLineTransparencyLeft(const uint8_t* framePtr,
                                                 const Pal& pal,
-                                                std::vector<Colour>& decodedFrame,
+                                                ColoursRef decodedFrame,
                                                 int regularCount,
                                                 int zeroCount)
     {
@@ -769,7 +765,7 @@ namespace Cel
     // transparent. Each line is assumed to have a width of 32 pixels.
     void CelDecoder::decodeLineTransparencyRight(const uint8_t* framePtr,
                                                 const Pal& pal,
-                                                std::vector<Colour>& decodedFrame,
+                                                ColoursRef decodedFrame,
                                                 int regularCount,
                                                 int zeroCount)
     {
