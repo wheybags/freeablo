@@ -1,4 +1,5 @@
 #include <vector>
+#include <iostream>
 #include <cel/celdecoder.h>
 #include <faio/faio.h>
 #include <misc/disablewarn.h>
