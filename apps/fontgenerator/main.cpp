@@ -52,10 +52,10 @@ int main(int argc, char** argv)
 
     int positionX = 0;
 
-    for(int i = 0 ; i < cel.numFrames(); i++)
+    for(size_t i = 0 ; i < cel.numFrames(); i++)
     {
         Cel::CelFrame& frame = cel[i];
-        int maximumVisibleX = 0;
+        size_t maximumVisibleX = 0;
         for(size_t x = 0; x < frame.mWidth; x++)
         {
             for(size_t y = 0; y < frame.mHeight; y++)
@@ -72,13 +72,15 @@ int main(int argc, char** argv)
 
         // Additional 2 pixels for every letter
         maximumVisibleX += 2;
+        if(maximumVisibleX > frame.mWidth)
+            maximumVisibleX = frame.mWidth;
 
         // Convert values to string
         char buffer[10];
         sprintf(buffer, "%d", asciiIdx);
         asciiStr = buffer;
 
-        sprintf(buffer, "%d", maximumVisibleX);
+        sprintf(buffer, "%u", maximumVisibleX);
         maximumVisibleXStr = buffer;
 
         sprintf(buffer, "%d", positionX);
