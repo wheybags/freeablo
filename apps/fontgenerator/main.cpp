@@ -80,7 +80,7 @@ int main(int argc, char** argv)
         sprintf(buffer, "%d", asciiIdx);
         asciiStr = buffer;
 
-        sprintf(buffer, "%u", maximumVisibleX);
+        sprintf(buffer, "%lu", maximumVisibleX);
         maximumVisibleXStr = buffer;
 
         sprintf(buffer, "%d", positionX);
