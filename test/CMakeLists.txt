@@ -2,23 +2,29 @@ set(FA_TESTS_ENABLED ON CACHE BOOL "enable tests")
 
 if(FA_TESTS_ENABLED)
     # Setup gtest
-    
-    include(ExternalProject)
-    ExternalProject_Add(gtest
-      URL https://github.com/google/googletest/archive/release-1.7.0.zip
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
-      INSTALL_COMMAND ""
-    )
-    
-    set_target_properties(gtest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
-
-    set(GTEST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/gtest")
+	
+	set(GTEST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/gtest")
     set(LIBPREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
     set(LIBSUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
     set(GTEST_LOCATION "${GTEST_PREFIX}/src/gtest-build")
     set(GTEST_INCLUDES "${GTEST_PREFIX}/src/gtest/include")
     set(GTEST_LIBRARY  "${GTEST_LOCATION}/${LIBPREFIX}gtest${LIBSUFFIX}")
     set(GTEST_MAINLIB  "${GTEST_LOCATION}/${LIBPREFIX}gtest_main${LIBSUFFIX}")
+	set(GTEST_CMAKE_ARGS "")
+	
+	if(WIN32)
+		set(GTEST_LIBRARY  "optimized;${GTEST_LOCATION}/Release/${LIBPREFIX}gtest${LIBSUFFIX};debug;${GTEST_LOCATION}/Debug/${LIBPREFIX}gtest${LIBSUFFIX}")
+		set(GTEST_MAINLIB  "optimized;${GTEST_LOCATION}/Release/${LIBPREFIX}gtest_main${LIBSUFFIX};debug;${GTEST_LOCATION}/Debug/${LIBPREFIX}gtest_main${LIBSUFFIX}")
+		set(GTEST_CMAKE_ARGS "-Dgtest_force_shared_crt=ON")
+	endif()
+    
+    include(ExternalProject)
+    ExternalProject_Add(gtest
+      URL https://github.com/google/googletest/archive/release-1.7.0.zip
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
+	  CMAKE_ARGS "${GTEST_CMAKE_ARGS}"
+      INSTALL_COMMAND ""
+    )
 
     add_custom_target(fatest)
 
