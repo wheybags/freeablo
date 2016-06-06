@@ -22,9 +22,9 @@ namespace Cel
     private:
 
         typedef std::vector<uint8_t> FrameBytes;
-        typedef FrameBytes& FrameBytesRef;
+        typedef const std::vector<uint8_t>& FrameBytesRef;
         typedef std::vector<Colour>& ColoursRef;
-        typedef std::function<void(CelDecoder&, const FrameBytesRef, const Pal&, ColoursRef)> FrameDecoder;
+        typedef std::function<void(CelDecoder&, FrameBytesRef, const Pal&, ColoursRef)> FrameDecoder;
 
         void readConfiguration();
         void readCelName();
@@ -37,15 +37,15 @@ namespace Cel
         bool isType2or4(FrameBytesRef frame);
         bool isType3or5(FrameBytesRef frame);
 
-        void decodeFrameType0(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
-        void decodeFrameType1(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
-        void decodeFrameType2(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
-        void decodeFrameType3(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
-        void decodeFrameType4(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
-        void decodeFrameType5(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
-        void decodeFrameType6(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
-        void decodeFrameType2or3(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType2);
-        void decodeFrameType4or5(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType4);
+        void decodeFrameType0(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
+        void decodeFrameType1(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
+        void decodeFrameType2(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
+        void decodeFrameType3(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
+        void decodeFrameType4(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
+        void decodeFrameType5(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
+        void decodeFrameType6(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame);
+        void decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType2);
+        void decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType4);
 
         void decodeLineTransparencyLeft(const uint8_t** framePtr,
                                         const Pal& pal,
