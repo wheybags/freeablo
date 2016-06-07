@@ -26,6 +26,20 @@
 #include <misc/boost_python.h>
 #include <Rocket/Core/Python/Python.h>
 
+struct SDL_Window
+{
+        const void *magic;
+        Uint32 id;
+        char *title;
+        SDL_Surface *icon;
+        int x, y;
+        int w, h;
+        int min_w, min_h;
+        int max_w, max_h;
+        Uint32 flags;
+};
+typedef struct SDL_Window SDL_Window;
+
 namespace Render
 {
     int32_t WIDTH = 1280;
@@ -55,10 +69,21 @@ namespace Render
         }
 
         SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-        screen = SDL_CreateWindow("LibRocket SDL2 test", 20, 20, WIDTH, HEIGHT, flags);
-        if(screen == NULL)
-            printf("Could not create window: %s\n", SDL_GetError());
+        if(settings.openglWinId == 0) {
+            screen = SDL_CreateWindow("LibRocket SDL2 test", 20, 20, WIDTH, HEIGHT, flags);
+        } else {
 
+            // Dirty hack for X11
+            // http://forums.libsdl.org/viewtopic.php?p=44634&sid=ac3883de654fcade89ffea73492c2a05
+
+            screen = SDL_CreateWindowFrom((void*)settings.openglWinId);
+            screen->flags |= flags;
+            SDL_GL_LoadLibrary(NULL);
+        }
+        if(screen == NULL) {
+            printf("Could not create window: %s\n", SDL_GetError());
+            return;
+        }
 
         SDL_GL_CreateContext(screen);
         int oglIdx = -1;
@@ -187,6 +212,14 @@ namespace Render
         WIDTH = w;
         HEIGHT = h;
         resized = true;
+    }
+
+    void resizeAndSetWindowSize(size_t w, size_t h)
+    {
+        SDL_SetWindowSize(screen, w,h);
+        glMatrixMode(GL_PROJECTION|GL_MODELVIEW);
+        glLoadIdentity();
+        glOrtho(0, w, h, 0, 0, 1);
     }
 
     RenderSettings getWindowSize()

@@ -41,8 +41,16 @@ namespace Render
      */
     struct RenderSettings
     {
+        RenderSettings() :
+            windowWidth(640),
+            windowHeight(480),
+            openglWinId(0),
+            fullscreen(false)
+        {}
+
         int32_t windowWidth;
         int32_t windowHeight;
+        uint32_t openglWinId;
         bool fullscreen;
     };
 
@@ -63,6 +71,7 @@ namespace Render
     void quit(); 
 
     void resize(size_t w, size_t h);
+    void resizeAndSetWindowSize(size_t w, size_t h);
     RenderSettings getWindowSize();
     void updateGuiBuffer(std::vector<DrawCommand>* buffer);
     void quitGui();
