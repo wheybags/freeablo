@@ -1,5 +1,5 @@
 #include "render.h"
-
+#include <stdint.h>
 #include <iostream>
 #include <complex>
 
@@ -8,8 +8,6 @@
 
 #include "../cel/celfile.h"
 #include "../cel/celframe.h"
-
-
 
 #include "../level/level.h"
 #include <misc/stringops.h>
@@ -76,7 +74,7 @@ namespace Render
             // Dirty hack for X11
             // http://forums.libsdl.org/viewtopic.php?p=44634&sid=ac3883de654fcade89ffea73492c2a05
 
-            screen = SDL_CreateWindowFrom((void*)settings.openglWinId);
+            screen = SDL_CreateWindowFrom((void*)(uintptr_t)(settings.openglWinId));
             screen->flags |= flags;
             SDL_GL_LoadLibrary(NULL);
         }
