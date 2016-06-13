@@ -331,7 +331,7 @@ namespace Cel
     //
     // Type0 corresponds to a plain 32x32 images, with no transparency.
     //
-    void CelDecoder::decodeFrameType0(const FrameBytesRef frame,
+    void CelDecoder::decodeFrameType0(FrameBytesRef frame,
                                       const Pal& pal,
                                       ColoursRef decodedFrame)
     {
@@ -356,7 +356,7 @@ namespace Cel
     //
     // Type1 corresponds to a regular CEL frame image of the specified dimensions.
     //
-    void CelDecoder::decodeFrameType1(const FrameBytesRef frame,
+    void CelDecoder::decodeFrameType1(FrameBytesRef frame,
                                       const Pal& pal,
                                       ColoursRef decodedFrame)
     {
@@ -432,7 +432,7 @@ namespace Cel
     //
     // Type2 corresponds to a 32x32 images of a left facing triangle.
     //
-    void CelDecoder::decodeFrameType2(const FrameBytesRef frame,
+    void CelDecoder::decodeFrameType2(FrameBytesRef frame,
                                       const Pal& pal,
                                       ColoursRef decodedFrame)
     {
@@ -489,7 +489,7 @@ namespace Cel
     //    +--------------------------------+
     //
     // Type3 corresponds to a 32x32 images of a right facing triangle.
-    void CelDecoder::decodeFrameType3(const FrameBytesRef frame,
+    void CelDecoder::decodeFrameType3(FrameBytesRef frame,
                                       const Pal& pal,
                                       ColoursRef decodedFrame)
     {
@@ -546,7 +546,7 @@ namespace Cel
     //    +--------------------------------+
     //
     // Type4 corresponds to a 32x32 images of a left facing trapezoid.
-    void CelDecoder::decodeFrameType4(const FrameBytesRef frame,
+    void CelDecoder::decodeFrameType4(FrameBytesRef frame,
                                       const Pal& pal,
                                       ColoursRef decodedFrame)
     {
@@ -603,7 +603,7 @@ namespace Cel
     //    +--------------------------------+
     //
     // Type5 corresponds to a 32x32 images of a right facing trapezoid.
-    void CelDecoder::decodeFrameType5(const FrameBytesRef frame,
+    void CelDecoder::decodeFrameType5(FrameBytesRef frame,
                                       const Pal& pal,
                                       ColoursRef decodedFrame)
     {
@@ -629,7 +629,7 @@ namespace Cel
     //    4) goto 1 until EOF is reached.
     //
     // Type6 is the only type for CL2 images.
-    void CelDecoder::decodeFrameType6(const FrameBytesRef frame,
+    void CelDecoder::decodeFrameType6(FrameBytesRef frame,
                                       const Pal& pal,
                                       ColoursRef decodedFrame)
     {
@@ -667,7 +667,7 @@ namespace Cel
         }
     }
 
-    void CelDecoder::decodeFrameType2or3(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType2)
+    void CelDecoder::decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType2)
     {
         // Select line decoding function
 
@@ -710,7 +710,7 @@ namespace Cel
         }
     }
 
-    void CelDecoder::decodeFrameType4or5(const FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType4)
+    void CelDecoder::decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, ColoursRef decodedFrame, bool frameType4)
     {
         // Select line decoding function
 
