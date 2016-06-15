@@ -16,26 +16,27 @@ namespace Engine
     }
 
     ThreadManager::ThreadManager()
-        :mRenderState(NULL)
-        ,audioManager(50, 100)
+        :mRenderState(NULL),
+        mAudioManager(50, 100)
     {
         mThreadManager = this;
     }
 
     void ThreadManager::run()
     {
+        const int MAXIMUM_DURATION_IN_MS = 1000;
         Input::InputManager* inputManager = Input::InputManager::get();
         FARender::Renderer* renderer = FARender::Renderer::get();
 
-        Message msg;
+        Message message;
         
         auto last = std::chrono::system_clock::now();
         size_t numFrames = 0;
 
         while(true)
         {
-            while(mQueue.pop(msg))
-                handleMessage(msg);
+            while(mQueue.pop(message))
+                handleMessage(message);
 
             inputManager->poll();
 
@@ -45,11 +46,11 @@ namespace Engine
             auto now = std::chrono::system_clock::now();
             numFrames++;
             
-            size_t dur = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count();
+            size_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count();
             
-            if(dur >= 1000)
+            if(duration >= MAXIMUM_DURATION_IN_MS)
             {
-                std::cout << "FPS: " << ((float)numFrames) / (((float)dur)/1000.0f) << std::endl;
+                std::cout << "FPS: " << ((float)numFrames) / (((float)duration)/MAXIMUM_DURATION_IN_MS) << std::endl;
                 numFrames = 0;
                 last = now;
             }
@@ -61,65 +62,63 @@ namespace Engine
 
     void ThreadManager::playMusic(const std::string& path)
     {
-        Message msg;
-        msg.type = musicPlay;
-        msg.data.musicPath = new std::string(path);
+        Message message;
+        message.type = PLAY_MUSIC;
+        message.data.musicPath = new std::string(path);
 
-        mQueue.push(msg);
+        mQueue.push(message);
     }
 
     void ThreadManager::playSound(const std::string& path)
     {
-        Message msg;
-        msg.type = soundPlay;
-        msg.data.soundPath = new std::string(path);
+        Message message;
+        message.type = PLAY_SOUND;
+        message.data.soundPath = new std::string(path);
 
-        mQueue.push(msg);
+        mQueue.push(message);
     }
 
     void ThreadManager::stopSound()
     {
-        Message msg;
-        msg.type = soundStop;
-        mQueue.push(msg);
+        Message message;
+        message.type = STOP_SOUND;
+        mQueue.push(message);
     }
 
     void ThreadManager::sendRenderState(FARender::RenderState* state)
     {
-        Message msg;
-        msg.type = renderState;
-        msg.data.renderState = state;
+        Message message;
+        message.type = RENDER_STATE;
+        message.data.renderState = state;
 
-        mQueue.push(msg);
+        mQueue.push(message);
     }
-
-
 
     void ThreadManager::handleMessage(const Message& message)
     {
         switch(message.type)
         {
-            case musicPlay:
+            case PLAY_MUSIC:
             {
-                audioManager.playMusic(*message.data.musicPath);
+                mAudioManager.playMusic(*message.data.musicPath);
                 delete message.data.musicPath;
                 break;
             }
 
-            case soundPlay:
+            case PLAY_SOUND:
             {
-                audioManager.play(*message.data.soundPath);
+                mAudioManager.playSound(*message.data.soundPath);
                 delete message.data.soundPath;
                 break;
             }
 
-            case soundStop:
+            case STOP_SOUND:
             {
-                audioManager.stopSound();
+                mAudioManager.stopSound();
                 break;
             }
 
-            case renderState:
+            case RENDER_STATE:
             {
 				if (mRenderState && mRenderState != message.data.renderState)
                     mRenderState->ready = true;

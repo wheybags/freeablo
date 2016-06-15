@@ -8,6 +8,7 @@
 #include "actor.h"
 #include "player.h"
 #include "gamelevel.h"
+#include "../engine/inputobserverinterface.h"
 
 
 namespace FARender
@@ -22,23 +23,22 @@ namespace DiabloExe
 
 namespace FAWorld
 {
-    class World
+    class World : public Engine::KeyboardInputObserverInterface, public Engine::MouseInputObserverInterface
     {
         public:
             World(const DiabloExe::DiabloExe& exe);
             ~World();
 
             static World* get();
-
+            void notify(Engine::KeyboardInputAction action);
+            void notify(Engine::MouseInputAction action, Engine::Point mousePosition);
             void generateLevels();
-
             GameLevel* getCurrentLevel();
             size_t getCurrentLevelIndex();
 
-            void setLevel(int32_t levelnum);
-
-            GameLevel* getLevel(size_t levelNum);
-            void insertLevel(size_t levelNum, GameLevel* level);
+            void setLevel(size_t level);
+            GameLevel* getLevel(size_t level);
+            void insertLevel(size_t level, GameLevel* gameLevel);
 
             Actor* getActorAt(size_t x, size_t y);
 
@@ -58,12 +58,18 @@ namespace FAWorld
             void getAllActors(std::vector<Actor*>& actors);
 
         private:
-            std::map<size_t, GameLevel*> mLevels;
+            void playLevelMusic(size_t level);
+            void changeLevel(bool up);
+            void stopPlayerActions();
+            void onMouseClick(Engine::Point mousePosition);
+            void onMouseDown(Engine::Point mousePosition);
 
-            size_t mTicksPassed=0;
+            std::map<size_t, GameLevel*> mLevels;
+            size_t mTicksPassed = 0;
             Player* mCurrentPlayer;
             std::vector<Player*> mPlayers;
             const DiabloExe::DiabloExe& mDiabloExe;
+            std::pair<int32_t, int32_t> mDestination;
     };
 }
 

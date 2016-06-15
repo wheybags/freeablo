@@ -65,7 +65,7 @@ namespace FAGui
             Engine::EngineMain& mEngine;
     };
 
-    void initPython(FAPythonFuncs& funcs);
+    void initializePython(FAPythonFuncs& funcs);
 }
 
 #endif

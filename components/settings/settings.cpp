@@ -1,9 +1,7 @@
-#include "settings.h"
-
-#include <boost/foreach.hpp>
 #include <fstream>
 #include <iostream>
 #include <faio/faio.h>
+#include "settings.h"
 
 namespace Settings
 {

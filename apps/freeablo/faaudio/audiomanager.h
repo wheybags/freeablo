@@ -2,12 +2,10 @@
 #define AUDIO_MANAGER_H
 
 #include <stdint.h>
-
 #include <string>
 #include <vector>
 #include <map>
 #include <list>
-
 #include <audio/audio.h>
 
 namespace Engine
@@ -34,20 +32,16 @@ namespace FAAudio
             AudioManager(int32_t channelCount, size_t cacheSize);
             ~AudioManager();
 
-            void play(std::string path);
+            void playSound(const std::string& path);
             void stopSound();
             void playMusic(const std::string& path);
-
-            static void playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager);
 
         private:
             std::vector<std::string> mPlaying;
             std::map<std::string, CacheEntry> mCache;
             std::list<std::string> mUsedList;
-
             size_t mCacheSize;
             size_t mCount;
-
             Audio::Music* mCurrentMusic;
     };
 }

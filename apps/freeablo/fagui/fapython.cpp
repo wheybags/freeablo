@@ -1,15 +1,11 @@
-#include "fapython.h"
-
 #include <Rocket/Core.h>
-
 #include <input/common.h>
-
-#include "../engine/input.h"
 #include "../faworld/world.h"
 #include "../fasavegame/savegamemanager.h"
 #include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
 #include "guimanager.h"
+#include "fapython.h"
 
 namespace FAGui
 {
@@ -147,38 +143,34 @@ namespace FAGui
 
     boost::python::list FAPythonFuncs::getHotkeyNames()
     {
-        boost::python::list hotkeynames;
+        boost::python::list hotkeyNames;
 
-        Engine::EngineInputManager* inputManager = mEngine.getInputManager();
+        auto& inputManager = mEngine.inputManager();
+        auto hotkeys = inputManager.getHotkeys();
 
-        hotkeynames.append(Input::getHotkeyName(inputManager->quit_key));
-        hotkeynames.append(Input::getHotkeyName(inputManager->noclip_key));
-        hotkeynames.append(Input::getHotkeyName(inputManager->changelvlup_key));
-        hotkeynames.append(Input::getHotkeyName(inputManager->changelvldwn_key));
-        return hotkeynames;
+        for(const auto& hotkey : hotkeys)
+        {
+            hotkeyNames.append(hotkey.name());
+        }
+
+        return hotkeyNames;
     }
 
     boost::python::list FAPythonFuncs::getHotkeys()
     {
-        auto inputManager = mEngine.getInputManager();
+        auto& inputManager = mEngine.inputManager();
 
-        boost::python::list hotkeys;
-        Input::Hotkey pquit_key = inputManager->quit_key;
-        Input::Hotkey pnoclip_key = inputManager->noclip_key;
-        Input::Hotkey pchangelvlup_key = inputManager->changelvlup_key;
-        Input::Hotkey pchangelvldwn_key = inputManager->changelvldwn_key;
+        boost::python::list pythonHotkeys;
+        auto hotkeys = inputManager.getHotkeys();
 
-        pquit_key.key = Input::convertAsciiToRocketKey(inputManager->quit_key.key);
-        pnoclip_key.key = Input::convertAsciiToRocketKey(inputManager->noclip_key.key);
-        pchangelvlup_key.key = Input::convertAsciiToRocketKey(inputManager->changelvlup_key.key);
-        pchangelvldwn_key.key = Input::convertAsciiToRocketKey(inputManager->changelvldwn_key.key);
+        for(const auto& hotkey : hotkeys)
+        {
+            Input::Hotkey pythonHotkey = hotkey;
+            pythonHotkey.key = Input::convertAsciiToRocketKey(hotkey.key);
+            pythonHotkeys.append(pythonHotkey);
+        }
 
-        hotkeys.append(pquit_key);
-        hotkeys.append(pnoclip_key);
-        hotkeys.append(pchangelvlup_key);
-        hotkeys.append(pchangelvldwn_key);
-
-        return hotkeys;
+        return pythonHotkeys;
     }
 
     void FAPythonFuncs::setHotkey(std::string function, boost::python::list pyhotkey)
@@ -189,30 +181,25 @@ namespace FAGui
         hotkey.ctrl = boost::python::extract<bool>(pyhotkey[2]);
         hotkey.alt = boost::python::extract<bool>(pyhotkey[3]);
 
-        auto inputManager = mEngine.getInputManager();
+        auto& inputManager = mEngine.inputManager();
 
         if (function == "quit")
         {
-            inputManager->quit_key = hotkey;
-            inputManager->quit_key.save("Quit");
+            inputManager.setHotkey(Engine::QUIT, hotkey);
         }
         if (function == "noclip")
         {
-            inputManager->noclip_key = hotkey;
-            inputManager->noclip_key.save("Noclip");
+            inputManager.setHotkey(Engine::NOCLIP, hotkey);
         }
         if (function == "changelvlup")
         {
-            inputManager->changelvlup_key = hotkey;
-            inputManager->changelvlup_key.save("Changelvlup");
+            inputManager.setHotkey(Engine::CHANGE_LEVEL_UP, hotkey);
         }
         if (function == "changelvldwn")
         {
-            inputManager->changelvldwn_key = hotkey;
-            inputManager->changelvldwn_key.save("Changelvldwn");
+            inputManager.setHotkey(Engine::CHANGE_LEVEL_DOWN, hotkey);
         }
     }
-
 
     void FAPythonFuncs::placeItem(uint32_t toPara,
                    uint32_t fromPara,
@@ -564,9 +551,10 @@ namespace FAGui
             { funcs->placeItem(toPara, fromPara, fromY, fromX, toY, toX, beltX); }          );
     }
 
-    void initPython(FAPythonFuncs& _funcs)
+    void initializePython(FAPythonFuncs& _funcs)
     {
         funcs = &_funcs;
         initfreeablo();
+        Input::Hotkey::initializePythonWrapper();
     }
 }

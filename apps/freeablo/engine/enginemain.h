@@ -1,7 +1,8 @@
 #ifndef ENGINEMAIN_H
 #define ENGINEMAIN_H
-
+#include <memory>
 #include <boost/program_options.hpp>
+#include "engineinputmanager.h"
 
 namespace Level
 {
@@ -20,29 +21,21 @@ namespace DiabloExe
 
 namespace Engine
 {
-    class EngineInputManager;
-
-    class EngineMain
+    class EngineMain : public KeyboardInputObserverInterface
     {
         public:
-            ~EngineMain();
-
+            EngineInputManager& inputManager();
             void run(const boost::program_options::variables_map& variables);
-
             void stop();
             void pause();
             void unPause();
             void toggleNoclip();
-
-            EngineInputManager* getInputManager()
-            {
-                return mInputManager;
-            }
+            void notify(KeyboardInputAction action);
 
         private:
             void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);
 
-            EngineInputManager* mInputManager = NULL;
+            std::shared_ptr<EngineInputManager> mInputManager;
             bool mDone = false;
             bool mPaused = false;
             bool mNoclip = false;

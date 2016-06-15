@@ -1,9 +1,10 @@
-#include "enginemain.h"
-
 #include <iostream>
 #include <thread>
+#include <functional>
 #include <boost/asio.hpp>
-
+#include <misc/misc.h>
+#include <input/inputmanager.h>
+#include <enet/enet.h>
 #include "../faworld/world.h"
 #include "../falevelgen/levelgen.h"
 #include "../falevelgen/random.h"
@@ -13,14 +14,8 @@
 #include "../faworld/characterstats.h"
 #include "../faworld/playerfactory.h"
 #include "threadmanager.h"
-#include "input.h"
 #include "netmanager.h"
-
-
-#include <misc/misc.h>
-#include <input/inputmanager.h>
-
-#include <enet/enet.h>
+#include "enginemain.h"
 
 namespace bpo = boost::program_options;
 
@@ -29,10 +24,9 @@ namespace Engine
 {
     volatile bool renderDone = false;
 
-    EngineMain::~EngineMain()
+    EngineInputManager& EngineMain::inputManager()
     {
-        if(mInputManager != NULL)
-            delete mInputManager;
+        return *(mInputManager.get());
     }
 
     void EngineMain::run(const bpo::variables_map& variables)
@@ -52,11 +46,9 @@ namespace Engine
 
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen == "true");
-
-        mInputManager = new EngineInputManager(*this);
-
-        std::thread mainThread(boost::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
-
+        mInputManager = std::make_shared<EngineInputManager>();
+        mInputManager->registerKeyboardObserver(this);
+        std::thread mainThread(std::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
         threadManager.run();
         renderDone = true;
 
@@ -87,9 +79,7 @@ namespace Engine
         FAWorld::World world(exe);
         FAWorld::PlayerFactory playerFactory(exe);
 
-
         bool isServer = variables["mode"].as<std::string>() == "server";
-
         if(isServer)
             world.generateLevels();
 
@@ -97,6 +87,8 @@ namespace Engine
         player = playerFactory.create(characterClass);
         world.addCurrentPlayer(player);
         world.generateLevels();
+        mInputManager->registerKeyboardObserver(&world);
+        mInputManager->registerMouseObserver(&world);
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 
@@ -164,7 +156,6 @@ namespace Engine
             else
             {
                 Render::updateGuiBuffer(NULL);
-
             }
             renderer.setCurrentState(state);
 
@@ -178,6 +169,18 @@ namespace Engine
 
         renderer.stop();
         renderer.waitUntilDone();
+    }
+
+    void EngineMain::notify(KeyboardInputAction action)
+    {
+        if(action == QUIT)
+        {
+            stop();
+        }
+        else if(action == NOCLIP)
+        {
+            toggleNoclip();
+        }
     }
 
     void EngineMain::stop()

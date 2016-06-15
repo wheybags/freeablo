@@ -3,8 +3,6 @@
 #include <iostream>
 #include <string>
 
-#include "../engine/threadmanager.h"
-
 namespace FAAudio
 {
     AudioManager::AudioManager(int32_t channelCount, size_t cacheSize) : mCacheSize(cacheSize), mCount(0), mCurrentMusic(NULL)
@@ -24,7 +22,7 @@ namespace FAAudio
         Audio::quit();
     }
 
-    void AudioManager::play(std::string path)
+    void AudioManager::playSound(const std::string& path)
     {
         if(mCache.find(path) == mCache.end())
         {
@@ -94,37 +92,5 @@ namespace FAAudio
 
         mCurrentMusic = Audio::loadMusic(path);
         Audio::playMusic(mCurrentMusic);
-    }
-
-    void AudioManager::playLevelMusic(int32_t currentLevel, Engine::ThreadManager& threadManager)
-    {
-        switch(currentLevel)
-        {
-            case 0:
-            {
-                threadManager.playMusic("music/dtowne.wav");
-                break;
-            }
-            case 1: case 2: case 3: case 4:
-            {
-                threadManager.playMusic("music/dlvla.wav");
-                break;
-            }
-            case 5: case 6: case 7: case 8:
-            {
-                threadManager.playMusic("music/dlvlb.wav");
-                break;
-            }
-            case 9: case 10: case 11: case 12:
-            {
-                threadManager.playMusic("music/dlvlc.wav");
-                break;
-            }
-            case 13: case 14: case 15: case 16:
-            {
-                threadManager.playMusic("music/dlvld.wav");
-                break;
-            }
-        }
     }
 }

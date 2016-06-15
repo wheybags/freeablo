@@ -1,13 +1,14 @@
-#include "world.h"
-
 #include <tuple>
+#include <iostream>
 #include <diabloexe/diabloexe.h>
 #include "../farender/renderer.h"
 #include "../falevelgen/levelgen.h"
 #include "../faaudio/audiomanager.h"
 #include "../engine/threadmanager.h"
+#include "../engine/enginemain.h"
 #include "actorstats.h"
 #include "monster.h"
+#include "world.h"
 
 namespace FAWorld
 {
@@ -28,6 +29,30 @@ namespace FAWorld
     World* World::get()
     {
         return singletonInstance;
+    }
+
+    void World::notify(Engine::KeyboardInputAction action)
+    {
+        if(action == Engine::CHANGE_LEVEL_UP || action == Engine::CHANGE_LEVEL_DOWN)
+        {
+            changeLevel(action == Engine::CHANGE_LEVEL_UP);
+        }
+    }
+
+    void World::notify(Engine::MouseInputAction action, Engine::Point mousePosition)
+    {
+        if(action == Engine::MOUSE_RELEASE)
+        {
+            stopPlayerActions();
+        }
+        else if(action == Engine::MOUSE_CLICK)
+        {
+            onMouseClick(mousePosition);
+        }
+        else if(action == Engine::MOUSE_DOWN)
+        {
+            onMouseDown(mousePosition);
+        }
     }
 
     void World::generateLevels()
@@ -73,24 +98,59 @@ namespace FAWorld
         return mCurrentPlayer->getLevel()->getLevelIndex();
     }
     
-    void World::setLevel(int32_t levelNum)
+    void World::setLevel(size_t level)
     {
-        if(levelNum >= (int32_t)mLevels.size() || levelNum < 0 || (mCurrentPlayer->getLevel() && (int32_t)mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
+        if(level >= mLevels.size() || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == level))
             return;
 
-        mCurrentPlayer->setLevel(mLevels[levelNum]);
-
-        FAAudio::AudioManager::playLevelMusic(levelNum, *Engine::ThreadManager::get());
+        mCurrentPlayer->setLevel(mLevels[level]);
+        playLevelMusic(level);
     }
 
-    GameLevel* World::getLevel(size_t levelNum)
+    void World::playLevelMusic(size_t level)
     {
-        return mLevels[levelNum];
+        auto threadManager = Engine::ThreadManager::get();
+        switch(level)
+        {
+            case 0:
+            {
+                threadManager->playMusic("music/dtowne.wav");
+                break;
+            }
+            case 1: case 2: case 3: case 4:
+            {
+                threadManager->playMusic("music/dlvla.wav");
+                break;
+            }
+            case 5: case 6: case 7: case 8:
+            {
+                threadManager->playMusic("music/dlvlb.wav");
+                break;
+            }
+            case 9: case 10: case 11: case 12:
+            {
+                threadManager->playMusic("music/dlvlc.wav");
+                break;
+            }
+            case 13: case 14: case 15: case 16:
+            {
+                threadManager->playMusic("music/dlvld.wav");
+                break;
+            }
+            default:
+                std::cout << "Wrong level " << level << std::endl;
+                break;
+        }
     }
 
-    void World::insertLevel(size_t levelNum, GameLevel *level)
+    GameLevel* World::getLevel(size_t level)
     {
-        mLevels[levelNum] = level;
+        return mLevels[level];
+    }
+
+    void World::insertLevel(size_t level, GameLevel *gameLevel)
+    {
+        mLevels[level] = gameLevel;
     }
 
     Actor* World::getActorAt(size_t x, size_t y)
@@ -161,4 +221,49 @@ namespace FAWorld
         for(auto pair : mLevels)
             pair.second->getActors(actors);
     }
+
+    void World::changeLevel(bool up)
+    {
+        size_t nextLevelIndex;
+        if(up)
+            nextLevelIndex = getCurrentLevel()->getPreviousLevel();
+        else
+            nextLevelIndex = getCurrentLevel()->getNextLevel();
+
+        setLevel(nextLevelIndex);
+
+        GameLevel* level = getCurrentLevel();
+        Player* player = getCurrentPlayer();
+
+        if(up)
+            player->mPos = Position(level->downStairsPos().first, level->downStairsPos().second);
+        else
+            player->mPos = Position(level->upStairsPos().first, level->upStairsPos().second);
+
+
+        player->destination() = player->mPos.current();
+    }
+
+    void World::stopPlayerActions()
+    {
+        getCurrentPlayer()->isAttacking = false;
+        getCurrentPlayer()->isTalking = false;
+    }
+
+    void World::onMouseClick(Engine::Point mousePosition)
+    {
+        UNUSED_PARAM(mousePosition);
+        auto level = getCurrentLevel();
+        level->activate(mDestination.first, mDestination.second);
+    }
+
+    void World::onMouseDown(Engine::Point mousePosition)
+    {
+        auto player = getCurrentPlayer();
+        auto level = getCurrentLevel();
+        std::pair<int32_t, int32_t>& destination = player->destination();
+        destination = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, *level, player->mPos);
+        mDestination = destination;
+    }
+
 }

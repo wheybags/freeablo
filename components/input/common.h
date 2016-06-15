@@ -17,8 +17,6 @@ namespace Input
     #define ATRCASE(val) case KEY_##val: key = rci::KI_##val; break;
 
     int convertAsciiToRocketKey(int asciik);
-    
-    std::string getHotkeyName(Hotkey key);
 }
 
 #endif	/* COMMON_H */

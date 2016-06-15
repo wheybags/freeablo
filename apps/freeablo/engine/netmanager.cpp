@@ -21,7 +21,8 @@ namespace Engine
         Sprite = 101
     };
 
-    NetManager::NetManager(bool isServer, const FAWorld::PlayerFactory& playerFactory) : mPlayerFactory(playerFactory)
+    NetManager::NetManager(bool isServer, const FAWorld::PlayerFactory& playerFactory)
+        : mPlayerFactory(playerFactory)
     {
         assert(singletonInstance == NULL);
         singletonInstance = this;
@@ -29,7 +30,6 @@ namespace Engine
         enet_initialize();
 
         mAddress.port = 6666;
-
         mIsServer = isServer;
 
         if(isServer)
@@ -41,7 +41,6 @@ namespace Engine
         {
             enet_address_set_host(&mAddress, "127.0.0.1");
             mHost = enet_host_create(NULL, 32, 2, 0, 0);
-
             mServerPeer = enet_host_connect(mHost, &mAddress, 2, 0);
 
             ENetEvent event;
@@ -70,7 +69,6 @@ namespace Engine
         }
 
         enet_host_destroy(mHost);
-
         enet_deinitialize();
     }
 
