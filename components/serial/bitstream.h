@@ -3,8 +3,6 @@
 
 #include <cstdint>
 
-//#include "bithackmacros.h"
-
 namespace Serial
 {
     namespace BSPos
@@ -37,9 +35,7 @@ namespace Serial
             WriteBitStream(uint8_t* buf, int64_t sizeInBytes);
 
             bool handleBool(bool val);
-            bool handleByte(uint8_t val);
-
-            //template <int64_t minVal, int64_t maxVal> bool handleInt(int64_t& val);
+            template <int64_t minVal, int64_t maxVal> bool handleInt(int64_t val);
     };
 
     class ReadBitStream : BitStreamBase
@@ -48,9 +44,7 @@ namespace Serial
             ReadBitStream(uint8_t* buf, int64_t sizeInBytes);
 
             bool handleBool(bool& val);
-            bool handleByte(uint8_t& val);
-
-            //template <int64_t minVal, int64_t maxVal> bool handleInt(int64_t& val);
+            template <int64_t minVal, int64_t maxVal> bool handleInt(int64_t& val);
     };
 }
 

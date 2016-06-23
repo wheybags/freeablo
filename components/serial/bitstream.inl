@@ -1,3 +1,7 @@
+#include "bithackmacros.h"
+
+#include "bitstream.h"
+
 namespace Serial
 {
     void BitStreamBase::init(uint8_t* buf, int64_t sizeInBytes)
@@ -94,5 +98,57 @@ namespace Serial
         }
 
         return false;
+    }
+
+    template <int64_t minVal, int64_t maxVal> bool WriteBitStream::handleInt(int64_t val)
+    {
+        int64_t requiredBits = BITS_REQUIRED(minVal, maxVal+1);
+
+        if (val > maxVal || val < minVal)
+            return false;
+
+        int64_t pos = tell();
+
+        for (int64_t i = 0; i < requiredBits; i++)
+        {
+            if (!handleBool((val >> i) & 1))
+            {
+                seek(pos, BSPos::Start);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(int64_t& val)
+    {
+        int64_t requiredBits = BITS_REQUIRED(minVal, maxVal+1);
+
+        if (size - currentPos < requiredBits)
+            return false;
+
+        int64_t tmp = 0;
+
+        for (int64_t i = 0; i < requiredBits; i++)
+        {
+            bool bit;
+            handleBool(bit);
+            int64_t ib = bit;
+            tmp ^= (-ib ^ tmp) & (1 << i);
+        }
+
+        if ((tmp >> (requiredBits-1)) & 1)
+        {
+            int64_t nBits = ~0 << requiredBits;
+            tmp |= nBits;
+        }
+
+        if (tmp > maxVal || tmp < minVal)
+            return false;
+
+        val = tmp;
+
+        return true;
     }
 }

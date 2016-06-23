@@ -26,9 +26,10 @@ if(FA_TESTS_ENABLED)
       INSTALL_COMMAND ""
     )
 
-    add_custom_target(fatest)
+    
+	set(all_tests)
 
-    function(fa_add_test test_name link_libs in_default)
+    function(fa_add_test test_name link_libs in_fatest)
         add_executable("test_${test_name}" "${test_name}.cpp")
 
         add_dependencies("test_${test_name}" gtest)
@@ -38,13 +39,17 @@ if(FA_TESTS_ENABLED)
         
         set_target_properties("test_${test_name}" PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
-        if(in_default)
-            add_custom_target("FATEST_${test_name}" COMMAND "${CMAKE_BINARY_DIR}/test_${test_name}" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-            add_dependencies("FATEST_${test_name}" "test_${test_name}")
-            add_dependencies(fatest "FATEST_${test_name}")
-        endif()
+		if(in_fatest)
+			list(APPEND all_tests COMMAND "test_${test_name}")
+			set(all_tests "${all_tests}" PARENT_SCOPE)
+		endif()
     endfunction(fa_add_test)
 
     # actual tests go here
     fa_add_test(cel Cel No)
+	fa_add_test(serial "" Yes)
+
+	
+	add_custom_target(fatest ${all_tests})
+	set_target_properties(fatest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
 endif()

@@ -86,6 +86,104 @@ TEST(Serial, TestBoolOverflow)
     ASSERT_FALSE(read.handleBool(testVal));
 }
 
+TEST(Serial, TestIntBasic)
+{
+    std::vector<uint8_t> buf(10, 0);
+    Serial::WriteBitStream write(&buf[0], buf.size());
+    Serial::ReadBitStream read(&buf[0], buf.size());
+
+    constexpr int64_t min = 0;
+    constexpr int64_t max = 2047;
+
+    int64_t testVal = 0;
+    int64_t readVal = 0;
+    bool success = true;
+
+    testVal = 0;
+    success = write.handleInt<min, max>(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt<min, max>(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = 1;
+    success = write.handleInt<min, max>(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt<min, max>(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = 1024;
+    success = write.handleInt<min, max>(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt<min, max>(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = 2047;
+    success = write.handleInt<min, max>(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt<min, max>(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+}
+
+TEST(Serial, TestIntNegative)
+{
+    std::vector<uint8_t> buf(10, 0);
+    Serial::WriteBitStream write(&buf[0], buf.size());
+    Serial::ReadBitStream read(&buf[0], buf.size());
+
+    constexpr int64_t min = -10;
+    constexpr int64_t max = 10;
+
+    int64_t testVal = 0;
+    int64_t readVal = 0;
+    bool success = true;
+
+    testVal = -5;
+    success = write.handleInt<min, max>(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt<min, max>(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = -1;
+    success = write.handleInt<min, max>(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt<min, max>(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = 0;
+    success = write.handleInt<min, max>(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt<min, max>(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = 3;
+    success = write.handleInt<min, max>(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt<min, max>(readVal);
+    ASSERT_TRUE(true);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = 1;
+    success = write.handleInt<min, max>(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt<min, max>(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = -10;
+    success = write.handleInt<min, max>(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt<min, max>(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+}
+
 int main(int argc, char **argv) 
 {
     ::testing::InitGoogleTest(&argc, argv);

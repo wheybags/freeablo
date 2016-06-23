@@ -112,5 +112,7 @@ set_target_properties(Script PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Serial
 	serial/bitstream.h
-	serial/bitstream.inl)
+	serial/bitstream.inl
+    serial/bithackmacros.h
+)
 set_target_properties(Serial PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
