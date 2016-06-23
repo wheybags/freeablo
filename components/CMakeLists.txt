@@ -109,3 +109,8 @@ add_library(Script
 )
 target_link_libraries(Script ${Boost_Libraries}  ${PYTHON_LIBRARIES})
 set_target_properties(Script PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_library(Serial
+	serial/bitstream.h
+	serial/bitstream.inl)
+set_target_properties(Serial PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
