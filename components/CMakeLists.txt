@@ -114,5 +114,6 @@ add_library(Serial
 	serial/bitstream.h
 	serial/bitstream.inl
     serial/bithackmacros.h
+    serial/placeholder.cpp # compile fails on osx if we don't have at least one cpp file in the project, remove this if you add a real one
 )
 set_target_properties(Serial PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
