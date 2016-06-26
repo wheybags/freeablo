@@ -62,7 +62,7 @@ namespace Serial
         init(buf, sizeInBytes);
     }
 
-    bool WriteBitStream::handleBool(bool val)
+    bool WriteBitStream::handleBool(bool& val)
     {
         if (currentPos < size)
         {
@@ -101,7 +101,7 @@ namespace Serial
     }
 
     // based on .NET's BinaryWriter.Write7BitEncodedInt method
-    bool WriteBitStream::handleInt32(int32_t val)
+    bool WriteBitStream::handleInt32(int32_t& val)
     {
         uint32_t num = (uint32_t)val;
 

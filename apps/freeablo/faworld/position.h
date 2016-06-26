@@ -66,11 +66,11 @@ namespace FAWorld
                 int64_t pos = stream.tell();
 
                 bool success = true;
-                success &= stream.handleInt<0, 100>(mDist);
-                success &= stream.handleInt<0, 7>(mDirection);
-                success &= stream.handleBool(mMoving);
-                success &= stream.handleInt32(mCurrent.first);
-                success &= stream.handleInt32(mCurrent.second);
+                success &= serialise_int(stream, 0, 100, mDist);
+                success &= serialise_int(stream, 0, 7, mDirection);
+                success &= serialise_bool(stream, mMoving);
+                success &= serialise_int32(stream, mCurrent.first);
+                success &= serialise_int32(stream, mCurrent.second);
 
                 if (!success)
                     stream.seek(pos, Serial::BSPos::Start);

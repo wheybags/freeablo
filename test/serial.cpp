@@ -12,7 +12,8 @@ TEST(Serial, TestBoolPingPong)
     Serial::WriteBitStream write(&buf[0], buf.size());
     for (uint32_t i = 0; i < buf.size() * 8; i++)
     {
-        bool success = write.handleBool(i % 2 == 0);
+        bool tmp = i % 2 == 0;
+        bool success = write.handleBool(tmp);
         ASSERT_TRUE(success);
     }
 
@@ -42,7 +43,8 @@ TEST(Serial, TestBoolPredefined)
     Serial::WriteBitStream write(&buf[0], buf.size());
     for (uint32_t i = 0; i < buf.size() * 8; i++)
     {
-        bool success = write.handleBool(groundTruthVec[i]);
+        bool tmp = groundTruthVec[i];
+        bool success = write.handleBool(tmp);
         ASSERT_TRUE(success);
     }
 
@@ -62,17 +64,18 @@ TEST(Serial, TestBoolOverflow)
 {
     uint8_t v = 0;
     Serial::WriteBitStream write(&v, 1);
+    
+    bool tmp = false;
+    ASSERT_TRUE(write.handleBool(tmp));
+    ASSERT_TRUE(write.handleBool(tmp));
+    ASSERT_TRUE(write.handleBool(tmp));
+    ASSERT_TRUE(write.handleBool(tmp));
+    ASSERT_TRUE(write.handleBool(tmp));
+    ASSERT_TRUE(write.handleBool(tmp));
+    ASSERT_TRUE(write.handleBool(tmp));
+    ASSERT_TRUE(write.handleBool(tmp));
 
-    ASSERT_TRUE(write.handleBool(false));
-    ASSERT_TRUE(write.handleBool(false));
-    ASSERT_TRUE(write.handleBool(false));
-    ASSERT_TRUE(write.handleBool(false));
-    ASSERT_TRUE(write.handleBool(false));
-    ASSERT_TRUE(write.handleBool(false));
-    ASSERT_TRUE(write.handleBool(false));
-    ASSERT_TRUE(write.handleBool(false));
-
-    ASSERT_FALSE(write.handleBool(false));
+    ASSERT_FALSE(write.handleBool(tmp));
 
     Serial::ReadBitStream read(&v, 1);
 
@@ -205,7 +208,7 @@ TEST(Serial, TestInt32Range)
     for (int64_t i = min; i < max; i += spacer)
     {
         int32_t val = (int32_t)i;
-        success = write.handleInt32(i);
+        success = write.handleInt32(val);
         ASSERT_TRUE(success);
         success = read.handleInt32(readVal);
         ASSERT_TRUE(success);
