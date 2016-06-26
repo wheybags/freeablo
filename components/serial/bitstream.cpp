@@ -1,5 +1,7 @@
 #include "bitstream.h"
 
+#include <stddef.h>
+
 namespace Serial
 {
     void BitStreamBase::init(uint8_t* buf, int64_t sizeInBytes)
@@ -113,7 +115,7 @@ namespace Serial
 
         toWrite.push_back((uint8_t)num);
 
-        if ((size - currentPos) < (toWrite.size() * 8))
+        if ((size - currentPos) < ((int64_t)toWrite.size() * 8))
             return false;
 
         for (size_t i = 0; i < toWrite.size(); i++)
