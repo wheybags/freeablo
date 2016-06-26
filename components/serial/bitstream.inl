@@ -1,6 +1,7 @@
 #include "bithackmacros.h"
-
 #include "bitstream.h"
+
+#include <vector>
 
 namespace Serial
 {
@@ -150,5 +151,98 @@ namespace Serial
         val = tmp;
 
         return true;
+    }
+
+    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(uint64_t& val)
+    {
+        int64_t tmp = 0;
+        bool retval = handleInt<minVal, maxVal>(tmp);
+        val = (uint64_t)tmp;
+        return retval;
+    }
+
+    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(int32_t& val)
+    {
+        int64_t tmp = 0;
+        bool retval = handleInt<minVal, maxVal>(tmp);
+        val = (int32_t)tmp;
+        return retval;
+    }
+
+    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(uint32_t& val)
+    {
+        int32_t tmp = 0;
+        bool retval = handleInt<minVal, maxVal>(tmp);
+        val = (uint32_t)tmp;
+        return retval;
+    }
+
+    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(int8_t& val)
+    {
+        int32_t tmp = 0;
+        bool retval = handleInt<minVal, maxVal>(tmp);
+        val = (int8_t)tmp;
+        return retval;
+    }
+
+    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(uint8_t& val)
+    {
+        int8_t tmp = 0;
+        bool retval = handleInt<minVal, maxVal>(tmp);
+        val = (uint8_t)tmp;
+        return retval;
+    }
+
+    // based on .NET's BinaryWriter.Write7BitEncodedInt method
+    bool WriteBitStream::handleInt32(int32_t val)
+    {
+        uint32_t num = (uint32_t)val;
+
+        std::vector<uint8_t> toWrite;
+
+        while (num >= 128U)
+        {
+            toWrite.push_back((uint8_t)(num | 128U));
+            num >>= 7;
+        }
+
+        toWrite.push_back((uint8_t)num);
+
+        if ((size - currentPos) < (toWrite.size() * 8))
+            return false;
+
+        for (size_t i = 0; i < toWrite.size(); i++)
+            handleInt<0, 255>(toWrite[i]);
+
+        return true;
+    }
+
+    bool ReadBitStream::handleInt32(int32_t& val)
+    {
+        int32_t returnValue = 0;
+        int32_t bitIndex = 0;
+
+        int64_t pos = tell();
+
+        while (bitIndex != 35)
+        {
+            uint8_t currentByte = 0;
+            if (!handleInt<0, 255>(currentByte))
+            {
+                seek(pos, BSPos::Start);
+                return false;
+            }
+
+            returnValue |= ((int)currentByte & (int)127) << bitIndex;
+            bitIndex += 7;
+
+            if (((int)currentByte & 128) == 0)
+            {
+                val = returnValue;
+                return true;
+            }
+        }
+
+        return false;
     }
 }

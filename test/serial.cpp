@@ -184,6 +184,82 @@ TEST(Serial, TestIntNegative)
     ASSERT_EQ(testVal, readVal);
 }
 
+
+TEST(Serial, TestInt32Range)
+{
+    std::vector<uint8_t> buf(100, 0);
+    Serial::WriteBitStream write(&buf[0], buf.size());
+    Serial::ReadBitStream read(&buf[0], buf.size());
+
+    int32_t readVal = 0;
+    bool success = true;
+
+    int64_t min = std::numeric_limits<int32_t>::min();
+    int64_t max = std::numeric_limits<int32_t>::max();
+    int64_t spacer = 100000; // can't run for every possible value, it would take too long
+
+    // use 64-bit int for the counter to avoid overflow issues
+    for (int64_t i = min; i < max; i += spacer)
+    {
+        int32_t val = (int32_t)i;
+        success = write.handleInt32(i);
+        ASSERT_TRUE(success);
+        success = read.handleInt32(readVal);
+        ASSERT_TRUE(success);
+        ASSERT_EQ(i, readVal);
+
+        write.seek(0, Serial::BSPos::Start);
+        read.seek(0, Serial::BSPos::Start);
+    }
+}
+
+TEST(Serial, TestInt32Basic)
+{
+    std::vector<uint8_t> buf(100, 0);
+    Serial::WriteBitStream write(&buf[0], buf.size());
+    Serial::ReadBitStream read(&buf[0], buf.size());
+
+    int32_t testVal = 0;
+    int32_t readVal = 0;
+    bool success = true;
+    
+    
+    testVal = 78;
+    success = write.handleInt32(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt32(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = 200;
+    success = write.handleInt32(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt32(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = 40065;
+    success = write.handleInt32(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt32(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+
+    testVal = 4194304;
+    success = write.handleInt32(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt32(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+   
+    testVal = 2147483647;
+    success = write.handleInt32(testVal);
+    ASSERT_TRUE(success);
+    success = read.handleInt32(readVal);
+    ASSERT_TRUE(success);
+    ASSERT_EQ(testVal, readVal);
+}
+
 int main(int argc, char **argv) 
 {
     ::testing::InitGoogleTest(&argc, argv);

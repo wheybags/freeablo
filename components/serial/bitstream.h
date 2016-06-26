@@ -29,22 +29,32 @@ namespace Serial
             uint8_t* data;
     };
 
-    class WriteBitStream : BitStreamBase
+    class WriteBitStream : public BitStreamBase
     {
         public:
             WriteBitStream(uint8_t* buf, int64_t sizeInBytes);
 
             bool handleBool(bool val);
             template <int64_t minVal, int64_t maxVal> bool handleInt(int64_t val);
+            bool handleInt32(int32_t val);
     };
 
-    class ReadBitStream : BitStreamBase
+    class ReadBitStream : public BitStreamBase
     {
         public:
             ReadBitStream(uint8_t* buf, int64_t sizeInBytes);
 
             bool handleBool(bool& val);
             template <int64_t minVal, int64_t maxVal> bool handleInt(int64_t& val);
+            template <int64_t minVal, int64_t maxVal> bool handleInt(uint64_t& val);
+
+            template <int64_t minVal, int64_t maxVal> bool handleInt(int32_t& val);
+            template <int64_t minVal, int64_t maxVal> bool handleInt(uint32_t& val);
+
+            template <int64_t minVal, int64_t maxVal> bool handleInt(int8_t& val);
+            template <int64_t minVal, int64_t maxVal> bool handleInt(uint8_t& val);
+
+            bool handleInt32(int32_t& val);
     };
 }
 
