@@ -2,6 +2,9 @@
 
 #include <serial/bitstream.h>
 
+#define private public
+#include "../apps/freeablo/faworld/position.h"
+
 TEST(Serial, TestBoolPingPong)
 {
     std::vector<uint8_t> buf(10, 0);
@@ -258,6 +261,26 @@ TEST(Serial, TestInt32Basic)
     success = read.handleInt32(readVal);
     ASSERT_TRUE(success);
     ASSERT_EQ(testVal, readVal);
+}
+
+TEST(Serial, TestPos)
+{
+    std::vector<uint8_t> buf(100, 0);
+    Serial::WriteBitStream write(&buf[0], buf.size());
+    Serial::ReadBitStream read(&buf[0], buf.size());
+
+    FAWorld::Position p(234, 754, 2);
+    p.mDist = 50;
+    bool success = write.handleObject(p);
+    ASSERT_TRUE(success);
+
+    FAWorld::Position p2;
+    read.handleObject(p2);
+    ASSERT_TRUE(success);
+
+    ASSERT_EQ(p.mCurrent, p2.mCurrent);
+    ASSERT_EQ(p.mDist, p2.mDist);
+    ASSERT_EQ(p.mDirection, p2.mDirection);
 }
 
 int main(int argc, char **argv) 

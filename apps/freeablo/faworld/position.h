@@ -9,6 +9,7 @@
 #include "netobject.h"
 
 #include <misc/misc.h>
+#include <serial/bitstream.h>
 
 namespace FAWorld
 {
@@ -59,6 +60,23 @@ namespace FAWorld
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
 
+            template<class Stream> 
+            bool faSerial(Stream& stream)
+            {
+                int64_t pos = stream.tell();
+
+                bool success = true;
+                success &= stream.handleInt<0, 100>(mDist);
+                success &= stream.handleInt<0, 7>(mDirection);
+                success &= stream.handleBool(mMoving);
+                success &= stream.handleInt32(mCurrent.first);
+                success &= stream.handleInt32(mCurrent.second);
+
+                if (!success)
+                    stream.seek(pos, Serial::BSPos::Start);
+
+                return success;
+            }
     };
 }
 
