@@ -35,8 +35,22 @@ namespace Serial
             WriteBitStream(uint8_t* buf, int64_t sizeInBytes);
 
             bool handleBool(bool val);
+
             template <int64_t minVal, int64_t maxVal> bool handleInt(int64_t val);
+            template <int64_t minVal, int64_t maxVal> bool handleInt(uint64_t val);
+
+            template <int64_t minVal, int64_t maxVal> bool handleInt(int32_t val);
+            template <int64_t minVal, int64_t maxVal> bool handleInt(uint32_t val);
+
+            template <int64_t minVal, int64_t maxVal> bool handleInt(int8_t val);
+            template <int64_t minVal, int64_t maxVal> bool handleInt(uint8_t val);
+
             bool handleInt32(int32_t val);
+
+            template <class SerializableClass> bool handleObject(SerializableClass& o);
+
+        private:
+            template <int64_t minVal, int64_t maxVal> bool handleIntBase(uint64_t val, bool handleSign);
     };
 
     class ReadBitStream : public BitStreamBase
@@ -45,6 +59,7 @@ namespace Serial
             ReadBitStream(uint8_t* buf, int64_t sizeInBytes);
 
             bool handleBool(bool& val);
+
             template <int64_t minVal, int64_t maxVal> bool handleInt(int64_t& val);
             template <int64_t minVal, int64_t maxVal> bool handleInt(uint64_t& val);
 
@@ -55,6 +70,11 @@ namespace Serial
             template <int64_t minVal, int64_t maxVal> bool handleInt(uint8_t& val);
 
             bool handleInt32(int32_t& val);
+
+            template <class SerializableClass> bool handleObject(SerializableClass& o);
+        
+        private:
+            template <int64_t minVal, int64_t maxVal> bool handleIntBase(uint64_t& val, bool handleSign);
     };
 }
 
