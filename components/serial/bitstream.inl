@@ -32,7 +32,7 @@ namespace Serial
 
         int64_t requiredBits = BITS_REQUIRED(0, maxVal)+((int)handleSign);
 
-        if (size - currentPos < requiredBits)
+        if (mSize - mCurrentPos < requiredBits)
             return Error::EndOfStream;
 
         uint64_t tmp = 0;

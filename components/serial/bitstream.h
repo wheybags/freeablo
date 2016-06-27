@@ -54,9 +54,9 @@ namespace Serial
         protected:
             void init(uint8_t* buf, int64_t sizeInBytes);
 
-            int64_t currentPos;
-            int64_t size;
-            uint8_t* data;
+            int64_t mCurrentPos;
+            int64_t mSize;
+            uint8_t* mData;
     };
 
     class WriteBitStream : public BitStreamBase

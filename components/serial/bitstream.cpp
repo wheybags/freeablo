@@ -7,14 +7,14 @@ namespace Serial
 {
     void BitStreamBase::init(uint8_t* buf, int64_t sizeInBytes)
     {
-        data = buf;
-        currentPos = 0;
-        size = sizeInBytes * 8;
+        mData = buf;
+        mCurrentPos = 0;
+        mSize = sizeInBytes * 8;
     }
 
     int64_t BitStreamBase::tell()
     {
-        return currentPos;
+        return mCurrentPos;
     }
 
     bool BitStreamBase::seek(int64_t offset, BSPos::BSPos origin)
@@ -31,20 +31,20 @@ namespace Serial
 
             case BSPos::Current:
             {
-                newPos = currentPos + offset;
+                newPos = mCurrentPos + offset;
                 break;
             }
 
             case BSPos::End:
             {
-                newPos = size + offset;
+                newPos = mSize + offset;
                 break;
             }
         }
 
-        if (newPos >= 0 && newPos < size)
+        if (newPos >= 0 && newPos < mSize)
         {
-            currentPos = newPos;
+            mCurrentPos = newPos;
             return true;
         }
         else
@@ -65,17 +65,17 @@ namespace Serial
 
     Error::Error WriteBitStream::handleBool(bool& val)
     {
-        if (currentPos < size)
+        if (mCurrentPos < mSize)
         {
-            int64_t bitPos = currentPos % 8;
-            int64_t bytePos = (currentPos - bitPos) / 8;
+            int64_t bitPos = mCurrentPos % 8;
+            int64_t bytePos = (mCurrentPos - bitPos) / 8;
 
-            uint8_t byte = data[bytePos];
+            uint8_t byte = mData[bytePos];
             uint8_t bVal = val;
             byte ^= (-bVal ^ byte) & (1 << bitPos);
-            data[bytePos] = byte;
+            mData[bytePos] = byte;
 
-            currentPos++;
+            mCurrentPos++;
 
             return Error::Success;
         }
@@ -85,15 +85,15 @@ namespace Serial
 
     Error::Error ReadBitStream::handleBool(bool& val)
     {
-        if (currentPos < size)
+        if (mCurrentPos < mSize)
         {
-            int64_t bitPos = currentPos % 8;
-            int64_t bytePos = (currentPos - bitPos) / 8;
+            int64_t bitPos = mCurrentPos % 8;
+            int64_t bytePos = (mCurrentPos - bitPos) / 8;
 
-            uint8_t byte = data[bytePos];
+            uint8_t byte = mData[bytePos];
             val = (byte >> bitPos) & 1;
 
-            currentPos++;
+            mCurrentPos++;
 
             return Error::Success;
         }
@@ -116,7 +116,7 @@ namespace Serial
 
         toWrite.push_back((uint8_t)num);
 
-        if ((size - currentPos) < ((int64_t)toWrite.size() * 8))
+        if ((mSize - mCurrentPos) < ((int64_t)toWrite.size() * 8))
             return Error::EndOfStream;
 
         for (size_t i = 0; i < toWrite.size(); i++)
