@@ -61,16 +61,21 @@ namespace FAWorld
             BOOST_SERIALIZATION_SPLIT_MEMBER()
 
             template<class Stream> 
-            bool faSerial(Stream& stream)
+            Serial::Error::Error faSerial(Stream& stream)
             {
                 int64_t pos = stream.tell();
 
-                bool success = true;
-                success &= serialise_int(stream, 0, 100, mDist);
-                success &= serialise_int(stream, 0, 7, mDirection);
-                success &= serialise_bool(stream, mMoving);
-                success &= serialise_int32(stream, mCurrent.first);
-                success &= serialise_int32(stream, mCurrent.second);
+                Serial::Error::Error success = Serial::Error::Success;
+                if(success == Serial::Error::Success)
+                    success = serialise_int(stream, 0, 100, mDist);
+                if(success == Serial::Error::Success)
+                    success = serialise_int(stream, 0, 7, mDirection);
+                if(success == Serial::Error::Success)
+                    success = serialise_bool(stream, mMoving);
+                if(success == Serial::Error::Success)
+                    success = serialise_int32(stream, mCurrent.first);
+                if(success == Serial::Error::Success)
+                    success = serialise_int32(stream, mCurrent.second);
 
                 if (!success)
                     stream.seek(pos, Serial::BSPos::Start);

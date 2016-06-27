@@ -1,3 +1,4 @@
+#define ERR_GET_NAME_IMPL
 #include "bitstream.h"
 
 #include <stddef.h>
@@ -62,7 +63,7 @@ namespace Serial
         init(buf, sizeInBytes);
     }
 
-    bool WriteBitStream::handleBool(bool& val)
+    Error::Error WriteBitStream::handleBool(bool& val)
     {
         if (currentPos < size)
         {
@@ -76,13 +77,13 @@ namespace Serial
 
             currentPos++;
 
-            return true;
+            return Error::Success;
         }
 
-        return false;
+        return Error::EndOfStream;
     }
 
-    bool ReadBitStream::handleBool(bool& val)
+    Error::Error ReadBitStream::handleBool(bool& val)
     {
         if (currentPos < size)
         {
@@ -94,14 +95,14 @@ namespace Serial
 
             currentPos++;
 
-            return true;
+            return Error::Success;
         }
 
-        return false;
+        return Error::EndOfStream;
     }
 
     // based on .NET's BinaryWriter.Write7BitEncodedInt method
-    bool WriteBitStream::handleInt32(int32_t& val)
+    Error::Error WriteBitStream::handleInt32(int32_t& val)
     {
         uint32_t num = (uint32_t)val;
 
@@ -116,15 +117,15 @@ namespace Serial
         toWrite.push_back((uint8_t)num);
 
         if ((size - currentPos) < ((int64_t)toWrite.size() * 8))
-            return false;
+            return Error::EndOfStream;
 
         for (size_t i = 0; i < toWrite.size(); i++)
             handleInt<0, 255>(toWrite[i]);
 
-        return true;
+        return Error::Success;
     }
 
-    bool ReadBitStream::handleInt32(int32_t& val)
+    Error::Error ReadBitStream::handleInt32(int32_t& val)
     {
         int32_t returnValue = 0;
         int32_t bitIndex = 0;
@@ -134,10 +135,10 @@ namespace Serial
         while (bitIndex != 35)
         {
             uint8_t currentByte = 0;
-            if (!handleInt<0, 255>(currentByte))
+            if (handleInt<0, 255>(currentByte) != Error::Success)
             {
                 seek(pos, BSPos::Start);
-                return false;
+                return Error::OutOfRange;
             }
 
             returnValue |= ((int)currentByte & (int)127) << bitIndex;
@@ -146,10 +147,10 @@ namespace Serial
             if (((int)currentByte & 128) == 0)
             {
                 val = returnValue;
-                return true;
+                return Error::Success;
             }
         }
 
-        return false;
+        return Error::InvalidData;
     }
 }

@@ -5,7 +5,7 @@
 
 namespace Serial
 {
-    template <int64_t minVal, int64_t maxVal> bool WriteBitStream::handleIntBase(uint64_t& val, bool handleSign)
+    template <int64_t minVal, int64_t maxVal> Error::Error WriteBitStream::handleIntBase(uint64_t& val, bool handleSign)
     {
         static_assert(minVal < maxVal, "invalid range for integer serialisation!");
 
@@ -16,24 +16,24 @@ namespace Serial
         for (int64_t i = 0; i < requiredBits; i++)
         {
             bool tmp = (val >> i) & 1;
-            if (!handleBool(tmp))
+            if (handleBool(tmp) != Error::Success)
             {
                 seek(pos, BSPos::Start);
-                return false;
+                return Error::EndOfStream;
             }
         }
 
-        return true;
+        return Error::Success;
     }
 
-    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleIntBase(uint64_t& val, bool handleSign)
+    template <int64_t minVal, int64_t maxVal> Error::Error ReadBitStream::handleIntBase(uint64_t& val, bool handleSign)
     {
         static_assert(minVal < maxVal, "invalid range for integer serialisation!");
 
         int64_t requiredBits = BITS_REQUIRED(0, maxVal)+((int)handleSign);
 
         if (size - currentPos < requiredBits)
-            return false;
+            return Error::EndOfStream;
 
         uint64_t tmp = 0;
 
@@ -53,20 +53,20 @@ namespace Serial
 
         val = tmp;
 
-        return true;
+        return Error::Success;
     }
 
 #pragma region write_int_type_overloads
-    template <int64_t minVal, int64_t maxVal> bool WriteBitStream::handleInt(int64_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error WriteBitStream::handleInt(int64_t& val)
     {
         if (val > maxVal || val < minVal)
-            return false;
+            return Error::OutOfRange;
 
         uint64_t val2 = (uint64_t)val;
         return handleIntBase<minVal, maxVal>(val2, true);
     }
 
-    template <int64_t minVal, int64_t maxVal> bool WriteBitStream::handleInt(uint64_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error WriteBitStream::handleInt(uint64_t& val)
     {
         static_assert(minVal >= 0 && maxVal >= 0, "invalid range for unsigned integer!");
 
@@ -74,30 +74,30 @@ namespace Serial
         uint64_t maxU = (uint64_t)maxVal;
 
         if (val > maxU || val < minU)
-            return false;
+            return Error::OutOfRange;
 
         return handleIntBase<minVal, maxVal>(val, false);
     }
 
-    template <int64_t minVal, int64_t maxVal> bool WriteBitStream::handleInt(int32_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error WriteBitStream::handleInt(int32_t& val)
     {
         int64_t val2 = (int64_t)val;
         return handleInt<minVal, maxVal>(val2);
     }
 
-    template <int64_t minVal, int64_t maxVal> bool WriteBitStream::handleInt(uint32_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error WriteBitStream::handleInt(uint32_t& val)
     {
         uint64_t val2 = (uint64_t)val;
         return handleInt<minVal, maxVal>(val2);
     }
 
-    template <int64_t minVal, int64_t maxVal> bool WriteBitStream::handleInt(int8_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error WriteBitStream::handleInt(int8_t& val)
     {
         int64_t val2 = (int64_t)val;
         return handleInt<minVal, maxVal>(val2);
     }
 
-    template <int64_t minVal, int64_t maxVal> bool WriteBitStream::handleInt(uint8_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error WriteBitStream::handleInt(uint8_t& val)
     {
         uint64_t val2 = (uint64_t)val;
         return handleInt<minVal, maxVal>(val2);
@@ -106,31 +106,37 @@ namespace Serial
 
 
 #pragma region read_int_type_overloads
-    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(int64_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error ReadBitStream::handleInt(int64_t& val)
     {
         uint64_t tmp = 0;
         int64_t pos = tell();
 
-        bool retval = handleIntBase<minVal, maxVal>(tmp, true);
+        Error::Error retval = handleIntBase<minVal, maxVal>(tmp, true);
+        if(retval != Error::Success)
+            return retval;
+
         val = (int64_t)tmp;
 
         if (val > maxVal || val < minVal)
         {
-            retval = false;
+            retval = Error::OutOfRange;
             seek(pos, BSPos::Start);
         }
 
         return retval;
     }
 
-    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(uint64_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error ReadBitStream::handleInt(uint64_t& val)
     {
         static_assert(minVal >= 0 && maxVal >= 0, "invalid range for unsigned integer!");
 
         uint64_t tmp = 0;
         int64_t pos = tell();
 
-        bool retval = handleIntBase<minVal, maxVal>(tmp, false);
+        Error::Error retval = handleIntBase<minVal, maxVal>(tmp, false);
+        if(retval != Error::Success)
+            return retval;
+
         val = (uint64_t)tmp;
 
         uint64_t minU = (uint64_t)minVal;
@@ -138,52 +144,52 @@ namespace Serial
 
         if (val > maxU || val < minU)
         {
-            retval = false;
+            retval = Error::OutOfRange;
             seek(pos, BSPos::Start);
         }
 
         return retval;
     }
 
-    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(int32_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error ReadBitStream::handleInt(int32_t& val)
     {
         int64_t tmp = 0;
-        bool retval = handleInt<minVal, maxVal>(tmp);
+        Error::Error retval = handleInt<minVal, maxVal>(tmp);
         val = (int32_t)tmp;
         return retval;
     }
 
-    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(uint32_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error ReadBitStream::handleInt(uint32_t& val)
     {
         uint64_t tmp = 0;
-        bool retval = handleInt<minVal, maxVal>(tmp);
+        Error::Error retval = handleInt<minVal, maxVal>(tmp);
         val = (uint32_t)tmp;
         return retval;
     }
 
-    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(int8_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error ReadBitStream::handleInt(int8_t& val)
     {
         int64_t tmp = 0;
-        bool retval = handleInt<minVal, maxVal>(tmp);
+        Error::Error retval = handleInt<minVal, maxVal>(tmp);
         val = (int8_t)tmp;
         return retval;
     }
 
-    template <int64_t minVal, int64_t maxVal> bool ReadBitStream::handleInt(uint8_t& val)
+    template <int64_t minVal, int64_t maxVal> Error::Error ReadBitStream::handleInt(uint8_t& val)
     {
         uint64_t tmp = 0;
-        bool retval = handleInt<minVal, maxVal>(tmp);
+        Error::Error retval = handleInt<minVal, maxVal>(tmp);
         val = (uint8_t)tmp;
         return retval;
     }
 #pragma endregion
 
-    template <class SerializableClass> bool WriteBitStream::handleObject(SerializableClass& o)
+    template <class SerializableClass> Error::Error WriteBitStream::handleObject(SerializableClass& o)
     {
         return o.template faSerial<WriteBitStream>(*this);
     }
 
-    template <class SerializableClass> bool ReadBitStream::handleObject(SerializableClass& o)
+    template <class SerializableClass> Error::Error ReadBitStream::handleObject(SerializableClass& o)
     {
         return o.template faSerial<ReadBitStream>(*this);
     }

@@ -2,6 +2,8 @@
 #define FA_BITSTREAM_H
 
 #include <cstdint>
+#include <string>
+#include <iostream>
 
 namespace Serial
 {
@@ -13,6 +15,34 @@ namespace Serial
             Current,
             End
         };
+    }
+
+    namespace Error
+    {
+        enum Error
+        {
+            Success,
+            OutOfRange,
+            EndOfStream,
+            InvalidData
+        };
+
+        std::string getName(Error err);
+
+        #ifdef ERR_GET_NAME_IMPL
+            const char* ErrorStrings[] = 
+            { 
+                "Success",
+                "OutOfRange",
+                "EndOfStream",
+                "InvalidData" 
+            };
+
+            std::string getName(Error err)
+            {
+                return std::string(ErrorStrings[err]);
+            }
+        #endif //ERR_GET_NAME_IMPL
     }
 
     class BitStreamBase
@@ -34,23 +64,23 @@ namespace Serial
         public:
             WriteBitStream(uint8_t* buf, int64_t sizeInBytes);
 
-            bool handleBool(bool& val);
+            Error::Error handleBool(bool& val);
 
-            template <int64_t minVal, int64_t maxVal> bool handleInt(int64_t& val);
-            template <int64_t minVal, int64_t maxVal> bool handleInt(uint64_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(int64_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(uint64_t& val);
 
-            template <int64_t minVal, int64_t maxVal> bool handleInt(int32_t& val);
-            template <int64_t minVal, int64_t maxVal> bool handleInt(uint32_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(int32_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(uint32_t& val);
 
-            template <int64_t minVal, int64_t maxVal> bool handleInt(int8_t& val);
-            template <int64_t minVal, int64_t maxVal> bool handleInt(uint8_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(int8_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(uint8_t& val);
 
-            bool handleInt32(int32_t& val);
+            Error::Error handleInt32(int32_t& val);
 
-            template <class SerializableClass> bool handleObject(SerializableClass& o);
+            template <class SerializableClass> Error::Error handleObject(SerializableClass& o);
 
         private:
-            template <int64_t minVal, int64_t maxVal> bool handleIntBase(uint64_t& val, bool handleSign);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleIntBase(uint64_t& val, bool handleSign);
     };
 
     class ReadBitStream : public BitStreamBase
@@ -58,23 +88,23 @@ namespace Serial
         public:
             ReadBitStream(uint8_t* buf, int64_t sizeInBytes);
 
-            bool handleBool(bool& val);
+            Error::Error handleBool(bool& val);
 
-            template <int64_t minVal, int64_t maxVal> bool handleInt(int64_t& val);
-            template <int64_t minVal, int64_t maxVal> bool handleInt(uint64_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(int64_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(uint64_t& val);
 
-            template <int64_t minVal, int64_t maxVal> bool handleInt(int32_t& val);
-            template <int64_t minVal, int64_t maxVal> bool handleInt(uint32_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(int32_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(uint32_t& val);
 
-            template <int64_t minVal, int64_t maxVal> bool handleInt(int8_t& val);
-            template <int64_t minVal, int64_t maxVal> bool handleInt(uint8_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(int8_t& val);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleInt(uint8_t& val);
 
-            bool handleInt32(int32_t& val);
+            Error::Error handleInt32(int32_t& val);
 
-            template <class SerializableClass> bool handleObject(SerializableClass& o);
+            template <class SerializableClass> Error::Error handleObject(SerializableClass& o);
         
         private:
-            template <int64_t minVal, int64_t maxVal> bool handleIntBase(uint64_t& val, bool handleSign);
+            template <int64_t minVal, int64_t maxVal> Error::Error handleIntBase(uint64_t& val, bool handleSign);
     };
 }
 

@@ -13,16 +13,16 @@ TEST(Serial, TestBoolPingPong)
     for (uint32_t i = 0; i < buf.size() * 8; i++)
     {
         bool tmp = i % 2 == 0;
-        bool success = write.handleBool(tmp);
-        ASSERT_TRUE(success);
+        Serial::Error::Error success = write.handleBool(tmp);
+        ASSERT_EQ(success, Serial::Error::Success);
     }
 
     Serial::ReadBitStream read(&buf[0], buf.size());
     for (uint32_t i = 0; i < buf.size() * 8; i++)
     {
         bool val;
-        bool success = read.handleBool(val);
-        ASSERT_TRUE(success);
+        Serial::Error::Error success = read.handleBool(val);
+        ASSERT_EQ(success, Serial::Error::Success);
 
         bool groundTruth = i % 2 == 0;
         ASSERT_EQ(val, groundTruth);
@@ -44,16 +44,16 @@ TEST(Serial, TestBoolPredefined)
     for (uint32_t i = 0; i < buf.size() * 8; i++)
     {
         bool tmp = groundTruthVec[i];
-        bool success = write.handleBool(tmp);
-        ASSERT_TRUE(success);
+        Serial::Error::Error success = write.handleBool(tmp);
+        ASSERT_EQ(success, Serial::Error::Success);
     }
 
     Serial::ReadBitStream read(&buf[0], buf.size());
     for (uint32_t i = 0; i < buf.size() * 8; i++)
     {
         bool val;
-        bool success = read.handleBool(val);
-        ASSERT_TRUE(success);
+        Serial::Error::Error success = read.handleBool(val);
+        ASSERT_EQ(success, Serial::Error::Success);
 
         bool groundTruth = groundTruthVec[i];
         ASSERT_EQ(val, groundTruth);
@@ -66,30 +66,30 @@ TEST(Serial, TestBoolOverflow)
     Serial::WriteBitStream write(&v, 1);
     
     bool tmp = false;
-    ASSERT_TRUE(write.handleBool(tmp));
-    ASSERT_TRUE(write.handleBool(tmp));
-    ASSERT_TRUE(write.handleBool(tmp));
-    ASSERT_TRUE(write.handleBool(tmp));
-    ASSERT_TRUE(write.handleBool(tmp));
-    ASSERT_TRUE(write.handleBool(tmp));
-    ASSERT_TRUE(write.handleBool(tmp));
-    ASSERT_TRUE(write.handleBool(tmp));
+    ASSERT_EQ(write.handleBool(tmp), Serial::Error::Success);
+    ASSERT_EQ(write.handleBool(tmp), Serial::Error::Success);
+    ASSERT_EQ(write.handleBool(tmp), Serial::Error::Success);
+    ASSERT_EQ(write.handleBool(tmp), Serial::Error::Success);
+    ASSERT_EQ(write.handleBool(tmp), Serial::Error::Success);
+    ASSERT_EQ(write.handleBool(tmp), Serial::Error::Success);
+    ASSERT_EQ(write.handleBool(tmp), Serial::Error::Success);
+    ASSERT_EQ(write.handleBool(tmp), Serial::Error::Success);
 
-    ASSERT_FALSE(write.handleBool(tmp));
+    ASSERT_EQ(write.handleBool(tmp), Serial::Error::EndOfStream);
 
     Serial::ReadBitStream read(&v, 1);
 
     bool testVal;
-    ASSERT_TRUE(read.handleBool(testVal));
-    ASSERT_TRUE(read.handleBool(testVal));
-    ASSERT_TRUE(read.handleBool(testVal));
-    ASSERT_TRUE(read.handleBool(testVal));
-    ASSERT_TRUE(read.handleBool(testVal));
-    ASSERT_TRUE(read.handleBool(testVal));
-    ASSERT_TRUE(read.handleBool(testVal));
-    ASSERT_TRUE(read.handleBool(testVal));
+    ASSERT_EQ(read.handleBool(testVal), Serial::Error::Success);
+    ASSERT_EQ(read.handleBool(testVal), Serial::Error::Success);
+    ASSERT_EQ(read.handleBool(testVal), Serial::Error::Success);
+    ASSERT_EQ(read.handleBool(testVal), Serial::Error::Success);
+    ASSERT_EQ(read.handleBool(testVal), Serial::Error::Success);
+    ASSERT_EQ(read.handleBool(testVal), Serial::Error::Success);
+    ASSERT_EQ(read.handleBool(testVal), Serial::Error::Success);
+    ASSERT_EQ(read.handleBool(testVal), Serial::Error::Success);
 
-    ASSERT_FALSE(read.handleBool(testVal));
+    ASSERT_EQ(read.handleBool(testVal), Serial::Error::EndOfStream);
 }
 
 TEST(Serial, TestIntBasic)
@@ -103,34 +103,34 @@ TEST(Serial, TestIntBasic)
 
     int64_t testVal = 0;
     int64_t readVal = 0;
-    bool success = true;
+    Serial::Error::Error success = Serial::Error::Success;
 
     testVal = 0;
     success = write.handleInt<min, max>(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt<min, max>(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = 1;
     success = write.handleInt<min, max>(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt<min, max>(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = 1024;
     success = write.handleInt<min, max>(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt<min, max>(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = 2047;
     success = write.handleInt<min, max>(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt<min, max>(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 }
 
@@ -145,48 +145,48 @@ TEST(Serial, TestIntNegative)
 
     int64_t testVal = 0;
     int64_t readVal = 0;
-    bool success = true;
+    Serial::Error::Error success = Serial::Error::Success;
 
     testVal = -5;
     success = write.handleInt<min, max>(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt<min, max>(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = -1;
     success = write.handleInt<min, max>(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt<min, max>(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = 0;
     success = write.handleInt<min, max>(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt<min, max>(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = 3;
     success = write.handleInt<min, max>(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt<min, max>(readVal);
-    ASSERT_TRUE(true);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = 1;
     success = write.handleInt<min, max>(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt<min, max>(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = -10;
     success = write.handleInt<min, max>(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt<min, max>(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 }
 
@@ -198,7 +198,7 @@ TEST(Serial, TestInt32Range)
     Serial::ReadBitStream read(&buf[0], buf.size());
 
     int32_t readVal = 0;
-    bool success = true;
+    Serial::Error::Error success = Serial::Error::Success;
 
     int64_t min = std::numeric_limits<int32_t>::min();
     int64_t max = std::numeric_limits<int32_t>::max();
@@ -209,9 +209,9 @@ TEST(Serial, TestInt32Range)
     {
         int32_t val = (int32_t)i;
         success = write.handleInt32(val);
-        ASSERT_TRUE(success);
+        ASSERT_EQ(success, Serial::Error::Success);
         success = read.handleInt32(readVal);
-        ASSERT_TRUE(success);
+        ASSERT_EQ(success, Serial::Error::Success);
         ASSERT_EQ(i, readVal);
 
         write.seek(0, Serial::BSPos::Start);
@@ -227,42 +227,42 @@ TEST(Serial, TestInt32Basic)
 
     int32_t testVal = 0;
     int32_t readVal = 0;
-    bool success = true;
+    Serial::Error::Error success = Serial::Error::Success;
     
     
     testVal = 78;
     success = write.handleInt32(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt32(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = 200;
     success = write.handleInt32(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt32(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = 40065;
     success = write.handleInt32(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt32(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 
     testVal = 4194304;
     success = write.handleInt32(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt32(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
    
     testVal = 2147483647;
     success = write.handleInt32(testVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     success = read.handleInt32(readVal);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
 }
 
@@ -274,12 +274,12 @@ TEST(Serial, TestPos)
 
     FAWorld::Position p(234, 754, 2);
     p.mDist = 50;
-    bool success = write.handleObject(p);
-    ASSERT_TRUE(success);
+    Serial::Error::Error success = write.handleObject(p);
+    ASSERT_EQ(success, Serial::Error::Success);
 
     FAWorld::Position p2;
     read.handleObject(p2);
-    ASSERT_TRUE(success);
+    ASSERT_EQ(success, Serial::Error::Success);
 
     ASSERT_EQ(p.mCurrent, p2.mCurrent);
     ASSERT_EQ(p.mDist, p2.mDist);
