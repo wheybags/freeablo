@@ -1,5 +1,5 @@
-add_executable(freeablo 
-    main.cpp 
+add_library(freeablo_lib # split into a library so I can link to it from tests
+    fa_main.cpp 
 
     falevelgen/levelgen.h 
     falevelgen/levelgen.cpp 
@@ -77,7 +77,9 @@ add_executable(freeablo
     fasavegame/savegame.h
     fasavegame/savegamemanager.h
     fasavegame/savegamemanager.cpp
-
-
 )
-set_target_properties(freeablo PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_executable(freeablo main.cpp)
+target_link_libraries(freeablo freeablo_lib)
+
+set_target_properties(freeablo_lib PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

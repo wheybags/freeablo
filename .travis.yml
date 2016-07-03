@@ -29,6 +29,7 @@ before_script:
 - cmake ../ -DCMAKE_CXX_FLAGS="-Werror"
 script:
 - make
+- make fatest
 after_success: 
 - cd ..
 - ./update-gh-pages.sh

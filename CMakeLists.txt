@@ -49,7 +49,7 @@ if ( NOT SDL2_FOUND )
 endif ()
 
 if(UNIX)
-    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -g -std=c++11")
+    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -g -std=c++11 -Wno-unknown-pragmas")
     SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 endif()
 

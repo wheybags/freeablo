@@ -27,3 +27,7 @@ before_build:
   - echo Running cmake...
   - cd c:\projects\freeablo-windows-build
   - cmake.bat
+
+test_script:
+  - cd c:\projects\freeablo-windows-build\build
+  - cmake.exe --build . --config Debug --target fatest
