@@ -153,4 +153,18 @@ namespace Serial
 
         return Error::InvalidData;
     }
+
+    Error::Error WriteBitStream::handleInt32(uint32_t& val)
+    {
+        int32_t val2 = val;
+        return handleInt32(val2);
+    }
+
+    Error::Error ReadBitStream::handleInt32(uint32_t& val)
+    {
+        int32_t val2 = 0;
+        Error::Error retval = handleInt32(val2);
+        val = val2;
+        return retval;
+    }
 }

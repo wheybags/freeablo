@@ -13,7 +13,7 @@
 
 namespace FAWorld
 {
-    class Position : public NetObject
+    class Position
     {
         public:
             Position();
@@ -27,10 +27,6 @@ namespace FAWorld
             int32_t mDirection;
             bool mMoving;
             double distanceFrom(Position B);
-            virtual size_t getWriteSize();
-            virtual bool writeTo(ENetPacket *packet, size_t& position);
-            virtual bool readFrom(ENetPacket *packet, size_t& position);
-
         
         private:
             std::pair<int32_t, int32_t> mCurrent;
@@ -63,25 +59,17 @@ namespace FAWorld
             template<class Stream> 
             Serial::Error::Error faSerial(Stream& stream)
             {
-                int64_t pos = stream.tell();
+                serialise_int(stream, 0, 100, mDist);
+                serialise_int(stream, 0, 7, mDirection);
+                serialise_bool(stream, mMoving);
+                serialise_int32(stream, mCurrent.first);
+                serialise_int32(stream, mCurrent.second);
 
-                Serial::Error::Error success = Serial::Error::Success;
-                if(success == Serial::Error::Success)
-                    success = serialise_int(stream, 0, 100, mDist);
-                if(success == Serial::Error::Success)
-                    success = serialise_int(stream, 0, 7, mDirection);
-                if(success == Serial::Error::Success)
-                    success = serialise_bool(stream, mMoving);
-                if(success == Serial::Error::Success)
-                    success = serialise_int32(stream, mCurrent.first);
-                if(success == Serial::Error::Success)
-                    success = serialise_int32(stream, mCurrent.second);
-
-                if (!success)
-                    stream.seek(pos, Serial::BSPos::Start);
-
-                return success;
+                return Serial::Error::Success;
             }
+
+            friend class Serial::WriteBitStream;
+            friend class Serial::ReadBitStream;
     };
 }
 

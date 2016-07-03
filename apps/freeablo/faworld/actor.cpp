@@ -274,13 +274,13 @@ namespace FAWorld
 
     size_t Actor::getWriteSize()
     {
-        return mPos.getWriteSize() + sizeof(ActorNetData);
+        return 1;//mPos.getWriteSize() + sizeof(ActorNetData);
     }
 
     bool Actor::writeTo(ENetPacket *packet, size_t& position)
     {
-        if(!mPos.writeTo(packet, position))
-            return false;
+        //if(!mPos.writeTo(packet, position))
+        //    return false;
 
         ActorNetData data;
         data.frame = mFrame;
@@ -315,8 +315,8 @@ namespace FAWorld
 
     bool Actor::readFrom(ENetPacket *packet, size_t& position)
     {
-        if(!mPos.readFrom(packet, position))
-            return false;
+        //if(!mPos.readFrom(packet, position))
+        //    return false;
 
         ActorNetData data;
         if(Engine::readFromPacket(packet, position, data))

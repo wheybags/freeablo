@@ -62,6 +62,8 @@ namespace Serial
     class WriteBitStream : public BitStreamBase
     {
         public:
+            bool isWriting() { return true; }
+
             WriteBitStream(uint8_t* buf, int64_t sizeInBytes);
 
             Error::Error handleBool(bool& val);
@@ -76,6 +78,7 @@ namespace Serial
             template <int64_t minVal, int64_t maxVal> Error::Error handleInt(uint8_t& val);
 
             Error::Error handleInt32(int32_t& val);
+            Error::Error handleInt32(uint32_t& val);
 
             template <class SerializableClass> Error::Error handleObject(SerializableClass& o);
 
@@ -86,6 +89,8 @@ namespace Serial
     class ReadBitStream : public BitStreamBase
     {
         public:
+            bool isWriting() { return false; }
+
             ReadBitStream(uint8_t* buf, int64_t sizeInBytes);
 
             Error::Error handleBool(bool& val);
@@ -100,6 +105,7 @@ namespace Serial
             template <int64_t minVal, int64_t maxVal> Error::Error handleInt(uint8_t& val);
 
             Error::Error handleInt32(int32_t& val);
+            Error::Error handleInt32(uint32_t& val);
 
             template <class SerializableClass> Error::Error handleObject(SerializableClass& o);
         
@@ -110,18 +116,37 @@ namespace Serial
 
 #include "bitstream.inl"
 
+#define SERIALISE_MACRO_BASE(macro) do  \
+{                                       \
+    auto ret = macro;                   \
+    if (ret != Serial::Error::Success)  \
+        return ret;                     \
+} while(0)
+
 
 // workaround for msvc's bad handling of "dependent-name"s https://stackoverflow.com/questions/2974780/visual-c-compiler-allows-dependent-name-as-a-type-without-typename
 #ifdef _MSC_VER
-    #define serialise_int(stream, min, max, val) stream.handleInt<min, max>(val)
-    #define serialise_int32(stream, val) stream.handleInt32(val)
-    #define serialise_bool(stream, val) stream.handleBool(val)
-    #define serialise_object(stream, val) stream.handleObject(val) 
+    #define _serialise_int(stream, min, max, val) stream.handleInt<min, max>(val)
+    #define _serialise_int32(stream, val) stream.handleInt32(val)
+    #define _serialise_bool(stream, val) stream.handleBool(val)
+    #define _serialise_object(stream, val) stream.handleObject(val) 
 #else
-    #define serialise_int(stream, min, max, val) stream.template handleInt<min, max>(val)
-    #define serialise_int32(stream, val) stream.template handleInt32(val)
-    #define serialise_bool(stream, val) stream.template handleBool(val)
-    #define serialise_object(stream, val) stream.template handleObject(val) 
+    #define _serialise_int(stream, min, max, val) stream.template handleInt<min, max>(val)
+    #define _serialise_int32(stream, val) stream.template handleInt32(val)
+    #define _serialise_bool(stream, val) stream.template handleBool(val)
+    #define _serialise_object(stream, val) stream.template handleObject(val) 
 #endif
+
+#define serialise_int(stream, min, max, val) SERIALISE_MACRO_BASE(_serialise_int(stream, min, max, val))
+#define serialise_int32(stream, val) SERIALISE_MACRO_BASE(_serialise_int32(stream, val))
+#define serialise_bool(stream, val) SERIALISE_MACRO_BASE(_serialise_bool(stream, val))
+#define serialise_object(stream, val) SERIALISE_MACRO_BASE(_serialise_object(stream, val))
+
+#define serialise_enum(stream, type, val) do                \
+{                                                           \
+    int32_t enumValInt = val;                               \
+    serialise_int(stream, 0, type##::ENUM_END, enumValInt); \
+    val = (type)enumValInt;                                 \
+} while(0)
 
 #endif // !FA_BITSTREAM_H

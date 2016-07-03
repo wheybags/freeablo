@@ -107,6 +107,7 @@ link_libraries (
     Audio
     Settings
     Script
+    Serial
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
