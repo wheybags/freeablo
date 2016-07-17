@@ -81,7 +81,7 @@ namespace Engine
 
     void NetManager::update()
     {
-        uint32_t stallThresh = FAWorld::World::ticksPerSecond;
+        uint32_t stallThresh = FAWorld::World::ticksPerSecond*2;
 
         if (mIsServer)
         {
@@ -231,7 +231,6 @@ namespace Engine
         header.tick = mTick;
 
         header.faSerial(stream);
-        //writeToPacket(packet, position, header);
 
         std::vector<FAWorld::Actor*> allActors;
         world.getAllActors(allActors);
@@ -251,10 +250,6 @@ namespace Engine
 
             if(!packetFull)
             {
-                //bool fits =
-                //writeToPacket(packet, position, actor->getClassId()) &&
-                //writeToPacket(packet, position, actor->getId()) &&
-                //actor->writeTo(packet, position);
                 int32_t classId = actor->getClassId();
                 int32_t actorId = actor->getId();
 
@@ -278,18 +273,10 @@ namespace Engine
                     std::cerr << "Serialisation send error " << Serial::Error::getName(err) << std::endl;
                     exit(1);
                 }
-
-
-                //if(!fits)
-                //    packetFull = true;
-                //else
-                //    header.numPlayers++;
             }
 
             actor->tickDone(!packetFull);
         }
-
-        //std::cout << "DBG " << stream.tell() << std::endl;
 
         // pad the leftover space with 0101010...
         bool flipflop = true;
@@ -298,12 +285,10 @@ namespace Engine
             err = stream.handleBool(flipflop);
             flipflop = !flipflop;
         } while (err == Serial::Error::Success);
-        
+
         // rewrite packet header with correct object count
         stream.seek(0, Serial::BSPos::Start);
         header.faSerial(stream);
-        //position = 0;
-        //writeToPacket(packet, position, header);
 
         enet_host_broadcast(mHost, UNRELIABLE_CHANNEL_ID, packet);
     }
@@ -373,7 +358,6 @@ namespace Engine
         }
         else
         {
-            std::cout << "GOT MESSAGE " << mTick << " " << mClientTickWhenLastServerPacketReceived << std::endl;
             mClientTickWhenLastServerPacketReceived = mTick;
             
             FAWorld::World& world = *FAWorld::World::get();
@@ -383,7 +367,6 @@ namespace Engine
 
             ServerPacketHeader header;
             header.faSerial(stream);
-            //readFromPacket(event.packet, position, header);
 
             if(header.tick > mLastServerTickProcessed)
             {
@@ -398,9 +381,7 @@ namespace Engine
                         err = stream.handleInt<0, 1024>(classId);
                     if (err == Serial::Error::Success)
                         err = stream.handleInt32(actorId);
-                  
-                    //readFromPacket(event.packet, position, classId);
-                    //readFromPacket(event.packet, position, actorId);
+
 
                     if (err == Serial::Error::Success)
                     {
@@ -423,18 +404,17 @@ namespace Engine
                 }
 
                 // leftover space should be padded with 01010101..., make sure it is
-                /*bool flipflop = true;
+                bool flipflop = true;
                 bool read = true;
 
                 std::vector<bool> test;
                 
-                while(err != Serial::Error::EndOfStream)
+                while((err = stream.handleBool(read)) != Serial::Error::EndOfStream)
                 {
-                    err = stream.handleBool(read);
                     test.push_back(read);
-                    //assert(flipflop == read && "INVALID PADDING DATA AT END");
-                    //flipflop = !flipflop;
-                }*/
+                    assert(flipflop == read && "INVALID PADDING DATA AT END");
+                    flipflop = !flipflop;
+                }
             }
         }
     }
@@ -468,7 +448,7 @@ namespace Engine
             
             mServersClientData[event.peer->connectID].lastReceiveTick = mTick;
 
-            std::cout << "GOT MESSAGE " << mTick << " " << mServersClientData[event.peer->connectID].lastReceiveTick << std::endl;
+            //std::cout << "GOT MESSAGE " << mTick << " " << mServersClientData[event.peer->connectID].lastReceiveTick << std::endl;
 
             auto player = mServersClientData[event.peer->connectID].player;
 

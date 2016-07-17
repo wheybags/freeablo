@@ -1,5 +1,7 @@
 #include <tuple>
 #include <iostream>
+#include <algorithm>
+
 #include <diabloexe/diabloexe.h>
 #include "../farender/renderer.h"
 #include "../falevelgen/levelgen.h"
@@ -268,7 +270,7 @@ namespace FAWorld
 
     size_t World::getTicksInPeriod(float seconds)
     {
-        return (size_t)round(((float)ticksPerSecond) * seconds);
+        return std::max((size_t)1, (size_t)round(((float)ticksPerSecond) * seconds));
     }
 
     float World::getSecondsPerTick()
