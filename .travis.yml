@@ -17,11 +17,18 @@ before_install:
 - echo yes | sudo apt-add-repository ppa:canonical-qt5-edgers/ubuntu1204-qt5
 - sudo apt-get update -qq
 - sudo apt-get install -qq libboost1.54-all-dev libsdl2-dev libsdl2-image-dev libsdl-ttf2.0-dev zlib1g-dev
-  libbz2-dev doxygen libfreetype6-dev libpython2.7 libsdl2-mixer-dev cmake qtdeclarative5-dev libpng12-dev zlib1g-dev libenet-dev graphviz
+  libbz2-dev doxygen libfreetype6-dev libpython2.7 libsdl2-mixer-dev cmake qtdeclarative5-dev libpng12-dev zlib1g-dev graphviz
 - wget http://wheybags.netsoc.ie/pkg/librocket_1.3-1_amd64.deb
 - sudo dpkg -i librocket_1.3-1_amd64.deb
 - wget http://wheybags.netsoc.ie/pkg/librocket-dev_1.3-1_amd64.deb
 - sudo dpkg -i librocket-dev_1.3-1_amd64.deb
+- git clone https://github.com/lsalzman/enet # install enet from source
+- cd enet
+- git checkout f46fee0acc8e243b2b6910b09693f93c3aad775f # just current HEAD at time of writing
+- autoreconf -vfi && ./configure
+- make
+- sudo make install
+- cd ..
 
 before_script:
 - mkdir build
