@@ -83,10 +83,16 @@ namespace Engine
 
     void NetManager::update()
     {
-        uint32_t stallThresh = FAWorld::World::ticksPerSecond*2;
+        mTick++;
+
+        uint32_t stallThresh = FAWorld::World::ticksPerSecond*3;
 
         if (mIsServer)
         {
+
+            if (mTick % 2 == 0) // server only send packets every second tick
+                return;
+
             for (size_t i = 0; i < mClients.size(); i++)
             {
                 uint32_t diff = mTick - mServersClientData[mClients[i]->connectID].lastReceiveTick;
@@ -115,7 +121,6 @@ namespace Engine
             }
         }
 
-        mTick++;
         update_imp();
     }
 
