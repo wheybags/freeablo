@@ -145,7 +145,7 @@ namespace Serial
 #define serialise_enum(stream, type, val) do                \
 {                                                           \
     int32_t enumValInt = val;                               \
-    serialise_int(stream, 0, type##::ENUM_END, enumValInt); \
+    serialise_int(stream, 0, type::ENUM_END, enumValInt);   \
     val = (type)enumValInt;                                 \
 } while(0)
 
