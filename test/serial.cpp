@@ -5,6 +5,89 @@
 #define private public
 #include "../apps/freeablo/faworld/position.h"
 
+TEST(Serial, TestFillZeros)
+{
+    std::vector<uint8_t> buf(10, 255);
+
+    Serial::WriteBitStream write(&buf[0], buf.size());
+    Serial::ReadBitStream read(&buf[0], buf.size());
+   
+    bool b = true;
+    for(size_t i = 0; i < 3; i++)
+        write.handleBool(b);
+
+    write.fillWithZeros();
+
+
+    for (size_t i = 0; i < 3; i++)
+    {
+        read.handleBool(b);
+        ASSERT_TRUE(b);
+    }
+
+    Serial::Error::Error err = Serial::Error::Success;
+    
+    while((err = read.handleBool(b)) != Serial::Error::EndOfStream)
+        ASSERT_FALSE(b);
+
+
+    // now write 8 bools so we can test the case where we start filling from a byte boundary
+    read.seek(0, Serial::BSPos::Start);
+    write.seek(0, Serial::BSPos::Start);
+
+
+    b = true;
+    for (size_t i = 0; i < 8; i++)
+        write.handleBool(b);
+
+    write.fillWithZeros();
+
+
+    for (size_t i = 0; i < 8; i++)
+    {
+        read.handleBool(b);
+        ASSERT_TRUE(b);
+    }
+
+    err = Serial::Error::Success;
+
+    while ((err = read.handleBool(b)) != Serial::Error::EndOfStream)
+        ASSERT_FALSE(b);
+}
+
+
+TEST(Serial, TestVerifyZeros)
+{
+    std::vector<uint8_t> buf(10, 255);
+
+    Serial::WriteBitStream write(&buf[0], buf.size());
+    Serial::ReadBitStream read(&buf[0], buf.size());
+    
+    ASSERT_FALSE(read.verifyZeros());
+
+    write.fillWithZeros();
+
+    read.seek(0, Serial::BSPos::Start);
+    ASSERT_TRUE(read.verifyZeros());
+
+
+    write.seek(0, Serial::BSPos::Start);
+    read.seek(0, Serial::BSPos::Start);
+
+    bool b = true;
+    int32_t i = 87;
+    write.handleBool(b);
+    write.handleInt32(i);
+    write.fillWithZeros();
+
+    read.handleBool(b);
+    ASSERT_TRUE(b);
+    i = 0;
+    read.handleInt32(i);
+    ASSERT_EQ(i, 87);
+    ASSERT_TRUE(read.verifyZeros());
+}
+
 TEST(Serial, TestBoolPingPong)
 {
     std::vector<uint8_t> buf(10, 0);

@@ -82,6 +82,8 @@ namespace Serial
 
             template <class SerializableClass> Error::Error handleObject(SerializableClass& o);
 
+            void fillWithZeros();
+
         private:
             template <int64_t minVal, int64_t maxVal> Error::Error handleIntBase(uint64_t& val, bool handleSign);
     };
@@ -108,6 +110,8 @@ namespace Serial
             Error::Error handleInt32(uint32_t& val);
 
             template <class SerializableClass> Error::Error handleObject(SerializableClass& o);
+
+            bool verifyZeros();
         
         private:
             template <int64_t minVal, int64_t maxVal> Error::Error handleIntBase(uint64_t& val, bool handleSign);

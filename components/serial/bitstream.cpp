@@ -167,4 +167,52 @@ namespace Serial
         val = val2;
         return retval;
     }
+
+    void WriteBitStream::fillWithZeros()
+    {
+        bool f = false;
+
+        int32_t done = 0;
+
+        while (mCurrentPos % 8 != 0)
+        {
+            handleBool(f);
+            done++;
+        }
+
+        size_t bytePos = mCurrentPos / 8;
+        size_t byteSize = mSize / 8;
+
+        memset(&mData[bytePos], 0, byteSize - bytePos);
+    }
+
+    bool ReadBitStream::verifyZeros()
+    {
+        bool b = false;
+
+        int32_t done = 0;
+
+        while (mCurrentPos % 8 != 0)
+        {
+            handleBool(b);
+
+            if (b)
+                return false;
+
+            done++;
+        }
+
+        size_t bytePos = mCurrentPos / 8;
+        size_t byteSize = mSize / 8;
+
+        for (size_t i = bytePos; i < byteSize; i++)
+        {
+            if (mData[i] != 0)
+                return false;
+
+            done += 8;
+        }
+
+        return true;
+    }
 }

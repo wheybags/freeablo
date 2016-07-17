@@ -279,13 +279,7 @@ namespace Engine
             actor->tickDone(!packetFull);
         }
 
-        // pad the leftover space with 0101010...
-        bool flipflop = true;
-        do
-        {
-            err = stream.handleBool(flipflop);
-            flipflop = !flipflop;
-        } while (err == Serial::Error::Success);
+        stream.fillWithZeros();
 
         // rewrite packet header with correct object count
         stream.seek(0, Serial::BSPos::Start);
@@ -403,18 +397,7 @@ namespace Engine
                     }
                 }
 
-                // leftover space should be padded with 01010101..., make sure it is
-                bool flipflop = true;
-                bool read = true;
-
-                std::vector<bool> test;
-                
-                while((err = stream.handleBool(read)) != Serial::Error::EndOfStream)
-                {
-                    test.push_back(read);
-                    assert(flipflop == read && "INVALID PADDING DATA AT END");
-                    flipflop = !flipflop;
-                }
+                assert(stream.verifyZeros() && "INVALID PADDING DATA AT END");
             }
         }
     }
