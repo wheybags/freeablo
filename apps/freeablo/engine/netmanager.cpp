@@ -213,6 +213,7 @@ namespace Engine
         {
             serialise_int(stream, 0, 1024, numPlayers);
             serialise_int32(stream, tick);
+            return Serial::Error::Success;
         }
     };
 
@@ -224,8 +225,6 @@ namespace Engine
         ENetPacket* packet = enet_packet_create(NULL, packetSize, ENET_PACKET_FLAG_UNSEQUENCED);
 
         Serial::WriteBitStream stream(packet->data, packet->dataLength);
-
-        size_t position = 0;
 
         // write header
         ServerPacketHeader header;
@@ -364,7 +363,6 @@ namespace Engine
             
             FAWorld::World& world = *FAWorld::World::get();
 
-            size_t position = 0;
             Serial::ReadBitStream stream(event.packet->data, event.packet->dataLength);
 
             ServerPacketHeader header;
