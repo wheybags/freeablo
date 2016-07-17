@@ -19,7 +19,7 @@ namespace FAWorld
             size_t animDivisor = mAnimTimeMap[getAnimState()];
             if(animDivisor == 0)
             {
-                animDivisor=12;
+                animDivisor = FAWorld::World::getTicksInPeriod(0.1);
             }
             bool advanceAnims  = !(ticksPassed % (World::ticksPerSecond/animDivisor));
 
@@ -143,8 +143,8 @@ namespace FAWorld
         if (!idleAnimPath.empty())
             mIdleAnim = FARender::Renderer::get()->loadImage(idleAnimPath);
         mDestination = mPos.current();
-        mAnimTimeMap[AnimState::idle] = 10;
-        mAnimTimeMap[AnimState::walk] = 10;
+        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1);
+        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1);
 
         mId = getNewId();
     }

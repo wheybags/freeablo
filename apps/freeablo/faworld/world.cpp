@@ -266,4 +266,13 @@ namespace FAWorld
         mDestination = destination;
     }
 
+    size_t World::getTicksInPeriod(float seconds)
+    {
+        return (size_t)round(((float)ticksPerSecond) * seconds);
+    }
+
+    float World::getSecondsPerTick()
+    {
+        return 1.0f / ((float)ticksPerSecond);
+    }
 }

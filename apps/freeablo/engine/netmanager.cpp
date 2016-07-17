@@ -4,7 +4,13 @@
 #include "../faworld/playerfactory.h"
 #include "../faworld/monster.h"
 
+#include <serial/bitstream.h>
+
 #include <boost/math/special_functions.hpp>
+
+#include <thread>
+#include <chrono>
+
 
 namespace Engine
 {
@@ -42,6 +48,7 @@ namespace Engine
             enet_address_set_host(&mAddress, "127.0.0.1");
             mHost = enet_host_create(NULL, 32, 2, 0, 0);
             mServerPeer = enet_host_connect(mHost, &mAddress, 2, 0);
+            enet_peer_timeout(mServerPeer, std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max());
 
             ENetEvent event;
 
@@ -74,8 +81,44 @@ namespace Engine
 
     void NetManager::update()
     {
-        mTick++;
+        uint32_t stallThresh = FAWorld::World::ticksPerSecond;
 
+        if (mIsServer)
+        {
+            for (size_t i = 0; i < mClients.size(); i++)
+            {
+                uint32_t diff = mTick - mServersClientData[mClients[i]->connectID].lastReceiveTick;
+                if (diff > stallThresh)
+                    std::cout << "STALLED BY NETWORK" << std::endl;
+
+                while (diff > stallThresh)
+                {
+                    update_imp();
+                    diff = mTick - mServersClientData[mClients[i]->connectID].lastReceiveTick;
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
+            }
+        }
+        else
+        {
+            uint32_t diff = mTick - mClientTickWhenLastServerPacketReceived;
+            if (diff > stallThresh)
+                std::cout << "STALLED BY NETWORK" << std::endl;
+
+            while (diff > stallThresh)
+            {
+                update_imp();
+                diff = mTick - mClientTickWhenLastServerPacketReceived;
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
+        }
+
+        mTick++;
+        update_imp();
+    }
+
+    void NetManager::update_imp()
+    {
         ENetEvent event;
 
         // TODO: remove this block when we handle level switching properly
@@ -93,6 +136,8 @@ namespace Engine
                 {
                     if(mIsServer)
                     {
+                        enet_peer_timeout(event.peer, std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max());
+
                         auto player = spawnPlayer(-1);
 
                         // send the client its player id
@@ -104,7 +149,7 @@ namespace Engine
                         sendLevel(0, event.peer);
                         sendLevel(1, event.peer);
                         mClients.push_back(event.peer);
-                        mServerPlayerList[event.peer->connectID] = player;
+                        mServersClientData[event.peer->connectID] = ClientData(player);
                     }
                     break;
                 }
@@ -119,8 +164,20 @@ namespace Engine
                     break;
                 }
 
+                case ENET_EVENT_TYPE_DISCONNECT:
+                {
+                    std::cout << "DISCONNECT" << std::endl;
+                    break;
+                }
+
+                case ENET_EVENT_TYPE_NONE:
+                {
+                    break;
+                }
+
                 default:
                 {
+                    std::cout << "UNHANDLED" << std::endl;
                     break;
                 }
             }
@@ -147,7 +204,14 @@ namespace Engine
     struct ServerPacketHeader
     {
         uint32_t numPlayers;
-        size_t tick;
+        uint32_t tick;
+
+        template <class Stream>
+        Serial::Error::Error faSerial(Stream& stream)
+        {
+            serialise_int(stream, 0, 1024, numPlayers);
+            serialise_int32(stream, tick);
+        }
     };
 
     void NetManager::sendServerPacket()
@@ -156,13 +220,18 @@ namespace Engine
 
         size_t packetSize = 512;
         ENetPacket* packet = enet_packet_create(NULL, packetSize, ENET_PACKET_FLAG_UNSEQUENCED);
+
+        Serial::WriteBitStream stream(packet->data, packet->dataLength);
+
         size_t position = 0;
 
         // write header
         ServerPacketHeader header;
         header.numPlayers = 0;
         header.tick = mTick;
-        writeToPacket(packet, position, header);
+
+        header.faSerial(stream);
+        //writeToPacket(packet, position, header);
 
         std::vector<FAWorld::Actor*> allActors;
         world.getAllActors(allActors);
@@ -172,6 +241,8 @@ namespace Engine
             return a->getPriority() > b->getPriority();
         });
 
+        Serial::Error::Error err = Serial::Error::Success;
+
         bool packetFull = false;
         for(auto actor : allActors)
         {
@@ -180,23 +251,59 @@ namespace Engine
 
             if(!packetFull)
             {
-                bool fits =
-                writeToPacket(packet, position, actor->getClassId()) &&
-                writeToPacket(packet, position, actor->getId()) &&
-                actor->writeTo(packet, position);
+                //bool fits =
+                //writeToPacket(packet, position, actor->getClassId()) &&
+                //writeToPacket(packet, position, actor->getId()) &&
+                //actor->writeTo(packet, position);
+                int32_t classId = actor->getClassId();
+                int32_t actorId = actor->getId();
 
-                if(!fits)
-                    packetFull = true;
-                else
+                if (err == Serial::Error::Success) 
+                    err = stream.handleInt<0, 1024>(classId);
+                if (err == Serial::Error::Success)
+                    err = stream.handleInt32(actorId);
+                if (err == Serial::Error::Success)
+                    err = actor->streamHandle(stream);
+
+                if (err == Serial::Error::Success)
+                {
                     header.numPlayers++;
+                }
+                else if (err == Serial::Error::EndOfStream)
+                {
+                    packetFull = true;
+                }
+                else
+                {
+                    std::cerr << "Serialisation send error " << Serial::Error::getName(err) << std::endl;
+                    exit(1);
+                }
+
+
+                //if(!fits)
+                //    packetFull = true;
+                //else
+                //    header.numPlayers++;
             }
 
             actor->tickDone(!packetFull);
         }
 
+        //std::cout << "DBG " << stream.tell() << std::endl;
+
+        // pad the leftover space with 0101010...
+        bool flipflop = true;
+        do
+        {
+            err = stream.handleBool(flipflop);
+            flipflop = !flipflop;
+        } while (err == Serial::Error::Success);
+        
         // rewrite packet header with correct object count
-        position = 0;
-        writeToPacket(packet, position, header);
+        stream.seek(0, Serial::BSPos::Start);
+        header.faSerial(stream);
+        //position = 0;
+        //writeToPacket(packet, position, header);
 
         enet_host_broadcast(mHost, UNRELIABLE_CHANNEL_ID, packet);
     }
@@ -266,31 +373,68 @@ namespace Engine
         }
         else
         {
+            std::cout << "GOT MESSAGE " << mTick << " " << mClientTickWhenLastServerPacketReceived << std::endl;
+            mClientTickWhenLastServerPacketReceived = mTick;
+            
             FAWorld::World& world = *FAWorld::World::get();
 
             size_t position = 0;
+            Serial::ReadBitStream stream(event.packet->data, event.packet->dataLength);
 
             ServerPacketHeader header;
-            readFromPacket(event.packet, position, header);
+            header.faSerial(stream);
+            //readFromPacket(event.packet, position, header);
 
             if(header.tick > mLastServerTickProcessed)
             {
+                Serial::Error::Error err = Serial::Error::Success;
+
                 for(size_t i = 0; i < header.numPlayers; i++)
                 {
                     int32_t classId;
                     int32_t actorId;
-                    readFromPacket(event.packet, position, classId);
-                    readFromPacket(event.packet, position, actorId);
 
-                    FAWorld::Actor* actor = world.getActorById(actorId);
-                    if(actor == NULL)
+                    if (err == Serial::Error::Success)
+                        err = stream.handleInt<0, 1024>(classId);
+                    if (err == Serial::Error::Success)
+                        err = stream.handleInt32(actorId);
+                  
+                    //readFromPacket(event.packet, position, classId);
+                    //readFromPacket(event.packet, position, actorId);
+
+                    if (err == Serial::Error::Success)
                     {
-                        actor = dynamic_cast<FAWorld::Actor*>(FAWorld::NetObject::construct(classId));
-                        actor->mId = actorId;
+                        FAWorld::Actor* actor = world.getActorById(actorId);
+                        if (actor == NULL)
+                        {
+                            actor = dynamic_cast<FAWorld::Actor*>(FAWorld::NetObject::construct(classId));
+                            actor->mId = actorId;
+                        }
+
+                        err = actor->streamHandle(stream);
                     }
 
-                    actor->readFrom(event.packet, position);
+                    
+                    if(err != Serial::Error::Success)
+                    {
+                        std::cerr << "Serialisation read error " << Serial::Error::getName(err) << std::endl;
+                        exit(1);
+                    }
                 }
+
+                // leftover space should be padded with 01010101..., make sure it is
+                /*bool flipflop = true;
+                bool read = true;
+
+                std::vector<bool> test;
+                
+                while(err != Serial::Error::EndOfStream)
+                {
+                    err = stream.handleBool(read);
+                    test.push_back(read);
+                    //assert(flipflop == read && "INVALID PADDING DATA AT END");
+                    //flipflop = !flipflop;
+                }*/
             }
         }
     }
@@ -321,7 +465,12 @@ namespace Engine
 
             auto world = FAWorld::World::get();
 
-            auto player = mServerPlayerList[event.peer->connectID];
+            
+            mServersClientData[event.peer->connectID].lastReceiveTick = mTick;
+
+            std::cout << "GOT MESSAGE " << mTick << " " << mServersClientData[event.peer->connectID].lastReceiveTick << std::endl;
+
+            auto player = mServersClientData[event.peer->connectID].player;
 
             player->destination().first = data.destX;
             player->destination().second = data.destY;

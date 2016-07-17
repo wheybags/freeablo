@@ -3,8 +3,7 @@
 
 #include <vector>
 #include <set>
-#include <map>
-
+#include <unordered_map>
 #include <enet/enet.h>
 
 namespace FAWorld
@@ -68,6 +67,8 @@ namespace Engine
             static constexpr uint8_t UNRELIABLE_CHANNEL_ID = 0;
             static constexpr uint8_t RELIABLE_CHANNEL_ID = 1;
 
+            void update_imp();
+
             const FAWorld::PlayerFactory& mPlayerFactory;
 
             void sendServerPacket();
@@ -88,13 +89,25 @@ namespace Engine
             bool mIsServer;
 
             ENetPeer* mServerPeer = NULL;
+            
             std::vector<ENetPeer*> mClients;
-            std::map<enet_uint32, FAWorld::Player*> mServerPlayerList;
+            
+            struct ClientData
+            {
+                ClientData(FAWorld::Player* p) : player(p), lastReceiveTick(0) {}
+                ClientData() {}
+
+                FAWorld::Player* player;
+                uint32_t lastReceiveTick;
+            };
+
+            std::unordered_map<enet_uint32, ClientData> mServersClientData;
             ENetHost* mHost = NULL;
             ENetAddress mAddress;
 
-            size_t mTick = 0;
-            size_t mLastServerTickProcessed = 0;
+            uint32_t mTick = 0;
+            uint32_t mLastServerTickProcessed = 0;
+            uint32_t mClientTickWhenLastServerPacketReceived = 0;
 
             int32_t mLevelIndexTmp; // TODO: remove this when we fix mp level changing
 

@@ -2,6 +2,8 @@
 
 #include "../engine/netmanager.h"
 
+#include "world.h"
+
 namespace FAWorld
 {
     Position::Position(): mDist(0), mDirection(0),
@@ -18,7 +20,7 @@ namespace FAWorld
     {
         if(mMoving)
         {
-            mDist += 2;
+            mDist += FAWorld::World::getSecondsPerTick() * 250;
 
             if(mDist >= 100)
             {

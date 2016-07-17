@@ -37,12 +37,12 @@
         virtual Serial::Error::Error streamHandle(Serial::WriteBitStream& stream);                                  \
         virtual Serial::Error::Error streamHandle(Serial::ReadBitStream& stream);
 
-#define serialise_as_parent_class(parentClassName) do   \
-{                                                       \
-    parentClassName& asParent = *this;                  \
-    auto ret = asParent.streamHandle(stream);           \
-    if (ret != Serial::Error::Success)                  \
-        return ret;                                     \
+#define serialise_as_parent_class(parentClassName) do           \
+{                                                               \
+    parentClassName& asParent = *this;                          \
+    auto ret = asParent.parentClassName::streamHandle(stream);  \
+    if (ret != Serial::Error::Success)                          \
+        return ret;                                             \
 } while(0)                          
 
 

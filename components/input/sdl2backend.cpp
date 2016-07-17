@@ -261,6 +261,12 @@ namespace Input
 					break;
 				}
 
+                case SDL_QUIT:
+                {
+                    exit(0);
+                    break;
+                }
+
                 default:
                 {
                     break;
