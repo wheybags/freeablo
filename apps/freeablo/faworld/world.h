@@ -5,9 +5,6 @@
 #include <map>
 #include <utility>
 
-#include "actor.h"
-#include "player.h"
-#include "gamelevel.h"
 #include "../engine/inputobserverinterface.h"
 
 
@@ -23,6 +20,10 @@ namespace DiabloExe
 
 namespace FAWorld
 {
+    class Actor;
+    class Player;
+    class GameLevel;
+
     class World : public Engine::KeyboardInputObserverInterface, public Engine::MouseInputObserverInterface
     {
         public:
@@ -54,7 +55,7 @@ namespace FAWorld
             
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
             static size_t getTicksInPeriod(float seconds);
-            static float World::getSecondsPerTick();
+            static float getSecondsPerTick();
 
             Actor* getActorById(int32_t id);
 

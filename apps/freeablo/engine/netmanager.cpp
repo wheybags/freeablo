@@ -2,6 +2,8 @@
 
 #include "../faworld/world.h"
 #include "../faworld/playerfactory.h"
+#include "../faworld/actor.h"
+#include "../faworld/player.h"
 #include "../faworld/monster.h"
 
 #include <serial/bitstream.h>

@@ -7,6 +7,7 @@
 #include "../engine/threadmanager.h"
 #include "../engine/netmanager.h"
 #include "../falevelgen/random.h"
+#include "player.h"
 
 namespace FAWorld
 {

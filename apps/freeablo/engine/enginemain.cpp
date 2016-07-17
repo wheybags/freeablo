@@ -6,6 +6,7 @@
 #include <input/inputmanager.h>
 #include <enet/enet.h>
 #include "../faworld/world.h"
+#include "../faworld/player.h"
 #include "../falevelgen/levelgen.h"
 #include "../falevelgen/random.h"
 #include "../fagui/guimanager.h"

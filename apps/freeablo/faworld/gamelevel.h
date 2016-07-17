@@ -3,16 +3,17 @@
 
 #include <level/level.h>
 
-#include "actor.h"
+#include <enet/enet.h> // TODO: remove
 
 namespace FARender
 {
     class Renderer;
+    class RenderState;
 }
 
 namespace FAWorld
 {
-    class Player;
+    class Actor;
 
     class GameLevel
     {

@@ -1,13 +1,21 @@
 #ifndef ACTOR_H
 #define ACTOR_H
 
-#include "position.h"
+#include <map>
 
+#include <boost/format.hpp>
+
+#include <misc/misc.h>
+
+#include "../engine/netmanager.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/savegame.h"
-#include <boost/format.hpp>
-#include <misc/misc.h>
-#include <map>
+
+#include "position.h"
+#include "gamelevel.h"
+#include "world.h"
+
+
 
 namespace Engine
 {
@@ -128,7 +136,7 @@ namespace FAWorld
 
                 if (!stream.isWriting())
                 {
-                    if (World::get()->getCurrentPlayer() != this)
+                    if ((Actor*)World::get()->getCurrentPlayer() != this)
                     {
                         // don't want to read destination for our player object,
                         // we keep track of our own destination

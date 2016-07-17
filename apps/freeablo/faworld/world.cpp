@@ -11,6 +11,9 @@
 #include "actorstats.h"
 #include "monster.h"
 #include "world.h"
+#include "actor.h"
+#include "player.h"
+#include "gamelevel.h"
 
 namespace FAWorld
 {
