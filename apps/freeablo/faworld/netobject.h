@@ -18,12 +18,12 @@
             className::mClassIndirectId = NetObject::registerNetObjectClass(#className, StaticInitialiseFunc##className);   \
         }                                                                                                                   \
     } _StaticInitialise##className;                                                                                         \
-    Serial::Error::Error className##::streamHandle(Serial::WriteBitStream& stream)                                          \
+    Serial::Error::Error className::streamHandle(Serial::WriteBitStream& stream)                                            \
     {                                                                                                                       \
          serialise_object(stream, *this);                                                                                   \
          return Serial::Error::Success;                                                                                     \
      }                                                                                                                      \
-     Serial::Error::Error className##::streamHandle(Serial::ReadBitStream& stream)                                          \
+     Serial::Error::Error className::streamHandle(Serial::ReadBitStream& stream)                                            \
      {                                                                                                                      \
          serialise_object(stream, *this);                                                                                   \
          return Serial::Error::Success;                                                                                     \
