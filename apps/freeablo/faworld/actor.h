@@ -114,10 +114,6 @@ namespace FAWorld
 
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
-            virtual size_t getWriteSize();
-            virtual bool writeTo(ENetPacket *packet, size_t& position);
-            virtual bool readFrom(ENetPacket *packet, size_t& position);
-
 
             template <class Stream>
             Serial::Error::Error faSerial(Stream& stream)

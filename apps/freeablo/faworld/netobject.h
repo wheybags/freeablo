@@ -57,26 +57,6 @@ namespace FAWorld
             virtual Serial::Error::Error streamHandle(Serial::ReadBitStream& stream) = 0;
 
             /*!
-             * \return size to be written
-             */
-            virtual size_t getWriteSize() = 0;
-
-            /*!
-             * \brief Write object to packet.
-             * \param packet packet to write to
-             * \param start index in package to start at, must be incremented by amount written by implementors
-             * \return success
-             */
-            virtual bool writeTo(ENetPacket* packet, size_t& position) = 0;
-
-            /*!
-             * \param packet packet to read from
-             * \param start index in package to start at, must be incremented by amount read by implementors
-             * \return success
-             */
-            virtual bool readFrom(ENetPacket* packet, size_t& position) = 0;
-
-            /*!
              * \return The implementor's base priority for synchronisation, eg, Player will have higher priority than Monster
              */
              virtual size_t getBasePriority()
