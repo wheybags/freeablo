@@ -63,8 +63,6 @@ namespace Engine
     {
         mTick++;
 
-        uint32_t stallThresh = FAWorld::World::ticksPerSecond*3;
-
         if (mIsServer)
             mServer->update(mTick);
         else
