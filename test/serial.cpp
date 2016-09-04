@@ -5,6 +5,58 @@
 #define private public
 #include "../apps/freeablo/faworld/position.h"
 
+
+TEST(Serial, TestStringLength)
+{
+    std::string test = "asdf";
+
+    std::vector<uint8_t> buf(test.length(), 255);
+
+    Serial::WriteBitStream write(&buf[0], buf.size());
+    Serial::ReadBitStream read(&buf[0], buf.size());
+
+    Serial::Error::Error err = Serial::Error::Success;
+
+    err = write.handleString((uint8_t*)&test[0], test.length());
+    ASSERT_EQ(Serial::Error::Success, err);
+
+    bool b = true;
+    err = write.handleBool(b);
+    ASSERT_EQ(Serial::Error::EndOfStream, err);
+
+    err = Serial::Error::Success;
+    write.seek(0, Serial::BSPos::Start);
+    
+    test = "asdfg";
+    err = write.handleString((uint8_t*)&test[0], test.length());
+    ASSERT_EQ(Serial::Error::EndOfStream, err);
+}
+
+TEST(Serial, TestStringPadding)
+{
+    std::string test = "a";
+
+    std::vector<uint8_t> buf(64, 255);
+
+    Serial::WriteBitStream write(&buf[0], buf.size());
+    Serial::ReadBitStream read(&buf[0], buf.size());
+
+    for (uint32_t i = 1; i < 8; i++)
+    {
+        write.seek(0, Serial::BSPos::Start);
+
+        bool b = true;
+
+        for (uint32_t j = 0; j < i; j++)
+            write.handleBool(b);
+
+        write.handleString((uint8_t*)&test[0], test.length());
+
+        ASSERT_EQ(16, write.tell());
+    }
+}
+
+
 TEST(Serial, TestWriteString)
 {
     std::vector<uint8_t> buf(1024, 255);

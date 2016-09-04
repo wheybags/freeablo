@@ -218,9 +218,9 @@ namespace Serial
 
     Error::Error WriteBitStream::handleString(uint8_t* data, uint32_t len)
     {
-        int32_t padding = mCurrentPos - (8 - (mCurrentPos % 8));
+        int32_t padding = (8 - (mCurrentPos % 8)) % 8;
 
-        if (len + padding + mCurrentPos > mSize - 1)
+        if (len*8 + padding + mCurrentPos > mSize)
             return Error::EndOfStream;
 
         bool zero = false;
@@ -236,9 +236,9 @@ namespace Serial
 
     Error::Error ReadBitStream::handleString(uint8_t* data, uint32_t len)
     {
-        int32_t padding = mCurrentPos - (8 - (mCurrentPos % 8));
+        int32_t padding = (8 - (mCurrentPos % 8)) % 8;
 
-        if (len + padding + mCurrentPos > mSize - 1)
+        if (len*8 + padding + mCurrentPos > mSize)
             return Error::EndOfStream;
 
         bool zero = false;
