@@ -15,7 +15,7 @@
 #include "../faworld/characterstats.h"
 #include "../faworld/playerfactory.h"
 #include "threadmanager.h"
-#include "netmanager.h"
+#include "net/netmanager.h"
 #include "enginemain.h"
 
 namespace bpo = boost::program_options;

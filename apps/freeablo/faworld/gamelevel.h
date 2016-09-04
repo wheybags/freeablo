@@ -54,6 +54,9 @@ namespace FAWorld
                 return mLevelIndex;
             }
 
+            std::string serialiseToString();
+            static GameLevel* loadFromString(const std::string& data);
+
             void saveToPacket(ENetPacket* packet, size_t& position);
             static GameLevel* fromPacket(ENetPacket* packet, size_t& position);
 

@@ -7,7 +7,7 @@
 
 #include <misc/misc.h>
 
-#include "../engine/netmanager.h"
+#include "../engine/net/netmanager.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/savegame.h"
 
@@ -20,6 +20,8 @@
 namespace Engine
 {
     class NetManager;
+    class Server;
+    class Client;
 }
 
 namespace FAWorld
@@ -241,6 +243,8 @@ namespace FAWorld
         private:
             std::string mActorId;
             int32_t mId;
+            friend class Engine::Server; // TODO: fix
+            friend class Engine::Client;
             friend class Engine::NetManager;
     };
 }

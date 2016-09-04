@@ -1,7 +1,5 @@
 #include "position.h"
 
-#include "../engine/netmanager.h"
-
 #include "world.h"
 
 namespace FAWorld
@@ -116,14 +114,4 @@ namespace FAWorld
 
         return retval;
     }
-
-    #pragma pack(1)
-    struct PosNetData
-    {
-        int32_t dist;
-        int32_t direction;
-        uint8_t moving;
-        int32_t currentX;
-        int32_t currentY;
-    };
 }

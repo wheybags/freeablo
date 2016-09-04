@@ -5,7 +5,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 
-#include "../engine/netmanager.h"
+#include "../engine/net/netmanager.h"
 
 #include <diabloexe/diabloexe.h>
 #include "monster.h"

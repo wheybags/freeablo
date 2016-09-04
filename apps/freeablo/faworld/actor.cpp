@@ -5,7 +5,7 @@
 #include "actorstats.h"
 #include "world.h"
 #include "../engine/threadmanager.h"
-#include "../engine/netmanager.h"
+#include "../engine/net/netmanager.h"
 #include "../falevelgen/random.h"
 #include "player.h"
 
