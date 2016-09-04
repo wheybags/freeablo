@@ -5,6 +5,40 @@
 #define private public
 #include "../apps/freeablo/faworld/position.h"
 
+TEST(Serial, TestWriteString)
+{
+    std::vector<uint8_t> buf(1024, 255);
+
+    Serial::WriteBitStream write(&buf[0], buf.size());
+    Serial::ReadBitStream read(&buf[0], buf.size());
+
+    std::string test = "hello i am a test";
+    uint32_t len = test.length();
+
+    Serial::Error::Error err = Serial::Error::Success;
+
+    err = write.handleInt32(len);
+    ASSERT_EQ(Serial::Error::Success, err);
+    uint32_t posAfterWritingLen = write.tell();
+
+    write.handleString((uint8_t*)&test[0], test.length());
+    ASSERT_EQ(Serial::Error::Success, err);
+
+
+
+    uint32_t readLen = 0;
+    err = read.handleInt32(readLen);
+    ASSERT_EQ(Serial::Error::Success, err);
+    ASSERT_EQ(len, readLen);
+
+    std::string readStr(readLen, '\0');
+    err = read.handleString((uint8_t*)&readStr[0], readLen);
+    ASSERT_EQ(Serial::Error::Success, err);
+    ASSERT_EQ(readStr, test);
+
+    ASSERT_EQ(write.tell(), (test.length()*8) + posAfterWritingLen);
+}
+
 TEST(Serial, TestFillZeros)
 {
     std::vector<uint8_t> buf(10, 255);

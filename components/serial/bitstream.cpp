@@ -215,4 +215,40 @@ namespace Serial
 
         return true;
     }
+
+    Error::Error WriteBitStream::handleString(uint8_t* data, uint32_t len)
+    {
+        int32_t padding = mCurrentPos - (8 - (mCurrentPos % 8));
+
+        if (len + padding + mCurrentPos > mSize - 1)
+            return Error::EndOfStream;
+
+        bool zero = false;
+        for(int32_t i = 0; i < padding; i++)
+            handleBool(zero);
+
+        uint8_t* dest = &mData[mCurrentPos / 8];
+        memcpy(dest, data, len);
+        mCurrentPos = mCurrentPos + len * 8;
+
+        return Error::Success;
+    }
+
+    Error::Error ReadBitStream::handleString(uint8_t* data, uint32_t len)
+    {
+        int32_t padding = mCurrentPos - (8 - (mCurrentPos % 8));
+
+        if (len + padding + mCurrentPos > mSize - 1)
+            return Error::EndOfStream;
+
+        bool zero = false;
+        for (int32_t i = 0; i < padding; i++)
+            handleBool(zero);
+
+        uint8_t* src = &mData[mCurrentPos / 8];
+        memcpy(data, src, len);
+        mCurrentPos = mCurrentPos + len * 8;
+
+        return Error::Success;
+    }
 }

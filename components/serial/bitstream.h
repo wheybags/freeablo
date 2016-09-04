@@ -82,6 +82,8 @@ namespace Serial
 
             template <class SerializableClass> Error::Error handleObject(SerializableClass& o);
 
+            Error::Error handleString(uint8_t* data, uint32_t len);
+
             void fillWithZeros();
 
         private:
@@ -110,6 +112,8 @@ namespace Serial
             Error::Error handleInt32(uint32_t& val);
 
             template <class SerializableClass> Error::Error handleObject(SerializableClass& o);
+
+            Error::Error handleString(uint8_t* data, uint32_t len);
 
             bool verifyZeros();
         
