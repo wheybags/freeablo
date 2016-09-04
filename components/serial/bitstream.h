@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <iostream>
+#include <cstring>
 
 namespace Serial
 {
