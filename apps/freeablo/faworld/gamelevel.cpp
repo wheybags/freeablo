@@ -152,6 +152,33 @@ namespace FAWorld
         size_t contentLength;
     };
 
+    std::string GameLevel::serialiseToString()
+    {
+        std::string dataSavingTmp;
+        boost::iostreams::back_insert_device<std::string> inserter(dataSavingTmp);
+        boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
+        boost::archive::binary_oarchive oa(s);
+        oa & mLevel;
+        oa & mLevelIndex;
+        s.flush();
+
+        return dataSavingTmp;
+    }
+
+    GameLevel* GameLevel::loadFromString(const std::string& data)
+    {
+        GameLevel* retval = new GameLevel();
+
+        boost::iostreams::basic_array_source<char> device(data.data(), data.size());
+        boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s(device);
+        boost::archive::binary_iarchive ia(s);
+        ia & retval->mLevel;
+        ia & retval->mLevelIndex;
+
+        return retval;
+    }
+
+
     void GameLevel::saveToPacket(ENetPacket* packet, size_t& position)
     {
         // serialise mLevel into a binary string

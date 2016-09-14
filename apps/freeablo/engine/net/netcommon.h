@@ -1,4 +1,5 @@
 #ifndef NET_COMMON_H
+#define NET_COMMON_H
 
 #include <stdint.h>
 #include <serial/bitstream.h>
@@ -13,10 +14,11 @@ namespace Engine
     static constexpr uint8_t UNRELIABLE_CHANNEL_ID = 0;
     static constexpr uint8_t RELIABLE_CHANNEL_ID = 1;
 
-    enum ReliableMessageKind
+    enum PacketType
     {
-        Level = 100,
-        Sprite = 101
+        Level,
+        Sprite,
+        MAX_PACKET_TYPE
     };
 
     struct ServerPacketHeader

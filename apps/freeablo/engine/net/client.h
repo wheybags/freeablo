@@ -1,10 +1,13 @@
 #ifndef FA_CLIENT_H
+#define FA_CLIENT_H
 
 #include <stdint.h>
 
 #include <unordered_set>
 
 #include "enet/enet.h"
+
+#include "netops.h"
 
 namespace FARender
 {
@@ -24,11 +27,11 @@ namespace Engine
 
         private: // methods
             void updateImp(uint32_t tick);
-            void receiveLevel(ENetPacket* packet, size_t position);
+            void receiveLevel(std::shared_ptr<ReadPacket> packet);
             void readServerPacket(ENetEvent& event, uint32_t tick);
             void sendClientPacket();
             void sendSpriteRequest();
-            void readSpriteResponse(ENetPacket* packet, size_t& position);
+            Serial::Error::Error readSpriteResponse(std::shared_ptr<ReadPacket> packet);
 
         private: // members
             ENetPeer* mServerPeer = NULL;
@@ -40,8 +43,8 @@ namespace Engine
             uint32_t mLastServerTickProcessed = 0;
             uint32_t mLevelIndexTmp = 0;
 
-            std::unordered_set<size_t> mAlreadySentServerSprites;
-            std::unordered_set<size_t> mUnknownServerSprites;
+            std::unordered_set<uint32_t> mAlreadySentServerSprites;
+            std::unordered_set<uint32_t> mUnknownServerSprites;
     };
 }
 

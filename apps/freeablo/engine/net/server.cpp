@@ -7,6 +7,7 @@
 #include "../../faworld/monster.h"
 
 #include "netcommon.h"
+#include "netops.h"
 
 namespace Engine
 {
@@ -33,7 +34,7 @@ namespace Engine
         #ifdef ENABLE_NET_STALL_ON_TIMEOUT
         {
             uint32_t stallThresh = getStallThreshold();
-
+                           
             for (size_t i = 0; i < mClients.size(); i++)
             {
                 uint32_t diff = tick - mServersClientData[mClients[i]->connectID].lastReceiveTick;
@@ -62,25 +63,7 @@ namespace Engine
             {
                 case ENET_EVENT_TYPE_CONNECT:
                 {
-
-                    #ifdef ENABLE_NET_STALL_ON_TIMEOUT
-                        enet_peer_timeout(event.peer, std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max());
-                    #endif
-
-                    auto player = spawnPlayer(-1);
-
-                    // send the client its player id
-                    auto packet = enet_packet_create(NULL, sizeof(size_t), ENET_PACKET_FLAG_RELIABLE);
-                    size_t position = 0;
-                    writeToPacket(packet, position, player->getId());
-                    enet_peer_send(event.peer, RELIABLE_CHANNEL_ID, packet);
-
-                    // TODO: send levels on-demand
-                    sendLevel(0, event.peer);
-                    sendLevel(1, event.peer);
-                    mClients.push_back(event.peer);
-                    mServersClientData[event.peer->connectID] = ClientData(player);
-
+                    handleNewClient(event.peer);
                     break;
                 }
 
@@ -129,16 +112,15 @@ namespace Engine
 
     void Server::sendLevel(size_t levelIndex, ENetPeer *peer)
     {
-        int32_t typeHeader = ReliableMessageKind::Level;
-
-        ENetPacket* packet = enet_packet_create(NULL, sizeof(int32_t), ENET_PACKET_FLAG_RELIABLE);
-        size_t position = 0;
-        writeToPacket(packet, position, typeHeader);
-
         FAWorld::GameLevel* level = FAWorld::World::get()->getLevel(levelIndex);
-        level->saveToPacket(packet, position);
+        std::string data = level->serialiseToString();
 
-        enet_peer_send(peer, RELIABLE_CHANNEL_ID, packet);
+        WritePacket packet = getWritePacket(PacketType::Level, data.size(), true, WritePacketResizableType::Resizable);
+        
+        uint32_t dataSize = data.size();
+        packet.writer.handleInt32(dataSize);
+        packet.writer.handleString((uint8_t*)&data[0], data.length());
+        sendPacket(packet, peer);
     }
 
     void Server::sendServerPacket(uint32_t tick)
@@ -217,15 +199,26 @@ namespace Engine
     {
         if (event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
         {
-            int32_t typeHeader;
+            /*int32_t typeHeader;
             size_t position = 0;
             readFromPacket(event.packet, position, typeHeader);
 
             switch (typeHeader)
             {
-                case ReliableMessageKind::Sprite:
+                case PacketType::Sprite:
                 {
                     readSpriteRequest(event.packet, event.peer, position);
+                    break;
+                }
+            }*/
+
+            std::shared_ptr<ReadPacket> packet = getReadPacket(event.packet);
+
+            switch (packet->type)
+            {
+                case PacketType::Sprite:
+                {
+                    readSpriteRequest(packet, event.peer);
                     break;
                 }
             }
@@ -263,61 +256,75 @@ namespace Engine
         }
     }
 
-    void Server::readSpriteRequest(ENetPacket* packet, ENetPeer* peer, size_t& position)
+    Serial::Error::Error Server::readSpriteRequest(std::shared_ptr<ReadPacket> packet, ENetPeer* peer)
     {
-        size_t numSprites;
-        readFromPacket(packet, position, numSprites);
+        uint32_t numEntries = 0;
+        serialise_int32(packet->reader, numEntries);
 
-        std::vector<size_t> requestedSprites(numSprites);
-
-        for (size_t i = 0; i < numSprites; i++)
-            readFromPacket(packet, position, requestedSprites[i]);
-
-        std::vector<std::string> paths(numSprites);
+        std::vector<uint32_t> requestedSprites;
+        std::vector<std::string> paths;
 
         auto renderer = FARender::Renderer::get();
 
-        size_t size = 0;
-
-        for (size_t i = 0; i < numSprites; i++)
+        for (uint32_t i = 0; i < numEntries; i++)
         {
-            paths[i] = renderer->getPathForIndex(requestedSprites[i]);
-            size += paths[i].size();
-            size += 1; // null terminator
+            uint32_t index = 0;
+            serialise_int32(packet->reader, index);
 
-            std::cout << "responding to: " << requestedSprites[i] << " " << paths[i] << std::endl;
-
+            requestedSprites.push_back(index);
+            paths.push_back(renderer->getPathForIndex(index));
         }
 
-        size += numSprites * sizeof(size_t);
-        size += sizeof(int32_t); // type header
-        size += sizeof(size_t); // numSprites count
+        Serial::Error::Error err = answerSpriteRequest(paths, requestedSprites, peer);
+        if (err != Serial::Error::Success)
+            return err;
 
-        int32_t typeHeader = ReliableMessageKind::Sprite;
+        return Serial::Error::Success;
+    }
 
-        ENetPacket* responsePacket = enet_packet_create(NULL, size, ENET_PACKET_FLAG_RELIABLE);
-        size_t writePosition = 0;
+    Serial::Error::Error Server::answerSpriteRequest(std::vector<std::string>& paths, std::vector<uint32_t>& requestedSprites, ENetPeer* peer)
+    {
+        WritePacket packet = getWritePacket(PacketType::Sprite, 0, true, WritePacketResizableType::Resizable);
 
-        writeToPacket(responsePacket, writePosition, typeHeader);
-        writeToPacket(responsePacket, writePosition, numSprites);
+        uint32_t numEntries = paths.size();
+        serialise_int32(packet.writer, numEntries);
 
-        for (size_t i = 0; i < numSprites; i++)
+        for (uint32_t i = 0; i < paths.size(); i++)
         {
-            writeToPacket(responsePacket, writePosition, requestedSprites[i]);
+            uint32_t len = paths[i].length();
 
-            std::string& path = paths[i];
-            char c;
+            serialise_int32(packet.writer, requestedSprites[i]);
+            serialise_int32(packet.writer, len);
+            serialise_str(packet.writer, (uint8_t*)&paths[i][0], len);
 
-            for (size_t j = 0; j < path.size(); j++)
-            {
-                c = path[j];
-                writeToPacket(responsePacket, writePosition, c);
-            }
-
-            c = 0;
-            writeToPacket(responsePacket, writePosition, c);
+            std::cout << "SPRITE RESPONSE: " << requestedSprites[i] << " " << paths[i] << std::endl;
         }
 
-        enet_peer_send(peer, RELIABLE_CHANNEL_ID, responsePacket);
+        packet.writer.fillWithZeros();
+
+        sendPacket(packet, peer);
+
+        return Serial::Error::Success;
+    }
+
+    void Server::handleNewClient(ENetPeer* peer)
+    {
+        #ifdef ENABLE_NET_STALL_ON_TIMEOUT
+            enet_peer_timeout(peer, std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max());
+        #endif
+
+        auto newPlayer = spawnPlayer(-1);
+
+        // send the client its player id
+        auto packet = enet_packet_create(NULL, sizeof(size_t), ENET_PACKET_FLAG_RELIABLE);
+        size_t position = 0;
+        writeToPacket(packet, position, newPlayer->getId());
+        enet_peer_send(peer, RELIABLE_CHANNEL_ID, packet);
+        mClients.push_back(peer);
+        mServersClientData[peer->connectID] = ClientData(newPlayer);
+
+        // TODO: send levels on-demand
+        sendLevel(0, peer);
+        sendLevel(1, peer);
     }
 }

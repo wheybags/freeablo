@@ -1,10 +1,15 @@
 #ifndef FA_SERVER_H
+#define FA_SERVER_H
 
 #include <unordered_map>
 
 #include <enet/enet.h>
 
+#include <serial/bitstream.h>
+
 #include "../../faworld/playerfactory.h"
+
+#include "netops.h"
 
 namespace Engine
 {
@@ -31,7 +36,9 @@ namespace Engine
             void sendLevel(size_t levelIndex, ENetPeer* peer);
             void sendServerPacket(uint32_t tick);
             void readClientPacket(ENetEvent& event, uint32_t tick);
-            void readSpriteRequest(ENetPacket* packet, ENetPeer* peer, size_t& position);
+            Serial::Error::Error readSpriteRequest(std::shared_ptr<ReadPacket> packet, ENetPeer* peer);
+            Serial::Error::Error answerSpriteRequest(std::vector<std::string>& paths, std::vector<uint32_t>& requestedSprites, ENetPeer* peer);
+            void handleNewClient(ENetPeer* peer);
 
 
         private: // members

@@ -8,6 +8,7 @@
 #include "../../faworld/player.h"
 
 #include "netcommon.h"
+#include "netops.h"
 
 
 
@@ -118,12 +119,16 @@ namespace Engine
         enet_host_flush(mHost);
     }
 
-    void Client::receiveLevel(ENetPacket* packet, size_t position)
+    void Client::receiveLevel(std::shared_ptr<ReadPacket> packet)
     {
-        FAWorld::GameLevel* level = FAWorld::GameLevel::fromPacket(packet, position);
+        uint32_t dataSize = 0;
+        packet->reader.handleInt32(dataSize);
 
-        if (level)
-            FAWorld::World::get()->insertLevel(level->getLevelIndex(), level);
+        std::string data(dataSize, '\0');
+        packet->reader.handleString((uint8_t*)&data[0], dataSize);
+
+        auto level = FAWorld::GameLevel::loadFromString(data);
+        FAWorld::World::get()->insertLevel(level->getLevelIndex(), level);
     }
 
     void Client::readServerPacket(ENetEvent& event, uint32_t tick)
@@ -143,23 +148,26 @@ namespace Engine
 
                 return;
             }
-            int32_t typeHeader;
-            readFromPacket(event.packet, position, typeHeader);
 
-            switch (typeHeader)
+            std::shared_ptr<ReadPacket> packet = getReadPacket(event.packet);
+
+            Serial::Error::Error err = Serial::Error::Success;
+
+            switch (packet->type)
             {
-                case ReliableMessageKind::Level:
-                {
-                    receiveLevel(event.packet, position);
-                    FAWorld::World::get()->setLevel(0);
+                case PacketType::Level:
+                    receiveLevel(packet);
                     break;
-                }
+                
+                case PacketType::Sprite:
+                    err = readSpriteResponse(packet);
+                    break;
+            }
 
-                case ReliableMessageKind::Sprite:
-                {
-                    readSpriteResponse(event.packet, position);
-                    break;
-                }
+            if (err != Serial::Error::Success)
+            {
+                std::cerr << "Serialisation read error " << Serial::Error::getName(err) << std::endl;
+                exit(1);
             }
         }
         else
@@ -235,56 +243,47 @@ namespace Engine
 
     void Client::sendSpriteRequest()
     {
-        int32_t typeHeader = ReliableMessageKind::Sprite;
-        size_t numSprites = mUnknownServerSprites.size();
+        WritePacket packet = getWritePacket(PacketType::Sprite, 0, true, WritePacketResizableType::Resizable);
+        uint32_t numSprites = mUnknownServerSprites.size();
+        packet.writer.handleInt32(numSprites);
 
-        ENetPacket* packet = enet_packet_create(NULL, (numSprites + 1) * sizeof(size_t) + sizeof(int32_t), ENET_PACKET_FLAG_RELIABLE);
-
-        size_t position = 0;
-        writeToPacket(packet, position, typeHeader);
-        writeToPacket(packet, position, numSprites);
-
-        for (size_t index : mUnknownServerSprites)
+        for (uint32_t index : mUnknownServerSprites)
         {
-            writeToPacket(packet, position, index);
+            packet.writer.handleInt32(index);
             mAlreadySentServerSprites.insert(index);
 
             std::cout << "requesting " << index << std::endl;
         }
 
         mUnknownServerSprites.clear();
-
-        enet_peer_send(mServerPeer, RELIABLE_CHANNEL_ID, packet);
+        sendPacket(packet, mServerPeer);
     }
 
-    void Client::readSpriteResponse(ENetPacket* packet, size_t& position)
+    Serial::Error::Error Client::readSpriteResponse(std::shared_ptr<ReadPacket> packet)
     {
-        size_t numSprites;
-        readFromPacket(packet, position, numSprites);
+        uint32_t numEntries = 0;
+        serialise_int32(packet->reader, numEntries);
+
+        std::cout << "SPRITE RESPONSE FOR " << numEntries << " SPRITES" << std::endl;
 
         auto renderer = FARender::Renderer::get();
 
-        for (size_t i = 0; i < numSprites; i++)
+        for (uint32_t i = 0; i < numEntries; i++)
         {
-            size_t index;
-            readFromPacket(packet, position, index);
+            uint32_t index = 0;
+            uint32_t len = 0;
+            serialise_int32(packet->reader, index);
+            serialise_int32(packet->reader, len);
 
-            std::string path;
-
-            char c = 0;
-
-            do
-            {
-                readFromPacket(packet, position, c);
-
-                if (c)
-                    path += c;
-            } while (c);
+            std::string path(len, '\0');
+            serialise_str(packet->reader, (uint8_t*)&path[0], len);
 
             renderer->fillServerSprite(index, path);
 
-            std::cout << "response recieved " << index << " " << path << std::endl;
+            std::cout << "SPRITE RESPONSE:" << index << " " << path << std::endl;
         }
+
+        return Serial::Error::Success;
     }
 
     FARender::FASpriteGroup* Client::getServerSprite(size_t index)

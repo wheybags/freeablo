@@ -27,12 +27,6 @@ namespace Engine
         return singletonInstance;
     }
 
-    enum ReliableMessageKind
-    {
-        Level = 100,
-        Sprite = 101
-    };
-
     NetManager::NetManager(bool isServer, const FAWorld::PlayerFactory& playerFactory)
     {
         assert(singletonInstance == NULL);

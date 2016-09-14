@@ -77,6 +77,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     engine/net/client.cpp
     engine/net/netcommon.h
     engine/net/netcommon.cpp
+    engine/net/netops.h
+    engine/net/netops.cpp
 
     faaudio/audiomanager.h
     faaudio/audiomanager.cpp
