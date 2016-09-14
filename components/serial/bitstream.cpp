@@ -2,6 +2,7 @@
 #include "bitstream.h"
 
 #include <stddef.h>
+#include <assert.h>
 
 namespace Serial
 {
@@ -58,6 +59,31 @@ namespace Serial
         init(buf, sizeInBytes);
     }
 
+    WriteBitStream::WriteBitStream(std::vector<uint8_t>& resizeableBacking)
+    {
+        mResizableBacking = &resizeableBacking;
+        
+        if (mResizableBacking->size() == 0)
+            mResizableBacking->resize(1, 0); // make sure we have a bit of space at least so the old &vec[0] trick works
+
+        init(&(*mResizableBacking)[0], mResizableBacking->size());
+    }
+
+    void WriteBitStream::resize(int64_t sizeInBits)
+    {
+        assert(mResizableBacking != nullptr && "Attempted to resize a non-resizable bitstream!");
+
+        int64_t extraByte = (int64_t)(sizeInBits % 8 != 0); // 1 if sizeInBits is not divisible by 8, 0 otherwise
+        int64_t byteSize = (sizeInBits / 8) + extraByte;
+
+        if (byteSize > mResizableBacking->size())
+        {
+            mResizableBacking->resize(byteSize, 0);
+            mSize = byteSize * 8;
+            mData = &(*mResizableBacking)[0];
+        }
+    }
+
     ReadBitStream::ReadBitStream(uint8_t* buf, int64_t sizeInBytes)
     {
         init(buf, sizeInBytes);
@@ -65,6 +91,9 @@ namespace Serial
 
     Error::Error WriteBitStream::handleBool(bool& val)
     {
+        if (mCurrentPos >= mSize && mResizableBacking != nullptr)
+            resize(mCurrentPos + 1);
+
         if (mCurrentPos < mSize)
         {
             int64_t bitPos = mCurrentPos % 8;
@@ -116,8 +145,16 @@ namespace Serial
 
         toWrite.push_back((uint8_t)num);
 
-        if ((mSize - mCurrentPos) < ((int64_t)toWrite.size() * 8))
-            return Error::EndOfStream;
+
+        int64_t neededSize = mCurrentPos + ((int64_t)toWrite.size() * 8);
+
+        if (mSize < neededSize)
+        {
+            if (mResizableBacking != nullptr)
+                resize(neededSize);
+            else
+                return Error::EndOfStream;
+        }
 
         for (size_t i = 0; i < toWrite.size(); i++)
             handleInt<0, 255>(toWrite[i]);
@@ -220,8 +257,15 @@ namespace Serial
     {
         int32_t padding = (8 - (mCurrentPos % 8)) % 8;
 
-        if (len*8 + padding + mCurrentPos > mSize)
-            return Error::EndOfStream;
+        int64_t neededSize = len * 8 + padding + mCurrentPos;
+
+        if (mSize < neededSize)
+        {
+            if (mResizableBacking != nullptr)
+                resize(neededSize);
+            else
+                return Error::EndOfStream;
+        }
 
         bool zero = false;
         for(int32_t i = 0; i < padding; i++)

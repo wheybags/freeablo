@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <cstring>
+#include <vector>
 
 namespace Serial
 {
@@ -66,6 +67,7 @@ namespace Serial
             bool isWriting() { return true; }
 
             WriteBitStream(uint8_t* buf, int64_t sizeInBytes);
+            WriteBitStream(std::vector<uint8_t>& resizeableBacking); /// creates a resizeable stream backed by the vector
 
             Error::Error handleBool(bool& val);
 
@@ -89,6 +91,10 @@ namespace Serial
 
         private:
             template <int64_t minVal, int64_t maxVal> Error::Error handleIntBase(uint64_t& val, bool handleSign);
+
+            void resize(int64_t sizeInBits);
+
+            std::vector<uint8_t>* mResizableBacking = nullptr;
     };
 
     class ReadBitStream : public BitStreamBase
@@ -139,17 +145,20 @@ namespace Serial
     #define _serialise_int32(stream, val) stream.handleInt32(val)
     #define _serialise_bool(stream, val) stream.handleBool(val)
     #define _serialise_object(stream, val) stream.handleObject(val) 
+    #define _serialise_str(stream, val, len) stream.handleString(val, len)
 #else
     #define _serialise_int(stream, min, max, val) stream.template handleInt<min, max>(val)
     #define _serialise_int32(stream, val) stream.template handleInt32(val)
     #define _serialise_bool(stream, val) stream.template handleBool(val)
     #define _serialise_object(stream, val) stream.template handleObject(val) 
+    #define _serialise_str(stream, val, len) stream.template handleString(val)
 #endif
 
 #define serialise_int(stream, min, max, val) SERIALISE_MACRO_BASE(_serialise_int(stream, min, max, val))
 #define serialise_int32(stream, val) SERIALISE_MACRO_BASE(_serialise_int32(stream, val))
 #define serialise_bool(stream, val) SERIALISE_MACRO_BASE(_serialise_bool(stream, val))
 #define serialise_object(stream, val) SERIALISE_MACRO_BASE(_serialise_object(stream, val))
+#define serialise_str(stream, val, len) SERIALISE_MACRO_BASE(_serialise_str(stream, val, len))
 
 #define serialise_enum(stream, type, val) do                \
 {                                                           \

@@ -455,6 +455,54 @@ TEST(Serial, TestPos)
     ASSERT_EQ(p.mDirection, p2.mDirection);
 }
 
+TEST(Serial, TestResizable)
+{
+    std::vector<uint8_t> buf(1, 0);
+    Serial::WriteBitStream write(buf);
+    Serial::Error::Error err = Serial::Error::Success;
+
+
+    bool b = true;
+
+    ASSERT_EQ(1, buf.size());
+    for (uint32_t i = 0; i < 8; ++i)
+    {
+        err = write.handleBool(b);
+        ASSERT_EQ(err, Serial::Error::Success);
+    }
+
+    b = false;
+
+    ASSERT_EQ(1, buf.size());
+    err = write.handleBool(b);
+    ASSERT_EQ(err, Serial::Error::Success);
+    ASSERT_EQ(2, buf.size());
+
+    buf.resize(1);
+    buf[0] = 0;
+    write = Serial::WriteBitStream(buf);
+
+    int32_t i = 87;
+
+    ASSERT_EQ(1, buf.size());
+    err = write.handleInt32(i);
+    ASSERT_EQ(err, Serial::Error::Success);
+    ASSERT_EQ(1, buf.size());
+    err = write.handleInt32(i);
+    ASSERT_EQ(err, Serial::Error::Success);
+    ASSERT_EQ(2, buf.size());
+
+    buf.resize(1);
+    buf[0] = 0;
+    write = Serial::WriteBitStream(buf);
+
+    std::string str = "1234";
+    ASSERT_EQ(1, buf.size());
+    err = write.handleString((uint8_t*)&str[0], 4);
+    ASSERT_EQ(err, Serial::Error::Success);
+    ASSERT_EQ(4, buf.size());
+}
+
 int main(int argc, char **argv) 
 {
     ::testing::InitGoogleTest(&argc, argv);
