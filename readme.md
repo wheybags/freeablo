@@ -1,3 +1,5 @@
+[![Join the chat at https://gitter.im/freeablo/Lobby](https://badges.gitter.im/freeablo/Lobby.svg)](https://gitter.im/freeablo/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Hello my friend, stay a while and listen!
 
 freeablo is a modern cross platform reimplementation of the game engine used in Diablo 1.
