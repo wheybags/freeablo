@@ -1,35 +1,42 @@
-#include "mainwindow.h"
-#include "ui_celview.h"
-#include "render/render.h"
-
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QStringList>
 #include <QColorDialog>
 #include <QDebug>
-
+#include <QStandardItemModel>
+#include "mainwindow.h"
+#include "ui_celview.h"
+#include "render/render.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     mDiabdat(NULL),
     mIsAnimation(false),
-    mSettingsFile(QApplication::applicationDirPath() + "/celview.ini")
+    mSettingsFile(QApplication::applicationDirPath() + "/celview.ini"),
+    mProxyModel(new ProxyModel(this))
 {
-    mSettings.loadFromFile(mSettingsFile.toStdString());
     ui->setupUi(this);
-    this->setWindowTitle("Celview");
-    connect(ui->listView, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(itemDoubleClicked(QListWidgetItem * )));
-    connect(&mRenderTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
-
     ui->currentFrame->setValidator(new QIntValidator(0, 9999999, this));
     ui->currentFrame->setText("0");
-    
-    qDebug() << mSettingsFile;
+    ui->listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    mModel = new QStandardItemModel(0, 1, ui->listView);
+    mProxyModel->setSourceModel(mModel);
+    ui->listView->setModel(mProxyModel);
 
+    connect(&mRenderTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
+    mRenderTimer.start();
+
+    mSettings.loadFromFile(mSettingsFile.toStdString());
+    initOpenglWindow();
     loadSettings();
-    initRender();    
+    openMPQ(false);
+    initRender();
+
+    setCentralWidget(mGLWidget);
+    setWindowTitle("Celview");
+    showMaximized();
 }
 
 MainWindow::~MainWindow()
@@ -37,6 +44,12 @@ MainWindow::~MainWindow()
     closeMPQ();
     saveSettings();
     delete ui;
+}
+
+void MainWindow::initOpenglWindow()
+{
+    mNativeWindow = new MyNativeWindow();
+    mGLWidget = QWidget::createWindowContainer( mNativeWindow );
 }
 
 void MainWindow::initRender()
@@ -47,15 +60,14 @@ void MainWindow::initRender()
 void MainWindow::loadSettings()
 {
     mFilename = QString::fromStdString(mSettings.get<std::string>("General", "filename", "DIABLO.MPQ"));
-    mListfile = QString::fromStdString(mSettings.get<std::string>("General", "listfile", "Diablo I"));
-    mRenderSettings.windowWidth = mSettings.get<int>("General", "windowWidth", 800);
-    mRenderSettings.windowHeight = mSettings.get<int>("General", "windowHeight", 600);
+    mFileList = QString::fromStdString(mSettings.get<std::string>("General", "filelist", "Diablo I.txt"));
 
-    mBackgroundColor = QColor(QString::fromStdString(mSettings.get<std::string>("General", "backgroundColor", "#0000FF")));
+    mRenderSettings.windowWidth = mSettings.get<int>("General", "windowWidth", 640);
+    mRenderSettings.windowHeight = mSettings.get<int>("General", "windowHeight", 480);
+    mRenderSettings.openglWinId = mNativeWindow->winId();
+
+    mBackgroundColor = QColor(QString::fromStdString(mSettings.get<std::string>("General", "backgroundColor", "#aaaaff")));
     mRenderSettings.fullscreen = mSettings.get<bool>("General", "fullscreen", false);
-
-    ui->lineEdit->setText(mFilename);
-    ui->lineEdit_2->setText(mListfile);
 
     if (!QFile(mSettingsFile).exists())
     {
@@ -66,7 +78,7 @@ void MainWindow::loadSettings()
 void MainWindow::saveSettings()
 {
     mSettings.set<std::string>("General", "filename", mFilename.toStdString());
-    mSettings.set<std::string>("General", "listfile", mListfile.toStdString());
+    mSettings.set<std::string>("General", "filelist", mFileList.toStdString());
 
     Render::RenderSettings windowSize = Render::getWindowSize();
 
@@ -77,18 +89,22 @@ void MainWindow::saveSettings()
     mSettings.save();
 }
 
-void MainWindow::itemDoubleClicked(QListWidgetItem* /*item*/)
+void MainWindow::showCel(const QString& cel)
 {
     mRenderTimer.stop();
-    mCurrentCelFilename = ui->listView->currentItem()->text();
-    mCurrentCel = QSharedPointer<Render::SpriteGroup>(new Render::SpriteGroup(mCurrentCelFilename.toStdString().c_str()));
-    if(mCurrentCel->size() == 0)
-        QMessageBox::critical(0,"Error","CEL/CL2 file can't be loaded");
+    mCurrentCelFilename = cel;
+    if(mDiabdat && !mCurrentCelFilename.isEmpty())
+    {
+        mCurrentCel = QSharedPointer<Render::SpriteGroup>(new Render::SpriteGroup(mCurrentCelFilename.toStdString().c_str()));
+        if(mCurrentCel->size() == 0)
+            QMessageBox::critical(0,"Error","CEL/CL2 file can't be loaded");
 
-    mCurrentFrame = 0;
-    ui->numFramesLabel->setText(QString("Number of frames: ") + QString::number(mCurrentCel->size()));
-    ui->currentFrame->setText("0");
-    this->setWindowTitle(QString("Celview - ") + mCurrentCelFilename);
+        mCurrentFrame = 0;
+        ui->labelFrames->setText(QString::number(mCurrentCel->size()));
+        ui->labelAnimation->setText(QString::number(mCurrentCel->animLength()));
+        ui->currentFrame->setText("0");
+        this->setWindowTitle(QString("Celview - ") + mCurrentCelFilename);
+    }
 
     mRenderTimer.start(200);
 }
@@ -110,58 +126,14 @@ void MainWindow::on_actionExit_triggered()
     this->close();
 }
 
-void MainWindow::on_selectMPQ_clicked()
+void MainWindow::selectMPQ()
 {
-    QString tmpFilename = QFileDialog::getOpenFileName(this, tr("Open MPQ"), ".", tr("MPQ Files (*.mpq)"));
-    if (!tmpFilename.isEmpty())
-    {
-        mFilename = tmpFilename;
-        ui->lineEdit->setText(mFilename);
-    }
+    mFilename = QFileDialog::getOpenFileName(this, tr("Open MPQ"), ".", tr("MPQ Files (*.mpq)"));
 }
 
-void MainWindow::on_selectFileList_clicked()
+void MainWindow::selectFileList()
 {
-    QString tmpFilename = QFileDialog::getOpenFileName(this, tr("Open Listfile"), ".", tr("List Files (*.txt)"));
-    if (!tmpFilename.isEmpty())
-    {
-        mListfile = tmpFilename;
-        ui->lineEdit_2->setText(mListfile);
-    }
-}
-
-void MainWindow::on_openButton_clicked()
-{
-    closeMPQ();
-    if (openMPQ() == false) return;
-    listFiles();
-}
-
-
-void MainWindow::on_leftButton_clicked()
-{
-    if (!mCurrentCel)
-        return;
-
-    mCurrentFrame--;
-    if (mCurrentFrame < 0)
-    {
-        mCurrentFrame = mCurrentCel->size() - 1;
-    }
-        
-    ui->currentFrame->setText(QString::number(mCurrentFrame));
-}
-
-void MainWindow::on_rightButton_clicked()
-{
-    if (!mCurrentCel)
-        return; 
-
-    mCurrentFrame++;
-    if (mCurrentFrame >= (int)mCurrentCel->size())
-        mCurrentFrame = 0;
-
-    ui->currentFrame->setText(QString::number(mCurrentFrame));
+    mFileList = QFileDialog::getOpenFileName(this, tr("Open Filelist"), ".", tr("File List (*.txt)"));
 }
 
 void MainWindow::on_actionExport_CEL_CL2_to_PNG_triggered()
@@ -197,10 +169,10 @@ void MainWindow::on_actionExport_all_CEL_CL2_to_PNG_triggered()
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"",QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
     if(!dir.isEmpty())
     {
-        int count = ui->listView->count();
+        int count = mModel->rowCount();
         for(int i = 0 ; i < count ; i++)
         {
-            QString pathInMPQ = ui->listView->item(i)->text();
+            QString pathInMPQ = mModel->item(i,0)->text();
             QString modifiedPathInMPQ = pathInMPQ;
             modifiedPathInMPQ = modifiedPathInMPQ.replace('\\', '_').replace('/','_').replace(".cel", ".png").replace(".cl2",".png");
             
@@ -213,11 +185,6 @@ void MainWindow::on_actionExport_all_CEL_CL2_to_PNG_triggered()
 
         QMessageBox::information(0, "Success", "Export complete!");
     }
-}
-
-void MainWindow::on_startStopButton_clicked()
-{
-    mIsAnimation = !mIsAnimation;
 }
 
 void MainWindow::on_currentFrame_textEdited(const QString &arg1)
@@ -234,41 +201,52 @@ void MainWindow::on_currentFrame_textEdited(const QString &arg1)
 
 void MainWindow::updateRender()
 {
-    int size = mCurrentCel->size();
+    if(!mNativeWindow->isExposed())
+        return;
 
-    if (mIsAnimation)
-    {
-        mCurrentFrame = (mCurrentFrame+1) % size;
-        ui->currentFrame->setText(QString::number(mCurrentFrame));
-    }
-
+    QSize windowSize = mGLWidget->size();
+    mNativeWindow->resize(windowSize);
+    Render::resizeAndSetWindowSize(windowSize.width(), windowSize.height());    
     Render::clear(mBackgroundColor.red(), mBackgroundColor.green(), mBackgroundColor.blue());
 
-    if(mCurrentCel->size() > 0)
-        Render::drawAt((*mCurrentCel)[mCurrentFrame], 0, 0);
+    if(mDiabdat && mCurrentCel)
+    {
+        if (mIsAnimation)
+        {
+            int size = mCurrentCel->size();
+            mCurrentFrame = (mCurrentFrame+1) % size;
+            ui->currentFrame->setText(QString::number(mCurrentFrame));
+        }
+
+        if(mCurrentCel->size() > 0)
+        {
+            Render::drawAt((*mCurrentCel)[mCurrentFrame], 0, 0);
+        }
+    }
+
     Render::draw();
 }
 
-bool MainWindow::openMPQ()
+bool MainWindow::openMPQ(bool popup)
 {
-    mFilename = ui->lineEdit->text();
-    mListfile = ui->lineEdit_2->text();
-
-    if (mListfile.isEmpty() || mFilename.isEmpty())
+    if (mFilename.isEmpty())
     {
-        QMessageBox::critical(0, "Error", "Select MPQ archive and file list!");
+        if(popup)
+            QMessageBox::critical(0, "Error", "Select MPQ archive and file list!");
         return false;
     }
 
     if (!fileExists(mFilename))
     {
-        QMessageBox::critical(0, "Error", "MPQ archive does not exist!");
+        if(popup)
+            QMessageBox::critical(0, "Error", "MPQ archive does not exist!");
         return false;
     }
 
-    if (!fileExists(mListfile))
+    if (!fileExists(mFileList))
     {
-        QMessageBox::critical(0, "Error", "Listfile does not exist!");
+        if(popup)
+            QMessageBox::critical(0, "Error", "File List does not exist!");
         return false;
     }
 
@@ -276,14 +254,17 @@ bool MainWindow::openMPQ()
 
     if (!success)
     {
-        QMessageBox::critical(0, "Error", "Cannot open file \"" + mFilename + "\"");
+        if(popup)
+            QMessageBox::critical(0, "Error", "Cannot open file \"" + mFilename + "\"");
         return false;
     }
 
-    std::string fileList = ui->lineEdit_2->text().toStdString();
-    SFileAddListFile(mDiabdat, fileList.c_str());
+    if(!mFileList.isEmpty())
+        SFileAddListFile(mDiabdat, mFileList.toStdString().c_str());
 
     FAIO::init(mFilename.toStdString().c_str());
+
+    listFiles();
 
     return true;
 }
@@ -291,8 +272,6 @@ bool MainWindow::openMPQ()
 void MainWindow::closeMPQ()
 {
     FAIO::quit();
-
-    ui->listView->clear();
 
     if (mDiabdat)
     {
@@ -307,12 +286,13 @@ void MainWindow::listFiles()
     listFilesDetails("cel", fileList);
     listFilesDetails("cl2", fileList);
 
-    fileList.sort();
-
     for (QStringList::const_iterator it = fileList.cbegin(); it != fileList.cend(); it++)
     {
-        ui->listView->addItem(*it);
+        mModel->insertRow(0);
+        mModel->setData(mModel->index(0,0), *it);
     }
+
+    mModel->sort(0);
 }
 
 void MainWindow::listFilesDetails(QString extension, QStringList & list)
@@ -335,13 +315,91 @@ void MainWindow::listFilesDetails(QString extension, QStringList & list)
 bool MainWindow::fileExists(QString path) 
 {
     QFileInfo checkFile(path);
+    return checkFile.exists() && checkFile.isFile();
+}
 
-    if (checkFile.exists() && checkFile.isFile()) 
-    {
-        return true;
+void MainWindow::toggleDock(QDockWidget* dock)
+{
+    if(dock->isVisible()) {
+        dock->close();
+    } else {
+        dock->show();
     }
-    else 
+}
+
+void MainWindow::on_actionControls_triggered()
+{
+    toggleDock(ui->dockControls);
+}
+
+void MainWindow::on_actionFind_file_triggered()
+{
+    toggleDock(ui->dockFind);
+}
+
+void MainWindow::on_actionFiles_triggered()
+{
+    toggleDock(ui->dockFiles);
+}
+
+void MainWindow::on_actionPallete_triggered()
+{
+    toggleDock(ui->dockPallete);
+}
+
+void MainWindow::on_buttonNextFrame_clicked()
+{
+    if (!mCurrentCel)
+        return;
+
+    mCurrentFrame++;
+    if (mCurrentFrame >= (int)mCurrentCel->size())
+        mCurrentFrame = 0;
+
+    ui->currentFrame->setText(QString::number(mCurrentFrame));
+}
+
+void MainWindow::on_buttonPreviousFrame_clicked()
+{
+    if (!mCurrentCel)
+        return;
+
+    mCurrentFrame--;
+    if (mCurrentFrame < 0)
     {
-        return false;
+        mCurrentFrame = mCurrentCel->size() - 1;
     }
+
+    ui->currentFrame->setText(QString::number(mCurrentFrame));
+}
+
+void MainWindow::on_actionOpen_MPQ_triggered()
+{
+    closeMPQ();
+    selectMPQ();
+    selectFileList();
+    openMPQ();
+}
+
+void MainWindow::on_listView_doubleClicked(const QModelIndex &index)
+{
+    QVariant value = ui->listView->model()->data(index);
+    QString strValue = value.toString();
+    showCel(strValue);
+}
+
+void MainWindow::textFilterChanged()
+{
+    mProxyModel->find(ui->find->text());
+}
+
+void MainWindow::on_find_textChanged(const QString &arg1)
+{
+    Q_UNUSED(arg1);
+    textFilterChanged();
+}
+
+void MainWindow::on_buttonStartStop_clicked()
+{
+    mIsAnimation = !mIsAnimation;
 }

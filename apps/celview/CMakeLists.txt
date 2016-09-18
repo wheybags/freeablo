@@ -3,6 +3,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 qt5_wrap_ui(UI_HEADERS ../../resources/ui/celview.ui)
 
+find_package(Qt5OpenGL REQUIRED)
+
 include_directories (
     ${SDL2_INCLUDE_DIR})
 
@@ -16,6 +18,8 @@ add_executable(celview
     main.cpp
     mainwindow.h
     mainwindow.cpp
+    proxymodel.h
+    proxymodel.cpp
 )
 
 set_target_properties(celview PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
