@@ -28,6 +28,10 @@ esc to open pause menu
 
 The above will all be made configurable at some point.
 
+#Documentation
+https://wheybags.github.io/freeablo
+[decisions.md!](decisions.md) contains a list of significant decisions taken over the project's lifetime.
+
 #Compilation
 
 ## Windows
