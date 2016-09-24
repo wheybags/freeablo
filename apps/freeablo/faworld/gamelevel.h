@@ -57,9 +57,6 @@ namespace FAWorld
             std::string serialiseToString();
             static GameLevel* loadFromString(const std::string& data);
 
-            void saveToPacket(ENetPacket* packet, size_t& position);
-            static GameLevel* fromPacket(ENetPacket* packet, size_t& position);
-
             Actor* getActorById(int32_t id);
 
             void getActors(std::vector<Actor*>& actors);

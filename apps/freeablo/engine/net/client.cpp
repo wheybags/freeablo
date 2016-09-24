@@ -11,9 +11,6 @@
 #include "netops.h"
 
 
-
-#include "netmanager.h" // TODO: REMOVE
-
 namespace Engine
 {
     Client::Client()

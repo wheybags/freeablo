@@ -19,38 +19,6 @@ namespace FARender
 
 namespace Engine
 {
-    template <typename T>
-    bool writeToPacket(ENetPacket* packet, size_t& position, const T& data)
-    {
-        size_t end = position + sizeof(T);
-
-        if(end > packet->dataLength)
-            return false;
-
-        T* dest = (T*)(packet->data + position);
-        *dest = data;
-
-        position = end;
-
-        return true;
-    }
-
-    template <typename T>
-    bool readFromPacket(ENetPacket* packet, size_t& position, T& dest)
-    {
-        size_t end = position + sizeof(T);
-
-        if(end > packet->dataLength)
-            return false;
-
-        T* data = (T*)(packet->data + position);
-        dest = *data;
-
-        position = end;
-
-        return true;
-    }
-
     class Client;
     class Server;
 
