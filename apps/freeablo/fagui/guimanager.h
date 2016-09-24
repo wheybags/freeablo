@@ -91,7 +91,7 @@ namespace FAGui
         std::function<void(GuiManager&)> mFadeOutCallback;
         float mFadeDelta;
         float mFadeValue;
-        Rocket::Core::ElementDocument * mFadeCurrentDocument;
+        Rocket::Core::ElementDocument * mFadeCurrentDocument = nullptr;
         std::queue<State> mStateQueue;
         GuiType mCurrentGuiType;
         std::chrono::system_clock::time_point mStartTime;

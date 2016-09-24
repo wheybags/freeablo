@@ -47,7 +47,7 @@ if(FA_TESTS_ENABLED)
 
     # actual tests go here
     fa_add_test(cel Cel No)
-	fa_add_test(serial "Serial;freeablo_lib" Yes)
+	fa_add_test(serial "Serial;freeablo_lib;${ENET_LIBRARY}" Yes)
 
 	
 	add_custom_target(fatest ${all_tests})

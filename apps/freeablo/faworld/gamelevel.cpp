@@ -5,7 +5,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 
-#include "../engine/netmanager.h"
+#include "../engine/net/netmanager.h"
 
 #include <diabloexe/diabloexe.h>
 #include "monster.h"
@@ -152,50 +152,28 @@ namespace FAWorld
         size_t contentLength;
     };
 
-    void GameLevel::saveToPacket(ENetPacket* packet, size_t& position)
+    std::string GameLevel::serialiseToString()
     {
-        // serialise mLevel into a binary string
         std::string dataSavingTmp;
         boost::iostreams::back_insert_device<std::string> inserter(dataSavingTmp);
         boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
         boost::archive::binary_oarchive oa(s);
         oa & mLevel;
+        oa & mLevelIndex;
         s.flush();
 
-        // write data to packet
-        GameLevelHeader header;
-        header.levelIndex = mLevelIndex;
-        header.contentLength = dataSavingTmp.length();
-
-        size_t requiredSize = position + sizeof(header) + header.contentLength;
-        if(packet->dataLength < requiredSize)
-            enet_packet_resize(packet, requiredSize);
-
-        Engine::writeToPacket(packet, position, header);
-
-        for(size_t i = 0; i < dataSavingTmp.length(); i++)
-            packet->data[position++] = (uint8_t) dataSavingTmp[i];
+        return dataSavingTmp;
     }
 
-
-    GameLevel* GameLevel::fromPacket(ENetPacket *packet, size_t &position)
+    GameLevel* GameLevel::loadFromString(const std::string& data)
     {
         GameLevel* retval = new GameLevel();
 
-        GameLevelHeader header;
-        Engine::readFromPacket(packet, position, header);
-
-        retval->mLevelIndex = header.levelIndex;
-
-        std::string strTmp(header.contentLength, '\0');
-
-        for(size_t i = 0; i < strTmp.length(); i++)
-            strTmp[i] = packet->data[position++];
-
-        boost::iostreams::basic_array_source<char> device(strTmp.data(), strTmp.size());
+        boost::iostreams::basic_array_source<char> device(data.data(), data.size());
         boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s(device);
         boost::archive::binary_iarchive ia(s);
         ia & retval->mLevel;
+        ia & retval->mLevelIndex;
 
         return retval;
     }

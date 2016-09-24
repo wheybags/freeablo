@@ -30,7 +30,7 @@ FIND_LIBRARY(ENET_LIBRARY
 )
 
 IF(WIN32)
-	set(ENET_LIBRARY "${ENET_LIBRARY}" "WINMM.LIB") # needs winmm.lib on windows apparently
+	set(ENET_LIBRARY "${ENET_LIBRARY}" "WINMM.LIB" "Ws2_32.lib") # needs some libs on windows apparently
 ENDIF()
 
 SET(ENET_FOUND "NO")

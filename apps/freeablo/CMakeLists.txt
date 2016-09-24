@@ -68,8 +68,17 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     engine/inputobserverinterface.h
     engine/enginemain.h
     engine/enginemain.cpp
-    engine/netmanager.cpp
-    engine/netmanager.h
+    
+    engine/net/netmanager.cpp
+    engine/net/netmanager.h
+    engine/net/server.h
+    engine/net/server.cpp
+    engine/net/client.h
+    engine/net/client.cpp
+    engine/net/netcommon.h
+    engine/net/netcommon.cpp
+    engine/net/netops.h
+    engine/net/netops.cpp
 
     faaudio/audiomanager.h
     faaudio/audiomanager.cpp

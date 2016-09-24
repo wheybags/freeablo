@@ -1,5 +1,7 @@
 #include <tuple>
 #include <iostream>
+#include <algorithm>
+
 #include <diabloexe/diabloexe.h>
 #include "../farender/renderer.h"
 #include "../falevelgen/levelgen.h"
@@ -9,6 +11,9 @@
 #include "actorstats.h"
 #include "monster.h"
 #include "world.h"
+#include "actor.h"
+#include "player.h"
+#include "gamelevel.h"
 
 namespace FAWorld
 {
@@ -266,4 +271,13 @@ namespace FAWorld
         mDestination = destination;
     }
 
+    size_t World::getTicksInPeriod(float seconds)
+    {
+        return std::max((size_t)1, (size_t)round(((float)ticksPerSecond) * seconds));
+    }
+
+    float World::getSecondsPerTick()
+    {
+        return 1.0f / ((float)ticksPerSecond);
+    }
 }

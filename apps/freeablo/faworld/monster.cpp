@@ -4,6 +4,9 @@
 
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
+
+#include "world.h"
+
 #include <boost/format.hpp>
 
 namespace FAWorld
@@ -12,10 +15,10 @@ namespace FAWorld
 
     void Monster::init()
     {
-        mAnimTimeMap[AnimState::dead] = 10;
-        mAnimTimeMap[AnimState::idle] = 10;
-        mAnimTimeMap[AnimState::dead] = 10;
-        mAnimTimeMap[AnimState::hit] = 10;
+        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1);
+        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1);
+        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1);
+        mAnimTimeMap[AnimState::hit] = FAWorld::World::getTicksInPeriod(0.1);
 
         mIsEnemy = true;
     }

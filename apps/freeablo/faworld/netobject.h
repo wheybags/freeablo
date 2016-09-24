@@ -4,24 +4,46 @@
 #include <enet/enet.h>
 #include <stdint.h>
 
+#include <serial/bitstream.h>
+
 // put in implementation file for NetObject subclasses. Requires the below macro.
 // see registerNetObjectClass below
-#define STATIC_HANDLE_NET_OBJECT_IN_IMPL(className) \
-    int32_t className::mClassIndirectId = -1; \
-    NetObject* StaticInitialiseFunc##className() { return new className(); } \
-    struct StaticInitialise##className \
-    { \
-        StaticInitialise##className() \
-        { \
-            className::mClassIndirectId = NetObject::registerNetObjectClass(#className, StaticInitialiseFunc##className); \
-        } \
-    } _StaticInitialise##className;
+#define STATIC_HANDLE_NET_OBJECT_IN_IMPL(className)                                                                         \
+    int32_t className::mClassIndirectId = -1;                                                                               \
+    NetObject* StaticInitialiseFunc##className() { return new className(); }                                                \
+    struct StaticInitialise##className                                                                                      \
+    {                                                                                                                       \
+        StaticInitialise##className()                                                                                       \
+        {                                                                                                                   \
+            className::mClassIndirectId = NetObject::registerNetObjectClass(#className, StaticInitialiseFunc##className);   \
+        }                                                                                                                   \
+    } _StaticInitialise##className;                                                                                         \
+    Serial::Error::Error className::streamHandle(Serial::WriteBitStream& stream)                                            \
+    {                                                                                                                       \
+         serialise_object(stream, *this);                                                                                   \
+         return Serial::Error::Success;                                                                                     \
+     }                                                                                                                      \
+     Serial::Error::Error className::streamHandle(Serial::ReadBitStream& stream)                                            \
+     {                                                                                                                      \
+         serialise_object(stream, *this);                                                                                   \
+         return Serial::Error::Success;                                                                                     \
+     }
 
 // put in class defenition of NetObject subclasses
-#define STATIC_HANDLE_NET_OBJECT_IN_CLASS() \
-    public: \
-        static int32_t mClassIndirectId; \
-        virtual int32_t getClassId() { return ::FAWorld::NetObject::getClassIdFromIndirectId(mClassIndirectId); }
+#define STATIC_HANDLE_NET_OBJECT_IN_CLASS()                                                                         \
+    public:                                                                                                         \
+        static int32_t mClassIndirectId;                                                                            \
+        virtual int32_t getClassId() { return ::FAWorld::NetObject::getClassIdFromIndirectId(mClassIndirectId); }   \
+        virtual Serial::Error::Error streamHandle(Serial::WriteBitStream& stream);                                  \
+        virtual Serial::Error::Error streamHandle(Serial::ReadBitStream& stream);
+
+#define serialise_as_parent_class(parentClassName) do           \
+{                                                               \
+    parentClassName& asParent = *this;                          \
+    auto ret = asParent.parentClassName::streamHandle(stream);  \
+    if (ret != Serial::Error::Success)                          \
+        return ret;                                             \
+} while(0)                          
 
 
 namespace FAWorld
@@ -31,25 +53,8 @@ namespace FAWorld
         public:
             virtual ~NetObject() {}
 
-            /*!
-             * \return size to be written
-             */
-            virtual size_t getWriteSize() = 0;
-
-            /*!
-             * \brief Write object to packet.
-             * \param packet packet to write to
-             * \param start index in package to start at, must be incremented by amount written by implementors
-             * \return success
-             */
-            virtual bool writeTo(ENetPacket* packet, size_t& position) = 0;
-
-            /*!
-             * \param packet packet to read from
-             * \param start index in package to start at, must be incremented by amount read by implementors
-             * \return success
-             */
-            virtual bool readFrom(ENetPacket* packet, size_t& position) = 0;
+            virtual Serial::Error::Error streamHandle(Serial::WriteBitStream& stream) = 0;
+            virtual Serial::Error::Error streamHandle(Serial::ReadBitStream& stream) = 0;
 
             /*!
              * \return The implementor's base priority for synchronisation, eg, Player will have higher priority than Monster

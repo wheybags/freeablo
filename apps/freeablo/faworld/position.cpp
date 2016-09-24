@@ -1,6 +1,6 @@
 #include "position.h"
 
-#include "../engine/netmanager.h"
+#include "world.h"
 
 namespace FAWorld
 {
@@ -18,7 +18,7 @@ namespace FAWorld
     {
         if(mMoving)
         {
-            mDist += 2;
+            mDist += FAWorld::World::getSecondsPerTick() * 250;
 
             if(mDist >= 100)
             {
@@ -113,50 +113,5 @@ namespace FAWorld
         }
 
         return retval;
-    }
-
-    #pragma pack(1)
-    struct PosNetData
-    {
-        int32_t dist;
-        int32_t direction;
-        uint8_t moving;
-        int32_t currentX;
-        int32_t currentY;
-    };
-
-    size_t Position::getWriteSize()
-    {
-        return sizeof(PosNetData);
-    }
-
-    bool Position::writeTo(ENetPacket *packet, size_t& position)
-    {
-        PosNetData data;
-        data.dist = mDist;
-        data.direction = mDirection;
-        data.moving = mMoving;
-        data.currentX = mCurrent.first;
-        data.currentY = mCurrent.second;
-
-        return Engine::writeToPacket(packet, position, data);
-    }
-
-    bool Position::readFrom(ENetPacket *packet, size_t& position)
-    {
-        PosNetData data;
-
-        if(Engine::readFromPacket(packet, position, data))
-        {
-            mDist = data.dist;
-            mDirection = data.direction;
-            mMoving = data.moving;
-            mCurrent.first = data.currentX;
-            mCurrent.second = data.currentY;
-
-            return true;
-        }
-
-        return false;
     }
 }

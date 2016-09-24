@@ -1,11 +1,15 @@
 #include <Rocket/Core.h>
 #include <input/common.h>
 #include "../faworld/world.h"
+#include "../faworld/player.h"
+#include "../faworld/position.h"
+#include "../faworld/inventory.h"
 #include "../fasavegame/savegamemanager.h"
 #include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
 #include "guimanager.h"
 #include "fapython.h"
+
 
 namespace FAGui
 {

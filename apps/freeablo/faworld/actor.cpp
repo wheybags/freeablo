@@ -5,8 +5,9 @@
 #include "actorstats.h"
 #include "world.h"
 #include "../engine/threadmanager.h"
-#include "../engine/netmanager.h"
+#include "../engine/net/netmanager.h"
 #include "../falevelgen/random.h"
+#include "player.h"
 
 namespace FAWorld
 {
@@ -19,7 +20,7 @@ namespace FAWorld
             size_t animDivisor = mAnimTimeMap[getAnimState()];
             if(animDivisor == 0)
             {
-                animDivisor=12;
+                animDivisor = FAWorld::World::getTicksInPeriod(0.1);
             }
             bool advanceAnims  = !(ticksPassed % (World::ticksPerSecond/animDivisor));
 
@@ -143,8 +144,8 @@ namespace FAWorld
         if (!idleAnimPath.empty())
             mIdleAnim = FARender::Renderer::get()->loadImage(idleAnimPath);
         mDestination = mPos.current();
-        mAnimTimeMap[AnimState::idle] = 10;
-        mAnimTimeMap[AnimState::walk] = 10;
+        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1);
+        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1);
 
         mId = getNewId();
     }
@@ -254,109 +255,6 @@ namespace FAWorld
             mAnimState = state;
             mFrame = 0;
         }
-    }
-
-    #pragma pack(1)
-    struct ActorNetData
-    {
-        int32_t frame;
-        uint8_t animState;
-        int32_t destX;
-        int32_t destY;
-        int32_t levelIndex;
-
-        uint32_t walkAnimIndex;
-        uint32_t idleAnimIndex;
-        uint32_t dieAnimIndex;
-        uint32_t attackAnimIndex;
-        uint32_t hitAnimIndex;
-    };
-
-    size_t Actor::getWriteSize()
-    {
-        return mPos.getWriteSize() + sizeof(ActorNetData);
-    }
-
-    bool Actor::writeTo(ENetPacket *packet, size_t& position)
-    {
-        if(!mPos.writeTo(packet, position))
-            return false;
-
-        ActorNetData data;
-        data.frame = mFrame;
-        data.animState = mAnimState;
-        data.destX = mDestination.first;
-        data.destY = mDestination.second;
-
-        data.walkAnimIndex = 0;
-        data.idleAnimIndex = 0;
-        data.dieAnimIndex = 0;
-        data.attackAnimIndex = 0;
-        data.hitAnimIndex = 0;
-
-        if(mWalkAnim)
-            data.walkAnimIndex = mWalkAnim->getCacheIndex();
-        if(mIdleAnim)
-            data.idleAnimIndex = mIdleAnim->getCacheIndex();
-        if(mDieAnim)
-            data.dieAnimIndex = mDieAnim->getCacheIndex();
-        if(mAttackAnim)
-            data.attackAnimIndex = mAttackAnim->getCacheIndex();
-        if(mHitAnim)
-            data.hitAnimIndex = mHitAnim->getCacheIndex();
-
-        if(mLevel)
-            data.levelIndex = mLevel->getLevelIndex();
-        else
-            data.levelIndex = -1;
-
-        return Engine::writeToPacket(packet, position, data);
-    }
-
-    bool Actor::readFrom(ENetPacket *packet, size_t& position)
-    {
-        if(!mPos.readFrom(packet, position))
-            return false;
-
-        ActorNetData data;
-        if(Engine::readFromPacket(packet, position, data))
-        {
-            mFrame = data.frame;
-            mAnimState = (AnimState::AnimState)data.animState;
-
-            if(World::get()->getCurrentPlayer() != this)
-            {
-                // don't want to read destination for our player object,
-                // we keep track of our own destination
-                mDestination.first = data.destX;
-                mDestination.second = data.destY;
-
-                setLevel(World::get()->getLevel(data.levelIndex));
-            }
-
-            mWalkAnim = FARender::getDefaultSprite();
-            mIdleAnim = FARender::getDefaultSprite();
-            mDieAnim = FARender::getDefaultSprite();
-            mAttackAnim = FARender::getDefaultSprite();
-            mHitAnim = FARender::getDefaultSprite();
-
-            auto netManager = Engine::NetManager::get();
-
-            if(data.walkAnimIndex)
-                mWalkAnim = netManager->getServerSprite(data.walkAnimIndex);
-            if(data.idleAnimIndex)
-                mIdleAnim = netManager->getServerSprite(data.idleAnimIndex);
-            if(data.dieAnimIndex)
-                mDieAnim = netManager->getServerSprite(data.dieAnimIndex);
-            if(data.attackAnimIndex)
-                mAttackAnim = netManager->getServerSprite(data.attackAnimIndex);
-            if(data.hitAnimIndex)
-                mHitAnim = netManager->getServerSprite(data.hitAnimIndex);
-
-            return true;
-        }
-
-        return false;
     }
 
     void Actor::setLevel(GameLevel* level)

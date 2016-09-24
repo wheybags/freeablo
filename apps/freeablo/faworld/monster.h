@@ -24,6 +24,16 @@ namespace FAWorld
         private:
             std::string mAnimPath;
             std::string mSoundPath;
+
+            template <class Stream>
+            Serial::Error::Error faSerial(Stream& stream)
+            {
+                serialise_as_parent_class(Actor);
+                return Serial::Error::Success;
+            }
+
+            friend class Serial::WriteBitStream;
+            friend class Serial::ReadBitStream;
     };
 }
 

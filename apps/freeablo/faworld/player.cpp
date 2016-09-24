@@ -11,10 +11,10 @@ namespace FAWorld
 
     Player::Player() : Actor(), mInventory(this)
     {
-        mAnimTimeMap[AnimState::dead] = 10;
-        mAnimTimeMap[AnimState::walk] = 10;
-        mAnimTimeMap[AnimState::attack] = 16;
-        mAnimTimeMap[AnimState::idle] = 10;
+        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1);
+        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1);
+        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(0.2);
+        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1);
 
         FAWorld::World::get()->registerPlayer(this);
     }

@@ -3,16 +3,17 @@
 
 #include <level/level.h>
 
-#include "actor.h"
+#include <enet/enet.h> // TODO: remove
 
 namespace FARender
 {
     class Renderer;
+    class RenderState;
 }
 
 namespace FAWorld
 {
-    class Player;
+    class Actor;
 
     class GameLevel
     {
@@ -53,8 +54,8 @@ namespace FAWorld
                 return mLevelIndex;
             }
 
-            void saveToPacket(ENetPacket* packet, size_t& position);
-            static GameLevel* fromPacket(ENetPacket* packet, size_t& position);
+            std::string serialiseToString();
+            static GameLevel* loadFromString(const std::string& data);
 
             Actor* getActorById(int32_t id);
 

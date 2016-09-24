@@ -2,6 +2,7 @@
 #include "bitstream.h"
 
 #include <stddef.h>
+#include <assert.h>
 
 namespace Serial
 {
@@ -58,6 +59,31 @@ namespace Serial
         init(buf, sizeInBytes);
     }
 
+    WriteBitStream::WriteBitStream(std::vector<uint8_t>& resizeableBacking)
+    {
+        mResizableBacking = &resizeableBacking;
+        
+        if (mResizableBacking->size() == 0)
+            mResizableBacking->resize(1, 0); // make sure we have a bit of space at least so the old &vec[0] trick works
+
+        init(&(*mResizableBacking)[0], mResizableBacking->size());
+    }
+
+    void WriteBitStream::resize(int64_t sizeInBits)
+    {
+        assert(mResizableBacking != nullptr && "Attempted to resize a non-resizable bitstream!");
+
+        uint64_t extraByte = (uint64_t)(sizeInBits % 8 != 0); // 1 if sizeInBits is not divisible by 8, 0 otherwise
+        uint64_t byteSize = (sizeInBits / 8) + extraByte;
+
+        if (byteSize > mResizableBacking->size())
+        {
+            mResizableBacking->resize(byteSize, 0);
+            mSize = byteSize * 8;
+            mData = &(*mResizableBacking)[0];
+        }
+    }
+
     ReadBitStream::ReadBitStream(uint8_t* buf, int64_t sizeInBytes)
     {
         init(buf, sizeInBytes);
@@ -65,6 +91,9 @@ namespace Serial
 
     Error::Error WriteBitStream::handleBool(bool& val)
     {
+        if (mCurrentPos >= mSize && mResizableBacking != nullptr)
+            resize(mCurrentPos + 1);
+
         if (mCurrentPos < mSize)
         {
             int64_t bitPos = mCurrentPos % 8;
@@ -116,8 +145,16 @@ namespace Serial
 
         toWrite.push_back((uint8_t)num);
 
-        if ((mSize - mCurrentPos) < ((int64_t)toWrite.size() * 8))
-            return Error::EndOfStream;
+
+        int64_t neededSize = mCurrentPos + ((int64_t)toWrite.size() * 8);
+
+        if (mSize < neededSize)
+        {
+            if (mResizableBacking != nullptr)
+                resize(neededSize);
+            else
+                return Error::EndOfStream;
+        }
 
         for (size_t i = 0; i < toWrite.size(); i++)
             handleInt<0, 255>(toWrite[i]);
@@ -152,5 +189,110 @@ namespace Serial
         }
 
         return Error::InvalidData;
+    }
+
+    Error::Error WriteBitStream::handleInt32(uint32_t& val)
+    {
+        int32_t val2 = val;
+        return handleInt32(val2);
+    }
+
+    Error::Error ReadBitStream::handleInt32(uint32_t& val)
+    {
+        int32_t val2 = 0;
+        Error::Error retval = handleInt32(val2);
+        val = val2;
+        return retval;
+    }
+
+    void WriteBitStream::fillWithZeros()
+    {
+        bool f = false;
+
+        int32_t done = 0;
+
+        while (mCurrentPos % 8 != 0)
+        {
+            handleBool(f);
+            done++;
+        }
+
+        size_t bytePos = mCurrentPos / 8;
+        size_t byteSize = mSize / 8;
+
+        memset(&mData[bytePos], 0, byteSize - bytePos);
+    }
+
+    bool ReadBitStream::verifyZeros()
+    {
+        bool b = false;
+
+        int32_t done = 0;
+
+        while (mCurrentPos % 8 != 0)
+        {
+            handleBool(b);
+
+            if (b)
+                return false;
+
+            done++;
+        }
+
+        size_t bytePos = mCurrentPos / 8;
+        size_t byteSize = mSize / 8;
+
+        for (size_t i = bytePos; i < byteSize; i++)
+        {
+            if (mData[i] != 0)
+                return false;
+
+            done += 8;
+        }
+
+        return true;
+    }
+
+    Error::Error WriteBitStream::handleString(uint8_t* data, uint32_t len)
+    {
+        int32_t padding = (8 - (mCurrentPos % 8)) % 8;
+
+        int64_t neededSize = len * 8 + padding + mCurrentPos;
+
+        if (mSize < neededSize)
+        {
+            if (mResizableBacking != nullptr)
+                resize(neededSize);
+            else
+                return Error::EndOfStream;
+        }
+
+        bool zero = false;
+        for(int32_t i = 0; i < padding; i++)
+            handleBool(zero);
+
+        uint8_t* dest = &mData[mCurrentPos / 8];
+        memcpy(dest, data, len);
+        mCurrentPos = mCurrentPos + len * 8;
+
+        return Error::Success;
+    }
+
+    Error::Error ReadBitStream::handleString(uint8_t* data, uint32_t len)
+    {
+        int32_t padding = (8 - (mCurrentPos % 8)) % 8;
+
+        if (len*8 + padding + mCurrentPos > mSize)
+            return Error::EndOfStream;
+
+        bool zero = false;
+        for (int32_t i = 0; i < padding; i++)
+            handleBool(zero);
+
+        uint8_t* src = &mData[mCurrentPos / 8];
+        memcpy(data, src, len);
+        mCurrentPos = mCurrentPos + len * 8;
+
+        return Error::Success;
     }
 }

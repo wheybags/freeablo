@@ -6,6 +6,7 @@
 #include <input/inputmanager.h>
 #include <enet/enet.h>
 #include "../faworld/world.h"
+#include "../faworld/player.h"
 #include "../falevelgen/levelgen.h"
 #include "../falevelgen/random.h"
 #include "../fagui/guimanager.h"
@@ -14,7 +15,7 @@
 #include "../faworld/characterstats.h"
 #include "../faworld/playerfactory.h"
 #include "threadmanager.h"
-#include "netmanager.h"
+#include "net/netmanager.h"
 #include "enginemain.h"
 
 namespace bpo = boost::program_options;

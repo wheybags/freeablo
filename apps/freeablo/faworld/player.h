@@ -35,7 +35,17 @@ namespace FAWorld
             std::string mFmtWeaponCode;
             bool mFmtInDungeon = false;
 
-        friend class Inventory;
+            friend class Inventory;
+
+            template <class Stream>
+            Serial::Error::Error faSerial(Stream& stream)
+            {
+                serialise_as_parent_class(Actor);
+                return Serial::Error::Success;
+            }
+
+            friend class Serial::WriteBitStream;
+            friend class Serial::ReadBitStream;
     };
 }
 #endif
