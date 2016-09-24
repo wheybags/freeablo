@@ -34,9 +34,10 @@ namespace Engine
             wpTmp->writer = Serial::WriteBitStream(*resizableBacking);
         }
 
+        static_assert((int)PacketType::MAX_PACKET_TYPE < 256, "can't send PacketType as uint8 if we have > 256 of em");
 
-        uint8_t type8 = type;
-        wpTmp->writer.handleInt<0, PacketType::MAX_PACKET_TYPE>(type8);
+        uint8_t type8 = (uint8_t)type;
+        wpTmp->writer.handleInt<0, (int32_t)PacketType::MAX_PACKET_TYPE>(type8);
         assert(wpTmp->writer.tell() <= 8); // make sure that the assumption we made earlier (1 byte for packetType) is ok
 
         uint8_t channelId = UNRELIABLE_CHANNEL_ID;
@@ -94,7 +95,7 @@ namespace Engine
         auto read = Serial::ReadBitStream(p->data, p->dataLength);
 
         uint8_t type8 = 0;
-        read.handleInt<0, PacketType::MAX_PACKET_TYPE>(type8);
+        read.handleInt<0, (int32_t)PacketType::MAX_PACKET_TYPE>(type8);
 
         return std::shared_ptr<ReadPacket>(new ReadPacket(read, (PacketType)type8, packet));
     }

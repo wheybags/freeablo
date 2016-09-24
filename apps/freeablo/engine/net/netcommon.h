@@ -14,10 +14,11 @@ namespace Engine
     static constexpr uint8_t UNRELIABLE_CHANNEL_ID = 0;
     static constexpr uint8_t RELIABLE_CHANNEL_ID = 1;
 
-    enum PacketType
+    enum class PacketType
     {
         Level,
         Sprite,
+        NewClient,
         MAX_PACKET_TYPE
     };
 

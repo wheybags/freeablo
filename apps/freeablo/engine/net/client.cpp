@@ -135,26 +135,16 @@ namespace Engine
     {
         if (event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
         {
-            size_t position = 0;
-
-            if (mClientRecievedId == false)
-            {
-                mClientRecievedId = true;
-
-                size_t playerId;
-                readFromPacket(event.packet, position, playerId);
-
-                FAWorld::World::get()->getCurrentPlayer()->mId = playerId;
-
-                return;
-            }
-
             std::shared_ptr<ReadPacket> packet = getReadPacket(event.packet);
 
             Serial::Error::Error err = Serial::Error::Success;
 
             switch (packet->type)
             {
+                case PacketType::NewClient:
+                    packet->reader.handleInt32(FAWorld::World::get()->getCurrentPlayer()->mId);
+                    break;
+
                 case PacketType::Level:
                     receiveLevel(packet);
                     break;

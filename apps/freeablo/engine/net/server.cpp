@@ -199,19 +199,6 @@ namespace Engine
     {
         if (event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
         {
-            /*int32_t typeHeader;
-            size_t position = 0;
-            readFromPacket(event.packet, position, typeHeader);
-
-            switch (typeHeader)
-            {
-                case PacketType::Sprite:
-                {
-                    readSpriteRequest(event.packet, event.peer, position);
-                    break;
-                }
-            }*/
-
             std::shared_ptr<ReadPacket> packet = getReadPacket(event.packet);
 
             switch (packet->type)
@@ -315,11 +302,11 @@ namespace Engine
 
         auto newPlayer = spawnPlayer(-1);
 
-        // send the client its player id
-        auto packet = enet_packet_create(NULL, sizeof(size_t), ENET_PACKET_FLAG_RELIABLE);
-        size_t position = 0;
-        writeToPacket(packet, position, newPlayer->getId());
-        enet_peer_send(peer, RELIABLE_CHANNEL_ID, packet);
+        auto packet = getWritePacket(Engine::PacketType::NewClient, 0, true, Engine::WritePacketResizableType::Resizable);
+        int32_t id = newPlayer->getId();
+        packet.writer.handleInt32(id);
+        Engine::sendPacket(packet, peer);
+
         mClients.push_back(peer);
         mServersClientData[peer->connectID] = ClientData(newPlayer);
 
