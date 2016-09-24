@@ -19,6 +19,7 @@ namespace Engine
         Level,
         Sprite,
         NewClient,
+        GameUpdateMessage,
         MAX_PACKET_TYPE
     };
 

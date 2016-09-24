@@ -29,6 +29,7 @@ namespace Engine
             void updateImp(uint32_t tick);
             void receiveLevel(std::shared_ptr<ReadPacket> packet);
             void readServerPacket(ENetEvent& event, uint32_t tick);
+            void handleGameUpdateMessage(std::shared_ptr<ReadPacket> packet, uint32_t tick);
             void sendClientPacket();
             void sendSpriteRequest();
             Serial::Error::Error readSpriteResponse(std::shared_ptr<ReadPacket> packet);

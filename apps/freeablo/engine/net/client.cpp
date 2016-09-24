@@ -133,81 +133,80 @@ namespace Engine
 
     void Client::readServerPacket(ENetEvent& event, uint32_t tick)
     {
-        if (event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
-        {
-            std::shared_ptr<ReadPacket> packet = getReadPacket(event.packet);
+        std::shared_ptr<ReadPacket> packet = getReadPacket(event.packet);
 
+        Serial::Error::Error err = Serial::Error::Success;
+
+        switch (packet->type)
+        {
+            case PacketType::NewClient:
+                packet->reader.handleInt32(FAWorld::World::get()->getCurrentPlayer()->mId);
+                break;
+
+            case PacketType::Level:
+                receiveLevel(packet);
+                break;
+                
+            case PacketType::Sprite:
+                err = readSpriteResponse(packet);
+                break;
+
+            case PacketType::GameUpdateMessage:
+                handleGameUpdateMessage(packet, tick);
+        }
+
+        if (err != Serial::Error::Success)
+        {
+            std::cerr << "Serialisation read error " << Serial::Error::getName(err) << std::endl;
+            exit(1);
+        }
+    }
+
+    void Client::handleGameUpdateMessage(std::shared_ptr<ReadPacket> packet, uint32_t tick)
+    {
+        mClientTickWhenLastServerPacketReceived = tick;
+
+        FAWorld::World& world = *FAWorld::World::get();
+
+        ServerPacketHeader header;
+        header.faSerial(packet->reader);
+
+        if (header.tick > mLastServerTickProcessed)
+        {
             Serial::Error::Error err = Serial::Error::Success;
 
-            switch (packet->type)
+            for (size_t i = 0; i < header.numPlayers; i++)
             {
-                case PacketType::NewClient:
-                    packet->reader.handleInt32(FAWorld::World::get()->getCurrentPlayer()->mId);
-                    break;
+                int32_t classId;
+                int32_t actorId;
 
-                case PacketType::Level:
-                    receiveLevel(packet);
-                    break;
-                
-                case PacketType::Sprite:
-                    err = readSpriteResponse(packet);
-                    break;
-            }
+                if (err == Serial::Error::Success)
+                    err = packet->reader.handleInt<0, 1024>(classId);
+                if (err == Serial::Error::Success)
+                    err = packet->reader.handleInt32(actorId);
 
-            if (err != Serial::Error::Success)
-            {
-                std::cerr << "Serialisation read error " << Serial::Error::getName(err) << std::endl;
-                exit(1);
-            }
-        }
-        else
-        {
-            mClientTickWhenLastServerPacketReceived = tick;
 
-            FAWorld::World& world = *FAWorld::World::get();
-
-            Serial::ReadBitStream stream(event.packet->data, event.packet->dataLength);
-
-            ServerPacketHeader header;
-            header.faSerial(stream);
-
-            if (header.tick > mLastServerTickProcessed)
-            {
-                Serial::Error::Error err = Serial::Error::Success;
-
-                for (size_t i = 0; i < header.numPlayers; i++)
+                if (err == Serial::Error::Success)
                 {
-                    int32_t classId;
-                    int32_t actorId;
-
-                    if (err == Serial::Error::Success)
-                        err = stream.handleInt<0, 1024>(classId);
-                    if (err == Serial::Error::Success)
-                        err = stream.handleInt32(actorId);
-
-
-                    if (err == Serial::Error::Success)
+                    FAWorld::Actor* actor = world.getActorById(actorId);
+                    if (actor == NULL)
                     {
-                        FAWorld::Actor* actor = world.getActorById(actorId);
-                        if (actor == NULL)
-                        {
-                            actor = dynamic_cast<FAWorld::Actor*>(FAWorld::NetObject::construct(classId));
-                            actor->mId = actorId;
-                        }
-
-                        err = actor->streamHandle(stream);
+                        actor = dynamic_cast<FAWorld::Actor*>(FAWorld::NetObject::construct(classId));
+                        actor->mId = actorId;
                     }
 
-
-                    if (err != Serial::Error::Success)
-                    {
-                        std::cerr << "Serialisation read error " << Serial::Error::getName(err) << std::endl;
-                        exit(1);
-                    }
+                    err = actor->streamHandle(packet->reader);
                 }
 
-                assert(stream.verifyZeros() && "INVALID PADDING DATA AT END");
+
+                if (err != Serial::Error::Success)
+                {
+                    std::cerr << "Serialisation read error " << Serial::Error::getName(err) << std::endl;
+                    exit(1);
+                }
             }
+
+            assert(packet->reader.verifyZeros() && "INVALID PADDING DATA AT END");
         }
     }
 

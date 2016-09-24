@@ -127,17 +127,15 @@ namespace Engine
     {
         FAWorld::World& world = *FAWorld::World::get();
 
-        size_t packetSize = 512;
-        ENetPacket* packet = enet_packet_create(NULL, packetSize, ENET_PACKET_FLAG_UNSEQUENCED);
-
-        Serial::WriteBitStream stream(packet->data, packet->dataLength);
+        auto packet = getWritePacket(Engine::PacketType::GameUpdateMessage, 512, false);
 
         // write header
+        int64_t headerPos = packet.writer.tell();
         ServerPacketHeader header;
         header.numPlayers = 0;
         header.tick = tick;
 
-        header.faSerial(stream);
+        header.faSerial(packet.writer);
 
         std::vector<FAWorld::Actor*> allActors;
         world.getAllActors(allActors);
@@ -161,11 +159,11 @@ namespace Engine
                 int32_t actorId = actor->getId();
 
                 if (err == Serial::Error::Success)
-                    err = stream.handleInt<0, 1024>(classId);
+                    err = packet.writer.handleInt<0, 1024>(classId);
                 if (err == Serial::Error::Success)
-                    err = stream.handleInt32(actorId);
+                    err = packet.writer.handleInt32(actorId);
                 if (err == Serial::Error::Success)
-                    err = actor->streamHandle(stream);
+                    err = actor->streamHandle(packet.writer);
 
                 if (err == Serial::Error::Success)
                 {
@@ -185,13 +183,13 @@ namespace Engine
             actor->tickDone(!packetFull);
         }
 
-        stream.fillWithZeros();
+        packet.writer.fillWithZeros();
 
         // rewrite packet header with correct object count
-        stream.seek(0, Serial::BSPos::Start);
-        header.faSerial(stream);
+        packet.writer.seek(headerPos, Serial::BSPos::Start);
+        header.faSerial(packet.writer);
 
-        enet_host_broadcast(mHost, UNRELIABLE_CHANNEL_ID, packet);
+        broadcastPacket(packet, mHost);
     }
 
 
