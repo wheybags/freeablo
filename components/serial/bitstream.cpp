@@ -73,8 +73,8 @@ namespace Serial
     {
         assert(mResizableBacking != nullptr && "Attempted to resize a non-resizable bitstream!");
 
-        int64_t extraByte = (int64_t)(sizeInBits % 8 != 0); // 1 if sizeInBits is not divisible by 8, 0 otherwise
-        int64_t byteSize = (sizeInBits / 8) + extraByte;
+        uint64_t extraByte = (uint64_t)(sizeInBits % 8 != 0); // 1 if sizeInBits is not divisible by 8, 0 otherwise
+        uint64_t byteSize = (sizeInBits / 8) + extraByte;
 
         if (byteSize > mResizableBacking->size())
         {

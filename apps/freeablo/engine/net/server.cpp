@@ -1,6 +1,7 @@
 #include "server.h"
 
 #include <iostream>
+#include <thread>
 
 #include "../../faworld/position.h"
 #include "../../faworld/player.h"
@@ -245,6 +246,8 @@ namespace Engine
 
             player->setLevel(level);
         }
+
+        return Serial::Error::Success;
     }
 
     Serial::Error::Error Server::readSpriteRequest(std::shared_ptr<ReadPacket> packet, ENetPeer* peer)

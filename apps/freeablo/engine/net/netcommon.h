@@ -50,6 +50,7 @@ namespace Engine
             serialise_int32(stream, destX);
             serialise_int32(stream, destY);
             serialise_int32(stream, levelIndex);
+            return Serial::Error::Success;
         }
     };
 }

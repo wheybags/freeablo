@@ -148,10 +148,10 @@ namespace Serial
     #define _serialise_str(stream, val, len) stream.handleString(val, len)
 #else
     #define _serialise_int(stream, min, max, val) stream.template handleInt<min, max>(val)
-    #define _serialise_int32(stream, val) stream.template handleInt32(val)
-    #define _serialise_bool(stream, val) stream.template handleBool(val)
+    #define _serialise_int32(stream, val) stream.handleInt32(val)
+    #define _serialise_bool(stream, val) stream.handleBool(val)
     #define _serialise_object(stream, val) stream.template handleObject(val) 
-    #define _serialise_str(stream, val, len) stream.template handleString(val)
+    #define _serialise_str(stream, val, len) stream.handleString(val, len)
 #endif
 
 #define serialise_int(stream, min, max, val) SERIALISE_MACRO_BASE(_serialise_int(stream, min, max, val))

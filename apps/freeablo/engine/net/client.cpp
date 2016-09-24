@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <iostream>
+#include <thread>
 
 #include "../../faworld/gamelevel.h"
 #include "../../faworld/world.h"
