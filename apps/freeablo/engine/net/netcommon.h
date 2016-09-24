@@ -20,6 +20,7 @@ namespace Engine
         Sprite,
         NewClient,
         GameUpdateMessage,
+        ClientToServerUpdate,
         MAX_PACKET_TYPE
     };
 
@@ -39,9 +40,17 @@ namespace Engine
 
     struct ClientPacket
     {
-        size_t destX;
-        size_t destY;
+        int32_t destX;
+        int32_t destY;
         int32_t levelIndex; // TODO: don't just trust this data
+
+        template <class Stream>
+        Serial::Error::Error faSerial(Stream& stream)
+        {
+            serialise_int32(stream, destX);
+            serialise_int32(stream, destY);
+            serialise_int32(stream, levelIndex);
+        }
     };
 }
 

@@ -153,6 +153,10 @@ namespace Engine
 
             case PacketType::GameUpdateMessage:
                 handleGameUpdateMessage(packet, tick);
+                break;
+
+            default:
+                assert(false && "BAD PACKET TYPE RECEIVED");
         }
 
         if (err != Serial::Error::Success)
@@ -212,7 +216,7 @@ namespace Engine
 
     void Client::sendClientPacket()
     {
-        ENetPacket* packet = enet_packet_create(NULL, sizeof(ClientPacket), 0);
+        auto packet = getWritePacket(Engine::PacketType::ClientToServerUpdate, 0, false, Engine::WritePacketResizableType::Resizable);
 
         auto player = FAWorld::World::get()->getCurrentPlayer();
 
@@ -221,10 +225,9 @@ namespace Engine
         data.destY = player->destination().second;
         data.levelIndex = mLevelIndexTmp;
 
-        size_t position = 0;
-        writeToPacket(packet, position, data);
+        packet.writer.handleObject(data);
 
-        enet_peer_send(mServerPeer, UNRELIABLE_CHANNEL_ID, packet);
+        sendPacket(packet, mServerPeer);
 
         if (mUnknownServerSprites.size())
             sendSpriteRequest();

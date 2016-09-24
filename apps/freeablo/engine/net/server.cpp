@@ -195,49 +195,55 @@ namespace Engine
 
     void Server::readClientPacket(ENetEvent& event, uint32_t tick)
     {
-        if (event.packet->flags & ENET_PACKET_FLAG_RELIABLE)
-        {
-            std::shared_ptr<ReadPacket> packet = getReadPacket(event.packet);
+        std::shared_ptr<ReadPacket> packet = getReadPacket(event.packet);
 
-            switch (packet->type)
+        switch (packet->type)
+        {
+            case PacketType::Sprite:
             {
-                case PacketType::Sprite:
-                {
-                    readSpriteRequest(packet, event.peer);
-                    break;
-                }
+                readSpriteRequest(packet, event.peer);
+                break;
+            }
+
+            case PacketType::ClientToServerUpdate:
+            {
+                readClientUpdatePacket(packet, event.peer, tick);
+                break;
+            }
+
+            default:
+            {
+                assert(false && "BAD PACKET TYPE RECEIVED");
             }
         }
-        else
+    }
+
+    Serial::Error::Error Server::readClientUpdatePacket(std::shared_ptr<ReadPacket> packet, ENetPeer* peer, uint32_t tick)
+    {
+        ClientPacket data;
+        serialise_object(packet->reader, data);
+
+        auto world = FAWorld::World::get();
+
+        mServersClientData[peer->connectID].lastReceiveTick = tick;
+
+        //std::cout << "GOT MESSAGE " << mTick << " " << mServersClientData[event.peer->connectID].lastReceiveTick << std::endl;
+
+        auto player = mServersClientData[peer->connectID].player;
+
+        player->destination().first = data.destX;
+        player->destination().second = data.destY;
+
+        if (data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
         {
-            ClientPacket data;
+            auto level = world->getLevel(data.levelIndex);
 
-            size_t position = 0;
-            readFromPacket(event.packet, position, data);
+            if (player->getLevel() != NULL && data.levelIndex < (int32_t)player->getLevel()->getLevelIndex())
+                player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
+            else
+                player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 
-            auto world = FAWorld::World::get();
-
-
-            mServersClientData[event.peer->connectID].lastReceiveTick = tick;
-
-            //std::cout << "GOT MESSAGE " << mTick << " " << mServersClientData[event.peer->connectID].lastReceiveTick << std::endl;
-
-            auto player = mServersClientData[event.peer->connectID].player;
-
-            player->destination().first = data.destX;
-            player->destination().second = data.destY;
-
-            if (data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
-            {
-                auto level = world->getLevel(data.levelIndex);
-
-                if (player->getLevel() != NULL && data.levelIndex < (int32_t)player->getLevel()->getLevelIndex())
-                    player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
-                else
-                    player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
-
-                player->setLevel(level);
-            }
+            player->setLevel(level);
         }
     }
 
