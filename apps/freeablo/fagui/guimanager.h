@@ -38,6 +38,7 @@ namespace FAGui
 
         void openDialogue(const std::string& document);
         void closeDialogue();
+        void toggleDialogue(const std::string& document);
         bool isDialogueOpened() const;
         void openDialogueScrollbox(const std::string& document);
         void closeDialogueScrollbox();
