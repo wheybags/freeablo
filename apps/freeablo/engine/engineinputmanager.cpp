@@ -159,6 +159,9 @@ namespace Engine
             case QUIT:
                 actionAsString = "Quit";
                 break;
+            case INVENTORY:
+                actionAsString = "Inventory";
+                break;
             case NOCLIP:
                 actionAsString = "Noclip";
                 break;

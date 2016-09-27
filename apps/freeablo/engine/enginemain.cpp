@@ -93,7 +93,7 @@ namespace Engine
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 
-        FAGui::GuiManager guiManager(player->mInventory, *this, characterClass);
+        mGuiManager = std::make_shared<FAGui::GuiManager>(player->mInventory, *this, characterClass);
 
         // -1 represents the main menu
         if(currentLevel != -1 && isServer)
@@ -103,7 +103,7 @@ namespace Engine
             FAWorld::GameLevel& level = *world.getCurrentLevel();
 
             player->mPos = FAWorld::Position(level.upStairsPos().first, level.upStairsPos().second);
-            guiManager.showIngameGui();
+            mGuiManager->showIngameGui();
         }
         else
         {
@@ -111,11 +111,11 @@ namespace Engine
             bool showTitleScreen = settings.get<bool>("Game", "showTitleScreen");
             if(showTitleScreen)
             {
-                guiManager.showTitleScreen();
+                mGuiManager->showTitleScreen();
             }
             else
             {
-                guiManager.showMainMenu();
+                mGuiManager->showMainMenu();
             }
         }
 
@@ -135,7 +135,7 @@ namespace Engine
             }
 
             netManager.update();
-            guiManager.update(mPaused);
+            mGuiManager->update(mPaused);
 
             FAWorld::GameLevel* level = world.getCurrentLevel();
             FARender::RenderState* state = renderer.getFreeState();
@@ -177,6 +177,10 @@ namespace Engine
         if(action == QUIT)
         {
             stop();
+        }
+        else if (action == INVENTORY)
+        {
+            mGuiManager->toggleDialogue("resources/gui/inventory.rml");
         }
         else if(action == NOCLIP)
         {
