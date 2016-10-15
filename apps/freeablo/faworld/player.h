@@ -11,6 +11,7 @@ namespace FAWorld
 
         public:
             Player();
+            Player(const std::string& className, const DiabloExe::CharacterStats& charStats);
             virtual ~Player();
             Inventory mInventory;
             void setSpriteClass(std::string className);
@@ -28,6 +29,8 @@ namespace FAWorld
             }
 
         private:
+            void init(const std::string& className, const DiabloExe::CharacterStats& charStats);
+
             // these "Fmt" vars are just used by getCurrentAnim
             std::string mFmtClassName;
             std::string mFmtClassCode;

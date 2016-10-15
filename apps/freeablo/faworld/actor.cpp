@@ -126,11 +126,10 @@ namespace FAWorld
             const std::string& walkAnimPath,
             const std::string& idleAnimPath,
             const Position& pos,
-            const std::string& dieAnimPath,
-            ActorStats* stats):
+            const std::string& dieAnimPath
+            ):
         mPos(pos),
         mFrame(0),        
-        mStats(stats),
         mIsEnemy(false),
         mAnimState(AnimState::idle)
     {
@@ -241,11 +240,6 @@ namespace FAWorld
             retval = mIdleAnim;
         
         return retval;
-    }
-
-    void Actor::setStats(ActorStats * stats)
-    {
-        mStats = stats;
     }
 
     void Actor::setAnimation(AnimState::AnimState state, bool reset)

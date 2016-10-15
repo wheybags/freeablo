@@ -16,13 +16,12 @@ namespace FAWorld
 
         public:
             Monster();
-            Monster(const DiabloExe::Monster& monster, Position pos, ActorStats * stats=nullptr);
+            Monster(const DiabloExe::Monster& monster, Position pos);
             void init();
             std::string getDieWav();
             std::string getHitWav();
 
         private:
-            std::string mAnimPath;
             std::string mSoundPath;
 
             template <class Stream>
