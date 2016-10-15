@@ -35,6 +35,9 @@ namespace FAWorld
 
                     if(mFrame >= currentAnim->getAnimLength())
                     {
+                        if (currentAnim == mAttackAnim)
+                            isAttacking = false;
+
                         mAnimPlaying = false;
                         mFrame--;
                     }

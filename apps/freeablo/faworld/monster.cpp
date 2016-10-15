@@ -48,10 +48,17 @@ namespace FAWorld
 
     std::string Monster::getDieWav()
     {
-        boost::format fmt(mSoundPath);
-        fmt % 'd';
-        return (fmt % FALevelGen::randomInRange(1, 2)).str();
-
+        if (mSoundPath.empty())
+        {
+            printf("No sound for caller\n");
+            return "";
+        }
+        else
+        {
+            boost::format fmt(mSoundPath);
+            fmt % 'd';
+            return (fmt % FALevelGen::randomInRange(1, 2)).str();
+        }
     }
 
     std::string Monster::getHitWav()

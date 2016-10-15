@@ -717,7 +717,7 @@ namespace FAWorld
                 }
             }
             if(mActor->mStats != NULL)
-                mActor->mStats->recalculateDerivedStats();;
+                mActor->mStats->recalculateDerivedStats();
         }
 
     std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t> > &Inventory::getTotalEffects()

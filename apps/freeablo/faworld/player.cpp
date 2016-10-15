@@ -31,6 +31,7 @@ namespace FAWorld
         else if (className == "Sorceror")
             mStats = new FAWorld::MageStats(charStats, this);
         
+        mStats->setActor(this);
         mStats->recalculateDerivedStats();
         
         mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1);

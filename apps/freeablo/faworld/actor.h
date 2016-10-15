@@ -193,6 +193,11 @@ namespace FAWorld
                         mHitAnim = netManager->getServerSprite(hitAnimIndex);
                 }
 
+                serialise_bool(stream, mIsDead);
+
+                if(mStats)
+                    serialise_object(stream, *mStats);
+
                 return Serial::Error::Success;
             }
 

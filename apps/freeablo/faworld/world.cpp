@@ -251,7 +251,6 @@ namespace FAWorld
 
     void World::stopPlayerActions()
     {
-        getCurrentPlayer()->isAttacking = false;
         getCurrentPlayer()->isTalking = false;
     }
 
