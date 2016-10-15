@@ -80,13 +80,42 @@ namespace FAWorld
             virtual int32_t getCurrentHP();
             virtual void recalculateDerivedStats(){}
 
+            template <class Stream>
+            Serial::Error::Error faSerial(Stream& stream)
+            {
+                serialise_int32(stream, mStrength);
+                serialise_int32(stream, mMagic);
+                serialise_int32(stream, mDexterity);
+                serialise_int32(stream, mVitality);
+                serialise_int32(stream, mMana);
+                serialise_int32(stream, mCurrentMana);
+                serialise_int32(stream, mHP);
+                serialise_int32(stream, mCurrentHP);
+                serialise_int32(stream, mMonsterType);
+
+                return Serial::Error::Success;
+            }
+
         protected:
-            const std::vector<uint32_t> mExpForLevel;
             virtual void clearDerivedStats();
+
+            // these attributes are synced by multiplayer
+            // the rest are left at default values on clients for now
             uint32_t mStrength;
             uint32_t mMagic;
             uint32_t mDexterity;
             uint32_t mVitality;
+            uint32_t mMana = 0;
+            uint32_t mCurrentMana = 0;
+            uint32_t mHP = 0;
+            int32_t mCurrentHP = 0;
+            uint32_t mMonsterType;
+
+
+
+
+
+            const std::vector<uint32_t> mExpForLevel;
             uint32_t mLevel;
             uint32_t mLevelPoints;
             uint32_t mExp;
@@ -113,10 +142,6 @@ namespace FAWorld
             uint32_t mSpentLevelsOnMagic=0;
             uint32_t mSpentLevelsOnDexterity=0;
             uint32_t mSpentLevelsOnVitality=0;
-            uint32_t mMana=0;
-            uint32_t mCurrentMana=0;
-            uint32_t mHP=0;
-            int32_t mCurrentHP=0;
             uint32_t mBonusStrength=0;
             uint32_t mBonusMagic=0;
             uint32_t mBonusDexterity=0;
@@ -148,7 +173,6 @@ namespace FAWorld
             double mSwingSpeed=0.0;
             double mHitRecovery=0.0;
             double mSecondAttackDamageDone=0.0;
-            uint32_t mMonsterType;
             uint8_t mLevelPointsToSpend;
             Actor * mActor;
     };

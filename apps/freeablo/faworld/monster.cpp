@@ -6,6 +6,7 @@
 #include "../engine/threadmanager.h"
 
 #include "world.h"
+#include "actorstats.h"
 
 #include <boost/format.hpp>
 
@@ -26,14 +27,19 @@ namespace FAWorld
     Monster::Monster()
     {
         init();
+
+        DiabloExe::Monster dMonster; //TODO: hack
+        mStats = new FAWorld::ActorStats(dMonster);
     }
 
-    Monster::Monster(const DiabloExe::Monster& monster, Position pos, ActorStats *stats):
-        Actor("", "", pos, "", stats), mAnimPath(monster.cl2Path), mSoundPath(monster.soundPath)
+    Monster::Monster(const DiabloExe::Monster& monster, Position pos):
+        Actor("", "", pos, ""), mSoundPath(monster.soundPath)
     {
         init();
 
-        boost::format fmt(mAnimPath); 
+        mStats = new FAWorld::ActorStats(monster);
+
+        boost::format fmt(monster.cl2Path);
         mWalkAnim = FARender::Renderer::get()->loadImage((fmt % 'w').str());
         mIdleAnim = FARender::Renderer::get()->loadImage((fmt % 'n').str());
         mDieAnim =  FARender::Renderer::get()->loadImage((fmt % 'd').str());
@@ -42,10 +48,17 @@ namespace FAWorld
 
     std::string Monster::getDieWav()
     {
-        boost::format fmt(mSoundPath);
-        fmt % 'd';
-        return (fmt % FALevelGen::randomInRange(1, 2)).str();
-
+        if (mSoundPath.empty())
+        {
+            printf("No sound for caller\n");
+            return "";
+        }
+        else
+        {
+            boost::format fmt(mSoundPath);
+            fmt % 'd';
+            return (fmt % FALevelGen::randomInRange(1, 2)).str();
+        }
     }
 
     std::string Monster::getHitWav()

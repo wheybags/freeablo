@@ -151,13 +151,12 @@ namespace Engine
         bool packetFull = false;
         for (auto actor : allActors)
         {
-            if (((bool)dynamic_cast<FAWorld::Monster*>(actor)))
-                continue;
-
             if (!packetFull)
             {
                 int32_t classId = actor->getClassId();
                 int32_t actorId = actor->getId();
+
+                int64_t startPos = packet.writer.tell();
 
                 if (err == Serial::Error::Success)
                     err = packet.writer.handleInt<0, 1024>(classId);
@@ -172,6 +171,7 @@ namespace Engine
                 }
                 else if (err == Serial::Error::EndOfStream)
                 {
+                    packet.writer.seek(startPos, Serial::BSPos::Start);
                     packetFull = true;
                 }
                 else

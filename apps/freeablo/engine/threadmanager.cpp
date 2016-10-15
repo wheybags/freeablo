@@ -71,6 +71,12 @@ namespace Engine
 
     void ThreadManager::playSound(const std::string& path)
     {
+        if (path == "")
+        {
+            std::cerr << "Attempt to play invalid sound!" << std::endl;
+            return;
+        }
+
         Message message;
         message.type = PLAY_SOUND;
         message.data.soundPath = new std::string(path);

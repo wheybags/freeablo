@@ -927,8 +927,7 @@ namespace FALevelGen
             std::string name = possibleMonsters[randomInRange(0, possibleMonsters.size()-1)]->monsterName;
             DiabloExe::Monster monster =  exe.getMonster(name);
 
-            FAWorld::ActorStats * stats = new FAWorld::ActorStats(monster);
-            FAWorld::Monster * monsterObj = new FAWorld::Monster(monster, FAWorld::Position(xPos, yPos), stats);
+            FAWorld::Monster * monsterObj = new FAWorld::Monster(monster, FAWorld::Position(xPos, yPos));
             actors.push_back(monsterObj);
         }
     }

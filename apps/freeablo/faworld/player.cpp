@@ -1,6 +1,7 @@
 #include "player.h"
 #include "world.h"
 #include "actorstats.h"
+#include "characterstats.h"
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
 #include <boost/python.hpp>
@@ -11,6 +12,28 @@ namespace FAWorld
 
     Player::Player() : Actor(), mInventory(this)
     {
+        //TODO: hack - need to think of some more elegant way of handling Actors in general
+        DiabloExe::CharacterStats stats;
+        init("Warrior", stats);
+    }
+    
+    Player::Player(const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor(), mInventory(this)
+    {
+        init(className, charStats);
+    }
+
+    void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
+    {
+        if (className == "Warrior")
+            mStats = new FAWorld::MeleeStats(charStats, this);
+        else if (className == "Rogue")
+            mStats = new FAWorld::RangerStats(charStats, this);
+        else if (className == "Sorceror")
+            mStats = new FAWorld::MageStats(charStats, this);
+        
+        mStats->setActor(this);
+        mStats->recalculateDerivedStats();
+        
         mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1);
         mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1);
         mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(0.2);

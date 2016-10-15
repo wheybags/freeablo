@@ -49,11 +49,10 @@ namespace FAWorld
             Actor(const std::string& walkAnimPath="",
                   const std::string& idleAnimPath="",
                   const Position& pos = Position(0,0),
-                  const std::string& dieAnimPath="",
-                  ActorStats* stats=nullptr);
+                  const std::string& dieAnimPath=""
+                  );
 
             void update(bool noclip, size_t ticksPassed);
-            void setStats(ActorStats* stats);
             virtual ~Actor();
             virtual std::string getDieWav(){return "";}
             virtual std::string getHitWav(){return "";}
@@ -193,6 +192,11 @@ namespace FAWorld
                     if (hitAnimIndex)
                         mHitAnim = netManager->getServerSprite(hitAnimIndex);
                 }
+
+                serialise_bool(stream, mIsDead);
+
+                if(mStats)
+                    serialise_object(stream, *mStats);
 
                 return Serial::Error::Success;
             }
