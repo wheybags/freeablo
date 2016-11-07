@@ -7,7 +7,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 
 namespace Audio
@@ -15,7 +15,7 @@ namespace Audio
     void init(size_t channelCount)
     {
         Mix_Init(0);
-        if(Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0)
+        if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
             std::cerr << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << std::endl;
 
         Mix_AllocateChannels(channelCount);
@@ -29,13 +29,12 @@ namespace Audio
 
     Music* loadMusic(const std::string& path)
     {
-        FAIO::FAFile* f = FAIO::FAfopen(path);
-        size_t len = FAIO::FAsize(f);
+        FAIO::FAFileObject f(path);
+        size_t len = f.FAsize();
         uint8_t* buffer = new uint8_t[len];
-        FAIO::FAfread(buffer, 1, len, f);
-        FAIO::FAfclose(f);
+        f.FAfread(buffer, 1, len);
 
-        SDL_RWops *rw = SDL_RWFromMem(buffer, len); 
+        SDL_RWops *rw = SDL_RWFromMem(buffer, len);
 
         Music* mus = (Music*) new std::pair<Mix_Music*, uint8_t*>(Mix_LoadMUS_RW(rw, 1), buffer);
         return mus;
@@ -56,13 +55,12 @@ namespace Audio
 
     Sound* loadSound(const std::string& path)
     {
-        FAIO::FAFile* f = FAIO::FAfopen(path);
-        size_t len = FAIO::FAsize(f);
+        FAIO::FAFileObject f(path);
+        size_t len = f.FAsize();
         uint8_t* buffer = new uint8_t[len];
-        FAIO::FAfread(buffer, 1, len, f);
-        FAIO::FAfclose(f);
+        f.FAfread(buffer, 1, len);
 
-        SDL_RWops *rw = SDL_RWFromMem(buffer, len); 
+        SDL_RWops *rw = SDL_RWFromMem(buffer, len);
 
         Sound* sound = (Sound*) new std::pair<Mix_Chunk*, uint8_t*>(Mix_LoadWAV_RW(rw, 1), buffer);
         return sound;

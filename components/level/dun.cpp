@@ -3,24 +3,22 @@
 
 #include "dun.h"
 
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 namespace Level
 {
     Dun::Dun(const std::string& filename)
     {
-        FAIO::FAFile* f = FAIO::FAfopen(filename);
+        FAIO::FAFileObject f(filename);
         
         int16_t temp;        
-        FAIO::FAfread(&temp, 2, 1, f);
+        f.FAfread(&temp, 2, 1);
         mWidth = temp;
-        FAIO::FAfread(&temp, 2, 1, f);
+        f.FAfread(&temp, 2, 1);
         mHeight = temp;
        
         mBlocks.resize(mWidth*mHeight);
-        FAIO::FAfread(&mBlocks[0], 2, mWidth*mHeight, f);
-
-        FAIO::FAfclose(f);
+        f.FAfread(&mBlocks[0], 2, mWidth*mHeight);
 
         std::cout << "w: " << mWidth << ", h: " << mHeight << std::endl;
     }

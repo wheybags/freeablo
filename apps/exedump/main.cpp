@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 int main(int, char**)
 {
@@ -12,11 +12,11 @@ int main(int, char**)
     std::string pathEXE = settings.get<std::string>("Game", "PathEXE");
     std::string pathMPQ = settings.get<std::string>("Game", "PathMPQ");
 
-    FAIO::init(pathMPQ);
+    FAIO::FAFileObject::init(pathMPQ);
 
     DiabloExe::DiabloExe exe(pathEXE);
     std::cout << exe.dump();
 
-    FAIO::quit();
+    FAIO::FAFileObject::quit();
     return 0;
 }

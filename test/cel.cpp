@@ -10,7 +10,7 @@
 
 #define private public
 #include <cel/celfile.h>
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 #include <misc/md5.h>
 #include <misc/stringops.h>
 
@@ -308,12 +308,12 @@ TEST (Cel, TestOpen)
 
 int main(int argc, char **argv) 
 {
-    FAIO::init();    
+    FAIO::FAFileObject::init();    
 
     ::testing::InitGoogleTest(&argc, argv);
     int retval = RUN_ALL_TESTS();
 
-    FAIO::quit();
+    FAIO::FAFileObject::quit();
 
     return retval;
 }

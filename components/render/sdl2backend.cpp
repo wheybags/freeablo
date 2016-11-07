@@ -14,7 +14,7 @@
 #include "../level/level.h"
 #include <misc/stringops.h>
 #include <misc/savePNG.h>
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 #include <Rocket/Core.h>
 #include <Rocket/Core/Input.h>
@@ -218,15 +218,14 @@ namespace Render
 
     SDL_Surface* loadNonCelImage(const std::string& sourcePath, const std::string& extension)
     {
-        FAIO::FAFile* file_handle = FAIO::FAfopen(sourcePath);
-        if (!file_handle)
+        FAIO::FAFileObject file_handle(sourcePath);
+        if (!file_handle.isValid())
             return NULL;
 
-        size_t buffer_size = FAIO::FAsize(file_handle);
+        size_t buffer_size = file_handle.FAsize();
 
         char* buffer = new char[buffer_size];
-        FAIO::FAfread(buffer, 1, buffer_size, file_handle);
-        FAIO::FAfclose(file_handle);
+        file_handle.FAfread(buffer, 1, buffer_size);
 
         SDL_Surface* s = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.c_str());
         delete[] buffer;

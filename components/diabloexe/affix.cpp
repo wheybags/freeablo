@@ -6,27 +6,27 @@
 namespace DiabloExe
 {
 
-    Affix::Affix(FAIO::FAFile *exe, size_t codeOffset)
+    Affix::Affix(FAIO::FAFileObject& exe, size_t codeOffset)
     {
-        uint32_t nameTemp = FAIO::read32(exe);
-        mEffect   = FAIO::read32(exe);
-        mMinEffect      = FAIO::read32(exe);
-        mMaxEffect      = FAIO::read32(exe);
-        mQualLevel      = FAIO::read32(exe);
+        uint32_t nameTemp = exe.read32();
+        mEffect   = exe.read32();
+        mMinEffect      = exe.read32();
+        mMaxEffect      = exe.read32();
+        mQualLevel      = exe.read32();
 
-        mBowjewelProb = FAIO::read8(exe);
-        mWSProb       = FAIO::read8(exe);
-        mASProb       = FAIO::read8(exe);
-        mUnknown0     = FAIO::read8(exe);
+        mBowjewelProb = exe.read8();
+        mWSProb       = exe.read8();
+        mASProb       = exe.read8();
+        mUnknown0     = exe.read8();
 
-        mExcludedCombination0 = FAIO::read32(exe);
-        mExcludedCombination1 = FAIO::read32(exe);
+        mExcludedCombination0 = exe.read32();
+        mExcludedCombination1 = exe.read32();
 
-        mCursed     = FAIO::read32(exe);
-        mMinGold    = FAIO::read32(exe);
-        mMaxGold    = FAIO::read32(exe);
-        mMultiplier = FAIO::read32(exe);
-        mName     = FAIO::readCStringFromWin32Binary(exe, nameTemp, codeOffset);
+        mCursed     = exe.read32();
+        mMinGold    = exe.read32();
+        mMaxGold    = exe.read32();
+        mMultiplier = exe.read32();
+        mName     = exe.readCStringFromWin32Binary(nameTemp, codeOffset);
 
 
 

@@ -2,7 +2,7 @@
 #define UNIQUEITEM_H
 #include <stdint.h>
 #include <string>
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 namespace DiabloExe
 {
@@ -48,7 +48,7 @@ namespace DiabloExe
         uint32_t mMaxRange5;
         UniqueItem(){}
     private:
-        UniqueItem(FAIO::FAFile * exe, size_t codeOffset);
+        UniqueItem(FAIO::FAFileObject& exe, size_t codeOffset);
         friend class DiabloExe;
 
 

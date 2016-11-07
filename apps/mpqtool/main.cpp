@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 int main(int argc, char** argv)
 {
@@ -18,9 +18,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    FAIO::init();
+    FAIO::FAFileObject::init();
 
-    FAIO::FAFile* file = FAIO::FAfopen(argv[1]);
+    FAIO::FAFileObject file(argv[1]);
     FILE* output = fopen(argv[2], "w");
 
     int read = 1;
@@ -28,12 +28,12 @@ int main(int argc, char** argv)
 
     while(read > 0)
     {
-        read = FAIO::FAfread(buffer, 1, sizeof(buffer), file);
+        read = file.FAfread(buffer, 1, sizeof(buffer));
         fwrite(buffer, 1, read, output);
     }
 
     fclose(output);
 
-    FAIO::quit();
+    FAIO::FAFileObject::quit();
     return 0;
 }

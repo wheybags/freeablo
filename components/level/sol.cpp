@@ -1,18 +1,16 @@
 #include "sol.h"
 
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 namespace Level
 {
     Sol::Sol(const std::string& path)
     {
-        FAIO::FAFile* solF = FAIO::FAfopen(path);
-        size_t size = FAIO::FAsize(solF);
+        FAIO::FAFileObject solF(path);
+        size_t size = solF.FAsize();
         mData.resize(size);
 
-        FAIO::FAfread(&mData[0], 1, size, solF);
-
-        FAIO::FAfclose(solF);
+        solF.FAfread(&mData[0], 1, size);
     }
 
     bool Sol::passable(size_t index) const

@@ -5,7 +5,7 @@ add_library(Cel
     cel/celdecoder.cpp cel/celdecoder.h)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
-add_library(FAIO faio/faio.cpp faio/faio.h)
+add_library(FAIO faio/faio.cpp faio/faio.h faio/fafileobject.h faio/fafileobject.cpp)
 target_link_libraries(FAIO StormLib ${Boost_LIBRARIES})
 set_target_properties(FAIO PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

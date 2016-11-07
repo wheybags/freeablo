@@ -28,7 +28,7 @@ namespace FAWorld
             mStats = new FAWorld::MeleeStats(charStats, this);
         else if (className == "Rogue")
             mStats = new FAWorld::RangerStats(charStats, this);
-        else if (className == "Sorceror")
+        else if (className == "Sorcerer")
             mStats = new FAWorld::MageStats(charStats, this);
         
         mStats->setActor(this);

@@ -252,14 +252,14 @@ namespace Input
                     e.vals.mouseMove.y = event.motion.y;
                     break;
                 }
-				
-				case SDL_WINDOWEVENT:
-				{
-					if(event.window.event == SDL_WINDOWEVENT_RESIZED)
-						Render::resize(event.window.data1, event.window.data2);
+                
+                case SDL_WINDOWEVENT:
+                {
+                    if(event.window.event == SDL_WINDOWEVENT_RESIZED)
+                        Render::resize(event.window.data1, event.window.data2);
 
-					break;
-				}
+                    break;
+                }
 
                 case SDL_QUIT:
                 {

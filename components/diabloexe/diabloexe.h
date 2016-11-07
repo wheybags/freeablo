@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <settings/settings.h>
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 #include "monster.h"
 #include "npc.h"
@@ -45,12 +45,12 @@ namespace DiabloExe
             std::string getVersion(const std::string& pathEXE);
 
 
-            void loadMonsters(FAIO::FAFile* exe);
-            void loadNpcs(FAIO::FAFile* exe);
-            void loadBaseItems(FAIO::FAFile* exe);
-            void loadUniqueItems(FAIO::FAFile* exe);
-            void loadAffixes(FAIO::FAFile* exe);
-            void loadCharacterStats(FAIO::FAFile * exe);
+            void loadMonsters(FAIO::FAFileObject& exe);
+            void loadNpcs(FAIO::FAFileObject& exe);
+            void loadBaseItems(FAIO::FAFileObject& exe);
+            void loadUniqueItems(FAIO::FAFileObject& exe);
+            void loadAffixes(FAIO::FAFileObject& exe);
+            void loadCharacterStats(FAIO::FAFileObject& exe);
 
 
 
