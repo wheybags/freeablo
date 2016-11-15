@@ -9,48 +9,48 @@ namespace DiabloExe
 
     BaseItem::BaseItem(){}
 
-    BaseItem::BaseItem(FAIO::FAFile *exe, size_t codeOffset)
+    BaseItem::BaseItem(FAIO::FAFileObject& exe, size_t codeOffset)
     {
-        activTrigger = FAIO::read32(exe);
+        activTrigger = exe.read32();
 
-        itemType = FAIO::read8(exe);
-        equipLoc = FAIO::read8(exe);
+        itemType = exe.read8();
+        equipLoc = exe.read8();
 
-        unknown0 = FAIO::read16(exe);
+        unknown0 = exe.read16();
 
-        graphicValue = FAIO::read32(exe);
+        graphicValue = exe.read32();
 
-        itemCode = FAIO::read8(exe);
-        uniqCode = FAIO::read8(exe);
+        itemCode = exe.read8();
+        uniqCode = exe.read8();
 
-        unknown1 = FAIO::read16(exe);
+        unknown1 = exe.read16();
 
 
-        uint32_t tempName = FAIO::read32(exe);
-        uint32_t tempSecondName = FAIO::read32(exe);
-        qualityLevel = FAIO::read32(exe);
-        durability = FAIO::read32(exe);
-        minAttackDamage = FAIO::read32(exe);
-        maxAttackDamage = FAIO::read32(exe);
-        minArmourClass  = FAIO::read32(exe);
-        maxArmourClass  = FAIO::read32(exe);
+        uint32_t tempName = exe.read32();
+        uint32_t tempSecondName = exe.read32();
+        qualityLevel = exe.read32();
+        durability = exe.read32();
+        minAttackDamage = exe.read32();
+        maxAttackDamage = exe.read32();
+        minArmourClass  = exe.read32();
+        maxArmourClass  = exe.read32();
 
-        reqStr = FAIO::read8(exe);
-        reqMagic = FAIO::read8(exe);
-        reqDex   = FAIO::read8(exe);
-        reqVit   = FAIO::read8(exe);
+        reqStr = exe.read8();
+        reqMagic = exe.read8();
+        reqDex   = exe.read8();
+        reqVit   = exe.read8();
 
-        specialEffect = FAIO::read32(exe);
-        magicCode = FAIO::read32(exe);
-        spellCode = FAIO::read32(exe);
-        useOnce = FAIO::read32(exe);
-        price1 = FAIO::read32(exe);
-        price2 = FAIO::read32(exe);
+        specialEffect = exe.read32();
+        magicCode = exe.read32();
+        spellCode = exe.read32();
+        useOnce = exe.read32();
+        price1 = exe.read32();
+        price2 = exe.read32();
 
-        itemName = FAIO::readCStringFromWin32Binary(exe, tempName, codeOffset);
+        itemName = exe.readCStringFromWin32Binary(tempName, codeOffset);
         if(tempSecondName)
         {
-            itemSecondName = FAIO::readCStringFromWin32Binary(exe, tempSecondName, codeOffset);
+            itemSecondName = exe.readCStringFromWin32Binary(tempSecondName, codeOffset);
         }
         else
         {

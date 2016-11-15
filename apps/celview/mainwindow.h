@@ -12,7 +12,7 @@
 #include <misc/enablewarn.h>
 
 #include <settings/settings.h>
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 #include <render/render.h>
 
 namespace Ui {

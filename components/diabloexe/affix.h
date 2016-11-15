@@ -4,7 +4,7 @@
 
 #include <string>
 #include <map>
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 
 
@@ -37,7 +37,7 @@ namespace DiabloExe
         Affix(){}
 
     private:
-        Affix(FAIO::FAFile* exe, size_t codeOffset);
+        Affix(FAIO::FAFileObject& exe, size_t codeOffset);
         friend class DiabloExe;
 
 

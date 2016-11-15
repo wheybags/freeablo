@@ -9,6 +9,7 @@
 namespace FAIO
 {
     struct FAFile;
+	class FAFileObject;
 }
 
 namespace DiabloExe
@@ -92,7 +93,7 @@ namespace DiabloExe
             Monster() {} 
 
         private:
-            Monster(FAIO::FAFile* exe, size_t codeOffset);
+            Monster(FAIO::FAFileObject& exe, size_t codeOffset);
 
             friend class DiabloExe;
     };

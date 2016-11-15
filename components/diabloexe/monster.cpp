@@ -1,89 +1,89 @@
 #include "monster.h"
 
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 #include <iostream>
 #include <sstream>
 
 namespace DiabloExe
 {
-    Monster::Monster(FAIO::FAFile* exe, size_t codeOffset)
+    Monster::Monster(FAIO::FAFileObject& exe, size_t codeOffset)
     {
-        animSize = FAIO::read32(exe);
-        seedSize = FAIO::read32(exe);
-        uint32_t cl2Tmp = FAIO::read32(exe);
-        secondAttack = FAIO::read32(exe);
-        uint32_t soundTmp = FAIO::read32(exe);
-        specialSound = FAIO::read32(exe);
+        animSize = exe.read32();
+        seedSize = exe.read32();
+        uint32_t cl2Tmp = exe.read32();
+        secondAttack = exe.read32();
+        uint32_t soundTmp = exe.read32();
+        specialSound = exe.read32();
 
-        usesTrn = FAIO::read32(exe);
-        uint32_t trnTmp = FAIO::read32(exe);
+        usesTrn = exe.read32();
+        uint32_t trnTmp = exe.read32();
 
-        idleFrameSet = FAIO::read32(exe);
-        walkFrameSet = FAIO::read32(exe);
-        attackFrameSet = FAIO::read32(exe);
-        recoveryFrameSet = FAIO::read32(exe);
-        deathFrameSet = FAIO::read32(exe);
-        secondAttackFrameSet = FAIO::read32(exe);
+        idleFrameSet = exe.read32();
+        walkFrameSet = exe.read32();
+        attackFrameSet = exe.read32();
+        recoveryFrameSet = exe.read32();
+        deathFrameSet = exe.read32();
+        secondAttackFrameSet = exe.read32();
 
-        idlePlayback = FAIO::read32(exe);
-        walkPlayback = FAIO::read32(exe);
-        attackPlayback = FAIO::read32(exe);
-        recoveryPlayback = FAIO::read32(exe);
-        deathPlayback = FAIO::read32(exe);
-        secondAttackPlayback = FAIO::read32(exe);
+        idlePlayback = exe.read32();
+        walkPlayback = exe.read32();
+        attackPlayback = exe.read32();
+        recoveryPlayback = exe.read32();
+        deathPlayback = exe.read32();
+        secondAttackPlayback = exe.read32();
         
-        uint32_t nameTmp = FAIO::read32(exe);
+        uint32_t nameTmp = exe.read32();
 
-        minDunLevel = FAIO::read8(exe);
-        maxDunLevel = FAIO::read8(exe);
+        minDunLevel = exe.read8();
+        maxDunLevel = exe.read8();
 
-        level = FAIO::read16(exe);
+        level = exe.read16();
 
-        minHp = FAIO::read32(exe);
-        maxHp = FAIO::read32(exe);
+        minHp = exe.read32();
+        maxHp = exe.read32();
 
-        attackType = FAIO::read8(exe);
+        attackType = exe.read8();
 
-        unknown1 = FAIO::read8(exe);
-        unknown2 = FAIO::read8(exe);
-        unknown3 = FAIO::read8(exe);
-        unknown4 = FAIO::read8(exe);
+        unknown1 = exe.read8();
+        unknown2 = exe.read8();
+        unknown3 = exe.read8();
+        unknown4 = exe.read8();
 
-        intelligence = FAIO::read8(exe);
+        intelligence = exe.read8();
 
-        unknown5 = FAIO::read8(exe);
-        unknown6 = FAIO::read8(exe);
+        unknown5 = exe.read8();
+        unknown6 = exe.read8();
 
-        subType = FAIO::read8(exe);
+        subType = exe.read8();
 
-        toHit = FAIO::read8(exe);
-        hitFrame = FAIO::read8(exe);
-        minDamage = FAIO::read8(exe);
-        maxDamage = FAIO::read8(exe);
+        toHit = exe.read8();
+        hitFrame = exe.read8();
+        minDamage = exe.read8();
+        maxDamage = exe.read8();
 
-        toHitSecond = FAIO::read8(exe);
-        hitFrameSecond = FAIO::read8(exe);
-        minDamageSecond = FAIO::read8(exe);
-        maxDamageSecond = FAIO::read8(exe);
+        toHitSecond = exe.read8();
+        hitFrameSecond = exe.read8();
+        minDamageSecond = exe.read8();
+        maxDamageSecond = exe.read8();
 
-        armourClass = FAIO::read8(exe);
+        armourClass = exe.read8();
 
-        type = FAIO::read16(exe);
+        type = exe.read16();
 
-        normalResistanceImmunitiesFlags = FAIO::read16(exe);
-        hellResistanceImmunitiesFlags = FAIO::read16(exe);
+        normalResistanceImmunitiesFlags = exe.read16();
+        hellResistanceImmunitiesFlags = exe.read16();
 
-        drops = FAIO::read16(exe);
+        drops = exe.read16();
 
-        selectionOutline = FAIO::read16(exe);
+        selectionOutline = exe.read16();
 
-        exp = FAIO::read32(exe);
+        exp = exe.read32();
 
-        cl2Path = FAIO::readCStringFromWin32Binary(exe, cl2Tmp, codeOffset);
-        soundPath = FAIO::readCStringFromWin32Binary(exe, soundTmp, codeOffset);
-        trnPath = FAIO::readCStringFromWin32Binary(exe, trnTmp, codeOffset);
-        monsterName = FAIO::readCStringFromWin32Binary(exe, nameTmp, codeOffset);
+        cl2Path = exe.readCStringFromWin32Binary(cl2Tmp, codeOffset);
+        soundPath = exe.readCStringFromWin32Binary(soundTmp, codeOffset);
+        trnPath = exe.readCStringFromWin32Binary(trnTmp, codeOffset);
+        monsterName = exe.readCStringFromWin32Binary(nameTmp, codeOffset);
     } 
     
     std::string Monster::dump() const

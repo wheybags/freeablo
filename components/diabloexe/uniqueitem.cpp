@@ -3,43 +3,43 @@
 namespace DiabloExe
 {
 
-    UniqueItem::UniqueItem(FAIO::FAFile *exe, size_t codeOffset)
+    UniqueItem::UniqueItem(FAIO::FAFileObject& exe, size_t codeOffset)
     {
-        mNamePtr = FAIO::read32(exe);
+        mNamePtr = exe.read32();
 
-        mItemType = FAIO::read8(exe);
+        mItemType = exe.read8();
 
-        mQualityLevel = FAIO::read8(exe);
+        mQualityLevel = exe.read8();
 
-        mNumEffects = FAIO::read16(exe);
+        mNumEffects = exe.read16();
 
-        mGoldValue = FAIO::read32(exe);
+        mGoldValue = exe.read32();
 
-        mEffect0 = FAIO::read32(exe);
-        mMinRange0 = FAIO::read32(exe);
-        mMaxRange0 = FAIO::read32(exe);
+        mEffect0 = exe.read32();
+        mMinRange0 = exe.read32();
+        mMaxRange0 = exe.read32();
 
-        mEffect1 = FAIO::read32(exe);
-        mMinRange1 = FAIO::read32(exe);
-        mMaxRange1 = FAIO::read32(exe);
+        mEffect1 = exe.read32();
+        mMinRange1 = exe.read32();
+        mMaxRange1 = exe.read32();
 
-        mEffect2 = FAIO::read32(exe);
-        mMinRange2 = FAIO::read32(exe);
-        mMaxRange2 = FAIO::read32(exe);
+        mEffect2 = exe.read32();
+        mMinRange2 = exe.read32();
+        mMaxRange2 = exe.read32();
 
-        mEffect3 = FAIO::read32(exe);
-        mMinRange3 = FAIO::read32(exe);
-        mMaxRange3 = FAIO::read32(exe);
+        mEffect3 = exe.read32();
+        mMinRange3 = exe.read32();
+        mMaxRange3 = exe.read32();
 
-        mEffect4 = FAIO::read32(exe);
-        mMinRange4 = FAIO::read32(exe);
-        mMaxRange4 = FAIO::read32(exe);
+        mEffect4 = exe.read32();
+        mMinRange4 = exe.read32();
+        mMaxRange4 = exe.read32();
 
-        mEffect5 = FAIO::read32(exe);
-        mMinRange5 = FAIO::read32(exe);
-        mMaxRange5 = FAIO::read32(exe);
+        mEffect5 = exe.read32();
+        mMinRange5 = exe.read32();
+        mMaxRange5 = exe.read32();
 
-        mName = FAIO::readCStringFromWin32Binary(exe, mNamePtr, codeOffset);
+        mName = exe.readCStringFromWin32Binary(mNamePtr, codeOffset);
 
 
 

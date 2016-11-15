@@ -4,7 +4,7 @@
 
 #include <string>
 #include <map>
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 
 
 
@@ -51,7 +51,7 @@ namespace DiabloExe
         BaseItem();
 
     private:
-        BaseItem(FAIO::FAFile* exe, size_t codeOffset);
+        BaseItem(FAIO::FAFileObject& exe, size_t codeOffset);
         friend class DiabloExe;
 
 

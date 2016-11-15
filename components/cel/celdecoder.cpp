@@ -2,7 +2,7 @@
 #include <set>
 #include <functional>
 #include <misc/stringops.h>
-#include <faio/faio.h>
+#include <faio/fafileobject.h>
 #include "celdecoder.h"
 
 namespace Cel
@@ -143,8 +143,8 @@ namespace Cel
     {
         // Open CEL file.
 
-        FAIO::FAFile* file = FAIO::FAfopen(mCelPath);
-        if(file == NULL) {
+        FAIO::FAFileObject file(mCelPath);
+        if(!file.isValid()) {
             return;
         }
 
@@ -152,14 +152,14 @@ namespace Cel
         uint32_t frameCount = 0;
         uint32_t firstWord = 0;
         uint32_t repeat = 1;
-        FAIO::FAfread(&firstWord, 4, 1, file);
+        file.FAfread(&firstWord, 4, 1);
 
         std::vector<uint32_t> headerOffsets;
 
         // If firstWord == 32 then it is archive
         // that contains 8 cels and information about offsets in header.
 
-        FAIO::FAfseek(file, 0, SEEK_SET);
+        file.FAfseek(0, SEEK_SET);
 
         if(firstWord == 32) {
             repeat = 8;
@@ -168,7 +168,7 @@ namespace Cel
             for(uint32_t i = 0; i < repeat ; i++)
             {
                 uint32_t offset = 0;
-                FAIO::FAfread(&offset, 4, 1, file);
+                file.FAfread(&offset, 4, 1);
                 headerOffsets.push_back(offset);
             }
         }
@@ -177,22 +177,22 @@ namespace Cel
         {
             // Offset file
             if(!headerOffsets.empty()) {
-                FAIO::FAfseek(file, headerOffsets[r], SEEK_SET);
+                file.FAfseek(headerOffsets[r], SEEK_SET);
             }
 
             // Read frame count
-            FAIO::FAfread(&frameCount, 4, 1, file);
+            file.FAfread(&frameCount, 4, 1);
 
             // Read frame offsets.
             std::vector<uint32_t> frameOffsets(frameCount+1);
             for(uint32_t i = 0 ; i < frameCount + 1; i++)
             {
-                FAIO::FAfread(&frameOffsets[i], 4, 1, file);
+                file.FAfread(&frameOffsets[i], 4, 1);
             }
 
             // Magic offset that fixes everything!
             if(!headerOffsets.empty()) {
-                FAIO::FAfseek(file, headerOffsets[r] + frameOffsets[0], SEEK_SET);
+                file.FAfseek( headerOffsets[r] + frameOffsets[0], SEEK_SET);
             }
 
             // Read frame contents
@@ -203,20 +203,17 @@ namespace Cel
                 int64_t frameSize = frameEnd - frameStart;
 
                 if(frameSize < 0) {
-                    FAIO::FAfclose(file);
                     return;
                 }
 
                 mFrames.push_back(std::vector<uint8_t>(frameSize));
                 uint32_t idx = mFrames.size() - 1;
-                FAIO::FAfseek(file, mHeaderSize, SEEK_CUR);
-                FAIO::FAfread(&mFrames[idx][0], 1, frameSize, file);
+                file.FAfseek(mHeaderSize, SEEK_CUR);
+                file.FAfread(&mFrames[idx][0], 1, frameSize);
             }
 
             mAnimationLength = frameCount;
         }
-
-        FAIO::FAfclose(file);
     }
 
     void CelDecoder::decodeFrame(size_t index, FrameBytesRef frame, CelFrame& celFrame) {
