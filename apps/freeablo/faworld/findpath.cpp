@@ -126,6 +126,7 @@ namespace FAWorld
     {
         //int dx = abs(goal.first - start.first);
         //int dy = abs(goal.second - start.second);
+        UNUSED_PARAM(start);
         int minDistance = level->width() * level->width() + level->height() * level->height();
 
         Location result(-1, -1);
