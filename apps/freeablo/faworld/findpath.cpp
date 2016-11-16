@@ -146,7 +146,7 @@ namespace FAWorld
         return result;
     }
 
-    vector<FindPath::Location> FindPath::find(FindPath::Location start, FindPath::Location goal)
+    vector<FindPath::Location> FindPath::find(FindPath::Location start, FindPath::Location& goal)
     {
         unordered_map<Location, int> costSoFar;
         unordered_map<Location, Location> cameFrom;

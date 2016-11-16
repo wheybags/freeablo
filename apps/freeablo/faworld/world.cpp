@@ -268,11 +268,7 @@ namespace FAWorld
         auto level = getCurrentLevel();
         std::pair<int32_t, int32_t>& destination = player->destination();
         destination = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, *level, player->mPos);
-        //find path and save in the position value
-
-        auto findedPath = FindPath::get(level)->find(player->destination(), destination);
-        //TODO: change it.
-        mDestination = destination;
+        player->mDestination = destination; //update it.
     }
 
     size_t World::getTicksInPeriod(float seconds)

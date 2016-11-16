@@ -59,10 +59,10 @@ namespace FAWorld
     class FindPath {
     public:
 
-        typedef pair<int, int> Location;
+        typedef pair<int32_t, int32_t> Location;
 
         FindPath(GameLevelImpl * level);
-        vector<Location> find(Location start, Location goal);
+        vector<Location> find(Location start, Location& goal);
         static FindPath* get(GameLevelImpl* level);
 
     private:

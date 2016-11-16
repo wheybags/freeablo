@@ -4,25 +4,31 @@
 
 namespace FAWorld
 {
-    Position::Position(): mDist(0), mDirection(0),
-        mMoving(false), mCurrent(std::make_pair(0,0)) {}
+    Position::Position() : mDist(0), mDirection(0),
+        mMoving(false), mCurrent(std::make_pair(0, 0)), mPath(std::vector<std::pair<int32_t, int32_t>>()), mIndex(-1) {}
 
-    Position::Position(int32_t x, int32_t y): mDist(0), mDirection(0),
-        mMoving(false), mCurrent(std::make_pair(x,y)) {}
+    Position::Position(int32_t x, int32_t y) : mDist(0), mDirection(0),
+        mMoving(false), mCurrent(std::make_pair(x, y)), mPath(std::vector<std::pair<int32_t, int32_t>>()), mIndex(-1) {}
 
-    Position::Position(int32_t x, int32_t y, int32_t direction): mDist(0),
+    Position::Position(int32_t x, int32_t y, int32_t direction) : mDist(0),
         mDirection(direction), mMoving(false),
-        mCurrent(std::make_pair(x,y)) {}
+        mCurrent(std::make_pair(x, y)), mPath(std::vector<std::pair<int32_t, int32_t>>()), mIndex(-1) {}
 
     void Position::update()
     {
-        if(mMoving)
+        if (mMoving)
         {
             mDist += FAWorld::World::getSecondsPerTick() * 250;
 
-            if(mDist >= 100)
+            if (mDist >= 100)
             {
-                mCurrent = next();
+                if (mPath.size() && mIndex != -1)
+                {
+                    mCurrent = pathNext(true);
+                }
+                else {
+                    mCurrent = next();
+                }
                 mDist = 0;
             }
         }
@@ -47,71 +53,94 @@ namespace FAWorld
 
     std::pair<int32_t, int32_t> Position::next() const
     {
-        if(!mMoving)
+        if (!mMoving)
             return mCurrent;
-        
+
         std::pair<int32_t, int32_t> retval = mCurrent;
 
-        switch(mDirection)
+        switch (mDirection)
         {
-            case 0:
-            {
-                retval.first++;
-                retval.second++;
-                break;
-            }
-            
-            case 7:
-            {
-                retval.first++;
-                break;
-            }
+        case 0:
+        {
+            retval.first++;
+            retval.second++;
+            break;
+        }
 
-            case 6:
-            {
-                retval.first++;
-                retval.second--;
-                break;
-            }
+        case 7:
+        {
+            retval.first++;
+            break;
+        }
 
-            case 5:
-            {
-                retval.second--;
-                break;
-            }
-            
-            case 4:
-            {
-                retval.first--;
-                retval.second--;
-                break;
-            }
+        case 6:
+        {
+            retval.first++;
+            retval.second--;
+            break;
+        }
 
-            case 3:
-            {
-                retval.first--;
-                break;
-            }
+        case 5:
+        {
+            retval.second--;
+            break;
+        }
 
-            case 2:
-            {
-                retval.first--;
-                retval.second++;
-                break;
-            }
+        case 4:
+        {
+            retval.first--;
+            retval.second--;
+            break;
+        }
 
-            case 1:
-            {
-                retval.second++;
-                break;
-            }
+        case 3:
+        {
+            retval.first--;
+            break;
+        }
 
-            default:
-            {
-                break;
-            }
+        case 2:
+        {
+            retval.first--;
+            retval.second++;
+            break;
+        }
+
+        case 1:
+        {
+            retval.second++;
+            break;
+        }
+
+        default:
+        {
+            break;
+        }
         }
 
         return retval;
+    }
+
+    std::pair<int32_t, int32_t> Position::pathNext(bool bIncrease)
+    {
+        if (bIncrease && !mMoving)
+            return mCurrent;
+
+        if (mIndex != -1 && mPath.size() && mIndex < mPath.size() - 1)
+        {
+            int newIndex = mIndex + 1;
+            auto nextPos = mPath[newIndex];
+            if (bIncrease)
+            {
+                mIndex = newIndex;
+            }
+            return nextPos;
+        }
+        else
+        {
+            mIndex = -1;
+            mMoving = false;
+        }
+        return mCurrent;
     }
 }

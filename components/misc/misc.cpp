@@ -34,7 +34,7 @@ namespace Misc
             return 5;
         else if(angle <= 337.5 && angle >= 292.5)
             return 6;
-
+        printf("getVecDir: error angle: %f flat: %d \r\n",angle, (angle <= 22.5 && angle >= 0.0) || (angle <= 360.0 && angle >= 337.5));
         return -1; // shut up compiler
     }
 }
