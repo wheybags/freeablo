@@ -14,7 +14,7 @@ namespace FAWorld
 {
     STATIC_HANDLE_NET_OBJECT_IN_IMPL(Actor)
 
-        void Actor::update(bool noclip, size_t ticksPassed)
+    void Actor::update(bool noclip, size_t ticksPassed)
     {
         if (mLevel)
         {
@@ -55,7 +55,7 @@ namespace FAWorld
 #endif
             }
 
-            if (mDestination != std::make_pair<int32_t, int32_t>(0, 0) && mPos.current() != mDestination)
+            if (mPos.mGoal != std::pair<int32_t, int32_t>(0, 0) && mPos.current() != mPos.mGoal)
             {
                 Actor * actor;
                 actor = World::get()->getActorAt(mDestination.first, mDestination.second);
@@ -78,30 +78,38 @@ namespace FAWorld
                     World& world = *World::get();
                     if (!mPos.mPath.size() || mPos.mIndex == -1 || mPos.mPath.back() != mDestination)
                     {
-                        findPath(world.getCurrentLevel(), mDestination);
+                        findPath(world.getCurrentLevel(), mPos.mGoal);
                     }
                     if (!mAnimPlaying)
                     {
-                        auto nextPos = mPos.pathNext(false);
-                        FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.first, nextPos.second);
-
-                        if ((noclip || (mLevel->getTile(nextPos.first, nextPos.second).passable() &&
-                            (actorAtNext == NULL || actorAtNext == this))) && !mAnimPlaying)
-                        {
-                            if (!mPos.mMoving && !mAnimPlaying)
-                            {
-                                mPos.mMoving = true;
-                                setAnimation(AnimState::walk);
-                            }
-                        }
-                        else if (!mAnimPlaying)
+                        if (mPos.current() == mPos.mGoal)        //the mPos.mGoal maybe changed by the findPath call.so we need judge it again.
                         {
                             mPos.mMoving = false;
-                            mDestination = mPos.current();
                             setAnimation(AnimState::idle);
                         }
-                        int newDirection = Misc::getVecDir(Misc::getVec(mPos.current(), nextPos));
-                        mPos.mDirection = newDirection == -1 ? mPos.mDirection : newDirection;// we often got the error direction why ?
+                        else
+                        {
+                            auto nextPos = mPos.pathNext(false);
+                            FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.first, nextPos.second);
+
+                            if ((noclip || (mLevel->getTile(nextPos.first, nextPos.second).passable() &&
+                                (actorAtNext == NULL || actorAtNext == this))) && !mAnimPlaying)
+                            {
+                                if (!mPos.mMoving && !mAnimPlaying)
+                                {
+                                    mPos.mMoving = true;
+                                    setAnimation(AnimState::walk);
+                                }
+                            }
+                            else if (!mAnimPlaying)
+                            {
+                                mPos.mMoving = false;
+                                mDestination = mPos.current();
+                                setAnimation(AnimState::idle);
+                            }
+                            int newDirection = Misc::getVecDir(Misc::getVec(mPos.current(), nextPos));
+                            mPos.mDirection = newDirection == -1 ? mPos.mDirection : newDirection;// we often got the error direction why ?
+                        }
                     }
                 }
             }
@@ -212,16 +220,13 @@ namespace FAWorld
         return mAnimState;
     }
 
-    void Actor::findPath(GameLevelImpl * level, std::pair<int32_t, int32_t>& destination)
+    bool Actor::findPath(GameLevelImpl * level, std::pair<int32_t, int32_t> destination)
     {
-        mDestination = destination;
-        mPos.mPath = std::move(FindPath::get(level)->find(mPos.current(), destination));
-        if (!count(mPos.mPath.begin(),mPos.mPath.end(),mPos.current()))
-        {
-            mPos.mPath.insert(mPos.mPath.begin(), std::move(mPos.current()));   // if not contain, we must insert the origin point to get a smooth movement.
-                                                                                // alos,maybe there has other way to do this.
-        }
+        bool bArrivable = false;
+        mPos.mPath = std::move(FindPath::get(level)->find(mPos.current(), destination, bArrivable));
+        mPos.mGoal = destination; // destination maybe changed by findPath.
         mPos.mIndex = 0;
+        return bArrivable;
     }
 
     FARender::FASpriteGroup* Actor::getCurrentAnim()

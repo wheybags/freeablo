@@ -4,13 +4,13 @@
 
 namespace FAWorld
 {
-    Position::Position() : mDist(0), mDirection(0), mPath(std::vector<std::pair<int32_t, int32_t>>()), mIndex(-1), mMoving(false),
+    Position::Position() : mDist(0), mDirection(0), mPath(std::vector<std::pair<int32_t, int32_t>>()), mGoal(std::pair<int32_t, int32_t>(0,0)), mIndex(-1), mMoving(false),
         mCurrent(std::make_pair(0, 0)) {}
 
-    Position::Position(int32_t x, int32_t y) : mDist(0), mDirection(0), mPath(std::vector<std::pair<int32_t, int32_t>>()), mIndex(-1), mMoving(false),
+    Position::Position(int32_t x, int32_t y) : mDist(0), mDirection(0), mPath(std::vector<std::pair<int32_t, int32_t>>()), mGoal(std::pair<int32_t, int32_t>(0, 0)), mIndex(-1), mMoving(false),
         mCurrent(std::make_pair(x, y)) {}
 
-    Position::Position(int32_t x, int32_t y, int32_t direction) : mDist(0), mDirection(direction), mPath(std::vector<std::pair<int32_t, int32_t>>()), mIndex(-1), mMoving(false),
+    Position::Position(int32_t x, int32_t y, int32_t direction) : mDist(0), mDirection(direction), mPath(std::vector<std::pair<int32_t, int32_t>>()), mGoal(std::pair<int32_t, int32_t>(0, 0)), mIndex(-1), mMoving(false),
         mCurrent(std::make_pair(x, y)) {}
 
     void Position::update()
@@ -125,13 +125,12 @@ namespace FAWorld
         if (bIncrease && !mMoving)
             return mCurrent;
 
-        if (mIndex != -1 && mPath.size() && mIndex < (int)(mPath.size() - 1))
+        if (mIndex != -1 && mPath.size() && mIndex < (int)(mPath.size()))
         {
-            int newIndex = mIndex + 1;
-            auto nextPos = mPath[newIndex];
+            auto nextPos = mPath[mIndex];
             if (bIncrease)
             {
-                mIndex = newIndex;
+                mIndex++;
             }
             return nextPos;
         }

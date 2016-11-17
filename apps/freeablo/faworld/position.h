@@ -28,6 +28,7 @@ namespace FAWorld
             int32_t mDist; ///< percentage of the way there
             int32_t mDirection;
             std::vector<std::pair<int32_t, int32_t>> mPath;  ///< find path result
+            std::pair<int32_t, int32_t> mGoal;  ///< the movement goal point. it maybe changed by findPath,otherwise it maybe 0 if findpath failed. It's necessary and different from World::mDestination.
             int mIndex;///< index
             bool mMoving;
             double distanceFrom(Position B);

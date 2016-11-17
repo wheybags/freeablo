@@ -53,8 +53,8 @@ namespace FAWorld
 
         void generateMap()
         {
-            memset(gameMap, 0, MAP_SIZE*MAP_SIZE*sizeof(int));
-            for(int i = 0 ; i < MAP_SIZE ; i++)
+            memset(gameMap, 0, MAP_SIZE*MAP_SIZE * sizeof(int));
+            for (int i = 0; i < MAP_SIZE; i++)
             {
                 gameMap[0][i] = 1;
                 gameMap[MAP_SIZE - 1][i] = 1;
@@ -66,9 +66,9 @@ namespace FAWorld
             gameMap[MAP_SIZE / 2 + 3][MAP_SIZE / 2] = 1;
             gameMap[MAP_SIZE / 2 + 4][MAP_SIZE / 2] = 1;
 
-            for(int i = 3; i <= MAP_SIZE - 1; i++)
-                for(int j = 14; j <= 16; j++)
-                    if(i == MAP_SIZE - 3)
+            for (int i = 3; i <= MAP_SIZE - 1; i++)
+                for (int j = 14; j <= 16; j++)
+                    if (i == MAP_SIZE - 3)
                         gameMap[i][j] = 0;
                     else
                         gameMap[i][j] = 1;
@@ -77,11 +77,11 @@ namespace FAWorld
 
         void drawMap()
         {
-            for(int y = 0 ; y < MAP_SIZE; y++)
+            for (int y = 0; y < MAP_SIZE; y++)
             {
-                for(int x = 0 ; x < MAP_SIZE ; x++)
+                for (int x = 0; x < MAP_SIZE; x++)
                 {
-                    if(gameMap[y][x])
+                    if (gameMap[y][x])
                         cout << "# ";
                     else
                         cout << ". ";
@@ -95,16 +95,16 @@ namespace FAWorld
 
 using namespace FAWorld;
 
-ostream& operator<<(ostream& os, FindPath::Location & location )
+ostream& operator<<(ostream& os, FindPath::Location & location)
 {
     os << "(" << location.first << "," << location.second << ")";
     return os;
 }
 
 void drawPath(::GameLevel::GameLevelImpl& graph, int field_width,
-               unordered_map<FindPath::Location, int>* distances=0,
-               unordered_map<FindPath::Location, FindPath::Location>* point_to=0,
-               vector<FindPath::Location>* path=0)
+    unordered_map<FindPath::Location, int>* distances = 0,
+    unordered_map<FindPath::Location, FindPath::Location>* point_to = 0,
+    vector<FindPath::Location>* path = 0)
 {
     for (int y = 0; y != LevelImpl::MAP_SIZE; ++y)
     {
@@ -114,7 +114,7 @@ void drawPath(::GameLevel::GameLevelImpl& graph, int field_width,
             id.first = x;
             id.second = y;
             cout << left << setw(field_width);
-            if (!graph.isPassable(x,y))
+            if (!graph.isPassable(x, y))
             {
                 cout << string(field_width, '#');
             }
@@ -153,53 +153,53 @@ int main()
     FAWorld::LevelImpl * level = new LevelImpl();
     FindPath findPath(level);
 
-    FindPath::Location start,goal;
+    FindPath::Location start, goal;
     vector<FindPath::Location> path;
 
     int caseId = 1;
     cout << "Select case ID [1-6]";
     cin >> caseId;
 
-    switch(caseId)
+    switch (caseId)
     {
     case 1:
-        start = FindPath::Location(2,4);
-        goal = FindPath::Location(18,5);
+        start = FindPath::Location(2, 4);
+        goal = FindPath::Location(18, 5);
         break;
     case 2:
-        start = FindPath::Location(18,5);
-        goal = FindPath::Location(2,3);
+        start = FindPath::Location(18, 5);
+        goal = FindPath::Location(2, 3);
         break;
     case 3:
-        start = FindPath::Location(3,10);
-        goal = FindPath::Location(18,10);
+        start = FindPath::Location(3, 10);
+        goal = FindPath::Location(18, 10);
         break;
     case 4:
         // This case uses "findClosesPointToGoal"
-        start = FindPath::Location(3,10);
-        goal = FindPath::Location(15,10);
+        start = FindPath::Location(3, 10);
+        goal = FindPath::Location(15, 10);
         break;
     case 5:
         // This case uses "findClosesPointToGoal"
-        start = FindPath::Location(18,7);
-        goal = FindPath::Location(10,10);
+        start = FindPath::Location(18, 7);
+        goal = FindPath::Location(10, 10);
         break;
     default:
         // This case uses "findClosesPointToGoal"
-        start = FindPath::Location(18,10);
-        goal = FindPath::Location(10,10);
+        start = FindPath::Location(18, 10);
+        goal = FindPath::Location(10, 10);
         break;
     }
 
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
-    path = findPath.find(start, goal);
+    bool bArrivable = false;
+    path = findPath.find(start, goal, bArrivable);
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
-    drawPath(*level,2,0,0,&path);
+    drawPath(*level, 2, 0, 0, &path);
 
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     cout << "Duration: " << duration << " us" << endl;
 
 

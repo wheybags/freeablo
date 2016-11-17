@@ -268,7 +268,7 @@ namespace FAWorld
         auto level = getCurrentLevel();
         std::pair<int32_t, int32_t>& destination = player->destination();
         destination = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, *level, player->mPos);
-        player->mDestination = destination; //update it.
+        mDestination = player->mPos.mGoal = destination; //update it.
     }
 
     size_t World::getTicksInPeriod(float seconds)

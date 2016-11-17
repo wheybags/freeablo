@@ -147,14 +147,20 @@ namespace FAWorld
         return result;
     }
 
-    vector<FindPath::Location> FindPath::find(FindPath::Location start, FindPath::Location& goal)
+    vector<FindPath::Location> FindPath::find(FindPath::Location start, FindPath::Location& goal, bool& bArrivable)
     {
         unordered_map<Location, int> costSoFar;
         unordered_map<Location, Location> cameFrom;
 
         bool found = AStarSearch(start, goal, cameFrom, costSoFar);
-        if (!found)
+        if (!found) {
             goal = findClosesPointToGoal(start, goal, cameFrom);
+            bArrivable = false;
+        }
+        else
+        {
+            bArrivable = true;
+        }
 
         return reconstructPath(start, goal, cameFrom);
     }
