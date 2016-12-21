@@ -34,7 +34,6 @@ namespace Misc
             return 5;
         else if(angle <= 337.5 && angle >= 292.5)
             return 6;
-
         return -1; // shut up compiler
     }
 }

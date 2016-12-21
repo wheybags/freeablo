@@ -73,7 +73,7 @@ namespace FAWorld
             Player* mCurrentPlayer;
             std::vector<Player*> mPlayers;
             const DiabloExe::DiabloExe& mDiabloExe;
-            std::pair<int32_t, int32_t> mDestination;
+            std::pair<int32_t, int32_t> mDestination;       ///< this is the aim point to move to.
     };
 }
 

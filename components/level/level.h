@@ -39,6 +39,7 @@ namespace Level
             friend const MinPillar get(size_t x, size_t y, const Level& level);
     };
 
+
     class Level
     {
         public:

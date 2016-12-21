@@ -123,7 +123,6 @@ namespace Engine
         for(auto it = mHotkeys.begin(); it != mHotkeys.end(); it++) {
             hotkeys.push_back(it->second);
         }
-
         return hotkeys;
     }
 

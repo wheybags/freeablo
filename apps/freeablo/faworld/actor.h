@@ -16,7 +16,6 @@
 #include "world.h"
 
 
-
 namespace Engine
 {
     class NetManager;
@@ -67,6 +66,8 @@ namespace FAWorld
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);            
             AnimState::AnimState getAnimState();
+            bool findPath(GameLevelImpl* level, std::pair<int32_t, int32_t> destination);
+
 
             int32_t getId()
             {

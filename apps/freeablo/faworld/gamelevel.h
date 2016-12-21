@@ -15,62 +15,73 @@ namespace FAWorld
 {
     class Actor;
 
-    class GameLevel
+
+    class GameLevelImpl
     {
-        public:
-            GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors);
-            ~GameLevel();
+    public:
+        virtual ~GameLevelImpl() {}
+        virtual size_t width() const = 0;
+        virtual size_t height() const = 0;
+        virtual bool isPassable(int x, int y) const = 0;
+    };
 
-            Level::MinPillar getTile(size_t x, size_t y);
+    class GameLevel :public GameLevelImpl
+    {
+    public:
+        GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors);
+        ~GameLevel();
 
-            size_t width() const;
-            size_t height() const;
+        Level::MinPillar getTile(size_t x, size_t y);
 
-            const std::pair<size_t,size_t>& upStairsPos() const;
-            const std::pair<size_t,size_t>& downStairsPos() const;
+        size_t width() const;
+        size_t height() const;
 
-            void activate(size_t x, size_t y);
+        const std::pair<size_t, size_t>& upStairsPos() const;
+        const std::pair<size_t, size_t>& downStairsPos() const;
 
-            size_t getNextLevel();
-            size_t getPreviousLevel();
+        void activate(size_t x, size_t y);
 
-            void update(bool noclip, size_t tick);
+        size_t getNextLevel();
+        size_t getPreviousLevel();
 
-            void actorMapInsert(Actor* actor);
-            void actorMapRemove(Actor* actor);
-            void actorMapClear();
-            void actorMapRefresh();
+        void update(bool noclip, size_t tick);
 
-            Actor* getActorAt(size_t x, size_t y);
+        void actorMapInsert(Actor* actor);
+        void actorMapRemove(Actor* actor);
+        void actorMapClear();
+        void actorMapRefresh();
+        virtual bool isPassable(int x, int y) const;
 
-            void addActor(Actor* actor);
+        Actor* getActorAt(size_t x, size_t y);
 
-            void fillRenderState(FARender::RenderState* state);
+        void addActor(Actor* actor);
 
-            void removeActor(Actor* actor);
+        void fillRenderState(FARender::RenderState* state);
 
-            size_t getLevelIndex()
-            {
-                return mLevelIndex;
-            }
+        void removeActor(Actor* actor);
 
-            std::string serialiseToString();
-            static GameLevel* loadFromString(const std::string& data);
+        size_t getLevelIndex()
+        {
+            return mLevelIndex;
+        }
 
-            Actor* getActorById(int32_t id);
+        std::string serialiseToString();
+        static GameLevel* loadFromString(const std::string& data);
 
-            void getActors(std::vector<Actor*>& actors);
+        Actor* getActorById(int32_t id);
 
-        private:
-            GameLevel() {}
+        void getActors(std::vector<Actor*>& actors);
 
-            Level::Level mLevel;
-            size_t mLevelIndex;
+    private:
+        GameLevel() {}
 
-            std::vector<Actor*> mActors;
-            std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
-                                                                        ///< Where an actor straddles two squares, they shall be placed in both.
-            friend class FARender::Renderer;
+        Level::Level mLevel;
+        size_t mLevelIndex;
+
+        std::vector<Actor*> mActors;
+        std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
+                                                                    ///< Where an actor straddles two squares, they shall be placed in both.
+        friend class FARender::Renderer;
     };
 }
 
