@@ -920,8 +920,9 @@ namespace Render
 
       // drawing on the ground objects
       drawObjectsByTiles (toScreen, [&](const Tile &tile, const Point &topLeft){
+          // Fill invalid tiles with ground, it looks ok but it's probably better to have something else than zero-eth sprite here
           if (isInvalidTile (tile))
-            return;
+            return drawAtTile ((*minBottoms)[0], topLeft, tileWidth, staticObjectHeight);
 
         size_t index = level[tile.x][tile.y].index();
         if(index < minBottoms->size())
