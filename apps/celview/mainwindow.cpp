@@ -25,11 +25,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->currentFrame->setValidator(new QIntValidator(0, 9999999, this));
     ui->currentFrame->setText("0");
-    
+
     qDebug() << mSettingsFile;
 
     loadSettings();
-    initRender();    
+    initRender();
 }
 
 MainWindow::~MainWindow()
@@ -148,14 +148,14 @@ void MainWindow::on_leftButton_clicked()
     {
         mCurrentFrame = mCurrentCel->size() - 1;
     }
-        
+
     ui->currentFrame->setText(QString::number(mCurrentFrame));
 }
 
 void MainWindow::on_rightButton_clicked()
 {
     if (!mCurrentCel)
-        return; 
+        return;
 
     mCurrentFrame++;
     if (mCurrentFrame >= (int)mCurrentCel->size())
@@ -181,7 +181,7 @@ void MainWindow::on_actionExport_CEL_CL2_to_PNG_triggered()
     QString tmpFilename = QFileDialog::getSaveFileName(this, tr("Save CEL/CL2 as PNG"), ".", tr("PNG Files (*.png)"));
     if (!tmpFilename.isEmpty())
     {
-        Render::SpriteGroup::toPng(mCurrentCelFilename.toStdString(), tmpFilename.toStdString());   
+        Render::SpriteGroup::toPng(mCurrentCelFilename.toStdString(), tmpFilename.toStdString());
         QMessageBox::information(0, "Success", "Export complete!");
     }
 }
@@ -203,12 +203,12 @@ void MainWindow::on_actionExport_all_CEL_CL2_to_PNG_triggered()
             QString pathInMPQ = ui->listView->item(i)->text();
             QString modifiedPathInMPQ = pathInMPQ;
             modifiedPathInMPQ = modifiedPathInMPQ.replace('\\', '_').replace('/','_').replace(".cel", ".png").replace(".cl2",".png");
-            
+
             std::string stdModifiedPathInMPQ = modifiedPathInMPQ.toStdString();
             std::string path = pathInMPQ.toStdString();
             std::string target = dir.toStdString() + "/" + stdModifiedPathInMPQ;
 
-            Render::SpriteGroup::toPng(path, target);  
+            Render::SpriteGroup::toPng(path, target);
         }
 
         QMessageBox::information(0, "Success", "Export complete!");
@@ -245,7 +245,7 @@ void MainWindow::updateRender()
     Render::clear(mBackgroundColor.red(), mBackgroundColor.green(), mBackgroundColor.blue());
 
     if(mCurrentCel->size() > 0)
-        Render::drawAt((*mCurrentCel)[mCurrentFrame], 0, 0);
+      Render::drawSprite((SDL_Texture*)(*mCurrentCel)[mCurrentFrame], 0, 0);
     Render::draw();
 }
 
@@ -321,7 +321,7 @@ void MainWindow::listFilesDetails(QString extension, QStringList & list)
 
     SFILE_FIND_DATA findFileData;
     HANDLE findHandle = SFileFindFirstFile(mDiabdat, extension.toStdString().c_str(), &findFileData, NULL);
-    
+
     list.append(QString(findFileData.cFileName));
 
     while (SFileFindNextFile(findHandle, &findFileData))
@@ -332,15 +332,15 @@ void MainWindow::listFilesDetails(QString extension, QStringList & list)
     SFileFindClose(findHandle);
 }
 
-bool MainWindow::fileExists(QString path) 
+bool MainWindow::fileExists(QString path)
 {
     QFileInfo checkFile(path);
 
-    if (checkFile.exists() && checkFile.isFile()) 
+    if (checkFile.exists() && checkFile.isFile())
     {
         return true;
     }
-    else 
+    else
     {
         return false;
     }

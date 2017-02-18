@@ -36,6 +36,34 @@ namespace Level
 
 namespace Render
 {
+    // Difference between two points
+    struct Vector
+    {
+      int32_t x;
+      int32_t y;
+
+      Vector operator* (const double &scalar) const
+      {
+        return {static_cast<int32_t> (x * scalar), static_cast<int32_t> (y * scalar)};
+      }
+    };
+
+    // Point in pixels
+    struct Point
+    {
+      int32_t x;
+      int32_t y;
+      Point operator+ (const Vector &v) const { return {x + v.x, y + v.y}; }
+      Point operator- (const Vector &v) const { return {x - v.x, y - v.y}; }
+      Vector operator- (const Point &other) const { return {x - other.x, y - other.y}; }
+    };
+
+    // Tile mesasured in indexes on tile grid
+    struct Tile
+    {
+      int32_t x;
+      int32_t y;
+    };
     /**
      * @brief Render settings for initialization.
      */
@@ -55,12 +83,12 @@ namespace Render
 
 
 
-    void init(const RenderSettings& settings); 
+    void init(const RenderSettings& settings);
     Rocket::Core::Context* initGui(std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
                                    std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
                                    std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc);
 
-    void quit(); 
+    void quit();
 
     void resize(size_t w, size_t h);
     RenderSettings getWindowSize();
@@ -79,7 +107,7 @@ namespace Render
 
     void draw();
 
-    void drawAt(const Sprite& sprite, size_t x, size_t y); 
+    void drawSprite(const Sprite& sprite, size_t x, size_t y);
 
     class SpriteGroup
     {
@@ -87,7 +115,7 @@ namespace Render
             SpriteGroup(const std::string& path);
             SpriteGroup(const std::vector<Sprite> sprites): mSprites(sprites), mAnimLength(sprites.size()) {}
             void destroy();
-            
+
             Sprite& operator[](size_t index)
             {
                 #ifndef NDEBUG
@@ -102,7 +130,7 @@ namespace Render
             }
 
             size_t animLength()
-            {   
+            {
                 return mAnimLength;
             }
 
@@ -122,12 +150,12 @@ namespace Render
         bool needsImmortal;
     };
 
-    void spriteSize(const Sprite& sprite, size_t& w, size_t& h);
+    void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h);
 
     SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top);
     void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
-    
-    std::pair<int32_t, int32_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+
+    Tile getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
     void clear(int r = 0, int g = 0, int b = 255);
 }
