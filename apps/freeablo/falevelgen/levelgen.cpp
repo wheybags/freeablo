@@ -928,6 +928,7 @@ namespace FALevelGen
             DiabloExe::Monster monster =  exe.getMonster(name);
 
             FAWorld::Monster * monsterObj = new FAWorld::Monster(monster, FAWorld::Position(xPos, yPos));
+            monsterObj->setName(name);
             actors.push_back(monsterObj);
         }
     }

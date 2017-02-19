@@ -315,7 +315,10 @@ namespace FAWorld
     {
       auto tile = getTileByScreenPos(mousePosition);
       auto actor = getActorAt(tile.x, tile.y);
-      if (actor != nullptr)
+      if (!actor && tile.x < getCurrentLevel ()->width() && tile.y < getCurrentLevel()->height ())
+        actor = getActorAt(tile.x + 1, tile.y + 1); // It seems like all actors are 2 "tile" tall for hover and targeting
+
+      if (actor)
           {
             if (m_hoverState.actorHovered (actor->getId ()))
               mGuiManager->setStatusBarText(actor->getName ());
