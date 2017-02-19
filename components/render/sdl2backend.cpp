@@ -871,11 +871,7 @@ namespace Render
     template <typename ProcessTileFunc>
     void drawObjectsByTiles (const Vector &toScreen, ProcessTileFunc processTile)
     {
-      // we move in isometric y=const lines starting from the top right of the screen, thus covering the whole screen
-      // we move tile and pixel coords simultaneously to avoid performing mapping coordinates back and forth
-      // movement should be pretty obvious if you understand how isometric grid works
-
-      Point start {WIDTH, -tileHeight};
+      Point start {-tileWidth, -tileHeight};
       auto startingTile = getTileFromScreenCoords(start, toScreen);
 
       auto startingPoint = tileTopPoint(startingTile) + toScreen;
@@ -884,31 +880,23 @@ namespace Render
            auto point = startingPoint;
            auto tile = startingTile;
 
-           // we need to draw object a little bit off screen since object can be staticObjectHeight tall
-           // and still be visible even if placed on tile off the screen. tileWidth / 2 addition is due to
-           // the fact that our point is actually top of tile and it will be completely invisible a bit farther
-           while (point.y < HEIGHT + staticObjectHeight - tileHeight && point.x < WIDTH + tileWidth / 2)
+           while (point.x < WIDTH + tileWidth / 2)
              {
-               point.x += tileWidth / 2;
-               point.y += tileHeight / 2;
+               point.x += tileWidth;
                ++tile.x;
+               --tile.y;
                processTile (tile, point);
              }
         };
 
-      // tile of origin moves from top-right to top left
-      while (startingPoint.x > -tileWidth)
-        {
-          startingPoint.x -= tileWidth;
-          --startingTile.x; ++startingTile.y;
-          processLine ();
-        }
-
       // then from top left to top-bottom
       while (startingPoint.y < HEIGHT + staticObjectHeight - tileHeight)
         {
-          startingPoint.y += tileHeight;
-          ++startingTile.x; ++startingTile.y;
+          ++startingTile.y;
+          startingPoint.x -= tileWidth / 2; startingPoint.y += tileHeight / 2;
+          processLine ();
+          ++startingTile.x;
+          startingPoint.x += tileWidth / 2; startingPoint.y += tileHeight / 2;
           processLine ();
         }
     }
