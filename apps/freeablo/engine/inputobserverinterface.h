@@ -17,7 +17,8 @@ namespace Engine {
     {
         MOUSE_RELEASE,
         MOUSE_DOWN,
-        MOUSE_CLICK
+        MOUSE_CLICK,
+        MOUSE_MOVE,
     };
 
     struct Point

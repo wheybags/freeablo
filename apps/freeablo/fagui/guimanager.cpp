@@ -11,11 +11,11 @@
 #include "animateddecoratorinstancer.h"
 #include "../engine/threadmanager.h"
 #include "scrollbox.h"
-
+#include "misc/stringops.h"
 
 
 namespace FAGui
-{   
+{
     std::map<std::string, Rocket::Core::ElementDocument*> menus;
 
     std::string GuiManager::invClass;
@@ -43,6 +43,7 @@ namespace FAGui
         menus["invalidNameMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/invalid_name_menu.rml");
         menus["selectHeroMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/select_hero_menu.rml");
         menus["saveFileExistsMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/creator/save_file_exists_menu.rml");
+        menus["bottomMenu"] = renderer->getRocketContext()->LoadDocument("resources/gui/bottommenu.rml");
     }
 
     void GuiManager::openDialogue(const std::string& document)
@@ -104,6 +105,7 @@ namespace FAGui
         menus["ingameUi"]->PushToBack(); // base.rml is an empty sheet that covers the whole screen for
         // detecting clicks outside the gui, push it to back so it doesn't
         // block clicks on the real gui.
+        menus["bottomMenu"]->Show ();
 
         mCurrentGuiType = IngameMenu;
     }
@@ -295,6 +297,18 @@ namespace FAGui
 
         showFadeElement();
         computeFadeDelta();
+    }
+
+    void GuiManager::setStatusBarText(std::string text) {
+      auto element = menus["bottomMenu"]->GetElementById("statusBarContents");
+      if (!element)
+        return;
+      Misc::StringUtils::toLower (text); // Because uppercase letters are not supported in "White" font
+
+      auto height = static_cast<int> (element->GetParentNode()->GetBox ().GetSize ().y);
+      // yes it was technically possible to implement it in css but rocketlib was displaying solution I came up with incorrectly :(
+      element->SetAttribute("style", ("vertical-align:middle;line-height:" + std::to_string (height / (std::count (text.begin (), text.end (), '\n') + 1)) + "px;").c_str ());
+      element->SetInnerRML(text.c_str ());
     }
 
     void GuiManager::updateFadeIn()

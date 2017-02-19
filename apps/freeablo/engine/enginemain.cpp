@@ -94,6 +94,7 @@ namespace Engine
         int32_t currentLevel = variables["level"].as<int32_t>();
 
         FAGui::GuiManager guiManager(player->mInventory, *this, characterClass);
+        world.setGuiManager (&guiManager); // is this bad for world to know about guimanager at all?
 
         // -1 represents the main menu
         if(currentLevel != -1 && isServer)

@@ -340,7 +340,11 @@ namespace FAWorld
         mCanTalk = canTalk;
     }
 
-    bool Actor::canTalk() const
+  void Actor::setName(const std::string& name) {
+      mName = name;
+  }
+
+  bool Actor::canTalk() const
     {
         return mCanTalk;
     }

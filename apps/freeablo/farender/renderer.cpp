@@ -182,7 +182,7 @@ namespace FARender
         return mSpriteManager.getPathForIndex(index);
     }
 
-    Render::Tile Renderer::getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos)
+    Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
         return Render::getClickedTile(x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
     }

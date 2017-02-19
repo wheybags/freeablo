@@ -2,17 +2,18 @@
 #include "../farender/renderer.h"
 #include "../fagui/console.h"
 #include "engineinputmanager.h"
+#include "misc/utility.h"
 
 namespace Engine
 {
     namespace ph = std::placeholders;
 
     EngineInputManager::EngineInputManager():
-        mInput( std::bind(&EngineInputManager::keyPress,this, ph::_1),
+        mInput( BIND_THIS (keyPress),
                 NULL,
-                std::bind(&EngineInputManager::mouseClick, this, ph::_1, ph::_2, ph::_3),
-                std::bind(&EngineInputManager::mouseRelease, this, ph::_1, ph::_2, ph::_3),
-                std::bind(&EngineInputManager::mouseMove, this, ph::_1, ph::_2),
+                BIND_THIS (mouseClick),
+                BIND_THIS (mouseRelease),
+                BIND_THIS (mouseMove),
                 FARender::Renderer::get()->getRocketContext())
     {
         for(int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
@@ -147,6 +148,7 @@ namespace Engine
     void EngineInputManager::mouseMove(size_t x, size_t y)
     {
         mMousePosition = Point(x,y);
+       notifyMouseObservers(MOUSE_MOVE, mMousePosition);
     }
 
     std::string EngineInputManager::keyboardActionToString(KeyboardInputAction action) const

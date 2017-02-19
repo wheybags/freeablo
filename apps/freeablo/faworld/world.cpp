@@ -18,9 +18,38 @@
 
 namespace FAWorld
 {
-    World* singletonInstance = nullptr;
+  World* singletonInstance = nullptr;
 
-    World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
+  bool HoverState::applyIfNeeded(const HoverState& newState) {
+    if (*this == newState)
+      return false;
+
+    *this = newState;
+    return true;
+  }
+
+  bool HoverState::operator==(const HoverState& other) const {
+    if (type != other.type)
+      return false;
+
+    switch (type) {
+    case HoverType::actor:
+      return actorId == other.actorId;
+    }
+  }
+
+  bool HoverState::actorHovered(int32_t actorIdArg) {
+    HoverState newState (HoverType::actor);
+    newState.actorId = actorIdArg;
+    return applyIfNeeded (newState);
+  }
+
+  bool HoverState::nothingHovered() {
+    HoverState newState (HoverType::none);
+    return applyIfNeeded (newState);
+  }
+
+  World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
     {
         assert(singletonInstance == nullptr);
         singletonInstance = this;
@@ -47,18 +76,21 @@ namespace FAWorld
 
     void World::notify(Engine::MouseInputAction action, Engine::Point mousePosition)
     {
-        if (action == Engine::MOUSE_RELEASE)
-        {
-            stopPlayerActions();
-        }
-        else if (action == Engine::MOUSE_CLICK)
-        {
-            onMouseClick(mousePosition);
-        }
-        else if (action == Engine::MOUSE_DOWN)
-        {
-            onMouseDown(mousePosition);
-        }
+      switch (action) {
+
+      case Engine::MOUSE_RELEASE:
+        stopPlayerActions();
+        break;
+      case Engine::MOUSE_DOWN:
+        onMouseDown(mousePosition);
+        break;
+      case Engine::MOUSE_CLICK:
+        onMouseClick(mousePosition);
+        break;
+      case Engine::MOUSE_MOVE:
+        onMouseMove(mousePosition);
+        break;
+      }
     }
 
     void World::generateLevels()
@@ -81,6 +113,7 @@ namespace FAWorld
             Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
             actor->setCanTalk(true);
             actor->setActorId(npcs[i]->id);
+            actor->setName (npcs[i]->name);
             townActors.push_back(actor);
         }
 
@@ -235,7 +268,12 @@ namespace FAWorld
             pair.second->getActors(actors);
     }
 
-    void World::changeLevel(bool up)
+  void World::setGuiManager(FAGui::GuiManager* guiManager)
+  {
+    mGuiManager = guiManager;
+  }
+
+  void World::changeLevel(bool up)
     {
         size_t nextLevelIndex;
         if (up)
@@ -269,11 +307,32 @@ namespace FAWorld
         level->activate(mDestination.first, mDestination.second);
     }
 
+    Render::Tile World::getTileByScreenPos(Engine::Point screenPos) {
+      return FARender::Renderer::get()->getTileByScreenPos(screenPos.x, screenPos.y, getCurrentPlayer()->mPos);
+    }
+
+    void World::onMouseMove(Engine::Point mousePosition)
+    {
+      auto tile = getTileByScreenPos(mousePosition);
+      auto actor = getActorAt(tile.x, tile.y);
+      if (actor != nullptr)
+          {
+            if (m_hoverState.actorHovered (actor->getId ()))
+              mGuiManager->setStatusBarText(actor->getName ());
+
+            return;
+          }
+
+      if (m_hoverState.nothingHovered ())
+        return mGuiManager->setStatusBarText ("");
+      // and here we should tecnically run redraw if mHoveredActorId changed.
+    }
+
     void World::onMouseDown(Engine::Point mousePosition)
     {
         auto player = getCurrentPlayer();
         std::pair<int32_t, int32_t>& destination = player->destination();
-        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->mPos);
+        auto clickedTile = getTileByScreenPos(mousePosition);
         destination = {clickedTile.x, clickedTile.y};
         mDestination = player->mPos.mGoal = destination; //update it.
     }

@@ -81,7 +81,7 @@ namespace FARender
             void fillServerSprite(uint32_t index, const std::string& path);
             std::string getPathForIndex(uint32_t index);
 
-            Render::Tile getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos);
+            Render::Tile getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos);
 
             Rocket::Core::Context* getRocketContext();
 
