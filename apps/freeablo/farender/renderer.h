@@ -34,6 +34,13 @@ namespace FARender
             friend class Renderer;
     };
 
+    struct ObjectToRender {
+      FASpriteGroup* spriteGroup;
+      uint32_t frame;
+      FAWorld::Position position;
+      boost::optional<Cel::Colour> hoverColor;
+    };
+
     class RenderState
     {
         public:
@@ -42,7 +49,7 @@ namespace FARender
 
         FAWorld::Position mPos;
 
-        std::vector<std::tuple<FASpriteGroup*, uint32_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
+        std::vector<ObjectToRender> mObjects; ///< group, index into group, and position
 
         std::vector<DrawCommand> guiDrawBuffer;
 

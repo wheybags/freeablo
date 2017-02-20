@@ -20,6 +20,10 @@
 #include "rocketglue/drawcommand.h"
 
 #include <SDL.h>
+
+class LevelObjects;
+class SpriteGroup;
+
 namespace Render
 {
     typedef void* Sprite;
@@ -85,7 +89,7 @@ namespace Render
 
     void draw();
 
-    void drawSprite(const Sprite& sprite, size_t x, size_t y);
+    void drawSprite(const Sprite& sprite, size_t x, size_t y, boost::optional<Cel::Colour> color = boost::none);
 
     class SpriteGroup
     {
@@ -113,10 +117,11 @@ namespace Render
             }
 
             static void toPng(const std::string& celPath, const std::string& pngPath);
-
+            const std::vector<Sprite> &masks () { return mMasks; }
 
         private:
             std::vector<Sprite> mSprites;
+            std::vector<Sprite> mMasks; // used for highlighting during hovering
             size_t mAnimLength;
     };
 

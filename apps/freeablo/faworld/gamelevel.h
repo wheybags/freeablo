@@ -5,6 +5,8 @@
 
 #include <enet/enet.h> // TODO: remove
 
+#include "hoverstate.h"
+
 namespace FARender
 {
     class Renderer;
@@ -66,6 +68,7 @@ namespace FAWorld
         }
 
         std::string serialiseToString();
+        HoverState& getHoverState();
         static GameLevel* loadFromString(const std::string& data);
 
         Actor* getActorById(int32_t id);
@@ -73,10 +76,11 @@ namespace FAWorld
         void getActors(std::vector<Actor*>& actors);
 
     private:
-        GameLevel() {}
+      GameLevel();
 
         Level::Level mLevel;
         size_t mLevelIndex;
+        HoverState mHoverState;
 
         std::vector<Actor*> mActors;
         std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.

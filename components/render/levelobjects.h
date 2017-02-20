@@ -1,9 +1,9 @@
+#ifndef LEVEL_OBJ_H
+#define LEVEL_OBJ_H
+
 #include "render.h"
 
 #include <misc/helper2d.h>
-
-#ifndef LEVEL_OBJ_H
-#define LEVEL_OBJ_H
 
 namespace Render
 {
@@ -17,6 +17,7 @@ namespace Render
         int32_t x2;
         int32_t y2;
         int32_t dist;
+        boost::optional<Cel::Colour> hoverColor;
     };
 
     class LevelObjects
@@ -28,7 +29,7 @@ namespace Render
 
             size_t width();
             size_t height();
-        
+
         private:
             std::vector<LevelObject> mData;
             size_t mWidth;

@@ -15,39 +15,11 @@
 #include "player.h"
 #include "gamelevel.h"
 #include "findpath.h"
+#include "hoverstate.h"
 
 namespace FAWorld
 {
   World* singletonInstance = nullptr;
-
-  bool HoverState::applyIfNeeded(const HoverState& newState) {
-    if (*this == newState)
-      return false;
-
-    *this = newState;
-    return true;
-  }
-
-  bool HoverState::operator==(const HoverState& other) const {
-    if (type != other.type)
-      return false;
-
-    switch (type) {
-    case HoverType::actor:
-      return actorId == other.actorId;
-    }
-  }
-
-  bool HoverState::actorHovered(int32_t actorIdArg) {
-    HoverState newState (HoverType::actor);
-    newState.actorId = actorIdArg;
-    return applyIfNeeded (newState);
-  }
-
-  bool HoverState::nothingHovered() {
-    HoverState newState (HoverType::none);
-    return applyIfNeeded (newState);
-  }
 
   World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
     {
@@ -311,22 +283,24 @@ namespace FAWorld
       return FARender::Renderer::get()->getTileByScreenPos(screenPos.x, screenPos.y, getCurrentPlayer()->mPos);
     }
 
+    HoverState &World::getHoverState () { return getCurrentLevel ()->getHoverState (); };
+
     void World::onMouseMove(Engine::Point mousePosition)
     {
       auto tile = getTileByScreenPos(mousePosition);
       auto actor = getActorAt(tile.x, tile.y);
-      if (!actor && tile.x < getCurrentLevel ()->width() && tile.y < getCurrentLevel()->height ())
+      if (!actor && static_cast<size_t> (tile.x) < getCurrentLevel ()->width() && static_cast<size_t> (tile.y) < getCurrentLevel()->height ())
         actor = getActorAt(tile.x + 1, tile.y + 1); // It seems like all actors are 2 "tile" tall for hover and targeting
 
-      if (actor)
+      if (actor && actor != getCurrentPlayer())
           {
-            if (m_hoverState.actorHovered (actor->getId ()))
+            if (getHoverState ().setActorHovered (actor->getId ()))
               mGuiManager->setStatusBarText(actor->getName ());
 
             return;
           }
 
-      if (m_hoverState.nothingHovered ())
+      if (getHoverState ().setNothingHovered ())
         return mGuiManager->setStatusBarText ("");
       // and here we should tecnically run redraw if mHoveredActorId changed.
     }

@@ -18,7 +18,7 @@ namespace Render
     {
         return Misc::Helper2D<LevelObjects, LevelObject&>(*this, x, get);
     }
-    
+
     size_t LevelObjects::width()
     {
         return mWidth;

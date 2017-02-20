@@ -287,6 +287,7 @@ namespace Render
     void setpixel(SDL_Surface *s, int x, int y, Cel::Colour c);
     SDL_Surface* createTransparentSurface(size_t width, size_t height);
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
+    void drawFrameMask(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
 
     SDL_Surface* loadNonCelImageTrans(const std::string& path, const std::string& extension, bool hasTrans, size_t transR, size_t transG, size_t transB)
     {
@@ -541,13 +542,15 @@ namespace Render
         SDL_RenderPresent(renderer);
     }
 
-    void drawSprite(const Sprite &sprite, size_t x, size_t y)
+    void drawSprite(const Sprite &sprite, size_t x, size_t y, boost::optional<Cel::Colour> color)
     {
         int width, height;
         auto texture = static_cast<SDL_Texture *> (sprite);
         SDL_QueryTexture(texture, NULL, NULL, &width, &height);
 
         SDL_Rect dest = { int(x), int(y), width, height };
+        if (color)
+          SDL_SetTextureColorMod (texture, color->r, color->g, color->b);
 
         SDL_RenderCopy(renderer, texture, NULL, &dest);
     }
@@ -555,10 +558,10 @@ namespace Render
     constexpr auto tileHeight = 32;
     constexpr auto tileWidth = tileHeight * 2;
 
-    void drawAtTile(const Sprite& sprite, const Misc::Point& tileTop, int spriteW, int spriteH)
+    void drawAtTile(const Sprite& sprite, const Misc::Point& tileTop, int spriteW, int spriteH, boost::optional<Cel::Colour> color = boost::none)
     {
         // centering spright at the center of tile by width and at the bottom of tile by height
-        drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight);
+        drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight, color);
     }
 
 
@@ -572,7 +575,11 @@ namespace Render
             drawFrame(s, 0, 0, cel[i]);
 
             mSprites.push_back(SDL_CreateTextureFromSurface(renderer, s));
+            SDL_FreeSurface(s);
 
+            s = createTransparentSurface(cel[i].mWidth, cel[i].mHeight);
+            drawFrameMask(s, 0, 0, cel[i]);
+            mMasks.push_back (SDL_CreateTextureFromSurface (renderer, s));
             SDL_FreeSurface(s);
         }
 
@@ -769,6 +776,28 @@ namespace Render
         }
     }
 
+    void drawFrameMask (SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)
+    {
+        for(size_t x = 0; x < frame.mWidth; x++)
+        {
+            for(size_t y = 0; y < frame.mHeight; y++)
+            {
+              constexpr int dirs[4][2] = {{1, 0},{-1, 0},{0, 1},{0, -1}};
+              auto isValid = [&](size_t xArg, size_t yArg){ return xArg >= 0 && yArg >= 0 && xArg < frame.mWidth && yArg < frame.mHeight; };
+              auto isBlack = [&]{ return frame[x][y].r == 0 && frame[x][y].g == 0 && frame[x][y].b == 0; };
+                if(frame[x][y].visible && !isBlack ()) {
+                    for (auto dir : dirs) {
+                      auto newX = x + dir[0]; auto newY = y + dir[1];
+                      if (!isValid (newX, newY))
+                        continue;
+
+                      setpixel(s, newX, newY, Cel::Colour (255, 255, 255, true));
+                    }
+                }
+            }
+        }
+    }
+
     void drawMinTile(SDL_Surface* s, Cel::CelFile& f, int x, int y, int16_t l, int16_t r)
     {
         if(l != -1)
@@ -841,13 +870,13 @@ namespace Render
       return pointA + (pointB - pointA) * (percent * 0.01);
     }
 
-    void drawMovingSprite(const Sprite& sprite, const Tile& start, const Tile& finish, size_t dist, const Misc::Point& toScreen)
+    void drawMovingSprite(const Sprite& sprite, const Tile& start, const Tile& finish, size_t dist, const Misc::Point& toScreen, boost::optional<Cel::Colour> color = boost::none)
     {
         int32_t w, h;
         spriteSize(sprite, w, h);
         auto point = pointBetween (start, finish, dist);
         auto res = point + toScreen;
-        drawAtTile(sprite, res, w, h);
+        drawAtTile(sprite, res, w, h, color);
     }
 
     constexpr auto bottomMenuSize = 144; // TODO: pass it as a variable
@@ -928,7 +957,14 @@ namespace Render
 
         auto &obj = objs[tile.x][tile.y];
         if (obj.valid)
-           drawMovingSprite((*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen);
+          {
+            if (obj.hoverColor)
+                {
+                  drawMovingSprite(cache->get(obj.spriteCacheIndex)->masks ()[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen, obj.hoverColor);
+                }
+
+            drawMovingSprite((*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen);
+          }
       });
 
       cache->setImmortal(minTopsHandle, false);
