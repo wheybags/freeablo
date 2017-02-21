@@ -32,7 +32,7 @@ namespace FAWorld
 
     bool FindPath::passable(Location location)
     {
-        bool isPassable = level->isPassable(location.first, location.second);
+        bool isPassable = level->isPassableFor(location.first, location.second, mActor);
         return isPassable;
     }
 
@@ -147,8 +147,9 @@ namespace FAWorld
         return result;
     }
 
-    vector<FindPath::Location> FindPath::find(FindPath::Location start, FindPath::Location& goal, bool& bArrivable)
+    vector<FindPath::Location> FindPath::find(FindPath::Location start, FindPath::Location& goal, bool& bArrivable, const Actor *actor)
     {
+        mActor = actor;
         unordered_map<Location, int> costSoFar;
         unordered_map<Location, Location> cameFrom;
 

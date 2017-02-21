@@ -62,7 +62,7 @@ namespace FAWorld
         typedef pair<int32_t, int32_t> Location;
 
         FindPath(GameLevelImpl * level);
-        vector<Location> find(Location start, Location& goal,bool& bArrivable);
+        vector<Location> find(Location start, Location& goal,bool& bArrivable, const Actor *actor = nullptr);
         static FindPath* get(GameLevelImpl* level);
 
     private:
@@ -80,6 +80,7 @@ namespace FAWorld
         vector<Location> directions;
         unsigned int sizeOfDirections;
         static FindPath* instance;
+        const Actor *mActor;
     };
 
 }

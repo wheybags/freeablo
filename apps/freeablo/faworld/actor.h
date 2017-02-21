@@ -51,6 +51,7 @@ namespace FAWorld
                   const std::string& dieAnimPath=""
                   );
 
+            bool checkAttackTalkAction();
             void update(bool noclip, size_t ticksPassed);
             virtual ~Actor();
             virtual std::string getDieWav(){return "";}

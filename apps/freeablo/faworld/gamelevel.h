@@ -25,6 +25,7 @@ namespace FAWorld
         virtual size_t width() const = 0;
         virtual size_t height() const = 0;
         virtual bool isPassable(int x, int y) const = 0;
+        virtual bool isPassableFor(int x, int y, const Actor* actor) const = 0;
     };
 
     class GameLevel :public GameLevelImpl
@@ -52,9 +53,10 @@ namespace FAWorld
         void actorMapRemove(Actor* actor);
         void actorMapClear();
         void actorMapRefresh();
-        virtual bool isPassable(int x, int y) const;
+        bool isPassable(int x, int y) const override;
+        bool isPassableFor(int x, int y, const Actor* actor) const override;
 
-        Actor* getActorAt(size_t x, size_t y);
+      Actor* getActorAt(size_t x, size_t y) const;
 
         void addActor(Actor* actor);
 

@@ -57,22 +57,7 @@ namespace FAWorld
 
             if (mPos.mGoal != std::pair<int32_t, int32_t>(0, 0) && mPos.current() != mPos.mGoal)
             {
-                Actor * actor;
-                actor = World::get()->getActorAt(mDestination.first, mDestination.second);
-                if (canIAttack(actor))
-                {
-                    std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
-                    mPos.mDirection = Misc::getVecDir(vector);
-                    mPos.update();
-                    mPos.mDist = 0;
-
-                    attack(actor);
-                }
-                else if (canTalkTo(actor))
-                {
-                    mPos.mDist = 0;
-                    talk(actor);
-                }
+                if (checkAttackTalkAction ()) {}
                 else if (mPos.mDist == 0)
                 {
                     World& world = *World::get();
@@ -115,6 +100,7 @@ namespace FAWorld
             }
             else if (mPos.mMoving && mPos.mDist == 0 && !mAnimPlaying)
             {
+                checkAttackTalkAction ();
                 mPos.mMoving = false;
                 setAnimation(AnimState::idle);
             }
@@ -164,7 +150,30 @@ namespace FAWorld
         mId = getNewId();
     }
 
-    Actor::~Actor()
+  bool Actor::checkAttackTalkAction()
+  {
+      Actor * actor;
+      actor = World::get()->getActorAt(mDestination.first, mDestination.second);
+      if (canIAttack(actor))
+      {
+          std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
+          mPos.mDirection = Misc::getVecDir(vector);
+          mPos.update();
+          mPos.mDist = 0;
+
+          attack(actor);
+          return true;
+      }
+      else if (canTalkTo(actor))
+      {
+          mPos.mDist = 0;
+          talk(actor);
+          return true;
+      }
+      return false;
+  }
+
+  Actor::~Actor()
     {
         if (mStats != nullptr)
             delete mStats;
@@ -223,7 +232,7 @@ namespace FAWorld
     bool Actor::findPath(GameLevelImpl * level, std::pair<int32_t, int32_t> destination)
     {
         bool bArrivable = false;
-        mPos.mPath = std::move(FindPath::get(level)->find(mPos.current(), destination, bArrivable));
+        mPos.mPath = std::move(FindPath::get(level)->find(mPos.current(), destination, bArrivable, this));
         mPos.mGoal = destination; // destination maybe changed by findPath.
         mPos.mIndex = 0;
         return bArrivable;

@@ -13,6 +13,7 @@ namespace FAWorld
             Player();
             Player(const std::string& className, const DiabloExe::CharacterStats& charStats);
             virtual ~Player();
+            bool isMoving();
             Inventory mInventory;
             void setSpriteClass(std::string className);
             bool attack(Actor * enemy);

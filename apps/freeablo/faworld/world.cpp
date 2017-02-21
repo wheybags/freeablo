@@ -193,6 +193,12 @@ namespace FAWorld
                 level->update(noclip, mTicksPassed);
             }
         }
+       if (getCurrentPlayer ()->isMoving ())
+         {
+           int x, y;
+           SDL_GetMouseState(&x,&y);
+           onMouseMove ({static_cast<size_t> (x), static_cast<size_t> (y)});
+         }
     }
 
     Player* World::getCurrentPlayer()
@@ -289,10 +295,13 @@ namespace FAWorld
     {
       auto actorStayingAt = [this](int32_t x, int32_t y) -> Actor*
       {
-        if (x < 0 || y < 0 || x >= static_cast<int32_t> (getCurrentLevel ()->width()) || y >= static_cast<int32_t> (getCurrentLevel ()->height()))
+        if (x >= static_cast<int32_t> (getCurrentLevel ()->width()) || y >= static_cast<int32_t> (getCurrentLevel ()->height()))
           return nullptr;
 
-        return getActorAt (x, y);
+        auto actor = getActorAt (x, y);
+        if (actor && actor != getCurrentPlayer()) return actor;
+
+        return nullptr;
       };
       auto tile = getTileByScreenPos(screenPosition);
       // actors could be hovered/targeted by hexagonal pattern consisiting of two tiles on top of each other + halves of two adjacent tiles
@@ -311,7 +320,7 @@ namespace FAWorld
     void World::onMouseMove(Engine::Point mousePosition)
     {
       auto actor = targetedActor (mousePosition);
-      if (actor && actor != getCurrentPlayer())
+      if (actor)
           {
             if (getHoverState ().setActorHovered (actor->getId ()))
               mGuiManager->setStatusBarText(actor->getName ());
@@ -330,6 +339,9 @@ namespace FAWorld
         std::pair<int32_t, int32_t>& destination = player->destination();
         auto clickedTile = getTileByScreenPos(mousePosition);
         destination = {clickedTile.x, clickedTile.y};
+        if (auto actor = targetedActor (mousePosition)) // if we're targeting an actor, we're really want to reach that actor
+          destination = {actor->mPos.current().first, actor->mPos.current().second}; // hacky way to override destination
+
         mDestination = player->mPos.mGoal = destination; //update it.
     }
 

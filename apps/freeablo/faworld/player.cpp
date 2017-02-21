@@ -47,7 +47,11 @@ namespace FAWorld
         FAWorld::World::get()->deregisterPlayer(this);
     }
 
-    bool Player::attack(Actor *enemy)
+  bool Player::isMoving() {
+      return mPos.mMoving;
+  }
+
+  bool Player::attack(Actor *enemy)
     {
         if(enemy->isDead() && enemy->mStats != nullptr)
             return false;
