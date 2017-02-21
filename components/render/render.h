@@ -40,11 +40,17 @@ namespace Level
 
 namespace Render
 {
+    enum class TileHalf {
+      left,
+      right,
+    };
+
     // Tile mesasured in indexes on tile grid
     struct Tile
     {
       int32_t x;
       int32_t y;
+      TileHalf half; // assuming that we never need to get more precise than left/right halfs for now
     };
     /**
      * @brief Render settings for initialization.

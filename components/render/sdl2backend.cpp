@@ -861,7 +861,9 @@ namespace Render
     Tile getTileFromScreenCoords(const Misc::Point& screenPos, const Misc::Point& toScreen)
     {
         auto point = screenPos - toScreen;
-        return {(2 * point.y + point.x) / tileWidth, (2 * point.y - point.x) / tileWidth}; // divisin by 64 is pretty fast btw
+        auto x = std::div (2 * point.y + point.x, tileWidth); // divisin by 64 is pretty fast btw
+        auto y = std::div (2 * point.y - point.x, tileWidth);
+        return {x.quot, y.quot, x.rem > y.rem ? TileHalf::right : TileHalf::left};
     }
 
     static Misc::Point pointBetween (const Tile &start, const Tile &finish, const size_t &percent) {

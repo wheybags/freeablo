@@ -285,13 +285,32 @@ namespace FAWorld
 
     HoverState &World::getHoverState () { return getCurrentLevel ()->getHoverState (); };
 
+    Actor *World::targetedActor(Engine::Point screenPosition)
+    {
+      auto actorStayingAt = [this](int32_t x, int32_t y) -> Actor*
+      {
+        if (x < 0 || y < 0 || x >= static_cast<int32_t> (getCurrentLevel ()->width()) || y >= static_cast<int32_t> (getCurrentLevel ()->height()))
+          return nullptr;
+
+        return getActorAt (x, y);
+      };
+      auto tile = getTileByScreenPos(screenPosition);
+      // actors could be hovered/targeted by hexagonal pattern consisiting of two tiles on top of each other + halves of two adjacent tiles
+      // the same logic seems to apply ot other tall objects
+      if (auto actor = actorStayingAt(tile.x, tile.y)) return actor;
+      if (auto actor = actorStayingAt(tile.x + 1, tile.y + 1)) return actor;
+      if (tile.half == Render::TileHalf::right)
+        if (auto actor = actorStayingAt(tile.x + 1, tile.y))
+          return actor;
+      if (tile.half == Render::TileHalf::left)
+        if (auto actor = actorStayingAt(tile.x, tile.y + 1))
+          return actor;
+      return nullptr;
+    }
+
     void World::onMouseMove(Engine::Point mousePosition)
     {
-      auto tile = getTileByScreenPos(mousePosition);
-      auto actor = getActorAt(tile.x, tile.y);
-      if (!actor && static_cast<size_t> (tile.x) < getCurrentLevel ()->width() && static_cast<size_t> (tile.y) < getCurrentLevel()->height ())
-        actor = getActorAt(tile.x + 1, tile.y + 1); // It seems like all actors are 2 "tile" tall for hover and targeting
-
+      auto actor = targetedActor (mousePosition);
       if (actor && actor != getCurrentPlayer())
           {
             if (getHoverState ().setActorHovered (actor->getId ()))

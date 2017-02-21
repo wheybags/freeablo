@@ -77,6 +77,7 @@ namespace FAWorld
             void onMouseClick(Engine::Point mousePosition);
             Render::Tile getTileByScreenPos(Engine::Point screenPos);
             HoverState& getHoverState();
+            Actor* targetedActor(Engine::Point screenPosition);
             void onMouseMove(Engine::Point mousePosition);
             void onMouseDown(Engine::Point mousePosition);
 
