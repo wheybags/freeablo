@@ -332,8 +332,8 @@ namespace FAWorld
         mMagic += mStartingMagic + mSpentLevelsOnMagic;
         mDexterity += mStartingDexterity + mSpentLevelsOnDexterity;
         mVitality += mStartingVitality + mSpentLevelsOnVitality;
-        mHP += mVitality + 1.5*mBonusVitality + 2*mLevel + 23;
-        mMana += mMagic + 1.5*mBonusMagic + 2*mLevel + 5;
+        mHP += static_cast<uint32_t> (mVitality + 1.5*mBonusVitality + 2*mLevel + 23);
+        mMana += static_cast<uint32_t> (mMagic + 1.5*mBonusMagic + 2*mLevel + 5);
         mArmourClass += mDexterity/5;
         mDamageDoneBow += ((mStrength + mDexterity) * mLevel)/100;
         mDamageDoneMelee += ((mStrength + mDexterity) * mLevel)/200.0;

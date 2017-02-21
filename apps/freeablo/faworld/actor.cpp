@@ -21,7 +21,7 @@ namespace FAWorld
             size_t animDivisor = mAnimTimeMap[getAnimState()];
             if (animDivisor == 0)
             {
-                animDivisor = FAWorld::World::getTicksInPeriod(0.1);
+                animDivisor = FAWorld::World::getTicksInPeriod(0.1f);
             }
             bool advanceAnims = !(ticksPassed % (World::ticksPerSecond / animDivisor));
 
@@ -158,8 +158,8 @@ namespace FAWorld
         if (!idleAnimPath.empty())
             mIdleAnim = FARender::Renderer::get()->loadImage(idleAnimPath);
         mDestination = mPos.current();
-        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1);
-        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1);
+        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1f);
+        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1f);
 
         mId = getNewId();
     }
@@ -172,7 +172,7 @@ namespace FAWorld
 
     void Actor::takeDamage(double amount)
     {
-        mStats->takeDamage(amount);
+        mStats->takeDamage(static_cast<int32_t> (amount));
         if (!(mStats->getCurrentHP() <= 0))
         {
             Engine::ThreadManager::get()->playSound(getHitWav());

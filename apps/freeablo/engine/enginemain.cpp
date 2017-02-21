@@ -58,7 +58,7 @@ namespace Engine
 
     void EngineMain::runGameLoop(const bpo::variables_map& variables, const std::string& pathEXE)
     {
-        FALevelGen::FAsrand(time(NULL));
+        FALevelGen::FAsrand(static_cast<int> (time(nullptr)));
 
         FAWorld::Player* player;
         FARender::Renderer& renderer = *FARender::Renderer::get();
@@ -148,11 +148,11 @@ namespace Engine
                 if(!FAGui::cursorPath.empty())
                     state->mCursorEmpty = false;
                 else
-                    state->mCursorEmpty = true;                
+                    state->mCursorEmpty = true;
                 state->mCursorFrame = FAGui::cursorFrame;
-                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");                
-                world.fillRenderState(state);                
-                Render::updateGuiBuffer(&state->guiDrawBuffer);                
+                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
+                world.fillRenderState(state);
+                Render::updateGuiBuffer(&state->guiDrawBuffer);
             }
             else
             {
@@ -160,7 +160,7 @@ namespace Engine
             }
             renderer.setCurrentState(state);
 
-            long remainingTickTime = timer.expires_from_now().total_milliseconds();
+            auto remainingTickTime = timer.expires_from_now().total_milliseconds();
 
             if(remainingTickTime < 0)
                 std::cerr << "tick time exceeded by " << -remainingTickTime << "ms" << std::endl;

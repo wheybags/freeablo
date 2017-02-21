@@ -16,7 +16,7 @@ namespace FAWorld
         DiabloExe::CharacterStats stats;
         init("Warrior", stats);
     }
-    
+
     Player::Player(const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor(), mInventory(this)
     {
         init(className, charStats);
@@ -30,14 +30,14 @@ namespace FAWorld
             mStats = new FAWorld::RangerStats(charStats, this);
         else if (className == "Sorcerer")
             mStats = new FAWorld::MageStats(charStats, this);
-        
+
         mStats->setActor(this);
         mStats->recalculateDerivedStats();
-        
-        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1);
-        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1);
-        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(0.2);
-        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1);
+
+        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1f);
+        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1f);
+        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(0.2f);
+        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1f);
 
         FAWorld::World::get()->registerPlayer(this);
     }
@@ -96,7 +96,7 @@ namespace FAWorld
     }
 
     FARender::FASpriteGroup* Player::getCurrentAnim()
-    {       
+    {
         auto lastClassName = mFmtClassName;
         auto lastClassCode = mFmtClassCode;
         auto lastArmourCode = mFmtArmourCode;
