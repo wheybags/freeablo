@@ -174,6 +174,8 @@ namespace FAWorld
                 weapon = "t";
             else if(mInventory.mLeftHand.getCode() == Item::icBlunt || mInventory.mRightHand.getCode() == Item::icBlunt)
                 weapon = "h";
+
+            assert (!weapon.empty ()); // Empty weapon format
         }
         weaponCode = weapon;
         armourCode = armour;

@@ -8,7 +8,7 @@
 #include "../farender/renderer.h"
 #include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
-
+#include "../faworld/player.h"
 
 
 namespace FAGui
@@ -53,8 +53,8 @@ namespace FAGui
         return "";
     }
 
-    GuiManager::GuiManager(Engine::EngineMain& engine)
-        : mEngine(engine)
+    GuiManager::GuiManager(Engine::EngineMain& engine, const FAWorld::Player &player)
+        : mEngine(engine), mPlayer (player)
     {
 
     }
@@ -131,7 +131,15 @@ namespace FAGui
 
     void GuiManager::inventoryPanel(nk_context* ctx)
     {
-        drawPanel (ctx, PanelType::inventory, [&](){});
+        drawPanel (ctx, PanelType::inventory, [&]()
+        {
+            {
+                auto &inv = mPlayer.mInventory;
+                auto renderer = FARender::Renderer::get();
+                nk_layout_space_push(ctx, nk_rect(75, 133, 87, 58));
+                nk_button_image (ctx, renderer->loadImage);
+            }
+        });
     }
 
      void GuiManager::characterPanel(nk_context* ctx)
@@ -262,4 +270,8 @@ namespace FAGui
         else
             curPanel = type;
     }
+
+    std::string cursorPath = "data/inv/objcurs.cel";
+    uint32_t cursorFrame = 0;
+    Render::CursorHotspotLocation cursorHotspot = Render::CursorHotspotLocation::topLeft;
 }

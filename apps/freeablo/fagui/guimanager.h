@@ -17,8 +17,23 @@ class ElementDocument;
 }
 }
 
+namespace Render
+{
+    enum class CursorHotspotLocation;
+}
+
+namespace FAWorld
+{
+    class Player;
+}
+
 namespace FAGui
 {
+    // move all this to better place since cursor state is also dependent on spells etc.
+    extern std::string cursorPath;
+    extern Render::CursorHotspotLocation cursorHotspot;
+    extern uint32_t cursorFrame;
+
     enum class PanelType {
         none,
         inventory,
@@ -42,7 +57,7 @@ namespace FAGui
     class GuiManager
     {
     public:
-        GuiManager(Engine::EngineMain& engine);
+        GuiManager(Engine::EngineMain& engine, const FAWorld::Player &player);
         void update(bool paused, nk_context* ctx);
 
     private:
@@ -58,7 +73,8 @@ namespace FAGui
 
     private:
         Engine::EngineMain& mEngine;
-        PanelType mCurRightPanel, mCurLeftPanel;
+        const FAWorld::Player& mPlayer;
+        PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
     };
 }
 

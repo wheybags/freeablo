@@ -15,6 +15,23 @@
 
 #include "misc.h"
 
+#include <SDL.h>
+
+class LevelObjects;
+class SpriteGroup;
+
+namespace Render
+{
+    typedef void* Sprite;
+    typedef SDL_Cursor * FACursor;
+    typedef SDL_Surface * FASurface;
+
+     enum class CursorHotspotLocation {
+        topLeft,
+        center,
+    };
+}
+
 #include "levelobjects.h"
 
 #include "nuklear_sdl_gl3.h"
@@ -54,14 +71,14 @@ namespace Render
     void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);
 
     void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics);
-    void quit(); 
+    void quit();
 
     void resize(size_t w, size_t h);
     RenderSettings getWindowSize();
     void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache);
 
     bool getImageInfo(const std::string& path, uint32_t& width, uint32_t& height, uint32_t& animLength, int32_t celIndex=0);
-    void drawCursor(Sprite s, size_t w=0, size_t h=0);
+    void drawCursor(Sprite s, CursorHotspotLocation hotspotLocation);
     SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadResizedSprite(const std::string& path, size_t width, size_t height, size_t tileWidth, size_t tileHeight,  bool hasTrans, size_t transR, size_t transG, size_t transB);

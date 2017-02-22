@@ -11,6 +11,7 @@
 
 #include "../faworld/gamelevel.h"
 #include "../engine/threadmanager.h"
+#include "../fagui/guimanager.h"
 
 namespace FARender
 {
@@ -49,7 +50,7 @@ namespace FARender
 
         return handle;
     }
-                                  
+
     Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen)
         :mDone(false)
         ,mSpriteManager(1024)
@@ -92,7 +93,7 @@ namespace FARender
 
             for (size_t i = 0; i < mNumRenderStates; ++i)
                 new (mStates + i) RenderState(mNuklearGraphicsData);
-            
+
             mRenderer = this;
         }
     }
@@ -207,7 +208,6 @@ namespace FARender
 
         if(state)
         {
-
             if(state->level)
             {
                 if(mLevelObjects.width() != state->level->width() || mLevelObjects.height() != state->level->height())
@@ -245,9 +245,10 @@ namespace FARender
                     state->mPos.next().first, state->mPos.next().second, state->mPos.mDist);
 
                 Render::drawGui(state->nuklearData, &mSpriteManager);
+                {
+                    Renderer::drawCursor(state);
+                }
             }
-            
-            Renderer::setCursor(state);
         }
 
         Render::draw();
@@ -260,17 +261,17 @@ namespace FARender
 
         return true;
     }
-    void Renderer::setCursor(RenderState * State)
+    void Renderer::drawCursor(RenderState * State)
     {
 
         if(!State->mCursorEmpty)
         {
             Render::Sprite sprite = mSpriteManager.get(State->mCursorSpriteGroup->getCacheIndex())->operator [](State->mCursorFrame);
-            Render::drawCursor(sprite, State->mCursorSpriteGroup->getWidth(), State->mCursorSpriteGroup->getHeight());
+            Render::drawCursor(sprite, State->mCursorHotspot);
         }
         else
         {
-            Render::drawCursor(NULL);
+            Render::drawCursor(NULL, State->mCursorHotspot);
         }
         return;
 
