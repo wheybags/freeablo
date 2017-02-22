@@ -90,7 +90,7 @@ namespace FAWorld
 
         for (int32_t i = 1; i < 17; i++)
         {
-            mLevels[i] = FALevelGen::generate(100, 100, i, mDiabloExe, i - 1, i + 1);
+            mLevels[i] = nullptr; // let's generate levels on demand
         }
     }
 
@@ -109,7 +109,7 @@ namespace FAWorld
         if (level >= mLevels.size() || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == level))
             return;
 
-        mCurrentPlayer->setLevel(mLevels[level]);
+        mCurrentPlayer->setLevel(getLevel (level));
         playLevelMusic(level);
     }
 
@@ -151,7 +151,14 @@ namespace FAWorld
 
     GameLevel* World::getLevel(size_t level)
     {
-        return mLevels[level];
+        auto p = mLevels.find (level);
+        if (p == mLevels.end ())
+          return nullptr;
+        if (p->second == nullptr)
+          {
+            p->second = FALevelGen::generate(100, 100, level, mDiabloExe, level - 1, level + 1);
+          }
+        return p->second;
     }
 
     void World::insertLevel(size_t level, GameLevel *gameLevel)
