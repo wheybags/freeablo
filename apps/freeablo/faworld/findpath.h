@@ -72,7 +72,7 @@ namespace FAWorld
         bool passable(Location location);
         vector<Location> neighbors(Location location);
         int heuristic(Location a, Location b);
-        bool AStarSearch(Location start, Location goal, unordered_map<Location, Location>& cameFrom, unordered_map<Location, int>& costSoFar);
+        bool AStarSearch(Location start, FindPath::Location& goal, unordered_map<Location, Location>& cameFrom, unordered_map<Location, int>& costSoFar);
         vector<Location> reconstructPath(Location start, Location goal, unordered_map<Location, Location>& cameFrom);
         Location findClosesPointToGoal(Location start, Location goal, unordered_map<Location, Location> & cameFrom);
 

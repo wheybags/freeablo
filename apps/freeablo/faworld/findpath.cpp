@@ -66,10 +66,10 @@ namespace FAWorld
     }
 
     bool FindPath::AStarSearch(
-        FindPath::Location start,
-        FindPath::Location goal,
-        unordered_map<FindPath::Location, FindPath::Location>& came_from,
-        unordered_map<FindPath::Location, int>& costSoFar)
+      FindPath::Location start,
+      FindPath::Location& goal,
+      unordered_map<FindPath::Location, FindPath::Location>& came_from,
+      unordered_map<FindPath::Location, int>& costSoFar)
     {
         PriorityQueue<Location> frontier;
         frontier.put(start, 0);
@@ -80,10 +80,19 @@ namespace FAWorld
             Location current = frontier.get();
 
             // Early exit
-            if (current == goal)
-            {
-                return true;
-            }
+            if (passable (goal))
+              {
+                if (current == goal)
+                  return true;
+              }
+            else // if we didn't reach goal and it's unreachable but we reach neighbour's tile, then it's our new goal
+              {
+                if (abs (goal.first - current.first) <= 1 && abs (goal.second - current.second) <= 1)
+                    {
+                      goal = current;
+                      return true;
+                    }
+              }
 
             vector<Location> neighborsContainer = neighbors(current);
             for (vector<Location>::iterator it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
@@ -153,8 +162,12 @@ namespace FAWorld
         unordered_map<Location, int> costSoFar;
         unordered_map<Location, Location> cameFrom;
 
+        // looks like original game does the following: it reaches one of neighbor tiles (possibly one with sqrt (2) distance, not 1 if it's closer)
+        // of the target if target itself is not passable, otherwise it does nothing. Also resolution of its search is much lower.
+        // the reaching neighbor tile fastest way is important since it allows to talk with/perform melee attack on target
+
         bool found = AStarSearch(start, goal, cameFrom, costSoFar);
-        if (!found) {
+        if (!found) { // so according to above explanation part in this branch is not performed by original game, I'll leave it be for now
             goal = findClosesPointToGoal(start, goal, cameFrom);
             bArrivable = false;
         }
