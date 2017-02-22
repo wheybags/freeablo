@@ -28,7 +28,6 @@ namespace FAWorld
             if (advanceAnims)
             {
                 auto currentAnim = getCurrentAnim();
-
                 if (mAnimPlaying)
                 {
                     if (mFrame < currentAnim->getAnimLength())
@@ -100,9 +99,9 @@ namespace FAWorld
             }
             else if (mPos.mMoving && mPos.mDist == 0 && !mAnimPlaying)
             {
-                checkAttackTalkAction ();
                 mPos.mMoving = false;
                 setAnimation(AnimState::idle);
+                checkAttackTalkAction ();
             }
 
             if (!mIsDead && !mPos.mMoving && !mAnimPlaying && mAnimState != AnimState::idle)
