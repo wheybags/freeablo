@@ -299,7 +299,7 @@ namespace FAWorld
           return nullptr;
 
         auto actor = getActorAt (x, y);
-        if (actor && actor != getCurrentPlayer()) return actor;
+        if (actor && !actor->isDead() && actor != getCurrentPlayer()) return actor;
 
         return nullptr;
       };

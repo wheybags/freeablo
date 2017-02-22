@@ -117,7 +117,7 @@ namespace FAWorld
     bool GameLevel::isPassableFor(int x, int y, const Actor *actor) const
     {
       auto actorAtPos = getActorAt (x, y);
-      return mLevel[x][y].passable() && (actorAtPos == nullptr || actorAtPos == actor);
+      return mLevel[x][y].passable() && (actorAtPos == nullptr || actorAtPos == actor || actorAtPos->isDead());
     }
 
     Actor* GameLevel::getActorAt(size_t x, size_t y) const
