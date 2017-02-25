@@ -39,3 +39,7 @@ of that have already been made.
 - using qt for the launcher because it has good cross platform support (better
   than gtk), and besides, gtk is yucky. Also, gtk and qt are the only real
   options for cross platform gui libs in c/c++.
+  
+## 19 Feb 2017 12:44:21
+No more unsigned ints. They just cause problems (just finished spending several 
+hours debugging a problem with a negative value being passed as a size_t).

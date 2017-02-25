@@ -79,7 +79,7 @@ namespace Render
 
     void draw();
 
-    void drawAt(const Sprite& sprite, size_t x, size_t y); 
+    void drawAt(const Sprite& sprite, int32_t x, int32_t y);
 
     class SpriteGroup
     {

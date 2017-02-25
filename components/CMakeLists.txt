@@ -54,6 +54,8 @@ set(RenderFiles
     render/rocketglue/FAIOFileInterface.cpp
     render/rocketglue/drawcommand.h
     render/sdl2backend.cpp
+    render/sdl_gl_funcs.h
+    render/sdl_gl_funcs.cpp
 )
 add_library(Render ${RenderFiles})
 target_link_libraries(Render Cel Levels ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${OPENGL_LIBRARIES} ${ROCKET_LIBRARIES} ${PYTHON_LIBRARIES})
