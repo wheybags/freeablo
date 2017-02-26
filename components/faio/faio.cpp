@@ -24,14 +24,14 @@ namespace FAIO
     std::string getStormLibPath(const bfs::path& path)
     {
         std::string retval = "";
-        
+
         for(bfs::path::iterator it = path.begin(); it != path.end(); ++it)
         {
             retval += it->string() + "\\";
         }
-        
+
         retval = retval.substr(0, retval.size()-1);
-        
+
         return retval;
     }
 
@@ -86,7 +86,7 @@ namespace FAIO
                 std::cerr << "File " << path << " not found" << std::endl;
                 return NULL;
             }
-            
+
             FAFile* file = new FAFile();
             file->data.mpqFile = malloc(sizeof(HANDLE));
 
@@ -108,7 +108,7 @@ namespace FAIO
                 return NULL;
 
             FAFile* file = new FAFile();
-            file->mode = FAFile::PlainFile; 
+            file->mode = FAFile::PlainFile;
             file->data.plainFile.file = plainFile;
             file->data.plainFile.filename = new std::string(filename);
 
@@ -122,7 +122,7 @@ namespace FAIO
         {
             case FAFile::PlainFile:
                 return fread(ptr, size, count, stream->data.plainFile.file);
-            
+
             case FAFile::MPQFile:
             {
                 std::lock_guard<std::mutex> lock(m);
@@ -146,7 +146,7 @@ namespace FAIO
         }
         return 0;
     }
-    
+
     int FAfclose(FAFile* stream)
     {
         int retval = 0;
@@ -185,12 +185,12 @@ namespace FAIO
         {
             case FAFile::PlainFile:
                 return fseek(stream->data.plainFile.file, offset, origin);
-            
+
             case FAFile::MPQFile:
             {
                 std::lock_guard<std::mutex> lock(m);
                 DWORD moveMethod;
-                
+
                 switch(origin)
                 {
                     case SEEK_SET:
@@ -204,7 +204,7 @@ namespace FAIO
                     case SEEK_END:
                         moveMethod = FILE_END;
                         break;
-                    
+
                     default:
                         return 1; // error, incorrect origin
                 }
@@ -243,7 +243,7 @@ namespace FAIO
         switch(stream->mode)
         {
             case FAFile::PlainFile:
-                return bfs::file_size(*(stream->data.plainFile.filename));
+                return static_cast<size_t> (bfs::file_size(*(stream->data.plainFile.filename)));
 
             case FAFile::MPQFile:
             {
@@ -252,7 +252,7 @@ namespace FAIO
             }
         }
 
-        return 0; 
+        return 0;
     }
 
     uint32_t read32(FAFile* file)
@@ -279,7 +279,7 @@ namespace FAIO
     std::string readCString(FAFile* file, size_t ptr)
     {
         std::string retval = "";
-        
+
         if(ptr)
         {
             FAfseek(file, ptr, SEEK_SET);
@@ -308,7 +308,7 @@ namespace FAIO
     std::string getMPQFileName()
     {
 		bfs::directory_iterator end;
-		for(bfs::directory_iterator entry(".") ; entry != end; entry++) 
+		for(bfs::directory_iterator entry(".") ; entry != end; entry++)
 		{
 			if (!bfs::is_directory(*entry))
 			{

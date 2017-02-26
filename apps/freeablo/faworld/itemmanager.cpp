@@ -34,7 +34,7 @@ void ItemManager::loadItems(DiabloExe::DiabloExe * exe)
         std::map<std::string, DiabloExe::BaseItem> itemMap = exe->getItemMap();
         for(std::map<std::string, DiabloExe::BaseItem>::const_iterator it = itemMap.begin();it !=itemMap.end();++it)
         {
-            this->mRegisteredItems[this->mRegisteredItems.size()] = Item(it->second, mRegisteredItems.size());
+            this->mRegisteredItems[static_cast<uint8_t> (this->mRegisteredItems.size())] = Item(it->second, mRegisteredItems.size());
             if(it->second.uniqCode !=0)
                 this->mUniqueCodeToBaseItem[it->second.uniqCode] = it->second;
 
@@ -50,7 +50,7 @@ void ItemManager::loadUniqueItems(DiabloExe::DiabloExe * exe)
         const std::map<std::string, DiabloExe::UniqueItem>& uniqueItemMap = exe->getUniqueItemMap();
         for(std::map<std::string, DiabloExe::UniqueItem>::const_iterator it = uniqueItemMap.begin();it !=uniqueItemMap.end();++it)
         {
-            this->mUniqueItems[this->mUniqueItems.size()] = Item(it->second, mUniqueItems.size());
+            this->mUniqueItems[static_cast<uint8_t> (this->mUniqueItems.size())] = Item(it->second, mUniqueItems.size());
 
 
 

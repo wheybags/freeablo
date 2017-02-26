@@ -17,7 +17,7 @@ namespace FAWorld
     {
         if (mMoving)
         {
-            mDist += FAWorld::World::getSecondsPerTick() * 250;
+            mDist += static_cast<int32_t> (FAWorld::World::getSecondsPerTick() * 250);
 
             if (mDist >= 100)
             {

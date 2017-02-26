@@ -9,7 +9,7 @@ namespace FALevelGen
     {
         rng.seed(seed);
     }
-    
+
     int normRand(int min, int max)
     {
         std::normal_distribution<> nd(min, (float)(max-min)/3.5);
@@ -17,7 +17,7 @@ namespace FALevelGen
         int result;
         do
         {
-            result = nd(rng);
+            result = static_cast<int> (nd(rng));
         }
         while(result < min || result > max);
 

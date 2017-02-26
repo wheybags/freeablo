@@ -62,7 +62,7 @@ namespace Serial
     WriteBitStream::WriteBitStream(std::vector<uint8_t>& resizeableBacking)
     {
         mResizableBacking = &resizeableBacking;
-        
+
         if (mResizableBacking->size() == 0)
             mResizableBacking->resize(1, 0); // make sure we have a bit of space at least so the old &vec[0] trick works
 
@@ -78,7 +78,7 @@ namespace Serial
 
         if (byteSize > mResizableBacking->size())
         {
-            mResizableBacking->resize(byteSize, 0);
+            mResizableBacking->resize(static_cast<size_t> (byteSize), 0);
             mSize = byteSize * 8;
             mData = &(*mResizableBacking)[0];
         }
@@ -217,8 +217,8 @@ namespace Serial
             done++;
         }
 
-        size_t bytePos = mCurrentPos / 8;
-        size_t byteSize = mSize / 8;
+        size_t bytePos = static_cast<size_t> (mCurrentPos) / 8;
+        size_t byteSize = static_cast<size_t> (mSize) / 8;
 
         memset(&mData[bytePos], 0, byteSize - bytePos);
     }
@@ -239,8 +239,8 @@ namespace Serial
             done++;
         }
 
-        size_t bytePos = mCurrentPos / 8;
-        size_t byteSize = mSize / 8;
+        size_t bytePos = static_cast<size_t> (mCurrentPos) / 8;
+        size_t byteSize = static_cast<size_t> (mSize) / 8;
 
         for (size_t i = bytePos; i < byteSize; i++)
         {

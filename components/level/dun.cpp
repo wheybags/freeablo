@@ -10,15 +10,17 @@ namespace Level
     Dun::Dun(const std::string& filename)
     {
         FAIO::FAFileObject f(filename);
-        
-        int16_t temp;        
+
+        int16_t temp;
         f.FAfread(&temp, 2, 1);
         mWidth = temp;
         f.FAfread(&temp, 2, 1);
         mHeight = temp;
-       
-        mBlocks.resize(mWidth*mHeight);
-        f.FAfread(&mBlocks[0], 2, mWidth*mHeight);
+
+        std::vector<int16_t> buf (mWidth*mHeight);
+        f.FAfread(buf.data (), 2, mWidth*mHeight);
+        mBlocks.resize(buf.size ());
+        std::copy (buf.begin (), buf.end (), mBlocks.begin ());
 
         std::cout << "w: " << mWidth << ", h: " << mHeight << std::endl;
     }
@@ -34,13 +36,13 @@ namespace Level
     {
         mWidth = width;
         mHeight = height;
-        mBlocks.resize(mWidth*mHeight, 0);    
+        mBlocks.resize(mWidth*mHeight, 0);
     }
 
     Dun Dun::getTown(const Dun& sector1, const Dun& sector2, const Dun& sector3, const Dun& sector4)
     {
         Dun town(48, 48);
-        
+
         for(size_t x = 0; x < sector3.mWidth; x++)
         {
             for(size_t y = 0; y < sector3.mHeight; y++)
@@ -76,24 +78,24 @@ namespace Level
         return town;
     }
 
-    int16_t& get(size_t x, size_t y, Dun& dun)
+    size_t& get(size_t x, size_t y, Dun& dun)
     {
         return dun.mBlocks[x+y*dun.width()];
     }
 
-    const int16_t& get(size_t x, size_t y, const Dun& dun)
+    const size_t& get(size_t x, size_t y, const Dun& dun)
     {
         return dun.mBlocks[x+y*dun.width()];
     }
 
-    Misc::Helper2D<Dun, int16_t&> Dun::operator[] (size_t x)
+    Misc::Helper2D<Dun, size_t&> Dun::operator[] (size_t x)
     {
-        return Misc::Helper2D<Dun, int16_t&>(*this, x, get);
+        return Misc::Helper2D<Dun, size_t&>(*this, x, get);
     }
 
-    Misc::Helper2D<const Dun, const int16_t&> Dun::operator[] (size_t x) const
+    Misc::Helper2D<const Dun, const size_t&> Dun::operator[] (size_t x) const
     {
-        return Misc::Helper2D<const Dun, const int16_t&>(*this, x, get);
+        return Misc::Helper2D<const Dun, const size_t&>(*this, x, get);
     }
 
     size_t Dun::width() const
