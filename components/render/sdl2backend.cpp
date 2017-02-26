@@ -557,10 +557,8 @@ namespace Render
 
     void drawAtTile(const Sprite& sprite, const Point& tileTop, int spriteW, int spriteH)
     {
-         int32_t w, h;
-        spriteSize(sprite, w, h);
         // centering spright at the center of tile by width and at the bottom of tile by height
-        drawSprite(sprite, tileTop.x - w / 2, tileTop.y - h + tileHeight);
+        drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight);
     }
 
 
@@ -843,7 +841,7 @@ namespace Render
       return pointA + (pointB - pointA) * (percent * 0.01);
     }
 
-    void drawMovingSprite(const Level::Level& level, const Sprite& sprite, const Tile& start, const Tile& finish, size_t dist, const Vector& toScreen)
+    void drawMovingSprite(const Sprite& sprite, const Tile& start, const Tile& finish, size_t dist, const Vector& toScreen)
     {
         int32_t w, h;
         spriteSize(sprite, w, h);
@@ -853,16 +851,15 @@ namespace Render
     }
 
   constexpr auto bottomMenuSize = 144; // TODO: pass it as a variable
-  Vector worldToScreenVector(const Level::Level& level, const Tile& start, const Tile& finish, size_t dist)
+  Vector worldToScreenVector(const Tile& start, const Tile& finish, size_t dist)
     {
-        auto levelWidth = static_cast<int32_t> (level.width());
         // centering takes in accord bottom menu size to be consistent with original game centering
         return Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - pointBetween(start, finish, dist);
     }
 
-    Tile getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    Tile getClickedTile(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
-        auto toScreen = worldToScreenVector(level, {x1, y1}, {x2, y2}, dist);
+        auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
         return getTileFromScreenCoords({static_cast<int32_t> (x), static_cast<int32_t> (y)}, toScreen);
     }
 
@@ -902,7 +899,7 @@ namespace Render
     }
 
     void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist) {
-      auto toScreen = worldToScreenVector(level, {x1, y1}, {x2, y2}, dist);
+      auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
       SpriteGroup* minBottoms = cache->get(minBottomsHandle);
       auto isInvalidTile = [&](const Tile &tile){ return tile.x < 0 || tile.y < 0 || tile.x >= static_cast<int32_t> (level.width()) || tile.y >= static_cast<int32_t> (level.height());};
 
@@ -931,7 +928,7 @@ namespace Render
 
         auto &obj = objs[tile.x][tile.y];
         if (obj.valid)
-           drawMovingSprite(level, (*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen);
+           drawMovingSprite((*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen);
       });
 
       cache->setImmortal(minTopsHandle, false);
