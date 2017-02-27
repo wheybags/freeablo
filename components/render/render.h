@@ -36,28 +36,6 @@ namespace Level
 
 namespace Render
 {
-    // Difference between two points
-    struct Vector
-    {
-      int32_t x;
-      int32_t y;
-
-      Vector operator* (const double &scalar) const
-      {
-        return {static_cast<int32_t> (x * scalar), static_cast<int32_t> (y * scalar)};
-      }
-    };
-
-    // Point in pixels
-    struct Point
-    {
-      int32_t x;
-      int32_t y;
-      Point operator+ (const Vector &v) const { return {x + v.x, y + v.y}; }
-      Point operator- (const Vector &v) const { return {x - v.x, y - v.y}; }
-      Vector operator- (const Point &other) const { return {x - other.x, y - other.y}; }
-    };
-
     // Tile mesasured in indexes on tile grid
     struct Tile
     {

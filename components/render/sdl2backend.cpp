@@ -555,7 +555,7 @@ namespace Render
     constexpr auto tileHeight = 32;
     constexpr auto tileWidth = tileHeight * 2;
 
-    void drawAtTile(const Sprite& sprite, const Point& tileTop, int spriteW, int spriteH)
+    void drawAtTile(const Sprite& sprite, const Misc::Point& tileTop, int spriteW, int spriteH)
     {
         // centering spright at the center of tile by width and at the bottom of tile by height
         drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight);
@@ -823,25 +823,25 @@ namespace Render
     // basic transform of isometric grid to normal, (0, 0) tile coordinate maps to (0, 0) pixel coordinates
     // since eventually we're gonna shift coordinates to viewport center, it's better to keep transform itself
     // as simple as possible
-    static Point tileTopPoint (const Tile &tile) {
+    static Misc::Point tileTopPoint (const Tile &tile) {
       return {(tileWidth / 2) * (tile.x - tile.y), (tile.y + tile.x) * (tileHeight / 2)};
     }
 
     // this function simply does the reverse of the above function, could be found by solving linear equation system
     // it obviously uses the fact that ttileWidth = tileHeight * 2
-    Tile getTileFromScreenCoords(const Point& screenPos, const Vector& toScreen)
+    Tile getTileFromScreenCoords(const Misc::Point& screenPos, const Misc::Point& toScreen)
     {
         auto point = screenPos - toScreen;
         return {(2 * point.y + point.x) / tileWidth, (2 * point.y - point.x) / tileWidth}; // divisin by 64 is pretty fast btw
     }
 
-    static Point pointBetween (const Tile &start, const Tile &finish, const size_t &percent) {
+    static Misc::Point pointBetween (const Tile &start, const Tile &finish, const size_t &percent) {
       auto pointA = tileTopPoint (start);
       auto pointB = tileTopPoint (finish);
       return pointA + (pointB - pointA) * (percent * 0.01);
     }
 
-    void drawMovingSprite(const Sprite& sprite, const Tile& start, const Tile& finish, size_t dist, const Vector& toScreen)
+    void drawMovingSprite(const Sprite& sprite, const Tile& start, const Tile& finish, size_t dist, const Misc::Point& toScreen)
     {
         int32_t w, h;
         spriteSize(sprite, w, h);
@@ -850,11 +850,11 @@ namespace Render
         drawAtTile(sprite, res, w, h);
     }
 
-  constexpr auto bottomMenuSize = 144; // TODO: pass it as a variable
-  Vector worldToScreenVector(const Tile& start, const Tile& finish, size_t dist)
+    constexpr auto bottomMenuSize = 144; // TODO: pass it as a variable
+    Misc::Point worldToScreenVector(const Tile& start, const Tile& finish, size_t dist)
     {
         // centering takes in accord bottom menu size to be consistent with original game centering
-        return Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - pointBetween(start, finish, dist);
+        return Misc::Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - pointBetween(start, finish, dist);
     }
 
     Tile getClickedTile(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
@@ -866,9 +866,9 @@ namespace Render
     constexpr auto staticObjectHeight = 256;
 
     template <typename ProcessTileFunc>
-    void drawObjectsByTiles (const Vector &toScreen, ProcessTileFunc processTile)
+    void drawObjectsByTiles (const Misc::Point &toScreen, ProcessTileFunc processTile)
     {
-      Point start {-tileWidth, -tileHeight};
+      Misc::Point start {-tileWidth, -tileHeight};
       auto startingTile = getTileFromScreenCoords(start, toScreen);
 
       auto startingPoint = tileTopPoint(startingTile) + toScreen;
@@ -904,7 +904,7 @@ namespace Render
       auto isInvalidTile = [&](const Tile &tile){ return tile.x < 0 || tile.y < 0 || tile.x >= static_cast<int32_t> (level.width()) || tile.y >= static_cast<int32_t> (level.height());};
 
       // drawing on the ground objects
-      drawObjectsByTiles (toScreen, [&](const Tile &tile, const Point &topLeft){
+      drawObjectsByTiles (toScreen, [&](const Tile &tile, const Misc::Point &topLeft){
           // Fill invalid tiles with ground, it looks ok but it's probably better to have something else than zero-eth sprite here
           if (isInvalidTile (tile))
             return drawAtTile ((*minBottoms)[0], topLeft, tileWidth, staticObjectHeight);
@@ -918,7 +918,7 @@ namespace Render
       cache->setImmortal(minTopsHandle, true);
 
       // drawing above the ground and moving object
-      drawObjectsByTiles (toScreen, [&](const Tile &tile, const Point &topLeft){
+      drawObjectsByTiles (toScreen, [&](const Tile &tile, const Misc::Point &topLeft){
         if (isInvalidTile (tile))
           return;
 
