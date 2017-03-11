@@ -421,7 +421,6 @@ namespace FAGui
         {
             for(uint8_t j=0;j<10;j++)
             {
-                boost::python::dict itemDict;
                 FAWorld::Item item = mPlayerInv.getItemAt(FAWorld::Item::eqINV, i, j);
                 if(!item.isEmpty())
                 {
@@ -501,7 +500,7 @@ namespace FAGui
 
 
 // horrible macro for a horrible task - turns lambdas into std::functions and passes em to boost::python::def
-// eg: 
+// eg:
 //        DEF_FUNC("openDialogue", void, (const char* document), { funcs->openDialogue(document); });
 //        expands to:
 //        boost::python::def("openDialogue", std::function<void (const char* document)>([] (const char* document) { funcs->openDialogue(document); } ));
@@ -546,9 +545,9 @@ namespace FAGui
         DEF_FUNC("loadGame",                    void,                   (void),                                                 { funcs->loadGame(); }                          );
         DEF_FUNC("getInvClass",                 std::string,            (void),                                                 { return funcs->getInvClass(); }                );
         DEF_FUNC("updateInventory",             boost::python::dict,    (void),                                                 { return funcs->updateInventory(); }            );
-        
+
         // these handled separately because they're too long to align
-        DEF_FUNC("canPlaceItem",    bool, (uint32_t toPara, uint32_t fromPara, uint32_t fromY, uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX), 
+        DEF_FUNC("canPlaceItem",    bool, (uint32_t toPara, uint32_t fromPara, uint32_t fromY, uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX),
             { return funcs->canPlace(toPara, fromPara, fromY, fromX, toY, toX, beltX); }    );
 
         DEF_FUNC("placeItem",       void, (uint32_t toPara, uint32_t fromPara, uint32_t fromY, uint32_t fromX, uint32_t toY, uint32_t toX, uint32_t beltX),

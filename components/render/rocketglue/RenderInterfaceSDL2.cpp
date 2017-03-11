@@ -14,7 +14,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -43,7 +43,7 @@
     #error "Only the opengl sdl backend is supported. To add support for others, see http://mdqinc.com/blog/2013/01/integrating-librocket-with-sdl-2/"
 #endif
 
-RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen, 
+RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* screen,
         std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
         std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
         std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc) :
@@ -53,7 +53,7 @@ RocketSDL2Renderer::RocketSDL2Renderer(SDL_Renderer* renderer, SDL_Window* scree
     mScreen = screen;
 
     getGLFunc();
-    
+
     ROCKET_ASSERT(glUseProgramObjectARB != NULL);
 }
 
@@ -101,16 +101,16 @@ void RocketSDL2Renderer::drawBuffer(std::vector<DrawCommand>& buffer, Render::Sp
 // Called by Rocket when it wants to render geometry that it does not wish to optimise.
 void RocketSDL2Renderer::RenderGeometryImp(Rocket::Core::Vertex* vertices, int num_vertices, int* indices, int num_indices, const Rocket::Core::TextureHandle texture, const Rocket::Core::Vector2f& translation, Render::SpriteCacheBase* cache)
 {
-    // SDL uses shaders that we need to disable here  
+    // SDL uses shaders that we need to disable here
     glUseProgramObjectARB(0);
     glPushMatrix();
     glTranslatef(translation.x, translation.y, 0);
- 
+
     std::vector<Rocket::Core::Vector2f> Positions(num_vertices);
     std::vector<Rocket::Core::Colourb> Colors(num_vertices);
     std::vector<Rocket::Core::Vector2f> TexCoords(num_vertices);
-    float texw, texh;
- 
+    float texw = 0.0, texh = 0.0;
+
     SDL_Texture* sdl_texture = NULL;
     if(texture)
     {
@@ -120,7 +120,7 @@ void RocketSDL2Renderer::RenderGeometryImp(Rocket::Core::Vertex* vertices, int n
         sdl_texture = (SDL_Texture *) cache->get(rtex->spriteIndex)->operator[](rtex->index);
         SDL_GL_BindTexture(sdl_texture, &texw, &texh);
     }
- 
+
     for(int  i = 0; i < num_vertices; i++) {
         Positions[i] = vertices[i].position;
         Colors[i] = vertices[i].colour;
@@ -130,25 +130,25 @@ void RocketSDL2Renderer::RenderGeometryImp(Rocket::Core::Vertex* vertices, int n
         }
         else TexCoords[i] = vertices[i].tex_coord;
     };
- 
+
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
     glVertexPointer(2, GL_FLOAT, 0, &Positions[0]);
     glColorPointer(4, GL_UNSIGNED_BYTE, 0, &Colors[0]);
     glTexCoordPointer(2, GL_FLOAT, 0, &TexCoords[0]);
- 
+
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, indices);
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
- 
+
     if (sdl_texture) {
         SDL_GL_UnbindTexture(sdl_texture);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
- 
+
     glColor4f(1.0, 1.0, 1.0, 1.0);
     glPopMatrix();
     /* Reset blending and draw a fake point just outside the screen to let SDL know that it needs to reset its state in case it wants to render a texture */
@@ -158,7 +158,7 @@ void RocketSDL2Renderer::RenderGeometryImp(Rocket::Core::Vertex* vertices, int n
 }
 
 
-// Called by Rocket when it wants to enable or disable scissoring to clip content.		
+// Called by Rocket when it wants to enable or disable scissoring to clip content.
 void RocketSDL2Renderer::EnableScissorRegion(bool enable)
 {
     if(mDrawBuffer)
@@ -179,7 +179,7 @@ void RocketSDL2Renderer::EnableScissorRegionImp(bool enable)
         glDisable(GL_SCISSOR_TEST);
 }
 
-// Called by Rocket when it wants to change the scissor region.		
+// Called by Rocket when it wants to change the scissor region.
 void RocketSDL2Renderer::SetScissorRegion(int x, int y, int width, int height)
 {
     if(mDrawBuffer)

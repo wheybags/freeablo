@@ -28,7 +28,7 @@
 #endif
 
 /* libpng callbacks */
-static void png_error_SDL(png_structp ctx, png_const_charp str)
+static void png_error_SDL(png_structp /*ctx*/, png_const_charp str)
 {
     SDL_SetError("libpng: %s\n", str);
 }
@@ -107,10 +107,11 @@ int SDL_SavePNG_RW(SDL_Surface *surface, SDL_RWops *dst, int freedst)
     png_set_write_fn(png_ptr, dst, png_write_SDL, NULL); /* w_ptr, write_fn, flush_fn */
 
     /* Prepare chunks */
+    pal = surface->format->palette;
     colortype = PNG_COLOR_MASK_COLOR;
     if (surface->format->BytesPerPixel > 0
         && surface->format->BytesPerPixel <= 8
-        && (pal = surface->format->palette))
+        && pal)
     {
         colortype |= PNG_COLOR_MASK_PALETTE;
         pal_ptr = (png_colorp)malloc(pal->ncolors * sizeof(png_color));
