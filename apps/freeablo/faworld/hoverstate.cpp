@@ -15,6 +15,7 @@ bool HoverState::applyIfNeeded(const HoverState& newState) {
     switch (mType) {
     case HoverType::actor:
       return mActorId == other.mActorId;
+    case HoverType::none: break;
     }
     return true;
   }

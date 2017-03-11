@@ -287,7 +287,7 @@ namespace Render
     void setpixel(SDL_Surface *s, int x, int y, Cel::Colour c);
     SDL_Surface* createTransparentSurface(size_t width, size_t height);
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
-    void drawFrameMask(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
+    void drawFrameMask(SDL_Surface* s, const Cel::CelFrame& frame);
 
     SDL_Surface* loadNonCelImageTrans(const std::string& path, const std::string& extension, bool hasTrans, size_t transR, size_t transG, size_t transB)
     {
@@ -578,7 +578,7 @@ namespace Render
             SDL_FreeSurface(s);
 
             s = createTransparentSurface(cel[i].mWidth, cel[i].mHeight);
-            drawFrameMask(s, 0, 0, cel[i]);
+            drawFrameMask(s, cel[i]);
             mMasks.push_back (SDL_CreateTextureFromSurface (renderer, s));
             SDL_FreeSurface(s);
         }
@@ -776,14 +776,14 @@ namespace Render
         }
     }
 
-    void drawFrameMask (SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)
+    void drawFrameMask (SDL_Surface* s, const Cel::CelFrame& frame)
     {
-        for(size_t x = 0; x < frame.mWidth; x++)
+        for(int x = 0; x < static_cast<int> (frame.mWidth); x++)
         {
-            for(size_t y = 0; y < frame.mHeight; y++)
+            for(int y = 0; y < static_cast<int> (frame.mHeight); y++)
             {
               constexpr int dirs[4][2] = {{1, 0},{-1, 0},{0, 1},{0, -1}};
-              auto isValid = [&](size_t xArg, size_t yArg){ return xArg >= 0 && yArg >= 0 && xArg < frame.mWidth && yArg < frame.mHeight; };
+              auto isValid = [&](int xArg, int yArg){ return xArg >= 0 && yArg >= 0 && xArg < static_cast<int> (frame.mWidth) && yArg < static_cast<int> (frame.mHeight); };
               auto isBlack = [&]{ return frame[x][y].r == 0 && frame[x][y].g == 0 && frame[x][y].b == 0; };
                 if(frame[x][y].visible && !isBlack ()) {
                     for (auto dir : dirs) {

@@ -36,7 +36,7 @@ namespace FARender
 
     struct ObjectToRender {
       FASpriteGroup* spriteGroup;
-      uint32_t frame;
+      size_t frame;
       FAWorld::Position position;
       boost::optional<Cel::Colour> hoverColor;
     };

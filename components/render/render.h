@@ -50,7 +50,9 @@ namespace Render
     {
       int32_t x;
       int32_t y;
-      TileHalf half; // assuming that we never need to get more precise than left/right halfs for now
+      TileHalf half = TileHalf::left; // assuming that we never need to get more precise than left/right halfs for now
+      Tile (int32_t xArg, int32_t yArg) : x (xArg), y (yArg) {}
+      Tile (int32_t xArg, int32_t yArg, TileHalf halfArg) : x (xArg), y (yArg), half (halfArg) {}
     };
     /**
      * @brief Render settings for initialization.

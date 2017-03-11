@@ -74,9 +74,8 @@ namespace FAWorld
                         else
                         {
                             auto nextPos = mPos.pathNext(false);
-                            FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.first, nextPos.second);
 
-                            if (noclip || (mLevel->isPassableFor (nextPos.first, nextPos.second, this)) && !mAnimPlaying)
+                            if ((noclip || mLevel->isPassableFor (nextPos.first, nextPos.second, this)) && !mAnimPlaying)
                             {
                                 mPos.mMoving = true;
                                 setAnimation(AnimState::walk);

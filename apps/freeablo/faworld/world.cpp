@@ -289,7 +289,7 @@ namespace FAWorld
       return FARender::Renderer::get()->getTileByScreenPos(screenPos.x, screenPos.y, getCurrentPlayer()->mPos);
     }
 
-    HoverState &World::getHoverState () { return getCurrentLevel ()->getHoverState (); };
+    HoverState &World::getHoverState () { return getCurrentLevel ()->getHoverState (); }
 
     Actor *World::targetedActor(Engine::Point screenPosition)
     {
