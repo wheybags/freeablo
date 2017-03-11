@@ -265,9 +265,9 @@ namespace FAWorld
     void World::onMouseDown(Engine::Point mousePosition)
     {
         auto player = getCurrentPlayer();
-        auto level = getCurrentLevel();
         std::pair<int32_t, int32_t>& destination = player->destination();
-        destination = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, *level, player->mPos);
+        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->mPos);
+        destination = {clickedTile.x, clickedTile.y};
         mDestination = player->mPos.mGoal = destination; //update it.
     }
 

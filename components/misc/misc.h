@@ -14,6 +14,16 @@ namespace Misc
     {
         return std::make_pair(((float)to.first)-((float)from.first), ((float)to.second)-((float)from.second));
     }
+
+    // Point in pixels
+    struct Point
+    {
+      int32_t x;
+      int32_t y;
+      Point operator+ (const Point &v) const { return {x + v.x, y + v.y}; }
+      Point operator- (const Point &v) const { return {x - v.x, y - v.y}; }
+      Point operator* (double c) const { return {static_cast<int32_t> (x * c), static_cast<int32_t> (y * c)}; }
+    };
 }
 
 #define UNUSED_PARAM(x) (void)(x)

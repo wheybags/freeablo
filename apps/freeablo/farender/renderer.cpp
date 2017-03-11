@@ -26,7 +26,7 @@ namespace FARender
     {
         return mRenderer;
     }
-                                  
+
 
     Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen)
         :mDone(false)
@@ -43,7 +43,7 @@ namespace FARender
             settings.fullscreen = fullscreen;
 
             Render::init(settings);
-            
+
             mRocketContext = Render::initGui(std::bind(&Renderer::loadGuiTextureFunc, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
                                              std::bind(&Renderer::generateGuiTextureFunc, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
                                              std::bind(&Renderer::releaseGuiTextureFunc, this, std::placeholders::_1));
@@ -161,7 +161,7 @@ namespace FARender
     {
         Engine::ThreadManager::get()->sendRenderState(current);
     }
-    
+
     FASpriteGroup* Renderer::loadImage(const std::string& path)
     {
         return mSpriteManager.get(path);
@@ -182,9 +182,9 @@ namespace FARender
         return mSpriteManager.getPathForIndex(index);
     }
 
-    std::pair<size_t, size_t> Renderer::getClickedTile(size_t x, size_t y, const FAWorld::GameLevel& level, const FAWorld::Position& screenPos)
+    Render::Tile Renderer::getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getClickedTile(level.mLevel, x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
+        return Render::getClickedTile(x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
     }
 
     Rocket::Core::Context* Renderer::getRocketContext()
@@ -213,7 +213,7 @@ namespace FARender
 
         if(state)
         {
-            
+
             if(state->level)
             {
                 if(mLevelObjects.width() != state->level->width() || mLevelObjects.height() != state->level->height())
@@ -249,7 +249,7 @@ namespace FARender
             Render::drawGui(state->guiDrawBuffer, &mSpriteManager);
             Renderer::setCursor(state);
         }
-        
+
         Render::draw();
 
         return true;
