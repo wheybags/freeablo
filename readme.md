@@ -13,6 +13,8 @@ This is just a base for a game so far, so if you can help, please see the contri
 There is a website at http://freeablo.org
 
 #Installation
+
+[![Join the chat at https://gitter.im/freeablo/Lobby](https://badges.gitter.im/freeablo/Lobby.svg)](https://gitter.im/freeablo/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Build the engine yourself (instructions below), or grab a prebuilt binary for your platform from https://github.com/wheybags/freeablo/releases
 Copy DIABDAT.MPQ and Diablo.exe from your diablo install into the folder with the freeablo executable. (NOTE: only version 1.09 of diablo is currently supported, so please patch to that version)
 
