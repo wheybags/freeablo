@@ -28,13 +28,14 @@ class DocManager(object):
         self.pauseHandle = self.PauseFile
         self.loadDoc(self.pauseHandle)
 
-    def showDoc(self, docpath):
+    def showDoc(self, docpath, focus=rocket.focus.FOCUS):
         handle = self.docs[docpath]
-        handle["doc"].Show()
+        handle["doc"].Show(focus)
         handle["visible"] = True
 
     def hideDoc(self, docpath):
         handle = self.docs[docpath]
+        handle["doc"].Show(rocket.focus.NONE)
         handle["doc"].Hide()
         handle["visible"] = False
 
@@ -66,16 +67,22 @@ class DocManager(object):
     def pause(self):
         for docpath in self.docs:
             handle = self.docs[docpath]
-            if handle["visible"]:
+            if handle["visible"] and docpath != "resources/gui/bottommenu.rml":
                 self.toggleDoc(docpath)
+                #self.docs[docpath]["doc"].Show(rocket.focus.NONE)
                 self.pauseHiddenDocs.append(docpath)
 
         self.paused = True
-        self.toggleDoc(self.pauseHandle)
+        #self.showDoc(self.pauseHandle, rocket.focus.MODAL)
+        self.showDoc(self.pauseHandle)
         freeablo.pause()
 
     def unpause(self):
-        self.toggleDoc(self.pauseHandle)
+        for docpath in self.docs:
+            handle = self.docs[docpath]
+            if handle["visible"] and docpath != "resources/gui/bottommenu.rml":
+                
+                self.toggleDoc(docpath)
 
         for docpath in self.pauseHiddenDocs:
             self.toggleDoc(docpath)

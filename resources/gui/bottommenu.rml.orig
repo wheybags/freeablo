@@ -7,7 +7,6 @@
                 text-align: center;
                 bottom: 0px;
                 width: 100%;
-                z-index: 0;
             }
 
             span#container
@@ -62,10 +61,20 @@
 import docmanage
 import draggable
 instance = draggable.DraggableWidget(document, 0, 0)
+<<<<<<< HEAD
 docmanage.manager.loadDoc(docmanage.manager.InventoryFile)
 docmanage.manager.loadDoc(docmanage.manager.CharacterFile)
 docmanage.manager.loadDoc(docmanage.manager.SpellsFile)
 docmanage.manager.loadDoc(docmanage.manager.QuestFile)
+=======
+invHandle = "resources/gui/inventory.rml"
+charHandle = "resources/gui/character.rml"
+spellsHandle = "resources/gui/spells.rml"
+questHandle = "resources/gui/quest.rml"
+docmanage.manager.loadDoc(invHandle)
+docmanage.manager.loadDoc(charHandle)
+docmanage.manager.loadDoc(spellsHandle)
+docmanage.manager.loadDoc(questHandle)
 
 def toggleScreen(screen):
     if not docmanage.manager.paused:
@@ -73,6 +82,7 @@ def toggleScreen(screen):
     else:
         docmanage.manager.unpause()
         docmanage.manager.showDoc(screen)
+>>>>>>> stash
         </script>
 
     </head>
@@ -89,12 +99,23 @@ def toggleScreen(screen):
         <div class="beltSocket" id="belt6" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
         <div class="beltSocket" id="belt7" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
         </span>
-            <button id="charBut" onclick="toggleScreen(docmanage.manager.CharacterFile)"></button>
-            <button id="questBut" onclick="toggleScreen(docmanage.manager.QuestFile)"></button>
+<<<<<<< HEAD
+            <button id="charBut" onclick="docmanage.manager.toggleDoc(docmanage.manager.CharacterFile)"></button>
+            <button id="questBut" onclick="docmanage.manager.toggleDoc(docmanage.manager.QuestFile)"></button>
+=======
+            <button id="charBut" onclick="toggleScreen(charHandle)"></button>
+            <button id="questBut" onclick="toggleScreen(questHandle)"></button>
+>>>>>>> stash
             <button id="mapBut" onclick="print 'map clicked'"></button>
+<<<<<<< HEAD
+            <button id="menuBut" onclick="docmanage.manager.pause()"></button>
+            <button id="invBut" onclick="docmanage.manager.toggleDoc(docmanage.manager.InventoryFile)"></button>
+            <button id="spellBut" onclick="docmanage.manager.toggleDoc(docmanage.manager.SpellsFile)"></button>
+=======
             <button id="menuBut" onclick="docmanage.manager.togglePause()"></button>
-            <button id="invBut" onclick="toggleScreen(docmanage.manager.InventoryFile)"></button>
-            <button id="spellBut" onclick="toggleScreen(docmanage.manager.SpellsFile)"></button>
+            <button id="invBut" onclick="toggleScreen(invHandle)"></button>
+            <button id="spellBut" onclick="toggleScreen(spellsHandle)"></button>
+>>>>>>> stash
         </span>
     </body>
 </rml>

@@ -72,9 +72,16 @@ def onKeyDown(event, document):
         docmanage.manager.onKeyDown(event)
 
 def showHotkeys():
+<<<<<<< HEAD
     docmanage.manager.loadDoc(docmanage.manager.HotKeyMenuFile)
     docmanage.manager.hideDoc(docmanage.manager.PauseFile)
     docmanage.manager.showDoc(docmanage.manager.HotKeyMenuFile)
+=======
+    docmanage.manager.loadDoc("resources/gui/hotkeymenu.rml")
+    docmanage.manager.hideDoc("resources/gui/pausemenu.rml")
+    #docmanage.manager.showDoc("resources/gui/hotkeymenu.rml", rocket.focus.MODAL)
+    docmanage.manager.showDoc("resources/gui/hotkeymenu.rml")
+>>>>>>> stash
 
 def saveGame():
     docmanage.manager.unpause()
