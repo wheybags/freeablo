@@ -53,6 +53,7 @@ namespace FAGui
         void showInvalidNameMenu(int classNumber);
         void update(bool paused);
         GuiType currentGuiType() const;
+        void setStatusBarText(std::string text);
         static std::string invClass;
 
         FAPythonFuncs mPythonFuncs;

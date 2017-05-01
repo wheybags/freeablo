@@ -5,6 +5,8 @@
 
 #include <enet/enet.h> // TODO: remove
 
+#include "hoverstate.h"
+
 namespace FARender
 {
     class Renderer;
@@ -23,6 +25,7 @@ namespace FAWorld
         virtual size_t width() const = 0;
         virtual size_t height() const = 0;
         virtual bool isPassable(int x, int y) const = 0;
+        virtual bool isPassableFor(int x, int y, const Actor* actor) const = 0;
     };
 
     class GameLevel :public GameLevelImpl
@@ -50,9 +53,10 @@ namespace FAWorld
         void actorMapRemove(Actor* actor);
         void actorMapClear();
         void actorMapRefresh();
-        virtual bool isPassable(int x, int y) const;
+        bool isPassable(int x, int y) const override;
+        bool isPassableFor(int x, int y, const Actor* actor) const override;
 
-        Actor* getActorAt(size_t x, size_t y);
+      Actor* getActorAt(size_t x, size_t y) const;
 
         void addActor(Actor* actor);
 
@@ -66,6 +70,7 @@ namespace FAWorld
         }
 
         std::string serialiseToString();
+        HoverState& getHoverState();
         static GameLevel* loadFromString(const std::string& data);
 
         Actor* getActorById(int32_t id);
@@ -73,10 +78,11 @@ namespace FAWorld
         void getActors(std::vector<Actor*>& actors);
 
     private:
-        GameLevel() {}
+      GameLevel();
 
         Level::Level mLevel;
         size_t mLevelIndex;
+        HoverState mHoverState;
 
         std::vector<Actor*> mActors;
         std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.

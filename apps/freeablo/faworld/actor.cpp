@@ -28,7 +28,6 @@ namespace FAWorld
             if (advanceAnims)
             {
                 auto currentAnim = getCurrentAnim();
-
                 if (mAnimPlaying)
                 {
                     if (mFrame < currentAnim->getAnimLength())
@@ -57,22 +56,7 @@ namespace FAWorld
 
             if (mPos.mGoal != std::pair<int32_t, int32_t>(0, 0) && mPos.current() != mPos.mGoal)
             {
-                Actor * actor;
-                actor = World::get()->getActorAt(mDestination.first, mDestination.second);
-                if (canIAttack(actor))
-                {
-                    std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
-                    mPos.mDirection = Misc::getVecDir(vector);
-                    mPos.update();
-                    mPos.mDist = 0;
-
-                    attack(actor);
-                }
-                else if (canTalkTo(actor))
-                {
-                    mPos.mDist = 0;
-                    talk(actor);
-                }
+                if (checkAttackTalkAction ()) {}
                 else if (mPos.mDist == 0)
                 {
                     World& world = *World::get();
@@ -90,16 +74,11 @@ namespace FAWorld
                         else
                         {
                             auto nextPos = mPos.pathNext(false);
-                            FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.first, nextPos.second);
 
-                            if ((noclip || (mLevel->getTile(nextPos.first, nextPos.second).passable() &&
-                                (actorAtNext == NULL || actorAtNext == this))) && !mAnimPlaying)
+                            if ((noclip || mLevel->isPassableFor (nextPos.first, nextPos.second, this)) && !mAnimPlaying)
                             {
-                                if (!mPos.mMoving && !mAnimPlaying)
-                                {
-                                    mPos.mMoving = true;
-                                    setAnimation(AnimState::walk);
-                                }
+                                mPos.mMoving = true;
+                                setAnimation(AnimState::walk);
                             }
                             else if (!mAnimPlaying)
                             {
@@ -117,6 +96,7 @@ namespace FAWorld
             {
                 mPos.mMoving = false;
                 setAnimation(AnimState::idle);
+                checkAttackTalkAction ();
             }
 
             if (!mIsDead && !mPos.mMoving && !mAnimPlaying && mAnimState != AnimState::idle)
@@ -164,7 +144,30 @@ namespace FAWorld
         mId = getNewId();
     }
 
-    Actor::~Actor()
+  bool Actor::checkAttackTalkAction()
+  {
+      Actor * actor;
+      actor = World::get()->getActorAt(mDestination.first, mDestination.second);
+      if (canIAttack(actor))
+      {
+          std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
+          mPos.mDirection = Misc::getVecDir(vector);
+          mPos.update();
+          mPos.mDist = 0;
+
+          attack(actor);
+          return true;
+      }
+      else if (canTalkTo(actor))
+      {
+          mPos.mDist = 0;
+          talk(actor);
+          return true;
+      }
+      return false;
+  }
+
+  Actor::~Actor()
     {
         if (mStats != nullptr)
             delete mStats;
@@ -223,7 +226,7 @@ namespace FAWorld
     bool Actor::findPath(GameLevelImpl * level, std::pair<int32_t, int32_t> destination)
     {
         bool bArrivable = false;
-        mPos.mPath = std::move(FindPath::get(level)->find(mPos.current(), destination, bArrivable));
+        mPos.mPath = FindPath::get(level)->find(mPos.current(), destination, bArrivable, this);
         mPos.mGoal = destination; // destination maybe changed by findPath.
         mPos.mIndex = 0;
         return bArrivable;
@@ -340,7 +343,11 @@ namespace FAWorld
         mCanTalk = canTalk;
     }
 
-    bool Actor::canTalk() const
+  void Actor::setName(const std::string& name) {
+      mName = name;
+  }
+
+  bool Actor::canTalk() const
     {
         return mCanTalk;
     }

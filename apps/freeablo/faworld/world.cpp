@@ -15,12 +15,13 @@
 #include "player.h"
 #include "gamelevel.h"
 #include "findpath.h"
+#include "hoverstate.h"
 
 namespace FAWorld
 {
-    World* singletonInstance = nullptr;
+  World* singletonInstance = nullptr;
 
-    World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
+  World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
     {
         assert(singletonInstance == nullptr);
         singletonInstance = this;
@@ -47,18 +48,21 @@ namespace FAWorld
 
     void World::notify(Engine::MouseInputAction action, Engine::Point mousePosition)
     {
-        if (action == Engine::MOUSE_RELEASE)
-        {
-            stopPlayerActions();
-        }
-        else if (action == Engine::MOUSE_CLICK)
-        {
-            onMouseClick(mousePosition);
-        }
-        else if (action == Engine::MOUSE_DOWN)
-        {
-            onMouseDown(mousePosition);
-        }
+      switch (action) {
+
+      case Engine::MOUSE_RELEASE:
+        stopPlayerActions();
+        break;
+      case Engine::MOUSE_DOWN:
+        onMouseDown(mousePosition);
+        break;
+      case Engine::MOUSE_CLICK:
+        onMouseClick(mousePosition);
+        break;
+      case Engine::MOUSE_MOVE:
+        onMouseMove(mousePosition);
+        break;
+      }
     }
 
     void World::generateLevels()
@@ -81,6 +85,7 @@ namespace FAWorld
             Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
             actor->setCanTalk(true);
             actor->setActorId(npcs[i]->id);
+            actor->setName (npcs[i]->name);
             townActors.push_back(actor);
         }
 
@@ -188,6 +193,12 @@ namespace FAWorld
                 level->update(noclip, mTicksPassed);
             }
         }
+       if (getCurrentPlayer ()->isMoving ())
+         {
+           int x, y;
+           SDL_GetMouseState(&x,&y);
+           onMouseMove ({static_cast<size_t> (x), static_cast<size_t> (y)});
+         }
     }
 
     Player* World::getCurrentPlayer()
@@ -235,7 +246,12 @@ namespace FAWorld
             pair.second->getActors(actors);
     }
 
-    void World::changeLevel(bool up)
+  void World::setGuiManager(FAGui::GuiManager* guiManager)
+  {
+    mGuiManager = guiManager;
+  }
+
+  void World::changeLevel(bool up)
     {
         size_t nextLevelIndex;
         if (up)
@@ -269,12 +285,63 @@ namespace FAWorld
         level->activate(mDestination.first, mDestination.second);
     }
 
+    Render::Tile World::getTileByScreenPos(Engine::Point screenPos) {
+      return FARender::Renderer::get()->getTileByScreenPos(screenPos.x, screenPos.y, getCurrentPlayer()->mPos);
+    }
+
+    HoverState &World::getHoverState () { return getCurrentLevel ()->getHoverState (); }
+
+    Actor *World::targetedActor(Engine::Point screenPosition)
+    {
+      auto actorStayingAt = [this](int32_t x, int32_t y) -> Actor*
+      {
+        if (x >= static_cast<int32_t> (getCurrentLevel ()->width()) || y >= static_cast<int32_t> (getCurrentLevel ()->height()))
+          return nullptr;
+
+        auto actor = getActorAt (x, y);
+        if (actor && !actor->isDead() && actor != getCurrentPlayer()) return actor;
+
+        return nullptr;
+      };
+      auto tile = getTileByScreenPos(screenPosition);
+      // actors could be hovered/targeted by hexagonal pattern consisiting of two tiles on top of each other + halves of two adjacent tiles
+      // the same logic seems to apply ot other tall objects
+      if (auto actor = actorStayingAt(tile.x, tile.y)) return actor;
+      if (auto actor = actorStayingAt(tile.x + 1, tile.y + 1)) return actor;
+      if (tile.half == Render::TileHalf::right)
+        if (auto actor = actorStayingAt(tile.x + 1, tile.y))
+          return actor;
+      if (tile.half == Render::TileHalf::left)
+        if (auto actor = actorStayingAt(tile.x, tile.y + 1))
+          return actor;
+      return nullptr;
+    }
+
+    void World::onMouseMove(Engine::Point mousePosition)
+    {
+      auto actor = targetedActor (mousePosition);
+      if (actor)
+          {
+            if (getHoverState ().setActorHovered (actor->getId ()))
+              mGuiManager->setStatusBarText(actor->getName ());
+
+            return;
+          }
+
+      if (getHoverState ().setNothingHovered ())
+        return mGuiManager->setStatusBarText ("");
+      // and here we should tecnically run redraw if mHoveredActorId changed.
+    }
+
     void World::onMouseDown(Engine::Point mousePosition)
     {
         auto player = getCurrentPlayer();
         std::pair<int32_t, int32_t>& destination = player->destination();
-        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->mPos);
+        auto clickedTile = getTileByScreenPos(mousePosition);
         destination = {clickedTile.x, clickedTile.y};
+        if (auto actor = targetedActor (mousePosition)) // if we're targeting an actor, we're really want to reach that actor
+          destination = {actor->mPos.current().first, actor->mPos.current().second}; // hacky way to override destination
+
         mDestination = player->mPos.mGoal = destination; //update it.
     }
 

@@ -3,7 +3,7 @@
         <style>
             body
             {
-                font-family: FreeMono;
+                font-family: FreeabloWhite11;
                 text-align: center;
                 bottom: 0px;
                 width: 100%;
@@ -19,6 +19,24 @@
                 background-decorator: image;
                 background-image: /ctrlpan/panel8.cel;
             }
+            #statusBarContainer
+            {
+                left: 185px;
+                top: 66px;
+                width: 275px;
+                height: 60px;
+                position: absolute;
+                text-align: center;
+                z-index: 1;
+                display: inline-block;
+            }
+            /*
+            #statusBarContents
+            {
+                line-height: 60px;
+                vertical-align: middle;
+            }
+            */
             span.beltContainer
             {
                 width: 232px;
@@ -82,6 +100,7 @@ docmanage.manager.loadDoc(docmanage.manager.QuestFile)
         <div class="beltSocket" id="belt6" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
         <div class="beltSocket" id="belt7" onclick="instance.onBeltClick(event)" onmouseover="instance.onBeltMouseOver(event)" onmouseout="instance.onBeltMouseOut(event)"></div>
         </span>
+            <div id="statusBarContainer"><pre id = "statusBarContents" /></div>
             <button id="charBut" onclick="docmanage.manager.toggleDoc(docmanage.manager.CharacterFile)"></button>
             <button id="questBut" onclick="docmanage.manager.toggleDoc(docmanage.manager.QuestFile)"></button>
             <button id="mapBut" onclick="print 'map clicked'"></button>

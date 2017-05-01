@@ -31,8 +31,8 @@ namespace FAWorld
             std::pair<int32_t, int32_t> mGoal;  ///< the movement goal point. it maybe changed by findPath,otherwise it maybe 0 if findpath failed. It's necessary and different from World::mDestination.
             int mIndex;///< index
             bool mMoving;
-            double distanceFrom(Position B);
-        
+            double distanceFrom(const Position &B);
+
         private:
             std::pair<int32_t, int32_t> mCurrent;
 
@@ -61,7 +61,7 @@ namespace FAWorld
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-            template<class Stream> 
+            template<class Stream>
             Serial::Error::Error faSerial(Stream& stream)
             {
                 serialise_int(stream, 0, 100, mDist);

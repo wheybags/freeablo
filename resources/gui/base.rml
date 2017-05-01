@@ -14,12 +14,6 @@ import draggable
 instance = draggable.DraggableWidget(document, -1675, -650)
 def onLoad(document):
     docmanage.init()
-
-    bottomMenuHandle = "resources/gui/bottommenu.rml"
-
-    docmanage.manager.loadDoc(bottomMenuHandle)
-    docmanage.manager.showDoc(bottomMenuHandle)
-
         </script>
     </head>
 

@@ -34,6 +34,13 @@ namespace FARender
             friend class Renderer;
     };
 
+    struct ObjectToRender {
+      FASpriteGroup* spriteGroup;
+      size_t frame;
+      FAWorld::Position position;
+      boost::optional<Cel::Colour> hoverColor;
+    };
+
     class RenderState
     {
         public:
@@ -42,7 +49,7 @@ namespace FARender
 
         FAWorld::Position mPos;
 
-        std::vector<std::tuple<FASpriteGroup*, uint32_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
+        std::vector<ObjectToRender> mObjects; ///< group, index into group, and position
 
         std::vector<DrawCommand> guiDrawBuffer;
 
@@ -81,7 +88,7 @@ namespace FARender
             void fillServerSprite(uint32_t index, const std::string& path);
             std::string getPathForIndex(uint32_t index);
 
-            Render::Tile getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos);
+            Render::Tile getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos);
 
             Rocket::Core::Context* getRocketContext();
 

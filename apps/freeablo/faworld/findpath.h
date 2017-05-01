@@ -62,7 +62,7 @@ namespace FAWorld
         typedef pair<int32_t, int32_t> Location;
 
         FindPath(GameLevelImpl * level);
-        vector<Location> find(Location start, Location& goal,bool& bArrivable);
+        vector<Location> find(Location start, Location& goal,bool& bArrivable, const Actor *actor = nullptr);
         static FindPath* get(GameLevelImpl* level);
 
     private:
@@ -72,7 +72,7 @@ namespace FAWorld
         bool passable(Location location);
         vector<Location> neighbors(Location location);
         int heuristic(Location a, Location b);
-        bool AStarSearch(Location start, Location goal, unordered_map<Location, Location>& cameFrom, unordered_map<Location, int>& costSoFar);
+        bool AStarSearch(Location start, FindPath::Location& goal, unordered_map<Location, Location>& cameFrom, unordered_map<Location, int>& costSoFar);
         vector<Location> reconstructPath(Location start, Location goal, unordered_map<Location, Location>& cameFrom);
         Location findClosesPointToGoal(Location start, Location goal, unordered_map<Location, Location> & cameFrom);
 
@@ -80,6 +80,7 @@ namespace FAWorld
         vector<Location> directions;
         unsigned int sizeOfDirections;
         static FindPath* instance;
+        const Actor *mActor;
     };
 
 }

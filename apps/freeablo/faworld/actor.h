@@ -39,7 +39,7 @@ namespace FAWorld
             hit,
             ENUM_END // always leave this as the last entry, and don't set explicit values for any of the entries
         };
-    }    
+    }
     class Actor : public NetObject
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
@@ -51,6 +51,7 @@ namespace FAWorld
                   const std::string& dieAnimPath=""
                   );
 
+            bool checkAttackTalkAction();
             void update(bool noclip, size_t ticksPassed);
             virtual ~Actor();
             virtual std::string getDieWav(){return "";}
@@ -64,7 +65,7 @@ namespace FAWorld
             virtual FARender::FASpriteGroup* getCurrentAnim();
             void setAnimation(AnimState::AnimState state, bool reset=false);
             void setWalkAnimation(const std::string path);
-            void setIdleAnimation(const std::string path);            
+            void setIdleAnimation(const std::string path);
             AnimState::AnimState getAnimState();
             bool findPath(GameLevelImpl* level, std::pair<int32_t, int32_t> destination);
 
@@ -72,6 +73,11 @@ namespace FAWorld
             int32_t getId()
             {
                 return mId;
+            }
+
+            std::string getName()
+            {
+                return mName;
             }
 
             virtual void setLevel(GameLevel* level);
@@ -89,14 +95,14 @@ namespace FAWorld
                 return false;
             }
 
-            Position mPos;            
+            Position mPos;
         //private: //TODO: fix this
             FARender::FASpriteGroup* mWalkAnim = FARender::getDefaultSprite();
             FARender::FASpriteGroup* mIdleAnim = FARender::getDefaultSprite();
             FARender::FASpriteGroup* mDieAnim = FARender::getDefaultSprite();
             FARender::FASpriteGroup* mAttackAnim = FARender::getDefaultSprite();
             FARender::FASpriteGroup* mHitAnim = FARender::getDefaultSprite();
-        
+
             size_t mFrame;
             virtual void die();
             std::pair<int32_t, int32_t> mDestination;
@@ -111,6 +117,7 @@ namespace FAWorld
             std::string getActorId() const;
             void setActorId(const std::string& id);
             void setCanTalk(bool canTalk);
+            void setName (const std::string &name);
 
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
@@ -243,6 +250,7 @@ namespace FAWorld
 
         private:
             std::string mActorId;
+            std::string mName;
             int32_t mId;
             friend class Engine::Server; // TODO: fix
             friend class Engine::Client;

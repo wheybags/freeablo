@@ -114,9 +114,19 @@ namespace FAWorld
         return mLevel[x][y].passable();
     }
 
-    Actor* GameLevel::getActorAt(size_t x, size_t y)
+    bool GameLevel::isPassableFor(int x, int y, const Actor *actor) const
     {
-        return mActorMap2D[std::pair<size_t, size_t>(x, y)];
+      auto actorAtPos = getActorAt (x, y);
+      return mLevel[x][y].passable() && (actorAtPos == nullptr || actorAtPos == actor || actorAtPos->isDead());
+    }
+
+    Actor* GameLevel::getActorAt(size_t x, size_t y) const
+    {
+      auto it = mActorMap2D.find (std::pair<size_t, size_t>(x, y));
+      if (it != mActorMap2D.end ())
+        return it->second;
+
+      return nullptr;
     }
 
     void GameLevel::addActor(Actor* actor)
@@ -125,6 +135,9 @@ namespace FAWorld
         actorMapInsert(actor);
     }
 
+    static const Cel::Colour friendHoverColor = {180, 110, 110, true};
+    static const Cel::Colour enemyHoverColor = {164, 46, 46, true};
+
     void GameLevel::fillRenderState(FARender::RenderState* state)
     {
         state->mObjects.clear();
@@ -132,7 +145,10 @@ namespace FAWorld
         for(size_t i = 0; i < mActors.size(); i++)
         {
             size_t frame = mActors[i]->mFrame + mActors[i]->mPos.mDirection * mActors[i]->getCurrentAnim()->getAnimLength();
-            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
+            boost::optional<Cel::Colour> hoverColor;
+            if (mHoverState.isActorHovered(mActors[i]->getId()))
+              hoverColor = mActors[i]->isEnemy () ? enemyHoverColor : friendHoverColor;
+            state->mObjects.push_back({mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos, hoverColor});
         }
     }
 
@@ -170,7 +186,11 @@ namespace FAWorld
         return dataSavingTmp;
     }
 
-    GameLevel* GameLevel::loadFromString(const std::string& data)
+  HoverState& GameLevel::getHoverState() {
+      return mHoverState;
+  }
+
+  GameLevel* GameLevel::loadFromString(const std::string& data)
     {
         GameLevel* retval = new GameLevel();
 
@@ -198,4 +218,7 @@ namespace FAWorld
     {
         actors.insert(actors.end(), mActors.begin(), mActors.end());
     }
+
+  GameLevel::GameLevel() {
+  }
 }

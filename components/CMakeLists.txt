@@ -25,7 +25,7 @@ add_library(Levels
 target_link_libraries(Levels FAIO DiabloExe)
 set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
-add_library(Misc 
+add_library(Misc
     misc/stringops.h
     misc/helper2d.h
     misc/md5.h
@@ -36,6 +36,7 @@ add_library(Misc
     misc/enablewarn.h
     misc/savePNG.h
     misc/savePNG.cpp
+    misc/utility.h
 )
 target_link_libraries(Misc ${PNG_LIBRARY})
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)

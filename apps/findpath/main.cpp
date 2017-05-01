@@ -46,6 +46,11 @@ namespace FAWorld
             return gameMap[y][x] == 0 ? true : false;
         }
 
+        bool isPassableFor(int x, int y, const Actor *) const override
+        {
+            return isPassable (x, y);
+        }
+
     private:
         int gameMap[MAP_SIZE][MAP_SIZE];
 

@@ -7,6 +7,14 @@
 
 #include "../engine/inputobserverinterface.h"
 
+#include "../fagui/guimanager.h"
+
+class HoverState;
+
+namespace Render
+{
+  struct Tile;
+}
 
 namespace FARender
 {
@@ -52,7 +60,7 @@ namespace FAWorld
             void deregisterPlayer(Player* player);
 
             void fillRenderState(FARender::RenderState* state);
-            
+
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
             static size_t getTicksInPeriod(float seconds);
             static float getSecondsPerTick();
@@ -60,12 +68,17 @@ namespace FAWorld
             Actor* getActorById(int32_t id);
 
             void getAllActors(std::vector<Actor*>& actors);
+            void setGuiManager(FAGui::GuiManager* guiManager);
 
         private:
             void playLevelMusic(size_t level);
             void changeLevel(bool up);
             void stopPlayerActions();
             void onMouseClick(Engine::Point mousePosition);
+            Render::Tile getTileByScreenPos(Engine::Point screenPos);
+            HoverState& getHoverState();
+            Actor* targetedActor(Engine::Point screenPosition);
+            void onMouseMove(Engine::Point mousePosition);
             void onMouseDown(Engine::Point mousePosition);
 
             std::map<size_t, GameLevel*> mLevels;
@@ -74,6 +87,7 @@ namespace FAWorld
             std::vector<Player*> mPlayers;
             const DiabloExe::DiabloExe& mDiabloExe;
             std::pair<int32_t, int32_t> mDestination;       ///< this is the aim point to move to.
+            FAGui::GuiManager* mGuiManager;
     };
 }
 

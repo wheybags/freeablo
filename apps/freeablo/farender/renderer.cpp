@@ -182,7 +182,7 @@ namespace FARender
         return mSpriteManager.getPathForIndex(index);
     }
 
-    Render::Tile Renderer::getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos)
+    Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
         return Render::getClickedTile(x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
     }
@@ -229,21 +229,24 @@ namespace FARender
 
                 for(size_t i = 0; i < state->mObjects.size(); i++)
                 {
-                    FAWorld::Position & position = std::get<2>(state->mObjects[i]);
+                    auto &object = state->mObjects[i];
+                    FAWorld::Position & position = object.position;
 
                     size_t x = position.current().first;
                     size_t y = position.current().second;
 
-                    mLevelObjects[x][y].valid = std::get<0>(state->mObjects[i])->isValid();
-                    mLevelObjects[x][y].spriteCacheIndex = std::get<0>(state->mObjects[i])->getCacheIndex();
-                    mLevelObjects[x][y].spriteFrame = std::get<1>(state->mObjects[i]);
+                    mLevelObjects[x][y].valid = object.spriteGroup->isValid();
+                    mLevelObjects[x][y].spriteCacheIndex = object.spriteGroup->getCacheIndex();
+                    mLevelObjects[x][y].spriteFrame = object.frame;
                     mLevelObjects[x][y].x2 = position.next().first;
                     mLevelObjects[x][y].y2 = position.next().second;
                     mLevelObjects[x][y].dist = position.mDist;
+                    mLevelObjects[x][y].hoverColor = object.hoverColor;
                 }
 
-                Render::drawLevel(state->level->mLevel, state->tileset.minTops->getCacheIndex(), state->tileset.minBottoms->getCacheIndex(), &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,
-                    state->mPos.next().first, state->mPos.next().second, state->mPos.mDist);
+                Render::drawLevel(state->level->mLevel, state->tileset.minTops->getCacheIndex(), state->tileset.minBottoms->getCacheIndex(),
+                                  &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,
+                                  state->mPos.next().first, state->mPos.next().second, state->mPos.mDist);
             }
 
             Render::drawGui(state->guiDrawBuffer, &mSpriteManager);

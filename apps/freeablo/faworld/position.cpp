@@ -38,13 +38,13 @@ namespace FAWorld
         return mCurrent;
     }
 
-    double Position::distanceFrom(Position B)
+    double Position::distanceFrom(const Position &B)
     {
         int dx = mCurrent.first - B.mCurrent.first;
         int dy = mCurrent.second - B.mCurrent.second;
 
-        double x = pow(dx, 2.0);
-        double y = pow(dy, 2.0);
+        double x = dx * dx;
+        double y = dy * dy;
         double distance = sqrt(x + y);
 
         return distance;
