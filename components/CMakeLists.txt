@@ -56,11 +56,10 @@ set(RenderFiles
     render/sdl2backend.cpp
     render/sdl_gl_funcs.h
     render/sdl_gl_funcs.cpp
-    render/nuklear/nuklear.h
     render/nuklear/nuklear_sdl_gl3.h
 )
 add_library(Render ${RenderFiles})
-target_link_libraries(Render Cel Levels ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${OPENGL_LIBRARIES} ${ROCKET_LIBRARIES} ${PYTHON_LIBRARIES})
+target_link_libraries(Render Cel Levels nuklear ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${OPENGL_LIBRARIES} ${ROCKET_LIBRARIES} ${PYTHON_LIBRARIES})
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
@@ -72,6 +71,7 @@ add_library(Input
     input/keys.h
     input/sdl2backend.cpp)
 set_target_properties(Input PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+target_link_libraries(Input nuklear)
 
 add_library(DiabloExe
     diabloexe/diabloexe.h
