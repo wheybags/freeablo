@@ -64,7 +64,12 @@ namespace Render
     Rocket::Core::Context* Context;
     
 
+
     struct nk_context *ctx;
+
+    nk_context ctxb;
+    nk_gl_device dev;
+    nk_font_atlas atlas;
 
     void init(const RenderSettings& settings)
     {
@@ -114,20 +119,29 @@ namespace Render
         glDisable(GL_DEPTH_TEST);
 
 
+        ctx = &ctxb;
 
-        ctx = nk_sdl_init(screen);
+        nk_init_default(ctx, nullptr);
+        ctx->clip.copy = nullptr;// nk_sdl_clipbard_copy;
+        ctx->clip.paste = nullptr;// nk_sdl_clipbard_paste;
+        ctx->clip.userdata = nk_handle_ptr(0);
+
+        nk_sdl_device_create(dev);
+
+        //nk_sdl_init(sdl, screen);
+        //ctx = &sdl.ctx;
+
         /* Load Fonts: if none of these are loaded a default font will be used  */
         /* Load Cursor: if you uncomment cursor loading please hide the cursor */
         {
-            struct nk_font_atlas *atlas;
-            nk_sdl_font_stash_begin(&atlas);
+            nk_sdl_font_stash_begin(atlas);
             /*struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);*/
             /*struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 16, 0);*/
             /*struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);*/
             /*struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);*/
             /*struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);*/
             /*struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);*/
-            nk_sdl_font_stash_end();
+            dev.font_tex = nk_sdl_font_stash_end(ctx, atlas, dev.null);
             /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
             /*nk_style_set_font(ctx, &roboto->handle)*/;
         }
@@ -361,19 +375,15 @@ namespace Render
         }
         nk_end(ctx);
 
-        NuklearFrameDump dump(sdl.ogl.null);
-
-        nk_buffer cmds;
-        nk_buffer_init_default(&cmds);
-
-        dump.fill(ctx, &cmds);
+        static NuklearFrameDump dump(dev);
+        dump.fill(ctx);
 
         /* IMPORTANT: `nk_sdl_render` modifies some global OpenGL state
         * with blending, scissor, face culling, depth test and viewport and
         * defaults everything back into a default state.
         * Make sure to either a.) save and restore or b.) reset your own state after
         * rendering the UI. */
-        nk_sdl_render_dump(dump);
+        nk_sdl_render_dump(dump, dev, screen);
 
         //nk_sdl_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_MEMORY, MAX_ELEMENT_MEMORY);
         glEnable(GL_BLEND);

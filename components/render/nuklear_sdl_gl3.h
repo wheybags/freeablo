@@ -9,9 +9,10 @@
 #include <fa_nuklear.h>
 
 
-struct nk_sdl_device {
-    struct nk_buffer cmds;
-    struct nk_draw_null_texture null;
+struct nk_gl_device 
+{
+    nk_buffer cmds;
+    nk_draw_null_texture null;
     GLuint vbo, vao, ebo;
     GLuint prog;
     GLuint vert_shdr;
@@ -24,28 +25,18 @@ struct nk_sdl_device {
     GLuint font_tex;
 };
 
-struct nk_sdl_vertex {
-    float position[2];
-    float uv[2];
-    nk_byte col[4];
-};
-
-struct nk_sdl {
-    SDL_Window *win;
-    struct nk_sdl_device ogl;
-    struct nk_context ctx;
-    struct nk_font_atlas atlas;
-};
-
-extern struct nk_sdl sdl;
 
 
 class NuklearFrameDump
 {
     public:
-        NuklearFrameDump(const nk_draw_null_texture& nullTex);
+        NuklearFrameDump() = delete;
+        NuklearFrameDump(const NuklearFrameDump&) = delete;
+
+        NuklearFrameDump(const nk_gl_device& dev);
+        ~NuklearFrameDump();
     
-        void fill(nk_context* ctx, nk_buffer* cmds);
+        void fill(nk_context* ctx);
 
         nk_buffer vbuf; // vertices
         nk_buffer ebuf; // indices
@@ -54,16 +45,16 @@ class NuklearFrameDump
 
     private:
         nk_convert_config config;
+        nk_buffer cmds; // draw commands temp storage
 };
 
-
-NK_API struct nk_context*   nk_sdl_init(SDL_Window *win);
-NK_API void                 nk_sdl_font_stash_begin(struct nk_font_atlas **atlas);
-NK_API void                 nk_sdl_font_stash_end(void);
-NK_API int                  nk_sdl_handle_event(SDL_Event *evt);
-NK_API void                 nk_sdl_render_dump(const NuklearFrameDump& dump);
-NK_API void                 nk_sdl_shutdown(void);
-NK_API void                 nk_sdl_device_destroy(void);
-NK_API void                 nk_sdl_device_create(void);
+//void nk_sdl_init(nk_sdl& nkSdl, SDL_Window *win);
+void nk_sdl_font_stash_begin(nk_font_atlas& atlas);
+GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
+//NK_API int                  nk_sdl_handle_event(SDL_Event *evt);
+void nk_sdl_render_dump(const NuklearFrameDump& dump, nk_gl_device& dev, SDL_Window* win);
+//NK_API void                 nk_sdl_shutdown(void);
+//NK_API void                 nk_sdl_device_destroy(void);
+void nk_sdl_device_create(nk_gl_device& dev);
 
 #endif
