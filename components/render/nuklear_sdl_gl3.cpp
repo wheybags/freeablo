@@ -407,6 +407,4 @@ void NuklearFrameDump::fill(nk_context* ctx)
     {
         drawCommands.push_back(*cmd);
     }
-
-    nk_clear(ctx);
 }

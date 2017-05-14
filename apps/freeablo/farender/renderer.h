@@ -45,6 +45,7 @@ namespace FARender
         std::vector<std::tuple<FASpriteGroup*, uint32_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
 
         std::vector<DrawCommand> guiDrawBuffer;
+        NuklearFrameDump nuklearData;
 
         Tileset tileset;
 
@@ -55,7 +56,7 @@ namespace FARender
 
         bool mCursorEmpty;
 
-        RenderState():ready(true) {}
+        RenderState(Render::NuklearGraphicsContext& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData.dev) {}
     };
 
     FASpriteGroup* getDefaultSprite();
@@ -90,6 +91,11 @@ namespace FARender
             bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
             void cleanup(); ///< To be called only by Engine::ThreadManager
 
+            nk_context* getNuklearContext()
+            {
+                return &mNuklearContext;
+            }
+
             
         private:
             bool loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
@@ -101,7 +107,8 @@ namespace FARender
             std::atomic_bool mDone;
             Render::LevelObjects mLevelObjects;
 
-            RenderState mStates[15];
+            size_t mNumRenderStates = 15;
+            RenderState* mStates;
 
             Rocket::Core::Context* mRocketContext;
 

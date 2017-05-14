@@ -31,8 +31,8 @@ class NuklearFrameDump
 {
     public:
         NuklearFrameDump() = delete;
-        NuklearFrameDump(const NuklearFrameDump&)  = delete;
-
+        NuklearFrameDump(const NuklearFrameDump&) = delete;
+        
         NuklearFrameDump(nk_gl_device& dev);
         ~NuklearFrameDump();
     
