@@ -31,6 +31,7 @@ namespace Input
                 std::function<void(uint32_t, uint32_t, Key, bool)> mouseClick,
                 std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
                 std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
+                std::function<void(std::string)> textInput,
                 Rocket::Core::Context* context);
 
             void processInput(bool paused);
@@ -72,6 +73,11 @@ namespace Input
                         int32_t yrel;
                     } mouseMove;
 
+                    struct _textInput
+                    {
+                        std::string* text;
+                    } textInput;
+
                 } vals;
             };
 
@@ -81,6 +87,7 @@ namespace Input
             std::function<void(uint32_t, uint32_t, Key, bool)> mMouseClick;
             std::function<void(uint32_t, uint32_t, Key)> mMouseRelease;
             std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mMouseMove;
+            std::function<void(std::string)> mTextInput;
 
             Rocket::Core::Context* mContext;
 

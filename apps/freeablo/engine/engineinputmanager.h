@@ -17,6 +17,13 @@ namespace Engine
 {
     class EngineMain;
 
+    struct KeyboardModifiers
+    {
+        bool ctrl = false;
+        bool alt = false;
+        bool shift = false;
+    };
+
     class EngineInputManager
     {
         public:
@@ -27,11 +34,17 @@ namespace Engine
             std::vector<Input::Hotkey> getHotkeys();
             void registerKeyboardObserver(KeyboardInputObserverInterface* observer);
             void registerMouseObserver(MouseInputObserverInterface* observer);
+            KeyboardModifiers getKeyboardModifiers()
+            {
+                return mKbMods;
+            }
 
         private:
             EngineInputManager(const EngineInputManager&);
             EngineInputManager& operator=(const EngineInputManager&);
             void keyPress(Input::Key key);
+            void keyRelease(Input::Key key);
+            void textInput(std::string inp);
             void mouseClick(int32_t x, int32_t y, Input::Key key, bool isDoubleClick);
             void mouseRelease(int32_t, int32_t, Input::Key key);
             void mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel);
@@ -45,6 +58,7 @@ namespace Engine
             Point mMousePosition;
             bool mMouseDown = false;
             bool mClick = false;
+            KeyboardModifiers mKbMods;
             std::map<KeyboardInputAction,Input::Hotkey> mHotkeys;
             std::vector<KeyboardInputObserverInterface*> mKeyboardObservers;
             std::vector<MouseInputObserverInterface*> mMouseObservers;

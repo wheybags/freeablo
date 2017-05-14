@@ -25,7 +25,8 @@ namespace Input
     void doNothing_keyRelease(Key){}
     void doNothing_mouseClick(uint32_t, uint32_t, Key, bool){}
     void doNothing_mouseRelease(uint32_t, uint32_t, Key){}
-    void doNothing_mouseMove(uint32_t, uint32_t, uint32_t, uint32_t){}
+    void doNothing_mouseMove(uint32_t, uint32_t, uint32_t, uint32_t) {}
+    void doNothing_textInput(std::string){}
     
     #define getFunc(f) f ? f : doNothing_##f
 
@@ -43,10 +44,11 @@ namespace Input
         std::function<void(uint32_t, uint32_t, Key, bool)> mouseClick,
         std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
         std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
+        std::function<void(std::string)> textInput,
         Rocket::Core::Context* context):
             
             mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
-            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)), mContext(context), mModifiers(0)
+            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)), mTextInput(getFunc(textInput)), mContext(context), mModifiers(0)
             {
                 assert(!instance);
                 instance = this;
@@ -247,6 +249,12 @@ namespace Input
                 case SDL_KEYUP:
                 {
                     e.vals.key = event.key.keysym.sym;
+                    break;
+                }
+
+                case SDL_TEXTINPUT:
+                {
+                    e.vals.textInput.text = new std::string(event.text.text);
                     break;
                 }
 
@@ -778,6 +786,13 @@ namespace Input
                         if(mContext)
                             mContext->ProcessKeyUp(rocketTranslateKey(event.vals.key), getRocketModifiers(mModifiers));
                     }
+                    break;
+                }
+
+                case SDL_TEXTINPUT:
+                {
+                    mTextInput(*event.vals.textInput.text);
+                    delete event.vals.textInput.text;
                     break;
                 }
 
