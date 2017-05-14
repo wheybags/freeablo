@@ -40,9 +40,10 @@
 #define NK_INCLUDE_FONT_BAKING
 #define NK_INCLUDE_DEFAULT_FONT
 #define NK_IMPLEMENTATION*/
-#define NK_SDL_GL3_IMPLEMENTATION
 #include <fa_nuklear.h>
-#include "nuklear/nuklear_sdl_gl3.h"
+
+#define NK_SDL_GL3_IMPLEMENTATION
+#include "nuklear_sdl_gl3.h"
 
 
 #define MAX_VERTEX_MEMORY 512 * 1024
@@ -318,6 +319,10 @@ namespace Render
 
     void drawGui(std::vector<DrawCommand>& buffer, SpriteCacheBase* cache)
     {
+
+        nk_input_begin(ctx);
+        nk_input_end(ctx);
+
         if (nk_begin(ctx, "Demo", nk_rect(50, 50, 200, 200),
             NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
             NK_WINDOW_CLOSABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
@@ -356,21 +361,6 @@ namespace Render
         }
         nk_end(ctx);
 
-        struct nk_color background = background = nk_rgb(255, 0, 0);
-        int win_width, win_height;
-
-        float bg[4];
-        nk_color_fv(bg, background);
-        SDL_GetWindowSize(screen, &win_width, &win_height);
-        glViewport(0, 0, win_width, win_height);
-        //glClear(GL_COLOR_BUFFER_BIT);
-        //glClearColor(bg[0], bg[1], bg[2], bg[3]);
-        /* IMPORTANT: `nk_sdl_render` modifies some global OpenGL state
-        * with blending, scissor, face culling, depth test and viewport and
-        * defaults everything back into a default state.
-        * Make sure to either a.) save and restore or b.) reset your own state after
-        * rendering the UI. */
-
         NuklearFrameDump dump(sdl.ogl.null);
 
         nk_buffer cmds;
@@ -378,6 +368,11 @@ namespace Render
 
         dump.fill(ctx, &cmds);
 
+        /* IMPORTANT: `nk_sdl_render` modifies some global OpenGL state
+        * with blending, scissor, face culling, depth test and viewport and
+        * defaults everything back into a default state.
+        * Make sure to either a.) save and restore or b.) reset your own state after
+        * rendering the UI. */
         nk_sdl_render_dump(dump);
 
         //nk_sdl_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_MEMORY, MAX_ELEMENT_MEMORY);

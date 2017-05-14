@@ -1,78 +1,20 @@
-/*
- * Nuklear - 1.32.0 - public domain
- * no warrenty implied; use at your own risk.
- * authored from 2015-2016 by Micha Mettke
- */
-/*
- * ==============================================================
- *
- *                              API
- *
- * ===============================================================
- */
-#ifndef NK_SDL_GL3_H_
-#define NK_SDL_GL3_H_
-
-#include <SDL.h>
-#include <SDL_opengl.h>
-
-NK_API struct nk_context*   nk_sdl_init(SDL_Window *win);
-NK_API void                 nk_sdl_font_stash_begin(struct nk_font_atlas **atlas);
-NK_API void                 nk_sdl_font_stash_end(void);
-NK_API int                  nk_sdl_handle_event(SDL_Event *evt);
-NK_API void                 nk_sdl_render(enum nk_anti_aliasing , int max_vertex_buffer, int max_element_buffer);
-NK_API void                 nk_sdl_shutdown(void);
-NK_API void                 nk_sdl_device_destroy(void);
-NK_API void                 nk_sdl_device_create(void);
-
-#endif
-
-/*
- * ==============================================================
- *
- *                          IMPLEMENTATION
- *
- * ===============================================================
- */
-#ifdef NK_SDL_GL3_IMPLEMENTATION
+#include "nuklear_sdl_gl3.h"
+#include "sdl_gl_funcs.h"
 
 #include <string.h>
+#include <assert.h>
 
-struct nk_sdl_device {
-    struct nk_buffer cmds;
-    struct nk_draw_null_texture null;
-    GLuint vbo, vao, ebo;
-    GLuint prog;
-    GLuint vert_shdr;
-    GLuint frag_shdr;
-    GLint attrib_pos;
-    GLint attrib_uv;
-    GLint attrib_col;
-    GLint uniform_tex;
-    GLint uniform_proj;
-    GLuint font_tex;
-};
+struct nk_sdl sdl;
 
-struct nk_sdl_vertex {
-    float position[2];
-    float uv[2];
-    nk_byte col[4];
-};
 
-static struct nk_sdl {
-    SDL_Window *win;
-    struct nk_sdl_device ogl;
-    struct nk_context ctx;
-    struct nk_font_atlas atlas;
-} sdl;
 
 #ifdef __APPLE__
   #define NK_SHADER_VERSION "#version 150\n"
 #else
   #define NK_SHADER_VERSION "#version 300 es\n"
 #endif
-NK_API void
-nk_sdl_device_create(void)
+
+void nk_sdl_device_create(void)
 {
     GLint status;
     static const GLchar *vertex_shader =
@@ -181,55 +123,6 @@ nk_sdl_device_destroy(void)
     nk_buffer_free(&dev->cmds);
 }
 
-class NuklearFrameDump
-{
-public: 
-    nk_buffer vbuf; // vertices
-    nk_buffer ebuf; // indices
-
-    std::vector<nk_draw_command> drawCommands;
-
-    nk_convert_config config;
-
-    NuklearFrameDump(const nk_draw_null_texture& nullTex)
-    {
-        nk_buffer_init_default(&vbuf);
-        nk_buffer_init_default(&ebuf);
-
-        static const struct nk_draw_vertex_layout_element vertex_layout[] = {
-            { NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, position) },
-            { NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, uv) },
-            { NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct nk_sdl_vertex, col) },
-            { NK_VERTEX_LAYOUT_END }
-        };
-
-        memset(&config, 0, sizeof(config));
-        config.vertex_layout = vertex_layout;
-        config.vertex_size = sizeof(struct nk_sdl_vertex);
-        config.vertex_alignment = NK_ALIGNOF(struct nk_sdl_vertex);
-        config.null = nullTex;
-        config.circle_segment_count = 22;
-        config.curve_segment_count = 22;
-        config.arc_segment_count = 22;
-        config.global_alpha = 1.0f;
-        config.shape_AA = nk_anti_aliasing::NK_ANTI_ALIASING_ON;
-        config.line_AA = nk_anti_aliasing::NK_ANTI_ALIASING_ON;
-    }
-
-    void fill(nk_context* ctx, nk_buffer* cmds)
-    {
-        nk_convert(ctx, cmds, &vbuf, &ebuf, &config);
-
-        const nk_draw_command *cmd;
-        nk_draw_foreach(cmd, ctx, cmds) 
-        {
-            drawCommands.push_back(*cmd);
-        }
-
-        nk_clear(ctx);
-    }
-};
-
 NK_API void
 nk_sdl_render_dump(const NuklearFrameDump& dump)
 {
@@ -306,112 +199,6 @@ nk_sdl_render_dump(const NuklearFrameDump& dump)
             offset += cmd->elem_count;
         }
         //nk_clear(&sdl.ctx);
-    }
-
-    glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    glDisable(GL_BLEND);
-    glDisable(GL_SCISSOR_TEST);
-}
-
-
-
-NK_API void
-nk_sdl_render(enum nk_anti_aliasing AA, int max_vertex_buffer, int max_element_buffer)
-{
-    struct nk_sdl_device *dev = &sdl.ogl;
-    int width, height;
-    int display_width, display_height;
-    struct nk_vec2 scale;
-    GLfloat ortho[4][4] = {
-        {2.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f,-2.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f,-1.0f, 0.0f},
-        {-1.0f,1.0f, 0.0f, 1.0f},
-    };
-    SDL_GetWindowSize(sdl.win, &width, &height);
-    SDL_GL_GetDrawableSize(sdl.win, &display_width, &display_height);
-    ortho[0][0] /= (GLfloat)width;
-    ortho[1][1] /= (GLfloat)height;
-
-    scale.x = (float)display_width/(float)width;
-    scale.y = (float)display_height/(float)height;
-
-    /* setup global state */
-    glViewport(0,0,display_width,display_height);
-    glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_SCISSOR_TEST);
-    glActiveTexture(GL_TEXTURE0);
-
-    /* setup program */
-    glUseProgram(dev->prog);
-    glUniform1i(dev->uniform_tex, 0);
-    glUniformMatrix4fv(dev->uniform_proj, 1, GL_FALSE, &ortho[0][0]);
-    {
-        /* convert from command queue into draw list and draw to screen */
-        const struct nk_draw_command *cmd;
-        void *vertices, *elements;
-        const nk_draw_index *offset = NULL;
-
-        /* allocate vertex and element buffer */
-        glBindVertexArray(dev->vao);
-        glBindBuffer(GL_ARRAY_BUFFER, dev->vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, dev->ebo);
-
-        glBufferData(GL_ARRAY_BUFFER, max_vertex_buffer, NULL, GL_STREAM_DRAW);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, max_element_buffer, NULL, GL_STREAM_DRAW);
-
-        /* load vertices/elements directly into vertex/element buffer */
-        vertices = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        elements = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-        {
-            /* fill convert configuration */
-            struct nk_convert_config config;
-            static const struct nk_draw_vertex_layout_element vertex_layout[] = {
-                {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, position)},
-                {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, uv)},
-                {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct nk_sdl_vertex, col)},
-                {NK_VERTEX_LAYOUT_END}
-            };
-            memset(&config, 0, sizeof(config));
-            config.vertex_layout = vertex_layout;
-            config.vertex_size = sizeof(struct nk_sdl_vertex);
-            config.vertex_alignment = NK_ALIGNOF(struct nk_sdl_vertex);
-            config.null = dev->null;
-            config.circle_segment_count = 22;
-            config.curve_segment_count = 22;
-            config.arc_segment_count = 22;
-            config.global_alpha = 1.0f;
-            config.shape_AA = AA;
-            config.line_AA = AA;
-
-            /* setup buffers to load vertices and elements */
-            {struct nk_buffer vbuf, ebuf;
-            nk_buffer_init_fixed(&vbuf, vertices, (nk_size)max_vertex_buffer);
-            nk_buffer_init_fixed(&ebuf, elements, (nk_size)max_element_buffer);
-            nk_convert(&sdl.ctx, &dev->cmds, &vbuf, &ebuf, &config);}
-        }
-        glUnmapBuffer(GL_ARRAY_BUFFER);
-        glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-
-        /* iterate over and execute each draw command */
-        nk_draw_foreach(cmd, &sdl.ctx, &dev->cmds) {
-            if (!cmd->elem_count) continue;
-            glBindTexture(GL_TEXTURE_2D, (GLuint)cmd->texture.id);
-            glScissor((GLint)(cmd->clip_rect.x * scale.x),
-                (GLint)((height - (GLint)(cmd->clip_rect.y + cmd->clip_rect.h)) * scale.y),
-                (GLint)(cmd->clip_rect.w * scale.x),
-                (GLint)(cmd->clip_rect.h * scale.y));
-            glDrawElements(GL_TRIANGLES, (GLsizei)cmd->elem_count, GL_UNSIGNED_SHORT, offset);
-            offset += cmd->elem_count;
-        }
-        nk_clear(&sdl.ctx);
     }
 
     glUseProgram(0);
@@ -576,4 +363,41 @@ void nk_sdl_shutdown(void)
     memset(&sdl, 0, sizeof(sdl));
 }
 
-#endif
+
+NuklearFrameDump::NuklearFrameDump(const nk_draw_null_texture& nullTex)
+{
+    nk_buffer_init_default(&vbuf);
+    nk_buffer_init_default(&ebuf);
+
+    static const struct nk_draw_vertex_layout_element vertex_layout[] = {
+        { NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, position) },
+        { NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, uv) },
+        { NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct nk_sdl_vertex, col) },
+        { NK_VERTEX_LAYOUT_END }
+    };
+
+    memset(&config, 0, sizeof(config));
+    config.vertex_layout = vertex_layout;
+    config.vertex_size = sizeof(struct nk_sdl_vertex);
+    config.vertex_alignment = NK_ALIGNOF(struct nk_sdl_vertex);
+    config.null = nullTex;
+    config.circle_segment_count = 22;
+    config.curve_segment_count = 22;
+    config.arc_segment_count = 22;
+    config.global_alpha = 1.0f;
+    config.shape_AA = nk_anti_aliasing::NK_ANTI_ALIASING_ON;
+    config.line_AA = nk_anti_aliasing::NK_ANTI_ALIASING_ON;
+}
+
+void NuklearFrameDump::fill(nk_context* ctx, nk_buffer* cmds)
+{
+    nk_convert(ctx, cmds, &vbuf, &ebuf, &config);
+
+    const nk_draw_command *cmd;
+    nk_draw_foreach(cmd, ctx, cmds)
+    {
+        drawCommands.push_back(*cmd);
+    }
+
+    nk_clear(ctx);
+}

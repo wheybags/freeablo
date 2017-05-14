@@ -10,7 +10,7 @@
 
 
 #include <fa_nuklear.h>
-#include "../render/nuklear/nuklear_sdl_gl3.h"
+//#include "../render/nuklear/nuklear_sdl_gl3.h"
 
 
 namespace Render
@@ -235,10 +235,10 @@ namespace Input
         
         Event e;
 
-        nk_input_begin(Render::ctx);
+        //nk_input_begin(Render::ctx);
         while(SDL_PollEvent(&event))
         {   
-            nk_sdl_handle_event(&event);
+            //nk_sdl_handle_event(&event);
 
             e.type = event.type;
 
@@ -289,7 +289,7 @@ namespace Input
 
             while(!mQueue.push(e)) {} // push, or wait until buffer not full, then push
         }
-        nk_input_end(Render::ctx);
+        //nk_input_end(Render::ctx);
 
         uint32_t mods = 0;
 
