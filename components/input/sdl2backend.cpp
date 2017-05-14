@@ -8,6 +8,22 @@
 
 #include <iostream>
 
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#include "../render/nuklear/nuklear.h"
+#include "../render/nuklear/nuklear_sdl_gl3.h"
+
+
+namespace Render
+{
+    extern struct nk_context* ctx;
+}
+
 namespace Input
 {
     InputManager* InputManager::instance = NULL;
@@ -217,6 +233,7 @@ namespace Input
                 return KEY_UNDEF;
         }
     }
+   
     
     void InputManager::poll()
     {
@@ -224,8 +241,11 @@ namespace Input
         
         Event e;
 
+        nk_input_begin(Render::ctx);
         while(SDL_PollEvent(&event))
         {   
+            nk_sdl_handle_event(&event);
+
             e.type = event.type;
 
             switch (event.type) 
@@ -275,6 +295,7 @@ namespace Input
 
             while(!mQueue.push(e)) {} // push, or wait until buffer not full, then push
         }
+        nk_input_end(Render::ctx);
 
         uint32_t mods = 0;
 
