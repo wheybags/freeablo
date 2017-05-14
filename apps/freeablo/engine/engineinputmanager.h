@@ -20,7 +20,7 @@ namespace Engine
     class EngineInputManager
     {
         public:
-            EngineInputManager();
+            EngineInputManager(nk_context* nk_ctx);
             void update(bool paused);
             void setHotkey(KeyboardInputAction action, Input::Hotkey hotkey);
             Input::Hotkey getHotkey(KeyboardInputAction action);
@@ -32,13 +32,14 @@ namespace Engine
             EngineInputManager(const EngineInputManager&);
             EngineInputManager& operator=(const EngineInputManager&);
             void keyPress(Input::Key key);
-            void mouseClick(size_t x, size_t y, Input::Key key);
-            void mouseRelease(size_t, size_t, Input::Key key);
-            void mouseMove(size_t x, size_t y);
+            void mouseClick(int32_t x, int32_t y, Input::Key key, bool isDoubleClick);
+            void mouseRelease(int32_t, int32_t, Input::Key key);
+            void mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel);
             std::string keyboardActionToString(KeyboardInputAction action) const;
             void notifyKeyboardObservers(KeyboardInputAction action);
             void notifyMouseObservers(MouseInputAction action, Point mousePosition);
 
+            nk_context* mNkCtx = nullptr;
             Input::InputManager mInput;
             bool mToggleConsole = false;
             Point mMousePosition;

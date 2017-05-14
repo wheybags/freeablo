@@ -12,6 +12,9 @@
 
 #include "keys.h"
 
+#include <fa_nuklear.h>
+
+
 namespace Input
 {
     enum Modifier
@@ -25,9 +28,9 @@ namespace Input
     {
         public:
             InputManager(std::function<void(Key)> keyPress, std::function<void(Key)> keyRelease,
-                std::function<void(uint32_t, uint32_t, Key)> mouseClick,
+                std::function<void(uint32_t, uint32_t, Key, bool)> mouseClick,
                 std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
-                std::function<void(uint32_t, uint32_t)> mouseMove,
+                std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
                 Rocket::Core::Context* context);
 
             void processInput(bool paused);
@@ -58,12 +61,15 @@ namespace Input
                         int32_t key;
                         int32_t x;
                         int32_t y;
+                        int32_t numClicks;
                     } mouseButton;
 
                     struct _mouseMove
                     {
                         int32_t x;
                         int32_t y;
+                        int32_t xrel;
+                        int32_t yrel;
                     } mouseMove;
 
                 } vals;
@@ -72,9 +78,9 @@ namespace Input
             boost::lockfree::spsc_queue<Event, boost::lockfree::capacity<500> > mQueue;
             std::function<void(Key)> mKeyPress;
             std::function<void(Key)> mKeyRelease;
-            std::function<void(uint32_t, uint32_t, Key)> mMouseClick;
+            std::function<void(uint32_t, uint32_t, Key, bool)> mMouseClick;
             std::function<void(uint32_t, uint32_t, Key)> mMouseRelease;
-            std::function<void(uint32_t, uint32_t)> mMouseMove;
+            std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mMouseMove;
 
             Rocket::Core::Context* mContext;
 

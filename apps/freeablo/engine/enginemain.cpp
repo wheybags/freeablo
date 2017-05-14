@@ -47,7 +47,7 @@ namespace Engine
 
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen == "true");
-        mInputManager = std::make_shared<EngineInputManager>();
+        mInputManager = std::make_shared<EngineInputManager>(renderer.getNuklearContext());
         mInputManager->registerKeyboardObserver(this);
         std::thread mainThread(std::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
         threadManager.run();
@@ -137,11 +137,10 @@ namespace Engine
             netManager.update();
             guiManager.update(mPaused);
 
+            //nk_input_begin(ctx);
+            //nk_input_end(ctx);
 
             nk_context* ctx = renderer.getNuklearContext();
-
-            nk_input_begin(ctx);
-            nk_input_end(ctx);
 
             if (nk_begin(ctx, "Demo", nk_rect(50, 50, 200, 200),
                 NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |

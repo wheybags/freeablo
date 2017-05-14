@@ -9,7 +9,6 @@
 #include <iostream>
 
 
-#include <fa_nuklear.h>
 //#include "../render/nuklear/nuklear_sdl_gl3.h"
 
 
@@ -24,9 +23,9 @@ namespace Input
 
     void doNothing_keyPress(Key){}
     void doNothing_keyRelease(Key){}
-    void doNothing_mouseClick(uint32_t, uint32_t, Key){}
+    void doNothing_mouseClick(uint32_t, uint32_t, Key, bool){}
     void doNothing_mouseRelease(uint32_t, uint32_t, Key){}
-    void doNothing_mouseMove(uint32_t, uint32_t){}
+    void doNothing_mouseMove(uint32_t, uint32_t, uint32_t, uint32_t){}
     
     #define getFunc(f) f ? f : doNothing_##f
 
@@ -41,9 +40,9 @@ namespace Input
     }
 
     InputManager::InputManager(std::function<void(Key)> keyPress, std::function<void(Key)> keyRelease,
-        std::function<void(uint32_t, uint32_t, Key)> mouseClick,
+        std::function<void(uint32_t, uint32_t, Key, bool)> mouseClick,
         std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
-        std::function<void(uint32_t, uint32_t)> mouseMove,
+        std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
         Rocket::Core::Context* context):
             
             mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
@@ -257,6 +256,7 @@ namespace Input
                     e.vals.mouseButton.key = event.button.button;
                     e.vals.mouseButton.x = event.button.x;
                     e.vals.mouseButton.y = event.button.y;
+                    e.vals.mouseButton.numClicks = event.button.clicks;
                     break;
                 }
 
@@ -264,6 +264,8 @@ namespace Input
                 {
                     e.vals.mouseMove.x = event.motion.x;
                     e.vals.mouseMove.y = event.motion.y;
+                    e.vals.mouseMove.xrel = event.motion.xrel;
+                    e.vals.mouseMove.yrel = event.motion.yrel;
                     break;
                 }
                 
@@ -785,7 +787,9 @@ namespace Input
 
                     if(key != KEY_UNDEF)
                     {
-                        if(mContext)
+                        mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key, event.vals.mouseButton.numClicks > 1);
+
+                        /*if(mContext)
                         {
                             mBaseWasClicked = false;
                             mContext->ProcessMouseButtonDown(rocketTranslateMouse(key), getRocketModifiers(mModifiers));
@@ -797,7 +801,7 @@ namespace Input
                         {
                             if(!paused)
                                 mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
-                        }
+                        }*/
                     }
                     
                     break;
@@ -806,25 +810,27 @@ namespace Input
                 case SDL_MOUSEBUTTONUP:
                 {
                     Key key = getMouseKey(event.vals.mouseButton.key);
+                    mMouseRelease(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
 
-                    if(key != KEY_UNDEF)
+                    /*if(key != KEY_UNDEF)
                     {
                         if(!paused)
                             mMouseRelease(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
                         if(mContext)
                             mContext->ProcessMouseButtonUp(rocketTranslateMouse(key), getRocketModifiers(mModifiers));
-                    }
+                    }*/
                     
                     break;
                 }
 
                 case SDL_MOUSEMOTION:
                 {
-                    if(!paused)
+                    mMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y, event.vals.mouseMove.xrel, event.vals.mouseMove.yrel);
+                    /*if(!paused)
                         mMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y);
                     if(mContext)
                         mContext->ProcessMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y, getRocketModifiers(mModifiers));
-                    break;
+                    break;*/
                 }
 
                 default:

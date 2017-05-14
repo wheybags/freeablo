@@ -7,12 +7,13 @@ namespace Engine
 {
     namespace ph = std::placeholders;
 
-    EngineInputManager::EngineInputManager():
+    EngineInputManager::EngineInputManager(nk_context* nk_ctx):
+        mNkCtx(nk_ctx),
         mInput( std::bind(&EngineInputManager::keyPress,this, ph::_1),
                 NULL,
-                std::bind(&EngineInputManager::mouseClick, this, ph::_1, ph::_2, ph::_3),
+                std::bind(&EngineInputManager::mouseClick, this, ph::_1, ph::_2, ph::_3, ph::_4),
                 std::bind(&EngineInputManager::mouseRelease, this, ph::_1, ph::_2, ph::_3),
-                std::bind(&EngineInputManager::mouseMove, this, ph::_1, ph::_2),
+                std::bind(&EngineInputManager::mouseMove, this, ph::_1, ph::_2, ph::_3, ph::_4),
                 FARender::Renderer::get()->getRocketContext())
     {
         for(int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
@@ -126,8 +127,30 @@ namespace Engine
         return hotkeys;
     }
 
-    void EngineInputManager::mouseClick(size_t x, size_t y, Input::Key key)
+    void handleNuklearMouseEvent(nk_context* ctx, int32_t x, int32_t y, Input::Key key, bool isDown, bool isDoubleClick)
     {
+        int down = isDown;
+
+        if (key == Input::KEY_LEFT_MOUSE) 
+        {
+            if (isDoubleClick)
+                nk_input_button(ctx, NK_BUTTON_DOUBLE, x, y, down);
+            nk_input_button(ctx, NK_BUTTON_LEFT, x, y, down);
+        }
+        else if (key == Input::KEY_MIDDLE_MOUSE)
+        {
+            nk_input_button(ctx, NK_BUTTON_MIDDLE, x, y, down);
+        }
+        else if (key == Input::KEY_RIGHT_MOUSE)
+        {
+            nk_input_button(ctx, NK_BUTTON_RIGHT, x, y, down);
+        }
+    }
+
+    void EngineInputManager::mouseClick(int32_t x, int32_t y, Input::Key key, bool isDoubleClick)
+    {
+        handleNuklearMouseEvent(mNkCtx, x, y, key, true, isDoubleClick);
+
         if(key == Input::KEY_LEFT_MOUSE)
         {
             mMousePosition = Point(x,y);
@@ -136,16 +159,28 @@ namespace Engine
         }
     }
 
-    void EngineInputManager::mouseRelease(size_t, size_t, Input::Key key)
+    void EngineInputManager::mouseRelease(int32_t x, int32_t y, Input::Key key)
     {
+        handleNuklearMouseEvent(mNkCtx, x, y, key, false, false);
+
         if(key == Input::KEY_LEFT_MOUSE)
             mMouseDown = false;
 
         notifyMouseObservers(MOUSE_RELEASE, mMousePosition);
     }
 
-    void EngineInputManager::mouseMove(size_t x, size_t y)
+    void EngineInputManager::mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel)
     {
+        if (mNkCtx->input.mouse.grabbed) 
+        {
+            int x = (int)mNkCtx->input.mouse.prev.x, y = (int)mNkCtx->input.mouse.prev.y;
+            nk_input_motion(mNkCtx, x + xrel, y + yrel);
+        }
+        else
+        {
+            nk_input_motion(mNkCtx, x, y);
+        }
+
         mMousePosition = Point(x,y);
     }
 
@@ -180,7 +215,10 @@ namespace Engine
 
     void EngineInputManager::update(bool paused)
     {
+        nk_input_begin(mNkCtx);
         mInput.processInput(paused);
+        nk_input_end(mNkCtx);
+
         if(mToggleConsole)
         {
             FAGui::Console & console = FAGui::Console::getInstance(FARender::Renderer::get()->getRocketContext());
