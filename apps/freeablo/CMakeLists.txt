@@ -90,6 +90,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fasavegame/savegamemanager.cpp
 )
 
+target_link_libraries(freeablo_lib nuklear)
+
 add_executable(freeablo main.cpp)
 target_link_libraries(freeablo freeablo_lib)
 

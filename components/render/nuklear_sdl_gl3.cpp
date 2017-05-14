@@ -132,7 +132,7 @@ void nk_sdl_device_destroy(nk_gl_device& dev)
     nk_buffer_free(&dev.cmds);
 }
 
-void nk_sdl_render_dump(const NuklearFrameDump& dump, nk_gl_device& dev, SDL_Window* win)
+void nk_sdl_render_dump(const NuklearFrameDump& dump, SDL_Window* win)
 {
     int width, height;
     int display_width, display_height;
@@ -160,6 +160,8 @@ void nk_sdl_render_dump(const NuklearFrameDump& dump, nk_gl_device& dev, SDL_Win
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
     glActiveTexture(GL_TEXTURE0);
+
+    nk_gl_device& dev = dump.dev;
 
     // setup program
     glUseProgram(dev.prog);
@@ -368,7 +370,7 @@ nk_sdl_handle_event(SDL_Event *evt)
     memset(&sdl, 0, sizeof(sdl));
 }*/
 
-NuklearFrameDump::NuklearFrameDump(const nk_gl_device& dev)
+NuklearFrameDump::NuklearFrameDump(nk_gl_device& dev) : dev(dev)
 {
     nk_buffer_init_default(&vbuf);
     nk_buffer_init_default(&ebuf);

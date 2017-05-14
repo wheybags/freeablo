@@ -31,15 +31,17 @@ class NuklearFrameDump
 {
     public:
         NuklearFrameDump() = delete;
-        NuklearFrameDump(const NuklearFrameDump&) = delete;
+        NuklearFrameDump(const NuklearFrameDump&)  = delete;
 
-        NuklearFrameDump(const nk_gl_device& dev);
+        NuklearFrameDump(nk_gl_device& dev);
         ~NuklearFrameDump();
     
         void fill(nk_context* ctx);
 
         nk_buffer vbuf; // vertices
         nk_buffer ebuf; // indices
+
+        nk_gl_device& dev;
 
         std::vector<nk_draw_command> drawCommands;
 
@@ -52,9 +54,9 @@ class NuklearFrameDump
 void nk_sdl_font_stash_begin(nk_font_atlas& atlas);
 GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
 //NK_API int                  nk_sdl_handle_event(SDL_Event *evt);
-void nk_sdl_render_dump(const NuklearFrameDump& dump, nk_gl_device& dev, SDL_Window* win);
+void nk_sdl_render_dump(const NuklearFrameDump& dump, SDL_Window* win);
 //NK_API void                 nk_sdl_shutdown(void);
-//NK_API void                 nk_sdl_device_destroy(void);
+void nk_sdl_device_destroy(nk_gl_device& dev);
 void nk_sdl_device_create(nk_gl_device& dev);
 
 #endif

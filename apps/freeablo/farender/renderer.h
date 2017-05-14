@@ -110,6 +110,9 @@ namespace FARender
             volatile bool mAlreadyExited = false;
             std::mutex mDoneMutex;
             std::condition_variable mDoneCV;
+
+            nk_context mNuklearContext = { 0 };
+            Render::NuklearGraphicsContext mNuklearGraphicsData = { 0 };
     };
 }
 

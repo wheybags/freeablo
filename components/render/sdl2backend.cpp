@@ -65,13 +65,13 @@ namespace Render
     
 
 
-    struct nk_context *ctx;
+    /*struct nk_context *ctx;
 
     nk_context ctxb;
     nk_gl_device dev;
-    nk_font_atlas atlas;
+    nk_font_atlas atlas;*/
 
-    void init(const RenderSettings& settings)
+    void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
     {
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
@@ -118,15 +118,8 @@ namespace Render
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
 
-
-        ctx = &ctxb;
-
-        nk_init_default(ctx, nullptr);
-        ctx->clip.copy = nullptr;// nk_sdl_clipbard_copy;
-        ctx->clip.paste = nullptr;// nk_sdl_clipbard_paste;
-        ctx->clip.userdata = nk_handle_ptr(0);
-
-        nk_sdl_device_create(dev);
+        memset(&nuklearGraphics, 0, sizeof(nuklearGraphics));
+        nk_sdl_device_create(nuklearGraphics.dev);
 
         //nk_sdl_init(sdl, screen);
         //ctx = &sdl.ctx;
@@ -134,14 +127,14 @@ namespace Render
         /* Load Fonts: if none of these are loaded a default font will be used  */
         /* Load Cursor: if you uncomment cursor loading please hide the cursor */
         {
-            nk_sdl_font_stash_begin(atlas);
+            nk_sdl_font_stash_begin(nuklearGraphics.atlas);
             /*struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);*/
             /*struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 16, 0);*/
             /*struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);*/
             /*struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);*/
             /*struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);*/
             /*struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);*/
-            dev.font_tex = nk_sdl_font_stash_end(ctx, atlas, dev.null);
+            nuklearGraphics.dev.font_tex = nk_sdl_font_stash_end(nk_ctx, nuklearGraphics.atlas, nuklearGraphics.dev.null);
             /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
             /*nk_style_set_font(ctx, &roboto->handle)*/;
         }
@@ -156,6 +149,12 @@ namespace Render
         glMatrixMode(GL_PROJECTION|GL_MODELVIEW);
         glLoadIdentity();
         glOrtho(0, WIDTH, HEIGHT, 0, 0, 1);*/
+    }
+
+    void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics)
+    {
+        nk_font_atlas_clear(&nuklearGraphics.atlas);
+        nk_sdl_device_destroy(nuklearGraphics.dev);
     }
 
     bool import(const std::string& name)
@@ -331,64 +330,16 @@ namespace Render
         Context->Render();*/
     }
 
-    void drawGui(std::vector<DrawCommand>& buffer, SpriteCacheBase* cache)
+    void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache)
     {
+        // IMPORTANT: `nk_sdl_render` modifies some global OpenGL state
+        // with blending, scissor, face culling, depth test and viewport and
+        // defaults everything back into a default state.
+        // Make sure to either a.) save and restore or b.) reset your own state after
+        // rendering the UI.
+        nk_sdl_render_dump(dump, screen);
 
-        nk_input_begin(ctx);
-        nk_input_end(ctx);
-
-        if (nk_begin(ctx, "Demo", nk_rect(50, 50, 200, 200),
-            NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
-            NK_WINDOW_CLOSABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
-        {
-            nk_menubar_begin(ctx);
-            nk_layout_row_begin(ctx, NK_STATIC, 25, 2);
-            nk_layout_row_push(ctx, 45);
-            if (nk_menu_begin_label(ctx, "FILE", NK_TEXT_LEFT, nk_vec2(120, 200))) {
-                nk_layout_row_dynamic(ctx, 30, 1);
-                nk_menu_item_label(ctx, "OPEN", NK_TEXT_LEFT);
-                nk_menu_item_label(ctx, "CLOSE", NK_TEXT_LEFT);
-                nk_menu_end(ctx);
-            }
-            nk_layout_row_push(ctx, 45);
-            if (nk_menu_begin_label(ctx, "EDIT", NK_TEXT_LEFT, nk_vec2(120, 200))) {
-                nk_layout_row_dynamic(ctx, 30, 1);
-                nk_menu_item_label(ctx, "COPY", NK_TEXT_LEFT);
-                nk_menu_item_label(ctx, "CUT", NK_TEXT_LEFT);
-                nk_menu_item_label(ctx, "PASTE", NK_TEXT_LEFT);
-                nk_menu_end(ctx);
-            }
-            nk_layout_row_end(ctx);
-            nk_menubar_end(ctx);
-
-            enum { EASY, HARD };
-            static int op = EASY;
-            static int property = 20;
-            nk_layout_row_static(ctx, 30, 80, 1);
-            if (nk_button_label(ctx, "button"))
-                fprintf(stdout, "button pressed\n");
-            nk_layout_row_dynamic(ctx, 30, 2);
-            if (nk_option_label(ctx, "easy", op == EASY)) op = EASY;
-            if (nk_option_label(ctx, "hard", op == HARD)) op = HARD;
-            nk_layout_row_dynamic(ctx, 25, 1);
-            nk_property_int(ctx, "Compression:", 0, &property, 100, 10, 1);
-        }
-        nk_end(ctx);
-
-        static NuklearFrameDump dump(dev);
-        dump.fill(ctx);
-
-        /* IMPORTANT: `nk_sdl_render` modifies some global OpenGL state
-        * with blending, scissor, face culling, depth test and viewport and
-        * defaults everything back into a default state.
-        * Make sure to either a.) save and restore or b.) reset your own state after
-        * rendering the UI. */
-        nk_sdl_render_dump(dump, dev, screen);
-
-        //nk_sdl_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_MEMORY, MAX_ELEMENT_MEMORY);
-        glEnable(GL_BLEND);
-
-        //Renderer->drawBuffer(buffer, cache);
+        glEnable(GL_BLEND); // see above comment
     }
 
     SDL_Surface* loadNonCelImage(const std::string& sourcePath, const std::string& extension)

@@ -29,6 +29,8 @@ namespace Render
 
 #include "levelobjects.h"
 
+#include "nuklear_sdl_gl3.h"
+
 namespace Level
 {
     class Level;
@@ -46,6 +48,12 @@ namespace Render
         bool fullscreen;
     };
 
+    struct NuklearGraphicsContext
+    {
+        nk_gl_device dev;
+        nk_font_atlas atlas;
+    };
+
     class SpriteCacheBase
     {
         public:
@@ -55,18 +63,19 @@ namespace Render
 
 
 
-    void init(const RenderSettings& settings); 
+    void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);
     Rocket::Core::Context* initGui(std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
                                    std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
                                    std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc);
 
+    void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics);
     void quit(); 
 
     void resize(size_t w, size_t h);
     RenderSettings getWindowSize();
     void updateGuiBuffer(std::vector<DrawCommand>* buffer);
     void quitGui();
-    void drawGui(std::vector<DrawCommand>& buffer, SpriteCacheBase* cache);
+    void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache);
 
     bool getImageInfo(const std::string& path, uint32_t& width, uint32_t& height, uint32_t& animLength, int32_t celIndex=0);
     void drawCursor(Sprite s, size_t w=0, size_t h=0);

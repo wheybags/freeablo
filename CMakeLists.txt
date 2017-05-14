@@ -108,6 +108,7 @@ link_libraries (
     Settings
     Script
     Serial
+    nuklear
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
