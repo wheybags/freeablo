@@ -260,6 +260,12 @@ namespace FARender
             mDoneCV.wait(lk);
     }
 
+    union I32sAs64
+    {
+        int32_t int32s[2];
+        int64_t int64;
+    };
+
     bool Renderer::renderFrame(RenderState* state)
     {
         if(mDone)
@@ -314,6 +320,12 @@ namespace FARender
         
         Render::draw();
 
+        I32sAs64 tmp;
+        tmp.int32s[0] = Render::WIDTH;
+        tmp.int32s[1] = Render::HEIGHT;
+
+        mWidthHeightTmp = tmp.int64;
+
         return true;
     }
     void Renderer::setCursor(RenderState * State)
@@ -335,5 +347,14 @@ namespace FARender
     void Renderer::cleanup()
     {
         mSpriteManager.clear();
+    }
+
+    void Renderer::getWindowDimensions(int32_t& w, int32_t& h)
+    {
+        I32sAs64 tmp;
+        tmp.int64 = mWidthHeightTmp;
+
+        w = tmp.int32s[0];
+        h = tmp.int32s[1];
     }
 }

@@ -96,6 +96,8 @@ namespace FARender
                 return &mNuklearContext;
             }
 
+            void getWindowDimensions(int32_t& w, int32_t& h);
+
             
         private:
             bool loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
@@ -120,6 +122,8 @@ namespace FARender
 
             nk_context mNuklearContext = { 0 };
             Render::NuklearGraphicsContext mNuklearGraphicsData = { 0 };
+
+            std::atomic_int64_t mWidthHeightTmp = 0;
     };
 }
 

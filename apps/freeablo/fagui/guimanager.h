@@ -8,6 +8,7 @@
 
 
 #include "fapython.h"
+#include <fa_nuklear.h>
 
 namespace Rocket
 {
@@ -51,7 +52,7 @@ namespace FAGui
         void showSaveFileExistsMenu(int classNumber);
         void showEnterNameMenu(int classNumber);
         void showInvalidNameMenu(int classNumber);
-        void update(bool paused);
+        void update(bool paused, nk_context* ctx);
         GuiType currentGuiType() const;
         static std::string invClass;
 

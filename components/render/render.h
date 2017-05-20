@@ -32,6 +32,10 @@ namespace Level
 
 namespace Render
 {
+
+    extern int32_t WIDTH;
+    extern int32_t HEIGHT;
+
     /**
      * @brief Render settings for initialization.
      */
