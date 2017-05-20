@@ -58,6 +58,7 @@ set(RenderFiles
     render/sdl_gl_funcs.cpp
     render/nuklear_sdl_gl3.cpp
     render/nuklear_sdl_gl3.h
+    render/misc.h
 )
 add_library(Render ${RenderFiles})
 target_link_libraries(Render Cel Levels nuklear ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${OPENGL_LIBRARIES} ${ROCKET_LIBRARIES} ${PYTHON_LIBRARIES})

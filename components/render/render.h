@@ -19,13 +19,7 @@
 
 #include "rocketglue/drawcommand.h"
 
-#include <SDL.h>
-namespace Render
-{
-    typedef void* Sprite;
-    typedef SDL_Cursor * FACursor;
-    typedef SDL_Surface * FASurface;
-}
+#include "misc.h"
 
 #include "levelobjects.h"
 
@@ -54,15 +48,6 @@ namespace Render
         nk_font_atlas atlas;
     };
 
-    class SpriteCacheBase
-    {
-        public:
-            virtual SpriteGroup* get(uint32_t key) = 0;
-            virtual void setImmortal(uint32_t index, bool immortal) = 0;
-    };
-
-
-
     void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);
     Rocket::Core::Context* initGui(std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
                                    std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
@@ -89,39 +74,6 @@ namespace Render
     void draw();
 
     void drawAt(const Sprite& sprite, int32_t x, int32_t y);
-
-    class SpriteGroup
-    {
-        public:
-            SpriteGroup(const std::string& path);
-            SpriteGroup(const std::vector<Sprite> sprites): mSprites(sprites), mAnimLength(sprites.size()) {}
-            void destroy();
-            
-            Sprite& operator[](size_t index)
-            {
-                #ifndef NDEBUG
-                    assert(index < mSprites.size());
-                #endif
-                return mSprites[index];
-            }
-
-            size_t size()
-            {
-                return mSprites.size();
-            }
-
-            size_t animLength()
-            {   
-                return mAnimLength;
-            }
-
-            static void toPng(const std::string& celPath, const std::string& pngPath);
-
-
-        private:
-            std::vector<Sprite> mSprites;
-            size_t mAnimLength;
-    };
 
     struct RocketFATex
     {

@@ -26,6 +26,29 @@ namespace FARender
     {
         return mRenderer;
     }
+
+    void nk_fa_font_stash_begin(nk_font_atlas& atlas)
+    {
+        nk_font_atlas_init_default(&atlas);
+        nk_font_atlas_begin(&atlas);
+    }
+
+    nk_handle nk_fa_font_stash_end(SpriteManager& spriteManager, nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
+    {
+        const void *image; int w, h;
+        image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
+
+        FASpriteGroup* sprite = spriteManager.getFromRaw((uint8_t*)image, w, h);
+        spriteManager.setImmortal(sprite->getCacheIndex(), true);
+
+        nk_handle handle = nk_handle_id(sprite->getCacheIndex());
+        nk_font_atlas_end(&atlas, handle, &nullTex);
+
+        if (atlas.default_font)
+            nk_style_set_font(ctx, &atlas.default_font->handle);
+
+        return handle;
+    }
                                   
 
     Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen)
@@ -48,6 +71,23 @@ namespace FARender
             mNuklearContext.clip.userdata = nk_handle_ptr(0);
 
             Render::init(settings, mNuklearGraphicsData, &mNuklearContext);
+
+            // Load Fonts: if none of these are loaded a default font will be used
+            // Load Cursor: if you uncomment cursor loading please hide the cursor
+            {
+                nk_fa_font_stash_begin(mNuklearGraphicsData.atlas);
+                //struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);
+                //struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 16, 0);
+                //struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);
+                //struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
+                //struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
+                //struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
+                mNuklearGraphicsData.dev.font_tex = nk_fa_font_stash_end(mSpriteManager, &mNuklearContext, mNuklearGraphicsData.atlas, mNuklearGraphicsData.dev.null);
+                //nk_style_load_all_cursors(ctx, atlas->cursors);
+                //nk_style_set_font(ctx, &roboto->handle);
+            }
+
+
 
             mStates = (RenderState*)malloc(sizeof(RenderState) * mNumRenderStates);
 

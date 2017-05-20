@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "sdl_gl_funcs.h"
+#include "misc.h"
 
 #include <fa_nuklear.h>
 
@@ -22,9 +23,8 @@ struct nk_gl_device
     GLint attrib_col;
     GLint uniform_tex;
     GLint uniform_proj;
-    GLuint font_tex;
+    nk_handle font_tex;
 };
-
 
 
 class NuklearFrameDump
@@ -54,7 +54,7 @@ class NuklearFrameDump
 void nk_sdl_font_stash_begin(nk_font_atlas& atlas);
 GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
 //NK_API int                  nk_sdl_handle_event(SDL_Event *evt);
-void nk_sdl_render_dump(const NuklearFrameDump& dump, SDL_Window* win);
+void nk_sdl_render_dump(Render::SpriteCacheBase* cache, const NuklearFrameDump& dump, SDL_Window* win);
 //NK_API void                 nk_sdl_shutdown(void);
 void nk_sdl_device_destroy(nk_gl_device& dev);
 void nk_sdl_device_create(nk_gl_device& dev);

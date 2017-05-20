@@ -107,7 +107,7 @@ void nk_sdl_device_create(nk_gl_device& dev)
     glBindVertexArray(0);
 }
 
-GLuint nk_sdl_device_upload_atlas(const void *image, int width, int height)
+/*GLuint nk_sdl_device_upload_atlas(const void *image, int width, int height)
 {
     GLuint font_tex;
     glGenTextures(1, &font_tex);
@@ -117,7 +117,7 @@ GLuint nk_sdl_device_upload_atlas(const void *image, int width, int height)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)width, (GLsizei)height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 
     return font_tex;
-}
+}*/
 
 void nk_sdl_device_destroy(nk_gl_device& dev)
 {
@@ -126,13 +126,13 @@ void nk_sdl_device_destroy(nk_gl_device& dev)
     glDeleteShader(dev.vert_shdr);
     glDeleteShader(dev.frag_shdr);
     glDeleteProgram(dev.prog);
-    glDeleteTextures(1, &dev.font_tex);
+    //glDeleteTextures(1, &dev.font_tex);
     glDeleteBuffers(1, &dev.vbo);
     glDeleteBuffers(1, &dev.ebo);
     nk_buffer_free(&dev.cmds);
 }
 
-void nk_sdl_render_dump(const NuklearFrameDump& dump, SDL_Window* win)
+void nk_sdl_render_dump(Render::SpriteCacheBase* cache, const NuklearFrameDump& dump, SDL_Window* win)
 {
     int width, height;
     int display_width, display_height;
@@ -196,7 +196,10 @@ void nk_sdl_render_dump(const NuklearFrameDump& dump, SDL_Window* win)
             const struct nk_draw_command& cmd = dump.drawCommands[i];
 
             if (!cmd.elem_count) continue;
-            glBindTexture(GL_TEXTURE_2D, (GLuint)cmd.texture.id);
+
+            Render::SpriteGroup* sprite = cache->get(cmd.texture.id);
+            glBindTexture(GL_TEXTURE_2D, (GLuint)sprite->operator[](0));
+
             glScissor((GLint)(cmd.clip_rect.x * scale.x),
                 (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),
                 (GLint)(cmd.clip_rect.w * scale.x),
@@ -251,7 +254,7 @@ nk_sdl_clipbard_copy(nk_handle usr, const char *text, int len)
     nk_sdl_device_create();
 }*/
 
-void nk_sdl_font_stash_begin(nk_font_atlas& atlas)
+/*void nk_sdl_font_stash_begin(nk_font_atlas& atlas)
 {
     nk_font_atlas_init_default(&atlas);
     nk_font_atlas_begin(&atlas);
@@ -267,7 +270,7 @@ GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null
         nk_style_set_font(ctx, &atlas.default_font->handle);
 
     return font_tex;
-}
+}*/
 
 #if 0
 NK_API int
