@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_celview.h"
-#include "render/render.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -39,9 +38,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+Render::NuklearGraphicsContext dummy;
+
 void MainWindow::initRender()
 {
-    Render::init(mRenderSettings);
+    Render::init(mRenderSettings, dummy, nullptr);
 }
 
 void MainWindow::loadSettings()

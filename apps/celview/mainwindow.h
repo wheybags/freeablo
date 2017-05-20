@@ -1,6 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+// This header must be included before all qt headers, because deep in it's include chain there is a
+// struct member called slots, which qt #defines out unfortunately :(
+#include <render/render.h> 
+
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QTimer>
@@ -13,7 +17,7 @@
 
 #include <settings/settings.h>
 #include <faio/fafileobject.h>
-#include <render/render.h>
+
 
 namespace Ui {
 class MainWindow;
