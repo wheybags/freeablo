@@ -41,7 +41,7 @@ namespace FARender
         FASpriteGroup* sprite = spriteManager.getFromRaw((uint8_t*)image, w, h);
         spriteManager.setImmortal(sprite->getCacheIndex(), true);
 
-        nk_handle handle = nk_handle_id(sprite->getCacheIndex());
+        nk_handle handle = sprite->getNkImage().handle;
         nk_font_atlas_end(&atlas, handle, &nullTex);
 
         if (atlas.default_font)

@@ -197,8 +197,11 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, const NuklearFrameDump& 
 
             if (!cmd.elem_count) continue;
 
-            Render::SpriteGroup* sprite = cache->get(cmd.texture.id);
-            glBindTexture(GL_TEXTURE_2D, (GLuint)sprite->operator[](0));
+            uint32_t cacheIndex = ((uint32_t*)cmd.texture.ptr)[0];
+            uint32_t frameNum = ((uint32_t*)cmd.texture.ptr)[1];
+
+            Render::SpriteGroup* sprite = cache->get(cacheIndex);
+            glBindTexture(GL_TEXTURE_2D, (GLuint)sprite->operator[](frameNum));
 
             glScissor((GLint)(cmd.clip_rect.x * scale.x),
                 (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),
