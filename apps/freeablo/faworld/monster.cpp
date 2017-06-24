@@ -19,6 +19,7 @@ namespace FAWorld
         mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1f);
         mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1f);
         mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1f);
+        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(0.2f);
         mAnimTimeMap[AnimState::hit] = FAWorld::World::getTicksInPeriod(0.1f);
 
         mFaction = Faction::hell();
@@ -84,6 +85,7 @@ namespace FAWorld
         mWalkAnim = FARender::Renderer::get()->loadImage((fmt % 'w').str());
         mIdleAnim = FARender::Renderer::get()->loadImage((fmt % 'n').str());
         mDieAnim =  FARender::Renderer::get()->loadImage((fmt % 'd').str());
+        mAttackAnim =  FARender::Renderer::get()->loadImage((fmt % 'a').str());
         mHitAnim =  FARender::Renderer::get()->loadImage((fmt % 'h').str());
     }
 

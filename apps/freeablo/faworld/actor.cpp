@@ -113,7 +113,7 @@ namespace FAWorld
                     }
                 }
             }
-            else if (mPos.mMoving && mPos.mDist == 0 && !mAnimPlaying)
+            else if (mPos.mMoving && mPos.mDist == 0 && !mAnimPlaying && !isDead())
             {
                 mPos.mMoving = false;
                 setAnimation(AnimState::idle);
@@ -201,7 +201,8 @@ namespace FAWorld
     void Actor::die()
     {
         mDestination = mPos.mGoal = mPos.current();
-        setAnimation(AnimState::dead);
+        mPos.mMoving = false;
+        setAnimation(AnimState::dead, true);
         mIsDead = true;
         Engine::ThreadManager::get()->playSound(getDieWav());
     }
