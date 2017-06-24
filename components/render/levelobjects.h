@@ -24,17 +24,17 @@ namespace Render
         public:
             void resize(size_t x, size_t y);
 
-            Misc::Helper2D<LevelObjects, LevelObject&> operator[] (size_t x);
+            Misc::Helper2D<LevelObjects, std::vector<LevelObject>&> operator[] (size_t x);
 
             size_t width();
             size_t height();
-        
+
         private:
-            std::vector<LevelObject> mData;
+            std::vector<std::vector<LevelObject>> mData;
             size_t mWidth;
             size_t mHeight;
 
-            friend LevelObject& get(size_t x, size_t y, LevelObjects& obj);
+            friend std::vector<LevelObject>& get(size_t x, size_t y, LevelObjects& obj);
     };
 }
 

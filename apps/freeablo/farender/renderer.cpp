@@ -223,7 +223,7 @@ namespace FARender
                 {
                     for(size_t y = 0; y < mLevelObjects.height(); y++)
                     {
-                        mLevelObjects[x][y].valid = false;
+                        mLevelObjects[x][y].clear();
                     }
                 }
 
@@ -233,13 +233,16 @@ namespace FARender
 
                     size_t x = position.current().first;
                     size_t y = position.current().second;
+                    Render::LevelObject levelObject = {
+                        std::get<0>(state->mObjects[i])->isValid(),
+                        std::get<0>(state->mObjects[i])->getCacheIndex(),
+                        std::get<1>(state->mObjects[i]),
+                        position.next().first,
+                        position.next().second,
+                        position.mDist
+                    };
 
-                    mLevelObjects[x][y].valid = std::get<0>(state->mObjects[i])->isValid();
-                    mLevelObjects[x][y].spriteCacheIndex = std::get<0>(state->mObjects[i])->getCacheIndex();
-                    mLevelObjects[x][y].spriteFrame = std::get<1>(state->mObjects[i]);
-                    mLevelObjects[x][y].x2 = position.next().first;
-                    mLevelObjects[x][y].y2 = position.next().second;
-                    mLevelObjects[x][y].dist = position.mDist;
+                    mLevelObjects[x][y].push_back(levelObject);
                 }
 
                 Render::drawLevel(state->level->mLevel, state->tileset.minTops->getCacheIndex(), state->tileset.minBottoms->getCacheIndex(), &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,

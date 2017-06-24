@@ -92,8 +92,8 @@ namespace FAWorld
                             auto nextPos = mPos.pathNext(false);
                             FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.first, nextPos.second);
 
-                            if ((noclip || (mLevel->getTile(nextPos.first, nextPos.second).passable() &&
-                                (actorAtNext == NULL || actorAtNext == this))) && !mAnimPlaying)
+                            if ((noclip || (mLevel->isPassable(nextPos.first, nextPos.second) &&
+                                (actorAtNext == NULL || actorAtNext == this || actorAtNext->isDead()))) && !mAnimPlaying)
                             {
                                 if (!mPos.mMoving && !mAnimPlaying)
                                 {
