@@ -210,6 +210,11 @@ namespace FAWorld
         mPlayers.erase(std::find(mPlayers.begin(), mPlayers.end(), player));
     }
 
+    const std::vector<Player*>& World::getPlayers()
+    {
+        return mPlayers;
+    }
+
     void World::fillRenderState(FARender::RenderState* state)
     {
         if (getCurrentLevel())

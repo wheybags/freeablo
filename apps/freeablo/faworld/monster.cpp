@@ -22,6 +22,47 @@ namespace FAWorld
         mAnimTimeMap[AnimState::hit] = FAWorld::World::getTicksInPeriod(0.1f);
 
         mFaction = Faction::hell();
+        mAi = new FAWorld::NullAI(this);
+    }
+
+    void Monster::update(bool noclip, size_t ticksPassed)
+    {
+        Actor::update(noclip, ticksPassed);
+        mAi->update();
+    }
+
+    bool Monster::attack(Actor *enemy)
+    {
+        if(enemy->isDead() && enemy->mStats != nullptr)
+            return false;
+        isAttacking = true;
+        Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
+        setAnimation(AnimState::attack, true);
+        mAnimPlaying = true;
+        return true;
+    }
+
+    bool Monster::canIAttack(Actor * actor)
+    {
+        if (actor == nullptr)
+            return false;
+
+        if (this == actor)
+            return false;
+
+        if (!isEnemy(actor))
+            return false;
+
+        if (actor->isDead())
+            return false;
+
+        if (mPos.distanceFrom(actor->mPos) >= 2)
+            return false;
+
+        if (isAttacking)
+            return false;
+
+        return true;
     }
 
     Monster::Monster()
@@ -44,6 +85,12 @@ namespace FAWorld
         mIdleAnim = FARender::Renderer::get()->loadImage((fmt % 'n').str());
         mDieAnim =  FARender::Renderer::get()->loadImage((fmt % 'd').str());
         mHitAnim =  FARender::Renderer::get()->loadImage((fmt % 'h').str());
+    }
+
+    Monster::~Monster()
+    {
+        if (mAi != nullptr)
+            delete mAi;
     }
 
     std::string Monster::getDieWav()

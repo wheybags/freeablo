@@ -51,7 +51,7 @@ namespace FAWorld
                   const std::string& dieAnimPath=""
                   );
 
-            void update(bool noclip, size_t ticksPassed);
+            virtual void update(bool noclip, size_t ticksPassed);
             virtual ~Actor();
             virtual std::string getDieWav(){return "";}
             virtual std::string getHitWav(){return "";}
@@ -235,7 +235,7 @@ namespace FAWorld
                 ar & this->mDestination;
             }
 
-            bool canIAttack(Actor * actor);
+            virtual bool canIAttack(Actor * actor);
             bool canTalkTo(Actor * actor);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()

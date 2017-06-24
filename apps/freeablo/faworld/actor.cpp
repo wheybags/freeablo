@@ -200,6 +200,7 @@ namespace FAWorld
 
     void Actor::die()
     {
+        mDestination = mPos.mGoal = mPos.current();
         setAnimation(AnimState::dead);
         mIsDead = true;
         Engine::ThreadManager::get()->playSound(getDieWav());
