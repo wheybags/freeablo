@@ -223,7 +223,9 @@ namespace FARender
                 {
                     for(size_t y = 0; y < mLevelObjects.height(); y++)
                     {
-                        mLevelObjects[x][y].clear();
+                        if (mLevelObjects[x][y].size() > 0) {
+                            mLevelObjects[x][y].clear();
+                        }
                     }
                 }
 
