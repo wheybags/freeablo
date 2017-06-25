@@ -7,14 +7,14 @@ namespace FAWorld
     namespace ActorState
     {
 
-        boost::optional<StateChange<BaseState>> AttackState::update(Actor& actor, bool noclip, size_t ticksPassed)
+        boost::optional<StateMachine::StateChange<Actor>> AttackState::update(Actor& actor, bool noclip, size_t ticksPassed)
         {
             UNUSED_PARAM(noclip);
             UNUSED_PARAM(ticksPassed);
 
             if (!actor.mAnimPlaying) {
                 actor.setAnimation(AnimState::idle);
-                return StateChange<BaseState>{StateOperation::pop};
+                return StateMachine::StateChange<Actor>{StateMachine::StateOperation::pop};
             }
 
             return boost::none;

@@ -1,7 +1,10 @@
 #ifndef ACTOR_ATTACKSTATE_H
 #define ACTOR_ATTACKSTATE_H
 
-#include "basestate.h"
+#include <stddef.h>
+#include <statemachine/statemachine.h>
+#include <misc/misc.h>
+#include <boost/optional.hpp>
 
 namespace FAWorld
 {
@@ -11,11 +14,11 @@ namespace FAWorld
     namespace ActorState
     {
 
-        class AttackState : public BaseState
+        class AttackState : public StateMachine::AbstractState<Actor>
         {
         public:
             ~AttackState() {};
-            boost::optional<StateChange<BaseState>> update(Actor& actor, bool noclip, size_t ticksPassed);
+            boost::optional<StateMachine::StateChange<Actor>> update(Actor& actor, bool noclip, size_t ticksPassed);
 
             void onEnter(Actor& actor);
         };

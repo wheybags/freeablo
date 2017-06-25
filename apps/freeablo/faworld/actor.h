@@ -5,6 +5,7 @@
 
 #include <boost/format.hpp>
 
+#include <statemachine/statemachine.h>
 #include <misc/misc.h>
 
 #include "../engine/net/netmanager.h"
@@ -15,6 +16,7 @@
 #include "gamelevel.h"
 #include "world.h"
 #include "faction.h"
+
 
 namespace Engine
 {
@@ -76,7 +78,7 @@ namespace FAWorld
             AnimState::AnimState getAnimState();
             bool findPath(GameLevelImpl* level, std::pair<int32_t, int32_t> destination);
 
-            std::vector<ActorState::BaseState*> mActorState;
+            StateMachine::StateMachine<Actor>* mActorStateMachine;
 
 
             int32_t getId()

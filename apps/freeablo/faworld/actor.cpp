@@ -56,25 +56,7 @@ namespace FAWorld
 #endif
             }
 
-            if (!mActorState.empty()) {
-                if (auto next = mActorState.back()->update(*this, noclip, ticksPassed)) {
-                    mActorState.back()->onExit(*this);
-
-                    switch (next->op) {
-                        case StateOperation::pop:
-                            mActorState.pop_back();
-                            break;
-                        case StateOperation::push:
-                            mActorState.push_back(next->nextState);
-                        case StateOperation::replace:
-                            mActorState.pop_back();
-                            mActorState.push_back(next->nextState);
-                            break;
-                    }
-
-                    mActorState.back()->onEnter(*this);
-                }
-            }
+            mActorStateMachine->update(noclip, ticksPassed);
         }
     }
 
@@ -108,7 +90,7 @@ namespace FAWorld
         mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1f);
         mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1f);
 
-        mActorState.push_back(new ActorState::BaseState());
+        mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this);
 
         mId = getNewId();
     }

@@ -9,7 +9,7 @@ namespace FAWorld
     namespace ActorState
     {
 
-        boost::optional<StateChange<BaseState>> BaseState::update(Actor& actor, bool noclip, size_t ticksPassed)
+        boost::optional<StateMachine::StateChange<Actor>> BaseState::update(Actor& actor, bool noclip, size_t ticksPassed)
         {
             UNUSED_PARAM(ticksPassed);
             if (actor.mPos.mGoal != std::pair<int32_t, int32_t>(0, 0) && actor.mPos.current() != actor.mPos.mGoal)
@@ -24,7 +24,7 @@ namespace FAWorld
                     actor.mPos.mDist = 0;
 
                     if (actor.attack(destActor)) {
-                        return StateChange<BaseState>{StateOperation::push, new AttackState()};
+                        return StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
                     }
                 }
                 else if (actor.canTalkTo(destActor))
