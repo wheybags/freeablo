@@ -26,6 +26,10 @@ namespace FAWorld
             std::pair<int32_t, int32_t> pathNext(bool bIncrease ); ///< get the next find path way node.
 
             int32_t mDist; ///< percentage of the way there
+        private:
+            int32_t mDirection;
+
+        public:
             int32_t getDirection() const;
             void setDirection(int32_t mDirection);
 
@@ -37,7 +41,6 @@ namespace FAWorld
 
         private:
             std::pair<int32_t, int32_t> mCurrent;
-            int32_t mDirection;
 
             template<class Archive>
             void save(Archive & ar, const unsigned int version) const
@@ -64,7 +67,7 @@ namespace FAWorld
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-            template<class Stream> 
+            template<class Stream>
             Serial::Error::Error faSerial(Stream& stream)
             {
                 serialise_int(stream, 0, 100, mDist);
