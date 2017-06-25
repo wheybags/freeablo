@@ -1,13 +1,13 @@
 #ifndef AI_H
 #define AI_H
 
-#include "player.h"
-#include "actor.h"
+#include <misc/misc.h>
 
 namespace FAWorld
 {
 
     class Actor;
+    class Player;
 
     class AI
     {
@@ -15,7 +15,7 @@ namespace FAWorld
         AI(const Actor* actor): mActor(actor) {};
         virtual ~AI() {};
 
-        virtual void update() = 0;
+        virtual void update(size_t ticksPassed) = 0;
 
     protected:
         const Actor * mActor;
@@ -28,7 +28,9 @@ namespace FAWorld
     public:
         NullAI(const Actor* actor): AI(actor) {};
         ~NullAI() {};
-        void update() {};
+        void update(size_t ticksPassed) {
+            UNUSED_PARAM(ticksPassed);
+        };
     };
 
     class BasicMonsterAI : public AI
@@ -36,9 +38,11 @@ namespace FAWorld
     public:
         BasicMonsterAI(const Actor* actor): AI(actor) {};
         ~BasicMonsterAI() {};
-        void update();
+        void update(size_t ticksPassed);
 
     private:
+        size_t mLastActionTick;
+
         const Player * findNearestPlayer();
     };
 

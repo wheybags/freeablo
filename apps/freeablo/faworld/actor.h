@@ -112,6 +112,8 @@ namespace FAWorld
             void setActorId(const std::string& id);
             void setCanTalk(bool canTalk);
 
+            bool canWalkTo(int32_t x, int32_t y);
+
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
 

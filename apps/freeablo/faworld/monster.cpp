@@ -29,7 +29,7 @@ namespace FAWorld
     void Monster::update(bool noclip, size_t ticksPassed)
     {
         Actor::update(noclip, ticksPassed);
-        mAi->update();
+        mAi->update(ticksPassed);
     }
 
     bool Monster::attack(Actor *enemy)

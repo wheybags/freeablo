@@ -347,6 +347,11 @@ namespace FAWorld
         return mCanTalk;
     }
 
+    bool Actor::canWalkTo(int32_t x, int32_t y)
+    {
+        return mLevel->isPassable(x, y);
+    }
+
     std::string Actor::getActorId() const
     {
         return mActorId;
