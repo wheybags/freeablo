@@ -33,6 +33,17 @@ namespace FAWorld
         }
     }
 
+    int32_t Position::getDirection() const
+    {
+        return mDirection;
+    }
+
+    void Position::setDirection(int32_t mDirection)
+    {
+        if (mDirection >= 0)
+            this->mDirection = mDirection;
+    }
+
     std::pair<int32_t, int32_t> Position::current() const
     {
         return mCurrent;
