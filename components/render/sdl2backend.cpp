@@ -926,9 +926,11 @@ namespace Render
         if(index < minTops->size())
            drawAtTile ((*minTops)[index], topLeft, tileWidth, staticObjectHeight);
 
-        auto &obj = objs[tile.x][tile.y];
-        if (obj.valid)
-           drawMovingSprite((*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen);
+        auto &objsForTile = objs[tile.x][tile.y];
+        for (auto obj : objsForTile) {
+            if (obj.valid)
+                drawMovingSprite((*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen);
+        }
       });
 
       cache->setImmortal(minTopsHandle, false);

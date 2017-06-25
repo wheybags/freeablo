@@ -9,16 +9,16 @@ namespace Render
         mHeight = y;
     }
 
-    LevelObject& get(size_t x, size_t y, LevelObjects& objs)
+    std::vector<LevelObject>& get(size_t x, size_t y, LevelObjects& objs)
     {
         return objs.mData[x+y*objs.mWidth];
     }
 
-    Misc::Helper2D<LevelObjects, LevelObject&> LevelObjects::operator[] (size_t x)
+    Misc::Helper2D<LevelObjects, std::vector<LevelObject>&> LevelObjects::operator[] (size_t x)
     {
-        return Misc::Helper2D<LevelObjects, LevelObject&>(*this, x, get);
+        return Misc::Helper2D<LevelObjects, std::vector<LevelObject>&>(*this, x, get);
     }
-    
+
     size_t LevelObjects::width()
     {
         return mWidth;
