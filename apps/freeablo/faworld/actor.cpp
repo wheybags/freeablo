@@ -62,7 +62,7 @@ namespace FAWorld
                 if (canIAttack(actor))
                 {
                     std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
-                    mPos.mDirection = Misc::getVecDir(vector);
+                    mPos.setDirection(Misc::getVecDir(vector));
                     mPos.update();
                     mPos.mDist = 0;
 
@@ -107,8 +107,8 @@ namespace FAWorld
                                 mDestination = mPos.current();
                                 setAnimation(AnimState::idle);
                             }
-                            int newDirection = Misc::getVecDir(Misc::getVec(mPos.current(), nextPos));
-                            mPos.mDirection = newDirection == -1 ? mPos.mDirection : newDirection;// we often got the error direction why ?
+
+                            mPos.setDirection(Misc::getVecDir(Misc::getVec(mPos.current(), nextPos)));
                         }
                     }
                 }
