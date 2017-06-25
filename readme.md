@@ -58,7 +58,14 @@ and continue on with the Linux/Unix section (ignore the librocket instructions).
 ## Linux/Unix
 
 freeablo uses cmake, and depends on boost >= 1.54, libbz2, zlib, and SDL2, sdl2_image, and libRocket, so make sure to have those installed.
-libRocket (http://github.com/libRocket/libRocket) isn't packaged in most distros, so you'll have to install it from source (this isn't very hard).
+
+If you are on debian-based distro you can grab them with
+
+``` shell
+sudo apt install libsdl2-dev qt5-default libboost-all-dev libbz2-dev zlib1g-dev libsdl2-mixer-dev libsdl2-image-dev libenet-dev
+```
+
+[libRocket](http://github.com/libRocket/libRocket) isn't packaged in most distros, so you'll have to install it from source (this isn't very hard).
 
 libRocket installation:
 
