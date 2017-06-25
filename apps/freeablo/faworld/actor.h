@@ -40,9 +40,17 @@ namespace FAWorld
             ENUM_END // always leave this as the last entry, and don't set explicit values for any of the entries
         };
     }
+
+    namespace ActorState
+    {
+        class BaseState;
+    }
+
     class Actor : public NetObject
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
+
+        friend class ActorState::BaseState; // TODO: fix
 
         public:
             Actor(const std::string& walkAnimPath="",
@@ -67,6 +75,8 @@ namespace FAWorld
             void setIdleAnimation(const std::string path);
             AnimState::AnimState getAnimState();
             bool findPath(GameLevelImpl* level, std::pair<int32_t, int32_t> destination);
+
+            std::vector<ActorState::BaseState*> mActorState;
 
 
             int32_t getId()
@@ -201,8 +211,6 @@ namespace FAWorld
 
                 return Serial::Error::Success;
             }
-
-
 
         protected:
             GameLevel* mLevel = NULL;

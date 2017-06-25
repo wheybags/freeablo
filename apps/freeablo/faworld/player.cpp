@@ -53,13 +53,10 @@ namespace FAWorld
     {
         if(enemy->isDead() && enemy->mStats != nullptr)
             return false;
-        isAttacking = true;
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
         enemy->takeDamage((uint32_t)mStats->getMeleeDamage());
         if(enemy->getCurrentHP() <= 0)
             enemy->die();
-        setAnimation(AnimState::attack, true);
-        mAnimPlaying = true;
         return true;
     }
 
