@@ -124,10 +124,10 @@ void drawPath(::GameLevel::GameLevelImpl& graph, int field_width,
                 x2 = (*point_to)[id].first;
                 y2 = (*point_to)[id].second;
 
-                if (x2 == x + 1) { cout << "\u2192 "; }
-                else if (x2 == x - 1) { cout << "\u2190 "; }
-                else if (y2 == y + 1) { cout << "\u2193 "; }
-                else if (y2 == y - 1) { cout << "\u2191 "; }
+                if (x2 == x + 1) { cout << u8"\u2192 "; }
+                else if (x2 == x - 1) { cout << u8"\u2190 "; }
+                else if (y2 == y + 1) { cout << u8"\u2193 "; }
+                else if (y2 == y - 1) { cout << u8"\u2191 "; }
                 else { cout << "* "; }
             }
             else if (distances != 0 && distances->count(id))

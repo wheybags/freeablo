@@ -12,8 +12,8 @@ namespace Misc
     {
         if(vector.first == 0 && vector.second == 0)
             return -1;
-        
-        float angle = (std::atan2(vector.second, vector.first) / M_PI) * 180.0;
+
+        auto angle = (std::atan2(vector.second, vector.first) / M_PI) * 180.0;
 
         if(angle < 0)
             angle = 360 + angle;

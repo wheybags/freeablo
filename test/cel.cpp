@@ -63,10 +63,10 @@ std::vector<std::string> getCelsFromListfile(const std::string& path)
     {
         if(Misc::StringUtils::ciEndsWith(lines[i], ".cel") || Misc::StringUtils::ciEndsWith(lines[i], ".cl2"))
         {
-            std::string path = Misc::StringUtils::toLower(lines[i]);
+            std::string path_local = Misc::StringUtils::toLower(lines[i]);
 
-            if(FAIO::exists(path))
-                celFiles.push_back(path);
+            if(FAIO::exists(path_local))
+                celFiles.push_back(path_local);
         }
     }
 
@@ -247,7 +247,7 @@ std::map<std::string, std::vector<std::string> > getCelHashes()
 }
 
 TEST (Cel, TestOpen)
-{ 
+{
     std::string thisFolder = bfs::path(__FILE__).parent_path().string();
 
     std::vector<std::string> celPaths = getCelsFromListfile(thisFolder+ "/Diablo I.txt");
@@ -306,9 +306,9 @@ TEST (Cel, TestOpen)
     ASSERT_EQ(succeededFrames, totalFrames);
 }
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
-    FAIO::FAFileObject::init();    
+    FAIO::FAFileObject::init();
 
     ::testing::InitGoogleTest(&argc, argv);
     int retval = RUN_ALL_TESTS();

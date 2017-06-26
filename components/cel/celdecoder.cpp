@@ -206,10 +206,10 @@ namespace Cel
                     return;
                 }
 
-                mFrames.push_back(std::vector<uint8_t>(frameSize));
+                mFrames.push_back(std::vector<uint8_t>(static_cast<size_t> (frameSize)));
                 uint32_t idx = mFrames.size() - 1;
                 file.FAfseek(mHeaderSize, SEEK_CUR);
-                file.FAfread(&mFrames[idx][0], 1, frameSize);
+                file.FAfread(&mFrames[idx][0], 1, static_cast<size_t> (frameSize));
             }
 
             mAnimationLength = frameCount;

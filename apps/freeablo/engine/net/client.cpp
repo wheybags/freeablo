@@ -39,7 +39,7 @@ namespace Engine
     {
         if (mServerPeer != NULL)
             enet_peer_disconnect(mServerPeer, 0);
-        
+
         enet_host_destroy(mHost);
     }
 
@@ -72,7 +72,7 @@ namespace Engine
         if (player->getLevel())
             mLevelIndexTmp = player->getLevel()->getLevelIndex();
         else
-            mLevelIndexTmp = -1;
+            mLevelIndexTmp = static_cast<uint32_t> (-1);
 
         ENetEvent event;
 
@@ -144,7 +144,7 @@ namespace Engine
             case PacketType::Level:
                 receiveLevel(packet);
                 break;
-                
+
             case PacketType::Sprite:
                 err = readSpriteResponse(packet);
                 break;
@@ -179,8 +179,8 @@ namespace Engine
 
             for (size_t i = 0; i < header.numPlayers; i++)
             {
-                int32_t classId;
-                int32_t actorId;
+                int32_t classId = 0;
+                int32_t actorId = 0;
 
                 if (err == Serial::Error::Success)
                     err = packet->reader.handleInt<0, 1024>(classId);

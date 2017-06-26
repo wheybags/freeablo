@@ -21,7 +21,7 @@ namespace FAWorld
             size_t animDivisor = mAnimTimeMap[getAnimState()];
             if (animDivisor == 0)
             {
-                animDivisor = FAWorld::World::getTicksInPeriod(0.1);
+                animDivisor = FAWorld::World::getTicksInPeriod(0.1f);
             }
             bool advanceAnims = !(ticksPassed % (World::ticksPerSecond / animDivisor));
 
@@ -62,7 +62,7 @@ namespace FAWorld
                 if (canIAttack(actor))
                 {
                     std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
-                    mPos.mDirection = Misc::getVecDir(vector);
+                    mPos.setDirection(Misc::getVecDir(vector));
                     mPos.update();
                     mPos.mDist = 0;
 
@@ -92,8 +92,8 @@ namespace FAWorld
                             auto nextPos = mPos.pathNext(false);
                             FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.first, nextPos.second);
 
-                            if ((noclip || (mLevel->getTile(nextPos.first, nextPos.second).passable() &&
-                                (actorAtNext == NULL || actorAtNext == this))) && !mAnimPlaying)
+                            if ((noclip || (mLevel->isPassable(nextPos.first, nextPos.second) &&
+                                (actorAtNext == NULL || actorAtNext == this || actorAtNext->isDead()))) && !mAnimPlaying)
                             {
                                 if (!mPos.mMoving && !mAnimPlaying)
                                 {
@@ -107,8 +107,8 @@ namespace FAWorld
                                 mDestination = mPos.current();
                                 setAnimation(AnimState::idle);
                             }
-                            int newDirection = Misc::getVecDir(Misc::getVec(mPos.current(), nextPos));
-                            mPos.mDirection = newDirection == -1 ? mPos.mDirection : newDirection;// we often got the error direction why ?
+
+                            mPos.setDirection(Misc::getVecDir(Misc::getVec(mPos.current(), nextPos)));
                         }
                     }
                 }
@@ -158,8 +158,8 @@ namespace FAWorld
         if (!idleAnimPath.empty())
             mIdleAnim = FARender::Renderer::get()->loadImage(idleAnimPath);
         mDestination = mPos.current();
-        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1);
-        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1);
+        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1f);
+        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1f);
 
         mId = getNewId();
     }
@@ -172,7 +172,7 @@ namespace FAWorld
 
     void Actor::takeDamage(double amount)
     {
-        mStats->takeDamage(amount);
+        mStats->takeDamage(static_cast<int32_t> (amount));
         if (!(mStats->getCurrentHP() <= 0))
         {
             Engine::ThreadManager::get()->playSound(getHitWav());

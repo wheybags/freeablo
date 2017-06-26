@@ -32,10 +32,15 @@ namespace Level
 
 namespace Render
 {
-
     extern int32_t WIDTH;
     extern int32_t HEIGHT;
 
+    // Tile mesasured in indexes on tile grid
+    struct Tile
+    {
+      int32_t x;
+      int32_t y;
+    };
     /**
      * @brief Render settings for initialization.
      */
@@ -53,6 +58,7 @@ namespace Render
     };
 
     void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);
+
     Rocket::Core::Context* initGui(std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
                                    std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
                                    std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc);
@@ -77,7 +83,7 @@ namespace Render
 
     void draw();
 
-    void drawAt(const Sprite& sprite, int32_t x, int32_t y);
+    void drawSprite(const Sprite& sprite, int32_t x, int32_t y);
 
     struct RocketFATex
     {
@@ -87,12 +93,12 @@ namespace Render
         bool needsImmortal;
     };
 
-    void spriteSize(const Sprite& sprite, size_t& w, size_t& h);
+    void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h);
 
     SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top);
     void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
-    
-    std::pair<int32_t, int32_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+
+    Tile getClickedTile(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
     void clear(int r = 0, int g = 0, int b = 255);
 }

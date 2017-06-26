@@ -50,7 +50,6 @@ namespace FARender
         return handle;
     }
                                   
-
     Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen)
         :mDone(false)
         ,mRocketContext(NULL)
@@ -94,6 +93,7 @@ namespace FARender
             for (size_t i = 0; i < mNumRenderStates; ++i)
                 new (mStates + i) RenderState(mNuklearGraphicsData);
             
+
             mRocketContext = Render::initGui(std::bind(&Renderer::loadGuiTextureFunc, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
                                              std::bind(&Renderer::generateGuiTextureFunc, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
                                              std::bind(&Renderer::releaseGuiTextureFunc, this, std::placeholders::_1));
@@ -222,7 +222,7 @@ namespace FARender
     {
         Engine::ThreadManager::get()->sendRenderState(current);
     }
-    
+
     FASpriteGroup* Renderer::loadImage(const std::string& path)
     {
         return mSpriteManager.get(path);
@@ -243,9 +243,9 @@ namespace FARender
         return mSpriteManager.getPathForIndex(index);
     }
 
-    std::pair<size_t, size_t> Renderer::getClickedTile(size_t x, size_t y, const FAWorld::GameLevel& level, const FAWorld::Position& screenPos)
+    Render::Tile Renderer::getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getClickedTile(level.mLevel, x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
+        return Render::getClickedTile(x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
     }
 
     Rocket::Core::Context* Renderer::getRocketContext()
@@ -280,7 +280,7 @@ namespace FARender
 
         if(state)
         {
-            
+
             if(state->level)
             {
                 if(mLevelObjects.width() != state->level->width() || mLevelObjects.height() != state->level->height())
@@ -290,7 +290,9 @@ namespace FARender
                 {
                     for(size_t y = 0; y < mLevelObjects.height(); y++)
                     {
-                        mLevelObjects[x][y].valid = false;
+                        if (mLevelObjects[x][y].size() > 0) {
+                            mLevelObjects[x][y].clear();
+                        }
                     }
                 }
 
@@ -300,13 +302,16 @@ namespace FARender
 
                     size_t x = position.current().first;
                     size_t y = position.current().second;
+                    Render::LevelObject levelObject = {
+                        std::get<0>(state->mObjects[i])->isValid(),
+                        std::get<0>(state->mObjects[i])->getCacheIndex(),
+                        std::get<1>(state->mObjects[i]),
+                        position.next().first,
+                        position.next().second,
+                        position.mDist
+                    };
 
-                    mLevelObjects[x][y].valid = std::get<0>(state->mObjects[i])->isValid();
-                    mLevelObjects[x][y].spriteCacheIndex = std::get<0>(state->mObjects[i])->getCacheIndex();
-                    mLevelObjects[x][y].spriteFrame = std::get<1>(state->mObjects[i]);
-                    mLevelObjects[x][y].x2 = position.next().first;
-                    mLevelObjects[x][y].y2 = position.next().second;
-                    mLevelObjects[x][y].dist = position.mDist;
+                    mLevelObjects[x][y].push_back(levelObject);
                 }
 
                 Render::drawLevel(state->level->mLevel, state->tileset.minTops->getCacheIndex(), state->tileset.minBottoms->getCacheIndex(), &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,
@@ -317,7 +322,7 @@ namespace FARender
             
             Renderer::setCursor(state);
         }
-        
+
         Render::draw();
 
         I32sAs64 tmp;

@@ -62,14 +62,6 @@ namespace Render
     RocketSDL2SystemInterface* SystemInterface;
     FAIOFileInterface* FileInterface;
     Rocket::Core::Context* Context;
-    
-
-
-    /*struct nk_context *ctx;
-
-    nk_context ctxb;
-    nk_gl_device dev;
-    nk_font_atlas atlas;*/
 
     void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
     {
@@ -163,7 +155,7 @@ namespace Render
                 PyRun_SimpleString("import sys\nsys.path.append('./Debug')");
             #endif
         #endif
-        
+
         // add our python libs to path
         PyRun_SimpleString("import sys\nsys.path.append('./resources/python')");
 
@@ -220,7 +212,7 @@ namespace Render
     }
 
 
-    
+
     void quit()
     {
         SDL_DestroyRenderer(renderer);
@@ -280,7 +272,7 @@ namespace Render
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
-        size_t w, h;
+        int32_t w, h;
         spriteSize((Sprite)tex, w, h);
 
         if (w != surf->w || h != surf->h)
@@ -362,7 +354,7 @@ namespace Render
         else
         {
             if(celIndex != 0)   // no indices on normal files
-                return false; 
+                return false;
 
             SDL_Surface* surface = loadNonCelImage(path, extension);
 
@@ -607,7 +599,7 @@ namespace Render
             SDL_ShowCursor(0);
             int x,y;
             SDL_GetMouseState(&x,&y);
-            drawAt(s, x-w/2, y-h/2);
+            drawSprite (s, x-w/2, y - h/2);
         }
     }
 
@@ -819,7 +811,7 @@ namespace Render
         SDL_RenderPresent(renderer);
     }
 
-    void drawAt(GLuint sprite, int32_t x, int32_t y)
+    void drawSprite(GLuint sprite, int32_t x, int32_t y)
     {
         /*int width, height;
         SDL_QueryTexture(sprite, NULL, NULL, &width, &height);
@@ -850,7 +842,7 @@ namespace Render
         }
 
 
-        size_t w, h;
+        int32_t w, h;
         spriteSize((Sprite)sprite, w, h);
 
         loc = glGetUniformLocation(shader_programme, "imgW");
@@ -885,16 +877,25 @@ namespace Render
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
     
-    void drawAt(const Sprite& sprite, int32_t x, int32_t y)
+    void drawSprite(const Sprite& sprite, int32_t x, int32_t y)
     {
-        drawAt((GLuint)sprite, x, y);
+        drawSprite((GLuint)sprite, x, y);
+    }
+
+    constexpr auto tileHeight = 32;
+    constexpr auto tileWidth = tileHeight * 2;
+
+    void drawAtTile(const Sprite& sprite, const Misc::Point& tileTop, int spriteW, int spriteH)
+    {
+        // centering spright at the center of tile by width and at the bottom of tile by height
+        drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight);
     }
 
 
     SpriteGroup::SpriteGroup(const std::string& path)
     {
         Cel::CelFile cel(path);
-        
+
         for(size_t i = 0; i < cel.numFrames(); i++)
         {
             SDL_Surface* s = createTransparentSurface(cel[i].mWidth, cel[i].mHeight);
@@ -951,10 +952,10 @@ namespace Render
             glDeleteTextures(1, &tex);
         }
     }
-    
+
     void drawMinPillarTop(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
     void drawMinPillarBase(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
-    
+
     SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top)
     {
         Cel::CelFile cel(celPath);
@@ -980,8 +981,8 @@ namespace Render
 
         return new SpriteGroup(newMin);
     }
-    
-    void spriteSize(const Sprite& sprite, size_t& w, size_t& h)
+
+    void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h)
     {
         GLint tmpW = 0, tmpH = 0;
 
@@ -1005,13 +1006,13 @@ namespace Render
 
     void clearTransparentSurface(SDL_Surface* s)
     {
-        SDL_FillRect(s, NULL, SDL_MapRGBA(s->format, 0, 0, 0, 0)); 
+        SDL_FillRect(s, NULL, SDL_MapRGBA(s->format, 0, 0, 0, 0));
     }
 
     SDL_Surface* createTransparentSurface(size_t width, size_t height)
     {
-         SDL_Surface* s; 
-        
+         SDL_Surface* s;
+
         // SDL y u do dis
         #if SDL_BYTEORDER == SDL_BIG_ENDIAN
             s = SDL_CreateRGBSurface(0, width, height, DEPTH, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
@@ -1143,9 +1144,9 @@ namespace Render
         {
             int16_t l = (pillar[i]&0x0FFF)-1;
             int16_t r = (pillar[i+1]&0x0FFF)-1;
-            
+
             drawMinTile(s, tileset, x, y, l, r);
-        
+
             y += 32; // down 32 each row
         }
     }
@@ -1160,206 +1161,119 @@ namespace Render
         drawMinPillar(s, x, y, pillar, tileset, false);
     }
 
-    void drawAt(const Level::Level& level, const Sprite& sprite, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist, int32_t levelX, int32_t levelY)
+    // basic transform of isometric grid to normal, (0, 0) tile coordinate maps to (0, 0) pixel coordinates
+    // since eventually we're gonna shift coordinates to viewport center, it's better to keep transform itself
+    // as simple as possible
+    static Misc::Point tileTopPoint (const Tile &tile) {
+      return {(tileWidth / 2) * (tile.x - tile.y), (tile.y + tile.x) * (tileHeight / 2)};
+    }
+
+    // this function simply does the reverse of the above function, could be found by solving linear equation system
+    // it obviously uses the fact that ttileWidth = tileHeight * 2
+    Tile getTileFromScreenCoords(const Misc::Point& screenPos, const Misc::Point& toScreen)
     {
-        size_t w, h;
+        auto point = screenPos - toScreen;
+        return {(2 * point.y + point.x) / tileWidth, (2 * point.y - point.x) / tileWidth}; // divisin by 64 is pretty fast btw
+    }
+
+    static Misc::Point pointBetween (const Tile &start, const Tile &finish, const size_t &percent) {
+      auto pointA = tileTopPoint (start);
+      auto pointB = tileTopPoint (finish);
+      return pointA + (pointB - pointA) * (percent * 0.01);
+    }
+
+    void drawMovingSprite(const Sprite& sprite, const Tile& start, const Tile& finish, size_t dist, const Misc::Point& toScreen)
+    {
+        int32_t w, h;
         spriteSize(sprite, w, h);
-
-        int32_t xPx1 = ((y1*(-32)) + 32*x1 + level.width()*32) + levelX - w/2;
-        int32_t yPx1 = ((y1*16) + (16*x1) +160) + levelY;
-
-        int32_t xPx2 = ((y2*(-32)) + 32*x2 + level.width()*32) + levelX - w/2;
-        int32_t yPx2 = ((y2*16) + (16*x2) +160) + levelY;
-
-        int32_t x = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
-        int32_t y = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
-
-        drawAt(sprite, x, y);
+        auto point = pointBetween (start, finish, dist);
+        auto res = point + toScreen;
+        drawAtTile(sprite, res, w, h);
     }
 
-    void getMapScreenCoords(const Level::Level& level, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist, int32_t& levelX, int32_t& levelY)
+    constexpr auto bottomMenuSize = 144; // TODO: pass it as a variable
+    Misc::Point worldToScreenVector(const Tile& start, const Tile& finish, size_t dist)
     {
-        int16_t xPx1 = -((y1*(-32)) + 32*x1 + level.width()*32) +WIDTH/2;
-        int16_t yPx1 = -((y1*16) + (16*x1) +160) + HEIGHT/2;
-
-        int16_t xPx2 = -((y2*(-32)) + 32*x2 + level.width()*32) +WIDTH/2;
-        int16_t yPx2 = -((y2*16) + (16*x2) +160) + HEIGHT/2;
-
-        levelX = xPx1 + ((((float)(xPx2-xPx1))/100.0)*(float)dist);
-        levelY = yPx1 + ((((float)(yPx2-yPx1))/100.0)*(float)dist);
+        // centering takes in accord bottom menu size to be consistent with original game centering
+        return Misc::Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - pointBetween(start, finish, dist);
     }
 
-    std::pair<int32_t, int32_t> getTileFromScreenCoords(const Level::Level& level, size_t levelX, size_t levelY, size_t x, size_t y)
+    Tile getClickedTile(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
-        // Position on the map in pixels
-        int32_t flatX = x - levelX;
-        int32_t flatY = y - levelY;
+        auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
+        return getTileFromScreenCoords({static_cast<int32_t> (x), static_cast<int32_t> (y)}, toScreen);
+    }
 
-        // position on the map divided into 32x16 flat blocks
-        // every second one of these blocks is centred on an isometric
-        // block centre, the others are centred on isometric block corners
-        int32_t flatGridX = (flatX+16) / 32;
-        int32_t flatGridY = (flatY+8) / 16;
-        
-        // origin position (in flat grid coords) for the first line (isometric y = 0)
-        int32_t flatOriginPosX = level.height();
-        int32_t flatOriginPosY = 15;
+    constexpr auto staticObjectHeight = 256;
 
-        // when a flat grid box is clicked that does not centre on an isometric block, work out which
-        // isometric quadrant of that box was clicked, then adjust flatGridPos accordingly
-        if((flatGridX % 2 == 1 && flatGridY % 2 == 1) || (flatGridX % 2 == 0 && flatGridY % 2 == 0))
+    template <typename ProcessTileFunc>
+    void drawObjectsByTiles (const Misc::Point &toScreen, ProcessTileFunc processTile)
+    {
+      Misc::Point start {-tileWidth, -tileHeight};
+      auto startingTile = getTileFromScreenCoords(start, toScreen);
+
+      auto startingPoint = tileTopPoint(startingTile) + toScreen;
+      auto processLine = [&]()
         {
-            
-            // origin of current flat grid box
-            int32_t baseX = 32*flatGridX - 16;
-            int32_t baseY = 16*flatGridY - 8;
-            
-            // position within grid box
-            int32_t blockPosX = flatX - baseX;
-            int32_t blockPosY = flatY - baseY;
+           auto point = startingPoint;
+           auto tile = startingTile;
 
-            if(blockPosY*2 > blockPosX)
-            {
-                if(blockPosX < (15-blockPosY)*2)
-                    flatGridX--;
-                else
-                    flatGridY++;
-            }
-            else
-            {
-                if(blockPosX < (15-blockPosY)*2)
-                    flatGridY--;
-                else
-                    flatGridX++;
-            }
-        }
-        
-        // flatOrigin adjusted for the current y value
-        int32_t lineOriginPosX = flatOriginPosX + ((flatGridX - flatOriginPosX) - (flatGridY - flatOriginPosY))/2;
-        int32_t lineOriginPosY = flatOriginPosY - (-(flatGridX - flatOriginPosX) -( flatGridY - flatOriginPosY))/2;
+           while (point.x < WIDTH + tileWidth / 2)
+             {
+               point.x += tileWidth;
+               ++tile.x;
+               --tile.y;
+               processTile (tile, point);
+             }
+        };
 
-        int32_t isoPosX = flatGridX - lineOriginPosX;
-        int32_t isoPosY = flatGridY - lineOriginPosY;
-
-        return std::make_pair(isoPosX, isoPosY);
-    }
-    
-    std::pair<int32_t, int32_t> getClickedTile(const Level::Level& level, size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
-    {
-        int32_t levelX, levelY;
-        getMapScreenCoords(level, x1, y1, x2, y2, dist, levelX, levelY);
-        
-        return getTileFromScreenCoords(level, levelX, levelY, x, y);
-    }
-    
-    // returns: whether or not to keep drawing the current line (see where it's used for what I mean by "line"
-    bool drawLevelHelper(const Level::Level& level, SpriteGroup& minSprites, int32_t x, int32_t y, int32_t levelX, int32_t levelY)
-    {
-        // if the top left of our screen is on a negative coord (we're at the edge of the map)
-        // we want to continue the line, but we obviously don't want to draw tiles outside the map
-        if(x < 0)
-            return true;
-        
-        if((size_t)x < level.width() && (size_t)y < level.height())
+      // then from top left to top-bottom
+      while (startingPoint.y < HEIGHT + staticObjectHeight - tileHeight)
         {
-            size_t index = level[x][y].index();
-            int32_t xCoord = (y*(-32)) + 32*x + level.height()*32-32 + levelX;
-            int32_t yCoord = (y*16) + 16*x + levelY;
-
-            if(xCoord <=  WIDTH && yCoord <= HEIGHT)
-            {
-                if(index < minSprites.size())
-                    drawAt(minSprites[index], xCoord, yCoord);
-                
-                return true;
-            }
-            
-            return false;
+          ++startingTile.y;
+          startingPoint.x -= tileWidth / 2; startingPoint.y += tileHeight / 2;
+          processLine ();
+          ++startingTile.x;
+          startingPoint.x += tileWidth / 2; startingPoint.y += tileHeight / 2;
+          processLine ();
         }
-        
-        return false;
     }
 
-    void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
-    {
-        int32_t levelX, levelY;
-        getMapScreenCoords(level, x1, y1, x2, y2, dist, levelX, levelY);
+    void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist) {
+      auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
+      SpriteGroup* minBottoms = cache->get(minBottomsHandle);
+      auto isInvalidTile = [&](const Tile &tile){ return tile.x < 0 || tile.y < 0 || tile.x >= static_cast<int32_t> (level.width()) || tile.y >= static_cast<int32_t> (level.height());};
 
-        //TODO clean up the magic numbers here, and elsewhere in this file
+      // drawing on the ground objects
+      drawObjectsByTiles (toScreen, [&](const Tile &tile, const Misc::Point &topLeft){
+          // Fill invalid tiles with ground, it looks ok but it's probably better to have something else than zero-eth sprite here
+          if (isInvalidTile (tile))
+            return drawAtTile ((*minBottoms)[0], topLeft, tileWidth, staticObjectHeight);
 
-        SpriteGroup* minBottoms = cache->get(minBottomsHandle);
-        
-        
-        int32_t startX = WIDTH;
-        int32_t startY = -32;
+        size_t index = level[tile.x][tile.y].index();
+        if(index < minBottoms->size())
+           drawAtTile ((*minBottoms)[index], topLeft, tileWidth, staticObjectHeight); // all static objects have the same sprite size
+      });
 
-        
-        // draw the squares that are in view, starting at the top right of the screen, running
-        // in lines along the isometric x axis until they go off screen, with each line starting one
-        // to the left in screen space (x-1, y+1 in iso space)
-        // this loop draws the bottoms of the tiles, ie the ground, not including walls
-        while(startY < HEIGHT)
-        {
-            std::pair<int32_t, int32_t> tilePos = getTileFromScreenCoords(level, levelX, levelY, startX, startY);
-            
-            while(drawLevelHelper(level, *minBottoms, tilePos.first, tilePos.second, levelX, levelY))
-                tilePos.first++;
+      SpriteGroup* minTops = cache->get(minTopsHandle);
+      cache->setImmortal(minTopsHandle, true);
 
-            
-            
-            if(startX > -64)
-            {
-                startX -= 64;
-                
-                if(startX < -64)
-                    startX = -64;
-            }
-            else
-            {
-                startY += 32;
-            }
+      // drawing above the ground and moving object
+      drawObjectsByTiles (toScreen, [&](const Tile &tile, const Misc::Point &topLeft){
+        if (isInvalidTile (tile))
+          return;
+
+        size_t index = level[tile.x][tile.y].index();
+        if(index < minTops->size())
+           drawAtTile ((*minTops)[index], topLeft, tileWidth, staticObjectHeight);
+
+        auto &objsForTile = objs[tile.x][tile.y];
+        for (auto obj : objsForTile) {
+            if (obj.valid)
+                drawMovingSprite((*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen);
         }
-        
-        
-        startX = WIDTH;
-        startY = -256;
+      });
 
-        SpriteGroup* minTops = cache->get(minTopsHandle);
-        cache->setImmortal(minTopsHandle, true);
-        
-        // same as above, but for the above-gound parts (walls + actors)
-        // starts at -256 and finishes at +256 because the minTops are 256 px tall
-        // Note to people trying to improve perf: I tried rolling both loops into one,
-        // the stuff from this loop has to be drawn at y-1 of the stuff from the first loop (or maybe >1)
-        // but it's actually slower. My guess would be that the offset ruins the cache,
-        // so yeah, it's a copy pasted loop DRY blah blah blah
-        while(startY < HEIGHT + 256)
-        {
-            std::pair<int32_t, int32_t> tilePos = getTileFromScreenCoords(level, levelX, levelY, startX, startY);
-            
-            while(drawLevelHelper(level, *minTops, tilePos.first, tilePos.second, levelX, levelY))
-            {
-                if(tilePos.first >= 0 && tilePos.second >= 0 && objs[tilePos.first][tilePos.second].valid)
-                {
-                    LevelObject o = objs[tilePos.first][tilePos.second];
-                    drawAt(level, cache->get(objs[tilePos.first][tilePos.second].spriteCacheIndex)->operator[](o.spriteFrame), tilePos.first, tilePos.second, objs[tilePos.first][tilePos.second].x2, objs[tilePos.first][tilePos.second].y2, objs[tilePos.first][tilePos.second].dist, levelX, levelY);
-                }
-                
-                tilePos.first++;
-            }
-            
-            if(startX > -64)
-            {
-                startX -= 64;
-                
-                if(startX < -64)
-                    startX = -64;
-            }
-            else
-            {
-                startY += 32;
-            }
-        }
-        cache->setImmortal(minTopsHandle, false);
+      cache->setImmortal(minTopsHandle, false);
     }
 }

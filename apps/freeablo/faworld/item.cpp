@@ -87,8 +87,8 @@ Item::Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix, bool 
 
         mGraphicValue +=11;
         Cel::CelFrame frame = (*mObjcurs)[mGraphicValue];
-        mSizeX = frame.mWidth/28;
-        mSizeY = frame.mHeight/28;
+        mSizeX = static_cast<uint8_t> (frame.mWidth/28);
+        mSizeY = static_cast<uint8_t> (frame.mHeight/28);
         mMaxCount = 1;
         mCount=1;
     }

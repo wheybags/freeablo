@@ -70,7 +70,7 @@ namespace FAWorld
 
         Level::Level townLevelBase(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
             "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
-            std::make_pair(25, 29), std::make_pair(75, 68), std::map<size_t, size_t>(), -1, 1);
+            std::make_pair(25u, 29u), std::make_pair(75u, 68u), std::map<size_t, size_t>(), static_cast<size_t> (-1), 1);
 
         std::vector<Actor*> townActors;
 
@@ -90,7 +90,7 @@ namespace FAWorld
 
         for (int32_t i = 1; i < 17; i++)
         {
-            mLevels[i] = FALevelGen::generate(100, 100, i, mDiabloExe, i - 1, i + 1);
+            mLevels[i] = nullptr; // let's generate levels on demand
         }
     }
 
@@ -109,7 +109,7 @@ namespace FAWorld
         if (level >= mLevels.size() || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == level))
             return;
 
-        mCurrentPlayer->setLevel(mLevels[level]);
+        mCurrentPlayer->setLevel(getLevel (level));
         playLevelMusic(level);
     }
 
@@ -151,7 +151,14 @@ namespace FAWorld
 
     GameLevel* World::getLevel(size_t level)
     {
-        return mLevels[level];
+        auto p = mLevels.find (level);
+        if (p == mLevels.end ())
+          return nullptr;
+        if (p->second == nullptr)
+          {
+            p->second = FALevelGen::generate(100, 100, level, mDiabloExe, level - 1, level + 1);
+          }
+        return p->second;
     }
 
     void World::insertLevel(size_t level, GameLevel *gameLevel)
@@ -265,9 +272,9 @@ namespace FAWorld
     void World::onMouseDown(Engine::Point mousePosition)
     {
         auto player = getCurrentPlayer();
-        auto level = getCurrentLevel();
         std::pair<int32_t, int32_t>& destination = player->destination();
-        destination = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, *level, player->mPos);
+        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->mPos);
+        destination = {clickedTile.x, clickedTile.y};
         mDestination = player->mPos.mGoal = destination; //update it.
     }
 

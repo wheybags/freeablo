@@ -24,7 +24,7 @@ namespace DiabloExe
             std::cout << "Cannot load settings file.";
             return;
         }
-        
+
         FAIO::FAFileObject exe(pathEXE);
         if (!exe.isValid())
         {
@@ -59,7 +59,7 @@ namespace DiabloExe
         size_t size = dexe.FAsize();
         Misc::md5_byte_t* buff = new Misc::md5_byte_t[size];
         dexe.FAfread(buff, sizeof(Misc::md5_byte_t), size);
-        
+
         Misc::md5_state_t state;
         Misc::md5_byte_t digest[16];
 
@@ -108,7 +108,7 @@ namespace DiabloExe
 
         else
             std::cout << "Diablo.exe " << version << " detected" << std::endl;
-        
+
         return version;
     }
 
@@ -126,10 +126,10 @@ namespace DiabloExe
 
             if(mMonsters.find(tmp.monsterName) != mMonsters.end())
             {
-                size_t i;
-                for(i = 1; mMonsters.find(tmp.monsterName + "_" + std::to_string(i)) != mMonsters.end(); i++);
+                size_t j;
+                for(j = 1; mMonsters.find(tmp.monsterName + "_" + std::to_string(j)) != mMonsters.end(); j++);
 
-                mMonsters[tmp.monsterName + "_" + std::to_string(i)] = tmp;
+                mMonsters[tmp.monsterName + "_" + std::to_string(j)] = tmp;
             }
             else
             {
@@ -137,7 +137,7 @@ namespace DiabloExe
             }
         }
     }
-    
+
     void DiabloExe::loadNpcs(FAIO::FAFileObject& exe)
     {
         Settings::Container sections = mSettings.getSections();
@@ -166,7 +166,7 @@ namespace DiabloExe
         {
             exe.FAfseek(itemOffset + 76*i, SEEK_SET);
             BaseItem tmp(exe, codeOffset);
-            
+
             if(tmp.useOnce > 1 || tmp.itemName == "")
                 continue;
             if(Misc::StringUtils::containsNonPrint(tmp.itemName))
@@ -175,10 +175,10 @@ namespace DiabloExe
                 continue;
             if(mBaseItems.find(tmp.itemName) != mBaseItems.end())
             {
-                size_t i;
-                for(i = 1; mBaseItems.find(tmp.itemName + "_" + std::to_string(i)) != mBaseItems.end(); i++);
+                size_t j;
+                for(j = 1; mBaseItems.find(tmp.itemName + "_" + std::to_string(j)) != mBaseItems.end(); j++);
 
-                mBaseItems[tmp.itemName + "_" + std::to_string(i)] = tmp;
+                mBaseItems[tmp.itemName + "_" + std::to_string(j)] = tmp;
             }
             else
             {
@@ -234,10 +234,10 @@ namespace DiabloExe
 
             if(mUniqueItems.find(tmp.mName) != mUniqueItems.end())
             {
-                size_t i;
-                for(i = 1; mUniqueItems.find(tmp.mName + "_" + std::to_string(i)) != mUniqueItems.end(); i++);
+                size_t j;
+                for(j = 1; mUniqueItems.find(tmp.mName + "_" + std::to_string(j)) != mUniqueItems.end(); j++);
 
-                mUniqueItems[tmp.mName + "_" + std::to_string(i)] = tmp;
+                mUniqueItems[tmp.mName + "_" + std::to_string(j)] = tmp;
             }
             else
             {
@@ -263,10 +263,10 @@ namespace DiabloExe
                 continue;
             if(mAffixes.find(tmp.mName) != mAffixes.end())
             {
-                size_t i;
-                for(i = 1; mAffixes.find(tmp.mName + "_" + std::to_string(i)) != mAffixes.end(); i++);
+                size_t j;
+                for(j = 1; mAffixes.find(tmp.mName + "_" + std::to_string(j)) != mAffixes.end(); j++);
 
-                mAffixes[tmp.mName + "_" + std::to_string(i)] = tmp;
+                mAffixes[tmp.mName + "_" + std::to_string(j)] = tmp;
             }
             else
             {
@@ -419,7 +419,7 @@ namespace DiabloExe
     std::vector<const Monster*> DiabloExe::getMonstersInLevel(size_t levelNum) const
     {
         std::vector<const Monster*> retval;
-        
+
         for(std::map<std::string, Monster>::const_iterator it = mMonsters.begin(); it != mMonsters.end(); ++it)
         {
             if (levelNum >= it->second.minDunLevel && levelNum <= it->second.maxDunLevel &&
@@ -451,13 +451,13 @@ namespace DiabloExe
     std::string DiabloExe::dump() const
     {
         std::stringstream ss;
-        
+
         ss << "Monsters: " << mMonsters.size() << std::endl;
         for(std::map<std::string, Monster>::const_iterator it = mMonsters.begin(); it != mMonsters.end(); ++it)
         {
             ss << it->second.dump();
         }
-        
+
         ss << "Npcs: " << mNpcs.size() << std::endl;
         for(std::map<std::string, Npc>::const_iterator it = mNpcs.begin(); it != mNpcs.end(); ++it)
         {

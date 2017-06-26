@@ -29,7 +29,7 @@ namespace Engine
         FARender::Renderer* renderer = FARender::Renderer::get();
 
         Message message;
-        
+
         auto last = std::chrono::system_clock::now();
         size_t numFrames = 0;
 
@@ -42,12 +42,12 @@ namespace Engine
 
             if(!renderer->renderFrame(mRenderState))
                 break;
-            
+
             auto now = std::chrono::system_clock::now();
             numFrames++;
-            
-            size_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count();
-            
+
+            size_t duration = static_cast<size_t> (std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count());
+
             if(duration >= MAXIMUM_DURATION_IN_MS)
             {
                 std::cout << "FPS: " << ((float)numFrames) / (((float)duration)/MAXIMUM_DURATION_IN_MS) << std::endl;

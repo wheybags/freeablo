@@ -23,7 +23,7 @@ namespace FAWorld
 }
 
 namespace FARender
-{       
+{
 
     class Renderer;
     class Tileset
@@ -65,7 +65,7 @@ namespace FARender
     {
         public:
             static Renderer* get();
-            
+
             Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen);
             ~Renderer();
 
@@ -82,7 +82,7 @@ namespace FARender
             void fillServerSprite(uint32_t index, const std::string& path);
             std::string getPathForIndex(uint32_t index);
 
-            std::pair<size_t, size_t> getClickedTile(size_t x, size_t y, const FAWorld::GameLevel& level, const FAWorld::Position& screenPos);
+            Render::Tile getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos);
 
             Rocket::Core::Context* getRocketContext();
 
@@ -98,7 +98,6 @@ namespace FARender
 
             void getWindowDimensions(int32_t& w, int32_t& h);
 
-            
         private:
             bool loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
             bool generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions);
