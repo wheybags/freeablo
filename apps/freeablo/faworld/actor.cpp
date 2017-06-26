@@ -145,7 +145,7 @@ namespace FAWorld
     ) :
         mPos(pos),
         mFrame(0),
-        mIsEnemy(false),
+        mFaction(Faction::heaven()),
         mAnimState(AnimState::idle)
     {
         if (!dieAnimPath.empty())
@@ -210,9 +210,9 @@ namespace FAWorld
         return mIsDead;
     }
 
-    bool Actor::isEnemy() const
+    bool Actor::isEnemy(Actor* other) const
     {
-        return mIsEnemy;
+        return mFaction.canAttack(other->mFaction);
     }
 
     AnimState::AnimState Actor::getAnimState()
@@ -300,7 +300,7 @@ namespace FAWorld
         if (this == actor)
             return false;
 
-        if (!actor->isEnemy())
+        if (!isEnemy(actor))
             return false;
 
         if (actor->isDead())

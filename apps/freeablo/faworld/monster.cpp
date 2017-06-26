@@ -21,7 +21,7 @@ namespace FAWorld
         mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1f);
         mAnimTimeMap[AnimState::hit] = FAWorld::World::getTicksInPeriod(0.1f);
 
-        mIsEnemy = true;
+        mFaction = Faction::hell();
     }
 
     Monster::Monster()

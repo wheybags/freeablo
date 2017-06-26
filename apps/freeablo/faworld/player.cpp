@@ -39,6 +39,8 @@ namespace FAWorld
         mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(0.2f);
         mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1f);
 
+        mFaction = Faction::heaven();
+
         FAWorld::World::get()->registerPlayer(this);
     }
 
