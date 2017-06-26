@@ -10,6 +10,7 @@
 #include "../farender/renderer.h"
 #include "animateddecoratorinstancer.h"
 #include "../engine/threadmanager.h"
+#include "../engine/enginemain.h"
 #include "scrollbox.h"
 
 
@@ -23,7 +24,8 @@ namespace FAGui
     GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass)
         : mPythonFuncs(playerInventory, *this, engine),
           mDocument(nullptr),
-          mCurrentGuiType(TitleScreen)
+          mCurrentGuiType(TitleScreen),
+          mEngine(engine)
     {
 
         this->invClass = invClass;
@@ -233,6 +235,32 @@ namespace FAGui
         ctx->style.window.padding = tmpPadding;
     }
 
+    void pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
+    {
+        FARender::Renderer* renderer = FARender::Renderer::get();
+
+        int32_t screenW, screenH;
+        renderer->getWindowDimensions(screenW, screenH);
+
+        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_color(nk_rgba(0, 0, 0, 0)));
+
+        if (nk_begin(ctx, "pause menu", nk_rect(0, 0, screenW, screenH), 0))
+        {
+            nk_layout_row_dynamic(ctx, 30, 1);
+            
+            nk_label(ctx, "PAUSED", NK_TEXT_CENTERED);
+
+            if (nk_button_label(ctx, "Resume"))
+                engine.unPause();
+
+            if (nk_button_label(ctx, "Quit"))
+                engine.stop();
+        }
+        nk_end(ctx);
+
+        nk_style_pop_style_item(ctx);
+    }
+
     void bottomMenu(nk_context* ctx)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
@@ -320,6 +348,9 @@ namespace FAGui
         FARender::Renderer* renderer = FARender::Renderer::get();
 
         bottomMenu(ctx);
+
+        if (paused)
+            pauseMenu(ctx, mEngine);
 
         updateGui(paused);
         renderer->getRocketContext()->Update();

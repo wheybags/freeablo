@@ -98,6 +98,8 @@ namespace FAGui
         std::chrono::system_clock::time_point mStartTime;
         std::shared_ptr<ScrollBox> mCreditsScrollBox;
         std::shared_ptr<ScrollBox> mDialogueScrollBox;
+
+        Engine::EngineMain& mEngine;
     };
 
     extern std::string cursorPath;
