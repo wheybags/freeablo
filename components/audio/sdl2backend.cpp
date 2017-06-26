@@ -87,6 +87,6 @@ namespace Audio
 
     bool channelPlaying(int32_t channel)
     {
-        return Mix_Playing(channel);
+        return Mix_Playing(channel) != 0;
     }
 }

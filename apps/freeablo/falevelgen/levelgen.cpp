@@ -157,7 +157,7 @@ namespace FALevelGen
     // grid of size width * height
     void moveRoom(Room& room, const std::pair<float, float>& vector, size_t width, size_t height)
     {
-        int32_t xMove, yMove;
+        int32_t xMove = 0, yMove = 0;
 
         switch(Misc::getVecDir(vector))
         {
@@ -434,7 +434,7 @@ namespace FALevelGen
                 int32_t testX = xoffs + x;
                 int32_t testY = yoffs + y;
 
-                if(getXY(testX, testY, level) == tile)
+                if(getXY(testX, testY, level) == static_cast<size_t> (tile))
                     return true;
             }
         }
@@ -501,21 +501,21 @@ namespace FALevelGen
                         if(rooms[i].onBorder(x,y))
                         {
                             // Draw x oriented walls
-                            for(size_t x = 0; x < rooms[i].width; x++)
+                            for(size_t i_x = 0; i_x < rooms[i].width; i_x++)
                             {
-                                if(includeBorders || !borders(x + rooms[i].xPos, rooms[i].yPos, blank, level))
-                                    level[x + rooms[i].xPos][rooms[i].yPos] = floor;
-                                if(includeBorders || !borders(x + rooms[i].xPos, rooms[i].height-1 + rooms[i].yPos, blank, level))
-                                    level[x + rooms[i].xPos][rooms[i].height-1 + rooms[i].yPos] = floor;
+                                if(includeBorders || !borders(i_x + rooms[i].xPos, rooms[i].yPos, blank, level))
+                                    level[i_x + rooms[i].xPos][rooms[i].yPos] = floor;
+                                if(includeBorders || !borders(i_x + rooms[i].xPos, rooms[i].height-1 + rooms[i].yPos, blank, level))
+                                    level[i_x + rooms[i].xPos][rooms[i].height-1 + rooms[i].yPos] = floor;
                             }
 
                             // Draw y oriented walls
-                            for(size_t y = 0; y < rooms[i].height; y++)
+                            for(size_t i_y = 0; i_y < rooms[i].height; i_y++)
                             {
-                                if(includeBorders || !borders(rooms[i].xPos, y + rooms[i].yPos, blank, level))
-                                    level[rooms[i].xPos][y + rooms[i].yPos] = floor;
-                                if(includeBorders || !borders(rooms[i].width-1 + rooms[i].xPos, y + rooms[i].yPos, blank, level))
-                                    level[rooms[i].width-1 + rooms[i].xPos][y + rooms[i].yPos] = floor;
+                                if(includeBorders || !borders(rooms[i].xPos, i_y + rooms[i].yPos, blank, level))
+                                    level[rooms[i].xPos][i_y + rooms[i].yPos] = floor;
+                                if(includeBorders || !borders(rooms[i].width-1 + rooms[i].xPos, i_y + rooms[i].yPos, blank, level))
+                                    level[rooms[i].width-1 + rooms[i].xPos][i_y + rooms[i].yPos] = floor;
                             }
 
                             rooms.erase(rooms.begin() + i);

@@ -70,7 +70,7 @@ namespace FAWorld
 
         Level::Level townLevelBase(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
             "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
-            std::make_pair(25, 29), std::make_pair(75, 68), std::map<size_t, size_t>(), -1, 1);
+            std::make_pair(25u, 29u), std::make_pair(75u, 68u), std::map<size_t, size_t>(), static_cast<size_t> (-1), 1);
 
         std::vector<Actor*> townActors;
 

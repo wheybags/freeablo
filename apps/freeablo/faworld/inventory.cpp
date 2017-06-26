@@ -28,9 +28,9 @@ namespace FAWorld
 
     uint32_t Inventory::getTotalArmourClass()
     {
-        return mArmourClassTotal;
         if(mActor == NULL)
             return 0;
+        return mArmourClassTotal;
     }
 
     uint32_t Inventory::getTotalAttackDamage()
