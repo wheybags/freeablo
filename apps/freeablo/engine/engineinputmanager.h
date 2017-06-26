@@ -54,7 +54,6 @@ namespace Engine
 
             nk_context* mNkCtx = nullptr;
             Input::InputManager mInput;
-            bool mToggleConsole = false;
             Point mMousePosition;
             bool mMouseDown = false;
             bool mClick = false;

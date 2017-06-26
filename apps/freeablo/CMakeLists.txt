@@ -48,20 +48,10 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     
     fagui/guimanager.h
     fagui/guimanager.cpp
-    fagui/animateddecorator.h
-    fagui/animateddecorator.cpp
-    fagui/animateddecoratorinstancer.h
-    fagui/animateddecoratorinstancer.cpp
-    fagui/console.h
-    fagui/console.cpp
-    fagui/scrollbox.h
-    fagui/scrollbox.cpp
     fagui/commandhistory.h
     fagui/commandhistory.cpp
     fagui/autocomplete.h
     fagui/autocomplete.cpp
-    fagui/fapython.cpp
-    fagui/fapython.h
 
     engine/threadmanager.h
     engine/threadmanager.cpp

@@ -46,13 +46,6 @@ set(RenderFiles
     render/render.h 
     render/levelobjects.cpp 
     render/levelobjects.h
-    render/rocketglue/RenderInterfaceSDL2.cpp  
-    render/rocketglue/RenderInterfaceSDL2.h 
-    render/rocketglue/SystemInterfaceSDL2.cpp
-    render/rocketglue/SystemInterfaceSDL2.h
-    render/rocketglue/FAIOFileInterface.h
-    render/rocketglue/FAIOFileInterface.cpp
-    render/rocketglue/drawcommand.h
     render/sdl2backend.cpp
     render/sdl_gl_funcs.h
     render/sdl_gl_funcs.cpp
@@ -65,8 +58,6 @@ target_link_libraries(Render Cel Levels nuklear ${SDL2_LIBRARY} ${SDL2IMAGE_LIBR
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
-    input/common.cpp
-    input/common.h
     input/hotkey.cpp
     input/hotkey.h
     input/inputmanager.h

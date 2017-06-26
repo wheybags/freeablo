@@ -95,6 +95,9 @@ namespace Engine
 
         FAGui::GuiManager guiManager(player->mInventory, *this, characterClass);
 
+        if (currentLevel == -1)
+            currentLevel = 0;
+
         // -1 represents the main menu
         if(currentLevel != -1 && isServer)
         {
@@ -103,12 +106,12 @@ namespace Engine
             FAWorld::GameLevel& level = *world.getCurrentLevel();
 
             player->mPos = FAWorld::Position(level.upStairsPos().first, level.upStairsPos().second);
-            guiManager.showIngameGui();
+            //guiManager.showIngameGui();
         }
         else
         {
             pause();
-            bool showTitleScreen = settings.get<bool>("Game", "showTitleScreen");
+            /*bool showTitleScreen = settings.get<bool>("Game", "showTitleScreen");
             if(showTitleScreen)
             {
                 guiManager.showTitleScreen();
@@ -116,7 +119,7 @@ namespace Engine
             else
             {
                 guiManager.showMainMenu();
-            }
+            }*/
         }
 
         boost::asio::io_service io;
@@ -149,22 +152,15 @@ namespace Engine
                 if(level != NULL)
                     state->tileset = renderer.getTileset(*level);
                 state->level = level;
-                if(!FAGui::cursorPath.empty())
-                    state->mCursorEmpty = false;
-                else
-                    state->mCursorEmpty = true;
-                state->mCursorFrame = FAGui::cursorFrame;
+               
+                state->mCursorEmpty = true;
+               
                 state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");                
                 world.fillRenderState(state);                
-                Render::updateGuiBuffer(&state->guiDrawBuffer);
 
                 state->nuklearData.fill(ctx);
             }
-            else
-            {
-                Render::updateGuiBuffer(NULL);
-            }
-
+            
             nk_clear(ctx);
 
             renderer.setCurrentState(state);

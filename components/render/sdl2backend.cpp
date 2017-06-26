@@ -20,17 +20,6 @@
 #include <misc/savePNG.h>
 #include <faio/fafileobject.h>
 
-#include <Rocket/Core.h>
-#include <Rocket/Core/Input.h>
-
-#include "rocketglue/FAIOFileInterface.h"
-#include "rocketglue/SystemInterfaceSDL2.h"
-#include "rocketglue/RenderInterfaceSDL2.h"
-
-#include <misc/boost_python.h>
-#include <Rocket/Core/Python/Python.h>
-
-
 
 /*#define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
@@ -57,11 +46,6 @@ namespace Render
 
     SDL_Window* screen;
     SDL_Renderer* renderer;
-
-    RocketSDL2Renderer* Renderer;
-    RocketSDL2SystemInterface* SystemInterface;
-    FAIOFileInterface* FileInterface;
-    Rocket::Core::Context* Context;
 
     void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
     {
@@ -122,96 +106,6 @@ namespace Render
         nk_font_atlas_clear(&nuklearGraphics.atlas);
         nk_sdl_device_destroy(nuklearGraphics.dev);
     }
-
-    bool import(const std::string& name)
-    {
-        PyObject* module = PyImport_ImportModule(name.c_str());
-        if (!module)
-        {
-            PyErr_Print();
-            return false;
-        }
-
-        Py_DECREF(module);
-        return true;
-    }
-
-    Rocket::Core::Context* initGui(std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
-                                   std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
-                                   std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc)
-    {
-        #ifdef WIN32
-            Py_SetPythonHome("Python27");
-        #endif
-
-        Py_Initialize();
-
-        #ifdef WIN32
-            PyRun_SimpleString("import sys\nsys.path.append('.')");
-
-            #ifdef NDEBUG
-                PyRun_SimpleString("import sys\nsys.path.append('./Release')");
-            #else
-                PyRun_SimpleString("import sys\nsys.path.append('./Debug')");
-            #endif
-        #endif
-
-        // add our python libs to path
-        PyRun_SimpleString("import sys\nsys.path.append('./resources/python')");
-
-        // Pull in the Rocket Python module.
-        import("rocket");
-
-        Renderer = new RocketSDL2Renderer(renderer, screen, loadTextureFunc, generateTextureFunc, releaseTextureFunc);
-        SystemInterface = new RocketSDL2SystemInterface();
-        FileInterface = new FAIOFileInterface();
-
-        Rocket::Core::SetFileInterface(FileInterface);
-        Rocket::Core::SetRenderInterface(Renderer);
-        Rocket::Core::SetSystemInterface(SystemInterface);
-
-        if(!Rocket::Core::Initialise())
-            fprintf(stderr, "couldn't initialise rocket!");
-
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloWhite11.fnt");
-
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold16.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold22.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold24.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold30.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold42.fnt");
-
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver16.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver24.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver30.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver42.fnt");
-
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoBoldOblique.ttf");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoBold.ttf");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoOblique.ttf");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMono.ttf");
-
-        Context = Rocket::Core::CreateContext("default",
-            Rocket::Core::Vector2i(WIDTH, HEIGHT));
-
-        return Context;
-    }
-
-    void quitGui()
-    {
-        Context->UnloadAllDocuments();
-
-        Context->RemoveReference();
-
-        Rocket::Core::Shutdown();
-        Py_Finalize();
-
-        delete Renderer;
-        delete FileInterface;
-        delete SystemInterface;
-    }
-
-
 
     void quit()
     {
@@ -279,21 +173,6 @@ namespace Render
             w = w;
 
         return tex;
-    }
-
-    void updateGuiBuffer(std::vector<DrawCommand>* buffer)
-    {
-        if(resized)
-        {
-            Context->SetDimensions(Rocket::Core::Vector2i(WIDTH, HEIGHT));
-            resized = false;
-        }
-
-        /*if(buffer)
-            buffer->clear();
-
-        Renderer->mDrawBuffer = buffer;
-        Context->Render();*/
     }
 
     void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache)

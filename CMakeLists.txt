@@ -17,7 +17,6 @@ find_package(PNG REQUIRED)
 Find_Package(OpenGL REQUIRED)
 
 Find_Package(PythonLibs 2 REQUIRED)
-Find_package(LibRocket REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Enet REQUIRED)
@@ -71,7 +70,6 @@ include_directories ( SYSTEM
     ${OPENGL_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIR}
-    ${ROCKET_INCLUDE_DIR}
     ${Qt5Widgets_INCLUDE_DIRS}
     ${ENET_INCLUDE_DIR}
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
@@ -101,7 +99,6 @@ link_libraries (
     ${SDL2MIXER_LIBRARY}
     ${PNG_LIBRARY}
     ${OPENGL_LIBRARIES}
-    ${ROCKET_LIBRARIES}
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Qt5Widgets_LIBRARIES}

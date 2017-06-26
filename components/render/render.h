@@ -13,12 +13,6 @@
 #include <cel/celfile.h>
 #include <cel/celframe.h>
 
-#include <misc/disablewarn.h>
-    #include <Rocket/Core.h>
-#include <misc/enablewarn.h>
-
-#include "rocketglue/drawcommand.h"
-
 #include "misc.h"
 
 #include "levelobjects.h"
@@ -59,17 +53,11 @@ namespace Render
 
     void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);
 
-    Rocket::Core::Context* initGui(std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
-                                   std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
-                                   std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc);
-
     void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics);
     void quit(); 
 
     void resize(size_t w, size_t h);
     RenderSettings getWindowSize();
-    void updateGuiBuffer(std::vector<DrawCommand>* buffer);
-    void quitGui();
     void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache);
 
     bool getImageInfo(const std::string& path, uint32_t& width, uint32_t& height, uint32_t& animLength, int32_t celIndex=0);

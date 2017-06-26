@@ -1,6 +1,5 @@
 #include <functional>
 #include "../farender/renderer.h"
-#include "../fagui/console.h"
 #include "engineinputmanager.h"
 
 namespace Engine
@@ -14,8 +13,7 @@ namespace Engine
                 std::bind(&EngineInputManager::mouseClick, this, ph::_1, ph::_2, ph::_3, ph::_4),
                 std::bind(&EngineInputManager::mouseRelease, this, ph::_1, ph::_2, ph::_3),
                 std::bind(&EngineInputManager::mouseMove, this, ph::_1, ph::_2, ph::_3, ph::_4),
-                std::bind(&EngineInputManager::textInput, this, ph::_1),
-                FARender::Renderer::get()->getRocketContext())
+                std::bind(&EngineInputManager::textInput, this, ph::_1))
     {
         for(int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
         {
@@ -148,20 +146,11 @@ namespace Engine
             case 7: hotkey.ctrl = true; hotkey.alt = true; hotkey.shift = true; break;
         }
 
-        FAGui::Console & console = FAGui::Console::getInstance(FARender::Renderer::get()->getRocketContext());
-
-        if(hotkey == getHotkey(TOGGLE_CONSOLE))
+        for(int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
         {
-            mToggleConsole = true;
-        }
-        else if(console.isVisible() == false)
-        {
-            for(int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
-            {
-                KeyboardInputAction keyAction = (KeyboardInputAction)action;
-                if (hotkey == getHotkey(keyAction)) {
-                    notifyKeyboardObservers(keyAction);
-                }
+            KeyboardInputAction keyAction = (KeyboardInputAction)action;
+            if (hotkey == getHotkey(keyAction)) {
+                notifyKeyboardObservers(keyAction);
             }
         }
     }
@@ -308,13 +297,6 @@ namespace Engine
         nk_input_begin(mNkCtx);
         mInput.processInput(paused);
         nk_input_end(mNkCtx);
-
-        if(mToggleConsole)
-        {
-            FAGui::Console & console = FAGui::Console::getInstance(FARender::Renderer::get()->getRocketContext());
-            console.toggle();
-            mToggleConsole = false;
-        }
 
         if(!paused && mMouseDown)
         {
