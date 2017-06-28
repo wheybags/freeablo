@@ -12,6 +12,7 @@
 #include "mst.h"
 #include "tileset.h"
 #include "../faworld/monster.h"
+#include "../faworld/behaviour.h"
 #include "../faworld/actorstats.h"
 
 #include <diabloexe/diabloexe.h>
@@ -928,8 +929,8 @@ namespace FALevelGen
             DiabloExe::Monster monster =  exe.getMonster(name);
 
             FAWorld::Monster * monsterObj = new FAWorld::Monster(monster, FAWorld::Position(xPos, yPos));
-            FAWorld::AI * ai = new FAWorld::BasicMonsterAI(monsterObj);
-            monsterObj->attachAI(ai);
+            FAWorld::Behaviour * behaviour = new FAWorld::BasicMonsterBehaviour(monsterObj);
+            monsterObj->attachBehaviour(behaviour);
             actors.push_back(monsterObj);
         }
     }

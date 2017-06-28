@@ -2,7 +2,6 @@
 #define W_MONSTER_H
 
 #include "actor.h"
-#include "ai.h"
 
 namespace DiabloExe
 {
@@ -21,20 +20,15 @@ namespace FAWorld
         public:
             Monster();
             Monster(const DiabloExe::Monster& monster, Position pos);
-            ~Monster();
+            ~Monster() {};
             void init();
             std::string getDieWav();
             std::string getHitWav();
-            void attachAI(AI* ai) {
-              mAi = ai;
-            };
 
             bool attack(Actor * enemy);
-            void update(bool noclip, size_t ticksPassed);
             bool canIAttack(Actor * actor);
 
         private:
-            AI * mAi;
             std::string mSoundPath;
 
             template <class Stream>

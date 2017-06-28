@@ -26,6 +26,7 @@ namespace Engine
 namespace FAWorld
 {
     class ActorStats;
+    class Behaviour;
     class World;
 
     namespace AnimState
@@ -113,6 +114,10 @@ namespace FAWorld
             void setCanTalk(bool canTalk);
 
             bool canWalkTo(int32_t x, int32_t y);
+
+            void attachBehaviour(Behaviour* behaviour) {
+              mBehaviour = behaviour;
+            };
 
             std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
@@ -208,6 +213,7 @@ namespace FAWorld
 
         protected:
             GameLevel* mLevel = NULL;
+            Behaviour* mBehaviour = nullptr;
 
             bool mIsDead = false;
             bool mCanTalk = false;

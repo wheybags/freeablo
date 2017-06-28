@@ -1,4 +1,5 @@
 #include "monster.h"
+#include "behaviour.h"
 
 #include <diabloexe/monster.h>
 
@@ -23,13 +24,6 @@ namespace FAWorld
         mAnimTimeMap[AnimState::hit] = FAWorld::World::getTicksInPeriod(0.1f);
 
         mFaction = Faction::hell();
-        mAi = new FAWorld::NullAI(this);
-    }
-
-    void Monster::update(bool noclip, size_t ticksPassed)
-    {
-        Actor::update(noclip, ticksPassed);
-        mAi->update(ticksPassed);
     }
 
     bool Monster::attack(Actor *enemy)
@@ -87,12 +81,6 @@ namespace FAWorld
         mDieAnim =  FARender::Renderer::get()->loadImage((fmt % 'd').str());
         mAttackAnim =  FARender::Renderer::get()->loadImage((fmt % 'a').str());
         mHitAnim =  FARender::Renderer::get()->loadImage((fmt % 'h').str());
-    }
-
-    Monster::~Monster()
-    {
-        if (mAi != nullptr)
-            delete mAi;
     }
 
     std::string Monster::getDieWav()

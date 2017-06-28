@@ -1,5 +1,5 @@
-#ifndef AI_H
-#define AI_H
+#ifndef BEHAVIOUR_H
+#define BEHAVIOUR_H
 
 #include <misc/misc.h>
 
@@ -9,11 +9,11 @@ namespace FAWorld
     class Actor;
     class Player;
 
-    class AI
+    class Behaviour
     {
     public:
-        AI(const Actor* actor): mActor(actor) {};
-        virtual ~AI() {};
+        Behaviour(const Actor* actor): mActor(actor) {};
+        virtual ~Behaviour() {};
 
         virtual void update(size_t ticksPassed) = 0;
 
@@ -23,21 +23,21 @@ namespace FAWorld
     };
 
     // Does nothing
-    class NullAI : public AI
+    class NullBehaviour : public Behaviour
     {
     public:
-        NullAI(const Actor* actor): AI(actor) {};
-        ~NullAI() {};
+        NullBehaviour(const Actor* actor): Behaviour(actor) {};
+        ~NullBehaviour() {};
         void update(size_t ticksPassed) {
             UNUSED_PARAM(ticksPassed);
         };
     };
 
-    class BasicMonsterAI : public AI
+    class BasicMonsterBehaviour : public Behaviour
     {
     public:
-        BasicMonsterAI(const Actor* actor): AI(actor) {};
-        ~BasicMonsterAI() {};
+        BasicMonsterBehaviour(const Actor* actor): Behaviour(actor) {};
+        ~BasicMonsterBehaviour() {};
         void update(size_t ticksPassed);
 
     private:

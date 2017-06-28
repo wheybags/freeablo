@@ -1,4 +1,4 @@
-#include "ai.h"
+#include "behaviour.h"
 #include "actor.h"
 #include "player.h"
 
@@ -16,10 +16,28 @@ namespace FAWorld
         return tmpX*tmpX + tmpY*tmpY;
     }
 
-    void BasicMonsterAI::update(size_t ticksPassed)
+    // TODO: could be a method on Actor class
+    const Player* findNearestPlayer(Actor* actor)
+    {
+        Player* nearest;
+        int minDistance = 99999999;
+        for (auto player : World::get()->getPlayers())
+        {
+            int distance = FAWorld::squaredDistance(player->mPos, actor->mPos);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                nearest = player;
+            }
+        }
+
+        return nearest;
+    }
+
+    void BasicMonsterBehaviour::update(size_t ticksPassed)
     {
         if (!mActor->isDead()) {
-            const Player * nearest = findNearestPlayer();
+            const Player * nearest = FAWorld::findNearestPlayer(mActor);
             // we are close enough to engage the player
             if (FAWorld::squaredDistance(nearest->mPos, mActor->mPos) <= 25) {
                 mActor->mDestination = mActor->mPos.mGoal = nearest->mPos.current();
@@ -29,7 +47,7 @@ namespace FAWorld
                 // we arrived at the destination, so let's decide if
                 // we want to move some more
                 if (ticksPassed - mLastActionTick > (rand() % 300) + 100) {
-                    // if 1 let's move, else wait
+                    // if 1 let's move, else wbehaviourt
                     if (rand() % 2) {
                         auto next = mActor->mPos.current();
                         do {
@@ -43,23 +61,6 @@ namespace FAWorld
                 }
             }
         }
-    }
-
-    const Player * BasicMonsterAI::findNearestPlayer()
-    {
-        Player * nearest;
-        int minDistance = 99999999;
-        for (auto player : World::get()->getPlayers())
-        {
-            int distance = FAWorld::squaredDistance(player->mPos, mActor->mPos);
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                nearest = player;
-            }
-        }
-
-        return nearest;
     }
 
 }

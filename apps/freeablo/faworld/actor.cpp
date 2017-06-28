@@ -1,4 +1,5 @@
 #include "actor.h"
+#include "behaviour.h"
 
 #include <misc/misc.h>
 
@@ -129,6 +130,10 @@ namespace FAWorld
                 mPos.update();
             }
         }
+
+        if (mBehaviour) {
+            mBehaviour->update(ticksPassed);
+        }
     }
 
     size_t nextId = 0;
@@ -168,6 +173,8 @@ namespace FAWorld
     {
         if (mStats != nullptr)
             delete mStats;
+        if (mBehaviour != nullptr)
+            delete mBehaviour;
     }
 
     void Actor::takeDamage(double amount)
