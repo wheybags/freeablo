@@ -9,7 +9,7 @@
 namespace FAWorld
 {
 
-    static int squaredDistance(Position a, Position b)
+    static int squaredDistance(const Position& a, const Position& b)
     {
         int tmpX = abs(a.current().first - b.current().first);
         int tmpY = abs(a.current().second - b.current().second);
@@ -17,7 +17,7 @@ namespace FAWorld
     }
 
     // TODO: could be a method on Actor class
-    const Player* findNearestPlayer(Actor* actor)
+    const Player* findNearestPlayer(const Actor* actor)
     {
         Player* nearest;
         int minDistance = 99999999;
@@ -46,7 +46,7 @@ namespace FAWorld
             else if (!mActor->mPos.mMoving) {
                 // we arrived at the destination, so let's decide if
                 // we want to move some more
-                if (ticksPassed - mLastActionTick > (rand() % 300) + 100) {
+                if (ticksPassed - mLastActionTick > ((size_t)rand() % 300) + 100) {
                     // if 1 let's move, else wbehaviourt
                     if (rand() % 2) {
                         auto next = mActor->mPos.current();

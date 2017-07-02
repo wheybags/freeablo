@@ -12,13 +12,13 @@ namespace FAWorld
     class Behaviour
     {
     public:
-        Behaviour(const Actor* actor): mActor(actor) {};
+        Behaviour(Actor* actor): mActor(actor) {};
         virtual ~Behaviour() {};
 
         virtual void update(size_t ticksPassed) = 0;
 
     protected:
-        const Actor * mActor;
+        Actor * mActor;
 
     };
 
@@ -26,7 +26,7 @@ namespace FAWorld
     class NullBehaviour : public Behaviour
     {
     public:
-        NullBehaviour(const Actor* actor): Behaviour(actor) {};
+        NullBehaviour(Actor* actor): Behaviour(actor) {};
         ~NullBehaviour() {};
         void update(size_t ticksPassed) {
             UNUSED_PARAM(ticksPassed);
@@ -36,14 +36,12 @@ namespace FAWorld
     class BasicMonsterBehaviour : public Behaviour
     {
     public:
-        BasicMonsterBehaviour(const Actor* actor): Behaviour(actor) {};
+        BasicMonsterBehaviour(Actor* actor): Behaviour(actor) {};
         ~BasicMonsterBehaviour() {};
         void update(size_t ticksPassed);
 
     private:
         size_t mLastActionTick;
-
-        const Player * findNearestPlayer();
     };
 
 }
