@@ -2,6 +2,7 @@
 #define VISIBILITYMAP_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 namespace ShadowCaster
 {
@@ -12,8 +13,8 @@ namespace ShadowCaster
         virtual ~VisibilityMap() {};
 
         virtual bool isTransparent(int32_t x, int32_t y) const = 0;
-        virtual int getHeight() const = 0;
-        virtual int getWidth() const = 0;
+        virtual size_t height() const = 0;
+        virtual size_t width() const = 0;
     };
 
 }

@@ -15,7 +15,7 @@ namespace ShadowCaster
         Scanner(
             const VisibilityMap* visibilityMap,
             std::pair<int32_t, int32_t> startPos,
-            int lightingRadius = 10 * 10
+            int lightingRadius = 10
         ): mVisibilityMap(visibilityMap),
            mStartPos(startPos),
            mLightingRadius(lightingRadius) {}

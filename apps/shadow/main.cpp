@@ -30,8 +30,8 @@ public:
         return map[y][x];
     }
 
-    int getHeight() const { return 10; }
-    int getWidth() const { return 10; }
+    size_t height() const { return 10; }
+    size_t width() const { return 10; }
 };
 
 

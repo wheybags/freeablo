@@ -20,6 +20,7 @@ namespace FAWorld
             bool talk(Actor * actor);
             FARender::FASpriteGroup* getCurrentAnim();
             void updateSpriteFormatVars();
+            void update(bool noclip, size_t ticksPassed);
 
             virtual void setLevel(GameLevel* level);
 

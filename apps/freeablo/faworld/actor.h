@@ -15,6 +15,7 @@
 #include "gamelevel.h"
 #include "world.h"
 #include "faction.h"
+#include "actorvision.h"
 
 namespace Engine
 {
@@ -51,7 +52,7 @@ namespace FAWorld
                   const std::string& dieAnimPath=""
                   );
 
-            void update(bool noclip, size_t ticksPassed);
+            virtual void update(bool noclip, size_t ticksPassed);
             virtual ~Actor();
             virtual std::string getDieWav(){return "";}
             virtual std::string getHitWav(){return "";}
@@ -75,7 +76,7 @@ namespace FAWorld
             }
 
             virtual void setLevel(GameLevel* level);
-            GameLevel* getLevel();
+            GameLevel* getLevel() const;
 
             virtual bool attack(Actor * enemy)
             {
@@ -202,10 +203,14 @@ namespace FAWorld
                 return Serial::Error::Success;
             }
 
-
+            inline bool canSee(const std::pair<int32_t, int32_t>& pos) const
+            {
+                return mVision.canSee(pos.first, pos.second);
+            }
 
         protected:
             GameLevel* mLevel = NULL;
+            ActorVision mVision;
 
             bool mIsDead = false;
             bool mCanTalk = false;

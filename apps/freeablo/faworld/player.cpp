@@ -145,6 +145,12 @@ namespace FAWorld
         return Actor::getCurrentAnim();
     }
 
+    void Player::update(bool noclip, size_t ticksPassed)
+    {
+        Actor::update(noclip, ticksPassed);
+        mVision.update();
+    }
+
     void Player::updateSpriteFormatVars()
     {
         std::string armour, weapon;

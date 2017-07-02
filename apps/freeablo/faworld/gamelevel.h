@@ -2,6 +2,7 @@
 #define FAWORLD_LEVEL_H
 
 #include <level/level.h>
+#include <shadowcaster/shadowcaster.h>
 
 #include <enet/enet.h> // TODO: remove
 
@@ -26,7 +27,7 @@ namespace FAWorld
         virtual bool isPassable(int x, int y) const = 0;
     };
 
-    class GameLevel :public GameLevelImpl
+    class GameLevel :public GameLevelImpl, public ShadowCaster::VisibilityMap
     {
     public:
         GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors);
@@ -72,6 +73,8 @@ namespace FAWorld
         Actor* getActorById(int32_t id);
 
         void getActors(std::vector<Actor*>& actors);
+
+        bool isTransparent(int32_t x, int32_t y) const;
 
     private:
         GameLevel() {}
