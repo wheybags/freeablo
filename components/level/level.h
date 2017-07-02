@@ -26,6 +26,7 @@ namespace Level
             size_t size() const;
             int16_t operator[] (size_t index) const;
             bool passable() const;
+            bool transparent() const;
             int32_t index() const;
 
         private:

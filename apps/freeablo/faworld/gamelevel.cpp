@@ -125,7 +125,7 @@ namespace FAWorld
         actorMapInsert(actor);
     }
 
-    void GameLevel::fillRenderState(FARender::RenderState* state)
+    void GameLevel::fillRenderState(FARender::RenderState* state, const Player& player)
     {
         state->mObjects.clear();
 

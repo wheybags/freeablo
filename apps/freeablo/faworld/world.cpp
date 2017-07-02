@@ -210,10 +210,10 @@ namespace FAWorld
         mPlayers.erase(std::find(mPlayers.begin(), mPlayers.end(), player));
     }
 
-    void World::fillRenderState(FARender::RenderState* state)
+    void World::fillRenderState(FARender::RenderState* state, const Player& player)
     {
         if (getCurrentLevel())
-            getCurrentLevel()->fillRenderState(state);
+            getCurrentLevel()->fillRenderState(state, player);
     }
 
     Actor* World::getActorById(int32_t id)

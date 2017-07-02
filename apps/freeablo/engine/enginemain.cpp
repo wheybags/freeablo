@@ -151,7 +151,7 @@ namespace Engine
                     state->mCursorEmpty = true;
                 state->mCursorFrame = FAGui::cursorFrame;
                 state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
-                world.fillRenderState(state);
+                world.fillRenderState(state, *player);
                 Render::updateGuiBuffer(&state->guiDrawBuffer);
             }
             else

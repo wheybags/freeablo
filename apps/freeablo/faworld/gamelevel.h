@@ -14,6 +14,7 @@ namespace FARender
 namespace FAWorld
 {
     class Actor;
+    class Player;
 
 
     class GameLevelImpl
@@ -56,7 +57,7 @@ namespace FAWorld
 
         void addActor(Actor* actor);
 
-        void fillRenderState(FARender::RenderState* state);
+        void fillRenderState(FARender::RenderState* state, const Player&);
 
         void removeActor(Actor* actor);
 
