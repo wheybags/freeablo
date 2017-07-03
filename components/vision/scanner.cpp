@@ -58,16 +58,16 @@ namespace Vision
             if (y < 0) return;
 
             x = mStartPos.first + (int)antitrunc(startSlope * (double)depth);
-            if (x >= mTransparencyMap->width()) x = mTransparencyMap->width() - 1;
+            if (x >= (int)mTransparencyMap->width()) x = mTransparencyMap->width() - 1;
 
             while (getSlope(x, y, false) <= endSlope) {
                 if (!isTransparent(x, y)) {
-                    if (x + 1 < mTransparencyMap->width() && isTransparent(x + 1, y)) {
+                    if (x + 1 < (int)mTransparencyMap->width() && isTransparent(x + 1, y)) {
                         auto newEndSlope = getSlope(x + 0.5, y + 0.5, false);
                         scan(depth + 1, octant, startSlope, newEndSlope);
                     }
                 } else {
-                    if (x + 1 < mTransparencyMap->width() && !isTransparent(x + 1, y) && x + 1 < mStartPos.first + depth) {
+                    if (x + 1 < (int)mTransparencyMap->width() && !isTransparent(x + 1, y) && x + 1 < mStartPos.first + depth) {
                         startSlope = -getSlope(x + 0.5, y - 0.5, false);
                     }
                     mVisibleTiles.insert({x, y});
@@ -78,7 +78,7 @@ namespace Vision
             break;
         case 3:
             x = mStartPos.first + depth;
-            if (x >= mTransparencyMap->width()) return;
+            if (x >= (int)mTransparencyMap->width()) return;
 
             y = mStartPos.second - (int)antitrunc(startSlope * (double)depth);
             if (y < 0) y = 0;
@@ -101,19 +101,19 @@ namespace Vision
             break;
         case 4:
             x = mStartPos.first + depth;
-            if (x >= mTransparencyMap->width()) return;
+            if (x >= (int)mTransparencyMap->width()) return;
 
             y = mStartPos.second + (int)antitrunc(startSlope * (double)depth);
-            if (y >= mTransparencyMap->height()) y = mTransparencyMap->height() - 1;
+            if (y >= (int)mTransparencyMap->height()) y = mTransparencyMap->height() - 1;
 
             while (getSlope(x, y, true) >= endSlope) {
                 if (!isTransparent(x, y)) {
-                    if (y + 1 < mTransparencyMap->height() && isTransparent(x, y + 1)) {
+                    if (y + 1 < (int)mTransparencyMap->height() && isTransparent(x, y + 1)) {
                         auto newEndSlope = getSlope(x - 0.5, y + 0.5, true);
                         scan(depth + 1, octant, startSlope, newEndSlope);
                     }
                 } else {
-                    if (y + 1 < mTransparencyMap->height() && !isTransparent(x, y + 1) && y + 1 < mStartPos.second + depth) {
+                    if (y + 1 < (int)mTransparencyMap->height() && !isTransparent(x, y + 1) && y + 1 < mStartPos.second + depth) {
                         startSlope = getSlope(x + 0.5, y + 0.5, true);
                     }
                     mVisibleTiles.insert({x, y});
@@ -124,19 +124,19 @@ namespace Vision
             break;
         case 5:
             y = mStartPos.second + depth;
-            if (y >= mTransparencyMap->height()) return;
+            if (y >= (int)mTransparencyMap->height()) return;
 
             x = mStartPos.first + (int)antitrunc(startSlope * (double)depth);
-            if (x >= mTransparencyMap->width()) x = mTransparencyMap->width() - 1;
+            if (x >= (int)mTransparencyMap->width()) x = mTransparencyMap->width() - 1;
 
             while (getSlope(x, y, false) >= endSlope) {
                 if (!isTransparent(x, y)) {
-                    if (x + 1 < mTransparencyMap->width() && isTransparent(x + 1, y)) {
+                    if (x + 1 < (int)mTransparencyMap->width() && isTransparent(x + 1, y)) {
                         auto newEndSlope = getSlope(x + 0.5, y - 0.5, false);
                         scan(depth + 1, octant, startSlope, newEndSlope);
                     }
                 } else {
-                    if (x + 1 < mTransparencyMap->width() && !isTransparent(x + 1, y) && x + 1 < mStartPos.first + depth) {
+                    if (x + 1 < (int)mTransparencyMap->width() && !isTransparent(x + 1, y) && x + 1 < mStartPos.first + depth) {
                         startSlope = getSlope(x + 0.5, y + 0.5, false);
                     }
                     mVisibleTiles.insert({x, y});
@@ -147,7 +147,7 @@ namespace Vision
             break;
         case 6:
             y = mStartPos.second + depth;
-            if (y >= mTransparencyMap->height()) return;
+            if (y >= (int)mTransparencyMap->height()) return;
 
             x = mStartPos.first - (int)antitrunc(startSlope * (double)depth);
             if (x < 0) x = 0;
@@ -173,16 +173,16 @@ namespace Vision
             if (x < 0) return;
 
             y = mStartPos.second + (int)antitrunc(startSlope * (double)depth);
-            if (y >= mTransparencyMap->height()) y = mTransparencyMap->height() - 1;
+            if (y >= (int)mTransparencyMap->height()) y = mTransparencyMap->height() - 1;
 
             while (getSlope(x, y, true) <= endSlope) {
                 if (!isTransparent(x, y)) {
-                    if (y + 1 < mTransparencyMap->height() && isTransparent(x, y + 1)) {
+                    if (y + 1 < (int)mTransparencyMap->height() && isTransparent(x, y + 1)) {
                         auto newEndSlope = getSlope(x + 0.5, y + 0.5, true);
                         scan(depth + 1, octant, startSlope, newEndSlope);
                     }
                 } else {
-                    if (y + 1 < mTransparencyMap->height() && !isTransparent(x, y + 1) && y + 1 < mStartPos.second + depth) {
+                    if (y + 1 < (int)mTransparencyMap->height() && !isTransparent(x, y + 1) && y + 1 < mStartPos.second + depth) {
                         startSlope = -getSlope(x - 0.5, y + 0.5, true);
                     }
                     mVisibleTiles.insert({x, y});
@@ -217,10 +217,10 @@ namespace Vision
         }
 
         if (x < 0) x = 0;
-        if (x >= mTransparencyMap->width()) x = mTransparencyMap->width() - 1;
+        if (x >= (int)mTransparencyMap->width()) x = mTransparencyMap->width() - 1;
 
         if (y < 0) y = 0;
-        if (y >= mTransparencyMap->height()) y = mTransparencyMap->height() - 1;
+        if (y >= (int)mTransparencyMap->height()) y = mTransparencyMap->height() - 1;
 
         if (depth < mLightingRadius && isTransparent(x, y)) {
             scan(depth + 1, octant, startSlope, endSlope);
