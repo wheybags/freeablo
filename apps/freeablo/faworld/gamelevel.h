@@ -27,7 +27,7 @@ namespace FAWorld
         virtual bool isPassable(int x, int y) const = 0;
     };
 
-    class GameLevel :public GameLevelImpl, public ShadowCaster::VisibilityMap
+    class GameLevel :public GameLevelImpl, public ShadowCaster::TransparencyMap
     {
     public:
         GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors);

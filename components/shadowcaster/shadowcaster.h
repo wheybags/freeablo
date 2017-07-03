@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <set>
 
-#include "visibilitymap.h"
+#include "transparencymap.h"
 
 namespace ShadowCaster
 {
@@ -13,17 +13,17 @@ namespace ShadowCaster
     {
     public:
         Scanner(
-            const VisibilityMap* visibilityMap,
+            const TransparencyMap* transparencyMap,
             std::pair<int32_t, int32_t> startPos,
             int lightingRadius = 10
-        ): mVisibilityMap(visibilityMap),
+        ): mTransparencyMap(transparencyMap),
            mStartPos(startPos),
            mLightingRadius(lightingRadius) {}
 
         std::set<std::pair<int32_t, int32_t>> getVisibleTiles();
 
     private:
-        const VisibilityMap* mVisibilityMap;
+        const TransparencyMap* mTransparencyMap;
         std::pair<int32_t, int32_t> mStartPos;
         int mLightingRadius;
 
@@ -33,7 +33,7 @@ namespace ShadowCaster
         float getSlope(float x1, float y1, bool invert);
         int getDistance(int x1, int y1);
         inline bool isTransparent(int32_t x, int32_t y) {
-            return mVisibilityMap->isTransparent(x, y);
+            return mTransparencyMap->isTransparent(x, y);
         }
     };
 

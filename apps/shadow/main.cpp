@@ -7,7 +7,7 @@
 using namespace ShadowCaster;
 using namespace std;
 
-class Map : public VisibilityMap
+class Map : public TransparencyMap
 {
 public:
     ~Map() {}
