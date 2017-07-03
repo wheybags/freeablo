@@ -12,7 +12,7 @@ namespace FAWorld
     class ActorVision
     {
     public:
-        ActorVision(const Actor* actor): mActor(actor) {};
+        ActorVision(const Actor* actor);
         ~ActorVision() {}
 
         void update();
@@ -24,6 +24,11 @@ namespace FAWorld
 
     private:
         const Actor* mActor;
+        // TODO: add an event to Position that will trigger when the
+        // actor's position changes.  We can hook vision on that and
+        // update only when necessary.  Then this variable can be
+        // removed.
+        std::pair<int32_t, int32_t> mOrigin;
         std::set<std::pair<int32_t, int32_t>> mVisibleTiles;
     };
 

@@ -148,7 +148,6 @@ namespace FAWorld
     void Player::update(bool noclip, size_t ticksPassed)
     {
         Actor::update(noclip, ticksPassed);
-        mVision.update();
     }
 
     void Player::updateSpriteFormatVars()

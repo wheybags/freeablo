@@ -128,6 +128,8 @@ namespace FAWorld
             if (!mAnimPlaying) {
                 mPos.update();
             }
+
+            mVision.update();
         }
     }
 
