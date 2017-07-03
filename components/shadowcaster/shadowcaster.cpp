@@ -51,9 +51,7 @@ namespace ShadowCaster
                 }
                 x++;
             }
-            if (x - 1 >= 0 && !isTransparent(x - 1, y)) {
-                startSlope = getSlope(x - 0.5, y - 0.5, false);
-            }
+            x--;
             break;
         case 2:
             y = mStartPos.second - depth;
@@ -76,9 +74,7 @@ namespace ShadowCaster
                 }
                 x--;
             }
-            if (x + 1 < mVisibilityMap->width() && !isTransparent(x + 1, y)) {
-                startSlope = -getSlope(x + 0.5, y - 0.5, false);
-            }
+            x++;
             break;
         case 3:
             x = mStartPos.first + depth;
@@ -89,21 +85,19 @@ namespace ShadowCaster
 
             while (getSlope(x, y, true) <= endSlope) {
                 if (!isTransparent(x, y)) {
-                    if (y - 1 >= 0 && isTransparent(x, y - 1)) {
+                    if (y - 1 >= 0 && isTransparent(x, y - 1) && y - 1 > mStartPos.second - depth) {
                         auto newEndSlope = getSlope(x - 0.5, y - 0.5, true);
                         scan(depth + 1, octant, startSlope, newEndSlope);
                     }
                 } else {
-                    if (y - 1 >= 0 && !isTransparent(x, y - 1) && y - 1 > mStartPos.second - depth) {
-                        startSlope = -getSlope(x - 0.5, y + 0.5, true);
+                    if (y - 1 >= 0 && !isTransparent(x, y - 1) && y - 1 >= mStartPos.second - depth) {
+                        startSlope = -getSlope(x + 0.5, y - 0.5, true);
                     }
                     mVisibleTiles.insert({x, y});
                 }
                 y++;
             }
-            if (y - 1 >= 0 && !isTransparent(x, y - 1)) {
-                startSlope = -getSlope(x - 0.5, y + 0.5, true);
-            }
+            y--;
             break;
         case 4:
             x = mStartPos.first + depth;
@@ -115,20 +109,18 @@ namespace ShadowCaster
             while (getSlope(x, y, true) >= endSlope) {
                 if (!isTransparent(x, y)) {
                     if (y + 1 < mVisibilityMap->height() && isTransparent(x, y + 1)) {
-                        auto newEndSlope = getSlope(x + 0.5, y + 0.5, true);
+                        auto newEndSlope = getSlope(x - 0.5, y + 0.5, true);
                         scan(depth + 1, octant, startSlope, newEndSlope);
                     }
                 } else {
                     if (y + 1 < mVisibilityMap->height() && !isTransparent(x, y + 1) && y + 1 < mStartPos.second + depth) {
-                        startSlope = getSlope(x + 0.5, y - 0.5, true);
+                        startSlope = getSlope(x + 0.5, y + 0.5, true);
                     }
                     mVisibleTiles.insert({x, y});
                 }
                 y--;
             }
-            if (y + 1 < mVisibilityMap->height() && !isTransparent(x, y + 1)) {
-                startSlope = getSlope(x + 0.5, y - 0.5, true);
-            }
+            y++;
             break;
         case 5:
             y = mStartPos.second + depth;
@@ -151,9 +143,7 @@ namespace ShadowCaster
                 }
                 x--;
             }
-            if (x + 1 < mVisibilityMap->width() && !isTransparent(x + 1, y)) {
-                startSlope = getSlope(x + 0.5, y + 0.5, false);
-            }
+            x++;
             break;
         case 6:
             y = mStartPos.second + depth;
@@ -176,9 +166,7 @@ namespace ShadowCaster
                 }
                 x++;
             }
-            if (x - 1 >= 0 && !isTransparent(x - 1, y)) {
-                startSlope = -getSlope(x - 0.5, y + 0.5, false);
-            }
+            x--;
             break;
         case 7:
             x = mStartPos.first - depth;
@@ -195,15 +183,13 @@ namespace ShadowCaster
                     }
                 } else {
                     if (y + 1 < mVisibilityMap->height() && !isTransparent(x, y + 1) && y + 1 < mStartPos.second + depth) {
-                        startSlope = -getSlope(x + 0.5, y - 0.5, true);
+                        startSlope = -getSlope(x - 0.5, y + 0.5, true);
                     }
                     mVisibleTiles.insert({x, y});
                 }
                 y--;
             }
-            if (y + 1 < mVisibilityMap->height() && !isTransparent(x, y + 1)) {
-                startSlope = -getSlope(x + 0.5, y - 0.5, true);
-            }
+            y++;
             break;
         case 8:
             x = mStartPos.first - depth;
@@ -220,19 +206,23 @@ namespace ShadowCaster
                     }
                 } else {
                     if (y - 1 >= 0 && !isTransparent(x, y - 1) && y - 1 > mStartPos.second - depth) {
-                        startSlope = getSlope(x - 0.5, y + 0.5, true);
+                        startSlope = getSlope(x - 0.5, y - 0.5, true);
                     }
                     mVisibleTiles.insert({x, y});
                 }
                 y++;
             }
-            if (y - 1 >= 0 && !isTransparent(x, y - 1)) {
-                startSlope = getSlope(x - 0.5, y + 0.5, true);
-            }
+            y--;
             break;
         }
 
-        if (depth < mLightingRadius) {
+        if (x < 0) x = 0;
+        if (x >= mVisibilityMap->width()) x = mVisibilityMap->width() - 1;
+
+        if (y < 0) y = 0;
+        if (y >= mVisibilityMap->height()) y = mVisibilityMap->height() - 1;
+
+        if (depth < mLightingRadius && isTransparent(x, y)) {
             scan(depth + 1, octant, startSlope, endSlope);
         }
 
