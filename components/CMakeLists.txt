@@ -118,10 +118,10 @@ add_library(Serial
 )
 set_target_properties(Serial PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
-add_library(ShadowCaster
-    shadowcaster/shadowcaster.h
-    shadowcaster/shadowcaster.cpp
-    shadowcaster/visibilitymap.h
+add_library(Vision
+    vision/scanner.h
+    vision/scanner.cpp
+    vision/transparencymap.h
 )
-target_link_libraries(ShadowCaster ${Boost_Libraries})
-set_target_properties(ShadowCaster PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+target_link_libraries(Vision ${Boost_Libraries})
+set_target_properties(Vision PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

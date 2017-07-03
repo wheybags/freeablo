@@ -1,4 +1,4 @@
-#include <shadowcaster/shadowcaster.h>
+#include <vision/scanner.h>
 #include "actorvision.h"
 #include "actor.h"
 
@@ -13,7 +13,7 @@ namespace FAWorld
         auto start = mActor->mPos.current();
         if (start != mOrigin) {
             mOrigin = start;
-            ShadowCaster::Scanner scanner(level, start, 8);
+            Vision::Scanner scanner(level, start, 8);
 
             mVisibleTiles = scanner.getVisibleTiles();
             mVisibleTiles.insert(start);

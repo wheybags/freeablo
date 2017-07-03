@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <shadowcaster/shadowcaster.h>
+#include <vision/scanner.h>
 
-using namespace ShadowCaster;
+using namespace Vision;
 using namespace std;
 
 class Map : public TransparencyMap

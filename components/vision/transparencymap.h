@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-namespace ShadowCaster
+namespace Vision
 {
 
     class TransparencyMap

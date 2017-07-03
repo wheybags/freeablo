@@ -1,8 +1,8 @@
-#include "shadowcaster.h"
+#include "scanner.h"
 #include <iostream>
 #include <cmath>
 
-namespace ShadowCaster
+namespace Vision
 {
 
     std::set<std::pair<int32_t, int32_t>> Scanner::getVisibleTiles()

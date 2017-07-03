@@ -118,7 +118,7 @@ link_libraries (
     Settings
     Script
     Serial
-    ShadowCaster
+    Vision
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

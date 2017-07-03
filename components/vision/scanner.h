@@ -1,12 +1,12 @@
-#ifndef SHADOWCASTER_H
-#define SHADOWCASTER_H
+#ifndef SCANNER_H
+#define SCANNER_H
 
 #include <stdint.h>
 #include <set>
 
 #include "transparencymap.h"
 
-namespace ShadowCaster
+namespace Vision
 {
 
     class Scanner
