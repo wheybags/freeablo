@@ -103,6 +103,7 @@ set_target_properties(Settings PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(StateMachine
     statemachine/statemachine.h
+    statemachine/statemachine.cpp
 )
 target_link_libraries(StateMachine ${Boost_Libraries})
 set_target_properties(StateMachine PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
