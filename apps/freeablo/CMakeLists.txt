@@ -19,6 +19,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
 
     faworld/actor.cpp
     faworld/actor.h
+    faworld/actorvision.cpp
+    faworld/actorvision.h
     faworld/monster.h
     faworld/monster.cpp
     faworld/player.h

@@ -1,7 +1,7 @@
-add_library(Cel 
-    cel/celfile.cpp cel/celfile.h  
+add_library(Cel
+    cel/celfile.cpp cel/celfile.h
     cel/celframe.h cel/celframe.cpp
-    cel/pal.cpp cel/pal.h  
+    cel/pal.cpp cel/pal.h
     cel/celdecoder.cpp cel/celdecoder.h)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
@@ -9,12 +9,12 @@ add_library(FAIO faio/faio.cpp faio/faio.h faio/fafileobject.h faio/fafileobject
 target_link_libraries(FAIO StormLib ${Boost_LIBRARIES})
 set_target_properties(FAIO PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
-add_library(Levels 
-    level/dun.cpp  
+add_library(Levels
+    level/dun.cpp
     level/dun.h
-    level/min.cpp  
-    level/min.h  
-    level/tileset.cpp  
+    level/min.cpp
+    level/min.h
+    level/tileset.cpp
     level/tileset.h
     level/level.h
     level/level.cpp
@@ -25,7 +25,7 @@ add_library(Levels
 target_link_libraries(Levels FAIO DiabloExe)
 set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
-add_library(Misc 
+add_library(Misc
     misc/stringops.h
     misc/helper2d.h
     misc/md5.h
@@ -42,12 +42,12 @@ SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 
-set(RenderFiles 
-    render/render.h 
-    render/levelobjects.cpp 
+set(RenderFiles
+    render/render.h
+    render/levelobjects.cpp
     render/levelobjects.h
-    render/rocketglue/RenderInterfaceSDL2.cpp  
-    render/rocketglue/RenderInterfaceSDL2.h 
+    render/rocketglue/RenderInterfaceSDL2.cpp
+    render/rocketglue/RenderInterfaceSDL2.h
     render/rocketglue/SystemInterfaceSDL2.cpp
     render/rocketglue/SystemInterfaceSDL2.h
     render/rocketglue/FAIOFileInterface.h
@@ -117,3 +117,11 @@ add_library(Serial
     serial/bithackmacros.h
 )
 set_target_properties(Serial PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_library(Vision
+    vision/scanner.h
+    vision/scanner.cpp
+    vision/transparencymap.h
+)
+target_link_libraries(Vision ${Boost_Libraries})
+set_target_properties(Vision PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

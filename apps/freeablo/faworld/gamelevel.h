@@ -2,6 +2,7 @@
 #define FAWORLD_LEVEL_H
 
 #include <level/level.h>
+#include <vision/transparencymap.h>
 
 #include <enet/enet.h> // TODO: remove
 
@@ -14,6 +15,7 @@ namespace FARender
 namespace FAWorld
 {
     class Actor;
+    class Player;
 
 
     class GameLevelImpl
@@ -25,7 +27,7 @@ namespace FAWorld
         virtual bool isPassable(int x, int y) const = 0;
     };
 
-    class GameLevel :public GameLevelImpl
+    class GameLevel :public GameLevelImpl, public Vision::TransparencyMap
     {
     public:
         GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors);
@@ -56,7 +58,7 @@ namespace FAWorld
 
         void addActor(Actor* actor);
 
-        void fillRenderState(FARender::RenderState* state);
+        void fillRenderState(FARender::RenderState* state, const Player&);
 
         void removeActor(Actor* actor);
 
@@ -71,6 +73,8 @@ namespace FAWorld
         Actor* getActorById(int32_t id);
 
         void getActors(std::vector<Actor*>& actors);
+
+        bool isTransparent(int32_t x, int32_t y) const;
 
     private:
         GameLevel() {}

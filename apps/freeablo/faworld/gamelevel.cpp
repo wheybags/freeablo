@@ -11,6 +11,7 @@
 #include "monster.h"
 #include "world.h"
 #include "actorstats.h"
+#include "player.h"
 
 namespace FAWorld
 {
@@ -114,6 +115,11 @@ namespace FAWorld
         return mLevel[x][y].passable();
     }
 
+    bool GameLevel::isTransparent(int32_t x, int32_t y) const
+    {
+        return isPassable(x, y); // TODO: use proper flag
+    }
+
     Actor* GameLevel::getActorAt(size_t x, size_t y)
     {
         return mActorMap2D[std::pair<size_t, size_t>(x, y)];
@@ -125,15 +131,17 @@ namespace FAWorld
         actorMapInsert(actor);
     }
 
-    void GameLevel::fillRenderState(FARender::RenderState* state)
+    void GameLevel::fillRenderState(FARender::RenderState* state, const Player& player)
     {
         state->mObjects.clear();
 
         for(size_t i = 0; i < mActors.size(); i++)
         {
-            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.getDirection() * mActors[i]->getCurrentAnim()->getAnimLength();
+            if (player.canSee(mActors[i]->mPos.current())) {
+                size_t frame = mActors[i]->mFrame + mActors[i]->mPos.getDirection() * mActors[i]->getCurrentAnim()->getAnimLength();
 
-            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
+                state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
+            }
         }
     }
 

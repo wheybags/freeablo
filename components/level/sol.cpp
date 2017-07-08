@@ -21,6 +21,14 @@ namespace Level
             return !(mData[index] & 0x01);
     }
 
+    bool Sol::transparent(size_t index) const
+    {
+        if(index >= size())
+            return 0;
+        else
+            return !(mData[index] & 0x08);
+    }
+
     size_t Sol::size() const
     {
         return mData.size();

@@ -26,6 +26,15 @@ namespace Level
 
     const MinPillar get(size_t x, size_t y, const Level& level)
     {
+        // static std::map<std::pair<size_t, size_t>, MinPillar&> minCache;
+
+        // {
+        //     auto min = minCache.find({x, y});
+        //     if (min != minCache.end()) {
+        //         return min->second;
+        //     }
+        // }
+
         size_t xDunIndex = x;
         size_t xTilIndex = 0;
         if((xDunIndex % 2) != 0)
@@ -45,7 +54,7 @@ namespace Level
         yDunIndex /= 2;
 
         size_t tilIndex;
-        
+
         if(xTilIndex)
         {
             if(yTilIndex)
@@ -67,15 +76,18 @@ namespace Level
             return MinPillar(Level::mEmpty, 0, -1);
 
         size_t minIndex = level.mTil[dunIndex][tilIndex];
-        
-        return MinPillar(level.mMin[minIndex], level.mSol.passable(minIndex), minIndex);
+
+        MinPillar min(level.mMin[minIndex], level.mSol.passable(minIndex), minIndex);
+        //minCache.insert({{x, y}, min});
+
+        return min;
     }
 
     Misc::Helper2D<const Level, const MinPillar> Level::operator[] (size_t x) const
     {
         return Misc::Helper2D<const Level, const MinPillar>(*this, x, get);
     }
-            
+
     void Level::activate(size_t x, size_t y)
     {
         size_t xDunIndex = x;
@@ -88,13 +100,13 @@ namespace Level
             yDunIndex--;
         yDunIndex /= 2;
 
-        size_t index = mDun[xDunIndex][yDunIndex]; 
-        
+        size_t index = mDun[xDunIndex][yDunIndex];
+
         // open doors when clicked on
         if(mDoorMap.find(index) != mDoorMap.end())
             mDun[xDunIndex][yDunIndex] = mDoorMap[index];
     }
-    
+
     size_t Level::minSize() const
     {
         return mMin.size();
@@ -150,6 +162,11 @@ namespace Level
     bool MinPillar::passable() const
     {
         return mPassable;
+    }
+
+    bool MinPillar::transparent() const
+    {
+        return mPassable; // TODO: correct flag
     }
 
     int32_t MinPillar::index() const

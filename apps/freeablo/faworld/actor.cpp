@@ -128,6 +128,8 @@ namespace FAWorld
             if (!mAnimPlaying) {
                 mPos.update();
             }
+
+            mVision.update();
         }
     }
 
@@ -145,6 +147,7 @@ namespace FAWorld
     ) :
         mPos(pos),
         mFrame(0),
+        mVision({this}),
         mFaction(Faction::heaven()),
         mAnimState(AnimState::idle)
     {
@@ -287,7 +290,7 @@ namespace FAWorld
         }
     }
 
-    GameLevel* Actor::getLevel()
+    GameLevel* Actor::getLevel() const
     {
         return mLevel;
     }

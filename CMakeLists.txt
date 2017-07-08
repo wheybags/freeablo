@@ -118,6 +118,7 @@ link_libraries (
     Settings
     Script
     Serial
+    Vision
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
@@ -129,4 +130,5 @@ add_subdirectory(apps/exedump)
 add_subdirectory(apps/launcher)
 add_subdirectory(apps/fontgenerator)
 add_subdirectory(apps/findpath)
+add_subdirectory(apps/shadow)
 add_subdirectory(test)
