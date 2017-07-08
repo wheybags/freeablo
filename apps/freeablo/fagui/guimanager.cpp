@@ -15,7 +15,7 @@ namespace FAGui
 {   
     std::map<std::string, Rocket::Core::ElementDocument*> menus;
 
-    GuiManager::GuiManager(FAWorld::Inventory & playerInventory, Engine::EngineMain& engine, std::string invClass)
+    GuiManager::GuiManager(Engine::EngineMain& engine)
         : mEngine(engine)
     {
 

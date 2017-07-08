@@ -46,7 +46,7 @@ namespace FARender
 
             struct nk_image getNkImage(int32_t frame = 0)
             {
-                assert(frame >= 0 && frame < frameHandles.size());
+                assert(frame >= 0 && frame < (int32_t)frameHandles.size());
                 return nk_image_handle(nk_handle_ptr(&frameHandles[frame]));
             }
 

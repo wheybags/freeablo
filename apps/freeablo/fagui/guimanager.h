@@ -1,10 +1,10 @@
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H
-#include "../faworld/itemmanager.h"
 #include <string>
 #include <chrono>
 #include <queue>
 #include <functional>
+#include "../engine/enginemain.h"
 
 
 #include <fa_nuklear.h>
@@ -25,9 +25,9 @@ namespace FAGui
     {
     public:
 
-        GuiManager(FAWorld::Inventory &playerInventory, Engine::EngineMain& engine, std::string invClass);
+        GuiManager(Engine::EngineMain& engine);
 
-        void GuiManager::update(bool paused, nk_context* ctx);
+        void update(bool paused, nk_context* ctx);
 
 
     private:

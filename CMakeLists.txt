@@ -47,8 +47,10 @@ if ( NOT SDL2_FOUND )
     message ( FATAL_ERROR "SDL2 not found!" )
 endif ()
 
+set (CMAKE_CXX_STANDARD 11)
+
 if(UNIX)
-    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -g -std=c++11 -Wno-unknown-pragmas")
+    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -Wno-unknown-pragmas")
     SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 endif()
 

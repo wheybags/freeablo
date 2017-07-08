@@ -2,6 +2,7 @@
 
 #include <SDL.h>
 #include <assert.h>
+#include <string>
 
 
 namespace Render

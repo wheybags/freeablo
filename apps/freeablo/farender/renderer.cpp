@@ -53,6 +53,7 @@ namespace FARender
     Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen)
         :mDone(false)
         ,mSpriteManager(1024)
+        ,mWidthHeightTmp(0)
     {
         assert(!mRenderer); // singleton, only one instance
 

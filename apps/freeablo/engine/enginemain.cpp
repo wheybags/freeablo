@@ -93,7 +93,7 @@ namespace Engine
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 
-        FAGui::GuiManager guiManager(player->mInventory, *this, characterClass);
+        FAGui::GuiManager guiManager(*this);
 
         if (currentLevel == -1)
             currentLevel = 0;

@@ -167,7 +167,7 @@ namespace Render
 
 
         int32_t w, h;
-        spriteSize((Sprite)tex, w, h);
+        spriteSize((Sprite)(intptr_t)tex, w, h);
 
         if (w != surf->w || h != surf->h)
             w = w;
@@ -298,7 +298,7 @@ namespace Render
             SDL_Surface* tmp = loadNonCelImageTrans(path, extension, hasTrans, transR, transG, transB);
 
             std::vector<Sprite> vec(1);
-            vec[0] = (Sprite)getGLTexFromSurface(tmp);
+            vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(tmp);
             
             SDL_FreeSurface(tmp);
 
@@ -388,7 +388,7 @@ namespace Render
         }
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)getGLTexFromSurface(tmp);
+        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(tmp);
 
         SDL_FreeSurface(original);
         SDL_FreeSurface(tmp);
@@ -422,7 +422,7 @@ namespace Render
         }
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)getGLTexFromSurface(surface);
+        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(surface);
         
         SDL_FreeSurface(surface);
 
@@ -457,7 +457,7 @@ namespace Render
         }
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)getGLTexFromSurface(texture);
+        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(texture);
 
         SDL_FreeSurface(texture);
         SDL_FreeSurface(tile);
@@ -501,7 +501,7 @@ namespace Render
         //SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)getGLTexFromSurface(surface);
+        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(surface);
         
         SDL_FreeSurface(surface);
 
@@ -722,7 +722,7 @@ namespace Render
 
 
         int32_t w, h;
-        spriteSize((Sprite)sprite, w, h);
+        spriteSize((Sprite)(intptr_t)sprite, w, h);
 
         loc = glGetUniformLocation(shader_programme, "imgW");
         if (loc != -1)
@@ -758,7 +758,7 @@ namespace Render
     
     void drawSprite(const Sprite& sprite, int32_t x, int32_t y)
     {
-        drawSprite((GLuint)sprite, x, y);
+        drawSprite((GLuint)(intptr_t)sprite, x, y);
     }
 
     constexpr auto tileHeight = 32;
@@ -780,7 +780,7 @@ namespace Render
             SDL_Surface* s = createTransparentSurface(cel[i].mWidth, cel[i].mHeight);
             drawFrame(s, 0, 0, cel[i]);
 
-            mSprites.push_back((Render::Sprite)getGLTexFromSurface(s));// SDL_CreateTextureFromSurface(renderer, s));
+            mSprites.push_back((Render::Sprite)(intptr_t)getGLTexFromSurface(s));// SDL_CreateTextureFromSurface(renderer, s));
 
             SDL_FreeSurface(s);
         }
@@ -827,7 +827,7 @@ namespace Render
     {
         for (size_t i = 0; i < mSprites.size(); i++)
         {
-            GLuint tex = (GLuint)mSprites[i];
+            GLuint tex = (GLuint)(intptr_t)mSprites[i];
             glDeleteTextures(1, &tex);
         }
     }
@@ -853,7 +853,7 @@ namespace Render
             else
                 drawMinPillarBase(newPillar, 0, 0, min[i], cel);
 
-            newMin[i] = (Sprite) getGLTexFromSurface(newPillar);// NULL;// SDL_CreateTextureFromSurface(renderer, newPillar);
+            newMin[i] = (Sprite)(intptr_t)getGLTexFromSurface(newPillar);// NULL;// SDL_CreateTextureFromSurface(renderer, newPillar);
         }
 
         SDL_FreeSurface(newPillar);
@@ -865,7 +865,7 @@ namespace Render
     {
         GLint tmpW = 0, tmpH = 0;
 
-        glBindTexture(GL_TEXTURE_2D, (GLuint)sprite);
+        glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)sprite);
 
         glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &tmpW);
         glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &tmpH);
