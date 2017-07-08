@@ -17,6 +17,11 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     farender/spritemanager.cpp
     farender/spritemanager.h
 
+    faworld/actor/basestate.cpp
+    faworld/actor/basestate.h
+    faworld/actor/attackstate.cpp
+    faworld/actor/attackstate.h
+
     faworld/actor.cpp
     faworld/actor.h
     faworld/monster.h

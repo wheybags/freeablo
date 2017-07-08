@@ -116,6 +116,7 @@ link_libraries (
     StormLib
     Audio
     Settings
+    StateMachine
     Script
     Serial
 )

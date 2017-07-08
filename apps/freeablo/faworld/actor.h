@@ -5,6 +5,7 @@
 
 #include <boost/format.hpp>
 
+#include <statemachine/statemachine.h>
 #include <misc/misc.h>
 
 #include "../engine/net/netmanager.h"
@@ -15,6 +16,7 @@
 #include "gamelevel.h"
 #include "world.h"
 #include "faction.h"
+
 
 namespace Engine
 {
@@ -40,9 +42,17 @@ namespace FAWorld
             ENUM_END // always leave this as the last entry, and don't set explicit values for any of the entries
         };
     }
+
+    namespace ActorState
+    {
+        class BaseState;
+    }
+
     class Actor : public NetObject
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
+
+        friend class ActorState::BaseState; // TODO: fix
 
         public:
             Actor(const std::string& walkAnimPath="",
@@ -67,6 +77,8 @@ namespace FAWorld
             void setIdleAnimation(const std::string path);
             AnimState::AnimState getAnimState();
             bool findPath(GameLevelImpl* level, std::pair<int32_t, int32_t> destination);
+
+            StateMachine::StateMachine<Actor>* mActorStateMachine;
 
 
             int32_t getId()
@@ -201,8 +213,6 @@ namespace FAWorld
 
                 return Serial::Error::Success;
             }
-
-
 
         protected:
             GameLevel* mLevel = NULL;
