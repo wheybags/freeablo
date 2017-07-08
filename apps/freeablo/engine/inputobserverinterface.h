@@ -6,6 +6,7 @@ namespace Engine {
     enum KeyboardInputAction
     {
         QUIT,
+        INVENTORY,
         NOCLIP,
         CHANGE_LEVEL_DOWN,
         CHANGE_LEVEL_UP,

@@ -1,4 +1,4 @@
-﻿#include "guimanager.h"
+#include "guimanager.h"
 
 #include <string>
 
@@ -15,7 +15,7 @@
 
 
 namespace FAGui
-{   
+{
     std::map<std::string, Rocket::Core::ElementDocument*> menus;
 
     std::string GuiManager::invClass;
@@ -61,6 +61,21 @@ namespace FAGui
         if(mDocument != nullptr)
             mDocument->Close();
         mDocument = nullptr;
+    }
+
+    void GuiManager::toggleDialogue(const std::string& document)
+    {
+        if (!isDialogueOpened())
+        {
+            openDialogue(document);
+        }
+        else
+        {
+            if (mDocument->IsVisible())
+                mDocument->Hide();
+            else
+                mDocument->Show();
+        }
     }
 
     bool GuiManager::isDialogueOpened() const

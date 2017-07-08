@@ -19,6 +19,11 @@ namespace DiabloExe
     class DiabloExe;
 }
 
+namespace FAGui
+{
+    class GuiManager;
+}
+
 namespace Engine
 {
     class EngineMain : public KeyboardInputObserverInterface
@@ -36,6 +41,7 @@ namespace Engine
             void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);
 
             std::shared_ptr<EngineInputManager> mInputManager;
+            std::shared_ptr<FAGui::GuiManager> mGuiManager;
             bool mDone = false;
             bool mPaused = false;
             bool mNoclip = false;
