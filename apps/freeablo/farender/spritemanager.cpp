@@ -84,6 +84,7 @@ namespace FARender
 
     void SpriteManager::setImmortal(uint32_t index, bool immortal)
     {
+        get(index);
         mCache.setImmortal(index, immortal);
     }
 
