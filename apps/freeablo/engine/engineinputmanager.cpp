@@ -252,6 +252,9 @@ namespace Engine
 
         switch(action)
         {
+            case PAUSE:
+                actionAsString = "Pause";
+                break;
             case QUIT:
                 actionAsString = "Quit";
                 break;
@@ -268,7 +271,7 @@ namespace Engine
                 actionAsString = "ToggleConsole";
                 break;
             default:
-                actionAsString = "Unknown";
+                assert(false && "Invalid enum value passed to keyboardActionToString");
                 break;
         }
 

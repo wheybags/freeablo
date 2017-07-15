@@ -110,7 +110,7 @@ namespace Engine
         }
         else
         {
-            pause();
+            togglePause();
             /*bool showTitleScreen = settings.get<bool>("Game", "showTitleScreen");
             if(showTitleScreen)
             {
@@ -179,6 +179,10 @@ namespace Engine
 
     void EngineMain::notify(KeyboardInputAction action)
     {
+        if (action == PAUSE)
+        {
+            togglePause();
+        }
         if(action == QUIT)
         {
             stop();
@@ -194,14 +198,9 @@ namespace Engine
         mDone = true;
     }
 
-    void EngineMain::pause()
+    void EngineMain::togglePause()
     {
-        mPaused = true;
-    }
-
-    void EngineMain::unPause()
-    {
-        mPaused = false;
+        mPaused = !mPaused;
     }
 
     void EngineMain::toggleNoclip()

@@ -54,7 +54,7 @@ namespace FAGui
             nk_label(ctx, "PAUSED", NK_TEXT_CENTERED);
 
             if (nk_button_label(ctx, "Resume"))
-                engine.unPause();
+                engine.togglePause();
 
             if (nk_button_label(ctx, "Quit"))
                 engine.stop();
