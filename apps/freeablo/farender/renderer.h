@@ -110,8 +110,8 @@ namespace FARender
             std::mutex mDoneMutex;
             std::condition_variable mDoneCV;
 
-            nk_context mNuklearContext = {};
-            Render::NuklearGraphicsContext mNuklearGraphicsData = {};
+            nk_context mNuklearContext = nk_context();
+            Render::NuklearGraphicsContext mNuklearGraphicsData = Render::NuklearGraphicsContext();
 
             std::atomic<std::int64_t> mWidthHeightTmp;
     };
