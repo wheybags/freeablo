@@ -47,7 +47,7 @@ namespace Engine
 
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen == "true");
-        mInputManager = std::make_shared<EngineInputManager>();
+        mInputManager = std::make_shared<EngineInputManager>(renderer.getNuklearContext());
         mInputManager->registerKeyboardObserver(this);
         std::thread mainThread(std::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
         threadManager.run();
@@ -93,7 +93,10 @@ namespace Engine
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 
-        FAGui::GuiManager guiManager(player->mInventory, *this, characterClass);
+        FAGui::GuiManager guiManager(*this);
+
+        if (currentLevel == -1)
+            currentLevel = 0;
 
         // -1 represents the main menu
         if(currentLevel != -1 && isServer)
@@ -103,12 +106,12 @@ namespace Engine
             FAWorld::GameLevel& level = *world.getCurrentLevel();
 
             player->mPos = FAWorld::Position(level.upStairsPos().first, level.upStairsPos().second);
-            guiManager.showIngameGui();
+            //guiManager.showIngameGui();
         }
         else
         {
-            pause();
-            bool showTitleScreen = settings.get<bool>("Game", "showTitleScreen");
+            togglePause();
+            /*bool showTitleScreen = settings.get<bool>("Game", "showTitleScreen");
             if(showTitleScreen)
             {
                 guiManager.showTitleScreen();
@@ -116,7 +119,7 @@ namespace Engine
             else
             {
                 guiManager.showMainMenu();
-            }
+            }*/
         }
 
         boost::asio::io_service io;
@@ -134,8 +137,12 @@ namespace Engine
                 world.update(mNoclip);
             }
 
+            nk_context* ctx = renderer.getNuklearContext();
+
             netManager.update();
-            guiManager.update(mPaused);
+            guiManager.update(mPaused, ctx);
+
+           
 
             FAWorld::GameLevel* level = world.getCurrentLevel();
             FARender::RenderState* state = renderer.getFreeState();
@@ -145,19 +152,17 @@ namespace Engine
                 if(level != NULL)
                     state->tileset = renderer.getTileset(*level);
                 state->level = level;
-                if(!FAGui::cursorPath.empty())
-                    state->mCursorEmpty = false;
-                else
-                    state->mCursorEmpty = true;
-                state->mCursorFrame = FAGui::cursorFrame;
-                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
-                world.fillRenderState(state);
-                Render::updateGuiBuffer(&state->guiDrawBuffer);
+               
+                state->mCursorEmpty = true;
+               
+                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");                
+                world.fillRenderState(state);                
+
+                state->nuklearData.fill(ctx);
             }
-            else
-            {
-                Render::updateGuiBuffer(NULL);
-            }
+            
+            nk_clear(ctx);
+
             renderer.setCurrentState(state);
 
             auto remainingTickTime = timer.expires_from_now().total_milliseconds();
@@ -174,6 +179,10 @@ namespace Engine
 
     void EngineMain::notify(KeyboardInputAction action)
     {
+        if (action == PAUSE)
+        {
+            togglePause();
+        }
         if(action == QUIT)
         {
             stop();
@@ -189,14 +198,9 @@ namespace Engine
         mDone = true;
     }
 
-    void EngineMain::pause()
+    void EngineMain::togglePause()
     {
-        mPaused = true;
-    }
-
-    void EngineMain::unPause()
-    {
-        mPaused = false;
+        mPaused = !mPaused;
     }
 
     void EngineMain::toggleNoclip()

@@ -5,6 +5,7 @@ namespace Engine {
 
     enum KeyboardInputAction
     {
+        PAUSE,
         QUIT,
         NOCLIP,
         CHANGE_LEVEL_DOWN,

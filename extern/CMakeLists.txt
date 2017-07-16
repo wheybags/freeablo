@@ -54,3 +54,7 @@ target_link_libraries(StormLib ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
 if(UNIX)
     set_target_properties(StormLib PROPERTIES COMPILE_FLAGS "-w")
 endif()
+
+# nuklear
+###################
+add_subdirectory(nuklear)

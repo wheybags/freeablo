@@ -32,7 +32,9 @@
 #include <misc/enablewarn.h>
 
 #include <SDL.h>
-#include <SDL_opengl.h>
+//#include <SDL_opengl.h>
+
+#include "../sdl_gl_funcs.h"
 
 #include <functional>
 

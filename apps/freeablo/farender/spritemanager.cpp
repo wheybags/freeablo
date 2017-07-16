@@ -56,10 +56,7 @@ namespace FARender
         mRawCache[index] = rawTmp;
 
         FASpriteGroup* retval = mCache.allocNewSpriteGroup();
-        retval->spriteCacheIndex = index;
-        retval->animLength = 1;
-        retval->width = width;
-        retval->height = height;
+        retval->init(1, width, height, index);
 
         // put it in a member vector because we need to return a persistent pointer
         mRawSpriteGroups.push_back(retval);
@@ -87,6 +84,7 @@ namespace FARender
 
     void SpriteManager::setImmortal(uint32_t index, bool immortal)
     {
+        get(index);
         mCache.setImmortal(index, immortal);
     }
 

@@ -27,8 +27,7 @@ namespace Engine
             EngineInputManager& inputManager();
             void run(const boost::program_options::variables_map& variables);
             void stop();
-            void pause();
-            void unPause();
+            void togglePause();
             void toggleNoclip();
             void notify(KeyboardInputAction action);
 

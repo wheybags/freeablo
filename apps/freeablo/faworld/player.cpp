@@ -110,7 +110,7 @@ namespace FAWorld
             lastArmourCode  != mFmtArmourCode  ||
             lastInDungeon   != mFmtInDungeon   )
         {
-            auto helper = [&] (bool isDie = false)
+            auto helper = [&] (bool isDie)
             {
                 std::string weapFormat = mFmtWeaponCode;
 
@@ -125,17 +125,17 @@ namespace FAWorld
             auto renderer = FARender::Renderer::get();
 
             mDieAnim = renderer->loadImage((helper(true) % "dt").str());
-            mAttackAnim = renderer->loadImage((helper() % "at").str());
+            mAttackAnim = renderer->loadImage((helper(false) % "at").str());
 
             if(mFmtInDungeon)
             {
-                mWalkAnim = renderer->loadImage((helper() % "aw").str());
-                mIdleAnim = renderer->loadImage((helper() % "as").str());
+                mWalkAnim = renderer->loadImage((helper(false) % "aw").str());
+                mIdleAnim = renderer->loadImage((helper(false) % "as").str());
             }
             else
             {
-                mWalkAnim = renderer->loadImage((helper() % "wl").str());
-                mIdleAnim = renderer->loadImage((helper() % "st").str());
+                mWalkAnim = renderer->loadImage((helper(false) % "wl").str());
+                mIdleAnim = renderer->loadImage((helper(false) % "st").str());
             }
         }
 

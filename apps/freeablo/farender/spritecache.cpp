@@ -27,13 +27,10 @@ namespace FARender
     {
         if(!mStrToCache.count(path))
         {
-            FASpriteGroup* newCacheEntry = allocNewSpriteGroup();
-            uint32_t cacheIndex = newUniqueIndex();
-            newCacheEntry->spriteCacheIndex = cacheIndex;
-
             std::vector<std::string> components = Misc::StringUtils::split(path, '&');
 
-            Render::getImageInfo(components[0], newCacheEntry->width, newCacheEntry->height, newCacheEntry->animLength, 0);
+            uint32_t tmpWidth, tmpHeight, tmpAnimLength;
+            Render::getImageInfo(components[0], tmpWidth, tmpHeight, tmpAnimLength, 0);
 
             for(uint32_t i = 1; i < components.size(); i++)
             {
@@ -46,14 +43,18 @@ namespace FARender
                     uint32_t vAnim;
                     vanimss >> vAnim;
 
-                    newCacheEntry->animLength = (newCacheEntry->height / vAnim);
-                    if(newCacheEntry->height % vAnim != 0)
-                        newCacheEntry->animLength++;
+                    tmpAnimLength = (tmpHeight / vAnim);
+                    if(tmpHeight % vAnim != 0)
+                        tmpAnimLength++;
 
-                    newCacheEntry->height = vAnim;
+                    tmpHeight = vAnim;
                 }
             }
 
+            FASpriteGroup* newCacheEntry = allocNewSpriteGroup();
+            uint32_t cacheIndex = newUniqueIndex();
+            
+            newCacheEntry->init(tmpAnimLength, tmpWidth, tmpHeight, cacheIndex);
 
             mStrToCache[path] = newCacheEntry;
             mCacheToStr[cacheIndex] = path;
@@ -72,7 +73,7 @@ namespace FARender
         {
             FASpriteGroup* newCacheEntry = allocNewSpriteGroup();
             uint32_t cacheIndex = newUniqueIndex();
-            newCacheEntry->spriteCacheIndex = cacheIndex;
+            newCacheEntry->init(0, 0, 0, cacheIndex);
             mStrToTilesetCache[key] = newCacheEntry;
             mCacheToTilesetPath[cacheIndex] = TilesetPath(celPath, minPath, top);
         }
