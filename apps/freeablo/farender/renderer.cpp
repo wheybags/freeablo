@@ -183,7 +183,7 @@ namespace FARender
         int64_t int64;
     };
 
-    bool Renderer::renderFrame(RenderState* state)
+    bool Renderer::renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload)
     {
         if(mDone)
         {
@@ -193,6 +193,14 @@ namespace FARender
             }
             mDoneCV.notify_one();
             return false;
+        }
+
+        // force preloading of sprites by drawing them offscreen
+        for (auto id : spritesToPreload)
+        {
+            Render::SpriteGroup* sprite = mSpriteManager.get(id);
+            for (size_t i = 0; i < sprite->size(); i++)
+                Render::drawSprite(sprite->operator[](i), Render::WIDTH + 10, 0);
         }
 
         if(state)
@@ -278,5 +286,10 @@ namespace FARender
 
         w = tmp.int32s[0];
         h = tmp.int32s[1];
+    }
+
+    bool Renderer::getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites)
+    {
+        return mSpriteManager.getAndClearSpritesNeedingPreloading(sprites);
     }
 }

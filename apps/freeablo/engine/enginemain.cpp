@@ -160,6 +160,10 @@ namespace Engine
 
                 state->nuklearData.fill(ctx);
             }
+
+            std::vector<uint32_t> spritesToPreload;
+            if (renderer.getAndClearSpritesNeedingPreloading(spritesToPreload))
+                ThreadManager::get()->sendSpritesForPreload(spritesToPreload);
             
             nk_clear(ctx);
 
