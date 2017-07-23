@@ -6,14 +6,22 @@ namespace FARender
 {
     SpriteManager::SpriteManager(uint32_t cacheSize): mCache(cacheSize) {}
 
+    ///////////////////////////
+    // game thread functions //
+    ///////////////////////////
+
     FASpriteGroup* SpriteManager::get(const std::string& path)
     {
-        return mCache.get(path);
+        auto tmp = mCache.get(path);
+        mSpritesNeedingPreloading.push_back(tmp->spriteCacheIndex);
+        return tmp;
     }
 
     FASpriteGroup* SpriteManager::getTileset(const std::string& celPath, const std::string& minPath, bool top)
     {
-        return mCache.getTileset(celPath, minPath, top);
+        auto tmp = mCache.getTileset(celPath, minPath, top);
+        mSpritesNeedingPreloading.push_back(tmp->spriteCacheIndex);
+        return tmp;
     }
 
     FASpriteGroup* SpriteManager::getByServerSpriteIndex(uint32_t index)
@@ -61,8 +69,21 @@ namespace FARender
         // put it in a member vector because we need to return a persistent pointer
         mRawSpriteGroups.push_back(retval);
 
-        return mRawSpriteGroups[mRawSpriteGroups.size()-1];
+        mSpritesNeedingPreloading.push_back(retval->spriteCacheIndex);
+
+        return retval;
     }
+
+    bool SpriteManager::getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites)
+    {
+        sprites = mSpritesNeedingPreloading;
+        mSpritesNeedingPreloading.clear();
+        return sprites.size() != 0;
+    }
+
+    /////////////////////////////
+    // render thread functions //
+    /////////////////////////////
 
     Render::SpriteGroup* SpriteManager::get(uint32_t index)
     {

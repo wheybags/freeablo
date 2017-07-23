@@ -85,7 +85,7 @@ namespace FARender
 
             void setCursor(RenderState *State);
 
-            bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
+            bool renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload); ///< To be called only by Engine::ThreadManager
             void cleanup(); ///< To be called only by Engine::ThreadManager
 
             nk_context* getNuklearContext()
@@ -94,6 +94,8 @@ namespace FARender
             }
 
             void getWindowDimensions(int32_t& w, int32_t& h);
+
+            bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites);
 
         private:
             static Renderer* mRenderer; ///< Singleton instance
