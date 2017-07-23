@@ -13,14 +13,14 @@ namespace FARender
     FASpriteGroup* SpriteManager::get(const std::string& path)
     {
         auto tmp = mCache.get(path);
-        mSpritesNeedingPreloading.push_back(tmp->spriteCacheIndex);
+        addToPreloadList(tmp->spriteCacheIndex);
         return tmp;
     }
 
     FASpriteGroup* SpriteManager::getTileset(const std::string& celPath, const std::string& minPath, bool top)
     {
         auto tmp = mCache.getTileset(celPath, minPath, top);
-        mSpritesNeedingPreloading.push_back(tmp->spriteCacheIndex);
+        addToPreloadList(tmp->spriteCacheIndex);
         return tmp;
     }
 
@@ -69,7 +69,7 @@ namespace FARender
         // put it in a member vector because we need to return a persistent pointer
         mRawSpriteGroups.push_back(retval);
 
-        mSpritesNeedingPreloading.push_back(retval->spriteCacheIndex);
+        addToPreloadList(retval->spriteCacheIndex);
 
         return retval;
     }
@@ -79,6 +79,15 @@ namespace FARender
         sprites = mSpritesNeedingPreloading;
         mSpritesNeedingPreloading.clear();
         return sprites.size() != 0;
+    }
+
+    void SpriteManager::addToPreloadList(uint32_t index)
+    {
+        if (mSpritesAlredyPreloaded.count(index) == 0)
+        {
+            mSpritesAlredyPreloaded.insert(index);
+            mSpritesNeedingPreloading.push_back(index);
+        }
     }
 
     /////////////////////////////

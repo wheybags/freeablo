@@ -3,6 +3,8 @@
 
 #include "spritecache.h"
 
+#include <set>
+
 namespace FARender
 {
     struct RawCacheTmp
@@ -22,9 +24,9 @@ namespace FARender
         public:
             SpriteManager(uint32_t cacheSize);
 
-            ///////////////////////////
-            // game thread functions //
-            ///////////////////////////
+            //////////////////////////////////
+            // game thread public functions //
+            //////////////////////////////////
 
             FASpriteGroup* get(const std::string& path); ///< To be called from the game thread
             FASpriteGroup* getTileset(const std::string& celPath, const std::string& minPath, bool top); ///< To be called from the game thread
@@ -68,10 +70,13 @@ namespace FARender
        private:
             SpriteCache mCache;
 
+            void addToPreloadList(uint32_t index); ///< To be called from the game thread
+
             std::map<uint32_t, RawCacheTmp> mRawCache;
             std::vector<FASpriteGroup*> mRawSpriteGroups;
             std::map<uint32_t, FASpriteGroup*> mServerSpriteMap;
             std::vector<uint32_t> mSpritesNeedingPreloading;
+            std::set<uint32_t> mSpritesAlredyPreloaded;
     };
 }
 
