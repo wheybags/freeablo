@@ -6,14 +6,22 @@ namespace FARender
 {
     SpriteManager::SpriteManager(uint32_t cacheSize): mCache(cacheSize) {}
 
+    ///////////////////////////
+    // game thread functions //
+    ///////////////////////////
+
     FASpriteGroup* SpriteManager::get(const std::string& path)
     {
-        return mCache.get(path);
+        auto tmp = mCache.get(path);
+        addToPreloadList(tmp->spriteCacheIndex);
+        return tmp;
     }
 
     FASpriteGroup* SpriteManager::getTileset(const std::string& celPath, const std::string& minPath, bool top)
     {
-        return mCache.getTileset(celPath, minPath, top);
+        auto tmp = mCache.getTileset(celPath, minPath, top);
+        addToPreloadList(tmp->spriteCacheIndex);
+        return tmp;
     }
 
     FASpriteGroup* SpriteManager::getByServerSpriteIndex(uint32_t index)
@@ -56,16 +64,35 @@ namespace FARender
         mRawCache[index] = rawTmp;
 
         FASpriteGroup* retval = mCache.allocNewSpriteGroup();
-        retval->spriteCacheIndex = index;
-        retval->animLength = 1;
-        retval->width = width;
-        retval->height = height;
+        retval->init(1, width, height, index);
 
         // put it in a member vector because we need to return a persistent pointer
         mRawSpriteGroups.push_back(retval);
 
-        return mRawSpriteGroups[mRawSpriteGroups.size()-1];
+        addToPreloadList(retval->spriteCacheIndex);
+
+        return retval;
     }
+
+    bool SpriteManager::getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites)
+    {
+        sprites = mSpritesNeedingPreloading;
+        mSpritesNeedingPreloading.clear();
+        return sprites.size() != 0;
+    }
+
+    void SpriteManager::addToPreloadList(uint32_t index)
+    {
+        if (mSpritesAlredyPreloaded.count(index) == 0)
+        {
+            mSpritesAlredyPreloaded.insert(index);
+            mSpritesNeedingPreloading.push_back(index);
+        }
+    }
+
+    /////////////////////////////
+    // render thread functions //
+    /////////////////////////////
 
     Render::SpriteGroup* SpriteManager::get(uint32_t index)
     {
@@ -87,6 +114,7 @@ namespace FARender
 
     void SpriteManager::setImmortal(uint32_t index, bool immortal)
     {
+        get(index);
         mCache.setImmortal(index, immortal);
     }
 

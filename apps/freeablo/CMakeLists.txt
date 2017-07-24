@@ -17,6 +17,11 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     farender/spritemanager.cpp
     farender/spritemanager.h
 
+    faworld/actor/basestate.cpp
+    faworld/actor/basestate.h
+    faworld/actor/attackstate.cpp
+    faworld/actor/attackstate.h
+
     faworld/actor.cpp
     faworld/actor.h
     faworld/behaviour.cpp
@@ -52,20 +57,10 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
 
     fagui/guimanager.h
     fagui/guimanager.cpp
-    fagui/animateddecorator.h
-    fagui/animateddecorator.cpp
-    fagui/animateddecoratorinstancer.h
-    fagui/animateddecoratorinstancer.cpp
-    fagui/console.h
-    fagui/console.cpp
-    fagui/scrollbox.h
-    fagui/scrollbox.cpp
     fagui/commandhistory.h
     fagui/commandhistory.cpp
     fagui/autocomplete.h
     fagui/autocomplete.cpp
-    fagui/fapython.cpp
-    fagui/fapython.h
 
     engine/threadmanager.h
     engine/threadmanager.cpp
@@ -93,6 +88,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fasavegame/savegamemanager.h
     fasavegame/savegamemanager.cpp
 )
+
+target_link_libraries(freeablo_lib nuklear)
 
 add_executable(freeablo main.cpp)
 target_link_libraries(freeablo freeablo_lib)

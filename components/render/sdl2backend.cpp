@@ -4,7 +4,11 @@
 #include <complex>
 
 #include <SDL.h>
+//#include <SDL_opengl.h>
 #include <SDL_image.h>
+
+
+#include "sdl_gl_funcs.h"
 
 #include "../cel/celfile.h"
 #include "../cel/celframe.h"
@@ -16,15 +20,24 @@
 #include <misc/savePNG.h>
 #include <faio/fafileobject.h>
 
-#include <Rocket/Core.h>
-#include <Rocket/Core/Input.h>
 
-#include "rocketglue/FAIOFileInterface.h"
-#include "rocketglue/SystemInterfaceSDL2.h"
-#include "rocketglue/RenderInterfaceSDL2.h"
+/*#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_IMPLEMENTATION*/
+#include <fa_nuklear.h>
 
-#include <misc/boost_python.h>
-#include <Rocket/Core/Python/Python.h>
+#define NK_SDL_GL3_IMPLEMENTATION
+#include "nuklear_sdl_gl3.h"
+
+
+#define MAX_VERTEX_MEMORY 512 * 1024
+#define MAX_ELEMENT_MEMORY 128 * 1024
+
 
 namespace Render
 {
@@ -34,12 +47,7 @@ namespace Render
     SDL_Window* screen;
     SDL_Renderer* renderer;
 
-    RocketSDL2Renderer* Renderer;
-    RocketSDL2SystemInterface* SystemInterface;
-    FAIOFileInterface* FileInterface;
-    Rocket::Core::Context* Context;
-
-    void init(const RenderSettings& settings)
+    void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
     {
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
@@ -59,6 +67,10 @@ namespace Render
         if(screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
 
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
         SDL_GL_CreateContext(screen);
         int oglIdx = -1;
@@ -77,101 +89,23 @@ namespace Render
 
         renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        glMatrixMode(GL_PROJECTION|GL_MODELVIEW);
-        glLoadIdentity();
-        glOrtho(0, WIDTH, HEIGHT, 0, 0, 1);
-    }
+        initGlFuncs();
 
-    bool import(const std::string& name)
-    {
-        PyObject* module = PyImport_ImportModule(name.c_str());
-        if (!module)
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+
+        if (nk_ctx)
         {
-            PyErr_Print();
-            return false;
+            memset(&nuklearGraphics, 0, sizeof(nuklearGraphics));
+            nk_sdl_device_create(nuklearGraphics.dev);
         }
-
-        Py_DECREF(module);
-        return true;
     }
 
-    Rocket::Core::Context* initGui(std::function<bool(Rocket::Core::TextureHandle&, Rocket::Core::Vector2i&, const Rocket::Core::String&)> loadTextureFunc,
-                                   std::function<bool(Rocket::Core::TextureHandle&, const Rocket::Core::byte*, const Rocket::Core::Vector2i&)> generateTextureFunc,
-                                   std::function<void(Rocket::Core::TextureHandle)> releaseTextureFunc)
+    void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics)
     {
-        #ifdef WIN32
-            Py_SetPythonHome("Python27");
-        #endif
-
-        Py_Initialize();
-
-        #ifdef WIN32
-            PyRun_SimpleString("import sys\nsys.path.append('.')");
-
-            #ifdef NDEBUG
-                PyRun_SimpleString("import sys\nsys.path.append('./Release')");
-            #else
-                PyRun_SimpleString("import sys\nsys.path.append('./Debug')");
-            #endif
-        #endif
-
-        // add our python libs to path
-        PyRun_SimpleString("import sys\nsys.path.append('./resources/python')");
-
-        // Pull in the Rocket Python module.
-        import("rocket");
-
-        Renderer = new RocketSDL2Renderer(renderer, screen, loadTextureFunc, generateTextureFunc, releaseTextureFunc);
-        SystemInterface = new RocketSDL2SystemInterface();
-        FileInterface = new FAIOFileInterface();
-
-        Rocket::Core::SetFileInterface(FileInterface);
-        Rocket::Core::SetRenderInterface(Renderer);
-        Rocket::Core::SetSystemInterface(SystemInterface);
-
-        if(!Rocket::Core::Initialise())
-            fprintf(stderr, "couldn't initialise rocket!");
-
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloWhite11.fnt");
-
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold16.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold22.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold24.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold30.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloGold42.fnt");
-
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver16.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver24.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver30.fnt");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/Freeablo/FreeabloSilver42.fnt");
-
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoBoldOblique.ttf");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoBold.ttf");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMonoOblique.ttf");
-        Rocket::Core::FontDatabase::LoadFontFace("resources/fonts/FreeMono/FreeMono.ttf");
-
-        Context = Rocket::Core::CreateContext("default",
-            Rocket::Core::Vector2i(WIDTH, HEIGHT));
-
-        return Context;
+        nk_font_atlas_clear(&nuklearGraphics.atlas);
+        nk_sdl_device_destroy(nuklearGraphics.dev);
     }
-
-    void quitGui()
-    {
-        Context->UnloadAllDocuments();
-
-        Context->RemoveReference();
-
-        Rocket::Core::Shutdown();
-        Py_Finalize();
-
-        delete Renderer;
-        delete FileInterface;
-        delete SystemInterface;
-    }
-
-
 
     void quit()
     {
@@ -196,24 +130,61 @@ namespace Render
         return settings;
     }
 
-    void updateGuiBuffer(std::vector<DrawCommand>* buffer)
+    GLuint getGLTexFromSurface(SDL_Surface* surf)
     {
-        if(resized)
+        GLenum data_fmt = GL_RGBA;
+        /*Uint8 test = SDL_MapRGB(surf->format, 0xAA, 0xBB, 0xCC) & 0xFF;
+        if (test == 0xAA) data_fmt = GL_RGB;
+        else if (test == 0xCC) data_fmt = GL_BGR;//GL_BGR;
+        else {
+        printf("Error: \"Loaded surface was neither RGB or BGR!\""); return;
+        }*/
+
+        bool validFormat = true;
+        if (surf->format->BitsPerPixel != 24 && surf->format->BitsPerPixel != 32)
+            validFormat = false;
+        if (surf->format->Rmask != 0x000000FF || surf->format->Gmask != 0x0000FF00 || surf->format->Bmask != 0x00FF0000)
+            validFormat = false;
+        if (surf->format->BitsPerPixel != 32 || surf->format->Amask != 0xFF000000)
+            validFormat = false;
+        if (surf->pitch != 4 * surf->w)
+            validFormat = false;
+
+        if (!validFormat)
         {
-            Context->SetDimensions(Rocket::Core::Vector2i(WIDTH, HEIGHT));
-            resized = false;
+            std::cerr << "INVALID TEXTURE FORMAT" << std::endl;
+            return 0;
         }
 
-        if(buffer)
-            buffer->clear();
+        GLuint tex = 0;
 
-        Renderer->mDrawBuffer = buffer;
-        Context->Render();
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surf->w, surf->h, 0, data_fmt, GL_UNSIGNED_BYTE, surf->pixels);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+        int32_t w, h;
+        spriteSize((Sprite)(intptr_t)tex, w, h);
+
+        if (w != surf->w || h != surf->h)
+            w = w;
+
+        return tex;
     }
 
-    void drawGui(std::vector<DrawCommand>& buffer, SpriteCacheBase* cache)
+    void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache)
     {
-        Renderer->drawBuffer(buffer, cache);
+        // IMPORTANT: `nk_sdl_render` modifies some global OpenGL state
+        // with blending, scissor, face culling, depth test and viewport and
+        // defaults everything back into a default state.
+        // Make sure to either a.) save and restore or b.) reset your own state after
+        // rendering the UI.
+        nk_sdl_render_dump(cache, dump, screen);
+
+        glEnable(GL_BLEND); // see above comment
     }
 
     SDL_Surface* loadNonCelImage(const std::string& sourcePath, const std::string& extension)
@@ -325,11 +296,11 @@ namespace Render
         else
         {
             SDL_Surface* tmp = loadNonCelImageTrans(path, extension, hasTrans, transR, transG, transB);
-            SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, tmp);
-            SDL_FreeSurface(tmp);
 
             std::vector<Sprite> vec(1);
-            vec[0] = (Sprite)tex;
+            vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(tmp);
+            
+            SDL_FreeSurface(tmp);
 
             return new SpriteGroup(vec);
         }
@@ -416,12 +387,11 @@ namespace Render
                 break;
         }
 
-        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, tmp);
+        std::vector<Sprite> vec(1);
+        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(tmp);
+
         SDL_FreeSurface(original);
         SDL_FreeSurface(tmp);
-
-        std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)tex;
 
         return new SpriteGroup(vec);
     }
@@ -451,14 +421,16 @@ namespace Render
             x += cel[i].mWidth;
         }
 
-        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_FreeSurface(surface);
-
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)tex;
+        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(surface);
+        
+        SDL_FreeSurface(surface);
 
         return new SpriteGroup(vec);
     }
+
+
+   
 
     SpriteGroup* loadTiledTexture(const std::string& sourcePath, size_t width, size_t height, bool hasTrans, size_t transR, size_t transG, size_t transB)
     {
@@ -484,12 +456,11 @@ namespace Render
             }
         }
 
-        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, texture);
+        std::vector<Sprite> vec(1);
+        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(texture);
+
         SDL_FreeSurface(texture);
         SDL_FreeSurface(tile);
-
-        std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)tex;
 
         return new SpriteGroup(vec);
     }
@@ -526,30 +497,268 @@ namespace Render
         #endif
 
         SDL_Surface *surface = SDL_CreateRGBSurfaceFrom ((void*) source, width, height, 32, width*4, rmask, gmask, bmask, amask);
-        SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
-        SDL_FreeSurface(surface);
+        //SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, surface);
+        //SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)tex;
+        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(surface);
+        
+        SDL_FreeSurface(surface);
+
         return new SpriteGroup(vec);
     }
 
 
+    bool once = false;
+
+   
+
+    GLuint vao = 0;
+    GLuint shader_programme = 0;
+    GLuint texture = 0;
+
     void draw()
     {
+        if (!once)
+        {
+
+            glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            once = true;
+
+            float points[] = {
+                0, 0, 0,
+                1, 0, 0,
+                1, 1, 0,
+                0, 0, 0,
+                1, 1, 0,
+                0, 1, 0
+            };
+
+
+           
+
+
+            float colours[] = {
+                0, 0,
+                1, 0,
+                1, 1,
+                0, 0,
+                1, 1,
+                0, 1
+            };
+
+
+            GLuint vbo = 0;
+            glGenBuffers(1, &vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), points, GL_STATIC_DRAW);
+
+
+            GLuint uvs_vbo = 0;
+            glGenBuffers(1, &uvs_vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, uvs_vbo);
+            glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), colours, GL_STATIC_DRAW);
+
+            glGenVertexArrays(1, &vao);
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+            glBindBuffer(GL_ARRAY_BUFFER, uvs_vbo);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(1);
+
+
+
+
+            std::string src = Misc::StringUtils::readAsString("resources/shaders/basic.vert");
+            const GLchar* srcPtr = src.c_str();
+
+            GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+            glShaderSource(vs, 1, &srcPtr, NULL);
+            glCompileShader(vs);
+
+            GLint isCompiled = 0;
+            glGetShaderiv(vs, GL_COMPILE_STATUS, &isCompiled);
+            if (isCompiled == GL_FALSE)
+            {
+                GLint maxLength = 0;
+                glGetShaderiv(vs, GL_INFO_LOG_LENGTH, &maxLength);
+
+                // The maxLength includes the NULL character
+                std::vector<GLchar> errorLog(maxLength);
+                glGetShaderInfoLog(vs, maxLength, &maxLength, &errorLog[0]);
+
+                std::cout << &errorLog[0] << std::endl;
+
+                // Provide the infolog in whatever manor you deem best.
+                // Exit with failure.
+                glDeleteShader(vs); // Don't leak the shader.
+                return;
+            }
+
+            src = Misc::StringUtils::readAsString("resources/shaders/basic.frag");
+            srcPtr = src.c_str();
+
+            GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+            glShaderSource(fs, 1, &srcPtr, NULL);
+            glCompileShader(fs);
+
+            glGetShaderiv(fs, GL_COMPILE_STATUS, &isCompiled);
+            if (isCompiled == GL_FALSE)
+            {
+                GLint maxLength = 0;
+                glGetShaderiv(fs, GL_INFO_LOG_LENGTH, &maxLength);
+
+                // The maxLength includes the NULL character
+                std::vector<GLchar> errorLog(maxLength);
+                glGetShaderInfoLog(fs, maxLength, &maxLength, &errorLog[0]);
+
+                std::cout << &errorLog[0] << std::endl;
+
+                // Provide the infolog in whatever manor you deem best.
+                // Exit with failure.
+                glDeleteShader(fs); // Don't leak the shader.
+                return;
+            }
+
+
+
+            shader_programme = glCreateProgram();
+            glAttachShader(shader_programme, fs);
+            glAttachShader(shader_programme, vs);
+            glLinkProgram(shader_programme);
+
+
+            /*SDL_Surface* surf = SDL_LoadBMP("E:\\tom.bmp");
+
+            SDL_Surface* s = createTransparentSurface(surf->w, surf->h);
+            SDL_BlitSurface(surf, NULL, s, NULL);
+
+            texture = getGLTexFromSurface(s);
+
+            SDL_FreeSurface(s);
+            SDL_FreeSurface(surf);*/
+        }
+
+
+        /*GLint loc = glGetUniformLocation(shader_programme, "width");
+        if (loc != -1)
+        {
+            glUniform1f(loc, WIDTH);
+        }
+        loc = glGetUniformLocation(shader_programme, "height");
+        if (loc != -1)
+        {
+            glUniform1f(loc, HEIGHT);
+        }
+
+        loc = glGetUniformLocation(shader_programme, "imgW");
+        if (loc != -1)
+        {
+            glUniform1f(loc, 150);
+        }
+        loc = glGetUniformLocation(shader_programme, "imgH");
+        if (loc != -1)
+        {
+            glUniform1f(loc, 100);
+        }
+
+        loc = glGetUniformLocation(shader_programme, "offsetX");
+        if (loc != -1)
+        {
+            glUniform1f(loc, 150);
+        }
+        loc = glGetUniformLocation(shader_programme, "offsetY");
+        if (loc != -1)
+        {
+            glUniform1f(loc, 100);
+        }
+
+        //glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glUseProgram(shader_programme);
+        glBindVertexArray(vao);
+        // draw points 0-3 from the currently bound VAO with current in-use shader
+        glDrawArrays(GL_TRIANGLES, 0, 6);*/
+
+        //drawAt(texture, 0, 0);
+
         SDL_RenderPresent(renderer);
     }
 
-    void drawSprite(const Sprite &sprite, size_t x, size_t y)
+    void drawSprite(GLuint sprite, int32_t x, int32_t y)
     {
-        int width, height;
-        auto texture = static_cast<SDL_Texture *> (sprite);
-        SDL_QueryTexture(texture, NULL, NULL, &width, &height);
+        /*int width, height;
+        SDL_QueryTexture(sprite, NULL, NULL, &width, &height);
 
         SDL_Rect dest = { int(x), int(y), width, height };
+        
+        SDL_RenderCopy(renderer, sprite, NULL, &dest);*/
 
-        SDL_RenderCopy(renderer, texture, NULL, &dest);
+        if (sprite == 0)
+        {
+            sprite = texture;
+        }
+        else
+        {
+            sprite = sprite;
+        }
+
+
+        GLint loc = glGetUniformLocation(shader_programme, "width");
+        if (loc != -1)
+        {
+            glUniform1f(loc, WIDTH);
+        }
+        loc = glGetUniformLocation(shader_programme, "height");
+        if (loc != -1)
+        {
+            glUniform1f(loc, HEIGHT);
+        }
+
+
+        int32_t w, h;
+        spriteSize((Sprite)(intptr_t)sprite, w, h);
+
+        loc = glGetUniformLocation(shader_programme, "imgW");
+        if (loc != -1)
+        {
+            glUniform1f(loc, w);
+        }
+        loc = glGetUniformLocation(shader_programme, "imgH");
+        if (loc != -1)
+        {
+            glUniform1f(loc, h);
+        }
+
+        loc = glGetUniformLocation(shader_programme, "offsetX");
+        if (loc != -1)
+        {
+            glUniform1f(loc, x);
+        }
+        loc = glGetUniformLocation(shader_programme, "offsetY");
+        if (loc != -1)
+        {
+            glUniform1f(loc, y);
+        }
+
+      
+
+        glBindTexture(GL_TEXTURE_2D, sprite);
+
+        glUseProgram(shader_programme);
+        glBindVertexArray(vao);
+        // draw points 0-3 from the currently bound VAO with current in-use shader
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+    
+    void drawSprite(const Sprite& sprite, int32_t x, int32_t y)
+    {
+        drawSprite((GLuint)(intptr_t)sprite, x, y);
     }
 
     constexpr auto tileHeight = 32;
@@ -571,7 +780,7 @@ namespace Render
             SDL_Surface* s = createTransparentSurface(cel[i].mWidth, cel[i].mHeight);
             drawFrame(s, 0, 0, cel[i]);
 
-            mSprites.push_back(SDL_CreateTextureFromSurface(renderer, s));
+            mSprites.push_back((Render::Sprite)(intptr_t)getGLTexFromSurface(s));// SDL_CreateTextureFromSurface(renderer, s));
 
             SDL_FreeSurface(s);
         }
@@ -616,8 +825,11 @@ namespace Render
 
     void SpriteGroup::destroy()
     {
-        for(size_t i = 0; i < mSprites.size(); i++)
-            SDL_DestroyTexture((SDL_Texture*)mSprites[i]);
+        for (size_t i = 0; i < mSprites.size(); i++)
+        {
+            GLuint tex = (GLuint)(intptr_t)mSprites[i];
+            glDeleteTextures(1, &tex);
+        }
     }
 
     void drawMinPillarTop(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
@@ -641,7 +853,7 @@ namespace Render
             else
                 drawMinPillarBase(newPillar, 0, 0, min[i], cel);
 
-            newMin[i] = SDL_CreateTextureFromSurface(renderer, newPillar);
+            newMin[i] = (Sprite)(intptr_t)getGLTexFromSurface(newPillar);// NULL;// SDL_CreateTextureFromSurface(renderer, newPillar);
         }
 
         SDL_FreeSurface(newPillar);
@@ -651,7 +863,15 @@ namespace Render
 
     void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h)
     {
-        SDL_QueryTexture((SDL_Texture*)sprite, NULL, NULL, &w, &h);
+        GLint tmpW = 0, tmpH = 0;
+
+        glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)sprite);
+
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &tmpW);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &tmpH);
+        //SDL_QueryTexture((SDL_Texture*)sprite, NULL, NULL, &tmpW, &tmpH);
+        w = tmpW;
+        h = tmpH;
     }
 
     void clear(int r, int g, int b)

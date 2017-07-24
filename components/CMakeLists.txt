@@ -46,28 +46,25 @@ set(RenderFiles
     render/render.h 
     render/levelobjects.cpp 
     render/levelobjects.h
-    render/rocketglue/RenderInterfaceSDL2.cpp  
-    render/rocketglue/RenderInterfaceSDL2.h 
-    render/rocketglue/SystemInterfaceSDL2.cpp
-    render/rocketglue/SystemInterfaceSDL2.h
-    render/rocketglue/FAIOFileInterface.h
-    render/rocketglue/FAIOFileInterface.cpp
-    render/rocketglue/drawcommand.h
     render/sdl2backend.cpp
+    render/sdl_gl_funcs.h
+    render/sdl_gl_funcs.cpp
+    render/nuklear_sdl_gl3.cpp
+    render/nuklear_sdl_gl3.h
+    render/misc.h
 )
 add_library(Render ${RenderFiles})
-target_link_libraries(Render Cel Levels ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${OPENGL_LIBRARIES} ${ROCKET_LIBRARIES} ${PYTHON_LIBRARIES})
+target_link_libraries(Render Cel Levels nuklear ${SDL2_LIBRARY} ${SDL2IMAGE_LIBRARY} ${OPENGL_LIBRARIES} ${ROCKET_LIBRARIES} ${PYTHON_LIBRARIES})
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
-    input/common.cpp
-    input/common.h
     input/hotkey.cpp
     input/hotkey.h
     input/inputmanager.h
     input/keys.h
     input/sdl2backend.cpp)
 set_target_properties(Input PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+target_link_libraries(Input nuklear)
 
 add_library(DiabloExe
     diabloexe/diabloexe.h
@@ -100,6 +97,13 @@ add_library(Settings
 )
 target_link_libraries(Settings ${Boost_Libraries})
 set_target_properties(Settings PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_library(StateMachine
+    statemachine/statemachine.h
+    statemachine/statemachine.cpp
+)
+target_link_libraries(StateMachine ${Boost_Libraries})
+set_target_properties(StateMachine PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Script
     script/scriptcontext.h

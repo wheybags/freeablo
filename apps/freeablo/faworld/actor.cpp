@@ -4,6 +4,7 @@
 #include <misc/misc.h>
 
 #include "actorstats.h"
+#include "actor/basestate.h"
 #include "world.h"
 #include "../engine/threadmanager.h"
 #include "../engine/net/netmanager.h"
@@ -56,79 +57,7 @@ namespace FAWorld
 #endif
             }
 
-            if (mPos.mGoal != std::pair<int32_t, int32_t>(0, 0) && mPos.current() != mPos.mGoal)
-            {
-                Actor * actor;
-                actor = World::get()->getActorAt(mDestination.first, mDestination.second);
-                if (canIAttack(actor))
-                {
-                    std::pair<float, float> vector = Misc::getVec(mPos.current(), mDestination);
-                    mPos.setDirection(Misc::getVecDir(vector));
-                    mPos.update();
-                    mPos.mDist = 0;
-
-                    attack(actor);
-                }
-                else if (canTalkTo(actor))
-                {
-                    mPos.mDist = 0;
-                    talk(actor);
-                }
-                else if (mPos.mDist == 0)
-                {
-                    World& world = *World::get();
-                    if (!mPos.mPath.size() || mPos.mIndex == -1 || mPos.mPath.back() != mDestination)
-                    {
-                        findPath(world.getCurrentLevel(), mPos.mGoal);
-                    }
-                    if (!mAnimPlaying)
-                    {
-                        if (mPos.current() == mPos.mGoal)        //the mPos.mGoal maybe changed by the findPath call.so we need judge it again.
-                        {
-                            mPos.mMoving = false;
-                            setAnimation(AnimState::idle);
-                        }
-                        else
-                        {
-                            auto nextPos = mPos.pathNext(false);
-                            FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.first, nextPos.second);
-
-                            if ((noclip || (mLevel->isPassable(nextPos.first, nextPos.second) &&
-                                (actorAtNext == NULL || actorAtNext == this || actorAtNext->isDead()))) && !mAnimPlaying)
-                            {
-                                if (!mPos.mMoving && !mAnimPlaying)
-                                {
-                                    mPos.mMoving = true;
-                                    setAnimation(AnimState::walk);
-                                }
-                            }
-                            else if (!mAnimPlaying)
-                            {
-                                mPos.mMoving = false;
-                                mDestination = mPos.current();
-                                setAnimation(AnimState::idle);
-                            }
-
-                            mPos.setDirection(Misc::getVecDir(Misc::getVec(mPos.current(), nextPos)));
-                        }
-                    }
-                }
-            }
-            else if (mPos.mMoving && mPos.mDist == 0 && !mAnimPlaying && !isDead())
-            {
-                mPos.mMoving = false;
-                setAnimation(AnimState::idle);
-            }
-
-            if (!mIsDead && !mPos.mMoving && !mAnimPlaying && mAnimState != AnimState::idle)
-                setAnimation(AnimState::idle);
-            else if (!mIsDead && mPos.mMoving && !mAnimPlaying && mAnimState != AnimState::walk)
-                setAnimation(AnimState::walk);
-
-            //if walk anim finished,we need move the role to next tiled
-            if (!mAnimPlaying) {
-                mPos.update();
-            }
+            mActorStateMachine->update(noclip, ticksPassed);
         }
 
         if (mBehaviour) {
@@ -165,6 +94,8 @@ namespace FAWorld
         mDestination = mPos.current();
         mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1f);
         mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1f);
+
+        mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this);
 
         mId = getNewId();
     }

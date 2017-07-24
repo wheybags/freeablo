@@ -17,7 +17,6 @@ find_package(PNG REQUIRED)
 Find_Package(OpenGL REQUIRED)
 
 Find_Package(PythonLibs 2 REQUIRED)
-Find_package(LibRocket REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Enet REQUIRED)
@@ -48,13 +47,24 @@ if ( NOT SDL2_FOUND )
     message ( FATAL_ERROR "SDL2 not found!" )
 endif ()
 
+set (CMAKE_CXX_STANDARD 11)
+
+# Use C++11
+if (CMAKE_VERSION VERSION_LESS "3.1")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
+    endif ()
+else ()
+    set (CMAKE_CXX_STANDARD 11)
+endif ()
+
 if(UNIX)
-    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -g -std=c++11 -Wno-unknown-pragmas")
+    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -Wno-unknown-pragmas")
     SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 endif()
 
 if(MSVC)
-    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /W4 /WX /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4100 /wd4611 /wd4458 /wd4459 /wd4127")
+    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /W4 /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4100 /wd4611 /wd4458 /wd4459 /wd4127")
     # 4244 - e.g. 'argument': conversion from 'const long double' to 'double' -- boost headers
     # 4100 - unreferenced formal parameter -- boost headers
     # 4611 - interaction between '_setjmp' and C++ object destruction is non-portable -- savepng.cpp
@@ -71,7 +81,6 @@ include_directories ( SYSTEM
     ${OPENGL_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIR}
-    ${ROCKET_INCLUDE_DIR}
     ${Qt5Widgets_INCLUDE_DIRS}
     ${ENET_INCLUDE_DIR}
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
@@ -101,7 +110,6 @@ link_libraries (
     ${SDL2MIXER_LIBRARY}
     ${PNG_LIBRARY}
     ${OPENGL_LIBRARIES}
-    ${ROCKET_LIBRARIES}
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Qt5Widgets_LIBRARIES}
@@ -116,8 +124,10 @@ link_libraries (
     StormLib
     Audio
     Settings
+    StateMachine
     Script
     Serial
+    nuklear
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

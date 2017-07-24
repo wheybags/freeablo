@@ -35,12 +35,14 @@ namespace Engine
 
         while(true)
         {
+            mSpritesToPreload.clear();
+
             while(mQueue.pop(message))
                 handleMessage(message);
 
             inputManager->poll();
 
-            if(!renderer->renderFrame(mRenderState))
+            if(!renderer->renderFrame(mRenderState, mSpritesToPreload))
                 break;
 
             auto now = std::chrono::system_clock::now();
@@ -63,7 +65,7 @@ namespace Engine
     void ThreadManager::playMusic(const std::string& path)
     {
         Message message;
-        message.type = PLAY_MUSIC;
+        message.type = ThreadState::PLAY_MUSIC;
         message.data.musicPath = new std::string(path);
 
         mQueue.push(message);
@@ -78,7 +80,7 @@ namespace Engine
         }
 
         Message message;
-        message.type = PLAY_SOUND;
+        message.type = ThreadState::PLAY_SOUND;
         message.data.soundPath = new std::string(path);
 
         mQueue.push(message);
@@ -87,52 +89,67 @@ namespace Engine
     void ThreadManager::stopSound()
     {
         Message message;
-        message.type = STOP_SOUND;
+        message.type = ThreadState::STOP_SOUND;
         mQueue.push(message);
     }
 
     void ThreadManager::sendRenderState(FARender::RenderState* state)
     {
         Message message;
-        message.type = RENDER_STATE;
+        message.type = ThreadState::RENDER_STATE;
         message.data.renderState = state;
 
         mQueue.push(message);
     }
 
+    void ThreadManager::sendSpritesForPreload(std::vector<uint32_t> sprites)
+    {
+        Message message;
+        message.type = ThreadState::PRELOAD_SPRITES;
+        message.data.preloadSpriteIds = new std::vector<uint32_t>(sprites);
+
+        mQueue.push(message);
+    }
+
+
     void ThreadManager::handleMessage(const Message& message)
     {
         switch(message.type)
         {
-            case PLAY_MUSIC:
+            case ThreadState::PLAY_MUSIC:
             {
                 mAudioManager.playMusic(*message.data.musicPath);
                 delete message.data.musicPath;
                 break;
             }
 
-            case PLAY_SOUND:
+            case ThreadState::PLAY_SOUND:
             {
                 mAudioManager.playSound(*message.data.soundPath);
                 delete message.data.soundPath;
                 break;
             }
 
-            case STOP_SOUND:
+            case ThreadState::STOP_SOUND:
             {
                 mAudioManager.stopSound();
                 break;
             }
 
-            case RENDER_STATE:
+            case ThreadState::RENDER_STATE:
             {
-				if (mRenderState && mRenderState != message.data.renderState)
+                if (mRenderState && mRenderState != message.data.renderState)
                     mRenderState->ready = true;
 
                 mRenderState = message.data.renderState;
                 break;
             }
-
+            case ThreadState::PRELOAD_SPRITES:
+            {
+                mSpritesToPreload.insert(mSpritesToPreload.end(), message.data.preloadSpriteIds->begin(), message.data.preloadSpriteIds->end());
+                delete message.data.preloadSpriteIds;
+                break;
+            }
         }
     }
 }

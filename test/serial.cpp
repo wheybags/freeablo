@@ -88,7 +88,7 @@ TEST(Serial, TestWriteString)
     ASSERT_EQ(Serial::Error::Success, err);
     ASSERT_EQ(readStr, test);
 
-    ASSERT_EQ(write.tell(), (test.length()*8) + posAfterWritingLen);
+    ASSERT_EQ(write.tell(), int64_t((test.length()*8) + posAfterWritingLen));
 }
 
 TEST(Serial, TestFillZeros)
@@ -464,7 +464,7 @@ TEST(Serial, TestResizable)
 
     bool b = true;
 
-    ASSERT_EQ(1, buf.size());
+    ASSERT_EQ(1U, buf.size());
     for (uint32_t i = 0; i < 8; ++i)
     {
         err = write.handleBool(b);
@@ -473,10 +473,10 @@ TEST(Serial, TestResizable)
 
     b = false;
 
-    ASSERT_EQ(1, buf.size());
+    ASSERT_EQ(1U, buf.size());
     err = write.handleBool(b);
     ASSERT_EQ(err, Serial::Error::Success);
-    ASSERT_EQ(2, buf.size());
+    ASSERT_EQ(2U, buf.size());
 
     buf.resize(1);
     buf[0] = 0;
@@ -484,23 +484,23 @@ TEST(Serial, TestResizable)
 
     int32_t i = 87;
 
-    ASSERT_EQ(1, buf.size());
+    ASSERT_EQ(1U, buf.size());
     err = write.handleInt32(i);
     ASSERT_EQ(err, Serial::Error::Success);
-    ASSERT_EQ(1, buf.size());
+    ASSERT_EQ(1U, buf.size());
     err = write.handleInt32(i);
     ASSERT_EQ(err, Serial::Error::Success);
-    ASSERT_EQ(2, buf.size());
+    ASSERT_EQ(2U, buf.size());
 
     buf.resize(1);
     buf[0] = 0;
     write = Serial::WriteBitStream(buf);
 
     std::string str = "1234";
-    ASSERT_EQ(1, buf.size());
+    ASSERT_EQ(1U, buf.size());
     err = write.handleString((uint8_t*)&str[0], 4);
     ASSERT_EQ(err, Serial::Error::Success);
-    ASSERT_EQ(4, buf.size());
+    ASSERT_EQ(4U, buf.size());
 }
 
 int main(int argc, char **argv) 

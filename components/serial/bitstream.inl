@@ -47,7 +47,7 @@ namespace Serial
 
         if (handleSign && ((tmp >> (requiredBits-1)) & 1))
         {
-            int64_t nBits = ~0 << requiredBits;
+            uint64_t nBits = uint64_t(~0) << requiredBits;
             tmp |= nBits;
         }
 

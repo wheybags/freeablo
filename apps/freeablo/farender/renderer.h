@@ -44,7 +44,7 @@ namespace FARender
 
         std::vector<std::tuple<FASpriteGroup*, uint32_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
 
-        std::vector<DrawCommand> guiDrawBuffer;
+        NuklearFrameDump nuklearData;
 
         Tileset tileset;
 
@@ -55,7 +55,7 @@ namespace FARender
 
         bool mCursorEmpty;
 
-        RenderState():ready(true) {}
+        RenderState(Render::NuklearGraphicsContext& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData.dev) {}
     };
 
     FASpriteGroup* getDefaultSprite();
@@ -83,33 +83,39 @@ namespace FARender
 
             Render::Tile getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos);
 
-            Rocket::Core::Context* getRocketContext();
-
             void setCursor(RenderState *State);
 
-            bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
+            bool renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload); ///< To be called only by Engine::ThreadManager
             void cleanup(); ///< To be called only by Engine::ThreadManager
 
+            nk_context* getNuklearContext()
+            {
+                return &mNuklearContext;
+            }
+
+            void getWindowDimensions(int32_t& w, int32_t& h);
+
+            bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites);
 
         private:
-            bool loadGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, Rocket::Core::Vector2i& texture_dimensions, const Rocket::Core::String& source);
-            bool generateGuiTextureFunc(Rocket::Core::TextureHandle& texture_handle, const Rocket::Core::byte* source, const Rocket::Core::Vector2i& source_dimensions);
-            void releaseGuiTextureFunc(Rocket::Core::TextureHandle texture_handle);
-
             static Renderer* mRenderer; ///< Singleton instance
 
             std::atomic_bool mDone;
             Render::LevelObjects mLevelObjects;
 
-            RenderState mStates[15];
-
-            Rocket::Core::Context* mRocketContext;
+            size_t mNumRenderStates = 15;
+            RenderState* mStates;
 
             SpriteManager mSpriteManager;
 
             volatile bool mAlreadyExited = false;
             std::mutex mDoneMutex;
             std::condition_variable mDoneCV;
+
+            nk_context mNuklearContext = nk_context();
+            Render::NuklearGraphicsContext mNuklearGraphicsData = Render::NuklearGraphicsContext();
+
+            std::atomic<std::int64_t> mWidthHeightTmp;
     };
 }
 

@@ -4,9 +4,13 @@
 
 #include <render/render.h>
 
-#include <misc/boost_python.h>
-
 #include <iostream>
+
+
+namespace Render
+{
+    extern struct nk_context* ctx;
+}
 
 namespace Input
 {
@@ -14,36 +18,24 @@ namespace Input
 
     void doNothing_keyPress(Key){}
     void doNothing_keyRelease(Key){}
-    void doNothing_mouseClick(uint32_t, uint32_t, Key){}
+    void doNothing_mouseClick(uint32_t, uint32_t, Key, bool){}
     void doNothing_mouseRelease(uint32_t, uint32_t, Key){}
-    void doNothing_mouseMove(uint32_t, uint32_t){}
+    void doNothing_mouseMove(uint32_t, uint32_t, uint32_t, uint32_t) {}
+    void doNothing_textInput(std::string){}
     
     #define getFunc(f) f ? f : doNothing_##f
 
-    void baseClickedHelper()
-    {
-        InputManager::get()->rocketBaseClicked();
-    }
-
-    BOOST_PYTHON_MODULE(freeablo_input)
-    {
-        boost::python::def("baseClicked", &baseClickedHelper);
-    }
-
     InputManager::InputManager(std::function<void(Key)> keyPress, std::function<void(Key)> keyRelease,
-        std::function<void(uint32_t, uint32_t, Key)> mouseClick,
+        std::function<void(uint32_t, uint32_t, Key, bool)> mouseClick,
         std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
-        std::function<void(uint32_t, uint32_t)> mouseMove,
-        Rocket::Core::Context* context):
-            
+        std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
+        std::function<void(std::string)> textInput):
             mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
-            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)), mContext(context), mModifiers(0)
-            {
-                assert(!instance);
-                instance = this;
-
-                initfreeablo_input();
-            }
+            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)), mTextInput(getFunc(textInput)), mModifiers(0)
+        {
+            assert(!instance);
+            instance = this;
+        }
 
     #define CASE(val) case SDLK_##val: key = KEY_##val; break; 
 
@@ -217,6 +209,7 @@ namespace Input
                 return KEY_UNDEF;
         }
     }
+   
     
     void InputManager::poll()
     {
@@ -237,12 +230,19 @@ namespace Input
                     break;
                 }
 
+                case SDL_TEXTINPUT:
+                {
+                    e.vals.textInput.text = new std::string(event.text.text);
+                    break;
+                }
+
                 case SDL_MOUSEBUTTONDOWN:
                 case SDL_MOUSEBUTTONUP:
                 {
                     e.vals.mouseButton.key = event.button.button;
                     e.vals.mouseButton.x = event.button.x;
                     e.vals.mouseButton.y = event.button.y;
+                    e.vals.mouseButton.numClicks = event.button.clicks;
                     break;
                 }
 
@@ -250,6 +250,8 @@ namespace Input
                 {
                     e.vals.mouseMove.x = event.motion.x;
                     e.vals.mouseMove.y = event.motion.y;
+                    e.vals.mouseMove.xrel = event.motion.xrel;
+                    e.vals.mouseMove.yrel = event.motion.yrel;
                     break;
                 }
                 
@@ -293,425 +295,9 @@ namespace Input
         mModifiers = mods;
     }
     
-    int rocketTranslateMouse(Key key)
-    {
-        switch(key)
-        {
-            case KEY_LEFT_MOUSE:
-                return 0;
-            case KEY_RIGHT_MOUSE:
-                return 1;
-            case KEY_MIDDLE_MOUSE:
-                return 2;
-            default:
-                return 3;
-        }
-    }
-
-    int getRocketModifiers(uint32_t mods)
-    {
-        int retval = 0;
-
-        if(mods & FAMOD_CTRL)
-            retval |= Rocket::Core::Input::KM_CTRL;
-
-        if(mods & FAMOD_SHIFT)
-            retval |= Rocket::Core::Input::KM_SHIFT;
-
-        if(mods & FAMOD_ALT)
-            retval |= Rocket::Core::Input::KM_ALT;
-
-        return retval;
-    }
-
-    int32_t consoleTranslateKey(int32_t key, uint32_t mods)
-    {
-        static const int32_t ASCII_OFFSET = 32;
-
-        if(mods & FAMOD_SHIFT)
-        {
-            switch(key)
-            {
-                case SDLK_0: key = SDLK_RIGHTPAREN; break;
-                case SDLK_1: key = SDLK_EXCLAIM; break;
-                case SDLK_2: key = SDLK_AT; break;
-                case SDLK_3: key = SDLK_HASH; break;
-                case SDLK_4: key = SDLK_DOLLAR; break;
-                case SDLK_5: key = SDLK_PERCENT; break;
-                case SDLK_6: key = SDLK_CARET; break;
-                case SDLK_7: key = SDLK_AMPERSAND; break;
-                case SDLK_8: key = SDLK_ASTERISK; break;
-                case SDLK_9: key = SDLK_LEFTPAREN; break;
-                case SDLK_MINUS: key = SDLK_UNDERSCORE; break;
-                case SDLK_EQUALS: key = SDLK_PLUS; break;
-                case SDLK_SEMICOLON: key = SDLK_COLON; break;
-                case SDLK_COMMA: key = SDLK_LESS; break;
-                case SDLK_STOP: key = SDLK_GREATER; break;
-                case SDLK_QUOTE: key = SDLK_QUOTEDBL; break;
-                case SDLK_SLASH: key = SDLK_QUESTION; break;
-                default: break;
-            }
-
-            if(key >= SDLK_a && key <= SDLK_z)
-                key -= ASCII_OFFSET;
-        }
-
-        return key;
-    }
-
-    Rocket::Core::Input::KeyIdentifier rocketTranslateKey(int sdlkey)
-    {
-        using namespace Rocket::Core::Input;
-
-
-        switch(sdlkey) {
-            case SDLK_UNKNOWN:
-                return KI_UNKNOWN;
-                break;
-            case SDLK_SPACE:
-                return KI_SPACE;
-                break;
-            case SDLK_0:
-                return KI_0;
-                break;
-            case SDLK_1:
-                return KI_1;
-                break;
-            case SDLK_2:
-                return KI_2;
-                break;
-            case SDLK_3:
-                return KI_3;
-                break;
-            case SDLK_4:
-                return KI_4;
-                break;
-            case SDLK_5:
-                return KI_5;
-                break;
-            case SDLK_6:
-                return KI_6;
-                break;
-            case SDLK_7:
-                return KI_7;
-                break;
-            case SDLK_8:
-                return KI_8;
-                break;
-            case SDLK_9:
-                return KI_9;
-                break;
-            case SDLK_a:
-                return KI_A;
-                break;
-            case SDLK_b:
-                return KI_B;
-                break;
-            case SDLK_c:
-                return KI_C;
-                break;
-            case SDLK_d:
-                return KI_D;
-                break;
-            case SDLK_e:
-                return KI_E;
-                break;
-            case SDLK_f:
-                return KI_F;
-                break;
-            case SDLK_g:
-                return KI_G;
-                break;
-            case SDLK_h:
-                return KI_H;
-                break;
-            case SDLK_i:
-                return KI_I;
-                break;
-            case SDLK_j:
-                return KI_J;
-                break;
-            case SDLK_k:
-                return KI_K;
-                break;
-            case SDLK_l:
-                return KI_L;
-                break;
-            case SDLK_m:
-                return KI_M;
-                break;
-            case SDLK_n:
-                return KI_N;
-                break;
-            case SDLK_o:
-                return KI_O;
-                break;
-            case SDLK_p:
-                return KI_P;
-                break;
-            case SDLK_q:
-                return KI_Q;
-                break;
-            case SDLK_r:
-                return KI_R;
-                break;
-            case SDLK_s:
-                return KI_S;
-                break;
-            case SDLK_t:
-                return KI_T;
-                break;
-            case SDLK_u:
-                return KI_U;
-                break;
-            case SDLK_v:
-                return KI_V;
-                break;
-            case SDLK_w:
-                return KI_W;
-                break;
-            case SDLK_x:
-                return KI_X;
-                break;
-            case SDLK_y:
-                return KI_Y;
-                break;
-            case SDLK_z:
-                return KI_Z;
-                break;
-            case SDLK_SEMICOLON:
-                return KI_OEM_1;
-                break;
-            case SDLK_PLUS:
-                return KI_OEM_PLUS;
-                break;
-            case SDLK_COMMA:
-                return KI_OEM_COMMA;
-                break;
-            case SDLK_MINUS:
-                return KI_OEM_MINUS;
-                break;
-            case SDLK_PERIOD:
-                return KI_OEM_PERIOD;
-                break;
-            case SDLK_SLASH:
-                return KI_OEM_2;
-                break;
-            case SDLK_BACKQUOTE:
-                return KI_OEM_3;
-                break;
-            case SDLK_LEFTBRACKET:
-                return KI_OEM_4;
-                break;
-            case SDLK_BACKSLASH:
-                return KI_OEM_5;
-                break;
-            case SDLK_RIGHTBRACKET:
-                return KI_OEM_6;
-                break;
-            case SDLK_QUOTEDBL:
-                return KI_OEM_7;
-                break;
-            case SDLK_KP_0:
-                return KI_NUMPAD0;
-                break;
-            case SDLK_KP_1:
-                return KI_NUMPAD1;
-                break;
-            case SDLK_KP_2:
-                return KI_NUMPAD2;
-                break;
-            case SDLK_KP_3:
-                return KI_NUMPAD3;
-                break;
-            case SDLK_KP_4:
-                return KI_NUMPAD4;
-                break;
-            case SDLK_KP_5:
-                return KI_NUMPAD5;
-                break;
-            case SDLK_KP_6:
-                return KI_NUMPAD6;
-                break;
-            case SDLK_KP_7:
-                return KI_NUMPAD7;
-                break;
-            case SDLK_KP_8:
-                return KI_NUMPAD8;
-                break;
-            case SDLK_KP_9:
-                return KI_NUMPAD9;
-                break;
-            case SDLK_KP_ENTER:
-                return KI_NUMPADENTER;
-                break;
-            case SDLK_KP_MULTIPLY:
-                return KI_MULTIPLY;
-                break;
-            case SDLK_KP_PLUS:
-                return KI_ADD;
-                break;
-            case SDLK_KP_MINUS:
-                return KI_SUBTRACT;
-                break;
-            case SDLK_KP_PERIOD:
-                return KI_DECIMAL;
-                break;
-            case SDLK_KP_DIVIDE:
-                return KI_DIVIDE;
-                break;
-            case SDLK_KP_EQUALS:
-                return KI_OEM_NEC_EQUAL;
-                break;
-            case SDLK_BACKSPACE:
-                return KI_BACK;
-                break;
-            case SDLK_TAB:
-                return KI_TAB;
-                break;
-            case SDLK_CLEAR:
-                return KI_CLEAR;
-                break;
-            case SDLK_RETURN:
-                return KI_RETURN;
-                break;
-            case SDLK_PAUSE:
-                return KI_PAUSE;
-                break;
-            case SDLK_CAPSLOCK:
-                return KI_CAPITAL;
-                break;
-            case SDLK_PAGEUP:
-                return KI_PRIOR;
-                break;
-            case SDLK_PAGEDOWN:
-                return KI_NEXT;
-                break;
-            case SDLK_END:
-                return KI_END;
-                break;
-            case SDLK_HOME:
-                return KI_HOME;
-                break;
-            case SDLK_LEFT:
-                return KI_LEFT;
-                break;
-            case SDLK_UP:
-                return KI_UP;
-                break;
-            case SDLK_RIGHT:
-                return KI_RIGHT;
-                break;
-            case SDLK_DOWN:
-                return KI_DOWN;
-                break;
-            case SDLK_INSERT:
-                return KI_INSERT;
-                break;
-            case SDLK_DELETE:
-                return KI_DELETE;
-                break;
-            case SDLK_HELP:
-                return KI_HELP;
-                break;
-            case SDLK_F1:
-                return KI_F1;
-                break;
-            case SDLK_F2:
-                return KI_F2;
-                break;
-            case SDLK_F3:
-                return KI_F3;
-                break;
-            case SDLK_F4:
-                return KI_F4;
-                break;
-            case SDLK_F5:
-                return KI_F5;
-                break;
-            case SDLK_F6:
-                return KI_F6;
-                break;
-            case SDLK_F7:
-                return KI_F7;
-                break;
-            case SDLK_F8:
-                return KI_F8;
-                break;
-            case SDLK_F9:
-                return KI_F9;
-                break;
-            case SDLK_F10:
-                return KI_F10;
-                break;
-            case SDLK_F11:
-                return KI_F11;
-                break;
-            case SDLK_F12:
-                return KI_F12;
-                break;
-            case SDLK_F13:
-                return KI_F13;
-                break;
-            case SDLK_F14:
-                return KI_F14;
-                break;
-            case SDLK_F15:
-                return KI_F15;
-                break;
-            case SDLK_NUMLOCKCLEAR:
-                return KI_NUMLOCK;
-                break;
-            case SDLK_SCROLLLOCK:
-                return KI_SCROLL;
-                break;
-            case SDLK_LSHIFT:
-                return KI_LSHIFT;
-                break;
-            case SDLK_RSHIFT:
-                return KI_RSHIFT;
-                break;
-            case SDLK_LCTRL:
-                return KI_LCONTROL;
-                break;
-            case SDLK_RCTRL:
-                return KI_RCONTROL;
-                break;
-            case SDLK_LALT:
-                return KI_LMENU;
-                break;
-            case SDLK_RALT:
-                return KI_RMENU;
-                break;
-            case SDLK_LGUI:
-                return KI_LMETA;
-                break;
-            case SDLK_RGUI:
-                return KI_RMETA;
-                break;
-            /*case SDLK_LSUPER:
-                return KI_LWIN;
-                break;
-            case SDLK_RSUPER:
-                return KI_RWIN;
-                break;*/
-            case SDLK_ESCAPE:
-                return KI_ESCAPE;
-                break;
-            default:
-                return KI_UNKNOWN;
-                break;
-        }
-    }
-
     uint32_t InputManager::getModifiers()
     {
         return mModifiers;
-    }
-
-    void InputManager::rocketBaseClicked()
-    {
-        mBaseWasClicked = true;
     }
 
     void InputManager::processInput(bool paused)
@@ -729,25 +315,6 @@ namespace Input
                     {
                         if(!paused)
                             mKeyPress(key);
-
-                        if(mContext)
-                        {
-                            if(event.vals.key >= 32 && event.vals.key <= 255)
-                            {
-                                // How to convert properly event.vals.key + mModifier to lower/uppercase/chars like !@#$%^...?
-                                int32_t consoleKey = consoleTranslateKey(event.vals.key, mModifiers);
-                                mContext->ProcessTextInput(consoleKey);
-                            }
-
-                            mContext->ProcessKeyDown(rocketTranslateKey(event.vals.key), getRocketModifiers(mModifiers));
-
-                            // Hack for moving cursor on the end of the text in input in librocket
-                            // Default behaviour sets cursor on the start of input
-                            if(event.vals.key == SDLK_UP || event.vals.key == SDLK_TAB)
-                            {
-                                mContext->ProcessKeyDown(rocketTranslateKey(SDLK_END), getRocketModifiers(mModifiers));
-                            }
-                        }
                     }
                     break;
                 }
@@ -758,9 +325,14 @@ namespace Input
                     {
                         if(!paused)
                             mKeyRelease(key);
-                        if(mContext)
-                            mContext->ProcessKeyUp(rocketTranslateKey(event.vals.key), getRocketModifiers(mModifiers));
                     }
+                    break;
+                }
+
+                case SDL_TEXTINPUT:
+                {
+                    mTextInput(*event.vals.textInput.text);
+                    delete event.vals.textInput.text;
                     break;
                 }
 
@@ -769,21 +341,7 @@ namespace Input
                     Key key = getMouseKey(event.vals.mouseButton.key);
 
                     if(key != KEY_UNDEF)
-                    {
-                        if(mContext)
-                        {
-                            mBaseWasClicked = false;
-                            mContext->ProcessMouseButtonDown(rocketTranslateMouse(key), getRocketModifiers(mModifiers));
-
-                            if(mBaseWasClicked && !paused)
-                                mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
-                        }
-                        else
-                        {
-                            if(!paused)
-                                mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
-                        }
-                    }
+                        mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key, event.vals.mouseButton.numClicks > 1);
                     
                     break;
                 }
@@ -791,25 +349,14 @@ namespace Input
                 case SDL_MOUSEBUTTONUP:
                 {
                     Key key = getMouseKey(event.vals.mouseButton.key);
+                    mMouseRelease(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
 
-                    if(key != KEY_UNDEF)
-                    {
-                        if(!paused)
-                            mMouseRelease(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
-                        if(mContext)
-                            mContext->ProcessMouseButtonUp(rocketTranslateMouse(key), getRocketModifiers(mModifiers));
-                    }
-                    
                     break;
                 }
 
                 case SDL_MOUSEMOTION:
                 {
-                    if(!paused)
-                        mMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y);
-                    if(mContext)
-                        mContext->ProcessMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y, getRocketModifiers(mModifiers));
-                    break;
+                    mMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y, event.vals.mouseMove.xrel, event.vals.mouseMove.yrel);
                 }
 
                 default:

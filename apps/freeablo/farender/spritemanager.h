@@ -3,6 +3,8 @@
 
 #include "spritecache.h"
 
+#include <set>
+
 namespace FARender
 {
     struct RawCacheTmp
@@ -21,6 +23,10 @@ namespace FARender
     {
         public:
             SpriteManager(uint32_t cacheSize);
+
+            //////////////////////////////////
+            // game thread public functions //
+            //////////////////////////////////
 
             FASpriteGroup* get(const std::string& path); ///< To be called from the game thread
             FASpriteGroup* getTileset(const std::string& celPath, const std::string& minPath, bool top); ///< To be called from the game thread
@@ -44,6 +50,13 @@ namespace FARender
             /// @brief To be called from the game thread
             FASpriteGroup* getFromRaw(const uint8_t* source, uint32_t width, uint32_t height);
 
+            bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites); ///< To be called from the game thread
+
+
+            /////////////////////////////
+            // render thread functions //
+            /////////////////////////////
+
             /// Wrapper for SpriteCache::get(uint32_t, bool)
             /// When loading a normal sprite reference, will just pass through, otherwise the reference is a raw load reference from getFromRaw above,
             /// so will load that and inject it into mCache with SpriteCache::directInsert
@@ -57,9 +70,13 @@ namespace FARender
        private:
             SpriteCache mCache;
 
+            void addToPreloadList(uint32_t index); ///< To be called from the game thread
+
             std::map<uint32_t, RawCacheTmp> mRawCache;
             std::vector<FASpriteGroup*> mRawSpriteGroups;
             std::map<uint32_t, FASpriteGroup*> mServerSpriteMap;
+            std::vector<uint32_t> mSpritesNeedingPreloading;
+            std::set<uint32_t> mSpritesAlredyPreloaded;
     };
 }
 
