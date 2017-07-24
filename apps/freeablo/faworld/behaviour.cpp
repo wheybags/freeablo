@@ -34,8 +34,10 @@ namespace FAWorld
         return nearest;
     }
 
-    void BasicMonsterBehaviour::update(size_t ticksPassed)
+    void BasicMonsterBehaviour::update()
     {
+        Tick ticksPassed = World::get()->getCurrentTick();
+
         if (!mActor->isDead()) {
             const Player * nearest = FAWorld::findNearestPlayer(mActor);
             // we are close enough to engage the player

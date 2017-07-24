@@ -44,7 +44,7 @@ namespace FAWorld
         size_t getNextLevel();
         size_t getPreviousLevel();
 
-        void update(bool noclip, size_t tick);
+        void update(bool noclip);
 
         void actorMapInsert(Actor* actor);
         void actorMapRemove(Actor* actor);

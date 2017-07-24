@@ -15,7 +15,7 @@ namespace FAWorld
         Behaviour(Actor* actor): mActor(actor) {};
         virtual ~Behaviour() {};
 
-        virtual void update(size_t ticksPassed) = 0;
+        virtual void update() = 0;
 
     protected:
         Actor * mActor;
@@ -28,8 +28,7 @@ namespace FAWorld
     public:
         NullBehaviour(Actor* actor): Behaviour(actor) {};
         ~NullBehaviour() {};
-        void update(size_t ticksPassed) {
-            UNUSED_PARAM(ticksPassed);
+        void update() {
         };
     };
 
@@ -38,7 +37,7 @@ namespace FAWorld
     public:
         BasicMonsterBehaviour(Actor* actor): Behaviour(actor) {};
         ~BasicMonsterBehaviour() {};
-        void update(size_t ticksPassed);
+        void update();
 
     private:
         size_t mLastActionTick;

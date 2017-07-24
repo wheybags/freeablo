@@ -34,10 +34,10 @@ namespace FAWorld
         mStats->setActor(this);
         mStats->recalculateDerivedStats();
 
-        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1f);
-        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.1f);
-        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(0.2f);
-        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1f);
+        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.5f);
+        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.5f);
+        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(1.0f);
+        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.5f);
 
         mFaction = Faction::heaven();
 
@@ -94,7 +94,7 @@ namespace FAWorld
         mFmtClassCode = className[0];
     }
 
-    FARender::FASpriteGroup* Player::getCurrentAnim()
+    void Player::getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame)
     {
         auto lastClassName = mFmtClassName;
         auto lastClassCode = mFmtClassCode;
@@ -139,7 +139,9 @@ namespace FAWorld
             }
         }
 
-        return Actor::getCurrentAnim();
+        mAnimation.setIdleAnimation(mIdleAnim, mAnimTimeMap[AnimState::idle]);
+
+        Actor::getCurrentFrame(sprite, frame);
     }
 
     void Player::updateSpriteFormatVars()

@@ -24,6 +24,8 @@ namespace FAWorld
     class Player;
     class GameLevel;
 
+    typedef int32_t Tick;
+
     class World : public Engine::KeyboardInputObserverInterface, public Engine::MouseInputObserverInterface
     {
         public:
@@ -62,6 +64,8 @@ namespace FAWorld
 
             void getAllActors(std::vector<Actor*>& actors);
 
+            Tick getCurrentTick();
+
         private:
             void playLevelMusic(size_t level);
             void changeLevel(bool up);
@@ -70,7 +74,7 @@ namespace FAWorld
             void onMouseDown(Engine::Point mousePosition);
 
             std::map<size_t, GameLevel*> mLevels;
-            size_t mTicksPassed = 0;
+            Tick mTicksPassed = 0;
             Player* mCurrentPlayer;
             std::vector<Player*> mPlayers;
             const DiabloExe::DiabloExe& mDiabloExe;

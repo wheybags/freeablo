@@ -17,11 +17,11 @@ namespace FAWorld
 
     void Monster::init()
     {
-        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1f);
-        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.1f);
-        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.1f);
-        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(0.2f);
-        mAnimTimeMap[AnimState::hit] = FAWorld::World::getTicksInPeriod(0.1f);
+        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.5f);
+        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.5f);
+        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.5f);
+        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(1.0f);
+        mAnimTimeMap[AnimState::hit] = FAWorld::World::getTicksInPeriod(0.5f);
 
         mFaction = Faction::hell();
     }
@@ -32,8 +32,7 @@ namespace FAWorld
             return false;
         isAttacking = true;
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-        setAnimation(AnimState::attack, true);
-        mAnimPlaying = true;
+        playAnimation(AnimState::attack, AnimationPlayer::AnimationType::Once);
         return true;
     }
 
@@ -81,6 +80,8 @@ namespace FAWorld
         mDieAnim =  FARender::Renderer::get()->loadImage((fmt % 'd').str());
         mAttackAnim =  FARender::Renderer::get()->loadImage((fmt % 'a').str());
         mHitAnim =  FARender::Renderer::get()->loadImage((fmt % 'h').str());
+
+        setIdleAnimation((fmt % 'n').str());
     }
 
     std::string Monster::getDieWav()

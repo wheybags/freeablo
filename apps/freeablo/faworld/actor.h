@@ -49,6 +49,35 @@ namespace FAWorld
         class BaseState;
     }
 
+    class AnimationPlayer
+    {
+        public:
+
+            enum class AnimationType
+            {
+                Looped,
+                Once,
+                FreezeAtEnd
+            };
+
+            AnimationPlayer() {}
+            AnimationPlayer(FARender::FASpriteGroup* idleAnim, Tick idleAnimDuration);
+
+            void getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame);
+            void playAnimation(FARender::FASpriteGroup* anim, Tick duration, AnimationType type);
+            void setIdleAnimation(FARender::FASpriteGroup* idleAnim, Tick idleAnimDuration);
+
+        private:
+            FARender::FASpriteGroup* mIdleAnim = nullptr;
+            Tick mIdleAnimDuration = 0;
+
+            FARender::FASpriteGroup* mCurrentAnim = nullptr;
+            
+            Tick mPlayingAnimDuration = 0;
+            AnimationType mPlayingAnimType;
+            Tick mPlayingAnimStarted;
+    };
+
     class Actor : public NetObject
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
@@ -62,26 +91,25 @@ namespace FAWorld
                   const std::string& dieAnimPath=""
                   );
 
-            virtual void update(bool noclip, size_t ticksPassed);
+            virtual void update(bool noclip);
             virtual ~Actor();
             virtual std::string getDieWav(){return "";}
             virtual std::string getHitWav(){return "";}
             virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}
             virtual void takeDamage(double amount);
             virtual int32_t getCurrentHP();
-            bool mAnimPlaying = false;
             bool isAttacking = false;
             bool isTalking = false;
-            virtual FARender::FASpriteGroup* getCurrentAnim();
-            void setAnimation(AnimState::AnimState state, bool reset=false);
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);
-            AnimState::AnimState getAnimState();
             bool findPath(GameLevelImpl* level, std::pair<int32_t, int32_t> destination);
 
             StateMachine::StateMachine<Actor>* mActorStateMachine;
 
-
+            virtual void getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame);
+            void playAnimation(AnimState::AnimState state, AnimationPlayer::AnimationType type);
+            bool animationPlaying();
+            
             int32_t getId()
             {
                 return mId;
@@ -110,7 +138,9 @@ namespace FAWorld
             FARender::FASpriteGroup* mAttackAnim = FARender::getDefaultSprite();
             FARender::FASpriteGroup* mHitAnim = FARender::getDefaultSprite();
 
-            size_t mFrame;
+            std::map<AnimState::AnimState, size_t> mAnimTimeMap;
+
+
             virtual void die();
             std::pair<int32_t, int32_t> mDestination;
             std::pair<int32_t, int32_t>& destination()
@@ -131,15 +161,14 @@ namespace FAWorld
               mBehaviour = behaviour;
             };
 
-            std::map<AnimState::AnimState, size_t> mAnimTimeMap;
             ActorStats * mStats=nullptr;
 
             template <class Stream>
             Serial::Error::Error faSerial(Stream& stream)
             {
                 serialise_object(stream, mPos);
-                serialise_int(stream, 0, 2048, mFrame);
-                serialise_enum(stream, AnimState::AnimState, mAnimState);
+                //serialise_int(stream, 0, 2048, mFrame);
+                //serialise_enum(stream, AnimState::AnimState, mAnimState);
 
                 int32_t destXTmp = mDestination.first;
                 int32_t destYTmp = mDestination.second;
@@ -229,6 +258,8 @@ namespace FAWorld
             bool mCanTalk = false;
             Faction mFaction;
 
+            AnimationPlayer mAnimation;
+
             friend class boost::serialization::access;
 
             template<class Archive>
@@ -237,8 +268,7 @@ namespace FAWorld
                 UNUSED_PARAM(version);
 
                 ar & this->mPos;
-                ar & this->mFrame;
-                ar & this->mAnimState;
+                //ar & this->mFrame;
                 ar & this->mDestination;
             }
 
@@ -248,8 +278,7 @@ namespace FAWorld
                 UNUSED_PARAM(version);
 
                 ar & this->mPos;
-                ar & this->mFrame;
-                ar & this->mAnimState;
+                //ar & this->mFrame;
                 ar & this->mDestination;
             }
 
@@ -257,7 +286,6 @@ namespace FAWorld
             bool canTalkTo(Actor * actor);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
-            AnimState::AnimState mAnimState;
 
         private:
             std::string mActorId;

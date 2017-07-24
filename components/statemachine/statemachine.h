@@ -23,7 +23,7 @@ namespace StateMachine
     {
     public:
         virtual ~AbstractState() {};
-        virtual boost::optional<StateChange<E>> update(E& entity, bool noclip, size_t ticksPassed) = 0;
+        virtual boost::optional<StateChange<E>> update(E& entity, bool noclip) = 0;
         virtual void onEnter(E& entity)
         {
                 UNUSED_PARAM(entity);
@@ -54,10 +54,10 @@ namespace StateMachine
         }
         ~StateMachine() {};
 
-        void update(bool noclip, size_t ticksPassed)
+        void update(bool noclip)
         {
             if (!mStateStack.empty()) {
-                if (auto next = mStateStack.back()->update(*mEntity, noclip, ticksPassed)) {
+                if (auto next = mStateStack.back()->update(*mEntity, noclip)) {
                     mStateStack.back()->onExit(*mEntity);
 
                     switch (next->op) {

@@ -68,14 +68,14 @@ namespace FAWorld
         return mLevel.getPreviousLevel();
     }
 
-    void GameLevel::update(bool noclip, size_t tick)
+    void GameLevel::update(bool noclip)
     {
         for(size_t i = 0; i < mActors.size(); i++)
         {
             Actor * actor = mActors[i];
 
             actorMapRemove(actor);
-            actor->update(noclip, tick);
+            actor->update(noclip);
             actorMapInsert(actor);
         }
 
@@ -131,9 +131,14 @@ namespace FAWorld
 
         for(size_t i = 0; i < mActors.size(); i++)
         {
-            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.getDirection() * mActors[i]->getCurrentAnim()->getAnimLength();
+            FARender::FASpriteGroup* sprite = nullptr;
+            int32_t frame = 0;
+            mActors[i]->getCurrentFrame(sprite, frame);
 
-            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
+            // offset the sprite for the current direction of the actor
+            frame += mActors[i]->mPos.getDirection() * sprite->getAnimLength();
+
+            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(sprite, frame, mActors[i]->mPos));
         }
     }
 

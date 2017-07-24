@@ -185,7 +185,7 @@ namespace FAWorld
             if (level && !done.count(level))
             {
                 done.insert(level);
-                level->update(noclip, mTicksPassed);
+                level->update(noclip);
             }
         }
     }
@@ -239,6 +239,12 @@ namespace FAWorld
         for (auto pair : mLevels)
             pair.second->getActors(actors);
     }
+
+    Tick World::getCurrentTick()
+    {
+        return mTicksPassed;
+    }
+
 
     void World::changeLevel(bool up)
     {
