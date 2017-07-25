@@ -84,17 +84,17 @@ namespace FAWorld
 
     void GameLevel::actorMapInsert(Actor* actor)
     {
-        mActorMap2D[actor->mPos.current()] = actor;
-        if(actor->mPos.mMoving)
-            mActorMap2D[actor->mPos.next()] = actor;
+        mActorMap2D[actor->getPos().current()] = actor;
+        if(actor->getPos().mMoving)
+            mActorMap2D[actor->getPos().next()] = actor;
     }
 
     void GameLevel::actorMapRemove(Actor* actor)
     {
-        if(mActorMap2D[actor->mPos.current()] == actor)
-            mActorMap2D.erase(actor->mPos.current());
-        if(actor->mPos.mMoving && mActorMap2D[actor->mPos.next()] == actor)
-            mActorMap2D.erase(actor->mPos.next());
+        if(mActorMap2D[actor->getPos().current()] == actor)
+            mActorMap2D.erase(actor->getPos().current());
+        if(actor->getPos().mMoving && mActorMap2D[actor->getPos().next()] == actor)
+            mActorMap2D.erase(actor->getPos().next());
     }
 
     void GameLevel::actorMapClear()
@@ -141,9 +141,9 @@ namespace FAWorld
             mActors[i]->getCurrentFrame(sprite, frame);
 
             // offset the sprite for the current direction of the actor
-            frame += mActors[i]->mPos.getDirection() * sprite->getAnimLength();
+            frame += mActors[i]->getPos().getDirection() * sprite->getAnimLength();
 
-            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(sprite, frame, mActors[i]->mPos));
+            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(sprite, frame, mActors[i]->getPos()));
         }
     }
 

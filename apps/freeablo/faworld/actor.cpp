@@ -54,9 +54,10 @@ namespace FAWorld
         const Position& pos,
         const std::string& dieAnimPath
     ) :
-        mPos(pos),
         mFaction(Faction::heaven())
     {
+        mMoveHandler.mCurrentPos = pos;
+
         if (!dieAnimPath.empty())
         {
             mDieAnim = FARender::Renderer::get()->loadImage(dieAnimPath);
@@ -66,7 +67,7 @@ namespace FAWorld
             mWalkAnim = FARender::Renderer::get()->loadImage(walkAnimPath);
         if (!idleAnimPath.empty())
             mIdleAnim = FARender::Renderer::get()->loadImage(idleAnimPath);
-        mDestination = mPos.current();
+
         mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.5f);
         mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.5f);
 
@@ -110,8 +111,9 @@ namespace FAWorld
 
     void Actor::die()
     {
-        mDestination = mPos.mGoal = mPos.current();
-        mPos.mMoving = false;
+        assert(false);
+        //mDestination = mPos.mGoal = mPos.current();
+        //mPos.mMoving = false;
         playAnimation(AnimState::dead, FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
         mIsDead = true;
         Engine::ThreadManager::get()->playSound(getDieWav());
@@ -127,14 +129,14 @@ namespace FAWorld
         return mFaction.canAttack(other->mFaction);
     }
 
-    bool Actor::findPath(GameLevelImpl * level, std::pair<int32_t, int32_t> destination)
+    /*bool Actor::findPath(GameLevelImpl * level, std::pair<int32_t, int32_t> destination)
     {
         bool bArrivable = false;
         mPos.mPath = pathFind(level, mPos.current(), destination, bArrivable);
         //mPos.mGoal = destination; // destination maybe changed by findPath.
         mPos.mIndex = 0;
         return bArrivable;
-    }
+    }*/
 
     void Actor::setLevel(GameLevel* level)
     {
@@ -145,6 +147,8 @@ namespace FAWorld
 
             mLevel = level;
             mLevel->addActor(this);
+
+            mMoveHandler.setLevel(level);
         }
     }
 
@@ -167,7 +171,7 @@ namespace FAWorld
         if (actor->isDead())
             return false;
 
-        if (mPos.distanceFrom(actor->mPos) >= 2)
+        if (getPos().distanceFrom(actor->getPos()) >= 2)
             return false;
 
         if (isAttacking)
@@ -184,7 +188,7 @@ namespace FAWorld
         if (this == actor)
             return false;
 
-        if (mPos.distanceFrom(actor->mPos) >= 2)
+        if (getPos().distanceFrom(actor->getPos()) >= 2)
             return false;
 
         if (!actor->canTalk())

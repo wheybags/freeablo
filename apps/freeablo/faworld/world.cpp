@@ -260,12 +260,12 @@ namespace FAWorld
         Player* player = getCurrentPlayer();
 
         if (up)
-            player->mPos = Position(level->downStairsPos().first, level->downStairsPos().second);
+            player->mMoveHandler.mCurrentPos = Position(level->downStairsPos().first, level->downStairsPos().second);
         else
-            player->mPos = Position(level->upStairsPos().first, level->upStairsPos().second);
+            player->mMoveHandler.mCurrentPos = Position(level->upStairsPos().first, level->upStairsPos().second);
 
 
-        player->destination() = player->mPos.current();
+        //player->destination() = player->getPos().current();
     }
 
     void World::stopPlayerActions()
@@ -276,7 +276,7 @@ namespace FAWorld
     void World::onMouseClick(Engine::Point mousePosition)
     {
         auto player = getCurrentPlayer();
-        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->mPos);
+        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->getPos());
 
         auto level = getCurrentLevel();
         level->activate(clickedTile.x, clickedTile.y);
@@ -285,10 +285,13 @@ namespace FAWorld
     void World::onMouseDown(Engine::Point mousePosition)
     {
         auto player = getCurrentPlayer();
-        std::pair<int32_t, int32_t>& destination = player->destination();
-        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->mPos);
+        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->getPos());
+
+        player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
+
+       /* std::pair<int32_t, int32_t>& destination = player->destination();
         destination = {clickedTile.x, clickedTile.y};
-        player->mPos.mGoal = destination;
+        player->mPos.mGoal = destination;*/
     }
 
     size_t World::getTicksInPeriod(float seconds)

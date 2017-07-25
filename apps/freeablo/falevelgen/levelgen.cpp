@@ -1217,7 +1217,7 @@ namespace FALevelGen
         Level::Level retval(level, tilPath, minPath, solPath, celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap(), previous, next);
 
         std::vector<FAWorld::Actor*> actors;
-        placeMonsters(retval, actors, exe, dLvl);
+        //placeMonsters(retval, actors, exe, dLvl);
 
         return new FAWorld::GameLevel(retval, dLvl, actors);
     }

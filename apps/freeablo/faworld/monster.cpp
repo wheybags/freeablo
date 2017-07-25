@@ -50,7 +50,7 @@ namespace FAWorld
         if (actor->isDead())
             return false;
 
-        if (mPos.distanceFrom(actor->mPos) >= 2)
+        if (getPos().distanceFrom(actor->getPos()) >= 2)
             return false;
 
         if (isAttacking)

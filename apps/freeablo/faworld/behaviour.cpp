@@ -23,7 +23,7 @@ namespace FAWorld
         int minDistance = 99999999;
         for (auto player : World::get()->getPlayers())
         {
-            int32_t distance = FAWorld::squaredDistance(player->mPos, actor->mPos);
+            int32_t distance = FAWorld::squaredDistance(player->getPos(), actor->getPos());
             if (distance < minDistance)
             {
                 minDistance = distance;
@@ -36,7 +36,7 @@ namespace FAWorld
 
     void BasicMonsterBehaviour::update()
     {
-        Tick ticksPassed = World::get()->getCurrentTick();
+        /*Tick ticksPassed = World::get()->getCurrentTick();
 
         if (!mActor->isDead()) 
         {
@@ -70,6 +70,6 @@ namespace FAWorld
                     mLastActionTick = ticksPassed;
                 }
             }
-        }
+        }*/
     }
 }

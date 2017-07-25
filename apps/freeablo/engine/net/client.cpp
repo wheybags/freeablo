@@ -214,7 +214,8 @@ namespace Engine
 
     void Client::sendClientPacket()
     {
-        auto packet = getWritePacket(Engine::PacketType::ClientToServerUpdate, 0, false, Engine::WritePacketResizableType::Resizable);
+        assert(false);
+        /*auto packet = getWritePacket(Engine::PacketType::ClientToServerUpdate, 0, false, Engine::WritePacketResizableType::Resizable);
 
         auto player = FAWorld::World::get()->getCurrentPlayer();
 
@@ -228,7 +229,7 @@ namespace Engine
         sendPacket(packet, mServerPeer);
 
         if (mUnknownServerSprites.size())
-            sendSpriteRequest();
+            sendSpriteRequest();*/
     }
 
     void Client::sendSpriteRequest()
