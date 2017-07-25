@@ -275,9 +275,11 @@ namespace FAWorld
 
     void World::onMouseClick(Engine::Point mousePosition)
     {
-        UNUSED_PARAM(mousePosition);
+        auto player = getCurrentPlayer();
+        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->mPos);
+
         auto level = getCurrentLevel();
-        level->activate(mDestination.first, mDestination.second);
+        level->activate(clickedTile.x, clickedTile.y);
     }
 
     void World::onMouseDown(Engine::Point mousePosition)
@@ -286,7 +288,7 @@ namespace FAWorld
         std::pair<int32_t, int32_t>& destination = player->destination();
         auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->mPos);
         destination = {clickedTile.x, clickedTile.y};
-        mDestination = player->mPos.mGoal = destination; //update it.
+        player->mPos.mGoal = destination;
     }
 
     size_t World::getTicksInPeriod(float seconds)
