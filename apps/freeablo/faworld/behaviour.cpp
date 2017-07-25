@@ -9,10 +9,10 @@
 namespace FAWorld
 {
 
-    static int squaredDistance(const Position& a, const Position& b)
+    static int32_t squaredDistance(const Position& a, const Position& b)
     {
-        int tmpX = abs(a.current().first - b.current().first);
-        int tmpY = abs(a.current().second - b.current().second);
+        int32_t tmpX = abs(a.current().first - b.current().first);
+        int32_t tmpY = abs(a.current().second - b.current().second);
         return tmpX*tmpX + tmpY*tmpY;
     }
 
@@ -23,7 +23,7 @@ namespace FAWorld
         int minDistance = 99999999;
         for (auto player : World::get()->getPlayers())
         {
-            int distance = FAWorld::squaredDistance(player->mPos, actor->mPos);
+            int32_t distance = FAWorld::squaredDistance(player->mPos, actor->mPos);
             if (distance < minDistance)
             {
                 minDistance = distance;
@@ -38,14 +38,22 @@ namespace FAWorld
     {
         Tick ticksPassed = World::get()->getCurrentTick();
 
-        if (!mActor->isDead()) {
+        if (!mActor->isDead()) 
+        {
             const Player * nearest = FAWorld::findNearestPlayer(mActor);
-            // we are close enough to engage the player
-            if (FAWorld::squaredDistance(nearest->mPos, mActor->mPos) <= 25) {
+
+            int32_t dist = FAWorld::squaredDistance(nearest->mPos, mActor->mPos);
+
+            if (dist <= 25) // we are close enough to engage the player
+            {
                 mActor->mDestination = mActor->mPos.mGoal = nearest->mPos.current();
             }
-            // if no player is in sight, let's wander around a bit
-            else if (!mActor->mPos.mMoving) {
+            else if (dist >= 200) // just freeze if we're miles away from anyone
+            {
+                return;
+            }
+            else if (!mActor->mPos.mMoving) // if no player is in sight, let's wander around a bit
+            {
                 // we arrived at the destination, so let's decide if
                 // we want to move some more
                 if (ticksPassed - mLastActionTick > ((size_t)rand() % 300) + 100) {
@@ -64,5 +72,4 @@ namespace FAWorld
             }
         }
     }
-
 }
