@@ -52,7 +52,7 @@ namespace FAWorld
         void actorMapRefresh();
         virtual bool isPassable(int x, int y) const;
 
-        Actor* getActorAt(size_t x, size_t y);
+        Actor* getActorAt(size_t x, size_t y) const;
 
         void addActor(Actor* actor);
 

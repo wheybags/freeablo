@@ -16,6 +16,7 @@
 #include "gamelevel.h"
 #include "world.h"
 #include "faction.h"
+#include "findpath.h"
 
 
 namespace Engine
@@ -49,6 +50,83 @@ namespace FAWorld
         class BaseState;
     }
 
+    class MovementHandler
+    {
+        void setDestination(std::pair<int32_t, int32_t> dest)
+        {
+            mDestination = dest;
+        }
+
+        bool moving()
+        {
+            return mCurrentPos.mMoving;
+        }
+
+
+        Position getCurrentPosition()
+        {
+            return mCurrentPos;
+        }
+
+        void update()
+        {
+            if (mCurrentPos.mDist == 0)
+            {
+                // if we have arrived, stop moving
+                if (mCurrentPos.current() == mDestination)
+                {
+                    mCurrentPos.mMoving = false;
+                    mCurrentPath.clear();
+                    mCurrentPathIndex = 0;
+                }
+                else
+                {
+                    bool needsRepath = true;
+
+                    // If our destination hasn't changed, keep pathing towards it
+                    if (mCurrentPath[mCurrentPath.size() - 1] == mDestination)
+                    {
+                        mCurrentPathIndex++;
+                        auto next = mCurrentPath[mCurrentPathIndex];
+                        
+                        // Make sure nothing has moved into the way
+                        if (mLevel->isPassable(next.first, next.second))
+                        {
+                            int32_t direction = Misc::getVecDir(Misc::getVec(mCurrentPos.current(), next));
+                            mCurrentPos.setDirection(direction);
+                            mCurrentPos.mMoving = true;
+                            needsRepath = false;
+                        }
+                    }
+
+                    if (needsRepath)
+                    {
+                        bool _;
+                        mCurrentPath = std::move(pathFind(mLevel, mCurrentPos.current(), mDestination, _));
+                        mCurrentPathIndex = 0;
+
+                        update();
+                        return;
+                    }
+                }
+            }
+
+            mCurrentPos.update();
+        }
+        
+        void setLevel(GameLevel* level)
+        {
+            mLevel = level;
+        }
+
+        GameLevel* mLevel;
+        Position mCurrentPos;
+        std::pair<int32_t, int32_t> mDestination;
+
+        int32_t mCurrentPathIndex = 0;
+        std::vector<std::pair<int32_t, int32_t>> mCurrentPath;
+    };
+
     class Actor : public NetObject
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
@@ -80,6 +158,16 @@ namespace FAWorld
             virtual void getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame);
             void playAnimation(AnimState::AnimState state, FARender::AnimationPlayer::AnimationType type);
             bool animationPlaying();
+
+            bool isPassable()
+            {
+                return mPassable || mIsDead;
+            }
+
+            bool setPassable(bool passable)
+            {
+                mPassable = passable;
+            }
             
             int32_t getId()
             {
@@ -228,6 +316,8 @@ namespace FAWorld
             bool mIsDead = false;
             bool mCanTalk = false;
             Faction mFaction;
+
+            bool mPassable = false;
 
             FARender::AnimationPlayer mAnimation;
 

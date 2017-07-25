@@ -37,10 +37,8 @@ namespace FAWorld
                     actor.findPath(world.getCurrentLevel(), actor.mPos.mGoal);
                     
                     auto nextPos = actor.mPos.pathNext(false);
-                    FAWorld::Actor* actorAtNext = world.getActorAt(nextPos.first, nextPos.second);
 
-                    if ((noclip || (actor.mLevel->isPassable(nextPos.first, nextPos.second) &&
-                                    (actorAtNext == NULL || actorAtNext == &actor || actorAtNext->isDead()))))
+                    if (actor.mLevel->isPassable(nextPos.first, nextPos.second))
                     {
                         actor.mPos.setDirection(Misc::getVecDir(Misc::getVec(actor.mPos.current(), nextPos)));
                         actor.mPos.mMoving = true;
