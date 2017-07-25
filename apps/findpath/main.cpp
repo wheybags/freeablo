@@ -16,6 +16,20 @@
 using namespace std::chrono;
 using namespace std;
 
+namespace std
+{
+    template <>
+    struct hash<pair<int, int> > {
+        inline size_t operator()(const pair<size_t, size_t>& location) const {
+            int x, y;
+            x = location.first;
+            y = location.second;
+            return x * 1812433253 + y;
+        }
+    };
+}
+
+
 namespace FAWorld
 {
     class LevelImpl : public GameLevelImpl
@@ -95,22 +109,22 @@ namespace FAWorld
 
 using namespace FAWorld;
 
-ostream& operator<<(ostream& os, FindPath::Location & location)
+ostream& operator<<(ostream& os, std::pair<int32_t, int32_t> & location)
 {
     os << "(" << location.first << "," << location.second << ")";
     return os;
 }
 
 void drawPath(::GameLevel::GameLevelImpl& graph, int field_width,
-    unordered_map<FindPath::Location, int>* distances = 0,
-    unordered_map<FindPath::Location, FindPath::Location>* point_to = 0,
-    vector<FindPath::Location>* path = 0)
+    unordered_map<std::pair<int32_t, int32_t>, int>* distances = 0,
+    unordered_map<std::pair<int32_t, int32_t>, std::pair<int32_t, int32_t>>* point_to = 0,
+    vector<std::pair<int32_t, int32_t>>* path = 0)
 {
     for (int y = 0; y != LevelImpl::MAP_SIZE; ++y)
     {
         for (int x = 0; x != LevelImpl::MAP_SIZE; ++x)
         {
-            FindPath::Location id;
+            std::pair<int32_t, int32_t> id;
             id.first = x;
             id.second = y;
             cout << left << setw(field_width);
@@ -151,10 +165,9 @@ int main()
 {
     using namespace FAWorld;
     FAWorld::LevelImpl * level = new LevelImpl();
-    FindPath findPath(level);
 
-    FindPath::Location start, goal;
-    vector<FindPath::Location> path;
+    std::pair<int32_t, int32_t> start, goal;
+    vector<std::pair<int32_t, int32_t>> path;
 
     int caseId = 1;
     cout << "Select case ID [1-6]";
@@ -163,37 +176,37 @@ int main()
     switch (caseId)
     {
     case 1:
-        start = FindPath::Location(2, 4);
-        goal = FindPath::Location(18, 5);
+        start = std::pair<int32_t, int32_t>(2, 4);
+        goal = std::pair<int32_t, int32_t>(18, 5);
         break;
     case 2:
-        start = FindPath::Location(18, 5);
-        goal = FindPath::Location(2, 3);
+        start = std::pair<int32_t, int32_t>(18, 5);
+        goal = std::pair<int32_t, int32_t>(2, 3);
         break;
     case 3:
-        start = FindPath::Location(3, 10);
-        goal = FindPath::Location(18, 10);
+        start = std::pair<int32_t, int32_t>(3, 10);
+        goal = std::pair<int32_t, int32_t>(18, 10);
         break;
     case 4:
         // This case uses "findClosesPointToGoal"
-        start = FindPath::Location(3, 10);
-        goal = FindPath::Location(15, 10);
+        start = std::pair<int32_t, int32_t>(3, 10);
+        goal = std::pair<int32_t, int32_t>(15, 10);
         break;
     case 5:
         // This case uses "findClosesPointToGoal"
-        start = FindPath::Location(18, 7);
-        goal = FindPath::Location(10, 10);
+        start = std::pair<int32_t, int32_t>(18, 7);
+        goal = std::pair<int32_t, int32_t>(10, 10);
         break;
     default:
         // This case uses "findClosesPointToGoal"
-        start = FindPath::Location(18, 10);
-        goal = FindPath::Location(10, 10);
+        start = std::pair<int32_t, int32_t>(18, 10);
+        goal = std::pair<int32_t, int32_t>(10, 10);
         break;
     }
 
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
     bool bArrivable = false;
-    path = findPath.find(start, goal, bArrivable);
+    path = pathFind(level, start, goal, bArrivable);
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
 

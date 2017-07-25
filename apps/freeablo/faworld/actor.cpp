@@ -130,7 +130,7 @@ namespace FAWorld
     bool Actor::findPath(GameLevelImpl * level, std::pair<int32_t, int32_t> destination)
     {
         bool bArrivable = false;
-        mPos.mPath = std::move(FindPath::get(level)->find(mPos.current(), destination, bArrivable));
+        mPos.mPath = pathFind(level, mPos.current(), destination, bArrivable);
         //mPos.mGoal = destination; // destination maybe changed by findPath.
         mPos.mIndex = 0;
         return bArrivable;

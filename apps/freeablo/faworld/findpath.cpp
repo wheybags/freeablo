@@ -1,63 +1,72 @@
 #include "findpath.h"
 
+namespace std 
+{
+    template <>
+    struct hash<pair<int, int> > {
+        inline size_t operator()(const pair<size_t, size_t>& location) const {
+            int x, y;
+            x = location.first;
+            y = location.second;
+            return x * 1812433253 + y;
+        }
+    };
+}
+
 namespace FAWorld
 {
-
-    FindPath* FindPath::instance = nullptr;
-
-    FindPath::FindPath(GameLevelImpl * level)
-        :FindPath::FindPath()
+    template<typename T, typename Number = size_t>
+    struct PriorityQueue
     {
-        this->level = level;
-    }
+        typedef std::pair<Number, T> PQElement;
+        std::priority_queue<PQElement, std::vector<PQElement>, std::greater<PQElement> > elements;
 
-    FindPath::FindPath() {
-        directions.push_back(make_pair(-1, 0));
-        directions.push_back(make_pair(1, 0));
-        directions.push_back(make_pair(0, -1));
-        directions.push_back(make_pair(0, 1));
-        directions.push_back(make_pair(-1, -1));
-        directions.push_back(make_pair(1, -1));
-        directions.push_back(make_pair(1, 1));
-        directions.push_back(make_pair(-1, 1));
-        sizeOfDirections = directions.size();
-    }
+        inline bool empty() { return elements.empty(); }
 
-    bool FindPath::inBounds(Location location)
+        inline void put(T item, Number priority)
+        {
+            elements.emplace(priority, item);
+        }
+
+        inline T get()
+        {
+            T best_item = elements.top().second;
+            elements.pop();
+            return best_item;
+        }
+    };
+
+    typedef std::pair<int32_t, int32_t> Location;
+
+    bool inBounds(GameLevelImpl* level, Location location)
     {
         int x = location.first;
         int y = location.second;
         return 0 <= x && x < (int)level->width() && 0 <= y && y < (int)level->height();
     }
 
-    bool FindPath::passable(Location location)
-    {
-        bool isPassable = level->isPassable(location.first, location.second);
-        return isPassable;
-    }
 
-    vector<FindPath::Location> FindPath::neighbors(Location location)
+    std::vector<Location> neighbors(GameLevelImpl* level, Location location)
     {
-        int dx, dy;
         int x = location.first;
         int y = location.second;
 
-        vector<Location> results;
+        std::vector<Location> results;
 
-        for (unsigned int i = 0; i < sizeOfDirections; i++)
+        for (int32_t dy = -1; dy <= 1; dy++)
         {
-            dx = directions[i].first;
-            dy = directions[i].second;
-
-            Location next(x + dx, y + dy);
-            if (inBounds(next) && passable(next))
-                results.push_back(next);
+            for (int32_t dx = -1; dx <= 1; dx++)
+            {
+                Location next(x + dx, y + dy);
+                if (inBounds(level, next) && level->isPassable(next.first, next.second))
+                    results.push_back(next);
+            }
         }
 
         return results;
     }
 
-    int FindPath::heuristic(FindPath::Location a, FindPath::Location b)
+    int heuristic(Location a, Location b)
     {
         int dx = abs(b.first - a.first);
         int dy = abs(b.second - a.second);
@@ -65,11 +74,12 @@ namespace FAWorld
         return dx + dy;
     }
 
-    bool FindPath::AStarSearch(
-        FindPath::Location start,
-        FindPath::Location goal,
-        unordered_map<FindPath::Location, FindPath::Location>& came_from,
-        unordered_map<FindPath::Location, int>& costSoFar)
+    bool AStarSearch(
+        GameLevelImpl* level,
+        Location start,
+        Location goal,
+        std::unordered_map<Location, Location>& came_from,
+        std::unordered_map<Location, int>& costSoFar)
     {
         PriorityQueue<Location> frontier;
         frontier.put(start, 0);
@@ -85,8 +95,8 @@ namespace FAWorld
                 return true;
             }
 
-            vector<Location> neighborsContainer = neighbors(current);
-            for (vector<Location>::iterator it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
+            std::vector<Location> neighborsContainer = neighbors(level, current);
+            for (std::vector<Location>::iterator it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
             {
                 int new_cost = costSoFar[current] + 1; //graph.cost(current, next);
                 Location next = *it;
@@ -104,12 +114,12 @@ namespace FAWorld
         return false;
     }
 
-    vector<FindPath::Location> FindPath::reconstructPath(
-        FindPath::Location start,
-        FindPath::Location goal,
-        unordered_map<FindPath::Location, FindPath::Location>& cameFrom)
+    std::vector<Location> reconstructPath(
+        Location start,
+        Location goal,
+        std::unordered_map<Location, Location>& cameFrom)
     {
-        vector<Location> path;
+        std::vector<Location> path;
         Location current = goal;
         path.push_back(current);
         while (current != start)
@@ -122,7 +132,7 @@ namespace FAWorld
         return path;
     }
 
-    FindPath::Location FindPath::findClosesPointToGoal(FindPath::Location start, FindPath::Location goal, unordered_map<FindPath::Location, FindPath::Location> & cameFrom)
+    Location findClosesPointToGoal(GameLevelImpl* level, Location start, Location goal, std::unordered_map<Location, Location> & cameFrom)
     {
         //int dx = abs(goal.first - start.first);
         //int dy = abs(goal.second - start.second);
@@ -131,7 +141,7 @@ namespace FAWorld
 
         Location result(-1, -1);
 
-        for (unordered_map<Location, Location>::iterator it = cameFrom.begin(); it != cameFrom.end(); it++)
+        for (std::unordered_map<Location, Location>::iterator it = cameFrom.begin(); it != cameFrom.end(); it++)
         {
             int tmpX = abs(it->first.first - goal.first);
             int tmpY = abs(it->first.second - goal.second);
@@ -147,29 +157,15 @@ namespace FAWorld
         return result;
     }
 
-    vector<FindPath::Location> FindPath::find(FindPath::Location start, FindPath::Location& goal, bool& bArrivable)
+    std::vector<Location> pathFind(GameLevelImpl* level, Location start, Location& goal, bool& bArrivable)
     {
-        unordered_map<Location, int> costSoFar;
-        unordered_map<Location, Location> cameFrom;
+        std::unordered_map<Location, int> costSoFar;
+        std::unordered_map<Location, Location> cameFrom;
 
-        bool found = AStarSearch(start, goal, cameFrom, costSoFar);
-        if (!found) {
-            goal = findClosesPointToGoal(start, goal, cameFrom);
-            bArrivable = false;
-        }
-        else
-        {
-            bArrivable = true;
-        }
+        bArrivable = AStarSearch(level, start, goal, cameFrom, costSoFar);
+        if (!bArrivable) 
+            goal = findClosesPointToGoal(level, start, goal, cameFrom);
 
         return reconstructPath(start, goal, cameFrom);
-    }
-
-    FindPath * FindPath::get(GameLevelImpl* level)
-    {
-        if (instance == nullptr)
-            instance = new FindPath();
-        instance->level = level;
-        return instance;
     }
 }
