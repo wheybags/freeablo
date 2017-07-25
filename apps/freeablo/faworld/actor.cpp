@@ -15,66 +15,6 @@
 
 namespace FAWorld
 {
-
-    AnimationPlayer::AnimationPlayer(FARender::FASpriteGroup* idleAnim, Tick idleAnimDuration)
-    {
-        mIdleAnim = idleAnim;
-        mIdleAnimDuration = idleAnimDuration;
-
-        playAnimation(mIdleAnim, mIdleAnimDuration, AnimationType::Looped);
-    }
-
-    void AnimationPlayer::getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame)
-    {
-        Tick currentTick = World::get()->getCurrentTick();
-
-        int32_t ticksIntoAnim = currentTick - mPlayingAnimStarted;
-        float progress = ((float)ticksIntoAnim) / ((float)mPlayingAnimDuration);
-        int32_t currentFrame = progress * mCurrentAnim->getAnimLength();
-
-        if (currentFrame >= mCurrentAnim->getAnimLength())
-        {
-            if (mPlayingAnimType == AnimationType::Once)
-            {
-                playAnimation(mIdleAnim, mIdleAnimDuration, AnimationType::Looped);
-                getCurrentFrame(sprite, currentFrame);
-                return;
-            }
-            else if (mPlayingAnimType == AnimationType::FreezeAtEnd)
-            {
-                currentFrame = mCurrentAnim->getAnimLength() - 1;
-            }
-            else if (mPlayingAnimType == AnimationType::Looped)
-            {
-                currentFrame = currentFrame % mCurrentAnim->getAnimLength();
-            }
-        }
-
-        frame = currentFrame;
-        sprite = mCurrentAnim;
-    }
-
-    void AnimationPlayer::playAnimation(FARender::FASpriteGroup* anim, Tick duration, AnimationPlayer::AnimationType type)
-    {
-        mCurrentAnim = anim;
-        mPlayingAnimDuration = duration;
-
-        mPlayingAnimType = type;
-        mPlayingAnimStarted = World::get()->getCurrentTick();
-    }
-
-    void AnimationPlayer::setIdleAnimation(FARender::FASpriteGroup* idleAnim, Tick idleAnimDuration)
-    {
-        bool restartIdle = mCurrentAnim == mIdleAnim && idleAnim != mIdleAnim;
-
-        mIdleAnim = idleAnim;
-        mIdleAnimDuration = idleAnimDuration;
-
-        if(restartIdle)
-            playAnimation(mIdleAnim, mIdleAnimDuration, AnimationType::Looped);
-    }
-
-
     STATIC_HANDLE_NET_OBJECT_IN_IMPL(Actor)
 
     void Actor::update(bool noclip)
@@ -126,7 +66,7 @@ namespace FAWorld
         mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.5f);
         mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.5f);
 
-        mAnimation = AnimationPlayer(mIdleAnim, mAnimTimeMap[AnimState::idle]);
+        mAnimation = FARender::AnimationPlayer(mIdleAnim, mAnimTimeMap[AnimState::idle]);
 
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this);
 
@@ -147,7 +87,7 @@ namespace FAWorld
         if (!(mStats->getCurrentHP() <= 0))
         {
             Engine::ThreadManager::get()->playSound(getHitWav());
-            playAnimation(AnimState::hit, AnimationPlayer::AnimationType::Once);
+            playAnimation(AnimState::hit, FARender::AnimationPlayer::AnimationType::Once);
         }
     }
 
@@ -171,7 +111,7 @@ namespace FAWorld
     {
         mDestination = mPos.mGoal = mPos.current();
         mPos.mMoving = false;
-        playAnimation(AnimState::dead, AnimationPlayer::AnimationType::FreezeAtEnd);
+        playAnimation(AnimState::dead, FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
         mIsDead = true;
         Engine::ThreadManager::get()->playSound(getDieWav());
     }
@@ -285,7 +225,7 @@ namespace FAWorld
         mAnimation.getCurrentFrame(sprite, frame);
     }
 
-    void Actor::playAnimation(AnimState::AnimState state, AnimationPlayer::AnimationType type)
+    void Actor::playAnimation(AnimState::AnimState state, FARender::AnimationPlayer::AnimationType type)
     {
         FARender::FASpriteGroup* sprite = nullptr;
 

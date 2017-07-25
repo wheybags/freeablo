@@ -32,7 +32,7 @@ namespace FAWorld
             return false;
         isAttacking = true;
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-        playAnimation(AnimState::attack, AnimationPlayer::AnimationType::Once);
+        playAnimation(AnimState::attack, FARender::AnimationPlayer::AnimationType::Once);
         return true;
     }
 

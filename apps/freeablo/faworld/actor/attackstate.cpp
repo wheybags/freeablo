@@ -20,7 +20,7 @@ namespace FAWorld
         void AttackState::onEnter(Actor& actor)
         {
             actor.isAttacking = true;
-            actor.playAnimation(AnimState::attack, AnimationPlayer::AnimationType::Once);
+            actor.playAnimation(AnimState::attack, FARender::AnimationPlayer::AnimationType::Once);
         }
     }
 }

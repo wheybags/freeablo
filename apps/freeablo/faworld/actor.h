@@ -9,7 +9,7 @@
 #include <misc/misc.h>
 
 #include "../engine/net/netmanager.h"
-#include "../farender/renderer.h"
+#include "../farender/animationplayer.h"
 #include "../fasavegame/savegame.h"
 
 #include "position.h"
@@ -49,35 +49,6 @@ namespace FAWorld
         class BaseState;
     }
 
-    class AnimationPlayer
-    {
-        public:
-
-            enum class AnimationType
-            {
-                Looped,
-                Once,
-                FreezeAtEnd
-            };
-
-            AnimationPlayer() {}
-            AnimationPlayer(FARender::FASpriteGroup* idleAnim, Tick idleAnimDuration);
-
-            void getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame);
-            void playAnimation(FARender::FASpriteGroup* anim, Tick duration, AnimationType type);
-            void setIdleAnimation(FARender::FASpriteGroup* idleAnim, Tick idleAnimDuration);
-
-        private:
-            FARender::FASpriteGroup* mIdleAnim = nullptr;
-            Tick mIdleAnimDuration = 0;
-
-            FARender::FASpriteGroup* mCurrentAnim = nullptr;
-            
-            Tick mPlayingAnimDuration = 0;
-            AnimationType mPlayingAnimType;
-            Tick mPlayingAnimStarted;
-    };
-
     class Actor : public NetObject
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
@@ -107,7 +78,7 @@ namespace FAWorld
             StateMachine::StateMachine<Actor>* mActorStateMachine;
 
             virtual void getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame);
-            void playAnimation(AnimState::AnimState state, AnimationPlayer::AnimationType type);
+            void playAnimation(AnimState::AnimState state, FARender::AnimationPlayer::AnimationType type);
             bool animationPlaying();
             
             int32_t getId()
@@ -258,7 +229,7 @@ namespace FAWorld
             bool mCanTalk = false;
             Faction mFaction;
 
-            AnimationPlayer mAnimation;
+            FARender::AnimationPlayer mAnimation;
 
             friend class boost::serialization::access;
 
