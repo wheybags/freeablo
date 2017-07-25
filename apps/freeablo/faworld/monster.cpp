@@ -67,8 +67,8 @@ namespace FAWorld
         mStats = new FAWorld::ActorStats(dMonster);
     }
 
-    Monster::Monster(const DiabloExe::Monster& monster, Position pos):
-        Actor("", "", pos, ""), mSoundPath(monster.soundPath)
+    Monster::Monster(const DiabloExe::Monster& monster):
+        Actor("", "", ""), mSoundPath(monster.soundPath)
     {
         init();
 

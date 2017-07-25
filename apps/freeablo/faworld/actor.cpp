@@ -51,13 +51,10 @@ namespace FAWorld
     Actor::Actor(
         const std::string& walkAnimPath,
         const std::string& idleAnimPath,
-        const Position& pos,
         const std::string& dieAnimPath
     ) :
         mFaction(Faction::heaven())
     {
-        mMoveHandler.mCurrentPos = pos;
-
         if (!dieAnimPath.empty())
         {
             mDieAnim = FARender::Renderer::get()->loadImage(dieAnimPath);
@@ -138,7 +135,7 @@ namespace FAWorld
         return bArrivable;
     }*/
 
-    void Actor::setLevel(GameLevel* level)
+    void Actor::teleport(GameLevel* level, Position pos)
     {
         if (!mLevel || mLevel->getLevelIndex() != level->getLevelIndex())
         {
@@ -148,7 +145,7 @@ namespace FAWorld
             mLevel = level;
             mLevel->addActor(this);
 
-            mMoveHandler.setLevel(level);
+            mMoveHandler.teleport(level, pos);
         }
     }
 

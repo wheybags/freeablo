@@ -242,9 +242,4 @@ namespace FAWorld
         else
             mFmtInDungeon=false;
     }
-
-    void Player::setLevel(GameLevel *level)
-    {
-        Actor::setLevel(level);
-    }
 }

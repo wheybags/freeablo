@@ -28,7 +28,7 @@ namespace FAWorld
     class GameLevel :public GameLevelImpl
     {
     public:
-        GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors);
+        GameLevel(Level::Level level, size_t levelIndex);
         ~GameLevel();
 
         Level::MinPillar getTile(size_t x, size_t y);

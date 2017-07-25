@@ -19,7 +19,7 @@ namespace FAWorld
 
         public:
             Monster();
-            Monster(const DiabloExe::Monster& monster, Position pos);
+            Monster(const DiabloExe::Monster& monster);
             ~Monster() {};
             void init();
             std::string getDieWav();

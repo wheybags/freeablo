@@ -39,7 +39,7 @@ namespace FAWorld
             GameLevel* getCurrentLevel();
             size_t getCurrentLevelIndex();
 
-            void setLevel(size_t level);
+            void setLevel(size_t levelNum);
             GameLevel* getLevel(size_t level);
             void insertLevel(size_t level, GameLevel* gameLevel);
 

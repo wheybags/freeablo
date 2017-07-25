@@ -21,8 +21,6 @@ namespace FAWorld
             void getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame);
             void updateSpriteFormatVars();
 
-            virtual void setLevel(GameLevel* level);
-
             virtual size_t getBasePriority()
             {
                 return 10;

@@ -14,12 +14,8 @@
 
 namespace FAWorld
 {
-    GameLevel::GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors) : mLevel(level), mLevelIndex(levelIndex)
+    GameLevel::GameLevel(Level::Level level, size_t levelIndex) : mLevel(level), mLevelIndex(levelIndex)
     {
-        for(auto actor : actors)
-            actor->setLevel(this);
-
-        actorMapRefresh();
     }
 
     GameLevel::~GameLevel()

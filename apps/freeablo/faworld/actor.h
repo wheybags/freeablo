@@ -115,11 +115,14 @@ namespace FAWorld
             mCurrentPos.update();
         }
         
-        void setLevel(GameLevel* level)
+        void teleport(GameLevel* level, Position pos)
         {
             mLevel = level;
+            mCurrentPos = pos;
+            mDestination = mCurrentPos.current();
         }
 
+    private:
         GameLevel* mLevel;
         Position mCurrentPos;
         std::pair<int32_t, int32_t> mDestination;
@@ -137,7 +140,6 @@ namespace FAWorld
         public:
             Actor(const std::string& walkAnimPath="",
                   const std::string& idleAnimPath="",
-                  const Position& pos = Position(0,0),
                   const std::string& dieAnimPath=""
                   );
 
@@ -175,7 +177,7 @@ namespace FAWorld
                 return mId;
             }
 
-            virtual void setLevel(GameLevel* level);
+            void teleport(GameLevel* level, Position pos);
             GameLevel* getLevel();
 
             virtual bool attack(Actor * enemy)

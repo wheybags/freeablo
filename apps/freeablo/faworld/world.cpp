@@ -72,21 +72,17 @@ namespace FAWorld
             "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
             std::make_pair(25u, 29u), std::make_pair(75u, 68u), std::map<size_t, size_t>(), static_cast<size_t> (-1), 1);
 
-        std::vector<Actor*> townActors;
+        auto townLevel = new GameLevel(townLevelBase, 0);
+        mLevels[0] = townLevel;
 
         const std::vector<const DiabloExe::Npc*> npcs = mDiabloExe.getNpcs();
-
         for (size_t i = 0; i < npcs.size(); i++)
         {
-            Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
+            Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath);
             actor->setCanTalk(true);
             actor->setActorId(npcs[i]->id);
-            townActors.push_back(actor);
+            actor->teleport(townLevel, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
         }
-
-        auto tmp = new GameLevel(townLevelBase, 0, townActors);
-        mLevels[0] = tmp;
-
 
         for (int32_t i = 1; i < 17; i++)
         {
@@ -104,13 +100,15 @@ namespace FAWorld
         return mCurrentPlayer->getLevel()->getLevelIndex();
     }
 
-    void World::setLevel(size_t level)
+    void World::setLevel(size_t levelNum)
     {
-        if (level >= mLevels.size() || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == level))
+        if (levelNum >= mLevels.size() || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
             return;
 
-        mCurrentPlayer->setLevel(getLevel (level));
-        playLevelMusic(level);
+        auto level = getLevel(levelNum);
+
+        mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
+        playLevelMusic(levelNum);
     }
 
     void World::playLevelMusic(size_t level)
@@ -260,9 +258,9 @@ namespace FAWorld
         Player* player = getCurrentPlayer();
 
         if (up)
-            player->mMoveHandler.mCurrentPos = Position(level->downStairsPos().first, level->downStairsPos().second);
+            player->teleport(level, Position(level->downStairsPos().first, level->downStairsPos().second));
         else
-            player->mMoveHandler.mCurrentPos = Position(level->upStairsPos().first, level->upStairsPos().second);
+            player->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
 
 
         //player->destination() = player->getPos().current();

@@ -102,11 +102,6 @@ namespace Engine
         if(currentLevel != -1 && isServer)
         {
             world.setLevel(currentLevel);
-
-            FAWorld::GameLevel& level = *world.getCurrentLevel();
-
-            player->mMoveHandler.mCurrentPos = FAWorld::Position(level.upStairsPos().first, level.upStairsPos().second);
-            player->mMoveHandler.setDestination(player->getPos().current());
             //guiManager.showIngameGui();
         }
         else
