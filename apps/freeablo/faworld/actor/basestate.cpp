@@ -60,7 +60,7 @@ namespace FAWorld
             int32_t frame;
             actor.getCurrentFrame(sprite, frame);
 
-            if(actor.mPos.mMoving && sprite == actor.mIdleAnim)
+            if(actor.mPos.mMoving && sprite != actor.mWalkAnim)
                 actor.playAnimation(AnimState::walk, FARender::AnimationPlayer::AnimationType::Looped);
             else if(!actor.mPos.mMoving && sprite == actor.mWalkAnim)
                 actor.playAnimation(AnimState::idle, FARender::AnimationPlayer::AnimationType::Looped);

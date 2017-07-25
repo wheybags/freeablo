@@ -139,8 +139,6 @@ namespace FAWorld
             }
         }
 
-        mAnimation.setIdleAnimation(mIdleAnim, mAnimTimeMap[AnimState::idle]);
-
         Actor::getCurrentFrame(sprite, frame);
     }
 

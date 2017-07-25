@@ -19,14 +19,18 @@ namespace FAWorld
 
     void Actor::update(bool noclip)
     {
+        FARender::FASpriteGroup* currentAnim = nullptr;
+        int32_t currentFrame = 0;
+        mAnimation.getCurrentFrame(currentAnim, currentFrame);
+
+        // play idle animation if there's nothing else going on
+        if (currentAnim == nullptr)
+            mAnimation.playAnimation(mIdleAnim, mAnimTimeMap[AnimState::idle], FARender::AnimationPlayer::AnimationType::Looped);
+
         if (mLevel)
         {
             if (isAttacking)
             {
-                FARender::FASpriteGroup* currentAnim = nullptr;
-                int32_t currentFrame = 0;
-                mAnimation.getCurrentFrame(currentAnim, currentFrame);
-
                 if (currentAnim != mAttackAnim)
                     isAttacking = false;
             }
@@ -66,8 +70,6 @@ namespace FAWorld
         mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.5f);
         mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.5f);
 
-        mAnimation = FARender::AnimationPlayer(mIdleAnim, mAnimTimeMap[AnimState::idle]);
-
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this);
 
         mId = getNewId();
@@ -104,7 +106,6 @@ namespace FAWorld
     void Actor::setIdleAnimation(const std::string path)
     {
         mIdleAnim = FARender::Renderer::get()->loadImage(path);
-        mAnimation.setIdleAnimation(mIdleAnim, mAnimTimeMap[AnimState::idle]);
     }
 
     void Actor::die()

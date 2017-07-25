@@ -2,16 +2,15 @@
 
 namespace FARender
 {
-    AnimationPlayer::AnimationPlayer(FARender::FASpriteGroup* idleAnim, FAWorld::Tick idleAnimDuration)
-    {
-        mIdleAnim = idleAnim;
-        mIdleAnimDuration = idleAnimDuration;
-
-        playAnimation(mIdleAnim, mIdleAnimDuration, AnimationType::Looped);
-    }
-
     void AnimationPlayer::getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame)
     {
+        if (mCurrentAnim == nullptr)
+        {
+            sprite = nullptr;
+            frame = 0;
+            return;
+        }
+
         FAWorld::Tick currentTick = FAWorld::World::get()->getCurrentTick();
 
         int32_t ticksIntoAnim = currentTick - mPlayingAnimStarted;
@@ -22,7 +21,7 @@ namespace FARender
         {
             if (mPlayingAnimType == AnimationType::Once)
             {
-                playAnimation(mIdleAnim, mIdleAnimDuration, AnimationType::Looped);
+                playAnimation(nullptr, 0, AnimationType::Looped);
                 getCurrentFrame(sprite, currentFrame);
                 return;
             }
@@ -47,16 +46,5 @@ namespace FARender
 
         mPlayingAnimType = type;
         mPlayingAnimStarted = FAWorld::World::get()->getCurrentTick();
-    }
-
-    void AnimationPlayer::setIdleAnimation(FARender::FASpriteGroup* idleAnim, FAWorld::Tick idleAnimDuration)
-    {
-        bool restartIdle = mCurrentAnim == mIdleAnim && idleAnim != mIdleAnim;
-
-        mIdleAnim = idleAnim;
-        mIdleAnimDuration = idleAnimDuration;
-
-        if (restartIdle)
-            playAnimation(mIdleAnim, mIdleAnimDuration, AnimationType::Looped);
     }
 }
