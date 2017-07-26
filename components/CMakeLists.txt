@@ -36,6 +36,7 @@ add_library(Misc
     misc/enablewarn.h
     misc/savePNG.h
     misc/savePNG.cpp
+    misc/stdhashes.h
 )
 target_link_libraries(Misc ${PNG_LIBRARY})
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)

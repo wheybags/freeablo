@@ -2,8 +2,11 @@
 #define FAWORLD_LEVEL_H
 
 #include <level/level.h>
+#include <unordered_map>
 
 #include <enet/enet.h> // TODO: remove
+
+#include <misc/stdhashes.h>
 
 namespace FARender
 {
@@ -79,7 +82,7 @@ namespace FAWorld
         size_t mLevelIndex;
 
         std::vector<Actor*> mActors;
-        std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
+        std::unordered_map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
                                                                     ///< Where an actor straddles two squares, they shall be placed in both.
         friend class FARender::Renderer;
     };

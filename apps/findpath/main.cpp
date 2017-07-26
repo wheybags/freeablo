@@ -12,23 +12,10 @@
 #include <algorithm>
 #include <chrono>
 #include <string>
+#include <misc/stdhashes.h>
 
 using namespace std::chrono;
 using namespace std;
-
-namespace std
-{
-    template <>
-    struct hash<pair<int, int> > {
-        inline size_t operator()(const pair<size_t, size_t>& location) const {
-            int x, y;
-            x = location.first;
-            y = location.second;
-            return x * 1812433253 + y;
-        }
-    };
-}
-
 
 namespace FAWorld
 {

@@ -1,17 +1,5 @@
 #include "findpath.h"
-
-namespace std 
-{
-    template <>
-    struct hash<pair<int, int> > {
-        inline size_t operator()(const pair<size_t, size_t>& location) const {
-            int x, y;
-            x = location.first;
-            y = location.second;
-            return x * 1812433253 + y;
-        }
-    };
-}
+#include <misc/stdhashes.h>
 
 namespace FAWorld
 {
@@ -51,7 +39,8 @@ namespace FAWorld
         int x = location.first;
         int y = location.second;
 
-        std::vector<Location> results;
+        std::vector<Location> results(0);
+        results.reserve(9);
 
         for (int32_t dy = -1; dy <= 1; dy++)
         {
@@ -95,7 +84,7 @@ namespace FAWorld
                 return level->isPassable(goal.first, goal.second);
             }
 
-            std::vector<Location> neighborsContainer = neighbors(level, current);
+            std::vector<Location> neighborsContainer = std::move(neighbors(level, current));
             for (std::vector<Location>::iterator it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
             {
                 int new_cost = costSoFar[current] + 1; //graph.cost(current, next);
