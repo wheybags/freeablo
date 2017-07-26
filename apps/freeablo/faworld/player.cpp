@@ -20,6 +20,7 @@ namespace FAWorld
     Player::Player(const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor(), mInventory(this)
     {
         init(className, charStats);
+        mMoveHandler = MovementHandler(World::getTicksInPeriod(0.1f)); // allow players to repath much more often than other actors
     }
 
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)

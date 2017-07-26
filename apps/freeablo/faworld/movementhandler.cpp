@@ -4,6 +4,9 @@
 
 namespace FAWorld
 {
+    MovementHandler::MovementHandler(Tick pathRateLimit) : mPathRateLimit(pathRateLimit)
+    {}
+
     std::pair<int32_t, int32_t> MovementHandler::getDestination() const
     {
         return mDestination;
@@ -37,16 +40,13 @@ namespace FAWorld
             }
             else
             {
-                bool canRepath = mTickSinceLastPath > World::getTicksInPeriod(1.0f);
+                bool canRepath = std::abs(World::get()->getCurrentTick() - mLastRepathed) > mPathRateLimit;
                 bool needsRepath = true;
                 mCurrentPos.mMoving = false;
 
                 if (mCurrentPathIndex < mCurrentPath.size())
                 {
-                    //|| mCurrentPath[mCurrentPath.size() - 1] != mDestination)
-                    //needsRepath = true;
-
-                    // If our destination hasn't changed, or we can't repath, keep pathing towards it
+                    // If our destination hasn't changed, or we can't repath, keep moving along our current path
                     if (mCurrentPath[mCurrentPath.size() - 1] == mDestination || !canRepath)
                     {
                         auto next = mCurrentPath[mCurrentPathIndex];
@@ -65,7 +65,7 @@ namespace FAWorld
 
                 if (needsRepath && canRepath)
                 {
-                    mTickSinceLastPath = 0;
+                    mLastRepathed = World::get()->getCurrentTick();
 
                     bool _;
                     mCurrentPath = std::move(pathFind(mLevel, mCurrentPos.current(), mDestination, _));
@@ -78,7 +78,6 @@ namespace FAWorld
         }
 
         mCurrentPos.update();
-        mTickSinceLastPath++;
     }
 
     void MovementHandler::teleport(GameLevel* level, Position pos)

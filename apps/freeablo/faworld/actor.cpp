@@ -53,7 +53,8 @@ namespace FAWorld
         const std::string& idleAnimPath,
         const std::string& dieAnimPath
     ) :
-        mFaction(Faction::heaven())
+        mFaction(Faction::heaven()),
+        mMoveHandler(World::getTicksInPeriod(1.0f))
     {
         if (!dieAnimPath.empty())
         {

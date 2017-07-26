@@ -10,6 +10,8 @@ namespace FAWorld
     class MovementHandler
     {
     public:
+        MovementHandler(Tick pathRateLimit);
+
         std::pair<int32_t, int32_t> getDestination() const;
         void setDestination(std::pair<int32_t, int32_t> dest);
 
@@ -25,6 +27,7 @@ namespace FAWorld
 
         int32_t mCurrentPathIndex = 0;
         std::vector<std::pair<int32_t, int32_t>> mCurrentPath;
-        Tick mTickSinceLastPath = std::numeric_limits<Tick>::max();
+        Tick mLastRepathed = std::numeric_limits<Tick>::min();
+        Tick mPathRateLimit;
     };
 }
