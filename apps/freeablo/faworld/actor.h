@@ -69,6 +69,11 @@ namespace FAWorld
             return mCurrentPos;
         }
 
+        std::pair<int32_t, int32_t> getDestination() const
+        {
+            return mDestination;
+        }
+
         void update()
         {
             if (mCurrentPos.mDist == 0)
@@ -82,26 +87,36 @@ namespace FAWorld
                 }
                 else
                 {
+                    bool canRepath = mTickSinceLastPath > World::getTicksInPeriod(1.0f);
                     bool needsRepath = true;
+                    mCurrentPos.mMoving = false;
 
-                    // If our destination hasn't changed, keep pathing towards it
-                    if (mCurrentPath.size() > 0 && mCurrentPath[mCurrentPath.size() - 1] == mDestination)
+                    if (mCurrentPathIndex < mCurrentPath.size())
                     {
-                        auto next = mCurrentPath[mCurrentPathIndex];
-                        mCurrentPathIndex++;
+                        //|| mCurrentPath[mCurrentPath.size() - 1] != mDestination)
+                        //needsRepath = true;
 
-                        // Make sure nothing has moved into the way
-                        if (mLevel->isPassable(next.first, next.second))
+                        // If our destination hasn't changed, or we can't repath, keep pathing towards it
+                        if (mCurrentPath[mCurrentPath.size() - 1] == mDestination || !canRepath)
                         {
-                            int32_t direction = Misc::getVecDir(Misc::getVec(mCurrentPos.current(), next));
-                            mCurrentPos.setDirection(direction);
-                            mCurrentPos.mMoving = true;
-                            needsRepath = false;
+                            auto next = mCurrentPath[mCurrentPathIndex];
+
+                            // Make sure nothing has moved into the way
+                            if (mLevel->isPassable(next.first, next.second))
+                            {
+                                int32_t direction = Misc::getVecDir(Misc::getVec(mCurrentPos.current(), next));
+                                mCurrentPos.setDirection(direction);
+                                mCurrentPos.mMoving = true;
+                                needsRepath = false;
+                                mCurrentPathIndex++;
+                            }
                         }
                     }
 
-                    if (needsRepath)
+                    if (needsRepath && canRepath)
                     {
+                        mTickSinceLastPath = 0;
+
                         bool _;
                         mCurrentPath = std::move(pathFind(mLevel, mCurrentPos.current(), mDestination, _));
                         mCurrentPathIndex = 0;
@@ -113,6 +128,7 @@ namespace FAWorld
             }
 
             mCurrentPos.update();
+            mTickSinceLastPath++;
         }
         
         void teleport(GameLevel* level, Position pos)
@@ -129,6 +145,7 @@ namespace FAWorld
 
         int32_t mCurrentPathIndex = 0;
         std::vector<std::pair<int32_t, int32_t>> mCurrentPath;
+        Tick mTickSinceLastPath = std::numeric_limits<Tick>::max();
     };
 
     class Actor : public NetObject
@@ -154,7 +171,6 @@ namespace FAWorld
             bool isTalking = false;
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);
-            bool findPath(GameLevelImpl* level, std::pair<int32_t, int32_t> destination);
 
             StateMachine::StateMachine<Actor>* mActorStateMachine;
 
@@ -193,6 +209,7 @@ namespace FAWorld
             }
 
             MovementHandler mMoveHandler;
+            Actor* actorTarget = nullptr;
 
             Position getPos() const
             {

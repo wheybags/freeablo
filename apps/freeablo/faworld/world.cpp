@@ -284,12 +284,12 @@ namespace FAWorld
     {
         auto player = getCurrentPlayer();
         auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->getPos());
-
-        player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
-
-       /* std::pair<int32_t, int32_t>& destination = player->destination();
-        destination = {clickedTile.x, clickedTile.y};
-        player->mPos.mGoal = destination;*/
+        Actor* clickedActor = World::get()->getActorAt(clickedTile.x, clickedTile.y);
+        
+        if (clickedActor)
+            player->actorTarget = clickedActor;
+        else
+            player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
     }
 
     size_t World::getTicksInPeriod(float seconds)

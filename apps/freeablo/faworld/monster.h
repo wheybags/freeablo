@@ -26,7 +26,6 @@ namespace FAWorld
             std::string getHitWav();
 
             bool attack(Actor * enemy);
-            bool canIAttack(Actor * actor);
 
         private:
             std::string mSoundPath;

@@ -36,29 +36,6 @@ namespace FAWorld
         return true;
     }
 
-    bool Monster::canIAttack(Actor * actor)
-    {
-        if (actor == nullptr)
-            return false;
-
-        if (this == actor)
-            return false;
-
-        if (!isEnemy(actor))
-            return false;
-
-        if (actor->isDead())
-            return false;
-
-        if (getPos().distanceFrom(actor->getPos()) >= 2)
-            return false;
-
-        if (isAttacking)
-            return false;
-
-        return true;
-    }
-
     Monster::Monster()
     {
         init();

@@ -92,7 +92,7 @@ namespace FAWorld
             // Early exit
             if (current == goal)
             {
-                return true;
+                return level->isPassable(goal.first, goal.second);
             }
 
             std::vector<Location> neighborsContainer = neighbors(level, current);

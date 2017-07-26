@@ -108,9 +108,7 @@ namespace FAWorld
 
     void Actor::die()
     {
-        assert(false);
-        //mDestination = mPos.mGoal = mPos.current();
-        //mPos.mMoving = false;
+        mMoveHandler.setDestination(getPos().current());
         playAnimation(AnimState::dead, FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
         mIsDead = true;
         Engine::ThreadManager::get()->playSound(getDieWav());
@@ -125,15 +123,6 @@ namespace FAWorld
     {
         return mFaction.canAttack(other->mFaction);
     }
-
-    /*bool Actor::findPath(GameLevelImpl * level, std::pair<int32_t, int32_t> destination)
-    {
-        bool bArrivable = false;
-        mPos.mPath = pathFind(level, mPos.current(), destination, bArrivable);
-        //mPos.mGoal = destination; // destination maybe changed by findPath.
-        mPos.mIndex = 0;
-        return bArrivable;
-    }*/
 
     void Actor::teleport(GameLevel* level, Position pos)
     {
@@ -166,12 +155,6 @@ namespace FAWorld
             return false;
 
         if (actor->isDead())
-            return false;
-
-        if (getPos().distanceFrom(actor->getPos()) >= 2)
-            return false;
-
-        if (isAttacking)
             return false;
 
         return true;
