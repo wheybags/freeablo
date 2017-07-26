@@ -56,6 +56,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/findpath.cpp
     faworld/faction.cpp
     faworld/faction.h
+    faworld/movementhandler.cpp
+    faworld/movementhandler.h
 
     fagui/guimanager.h
     fagui/guimanager.cpp
