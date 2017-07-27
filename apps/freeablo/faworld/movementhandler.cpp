@@ -44,7 +44,7 @@ namespace FAWorld
                 bool needsRepath = true;
                 mCurrentPos.mMoving = false;
 
-                if (mCurrentPathIndex < mCurrentPath.size())
+                if (mCurrentPathIndex < (int32_t)mCurrentPath.size())
                 {
                     // If our destination hasn't changed, or we can't repath, keep moving along our current path
                     if (mCurrentPath[mCurrentPath.size() - 1] == mDestination || !canRepath)

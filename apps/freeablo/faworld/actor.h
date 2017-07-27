@@ -85,7 +85,7 @@ namespace FAWorld
                 return mPassable || mIsDead;
             }
 
-            bool setPassable(bool passable)
+            void setPassable(bool passable)
             {
                 mPassable = passable;
             }
@@ -148,6 +148,7 @@ namespace FAWorld
             template <class Stream>
             Serial::Error::Error faSerial(Stream& stream)
             {
+                UNUSED_PARAM(stream);
                 assert(false);
                 //serialise_object(stream, mPos);
                 ////serialise_int(stream, 0, 2048, mFrame);
@@ -251,6 +252,7 @@ namespace FAWorld
             void save(Archive & ar, const unsigned int version) const
             {
                 UNUSED_PARAM(version);
+                UNUSED_PARAM(ar);
                 assert(false);
                 //ar & this->mPos;
                 //ar & this->mFrame;
@@ -261,6 +263,7 @@ namespace FAWorld
             void load(Archive & ar, const unsigned int version)
             {
                 UNUSED_PARAM(version);
+                UNUSED_PARAM(ar);
                 assert(false);
                 //ar & this->mPos;
                 //ar & this->mFrame;

@@ -17,7 +17,7 @@ namespace FARender
         float progress = ((float)ticksIntoAnim) / ((float)mPlayingAnimDuration);
         int32_t currentFrame = progress * mCurrentAnim->getAnimLength();
 
-        if (currentFrame >= mCurrentAnim->getAnimLength())
+        if (currentFrame >= (int32_t)mCurrentAnim->getAnimLength())
         {
             if (mPlayingAnimType == AnimationType::Once)
             {

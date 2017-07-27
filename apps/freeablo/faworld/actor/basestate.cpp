@@ -11,6 +11,8 @@ namespace FAWorld
 
         boost::optional<StateMachine::StateChange<Actor>> BaseState::update(Actor& actor, bool noclip)
         {
+            UNUSED_PARAM(noclip);
+
             if (actor.actorTarget != nullptr)
             {
                 if (actor.canIAttack(actor.actorTarget))

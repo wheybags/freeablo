@@ -101,6 +101,7 @@ namespace Engine
 
     FAWorld::Player* Server::spawnPlayer(int32_t id)
     {
+        UNUSED_PARAM(id);
         assert(false); return nullptr;
         /*auto newPlayer = mPlayerFactory.create("Warrior");
         newPlayer->mPos = FAWorld::Position(76, 68);
@@ -225,13 +226,13 @@ namespace Engine
         ClientPacket data;
         serialise_object(packet->reader, data);
 
-        auto world = FAWorld::World::get();
+        //auto world = FAWorld::World::get();
 
         mServersClientData[peer->connectID].lastReceiveTick = tick;
 
         //std::cout << "GOT MESSAGE " << mTick << " " << mServersClientData[event.peer->connectID].lastReceiveTick << std::endl;
 
-        auto player = mServersClientData[peer->connectID].player;
+        //auto player = mServersClientData[peer->connectID].player;
 
         assert(false);
 
