@@ -28,12 +28,7 @@ namespace FAWorld
         private:
             void init(const std::string& className, const DiabloExe::CharacterStats& charStats);
 
-            // these "Fmt" vars are just used by getCurrentAnim
-            std::string mFmtClassName;
-            std::string mFmtClassCode;
-            std::string mFmtArmourCode;
-            std::string mFmtWeaponCode;
-            bool mFmtInDungeon = false;
+            std::string mClassName;
 
             friend class Inventory;
 

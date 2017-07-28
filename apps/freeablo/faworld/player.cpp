@@ -6,6 +6,7 @@
 #include "../engine/threadmanager.h"
 #include <boost/python.hpp>
 #include <misc/stringops.h>
+#include <string>
 
 namespace FAWorld
 {
@@ -89,14 +90,18 @@ namespace FAWorld
 
     void Player::setSpriteClass(std::string className)
     {
-        mFmtClassName = className;
-        mFmtClassCode = className[0];
-
+        mClassName = className;
         updateSprites();
     }
 
     void Player::updateSprites()
     {
+        std::string classCode;
+        classCode = mClassName[0];
+        std::string armourCode;
+        std::string weaponCode;
+        bool inDungeon = false;
+
         std::string armour, weapon;
         switch(mInventory.mBody.getCode())
         {
@@ -187,25 +192,23 @@ namespace FAWorld
             else if(mInventory.mLeftHand.getCode() == Item::icBlunt || mInventory.mRightHand.getCode() == Item::icBlunt)
                 weapon = "h";
         }
-        mFmtWeaponCode = weapon;
-        mFmtArmourCode = armour;
+        weaponCode = weapon;
+        armourCode = armour;
 
         if(getLevel() && getLevel()->getLevelIndex() != 0)
-            mFmtInDungeon=true;
+            inDungeon=true;
         else
-            mFmtInDungeon=false;
-
-
+            inDungeon=false;
 
         auto helper = [&](bool isDie)
         {
-            std::string weapFormat = mFmtWeaponCode;
+            std::string weapFormat = weaponCode;
 
             if (isDie)
                 weapFormat = "n";
 
             boost::format fmt("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
-            fmt % mFmtClassName % mFmtClassCode % mFmtArmourCode % weapFormat % mFmtClassCode % mFmtArmourCode % weapFormat;
+            fmt % mClassName % classCode % armourCode % weapFormat % classCode % armourCode % weapFormat;
             return fmt;
         };
 
@@ -214,7 +217,7 @@ namespace FAWorld
         getAnimationManager().setAnimation(AnimState::dead, renderer->loadImage((helper(true) % "dt").str()));
         getAnimationManager().setAnimation(AnimState::attack, renderer->loadImage((helper(false) % "at").str()));
 
-        if (mFmtInDungeon)
+        if (inDungeon)
         {
             getAnimationManager().setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "aw").str()));
             getAnimationManager().setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "as").str()));
