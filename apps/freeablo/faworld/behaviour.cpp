@@ -1,6 +1,7 @@
 #include "behaviour.h"
 #include "actor.h"
 #include "player.h"
+#include "../falevelgen/random.h"
 
 #include <iostream>
 
@@ -8,6 +9,9 @@
 
 namespace FAWorld
 {
+    STATIC_HANDLE_NET_OBJECT_IN_IMPL(BasicMonsterBehaviour)
+    STATIC_HANDLE_NET_OBJECT_IN_IMPL(NullBehaviour)
+
 
     static int32_t squaredDistance(const Position& a, const Position& b)
     {
@@ -19,7 +23,7 @@ namespace FAWorld
     // TODO: could be a method on Actor class
     Player* findNearestPlayer(const Actor* actor)
     {
-        Player* nearest;
+        Player* nearest = nullptr;
         int minDistance = 99999999;
         for (auto player : World::get()->getPlayers())
         {
@@ -36,6 +40,8 @@ namespace FAWorld
 
     void BasicMonsterBehaviour::update()
     {
+        mTicksSinceLastAction++;
+
         if (!mActor->isDead()) 
         {
             Tick ticksPassed = World::get()->getCurrentTick();
@@ -44,35 +50,41 @@ namespace FAWorld
 
             int32_t dist = FAWorld::squaredDistance(nearest->getPos(), mActor->getPos());
 
-            if (dist <= 25) // we are close enough to engage the player
+            if (dist <= std::pow(5, 2)) // we are close enough to engage the player
             {
                 mActor->actorTarget = nearest;
             }
-            else if (dist >= 200) // just freeze if we're miles away from anyone
+            else if (dist >= std::pow(100, 2)) // just freeze if we're miles away from anyone
             {
+                //mActor->die();
                 //mActor->actorTarget = nullptr;
                 return;
             }
             else if (mActor->actorTarget == nullptr && !mActor->mMoveHandler.moving()) // if no player is in sight, let's wander around a bit
             {
+                // seed a simple RNG with some variables that should be stable across server and client
+                FALevelGen::RandLCG r(mTicksSinceLastAction + mActor->getId() + mActor->getPos().current().first);
+
                 // we arrived at the destination, so let's decide if
                 // we want to move some more
-                if (ticksPassed - mLastActionTick > ((size_t)rand() % 300) + 100) {
+                if (mTicksSinceLastAction > ((size_t)r.get() % 300) + 100)
+                {
                     // if 1 let's move, else wbehaviourt
-                    if (rand() % 2) 
+                    if (r.get() % 2) 
                     {
                         std::pair<int32_t, int32_t> next;
 
                         do 
                         {
                             next = mActor->getPos().current();
-                            next.first += ((rand() % 3) - 1) * (rand() % 3 + 1);
-                            next.second += ((rand() % 3) - 1) * (rand() % 3 + 1);
-                        } while (!mActor->canWalkTo(next.first, next.second));
+                            next.first += ((r.get() % 3) - 1) * (r.get() % 3 + 1);
+                            next.second += ((r.get() % 3) - 1) * (r.get() % 3 + 1);
+                        } while (!mActor->getLevel()->isPassable(next.first, next.second) || next == mActor->getPos().current());
                         
                         mActor->mMoveHandler.setDestination(next);
                     }
-                    mLastActionTick = ticksPassed;
+
+                    mTicksSinceLastAction = 0;
                 }
             }
         }

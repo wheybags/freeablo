@@ -19,19 +19,22 @@ namespace FAWorld
 
     void Actor::update(bool noclip)
     {
-        if (getLevel())
+        if (!isDead())
         {
-            if (isAttacking)
+            if (getLevel())
             {
-                if (getAnimationManager().getCurrentAnimation() != AnimState::attack)
-                    isAttacking = false;
+                if (isAttacking)
+                {
+                    if (getAnimationManager().getCurrentAnimation() != AnimState::attack)
+                        isAttacking = false;
+                }
+
+                mActorStateMachine->update(noclip);
             }
 
-            mActorStateMachine->update(noclip);
+            if (mBehaviour)
+                mBehaviour->update();
         }
-
-        if (mBehaviour)
-            mBehaviour->update();
 
         mAnimation.update();
     }

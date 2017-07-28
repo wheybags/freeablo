@@ -12,8 +12,8 @@ namespace Render
     struct LevelObject
     {
         bool valid;
-        size_t spriteCacheIndex;
-        size_t spriteFrame;
+        int32_t spriteCacheIndex;
+        int32_t spriteFrame;
         int32_t x2;
         int32_t y2;
         int32_t dist;

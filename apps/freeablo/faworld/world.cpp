@@ -205,7 +205,12 @@ namespace FAWorld
 
     void World::registerPlayer(Player *player)
     {
-        mPlayers.push_back(player);
+        auto sortedInsertPosIt = std::upper_bound(mPlayers.begin(), mPlayers.end(), player, [](auto lhs, auto rhs)
+        {
+            return lhs->getId() > rhs->getId();
+        });
+
+        mPlayers.insert(sortedInsertPosIt, player);
     }
 
     void World::deregisterPlayer(Player *player)

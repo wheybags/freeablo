@@ -929,7 +929,8 @@ namespace FALevelGen
             DiabloExe::Monster monster =  exe.getMonster(name);
 
             FAWorld::Monster * monsterObj = new FAWorld::Monster(monster);
-            FAWorld::Behaviour * behaviour = new FAWorld::BasicMonsterBehaviour(monsterObj);
+            FAWorld::Behaviour * behaviour = new FAWorld::BasicMonsterBehaviour();
+            behaviour->attach(monsterObj);
             monsterObj->attachBehaviour(behaviour);
             monsterObj->teleport(&level, FAWorld::Position(xPos, yPos));
         }
@@ -1217,7 +1218,7 @@ namespace FALevelGen
         Level::Level levelBase(level, tilPath, minPath, solPath, celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap(), previous, next);
         auto retval = new FAWorld::GameLevel(levelBase, dLvl);
         
-        //placeMonsters(*retval, levelBase, exe, dLvl);
+        placeMonsters(*retval, levelBase, exe, dLvl);
 
         return retval;
     }

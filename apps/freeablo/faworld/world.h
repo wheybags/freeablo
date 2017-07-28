@@ -78,7 +78,7 @@ namespace FAWorld
             std::map<size_t, GameLevel*> mLevels;
             Tick mTicksPassed = 0;
             Player* mCurrentPlayer;
-            std::vector<Player*> mPlayers;
+            std::vector<Player*> mPlayers; ///< This vector is sorted
             const DiabloExe::DiabloExe& mDiabloExe;
     };
 }
