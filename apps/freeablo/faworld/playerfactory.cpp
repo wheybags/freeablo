@@ -72,8 +72,8 @@ void PlayerFactory::createWarrior(Player* player) const
                                FAWorld::Item::eqFLOOR,
                                0, 0, 1, false);
     player->setSpriteClass("warrior");
-    player->setIdleAnimation("plrgfx/warrior/wld/wldst.cl2");
-    player->setWalkAnimation("plrgfx/warrior/wld/wldwl.cl2");
+    player->getAnimationManager().setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldst.cl2"));
+    player->getAnimationManager().setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldwl.cl2"));
 }
 
 void PlayerFactory::createRogue(Player* player) const
@@ -106,8 +106,8 @@ void PlayerFactory::createRogue(Player* player) const
                                0, 0, 1, false);
 
     player->setSpriteClass("rogue");
-    player->setIdleAnimation("plrgfx/rogue/rlb/rlbst.cl2");
-    player->setWalkAnimation("plrgfx/rogue/rlb/rlbwl.cl2");
+    player->getAnimationManager().setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/rogue/rlb/rlbst.cl2"));
+    player->getAnimationManager().setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/rogue/rlb/rlbwl.cl2"));
 }
 
 void PlayerFactory::createSorcerer(Player* player) const
@@ -140,8 +140,8 @@ void PlayerFactory::createSorcerer(Player* player) const
                                0, 0, 1, false);
 
     player->setSpriteClass("sorceror");
-    player->setIdleAnimation("plrgfx/sorceror/slt/sltst.cl2");
-    player->setWalkAnimation("plrgfx/sorceror/slt/sltwl.cl2");
+    player->getAnimationManager().setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/sorceror/slt/sltst.cl2"));
+    player->getAnimationManager().setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/sorceror/slt/sltwl.cl2"));
 
 }
 

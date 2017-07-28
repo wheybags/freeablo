@@ -38,11 +38,6 @@ namespace FAWorld
         mStats->setActor(this);
         mStats->recalculateDerivedStats();
 
-        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.5f);
-        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.5f);
-        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(1.0f);
-        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.5f);
-
         mFaction = Faction::heaven();
 
         FAWorld::World::get()->registerPlayer(this);
@@ -96,57 +91,11 @@ namespace FAWorld
     {
         mFmtClassName = className;
         mFmtClassCode = className[0];
+
+        updateSprites();
     }
 
-    void Player::getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame)
-    {
-        auto lastClassName = mFmtClassName;
-        auto lastClassCode = mFmtClassCode;
-        auto lastArmourCode = mFmtArmourCode;
-        auto lastWeaponCode = mFmtWeaponCode;
-        auto lastInDungeon = mFmtInDungeon;
-
-        updateSpriteFormatVars();
-
-        if( lastClassName   != mFmtClassName   ||
-            lastClassCode   != mFmtClassCode   ||
-            lastWeaponCode  != mFmtWeaponCode  ||
-            lastArmourCode  != mFmtArmourCode  ||
-            lastInDungeon   != mFmtInDungeon   )
-        {
-            auto helper = [&] (bool isDie)
-            {
-                std::string weapFormat = mFmtWeaponCode;
-
-                if(isDie)
-                    weapFormat = "n";
-
-                boost::format fmt("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
-                fmt % mFmtClassName % mFmtClassCode % mFmtArmourCode % weapFormat % mFmtClassCode % mFmtArmourCode % weapFormat;
-                return fmt;
-            };
-
-            auto renderer = FARender::Renderer::get();
-
-            mDieAnim = renderer->loadImage((helper(true) % "dt").str());
-            mAttackAnim = renderer->loadImage((helper(false) % "at").str());
-
-            if(mFmtInDungeon)
-            {
-                mWalkAnim = renderer->loadImage((helper(false) % "aw").str());
-                mIdleAnim = renderer->loadImage((helper(false) % "as").str());
-            }
-            else
-            {
-                mWalkAnim = renderer->loadImage((helper(false) % "wl").str());
-                mIdleAnim = renderer->loadImage((helper(false) % "st").str());
-            }
-        }
-
-        Actor::getCurrentFrame(sprite, frame);
-    }
-
-    void Player::updateSpriteFormatVars()
+    void Player::updateSprites()
     {
         std::string armour, weapon;
         switch(mInventory.mBody.getCode())
@@ -245,5 +194,35 @@ namespace FAWorld
             mFmtInDungeon=true;
         else
             mFmtInDungeon=false;
+
+
+
+        auto helper = [&](bool isDie)
+        {
+            std::string weapFormat = mFmtWeaponCode;
+
+            if (isDie)
+                weapFormat = "n";
+
+            boost::format fmt("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
+            fmt % mFmtClassName % mFmtClassCode % mFmtArmourCode % weapFormat % mFmtClassCode % mFmtArmourCode % weapFormat;
+            return fmt;
+        };
+
+        auto renderer = FARender::Renderer::get();
+
+        getAnimationManager().setAnimation(AnimState::dead, renderer->loadImage((helper(true) % "dt").str()));
+        getAnimationManager().setAnimation(AnimState::attack, renderer->loadImage((helper(false) % "at").str()));
+
+        if (mFmtInDungeon)
+        {
+            getAnimationManager().setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "aw").str()));
+            getAnimationManager().setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "as").str()));
+        }
+        else
+        {
+            getAnimationManager().setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "wl").str()));
+            getAnimationManager().setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "st").str()));
+        }
     }
 }

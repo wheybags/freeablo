@@ -2,14 +2,11 @@
 
 namespace FARender
 {
-    void AnimationPlayer::getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame)
+    std::pair<FARender::FASpriteGroup*, int32_t> AnimationPlayer::getCurrentFrame()
     {
         if (mCurrentAnim == nullptr)
-        {
-            sprite = nullptr;
-            frame = 0;
-            return;
-        }
+            return std::make_pair <FARender::FASpriteGroup*, int32_t >(nullptr, 0);
+
 
         FAWorld::Tick currentTick = FAWorld::World::get()->getCurrentTick();
 
@@ -22,8 +19,7 @@ namespace FARender
             if (mPlayingAnimType == AnimationType::Once)
             {
                 playAnimation(nullptr, 0, AnimationType::Looped);
-                getCurrentFrame(sprite, currentFrame);
-                return;
+                return getCurrentFrame();
             }
             else if (mPlayingAnimType == AnimationType::FreezeAtEnd)
             {
@@ -35,8 +31,7 @@ namespace FARender
             }
         }
 
-        frame = currentFrame;
-        sprite = mCurrentAnim;
+        return std::make_pair(mCurrentAnim, currentFrame);
     }
 
     void AnimationPlayer::playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick duration, AnimationPlayer::AnimationType type)
@@ -46,5 +41,10 @@ namespace FARender
 
         mPlayingAnimType = type;
         mPlayingAnimStarted = FAWorld::World::get()->getCurrentTick();
+    }
+
+    void AnimationPlayer::replaceAnimation(FARender::FASpriteGroup* anim)
+    {
+        mCurrentAnim = anim;
     }
 }

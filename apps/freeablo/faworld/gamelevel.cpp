@@ -132,9 +132,10 @@ namespace FAWorld
 
         for(size_t i = 0; i < mActors.size(); i++)
         {
-            FARender::FASpriteGroup* sprite = nullptr;
-            int32_t frame = 0;
-            mActors[i]->getCurrentFrame(sprite, frame);
+            auto tmp = mActors[i]->getAnimationManager().getCurrentRealFrame();
+
+            FARender::FASpriteGroup* sprite = tmp.first;
+            int32_t frame = tmp.second;
 
             if (!sprite)
                 sprite = FARender::getDefaultSprite();

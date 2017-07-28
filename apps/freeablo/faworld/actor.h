@@ -17,6 +17,7 @@
 #include "world.h"
 #include "faction.h"
 #include "movementhandler.h"
+#include "actoranimationmanager.h"
 
 
 namespace Engine
@@ -31,19 +32,6 @@ namespace FAWorld
     class ActorStats;
     class Behaviour;
     class World;
-
-    namespace AnimState
-    {
-        enum AnimState
-        {
-            walk,
-            idle,
-            attack,
-            dead,
-            hit,
-            ENUM_END // always leave this as the last entry, and don't set explicit values for any of the entries
-        };
-    }
 
     namespace ActorState
     {
@@ -71,14 +59,13 @@ namespace FAWorld
             virtual int32_t getCurrentHP();
             bool isAttacking = false;
             bool isTalking = false;
-            void setWalkAnimation(const std::string path);
-            void setIdleAnimation(const std::string path);
 
             StateMachine::StateMachine<Actor>* mActorStateMachine;
 
-            virtual void getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame);
-            void playAnimation(AnimState::AnimState state, FARender::AnimationPlayer::AnimationType type);
-            bool animationPlaying();
+            ActorAnimationManager& getAnimationManager()
+            {
+                return mAnimation;
+            }
 
             bool isPassable()
             {
@@ -119,14 +106,7 @@ namespace FAWorld
             }
 
         //private: //TODO: fix this
-            FARender::FASpriteGroup* mWalkAnim = FARender::getDefaultSprite();
-            FARender::FASpriteGroup* mIdleAnim = FARender::getDefaultSprite();
-            FARender::FASpriteGroup* mDieAnim = FARender::getDefaultSprite();
-            FARender::FASpriteGroup* mAttackAnim = FARender::getDefaultSprite();
-            FARender::FASpriteGroup* mHitAnim = FARender::getDefaultSprite();
-
-            std::map<AnimState::AnimState, size_t> mAnimTimeMap;
-
+           
 
             virtual void die();
             
@@ -270,7 +250,7 @@ namespace FAWorld
 
             bool mPassable = false;
 
-            FARender::AnimationPlayer mAnimation;
+            ActorAnimationManager mAnimation;
 
             friend class boost::serialization::access;
 

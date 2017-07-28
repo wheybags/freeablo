@@ -11,7 +11,7 @@ namespace FAWorld
         {
             UNUSED_PARAM(noclip);
 
-            if (!actor.animationPlaying())
+            if (actor.getAnimationManager().getCurrentAnimation() != AnimState::attack)
                 return StateMachine::StateChange<Actor>{StateMachine::StateOperation::pop};
 
             return boost::none;
@@ -20,7 +20,7 @@ namespace FAWorld
         void AttackState::onEnter(Actor& actor)
         {
             actor.isAttacking = true;
-            actor.playAnimation(AnimState::attack, FARender::AnimationPlayer::AnimationType::Once);
+            actor.getAnimationManager().playAnimation(AnimState::attack, FARender::AnimationPlayer::AnimationType::Once);
         }
     }
 }

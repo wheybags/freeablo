@@ -18,8 +18,7 @@ namespace FAWorld
             bool attack(Actor * enemy);
             bool attack(Player * enemy);
             bool talk(Actor * actor);
-            void getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame);
-            void updateSpriteFormatVars();
+            void updateSprites();
 
             virtual size_t getBasePriority()
             {
