@@ -21,13 +21,13 @@ namespace FAWorld
 
             if (mDist >= 100)
             {
-                if (mPath.size() && mIndex != -1)
+                /*if (mPath.size() && mIndex != -1)
                 {
                     mCurrent = pathNext(true);
                 }
-                else {
+                else {*/
                     mCurrent = next();
-                }
+                //}
                 mDist = 0;
             }
         }

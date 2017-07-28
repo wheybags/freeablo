@@ -14,12 +14,8 @@
 
 namespace FAWorld
 {
-    GameLevel::GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors) : mLevel(level), mLevelIndex(levelIndex)
+    GameLevel::GameLevel(Level::Level level, size_t levelIndex) : mLevel(level), mLevelIndex(levelIndex)
     {
-        for(auto actor : actors)
-            actor->setLevel(this);
-
-        actorMapRefresh();
     }
 
     GameLevel::~GameLevel()
@@ -68,14 +64,14 @@ namespace FAWorld
         return mLevel.getPreviousLevel();
     }
 
-    void GameLevel::update(bool noclip, size_t tick)
+    void GameLevel::update(bool noclip)
     {
         for(size_t i = 0; i < mActors.size(); i++)
         {
             Actor * actor = mActors[i];
 
             actorMapRemove(actor);
-            actor->update(noclip, tick);
+            actor->update(noclip);
             actorMapInsert(actor);
         }
 
@@ -84,17 +80,17 @@ namespace FAWorld
 
     void GameLevel::actorMapInsert(Actor* actor)
     {
-        mActorMap2D[actor->mPos.current()] = actor;
-        if(actor->mPos.mMoving)
-            mActorMap2D[actor->mPos.next()] = actor;
+        mActorMap2D[actor->getPos().current()] = actor;
+        if(actor->getPos().mMoving)
+            mActorMap2D[actor->getPos().next()] = actor;
     }
 
     void GameLevel::actorMapRemove(Actor* actor)
     {
-        if(mActorMap2D[actor->mPos.current()] == actor)
-            mActorMap2D.erase(actor->mPos.current());
-        if(actor->mPos.mMoving && mActorMap2D[actor->mPos.next()] == actor)
-            mActorMap2D.erase(actor->mPos.next());
+        if(mActorMap2D[actor->getPos().current()] == actor)
+            mActorMap2D.erase(actor->getPos().current());
+        if(actor->getPos().mMoving && mActorMap2D[actor->getPos().next()] == actor)
+            mActorMap2D.erase(actor->getPos().next());
     }
 
     void GameLevel::actorMapClear()
@@ -111,12 +107,17 @@ namespace FAWorld
 
     bool GameLevel::isPassable(int x, int y) const
     {
-        return mLevel[x][y].passable();
+        FAWorld::Actor* actor = getActorAt(x, y);
+        return mLevel[x][y].passable() && (actor == NULL || actor->isPassable());
     }
 
-    Actor* GameLevel::getActorAt(size_t x, size_t y)
+    Actor* GameLevel::getActorAt(size_t x, size_t y) const
     {
-        return mActorMap2D[std::pair<size_t, size_t>(x, y)];
+        auto it = mActorMap2D.find(std::pair<size_t, size_t>(x, y));
+        if (it == mActorMap2D.end())
+            return nullptr;
+
+        return it->second;
     }
 
     void GameLevel::addActor(Actor* actor)
@@ -131,9 +132,14 @@ namespace FAWorld
 
         for(size_t i = 0; i < mActors.size(); i++)
         {
-            size_t frame = mActors[i]->mFrame + mActors[i]->mPos.getDirection() * mActors[i]->getCurrentAnim()->getAnimLength();
+            FARender::FASpriteGroup* sprite = nullptr;
+            int32_t frame = 0;
+            mActors[i]->getCurrentFrame(sprite, frame);
 
-            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(mActors[i]->getCurrentAnim(), frame, mActors[i]->mPos));
+            // offset the sprite for the current direction of the actor
+            frame += mActors[i]->getPos().getDirection() * sprite->getAnimLength();
+
+            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(sprite, frame, mActors[i]->getPos()));
         }
     }
 

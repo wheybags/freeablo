@@ -24,6 +24,8 @@ namespace FAWorld
     class Player;
     class GameLevel;
 
+    typedef int32_t Tick;
+
     class World : public Engine::KeyboardInputObserverInterface, public Engine::MouseInputObserverInterface
     {
         public:
@@ -37,7 +39,7 @@ namespace FAWorld
             GameLevel* getCurrentLevel();
             size_t getCurrentLevelIndex();
 
-            void setLevel(size_t level);
+            void setLevel(size_t levelNum);
             GameLevel* getLevel(size_t level);
             void insertLevel(size_t level, GameLevel* gameLevel);
 
@@ -50,9 +52,10 @@ namespace FAWorld
 
             void registerPlayer(Player* player);
             void deregisterPlayer(Player* player);
+            const std::vector<Player*>& getPlayers();
 
             void fillRenderState(FARender::RenderState* state);
-            
+
             static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
             static size_t getTicksInPeriod(float seconds);
             static float getSecondsPerTick();
@@ -60,6 +63,8 @@ namespace FAWorld
             Actor* getActorById(int32_t id);
 
             void getAllActors(std::vector<Actor*>& actors);
+
+            Tick getCurrentTick();
 
         private:
             void playLevelMusic(size_t level);
@@ -69,11 +74,10 @@ namespace FAWorld
             void onMouseDown(Engine::Point mousePosition);
 
             std::map<size_t, GameLevel*> mLevels;
-            size_t mTicksPassed = 0;
+            Tick mTicksPassed = 0;
             Player* mCurrentPlayer;
             std::vector<Player*> mPlayers;
             const DiabloExe::DiabloExe& mDiabloExe;
-            std::pair<int32_t, int32_t> mDestination;       ///< this is the aim point to move to.
     };
 }
 

@@ -102,10 +102,6 @@ namespace Engine
         if(currentLevel != -1 && isServer)
         {
             world.setLevel(currentLevel);
-
-            FAWorld::GameLevel& level = *world.getCurrentLevel();
-
-            player->mPos = FAWorld::Position(level.upStairsPos().first, level.upStairsPos().second);
             //guiManager.showIngameGui();
         }
         else
@@ -148,7 +144,7 @@ namespace Engine
             FARender::RenderState* state = renderer.getFreeState();
             if(state)
             {
-                state->mPos = player->mPos;
+                state->mPos = player->getPos();
                 if(level != NULL)
                     state->tileset = renderer.getTileset(*level);
                 state->level = level;

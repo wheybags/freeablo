@@ -7,15 +7,12 @@ namespace FAWorld
     namespace ActorState
     {
 
-        boost::optional<StateMachine::StateChange<Actor>> AttackState::update(Actor& actor, bool noclip, size_t ticksPassed)
+        boost::optional<StateMachine::StateChange<Actor>> AttackState::update(Actor& actor, bool noclip)
         {
             UNUSED_PARAM(noclip);
-            UNUSED_PARAM(ticksPassed);
 
-            if (!actor.mAnimPlaying) {
-                actor.setAnimation(AnimState::idle);
+            if (!actor.animationPlaying())
                 return StateMachine::StateChange<Actor>{StateMachine::StateOperation::pop};
-            }
 
             return boost::none;
         }
@@ -23,10 +20,7 @@ namespace FAWorld
         void AttackState::onEnter(Actor& actor)
         {
             actor.isAttacking = true;
-            actor.setAnimation(AnimState::attack, true);
-            actor.mAnimPlaying = true;
+            actor.playAnimation(AnimState::attack, FARender::AnimationPlayer::AnimationType::Once);
         }
-
     }
-
 }

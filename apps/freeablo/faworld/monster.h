@@ -10,16 +10,22 @@ namespace DiabloExe
 
 namespace FAWorld
 {
+    class AI;
+    class NullAI;
+
     class Monster: public Actor
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
 
         public:
             Monster();
-            Monster(const DiabloExe::Monster& monster, Position pos);
+            Monster(const DiabloExe::Monster& monster);
+            ~Monster() {};
             void init();
             std::string getDieWav();
             std::string getHitWav();
+
+            bool attack(Actor * enemy);
 
         private:
             std::string mSoundPath;
@@ -36,4 +42,4 @@ namespace FAWorld
     };
 }
 
-#endif     
+#endif

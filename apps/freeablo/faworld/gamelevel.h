@@ -2,8 +2,11 @@
 #define FAWORLD_LEVEL_H
 
 #include <level/level.h>
+#include <unordered_map>
 
 #include <enet/enet.h> // TODO: remove
+
+#include <misc/stdhashes.h>
 
 namespace FARender
 {
@@ -28,7 +31,7 @@ namespace FAWorld
     class GameLevel :public GameLevelImpl
     {
     public:
-        GameLevel(Level::Level level, size_t levelIndex, std::vector<Actor*> actors);
+        GameLevel(Level::Level level, size_t levelIndex);
         ~GameLevel();
 
         Level::MinPillar getTile(size_t x, size_t y);
@@ -44,7 +47,7 @@ namespace FAWorld
         size_t getNextLevel();
         size_t getPreviousLevel();
 
-        void update(bool noclip, size_t tick);
+        void update(bool noclip);
 
         void actorMapInsert(Actor* actor);
         void actorMapRemove(Actor* actor);
@@ -52,7 +55,7 @@ namespace FAWorld
         void actorMapRefresh();
         virtual bool isPassable(int x, int y) const;
 
-        Actor* getActorAt(size_t x, size_t y);
+        Actor* getActorAt(size_t x, size_t y) const;
 
         void addActor(Actor* actor);
 
@@ -79,7 +82,7 @@ namespace FAWorld
         size_t mLevelIndex;
 
         std::vector<Actor*> mActors;
-        std::map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
+        std::unordered_map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
                                                                     ///< Where an actor straddles two squares, they shall be placed in both.
         friend class FARender::Renderer;
     };

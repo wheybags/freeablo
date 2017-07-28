@@ -9,13 +9,14 @@
 #include <misc/misc.h>
 
 #include "../engine/net/netmanager.h"
-#include "../farender/renderer.h"
+#include "../farender/animationplayer.h"
 #include "../fasavegame/savegame.h"
 
 #include "position.h"
 #include "gamelevel.h"
 #include "world.h"
 #include "faction.h"
+#include "movementhandler.h"
 
 
 namespace Engine
@@ -28,6 +29,7 @@ namespace Engine
 namespace FAWorld
 {
     class ActorStats;
+    class Behaviour;
     class World;
 
     namespace AnimState
@@ -57,36 +59,43 @@ namespace FAWorld
         public:
             Actor(const std::string& walkAnimPath="",
                   const std::string& idleAnimPath="",
-                  const Position& pos = Position(0,0),
                   const std::string& dieAnimPath=""
                   );
 
-            void update(bool noclip, size_t ticksPassed);
+            virtual void update(bool noclip);
             virtual ~Actor();
             virtual std::string getDieWav(){return "";}
             virtual std::string getHitWav(){return "";}
             virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}
             virtual void takeDamage(double amount);
             virtual int32_t getCurrentHP();
-            bool mAnimPlaying = false;
             bool isAttacking = false;
             bool isTalking = false;
-            virtual FARender::FASpriteGroup* getCurrentAnim();
-            void setAnimation(AnimState::AnimState state, bool reset=false);
             void setWalkAnimation(const std::string path);
             void setIdleAnimation(const std::string path);
-            AnimState::AnimState getAnimState();
-            bool findPath(GameLevelImpl* level, std::pair<int32_t, int32_t> destination);
 
             StateMachine::StateMachine<Actor>* mActorStateMachine;
 
+            virtual void getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame);
+            void playAnimation(AnimState::AnimState state, FARender::AnimationPlayer::AnimationType type);
+            bool animationPlaying();
 
+            bool isPassable()
+            {
+                return mPassable || mIsDead;
+            }
+
+            void setPassable(bool passable)
+            {
+                mPassable = passable;
+            }
+            
             int32_t getId()
             {
                 return mId;
             }
 
-            virtual void setLevel(GameLevel* level);
+            void teleport(GameLevel* level, Position pos);
             GameLevel* getLevel();
 
             virtual bool attack(Actor * enemy)
@@ -101,7 +110,14 @@ namespace FAWorld
                 return false;
             }
 
-            Position mPos;
+            MovementHandler mMoveHandler;
+            Actor* actorTarget = nullptr;
+
+            Position getPos() const
+            {
+                return mMoveHandler.getCurrentPosition();
+            }
+
         //private: //TODO: fix this
             FARender::FASpriteGroup* mWalkAnim = FARender::getDefaultSprite();
             FARender::FASpriteGroup* mIdleAnim = FARender::getDefaultSprite();
@@ -109,14 +125,11 @@ namespace FAWorld
             FARender::FASpriteGroup* mAttackAnim = FARender::getDefaultSprite();
             FARender::FASpriteGroup* mHitAnim = FARender::getDefaultSprite();
 
-            size_t mFrame;
-            virtual void die();
-            std::pair<int32_t, int32_t> mDestination;
-            std::pair<int32_t, int32_t>& destination()
-            {
-                return mDestination;
-            }
+            std::map<AnimState::AnimState, size_t> mAnimTimeMap;
 
+
+            virtual void die();
+            
             bool canTalk() const;
             bool isDead() const;
             bool isEnemy(Actor* other) const;
@@ -124,102 +137,114 @@ namespace FAWorld
             void setActorId(const std::string& id);
             void setCanTalk(bool canTalk);
 
-            std::map<AnimState::AnimState, size_t> mAnimTimeMap;
+            bool canWalkTo(int32_t x, int32_t y);
+
+            void attachBehaviour(Behaviour* behaviour) {
+              mBehaviour = behaviour;
+            };
+
             ActorStats * mStats=nullptr;
 
             template <class Stream>
             Serial::Error::Error faSerial(Stream& stream)
             {
-                serialise_object(stream, mPos);
-                serialise_int(stream, 0, 2048, mFrame);
-                serialise_enum(stream, AnimState::AnimState, mAnimState);
+                UNUSED_PARAM(stream);
+                assert(false);
+                //serialise_object(stream, mPos);
+                ////serialise_int(stream, 0, 2048, mFrame);
+                ////serialise_enum(stream, AnimState::AnimState, mAnimState);
 
-                int32_t destXTmp = mDestination.first;
-                int32_t destYTmp = mDestination.second;
-                int32_t levelIndexTmp = -1;
-                if (mLevel)
-                    levelIndexTmp = mLevel->getLevelIndex();
+                //int32_t destXTmp = mDestination.first;
+                //int32_t destYTmp = mDestination.second;
+                //int32_t levelIndexTmp = -1;
+                //if (mLevel)
+                //    levelIndexTmp = mLevel->getLevelIndex();
 
-                serialise_int32(stream, destXTmp);
-                serialise_int32(stream, destYTmp);
-                serialise_int32(stream, levelIndexTmp);
+                //serialise_int32(stream, destXTmp);
+                //serialise_int32(stream, destYTmp);
+                //serialise_int32(stream, levelIndexTmp);
 
-                if (!stream.isWriting())
-                {
-                    if ((Actor*)World::get()->getCurrentPlayer() != this)
-                    {
-                        // don't want to read destination for our player object,
-                        // we keep track of our own destination
-                        mDestination.first = destXTmp;
-                        mDestination.second = destYTmp;
+                //if (!stream.isWriting())
+                //{
+                //    if ((Actor*)World::get()->getCurrentPlayer() != this)
+                //    {
+                //        // don't want to read destination for our player object,
+                //        // we keep track of our own destination
+                //        mDestination.first = destXTmp;
+                //        mDestination.second = destYTmp;
 
-                        if (levelIndexTmp != -1)
-                            setLevel(World::get()->getLevel(levelIndexTmp));
-                    }
-                }
+                //        if (levelIndexTmp != -1)
+                //            setLevel(World::get()->getLevel(levelIndexTmp));
+                //    }
+                //}
 
-                uint32_t walkAnimIndex = 0;
-                uint32_t idleAnimIndex = 0;
-                uint32_t dieAnimIndex = 0;
-                uint32_t attackAnimIndex = 0;
-                uint32_t hitAnimIndex = 0;
+                //uint32_t walkAnimIndex = 0;
+                //uint32_t idleAnimIndex = 0;
+                //uint32_t dieAnimIndex = 0;
+                //uint32_t attackAnimIndex = 0;
+                //uint32_t hitAnimIndex = 0;
 
-                if (stream.isWriting())
-                {
-                    if (mWalkAnim)
-                        walkAnimIndex = mWalkAnim->getCacheIndex();
-                    if (mIdleAnim)
-                        idleAnimIndex = mIdleAnim->getCacheIndex();
-                    if (mDieAnim)
-                        dieAnimIndex = mDieAnim->getCacheIndex();
-                    if (mAttackAnim)
-                        attackAnimIndex = mAttackAnim->getCacheIndex();
-                    if (mHitAnim)
-                        hitAnimIndex = mHitAnim->getCacheIndex();
-                }
+                //if (stream.isWriting())
+                //{
+                //    if (mWalkAnim)
+                //        walkAnimIndex = mWalkAnim->getCacheIndex();
+                //    if (mIdleAnim)
+                //        idleAnimIndex = mIdleAnim->getCacheIndex();
+                //    if (mDieAnim)
+                //        dieAnimIndex = mDieAnim->getCacheIndex();
+                //    if (mAttackAnim)
+                //        attackAnimIndex = mAttackAnim->getCacheIndex();
+                //    if (mHitAnim)
+                //        hitAnimIndex = mHitAnim->getCacheIndex();
+                //}
 
-                serialise_int32(stream, walkAnimIndex);
-                serialise_int32(stream, idleAnimIndex);
-                serialise_int32(stream, dieAnimIndex);
-                serialise_int32(stream, attackAnimIndex);
-                serialise_int32(stream, hitAnimIndex);
+                //serialise_int32(stream, walkAnimIndex);
+                //serialise_int32(stream, idleAnimIndex);
+                //serialise_int32(stream, dieAnimIndex);
+                //serialise_int32(stream, attackAnimIndex);
+                //serialise_int32(stream, hitAnimIndex);
 
-                if (!stream.isWriting())
-                {
-                    mWalkAnim = FARender::getDefaultSprite();
-                    mIdleAnim = FARender::getDefaultSprite();
-                    mDieAnim = FARender::getDefaultSprite();
-                    mAttackAnim = FARender::getDefaultSprite();
-                    mHitAnim = FARender::getDefaultSprite();
+                //if (!stream.isWriting())
+                //{
+                //    mWalkAnim = FARender::getDefaultSprite();
+                //    mIdleAnim = FARender::getDefaultSprite();
+                //    mDieAnim = FARender::getDefaultSprite();
+                //    mAttackAnim = FARender::getDefaultSprite();
+                //    mHitAnim = FARender::getDefaultSprite();
 
-                    auto netManager = Engine::NetManager::get();
+                //    auto netManager = Engine::NetManager::get();
 
-                    if (walkAnimIndex)
-                        mWalkAnim = netManager->getServerSprite(walkAnimIndex);
-                    if (idleAnimIndex)
-                        mIdleAnim = netManager->getServerSprite(idleAnimIndex);
-                    if (dieAnimIndex)
-                        mDieAnim = netManager->getServerSprite(dieAnimIndex);
-                    if (attackAnimIndex)
-                        mAttackAnim = netManager->getServerSprite(attackAnimIndex);
-                    if (hitAnimIndex)
-                        mHitAnim = netManager->getServerSprite(hitAnimIndex);
-                }
+                //    if (walkAnimIndex)
+                //        mWalkAnim = netManager->getServerSprite(walkAnimIndex);
+                //    if (idleAnimIndex)
+                //        mIdleAnim = netManager->getServerSprite(idleAnimIndex);
+                //    if (dieAnimIndex)
+                //        mDieAnim = netManager->getServerSprite(dieAnimIndex);
+                //    if (attackAnimIndex)
+                //        mAttackAnim = netManager->getServerSprite(attackAnimIndex);
+                //    if (hitAnimIndex)
+                //        mHitAnim = netManager->getServerSprite(hitAnimIndex);
+                //}
 
-                serialise_bool(stream, mIsDead);
+                //serialise_bool(stream, mIsDead);
 
-                if(mStats)
-                    serialise_object(stream, *mStats);
+                //if(mStats)
+                //    serialise_object(stream, *mStats);
 
                 return Serial::Error::Success;
             }
 
         protected:
             GameLevel* mLevel = NULL;
+            Behaviour* mBehaviour = nullptr;
 
             bool mIsDead = false;
             bool mCanTalk = false;
             Faction mFaction;
+
+            bool mPassable = false;
+
+            FARender::AnimationPlayer mAnimation;
 
             friend class boost::serialization::access;
 
@@ -227,29 +252,28 @@ namespace FAWorld
             void save(Archive & ar, const unsigned int version) const
             {
                 UNUSED_PARAM(version);
-
-                ar & this->mPos;
-                ar & this->mFrame;
-                ar & this->mAnimState;
-                ar & this->mDestination;
+                UNUSED_PARAM(ar);
+                assert(false);
+                //ar & this->mPos;
+                //ar & this->mFrame;
+                //ar & this->mDestination;
             }
 
             template<class Archive>
             void load(Archive & ar, const unsigned int version)
             {
                 UNUSED_PARAM(version);
-
-                ar & this->mPos;
-                ar & this->mFrame;
-                ar & this->mAnimState;
-                ar & this->mDestination;
+                UNUSED_PARAM(ar);
+                assert(false);
+                //ar & this->mPos;
+                //ar & this->mFrame;
+                //ar & this->mDestination;
             }
 
-            bool canIAttack(Actor * actor);
+            virtual bool canIAttack(Actor * actor);
             bool canTalkTo(Actor * actor);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
-            AnimState::AnimState mAnimState;
 
         private:
             std::string mActorId;

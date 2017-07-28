@@ -101,14 +101,16 @@ namespace Engine
 
     FAWorld::Player* Server::spawnPlayer(int32_t id)
     {
-        auto newPlayer = mPlayerFactory.create("Warrior");
+        UNUSED_PARAM(id);
+        assert(false); return nullptr;
+        /*auto newPlayer = mPlayerFactory.create("Warrior");
         newPlayer->mPos = FAWorld::Position(76, 68);
         newPlayer->destination() = newPlayer->mPos.current();
 
         if (id != -1)
             newPlayer->mId = id;
 
-        return newPlayer;
+        return newPlayer;*/
     }
 
     void Server::sendLevel(size_t levelIndex, ENetPeer *peer)
@@ -224,15 +226,17 @@ namespace Engine
         ClientPacket data;
         serialise_object(packet->reader, data);
 
-        auto world = FAWorld::World::get();
+        //auto world = FAWorld::World::get();
 
         mServersClientData[peer->connectID].lastReceiveTick = tick;
 
         //std::cout << "GOT MESSAGE " << mTick << " " << mServersClientData[event.peer->connectID].lastReceiveTick << std::endl;
 
-        auto player = mServersClientData[peer->connectID].player;
+        //auto player = mServersClientData[peer->connectID].player;
 
-        player->destination().first = data.destX;
+        assert(false);
+
+        /*player->destination().first = data.destX;
         player->destination().second = data.destY;
 
         if (data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
@@ -245,7 +249,7 @@ namespace Engine
                 player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
 
             player->setLevel(level);
-        }
+        }*/
 
         return Serial::Error::Success;
     }

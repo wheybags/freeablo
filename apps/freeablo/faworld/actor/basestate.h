@@ -18,7 +18,7 @@ namespace FAWorld
         {
         public:
             ~BaseState() {};
-            boost::optional<StateMachine::StateChange<Actor>> update(Actor& actor, bool noclip, size_t ticksPassed);
+            virtual boost::optional<StateMachine::StateChange<Actor>> update(Actor& actor, bool noclip);
         };
 
     }
