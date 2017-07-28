@@ -128,14 +128,11 @@ namespace FAWorld
     void Actor::teleport(GameLevel* level, Position pos)
     {
         auto currentLevel = getLevel();
-        if (!currentLevel || currentLevel->getLevelIndex() != level->getLevelIndex())
-        {
-            if (currentLevel)
-                currentLevel->removeActor(this);
+        if (currentLevel)
+            currentLevel->removeActor(this);
 
-            level->addActor(this);
-            mMoveHandler.teleport(level, pos);
-        }
+        level->addActor(this);
+        mMoveHandler.teleport(level, pos);
     }
 
     GameLevel* Actor::getLevel()

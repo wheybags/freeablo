@@ -148,7 +148,16 @@ namespace FAWorld
             template <class Stream>
             Serial::Error::Error faSerial(Stream& stream)
             {
+                auto levelTmp = mMoveHandler.getLevel();
                 serialise_object(stream, mMoveHandler);
+
+                if (levelTmp != mMoveHandler.getLevel())
+                {
+                    if (levelTmp)
+                        levelTmp->removeActor(this);
+
+                    mMoveHandler.getLevel()->addActor(this);
+                }
                 //serialise_object(stream, mPos);
                 //serialise_int(stream, 0, 2048, mFrame);
                 //serialise_enum(stream, AnimState::AnimState, mAnimState);

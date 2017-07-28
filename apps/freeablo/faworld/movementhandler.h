@@ -39,6 +39,20 @@ namespace FAWorld
             serialise_int32(stream, mDestination.first);
             serialise_int32(stream, mDestination.second);
 
+            int32_t levelIndex = -1;
+            if (mLevel)
+                levelIndex = mLevel->getLevelIndex();
+
+            serialise_int32(stream, levelIndex);
+
+            if (!stream.isWriting())
+            {
+                if (levelIndex == -1)
+                    mLevel = nullptr;
+                else
+                    mLevel = World::get()->getLevel(levelIndex);
+            }
+
             return Serial::Error::Success;
         }
 

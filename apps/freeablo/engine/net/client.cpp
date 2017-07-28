@@ -192,17 +192,12 @@ namespace Engine
                 {
                     FAWorld::Actor* actor = world.getActorById(actorId);
 
-                    if (actorId == world.getCurrentPlayer()->mId)
+                    if (!actor && actorId == world.getCurrentPlayer()->mId)
                         actor = world.getCurrentPlayer();
-
-                    static bool doonce = false;
-                    if(!doonce && actor == world.getCurrentPlayer())
-                        actor->teleport(FAWorld::World::get()->getLevel(0), FAWorld::Position(76, 68));
 
                     if (actor == NULL)
                     {
                         actor = dynamic_cast<FAWorld::Actor*>(FAWorld::NetObject::construct(classId));
-                            actor->teleport(FAWorld::World::get()->getLevel(0), FAWorld::Position(76, 68));
                         actor->mId = actorId;
                     }
 
