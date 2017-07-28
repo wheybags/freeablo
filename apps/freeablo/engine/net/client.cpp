@@ -67,13 +67,6 @@ namespace Engine
 
     void Client::updateImp(uint32_t tick)
     {
-        // TODO: remove this block when we handle level switching properly
-        auto player = FAWorld::World::get()->getCurrentPlayer();
-        if (player->getLevel())
-            mLevelIndexTmp = player->getLevel()->getLevelIndex();
-        else
-            mLevelIndexTmp = static_cast<uint32_t> (-1);
-
         ENetEvent event;
 
         while(enet_host_service(mHost, &event, 0))
@@ -226,7 +219,6 @@ namespace Engine
         ClientPacket data;
         data.destX = player->mMoveHandler.getDestination().first;
         data.destY = player->mMoveHandler.getDestination().second;
-        data.levelIndex = mLevelIndexTmp;
 
         packet.writer.handleObject(data);
 
@@ -253,6 +245,16 @@ namespace Engine
         mUnknownServerSprites.clear();
         sendPacket(packet, mServerPeer);
     }
+
+    void Client::sendLevelChangePacket(int32_t level)
+    {
+        WritePacket packet = getWritePacket(PacketType::LevelChangeRequest, 0, true, WritePacketResizableType::Resizable);
+
+        int32_t blah = level;
+        packet.writer.handleInt32(blah);
+        sendPacket(packet, mServerPeer);
+    }
+
 
     Serial::Error::Error Client::readSpriteResponse(std::shared_ptr<ReadPacket> packet)
     {

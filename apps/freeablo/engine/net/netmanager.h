@@ -32,14 +32,22 @@ namespace Engine
 
             void update();
 
+            bool isServer()
+            {
+                return mIsServer;
+            }
+
+            // TODO: don't proxy these calls? Just add a getter for mClient?
             FARender::FASpriteGroup* getServerSprite(size_t index);
+            void sendLevelChangePacket(int32_t level);
+
 
         private:
 
             uint32_t mTick = 0;
-            bool mIsServer;
-            Client* mClient;
-            Server* mServer;
+            bool mIsServer = false;
+            Client* mClient = nullptr;
+            Server* mServer = nullptr;
     };
 }
 

@@ -24,6 +24,7 @@ namespace Engine
 
             void update(uint32_t tick);
             FARender::FASpriteGroup* getServerSprite(size_t index);
+            void sendLevelChangePacket(int32_t level);
 
         private: // methods
             void updateImp(uint32_t tick);
@@ -42,7 +43,6 @@ namespace Engine
             bool mClientRecievedId = false;
             uint32_t mClientTickWhenLastServerPacketReceived = 0;
             uint32_t mLastServerTickProcessed = 0;
-            uint32_t mLevelIndexTmp = 0;
 
             std::unordered_set<uint32_t> mAlreadySentServerSprites;
             std::unordered_set<uint32_t> mUnknownServerSprites;

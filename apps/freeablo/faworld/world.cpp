@@ -109,6 +109,11 @@ namespace FAWorld
 
         mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
         playLevelMusic(levelNum);
+
+        auto netManager = Engine::NetManager::get();
+
+        if (netManager && !netManager->isServer())
+            netManager->sendLevelChangePacket(level->getLevelIndex());
     }
 
     void World::playLevelMusic(size_t level)
@@ -267,9 +272,6 @@ namespace FAWorld
             player->teleport(level, Position(level->downStairsPos().first, level->downStairsPos().second));
         else
             player->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
-
-
-        //player->destination() = player->getPos().current();
     }
 
     void World::stopPlayerActions()

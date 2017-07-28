@@ -37,6 +37,7 @@ namespace Engine
             void sendServerPacket(uint32_t tick);
             void readClientPacket(ENetEvent& event, uint32_t tick);
             Serial::Error::Error readClientUpdatePacket(std::shared_ptr<ReadPacket> packet, ENetPeer* peer, uint32_t tick);
+            Serial::Error::Error readClientLevelChangePacket(std::shared_ptr<ReadPacket> packet, ENetPeer* peer);
             Serial::Error::Error readSpriteRequest(std::shared_ptr<ReadPacket> packet, ENetPeer* peer);
             Serial::Error::Error answerSpriteRequest(std::vector<std::string>& paths, std::vector<uint32_t>& requestedSprites, ENetPeer* peer);
             void handleNewClient(ENetPeer* peer);

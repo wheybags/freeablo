@@ -211,6 +211,12 @@ namespace Engine
                 break;
             }
 
+            case PacketType::LevelChangeRequest:
+            {
+                readClientLevelChangePacket(packet, event.peer);
+                break;
+            }
+
             default:
             {
                 assert(false && "BAD PACKET TYPE RECEIVED");
@@ -223,20 +229,33 @@ namespace Engine
         ClientPacket data;
         serialise_object(packet->reader, data);
 
-        auto world = FAWorld::World::get();
-
         mServersClientData[peer->connectID].lastReceiveTick = tick;
 
         //std::cout << "GOT MESSAGE " << mTick << " " << mServersClientData[event.peer->connectID].lastReceiveTick << std::endl;
 
         auto player = mServersClientData[peer->connectID].player;
-
         player->mMoveHandler.setDestination({ data.destX, data.destY });
 
-        if (data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
+        return Serial::Error::Success;
+    }
+
+    Serial::Error::Error Server::readClientLevelChangePacket(std::shared_ptr<ReadPacket> packet, ENetPeer* peer)
+    {
+        auto player = mServersClientData[peer->connectID].player;
+
+        int32_t requestedLevelIndex = -1;
+        serialise_int32(packet->reader, requestedLevelIndex);
+
+        if (requestedLevelIndex != -1 && (player->getLevel() == NULL || requestedLevelIndex != (int32_t)player->getLevel()->getLevelIndex()))
         {
-            auto level = world->getLevel(data.levelIndex);
-            player->teleport(level, FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second));
+            auto level = FAWorld::World::get()->getLevel(requestedLevelIndex);
+            
+            bool up = player->getLevel() && level->getLevelIndex() < player->getLevel()->getLevelIndex();
+
+            if (up)
+                player->teleport(level, FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second));
+            else
+                player->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
         }
 
         return Serial::Error::Success;
@@ -315,5 +334,6 @@ namespace Engine
         // TODO: send levels on-demand
         sendLevel(0, peer);
         sendLevel(1, peer);
+        sendLevel(2, peer);
     }
 }

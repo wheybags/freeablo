@@ -87,7 +87,6 @@ namespace Engine
         itemManager.loadItems(&exe);
         player = playerFactory.create(characterClass);
         world.addCurrentPlayer(player);
-        world.generateLevels();
         mInputManager->registerKeyboardObserver(&world);
         mInputManager->registerMouseObserver(&world);
 
@@ -102,25 +101,9 @@ namespace Engine
 
         // -1 represents the main menu
         if(currentLevel != -1 && isServer)
-        {
             world.setLevel(currentLevel);
-            //guiManager.showIngameGui();
-        }
         else
-        {
             clientWaitingForLevel = true;
-
-            //togglePause();
-            /*bool showTitleScreen = settings.get<bool>("Game", "showTitleScreen");
-            if(showTitleScreen)
-            {
-                guiManager.showTitleScreen();
-            }
-            else
-            {
-                guiManager.showMainMenu();
-            }*/
-        }
 
         boost::asio::io_service io;
 

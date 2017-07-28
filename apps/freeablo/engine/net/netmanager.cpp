@@ -70,4 +70,9 @@ namespace Engine
             return FARender::getDefaultSprite();
         return mClient->getServerSprite(index);
     }
+
+    void NetManager::sendLevelChangePacket(int32_t level)
+    {
+        mClient->sendLevelChangePacket(level);
+    }
 }
