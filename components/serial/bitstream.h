@@ -7,6 +7,8 @@
 #include <cstring>
 #include <vector>
 
+#include <assert.h>
+
 namespace Serial
 {
     namespace BSPos
@@ -131,12 +133,27 @@ namespace Serial
 
 #include "bitstream.inl"
 
-#define SERIALISE_MACRO_BASE(macro) do  \
-{                                       \
-    auto ret = macro;                   \
-    if (ret != Serial::Error::Success)  \
-        return ret;                     \
-} while(0)
+#ifdef NDEBUG
+
+    #define SERIALISE_MACRO_BASE(macro) do  \
+    {                                       \
+        auto ret = macro;                   \
+        if (ret != Serial::Error::Success)  \
+            return ret;                     \
+    } while(0)
+
+#else
+    #define SERIALISE_MACRO_BASE(macro) do              \
+    {                                                   \
+        auto ret = macro;                               \
+        if (ret != Serial::Error::Success)              \
+        {                                               \
+            assert(ret == Serial::Error::EndOfStream);  \
+            return ret;                                 \
+        }                                               \
+    } while(0)
+#endif
+
 
 
 // workaround for msvc's bad handling of "dependent-name"s https://stackoverflow.com/questions/2974780/visual-c-compiler-allows-dependent-name-as-a-type-without-typename
@@ -160,11 +177,11 @@ namespace Serial
 #define serialise_object(stream, val) SERIALISE_MACRO_BASE(_serialise_object(stream, val))
 #define serialise_str(stream, val, len) SERIALISE_MACRO_BASE(_serialise_str(stream, val, len))
 
-#define serialise_enum(stream, type, val) do                \
-{                                                           \
-    int32_t enumValInt = val;                               \
-    serialise_int(stream, 0, type::ENUM_END, enumValInt);   \
-    val = (type)enumValInt;                                 \
+#define serialise_enum(stream, type, val) do                        \
+{                                                                   \
+    int32_t enumValInt = (int32_t)val;                              \
+    serialise_int(stream, 0, (int32_t)type::ENUM_END, enumValInt);  \
+    val = (type)enumValInt;                                         \
 } while(0)
 
 #endif // !FA_BITSTREAM_H

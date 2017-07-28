@@ -24,8 +24,9 @@ namespace FAWorld
     class Player;
     class GameLevel;
 
-    // at 125 ticks/second, it will take about two billion years to reach max value, so int64 will probably do :p
+    // at 125 ticks/second, it will take about 200 days to reach max value, so int32 will probably do :p
     typedef int64_t Tick;
+    static const Tick MAX_TICK = 214748364;
 
     class World : public Engine::KeyboardInputObserverInterface, public Engine::MouseInputObserverInterface
     {

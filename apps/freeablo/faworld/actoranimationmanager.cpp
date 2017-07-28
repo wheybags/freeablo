@@ -44,6 +44,7 @@ namespace FAWorld
 
     void ActorAnimationManager::update()
     {
+        mAnimationPlayer.update();
         auto sprite = mAnimationPlayer.getCurrentFrame().first;
 
         // loop idle animation if we're not doing anything else

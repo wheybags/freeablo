@@ -152,6 +152,8 @@ namespace FAWorld
                         mMoveHandler.setDestination(destTmp);
                 }
 
+                serialise_object(stream, mAnimation);
+
                 //serialise_object(stream, mPos);
                 //serialise_int(stream, 0, 2048, mFrame);
                 //serialise_enum(stream, AnimState::AnimState, mAnimState);

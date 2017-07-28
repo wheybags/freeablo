@@ -66,6 +66,8 @@ namespace Engine
     FARender::FASpriteGroup* NetManager::getServerSprite(size_t index)
     {
         assert(!mIsServer);
+        if (index == 0)
+            return FARender::getDefaultSprite();
         return mClient->getServerSprite(index);
     }
 }
