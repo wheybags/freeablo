@@ -75,14 +75,14 @@ namespace FAWorld
         auto townLevel = new GameLevel(townLevelBase, 0);
         mLevels[0] = townLevel;
 
-        const std::vector<const DiabloExe::Npc*> npcs = mDiabloExe.getNpcs();
+        /*const std::vector<const DiabloExe::Npc*> npcs = mDiabloExe.getNpcs();
         for (size_t i = 0; i < npcs.size(); i++)
         {
             Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath);
             actor->setCanTalk(true);
             actor->setActorId(npcs[i]->id);
             actor->teleport(townLevel, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
-        }
+        }*/
 
         for (int32_t i = 1; i < 17; i++)
         {
@@ -223,10 +223,13 @@ namespace FAWorld
     {
         for (auto levelPair : mLevels)
         {
-            auto actor = levelPair.second->getActorById(id);
+            if (levelPair.second)
+            {
+                auto actor = levelPair.second->getActorById(id);
 
-            if (actor)
-                return actor;
+                if (actor)
+                    return actor;
+            }
         }
 
         return NULL;
@@ -235,7 +238,10 @@ namespace FAWorld
     void World::getAllActors(std::vector<Actor*>& actors)
     {
         for (auto pair : mLevels)
-            pair.second->getActors(actors);
+        {
+            if(pair.second)
+                pair.second->getActors(actors);
+        }
     }
 
     Tick World::getCurrentTick()

@@ -191,9 +191,18 @@ namespace Engine
                 if (err == Serial::Error::Success)
                 {
                     FAWorld::Actor* actor = world.getActorById(actorId);
+
+                    if (actorId == world.getCurrentPlayer()->mId)
+                        actor = world.getCurrentPlayer();
+
+                    static bool doonce = false;
+                    if(!doonce && actor == world.getCurrentPlayer())
+                        actor->teleport(FAWorld::World::get()->getLevel(0), FAWorld::Position(76, 68));
+
                     if (actor == NULL)
                     {
                         actor = dynamic_cast<FAWorld::Actor*>(FAWorld::NetObject::construct(classId));
+                            actor->teleport(FAWorld::World::get()->getLevel(0), FAWorld::Position(76, 68));
                         actor->mId = actorId;
                     }
 
@@ -214,14 +223,13 @@ namespace Engine
 
     void Client::sendClientPacket()
     {
-        assert(false);
-        /*auto packet = getWritePacket(Engine::PacketType::ClientToServerUpdate, 0, false, Engine::WritePacketResizableType::Resizable);
+        auto packet = getWritePacket(Engine::PacketType::ClientToServerUpdate, 0, false, Engine::WritePacketResizableType::Resizable);
 
         auto player = FAWorld::World::get()->getCurrentPlayer();
 
         ClientPacket data;
-        data.destX = player->destination().first;
-        data.destY = player->destination().second;
+        data.destX = player->mMoveHandler.getDestination().first;
+        data.destY = player->mMoveHandler.getDestination().second;
         data.levelIndex = mLevelIndexTmp;
 
         packet.writer.handleObject(data);
@@ -229,7 +237,7 @@ namespace Engine
         sendPacket(packet, mServerPeer);
 
         if (mUnknownServerSprites.size())
-            sendSpriteRequest();*/
+            sendSpriteRequest();
     }
 
     void Client::sendSpriteRequest()

@@ -136,6 +136,9 @@ namespace FAWorld
             int32_t frame = 0;
             mActors[i]->getCurrentFrame(sprite, frame);
 
+            if (!sprite)
+                sprite = FARender::getDefaultSprite();
+
             // offset the sprite for the current direction of the actor
             frame += mActors[i]->getPos().getDirection() * sprite->getAnimLength();
 

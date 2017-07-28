@@ -1217,7 +1217,7 @@ namespace FALevelGen
         Level::Level levelBase(level, tilPath, minPath, solPath, celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap(), previous, next);
         auto retval = new FAWorld::GameLevel(levelBase, dLvl);
         
-        placeMonsters(*retval, levelBase, exe, dLvl);
+        //placeMonsters(*retval, levelBase, exe, dLvl);
 
         return retval;
     }

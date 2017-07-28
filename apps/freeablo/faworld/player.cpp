@@ -5,6 +5,7 @@
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
 #include <boost/python.hpp>
+#include <misc/stringops.h>
 
 namespace FAWorld
 {
@@ -31,6 +32,8 @@ namespace FAWorld
             mStats = new FAWorld::RangerStats(charStats, this);
         else if (className == "Sorcerer")
             mStats = new FAWorld::MageStats(charStats, this);
+
+        setSpriteClass(Misc::StringUtils::lowerCase(className));
 
         mStats->setActor(this);
         mStats->recalculateDerivedStats();
@@ -238,7 +241,7 @@ namespace FAWorld
         mFmtWeaponCode = weapon;
         mFmtArmourCode = armour;
 
-        if(mLevel && mLevel->getLevelIndex() != 0)
+        if(getLevel() && getLevel()->getLevelIndex() != 0)
             mFmtInDungeon=true;
         else
             mFmtInDungeon=false;

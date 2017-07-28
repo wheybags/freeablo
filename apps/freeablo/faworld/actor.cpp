@@ -27,7 +27,7 @@ namespace FAWorld
         if (currentAnim == nullptr)
             mAnimation.playAnimation(mIdleAnim, mAnimTimeMap[AnimState::idle], FARender::AnimationPlayer::AnimationType::Looped);
 
-        if (mLevel)
+        if (getLevel())
         {
             if (isAttacking)
             {
@@ -127,21 +127,20 @@ namespace FAWorld
 
     void Actor::teleport(GameLevel* level, Position pos)
     {
-        if (!mLevel || mLevel->getLevelIndex() != level->getLevelIndex())
+        auto currentLevel = getLevel();
+        if (!currentLevel || currentLevel->getLevelIndex() != level->getLevelIndex())
         {
-            if (mLevel)
-                mLevel->removeActor(this);
+            if (currentLevel)
+                currentLevel->removeActor(this);
 
-            mLevel = level;
-            mLevel->addActor(this);
-
+            level->addActor(this);
             mMoveHandler.teleport(level, pos);
         }
     }
 
     GameLevel* Actor::getLevel()
     {
-        return mLevel;
+        return mMoveHandler.getLevel();
     }
 
     bool Actor::canIAttack(Actor * actor)
@@ -193,7 +192,7 @@ namespace FAWorld
 
     bool Actor::canWalkTo(int32_t x, int32_t y)
     {
-        return mLevel->isPassable(x, y);
+        return getLevel()->isPassable(x, y);
     }
 
     std::string Actor::getActorId() const

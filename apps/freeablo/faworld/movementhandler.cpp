@@ -27,6 +27,11 @@ namespace FAWorld
         return mCurrentPos;
     }
 
+    GameLevel* MovementHandler::getLevel()
+    {
+        return mLevel;
+    }
+
     void MovementHandler::update()
     {
         if (mCurrentPos.mDist == 0)
