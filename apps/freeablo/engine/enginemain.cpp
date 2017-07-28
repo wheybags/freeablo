@@ -98,6 +98,8 @@ namespace Engine
         if (currentLevel == -1)
             currentLevel = 0;
 
+        bool clientWaitingForLevel = false;
+
         // -1 represents the main menu
         if(currentLevel != -1 && isServer)
         {
@@ -106,7 +108,9 @@ namespace Engine
         }
         else
         {
-            togglePause();
+            clientWaitingForLevel = true;
+
+            //togglePause();
             /*bool showTitleScreen = settings.get<bool>("Game", "showTitleScreen");
             if(showTitleScreen)
             {
@@ -127,8 +131,13 @@ namespace Engine
         {
             boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000/FAWorld::World::ticksPerSecond));
 
+            if (clientWaitingForLevel)
+            {
+                clientWaitingForLevel = world.getCurrentLevel() != nullptr;
+            }
+
             mInputManager->update(mPaused);
-            if(!mPaused)
+            if(!mPaused && !clientWaitingForLevel)
             {
                 world.update(mNoclip);
             }

@@ -111,7 +111,8 @@ namespace Engine
             }
         }
 
-        if(mServerPeer != NULL)
+        // don't send client updates until we're fully connected
+        if(mServerPeer != nullptr && FAWorld::World::get()->getCurrentLevel() != nullptr)
             sendClientPacket();
 
         enet_host_flush(mHost);

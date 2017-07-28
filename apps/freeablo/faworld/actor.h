@@ -148,16 +148,30 @@ namespace FAWorld
             template <class Stream>
             Serial::Error::Error faSerial(Stream& stream)
             {
+                auto destTmp = mMoveHandler.getDestination();
                 auto levelTmp = mMoveHandler.getLevel();
                 serialise_object(stream, mMoveHandler);
 
-                if (levelTmp != mMoveHandler.getLevel())
+                
+                if (!stream.isWriting())
                 {
-                    if (levelTmp)
-                        levelTmp->removeActor(this);
+                    // make sure we let the level object know if we've changed levels
+                    if (levelTmp != mMoveHandler.getLevel())
+                    {
+                        if (levelTmp)
+                            levelTmp->removeActor(this);
 
-                    mMoveHandler.getLevel()->addActor(this);
+                        mMoveHandler.getLevel()->addActor(this);
+
+                        destTmp = mMoveHandler.getCurrentPosition().current(); // just sit still after a level change
+                    }
+
+
+                    // don't sync our own destination, we set that ourselves
+                    if ((Actor*)World::get()->getCurrentPlayer() == this)
+                        mMoveHandler.setDestination(destTmp);
                 }
+
                 //serialise_object(stream, mPos);
                 //serialise_int(stream, 0, 2048, mFrame);
                 //serialise_enum(stream, AnimState::AnimState, mAnimState);
