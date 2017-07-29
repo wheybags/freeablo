@@ -80,7 +80,7 @@ namespace FAWorld
                     mCurrentPath = std::move(pathFind(mLevel, mCurrentPos.current(), mDestination, _));
                     mCurrentPathIndex = 0;
 
-                    update();
+                    update(actorId);
                     return;
                 }
             }
