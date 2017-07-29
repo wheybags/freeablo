@@ -32,7 +32,7 @@ namespace FAWorld
         return mLevel;
     }
 
-    void MovementHandler::update()
+    void MovementHandler::update(int32_t actorId)
     {
         if (mCurrentPos.mDist == 0)
         {
@@ -46,6 +46,10 @@ namespace FAWorld
             else
             {
                 bool canRepath = std::abs(World::get()->getCurrentTick() - mLastRepathed) > mPathRateLimit;
+
+                int32_t modNum = 3;
+                canRepath = canRepath && ((World::get()->getCurrentTick() % modNum) == (actorId % modNum));
+
                 bool needsRepath = true;
                 mCurrentPos.mMoving = false;
 

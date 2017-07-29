@@ -55,7 +55,7 @@ namespace FAWorld
         void actorMapRefresh();
         virtual bool isPassable(int x, int y) const;
 
-        Actor* getActorAt(size_t x, size_t y) const;
+        Actor* getActorAt(int32_t x, int32_t y) const;
 
         void addActor(Actor* actor);
 
@@ -82,7 +82,7 @@ namespace FAWorld
         size_t mLevelIndex;
 
         std::vector<Actor*> mActors;
-        std::unordered_map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
+        std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
                                                                     ///< Where an actor straddles two squares, they shall be placed in both.
         friend class FARender::Renderer;
     };

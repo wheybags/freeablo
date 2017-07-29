@@ -107,13 +107,16 @@ namespace FAWorld
 
     bool GameLevel::isPassable(int x, int y) const
     {
+        if (x > 0 && x < width() && y > 0 && y < height() && !mLevel[x][y].passable())
+            return false;
+
         FAWorld::Actor* actor = getActorAt(x, y);
-        return mLevel[x][y].passable() && (actor == NULL || actor->isPassable());
+        return actor == NULL || actor->isPassable();
     }
 
-    Actor* GameLevel::getActorAt(size_t x, size_t y) const
+    Actor* GameLevel::getActorAt(int32_t x, int32_t y) const
     {
-        auto it = mActorMap2D.find(std::pair<size_t, size_t>(x, y));
+        auto it = mActorMap2D.find(std::pair<int32_t, int32_t>(x, y));
         if (it == mActorMap2D.end())
             return nullptr;
 

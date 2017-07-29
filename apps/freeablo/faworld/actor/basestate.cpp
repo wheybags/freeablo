@@ -35,7 +35,7 @@ namespace FAWorld
                 }
             }
 
-            actor.mMoveHandler.update();
+            actor.mMoveHandler.update(actor.getId());
 
             AnimState anim = actor.mAnimation.getCurrentAnimation();
 

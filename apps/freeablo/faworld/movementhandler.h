@@ -18,7 +18,7 @@ namespace FAWorld
         bool moving();
         Position getCurrentPosition() const;
         GameLevel* getLevel();
-        void update();
+        void update(int32_t actorId);
         void teleport(GameLevel* level, Position pos);
 
     private:
