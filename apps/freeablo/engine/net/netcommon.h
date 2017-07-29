@@ -44,11 +44,15 @@ namespace Engine
         int32_t destX;
         int32_t destY;
 
+        int32_t targetActorId;
+
         template <class Stream>
         Serial::Error::Error faSerial(Stream& stream)
         {
             serialise_int32(stream, destX);
             serialise_int32(stream, destY);
+
+            serialise_int32(stream, targetActorId);
             return Serial::Error::Success;
         }
     };

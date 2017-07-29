@@ -236,6 +236,9 @@ namespace Engine
         auto player = mServersClientData[peer->connectID].player;
         player->mMoveHandler.setDestination({ data.destX, data.destY });
 
+        if (data.targetActorId != -1)
+            player->actorTarget = FAWorld::World::get()->getActorById(data.targetActorId);
+
         return Serial::Error::Success;
     }
 

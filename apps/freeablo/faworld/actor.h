@@ -184,6 +184,15 @@ namespace FAWorld
                         return err;
                 }
 
+                int32_t targetId = -1;
+                if (stream.isWriting() && actorTarget != nullptr)
+                    targetId = actorTarget->getId();
+
+                serialise_int32(stream, targetId);
+
+                if (!stream.isWriting() && targetId != -1)
+                    actorTarget = World::get()->getActorById(targetId);
+
                 return Serial::Error::Success;
             }
 

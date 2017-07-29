@@ -219,6 +219,10 @@ namespace Engine
         ClientPacket data;
         data.destX = player->mMoveHandler.getDestination().first;
         data.destY = player->mMoveHandler.getDestination().second;
+        
+        data.targetActorId = -1;
+        if (player->actorTarget != nullptr)
+            data.targetActorId = player->actorTarget->getId();
 
         packet.writer.handleObject(data);
 
