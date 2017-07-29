@@ -56,33 +56,29 @@ namespace FAWorld
             }
             else if (dist >= std::pow(100, 2)) // just freeze if we're miles away from anyone
             {
-                //mActor->die();
-                //mActor->actorTarget = nullptr;
                 return;
             }
-            else if (mActor->actorTarget == nullptr && !mActor->mMoveHandler.moving()) // if no player is in sight, let's wander around a bit
+            // if no player is in sight, let's wander around a bit
+            else if (mTicksSinceLastAction > World::getTicksInPeriod(0.5f) && mActor->actorTarget == nullptr && !mActor->mMoveHandler.moving())
             {
                 // seed a simple RNG with some variables that should be stable across server and client
                 FALevelGen::RandLCG r(mTicksSinceLastAction + mActor->getId() + mActor->getPos().current().first);
 
-                // we arrived at the destination, so let's decide if
-                // we want to move some more
-                if (mTicksSinceLastAction > ((size_t)r.get() % 300) + 100)
+                if ((r.get() % 100) > 80) 
                 {
-                    // if 1 let's move, else wbehaviourt
-                    if (r.get() % 2) 
-                    {
-                        std::pair<int32_t, int32_t> next;
+                    std::pair<int32_t, int32_t> next;
 
-                        do 
-                        {
-                            next = mActor->getPos().current();
-                            next.first += ((r.get() % 3) - 1) * (r.get() % 3 + 1);
-                            next.second += ((r.get() % 3) - 1) * (r.get() % 3 + 1);
-                        } while (!mActor->getLevel()->isPassable(next.first, next.second) || next == mActor->getPos().current());
+                    int its = 0;
+                    do 
+                    {
+                        ++its;
+                        next = mActor->getPos().current();
+                        next.first += ((r.get() % 3) - 1) * (r.get() % 3 + 1);
+                        next.second += ((r.get() % 3) - 1) * (r.get() % 3 + 1);
+                    } while (its < 10 && !mActor->getLevel()->isPassable(next.first, next.second) || next == mActor->getPos().current());
                         
+                    if(its < 10)
                         mActor->mMoveHandler.setDestination(next);
-                    }
 
                     mTicksSinceLastAction = 0;
                 }
