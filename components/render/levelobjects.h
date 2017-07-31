@@ -22,19 +22,19 @@ namespace Render
     class LevelObjects
     {
         public:
-            void resize(size_t x, size_t y);
+            void resize(int32_t x, int32_t y);
 
-            Misc::Helper2D<LevelObjects, std::vector<LevelObject>&> operator[] (size_t x);
+            Misc::Helper2D<LevelObjects, std::vector<LevelObject>&> operator[] (int32_t x);
 
-            size_t width();
-            size_t height();
+            int32_t width();
+            int32_t height();
 
         private:
             std::vector<std::vector<LevelObject>> mData;
-            size_t mWidth;
-            size_t mHeight;
+            int32_t mWidth;
+            int32_t mHeight;
 
-            friend std::vector<LevelObject>& get(size_t x, size_t y, LevelObjects& obj);
+            friend std::vector<LevelObject>& get(int32_t x, int32_t y, LevelObjects& obj);
     };
 }
 

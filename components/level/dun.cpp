@@ -25,14 +25,14 @@ namespace Level
         std::cout << "w: " << mWidth << ", h: " << mHeight << std::endl;
     }
 
-    Dun::Dun(size_t width, size_t height)
+    Dun::Dun(int32_t width, int32_t height)
     {
         resize(width, height);
     }
 
     Dun::Dun() {}
 
-    void Dun::resize(size_t width, size_t height)
+    void Dun::resize(int32_t width, int32_t height)
     {
         mWidth = width;
         mHeight = height;
@@ -43,33 +43,33 @@ namespace Level
     {
         Dun town(48, 48);
 
-        for(size_t x = 0; x < sector3.mWidth; x++)
+        for(int32_t x = 0; x < sector3.mWidth; x++)
         {
-            for(size_t y = 0; y < sector3.mHeight; y++)
+            for(int32_t y = 0; y < sector3.mHeight; y++)
             {
                 town[0+x][23+y] = sector3[x][y];
             }
         }
 
-        for(size_t x = 0; x < sector4.mWidth; x++)
+        for(int32_t x = 0; x < sector4.mWidth; x++)
         {
-            for(size_t y = 0; y < sector4.mHeight; y++)
+            for(int32_t y = 0; y < sector4.mHeight; y++)
             {
                 town[0+x][0+y] = sector4[x][y];
             }
         }
 
-        for(size_t x = 0; x < sector1.mWidth; x++)
+        for(int32_t x = 0; x < sector1.mWidth; x++)
         {
-            for(size_t y = 0; y < sector1.mHeight; y++)
+            for(int32_t y = 0; y < sector1.mHeight; y++)
             {
                 town[23+x][23+y] = sector1[x][y];
             }
         }
 
-        for(size_t x = 0; x < sector2.mWidth; x++)
+        for(int32_t x = 0; x < sector2.mWidth; x++)
         {
-            for(size_t y = 0; y < sector2.mHeight; y++)
+            for(int32_t y = 0; y < sector2.mHeight; y++)
             {
                 town[23+x][0+y] = sector2[x][y];
             }
@@ -78,32 +78,32 @@ namespace Level
         return town;
     }
 
-    size_t& get(size_t x, size_t y, Dun& dun)
+    int32_t& get(int32_t x, int32_t y, Dun& dun)
     {
         return dun.mBlocks[x+y*dun.width()];
     }
 
-    const size_t& get(size_t x, size_t y, const Dun& dun)
+    const int32_t& get(int32_t x, int32_t y, const Dun& dun)
     {
         return dun.mBlocks[x+y*dun.width()];
     }
 
-    Misc::Helper2D<Dun, size_t&> Dun::operator[] (size_t x)
+    Misc::Helper2D<Dun, int32_t&> Dun::operator[] (int32_t x)
     {
-        return Misc::Helper2D<Dun, size_t&>(*this, x, get);
+        return Misc::Helper2D<Dun, int32_t&>(*this, x, get);
     }
 
-    Misc::Helper2D<const Dun, const size_t&> Dun::operator[] (size_t x) const
+    Misc::Helper2D<const Dun, const int32_t&> Dun::operator[] (int32_t x) const
     {
-        return Misc::Helper2D<const Dun, const size_t&>(*this, x, get);
+        return Misc::Helper2D<const Dun, const int32_t&>(*this, x, get);
     }
 
-    size_t Dun::width() const
+    int32_t Dun::width() const
     {
         return mWidth;
     }
 
-    size_t Dun::height() const
+    int32_t Dun::height() const
     {
         return mHeight;
     }

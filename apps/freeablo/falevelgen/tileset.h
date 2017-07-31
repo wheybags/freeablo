@@ -102,90 +102,90 @@ namespace FALevelGen
         public:
             TileSet(const std::string& path);
 
-            size_t xWall;
-            size_t outsideXWall;
-            size_t yWall;
-            size_t outsideYWall;
-            size_t bottomCorner;
-            size_t outsideBottomCorner;
-            size_t rightCorner;
-            size_t outsideRightCorner;
-            size_t leftCorner;
-            size_t outsideLeftCorner;
-            size_t topCorner;
-            size_t outsideTopCorner;
-            size_t floor;
-            size_t blank;
-            size_t xWallEnd;
-            size_t xWallEndBack;
-            size_t yWallEnd;
-            size_t yWallEndBack;
-            size_t xDoor;
-            size_t yDoor;
+            int32_t xWall;
+            int32_t outsideXWall;
+            int32_t yWall;
+            int32_t outsideYWall;
+            int32_t bottomCorner;
+            int32_t outsideBottomCorner;
+            int32_t rightCorner;
+            int32_t outsideRightCorner;
+            int32_t leftCorner;
+            int32_t outsideLeftCorner;
+            int32_t topCorner;
+            int32_t outsideTopCorner;
+            int32_t floor;
+            int32_t blank;
+            int32_t xWallEnd;
+            int32_t xWallEndBack;
+            int32_t yWallEnd;
+            int32_t yWallEndBack;
+            int32_t xDoor;
+            int32_t yDoor;
 
-            size_t upStairs1;
-            size_t upStairs2;
-            size_t upStairs3;
+            int32_t upStairs1;
+            int32_t upStairs2;
+            int32_t upStairs3;
 
-            size_t upStairs4;
-            size_t upStairs5;
-            size_t upStairs6;
+            int32_t upStairs4;
+            int32_t upStairs5;
+            int32_t upStairs6;
 
-            size_t upStairs7;
-            size_t upStairs8;
-            size_t upStairs9;
+            int32_t upStairs7;
+            int32_t upStairs8;
+            int32_t upStairs9;
 
-            size_t downStairs1;
-            size_t downStairs2;
-            size_t downStairs3;
+            int32_t downStairs1;
+            int32_t downStairs2;
+            int32_t downStairs3;
 
-            size_t downStairs4;
-            size_t downStairs5;
-            size_t downStairs6;
+            int32_t downStairs4;
+            int32_t downStairs5;
+            int32_t downStairs6;
 
-            size_t downStairs7;
-            size_t downStairs8;
-            size_t downStairs9;
+            int32_t downStairs7;
+            int32_t downStairs8;
+            int32_t downStairs9;
 
-            size_t insideXWall;
-            size_t insideXWallEnd;
-            size_t insideXWallEndBack;
-            size_t insideYWall;
-            size_t insideYWallEnd;
-            size_t insideYWallEndBack;
-            size_t insideLeftCorner;
-            size_t insideRightCorner;
-            size_t insideBottomCorner;
-            size_t insideTopCorner;
+            int32_t insideXWall;
+            int32_t insideXWallEnd;
+            int32_t insideXWallEndBack;
+            int32_t insideYWall;
+            int32_t insideYWallEnd;
+            int32_t insideYWallEndBack;
+            int32_t insideLeftCorner;
+            int32_t insideRightCorner;
+            int32_t insideBottomCorner;
+            int32_t insideTopCorner;
 
-            size_t joinY;
-            size_t joinYRightCorner;
-            size_t joinRightCorner;
-            size_t joinOutXRightCorner;
-            size_t joinOutX;
-            size_t joinOutXTopCorner;
-            size_t joinTopCorner;
-            size_t joinOutYTopCorner;
-            size_t joinOutY;
-            size_t joinOutYLeftCorner;
-            size_t joinLeftCorner;
-            size_t joinXLeftCorner;
-            size_t joinX;
-            size_t joinXBottomCorner;
-            size_t joinBottomCorner;
-            size_t joinYBottomCorner;
+            int32_t joinY;
+            int32_t joinYRightCorner;
+            int32_t joinRightCorner;
+            int32_t joinOutXRightCorner;
+            int32_t joinOutX;
+            int32_t joinOutXTopCorner;
+            int32_t joinTopCorner;
+            int32_t joinOutYTopCorner;
+            int32_t joinOutY;
+            int32_t joinOutYLeftCorner;
+            int32_t joinLeftCorner;
+            int32_t joinXLeftCorner;
+            int32_t joinX;
+            int32_t joinXBottomCorner;
+            int32_t joinBottomCorner;
+            int32_t joinYBottomCorner;
 
-            size_t getRandomTile(size_t tile);
-            std::map<size_t, size_t> getDoorMap();
+            int32_t getRandomTile(int32_t tile);
+            std::map<int32_t, int32_t> getDoorMap();
 
-            size_t convert(TileSetEnum::TileSetEnum val);
+            int32_t convert(TileSetEnum::TileSetEnum val);
         
         private:
-            std::map<size_t, std::pair<std::vector<std::pair<size_t, size_t> >, size_t> > mAlternatives;
+            std::map<int32_t, std::pair<std::vector<std::pair<int32_t, int32_t> >, int32_t> > mAlternatives;
 
-            std::map<size_t, size_t> mDoorMap;
+            std::map<int32_t, int32_t> mDoorMap;
 
-            void fillTile(size_t tile, Settings::Settings & settings, const std::string& str);
+            void fillTile(int32_t tile, Settings::Settings & settings, const std::string& str);
 
             void loadDoorMap(Settings::Settings & settings);
     };

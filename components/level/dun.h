@@ -18,25 +18,25 @@ namespace Level
         public:
             Dun(const std::string&);
             Dun();
-            Dun(size_t width, size_t height);
+            Dun(int32_t width, int32_t height);
 
             static Dun getTown(const Dun& sector1, const Dun& sector2, const Dun& sector3, const Dun& sector4);
 
-            Misc::Helper2D<Dun, size_t&> operator[] (size_t x);
-            Misc::Helper2D<const Dun, const size_t&> operator[] (size_t x) const;
+            Misc::Helper2D<Dun, int32_t&> operator[] (int32_t x);
+            Misc::Helper2D<const Dun, const int32_t&> operator[] (int32_t x) const;
 
-            size_t width() const;
-            size_t height() const;
+            int32_t width() const;
+            int32_t height() const;
 
         private:
-            void resize(size_t width, size_t height);
+            void resize(int32_t width, int32_t height);
 
-            std::vector<size_t> mBlocks;
-            size_t mWidth;
-            size_t mHeight;
+            std::vector<int32_t> mBlocks;
+            int32_t mWidth;
+            int32_t mHeight;
 
-            friend const size_t& get(size_t x, size_t y, const Dun& dun);
-            friend size_t& get(size_t x, size_t y, Dun& dun);
+            friend const int32_t& get(int32_t x, int32_t y, const Dun& dun);
+            friend int32_t& get(int32_t x, int32_t y, Dun& dun);
 
             friend class boost::serialization::access;
 

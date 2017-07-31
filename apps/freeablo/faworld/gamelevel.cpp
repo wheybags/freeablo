@@ -29,22 +29,22 @@ namespace FAWorld
         return mLevel[x][y];
     }
 
-    size_t GameLevel::width() const
+    int32_t GameLevel::width() const
     {
         return mLevel.width();
     }
 
-    size_t GameLevel::height() const
+    int32_t GameLevel::height() const
     {
         return mLevel.height();
     }
 
-    const std::pair<size_t,size_t>& GameLevel::upStairsPos() const
+    const std::pair<size_t,size_t> GameLevel::upStairsPos() const
     {
         return mLevel.upStairsPos();
     }
 
-    const std::pair<size_t,size_t>& GameLevel::downStairsPos() const
+    const std::pair<size_t,size_t> GameLevel::downStairsPos() const
     {
         return mLevel.downStairsPos();
     }

@@ -20,7 +20,7 @@ namespace Cel
         getFrames();
     }
 
-    CelFrame& CelDecoder::operator [](size_t index) {
+    CelFrame& CelDecoder::operator [](int32_t index) {
 
         if(mCache.count(index)) {
             return mCache[index];
@@ -34,12 +34,12 @@ namespace Cel
         return mCache[index];
     }
 
-    size_t CelDecoder::numFrames() const
+    int32_t CelDecoder::numFrames() const
     {
         return mFrames.size();
     }
 
-    size_t CelDecoder::animationLength() const
+    int32_t CelDecoder::animationLength() const
     {
         return mAnimationLength;
     }
@@ -82,7 +82,7 @@ namespace Cel
             mIsCl2 = true;
         }
 
-        size_t pos = celNameWithoutExtension.find_last_of(extension) - 3;
+        int32_t pos = celNameWithoutExtension.find_last_of(extension) - 3;
         celNameWithoutExtension = celNameWithoutExtension.substr(0, pos);
 
         // If more than one image in cel
@@ -206,17 +206,17 @@ namespace Cel
                     return;
                 }
 
-                mFrames.push_back(std::vector<uint8_t>(static_cast<size_t> (frameSize)));
+                mFrames.push_back(std::vector<uint8_t>(static_cast<int32_t> (frameSize)));
                 uint32_t idx = mFrames.size() - 1;
                 file.FAfseek(mHeaderSize, SEEK_CUR);
-                file.FAfread(&mFrames[idx][0], 1, static_cast<size_t> (frameSize));
+                file.FAfread(&mFrames[idx][0], 1, static_cast<int32_t> (frameSize));
             }
 
             mAnimationLength = frameCount;
         }
     }
 
-    void CelDecoder::decodeFrame(size_t index, FrameBytesRef frame, CelFrame& celFrame) {
+    void CelDecoder::decodeFrame(int32_t index, FrameBytesRef frame, CelFrame& celFrame) {
         auto decoder = getFrameDecoder(mCelName, frame, index);
 
         if(mIsObjcursCel) {
@@ -332,8 +332,8 @@ namespace Cel
                                       const Pal& pal,
                                       ColoursRef decodedFrame)
     {
-        size_t len = frame.size();
-        for(size_t pos = 0 ; pos < len ; pos++)
+        int32_t len = frame.size();
+        for(int32_t pos = 0 ; pos < len ; pos++)
         {
             Colour color = pal[frame[pos]];
             decodedFrame.push_back(color);
@@ -357,8 +357,8 @@ namespace Cel
                                       const Pal& pal,
                                       ColoursRef decodedFrame)
     {
-        size_t len = frame.size();
-        for(size_t pos = 0 ; pos < len ;)
+        int32_t len = frame.size();
+        for(int32_t pos = 0 ; pos < len ;)
         {
             int chunkSize = int(int8_t(frame[pos]));
             pos++;
@@ -630,8 +630,8 @@ namespace Cel
                                       const Pal& pal,
                                       ColoursRef decodedFrame)
     {
-        size_t len = frame.size();
-        for(size_t pos = 0 ; pos < len ;)
+        int32_t len = frame.size();
+        for(int32_t pos = 0 ; pos < len ;)
         {
             int chunkSize = int(int8_t(frame[pos]));
             pos++;

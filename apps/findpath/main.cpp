@@ -32,12 +32,12 @@ namespace FAWorld
             //drawMap();
         }
 
-        size_t width() const
+        int32_t width() const
         {
             return MAP_SIZE;
         }
 
-        size_t height() const
+        int32_t height() const
         {
             return MAP_SIZE;
         }

@@ -70,7 +70,7 @@ namespace FAWorld
 
         Level::Level townLevelBase(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
             "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
-            std::make_pair(25u, 29u), std::make_pair(75u, 68u), std::map<size_t, size_t>(), static_cast<size_t> (-1), 1);
+            std::make_pair(25u, 29u), std::make_pair(75u, 68u), std::map<int32_t, int32_t>(), static_cast<int32_t> (-1), 1);
 
         auto townLevel = new GameLevel(townLevelBase, 0);
         mLevels[0] = townLevel;
@@ -205,7 +205,7 @@ namespace FAWorld
 
     void World::registerPlayer(Player *player)
     {
-        auto sortedInsertPosIt = std::upper_bound(mPlayers.begin(), mPlayers.end(), player, [](auto lhs, auto rhs)
+        auto sortedInsertPosIt = std::upper_bound(mPlayers.begin(), mPlayers.end(), player, [](Player* lhs, Player* rhs)
         {
             return lhs->getId() > rhs->getId();
         });
@@ -305,9 +305,9 @@ namespace FAWorld
             player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
     }
 
-    size_t World::getTicksInPeriod(float seconds)
+    Tick World::getTicksInPeriod(float seconds)
     {
-        return std::max((size_t)1, (size_t)round(((float)ticksPerSecond) * seconds));
+        return std::max((Tick)1, (Tick)round(((float)ticksPerSecond) * seconds));
     }
 
     float World::getSecondsPerTick()

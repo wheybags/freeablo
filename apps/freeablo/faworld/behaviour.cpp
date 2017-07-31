@@ -44,8 +44,6 @@ namespace FAWorld
 
         if (!mActor->isDead()) 
         {
-            Tick ticksPassed = World::get()->getCurrentTick();
-
             Player * nearest = FAWorld::findNearestPlayer(mActor);
 
             int32_t dist = FAWorld::squaredDistance(nearest->getPos(), mActor->getPos());
@@ -75,7 +73,7 @@ namespace FAWorld
                         next = mActor->getPos().current();
                         next.first += ((r.get() % 3) - 1) * (r.get() % 3 + 1);
                         next.second += ((r.get() % 3) - 1) * (r.get() % 3 + 1);
-                    } while (its < 10 && !mActor->getLevel()->isPassable(next.first, next.second) || next == mActor->getPos().current());
+                    } while (its < 10 && (!mActor->getLevel()->isPassable(next.first, next.second) || next == mActor->getPos().current()));
                         
                     if(its < 10)
                         mActor->mMoveHandler.setDestination(next);

@@ -2,6 +2,7 @@
 
 #include "renderer.h"
 #include "../faworld/world.h"
+#include "../engine/net/netmanager.h"
 
 namespace FARender
 {

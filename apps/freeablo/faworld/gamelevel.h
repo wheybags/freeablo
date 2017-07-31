@@ -23,8 +23,8 @@ namespace FAWorld
     {
     public:
         virtual ~GameLevelImpl() {}
-        virtual size_t width() const = 0;
-        virtual size_t height() const = 0;
+        virtual int32_t width() const = 0;
+        virtual int32_t height() const = 0;
         virtual bool isPassable(int x, int y) const = 0;
     };
 
@@ -36,11 +36,11 @@ namespace FAWorld
 
         Level::MinPillar getTile(size_t x, size_t y);
 
-        size_t width() const;
-        size_t height() const;
+        int32_t width() const;
+        int32_t height() const;
 
-        const std::pair<size_t, size_t>& upStairsPos() const;
-        const std::pair<size_t, size_t>& downStairsPos() const;
+        const std::pair<size_t, size_t> upStairsPos() const;
+        const std::pair<size_t, size_t> downStairsPos() const;
 
         void activate(size_t x, size_t y);
 

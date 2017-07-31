@@ -45,6 +45,7 @@ namespace FAWorld
         template <class Stream>
         Serial::Error::Error faSerial(Stream& stream)
         {
+            UNUSED_PARAM(stream);
             return Serial::Error::Success;
         }
 
@@ -67,6 +68,7 @@ namespace FAWorld
         template <class Stream>
         Serial::Error::Error faSerial(Stream& stream)
         {
+            UNUSED_PARAM(stream);
             return Serial::Error::Success;
         }
 

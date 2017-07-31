@@ -58,8 +58,8 @@ namespace FAWorld
 
             void fillRenderState(FARender::RenderState* state);
 
-            static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
-            static size_t getTicksInPeriod(float seconds);
+            static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
+            static Tick getTicksInPeriod(float seconds);
             static float getSecondsPerTick();
 
             Actor* getActorById(int32_t id);

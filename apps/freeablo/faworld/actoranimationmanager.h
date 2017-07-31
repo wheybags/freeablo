@@ -4,6 +4,8 @@
 
 #include "../farender/animationplayer.h"
 
+#include <misc/stdhashes.h>
+
 namespace FAWorld
 {
     enum class AnimState
@@ -34,7 +36,7 @@ namespace FAWorld
         AnimState mPlayingAnim = AnimState::none;
         FARender::AnimationPlayer mAnimationPlayer;
 
-        std::unordered_map<AnimState, FARender::FASpriteGroup*> mAnimations;
+        std::unordered_map<AnimState, FARender::FASpriteGroup*, EnumClassHash> mAnimations;
         std::map<AnimState, Tick> mAnimTimeMap;
 
         template <class Stream>

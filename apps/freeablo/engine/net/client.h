@@ -40,7 +40,6 @@ namespace Engine
             ENetHost* mHost = NULL;
             ENetAddress mAddress;
 
-            bool mClientRecievedId = false;
             uint32_t mClientTickWhenLastServerPacketReceived = 0;
             uint32_t mLastServerTickProcessed = 0;
 

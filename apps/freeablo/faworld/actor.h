@@ -18,6 +18,7 @@
 #include "faction.h"
 #include "movementhandler.h"
 #include "actoranimationmanager.h"
+#include "behaviour.h"
 
 
 namespace Engine

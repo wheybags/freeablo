@@ -16,9 +16,9 @@ namespace Cel
     public:
         CelDecoder(const std::string& celPath);
         void decode();
-        CelFrame& operator[](size_t index);
-        size_t numFrames() const;
-        size_t animationLength() const;
+        CelFrame& operator[](int32_t index);
+        int32_t numFrames() const;
+        int32_t animationLength() const;
     private:
 
         typedef std::vector<uint8_t> FrameBytes;
@@ -31,7 +31,7 @@ namespace Cel
         void readPalette();
 
         void getFrames();
-        void decodeFrame(size_t index, FrameBytesRef frame, CelFrame& celFrame);
+        void decodeFrame(int32_t index, FrameBytesRef frame, CelFrame& celFrame);
         FrameDecoder getFrameDecoder(const std::string& celName, FrameBytesRef frame, int frameNumber);
         bool isType0(const std::string& celName, int frameNumber);
         bool isType2or4(FrameBytesRef frame);
@@ -59,7 +59,7 @@ namespace Cel
         void setCharbutCelDimensions(int frame);
 
         std::vector<FrameBytes> mFrames;
-        std::map<size_t, CelFrame> mCache;
+        std::map<int32_t, CelFrame> mCache;
         std::string mCelPath;
         std::string mCelName;
         Pal mPal;
@@ -70,7 +70,7 @@ namespace Cel
         int mFrameWidth;
         int mFrameHeight;
         int mHeaderSize;
-        size_t mAnimationLength;
+        int32_t mAnimationLength;
         static Settings::Settings mSettingsCel;
         static Settings::Settings mSettingsCl2;
     };
