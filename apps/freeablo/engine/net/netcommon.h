@@ -21,6 +21,7 @@ namespace Engine
         NewClient,
         GameUpdateMessage,
         ClientToServerUpdate,
+        LevelChangeRequest,
         MAX_PACKET_TYPE
     };
 
@@ -42,14 +43,16 @@ namespace Engine
     {
         int32_t destX;
         int32_t destY;
-        int32_t levelIndex; // TODO: don't just trust this data
+
+        int32_t targetActorId;
 
         template <class Stream>
         Serial::Error::Error faSerial(Stream& stream)
         {
             serialise_int32(stream, destX);
             serialise_int32(stream, destY);
-            serialise_int32(stream, levelIndex);
+
+            serialise_int32(stream, targetActorId);
             return Serial::Error::Success;
         }
     };

@@ -169,9 +169,6 @@ namespace Render
         int32_t w, h;
         spriteSize((Sprite)(intptr_t)tex, w, h);
 
-        if (w != surf->w || h != surf->h)
-            w = w;
-
         return tex;
     }
 
@@ -400,10 +397,10 @@ namespace Render
     {
         Cel::CelFile cel(path);
 
-        size_t width = 0;
-        size_t height = 0;
+        int32_t width = 0;
+        int32_t height = 0;
 
-        for(size_t i = 0; i < cel.numFrames(); i++)
+        for(int32_t i = 0; i < cel.numFrames(); i++)
         {
             width += cel[i].mWidth;
             height = (cel[i].mHeight > height ? cel[i].mHeight : height);
@@ -414,8 +411,8 @@ namespace Render
 
         SDL_Surface* surface = createTransparentSurface(width, height);
 
-        size_t x = 0;
-        for(size_t i = 0; i < cel.numFrames(); i++)
+        int32_t x = 0;
+        for(int32_t i = 0; i < cel.numFrames(); i++)
         {
             drawFrame(surface, x, 0, cel[i]);
             x += cel[i].mWidth;
@@ -699,16 +696,6 @@ namespace Render
         
         SDL_RenderCopy(renderer, sprite, NULL, &dest);*/
 
-        if (sprite == 0)
-        {
-            sprite = texture;
-        }
-        else
-        {
-            sprite = sprite;
-        }
-
-
         GLint loc = glGetUniformLocation(shader_programme, "width");
         if (loc != -1)
         {
@@ -775,7 +762,7 @@ namespace Render
     {
         Cel::CelFile cel(path);
 
-        for(size_t i = 0; i < cel.numFrames(); i++)
+        for(int32_t i = 0; i < cel.numFrames(); i++)
         {
             SDL_Surface* s = createTransparentSurface(cel[i].mWidth, cel[i].mHeight);
             drawFrame(s, 0, 0, cel[i]);
@@ -793,13 +780,13 @@ namespace Render
     {
         Cel::CelFile cel(celPath);
 
-        size_t numFrames = cel.animLength();
+        int32_t numFrames = cel.animLength();
         if(numFrames == 0)
             return;
 
-        size_t sumWidth = 0;
-        size_t maxHeight = 0;
-        for(size_t i = 0; i < numFrames; i++)
+        int32_t sumWidth = 0;
+        int32_t maxHeight = 0;
+        for(int32_t i = 0; i < numFrames; i++)
         {
             sumWidth += cel[i].mWidth;
             if(cel[i].mHeight > maxHeight) maxHeight = cel[i].mHeight;
@@ -811,7 +798,7 @@ namespace Render
         SDL_Surface* s = createTransparentSurface(sumWidth, maxHeight);
         unsigned int x = 0;
         unsigned int dx = 0;
-        for(size_t i = 0; i < numFrames; i++)
+        for(int32_t i = 0; i < numFrames; i++)
         {
             drawFrame(s, x, 0, cel[i]);
             dx = cel[i].mWidth;
@@ -979,9 +966,9 @@ namespace Render
 
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)
     {
-        for(size_t x = 0; x < frame.mWidth; x++)
+        for(int32_t x = 0; x < frame.mWidth; x++)
         {
-            for(size_t y = 0; y < frame.mHeight; y++)
+            for(int32_t y = 0; y < frame.mHeight; y++)
             {
                 if(frame[x][y].visible)
                     setpixel(s, start_x+x, start_y+y, frame[x][y]);

@@ -70,7 +70,7 @@ namespace FAWorld
 
         Level::Level townLevelBase(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
             "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
-            std::make_pair(25u, 29u), std::make_pair(75u, 68u), std::map<size_t, size_t>(), static_cast<size_t> (-1), 1);
+            std::make_pair(25u, 29u), std::make_pair(75u, 68u), std::map<int32_t, int32_t>(), static_cast<int32_t> (-1), 1);
 
         auto townLevel = new GameLevel(townLevelBase, 0);
         mLevels[0] = townLevel;
@@ -109,6 +109,11 @@ namespace FAWorld
 
         mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
         playLevelMusic(levelNum);
+
+        auto netManager = Engine::NetManager::get();
+
+        if (netManager && !netManager->isServer())
+            netManager->sendLevelChangePacket(level->getLevelIndex());
     }
 
     void World::playLevelMusic(size_t level)
@@ -200,7 +205,12 @@ namespace FAWorld
 
     void World::registerPlayer(Player *player)
     {
-        mPlayers.push_back(player);
+        auto sortedInsertPosIt = std::upper_bound(mPlayers.begin(), mPlayers.end(), player, [](Player* lhs, Player* rhs)
+        {
+            return lhs->getId() > rhs->getId();
+        });
+
+        mPlayers.insert(sortedInsertPosIt, player);
     }
 
     void World::deregisterPlayer(Player *player)
@@ -223,10 +233,13 @@ namespace FAWorld
     {
         for (auto levelPair : mLevels)
         {
-            auto actor = levelPair.second->getActorById(id);
+            if (levelPair.second)
+            {
+                auto actor = levelPair.second->getActorById(id);
 
-            if (actor)
-                return actor;
+                if (actor)
+                    return actor;
+            }
         }
 
         return NULL;
@@ -235,7 +248,10 @@ namespace FAWorld
     void World::getAllActors(std::vector<Actor*>& actors)
     {
         for (auto pair : mLevels)
-            pair.second->getActors(actors);
+        {
+            if(pair.second)
+                pair.second->getActors(actors);
+        }
     }
 
     Tick World::getCurrentTick()
@@ -261,9 +277,6 @@ namespace FAWorld
             player->teleport(level, Position(level->downStairsPos().first, level->downStairsPos().second));
         else
             player->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
-
-
-        //player->destination() = player->getPos().current();
     }
 
     void World::stopPlayerActions()
@@ -292,9 +305,9 @@ namespace FAWorld
             player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
     }
 
-    size_t World::getTicksInPeriod(float seconds)
+    Tick World::getTicksInPeriod(float seconds)
     {
-        return std::max((size_t)1, (size_t)round(((float)ticksPerSecond) * seconds));
+        return std::max((Tick)1, (Tick)round(((float)ticksPerSecond) * seconds));
     }
 
     float World::getSecondsPerTick()

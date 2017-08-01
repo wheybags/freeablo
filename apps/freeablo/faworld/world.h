@@ -24,7 +24,9 @@ namespace FAWorld
     class Player;
     class GameLevel;
 
-    typedef int32_t Tick;
+    // at 125 ticks/second, it will take about 200 days to reach max value, so int32 will probably do :p
+    typedef int64_t Tick;
+    static const Tick MAX_TICK = 214748364;
 
     class World : public Engine::KeyboardInputObserverInterface, public Engine::MouseInputObserverInterface
     {
@@ -56,8 +58,8 @@ namespace FAWorld
 
             void fillRenderState(FARender::RenderState* state);
 
-            static const size_t ticksPerSecond = 125; ///< number of times per second that game state will be updated
-            static size_t getTicksInPeriod(float seconds);
+            static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
+            static Tick getTicksInPeriod(float seconds);
             static float getSecondsPerTick();
 
             Actor* getActorById(int32_t id);
@@ -76,7 +78,7 @@ namespace FAWorld
             std::map<size_t, GameLevel*> mLevels;
             Tick mTicksPassed = 0;
             Player* mCurrentPlayer;
-            std::vector<Player*> mPlayers;
+            std::vector<Player*> mPlayers; ///< This vector is sorted
             const DiabloExe::DiabloExe& mDiabloExe;
     };
 }

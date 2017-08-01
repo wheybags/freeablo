@@ -24,22 +24,22 @@ namespace FARender
                 return spriteCacheIndex != 0;
             }
 
-            uint32_t getAnimLength()
+            int32_t getAnimLength()
             {
                 return animLength;
             }
 
-            uint32_t getWidth()
+            int32_t getWidth()
             {
                 return width;
             }
 
-            uint32_t getHeight()
+            int32_t getHeight()
             {
                 return height;
             }
 
-            uint32_t getCacheIndex()
+            int32_t getCacheIndex()
             {
                 return spriteCacheIndex;
             }
@@ -52,7 +52,7 @@ namespace FARender
 
         private:
             
-            void init(uint32_t _animLength, uint32_t _width, uint32_t _height, uint32_t _spriteCacheIndex)
+            void init(int32_t _animLength, int32_t _width, int32_t _height, int32_t _spriteCacheIndex)
             {
                 animLength = _animLength;
                 width = _width;
@@ -67,12 +67,12 @@ namespace FARender
                 }
             }
 
-            uint32_t animLength = 1;
-            uint32_t width = 1;
-            uint32_t height = 1;
-            uint32_t spriteCacheIndex = 0;
+            int32_t animLength = 1;
+            int32_t width = 1;
+            int32_t height = 1;
+            int32_t spriteCacheIndex = 0;
 
-            std::vector<std::pair<uint32_t, uint32_t>> frameHandles;
+            std::vector<std::pair<int32_t, int32_t>> frameHandles;
 
         friend class SpriteCache;
         friend class SpriteManager;

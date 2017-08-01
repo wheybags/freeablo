@@ -15,192 +15,192 @@ namespace FALevelGen
         Settings::Settings settings;
         settings.loadFromFile(path);
 
-        xWall = settings.get<size_t>("Basic","xWall");
+        xWall = settings.get<int32_t>("Basic","xWall");
         fillTile(xWall, settings, "XWall");
         
-        outsideXWall = settings.get<size_t>("Basic","outsideXWall");
+        outsideXWall = settings.get<int32_t>("Basic","outsideXWall");
         fillTile(outsideXWall, settings, "outsideXWall");
 
-        yWall = settings.get<size_t>("Basic","yWall");
+        yWall = settings.get<int32_t>("Basic","yWall");
         fillTile(yWall, settings, "YWall");
 
-        outsideYWall = settings.get<size_t>("Basic","outsideYWall");
+        outsideYWall = settings.get<int32_t>("Basic","outsideYWall");
         fillTile(outsideYWall, settings, "OutsideYWall");
 
-        bottomCorner = settings.get<size_t>("Basic","bottomCorner");
+        bottomCorner = settings.get<int32_t>("Basic","bottomCorner");
         fillTile(bottomCorner, settings, "BottomCorner");
 
-        outsideBottomCorner = settings.get<size_t>("Basic","outsideBottomCorner");
+        outsideBottomCorner = settings.get<int32_t>("Basic","outsideBottomCorner");
         fillTile(outsideBottomCorner, settings, "OutsideBottomCorner");
 
-        rightCorner = settings.get<size_t>("Basic","rightCorner");
+        rightCorner = settings.get<int32_t>("Basic","rightCorner");
         fillTile(rightCorner, settings, "RightCorner");
 
-        outsideRightCorner = settings.get<size_t>("Basic","outsideRightCorner");
+        outsideRightCorner = settings.get<int32_t>("Basic","outsideRightCorner");
         fillTile(outsideRightCorner, settings, "OutsideRightCorner");
 
-        leftCorner = settings.get<size_t>("Basic","leftCorner");
+        leftCorner = settings.get<int32_t>("Basic","leftCorner");
         fillTile(leftCorner, settings, "LeftCorner");
 
-        outsideLeftCorner = settings.get<size_t>("Basic","outsideLeftCorner");
+        outsideLeftCorner = settings.get<int32_t>("Basic","outsideLeftCorner");
         fillTile(outsideLeftCorner, settings, "OutsideLeftCorner");
 
-        topCorner = settings.get<size_t>("Basic","topCorner");
+        topCorner = settings.get<int32_t>("Basic","topCorner");
         fillTile(topCorner, settings, "TopCorner");
 
-        outsideTopCorner = settings.get<size_t>("Basic","outsideTopCorner");
+        outsideTopCorner = settings.get<int32_t>("Basic","outsideTopCorner");
         fillTile(outsideTopCorner, settings, "OutsideTopCorner");
 
-        floor = settings.get<size_t>("Basic","floor");
+        floor = settings.get<int32_t>("Basic","floor");
         fillTile(floor, settings, "Floor");
 
-        blank = settings.get<size_t>("Basic","blank");
+        blank = settings.get<int32_t>("Basic","blank");
         fillTile(blank, settings, "Blank");
 
-        xDoor = settings.get<size_t>("Basic","xDoor");
+        xDoor = settings.get<int32_t>("Basic","xDoor");
         fillTile(xDoor, settings, "XDoor");
 
-        yDoor = settings.get<size_t>("Basic","yDoor");
+        yDoor = settings.get<int32_t>("Basic","yDoor");
         fillTile(yDoor, settings, "YDoor");
 
-        insideXWall = settings.get<size_t>("Basic","insideXWall");
+        insideXWall = settings.get<int32_t>("Basic","insideXWall");
         fillTile(insideXWall, settings, "InsideXWall");
-        insideXWallEnd = settings.get<size_t>("Basic","insideXWallEnd");
+        insideXWallEnd = settings.get<int32_t>("Basic","insideXWallEnd");
         fillTile(insideXWallEnd, settings, "InsideXWallEnd");
-        insideXWallEndBack = settings.get<size_t>("Basic","insideXWallEndBack");
+        insideXWallEndBack = settings.get<int32_t>("Basic","insideXWallEndBack");
         fillTile(insideXWallEndBack, settings, "InsideXWallEndBack");
-        insideYWall = settings.get<size_t>("Basic","insideYWall");
+        insideYWall = settings.get<int32_t>("Basic","insideYWall");
         fillTile(insideYWall, settings, "InsideYWall");
-        insideYWallEnd = settings.get<size_t>("Basic","insideYWallEnd");
+        insideYWallEnd = settings.get<int32_t>("Basic","insideYWallEnd");
         fillTile(insideYWallEnd, settings, "InsideYWallEnd");
-        insideYWallEndBack = settings.get<size_t>("Basic","insideYWallEndBack");
+        insideYWallEndBack = settings.get<int32_t>("Basic","insideYWallEndBack");
         fillTile(insideYWallEndBack, settings, "InsideYWallEndBack");
-        insideLeftCorner = settings.get<size_t>("Basic","insideLeftCorner");
+        insideLeftCorner = settings.get<int32_t>("Basic","insideLeftCorner");
         fillTile(insideLeftCorner, settings, "InsideLeftCorner");
-        insideRightCorner = settings.get<size_t>("Basic","insideRightCorner");
+        insideRightCorner = settings.get<int32_t>("Basic","insideRightCorner");
         fillTile(insideRightCorner, settings, "InsideRightCorner");
-        insideBottomCorner = settings.get<size_t>("Basic","insideBottomCorner");
+        insideBottomCorner = settings.get<int32_t>("Basic","insideBottomCorner");
         fillTile(insideBottomCorner, settings, "InsideBottomCorner");
-        insideTopCorner = settings.get<size_t>("Basic","insideTopCorner");
+        insideTopCorner = settings.get<int32_t>("Basic","insideTopCorner");
         fillTile(insideTopCorner, settings, "InsideTopCorner");
 
-        joinY = settings.get<size_t>("Basic","joinY");
+        joinY = settings.get<int32_t>("Basic","joinY");
         fillTile(joinY, settings, "JoinY");
-        joinYRightCorner = settings.get<size_t>("Basic","joinYRightCorner");
+        joinYRightCorner = settings.get<int32_t>("Basic","joinYRightCorner");
         fillTile(joinYRightCorner, settings, "JoinYRightCorner");
-        joinRightCorner = settings.get<size_t>("Basic","joinRightCorner");
+        joinRightCorner = settings.get<int32_t>("Basic","joinRightCorner");
         fillTile(joinRightCorner, settings, "JoinRightCorner");
-        joinOutXRightCorner = settings.get<size_t>("Basic","joinOutXRightCorner");
+        joinOutXRightCorner = settings.get<int32_t>("Basic","joinOutXRightCorner");
         fillTile(joinOutXRightCorner, settings, "JoinOutXRightCorner");
-        joinOutX = settings.get<size_t>("Basic","joinOutX");
+        joinOutX = settings.get<int32_t>("Basic","joinOutX");
         fillTile(joinOutX, settings, "JoinOutX");
-        joinOutXTopCorner = settings.get<size_t>("Basic","joinOutXTopCorner");
+        joinOutXTopCorner = settings.get<int32_t>("Basic","joinOutXTopCorner");
         fillTile(joinOutXTopCorner, settings, "JoinOutXTopCorner");
-        joinTopCorner = settings.get<size_t>("Basic","joinTopCorner");
+        joinTopCorner = settings.get<int32_t>("Basic","joinTopCorner");
         fillTile(joinTopCorner, settings, "JoinTopCorner");
-        joinOutYTopCorner = settings.get<size_t>("Basic","joinOutYTopCorner");
+        joinOutYTopCorner = settings.get<int32_t>("Basic","joinOutYTopCorner");
         fillTile(joinOutYTopCorner, settings, "JoinOutYTopCorner");
-        joinOutY = settings.get<size_t>("Basic","joinOutY");
+        joinOutY = settings.get<int32_t>("Basic","joinOutY");
         fillTile(joinOutY, settings, "JoinOutY");
-        joinOutYLeftCorner = settings.get<size_t>("Basic","joinOutYLeftCorner");
+        joinOutYLeftCorner = settings.get<int32_t>("Basic","joinOutYLeftCorner");
         fillTile(joinOutYLeftCorner, settings, "JoinOutYLeftCorner");
-        joinLeftCorner = settings.get<size_t>("Basic","joinLeftCorner");
+        joinLeftCorner = settings.get<int32_t>("Basic","joinLeftCorner");
         fillTile(joinLeftCorner, settings, "JoinLeftCorner");
-        joinXLeftCorner = settings.get<size_t>("Basic","joinXLeftCorner");
+        joinXLeftCorner = settings.get<int32_t>("Basic","joinXLeftCorner");
         fillTile(joinXLeftCorner, settings, "JoinXLeftCorner");
-        joinX = settings.get<size_t>("Basic","joinX");
+        joinX = settings.get<int32_t>("Basic","joinX");
         fillTile(joinX, settings, "JoinX");
-        joinXBottomCorner = settings.get<size_t>("Basic","joinXBottomCorner");
+        joinXBottomCorner = settings.get<int32_t>("Basic","joinXBottomCorner");
         fillTile(joinXBottomCorner, settings, "JoinXBottomCorner");
-        joinBottomCorner = settings.get<size_t>("Basic","joinBottomCorner");
+        joinBottomCorner = settings.get<int32_t>("Basic","joinBottomCorner");
         fillTile(joinBottomCorner, settings, "JoinBottomCorner");
-        joinYBottomCorner = settings.get<size_t>("Basic","joinYBottomCorner");
+        joinYBottomCorner = settings.get<int32_t>("Basic","joinYBottomCorner");
         fillTile(joinYBottomCorner, settings, "JoinYBottomCorner");
 
 
-        upStairs1 = settings.get<size_t>("Basic","upStairs1");
-        upStairs2 = settings.get<size_t>("Basic","upStairs2");
-        upStairs3 = settings.get<size_t>("Basic","upStairs3");
+        upStairs1 = settings.get<int32_t>("Basic","upStairs1");
+        upStairs2 = settings.get<int32_t>("Basic","upStairs2");
+        upStairs3 = settings.get<int32_t>("Basic","upStairs3");
 
-        upStairs4 = settings.get<size_t>("Basic","upStairs4");
-        upStairs5 = settings.get<size_t>("Basic","upStairs5");
-        upStairs6 = settings.get<size_t>("Basic","upStairs6");
+        upStairs4 = settings.get<int32_t>("Basic","upStairs4");
+        upStairs5 = settings.get<int32_t>("Basic","upStairs5");
+        upStairs6 = settings.get<int32_t>("Basic","upStairs6");
 
-        upStairs7 = settings.get<size_t>("Basic","upStairs7");
-        upStairs8 = settings.get<size_t>("Basic","upStairs8");
-        upStairs9 = settings.get<size_t>("Basic","upStairs9");
+        upStairs7 = settings.get<int32_t>("Basic","upStairs7");
+        upStairs8 = settings.get<int32_t>("Basic","upStairs8");
+        upStairs9 = settings.get<int32_t>("Basic","upStairs9");
         
-        downStairs1 = settings.get<size_t>("Basic","downStairs1");
-        downStairs2 = settings.get<size_t>("Basic","downStairs2");
-        downStairs3 = settings.get<size_t>("Basic","downStairs3");
+        downStairs1 = settings.get<int32_t>("Basic","downStairs1");
+        downStairs2 = settings.get<int32_t>("Basic","downStairs2");
+        downStairs3 = settings.get<int32_t>("Basic","downStairs3");
 
-        downStairs4 = settings.get<size_t>("Basic","downStairs4");
-        downStairs5 = settings.get<size_t>("Basic","downStairs5");
-        downStairs6 = settings.get<size_t>("Basic","downStairs6");
+        downStairs4 = settings.get<int32_t>("Basic","downStairs4");
+        downStairs5 = settings.get<int32_t>("Basic","downStairs5");
+        downStairs6 = settings.get<int32_t>("Basic","downStairs6");
 
-        downStairs7 = settings.get<size_t>("Basic","downStairs7");
-        downStairs8 = settings.get<size_t>("Basic","downStairs8");
-        downStairs9 = settings.get<size_t>("Basic","downStairs9");
+        downStairs7 = settings.get<int32_t>("Basic","downStairs7");
+        downStairs8 = settings.get<int32_t>("Basic","downStairs8");
+        downStairs9 = settings.get<int32_t>("Basic","downStairs9");
 
         loadDoorMap(settings);
     }
     
-    void TileSet::fillTile(size_t tile, Settings::Settings & settings, const std::string& section)
+    void TileSet::fillTile(int32_t tile, Settings::Settings & settings, const std::string& section)
     {
-        std::vector<std::pair<size_t, size_t> > tileVec;
-        size_t normPercent = 100;
+        std::vector<std::pair<int32_t, int32_t> > tileVec;
+        int32_t normPercent = 100;
 
         if(settings.isSectionExists(section))
         {
             Settings::Container properties = settings.getPropertiesInSection(section);
-            size_t size = properties.size();
+            int32_t size = properties.size();
 
-            for(size_t i = 0 ; i < size ; i++)
+            for(int32_t i = 0 ; i < size ; i++)
             {
                 if(properties[i] != "normal")
                 {
                     std::stringstream buffer(properties[i]);
-                    size_t propertyAsSizeT;
+                    int32_t propertyAsSizeT;
                     buffer >> propertyAsSizeT;
 
-                    size_t value = settings.get<size_t>(section, properties[i]);
-                    tileVec.push_back(std::pair<size_t, size_t>(propertyAsSizeT, value));
+                    int32_t value = settings.get<int32_t>(section, properties[i]);
+                    tileVec.push_back(std::pair<int32_t, int32_t>(propertyAsSizeT, value));
                 }
             }
 
-            normPercent = settings.get<size_t>(section, "normal");
+            normPercent = settings.get<int32_t>(section, "normal");
         }
 
-        mAlternatives[tile] = std::pair<std::vector<std::pair<size_t, size_t> >, size_t>(tileVec, normPercent);
+        mAlternatives[tile] = std::pair<std::vector<std::pair<int32_t, int32_t> >, int32_t>(tileVec, normPercent);
     }
     
-    size_t TileSet::getRandomTile(size_t tile)
+    int32_t TileSet::getRandomTile(int32_t tile)
     {
         if(mAlternatives.find(tile) == mAlternatives.end())
             return tile;
 
-        std::vector<std::pair<size_t, size_t> >& tileVec = mAlternatives[tile].first;
-        size_t normPercent = mAlternatives[tile].second;
+        std::vector<std::pair<int32_t, int32_t> >& tileVec = mAlternatives[tile].first;
+        int32_t normPercent = mAlternatives[tile].second;
 
-        size_t random = randomInRange(0, 100);
+        int32_t random = randomInRange(0, 100);
 
         if(random <= normPercent)
             return tile;
         
-        size_t max = 0;
-        for(size_t i = 0; i < tileVec.size(); i++)
+        int32_t max = 0;
+        for(int32_t i = 0; i < (int32_t)tileVec.size(); i++)
             max += tileVec[i].second;
        
         random = randomInRange(0, max);          
         
-        size_t i = 0;
-        for(; i < tileVec.size() && random > tileVec[i].second; i++) 
+        int32_t i = 0;
+        for(; i < (int32_t)tileVec.size() && random > tileVec[i].second; i++) 
             random -= tileVec[i].second;
 
         return tileVec[i].first;
     }
 
-    std::map<size_t, size_t> TileSet::getDoorMap()
+    std::map<int32_t, int32_t> TileSet::getDoorMap()
     {
         return mDoorMap;
     }
@@ -212,17 +212,17 @@ namespace FALevelGen
         for(Settings::Container::const_iterator it = properties.begin(); it != properties.end(); ++it)
         {
             std::stringstream buffer(*it);
-            size_t propertyAsSizeT;
+            int32_t propertyAsSizeT;
             buffer >> propertyAsSizeT;
 
-            size_t value = settings.get<size_t>("DoorMap", *it);
+            int32_t value = settings.get<int32_t>("DoorMap", *it);
 
             mDoorMap[propertyAsSizeT] = value;
             mDoorMap[value] = propertyAsSizeT;
         }
     }
 
-    size_t TileSet::convert(TileSetEnum::TileSetEnum val)
+    int32_t TileSet::convert(TileSetEnum::TileSetEnum val)
     {
         switch(val)
         {

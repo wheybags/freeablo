@@ -17,9 +17,9 @@
 
 
 
-std::string hashImageData(size_t width, size_t height, Cel::Colour* data)
+std::string hashImageData(int32_t width, int32_t height, Cel::Colour* data)
 {
-    size_t size = width * height * sizeof(Cel::Colour);
+    int32_t size = width * height * sizeof(Cel::Colour);
     Misc::md5_byte_t* buff = (Misc::md5_byte_t*)data;
 
     Misc::md5_state_t state;
@@ -31,7 +31,7 @@ std::string hashImageData(size_t width, size_t height, Cel::Colour* data)
 
     std::stringstream s;
 
-    for(size_t i = 0; i < 16; i++)
+    for(int32_t i = 0; i < 16; i++)
        s << std::hex << std::setw(2) << std::setfill('0') << (int)digest[i];
 
     return s.str();
@@ -46,7 +46,7 @@ std::vector<std::string> getCelsFromListfile(const std::string& path)
 {
     FILE* f = fopen(path.c_str(), "rb");
     fseek(f, 0, SEEK_END);
-    size_t size = ftell(f);
+    int32_t size = ftell(f);
     fseek(f, 0, SEEK_SET);
     char* buf = (char*)malloc(size);
     fread(buf, 1, size, f);
@@ -59,7 +59,7 @@ std::vector<std::string> getCelsFromListfile(const std::string& path)
     std::vector<std::string> lines = Misc::StringUtils::split(str, '\n');
 
     std::vector<std::string> celFiles;
-    for(size_t i = 0; i < lines.size(); i++)
+    for(int32_t i = 0; i < (int32_t)lines.size(); i++)
     {
         if(Misc::StringUtils::ciEndsWith(lines[i], ".cel") || Misc::StringUtils::ciEndsWith(lines[i], ".cl2"))
         {
@@ -116,7 +116,7 @@ std::string hashOneFramePng(const std::string& path)
 {
     FILE* f = fopen(path.c_str(), "rb");
     fseek(f, 0, SEEK_END);
-    size_t buffer_size = ftell(f);
+    int32_t buffer_size = ftell(f);
     fseek(f, 0, SEEK_SET);
 
     char* buffer = new char[buffer_size];
@@ -168,7 +168,7 @@ void getBlizzconvHashes(const std::string& blizzconvBase, const std::string& lis
 
     std::ofstream out(destFile);
 
-    for(size_t i = 0; i < celPaths.size(); i++)
+    for(int32_t i = 0; i < (int32_t)celPaths.size(); i++)
     {
         std::string path = Misc::StringUtils::replaceEnd(".cel", "", celPaths[i]);
         Misc::StringUtils::replace(path, "\\", "/"); // fukken windows path separators...
@@ -253,9 +253,9 @@ TEST (Cel, TestOpen)
     std::vector<std::string> celPaths = getCelsFromListfile(thisFolder+ "/Diablo I.txt");
     auto celHashes = getCelHashes();
 
-    size_t succeededFiles = 0;
-    size_t succeededFrames = 0;
-    size_t totalFrames = 0;
+    int32_t succeededFiles = 0;
+    int32_t succeededFrames = 0;
+    int32_t totalFrames = 0;
 
     for(auto p : celPaths)
     {
@@ -270,7 +270,7 @@ TEST (Cel, TestOpen)
         bool fileSucceeded = true;
         totalFrames += cel.numFrames();
 
-        for(size_t i = 0; i < cel.numFrames(); i++)
+        for(int32_t i = 0; i < cel.numFrames(); i++)
         {
             if(celHashes[p].size() == 0)
             {

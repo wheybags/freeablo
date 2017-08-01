@@ -87,7 +87,6 @@ namespace Engine
         itemManager.loadItems(&exe);
         player = playerFactory.create(characterClass);
         world.addCurrentPlayer(player);
-        world.generateLevels();
         mInputManager->registerKeyboardObserver(&world);
         mInputManager->registerMouseObserver(&world);
 
@@ -98,25 +97,13 @@ namespace Engine
         if (currentLevel == -1)
             currentLevel = 0;
 
+        bool clientWaitingForLevel = false;
+
         // -1 represents the main menu
         if(currentLevel != -1 && isServer)
-        {
             world.setLevel(currentLevel);
-            //guiManager.showIngameGui();
-        }
         else
-        {
-            togglePause();
-            /*bool showTitleScreen = settings.get<bool>("Game", "showTitleScreen");
-            if(showTitleScreen)
-            {
-                guiManager.showTitleScreen();
-            }
-            else
-            {
-                guiManager.showMainMenu();
-            }*/
-        }
+            clientWaitingForLevel = true;
 
         boost::asio::io_service io;
 
@@ -127,8 +114,13 @@ namespace Engine
         {
             boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000/FAWorld::World::ticksPerSecond));
 
+            if (clientWaitingForLevel)
+            {
+                clientWaitingForLevel = world.getCurrentLevel() != nullptr;
+            }
+
             mInputManager->update(mPaused);
-            if(!mPaused)
+            if(!mPaused && !clientWaitingForLevel)
             {
                 world.update(mNoclip);
             }

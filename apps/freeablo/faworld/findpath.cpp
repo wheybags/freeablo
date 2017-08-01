@@ -63,37 +63,77 @@ namespace FAWorld
         return dx + dy;
     }
 
+    template<typename T>
+    class Array2D
+    {
+    public:
+        Array2D(int32_t width, int32_t height) : 
+            mData(width*height),
+            mWidth(width),
+            mHeight(height)
+        {}
+
+        Array2D(int32_t width, int32_t height, T defaultVal) :
+            mData(width*height, defaultVal),
+            mWidth(width),
+            mHeight(height)
+        {}
+
+        T& get(int32_t x, int32_t y)
+        {
+            return mData.at(x + y*mHeight);
+        }
+
+        int32_t width()
+        {
+            return mWidth;
+        }
+
+        int32_t height()
+        {
+            return mHeight;
+        }
+
+    private:
+        std::vector<T> mData;
+        int32_t mWidth;
+        int32_t mHeight;
+    };
+
     bool AStarSearch(
         GameLevelImpl* level,
         Location start,
         Location goal,
-        std::unordered_map<Location, Location>& came_from,
-        std::unordered_map<Location, int>& costSoFar)
+        std::unordered_map<Location, Location>& came_from
+       )
     {
         PriorityQueue<Location> frontier;
         frontier.put(start, 0);
         came_from[start] = start;
-        costSoFar[start] = 0;
-        while (!frontier.empty())
+
+        Array2D<int32_t> costSoFar(level->width(), level->height(), -1);
+        costSoFar.get(start.first, start.second) = 0;
+        
+        int32_t iterations = 0;
+        while (!frontier.empty() && iterations < 500)
         {
+            iterations++;
             Location current = frontier.get();
 
             // Early exit
             if (current == goal)
-            {
                 return level->isPassable(goal.first, goal.second);
-            }
 
             std::vector<Location> neighborsContainer = std::move(neighbors(level, current));
             for (std::vector<Location>::iterator it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
             {
-                int new_cost = costSoFar[current] + 1; //graph.cost(current, next);
+                int32_t new_cost = costSoFar.get(current.first, current.second) + 1; //graph.cost(current, next);
                 Location next = *it;
 
-                if (!costSoFar.count(next) || new_cost < costSoFar[next])
+                if (costSoFar.get(next.first, next.second) == -1 || new_cost < costSoFar.get(next.first, next.second))
                 {
-                    costSoFar[next] = new_cost;
-                    int priority = new_cost + heuristic(next, goal);
+                    costSoFar.get(next.first, next.second) = new_cost;
+                    int32_t priority = new_cost + heuristic(next, goal);
                     frontier.put(next, priority);
                     came_from[next] = current;
                 }
@@ -148,10 +188,9 @@ namespace FAWorld
 
     std::vector<Location> pathFind(GameLevelImpl* level, Location start, Location& goal, bool& bArrivable)
     {
-        std::unordered_map<Location, int> costSoFar;
         std::unordered_map<Location, Location> cameFrom;
 
-        bArrivable = AStarSearch(level, start, goal, cameFrom, costSoFar);
+        bArrivable = AStarSearch(level, start, goal, cameFrom);
         if (!bArrivable) 
             goal = findClosesPointToGoal(level, start, goal, cameFrom);
 

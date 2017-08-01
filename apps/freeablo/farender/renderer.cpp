@@ -211,9 +211,9 @@ namespace FARender
                 if(mLevelObjects.width() != state->level->width() || mLevelObjects.height() != state->level->height())
                     mLevelObjects.resize(state->level->width(), state->level->height());
 
-                for(size_t x = 0; x < mLevelObjects.width(); x++)
+                for(int32_t x = 0; x < mLevelObjects.width(); x++)
                 {
-                    for(size_t y = 0; y < mLevelObjects.height(); y++)
+                    for(int32_t y = 0; y < mLevelObjects.height(); y++)
                     {
                         if (mLevelObjects[x][y].size() > 0) {
                             mLevelObjects[x][y].clear();

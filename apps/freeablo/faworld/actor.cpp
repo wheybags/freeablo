@@ -19,27 +19,24 @@ namespace FAWorld
 
     void Actor::update(bool noclip)
     {
-        FARender::FASpriteGroup* currentAnim = nullptr;
-        int32_t currentFrame = 0;
-        mAnimation.getCurrentFrame(currentAnim, currentFrame);
-
-        // play idle animation if there's nothing else going on
-        if (currentAnim == nullptr)
-            mAnimation.playAnimation(mIdleAnim, mAnimTimeMap[AnimState::idle], FARender::AnimationPlayer::AnimationType::Looped);
-
-        if (mLevel)
+        if (!isDead())
         {
-            if (isAttacking)
+            if (getLevel())
             {
-                if (currentAnim != mAttackAnim)
-                    isAttacking = false;
+                if (isAttacking)
+                {
+                    if (getAnimationManager().getCurrentAnimation() != AnimState::attack)
+                        isAttacking = false;
+                }
+
+                mActorStateMachine->update(noclip);
             }
 
-            mActorStateMachine->update(noclip);
+            if (mBehaviour)
+                mBehaviour->update();
         }
 
-        if (mBehaviour)
-            mBehaviour->update();
+        mAnimation.update();
     }
 
     size_t nextId = 0;
@@ -57,17 +54,11 @@ namespace FAWorld
         mFaction(Faction::heaven())
     {
         if (!dieAnimPath.empty())
-        {
-            mDieAnim = FARender::Renderer::get()->loadImage(dieAnimPath);
-        }
-
+            mAnimation.setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage(dieAnimPath));
         if (!walkAnimPath.empty())
-            mWalkAnim = FARender::Renderer::get()->loadImage(walkAnimPath);
+            mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage(walkAnimPath));
         if (!idleAnimPath.empty())
-            mIdleAnim = FARender::Renderer::get()->loadImage(idleAnimPath);
-
-        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.5f);
-        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.5f);
+            mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage(idleAnimPath));
 
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this);
 
@@ -88,7 +79,7 @@ namespace FAWorld
         if (!(mStats->getCurrentHP() <= 0))
         {
             Engine::ThreadManager::get()->playSound(getHitWav());
-            playAnimation(AnimState::hit, FARender::AnimationPlayer::AnimationType::Once);
+            mAnimation.playAnimation(AnimState::hit, FARender::AnimationPlayer::AnimationType::Once);
         }
     }
 
@@ -97,20 +88,10 @@ namespace FAWorld
         return mStats->getCurrentHP();
     }
 
-    void Actor::setWalkAnimation(const std::string path)
-    {
-        mWalkAnim = FARender::Renderer::get()->loadImage(path);
-    }
-
-    void Actor::setIdleAnimation(const std::string path)
-    {
-        mIdleAnim = FARender::Renderer::get()->loadImage(path);
-    }
-
     void Actor::die()
     {
         mMoveHandler.setDestination(getPos().current());
-        playAnimation(AnimState::dead, FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
+        mAnimation.playAnimation(AnimState::dead, FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
         mIsDead = true;
         Engine::ThreadManager::get()->playSound(getDieWav());
     }
@@ -127,21 +108,17 @@ namespace FAWorld
 
     void Actor::teleport(GameLevel* level, Position pos)
     {
-        if (!mLevel || mLevel->getLevelIndex() != level->getLevelIndex())
-        {
-            if (mLevel)
-                mLevel->removeActor(this);
+        auto currentLevel = getLevel();
+        if (currentLevel)
+            currentLevel->removeActor(this);
 
-            mLevel = level;
-            mLevel->addActor(this);
-
-            mMoveHandler.teleport(level, pos);
-        }
+        level->addActor(this);
+        mMoveHandler.teleport(level, pos);
     }
 
     GameLevel* Actor::getLevel()
     {
-        return mLevel;
+        return mMoveHandler.getLevel();
     }
 
     bool Actor::canIAttack(Actor * actor)
@@ -193,7 +170,7 @@ namespace FAWorld
 
     bool Actor::canWalkTo(int32_t x, int32_t y)
     {
-        return mLevel->isPassable(x, y);
+        return getLevel()->isPassable(x, y);
     }
 
     std::string Actor::getActorId() const
@@ -205,52 +182,4 @@ namespace FAWorld
     {
         mActorId = id;
     }
-
-    void Actor::getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame)
-    {
-        mAnimation.getCurrentFrame(sprite, frame);
-    }
-
-    void Actor::playAnimation(AnimState::AnimState state, FARender::AnimationPlayer::AnimationType type)
-    {
-        FARender::FASpriteGroup* sprite = nullptr;
-
-        switch (state)
-        {
-            case FAWorld::AnimState::walk:
-                sprite = mWalkAnim;
-                break;
-            case FAWorld::AnimState::idle:
-                sprite = mIdleAnim;
-                break;
-            case FAWorld::AnimState::attack:
-                sprite = mAttackAnim;
-                break;
-            case FAWorld::AnimState::dead:
-                sprite = mDieAnim;
-                break;
-            case FAWorld::AnimState::hit:
-                sprite = mHitAnim;
-                break;
-            default:
-                assert(false && "BAD ENUM VALUE PASSED TO Actor::playAnimation");
-        }
-
-        Tick animLength = World::getTicksInPeriod(0.5f);
-        if (mAnimTimeMap.count(state) != 0)
-            animLength = mAnimTimeMap[state];
-
-        mAnimation.playAnimation(sprite, animLength, type);
-    }
-
-    bool Actor::animationPlaying()
-    {
-        FARender::FASpriteGroup* sprite;
-        int32_t frame;
-
-        getCurrentFrame(sprite, frame);
-
-        return sprite != mIdleAnim;
-    }
-
 }

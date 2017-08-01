@@ -35,16 +35,14 @@ namespace FAWorld
                 }
             }
 
-            actor.mMoveHandler.update();
+            actor.mMoveHandler.update(actor.getId());
 
-            FARender::FASpriteGroup* sprite = nullptr;
-            int32_t frame;
-            actor.getCurrentFrame(sprite, frame);
+            AnimState anim = actor.mAnimation.getCurrentAnimation();
 
-            if (actor.mMoveHandler.moving() && sprite != actor.mWalkAnim)
-                actor.playAnimation(AnimState::walk, FARender::AnimationPlayer::AnimationType::Looped);
-            else if (!actor.mMoveHandler.moving() && sprite == actor.mWalkAnim)
-                actor.playAnimation(AnimState::idle, FARender::AnimationPlayer::AnimationType::Looped);
+            if (actor.mMoveHandler.moving() && anim != AnimState::walk)
+                actor.mAnimation.playAnimation(AnimState::walk, FARender::AnimationPlayer::AnimationType::Looped);
+            else if (!actor.mMoveHandler.moving() && anim == AnimState::walk)
+                actor.mAnimation.playAnimation(AnimState::idle, FARender::AnimationPlayer::AnimationType::Looped);
 
             return boost::none;
         }

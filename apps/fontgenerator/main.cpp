@@ -53,13 +53,13 @@ int main(int argc, char** argv)
 
     int positionX = 0;
 
-    for(size_t i = 0 ; i < cel.numFrames(); i++)
+    for(int32_t i = 0 ; i < cel.numFrames(); i++)
     {
         Cel::CelFrame& frame = cel[i];
-        size_t maximumVisibleX = 0;
-        for(size_t x = 0; x < frame.mWidth; x++)
+        int32_t maximumVisibleX = 0;
+        for(int32_t x = 0; x < frame.mWidth; x++)
         {
-            for(size_t y = 0; y < frame.mHeight; y++)
+            for(int32_t y = 0; y < frame.mHeight; y++)
             {
                 if(frame[x][y].visible)
                     if(x > maximumVisibleX)
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         sprintf(buffer, "%d", asciiIdx);
         asciiStr = buffer;
 
-        sprintf(buffer, "%lu", maximumVisibleX);
+        sprintf(buffer, "%d", maximumVisibleX);
         maximumVisibleXStr = buffer;
 
         sprintf(buffer, "%d", positionX);

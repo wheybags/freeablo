@@ -3,10 +3,11 @@
 
 #include <vector>
 #include <cstddef>
+#include <stdint.h>
 
 namespace FALevelGen
 {
-    void minimumSpanningTree(const std::vector<std::vector<size_t> >& graph, std::vector<size_t>& parent);
+    void minimumSpanningTree(const std::vector<std::vector<int32_t> >& graph, std::vector<int32_t>& parent);
 }
 
 #endif

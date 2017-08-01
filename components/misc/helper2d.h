@@ -13,12 +13,12 @@ namespace Misc
     {
         private:
             From& parent;
-            size_t x;
-            Retval (*func)(size_t, size_t, From&); 
+            int32_t x;
+            Retval (*func)(int32_t, int32_t, From&); 
         public:    
-            Helper2D(From& _p, size_t _x, Retval (*_func)(size_t, size_t, From&)) : parent(_p), x(_x), func(_func) {}
+            Helper2D(From& _p, int32_t _x, Retval (*_func)(int32_t, int32_t, From&)) : parent(_p), x(_x), func(_func) {}
             
-            Retval operator[](size_t y){ return func(x, y, parent); }
+            Retval operator[](int32_t y){ return func(x, y, parent); }
     };
 }
 

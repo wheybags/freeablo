@@ -66,6 +66,13 @@ namespace Engine
     FARender::FASpriteGroup* NetManager::getServerSprite(size_t index)
     {
         assert(!mIsServer);
+        if (index == 0)
+            return FARender::getDefaultSprite();
         return mClient->getServerSprite(index);
+    }
+
+    void NetManager::sendLevelChangePacket(int32_t level)
+    {
+        mClient->sendLevelChangePacket(level);
     }
 }

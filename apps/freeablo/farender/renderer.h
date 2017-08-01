@@ -42,7 +42,7 @@ namespace FARender
 
         FAWorld::Position mPos;
 
-        std::vector<std::tuple<FASpriteGroup*, uint32_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
+        std::vector<std::tuple<FASpriteGroup*, int32_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
 
         NuklearFrameDump nuklearData;
 

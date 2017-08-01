@@ -67,13 +67,6 @@ namespace Engine
 
     void Client::updateImp(uint32_t tick)
     {
-        // TODO: remove this block when we handle level switching properly
-        auto player = FAWorld::World::get()->getCurrentPlayer();
-        if (player->getLevel())
-            mLevelIndexTmp = player->getLevel()->getLevelIndex();
-        else
-            mLevelIndexTmp = static_cast<uint32_t> (-1);
-
         ENetEvent event;
 
         while(enet_host_service(mHost, &event, 0))
@@ -111,7 +104,8 @@ namespace Engine
             }
         }
 
-        if(mServerPeer != NULL)
+        // don't send client updates until we're fully connected
+        if(mServerPeer != nullptr && FAWorld::World::get()->getCurrentLevel() != nullptr)
             sendClientPacket();
 
         enet_host_flush(mHost);
@@ -191,6 +185,10 @@ namespace Engine
                 if (err == Serial::Error::Success)
                 {
                     FAWorld::Actor* actor = world.getActorById(actorId);
+
+                    if (!actor && actorId == world.getCurrentPlayer()->mId)
+                        actor = world.getCurrentPlayer();
+
                     if (actor == NULL)
                     {
                         actor = dynamic_cast<FAWorld::Actor*>(FAWorld::NetObject::construct(classId));
@@ -214,22 +212,24 @@ namespace Engine
 
     void Client::sendClientPacket()
     {
-        assert(false);
-        /*auto packet = getWritePacket(Engine::PacketType::ClientToServerUpdate, 0, false, Engine::WritePacketResizableType::Resizable);
+        auto packet = getWritePacket(Engine::PacketType::ClientToServerUpdate, 0, false, Engine::WritePacketResizableType::Resizable);
 
         auto player = FAWorld::World::get()->getCurrentPlayer();
 
         ClientPacket data;
-        data.destX = player->destination().first;
-        data.destY = player->destination().second;
-        data.levelIndex = mLevelIndexTmp;
+        data.destX = player->mMoveHandler.getDestination().first;
+        data.destY = player->mMoveHandler.getDestination().second;
+        
+        data.targetActorId = -1;
+        if (player->actorTarget != nullptr)
+            data.targetActorId = player->actorTarget->getId();
 
         packet.writer.handleObject(data);
 
         sendPacket(packet, mServerPeer);
 
         if (mUnknownServerSprites.size())
-            sendSpriteRequest();*/
+            sendSpriteRequest();
     }
 
     void Client::sendSpriteRequest()
@@ -249,6 +249,16 @@ namespace Engine
         mUnknownServerSprites.clear();
         sendPacket(packet, mServerPeer);
     }
+
+    void Client::sendLevelChangePacket(int32_t level)
+    {
+        WritePacket packet = getWritePacket(PacketType::LevelChangeRequest, 0, true, WritePacketResizableType::Resizable);
+
+        int32_t blah = level;
+        packet.writer.handleInt32(blah);
+        sendPacket(packet, mServerPeer);
+    }
+
 
     Serial::Error::Error Client::readSpriteResponse(std::shared_ptr<ReadPacket> packet)
     {

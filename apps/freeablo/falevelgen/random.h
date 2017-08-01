@@ -15,6 +15,24 @@ namespace FALevelGen
         int n = randomInRange(0, parameters.size()-1);
         return *(parameters.begin() + n);
     }
+
+    ///< This is a really shit RNG but it is guaranteed to give the same results across multiple machines
+    class RandLCG
+    {
+    public:
+        RandLCG(int32_t seed) :mSeed(seed) {}
+
+        int32_t get()
+        {
+            mSeed = (22695477 * mSeed + 1) % 4294967296;
+            return mSeed;
+        }
+
+    private:
+
+        int32_t mSeed;
+
+    };
 }
 
 #endif

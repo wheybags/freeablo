@@ -5,6 +5,8 @@
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
 #include <boost/python.hpp>
+#include <misc/stringops.h>
+#include <string>
 
 namespace FAWorld
 {
@@ -32,13 +34,10 @@ namespace FAWorld
         else if (className == "Sorcerer")
             mStats = new FAWorld::MageStats(charStats, this);
 
+        setSpriteClass(Misc::StringUtils::lowerCase(className));
+
         mStats->setActor(this);
         mStats->recalculateDerivedStats();
-
-        mAnimTimeMap[AnimState::dead] = FAWorld::World::getTicksInPeriod(0.5f);
-        mAnimTimeMap[AnimState::walk] = FAWorld::World::getTicksInPeriod(0.5f);
-        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(1.0f);
-        mAnimTimeMap[AnimState::idle] = FAWorld::World::getTicksInPeriod(0.5f);
 
         mFaction = Faction::heaven();
 
@@ -91,60 +90,18 @@ namespace FAWorld
 
     void Player::setSpriteClass(std::string className)
     {
-        mFmtClassName = className;
-        mFmtClassCode = className[0];
+        mClassName = className;
+        updateSprites();
     }
 
-    void Player::getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame)
+    void Player::updateSprites()
     {
-        auto lastClassName = mFmtClassName;
-        auto lastClassCode = mFmtClassCode;
-        auto lastArmourCode = mFmtArmourCode;
-        auto lastWeaponCode = mFmtWeaponCode;
-        auto lastInDungeon = mFmtInDungeon;
+        std::string classCode;
+        classCode = mClassName[0];
+        std::string armourCode;
+        std::string weaponCode;
+        bool inDungeon = false;
 
-        updateSpriteFormatVars();
-
-        if( lastClassName   != mFmtClassName   ||
-            lastClassCode   != mFmtClassCode   ||
-            lastWeaponCode  != mFmtWeaponCode  ||
-            lastArmourCode  != mFmtArmourCode  ||
-            lastInDungeon   != mFmtInDungeon   )
-        {
-            auto helper = [&] (bool isDie)
-            {
-                std::string weapFormat = mFmtWeaponCode;
-
-                if(isDie)
-                    weapFormat = "n";
-
-                boost::format fmt("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
-                fmt % mFmtClassName % mFmtClassCode % mFmtArmourCode % weapFormat % mFmtClassCode % mFmtArmourCode % weapFormat;
-                return fmt;
-            };
-
-            auto renderer = FARender::Renderer::get();
-
-            mDieAnim = renderer->loadImage((helper(true) % "dt").str());
-            mAttackAnim = renderer->loadImage((helper(false) % "at").str());
-
-            if(mFmtInDungeon)
-            {
-                mWalkAnim = renderer->loadImage((helper(false) % "aw").str());
-                mIdleAnim = renderer->loadImage((helper(false) % "as").str());
-            }
-            else
-            {
-                mWalkAnim = renderer->loadImage((helper(false) % "wl").str());
-                mIdleAnim = renderer->loadImage((helper(false) % "st").str());
-            }
-        }
-
-        Actor::getCurrentFrame(sprite, frame);
-    }
-
-    void Player::updateSpriteFormatVars()
-    {
         std::string armour, weapon;
         switch(mInventory.mBody.getCode())
         {
@@ -235,12 +192,40 @@ namespace FAWorld
             else if(mInventory.mLeftHand.getCode() == Item::icBlunt || mInventory.mRightHand.getCode() == Item::icBlunt)
                 weapon = "h";
         }
-        mFmtWeaponCode = weapon;
-        mFmtArmourCode = armour;
+        weaponCode = weapon;
+        armourCode = armour;
 
-        if(mLevel && mLevel->getLevelIndex() != 0)
-            mFmtInDungeon=true;
+        if(getLevel() && getLevel()->getLevelIndex() != 0)
+            inDungeon=true;
         else
-            mFmtInDungeon=false;
+            inDungeon=false;
+
+        auto helper = [&](bool isDie)
+        {
+            std::string weapFormat = weaponCode;
+
+            if (isDie)
+                weapFormat = "n";
+
+            boost::format fmt("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
+            fmt % mClassName % classCode % armourCode % weapFormat % classCode % armourCode % weapFormat;
+            return fmt;
+        };
+
+        auto renderer = FARender::Renderer::get();
+
+        getAnimationManager().setAnimation(AnimState::dead, renderer->loadImage((helper(true) % "dt").str()));
+        getAnimationManager().setAnimation(AnimState::attack, renderer->loadImage((helper(false) % "at").str()));
+
+        if (inDungeon)
+        {
+            getAnimationManager().setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "aw").str()));
+            getAnimationManager().setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "as").str()));
+        }
+        else
+        {
+            getAnimationManager().setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "wl").str()));
+            getAnimationManager().setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "st").str()));
+        }
     }
 }

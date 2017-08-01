@@ -23,8 +23,8 @@ namespace FAWorld
     {
     public:
         virtual ~GameLevelImpl() {}
-        virtual size_t width() const = 0;
-        virtual size_t height() const = 0;
+        virtual int32_t width() const = 0;
+        virtual int32_t height() const = 0;
         virtual bool isPassable(int x, int y) const = 0;
     };
 
@@ -36,11 +36,11 @@ namespace FAWorld
 
         Level::MinPillar getTile(size_t x, size_t y);
 
-        size_t width() const;
-        size_t height() const;
+        int32_t width() const;
+        int32_t height() const;
 
-        const std::pair<size_t, size_t>& upStairsPos() const;
-        const std::pair<size_t, size_t>& downStairsPos() const;
+        const std::pair<size_t, size_t> upStairsPos() const;
+        const std::pair<size_t, size_t> downStairsPos() const;
 
         void activate(size_t x, size_t y);
 
@@ -55,7 +55,7 @@ namespace FAWorld
         void actorMapRefresh();
         virtual bool isPassable(int x, int y) const;
 
-        Actor* getActorAt(size_t x, size_t y) const;
+        Actor* getActorAt(int32_t x, int32_t y) const;
 
         void addActor(Actor* actor);
 
@@ -82,7 +82,7 @@ namespace FAWorld
         size_t mLevelIndex;
 
         std::vector<Actor*> mActors;
-        std::unordered_map<std::pair<size_t, size_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
+        std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
                                                                     ///< Where an actor straddles two squares, they shall be placed in both.
         friend class FARender::Renderer;
     };

@@ -18,8 +18,7 @@ namespace FAWorld
             bool attack(Actor * enemy);
             bool attack(Player * enemy);
             bool talk(Actor * actor);
-            void getCurrentFrame(FARender::FASpriteGroup*& sprite, int32_t& frame);
-            void updateSpriteFormatVars();
+            void updateSprites();
 
             virtual size_t getBasePriority()
             {
@@ -29,12 +28,7 @@ namespace FAWorld
         private:
             void init(const std::string& className, const DiabloExe::CharacterStats& charStats);
 
-            // these "Fmt" vars are just used by getCurrentAnim
-            std::string mFmtClassName;
-            std::string mFmtClassCode;
-            std::string mFmtArmourCode;
-            std::string mFmtWeaponCode;
-            bool mFmtInDungeon = false;
+            std::string mClassName;
 
             friend class Inventory;
 

@@ -8,17 +8,17 @@ namespace Cel
         mDecoder(filename)
     {}
 
-    size_t CelFile::numFrames() const
+    int32_t CelFile::numFrames() const
     {
         return mDecoder.numFrames();
     }
 
-    size_t CelFile::animLength() const
+    int32_t CelFile::animLength() const
     {
         return mDecoder.animationLength();
     }
 
-    CelFrame& CelFile::operator[] (size_t index)
+    CelFrame& CelFile::operator[] (int32_t index)
     {
         return mDecoder[index];
     }

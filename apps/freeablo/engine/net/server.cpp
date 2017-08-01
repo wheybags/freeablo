@@ -101,16 +101,13 @@ namespace Engine
 
     FAWorld::Player* Server::spawnPlayer(int32_t id)
     {
-        UNUSED_PARAM(id);
-        assert(false); return nullptr;
-        /*auto newPlayer = mPlayerFactory.create("Warrior");
-        newPlayer->mPos = FAWorld::Position(76, 68);
-        newPlayer->destination() = newPlayer->mPos.current();
+        auto newPlayer = mPlayerFactory.create("Warrior");
+        newPlayer->teleport(FAWorld::World::get()->getLevel(0), FAWorld::Position(76, 68));
 
         if (id != -1)
             newPlayer->mId = id;
 
-        return newPlayer;*/
+        return newPlayer;
     }
 
     void Server::sendLevel(size_t levelIndex, ENetPeer *peer)
@@ -214,6 +211,12 @@ namespace Engine
                 break;
             }
 
+            case PacketType::LevelChangeRequest:
+            {
+                readClientLevelChangePacket(packet, event.peer);
+                break;
+            }
+
             default:
             {
                 assert(false && "BAD PACKET TYPE RECEIVED");
@@ -226,30 +229,37 @@ namespace Engine
         ClientPacket data;
         serialise_object(packet->reader, data);
 
-        //auto world = FAWorld::World::get();
-
         mServersClientData[peer->connectID].lastReceiveTick = tick;
 
         //std::cout << "GOT MESSAGE " << mTick << " " << mServersClientData[event.peer->connectID].lastReceiveTick << std::endl;
 
-        //auto player = mServersClientData[peer->connectID].player;
+        auto player = mServersClientData[peer->connectID].player;
+        player->mMoveHandler.setDestination({ data.destX, data.destY });
 
-        assert(false);
+        if (data.targetActorId != -1)
+            player->actorTarget = FAWorld::World::get()->getActorById(data.targetActorId);
 
-        /*player->destination().first = data.destX;
-        player->destination().second = data.destY;
+        return Serial::Error::Success;
+    }
 
-        if (data.levelIndex != -1 && (player->getLevel() == NULL || data.levelIndex != (int32_t)player->getLevel()->getLevelIndex()))
+    Serial::Error::Error Server::readClientLevelChangePacket(std::shared_ptr<ReadPacket> packet, ENetPeer* peer)
+    {
+        auto player = mServersClientData[peer->connectID].player;
+
+        int32_t requestedLevelIndex = -1;
+        serialise_int32(packet->reader, requestedLevelIndex);
+
+        if (requestedLevelIndex != -1 && (player->getLevel() == NULL || requestedLevelIndex != (int32_t)player->getLevel()->getLevelIndex()))
         {
-            auto level = world->getLevel(data.levelIndex);
+            auto level = FAWorld::World::get()->getLevel(requestedLevelIndex);
+            
+            bool up = player->getLevel() && level->getLevelIndex() < player->getLevel()->getLevelIndex();
 
-            if (player->getLevel() != NULL && data.levelIndex < (int32_t)player->getLevel()->getLevelIndex())
-                player->mPos = FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second);
+            if (up)
+                player->teleport(level, FAWorld::Position(level->downStairsPos().first, level->downStairsPos().second));
             else
-                player->mPos = FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second);
-
-            player->setLevel(level);
-        }*/
+                player->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
+        }
 
         return Serial::Error::Success;
     }
@@ -315,6 +325,9 @@ namespace Engine
 
         auto packet = getWritePacket(Engine::PacketType::NewClient, 0, true, Engine::WritePacketResizableType::Resizable);
         int32_t id = newPlayer->getId();
+
+        std::cout << "ASSIGNING ID " << id << "TO NEW CLIENT" << std::endl;
+
         packet.writer.handleInt32(id);
         Engine::sendPacket(packet, peer);
 
@@ -324,5 +337,6 @@ namespace Engine
         // TODO: send levels on-demand
         sendLevel(0, peer);
         sendLevel(1, peer);
+        sendLevel(2, peer);
     }
 }

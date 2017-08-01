@@ -27,7 +27,12 @@ namespace FAWorld
         return mCurrentPos;
     }
 
-    void MovementHandler::update()
+    GameLevel* MovementHandler::getLevel()
+    {
+        return mLevel;
+    }
+
+    void MovementHandler::update(int32_t actorId)
     {
         if (mCurrentPos.mDist == 0)
         {
@@ -41,6 +46,10 @@ namespace FAWorld
             else
             {
                 bool canRepath = std::abs(World::get()->getCurrentTick() - mLastRepathed) > mPathRateLimit;
+
+                int32_t modNum = 3;
+                canRepath = canRepath && ((World::get()->getCurrentTick() % modNum) == (actorId % modNum));
+
                 bool needsRepath = true;
                 mCurrentPos.mMoving = false;
 
@@ -71,7 +80,7 @@ namespace FAWorld
                     mCurrentPath = std::move(pathFind(mLevel, mCurrentPos.current(), mDestination, _));
                     mCurrentPathIndex = 0;
 
-                    update();
+                    update(actorId);
                     return;
                 }
             }
