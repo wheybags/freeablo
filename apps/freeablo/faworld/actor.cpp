@@ -182,4 +182,15 @@ namespace FAWorld
     {
         mActorId = id;
     }
+
+    bool Actor::attack(Actor *enemy)
+    {
+        if (enemy->isDead() && enemy->mStats != nullptr)
+            return false;
+        Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({ "sfx/misc/swing2.wav", "sfx/misc/swing.wav" }));
+        enemy->takeDamage((uint32_t)mStats->getMeleeDamage());
+        if (enemy->getCurrentHP() <= 0)
+            enemy->die();
+        return true;
+    }
 }

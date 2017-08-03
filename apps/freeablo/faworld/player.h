@@ -15,8 +15,6 @@ namespace FAWorld
             virtual ~Player();
             Inventory mInventory;
             void setSpriteClass(std::string className);
-            bool attack(Actor * enemy);
-            bool attack(Player * enemy);
             bool talk(Actor * actor);
             void updateSprites();
 

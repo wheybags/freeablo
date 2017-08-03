@@ -20,16 +20,6 @@ namespace FAWorld
         mFaction = Faction::hell();
     }
 
-    bool Monster::attack(Actor *enemy)
-    {
-        if(enemy->isDead() && enemy->mStats != nullptr)
-            return false;
-        isAttacking = true;
-        Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-        getAnimationManager().playAnimation(AnimState::attack, FARender::AnimationPlayer::AnimationType::Once);
-        return true;
-    }
-
     Monster::Monster()
     {
         init();

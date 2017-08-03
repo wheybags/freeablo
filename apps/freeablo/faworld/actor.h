@@ -86,12 +86,8 @@ namespace FAWorld
             void teleport(GameLevel* level, Position pos);
             GameLevel* getLevel();
 
-            virtual bool attack(Actor * enemy)
-            {
-                UNUSED_PARAM(enemy);
-                return false;
-            }
-
+            bool attack(Actor * enemy);
+            
             virtual bool talk(Actor * actor)
             {
                 UNUSED_PARAM(actor);

@@ -49,23 +49,6 @@ namespace FAWorld
         FAWorld::World::get()->deregisterPlayer(this);
     }
 
-    bool Player::attack(Actor *enemy)
-    {
-        if(enemy->isDead() && enemy->mStats != nullptr)
-            return false;
-        Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-        enemy->takeDamage((uint32_t)mStats->getMeleeDamage());
-        if(enemy->getCurrentHP() <= 0)
-            enemy->die();
-        return true;
-    }
-
-    bool Player::attack(Player *enemy)
-    {
-        UNUSED_PARAM(enemy);
-        return false;
-    }
-
     bool Player::talk(Actor * actor)
     {
         isTalking = true;
@@ -216,6 +199,7 @@ namespace FAWorld
 
         getAnimationManager().setAnimation(AnimState::dead, renderer->loadImage((helper(true) % "dt").str()));
         getAnimationManager().setAnimation(AnimState::attack, renderer->loadImage((helper(false) % "at").str()));
+        getAnimationManager().setAnimation(AnimState::hit, renderer->loadImage((helper(false) % "ht").str()));
 
         if (inDungeon)
         {
