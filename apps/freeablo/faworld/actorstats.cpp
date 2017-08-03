@@ -76,7 +76,7 @@ namespace FAWorld
     void ActorStats::clearDerivedStats()
     {
         mHP=0;
-        mCurrentHP=0;
+        //mCurrentHP=0;
         mMana=0;
         mCurrentMana=0;
         mStrength=0;

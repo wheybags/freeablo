@@ -86,12 +86,8 @@ namespace FAWorld
             void teleport(GameLevel* level, Position pos);
             GameLevel* getLevel();
 
-            virtual bool attack(Actor * enemy)
-            {
-                UNUSED_PARAM(enemy);
-                return false;
-            }
-
+            bool attack(Actor * enemy);
+            
             virtual bool talk(Actor * actor)
             {
                 UNUSED_PARAM(actor);
@@ -104,6 +100,11 @@ namespace FAWorld
             Position getPos() const
             {
                 return mMoveHandler.getCurrentPosition();
+            }
+
+            void setInvuln(bool invuln)
+            {
+                mInvuln = invuln;
             }
 
         //private: //TODO: fix this
@@ -236,6 +237,8 @@ namespace FAWorld
             bool canTalkTo(Actor * actor);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+            bool mInvuln = false;
 
         private:
             std::string mActorId;
