@@ -75,6 +75,9 @@ namespace FAWorld
 
     void Actor::takeDamage(double amount)
     {
+        if (mInvuln)
+            return;
+
         mStats->takeDamage(static_cast<int32_t> (amount));
         if (!(mStats->getCurrentHP() <= 0))
         {

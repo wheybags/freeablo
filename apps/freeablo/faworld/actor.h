@@ -102,6 +102,11 @@ namespace FAWorld
                 return mMoveHandler.getCurrentPosition();
             }
 
+            void setInvuln(bool invuln)
+            {
+                mInvuln = invuln;
+            }
+
         //private: //TODO: fix this
            
 
@@ -232,6 +237,8 @@ namespace FAWorld
             bool canTalkTo(Actor * actor);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+            bool mInvuln = false;
 
         private:
             std::string mActorId;

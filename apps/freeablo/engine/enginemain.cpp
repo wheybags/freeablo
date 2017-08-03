@@ -87,6 +87,10 @@ namespace Engine
         itemManager.loadItems(&exe);
         player = playerFactory.create(characterClass);
         world.addCurrentPlayer(player);
+
+        if (variables["invuln"].as<std::string>() == "on")
+            player->setInvuln(true);
+
         mInputManager->registerKeyboardObserver(&world);
         mInputManager->registerMouseObserver(&world);
 
