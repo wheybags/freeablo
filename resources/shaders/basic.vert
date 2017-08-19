@@ -1,4 +1,6 @@
-#version 330 core
+#version 320 es
+precision mediump float;
+
 in vec3 vertex_position;
 in vec2 v_uv;
 out vec2 uv;
