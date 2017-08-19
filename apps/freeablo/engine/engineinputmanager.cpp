@@ -193,7 +193,7 @@ namespace Engine
     {
         int down = isDown;
 
-        if (key == Input::KEY_LEFT_MOUSE) 
+        if (key == Input::KEY_LEFT_MOUSE)
         {
             if (isDoubleClick)
                 nk_input_button(ctx, NK_BUTTON_DOUBLE, x, y, down);
@@ -233,10 +233,10 @@ namespace Engine
 
     void EngineInputManager::mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel)
     {
-        if (mNkCtx->input.mouse.grabbed) 
+        if (mNkCtx->input.mouse.grabbed)
         {
-            int x = (int)mNkCtx->input.mouse.prev.x, y = (int)mNkCtx->input.mouse.prev.y;
-            nk_input_motion(mNkCtx, x + xrel, y + yrel);
+            int mouse_prev_x = (int)mNkCtx->input.mouse.prev.x, mouse_prev_y = (int)mNkCtx->input.mouse.prev.y;
+            nk_input_motion(mNkCtx, mouse_prev_x + xrel, mouse_prev_y + yrel);
         }
         else
         {

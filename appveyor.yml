@@ -26,7 +26,7 @@ before_build:
   - git submodule update --init
   - echo Running cmake...
   - cd c:\projects\freeablo-windows-build
-  - cmake.bat
+  - cmake.bat -DTREAT_WARNINGS_AS_ERRORS=ON
 
 test_script:
   - cd c:\projects\freeablo-windows-build\build
