@@ -755,6 +755,16 @@ namespace Render
         // draw points 0-3 from the currently bound VAO with current in-use shader
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
+
+
+    void handleEvents()
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            //do nothing, just clear the event queue to avoid render window hang up in ubuntu.
+        }
+    }
     
     void drawSprite(const Sprite& sprite, int32_t x, int32_t y)
     {

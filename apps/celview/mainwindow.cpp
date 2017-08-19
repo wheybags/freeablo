@@ -113,7 +113,7 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_selectMPQ_clicked()
 {
-    QString tmpFilename = QFileDialog::getOpenFileName(this, tr("Open MPQ"), ".", tr("MPQ Files (*.mpq)"));
+    QString tmpFilename = QFileDialog::getOpenFileName(this, tr("Open MPQ"), ".", tr("MPQ Files (*.mpq *.MPQ)"));
     if (!tmpFilename.isEmpty())
     {
         mFilename = tmpFilename;
@@ -248,6 +248,7 @@ void MainWindow::updateRender()
     if(mCurrentCel->size() > 0)
       Render::drawSprite((SDL_Texture*)(*mCurrentCel)[mCurrentFrame], 0, 0);
     Render::draw();
+    Render::handleEvents();
 }
 
 bool MainWindow::openMPQ()

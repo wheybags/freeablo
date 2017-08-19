@@ -1,3 +1,4 @@
+#version 330 core
 in vec2 uv;
 out vec4 frag_colour;
 uniform sampler2D tex;
