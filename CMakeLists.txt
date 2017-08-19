@@ -58,9 +58,14 @@ else ()
     set (CMAKE_CXX_STANDARD 11)
 endif ()
 
+option (TREAT_WARNINGS_AS_ERRORS "Treat warnings as errors")
+
 if(UNIX)
     set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -Wno-unknown-pragmas")
     SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
+    if (TREAT_WARNINGS_AS_ERRORS)
+        set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Werror")
+    endif()
 endif()
 
 if(MSVC)
@@ -71,6 +76,9 @@ if(MSVC)
     # 4458 - shadow for class member -- librocket headers
     # 4459 - declaration of 'self' hides global declaration
     # 4127 - conditional expression is constant, could be useful to check that both branches compilable.
+    if (TREAT_WARNINGS_AS_ERRORS)
+        set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /WX")
+    endif()
 endif()
 
 include_directories ( SYSTEM

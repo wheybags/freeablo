@@ -35,11 +35,11 @@ before_install:
 before_script:
 - mkdir build
 - cd build
-- cmake ../ -DCMAKE_CXX_FLAGS="-Werror"
+- cmake -DTREAT_WARNINGS_AS_ERRORS=ON ../
 script:
 - make
 - make fatest
-after_success: 
+after_success:
 - cd ..
 - ./update-gh-pages.sh
 notifications:
