@@ -71,6 +71,8 @@ namespace Render
 
     void draw();
 
+    void handleEvents();
+
     void drawSprite(const Sprite& sprite, int32_t x, int32_t y);
 
     struct RocketFATex
