@@ -12,8 +12,46 @@
 
 
 namespace FAGui
-{   
+{
     std::map<std::string, Rocket::Core::ElementDocument*> menus;
+
+    PanelPlacement panelPlacementByType(PanelType type) {
+        switch (type)
+        {
+        case PanelType::none:      return PanelPlacement::none;
+        case PanelType::inventory: return PanelPlacement::right;
+        case PanelType::spells:    return PanelPlacement::right;
+        case PanelType::character: return PanelPlacement::left;
+        case PanelType::quests:    return PanelPlacement::left;
+        }
+        return PanelPlacement::none;
+    }
+
+    const char* bgImgPath(PanelType type)
+    {
+        switch (type)
+        {
+        case PanelType::none:      break;
+        case PanelType::inventory: return "data/inv/inv.cel";
+        case PanelType::spells:    return "data/spellbk.cel";
+        case PanelType::character: return "data/char.cel";
+        case PanelType::quests:    return "data/quest.cel";
+        }
+        return nullptr;
+    }
+
+    const char* panelName(PanelType type)
+    {
+        switch (type)
+        {
+        case PanelType::none: return "none";
+        case PanelType::inventory: return "inventory";
+        case PanelType::spells: return "spells";
+        case PanelType::character: return "character";
+        case PanelType::quests: return "quests";
+        }
+        return "";
+    }
 
     GuiManager::GuiManager(Engine::EngineMain& engine)
         : mEngine(engine)
@@ -50,7 +88,7 @@ namespace FAGui
         if (nk_begin(ctx, "pause menu", nk_rect(0, 0, screenW, screenH), 0))
         {
             nk_layout_row_dynamic(ctx, 30, 1);
-            
+
             nk_label(ctx, "PAUSED", NK_TEXT_CENTERED);
 
             if (nk_button_label(ctx, "Resume"))
@@ -64,7 +102,56 @@ namespace FAGui
         nk_style_pop_style_item(ctx);
     }
 
-    void bottomMenu(nk_context* ctx)
+
+
+    template <typename Function>
+    void GuiManager::drawPanel (nk_context* ctx, PanelType panelType, Function op)
+    {
+        auto renderer = FARender::Renderer::get();
+        auto invTex = renderer->loadImage(bgImgPath (panelType));
+        int32_t screenW, screenH;
+        renderer->getWindowDimensions(screenW, screenH);
+        auto placement = panelPlacementByType (panelType);
+        struct nk_rect dims = nk_rect(
+            [&]()
+            {
+            switch (placement)
+            {
+            case PanelPlacement::none: break;
+            case PanelPlacement::left: return 0;
+            case PanelPlacement::right: return screenW - invTex->getWidth();
+            }
+            return 0;
+            }(), screenH - 125 - invTex->getHeight(),
+            invTex->getWidth(), invTex->getHeight());
+        nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
+        nk_window_show (ctx, panelName (panelType), *panel (placement) == panelType ? NK_SHOWN : NK_HIDDEN);
+        nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op);
+    }
+
+    void GuiManager::inventoryPanel(nk_context* ctx)
+    {
+        drawPanel (ctx, PanelType::inventory, [&](){});
+    }
+
+     void GuiManager::characterPanel(nk_context* ctx)
+    {
+        drawPanel (ctx, PanelType::character, [&](){});
+    }
+
+   void GuiManager::questsPanel(nk_context* ctx)
+    {
+        drawPanel (ctx, PanelType::quests, [&](){});
+    }
+
+    void GuiManager::spellsPanel(nk_context* ctx)
+    {
+        drawPanel (ctx, PanelType::spells, [&](){});
+    }
+
+
+
+    void GuiManager::bottomMenu(nk_context* ctx)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
 
@@ -120,11 +207,11 @@ namespace FAGui
 
             // CHAR button
             if (bottomMenuButton(buttonRow1TopIndent, buttonLeftIndent, charButtonFrame))
-                std::cout << "pressed CHAR" << std::endl;
+                togglePanel (PanelType::character);
 
             // QUEST button
             if (bottomMenuButton(buttonRow2TopIndent, buttonLeftIndent, questButtonFrame))
-                std::cout << "pressed QUEST" << std::endl;
+                togglePanel (PanelType::quests);
 
             // MAP button
             if (bottomMenuButton(buttonRow3TopIndent, buttonLeftIndent, mapButtonFrame))
@@ -136,11 +223,11 @@ namespace FAGui
 
             // INV button
             if (bottomMenuButton(buttonRow1TopIndent, buttonRightIndent, invButtonFrame))
-                std::cout << "pressed INV" << std::endl;
+                togglePanel (PanelType::inventory);
 
             // SPELLS button
             if (bottomMenuButton(buttonRow2TopIndent, buttonRightIndent, spellsButtonFrame))
-                std::cout << "pressed SPELLS" << std::endl;
+                togglePanel (PanelType::spells);
 
             nk_layout_space_end(ctx);
         });
@@ -148,9 +235,31 @@ namespace FAGui
 
     void GuiManager::update(bool paused, nk_context* ctx)
     {
-        bottomMenu(ctx);
-
         if (paused)
             pauseMenu(ctx, mEngine);
+
+        bottomMenu(ctx);
+        inventoryPanel(ctx);
+        spellsPanel(ctx);
+        questsPanel(ctx);
+        characterPanel(ctx);
+    }
+
+    PanelType *GuiManager::panel (PanelPlacement placement) {
+        switch (placement) {
+        case PanelPlacement::none: break;
+        case PanelPlacement::left: return &mCurLeftPanel;
+        case PanelPlacement::right: return &mCurRightPanel;
+        }
+        return nullptr;
+    }
+
+    void GuiManager::togglePanel(PanelType type)
+    {
+        auto &curPanel = *panel (panelPlacementByType (type));
+        if (curPanel == type)
+            curPanel = PanelType::none;
+        else
+            curPanel = type;
     }
 }
