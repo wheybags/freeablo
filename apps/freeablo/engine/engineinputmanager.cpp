@@ -228,7 +228,8 @@ namespace Engine
         if(key == Input::KEY_LEFT_MOUSE)
             mMouseDown = false;
 
-        notifyMouseObservers(MOUSE_RELEASE, mMousePosition);
+        if (!nk_item_is_any_active (mNkCtx))
+            notifyMouseObservers(MOUSE_RELEASE, mMousePosition);
     }
 
     void EngineInputManager::mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel)
@@ -301,7 +302,7 @@ namespace Engine
         mInput.processInput(paused);
         nk_input_end(mNkCtx);
 
-        if(!paused && mMouseDown)
+        if(!paused && mMouseDown && !nk_item_is_any_active (mNkCtx))
         {
             notifyMouseObservers(MOUSE_DOWN, mMousePosition);
 
