@@ -9,3 +9,4 @@ resources/settings-user.ini
 *CMakeFiles*
 build/
 .DS_Store
+.vscode
