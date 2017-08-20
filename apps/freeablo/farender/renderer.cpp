@@ -195,6 +195,8 @@ namespace FARender
             return false;
         }
 
+        Render::clear(0, 255, 0);
+
         // force preloading of sprites by drawing them offscreen
         for (auto id : spritesToPreload)
         {
