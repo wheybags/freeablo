@@ -873,8 +873,8 @@ namespace Render
 
     void clear(int r, int g, int b)
     {
-         SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-         SDL_RenderClear(renderer);
+        glClearColor(((float)r)/255.0, ((float)g)/255.0, ((float)b)/255.0, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT);
     }
 
     #define BPP 4
