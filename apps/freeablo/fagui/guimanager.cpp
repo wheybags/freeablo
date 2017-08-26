@@ -124,9 +124,11 @@ namespace FAGui
             return 0;
             }(), screenH - 125 - invTex->getHeight(),
             invTex->getWidth(), invTex->getHeight());
-        nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
-        nk_window_show (ctx, panelName (panelType), *panel (placement) == panelType ? NK_SHOWN : NK_HIDDEN);
-        nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op);
+        nk_flags flags = NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND;
+        if (*panel (placement) == panelType)
+            nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op);
+        else
+            nk_window_close (ctx, panelName (panelType));
     }
 
     void GuiManager::inventoryPanel(nk_context* ctx)
