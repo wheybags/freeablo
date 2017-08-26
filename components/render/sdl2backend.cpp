@@ -214,7 +214,7 @@ namespace Render
     }
 
 
-    bool getImageInfo(const std::string& path, uint32_t& width, uint32_t& height, uint32_t& animLength, int32_t celIndex)
+    bool getImageInfo(const std::string& path, std::vector<int32_t>& widths, std::vector<int32_t>& heights, int32_t& animLength)
     {
         //TODO: get better image decoders that allow you to peek image dimensions without loading full image
 
@@ -223,21 +223,22 @@ namespace Render
         if(Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
         {
             Cel::CelFile cel(path);
-            width = cel[celIndex].mWidth;
-            height = cel[celIndex].mHeight;
+            widths.resize (cel.animLength()); heights.resize (cel.animLength());
+            for (int i = 0; i < cel.animLength(); ++i)
+                {
+                    widths[i] = cel[i].mWidth;
+                    heights[i] = cel[i].mHeight;
+                }
             animLength = cel.animLength();
         }
         else
         {
-            if(celIndex != 0)   // no indices on normal files
-                return false;
-
             SDL_Surface* surface = loadNonCelImage(path, extension);
 
             if(surface)
             {
-                width = surface->w;
-                height = surface->h;
+                widths = {surface->w};
+                heights = {surface->h};
                 animLength = 1;
 
                 SDL_FreeSurface(surface);
