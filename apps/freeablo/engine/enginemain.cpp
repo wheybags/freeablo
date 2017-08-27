@@ -96,7 +96,7 @@ namespace Engine
 
         int32_t currentLevel = variables["level"].as<int32_t>();
 
-        FAGui::GuiManager guiManager(*this);
+        FAGui::GuiManager guiManager(*this, *player);
 
         if (currentLevel == -1)
             currentLevel = 0;
@@ -134,7 +134,7 @@ namespace Engine
             netManager.update();
             guiManager.update(mPaused, ctx);
 
-           
+
 
             FAWorld::GameLevel* level = world.getCurrentLevel();
             FARender::RenderState* state = renderer.getFreeState();
@@ -144,19 +144,21 @@ namespace Engine
                 if(level != NULL)
                     state->tileset = renderer.getTileset(*level);
                 state->level = level;
-               
-                state->mCursorEmpty = true;
-               
-                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");                
-                world.fillRenderState(state);                
-
+                if(!FAGui::cursorPath.empty())
+                    state->mCursorEmpty = false;
+                else
+                    state->mCursorEmpty = true;
+                state->mCursorFrame = FAGui::cursorFrame;
+                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
+                state->mCursorHotspot = FAGui::cursorHotspot;
+                world.fillRenderState(state);
                 state->nuklearData.fill(ctx);
             }
 
             std::vector<uint32_t> spritesToPreload;
             if (renderer.getAndClearSpritesNeedingPreloading(spritesToPreload))
                 ThreadManager::get()->sendSpritesForPreload(spritesToPreload);
-            
+
             nk_clear(ctx);
 
             renderer.setCurrentState(state);

@@ -214,7 +214,7 @@ namespace Render
     }
 
 
-    bool getImageInfo(const std::string& path, uint32_t& width, uint32_t& height, uint32_t& animLength, int32_t celIndex)
+    bool getImageInfo(const std::string& path, std::vector<int32_t>& widths, std::vector<int32_t>& heights, int32_t& animLength)
     {
         //TODO: get better image decoders that allow you to peek image dimensions without loading full image
 
@@ -223,21 +223,22 @@ namespace Render
         if(Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
         {
             Cel::CelFile cel(path);
-            width = cel[celIndex].mWidth;
-            height = cel[celIndex].mHeight;
+            widths.resize (cel.animLength()); heights.resize (cel.animLength());
+            for (int i = 0; i < cel.animLength(); ++i)
+                {
+                    widths[i] = cel[i].mWidth;
+                    heights[i] = cel[i].mHeight;
+                }
             animLength = cel.animLength();
         }
         else
         {
-            if(celIndex != 0)   // no indices on normal files
-                return false;
-
             SDL_Surface* surface = loadNonCelImage(path, extension);
 
             if(surface)
             {
-                width = surface->w;
-                height = surface->h;
+                widths = {surface->w};
+                heights = {surface->h};
                 animLength = 1;
 
                 SDL_FreeSurface(surface);
@@ -296,7 +297,7 @@ namespace Render
 
             std::vector<Sprite> vec(1);
             vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(tmp);
-            
+
             SDL_FreeSurface(tmp);
 
             return new SpriteGroup(vec);
@@ -420,14 +421,14 @@ namespace Render
 
         std::vector<Sprite> vec(1);
         vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(surface);
-        
+
         SDL_FreeSurface(surface);
 
         return new SpriteGroup(vec);
     }
 
 
-   
+
 
     SpriteGroup* loadTiledTexture(const std::string& sourcePath, size_t width, size_t height, bool hasTrans, size_t transR, size_t transG, size_t transB)
     {
@@ -462,7 +463,7 @@ namespace Render
         return new SpriteGroup(vec);
     }
 
-    void drawCursor(Sprite s, size_t w, size_t h)
+    void drawCursor(Sprite s, CursorHotspotLocation hotspotLocation)
     {
         if(s == NULL)
         {
@@ -475,7 +476,18 @@ namespace Render
             SDL_ShowCursor(0);
             int x,y;
             SDL_GetMouseState(&x,&y);
-            drawSprite (s, x-w/2, y - h/2);
+            int32_t w, h;
+            spriteSize(s, w, h);
+            int shiftX = 0;
+            int shiftY = 0;
+            switch (hotspotLocation) {
+            case CursorHotspotLocation::topLeft: break;
+            case CursorHotspotLocation::center:
+                shiftX = w / 2;
+                shiftY = h / 2;
+                break;
+            }
+            drawSprite (s, x - shiftX, y - shiftY); // this shouldn't be the case for default cursor
         }
     }
 
@@ -499,7 +511,7 @@ namespace Render
 
         std::vector<Sprite> vec(1);
         vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(surface);
-        
+
         SDL_FreeSurface(surface);
 
         return new SpriteGroup(vec);
@@ -508,7 +520,7 @@ namespace Render
 
     bool once = false;
 
-   
+
 
     GLuint vao = 0;
     GLuint shader_programme = 0;
@@ -533,7 +545,7 @@ namespace Render
             };
 
 
-           
+
 
 
             float colours[] = {
@@ -693,9 +705,10 @@ namespace Render
         SDL_QueryTexture(sprite, NULL, NULL, &width, &height);
 
         SDL_Rect dest = { int(x), int(y), width, height };
-        
+
         SDL_RenderCopy(renderer, sprite, NULL, &dest);*/
 
+        glUseProgram(shader_programme);
         GLint loc = glGetUniformLocation(shader_programme, "width");
         if (loc != -1)
         {
@@ -733,11 +746,10 @@ namespace Render
             glUniform1f(loc, y);
         }
 
-      
+
 
         glBindTexture(GL_TEXTURE_2D, sprite);
 
-        glUseProgram(shader_programme);
         glBindVertexArray(vao);
         // draw points 0-3 from the currently bound VAO with current in-use shader
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -752,7 +764,7 @@ namespace Render
             //do nothing, just clear the event queue to avoid render window hang up in ubuntu.
         }
     }
-    
+
     void drawSprite(const Sprite& sprite, int32_t x, int32_t y)
     {
         drawSprite((GLuint)(intptr_t)sprite, x, y);

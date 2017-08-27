@@ -29,14 +29,14 @@ namespace FARender
                 return animLength;
             }
 
-            int32_t getWidth()
+            int32_t getWidth(int frame = 0)
             {
-                return width;
+                return width[frame];
             }
 
-            int32_t getHeight()
+            int32_t getHeight(int frame = 0)
             {
-                return height;
+                return height[frame];
             }
 
             int32_t getCacheIndex()
@@ -51,8 +51,8 @@ namespace FARender
             }
 
         private:
-            
-            void init(int32_t _animLength, int32_t _width, int32_t _height, int32_t _spriteCacheIndex)
+
+            void init(int32_t _animLength, const std::vector<int32_t> &_width, const std::vector<int32_t> &_height, int32_t _spriteCacheIndex)
             {
                 animLength = _animLength;
                 width = _width;
@@ -67,9 +67,9 @@ namespace FARender
                 }
             }
 
-            int32_t animLength = 1;
-            int32_t width = 1;
-            int32_t height = 1;
+            int32_t animLength = 0;
+            std::vector<int32_t> width = {};
+            std::vector<int32_t> height = {};
             int32_t spriteCacheIndex = 0;
 
             std::vector<std::pair<int32_t, int32_t>> frameHandles;

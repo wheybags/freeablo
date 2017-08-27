@@ -15,6 +15,12 @@
 #include "../faworld/position.h"
 
 #include "spritemanager.h"
+#include "../fagui/guimanager.h"
+
+namespace Render
+{
+    enum class CursorHotspotLocation;
+}
 
 
 namespace FAWorld
@@ -51,6 +57,7 @@ namespace FARender
         FAWorld::GameLevel* level;
 
         FASpriteGroup* mCursorSpriteGroup;
+        Render::CursorHotspotLocation mCursorHotspot;
         uint32_t mCursorFrame;
 
         bool mCursorEmpty;
@@ -83,7 +90,7 @@ namespace FARender
 
             Render::Tile getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos);
 
-            void setCursor(RenderState *State);
+            void drawCursor(RenderState *State);
 
             bool renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload); ///< To be called only by Engine::ThreadManager
             void cleanup(); ///< To be called only by Engine::ThreadManager

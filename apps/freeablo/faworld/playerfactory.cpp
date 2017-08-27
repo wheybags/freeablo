@@ -28,82 +28,67 @@ Player* PlayerFactory::create(const std::string& playerClass) const
     return player;
 }
 
+void PlayerFactory::loadTestingKit (Player *player)
+{
+   ItemManager & itemManager = ItemManager::get();
+   player->mInventory.putItemUnsafe(itemManager.getItemByName("Buckler"), FAWorld::MakeEquipTarget<Item::eqINV> (1, 0));
+   player->mInventory.putItemUnsafe(itemManager.getItemByName("Short Bow"), FAWorld::MakeEquipTarget<Item::eqINV> (3, 0));
+   player->mInventory.putItemUnsafe(itemManager.getItemByName("Ring"), FAWorld::MakeEquipTarget<Item::eqINV> (1, 2));
+   player->mInventory.putItemUnsafe(itemManager.getItemByName("Ring"), FAWorld::MakeEquipTarget<Item::eqINV> (2, 2));
+   player->mInventory.putItemUnsafe(itemManager.getItemByName("Amulet"), FAWorld::MakeEquipTarget<Item::eqINV> (1, 3));
+   player->mInventory.putItemUnsafe(itemManager.getItemByName("Helm"), FAWorld::MakeEquipTarget<Item::eqINV> (5, 0));
+   player->mInventory.putItemUnsafe(itemManager.getItemByName("Rags"), FAWorld::MakeEquipTarget<Item::eqINV> (7, 0));
+}
+
 void PlayerFactory::createWarrior(Player* player) const
 {
     ItemManager & itemManager = ItemManager::get();
 
-    FAWorld::Item item = itemManager.getBaseItem(125);
-    player->mInventory.putItem(
-                item,
-                FAWorld::Item::eqLEFTHAND,
-                FAWorld::Item::eqFLOOR,
-                0, 0, 0, false);
+    FAWorld::Item item = itemManager.getItemByName("Short Sword");
+    player->mInventory.putItemUnsafe(
+        item, FAWorld::MakeEquipTarget<Item::eqLEFTHAND> ());
 
-    item = itemManager.getBaseItem(18);
-    player->mInventory.putItem(
-                item,
-                FAWorld::Item::eqRIGHTHAND,
-                FAWorld::Item::eqFLOOR,
-                0, 0, 0, false);
+    item = itemManager.getItemByName("Buckler");
+    player->mInventory.putItemUnsafe(
+        item, FAWorld::MakeEquipTarget<Item::eqRIGHTHAND> ());
 
-    item = itemManager.getBaseItem(26);
-    player->mInventory.putItem(
-                item,
-                FAWorld::Item::eqINV,
-                FAWorld::Item::eqFLOOR,
-                0, 0, 0, false);
+    item = itemManager.getItemByName("Club");
+    player->mInventory.putItemUnsafe(
+        item, FAWorld::MakeEquipTarget<Item::eqINV> (0, 0));
 
-    item = itemManager.getBaseItem(43);
+    item = itemManager.getItemByName("Gold");
     item.setCount(100);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqINV,
-                               FAWorld::Item::eqFLOOR,
-                               3, 0, 0, false);
+    player->mInventory.putItemUnsafe(
+        item, FAWorld::MakeEquipTarget<Item::eqINV> (0, 3));
 
-    item = itemManager.getBaseItem(79);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqBELT,
-                               FAWorld::Item::eqFLOOR,
-                               0, 0, 0, false);
+    for (auto i = 0; i < 2; ++i)
+        {
+            item = itemManager.getItemByName("Potion of Healing");
+            player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqBELT> (i));
+        }
 
-    item = itemManager.getBaseItem(79);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqBELT,
-                               FAWorld::Item::eqFLOOR,
-                               0, 0, 1, false);
     player->setSpriteClass("warrior");
     player->getAnimationManager().setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldst.cl2"));
     player->getAnimationManager().setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldwl.cl2"));
+    //loadTestingKit (player);
 }
 
 void PlayerFactory::createRogue(Player* player) const
 {
     ItemManager & itemManager = ItemManager::get();
 
-    FAWorld::Item item = itemManager.getBaseItem(121);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqLEFTHAND,
-                               FAWorld::Item::eqFLOOR,
-                               0, 0, 0, false);
+    FAWorld::Item item = itemManager.getItemByName("Short Bow");
+    player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqLEFTHAND> ());
 
-    item = itemManager.getBaseItem(43);
+    item = itemManager.getItemByName("Gold");
     item.setCount(100);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqINV,
-                               FAWorld::Item::eqFLOOR,
-                               3, 0, 0,false);
+    player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqINV> (0, 3));
 
-    item = itemManager.getBaseItem(79);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqBELT,
-                               FAWorld::Item::eqFLOOR,
-                               0, 0, 0, false);
-
-    item = itemManager.getBaseItem(79);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqBELT,
-                               FAWorld::Item::eqFLOOR,
-                               0, 0, 1, false);
+    for (auto i = 0; i < 2; ++i)
+        {
+            item = itemManager.getItemByName("Potion of Healing");
+            player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqBELT> (i));
+        }
 
     player->setSpriteClass("rogue");
     player->getAnimationManager().setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/rogue/rlb/rlbst.cl2"));
@@ -114,30 +99,18 @@ void PlayerFactory::createSorcerer(Player* player) const
 {
     ItemManager & itemManager = ItemManager::get();
 
-    FAWorld::Item item = itemManager.getBaseItem(124);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqLEFTHAND,
-                               FAWorld::Item::eqFLOOR,
-                               0, 0, 0, false);
+    FAWorld::Item item = itemManager.getItemByName("Short Staff of Charged Bolt");
+    player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqLEFTHAND> ());
 
-    item = itemManager.getBaseItem(43);
+    item = itemManager.getItemByName("Gold");
     item.setCount(100);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqINV,
-                               FAWorld::Item::eqFLOOR,
-                               3, 0, 0, false);
+    player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqINV> (0, 3));
 
-    item = itemManager.getBaseItem(81);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqBELT,
-                               FAWorld::Item::eqFLOOR,
-                               0, 0, 0, false);
-
-    item = itemManager.getBaseItem(81);
-    player->mInventory.putItem(item,
-                               FAWorld::Item::eqBELT,
-                               FAWorld::Item::eqBELT,
-                               0, 0, 1, false);
+    for (auto i = 0; i < 2; ++i)
+        {
+            item = itemManager.getItemByName("Potion of Mana");
+            player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqBELT> (i));
+        }
 
     player->setSpriteClass("sorceror");
     player->getAnimationManager().setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/sorceror/slt/sltst.cl2"));

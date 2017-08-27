@@ -1,6 +1,7 @@
 #include "itemmanager.h"
 #include <sstream>
 #include <iostream>
+#include <unordered_map>
 
 namespace FAWorld
 {
@@ -8,6 +9,7 @@ bool ItemManager::mIsLoaded = false;
 std::map<uint8_t, Item> ItemManager::mRegisteredItems;
 std::map<uint8_t, Item> ItemManager::mUniqueItems;
 std::map<uint32_t, DiabloExe::BaseItem> ItemManager::mUniqueCodeToBaseItem;
+std::unordered_map<std::string, const Item *> mItemByName; // of both types
 
 uint32_t ItemManager::lastUnique=0;
 ItemManager::ItemManager()
@@ -34,10 +36,11 @@ void ItemManager::loadItems(DiabloExe::DiabloExe * exe)
         std::map<std::string, DiabloExe::BaseItem> itemMap = exe->getItemMap();
         for(std::map<std::string, DiabloExe::BaseItem>::const_iterator it = itemMap.begin();it !=itemMap.end();++it)
         {
-            this->mRegisteredItems[static_cast<uint8_t> (this->mRegisteredItems.size())] = Item(it->second, mRegisteredItems.size());
+            auto &item = this->mRegisteredItems[static_cast<uint8_t> (this->mRegisteredItems.size())];
+            item = Item(it->second, mRegisteredItems.size());
+            mItemByName[item.getName()] = &item;
             if(it->second.uniqCode !=0)
                 this->mUniqueCodeToBaseItem[it->second.uniqCode] = it->second;
-
         }
 
     }
@@ -50,10 +53,9 @@ void ItemManager::loadUniqueItems(DiabloExe::DiabloExe * exe)
         const std::map<std::string, DiabloExe::UniqueItem>& uniqueItemMap = exe->getUniqueItemMap();
         for(std::map<std::string, DiabloExe::UniqueItem>::const_iterator it = uniqueItemMap.begin();it !=uniqueItemMap.end();++it)
         {
-            this->mUniqueItems[static_cast<uint8_t> (this->mUniqueItems.size())] = Item(it->second, mUniqueItems.size());
-
-
-
+            auto &item = this->mUniqueItems[static_cast<uint8_t> (this->mUniqueItems.size())];
+            item = Item(it->second, mUniqueItems.size());
+            mItemByName[item.getName()] = &item;
         }
         mIsLoaded=true;
     }
@@ -132,7 +134,17 @@ Item ItemManager::getUniqueItem(uint8_t id) const
 
 }
 
-DiabloExe::BaseItem & ItemManager::getBaseItemByUniqueCode(uint8_t uniqCode)
+Item ItemManager::getItemByName(const std::string& name)
+{
+    auto it = mItemByName.find(name);
+    if (it != mItemByName.end ())
+        return *it->second;
+
+    assert (false); // Item not found
+    return {};
+}
+
+    DiabloExe::BaseItem & ItemManager::getBaseItemByUniqueCode(uint8_t uniqCode)
 {
     return mUniqueCodeToBaseItem.find(uniqCode)->second;
 

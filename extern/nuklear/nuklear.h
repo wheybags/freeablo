@@ -1730,6 +1730,7 @@ NK_API float nk_widget_width(struct nk_context*);
 NK_API float nk_widget_height(struct nk_context*);
 NK_API int nk_widget_is_hovered(struct nk_context*);
 NK_API int nk_widget_is_mouse_clicked(struct nk_context*, enum nk_buttons);
+NK_API int nk_widget_is_mouse_click_down(struct nk_context*, enum nk_buttons, int down);
 NK_API int nk_widget_has_mouse_click_down(struct nk_context*, enum nk_buttons, int down);
 NK_API void nk_spacing(struct nk_context*, int cols);
 /* =============================================================================
@@ -19912,6 +19913,22 @@ nk_widget_is_mouse_clicked(struct nk_context *ctx, enum nk_buttons btn)
     nk_layout_peek(&bounds, ctx);
     ret = (ctx->active == ctx->current);
     ret = ret && nk_input_mouse_clicked(&ctx->input, btn, bounds);
+    return ret;
+}
+
+NK_API int
+nk_widget_is_mouse_click_down(struct nk_context *ctx, enum nk_buttons btn, int down)
+{
+    int ret;
+    struct nk_rect bounds;
+    NK_ASSERT(ctx);
+    NK_ASSERT(ctx->current);
+    if (!ctx || !ctx->current)
+        return 0;
+
+    nk_layout_peek(&bounds, ctx);
+    ret = (ctx->active == ctx->current);
+    ret = ret && nk_input_is_mouse_click_down_in_rect(&ctx->input, btn, bounds, down);
     return ret;
 }
 

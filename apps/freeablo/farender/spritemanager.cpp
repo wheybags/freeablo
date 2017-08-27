@@ -64,7 +64,7 @@ namespace FARender
         mRawCache[index] = rawTmp;
 
         FASpriteGroup* retval = mCache.allocNewSpriteGroup();
-        retval->init(1, width, height, index);
+        retval->init(1, {static_cast<int32_t> (width)}, {static_cast<int32_t> (height)}, index);
 
         // put it in a member vector because we need to return a persistent pointer
         mRawSpriteGroups.push_back(retval);
