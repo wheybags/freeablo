@@ -46,6 +46,10 @@ namespace FAWorld
             std::set<EquipTarget> NeedsToBeReplaced;
             std::set<EquipTarget> NeedsToBeReturned; // used only for equipping 2-handed weapon while wearing 1h weapon + shield
             boost::optional<EquipTarget> newTarget; // sometimes target changes during exchange
+            ExchangeResult (std::set<EquipTarget> NeedsToBeReplacedArg = {}, std::set<EquipTarget> NeedsToBeReturnedArg = {}, boost::optional<EquipTarget> newTargetArg = boost::none) :
+                NeedsToBeReplaced (NeedsToBeReplacedArg), NeedsToBeReturned (NeedsToBeReturnedArg), newTarget (newTargetArg)
+            {
+            }
         };
         enum class xorder
         {
@@ -57,6 +61,7 @@ namespace FAWorld
             fromTop,
             fromBottom
         };
+        using self = Inventory;
     public:
         Inventory(Player * actor);
         static constexpr auto inventoryWidth = 10;
@@ -75,7 +80,7 @@ namespace FAWorld
        uint32_t getTotalAttackDamage();
        uint32_t getTotalArmourClass();
        std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t> > & getTotalEffects();
-       void itemSlotLeftMouseButtonDown(const std::string& slotName);
+       void itemSlotLeftMouseButtonDown(EquipTarget target);
        void beltMouseLeftButtonDown(double x);
        void inventoryMouseLeftButtonDown(double x, double y);
        void setCursorHeld (const Item &item);

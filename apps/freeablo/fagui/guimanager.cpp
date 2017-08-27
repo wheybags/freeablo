@@ -10,6 +10,8 @@
 #include "../engine/enginemain.h"
 #include "../faworld/player.h"
 
+#include "boost/range/counting_range.hpp"
+#include <boost/variant/variant.hpp>
 
 namespace FAGui
 {
@@ -53,7 +55,7 @@ namespace FAGui
         return "";
     }
 
-    GuiManager::GuiManager(Engine::EngineMain& engine, const FAWorld::Player &player)
+    GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player &player)
         : mEngine(engine), mPlayer (player)
     {
 
@@ -64,6 +66,7 @@ namespace FAGui
         nk_style_item tmpBg = ctx->style.window.fixed_background;
         struct nk_vec2 tmpPadding = ctx->style.window.padding;
 
+        ctx->active = ctx->current; // yet another hack for background windows
         ctx->style.window.fixed_background = nk_style_item_image(background);
         ctx->style.window.padding = nk_vec2(0, 0);
 
@@ -103,6 +106,40 @@ namespace FAGui
     }
 
 
+    namespace
+    {
+        enum struct halign_t {
+            left,
+            center,
+            right,
+        };
+        enum struct valign_t {
+            top,
+            center,
+            bottom,
+        };
+        struct nk_vec2 center (const struct nk_rect &rect) {
+            return {rect.x + rect.w / 2, rect.y + rect.h / 2};
+        }
+        struct nk_rect align_rect (const struct nk_rect &inner_rect, const struct nk_rect &outer_rect, halign_t halign, valign_t valign) {
+            auto c = center (outer_rect);
+            auto shift = (outer_rect.w - inner_rect.w) / 2;
+            switch (halign) {
+                case halign_t::left: c.x -= shift; break;
+                case halign_t::right: c.x += shift; break;
+                default:
+                  break;
+            }
+            shift = (outer_rect.h - inner_rect.h) / 2;
+            switch (valign) {
+                case valign_t::top: c.y -= shift; break;
+                case valign_t::bottom: c.y += shift; break;
+                default:
+                  break;
+            }
+            return {c.x - inner_rect.w/2, c.y - inner_rect.h/2, inner_rect.w, inner_rect.h};
+        }
+    }
 
     template <typename Function>
     void GuiManager::drawPanel (nk_context* ctx, PanelType panelType, Function op)
@@ -129,16 +166,93 @@ namespace FAGui
         nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op);
     }
 
+    static nk_style_button dummyStyle = [](){
+        static nk_style_button buttonStyle;
+        buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_hide();
+        buttonStyle.border_color = {0, 0, 0, 0};
+        buttonStyle.border = 0;
+        buttonStyle.padding = {0, 0};
+        return buttonStyle;
+    }();
+
+    void GuiManager::item (nk_context* ctx, FAWorld::EquipTarget target,
+                           boost::variant<struct nk_rect, struct nk_vec2> placement)
+    {
+        auto &inv = mPlayer.mInventory;
+
+        boost::apply_visitor(Misc::overload([&](const struct nk_rect &rect)
+        {
+            nk_layout_space_push (ctx, rect);
+            nk_button_text_styled (ctx, &dummyStyle, "", 0); // dummy button which gives us ability to process clicks
+            if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                inv.itemSlotLeftMouseButtonDown (target);
+        }, [](const struct nk_vec2&){}), placement);
+
+        auto &item = inv.getItemAt (target);
+        if (!item.isReal()) return;
+
+        auto renderer = FARender::Renderer::get();
+
+        auto frame = item.getGraphicValue();
+        auto imgPath = "data/inv/objcurs.cel";
+        auto sprite = renderer->loadImage (imgPath);
+        auto img = sprite->getNkImage (frame);
+        auto w = sprite->getWidth(frame);
+        auto h = sprite->getHeight(frame);
+
+        boost::apply_visitor(Misc::overload([&](const struct nk_rect &rect)
+        {
+            nk_layout_space_push(ctx, align_rect (nk_rect (0, 0, w, h), rect, halign_t::center, valign_t::center));
+        }, [&](const struct nk_vec2 &point)
+        {
+             if (!item.isReal()) return;
+            nk_layout_space_push(ctx, nk_rect (point.x, point.y, w, h));
+        }), placement);
+        if (!item.isReal()) return;
+
+        nk_image (ctx, img);
+    }
+
     void GuiManager::inventoryPanel(nk_context* ctx)
     {
+        using namespace FAWorld;
         drawPanel (ctx, PanelType::inventory, [&]()
         {
+           static std::vector<std::pair<EquipTarget, struct nk_rect>> slot_rects =
+                  {{MakeEquipTarget<Item::equipLoc::eqHEAD>()    , nk_rect(133, 3, 56, 56)},
+                   {MakeEquipTarget<Item::equipLoc::eqAMULET>()   , nk_rect(205, 32, 28, 28)},
+                   {MakeEquipTarget<Item::equipLoc::eqBODY>()     , nk_rect(133, 75, 58, 87)},
+                   {MakeEquipTarget<Item::equipLoc::eqLEFTHAND>() , nk_rect(18, 75, 56, 84)},
+                   {MakeEquipTarget<Item::equipLoc::eqRIGHTHAND>(), nk_rect(249, 75, 56, 84)},
+                   {MakeEquipTarget<Item::equipLoc::eqLEFTRING>() , nk_rect(47, 178, 28, 28)},
+                   {MakeEquipTarget<Item::equipLoc::eqRIGHTRING>(), nk_rect(248, 178, 28, 28)}};
+            nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
             {
-                auto &inv = mPlayer.mInventory;
-                auto renderer = FARender::Renderer::get();
-                nk_layout_space_push(ctx, nk_rect(75, 133, 87, 58));
-                nk_button_image (ctx, renderer->loadImage);
+                for (auto &p : slot_rects)
+                    item (ctx, p.first, p.second);
             }
+            constexpr auto cellSize = 29;
+            auto invTopLeft = nk_vec2 (17, 222);
+            float invWidth = Inventory::inventoryWidth * cellSize;
+            float invHeight = Inventory::inventoryHeight * cellSize;
+            nk_layout_space_push(ctx, nk_recta (invTopLeft,
+                {invWidth, invHeight}));
+            auto &inv = mPlayer.mInventory;
+            nk_button_text_styled (ctx, &dummyStyle, "", 0);
+            if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                {
+                    inv.inventoryMouseLeftButtonDown(
+                            (ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x)/invWidth,
+                            (ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y)/invHeight);
+                }
+
+            for (auto row : boost::counting_range (0, Inventory::inventoryHeight))
+                for (auto col : boost::counting_range (0, Inventory::inventoryWidth))
+                    {
+                        auto cell_top_left = nk_vec2 (17 + col * cellSize, 222 + row * cellSize);
+                        item (ctx, MakeEquipTarget<Item::equipLoc::eqINV> (col, row), cell_top_left);
+                    }
+            nk_layout_space_end(ctx);
         });
     }
 
@@ -158,6 +272,27 @@ namespace FAGui
     }
 
 
+    void GuiManager::belt(nk_context* ctx) {
+        auto beltTopLeft = nk_vec2 (205, 21);
+        auto beltWidth = 232.0f, beltHeight = 29.0f, cellSize = 29.0f;
+        nk_layout_space_push(ctx, nk_recta (beltTopLeft,
+                {beltWidth, beltHeight}));
+            auto &inv = mPlayer.mInventory;
+            nk_button_text_styled (ctx, &dummyStyle, "", 0);
+            if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                {
+                    inv.beltMouseLeftButtonDown(
+                            (ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x)/beltWidth);
+                }
+
+            using namespace FAWorld;
+            for (auto num : boost::counting_range (0, Inventory::beltWidth))
+               {
+                   auto cell_top_left = nk_vec2 (beltTopLeft.x + num * cellSize, beltTopLeft.y);
+                   item (ctx, MakeEquipTarget<Item::equipLoc::eqBELT> (num), cell_top_left);
+               }
+            nk_layout_space_end(ctx);
+    }
 
     void GuiManager::bottomMenu(nk_context* ctx)
     {
@@ -237,6 +372,7 @@ namespace FAGui
             if (bottomMenuButton(buttonRow2TopIndent, buttonRightIndent, spellsButtonFrame))
                 togglePanel (PanelType::spells);
 
+            belt (ctx);
             nk_layout_space_end(ctx);
         });
     }

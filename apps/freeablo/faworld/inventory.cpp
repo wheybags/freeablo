@@ -271,7 +271,7 @@ namespace FAWorld
           requiredXOrder = override_order->first;
           requiredYOrder = override_order->second;
         }
-        boost::any_range<int, boost::single_pass_traversal_tag> xrange, yrange; // that's a bit slow technique in general but I think it's fine
+        boost::any_range<int, boost::single_pass_traversal_tag, int, std::ptrdiff_t> xrange, yrange; // that's a bit slow technique in general but I think it's fine
         if (requiredXOrder == xorder::fromLeft) xrange = boost::irange(0, inventoryWidth, 1); else xrange = boost::irange(inventoryWidth - 1, -1, -1);
         if (requiredYOrder == yorder::fromTop) yrange = boost::irange(0, inventoryHeight, 1); else yrange = boost::irange(inventoryHeight - 1, -1, -1);
         for (auto i : xrange)
@@ -299,7 +299,7 @@ namespace FAWorld
 
     bool Inventory::exchangeWithCursor (EquipTarget takeoutTarget, boost::optional<EquipTarget> maybePlacementTarget)
     {
-        auto placementTarget = maybePlacementTarget.value_or(takeoutTarget);
+        auto placementTarget = maybePlacementTarget ? *maybePlacementTarget : takeoutTarget;
         if (mCursorHeld.isEmpty ())
             {
                 if (getItemAt (takeoutTarget).isEmpty())
@@ -329,7 +329,7 @@ namespace FAWorld
                 takeOut (location); // take out and discard
             }
 
-        placementTarget = requirements.newTarget.value_or (placementTarget);
+        placementTarget = requirements.newTarget ? *requirements.newTarget : placementTarget;
 
         if (requirements.NeedsToBeReplaced.empty ())
             {
@@ -345,23 +345,8 @@ namespace FAWorld
         return true;
     }
 
-    static const std::map<std::string, EquipTarget> getLocation =
-    {
-        {"leftHand",  MakeEquipTarget<Item::eqLEFTHAND>()},
-        {"rightHand", MakeEquipTarget<Item::eqRIGHTHAND>()},
-        {"leftRing",  MakeEquipTarget<Item::eqLEFTRING>()},
-        {"rightRing", MakeEquipTarget<Item::eqRIGHTRING>()},
-        {"head",      MakeEquipTarget<Item::eqHEAD>()},
-        {"amulet",    MakeEquipTarget<Item::eqAMULET>()},
-        {"body",      MakeEquipTarget<Item::eqBODY>()},
-    };
-
-    void Inventory::itemSlotLeftMouseButtonDown (const std::string &slotName) {
-        auto p = getLocation.find (slotName);
-        if (p == getLocation.end ())
-            return;
-        auto targetLocation = p->second;
-        exchangeWithCursor (targetLocation);
+    void Inventory::itemSlotLeftMouseButtonDown (EquipTarget target) {
+        exchangeWithCursor (target);
     }
 
     void Inventory::beltMouseLeftButtonDown(double x) {

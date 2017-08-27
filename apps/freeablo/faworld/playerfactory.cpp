@@ -70,8 +70,6 @@ void PlayerFactory::createWarrior(Player* player) const
     player->setSpriteClass("warrior");
     player->getAnimationManager().setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldst.cl2"));
     player->getAnimationManager().setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldwl.cl2"));
-    player->setIdleAnimation("plrgfx/warrior/wld/wldst.cl2");
-    player->setWalkAnimation("plrgfx/warrior/wld/wldwl.cl2");
     //loadTestingKit (player);
 }
 
