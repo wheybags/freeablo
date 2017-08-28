@@ -48,8 +48,9 @@ namespace FAWorld
         FAWorld::World::get()->deregisterPlayer(this);
     }
 
-    bool Player::talk(Actor * actor)
+    bool Player::talk(Actor* actor)
     {
+        UNUSED_PARAM(actor);
         assert(false);
         return true;
     }

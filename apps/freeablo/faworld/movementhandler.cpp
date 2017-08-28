@@ -19,7 +19,7 @@ namespace FAWorld
 
     bool MovementHandler::moving()
     {
-        return mCurrentPos.mMoving;
+        return mCurrentPos.isMoving();
     }
 
     Position MovementHandler::getCurrentPosition() const
@@ -34,12 +34,12 @@ namespace FAWorld
 
     void MovementHandler::update(int32_t actorId)
     {
-        if (mCurrentPos.mDist == 0)
+        if (mCurrentPos.getDist() == 0)
         {
             // if we have arrived, stop moving
             if (mCurrentPos.current() == mDestination)
             {
-                mCurrentPos.mMoving = false;
+                mCurrentPos.stop();
                 mCurrentPath.clear();
                 mCurrentPathIndex = 0;
             }
@@ -51,7 +51,7 @@ namespace FAWorld
                 canRepath = canRepath && ((World::get()->getCurrentTick() % modNum) == (actorId % modNum));
 
                 bool needsRepath = true;
-                mCurrentPos.mMoving = false;
+                mCurrentPos.stop();
 
                 if (mCurrentPathIndex < (int32_t)mCurrentPath.size())
                 {
@@ -65,7 +65,7 @@ namespace FAWorld
                         {
                             int32_t direction = Misc::getVecDir(Misc::getVec(mCurrentPos.current(), next));
                             mCurrentPos.setDirection(direction);
-                            mCurrentPos.mMoving = true;
+                            mCurrentPos.start();
                             needsRepath = false;
                             mCurrentPathIndex++;
                         }
