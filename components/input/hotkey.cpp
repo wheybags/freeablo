@@ -1,7 +1,6 @@
 #include <string>
 #include <cctype>
 #include <settings/settings.h>
-#include <misc/boost_python.h>
 #include "hotkey.h"
 #include "keys.h"
 
@@ -137,23 +136,4 @@ namespace Input
         hotkeySettings.set<int>(sname, "alt", int(alt));
         hotkeySettings.save();
     }
-    
-    BOOST_PYTHON_MODULE(hotkey)
-    {
-        boost::python::class_<Hotkey>("Hotkey")
-            .def(boost::python::init<const char *>())
-            .def(boost::python::init<int, bool, bool, bool>())
-            .def("__eq__", &Hotkey::operator==)
-            .def("save", &Hotkey::save)
-            .def_readwrite("key", &Hotkey::key)
-            .def_readwrite("shift", &Hotkey::shift)
-            .def_readwrite("ctrl", &Hotkey::ctrl)
-            .def_readwrite("alt", &Hotkey::alt);
-    }
-    
-    void Hotkey::initializePythonWrapper()
-    {
-        inithotkey();
-    }
-    
 }
