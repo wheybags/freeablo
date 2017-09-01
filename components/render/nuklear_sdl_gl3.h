@@ -9,8 +9,7 @@
 
 #include <fa_nuklear.h>
 
-
-struct nk_gl_device 
+struct nk_gl_device
 {
     nk_buffer cmds;
     nk_draw_null_texture null;
@@ -22,6 +21,13 @@ struct nk_gl_device
     GLint attrib_uv;
     GLint attrib_col;
     GLint uniform_tex;
+    GLint uniform_hcolor_r;
+    GLint uniform_hcolor_g;
+    GLint uniform_hcolor_b;
+    GLint uniform_hcolor_a;
+    GLint uniform_checkerboarded;
+    GLint imgW;
+    GLint imgH;
     GLint uniform_proj;
     nk_handle font_tex;
 };
@@ -32,10 +38,10 @@ class NuklearFrameDump
     public:
         NuklearFrameDump() = delete;
         NuklearFrameDump(const NuklearFrameDump&) = delete;
-        
+
         NuklearFrameDump(nk_gl_device& dev);
         ~NuklearFrameDump();
-    
+
         void fill(nk_context* ctx);
 
         nk_buffer vbuf; // vertices
