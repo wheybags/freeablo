@@ -7963,8 +7963,17 @@ nk_draw_list_push_image(struct nk_draw_list *list, nk_handle texture)
     } else {
         struct nk_draw_command *prev = nk_draw_list_command_last(list);
         if (prev->elem_count == 0)
-            prev->texture = texture;
-        else if (prev->texture.id != texture.id)
+            {
+                prev->texture = texture;
+#ifdef NK_INCLUDE_COMMAND_USERDATA
+                prev->userdata = list->userdata;
+#endif // NK_INCLUDE_COMMAND_USERDATA
+            }
+        else if (prev->texture.id != texture.id
+#ifdef NK_INCLUDE_COMMAND_USERDATA
+              || prev->userdata.id != list->userdata.id
+#endif // NK_INCLUDE_COMMAND_USERDATA
+            )
             nk_draw_list_push_command(list, prev->clip_rect, texture);
     }
 }
@@ -18468,7 +18477,6 @@ nk_insert_window(struct nk_context *ctx, struct nk_window *win,
         ctx->active = ctx->end;
         ctx->end->flags &= ~(nk_flags)NK_WINDOW_ROM;
     } else {
-        ctx->end->flags |= NK_WINDOW_ROM;
         ctx->begin->prev = win;
         win->next = ctx->begin;
         win->prev = 0;
