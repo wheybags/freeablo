@@ -3,8 +3,11 @@
 
 #include <string.h>
 #include <assert.h>
+#include "render.h"
+#include "../../apps/freeablo/fagui/guimanager.h"
+#include <iostream>
 
-struct nk_sdl_vertex 
+struct nk_sdl_vertex
 {
     float position[2];
     float uv[2];
@@ -44,14 +47,40 @@ void nk_sdl_device_create(nk_gl_device& dev)
         "}\n";
     static const GLchar *fragment_shader =
         NK_SHADER_VERSION
-        "precision mediump float;\n"
-        "uniform sampler2D Texture;\n"
-        "in vec2 Frag_UV;\n"
-        "in vec4 Frag_Color;\n"
-        "out vec4 Out_Color;\n"
-        "void main(){\n"
-        "   Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
-        "}\n";
+       R"(precision mediump float;
+        uniform sampler2D Texture;
+        in vec2 Frag_UV;
+        in vec4 Frag_Color;
+        out vec4 Out_Color;
+        uniform float h_color_r;
+        uniform float h_color_g;
+        uniform float h_color_b;
+        uniform float h_color_a;
+        uniform float imgW;
+        uniform float imgH;
+        uniform int checkerboarded;
+        void main(){
+             vec4 c = Frag_Color * texture(Texture, Frag_UV.st);
+             if (c.w == 0. && h_color_a > 0.)
+                {
+                  for (float i= -1.; i <= 1.; i++)
+                    for (float j= -1.; j <= 1.; j++)
+                        {
+                          vec4 n = texture(Texture, vec2 (Frag_UV.st.x + i/imgW, Frag_UV.st.y + j/imgH));
+                          if (n.w > 0. && (n.x > 0. || n.y > 0. || n.z > 0.))
+                            c = vec4 (h_color_r, h_color_g, h_color_b, h_color_a);
+                        }
+                }
+           if (checkerboarded != 0)
+           {
+             float vx = floor (Frag_UV.st.x * imgW);
+             float vy = floor (Frag_UV.st.y * imgH);
+             if (mod (vx + vy, 2.) == 1.)
+               c.w = 0.;
+           }
+           Out_Color = c;
+        }
+       )";
 
     nk_buffer_init_default(&dev.cmds);
     dev.prog = glCreateProgram();
@@ -64,6 +93,13 @@ void nk_sdl_device_create(nk_gl_device& dev)
     glGetShaderiv(dev.vert_shdr, GL_COMPILE_STATUS, &status);
     assert(status == GL_TRUE);
     glGetShaderiv(dev.frag_shdr, GL_COMPILE_STATUS, &status);
+    if (!status)
+    {
+        int length = 1024;
+        std::vector<GLchar> errorLog(length);
+        glGetShaderInfoLog(dev.frag_shdr, length, &length, &errorLog[0]);
+        std::cout << &errorLog[0] << std::endl;
+    }
     assert(status == GL_TRUE);
     glAttachShader(dev.prog, dev.vert_shdr);
     glAttachShader(dev.prog, dev.frag_shdr);
@@ -71,6 +107,13 @@ void nk_sdl_device_create(nk_gl_device& dev)
     glGetProgramiv(dev.prog, GL_LINK_STATUS, &status);
     assert(status == GL_TRUE);
 
+    dev.uniform_hcolor_r = glGetUniformLocation(dev.prog, "h_color_r");
+    dev.uniform_hcolor_g = glGetUniformLocation(dev.prog, "h_color_g");
+    dev.uniform_hcolor_b = glGetUniformLocation(dev.prog, "h_color_b");
+    dev.uniform_hcolor_a = glGetUniformLocation(dev.prog, "h_color_a");
+    dev.uniform_checkerboarded = glGetUniformLocation(dev.prog, "checkerboarded");
+    dev.imgW = glGetUniformLocation(dev.prog, "imgW");
+    dev.imgH = glGetUniformLocation(dev.prog, "imgH");
     dev.uniform_tex = glGetUniformLocation(dev.prog, "Texture");
     dev.uniform_proj = glGetUniformLocation(dev.prog, "ProjMtx");
     dev.attrib_pos = glGetAttribLocation(dev.prog, "Position");
@@ -166,6 +209,7 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, const NuklearFrameDump& 
     // setup program
     glUseProgram(dev.prog);
     glUniform1i(dev.uniform_tex, 0);
+
     glUniformMatrix4fv(dev.uniform_proj, 1, GL_FALSE, &ortho[0][0]);
     {
         // convert from command queue into draw list and draw to screen
@@ -194,14 +238,25 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, const NuklearFrameDump& 
         for (size_t i = 0; i < dump.drawCommands.size(); i++)
         {
             const struct nk_draw_command& cmd = dump.drawCommands[i];
-
             if (!cmd.elem_count) continue;
 
             uint32_t cacheIndex = ((uint32_t*)cmd.texture.ptr)[0];
             uint32_t frameNum = ((uint32_t*)cmd.texture.ptr)[1];
+            auto effect = static_cast<FAGui::EffectType> (cmd.userdata.id);
 
             Render::SpriteGroup* sprite = cache->get(cacheIndex);
-            glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)sprite->operator[](frameNum));
+            auto s = sprite->operator[](frameNum);
+            glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)s);
+            int32_t w, h;
+            Render::spriteSize (s, w, h);
+            int item_hl_color[] = {0xB9, 0xAA, 0x77};
+            glUniform1f(dev.uniform_hcolor_r, item_hl_color[0] / 255.f);
+            glUniform1f(dev.uniform_hcolor_g, item_hl_color[1] / 255.f);
+            glUniform1f(dev.uniform_hcolor_b, item_hl_color[2] / 255.f);
+            glUniform1f(dev.uniform_hcolor_a, effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f);
+            glUniform1i(dev.uniform_checkerboarded, effect == FAGui::EffectType::checkerboarded ? 1 : 0);
+            glUniform1f(dev.imgW, w);
+            glUniform1f(dev.imgH, h);
 
             glScissor((GLint)(cmd.clip_rect.x * scale.x),
                 (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),

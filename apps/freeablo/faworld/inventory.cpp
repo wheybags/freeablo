@@ -111,13 +111,18 @@ namespace FAWorld
                     // case where weapon and shield are equipped
                     auto checkHand = [&](const EquipTarget &hand) -> boost::optional<ExchangeResult>
                         {
-                            if (item.getEquipLoc() == Item::eqTWOHAND && getItemAt (hand).getType() == Item::itWEAPON)
+                            auto &handItem = getItemAt (hand);
+                            auto &otherHandItem = getItemAt(getOtherHand (hand));
+                            if (item.getEquipLoc() == Item::eqTWOHAND)
                                 {
                                     // in this case we need to exchange with weapon and place shield back to inventory if possible
                                     // if it's not possible then this item equipping should also be deemed impossible.
-                                    return ExchangeResult {{hand}, {getOtherHand (hand)}};
+                                    if (otherHandItem.isEmpty ())
+                                        return ExchangeResult {{hand}, {}};
+                                    else if (handItem.getType() == Item::itWEAPON)
+                                        return ExchangeResult {{hand}, {getOtherHand (hand)}};
                                 }
-                            if (getItemAt (hand).getType() == item.getType ())
+                            if (handItem.getType() == item.getType ())
                                 {
                                     // if it's shield, it is replaced with shield, if it's 1h weapon, it's replaced with it
                                     // no matter which slot we clicked
@@ -166,7 +171,6 @@ namespace FAWorld
     {
         auto realTarget = avoidLinks (target);
         auto copy = getItemAt (realTarget);
-        assert (copy.isReal ());
         if (copy.getEquipLoc() == Item::eqTWOHAND)
             {
                 if (target.location == Item::eqLEFTHAND)
@@ -310,6 +314,9 @@ namespace FAWorld
             }
 
         auto &item = mCursorHeld;
+        if (item.getEquipLoc() == Item::eqTWOHAND && placementTarget.location == Item::eqRIGHTHAND)
+            placementTarget = MakeEquipTarget<Item::eqLEFTHAND> ();
+
         if (wearable.count (placementTarget.location) > 0 && !checkStatsRequirement(item))
             return false;
 

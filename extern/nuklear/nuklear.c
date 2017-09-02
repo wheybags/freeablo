@@ -6,6 +6,5 @@
 
 
 #define NK_IMPLEMENTATION
-#define NK_BUTTON_TRIGGER_ON_RELEASE true
 
 #include "fa_nuklear.h"

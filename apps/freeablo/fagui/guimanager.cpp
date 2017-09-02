@@ -66,7 +66,7 @@ namespace FAGui
         nk_style_item tmpBg = ctx->style.window.fixed_background;
         struct nk_vec2 tmpPadding = ctx->style.window.padding;
 
-        ctx->active = ctx->current; // yet another hack for background windows
+        ctx->active = ctx->current;
         ctx->style.window.fixed_background = nk_style_item_image(background);
         ctx->style.window.padding = nk_vec2(0, 0);
 
@@ -121,6 +121,11 @@ namespace FAGui
         struct nk_vec2 center (const struct nk_rect &rect) {
             return {rect.x + rect.w / 2, rect.y + rect.h / 2};
         }
+        bool nk_widget_is_mouse_click_down (nk_context *ctx, nk_buttons buttons, bool down)
+        {
+            return nk_widget_has_mouse_click_down (ctx, buttons, down) && ctx-> input.mouse.buttons[buttons].clicked;
+        }
+
         struct nk_rect align_rect (const struct nk_rect &inner_rect, const struct nk_rect &outer_rect, halign_t halign, valign_t valign) {
             auto c = center (outer_rect);
             auto shift = (outer_rect.w - inner_rect.w) / 2;
@@ -168,6 +173,19 @@ namespace FAGui
             nk_window_close (ctx, panelName (panelType));
     }
 
+    namespace {
+        struct applyEffect {
+          applyEffect (nk_context* ctx, EffectType type) : mCtx (ctx) {
+              nk_set_user_data (mCtx, nk_handle_id (static_cast<int> (type)));
+          }
+           ~applyEffect () {
+               nk_set_user_data (mCtx, nk_handle_id (static_cast<int> (EffectType::none)));
+          }
+
+           nk_context* mCtx;
+        };
+    }
+
     static nk_style_button dummyStyle = [](){
         static nk_style_button buttonStyle;
         buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_hide();
@@ -178,20 +196,24 @@ namespace FAGui
     }();
 
     void GuiManager::item (nk_context* ctx, FAWorld::EquipTarget target,
-                           boost::variant<struct nk_rect, struct nk_vec2> placement)
+                           boost::variant<struct nk_rect, struct nk_vec2> placement, itemHighlightInfo highlight)
     {
         auto &inv = mPlayer.mInventory;
-
-        boost::apply_visitor(Misc::overload([&](const struct nk_rect &rect)
-        {
-            nk_layout_space_push (ctx, rect);
-            nk_button_text_styled (ctx, &dummyStyle, "", 0); // dummy button which gives us ability to process clicks
-            if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
-                inv.itemSlotLeftMouseButtonDown (target);
-        }, [](const struct nk_vec2&){}), placement);
+        using namespace FAWorld;
+        if (!inv.getItemAt(MakeEquipTarget<Item::equipLoc::eqCURSOR> ()).isEmpty())
+            highlight = itemHighlightInfo::notHighlighed;
+        bool checkerboarded = false;
 
         auto &item = inv.getItemAt (target);
-        if (!item.isReal()) return;
+        if (!item.isReal()) {
+        if (item.getEquipLoc() == FAWorld::Item::equipLoc::eqTWOHAND && target.location == FAWorld::Item::equipLoc::eqRIGHTHAND)
+            {
+                checkerboarded = true;
+                highlight = itemHighlightInfo::notHighlighed;
+            }
+        else
+          return;
+        }
 
         auto renderer = FARender::Renderer::get();
 
@@ -201,6 +223,7 @@ namespace FAGui
         auto img = sprite->getNkImage (frame);
         auto w = sprite->getWidth(frame);
         auto h = sprite->getHeight(frame);
+        bool isHighlighted = (highlight == itemHighlightInfo::highlited);
 
         boost::apply_visitor(Misc::overload([&](const struct nk_rect &rect)
         {
@@ -209,9 +232,15 @@ namespace FAGui
         {
              if (!item.isReal()) return;
             nk_layout_space_push(ctx, nk_rect (point.x, point.y, w, h));
+            if (highlight == itemHighlightInfo::highlightIfHover) {
+                nk_button_text_styled (ctx, &dummyStyle, "", 0);
+                if (nk_widget_is_hovered(ctx))
+                   isHighlighted = true;
+            }
         }), placement);
-        if (!item.isReal()) return;
-
+        auto effectType = isHighlighted ? EffectType::highlighted : EffectType::none;
+        effectType = checkerboarded ? EffectType::checkerboarded : effectType;
+        applyEffect effect (ctx, effectType);
         nk_image (ctx, img);
     }
 
@@ -230,8 +259,15 @@ namespace FAGui
                    {MakeEquipTarget<Item::equipLoc::eqRIGHTRING>(), nk_rect(248, 178, 28, 28)}};
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
             {
+               auto &inv = mPlayer.mInventory;
                 for (auto &p : slot_rects)
-                    item (ctx, p.first, p.second);
+                    {
+                      nk_layout_space_push (ctx, p.second);
+                      nk_button_text_styled (ctx, &dummyStyle, "", 0); // dummy button which gives us ability to process clicks
+                      if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                          inv.itemSlotLeftMouseButtonDown (p.first);
+                      item (ctx, p.first, p.second, nk_widget_is_hovered(ctx) ? itemHighlightInfo::highlited : itemHighlightInfo::notHighlighed);
+                    }
             }
             constexpr auto cellSize = 29;
             auto invTopLeft = nk_vec2 (17, 222);
@@ -252,7 +288,7 @@ namespace FAGui
                 for (auto col : boost::counting_range (0, Inventory::inventoryWidth))
                     {
                         auto cell_top_left = nk_vec2 (17 + col * cellSize, 222 + row * cellSize);
-                        item (ctx, MakeEquipTarget<Item::equipLoc::eqINV> (col, row), cell_top_left);
+                        item (ctx, MakeEquipTarget<Item::equipLoc::eqINV> (col, row), cell_top_left, itemHighlightInfo::highlightIfHover);
                     }
             nk_layout_space_end(ctx);
         });
@@ -291,7 +327,7 @@ namespace FAGui
             for (auto num : boost::counting_range (0, Inventory::beltWidth))
                {
                    auto cell_top_left = nk_vec2 (beltTopLeft.x + num * cellSize, beltTopLeft.y);
-                   item (ctx, MakeEquipTarget<Item::equipLoc::eqBELT> (num), cell_top_left);
+                   item (ctx, MakeEquipTarget<Item::equipLoc::eqBELT> (num), cell_top_left, itemHighlightInfo::highlightIfHover);
                }
             nk_layout_space_end(ctx);
     }
@@ -384,11 +420,11 @@ namespace FAGui
         if (paused)
             pauseMenu(ctx, mEngine);
 
-        bottomMenu(ctx);
         inventoryPanel(ctx);
         spellsPanel(ctx);
         questsPanel(ctx);
         characterPanel(ctx);
+        bottomMenu(ctx);
     }
 
     PanelType *GuiManager::panel (PanelPlacement placement) {

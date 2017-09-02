@@ -31,6 +31,12 @@ namespace FAWorld
 
 namespace FAGui
 {
+    enum class EffectType {
+        none = 0,
+        highlighted,
+        checkerboarded,
+    };
+
     // move all this to better place since cursor state is also dependent on spells etc.
     extern std::string cursorPath;
     extern Render::CursorHotspotLocation cursorHotspot;
@@ -51,6 +57,12 @@ namespace FAGui
         right,
     };
 
+    enum class itemHighlightInfo {
+        highlited,
+        notHighlighed,
+        highlightIfHover,
+    };
+
     PanelPlacement panelPlacementByType (PanelType type);
     const char *bgImgPath (PanelType type);
     const char *panelName (PanelType type);
@@ -66,7 +78,7 @@ namespace FAGui
         void togglePanel (PanelType type);
         template <class Function>
         void drawPanel(nk_context* ctx, PanelType panelType, Function op);
-        void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement);
+        void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, itemHighlightInfo highligh);
         void inventoryPanel(nk_context* ctx);
         void characterPanel(nk_context* ctx);
         void questsPanel(nk_context* ctx);
