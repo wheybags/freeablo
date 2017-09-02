@@ -168,7 +168,7 @@ namespace FARender
 
     Render::Tile Renderer::getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getClickedTile(x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.mDist);
+        return Render::getClickedTile(x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.getDist());
     }
 
     void Renderer::waitUntilDone()
@@ -235,14 +235,14 @@ namespace FARender
                         std::get<1>(state->mObjects[i]),
                         position.next().first,
                         position.next().second,
-                        position.mDist
+                        position.getDist()
                     };
 
                     mLevelObjects[x][y].push_back(levelObject);
                 }
 
                 Render::drawLevel(state->level->mLevel, state->tileset.minTops->getCacheIndex(), state->tileset.minBottoms->getCacheIndex(), &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,
-                    state->mPos.next().first, state->mPos.next().second, state->mPos.mDist);
+                    state->mPos.next().first, state->mPos.next().second, state->mPos.getDist());
 
                 Render::drawGui(state->nuklearData, &mSpriteManager);
                 {

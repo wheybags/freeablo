@@ -81,7 +81,7 @@ namespace FAWorld
     void GameLevel::actorMapInsert(Actor* actor)
     {
         mActorMap2D[actor->getPos().current()] = actor;
-        if(actor->getPos().mMoving)
+        if(actor->getPos().isMoving())
             mActorMap2D[actor->getPos().next()] = actor;
     }
 
@@ -89,7 +89,7 @@ namespace FAWorld
     {
         if(mActorMap2D[actor->getPos().current()] == actor)
             mActorMap2D.erase(actor->getPos().current());
-        if(actor->getPos().mMoving && mActorMap2D[actor->getPos().next()] == actor)
+        if(actor->getPos().isMoving() && mActorMap2D[actor->getPos().next()] == actor)
             mActorMap2D.erase(actor->getPos().next());
     }
 

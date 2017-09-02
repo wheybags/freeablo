@@ -184,4 +184,8 @@ namespace Serial
     val = (type)enumValInt;                                         \
 } while(0)
 
+#define FA_SERIAL_TEMPLATE_INSTANTIATE(class) \
+    template Serial::Error::Error class::faSerial<Serial::ReadBitStream>(Serial::ReadBitStream& stream); \
+    template Serial::Error::Error class::faSerial<Serial::WriteBitStream>(Serial::WriteBitStream& stream)
+
 #endif // !FA_BITSTREAM_H

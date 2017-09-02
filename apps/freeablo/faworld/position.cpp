@@ -4,13 +4,13 @@
 
 namespace FAWorld
 {
-    Position::Position() : mDist(0), mDirection(0), mPath(std::vector<std::pair<int32_t, int32_t>>()), mGoal(std::pair<int32_t, int32_t>(0,0)), mIndex(-1), mMoving(false),
+    Position::Position() : mDist(0), mDirection(0), mMoving(false),
         mCurrent(std::make_pair(0, 0)) {}
 
-    Position::Position(int32_t x, int32_t y) : mDist(0), mDirection(0), mPath(std::vector<std::pair<int32_t, int32_t>>()), mGoal(std::pair<int32_t, int32_t>(0, 0)), mIndex(-1), mMoving(false),
+    Position::Position(int32_t x, int32_t y) : mDist(0), mDirection(0), mMoving(false),
         mCurrent(std::make_pair(x, y)) {}
 
-    Position::Position(int32_t x, int32_t y, int32_t direction) : mDist(0), mDirection(direction), mPath(std::vector<std::pair<int32_t, int32_t>>()), mGoal(std::pair<int32_t, int32_t>(0, 0)), mIndex(-1), mMoving(false),
+    Position::Position(int32_t x, int32_t y, int32_t direction) : mDist(0), mDirection(direction), mMoving(false),
         mCurrent(std::make_pair(x, y)) {}
 
     void Position::update()
@@ -21,13 +21,7 @@ namespace FAWorld
 
             if (mDist >= 100)
             {
-                /*if (mPath.size() && mIndex != -1)
-                {
-                    mCurrent = pathNext(true);
-                }
-                else {*/
-                    mCurrent = next();
-                //}
+                mCurrent = next();
                 mDist = 0;
             }
         }
@@ -131,25 +125,17 @@ namespace FAWorld
         return retval;
     }
 
-    std::pair<int32_t, int32_t> Position::pathNext(bool bIncrease)
+    template<class Stream>
+    Serial::Error::Error Position::faSerial(Stream& stream)
     {
-        if (bIncrease && !mMoving)
-            return mCurrent;
+        serialise_int(stream, 0, 100, mDist);
+        serialise_int(stream, 0, 7, mDirection);
+        serialise_bool(stream, mMoving);
+        serialise_int32(stream, mCurrent.first);
+        serialise_int32(stream, mCurrent.second);
 
-        if (mIndex != -1 && mPath.size() && mIndex < (int)(mPath.size()))
-        {
-            auto nextPos = mPath[mIndex];
-            if (bIncrease)
-            {
-                mIndex++;
-            }
-            return nextPos;
-        }
-        else
-        {
-            mIndex = -1;
-            mMoving = false;
-        }
-        return mCurrent;
+        return Serial::Error::Success;
     }
+
+    FA_SERIAL_TEMPLATE_INSTANTIATE(Position);
 }

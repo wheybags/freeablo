@@ -106,15 +106,6 @@ add_library(StateMachine
 target_link_libraries(StateMachine ${Boost_Libraries})
 set_target_properties(StateMachine PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
-add_library(Script
-    script/scriptcontext.h
-    script/scriptcontext.cpp
-    script/commandtranslator.h
-    script/commandtranslator.cpp
-)
-target_link_libraries(Script ${Boost_Libraries}  ${PYTHON_LIBRARIES})
-set_target_properties(Script PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
-
 add_library(Serial
     serial/bitstream.h
     serial/bitstream.inl

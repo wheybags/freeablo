@@ -16,7 +16,6 @@ Find_Package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 Find_Package(OpenGL REQUIRED)
 
-Find_Package(PythonLibs 2 REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Enet REQUIRED)
@@ -41,7 +40,7 @@ else()
 	add_definitions(-DNOMINMAX) # http://stackoverflow.com/questions/5004858/stdmin-gives-error
 endif()
 
-find_package(Boost COMPONENTS filesystem serialization system program_options python date_time regex REQUIRED)
+find_package(Boost COMPONENTS filesystem serialization system program_options date_time regex REQUIRED)
 
 if ( NOT SDL2_FOUND )
     message ( FATAL_ERROR "SDL2 not found!" )
@@ -69,13 +68,14 @@ if(UNIX)
 endif()
 
 if(MSVC)
-    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /W4 /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4100 /wd4611 /wd4458 /wd4459 /wd4127")
+    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /W4 /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4100 /wd4611 /wd4458 /wd4459 /wd4127 /wd4800")
     # 4244 - e.g. 'argument': conversion from 'const long double' to 'double' -- boost headers
     # 4100 - unreferenced formal parameter -- boost headers
     # 4611 - interaction between '_setjmp' and C++ object destruction is non-portable -- savepng.cpp
     # 4458 - shadow for class member -- librocket headers
     # 4459 - declaration of 'self' hides global declaration
     # 4127 - conditional expression is constant, could be useful to check that both branches compilable.
+    # 4800 - forcing value to bool, stupid warning
     if (TREAT_WARNINGS_AS_ERRORS)
         set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /WX")
     endif()
@@ -88,7 +88,6 @@ include_directories ( SYSTEM
     ${SDL2MIXER_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIR}
-    ${PYTHON_INCLUDE_DIR}
     ${Qt5Widgets_INCLUDE_DIRS}
     ${ENET_INCLUDE_DIR}
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
@@ -118,7 +117,6 @@ link_libraries (
     ${SDL2MIXER_LIBRARY}
     ${PNG_LIBRARY}
     ${OPENGL_LIBRARIES}
-    ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     ${Qt5Widgets_LIBRARIES}
     ${ENET_LIBRARY}
@@ -133,7 +131,6 @@ link_libraries (
     Audio
     Settings
     StateMachine
-    Script
     Serial
     nuklear
 )

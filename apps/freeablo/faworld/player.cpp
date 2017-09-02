@@ -4,7 +4,6 @@
 #include "characterstats.h"
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
-#include <boost/python.hpp>
 #include <misc/stringops.h>
 #include <string>
 
@@ -49,25 +48,10 @@ namespace FAWorld
         FAWorld::World::get()->deregisterPlayer(this);
     }
 
-    bool Player::talk(Actor * actor)
+    bool Player::talk(Actor* actor)
     {
-        isTalking = true;
-
-        using namespace boost::python;
-
-        try
-        {
-            object module = import("dialogues");
-            object talkTo = module.attr("talkTo");
-
-            talkTo(actor->getActorId().c_str());
-        }
-        catch(...)
-        {
-                PyErr_Print();
-                PyErr_Clear();
-        }
-
+        UNUSED_PARAM(actor);
+        assert(false);
         return true;
     }
 
