@@ -68,13 +68,14 @@ if(UNIX)
 endif()
 
 if(MSVC)
-    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /W4 /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4100 /wd4611 /wd4458 /wd4459 /wd4127")
+    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /W4 /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4100 /wd4611 /wd4458 /wd4459 /wd4127 /wd4800")
     # 4244 - e.g. 'argument': conversion from 'const long double' to 'double' -- boost headers
     # 4100 - unreferenced formal parameter -- boost headers
     # 4611 - interaction between '_setjmp' and C++ object destruction is non-portable -- savepng.cpp
     # 4458 - shadow for class member -- librocket headers
     # 4459 - declaration of 'self' hides global declaration
     # 4127 - conditional expression is constant, could be useful to check that both branches compilable.
+    # 4800 - forcing value to bool, stupid warning
     if (TREAT_WARNINGS_AS_ERRORS)
         set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /WX")
     endif()
