@@ -16,6 +16,7 @@
 
 #include "spritemanager.h"
 #include "../fagui/guimanager.h"
+#include <numeric>
 
 namespace Render
 {
@@ -30,6 +31,7 @@ namespace FAWorld
 
 namespace FARender
 {
+    class FontInfo;
 
     class Renderer;
     class Tileset
@@ -103,6 +105,10 @@ namespace FARender
             void getWindowDimensions(int32_t& w, int32_t& h);
 
             bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites);
+            nk_user_font *smallFont () const;
+
+        private:
+            std::unique_ptr<FontInfo> generateFont (const std::string& texturePath);
 
         private:
             static Renderer* mRenderer; ///< Singleton instance
@@ -123,6 +129,7 @@ namespace FARender
             Render::NuklearGraphicsContext mNuklearGraphicsData = Render::NuklearGraphicsContext();
 
             std::atomic<std::int64_t> mWidthHeightTmp;
+            std::unique_ptr<FontInfo> m_smallFont;
     };
 }
 

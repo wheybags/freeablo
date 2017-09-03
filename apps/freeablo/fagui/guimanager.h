@@ -57,10 +57,17 @@ namespace FAGui
         right,
     };
 
-    enum class itemHighlightInfo {
+    enum class ItemHighlightInfo {
         highlited,
         notHighlighed,
         highlightIfHover,
+    };
+
+    enum class TextColor {
+        white,
+        blue,
+        golden,
+        red,
     };
 
     PanelPlacement panelPlacementByType (PanelType type);
@@ -78,18 +85,21 @@ namespace FAGui
         void togglePanel (PanelType type);
         template <class Function>
         void drawPanel(nk_context* ctx, PanelType panelType, Function op);
-        void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, itemHighlightInfo highligh);
+        void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highligh);
         void inventoryPanel(nk_context* ctx);
         void characterPanel(nk_context* ctx);
         void questsPanel(nk_context* ctx);
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
         void bottomMenu(nk_context* ctx);
+        void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white);
+        void descriptionPanel(nk_context* ctx);
         PanelType* panel(PanelPlacement placement);
 
     private:
         Engine::EngineMain& mEngine;
         FAWorld::Player& mPlayer;
+        std::string m_currentDescription;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
     };
 }

@@ -196,12 +196,12 @@ namespace FAGui
     }();
 
     void GuiManager::item (nk_context* ctx, FAWorld::EquipTarget target,
-                           boost::variant<struct nk_rect, struct nk_vec2> placement, itemHighlightInfo highlight)
+                           boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highlight)
     {
         auto &inv = mPlayer.mInventory;
         using namespace FAWorld;
         if (!inv.getItemAt(MakeEquipTarget<Item::equipLoc::eqCURSOR> ()).isEmpty())
-            highlight = itemHighlightInfo::notHighlighed;
+            highlight = ItemHighlightInfo::notHighlighed;
         bool checkerboarded = false;
 
         auto &item = inv.getItemAt (target);
@@ -209,7 +209,7 @@ namespace FAGui
         if (item.getEquipLoc() == FAWorld::Item::equipLoc::eqTWOHAND && target.location == FAWorld::Item::equipLoc::eqRIGHTHAND)
             {
                 checkerboarded = true;
-                highlight = itemHighlightInfo::notHighlighed;
+                highlight = ItemHighlightInfo::notHighlighed;
             }
         else
           return;
@@ -223,7 +223,7 @@ namespace FAGui
         auto img = sprite->getNkImage (frame);
         auto w = sprite->getWidth(frame);
         auto h = sprite->getHeight(frame);
-        bool isHighlighted = (highlight == itemHighlightInfo::highlited);
+        bool isHighlighted = (highlight == ItemHighlightInfo::highlited);
 
         boost::apply_visitor(Misc::overload([&](const struct nk_rect &rect)
         {
@@ -232,7 +232,7 @@ namespace FAGui
         {
              if (!item.isReal()) return;
             nk_layout_space_push(ctx, nk_rect (point.x, point.y, w, h));
-            if (highlight == itemHighlightInfo::highlightIfHover) {
+            if (highlight == ItemHighlightInfo::highlightIfHover) {
                 nk_button_text_styled (ctx, &dummyStyle, "", 0);
                 if (nk_widget_is_hovered(ctx))
                    isHighlighted = true;
@@ -266,7 +266,7 @@ namespace FAGui
                       nk_button_text_styled (ctx, &dummyStyle, "", 0); // dummy button which gives us ability to process clicks
                       if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
                           inv.itemSlotLeftMouseButtonDown (p.first);
-                      item (ctx, p.first, p.second, nk_widget_is_hovered(ctx) ? itemHighlightInfo::highlited : itemHighlightInfo::notHighlighed);
+                      item (ctx, p.first, p.second, nk_widget_is_hovered(ctx) ? ItemHighlightInfo::highlited : ItemHighlightInfo::notHighlighed);
                     }
             }
             constexpr auto cellSize = 29;
@@ -288,7 +288,7 @@ namespace FAGui
                 for (auto col : boost::counting_range (0, Inventory::inventoryWidth))
                     {
                         auto cell_top_left = nk_vec2 (17 + col * cellSize, 222 + row * cellSize);
-                        item (ctx, MakeEquipTarget<Item::equipLoc::eqINV> (col, row), cell_top_left, itemHighlightInfo::highlightIfHover);
+                        item (ctx, MakeEquipTarget<Item::equipLoc::eqINV> (col, row), cell_top_left, ItemHighlightInfo::highlightIfHover);
                     }
             nk_layout_space_end(ctx);
         });
@@ -327,7 +327,7 @@ namespace FAGui
             for (auto num : boost::counting_range (0, Inventory::beltWidth))
                {
                    auto cell_top_left = nk_vec2 (beltTopLeft.x + num * cellSize, beltTopLeft.y);
-                   item (ctx, MakeEquipTarget<Item::equipLoc::eqBELT> (num), cell_top_left, itemHighlightInfo::highlightIfHover);
+                   item (ctx, MakeEquipTarget<Item::equipLoc::eqBELT> (num), cell_top_left, ItemHighlightInfo::highlightIfHover);
                }
             nk_layout_space_end(ctx);
     }
@@ -411,8 +411,37 @@ namespace FAGui
                 togglePanel (PanelType::spells);
 
             belt (ctx);
+            descriptionPanel(ctx);
             nk_layout_space_end(ctx);
         });
+    }
+
+    void GuiManager::smallText (nk_context *ctx, const char *text, TextColor color) {
+      FARender::Renderer* renderer = FARender::Renderer::get();
+      nk_style_push_font(ctx, renderer->smallFont());
+      nk_style_push_color (ctx, &ctx->style.text.color, [color]()
+      {
+          // Warning: These colors just placeholder similar colors (except white obviously),
+          // To achieve real Diablo palette coloring of smaltext.cel we need to apply palette shift
+          // which could not be represented as color multiplication so it's bettter to
+          // probably generate separate textures in the time of decoding.
+          switch (color) {
+              case TextColor::white:  return nk_color{255, 255, 255, 255};
+              case TextColor::blue:   return nk_color{170, 170, 255, 255};
+              case TextColor::golden: return nk_color{225, 225, 155, 255};
+              case TextColor::red:    return nk_color{255, 128, 128, 255};
+          }
+          return nk_color{255, 255, 255, 255};
+      }());
+      nk_label(ctx, text, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_MIDDLE);
+      nk_style_pop_color (ctx);
+       nk_style_pop_font(ctx);
+    }
+
+    void GuiManager::descriptionPanel (nk_context *ctx)
+    {
+      nk_layout_space_push(ctx, nk_rect (185, 66, 275, 60));
+      smallText (ctx, "Hello World", TextColor::white);
     }
 
     void GuiManager::update(bool paused, nk_context* ctx)

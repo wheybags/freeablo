@@ -371,6 +371,7 @@ namespace Cel
             } else {
                 // Regular pixels.
                 for (int i = 0; i < chunkSize; i++) {
+
                     Colour color = pal[frame[pos]];
                     decodedFrame.push_back(color);
                     pos++;

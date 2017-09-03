@@ -79,7 +79,7 @@ public:
         std::string out = in;
         return toLower(out);
     }
-    
+
     static bool containsNonPrint(const std::string & s)
     {
         for(uint32_t i=0; i < s.length(); i++)
@@ -147,13 +147,13 @@ public:
     static std::string readAsString(const std::string& path)
     {
         FAIO::FAFileObject f(path);
- 
+
         size_t size = f.FAsize();
         std::string retval;
         retval.resize(size);
- 
+
         f.FAfread(&retval[0], 1, size);
- 
+
         return retval;
     }
 };
