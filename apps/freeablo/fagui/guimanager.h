@@ -70,6 +70,11 @@ namespace FAGui
         red,
     };
 
+    enum class DescriptionType {
+        none,
+        item,
+    };
+
     PanelPlacement panelPlacementByType (PanelType type);
     const char *bgImgPath (PanelType type);
     const char *panelName (PanelType type);
@@ -80,6 +85,8 @@ namespace FAGui
     public:
         GuiManager(Engine::EngineMain& engine, FAWorld::Player &player);
         void update(bool paused, nk_context* ctx);
+        void setDescription (std::string text, TextColor color = TextColor::white);
+        void clearDescription();
 
     private:
         void togglePanel (PanelType type);
@@ -99,7 +106,9 @@ namespace FAGui
     private:
         Engine::EngineMain& mEngine;
         FAWorld::Player& mPlayer;
-        std::string m_currentDescription;
+        std::string mDescription;
+        TextColor mDescriptionColor;
+        DescriptionType mDescriptionType;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
     };
 }

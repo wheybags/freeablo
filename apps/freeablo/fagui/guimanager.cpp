@@ -121,10 +121,18 @@ namespace FAGui
         struct nk_vec2 center (const struct nk_rect &rect) {
             return {rect.x + rect.w / 2, rect.y + rect.h / 2};
         }
+
         bool nk_widget_is_mouse_click_down (nk_context *ctx, nk_buttons buttons, bool down)
         {
-            return nk_widget_has_mouse_click_down (ctx, buttons, down) && ctx-> input.mouse.buttons[buttons].clicked;
+            return nk_widget_has_mouse_click_down (ctx, buttons, down) && ctx->input.mouse.buttons[buttons].clicked;
         }
+
+        bool nk_widget_mouse_left (nk_context *ctx)
+        {
+            return !nk_widget_is_hovered(ctx) && nk_input_is_mouse_prev_hovering_rect(&ctx->input, nk_widget_bounds(ctx));
+        }
+
+
 
         struct nk_rect align_rect (const struct nk_rect &inner_rect, const struct nk_rect &outer_rect, halign_t halign, valign_t valign) {
             auto c = center (outer_rect);
@@ -194,7 +202,6 @@ namespace FAGui
         buttonStyle.padding = {0, 0};
         return buttonStyle;
     }();
-
     void GuiManager::item (nk_context* ctx, FAWorld::EquipTarget target,
                            boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highlight)
     {
@@ -233,13 +240,19 @@ namespace FAGui
              if (!item.isReal()) return;
             nk_layout_space_push(ctx, nk_rect (point.x, point.y, w, h));
             if (highlight == ItemHighlightInfo::highlightIfHover) {
-                nk_button_text_styled (ctx, &dummyStyle, "", 0);
+                nk_button_label_styled (ctx, &dummyStyle, "");
                 if (nk_widget_is_hovered(ctx))
-                   isHighlighted = true;
+                    {
+                       isHighlighted = true;
+                    }
+                else if (nk_widget_mouse_left (ctx))
+                   clearDescription ();
             }
         }), placement);
         auto effectType = isHighlighted ? EffectType::highlighted : EffectType::none;
         effectType = checkerboarded ? EffectType::checkerboarded : effectType;
+        if (isHighlighted)
+            setDescription(item.getName());
         applyEffect effect (ctx, effectType);
         nk_image (ctx, img);
     }
@@ -263,10 +276,16 @@ namespace FAGui
                 for (auto &p : slot_rects)
                     {
                       nk_layout_space_push (ctx, p.second);
-                      nk_button_text_styled (ctx, &dummyStyle, "", 0); // dummy button which gives us ability to process clicks
+                      nk_button_label_styled (ctx, &dummyStyle, "");
                       if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
                           inv.itemSlotLeftMouseButtonDown (p.first);
-                      item (ctx, p.first, p.second, nk_widget_is_hovered(ctx) ? ItemHighlightInfo::highlited : ItemHighlightInfo::notHighlighed);
+                      auto highlight = ItemHighlightInfo::notHighlighed;
+                      if (nk_widget_is_hovered(ctx)) {
+                          highlight = ItemHighlightInfo::highlited;
+                      }
+                      else if (nk_widget_mouse_left (ctx))
+                            clearDescription ();
+                      item (ctx, p.first, p.second, highlight);
                     }
             }
             constexpr auto cellSize = 29;
@@ -276,7 +295,7 @@ namespace FAGui
             nk_layout_space_push(ctx, nk_recta (invTopLeft,
                 {invWidth, invHeight}));
             auto &inv = mPlayer.mInventory;
-            nk_button_text_styled (ctx, &dummyStyle, "", 0);
+            nk_button_label_styled (ctx, &dummyStyle, "");
             if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
                 {
                     inv.inventoryMouseLeftButtonDown(
@@ -316,7 +335,6 @@ namespace FAGui
         nk_layout_space_push(ctx, nk_recta (beltTopLeft,
                 {beltWidth, beltHeight}));
             auto &inv = mPlayer.mInventory;
-            nk_button_text_styled (ctx, &dummyStyle, "", 0);
             if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
                 {
                     inv.beltMouseLeftButtonDown(
@@ -441,7 +459,7 @@ namespace FAGui
     void GuiManager::descriptionPanel (nk_context *ctx)
     {
       nk_layout_space_push(ctx, nk_rect (185, 66, 275, 60));
-      smallText (ctx, "Hello World", TextColor::white);
+      smallText (ctx, mDescription.c_str (), mDescriptionColor);
     }
 
     void GuiManager::update(bool paused, nk_context* ctx)
@@ -454,6 +472,17 @@ namespace FAGui
         questsPanel(ctx);
         characterPanel(ctx);
         bottomMenu(ctx);
+    }
+
+    void GuiManager::setDescription(std::string text, TextColor color)
+    {
+      mDescription = text;
+      mDescriptionColor = color;
+    }
+
+    void GuiManager::clearDescription()
+    {
+        return setDescription("");
     }
 
     PanelType *GuiManager::panel (PanelPlacement placement) {
