@@ -18,6 +18,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     farender/spritemanager.h
     farender/animationplayer.cpp
     farender/animationplayer.h
+    farender/fontinfo.cpp
+    farender/fontinfo.h
 
     faworld/actor/basestate.cpp
     faworld/actor/basestate.h

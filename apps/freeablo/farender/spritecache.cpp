@@ -7,6 +7,7 @@
 
 #include <cel/celfile.h>
 #include <misc/stringops.h>
+#include <numeric>
 
 
 namespace FARender
@@ -53,6 +54,10 @@ namespace FARender
                             tmpHeight[j] = vAnim;
                             tmpWidth[j] = tmpWidth[0];
                         }
+                } else if (pair[0] == "convertToSingleTexture") {
+                  tmpAnimLength = 1;
+                  tmpWidth = {std::accumulate (tmpWidth.begin (), tmpWidth.end (), 0)};
+                  tmpHeight = {*std::max_element (tmpHeight.begin (), tmpHeight.end ())};
                 }
             }
 

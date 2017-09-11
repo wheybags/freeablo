@@ -29,12 +29,12 @@ namespace FARender
                 return animLength;
             }
 
-            int32_t getWidth(int frame = 0)
+            int32_t getWidth(int frame = 0) const
             {
                 return width[frame];
             }
 
-            int32_t getHeight(int frame = 0)
+            int32_t getHeight(int frame = 0) const
             {
                 return height[frame];
             }

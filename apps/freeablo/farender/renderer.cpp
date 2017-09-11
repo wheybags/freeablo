@@ -12,6 +12,9 @@
 #include "../faworld/gamelevel.h"
 #include "../engine/threadmanager.h"
 #include "../fagui/guimanager.h"
+#include <numeric>
+#include <boost/range/irange.hpp>
+#include "fontinfo.h"
 
 namespace FARender
 {
@@ -22,6 +25,21 @@ namespace FARender
     }
 
     Renderer* Renderer::mRenderer = NULL;
+
+    std::unique_ptr <FontInfo> Renderer::generateFont(const std::string& texturePath)
+    {
+        std::unique_ptr<FontInfo> ret (new FontInfo ());
+        auto mergedTex = mSpriteManager.get(texturePath + "&convertToSingleTexture");
+        Cel::CelDecoder cel("ctrlpan/smaltext.cel");
+        ret->initByTexture(cel, mergedTex->getWidth());
+        ret->nkFont.userdata.ptr = ret.get();
+        ret->nkFont.height = mergedTex->getHeight();
+        ret->nkFont.width = &FontInfo::getWidth;
+        mSpriteManager.get(texturePath);
+        ret->nkFont.query = &FontInfo::queryGlyph;
+        ret->nkFont.texture = mergedTex->getNkImage().handle;
+        return ret;
+    }
 
     Renderer* Renderer::get()
     {
@@ -57,6 +75,7 @@ namespace FARender
         ,mWidthHeightTmp(0)
     {
         assert(!mRenderer); // singleton, only one instance
+        m_smallFont = generateFont ("ctrlpan/smaltext.cel");
 
         // Render initialization.
         {
@@ -294,5 +313,10 @@ namespace FARender
     bool Renderer::getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites)
     {
         return mSpriteManager.getAndClearSpritesNeedingPreloading(sprites);
+    }
+
+    nk_user_font* Renderer::smallFont() const
+    {
+        return &m_smallFont->nkFont;
     }
 }
