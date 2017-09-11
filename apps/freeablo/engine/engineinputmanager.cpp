@@ -244,6 +244,9 @@ namespace Engine
             nk_input_motion(mNkCtx, x, y);
         }
 
+        if (!nk_item_is_any_active (mNkCtx))
+            notifyMouseObservers(MOUSE_MOVE, mMousePosition);
+
         mMousePosition = Point(x,y);
     }
 

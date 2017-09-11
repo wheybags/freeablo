@@ -50,7 +50,7 @@ namespace FARender
 
         FAWorld::Position mPos;
 
-        std::vector<std::tuple<FASpriteGroup*, int32_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
+        std::vector<std::tuple<FASpriteGroup*, int32_t, FAWorld::Position, boost::optional<Cel::Colour>> > mObjects; ///< group, index into group, and position
 
         NuklearFrameDump nuklearData;
 
@@ -90,7 +90,7 @@ namespace FARender
             void fillServerSprite(uint32_t index, const std::string& path);
             std::string getPathForIndex(uint32_t index);
 
-            Render::Tile getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos);
+            Render::Tile getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos);
 
             void drawCursor(RenderState *State);
 

@@ -18,11 +18,22 @@ namespace DiabloExe
     class DiabloExe;
 }
 
+namespace FAGui
+{
+    class GuiManager;
+}
+
+namespace Render
+{
+    struct Tile;
+}
+
 namespace FAWorld
 {
     class Actor;
     class Player;
     class GameLevel;
+    class HoverState;
 
     // at 125 ticks/second, it will take about 200 days to reach max value, so int32 will probably do :p
     typedef int64_t Tick;
@@ -36,6 +47,9 @@ namespace FAWorld
 
             static World* get();
             void notify(Engine::KeyboardInputAction action);
+            Render::Tile getTileByScreenPos(Engine::Point screenPos);
+        Actor* targetedActor(Engine::Point screenPosition);
+        void onMouseMove(const Engine::Point& mouse_position);
             void notify(Engine::MouseInputAction action, Engine::Point mousePosition);
             void generateLevels();
             GameLevel* getCurrentLevel();
@@ -67,6 +81,8 @@ namespace FAWorld
             void getAllActors(std::vector<Actor*>& actors);
 
             Tick getCurrentTick();
+            void setGuiManager (FAGui::GuiManager * manager) { mGuiManager = manager; }
+            HoverState &getHoverState ();
 
         private:
             void playLevelMusic(size_t level);
@@ -80,6 +96,7 @@ namespace FAWorld
             Player* mCurrentPlayer;
             std::vector<Player*> mPlayers; ///< This vector is sorted
             const DiabloExe::DiabloExe& mDiabloExe;
+            FAGui::GuiManager *mGuiManager = nullptr;
     };
 }
 

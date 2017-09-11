@@ -7,6 +7,7 @@
 #include <enet/enet.h> // TODO: remove
 
 #include <misc/stdhashes.h>
+#include "hoverstate.h"
 
 namespace FARender
 {
@@ -59,7 +60,7 @@ namespace FAWorld
 
         void addActor(Actor* actor);
 
-        void fillRenderState(FARender::RenderState* state);
+        void fillRenderState(FARender::RenderState* state, Actor* displayedActor);
 
         void removeActor(Actor* actor);
 
@@ -74,6 +75,7 @@ namespace FAWorld
         Actor* getActorById(int32_t id);
 
         void getActors(std::vector<Actor*>& actors);
+        HoverState& getHoverState();
 
     private:
         GameLevel() {}
@@ -85,6 +87,7 @@ namespace FAWorld
         std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
                                                                     ///< Where an actor straddles two squares, they shall be placed in both.
         friend class FARender::Renderer;
+        HoverState mHoverState;
     };
 }
 

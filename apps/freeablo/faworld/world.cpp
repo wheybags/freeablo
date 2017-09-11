@@ -45,19 +45,68 @@ namespace FAWorld
         }
     }
 
+    Render::Tile World::getTileByScreenPos(Engine::Point screenPos) {
+       return FARender::Renderer::get()->getTileByScreenPos(screenPos.x, screenPos.y, getCurrentPlayer()->getPos());
+     }
+
+    Actor *World::targetedActor(Engine::Point screenPosition)
+    {
+       auto actorStayingAt = [this](int32_t x, int32_t y) -> Actor*
+       {
+         if (x >= static_cast<int32_t> (getCurrentLevel ()->width()) || y >= static_cast<int32_t> (getCurrentLevel ()->height()))
+           return nullptr;
+
+         auto actor = getActorAt (x, y);
+         if (actor && !actor->isDead() && actor != getCurrentPlayer()) return actor;
+
+         return nullptr;
+       };
+       auto tile = getTileByScreenPos(screenPosition);
+       // actors could be hovered/targeted by hexagonal pattern consisiting of two tiles on top of each other + halves of two adjacent tiles
+       // the same logic seems to apply ot other tall objects
+       if (auto actor = actorStayingAt(tile.x, tile.y)) return actor;
+       if (auto actor = actorStayingAt(tile.x + 1, tile.y + 1)) return actor;
+       if (tile.half == Render::TileHalf::right)
+         if (auto actor = actorStayingAt(tile.x + 1, tile.y))
+           return actor;
+       if (tile.half == Render::TileHalf::left)
+         if (auto actor = actorStayingAt(tile.x, tile.y + 1))
+           return actor;
+       return nullptr;
+     }
+
+    void World::onMouseMove(const Engine::Point &mousePosition)
+    {
+       auto nothingHovered = [&]
+        {
+          if (getHoverState().setNothingHovered ())
+            return mGuiManager->setDescription ("");
+        };
+
+      if (!mCurrentPlayer->mInventory.getItemAt(MakeEquipTarget<Item::eqCURSOR> ()).isEmpty())
+        return nothingHovered ();
+
+      auto tile = getTileByScreenPos(mousePosition);
+      auto actor = targetedActor (mousePosition);
+      if (actor != nullptr)
+          {
+            if (getHoverState().setActorHovered (actor->getId ()))
+              mGuiManager->setDescription(actor->getName ());
+
+            return;
+          }
+
+       return nothingHovered ();
+    }
+
     void World::notify(Engine::MouseInputAction action, Engine::Point mousePosition)
     {
-        if (action == Engine::MOUSE_RELEASE)
-        {
-            stopPlayerActions();
-        }
-        else if (action == Engine::MOUSE_CLICK)
-        {
-            onMouseClick(mousePosition);
-        }
-        else if (action == Engine::MOUSE_DOWN)
-        {
-            onMouseDown(mousePosition);
+        switch (action) {
+            case Engine::MOUSE_RELEASE: return stopPlayerActions();
+            case Engine::MOUSE_DOWN: return onMouseDown(mousePosition);
+            case Engine::MOUSE_CLICK: return onMouseClick(mousePosition);
+            case Engine::MOUSE_MOVE: return onMouseMove(mousePosition);
+            default: ;
         }
     }
 
@@ -81,6 +130,7 @@ namespace FAWorld
             Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath);
             actor->setCanTalk(true);
             actor->setActorId(npcs[i]->id);
+            actor->setName (npcs[i]->name);
             actor->teleport(townLevel, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
         }
 
@@ -114,6 +164,11 @@ namespace FAWorld
 
         if (netManager && !netManager->isServer())
             netManager->sendLevelChangePacket(level->getLevelIndex());
+    }
+
+    HoverState& World::getHoverState()
+    {
+        return getCurrentLevel()->getHoverState();
     }
 
     void World::playLevelMusic(size_t level)
@@ -226,7 +281,7 @@ namespace FAWorld
     void World::fillRenderState(FARender::RenderState* state)
     {
         if (getCurrentLevel())
-            getCurrentLevel()->fillRenderState(state);
+            getCurrentLevel()->fillRenderState(state, getCurrentPlayer());
     }
 
     Actor* World::getActorById(int32_t id)
@@ -287,7 +342,7 @@ namespace FAWorld
     void World::onMouseClick(Engine::Point mousePosition)
     {
         auto player = getCurrentPlayer();
-        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->getPos());
+        auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
 
         auto level = getCurrentLevel();
         level->activate(clickedTile.x, clickedTile.y);
@@ -296,9 +351,9 @@ namespace FAWorld
     void World::onMouseDown(Engine::Point mousePosition)
     {
         auto player = getCurrentPlayer();
-        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->getPos());
+        auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
         Actor* clickedActor = World::get()->getActorAt(clickedTile.x, clickedTile.y);
-        
+
         if (clickedActor)
             player->actorTarget = clickedActor;
         else

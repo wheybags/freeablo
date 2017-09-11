@@ -77,17 +77,20 @@ namespace FAWorld
             {
                 mPassable = passable;
             }
-            
+
             int32_t getId()
             {
                 return mId;
             }
 
+            std::string getName() const;
+            void setName(const std::string& name);
+
             void teleport(GameLevel* level, Position pos);
             GameLevel* getLevel();
 
             bool attack(Actor * enemy);
-            
+
             virtual bool talk(Actor * actor)
             {
                 UNUSED_PARAM(actor);
@@ -108,10 +111,10 @@ namespace FAWorld
             }
 
         //private: //TODO: fix this
-           
+
 
             virtual void die();
-            
+
             bool canTalk() const;
             bool isDead() const;
             bool isEnemy(Actor* other) const;
@@ -134,7 +137,7 @@ namespace FAWorld
                 auto levelTmp = mMoveHandler.getLevel();
                 serialise_object(stream, mMoveHandler);
 
-                
+
                 if (!stream.isWriting())
                 {
                     // make sure we let the level object know if we've changed levels
@@ -168,7 +171,7 @@ namespace FAWorld
                 if (hasBehaviour)
                 {
                     int32_t classId = -1;
-                    
+
                     if(stream.isWriting())
                         classId = mBehaviour->getClassId();
 
@@ -242,6 +245,7 @@ namespace FAWorld
 
         private:
             std::string mActorId;
+            std::string mName;
             int32_t mId;
             friend class Engine::Server; // TODO: fix
             friend class Engine::Client;

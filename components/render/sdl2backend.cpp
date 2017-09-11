@@ -699,54 +699,37 @@ namespace Render
         SDL_RenderPresent(renderer);
     }
 
-    void drawSprite(GLuint sprite, int32_t x, int32_t y)
+    void drawSprite(GLuint sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor)
     {
-        /*int width, height;
-        SDL_QueryTexture(sprite, NULL, NULL, &width, &height);
-
-        SDL_Rect dest = { int(x), int(y), width, height };
-
-        SDL_RenderCopy(renderer, sprite, NULL, &dest);*/
-
         glUseProgram(shader_programme);
-        GLint loc = glGetUniformLocation(shader_programme, "width");
-        if (loc != -1)
-        {
-            glUniform1f(loc, WIDTH);
-        }
-        loc = glGetUniformLocation(shader_programme, "height");
-        if (loc != -1)
-        {
-            glUniform1f(loc, HEIGHT);
-        }
 
+        auto setUniform = [](const char *name, double value)
+        {
+          GLint loc = glGetUniformLocation(shader_programme, name);
+          if (loc != -1)
+              {
+                  glUniform1f(loc, value);
+              }
+        };
+
+        setUniform ("width", WIDTH);
+        setUniform ("height", HEIGHT);
 
         int32_t w, h;
         spriteSize((Sprite)(intptr_t)sprite, w, h);
 
-        loc = glGetUniformLocation(shader_programme, "imgW");
-        if (loc != -1)
-        {
-            glUniform1f(loc, w);
+        setUniform ("imgW", w);
+        setUniform ("imgH", h);
+        setUniform ("offsetX", x);
+        setUniform ("offsetY", y);
+        if (auto c = highlightColor) {
+          setUniform ("h_color_r", c->r/255.f);
+          setUniform ("h_color_g", c->g/255.f);
+          setUniform ("h_color_b", c->b/255.f);
+          setUniform ("h_color_a", 1.0f);
         }
-        loc = glGetUniformLocation(shader_programme, "imgH");
-        if (loc != -1)
-        {
-            glUniform1f(loc, h);
-        }
-
-        loc = glGetUniformLocation(shader_programme, "offsetX");
-        if (loc != -1)
-        {
-            glUniform1f(loc, x);
-        }
-        loc = glGetUniformLocation(shader_programme, "offsetY");
-        if (loc != -1)
-        {
-            glUniform1f(loc, y);
-        }
-
-
+        else
+          setUniform ("h_color_a", 0.0f);
 
         glBindTexture(GL_TEXTURE_2D, sprite);
 
@@ -765,18 +748,18 @@ namespace Render
         }
     }
 
-    void drawSprite(const Sprite& sprite, int32_t x, int32_t y)
+    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor)
     {
-        drawSprite((GLuint)(intptr_t)sprite, x, y);
+        drawSprite((GLuint)(intptr_t)sprite, x, y, highlightColor);
     }
 
     constexpr auto tileHeight = 32;
     constexpr auto tileWidth = tileHeight * 2;
 
-    void drawAtTile(const Sprite& sprite, const Misc::Point& tileTop, int spriteW, int spriteH)
+    void drawAtTile(const Sprite& sprite, const Misc::Point& tileTop, int spriteW, int spriteH, boost::optional<Cel::Colour> highlightColor = boost::none)
     {
         // centering spright at the center of tile by width and at the bottom of tile by height
-        drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight);
+        drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight, highlightColor);
     }
 
 
@@ -1060,8 +1043,10 @@ namespace Render
     // it obviously uses the fact that ttileWidth = tileHeight * 2
     Tile getTileFromScreenCoords(const Misc::Point& screenPos, const Misc::Point& toScreen)
     {
-        auto point = screenPos - toScreen;
-        return {(2 * point.y + point.x) / tileWidth, (2 * point.y - point.x) / tileWidth}; // divisin by 64 is pretty fast btw
+         auto point = screenPos - toScreen;
+         auto x = std::div (2 * point.y + point.x, tileWidth); // division by 64 is pretty fast btw
+         auto y = std::div (2 * point.y - point.x, tileWidth);
+         return {x.quot, y.quot, x.rem > y.rem ? TileHalf::right : TileHalf::left};
     }
 
     static Misc::Point pointBetween (const Tile &start, const Tile &finish, const size_t &percent) {
@@ -1070,13 +1055,13 @@ namespace Render
       return pointA + (pointB - pointA) * (percent * 0.01);
     }
 
-    void drawMovingSprite(const Sprite& sprite, const Tile& start, const Tile& finish, size_t dist, const Misc::Point& toScreen)
+    static void drawMovingSprite(const Sprite& sprite, const Tile& start, const Tile& finish, size_t dist, const Misc::Point& toScreen, boost::optional<Cel::Colour> highlightColor = boost::none)
     {
         int32_t w, h;
         spriteSize(sprite, w, h);
         auto point = pointBetween (start, finish, dist);
         auto res = point + toScreen;
-        drawAtTile(sprite, res, w, h);
+        drawAtTile(sprite, res, w, h, highlightColor);
     }
 
     constexpr auto bottomMenuSize = 144; // TODO: pass it as a variable
@@ -1086,7 +1071,7 @@ namespace Render
         return Misc::Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - pointBetween(start, finish, dist);
     }
 
-    Tile getClickedTile(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
     {
         auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
         return getTileFromScreenCoords({static_cast<int32_t> (x), static_cast<int32_t> (y)}, toScreen);
@@ -1158,7 +1143,7 @@ namespace Render
         auto &objsForTile = objs[tile.x][tile.y];
         for (auto obj : objsForTile) {
             if (obj.valid)
-                drawMovingSprite((*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen);
+                drawMovingSprite((*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen, obj.hoverColor);
         }
       });
 

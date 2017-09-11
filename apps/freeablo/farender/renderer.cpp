@@ -185,9 +185,9 @@ namespace FARender
         return mSpriteManager.getPathForIndex(index);
     }
 
-    Render::Tile Renderer::getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos)
+    Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getClickedTile(x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.getDist());
+        return Render::getTileByScreenPos(x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.getDist());
     }
 
     void Renderer::waitUntilDone()
@@ -256,7 +256,7 @@ namespace FARender
                         position.next().second,
                         position.getDist()
                     };
-
+                    levelObject.hoverColor = std::get<boost::optional<Cel::Colour>> (state->mObjects[i]);
                     mLevelObjects[x][y].push_back(levelObject);
                 }
 

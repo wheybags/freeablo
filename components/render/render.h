@@ -46,11 +46,17 @@ namespace Render
     extern int32_t WIDTH;
     extern int32_t HEIGHT;
 
+    enum class TileHalf {
+        left,
+        right,
+    };
+
     // Tile mesasured in indexes on tile grid
     struct Tile
     {
       int32_t x;
       int32_t y;
+      TileHalf half;
     };
     /**
      * @brief Render settings for initialization.
@@ -90,7 +96,7 @@ namespace Render
 
     void handleEvents();
 
-    void drawSprite(const Sprite& sprite, int32_t x, int32_t y);
+    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor = boost::none);
 
     struct RocketFATex
     {
@@ -105,7 +111,7 @@ namespace Render
     SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top);
     void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
-    Tile getClickedTile(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
     void clear(int r = 0, int g = 0, int b = 255);
 }

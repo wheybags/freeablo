@@ -109,6 +109,16 @@ namespace FAWorld
         return mFaction.canAttack(other->mFaction);
     }
 
+    std::string Actor::getName() const
+    {
+        return mName;
+    }
+
+    void Actor::setName(const std::string& name)
+    {
+        mName = name;
+    }
+
     void Actor::teleport(GameLevel* level, Position pos)
     {
         auto currentLevel = getLevel();
