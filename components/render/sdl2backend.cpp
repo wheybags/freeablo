@@ -1112,7 +1112,8 @@ namespace Render
         }
     }
 
-    void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist) {
+    void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, LevelObjects
+                   & items, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist) {
       auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
       SpriteGroup* minBottoms = cache->get(minBottomsHandle);
       auto isInvalidTile = [&](const Tile &tile){ return tile.x < 0 || tile.y < 0 || tile.x >= static_cast<int32_t> (level.width()) || tile.y >= static_cast<int32_t> (level.height());};
@@ -1140,8 +1141,17 @@ namespace Render
         if(index < minTops->size())
            drawAtTile ((*minTops)[index], topLeft, tileWidth, staticObjectHeight);
 
+        auto &itemsForTile = items[tile.x][tile.y];
+        for (auto &item : itemsForTile)
+            {
+                int32_t w, h;
+                auto sprite = (*cache->get(item.spriteCacheIndex))[item.spriteFrame];
+                spriteSize(sprite, w, h);
+                drawAtTile(sprite, topLeft, w, h);
+            }
+
         auto &objsForTile = objs[tile.x][tile.y];
-        for (auto obj : objsForTile) {
+        for (auto &obj : objsForTile) {
             if (obj.valid)
                 drawMovingSprite((*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen, obj.hoverColor);
         }

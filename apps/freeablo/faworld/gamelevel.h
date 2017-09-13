@@ -8,6 +8,7 @@
 
 #include <misc/stdhashes.h>
 #include "hoverstate.h"
+#include "item.h"
 
 namespace FARender
 {
@@ -18,7 +19,7 @@ namespace FARender
 namespace FAWorld
 {
     class Actor;
-
+    class ItemMap;
 
     class GameLevelImpl
     {
@@ -70,6 +71,8 @@ namespace FAWorld
         }
 
         std::string serialiseToString();
+        bool isPassableFor(int i, int j, const Actor* actor) const;
+        bool dropItem(std::unique_ptr <Item>&& item, const Actor& actor, int32_t x, int32_t y);
         static GameLevel* loadFromString(const std::string& data);
 
         Actor* getActorById(int32_t id);
@@ -78,16 +81,17 @@ namespace FAWorld
         HoverState& getHoverState();
 
     private:
-        GameLevel() {}
+        GameLevel();
 
         Level::Level mLevel;
-        size_t mLevelIndex;
+        size_t mLevelIndex = 0u;
 
         std::vector<Actor*> mActors;
         std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
                                                                     ///< Where an actor straddles two squares, they shall be placed in both.
         friend class FARender::Renderer;
         HoverState mHoverState;
+        std::unique_ptr<ItemMap> mItemMap;
     };
 }
 

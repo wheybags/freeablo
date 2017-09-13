@@ -42,6 +42,13 @@ namespace FARender
             friend class Renderer;
     };
 
+    struct ObjectToRender {
+       FASpriteGroup* spriteGroup;
+       uint32_t frame;
+       FAWorld::Position position;
+       boost::optional<Cel::Colour> hoverColor;
+     };
+
     class RenderState
     {
         public:
@@ -50,7 +57,8 @@ namespace FARender
 
         FAWorld::Position mPos;
 
-        std::vector<std::tuple<FASpriteGroup*, int32_t, FAWorld::Position, boost::optional<Cel::Colour>> > mObjects; ///< group, index into group, and position
+        std::vector<ObjectToRender> mItems;
+        std::vector<ObjectToRender> mObjects;
 
         NuklearFrameDump nuklearData;
 
@@ -115,6 +123,7 @@ namespace FARender
 
             std::atomic_bool mDone;
             Render::LevelObjects mLevelObjects;
+            Render::LevelObjects mItems;
 
             size_t mNumRenderStates = 15;
             RenderState* mStates;

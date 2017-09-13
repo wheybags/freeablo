@@ -8,7 +8,7 @@ namespace FAWorld
     {
 
         std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> effects;
-        effects = mPlayer->mInventory.getTotalEffects();
+        effects = mPlayer->getInventory ().getTotalEffects();
         printf("%lu -- size of effects\n", effects.size());
         for(std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>>::iterator it= effects.begin();it != effects.end(); ++it)
         {
@@ -317,9 +317,9 @@ namespace FAWorld
         mBlockingChance += mBlockingBonus;
         mBlockingChancePVP += mBlockingBonus;
         mBlockingChanceTrap += mDexterity + mBlockingBonus;
-        mDamageDoneMelee += mPlayer->mInventory.getTotalAttackDamage();
-        mDamageDoneBow   += mPlayer->mInventory.getTotalAttackDamage();
-        mArmourClass += mPlayer->mInventory.getTotalArmourClass();
+        mDamageDoneMelee += mPlayer->getInventory ().getTotalAttackDamage();
+        mDamageDoneBow   += mPlayer->getInventory ().getTotalAttackDamage();
+        mArmourClass += mPlayer->getInventory ().getTotalArmourClass();
         mChanceToHitArrow += 10;
     }
 
@@ -340,9 +340,9 @@ namespace FAWorld
         mBlockingChance += mBlockingBonus;
         mBlockingChancePVP += mBlockingBonus;
         mBlockingChanceTrap += mDexterity + mBlockingBonus;
-        mDamageDoneMelee += mPlayer->mInventory.getTotalAttackDamage();
-        mDamageDoneBow   += mPlayer->mInventory.getTotalAttackDamage();
-        mArmourClass += mPlayer->mInventory.getTotalArmourClass();
+        mDamageDoneMelee += mPlayer->getInventory ().getTotalAttackDamage();
+        mDamageDoneBow   += mPlayer->getInventory ().getTotalAttackDamage();
+        mArmourClass += mPlayer->getInventory ().getTotalArmourClass();
         mChanceToHitArrow += 20;
     }
 
@@ -363,9 +363,9 @@ namespace FAWorld
         mBlockingChance += mBlockingBonus;
         mBlockingChancePVP += mBlockingBonus;
         mBlockingChanceTrap += mDexterity + mBlockingBonus;
-        mDamageDoneMelee += mPlayer->mInventory.getTotalAttackDamage();
-        mDamageDoneBow   += mPlayer->mInventory.getTotalAttackDamage();
-        mArmourClass += mPlayer->mInventory.getTotalArmourClass();
+        mDamageDoneMelee += mPlayer->getInventory ().getTotalAttackDamage();
+        mDamageDoneBow   += mPlayer->getInventory ().getTotalAttackDamage();
+        mArmourClass += mPlayer->getInventory ().getTotalArmourClass();
         mChanceToHitArrow += 10;
     }
 

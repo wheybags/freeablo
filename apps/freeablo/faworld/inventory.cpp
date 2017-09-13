@@ -8,7 +8,10 @@
 #include "actorstats.h"
 #include <algorithm>
 #include <boost/range/irange.hpp>
+#pragma warning(push)
+#pragma warning(disable:4172)  // boost being naughty
 #include <boost/range/any_range.hpp>
+#pragma warning(pop)
 
 namespace FAWorld
 {

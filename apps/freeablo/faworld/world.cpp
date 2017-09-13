@@ -83,7 +83,7 @@ namespace FAWorld
             return mGuiManager->setDescription ("");
         };
 
-      if (!mCurrentPlayer->mInventory.getItemAt(MakeEquipTarget<Item::eqCURSOR> ()).isEmpty())
+      if (!mCurrentPlayer->getInventory ().getItemAt(MakeEquipTarget<Item::eqCURSOR> ()).isEmpty())
         return nothingHovered ();
 
       auto tile = getTileByScreenPos(mousePosition);
@@ -351,7 +351,16 @@ namespace FAWorld
     void World::onMouseDown(Engine::Point mousePosition)
     {
         auto player = getCurrentPlayer();
+        auto &inv = player->getInventory ();
         auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
+
+        auto item = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
+        if (!item.isEmpty()) {
+            if (getCurrentLevel()->dropItem (std::make_unique<Item> (item), *player, clickedTile.x, clickedTile.y))
+                inv.setCursorHeld({});
+            return;
+        }
+
         Actor* clickedActor = World::get()->getActorAt(clickedTile.x, clickedTile.y);
 
         if (clickedActor)

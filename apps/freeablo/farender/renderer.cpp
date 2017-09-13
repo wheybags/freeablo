@@ -203,6 +203,40 @@ namespace FARender
         int64_t int64;
     };
 
+    static void fill(const FAWorld::GameLevel &level, const std::vector<ObjectToRender> src, Render::LevelObjects& dst)
+    {
+        if(dst.width() != level.width() || dst.height() != level.height())
+            dst.resize(level.width(), level.height());
+
+        for(int32_t x = 0; x < dst.width(); x++)
+        {
+            for(int32_t y = 0; y < dst.height(); y++)
+            {
+                dst[x][y].clear ();
+            }
+        }
+
+        for(size_t i = 0; i < src.size(); i++)
+        {
+            auto& object = src[i];
+            auto& position = object.position;
+
+            Render::LevelObject obj;
+            obj.spriteCacheIndex = object.spriteGroup->getCacheIndex();
+            obj.spriteFrame = object.frame;
+            obj.x2 = position.next().first;
+            obj.y2 = position.next().second;
+            obj.dist = position.getDist();
+            obj.hoverColor = object.hoverColor;
+            obj.valid = true;
+
+            size_t x = position.current().first;
+            size_t y = position.current().second;
+            dst[x][y].push_back (std::move (obj));
+        }
+    }
+
+
     bool Renderer::renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload)
     {
         if(mDone)
@@ -241,27 +275,11 @@ namespace FARender
                         }
                     }
                 }
+                fill(*state->level, state->mObjects, mLevelObjects);
+                fill(*state->level, state->mItems, mItems);
 
-                for(size_t i = 0; i < state->mObjects.size(); i++)
-                {
-                    FAWorld::Position & position = std::get<2>(state->mObjects[i]);
-
-                    size_t x = position.current().first;
-                    size_t y = position.current().second;
-                    Render::LevelObject levelObject = {
-                        std::get<0>(state->mObjects[i])->isValid(),
-                        std::get<0>(state->mObjects[i])->getCacheIndex(),
-                        std::get<1>(state->mObjects[i]),
-                        position.next().first,
-                        position.next().second,
-                        position.getDist()
-                    };
-                    levelObject.hoverColor = std::get<boost::optional<Cel::Colour>> (state->mObjects[i]);
-                    mLevelObjects[x][y].push_back(levelObject);
-                }
-
-                Render::drawLevel(state->level->mLevel, state->tileset.minTops->getCacheIndex(), state->tileset.minBottoms->getCacheIndex(), &mSpriteManager, mLevelObjects, state->mPos.current().first, state->mPos.current().second,
-                    state->mPos.next().first, state->mPos.next().second, state->mPos.getDist());
+                Render::drawLevel(state->level->mLevel, state->tileset.minTops->getCacheIndex(), state->tileset.minBottoms->getCacheIndex(), &mSpriteManager, mLevelObjects, mItems, state->mPos.current().first,
+                                  state->mPos.current().second, state->mPos.next().first, state->mPos.next().second, state->mPos.getDist());
 
                 Render::drawGui(state->nuklearData, &mSpriteManager);
                 {

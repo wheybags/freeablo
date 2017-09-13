@@ -109,7 +109,8 @@ namespace Render
     void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h);
 
     SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top);
-    void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, LevelObjects
+                   & items, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
     Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
