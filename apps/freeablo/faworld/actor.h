@@ -42,7 +42,7 @@ namespace FAWorld
     class Actor : public NetObject
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
-
+        void interact(Actor* actor);
         friend class ActorState::BaseState; // TODO: fix
 
         public:
@@ -237,6 +237,7 @@ namespace FAWorld
             }
 
             virtual bool canIAttack(Actor * actor);
+            bool canInteractWith(Actor* actor);
             bool canTalkTo(Actor * actor);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()

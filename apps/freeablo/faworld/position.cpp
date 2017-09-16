@@ -43,6 +43,12 @@ namespace FAWorld
         return mCurrent;
     }
 
+    int32_t Position::manhattanDistance (const Position &other)
+    {
+        return abs (mCurrent.first - other.mCurrent.first) +
+               abs (mCurrent.second - other.mCurrent.second);
+    }
+
     double Position::distanceFrom(Position B)
     {
         int dx = mCurrent.first - B.mCurrent.first;

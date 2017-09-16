@@ -147,8 +147,20 @@ namespace FAWorld
 
         if (actor->isDead())
             return false;
-
         return true;
+    }
+
+    bool Actor::canInteractWith (Actor *actor) {
+      if (actor == nullptr)
+          return false;
+
+      if (this == actor)
+          return false;
+
+      if (actor->isDead())
+          return false;
+
+      return true;
     }
 
     bool Actor::canTalkTo(Actor * actor)
@@ -159,13 +171,13 @@ namespace FAWorld
         if (this == actor)
             return false;
 
-        if (getPos().distanceFrom(actor->getPos()) >= 2)
-            return false;
-
         if (!actor->canTalk())
             return false;
 
         if (isTalking)
+            return false;
+
+        if (isEnemy(actor))
             return false;
 
         return true;

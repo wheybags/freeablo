@@ -193,7 +193,7 @@ int main()
 
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
     bool bArrivable = false;
-    path = pathFind(level, start, goal, bArrivable);
+    path = pathFind(level, start, goal, bArrivable, false);
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
 

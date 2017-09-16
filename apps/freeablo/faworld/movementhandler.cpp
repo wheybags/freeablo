@@ -77,7 +77,7 @@ namespace FAWorld
                     mLastRepathed = World::get()->getCurrentTick();
 
                     bool _;
-                    mCurrentPath = std::move(pathFind(mLevel, mCurrentPos.current(), mDestination, _));
+                    mCurrentPath = std::move(pathFind(mLevel, mCurrentPos.current(), mDestination, _, false));
                     mCurrentPathIndex = 0;
 
                     update(actorId);

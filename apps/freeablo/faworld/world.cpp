@@ -75,34 +75,38 @@ namespace FAWorld
        return nullptr;
      }
 
-    void World::onMouseMove(const Engine::Point &mousePosition)
-    {
-       auto nothingHovered = [&]
+    void World::updateHover(const Engine::Point& mousePosition) {
+        auto nothingHovered = [&]
         {
-          if (getHoverState().setNothingHovered ())
-            return mGuiManager->setDescription ("");
+            if (getHoverState().setNothingHovered ())
+                return mGuiManager->setDescription ("");
         };
 
-      if (!mCurrentPlayer->getInventory ().getItemAt(MakeEquipTarget<Item::eqCURSOR> ()).isEmpty())
-        return nothingHovered ();
+        if (!mCurrentPlayer->getInventory ().getItemAt(MakeEquipTarget<Item::eqCURSOR> ()).isEmpty())
+            return nothingHovered ();
 
-      auto tile = getTileByScreenPos(mousePosition);
-      auto actor = targetedActor (mousePosition);
-      if (actor != nullptr)
-          {
+        auto tile = getTileByScreenPos(mousePosition);
+        auto actor = targetedActor (mousePosition);
+        if (actor != nullptr)
+        {
             if (getHoverState().setActorHovered (actor->getId ()))
-              mGuiManager->setDescription(actor->getName ());
+                mGuiManager->setDescription(actor->getName ());
 
             return;
-          }
+        }
 
-       return nothingHovered ();
+        return nothingHovered ();
+    }
+
+    void World::onMouseMove(const Engine::Point &/*mousePosition*/)
+    {
+        return;
     }
 
     void World::notify(Engine::MouseInputAction action, Engine::Point mousePosition)
     {
         switch (action) {
-            case Engine::MOUSE_RELEASE: return stopPlayerActions();
+            case Engine::MOUSE_RELEASE: return onMouseRelease();
             case Engine::MOUSE_DOWN: return onMouseDown(mousePosition);
             case Engine::MOUSE_CLICK: return onMouseClick(mousePosition);
             case Engine::MOUSE_MOVE: return onMouseMove(mousePosition);
@@ -246,6 +250,16 @@ namespace FAWorld
                 level->update(noclip);
             }
         }
+
+        {
+            if (!nk_item_is_any_active(FARender::Renderer::get()->getNuklearContext())) {
+                // we need update hover not only on mouse move because viewport may move without mouse being moved
+                int x, y;
+                SDL_GetMouseState(&x,&y);
+                updateHover(Engine::Point (x, y));
+            }
+
+        }
     }
 
     Player* World::getCurrentPlayer()
@@ -334,8 +348,10 @@ namespace FAWorld
             player->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
     }
 
-    void World::stopPlayerActions()
+    void World::onMouseRelease()
     {
+        targetLock = false;
+        simpleMove = false;
         getCurrentPlayer()->isTalking = false;
     }
 
@@ -354,19 +370,33 @@ namespace FAWorld
         auto &inv = player->getInventory ();
         auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
 
+        bool targetWasLocked = targetLock; // better solution assign targetLock true at something like SCOPE_EXIT macro
+        targetLock = true;
+
         auto item = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
         if (!item.isEmpty()) {
+            // dropping items performs targetLock to prevent combining it with movement but it can be done while target is locked
             if (getCurrentLevel()->dropItem (std::make_unique<Item> (item), *player, clickedTile.x, clickedTile.y))
                 inv.setCursorHeld({});
             return;
         }
 
-        Actor* clickedActor = World::get()->getActorAt(clickedTile.x, clickedTile.y);
+       if (!targetWasLocked)
+           {
+               Actor* clickedActor = targetedActor (mousePosition);
+               if (clickedActor)
+                   {
+                       player->actorTarget = clickedActor;
+                       return;
+                   }
+           }
 
-        if (clickedActor)
-            player->actorTarget = clickedActor;
-        else
-            player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
+       if (!targetWasLocked || simpleMove)
+          {
+              player->actorTarget = nullptr;
+              player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
+              simpleMove = true;
+          }
     }
 
     Tick World::getTicksInPeriod(float seconds)

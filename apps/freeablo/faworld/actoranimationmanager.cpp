@@ -13,7 +13,8 @@ namespace FAWorld
             mAnimTimeMap[s] = World::getTicksInPeriod(0.5f);
         }
 
-        mAnimTimeMap[AnimState::attack] = FAWorld::World::getTicksInPeriod(1.0f);
+        mAnimTimeMap[AnimState::attack] = World::getTicksInPeriod(1.0f);
+        mAnimTimeMap[AnimState::idle] = World::getTicksInPeriod(1.0f);
     }
 
     AnimState ActorAnimationManager::getCurrentAnimation()

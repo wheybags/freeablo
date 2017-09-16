@@ -21,6 +21,7 @@
 
 namespace FAWorld
 {
-    std::vector<std::pair<int32_t, int32_t>> pathFind(GameLevelImpl* level, std::pair<int32_t, int32_t> start, std::pair<int32_t, int32_t>& goal, bool& bArrivable);
+    std::vector<std::pair<int32_t, int32_t>> pathFind(GameLevelImpl* level, std::pair<int32_t, int32_t> start, std::pair<int32_t, int32_t>& goal, bool& bArrivable, bool
+                                                      findAdjacent);
 }
 #endif /* COMPONENTS_LEVEL_PATHFINDING_H_ */

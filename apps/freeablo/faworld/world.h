@@ -49,6 +49,7 @@ namespace FAWorld
             void notify(Engine::KeyboardInputAction action);
             Render::Tile getTileByScreenPos(Engine::Point screenPos);
         Actor* targetedActor(Engine::Point screenPosition);
+        void updateHover(const Engine::Point& mousePosition);
         void onMouseMove(const Engine::Point& mouse_position);
             void notify(Engine::MouseInputAction action, Engine::Point mousePosition);
             void generateLevels();
@@ -87,7 +88,7 @@ namespace FAWorld
         private:
             void playLevelMusic(size_t level);
             void changeLevel(bool up);
-            void stopPlayerActions();
+            void onMouseRelease();
             void onMouseClick(Engine::Point mousePosition);
             void onMouseDown(Engine::Point mousePosition);
 
@@ -97,6 +98,10 @@ namespace FAWorld
             std::vector<Player*> mPlayers; ///< This vector is sorted
             const DiabloExe::DiabloExe& mDiabloExe;
             FAGui::GuiManager *mGuiManager = nullptr;
+            // Target is locked once we pressed the mouse button. If it's locked then we can't change current action and can retarget
+            // only simple movement.
+            bool targetLock = false;
+            bool simpleMove = false;
     };
 }
 

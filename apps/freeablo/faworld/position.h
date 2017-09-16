@@ -22,6 +22,7 @@ namespace FAWorld
 
             void update(); ///< advances towards mNext
             std::pair<int32_t, int32_t> current() const; ///< where we are coming from
+            int32_t manhattanDistance(const Position& other);
             std::pair<int32_t, int32_t> next() const; ///< where we are going to
 
             int32_t getDirection() const;

@@ -15,19 +15,25 @@ namespace FAWorld
 
             if (actor.actorTarget != nullptr)
             {
-                if (actor.canIAttack(actor.actorTarget))
+                if (actor.canInteractWith(actor.actorTarget))
                 {
-                    int32_t attackDistance = 2;
+                    int32_t interactionDistance = 2;
                     auto currentDest = actor.mMoveHandler.getDestination();
 
                     // move to the actor, if we're not already on our way
-                    if(actor.actorTarget->getPos().distanceFrom(Position(currentDest.first, currentDest.second)) > attackDistance)
-                        actor.mMoveHandler.setDestination(actor.actorTarget->getPos().current()); 
+                    if(actor.actorTarget->getPos().distanceFrom(Position(currentDest.first, currentDest.second)) > interactionDistance)
+                        actor.mMoveHandler.setDestination(actor.actorTarget->getPos().current());
 
                     // and attack them if in range
-                    bool inRange = actor.getPos().distanceFrom(actor.actorTarget->getPos()) <= attackDistance;
-                    if (inRange && actor.attack(actor.actorTarget))
-                        return StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
+                    bool inRange = actor.getPos().manhattanDistance(actor.actorTarget->getPos()) <= interactionDistance;
+                    if (inRange)
+                        {
+                            if (actor.canIAttack(actor.actorTarget) && actor.attack(actor.actorTarget))
+                              return StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
+                            else if (actor.canTalkTo(actor.actorTarget) && actor.talk(actor.actorTarget)) {
+
+                            }
+                        }
                 }
                 else
                 {
