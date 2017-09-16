@@ -12,9 +12,10 @@ namespace FAWorld
         return mDestination;
     }
 
-    void MovementHandler::setDestination(std::pair<int32_t, int32_t> dest)
+    void MovementHandler::setDestination(std::pair<int32_t, int32_t> dest, bool adjacent)
     {
         mDestination = dest;
+        mAdjacent = adjacent;
     }
 
     bool MovementHandler::moving()
@@ -77,7 +78,7 @@ namespace FAWorld
                     mLastRepathed = World::get()->getCurrentTick();
 
                     bool _;
-                    mCurrentPath = std::move(pathFind(mLevel, mCurrentPos.current(), mDestination, _, false));
+                    mCurrentPath = std::move(pathFind(mLevel, mCurrentPos.current(), mDestination, _, mAdjacent));
                     mCurrentPathIndex = 0;
 
                     update(actorId);

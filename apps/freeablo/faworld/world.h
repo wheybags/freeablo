@@ -34,6 +34,7 @@ namespace FAWorld
     class Player;
     class GameLevel;
     class HoverState;
+    class PlacedItemData;
 
     // at 125 ticks/second, it will take about 200 days to reach max value, so int32 will probably do :p
     typedef int64_t Tick;
@@ -48,9 +49,9 @@ namespace FAWorld
             static World* get();
             void notify(Engine::KeyboardInputAction action);
             Render::Tile getTileByScreenPos(Engine::Point screenPos);
-        Actor* targetedActor(Engine::Point screenPosition);
-        void updateHover(const Engine::Point& mousePosition);
-        void onMouseMove(const Engine::Point& mouse_position);
+            Actor* targetedActor(Engine::Point screenPosition);
+            void updateHover(const Engine::Point& mousePosition);
+            void onMouseMove(const Engine::Point& mouse_position);
             void notify(Engine::MouseInputAction action, Engine::Point mousePosition);
             void generateLevels();
             GameLevel* getCurrentLevel();
@@ -90,6 +91,7 @@ namespace FAWorld
             void changeLevel(bool up);
             void onMouseRelease();
             void onMouseClick(Engine::Point mousePosition);
+            PlacedItemData* targetedItem(Engine::Point screenPosition);
             void onMouseDown(Engine::Point mousePosition);
 
             std::map<size_t, GameLevel*> mLevels;

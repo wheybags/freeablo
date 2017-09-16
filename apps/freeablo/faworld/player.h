@@ -16,6 +16,7 @@ namespace FAWorld
             void setSpriteClass(std::string className);
             bool talk(Actor * actor);
             void updateSprites();
+            void pickupItem(PlacedItemData* data) override;
 
             virtual size_t getBasePriority()
             {

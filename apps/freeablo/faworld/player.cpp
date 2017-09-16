@@ -6,6 +6,7 @@
 #include "../engine/threadmanager.h"
 #include <misc/stringops.h>
 #include <string>
+#include "itemmap.h"
 
 namespace FAWorld
 {
@@ -197,5 +198,14 @@ namespace FAWorld
             getAnimationManager().setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "wl").str()));
             getAnimationManager().setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "st").str()));
         }
+    }
+
+    void Player::pickupItem(PlacedItemData* data)
+    {
+      auto &itemMap = getLevel()->getItemMap();
+      auto tile = data->getTile();
+      auto item = itemMap.takeItemAt (data->getTile());
+      if (!getInventory().autoPlaceItem(*item))
+          itemMap.dropItem(std::move (item), *this, tile);
     }
 }

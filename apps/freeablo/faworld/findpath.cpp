@@ -1,5 +1,6 @@
 #include "findpath.h"
 #include <misc/stdhashes.h>
+#include "gamelevel.h"
 
 namespace FAWorld
 {

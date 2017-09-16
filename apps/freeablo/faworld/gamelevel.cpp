@@ -138,6 +138,7 @@ namespace FAWorld
 
     static Cel::Colour friendHoverColor () { return {180, 110, 110, true};}
     static Cel::Colour enemyHoverColor () { return {164, 46, 46, true}; }
+    static Cel::Colour itemHoverColor () { return {185, 170, 119, true}; }
 
     void GameLevel::fillRenderState(FARender::RenderState* state, Actor* displayedActor)
     {
@@ -168,7 +169,9 @@ namespace FAWorld
                    FARender::ObjectToRender o;
                    o.spriteGroup = sf.first;
                    o.frame = sf.second;
-                   o.position = {p.first.first, p.first.second};
+                   o.position = {p.first.x, p.first.y};
+                   if (mHoverState.isItemHovered(p.first))
+                       o.hoverColor = itemHoverColor ();
                    state->mItems.push_back(o);
                }
         }
@@ -214,9 +217,9 @@ namespace FAWorld
        return mLevel[x][y].passable() && (actorAtPos == nullptr || actorAtPos == actor || actorAtPos->isPassable());
      }
 
-    bool GameLevel::dropItem(std::unique_ptr <Item>&& item, const Actor& actor, int32_t x, int32_t y)
+    bool GameLevel::dropItem(std::unique_ptr <Item>&& item, const Actor& actor, const Tile &tile)
     {
-        return mItemMap->dropItem (move (item), actor, x, y);
+        return mItemMap->dropItem (move (item), actor, tile);
     }
 
     GameLevel* GameLevel::loadFromString(const std::string& data)
@@ -254,5 +257,10 @@ namespace FAWorld
 
     GameLevel::GameLevel()
     {
+    }
+
+    ItemMap& GameLevel::getItemMap()
+    {
+        return *mItemMap;
     }
 }

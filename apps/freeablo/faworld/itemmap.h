@@ -23,30 +23,49 @@ namespace FAWorld
     class Actor;
     class GameLevel;
     class Item;
+    class Tile {
+    public:
+        int32_t x;
+        int32_t y;
+        bool operator== (const Tile &other) const {
+            return std::tie (x, y) == std::tie (other.x, other.y);
+        }
+        bool operator< (const Tile &other) const {
+            return std::tie (x, y) < std::tie (other.x, other.y);
+        }
+    };
+
+    class PlacedItemData
+    {
+    public:
+        PlacedItemData(std::unique_ptr <Item> itemArg, const Tile &tile);
+
+        void update();
+        std::pair<FARender::FASpriteGroup*, int32_t> getSpriteFrame();
+        Tile getTile () const { return mTile; }
+        bool onGround ();
+        const Item &item () const { return *mItem; }
+    private:
+        std::unique_ptr<Item> mItem;
+        std::unique_ptr<FARender::AnimationPlayer> mAnimation;
+        Tile mTile;
+        friend class ItemMap;
+    };
 
     class ItemMap
     {
         using self = ItemMap;
 
       public:
-        struct ItemData
-        {
-            std::unique_ptr<Item> item;
-            std::unique_ptr<FARender::AnimationPlayer> mAnimation;
-            ItemData(std::unique_ptr <Item> itemArg);
-
-            void update();
-           std::pair<FARender::FASpriteGroup*, int32_t> getSpriteFrame();
-        };
-
-      public:
         ItemMap(const GameLevel* level);
         ~ItemMap ();
-        bool dropItem(std::unique_ptr<FAWorld::Item>&& item, const Actor& actor, int i, int j);
+        bool dropItem(std::unique_ptr<FAWorld::Item>&& item, const Actor& actor, const Tile& tile);
+        PlacedItemData* getItemAt(const Tile &tile);
+        std::unique_ptr<FAWorld::Item> takeItemAt(const Tile& tile);
 
-      private:
+    private:
         int32_t mWidth, mHeight;
-        std::map<std::pair<int, int>, ItemData> mItems;
+        std::map<Tile, PlacedItemData> mItems;
         const GameLevel* mLevel;
 
         friend class GameLevel;

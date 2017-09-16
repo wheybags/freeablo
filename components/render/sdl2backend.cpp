@@ -1147,7 +1147,7 @@ namespace Render
                 int32_t w, h;
                 auto sprite = (*cache->get(item.spriteCacheIndex))[item.spriteFrame];
                 spriteSize(sprite, w, h);
-                drawAtTile(sprite, topLeft, w, h);
+                drawAtTile(sprite, topLeft, w, h, item.hoverColor);
             }
 
         auto &objsForTile = objs[tile.x][tile.y];

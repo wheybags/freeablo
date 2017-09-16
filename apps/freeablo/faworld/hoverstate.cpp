@@ -2,12 +2,26 @@
 
 namespace FAWorld
 {
+    class Tile;
+
     bool HoverState::applyIfNeeded(const HoverState& newState)
     {
         if(*this == newState)
             return false;
         *this = newState;
         return true;
+    }
+
+    bool HoverState::setItemHovered(const FAWorld::Tile& tile)
+    {
+        HoverState newState(HoverType::item);
+        newState.mItemTile = tile;
+        return applyIfNeeded(newState);
+    }
+
+    bool HoverState::isItemHovered(const FAWorld::Tile& tile) const
+    {
+        return mType == HoverType::item && tile == mItemTile;
     }
 
     bool HoverState::operator==(const HoverState& other) const

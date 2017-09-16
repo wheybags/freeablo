@@ -239,7 +239,10 @@ namespace FAWorld
             {
                 auto& place = getItemAt(MakeEquipTarget <Item::eqBELT>(i));
                 if(place.isEmpty())
+                {
                     place = item;
+                    return true;
+                }
             }
         // auto-equipping weapons
         auto& leftHand = getItemAt(MakeEquipTarget <Item::eqLEFTHAND>());

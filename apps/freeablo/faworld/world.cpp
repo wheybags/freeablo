@@ -15,6 +15,7 @@
 #include "player.h"
 #include "gamelevel.h"
 #include "findpath.h"
+#include "itemmap.h"
 
 namespace FAWorld
 {
@@ -82,8 +83,12 @@ namespace FAWorld
                 return mGuiManager->setDescription ("");
         };
 
-        if (!mCurrentPlayer->getInventory ().getItemAt(MakeEquipTarget<Item::eqCURSOR> ()).isEmpty())
-            return nothingHovered ();
+        auto &cursorItem = mCurrentPlayer->getInventory ().getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
+        if (!cursorItem.isEmpty())
+          {
+              mGuiManager->setDescription(cursorItem.getName());
+              return nothingHovered ();
+          }
 
         auto tile = getTileByScreenPos(mousePosition);
         auto actor = targetedActor (mousePosition);
@@ -93,6 +98,13 @@ namespace FAWorld
                 mGuiManager->setDescription(actor->getName ());
 
             return;
+        }
+        if (auto item = targetedItem (mousePosition))
+        {
+          if (getHoverState().setItemHovered (item->getTile ()))
+            mGuiManager->setDescription(item->item ().getName());
+
+          return;
         }
 
         return nothingHovered ();
@@ -364,6 +376,12 @@ namespace FAWorld
         level->activate(clickedTile.x, clickedTile.y);
     }
 
+    PlacedItemData *World::targetedItem(Engine::Point screenPosition)
+    {
+        auto tile = getTileByScreenPos(screenPosition);
+        return getCurrentLevel ()->getItemMap ().getItemAt ({tile.x, tile.y});
+    }
+
     void World::onMouseDown(Engine::Point mousePosition)
     {
         auto player = getCurrentPlayer();
@@ -373,12 +391,15 @@ namespace FAWorld
         bool targetWasLocked = targetLock; // better solution assign targetLock true at something like SCOPE_EXIT macro
         targetLock = true;
 
-        auto item = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
-        if (!item.isEmpty()) {
+        auto cursorItem = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
+        if (!cursorItem.isEmpty()) {
             // dropping items performs targetLock to prevent combining it with movement but it can be done while target is locked
-            if (getCurrentLevel()->dropItem (std::make_unique<Item> (item), *player, clickedTile.x, clickedTile.y))
+            if (getCurrentLevel()->dropItem (std::make_unique<Item> (cursorItem), *player, {clickedTile.x, clickedTile.y}))
                 inv.setCursorHeld({});
-            return;
+                {
+                    mGuiManager->clearDescription();
+                    return;
+                }
         }
 
        if (!targetWasLocked)
@@ -386,14 +407,19 @@ namespace FAWorld
                Actor* clickedActor = targetedActor (mousePosition);
                if (clickedActor)
                    {
-                       player->actorTarget = clickedActor;
+                       player->setTarget (clickedActor);
                        return;
                    }
+
+              if (auto item = targetedItem(mousePosition)) {
+                player->setTarget (item);
+                return;
+              }
            }
 
        if (!targetWasLocked || simpleMove)
           {
-              player->actorTarget = nullptr;
+              player->setTarget (boost::blank{});
               player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
               simpleMove = true;
           }

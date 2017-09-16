@@ -19,6 +19,8 @@
 #include "movementhandler.h"
 #include "actoranimationmanager.h"
 #include "behaviour.h"
+#include <boost/variant/variant.hpp>
+#include <boost/variant/get.hpp>
 
 
 namespace Engine
@@ -33,6 +35,7 @@ namespace FAWorld
     class ActorStats;
     class Behaviour;
     class World;
+    class PlacedItemData;
 
     namespace ActorState
     {
@@ -58,6 +61,9 @@ namespace FAWorld
             virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}
             virtual void takeDamage(double amount);
             virtual int32_t getCurrentHP();
+            virtual void pickupItem(PlacedItemData* data) {}
+            bool hasTarget() const;
+
             bool isAttacking = false;
             bool isTalking = false;
 
@@ -97,8 +103,10 @@ namespace FAWorld
                 return false;
             }
 
+            void setTarget (boost::variant<boost::blank, Actor*, PlacedItemData *> target);
+
             MovementHandler mMoveHandler;
-            Actor* actorTarget = nullptr;
+            boost::variant<boost::blank, Actor*, PlacedItemData *> mTarget;
 
             Position getPos() const
             {
@@ -190,13 +198,13 @@ namespace FAWorld
                 }
 
                 int32_t targetId = -1;
-                if (stream.isWriting() && actorTarget != nullptr)
-                    targetId = actorTarget->getId();
+                if (stream.isWriting() && mTarget.type() == typeid (Actor *))
+                    targetId = boost::get<Actor *> (mTarget)->getId ();
 
                 serialise_int32(stream, targetId);
 
                 if (!stream.isWriting() && targetId != -1)
-                    actorTarget = World::get()->getActorById(targetId);
+                    setTarget (World::get()->getActorById(targetId));
 
                 return Serial::Error::Success;
             }

@@ -20,6 +20,7 @@ namespace FAWorld
 {
     class Actor;
     class ItemMap;
+    class Tile;
 
     class GameLevelImpl
     {
@@ -72,13 +73,14 @@ namespace FAWorld
 
         std::string serialiseToString();
         bool isPassableFor(int i, int j, const Actor* actor) const;
-        bool dropItem(std::unique_ptr <Item>&& item, const Actor& actor, int32_t x, int32_t y);
+        bool dropItem(std::unique_ptr <Item>&& item, const Actor& actor, const Tile &tile);
         static GameLevel* loadFromString(const std::string& data);
 
         Actor* getActorById(int32_t id);
 
         void getActors(std::vector<Actor*>& actors);
         HoverState& getHoverState();
+        ItemMap &getItemMap();
 
     private:
         GameLevel();

@@ -14,7 +14,7 @@ namespace FAWorld
         MovementHandler(Tick pathRateLimit);
 
         std::pair<int32_t, int32_t> getDestination() const;
-        void setDestination(std::pair<int32_t, int32_t> dest);
+        void setDestination(std::pair<int32_t, int32_t> dest, bool adjacent = false);
 
         bool moving();
         Position getCurrentPosition() const;
@@ -31,6 +31,7 @@ namespace FAWorld
         std::vector<std::pair<int32_t, int32_t>> mCurrentPath;
         Tick mLastRepathed = std::numeric_limits<Tick>::min();
         Tick mPathRateLimit;
+        bool mAdjacent = false;
 
 
         template<class Stream>

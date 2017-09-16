@@ -91,6 +91,11 @@ namespace FAWorld
         return mStats->getCurrentHP();
     }
 
+    bool Actor::hasTarget() const
+    {
+        return mTarget.type() == typeid (boost::blank);
+    }
+
     void Actor::die()
     {
         mMoveHandler.setDestination(getPos().current());
@@ -217,5 +222,10 @@ namespace FAWorld
         if (enemy->getCurrentHP() <= 0)
             enemy->die();
         return true;
+    }
+
+    void Actor::setTarget(boost::variant<boost::blank, Actor*, PlacedItemData*> target)
+    {
+        mTarget = target;
     }
 }

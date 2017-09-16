@@ -7,6 +7,7 @@
 #include "../../faworld/gamelevel.h"
 #include "../../faworld/world.h"
 #include "../../faworld/player.h"
+#include "boost/variant/get.hpp"
 
 #include "netcommon.h"
 #include "netops.h"
@@ -219,10 +220,11 @@ namespace Engine
         ClientPacket data;
         data.destX = player->mMoveHandler.getDestination().first;
         data.destY = player->mMoveHandler.getDestination().second;
-        
+
         data.targetActorId = -1;
-        if (player->actorTarget != nullptr)
-            data.targetActorId = player->actorTarget->getId();
+
+        if (auto actorPtr = boost::get<FAWorld::Actor*> (&player->mTarget))
+            data.targetActorId = (*actorPtr)->getId();
 
         packet.writer.handleObject(data);
 

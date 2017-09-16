@@ -2,6 +2,7 @@
 
 #include "../actor.h"
 #include "attackstate.h"
+#include "../ItemMap.h"
 
 namespace FAWorld
 {
@@ -12,36 +13,58 @@ namespace FAWorld
         boost::optional<StateMachine::StateChange<Actor>> BaseState::update(Actor& actor, bool noclip)
         {
             UNUSED_PARAM(noclip);
+            boost::optional<StateMachine::StateChange<Actor>> ret;
 
-            if (actor.actorTarget != nullptr)
+            auto done = boost::apply_visitor (Misc::overload<bool>([](boost::blank){ return false; },
+                [&actor, &ret](Actor * target)
             {
-                if (actor.canInteractWith(actor.actorTarget))
+                Position pos;
+                if (actor.canInteractWith(target))
                 {
                     int32_t interactionDistance = 2;
                     auto currentDest = actor.mMoveHandler.getDestination();
 
                     // move to the actor, if we're not already on our way
-                    if(actor.actorTarget->getPos().distanceFrom(Position(currentDest.first, currentDest.second)) > interactionDistance)
-                        actor.mMoveHandler.setDestination(actor.actorTarget->getPos().current());
+                    if(target->getPos().distanceFrom(Position(currentDest.first, currentDest.second)) > interactionDistance)
+                        actor.mMoveHandler.setDestination(target->getPos().current());
 
                     // and attack them if in range
-                    bool inRange = actor.getPos().manhattanDistance(actor.actorTarget->getPos()) <= interactionDistance;
+                    bool inRange = actor.getPos().manhattanDistance(target->getPos()) <= interactionDistance;
                     if (inRange)
                         {
-                            if (actor.canIAttack(actor.actorTarget) && actor.attack(actor.actorTarget))
-                              return StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
-                            else if (actor.canTalkTo(actor.actorTarget) && actor.talk(actor.actorTarget)) {
+                            if (actor.canIAttack(target) && actor.attack(target))
+                            {
+                              ret = StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
+                              return true;
+                            }
+                            else if (actor.canTalkTo(target) && actor.talk(target)) {
 
                             }
                         }
                 }
                 else
                 {
-                    actor.actorTarget = nullptr;
+                    actor.setTarget (boost::blank{});
                 }
-            }
+                return true;
+            },
+            [&actor](PlacedItemData *item)
+            {
+              auto tile = item->getTile ();
+              if (actor.getPos().manhattanDistance ({tile.x, tile.y}) <= 2)
+                  {
+                      actor.pickupItem(item);
+                      actor.setTarget (boost::blank{});
+                  }
+              else
+                  actor.mMoveHandler.setDestination({tile.x, tile.y}, true);
+              return true;
+            }), actor.mTarget);
 
             actor.mMoveHandler.update(actor.getId());
+
+            if (done)
+              return ret;
 
             AnimState anim = actor.mAnimation.getCurrentAnimation();
 

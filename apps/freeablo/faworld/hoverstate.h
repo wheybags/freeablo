@@ -1,12 +1,13 @@
 #pragma once
 
-#include "world.h"
+#include "itemmap.h"
 
 namespace FAWorld
 {
     enum class HoverType
      {
         actor,
+        item,
         none,
     };
 
@@ -14,12 +15,15 @@ namespace FAWorld
     {
         HoverType mType = HoverType::none;
         int32_t mActorId = 0;
+        Tile mItemTile;
 
       public:
         HoverState()
         {
         }
         bool applyIfNeeded(const HoverState& newState);
+        bool setItemHovered(const FAWorld::Tile& tile);
+        bool isItemHovered(const FAWorld::Tile& tile) const;
         bool operator==(const HoverState& other) const;
         // for now this function if state was applied and if it was caller should ask guimanager to update status bar
         // later on logic probably will be different.
