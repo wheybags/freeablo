@@ -8,16 +8,14 @@
 
 #include "keys.h"
 
-#include <fa_nuklear.h>
-
 
 namespace Input
 {
-    enum Modifier
+    struct KeyboardModifiers
     {
-        FAMOD_CTRL = 1,
-        FAMOD_ALT = 2,
-        FAMOD_SHIFT = 4
+        bool ctrl = false;
+        bool alt = false;
+        bool shift = false;
     };
 
     class InputManager
@@ -32,7 +30,7 @@ namespace Input
             void processInput(bool paused);
             void poll();
 
-            uint32_t getModifiers();
+            KeyboardModifiers getModifiers();
 
             static InputManager* get();
 
@@ -81,7 +79,7 @@ namespace Input
 
             static InputManager* instance;
 
-            uint32_t mModifiers;
+            KeyboardModifiers mModifiers;
     };
 }
 

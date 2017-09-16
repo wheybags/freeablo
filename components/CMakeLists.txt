@@ -113,3 +113,10 @@ add_library(Serial
     serial/bithackmacros.h
 )
 set_target_properties(Serial PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_library(NuklearMisc
+    nuklearmisc/inputfwd.cpp
+    nuklearmisc/inputfwd.h
+)
+set_target_properties(NuklearMisc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+target_link_libraries(NuklearMisc nuklear)

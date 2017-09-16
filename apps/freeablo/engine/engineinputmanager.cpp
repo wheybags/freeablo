@@ -1,6 +1,7 @@
 #include <functional>
 #include "../farender/renderer.h"
 #include "engineinputmanager.h"
+#include <nuklearmisc/inputfwd.h>
 
 namespace Engine
 {
@@ -48,67 +49,9 @@ namespace Engine
         }
     }
 
-    void handleNuklearKeyboardEvent(nk_context* ctx, bool isDown, Input::Key sym, KeyboardModifiers mods)
-    {
-        int down = isDown;
-
-        if (sym == Input::KEY_RSHIFT || sym == Input::KEY_LSHIFT)
-            nk_input_key(ctx, NK_KEY_SHIFT, down);
-        else if (sym == Input::KEY_DELETE)
-            nk_input_key(ctx, NK_KEY_DEL, down);
-        else if (sym == Input::KEY_RETURN)
-            nk_input_key(ctx, NK_KEY_ENTER, down);
-        else if (sym == Input::KEY_TAB)
-            nk_input_key(ctx, NK_KEY_TAB, down);
-        else if (sym == Input::KEY_BACKSPACE)
-            nk_input_key(ctx, NK_KEY_BACKSPACE, down);
-        else if (sym == Input::KEY_HOME) {
-            nk_input_key(ctx, NK_KEY_TEXT_START, down);
-            nk_input_key(ctx, NK_KEY_SCROLL_START, down);
-        }
-        else if (sym == Input::KEY_END) {
-            nk_input_key(ctx, NK_KEY_TEXT_END, down);
-            nk_input_key(ctx, NK_KEY_SCROLL_END, down);
-        }
-        else if (sym == Input::KEY_PAGEDOWN) {
-            nk_input_key(ctx, NK_KEY_SCROLL_DOWN, down);
-        }
-        else if (sym == Input::KEY_PAGEUP) {
-            nk_input_key(ctx, NK_KEY_SCROLL_UP, down);
-        }
-        else if (sym == Input::KEY_z)
-            nk_input_key(ctx, NK_KEY_TEXT_UNDO, down && mods.ctrl);
-        else if (sym == Input::KEY_r)
-            nk_input_key(ctx, NK_KEY_TEXT_REDO, down && mods.ctrl);
-        else if (sym == Input::KEY_c)
-            nk_input_key(ctx, NK_KEY_COPY, down && mods.ctrl);
-        else if (sym == Input::KEY_v)
-            nk_input_key(ctx, NK_KEY_PASTE, down && mods.ctrl);
-        else if (sym == Input::KEY_x)
-            nk_input_key(ctx, NK_KEY_CUT, down && mods.ctrl);
-        else if (sym == Input::KEY_b)
-            nk_input_key(ctx, NK_KEY_TEXT_LINE_START, down && mods.ctrl);
-        else if (sym == Input::KEY_e)
-            nk_input_key(ctx, NK_KEY_TEXT_LINE_END, down && mods.ctrl);
-        else if (sym == Input::KEY_UP)
-            nk_input_key(ctx, NK_KEY_UP, down);
-        else if (sym == Input::KEY_DOWN)
-            nk_input_key(ctx, NK_KEY_DOWN, down);
-        else if (sym == Input::KEY_LEFT) {
-            if (mods.ctrl)
-                nk_input_key(ctx, NK_KEY_TEXT_WORD_LEFT, down);
-            else nk_input_key(ctx, NK_KEY_LEFT, down);
-        }
-        else if (sym == Input::KEY_RIGHT) {
-            if (mods.ctrl)
-                nk_input_key(ctx, NK_KEY_TEXT_WORD_RIGHT, down);
-            else nk_input_key(ctx, NK_KEY_RIGHT, down);
-        }
-    }
-
     void EngineInputManager::keyPress(Input::Key key)
     {
-        handleNuklearKeyboardEvent(mNkCtx, true, key, mKbMods);
+        NuklearMisc::handleNuklearKeyboardEvent(mNkCtx, true, key, mKbMods);
 
         switch(key)
         {
@@ -132,19 +75,11 @@ namespace Engine
         hotkey.key = key;
         Input::InputManager& input = *Input::InputManager::get();
 
-        uint32_t modifiers = input.getModifiers();
+        Input::KeyboardModifiers modifiers = input.getModifiers();
 
-        switch(modifiers)
-        {
-            case 0: break;
-            case 1: hotkey.ctrl = true; break;
-            case 2: hotkey.alt = true; break;
-            case 3: hotkey.ctrl = true; hotkey.alt = true; break;
-            case 4: hotkey.shift = true; break;
-            case 5: hotkey.ctrl = true; hotkey.shift = true; break;
-            case 6: hotkey.alt = true; hotkey.shift = true; break;
-            case 7: hotkey.ctrl = true; hotkey.alt = true; hotkey.shift = true; break;
-        }
+        hotkey.ctrl = modifiers.ctrl;
+        hotkey.shift = modifiers.shift;
+        hotkey.alt = modifiers.alt;
 
         for(int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
         {
@@ -157,14 +92,12 @@ namespace Engine
 
     void EngineInputManager::keyRelease(Input::Key key)
     {
-        handleNuklearKeyboardEvent(mNkCtx, false, key, mKbMods);
+        NuklearMisc::handleNuklearKeyboardEvent(mNkCtx, false, key, mKbMods);
     }
 
     void EngineInputManager::textInput(std::string inp)
     {
-        nk_glyph glyph;
-        memcpy(glyph, inp.c_str(), NK_UTF_SIZE);
-        nk_input_glyph(mNkCtx, glyph);
+        NuklearMisc::handleNuklearTextInputEvent(mNkCtx, inp);
     }
 
     void EngineInputManager::setHotkey(KeyboardInputAction action, Input::Hotkey hotkey)
@@ -189,29 +122,11 @@ namespace Engine
         return hotkeys;
     }
 
-    void handleNuklearMouseEvent(nk_context* ctx, int32_t x, int32_t y, Input::Key key, bool isDown, bool isDoubleClick)
-    {
-        int down = isDown;
 
-        if (key == Input::KEY_LEFT_MOUSE)
-        {
-            if (isDoubleClick)
-                nk_input_button(ctx, NK_BUTTON_DOUBLE, x, y, down);
-            nk_input_button(ctx, NK_BUTTON_LEFT, x, y, down);
-        }
-        else if (key == Input::KEY_MIDDLE_MOUSE)
-        {
-            nk_input_button(ctx, NK_BUTTON_MIDDLE, x, y, down);
-        }
-        else if (key == Input::KEY_RIGHT_MOUSE)
-        {
-            nk_input_button(ctx, NK_BUTTON_RIGHT, x, y, down);
-        }
-    }
 
     void EngineInputManager::mouseClick(int32_t x, int32_t y, Input::Key key, bool isDoubleClick)
     {
-        handleNuklearMouseEvent(mNkCtx, x, y, key, true, isDoubleClick);
+        NuklearMisc::handleNuklearMouseEvent(mNkCtx, x, y, key, true, isDoubleClick);
 
         if(key == Input::KEY_LEFT_MOUSE)
         {
@@ -223,7 +138,7 @@ namespace Engine
 
     void EngineInputManager::mouseRelease(int32_t x, int32_t y, Input::Key key)
     {
-        handleNuklearMouseEvent(mNkCtx, x, y, key, false, false);
+        NuklearMisc::handleNuklearMouseEvent(mNkCtx, x, y, key, false, false);
 
         if(key == Input::KEY_LEFT_MOUSE)
             mMouseDown = false;
@@ -234,15 +149,7 @@ namespace Engine
 
     void EngineInputManager::mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel)
     {
-        if (mNkCtx->input.mouse.grabbed)
-        {
-            int mouse_prev_x = (int)mNkCtx->input.mouse.prev.x, mouse_prev_y = (int)mNkCtx->input.mouse.prev.y;
-            nk_input_motion(mNkCtx, mouse_prev_x + xrel, mouse_prev_y + yrel);
-        }
-        else
-        {
-            nk_input_motion(mNkCtx, x, y);
-        }
+        NuklearMisc::handleNuklearMouseMoveEvent(mNkCtx, x, y, xrel, yrel);
 
         mMousePosition = Point(x,y);
     }
@@ -281,22 +188,7 @@ namespace Engine
 
     void EngineInputManager::update(bool paused)
     {
-
-        uint32_t modifiers = mInput.getModifiers();
-
-        mKbMods = KeyboardModifiers();
-
-        switch (modifiers)
-        {
-            case 0: break;
-            case 1: mKbMods.ctrl = true; break;
-            case 2: mKbMods.alt = true; break;
-            case 3: mKbMods.ctrl = true; mKbMods.alt = true; break;
-            case 4: mKbMods.shift = true; break;
-            case 5: mKbMods.ctrl = true; mKbMods.shift = true; break;
-            case 6: mKbMods.alt = true; mKbMods.shift = true; break;
-            case 7: mKbMods.ctrl = true; mKbMods.alt = true; mKbMods.shift = true; break;
-        }
+        mKbMods = mInput.getModifiers();
 
         nk_input_begin(mNkCtx);
         mInput.processInput(paused);

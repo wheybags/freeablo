@@ -7,10 +7,6 @@
 #include <iostream>
 
 
-namespace Render
-{
-    extern struct nk_context* ctx;
-}
 
 namespace Input
 {
@@ -31,7 +27,7 @@ namespace Input
         std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
         std::function<void(std::string)> textInput):
             mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
-            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)), mTextInput(getFunc(textInput)), mModifiers(0)
+            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)), mTextInput(getFunc(textInput))
         {
             assert(!instance);
             instance = this;
@@ -278,24 +274,23 @@ namespace Input
             while(!mQueue.push(e)) {} // push, or wait until buffer not full, then push
         }
 
-        uint32_t mods = 0;
-
         SDL_Keymod sdlMods = SDL_GetModState();
 
+        KeyboardModifiers mods;
 
         if(sdlMods & KMOD_CTRL)
-            mods |= FAMOD_CTRL;
+            mods.ctrl = true;
 
         if(sdlMods & KMOD_SHIFT)
-            mods |= FAMOD_SHIFT;
+            mods.shift = true;
 
         if(sdlMods & KMOD_ALT)
-            mods |= FAMOD_ALT;
+            mods.alt = true;
 
         mModifiers = mods;
     }
     
-    uint32_t InputManager::getModifiers()
+    KeyboardModifiers InputManager::getModifiers()
     {
         return mModifiers;
     }
