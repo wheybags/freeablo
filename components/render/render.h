@@ -15,8 +15,8 @@
 
 #include "misc.h"
 
-#include <SDL.h>
-
+struct SDL_Cursor;
+struct SDL_Surface;
 class LevelObjects;
 class SpriteGroup;
 

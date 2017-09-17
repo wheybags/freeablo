@@ -104,6 +104,7 @@ namespace FARender
 
             bool renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload); ///< To be called only by Engine::ThreadManager
             void cleanup(); ///< To be called only by Engine::ThreadManager
+            Misc::Point cursorSize () const { return mCursorSize; }
 
             nk_context* getNuklearContext()
             {
@@ -129,6 +130,7 @@ namespace FARender
             RenderState* mStates;
 
             SpriteManager mSpriteManager;
+            Misc::Point mCursorSize;
 
             volatile bool mAlreadyExited = false;
             std::mutex mDoneMutex;

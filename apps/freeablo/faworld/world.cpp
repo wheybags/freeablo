@@ -46,11 +46,11 @@ namespace FAWorld
         }
     }
 
-    Render::Tile World::getTileByScreenPos(Engine::Point screenPos) {
+    Render::Tile World::getTileByScreenPos(Misc::Point screenPos) {
        return FARender::Renderer::get()->getTileByScreenPos(screenPos.x, screenPos.y, getCurrentPlayer()->getPos());
      }
 
-    Actor *World::targetedActor(Engine::Point screenPosition)
+    Actor *World::targetedActor(Misc::Point screenPosition)
     {
        auto actorStayingAt = [this](int32_t x, int32_t y) -> Actor*
        {
@@ -76,7 +76,7 @@ namespace FAWorld
        return nullptr;
      }
 
-    void World::updateHover(const Engine::Point& mousePosition) {
+    void World::updateHover(const Misc::Point& mousePosition) {
         auto nothingHovered = [&]
         {
             if (getHoverState().setNothingHovered ())
@@ -110,12 +110,12 @@ namespace FAWorld
         return nothingHovered ();
     }
 
-    void World::onMouseMove(const Engine::Point &/*mousePosition*/)
+    void World::onMouseMove(const Misc::Point &/*mousePosition*/)
     {
         return;
     }
 
-    void World::notify(Engine::MouseInputAction action, Engine::Point mousePosition)
+    void World::notify(Engine::MouseInputAction action, Misc::Point mousePosition)
     {
         switch (action) {
             case Engine::MOUSE_RELEASE: return onMouseRelease();
@@ -268,7 +268,7 @@ namespace FAWorld
                 // we need update hover not only on mouse move because viewport may move without mouse being moved
                 int x, y;
                 SDL_GetMouseState(&x,&y);
-                updateHover(Engine::Point (x, y));
+                updateHover(Misc::Point {x, y});
             }
             else if (getHoverState().setNothingHovered ())
               return mGuiManager->setDescription ("");
@@ -368,7 +368,7 @@ namespace FAWorld
         getCurrentPlayer()->isTalking = false;
     }
 
-    void World::onMouseClick(Engine::Point mousePosition)
+    void World::onMouseClick(Misc::Point mousePosition)
     {
         auto player = getCurrentPlayer();
         auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
@@ -377,13 +377,13 @@ namespace FAWorld
         level->activate(clickedTile.x, clickedTile.y);
     }
 
-    PlacedItemData *World::targetedItem(Engine::Point screenPosition)
+    PlacedItemData *World::targetedItem(Misc::Point screenPosition)
     {
         auto tile = getTileByScreenPos(screenPosition);
         return getCurrentLevel ()->getItemMap ().getItemAt ({tile.x, tile.y});
     }
 
-    void World::onMouseDown(Engine::Point mousePosition)
+    void World::onMouseDown(Misc::Point mousePosition)
     {
         auto player = getCurrentPlayer();
         auto &inv = player->getInventory ();
@@ -396,8 +396,17 @@ namespace FAWorld
         {
             auto cursorItem = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
             if (!cursorItem.isEmpty()) {
-                // dropping items performs targetLock to prevent combining it with movement but it can be done while target is locked
-                if (player->dropItem ({clickedTile.x, clickedTile.y}))
+                // What happens here is not actually true to original game but
+                // It's a fair way to emulate it. Current data is that in all instances except interaction with inventory
+                // cursor has topleft as it's hotspot even when cursor is item. Other 2 instances actually:
+                // - dropping items
+                // - moving cursor outside the screen / window
+                // This shift by half cursor size emulates behavior during dropping items. And the only erroneous
+                // part of behavior now can be spotted by moving cursor outside the window which is not so significant.
+                // To emulate it totally true to original game we need to heavily hack interaction with inventory
+                // which is probably possible but inconvenient due to the fact that we interacting with librocket.
+                auto clickedTileShifted = getTileByScreenPos(mousePosition - FARender::Renderer::get()->cursorSize() / 2);
+                if (player->dropItem ({clickedTileShifted.x, clickedTileShifted.y}))
                     {
                         mGuiManager->clearDescription();
                     }

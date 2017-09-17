@@ -48,11 +48,11 @@ namespace FAWorld
 
             static World* get();
             void notify(Engine::KeyboardInputAction action);
-            Render::Tile getTileByScreenPos(Engine::Point screenPos);
-            Actor* targetedActor(Engine::Point screenPosition);
-            void updateHover(const Engine::Point& mousePosition);
-            void onMouseMove(const Engine::Point& mouse_position);
-            void notify(Engine::MouseInputAction action, Engine::Point mousePosition);
+            Render::Tile getTileByScreenPos(Misc::Point screenPos);
+            Actor* targetedActor(Misc::Point screenPosition);
+            void updateHover(const Misc::Point& mousePosition);
+            void onMouseMove(const Misc::Point& mouse_position);
+            void notify(Engine::MouseInputAction action, Misc::Point mousePosition);
             void generateLevels();
             GameLevel* getCurrentLevel();
             size_t getCurrentLevelIndex();
@@ -90,9 +90,9 @@ namespace FAWorld
             void playLevelMusic(size_t level);
             void changeLevel(bool up);
             void onMouseRelease();
-            void onMouseClick(Engine::Point mousePosition);
-            PlacedItemData* targetedItem(Engine::Point screenPosition);
-            void onMouseDown(Engine::Point mousePosition);
+            void onMouseClick(Misc::Point mousePosition);
+            PlacedItemData* targetedItem(Misc::Point screenPosition);
+            void onMouseDown(Misc::Point mousePosition);
 
             std::map<size_t, GameLevel*> mLevels;
             Tick mTicksPassed = 0;

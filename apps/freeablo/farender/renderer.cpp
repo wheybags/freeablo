@@ -304,6 +304,7 @@ namespace FARender
         if(!State->mCursorEmpty)
         {
             Render::Sprite sprite = mSpriteManager.get(State->mCursorSpriteGroup->getCacheIndex())->operator [](State->mCursorFrame);
+            Render::spriteSize(sprite, mCursorSize.x, mCursorSize.y);
             Render::drawCursor(sprite, State->mCursorHotspot);
         }
         else

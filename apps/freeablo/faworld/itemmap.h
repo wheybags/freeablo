@@ -3,14 +3,15 @@
 
 #include <vector>
 #include <memory>
+#include <map>
 
 #include "misc/helper2d.h"
 #include <boost/optional/optional.hpp>
-#include "../farender/spritecache.h"
 
 namespace FARender
 {
     class AnimationPlayer;
+    class FASpriteGroup;
 }
 
 namespace Render

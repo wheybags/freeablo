@@ -24,6 +24,7 @@ namespace Misc
       Point operator+ (const Point &v) const { return {x + v.x, y + v.y}; }
       Point operator- (const Point &v) const { return {x - v.x, y - v.y}; }
       Point operator* (double c) const { return {static_cast<int32_t> (x * c), static_cast<int32_t> (y * c)}; }
+      Point operator/ (int c) const { return {x / c, y / c}; }
     };
 
     namespace detail
