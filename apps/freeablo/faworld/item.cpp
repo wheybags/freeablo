@@ -262,7 +262,12 @@ FARender::FASpriteGroup* Item::getFlipSpriteGroup()
     return FARender::Renderer::get()->loadImage (getFlipAnimationPath());
 }
 
-uint32_t Item::getActiveTrigger() const
+bool Item::isBeltEquippable() const
+{
+    return mSizeX == 1 && mSizeY == 1 && mUseOnce && mCode != icGold;
+}
+
+    uint32_t Item::getActiveTrigger() const
 {
     return mActiveTrigger;
 }

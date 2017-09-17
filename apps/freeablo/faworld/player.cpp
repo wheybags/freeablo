@@ -200,12 +200,25 @@ namespace FAWorld
         }
     }
 
-    void Player::pickupItem(PlacedItemData* data)
+    void Player::pickupItem(ItemTarget target)
     {
       auto &itemMap = getLevel()->getItemMap();
-      auto tile = data->getTile();
-      auto item = itemMap.takeItemAt (data->getTile());
-      if (!getInventory().autoPlaceItem(*item))
-          itemMap.dropItem(std::move (item), *this, tile);
+      auto tile = target.item->getTile();
+      auto item = itemMap.takeItemAt (tile);
+      auto dropBack = [&](){ itemMap.dropItem(std::move (item), *this, tile); };
+      switch (target.action)
+      {
+      case ItemTarget::ActionType::autoEquip:
+          if (!getInventory().autoPlaceItem(*item))
+            dropBack ();
+          break;
+      case ItemTarget::ActionType::toCursor:
+          auto cursorItem = getInventory ().getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
+          if (!cursorItem.isEmpty ())
+              return dropBack ();
+
+          getInventory ().setCursorHeld(*item);
+          break;
+      }
     }
 }

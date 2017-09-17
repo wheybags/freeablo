@@ -125,6 +125,7 @@ public:
     std::string getFlipAnimationPath() const;
     std::string getFlipSoundPath() const;
     FARender::FASpriteGroup *getFlipSpriteGroup();
+    bool isBeltEquippable() const;
 
 
     bool mIsReal;

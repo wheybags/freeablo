@@ -494,6 +494,16 @@ namespace FAGui
         return nullptr;
     }
 
+    const PanelType* GuiManager::panel(PanelPlacement placement) const
+    {
+        return const_cast<self *> (this)->panel (placement);
+    }
+
+    bool GuiManager::isInventoryShown() const
+    {
+        return *panel (panelPlacementByType (PanelType::inventory)) == PanelType::inventory;
+    }
+
     void GuiManager::togglePanel(PanelType type)
     {
         auto &curPanel = *panel (panelPlacementByType (type));

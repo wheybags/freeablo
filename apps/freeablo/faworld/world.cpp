@@ -391,15 +391,18 @@ namespace FAWorld
         bool targetWasLocked = targetLock; // better solution assign targetLock true at something like SCOPE_EXIT macro
         targetLock = true;
 
-        auto cursorItem = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
-        if (!cursorItem.isEmpty()) {
-            // dropping items performs targetLock to prevent combining it with movement but it can be done while target is locked
-            if (getCurrentLevel()->dropItem (std::make_unique<Item> (cursorItem), *player, {clickedTile.x, clickedTile.y}))
-                inv.setCursorHeld({});
-                {
-                    mGuiManager->clearDescription();
-                    return;
-                }
+        if (!targetWasLocked)
+        {
+            auto cursorItem = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
+            if (!cursorItem.isEmpty()) {
+                // dropping items performs targetLock to prevent combining it with movement but it can be done while target is locked
+                if (getCurrentLevel()->dropItem (std::make_unique<Item> (cursorItem), *player, {clickedTile.x, clickedTile.y}))
+                    inv.setCursorHeld({});
+                    {
+                        mGuiManager->clearDescription();
+                        return;
+                    }
+            }
         }
 
        if (!targetWasLocked)
@@ -412,7 +415,9 @@ namespace FAWorld
                    }
 
               if (auto item = targetedItem(mousePosition)) {
-                player->setTarget (item);
+                player->setTarget (ItemTarget {mGuiManager->isInventoryShown() ?
+                    ItemTarget::ActionType::toCursor :
+                    ItemTarget::ActionType::autoEquip, item});
                 return;
               }
            }

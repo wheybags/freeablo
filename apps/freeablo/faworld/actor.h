@@ -35,7 +35,7 @@ namespace FAWorld
     class ActorStats;
     class Behaviour;
     class World;
-    class PlacedItemData;
+    class ItemTarget;
 
     namespace ActorState
     {
@@ -61,7 +61,7 @@ namespace FAWorld
             virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}
             virtual void takeDamage(double amount);
             virtual int32_t getCurrentHP();
-            virtual void pickupItem(PlacedItemData* data) {}
+            virtual void pickupItem(ItemTarget target) {}
             bool hasTarget() const;
 
             bool isAttacking = false;
@@ -103,10 +103,11 @@ namespace FAWorld
                 return false;
             }
 
-            void setTarget (boost::variant<boost::blank, Actor*, PlacedItemData *> target);
+            using TargetType = boost::variant<boost::blank, Actor*, ItemTarget>;
+            void setTarget (TargetType target);
 
             MovementHandler mMoveHandler;
-            boost::variant<boost::blank, Actor*, PlacedItemData *> mTarget;
+            TargetType mTarget;
 
             Position getPos() const
             {

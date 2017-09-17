@@ -82,11 +82,13 @@ namespace FAGui
     class ScrollBox;
     class GuiManager
     {
+        using self = GuiManager;
     public:
         GuiManager(Engine::EngineMain& engine, FAWorld::Player &player);
         void update(bool paused, nk_context* ctx);
         void setDescription (std::string text, TextColor color = TextColor::white);
         void clearDescription();
+        bool isInventoryShown () const;
 
     private:
         void togglePanel (PanelType type);
@@ -102,6 +104,7 @@ namespace FAGui
         void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white);
         void descriptionPanel(nk_context* ctx);
         PanelType* panel(PanelPlacement placement);
+        const PanelType* panel(PanelPlacement placement) const;
 
     private:
         Engine::EngineMain& mEngine;

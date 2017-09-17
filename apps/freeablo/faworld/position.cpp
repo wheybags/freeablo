@@ -43,10 +43,10 @@ namespace FAWorld
         return mCurrent;
     }
 
-    int32_t Position::manhattanDistance (const Position &other)
+    bool Position::isNear(const Position& other)
     {
-        return abs (mCurrent.first - other.mCurrent.first) +
-               abs (mCurrent.second - other.mCurrent.second);
+        return std::max (abs (mCurrent.first - other.mCurrent.first),
+                         abs (mCurrent.second - other.mCurrent.second)) <= 1;
     }
 
     double Position::distanceFrom(Position B)

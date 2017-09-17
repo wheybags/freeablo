@@ -93,7 +93,7 @@ namespace FAWorld
 
     bool Actor::hasTarget() const
     {
-        return mTarget.type() == typeid (boost::blank);
+        return mTarget.type() != typeid (boost::blank);
     }
 
     void Actor::die()
@@ -224,7 +224,7 @@ namespace FAWorld
         return true;
     }
 
-    void Actor::setTarget(boost::variant<boost::blank, Actor*, PlacedItemData*> target)
+    void Actor::setTarget(TargetType target)
     {
         mTarget = target;
     }
