@@ -61,7 +61,7 @@ namespace FAWorld
             virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}
             virtual void takeDamage(double amount);
             virtual int32_t getCurrentHP();
-            virtual void pickupItem(ItemTarget target) {}
+            virtual void pickupItem(ItemTarget /*target*/) {}
             bool hasTarget() const;
 
             bool isAttacking = false;

@@ -66,7 +66,6 @@ namespace FAWorld
         if (!mMoving)
             return mCurrent;
 
-        std::pair<int32_t, int32_t> retval = mCurrent;
         return Misc::getNextPosByDir (mCurrent, mDirection);
     }
 

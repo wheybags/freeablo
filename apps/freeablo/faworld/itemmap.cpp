@@ -1,4 +1,4 @@
-#include "ItemMap.h"
+#include "itemmap.h"
 
 #include "item.h"
 
@@ -9,7 +9,7 @@
 
 FAWorld::PlacedItemData::PlacedItemData(std::unique_ptr <Item> itemArg, const Tile &tile):
   mItem(std::move(itemArg)),
-  mAnimation (std::make_unique<FARender::AnimationPlayer> ()),
+  mAnimation (new FARender::AnimationPlayer ()),
   mTile (tile)
 {
     mAnimation->playAnimation(mItem->getFlipSpriteGroup(), FAWorld::World::getTicksInPeriod(0.5f), FARender::AnimationPlayer::AnimationType::FreezeAtEnd);

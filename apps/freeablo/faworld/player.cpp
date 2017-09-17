@@ -228,7 +228,7 @@ namespace FAWorld
        auto initialDir = Misc::getVecDir (Misc::getVec (getPos().current(), {clickedTile.x, clickedTile.y}));
        auto curPos = getPos().current ();
        auto tryDrop = [&](const std::pair<int32_t, int32_t> &pos){
-           if (getLevel()->dropItem (std::make_unique<Item> (cursorItem), *this, {pos.first, pos.second}))
+           if (getLevel()->dropItem (std::unique_ptr<Item> {new Item (cursorItem)}, *this, {pos.first, pos.second}))
                {
                    getInventory ().setCursorHeld({});
                    return true;

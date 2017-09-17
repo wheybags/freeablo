@@ -2,7 +2,7 @@
 
 #include "../actor.h"
 #include "attackstate.h"
-#include "../ItemMap.h"
+#include "../itemmap.h"
 
 namespace FAWorld
 {
@@ -21,8 +21,6 @@ namespace FAWorld
                 Position pos;
                 if (actor.canInteractWith(target))
                 {
-                    auto currentDest = actor.mMoveHandler.getDestination();
-
                     // move to the actor, if we're not already on our way
                     if(!actor.getPos().isNear(target->getPos()))
                         actor.mMoveHandler.setDestination(target->getPos().current());

@@ -57,6 +57,7 @@ namespace Render
       int32_t x;
       int32_t y;
       TileHalf half;
+      Tile (int32_t xArg, int32_t yArg, TileHalf halfArg = TileHalf::left) : x (xArg), y (yArg), half (halfArg) {}
     };
     /**
      * @brief Render settings for initialization.

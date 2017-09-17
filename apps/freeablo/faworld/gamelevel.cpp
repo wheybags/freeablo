@@ -11,12 +11,12 @@
 #include "monster.h"
 #include "world.h"
 #include "actorstats.h"
-#include "ItemMap.h"
+#include "itemmap.h"
 
 namespace FAWorld
 {
     GameLevel::GameLevel(Level::Level level, size_t levelIndex) : mLevel(level), mLevelIndex(levelIndex),
-       mItemMap (std::make_unique<ItemMap> (this))
+       mItemMap (new ItemMap (this))
     {
     }
 

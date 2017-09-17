@@ -90,7 +90,6 @@ namespace FAWorld
               return nothingHovered ();
           }
 
-        auto tile = getTileByScreenPos(mousePosition);
         auto actor = targetedActor (mousePosition);
         if (actor != nullptr)
         {
@@ -404,7 +403,7 @@ namespace FAWorld
                 // This shift by half cursor size emulates behavior during dropping items. And the only erroneous
                 // part of behavior now can be spotted by moving cursor outside the window which is not so significant.
                 // To emulate it totally true to original game we need to heavily hack interaction with inventory
-                // which is probably possible but inconvenient due to the fact that we interacting with librocket.
+                // which is possible
                 auto clickedTileShifted = getTileByScreenPos(mousePosition - FARender::Renderer::get()->cursorSize() / 2);
                 if (player->dropItem ({clickedTileShifted.x, clickedTileShifted.y}))
                     {
