@@ -17,8 +17,9 @@ namespace FAWorld
             bool talk(Actor * actor);
             void updateSprites();
             void pickupItem(ItemTarget target) override;
+        bool dropItem(const FAWorld::Tile& clickedTile);
 
-            virtual size_t getBasePriority()
+        virtual size_t getBasePriority()
             {
                 return 10;
             }

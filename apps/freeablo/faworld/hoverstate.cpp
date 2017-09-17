@@ -33,6 +33,8 @@ namespace FAWorld
         {
             case HoverType::actor:
                 return mActorId == other.mActorId;
+            case HoverType::item:
+                return mItemTile == other.mItemTile;
         }
         return true;
     }

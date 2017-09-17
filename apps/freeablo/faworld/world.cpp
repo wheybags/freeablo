@@ -270,7 +270,8 @@ namespace FAWorld
                 SDL_GetMouseState(&x,&y);
                 updateHover(Engine::Point (x, y));
             }
-
+            else if (getHoverState().setNothingHovered ())
+              return mGuiManager->setDescription ("");
         }
     }
 
@@ -396,12 +397,11 @@ namespace FAWorld
             auto cursorItem = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
             if (!cursorItem.isEmpty()) {
                 // dropping items performs targetLock to prevent combining it with movement but it can be done while target is locked
-                if (getCurrentLevel()->dropItem (std::make_unique<Item> (cursorItem), *player, {clickedTile.x, clickedTile.y}))
-                    inv.setCursorHeld({});
+                if (player->dropItem ({clickedTile.x, clickedTile.y}))
                     {
                         mGuiManager->clearDescription();
-                        return;
                     }
+                return;
             }
         }
 

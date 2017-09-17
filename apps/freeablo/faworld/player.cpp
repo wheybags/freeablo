@@ -221,4 +221,43 @@ namespace FAWorld
           break;
       }
     }
+
+    bool Player::dropItem(const FAWorld::Tile& clickedTile)
+    {
+       auto cursorItem = getInventory ().getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
+       auto initialDir = Misc::getVecDir (Misc::getVec (getPos().current(), {clickedTile.x, clickedTile.y}));
+       auto curPos = getPos().current ();
+       auto tryDrop = [&](const std::pair<int32_t, int32_t> &pos){
+           if (getLevel()->dropItem (std::make_unique<Item> (cursorItem), *this, {pos.first, pos.second}))
+               {
+                   getInventory ().setCursorHeld({});
+                   return true;
+               }
+           return false;
+       };
+
+       auto isPosOk = [&](std::pair<int32_t, int32_t> pos)
+       {
+           return getLevel()->isPassableFor(pos.first, pos.second, this) && !getLevel()->getItemMap().getItemAt({pos.first, pos.second});
+       };
+
+       if (clickedTile == FAWorld::Tile {curPos.first, curPos.second})
+       {
+           if (isPosOk (curPos))
+             return tryDrop (curPos);
+           initialDir = 7; // this is hack to emulate original game behavior, diablo's 0th direction is our 7th unfortunately
+       }
+
+        for (auto diff : {0, -1, 1})
+        {
+            auto dir = (initialDir + diff + 8) % 8;
+            auto pos = Misc::getNextPosByDir (curPos, dir);
+            if (isPosOk (pos))
+                return tryDrop (pos);
+        }
+
+      if (isPosOk (curPos))
+          return tryDrop (curPos);
+      return false;
+    }
 }
