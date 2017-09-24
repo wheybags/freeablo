@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 
     HANDLE handle;
     SFileOpenArchive(argv[1], 0, STREAM_FLAG_READ_ONLY, &handle);
-    FAIO::FAFileObject::init(argv[1]);
+    FAIO::init(argv[1]);
 
     // For now only smaltext.cel
 

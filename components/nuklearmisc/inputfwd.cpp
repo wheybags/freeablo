@@ -37,6 +37,11 @@ namespace NuklearMisc
 
     }
 
+    void handleNuklearMouseWheelEvent(nk_context* ctx, int32_t x, int32_t y)
+    {
+        nk_input_scroll(ctx, nk_vec2((float)x, (float)y));
+    }
+
     void handleNuklearKeyboardEvent(nk_context* ctx, bool isDown, Input::Key sym, Input::KeyboardModifiers mods)
     {
         int down = isDown;

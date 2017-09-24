@@ -36,7 +36,6 @@ namespace FAIO {
 
 
         static std::string getMPQFileName();
-        static bool init(const std::string pathMPQ = "DIABDAT.MPQ");
         static void quit();
 
     };

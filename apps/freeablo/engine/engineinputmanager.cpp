@@ -14,6 +14,7 @@ namespace Engine
                 std::bind(&EngineInputManager::mouseClick, this, ph::_1, ph::_2, ph::_3, ph::_4),
                 std::bind(&EngineInputManager::mouseRelease, this, ph::_1, ph::_2, ph::_3),
                 std::bind(&EngineInputManager::mouseMove, this, ph::_1, ph::_2, ph::_3, ph::_4),
+                nullptr,
                 std::bind(&EngineInputManager::textInput, this, ph::_1))
     {
         for(int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)

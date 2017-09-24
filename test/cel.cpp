@@ -308,7 +308,7 @@ TEST (Cel, TestOpen)
 
 int main(int argc, char **argv)
 {
-    FAIO::FAFileObject::init();
+    FAIO::init();
 
     ::testing::InitGoogleTest(&argc, argv);
     int retval = RUN_ALL_TESTS();

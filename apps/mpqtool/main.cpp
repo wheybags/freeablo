@@ -18,7 +18,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    FAIO::FAFileObject::init();
+    FAIO::init();
 
     FAIO::FAFileObject file(argv[1]);
     FILE* output = fopen(argv[2], "w");

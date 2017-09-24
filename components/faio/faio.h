@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include <string>
+#include <vector>
 
 // The functions in this header are designed to behave roughly like the normal fopen, fread family.
 // The difference is, if FAfopen is called on a file that doesn't exist, it will try to use StormLib
@@ -42,7 +43,9 @@ namespace FAIO
             friend size_t FAsize(FAFile* stream);
     };
 
-    bool init(const std::string pathMPQ = "DIABDAT.MPQ");
+    bool init(const std::string pathMPQ = "DIABDAT.MPQ", const std::string listFile = "");
+    std::vector<std::string> listMpqFiles(const std::string& pattern);
+
     void quit();
 
     bool exists(const std::string& filename);

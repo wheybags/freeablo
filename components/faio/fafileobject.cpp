@@ -122,11 +122,6 @@ std::string FAIO::FAFileObject::getMPQFileName() {
 }
 
 
-bool FAIO::FAFileObject::init(const std::string pathMPQ) {
-    return FAIO::init(pathMPQ);
-}
-
-
 void FAIO::FAFileObject::quit() {
     FAIO::quit();
 }

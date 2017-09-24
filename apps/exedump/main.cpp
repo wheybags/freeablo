@@ -12,7 +12,7 @@ int main(int, char**)
     std::string pathEXE = settings.get<std::string>("Game", "PathEXE");
     std::string pathMPQ = settings.get<std::string>("Game", "PathMPQ");
 
-    FAIO::FAFileObject::init(pathMPQ);
+    FAIO::init(pathMPQ);
 
     DiabloExe::DiabloExe exe(pathEXE);
     std::cout << exe.dump();
