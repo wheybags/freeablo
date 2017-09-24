@@ -258,6 +258,7 @@ nfdresult_t NFD_SaveDialog( const nfdchar_t *filterList,
     command[0] = strdup("zenity");
     command[1] = strdup("--file-selection");
     command[2] = strdup("--title=Save File");
+    command[3] = strdup("--save");
 
     char* stdOut = NULL;
     nfdresult_t result = ZenityCommon(command, commandLen, defaultPath, filterList, &stdOut);
