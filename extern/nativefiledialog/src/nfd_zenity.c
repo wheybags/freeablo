@@ -199,8 +199,9 @@ nfdresult_t NFD_OpenDialog( const char *filterList,
     if(stdOut != NULL)
     {
         size_t len = strlen(stdOut);
-        *outPath = NFDi_Malloc(len + 1);
-        memcpy(*outPath, stdOut, len + 1);
+        *outPath = NFDi_Malloc(len);
+        memcpy(*outPath, stdOut, len);
+        (*outPath)[len-1] = '\0'; // trim out the final \n with a null terminator
         free(stdOut);
     }
     else
@@ -231,6 +232,7 @@ nfdresult_t NFD_OpenDialogMultiple( const nfdchar_t *filterList,
     if(stdOut != NULL)
     {
         size_t len = strlen(stdOut);
+        stdOut[len-1] = '\0'; // remove trailing newline
 
         if ( AllocPathSet( stdOut, outPaths ) == NFD_ERROR )
             result = NFD_ERROR;
@@ -263,8 +265,9 @@ nfdresult_t NFD_SaveDialog( const nfdchar_t *filterList,
     if(stdOut != NULL)
     {
         size_t len = strlen(stdOut);
-        *outPath = NFDi_Malloc(len + 1);
-        memcpy(*outPath, stdOut, len + 1);
+        *outPath = NFDi_Malloc(len);
+        memcpy(*outPath, stdOut, len);
+        (*outPath)[len-1] = '\0'; // trim out the final \n with a null terminator
         free(stdOut);
     }
     else
@@ -293,8 +296,9 @@ nfdresult_t NFD_PickFolder(const nfdchar_t *defaultPath,
     if(stdOut != NULL)
     {
         size_t len = strlen(stdOut);
-        *outPath = NFDi_Malloc(len + 1);
-        memcpy(*outPath, stdOut, len + 1);
+        *outPath = NFDi_Malloc(len);
+        memcpy(*outPath, stdOut, len);
+        (*outPath)[len-1] = '\0'; // trim out the final \n with a null terminator
         free(stdOut);
     }
     else
