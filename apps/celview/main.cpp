@@ -252,6 +252,17 @@ int main(int argc, char *argv[])
                 {
                     frame = nk_propertyi(&ctx, "Frame", 0, frame, image.get()->sprite->size(), 1, 0.2);
 
+                    if(nk_button_label(&ctx, "save as png"))
+                    {
+                        nfdchar_t *outPath = NULL;
+                        nfdresult_t result = NFD_SaveDialog("png", NULL, &outPath);
+                        if(result == NFD_OKAY)
+                        {
+                            Render::SpriteGroup::toPng(selectedImage, outPath);
+                            free(outPath);
+                        }
+                    }
+
                     auto msSinceLastFrame = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrame).count();
                     if(animate && msSinceLastFrame > 100)
                     {
