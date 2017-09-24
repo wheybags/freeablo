@@ -91,6 +91,11 @@ namespace FAWorld
         return mStats->getCurrentHP();
     }
 
+    bool Actor::hasTarget() const
+    {
+        return mTarget.type() != typeid (boost::blank);
+    }
+
     void Actor::die()
     {
         mMoveHandler.setDestination(getPos().current());
@@ -107,6 +112,16 @@ namespace FAWorld
     bool Actor::isEnemy(Actor* other) const
     {
         return mFaction.canAttack(other->mFaction);
+    }
+
+    std::string Actor::getName() const
+    {
+        return mName;
+    }
+
+    void Actor::setName(const std::string& name)
+    {
+        mName = name;
     }
 
     void Actor::teleport(GameLevel* level, Position pos)
@@ -137,8 +152,20 @@ namespace FAWorld
 
         if (actor->isDead())
             return false;
-
         return true;
+    }
+
+    bool Actor::canInteractWith (Actor *actor) {
+      if (actor == nullptr)
+          return false;
+
+      if (this == actor)
+          return false;
+
+      if (actor->isDead())
+          return false;
+
+      return true;
     }
 
     bool Actor::canTalkTo(Actor * actor)
@@ -149,13 +176,13 @@ namespace FAWorld
         if (this == actor)
             return false;
 
-        if (getPos().distanceFrom(actor->getPos()) >= 2)
-            return false;
-
         if (!actor->canTalk())
             return false;
 
         if (isTalking)
+            return false;
+
+        if (isEnemy(actor))
             return false;
 
         return true;
@@ -195,5 +222,10 @@ namespace FAWorld
         if (enemy->getCurrentHP() <= 0)
             enemy->die();
         return true;
+    }
+
+    void Actor::setTarget(TargetType target)
+    {
+        mTarget = target;
     }
 }

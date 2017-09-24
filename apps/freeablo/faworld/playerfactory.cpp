@@ -23,7 +23,7 @@ Player* PlayerFactory::create(const std::string& playerClass) const
     else
         createSorcerer(player);
 
-    player->mInventory.collectEffects();
+    player->getInventory ().collectEffects();
 
     return player;
 }
@@ -31,13 +31,13 @@ Player* PlayerFactory::create(const std::string& playerClass) const
 void PlayerFactory::loadTestingKit (Player *player)
 {
    ItemManager & itemManager = ItemManager::get();
-   player->mInventory.putItemUnsafe(itemManager.getItemByName("Buckler"), FAWorld::MakeEquipTarget<Item::eqINV> (1, 0));
-   player->mInventory.putItemUnsafe(itemManager.getItemByName("Short Bow"), FAWorld::MakeEquipTarget<Item::eqINV> (3, 0));
-   player->mInventory.putItemUnsafe(itemManager.getItemByName("Ring"), FAWorld::MakeEquipTarget<Item::eqINV> (1, 2));
-   player->mInventory.putItemUnsafe(itemManager.getItemByName("Ring"), FAWorld::MakeEquipTarget<Item::eqINV> (2, 2));
-   player->mInventory.putItemUnsafe(itemManager.getItemByName("Amulet"), FAWorld::MakeEquipTarget<Item::eqINV> (1, 3));
-   player->mInventory.putItemUnsafe(itemManager.getItemByName("Helm"), FAWorld::MakeEquipTarget<Item::eqINV> (5, 0));
-   player->mInventory.putItemUnsafe(itemManager.getItemByName("Rags"), FAWorld::MakeEquipTarget<Item::eqINV> (7, 0));
+   player->getInventory ().putItemUnsafe(itemManager.getItemByName("Buckler"), FAWorld::MakeEquipTarget<Item::eqINV> (1, 0));
+   player->getInventory ().putItemUnsafe(itemManager.getItemByName("Short Bow"), FAWorld::MakeEquipTarget<Item::eqINV> (3, 0));
+   player->getInventory ().putItemUnsafe(itemManager.getItemByName("Ring"), FAWorld::MakeEquipTarget<Item::eqINV> (1, 2));
+   player->getInventory ().putItemUnsafe(itemManager.getItemByName("Ring"), FAWorld::MakeEquipTarget<Item::eqINV> (2, 2));
+   player->getInventory ().putItemUnsafe(itemManager.getItemByName("Amulet"), FAWorld::MakeEquipTarget<Item::eqINV> (1, 3));
+   player->getInventory ().putItemUnsafe(itemManager.getItemByName("Helm"), FAWorld::MakeEquipTarget<Item::eqINV> (5, 0));
+   player->getInventory ().putItemUnsafe(itemManager.getItemByName("Rags"), FAWorld::MakeEquipTarget<Item::eqINV> (7, 0));
 }
 
 void PlayerFactory::createWarrior(Player* player) const
@@ -45,26 +45,26 @@ void PlayerFactory::createWarrior(Player* player) const
     ItemManager & itemManager = ItemManager::get();
 
     FAWorld::Item item = itemManager.getItemByName("Short Sword");
-    player->mInventory.putItemUnsafe(
+    player->getInventory ().putItemUnsafe(
         item, FAWorld::MakeEquipTarget<Item::eqLEFTHAND> ());
 
     item = itemManager.getItemByName("Buckler");
-    player->mInventory.putItemUnsafe(
+    player->getInventory ().putItemUnsafe(
         item, FAWorld::MakeEquipTarget<Item::eqRIGHTHAND> ());
 
     item = itemManager.getItemByName("Club");
-    player->mInventory.putItemUnsafe(
+    player->getInventory ().putItemUnsafe(
         item, FAWorld::MakeEquipTarget<Item::eqINV> (0, 0));
 
     item = itemManager.getItemByName("Gold");
     item.setCount(100);
-    player->mInventory.putItemUnsafe(
+    player->getInventory ().putItemUnsafe(
         item, FAWorld::MakeEquipTarget<Item::eqINV> (0, 3));
 
     for (auto i = 0; i < 2; ++i)
         {
             item = itemManager.getItemByName("Potion of Healing");
-            player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqBELT> (i));
+            player->getInventory ().putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqBELT> (i));
         }
 
     player->setSpriteClass("warrior");
@@ -78,16 +78,16 @@ void PlayerFactory::createRogue(Player* player) const
     ItemManager & itemManager = ItemManager::get();
 
     FAWorld::Item item = itemManager.getItemByName("Short Bow");
-    player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqLEFTHAND> ());
+    player->getInventory ().putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqLEFTHAND> ());
 
     item = itemManager.getItemByName("Gold");
     item.setCount(100);
-    player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqINV> (0, 3));
+    player->getInventory ().putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqINV> (0, 3));
 
     for (auto i = 0; i < 2; ++i)
         {
             item = itemManager.getItemByName("Potion of Healing");
-            player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqBELT> (i));
+            player->getInventory ().putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqBELT> (i));
         }
 
     player->setSpriteClass("rogue");
@@ -100,16 +100,16 @@ void PlayerFactory::createSorcerer(Player* player) const
     ItemManager & itemManager = ItemManager::get();
 
     FAWorld::Item item = itemManager.getItemByName("Short Staff of Charged Bolt");
-    player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqLEFTHAND> ());
+    player->getInventory ().putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqLEFTHAND> ());
 
     item = itemManager.getItemByName("Gold");
     item.setCount(100);
-    player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqINV> (0, 3));
+    player->getInventory ().putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqINV> (0, 3));
 
     for (auto i = 0; i < 2; ++i)
         {
             item = itemManager.getItemByName("Potion of Mana");
-            player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqBELT> (i));
+            player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<Item::eqBELT> (i));
         }
 
     player->setSpriteClass("sorceror");

@@ -1,8 +1,10 @@
 #pragma once
 
-#include <SDL.h>
 #include <assert.h>
 #include <string>
+
+struct SDL_Cursor;
+struct SDL_Surface;
 
 
 namespace Render
@@ -18,7 +20,7 @@ namespace Render
             SpriteGroup(const std::string& path);
             SpriteGroup(const std::vector<Sprite> sprites): mSprites(sprites), mAnimLength(sprites.size()) {}
             void destroy();
-            
+
             Sprite& operator[](size_t index)
             {
                 #ifndef NDEBUG
@@ -33,7 +35,7 @@ namespace Render
             }
 
             size_t animLength()
-            {   
+            {
                 return mAnimLength;
             }
 

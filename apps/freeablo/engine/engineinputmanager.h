@@ -6,6 +6,7 @@
 #include <string>
 #include <input/hotkey.h>
 #include <input/inputmanager.h>
+#include "../components/misc/misc.h"
 #include "inputobserverinterface.h"
 #include <fa_nuklear.h>
 
@@ -44,11 +45,11 @@ namespace Engine
             void mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel);
             std::string keyboardActionToString(KeyboardInputAction action) const;
             void notifyKeyboardObservers(KeyboardInputAction action);
-            void notifyMouseObservers(MouseInputAction action, Point mousePosition);
+            void notifyMouseObservers(MouseInputAction action, Misc::Point mousePosition);
 
             nk_context* mNkCtx = nullptr;
             Input::InputManager mInput;
-            Point mMousePosition;
+            Misc::Point mMousePosition;
             bool mMouseDown = false;
             bool mClick = false;
             Input::KeyboardModifiers mKbMods;

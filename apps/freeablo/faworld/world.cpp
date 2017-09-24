@@ -15,6 +15,7 @@
 #include "player.h"
 #include "gamelevel.h"
 #include "findpath.h"
+#include "itemmap.h"
 
 namespace FAWorld
 {
@@ -45,19 +46,82 @@ namespace FAWorld
         }
     }
 
-    void World::notify(Engine::MouseInputAction action, Engine::Point mousePosition)
+    Render::Tile World::getTileByScreenPos(Misc::Point screenPos) {
+       return FARender::Renderer::get()->getTileByScreenPos(screenPos.x, screenPos.y, getCurrentPlayer()->getPos());
+     }
+
+    Actor *World::targetedActor(Misc::Point screenPosition)
     {
-        if (action == Engine::MOUSE_RELEASE)
+       auto actorStayingAt = [this](int32_t x, int32_t y) -> Actor*
+       {
+         if (x >= static_cast<int32_t> (getCurrentLevel ()->width()) || y >= static_cast<int32_t> (getCurrentLevel ()->height()))
+           return nullptr;
+
+         auto actor = getActorAt (x, y);
+         if (actor && !actor->isDead() && actor != getCurrentPlayer()) return actor;
+
+         return nullptr;
+       };
+       auto tile = getTileByScreenPos(screenPosition);
+       // actors could be hovered/targeted by hexagonal pattern consisiting of two tiles on top of each other + halves of two adjacent tiles
+       // the same logic seems to apply ot other tall objects
+       if (auto actor = actorStayingAt(tile.x, tile.y)) return actor;
+       if (auto actor = actorStayingAt(tile.x + 1, tile.y + 1)) return actor;
+       if (tile.half == Render::TileHalf::right)
+         if (auto actor = actorStayingAt(tile.x + 1, tile.y))
+           return actor;
+       if (tile.half == Render::TileHalf::left)
+         if (auto actor = actorStayingAt(tile.x, tile.y + 1))
+           return actor;
+       return nullptr;
+     }
+
+    void World::updateHover(const Misc::Point& mousePosition) {
+        auto nothingHovered = [&]
         {
-            stopPlayerActions();
+            if (getHoverState().setNothingHovered ())
+                return mGuiManager->setDescription ("");
+        };
+
+        auto &cursorItem = mCurrentPlayer->getInventory ().getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
+        if (!cursorItem.isEmpty())
+          {
+              mGuiManager->setDescription(cursorItem.getName());
+              return nothingHovered ();
+          }
+
+        auto actor = targetedActor (mousePosition);
+        if (actor != nullptr)
+        {
+            if (getHoverState().setActorHovered (actor->getId ()))
+                mGuiManager->setDescription(actor->getName ());
+
+            return;
         }
-        else if (action == Engine::MOUSE_CLICK)
+        if (auto item = targetedItem (mousePosition))
         {
-            onMouseClick(mousePosition);
+          if (getHoverState().setItemHovered (item->getTile ()))
+            mGuiManager->setDescription(item->item ().getName());
+
+          return;
         }
-        else if (action == Engine::MOUSE_DOWN)
-        {
-            onMouseDown(mousePosition);
+
+        return nothingHovered ();
+    }
+
+    void World::onMouseMove(const Misc::Point &/*mousePosition*/)
+    {
+        return;
+    }
+
+    void World::notify(Engine::MouseInputAction action, Misc::Point mousePosition)
+    {
+        switch (action) {
+            case Engine::MOUSE_RELEASE: return onMouseRelease();
+            case Engine::MOUSE_DOWN: return onMouseDown(mousePosition);
+            case Engine::MOUSE_CLICK: return onMouseClick(mousePosition);
+            case Engine::MOUSE_MOVE: return onMouseMove(mousePosition);
+            default: ;
         }
     }
 
@@ -81,6 +145,7 @@ namespace FAWorld
             Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath);
             actor->setCanTalk(true);
             actor->setActorId(npcs[i]->id);
+            actor->setName (npcs[i]->name);
             actor->teleport(townLevel, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
         }
 
@@ -114,6 +179,11 @@ namespace FAWorld
 
         if (netManager && !netManager->isServer())
             netManager->sendLevelChangePacket(level->getLevelIndex());
+    }
+
+    HoverState& World::getHoverState()
+    {
+        return getCurrentLevel()->getHoverState();
     }
 
     void World::playLevelMusic(size_t level)
@@ -191,6 +261,17 @@ namespace FAWorld
                 level->update(noclip);
             }
         }
+
+        {
+            if (!nk_item_is_any_active(FARender::Renderer::get()->getNuklearContext())) {
+                // we need update hover not only on mouse move because viewport may move without mouse being moved
+                int x, y;
+                SDL_GetMouseState(&x,&y);
+                updateHover(Misc::Point {x, y});
+            }
+            else if (getHoverState().setNothingHovered ())
+              return mGuiManager->setDescription ("");
+        }
     }
 
     Player* World::getCurrentPlayer()
@@ -226,7 +307,7 @@ namespace FAWorld
     void World::fillRenderState(FARender::RenderState* state)
     {
         if (getCurrentLevel())
-            getCurrentLevel()->fillRenderState(state);
+            getCurrentLevel()->fillRenderState(state, getCurrentPlayer());
     }
 
     Actor* World::getActorById(int32_t id)
@@ -279,30 +360,82 @@ namespace FAWorld
             player->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
     }
 
-    void World::stopPlayerActions()
+    void World::onMouseRelease()
     {
+        targetLock = false;
+        simpleMove = false;
         getCurrentPlayer()->isTalking = false;
     }
 
-    void World::onMouseClick(Engine::Point mousePosition)
+    void World::onMouseClick(Misc::Point mousePosition)
     {
         auto player = getCurrentPlayer();
-        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->getPos());
+        auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
 
         auto level = getCurrentLevel();
         level->activate(clickedTile.x, clickedTile.y);
     }
 
-    void World::onMouseDown(Engine::Point mousePosition)
+    PlacedItemData *World::targetedItem(Misc::Point screenPosition)
+    {
+        auto tile = getTileByScreenPos(screenPosition);
+        return getCurrentLevel ()->getItemMap ().getItemAt ({tile.x, tile.y});
+    }
+
+    void World::onMouseDown(Misc::Point mousePosition)
     {
         auto player = getCurrentPlayer();
-        auto clickedTile = FARender::Renderer::get()->getClickedTile(mousePosition.x, mousePosition.y, player->getPos());
-        Actor* clickedActor = World::get()->getActorAt(clickedTile.x, clickedTile.y);
-        
-        if (clickedActor)
-            player->actorTarget = clickedActor;
-        else
-            player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
+        auto &inv = player->getInventory ();
+        auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
+
+        bool targetWasLocked = targetLock; // better solution assign targetLock true at something like SCOPE_EXIT macro
+        targetLock = true;
+
+        if (!targetWasLocked)
+        {
+            auto cursorItem = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
+            if (!cursorItem.isEmpty()) {
+                // What happens here is not actually true to original game but
+                // It's a fair way to emulate it. Current data is that in all instances except interaction with inventory
+                // cursor has topleft as it's hotspot even when cursor is item. Other 2 instances actually:
+                // - dropping items
+                // - moving cursor outside the screen / window
+                // This shift by half cursor size emulates behavior during dropping items. And the only erroneous
+                // part of behavior now can be spotted by moving cursor outside the window which is not so significant.
+                // To emulate it totally true to original game we need to heavily hack interaction with inventory
+                // which is possible
+                auto clickedTileShifted = getTileByScreenPos(mousePosition - FARender::Renderer::get()->cursorSize() / 2);
+                if (player->dropItem ({clickedTileShifted.x, clickedTileShifted.y}))
+                    {
+                        mGuiManager->clearDescription();
+                    }
+                return;
+            }
+        }
+
+       if (!targetWasLocked)
+           {
+               Actor* clickedActor = targetedActor (mousePosition);
+               if (clickedActor)
+                   {
+                       player->setTarget (clickedActor);
+                       return;
+                   }
+
+              if (auto item = targetedItem(mousePosition)) {
+                player->setTarget (ItemTarget {mGuiManager->isInventoryShown() ?
+                    ItemTarget::ActionType::toCursor :
+                    ItemTarget::ActionType::autoEquip, item});
+                return;
+              }
+           }
+
+       if (!targetWasLocked || simpleMove)
+          {
+              player->setTarget (boost::blank{});
+              player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
+              simpleMove = true;
+          }
     }
 
     Tick World::getTicksInPeriod(float seconds)

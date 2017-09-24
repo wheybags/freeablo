@@ -8,6 +8,11 @@
 #include <vector>
 #include <tuple>
 
+namespace FARender
+{
+    class FASpriteGroup;
+}
+
 namespace FAWorld
 {
 class Inventory;
@@ -117,7 +122,10 @@ public:
     std::pair<uint8_t, uint8_t> getInvSize() const;
     std::pair<uint8_t, uint8_t> getInvCoords() const;
     std::pair<uint8_t, uint8_t> getCornerCoords() const;
-
+    std::string getFlipAnimationPath() const;
+    std::string getFlipSoundPath() const;
+    FARender::FASpriteGroup *getFlipSpriteGroup();
+    bool isBeltEquippable() const;
 
 
     bool mIsReal;
