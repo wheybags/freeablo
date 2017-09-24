@@ -7,6 +7,8 @@
 #include <faio/fafileobject.h>
 #include <chrono>
 
+#include <nfd.h>
+
 struct CVSprite
 {
     CVSprite(Render::SpriteGroup* sprite, uint32_t cacheIndex) : sprite(sprite), cacheIndex(cacheIndex)
@@ -90,6 +92,56 @@ nk_handle nk_fa_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_nu
     return handle;
 }
 
+float rowHeight = 30;
+
+bool nk_file_pick(nk_context* ctx, const std::string& label, std::string& path, const std::string& filter, float labelWidth = 120)
+{
+    // TODO: replace nasty static buffer, we could use the more advanced api, but I'm not bothered right now
+    char buf[4096];
+
+    assert(path.size()+1 < 4096);
+    memcpy(buf, path.c_str(), path.size()+1);
+
+    bool retval = false;
+
+    auto groupName = std::string("file_pick_group_") + std::to_string(size_t(&path));
+    if(nk_group_begin(ctx, groupName.c_str(), 0))
+    {
+        nk_layout_row_template_begin(ctx, rowHeight);
+        {
+            nk_layout_row_template_push_static(ctx, labelWidth);
+            nk_layout_row_template_push_variable(ctx, 80);
+            nk_layout_row_template_push_static(ctx, 40);
+        }
+        nk_layout_row_template_end(ctx);
+
+        nk_label(ctx, label.c_str(), NK_TEXT_LEFT);
+
+        if(nk_edit_string_zero_terminated(ctx, NK_EDIT_SIMPLE, buf, 4096, nk_filter_default) == NK_EDIT_COMMITED)
+            retval = true;
+
+        if(nk_button_label(ctx, "pick"))
+        {
+            nfdchar_t *outPath = NULL;
+            nfdresult_t result = NFD_OpenDialog(filter.c_str(), NULL, &outPath);
+            if(result == NFD_OKAY)
+            {
+                path = outPath;
+                free(outPath);
+                retval = true;
+            }
+        }
+        else
+        {
+            path = buf;
+        }
+
+        nk_group_end(ctx);
+    }
+
+    return retval;
+}
+
 int main(int argc, char *argv[])
 {
     /*QApplication a(argc, argv);
@@ -98,10 +150,10 @@ int main(int argc, char *argv[])
 
     return a.exec();*/
 
-    Render::RenderSettings settings;
-    settings.windowWidth = 800;
-    settings.windowHeight = 600;
-    settings.fullscreen = false;
+    Render::RenderSettings renderSettings;
+    renderSettings.windowWidth = 800;
+    renderSettings.windowHeight = 600;
+    renderSettings.fullscreen = false;
 
 
     Render::NuklearGraphicsContext nuklearGraphicsContext;
@@ -112,7 +164,7 @@ int main(int argc, char *argv[])
     ctx.clip.paste = nullptr;// nk_sdl_clipbard_paste;
     ctx.clip.userdata = nk_handle_ptr(0);
 
-    Render::init(settings, nuklearGraphicsContext, &ctx);
+    Render::init(renderSettings, nuklearGraphicsContext, &ctx);
 
     // Load Cursor: if you uncomment cursor loading please hide the cursor
     {
@@ -141,24 +193,19 @@ int main(int argc, char *argv[])
     );
 
 
-    std::string listFile = "/home/wheybags/diablo_data_files/Diablo I.txt";
-    std::string mpqFile = "/home/wheybags/diablo_data_files/DIABDAT.MPQ";
+    Settings::Settings settings;
+    settings.loadFromFile("resources/celview.ini");
 
-    //SFileAddListFile(mDiabdat, );
-    FAIO::init(mpqFile, listFile);
+    bool faioInitDone = false;
+    std::string listFile = settings.get<std::string>("celview", "listFile", "Diablo I.txt");
+    std::string mpqFile = settings.get<std::string>("celview", "mpqFile", "DIABDAT.MPQ");
 
-    std::vector<std::string> celFiles = FAIO::listMpqFiles("*.cel");
-    auto tmp = FAIO::listMpqFiles("*.cl2");
-    celFiles.insert(celFiles.end(), tmp.begin(), tmp.end());
-
-    std::sort(celFiles.begin(), celFiles.end());
+    std::vector<std::string> celFiles;
 
     std::string selectedImage = "";
     std::unique_ptr<CVSprite> image;
 
     std::unique_ptr<CVSprite> nextImage;
-
-    float rowHeight = 30;
 
     int animate = false;
     int32_t frame = 0;
@@ -180,9 +227,9 @@ int main(int argc, char *argv[])
 
         Render::clear();
 
-        auto settings = Render::getWindowSize();
+        renderSettings = Render::getWindowSize();
 
-        if(nk_begin(&ctx, "main_window", nk_rect(0, 0, settings.windowWidth, settings.windowHeight), NK_WINDOW_NO_SCROLLBAR))
+        if(nk_begin(&ctx, "main_window", nk_rect(0, 0, renderSettings.windowWidth, renderSettings.windowHeight), NK_WINDOW_NO_SCROLLBAR))
         {
             struct nk_rect bounds = nk_window_get_content_region(&ctx);
 
@@ -243,6 +290,30 @@ int main(int argc, char *argv[])
 
             if(nk_group_begin(&ctx, "file list", 0))
             {
+                if(!faioInitDone)
+                {
+                    nk_layout_row_dynamic(&ctx, rowHeight*2, 1);
+
+                    nk_file_pick(&ctx, "DIABDAT.MPQ", mpqFile, "mpq,MPQ");
+                    nk_file_pick(&ctx, "Diablo listfile", listFile, "txt");
+
+                    if(nk_button_label(&ctx, "load"))
+                    {
+                        FAIO::init(mpqFile, listFile);
+                        celFiles = FAIO::listMpqFiles("*.cel");
+                        auto tmp = FAIO::listMpqFiles("*.cl2");
+                        celFiles.insert(celFiles.end(), tmp.begin(), tmp.end());
+
+                        std::sort(celFiles.begin(), celFiles.end());
+
+                        settings.set<std::string>("celview", "listFile", listFile);
+                        settings.set<std::string>("celview", "mpqFile", mpqFile);
+                        settings.save();
+
+                        faioInitDone = true;
+                    }
+                }
+
                 nk_layout_row_dynamic(&ctx, rowHeight, 1);
 
                 for(size_t i = 0; i < celFiles.size(); i++)
