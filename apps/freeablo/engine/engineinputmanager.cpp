@@ -40,7 +40,7 @@ namespace Engine
         }
     }
 
-    void EngineInputManager::notifyMouseObservers(MouseInputAction action, Point mousePosition)
+    void EngineInputManager::notifyMouseObservers(MouseInputAction action, Misc::Point mousePosition)
     {
         for(auto observer : mMouseObservers)
         {
@@ -215,7 +215,7 @@ namespace Engine
 
         if(key == Input::KEY_LEFT_MOUSE)
         {
-            mMousePosition = Point(x,y);
+            mMousePosition = Misc::Point{x,y};
             mMouseDown = true;
             mClick = true;
         }
@@ -244,7 +244,10 @@ namespace Engine
             nk_input_motion(mNkCtx, x, y);
         }
 
-        mMousePosition = Point(x,y);
+        if (!nk_item_is_any_active (mNkCtx))
+            notifyMouseObservers(MOUSE_MOVE, mMousePosition);
+
+        mMousePosition = Misc::Point{x,y};
     }
 
     std::string EngineInputManager::keyboardActionToString(KeyboardInputAction action) const

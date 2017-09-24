@@ -19,6 +19,8 @@
 #include "movementhandler.h"
 #include "actoranimationmanager.h"
 #include "behaviour.h"
+#include <boost/variant/variant.hpp>
+#include <boost/variant/get.hpp>
 
 
 namespace Engine
@@ -33,6 +35,7 @@ namespace FAWorld
     class ActorStats;
     class Behaviour;
     class World;
+    class ItemTarget;
 
     namespace ActorState
     {
@@ -42,7 +45,7 @@ namespace FAWorld
     class Actor : public NetObject
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
-
+        void interact(Actor* actor);
         friend class ActorState::BaseState; // TODO: fix
 
         public:
@@ -58,6 +61,9 @@ namespace FAWorld
             virtual void setSpriteClass(std::string className){UNUSED_PARAM(className);}
             virtual void takeDamage(double amount);
             virtual int32_t getCurrentHP();
+            virtual void pickupItem(ItemTarget /*target*/) {}
+            bool hasTarget() const;
+
             bool isAttacking = false;
             bool isTalking = false;
 
@@ -77,25 +83,31 @@ namespace FAWorld
             {
                 mPassable = passable;
             }
-            
+
             int32_t getId()
             {
                 return mId;
             }
 
+            std::string getName() const;
+            void setName(const std::string& name);
+
             void teleport(GameLevel* level, Position pos);
             GameLevel* getLevel();
 
             bool attack(Actor * enemy);
-            
+
             virtual bool talk(Actor * actor)
             {
                 UNUSED_PARAM(actor);
                 return false;
             }
 
+            using TargetType = boost::variant<boost::blank, Actor*, ItemTarget>;
+            void setTarget (TargetType target);
+
             MovementHandler mMoveHandler;
-            Actor* actorTarget = nullptr;
+            TargetType mTarget;
 
             Position getPos() const
             {
@@ -108,10 +120,10 @@ namespace FAWorld
             }
 
         //private: //TODO: fix this
-           
+
 
             virtual void die();
-            
+
             bool canTalk() const;
             bool isDead() const;
             bool isEnemy(Actor* other) const;
@@ -134,7 +146,7 @@ namespace FAWorld
                 auto levelTmp = mMoveHandler.getLevel();
                 serialise_object(stream, mMoveHandler);
 
-                
+
                 if (!stream.isWriting())
                 {
                     // make sure we let the level object know if we've changed levels
@@ -168,7 +180,7 @@ namespace FAWorld
                 if (hasBehaviour)
                 {
                     int32_t classId = -1;
-                    
+
                     if(stream.isWriting())
                         classId = mBehaviour->getClassId();
 
@@ -187,13 +199,13 @@ namespace FAWorld
                 }
 
                 int32_t targetId = -1;
-                if (stream.isWriting() && actorTarget != nullptr)
-                    targetId = actorTarget->getId();
+                if (stream.isWriting() && mTarget.type() == typeid (Actor *))
+                    targetId = boost::get<Actor *> (mTarget)->getId ();
 
                 serialise_int32(stream, targetId);
 
                 if (!stream.isWriting() && targetId != -1)
-                    actorTarget = World::get()->getActorById(targetId);
+                    setTarget (World::get()->getActorById(targetId));
 
                 return Serial::Error::Success;
             }
@@ -234,6 +246,7 @@ namespace FAWorld
             }
 
             virtual bool canIAttack(Actor * actor);
+            bool canInteractWith(Actor* actor);
             bool canTalkTo(Actor * actor);
 
             BOOST_SERIALIZATION_SPLIT_MEMBER()
@@ -242,6 +255,7 @@ namespace FAWorld
 
         private:
             std::string mActorId;
+            std::string mName;
             int32_t mId;
             friend class Engine::Server; // TODO: fix
             friend class Engine::Client;

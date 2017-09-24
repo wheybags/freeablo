@@ -97,6 +97,7 @@ namespace Engine
         int32_t currentLevel = variables["level"].as<int32_t>();
 
         FAGui::GuiManager guiManager(*this, *player);
+        world.setGuiManager (&guiManager);
 
         if (currentLevel == -1)
             currentLevel = 0;

@@ -205,7 +205,7 @@ namespace FAGui
     void GuiManager::item (nk_context* ctx, FAWorld::EquipTarget target,
                            boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highlight)
     {
-        auto &inv = mPlayer.mInventory;
+        auto &inv = mPlayer.getInventory ();
         using namespace FAWorld;
         if (!inv.getItemAt(MakeEquipTarget<Item::equipLoc::eqCURSOR> ()).isEmpty())
             highlight = ItemHighlightInfo::notHighlighed;
@@ -272,7 +272,7 @@ namespace FAGui
                    {MakeEquipTarget<Item::equipLoc::eqRIGHTRING>(), nk_rect(248, 178, 28, 28)}};
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
             {
-               auto &inv = mPlayer.mInventory;
+               auto &inv = mPlayer.getInventory ();
                 for (auto &p : slot_rects)
                     {
                       nk_layout_space_push (ctx, p.second);
@@ -294,7 +294,7 @@ namespace FAGui
             float invHeight = Inventory::inventoryHeight * cellSize;
             nk_layout_space_push(ctx, nk_recta (invTopLeft,
                 {invWidth, invHeight}));
-            auto &inv = mPlayer.mInventory;
+            auto &inv = mPlayer.getInventory ();
             nk_button_label_styled (ctx, &dummyStyle, "");
             if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
                 {
@@ -334,7 +334,7 @@ namespace FAGui
         auto beltWidth = 232.0f, beltHeight = 29.0f, cellSize = 29.0f;
         nk_layout_space_push(ctx, nk_recta (beltTopLeft,
                 {beltWidth, beltHeight}));
-            auto &inv = mPlayer.mInventory;
+            auto &inv = mPlayer.getInventory ();
             if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
                 {
                     inv.beltMouseLeftButtonDown(
@@ -492,6 +492,16 @@ namespace FAGui
         case PanelPlacement::right: return &mCurRightPanel;
         }
         return nullptr;
+    }
+
+    const PanelType* GuiManager::panel(PanelPlacement placement) const
+    {
+        return const_cast<self *> (this)->panel (placement);
+    }
+
+    bool GuiManager::isInventoryShown() const
+    {
+        return *panel (panelPlacementByType (PanelType::inventory)) == PanelType::inventory;
     }
 
     void GuiManager::togglePanel(PanelType type)

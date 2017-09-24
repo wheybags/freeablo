@@ -1,5 +1,6 @@
 #include "findpath.h"
 #include <misc/stdhashes.h>
+#include "gamelevel.h"
 
 namespace FAWorld
 {
@@ -67,7 +68,7 @@ namespace FAWorld
     class Array2D
     {
     public:
-        Array2D(int32_t width, int32_t height) : 
+        Array2D(int32_t width, int32_t height) :
             mData(width*height),
             mWidth(width),
             mHeight(height)
@@ -103,17 +104,18 @@ namespace FAWorld
     bool AStarSearch(
         GameLevelImpl* level,
         Location start,
-        Location goal,
-        std::unordered_map<Location, Location>& came_from
-       )
+        Location& goal,
+        std::unordered_map<Location, Location>& came_from, bool findAdjacent
+    )
     {
+        auto goalPassable = level->isPassable(goal.first, goal.second);
         PriorityQueue<Location> frontier;
         frontier.put(start, 0);
         came_from[start] = start;
 
         Array2D<int32_t> costSoFar(level->width(), level->height(), -1);
         costSoFar.get(start.first, start.second) = 0;
-        
+
         int32_t iterations = 0;
         while (!frontier.empty() && iterations < 500)
         {
@@ -122,7 +124,16 @@ namespace FAWorld
 
             // Early exit
             if (current == goal)
-                return level->isPassable(goal.first, goal.second);
+                return true;
+            if (findAdjacent || !goalPassable)
+               {
+                 if (abs (goal.first - current.first) <= 1 && abs (goal.second - current.second) <= 1)
+                     {
+                       goal = current;
+                       return true;
+                     }
+               }
+
 
             std::vector<Location> neighborsContainer = std::move(neighbors(level, current));
             for (std::vector<Location>::iterator it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
@@ -186,13 +197,12 @@ namespace FAWorld
         return result;
     }
 
-    std::vector<Location> pathFind(GameLevelImpl* level, Location start, Location& goal, bool& bArrivable)
+    std::vector<Location> pathFind(GameLevelImpl* level, Location start, Location& goal, bool& bArrivable, bool findAdjacent)
     {
         std::unordered_map<Location, Location> cameFrom;
 
-        bArrivable = AStarSearch(level, start, goal, cameFrom);
-        if (!bArrivable) 
-            goal = findClosesPointToGoal(level, start, goal, cameFrom);
+        bArrivable = AStarSearch(level, start, goal, cameFrom, findAdjacent);
+        if (!bArrivable) return {};
 
         return reconstructPath(start, goal, cameFrom);
     }

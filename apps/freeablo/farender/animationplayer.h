@@ -35,7 +35,7 @@ namespace FARender
 
         private:
             FARender::FASpriteGroup* mCurrentAnim = nullptr;
-            
+
             FAWorld::Tick mPlayingAnimDuration = 0;
             AnimationType mPlayingAnimType = AnimationType::Once;
             FAWorld::Tick mTicksSinceAnimStarted = 0;
@@ -44,7 +44,7 @@ namespace FARender
             Serial::Error::Error faSerial(Stream& stream)
             {
                 int32_t animId = -1;
-                
+
                 if (stream.isWriting())
                 {
                     if (mCurrentAnim)

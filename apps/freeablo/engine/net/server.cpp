@@ -23,7 +23,7 @@ namespace Engine
     {
         for (size_t i = 0; i < mClients.size(); i++)
             enet_peer_disconnect(mClients[i], 0);
-        
+
         enet_host_destroy(mHost);
     }
 
@@ -35,7 +35,7 @@ namespace Engine
         #ifdef ENABLE_NET_STALL_ON_TIMEOUT
         {
             uint32_t stallThresh = getStallThreshold();
-                           
+
             for (size_t i = 0; i < mClients.size(); i++)
             {
                 uint32_t diff = tick - mServersClientData[mClients[i]->connectID].lastReceiveTick;
@@ -116,7 +116,7 @@ namespace Engine
         std::string data = level->serialiseToString();
 
         WritePacket packet = getWritePacket(PacketType::Level, data.size(), true, WritePacketResizableType::Resizable);
-        
+
         uint32_t dataSize = data.size();
         packet.writer.handleInt32(dataSize);
         packet.writer.handleString((uint8_t*)&data[0], data.length());
@@ -237,7 +237,7 @@ namespace Engine
         player->mMoveHandler.setDestination({ data.destX, data.destY });
 
         if (data.targetActorId != -1)
-            player->actorTarget = FAWorld::World::get()->getActorById(data.targetActorId);
+            player->setTarget (FAWorld::World::get()->getActorById(data.targetActorId));
 
         return Serial::Error::Success;
     }
@@ -252,7 +252,7 @@ namespace Engine
         if (requestedLevelIndex != -1 && (player->getLevel() == NULL || requestedLevelIndex != (int32_t)player->getLevel()->getLevelIndex()))
         {
             auto level = FAWorld::World::get()->getLevel(requestedLevelIndex);
-            
+
             bool up = player->getLevel() && level->getLevelIndex() < player->getLevel()->getLevelIndex();
 
             if (up)

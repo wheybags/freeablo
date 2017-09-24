@@ -13,20 +13,25 @@ namespace FAWorld
             Player();
             Player(const std::string& className, const DiabloExe::CharacterStats& charStats);
             virtual ~Player();
-            Inventory mInventory;
             void setSpriteClass(std::string className);
             bool talk(Actor * actor);
             void updateSprites();
+            void pickupItem(ItemTarget target) override;
+        bool dropItem(const FAWorld::Tile& clickedTile);
 
-            virtual size_t getBasePriority()
+        virtual size_t getBasePriority()
             {
                 return 10;
             }
+
+            const Inventory &getInventory () const { return mInventory; }
+            Inventory &getInventory () { return mInventory; }
 
         private:
             void init(const std::string& className, const DiabloExe::CharacterStats& charStats);
 
             std::string mClassName;
+            Inventory mInventory;
 
             friend class Inventory;
 

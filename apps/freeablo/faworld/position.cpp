@@ -43,6 +43,12 @@ namespace FAWorld
         return mCurrent;
     }
 
+    bool Position::isNear(const Position& other)
+    {
+        return std::max (abs (mCurrent.first - other.mCurrent.first),
+                         abs (mCurrent.second - other.mCurrent.second)) <= 1;
+    }
+
     double Position::distanceFrom(Position B)
     {
         int dx = mCurrent.first - B.mCurrent.first;
@@ -60,69 +66,7 @@ namespace FAWorld
         if (!mMoving)
             return mCurrent;
 
-        std::pair<int32_t, int32_t> retval = mCurrent;
-
-        switch (mDirection)
-        {
-        case 0:
-        {
-            retval.first++;
-            retval.second++;
-            break;
-        }
-
-        case 7:
-        {
-            retval.first++;
-            break;
-        }
-
-        case 6:
-        {
-            retval.first++;
-            retval.second--;
-            break;
-        }
-
-        case 5:
-        {
-            retval.second--;
-            break;
-        }
-
-        case 4:
-        {
-            retval.first--;
-            retval.second--;
-            break;
-        }
-
-        case 3:
-        {
-            retval.first--;
-            break;
-        }
-
-        case 2:
-        {
-            retval.first--;
-            retval.second++;
-            break;
-        }
-
-        case 1:
-        {
-            retval.second++;
-            break;
-        }
-
-        default:
-        {
-            break;
-        }
-        }
-
-        return retval;
+        return Misc::getNextPosByDir (mCurrent, mDirection);
     }
 
     template<class Stream>

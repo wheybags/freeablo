@@ -14,6 +14,7 @@ namespace Misc
     {
         return std::make_pair(((float)to.first)-((float)from.first), ((float)to.second)-((float)from.second));
     }
+    std::pair<int32_t, int32_t> getNextPosByDir(std::pair<int32_t, int32_t> pos, int32_t dir);
 
     // Point in pixels
     struct Point
@@ -23,6 +24,7 @@ namespace Misc
       Point operator+ (const Point &v) const { return {x + v.x, y + v.y}; }
       Point operator- (const Point &v) const { return {x - v.x, y - v.y}; }
       Point operator* (double c) const { return {static_cast<int32_t> (x * c), static_cast<int32_t> (y * c)}; }
+      Point operator/ (int c) const { return {x / c, y / c}; }
     };
 
     namespace detail

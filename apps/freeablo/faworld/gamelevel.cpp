@@ -11,10 +11,12 @@
 #include "monster.h"
 #include "world.h"
 #include "actorstats.h"
+#include "itemmap.h"
 
 namespace FAWorld
 {
-    GameLevel::GameLevel(Level::Level level, size_t levelIndex) : mLevel(level), mLevelIndex(levelIndex)
+    GameLevel::GameLevel(Level::Level level, size_t levelIndex) : mLevel(level), mLevelIndex(levelIndex),
+       mItemMap (new ItemMap (this))
     {
     }
 
@@ -76,6 +78,11 @@ namespace FAWorld
         }
 
         actorMapRefresh();
+
+        for (auto &p : mItemMap->mItems)
+            {
+                p.second.update ();
+            }
     }
 
     void GameLevel::actorMapInsert(Actor* actor)
@@ -129,9 +136,14 @@ namespace FAWorld
         actorMapInsert(actor);
     }
 
-    void GameLevel::fillRenderState(FARender::RenderState* state)
+    static Cel::Colour friendHoverColor () { return {180, 110, 110, true};}
+    static Cel::Colour enemyHoverColor () { return {164, 46, 46, true}; }
+    static Cel::Colour itemHoverColor () { return {185, 170, 119, true}; }
+
+    void GameLevel::fillRenderState(FARender::RenderState* state, Actor* displayedActor)
     {
         state->mObjects.clear();
+        state->mItems.clear ();
 
         for(size_t i = 0; i < mActors.size(); i++)
         {
@@ -139,14 +151,29 @@ namespace FAWorld
 
             FARender::FASpriteGroup* sprite = tmp.first;
             int32_t frame = tmp.second;
-
+            boost::optional<Cel::Colour> hoverColor;
+            if (mHoverState.isActorHovered(mActors[i]->getId()))
+               hoverColor = mActors[i]->isEnemy (displayedActor) ? enemyHoverColor() : friendHoverColor();
             if (!sprite)
                 sprite = FARender::getDefaultSprite();
+
 
             // offset the sprite for the current direction of the actor
             frame += mActors[i]->getPos().getDirection() * sprite->getAnimLength();
 
-            state->mObjects.push_back(std::tuple<FARender::FASpriteGroup*, size_t, FAWorld::Position>(sprite, frame, mActors[i]->getPos()));
+            state->mObjects.push_back({sprite, static_cast<uint32_t> (frame), mActors[i]->getPos(), hoverColor});
+
+            for (auto &p : mItemMap->mItems)
+               {
+                   auto sf = p.second.getSpriteFrame();
+                   FARender::ObjectToRender o;
+                   o.spriteGroup = sf.first;
+                   o.frame = sf.second;
+                   o.position = {p.first.x, p.first.y};
+                   if (mHoverState.isItemHovered(p.first))
+                       o.hoverColor = itemHoverColor ();
+                   state->mItems.push_back(o);
+               }
         }
     }
 
@@ -184,6 +211,17 @@ namespace FAWorld
         return dataSavingTmp;
     }
 
+    bool GameLevel::isPassableFor(int x, int y, const Actor *actor) const
+     {
+       auto actorAtPos = getActorAt (x, y);
+       return mLevel[x][y].passable() && (actorAtPos == nullptr || actorAtPos == actor || actorAtPos->isPassable());
+     }
+
+    bool GameLevel::dropItem(std::unique_ptr <Item>&& item, const Actor& actor, const Tile &tile)
+    {
+        return mItemMap->dropItem (move (item), actor, tile);
+    }
+
     GameLevel* GameLevel::loadFromString(const std::string& data)
     {
         GameLevel* retval = new GameLevel();
@@ -211,5 +249,18 @@ namespace FAWorld
     void GameLevel::getActors(std::vector<Actor*>& actors)
     {
         actors.insert(actors.end(), mActors.begin(), mActors.end());
+    }
+
+    HoverState& GameLevel::getHoverState() {
+       return mHoverState;
+    }
+
+    GameLevel::GameLevel()
+    {
+    }
+
+    ItemMap& GameLevel::getItemMap()
+    {
+        return *mItemMap;
     }
 }

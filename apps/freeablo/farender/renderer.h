@@ -42,6 +42,13 @@ namespace FARender
             friend class Renderer;
     };
 
+    struct ObjectToRender {
+       FASpriteGroup* spriteGroup;
+       uint32_t frame;
+       FAWorld::Position position;
+       boost::optional<Cel::Colour> hoverColor;
+     };
+
     class RenderState
     {
         public:
@@ -50,7 +57,8 @@ namespace FARender
 
         FAWorld::Position mPos;
 
-        std::vector<std::tuple<FASpriteGroup*, int32_t, FAWorld::Position> > mObjects; ///< group, index into group, and position
+        std::vector<ObjectToRender> mItems;
+        std::vector<ObjectToRender> mObjects;
 
         NuklearFrameDump nuklearData;
 
@@ -90,12 +98,13 @@ namespace FARender
             void fillServerSprite(uint32_t index, const std::string& path);
             std::string getPathForIndex(uint32_t index);
 
-            Render::Tile getClickedTile(size_t x, size_t y, const FAWorld::Position& screenPos);
+            Render::Tile getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos);
 
             void drawCursor(RenderState *State);
 
             bool renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload); ///< To be called only by Engine::ThreadManager
             void cleanup(); ///< To be called only by Engine::ThreadManager
+            Misc::Point cursorSize () const { return mCursorSize; }
 
             nk_context* getNuklearContext()
             {
@@ -115,11 +124,13 @@ namespace FARender
 
             std::atomic_bool mDone;
             Render::LevelObjects mLevelObjects;
+            Render::LevelObjects mItems;
 
             size_t mNumRenderStates = 15;
             RenderState* mStates;
 
             SpriteManager mSpriteManager;
+            Misc::Point mCursorSize;
 
             volatile bool mAlreadyExited = false;
             std::mutex mDoneMutex;

@@ -2,6 +2,8 @@
 #include "itemmanager.h"
 #include <iostream>
 #include "../falevelgen/random.h"
+#include "../farender/renderer.h"
+
 namespace FAWorld
 {
 Item Item::empty;
@@ -198,7 +200,74 @@ std::pair<uint8_t, uint8_t> Item::getCornerCoords() const
 {
     return std::pair<uint8_t, uint8_t>(mCornerX, mCornerY);
 }
-uint32_t Item::getActiveTrigger() const
+
+std::string Item::getFlipAnimationPath() const
+{
+    // TODO: extract mapping from exe
+    switch (getCode())
+    {
+        case icOther:
+            switch (getType())
+            {
+                case itPOT: return "items/fbttle.cel";
+            default:
+                break;
+            }
+            break;
+        case icSword: return "items/swrdflip.cel";
+        case icAxe: return "items/axe.cel";
+        case icBow: return "items/bow.cel";
+        case icBlunt: return "items/mace.cel";
+        case icShield: return "items/shield.cel";
+        case icLightArmour: return "items/larmor.cel";
+        case icHelm: return "items/helmut.cel";
+        case icMidArmour: return "items/armor2.cel";
+        case icHeavyArmour: return "items/FPlateAr.cel";
+        case icStave: return "items/staff.cel";
+        case icGold: return "items/goldflip.cel";
+        case icRing:
+        case icAmulet:
+            return "items/ring.cel";
+    }
+    return "";
+}
+
+std::string Item::getFlipSoundPath() const
+{
+    // TODO: add book, pot, scroll
+    switch (getCode())
+    {
+        case icOther:
+            return "";
+        case icSword: return "sfx/items/flipswor.wav";
+        case icAxe: return "sfx/items/flipaxe.wav";
+        case icBow: return "sfx/items/flipbow.wav";
+        case icBlunt: return "sfx/items/flipswor.wav"; // TODO: check
+        case icShield: return "sfx/items/flipshld.wav";
+        case icLightArmour: return "sfx/items/fliplarm.wav";
+        case icHelm: return "sfx/items/flipcap.wav";
+        case icMidArmour: return "sfx/items/fliplarm.wav"; // TODO: check
+        case icHeavyArmour: return "sfx/items/flipharm.wav";
+        case icStave: return "sfx/items/flipstaf.wav";
+        case icGold: return "sfx/items/gold.wav"; // also gold1.cel
+        case icRing:
+        case icAmulet:
+            return "sfx/items/flipring.wav";
+    }
+    return "";
+}
+
+FARender::FASpriteGroup* Item::getFlipSpriteGroup()
+{
+    return FARender::Renderer::get()->loadImage (getFlipAnimationPath());
+}
+
+bool Item::isBeltEquippable() const
+{
+    return mSizeX == 1 && mSizeY == 1 && mUseOnce && mCode != icGold;
+}
+
+    uint32_t Item::getActiveTrigger() const
 {
     return mActiveTrigger;
 }

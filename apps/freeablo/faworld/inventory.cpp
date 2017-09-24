@@ -8,7 +8,10 @@
 #include "actorstats.h"
 #include <algorithm>
 #include <boost/range/irange.hpp>
+#pragma warning(push)
+#pragma warning(disable:4172)  // boost being naughty
 #include <boost/range/any_range.hpp>
+#pragma warning(pop)
 
 namespace FAWorld
 {
@@ -70,7 +73,7 @@ namespace FAWorld
             case Item::eqINV:
                 return target.posX + item.getInvSize().first <= inventoryWidth && target.posY + item.getInvSize().second <= inventoryHeight;
             case Item::eqBELT:
-                return item.getType() == Item::itPOT; // TODO: scrolls
+                return item.isBeltEquippable ();
             default:
             {
                 auto it = appropriateLocations.find(item.getEquipLoc());
@@ -231,12 +234,15 @@ namespace FAWorld
     bool Inventory::autoPlaceItem(const Item& item, boost::optional <std::pair <Inventory::xorder, Inventory::yorder>> override_order)
     {
         // auto-placing in belt
-        if(item.getType() == Item::itPOT) // TODO: scrolls
+        if(item.isBeltEquippable())
             for(auto i = 0; i < beltWidth; ++i)
             {
                 auto& place = getItemAt(MakeEquipTarget <Item::eqBELT>(i));
                 if(place.isEmpty())
+                {
                     place = item;
+                    return true;
+                }
             }
         // auto-equipping weapons
         auto& leftHand = getItemAt(MakeEquipTarget <Item::eqLEFTHAND>());
@@ -285,26 +291,27 @@ namespace FAWorld
         if(requiredYOrder == yorder::fromTop) yrange = boost::irange(0, inventoryHeight, 1);
         else yrange = boost::irange(inventoryHeight - 1, -1, -1);
         for(auto i : xrange)
-            for(auto j : yrange)
             {
-                if(i + item.getInvSize().first >= inventoryWidth)
-                    continue;
-
-                if(j + item.getInvSize().second >= inventoryHeight)
-                    continue;
-
-                if(![&]
+                if(i + item.getInvSize().first > inventoryWidth)
+                   continue;
+                for(auto j : yrange)
                 {
-                    for(auto item_i = i; item_i < i + item.getInvSize().first; ++item_i)
-                        for(auto item_j = j; item_j < j + item.getInvSize().second; ++item_j)
-                            if(!mInventoryBox[item_j][item_i].isEmpty())
-                                return false;
-                    return true;
-                }())
-                    continue;
+                    if(j + item.getInvSize().second > inventoryHeight)
+                        continue;
 
-                layItem(item, i, j);
-                return true;
+                    if(![&]
+                    {
+                        for(auto item_i = i; item_i < i + item.getInvSize().first; ++item_i)
+                            for(auto item_j = j; item_j < j + item.getInvSize().second; ++item_j)
+                                if(!mInventoryBox[item_j][item_i].isEmpty())
+                                    return false;
+                        return true;
+                    }())
+                        continue;
+
+                    layItem(item, i, j);
+                    return true;
+                }
             }
         return false;
     }

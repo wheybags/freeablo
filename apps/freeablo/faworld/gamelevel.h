@@ -7,6 +7,8 @@
 #include <enet/enet.h> // TODO: remove
 
 #include <misc/stdhashes.h>
+#include "hoverstate.h"
+#include "item.h"
 
 namespace FARender
 {
@@ -17,7 +19,8 @@ namespace FARender
 namespace FAWorld
 {
     class Actor;
-
+    class ItemMap;
+    class Tile;
 
     class GameLevelImpl
     {
@@ -59,7 +62,7 @@ namespace FAWorld
 
         void addActor(Actor* actor);
 
-        void fillRenderState(FARender::RenderState* state);
+        void fillRenderState(FARender::RenderState* state, Actor* displayedActor);
 
         void removeActor(Actor* actor);
 
@@ -69,22 +72,28 @@ namespace FAWorld
         }
 
         std::string serialiseToString();
+        bool isPassableFor(int i, int j, const Actor* actor) const;
+        bool dropItem(std::unique_ptr <Item>&& item, const Actor& actor, const Tile &tile);
         static GameLevel* loadFromString(const std::string& data);
 
         Actor* getActorById(int32_t id);
 
         void getActors(std::vector<Actor*>& actors);
+        HoverState& getHoverState();
+        ItemMap &getItemMap();
 
     private:
-        GameLevel() {}
+        GameLevel();
 
         Level::Level mLevel;
-        size_t mLevelIndex;
+        size_t mLevelIndex = 0u;
 
         std::vector<Actor*> mActors;
         std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
                                                                     ///< Where an actor straddles two squares, they shall be placed in both.
         friend class FARender::Renderer;
+        HoverState mHoverState;
+        std::unique_ptr<ItemMap> mItemMap;
     };
 }
 
