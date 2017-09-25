@@ -20,10 +20,6 @@ before_install:
 - sudo apt-get update -qq
 - sudo apt-get install -qq libboost1.54-all-dev libsdl2-dev libsdl2-image-dev libsdl-ttf2.0-dev zlib1g-dev
   libbz2-dev doxygen libfreetype6-dev libpython2.7 libsdl2-mixer-dev cmake qtdeclarative5-dev libpng12-dev zlib1g-dev graphviz
-- wget http://wheybags.netsoc.ie/pkg/librocket_1.3-1_amd64.deb
-- sudo dpkg -i librocket_1.3-1_amd64.deb
-- wget http://wheybags.netsoc.ie/pkg/librocket-dev_1.3-1_amd64.deb
-- sudo dpkg -i librocket-dev_1.3-1_amd64.deb
 - git clone https://github.com/lsalzman/enet # install enet from source
 - cd enet
 - git checkout f46fee0acc8e243b2b6910b09693f93c3aad775f # just current HEAD at time of writing
@@ -37,8 +33,8 @@ before_script:
 - cd build
 - cmake -DTREAT_WARNINGS_AS_ERRORS=ON ../
 script:
-- make
-- make fatest
+- make -k
+- make fatest -k
 after_success:
 - cd ..
 - ./update-gh-pages.sh
