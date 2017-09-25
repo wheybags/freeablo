@@ -59,7 +59,7 @@ class CVSpriteCache : public Render::SpriteCacheBase
         return sprites[key]->sprite;
     }
 
-    virtual void setImmortal(uint32_t index, bool immortal)
+    virtual void setImmortal(uint32_t, bool)
     {
 
     }
@@ -142,7 +142,7 @@ bool nk_file_pick(nk_context* ctx, const std::string& label, std::string& path, 
     return retval;
 }
 
-int main(int argc, char *argv[])
+int main(int, char**)
 {
     /*QApplication a(argc, argv);
     MainWindow w;
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
                         frame++;
                     }
 
-                    if(frame >= image.get()->sprite->size())
+                    if(frame >= (int32_t)image.get()->sprite->size())
                         frame = 0;
 
                     Render::Sprite sprite = image.get()->sprite->operator[](frame);
