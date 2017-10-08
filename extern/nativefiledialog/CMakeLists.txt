@@ -23,3 +23,11 @@ if (EXTRA_LIBRARIES)
 endif()
 
 target_include_directories(${LIB} PUBLIC src/include)
+
+#if(CMAKE_VERSION VERSION_LESS "3.1")
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        set_target_properties(${LIB} PROPERTIES COMPILE_FLAGS "-std=gnu99")
+    endif()
+#else()
+#    set_property(TARGET ${LIB} PROPERTY C_STANDARD 99)
+#endif()

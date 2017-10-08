@@ -182,15 +182,17 @@ int main(int, char**)
 
     NuklearFrameDump nuklearData(nuklearGraphicsContext.dev);
 
+    Input::InputManager* inputTmp = nullptr;
     Input::InputManager input(
-        [&] (Input::Key key) { NuklearMisc::handleNuklearKeyboardEvent(&ctx, true, key, input.getModifiers()); },
-        [&] (Input::Key key) { NuklearMisc::handleNuklearKeyboardEvent(&ctx, false, key, input.getModifiers()); },
+        [&] (Input::Key key) { NuklearMisc::handleNuklearKeyboardEvent(&ctx, true, key, inputTmp->getModifiers()); },
+        [&] (Input::Key key) { NuklearMisc::handleNuklearKeyboardEvent(&ctx, false, key, inputTmp->getModifiers()); },
         [&] (int32_t x, int32_t y, Input::Key key, bool isDoubleClick) { NuklearMisc::handleNuklearMouseEvent(&ctx, x, y, key, true, isDoubleClick); },
         [&] (int32_t x, int32_t y, Input::Key key) { NuklearMisc::handleNuklearMouseEvent(&ctx, x, y, key, false, false); },
         [&] (int32_t x, int32_t y, int32_t xrel, int32_t yrel) { NuklearMisc::handleNuklearMouseMoveEvent(&ctx, x, y, xrel, yrel); },
         [&] (int32_t x, int32_t y) { NuklearMisc::handleNuklearMouseWheelEvent(&ctx, x, y); },
         [&] (std::string inp) { NuklearMisc::handleNuklearTextInputEvent(&ctx, inp); }
     );
+    inputTmp = &input;
 
 
     Settings::Settings settings;
@@ -250,7 +252,7 @@ int main(int, char**)
 
                 if(image)
                 {
-                    frame = nk_propertyi(&ctx, "Frame", 0, frame, image.get()->sprite->size(), 1, 0.2);
+                    frame = nk_propertyi(&ctx, "Frame", 0, frame, image.get()->sprite->size(), 1, 0.2f);
 
                     if(nk_button_label(&ctx, "save as png"))
                     {
