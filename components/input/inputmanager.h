@@ -8,16 +8,14 @@
 
 #include "keys.h"
 
-#include <fa_nuklear.h>
-
 
 namespace Input
 {
-    enum Modifier
+    struct KeyboardModifiers
     {
-        FAMOD_CTRL = 1,
-        FAMOD_ALT = 2,
-        FAMOD_SHIFT = 4
+        bool ctrl = false;
+        bool alt = false;
+        bool shift = false;
     };
 
     class InputManager
@@ -27,12 +25,13 @@ namespace Input
                 std::function<void(uint32_t, uint32_t, Key, bool)> mouseClick,
                 std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
                 std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
+                std::function<void(int32_t, int32_t)> mouseWheel,
                 std::function<void(std::string)> textInput);
 
             void processInput(bool paused);
             void poll();
 
-            uint32_t getModifiers();
+            KeyboardModifiers getModifiers();
 
             static InputManager* get();
 
@@ -63,6 +62,12 @@ namespace Input
                         int32_t yrel;
                     } mouseMove;
 
+                    struct _mouseWheel
+                    {
+                        int32_t x;
+                        int32_t y;
+                    } mouseWheel;
+
                     struct _textInput
                     {
                         std::string* text;
@@ -77,11 +82,12 @@ namespace Input
             std::function<void(uint32_t, uint32_t, Key, bool)> mMouseClick;
             std::function<void(uint32_t, uint32_t, Key)> mMouseRelease;
             std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mMouseMove;
+            std::function<void(int32_t, int32_t)> mMouseWheel;
             std::function<void(std::string)> mTextInput;
 
             static InputManager* instance;
 
-            uint32_t mModifiers;
+            KeyboardModifiers mModifiers;
     };
 }
 

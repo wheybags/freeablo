@@ -54,7 +54,7 @@ int fa_main(int argc, char** argv)
     if(!settings.loadUserSettings())
         return EXIT_FAILURE;
 
-    if (!FAIO::FAFileObject::init(settings.get<std::string>("Game","PathMPQ")))
+    if (!FAIO::init(settings.get<std::string>("Game","PathMPQ")))
     {
         return EXIT_FAILURE;
     }

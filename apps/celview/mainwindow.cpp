@@ -285,7 +285,7 @@ bool MainWindow::openMPQ()
     std::string fileList = ui->lineEdit_2->text().toStdString();
     SFileAddListFile(mDiabdat, fileList.c_str());
 
-    FAIO::FAFileObject::init(mFilename.toStdString().c_str());
+    FAIO::init(mFilename.toStdString().c_str());
 
     return true;
 }

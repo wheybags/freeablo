@@ -8,6 +8,7 @@
 #include <input/inputmanager.h>
 #include "../components/misc/misc.h"
 #include "inputobserverinterface.h"
+#include <fa_nuklear.h>
 
 namespace FAWorld
 {
@@ -17,13 +18,6 @@ namespace FAWorld
 namespace Engine
 {
     class EngineMain;
-
-    struct KeyboardModifiers
-    {
-        bool ctrl = false;
-        bool alt = false;
-        bool shift = false;
-    };
 
     class EngineInputManager
     {
@@ -35,7 +29,7 @@ namespace Engine
             std::vector<Input::Hotkey> getHotkeys();
             void registerKeyboardObserver(KeyboardInputObserverInterface* observer);
             void registerMouseObserver(MouseInputObserverInterface* observer);
-            KeyboardModifiers getKeyboardModifiers()
+            Input::KeyboardModifiers getKeyboardModifiers()
             {
                 return mKbMods;
             }
@@ -58,7 +52,7 @@ namespace Engine
             Misc::Point mMousePosition;
             bool mMouseDown = false;
             bool mClick = false;
-            KeyboardModifiers mKbMods;
+            Input::KeyboardModifiers mKbMods;
             std::map<KeyboardInputAction,Input::Hotkey> mHotkeys;
             std::vector<KeyboardInputObserverInterface*> mKeyboardObservers;
             std::vector<MouseInputObserverInterface*> mMouseObservers;

@@ -58,3 +58,6 @@ endif()
 # nuklear
 ###################
 add_subdirectory(nuklear)
+
+# nativefiledialog
+add_subdirectory(nativefiledialog)

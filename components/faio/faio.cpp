@@ -37,7 +37,7 @@ namespace FAIO
 
     HANDLE diabdat = NULL;
 
-	bool init(const std::string pathMPQ)
+    bool init(const std::string pathMPQ, const std::string listFile)
     {
 		const bool success = SFileOpenArchive(pathMPQ.c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat);
 
@@ -46,7 +46,29 @@ namespace FAIO
 			std::cerr << "Failed to open " << pathMPQ.c_str() << " with error " << GetLastError() << std::endl;
         }
 
+        if(!listFile.empty())
+            SFileAddListFile(diabdat, listFile.c_str());
+
         return success;
+    }
+
+    std::vector<std::string> listMpqFiles(const std::string& pattern)
+    {
+        SFILE_FIND_DATA findFileData;
+        HANDLE findHandle = SFileFindFirstFile(diabdat, pattern.c_str(), &findFileData, NULL);
+
+        std::vector<std::string> results;
+
+        results.push_back(findFileData.cFileName);
+
+        while (SFileFindNextFile(findHandle, &findFileData))
+        {
+            results.push_back(findFileData.cFileName);
+        }
+
+        SFileFindClose(findHandle);
+
+        return results;
     }
 
     void quit()

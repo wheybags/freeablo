@@ -7,10 +7,6 @@
 #include <iostream>
 
 
-namespace Render
-{
-    extern struct nk_context* ctx;
-}
 
 namespace Input
 {
@@ -21,6 +17,7 @@ namespace Input
     void doNothing_mouseClick(uint32_t, uint32_t, Key, bool){}
     void doNothing_mouseRelease(uint32_t, uint32_t, Key){}
     void doNothing_mouseMove(uint32_t, uint32_t, uint32_t, uint32_t) {}
+    void doNothing_mouseWheel(int32_t, int32_t) {}
     void doNothing_textInput(std::string){}
     
     #define getFunc(f) f ? f : doNothing_##f
@@ -29,9 +26,15 @@ namespace Input
         std::function<void(uint32_t, uint32_t, Key, bool)> mouseClick,
         std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
         std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
-        std::function<void(std::string)> textInput):
-            mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)),
-            mMouseRelease(getFunc(mouseRelease)), mMouseMove(getFunc(mouseMove)), mTextInput(getFunc(textInput)), mModifiers(0)
+        std::function<void(int32_t, int32_t)> mouseWheel,
+        std::function<void(std::string)> textInput)
+            : mKeyPress(getFunc(keyPress))
+            , mKeyRelease(getFunc(keyRelease))
+            , mMouseClick(getFunc(mouseClick))
+            , mMouseRelease(getFunc(mouseRelease))
+            , mMouseMove(getFunc(mouseMove))
+            , mMouseWheel(getFunc(mouseWheel))
+            , mTextInput(getFunc(textInput))
         {
             assert(!instance);
             instance = this;
@@ -254,7 +257,14 @@ namespace Input
                     e.vals.mouseMove.yrel = event.motion.yrel;
                     break;
                 }
-                
+
+                case SDL_MOUSEWHEEL:
+                {
+                    e.vals.mouseWheel.x = event.wheel.x;
+                    e.vals.mouseWheel.y = event.wheel.y;
+                    break;
+                }
+
                 case SDL_WINDOWEVENT:
                 {
                     if(event.window.event == SDL_WINDOWEVENT_RESIZED)
@@ -278,24 +288,23 @@ namespace Input
             while(!mQueue.push(e)) {} // push, or wait until buffer not full, then push
         }
 
-        uint32_t mods = 0;
-
         SDL_Keymod sdlMods = SDL_GetModState();
 
+        KeyboardModifiers mods;
 
         if(sdlMods & KMOD_CTRL)
-            mods |= FAMOD_CTRL;
+            mods.ctrl = true;
 
         if(sdlMods & KMOD_SHIFT)
-            mods |= FAMOD_SHIFT;
+            mods.shift = true;
 
         if(sdlMods & KMOD_ALT)
-            mods |= FAMOD_ALT;
+            mods.alt = true;
 
         mModifiers = mods;
     }
     
-    uint32_t InputManager::getModifiers()
+    KeyboardModifiers InputManager::getModifiers()
     {
         return mModifiers;
     }
@@ -357,6 +366,13 @@ namespace Input
                 case SDL_MOUSEMOTION:
                 {
                     mMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y, event.vals.mouseMove.xrel, event.vals.mouseMove.yrel);
+                    break;
+                }
+
+                case SDL_MOUSEWHEEL:
+                {
+                    mMouseWheel(event.vals.mouseWheel.x, event.vals.mouseWheel.y);
+                    break;
                 }
 
                 default:
