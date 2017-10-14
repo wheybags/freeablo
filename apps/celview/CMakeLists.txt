@@ -19,7 +19,7 @@ add_executable(celview
 )
 
 set_target_properties(celview PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
-target_link_libraries(celview nativefiledialog)
+target_link_libraries(celview NuklearMisc)
 
 if(UNIX) # qt headers generate a bunch of warnings, just ignore em
     set_target_properties(StormLib PROPERTIES COMPILE_FLAGS "-w")

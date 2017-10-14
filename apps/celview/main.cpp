@@ -3,144 +3,13 @@
 
 #include <render/render.h>
 #include <nuklearmisc/inputfwd.h>
+#include <nuklearmisc/widgets.h>
+#include <nuklearmisc/standaloneguispritehandler.h>
 #include <input/inputmanager.h>
 #include <faio/fafileobject.h>
 #include <chrono>
-
 #include <nfd.h>
 
-struct CVSprite
-{
-    CVSprite(Render::SpriteGroup* sprite, uint32_t cacheIndex) : sprite(sprite), cacheIndex(cacheIndex)
-    {
-        for(uint32_t i = 0; i < sprite->size(); i++)
-        {
-            id id;
-            id.cacheIndex = cacheIndex;
-            id.frameIndex = i;
-
-            frameIds.push_back(id);
-        }
-    }
-
-    Render::SpriteGroup* sprite;
-    uint32_t cacheIndex;
-
-    struct id
-    {
-        uint32_t cacheIndex;
-        uint32_t frameIndex;
-    };
-
-    std::vector<id> frameIds;
-
-    struct nk_image getNkImage(int32_t frame)
-    {
-        return nk_image_handle(nk_handle_ptr(&frameIds[frame]));
-    }
-};
-
-uint32_t nextSpriteId = 1;
-std::map<uint32_t, CVSprite*> sprites;
-
-CVSprite* getCVSprite(Render::SpriteGroup* sprite)
-{
-    auto retval = new CVSprite(sprite, nextSpriteId);
-    sprites[nextSpriteId] = retval;
-    nextSpriteId++;
-    return retval;
-}
-
-class CVSpriteCache : public Render::SpriteCacheBase
-{
-    public:
-    virtual Render::SpriteGroup* get(uint32_t key)
-    {
-        return sprites[key]->sprite;
-    }
-
-    virtual void setImmortal(uint32_t, bool)
-    {
-
-    }
-};
-
-void nk_fa_font_stash_begin(nk_font_atlas& atlas)
-{
-    nk_font_atlas_init_default(&atlas);
-    nk_font_atlas_begin(&atlas);
-}
-
-CVSprite* aaaa;
-
-nk_handle nk_fa_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
-{
-    const void *image; int w, h;
-    image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
-
-    CVSprite* sprite = getCVSprite(Render::loadSprite((uint8_t*)image, w, h));
-    aaaa = sprite;
-    //FASpriteGroup* sprite = spriteManager.getFromRaw((uint8_t*)image, w, h);
-    //spriteManager.setImmortal(sprite->getCacheIndex(), true);
-
-    nk_handle handle = sprite->getNkImage(0).handle;
-    nk_font_atlas_end(&atlas, handle, &nullTex);
-
-    if (atlas.default_font)
-        nk_style_set_font(ctx, &atlas.default_font->handle);
-
-    return handle;
-}
-
-float rowHeight = 30;
-
-bool nk_file_pick(nk_context* ctx, const std::string& label, std::string& path, const std::string& filter, float labelWidth = 120)
-{
-    // TODO: replace nasty static buffer, we could use the more advanced api, but I'm not bothered right now
-    char buf[4096];
-
-    assert(path.size()+1 < 4096);
-    memcpy(buf, path.c_str(), path.size()+1);
-
-    bool retval = false;
-
-    auto groupName = std::string("file_pick_group_") + std::to_string(size_t(&path));
-    if(nk_group_begin(ctx, groupName.c_str(), 0))
-    {
-        nk_layout_row_template_begin(ctx, rowHeight);
-        {
-            nk_layout_row_template_push_static(ctx, labelWidth);
-            nk_layout_row_template_push_variable(ctx, 80);
-            nk_layout_row_template_push_static(ctx, 40);
-        }
-        nk_layout_row_template_end(ctx);
-
-        nk_label(ctx, label.c_str(), NK_TEXT_LEFT);
-
-        if(nk_edit_string_zero_terminated(ctx, NK_EDIT_SIMPLE, buf, 4096, nk_filter_default) == NK_EDIT_COMMITED)
-            retval = true;
-
-        if(nk_button_label(ctx, "pick"))
-        {
-            nfdchar_t *outPath = NULL;
-            nfdresult_t result = NFD_OpenDialog(filter.c_str(), NULL, &outPath);
-            if(result == NFD_OKAY)
-            {
-                path = outPath;
-                free(outPath);
-                retval = true;
-            }
-        }
-        else
-        {
-            path = buf;
-        }
-
-        nk_group_end(ctx);
-    }
-
-    return retval;
-}
 
 int main(int, char**)
 {
@@ -155,6 +24,7 @@ int main(int, char**)
     renderSettings.windowHeight = 600;
     renderSettings.fullscreen = false;
 
+    float rowHeight = 30;
 
     Render::NuklearGraphicsContext nuklearGraphicsContext;
     nk_context ctx;
@@ -166,16 +36,18 @@ int main(int, char**)
 
     Render::init(renderSettings, nuklearGraphicsContext, &ctx);
 
+    FAStandaloneGuiSpriteHandler sprites;
+
     // Load Cursor: if you uncomment cursor loading please hide the cursor
     {
-        nk_fa_font_stash_begin(nuklearGraphicsContext.atlas);
+        sprites.nk_fa_font_stash_begin(nuklearGraphicsContext.atlas);
         //struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);
         //struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 16, 0);
         //struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);
         //struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
         //struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
         //struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
-        nuklearGraphicsContext.dev.font_tex = nk_fa_font_stash_end(&ctx, nuklearGraphicsContext.atlas, nuklearGraphicsContext.dev.null);
+        nuklearGraphicsContext.dev.font_tex = sprites.nk_fa_font_stash_end(&ctx, nuklearGraphicsContext.atlas, nuklearGraphicsContext.dev.null);
         //nk_style_load_all_cursors(ctx, atlas->cursors);
         //nk_style_set_font(ctx, &roboto->handle);
     }
@@ -205,9 +77,9 @@ int main(int, char**)
     std::vector<std::string> celFiles;
 
     std::string selectedImage = "";
-    std::unique_ptr<CVSprite> image;
+    std::unique_ptr<GuiSprite> image;
 
-    std::unique_ptr<CVSprite> nextImage;
+    std::unique_ptr<GuiSprite> nextImage;
 
     int animate = false;
     int32_t frame = 0;
@@ -219,7 +91,7 @@ int main(int, char**)
         auto now = std::chrono::high_resolution_clock::now();
 
         if(nextImage)
-            image = std::unique_ptr<CVSprite>(nextImage.release());
+            image = std::unique_ptr<GuiSprite>(nextImage.release());
 
         input.poll();
 
@@ -252,7 +124,7 @@ int main(int, char**)
 
                 if(image)
                 {
-                    frame = nk_propertyi(&ctx, "Frame", 0, frame, image.get()->sprite->size(), 1, 0.2f);
+                    frame = nk_propertyi(&ctx, "Frame", 0, frame, image.get()->getSprite()->size(), 1, 0.2f);
 
                     if(nk_button_label(&ctx, "save as png"))
                     {
@@ -272,10 +144,10 @@ int main(int, char**)
                         frame++;
                     }
 
-                    if(frame >= (int32_t)image.get()->sprite->size())
+                    if(frame >= (int32_t)image.get()->getSprite()->size())
                         frame = 0;
 
-                    Render::Sprite sprite = image.get()->sprite->operator[](frame);
+                    Render::Sprite sprite = image.get()->getSprite()->operator[](frame);
 
                     int32_t w, h;
                     Render::spriteSize(sprite, w, h);
@@ -307,8 +179,8 @@ int main(int, char**)
                 {
                     nk_layout_row_dynamic(&ctx, rowHeight*2, 1);
 
-                    nk_file_pick(&ctx, "DIABDAT.MPQ", mpqFile, "mpq,MPQ");
-                    nk_file_pick(&ctx, "Diablo listfile", listFile, "txt");
+                    NuklearMisc::nk_file_pick(&ctx, "DIABDAT.MPQ", mpqFile, "mpq,MPQ", rowHeight);
+                    NuklearMisc::nk_file_pick(&ctx, "Diablo listfile", listFile, "txt", rowHeight);
 
                     if(nk_button_label(&ctx, "load"))
                     {
@@ -340,7 +212,7 @@ int main(int, char**)
                     {
                         selectedImage = celFiles[i];
                         frame = 0;
-                        nextImage = std::unique_ptr<CVSprite>(getCVSprite(new Render::SpriteGroup(selectedImage)));
+                        nextImage = std::unique_ptr<GuiSprite>(sprites.getCVSprite(new Render::SpriteGroup(selectedImage)));
                     }
                 }
 
@@ -351,8 +223,7 @@ int main(int, char**)
 
         nuklearData.fill(&ctx);
 
-        CVSpriteCache cache;
-        Render::drawGui(nuklearData, &cache);
+        Render::drawGui(nuklearData, &sprites);
         nk_clear(&ctx);
 
         Render::draw();
