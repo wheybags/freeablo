@@ -10,11 +10,8 @@ namespace FAWorld
         for (AnimState s = (AnimState)0; s < AnimState::ENUM_END; s = (AnimState)(((int32_t)s) + 1))
         {
             mAnimations[s] = FARender::getDefaultSprite();
-            mAnimTimeMap[s] = World::getTicksInPeriod(0.5f);
+            mAnimTimeMap[s] = World::getTicksInPeriod(0.06f);
         }
-
-        mAnimTimeMap[AnimState::attack] = World::getTicksInPeriod(1.0f);
-        mAnimTimeMap[AnimState::idle] = World::getTicksInPeriod(1.0f);
     }
 
     AnimState ActorAnimationManager::getCurrentAnimation()
@@ -31,6 +28,12 @@ namespace FAWorld
     {
         mPlayingAnim = animation;
         mAnimationPlayer.playAnimation(mAnimations[animation], mAnimTimeMap[animation], type);
+    }
+
+    void ActorAnimationManager::playAnimation(AnimState animation, std::vector<int> frameSequence)
+    {
+        mPlayingAnim = animation;
+        mAnimationPlayer.playAnimation(mAnimations[animation], mAnimTimeMap[animation], frameSequence);
     }
 
     void ActorAnimationManager::setAnimation(AnimState animation, FARender::FASpriteGroup* sprite)
@@ -50,6 +53,16 @@ namespace FAWorld
 
         // loop idle animation if we're not doing anything else
         if (sprite == nullptr)
-            playAnimation(AnimState::idle, FARender::AnimationPlayer::AnimationType::Looped);
+        {
+            if (mIdleFrameSequence.empty ())
+                playAnimation(AnimState::idle, FARender::AnimationPlayer::AnimationType::Looped);
+            else
+                playAnimation(AnimState::idle, mIdleFrameSequence);
+        }
+    }
+
+    void ActorAnimationManager::setIdleFrameSequence(const std::vector<int>& sequence)
+    {
+        mIdleFrameSequence = sequence;
     }
 }

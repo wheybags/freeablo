@@ -143,6 +143,8 @@ namespace FAWorld
         for (size_t i = 0; i < npcs.size(); i++)
         {
             Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath);
+            if (auto id = npcs[i]->animationSequenceId)
+                actor->setIdleAnimSequence (mDiabloExe.getTownerAnimation()[*id]);
             actor->setCanTalk(true);
             actor->setActorId(npcs[i]->id);
             actor->setName (npcs[i]->name);

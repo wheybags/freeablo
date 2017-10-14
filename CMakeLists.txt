@@ -76,6 +76,8 @@ if(MSVC)
     # 4459 - declaration of 'self' hides global declaration
     # 4127 - conditional expression is constant, could be useful to check that both branches compilable.
     # 4800 - forcing value to bool, stupid warning
+    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /w44062")
+    # 4061 - not all enumerator values are handled by the switch statement
     if (TREAT_WARNINGS_AS_ERRORS)
         set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /WX")
     endif()

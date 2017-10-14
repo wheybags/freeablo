@@ -15,6 +15,7 @@ namespace FARender
                 Looped,
                 Once,
                 FreezeAtEnd,
+                BySequence,
 
                 ENUM_END
             };
@@ -22,7 +23,8 @@ namespace FARender
             AnimationPlayer() {}
 
             std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame();
-            void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick duration, AnimationType type);
+            void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationType type);
+            void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int> frameSequence);
 
             //!
             //! Simply replaces the currently running animation.
@@ -39,6 +41,7 @@ namespace FARender
             FAWorld::Tick mPlayingAnimDuration = 0;
             AnimationType mPlayingAnimType = AnimationType::Once;
             FAWorld::Tick mTicksSinceAnimStarted = 0;
+            std::vector<int> mFrameSequence;
 
             template <class Stream>
             Serial::Error::Error faSerial(Stream& stream)

@@ -28,9 +28,11 @@ namespace FAWorld
         std::pair<FARender::FASpriteGroup*, int32_t> getCurrentRealFrame();
 
         void playAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type);
+        void playAnimation(AnimState animation, std::vector<int> frameSequence);
         void setAnimation(AnimState animation, FARender::FASpriteGroup* sprite);
 
         void update();
+        void setIdleFrameSequence(const std::vector<int>& sequence);
 
     private:
         AnimState mPlayingAnim = AnimState::none;
@@ -38,6 +40,7 @@ namespace FAWorld
 
         std::unordered_map<AnimState, FARender::FASpriteGroup*, EnumClassHash> mAnimations;
         std::map<AnimState, Tick> mAnimTimeMap;
+        std::vector<int> mIdleFrameSequence;
 
         template <class Stream>
         Serial::Error::Error faSerial(Stream& stream)
