@@ -275,7 +275,10 @@ namespace Input
 
                 case SDL_QUIT:
                 {
-                    exit(0);
+                    if(!mHasQuit)
+                        mHasQuit = true;
+                    else // quit immediately if user asks for quit twice
+                        exit(0);
                     break;
                 }
 
@@ -309,9 +312,11 @@ namespace Input
         return mModifiers;
     }
 
-    void InputManager::processInput(bool paused)
+    bool InputManager::processInput(bool paused)
     {
         Event event;
+
+        bool quit = false;
 
         while(mQueue.pop(event))
         {
@@ -375,12 +380,20 @@ namespace Input
                     break;
                 }
 
+                case SDL_QUIT:
+                {
+                    quit = true;
+                    break;
+                }
+
                 default:
                 {
                     break;
                 }
             }
         }
+
+        return quit;
     }
 
     InputManager* InputManager::get()

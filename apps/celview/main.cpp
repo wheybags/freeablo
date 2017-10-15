@@ -24,48 +24,9 @@ int main(int, char**)
     renderSettings.windowHeight = 600;
     renderSettings.fullscreen = false;
 
-    float rowHeight = 30;
+    NuklearMisc::StandaloneGuiHandler guiHandler(renderSettings);
 
-    Render::NuklearGraphicsContext nuklearGraphicsContext;
-    nk_context ctx;
-
-    nk_init_default(&ctx, nullptr);
-    ctx.clip.copy = nullptr;// nk_sdl_clipbard_copy;
-    ctx.clip.paste = nullptr;// nk_sdl_clipbard_paste;
-    ctx.clip.userdata = nk_handle_ptr(0);
-
-    Render::init(renderSettings, nuklearGraphicsContext, &ctx);
-
-    FAStandaloneGuiSpriteHandler sprites;
-
-    // Load Cursor: if you uncomment cursor loading please hide the cursor
-    {
-        sprites.nk_fa_font_stash_begin(nuklearGraphicsContext.atlas);
-        //struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);
-        //struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 16, 0);
-        //struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);
-        //struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
-        //struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
-        //struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
-        nuklearGraphicsContext.dev.font_tex = sprites.nk_fa_font_stash_end(&ctx, nuklearGraphicsContext.atlas, nuklearGraphicsContext.dev.null);
-        //nk_style_load_all_cursors(ctx, atlas->cursors);
-        //nk_style_set_font(ctx, &roboto->handle);
-    }
-
-    NuklearFrameDump nuklearData(nuklearGraphicsContext.dev);
-
-    Input::InputManager* inputTmp = nullptr;
-    Input::InputManager input(
-        [&] (Input::Key key) { NuklearMisc::handleNuklearKeyboardEvent(&ctx, true, key, inputTmp->getModifiers()); },
-        [&] (Input::Key key) { NuklearMisc::handleNuklearKeyboardEvent(&ctx, false, key, inputTmp->getModifiers()); },
-        [&] (int32_t x, int32_t y, Input::Key key, bool isDoubleClick) { NuklearMisc::handleNuklearMouseEvent(&ctx, x, y, key, true, isDoubleClick); },
-        [&] (int32_t x, int32_t y, Input::Key key) { NuklearMisc::handleNuklearMouseEvent(&ctx, x, y, key, false, false); },
-        [&] (int32_t x, int32_t y, int32_t xrel, int32_t yrel) { NuklearMisc::handleNuklearMouseMoveEvent(&ctx, x, y, xrel, yrel); },
-        [&] (int32_t x, int32_t y) { NuklearMisc::handleNuklearMouseWheelEvent(&ctx, x, y); },
-        [&] (std::string inp) { NuklearMisc::handleNuklearTextInputEvent(&ctx, inp); }
-    );
-    inputTmp = &input;
-
+    nk_context* ctx = guiHandler.getNuklearContext();
 
     Settings::Settings settings;
     settings.loadFromFile("resources/celview.ini");
@@ -77,56 +38,50 @@ int main(int, char**)
     std::vector<std::string> celFiles;
 
     std::string selectedImage = "";
-    std::unique_ptr<GuiSprite> image;
+    std::unique_ptr<NuklearMisc::GuiSprite> image;
 
-    std::unique_ptr<GuiSprite> nextImage;
+    std::unique_ptr<NuklearMisc::GuiSprite> nextImage;
 
     int animate = false;
     int32_t frame = 0;
 
+    float rowHeight = 30;
     auto lastFrame = std::chrono::high_resolution_clock::now();
 
-    while(true)
+    bool quit = false;
+    while(!quit)
     {
         auto now = std::chrono::high_resolution_clock::now();
 
         if(nextImage)
-            image = std::unique_ptr<GuiSprite>(nextImage.release());
-
-        input.poll();
-
-        nk_input_begin(&ctx);
-        input.processInput(false);
-        nk_input_end(&ctx);
-
-        Render::clear();
+            image = std::unique_ptr<NuklearMisc::GuiSprite>(nextImage.release());
 
         renderSettings = Render::getWindowSize();
 
-        if(nk_begin(&ctx, "main_window", nk_rect(0, 0, renderSettings.windowWidth, renderSettings.windowHeight), NK_WINDOW_NO_SCROLLBAR))
+        if(nk_begin(ctx, "main_window", nk_rect(0, 0, renderSettings.windowWidth, renderSettings.windowHeight), NK_WINDOW_NO_SCROLLBAR))
         {
-            struct nk_rect bounds = nk_window_get_content_region(&ctx);
+            struct nk_rect bounds = nk_window_get_content_region(ctx);
 
-            nk_layout_row_dynamic(&ctx, bounds.h, 2);
+            nk_layout_row_dynamic(ctx, bounds.h, 2);
 
-            if(nk_group_begin(&ctx, "image", 0))
+            if(nk_group_begin(ctx, "image", 0))
             {
-                nk_layout_row_dynamic(&ctx, rowHeight, 1);
+                nk_layout_row_dynamic(ctx, rowHeight, 1);
 
                 std::string label = selectedImage;
 
                 if(selectedImage == "")
                     label = "No image selected";
 
-                nk_label(&ctx, label.c_str(), NK_TEXT_CENTERED);
+                nk_label(ctx, label.c_str(), NK_TEXT_CENTERED);
 
-                nk_checkbox_label(&ctx, "Animate", &animate);
+                nk_checkbox_label(ctx, "Animate", &animate);
 
                 if(image)
                 {
-                    frame = nk_propertyi(&ctx, "Frame", 0, frame, image.get()->getSprite()->size(), 1, 0.2f);
+                    frame = nk_propertyi(ctx, "Frame", 0, frame, image.get()->getSprite()->size(), 1, 0.2f);
 
-                    if(nk_button_label(&ctx, "save as png"))
+                    if(nk_button_label(ctx, "save as png"))
                     {
                         nfdchar_t *outPath = NULL;
                         nfdresult_t result = NFD_SaveDialog("png", NULL, &outPath);
@@ -153,36 +108,35 @@ int main(int, char**)
                     Render::spriteSize(sprite, w, h);
 
 
-                    nk_layout_space_begin(&ctx, NK_STATIC, h, 1);
+                    nk_layout_space_begin(ctx, NK_STATIC, h, 1);
                     {
-                        nk_layout_space_push(&ctx, nk_rect(0, 0, w, h));
+                        nk_layout_space_push(ctx, nk_rect(0, 0, w, h));
 
-                        auto canvas = nk_window_get_canvas(&ctx);
+                        auto canvas = nk_window_get_canvas(ctx);
 
                         struct nk_rect imageRect;
-                        nk_widget(&imageRect, &ctx);
+                        nk_widget(&imageRect, ctx);
                         nk_fill_rect(canvas, imageRect, 0.0, nk_rgb(0, 255, 0));
 
                         auto img = image.get()->getNkImage(frame);
                         nk_draw_image(canvas, imageRect, &img, nk_rgb(255, 255, 255));
                     }
-                    nk_layout_space_end(&ctx);
+                    nk_layout_space_end(ctx);
                 }
 
-
-                nk_group_end(&ctx);
+                nk_group_end(ctx);
             }
 
-            if(nk_group_begin(&ctx, "file list", 0))
+            if(nk_group_begin(ctx, "file list", 0))
             {
                 if(!faioInitDone)
                 {
-                    nk_layout_row_dynamic(&ctx, rowHeight*2, 1);
+                    nk_layout_row_dynamic(ctx, rowHeight*2, 1);
 
-                    NuklearMisc::nk_file_pick(&ctx, "DIABDAT.MPQ", mpqFile, "mpq,MPQ", rowHeight);
-                    NuklearMisc::nk_file_pick(&ctx, "Diablo listfile", listFile, "txt", rowHeight);
+                    NuklearMisc::nk_file_pick(ctx, "DIABDAT.MPQ", mpqFile, "mpq,MPQ", rowHeight);
+                    NuklearMisc::nk_file_pick(ctx, "Diablo listfile", listFile, "txt", rowHeight);
 
-                    if(nk_button_label(&ctx, "load"))
+                    if(nk_button_label(ctx, "load"))
                     {
                         FAIO::init(mpqFile, listFile);
                         celFiles = FAIO::listMpqFiles("*.cel");
@@ -199,36 +153,30 @@ int main(int, char**)
                     }
                 }
 
-                nk_layout_row_dynamic(&ctx, rowHeight, 1);
+                nk_layout_row_dynamic(ctx, rowHeight, 1);
 
                 for(size_t i = 0; i < celFiles.size(); i++)
                 {
-                    auto buttonStyle = ctx.style.button;
+                    auto buttonStyle = ctx->style.button;
 
                     if(selectedImage == celFiles[i])
                         buttonStyle.normal = buttonStyle.hover;
 
-                    if(nk_button_label_styled(&ctx, &buttonStyle, celFiles[i].c_str()))
+                    if(nk_button_label_styled(ctx, &buttonStyle, celFiles[i].c_str()))
                     {
                         selectedImage = celFiles[i];
                         frame = 0;
-                        nextImage = std::unique_ptr<GuiSprite>(sprites.getCVSprite(new Render::SpriteGroup(selectedImage)));
+                        nextImage = std::unique_ptr<NuklearMisc::GuiSprite>(guiHandler.getSprite(new Render::SpriteGroup(selectedImage)));
                     }
                 }
 
-                nk_group_end(&ctx);
+                nk_group_end(ctx);
             }
         }
-        nk_end(&ctx);
+        nk_end(ctx);
 
-        nuklearData.fill(&ctx);
-
-        Render::drawGui(nuklearData, &sprites);
-        nk_clear(&ctx);
-
-        Render::draw();
+        quit = guiHandler.update();
     }
-
 
     return 0;
 }

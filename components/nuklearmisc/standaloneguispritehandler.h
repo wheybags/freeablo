@@ -5,57 +5,71 @@
 #include <fa_nuklear.h>
 #include <map>
 #include <render/render.h>
+#include <input/inputmanager.h>
 
-class FAStandaloneGuiSpriteHandler;
-
-class GuiSprite
+namespace NuklearMisc
 {
-public:
-    GuiSprite(Render::SpriteGroup* sprite, uint32_t cacheIndex, FAStandaloneGuiSpriteHandler* handler);
-    ~GuiSprite();
+    class StandaloneGuiHandler;
 
-    struct nk_image getNkImage(int32_t frame)
+    class GuiSprite
     {
-        return nk_image_handle(nk_handle_ptr(&mFrameIds[frame]));
-    }
+    public:
+        GuiSprite(Render::SpriteGroup* sprite, uint32_t cacheIndex, StandaloneGuiHandler* handler);
+        ~GuiSprite();
 
-    Render::SpriteGroup* getSprite()
-    {
-        return mSprite;
-    }
+        struct nk_image getNkImage(int32_t frame)
+        {
+            return nk_image_handle(nk_handle_ptr(&mFrameIds[frame]));
+        }
 
-private:
-    Render::SpriteGroup* mSprite;
-    FAStandaloneGuiSpriteHandler* mHandler;
-    uint32_t mCacheIndex;
+        Render::SpriteGroup* getSprite()
+        {
+            return mSprite;
+        }
 
-    struct id
-    {
-        uint32_t cacheIndex;
-        uint32_t frameIndex;
+    private:
+        Render::SpriteGroup* mSprite;
+        StandaloneGuiHandler* mHandler;
+        uint32_t mCacheIndex;
+
+        struct id
+        {
+            uint32_t cacheIndex;
+            uint32_t frameIndex;
+        };
+
+        std::vector<id> mFrameIds;
     };
 
-    std::vector<id> mFrameIds;
-};
-
-class FAStandaloneGuiSpriteHandler : public Render::SpriteCacheBase
-{
-public:
-    Render::SpriteGroup* get(uint32_t key) override
+    class StandaloneGuiHandler : private Render::SpriteCacheBase
     {
-        return mSprites[key]->getSprite();
-    }
+    public:
+        StandaloneGuiHandler(const Render::RenderSettings& renderSettings);
+        ~StandaloneGuiHandler();
 
-    virtual void setImmortal(uint32_t, bool) override {}
+        GuiSprite* getSprite(Render::SpriteGroup* sprite);
+        nk_context* getNuklearContext() { return &mCtx; }
+        bool update();
 
-    GuiSprite* getCVSprite(Render::SpriteGroup* sprite);
+    private:
+        static void fontStashBegin(nk_font_atlas& atlas);
+        nk_handle fontStashEnd(nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
 
-    void nk_fa_font_stash_begin(nk_font_atlas& atlas);
-    nk_handle nk_fa_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
+        Render::SpriteGroup* get(uint32_t key) override
+        {
+            return mSprites[key]->getSprite();
+        }
 
-private:
-    uint32_t mNextFrameId = 1;
-    std::map<uint32_t, GuiSprite*> mSprites;
+        virtual void setImmortal(uint32_t, bool) override {}
 
-    friend class GuiSprite;
-};
+        uint32_t mNextFrameId = 1;
+        std::map<uint32_t, GuiSprite*> mSprites;
+
+        Render::NuklearGraphicsContext mNuklearGraphicsContext;
+        nk_context mCtx;
+        Input::InputManager mInput;
+        NuklearFrameDump mNuklearData;
+
+        friend class GuiSprite;
+    };
+}

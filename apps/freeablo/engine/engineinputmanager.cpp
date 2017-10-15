@@ -195,7 +195,12 @@ namespace Engine
         mKbMods = mInput.getModifiers();
 
         nk_input_begin(mNkCtx);
-        mInput.processInput(paused);
+        bool quit = mInput.processInput(paused);
+
+        //TODO: bit nasty to use keybard observers for this, but meh
+        if(quit)
+             notifyKeyboardObservers(KeyboardInputAction::QUIT);
+
         nk_input_end(mNkCtx);
 
         if(!paused && mMouseDown && !nk_item_is_any_active (mNkCtx))
