@@ -46,6 +46,7 @@ namespace FAWorld
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
         void interact(Actor* actor);
+        void setIdleAnimSequence(const std::vector<int> & sequence);
         friend class ActorState::BaseState; // TODO: fix
 
         public:

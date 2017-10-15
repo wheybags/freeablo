@@ -17,6 +17,11 @@ namespace FAWorld
 {
     STATIC_HANDLE_NET_OBJECT_IN_IMPL(Actor)
 
+    void Actor::setIdleAnimSequence(const std::vector<int>& sequence)
+    {
+        mAnimation.setIdleFrameSequence (sequence);
+    }
+
     void Actor::update(bool noclip)
     {
         if (!isDead())

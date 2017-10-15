@@ -2,6 +2,7 @@
 #define EXE_NPC_H
 
 #include <faio/fafileobject.h>
+#include <boost/optional/optional.hpp>
 
 namespace DiabloExe
 {
@@ -14,6 +15,7 @@ namespace DiabloExe
             uint8_t x;
             uint8_t y;
             size_t rotation;
+            boost::optional<int32_t> animationSequenceId;
 
             Npc() {}
 

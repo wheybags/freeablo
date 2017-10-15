@@ -32,6 +32,7 @@ namespace DiabloExe
         }
 
         loadMonsters(exe);
+        loadTownerAnimation(exe);
         loadNpcs(exe);
         loadCharacterStats(exe);
         loadBaseItems(exe);
@@ -138,6 +139,28 @@ namespace DiabloExe
         }
     }
 
+    void DiabloExe::loadTownerAnimation(FAIO::FAFileObject& exe)
+    {
+        auto offset = mSettings.get<int32_t>("TownerAnimation","offset");
+        auto size = mSettings.get<int32_t>("TownerAnimation","size");
+        auto count = mSettings.get<int32_t>("TownerAnimation","count");
+        exe.FAfseek(offset, SEEK_SET);
+        mTownerAnimation.resize (count);
+        for (int32_t i = 0; i < count; ++i) {
+            mTownerAnimation[i].reserve (size);
+            bool pastTheEnd = false;
+            for (int32_t j = 0; j < size; ++j)
+                {
+                    auto r = exe.read8();
+                    if (r == 255u)
+                        pastTheEnd = true;
+                    if (!pastTheEnd)
+                        mTownerAnimation[i].push_back (static_cast<int32_t> (r - 1));
+                }
+        }
+    }
+
+
     void DiabloExe::loadNpcs(FAIO::FAFileObject& exe)
     {
         Settings::Container sections = mSettings.getSections();
@@ -149,9 +172,14 @@ namespace DiabloExe
 
             if(Misc::StringUtils::startsWith(name, "NPC"))
             {
-                mNpcs[name.substr(3, name.size()-3)] =
+                auto &curNpc = mNpcs[name.substr(3, name.size()-3)];
+                 curNpc =
                     Npc(exe, name, mSettings.get<size_t>(section, "name"), mSettings.get<size_t>(section, "cel"),
                         mSettings.get<size_t>(section, "x"), mSettings.get<size_t>(section, "y"), mSettings.get<size_t>(section, "rotation", 0));
+
+                auto animId = mSettings.get<int32_t>(section, "animationId", -1);
+                if (animId >= 0)
+                    curNpc.animationSequenceId = animId;
             }
         }
     }
@@ -446,6 +474,11 @@ namespace DiabloExe
             retval.push_back(&(it->second));
 
         return retval;
+    }
+
+    const std::vector<std::vector<int32_t>> &DiabloExe::getTownerAnimation() const
+    {
+        return mTownerAnimation;
     }
 
     std::string DiabloExe::dump() const

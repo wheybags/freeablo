@@ -7,36 +7,54 @@ namespace FARender
         if (mCurrentAnim == nullptr)
             return std::make_pair <FARender::FASpriteGroup*, int32_t >(nullptr, 0);
 
+        int32_t currentFrame;
         float progress = ((float)mTicksSinceAnimStarted) / ((float)mPlayingAnimDuration);
-        int32_t currentFrame = progress * mCurrentAnim->getAnimLength();
 
-        if (currentFrame >= (int32_t)mCurrentAnim->getAnimLength())
+        if (mPlayingAnimType != AnimationType::BySequence)
         {
-            if (mPlayingAnimType == AnimationType::Once)
+            currentFrame = progress;
+
+            if (currentFrame >= (int32_t)mCurrentAnim->getAnimLength())
             {
-                playAnimation(nullptr, 0, AnimationType::Looped);
-                return getCurrentFrame();
-            }
-            else if (mPlayingAnimType == AnimationType::FreezeAtEnd)
-            {
-                currentFrame = mCurrentAnim->getAnimLength() - 1;
-            }
-            else if (mPlayingAnimType == AnimationType::Looped)
-            {
-                currentFrame = currentFrame % mCurrentAnim->getAnimLength();
+                switch (mPlayingAnimType)
+                {
+                case AnimationType::Once:
+                    playAnimation(nullptr, 0, AnimationType::Looped);
+                    return getCurrentFrame();
+                case AnimationType::FreezeAtEnd:
+                    currentFrame = mCurrentAnim->getAnimLength() - 1;
+                    break;
+                case AnimationType::Looped:
+                    currentFrame = currentFrame % mCurrentAnim->getAnimLength();
+                    break;
+                case AnimationType::BySequence:
+                    // handled below
+                case AnimationType::ENUM_END:
+                    break;
+                }
             }
         }
+        else
+            currentFrame = mFrameSequence[static_cast<int32_t> (progress) % mFrameSequence.size ()];
 
         return std::make_pair(mCurrentAnim, currentFrame);
     }
 
-    void AnimationPlayer::playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick duration, AnimationPlayer::AnimationType type)
+    void AnimationPlayer::playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationPlayer::AnimationType type)
     {
         mCurrentAnim = anim;
-        mPlayingAnimDuration = duration;
+        mPlayingAnimDuration = frameDuration;
 
         mPlayingAnimType = type;
         mTicksSinceAnimStarted = 0;
+    }
+
+    void AnimationPlayer::playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int> frameSequence)
+    {
+        mCurrentAnim = anim;
+        mPlayingAnimDuration = frameDuration;
+        mPlayingAnimType = AnimationType::BySequence;
+        mFrameSequence = frameSequence;
     }
 
     void AnimationPlayer::replaceAnimation(FARender::FASpriteGroup* anim)
