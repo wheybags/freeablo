@@ -46,6 +46,7 @@ namespace Render
 
     SDL_Window* screen;
     SDL_Renderer* renderer;
+    SDL_GLContext glContext;
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
     {
@@ -72,7 +73,7 @@ namespace Render
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-        SDL_GL_CreateContext(screen);
+        glContext = SDL_GL_CreateContext(screen);
         int oglIdx = -1;
         int nRD = SDL_GetNumRenderDrivers();
         for(int i=0; i<nRD; i++)
@@ -115,6 +116,7 @@ namespace Render
 
     void quit()
     {
+        SDL_GL_DeleteContext(glContext);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
         SDL_Quit();
