@@ -9,6 +9,7 @@
 #include <nuklearmisc/standaloneguispritehandler.h>
 #include <nuklearmisc/widgets.h>
 #include <faio/faio.h>
+#include <climits>
 
 int main(int argc, char *argv[])
 {
