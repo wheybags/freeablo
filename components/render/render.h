@@ -75,7 +75,9 @@ namespace Render
         nk_font_atlas atlas;
     };
 
-    void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);
+    void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);
+
+    void setWindowSize(const RenderSettings& settings);
 
     void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics);
     void quit();
@@ -92,6 +94,7 @@ namespace Render
     SpriteGroup* loadCelToSingleTexture(const std::string& path);
     SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height);
     SpriteGroup* loadTiledTexture(const std::string& sourcePath, size_t width, size_t height, bool hasTrans, size_t transR, size_t transG, size_t transB);
+    SpriteGroup* loadNonCelSprite(const std::string& path);
 
     void draw();
 

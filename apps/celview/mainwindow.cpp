@@ -42,7 +42,7 @@ Render::NuklearGraphicsContext dummy;
 
 void MainWindow::initRender()
 {
-    Render::init(mRenderSettings, dummy, nullptr);
+    Render::init("asdasd", mRenderSettings, dummy, nullptr);
 }
 
 void MainWindow::loadSettings()

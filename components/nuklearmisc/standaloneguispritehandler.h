@@ -44,7 +44,7 @@ namespace NuklearMisc
     class StandaloneGuiHandler : private Render::SpriteCacheBase
     {
     public:
-        StandaloneGuiHandler(const Render::RenderSettings& renderSettings);
+        StandaloneGuiHandler(const std::string& title, const Render::RenderSettings& renderSettings);
         ~StandaloneGuiHandler();
 
         GuiSprite* getSprite(Render::SpriteGroup* sprite);

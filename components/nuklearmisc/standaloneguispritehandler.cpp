@@ -27,7 +27,7 @@ namespace NuklearMisc
         mHandler->mSprites.erase(mCacheIndex);
     }
 
-    StandaloneGuiHandler::StandaloneGuiHandler(const Render::RenderSettings& renderSettings)
+    StandaloneGuiHandler::StandaloneGuiHandler(const std::string& title, const Render::RenderSettings& renderSettings)
         : mInput([this] (Input::Key key) { NuklearMisc::handleNuklearKeyboardEvent(&mCtx, true, key, mInput.getModifiers()); },
                  [this] (Input::Key key) { NuklearMisc::handleNuklearKeyboardEvent(&mCtx, false, key, mInput.getModifiers()); },
                  [this] (int32_t x, int32_t y, Input::Key key, bool isDoubleClick) { NuklearMisc::handleNuklearMouseEvent(&mCtx, x, y, key, true, isDoubleClick); },
@@ -41,7 +41,7 @@ namespace NuklearMisc
         mCtx.clip.paste = nullptr;// nk_sdl_clipbard_paste;
         mCtx.clip.userdata = nk_handle_ptr(0);
 
-        Render::init(renderSettings, mNuklearGraphicsContext, &mCtx);
+        Render::init(title, renderSettings, mNuklearGraphicsContext, &mCtx);
 
         // Load Cursor: if you uncomment cursor loading please hide the cursor
         {

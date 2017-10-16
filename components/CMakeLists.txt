@@ -123,4 +123,4 @@ add_library(NuklearMisc
     nuklearmisc/standaloneguispritehandler.h
 )
 set_target_properties(NuklearMisc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
-target_link_libraries(NuklearMisc nuklear nativefiledialog Input)
+target_link_libraries(NuklearMisc nuklear nativefiledialog Input Render)

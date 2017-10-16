@@ -25,6 +25,7 @@ add_executable(launcher
 )
 
 set_target_properties(launcher PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+target_link_libraries(launcher NuklearMisc)
 
 if(UNIX) # qt headers generate a bunch of warnings, just ignore em
     set_target_properties(StormLib PROPERTIES COMPILE_FLAGS "-w")

@@ -24,7 +24,7 @@ int main(int, char**)
     renderSettings.windowHeight = 600;
     renderSettings.fullscreen = false;
 
-    NuklearMisc::StandaloneGuiHandler guiHandler(renderSettings);
+    NuklearMisc::StandaloneGuiHandler guiHandler("Cel Viewer", renderSettings);
 
     nk_context* ctx = guiHandler.getNuklearContext();
 
