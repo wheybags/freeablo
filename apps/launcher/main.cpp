@@ -201,6 +201,8 @@ int main(int argc, char *argv[])
         settings.set<std::string>("Game", "PathMPQ", mpqPath);
 
         settings.save();
+
+        FAIO::quit();
     }
 
     if(runFreeablo)

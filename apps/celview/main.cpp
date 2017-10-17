@@ -178,5 +178,7 @@ int main(int, char**)
         quit = guiHandler.update();
     }
 
+    FAIO::quit();
+
     return 0;
 }
