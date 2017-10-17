@@ -194,4 +194,6 @@ int main(int, char** argv)
 
     if(runFreeablo)
         system((boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string().c_str());
+
+    return 0;
 }
