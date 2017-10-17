@@ -13,12 +13,6 @@
 
 int main(int, char**)
 {
-    /*QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-
-    return a.exec();*/
-
     Render::RenderSettings renderSettings;
     renderSettings.windowWidth = 800;
     renderSettings.windowHeight = 600;
