@@ -11,7 +11,7 @@
 #include <faio/faio.h>
 #include <climits>
 
-int main(int argc, char *argv[])
+int main(int, char** argv)
 {
     /*QApplication app(argc, argv);
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
                         nk_layout_space_begin(ctx, NK_STATIC, headerBounds.h, INT_MAX);
                         {
-                            float buttonSize = 0.7;
+                            float buttonSize = 0.7f;
                             nk_color selectedColor = nk_rgb(255, 255, 255);
 
                             nk_layout_space_push(ctx, nk_rect(0.1*headerBounds.h, 0.1*headerBounds.h, buttonSize*headerBounds.h, buttonSize*headerBounds.h));
@@ -206,5 +206,5 @@ int main(int argc, char *argv[])
     }
 
     if(runFreeablo)
-        system((boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").c_str());
+        system((boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string().c_str());
 }
