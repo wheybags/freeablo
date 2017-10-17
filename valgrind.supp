@@ -1,0 +1,118 @@
+{
+   feckinXlib01
+   Memcheck:Leak
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libX11.so.*
+   ...
+}
+
+{
+   feckinXlib02
+   Memcheck:Param
+   writev(vector[...])
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libX11.so.*
+   ...
+}
+
+{
+   feckinXlib03
+   Memcheck:Cond
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libX11.so.*
+   ...
+}
+
+{
+   feckinIntelDrivers01
+   Memcheck:Cond
+   fun:rawmemchr
+   fun:_IO_str_init_static_internal
+   fun:vsscanf
+   fun:sscanf
+   ...
+   fun:glXQueryExtensionsString
+   ...
+}
+
+{
+   feckinIntelDrivers02
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   fun:_ZN6Render5clearEiii
+   ...
+}
+
+{
+   feckinIntelDrivers03    
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:glXGetFBConfigs
+}
+
+{
+    feckinPoettering01
+    Memcheck:Leak
+    ...
+    obj:/usr/lib/x86_64-linux-gnu/libpulse.so.*
+    ...
+}
+
+{
+   feckinIntelDrivers04
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:dlopen@@GLIBC_2.2.5
+   obj:/usr/lib/x86_64-linux-gnu/libGL.so.*
+   ...
+}
+
+{
+   feckinIntelDrivers05
+   Memcheck:Leak
+   ...
+   fun:dlopen@@GLIBC_2.2.5
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   ...
+}
+
+{
+   feckinIntelDrivers05
+   Memcheck:Leak
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   fun:_ZN6Render5clearEiii
+   ...
+}
+
+{
+   godKnowHowThisGotInThere
+   Memcheck:Leak
+   ...
+   obj:/lib/x86_64-linux-gnu/libglib-2.0.so.*
+   ...
+}
+
+{
+   sdlDlopen
+   Memcheck:Leak
+   ...
+   fun:dlopen@@GLIBC_2.2.5
+   obj:/usr/lib/x86_64-linux-gnu/libSDL2-2.0.so.*
+   ...
+}
+
+{
+   whatTheHellEvenIsLibJack
+   Memcheck:Leak
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libjack.so.0.1.0
+   ...
+}
+
+
+

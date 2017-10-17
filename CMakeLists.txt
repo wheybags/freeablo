@@ -15,14 +15,7 @@ Find_Package(SDL2_mixer REQUIRED)
 Find_Package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 Find_Package(OpenGL REQUIRED)
-
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Core REQUIRED)
 find_package(Enet REQUIRED)
-
-if (Qt5_POSITION_INDEPENDENT_CODE)
-    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-endif()
 
 set(FA_COMPILER_FLAGS "")
 
@@ -90,7 +83,6 @@ include_directories ( SYSTEM
     ${SDL2MIXER_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIR}
-    ${Qt5Widgets_INCLUDE_DIRS}
     ${ENET_INCLUDE_DIR}
     "${PROJECT_SOURCE_DIR}/extern/StormLib/src/"
 )
@@ -120,7 +112,6 @@ link_libraries (
     ${PNG_LIBRARY}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${Qt5Widgets_LIBRARIES}
     ${ENET_LIBRARY}
     Cel
     FAIO

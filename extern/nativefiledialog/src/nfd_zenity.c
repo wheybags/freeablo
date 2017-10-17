@@ -127,7 +127,7 @@ static nfdresult_t ZenityCommon(char** command, int commandLen, const char* defa
             result = NFD_CANCEL;
     }
 
-    return NFD_OKAY;
+    return result;
 }
  
 

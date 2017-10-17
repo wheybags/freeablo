@@ -39,6 +39,12 @@ namespace FAIO
 
     bool init(const std::string pathMPQ, const std::string listFile)
     {
+        if(pathMPQ.empty())
+        {
+            std::cout << "skipping stormlib init - won't be able to read files in MPQ archives" << std::endl;
+            return true;
+        }
+
 		const bool success = SFileOpenArchive(pathMPQ.c_str(), 0, STREAM_FLAG_READ_ONLY, &diabdat);
 
         if (!success)

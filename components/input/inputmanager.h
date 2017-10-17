@@ -28,7 +28,7 @@ namespace Input
                 std::function<void(int32_t, int32_t)> mouseWheel,
                 std::function<void(std::string)> textInput);
 
-            void processInput(bool paused);
+            bool processInput(bool paused); ///< \return true if user requested quit, false otherwise
             void poll();
 
             KeyboardModifiers getModifiers();
@@ -36,6 +36,8 @@ namespace Input
             static InputManager* get();
 
         private:
+
+            bool mHasQuit = false;
             
             ///< Basically a copy of the subset of SDL_Event that we actually use
             struct Event

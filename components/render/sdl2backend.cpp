@@ -46,8 +46,9 @@ namespace Render
 
     SDL_Window* screen;
     SDL_Renderer* renderer;
+    SDL_GLContext glContext;
 
-    void init(const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
+    void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
     {
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
@@ -63,7 +64,7 @@ namespace Render
         }
 
         SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-        screen = SDL_CreateWindow("LibRocket SDL2 test", 20, 20, WIDTH, HEIGHT, flags);
+        screen = SDL_CreateWindow(title.c_str(), 20, 20, WIDTH, HEIGHT, flags);
         if(screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
 
@@ -72,7 +73,7 @@ namespace Render
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-        SDL_GL_CreateContext(screen);
+        glContext = SDL_GL_CreateContext(screen);
         int oglIdx = -1;
         int nRD = SDL_GetNumRenderDrivers();
         for(int i=0; i<nRD; i++)
@@ -101,6 +102,12 @@ namespace Render
         }
     }
 
+    void setWindowSize(const RenderSettings& settings)
+    {
+        SDL_SetWindowSize(screen, settings.windowWidth, settings.windowHeight);
+    }
+
+
     void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics)
     {
         nk_font_atlas_clear(&nuklearGraphics.atlas);
@@ -109,6 +116,7 @@ namespace Render
 
     void quit()
     {
+        SDL_GL_DeleteContext(glContext);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
         SDL_Quit();
@@ -126,7 +134,10 @@ namespace Render
     RenderSettings getWindowSize()
     {
         RenderSettings settings;
-        SDL_GetWindowSize(screen, &settings.windowWidth, &settings.windowHeight);
+        settings.windowWidth = 0;
+        settings.windowHeight = 0;
+        SDL_GetRendererOutputSize(renderer, &settings.windowWidth, &settings.windowHeight);
+        //SDL_GetWindowSize(screen, &settings.windowWidth, &settings.windowHeight);
         return settings;
     }
 
@@ -151,10 +162,9 @@ namespace Render
             validFormat = false;
 
         if (!validFormat)
-        {
-            std::cerr << "INVALID TEXTURE FORMAT" << std::endl;
-            return 0;
-        }
+            surf = SDL_ConvertSurfaceFormat(surf, SDL_PIXELFORMAT_ABGR8888, 0); // SDL is stupid and interprets pixel formats by endianness, so on LE, it calls RGBA ABGR...
+
+        assert(surf->pitch == 4 * surf->w);
 
         GLuint tex = 0;
 
@@ -165,9 +175,11 @@ namespace Render
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-
         int32_t w, h;
         spriteSize((Sprite)(intptr_t)tex, w, h);
+
+        if (!validFormat)
+            SDL_FreeSurface(surf);
 
         return tex;
     }
@@ -459,6 +471,19 @@ namespace Render
 
         SDL_FreeSurface(texture);
         SDL_FreeSurface(tile);
+
+        return new SpriteGroup(vec);
+    }
+
+    SpriteGroup* loadNonCelSprite(const std::string& path)
+    {
+        std::string extension = getImageExtension(path);
+        SDL_Surface* image = loadNonCelImage(path, extension);
+
+        std::vector<Sprite> vec(1);
+        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(image);
+
+        SDL_FreeSurface(image);
 
         return new SpriteGroup(vec);
     }

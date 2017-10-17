@@ -175,7 +175,7 @@ void nk_sdl_device_destroy(nk_gl_device& dev)
     nk_buffer_free(&dev.cmds);
 }
 
-void nk_sdl_render_dump(Render::SpriteCacheBase* cache, const NuklearFrameDump& dump, SDL_Window* win)
+void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win)
 {
     int width, height;
     int display_width, display_height;
@@ -204,7 +204,7 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, const NuklearFrameDump& 
     glEnable(GL_SCISSOR_TEST);
     glActiveTexture(GL_TEXTURE0);
 
-    nk_gl_device& dev = dump.dev;
+    nk_gl_device& dev = dump.getDevice();
 
     // setup program
     glUseProgram(dev.prog);
@@ -431,8 +431,14 @@ nk_sdl_handle_event(SDL_Event *evt)
     memset(&sdl, 0, sizeof(sdl));
 }*/
 
-NuklearFrameDump::NuklearFrameDump(nk_gl_device& dev) : dev(dev)
+NuklearFrameDump::NuklearFrameDump(nk_gl_device& dev)
 {
+    init(dev);
+}
+
+void NuklearFrameDump::init(nk_gl_device& dev)
+{
+    this->dev = &dev;
     nk_buffer_init_default(&vbuf);
     nk_buffer_init_default(&ebuf);
     nk_buffer_init_default(&cmds);
@@ -452,6 +458,7 @@ NuklearFrameDump::NuklearFrameDump(nk_gl_device& dev) : dev(dev)
 
 NuklearFrameDump::~NuklearFrameDump()
 {
+    assert(dev);
     nk_buffer_free(&vbuf);
     nk_buffer_free(&ebuf);
     nk_buffer_free(&cmds);
@@ -459,6 +466,7 @@ NuklearFrameDump::~NuklearFrameDump()
 
 void NuklearFrameDump::fill(nk_context* ctx)
 {
+    assert(dev);
     nk_convert(ctx, &cmds, &vbuf, &ebuf, &config);
 
     drawCommands.clear();

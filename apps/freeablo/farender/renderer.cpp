@@ -89,7 +89,7 @@ namespace FARender
             mNuklearContext.clip.paste = nullptr;// nk_sdl_clipbard_paste;
             mNuklearContext.clip.userdata = nk_handle_ptr(0);
 
-            Render::init(settings, mNuklearGraphicsData, &mNuklearContext);
+            Render::init("Freeablo", settings, mNuklearGraphicsData, &mNuklearContext);
 
             // Load Fonts: if none of these are loaded a default font will be used
             // Load Cursor: if you uncomment cursor loading please hide the cursor

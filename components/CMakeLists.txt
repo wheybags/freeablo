@@ -117,6 +117,10 @@ set_target_properties(Serial PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 add_library(NuklearMisc
     nuklearmisc/inputfwd.cpp
     nuklearmisc/inputfwd.h
+    nuklearmisc/widgets.cpp
+    nuklearmisc/widgets.h
+    nuklearmisc/standaloneguispritehandler.cpp
+    nuklearmisc/standaloneguispritehandler.h
 )
 set_target_properties(NuklearMisc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
-target_link_libraries(NuklearMisc nuklear)
+target_link_libraries(NuklearMisc nuklear nativefiledialog Input Render)
