@@ -154,6 +154,11 @@ int main(int, char** argv)
                         NuklearMisc::nk_file_pick(ctx, "Diablo.exe", diabloExePath, "exe", rowHeight);
                         NuklearMisc::nk_file_pick(ctx, "DIABDAT.MPQ", mpqPath, "mpq,MPQ", rowHeight);
                     }
+                    else if (currentTab == TabType::Graphics)
+                    {
+                        nk_layout_row_dynamic(ctx, rowHeight, 1);
+                        nk_label(ctx, "TODO: reimplement this pane", NK_TEXT_CENTERED);
+                    }
 
                     nk_panel* panel = nk_window_get_panel(ctx);
 
