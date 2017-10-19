@@ -1,17 +1,22 @@
 language: cpp
-dist: precise
 compiler:
 - gcc
+
 branches:
   only:
   - master
+
 sudo: false
 dist: trusty
-before_script:
+
+cache:
+  directories:
+  - $HOME/.hunter
+
+script:
 - mkdir build
 - cd build
 - cmake -DTREAT_WARNINGS_AS_ERRORS=ON ../
-script:
 - make -k
 - make fatest -k
 after_success:
