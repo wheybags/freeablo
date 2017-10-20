@@ -75,7 +75,7 @@ if (WIN32)
     set(SRCS ${SRCS} nativefiledialog/src/nfd_win.cpp)
 endif()
 
-if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux" OR "${CMAKE_SYSTEM_NAME}" MATCHES "OpenBSD")
     set(SRCS ${SRCS} nativefiledialog/src/nfd_zenity.c)
 endif()
 
