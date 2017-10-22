@@ -6,28 +6,27 @@ branches:
 # Operating system (build VM template)
 os: Visual Studio 2015
 
-# scripts that are called at very beginning, before repo cloning
-init:
-  - git clone https://github.com/wheybags/freeablo-windows-build c:\projects\freeablo-windows-build-tmp
-  - xcopy c:\projects\freeablo-windows-build-tmp c:\projects\freeablo-windows-build /s /e /q
-
-
 # clone directory
-clone_folder: c:\projects\freeablo-windows-build\freeablo
+clone_folder: c:\projects\freeablo
 
 platform: Win32
 configuration: Debug
 
-build:
-  project: c:\projects\freeablo-windows-build\build\Freeablo.sln      # path to Visual Studio solution or project
+cache:
+  - '%USERPROFILE%\.hunter'
 
 # scripts to run before build
 before_build:
-  - git submodule update --init
   - echo Running cmake...
-  - cd c:\projects\freeablo-windows-build
-  - cmake.bat -DTREAT_WARNINGS_AS_ERRORS=ON
+  - cd c:\projects\freeablo
+  - mkdir build
+  - cd build
+  - mklink /j resources ..\resources
+  - cmake .. -G "Visual Studio 14 2015 Win64"
+
+build:
+  project: c:\projects\freeablo\build\Freeablo.sln # path to Visual Studio solution or project
 
 test_script:
-  - cd c:\projects\freeablo-windows-build\build
+  - cd c:\projects\freeablo\build
   - cmake.exe --build . --config Debug --target fatest
