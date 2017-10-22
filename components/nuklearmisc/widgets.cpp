@@ -2,6 +2,7 @@
 
 #include <nfd.h>
 #include <assert.h>
+#include <cstdlib>
 #include <cstring>
 
 namespace NuklearMisc
