@@ -1,5 +1,6 @@
 #include "inputfwd.h"
 #include <string>
+#include <cstring>
 
 namespace NuklearMisc
 {

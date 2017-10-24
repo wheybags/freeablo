@@ -40,46 +40,11 @@ https://wheybags.github.io/freeablo
 
 # Compilation
 
-## Windows
+freeablo uses cmake and a c++ package manager called [hunter](https://github.com/ruslo/hunter), so it should be as simple as just compiling it like any normal cmake project.
+During the intitial run of cmake, some third-party dependencies will be downloaded and compiled. They can take a while, but they will be cached in ~/.hunter afterwards,
+so you should only have to do that once.
 
-If you are using windows, please see https://github.com/wheybags/freeablo-windows-build/tree/master for instructions on building with Visual Studio 2013
-
-## OSX
-
-First install Xcode, and brew, of course.
-```bash
-brew install boost boost-python enet freetype libtomcrypt lbzip2 lzlib qt5 sdl2 sdl2_image sdl2_mixer --universal cmake
-brew tap wheybags/homebrew-librocket
-brew install --HEAD librocket
-# here it will possibly print a message about python module path settings, follow its instructions
-```
-and continue on with the Linux/Unix section (ignore the librocket instructions).
-
-## Linux/Unix
-
-freeablo uses cmake, and depends on boost >= 1.54, libbz2, zlib, and SDL2, sdl2_image, and libRocket, so make sure to have those installed.
-
-If you are on debian-based distro you can grab them with
-
-``` shell
-sudo apt install libsdl2-dev qt5-default libboost-all-dev libbz2-dev zlib1g-dev libsdl2-mixer-dev libsdl2-image-dev libenet-dev
-```
-
-[libRocket](http://github.com/libRocket/libRocket) isn't packaged in most distros, so you'll have to install it from source (this isn't very hard).
-
-libRocket installation:
-
-```bash
-git clone https://github.com/libRocket/libRocket.git
-cd libRocket
-mkdir buildDir
-cd buildDir
-cmake ../Build -DBUILD_PYTHON_BINDINGS=On -DCMAKE_INSTALL_PREFIX:PATH=/usr
-make
-sudo make install
-```
-
-libRocket depends on boost::python and freetype
+## Detailed instructions
 
 Get the source:
 
@@ -87,8 +52,6 @@ via git:
 
 ```bash
 git clone https://github.com/wheybags/freeablo.git
-cd freeablo
-git submodule update --init
 ```
 
 or download from [https://github.com/wheybags/freeablo/releases](https://github.com/wheybags/freeablo/releases).
@@ -96,14 +59,18 @@ or download from [https://github.com/wheybags/freeablo/releases](https://github.
 make a build directory:
 
 ```bash
-cd ..
+cd freeablo
 mkdir build
 cd build
 ```
 
-symlink the resources folder:
+symlink the resources folder (linux/unix):
 ```bash
 ln -s ../freeablo/resources
+```
+symlink the resources folder (windows):
+```
+mklink /j resources ..\resources
 ```
 
 call cmake:
@@ -111,7 +78,7 @@ call cmake:
 cmake ../freeablo
 ```
 
-Now you're ready to go, cmake has generated a makefile, just run make to compile
+Now you're ready to go, cmake has generated a makefile/vs solution, just run make/open in vs to compile.
 
 # Contributing
 

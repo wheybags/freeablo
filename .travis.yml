@@ -1,38 +1,22 @@
 language: cpp
-dist: precise
 compiler:
 - gcc
+
 branches:
   only:
   - master
-before_install:
-- sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-- sudo apt-get update -qq
-- if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8 --force-yes; fi
-- if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
-- pwd
-- git submodule update --init --recursive
-- echo yes | sudo apt-add-repository ppa:zoogie/sdl2-snapshots
-- echo yes | sudo apt-add-repository ppa:boost-latest/ppa
-- echo yes | sudo apt-add-repository ppa:kalakris/cmake
-- echo yes | sudo apt-add-repository ppa:canonical-qt5-edgers/ubuntu1204-qt5
-- echo yes | sudo apt-add-repository ppa:kedazo/doxygen-updates-precise
-- sudo apt-get update -qq
-- sudo apt-get install -qq libboost1.54-all-dev libsdl2-dev libsdl2-image-dev libsdl-ttf2.0-dev zlib1g-dev
-  libbz2-dev doxygen libfreetype6-dev libpython2.7 libsdl2-mixer-dev cmake qtdeclarative5-dev libpng12-dev zlib1g-dev graphviz
-- git clone https://github.com/lsalzman/enet # install enet from source
-- cd enet
-- git checkout f46fee0acc8e243b2b6910b09693f93c3aad775f # just current HEAD at time of writing
-- autoreconf -vfi && ./configure
-- make
-- sudo make install
-- cd ..
 
-before_script:
+sudo: false
+dist: trusty
+
+cache:
+  directories:
+  - $HOME/.hunter
+
+script:
 - mkdir build
 - cd build
 - cmake -DTREAT_WARNINGS_AS_ERRORS=ON ../
-script:
 - make -k
 - make fatest -k
 after_success:
