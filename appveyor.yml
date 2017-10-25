@@ -13,7 +13,7 @@ platform: x64
 configuration: Debug
 
 cache:
-  - '%USERPROFILE%\.hunter'
+  - C:\.hunter
 
 # scripts to run before build
 before_build:
