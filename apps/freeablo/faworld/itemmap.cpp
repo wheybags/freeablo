@@ -12,7 +12,7 @@ FAWorld::PlacedItemData::PlacedItemData(std::unique_ptr <Item> itemArg, const Ti
   mAnimation (new FARender::AnimationPlayer ()),
   mTile (tile)
 {
-    mAnimation->playAnimation(mItem->getFlipSpriteGroup(), FAWorld::World::getTicksInPeriod(0.5f), FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
+    mAnimation->playAnimation(mItem->getFlipSpriteGroup(), FAWorld::World::getTicksInPeriod(0.05f), FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
 }
 
 void FAWorld::PlacedItemData::update()
