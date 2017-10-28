@@ -41,7 +41,7 @@ https://wheybags.github.io/freeablo
 # Compilation
 
 freeablo uses cmake and a c++ package manager called [hunter](https://github.com/ruslo/hunter), so it should be as simple as just compiling it like any normal cmake project.
-During the intitial run of cmake, some third-party dependencies will be downloaded and compiled. They can take a while, but they will be cached in ~/.hunter afterwards,
+During the intitial run of cmake, some third-party dependencies will be downloaded and compiled. They can take a while, but they will be cached in ~/.hunter (C:\\.hunter on windows) afterwards,
 so you should only have to do that once.
 
 ## Detailed instructions
