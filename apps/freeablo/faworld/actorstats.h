@@ -78,7 +78,11 @@ namespace FAWorld
             virtual uint8_t getAttackSpeed();
             virtual uint8_t getAttackFrameset();
             virtual int32_t getCurrentHP();
+            int32_t getMaxHp() { return mHP; }
             virtual void recalculateDerivedStats(){}
+
+            int32_t getCurrentMana() { return mCurrentMana; }
+            int32_t getMaxMana() { return mMana; }
 
             template <class Stream>
             Serial::Error::Error faSerial(Stream& stream)

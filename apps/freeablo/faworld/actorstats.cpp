@@ -78,7 +78,7 @@ namespace FAWorld
         mHP=0;
         //mCurrentHP=0;
         mMana=0;
-        mCurrentMana=0;
+        //mCurrentMana=0;
         mStrength=0;
         mVitality=0;
         mDexterity=0;

@@ -1,10 +1,13 @@
 #include "guimanager.h"
 
 #include <string>
+#include <cstdint>
 
 #include <input/hotkey.h>
+#include <misc/misc.h>
 
 #include "../faworld/world.h"
+#include "../faworld/actorstats.h"
 #include "../farender/renderer.h"
 #include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
@@ -61,22 +64,24 @@ namespace FAGui
 
     }
 
-    void nk_fa_begin_image_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void(void)> action)
+    void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action)
     {
-        nk_style_item tmpBg = ctx->style.window.fixed_background;
-        struct nk_vec2 tmpPadding = ctx->style.window.padding;
-
         ctx->active = ctx->current;
-        ctx->style.window.fixed_background = nk_style_item_image(background);
-        ctx->style.window.padding = nk_vec2(0, 0);
+        nk_style_push_vec2(ctx, &ctx->style.window.padding, nk_vec2(0,0));
 
         if (nk_begin(ctx, title, bounds, flags))
             action();
 
         nk_end(ctx);
 
-        ctx->style.window.fixed_background = tmpBg;
-        ctx->style.window.padding = tmpPadding;
+        nk_style_pop_vec2(ctx);
+    }
+
+    void nk_fa_begin_image_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void(void)> action)
+    {
+        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(background));
+        nk_fa_begin_window(ctx, title, bounds, flags, action);
+        nk_style_pop_style_item(ctx);
     }
 
     void pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
@@ -359,6 +364,10 @@ namespace FAGui
         // the buttons are baked into the background image.
         FARender::FASpriteGroup* bottomMenuTex = renderer->loadImage("ctrlpan/panel8.cel");
         FARender::FASpriteGroup* bottomMenuButtonsTex = renderer->loadImage("ctrlpan/panel8bu.cel");
+        FARender::FASpriteGroup* healthAndManaEmptyBulbs = renderer->loadImage("ctrlpan/p8bulbs.cel");
+
+        int32_t bulbWidth = healthAndManaEmptyBulbs->getWidth();
+        int32_t bulbHeight = healthAndManaEmptyBulbs->getHeight();
 
         int32_t bottomMenuWidth = bottomMenuTex->getWidth();
         int32_t bottomMenuHeight = bottomMenuTex->getHeight();
@@ -383,14 +392,54 @@ namespace FAGui
         int32_t invButtonFrame      = 4;
         int32_t spellsButtonFrame   = 5;
 
+        int32_t healthBulbLeftOffset = 96;
+        int32_t manaBulbLeftOffset = 464;
+
         // Centre the bottom menu on the bottom of the screen
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
         struct nk_rect dims = nk_rect((screenW / 2) - (bottomMenuWidth / 2), screenH - bottomMenuHeight, bottomMenuWidth, bottomMenuHeight);
 
-        nk_fa_begin_image_window(ctx, "bottom_menu", dims, NK_WINDOW_NO_SCROLLBAR, bottomMenuTex->getNkImage(), [&]()
+        Misc::ScopedSetter<float> setter(ctx->style.button.border, 0);
+        Misc::ScopedSetter<struct nk_style_item> setter2(ctx->style.window.fixed_background, nk_style_item_color(nk_rgba(0,0,0,0)));
+
+        nk_fa_begin_window(ctx, "bottom_menu", dims, NK_WINDOW_NO_SCROLLBAR, [&]()
         {
             nk_layout_space_begin(ctx, NK_STATIC, buttonHeight, INT_MAX);
+
+            auto drawBgSection = [&](struct nk_rect rect)
+            {
+                struct nk_image section = nk_subimage_handle(bottomMenuTex->getNkImage(0).handle, bottomMenuWidth, bottomMenuHeight, rect);
+                nk_layout_space_push(ctx, rect);
+                nk_image(ctx, section);
+            };
+
+            // The bottom panel background image has full health and mana orbs baked into the image.
+            // The empty orbs are contained in separate images, and include the background, clearly intended
+            // to be drawn on top of the backgorund image. That works fine if you're a dumb cpu loop overwriting pixels,
+            // but we're doing a normal draw with an alpha channel because it's not 1996 anymore. So, what we want is
+            // the background image with empty health bulbs, on top of which we can draw the filled ones.
+            // So, we draw the whole panel background excluding the bulbs, then separately draw the empty bulbs.
+
+            // Leftmost section
+            drawBgSection(nk_rect(0, 0, healthBulbLeftOffset, bottomMenuHeight));
+            // Below left bulb section
+            drawBgSection(nk_rect(healthBulbLeftOffset, bulbHeight, bulbWidth, bottomMenuHeight - bulbHeight));
+            // Middle section
+            drawBgSection(nk_rect(healthBulbLeftOffset + bulbWidth, 0, manaBulbLeftOffset - (healthBulbLeftOffset + bulbWidth), bottomMenuHeight));
+            // Below right bulb section
+            drawBgSection(nk_rect(manaBulbLeftOffset, bulbHeight, bulbWidth, bottomMenuHeight - bulbHeight));
+            // Rightmost section
+            drawBgSection(nk_rect(manaBulbLeftOffset + bulbWidth, 0, bottomMenuWidth - manaBulbLeftOffset, bottomMenuHeight));
+
+            // Health bulb
+            nk_layout_space_push(ctx, nk_rect(healthBulbLeftOffset, 0, bulbWidth, bulbHeight));
+            nk_image(ctx, healthAndManaEmptyBulbs->getNkImage(0));
+
+            // Mana bulb
+            nk_layout_space_push(ctx, nk_rect(manaBulbLeftOffset, 0, bulbWidth, bulbHeight));
+            nk_image(ctx, healthAndManaEmptyBulbs->getNkImage(1));
+
 
             nk_style_button buttonStyle = ctx->style.button;
             // The "unpressed" version of the button is baked into the background image, so just draw nothing
@@ -427,6 +476,24 @@ namespace FAGui
             // SPELLS button
             if (bottomMenuButton(buttonRow2TopIndent, buttonRightIndent, spellsButtonFrame))
                 togglePanel (PanelType::spells);
+
+            auto drawBulb = [&] (float current, float max, int32_t leftOffset)
+            {
+                float percent = current / max;
+                float useBulbHeight = bulbHeight * percent;
+
+                struct nk_rect r = nk_rect(leftOffset, (bulbHeight - useBulbHeight), bulbWidth, useBulbHeight);
+                nk_layout_space_push(ctx, r);
+
+                struct nk_image bulbImage = nk_subimage_handle(bottomMenuTex->getNkImage(0).handle, bottomMenuWidth, bottomMenuHeight, r);
+                nk_image(ctx, bulbImage);
+            };
+
+            FAWorld::ActorStats* stats = FAWorld::World::get()->getCurrentPlayer()->mStats;
+            // draw current hp into health bulb
+            drawBulb(stats->getCurrentHP(), stats->getMaxHp(), healthBulbLeftOffset);
+            // and current mana
+            drawBulb(stats->getCurrentMana(), stats->getMaxMana(), manaBulbLeftOffset);
 
             belt (ctx);
             descriptionPanel(ctx);
