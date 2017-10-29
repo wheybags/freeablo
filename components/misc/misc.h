@@ -88,6 +88,26 @@ namespace Misc
     // generate class overloading operator() of several function objects to ease the usage of variant classes
     template <typename RetType = void, typename... Args>
     auto overload(Args&&... args) -> detail::overload_class<RetType, detail::wrapper_for_t<typename std::decay<Args>::type>...> { return { std::forward<Args>(args)... }; }
+
+    template <typename T>
+    class ScopedSetter
+    {
+    public:
+        ScopedSetter(T& toSet, T val) : mOriginal(toSet), mToSet(toSet)
+        {
+            mToSet = val;
+        }
+
+        ~ScopedSetter()
+        {
+            mToSet = mOriginal;
+        }
+
+    private:
+        T mOriginal;
+        T& mToSet;
+
+    };
 }
 
 #define UNUSED_PARAM(x) (void)(x)

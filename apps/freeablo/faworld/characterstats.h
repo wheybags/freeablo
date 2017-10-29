@@ -26,8 +26,7 @@ namespace FAWorld
             mHP = 2*mVitality + 2*mLevel+18;
             mCurrentHP = mHP;
             mMana = mMagic + mLevel -1;
-
-
+            mCurrentMana = mMana;
         }
         void recalculateDerivedStats() final;
     private:
@@ -44,6 +43,7 @@ namespace FAWorld
                 mHP = mVitality + 2*mLevel+23;
                 mCurrentHP = mHP;
                 mMana = mMagic + 2*mLevel +5;
+                mCurrentMana = mMana;
             }
 
             void recalculateDerivedStats() final;
@@ -62,6 +62,7 @@ namespace FAWorld
                 mHP = mVitality + 2*mLevel + 9;
                 mCurrentHP = mHP;
                 mMana = 2*mMagic + 2*mLevel -2;
+                mCurrentMana = mMana;
             }
             void recalculateDerivedStats() final;
         private:
