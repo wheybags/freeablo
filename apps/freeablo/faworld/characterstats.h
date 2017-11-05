@@ -2,6 +2,11 @@
 #define DIABLOCHARACTERSTATS_H
 #include "actorstats.h"
 
+namespace DiabloExe
+{
+  class CharacterStats;
+}
+
 namespace FAWorld
 {
     class Inventory;
@@ -10,7 +15,7 @@ namespace FAWorld
     class CharacterStatsBase : public ActorStats
     {
         public:
-            CharacterStatsBase(DiabloExe::CharacterStats stats, Player * player) : ActorStats(stats), mPlayer(player){}
+        CharacterStatsBase(DiabloExe::CharacterStats stats, Player* player);
             virtual void processEffects();
 
         protected:
@@ -21,13 +26,7 @@ namespace FAWorld
     class MeleeStats : public CharacterStatsBase
     {
     public:
-        MeleeStats(DiabloExe::CharacterStats stats, Player * player) : CharacterStatsBase(stats, player)
-        {
-            mHP = 2*mVitality + 2*mLevel+18;
-            mCurrentHP = mHP;
-            mMana = mMagic + mLevel -1;
-            mCurrentMana = mMana;
-        }
+        MeleeStats(DiabloExe::CharacterStats stats, Player* player);
         void recalculateDerivedStats() final;
     private:
 
@@ -38,13 +37,7 @@ namespace FAWorld
     class RangerStats : public CharacterStatsBase
     {
         public:
-            RangerStats(DiabloExe::CharacterStats stats, Player * player) : CharacterStatsBase(stats, player)
-            {
-                mHP = mVitality + 2*mLevel+23;
-                mCurrentHP = mHP;
-                mMana = mMagic + 2*mLevel +5;
-                mCurrentMana = mMana;
-            }
+        RangerStats(DiabloExe::CharacterStats stats, Player* player);
 
             void recalculateDerivedStats() final;
         private:
@@ -57,13 +50,7 @@ namespace FAWorld
     {
         public:
 
-            MageStats(DiabloExe::CharacterStats stats, Player * player) : CharacterStatsBase(stats, player)
-            {
-                mHP = mVitality + 2*mLevel + 9;
-                mCurrentHP = mHP;
-                mMana = 2*mMagic + 2*mLevel -2;
-                mCurrentMana = mMana;
-            }
+        MageStats(DiabloExe::CharacterStats stats, Player* player);
             void recalculateDerivedStats() final;
         private:
             friend class Inventory;

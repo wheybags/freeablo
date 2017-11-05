@@ -2,6 +2,7 @@
 #include "player.h"
 #include "characterstats.h"
 #include "itemmanager.h"
+#include "diabloexe/characterstats.h"
 
 namespace FAWorld
 {

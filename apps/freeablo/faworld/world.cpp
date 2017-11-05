@@ -16,6 +16,7 @@
 #include "gamelevel.h"
 #include "findpath.h"
 #include "itemmap.h"
+#include "diabloexe/npc.h"
 
 namespace FAWorld
 {

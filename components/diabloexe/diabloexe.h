@@ -4,23 +4,30 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
 
-#include <settings/settings.h>
 #include <faio/fafileobject.h>
 
-#include "monster.h"
-#include "npc.h"
-#include "baseitem.h"
-#include "affix.h"
-#include "uniqueitem.h"
-#include "characterstats.h"
+namespace Settings
+{
+    class Settings;
+}
+
 namespace DiabloExe
 {
+    class Monster;
+    class Npc;
+    class BaseItem;
+    class CharacterStats;
+    class UniqueItem;
+    class Affix;
+
     class DiabloExe
     {
         public:
 
             DiabloExe(const std::string& pathEXE = "Diablo.exe");
+            ~DiabloExe ();
 
             const Monster& getMonster(const std::string& name) const;
             std::vector<const Monster*> getMonstersInLevel(size_t levelNum) const;
@@ -55,9 +62,7 @@ namespace DiabloExe
             void loadCharacterStats(FAIO::FAFileObject& exe);
             void loadTownerAnimation(FAIO::FAFileObject& exe);
 
-
-
-            Settings::Settings mSettings;
+            std::unique_ptr<Settings::Settings> mSettings;
 
             std::string mVersion;
             std::map<std::string, Monster> mMonsters;

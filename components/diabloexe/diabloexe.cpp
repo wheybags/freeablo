@@ -9,17 +9,25 @@
 #include <misc/md5.h>
 #include <misc/stringops.h>
 
+#include "settings/settings.h"
+#include "monster.h"
+#include "npc.h"
+#include "baseitem.h"
+#include "characterstats.h"
+#include "../../apps/freeablo/faworld/item.h"
+
 namespace DiabloExe
 {
     DiabloExe::DiabloExe(const std::string& pathEXE)
     {
+        mSettings = std::make_unique<Settings::Settings> ();
         mVersion = getVersion(pathEXE);
         if (mVersion.empty())
         {
             return;
         }
 
-        if(!mSettings.loadFromFile("resources/exeversions/" + mVersion + ".ini"))
+        if(!mSettings->loadFromFile("resources/exeversions/" + mVersion + ".ini"))
         {
             std::cout << "Cannot load settings file.";
             return;
@@ -38,6 +46,10 @@ namespace DiabloExe
         loadBaseItems(exe);
         loadUniqueItems(exe);
         loadAffixes(exe);
+    }
+
+    DiabloExe::~DiabloExe()
+    {
     }
 
 
@@ -115,9 +127,9 @@ namespace DiabloExe
 
     void DiabloExe::loadMonsters(FAIO::FAFileObject& exe)
     {
-        size_t monsterOffset = mSettings.get<size_t>("Monsters", "monsterOffset");
-        size_t codeOffset = mSettings.get<size_t>("Monsters", "codeOffset");
-        size_t count = mSettings.get<size_t>("Monsters", "count");
+        size_t monsterOffset = mSettings->get<size_t>("Monsters", "monsterOffset");
+        size_t codeOffset = mSettings->get<size_t>("Monsters", "codeOffset");
+        size_t count = mSettings->get<size_t>("Monsters", "count");
 
         for(size_t i = 0; i < count; i++)
         {
@@ -141,9 +153,9 @@ namespace DiabloExe
 
     void DiabloExe::loadTownerAnimation(FAIO::FAFileObject& exe)
     {
-        auto offset = mSettings.get<int32_t>("TownerAnimation","offset");
-        auto size = mSettings.get<int32_t>("TownerAnimation","size");
-        auto count = mSettings.get<int32_t>("TownerAnimation","count");
+        auto offset = mSettings->get<int32_t>("TownerAnimation","offset");
+        auto size = mSettings->get<int32_t>("TownerAnimation","size");
+        auto count = mSettings->get<int32_t>("TownerAnimation","count");
         exe.FAfseek(offset, SEEK_SET);
         mTownerAnimation.resize (count);
         for (int32_t i = 0; i < count; ++i) {
@@ -163,7 +175,7 @@ namespace DiabloExe
 
     void DiabloExe::loadNpcs(FAIO::FAFileObject& exe)
     {
-        Settings::Container sections = mSettings.getSections();
+        Settings::Container sections = mSettings->getSections();
 
         for(Settings::Container::const_iterator it = sections.begin(); it != sections.end(); ++it)
         {
@@ -174,10 +186,10 @@ namespace DiabloExe
             {
                 auto &curNpc = mNpcs[name.substr(3, name.size()-3)];
                  curNpc =
-                    Npc(exe, name, mSettings.get<size_t>(section, "name"), mSettings.get<size_t>(section, "cel"),
-                        mSettings.get<size_t>(section, "x"), mSettings.get<size_t>(section, "y"), mSettings.get<size_t>(section, "rotation", 0));
+                    Npc(exe, name, mSettings->get<size_t>(section, "name"), mSettings->get<size_t>(section, "cel"),
+                        mSettings->get<size_t>(section, "x"), mSettings->get<size_t>(section, "y"), mSettings->get<size_t>(section, "rotation", 0));
 
-                auto animId = mSettings.get<int32_t>(section, "animationId", -1);
+                auto animId = mSettings->get<int32_t>(section, "animationId", -1);
                 if (animId >= 0)
                     curNpc.animationSequenceId = animId;
             }
@@ -186,9 +198,9 @@ namespace DiabloExe
 
     void DiabloExe::loadBaseItems(FAIO::FAFileObject& exe)
     {
-        size_t itemOffset = mSettings.get<size_t>("BaseItems","itemOffset");
-        size_t codeOffset = mSettings.get<size_t>("BaseItems","codeOffset");
-        size_t count = mSettings.get<size_t>("BaseItems","count");
+        size_t itemOffset = mSettings->get<size_t>("BaseItems","itemOffset");
+        size_t codeOffset = mSettings->get<size_t>("BaseItems","codeOffset");
+        size_t count = mSettings->get<size_t>("BaseItems","count");
 
         for(size_t i=0; i < count; i++)
         {
@@ -216,9 +228,9 @@ namespace DiabloExe
     }
     void DiabloExe::loadUniqueItems(FAIO::FAFileObject& exe)
     {
-        size_t itemOffset = mSettings.get<size_t>("UniqueItems","uniqueItemOffset");
-        size_t codeOffset = mSettings.get<size_t>("UniqueItems","codeOffset");
-        size_t count = mSettings.get<size_t>("UniqueItems","count");
+        size_t itemOffset = mSettings->get<size_t>("UniqueItems","uniqueItemOffset");
+        size_t codeOffset = mSettings->get<size_t>("UniqueItems","codeOffset");
+        size_t count = mSettings->get<size_t>("UniqueItems","count");
 
         for(size_t i=0; i < count; i++)
         {
@@ -276,9 +288,9 @@ namespace DiabloExe
 
     void DiabloExe::loadAffixes(FAIO::FAFileObject& exe)
     {
-        size_t affixOffset = mSettings.get<size_t>("Affix","affixOffset");
-        size_t codeOffset = mSettings.get<size_t>("Affix","codeOffset");
-        size_t count = mSettings.get<size_t>("Affix","count");
+        size_t affixOffset = mSettings->get<size_t>("Affix","affixOffset");
+        size_t codeOffset = mSettings->get<size_t>("Affix","codeOffset");
+        size_t count = mSettings->get<size_t>("Affix","count");
 
 
         for(size_t i=0; i < count; i++)
@@ -305,12 +317,12 @@ namespace DiabloExe
 
     void DiabloExe::loadCharacterStats(FAIO::FAFileObject& exe)
     {
-        size_t startingStatsOffset = mSettings.get<size_t>("CharacterStats", "startingStatsOffset");
-        size_t maxStatsOffset = mSettings.get<size_t>("CharacterStats", "maxStatsOffset");
-        size_t blockingBonusOffset = mSettings.get<size_t>("CharacterStats", "blockingBonusOffset");
-        size_t framesetOffset = mSettings.get<size_t>("CharacterStats", "framesetOffset");
-        size_t expPerLevelOffset = mSettings.get<size_t>("CharacterStats", "expPerLevelOffset");
-        size_t levelCount = mSettings.get<size_t>("CharacterStats", "maxLevel");
+        size_t startingStatsOffset = mSettings->get<size_t>("CharacterStats", "startingStatsOffset");
+        size_t maxStatsOffset = mSettings->get<size_t>("CharacterStats", "maxStatsOffset");
+        size_t blockingBonusOffset = mSettings->get<size_t>("CharacterStats", "blockingBonusOffset");
+        size_t framesetOffset = mSettings->get<size_t>("CharacterStats", "framesetOffset");
+        size_t expPerLevelOffset = mSettings->get<size_t>("CharacterStats", "expPerLevelOffset");
+        size_t levelCount = mSettings->get<size_t>("CharacterStats", "maxLevel");
         CharacterStats meleeCharacter, rangerCharacter, mageCharacter;
 
         exe.FAfseek(framesetOffset, SEEK_SET);

@@ -1,8 +1,34 @@
 #include "actorstats.h"
 #include "../falevelgen/random.h"
 #include "item.h"
+#include "diabloexe/characterstats.h"
+
 namespace FAWorld
 {
+    ActorStats::ActorStats(DiabloExe::CharacterStats stats):
+                                                           mExpForLevel(stats.mNextLevelExp)
+                                                           , mLevel(1)
+                                                           , mLevelPoints(0)
+                                                           , mExp(0)
+                                                           , mExpToNextLevel(2000)
+                                                           , mStartingVitality(stats.mVitality)
+                                                           , mMaxVitality(stats.mMaxVitality)
+                                                           , mStartingMagic(stats.mMagic)
+                                                           , mMaxMagic(stats.mMaxMagic)
+                                                           , mStartingDexterity(stats.mDexterity)
+                                                           , mMaxDexterity(stats.mMaxDexterity)
+                                                           , mStartingStrength(stats.mStrength)
+                                                           , mMaxStrength(stats.mMaxStrength)
+                                                           , mBlockingBonus(stats.mBlockingBonus)
+                                                           , mAttackFrameset(stats.mAttackFrameset)
+                                                           , mAttackSpeed(stats.mSingleHandedAttackSpeed)
+    {
+        mVitality = mStartingVitality;
+        mStrength = mStartingStrength;
+        mMagic = mStartingMagic;
+        mDexterity = mStartingDexterity;
+        recalculateDerivedStats();
+    }
 
     ActorStats::ActorStats(const DiabloExe::Monster &monsterStat)
         : mMaxVitality(0), mMaxMagic(0),
@@ -123,7 +149,7 @@ namespace FAWorld
     uint8_t ActorStats::getAttackSpeed()
     {
         return mAttackSpeed;
-    } 
+    }
 
     uint8_t ActorStats::getAttackFrameset()
     {

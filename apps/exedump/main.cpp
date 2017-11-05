@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <faio/fafileobject.h>
+#include "settings/settings.h"
 
 int main(int, char**)
 {

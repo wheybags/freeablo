@@ -1,8 +1,14 @@
 #include "characterstats.h"
 #include "player.h"
 #include "../falevelgen/random.h"
+#include "diabloexe/characterstats.h"
+
 namespace FAWorld
 {
+    CharacterStatsBase::CharacterStatsBase(DiabloExe::CharacterStats stats, Player* player): ActorStats(stats)
+                                                                                           , mPlayer(player)
+    {
+    }
 
     void CharacterStatsBase::processEffects()
     {
@@ -300,6 +306,14 @@ namespace FAWorld
     }
 
 
+    MeleeStats::MeleeStats(DiabloExe::CharacterStats stats, Player* player): CharacterStatsBase(stats, player)
+    {
+        mHP = 2 * mVitality + 2 * mLevel + 18;
+        mCurrentHP = mHP;
+        mMana = mMagic + mLevel - 1;
+        mCurrentMana = mMana;
+    }
+
     void MeleeStats::recalculateDerivedStats()
     {
         clearDerivedStats();
@@ -323,6 +337,14 @@ namespace FAWorld
         mChanceToHitArrow += 10;
     }
 
+    RangerStats::RangerStats(DiabloExe::CharacterStats stats, Player* player): CharacterStatsBase(stats, player)
+    {
+        mHP = mVitality + 2 * mLevel + 23;
+        mCurrentHP = mHP;
+        mMana = mMagic + 2 * mLevel + 5;
+        mCurrentMana = mMana;
+    }
+
     void RangerStats::recalculateDerivedStats()
     {
         clearDerivedStats();
@@ -344,6 +366,14 @@ namespace FAWorld
         mDamageDoneBow   += mPlayer->getInventory ().getTotalAttackDamage();
         mArmourClass += mPlayer->getInventory ().getTotalArmourClass();
         mChanceToHitArrow += 20;
+    }
+
+    MageStats::MageStats(DiabloExe::CharacterStats stats, Player* player): CharacterStatsBase(stats, player)
+    {
+        mHP = mVitality + 2 * mLevel + 9;
+        mCurrentHP = mHP;
+        mMana = 2 * mMagic + 2 * mLevel - 2;
+        mCurrentMana = mMana;
     }
 
     void MageStats::recalculateDerivedStats()
