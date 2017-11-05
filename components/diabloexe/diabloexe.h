@@ -54,11 +54,11 @@ namespace DiabloExe
             std::string getVersion(const std::string& pathEXE);
 
 
-            void loadMonsters(FAIO::FAFileObject& exe);
+            void loadMonsters(FAIO::FAFileObject& exe, size_t codeOffset);
             void loadNpcs(FAIO::FAFileObject& exe);
-            void loadBaseItems(FAIO::FAFileObject& exe);
-            void loadUniqueItems(FAIO::FAFileObject& exe);
-            void loadAffixes(FAIO::FAFileObject& exe);
+            void loadBaseItems(FAIO::FAFileObject& exe, size_t codeOffset);
+            void loadUniqueItems(FAIO::FAFileObject& exe, size_t codeOffset);
+            void loadAffixes(FAIO::FAFileObject& exe, size_t codeOffset);
             void loadCharacterStats(FAIO::FAFileObject& exe);
             void loadTownerAnimation(FAIO::FAFileObject& exe);
 

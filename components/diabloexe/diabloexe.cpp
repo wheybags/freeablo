@@ -39,13 +39,14 @@ namespace DiabloExe
             return;
         }
 
-        loadMonsters(exe);
+        auto codeOffset = mSettings->get<size_t>("General", "codeOffset");
+        loadMonsters(exe, codeOffset);
         loadTownerAnimation(exe);
         loadNpcs(exe);
         loadCharacterStats(exe);
-        loadBaseItems(exe);
-        loadUniqueItems(exe);
-        loadAffixes(exe);
+        loadBaseItems(exe, codeOffset);
+        loadUniqueItems(exe, codeOffset);
+        loadAffixes(exe, codeOffset);
     }
 
     DiabloExe::~DiabloExe()
@@ -125,10 +126,9 @@ namespace DiabloExe
         return version;
     }
 
-    void DiabloExe::loadMonsters(FAIO::FAFileObject& exe)
+    void DiabloExe::loadMonsters(FAIO::FAFileObject& exe, size_t codeOffset)
     {
         size_t monsterOffset = mSettings->get<size_t>("Monsters", "monsterOffset");
-        size_t codeOffset = mSettings->get<size_t>("Monsters", "codeOffset");
         size_t count = mSettings->get<size_t>("Monsters", "count");
 
         for(size_t i = 0; i < count; i++)
@@ -196,10 +196,9 @@ namespace DiabloExe
         }
     }
 
-    void DiabloExe::loadBaseItems(FAIO::FAFileObject& exe)
+    void DiabloExe::loadBaseItems(FAIO::FAFileObject& exe, size_t codeOffset)
     {
         size_t itemOffset = mSettings->get<size_t>("BaseItems","itemOffset");
-        size_t codeOffset = mSettings->get<size_t>("BaseItems","codeOffset");
         size_t count = mSettings->get<size_t>("BaseItems","count");
 
         for(size_t i=0; i < count; i++)
@@ -226,10 +225,9 @@ namespace DiabloExe
             }
         }
     }
-    void DiabloExe::loadUniqueItems(FAIO::FAFileObject& exe)
+    void DiabloExe::loadUniqueItems(FAIO::FAFileObject& exe, size_t codeOffset)
     {
         size_t itemOffset = mSettings->get<size_t>("UniqueItems","uniqueItemOffset");
-        size_t codeOffset = mSettings->get<size_t>("UniqueItems","codeOffset");
         size_t count = mSettings->get<size_t>("UniqueItems","count");
 
         for(size_t i=0; i < count; i++)
@@ -286,10 +284,9 @@ namespace DiabloExe
         }
     }
 
-    void DiabloExe::loadAffixes(FAIO::FAFileObject& exe)
+    void DiabloExe::loadAffixes(FAIO::FAFileObject& exe, size_t codeOffset)
     {
         size_t affixOffset = mSettings->get<size_t>("Affix","affixOffset");
-        size_t codeOffset = mSettings->get<size_t>("Affix","codeOffset");
         size_t count = mSettings->get<size_t>("Affix","count");
 
 
