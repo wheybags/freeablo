@@ -24,6 +24,15 @@ namespace FAWorld
         return mAnimationPlayer.getCurrentFrame();
     }
 
+    void ActorAnimationManager::interruptAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type)
+    {
+        mInterruptedAnimationState = mPlayingAnim;
+        mInterruptedAnimationFrame = mAnimationPlayer.getCurrentFrame().second;
+        mInterruptedAnimationType = mAnimationPlayer.getCurrentAnimationType();
+
+        playAnimation(animation, type);
+    }
+
     void ActorAnimationManager::playAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type)
     {
         mPlayingAnim = animation;
@@ -54,10 +63,21 @@ namespace FAWorld
         // loop idle animation if we're not doing anything else
         if (sprite == nullptr)
         {
-            if (mIdleFrameSequence.empty ())
-                playAnimation(AnimState::idle, FARender::AnimationPlayer::AnimationType::Looped);
+            if (mInterruptedAnimationState != AnimState::none)
+            {
+                mPlayingAnim = mInterruptedAnimationState;
+                mAnimationPlayer.playAnimation(mAnimations[mPlayingAnim], mAnimTimeMap[mPlayingAnim], mInterruptedAnimationType, mInterruptedAnimationFrame);
+
+                mInterruptedAnimationState = AnimState::none;
+                mInterruptedAnimationFrame = 0;
+            }
             else
-                playAnimation(AnimState::idle, mIdleFrameSequence);
+            {
+                if (mIdleFrameSequence.empty ())
+                    playAnimation(AnimState::idle, FARender::AnimationPlayer::AnimationType::Looped);
+                else
+                    playAnimation(AnimState::idle, mIdleFrameSequence);
+            }
         }
     }
 
