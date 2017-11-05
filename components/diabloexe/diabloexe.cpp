@@ -39,7 +39,7 @@ namespace DiabloExe
             return;
         }
 
-        auto codeOffset = mSettings->get<size_t>("General", "codeOffset");
+        auto codeOffset = mSettings->get<size_t>("Common", "codeOffset");
         loadMonsters(exe, codeOffset);
         loadTownerAnimation(exe);
         loadNpcs(exe);
@@ -47,6 +47,7 @@ namespace DiabloExe
         loadBaseItems(exe, codeOffset);
         loadUniqueItems(exe, codeOffset);
         loadAffixes(exe, codeOffset);
+        loadDropGraphicsFilenames (exe, codeOffset);
     }
 
     DiabloExe::~DiabloExe()
@@ -124,6 +125,17 @@ namespace DiabloExe
             std::cout << "Diablo.exe " << version << " detected" << std::endl;
 
         return version;
+    }
+
+    void DiabloExe::loadDropGraphicsFilenames(FAIO::FAFileObject& exe, size_t codeOffset)
+    {
+        auto offset = mSettings->get<size_t>("ItemDropGraphics", "filenames");
+        itemDropGraphicsFilename.resize (35);
+        for(int i = 0; i < itemDropGraphicsFilename.size (); ++i) {
+            exe.FAfseek(offset + i * 4, SEEK_SET);
+            auto nameOffset = exe.read32();
+            itemDropGraphicsFilename[i] = exe.readCStringFromWin32Binary(nameOffset, codeOffset);
+        }
     }
 
     void DiabloExe::loadMonsters(FAIO::FAFileObject& exe, size_t codeOffset)

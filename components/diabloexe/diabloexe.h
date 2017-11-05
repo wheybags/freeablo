@@ -54,6 +54,7 @@ namespace DiabloExe
             std::string getVersion(const std::string& pathEXE);
 
 
+            void loadDropGraphicsFilenames(FAIO::FAFileObject& exe, size_t codeOffset);
             void loadMonsters(FAIO::FAFileObject& exe, size_t codeOffset);
             void loadNpcs(FAIO::FAFileObject& exe);
             void loadBaseItems(FAIO::FAFileObject& exe, size_t codeOffset);
@@ -72,6 +73,7 @@ namespace DiabloExe
             std::map<std::string, Affix> mAffixes;
             std::map<std::string, CharacterStats> mCharacters;
             std::vector<std::vector<int32_t>> mTownerAnimation;
+            std::vector<std::string> itemDropGraphicsFilename;
     };
 }
 
