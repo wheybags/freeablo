@@ -25,15 +25,15 @@ namespace FAWorld
                     if(!actor.getPos().isNear(target->getPos()))
                         actor.mMoveHandler.setDestination(target->getPos().current());
                     else // and interact them if in range
+                    {
+                        if (actor.canIAttack(target) && actor.attack(target))
                         {
-                            if (actor.canIAttack(target) && actor.attack(target))
-                            {
-                              ret = StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
-                            }
-                            else if (actor.canTalkTo(target) && actor.talk(target)) {
-
-                            }
+                          ret = StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
                         }
+                        else if (actor.canTalkTo(target) && actor.talk(target)) {
+
+                        }
+                    }
                 }
                 else
                 {

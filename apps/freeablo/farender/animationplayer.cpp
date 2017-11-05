@@ -40,13 +40,13 @@ namespace FARender
         return std::make_pair(mCurrentAnim, currentFrame);
     }
 
-    void AnimationPlayer::playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationPlayer::AnimationType type)
+    void AnimationPlayer::playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationPlayer::AnimationType type, int32_t startFrame)
     {
         mCurrentAnim = anim;
         mPlayingAnimDuration = frameDuration;
 
         mPlayingAnimType = type;
-        mTicksSinceAnimStarted = 0;
+        mTicksSinceAnimStarted = frameDuration * startFrame;
     }
 
     void AnimationPlayer::playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int> frameSequence)

@@ -25,14 +25,19 @@ namespace FAWorld
         ActorAnimationManager();
 
         AnimState getCurrentAnimation();
+        AnimState getInterruptedAnimation() { return mInterruptedAnimationState; }
+
         std::pair<FARender::FASpriteGroup*, int32_t> getCurrentRealFrame();
 
         void playAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type);
         void playAnimation(AnimState animation, std::vector<int> frameSequence);
+        void interruptAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type);
+
         void setAnimation(AnimState animation, FARender::FASpriteGroup* sprite);
 
         void update();
         void setIdleFrameSequence(const std::vector<int>& sequence);
+
 
     private:
         AnimState mPlayingAnim = AnimState::none;
@@ -41,6 +46,13 @@ namespace FAWorld
         std::unordered_map<AnimState, FARender::FASpriteGroup*, EnumClassHash> mAnimations;
         std::map<AnimState, Tick> mAnimTimeMap;
         std::vector<int> mIdleFrameSequence;
+
+        // TODO: we could probably do with making this a stack, but it's good enough for now
+        // At time of writing (5/Nov/17), it's just used for hit animations, which don't need a stack
+        AnimState mInterruptedAnimationState = AnimState::none;
+        FARender::AnimationPlayer::AnimationType mInterruptedAnimationType;
+        int32_t mInterruptedAnimationFrame = 0;
+
 
         template <class Stream>
         Serial::Error::Error faSerial(Stream& stream)

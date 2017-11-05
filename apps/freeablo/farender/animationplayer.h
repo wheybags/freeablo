@@ -23,7 +23,9 @@ namespace FARender
             AnimationPlayer() {}
 
             std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame();
-            void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationType type);
+            AnimationType getCurrentAnimationType() { return mPlayingAnimType; }
+
+            void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationType type, int32_t startFrame = 0);
             void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int> frameSequence);
 
             //!

@@ -28,12 +28,6 @@ namespace FAWorld
         {
             if (getLevel())
             {
-                if (isAttacking)
-                {
-                    if (getAnimationManager().getCurrentAnimation() != AnimState::attack)
-                        isAttacking = false;
-                }
-
                 mActorStateMachine->update(noclip);
             }
 
@@ -87,7 +81,9 @@ namespace FAWorld
         if (!(mStats->getCurrentHP() <= 0))
         {
             Engine::ThreadManager::get()->playSound(getHitWav());
-            mAnimation.playAnimation(AnimState::hit, FARender::AnimationPlayer::AnimationType::Once);
+
+            if (mAnimation.getCurrentAnimation() != AnimState::hit)
+                mAnimation.interruptAnimation(AnimState::hit, FARender::AnimationPlayer::AnimationType::Once);
         }
     }
 

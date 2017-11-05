@@ -11,8 +11,13 @@ namespace FAWorld
         {
             UNUSED_PARAM(noclip);
 
-            if (actor.getAnimationManager().getCurrentAnimation() != AnimState::attack)
+            auto& animManager = actor.getAnimationManager();
+            if (animManager.getCurrentAnimation() != AnimState::attack && animManager.getInterruptedAnimation() != AnimState::attack)
+            {
+                actor.isAttacking = false;
                 return StateMachine::StateChange<Actor>{StateMachine::StateOperation::pop};
+            }
+
 
             return boost::none;
         }
