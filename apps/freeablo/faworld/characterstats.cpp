@@ -9,7 +9,7 @@ namespace FAWorld
 
         std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> effects;
         effects = mPlayer->getInventory ().getTotalEffects();
-        printf("%lu -- size of effects\n", effects.size());
+        printf("%zu -- size of effects\n", effects.size());
         for(std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>>::iterator it= effects.begin();it != effects.end(); ++it)
         {
             Item::ItemEffect effect;
