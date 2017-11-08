@@ -8,7 +8,6 @@
 
 #include <misc/stdhashes.h>
 #include "hoverstate.h"
-#include "item.h"
 
 namespace FARender
 {

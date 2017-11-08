@@ -44,10 +44,10 @@ namespace DiabloExe
         loadTownerAnimation(exe);
         loadNpcs(exe);
         loadCharacterStats(exe);
+        loadDropGraphicsFilenames (exe, codeOffset);
         loadBaseItems(exe, codeOffset);
         loadUniqueItems(exe, codeOffset);
         loadAffixes(exe, codeOffset);
-        loadDropGraphicsFilenames (exe, codeOffset);
     }
 
     DiabloExe::~DiabloExe()
@@ -212,6 +212,12 @@ namespace DiabloExe
     {
         size_t itemOffset = mSettings->get<size_t>("BaseItems","itemOffset");
         size_t count = mSettings->get<size_t>("BaseItems","count");
+        size_t itemGraphicsIdToDropGraphicsIdOffset = mSettings->get<size_t>("ItemDropGraphics","itemGraphicsIdToDropGraphicsId");
+        std::vector<size_t> itemGraphicsIdToDropGraphicsId (172);
+
+        exe.FAfseek(itemGraphicsIdToDropGraphicsIdOffset, SEEK_SET);
+        for (auto &el : itemGraphicsIdToDropGraphicsId)
+            el = exe.read8();
 
         for(size_t i=0; i < count; i++)
         {
@@ -224,6 +230,8 @@ namespace DiabloExe
                 continue;
             if(Misc::StringUtils::containsNonPrint(tmp.itemSecondName))
                 continue;
+
+            tmp.dropItemGraphicsPath = "items/" + itemDropGraphicsFilename[itemGraphicsIdToDropGraphicsId[tmp.graphicValue]] + ".cel";
             if(mBaseItems.find(tmp.itemName) != mBaseItems.end())
             {
                 size_t j;
