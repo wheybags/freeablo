@@ -20,7 +20,7 @@ namespace DiabloExe
 {
     DiabloExe::DiabloExe(const std::string& pathEXE)
     {
-        mSettings = std::make_unique<Settings::Settings> ();
+        mSettings.reset (new Settings::Settings ());
         mVersion = getVersion(pathEXE);
         if (mVersion.empty())
         {
@@ -131,7 +131,7 @@ namespace DiabloExe
     {
         auto offset = mSettings->get<size_t>("ItemDropGraphics", "filenames");
         itemDropGraphicsFilename.resize (35);
-        for(int i = 0; i < itemDropGraphicsFilename.size (); ++i) {
+        for(int i = 0; i < static_cast<int> (itemDropGraphicsFilename.size ()); ++i) {
             exe.FAfseek(offset + i * 4, SEEK_SET);
             auto nameOffset = exe.read32();
             itemDropGraphicsFilename[i] = exe.readCStringFromWin32Binary(nameOffset, codeOffset);
