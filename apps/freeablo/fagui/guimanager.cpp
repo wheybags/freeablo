@@ -61,7 +61,7 @@ namespace FAGui
     GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player &player)
         : mEngine(engine), mPlayer (player)
     {
-
+        mActiveDialog = DialogData {}; 
     }
 
     void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action)
@@ -82,6 +82,41 @@ namespace FAGui
         nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(background));
         nk_fa_begin_window(ctx, title, bounds, flags, action);
         nk_style_pop_style_item(ctx);
+    }
+
+    namespace {
+        struct applyEffect {
+          applyEffect (nk_context* ctx, EffectType type) : mCtx (ctx) {
+              nk_set_user_data (mCtx, nk_handle_id (static_cast<int> (type)));
+          }
+           ~applyEffect () {
+               nk_set_user_data (mCtx, nk_handle_id (static_cast<int> (EffectType::none)));
+          }
+
+           nk_context* mCtx;
+        };
+    }
+
+    void GuiManager::dialog(nk_context* ctx)
+    {
+        if (!mActiveDialog)
+            return;
+
+        auto renderer = FARender::Renderer::get();
+        auto boxTex = renderer->loadImage("data/textbox2.cel");
+        nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
+        int32_t screenW, screenH;
+        renderer->getWindowDimensions(screenW, screenH);
+        nk_fa_begin_image_window(ctx, "dialog", nk_rect(screenW / 2, screenH - boxTex->getHeight () - 153, boxTex->getWidth(), boxTex->getHeight ()), flags, boxTex->getNkImage(),
+        [&]()
+        {
+           nk_layout_space_begin(ctx, NK_STATIC, 35, INT_MAX);
+           auto cbRect = nk_rect (3, 3, boxTex->getWidth() - 6, boxTex->getHeight () - 6);
+           nk_layout_space_push (ctx, cbRect);
+           auto blackTex = renderer->loadImage("resources/black.png");
+           applyEffect effect (ctx, EffectType::checkerboarded);
+           nk_image (ctx, nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect));
+        });
     }
 
     void pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
@@ -184,19 +219,6 @@ namespace FAGui
             nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op);
         else
             nk_window_close (ctx, panelName (panelType));
-    }
-
-    namespace {
-        struct applyEffect {
-          applyEffect (nk_context* ctx, EffectType type) : mCtx (ctx) {
-              nk_set_user_data (mCtx, nk_handle_id (static_cast<int> (type)));
-          }
-           ~applyEffect () {
-               nk_set_user_data (mCtx, nk_handle_id (static_cast<int> (EffectType::none)));
-          }
-
-           nk_context* mCtx;
-        };
     }
 
     static nk_style_button dummyStyle = [](){
@@ -539,6 +561,7 @@ namespace FAGui
         questsPanel(ctx);
         characterPanel(ctx);
         bottomMenu(ctx);
+        dialog(ctx);
     }
 
     void GuiManager::setDescription(std::string text, TextColor color)

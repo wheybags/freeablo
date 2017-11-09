@@ -17,6 +17,8 @@
 #include "findpath.h"
 #include "itemmap.h"
 #include "diabloexe/npc.h"
+#include "../fagui/guimanager.h"
+
 
 namespace FAWorld
 {

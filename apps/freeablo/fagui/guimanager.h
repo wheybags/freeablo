@@ -29,6 +29,11 @@ namespace FAWorld
     class Player;
 }
 
+class DialogData
+{
+    
+};
+
 namespace FAGui
 {
     enum class EffectType {
@@ -85,6 +90,7 @@ namespace FAGui
         using self = GuiManager;
     public:
         GuiManager(Engine::EngineMain& engine, FAWorld::Player &player);
+        void dialog(nk_context* ctx);
         void update(bool paused, nk_context* ctx);
         void setDescription (std::string text, TextColor color = TextColor::white);
         void clearDescription();
@@ -111,8 +117,9 @@ namespace FAGui
         FAWorld::Player& mPlayer;
         std::string mDescription;
         TextColor mDescriptionColor;
-        DescriptionType mDescriptionType;
+        DescriptionType mDescriptionType; 
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
+        boost::optional<DialogData> mActiveDialog;
     };
 }
 
