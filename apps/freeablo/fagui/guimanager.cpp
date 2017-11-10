@@ -61,7 +61,17 @@ namespace FAGui
     GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player &player)
         : mEngine(engine), mPlayer (player)
     {
-        mActiveDialog = DialogData {}; 
+        DialogData d;
+        d.header ({"Welcome to the", "Blacksmith's Shop"});
+        d.text_lines ({"Would You Like to:"}, TextColor::golden);
+        d.skip_line ();
+        d.text_lines ({"Talk to Griswold"}, TextColor::blue);
+        d.text_lines ({"Buy Basic Items"});
+        d.text_lines ({"Buy Premium Items"});
+        d.text_lines ({"Sell Items"});
+        d.text_lines ({"Repair Items"});
+        d.text_lines ({"Leave the Shop"});
+        mActiveDialog = std::move (d); 
     }
 
     void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action)
@@ -97,55 +107,6 @@ namespace FAGui
         };
     }
 
-    void GuiManager::dialog(nk_context* ctx)
-    {
-        if (!mActiveDialog)
-            return;
-
-        auto renderer = FARender::Renderer::get();
-        auto boxTex = renderer->loadImage("data/textbox2.cel");
-        nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
-        int32_t screenW, screenH;
-        renderer->getWindowDimensions(screenW, screenH);
-        nk_fa_begin_image_window(ctx, "dialog", nk_rect(screenW / 2, screenH - boxTex->getHeight () - 153, boxTex->getWidth(), boxTex->getHeight ()), flags, boxTex->getNkImage(),
-        [&]()
-        {
-           nk_layout_space_begin(ctx, NK_STATIC, 35, INT_MAX);
-           auto cbRect = nk_rect (3, 3, boxTex->getWidth() - 6, boxTex->getHeight () - 6);
-           nk_layout_space_push (ctx, cbRect);
-           auto blackTex = renderer->loadImage("resources/black.png");
-           applyEffect effect (ctx, EffectType::checkerboarded);
-           nk_image (ctx, nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect));
-        });
-    }
-
-    void pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
-    {
-        FARender::Renderer* renderer = FARender::Renderer::get();
-
-        int32_t screenW, screenH;
-        renderer->getWindowDimensions(screenW, screenH);
-
-        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_color(nk_rgba(0, 0, 0, 0)));
-
-        if (nk_begin(ctx, "pause menu", nk_rect(0, 0, screenW, screenH), 0))
-        {
-            nk_layout_row_dynamic(ctx, 30, 1);
-
-            nk_label(ctx, "PAUSED", NK_TEXT_CENTERED);
-
-            if (nk_button_label(ctx, "Resume"))
-                engine.togglePause();
-
-            if (nk_button_label(ctx, "Quit"))
-                engine.stop();
-        }
-        nk_end(ctx);
-
-        nk_style_pop_style_item(ctx);
-    }
-
-
     namespace
     {
         enum struct halign_t {
@@ -174,7 +135,7 @@ namespace FAGui
 
 
 
-        struct nk_rect align_rect (const struct nk_rect &inner_rect, const struct nk_rect &outer_rect, halign_t halign, valign_t valign) {
+        struct nk_rect alignRect (const struct nk_rect &inner_rect, const struct nk_rect &outer_rect, halign_t halign, valign_t valign) {
             auto c = center (outer_rect);
             auto shift = (outer_rect.w - inner_rect.w) / 2;
             switch (halign) {
@@ -192,6 +153,74 @@ namespace FAGui
             }
             return {c.x - inner_rect.w/2, c.y - inner_rect.h/2, inner_rect.w, inner_rect.h};
         }
+    }
+
+    void GuiManager::dialog(nk_context* ctx)
+    {
+        if (!mActiveDialog)
+            return;
+
+        auto renderer = FARender::Renderer::get();
+        auto boxTex = renderer->loadImage("data/textbox2.cel");
+        nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
+        int32_t screenW, screenH;
+        renderer->getWindowDimensions(screenW, screenH);
+        nk_fa_begin_image_window(ctx, "dialog", nk_rect(screenW / 2, screenH - boxTex->getHeight () - 153, boxTex->getWidth(), boxTex->getHeight ()), flags, boxTex->getNkImage(),
+        [&]()
+        {
+           nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
+           auto cbRect = nk_rect (3, 3, boxTex->getWidth() - 6, boxTex->getHeight () - 6);
+           nk_layout_space_push (ctx, cbRect);
+           auto blackTex = renderer->loadImage("resources/black.png");
+           {
+               applyEffect effect (ctx, EffectType::checkerboarded);
+               nk_image (ctx, nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect));
+           }
+
+           int y = 0;
+           constexpr int textRowHeight = 12;
+           for (auto &line : mActiveDialog->mLines)
+           {
+               auto line_rect = nk_rect (3, 3 + y, boxTex->getWidth() - 6, textRowHeight);
+               if (line.isSeparator)
+               {   
+                   auto separatorRect = nk_rect (3, 0, boxTex->getWidth() - 6, 3);
+                   nk_layout_space_push (ctx, alignRect (separatorRect, line_rect, halign_t::center, valign_t::center));
+                   auto separator_image = nk_subimage_handle(boxTex->getNkImage().handle, boxTex->getWidth(), boxTex->getHeight (), separatorRect);
+                   nk_image (ctx, separator_image);
+                   continue;
+               }
+               nk_layout_space_push (ctx, line_rect);
+               smallText (ctx, line.text.c_str (), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
+               y += textRowHeight;
+           }
+        });
+    }
+
+    void pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
+    {
+        FARender::Renderer* renderer = FARender::Renderer::get();
+
+        int32_t screenW, screenH;
+        renderer->getWindowDimensions(screenW, screenH);
+
+        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_color(nk_rgba(0, 0, 0, 0)));
+
+        if (nk_begin(ctx, "pause menu", nk_rect(0, 0, screenW, screenH), 0))
+        {
+            nk_layout_row_dynamic(ctx, 30, 1);
+
+            nk_label(ctx, "PAUSED", NK_TEXT_CENTERED);
+
+            if (nk_button_label(ctx, "Resume"))
+                engine.togglePause();
+
+            if (nk_button_label(ctx, "Quit"))
+                engine.stop();
+        }
+        nk_end(ctx);
+
+        nk_style_pop_style_item(ctx);
     }
 
     template <typename Function>
@@ -261,7 +290,7 @@ namespace FAGui
 
         boost::apply_visitor(Misc::overload([&](const struct nk_rect &rect)
         {
-            nk_layout_space_push(ctx, align_rect (nk_rect (0, 0, w, h), rect, halign_t::center, valign_t::center));
+            nk_layout_space_push(ctx, alignRect (nk_rect (0, 0, w, h), rect, halign_t::center, valign_t::center));
         }, [&](const struct nk_vec2 &point)
         {
              if (!item.isReal()) return;
@@ -523,7 +552,7 @@ namespace FAGui
         });
     }
 
-    void GuiManager::smallText (nk_context *ctx, const char *text, TextColor color) {
+    void GuiManager::smallText (nk_context *ctx, const char *text, TextColor color, nk_flags alignment) {
       FARender::Renderer* renderer = FARender::Renderer::get();
       nk_style_push_font(ctx, renderer->smallFont());
       nk_style_push_color (ctx, &ctx->style.text.color, [color]()
@@ -540,7 +569,7 @@ namespace FAGui
           }
           return nk_color{255, 255, 255, 255};
       }());
-      nk_label(ctx, text, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_MIDDLE);
+      nk_label(ctx, text, alignment);
       nk_style_pop_color (ctx);
        nk_style_pop_font(ctx);
     }

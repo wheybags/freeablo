@@ -29,14 +29,62 @@ namespace FAWorld
     class Player;
 }
 
-class DialogData
-{
-    
-};
-
 namespace FAGui
 {
-    enum class EffectType {
+    class GuiManager;
+
+    enum class TextColor 
+    {
+            white,
+            blue,
+            golden,
+            red,
+    };
+    
+    class DialogLineData
+    {
+    public:
+        std::string text;
+        bool alignCenter = false;
+        bool isSeparator = false;
+        TextColor color = TextColor::white;
+    };
+    
+    class DialogData
+    {
+    public:
+        void text_lines (const std::vector<std::string> &texts, TextColor color = TextColor::white, bool alignCenter = true)
+        {
+            for (auto &text : texts)
+            {
+                mLines[last_line].text = text;
+                mLines[last_line].color = color;
+                mLines[last_line].isSeparator = false;
+                mLines[last_line].alignCenter = alignCenter;
+                ++last_line;
+            }
+            skip_line ();
+        }
+        void skip_line (int cnt = 1) { last_line += cnt; }
+        void separator () { mLines[last_line].isSeparator = true; ++last_line; skip_line (); }
+        void header (const std::vector<std::string> &text)
+        {
+          for (auto &line : text)
+          {
+              text_lines ({line}, TextColor::golden);
+          }
+          separator ();
+          skip_line ();
+        }
+    
+    private:
+        std::array<DialogLineData, 24> mLines;
+        int last_line = 1;
+        friend class FAGui::GuiManager;
+    };
+
+    enum class EffectType 
+    {
         none = 0,
         highlighted,
         checkerboarded,
@@ -66,13 +114,6 @@ namespace FAGui
         highlited,
         notHighlighed,
         highlightIfHover,
-    };
-
-    enum class TextColor {
-        white,
-        blue,
-        golden,
-        red,
     };
 
     enum class DescriptionType {
@@ -107,7 +148,7 @@ namespace FAGui
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
         void bottomMenu(nk_context* ctx);
-        void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white);
+        void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white, nk_flags alignment = NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_MIDDLE);
         void descriptionPanel(nk_context* ctx);
         PanelType* panel(PanelPlacement placement);
         const PanelType* panel(PanelPlacement placement) const;
