@@ -62,11 +62,11 @@ namespace FAGui
         d.text_lines ({"Would You Like to:"}, TextColor::golden);
         d.skip_line ();
         d.text_lines ({"Talk to Griswold"}, TextColor::blue).setAction([](){});
-        d.text_lines ({"Buy Basic Items"});
-        d.text_lines ({"Buy Premium Items"});
-        d.text_lines ({"Sell Items"});
-        d.text_lines ({"Repair Items"});
-        d.text_lines ({"Leave the Shop"});
+        d.text_lines ({"Buy Basic Items"}).setAction([](){});
+        d.text_lines ({"Buy Premium Items"}).setAction([](){});
+        d.text_lines ({"Sell Items"}).setAction([](){});
+        d.text_lines ({"Repair Items"}).setAction([](){});
+        d.text_lines ({"Leave the Shop"}).setAction([](){});
         mActiveDialog = std::move (d); 
         mPentagramAnim.reset (new FARender::AnimationPlayer ());
         auto renderer = FARender::Renderer::get();
@@ -158,6 +158,25 @@ namespace FAGui
     {
         if (!mActiveDialog)
             return;
+
+        int dir = 0;
+        if (nk_input_is_key_pressed (&ctx->input, NK_KEY_UP))
+            dir = -1;
+        if (nk_input_is_key_pressed (&ctx->input, NK_KEY_DOWN))
+            dir = 1;
+        if (dir != 0)
+        {
+            int i = mActiveDialog->mSelectedLine + dir;
+            while (!mActiveDialog->mLines[i].action)
+                {
+                    i += dir;
+                    if (i < 0)
+                        i += mActiveDialog->mLines.size ();
+                    else if (i >= mActiveDialog->mLines.size ())
+                        i -= mActiveDialog->mLines.size ();
+                }
+            mActiveDialog->mSelectedLine = i;
+        }
 
         auto renderer = FARender::Renderer::get();
         auto boxTex = renderer->loadImage("data/textbox2.cel");
