@@ -3,13 +3,11 @@
 #include <string>
 #include <cstdint>
 
-#include <input/hotkey.h>
 #include <misc/misc.h>
 
 #include "../faworld/world.h"
 #include "../faworld/actorstats.h"
 #include "../farender/renderer.h"
-#include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
 #include "../faworld/player.h"
 
@@ -18,8 +16,6 @@
 
 namespace FAGui
 {
-    std::map<std::string, Rocket::Core::ElementDocument*> menus;
-
     PanelPlacement panelPlacementByType(PanelType type) {
         switch (type)
         {
@@ -65,13 +61,16 @@ namespace FAGui
         d.header ({"Welcome to the", "Blacksmith's Shop"});
         d.text_lines ({"Would You Like to:"}, TextColor::golden);
         d.skip_line ();
-        d.text_lines ({"Talk to Griswold"}, TextColor::blue);
+        d.text_lines ({"Talk to Griswold"}, TextColor::blue).setAction([](){});
         d.text_lines ({"Buy Basic Items"});
         d.text_lines ({"Buy Premium Items"});
         d.text_lines ({"Sell Items"});
         d.text_lines ({"Repair Items"});
         d.text_lines ({"Leave the Shop"});
         mActiveDialog = std::move (d); 
+        mPentagramAnim.reset (new FARender::AnimationPlayer ());
+        auto renderer = FARender::Renderer::get();
+        mPentagramAnim->playAnimation(renderer->loadImage ("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
     }
 
     void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action)
@@ -179,22 +178,52 @@ namespace FAGui
 
            int y = 0;
            constexpr int textRowHeight = 12;
-           for (auto &line : mActiveDialog->mLines)
+           for (int i = 0; i < static_cast<int> (mActiveDialog->mLines.size ()); ++i)
            {
-               auto line_rect = nk_rect (3, 3 + y, boxTex->getWidth() - 6, textRowHeight);
+               auto &line = mActiveDialog->mLines[i];
+               auto lineRect = nk_rect (3, 3 + y, boxTex->getWidth() - 6, textRowHeight);
                if (line.isSeparator)
                {   
                    auto separatorRect = nk_rect (3, 0, boxTex->getWidth() - 6, 3);
-                   nk_layout_space_push (ctx, alignRect (separatorRect, line_rect, halign_t::center, valign_t::center));
+                   nk_layout_space_push (ctx, alignRect (separatorRect, lineRect, halign_t::center, valign_t::center));
                    auto separator_image = nk_subimage_handle(boxTex->getNkImage().handle, boxTex->getWidth(), boxTex->getHeight (), separatorRect);
                    nk_image (ctx, separator_image);
                    continue;
                }
-               nk_layout_space_push (ctx, line_rect);
+               nk_layout_space_push (ctx, lineRect);
                smallText (ctx, line.text.c_str (), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
+               if (mActiveDialog->selectedLine() == i)
+               {
+                   auto pent = renderer->loadImage ("data/pentspn2.cel");
+                   int pentOffset = 10;
+                   auto textWidth = smallTextWidth (line.text.c_str ());
+                   // left pentagram
+                   {
+                       int offset = 0;
+                       if (line.alignCenter)
+                           offset = ((boxTex->getWidth() - 6) / 2 - textWidth / 2 - pent->getWidth() - pentOffset);
+                       nk_layout_space_push (ctx, nk_rect (3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
+                       nk_image (ctx, pent->getNkImage(mPentagramAnim->getCurrentFrame().second));
+                   }
+                   // right pentagram
+                   {
+                       int offset = textWidth + pentOffset;
+                       if (line.alignCenter)
+                           offset = ((boxTex->getWidth() - 6) / 2 + textWidth / 2 + pentOffset);
+                       nk_layout_space_push (ctx, nk_rect (3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
+                       nk_image (ctx, pent->getNkImage(mPentagramAnim->getCurrentFrame().second));
+                   }
+                }
+               
                y += textRowHeight;
            }
         });
+    }
+
+    void GuiManager::updateAnimations()
+    {
+        for (auto &anim : {mPentagramAnim.get ()})
+            anim->update();
     }
 
     void pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
@@ -574,6 +603,13 @@ namespace FAGui
        nk_style_pop_font(ctx);
     }
 
+    int GuiManager::smallTextWidth(const char* text)
+    {
+        auto renderer = FARender::Renderer::get();
+        auto fnt = renderer->smallFont();
+        return fnt->width(fnt->userdata, 0.0f, text, strlen (text) - 1);
+    }
+
     void GuiManager::descriptionPanel (nk_context *ctx)
     {
       nk_layout_space_push(ctx, nk_rect (185, 66, 275, 60));
@@ -584,6 +620,8 @@ namespace FAGui
     {
         if (paused)
             pauseMenu(ctx, mEngine);
+
+        updateAnimations ();
 
         inventoryPanel(ctx);
         spellsPanel(ctx);
