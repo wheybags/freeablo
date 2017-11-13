@@ -158,7 +158,7 @@ namespace FAGui
         if (nk_input_is_key_pressed (&ctx->input, NK_KEY_UP))
             dir = -1;
         if (nk_input_is_key_pressed (&ctx->input, NK_KEY_DOWN))
-            dir = 1;1
+            dir = 1;
         /*
         // This is an escape key. Maybe later it should work through engineinputmanager
         if (nk_input_is_key_pressed (&ctx->input, NK_KEY_TEXT_RESET_MODE))
@@ -172,8 +172,7 @@ namespace FAGui
         if (nk_input_is_key_pressed (&ctx->input, NK_KEY_ENTER))
         {
             activeDialog.mLines[activeDialog.selectedLine()].action ();
-            if (mDialogs.empty ())
-                return;
+            return;
         }
 
         if (dir != 0)
@@ -208,7 +207,7 @@ namespace FAGui
                nk_image (ctx, nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect));
            }
 
-           int y = 0;
+           int y = 5;
            constexpr int textRowHeight = 12;
            for (int i = 0; i < static_cast<int> (activeDialog.mLines.size ()); ++i)
            {

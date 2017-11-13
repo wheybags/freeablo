@@ -39,9 +39,18 @@ namespace FAGui
 
     void DialogData::header(const std::vector<std::string>& text)
     {
-        for(auto& line : text)
+        if(text.size() == 1)
         {
-            text_lines({line}, TextColor::golden);
+            skip_line();
+            text_lines({text.front()}, TextColor::golden);
+            skip_line();
+        }
+        else
+        {
+            for(auto& line : text)
+            {
+                text_lines({line}, TextColor::golden);
+            }
         }
         separator();
         skip_line();
@@ -64,10 +73,172 @@ namespace FAGui
     {
     }
 
+    void DialogManager::talkOgden()
+    {
+        DialogData d;
+        d.header({"Welcome to the", "Rising Sun"});
+        d.skip_line(2);
+        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.skip_line();
+        d.text_lines({"Talk to Ogden"}, TextColor::blue).setAction([]()
+        {
+        });
+        d.skip_line(4);
+        d.text_lines({"Leave the Tavern"}).setAction([&]()
+        {
+            mGuiManager.popDialogData();
+        });
+        mGuiManager.pushDialogData(std::move(d));
+    }
+
+    void DialogManager::talkFarnham()
+    {
+        DialogData d;
+        d.header({"Farnham the Drunk"});
+        d.skip_line(2);
+        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.skip_line();
+        d.text_lines({"Talk to Farnham"}, TextColor::blue).setAction([]()
+        {
+        });
+        d.skip_line(4);
+        d.text_lines({"Say Goodbye"}).setAction([&]()
+        {
+            mGuiManager.popDialogData();
+        });
+        mGuiManager.pushDialogData(std::move(d));
+    }
+
+    void DialogManager::talkAdria()
+    {
+        DialogData d;
+        d.header({"Witch's Shack"});
+
+        d.skip_line(2);
+        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.skip_line();
+        d.text_lines({"Talk to Adria"}, TextColor::blue).setAction([]()
+        {
+        });
+        d.text_lines({"Buy Items"}).setAction([]()
+        {
+        });
+        d.text_lines({"Sell Items"}).setAction([]()
+        {
+        });
+        d.text_lines({"Recharge Staves"}).setAction([]()
+        {
+        });
+        d.text_lines({"Leave the Shack"}).setAction([&]()
+        {
+            mGuiManager.popDialogData();
+        });
+        mGuiManager.pushDialogData(std::move(d));
+    }
+
+    void DialogManager::talkWirt()
+    {
+        DialogData d;
+        d.header({"Wirt the Peg-Legged Boy"});
+
+        d.skip_line();
+        d.text_lines({"Talk to Wirt"}, TextColor::blue).setAction([](){
+        });
+        d.skip_line(2);
+        d.text_lines({"I have something for sale,"}, TextColor::golden);
+        d.text_lines({"But it will cost 50 gold"}, TextColor::golden);
+        d.text_lines({"Just to take a look."}, TextColor::golden);
+        d.text_lines({"What have you got?"}).setAction([&]()
+        {
+        });
+        d.text_lines({"Goodbye"}).setAction([&]()
+        {
+            mGuiManager.popDialogData();
+        });
+        mGuiManager.pushDialogData(std::move(d));
+    }
+
+    void DialogManager::talkPepin()
+    {
+        DialogData d;
+        d.header({"Welcome to the", "Healer's Home"});
+
+        d.skip_line(2);
+        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.skip_line();
+        d.text_lines({"Talk to Pepin"}, TextColor::blue).setAction([]()
+        {
+        });
+        d.text_lines({"Receive Healing"}).setAction([]()
+        {
+        });
+        d.text_lines({"Buy Items"}).setAction([]()
+        {
+        });
+        d.text_lines({"Leave Healer's Home"}).setAction([&]()
+        {
+            mGuiManager.popDialogData();
+        });
+        mGuiManager.pushDialogData(std::move(d));
+    }
+
+    void DialogManager::talkCain()
+    {
+        DialogData d;
+        d.header({"The Town Elder"});
+        d.skip_line(2);
+        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.skip_line();
+        d.text_lines({"Talk to Cain"}, TextColor::blue).setAction([]()
+        {
+        });
+        d.text_lines({"Identify an Item"}).setAction([]()
+        {
+        });
+        d.skip_line(2);
+        d.text_lines({"Say Goodbye"}).setAction([&]()
+        {
+            mGuiManager.popDialogData();
+        });
+        mGuiManager.pushDialogData(std::move(d));
+    }
+
+    void DialogManager::talkGillian()
+    {
+        DialogData d;
+        d.header({"Gillian"});
+        d.skip_line(2);
+        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.skip_line();
+        d.text_lines({"Talk to Gillian"}, TextColor::blue).setAction([]()
+        {
+        });
+        d.skip_line(4);
+        d.text_lines({"Say Goodbye"}).setAction([&]()
+        {
+            mGuiManager.popDialogData();
+        });
+        mGuiManager.pushDialogData(std::move(d));
+    }
+
     void DialogManager::talk(const std::string& npcId)
     {
         if(npcId == "NPCsmith")
             talkGriswold();
+        else if(npcId == "NPCtavern")
+            talkOgden();
+        else if(npcId == "NPCdrunk")
+            talkFarnham();
+        else if(npcId == "NPCmaid")
+            talkGillian();
+        else if(npcId == "NPCboy")
+            talkWirt();
+        else if(npcId == "NPChealer")
+            talkPepin();
+        else if(npcId == "NPCwitch")
+            talkAdria();
+        else if(npcId == "NPCstorytell")
+            talkCain();
     }
 
     void DialogManager::talkGriswold()
@@ -92,9 +263,9 @@ namespace FAGui
         {
         });
         d.text_lines({"Leave the Shop"}).setAction([&]()
-        { 
-            mGuiManager.popDialogData ();
+        {
+            mGuiManager.popDialogData();
         });
-        mGuiManager.pushDialogData(std::move (d));
+        mGuiManager.pushDialogData(std::move(d));
     }
 }

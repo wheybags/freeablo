@@ -43,6 +43,13 @@ namespace FAGui
     {
     public:
         explicit DialogManager(GuiManager& gui_manager);
+        void talkOgden();
+        void talkFarnham();
+        void talkAdria();
+        void talkWirt();
+        void talkPepin();
+        void talkCain();
+        void talkGillian();
         void talk(const std::string& npcId);
 
     private:
