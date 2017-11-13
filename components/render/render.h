@@ -10,10 +10,10 @@
 
 #include <functional>
 
-#include <cel/celfile.h>
-#include <cel/celframe.h>
-
 #include "misc.h"
+
+#include "cel/pal.h"
+#include <boost/optional.hpp>
 
 struct SDL_Cursor;
 struct SDL_Surface;
@@ -30,6 +30,11 @@ namespace Render
         topLeft,
         center,
     };
+}
+
+namespace Cel
+{
+    struct Colour;
 }
 
 #include "levelobjects.h"

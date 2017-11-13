@@ -1,9 +1,15 @@
+#ifndef LEVEL_OBJ_H
+#define LEVEL_OBJ_H
+
 #include "render.h"
 
 #include <misc/helper2d.h>
+#include <boost/optional.hpp>
 
-#ifndef LEVEL_OBJ_H
-#define LEVEL_OBJ_H
+namespace Cel
+{
+    struct Colour;
+}
 
 namespace Render
 {

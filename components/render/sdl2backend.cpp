@@ -45,7 +45,7 @@ namespace Render
     int32_t HEIGHT = 960;
 
     SDL_Window* screen;
-    SDL_Renderer* renderer;
+    SDL_Renderer* renderer; 
     SDL_GLContext glContext;
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
@@ -1000,8 +1000,9 @@ namespace Render
         {
             for(int32_t y = 0; y < frame.mHeight; y++)
             {
-                if(frame[x][y].visible)
-                    setpixel(s, start_x+x, start_y+y, frame[x][y]);
+                auto &c = frame[x][y];
+                if(c.visible)
+                    setpixel(s, start_x+x, start_y+y, c);
             }
         }
     }

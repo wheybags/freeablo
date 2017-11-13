@@ -9,6 +9,7 @@
 #include <faio/fafileobject.h>
 #include <chrono>
 #include <nfd.h>
+#include "../components/settings/settings.h"
 
 
 int main(int, char**)
