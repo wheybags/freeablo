@@ -183,7 +183,7 @@ namespace FAGui
                     i += dir;
                     if (i < 0)
                         i += activeDialog.mLines.size ();
-                    else if (i >= activeDialog.mLines.size ())
+                    else if (i >= static_cast<int> (activeDialog.mLines.size ()))
                         i -= activeDialog.mLines.size ();
                 }
             while (!activeDialog.mLines[i].action);
