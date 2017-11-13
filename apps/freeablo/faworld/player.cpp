@@ -52,8 +52,7 @@ namespace FAWorld
 
     bool Player::talk(Actor* actor)
     {
-        UNUSED_PARAM(actor);
-        //assert(false);
+        talkRequested (actor);
         return true;
     }
 

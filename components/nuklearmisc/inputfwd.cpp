@@ -53,6 +53,8 @@ namespace NuklearMisc
             nk_input_key(ctx, NK_KEY_DEL, down);
         else if (sym == Input::KEY_RETURN)
             nk_input_key(ctx, NK_KEY_ENTER, down);
+        else if (sym == Input::KEY_ESCAPE)
+            nk_input_key(ctx, NK_KEY_TEXT_RESET_MODE, down);
         else if (sym == Input::KEY_TAB)
             nk_input_key(ctx, NK_KEY_TAB, down);
         else if (sym == Input::KEY_BACKSPACE)

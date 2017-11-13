@@ -5,6 +5,7 @@
 #include <queue>
 #include <functional>
 #include "../engine/enginemain.h"
+#include "textcolor.h"
 
 
 #include <fa_nuklear.h>
@@ -30,88 +31,7 @@ namespace FAWorld
 namespace FAGui
 {
     class GuiManager;
-
-    enum class TextColor
-    {
-        white,
-        blue,
-        golden,
-        red,
-    };
-
-    class DialogLineData
-    {
-    public:
-        DialogLineData& setAction(std::function<void ()> actionArg)
-        {
-            action = actionArg;
-            return *this;
-        }
-
-    public:
-        std::function<void ()> action;
-        std::string text;
-        bool alignCenter = false;
-        bool isSeparator = false;
-        TextColor color = TextColor::white;
-    };
-
-    class DialogData
-    {
-    public:
-        DialogLineData& text_lines(const std::vector<std::string>& texts, TextColor color = TextColor::white, bool alignCenter = true)
-        {
-            auto& ret = mLines[mLastLine];
-            for(auto& text : texts)
-            {
-                mLines[mLastLine].text = text;
-                mLines[mLastLine].color = color;
-                mLines[mLastLine].isSeparator = false;
-                mLines[mLastLine].alignCenter = alignCenter;
-                ++mLastLine;
-            }
-            skip_line();
-            return ret;
-        }
-
-        void skip_line(int cnt = 1) { mLastLine += cnt; }
-
-        void separator()
-        {
-            mLines[mLastLine].isSeparator = true;
-            ++mLastLine;
-            skip_line();
-        }
-
-        void header(const std::vector<std::string>& text)
-        {
-            for(auto& line : text)
-            {
-                text_lines({line}, TextColor::golden);
-            }
-            separator();
-            skip_line();
-        }
-
-        int selectedLine()
-        {
-            if(mSelectedLine == -1)
-                {
-                    auto it = std::find_if (mLines.begin (), mLines.end (),
-                        [](const DialogLineData &data){ return !!data.action; });
-                        if(it != mLines.end ())
-                            return mSelectedLine = it - mLines.begin ();
-                    assert (false);
-                }
-            return mSelectedLine;
-        }
-
-    private:
-        std::array<DialogLineData, 24> mLines;
-        int mLastLine = 1;
-        int mSelectedLine = -1;
-        friend class FAGui::GuiManager;
-    };
+    class DialogData;
 
     enum class EffectType
     {
@@ -159,12 +79,15 @@ namespace FAGui
         using self = GuiManager;
     public:
         GuiManager(Engine::EngineMain& engine, FAWorld::Player& player);
+        ~GuiManager ();
         void dialog(nk_context* ctx);
         void updateAnimations();
         void update(bool paused, nk_context* ctx);
         void setDescription(std::string text, TextColor color = TextColor::white);
         void clearDescription();
         bool isInventoryShown() const;
+        void popDialogData();
+        void pushDialogData(DialogData &&data);
 
     private:
         void togglePanel(PanelType type);
@@ -191,7 +114,7 @@ namespace FAGui
         std::string mDescription;
         TextColor mDescriptionColor = TextColor::white;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
-        boost::optional<DialogData> mActiveDialog;
+        std::vector<DialogData> mDialogs;
         std::unique_ptr<FARender::AnimationPlayer> mPentagramAnim;
     };
 }

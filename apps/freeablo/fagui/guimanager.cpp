@@ -13,6 +13,7 @@
 
 #include "boost/range/counting_range.hpp"
 #include <boost/variant/variant.hpp>
+#include "dialogmanager.h"
 
 namespace FAGui
 {
@@ -57,20 +58,13 @@ namespace FAGui
     GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player &player)
         : mEngine(engine), mPlayer (player)
     {
-        DialogData d;
-        d.header ({"Welcome to the", "Blacksmith's Shop"});
-        d.text_lines ({"Would You Like to:"}, TextColor::golden);
-        d.skip_line ();
-        d.text_lines ({"Talk to Griswold"}, TextColor::blue).setAction([](){});
-        d.text_lines ({"Buy Basic Items"}).setAction([](){});
-        d.text_lines ({"Buy Premium Items"}).setAction([](){});
-        d.text_lines ({"Sell Items"}).setAction([](){});
-        d.text_lines ({"Repair Items"}).setAction([](){});
-        d.text_lines ({"Leave the Shop"}).setAction([](){});
-        mActiveDialog = std::move (d); 
         mPentagramAnim.reset (new FARender::AnimationPlayer ());
         auto renderer = FARender::Renderer::get();
         mPentagramAnim->playAnimation(renderer->loadImage ("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
+    }
+
+    GuiManager::~GuiManager()
+    {
     }
 
     void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action)
@@ -156,26 +150,45 @@ namespace FAGui
 
     void GuiManager::dialog(nk_context* ctx)
     {
-        if (!mActiveDialog)
+        if (mDialogs.empty ())
             return;
 
+        auto &activeDialog = mDialogs.back ();
         int dir = 0;
         if (nk_input_is_key_pressed (&ctx->input, NK_KEY_UP))
             dir = -1;
         if (nk_input_is_key_pressed (&ctx->input, NK_KEY_DOWN))
-            dir = 1;
+            dir = 1;1
+        /*
+        // This is an escape key. Maybe later it should work through engineinputmanager
+        if (nk_input_is_key_pressed (&ctx->input, NK_KEY_TEXT_RESET_MODE))
+        {
+           popDialogData ();
+           if (mDialogs.empty ())
+               return;
+        }
+        */
+
+        if (nk_input_is_key_pressed (&ctx->input, NK_KEY_ENTER))
+        {
+            activeDialog.mLines[activeDialog.selectedLine()].action ();
+            if (mDialogs.empty ())
+                return;
+        }
+
         if (dir != 0)
         {
-            int i = mActiveDialog->mSelectedLine + dir;
-            while (!mActiveDialog->mLines[i].action)
+            int i = activeDialog.mSelectedLine;
+            do
                 {
                     i += dir;
                     if (i < 0)
-                        i += mActiveDialog->mLines.size ();
-                    else if (i >= mActiveDialog->mLines.size ())
-                        i -= mActiveDialog->mLines.size ();
+                        i += activeDialog.mLines.size ();
+                    else if (i >= activeDialog.mLines.size ())
+                        i -= activeDialog.mLines.size ();
                 }
-            mActiveDialog->mSelectedLine = i;
+            while (!activeDialog.mLines[i].action);
+            activeDialog.mSelectedLine = i;
         }
 
         auto renderer = FARender::Renderer::get();
@@ -197,9 +210,9 @@ namespace FAGui
 
            int y = 0;
            constexpr int textRowHeight = 12;
-           for (int i = 0; i < static_cast<int> (mActiveDialog->mLines.size ()); ++i)
+           for (int i = 0; i < static_cast<int> (activeDialog.mLines.size ()); ++i)
            {
-               auto &line = mActiveDialog->mLines[i];
+               auto &line = activeDialog.mLines[i];
                auto lineRect = nk_rect (3, 3 + y, boxTex->getWidth() - 6, textRowHeight);
                if (line.isSeparator)
                {   
@@ -211,7 +224,7 @@ namespace FAGui
                }
                nk_layout_space_push (ctx, lineRect);
                smallText (ctx, line.text.c_str (), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
-               if (mActiveDialog->selectedLine() == i)
+               if (activeDialog.selectedLine() == i)
                {
                    auto pent = renderer->loadImage ("data/pentspn2.cel");
                    int pentOffset = 10;
@@ -678,6 +691,16 @@ namespace FAGui
     bool GuiManager::isInventoryShown() const
     {
         return *panel (panelPlacementByType (PanelType::inventory)) == PanelType::inventory;
+    }
+
+    void GuiManager::popDialogData()
+    {
+        mDialogs.pop_back ();
+    }
+
+    void GuiManager::pushDialogData(DialogData&& data)
+    {
+        mDialogs.push_back (std::move (data));
     }
 
     void GuiManager::togglePanel(PanelType type)

@@ -84,6 +84,9 @@ if(MSVC)
     # 4800 - forcing value to bool, stupid warning
     set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /w44062")
     # 4061 - not all enumerator values are handled by the switch statement
+    add_definitions (-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
+    # SCL - because current boost is too old and emits this warning
+    # CRT - something in nuklear.h
     if (TREAT_WARNINGS_AS_ERRORS)
         set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /WX")
     endif()

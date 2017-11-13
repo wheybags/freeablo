@@ -67,8 +67,11 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/actoranimationmanager.h
     faworld/actoranimationmanager.cpp
 
+    fagui/textcolor.h
     fagui/guimanager.h
     fagui/guimanager.cpp
+    fagui/dialogmanager.h
+    fagui/dialogmanager.cpp
     fagui/commandhistory.h
     fagui/commandhistory.cpp
     fagui/autocomplete.h

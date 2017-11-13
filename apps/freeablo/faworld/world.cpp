@@ -18,6 +18,7 @@
 #include "itemmap.h"
 #include "diabloexe/npc.h"
 #include "../fagui/guimanager.h"
+#include "../fagui/dialogmanager.h"
 
 
 namespace FAWorld
@@ -343,6 +344,14 @@ namespace FAWorld
     Tick World::getCurrentTick()
     {
         return mTicksPassed;
+    }
+
+    void World::setGuiManager(FAGui::GuiManager* manager)
+    {
+        mGuiManager = manager;
+        mDlgManager.reset (new FAGui::DialogManager(*mGuiManager));
+        getCurrentPlayer()->talkRequested.connect(
+            [&](Actor *actor){mDlgManager->talk(actor->getActorId()); });
     }
 
 
