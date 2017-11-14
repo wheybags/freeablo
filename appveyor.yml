@@ -25,6 +25,7 @@ before_build:
   - cmake .. -G "Visual Studio 14 2015 Win64"
 
 build:
+  parallel: true
   project: c:\projects\freeablo\build\Freeablo.sln # path to Visual Studio solution or project
 
 test_script:
