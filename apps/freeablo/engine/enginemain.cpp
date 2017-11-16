@@ -98,6 +98,7 @@ namespace Engine
 
         FAGui::GuiManager guiManager(*this, *player);
         world.setGuiManager (&guiManager);
+        mInputManager->setGuiManager (&guiManager);
 
         if (currentLevel == -1)
             currentLevel = 0;

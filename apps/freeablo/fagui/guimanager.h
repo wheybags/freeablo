@@ -80,6 +80,10 @@ namespace FAGui
     public:
         GuiManager(Engine::EngineMain& engine, FAWorld::Player& player);
         ~GuiManager ();
+        void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void()> action,
+                                bool isModal);
+        void nk_fa_begin_image_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background,
+                                      std::function<void()> action, bool isModal);
         void dialog(nk_context* ctx);
         void updateAnimations();
         void update(bool paused, nk_context* ctx);
@@ -88,6 +92,8 @@ namespace FAGui
         bool isInventoryShown() const;
         void popDialogData();
         void pushDialogData(DialogData &&data);
+        // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
+        bool isModalDlgShown () const;
 
     private:
         void togglePanel(PanelType type);

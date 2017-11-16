@@ -351,7 +351,13 @@ namespace FAWorld
         mGuiManager = manager;
         mDlgManager.reset (new FAGui::DialogManager(*mGuiManager));
         getCurrentPlayer()->talkRequested.connect(
-            [&](Actor *actor){mDlgManager->talk(actor->getActorId()); });
+            [&](Actor *actor)
+        {
+            // This is important because mouse released becomes blocked by "modal" dialog
+            // Thus creating some uncomfortable effects
+            targetLock = false; 
+            mDlgManager->talk(actor->getActorId());
+        });
     }
 
 

@@ -67,23 +67,25 @@ namespace FAGui
     {
     }
 
-    void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action)
+    void GuiManager::nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action, bool isModal)
     {
-        ctx->active = ctx->current;
         nk_style_push_vec2(ctx, &ctx->style.window.padding, nk_vec2(0,0));
-
+        if (isModalDlgShown() && !isModal)
+            flags |= NK_WINDOW_NO_INPUT;
         if (nk_begin(ctx, title, bounds, flags))
-            action();
+            {
+                action();
+            }
 
         nk_end(ctx);
 
         nk_style_pop_vec2(ctx);
     }
 
-    void nk_fa_begin_image_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void(void)> action)
+    void GuiManager::nk_fa_begin_image_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void(void)> action, bool isModal)
     {
         nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(background));
-        nk_fa_begin_window(ctx, title, bounds, flags, action);
+        nk_fa_begin_window(ctx, title, bounds, flags, action, isModal);
         nk_style_pop_style_item(ctx);
     }
 
@@ -159,7 +161,7 @@ namespace FAGui
             dir = -1;
         if (nk_input_is_key_pressed (&ctx->input, NK_KEY_DOWN))
             dir = 1;
-        /*
+
         // This is an escape key. Maybe later it should work through engineinputmanager
         if (nk_input_is_key_pressed (&ctx->input, NK_KEY_TEXT_RESET_MODE))
         {
@@ -167,7 +169,6 @@ namespace FAGui
            if (mDialogs.empty ())
                return;
         }
-        */
 
         if (nk_input_is_key_pressed (&ctx->input, NK_KEY_ENTER))
         {
@@ -254,7 +255,7 @@ namespace FAGui
                
                y += textRowHeight;
            }
-        });
+        }, true);
     }
 
     void GuiManager::updateAnimations()
@@ -311,7 +312,7 @@ namespace FAGui
             invTex->getWidth(), invTex->getHeight());
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND;
         if (*panel (placement) == panelType)
-            nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op);
+            nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op, false);
         else
             nk_window_close (ctx, panelName (panelType));
     }
@@ -615,7 +616,7 @@ namespace FAGui
             belt (ctx);
             descriptionPanel(ctx);
             nk_layout_space_end(ctx);
-        });
+        }, false);
     }
 
     void GuiManager::smallText (nk_context *ctx, const char *text, TextColor color, nk_flags alignment) {
@@ -706,6 +707,14 @@ namespace FAGui
     void GuiManager::pushDialogData(DialogData&& data)
     {
         mDialogs.push_back (std::move (data));
+    }
+
+    bool GuiManager::isModalDlgShown() const
+    {
+        if (!mDialogs.empty ())
+            return true;
+
+        return false;
     }
 
     void GuiManager::togglePanel(PanelType type)

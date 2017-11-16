@@ -9,10 +9,16 @@
 #include "../components/misc/misc.h"
 #include "inputobserverinterface.h"
 #include <fa_nuklear.h>
+#include "../faworld/actoranimationmanager.h"
 
 namespace FAWorld
 {
     class World;
+}
+
+namespace FAGui
+{
+    class GuiManager;
 }
 
 namespace Engine
@@ -29,12 +35,13 @@ namespace Engine
             std::vector<Input::Hotkey> getHotkeys();
             void registerKeyboardObserver(KeyboardInputObserverInterface* observer);
             void registerMouseObserver(MouseInputObserverInterface* observer);
+            void setGuiManager(FAGui::GuiManager* guiManager);
             Input::KeyboardModifiers getKeyboardModifiers()
             {
                 return mKbMods;
             }
 
-        private:
+    private:
             EngineInputManager(const EngineInputManager&);
             EngineInputManager& operator=(const EngineInputManager&);
             void keyPress(Input::Key key);
@@ -53,6 +60,7 @@ namespace Engine
             bool mMouseDown = false;
             bool mClick = false;
             Input::KeyboardModifiers mKbMods;
+            FAGui::GuiManager *mGuiManager;
             std::map<KeyboardInputAction,Input::Hotkey> mHotkeys;
             std::vector<KeyboardInputObserverInterface*> mKeyboardObservers;
             std::vector<MouseInputObserverInterface*> mMouseObservers;
