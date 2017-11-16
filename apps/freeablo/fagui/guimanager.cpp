@@ -222,6 +222,12 @@ namespace FAGui
                    continue;
                }
                nk_layout_space_push (ctx, lineRect);
+               if (nk_widget_is_mouse_click_down (ctx, NK_BUTTON_LEFT, true) && line.action)
+                   {
+                     activeDialog.mSelectedLine = i;
+                     line.action ();
+                     return;
+                   }
                smallText (ctx, line.text.c_str (), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
                if (activeDialog.selectedLine() == i)
                {
