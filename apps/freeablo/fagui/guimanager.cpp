@@ -155,6 +155,11 @@ namespace FAGui
         if (mDialogs.empty ())
             return;
 
+        if (mCurRightPanel != PanelType::none)
+            mCurRightPanel = PanelType::none;
+        if (mCurLeftPanel != PanelType::none)
+            mCurLeftPanel = PanelType::none;
+        
         auto &activeDialog = mDialogs.back ();
         int dir = 0;
         if (nk_input_is_key_pressed (&ctx->input, NK_KEY_UP))
@@ -311,10 +316,9 @@ namespace FAGui
             }(), screenH - 125 - invTex->getHeight(),
             invTex->getWidth(), invTex->getHeight());
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND;
-        if (*panel (placement) == panelType)
-            nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op, false);
-        else
-            nk_window_close (ctx, panelName (panelType));
+        nk_window_show (ctx, panelName (panelType), *panel (placement) == panelType ? NK_SHOWN : NK_HIDDEN);
+
+        nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op, false);
     }
 
     static nk_style_button dummyStyle = [](){
