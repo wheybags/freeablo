@@ -107,6 +107,9 @@ namespace FAWorld
             // only simple movement.
             bool targetLock = false;
             bool simpleMove = false;
+            // that's sadly another state required
+            // it means after dialog we have to release button before doing next meaningful action
+            bool afterDialog = false;
     };
 }
 

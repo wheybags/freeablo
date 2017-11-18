@@ -356,6 +356,7 @@ namespace FAWorld
             // This is important because mouse released becomes blocked by "modal" dialog
             // Thus creating some uncomfortable effects
             targetLock = false; 
+            afterDialog = true;
             mDlgManager->talk(actor->getActorId());
         });
     }
@@ -382,6 +383,7 @@ namespace FAWorld
 
     void World::onMouseRelease()
     {
+        afterDialog = false;
         targetLock = false;
         simpleMove = false;
         getCurrentPlayer()->isTalking = false;
@@ -404,6 +406,9 @@ namespace FAWorld
 
     void World::onMouseDown(Misc::Point mousePosition)
     {
+        if (afterDialog)
+            return;
+
         auto player = getCurrentPlayer();
         auto &inv = player->getInventory ();
         auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
