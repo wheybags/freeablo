@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <vector>
 #include <misc/helper2d.h>
-#include "pal.h"
 
 namespace Cel
 {

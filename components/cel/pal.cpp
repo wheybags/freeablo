@@ -23,6 +23,6 @@ namespace Cel
 
     const Colour& Pal::operator[](size_t index) const
     {
-        return contents[index];
+        return contents.data()[index];
     }
 }

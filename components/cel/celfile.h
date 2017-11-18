@@ -2,9 +2,6 @@
 #define CEL_FILE_H
 
 #include <stdint.h>
-#include <vector>
-#include <map>
-#include "pal.h"
 #include "celframe.h"
 #include "celdecoder.h"
 

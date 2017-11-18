@@ -10,6 +10,7 @@
 #include <nuklearmisc/widgets.h>
 #include <faio/faio.h>
 #include <climits>
+#include "../components/settings/settings.h"
 
 int main(int, char** argv)
 {

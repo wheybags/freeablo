@@ -18,8 +18,7 @@ namespace Cel
         {
             r = _r; g = _g; b = _b; visible = _visible;
         }
-
-        Colour(){ visible = true; }
+        Colour () { visible = true; }
     };
 
 
