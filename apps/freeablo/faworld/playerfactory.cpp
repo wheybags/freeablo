@@ -2,6 +2,7 @@
 #include "player.h"
 #include "characterstats.h"
 #include "itemmanager.h"
+#include "diabloexe/characterstats.h"
 
 namespace FAWorld
 {
@@ -70,7 +71,7 @@ void PlayerFactory::createWarrior(Player* player) const
     player->setSpriteClass("warrior");
     player->getAnimationManager().setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldst.cl2"));
     player->getAnimationManager().setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldwl.cl2"));
-    //loadTestingKit (player);
+    loadTestingKit (player);
 }
 
 void PlayerFactory::createRogue(Player* player) const

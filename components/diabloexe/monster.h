@@ -14,7 +14,7 @@ namespace FAIO
 
 namespace DiabloExe
 {
-    struct Monster
+    class Monster
     {
         public:
             uint32_t animSize;
@@ -23,17 +23,17 @@ namespace DiabloExe
             uint32_t secondAttack;
             std::string soundPath; // uint32_t ptr in exe
             uint32_t specialSound;
-            
+
             uint32_t usesTrn;
             std::string trnPath; // uint32_t p
-            
+
             uint32_t idleFrameSet;
             uint32_t walkFrameSet;
             uint32_t attackFrameSet;
             uint32_t recoveryFrameSet;
             uint32_t deathFrameSet;
             uint32_t secondAttackFrameSet;
-            
+
             uint32_t idlePlayback;
             uint32_t walkPlayback;
             uint32_t attackPlayback;
@@ -45,21 +45,21 @@ namespace DiabloExe
 
             uint8_t minDunLevel;
             uint8_t maxDunLevel;
-            
+
             uint16_t level;
 
             uint32_t minHp;
             uint32_t maxHp;
 
             uint8_t attackType;
-            
+
             uint8_t unknown1;
             uint8_t unknown2;
             uint8_t unknown3;
             uint8_t unknown4;
-            
+
             uint8_t intelligence;
-            
+
             uint8_t unknown5;
             uint8_t unknown6;
 
@@ -69,7 +69,7 @@ namespace DiabloExe
             uint8_t hitFrame;
             uint8_t minDamage;
             uint8_t maxDamage;
-            
+
             uint8_t toHitSecond;
             uint8_t hitFrameSecond;
             uint8_t minDamageSecond;
@@ -81,16 +81,16 @@ namespace DiabloExe
 
             uint16_t normalResistanceImmunitiesFlags;
             uint16_t hellResistanceImmunitiesFlags;
-            
+
             uint16_t drops;
 
             uint16_t selectionOutline;
-            
+
             uint32_t exp;
 
             std::string dump() const;
 
-            Monster() {} 
+            Monster() {}
 
         private:
             Monster(FAIO::FAFileObject& exe, size_t codeOffset);

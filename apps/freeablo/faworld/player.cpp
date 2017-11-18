@@ -7,6 +7,7 @@
 #include <misc/stringops.h>
 #include <string>
 #include "itemmap.h"
+#include "diabloexe/characterstats.h"
 
 namespace FAWorld
 {

@@ -47,6 +47,8 @@ namespace DiabloExe
         uint32_t price1;
         uint32_t price2;
 
+        std::string dropItemGraphicsPath;
+
         std::string dump() const;
         BaseItem();
 

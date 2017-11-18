@@ -1,7 +1,6 @@
 #ifndef ITEMMANAGER_H
 #define ITEMMANAGER_H
 
-#include "item.h"
 #include <map>
 #include <stdint.h>
 #include <diabloexe/diabloexe.h>
@@ -13,8 +12,8 @@ namespace Engine
     class EngineMain;
 }
 namespace FAWorld
-
 {
+    class Item;
 
     class ItemPosition
     {

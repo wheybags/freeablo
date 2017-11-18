@@ -1,4 +1,6 @@
 #include "itemmanager.h"
+#include "item.h"
+
 #include <sstream>
 #include <iostream>
 #include <unordered_map>

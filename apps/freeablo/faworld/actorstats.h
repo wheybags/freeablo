@@ -8,6 +8,11 @@
 #include "actor.h"
 
 
+namespace DiabloExe
+{
+    class CharacterStats;
+}
+
 namespace FAWorld
 {
 
@@ -43,31 +48,7 @@ namespace FAWorld
 
             void setActor(Actor * actor){mActor = actor;}
 
-            ActorStats(DiabloExe::CharacterStats stats) :
-                mExpForLevel(stats.mNextLevelExp),
-                mLevel(1),
-                mLevelPoints(0),
-                mExp(0),
-                mExpToNextLevel(2000),
-                mStartingVitality(stats.mVitality),
-                mMaxVitality(stats.mMaxVitality),
-                mStartingMagic(stats.mMagic),
-                mMaxMagic(stats.mMaxMagic),
-                mStartingDexterity(stats.mDexterity),
-                mMaxDexterity(stats.mMaxDexterity),
-                mStartingStrength(stats.mStrength),
-                mMaxStrength(stats.mMaxStrength),
-                mBlockingBonus(stats.mBlockingBonus),
-                mAttackFrameset(stats.mAttackFrameset),
-                mAttackSpeed(stats.mSingleHandedAttackSpeed)
-
-            {
-                mVitality = mStartingVitality;
-                mStrength = mStartingStrength;                
-                mMagic    = mStartingMagic;
-                mDexterity = mStartingDexterity;
-                recalculateDerivedStats();
-            }
+        ActorStats(DiabloExe::CharacterStats stats);
             ActorStats(const DiabloExe::Monster & monsterStat);
 
             virtual void printStats();

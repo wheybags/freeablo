@@ -300,7 +300,7 @@ private:
     uint8_t mSizeY;
 
     static bool mObjcursLoaded;
-
+    std::string mDropItemGraphicsPath;
 };
 }
 #endif // ITEM_H

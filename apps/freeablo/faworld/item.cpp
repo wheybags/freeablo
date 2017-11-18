@@ -83,6 +83,7 @@ Item::Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix, bool 
     mUseOnce  = item.useOnce;
     mBuyPrice = item.price1;
     mSellPrice= item.price2;
+    mDropItemGraphicsPath = item.dropItemGraphicsPath;
 
     if(mType != itGOLD)
     {
@@ -203,33 +204,7 @@ std::pair<uint8_t, uint8_t> Item::getCornerCoords() const
 
 std::string Item::getFlipAnimationPath() const
 {
-    // TODO: extract mapping from exe
-    switch (getCode())
-    {
-        case icOther:
-            switch (getType())
-            {
-                case itPOT: return "items/fbttle.cel";
-            default:
-                break;
-            }
-            break;
-        case icSword: return "items/swrdflip.cel";
-        case icAxe: return "items/axe.cel";
-        case icBow: return "items/bow.cel";
-        case icBlunt: return "items/mace.cel";
-        case icShield: return "items/shield.cel";
-        case icLightArmour: return "items/larmor.cel";
-        case icHelm: return "items/helmut.cel";
-        case icMidArmour: return "items/armor2.cel";
-        case icHeavyArmour: return "items/FPlateAr.cel";
-        case icStave: return "items/staff.cel";
-        case icGold: return "items/goldflip.cel";
-        case icRing:
-        case icAmulet:
-            return "items/ring.cel";
-    }
-    return "";
+    return mDropItemGraphicsPath;
 }
 
 std::string Item::getFlipSoundPath() const

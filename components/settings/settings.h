@@ -5,11 +5,56 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/filesystem.hpp>
 #include <string>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 namespace Settings
 {
 
 typedef std::vector<std::string> Container;
+
+// adding custom translator to allwo reading hex valuess
+template <typename E>
+class stream_translator
+{
+    typedef boost::property_tree::customize_stream<char, std::char_traits<char>, E> customized;
+public:
+    typedef E external_type;
+
+    explicit stream_translator(std::locale loc = std::locale())
+        : m_loc(loc)
+    {}
+
+    boost::optional<E> get_value(const std::string &v) {
+        auto v_cpy = v;
+        boost::trim(v_cpy);
+        std::istringstream iss(v);
+        iss.imbue(m_loc);
+        if (boost::starts_with (v_cpy, "0x"))
+            {
+                iss.ignore (2);
+                iss >> std::hex;
+            }
+        E e;
+        customized::extract(iss, e);
+        if(iss.fail() || iss.bad() || iss.get() != std::char_traits<char>::eof()) {
+            return boost::optional<E>();
+        }
+        return e;
+    }
+    boost::optional<std::string> put_value(const E &v) {
+        std::ostringstream oss;
+        oss.imbue(m_loc);
+        customized::insert(oss, v);
+        if(oss) {
+            return oss.str();
+        }
+        return {};
+    }
+
+private:
+    std::locale m_loc;
+};
 
 class Settings
 {
@@ -37,7 +82,7 @@ public:
 
         std::string fullName = section + connector + name;
 
-        boost::optional< T > child = mUserPropertyTree.get_optional<T>( fullName.c_str() );
+        boost::optional< T > child = mUserPropertyTree.get_optional<T>( fullName.c_str(), stream_translator<T> {});
         if(!child)
         {
             T value;
