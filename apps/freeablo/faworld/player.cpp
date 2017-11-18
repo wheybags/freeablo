@@ -1,7 +1,6 @@
 #include "player.h"
 #include "world.h"
 #include "actorstats.h"
-#include "characterstats.h"
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
 #include <misc/stringops.h>
@@ -23,26 +22,18 @@ namespace FAWorld
     Player::Player(const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor(), mInventory(this)
     {
         init(className, charStats);
-        mMoveHandler = MovementHandler(World::getTicksInPeriod(0.1f)); // allow players to repath much more often than other actors
     }
 
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
     {
-        if (className == "Warrior")
-            mStats = new FAWorld::MeleeStats(charStats, this);
-        else if (className == "Rogue")
-            mStats = new FAWorld::RangerStats(charStats, this);
-        else if (className == "Sorcerer")
-            mStats = new FAWorld::MageStats(charStats, this);
-
-        setSpriteClass(Misc::StringUtils::lowerCase(className));
-
-        mStats->setActor(this);
-        mStats->recalculateDerivedStats();
+        UNUSED_PARAM(className);
+        UNUSED_PARAM(charStats);
 
         mFaction = Faction::heaven();
-
         FAWorld::World::get()->registerPlayer(this);
+        mMoveHandler = MovementHandler(World::getTicksInPeriod(0.1f)); // allow players to repath much more often than other actors
+
+        mStats.mAttackDamage = 60;
     }
 
     Player::~Player()

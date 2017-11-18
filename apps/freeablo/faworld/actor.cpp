@@ -71,8 +71,6 @@ namespace FAWorld
 
     Actor::~Actor()
     {
-        if (mStats != nullptr)
-            delete mStats;
         if (mBehaviour != nullptr)
             delete mBehaviour;
     }
@@ -82,8 +80,11 @@ namespace FAWorld
         if (mInvuln)
             return;
 
-        mStats->takeDamage(static_cast<int32_t> (amount));
-        if (!(mStats->getCurrentHP() <= 0))
+        if (amount > 10)
+            amount = 60;
+
+        mStats.takeDamage(static_cast<int32_t> (amount));
+        if (!(mStats.mHp.current <= 0))
         {
             Engine::ThreadManager::get()->playSound(getHitWav());
 
@@ -94,7 +95,7 @@ namespace FAWorld
 
     int32_t Actor::getCurrentHP()
     {
-        return mStats->getCurrentHP();
+        return mStats.mHp.current;
     }
 
     bool Actor::hasTarget() const
@@ -221,10 +222,10 @@ namespace FAWorld
 
     bool Actor::attack(Actor *enemy)
     {
-        if (enemy->isDead() && enemy->mStats != nullptr)
+        if (enemy->isDead())
             return false;
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({ "sfx/misc/swing2.wav", "sfx/misc/swing.wav" }));
-        enemy->takeDamage((uint32_t)mStats->getMeleeDamage());
+        enemy->takeDamage(mStats.getAttackDamage());
         if (enemy->getCurrentHP() <= 0)
             enemy->die();
         return true;

@@ -611,11 +611,11 @@ namespace FAGui
                 nk_image(ctx, bulbImage);
             };
 
-            FAWorld::ActorStats* stats = FAWorld::World::get()->getCurrentPlayer()->mStats;
+            FAWorld::ActorStats& stats = FAWorld::World::get()->getCurrentPlayer()->mStats;
             // draw current hp into health bulb
-            drawBulb(stats->getCurrentHP(), stats->getMaxHp(), healthBulbLeftOffset);
+            drawBulb(stats.mHp.current, stats.mHp.max, healthBulbLeftOffset);
             // and current mana
-            drawBulb(stats->getCurrentMana(), stats->getMaxMana(), manaBulbLeftOffset);
+            drawBulb(stats.mMana.current, stats.mMana.current, manaBulbLeftOffset);
 
             belt (ctx);
             descriptionPanel(ctx);

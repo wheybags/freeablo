@@ -19,6 +19,7 @@
 #include "movementhandler.h"
 #include "actoranimationmanager.h"
 #include "behaviour.h"
+#include "actorstats.h"
 #include <boost/variant/variant.hpp>
 #include <boost/variant/get.hpp>
 
@@ -32,7 +33,6 @@ namespace Engine
 
 namespace FAWorld
 {
-    class ActorStats;
     class Behaviour;
     class World;
     class ItemTarget;
@@ -142,7 +142,7 @@ namespace FAWorld
 
             const std::unordered_map<std::string, std::string> &getTalkData () const { return mTalkData; }
 
-            ActorStats * mStats=nullptr;
+            ActorStats mStats;
 
             template <class Stream>
             Serial::Error::Error faSerial(Stream& stream)
@@ -175,8 +175,8 @@ namespace FAWorld
 
                 serialise_bool(stream, mIsDead);
 
-                if(mStats)
-                    serialise_object(stream, *mStats);
+                //if(mStats)
+                //    serialise_object(stream, *mStats);
 
                 bool hasBehaviour = mBehaviour != nullptr;
 

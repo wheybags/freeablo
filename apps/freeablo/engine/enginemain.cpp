@@ -12,7 +12,6 @@
 #include "../fagui/guimanager.h"
 #include "../faaudio/audiomanager.h"
 #include "../faworld/itemmanager.h"
-#include "../faworld/characterstats.h"
 #include "../faworld/playerfactory.h"
 #include "threadmanager.h"
 #include "net/netmanager.h"

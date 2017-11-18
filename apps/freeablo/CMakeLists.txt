@@ -52,8 +52,6 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/itemmap.cpp
     faworld/actorstats.h
     faworld/actorstats.cpp
-    faworld/characterstats.h
-    faworld/characterstats.cpp
     faworld/netobject.h
     faworld/netobject.cpp
     faworld/gamelevel.cpp

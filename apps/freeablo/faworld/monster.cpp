@@ -25,7 +25,7 @@ namespace FAWorld
         init();
 
         DiabloExe::Monster dMonster; //TODO: hack
-        mStats = new FAWorld::ActorStats(dMonster);
+        //mStats = new FAWorld::ActorStats(dMonster);
     }
 
     Monster::Monster(const DiabloExe::Monster& monster):
@@ -33,7 +33,7 @@ namespace FAWorld
     {
         init();
 
-        mStats = new FAWorld::ActorStats(monster);
+        //mStats = new FAWorld::ActorStats(monster);
 
         boost::format fmt(monster.cl2Path);
         getAnimationManager().setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage((fmt % 'w').str()));
