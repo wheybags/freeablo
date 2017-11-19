@@ -5,6 +5,12 @@
 #include <vector>
 
 #include "textcolor.h"
+#include "../faworld/actoranimationmanager.h"
+
+namespace FAWorld
+{
+    class actor;
+}
 
 namespace FAGui
 {
@@ -43,17 +49,18 @@ namespace FAGui
     {
     public:
         explicit DialogManager(GuiManager& gui_manager);
-        void talkOgden();
-        void talkFarnham();
-        void talkAdria();
-        void talkWirt();
-        void talkPepin();
-        void talkCain();
-        void talkGillian();
-        void talk(const std::string& npcId);
+        void talkOgden(const FAWorld::Actor* npc);
+        void talkFarnham(const FAWorld::Actor* npc);
+        void talkAdria(const FAWorld::Actor* npc);
+        void talkWirt(const FAWorld::Actor* npc);
+        void talkPepin(const FAWorld::Actor* npc);
+        void talkCain(const FAWorld::Actor* npc);
+        void talkGillian(const FAWorld::Actor* npc);
+        void talkGriswold(const FAWorld::Actor* npc);
+        void talk(const FAWorld::Actor* npc);
 
     private:
-        void talkGriswold();
+        void talkGriswold(const FAWorld::actor* npc);
 
     private:
         GuiManager& mGuiManager;

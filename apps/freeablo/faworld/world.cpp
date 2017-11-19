@@ -143,16 +143,16 @@ namespace FAWorld
         auto townLevel = new GameLevel(townLevelBase, 0);
         mLevels[0] = townLevel;
 
-        const std::vector<const DiabloExe::Npc*> npcs = mDiabloExe.getNpcs();
-        for (size_t i = 0; i < npcs.size(); i++)
+        for (auto npc : mDiabloExe.getNpcs())
         {
-            Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath);
-            if (auto id = npcs[i]->animationSequenceId)
+            Actor* actor = new Actor(npc->celPath, npc->celPath);
+            if (auto id = npc->animationSequenceId)
                 actor->setIdleAnimSequence (mDiabloExe.getTownerAnimation()[*id]);
+            actor->setTalkData (npc->talkData);
             actor->setCanTalk(true);
-            actor->setActorId(npcs[i]->id);
-            actor->setName (npcs[i]->name);
-            actor->teleport(townLevel, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
+            actor->setActorId(npc->id);
+            actor->setName (npc->name);
+            actor->teleport(townLevel, Position(npc->x, npc->y, npc->rotation));
         }
 
         for (int32_t i = 1; i < 17; i++)
@@ -357,7 +357,7 @@ namespace FAWorld
             // Thus creating some uncomfortable effects
             targetLock = false; 
             afterDialog = true;
-            mDlgManager->talk(actor->getActorId());
+            mDlgManager->talk(actor);
         });
     }
 

@@ -1,6 +1,7 @@
 #include "dialogmanager.h"
 #include <cassert>
 #include "guimanager.h"
+#include "../faworld/actor.h"
 
 namespace FAGui
 {
@@ -73,7 +74,7 @@ namespace FAGui
     {
     }
 
-    void DialogManager::talkOgden()
+    void DialogManager::talkOgden(const FAWorld::Actor *npc)
     {
         DialogData d;
         d.header({"Welcome to the", "Rising Sun"});
@@ -91,7 +92,7 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    void DialogManager::talkFarnham()
+    void DialogManager::talkFarnham(const FAWorld::Actor* npc)
     {
         DialogData d;
         d.header({"Farnham the Drunk"});
@@ -109,7 +110,7 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    void DialogManager::talkAdria()
+    void DialogManager::talkAdria(const FAWorld::Actor* npc)
     {
         DialogData d;
         d.header({"Witch's Shack"});
@@ -136,7 +137,7 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    void DialogManager::talkWirt()
+    void DialogManager::talkWirt(const FAWorld::Actor* npc)
     {
         DialogData d;
         d.header({"Wirt the Peg-Legged Boy"});
@@ -158,7 +159,7 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    void DialogManager::talkPepin()
+    void DialogManager::talkPepin(const FAWorld::Actor* npc)
     {
         DialogData d;
         d.header({"Welcome to the", "Healer's Home"});
@@ -182,7 +183,7 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    void DialogManager::talkCain()
+    void DialogManager::talkCain(const FAWorld::Actor* npc)
     {
         DialogData d;
         d.header({"The Town Elder"});
@@ -203,7 +204,7 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    void DialogManager::talkGillian()
+    void DialogManager::talkGillian(const FAWorld::Actor* npc)
     {
         DialogData d;
         d.header({"Gillian"});
@@ -221,48 +222,50 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    void DialogManager::talk(const std::string& npcId)
+    void DialogManager::talk(const FAWorld::Actor* npc)
     {
+        auto npcId = npc->getActorId ();
         if(npcId == "NPCsmith")
-            talkGriswold();
+            talkGriswold(npc);
         else if(npcId == "NPCtavern")
-            talkOgden();
+            talkOgden(npc);
         else if(npcId == "NPCdrunk")
-            talkFarnham();
+            talkFarnham(npc);
         else if(npcId == "NPCmaid")
-            talkGillian();
+            talkGillian(npc);
         else if(npcId == "NPCboy")
-            talkWirt();
+            talkWirt(npc);
         else if(npcId == "NPChealer")
-            talkPepin();
+            talkPepin(npc);
         else if(npcId == "NPCwitch")
-            talkAdria();
+            talkAdria(npc);
         else if(npcId == "NPCstorytell")
-            talkCain();
+            talkCain(npc);
     }
 
-    void DialogManager::talkGriswold()
+    void DialogManager::talkGriswold(const FAWorld::Actor* npc)
     {
         DialogData d;
-        d.header({"Welcome to the", "Blacksmith's Shop"});
-        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        auto &td = npc->getTalkData ();
+        d.header({td.at ("introductionHeader1"), td.at ("introductionHeader2")});
+        d.text_lines({td.at ("introduction")}, TextColor::golden);
         d.skip_line();
-        d.text_lines({"Talk to Griswold"}, TextColor::blue).setAction([]()
+        d.text_lines({td.at ("talk")}, TextColor::blue).setAction([]()
         {
         });
-        d.text_lines({"Buy Basic Items"}).setAction([]()
+        d.text_lines({td.at ("buyBasic")}).setAction([]()
         {
         });
-        d.text_lines({"Buy Premium Items"}).setAction([]()
+        d.text_lines({td.at ("buyPremium")}).setAction([]()
         {
         });
-        d.text_lines({"Sell Items"}).setAction([]()
+        d.text_lines({td.at ("sell")}).setAction([]()
         {
         });
-        d.text_lines({"Repair Items"}).setAction([]()
+        d.text_lines({td.at ("repair")}).setAction([]()
         {
         });
-        d.text_lines({"Leave the Shop"}).setAction([&]()
+        d.text_lines({td.at ("quit")}).setAction([&]()
         {
             mGuiManager.popDialogData();
         });
