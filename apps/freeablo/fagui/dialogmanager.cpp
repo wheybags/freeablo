@@ -77,15 +77,16 @@ namespace FAGui
     void DialogManager::talkOgden(const FAWorld::Actor *npc)
     {
         DialogData d;
-        d.header({"Welcome to the", "Rising Sun"});
+        auto &td = npc->getTalkData();
+        d.header({td.at("introductionHeader1"), td.at("introductionHeader2")});
         d.skip_line(2);
-        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.text_lines({td.at("introduction")}, TextColor::golden);
         d.skip_line();
-        d.text_lines({"Talk to Ogden"}, TextColor::blue).setAction([]()
+        d.text_lines({td.at("talk")}, TextColor::blue).setAction([]()
         {
         });
         d.skip_line(4);
-        d.text_lines({"Leave the Tavern"}).setAction([&]()
+        d.text_lines({td.at("quit")}).setAction([&]()
         {
             mGuiManager.popDialogData();
         });
@@ -95,15 +96,16 @@ namespace FAGui
     void DialogManager::talkFarnham(const FAWorld::Actor* npc)
     {
         DialogData d;
-        d.header({"Farnham the Drunk"});
+        auto &td = npc->getTalkData();
+        d.header({td.at("introductionHeader")});
         d.skip_line(2);
-        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.text_lines({td.at("introduction")}, TextColor::golden);
         d.skip_line();
-        d.text_lines({"Talk to Farnham"}, TextColor::blue).setAction([]()
+        d.text_lines({td.at("talk")}, TextColor::blue).setAction([]()
         {
         });
         d.skip_line(4);
-        d.text_lines({"Say Goodbye"}).setAction([&]()
+        d.text_lines({td.at("quit")}).setAction([&]()
         {
             mGuiManager.popDialogData();
         });
@@ -113,24 +115,25 @@ namespace FAGui
     void DialogManager::talkAdria(const FAWorld::Actor* npc)
     {
         DialogData d;
-        d.header({"Witch's Shack"});
+        auto &td = npc->getTalkData ();
+        d.header({{td.at("introductionHeader")}});
 
         d.skip_line(2);
-        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.text_lines({td.at("introduction")}, TextColor::golden);
         d.skip_line();
-        d.text_lines({"Talk to Adria"}, TextColor::blue).setAction([]()
+        d.text_lines({td.at("talk")}, TextColor::blue).setAction([]()
         {
         });
-        d.text_lines({"Buy Items"}).setAction([]()
+        d.text_lines({td.at("buy")}).setAction([]()
         {
         });
-        d.text_lines({"Sell Items"}).setAction([]()
+        d.text_lines({td.at("sell")}).setAction([]()
         {
         });
-        d.text_lines({"Recharge Staves"}).setAction([]()
+        d.text_lines({td.at("recharge")}).setAction([]()
         {
         });
-        d.text_lines({"Leave the Shack"}).setAction([&]()
+        d.text_lines({td.at("quit")}).setAction([&]()
         {
             mGuiManager.popDialogData();
         });
@@ -140,19 +143,20 @@ namespace FAGui
     void DialogManager::talkWirt(const FAWorld::Actor* npc)
     {
         DialogData d;
-        d.header({"Wirt the Peg-Legged Boy"});
+        auto &td = npc->getTalkData ();
+        d.header({td.at("introductionHeader")});
 
         d.skip_line();
-        d.text_lines({"Talk to Wirt"}, TextColor::blue).setAction([](){
+        d.text_lines({td.at("talk")}, TextColor::blue).setAction([](){
         });
         d.skip_line(2);
-        d.text_lines({"I have something for sale,"}, TextColor::golden);
-        d.text_lines({"But it will cost 50 gold"}, TextColor::golden);
-        d.text_lines({"Just to take a look."}, TextColor::golden);
-        d.text_lines({"What have you got?"}).setAction([&]()
+        d.text_lines({td.at("introduction1")}, TextColor::golden);
+        d.text_lines({td.at("introduction2")}, TextColor::golden);
+        d.text_lines({td.at("introduction3")}, TextColor::golden);
+        d.text_lines({td.at("look")}).setAction([&]()
         {
         });
-        d.text_lines({"Goodbye"}).setAction([&]()
+        d.text_lines({td.at("quit")}).setAction([&]()
         {
             mGuiManager.popDialogData();
         });
@@ -162,21 +166,22 @@ namespace FAGui
     void DialogManager::talkPepin(const FAWorld::Actor* npc)
     {
         DialogData d;
-        d.header({"Welcome to the", "Healer's Home"});
+        auto &td = npc->getTalkData();
+        d.header({td.at("introductionHeader1"), td.at ("introductionHeader2")});
 
         d.skip_line(2);
-        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.text_lines({td.at("introduction")}, TextColor::golden);
         d.skip_line();
-        d.text_lines({"Talk to Pepin"}, TextColor::blue).setAction([]()
+        d.text_lines({td.at("talk")}, TextColor::blue).setAction([]()
         {
         });
-        d.text_lines({"Receive Healing"}).setAction([]()
+        d.text_lines({td.at("heal")}).setAction([]()
         {
         });
-        d.text_lines({"Buy Items"}).setAction([]()
+        d.text_lines({td.at("buy")}).setAction([]()
         {
         });
-        d.text_lines({"Leave Healer's Home"}).setAction([&]()
+        d.text_lines({td.at("quit")}).setAction([&]()
         {
             mGuiManager.popDialogData();
         });
@@ -186,18 +191,19 @@ namespace FAGui
     void DialogManager::talkCain(const FAWorld::Actor* npc)
     {
         DialogData d;
-        d.header({"The Town Elder"});
+        auto &td = npc->getTalkData ();
+        d.header({td.at("introductionHeader")});
         d.skip_line(2);
-        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.text_lines({td.at("introduction")}, TextColor::golden);
         d.skip_line();
-        d.text_lines({"Talk to Cain"}, TextColor::blue).setAction([]()
+        d.text_lines({td.at("talk")}, TextColor::blue).setAction([]()
         {
         });
-        d.text_lines({"Identify an Item"}).setAction([]()
+        d.text_lines({td.at("identify")}).setAction([]()
         {
         });
         d.skip_line(2);
-        d.text_lines({"Say Goodbye"}).setAction([&]()
+        d.text_lines({td.at("quit")}).setAction([&]()
         {
             mGuiManager.popDialogData();
         });
@@ -207,15 +213,16 @@ namespace FAGui
     void DialogManager::talkGillian(const FAWorld::Actor* npc)
     {
         DialogData d;
-        d.header({"Gillian"});
+        auto &td = npc->getTalkData();
+        d.header({td.at("introductionHeader")});
         d.skip_line(2);
-        d.text_lines({"Would You Like to:"}, TextColor::golden);
+        d.text_lines({td.at ("introduction")}, TextColor::golden);
         d.skip_line();
-        d.text_lines({"Talk to Gillian"}, TextColor::blue).setAction([]()
+        d.text_lines({td.at ("talk")}, TextColor::blue).setAction([]()
         {
         });
         d.skip_line(4);
-        d.text_lines({"Say Goodbye"}).setAction([&]()
+        d.text_lines({td.at ("quit")}).setAction([&]()
         {
             mGuiManager.popDialogData();
         });
