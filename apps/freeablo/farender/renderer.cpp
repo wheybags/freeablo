@@ -26,18 +26,32 @@ namespace FARender
 
     Renderer* Renderer::mRenderer = NULL;
 
-    std::unique_ptr <FontInfo> Renderer::generateFont(const std::string& texturePath)
+    std::unique_ptr <CelFontInfo> Renderer::generateFontFromFrames(const std::string& texturePath)
     {
-        std::unique_ptr<FontInfo> ret (new FontInfo ());
+        std::unique_ptr<CelFontInfo> ret (new CelFontInfo ());
         auto mergedTex = mSpriteManager.get(texturePath + "&convertToSingleTexture");
         Cel::CelDecoder cel("ctrlpan/smaltext.cel");
-        ret->initByTexture(cel, mergedTex->getWidth());
+        ret->initByCel(cel, mergedTex->getWidth());
         ret->nkFont.userdata.ptr = ret.get();
         ret->nkFont.height = mergedTex->getHeight();
-        ret->nkFont.width = &FontInfo::getWidth;
+        ret->nkFont.width = &CelFontInfo::getWidth;
         mSpriteManager.get(texturePath);
-        ret->nkFont.query = &FontInfo::queryGlyph;
+        ret->nkFont.query = &CelFontInfo::queryGlyph;
         ret->nkFont.texture = mergedTex->getNkImage().handle;
+        return ret;
+    }
+
+    std::unique_ptr<PcxFontInfo> Renderer::generateFont(const std::string& texturePath)
+    {
+        std::unique_ptr<PcxFontInfo> ret (new PcxFontInfo ());
+        auto texture = Render::loadNonCelImageTrans(texturePath, "pcx", true, 0, 255, 0);
+        ret->initBySurface(texture);
+        ret->nkFont.userdata.ptr = ret.get();
+        ret->nkFont.height = texture->h / 256;
+        ret->nkFont.width = &PcxFontInfo::getWidth;
+        mSpriteManager.get(texturePath);
+        ret->nkFont.query = &PcxFontInfo::queryGlyph;
+        ret->nkFont.texture = mSpriteManager.get(texturePath + "&trans=0,255,0")->getNkImage().handle;
         return ret;
     }
 
@@ -75,7 +89,8 @@ namespace FARender
         ,mWidthHeightTmp(0)
     {
         assert(!mRenderer); // singleton, only one instance
-        m_smallFont = generateFont ("ctrlpan/smaltext.cel");
+        m_smallFont = generateFontFromFrames ("ctrlpan/smaltext.cel");
+        m_gold42 = generateFont ("ui_art/font42g.pcx");
 
         // Render initialization.
         {
@@ -337,5 +352,10 @@ namespace FARender
     nk_user_font* Renderer::smallFont() const
     {
         return &m_smallFont->nkFont;
+    }
+    
+    nk_user_font* Renderer::gold42Font() const
+    {
+        return &m_gold42->nkFont;
     }
 }

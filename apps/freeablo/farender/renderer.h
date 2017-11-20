@@ -17,6 +17,8 @@
 
 #include "spritemanager.h"
 #include <numeric>
+#include "fontinfo.h"
+#include <memory>
 
 namespace Render
 {
@@ -31,7 +33,7 @@ namespace FAWorld
 
 namespace FARender
 {
-    class FontInfo;
+    class CelFontInfo;
 
     class Renderer;
     class Tileset
@@ -115,11 +117,13 @@ namespace FARender
 
             bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites);
             nk_user_font *smallFont () const;
+        nk_user_font* gold42Font() const;
 
-        private:
-            std::unique_ptr<FontInfo> generateFont (const std::string& texturePath);
+    private:
+            std::unique_ptr<CelFontInfo> generateFontFromFrames (const std::string& texturePath);
+        std::unique_ptr<PcxFontInfo> generateFont(const std::string& texturePath);
 
-        private:
+    private:
             static Renderer* mRenderer; ///< Singleton instance
 
             std::atomic_bool mDone;
@@ -140,7 +144,8 @@ namespace FARender
             Render::NuklearGraphicsContext mNuklearGraphicsData = Render::NuklearGraphicsContext();
 
             std::atomic<std::int64_t> mWidthHeightTmp;
-            std::unique_ptr<FontInfo> m_smallFont;
+            std::unique_ptr<CelFontInfo> m_smallFont;
+            std::unique_ptr<PcxFontInfo> m_gold42;
     };
 }
 

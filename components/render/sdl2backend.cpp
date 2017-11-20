@@ -271,7 +271,7 @@ namespace Render
         return true;
     }
 
-    Cel::Colour getPixel(SDL_Surface* s, int x, int y);
+    Cel::Colour getPixel(const SDL_Surface* s, int x, int y);
     void setpixel(SDL_Surface *s, int x, int y, Cel::Colour c);
     SDL_Surface* createTransparentSurface(size_t width, size_t height);
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
@@ -963,7 +963,7 @@ namespace Render
         }
     }
 
-    Cel::Colour getPixel(SDL_Surface* s, int x, int y)
+    Cel::Colour getPixel(const SDL_Surface* s, int x, int y)
     {
         Uint32 pix;
 

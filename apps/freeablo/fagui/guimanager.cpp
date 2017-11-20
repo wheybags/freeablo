@@ -668,8 +668,20 @@ namespace FAGui
 
             belt (ctx);
             descriptionPanel(ctx);
+
+            {
+                nk_layout_space_push (ctx, nk_rect (0, 0, 600, 100));
+            }
+
             nk_layout_space_end(ctx);
         }, false);
+    }
+
+    void GuiManager::menuText (nk_context *ctx, const char *text, nk_flags alignment) {
+      FARender::Renderer* renderer = FARender::Renderer::get();
+      nk_style_push_font(ctx, renderer->gold42Font());
+      nk_label(ctx, text, alignment);
+       nk_style_pop_font(ctx);
     }
 
     void GuiManager::smallText (nk_context *ctx, const char *text, TextColor color, nk_flags alignment) {
@@ -713,7 +725,7 @@ namespace FAGui
             pauseMenu(ctx, mEngine);
 
         updateAnimations ();
-
+         
         inventoryPanel(ctx);
         spellsPanel(ctx);
         questsPanel(ctx);
