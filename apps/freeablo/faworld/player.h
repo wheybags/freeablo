@@ -3,6 +3,9 @@
 #include <boost/format.hpp>
 #include "actor.h"
 #include "inventory.h"
+
+#include <boost/signals2/signal.hpp>
+
 namespace FAWorld
 {
     class Player: public Actor
@@ -42,6 +45,9 @@ namespace FAWorld
                 return Serial::Error::Success;
             }
 
+    public:
+            boost::signals2::signal<void (Actor *)> talkRequested;
+    private:
             friend class Serial::WriteBitStream;
             friend class Serial::ReadBitStream;
     };

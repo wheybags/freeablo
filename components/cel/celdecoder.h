@@ -1,4 +1,4 @@
-﻿#ifndef CEL_DECODING_H
+#ifndef CEL_DECODING_H
 #define CEL_DECODING_H
 
 #include <map>

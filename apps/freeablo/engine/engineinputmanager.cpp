@@ -2,6 +2,7 @@
 #include "../farender/renderer.h"
 #include "engineinputmanager.h"
 #include <nuklearmisc/inputfwd.h>
+#include "../fagui/guimanager.h"
 
 namespace Engine
 {
@@ -32,6 +33,11 @@ namespace Engine
     void EngineInputManager::registerMouseObserver(MouseInputObserverInterface* observer)
     {
         mMouseObservers.push_back(observer);
+    }
+
+    void EngineInputManager::setGuiManager(FAGui::GuiManager* guiManager)
+    {
+        mGuiManager = guiManager;
     }
 
     void EngineInputManager::notifyKeyboardObservers(KeyboardInputAction action)
@@ -81,6 +87,9 @@ namespace Engine
         hotkey.ctrl = modifiers.ctrl;
         hotkey.shift = modifiers.shift;
         hotkey.alt = modifiers.alt;
+
+        if (mGuiManager->isModalDlgShown())
+            return;
 
         for(int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
         {
@@ -144,7 +153,7 @@ namespace Engine
         if(key == Input::KEY_LEFT_MOUSE)
             mMouseDown = false;
 
-        if (!nk_item_is_any_active (mNkCtx))
+        if (!nk_item_is_any_active (mNkCtx) && !mGuiManager->isModalDlgShown())
             notifyMouseObservers(MOUSE_RELEASE, mMousePosition);
     }
 
@@ -177,7 +186,7 @@ namespace Engine
                 actionAsString = "Changelvlup";
                 break;
             case CHANGE_LEVEL_DOWN:
-                actionAsString = "Changelvldwn";
+                actionAsString = "Changelvlmdwn";
                 break;
             case TOGGLE_CONSOLE:
                 actionAsString = "ToggleConsole";
@@ -203,7 +212,7 @@ namespace Engine
 
         nk_input_end(mNkCtx);
 
-        if(!paused && mMouseDown && !nk_item_is_any_active (mNkCtx))
+        if(!paused && mMouseDown && !nk_item_is_any_active (mNkCtx) &&  !mGuiManager->isModalDlgShown())
         {
             notifyMouseObservers(MOUSE_DOWN, mMousePosition);
 

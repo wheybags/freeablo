@@ -15,7 +15,6 @@
 #include "../faworld/position.h"
 
 #include "spritemanager.h"
-#include "../fagui/guimanager.h"
 #include <numeric>
 
 namespace Render

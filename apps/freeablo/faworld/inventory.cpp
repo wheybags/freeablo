@@ -8,6 +8,7 @@
 #include "actorstats.h"
 #include <algorithm>
 #include <boost/range/irange.hpp>
+#include "../fagui/guimanager.h"
 #pragma warning(push)
 #pragma warning(disable:4172)  // boost being naughty
 #include <boost/range/any_range.hpp>

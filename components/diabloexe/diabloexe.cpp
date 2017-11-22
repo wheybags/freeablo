@@ -204,6 +204,15 @@ namespace DiabloExe
                 auto animId = mSettings->get<int32_t>(section, "animationId", -1);
                 if (animId >= 0)
                     curNpc.animationSequenceId = animId;
+                for (auto property : mSettings->getPropertiesInSection(section))
+                    {
+                        std::string talkPrefix = "talk#";
+                        if (Misc::StringUtils::startsWith(property, talkPrefix))
+                            {
+                                auto addr = mSettings->get<size_t> (section, property);
+                                curNpc.talkData[property.substr(talkPrefix.length ())] = exe.readCString(addr);
+                            }
+                    }
             }
         }
     }

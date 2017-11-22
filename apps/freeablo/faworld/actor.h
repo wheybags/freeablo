@@ -47,6 +47,7 @@ namespace FAWorld
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
         void interact(Actor* actor);
         void setIdleAnimSequence(const std::vector<int> & sequence);
+        void setTalkData(const std::unordered_map<std::basic_string<char>, std::basic_string<char>>& talkData);
         friend class ActorState::BaseState; // TODO: fix
 
         public:
@@ -70,7 +71,8 @@ namespace FAWorld
 
             StateMachine::StateMachine<Actor>* mActorStateMachine;
 
-            ActorAnimationManager& getAnimationManager()
+
+        ActorAnimationManager& getAnimationManager()
             {
                 return mAnimation;
             }
@@ -137,6 +139,8 @@ namespace FAWorld
             void attachBehaviour(Behaviour* behaviour) {
               mBehaviour = behaviour;
             };
+
+            const std::unordered_map<std::string, std::string> &getTalkData () const { return mTalkData; }
 
             ActorStats * mStats=nullptr;
 
@@ -261,6 +265,8 @@ namespace FAWorld
             friend class Engine::Server; // TODO: fix
             friend class Engine::Client;
             friend class Engine::NetManager;
+             // lines of talk for npcs taken from original game exe
+            std::unordered_map<std::basic_string<char>, std::basic_string<char>> mTalkData;
     };
 }
 

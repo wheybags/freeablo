@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <utility>
+#include <memory>
 
 #include "../engine/inputobserverinterface.h"
 
@@ -20,6 +21,7 @@ namespace DiabloExe
 
 namespace FAGui
 {
+    class DialogManager;
     class GuiManager;
 }
 
@@ -83,7 +85,7 @@ namespace FAWorld
             void getAllActors(std::vector<Actor*>& actors);
 
             Tick getCurrentTick();
-            void setGuiManager (FAGui::GuiManager * manager) { mGuiManager = manager; }
+        void setGuiManager(FAGui::GuiManager* manager);
             HoverState &getHoverState ();
 
         private:
@@ -97,6 +99,7 @@ namespace FAWorld
             std::map<size_t, GameLevel*> mLevels;
             Tick mTicksPassed = 0;
             Player* mCurrentPlayer;
+            std::unique_ptr<FAGui::DialogManager> mDlgManager;
             std::vector<Player*> mPlayers; ///< This vector is sorted
             const DiabloExe::DiabloExe& mDiabloExe;
             FAGui::GuiManager *mGuiManager = nullptr;
@@ -104,6 +107,9 @@ namespace FAWorld
             // only simple movement.
             bool targetLock = false;
             bool simpleMove = false;
+            // that's sadly another state required
+            // it means after dialog we have to release button before doing next meaningful action
+            bool afterDialog = false;
     };
 }
 

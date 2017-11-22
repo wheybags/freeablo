@@ -31,7 +31,7 @@ namespace FAWorld
                           ret = StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
                         }
                         else if (actor.canTalkTo(target) && actor.talk(target)) {
-
+                            actor.setTarget (boost::blank{});
                         }
                     }
                 }

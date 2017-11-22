@@ -17,6 +17,9 @@
 #include "findpath.h"
 #include "itemmap.h"
 #include "diabloexe/npc.h"
+#include "../fagui/guimanager.h"
+#include "../fagui/dialogmanager.h"
+
 
 namespace FAWorld
 {
@@ -140,16 +143,16 @@ namespace FAWorld
         auto townLevel = new GameLevel(townLevelBase, 0);
         mLevels[0] = townLevel;
 
-        const std::vector<const DiabloExe::Npc*> npcs = mDiabloExe.getNpcs();
-        for (size_t i = 0; i < npcs.size(); i++)
+        for (auto npc : mDiabloExe.getNpcs())
         {
-            Actor* actor = new Actor(npcs[i]->celPath, npcs[i]->celPath);
-            if (auto id = npcs[i]->animationSequenceId)
+            Actor* actor = new Actor(npc->celPath, npc->celPath);
+            if (auto id = npc->animationSequenceId)
                 actor->setIdleAnimSequence (mDiabloExe.getTownerAnimation()[*id]);
+            actor->setTalkData (npc->talkData);
             actor->setCanTalk(true);
-            actor->setActorId(npcs[i]->id);
-            actor->setName (npcs[i]->name);
-            actor->teleport(townLevel, Position(npcs[i]->x, npcs[i]->y, npcs[i]->rotation));
+            actor->setActorId(npc->id);
+            actor->setName (npc->name);
+            actor->teleport(townLevel, Position(npc->x, npc->y, npc->rotation));
         }
 
         for (int32_t i = 1; i < 17; i++)
@@ -343,6 +346,21 @@ namespace FAWorld
         return mTicksPassed;
     }
 
+    void World::setGuiManager(FAGui::GuiManager* manager)
+    {
+        mGuiManager = manager;
+        mDlgManager.reset (new FAGui::DialogManager(*mGuiManager));
+        getCurrentPlayer()->talkRequested.connect(
+            [&](Actor *actor)
+        {
+            // This is important because mouse released becomes blocked by "modal" dialog
+            // Thus creating some uncomfortable effects
+            targetLock = false; 
+            afterDialog = true;
+            mDlgManager->talk(actor);
+        });
+    }
+
 
     void World::changeLevel(bool up)
     {
@@ -365,6 +383,7 @@ namespace FAWorld
 
     void World::onMouseRelease()
     {
+        afterDialog = false;
         targetLock = false;
         simpleMove = false;
         getCurrentPlayer()->isTalking = false;
@@ -387,6 +406,9 @@ namespace FAWorld
 
     void World::onMouseDown(Misc::Point mousePosition)
     {
+        if (afterDialog)
+            return;
+
         auto player = getCurrentPlayer();
         auto &inv = player->getInventory ();
         auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());

@@ -22,6 +22,11 @@ namespace FAWorld
         mAnimation.setIdleFrameSequence (sequence);
     }
 
+    void Actor::setTalkData(const std::unordered_map<std::basic_string<char>, std::basic_string<char>>& talkData)
+    {
+        mTalkData = talkData;
+    }
+
     void Actor::update(bool noclip)
     {
         if (!isDead())

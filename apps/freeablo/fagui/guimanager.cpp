@@ -3,23 +3,20 @@
 #include <string>
 #include <cstdint>
 
-#include <input/hotkey.h>
 #include <misc/misc.h>
 
 #include "../faworld/world.h"
 #include "../faworld/actorstats.h"
 #include "../farender/renderer.h"
-#include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
 #include "../faworld/player.h"
 
 #include "boost/range/counting_range.hpp"
 #include <boost/variant/variant.hpp>
+#include "dialogmanager.h"
 
 namespace FAGui
 {
-    std::map<std::string, Rocket::Core::ElementDocument*> menus;
-
     PanelPlacement panelPlacementByType(PanelType type) {
         switch (type)
         {
@@ -61,55 +58,49 @@ namespace FAGui
     GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player &player)
         : mEngine(engine), mPlayer (player)
     {
-
+        mPentagramAnim.reset (new FARender::AnimationPlayer ());
+        auto renderer = FARender::Renderer::get();
+        mPentagramAnim->playAnimation(renderer->loadImage ("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
     }
 
-    void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action)
+    GuiManager::~GuiManager()
     {
-        ctx->active = ctx->current;
-        nk_style_push_vec2(ctx, &ctx->style.window.padding, nk_vec2(0,0));
+    }
 
+    void GuiManager::nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action, bool isModal)
+    {
+        nk_style_push_vec2(ctx, &ctx->style.window.padding, nk_vec2(0,0));
+        if (isModalDlgShown() && !isModal)
+            flags |= NK_WINDOW_NO_INPUT;
         if (nk_begin(ctx, title, bounds, flags))
-            action();
+            {
+                action();
+            }
 
         nk_end(ctx);
 
         nk_style_pop_vec2(ctx);
     }
 
-    void nk_fa_begin_image_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void(void)> action)
+    void GuiManager::nk_fa_begin_image_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void(void)> action, bool isModal)
     {
         nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(background));
-        nk_fa_begin_window(ctx, title, bounds, flags, action);
+        nk_fa_begin_window(ctx, title, bounds, flags, action, isModal);
         nk_style_pop_style_item(ctx);
     }
 
-    void pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
-    {
-        FARender::Renderer* renderer = FARender::Renderer::get();
+    namespace {
+        struct applyEffect {
+          applyEffect (nk_context* ctx, EffectType type) : mCtx (ctx) {
+              nk_set_user_data (mCtx, nk_handle_id (static_cast<int> (type)));
+          }
+           ~applyEffect () {
+               nk_set_user_data (mCtx, nk_handle_id (static_cast<int> (EffectType::none)));
+          }
 
-        int32_t screenW, screenH;
-        renderer->getWindowDimensions(screenW, screenH);
-
-        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_color(nk_rgba(0, 0, 0, 0)));
-
-        if (nk_begin(ctx, "pause menu", nk_rect(0, 0, screenW, screenH), 0))
-        {
-            nk_layout_row_dynamic(ctx, 30, 1);
-
-            nk_label(ctx, "PAUSED", NK_TEXT_CENTERED);
-
-            if (nk_button_label(ctx, "Resume"))
-                engine.togglePause();
-
-            if (nk_button_label(ctx, "Quit"))
-                engine.stop();
-        }
-        nk_end(ctx);
-
-        nk_style_pop_style_item(ctx);
+           nk_context* mCtx;
+        };
     }
-
 
     namespace
     {
@@ -139,7 +130,7 @@ namespace FAGui
 
 
 
-        struct nk_rect align_rect (const struct nk_rect &inner_rect, const struct nk_rect &outer_rect, halign_t halign, valign_t valign) {
+        struct nk_rect alignRect (const struct nk_rect &inner_rect, const struct nk_rect &outer_rect, halign_t halign, valign_t valign) {
             auto c = center (outer_rect);
             auto shift = (outer_rect.w - inner_rect.w) / 2;
             switch (halign) {
@@ -157,6 +148,151 @@ namespace FAGui
             }
             return {c.x - inner_rect.w/2, c.y - inner_rect.h/2, inner_rect.w, inner_rect.h};
         }
+    }
+
+    void GuiManager::dialog(nk_context* ctx)
+    {
+        if (mDialogs.empty ())
+            return;
+
+        if (mCurRightPanel != PanelType::none)
+            mCurRightPanel = PanelType::none;
+        if (mCurLeftPanel != PanelType::none)
+            mCurLeftPanel = PanelType::none;
+        
+        auto &activeDialog = mDialogs.back ();
+        int dir = 0;
+        if (nk_input_is_key_pressed (&ctx->input, NK_KEY_UP))
+            dir = -1;
+        if (nk_input_is_key_pressed (&ctx->input, NK_KEY_DOWN))
+            dir = 1;
+
+        // This is an escape key. Maybe later it should work through engineinputmanager
+        if (nk_input_is_key_pressed (&ctx->input, NK_KEY_TEXT_RESET_MODE))
+        {
+           popDialogData ();
+           if (mDialogs.empty ())
+               return;
+        }
+
+        if (nk_input_is_key_pressed (&ctx->input, NK_KEY_ENTER))
+        {
+            activeDialog.mLines[activeDialog.selectedLine()].action ();
+            return;
+        }
+
+        if (dir != 0)
+        {
+            int i = activeDialog.mSelectedLine;
+            do
+                {
+                    i += dir;
+                    if (i < 0)
+                        i += activeDialog.mLines.size ();
+                    else if (i >= static_cast<int> (activeDialog.mLines.size ()))
+                        i -= activeDialog.mLines.size ();
+                }
+            while (!activeDialog.mLines[i].action);
+            activeDialog.mSelectedLine = i;
+        }
+
+        auto renderer = FARender::Renderer::get();
+        auto boxTex = renderer->loadImage("data/textbox2.cel");
+        nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
+        int32_t screenW, screenH;
+        renderer->getWindowDimensions(screenW, screenH);
+        nk_fa_begin_image_window(ctx, "dialog", nk_rect(screenW / 2, screenH - boxTex->getHeight () - 153, boxTex->getWidth(), boxTex->getHeight ()), flags, boxTex->getNkImage(),
+        [&]()
+        {
+           nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
+           auto cbRect = nk_rect (3, 3, boxTex->getWidth() - 6, boxTex->getHeight () - 6);
+           nk_layout_space_push (ctx, cbRect);
+           auto blackTex = renderer->loadImage("resources/black.png");
+           {
+               applyEffect effect (ctx, EffectType::checkerboarded);
+               nk_image (ctx, nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect));
+           }
+
+           int y = 5;
+           constexpr int textRowHeight = 12;
+           for (int i = 0; i < static_cast<int> (activeDialog.mLines.size ()); ++i)
+           {
+               auto &line = activeDialog.mLines[i];
+               auto lineRect = nk_rect (3, 3 + y, boxTex->getWidth() - 6, textRowHeight);
+               if (line.isSeparator)
+               {   
+                   auto separatorRect = nk_rect (3, 0, boxTex->getWidth() - 6, 3);
+                   nk_layout_space_push (ctx, alignRect (separatorRect, lineRect, halign_t::center, valign_t::center));
+                   auto separator_image = nk_subimage_handle(boxTex->getNkImage().handle, boxTex->getWidth(), boxTex->getHeight (), separatorRect);
+                   nk_image (ctx, separator_image);
+                   continue;
+               }
+               nk_layout_space_push (ctx, lineRect);
+               if (nk_widget_is_mouse_click_down (ctx, NK_BUTTON_LEFT, true) && line.action)
+                   {
+                     activeDialog.mSelectedLine = i;
+                     line.action ();
+                     return;
+                   }
+               smallText (ctx, line.text.c_str (), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
+               if (activeDialog.selectedLine() == i)
+               {
+                   auto pent = renderer->loadImage ("data/pentspn2.cel");
+                   int pentOffset = 10;
+                   auto textWidth = smallTextWidth (line.text.c_str ());
+                   // left pentagram
+                   {
+                       int offset = 0;
+                       if (line.alignCenter)
+                           offset = ((boxTex->getWidth() - 6) / 2 - textWidth / 2 - pent->getWidth() - pentOffset);
+                       nk_layout_space_push (ctx, nk_rect (3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
+                       nk_image (ctx, pent->getNkImage(mPentagramAnim->getCurrentFrame().second));
+                   }
+                   // right pentagram
+                   {
+                       int offset = textWidth + pentOffset;
+                       if (line.alignCenter)
+                           offset = ((boxTex->getWidth() - 6) / 2 + textWidth / 2 + pentOffset);
+                       nk_layout_space_push (ctx, nk_rect (3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
+                       nk_image (ctx, pent->getNkImage(mPentagramAnim->getCurrentFrame().second));
+                   }
+                }
+               
+               y += textRowHeight;
+           }
+        }, true);
+    }
+
+    void GuiManager::updateAnimations()
+    {
+        for (auto &anim : {mPentagramAnim.get ()})
+            anim->update();
+    }
+
+    void pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
+    {
+        FARender::Renderer* renderer = FARender::Renderer::get();
+
+        int32_t screenW, screenH;
+        renderer->getWindowDimensions(screenW, screenH);
+
+        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_color(nk_rgba(0, 0, 0, 0)));
+
+        if (nk_begin(ctx, "pause menu", nk_rect(0, 0, screenW, screenH), 0))
+        {
+            nk_layout_row_dynamic(ctx, 30, 1);
+
+            nk_label(ctx, "PAUSED", NK_TEXT_CENTERED);
+
+            if (nk_button_label(ctx, "Resume"))
+                engine.togglePause();
+
+            if (nk_button_label(ctx, "Quit"))
+                engine.stop();
+        }
+        nk_end(ctx);
+
+        nk_style_pop_style_item(ctx);
     }
 
     template <typename Function>
@@ -180,23 +316,9 @@ namespace FAGui
             }(), screenH - 125 - invTex->getHeight(),
             invTex->getWidth(), invTex->getHeight());
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND;
-        if (*panel (placement) == panelType)
-            nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op);
-        else
-            nk_window_close (ctx, panelName (panelType));
-    }
+        nk_window_show (ctx, panelName (panelType), *panel (placement) == panelType ? NK_SHOWN : NK_HIDDEN);
 
-    namespace {
-        struct applyEffect {
-          applyEffect (nk_context* ctx, EffectType type) : mCtx (ctx) {
-              nk_set_user_data (mCtx, nk_handle_id (static_cast<int> (type)));
-          }
-           ~applyEffect () {
-               nk_set_user_data (mCtx, nk_handle_id (static_cast<int> (EffectType::none)));
-          }
-
-           nk_context* mCtx;
-        };
+        nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op, false);
     }
 
     static nk_style_button dummyStyle = [](){
@@ -239,7 +361,7 @@ namespace FAGui
 
         boost::apply_visitor(Misc::overload([&](const struct nk_rect &rect)
         {
-            nk_layout_space_push(ctx, align_rect (nk_rect (0, 0, w, h), rect, halign_t::center, valign_t::center));
+            nk_layout_space_push(ctx, alignRect (nk_rect (0, 0, w, h), rect, halign_t::center, valign_t::center));
         }, [&](const struct nk_vec2 &point)
         {
              if (!item.isReal()) return;
@@ -498,10 +620,10 @@ namespace FAGui
             belt (ctx);
             descriptionPanel(ctx);
             nk_layout_space_end(ctx);
-        });
+        }, false);
     }
 
-    void GuiManager::smallText (nk_context *ctx, const char *text, TextColor color) {
+    void GuiManager::smallText (nk_context *ctx, const char *text, TextColor color, nk_flags alignment) {
       FARender::Renderer* renderer = FARender::Renderer::get();
       nk_style_push_font(ctx, renderer->smallFont());
       nk_style_push_color (ctx, &ctx->style.text.color, [color]()
@@ -518,9 +640,16 @@ namespace FAGui
           }
           return nk_color{255, 255, 255, 255};
       }());
-      nk_label(ctx, text, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_MIDDLE);
+      nk_label(ctx, text, alignment);
       nk_style_pop_color (ctx);
        nk_style_pop_font(ctx);
+    }
+
+    int GuiManager::smallTextWidth(const char* text)
+    {
+        auto renderer = FARender::Renderer::get();
+        auto fnt = renderer->smallFont();
+        return fnt->width(fnt->userdata, 0.0f, text, strlen (text) - 1);
     }
 
     void GuiManager::descriptionPanel (nk_context *ctx)
@@ -534,11 +663,14 @@ namespace FAGui
         if (paused)
             pauseMenu(ctx, mEngine);
 
+        updateAnimations ();
+
         inventoryPanel(ctx);
         spellsPanel(ctx);
         questsPanel(ctx);
         characterPanel(ctx);
         bottomMenu(ctx);
+        dialog(ctx);
     }
 
     void GuiManager::setDescription(std::string text, TextColor color)
@@ -569,6 +701,24 @@ namespace FAGui
     bool GuiManager::isInventoryShown() const
     {
         return *panel (panelPlacementByType (PanelType::inventory)) == PanelType::inventory;
+    }
+
+    void GuiManager::popDialogData()
+    {
+        mDialogs.pop_back ();
+    }
+
+    void GuiManager::pushDialogData(DialogData&& data)
+    {
+        mDialogs.push_back (std::move (data));
+    }
+
+    bool GuiManager::isModalDlgShown() const
+    {
+        if (!mDialogs.empty ())
+            return true;
+
+        return false;
     }
 
     void GuiManager::togglePanel(PanelType type)
