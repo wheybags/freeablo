@@ -15,6 +15,7 @@
 #include <numeric>
 #include <boost/range/irange.hpp>
 #include "fontinfo.h"
+#include <boost/format.hpp>
 
 namespace FARender
 {
@@ -89,8 +90,13 @@ namespace FARender
         ,mWidthHeightTmp(0)
     {
         assert(!mRenderer); // singleton, only one instance
-        m_smallFont = generateFontFromFrames ("ctrlpan/smaltext.cel");
-        m_gold42 = generateFont ("ui_art/font42g.pcx");
+        mSmallFont = generateFontFromFrames ("ctrlpan/smaltext.cel");
+        for (auto size : {16, 24, 30, 42})
+        {
+            mGoldFont[size] = generateFont ((boost::format ("ui_art/font%1%g.pcx") % size).str());
+            if (size != 42)
+              mSilverFont[size] = generateFont ((boost::format ("ui_art/font%1%s.pcx") % size).str());
+        }
 
         // Render initialization.
         {
@@ -351,11 +357,16 @@ namespace FARender
 
     nk_user_font* Renderer::smallFont() const
     {
-        return &m_smallFont->nkFont;
+        return &mSmallFont->nkFont;
     }
     
-    nk_user_font* Renderer::gold42Font() const
+    nk_user_font* Renderer::goldFont(int height) const
     {
-        return &m_gold42->nkFont;
+        return &mGoldFont.at (height)->nkFont;
+    }
+
+    nk_user_font* Renderer::silverFont(int height) const
+    {
+        return &mSilverFont.at (height)->nkFont;
     }
 }

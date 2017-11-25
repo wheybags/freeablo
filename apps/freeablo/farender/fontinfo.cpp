@@ -94,7 +94,7 @@ namespace FARender
             widthPx[i] = actualWidth;
             uvWidth[i] = (actualWidth + 0.0) / surface->w;
         }
-        widthPx[' '] = 22;
+        widthPx[' '] = char_height / 2;
     }
 
     float PcxFontInfo::getWidth(nk_handle handle, float h, const char* s, int len)

@@ -19,6 +19,7 @@
 #include <numeric>
 #include "fontinfo.h"
 #include <memory>
+#include "boost/container/flat_map.hpp"
 
 namespace Render
 {
@@ -117,7 +118,8 @@ namespace FARender
 
             bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites);
             nk_user_font *smallFont () const;
-        nk_user_font* gold42Font() const;
+        nk_user_font* goldFont(int height) const;
+        nk_user_font* silverFont(int height) const;
 
     private:
             std::unique_ptr<CelFontInfo> generateFontFromFrames (const std::string& texturePath);
@@ -144,8 +146,8 @@ namespace FARender
             Render::NuklearGraphicsContext mNuklearGraphicsData = Render::NuklearGraphicsContext();
 
             std::atomic<std::int64_t> mWidthHeightTmp;
-            std::unique_ptr<CelFontInfo> m_smallFont;
-            std::unique_ptr<PcxFontInfo> m_gold42;
+            std::unique_ptr<CelFontInfo> mSmallFont;
+            boost::container::flat_map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
     };
 }
 
