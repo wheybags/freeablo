@@ -31,6 +31,12 @@ namespace Engine
     class Client;
 }
 
+namespace FASaveGame
+{
+    class Loader;
+    class Saver;
+}
+
 namespace FAWorld
 {
     class Behaviour;
@@ -45,8 +51,9 @@ namespace FAWorld
     class Actor : public NetObject
     {
         STATIC_HANDLE_NET_OBJECT_IN_CLASS()
+
         void interact(Actor* actor);
-        void setIdleAnimSequence(const std::vector<int> & sequence);
+        void setIdleAnimSequence(const std::vector<int32_t> & sequence);
         void setTalkData(const std::unordered_map<std::basic_string<char>, std::basic_string<char>>& talkData);
         friend class ActorState::BaseState; // TODO: fix
 
@@ -55,6 +62,12 @@ namespace FAWorld
                   const std::string& idleAnimPath="",
                   const std::string& dieAnimPath=""
                   );
+
+            Actor(FASaveGame::GameLoader& loader);
+            virtual void save(FASaveGame::GameSaver& saver);
+
+            static const std::string typeId;
+            virtual const std::string& getTypeId() { return typeId; }
 
             virtual void update(bool noclip);
             virtual ~Actor();
@@ -79,12 +92,7 @@ namespace FAWorld
 
             bool isPassable()
             {
-                return mPassable || mIsDead;
-            }
-
-            void setPassable(bool passable)
-            {
-                mPassable = passable;
+                return mIsDead;
             }
 
             int32_t getId()
@@ -221,8 +229,6 @@ namespace FAWorld
             bool mIsDead = false;
             bool mCanTalk = false;
             Faction mFaction;
-
-            bool mPassable = false;
 
             ActorAnimationManager mAnimation;
 

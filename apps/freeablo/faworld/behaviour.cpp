@@ -2,6 +2,7 @@
 #include "actor.h"
 #include "player.h"
 #include "../falevelgen/random.h"
+#include "../fasavegame/gameloader.h"
 
 #include <iostream>
 
@@ -11,6 +12,9 @@ namespace FAWorld
 {
     STATIC_HANDLE_NET_OBJECT_IN_IMPL(BasicMonsterBehaviour)
     STATIC_HANDLE_NET_OBJECT_IN_IMPL(NullBehaviour)
+
+    const std::string BasicMonsterBehaviour::typeId = "basic-monster-behaviour";
+    const std::string NullBehaviour::typeId = "null-behaviour";
 
 
     static int32_t squaredDistance(const Position& a, const Position& b)
@@ -36,6 +40,16 @@ namespace FAWorld
         }
 
         return nearest;
+    }
+
+    BasicMonsterBehaviour::BasicMonsterBehaviour(FASaveGame::GameLoader& loader)
+    {
+        mTicksSinceLastAction = loader.load<Tick>();
+    }
+
+    void BasicMonsterBehaviour::save(FASaveGame::GameSaver& saver)
+    {
+        saver.save(mTicksSinceLastAction);
     }
 
     void BasicMonsterBehaviour::update()

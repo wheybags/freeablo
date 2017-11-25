@@ -3,6 +3,7 @@
 #include "actorstats.h"
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
+#include "../fasavegame/gameloader.h"
 #include <misc/stringops.h>
 #include <string>
 #include "itemmap.h"
@@ -12,16 +13,20 @@ namespace FAWorld
 {
     STATIC_HANDLE_NET_OBJECT_IN_IMPL(Player)
 
+    const std::string Player::typeId = "player";
+
     Player::Player() : Actor(), mInventory(this)
     {
         //TODO: hack - need to think of some more elegant way of handling Actors in general
         DiabloExe::CharacterStats stats;
         init("Warrior", stats);
+        FAWorld::World::get()->registerPlayer(this);
     }
 
     Player::Player(const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor(), mInventory(this)
     {
         init(className, charStats);
+        FAWorld::World::get()->registerPlayer(this);
     }
 
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
@@ -30,10 +35,22 @@ namespace FAWorld
         UNUSED_PARAM(charStats);
 
         mFaction = Faction::heaven();
-        FAWorld::World::get()->registerPlayer(this);
         mMoveHandler = MovementHandler(World::getTicksInPeriod(0.1f)); // allow players to repath much more often than other actors
 
         mStats.mAttackDamage = 60;
+    }
+
+    Player::Player(FASaveGame::GameLoader& loader)
+        : Actor(loader), mInventory(this)
+    {
+        mClassName = loader.load<std::string>();
+        FAWorld::World::get()->registerPlayer(this);
+    }
+
+    void Player::save(FASaveGame::GameSaver& saver)
+    {
+        Actor::save(saver);
+        saver.save(mClassName);
     }
 
     Player::~Player()
@@ -219,7 +236,7 @@ namespace FAWorld
        auto initialDir = Misc::getVecDir (Misc::getVec (getPos().current(), {clickedTile.x, clickedTile.y}));
        auto curPos = getPos().current ();
        auto tryDrop = [&](const std::pair<int32_t, int32_t> &pos){
-           if (getLevel()->dropItem (std::unique_ptr<Item> {new Item (cursorItem)}, *this, {pos.first, pos.second}))
+           if (getLevel()->dropItem (std::unique_ptr<Item> {new Item (cursorItem)}, *this, FAWorld::Tile(pos.first, pos.second)))
                {
                    getInventory ().setCursorHeld({});
                    return true;

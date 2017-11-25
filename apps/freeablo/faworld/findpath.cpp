@@ -135,7 +135,7 @@ namespace FAWorld
                }
 
 
-            std::vector<Location> neighborsContainer = std::move(neighbors(level, current));
+            std::vector<Location> neighborsContainer = neighbors(level, current);
             for (std::vector<Location>::iterator it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
             {
                 int32_t new_cost = costSoFar.get(current.first, current.second) + 1; //graph.cost(current, next);

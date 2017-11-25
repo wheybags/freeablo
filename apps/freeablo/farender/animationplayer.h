@@ -4,13 +4,19 @@
 #include "../faworld/world.h"
 #include "../engine/net/netmanager.h"
 
+namespace FASaveGame
+{
+    class GameLoader;
+    class GameSaver;
+}
+
 namespace FARender
 {
     class AnimationPlayer
     {
         public:
 
-            enum class AnimationType
+            enum class AnimationType : uint8_t
             {
                 Looped,
                 Once,
@@ -21,12 +27,14 @@ namespace FARender
             };
 
             AnimationPlayer() {}
+            AnimationPlayer(FASaveGame::GameLoader& loader);
+            void save(FASaveGame::GameSaver& saver);
 
             std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame();
             AnimationType getCurrentAnimationType() { return mPlayingAnimType; }
 
             void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationType type, int32_t startFrame = 0);
-            void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int> frameSequence);
+            void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int32_t> frameSequence);
 
             //!
             //! Simply replaces the currently running animation.
@@ -43,7 +51,7 @@ namespace FARender
             FAWorld::Tick mPlayingAnimDuration = 0;
             AnimationType mPlayingAnimType = AnimationType::Once;
             FAWorld::Tick mTicksSinceAnimStarted = 0;
-            std::vector<int> mFrameSequence;
+            std::vector<int32_t> mFrameSequence;
 
             template <class Stream>
             Serial::Error::Error faSerial(Stream& stream)

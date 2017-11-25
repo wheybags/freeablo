@@ -15,6 +15,12 @@ namespace FARender
     class RenderState;
 }
 
+namespace FASaveGame
+{
+    class GameLoader;
+    class GameSaver;
+}
+
 namespace FAWorld
 {
     class Actor;
@@ -34,6 +40,10 @@ namespace FAWorld
     {
     public:
         GameLevel(Level::Level level, size_t levelIndex);
+        GameLevel(FASaveGame::GameLoader& gameLoader);
+
+        void save(FASaveGame::GameSaver& gameSaver);
+
         ~GameLevel();
 
         Level::MinPillar getTile(size_t x, size_t y);
@@ -65,7 +75,7 @@ namespace FAWorld
 
         void removeActor(Actor* actor);
 
-        size_t getLevelIndex()
+        int32_t getLevelIndex()
         {
             return mLevelIndex;
         }
@@ -85,7 +95,7 @@ namespace FAWorld
         GameLevel();
 
         Level::Level mLevel;
-        size_t mLevelIndex = 0u;
+        int32_t mLevelIndex = 0;
 
         std::vector<Actor*> mActors;
         std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D;    ///< Map of points to actors.

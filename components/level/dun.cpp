@@ -4,6 +4,7 @@
 #include "dun.h"
 
 #include <faio/fafileobject.h>
+#include <serial/loader.h>
 
 namespace Level
 {
@@ -25,12 +26,34 @@ namespace Level
         std::cout << "w: " << mWidth << ", h: " << mHeight << std::endl;
     }
 
+    Dun::Dun(Serial::Loader& loader)
+    {
+        uint32_t size = loader.load<uint32_t>();
+        mBlocks.reserve(size);
+        for (uint32_t i = 0; i < size; i++)
+            mBlocks.push_back(loader.load<int32_t>());
+
+        mWidth = loader.load<int32_t>();
+        mHeight = loader.load<int32_t>();
+    }
+
     Dun::Dun(int32_t width, int32_t height)
     {
         resize(width, height);
     }
 
     Dun::Dun() {}
+
+    void Dun::save(Serial::Saver& saver)
+    {
+        uint32_t size = mBlocks.size();
+        saver.save(size);
+        for (int32_t val : mBlocks)
+            saver.save(val);
+
+        saver.save(mWidth);
+        saver.save(mHeight);
+    }
 
     void Dun::resize(int32_t width, int32_t height)
     {

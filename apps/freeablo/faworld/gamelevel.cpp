@@ -6,6 +6,7 @@
 #include <boost/archive/binary_iarchive.hpp>
 
 #include "../engine/net/netmanager.h"
+#include "../fasavegame/gameloader.h"
 
 #include <diabloexe/diabloexe.h>
 #include "monster.h"
@@ -15,9 +16,43 @@
 
 namespace FAWorld
 {
-    GameLevel::GameLevel(Level::Level level, size_t levelIndex) : mLevel(level), mLevelIndex(levelIndex),
-       mItemMap (new ItemMap (this))
+    GameLevel::GameLevel(Level::Level level, size_t levelIndex)
+        : mLevel(level)
+        , mLevelIndex(levelIndex)
+        , mItemMap(new ItemMap (this))
     {
+    }
+
+    GameLevel::GameLevel(FASaveGame::GameLoader& loader)
+        : mLevel(Level::Level(loader))
+        , mLevelIndex(loader.load<int32_t>())
+        , mItemMap(new ItemMap(loader, this))
+    {
+        uint32_t actorsSize = loader.load<uint32_t>();
+
+        mActors.reserve(actorsSize);
+        for (uint32_t i = 0; i < actorsSize; i++)
+        {
+            std::string actorTypeId = loader.load<std::string>();
+            Actor* actor = static_cast<Actor*>(World::get()->mObjectIdMapper.construct(actorTypeId, loader));
+            mActors.push_back(actor);
+        }
+    }
+
+    void GameLevel::save(FASaveGame::GameSaver& saver)
+    {
+        mLevel.save(saver);
+        saver.save(mLevelIndex);
+        //mItemMap->save(saver);
+
+        uint32_t actorsSize = mActors.size();
+        saver.save(actorsSize);
+
+        for (Actor* actor : mActors)
+        {
+            saver.save(actor->getTypeId());
+            actor->save(saver);
+        }
     }
 
     GameLevel::~GameLevel()
@@ -80,9 +115,7 @@ namespace FAWorld
         actorMapRefresh();
 
         for (auto &p : mItemMap->mItems)
-            {
-                p.second.update ();
-            }
+            p.second.update ();
     }
 
     void GameLevel::actorMapInsert(Actor* actor)

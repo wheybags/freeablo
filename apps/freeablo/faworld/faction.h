@@ -1,11 +1,13 @@
 #ifndef FACTION_H
 #define FACTION_H
 
+#include <cstdint>
+
 namespace FAWorld
 {
     class Actor;
 
-    enum FactionType
+    enum class FactionType : uint8_t
     {
         hell,
         heaven,
@@ -18,6 +20,7 @@ namespace FAWorld
     class Faction
     {
     public:
+        Faction() = default;
         Faction(FactionType faction): mFaction(faction) {};
 
         bool canAttack(const Faction& other) const;
@@ -31,6 +34,8 @@ namespace FAWorld
         {
             return Faction(FactionType::heaven);
         }
+        
+        FactionType getType() { return mFaction; }
 
     private:
         FactionType mFaction;

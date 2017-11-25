@@ -1,16 +1,101 @@
 #include "actoranimationmanager.h"
 
 #include "world.h"
+#include "../fasavegame/gameloader.h"
 
 
 namespace FAWorld
 {
     ActorAnimationManager::ActorAnimationManager()
     {
-        for (AnimState s = (AnimState)0; s < AnimState::ENUM_END; s = (AnimState)(((int32_t)s) + 1))
+        this->initAnimMaps();
+    }
+
+    ActorAnimationManager::ActorAnimationManager(FASaveGame::GameLoader& loader)
+        : mAnimationPlayer(loader)
+    {
+        this->initAnimMaps();
+
+        mPlayingAnim = AnimState(loader.load<uint8_t>());
+
+        uint32_t numAnimations = loader.load<uint32_t>();
+        for (uint32_t i = 0; i < numAnimations; i++)
         {
-            mAnimations[s] = FARender::getDefaultSprite();
-            mAnimTimeMap[s] = World::getTicksInPeriod(0.06f);
+            bool haveThisAnim = loader.load<bool>();
+
+            if (haveThisAnim)
+            {
+                AnimState type = AnimState(loader.load<uint8_t>());
+                std::string path = loader.load<std::string>();
+
+                mAnimations[size_t(type)] = FARender::Renderer::get()->loadImage(path);
+            }
+        }
+
+        uint32_t numTimeMapEntries = loader.load<uint32_t>();
+        for (uint32_t i = 0; i < numTimeMapEntries; i++)
+        {
+            AnimState type = AnimState(loader.load<uint8_t>());
+            Tick time = loader.load<Tick>();
+
+            mAnimTimeMap[size_t(type)] = time;
+        }
+
+        uint32_t idleFrameCount = loader.load<uint32_t>();
+        mIdleFrameSequence.reserve(idleFrameCount);
+        for (uint32_t i = 0; i < idleFrameCount; i++)
+            mIdleFrameSequence.push_back(loader.load<int32_t>());
+
+        mInterruptedAnimationState = AnimState(loader.load<uint8_t>());
+        mInterruptedAnimationType = FARender::AnimationPlayer::AnimationType(loader.load<uint8_t>());
+        mInterruptedAnimationFrame = loader.load<int32_t>();
+    }
+
+    void ActorAnimationManager::save(FASaveGame::GameSaver& saver)
+    {
+        mAnimationPlayer.save(saver);
+        saver.save(uint8_t(mPlayingAnim));
+
+        saver.save(uint32_t(AnimState::ENUM_END)); // save the number of entries we're about to save
+        for (AnimState s = (AnimState)0; s < AnimState::ENUM_END; s = AnimState(size_t(s) + 1))
+        {
+            bool haveThisAnim = mAnimations[size_t(s)]->isValid();
+            saver.save(haveThisAnim);
+
+            if (haveThisAnim)
+            {
+                std::string animPath = FARender::Renderer::get()->getPathForIndex(mAnimations[size_t(s)]->getCacheIndex());
+                assert(animPath.size());
+
+                saver.save(uint8_t(s));
+                saver.save(animPath);
+            }
+        }
+
+        saver.save(uint32_t(AnimState::ENUM_END));
+        for (AnimState s = (AnimState)0; s < AnimState::ENUM_END; s = AnimState(size_t(s) + 1))
+        {
+            saver.save(uint8_t(s));
+            saver.save(mAnimTimeMap[size_t(s)]);
+        }
+
+        uint32_t idleFrameCount = mIdleFrameSequence.size();
+        saver.save(idleFrameCount);
+
+        for (uint32_t i = 0; i < idleFrameCount; i++)
+            saver.save(mIdleFrameSequence[i]);
+
+        saver.save(uint8_t(mInterruptedAnimationState));
+        saver.save(uint8_t(mInterruptedAnimationType));
+        saver.save(mInterruptedAnimationFrame);
+    }
+
+    void ActorAnimationManager::initAnimMaps()
+    {
+        for (AnimState s = (AnimState)0; s < AnimState::ENUM_END; s = AnimState(size_t(s) + 1))
+        {
+            mAnimations[size_t(s)] = FARender::getDefaultSprite();
+            mAnimTimeMap[size_t(s)] = World::getTicksInPeriod(0.06f);
         }
     }
 
@@ -36,23 +121,23 @@ namespace FAWorld
     void ActorAnimationManager::playAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type)
     {
         mPlayingAnim = animation;
-        mAnimationPlayer.playAnimation(mAnimations[animation], mAnimTimeMap[animation], type);
+        mAnimationPlayer.playAnimation(mAnimations[size_t(animation)], mAnimTimeMap[size_t(animation)], type);
     }
 
-    void ActorAnimationManager::playAnimation(AnimState animation, std::vector<int> frameSequence)
+    void ActorAnimationManager::playAnimation(AnimState animation, std::vector<int32_t> frameSequence)
     {
         mPlayingAnim = animation;
-        mAnimationPlayer.playAnimation(mAnimations[animation], mAnimTimeMap[animation], frameSequence);
+        mAnimationPlayer.playAnimation(mAnimations[size_t(animation)], mAnimTimeMap[size_t(animation)], frameSequence);
     }
 
     void ActorAnimationManager::setAnimation(AnimState animation, FARender::FASpriteGroup* sprite)
     {
         auto playingSprite = mAnimationPlayer.getCurrentFrame().first;
 
-        if (playingSprite == mAnimations[animation])
+        if (playingSprite == mAnimations[size_t(animation)])
             mAnimationPlayer.replaceAnimation(sprite);
 
-        mAnimations[animation] = sprite;
+        mAnimations[size_t(animation)] = sprite;
     }
 
     void ActorAnimationManager::update()
@@ -66,7 +151,7 @@ namespace FAWorld
             if (mInterruptedAnimationState != AnimState::none)
             {
                 mPlayingAnim = mInterruptedAnimationState;
-                mAnimationPlayer.playAnimation(mAnimations[mPlayingAnim], mAnimTimeMap[mPlayingAnim], mInterruptedAnimationType, mInterruptedAnimationFrame);
+                mAnimationPlayer.playAnimation(mAnimations[size_t(mPlayingAnim)], mAnimTimeMap[size_t(mPlayingAnim)], mInterruptedAnimationType, mInterruptedAnimationFrame);
 
                 mInterruptedAnimationState = AnimState::none;
                 mInterruptedAnimationFrame = 0;
@@ -81,7 +166,7 @@ namespace FAWorld
         }
     }
 
-    void ActorAnimationManager::setIdleFrameSequence(const std::vector<int>& sequence)
+    void ActorAnimationManager::setIdleFrameSequence(const std::vector<int32_t>& sequence)
     {
         mIdleFrameSequence = sequence;
     }

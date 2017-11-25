@@ -1,17 +1,30 @@
 #include "position.h"
 
 #include "world.h"
+#include "../fasavegame/gameloader.h"
 
 namespace FAWorld
 {
-    Position::Position() : mDist(0), mDirection(0), mMoving(false),
-        mCurrent(std::make_pair(0, 0)) {}
+    Position::Position(FASaveGame::GameLoader& loader)
+    {
+        mDist = loader.load<int32_t>();
+        mDirection = loader.load<int32_t>();
+        mMoving = loader.load<bool>();
 
-    Position::Position(int32_t x, int32_t y) : mDist(0), mDirection(0), mMoving(false),
-        mCurrent(std::make_pair(x, y)) {}
+        int32_t first, second;
+        first = loader.load<int32_t>();
+        second = loader.load<int32_t>();
+        mCurrent = std::make_pair(first, second);
+    }
 
-    Position::Position(int32_t x, int32_t y, int32_t direction) : mDist(0), mDirection(direction), mMoving(false),
-        mCurrent(std::make_pair(x, y)) {}
+    void Position::save(FASaveGame::GameSaver& saver)
+    {
+        saver.save(mDist);
+        saver.save(mDirection);
+        saver.save(mMoving);
+        saver.save(mCurrent.first);
+        saver.save(mCurrent.second);
+    }
 
     void Position::update()
     {

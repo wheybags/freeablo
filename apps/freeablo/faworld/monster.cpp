@@ -5,6 +5,7 @@
 
 #include "../falevelgen/random.h"
 #include "../engine/threadmanager.h"
+#include "../fasavegame/gameloader.h"
 
 #include "world.h"
 #include "actorstats.h"
@@ -14,6 +15,8 @@
 namespace FAWorld
 {
     STATIC_HANDLE_NET_OBJECT_IN_IMPL(Monster)
+
+    const std::string Monster::typeId = "monster";
 
     void Monster::init()
     {
@@ -41,6 +44,18 @@ namespace FAWorld
         getAnimationManager().setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage((fmt % 'd').str()));
         getAnimationManager().setAnimation(AnimState::attack, FARender::Renderer::get()->loadImage((fmt % 'a').str()));
         getAnimationManager().setAnimation(AnimState::hit, FARender::Renderer::get()->loadImage((fmt % 'h').str()));
+    }
+
+    Monster::Monster(FASaveGame::GameLoader& loader)
+        : Actor(loader)
+    {
+        mSoundPath = loader.load<std::string>();
+    }
+
+    void Monster::save(FASaveGame::GameSaver& saver)
+    {
+        Actor::save(saver);
+        saver.save(mSoundPath);
     }
 
     std::string Monster::getDieWav()

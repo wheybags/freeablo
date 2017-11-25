@@ -286,7 +286,10 @@ namespace FARender
 
     std::string SpriteCache::getPathForIndex(uint32_t index)
     {
-        return mCacheToStr.at(index);
+        auto it = mCacheToStr.find(index);
+        if (it != mCacheToStr.end())
+            return it->second;
+        return "";
     }
 
     FASpriteGroup* SpriteCache::allocNewSpriteGroup()

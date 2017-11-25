@@ -10,6 +10,12 @@
 
 #include <boost/serialization/access.hpp>
 
+namespace Serial
+{
+    class Loader;
+    class Saver;
+}
+
 namespace Level
 {
     class Dun
@@ -17,8 +23,11 @@ namespace Level
 
         public:
             Dun(const std::string&);
+            Dun(Serial::Loader& loader);
             Dun();
             Dun(int32_t width, int32_t height);
+
+            void save(Serial::Saver& saver);
 
             static Dun getTown(const Dun& sector1, const Dun& sector2, const Dun& sector3, const Dun& sector4);
 

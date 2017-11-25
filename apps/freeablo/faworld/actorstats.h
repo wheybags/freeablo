@@ -2,55 +2,34 @@
 #define ACTORSTATS_H
 
 #include <stdint.h>
-#include <algorithm>
+#include <misc/maxcurrentitem.h>
 
 namespace DiabloExe
 {
     class CharacterStats;
 }
 
+namespace FASaveGame
+{
+    class GameLoader;
+    class GameSaver;
+}
+
 namespace FAWorld
 {
-    template<typename T>
-    class MaxCurrentItem
-    {
-    public:
-        T max;
-        T current;
-
-        MaxCurrentItem(T max) : max(max), current(max) {}
-
-        bool change(T delta, bool allowClamp = true)
-        {
-            T next = std::max(std::min(current + delta, max), 0);
-            bool clamped = next != current + delta;
-
-            if (!clamped || allowClamp)
-                current = next;
-
-            return clamped;
-        }
-    };
-
     class ActorStats
     {
     public:
-        MaxCurrentItem<int32_t> mHp;
-        MaxCurrentItem<int32_t> mMana;
-
-        int32_t mAttackDamage = 3;
-
         ActorStats() : mHp(100), mMana(100) {}
+        ActorStats(FASaveGame::GameLoader& loader);
+        void save(FASaveGame::GameSaver& saver);
 
-        void takeDamage(int32_t damage)
-        {
-            mHp.change(-damage);
-        }
+        void takeDamage(int32_t damage) { mHp.change(-damage); }
+        int32_t getAttackDamage() { return mAttackDamage; }
 
-        int32_t getAttackDamage()
-        {
-            return mAttackDamage;
-        }
+        Misc::MaxCurrentItem<int32_t> mHp;
+        Misc::MaxCurrentItem<int32_t> mMana;
+        int32_t mAttackDamage = 3;
     };
 }
 

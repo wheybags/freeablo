@@ -10,6 +10,7 @@
 #include "../engine/net/netmanager.h"
 #include "../engine/enginemain.h"
 #include "../falevelgen/random.h"
+#include "../fasavegame/gameloader.h"
 #include "player.h"
 #include "findpath.h"
 
@@ -17,7 +18,9 @@ namespace FAWorld
 {
     STATIC_HANDLE_NET_OBJECT_IN_IMPL(Actor)
 
-    void Actor::setIdleAnimSequence(const std::vector<int>& sequence)
+    const std::string Actor::typeId = "base_actor";
+
+    void Actor::setIdleAnimSequence(const std::vector<int32_t>& sequence)
     {
         mAnimation.setIdleFrameSequence (sequence);
     }
@@ -67,6 +70,47 @@ namespace FAWorld
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this);
 
         mId = getNewId();
+    }
+
+    Actor::Actor(FASaveGame::GameLoader& loader)
+        : mMoveHandler(loader)
+        , mStats(loader)
+        , mAnimation(loader)
+    {
+        mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
+        mIsDead = loader.load<bool>();
+
+        bool hasBehaviour = loader.load<bool>();
+        if (hasBehaviour)
+        {
+            std::string typeId = loader.load<std::string>();
+            mBehaviour = static_cast<Behaviour*>(World::get()->mObjectIdMapper.construct(typeId, loader));
+            mBehaviour->attach(this);
+        }
+
+        // TODO: handle mTarget here
+
+    }
+
+    void Actor::save(FASaveGame::GameSaver& saver)
+    {
+        mMoveHandler.save(saver);
+        mStats.save(saver);
+        mAnimation.save(saver);
+
+        saver.save(uint8_t(mFaction.getType()));
+        saver.save(mIsDead);
+
+        bool hasBehaviour = mBehaviour != nullptr;
+        saver.save(hasBehaviour);
+
+        if (hasBehaviour)
+        {
+            saver.save(mBehaviour->getTypeId());
+            mBehaviour->save(saver);
+        }
+
+        // TODO: handle mTarget here
     }
 
     Actor::~Actor()

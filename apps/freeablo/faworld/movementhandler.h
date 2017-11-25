@@ -4,6 +4,12 @@
 #include "world.h"
 #include "gamelevel.h"
 
+namespace FASaveGame
+{
+    class GameLoader;
+    class GameSaver;
+}
+
 namespace FAWorld
 {
     class GameLevel;
@@ -12,6 +18,9 @@ namespace FAWorld
     {
     public:
         MovementHandler(Tick pathRateLimit);
+
+        MovementHandler(FASaveGame::GameLoader& loader);
+        void save(FASaveGame::GameSaver& saver);
 
         std::pair<int32_t, int32_t> getDestination() const;
         void setDestination(std::pair<int32_t, int32_t> dest, bool adjacent = false);

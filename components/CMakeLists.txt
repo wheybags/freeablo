@@ -23,7 +23,7 @@ add_library(Levels
     level/sol.h
     level/baseitemmanager.h
     level/baseproperty.h)
-target_link_libraries(Levels FAIO DiabloExe)
+target_link_libraries(Levels FAIO DiabloExe Serial)
 set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Misc 
@@ -38,6 +38,8 @@ add_library(Misc
     misc/savePNG.h
     misc/savePNG.cpp
     misc/stdhashes.h
+    misc/maxcurrentitem.cpp
+    misc/maxcurrentitem.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
@@ -112,6 +114,8 @@ add_library(Serial
     serial/bitstream.inl
     serial/bitstream.cpp
     serial/bithackmacros.h
+    serial/loader.h
+    serial/loader.cpp
 )
 set_target_properties(Serial PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
