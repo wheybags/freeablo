@@ -16,6 +16,7 @@
 #include "../faworld/player.h"
 #include "../fasavegame/gameloader.h"
 
+#include "mainmenu.h"
 #include "boost/range/counting_range.hpp"
 #include <boost/variant/variant.hpp>
 #include "dialogmanager.h"
@@ -63,6 +64,7 @@ namespace FAGui
     GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player &player)
         : mEngine(engine), mPlayer (player)
     {
+        mMainMenu.reset (new MainMenu ());
         mPentagramAnim.reset (new FARender::AnimationPlayer ());
         auto renderer = FARender::Renderer::get();
         mPentagramAnim->playAnimation(renderer->loadImage ("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
@@ -721,6 +723,7 @@ namespace FAGui
             pauseMenu(ctx, mEngine);
 
         updateAnimations ();
+        mMainMenu->update ();
          
         inventoryPanel(ctx);
         spellsPanel(ctx);
@@ -728,6 +731,7 @@ namespace FAGui
         characterPanel(ctx);
         bottomMenu(ctx);
         dialog(ctx);
+        mMainMenu->startingScreen(ctx);
     }
 
     void GuiManager::setDescription(std::string text, TextColor color)
