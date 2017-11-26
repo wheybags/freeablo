@@ -41,6 +41,8 @@ namespace FAWorld
 
     void GameLevel::save(FASaveGame::GameSaver& saver)
     {
+        Serial::ScopedCategorySaver cat("GameLevel", saver);
+
         mLevel.save(saver);
         saver.save(mLevelIndex);
         //mItemMap->save(saver);

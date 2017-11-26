@@ -53,6 +53,8 @@ namespace FAWorld
 
     void ActorAnimationManager::save(FASaveGame::GameSaver& saver)
     {
+        Serial::ScopedCategorySaver cat("ActorAnimationManager", saver);
+
         mAnimationPlayer.save(saver);
         saver.save(uint8_t(mPlayingAnim));
 

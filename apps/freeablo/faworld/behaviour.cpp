@@ -49,6 +49,8 @@ namespace FAWorld
 
     void BasicMonsterBehaviour::save(FASaveGame::GameSaver& saver)
     {
+        Serial::ScopedCategorySaver cat("BasicMonsterBehaviour", saver);
+
         saver.save(mTicksSinceLastAction);
     }
 

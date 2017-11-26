@@ -46,12 +46,6 @@ namespace FAWorld
         mAnimation.update();
     }
 
-    size_t nextId = 0;
-    size_t getNewId()
-    {
-        return nextId++;
-    }
-
     Actor::Actor(
         const std::string& walkAnimPath,
         const std::string& idleAnimPath,
@@ -69,7 +63,7 @@ namespace FAWorld
 
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this);
 
-        mId = getNewId();
+        mId = FAWorld::World::get()->getNewId();
     }
 
     Actor::Actor(FASaveGame::GameLoader& loader)
@@ -88,12 +82,16 @@ namespace FAWorld
             mBehaviour->attach(this);
         }
 
+        mId = loader.load<int32_t>();
+        mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this); // TODO: handle this
         // TODO: handle mTarget here
 
     }
 
     void Actor::save(FASaveGame::GameSaver& saver)
     {
+        Serial::ScopedCategorySaver cat("Actor", saver);
+
         mMoveHandler.save(saver);
         mStats.save(saver);
         mAnimation.save(saver);
@@ -110,6 +108,9 @@ namespace FAWorld
             mBehaviour->save(saver);
         }
 
+        saver.save(mId);
+
+        // TODO: handle mActorStateMachine here
         // TODO: handle mTarget here
     }
 

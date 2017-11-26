@@ -100,6 +100,11 @@ namespace FAWorld
             void setupObjectIdMappers();
             FASaveGame::ObjectIdMapper mObjectIdMapper;
 
+            int32_t getNewId()
+            {
+                return mNextId++;
+            }
+
         private:
             void playLevelMusic(size_t level);
             void changeLevel(bool up);
@@ -122,6 +127,8 @@ namespace FAWorld
             // that's sadly another state required
             // it means after dialog we have to release button before doing next meaningful action
             bool afterDialog = false;
+
+            int32_t mNextId = 1;
     };
 }
 

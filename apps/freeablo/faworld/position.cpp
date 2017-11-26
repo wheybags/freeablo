@@ -19,6 +19,8 @@ namespace FAWorld
 
     void Position::save(FASaveGame::GameSaver& saver)
     {
+        Serial::ScopedCategorySaver cat("Position", saver);
+
         saver.save(mDist);
         saver.save(mDirection);
         saver.save(mMoving);

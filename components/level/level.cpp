@@ -63,6 +63,8 @@ namespace Level
 
     void Level::save(Serial::Saver& saver)
     {
+        Serial::ScopedCategorySaver cat("Level", saver);
+
         saver.save(mTilesetCelPath);
         saver.save(mTilPath);
         saver.save(mMinPath);

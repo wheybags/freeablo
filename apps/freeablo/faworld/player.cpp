@@ -49,6 +49,8 @@ namespace FAWorld
 
     void Player::save(FASaveGame::GameSaver& saver)
     {
+        Serial::ScopedCategorySaver cat("Player", saver);
+
         Actor::save(saver);
         saver.save(mClassName);
     }

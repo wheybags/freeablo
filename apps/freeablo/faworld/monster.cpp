@@ -54,6 +54,8 @@ namespace FAWorld
 
     void Monster::save(FASaveGame::GameSaver& saver)
     {
+        Serial::ScopedCategorySaver cat("Monster", saver);
+
         Actor::save(saver);
         saver.save(mSoundPath);
     }

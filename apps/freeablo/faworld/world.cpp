@@ -39,11 +39,21 @@ namespace FAWorld
 
         for (uint32_t i = 0; i < numLevels; i++)
         {
-            GameLevel* level = new GameLevel(loader);
-            mLevels[level->getLevelIndex()] = level;
+            int32_t levelIndex = loader.load<int32_t>();
+
+            bool hasThisLevel = loader.load<bool>();
+            GameLevel* level = nullptr;
+
+            if (hasThisLevel)
+                level = new GameLevel(loader);
+
+            mLevels[levelIndex] = level;
         }
 
         int32_t playerId = loader.load<int32_t>();
+        mNextId = loader.load<int32_t>();
+
+        loader.runFunctionsToRunAtEnd();
         mCurrentPlayer = (Player*)getActorById(playerId);
     }
 
@@ -54,6 +64,8 @@ namespace FAWorld
 
         for (auto& pair : mLevels)
         {
+            saver.save(pair.first);
+
             bool hasThisLevel = pair.second != nullptr;
             saver.save(hasThisLevel);
 
@@ -62,6 +74,7 @@ namespace FAWorld
         }
 
         saver.save(mCurrentPlayer->getId());
+        saver.save(mNextId);
     }
 
     void World::setupObjectIdMappers()

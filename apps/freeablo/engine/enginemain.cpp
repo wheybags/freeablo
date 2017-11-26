@@ -13,6 +13,8 @@
 #include "../faaudio/audiomanager.h"
 #include "../faworld/itemmanager.h"
 #include "../faworld/playerfactory.h"
+#include "../fasavegame/gameloader.h"
+#include <serial/textstream.h>
 #include "threadmanager.h"
 #include "net/netmanager.h"
 #include "enginemain.h"
@@ -59,7 +61,7 @@ namespace Engine
     {
         FALevelGen::FAsrand(static_cast<int> (time(nullptr)));
 
-        FAWorld::Player* player;
+        FAWorld::Player* player = nullptr;
         FARender::Renderer& renderer = *FARender::Renderer::get();
 
         Settings::Settings settings;
@@ -76,39 +78,68 @@ namespace Engine
         }
 
         FAWorld::ItemManager& itemManager = FAWorld::ItemManager::get();
-        FAWorld::World world(exe);
+
+        std::unique_ptr<FAWorld::World> worldPtr;
+
+        bool isServer = true;
+        bool clientWaitingForLevel = false;
         FAWorld::PlayerFactory playerFactory(exe);
 
-        bool isServer = variables["mode"].as<std::string>() == "server";
-        if(isServer)
-            world.generateLevels();
+        //std::unique_ptr<FAWorld::World> worldPtr(new FAWorld::World(exe));
 
-        itemManager.loadItems(&exe);
-        player = playerFactory.create(characterClass);
-        world.addCurrentPlayer(player);
+        FILE* f = fopen("save.sav", "rb");
 
-        if (variables["invuln"].as<std::string>() == "on")
-            player->setInvuln(true);
+        if (f)
+        {
+            fseek(f, 0, SEEK_END);
+            size_t size = ftell(f);
+            fseek(f, 0, SEEK_SET);
 
-        mInputManager->registerKeyboardObserver(&world);
-        mInputManager->registerMouseObserver(&world);
+            std::string tmp;
+            tmp.resize(size);
 
-        int32_t currentLevel = variables["level"].as<int32_t>();
+            fread((void*)tmp.data(), 1, size, f);
+
+            Serial::TextReadStream stream(tmp);
+            FASaveGame::GameLoader loader(stream);
+
+            worldPtr.reset(new FAWorld::World(loader, exe));
+
+            player = worldPtr->getCurrentPlayer();
+        }
+        else
+        {
+            worldPtr.reset(new FAWorld::World(exe));
+
+            worldPtr->generateLevels();
+
+            itemManager.loadItems(&exe);
+            player = playerFactory.create(characterClass);
+            worldPtr->addCurrentPlayer(player);
+
+            if (variables["invuln"].as<std::string>() == "on")
+                player->setInvuln(true);
+
+            int32_t currentLevel = variables["level"].as<int32_t>();
+
+            if (currentLevel == -1)
+                currentLevel = 0;
+
+            // -1 represents the main menu
+            if(currentLevel != -1 && isServer)
+                worldPtr->setLevel(currentLevel);
+            else
+                clientWaitingForLevel = true;
+        }
+
+        FAWorld::World& world = *worldPtr.get();
 
         FAGui::GuiManager guiManager(*this, *player);
         world.setGuiManager (&guiManager);
+
         mInputManager->setGuiManager (&guiManager);
-
-        if (currentLevel == -1)
-            currentLevel = 0;
-
-        bool clientWaitingForLevel = false;
-
-        // -1 represents the main menu
-        if(currentLevel != -1 && isServer)
-            world.setLevel(currentLevel);
-        else
-            clientWaitingForLevel = true;
+        mInputManager->registerKeyboardObserver(&world);
+        mInputManager->registerMouseObserver(&world);
 
         boost::asio::io_service io;
 

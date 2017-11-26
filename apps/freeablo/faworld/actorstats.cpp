@@ -11,6 +11,8 @@ namespace FAWorld
 
     void ActorStats::save(FASaveGame::GameSaver& saver)
     {
+        Serial::ScopedCategorySaver cat("ActorStats", saver);
+
         mHp.save(saver);
         mMana.save(saver);
         saver.save(mAttackDamage);

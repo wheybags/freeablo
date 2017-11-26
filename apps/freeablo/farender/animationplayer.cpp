@@ -23,6 +23,8 @@ namespace FARender
 
     void AnimationPlayer::save(FASaveGame::GameSaver& saver)
     {
+        Serial::ScopedCategorySaver cat("AnimationPlayer", saver);
+
         bool hasCurrentAnim = mCurrentAnim != nullptr;
         saver.save(hasCurrentAnim);
 

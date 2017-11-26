@@ -4,18 +4,21 @@
 
 namespace Serial
 {
-    class ReadBitStream;
-    class WriteBitStream;
+    class ReadStreamInterface;
+    class WriteStreamInterface;
 
     class Loader
     {
     public:
-        Loader(Serial::ReadBitStream& stream);
+        Loader(ReadStreamInterface& stream);
 
         template <typename T> T load() = delete;
 
+        void startCategory(const std::string& name);
+        void endCategory(const std::string& name);
+
     private:
-        Serial::ReadBitStream& mStream;
+        ReadStreamInterface& mStream;
     };
 
     template <> bool Loader::load<bool>();
@@ -32,7 +35,7 @@ namespace Serial
     class Saver
     {
     public:
-        Saver(Serial::WriteBitStream& stream);
+        Saver(WriteStreamInterface& stream);
 
         void save(bool val);
         void save(int64_t val);
@@ -45,7 +48,23 @@ namespace Serial
         void save(uint8_t val);
         void save(const std::string& val);
 
+        void startCategory(const std::string& name);
+        void endCategory(const std::string& name);
     private:
-        Serial::WriteBitStream& mStream;
+        WriteStreamInterface& mStream;
     };
+
+    template <typename T>
+    class ScopedCategory
+    {
+    public:
+        ScopedCategory(std::string&& name, T& saverOrLoader);
+        ~ScopedCategory();
+
+    private:
+        std::string mName;
+        T& mSaverOrLoader;
+    };
+
+    using ScopedCategorySaver = ScopedCategory<Saver>;
 }

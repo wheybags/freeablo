@@ -114,8 +114,12 @@ add_library(Serial
     serial/bitstream.inl
     serial/bitstream.cpp
     serial/bithackmacros.h
+
     serial/loader.h
     serial/loader.cpp
+    serial/streaminterface.h
+    serial/textstream.h
+    serial/textstream.cpp
 )
 set_target_properties(Serial PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

@@ -267,7 +267,7 @@ namespace FAWorld
         private:
             std::string mActorId;
             std::string mName;
-            int32_t mId;
+            int32_t mId = -1;
             friend class Engine::Server; // TODO: fix
             friend class Engine::Client;
             friend class Engine::NetManager;

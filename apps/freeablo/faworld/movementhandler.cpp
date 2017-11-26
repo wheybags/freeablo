@@ -12,7 +12,13 @@ namespace FAWorld
     {
         int32_t levelIndex = loader.load<int32_t>();
         if (levelIndex != -1)
-            mLevel = World::get()->getLevel(levelIndex);
+        {
+            // get the level at the end, because it doesn't exist yet
+            loader.addFunctionToRunAtEnd([this, levelIndex]()
+            {
+                this->mLevel = World::get()->getLevel(levelIndex);
+            });
+        }
 
         mCurrentPos = Position(loader);
 
@@ -38,6 +44,8 @@ namespace FAWorld
 
     void MovementHandler::save(FASaveGame::GameSaver& saver)
     {
+        Serial::ScopedCategorySaver cat("MovementHandler", saver);
+
         int32_t levelIndex = -1;
         if (mLevel)
             levelIndex = mLevel->getLevelIndex();
