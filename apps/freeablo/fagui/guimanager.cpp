@@ -675,13 +675,6 @@ namespace FAGui
         }, false);
     }
 
-    void GuiManager::menuText (nk_context *ctx, const char *text, nk_flags alignment) {
-      FARender::Renderer* renderer = FARender::Renderer::get();
-      nk_style_push_font(ctx, renderer->silverFont(24));
-      nk_label(ctx, text, alignment);
-       nk_style_pop_font(ctx);
-    }
-
     void GuiManager::smallText (nk_context *ctx, const char *text, TextColor color, nk_flags alignment) {
       FARender::Renderer* renderer = FARender::Renderer::get();
       nk_style_push_font(ctx, renderer->smallFont());

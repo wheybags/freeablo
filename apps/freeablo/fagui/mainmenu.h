@@ -10,6 +10,13 @@ namespace FARender
 
 namespace FAGui
 {
+    enum class MenuFontColor
+    {
+        gold,
+        silver,
+    };
+
+
     class MainMenu
     {
     private:
@@ -21,5 +28,6 @@ namespace FAGui
         void update();
         void startingScreen(nk_context* ctx);
         std::unique_ptr<FARender::AnimationPlayer> mSmLogo;
+        static void menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment);
     };
 }

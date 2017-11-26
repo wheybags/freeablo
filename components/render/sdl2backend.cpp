@@ -350,7 +350,7 @@ namespace Render
                 }
             }
 
-            vec.push_back((Sprite)SDL_CreateTextureFromSurface(renderer, tmp));
+            vec.push_back((Render::Sprite)(intptr_t)getGLTexFromSurface(tmp));
 
             clearTransparentSurface(tmp);
         }
