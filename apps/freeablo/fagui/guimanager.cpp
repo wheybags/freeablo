@@ -123,9 +123,15 @@ namespace FAGui
             return nk_widget_has_mouse_click_down (ctx, buttons, down) && ctx->input.mouse.buttons[buttons].clicked;
         }
 
+        // nk_widget_hovered without regard to activity of window
+        bool nk_inactive_widget_is_hovered (nk_context *ctx)
+        {
+            return nk_input_is_mouse_hovering_rect(&ctx->input, nk_widget_bounds(ctx));
+        }
+
         bool nk_widget_mouse_left (nk_context *ctx)
         {
-            return !nk_widget_is_hovered(ctx) && nk_input_is_mouse_prev_hovering_rect(&ctx->input, nk_widget_bounds(ctx));
+            return !nk_inactive_widget_is_hovered(ctx) && nk_input_is_mouse_prev_hovering_rect(&ctx->input, nk_widget_bounds(ctx));
         }
 
 
@@ -368,7 +374,7 @@ namespace FAGui
             nk_layout_space_push(ctx, nk_rect (point.x, point.y, w, h));
             if (highlight == ItemHighlightInfo::highlightIfHover) {
                 nk_button_label_styled (ctx, &dummyStyle, "");
-                if (nk_widget_is_hovered(ctx))
+                if (nk_inactive_widget_is_hovered(ctx))
                     {
                        isHighlighted = true;
                     }
@@ -407,7 +413,7 @@ namespace FAGui
                       if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
                           inv.itemSlotLeftMouseButtonDown (p.first);
                       auto highlight = ItemHighlightInfo::notHighlighed;
-                      if (nk_widget_is_hovered(ctx)) {
+                      if (nk_inactive_widget_is_hovered(ctx)) {
                           highlight = ItemHighlightInfo::highlited;
                       }
                       else if (nk_widget_mouse_left (ctx))
