@@ -10,24 +10,55 @@ namespace FARender
 
 namespace FAGui
 {
+    class MainMenuHandler;
+
     enum class MenuFontColor
     {
         gold,
         silver,
     };
 
+    class MainMenuScreen
+    {
+    public:
+        explicit MainMenuScreen(const MainMenuHandler& menu);
+        virtual ~MainMenuScreen();
+        virtual void update(nk_context* ctx) = 0;
 
-    class MainMenu
+    protected:
+        static void menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment);
+
+    protected:
+        const MainMenuHandler& mMenu;
+    };
+
+    class StartingScreen : public MainMenuScreen
     {
     private:
-        static const int menuWidth = 640;
-        static const int menuHeight = 480;
+        using Parent = MainMenuScreen;
+    public:
+        explicit StartingScreen(const MainMenuHandler& menu);
+        void update(nk_context* ctx) override;
+
+    private:
+        int cur_item = 0;
+        std::unique_ptr<FARender::AnimationPlayer> mSmLogo;
+    };
+
+    class MainMenuHandler
+    {
+    public:
+        static const int width = 640;
+        static const int height = 480;
+        std::unique_ptr<MainMenuScreen> mActiveScreen;
+        template <typename ScreenType>
+        void setActiveScreen ()
+        {
+            mActiveScreen.reset (new ScreenType(*this));
+        }
 
     public:
-        MainMenu();
-        void update();
-        void startingScreen(nk_context* ctx);
-        std::unique_ptr<FARender::AnimationPlayer> mSmLogo;
-        static void menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment);
+        MainMenuHandler();
+        void update(nk_context* ctx) const;
     };
 }

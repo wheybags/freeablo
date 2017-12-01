@@ -32,7 +32,7 @@ namespace FAGui
 {
     class GuiManager;
     class DialogData;
-    class MainMenu;
+    class MainMenuHandler;
 
     enum class EffectType
     {
@@ -123,7 +123,7 @@ namespace FAGui
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::vector<DialogData> mDialogs;
         std::unique_ptr<FARender::AnimationPlayer> mPentagramAnim;
-        std::unique_ptr<MainMenu> mMainMenu;
+        std::unique_ptr<MainMenuHandler> mMainMenuHandler;
     };
 }
 

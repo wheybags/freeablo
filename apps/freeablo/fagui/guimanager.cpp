@@ -64,7 +64,9 @@ namespace FAGui
     GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player &player)
         : mEngine(engine), mPlayer (player)
     {
-        mMainMenu.reset (new MainMenu ());
+        mMainMenuHandler.reset (new MainMenuHandler ());
+        mMainMenuHandler->setActiveScreen<StartingScreen>();
+
         mPentagramAnim.reset (new FARender::AnimationPlayer ());
         auto renderer = FARender::Renderer::get();
         mPentagramAnim->playAnimation(renderer->loadImage ("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
@@ -716,7 +718,7 @@ namespace FAGui
             pauseMenu(ctx, mEngine);
 
         updateAnimations ();
-        mMainMenu->update ();
+        mMainMenuHandler->update (ctx);
          
         inventoryPanel(ctx);
         spellsPanel(ctx);
@@ -724,7 +726,6 @@ namespace FAGui
         characterPanel(ctx);
         bottomMenu(ctx);
         dialog(ctx);
-        mMainMenu->startingScreen(ctx);
     }
 
     void GuiManager::setDescription(std::string text, TextColor color)

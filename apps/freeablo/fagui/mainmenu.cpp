@@ -4,7 +4,15 @@
 
 namespace FAGui
 {
-    MainMenu::MainMenu()
+    MainMenuScreen::MainMenuScreen(const MainMenuHandler& menu) : mMenu(menu)
+    {
+    }
+
+    MainMenuScreen::~MainMenuScreen()
+    {
+    }
+
+    StartingScreen::StartingScreen(const MainMenuHandler& menu) : Parent(menu)
     {
         mSmLogo.reset(new FARender::AnimationPlayer());
         auto renderer = FARender::Renderer::get();
@@ -12,20 +20,18 @@ namespace FAGui
                                FARender::AnimationPlayer::AnimationType::Looped);
     }
 
-    void MainMenu::update()
+    void StartingScreen::update(nk_context* ctx)
     {
         mSmLogo->update();
-    }
-
-    void MainMenu::startingScreen(nk_context* ctx)
-    {
         auto renderer = FARender::Renderer::get();
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
         Misc::ScopedSetter<float> setter(ctx->style.window.border, 0);
         auto bg = renderer->loadImage("ui_art/mainmenu.pcx")->getNkImage();
         nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(bg));
-        if(nk_begin(ctx, "startingScreen", nk_rect(screenW / 2 - menuWidth / 2, screenH / 2 - menuHeight / 2, menuWidth, menuHeight),
+        if(nk_begin(ctx, "startingScreen",
+                    nk_rect(screenW / 2 - MainMenuHandler::width / 2, screenH / 2 - MainMenuHandler::height / 2, MainMenuHandler::width,
+                            MainMenuHandler::height),
                     NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND))
         {
             nk_layout_space_begin(ctx, NK_STATIC, 48, INT_MAX);
@@ -53,7 +59,16 @@ namespace FAGui
         nk_end(ctx);
     }
 
-    void MainMenu::menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment)
+    MainMenuHandler::MainMenuHandler()
+    {
+    }
+
+    void MainMenuHandler::update(nk_context* ctx) const
+    {
+        mActiveScreen->update (ctx);
+    }
+
+    void MainMenuScreen::menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
         switch(color)
