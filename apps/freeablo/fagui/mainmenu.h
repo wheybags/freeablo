@@ -41,8 +41,9 @@ namespace FAGui
         void update(nk_context* ctx) override;
 
     private:
-        int cur_item = 0;
+        int active_item_index = 0;
         std::unique_ptr<FARender::AnimationPlayer> mSmLogo;
+        std::unique_ptr<FARender::AnimationPlayer> mFocus;
     };
 
     class MainMenuHandler
