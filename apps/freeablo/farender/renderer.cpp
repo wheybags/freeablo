@@ -18,9 +18,9 @@
 
 namespace FARender
 {
-    FASpriteGroup defaultSprite;
     FASpriteGroup* getDefaultSprite()
     {
+        static FASpriteGroup defaultSprite;
         return &defaultSprite;
     }
 

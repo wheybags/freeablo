@@ -19,7 +19,7 @@
 #include "diabloexe/npc.h"
 #include "../fagui/guimanager.h"
 #include "../fagui/dialogmanager.h"
-
+#include "../fasavegame/gameloader.h"
 
 namespace FAWorld
 {
@@ -29,12 +29,70 @@ namespace FAWorld
     {
         assert(singletonInstance == nullptr);
         singletonInstance = this;
+
+        this->setupObjectIdMappers();
+    }
+
+    World::World(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : World(exe)
+    {
+        uint32_t numLevels = loader.load<uint32_t>();
+
+        for (uint32_t i = 0; i < numLevels; i++)
+        {
+            int32_t levelIndex = loader.load<int32_t>();
+
+            bool hasThisLevel = loader.load<bool>();
+            GameLevel* level = nullptr;
+
+            if (hasThisLevel)
+                level = new GameLevel(loader);
+
+            mLevels[levelIndex] = level;
+        }
+
+        int32_t playerId = loader.load<int32_t>();
+        mNextId = loader.load<int32_t>();
+
+        loader.runFunctionsToRunAtEnd();
+        mCurrentPlayer = (Player*)getActorById(playerId);
+    }
+
+    void World::save(FASaveGame::GameSaver& saver)
+    {
+        uint32_t numLevels = mLevels.size();
+        saver.save(numLevels);
+
+        for (auto& pair : mLevels)
+        {
+            saver.save(pair.first);
+
+            bool hasThisLevel = pair.second != nullptr;
+            saver.save(hasThisLevel);
+
+            if (hasThisLevel)
+                pair.second->save(saver);
+        }
+
+        saver.save(mCurrentPlayer->getId());
+        saver.save(mNextId);
+    }
+
+    void World::setupObjectIdMappers()
+    {
+        mObjectIdMapper.addClass(Actor::typeId, [](FASaveGame::GameLoader& loader) { return new Actor(loader); });
+        mObjectIdMapper.addClass(Monster::typeId, [](FASaveGame::GameLoader& loader) { return new Monster(loader); });
+        mObjectIdMapper.addClass(Player::typeId, [](FASaveGame::GameLoader& loader) { return new Player(loader); });
+
+        mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
+        mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });
     }
 
     World::~World()
     {
         for (auto& pair : mLevels)
             delete pair.second;
+
+        singletonInstance = nullptr;
     }
 
     World* World::get()
@@ -166,25 +224,20 @@ namespace FAWorld
         return mCurrentPlayer->getLevel();
     }
 
-    size_t World::getCurrentLevelIndex()
+    int32_t World::getCurrentLevelIndex()
     {
         return mCurrentPlayer->getLevel()->getLevelIndex();
     }
 
-    void World::setLevel(size_t levelNum)
+    void World::setLevel(int32_t levelNum)
     {
-        if (levelNum >= mLevels.size() || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
+        if (levelNum >= int32_t(mLevels.size()) || levelNum < 0 || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
             return;
 
         auto level = getLevel(levelNum);
 
         mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
         playLevelMusic(levelNum);
-
-        auto netManager = Engine::NetManager::get();
-
-        if (netManager && !netManager->isServer())
-            netManager->sendLevelChangePacket(level->getLevelIndex());
     }
 
     HoverState& World::getHoverState()
@@ -364,7 +417,7 @@ namespace FAWorld
 
     void World::changeLevel(bool up)
     {
-        size_t nextLevelIndex;
+        int32_t nextLevelIndex;
         if (up)
             nextLevelIndex = getCurrentLevel()->getPreviousLevel();
         else

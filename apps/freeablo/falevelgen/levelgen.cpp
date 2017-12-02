@@ -16,6 +16,7 @@
 #include "../faworld/actorstats.h"
 
 #include <diabloexe/diabloexe.h>
+#include <diabloexe/monster.h>
 
 #include <misc/misc.h>
 
@@ -926,7 +927,7 @@ namespace FALevelGen
             while(!levelBase[xPos][yPos].passable() && !levelBase.isStairs(xPos, yPos));
 
             std::string name = possibleMonsters[randomInRange(0, possibleMonsters.size()-1)]->monsterName;
-            DiabloExe::Monster monster =  exe.getMonster(name);
+            DiabloExe::Monster monster = exe.getMonster(name);
 
             FAWorld::Monster * monsterObj = new FAWorld::Monster(monster);
             FAWorld::Behaviour * behaviour = new FAWorld::BasicMonsterBehaviour();

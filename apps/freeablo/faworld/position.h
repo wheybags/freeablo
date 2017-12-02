@@ -5,20 +5,25 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <cmath>
-#include "../fasavegame/savegame.h"
-#include "netobject.h"
-
 #include <misc/misc.h>
-#include <serial/bitstream.h>
+
+namespace FASaveGame
+{
+    class GameLoader;
+    class GameSaver;
+}
 
 namespace FAWorld
 {
     class Position
     {
         public:
-            Position();
-            Position(int32_t x, int32_t y);
-            Position(int32_t x, int32_t y, int32_t direction);
+            Position() = default;
+            Position(int32_t x, int32_t y) : mCurrent(x, y) {}
+            Position(int32_t x, int32_t y, int32_t direction) : mCurrent(x, y), mDirection(direction) {}
+
+            Position(FASaveGame::GameLoader& loader);
+            void save(FASaveGame::GameSaver& saver);
 
             void update(); ///< advances towards mNext
             std::pair<int32_t, int32_t> current() const; ///< where we are coming from
@@ -29,9 +34,6 @@ namespace FAWorld
             void setDirection(int32_t mDirection);
 
             double distanceFrom(Position B);
-
-            template<class Stream>
-            Serial::Error::Error faSerial(Stream& stream);
 
             bool isMoving() const { return mMoving; }
             int32_t getDist() const { return mDist; }
@@ -49,10 +51,10 @@ namespace FAWorld
             }
 
         private:
-            int32_t mDist; ///< percentage of the way there
-            int32_t mDirection;
-            bool mMoving;
-            std::pair<int32_t, int32_t> mCurrent;
+            std::pair<int32_t, int32_t> mCurrent = std::make_pair(0, 0);
+            int32_t mDist = 0; ///< percentage of the way there
+            int32_t mDirection = 0;
+            bool mMoving = false;
     };
 }
 

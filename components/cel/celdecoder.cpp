@@ -258,19 +258,20 @@ namespace Cel
                     return &CelDecoder::decodeFrameType0;
                 break;
             case 0x220:
-                if(isType2or4(frame)) {
+                if(isType2or4(frame))
                     return &CelDecoder::decodeFrameType2;
-                } else if(isType3or5(frame)) {
+                else if(isType3or5(frame))
                     return &CelDecoder::decodeFrameType3;
-                }
+                break;
             case 0x320:
-                if(isType2or4(frame)) {
+                if(isType2or4(frame))
                     return &CelDecoder::decodeFrameType4;
-                } else if(isType3or5(frame)) {
+                else if(isType3or5(frame))
                     return &CelDecoder::decodeFrameType5;
-                }
+                break;
             }
-        } else if(Misc::StringUtils::endsWith(celName,"cl2"))
+        }
+        else if(Misc::StringUtils::endsWith(celName,"cl2"))
         {
             return &CelDecoder::decodeFrameType6;
         }

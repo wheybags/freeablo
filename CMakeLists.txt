@@ -41,9 +41,9 @@ hunter_add_package(stormlib)
 find_package(stormlib CONFIG REQUIRED)
 set(HUNTER_LIBS ${HUNTER_LIBS} stormlib::stormlib)
 
-hunter_add_package(Boost COMPONENTS filesystem serialization system program_options date_time regex)
-find_package(Boost CONFIG REQUIRED  filesystem serialization system program_options date_time regex)
-set(HUNTER_BOOST_LIBS Boost::filesystem Boost::serialization Boost::system Boost::program_options Boost::date_time Boost::regex)
+hunter_add_package(Boost COMPONENTS filesystem system program_options date_time regex)
+find_package(Boost CONFIG REQUIRED  filesystem system program_options date_time regex)
+set(HUNTER_BOOST_LIBS Boost::filesystem Boost::system Boost::program_options Boost::date_time Boost::regex)
 set(HUNTER_LIBS ${HUNTER_LIBS} ${HUNTER_BOOST_LIBS})
 
 Find_Package(OpenGL REQUIRED)

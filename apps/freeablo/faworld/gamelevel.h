@@ -15,6 +15,12 @@ namespace FARender
     class RenderState;
 }
 
+namespace FASaveGame
+{
+    class GameLoader;
+    class GameSaver;
+}
+
 namespace FAWorld
 {
     class Actor;
@@ -34,6 +40,10 @@ namespace FAWorld
     {
     public:
         GameLevel(Level::Level level, size_t levelIndex);
+        GameLevel(FASaveGame::GameLoader& gameLoader);
+
+        void save(FASaveGame::GameSaver& gameSaver);
+
         ~GameLevel();
 
         Level::MinPillar getTile(size_t x, size_t y);
@@ -46,8 +56,8 @@ namespace FAWorld
 
         void activate(size_t x, size_t y);
 
-        size_t getNextLevel();
-        size_t getPreviousLevel();
+        int32_t getNextLevel();
+        int32_t getPreviousLevel();
 
         void update(bool noclip);
 
@@ -65,15 +75,13 @@ namespace FAWorld
 
         void removeActor(Actor* actor);
 
-        size_t getLevelIndex()
+        int32_t getLevelIndex()
         {
             return mLevelIndex;
         }
 
-        std::string serialiseToString();
         bool isPassableFor(int i, int j, const Actor* actor) const;
         bool dropItem(std::unique_ptr <Item>&& item, const Actor& actor, const Tile &tile);
-        static GameLevel* loadFromString(const std::string& data);
 
         Actor* getActorById(int32_t id);
 
@@ -85,7 +93,7 @@ namespace FAWorld
         GameLevel();
 
         Level::Level mLevel;
-        size_t mLevelIndex = 0u;
+        int32_t mLevelIndex = 0;
 
         std::vector<Actor*> mActors;
         std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D;    ///< Map of points to actors.

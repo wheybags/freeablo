@@ -12,10 +12,10 @@
 #include "../fagui/guimanager.h"
 #include "../faaudio/audiomanager.h"
 #include "../faworld/itemmanager.h"
-#include "../faworld/characterstats.h"
 #include "../faworld/playerfactory.h"
+#include "../fasavegame/gameloader.h"
+#include <serial/textstream.h>
 #include "threadmanager.h"
-#include "net/netmanager.h"
 #include "enginemain.h"
 
 namespace bpo = boost::program_options;
@@ -60,7 +60,7 @@ namespace Engine
     {
         FALevelGen::FAsrand(static_cast<int> (time(nullptr)));
 
-        FAWorld::Player* player;
+        FAWorld::Player* player = nullptr;
         FARender::Renderer& renderer = *FARender::Renderer::get();
 
         Settings::Settings settings;
@@ -77,63 +77,75 @@ namespace Engine
         }
 
         FAWorld::ItemManager& itemManager = FAWorld::ItemManager::get();
-        FAWorld::World world(exe);
+
+        std::unique_ptr<FAWorld::World> worldPtr;
+
         FAWorld::PlayerFactory playerFactory(exe);
 
-        bool isServer = variables["mode"].as<std::string>() == "server";
-        if(isServer)
-            world.generateLevels();
+        FILE* f = fopen("save.sav", "rb");
 
-        itemManager.loadItems(&exe);
-        player = playerFactory.create(characterClass);
-        world.addCurrentPlayer(player);
+        if (f)
+        {
+            fseek(f, 0, SEEK_END);
+            size_t size = ftell(f);
+            fseek(f, 0, SEEK_SET);
 
-        if (variables["invuln"].as<std::string>() == "on")
-            player->setInvuln(true);
+            std::string tmp;
+            tmp.resize(size);
 
-        mInputManager->registerKeyboardObserver(&world);
-        mInputManager->registerMouseObserver(&world);
+            fread((void*)tmp.data(), 1, size, f);
 
-        int32_t currentLevel = variables["level"].as<int32_t>();
+            Serial::TextReadStream stream(tmp);
+            FASaveGame::GameLoader loader(stream);
+
+            worldPtr.reset(new FAWorld::World(loader, exe));
+
+            player = worldPtr->getCurrentPlayer();
+        }
+        else
+        {
+            worldPtr.reset(new FAWorld::World(exe));
+
+            worldPtr->generateLevels();
+
+            itemManager.loadItems(&exe);
+            player = playerFactory.create(characterClass);
+            worldPtr->addCurrentPlayer(player);
+
+            if (variables["invuln"].as<std::string>() == "on")
+                player->setInvuln(true);
+
+            int32_t currentLevel = variables["level"].as<int32_t>();
+
+            if (currentLevel == -1)
+                currentLevel = 0;
+
+            // -1 represents the main menu
+            if(currentLevel != -1)
+                worldPtr->setLevel(currentLevel);
+        }
+
+        FAWorld::World& world = *worldPtr.get();
 
         FAGui::GuiManager guiManager(*this, *player);
         world.setGuiManager (&guiManager);
+
         mInputManager->setGuiManager (&guiManager);
-
-        if (currentLevel == -1)
-            currentLevel = 0;
-
-        bool clientWaitingForLevel = false;
-
-        // -1 represents the main menu
-        if(currentLevel != -1 && isServer)
-            world.setLevel(currentLevel);
-        else
-            clientWaitingForLevel = true;
+        mInputManager->registerKeyboardObserver(&world);
+        mInputManager->registerMouseObserver(&world);
 
         boost::asio::io_service io;
-
-        NetManager netManager(isServer, playerFactory);
 
         // Main game logic loop
         while(!mDone)
         {
             boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000/FAWorld::World::ticksPerSecond));
 
-            if (clientWaitingForLevel)
-            {
-                clientWaitingForLevel = world.getCurrentLevel() != nullptr;
-            }
-
             mInputManager->update(mPaused);
-            if(!mPaused && !clientWaitingForLevel)
-            {
+            if(!mPaused)
                 world.update(mNoclip);
-            }
 
             nk_context* ctx = renderer.getNuklearContext();
-
-            netManager.update();
             guiManager.update(mPaused, ctx);
 
 

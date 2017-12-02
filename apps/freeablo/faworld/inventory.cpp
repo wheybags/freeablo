@@ -45,15 +45,13 @@ namespace FAWorld
 
     bool Inventory::checkStatsRequirement(const Item& item) const
     {
-        if(mActor->mStats != NULL)
-            if(!(mActor->mStats->getStrength() >= item.getReqStr() &&
-                 mActor->mStats->getDexterity() >= item.getReqDex() &&
-                 mActor->mStats->getMagic() >= item.getReqMagic() &&
-                 mActor->mStats->getVitality() >= item.getReqVit()))
-                return false;
-            else
-                return true;
-        else
+        UNUSED_PARAM(item);
+        /*if(!(mActor.mStats->getStrength() >= item.getReqStr() &&
+             mActor.mStats->getDexterity() >= item.getReqDex() &&
+             mActor.mStats->getMagic() >= item.getReqMagic() &&
+             mActor.mStats->getVitality() >= item.getReqVit()))
+            return false;
+        else*/
             return true;
     }
 
@@ -636,8 +634,6 @@ namespace FAWorld
         {
             addEffectsAndStats(mRightHand);
         }
-        if(mActor->mStats != NULL)
-            mActor->mStats->recalculateDerivedStats();
     }
 
     std::vector <std::tuple <Item::ItemEffect, uint32_t, uint32_t, uint32_t>>& Inventory::getTotalEffects()

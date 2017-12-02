@@ -1,16 +1,94 @@
 #include "level.h"
 
 #include <iostream>
+#include <serial/loader.h>
 
 namespace Level
 {
-    Level::Level(const Dun& dun, const std::string& tilPath, const std::string& minPath,
-        const std::string& solPath, const std::string& tileSetPath, const std::pair<int32_t,int32_t>& downStairs,
-        const std::pair<int32_t,int32_t>& upStairs, std::map<int32_t, int32_t> doorMap, int32_t previous, int32_t next):
-        mDun(dun), mTil(tilPath), mMin(minPath), mSol(solPath), mTileSetPath(tileSetPath),
+    Level::Level(const Dun& dun,
+                 const std::string& tilPath,
+                 const std::string& minPath,
+                 const std::string& solPath,
+                 const std::string& tileSetPath,
+                 const std::pair<int32_t,int32_t>& downStairs,
+                 const std::pair<int32_t,int32_t>& upStairs,
+                 std::map<int32_t, int32_t> doorMap,
+                 int32_t previous,
+                 int32_t next)
+        : mTilesetCelPath(tileSetPath)
+        , mTilPath(tilPath)
+        , mMinPath(minPath)
+        , mSolPath(solPath)
+        , mDun(dun)
+        , mTil(mTilPath)
+        , mMin(mMinPath)
+        , mSol(mSolPath)
+        , mDoorMap(doorMap)
+        , mUpStairs(upStairs)
+        , mDownStairs(downStairs)
+        , mPrevious(previous)
+        , mNext(next)
+    {}
 
-        mTilPath(tilPath), mMinPath(minPath), mSolPath(solPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs),
-        mPrevious(previous), mNext(next){}
+    Level::Level(Serial::Loader& loader)
+        : mTilesetCelPath(loader.load<std::string>())
+        , mTilPath(loader.load<std::string>())
+        , mMinPath(loader.load<std::string>())
+        , mSolPath(loader.load<std::string>())
+        , mDun(loader)
+        , mTil(mTilPath)
+        , mMin(mMinPath)
+        , mSol(mSolPath)
+    {
+        uint32_t doorMapSize = loader.load<uint32_t>();
+        for (uint32_t i = 0; i < doorMapSize; i++)
+        {
+            int32_t key = loader.load<int32_t>();
+            mDoorMap[key] = loader.load<int32_t>();
+        }
+
+        int32_t first, second;
+
+        first = loader.load<int32_t>();
+        second = loader.load<int32_t>();
+        mUpStairs = { first, second };
+
+        first = loader.load<int32_t>();
+        second = loader.load<int32_t>();
+        mDownStairs = { first, second };
+
+        mPrevious = loader.load<int32_t>();
+        mNext = loader.load<int32_t>();
+    }
+
+    void Level::save(Serial::Saver& saver)
+    {
+        Serial::ScopedCategorySaver cat("Level", saver);
+
+        saver.save(mTilesetCelPath);
+        saver.save(mTilPath);
+        saver.save(mMinPath);
+        saver.save(mSolPath);
+        mDun.save(saver);
+
+        uint32_t doorMapSize = mDoorMap.size();
+        saver.save(doorMapSize);
+
+        for (const auto& entry : mDoorMap)
+        {
+            saver.save(entry.first);
+            saver.save(entry.second);
+        }
+
+        saver.save(mUpStairs.first);
+        saver.save(mUpStairs.second);
+
+        saver.save(mDownStairs.first);
+        saver.save(mDownStairs.second);
+
+        saver.save(mPrevious);
+        saver.save(mNext);
+    }
 
     std::vector<int16_t> Level::mEmpty(16);
 
@@ -127,7 +205,7 @@ namespace Level
 
     const std::string& Level::getTileSetPath() const
     {
-        return mTileSetPath;
+        return mTilesetCelPath;
     }
 
     const std::string& Level::getMinPath() const

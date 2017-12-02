@@ -6,7 +6,12 @@
 #include <misc/misc.h>
 
 #include "world.h"
-#include "netobject.h"
+
+namespace FASaveGame
+{
+    class GameLoader;
+    class GameSaver;
+}
 
 namespace FAWorld
 {
@@ -14,10 +19,12 @@ namespace FAWorld
     class Actor;
     class Player;
 
-    class Behaviour : public NetObject
+    class Behaviour
     {
     public:
-        virtual ~Behaviour() {};
+        virtual const std::string& getTypeId() = 0;
+        virtual void save(FASaveGame::GameSaver& saver) = 0;
+        virtual ~Behaviour() {}
 
         void attach(Actor* actor) 
         {
@@ -34,46 +41,30 @@ namespace FAWorld
     // Does nothing
     class NullBehaviour : public Behaviour
     {
-        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
-
     public:
-        ~NullBehaviour() {};
-        void update() {
-        };
+        static const std::string typeId;
+        const std::string& getTypeId() override { return typeId; }
 
-    protected:
-        template <class Stream>
-        Serial::Error::Error faSerial(Stream& stream)
-        {
-            UNUSED_PARAM(stream);
-            return Serial::Error::Success;
-        }
-
-        friend class Serial::WriteBitStream;
-        friend class Serial::ReadBitStream;
+        void save(FASaveGame::GameSaver&) {}
+        ~NullBehaviour() {}
+        void update() {}
     };
 
     class BasicMonsterBehaviour : public Behaviour
     {
-        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
-
     public:
-        ~BasicMonsterBehaviour() {};
+        BasicMonsterBehaviour() = default;
+        BasicMonsterBehaviour(FASaveGame::GameLoader& loader);
+        void save(FASaveGame::GameSaver& saver) override;
+
+        static const std::string typeId;
+        const std::string& getTypeId() override { return typeId; }
+
+        ~BasicMonsterBehaviour() {}
         void update();
 
     private:
         Tick mTicksSinceLastAction;
-
-    protected:
-        template <class Stream>
-        Serial::Error::Error faSerial(Stream& stream)
-        {
-            UNUSED_PARAM(stream);
-            return Serial::Error::Success;
-        }
-
-        friend class Serial::WriteBitStream;
-        friend class Serial::ReadBitStream;
     };
 
 }

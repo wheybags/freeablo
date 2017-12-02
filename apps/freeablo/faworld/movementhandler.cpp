@@ -1,11 +1,74 @@
 #include "movementhandler.h"
 
 #include "findpath.h"
+#include "../fasavegame/gameloader.h"
 
 namespace FAWorld
 {
     MovementHandler::MovementHandler(Tick pathRateLimit) : mPathRateLimit(pathRateLimit)
     {}
+
+    MovementHandler::MovementHandler(FASaveGame::GameLoader& loader)
+    {
+        int32_t levelIndex = loader.load<int32_t>();
+        if (levelIndex != -1)
+        {
+            // get the level at the end, because it doesn't exist yet
+            loader.addFunctionToRunAtEnd([this, levelIndex]()
+            {
+                this->mLevel = World::get()->getLevel(levelIndex);
+            });
+        }
+
+        mCurrentPos = Position(loader);
+
+        int32_t first, second;
+        first = loader.load<int32_t>();
+        second = loader.load<int32_t>();
+        mDestination = std::make_pair(first, second);
+
+        mCurrentPathIndex = loader.load<int32_t>();
+        uint32_t pathSize = loader.load<uint32_t>();
+        mCurrentPath.reserve(pathSize);
+        for (uint32_t i = 0; i < pathSize; i++)
+        {
+            first = loader.load<int32_t>();
+            second = loader.load<int32_t>();
+            mCurrentPath.push_back(std::make_pair(first, second));
+        }
+
+        mLastRepathed = loader.load<Tick>();
+        mPathRateLimit = loader.load<Tick>();
+        mAdjacent = loader.load<bool>();
+    }
+
+    void MovementHandler::save(FASaveGame::GameSaver& saver)
+    {
+        Serial::ScopedCategorySaver cat("MovementHandler", saver);
+
+        int32_t levelIndex = -1;
+        if (mLevel)
+            levelIndex = mLevel->getLevelIndex();
+
+        saver.save(levelIndex);
+        mCurrentPos.save(saver);
+        saver.save(mDestination.first);
+        saver.save(mDestination.second);
+
+        saver.save(mCurrentPathIndex);
+
+        uint32_t pathSize = mCurrentPath.size();
+        saver.save(pathSize);
+        for (const auto& item : mCurrentPath)
+        {
+            saver.save(item.first);
+            saver.save(item.second);
+        }
+
+        saver.save(mLastRepathed);
+        saver.save(mPathRateLimit);
+        saver.save(mAdjacent);
+    }
 
     std::pair<int32_t, int32_t> MovementHandler::getDestination() const
     {

@@ -1,17 +1,33 @@
 #include "position.h"
 
 #include "world.h"
+#include "../fasavegame/gameloader.h"
+#include <algorithm>
 
 namespace FAWorld
 {
-    Position::Position() : mDist(0), mDirection(0), mMoving(false),
-        mCurrent(std::make_pair(0, 0)) {}
+    Position::Position(FASaveGame::GameLoader& loader)
+    {
+        mDist = loader.load<int32_t>();
+        mDirection = loader.load<int32_t>();
+        mMoving = loader.load<bool>();
 
-    Position::Position(int32_t x, int32_t y) : mDist(0), mDirection(0), mMoving(false),
-        mCurrent(std::make_pair(x, y)) {}
+        int32_t first, second;
+        first = loader.load<int32_t>();
+        second = loader.load<int32_t>();
+        mCurrent = std::make_pair(first, second);
+    }
 
-    Position::Position(int32_t x, int32_t y, int32_t direction) : mDist(0), mDirection(direction), mMoving(false),
-        mCurrent(std::make_pair(x, y)) {}
+    void Position::save(FASaveGame::GameSaver& saver)
+    {
+        Serial::ScopedCategorySaver cat("Position", saver);
+
+        saver.save(mDist);
+        saver.save(mDirection);
+        saver.save(mMoving);
+        saver.save(mCurrent.first);
+        saver.save(mCurrent.second);
+    }
 
     void Position::update()
     {
@@ -68,18 +84,4 @@ namespace FAWorld
 
         return Misc::getNextPosByDir (mCurrent, mDirection);
     }
-
-    template<class Stream>
-    Serial::Error::Error Position::faSerial(Stream& stream)
-    {
-        serialise_int(stream, 0, 100, mDist);
-        serialise_int(stream, 0, 7, mDirection);
-        serialise_bool(stream, mMoving);
-        serialise_int32(stream, mCurrent.first);
-        serialise_int32(stream, mCurrent.second);
-
-        return Serial::Error::Success;
-    }
-
-    FA_SERIAL_TEMPLATE_INSTANTIATE(Position);
 }

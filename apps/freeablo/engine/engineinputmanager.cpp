@@ -186,7 +186,7 @@ namespace Engine
                 actionAsString = "Changelvlup";
                 break;
             case CHANGE_LEVEL_DOWN:
-                actionAsString = "Changelvlmdwn";
+                actionAsString = "Changelvldwn";
                 break;
             case TOGGLE_CONSOLE:
                 actionAsString = "ToggleConsole";

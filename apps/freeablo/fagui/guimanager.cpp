@@ -2,14 +2,19 @@
 
 #include <string>
 #include <cstdint>
+#include <cstdio>
+#include <memory>
+#include <iostream>
 
 #include <misc/misc.h>
+#include <serial/textstream.h>
 
 #include "../faworld/world.h"
 #include "../faworld/actorstats.h"
 #include "../farender/renderer.h"
 #include "../engine/enginemain.h"
 #include "../faworld/player.h"
+#include "../fasavegame/gameloader.h"
 
 #include "boost/range/counting_range.hpp"
 #include <boost/variant/variant.hpp>
@@ -88,6 +93,7 @@ namespace FAGui
         nk_fa_begin_window(ctx, title, bounds, flags, action, isModal);
         nk_style_pop_style_item(ctx);
     }
+
 
     namespace {
         struct applyEffect {
@@ -292,6 +298,43 @@ namespace FAGui
 
             if (nk_button_label(ctx, "Resume"))
                 engine.togglePause();
+
+            if (nk_button_label(ctx, "Save game"))
+            {
+                /*std::vector<uint8_t> streamData;
+                Serial::WriteBitStream stream(streamData);
+                FASaveGame::GameSaver saver(stream);
+
+                FAWorld::World::get()->save(saver);*/
+
+                Serial::TextWriteStream writeStream;
+                FASaveGame::GameSaver saver(writeStream);
+
+                FAWorld::World::get()->save(saver);
+
+                /*writeStream->write(true);
+                writeStream->write(false);
+
+                writeStream->write(int64_t(900));
+                writeStream->write(uint8_t(253));*/
+
+
+                std::pair<uint8_t*, size_t> writtenData = writeStream.getData();
+
+                /*std::string readData = (char*)writtenData.first;
+
+                std::unique_ptr<Serial::ReadStreamInterface> readStream(new Serial::TextReadStream(readData));
+
+                bool b1 = readStream->read_bool();
+                bool b2 = readStream->read_bool();
+                int64_t i1 = readStream->read_int64_t();
+                uint8_t i2 = readStream->read_uint8_t();*/
+
+
+                FILE* f = fopen("save.sav", "wb");
+                fwrite(writtenData.first, 1, writtenData.second, f);
+                fclose(f);
+            }
 
             if (nk_button_label(ctx, "Quit"))
                 engine.stop();
@@ -617,11 +660,11 @@ namespace FAGui
                 nk_image(ctx, bulbImage);
             };
 
-            FAWorld::ActorStats* stats = FAWorld::World::get()->getCurrentPlayer()->mStats;
+            FAWorld::ActorStats& stats = FAWorld::World::get()->getCurrentPlayer()->mStats;
             // draw current hp into health bulb
-            drawBulb(stats->getCurrentHP(), stats->getMaxHp(), healthBulbLeftOffset);
+            drawBulb(stats.mHp.current, stats.mHp.max, healthBulbLeftOffset);
             // and current mana
-            drawBulb(stats->getCurrentMana(), stats->getMaxMana(), manaBulbLeftOffset);
+            drawBulb(stats.mMana.current, stats.mMana.current, manaBulbLeftOffset);
 
             belt (ctx);
             descriptionPanel(ctx);

@@ -4,7 +4,6 @@
 #include <stddef.h>
 #include <statemachine/statemachine.h>
 #include <misc/misc.h>
-#include <boost/optional.hpp>
 
 namespace FAWorld
 {

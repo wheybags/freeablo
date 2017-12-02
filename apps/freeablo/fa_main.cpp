@@ -17,7 +17,6 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
         // -1 represents the main menu
         ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)")
         ("character,c", bpo::value<std::string>()->default_value("Warrior"), "Choose Warrior, Rogue or Sorcerer")
-        ("mode,m", bpo::value<std::string>()->default_value("server"), "server or client")
         ("invuln", bpo::value<std::string>()->default_value("off"), "on or off");
 
     try

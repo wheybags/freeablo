@@ -7,17 +7,17 @@
 #include "actor/basestate.h"
 #include "world.h"
 #include "../engine/threadmanager.h"
-#include "../engine/net/netmanager.h"
 #include "../engine/enginemain.h"
 #include "../falevelgen/random.h"
+#include "../fasavegame/gameloader.h"
 #include "player.h"
 #include "findpath.h"
 
 namespace FAWorld
 {
-    STATIC_HANDLE_NET_OBJECT_IN_IMPL(Actor)
+    const std::string Actor::typeId = "base_actor";
 
-    void Actor::setIdleAnimSequence(const std::vector<int>& sequence)
+    void Actor::setIdleAnimSequence(const std::vector<int32_t>& sequence)
     {
         mAnimation.setIdleFrameSequence (sequence);
     }
@@ -43,12 +43,6 @@ namespace FAWorld
         mAnimation.update();
     }
 
-    size_t nextId = 0;
-    size_t getNewId()
-    {
-        return nextId++;
-    }
-
     Actor::Actor(
         const std::string& walkAnimPath,
         const std::string& idleAnimPath,
@@ -66,13 +60,63 @@ namespace FAWorld
 
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this);
 
-        mId = getNewId();
+        mId = FAWorld::World::get()->getNewId();
+    }
+
+    Actor::Actor(FASaveGame::GameLoader& loader)
+        : mMoveHandler(loader)
+        , mStats(loader)
+        , mAnimation(loader)
+    {
+        mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
+        mIsDead = loader.load<bool>();
+
+        bool hasBehaviour = loader.load<bool>();
+        if (hasBehaviour)
+        {
+            std::string typeId = loader.load<std::string>();
+            mBehaviour = static_cast<Behaviour*>(World::get()->mObjectIdMapper.construct(typeId, loader));
+            mBehaviour->attach(this);
+        }
+
+        mId = loader.load<int32_t>();
+        mActorId = loader.load<std::string>();
+        mName = loader.load<std::string>();
+        mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this); // TODO: handle this
+        // TODO: handle mTarget here
+
+    }
+
+    void Actor::save(FASaveGame::GameSaver& saver)
+    {
+        Serial::ScopedCategorySaver cat("Actor", saver);
+
+        mMoveHandler.save(saver);
+        mStats.save(saver);
+        mAnimation.save(saver);
+
+        saver.save(uint8_t(mFaction.getType()));
+        saver.save(mIsDead);
+
+        bool hasBehaviour = mBehaviour != nullptr;
+        saver.save(hasBehaviour);
+
+        if (hasBehaviour)
+        {
+            saver.save(mBehaviour->getTypeId());
+            mBehaviour->save(saver);
+        }
+
+        saver.save(mId);
+        saver.save(mActorId);
+        saver.save(mName);
+
+        // TODO: handle mActorStateMachine here
+        // TODO: handle mTarget here
     }
 
     Actor::~Actor()
     {
-        if (mStats != nullptr)
-            delete mStats;
         if (mBehaviour != nullptr)
             delete mBehaviour;
     }
@@ -82,8 +126,11 @@ namespace FAWorld
         if (mInvuln)
             return;
 
-        mStats->takeDamage(static_cast<int32_t> (amount));
-        if (!(mStats->getCurrentHP() <= 0))
+        if (amount > 10)
+            amount = 60;
+
+        mStats.takeDamage(static_cast<int32_t> (amount));
+        if (!(mStats.mHp.current <= 0))
         {
             Engine::ThreadManager::get()->playSound(getHitWav());
 
@@ -94,7 +141,7 @@ namespace FAWorld
 
     int32_t Actor::getCurrentHP()
     {
-        return mStats->getCurrentHP();
+        return mStats.mHp.current;
     }
 
     bool Actor::hasTarget() const
@@ -221,10 +268,10 @@ namespace FAWorld
 
     bool Actor::attack(Actor *enemy)
     {
-        if (enemy->isDead() && enemy->mStats != nullptr)
+        if (enemy->isDead())
             return false;
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({ "sfx/misc/swing2.wav", "sfx/misc/swing.wav" }));
-        enemy->takeDamage((uint32_t)mStats->getMeleeDamage());
+        enemy->takeDamage(mStats.getAttackDamage());
         if (enemy->getCurrentHP() <= 0)
             enemy->die();
         return true;

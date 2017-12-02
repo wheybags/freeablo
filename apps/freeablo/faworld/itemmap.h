@@ -19,6 +19,12 @@ namespace Render
     class FASpriteGroup;
 }
 
+namespace FASaveGame
+{
+    class GameLoader;
+    class GameSaver;
+}
+
 namespace FAWorld
 {
     class Actor;
@@ -28,6 +34,12 @@ namespace FAWorld
     public:
         int32_t x;
         int32_t y;
+
+        Tile(int32_t x, int32_t y) : x(x), y(y) {}
+        Tile() : x(0), y(0) {}
+        Tile(FASaveGame::GameLoader& loader);
+        void save(FASaveGame::GameSaver& saver);
+
         bool operator== (const Tile &other) const {
             return std::tie (x, y) == std::tie (other.x, other.y);
         }
@@ -71,6 +83,10 @@ namespace FAWorld
 
       public:
         ItemMap(const GameLevel* level);
+        ItemMap(FASaveGame::GameLoader& loader, const GameLevel* level);
+
+        void save(FASaveGame::GameSaver& saver);
+
         ~ItemMap ();
         bool dropItem(std::unique_ptr<FAWorld::Item>&& item, const Actor& actor, const Tile& tile);
         PlacedItemData* getItemAt(const Tile &tile);

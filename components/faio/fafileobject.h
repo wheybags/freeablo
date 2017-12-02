@@ -4,15 +4,16 @@
 #define FAFILEWRAPPER_H
 
 #include "faio.h"
-#include <boost/noncopyable.hpp>
 
 namespace FAIO {
 
 
-    class FAFileObject :public boost::noncopyable {
+    class FAFileObject
+    {
 
     public:
         FAFileObject(const std::string pathFile);
+        FAFileObject(const FAFileObject&) = delete;
         ~FAFileObject();
 
     protected:

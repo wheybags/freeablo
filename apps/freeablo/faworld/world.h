@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "../engine/inputobserverinterface.h"
+#include "../fasavegame/objectidmapper.h"
 
 
 namespace FARender
@@ -30,6 +31,12 @@ namespace Render
     struct Tile;
 }
 
+namespace FASaveGame
+{
+    class GameLoader;
+    class GameSaver;
+}
+
 namespace FAWorld
 {
     class Actor;
@@ -38,14 +45,16 @@ namespace FAWorld
     class HoverState;
     class PlacedItemData;
 
-    // at 125 ticks/second, it will take about 200 days to reach max value, so int32 will probably do :p
+    // at 125 ticks/second, it will take about 2 billion years to reach max (signed) value, so int64 will probably do :p
     typedef int64_t Tick;
-    static const Tick MAX_TICK = 214748364;
+    static const Tick MAX_TICK = 9223372036854775807;
 
     class World : public Engine::KeyboardInputObserverInterface, public Engine::MouseInputObserverInterface
     {
         public:
             World(const DiabloExe::DiabloExe& exe);
+            World(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
+            void save(FASaveGame::GameSaver& saver);
             ~World();
 
             static World* get();
@@ -57,9 +66,9 @@ namespace FAWorld
             void notify(Engine::MouseInputAction action, Misc::Point mousePosition);
             void generateLevels();
             GameLevel* getCurrentLevel();
-            size_t getCurrentLevelIndex();
+            int32_t getCurrentLevelIndex();
 
-            void setLevel(size_t levelNum);
+            void setLevel(int32_t levelNum);
             GameLevel* getLevel(size_t level);
             void insertLevel(size_t level, GameLevel* gameLevel);
 
@@ -88,6 +97,14 @@ namespace FAWorld
         void setGuiManager(FAGui::GuiManager* manager);
             HoverState &getHoverState ();
 
+            void setupObjectIdMappers();
+            FASaveGame::ObjectIdMapper mObjectIdMapper;
+
+            int32_t getNewId()
+            {
+                return mNextId++;
+            }
+
         private:
             void playLevelMusic(size_t level);
             void changeLevel(bool up);
@@ -96,7 +113,7 @@ namespace FAWorld
             PlacedItemData* targetedItem(Misc::Point screenPosition);
             void onMouseDown(Misc::Point mousePosition);
 
-            std::map<size_t, GameLevel*> mLevels;
+            std::map<int32_t, GameLevel*> mLevels;
             Tick mTicksPassed = 0;
             Player* mCurrentPlayer;
             std::unique_ptr<FAGui::DialogManager> mDlgManager;
@@ -110,6 +127,8 @@ namespace FAWorld
             // that's sadly another state required
             // it means after dialog we have to release button before doing next meaningful action
             bool afterDialog = false;
+
+            int32_t mNextId = 1;
     };
 }
 
