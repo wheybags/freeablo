@@ -42,6 +42,7 @@ namespace FAGui
         using Parent = MainMenuScreen;
     public:
         explicit StartingScreen(MainMenuHandler& menu);
+        void menuItems(nk_context* ctx);
         void update(nk_context* ctx) override;
 
     private:
