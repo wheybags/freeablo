@@ -123,7 +123,7 @@ namespace FARender
 
     private:
             std::unique_ptr<CelFontInfo> generateFontFromFrames (const std::string& texturePath);
-        std::unique_ptr<PcxFontInfo> generateFont(const std::string& texturePath);
+        std::unique_ptr<PcxFontInfo> generateFont(const std::string& pcxPath, const std::string& binPath);
 
     private:
             static Renderer* mRenderer; ///< Singleton instance

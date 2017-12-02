@@ -5,6 +5,7 @@
 
 #include <numeric>
 #include "render/levelobjects.h"
+#include "faio/fafileobject.h"
 
 namespace FARender
 {
@@ -76,25 +77,17 @@ namespace FARender
         glyph->offset.y = 0.f;
     }
 
-    void PcxFontInfo::initBySurface(const SDL_Surface* surface)
+    void PcxFontInfo::initWidths(const std::string& binPath, int textureWidth)
     {
-        auto char_height = surface->h / charCount;
-        for(int i = 0; i < charCount; ++i)
+        FAIO::FAFileObject file_handle(binPath);
+        std::vector<unsigned char> buf (file_handle.FAsize());
+        file_handle.FAfread(buf.data (), 1, buf.size ());
+        for (int i = 0; i < charCount; ++i)
         {
-            int actualWidth = 0;
-            for(auto j : boost::irange(0, surface->w))
-            {
-                for(auto k : boost::irange(0, char_height))
-                {
-                    if(Render::getPixel(surface, j, k + i * char_height).visible)
-                        actualWidth = std::max(actualWidth, j);
-                }
-            }
-            actualWidth += 2;
-            widthPx[i] = actualWidth;
-            uvWidth[i] = (actualWidth + 0.0) / surface->w;
+            widthPx[i] = buf[i + 2];
+            uvWidth[i] = (widthPx[i] + 0.0) / textureWidth;
         }
-        widthPx[' '] = char_height / 2;
+        widthPx[' '] = buf[0];
     }
 
     float PcxFontInfo::getWidth(nk_handle handle, float /*h*/, const char* s, int len)

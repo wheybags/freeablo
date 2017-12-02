@@ -43,17 +43,17 @@ namespace FARender
         return ret;
     }
 
-    std::unique_ptr<PcxFontInfo> Renderer::generateFont(const std::string& texturePath)
+    std::unique_ptr<PcxFontInfo> Renderer::generateFont(const std::string& pcxPath, const std::string& binPath)
     {
         std::unique_ptr<PcxFontInfo> ret (new PcxFontInfo ());
-        auto texture = Render::loadNonCelImageTrans(texturePath, "pcx", true, 0, 255, 0);
-        ret->initBySurface(texture);
+        auto tex = mSpriteManager.get(pcxPath + "&trans=0,255,0");
+        ret->initWidths(binPath, tex->getWidth());
         ret->nkFont.userdata.ptr = ret.get();
-        ret->nkFont.height = texture->h / 256;
+        ret->nkFont.height = tex->getHeight() / PcxFontInfo::charCount;
         ret->nkFont.width = &PcxFontInfo::getWidth;
-        mSpriteManager.get(texturePath);
+        mSpriteManager.get(pcxPath);
         ret->nkFont.query = &PcxFontInfo::queryGlyph;
-        ret->nkFont.texture = mSpriteManager.get(texturePath + "&trans=0,255,0")->getNkImage().handle;
+        ret->nkFont.texture = tex->getNkImage().handle;
         return ret;
     }
 
@@ -94,9 +94,10 @@ namespace FARender
         mSmallFont = generateFontFromFrames ("ctrlpan/smaltext.cel");
         for (auto size : {16, 24, 30, 42})
         {
-            mGoldFont[size] = generateFont ((boost::format ("ui_art/font%1%g.pcx") % size).str());
+            std::string prefix = "ui_art/font" + std::to_string (size);
+            mGoldFont[size] = generateFont (prefix + "g.pcx", prefix + ".bin");
             if (size != 42)
-              mSilverFont[size] = generateFont ((boost::format ("ui_art/font%1%s.pcx") % size).str());
+              mSilverFont[size] = generateFont (prefix + "s.pcx", prefix + ".bin");
         }
 
         // Render initialization.

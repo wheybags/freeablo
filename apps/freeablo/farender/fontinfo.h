@@ -2,7 +2,6 @@
 #include "fa_nuklear.h"
 
 #include <array>
-#include <SDL_surface.h>
 
 namespace Cel {
     class CelDecoder;
@@ -41,7 +40,7 @@ private:
     std::array <float, charCount> uvWidth;
 
 private:
-    void initBySurface(const SDL_Surface *surface);
+    void initWidths(const std::string& binPath, int textureWidth);
     static float getWidth(nk_handle handle, float h, const char* s, int len);
     static void queryGlyph(nk_handle handle, float font_height,
                            struct nk_user_font_glyph* glyph,
