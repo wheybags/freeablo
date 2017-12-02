@@ -1,6 +1,10 @@
 #pragma once
 #include <memory>
 
+namespace Engine {
+    class EngineMain;
+}
+
 struct nk_context;
 
 namespace FARender
@@ -21,7 +25,7 @@ namespace FAGui
     class MainMenuScreen
     {
     public:
-        explicit MainMenuScreen(const MainMenuHandler& menu);
+        explicit MainMenuScreen(MainMenuHandler& menu);
         virtual ~MainMenuScreen();
         virtual void update(nk_context* ctx) = 0;
 
@@ -29,7 +33,7 @@ namespace FAGui
         static void menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment);
 
     protected:
-        const MainMenuHandler& mMenu;
+        MainMenuHandler& mMenuHandler;
     };
 
     class StartingScreen : public MainMenuScreen
@@ -37,11 +41,11 @@ namespace FAGui
     private:
         using Parent = MainMenuScreen;
     public:
-        explicit StartingScreen(const MainMenuHandler& menu);
+        explicit StartingScreen(MainMenuHandler& menu);
         void update(nk_context* ctx) override;
 
     private:
-        int active_item_index = 0;
+        int activeItemIndex = 0;
         std::unique_ptr<FARender::AnimationPlayer> mSmLogo;
         std::unique_ptr<FARender::AnimationPlayer> mFocus42;
     };
@@ -59,7 +63,11 @@ namespace FAGui
         }
 
     public:
-        MainMenuHandler();
+        explicit MainMenuHandler(Engine::EngineMain& engine);
         void update(nk_context* ctx) const;
+        void quit ();
+        void startGame ();
+    private:
+        Engine::EngineMain &mEngine;
     };
 }

@@ -65,8 +65,7 @@ namespace FAGui
     GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player &player)
         : mEngine(engine), mPlayer (player)
     {
-        mMainMenuHandler.reset (new MainMenuHandler ());
-        mMainMenuHandler->setActiveScreen<StartingScreen>();
+        mMainMenuHandler.reset (new MainMenuHandler (engine));
 
         mPentagramAnim.reset (new FARender::AnimationPlayer ());
         auto renderer = FARender::Renderer::get();
@@ -298,11 +297,15 @@ namespace FAGui
     template <typename Function>
     void GuiManager::drawPanel (nk_context* ctx, PanelType panelType, Function op)
     {
+        auto placement = panelPlacementByType (panelType);
+        bool shown = *panel (placement) == panelType;
+        nk_window_show (ctx, panelName (panelType), shown ? NK_SHOWN : NK_HIDDEN);
+        if (!shown)
+            return;
         auto renderer = FARender::Renderer::get();
         auto invTex = renderer->loadImage(bgImgPath (panelType));
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
-        auto placement = panelPlacementByType (panelType);
         struct nk_rect dims = nk_rect(
             [&]()
             {
@@ -316,7 +319,6 @@ namespace FAGui
             }(), screenH - 125 - invTex->getHeight(),
             invTex->getWidth(), invTex->getHeight());
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND;
-        nk_window_show (ctx, panelName (panelType), *panel (placement) == panelType ? NK_SHOWN : NK_HIDDEN);
 
         nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op, false);
     }
@@ -624,6 +626,11 @@ namespace FAGui
         }, false);
     }
 
+    void GuiManager::startingScreen()
+    {
+        mMainMenuHandler->setActiveScreen<StartingScreen>();
+    }
+
     void GuiManager::smallText (nk_context *ctx, const char *text, TextColor color, nk_flags alignment) {
       FARender::Renderer* renderer = FARender::Renderer::get();
       nk_style_push_font(ctx, renderer->smallFont());
@@ -659,20 +666,23 @@ namespace FAGui
       smallText (ctx, mDescription.c_str (), mDescriptionColor);
     }
 
-    void GuiManager::update(bool paused, nk_context* ctx)
+    void GuiManager::updateGameUI(bool paused, nk_context* ctx)
     {
         if (paused)
             pauseMenu(ctx, mEngine);
 
         updateAnimations ();
-        mMainMenuHandler->update (ctx);
-         
         inventoryPanel(ctx);
         spellsPanel(ctx);
         questsPanel(ctx);
         characterPanel(ctx);
         bottomMenu(ctx);
         dialog(ctx);
+    }
+
+    void GuiManager::updateMenuUI(nk_context* ctx)
+    {
+        mMainMenuHandler->update (ctx);
     }
 
     void GuiManager::setDescription(std::string text, TextColor color)

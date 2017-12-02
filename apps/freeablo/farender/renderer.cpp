@@ -16,6 +16,7 @@
 #include <boost/range/irange.hpp>
 #include "fontinfo.h"
 #include <boost/format.hpp>
+#include "cel/celdecoder.h"
 
 namespace FARender
 {
@@ -270,7 +271,7 @@ namespace FARender
             return false;
         }
 
-        Render::clear(0, 255, 0);
+        Render::clear(0, 0, 0);
 
         // force preloading of sprites by drawing them offscreen
         for (auto id : spritesToPreload)
@@ -302,11 +303,12 @@ namespace FARender
                 Render::drawLevel(state->level->mLevel, state->tileset.minTops->getCacheIndex(), state->tileset.minBottoms->getCacheIndex(), &mSpriteManager, mLevelObjects, mItems, state->mPos.current().first,
                                   state->mPos.current().second, state->mPos.next().first, state->mPos.next().second, state->mPos.getDist());
 
-                Render::drawGui(state->nuklearData, &mSpriteManager);
-                {
-                    Renderer::drawCursor(state);
-                }
             }
+
+           Render::drawGui(state->nuklearData, &mSpriteManager);
+           {
+               Renderer::drawCursor(state);
+           }
         }
 
         Render::draw();

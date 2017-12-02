@@ -2,10 +2,13 @@
 #include "fa_nuklear.h"
 #include "guimanager.h"
 #include "nkhelpers.h"
+#include "../farender/renderer.h"
+#include "../farender/animationplayer.h"
+#include "../engine/enginemain.h"
 
 namespace FAGui
 {
-    MainMenuScreen::MainMenuScreen(const MainMenuHandler& menu) : mMenu(menu)
+    MainMenuScreen::MainMenuScreen(MainMenuHandler& menu) : mMenuHandler(menu)
     {
     }
 
@@ -13,7 +16,7 @@ namespace FAGui
     {
     }
 
-    StartingScreen::StartingScreen(const MainMenuHandler& menu) : Parent(menu)
+    StartingScreen::StartingScreen(MainMenuHandler& menu) : Parent(menu)
     {
         auto renderer = FARender::Renderer::get();
         mSmLogo.reset(new FARender::AnimationPlayer());
@@ -47,13 +50,15 @@ namespace FAGui
                     nk_image(ctx, frame.first->getNkImage(frame.second));
                 }
 
-                int item_index = 0;
-                auto add_item = [&](const char* text, const struct nk_rect& rect)
+                int itemIndex = 0;
+                auto add_item = [&](const char* text, const struct nk_rect& rect, std::function<void ()> action)
                 {
                     nk_layout_space_push(ctx, rect);
                     menuText(ctx, text, MenuFontColor::gold, 42, NK_TEXT_ALIGN_CENTERED);
-                    if(active_item_index == item_index)
+                    if(activeItemIndex == itemIndex)
                     {
+                        if (nk_input_is_key_pressed (&ctx->input, NK_KEY_ENTER))
+                            action ();
                         auto frame = mFocus42->getCurrentFrame();
                         auto frameRect = nk_rect (0, 0, frame.first->getWidth(), frame.first->getHeight());
                         nk_layout_space_push (ctx, alignRect (frameRect, rect, halign_t::left, valign_t::center));
@@ -61,13 +66,18 @@ namespace FAGui
                         nk_layout_space_push (ctx, alignRect (frameRect, rect, halign_t::right, valign_t::center));
                         nk_image(ctx, frame.first->getNkImage(frame.second));
                     }
-                    ++item_index;
+                    ++itemIndex;
                 };
-                add_item("Single Player", {65, 192, 510, 42});
-                add_item("Multi Player", {65, 235, 510, 42});
-                add_item("Replay Intro", {65, 277, 510, 42});
-                add_item("Show Credits", {65, 320, 510, 42});
-                add_item("Exit Diablo", {65, 363, 510, 42});
+                add_item("Single Player", {65, 192, 510, 42}, [this](){ mMenuHandler.startGame (); });
+                add_item("Multi Player", {65, 235, 510, 42}, [](){});
+                add_item("Replay Intro", {65, 277, 510, 42}, [](){});
+                add_item("Show Credits", {65, 320, 510, 42}, [](){});
+                add_item("Exit Diablo", {65, 363, 510, 42}, [this](){ mMenuHandler.quit ();});
+                if (nk_input_is_key_pressed (&ctx->input, NK_KEY_UP))
+                    --activeItemIndex;
+                if (nk_input_is_key_pressed (&ctx->input, NK_KEY_DOWN))
+                    ++activeItemIndex;
+                activeItemIndex = (activeItemIndex + itemIndex) % itemIndex;
 
                 nk_layout_space_push(ctx, {17, 442, 605, 21});
                 menuText(ctx, "Freeablo", MenuFontColor::silver, 16, NK_TEXT_ALIGN_LEFT);
@@ -78,13 +88,23 @@ namespace FAGui
         nk_end(ctx);
     }
 
-    MainMenuHandler::MainMenuHandler()
+    MainMenuHandler::MainMenuHandler(Engine::EngineMain& engine) : mEngine (engine)
     {
     }
 
     void MainMenuHandler::update(nk_context* ctx) const
     {
         mActiveScreen->update(ctx);
+    }
+
+    void MainMenuHandler::quit()
+    {
+        mEngine.stop();
+    }
+
+    void MainMenuHandler::startGame()
+    {
+        mEngine.startGame();
     }
 
     void MainMenuScreen::menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment)

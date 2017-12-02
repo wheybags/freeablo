@@ -183,14 +183,13 @@ namespace FAWorld
             boost::optional<Cel::Colour> hoverColor;
             if (mHoverState.isActorHovered(mActors[i]->getId()))
                hoverColor = mActors[i]->isEnemy (displayedActor) ? enemyHoverColor() : friendHoverColor();
-            if (!sprite)
-                sprite = FARender::getDefaultSprite();
-
-
             // offset the sprite for the current direction of the actor
-            frame += mActors[i]->getPos().getDirection() * sprite->getAnimLength();
-
-            state->mObjects.push_back({sprite, static_cast<uint32_t> (frame), mActors[i]->getPos(), hoverColor});
+            
+            if (sprite)
+                {
+                    frame += mActors[i]->getPos().getDirection() * sprite->getAnimLength();
+                    state->mObjects.push_back({sprite, static_cast<uint32_t> (frame), mActors[i]->getPos(), hoverColor});
+                }
 
             for (auto &p : mItemMap->mItems)
                {

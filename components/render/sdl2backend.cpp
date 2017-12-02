@@ -1153,9 +1153,11 @@ namespace Render
 
       // drawing on the ground objects
       drawObjectsByTiles (toScreen, [&](const Tile &tile, const Misc::Point &topLeft){
-          // Fill invalid tiles with ground, it looks ok but it's probably better to have something else than zero-eth sprite here
           if (isInvalidTile (tile))
-            return drawAtTile ((*minBottoms)[0], topLeft, tileWidth, staticObjectHeight);
+              {
+                // For some reason this code stopped working so for now out of map tiles should be black
+                return drawAtTile ((*minBottoms)[0], topLeft, tileWidth, staticObjectHeight);
+              }
 
         size_t index = level[tile.x][tile.y].index();
         if(index < minBottoms->size())
@@ -1186,7 +1188,10 @@ namespace Render
         auto &objsForTile = objs[tile.x][tile.y];
         for (auto &obj : objsForTile) {
             if (obj.valid)
-                drawMovingSprite((*cache->get(obj.spriteCacheIndex))[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen, obj.hoverColor);
+                {
+                    auto sprite = cache->get(obj.spriteCacheIndex);
+                    drawMovingSprite((*sprite)[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen, obj.hoverColor);
+                }
         }
       });
 

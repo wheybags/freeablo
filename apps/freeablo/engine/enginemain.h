@@ -30,14 +30,18 @@ namespace Engine
             void togglePause();
             void toggleNoclip();
             void notify(KeyboardInputAction action);
+            void startGame ();
 
         private:
             void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);
 
+        private:
+            std::unique_ptr<FAWorld::World> mWorld;
             std::shared_ptr<EngineInputManager> mInputManager;
             bool mDone = false;
             bool mPaused = false;
             bool mNoclip = false;
+            bool inGame = false;
     };
 }
 
