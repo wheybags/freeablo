@@ -53,6 +53,8 @@ namespace FAWorld
 
     ItemMap::ItemMap(FASaveGame::GameLoader& loader, const GameLevel* level) : ItemMap(level)
     {
+        UNUSED_PARAM(loader);
+        UNUSED_PARAM(level);
         /*uint32_t itemsSize = loader.load<uint32_t>();
         for (uint32_t i; i < itemsSize; i++)
         {
