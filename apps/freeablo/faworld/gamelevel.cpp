@@ -93,12 +93,12 @@ namespace FAWorld
         mLevel.activate(x, y);
     }
 
-    size_t GameLevel::getNextLevel()
+    int32_t GameLevel::getNextLevel()
     {
         return mLevel.getNextLevel();
     }
 
-    size_t GameLevel::getPreviousLevel()
+    int32_t GameLevel::getPreviousLevel()
     {
         return mLevel.getPreviousLevel();
     }

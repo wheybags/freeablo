@@ -83,6 +83,8 @@ namespace FAWorld
         }
 
         mId = loader.load<int32_t>();
+        mActorId = loader.load<std::string>();
+        mName = loader.load<std::string>();
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this); // TODO: handle this
         // TODO: handle mTarget here
 
@@ -109,6 +111,8 @@ namespace FAWorld
         }
 
         saver.save(mId);
+        saver.save(mActorId);
+        saver.save(mName);
 
         // TODO: handle mActorStateMachine here
         // TODO: handle mTarget here

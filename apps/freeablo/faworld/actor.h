@@ -265,7 +265,7 @@ namespace FAWorld
             bool mInvuln = false;
 
         private:
-            std::string mActorId;
+            std::string mActorId; // TODO: this should be in an npc subclass
             std::string mName;
             int32_t mId = -1;
             friend class Engine::Server; // TODO: fix

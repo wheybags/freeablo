@@ -56,8 +56,8 @@ namespace FAWorld
 
         void activate(size_t x, size_t y);
 
-        size_t getNextLevel();
-        size_t getPreviousLevel();
+        int32_t getNextLevel();
+        int32_t getPreviousLevel();
 
         void update(bool noclip);
 
