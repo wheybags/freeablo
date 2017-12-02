@@ -7,7 +7,6 @@
 #include "actor/basestate.h"
 #include "world.h"
 #include "../engine/threadmanager.h"
-#include "../engine/net/netmanager.h"
 #include "../engine/enginemain.h"
 #include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
@@ -16,8 +15,6 @@
 
 namespace FAWorld
 {
-    STATIC_HANDLE_NET_OBJECT_IN_IMPL(Actor)
-
     const std::string Actor::typeId = "base_actor";
 
     void Actor::setIdleAnimSequence(const std::vector<int32_t>& sequence)

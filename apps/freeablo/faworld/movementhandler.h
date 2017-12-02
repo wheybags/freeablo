@@ -41,33 +41,5 @@ namespace FAWorld
         Tick mLastRepathed = std::numeric_limits<Tick>::min();
         Tick mPathRateLimit;
         bool mAdjacent = false;
-
-
-        template<class Stream>
-        Serial::Error::Error faSerial(Stream& stream)
-        {
-            serialise_object(stream, mCurrentPos);
-            serialise_int32(stream, mDestination.first);
-            serialise_int32(stream, mDestination.second);
-
-            int32_t levelIndex = -1;
-            if (mLevel)
-                levelIndex = mLevel->getLevelIndex();
-
-            serialise_int32(stream, levelIndex);
-
-            if (!stream.isWriting())
-            {
-                if (levelIndex == -1)
-                    mLevel = nullptr;
-                else
-                    mLevel = World::get()->getLevel(levelIndex);
-            }
-
-            return Serial::Error::Success;
-        }
-
-        friend class Serial::WriteBitStream;
-        friend class Serial::ReadBitStream;
     };
 }

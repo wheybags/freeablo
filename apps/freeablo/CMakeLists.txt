@@ -52,8 +52,6 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/itemmap.cpp
     faworld/actorstats.h
     faworld/actorstats.cpp
-    faworld/netobject.h
-    faworld/netobject.cpp
     faworld/gamelevel.cpp
     faworld/gamelevel.h
     faworld/findpath.h
@@ -83,23 +81,9 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     engine/enginemain.h
     engine/enginemain.cpp
 
-    engine/net/netmanager.cpp
-    engine/net/netmanager.h
-    engine/net/server.h
-    engine/net/server.cpp
-    engine/net/client.h
-    engine/net/client.cpp
-    engine/net/netcommon.h
-    engine/net/netcommon.cpp
-    engine/net/netops.h
-    engine/net/netops.cpp
-
     faaudio/audiomanager.h
     faaudio/audiomanager.cpp
 
-    fasavegame/savegame.h
-    fasavegame/savegamemanager.h
-    fasavegame/savegamemanager.cpp
     fasavegame/objectidmapper.h
     fasavegame/objectidmapper.cpp
     fasavegame/gameloader.h

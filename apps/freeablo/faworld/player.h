@@ -10,8 +10,6 @@ namespace FAWorld
 {
     class Player: public Actor
     {
-        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
-
         public:
             static const std::string typeId;
             const std::string& getTypeId() override { return typeId; }
@@ -41,18 +39,8 @@ namespace FAWorld
 
             friend class Inventory;
 
-            template <class Stream>
-            Serial::Error::Error faSerial(Stream& stream)
-            {
-                serialise_as_parent_class(Actor);
-                return Serial::Error::Success;
-            }
-
     public:
             boost::signals2::signal<void (Actor *)> talkRequested;
-    private:
-            friend class Serial::WriteBitStream;
-            friend class Serial::ReadBitStream;
     };
 }
 #endif

@@ -6,7 +6,6 @@
 #include <misc/misc.h>
 
 #include "world.h"
-#include "netobject.h"
 
 namespace FASaveGame
 {
@@ -20,7 +19,7 @@ namespace FAWorld
     class Actor;
     class Player;
 
-    class Behaviour : public NetObject
+    class Behaviour
     {
     public:
         virtual const std::string& getTypeId() = 0;
@@ -42,8 +41,6 @@ namespace FAWorld
     // Does nothing
     class NullBehaviour : public Behaviour
     {
-        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
-
     public:
         static const std::string typeId;
         const std::string& getTypeId() override { return typeId; }
@@ -51,23 +48,10 @@ namespace FAWorld
         void save(FASaveGame::GameSaver&) {}
         ~NullBehaviour() {}
         void update() {}
-
-    protected:
-        template <class Stream>
-        Serial::Error::Error faSerial(Stream& stream)
-        {
-            UNUSED_PARAM(stream);
-            return Serial::Error::Success;
-        }
-
-        friend class Serial::WriteBitStream;
-        friend class Serial::ReadBitStream;
     };
 
     class BasicMonsterBehaviour : public Behaviour
     {
-        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
-
     public:
         BasicMonsterBehaviour() = default;
         BasicMonsterBehaviour(FASaveGame::GameLoader& loader);
@@ -81,17 +65,6 @@ namespace FAWorld
 
     private:
         Tick mTicksSinceLastAction;
-
-    protected:
-        template <class Stream>
-        Serial::Error::Error faSerial(Stream& stream)
-        {
-            UNUSED_PARAM(stream);
-            return Serial::Error::Success;
-        }
-
-        friend class Serial::WriteBitStream;
-        friend class Serial::ReadBitStream;
     };
 
 }

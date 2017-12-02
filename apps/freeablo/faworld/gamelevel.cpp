@@ -1,11 +1,5 @@
 #include "gamelevel.h"
 
-#include <boost/iostreams/device/back_inserter.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-
-#include "../engine/net/netmanager.h"
 #include "../fasavegame/gameloader.h"
 
 #include <diabloexe/diabloexe.h>
@@ -226,26 +220,6 @@ namespace FAWorld
         assert(false && "tried to remove actor that isn't in level");
     }
 
-    #pragma pack(1)
-    struct GameLevelHeader
-    {
-        size_t levelIndex;
-        size_t contentLength;
-    };
-
-    std::string GameLevel::serialiseToString()
-    {
-        std::string dataSavingTmp;
-        boost::iostreams::back_insert_device<std::string> inserter(dataSavingTmp);
-        boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > s(inserter);
-        boost::archive::binary_oarchive oa(s);
-        oa & mLevel;
-        oa & mLevelIndex;
-        s.flush();
-
-        return dataSavingTmp;
-    }
-
     bool GameLevel::isPassableFor(int x, int y, const Actor *actor) const
      {
        auto actorAtPos = getActorAt (x, y);
@@ -255,19 +229,6 @@ namespace FAWorld
     bool GameLevel::dropItem(std::unique_ptr <Item>&& item, const Actor& actor, const Tile &tile)
     {
         return mItemMap->dropItem (move (item), actor, tile);
-    }
-
-    GameLevel* GameLevel::loadFromString(const std::string& data)
-    {
-        GameLevel* retval = new GameLevel();
-
-        boost::iostreams::basic_array_source<char> device(data.data(), data.size());
-        boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s(device);
-        boost::archive::binary_iarchive ia(s);
-        ia & retval->mLevel;
-        ia & retval->mLevelIndex;
-
-        return retval;
     }
 
     Actor* GameLevel::getActorById(int32_t id)

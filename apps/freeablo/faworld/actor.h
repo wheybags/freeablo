@@ -8,9 +8,7 @@
 #include <statemachine/statemachine.h>
 #include <misc/misc.h>
 
-#include "../engine/net/netmanager.h"
 #include "../farender/animationplayer.h"
-#include "../fasavegame/savegame.h"
 
 #include "position.h"
 #include "gamelevel.h"
@@ -22,14 +20,6 @@
 #include "actorstats.h"
 #include <boost/variant/variant.hpp>
 #include <boost/variant/get.hpp>
-
-
-namespace Engine
-{
-    class NetManager;
-    class Server;
-    class Client;
-}
 
 namespace FASaveGame
 {
@@ -48,10 +38,9 @@ namespace FAWorld
         class BaseState;
     }
 
-    class Actor : public NetObject
+    class Actor
     {
-        STATIC_HANDLE_NET_OBJECT_IN_CLASS()
-
+    public:
         void interact(Actor* actor);
         void setIdleAnimSequence(const std::vector<int32_t> & sequence);
         void setTalkData(const std::unordered_map<std::basic_string<char>, std::basic_string<char>>& talkData);
@@ -152,77 +141,6 @@ namespace FAWorld
 
             ActorStats mStats;
 
-            template <class Stream>
-            Serial::Error::Error faSerial(Stream& stream)
-            {
-                auto destTmp = mMoveHandler.getDestination();
-                auto levelTmp = mMoveHandler.getLevel();
-                serialise_object(stream, mMoveHandler);
-
-
-                if (!stream.isWriting())
-                {
-                    // make sure we let the level object know if we've changed levels
-                    if (levelTmp != mMoveHandler.getLevel())
-                    {
-                        if (levelTmp)
-                            levelTmp->removeActor(this);
-
-                        mMoveHandler.getLevel()->addActor(this);
-
-                        destTmp = mMoveHandler.getCurrentPosition().current(); // just sit still after a level change
-                    }
-
-
-                    // don't sync our own destination, we set that ourselves
-                    if ((Actor*)World::get()->getCurrentPlayer() == this)
-                        mMoveHandler.setDestination(destTmp);
-                }
-
-                serialise_object(stream, mAnimation);
-
-                serialise_bool(stream, mIsDead);
-
-                //if(mStats)
-                //    serialise_object(stream, *mStats);
-
-                bool hasBehaviour = mBehaviour != nullptr;
-
-                serialise_bool(stream, hasBehaviour);
-
-                if (hasBehaviour)
-                {
-                    int32_t classId = -1;
-
-                    if(stream.isWriting())
-                        classId = mBehaviour->getClassId();
-
-                    serialise_int32(stream, classId);
-
-                    if (!stream.isWriting() && mBehaviour == nullptr)
-                    {
-                        auto behaviour = (Behaviour*)NetObject::construct(classId);
-                        behaviour->attach(this);
-                        attachBehaviour(behaviour);
-                    }
-
-                    Serial::Error::Error err = mBehaviour->streamHandle(stream);
-                    if (err != Serial::Error::Success)
-                        return err;
-                }
-
-                int32_t targetId = -1;
-                if (stream.isWriting() && mTarget.type() == typeid (Actor *))
-                    targetId = boost::get<Actor *> (mTarget)->getId ();
-
-                serialise_int32(stream, targetId);
-
-                if (!stream.isWriting() && targetId != -1)
-                    setTarget (World::get()->getActorById(targetId));
-
-                return Serial::Error::Success;
-            }
-
         protected:
             Behaviour* mBehaviour = nullptr;
 
@@ -232,35 +150,9 @@ namespace FAWorld
 
             ActorAnimationManager mAnimation;
 
-            friend class boost::serialization::access;
-
-            template<class Archive>
-            void save(Archive & ar, const unsigned int version) const
-            {
-                UNUSED_PARAM(version);
-                UNUSED_PARAM(ar);
-                assert(false);
-                //ar & this->mPos;
-                //ar & this->mFrame;
-                //ar & this->mDestination;
-            }
-
-            template<class Archive>
-            void load(Archive & ar, const unsigned int version)
-            {
-                UNUSED_PARAM(version);
-                UNUSED_PARAM(ar);
-                assert(false);
-                //ar & this->mPos;
-                //ar & this->mFrame;
-                //ar & this->mDestination;
-            }
-
             virtual bool canIAttack(Actor * actor);
             bool canInteractWith(Actor* actor);
             bool canTalkTo(Actor * actor);
-
-            BOOST_SERIALIZATION_SPLIT_MEMBER()
 
             bool mInvuln = false;
 
@@ -268,9 +160,6 @@ namespace FAWorld
             std::string mActorId; // TODO: this should be in an npc subclass
             std::string mName;
             int32_t mId = -1;
-            friend class Engine::Server; // TODO: fix
-            friend class Engine::Client;
-            friend class Engine::NetManager;
              // lines of talk for npcs taken from original game exe
             std::unordered_map<std::basic_string<char>, std::basic_string<char>> mTalkData;
     };

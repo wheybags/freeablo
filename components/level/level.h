@@ -8,13 +8,7 @@
 #include "baseitemmanager.h"
 #include <utility>
 #include <map>
-
 #include <misc/misc.h>
-
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/split_member.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/map.hpp>
 
 namespace Serial
 {
@@ -115,39 +109,6 @@ namespace Level
 
             int32_t mPrevious; ///< index of previous level
             int32_t mNext; ///< index of next level
-
-            friend class boost::serialization::access;
-
-            template<class Archive>
-            void save(Archive& ar, const unsigned int version) const
-            {
-                UNUSED_PARAM(version);
-
-                ar & mDun;
-
-                ar & mTilesetCelPath & mTilPath & mMinPath & mSolPath;
-
-                ar & mDoorMap;
-                ar & mUpStairs & mDownStairs;
-                ar & mPrevious & mNext;
-            }
-
-            template<class Archive>
-            void load(Archive& ar, const unsigned int version)
-            {
-                UNUSED_PARAM(version);
-
-                ar & mDun;
-
-                ar & mTilesetCelPath & mTilPath & mMinPath & mSolPath;
-                mTil = TileSet(mTilPath); mMin = Min(mMinPath); mSol = Sol(mSolPath);
-
-                ar & mDoorMap;
-                ar & mUpStairs & mDownStairs;
-                ar & mPrevious & mNext;
-            }
-
-            BOOST_SERIALIZATION_SPLIT_MEMBER()
     };
 }
 

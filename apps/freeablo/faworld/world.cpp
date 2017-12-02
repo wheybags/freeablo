@@ -238,11 +238,6 @@ namespace FAWorld
 
         mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
         playLevelMusic(levelNum);
-
-        auto netManager = Engine::NetManager::get();
-
-        if (netManager && !netManager->isServer())
-            netManager->sendLevelChangePacket(level->getLevelIndex());
     }
 
     HoverState& World::getHoverState()

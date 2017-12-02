@@ -80,10 +80,8 @@ namespace FAWorld
             return mLevelIndex;
         }
 
-        std::string serialiseToString();
         bool isPassableFor(int i, int j, const Actor* actor) const;
         bool dropItem(std::unique_ptr <Item>&& item, const Actor& actor, const Tile &tile);
-        static GameLevel* loadFromString(const std::string& data);
 
         Actor* getActorById(int32_t id);
 

@@ -16,7 +16,6 @@
 #include "../fasavegame/gameloader.h"
 #include <serial/textstream.h>
 #include "threadmanager.h"
-#include "net/netmanager.h"
 #include "enginemain.h"
 
 namespace bpo = boost::program_options;
@@ -143,8 +142,6 @@ namespace Engine
 
         boost::asio::io_service io;
 
-        NetManager netManager(isServer, playerFactory);
-
         // Main game logic loop
         while(!mDone)
         {
@@ -162,8 +159,6 @@ namespace Engine
             }
 
             nk_context* ctx = renderer.getNuklearContext();
-
-            netManager.update();
             guiManager.update(mPaused, ctx);
 
 

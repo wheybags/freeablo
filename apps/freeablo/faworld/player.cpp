@@ -11,8 +11,6 @@
 
 namespace FAWorld
 {
-    STATIC_HANDLE_NET_OBJECT_IN_IMPL(Player)
-
     const std::string Player::typeId = "player";
 
     Player::Player() : Actor(), mInventory(this)

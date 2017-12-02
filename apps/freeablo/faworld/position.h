@@ -5,11 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <cmath>
-#include "../fasavegame/savegame.h"
-#include "netobject.h"
-
 #include <misc/misc.h>
-#include <serial/bitstream.h>
 
 namespace FASaveGame
 {
@@ -38,9 +34,6 @@ namespace FAWorld
             void setDirection(int32_t mDirection);
 
             double distanceFrom(Position B);
-
-            template<class Stream>
-            Serial::Error::Error faSerial(Stream& stream);
 
             bool isMoving() const { return mMoving; }
             int32_t getDist() const { return mDist; }

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <memory>
+#include <iostream>
 
 #include <misc/misc.h>
 #include <serial/textstream.h>

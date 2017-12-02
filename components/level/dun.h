@@ -8,8 +8,6 @@
 #include <misc/helper2d.h>
 #include <misc/misc.h>
 
-#include <boost/serialization/access.hpp>
-
 namespace Serial
 {
     class Loader;
@@ -46,17 +44,6 @@ namespace Level
 
             friend const int32_t& get(int32_t x, int32_t y, const Dun& dun);
             friend int32_t& get(int32_t x, int32_t y, Dun& dun);
-
-            friend class boost::serialization::access;
-
-            template<class Archive>
-            void serialize(Archive& ar, unsigned int version)
-            {
-                UNUSED_PARAM(version);
-
-                ar & mBlocks;
-                ar & mWidth & mHeight;
-            }
     };
 }
 

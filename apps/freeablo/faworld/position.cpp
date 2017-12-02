@@ -83,18 +83,4 @@ namespace FAWorld
 
         return Misc::getNextPosByDir (mCurrent, mDirection);
     }
-
-    template<class Stream>
-    Serial::Error::Error Position::faSerial(Stream& stream)
-    {
-        serialise_int(stream, 0, 100, mDist);
-        serialise_int(stream, 0, 7, mDirection);
-        serialise_bool(stream, mMoving);
-        serialise_int32(stream, mCurrent.first);
-        serialise_int32(stream, mCurrent.second);
-
-        return Serial::Error::Success;
-    }
-
-    FA_SERIAL_TEMPLATE_INSTANTIATE(Position);
 }

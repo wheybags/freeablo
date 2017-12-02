@@ -110,11 +110,6 @@ target_link_libraries(StateMachine ${HUNTER_BOOST_LIBS})
 set_target_properties(StateMachine PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Serial
-    serial/bitstream.h
-    serial/bitstream.inl
-    serial/bitstream.cpp
-    serial/bithackmacros.h
-
     serial/loader.h
     serial/loader.cpp
     serial/streaminterface.h

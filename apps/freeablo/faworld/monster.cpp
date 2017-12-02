@@ -14,8 +14,6 @@
 
 namespace FAWorld
 {
-    STATIC_HANDLE_NET_OBJECT_IN_IMPL(Monster)
-
     const std::string Monster::typeId = "monster";
 
     void Monster::init()

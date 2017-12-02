@@ -10,9 +10,6 @@
 
 namespace FAWorld
 {
-    STATIC_HANDLE_NET_OBJECT_IN_IMPL(BasicMonsterBehaviour)
-    STATIC_HANDLE_NET_OBJECT_IN_IMPL(NullBehaviour)
-
     const std::string BasicMonsterBehaviour::typeId = "basic-monster-behaviour";
     const std::string NullBehaviour::typeId = "null-behaviour";
 
