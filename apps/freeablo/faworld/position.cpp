@@ -2,6 +2,7 @@
 
 #include "world.h"
 #include "../fasavegame/gameloader.h"
+#include <algorithm>
 
 namespace FAWorld
 {

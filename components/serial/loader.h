@@ -12,7 +12,7 @@ namespace Serial
     public:
         Loader(ReadStreamInterface& stream);
 
-        template <typename T> T load() = delete;
+        template <typename T> T load();
 
         void startCategory(const std::string& name);
         void endCategory(const std::string& name);
