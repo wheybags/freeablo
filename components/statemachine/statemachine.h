@@ -66,6 +66,7 @@ namespace StateMachine
                         break;
                     case StateOperation::push:
                         mStateStack.push_back(next->nextState);
+                        break;
                     case StateOperation::replace:
                         mStateStack.pop_back();
                         mStateStack.push_back(next->nextState);

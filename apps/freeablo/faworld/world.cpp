@@ -231,7 +231,7 @@ namespace FAWorld
 
     void World::setLevel(int32_t levelNum)
     {
-        if (levelNum >= mLevels.size() || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
+        if (levelNum >= int32_t(mLevels.size()) || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
             return;
 
         auto level = getLevel(levelNum);
