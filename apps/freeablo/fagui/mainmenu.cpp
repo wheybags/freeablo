@@ -19,14 +19,14 @@ namespace FAGui
         mSmLogo.reset(new FARender::AnimationPlayer());
         mSmLogo->playAnimation(renderer->loadImage("ui_art/smlogo.pcx&trans=0,255,0&vanim=154"), FAWorld::World::getTicksInPeriod(0.06f),
                                FARender::AnimationPlayer::AnimationType::Looped);
-        mFocus.reset(new FARender::AnimationPlayer());
-        mFocus->playAnimation(renderer->loadImage("ui_art/focus.pcx&trans=0,255,0&vanim=30"), FAWorld::World::getTicksInPeriod(0.06f),
+        mFocus42.reset(new FARender::AnimationPlayer());
+        mFocus42->playAnimation(renderer->loadImage("ui_art/focus42.pcx&trans=0,255,0&vanim=42"), FAWorld::World::getTicksInPeriod(0.06f),
                               FARender::AnimationPlayer::AnimationType::Looped);
     }
 
     void StartingScreen::update(nk_context* ctx)
     {
-        for (auto ptr : {mSmLogo.get (), mFocus.get ()})
+        for (auto ptr : {mSmLogo.get (), mFocus42.get ()})
             ptr->update ();
         auto renderer = FARender::Renderer::get();
         int32_t screenW, screenH;
@@ -54,7 +54,7 @@ namespace FAGui
                     menuText(ctx, text, MenuFontColor::gold, 42, NK_TEXT_ALIGN_CENTERED);
                     if(active_item_index == item_index)
                     {
-                        auto frame = mFocus->getCurrentFrame();
+                        auto frame = mFocus42->getCurrentFrame();
                         auto frameRect = nk_rect (0, 0, frame.first->getWidth(), frame.first->getHeight());
                         nk_layout_space_push (ctx, alignRect (frameRect, rect, halign_t::left, valign_t::center));
                         nk_image(ctx, frame.first->getNkImage(frame.second));
@@ -63,11 +63,11 @@ namespace FAGui
                     }
                     ++item_index;
                 };
-                add_item("Single Player", {65, 191, 510, 42});
-                add_item("Multi Player", {65, 234, 510, 42});
-                add_item("Replay Intro", {65, 276, 510, 42});
-                add_item("Show Credits", {65, 319, 510, 42});
-                add_item("Exit Diablo", {65, 361, 510, 42});
+                add_item("Single Player", {65, 192, 510, 42});
+                add_item("Multi Player", {65, 235, 510, 42});
+                add_item("Replay Intro", {65, 277, 510, 42});
+                add_item("Show Credits", {65, 320, 510, 42});
+                add_item("Exit Diablo", {65, 363, 510, 42});
 
                 nk_layout_space_push(ctx, {17, 442, 605, 21});
                 menuText(ctx, "Freeablo", MenuFontColor::silver, 16, NK_TEXT_ALIGN_LEFT);
@@ -90,6 +90,7 @@ namespace FAGui
     void MainMenuScreen::menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
+        nk_style_push_color (ctx, &ctx->style.text.color, nk_color{255, 255, 255, 255});
         switch(color)
         {
             case MenuFontColor::gold:
@@ -100,6 +101,7 @@ namespace FAGui
                 break;
         }
         nk_label(ctx, text, textAlignment);
+        nk_style_pop_color (ctx);
         nk_style_pop_font(ctx);
     }
 }

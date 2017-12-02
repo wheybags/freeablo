@@ -43,7 +43,7 @@ namespace FAGui
     private:
         int active_item_index = 0;
         std::unique_ptr<FARender::AnimationPlayer> mSmLogo;
-        std::unique_ptr<FARender::AnimationPlayer> mFocus;
+        std::unique_ptr<FARender::AnimationPlayer> mFocus42;
     };
 
     class MainMenuHandler
