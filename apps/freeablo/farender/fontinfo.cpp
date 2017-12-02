@@ -97,13 +97,13 @@ namespace FARender
         widthPx[' '] = char_height / 2;
     }
 
-    float PcxFontInfo::getWidth(nk_handle handle, float h, const char* s, int len)
+    float PcxFontInfo::getWidth(nk_handle handle, float /*h*/, const char* s, int len)
     {
         auto info = static_cast<self *>(handle.ptr);
         return std::accumulate(s, s + len, 0, [info](int sum, char c) { return sum += info->widthPx[static_cast<unsigned char>(c)]; });
     }
 
-    void PcxFontInfo::queryGlyph(nk_handle handle, float font_height, nk_user_font_glyph* glyph, nk_rune codepoint, nk_rune next_codepoint)
+    void PcxFontInfo::queryGlyph(nk_handle handle, float /*font_height*/, nk_user_font_glyph* glyph, nk_rune codepoint, nk_rune /*next_codepoint*/)
     {
         if(codepoint > 255)
             return;
