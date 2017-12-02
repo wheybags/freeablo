@@ -77,16 +77,7 @@ namespace Engine
         }
 
         FAWorld::ItemManager& itemManager = FAWorld::ItemManager::get();
-        mWorld.reset (new FAWorld::World (exe));
         FAWorld::PlayerFactory playerFactory(exe);
-
-        bool isServer = variables["mode"].as<std::string>() == "server";
-        if(isServer)
-            mWorld->generateLevels();
-
-        itemManager.loadItems(&exe);
-        player = playerFactory.create(characterClass);
-        mWorld->addCurrentPlayer(player);
 
         FILE* f = fopen("save.sav", "rb");
 
@@ -122,22 +113,16 @@ namespace Engine
 
             int32_t currentLevel = variables["level"].as<int32_t>();
 
-            if (currentLevel == -1)
-                currentLevel = 0;
-
-            // -1 represents the main menu
             if(currentLevel != -1)
-                worldPtr->setLevel(currentLevel);
+                mWorld->setLevel(currentLevel);
         }
 
-        FAWorld::World& world = *worldPtr.get();
-
         FAGui::GuiManager guiManager(*this, *player);
-        world.setGuiManager (&guiManager);
+        mWorld->setGuiManager (&guiManager);
 
         mInputManager->setGuiManager (&guiManager);
-        mInputManager->registerKeyboardObserver(&world);
-        mInputManager->registerMouseObserver(&world);
+        mInputManager->registerKeyboardObserver(mWorld.get ());
+        mInputManager->registerMouseObserver(mWorld.get ());
 
         boost::asio::io_service io;
 
@@ -148,7 +133,7 @@ namespace Engine
 
             mInputManager->update(mPaused);
             if(!mPaused && inGame)
-                world.update(mNoclip);
+                mWorld->update(mNoclip);
 
             nk_context* ctx = renderer.getNuklearContext();
             if (inGame)
