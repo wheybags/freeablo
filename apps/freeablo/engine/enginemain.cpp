@@ -80,11 +80,7 @@ namespace Engine
 
         std::unique_ptr<FAWorld::World> worldPtr;
 
-        bool isServer = true;
-        bool clientWaitingForLevel = false;
         FAWorld::PlayerFactory playerFactory(exe);
-
-        //std::unique_ptr<FAWorld::World> worldPtr(new FAWorld::World(exe));
 
         FILE* f = fopen("save.sav", "rb");
 
@@ -125,10 +121,8 @@ namespace Engine
                 currentLevel = 0;
 
             // -1 represents the main menu
-            if(currentLevel != -1 && isServer)
+            if(currentLevel != -1)
                 worldPtr->setLevel(currentLevel);
-            else
-                clientWaitingForLevel = true;
         }
 
         FAWorld::World& world = *worldPtr.get();
@@ -147,16 +141,9 @@ namespace Engine
         {
             boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000/FAWorld::World::ticksPerSecond));
 
-            if (clientWaitingForLevel)
-            {
-                clientWaitingForLevel = world.getCurrentLevel() != nullptr;
-            }
-
             mInputManager->update(mPaused);
-            if(!mPaused && !clientWaitingForLevel)
-            {
+            if(!mPaused)
                 world.update(mNoclip);
-            }
 
             nk_context* ctx = renderer.getNuklearContext();
             guiManager.update(mPaused, ctx);
