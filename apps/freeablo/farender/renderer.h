@@ -9,6 +9,7 @@
 #include <mutex>
 #include <tuple>
 #include <atomic>
+#include <memory>
 
 #include <render/render.h>
 
