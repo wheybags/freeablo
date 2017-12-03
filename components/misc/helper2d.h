@@ -1,7 +1,7 @@
 #ifndef HELPER_2D_H
 #define HELPER_2D_H
 
-#include <stdlib.h>
+#include <cstdint>
 
 namespace Misc
 {
