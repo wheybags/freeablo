@@ -13,10 +13,10 @@ namespace FAAudio
 
     AudioManager::~AudioManager()
     {
-        for(std::map<std::string, CacheEntry>::iterator it = mCache.begin(); it != mCache.end(); ++it)
+        for (std::map<std::string, CacheEntry>::iterator it = mCache.begin(); it != mCache.end(); ++it)
             Audio::freeSound(it->second.sound);
 
-        if(mCurrentMusic)
+        if (mCurrentMusic)
             Audio::freeMusic(mCurrentMusic);
 
         Audio::quit();
@@ -24,21 +24,21 @@ namespace FAAudio
 
     void AudioManager::playSound(const std::string& path)
     {
-        if(mCache.find(path) == mCache.end())
+        if (mCache.find(path) == mCache.end())
         {
-            if(mCount >= mCacheSize)
+            if (mCount >= mCacheSize)
             {
                 // find the least recently used CacheEntry that is not still playing, and evict it
                 std::list<std::string>::reverse_iterator it = mUsedList.rbegin();
-                for(; it != mUsedList.rend(); ++it)
+                for (; it != mUsedList.rend(); ++it)
                 {
                     bool playing = false;
 
-                    for(size_t i = 0; i < mPlaying.size(); i++)
+                    for (size_t i = 0; i < mPlaying.size(); i++)
                     {
-                        if(mPlaying[i] == *it)
+                        if (mPlaying[i] == *it)
                         {
-                            if(Audio::channelPlaying(i))
+                            if (Audio::channelPlaying(i))
                             {
                                 playing = true;
                                 break;
@@ -46,7 +46,7 @@ namespace FAAudio
                         }
                     }
 
-                    if(!playing)
+                    if (!playing)
                         break;
                 }
 
@@ -76,18 +76,15 @@ namespace FAAudio
         }
 
         int channel = Audio::playSound(mCache[path].sound);
-        if(channel >= 0)
+        if (channel >= 0)
             mPlaying[channel] = path;
     }
 
-    void AudioManager::stopSound()
-    {
-        Audio::stopSound();
-    }
+    void AudioManager::stopSound() { Audio::stopSound(); }
 
     void AudioManager::playMusic(const std::string& path)
     {
-        if(mCurrentMusic != NULL)
+        if (mCurrentMusic != NULL)
             Audio::freeMusic(mCurrentMusic);
 
         mCurrentMusic = Audio::loadMusic(path);

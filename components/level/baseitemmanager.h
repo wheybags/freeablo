@@ -11,6 +11,4 @@ namespace Level
     };
 }
 
-
-
 #endif // BASEITEMMANAGER_H

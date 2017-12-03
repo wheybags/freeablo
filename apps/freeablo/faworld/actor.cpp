@@ -3,29 +3,23 @@
 
 #include <misc/misc.h>
 
-#include "actorstats.h"
-#include "actor/basestate.h"
-#include "world.h"
-#include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
+#include "../engine/threadmanager.h"
 #include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
-#include "player.h"
+#include "actor/basestate.h"
+#include "actorstats.h"
 #include "findpath.h"
+#include "player.h"
+#include "world.h"
 
 namespace FAWorld
 {
     const std::string Actor::typeId = "base_actor";
 
-    void Actor::setIdleAnimSequence(const std::vector<int32_t>& sequence)
-    {
-        mAnimation.setIdleFrameSequence (sequence);
-    }
+    void Actor::setIdleAnimSequence(const std::vector<int32_t>& sequence) { mAnimation.setIdleFrameSequence(sequence); }
 
-    void Actor::setTalkData(const std::unordered_map<std::basic_string<char>, std::basic_string<char>>& talkData)
-    {
-        mTalkData = talkData;
-    }
+    void Actor::setTalkData(const std::unordered_map<std::basic_string<char>, std::basic_string<char>>& talkData) { mTalkData = talkData; }
 
     void Actor::update(bool noclip)
     {
@@ -43,13 +37,8 @@ namespace FAWorld
         mAnimation.update();
     }
 
-    Actor::Actor(
-        const std::string& walkAnimPath,
-        const std::string& idleAnimPath,
-        const std::string& dieAnimPath
-    ) :
-        mMoveHandler(World::getTicksInPeriod(1.0f)),
-        mFaction(Faction::heaven())
+    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath)
+        : mMoveHandler(World::getTicksInPeriod(1.0f)), mFaction(Faction::heaven())
     {
         if (!dieAnimPath.empty())
             mAnimation.setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage(dieAnimPath));
@@ -63,10 +52,7 @@ namespace FAWorld
         mId = FAWorld::World::get()->getNewId();
     }
 
-    Actor::Actor(FASaveGame::GameLoader& loader)
-        : mMoveHandler(loader)
-        , mStats(loader)
-        , mAnimation(loader)
+    Actor::Actor(FASaveGame::GameLoader& loader) : mMoveHandler(loader), mStats(loader), mAnimation(loader)
     {
         mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
         mIsDead = loader.load<bool>();
@@ -84,7 +70,6 @@ namespace FAWorld
         mName = loader.load<std::string>();
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this); // TODO: handle this
         // TODO: handle mTarget here
-
     }
 
     void Actor::save(FASaveGame::GameSaver& saver)
@@ -129,7 +114,7 @@ namespace FAWorld
         if (amount > 10)
             amount = 60;
 
-        mStats.takeDamage(static_cast<int32_t> (amount));
+        mStats.takeDamage(static_cast<int32_t>(amount));
         if (!(mStats.mHp.current <= 0))
         {
             Engine::ThreadManager::get()->playSound(getHitWav());
@@ -139,15 +124,9 @@ namespace FAWorld
         }
     }
 
-    int32_t Actor::getCurrentHP()
-    {
-        return mStats.mHp.current;
-    }
+    int32_t Actor::getCurrentHP() { return mStats.mHp.current; }
 
-    bool Actor::hasTarget() const
-    {
-        return mTarget.type() != typeid (boost::blank);
-    }
+    bool Actor::hasTarget() const { return mTarget.type() != typeid(boost::blank); }
 
     void Actor::die()
     {
@@ -157,25 +136,13 @@ namespace FAWorld
         Engine::ThreadManager::get()->playSound(getDieWav());
     }
 
-    bool Actor::isDead() const
-    {
-        return mIsDead;
-    }
+    bool Actor::isDead() const { return mIsDead; }
 
-    bool Actor::isEnemy(Actor* other) const
-    {
-        return mFaction.canAttack(other->mFaction);
-    }
+    bool Actor::isEnemy(Actor* other) const { return mFaction.canAttack(other->mFaction); }
 
-    std::string Actor::getName() const
-    {
-        return mName;
-    }
+    std::string Actor::getName() const { return mName; }
 
-    void Actor::setName(const std::string& name)
-    {
-        mName = name;
-    }
+    void Actor::setName(const std::string& name) { mName = name; }
 
     void Actor::teleport(GameLevel* level, Position pos)
     {
@@ -187,12 +154,9 @@ namespace FAWorld
         mMoveHandler.teleport(level, pos);
     }
 
-    GameLevel* Actor::getLevel()
-    {
-        return mMoveHandler.getLevel();
-    }
+    GameLevel* Actor::getLevel() { return mMoveHandler.getLevel(); }
 
-    bool Actor::canIAttack(Actor * actor)
+    bool Actor::canIAttack(Actor* actor)
     {
         if (actor == nullptr)
             return false;
@@ -208,20 +172,21 @@ namespace FAWorld
         return true;
     }
 
-    bool Actor::canInteractWith (Actor *actor) {
-      if (actor == nullptr)
-          return false;
+    bool Actor::canInteractWith(Actor* actor)
+    {
+        if (actor == nullptr)
+            return false;
 
-      if (this == actor)
-          return false;
+        if (this == actor)
+            return false;
 
-      if (actor->isDead())
-          return false;
+        if (actor->isDead())
+            return false;
 
-      return true;
+        return true;
     }
 
-    bool Actor::canTalkTo(Actor * actor)
+    bool Actor::canTalkTo(Actor* actor)
     {
         if (actor == nullptr)
             return false;
@@ -241,44 +206,26 @@ namespace FAWorld
         return true;
     }
 
-    void Actor::setCanTalk(bool canTalk)
-    {
-        mCanTalk = canTalk;
-    }
+    void Actor::setCanTalk(bool canTalk) { mCanTalk = canTalk; }
 
-    bool Actor::canTalk() const
-    {
-        return mCanTalk;
-    }
+    bool Actor::canTalk() const { return mCanTalk; }
 
-    bool Actor::canWalkTo(int32_t x, int32_t y)
-    {
-        return getLevel()->isPassable(x, y);
-    }
+    bool Actor::canWalkTo(int32_t x, int32_t y) { return getLevel()->isPassable(x, y); }
 
-    std::string Actor::getActorId() const
-    {
-        return mActorId;
-    }
+    std::string Actor::getActorId() const { return mActorId; }
 
-    void Actor::setActorId(const std::string& id)
-    {
-        mActorId = id;
-    }
+    void Actor::setActorId(const std::string& id) { mActorId = id; }
 
-    bool Actor::attack(Actor *enemy)
+    bool Actor::attack(Actor* enemy)
     {
         if (enemy->isDead())
             return false;
-        Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({ "sfx/misc/swing2.wav", "sfx/misc/swing.wav" }));
+        Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
         enemy->takeDamage(mStats.getAttackDamage());
         if (enemy->getCurrentHP() <= 0)
             enemy->die();
         return true;
     }
 
-    void Actor::setTarget(TargetType target)
-    {
-        mTarget = target;
-    }
+    void Actor::setTarget(TargetType target) { mTarget = target; }
 }

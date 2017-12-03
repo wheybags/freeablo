@@ -3,7 +3,6 @@
 /// \ingroup apps
 /// \defgroup freeablo Freeablo
 
-
 /// \namespace FARender
 /// \ingroup freeablo
 /// \brief Rendering

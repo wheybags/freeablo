@@ -21,26 +21,19 @@ namespace FAWorld
     {
     public:
         Faction() = default;
-        Faction(FactionType faction): mFaction(faction) {};
+        Faction(FactionType faction) : mFaction(faction){};
 
         bool canAttack(const Faction& other) const;
 
-        static Faction hell()
-        {
-            return Faction(FactionType::hell);
-        }
+        static Faction hell() { return Faction(FactionType::hell); }
 
-        static Faction heaven()
-        {
-            return Faction(FactionType::heaven);
-        }
-        
+        static Faction heaven() { return Faction(FactionType::heaven); }
+
         FactionType getType() { return mFaction; }
 
     private:
         FactionType mFaction;
     };
-
 }
 
 #endif

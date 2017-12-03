@@ -26,7 +26,7 @@ TEST(Serial, TestStringLength)
 
     err = Serial::Error::Success;
     write.seek(0, Serial::BSPos::Start);
-    
+
     test = "asdfg";
     err = write.handleString((uint8_t*)&test[0], test.length());
     ASSERT_EQ(Serial::Error::EndOfStream, err);
@@ -97,7 +97,7 @@ TEST(Serial, TestFillZeros)
 
     Serial::WriteBitStream write(&buf[0], buf.size());
     Serial::ReadBitStream read(&buf[0], buf.size());
-   
+
     bool b = true;
     for(size_t i = 0; i < 3; i++)
         write.handleBool(b);
@@ -112,7 +112,7 @@ TEST(Serial, TestFillZeros)
     }
 
     Serial::Error::Error err = Serial::Error::Success;
-    
+
     while((err = read.handleBool(b)) != Serial::Error::EndOfStream)
         ASSERT_FALSE(b);
 
@@ -148,7 +148,7 @@ TEST(Serial, TestVerifyZeros)
 
     Serial::WriteBitStream write(&buf[0], buf.size());
     Serial::ReadBitStream read(&buf[0], buf.size());
-    
+
     ASSERT_FALSE(read.verifyZeros());
 
     write.fillWithZeros();
@@ -233,7 +233,7 @@ TEST(Serial, TestBoolOverflow)
 {
     uint8_t v = 0;
     Serial::WriteBitStream write(&v, 1);
-    
+
     bool tmp = false;
     ASSERT_EQ(write.handleBool(tmp), Serial::Error::Success);
     ASSERT_EQ(write.handleBool(tmp), Serial::Error::Success);
@@ -397,8 +397,8 @@ TEST(Serial, TestInt32Basic)
     int32_t testVal = 0;
     int32_t readVal = 0;
     Serial::Error::Error success = Serial::Error::Success;
-    
-    
+
+
     testVal = 78;
     success = write.handleInt32(testVal);
     ASSERT_EQ(success, Serial::Error::Success);
@@ -426,7 +426,7 @@ TEST(Serial, TestInt32Basic)
     success = read.handleInt32(readVal);
     ASSERT_EQ(success, Serial::Error::Success);
     ASSERT_EQ(testVal, readVal);
-   
+
     testVal = 2147483647;
     success = write.handleInt32(testVal);
     ASSERT_EQ(success, Serial::Error::Success);
@@ -503,9 +503,9 @@ TEST(Serial, TestResizable)
     ASSERT_EQ(4U, buf.size());
 }*/
 
-//TODO: reimplement these tests for the new serial interface
+// TODO: reimplement these tests for the new serial interface
 
-int main(int argc, char **argv) 
+int main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
     int retval = RUN_ALL_TESTS();

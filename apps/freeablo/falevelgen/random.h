@@ -1,18 +1,16 @@
 #ifndef FA_RANDOM_H
 #define FA_RANDOM_H
-#include <vector>
 #include <initializer_list>
+#include <vector>
 namespace FALevelGen
 {
     void FAsrand(int seed);
     int normRand(int min, int max);
-    int randomInRange (unsigned int min, unsigned int max);
+    int randomInRange(unsigned int min, unsigned int max);
 
-
-    template<typename T>
-    T chooseOne(std::initializer_list<T> parameters)
+    template <typename T> T chooseOne(std::initializer_list<T> parameters)
     {
-        int n = randomInRange(0, parameters.size()-1);
+        int n = randomInRange(0, parameters.size() - 1);
         return *(parameters.begin() + n);
     }
 
@@ -20,7 +18,7 @@ namespace FALevelGen
     class RandLCG
     {
     public:
-        RandLCG(int32_t seed) :mSeed(seed) {}
+        RandLCG(int32_t seed) : mSeed(seed) {}
 
         int32_t get()
         {
@@ -29,9 +27,7 @@ namespace FALevelGen
         }
 
     private:
-
         int32_t mSeed;
-
     };
 }
 

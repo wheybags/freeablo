@@ -10,17 +10,9 @@
 namespace Engine
 {
     ThreadManager* ThreadManager::mThreadManager = NULL;
-    ThreadManager* ThreadManager::get()
-    {
-        return mThreadManager;
-    }
+    ThreadManager* ThreadManager::get() { return mThreadManager; }
 
-    ThreadManager::ThreadManager()
-        :mRenderState(NULL),
-        mAudioManager(50, 100)
-    {
-        mThreadManager = this;
-    }
+    ThreadManager::ThreadManager() : mRenderState(NULL), mAudioManager(50, 100) { mThreadManager = this; }
 
     void ThreadManager::run()
     {
@@ -33,26 +25,27 @@ namespace Engine
         auto last = std::chrono::system_clock::now();
         size_t numFrames = 0;
 
-        while(true)
+        while (true)
         {
             mSpritesToPreload.clear();
 
-            while(mQueue.pop(message))
+            while (mQueue.pop(message))
                 handleMessage(message);
 
             inputManager->poll();
 
-            if(!renderer->renderFrame(mRenderState, mSpritesToPreload))
+            if (!renderer->renderFrame(mRenderState, mSpritesToPreload))
                 break;
 
             auto now = std::chrono::system_clock::now();
             numFrames++;
 
-            size_t duration = static_cast<size_t> (std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count());
+            size_t duration =
+                static_cast<size_t>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count());
 
-            if(duration >= MAXIMUM_DURATION_IN_MS)
+            if (duration >= MAXIMUM_DURATION_IN_MS)
             {
-                std::cout << "FPS: " << ((float)numFrames) / (((float)duration)/MAXIMUM_DURATION_IN_MS) << std::endl;
+                std::cout << "FPS: " << ((float)numFrames) / (((float)duration) / MAXIMUM_DURATION_IN_MS) << std::endl;
                 numFrames = 0;
                 last = now;
             }
@@ -60,7 +53,6 @@ namespace Engine
 
         renderer->cleanup();
     }
-
 
     void ThreadManager::playMusic(const std::string& path)
     {
@@ -111,10 +103,9 @@ namespace Engine
         mQueue.push(message);
     }
 
-
     void ThreadManager::handleMessage(const Message& message)
     {
-        switch(message.type)
+        switch (message.type)
         {
             case ThreadState::PLAY_MUSIC:
             {

@@ -4,8 +4,8 @@
 
 #include <vector>
 
-#include "sdl_gl_funcs.h"
 #include "misc.h"
+#include "sdl_gl_funcs.h"
 
 #include <fa_nuklear.h>
 
@@ -32,38 +32,41 @@ struct nk_gl_device
     nk_handle font_tex;
 };
 
-
 class NuklearFrameDump
 {
-    public:
-        NuklearFrameDump() {}
-        NuklearFrameDump(const NuklearFrameDump&) = delete;
+public:
+    NuklearFrameDump() {}
+    NuklearFrameDump(const NuklearFrameDump&) = delete;
 
-        NuklearFrameDump(nk_gl_device& dev);
-        ~NuklearFrameDump();
+    NuklearFrameDump(nk_gl_device& dev);
+    ~NuklearFrameDump();
 
-        void init(nk_gl_device& dev);
+    void init(nk_gl_device& dev);
 
-        void fill(nk_context* ctx);
-        nk_gl_device& getDevice() { assert(dev); return *dev; }
+    void fill(nk_context* ctx);
+    nk_gl_device& getDevice()
+    {
+        assert(dev);
+        return *dev;
+    }
 
-        nk_buffer vbuf; // vertices
-        nk_buffer ebuf; // indices
+    nk_buffer vbuf; // vertices
+    nk_buffer ebuf; // indices
 
-        std::vector<nk_draw_command> drawCommands;
+    std::vector<nk_draw_command> drawCommands;
 
-    private:
-        nk_gl_device* dev = nullptr;
-        nk_convert_config config;
-        nk_buffer cmds; // draw commands temp storage
+private:
+    nk_gl_device* dev = nullptr;
+    nk_convert_config config;
+    nk_buffer cmds; // draw commands temp storage
 };
 
-//void nk_sdl_init(nk_sdl& nkSdl, SDL_Window *win);
+// void nk_sdl_init(nk_sdl& nkSdl, SDL_Window *win);
 void nk_sdl_font_stash_begin(nk_font_atlas& atlas);
 GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
-//NK_API int                  nk_sdl_handle_event(SDL_Event *evt);
+// NK_API int                  nk_sdl_handle_event(SDL_Event *evt);
 void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win);
-//NK_API void                 nk_sdl_shutdown(void);
+// NK_API void                 nk_sdl_shutdown(void);
 void nk_sdl_device_destroy(nk_gl_device& dev);
 void nk_sdl_device_create(nk_gl_device& dev);
 

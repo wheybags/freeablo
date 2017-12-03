@@ -18,7 +18,6 @@ namespace FAWorld
                 return StateMachine::StateChange<Actor>{StateMachine::StateOperation::pop};
             }
 
-
             return boost::none;
         }
 

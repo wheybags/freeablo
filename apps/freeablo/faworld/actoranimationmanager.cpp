@@ -1,18 +1,13 @@
 #include "actoranimationmanager.h"
 
-#include "world.h"
 #include "../fasavegame/gameloader.h"
-
+#include "world.h"
 
 namespace FAWorld
 {
-    ActorAnimationManager::ActorAnimationManager()
-    {
-        this->initAnimMaps();
-    }
+    ActorAnimationManager::ActorAnimationManager() { this->initAnimMaps(); }
 
-    ActorAnimationManager::ActorAnimationManager(FASaveGame::GameLoader& loader)
-        : mAnimationPlayer(loader)
+    ActorAnimationManager::ActorAnimationManager(FASaveGame::GameLoader& loader) : mAnimationPlayer(loader)
     {
         this->initAnimMaps();
 
@@ -101,15 +96,9 @@ namespace FAWorld
         }
     }
 
-    AnimState ActorAnimationManager::getCurrentAnimation()
-    {
-        return mPlayingAnim;
-    }
+    AnimState ActorAnimationManager::getCurrentAnimation() { return mPlayingAnim; }
 
-    std::pair<FARender::FASpriteGroup*, int32_t> ActorAnimationManager::getCurrentRealFrame()
-    {
-        return mAnimationPlayer.getCurrentFrame();
-    }
+    std::pair<FARender::FASpriteGroup*, int32_t> ActorAnimationManager::getCurrentRealFrame() { return mAnimationPlayer.getCurrentFrame(); }
 
     void ActorAnimationManager::interruptAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type)
     {
@@ -153,14 +142,15 @@ namespace FAWorld
             if (mInterruptedAnimationState != AnimState::none)
             {
                 mPlayingAnim = mInterruptedAnimationState;
-                mAnimationPlayer.playAnimation(mAnimations[size_t(mPlayingAnim)], mAnimTimeMap[size_t(mPlayingAnim)], mInterruptedAnimationType, mInterruptedAnimationFrame);
+                mAnimationPlayer.playAnimation(
+                    mAnimations[size_t(mPlayingAnim)], mAnimTimeMap[size_t(mPlayingAnim)], mInterruptedAnimationType, mInterruptedAnimationFrame);
 
                 mInterruptedAnimationState = AnimState::none;
                 mInterruptedAnimationFrame = 0;
             }
             else
             {
-                if (mIdleFrameSequence.empty ())
+                if (mIdleFrameSequence.empty())
                     playAnimation(AnimState::idle, FARender::AnimationPlayer::AnimationType::Looped);
                 else
                     playAnimation(AnimState::idle, mIdleFrameSequence);
@@ -168,8 +158,5 @@ namespace FAWorld
         }
     }
 
-    void ActorAnimationManager::setIdleFrameSequence(const std::vector<int32_t>& sequence)
-    {
-        mIdleFrameSequence = sequence;
-    }
+    void ActorAnimationManager::setIdleFrameSequence(const std::vector<int32_t>& sequence) { mIdleFrameSequence = sequence; }
 }

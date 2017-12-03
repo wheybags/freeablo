@@ -1,43 +1,39 @@
-#include <iostream>
-#include <thread>
-#include <functional>
-#include <boost/asio.hpp>
-#include <misc/misc.h>
-#include <input/inputmanager.h>
-#include <enet/enet.h>
-#include "../faworld/world.h"
-#include "../faworld/player.h"
+#include "enginemain.h"
+#include "../faaudio/audiomanager.h"
+#include "../fagui/guimanager.h"
 #include "../falevelgen/levelgen.h"
 #include "../falevelgen/random.h"
-#include "../fagui/guimanager.h"
-#include "../faaudio/audiomanager.h"
-#include "../faworld/itemmanager.h"
-#include "../faworld/playerfactory.h"
 #include "../fasavegame/gameloader.h"
-#include <serial/textstream.h>
+#include "../faworld/itemmanager.h"
+#include "../faworld/player.h"
+#include "../faworld/playerfactory.h"
+#include "../faworld/world.h"
 #include "threadmanager.h"
-#include "enginemain.h"
+#include <boost/asio.hpp>
+#include <enet/enet.h>
+#include <functional>
+#include <input/inputmanager.h>
+#include <iostream>
+#include <misc/misc.h>
+#include <serial/textstream.h>
+#include <thread>
 
 namespace bpo = boost::program_options;
-
 
 namespace Engine
 {
     volatile bool renderDone = false;
 
-    EngineInputManager& EngineMain::inputManager()
-    {
-        return *(mInputManager.get());
-    }
+    EngineInputManager& EngineMain::inputManager() { return *(mInputManager.get()); }
 
     void EngineMain::run(const bpo::variables_map& variables)
     {
         Settings::Settings settings;
-        if(!settings.loadUserSettings())
+        if (!settings.loadUserSettings())
             return;
 
-        size_t resolutionWidth = settings.get<size_t>("Display","resolutionWidth");
-        size_t resolutionHeight = settings.get<size_t>("Display","resolutionHeight");
+        size_t resolutionWidth = settings.get<size_t>("Display", "resolutionWidth");
+        size_t resolutionHeight = settings.get<size_t>("Display", "resolutionHeight");
         std::string fullscreen = settings.get<std::string>("Display", "fullscreen");
         std::string pathEXE = settings.get<std::string>("Game", "PathEXE");
         if (pathEXE == "")
@@ -58,13 +54,13 @@ namespace Engine
 
     void EngineMain::runGameLoop(const bpo::variables_map& variables, const std::string& pathEXE)
     {
-        FALevelGen::FAsrand(static_cast<int> (time(nullptr)));
+        FALevelGen::FAsrand(static_cast<int>(time(nullptr)));
 
         FAWorld::Player* player = nullptr;
         FARender::Renderer& renderer = *FARender::Renderer::get();
 
         Settings::Settings settings;
-        if(!settings.loadUserSettings())
+        if (!settings.loadUserSettings())
             return;
 
         std::string characterClass = variables["character"].as<std::string>();
@@ -113,7 +109,7 @@ namespace Engine
 
             int32_t currentLevel = variables["level"].as<int32_t>();
 
-            if(currentLevel != -1)
+            if (currentLevel != -1)
             {
                 inGame = true;
                 mWorld->setLevel(currentLevel);
@@ -121,21 +117,21 @@ namespace Engine
         }
 
         FAGui::GuiManager guiManager(*this, *player);
-        mWorld->setGuiManager (&guiManager);
+        mWorld->setGuiManager(&guiManager);
 
-        mInputManager->setGuiManager (&guiManager);
-        mInputManager->registerKeyboardObserver(mWorld.get ());
-        mInputManager->registerMouseObserver(mWorld.get ());
+        mInputManager->setGuiManager(&guiManager);
+        mInputManager->registerKeyboardObserver(mWorld.get());
+        mInputManager->registerMouseObserver(mWorld.get());
 
         boost::asio::io_service io;
 
         // Main game logic loop
-        while(!mDone)
+        while (!mDone)
         {
-            boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000/FAWorld::World::ticksPerSecond));
+            boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000 / FAWorld::World::ticksPerSecond));
 
             mInputManager->update(mPaused);
-            if(!mPaused && inGame)
+            if (!mPaused && inGame)
                 mWorld->update(mNoclip);
 
             nk_context* ctx = renderer.getNuklearContext();
@@ -146,13 +142,13 @@ namespace Engine
 
             FAWorld::GameLevel* level = mWorld->getCurrentLevel();
             FARender::RenderState* state = renderer.getFreeState();
-            if(state)
+            if (state)
             {
                 state->mPos = player->getPos();
-                if(level != NULL)
+                if (level != NULL)
                     state->tileset = renderer.getTileset(*level);
                 state->level = level;
-                if(!FAGui::cursorPath.empty())
+                if (!FAGui::cursorPath.empty())
                     state->mCursorEmpty = false;
                 else
                     state->mCursorEmpty = true;
@@ -173,7 +169,7 @@ namespace Engine
 
             auto remainingTickTime = timer.expires_from_now().total_milliseconds();
 
-            if(remainingTickTime < 0)
+            if (remainingTickTime < 0)
                 std::cerr << "tick time exceeded by " << -remainingTickTime << "ms" << std::endl;
 
             timer.wait();
@@ -189,11 +185,11 @@ namespace Engine
         {
             togglePause();
         }
-        if(action == QUIT)
+        if (action == QUIT)
         {
             stop();
         }
-        else if(action == NOCLIP)
+        else if (action == NOCLIP)
         {
             toggleNoclip();
         }
@@ -205,18 +201,9 @@ namespace Engine
         mWorld->setLevel(0);
     }
 
-    void EngineMain::stop()
-    {
-        mDone = true;
-    }
+    void EngineMain::stop() { mDone = true; }
 
-    void EngineMain::togglePause()
-    {
-        mPaused = !mPaused;
-    }
+    void EngineMain::togglePause() { mPaused = !mPaused; }
 
-    void EngineMain::toggleNoclip()
-    {
-        mNoclip = !mNoclip;
-    }
+    void EngineMain::toggleNoclip() { mNoclip = !mNoclip; }
 }

@@ -1,65 +1,67 @@
-{
-  "ColumnLimit": 140,
-  "MaxEmptyLinesToKeep": 1,
-  "KeepEmptyLinesAtTheStartOfBlocks": true,
-  "PenaltyBreakComment": 300,
-  "PenaltyBreakString": 1000,
-  "PenaltyExcessCharacter": 1000000,
-  "PenaltyBreakFirstLessLess": 120,
-  "PenaltyBreakBeforeFirstCallParameter": 19,
-  "PointerAlignment": "Left",
-  "DerivePointerAlignment": false,
-  "AccessModifierOffset": -2,
-  "Standard": "Cpp11",
-  "IndentCaseLabels": true,
-  "IndentWrappedFunctionNames": false,
-  "NamespaceIndentation": "All",
-  "SpacesBeforeTrailingComments": 1,
-  "BinPackParameters": true,
-  "BinPackArguments": true,
-  "ExperimentalAutoDetectBinPacking": false,
-  "AllowAllParametersOfDeclarationOnNextLine": false,
-  "PenaltyReturnTypeOnItsOwnLine": 200,
-  "ConstructorInitializerAllOnOneLineOrOnePerLine": true,
-  "BreakConstructorInitializersBeforeComma": true,
-  "AllowShortBlocksOnASingleLine": false,
-  "AllowShortIfStatementsOnASingleLine": false,
-  "AllowShortLoopsOnASingleLine": false,
-  "AllowShortCaseLabelsOnASingleLine": false,
-  "AllowShortFunctionsOnASingleLine": "Empty",
-  "AlignAfterOpenBracket": "Align",
-  "AlignOperands": true,
-  "AlignTrailingComments": true,
-  "AlignConsecutiveAssignments": false,
-  "AlignEscapedNewlinesLeft": false,
-  "IndentWidth": 4,
-  "TabWidth": 8,
-  "ConstructorInitializerIndentWidth": 2,
-  "AlwaysBreakAfterDefinitionReturnType": "None",
-  "AlwaysBreakTemplateDeclarations": true,
-  "AlwaysBreakBeforeMultilineStrings": false,
-  "UseTab": "Never",
-  "BreakBeforeBinaryOperators": "None",
-  "BreakBeforeTernaryOperators": true,
-  "BreakBeforeBraces": "Allman",
-  "Cpp11BracedListStyle": true,
-  "SpacesInParentheses": false,
-  "SpacesInAngles": false,
-  "SpacesInSquareBrackets": false,
-  "SpaceInEmptyParentheses": false,
-  "SpacesInCStyleCastParentheses": false,
-  "SpaceAfterCStyleCast": false,
-  "SpaceBeforeParens": "Never",
-  "SpaceBeforeAssignmentOperators": true,
-  "ContinuationIndentWidth": 2,
-  "CommentPragmas": "^ IWYU pragma:",
-  "DisableFormat": false,
-  "ForEachMacros": [
-    "foreach",
-    "Q_FOREACH",
-    "BOOST_FOREACH",
-    "foreach",
-    "Q_FOREACH",
-    "BOOST_FOREACH"
-  ]
-}
+Language: Cpp
+Standard: Cpp11
+
+ColumnLimit: 160
+
+TabWidth: 4
+IndentWidth: 4
+UseTab: Never
+
+# spaces settings
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceBeforeParens: ControlStatements # after if, while, for, but not function calls
+
+#BreakConstructorInitializers: BeforeComma
+
+# break before {, all the god damn time
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterClass: true
+    AfterStruct: true
+    AfterUnion: true
+    AfterControlStatement: true
+    BeforeElse: true
+    AfterEnum: true
+    AfterFunction: true
+    AfterNamespace: true
+    BeforeCatch: true
+    IndentBraces: false
+
+
+# WISHLIST: set AccessModifierOffset to 4, and "inside class indent" to 8, so
+# you could get:
+# class X
+# {
+#     public:
+#         int foo();
+# };
+# We settle for aligning the access modier with the braces here.
+AccessModifierOffset: -4
+
+# single line settings
+#AllowShortFunctionsOnASingleLine: Inline
+#AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+# Misc indentation settings
+IndentCaseLabels: true
+NamespaceIndentation: All
+
+# use one line per param in huge function calls / definitions
+BinPackArguments: false
+BinPackParameters: false
+
+# misc alignment settings
+AlignAfterOpenBracket: Align
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+# WISHLIST: for all the below, and "allow" option, instead of just true or false
+# This would preserve alignment if it's already aligned, but not force it if it
+# wasn't. Without that option, the amount of false positives make these useless
+#AlignConsecutiveAssignments
+#AlignConsecutiveDeclarations
+#AlignEscapedNewlines
+#AlignTrailingComments

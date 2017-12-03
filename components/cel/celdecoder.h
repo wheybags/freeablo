@@ -1,13 +1,13 @@
 #ifndef CEL_DECODING_H
 #define CEL_DECODING_H
 
-#include <map>
-#include <vector>
-#include <functional>
-#include <stdint.h>
-#include <settings/settings.h>
 #include "celframe.h"
 #include "pal.h"
+#include <functional>
+#include <map>
+#include <settings/settings.h>
+#include <stdint.h>
+#include <vector>
 
 namespace Cel
 {
@@ -20,8 +20,8 @@ namespace Cel
         CelFrame& operator[](int32_t index);
         int32_t numFrames() const;
         int32_t animationLength() const;
-    private:
 
+    private:
         typedef std::vector<uint8_t> FrameBytes;
         typedef const std::vector<uint8_t>& FrameBytesRef;
         typedef std::vector<Colour>& ColoursRef;
@@ -49,14 +49,8 @@ namespace Cel
         void decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame, bool frameType2);
         void decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame, bool frameType4);
 
-        void decodeLineTransparencyLeft(const uint8_t** framePtr,
-                                        const Pal& pal,
-                                        ColoursRefIterator &decodedFrame,
-                                        int);
-        void decodeLineTransparencyRight(const uint8_t** framePtr,
-                                        const Pal& pal,
-                                        ColoursRefIterator &decodedFrame,
-                                        int);
+        void decodeLineTransparencyLeft(const uint8_t** framePtr, const Pal& pal, ColoursRefIterator& decodedFrame, int);
+        void decodeLineTransparencyRight(const uint8_t** framePtr, const Pal& pal, ColoursRefIterator& decodedFrame, int);
         void setObjcursCelDimensions(int frame);
         void setCharbutCelDimensions(int frame);
 

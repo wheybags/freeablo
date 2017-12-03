@@ -6,47 +6,44 @@
 
 #include <iostream>
 
-
-
 namespace Input
 {
     InputManager* InputManager::instance = NULL;
 
-    void doNothing_keyPress(Key){}
-    void doNothing_keyRelease(Key){}
-    void doNothing_mouseClick(uint32_t, uint32_t, Key, bool){}
-    void doNothing_mouseRelease(uint32_t, uint32_t, Key){}
+    void doNothing_keyPress(Key) {}
+    void doNothing_keyRelease(Key) {}
+    void doNothing_mouseClick(uint32_t, uint32_t, Key, bool) {}
+    void doNothing_mouseRelease(uint32_t, uint32_t, Key) {}
     void doNothing_mouseMove(uint32_t, uint32_t, uint32_t, uint32_t) {}
     void doNothing_mouseWheel(int32_t, int32_t) {}
-    void doNothing_textInput(std::string){}
-    
-    #define getFunc(f) f ? f : doNothing_##f
+    void doNothing_textInput(std::string) {}
 
-    InputManager::InputManager(std::function<void(Key)> keyPress, std::function<void(Key)> keyRelease,
-        std::function<void(uint32_t, uint32_t, Key, bool)> mouseClick,
-        std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
-        std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
-        std::function<void(int32_t, int32_t)> mouseWheel,
-        std::function<void(std::string)> textInput)
-            : mKeyPress(getFunc(keyPress))
-            , mKeyRelease(getFunc(keyRelease))
-            , mMouseClick(getFunc(mouseClick))
-            , mMouseRelease(getFunc(mouseRelease))
-            , mMouseMove(getFunc(mouseMove))
-            , mMouseWheel(getFunc(mouseWheel))
-            , mTextInput(getFunc(textInput))
-        {
-            assert(!instance);
-            instance = this;
-        }
+#define getFunc(f) f ? f : doNothing_##f
 
-    #define CASE(val) case SDLK_##val: key = KEY_##val; break; 
+    InputManager::InputManager(std::function<void(Key)> keyPress,
+                               std::function<void(Key)> keyRelease,
+                               std::function<void(uint32_t, uint32_t, Key, bool)> mouseClick,
+                               std::function<void(uint32_t, uint32_t, Key)> mouseRelease,
+                               std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
+                               std::function<void(int32_t, int32_t)> mouseWheel,
+                               std::function<void(std::string)> textInput)
+        : mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)), mMouseRelease(getFunc(mouseRelease)),
+          mMouseMove(getFunc(mouseMove)), mMouseWheel(getFunc(mouseWheel)), mTextInput(getFunc(textInput))
+    {
+        assert(!instance);
+        instance = this;
+    }
+
+#define CASE(val)                                                                                                                                              \
+    case SDLK_##val:                                                                                                                                           \
+        key = KEY_##val;                                                                                                                                       \
+        break;
 
     Key getKey(int sdlk)
     {
         Key key;
-        
-        switch(sdlk)
+
+        switch (sdlk)
         {
             CASE(BACKSPACE);
             CASE(TAB);
@@ -168,25 +165,55 @@ namespace Input
             CASE(POWER);
             CASE(UNDO);
 
-            case SDLK_KP_0: key = KEY_KP0; break;
-            case SDLK_KP_1: key = KEY_KP1; break;
-            case SDLK_KP_2: key = KEY_KP2; break;
-            case SDLK_KP_3: key = KEY_KP3; break;
-            case SDLK_KP_4: key = KEY_KP4; break;
-            case SDLK_KP_5: key = KEY_KP5; break;
-            case SDLK_KP_6: key = KEY_KP6; break;
-            case SDLK_KP_7: key = KEY_KP7; break;
-            case SDLK_KP_8: key = KEY_KP8; break;
-            case SDLK_KP_9: key = KEY_KP9; break;
+            case SDLK_KP_0:
+                key = KEY_KP0;
+                break;
+            case SDLK_KP_1:
+                key = KEY_KP1;
+                break;
+            case SDLK_KP_2:
+                key = KEY_KP2;
+                break;
+            case SDLK_KP_3:
+                key = KEY_KP3;
+                break;
+            case SDLK_KP_4:
+                key = KEY_KP4;
+                break;
+            case SDLK_KP_5:
+                key = KEY_KP5;
+                break;
+            case SDLK_KP_6:
+                key = KEY_KP6;
+                break;
+            case SDLK_KP_7:
+                key = KEY_KP7;
+                break;
+            case SDLK_KP_8:
+                key = KEY_KP8;
+                break;
+            case SDLK_KP_9:
+                key = KEY_KP9;
+                break;
 
-            case SDLK_NUMLOCKCLEAR: key = KEY_NUMLOCK; break;
-            case SDLK_SCROLLLOCK: key = KEY_SCROLLOCK; break;
+            case SDLK_NUMLOCKCLEAR:
+                key = KEY_NUMLOCK;
+                break;
+            case SDLK_SCROLLLOCK:
+                key = KEY_SCROLLOCK;
+                break;
 
-            case SDLK_RGUI: key = KEY_RSUPER; break;
-            case SDLK_LGUI: key = KEY_LSUPER; break;
+            case SDLK_RGUI:
+                key = KEY_RSUPER;
+                break;
+            case SDLK_LGUI:
+                key = KEY_LSUPER;
+                break;
 
-            case SDLK_PRINTSCREEN: key = KEY_PRINT; break;
-         
+            case SDLK_PRINTSCREEN:
+                key = KEY_PRINT;
+                break;
+
             default:
             {
                 key = KEY_UNDEF;
@@ -195,12 +222,11 @@ namespace Input
         }
 
         return key;
-
     }
 
     Key getMouseKey(int sdlk)
     {
-        switch(sdlk)
+        switch (sdlk)
         {
             case SDL_BUTTON_LEFT:
                 return KEY_LEFT_MOUSE;
@@ -212,19 +238,18 @@ namespace Input
                 return KEY_UNDEF;
         }
     }
-   
-    
+
     void InputManager::poll()
     {
         SDL_Event event;
-        
+
         Event e;
 
-        while(SDL_PollEvent(&event))
-        {   
+        while (SDL_PollEvent(&event))
+        {
             e.type = event.type;
 
-            switch (event.type) 
+            switch (event.type)
             {
                 case SDL_KEYDOWN:
                 case SDL_KEYUP:
@@ -267,7 +292,7 @@ namespace Input
 
                 case SDL_WINDOWEVENT:
                 {
-                    if(event.window.event == SDL_WINDOWEVENT_RESIZED)
+                    if (event.window.event == SDL_WINDOWEVENT_RESIZED)
                         Render::resize(event.window.data1, event.window.data2);
 
                     break;
@@ -275,7 +300,7 @@ namespace Input
 
                 case SDL_QUIT:
                 {
-                    if(!mHasQuit)
+                    if (!mHasQuit)
                         mHasQuit = true;
                     else // quit immediately if user asks for quit twice
                         exit(0);
@@ -288,29 +313,28 @@ namespace Input
                 }
             }
 
-            while(!mQueue.push(e)) {} // push, or wait until buffer not full, then push
+            while (!mQueue.push(e))
+            {
+            } // push, or wait until buffer not full, then push
         }
 
         SDL_Keymod sdlMods = SDL_GetModState();
 
         KeyboardModifiers mods;
 
-        if(sdlMods & KMOD_CTRL)
+        if (sdlMods & KMOD_CTRL)
             mods.ctrl = true;
 
-        if(sdlMods & KMOD_SHIFT)
+        if (sdlMods & KMOD_SHIFT)
             mods.shift = true;
 
-        if(sdlMods & KMOD_ALT)
+        if (sdlMods & KMOD_ALT)
             mods.alt = true;
 
         mModifiers = mods;
     }
-    
-    KeyboardModifiers InputManager::getModifiers()
-    {
-        return mModifiers;
-    }
+
+    KeyboardModifiers InputManager::getModifiers() { return mModifiers; }
 
     bool InputManager::processInput(bool paused)
     {
@@ -318,16 +342,16 @@ namespace Input
 
         bool quit = false;
 
-        while(mQueue.pop(event))
+        while (mQueue.pop(event))
         {
-            switch (event.type) 
+            switch (event.type)
             {
                 case SDL_KEYDOWN:
                 {
                     Key key = getKey(event.vals.key);
-                    if(key != KEY_UNDEF)
+                    if (key != KEY_UNDEF)
                     {
-                        if(!paused)
+                        if (!paused)
                             mKeyPress(key);
                     }
                     break;
@@ -335,9 +359,9 @@ namespace Input
                 case SDL_KEYUP:
                 {
                     Key key = getKey(event.vals.key);
-                    if(key != KEY_UNDEF)
+                    if (key != KEY_UNDEF)
                     {
-                        if(!paused)
+                        if (!paused)
                             mKeyRelease(key);
                     }
                     break;
@@ -354,9 +378,9 @@ namespace Input
                 {
                     Key key = getMouseKey(event.vals.mouseButton.key);
 
-                    if(key != KEY_UNDEF)
+                    if (key != KEY_UNDEF)
                         mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key, event.vals.mouseButton.numClicks > 1);
-                    
+
                     break;
                 }
 
@@ -396,8 +420,5 @@ namespace Input
         return quit;
     }
 
-    InputManager* InputManager::get()
-    {
-        return instance;
-    }
+    InputManager* InputManager::get() { return instance; }
 }

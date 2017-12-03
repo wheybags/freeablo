@@ -1,8 +1,8 @@
 #ifndef FAIO_H
 #define FAIO_H
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include <string>
 #include <vector>
@@ -16,31 +16,31 @@ namespace FAIO
     // A FILE* like container for either a normal FILE*, or a StormLib HANDLE
     struct FAFile
     {
-        private:
-            union FAFileUnion
+    private:
+        union FAFileUnion
+        {
+            struct
             {
-                struct
-                {
-                    FILE* file;
-                    std::string* filename;
-                } plainFile;
-                void* mpqFile; // This is a pointer to a StormLib HANDLE type, I jist didn't want to #include StormLib here
-            } data;
-        
-            enum FAFileMode
-            {
-                PlainFile,
-                MPQFile
-            } mode;
+                FILE* file;
+                std::string* filename;
+            } plainFile;
+            void* mpqFile; // This is a pointer to a StormLib HANDLE type, I jist didn't want to #include StormLib here
+        } data;
 
-            FAFile();
+        enum FAFileMode
+        {
+            PlainFile,
+            MPQFile
+        } mode;
 
-            friend FAFile* FAfopen(const std::string& filename);
-            friend size_t FAfread(void * ptr, size_t size, size_t count, FAFile* stream);
-            friend int FAfclose(FAFile* stream); 
-            friend int FAfseek (FAFile* stream, size_t offset, int origin);
-            friend size_t FAftell(FAFile* stream);
-            friend size_t FAsize(FAFile* stream);
+        FAFile();
+
+        friend FAFile* FAfopen(const std::string& filename);
+        friend size_t FAfread(void* ptr, size_t size, size_t count, FAFile* stream);
+        friend int FAfclose(FAFile* stream);
+        friend int FAfseek(FAFile* stream, size_t offset, int origin);
+        friend size_t FAftell(FAFile* stream);
+        friend size_t FAsize(FAFile* stream);
     };
 
     bool init(const std::string pathMPQ = "DIABDAT.MPQ", const std::string listFile = "");
@@ -50,9 +50,9 @@ namespace FAIO
 
     bool exists(const std::string& filename);
     FAFile* FAfopen(const std::string& filename);
-    size_t FAfread(void * ptr, size_t size, size_t count, FAFile* stream);
-    int FAfclose(FAFile* stream); 
-    int FAfseek (FAFile* stream, size_t offset, int origin);
+    size_t FAfread(void* ptr, size_t size, size_t count, FAFile* stream);
+    int FAfclose(FAFile* stream);
+    int FAfseek(FAFile* stream, size_t offset, int origin);
     size_t FAftell(FAFile* stream);
     size_t FAsize(FAFile* stream);
 
@@ -60,8 +60,8 @@ namespace FAIO
     uint16_t read16(FAFile* file);
     uint8_t read8(FAFile* file);
     std::string readCString(FAFile* file, size_t ptr);
-	std::string readCStringFromWin32Binary(FAFile* file, size_t ptr, size_t offset);
+    std::string readCStringFromWin32Binary(FAFile* file, size_t ptr, size_t offset);
     std::string getMPQFileName();
 }
 
-#endif 
+#endif

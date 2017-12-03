@@ -1,8 +1,8 @@
 #pragma once
 
 #include "streaminterface.h"
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace Serial
 {

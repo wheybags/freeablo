@@ -1,7 +1,8 @@
 #pragma once
 #include <memory>
 
-namespace Engine {
+namespace Engine
+{
     class EngineMain;
 }
 
@@ -40,6 +41,7 @@ namespace FAGui
     {
     private:
         using Parent = MainMenuScreen;
+
     public:
         explicit StartingScreen(MainMenuHandler& menu);
         void menuItems(nk_context* ctx);
@@ -57,18 +59,15 @@ namespace FAGui
         static const int width = 640;
         static const int height = 480;
         std::unique_ptr<MainMenuScreen> mActiveScreen;
-        template <typename ScreenType>
-        void setActiveScreen ()
-        {
-            mActiveScreen.reset (new ScreenType(*this));
-        }
+        template <typename ScreenType> void setActiveScreen() { mActiveScreen.reset(new ScreenType(*this)); }
 
     public:
         explicit MainMenuHandler(Engine::EngineMain& engine);
         void update(nk_context* ctx) const;
-        void quit ();
-        void startGame ();
+        void quit();
+        void startGame();
+
     private:
-        Engine::EngineMain &mEngine;
+        Engine::EngineMain& mEngine;
     };
 }

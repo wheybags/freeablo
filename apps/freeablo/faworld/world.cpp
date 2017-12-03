@@ -1,25 +1,25 @@
-#include <tuple>
-#include <iostream>
 #include <algorithm>
+#include <iostream>
+#include <tuple>
 
-#include <diabloexe/diabloexe.h>
-#include "../farender/renderer.h"
-#include "../falevelgen/levelgen.h"
-#include "../faaudio/audiomanager.h"
-#include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
-#include "actorstats.h"
-#include "monster.h"
-#include "world.h"
-#include "actor.h"
-#include "player.h"
-#include "gamelevel.h"
-#include "findpath.h"
-#include "itemmap.h"
-#include "diabloexe/npc.h"
-#include "../fagui/guimanager.h"
+#include "../engine/threadmanager.h"
+#include "../faaudio/audiomanager.h"
 #include "../fagui/dialogmanager.h"
+#include "../fagui/guimanager.h"
+#include "../falevelgen/levelgen.h"
+#include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
+#include "actor.h"
+#include "actorstats.h"
+#include "diabloexe/npc.h"
+#include "findpath.h"
+#include "gamelevel.h"
+#include "itemmap.h"
+#include "monster.h"
+#include "player.h"
+#include "world.h"
+#include <diabloexe/diabloexe.h>
 
 namespace FAWorld
 {
@@ -95,10 +95,7 @@ namespace FAWorld
         singletonInstance = nullptr;
     }
 
-    World* World::get()
-    {
-        return singletonInstance;
-    }
+    World* World::get() { return singletonInstance; }
 
     void World::notify(Engine::KeyboardInputAction action)
     {
@@ -108,82 +105,87 @@ namespace FAWorld
         }
     }
 
-    Render::Tile World::getTileByScreenPos(Misc::Point screenPos) {
-       return FARender::Renderer::get()->getTileByScreenPos(screenPos.x, screenPos.y, getCurrentPlayer()->getPos());
-     }
-
-    Actor *World::targetedActor(Misc::Point screenPosition)
+    Render::Tile World::getTileByScreenPos(Misc::Point screenPos)
     {
-       auto actorStayingAt = [this](int32_t x, int32_t y) -> Actor*
-       {
-         if (x >= static_cast<int32_t> (getCurrentLevel ()->width()) || y >= static_cast<int32_t> (getCurrentLevel ()->height()))
-           return nullptr;
+        return FARender::Renderer::get()->getTileByScreenPos(screenPos.x, screenPos.y, getCurrentPlayer()->getPos());
+    }
 
-         auto actor = getActorAt (x, y);
-         if (actor && !actor->isDead() && actor != getCurrentPlayer()) return actor;
+    Actor* World::targetedActor(Misc::Point screenPosition)
+    {
+        auto actorStayingAt = [this](int32_t x, int32_t y) -> Actor* {
+            if (x >= static_cast<int32_t>(getCurrentLevel()->width()) || y >= static_cast<int32_t>(getCurrentLevel()->height()))
+                return nullptr;
 
-         return nullptr;
-       };
-       auto tile = getTileByScreenPos(screenPosition);
-       // actors could be hovered/targeted by hexagonal pattern consisiting of two tiles on top of each other + halves of two adjacent tiles
-       // the same logic seems to apply ot other tall objects
-       if (auto actor = actorStayingAt(tile.x, tile.y)) return actor;
-       if (auto actor = actorStayingAt(tile.x + 1, tile.y + 1)) return actor;
-       if (tile.half == Render::TileHalf::right)
-         if (auto actor = actorStayingAt(tile.x + 1, tile.y))
-           return actor;
-       if (tile.half == Render::TileHalf::left)
-         if (auto actor = actorStayingAt(tile.x, tile.y + 1))
-           return actor;
-       return nullptr;
-     }
+            auto actor = getActorAt(x, y);
+            if (actor && !actor->isDead() && actor != getCurrentPlayer())
+                return actor;
 
-    void World::updateHover(const Misc::Point& mousePosition) {
-        auto nothingHovered = [&]
-        {
-            if (getHoverState().setNothingHovered ())
-                return mGuiManager->setDescription ("");
+            return nullptr;
+        };
+        auto tile = getTileByScreenPos(screenPosition);
+        // actors could be hovered/targeted by hexagonal pattern consisiting of two tiles on top of each other + halves of two adjacent tiles
+        // the same logic seems to apply ot other tall objects
+        if (auto actor = actorStayingAt(tile.x, tile.y))
+            return actor;
+        if (auto actor = actorStayingAt(tile.x + 1, tile.y + 1))
+            return actor;
+        if (tile.half == Render::TileHalf::right)
+            if (auto actor = actorStayingAt(tile.x + 1, tile.y))
+                return actor;
+        if (tile.half == Render::TileHalf::left)
+            if (auto actor = actorStayingAt(tile.x, tile.y + 1))
+                return actor;
+        return nullptr;
+    }
+
+    void World::updateHover(const Misc::Point& mousePosition)
+    {
+        auto nothingHovered = [&] {
+            if (getHoverState().setNothingHovered())
+                return mGuiManager->setDescription("");
         };
 
-        auto &cursorItem = mCurrentPlayer->getInventory ().getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
+        auto& cursorItem = mCurrentPlayer->getInventory().getItemAt(MakeEquipTarget<Item::eqCURSOR>());
         if (!cursorItem.isEmpty())
-          {
-              mGuiManager->setDescription(cursorItem.getName());
-              return nothingHovered ();
-          }
+        {
+            mGuiManager->setDescription(cursorItem.getName());
+            return nothingHovered();
+        }
 
-        auto actor = targetedActor (mousePosition);
+        auto actor = targetedActor(mousePosition);
         if (actor != nullptr)
         {
-            if (getHoverState().setActorHovered (actor->getId ()))
-                mGuiManager->setDescription(actor->getName ());
+            if (getHoverState().setActorHovered(actor->getId()))
+                mGuiManager->setDescription(actor->getName());
 
             return;
         }
-        if (auto item = targetedItem (mousePosition))
+        if (auto item = targetedItem(mousePosition))
         {
-          if (getHoverState().setItemHovered (item->getTile ()))
-            mGuiManager->setDescription(item->item ().getName());
+            if (getHoverState().setItemHovered(item->getTile()))
+                mGuiManager->setDescription(item->item().getName());
 
-          return;
+            return;
         }
 
-        return nothingHovered ();
+        return nothingHovered();
     }
 
-    void World::onMouseMove(const Misc::Point &/*mousePosition*/)
-    {
-        return;
-    }
+    void World::onMouseMove(const Misc::Point& /*mousePosition*/) { return; }
 
     void World::notify(Engine::MouseInputAction action, Misc::Point mousePosition)
     {
-        switch (action) {
-            case Engine::MOUSE_RELEASE: return onMouseRelease();
-            case Engine::MOUSE_DOWN: return onMouseDown(mousePosition);
-            case Engine::MOUSE_CLICK: return onMouseClick(mousePosition);
-            case Engine::MOUSE_MOVE: return onMouseMove(mousePosition);
-            default: ;
+        switch (action)
+        {
+            case Engine::MOUSE_RELEASE:
+                return onMouseRelease();
+            case Engine::MOUSE_DOWN:
+                return onMouseDown(mousePosition);
+            case Engine::MOUSE_CLICK:
+                return onMouseClick(mousePosition);
+            case Engine::MOUSE_MOVE:
+                return onMouseMove(mousePosition);
+            default:;
         }
     }
 
@@ -194,9 +196,16 @@ namespace FAWorld
         Level::Dun sector3("levels/towndata/sector3s.dun");
         Level::Dun sector4("levels/towndata/sector4s.dun");
 
-        Level::Level townLevelBase(Level::Dun::getTown(sector1, sector2, sector3, sector4), "levels/towndata/town.til",
-            "levels/towndata/town.min", "levels/towndata/town.sol", "levels/towndata/town.cel",
-            std::make_pair(25u, 29u), std::make_pair(75u, 68u), std::map<int32_t, int32_t>(), static_cast<int32_t> (-1), 1);
+        Level::Level townLevelBase(Level::Dun::getTown(sector1, sector2, sector3, sector4),
+                                   "levels/towndata/town.til",
+                                   "levels/towndata/town.min",
+                                   "levels/towndata/town.sol",
+                                   "levels/towndata/town.cel",
+                                   std::make_pair(25u, 29u),
+                                   std::make_pair(75u, 68u),
+                                   std::map<int32_t, int32_t>(),
+                                   static_cast<int32_t>(-1),
+                                   1);
 
         auto townLevel = new GameLevel(townLevelBase, 0);
         mLevels[0] = townLevel;
@@ -205,11 +214,11 @@ namespace FAWorld
         {
             Actor* actor = new Actor(npc->celPath, npc->celPath);
             if (auto id = npc->animationSequenceId)
-                actor->setIdleAnimSequence (mDiabloExe.getTownerAnimation()[*id]);
-            actor->setTalkData (npc->talkData);
+                actor->setIdleAnimSequence(mDiabloExe.getTownerAnimation()[*id]);
+            actor->setTalkData(npc->talkData);
             actor->setCanTalk(true);
             actor->setActorId(npc->id);
-            actor->setName (npc->name);
+            actor->setName(npc->name);
             actor->teleport(townLevel, Position(npc->x, npc->y, npc->rotation));
         }
 
@@ -219,15 +228,9 @@ namespace FAWorld
         }
     }
 
-    GameLevel* World::getCurrentLevel()
-    {
-        return mCurrentPlayer->getLevel();
-    }
+    GameLevel* World::getCurrentLevel() { return mCurrentPlayer->getLevel(); }
 
-    int32_t World::getCurrentLevelIndex()
-    {
-        return mCurrentPlayer->getLevel()->getLevelIndex();
-    }
+    int32_t World::getCurrentLevelIndex() { return mCurrentPlayer->getLevel()->getLevelIndex(); }
 
     void World::setLevel(int32_t levelNum)
     {
@@ -240,68 +243,71 @@ namespace FAWorld
         playLevelMusic(levelNum);
     }
 
-    HoverState& World::getHoverState()
-    {
-        return getCurrentLevel()->getHoverState();
-    }
+    HoverState& World::getHoverState() { return getCurrentLevel()->getHoverState(); }
 
     void World::playLevelMusic(size_t level)
     {
         auto threadManager = Engine::ThreadManager::get();
         switch (level)
         {
-        case 0:
-        {
-            threadManager->playMusic("music/dtowne.wav");
-            break;
-        }
-        case 1: case 2: case 3: case 4:
-        {
-            threadManager->playMusic("music/dlvla.wav");
-            break;
-        }
-        case 5: case 6: case 7: case 8:
-        {
-            threadManager->playMusic("music/dlvlb.wav");
-            break;
-        }
-        case 9: case 10: case 11: case 12:
-        {
-            threadManager->playMusic("music/dlvlc.wav");
-            break;
-        }
-        case 13: case 14: case 15: case 16:
-        {
-            threadManager->playMusic("music/dlvld.wav");
-            break;
-        }
-        default:
-            std::cout << "Wrong level " << level << std::endl;
-            break;
+            case 0:
+            {
+                threadManager->playMusic("music/dtowne.wav");
+                break;
+            }
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            {
+                threadManager->playMusic("music/dlvla.wav");
+                break;
+            }
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            {
+                threadManager->playMusic("music/dlvlb.wav");
+                break;
+            }
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            {
+                threadManager->playMusic("music/dlvlc.wav");
+                break;
+            }
+            case 13:
+            case 14:
+            case 15:
+            case 16:
+            {
+                threadManager->playMusic("music/dlvld.wav");
+                break;
+            }
+            default:
+                std::cout << "Wrong level " << level << std::endl;
+                break;
         }
     }
 
     GameLevel* World::getLevel(size_t level)
     {
-        auto p = mLevels.find (level);
-        if (p == mLevels.end ())
-          return nullptr;
+        auto p = mLevels.find(level);
+        if (p == mLevels.end())
+            return nullptr;
         if (p->second == nullptr)
-          {
+        {
             p->second = FALevelGen::generate(100, 100, level, mDiabloExe, level - 1, level + 1);
-          }
+        }
         return p->second;
     }
 
-    void World::insertLevel(size_t level, GameLevel *gameLevel)
-    {
-        mLevels[level] = gameLevel;
-    }
+    void World::insertLevel(size_t level, GameLevel* gameLevel) { mLevels[level] = gameLevel; }
 
-    Actor* World::getActorAt(size_t x, size_t y)
-    {
-        return getCurrentLevel()->getActorAt(x, y);
-    }
+    Actor* World::getActorAt(size_t x, size_t y) { return getCurrentLevel()->getActorAt(x, y); }
 
     void World::update(bool noclip)
     {
@@ -322,46 +328,33 @@ namespace FAWorld
         }
 
         {
-            if (!nk_item_is_any_active(FARender::Renderer::get()->getNuklearContext())) {
+            if (!nk_item_is_any_active(FARender::Renderer::get()->getNuklearContext()))
+            {
                 // we need update hover not only on mouse move because viewport may move without mouse being moved
                 int x, y;
-                SDL_GetMouseState(&x,&y);
-                updateHover(Misc::Point {x, y});
+                SDL_GetMouseState(&x, &y);
+                updateHover(Misc::Point{x, y});
             }
-            else if (getHoverState().setNothingHovered ())
-              return mGuiManager->setDescription ("");
+            else if (getHoverState().setNothingHovered())
+                return mGuiManager->setDescription("");
         }
     }
 
-    Player* World::getCurrentPlayer()
-    {
-        return mCurrentPlayer;
-    }
+    Player* World::getCurrentPlayer() { return mCurrentPlayer; }
 
-    void World::addCurrentPlayer(Player * player)
-    {
-        mCurrentPlayer = player;
-    }
+    void World::addCurrentPlayer(Player* player) { mCurrentPlayer = player; }
 
-    void World::registerPlayer(Player *player)
+    void World::registerPlayer(Player* player)
     {
-        auto sortedInsertPosIt = std::upper_bound(mPlayers.begin(), mPlayers.end(), player, [](Player* lhs, Player* rhs)
-        {
-            return lhs->getId() > rhs->getId();
-        });
+        auto sortedInsertPosIt =
+            std::upper_bound(mPlayers.begin(), mPlayers.end(), player, [](Player* lhs, Player* rhs) { return lhs->getId() > rhs->getId(); });
 
         mPlayers.insert(sortedInsertPosIt, player);
     }
 
-    void World::deregisterPlayer(Player *player)
-    {
-        mPlayers.erase(std::find(mPlayers.begin(), mPlayers.end(), player));
-    }
+    void World::deregisterPlayer(Player* player) { mPlayers.erase(std::find(mPlayers.begin(), mPlayers.end(), player)); }
 
-    const std::vector<Player*>& World::getPlayers()
-    {
-        return mPlayers;
-    }
+    const std::vector<Player*>& World::getPlayers() { return mPlayers; }
 
     void World::fillRenderState(FARender::RenderState* state)
     {
@@ -389,31 +382,25 @@ namespace FAWorld
     {
         for (auto pair : mLevels)
         {
-            if(pair.second)
+            if (pair.second)
                 pair.second->getActors(actors);
         }
     }
 
-    Tick World::getCurrentTick()
-    {
-        return mTicksPassed;
-    }
+    Tick World::getCurrentTick() { return mTicksPassed; }
 
     void World::setGuiManager(FAGui::GuiManager* manager)
     {
         mGuiManager = manager;
-        mDlgManager.reset (new FAGui::DialogManager(*mGuiManager));
-        getCurrentPlayer()->talkRequested.connect(
-            [&](Actor *actor)
-        {
+        mDlgManager.reset(new FAGui::DialogManager(*mGuiManager));
+        getCurrentPlayer()->talkRequested.connect([&](Actor* actor) {
             // This is important because mouse released becomes blocked by "modal" dialog
             // Thus creating some uncomfortable effects
-            targetLock = false; 
+            targetLock = false;
             afterDialog = true;
             mDlgManager->talk(actor);
         });
     }
-
 
     void World::changeLevel(bool up)
     {
@@ -451,10 +438,10 @@ namespace FAWorld
         level->activate(clickedTile.x, clickedTile.y);
     }
 
-    PlacedItemData *World::targetedItem(Misc::Point screenPosition)
+    PlacedItemData* World::targetedItem(Misc::Point screenPosition)
     {
         auto tile = getTileByScreenPos(screenPosition);
-        return getCurrentLevel ()->getItemMap ().getItemAt ({tile.x, tile.y});
+        return getCurrentLevel()->getItemMap().getItemAt({tile.x, tile.y});
     }
 
     void World::onMouseDown(Misc::Point mousePosition)
@@ -463,7 +450,7 @@ namespace FAWorld
             return;
 
         auto player = getCurrentPlayer();
-        auto &inv = player->getInventory ();
+        auto& inv = player->getInventory();
         auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
 
         bool targetWasLocked = targetLock; // better solution assign targetLock true at something like SCOPE_EXIT macro
@@ -471,8 +458,9 @@ namespace FAWorld
 
         if (!targetWasLocked)
         {
-            auto cursorItem = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR> ());
-            if (!cursorItem.isEmpty()) {
+            auto cursorItem = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR>());
+            if (!cursorItem.isEmpty())
+            {
                 // What happens here is not actually true to original game but
                 // It's a fair way to emulate it. Current data is that in all instances except interaction with inventory
                 // cursor has topleft as it's hotspot even when cursor is item. Other 2 instances actually:
@@ -483,46 +471,39 @@ namespace FAWorld
                 // To emulate it totally true to original game we need to heavily hack interaction with inventory
                 // which is possible
                 auto clickedTileShifted = getTileByScreenPos(mousePosition - FARender::Renderer::get()->cursorSize() / 2);
-                if (player->dropItem ({clickedTileShifted.x, clickedTileShifted.y}))
-                    {
-                        mGuiManager->clearDescription();
-                    }
+                if (player->dropItem({clickedTileShifted.x, clickedTileShifted.y}))
+                {
+                    mGuiManager->clearDescription();
+                }
                 return;
             }
         }
 
-       if (!targetWasLocked)
-           {
-               Actor* clickedActor = targetedActor (mousePosition);
-               if (clickedActor)
-                   {
-                       player->setTarget (clickedActor);
-                       return;
-                   }
-
-              if (auto item = targetedItem(mousePosition)) {
-                player->setTarget (ItemTarget {mGuiManager->isInventoryShown() ?
-                    ItemTarget::ActionType::toCursor :
-                    ItemTarget::ActionType::autoEquip, item});
+        if (!targetWasLocked)
+        {
+            Actor* clickedActor = targetedActor(mousePosition);
+            if (clickedActor)
+            {
+                player->setTarget(clickedActor);
                 return;
-              }
-           }
+            }
 
-       if (!targetWasLocked || simpleMove)
-          {
-              player->setTarget (boost::blank{});
-              player->mMoveHandler.setDestination({ clickedTile.x, clickedTile.y });
-              simpleMove = true;
-          }
+            if (auto item = targetedItem(mousePosition))
+            {
+                player->setTarget(ItemTarget{mGuiManager->isInventoryShown() ? ItemTarget::ActionType::toCursor : ItemTarget::ActionType::autoEquip, item});
+                return;
+            }
+        }
+
+        if (!targetWasLocked || simpleMove)
+        {
+            player->setTarget(boost::blank{});
+            player->mMoveHandler.setDestination({clickedTile.x, clickedTile.y});
+            simpleMove = true;
+        }
     }
 
-    Tick World::getTicksInPeriod(float seconds)
-    {
-        return std::max((Tick)1, (Tick)round(((float)ticksPerSecond) * seconds));
-    }
+    Tick World::getTicksInPeriod(float seconds) { return std::max((Tick)1, (Tick)round(((float)ticksPerSecond) * seconds)); }
 
-    float World::getSecondsPerTick()
-    {
-        return 1.0f / ((float)ticksPerSecond);
-    }
+    float World::getSecondsPerTick() { return 1.0f / ((float)ticksPerSecond); }
 }

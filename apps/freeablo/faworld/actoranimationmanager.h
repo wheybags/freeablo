@@ -48,7 +48,6 @@ namespace FAWorld
         void update();
         void setIdleFrameSequence(const std::vector<int32_t>& sequence);
 
-
     private:
         FARender::AnimationPlayer mAnimationPlayer;
         AnimState mPlayingAnim = AnimState::none;
@@ -56,7 +55,7 @@ namespace FAWorld
         // TODO: some template class for an array of T with EnumType::ENUM_END size array, to eliminate the casting used
         // for accessing these two arrays (call it EnumMap or something)
         FARender::FASpriteGroup* mAnimations[size_t(AnimState::ENUM_END)]; ///< "map" from AnimState to animation
-        Tick mAnimTimeMap[size_t(AnimState::ENUM_END)]; ///< "map" from AnimState to Tick
+        Tick mAnimTimeMap[size_t(AnimState::ENUM_END)];                    ///< "map" from AnimState to Tick
 
         std::vector<int32_t> mIdleFrameSequence;
 

@@ -8,8 +8,7 @@ namespace Serial
 
 namespace Misc
 {
-    template<typename T>
-    class MaxCurrentItem
+    template <typename T> class MaxCurrentItem
     {
     public:
         T max;

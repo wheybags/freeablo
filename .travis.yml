@@ -13,15 +13,16 @@ cache:
   directories:
   - $HOME/.hunter
 
-script:
-- mkdir build
-- cd build
-- cmake -DTREAT_WARNINGS_AS_ERRORS=ON ../
-- make -k
-- make fatest -k
+matrix:
+  include:
+    - env: JOB=build
+    - env: JOB=clang-format
+
+script: ./travis.sh
+     
 after_success:
-- cd ..
 - ./update-gh-pages.sh
+
 notifications:
   recipients:
   - wheybags+travis.ci@wheybags.com

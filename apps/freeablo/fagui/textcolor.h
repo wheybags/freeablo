@@ -2,7 +2,7 @@
 
 namespace FAGui
 {
-enum class TextColor
+    enum class TextColor
     {
         white,
         blue,

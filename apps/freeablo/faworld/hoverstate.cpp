@@ -6,7 +6,7 @@ namespace FAWorld
 
     bool HoverState::applyIfNeeded(const HoverState& newState)
     {
-        if(*this == newState)
+        if (*this == newState)
             return false;
         *this = newState;
         return true;
@@ -19,17 +19,14 @@ namespace FAWorld
         return applyIfNeeded(newState);
     }
 
-    bool HoverState::isItemHovered(const FAWorld::Tile& tile) const
-    {
-        return mType == HoverType::item && tile == mItemTile;
-    }
+    bool HoverState::isItemHovered(const FAWorld::Tile& tile) const { return mType == HoverType::item && tile == mItemTile; }
 
     bool HoverState::operator==(const HoverState& other) const
     {
-        if(mType != other.mType)
+        if (mType != other.mType)
             return false;
 
-        switch(mType)
+        switch (mType)
         {
             case HoverType::actor:
                 return mActorId == other.mActorId;
@@ -54,8 +51,5 @@ namespace FAWorld
         return applyIfNeeded(newState);
     }
 
-    bool HoverState::isActorHovered(int32_t actorId) const
-    {
-        return mType == HoverType::actor && actorId == mActorId;
-    }
- }
+    bool HoverState::isActorHovered(int32_t actorId) const { return mType == HoverType::actor && actorId == mActorId; }
+}

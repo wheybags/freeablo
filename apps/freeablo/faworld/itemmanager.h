@@ -1,11 +1,11 @@
 #ifndef ITEMMANAGER_H
 #define ITEMMANAGER_H
 
-#include <map>
-#include <stdint.h>
+#include <boost/program_options.hpp>
 #include <diabloexe/diabloexe.h>
 #include <level/baseitemmanager.h>
-#include <boost/program_options.hpp>
+#include <map>
+#include <stdint.h>
 
 namespace Engine
 {
@@ -20,26 +20,26 @@ namespace FAWorld
     public:
         ItemPosition(){};
         ItemPosition(std::pair<size_t, size_t> floorPosition);
-        void setFloorPosition(std::pair<size_t,size_t> pos);
+        void setFloorPosition(std::pair<size_t, size_t> pos);
         std::pair<size_t, size_t> getFloorPosition() const;
-        bool operator < (const ItemPosition rhs) const;
+        bool operator<(const ItemPosition rhs) const;
         bool operator==(const ItemPosition rhs) const;
+
     private:
-        std::pair<size_t,size_t> mFloorPosition;
+        std::pair<size_t, size_t> mFloorPosition;
     };
 
     class ItemManager : public Level::BaseItemManager
     {
     public:
-
         static ItemManager& get();
-        void loadItems(DiabloExe::DiabloExe * exe);
-        void loadUniqueItems(DiabloExe::DiabloExe * exe);
-        void addItem(Item &item, std::pair<size_t, size_t> floorPosition, uint32_t count);
+        void loadItems(DiabloExe::DiabloExe* exe);
+        void loadUniqueItems(DiabloExe::DiabloExe* exe);
+        void addItem(Item& item, std::pair<size_t, size_t> floorPosition, uint32_t count);
         Item getBaseItem(uint8_t id) const;
         Item getUniqueItem(uint8_t id) const;
-        Item getItemByName (const std::string &name);
-        DiabloExe::BaseItem &getBaseItemByUniqueCode(uint8_t uniqCode);
+        Item getItemByName(const std::string& name);
+        DiabloExe::BaseItem& getBaseItemByUniqueCode(uint8_t uniqCode);
         void putItemOnFloor(Item& item, std::pair<size_t, size_t> floor_pos);
         void dumpBaseItems() const;
         void dumpUniqueItems() const;
@@ -48,7 +48,6 @@ namespace FAWorld
         static uint32_t getUniqueItemCode();
 
     private:
-
         ItemManager();
         ItemManager(const ItemManager&);
         ~ItemManager() {}
@@ -61,7 +60,5 @@ namespace FAWorld
         static uint32_t lastUnique;
     };
 }
-
-
 
 #endif // ITEMMANAGER_H

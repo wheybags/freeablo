@@ -1,11 +1,11 @@
 #include "nuklear_sdl_gl3.h"
 #include "sdl_gl_funcs.h"
 
-#include <string.h>
-#include <assert.h>
-#include "render.h"
 #include "../../apps/freeablo/fagui/guimanager.h"
+#include "render.h"
+#include <assert.h>
 #include <iostream>
+#include <string.h>
 
 struct nk_sdl_vertex
 {
@@ -14,40 +14,33 @@ struct nk_sdl_vertex
     nk_byte col[4];
 };
 
-static const struct nk_draw_vertex_layout_element vertex_layout[] =
-{
-    { NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, position) },
-    { NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, uv) },
-    { NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct nk_sdl_vertex, col) },
-    { NK_VERTEX_LAYOUT_END }
-};
-
+static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, position)},
+                                                                     {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, uv)},
+                                                                     {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct nk_sdl_vertex, col)},
+                                                                     {NK_VERTEX_LAYOUT_END}};
 
 #ifdef __APPLE__
-  #define NK_SHADER_VERSION "#version 150\n"
+#define NK_SHADER_VERSION "#version 150\n"
 #else
-  #define NK_SHADER_VERSION "#version 300 es\n"
+#define NK_SHADER_VERSION "#version 300 es\n"
 #endif
 
 void nk_sdl_device_create(nk_gl_device& dev)
 {
     GLint status;
-    static const GLchar *vertex_shader =
-        NK_SHADER_VERSION
-        "uniform mat4 ProjMtx;\n"
-        "in vec2 Position;\n"
-        "in vec2 TexCoord;\n"
-        "in vec4 Color;\n"
-        "out vec2 Frag_UV;\n"
-        "out vec4 Frag_Color;\n"
-        "void main() {\n"
-        "   Frag_UV = TexCoord;\n"
-        "   Frag_Color = Color;\n"
-        "   gl_Position = ProjMtx * vec4(Position.xy, 0, 1);\n"
-        "}\n";
-    static const GLchar *fragment_shader =
-        NK_SHADER_VERSION
-       R"(precision mediump float;
+    static const GLchar* vertex_shader = NK_SHADER_VERSION "uniform mat4 ProjMtx;\n"
+                                                           "in vec2 Position;\n"
+                                                           "in vec2 TexCoord;\n"
+                                                           "in vec4 Color;\n"
+                                                           "out vec2 Frag_UV;\n"
+                                                           "out vec4 Frag_Color;\n"
+                                                           "void main() {\n"
+                                                           "   Frag_UV = TexCoord;\n"
+                                                           "   Frag_Color = Color;\n"
+                                                           "   gl_Position = ProjMtx * vec4(Position.xy, 0, 1);\n"
+                                                           "}\n";
+    static const GLchar* fragment_shader = NK_SHADER_VERSION
+        R"(precision mediump float;
         uniform sampler2D Texture;
         in vec2 Frag_UV;
         in vec4 Frag_Color;
@@ -169,7 +162,7 @@ void nk_sdl_device_destroy(nk_gl_device& dev)
     glDeleteShader(dev.vert_shdr);
     glDeleteShader(dev.frag_shdr);
     glDeleteProgram(dev.prog);
-    //glDeleteTextures(1, &dev.font_tex);
+    // glDeleteTextures(1, &dev.font_tex);
     glDeleteBuffers(1, &dev.vbo);
     glDeleteBuffers(1, &dev.ebo);
     nk_buffer_free(&dev.cmds);
@@ -181,10 +174,7 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
     int display_width, display_height;
     struct nk_vec2 scale;
     GLfloat ortho[4][4] = {
-        { 2.0f, 0.0f, 0.0f, 0.0f },
-        { 0.0f,-2.0f, 0.0f, 0.0f },
-        { 0.0f, 0.0f,-1.0f, 0.0f },
-        { -1.0f,1.0f, 0.0f, 1.0f },
+        {2.0f, 0.0f, 0.0f, 0.0f}, {0.0f, -2.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f, 0.0f}, {-1.0f, 1.0f, 0.0f, 1.0f},
     };
     SDL_GetWindowSize(win, &width, &height);
     SDL_GL_GetDrawableSize(win, &display_width, &display_height);
@@ -214,7 +204,7 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
     {
         // convert from command queue into draw list and draw to screen
         void *vertices, *elements;
-        const nk_draw_index *offset = NULL;
+        const nk_draw_index* offset = NULL;
 
         // allocate vertex and element buffer
         glBindVertexArray(dev.vao);
@@ -238,17 +228,18 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
         for (size_t i = 0; i < dump.drawCommands.size(); i++)
         {
             const struct nk_draw_command& cmd = dump.drawCommands[i];
-            if (!cmd.elem_count) continue;
+            if (!cmd.elem_count)
+                continue;
 
             uint32_t cacheIndex = ((uint32_t*)cmd.texture.ptr)[0];
             uint32_t frameNum = ((uint32_t*)cmd.texture.ptr)[1];
-            auto effect = static_cast<FAGui::EffectType> (cmd.userdata.id);
+            auto effect = static_cast<FAGui::EffectType>(cmd.userdata.id);
 
             Render::SpriteGroup* sprite = cache->get(cacheIndex);
             auto s = sprite->operator[](frameNum);
             glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)s);
             int32_t w, h;
-            Render::spriteSize (s, w, h);
+            Render::spriteSize(s, w, h);
             int item_hl_color[] = {0xB9, 0xAA, 0x77};
             glUniform1f(dev.uniform_hcolor_r, item_hl_color[0] / 255.f);
             glUniform1f(dev.uniform_hcolor_g, item_hl_color[1] / 255.f);
@@ -259,9 +250,9 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
             glUniform1f(dev.imgH, h);
 
             glScissor((GLint)(cmd.clip_rect.x * scale.x),
-                (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),
-                (GLint)(cmd.clip_rect.w * scale.x),
-                (GLint)(cmd.clip_rect.h * scale.y));
+                      (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),
+                      (GLint)(cmd.clip_rect.w * scale.x),
+                      (GLint)(cmd.clip_rect.h * scale.y));
             glDrawElements(GL_TRIANGLES, (GLsizei)cmd.elem_count, GL_UNSIGNED_SHORT, offset);
             offset += cmd.elem_count;
         }
@@ -298,7 +289,6 @@ nk_sdl_clipbard_copy(nk_handle usr, const char *text, int len)
     free(str);
 }
 */
-
 
 /*void nk_sdl_init(nk_sdl& nkSdl, SDL_Window *win)
 {
@@ -431,10 +421,7 @@ nk_sdl_handle_event(SDL_Event *evt)
     memset(&sdl, 0, sizeof(sdl));
 }*/
 
-NuklearFrameDump::NuklearFrameDump(nk_gl_device& dev)
-{
-    init(dev);
-}
+NuklearFrameDump::NuklearFrameDump(nk_gl_device& dev) { init(dev); }
 
 void NuklearFrameDump::init(nk_gl_device& dev)
 {
@@ -471,9 +458,6 @@ void NuklearFrameDump::fill(nk_context* ctx)
 
     drawCommands.clear();
 
-    const nk_draw_command *cmd;
-    nk_draw_foreach(cmd, ctx, &cmds)
-    {
-        drawCommands.push_back(*cmd);
-    }
+    const nk_draw_command* cmd;
+    nk_draw_foreach(cmd, ctx, &cmds) { drawCommands.push_back(*cmd); }
 }

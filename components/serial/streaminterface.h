@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <misc/misc.h>
 #include <string>
 #include <utility>
-#include <misc/misc.h>
 
 namespace Serial
 {

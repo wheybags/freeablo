@@ -1,6 +1,6 @@
 #include "inputfwd.h"
-#include <string>
 #include <cstring>
+#include <string>
 
 namespace NuklearMisc
 {
@@ -35,13 +35,9 @@ namespace NuklearMisc
         {
             nk_input_motion(ctx, x, y);
         }
-
     }
 
-    void handleNuklearMouseWheelEvent(nk_context* ctx, int32_t x, int32_t y)
-    {
-        nk_input_scroll(ctx, nk_vec2((float)x, (float)y));
-    }
+    void handleNuklearMouseWheelEvent(nk_context* ctx, int32_t x, int32_t y) { nk_input_scroll(ctx, nk_vec2((float)x, (float)y)); }
 
     void handleNuklearKeyboardEvent(nk_context* ctx, bool isDown, Input::Key sym, Input::KeyboardModifiers mods)
     {
@@ -59,18 +55,22 @@ namespace NuklearMisc
             nk_input_key(ctx, NK_KEY_TAB, down);
         else if (sym == Input::KEY_BACKSPACE)
             nk_input_key(ctx, NK_KEY_BACKSPACE, down);
-        else if (sym == Input::KEY_HOME) {
+        else if (sym == Input::KEY_HOME)
+        {
             nk_input_key(ctx, NK_KEY_TEXT_START, down);
             nk_input_key(ctx, NK_KEY_SCROLL_START, down);
         }
-        else if (sym == Input::KEY_END) {
+        else if (sym == Input::KEY_END)
+        {
             nk_input_key(ctx, NK_KEY_TEXT_END, down);
             nk_input_key(ctx, NK_KEY_SCROLL_END, down);
         }
-        else if (sym == Input::KEY_PAGEDOWN) {
+        else if (sym == Input::KEY_PAGEDOWN)
+        {
             nk_input_key(ctx, NK_KEY_SCROLL_DOWN, down);
         }
-        else if (sym == Input::KEY_PAGEUP) {
+        else if (sym == Input::KEY_PAGEUP)
+        {
             nk_input_key(ctx, NK_KEY_SCROLL_UP, down);
         }
         else if (sym == Input::KEY_z)
@@ -91,15 +91,19 @@ namespace NuklearMisc
             nk_input_key(ctx, NK_KEY_UP, down);
         else if (sym == Input::KEY_DOWN)
             nk_input_key(ctx, NK_KEY_DOWN, down);
-        else if (sym == Input::KEY_LEFT) {
+        else if (sym == Input::KEY_LEFT)
+        {
             if (mods.ctrl)
                 nk_input_key(ctx, NK_KEY_TEXT_WORD_LEFT, down);
-            else nk_input_key(ctx, NK_KEY_LEFT, down);
+            else
+                nk_input_key(ctx, NK_KEY_LEFT, down);
         }
-        else if (sym == Input::KEY_RIGHT) {
+        else if (sym == Input::KEY_RIGHT)
+        {
             if (mods.ctrl)
                 nk_input_key(ctx, NK_KEY_TEXT_WORD_RIGHT, down);
-            else nk_input_key(ctx, NK_KEY_RIGHT, down);
+            else
+                nk_input_key(ctx, NK_KEY_RIGHT, down);
         }
     }
 
@@ -109,5 +113,4 @@ namespace NuklearMisc
         memcpy(glyph, inp.c_str(), NK_UTF_SIZE);
         nk_input_glyph(ctx, glyph);
     }
-
 }

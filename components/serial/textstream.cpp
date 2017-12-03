@@ -1,6 +1,6 @@
 #include "textstream.h"
-#include <misc/stringops.h>
 #include <cassert>
+#include <misc/stringops.h>
 
 namespace Serial
 {
@@ -19,14 +19,12 @@ namespace Serial
         if (data[0] == "CATEGORY" || data[0] == "CATEGORY_END")
             return readTypedLine(expectedType); // ignore
 
-
         assert(data[0] == expectedType);
 
         return std::string(std::move(data[1]));
     }
 
-    template <typename T>
-    T fromString(const std::string& str)
+    template <typename T> T fromString(const std::string& str)
     {
         std::istringstream iss;
         iss.str(str);
@@ -34,9 +32,6 @@ namespace Serial
         iss >> retval;
         return retval;
     }
-
-
-
 
     bool TextReadStream::read_bool()
     {
@@ -128,58 +123,29 @@ namespace Serial
         assert(name == data);
     }
 
-
-
     std::pair<uint8_t*, size_t> TextWriteStream::getData()
     {
         mTmp = mData.str();
         return std::make_pair((uint8_t*)mTmp.data(), mTmp.size());
     }
 
-    void TextWriteStream::write(bool val)
-    {
-        writeTypedLine("BOOL", val ? "true" : "false");
-    }
+    void TextWriteStream::write(bool val) { writeTypedLine("BOOL", val ? "true" : "false"); }
 
-    void TextWriteStream::write(int64_t val)
-    {
-        writeTypedLine("I64", std::to_string(val));
-    }
+    void TextWriteStream::write(int64_t val) { writeTypedLine("I64", std::to_string(val)); }
 
-    void TextWriteStream::write(uint64_t val)
-    {
-        writeTypedLine("U64", std::to_string(val));
-    }
+    void TextWriteStream::write(uint64_t val) { writeTypedLine("U64", std::to_string(val)); }
 
-    void TextWriteStream::write(int32_t val)
-    {
-        writeTypedLine("I32", std::to_string(val));
-    }
+    void TextWriteStream::write(int32_t val) { writeTypedLine("I32", std::to_string(val)); }
 
-    void TextWriteStream::write(uint32_t val)
-    {
-        writeTypedLine("U32", std::to_string(val));
-    }
+    void TextWriteStream::write(uint32_t val) { writeTypedLine("U32", std::to_string(val)); }
 
-    void TextWriteStream::write(int16_t val)
-    {
-        writeTypedLine("I16", std::to_string(val));
-    }
+    void TextWriteStream::write(int16_t val) { writeTypedLine("I16", std::to_string(val)); }
 
-    void TextWriteStream::write(uint16_t val)
-    {
-        writeTypedLine("U16", std::to_string(val));
-    }
+    void TextWriteStream::write(uint16_t val) { writeTypedLine("U16", std::to_string(val)); }
 
-    void TextWriteStream::write(int8_t val)
-    {
-        writeTypedLine("I8", std::to_string(val));
-    }
+    void TextWriteStream::write(int8_t val) { writeTypedLine("I8", std::to_string(val)); }
 
-    void TextWriteStream::write(uint8_t val)
-    {
-        writeTypedLine("U8", std::to_string(val));
-    }
+    void TextWriteStream::write(uint8_t val) { writeTypedLine("U8", std::to_string(val)); }
 
     void TextWriteStream::write(const std::string& val)
     {

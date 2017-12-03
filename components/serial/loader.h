@@ -50,12 +50,12 @@ namespace Serial
 
         void startCategory(const std::string& name);
         void endCategory(const std::string& name);
+
     private:
         WriteStreamInterface& mStream;
     };
 
-    template <typename T>
-    class ScopedCategory
+    template <typename T> class ScopedCategory
     {
     public:
         ScopedCategory(std::string&& name, T& saverOrLoader);

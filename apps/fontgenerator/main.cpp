@@ -1,20 +1,21 @@
-#include <vector>
-#include <iostream>
+#include <StormLib.h>
 #include <cel/celdecoder.h>
 #include <faio/fafileobject.h>
+#include <iostream>
 #include <misc/disablewarn.h>
-#include <StormLib.h>
 #include <misc/enablewarn.h>
+#include <vector>
 
-
-void help(char** argv) {
+void help(char** argv)
+{
     std::cout << argv[0] << " mpq_path " << std::endl;
     std::cout << std::endl << "Application generates part of libRocket font file." << std::endl;
 }
 
 int main(int argc, char** argv)
 {
-    if(argc < 2) {
+    if (argc < 2)
+    {
         help(argv);
         return 0;
     }
@@ -32,20 +33,18 @@ int main(int argc, char** argv)
     // Prepare ascii vector according to order in cel file
     std::vector<int> ascii;
 
-    for(int i = 'a' ; i <= 'z' ; i++)
+    for (int i = 'a'; i <= 'z'; i++)
         ascii.push_back(i);
 
-    for(int i = '1' ; i <= '9'; i++)
+    for (int i = '1'; i <= '9'; i++)
         ascii.push_back(i);
 
     ascii.push_back('0');
 
-
     // I can't find mapping in ascii table for one signs so
     // I marked it as 255
-    std::vector<int> asciiSigns = { '-', '=', '+', '(', ')', '[', ']', '"', 255,
-                                    '`', '\'',':',';',',','.','/','?','!','&','%',
-                                    '#','$','*','<','>','@','\\','^','_','|','~'};
+    std::vector<int> asciiSigns = {'-', '=', '+', '(', ')', '[', ']', '"', 255, '`', '\'', ':', ';', ',', '.', '/',
+                                   '?', '!', '&', '%', '#', '$', '*', '<', '>', '@', '\\', '^', '_', '|', '~'};
 
     ascii.insert(ascii.end(), asciiSigns.begin(), asciiSigns.end());
 
@@ -53,16 +52,16 @@ int main(int argc, char** argv)
 
     int positionX = 0;
 
-    for(int32_t i = 0 ; i < cel.numFrames(); i++)
+    for (int32_t i = 0; i < cel.numFrames(); i++)
     {
         Cel::CelFrame& frame = cel[i];
         int32_t maximumVisibleX = 0;
-        for(int32_t x = 0; x < frame.mWidth; x++)
+        for (int32_t x = 0; x < frame.mWidth; x++)
         {
-            for(int32_t y = 0; y < frame.mHeight; y++)
+            for (int32_t y = 0; y < frame.mHeight; y++)
             {
-                if(frame[x][y].visible)
-                    if(x > maximumVisibleX)
+                if (frame[x][y].visible)
+                    if (x > maximumVisibleX)
                         maximumVisibleX = x;
             }
         }
@@ -73,7 +72,7 @@ int main(int argc, char** argv)
 
         // Additional 2 pixels for every letter
         maximumVisibleX += 2;
-        if(maximumVisibleX > frame.mWidth)
+        if (maximumVisibleX > frame.mWidth)
             maximumVisibleX = frame.mWidth;
 
         // Convert values to string
@@ -88,7 +87,8 @@ int main(int argc, char** argv)
         positionXStr = buffer;
 
         // Create output
-        std::string out = "<char id=\""+asciiStr+"\" x=\""+positionXStr+"\" y=\"0\" width=\""+maximumVisibleXStr+"\" height=\"11\" xoffset=\"0\" yoffset=\"0\" xadvance=\""+maximumVisibleXStr+"\" />";
+        std::string out = "<char id=\"" + asciiStr + "\" x=\"" + positionXStr + "\" y=\"0\" width=\"" + maximumVisibleXStr +
+                          "\" height=\"11\" xoffset=\"0\" yoffset=\"0\" xadvance=\"" + maximumVisibleXStr + "\" />";
         mapping[asciiIdx] = out;
 
         // Move further
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     // Sort by ascii
 
     std::sort(ascii.begin(), ascii.end());
-    for(int i : ascii)
+    for (int i : ascii)
     {
         std::cout << mapping[i] << std::endl;
     }

@@ -1,18 +1,18 @@
 #include "../../freeablo/apps/freeablo/faworld/findpath.h"
 #include "../../freeablo/apps/freeablo/faworld/gamelevel.h"
+#include <algorithm>
+#include <chrono>
+#include <iomanip>
 #include <iostream>
+#include <map>
+#include <misc/stdhashes.h>
+#include <queue>
+#include <set>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <map>
-#include <set>
-#include <vector>
-#include <queue>
-#include <iomanip>
-#include <algorithm>
-#include <chrono>
 #include <string>
-#include <misc/stdhashes.h>
+#include <vector>
 
 using namespace std::chrono;
 using namespace std;
@@ -23,38 +23,27 @@ namespace FAWorld
     {
 
     public:
-
         static const int MAP_SIZE = 20;
 
         LevelImpl()
         {
             generateMap();
-            //drawMap();
+            // drawMap();
         }
 
-        int32_t width() const
-        {
-            return MAP_SIZE;
-        }
+        int32_t width() const { return MAP_SIZE; }
 
-        int32_t height() const
-        {
-            return MAP_SIZE;
-        }
+        int32_t height() const { return MAP_SIZE; }
 
-        bool isPassable(int x, int y) const
-        {
-            return gameMap[y][x] == 0 ? true : false;
-        }
+        bool isPassable(int x, int y) const { return gameMap[y][x] == 0 ? true : false; }
 
     private:
         int gameMap[MAP_SIZE][MAP_SIZE];
 
     private:
-
         void generateMap()
         {
-            memset(gameMap, 0, MAP_SIZE*MAP_SIZE * sizeof(int));
+            memset(gameMap, 0, MAP_SIZE * MAP_SIZE * sizeof(int));
             for (int i = 0; i < MAP_SIZE; i++)
             {
                 gameMap[0][i] = 1;
@@ -73,7 +62,6 @@ namespace FAWorld
                         gameMap[i][j] = 0;
                     else
                         gameMap[i][j] = 1;
-
         }
 
         void drawMap()
@@ -96,16 +84,17 @@ namespace FAWorld
 
 using namespace FAWorld;
 
-ostream& operator<<(ostream& os, std::pair<int32_t, int32_t> & location)
+ostream& operator<<(ostream& os, std::pair<int32_t, int32_t>& location)
 {
     os << "(" << location.first << "," << location.second << ")";
     return os;
 }
 
-void drawPath(::GameLevel::GameLevelImpl& graph, int field_width,
-    unordered_map<std::pair<int32_t, int32_t>, int>* distances = 0,
-    unordered_map<std::pair<int32_t, int32_t>, std::pair<int32_t, int32_t>>* point_to = 0,
-    vector<std::pair<int32_t, int32_t>>* path = 0)
+void drawPath(::GameLevel::GameLevelImpl& graph,
+              int field_width,
+              unordered_map<std::pair<int32_t, int32_t>, int>* distances = 0,
+              unordered_map<std::pair<int32_t, int32_t>, std::pair<int32_t, int32_t>>* point_to = 0,
+              vector<std::pair<int32_t, int32_t>>* path = 0)
 {
     for (int y = 0; y != LevelImpl::MAP_SIZE; ++y)
     {
@@ -125,11 +114,26 @@ void drawPath(::GameLevel::GameLevelImpl& graph, int field_width,
                 x2 = (*point_to)[id].first;
                 y2 = (*point_to)[id].second;
 
-                if (x2 == x + 1) { cout << u8"\u2192 "; }
-                else if (x2 == x - 1) { cout << u8"\u2190 "; }
-                else if (y2 == y + 1) { cout << u8"\u2193 "; }
-                else if (y2 == y - 1) { cout << u8"\u2191 "; }
-                else { cout << "* "; }
+                if (x2 == x + 1)
+                {
+                    cout << u8"\u2192 ";
+                }
+                else if (x2 == x - 1)
+                {
+                    cout << u8"\u2190 ";
+                }
+                else if (y2 == y + 1)
+                {
+                    cout << u8"\u2193 ";
+                }
+                else if (y2 == y - 1)
+                {
+                    cout << u8"\u2191 ";
+                }
+                else
+                {
+                    cout << "* ";
+                }
             }
             else if (distances != 0 && distances->count(id))
             {
@@ -151,7 +155,7 @@ void drawPath(::GameLevel::GameLevelImpl& graph, int field_width,
 int main()
 {
     using namespace FAWorld;
-    FAWorld::LevelImpl * level = new LevelImpl();
+    FAWorld::LevelImpl* level = new LevelImpl();
 
     std::pair<int32_t, int32_t> start, goal;
     vector<std::pair<int32_t, int32_t>> path;
@@ -162,33 +166,33 @@ int main()
 
     switch (caseId)
     {
-    case 1:
-        start = std::pair<int32_t, int32_t>(2, 4);
-        goal = std::pair<int32_t, int32_t>(18, 5);
-        break;
-    case 2:
-        start = std::pair<int32_t, int32_t>(18, 5);
-        goal = std::pair<int32_t, int32_t>(2, 3);
-        break;
-    case 3:
-        start = std::pair<int32_t, int32_t>(3, 10);
-        goal = std::pair<int32_t, int32_t>(18, 10);
-        break;
-    case 4:
-        // This case uses "findClosesPointToGoal"
-        start = std::pair<int32_t, int32_t>(3, 10);
-        goal = std::pair<int32_t, int32_t>(15, 10);
-        break;
-    case 5:
-        // This case uses "findClosesPointToGoal"
-        start = std::pair<int32_t, int32_t>(18, 7);
-        goal = std::pair<int32_t, int32_t>(10, 10);
-        break;
-    default:
-        // This case uses "findClosesPointToGoal"
-        start = std::pair<int32_t, int32_t>(18, 10);
-        goal = std::pair<int32_t, int32_t>(10, 10);
-        break;
+        case 1:
+            start = std::pair<int32_t, int32_t>(2, 4);
+            goal = std::pair<int32_t, int32_t>(18, 5);
+            break;
+        case 2:
+            start = std::pair<int32_t, int32_t>(18, 5);
+            goal = std::pair<int32_t, int32_t>(2, 3);
+            break;
+        case 3:
+            start = std::pair<int32_t, int32_t>(3, 10);
+            goal = std::pair<int32_t, int32_t>(18, 10);
+            break;
+        case 4:
+            // This case uses "findClosesPointToGoal"
+            start = std::pair<int32_t, int32_t>(3, 10);
+            goal = std::pair<int32_t, int32_t>(15, 10);
+            break;
+        case 5:
+            // This case uses "findClosesPointToGoal"
+            start = std::pair<int32_t, int32_t>(18, 7);
+            goal = std::pair<int32_t, int32_t>(10, 10);
+            break;
+        default:
+            // This case uses "findClosesPointToGoal"
+            start = std::pair<int32_t, int32_t>(18, 10);
+            goal = std::pair<int32_t, int32_t>(10, 10);
+            break;
     }
 
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -201,7 +205,6 @@ int main()
 
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     cout << "Duration: " << duration << " us" << endl;
-
 
     delete level;
     return 0;

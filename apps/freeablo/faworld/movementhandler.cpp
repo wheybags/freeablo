@@ -1,12 +1,11 @@
 #include "movementhandler.h"
 
-#include "findpath.h"
 #include "../fasavegame/gameloader.h"
+#include "findpath.h"
 
 namespace FAWorld
 {
-    MovementHandler::MovementHandler(Tick pathRateLimit) : mPathRateLimit(pathRateLimit)
-    {}
+    MovementHandler::MovementHandler(Tick pathRateLimit) : mPathRateLimit(pathRateLimit) {}
 
     MovementHandler::MovementHandler(FASaveGame::GameLoader& loader)
     {
@@ -14,10 +13,7 @@ namespace FAWorld
         if (levelIndex != -1)
         {
             // get the level at the end, because it doesn't exist yet
-            loader.addFunctionToRunAtEnd([this, levelIndex]()
-            {
-                this->mLevel = World::get()->getLevel(levelIndex);
-            });
+            loader.addFunctionToRunAtEnd([this, levelIndex]() { this->mLevel = World::get()->getLevel(levelIndex); });
         }
 
         mCurrentPos = Position(loader);
@@ -70,10 +66,7 @@ namespace FAWorld
         saver.save(mAdjacent);
     }
 
-    std::pair<int32_t, int32_t> MovementHandler::getDestination() const
-    {
-        return mDestination;
-    }
+    std::pair<int32_t, int32_t> MovementHandler::getDestination() const { return mDestination; }
 
     void MovementHandler::setDestination(std::pair<int32_t, int32_t> dest, bool adjacent)
     {
@@ -81,20 +74,11 @@ namespace FAWorld
         mAdjacent = adjacent;
     }
 
-    bool MovementHandler::moving()
-    {
-        return mCurrentPos.isMoving();
-    }
+    bool MovementHandler::moving() { return mCurrentPos.isMoving(); }
 
-    Position MovementHandler::getCurrentPosition() const
-    {
-        return mCurrentPos;
-    }
+    Position MovementHandler::getCurrentPosition() const { return mCurrentPos; }
 
-    GameLevel* MovementHandler::getLevel()
-    {
-        return mLevel;
-    }
+    GameLevel* MovementHandler::getLevel() { return mLevel; }
 
     void MovementHandler::update(int32_t actorId)
     {

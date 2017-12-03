@@ -1,8 +1,8 @@
 #ifndef DRAW_COMMAND_H
 #define DRAW_COMMAND_H
 
+#include <Rocket/Core.h>
 #include <misc/disablewarn.h>
-    #include <Rocket/Core.h>
 #include <misc/enablewarn.h>
 
 #include <vector>
@@ -23,7 +23,7 @@ struct DrawCommand
         Rocket::Core::TextureHandle texture;
         Rocket::Core::Vector2f translation;
     } draw;
-    
+
     struct
     {
         int x;

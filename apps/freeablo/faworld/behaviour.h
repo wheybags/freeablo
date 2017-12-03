@@ -26,7 +26,7 @@ namespace FAWorld
         virtual void save(FASaveGame::GameSaver& saver) = 0;
         virtual ~Behaviour() {}
 
-        void attach(Actor* actor) 
+        void attach(Actor* actor)
         {
             assert(mActor == nullptr);
             mActor = actor;
@@ -35,7 +35,7 @@ namespace FAWorld
         virtual void update() = 0;
 
     protected:
-        Actor * mActor = nullptr;
+        Actor* mActor = nullptr;
     };
 
     // Does nothing
@@ -66,7 +66,6 @@ namespace FAWorld
     private:
         Tick mTicksSinceLastAction;
     };
-
 }
 
 #endif

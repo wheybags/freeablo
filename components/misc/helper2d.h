@@ -1,7 +1,7 @@
 #ifndef HELPER_2D_H
 #define HELPER_2D_H
 
-#include <stdlib.h>
+#include <cstdint>
 
 namespace Misc
 {
@@ -11,14 +11,15 @@ namespace Misc
     ///
     template <class From, class Retval> class Helper2D
     {
-        private:
-            From& parent;
-            int32_t x;
-            Retval (*func)(int32_t, int32_t, From&); 
-        public:    
-            Helper2D(From& _p, int32_t _x, Retval (*_func)(int32_t, int32_t, From&)) : parent(_p), x(_x), func(_func) {}
-            
-            Retval operator[](int32_t y){ return func(x, y, parent); }
+    private:
+        From& parent;
+        int32_t x;
+        Retval (*func)(int32_t, int32_t, From&);
+
+    public:
+        Helper2D(From& _p, int32_t _x, Retval (*_func)(int32_t, int32_t, From&)) : parent(_p), x(_x), func(_func) {}
+
+        Retval operator[](int32_t y) { return func(x, y, parent); }
     };
 }
 
