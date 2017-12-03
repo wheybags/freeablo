@@ -1,18 +1,17 @@
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H
-#include <string>
-#include <chrono>
-#include <queue>
-#include <functional>
 #include "textcolor.h"
+#include <chrono>
+#include <functional>
+#include <queue>
+#include <string>
 
-
-#include <fa_nuklear.h>
 #include <boost/variant/variant_fwd.hpp>
+#include <fa_nuklear.h>
 #include <memory>
 
-
-namespace Engine {
+namespace Engine
+{
     class EngineMain;
 }
 
@@ -82,13 +81,13 @@ namespace FAGui
     class GuiManager
     {
         using self = GuiManager;
+
     public:
         GuiManager(Engine::EngineMain& engine, FAWorld::Player& player);
-        ~GuiManager ();
-        void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void()> action,
-                                bool isModal);
-        void nk_fa_begin_image_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background,
-                                      std::function<void()> action, bool isModal);
+        ~GuiManager();
+        void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void()> action, bool isModal);
+        void nk_fa_begin_image_window(
+            nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void()> action, bool isModal);
         void dialog(nk_context* ctx);
         void updateAnimations();
         void updateGameUI(bool paused, nk_context* ctx);
@@ -97,25 +96,23 @@ namespace FAGui
         void clearDescription();
         bool isInventoryShown() const;
         void popDialogData();
-        void pushDialogData(DialogData &&data);
+        void pushDialogData(DialogData&& data);
         // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
-        bool isModalDlgShown () const;
-        void startingScreen ();
+        bool isModalDlgShown() const;
+        void startingScreen();
 
     private:
         void togglePanel(PanelType type);
-        template <class Function>
-        void drawPanel(nk_context* ctx, PanelType panelType, Function op);
-        void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement,
-                  ItemHighlightInfo highligh);
+        template <class Function> void drawPanel(nk_context* ctx, PanelType panelType, Function op);
+        void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highligh);
         void inventoryPanel(nk_context* ctx);
         void characterPanel(nk_context* ctx);
         void questsPanel(nk_context* ctx);
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
         void bottomMenu(nk_context* ctx);
-        static void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white,
-                       nk_flags alignment = NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_MIDDLE);
+        static void
+        smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white, nk_flags alignment = NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_MIDDLE);
         int smallTextWidth(const char* text);
         void descriptionPanel(nk_context* ctx);
         PanelType* panel(PanelPlacement placement);

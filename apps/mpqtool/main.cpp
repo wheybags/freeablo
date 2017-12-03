@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     int read = 1;
     uint8_t buffer[1024];
 
-    while(read > 0)
+    while (read > 0)
     {
         read = file.FAfread(buffer, 1, sizeof(buffer));
         fwrite(buffer, 1, read, output);

@@ -3,9 +3,5 @@
 namespace FAWorld
 {
 
-    bool Faction::canAttack(const Faction& other) const
-    {
-        return mFaction != other.mFaction;
-    }
-
+    bool Faction::canAttack(const Faction& other) const { return mFaction != other.mFaction; }
 }

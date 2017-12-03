@@ -1,16 +1,16 @@
 /*#include <QApplication>
+#include <QDesktopWidget>
 #include <QDir>
 #include <QStyle>
-#include <QDesktopWidget>
 #include <SDL.h>*
 
 #include "mainwindow.h"*/
 
+#include "../components/settings/settings.h"
+#include <climits>
+#include <faio/faio.h>
 #include <nuklearmisc/standaloneguispritehandler.h>
 #include <nuklearmisc/widgets.h>
-#include <faio/faio.h>
-#include <climits>
-#include "../components/settings/settings.h"
 
 int main(int, char** argv)
 {
@@ -31,7 +31,6 @@ int main(int, char** argv)
         std::unique_ptr<NuklearMisc::GuiSprite> banner(guiHandler.getSprite(Render::loadNonCelSprite("resources/launcher/banner.png")));
         std::unique_ptr<NuklearMisc::GuiSprite> graphicsHeader(guiHandler.getSprite(Render::loadNonCelSprite("resources/launcher/graphics.png")));
         std::unique_ptr<NuklearMisc::GuiSprite> playHeader(guiHandler.getSprite(Render::loadNonCelSprite("resources/launcher/play.png")));
-
 
         int32_t bannerW, bannerH;
         Render::spriteSize(banner->getSprite()->operator[](0), bannerW, bannerH);
@@ -67,11 +66,11 @@ int main(int, char** argv)
         ctx->style.window.group_padding = nk_vec2(0, 0);
 
         bool quit = false;
-        while(!quit)
+        while (!quit)
         {
             renderSettings = Render::getWindowSize();
 
-            if(nk_begin(ctx, "main_window", nk_rect(0, 0, renderSettings.windowWidth, renderSettings.windowHeight), NK_WINDOW_NO_SCROLLBAR))
+            if (nk_begin(ctx, "main_window", nk_rect(0, 0, renderSettings.windowWidth, renderSettings.windowHeight), NK_WINDOW_NO_SCROLLBAR))
             {
                 struct nk_rect bounds = nk_window_get_content_region(ctx);
 
@@ -82,7 +81,7 @@ int main(int, char** argv)
 
                 nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(banner->getNkImage(0)));
                 {
-                    if(nk_group_begin(ctx, "mode_selector", NK_WINDOW_NO_SCROLLBAR))
+                    if (nk_group_begin(ctx, "mode_selector", NK_WINDOW_NO_SCROLLBAR))
                     {
                         auto headerBounds = nk_window_get_content_region(ctx);
 
@@ -91,33 +90,33 @@ int main(int, char** argv)
                             float buttonSize = 0.7f;
                             nk_color selectedColor = nk_rgb(255, 255, 255);
 
-                            nk_layout_space_push(ctx, nk_rect(0.1*headerBounds.h, 0.1*headerBounds.h, buttonSize*headerBounds.h, buttonSize*headerBounds.h));
-                            if(nk_button_image_styled(ctx, &headerButtonStyle, playHeader->getNkImage(0)))
+                            nk_layout_space_push(ctx,
+                                                 nk_rect(0.1 * headerBounds.h, 0.1 * headerBounds.h, buttonSize * headerBounds.h, buttonSize * headerBounds.h));
+                            if (nk_button_image_styled(ctx, &headerButtonStyle, playHeader->getNkImage(0)))
                                 currentTab = TabType::Play;
 
-                            nk_layout_space_push(ctx, nk_rect(0.1*headerBounds.h,
-                                                              0.1*headerBounds.h + buttonSize*headerBounds.h,
-                                                              buttonSize*headerBounds.h,
-                                                              0.25*headerBounds.h));
+                            nk_layout_space_push(ctx,
+                                                 nk_rect(0.1 * headerBounds.h,
+                                                         0.1 * headerBounds.h + buttonSize * headerBounds.h,
+                                                         buttonSize * headerBounds.h,
+                                                         0.25 * headerBounds.h));
 
                             nk_label_colored(ctx, "PLAY", NK_TEXT_CENTERED, currentTab == TabType::Play ? selectedColor : ctx->style.text.color);
 
+                            nk_layout_space_push(
+                                ctx,
+                                nk_rect((buttonSize + 0.2) * headerBounds.h, 0.1 * headerBounds.h, buttonSize * headerBounds.h, buttonSize * headerBounds.h));
 
-                            nk_layout_space_push(ctx, nk_rect((buttonSize+0.2)*headerBounds.h,
-                                                              0.1*headerBounds.h,
-                                                              buttonSize*headerBounds.h,
-                                                              buttonSize*headerBounds.h));
-
-                            if(nk_button_image_styled(ctx, &headerButtonStyle, graphicsHeader->getNkImage(0)))
+                            if (nk_button_image_styled(ctx, &headerButtonStyle, graphicsHeader->getNkImage(0)))
                                 currentTab = TabType::Graphics;
 
-                            nk_layout_space_push(ctx, nk_rect((buttonSize+0.2)*headerBounds.h,
-                                                              0.1*headerBounds.h + buttonSize*headerBounds.h,
-                                                              buttonSize*headerBounds.h,
-                                                              0.25*headerBounds.h));
+                            nk_layout_space_push(ctx,
+                                                 nk_rect((buttonSize + 0.2) * headerBounds.h,
+                                                         0.1 * headerBounds.h + buttonSize * headerBounds.h,
+                                                         buttonSize * headerBounds.h,
+                                                         0.25 * headerBounds.h));
 
                             nk_label_colored(ctx, "GRAPHICS", NK_TEXT_CENTERED, currentTab == TabType::Graphics ? selectedColor : ctx->style.text.color);
-
                         }
                         nk_layout_space_end(ctx);
 
@@ -129,9 +128,9 @@ int main(int, char** argv)
                 nk_layout_row_dynamic(ctx, bounds.h - bannerHeightNow, 1);
 
                 nk_style_push_vec2(ctx, &ctx->style.window.group_padding, nk_vec2(10, 10));
-                if(nk_group_begin(ctx, "bottom section", NK_WINDOW_NO_SCROLLBAR))
+                if (nk_group_begin(ctx, "bottom section", NK_WINDOW_NO_SCROLLBAR))
                 {
-                    if(currentTab == TabType::Play)
+                    if (currentTab == TabType::Play)
                     {
                         nk_layout_row_dynamic(ctx, rowHeight, 1);
                         NuklearMisc::nk_file_pick(ctx, "Diablo.exe", diabloExePath, "exe", rowHeight);
@@ -152,20 +151,23 @@ int main(int, char** argv)
 
                     nk_layout_space_begin(ctx, NK_STATIC, remainingSpace, INT_MAX);
                     {
-                        nk_layout_space_push(ctx, nk_rect(bottomSectionBounds.w - bottomSectionBounds.w/4.0, remainingSpace - rowHeight - 10, bottomSectionBounds.w/4.0, rowHeight));
+                        nk_layout_space_push(
+                            ctx,
+                            nk_rect(
+                                bottomSectionBounds.w - bottomSectionBounds.w / 4.0, remainingSpace - rowHeight - 10, bottomSectionBounds.w / 4.0, rowHeight));
                         nk_style_push_vec2(ctx, &ctx->style.window.group_padding, nk_vec2(0, 0));
 
-                        if(nk_group_begin(ctx, "bottom_menu", NK_WINDOW_NO_SCROLLBAR))
+                        if (nk_group_begin(ctx, "bottom_menu", NK_WINDOW_NO_SCROLLBAR))
                         {
                             nk_layout_row_dynamic(ctx, rowHeight, 2);
 
-                            if(nk_button_label(ctx, "Play"))
+                            if (nk_button_label(ctx, "Play"))
                             {
                                 quit = true;
                                 runFreeablo = true;
                             }
 
-                            if(nk_button_label(ctx, "Close"))
+                            if (nk_button_label(ctx, "Close"))
                                 quit = true;
 
                             nk_group_end(ctx);
@@ -181,8 +183,8 @@ int main(int, char** argv)
             }
             nk_end(ctx);
 
-            if(guiHandler.update())
-               quit = true;
+            if (guiHandler.update())
+                quit = true;
         }
 
         settings.set<std::string>("Game", "PathEXE", diabloExePath);
@@ -193,7 +195,7 @@ int main(int, char** argv)
         FAIO::quit();
     }
 
-    if(runFreeablo)
+    if (runFreeablo)
         system((boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string().c_str());
 
     return 0;

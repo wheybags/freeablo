@@ -1,7 +1,7 @@
 #pragma once
 
-#include <serial/loader.h>
 #include <functional>
+#include <serial/loader.h>
 #include <vector>
 
 namespace FASaveGame

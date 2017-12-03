@@ -5,7 +5,7 @@
 namespace FAWorld
 {
     enum class HoverType
-     {
+    {
         actor,
         item,
         none,
@@ -17,10 +17,8 @@ namespace FAWorld
         int32_t mActorId = 0;
         Tile mItemTile;
 
-      public:
-        HoverState()
-        {
-        }
+    public:
+        HoverState() {}
         bool applyIfNeeded(const HoverState& newState);
         bool setItemHovered(const FAWorld::Tile& tile);
         bool isItemHovered(const FAWorld::Tile& tile) const;
@@ -31,10 +29,7 @@ namespace FAWorld
         bool setNothingHovered();
         bool isActorHovered(int32_t actorId) const;
 
-      private:
-        HoverState(HoverType typeArg) : mType(typeArg)
-        {
-        }
+    private:
+        HoverState(HoverType typeArg) : mType(typeArg) {}
     };
 }
-

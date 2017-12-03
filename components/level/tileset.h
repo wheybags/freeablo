@@ -1,8 +1,8 @@
 #ifndef TIL_H
 #define TIL_H
 
-#include <string>
 #include <stdint.h>
+#include <string>
 #include <vector>
 
 namespace Level
@@ -11,15 +11,15 @@ namespace Level
 
     class TileSet
     {
-        public:
-            TileSet(const std::string&);
-            TileSet() {}
+    public:
+        TileSet(const std::string&);
+        TileSet() {}
 
-            const TilBlock& operator[] (size_t index) const;
-            size_t size() const;
+        const TilBlock& operator[](size_t index) const;
+        size_t size() const;
 
-        private:
-            std::vector<TilBlock> mBlocks;
+    private:
+        std::vector<TilBlock> mBlocks;
     };
 }
 

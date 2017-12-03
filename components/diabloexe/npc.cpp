@@ -18,17 +18,17 @@ namespace DiabloExe
 
         rotation = _rotation;
     }
-    
+
     std::string Npc::dump() const
     {
         std::stringstream ss;
 
-        ss << "{" << std::endl <<
-        "\tname: " << name << std::endl <<
-        "\tcelPath: " << celPath << std::endl <<
-        "\tx: " << (int)x << std::endl <<
-        "\ty: " << (int)y << std::endl <<
-        "}" << std::endl;
+        ss << "{" << std::endl
+           << "\tname: " << name << std::endl
+           << "\tcelPath: " << celPath << std::endl
+           << "\tx: " << (int)x << std::endl
+           << "\ty: " << (int)y << std::endl
+           << "}" << std::endl;
 
         return ss.str();
     }

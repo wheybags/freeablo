@@ -1,8 +1,8 @@
 #ifndef THREAD_MANAGER_H
 #define THREAD_MANAGER_H
 
-#include <string>
 #include <boost/lockfree/spsc_queue.hpp>
+#include <string>
 
 #include "../faaudio/audiomanager.h"
 
@@ -37,25 +37,25 @@ namespace Engine
 
     class ThreadManager
     {
-        public:
-            static ThreadManager* get();
-            ThreadManager();
-            void run();
-            void playMusic(const std::string& path);
-            void playSound(const std::string& path);
-            void stopSound();
-            void sendRenderState(FARender::RenderState* state);
-            void sendSpritesForPreload(std::vector<uint32_t> sprites);
+    public:
+        static ThreadManager* get();
+        ThreadManager();
+        void run();
+        void playMusic(const std::string& path);
+        void playSound(const std::string& path);
+        void stopSound();
+        void sendRenderState(FARender::RenderState* state);
+        void sendSpritesForPreload(std::vector<uint32_t> sprites);
 
-        private:
-            void handleMessage(const Message& message);
+    private:
+        void handleMessage(const Message& message);
 
-            static ThreadManager* mThreadManager; ///< Singleton instance
-            boost::lockfree::spsc_queue<Message, boost::lockfree::capacity<100> > mQueue;
-            FARender::RenderState* mRenderState;
-            FAAudio::AudioManager mAudioManager;
+        static ThreadManager* mThreadManager; ///< Singleton instance
+        boost::lockfree::spsc_queue<Message, boost::lockfree::capacity<100>> mQueue;
+        FARender::RenderState* mRenderState;
+        FAAudio::AudioManager mAudioManager;
 
-            std::vector<uint32_t> mSpritesToPreload;
+        std::vector<uint32_t> mSpritesToPreload;
     };
 }
 

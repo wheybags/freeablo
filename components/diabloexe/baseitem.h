@@ -2,11 +2,9 @@
 #define BASEITEM_H
 #include <stdint.h>
 
-#include <string>
-#include <map>
 #include <faio/fafileobject.h>
-
-
+#include <map>
+#include <string>
 
 namespace DiabloExe
 {
@@ -35,10 +33,10 @@ namespace DiabloExe
         uint32_t minArmourClass; // LONG LIVE OUR GLORIOUS QUEEN
         uint32_t maxArmourClass;
 
-        uint8_t  reqStr;
-        uint8_t  reqMagic;
-        uint8_t  reqDex;
-        uint8_t  reqVit;
+        uint8_t reqStr;
+        uint8_t reqMagic;
+        uint8_t reqDex;
+        uint8_t reqVit;
 
         uint32_t specialEffect;
         uint32_t magicCode;
@@ -55,25 +53,7 @@ namespace DiabloExe
     private:
         BaseItem(FAIO::FAFileObject& exe, size_t codeOffset);
         friend class DiabloExe;
-
-
     };
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif // BASEITEM_H

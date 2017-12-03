@@ -9,16 +9,18 @@ enum nk_buttons;
 
 namespace FAGui
 {
-       enum struct halign_t {
-            left,
-            center,
-            right,
-        };
-        enum struct valign_t {
-            top,
-            center,
-            bottom,
-        };
+    enum struct halign_t
+    {
+        left,
+        center,
+        right,
+    };
+    enum struct valign_t
+    {
+        top,
+        center,
+        bottom,
+    };
 
     // returns center of nk_rect as nk_vec2
     struct nk_vec2 center(const struct nk_rect& rect);

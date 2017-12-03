@@ -1,9 +1,9 @@
 #pragma once
 
-#include <unordered_map>
-#include <string>
-#include <functional>
 #include <cstdint>
+#include <functional>
+#include <string>
+#include <unordered_map>
 
 namespace FASaveGame
 {

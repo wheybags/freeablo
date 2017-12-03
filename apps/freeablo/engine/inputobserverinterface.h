@@ -6,7 +6,8 @@ namespace Misc
     struct Point;
 }
 
-namespace Engine {
+namespace Engine
+{
 
     enum KeyboardInputAction
     {
@@ -38,7 +39,6 @@ namespace Engine {
     public:
         virtual void notify(MouseInputAction action, Misc::Point mousePosition) = 0;
     };
-
 }
 
 #endif

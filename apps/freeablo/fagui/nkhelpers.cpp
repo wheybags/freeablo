@@ -2,20 +2,14 @@
 
 #include "fa_nuklear.h"
 
-struct nk_vec2 FAGui::center(const struct nk_rect& rect)
-{
-    return {rect.x + rect.w / 2, rect.y + rect.h / 2};
-}
+struct nk_vec2 FAGui::center(const struct nk_rect& rect) { return {rect.x + rect.w / 2, rect.y + rect.h / 2}; }
 
 bool FAGui::nk_widget_is_mouse_click_down(nk_context* ctx, nk_buttons buttons, bool down)
 {
     return nk_widget_has_mouse_click_down(ctx, buttons, down) && ctx->input.mouse.buttons[buttons].clicked;
 }
 
-bool FAGui::nk_inactive_widget_is_hovered(nk_context* ctx)
-{
-    return nk_input_is_mouse_hovering_rect(&ctx->input, nk_widget_bounds(ctx));
-}
+bool FAGui::nk_inactive_widget_is_hovered(nk_context* ctx) { return nk_input_is_mouse_hovering_rect(&ctx->input, nk_widget_bounds(ctx)); }
 
 bool FAGui::nk_widget_mouse_left(nk_context* ctx)
 {
@@ -26,7 +20,7 @@ struct nk_rect FAGui::alignRect(const struct nk_rect& inner_rect, const struct n
 {
     auto c = center(outer_rect);
     auto shift = (outer_rect.w - inner_rect.w) / 2;
-    switch(halign)
+    switch (halign)
     {
         case halign_t::left:
             c.x -= shift;
@@ -38,7 +32,7 @@ struct nk_rect FAGui::alignRect(const struct nk_rect& inner_rect, const struct n
             break;
     }
     shift = (outer_rect.h - inner_rect.h) / 2;
-    switch(valign)
+    switch (valign)
     {
         case valign_t::top:
             c.y -= shift;

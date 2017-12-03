@@ -49,7 +49,7 @@ namespace FARender
     std::pair<FARender::FASpriteGroup*, int32_t> AnimationPlayer::getCurrentFrame()
     {
         if (mCurrentAnim == nullptr)
-            return std::make_pair <FARender::FASpriteGroup*, int32_t >(nullptr, 0);
+            return std::make_pair<FARender::FASpriteGroup*, int32_t>(nullptr, 0);
 
         int32_t currentFrame;
         float progress = ((float)mTicksSinceAnimStarted) / ((float)mPlayingAnimDuration);
@@ -62,24 +62,24 @@ namespace FARender
             {
                 switch (mPlayingAnimType)
                 {
-                case AnimationType::Once:
-                    playAnimation(nullptr, 0, AnimationType::Looped);
-                    return getCurrentFrame();
-                case AnimationType::FreezeAtEnd:
-                    currentFrame = mCurrentAnim->getAnimLength() - 1;
-                    break;
-                case AnimationType::Looped:
-                    currentFrame = currentFrame % mCurrentAnim->getAnimLength();
-                    break;
-                case AnimationType::BySequence:
+                    case AnimationType::Once:
+                        playAnimation(nullptr, 0, AnimationType::Looped);
+                        return getCurrentFrame();
+                    case AnimationType::FreezeAtEnd:
+                        currentFrame = mCurrentAnim->getAnimLength() - 1;
+                        break;
+                    case AnimationType::Looped:
+                        currentFrame = currentFrame % mCurrentAnim->getAnimLength();
+                        break;
+                    case AnimationType::BySequence:
                     // handled below
-                case AnimationType::ENUM_END:
-                    break;
+                    case AnimationType::ENUM_END:
+                        break;
                 }
             }
         }
         else
-            currentFrame = mFrameSequence[static_cast<int32_t> (progress) % mFrameSequence.size ()];
+            currentFrame = mFrameSequence[static_cast<int32_t>(progress) % mFrameSequence.size()];
 
         return std::make_pair(mCurrentAnim, currentFrame);
     }
@@ -101,13 +101,7 @@ namespace FARender
         mFrameSequence = frameSequence;
     }
 
-    void AnimationPlayer::replaceAnimation(FARender::FASpriteGroup* anim)
-    {
-        mCurrentAnim = anim;
-    }
+    void AnimationPlayer::replaceAnimation(FARender::FASpriteGroup* anim) { mCurrentAnim = anim; }
 
-    void AnimationPlayer::update()
-    {
-        mTicksSinceAnimStarted++;
-    }
+    void AnimationPlayer::update() { mTicksSinceAnimStarted++; }
 }

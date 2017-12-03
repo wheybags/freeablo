@@ -6,8 +6,8 @@
 
 #include <enet/enet.h> // TODO: remove
 
-#include <misc/stdhashes.h>
 #include "hoverstate.h"
+#include <misc/stdhashes.h>
 
 namespace FARender
 {
@@ -36,7 +36,7 @@ namespace FAWorld
         virtual bool isPassable(int x, int y) const = 0;
     };
 
-    class GameLevel :public GameLevelImpl
+    class GameLevel : public GameLevelImpl
     {
     public:
         GameLevel(Level::Level level, size_t levelIndex);
@@ -75,19 +75,16 @@ namespace FAWorld
 
         void removeActor(Actor* actor);
 
-        int32_t getLevelIndex()
-        {
-            return mLevelIndex;
-        }
+        int32_t getLevelIndex() { return mLevelIndex; }
 
         bool isPassableFor(int i, int j, const Actor* actor) const;
-        bool dropItem(std::unique_ptr <Item>&& item, const Actor& actor, const Tile &tile);
+        bool dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile);
 
         Actor* getActorById(int32_t id);
 
         void getActors(std::vector<Actor*>& actors);
         HoverState& getHoverState();
-        ItemMap &getItemMap();
+        ItemMap& getItemMap();
 
     private:
         GameLevel();
@@ -96,8 +93,8 @@ namespace FAWorld
         int32_t mLevelIndex = 0;
 
         std::vector<Actor*> mActors;
-        std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D;    ///< Map of points to actors.
-                                                                    ///< Where an actor straddles two squares, they shall be placed in both.
+        std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D; ///< Map of points to actors.
+                                                                             ///< Where an actor straddles two squares, they shall be placed in both.
         friend class FARender::Renderer;
         HoverState mHoverState;
         std::unique_ptr<ItemMap> mItemMap;

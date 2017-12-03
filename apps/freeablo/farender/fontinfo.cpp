@@ -1,11 +1,11 @@
 #include "fontinfo.h"
 
-#include <boost/range/irange.hpp>
 #include "cel/celdecoder.h"
+#include <boost/range/irange.hpp>
 
-#include <numeric>
-#include "render/levelobjects.h"
 #include "faio/fafileobject.h"
+#include "render/levelobjects.h"
+#include <numeric>
 
 namespace FARender
 {
@@ -16,16 +16,15 @@ namespace FARender
         uvLeft.fill(1.f);
         mapping.fill(-1);
         int index = 0, curOffset = 0;
-        auto addLetters = [&](std::initializer_list<char> letters)
-        {
+        auto addLetters = [&](std::initializer_list<char> letters) {
             int actualWidth = 0;
-            for(auto i : boost::irange(0, cel[index].mWidth))
-                for(auto j : boost::irange(0, cel[index].mHeight))
-                    if(cel[index][i][j].visible)
+            for (auto i : boost::irange(0, cel[index].mWidth))
+                for (auto j : boost::irange(0, cel[index].mHeight))
+                    if (cel[index][i][j].visible)
                         actualWidth = std::max(actualWidth, i);
             actualWidth += 2;
             actualWidth = std::min(actualWidth, cel[index].mWidth);
-            for(auto c : letters)
+            for (auto c : letters)
             {
                 widthPx[c] = actualWidth;
                 uvLeft[c] = (curOffset + 0.f) / totalWidth;
@@ -35,35 +34,33 @@ namespace FARender
             ++index;
         };
 
-        for(char c = 'a'; c <= 'z'; c++)
+        for (char c = 'a'; c <= 'z'; c++)
             addLetters({c, static_cast<char>(toupper(c))});
 
-        for(char c = '1'; c <= '9'; c++)
+        for (char c = '1'; c <= '9'; c++)
             addLetters({c});
 
         addLetters({'0'});
 
-        for(auto c : {
-            '-', '=', '+', '(', ')', '[', ']', '"', '\0'/*TODO: figure out unicode for this symbol*/,
-            '`', '\'',':',';',',','.','/','?','!','&','%',
-            '#','$','*','<','>','@','\\','^','_','|','~'
-        })
+        for (auto c : {'-', '=',  '+', '(', ')', '[', ']', '"', '\0' /*TODO: figure out unicode for this symbol*/,
+                       '`', '\'', ':', ';', ',', '.', '/', '?', '!',
+                       '&', '%',  '#', '$', '*', '<', '>', '@', '\\',
+                       '^', '_',  '|', '~'})
             addLetters({c});
         widthPx[' '] = 11;
     }
 
     float CelFontInfo::getWidth(nk_handle handle, float /*h*/, const char* s, int len)
     {
-        auto info = static_cast<self *>(handle.ptr);
+        auto info = static_cast<self*>(handle.ptr);
         return std::accumulate(s, s + len, 0, [info](int sum, char c) { return sum += (c >= 0 ? info->widthPx[c] : 0); });
     }
 
-    void CelFontInfo::queryGlyph(nk_handle handle, float /*font_height*/, nk_user_font_glyph* glyph, nk_rune codepoint,
-                                 nk_rune /*next_codepoint*/)
+    void CelFontInfo::queryGlyph(nk_handle handle, float /*font_height*/, nk_user_font_glyph* glyph, nk_rune codepoint, nk_rune /*next_codepoint*/)
     {
-        if(codepoint > 127)
+        if (codepoint > 127)
             return;
-        auto info = static_cast<self *>(handle.ptr);
+        auto info = static_cast<self*>(handle.ptr);
         glyph->width = info->widthPx[codepoint];
         glyph->height = info->nkFont.height;
         glyph->xadvance = info->widthPx[codepoint];
@@ -71,7 +68,7 @@ namespace FARender
         glyph->uv[0].y = 0.f;
         glyph->uv[1].x = info->uvLeft[codepoint] + info->uvWidth[codepoint];
         glyph->uv[1].y = 1.f;
-        if(codepoint == ' ')
+        if (codepoint == ' ')
             glyph->uv[0] = glyph->uv[1] = {0.f, 0.f};
         glyph->offset.x = 0.f;
         glyph->offset.y = 0.f;
@@ -80,8 +77,8 @@ namespace FARender
     void PcxFontInfo::initWidths(const std::string& binPath, int textureWidth)
     {
         FAIO::FAFileObject file_handle(binPath);
-        std::vector<unsigned char> buf (file_handle.FAsize());
-        file_handle.FAfread(buf.data (), 1, buf.size ());
+        std::vector<unsigned char> buf(file_handle.FAsize());
+        file_handle.FAfread(buf.data(), 1, buf.size());
         for (int i = 0; i < charCount; ++i)
         {
             widthPx[i] = buf[i + 2];
@@ -92,15 +89,15 @@ namespace FARender
 
     float PcxFontInfo::getWidth(nk_handle handle, float /*h*/, const char* s, int len)
     {
-        auto info = static_cast<self *>(handle.ptr);
+        auto info = static_cast<self*>(handle.ptr);
         return std::accumulate(s, s + len, 0, [info](int sum, char c) { return sum += info->widthPx[static_cast<unsigned char>(c)]; });
     }
 
     void PcxFontInfo::queryGlyph(nk_handle handle, float /*font_height*/, nk_user_font_glyph* glyph, nk_rune codepoint, nk_rune /*next_codepoint*/)
     {
-        if(codepoint > 255)
+        if (codepoint > 255)
             return;
-        auto info = static_cast<self *>(handle.ptr);
+        auto info = static_cast<self*>(handle.ptr);
         glyph->width = info->widthPx[codepoint];
         glyph->height = info->nkFont.height;
         glyph->xadvance = info->widthPx[codepoint];

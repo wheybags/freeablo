@@ -1,8 +1,8 @@
 #ifndef ACTORSTATS_H
 #define ACTORSTATS_H
 
-#include <stdint.h>
 #include <misc/maxcurrentitem.h>
+#include <stdint.h>
 
 namespace DiabloExe
 {
@@ -33,4 +33,4 @@ namespace FAWorld
     };
 }
 
-#endif //ACTORSTATS_H
+#endif // ACTORSTATS_H

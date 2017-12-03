@@ -3,11 +3,7 @@
 
 namespace FAWorld
 {
-    ActorStats::ActorStats(FASaveGame::GameLoader& loader)
-        : mHp(loader)
-        , mMana(loader)
-        , mAttackDamage(loader.load<int32_t>())
-    {}
+    ActorStats::ActorStats(FASaveGame::GameLoader& loader) : mHp(loader), mMana(loader), mAttackDamage(loader.load<int32_t>()) {}
 
     void ActorStats::save(FASaveGame::GameSaver& saver)
     {

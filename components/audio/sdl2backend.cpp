@@ -1,14 +1,13 @@
 #include "audio.h"
 
 #include <iostream>
-#include <utility>
 #include <stdint.h>
+#include <utility>
 
 #include <SDL.h>
 #include <SDL_mixer.h>
 
 #include <faio/fafileobject.h>
-
 
 namespace Audio
 {
@@ -34,9 +33,9 @@ namespace Audio
         uint8_t* buffer = new uint8_t[len];
         f.FAfread(buffer, 1, len);
 
-        SDL_RWops *rw = SDL_RWFromMem(buffer, len);
+        SDL_RWops* rw = SDL_RWFromMem(buffer, len);
 
-        Music* mus = (Music*) new std::pair<Mix_Music*, uint8_t*>(Mix_LoadMUS_RW(rw, 1), buffer);
+        Music* mus = (Music*)new std::pair<Mix_Music*, uint8_t*>(Mix_LoadMUS_RW(rw, 1), buffer);
         return mus;
     }
 
@@ -48,10 +47,7 @@ namespace Audio
         delete data;
     }
 
-    void playMusic(Music* mus)
-    {
-        Mix_PlayMusic(((std::pair<Mix_Music*, uint8_t*>*)mus)->first, -1);
-    }
+    void playMusic(Music* mus) { Mix_PlayMusic(((std::pair<Mix_Music*, uint8_t*>*)mus)->first, -1); }
 
     Sound* loadSound(const std::string& path)
     {
@@ -60,9 +56,9 @@ namespace Audio
         uint8_t* buffer = new uint8_t[len];
         f.FAfread(buffer, 1, len);
 
-        SDL_RWops *rw = SDL_RWFromMem(buffer, len);
+        SDL_RWops* rw = SDL_RWFromMem(buffer, len);
 
-        Sound* sound = (Sound*) new std::pair<Mix_Chunk*, uint8_t*>(Mix_LoadWAV_RW(rw, 1), buffer);
+        Sound* sound = (Sound*)new std::pair<Mix_Chunk*, uint8_t*>(Mix_LoadWAV_RW(rw, 1), buffer);
         return sound;
     }
 
@@ -80,13 +76,7 @@ namespace Audio
         return Mix_PlayChannel(-1, data->first, 0);
     }
 
-    void stopSound()
-    {
-        Mix_HaltChannel(-1);
-    }
+    void stopSound() { Mix_HaltChannel(-1); }
 
-    bool channelPlaying(int32_t channel)
-    {
-        return Mix_Playing(channel) != 0;
-    }
+    bool channelPlaying(int32_t channel) { return Mix_Playing(channel) != 0; }
 }

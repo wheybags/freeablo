@@ -7,7 +7,7 @@
 namespace DiabloExe
 {
 
-    BaseItem::BaseItem(){}
+    BaseItem::BaseItem() {}
 
     BaseItem::BaseItem(FAIO::FAFileObject& exe, size_t codeOffset)
     {
@@ -25,20 +25,19 @@ namespace DiabloExe
 
         unknown1 = exe.read16();
 
-
         uint32_t tempName = exe.read32();
         uint32_t tempSecondName = exe.read32();
         qualityLevel = exe.read32();
         durability = exe.read32();
         minAttackDamage = exe.read32();
         maxAttackDamage = exe.read32();
-        minArmourClass  = exe.read32();
-        maxArmourClass  = exe.read32();
+        minArmourClass = exe.read32();
+        maxArmourClass = exe.read32();
 
         reqStr = exe.read8();
         reqMagic = exe.read8();
-        reqDex   = exe.read8();
-        reqVit   = exe.read8();
+        reqDex = exe.read8();
+        reqVit = exe.read8();
 
         specialEffect = exe.read32();
         magicCode = exe.read32();
@@ -48,7 +47,7 @@ namespace DiabloExe
         price2 = exe.read32();
 
         itemName = exe.readCStringFromWin32Binary(tempName, codeOffset);
-        if(tempSecondName)
+        if (tempSecondName)
         {
             itemSecondName = exe.readCStringFromWin32Binary(tempSecondName, codeOffset);
         }
@@ -57,51 +56,47 @@ namespace DiabloExe
 
             itemSecondName = std::string();
         }
-
     }
 
     std::string BaseItem::dump() const
     {
         std::stringstream ss;
         ss << "{" << std::endl
-        << "\tactiveTrigger: " << +activTrigger << "," << std::endl
-        << "\titemType: " << +itemType << "," << std::endl
-        << "\tequipLoc: " << +equipLoc << "," << std::endl
-        << "\tgraphicValue: " << +graphicValue << "," << std::endl
-        << "\titemCode: " << +itemCode << "," << std::endl
-        << "\tuniqCode: " << +uniqCode << "," << std::endl
-        << "\tunknown0: " << +unknown0 << "," << std::endl
-        << "\tunknown1: " << +unknown1 << "," << std::endl
+           << "\tactiveTrigger: " << +activTrigger << "," << std::endl
+           << "\titemType: " << +itemType << "," << std::endl
+           << "\tequipLoc: " << +equipLoc << "," << std::endl
+           << "\tgraphicValue: " << +graphicValue << "," << std::endl
+           << "\titemCode: " << +itemCode << "," << std::endl
+           << "\tuniqCode: " << +uniqCode << "," << std::endl
+           << "\tunknown0: " << +unknown0 << "," << std::endl
+           << "\tunknown1: " << +unknown1 << "," << std::endl
 
+           << "\titemName: " << itemName << "," << std::endl
+           << "\titemSecondName: " << itemSecondName << "," << std::endl
+           << "\tqualityLevel: " << +qualityLevel << "," << std::endl
+           << "\tdurability: " << +durability << "," << std::endl
+           << "\tminAttackDamage: " << +minAttackDamage << "," << std::endl
+           << "\tmaxAttackDamage: " << +maxAttackDamage << "," << std::endl
 
-        << "\titemName: " << itemName << "," << std::endl
-        << "\titemSecondName: " << itemSecondName << "," << std::endl
-        << "\tqualityLevel: " << +qualityLevel << "," << std::endl
-        << "\tdurability: " << +durability << "," << std::endl
-        << "\tminAttackDamage: " << +minAttackDamage << "," << std::endl
-        << "\tmaxAttackDamage: " << +maxAttackDamage << "," << std::endl
+           << "\tminArmourClass: " << +minArmourClass << "," << std::endl
+           << "\tmaxArmourClass: " << +maxArmourClass << "," << std::endl
+           << "\treqStr: " << +reqStr << "," << std::endl
+           << "\treqMagic: " << +reqMagic << "," << std::endl
+           << "\treqDex: " << +reqDex << "," << std::endl
+           << "\treqVit: " << +reqVit << "," << std::endl
 
-        << "\tminArmourClass: " << +minArmourClass << "," << std::endl
-        << "\tmaxArmourClass: " << +maxArmourClass << "," << std::endl
-        << "\treqStr: " << +reqStr << "," << std::endl
-        << "\treqMagic: " << +reqMagic << "," << std::endl
-        << "\treqDex: " << +reqDex << "," << std::endl
-        << "\treqVit: " << +reqVit << "," << std::endl
+           << "\tspecialEffect : " << +specialEffect << "," << std::endl
 
-        << "\tspecialEffect : " << +specialEffect  << "," << std::endl
+           << "\tmagicCode: " << +magicCode << "," << std::endl
 
-        << "\tmagicCode: " << +magicCode << "," << std::endl
+           << "\tspellCode: " << +spellCode << "," << std::endl
+           << "\tuseOnce: " << +useOnce << "," << std::endl
 
-        << "\tspellCode: " << +spellCode << "," << std::endl
-        << "\tuseOnce: " << +useOnce << "," << std::endl
+           << "\tprice1: " << +price1 << "," << std::endl
 
-        << "\tprice1: " << +price1 << "," << std::endl
+           << "\tprice2: " << +price2 << "," << std::endl
 
-        << "\tprice2: " << +price2 << "," << std::endl
-
-        << "}" << std::endl;
+           << "}" << std::endl;
         return ss.str();
-
     }
-
 }

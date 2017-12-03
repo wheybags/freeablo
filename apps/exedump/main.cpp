@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include <faio/fafileobject.h>
 #include "settings/settings.h"
+#include <faio/fafileobject.h>
 
 int main(int, char**)
 {

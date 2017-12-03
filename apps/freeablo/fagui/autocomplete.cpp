@@ -14,14 +14,14 @@ namespace FAGui
 
     void AutoComplete::Trie::insert(const string& word)
     {
-        TrieNode * current = mHead.get();
+        TrieNode* current = mHead.get();
         current->prefixCount++;
 
         unsigned int wordLen = word.length();
-        for(unsigned int i = 0 ; i < wordLen ; i++ )
+        for (unsigned int i = 0; i < wordLen; i++)
         {
             char letter = word[i];
-            if(current->child[letter] == NULL)
+            if (current->child[letter] == NULL)
                 current->child[letter] = make_shared<TrieNode>();
             current->child[letter]->prefixCount++;
             current = current->child[letter].get();
@@ -30,22 +30,22 @@ namespace FAGui
         current->isEnd = true;
     }
 
-    void AutoComplete::Trie::findWordsWithPrefix(string& prefix, vector<string> & words)
+    void AutoComplete::Trie::findWordsWithPrefix(string& prefix, vector<string>& words)
     {
-        TrieNode * node = findParentWithPrefix(prefix);
+        TrieNode* node = findParentWithPrefix(prefix);
         traverse(prefix, *node, words);
     }
 
-    void AutoComplete::Trie::traverse(std::string& prefix, TrieNode const& node, vector<string> & words)
+    void AutoComplete::Trie::traverse(std::string& prefix, TrieNode const& node, vector<string>& words)
     {
         if (node.isEnd)
         {
             words.push_back(prefix);
         }
 
-        const TrieNode * current = &node;
+        const TrieNode* current = &node;
 
-        for(map<char, shared_ptr<TrieNode> >::const_iterator it = current->child.begin() ; it != current->child.end() ; it++)
+        for (map<char, shared_ptr<TrieNode>>::const_iterator it = current->child.begin(); it != current->child.end(); it++)
         {
             Trie::TrieNode const* pChild = it->second.get();
             if (pChild)
@@ -54,42 +54,35 @@ namespace FAGui
                 traverse(prefix, *pChild, words);
                 prefix.pop_back();
             }
-         }
+        }
     }
 
-
-    AutoComplete::Trie::TrieNode * AutoComplete::Trie::findParentWithPrefix(const string& prefix)
+    AutoComplete::Trie::TrieNode* AutoComplete::Trie::findParentWithPrefix(const string& prefix)
     {
-        Trie::TrieNode * current = mHead.get();
+        Trie::TrieNode* current = mHead.get();
         unsigned int prefixLen = prefix.length();
-        for(unsigned int i = 0 ; i < prefixLen ; i++ )
+        for (unsigned int i = 0; i < prefixLen; i++)
         {
-            if(current->child[prefix[i]])
+            if (current->child[prefix[i]])
                 current = current->child[prefix[i]].get();
         }
 
         return current;
     }
 
-    AutoComplete::AutoComplete()
-    {
-        prefixChanged();
-    }
+    AutoComplete::AutoComplete() { prefixChanged(); }
 
-    void AutoComplete::insertWord(const string& word)
-    {
-        mTrie.insert(word);
-    }
+    void AutoComplete::insertWord(const string& word) { mTrie.insert(word); }
 
     string AutoComplete::getNextWord(string& prefix)
     {
-        if(prefix == "")
+        if (prefix == "")
         {
             prefixChanged();
             return "";
         }
 
-        if(prefix != mLastPrefix)
+        if (prefix != mLastPrefix)
         {
             prefixChanged(prefix);
             mTrie.findWordsWithPrefix(prefix, mWords);
@@ -97,7 +90,7 @@ namespace FAGui
 
         string result = prefix;
 
-        if(mWords.size() > 0)
+        if (mWords.size() > 0)
         {
             result = mWords[mCounter % mWords.size()];
             mCounter++;

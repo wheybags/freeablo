@@ -1,11 +1,11 @@
 #pragma once
 #include <array>
-#include <string>
 #include <functional>
+#include <string>
 #include <vector>
 
-#include "textcolor.h"
 #include "../faworld/actoranimationmanager.h"
+#include "textcolor.h"
 
 namespace FAWorld
 {
@@ -19,10 +19,10 @@ namespace FAGui
     class DialogLineData
     {
     public:
-        DialogLineData& setAction(std::function<void ()> actionArg);
+        DialogLineData& setAction(std::function<void()> actionArg);
 
     public:
-        std::function<void ()> action;
+        std::function<void()> action;
         std::string text;
         bool alignCenter = false;
         bool isSeparator = false;

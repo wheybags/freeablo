@@ -1,10 +1,10 @@
 #ifndef ACTOR_BASESTATE_H
 #define ACTOR_BASESTATE_H
 
-#include <stddef.h>
-#include <statemachine/statemachine.h>
-#include <misc/misc.h>
 #include <boost/optional.hpp>
+#include <misc/misc.h>
+#include <statemachine/statemachine.h>
+#include <stddef.h>
 
 namespace FAWorld
 {
@@ -14,13 +14,12 @@ namespace FAWorld
     namespace ActorState
     {
 
-        class BaseState: public StateMachine::AbstractState<Actor>
+        class BaseState : public StateMachine::AbstractState<Actor>
         {
         public:
-            ~BaseState() {};
+            ~BaseState(){};
             virtual boost::optional<StateMachine::StateChange<Actor>> update(Actor& actor, bool noclip);
         };
-
     }
 }
 

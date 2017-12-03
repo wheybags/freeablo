@@ -5,8 +5,8 @@
 
 #include "faio.h"
 
-namespace FAIO {
-
+namespace FAIO
+{
 
     class FAFileObject
     {
@@ -20,11 +20,10 @@ namespace FAIO {
         FAIO::FAFile* faFile;
 
     public:
-
-        //wrapper api for faio 
+        // wrapper api for faio
         bool isValid();
         bool exists(const std::string& filename);
-        size_t FAfread(void * ptr, size_t size, size_t count);
+        size_t FAfread(void* ptr, size_t size, size_t count);
         int FAfseek(size_t offset, int origin);
         size_t FAftell();
         size_t FAsize();
@@ -35,14 +34,9 @@ namespace FAIO {
         std::string readCString(size_t ptr);
         std::string readCStringFromWin32Binary(size_t ptr, size_t offset);
 
-
         static std::string getMPQFileName();
         static void quit();
-
     };
-
 }
-
-
 
 #endif

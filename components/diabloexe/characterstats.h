@@ -8,7 +8,7 @@ namespace DiabloExe
     class CharacterStats
     {
     public:
-        CharacterStats(){}
+        CharacterStats() {}
 
         std::string dump() const;
         uint8_t mIdleInDungeonFrameset;
@@ -34,7 +34,6 @@ namespace DiabloExe
         uint32_t mMaxDexterity;
         uint32_t mMaxVitality;
         std::vector<uint32_t> mNextLevelExp;
-
     };
 }
 #endif // CHARACTERSTATS_H

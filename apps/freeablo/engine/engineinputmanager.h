@@ -1,15 +1,15 @@
 #ifndef FA_INPUT_H
 #define FA_INPUT_H
 
-#include <map>
-#include <vector>
-#include <string>
-#include <input/hotkey.h>
-#include <input/inputmanager.h>
 #include "../components/misc/misc.h"
+#include "../faworld/actoranimationmanager.h"
 #include "inputobserverinterface.h"
 #include <fa_nuklear.h>
-#include "../faworld/actoranimationmanager.h"
+#include <input/hotkey.h>
+#include <input/inputmanager.h>
+#include <map>
+#include <string>
+#include <vector>
 
 namespace FAWorld
 {
@@ -27,45 +27,41 @@ namespace Engine
 
     class EngineInputManager
     {
-        public:
-            EngineInputManager(nk_context* nk_ctx);
-            void update(bool paused);
-            void setHotkey(KeyboardInputAction action, Input::Hotkey hotkey);
-            Input::Hotkey getHotkey(KeyboardInputAction action);
-            std::vector<Input::Hotkey> getHotkeys();
-            void registerKeyboardObserver(KeyboardInputObserverInterface* observer);
-            void registerMouseObserver(MouseInputObserverInterface* observer);
-            void setGuiManager(FAGui::GuiManager* guiManager);
-            Input::KeyboardModifiers getKeyboardModifiers()
-            {
-                return mKbMods;
-            }
+    public:
+        EngineInputManager(nk_context* nk_ctx);
+        void update(bool paused);
+        void setHotkey(KeyboardInputAction action, Input::Hotkey hotkey);
+        Input::Hotkey getHotkey(KeyboardInputAction action);
+        std::vector<Input::Hotkey> getHotkeys();
+        void registerKeyboardObserver(KeyboardInputObserverInterface* observer);
+        void registerMouseObserver(MouseInputObserverInterface* observer);
+        void setGuiManager(FAGui::GuiManager* guiManager);
+        Input::KeyboardModifiers getKeyboardModifiers() { return mKbMods; }
 
     private:
-            EngineInputManager(const EngineInputManager&);
-            EngineInputManager& operator=(const EngineInputManager&);
-            void keyPress(Input::Key key);
-            void keyRelease(Input::Key key);
-            void textInput(std::string inp);
-            void mouseClick(int32_t x, int32_t y, Input::Key key, bool isDoubleClick);
-            void mouseRelease(int32_t, int32_t, Input::Key key);
-            void mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel);
-            std::string keyboardActionToString(KeyboardInputAction action) const;
-            void notifyKeyboardObservers(KeyboardInputAction action);
-            void notifyMouseObservers(MouseInputAction action, Misc::Point mousePosition);
+        EngineInputManager(const EngineInputManager&);
+        EngineInputManager& operator=(const EngineInputManager&);
+        void keyPress(Input::Key key);
+        void keyRelease(Input::Key key);
+        void textInput(std::string inp);
+        void mouseClick(int32_t x, int32_t y, Input::Key key, bool isDoubleClick);
+        void mouseRelease(int32_t, int32_t, Input::Key key);
+        void mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel);
+        std::string keyboardActionToString(KeyboardInputAction action) const;
+        void notifyKeyboardObservers(KeyboardInputAction action);
+        void notifyMouseObservers(MouseInputAction action, Misc::Point mousePosition);
 
-            nk_context* mNkCtx = nullptr;
-            Input::InputManager mInput;
-            Misc::Point mMousePosition;
-            bool mMouseDown = false;
-            bool mClick = false;
-            Input::KeyboardModifiers mKbMods;
-            FAGui::GuiManager *mGuiManager;
-            std::map<KeyboardInputAction,Input::Hotkey> mHotkeys;
-            std::vector<KeyboardInputObserverInterface*> mKeyboardObservers;
-            std::vector<MouseInputObserverInterface*> mMouseObservers;
+        nk_context* mNkCtx = nullptr;
+        Input::InputManager mInput;
+        Misc::Point mMousePosition;
+        bool mMouseDown = false;
+        bool mClick = false;
+        Input::KeyboardModifiers mKbMods;
+        FAGui::GuiManager* mGuiManager;
+        std::map<KeyboardInputAction, Input::Hotkey> mHotkeys;
+        std::vector<KeyboardInputObserverInterface*> mKeyboardObservers;
+        std::vector<MouseInputObserverInterface*> mMouseObservers;
     };
 }
 
 #endif // FA_INPUT_H
-

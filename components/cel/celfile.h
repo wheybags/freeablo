@@ -1,10 +1,9 @@
 #ifndef CEL_FILE_H
 #define CEL_FILE_H
 
-#include <stdint.h>
-#include "celframe.h"
 #include "celdecoder.h"
-
+#include "celframe.h"
+#include <stdint.h>
 
 namespace FAIO
 {
@@ -15,16 +14,16 @@ namespace Cel
 {
     class CelFile
     {
-        public:
-            CelFile(const std::string& filename);
+    public:
+        CelFile(const std::string& filename);
 
-            //If normal cel file, returns same as numFrames(), for an archive, the number of frames in each subcel
-            int32_t animLength() const;
-            int32_t numFrames() const;
-            CelFrame& operator[] (int32_t index);
+        // If normal cel file, returns same as numFrames(), for an archive, the number of frames in each subcel
+        int32_t animLength() const;
+        int32_t numFrames() const;
+        CelFrame& operator[](int32_t index);
 
-        private:
-            CelDecoder mDecoder;
+    private:
+        CelDecoder mDecoder;
     };
 }
 

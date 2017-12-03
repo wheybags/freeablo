@@ -1,7 +1,7 @@
 #include "position.h"
 
-#include "world.h"
 #include "../fasavegame/gameloader.h"
+#include "world.h"
 #include <algorithm>
 
 namespace FAWorld
@@ -33,7 +33,7 @@ namespace FAWorld
     {
         if (mMoving)
         {
-            mDist += static_cast<int32_t> (FAWorld::World::getSecondsPerTick() * 250);
+            mDist += static_cast<int32_t>(FAWorld::World::getSecondsPerTick() * 250);
 
             if (mDist >= 100)
             {
@@ -43,10 +43,7 @@ namespace FAWorld
         }
     }
 
-    int32_t Position::getDirection() const
-    {
-        return mDirection;
-    }
+    int32_t Position::getDirection() const { return mDirection; }
 
     void Position::setDirection(int32_t mDirection)
     {
@@ -54,15 +51,11 @@ namespace FAWorld
             this->mDirection = mDirection;
     }
 
-    std::pair<int32_t, int32_t> Position::current() const
-    {
-        return mCurrent;
-    }
+    std::pair<int32_t, int32_t> Position::current() const { return mCurrent; }
 
     bool Position::isNear(const Position& other)
     {
-        return std::max (abs (mCurrent.first - other.mCurrent.first),
-                         abs (mCurrent.second - other.mCurrent.second)) <= 1;
+        return std::max(abs(mCurrent.first - other.mCurrent.first), abs(mCurrent.second - other.mCurrent.second)) <= 1;
     }
 
     double Position::distanceFrom(Position B)
@@ -82,6 +75,6 @@ namespace FAWorld
         if (!mMoving)
             return mCurrent;
 
-        return Misc::getNextPosByDir (mCurrent, mDirection);
+        return Misc::getNextPosByDir(mCurrent, mDirection);
     }
 }

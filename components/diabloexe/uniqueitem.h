@@ -1,8 +1,8 @@
 #ifndef UNIQUEITEM_H
 #define UNIQUEITEM_H
+#include <faio/fafileobject.h>
 #include <stdint.h>
 #include <string>
-#include <faio/fafileobject.h>
 
 namespace DiabloExe
 {
@@ -10,7 +10,6 @@ namespace DiabloExe
     class UniqueItem
     {
     public:
-
         std::string dump() const;
         uint32_t mNamePtr;
         std::string mName;
@@ -46,14 +45,10 @@ namespace DiabloExe
         uint32_t mEffect5;
         uint32_t mMinRange5;
         uint32_t mMaxRange5;
-        UniqueItem(){}
+        UniqueItem() {}
     private:
         UniqueItem(FAIO::FAFileObject& exe, size_t codeOffset);
         friend class DiabloExe;
-
-
     };
-
 }
 #endif // UNIQUEITEM_H
-

@@ -1,21 +1,18 @@
+#include <fstream>
 #include <iostream>
 #include <string>
-#include <fstream>
 
-#include <gtest/gtest.h>
-#include <boost/filesystem.hpp>
-#include <boost/range.hpp>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <boost/filesystem.hpp>
+#include <boost/range.hpp>
+#include <gtest/gtest.h>
 
 #define private public
 #include <cel/celfile.h>
 #include <faio/fafileobject.h>
 #include <misc/md5.h>
 #include <misc/stringops.h>
-
-
-
 
 std::string hashImageData(int32_t width, int32_t height, Cel::Colour* data)
 {
@@ -31,16 +28,13 @@ std::string hashImageData(int32_t width, int32_t height, Cel::Colour* data)
 
     std::stringstream s;
 
-    for(int32_t i = 0; i < 16; i++)
-       s << std::hex << std::setw(2) << std::setfill('0') << (int)digest[i];
+    for (int32_t i = 0; i < 16; i++)
+        s << std::hex << std::setw(2) << std::setfill('0') << (int)digest[i];
 
     return s.str();
 }
 
-std::string hashCelFrame(Cel::CelFrame& frame)
-{
-    return hashImageData(frame.mWidth, frame.mHeight, &frame.mRawImage[0]);
-}
+std::string hashCelFrame(Cel::CelFrame& frame) { return hashImageData(frame.mWidth, frame.mHeight, &frame.mRawImage[0]); }
 
 std::vector<std::string> getCelsFromListfile(const std::string& path)
 {
@@ -59,13 +53,13 @@ std::vector<std::string> getCelsFromListfile(const std::string& path)
     std::vector<std::string> lines = Misc::StringUtils::split(str, '\n');
 
     std::vector<std::string> celFiles;
-    for(int32_t i = 0; i < (int32_t)lines.size(); i++)
+    for (int32_t i = 0; i < (int32_t)lines.size(); i++)
     {
-        if(Misc::StringUtils::ciEndsWith(lines[i], ".cel") || Misc::StringUtils::ciEndsWith(lines[i], ".cl2"))
+        if (Misc::StringUtils::ciEndsWith(lines[i], ".cel") || Misc::StringUtils::ciEndsWith(lines[i], ".cl2"))
         {
             std::string path_local = Misc::StringUtils::toLower(lines[i]);
 
-            if(FAIO::exists(path_local))
+            if (FAIO::exists(path_local))
                 celFiles.push_back(path_local);
         }
     }
@@ -73,33 +67,33 @@ std::vector<std::string> getCelsFromListfile(const std::string& path)
     return celFiles;
 }
 
-
 Cel::Colour getPixel(SDL_Surface* s, int x, int y)
 {
     Uint32 pix;
 
     int bpp = s->format->BytesPerPixel;
     // Here p is the address to the pixel we want to retrieve
-    Uint8 *p = (Uint8 *)s->pixels + y * s->pitch + x * bpp;
+    Uint8* p = (Uint8*)s->pixels + y * s->pitch + x * bpp;
 
-    switch(bpp) {
+    switch (bpp)
+    {
         case 1:
             pix = *p;
             break;
 
         case 2:
-            pix = *(Uint16 *)p;
+            pix = *(Uint16*)p;
             break;
 
         case 3:
-            if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+            if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
                 pix = p[0] << 16 | p[1] << 8 | p[2];
             else
                 pix = p[0] | p[1] << 8 | p[2] << 16;
             break;
 
         case 4:
-            pix = *(Uint32 *)p;
+            pix = *(Uint32*)p;
             break;
 
         default:
@@ -126,15 +120,14 @@ std::string hashOneFramePng(const std::string& path)
     SDL_Surface* s = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, "png");
     delete[] buffer;
 
-
     Cel::Colour* data = new Cel::Colour[s->w * s->h];
 
-    for(int32_t y = 0; y < s->h; y++)
+    for (int32_t y = 0; y < s->h; y++)
     {
-        for(int32_t x = 0; x < s->w; x++)
+        for (int32_t x = 0; x < s->w; x++)
         {
             Cel::Colour c = getPixel(s, x, y);
-            data[x + ((s->h-1-y)*s->w)] = c;
+            data[x + ((s->h - 1 - y) * s->w)] = c;
         }
     }
 
@@ -148,14 +141,14 @@ namespace bfs = boost::filesystem;
 void hashPngFolder(const std::string& folderPath, std::ofstream& out)
 {
     std::vector<std::string> paths;
-    for(bfs::directory_iterator it(folderPath); it != bfs::directory_iterator(); it++)
+    for (bfs::directory_iterator it(folderPath); it != bfs::directory_iterator(); it++)
         paths.push_back((*it).path().string());
 
     std::sort(paths.begin(), paths.end());
 
-    for(auto p : paths)
+    for (auto p : paths)
     {
-        if(Misc::StringUtils::ciEndsWith(p, ".png"))
+        if (Misc::StringUtils::ciEndsWith(p, ".png"))
             out << "," << hashOneFramePng(p);
     }
 }
@@ -168,15 +161,16 @@ void getBlizzconvHashes(const std::string& blizzconvBase, const std::string& lis
 
     std::ofstream out(destFile);
 
-    for(int32_t i = 0; i < (int32_t)celPaths.size(); i++)
+    for (int32_t i = 0; i < (int32_t)celPaths.size(); i++)
     {
         std::string path = Misc::StringUtils::replaceEnd(".cel", "", celPaths[i]);
         Misc::StringUtils::replace(path, "\\", "/"); // fukken windows path separators...
 
-        if(path == "monsters/darkmage/dmagew") // this cl2 file is completely broken, but probably just meant to be transparent, see https://github.com/mewrnd/blizzconv/issues/4#issuecomment-201929273
+        if (path == "monsters/darkmage/dmagew") // this cl2 file is completely broken, but probably just meant to be transparent, see
+                                                // https://github.com/mewrnd/blizzconv/issues/4#issuecomment-201929273
             continue;
 
-        if(bfs::exists(blizzconvBase + "/" + path + ".png"))
+        if (bfs::exists(blizzconvBase + "/" + path + ".png"))
         {
             std::string hash = hashOneFramePng(blizzconvBase + "/" + path + ".png");
             out << celPaths[i] << "," << hash << std::endl;
@@ -185,7 +179,7 @@ void getBlizzconvHashes(const std::string& blizzconvBase, const std::string& lis
         {
             std::string folderPath = blizzconvBase + "/" + path;
 
-            if(bfs::exists(folderPath))
+            if (bfs::exists(folderPath))
             {
                 out << celPaths[i];
                 hashPngFolder(folderPath, out);
@@ -194,7 +188,7 @@ void getBlizzconvHashes(const std::string& blizzconvBase, const std::string& lis
             else
             {
                 std::string pngPath = blizzconvBase + "/" + path + std::to_string(0) + ".png";
-                if(bfs::exists(pngPath))
+                if (bfs::exists(pngPath))
                 {
                     out << celPaths[i];
                     hashPngFolder(blizzconvBase + "/" + bfs::path(path).parent_path().string(), out);
@@ -209,7 +203,7 @@ void getBlizzconvHashes(const std::string& blizzconvBase, const std::string& lis
                     out << celPaths[i];
 
                     int32_t folderNum = 0;
-                    while(bfs::exists(subCelFolderPath))
+                    while (bfs::exists(subCelFolderPath))
                     {
                         hashPngFolder(subCelFolderPath, out);
 
@@ -225,15 +219,15 @@ void getBlizzconvHashes(const std::string& blizzconvBase, const std::string& lis
 }
 
 // the cel_hashes.txt file was generated by getBlizzconvHashes above
-std::map<std::string, std::vector<std::string> > getCelHashes()
+std::map<std::string, std::vector<std::string>> getCelHashes()
 {
     std::string thisFolder = bfs::path(__FILE__).parent_path().string();
 
     std::ifstream in(thisFolder + "/cel_hashes.txt");
     std::string line;
-    std::map<std::string, std::vector<std::string> > retval;
+    std::map<std::string, std::vector<std::string>> retval;
 
-    while(std::getline(in, line))
+    while (std::getline(in, line))
     {
         auto components = Misc::StringUtils::split(line, ',');
         std::string path = components[0];
@@ -246,23 +240,24 @@ std::map<std::string, std::vector<std::string> > getCelHashes()
     return retval;
 }
 
-TEST (Cel, TestOpen)
+TEST(Cel, TestOpen)
 {
     std::string thisFolder = bfs::path(__FILE__).parent_path().string();
 
-    std::vector<std::string> celPaths = getCelsFromListfile(thisFolder+ "/Diablo I.txt");
+    std::vector<std::string> celPaths = getCelsFromListfile(thisFolder + "/Diablo I.txt");
     auto celHashes = getCelHashes();
 
     int32_t succeededFiles = 0;
     int32_t succeededFrames = 0;
     int32_t totalFrames = 0;
 
-    for(auto p : celPaths)
+    for (auto p : celPaths)
     {
-        if(Misc::StringUtils::endsWith(p, "unravw.cel")) // this cel file is broken, see https://github.com/mewrnd/blizzconv/issues/2#issuecomment-58065868
+        if (Misc::StringUtils::endsWith(p, "unravw.cel")) // this cel file is broken, see https://github.com/mewrnd/blizzconv/issues/2#issuecomment-58065868
             continue;
 
-        if(p == "monsters\\darkmage\\dmagew.cl2") // this cl2 file is completely broken, but probably just meant to be transparent, see https://github.com/mewrnd/blizzconv/issues/4#issuecomment-201929273
+        if (p == "monsters\\darkmage\\dmagew.cl2") // this cl2 file is completely broken, but probably just meant to be transparent, see
+                                                   // https://github.com/mewrnd/blizzconv/issues/4#issuecomment-201929273
             continue;
 
         Cel::CelFile cel(p);
@@ -270,9 +265,9 @@ TEST (Cel, TestOpen)
         bool fileSucceeded = true;
         totalFrames += cel.numFrames();
 
-        for(int32_t i = 0; i < cel.numFrames(); i++)
+        for (int32_t i = 0; i < cel.numFrames(); i++)
         {
-            if(celHashes[p].size() == 0)
+            if (celHashes[p].size() == 0)
             {
                 std::cout << "TEST_CEL " << p << ", FAIL, NO DATA" << std::endl;
                 continue;
@@ -281,7 +276,7 @@ TEST (Cel, TestOpen)
             std::string savedHash = celHashes[p][i];
             std::string newHash = hashCelFrame(cel[i]);
 
-            if(savedHash == newHash)
+            if (savedHash == newHash)
             {
                 succeededFrames++;
                 std::cout << "TEST_CEL " << p << "[" << i << "] SUCCESS" << std::endl;
@@ -293,20 +288,20 @@ TEST (Cel, TestOpen)
             }
         }
 
-        if(fileSucceeded)
+        if (fileSucceeded)
             succeededFiles++;
     }
 
-    float percentFiles = ((100.0f/((float)celPaths.size())) * ((float)succeededFiles));
+    float percentFiles = ((100.0f / ((float)celPaths.size())) * ((float)succeededFiles));
     std::cout << succeededFiles << "/" << celPaths.size() << " files succeeded, " << percentFiles << "%" << std::endl;
 
-    float percentFrames = ((100.0f/((float)totalFrames)) * ((float)succeededFrames));
+    float percentFrames = ((100.0f / ((float)totalFrames)) * ((float)succeededFrames));
     std::cout << succeededFrames << "/" << totalFrames << " frames succeeded, " << percentFrames << "%" << std::endl;
 
     ASSERT_EQ(succeededFrames, totalFrames);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     FAIO::init();
 

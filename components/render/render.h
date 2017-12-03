@@ -1,12 +1,12 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include <stdint.h>
 #include <assert.h>
+#include <stdint.h>
 
-#include <vector>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <functional>
 
@@ -23,10 +23,11 @@ class SpriteGroup;
 namespace Render
 {
     typedef void* Sprite;
-    typedef SDL_Cursor * FACursor;
-    typedef SDL_Surface * FASurface;
+    typedef SDL_Cursor* FACursor;
+    typedef SDL_Surface* FASurface;
 
-     enum class CursorHotspotLocation {
+    enum class CursorHotspotLocation
+    {
         topLeft,
         center,
     };
@@ -51,7 +52,8 @@ namespace Render
     extern int32_t WIDTH;
     extern int32_t HEIGHT;
 
-    enum class TileHalf {
+    enum class TileHalf
+    {
         left,
         right,
     };
@@ -59,10 +61,10 @@ namespace Render
     // Tile mesasured in indexes on tile grid
     struct Tile
     {
-      int32_t x;
-      int32_t y;
-      TileHalf half;
-      Tile (int32_t xArg, int32_t yArg, TileHalf halfArg = TileHalf::left) : x (xArg), y (yArg), half (halfArg) {}
+        int32_t x;
+        int32_t y;
+        TileHalf half;
+        Tile(int32_t xArg, int32_t yArg, TileHalf halfArg = TileHalf::left) : x(xArg), y(yArg), half(halfArg) {}
     };
     /**
      * @brief Render settings for initialization.
@@ -95,13 +97,14 @@ namespace Render
     void drawCursor(Sprite s, CursorHotspotLocation hotspotLocation);
     SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    SpriteGroup* loadResizedSprite(const std::string& path, size_t width, size_t height, size_t tileWidth, size_t tileHeight,  bool hasTrans, size_t transR, size_t transG, size_t transB);
+    SpriteGroup* loadResizedSprite(
+        const std::string& path, size_t width, size_t height, size_t tileWidth, size_t tileHeight, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadCelToSingleTexture(const std::string& path);
     SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height);
     SpriteGroup* loadTiledTexture(const std::string& sourcePath, size_t width, size_t height, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadNonCelSprite(const std::string& path);
-    SDL_Surface* loadNonCelImageTrans (const std::string& path, const std::string& extension, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    Cel::Colour getPixel (const SDL_Surface* s, int x, int y);
+    SDL_Surface* loadNonCelImageTrans(const std::string& path, const std::string& extension, bool hasTrans, size_t transR, size_t transG, size_t transB);
+    Cel::Colour getPixel(const SDL_Surface* s, int x, int y);
 
     void draw();
 
@@ -120,8 +123,17 @@ namespace Render
     void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h);
 
     SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top);
-    void drawLevel(const Level::Level& level, size_t minTopsHandle, size_t minBottomsHandle, SpriteCacheBase* cache, LevelObjects& objs, LevelObjects
-                   & items, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    void drawLevel(const Level::Level& level,
+                   size_t minTopsHandle,
+                   size_t minBottomsHandle,
+                   SpriteCacheBase* cache,
+                   LevelObjects& objs,
+                   LevelObjects& items,
+                   int32_t x1,
+                   int32_t y1,
+                   int32_t x2,
+                   int32_t y2,
+                   size_t dist);
 
     Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
