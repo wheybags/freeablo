@@ -114,7 +114,10 @@ namespace Engine
             int32_t currentLevel = variables["level"].as<int32_t>();
 
             if(currentLevel != -1)
+            {
+                inGame = true;
                 mWorld->setLevel(currentLevel);
+            }
         }
 
         FAGui::GuiManager guiManager(*this, *player);
