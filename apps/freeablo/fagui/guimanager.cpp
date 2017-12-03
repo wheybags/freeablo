@@ -16,11 +16,12 @@
 #include "../faworld/player.h"
 #include "../faworld/world.h"
 
+#include <boost/variant/variant.hpp>
 #include "boost/range/counting_range.hpp"
 #include "dialogmanager.h"
 #include "mainmenu.h"
 #include "nkhelpers.h"
-#include <boost/variant/variant.hpp>
+#include "fa_nuklear.h"
 
 namespace FAGui
 {
@@ -672,6 +673,11 @@ namespace FAGui
         nk_label(ctx, text, alignment);
         nk_style_pop_color(ctx);
         nk_style_pop_font(ctx);
+    }
+
+    void GuiManager::smallText(nk_context* ctx, const char* text, TextColor color)
+    {
+        smallText (ctx, text, color, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_MIDDLE);
     }
 
     int GuiManager::smallTextWidth(const char* text)
