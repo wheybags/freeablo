@@ -19,7 +19,8 @@
 #include "fontinfo.h"
 #include "spritemanager.h"
 #include <memory>
-#include <numeric>
+#include "boost/container/flat_map.hpp"
+#include "diabloexe/diabloexe.h"
 
 namespace Render
 {
@@ -110,16 +111,17 @@ namespace FARender
 
         nk_context* getNuklearContext() { return &mNuklearContext; }
 
-        void getWindowDimensions(int32_t& w, int32_t& h);
+            void getWindowDimensions(int32_t& w, int32_t& h);
+            void loadFonts (const DiabloExe::DiabloExe &exe);
 
-        bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites);
-        nk_user_font* smallFont() const;
-        nk_user_font* goldFont(int height) const;
-        nk_user_font* silverFont(int height) const;
+            bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites);
+            nk_user_font *smallFont () const;
+            nk_user_font* goldFont(int height) const;
+            nk_user_font* silverFont(int height) const;
 
     private:
-        std::unique_ptr<CelFontInfo> generateFontFromFrames(const std::string& texturePath);
-        std::unique_ptr<PcxFontInfo> generateFont(const std::string& pcxPath, const std::string& binPath);
+            std::unique_ptr<CelFontInfo> generateCelFont (const std::string& texturePath, const DiabloExe::FontData& fontData);
+            std::unique_ptr<PcxFontInfo> generateFont(const std::string& pcxPath, const std::string& binPath);
 
     private:
         static Renderer* mRenderer; ///< Singleton instance

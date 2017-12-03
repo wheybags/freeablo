@@ -18,6 +18,25 @@
 
 namespace DiabloExe
 {
+    void DiabloExe::loadFontData(FAIO::FAFileObject& exe)
+    {
+        std::array<uint8_t, 256> charToFontIndex;
+        exe.FAfseek(mSettings->get<size_t>("Fonts", "charToFontIndex"), SEEK_SET);
+        exe.FAfread(charToFontIndex.data (), 1, charToFontIndex.size ());
+        for (std::string fontName : {"smaltext"})
+        {
+            auto &data = mFontData[fontName];
+            data.charToFontIndex = charToFontIndex;
+            exe.FAfseek(mSettings->get<size_t>("Fonts", fontName + "FontIndexToFrame"), SEEK_SET);
+            exe.FAfread(data.fontIndexToFrame.data (), 1, data.fontIndexToFrame.size ());
+
+            data.frameCount = mSettings->get<size_t>("Fonts", fontName + "FrameCount");
+            data.frameToWidth.resize (data.frameCount + 1);
+            exe.FAfseek(mSettings->get<size_t>("Fonts", fontName + "FrameToWidth"), SEEK_SET);
+            exe.FAfread(data.frameToWidth.data (), 1, data.frameToWidth.size ());
+        }
+    }
+
     DiabloExe::DiabloExe(const std::string& pathEXE)
     {
         mSettings.reset(new Settings::Settings());
@@ -40,6 +59,7 @@ namespace DiabloExe
         }
 
         auto codeOffset = mSettings->get<size_t>("Common", "codeOffset");
+        loadFontData(exe);
         loadMonsters(exe, codeOffset);
         loadTownerAnimation(exe);
         loadNpcs(exe);
@@ -57,6 +77,11 @@ namespace DiabloExe
 
         arg = ((arg << 8) & 0xFF00FF00) | ((arg >> 8) & 0xFF00FF);
         return (arg << 16) | (arg >> 16);
+    }
+
+    const FontData& DiabloExe::getFontData(const char* fontName) const
+    {
+        return mFontData.at (fontName);
     }
 
     std::string DiabloExe::getMD5(const std::string& pathEXE)

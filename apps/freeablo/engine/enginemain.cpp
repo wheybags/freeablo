@@ -74,6 +74,7 @@ namespace Engine
 
         FAWorld::ItemManager& itemManager = FAWorld::ItemManager::get();
         FAWorld::PlayerFactory playerFactory(exe);
+        renderer.loadFonts(exe);
 
         FILE* f = fopen("save.sav", "rb");
 

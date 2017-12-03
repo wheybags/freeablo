@@ -28,12 +28,11 @@ namespace FARender
 
     Renderer* Renderer::mRenderer = NULL;
 
-    std::unique_ptr<CelFontInfo> Renderer::generateFontFromFrames(const std::string& texturePath)
+    std::unique_ptr <CelFontInfo> Renderer::generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData)
     {
         std::unique_ptr<CelFontInfo> ret(new CelFontInfo());
         auto mergedTex = mSpriteManager.get(texturePath + "&convertToSingleTexture");
-        Cel::CelDecoder cel("ctrlpan/smaltext.cel");
-        ret->initByCel(cel, mergedTex->getWidth());
+        ret->initByFontData(fontData, mergedTex->getWidth(), 1);
         ret->nkFont.userdata.ptr = ret.get();
         ret->nkFont.height = mergedTex->getHeight();
         ret->nkFont.width = &CelFontInfo::getWidth;
@@ -86,14 +85,6 @@ namespace FARender
     Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen) : mDone(false), mSpriteManager(1024), mWidthHeightTmp(0)
     {
         assert(!mRenderer); // singleton, only one instance
-        mSmallFont = generateFontFromFrames("ctrlpan/smaltext.cel");
-        for (auto size : {16, 24, 30, 42})
-        {
-            std::string prefix = "ui_art/font" + std::to_string(size);
-            mGoldFont[size] = generateFont(prefix + "g.pcx", prefix + ".bin");
-            if (size != 42)
-                mSilverFont[size] = generateFont(prefix + "s.pcx", prefix + ".bin");
-        }
 
         // Render initialization.
         {
@@ -334,7 +325,22 @@ namespace FARender
         h = tmp.int32s[1];
     }
 
-    bool Renderer::getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites) { return mSpriteManager.getAndClearSpritesNeedingPreloading(sprites); }
+    void Renderer::loadFonts(const DiabloExe::DiabloExe& exe)
+    {
+        mSmallFont = generateCelFont ("ctrlpan/smaltext.cel", exe.getFontData ("smaltext"));
+        for (auto size : {16, 24, 30, 42})
+        {
+            std::string prefix = "ui_art/font" + std::to_string (size);
+            mGoldFont[size] = generateFont (prefix + "g.pcx", prefix + ".bin");
+            if (size != 42)
+              mSilverFont[size] = generateFont (prefix + "s.pcx", prefix + ".bin");
+        }
+    }
+
+    bool Renderer::getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites)
+    {
+        return mSpriteManager.getAndClearSpritesNeedingPreloading(sprites);
+    }
 
     nk_user_font* Renderer::smallFont() const { return &mSmallFont->nkFont; }
 
