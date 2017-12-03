@@ -4,14 +4,17 @@
 #include <chrono>
 #include <queue>
 #include <functional>
-#include "../engine/enginemain.h"
 #include "textcolor.h"
 
 
 #include <fa_nuklear.h>
-#include "../faworld/inventory.h"
 #include <boost/variant/variant_fwd.hpp>
+#include <memory>
 
+
+namespace Engine {
+    class EngineMain;
+}
 
 namespace FARender
 {
@@ -25,6 +28,7 @@ namespace Render
 
 namespace FAWorld
 {
+    struct EquipTarget;
     class Player;
 }
 
@@ -32,6 +36,7 @@ namespace FAGui
 {
     class GuiManager;
     class DialogData;
+    class MainMenuHandler;
 
     enum class EffectType
     {
@@ -86,7 +91,8 @@ namespace FAGui
                                       std::function<void()> action, bool isModal);
         void dialog(nk_context* ctx);
         void updateAnimations();
-        void update(bool paused, nk_context* ctx);
+        void updateGameUI(bool paused, nk_context* ctx);
+        void updateMenuUI(nk_context* ctx);
         void setDescription(std::string text, TextColor color = TextColor::white);
         void clearDescription();
         bool isInventoryShown() const;
@@ -94,6 +100,7 @@ namespace FAGui
         void pushDialogData(DialogData &&data);
         // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
         bool isModalDlgShown () const;
+        void startingScreen ();
 
     private:
         void togglePanel(PanelType type);
@@ -107,7 +114,7 @@ namespace FAGui
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
         void bottomMenu(nk_context* ctx);
-        void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white,
+        static void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white,
                        nk_flags alignment = NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_MIDDLE);
         int smallTextWidth(const char* text);
         void descriptionPanel(nk_context* ctx);
@@ -122,6 +129,7 @@ namespace FAGui
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::vector<DialogData> mDialogs;
         std::unique_ptr<FARender::AnimationPlayer> mPentagramAnim;
+        std::unique_ptr<MainMenuHandler> mMainMenuHandler;
     };
 }
 

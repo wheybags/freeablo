@@ -16,9 +16,11 @@
 #include "../faworld/player.h"
 #include "../fasavegame/gameloader.h"
 
+#include "mainmenu.h"
 #include "boost/range/counting_range.hpp"
 #include <boost/variant/variant.hpp>
 #include "dialogmanager.h"
+#include "nkhelpers.h"
 
 namespace FAGui
 {
@@ -63,9 +65,12 @@ namespace FAGui
     GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player &player)
         : mEngine(engine), mPlayer (player)
     {
+        mMainMenuHandler.reset (new MainMenuHandler (engine));
+
         mPentagramAnim.reset (new FARender::AnimationPlayer ());
         auto renderer = FARender::Renderer::get();
         mPentagramAnim->playAnimation(renderer->loadImage ("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
+        startingScreen ();
     }
 
     GuiManager::~GuiManager()
@@ -106,60 +111,6 @@ namespace FAGui
 
            nk_context* mCtx;
         };
-    }
-
-    namespace
-    {
-        enum struct halign_t {
-            left,
-            center,
-            right,
-        };
-        enum struct valign_t {
-            top,
-            center,
-            bottom,
-        };
-        struct nk_vec2 center (const struct nk_rect &rect) {
-            return {rect.x + rect.w / 2, rect.y + rect.h / 2};
-        }
-
-        bool nk_widget_is_mouse_click_down (nk_context *ctx, nk_buttons buttons, bool down)
-        {
-            return nk_widget_has_mouse_click_down (ctx, buttons, down) && ctx->input.mouse.buttons[buttons].clicked;
-        }
-
-        // nk_widget_hovered without regard to activity of window
-        bool nk_inactive_widget_is_hovered (nk_context *ctx)
-        {
-            return nk_input_is_mouse_hovering_rect(&ctx->input, nk_widget_bounds(ctx));
-        }
-
-        bool nk_widget_mouse_left (nk_context *ctx)
-        {
-            return !nk_inactive_widget_is_hovered(ctx) && nk_input_is_mouse_prev_hovering_rect(&ctx->input, nk_widget_bounds(ctx));
-        }
-
-
-
-        struct nk_rect alignRect (const struct nk_rect &inner_rect, const struct nk_rect &outer_rect, halign_t halign, valign_t valign) {
-            auto c = center (outer_rect);
-            auto shift = (outer_rect.w - inner_rect.w) / 2;
-            switch (halign) {
-                case halign_t::left: c.x -= shift; break;
-                case halign_t::right: c.x += shift; break;
-                default:
-                  break;
-            }
-            shift = (outer_rect.h - inner_rect.h) / 2;
-            switch (valign) {
-                case valign_t::top: c.y -= shift; break;
-                case valign_t::bottom: c.y += shift; break;
-                default:
-                  break;
-            }
-            return {c.x - inner_rect.w/2, c.y - inner_rect.h/2, inner_rect.w, inner_rect.h};
-        }
     }
 
     void GuiManager::dialog(nk_context* ctx)
@@ -347,11 +298,15 @@ namespace FAGui
     template <typename Function>
     void GuiManager::drawPanel (nk_context* ctx, PanelType panelType, Function op)
     {
+        auto placement = panelPlacementByType (panelType);
+        bool shown = *panel (placement) == panelType;
+        nk_window_show (ctx, panelName (panelType), shown ? NK_SHOWN : NK_HIDDEN);
+        if (!shown)
+            return;
         auto renderer = FARender::Renderer::get();
         auto invTex = renderer->loadImage(bgImgPath (panelType));
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
-        auto placement = panelPlacementByType (panelType);
         struct nk_rect dims = nk_rect(
             [&]()
             {
@@ -365,7 +320,6 @@ namespace FAGui
             }(), screenH - 125 - invTex->getHeight(),
             invTex->getWidth(), invTex->getHeight());
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND;
-        nk_window_show (ctx, panelName (panelType), *panel (placement) == panelType ? NK_SHOWN : NK_HIDDEN);
 
         nk_fa_begin_image_window(ctx, panelName (panelType), dims, flags, invTex->getNkImage(), op, false);
     }
@@ -668,8 +622,14 @@ namespace FAGui
 
             belt (ctx);
             descriptionPanel(ctx);
+
             nk_layout_space_end(ctx);
         }, false);
+    }
+
+    void GuiManager::startingScreen()
+    {
+        mMainMenuHandler->setActiveScreen<StartingScreen>();
     }
 
     void GuiManager::smallText (nk_context *ctx, const char *text, TextColor color, nk_flags alignment) {
@@ -707,19 +667,23 @@ namespace FAGui
       smallText (ctx, mDescription.c_str (), mDescriptionColor);
     }
 
-    void GuiManager::update(bool paused, nk_context* ctx)
+    void GuiManager::updateGameUI(bool paused, nk_context* ctx)
     {
         if (paused)
             pauseMenu(ctx, mEngine);
 
         updateAnimations ();
-
         inventoryPanel(ctx);
         spellsPanel(ctx);
         questsPanel(ctx);
         characterPanel(ctx);
         bottomMenu(ctx);
         dialog(ctx);
+    }
+
+    void GuiManager::updateMenuUI(nk_context* ctx)
+    {
+        mMainMenuHandler->update (ctx);
     }
 
     void GuiManager::setDescription(std::string text, TextColor color)

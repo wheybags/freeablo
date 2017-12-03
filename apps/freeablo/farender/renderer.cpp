@@ -15,6 +15,8 @@
 #include <numeric>
 #include <boost/range/irange.hpp>
 #include "fontinfo.h"
+#include <boost/format.hpp>
+#include "cel/celdecoder.h"
 
 namespace FARender
 {
@@ -26,18 +28,32 @@ namespace FARender
 
     Renderer* Renderer::mRenderer = NULL;
 
-    std::unique_ptr <FontInfo> Renderer::generateFont(const std::string& texturePath)
+    std::unique_ptr <CelFontInfo> Renderer::generateFontFromFrames(const std::string& texturePath)
     {
-        std::unique_ptr<FontInfo> ret (new FontInfo ());
+        std::unique_ptr<CelFontInfo> ret (new CelFontInfo ());
         auto mergedTex = mSpriteManager.get(texturePath + "&convertToSingleTexture");
         Cel::CelDecoder cel("ctrlpan/smaltext.cel");
-        ret->initByTexture(cel, mergedTex->getWidth());
+        ret->initByCel(cel, mergedTex->getWidth());
         ret->nkFont.userdata.ptr = ret.get();
         ret->nkFont.height = mergedTex->getHeight();
-        ret->nkFont.width = &FontInfo::getWidth;
+        ret->nkFont.width = &CelFontInfo::getWidth;
         mSpriteManager.get(texturePath);
-        ret->nkFont.query = &FontInfo::queryGlyph;
+        ret->nkFont.query = &CelFontInfo::queryGlyph;
         ret->nkFont.texture = mergedTex->getNkImage().handle;
+        return ret;
+    }
+
+    std::unique_ptr<PcxFontInfo> Renderer::generateFont(const std::string& pcxPath, const std::string& binPath)
+    {
+        std::unique_ptr<PcxFontInfo> ret (new PcxFontInfo ());
+        auto tex = mSpriteManager.get(pcxPath + "&trans=0,255,0");
+        ret->initWidths(binPath, tex->getWidth());
+        ret->nkFont.userdata.ptr = ret.get();
+        ret->nkFont.height = tex->getHeight() / PcxFontInfo::charCount;
+        ret->nkFont.width = &PcxFontInfo::getWidth;
+        mSpriteManager.get(pcxPath);
+        ret->nkFont.query = &PcxFontInfo::queryGlyph;
+        ret->nkFont.texture = tex->getNkImage().handle;
         return ret;
     }
 
@@ -75,7 +91,14 @@ namespace FARender
         ,mWidthHeightTmp(0)
     {
         assert(!mRenderer); // singleton, only one instance
-        m_smallFont = generateFont ("ctrlpan/smaltext.cel");
+        mSmallFont = generateFontFromFrames ("ctrlpan/smaltext.cel");
+        for (auto size : {16, 24, 30, 42})
+        {
+            std::string prefix = "ui_art/font" + std::to_string (size);
+            mGoldFont[size] = generateFont (prefix + "g.pcx", prefix + ".bin");
+            if (size != 42)
+              mSilverFont[size] = generateFont (prefix + "s.pcx", prefix + ".bin");
+        }
 
         // Render initialization.
         {
@@ -249,7 +272,7 @@ namespace FARender
             return false;
         }
 
-        Render::clear(0, 255, 0);
+        Render::clear(0, 0, 0);
 
         // force preloading of sprites by drawing them offscreen
         for (auto id : spritesToPreload)
@@ -281,11 +304,12 @@ namespace FARender
                 Render::drawLevel(state->level->mLevel, state->tileset.minTops->getCacheIndex(), state->tileset.minBottoms->getCacheIndex(), &mSpriteManager, mLevelObjects, mItems, state->mPos.current().first,
                                   state->mPos.current().second, state->mPos.next().first, state->mPos.next().second, state->mPos.getDist());
 
-                Render::drawGui(state->nuklearData, &mSpriteManager);
-                {
-                    Renderer::drawCursor(state);
-                }
             }
+
+           Render::drawGui(state->nuklearData, &mSpriteManager);
+           {
+               Renderer::drawCursor(state);
+           }
         }
 
         Render::draw();
@@ -336,6 +360,16 @@ namespace FARender
 
     nk_user_font* Renderer::smallFont() const
     {
-        return &m_smallFont->nkFont;
+        return &mSmallFont->nkFont;
+    }
+    
+    nk_user_font* Renderer::goldFont(int height) const
+    {
+        return &mGoldFont.at (height)->nkFont;
+    }
+
+    nk_user_font* Renderer::silverFont(int height) const
+    {
+        return &mSilverFont.at (height)->nkFont;
     }
 }

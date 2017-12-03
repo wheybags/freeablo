@@ -77,9 +77,6 @@ namespace Engine
         }
 
         FAWorld::ItemManager& itemManager = FAWorld::ItemManager::get();
-
-        std::unique_ptr<FAWorld::World> worldPtr;
-
         FAWorld::PlayerFactory playerFactory(exe);
 
         FILE* f = fopen("save.sav", "rb");
@@ -98,41 +95,37 @@ namespace Engine
             Serial::TextReadStream stream(tmp);
             FASaveGame::GameLoader loader(stream);
 
-            worldPtr.reset(new FAWorld::World(loader, exe));
+            mWorld.reset(new FAWorld::World(loader, exe));
 
-            player = worldPtr->getCurrentPlayer();
+            player = mWorld->getCurrentPlayer();
         }
         else
         {
-            worldPtr.reset(new FAWorld::World(exe));
-
-            worldPtr->generateLevels();
+            mWorld.reset(new FAWorld::World(exe));
+            mWorld->generateLevels();
 
             itemManager.loadItems(&exe);
             player = playerFactory.create(characterClass);
-            worldPtr->addCurrentPlayer(player);
+            mWorld->addCurrentPlayer(player);
 
             if (variables["invuln"].as<std::string>() == "on")
                 player->setInvuln(true);
 
             int32_t currentLevel = variables["level"].as<int32_t>();
 
-            if (currentLevel == -1)
-                currentLevel = 0;
-
-            // -1 represents the main menu
             if(currentLevel != -1)
-                worldPtr->setLevel(currentLevel);
+            {
+                inGame = true;
+                mWorld->setLevel(currentLevel);
+            }
         }
 
-        FAWorld::World& world = *worldPtr.get();
-
         FAGui::GuiManager guiManager(*this, *player);
-        world.setGuiManager (&guiManager);
+        mWorld->setGuiManager (&guiManager);
 
         mInputManager->setGuiManager (&guiManager);
-        mInputManager->registerKeyboardObserver(&world);
-        mInputManager->registerMouseObserver(&world);
+        mInputManager->registerKeyboardObserver(mWorld.get ());
+        mInputManager->registerMouseObserver(mWorld.get ());
 
         boost::asio::io_service io;
 
@@ -142,15 +135,16 @@ namespace Engine
             boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000/FAWorld::World::ticksPerSecond));
 
             mInputManager->update(mPaused);
-            if(!mPaused)
-                world.update(mNoclip);
+            if(!mPaused && inGame)
+                mWorld->update(mNoclip);
 
             nk_context* ctx = renderer.getNuklearContext();
-            guiManager.update(mPaused, ctx);
+            if (inGame)
+                guiManager.updateGameUI(mPaused, ctx);
+            else
+                guiManager.updateMenuUI(ctx);
 
-
-
-            FAWorld::GameLevel* level = world.getCurrentLevel();
+            FAWorld::GameLevel* level = mWorld->getCurrentLevel();
             FARender::RenderState* state = renderer.getFreeState();
             if(state)
             {
@@ -165,7 +159,7 @@ namespace Engine
                 state->mCursorFrame = FAGui::cursorFrame;
                 state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
                 state->mCursorHotspot = FAGui::cursorHotspot;
-                world.fillRenderState(state);
+                mWorld->fillRenderState(state);
                 state->nuklearData.fill(ctx);
             }
 
@@ -203,6 +197,12 @@ namespace Engine
         {
             toggleNoclip();
         }
+    }
+
+    void EngineMain::startGame()
+    {
+        inGame = true;
+        mWorld->setLevel(0);
     }
 
     void EngineMain::stop()
