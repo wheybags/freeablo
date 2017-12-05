@@ -182,6 +182,9 @@ namespace Engine
 
     void EngineMain::notify(KeyboardInputAction action)
     {
+        if (mPaused && action != PAUSE)
+            return;
+
         if (action == PAUSE)
         {
             togglePause();

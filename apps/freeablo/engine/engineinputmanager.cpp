@@ -48,7 +48,8 @@ namespace Engine
 
     void EngineInputManager::keyPress(Input::Key key)
     {
-        NuklearMisc::handleNuklearKeyboardEvent(mNkCtx, true, key, mKbMods);
+        if (!mPaused)
+            NuklearMisc::handleNuklearKeyboardEvent(mNkCtx, true, key, mKbMods);
 
         switch (key)
         {
@@ -184,6 +185,7 @@ namespace Engine
     void EngineInputManager::update(bool paused)
     {
         mKbMods = mInput.getModifiers();
+        mPaused = paused;
 
         nk_input_begin(mNkCtx);
         bool quit = mInput.processInput(paused);
