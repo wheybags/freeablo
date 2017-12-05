@@ -1,9 +1,9 @@
 /*
-* SDL_SavePNG -- libpng-based SDL_Surface writer.
-*
-* This code is free software, available under zlib/libpng license.
-* http://www.libpng.org/pub/png/src/libpng-LICENSE.txt
-*/
+ * SDL_SavePNG -- libpng-based SDL_Surface writer.
+ *
+ * This code is free software, available under zlib/libpng license.
+ * http://www.libpng.org/pub/png/src/libpng-LICENSE.txt
+ */
 
 #include <misc/disablewarn.h> // don't want warnings for third party files
 

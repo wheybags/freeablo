@@ -28,11 +28,11 @@ namespace FARender
 
     Renderer* Renderer::mRenderer = NULL;
 
-    std::unique_ptr <CelFontInfo> Renderer::generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData)
+    std::unique_ptr<CelFontInfo> Renderer::generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData, int spacing)
     {
         std::unique_ptr<CelFontInfo> ret(new CelFontInfo());
         auto mergedTex = mSpriteManager.get(texturePath + "&convertToSingleTexture");
-        ret->initByFontData(fontData, mergedTex->getWidth(), 1);
+        ret->initByFontData(fontData, mergedTex->getWidth(), spacing);
         ret->nkFont.userdata.ptr = ret.get();
         ret->nkFont.height = mergedTex->getHeight();
         ret->nkFont.width = &CelFontInfo::getWidth;
@@ -298,6 +298,7 @@ namespace FARender
 
         return true;
     }
+
     void Renderer::drawCursor(RenderState* State)
     {
 
@@ -327,22 +328,22 @@ namespace FARender
 
     void Renderer::loadFonts(const DiabloExe::DiabloExe& exe)
     {
-        mSmallFont = generateCelFont ("ctrlpan/smaltext.cel", exe.getFontData ("smaltext"));
+        mSmallTextFont = generateCelFont("ctrlpan/smaltext.cel", exe.getFontData("smaltext"), 1);
+        mBigTGoldFont = generateCelFont("data/bigtgold.cel", exe.getFontData("bigtgold"), 2);
         for (auto size : {16, 24, 30, 42})
         {
-            std::string prefix = "ui_art/font" + std::to_string (size);
-            mGoldFont[size] = generateFont (prefix + "g.pcx", prefix + ".bin");
+            std::string prefix = "ui_art/font" + std::to_string(size);
+            mGoldFont[size] = generateFont(prefix + "g.pcx", prefix + ".bin");
             if (size != 42)
-              mSilverFont[size] = generateFont (prefix + "s.pcx", prefix + ".bin");
+                mSilverFont[size] = generateFont(prefix + "s.pcx", prefix + ".bin");
         }
     }
 
-    bool Renderer::getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites)
-    {
-        return mSpriteManager.getAndClearSpritesNeedingPreloading(sprites);
-    }
+    bool Renderer::getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites) { return mSpriteManager.getAndClearSpritesNeedingPreloading(sprites); }
 
-    nk_user_font* Renderer::smallFont() const { return &mSmallFont->nkFont; }
+    nk_user_font* Renderer::smallFont() const { return &mSmallTextFont->nkFont; }
+
+    nk_user_font* Renderer::bigTGoldFont() const { return &mBigTGoldFont->nkFont; }
 
     nk_user_font* Renderer::goldFont(int height) const { return &mGoldFont.at(height)->nkFont; }
 

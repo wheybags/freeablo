@@ -22,18 +22,18 @@ namespace DiabloExe
     {
         std::array<uint8_t, 256> charToFontIndex;
         exe.FAfseek(mSettings->get<size_t>("Fonts", "charToFontIndex"), SEEK_SET);
-        exe.FAfread(charToFontIndex.data (), 1, charToFontIndex.size ());
-        for (std::string fontName : {"smaltext"})
+        exe.FAfread(charToFontIndex.data(), 1, charToFontIndex.size());
+        for (std::string fontName : {"smaltext", "bigtgold"})
         {
-            auto &data = mFontData[fontName];
+            auto& data = mFontData[fontName];
             data.charToFontIndex = charToFontIndex;
             exe.FAfseek(mSettings->get<size_t>("Fonts", fontName + "FontIndexToFrame"), SEEK_SET);
-            exe.FAfread(data.fontIndexToFrame.data (), 1, data.fontIndexToFrame.size ());
+            exe.FAfread(data.fontIndexToFrame.data(), 1, data.fontIndexToFrame.size());
 
             data.frameCount = mSettings->get<size_t>("Fonts", fontName + "FrameCount");
-            data.frameToWidth.resize (data.frameCount + 1);
+            data.frameToWidth.resize(data.frameCount + 1);
             exe.FAfseek(mSettings->get<size_t>("Fonts", fontName + "FrameToWidth"), SEEK_SET);
-            exe.FAfread(data.frameToWidth.data (), 1, data.frameToWidth.size ());
+            exe.FAfread(data.frameToWidth.data(), 1, data.frameToWidth.size());
         }
     }
 
@@ -79,10 +79,7 @@ namespace DiabloExe
         return (arg << 16) | (arg >> 16);
     }
 
-    const FontData& DiabloExe::getFontData(const char* fontName) const
-    {
-        return mFontData.at (fontName);
-    }
+    const FontData& DiabloExe::getFontData(const char* fontName) const { return mFontData.at(fontName); }
 
     std::string DiabloExe::getMD5(const std::string& pathEXE)
     {

@@ -3,14 +3,14 @@
 #include "cel/celdecoder.h"
 #include <boost/range/irange.hpp>
 
+#include "diabloexe/diabloexe.h"
 #include "faio/fafileobject.h"
 #include "render/levelobjects.h"
 #include <numeric>
-#include "diabloexe/diabloexe.h"
 
 namespace FARender
 {
-    void CelFontInfo::initByFontData(const DiabloExe::FontData &fontData, int textureWidthPx, int spacing)
+    void CelFontInfo::initByFontData(const DiabloExe::FontData& fontData, int textureWidthPx, int spacing)
     {
         mSpacing = spacing;
         for (int i = 0; i < charCount; ++i)
@@ -25,17 +25,16 @@ namespace FARender
 
     float CelFontInfo::getWidth(nk_handle handle, float /*h*/, const char* s, int len)
     {
-        auto info = static_cast<self *>(handle.ptr);
-        return std::accumulate(s, s + len, 0, [info](int sum, char c)
-        {
-            auto uc = static_cast<unsigned char> (c);
+        auto info = static_cast<self*>(handle.ptr);
+        return std::accumulate(s, s + len, 0, [info](int sum, char c) {
+            auto uc = static_cast<unsigned char>(c);
             return sum + info->widthPx[uc] + info->mSpacing;
         });
     }
 
     void CelFontInfo::queryGlyph(nk_handle handle, float /*font_height*/, nk_user_font_glyph* glyph, nk_rune codepoint, nk_rune /*next_codepoint*/)
     {
-        auto info = static_cast<self *>(handle.ptr);
+        auto info = static_cast<self*>(handle.ptr);
         glyph->width = info->widthPx[codepoint];
         glyph->height = info->nkFont.height;
         glyph->xadvance = info->widthPx[codepoint] + info->mSpacing;

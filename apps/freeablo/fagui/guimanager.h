@@ -10,14 +10,14 @@
 #include <fa_nuklear.h>
 #include <memory>
 
-
 struct nk_context;
 typedef uint32_t nk_flags;
 struct nk_rect;
 struct nk_vec2;
 struct nk_image;
 
-namespace Engine {
+namespace Engine
+{
     class EngineMain;
 }
 
@@ -117,6 +117,7 @@ namespace FAGui
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
         void bottomMenu(nk_context* ctx);
+        static void bigTGoldText(nk_context* ctx, const char* text, nk_flags alignment);
         static void smallText(nk_context* ctx, const char* text, TextColor color, nk_flags alignment);
         static void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white);
         int smallTextWidth(const char* text);

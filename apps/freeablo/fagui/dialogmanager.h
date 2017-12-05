@@ -49,6 +49,7 @@ namespace FAGui
     public:
         explicit DialogManager(GuiManager& gui_manager);
         void talk(const FAWorld::Actor* npc);
+
     private:
         void talkOgden(const FAWorld::Actor* npc);
         void talkFarnham(const FAWorld::Actor* npc);
@@ -58,6 +59,7 @@ namespace FAGui
         void talkCain(const FAWorld::Actor* npc);
         void talkGillian(const FAWorld::Actor* npc);
         void talkGriswold(const FAWorld::Actor* npc);
+
     private:
         GuiManager& mGuiManager;
     };

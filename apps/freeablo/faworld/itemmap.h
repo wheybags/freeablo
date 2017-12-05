@@ -55,6 +55,7 @@ namespace FAWorld
         Tile getTile() const { return mTile; }
         bool onGround();
         const Item& item() const { return *mItem; }
+
     private:
         std::unique_ptr<Item> mItem;
         std::unique_ptr<FARender::AnimationPlayer> mAnimation;
