@@ -250,7 +250,7 @@ namespace FAGui
             anim->update();
     }
 
-    void pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
+    void GuiManager::pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
 
@@ -261,6 +261,21 @@ namespace FAGui
 
         if (nk_begin(ctx, "pause menu", nk_rect(0, 0, screenW, screenH), 0))
         {
+            nk_layout_space_begin(ctx, NK_STATIC, 0.0f, INT_MAX);
+            {
+                auto img = renderer->loadImage("data/diabsmal.cel");
+                nk_layout_space_push(ctx, nk_rect(screenW / 2 - img->getWidth() / 2, 0, img->getWidth(), img->getHeight()));
+                nk_image(ctx, img->getNkImage());
+                int y = 115;
+                for (auto text : {"Save Game", "Options", "New Game", "Load Game", "Quit Diablo"})
+                {
+                    nk_layout_space_push(ctx, nk_rect(0, y, screenW, 45));
+                    bigTGoldText(ctx, text, NK_TEXT_CENTERED);
+                    y += 45;
+                }
+            }
+            nk_layout_space_end(ctx);
+#if 0 
             nk_layout_row_dynamic(ctx, 30, 1);
 
             nk_label(ctx, "PAUSED", NK_TEXT_CENTERED);
@@ -305,6 +320,7 @@ namespace FAGui
 
             if (nk_button_label(ctx, "Quit"))
                 engine.stop();
+#endif
         }
         nk_end(ctx);
 

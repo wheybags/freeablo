@@ -117,6 +117,7 @@ namespace FAGui
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
         void bottomMenu(nk_context* ctx);
+        void pauseMenu(nk_context* ctx, Engine::EngineMain& engine);
         static void bigTGoldText(nk_context* ctx, const char* text, nk_flags alignment);
         static void smallText(nk_context* ctx, const char* text, TextColor color, nk_flags alignment);
         static void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white);
