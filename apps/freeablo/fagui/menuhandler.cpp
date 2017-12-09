@@ -8,11 +8,11 @@
 
 namespace FAGui
 {
-    MainMenuScreen::MainMenuScreen(MainMenuHandler& menu) : mMenuHandler(menu) {}
+    MenuScreen::MenuScreen(MenuHandler& menu) : mMenuHandler(menu) {}
 
-    MainMenuScreen::~MainMenuScreen() {}
+    MenuScreen::~MenuScreen() {}
 
-    StartingScreen::StartingScreen(MainMenuHandler& menu) : Parent(menu)
+    StartingScreen::StartingScreen(MenuHandler& menu) : Parent(menu)
     {
         auto renderer = FARender::Renderer::get();
         mSmLogo.reset(new FARender::AnimationPlayer());
@@ -103,22 +103,22 @@ namespace FAGui
         if (nk_begin(
                 ctx,
                 "startingScreen",
-                nk_rect(screenW / 2 - MainMenuHandler::width / 2, screenH / 2 - MainMenuHandler::height / 2, MainMenuHandler::width, MainMenuHandler::height),
+                nk_rect(screenW / 2 - MenuHandler::width / 2, screenH / 2 - MenuHandler::height / 2, MenuHandler::width, MenuHandler::height),
                 NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND))
             menuItems(ctx);
         nk_style_pop_style_item(ctx);
         nk_end(ctx);
     }
 
-    MainMenuHandler::MainMenuHandler(Engine::EngineMain& engine) : mEngine(engine) {}
+    MenuHandler::MenuHandler(Engine::EngineMain& engine) : mEngine(engine) {}
 
-    void MainMenuHandler::update(nk_context* ctx) const { mActiveScreen->update(ctx); }
+    void MenuHandler::update(nk_context* ctx) const { mActiveScreen->update(ctx); }
 
-    void MainMenuHandler::quit() { mEngine.stop(); }
+    void MenuHandler::quit() { mEngine.stop(); }
 
-    void MainMenuHandler::startGame() { mEngine.startGame(); }
+    void MenuHandler::startGame() { mEngine.startGame(); }
 
-    void MainMenuScreen::menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment)
+    void MenuScreen::menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
         nk_style_push_color(ctx, &ctx->style.text.color, nk_color{255, 255, 255, 255});

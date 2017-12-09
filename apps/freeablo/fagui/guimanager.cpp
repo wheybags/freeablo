@@ -19,7 +19,7 @@
 #include "boost/range/counting_range.hpp"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
-#include "mainmenu.h"
+#include "menuhandler.h"
 #include "nkhelpers.h"
 #include <boost/variant/variant.hpp>
 
@@ -81,12 +81,16 @@ namespace FAGui
 
     GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player& player) : mEngine(engine), mPlayer(player)
     {
-        mMainMenuHandler.reset(new MainMenuHandler(engine));
+        mMainMenuHandler.reset(new MenuHandler(engine));
 
-        mPentagramAnim.reset(new FARender::AnimationPlayer());
         auto renderer = FARender::Renderer::get();
-        mPentagramAnim->playAnimation(
+        mSmallPentagram.reset(new FARender::AnimationPlayer());
+        mSmallPentagram->playAnimation(
             renderer->loadImage("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
+
+        mBigPentagram.reset(new FARender::AnimationPlayer());
+        mBigPentagram->playAnimation(
+            renderer->loadImage("data/pentspin.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
         startingScreen();
     }
 
@@ -226,7 +230,7 @@ namespace FAGui
                             if (line.alignCenter)
                                 offset = ((boxTex->getWidth() - 6) / 2 - textWidth / 2 - pent->getWidth() - pentOffset);
                             nk_layout_space_push(ctx, nk_rect(3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
-                            nk_image(ctx, pent->getNkImage(mPentagramAnim->getCurrentFrame().second));
+                            nk_image(ctx, pent->getNkImage(mSmallPentagram->getCurrentFrame().second));
                         }
                         // right pentagram
                         {
@@ -234,7 +238,7 @@ namespace FAGui
                             if (line.alignCenter)
                                 offset = ((boxTex->getWidth() - 6) / 2 + textWidth / 2 + pentOffset);
                             nk_layout_space_push(ctx, nk_rect(3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
-                            nk_image(ctx, pent->getNkImage(mPentagramAnim->getCurrentFrame().second));
+                            nk_image(ctx, pent->getNkImage(mSmallPentagram->getCurrentFrame().second));
                         }
                     }
 
@@ -246,7 +250,7 @@ namespace FAGui
 
     void GuiManager::updateAnimations()
     {
-        for (auto& anim : {mPentagramAnim.get()})
+        for (auto& anim : {mSmallPentagram.get()})
             anim->update();
     }
 

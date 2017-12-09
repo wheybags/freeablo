@@ -41,7 +41,7 @@ namespace FAGui
 {
     class GuiManager;
     class DialogData;
-    class MainMenuHandler;
+    class MenuHandler;
 
     enum class EffectType
     {
@@ -133,8 +133,9 @@ namespace FAGui
         TextColor mDescriptionColor = TextColor::white;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::vector<DialogData> mDialogs;
-        std::unique_ptr<FARender::AnimationPlayer> mPentagramAnim;
-        std::unique_ptr<MainMenuHandler> mMainMenuHandler;
+        std::unique_ptr<FARender::AnimationPlayer> mSmallPentagram;
+        std::unique_ptr<FARender::AnimationPlayer> mBigPentagram;
+        std::unique_ptr<MenuHandler> mMainMenuHandler;
     };
 }
 

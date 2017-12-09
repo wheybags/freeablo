@@ -72,8 +72,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fagui/commandhistory.cpp
     fagui/nkhelpers.h
     fagui/nkhelpers.cpp
-    fagui/mainmenu.h
-    fagui/mainmenu.cpp
+    fagui/menuhandler.h
+    fagui/menuhandler.cpp
     fagui/autocomplete.h
     fagui/autocomplete.cpp
 

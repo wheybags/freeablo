@@ -15,7 +15,7 @@ namespace FARender
 
 namespace FAGui
 {
-    class MainMenuHandler;
+    class MenuHandler;
 
     enum class MenuFontColor
     {
@@ -23,27 +23,27 @@ namespace FAGui
         silver,
     };
 
-    class MainMenuScreen
+    class MenuScreen
     {
     public:
-        explicit MainMenuScreen(MainMenuHandler& menu);
-        virtual ~MainMenuScreen();
+        explicit MenuScreen(MenuHandler& menu);
+        virtual ~MenuScreen();
         virtual void update(nk_context* ctx) = 0;
 
     protected:
         static void menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment);
 
     protected:
-        MainMenuHandler& mMenuHandler;
+        MenuHandler& mMenuHandler;
     };
 
-    class StartingScreen : public MainMenuScreen
+    class StartingScreen : public MenuScreen
     {
     private:
-        using Parent = MainMenuScreen;
+        using Parent = MenuScreen;
 
     public:
-        explicit StartingScreen(MainMenuHandler& menu);
+        explicit StartingScreen(MenuHandler& menu);
         void menuItems(nk_context* ctx);
         void update(nk_context* ctx) override;
 
@@ -53,16 +53,16 @@ namespace FAGui
         std::unique_ptr<FARender::AnimationPlayer> mFocus42;
     };
 
-    class MainMenuHandler
+    class MenuHandler
     {
     public:
         static const int width = 640;
         static const int height = 480;
-        std::unique_ptr<MainMenuScreen> mActiveScreen;
+        std::unique_ptr<MenuScreen> mActiveScreen;
         template <typename ScreenType> void setActiveScreen() { mActiveScreen.reset(new ScreenType(*this)); }
 
     public:
-        explicit MainMenuHandler(Engine::EngineMain& engine);
+        explicit MenuHandler(Engine::EngineMain& engine);
         void update(nk_context* ctx) const;
         void quit();
         void startGame();
