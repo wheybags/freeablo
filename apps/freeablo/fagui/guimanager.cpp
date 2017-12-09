@@ -81,16 +81,13 @@ namespace FAGui
 
     GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::Player& player) : mEngine(engine), mPlayer(player)
     {
-        mMainMenuHandler.reset(new MenuHandler(engine));
+        mMenuHandler.reset(new MenuHandler(engine));
 
         auto renderer = FARender::Renderer::get();
         mSmallPentagram.reset(new FARender::AnimationPlayer());
         mSmallPentagram->playAnimation(
             renderer->loadImage("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
 
-        mBigPentagram.reset(new FARender::AnimationPlayer());
-        mBigPentagram->playAnimation(
-            renderer->loadImage("data/pentspin.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
         startingScreen();
     }
 
@@ -252,83 +249,6 @@ namespace FAGui
     {
         for (auto& anim : {mSmallPentagram.get()})
             anim->update();
-    }
-
-    void GuiManager::pauseMenu(nk_context* ctx, Engine::EngineMain& engine)
-    {
-        FARender::Renderer* renderer = FARender::Renderer::get();
-
-        int32_t screenW, screenH;
-        renderer->getWindowDimensions(screenW, screenH);
-
-        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_color(nk_rgba(0, 0, 0, 0)));
-
-        if (nk_begin(ctx, "pause menu", nk_rect(0, 0, screenW, screenH), 0))
-        {
-            nk_layout_space_begin(ctx, NK_STATIC, 0.0f, INT_MAX);
-            {
-                auto img = renderer->loadImage("data/diabsmal.cel");
-                nk_layout_space_push(ctx, nk_rect(screenW / 2 - img->getWidth() / 2, 0, img->getWidth(), img->getHeight()));
-                nk_image(ctx, img->getNkImage());
-                int y = 115;
-                for (auto text : {"Save Game", "Options", "New Game", "Load Game", "Quit Diablo"})
-                {
-                    nk_layout_space_push(ctx, nk_rect(0, y, screenW, 45));
-                    bigTGoldText(ctx, text, NK_TEXT_CENTERED);
-                    y += 45;
-                }
-            }
-            nk_layout_space_end(ctx);
-#if 0 
-            nk_layout_row_dynamic(ctx, 30, 1);
-
-            nk_label(ctx, "PAUSED", NK_TEXT_CENTERED);
-
-            if (nk_button_label(ctx, "Resume"))
-                engine.togglePause();
-
-            if (nk_button_label(ctx, "Save game"))
-            {
-                /*std::vector<uint8_t> streamData;
-                Serial::WriteBitStream stream(streamData);
-                FASaveGame::GameSaver saver(stream);
-
-                FAWorld::World::get()->save(saver);*/
-
-                Serial::TextWriteStream writeStream;
-                FASaveGame::GameSaver saver(writeStream);
-
-                FAWorld::World::get()->save(saver);
-
-                /*writeStream->write(true);
-                writeStream->write(false);
-
-                writeStream->write(int64_t(900));
-                writeStream->write(uint8_t(253));*/
-
-                std::pair<uint8_t*, size_t> writtenData = writeStream.getData();
-
-                /*std::string readData = (char*)writtenData.first;
-
-                std::unique_ptr<Serial::ReadStreamInterface> readStream(new Serial::TextReadStream(readData));
-
-                bool b1 = readStream->read_bool();
-                bool b2 = readStream->read_bool();
-                int64_t i1 = readStream->read_int64_t();
-                uint8_t i2 = readStream->read_uint8_t();*/
-
-                FILE* f = fopen("save.sav", "wb");
-                fwrite(writtenData.first, 1, writtenData.second, f);
-                fclose(f);
-            }
-
-            if (nk_button_label(ctx, "Quit"))
-                engine.stop();
-#endif
-        }
-        nk_end(ctx);
-
-        nk_style_pop_style_item(ctx);
     }
 
     template <typename Function> void GuiManager::drawPanel(nk_context* ctx, PanelType panelType, Function op)
@@ -667,17 +587,7 @@ namespace FAGui
                            false);
     }
 
-    void GuiManager::bigTGoldText(nk_context* ctx, const char* text, nk_flags alignment)
-    {
-        FARender::Renderer* renderer = FARender::Renderer::get();
-        nk_style_push_font(ctx, renderer->bigTGoldFont());
-        nk_style_push_color(ctx, &ctx->style.text.color, nk_color{255, 255, 255, 255});
-        nk_label(ctx, text, alignment);
-        nk_style_pop_color(ctx);
-        nk_style_pop_font(ctx);
-    }
-
-    void GuiManager::startingScreen() { mMainMenuHandler->setActiveScreen<StartingScreen>(); }
+    void GuiManager::startingScreen() { mMenuHandler->setActiveScreen<StartingScreen>(); }
 
     void GuiManager::smallText(nk_context* ctx, const char* text, TextColor color, nk_flags alignment)
     {
@@ -727,7 +637,15 @@ namespace FAGui
     void GuiManager::updateGameUI(bool paused, nk_context* ctx)
     {
         if (paused)
-            pauseMenu(ctx, mEngine);
+            {
+                if (!mMenuHandler->isActive())
+                    {
+                       mMenuHandler->setActiveScreen<PauseMenuScreen>();
+                    }
+               mMenuHandler->update(ctx);
+            }
+        else if (mMenuHandler->isActive())
+           mMenuHandler->disable ();
 
         updateAnimations();
         inventoryPanel(ctx);
@@ -738,7 +656,7 @@ namespace FAGui
         dialog(ctx);
     }
 
-    void GuiManager::updateMenuUI(nk_context* ctx) { mMainMenuHandler->update(ctx); }
+    void GuiManager::updateMenuUI(nk_context* ctx) { mMenuHandler->update(ctx); }
 
     void GuiManager::setDescription(std::string text, TextColor color)
     {

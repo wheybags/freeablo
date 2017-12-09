@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "fa_nuklear.h"
 
 namespace Engine
 {
@@ -37,6 +38,23 @@ namespace FAGui
         MenuHandler& mMenuHandler;
     };
 
+    class PauseMenuScreen : public MenuScreen
+    {
+    private:
+        using Parent = MenuScreen;
+
+    public:
+        explicit PauseMenuScreen (MenuHandler& menu);
+        void bigTGoldText(nk_context* ctx, const char* text, nk_flags alignment);
+        float bigTGoldTextWidth (const char *text);
+        void menuItems(nk_context* ctx);
+        void update(nk_context* ctx) override;
+
+    private:
+        std::unique_ptr<FARender::AnimationPlayer> mBigPentagram;
+        int activeItemIndex = 0;
+    };
+
     class StartingScreen : public MenuScreen
     {
     private:
@@ -66,6 +84,8 @@ namespace FAGui
         void update(nk_context* ctx) const;
         void quit();
         void startGame();
+        bool isActive () const { return !!mActiveScreen; }
+        void disable();
 
     private:
         Engine::EngineMain& mEngine;
