@@ -89,7 +89,7 @@ namespace FAWorld
         static float getSecondsPerTick();
 
         Actor* getActorById(int32_t id);
-        void onPause (bool pause);
+        void onPause(bool pause);
 
         void getAllActors(std::vector<Actor*>& actors);
 

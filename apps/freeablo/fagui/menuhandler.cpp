@@ -62,11 +62,11 @@ namespace FAGui
                 nk_layout_space_push(ctx, rect);
                 bigTGoldText(ctx, text, NK_TEXT_CENTERED);
                 if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
-                    {
-                        activeItemIndex = itemIndex;
-                        if (action())
-                            return true;
-                    }
+                {
+                    activeItemIndex = itemIndex;
+                    if (action())
+                        return true;
+                }
                 rect.x -= (pentRect.w + pentOffset);
                 rect.w += (pentRect.w + pentOffset) * 2;
 

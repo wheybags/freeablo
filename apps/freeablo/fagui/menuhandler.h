@@ -1,6 +1,6 @@
 #pragma once
-#include <memory>
 #include "fa_nuklear.h"
+#include <memory>
 
 namespace Engine
 {
@@ -44,9 +44,9 @@ namespace FAGui
         using Parent = MenuScreen;
 
     public:
-        explicit PauseMenuScreen (MenuHandler& menu);
+        explicit PauseMenuScreen(MenuHandler& menu);
         void bigTGoldText(nk_context* ctx, const char* text, nk_flags alignment);
-        float bigTGoldTextWidth (const char *text);
+        float bigTGoldTextWidth(const char* text);
         void menuItems(nk_context* ctx);
         void update(nk_context* ctx) override;
 
@@ -84,9 +84,9 @@ namespace FAGui
         void update(nk_context* ctx) const;
         void quit();
         void startGame();
-        bool isActive () const { return !!mActiveScreen; }
+        bool isActive() const { return !!mActiveScreen; }
         void disable();
-        Engine::EngineMain& engine () { return mEngine; }
+        Engine::EngineMain& engine() { return mEngine; }
 
     private:
         Engine::EngineMain& mEngine;

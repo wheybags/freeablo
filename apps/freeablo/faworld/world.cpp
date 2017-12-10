@@ -378,7 +378,8 @@ namespace FAWorld
         return NULL;
     }
 
-    void World::onPause(bool pause) {
+    void World::onPause(bool pause)
+    {
         if (pause)
             blockNextMousePress = true;
     }

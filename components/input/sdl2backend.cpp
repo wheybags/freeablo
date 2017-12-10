@@ -351,7 +351,7 @@ namespace Input
                     Key key = getKey(event.vals.key);
                     if (key != KEY_UNDEF)
                     {
-                       mKeyPress(key);
+                        mKeyPress(key);
                     }
                     break;
                 }
@@ -360,7 +360,7 @@ namespace Input
                     Key key = getKey(event.vals.key);
                     if (key != KEY_UNDEF)
                     {
-                       mKeyRelease(key);
+                        mKeyRelease(key);
                     }
                     break;
                 }

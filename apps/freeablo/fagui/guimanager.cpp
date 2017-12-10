@@ -637,15 +637,15 @@ namespace FAGui
     void GuiManager::updateGameUI(bool paused, nk_context* ctx)
     {
         if (paused)
+        {
+            if (!mMenuHandler->isActive())
             {
-                if (!mMenuHandler->isActive())
-                    {
-                       mMenuHandler->setActiveScreen<PauseMenuScreen>();
-                    }
-               mMenuHandler->update(ctx);
+                mMenuHandler->setActiveScreen<PauseMenuScreen>();
             }
+            mMenuHandler->update(ctx);
+        }
         else if (mMenuHandler->isActive())
-           mMenuHandler->disable ();
+            mMenuHandler->disable();
 
         updateAnimations();
         inventoryPanel(ctx);
