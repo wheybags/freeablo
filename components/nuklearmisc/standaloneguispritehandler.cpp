@@ -105,7 +105,7 @@ namespace NuklearMisc
     {
         nk_input_begin(&mCtx);
         mInput.poll();
-        bool quit = mInput.processInput(false);
+        bool quit = mInput.processInput();
         nk_input_end(&mCtx);
 
         mNuklearData.fill(&mCtx);

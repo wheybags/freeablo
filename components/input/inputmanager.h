@@ -28,7 +28,7 @@ namespace Input
                      std::function<void(int32_t, int32_t)> mouseWheel,
                      std::function<void(std::string)> textInput);
 
-        bool processInput(bool paused); ///< \return true if user requested quit, false otherwise
+        bool processInput(); ///< \return true if user requested quit, false otherwise
         void poll();
 
         KeyboardModifiers getModifiers();

@@ -187,7 +187,7 @@ namespace Engine
         mPaused = paused;
 
         nk_input_begin(mNkCtx);
-        bool quit = mInput.processInput(paused);
+        bool quit = mInput.processInput();
 
         // TODO: bit nasty to use keybard observers for this, but meh
         if (quit)

@@ -336,7 +336,7 @@ namespace Input
 
     KeyboardModifiers InputManager::getModifiers() { return mModifiers; }
 
-    bool InputManager::processInput(bool paused)
+    bool InputManager::processInput()
     {
         Event event;
 
