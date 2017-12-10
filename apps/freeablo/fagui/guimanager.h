@@ -10,6 +10,12 @@
 #include <fa_nuklear.h>
 #include <memory>
 
+struct nk_context;
+typedef uint32_t nk_flags;
+struct nk_rect;
+struct nk_vec2;
+struct nk_image;
+
 namespace Engine
 {
     class EngineMain;
@@ -35,7 +41,7 @@ namespace FAGui
 {
     class GuiManager;
     class DialogData;
-    class MainMenuHandler;
+    class MenuHandler;
 
     enum class EffectType
     {
@@ -111,8 +117,9 @@ namespace FAGui
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
         void bottomMenu(nk_context* ctx);
-        static void
-        smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white, nk_flags alignment = NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_MIDDLE);
+        static void bigTGoldText(nk_context* ctx, const char* text, nk_flags alignment);
+        static void smallText(nk_context* ctx, const char* text, TextColor color, nk_flags alignment);
+        static void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white);
         int smallTextWidth(const char* text);
         void descriptionPanel(nk_context* ctx);
         PanelType* panel(PanelPlacement placement);
@@ -125,8 +132,8 @@ namespace FAGui
         TextColor mDescriptionColor = TextColor::white;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::vector<DialogData> mDialogs;
-        std::unique_ptr<FARender::AnimationPlayer> mPentagramAnim;
-        std::unique_ptr<MainMenuHandler> mMainMenuHandler;
+        std::unique_ptr<FARender::AnimationPlayer> mSmallPentagram;
+        std::unique_ptr<MenuHandler> mMenuHandler;
     };
 }
 

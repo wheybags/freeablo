@@ -17,8 +17,10 @@ namespace FAWorld
     public:
         EquipTarget() = delete;
         bool operator<(const EquipTarget& other) const { return std::tie(location, posX, posY) < std::tie(other.location, other.posX, other.posY); }
+
     protected:
         EquipTarget(Item::equipLoc locationArg, int posXArg = -1, int posYArg = -1) : location(locationArg), posX(posXArg), posY(posYArg) {}
+
     public:
         Item::equipLoc location;
         int posX;

@@ -74,6 +74,7 @@ namespace Engine
 
         FAWorld::ItemManager& itemManager = FAWorld::ItemManager::get();
         FAWorld::PlayerFactory playerFactory(exe);
+        renderer.loadFonts(exe);
 
         FILE* f = fopen("save.sav", "rb");
 
@@ -94,6 +95,7 @@ namespace Engine
             mWorld.reset(new FAWorld::World(loader, exe));
 
             player = mWorld->getCurrentPlayer();
+            inGame = true;
         }
         else
         {
@@ -181,6 +183,9 @@ namespace Engine
 
     void EngineMain::notify(KeyboardInputAction action)
     {
+        if (mPaused && action != PAUSE)
+            return;
+
         if (action == PAUSE)
         {
             togglePause();
@@ -203,7 +208,11 @@ namespace Engine
 
     void EngineMain::stop() { mDone = true; }
 
-    void EngineMain::togglePause() { mPaused = !mPaused; }
+    void EngineMain::togglePause()
+    {
+        mPaused = !mPaused;
+        mWorld->onPause(mPaused);
+    }
 
     void EngineMain::toggleNoclip() { mNoclip = !mNoclip; }
 }

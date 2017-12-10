@@ -378,6 +378,12 @@ namespace FAWorld
         return NULL;
     }
 
+    void World::onPause(bool pause)
+    {
+        if (pause)
+            blockNextMousePress = true;
+    }
+
     void World::getAllActors(std::vector<Actor*>& actors)
     {
         for (auto pair : mLevels)
@@ -397,7 +403,7 @@ namespace FAWorld
             // This is important because mouse released becomes blocked by "modal" dialog
             // Thus creating some uncomfortable effects
             targetLock = false;
-            afterDialog = true;
+            blockNextMousePress = true;
             mDlgManager->talk(actor);
         });
     }
@@ -423,7 +429,7 @@ namespace FAWorld
 
     void World::onMouseRelease()
     {
-        afterDialog = false;
+        blockNextMousePress = false;
         targetLock = false;
         simpleMove = false;
         getCurrentPlayer()->isTalking = false;
@@ -446,7 +452,7 @@ namespace FAWorld
 
     void World::onMouseDown(Misc::Point mousePosition)
     {
-        if (afterDialog)
+        if (blockNextMousePress)
             return;
 
         auto player = getCurrentPlayer();

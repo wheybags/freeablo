@@ -1,12 +1,12 @@
 #ifndef DIABLO_EXE_H
 #define DIABLO_EXE_H
 
+#include <array>
 #include <map>
 #include <memory>
-#include <string>
-#include <vector>
 
 #include <faio/fafileobject.h>
+#include <unordered_map>
 
 namespace Settings
 {
@@ -22,9 +22,26 @@ namespace DiabloExe
     class UniqueItem;
     class Affix;
 
+    class FontData
+    {
+        // Basic logic on how fonts work:
+        // charToFontIndex maps normal char 0..255 to font index 0..127 similar to ASCII indices
+        // font index could be then transformed to frame by fontIndexToFrame array specific to font
+        // frame then could be used for array frameToWidth to extract width or draw
+        constexpr static int charSize = 256;
+        constexpr static int fontIndexSize = 128;
+
+    public:
+        std::array<uint8_t, charSize> charToFontIndex;
+        std::array<uint8_t, fontIndexSize> fontIndexToFrame;
+        std::vector<uint8_t> frameToWidth;
+        int frameCount;
+    };
+
     class DiabloExe
     {
     public:
+        void loadFontData(FAIO::FAFileObject& exe);
         DiabloExe(const std::string& pathEXE = "Diablo.exe");
         ~DiabloExe();
 
@@ -45,6 +62,7 @@ namespace DiabloExe
         bool isLoaded() const;
 
         uint32_t swapEndian(uint32_t arg);
+        const FontData& getFontData(const char* fontName) const;
 
     private:
         std::string getMD5(const std::string& pathEXE);
@@ -70,6 +88,7 @@ namespace DiabloExe
         std::map<std::string, CharacterStats> mCharacters;
         std::vector<std::vector<int32_t>> mTownerAnimation;
         std::vector<std::string> itemDropGraphicsFilename;
+        std::unordered_map<std::string, FontData> mFontData;
     };
 }
 

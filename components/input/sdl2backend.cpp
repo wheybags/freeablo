@@ -336,7 +336,7 @@ namespace Input
 
     KeyboardModifiers InputManager::getModifiers() { return mModifiers; }
 
-    bool InputManager::processInput(bool paused)
+    bool InputManager::processInput()
     {
         Event event;
 
@@ -351,8 +351,7 @@ namespace Input
                     Key key = getKey(event.vals.key);
                     if (key != KEY_UNDEF)
                     {
-                        if (!paused)
-                            mKeyPress(key);
+                        mKeyPress(key);
                     }
                     break;
                 }
@@ -361,8 +360,7 @@ namespace Input
                     Key key = getKey(event.vals.key);
                     if (key != KEY_UNDEF)
                     {
-                        if (!paused)
-                            mKeyRelease(key);
+                        mKeyRelease(key);
                     }
                     break;
                 }

@@ -46,6 +46,7 @@ namespace DiabloExe
         uint32_t mMinRange5;
         uint32_t mMaxRange5;
         UniqueItem() {}
+
     private:
         UniqueItem(FAIO::FAFileObject& exe, size_t codeOffset);
         friend class DiabloExe;

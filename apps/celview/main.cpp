@@ -2,6 +2,7 @@
 //#include <QApplication>
 
 #include "../components/settings/settings.h"
+#include <boost/format.hpp>
 #include <chrono>
 #include <faio/fafileobject.h>
 #include <input/inputmanager.h>
@@ -73,6 +74,7 @@ int main(int, char**)
 
                 if (image)
                 {
+                    nk_label(ctx, (boost::format("Number of Frames: %1%") % image.get()->getSprite()->size()).str().c_str(), NK_TEXT_LEFT);
                     frame = nk_propertyi(ctx, "Frame", 0, frame, image.get()->getSprite()->size(), 1, 0.2f);
 
                     if (nk_button_label(ctx, "save as png"))

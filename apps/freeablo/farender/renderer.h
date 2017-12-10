@@ -16,10 +16,10 @@
 #include "../faworld/position.h"
 
 #include "boost/container/flat_map.hpp"
+#include "diabloexe/diabloexe.h"
 #include "fontinfo.h"
 #include "spritemanager.h"
 #include <memory>
-#include <numeric>
 
 namespace Render
 {
@@ -36,6 +36,7 @@ namespace FARender
     class CelFontInfo;
 
     class Renderer;
+
     class Tileset
     {
     private:
@@ -111,14 +112,16 @@ namespace FARender
         nk_context* getNuklearContext() { return &mNuklearContext; }
 
         void getWindowDimensions(int32_t& w, int32_t& h);
+        void loadFonts(const DiabloExe::DiabloExe& exe);
 
         bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites);
         nk_user_font* smallFont() const;
+        nk_user_font* bigTGoldFont() const;
         nk_user_font* goldFont(int height) const;
         nk_user_font* silverFont(int height) const;
 
     private:
-        std::unique_ptr<CelFontInfo> generateFontFromFrames(const std::string& texturePath);
+        std::unique_ptr<CelFontInfo> generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData, int spacing);
         std::unique_ptr<PcxFontInfo> generateFont(const std::string& pcxPath, const std::string& binPath);
 
     private:
@@ -142,7 +145,7 @@ namespace FARender
         Render::NuklearGraphicsContext mNuklearGraphicsData = Render::NuklearGraphicsContext();
 
         std::atomic<std::int64_t> mWidthHeightTmp;
-        std::unique_ptr<CelFontInfo> mSmallFont;
+        std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;
         boost::container::flat_map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
     };
 }
