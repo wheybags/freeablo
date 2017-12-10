@@ -2,9 +2,11 @@
 #include "../engine/enginemain.h"
 #include "../farender/animationplayer.h"
 #include "../farender/renderer.h"
+#include "../fasavegame/gameloader.h"
 #include "fa_nuklear.h"
 #include "guimanager.h"
 #include "nkhelpers.h"
+#include "serial/textstream.h"
 
 namespace FAGui
 {
@@ -12,11 +14,12 @@ namespace FAGui
 
     MenuScreen::~MenuScreen() {}
 
-    PauseMenuScreen::PauseMenuScreen(MenuHandler& menu) : Parent (menu) {
-    auto renderer = FARender::Renderer::get();
-    mBigPentagram.reset(new FARender::AnimationPlayer());
+    PauseMenuScreen::PauseMenuScreen(MenuHandler& menu) : Parent(menu)
+    {
+        auto renderer = FARender::Renderer::get();
+        mBigPentagram.reset(new FARender::AnimationPlayer());
         mBigPentagram->playAnimation(
-        renderer->loadImage("data/pentspin.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
+            renderer->loadImage("data/pentspin.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
     }
 
     void PauseMenuScreen::bigTGoldText(nk_context* ctx, const char* text, nk_flags alignment)
@@ -29,7 +32,8 @@ namespace FAGui
         nk_style_pop_font(ctx);
     }
 
-     float PauseMenuScreen::bigTGoldTextWidth(const char* text) {
+    float PauseMenuScreen::bigTGoldTextWidth(const char* text)
+    {
         auto renderer = FARender::Renderer::get();
         auto fnt = renderer->bigTGoldFont();
         return fnt->width(fnt->userdata, 0.0f, text, strlen(text));
@@ -38,106 +42,114 @@ namespace FAGui
     void PauseMenuScreen::menuItems(nk_context* ctx)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
-
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
 
-        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_color(nk_rgba(0, 0, 0, 0)));
-
-        if (nk_begin(ctx, "pause menu", nk_rect(0, 0, screenW, screenH), 0))
+        nk_layout_space_begin(ctx, NK_STATIC, 0.0f, INT_MAX);
         {
-            nk_layout_space_begin(ctx, NK_STATIC, 0.0f, INT_MAX);
-            {
-                auto img = renderer->loadImage("data/diabsmal.cel");
-                nk_layout_space_push(ctx, nk_rect(screenW / 2 - img->getWidth() / 2, 0, img->getWidth(), img->getHeight()));
-                nk_image(ctx, img->getNkImage());
-                int y = 115;
-                int itemIndex = 0;
-                constexpr int itemHeight = 45;
-                auto pentFrame = mBigPentagram->getCurrentFrame();
-                auto pentRect = nk_rect(0, 0, pentFrame.first->getWidth(), pentFrame.first->getHeight());
-                constexpr float pentOffset = 4.0f;
-                auto addItem = [&](const char *text, std::function<void ()> action)
+            auto img = renderer->loadImage("data/diabsmal.cel");
+            nk_layout_space_push(ctx, nk_rect(screenW / 2 - img->getWidth() / 2, 0, img->getWidth(), img->getHeight()));
+            nk_image(ctx, img->getNkImage());
+            int y = 115;
+            int itemIndex = 0;
+            constexpr int itemHeight = 45;
+            auto pentFrame = mBigPentagram->getCurrentFrame();
+            auto pentRect = nk_rect(0, 0, pentFrame.first->getWidth(), pentFrame.first->getHeight());
+            constexpr float pentOffset = 4.0f;
+            auto addItem = [&](const char* text, std::function<bool()> action) {
+                auto textWidth = bigTGoldTextWidth(text);
+                auto rect = nk_rect(screenW / 2 - textWidth / 2 - pentRect.w - pentOffset, y, textWidth + 2 * (pentRect.w + pentOffset), 45);
+                nk_layout_space_push(ctx, rect);
+                bigTGoldText(ctx, text, NK_TEXT_CENTERED);
+                if (activeItemIndex == itemIndex)
                 {
-                  auto textWidth = bigTGoldTextWidth (text);
-                  auto rect = nk_rect(screenW / 2 - textWidth / 2 - pentRect.w - pentOffset, y,
-                                      textWidth + 2 * (pentRect.w + pentOffset), 45);
-                  nk_layout_space_push (ctx, rect);
-                  bigTGoldText(ctx, text, NK_TEXT_CENTERED);
-                  if (activeItemIndex == itemIndex)
-                  {
-                      nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::left, valign_t::center));
-                      nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
-                      nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::right, valign_t::center));
-                      nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
-                  }
+                    if (nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
+                    {
+                        if (action())
+                            return true;
+                    }
+                    nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::left, valign_t::center));
+                    nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
+                    nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::right, valign_t::center));
+                    nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
+                }
 
-                  y += itemHeight;
-                  ++itemIndex;
-                };
-                addItem ("Save Game", [](){});
-                addItem ("Options", [](){});
-                addItem ("New Game", [](){});
-                addItem ("Load Game", [](){});
-                addItem ("Quit Diablo", [](){});
-            }
-            nk_layout_space_end(ctx);
-#if 0 
-            nk_layout_row_dynamic(ctx, 30, 1);
+                y += itemHeight;
+                ++itemIndex;
+                return false;
+            };
+            if (addItem("Save Game", [this]() {
+                    {
+                        /*std::vector<uint8_t> streamData;
+                        Serial::WriteBitStream stream(streamData);
+                        FASaveGame::GameSaver saver(stream);
 
-            nk_label(ctx, "PAUSED", NK_TEXT_CENTERED);
+                        FAWorld::World::get()->save(saver);*/
 
-            if (nk_button_label(ctx, "Resume"))
-                engine.togglePause();
+                        Serial::TextWriteStream writeStream;
+                        FASaveGame::GameSaver saver(writeStream);
 
-            if (nk_button_label(ctx, "Save game"))
-            {
-                /*std::vector<uint8_t> streamData;
-                Serial::WriteBitStream stream(streamData);
-                FASaveGame::GameSaver saver(stream);
+                        FAWorld::World::get()->save(saver);
 
-                FAWorld::World::get()->save(saver);*/
+                        /*writeStream->write(true);
+                        writeStream->write(false);
 
-                Serial::TextWriteStream writeStream;
-                FASaveGame::GameSaver saver(writeStream);
+                        writeStream->write(int64_t(900));
+                        writeStream->write(uint8_t(253));*/
 
-                FAWorld::World::get()->save(saver);
+                        std::pair<uint8_t*, size_t> writtenData = writeStream.getData();
 
-                /*writeStream->write(true);
-                writeStream->write(false);
+                        /*std::string readData = (char*)writtenData.first;
 
-                writeStream->write(int64_t(900));
-                writeStream->write(uint8_t(253));*/
+                        std::unique_ptr<Serial::ReadStreamInterface> readStream(new Serial::TextReadStream(readData));
 
-                std::pair<uint8_t*, size_t> writtenData = writeStream.getData();
+                        bool b1 = readStream->read_bool();
+                        bool b2 = readStream->read_bool();
+                        int64_t i1 = readStream->read_int64_t();
+                        uint8_t i2 = readStream->read_uint8_t();*/
 
-                /*std::string readData = (char*)writtenData.first;
-
-                std::unique_ptr<Serial::ReadStreamInterface> readStream(new Serial::TextReadStream(readData));
-
-                bool b1 = readStream->read_bool();
-                bool b2 = readStream->read_bool();
-                int64_t i1 = readStream->read_int64_t();
-                uint8_t i2 = readStream->read_uint8_t();*/
-
-                FILE* f = fopen("save.sav", "wb");
-                fwrite(writtenData.first, 1, writtenData.second, f);
-                fclose(f);
-            }
-
-            if (nk_button_label(ctx, "Quit"))
-                engine.stop();
-#endif
+                        FILE* f = fopen("save.sav", "wb");
+                        fwrite(writtenData.first, 1, writtenData.second, f);
+                        fclose(f);
+                    }
+                    mMenuHandler.engine().togglePause();
+                    return true;
+                }))
+                return;
+            if (addItem("Options", []() { return false; }))
+                return;
+            if (addItem("New Game", []() { return false; }))
+                return;
+            if (addItem("Load Game", []() { return false; }))
+                return;
+            if (addItem("Quit Diablo", [this]() {
+                    mMenuHandler.quit();
+                    return true;
+                }))
+                return;
+            // TODO: support autorepeat
+            if (nk_input_is_key_pressed(&ctx->input, NK_KEY_UP))
+                --activeItemIndex;
+            if (nk_input_is_key_pressed(&ctx->input, NK_KEY_DOWN))
+                ++activeItemIndex;
+            activeItemIndex = (activeItemIndex + itemIndex) % itemIndex;
         }
-        nk_end(ctx);
-
-        nk_style_pop_style_item(ctx);
+        nk_layout_space_end(ctx);
     }
 
     void PauseMenuScreen::update(nk_context* ctx)
     {
         mBigPentagram->update();
-        menuItems(ctx);
+        FARender::Renderer* renderer = FARender::Renderer::get();
+        int32_t screenW, screenH;
+        renderer->getWindowDimensions(screenW, screenH);
+        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_color(nk_rgba(0, 0, 0, 0)));
+        if (nk_begin(ctx, "pause menu", nk_rect(0, 0, screenW, screenH), 0))
+        {
+            menuItems(ctx);
+            nk_end(ctx);
+        }
+        nk_style_pop_style_item(ctx);
     }
 
     StartingScreen::StartingScreen(MenuHandler& menu) : Parent(menu)
@@ -249,9 +261,7 @@ namespace FAGui
 
     void MenuHandler::startGame() { mEngine.startGame(); }
 
-    void MenuHandler::disable() {
-        mActiveScreen.reset ();
-    }
+    void MenuHandler::disable() { mActiveScreen.reset(); }
 
     void MenuScreen::menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment)
     {

@@ -95,6 +95,7 @@ namespace Engine
             mWorld.reset(new FAWorld::World(loader, exe));
 
             player = mWorld->getCurrentPlayer();
+            inGame = true;
         }
         else
         {

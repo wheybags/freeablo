@@ -86,6 +86,7 @@ namespace FAGui
         void startGame();
         bool isActive () const { return !!mActiveScreen; }
         void disable();
+        Engine::EngineMain& engine () { return mEngine; }
 
     private:
         Engine::EngineMain& mEngine;
