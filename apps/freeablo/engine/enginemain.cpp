@@ -208,7 +208,11 @@ namespace Engine
 
     void EngineMain::stop() { mDone = true; }
 
-    void EngineMain::togglePause() { mPaused = !mPaused; }
+    void EngineMain::togglePause()
+    {
+        mPaused = !mPaused;
+        mWorld->onPause (mPaused);
+    }
 
     void EngineMain::toggleNoclip() { mNoclip = !mNoclip; }
 }

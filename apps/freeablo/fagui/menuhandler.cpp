@@ -58,9 +58,18 @@ namespace FAGui
             constexpr float pentOffset = 4.0f;
             auto addItem = [&](const char* text, std::function<bool()> action) {
                 auto textWidth = bigTGoldTextWidth(text);
-                auto rect = nk_rect(screenW / 2 - textWidth / 2 - pentRect.w - pentOffset, y, textWidth + 2 * (pentRect.w + pentOffset), 45);
+                auto rect = nk_rect(screenW / 2 - textWidth / 2, y, textWidth, 45);
                 nk_layout_space_push(ctx, rect);
                 bigTGoldText(ctx, text, NK_TEXT_CENTERED);
+                if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                    {
+                        activeItemIndex = itemIndex;
+                        if (action())
+                            return true;
+                    }
+                rect.x -= (pentRect.w + pentOffset);
+                rect.w += (pentRect.w + pentOffset) * 2;
+
                 if (activeItemIndex == itemIndex)
                 {
                     if (nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
