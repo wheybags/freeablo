@@ -8,6 +8,7 @@
 
 namespace FAWorld
 {
+    class World;
     class Actor;
 }
 
@@ -47,7 +48,7 @@ namespace FAGui
     class DialogManager
     {
     public:
-        explicit DialogManager(GuiManager& gui_manager);
+        explicit DialogManager(GuiManager& gui_manager, FAWorld::World& world);
         void talk(const FAWorld::Actor* npc);
 
     private:
@@ -59,8 +60,10 @@ namespace FAGui
         void talkCain(const FAWorld::Actor* npc);
         void talkGillian(const FAWorld::Actor* npc);
         void talkGriswold(const FAWorld::Actor* npc);
+        void quitDialog() const;
 
     private:
         GuiManager& mGuiManager;
+        FAWorld::World& mWorld;
     };
 }

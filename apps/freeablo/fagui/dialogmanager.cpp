@@ -66,7 +66,7 @@ namespace FAGui
         return mSelectedLine;
     }
 
-    DialogManager::DialogManager(GuiManager& gui_manager) : mGuiManager(gui_manager) {}
+    DialogManager::DialogManager(GuiManager& gui_manager, FAWorld::World& world) : mGuiManager(gui_manager), mWorld(world) {}
 
     void DialogManager::talkOgden(const FAWorld::Actor* npc)
     {
@@ -78,7 +78,7 @@ namespace FAGui
         d.skip_line();
         d.text_lines({td.at("talk")}, TextColor::blue).setAction([]() {});
         d.skip_line(4);
-        d.text_lines({td.at("quit")}).setAction([&]() { mGuiManager.popDialogData(); });
+        d.text_lines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
     }
 
@@ -92,7 +92,7 @@ namespace FAGui
         d.skip_line();
         d.text_lines({td.at("talk")}, TextColor::blue).setAction([]() {});
         d.skip_line(4);
-        d.text_lines({td.at("quit")}).setAction([&]() { mGuiManager.popDialogData(); });
+        d.text_lines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
     }
 
@@ -109,7 +109,7 @@ namespace FAGui
         d.text_lines({td.at("buy")}).setAction([]() {});
         d.text_lines({td.at("sell")}).setAction([]() {});
         d.text_lines({td.at("recharge")}).setAction([]() {});
-        d.text_lines({td.at("quit")}).setAction([&]() { mGuiManager.popDialogData(); });
+        d.text_lines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
     }
 
@@ -126,7 +126,7 @@ namespace FAGui
         d.text_lines({td.at("introduction2")}, TextColor::golden);
         d.text_lines({td.at("introduction3")}, TextColor::golden);
         d.text_lines({td.at("look")}).setAction([&]() {});
-        d.text_lines({td.at("quit")}).setAction([&]() { mGuiManager.popDialogData(); });
+        d.text_lines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
     }
 
@@ -142,7 +142,7 @@ namespace FAGui
         d.text_lines({td.at("talk")}, TextColor::blue).setAction([]() {});
         d.text_lines({td.at("heal")}).setAction([]() {});
         d.text_lines({td.at("buy")}).setAction([]() {});
-        d.text_lines({td.at("quit")}).setAction([&]() { mGuiManager.popDialogData(); });
+        d.text_lines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
     }
 
@@ -157,7 +157,7 @@ namespace FAGui
         d.text_lines({td.at("talk")}, TextColor::blue).setAction([]() {});
         d.text_lines({td.at("identify")}).setAction([]() {});
         d.skip_line(2);
-        d.text_lines({td.at("quit")}).setAction([&]() { mGuiManager.popDialogData(); });
+        d.text_lines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
     }
 
@@ -171,7 +171,7 @@ namespace FAGui
         d.skip_line();
         d.text_lines({td.at("talk")}, TextColor::blue).setAction([]() {});
         d.skip_line(4);
-        d.text_lines({td.at("quit")}).setAction([&]() { mGuiManager.popDialogData(); });
+        d.text_lines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
     }
 
@@ -208,7 +208,13 @@ namespace FAGui
         d.text_lines({td.at("buyPremium")}).setAction([]() {});
         d.text_lines({td.at("sell")}).setAction([]() {});
         d.text_lines({td.at("repair")}).setAction([]() {});
-        d.text_lines({td.at("quit")}).setAction([&]() { mGuiManager.popDialogData(); });
+        d.text_lines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
+    }
+
+    void DialogManager::quitDialog() const
+    {
+        mGuiManager.popDialogData();
+        mWorld.skipMousePressIfNeeded();
     }
 }

@@ -378,10 +378,16 @@ namespace FAWorld
         return NULL;
     }
 
+    void World::skipMousePressIfNeeded()
+    {
+        if (SDL_BUTTON(SDL_BUTTON_LEFT) & SDL_GetMouseState(nullptr, nullptr))
+            skipNextMousePress = true;
+    }
+
     void World::onPause(bool pause)
     {
-        if (pause)
-            blockNextMousePress = true;
+        if (!pause)
+            skipMousePressIfNeeded();
     }
 
     void World::getAllActors(std::vector<Actor*>& actors)
@@ -398,12 +404,11 @@ namespace FAWorld
     void World::setGuiManager(FAGui::GuiManager* manager)
     {
         mGuiManager = manager;
-        mDlgManager.reset(new FAGui::DialogManager(*mGuiManager));
+        mDlgManager.reset(new FAGui::DialogManager(*mGuiManager, *this));
         getCurrentPlayer()->talkRequested.connect([&](Actor* actor) {
             // This is important because mouse released becomes blocked by "modal" dialog
             // Thus creating some uncomfortable effects
             targetLock = false;
-            blockNextMousePress = true;
             mDlgManager->talk(actor);
         });
     }
@@ -429,7 +434,7 @@ namespace FAWorld
 
     void World::onMouseRelease()
     {
-        blockNextMousePress = false;
+        skipNextMousePress = false;
         targetLock = false;
         simpleMove = false;
         getCurrentPlayer()->isTalking = false;
@@ -452,7 +457,7 @@ namespace FAWorld
 
     void World::onMouseDown(Misc::Point mousePosition)
     {
-        if (blockNextMousePress)
+        if (skipNextMousePress)
             return;
 
         auto player = getCurrentPlayer();
