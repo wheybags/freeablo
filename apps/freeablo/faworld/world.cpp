@@ -342,7 +342,16 @@ namespace FAWorld
 
     Player* World::getCurrentPlayer() { return mCurrentPlayer; }
 
-    void World::addCurrentPlayer(Player* player) { mCurrentPlayer = player; }
+    void World::addCurrentPlayer(Player* player)
+    {
+        mCurrentPlayer = player;
+        mCurrentPlayer->talkRequested.connect([&](Actor* actor) {
+            // This is important because mouse released becomes blocked by "modal" dialog
+            // Thus creating some uncomfortable effects
+            targetLock = false;
+            mDlgManager->talk(actor);
+        });
+    }
 
     void World::registerPlayer(Player* player)
     {
@@ -405,12 +414,6 @@ namespace FAWorld
     {
         mGuiManager = manager;
         mDlgManager.reset(new FAGui::DialogManager(*mGuiManager, *this));
-        getCurrentPlayer()->talkRequested.connect([&](Actor* actor) {
-            // This is important because mouse released becomes blocked by "modal" dialog
-            // Thus creating some uncomfortable effects
-            targetLock = false;
-            mDlgManager->talk(actor);
-        });
     }
 
     void World::changeLevel(bool up)

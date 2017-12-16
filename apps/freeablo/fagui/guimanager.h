@@ -89,7 +89,7 @@ namespace FAGui
         using self = GuiManager;
 
     public:
-        GuiManager(Engine::EngineMain& engine, FAWorld::Player& player);
+        GuiManager(Engine::EngineMain& engine);
         ~GuiManager();
         void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void()> action, bool isModal);
         void nk_fa_begin_image_window(
@@ -106,6 +106,7 @@ namespace FAGui
         // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
         bool isModalDlgShown() const;
         void startingScreen();
+        void setPlayer(FAWorld::Player* player);
 
     private:
         void togglePanel(PanelType type);
@@ -127,7 +128,7 @@ namespace FAGui
 
     private:
         Engine::EngineMain& mEngine;
-        FAWorld::Player& mPlayer;
+        FAWorld::Player* mPlayer;
         std::string mDescription;
         TextColor mDescriptionColor = TextColor::white;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;

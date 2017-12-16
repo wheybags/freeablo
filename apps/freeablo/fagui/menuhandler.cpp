@@ -328,11 +328,20 @@ namespace FAGui
             ++itemIndex;
             return false;
         };
-        if (addItem("Warrior", {262, 278, 320, 33}, []() { return false; }))
+        if (addItem("Warrior", {262, 278, 320, 33}, [&]() {
+                mMenuHandler.engine().startGame("Warrior");
+                return true;
+            }))
             return true;
-        if (addItem("Rogue", {262, 311, 320, 33}, []() { return false; }))
+        if (addItem("Rogue", {262, 311, 320, 33}, [&]() {
+                mMenuHandler.engine().startGame("Rogue");
+                return true;
+            }))
             return true;
-        if (addItem("Sorcerer", {262, 344, 320, 33}, []() { return false; }))
+        if (addItem("Sorcerer", {262, 344, 320, 33}, [&]() {
+                mMenuHandler.engine().startGame("Sorcerer");
+                return true;
+            }))
             return true;
         nk_layout_space_push(ctx, {280, 425, 140, 35});
 
@@ -447,8 +456,6 @@ namespace FAGui
     }
 
     void MenuHandler::quit() { mEngine.stop(); }
-
-    void MenuHandler::startGame() { mEngine.startGame(); }
 
     void MenuHandler::disable() { mActiveScreen.reset(); }
 
