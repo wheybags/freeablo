@@ -89,6 +89,7 @@ namespace FAWorld
         static float getSecondsPerTick();
 
         Actor* getActorById(int32_t id);
+        void skipMousePressIfNeeded();
         void onPause(bool pause);
 
         void getAllActors(std::vector<Actor*>& actors);
@@ -123,7 +124,7 @@ namespace FAWorld
         bool simpleMove = false;
         // that's sadly another state required
         // it means after dialog or pause menu we have to release button before doing next meaningful action
-        bool blockNextMousePress = false;
+        bool skipNextMousePress = false;
 
         int32_t mNextId = 1;
     };
