@@ -71,15 +71,29 @@ namespace FAGui
         std::unique_ptr<FARender::AnimationPlayer> mFocus42;
     };
 
+    class SelectHeroScreen : public MenuScreen
+    {
+    private:
+        using Parent = MenuScreen;
+
+    public:
+        explicit SelectHeroScreen(MenuHandler& menu);
+        void update(nk_context* ctx) override;
+
+    private:
+        std::unique_ptr<FARender::AnimationPlayer> mSmLogo;
+    };
+
     class MenuHandler
     {
     public:
-        static const int width = 640;
-        static const int height = 480;
+        static const int menuWidth = 640;
+        static const int menuHeight = 480;
         std::unique_ptr<MenuScreen> mActiveScreen;
         template <typename ScreenType> void setActiveScreen() { mActiveScreen.reset(new ScreenType(*this)); }
 
     public:
+        std::unique_ptr<FARender::AnimationPlayer> createSmLogo ();
         explicit MenuHandler(Engine::EngineMain& engine);
         void update(nk_context* ctx) const;
         void quit();

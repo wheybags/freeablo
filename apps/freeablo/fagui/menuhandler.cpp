@@ -3,6 +3,7 @@
 #include "../farender/animationplayer.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
+#include "boost/make_unique.hpp"
 #include "fa_nuklear.h"
 #include "guimanager.h"
 #include "nkhelpers.h"
@@ -164,14 +165,11 @@ namespace FAGui
     StartingScreen::StartingScreen(MenuHandler& menu) : Parent(menu)
     {
         auto renderer = FARender::Renderer::get();
-        mSmLogo.reset(new FARender::AnimationPlayer());
-        mSmLogo->playAnimation(renderer->loadImage("ui_art/smlogo.pcx&trans=0,255,0&vanim=154"),
-                               FAWorld::World::getTicksInPeriod(0.06f),
-                               FARender::AnimationPlayer::AnimationType::Looped);
         mFocus42.reset(new FARender::AnimationPlayer());
         mFocus42->playAnimation(renderer->loadImage("ui_art/focus42.pcx&trans=0,255,0&vanim=42"),
                                 FAWorld::World::getTicksInPeriod(0.06f),
                                 FARender::AnimationPlayer::AnimationType::Looped);
+        mSmLogo = menu.createSmLogo();
     }
 
     void StartingScreen::menuItems(nk_context* ctx)
@@ -212,7 +210,7 @@ namespace FAGui
                 return false;
             };
             if (addItem("Single Player", {65, 192, 510, 42}, [this]() {
-                    mMenuHandler.startGame();
+                    mMenuHandler.setActiveScreen<SelectHeroScreen>();
                     return true;
                 }))
                 return;
@@ -249,13 +247,76 @@ namespace FAGui
         Misc::ScopedSetter<float> setter(ctx->style.window.border, 0);
         auto bg = renderer->loadImage("ui_art/mainmenu.pcx")->getNkImage();
         nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(bg));
-        if (nk_begin(ctx,
-                     "startingScreen",
-                     nk_rect(screenW / 2 - MenuHandler::width / 2, screenH / 2 - MenuHandler::height / 2, MenuHandler::width, MenuHandler::height),
-                     NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND))
+        if (nk_begin(
+                ctx,
+                "startingScreen",
+                nk_rect(screenW / 2 - MenuHandler::menuWidth / 2, screenH / 2 - MenuHandler::menuHeight / 2, MenuHandler::menuWidth, MenuHandler::menuHeight),
+                NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND))
             menuItems(ctx);
-        nk_style_pop_style_item(ctx);
         nk_end(ctx);
+        nk_style_pop_style_item(ctx);
+    }
+
+    SelectHeroScreen::SelectHeroScreen(MenuHandler& menu) : Parent(menu) { mSmLogo = menu.createSmLogo(); }
+
+    void SelectHeroScreen::update(nk_context* ctx)
+    {
+        mSmLogo->update();
+        Misc::ScopedSetter<float> setter(ctx->style.window.border, 0);
+        auto renderer = FARender::Renderer::get();
+        int32_t screenW, screenH;
+        renderer->getWindowDimensions(screenW, screenH);
+        auto bg = renderer->loadImage("ui_art/selhero.pcx")->getNkImage();
+        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image (bg));
+        if (nk_begin(
+                ctx,
+                "selectHeroScreen",
+                nk_rect(screenW / 2 - MenuHandler::menuWidth / 2, screenH / 2 - MenuHandler::menuHeight / 2, MenuHandler::menuWidth, MenuHandler::menuHeight),
+                NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND))
+        {
+            nk_layout_space_begin(ctx, NK_STATIC, 48, INT_MAX);
+            // NOTE: similar to starting screen position, reuse
+            nk_layout_space_push(ctx, {125, 0, 390, 154});
+            {
+                auto frame = mSmLogo->getCurrentFrame();
+                nk_image(ctx, frame.first->getNkImage(frame.second));
+            }
+            nk_layout_space_push(ctx, {25, 161, 590, 35});
+            {
+                menuText(ctx, "Single Player Characters", MenuFontColor::silver, 30, NK_TEXT_ALIGN_CENTERED);
+            }
+            auto draw_param_value = [&](const std::string &param, const std::string &value, float y)
+            {
+                nk_layout_space_push(ctx, {37, y, 110, 21});
+                menuText(ctx, param.c_str (), MenuFontColor::silver, 16, NK_TEXT_ALIGN_RIGHT);
+                nk_layout_space_push(ctx, {157, y, 40, 21});
+                menuText(ctx, value.c_str (), MenuFontColor::silver, 16, NK_TEXT_CENTERED);
+            };
+            draw_param_value ("Level:", "--", 318);
+            draw_param_value ("Strength:", "--", 354);
+            draw_param_value ("Magic:", "--", 375);
+            draw_param_value ("Dexterity:", "--", 396);
+            draw_param_value ("Vitality:", "--", 417);
+
+            nk_layout_space_push(ctx, {26, 207, 180, 76});
+            {
+                auto heros_img = renderer->loadImage("ui_art/heros.pcx&vanim=76")->getNkImage(3);
+                nk_image (ctx, heros_img);
+            }
+            nk_layout_space_end (ctx);
+        }
+        nk_end(ctx);
+        nk_style_pop_style_item(ctx);
+    }
+
+    std::unique_ptr<FARender::AnimationPlayer> MenuHandler::createSmLogo()
+    {
+        auto ret = boost::make_unique<FARender::AnimationPlayer>();
+        auto renderer = FARender::Renderer::get();
+        ret->playAnimation(renderer->loadImage("ui_art/smlogo.pcx&trans=0,255,0&vanim=154"),
+                           FAWorld::World::getTicksInPeriod(0.06f),
+                           FARender::AnimationPlayer::AnimationType::Looped);
+        return ret;
     }
 
     MenuHandler::MenuHandler(Engine::EngineMain& engine) : mEngine(engine) {}

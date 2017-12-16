@@ -122,8 +122,11 @@ namespace Engine
         mWorld->setGuiManager(&guiManager);
 
         mInputManager->setGuiManager(&guiManager);
-        mInputManager->registerKeyboardObserver(mWorld.get());
-        mInputManager->registerMouseObserver(mWorld.get());
+        if (inGame)
+            {
+                mInputManager->registerKeyboardObserver(mWorld.get());
+                mInputManager->registerMouseObserver(mWorld.get());
+            }
 
         boost::asio::io_service io;
 
@@ -203,6 +206,8 @@ namespace Engine
     void EngineMain::startGame()
     {
         inGame = true;
+        mInputManager->registerKeyboardObserver(mWorld.get());
+        mInputManager->registerMouseObserver(mWorld.get());
         mWorld->setLevel(0);
     }
 
