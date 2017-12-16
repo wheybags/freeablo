@@ -15,7 +15,6 @@
 #include <functional>
 #include <input/inputmanager.h>
 #include <iostream>
-#include <misc/assert.h>
 #include <misc/misc.h>
 #include <serial/textstream.h>
 #include <thread>
@@ -37,8 +36,6 @@ namespace Engine
         Settings::Settings settings;
         if (!settings.loadUserSettings())
             return;
-
-        release_assert(false);
 
         size_t resolutionWidth = settings.get<size_t>("Display", "resolutionWidth");
         size_t resolutionHeight = settings.get<size_t>("Display", "resolutionHeight");
