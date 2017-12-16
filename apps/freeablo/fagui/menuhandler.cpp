@@ -257,53 +257,160 @@ namespace FAGui
         nk_style_pop_style_item(ctx);
     }
 
-    SelectHeroScreen::SelectHeroScreen(MenuHandler& menu) : Parent(menu) { mSmLogo = menu.createSmLogo(); }
+    SelectHeroScreen::SelectHeroScreen(MenuHandler& menu) : Parent(menu)
+    {
+        auto renderer = FARender::Renderer::get();
+        mSmLogo = menu.createSmLogo();
+        mFocus.reset(new FARender::AnimationPlayer());
+        mFocus->playAnimation(renderer->loadImage("ui_art/focus.pcx&trans=0,255,0&vanim=30"),
+                              FAWorld::World::getTicksInPeriod(0.06f),
+                              FARender::AnimationPlayer::AnimationType::Looped);
+        mFocus16.reset(new FARender::AnimationPlayer());
+        mFocus16->playAnimation(renderer->loadImage("ui_art/focus16.pcx&trans=0,255,0&vanim=20"),
+                                FAWorld::World::getTicksInPeriod(0.06f),
+                                FARender::AnimationPlayer::AnimationType::Looped);
+    }
+
+    bool SelectHeroScreen::chooseClass(nk_context* ctx)
+    {
+        nk_layout_space_push(ctx, {265, 210, 320, 33});
+        menuText(ctx, "Choose Class", MenuFontColor::silver, 30, NK_TEXT_ALIGN_CENTERED);
+        int itemIndex = 0;
+        bool executeCurrent = false;
+        nk_layout_space_push(ctx, {280, 425, 140, 35});
+        menuText(ctx, "OK", MenuFontColor::gold, 30, NK_TEXT_ALIGN_CENTERED);
+        if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+            executeCurrent = true;
+        nk_layout_space_push(ctx, {430, 425, 140, 35});
+        menuText(ctx, "Cancel", MenuFontColor::gold, 30, NK_TEXT_ALIGN_CENTERED);
+        auto exitAction = [&]() {
+            mMenuHandler.setActiveScreen<StartingScreen>();
+            return true;
+        };
+
+        if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+            return exitAction();
+        auto addItem = [&](const char* text, const struct nk_rect& rect, std::function<bool()> action) {
+            nk_layout_space_push(ctx, rect);
+            menuText(ctx, text, MenuFontColor::gold, 24, NK_TEXT_ALIGN_CENTERED);
+            if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+            {
+                activeItemIndex = itemIndex;
+                if (action())
+                    return true;
+            }
+            if (activeItemIndex == itemIndex)
+            {
+                if (executeCurrent || nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
+                {
+                    if (action())
+                        return true;
+                }
+                auto frame = mFocus->getCurrentFrame();
+                auto frameRect = nk_rect(0, 0, frame.first->getWidth(), frame.first->getHeight());
+                nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::left, valign_t::center));
+                nk_image(ctx, frame.first->getNkImage(frame.second));
+                nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::right, valign_t::center));
+                nk_image(ctx, frame.first->getNkImage(frame.second));
+            }
+            ++itemIndex;
+            return false;
+        };
+        if (addItem("Warrior", {265, 281, 320, 33}, []() { return false; }))
+            return true;
+        if (addItem("Rogue", {265, 314, 320, 33}, []() { return false; }))
+            return true;
+        if (addItem("Sorcerer", {265, 347, 320, 33}, []() { return false; }))
+            return true;
+        nk_layout_space_push(ctx, {280, 425, 140, 35});
+
+        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_TEXT_RESET_MODE))
+            return exitAction();
+        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_UP))
+            --activeItemIndex;
+        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_DOWN))
+            ++activeItemIndex;
+        activeItemIndex = (activeItemIndex + itemIndex) % itemIndex;
+        return false;
+    }
+
+    void SelectHeroScreen::content(nk_context* ctx)
+    {
+        nk_layout_space_begin(ctx, NK_STATIC, 48, INT_MAX);
+        // NOTE: similar to starting screen position, reuse
+        nk_layout_space_push(ctx, {125, 0, 390, 154});
+        {
+            auto frame = mSmLogo->getCurrentFrame();
+            nk_image(ctx, frame.first->getNkImage(frame.second));
+        }
+        nk_layout_space_push(ctx, {25, 161, 590, 35});
+        {
+            menuText(ctx,
+                     [&]() {
+                         switch (mContentType)
+                         {
+                             case ContentType::heroList:
+                                 return "Single Player Characters";
+                             case ContentType::chooseClass:
+                             case ContentType::enterName:
+                                 return "New Single Player Hero";
+                         }
+                         return "";
+                     }(),
+                     MenuFontColor::silver,
+                     30,
+                     NK_TEXT_ALIGN_CENTERED);
+        }
+        auto draw_param_value = [&](const std::string& param, const std::string& value, float y) {
+            nk_layout_space_push(ctx, {37, y, 110, 21});
+            menuText(ctx, param.c_str(), MenuFontColor::silver, 16, NK_TEXT_ALIGN_RIGHT);
+            nk_layout_space_push(ctx, {157, y, 40, 21});
+            menuText(ctx, value.c_str(), MenuFontColor::silver, 16, NK_TEXT_CENTERED);
+        };
+        auto to_string = [&](int(characterInfo::*member)) { return mSelectedCharacterStats ? std::to_string((*mSelectedCharacterStats).*member) : "--"; };
+        draw_param_value("Level:", to_string(&characterInfo::level), 318);
+        draw_param_value("Strength:", to_string(&characterInfo::strength), 354);
+        draw_param_value("Magic:", to_string(&characterInfo::magic), 375);
+        draw_param_value("Dexterity:", to_string(&characterInfo::dexterity), 396);
+        draw_param_value("Vitality:", to_string(&characterInfo::vitality), 417);
+        switch (mContentType)
+        {
+            case ContentType::heroList:
+                break;
+            case ContentType::chooseClass:
+                if (chooseClass(ctx))
+                    return;
+            case ContentType::enterName:
+                break;
+        }
+
+        nk_layout_space_push(ctx, {26, 207, 180, 76});
+        {
+            auto renderer = FARender::Renderer::get();
+            auto heros_img = renderer->loadImage("ui_art/heros.pcx&vanim=76")
+                                 ->getNkImage(mSelectedCharacterStats ? static_cast<int>(mSelectedCharacterStats->charClass) : 3);
+            nk_image(ctx, heros_img);
+        }
+        nk_layout_space_end(ctx);
+    }
 
     void SelectHeroScreen::update(nk_context* ctx)
     {
-        mSmLogo->update();
+        for (auto ptr : {mSmLogo.get(), mFocus.get(), mFocus16.get()})
+            ptr->update();
         Misc::ScopedSetter<float> setter(ctx->style.window.border, 0);
         auto renderer = FARender::Renderer::get();
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
         auto bg = renderer->loadImage("ui_art/selhero.pcx")->getNkImage();
-        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image (bg));
+        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(bg));
         if (nk_begin(
                 ctx,
                 "selectHeroScreen",
                 nk_rect(screenW / 2 - MenuHandler::menuWidth / 2, screenH / 2 - MenuHandler::menuHeight / 2, MenuHandler::menuWidth, MenuHandler::menuHeight),
                 NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND))
         {
-            nk_layout_space_begin(ctx, NK_STATIC, 48, INT_MAX);
-            // NOTE: similar to starting screen position, reuse
-            nk_layout_space_push(ctx, {125, 0, 390, 154});
-            {
-                auto frame = mSmLogo->getCurrentFrame();
-                nk_image(ctx, frame.first->getNkImage(frame.second));
-            }
-            nk_layout_space_push(ctx, {25, 161, 590, 35});
-            {
-                menuText(ctx, "Single Player Characters", MenuFontColor::silver, 30, NK_TEXT_ALIGN_CENTERED);
-            }
-            auto draw_param_value = [&](const std::string &param, const std::string &value, float y)
-            {
-                nk_layout_space_push(ctx, {37, y, 110, 21});
-                menuText(ctx, param.c_str (), MenuFontColor::silver, 16, NK_TEXT_ALIGN_RIGHT);
-                nk_layout_space_push(ctx, {157, y, 40, 21});
-                menuText(ctx, value.c_str (), MenuFontColor::silver, 16, NK_TEXT_CENTERED);
-            };
-            draw_param_value ("Level:", "--", 318);
-            draw_param_value ("Strength:", "--", 354);
-            draw_param_value ("Magic:", "--", 375);
-            draw_param_value ("Dexterity:", "--", 396);
-            draw_param_value ("Vitality:", "--", 417);
-
-            nk_layout_space_push(ctx, {26, 207, 180, 76});
-            {
-                auto heros_img = renderer->loadImage("ui_art/heros.pcx&vanim=76")->getNkImage(3);
-                nk_image (ctx, heros_img);
-            }
-            nk_layout_space_end (ctx);
+            content(ctx);
         }
         nk_end(ctx);
         nk_style_pop_style_item(ctx);

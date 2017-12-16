@@ -1,5 +1,7 @@
 #pragma once
+#include "../faworld/gamelevel.h"
 #include "fa_nuklear.h"
+#include <boost/optional/optional.hpp>
 #include <memory>
 
 namespace Engine
@@ -75,13 +77,44 @@ namespace FAGui
     {
     private:
         using Parent = MenuScreen;
+        enum class ContentType
+        {
+            heroList,
+            chooseClass,
+            enterName,
+        };
+        // TODO: replace when appropriate enum will be program wide
+        enum class ClassType
+        {
+            warrior = 0,
+            rogue,
+            sorceror,
+        };
+
+        class characterInfo
+        {
+        public:
+            int level;
+            int strength;
+            int magic;
+            int dexterity;
+            int vitality;
+            ClassType charClass;
+        };
 
     public:
         explicit SelectHeroScreen(MenuHandler& menu);
+        bool chooseClass(nk_context* ctx);
+        void content(nk_context* ctx);
         void update(nk_context* ctx) override;
 
     private:
         std::unique_ptr<FARender::AnimationPlayer> mSmLogo;
+        std::unique_ptr<FARender::AnimationPlayer> mFocus;
+        std::unique_ptr<FARender::AnimationPlayer> mFocus16;
+        ContentType mContentType = ContentType::chooseClass;
+        boost::optional<characterInfo> mSelectedCharacterStats;
+        int activeItemIndex = 0;
     };
 
     class MenuHandler
@@ -93,7 +126,7 @@ namespace FAGui
         template <typename ScreenType> void setActiveScreen() { mActiveScreen.reset(new ScreenType(*this)); }
 
     public:
-        std::unique_ptr<FARender::AnimationPlayer> createSmLogo ();
+        std::unique_ptr<FARender::AnimationPlayer> createSmLogo();
         explicit MenuHandler(Engine::EngineMain& engine);
         void update(nk_context* ctx) const;
         void quit();
