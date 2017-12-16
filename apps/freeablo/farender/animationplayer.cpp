@@ -1,5 +1,6 @@
 #include "animationplayer.h"
 #include "../fasavegame/gameloader.h"
+#include <misc/assert.h>
 
 namespace FARender
 {
@@ -31,7 +32,7 @@ namespace FARender
         if (hasCurrentAnim)
         {
             std::string spritePath = Renderer::get()->getPathForIndex(mCurrentAnim->getCacheIndex());
-            assert(spritePath.size());
+            release_assert(spritePath.size());
             saver.save(spritePath);
         }
 

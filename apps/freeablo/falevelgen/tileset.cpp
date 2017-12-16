@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <faio/faio.h>
+#include <misc/assert.h>
 #include <settings/settings.h>
 
 #include "random.h"
@@ -358,7 +359,7 @@ namespace FALevelGen
                 break;
         }
 
-        assert(false && "tried to convert invalid tile");
+        release_assert(false && "tried to convert invalid tile");
         return val;
     }
 }

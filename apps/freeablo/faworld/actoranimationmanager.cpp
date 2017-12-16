@@ -1,7 +1,7 @@
 #include "actoranimationmanager.h"
-
 #include "../fasavegame/gameloader.h"
 #include "world.h"
+#include <misc/assert.h>
 
 namespace FAWorld
 {
@@ -62,7 +62,7 @@ namespace FAWorld
             if (haveThisAnim)
             {
                 std::string animPath = FARender::Renderer::get()->getPathForIndex(mAnimations[size_t(s)]->getCacheIndex());
-                assert(animPath.size());
+                release_assert(animPath.size());
 
                 saver.save(uint8_t(s));
                 saver.save(animPath);

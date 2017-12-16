@@ -20,21 +20,11 @@ namespace FARender
     {
     public:
         bool isValid() { return spriteCacheIndex != 0; }
-
         int32_t getAnimLength() { return animLength; }
-
         int32_t getWidth(int frame = 0) const { return width[frame]; }
-
         int32_t getHeight(int frame = 0) const { return height[frame]; }
-
         int32_t getCacheIndex() { return spriteCacheIndex; }
-
-        struct nk_image getNkImage(int32_t frame = 0)
-        {
-            assert(frame >= 0 && frame < (int32_t)frameHandles.size());
-            auto ret = nk_image_handle(nk_handle_ptr(&frameHandles[frame]));
-            return ret;
-        }
+        struct nk_image getNkImage(int32_t frame = 0);
 
     private:
         void init(int32_t _animLength, const std::vector<int32_t>& _width, const std::vector<int32_t>& _height, int32_t _spriteCacheIndex)

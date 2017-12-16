@@ -1,6 +1,6 @@
 #include "audiomanager.h"
-#include <assert.h>
 #include <iostream>
+#include <misc/assert.h>
 #include <string>
 
 namespace FAAudio
@@ -50,7 +50,7 @@ namespace FAAudio
                         break;
                 }
 
-                assert(it != mUsedList.rend() && "no evictable sounds found, this should never happen");
+                release_assert(it != mUsedList.rend() && "no evictable sounds found, this should never happen");
 
                 std::cerr << "EVICTING " << *it << std::endl;
 

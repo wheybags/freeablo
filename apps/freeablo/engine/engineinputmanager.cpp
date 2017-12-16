@@ -2,6 +2,7 @@
 #include "../fagui/guimanager.h"
 #include "../farender/renderer.h"
 #include <functional>
+#include <misc/assert.h>
 #include <nuklearmisc/inputfwd.h>
 
 namespace Engine
@@ -174,7 +175,7 @@ namespace Engine
                 actionAsString = "ToggleConsole";
                 break;
             default:
-                assert(false && "Invalid enum value passed to keyboardActionToString");
+                release_assert(false && "Invalid enum value passed to keyboardActionToString");
                 break;
         }
 

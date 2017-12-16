@@ -1,8 +1,6 @@
 #ifndef BEHAVIOUR_H
 #define BEHAVIOUR_H
 
-#include <assert.h>
-
 #include <misc/misc.h>
 
 #include "world.h"
@@ -26,11 +24,7 @@ namespace FAWorld
         virtual void save(FASaveGame::GameSaver& saver) = 0;
         virtual ~Behaviour() {}
 
-        void attach(Actor* actor)
-        {
-            assert(mActor == nullptr);
-            mActor = actor;
-        }
+        void attach(Actor* actor);
 
         virtual void update() = 0;
 

@@ -1,5 +1,5 @@
 #include "textstream.h"
-#include <cassert>
+#include <misc/assert.h>
 #include <misc/stringops.h>
 
 namespace Serial
@@ -14,12 +14,12 @@ namespace Serial
 
         std::vector<std::string> data = Misc::StringUtils::split(line, ' ');
 
-        assert(data.size() == 2);
+        release_assert(data.size() == 2);
 
         if (data[0] == "CATEGORY" || data[0] == "CATEGORY_END")
             return readTypedLine(expectedType); // ignore
 
-        assert(data[0] == expectedType);
+        release_assert(data[0] == expectedType);
 
         return std::string(std::move(data[1]));
     }
@@ -36,7 +36,7 @@ namespace Serial
     bool TextReadStream::read_bool()
     {
         std::string data = readTypedLine("BOOL");
-        assert(data == "true" || data == "false");
+        release_assert(data == "true" || data == "false");
         return data == "true";
     }
 
@@ -104,7 +104,7 @@ namespace Serial
         }
 
         mData >> c;
-        assert(c == '\n'); // trailing newline
+        release_assert(c == '\n'); // trailing newline
 
         mData >> std::skipws;
 
@@ -114,13 +114,13 @@ namespace Serial
     void TextReadStream::startCategory(const std::string& name)
     {
         std::string data = readTypedLine("CATEGORY");
-        assert(name == data);
+        release_assert(name == data);
     }
 
     void TextReadStream::endCategory(const std::string& name)
     {
         std::string data = readTypedLine("CATEGORY_END");
-        assert(name == data);
+        release_assert(name == data);
     }
 
     std::pair<uint8_t*, size_t> TextWriteStream::getData()

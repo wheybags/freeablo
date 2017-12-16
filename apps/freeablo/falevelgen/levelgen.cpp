@@ -18,6 +18,7 @@
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
 
+#include <misc/assert.h>
 #include <misc/misc.h>
 
 namespace FALevelGen
@@ -210,7 +211,7 @@ namespace FALevelGen
             }
             default:
             {
-                assert(false); // This should never happen
+                release_assert(false); // This should never happen
             }
         }
 

@@ -1,10 +1,8 @@
 #include "inputmanager.h"
-
 #include <SDL.h>
-
-#include <render/render.h>
-
 #include <iostream>
+#include <misc/assert.h>
+#include <render/render.h>
 
 namespace Input
 {
@@ -30,7 +28,7 @@ namespace Input
         : mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)), mMouseRelease(getFunc(mouseRelease)),
           mMouseMove(getFunc(mouseMove)), mMouseWheel(getFunc(mouseWheel)), mTextInput(getFunc(textInput))
     {
-        assert(!instance);
+        release_assert(!instance);
         instance = this;
     }
 

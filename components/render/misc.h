@@ -1,6 +1,5 @@
 #pragma once
 
-#include <assert.h>
 #include <string>
 
 struct SDL_Cursor;
@@ -19,14 +18,7 @@ namespace Render
         SpriteGroup(const std::vector<Sprite> sprites) : mSprites(sprites), mAnimLength(sprites.size()) {}
         void destroy();
 
-        Sprite& operator[](size_t index)
-        {
-#ifndef NDEBUG
-            assert(index < mSprites.size());
-#endif
-            return mSprites[index];
-        }
-
+        Sprite& operator[](size_t index);
         size_t size() { return mSprites.size(); }
 
         size_t animLength() { return mAnimLength; }

@@ -1,18 +1,18 @@
-#include <fstream>
-#include <iostream>
-#include <string>
-
 #include <SDL.h>
 #include <SDL_image.h>
 #include <boost/filesystem.hpp>
 #include <boost/range.hpp>
+#include <faio/fafileobject.h>
+#include <fstream>
 #include <gtest/gtest.h>
+#include <iostream>
+#include <misc/assert.h>
+#include <misc/md5.h>
+#include <misc/stringops.h>
+#include <string>
 
 #define private public
 #include <cel/celfile.h>
-#include <faio/fafileobject.h>
-#include <misc/md5.h>
-#include <misc/stringops.h>
 
 std::string hashImageData(int32_t width, int32_t height, Cel::Colour* data)
 {
@@ -198,7 +198,7 @@ void getBlizzconvHashes(const std::string& blizzconvBase, const std::string& lis
                 {
 
                     std::string subCelFolderPath = blizzconvBase + "/" + path + std::to_string(0);
-                    assert(bfs::exists(subCelFolderPath));
+                    release_assert(bfs::exists(subCelFolderPath));
 
                     out << celPaths[i];
 

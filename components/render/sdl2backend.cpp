@@ -14,6 +14,7 @@
 
 #include "../level/level.h"
 #include <faio/fafileobject.h>
+#include <misc/assert.h>
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
 
@@ -171,7 +172,7 @@ namespace Render
             surf = SDL_ConvertSurfaceFormat(
                 surf, SDL_PIXELFORMAT_ABGR8888, 0); // SDL is stupid and interprets pixel formats by endianness, so on LE, it calls RGBA ABGR...
 
-        assert(surf->pitch == 4 * surf->w);
+        debug_assert(surf->pitch == 4 * surf->w);
 
         GLuint tex = 0;
 
@@ -427,8 +428,8 @@ namespace Render
             height = (cel[i].mHeight > height ? cel[i].mHeight : height);
         }
 
-        assert(width > 0);
-        assert(height > 0);
+        debug_assert(width > 0);
+        debug_assert(height > 0);
 
         SDL_Surface* surface = createTransparentSurface(width, height);
 
@@ -779,6 +780,12 @@ namespace Render
         }
 
         mAnimLength = cel.animLength();
+    }
+
+    Sprite& SpriteGroup::operator[](size_t index)
+    {
+        debug_assert(index < mSprites.size());
+        return mSprites[index];
     }
 
     void SpriteGroup::toPng(const std::string& celPath, const std::string& pngPath)

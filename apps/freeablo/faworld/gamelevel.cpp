@@ -1,12 +1,11 @@
 #include "gamelevel.h"
-
 #include "../fasavegame/gameloader.h"
-
 #include "actorstats.h"
 #include "itemmap.h"
 #include "monster.h"
 #include "world.h"
 #include <diabloexe/diabloexe.h>
+#include <misc/assert.h>
 
 namespace FAWorld
 {
@@ -182,7 +181,7 @@ namespace FAWorld
                 return;
             }
         }
-        assert(false && "tried to remove actor that isn't in level");
+        release_assert(false && "tried to remove actor that isn't in level");
     }
 
     bool GameLevel::isPassableFor(int x, int y, const Actor* actor) const

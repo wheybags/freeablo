@@ -9,6 +9,7 @@
 #include "../components/settings/settings.h"
 #include <climits>
 #include <faio/faio.h>
+#include <misc/assert.h>
 #include <nuklearmisc/standaloneguispritehandler.h>
 #include <nuklearmisc/widgets.h>
 
@@ -41,9 +42,9 @@ int main(int, char** argv)
 
         nk_style_button headerButtonStyle = ctx->style.button;
         headerButtonStyle.normal = nk_style_item_color(nk_rgba(0, 0, 0, 0));
-        assert(headerButtonStyle.hover.type == NK_STYLE_ITEM_COLOR);
+        release_assert(headerButtonStyle.hover.type == NK_STYLE_ITEM_COLOR);
         headerButtonStyle.hover.data.color.a = 180;
-        assert(headerButtonStyle.active.type == NK_STYLE_ITEM_COLOR);
+        release_assert(headerButtonStyle.active.type == NK_STYLE_ITEM_COLOR);
         headerButtonStyle.active.data.color.a = 230;
         headerButtonStyle.border = 0;
 
