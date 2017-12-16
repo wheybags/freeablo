@@ -102,7 +102,7 @@ namespace Engine
             mWorld->setGuiManager(mGuiManager.get());
 
             mPlayer = mWorld->getCurrentPlayer();
-            setupNewPlayer (mPlayer);
+            setupNewPlayer(mPlayer);
             inGame = true;
         }
         else

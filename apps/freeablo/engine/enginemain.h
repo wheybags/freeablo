@@ -1,9 +1,9 @@
 #ifndef ENGINEMAIN_H
 #define ENGINEMAIN_H
+#include "../faworld/playerfactory.h"
 #include "engineinputmanager.h"
 #include <boost/program_options.hpp>
 #include <memory>
-#include "../faworld/playerfactory.h"
 
 namespace Level
 {
@@ -25,7 +25,7 @@ namespace Engine
     class EngineMain : public KeyboardInputObserverInterface
     {
     public:
-        EngineMain ();
+        EngineMain();
         ~EngineMain();
         EngineInputManager& inputManager();
         void run(const boost::program_options::variables_map& variables);
@@ -36,7 +36,7 @@ namespace Engine
         void setupNewPlayer(FAWorld::Player* player);
         // TODO: replace with enums
         void startGame(const std::string& characterClass);
-        const DiabloExe::DiabloExe &exe () const;
+        const DiabloExe::DiabloExe& exe() const;
 
     private:
         void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);
@@ -47,7 +47,7 @@ namespace Engine
         std::unique_ptr<DiabloExe::DiabloExe> mExe;
         std::unique_ptr<FAWorld::PlayerFactory> mPlayerFactory;
         std::unique_ptr<FAGui::GuiManager> mGuiManager;
-        FAWorld::Player *mPlayer = nullptr;
+        FAWorld::Player* mPlayer = nullptr;
         bool mDone = false;
         bool mPaused = false;
         bool mNoclip = false;

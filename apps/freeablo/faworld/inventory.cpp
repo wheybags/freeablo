@@ -242,7 +242,7 @@ namespace FAWorld
         if (item.getEquipLoc() == Item::eqTWOHAND && leftHand.isEmpty() && rightHand.isEmpty())
         {
             putItemUnsafe(item, MakeEquipTarget<Item::eqLEFTHAND>());
-            equipChanged ();
+            equipChanged();
             return true;
         }
         // only for weapons, not shields
@@ -251,7 +251,7 @@ namespace FAWorld
                 if (hand_ptr->isEmpty())
                 {
                     *hand_ptr = item;
-                    equipChanged ();
+                    equipChanged();
                     return true;
                 }
 

@@ -18,19 +18,19 @@ namespace FAWorld
         // TODO: hack - need to think of some more elegant way of handling Actors in general
         DiabloExe::CharacterStats stats;
         init("Warrior", stats);
-        initCommon ();
+        initCommon();
     }
 
     Player::Player(const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor(), mInventory(this)
     {
         init(className, charStats);
-        initCommon ();
+        initCommon();
     }
 
-    void Player::initCommon ()
+    void Player::initCommon()
     {
         FAWorld::World::get()->registerPlayer(this);
-        mInventory.equipChanged.connect([this](){ updateSprites (); });
+        mInventory.equipChanged.connect([this]() { updateSprites(); });
     }
 
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)

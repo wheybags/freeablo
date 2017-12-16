@@ -682,9 +682,7 @@ namespace FAGui
 
     const PanelType* GuiManager::panel(PanelPlacement placement) const { return const_cast<self*>(this)->panel(placement); }
 
-    void GuiManager::setPlayer(FAWorld::Player* player) {
-        mPlayer = player;
-    }
+    void GuiManager::setPlayer(FAWorld::Player* player) { mPlayer = player; }
 
     bool GuiManager::isInventoryShown() const { return *panel(panelPlacementByType(PanelType::inventory)) == PanelType::inventory; }
 
