@@ -4,6 +4,7 @@
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "boost/make_unique.hpp"
+#include "diabloexe/characterstats.h"
 #include "fa_nuklear.h"
 #include "guimanager.h"
 #include "nkhelpers.h"
@@ -257,6 +258,16 @@ namespace FAGui
         nk_style_pop_style_item(ctx);
     }
 
+    SelectHeroScreen::characterInfo::characterInfo(ClassType charClassArg, const DiabloExe::CharacterStats& stats)
+    {
+        level = 1;
+        charClass = charClassArg;
+        strength = stats.mStrength;
+        magic = stats.mMagic;
+        dexterity = stats.mDexterity;
+        vitality = stats.mVitality;
+    }
+
     SelectHeroScreen::SelectHeroScreen(MenuHandler& menu) : Parent(menu)
     {
         auto renderer = FARender::Renderer::get();
@@ -273,15 +284,15 @@ namespace FAGui
 
     bool SelectHeroScreen::chooseClass(nk_context* ctx)
     {
-        nk_layout_space_push(ctx, {265, 210, 320, 33});
+        nk_layout_space_push(ctx, {262, 207, 320, 33});
         menuText(ctx, "Choose Class", MenuFontColor::silver, 30, NK_TEXT_ALIGN_CENTERED);
         int itemIndex = 0;
         bool executeCurrent = false;
-        nk_layout_space_push(ctx, {280, 425, 140, 35});
+        nk_layout_space_push(ctx, {277, 422, 140, 35});
         menuText(ctx, "OK", MenuFontColor::gold, 30, NK_TEXT_ALIGN_CENTERED);
         if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
             executeCurrent = true;
-        nk_layout_space_push(ctx, {430, 425, 140, 35});
+        nk_layout_space_push(ctx, {427, 422, 140, 35});
         menuText(ctx, "Cancel", MenuFontColor::gold, 30, NK_TEXT_ALIGN_CENTERED);
         auto exitAction = [&]() {
             mMenuHandler.setActiveScreen<StartingScreen>();
@@ -301,6 +312,7 @@ namespace FAGui
             }
             if (activeItemIndex == itemIndex)
             {
+                mSelectedCharacterInfo = characterInfo{static_cast<ClassType>(itemIndex), mMenuHandler.engine().exe().getCharacterStat(text)};
                 if (executeCurrent || nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
                 {
                     if (action())
@@ -316,11 +328,11 @@ namespace FAGui
             ++itemIndex;
             return false;
         };
-        if (addItem("Warrior", {265, 281, 320, 33}, []() { return false; }))
+        if (addItem("Warrior", {262, 278, 320, 33}, []() { return false; }))
             return true;
-        if (addItem("Rogue", {265, 314, 320, 33}, []() { return false; }))
+        if (addItem("Rogue", {262, 311, 320, 33}, []() { return false; }))
             return true;
-        if (addItem("Sorcerer", {265, 347, 320, 33}, []() { return false; }))
+        if (addItem("Sorcerer", {262, 344, 320, 33}, []() { return false; }))
             return true;
         nk_layout_space_push(ctx, {280, 425, 140, 35});
 
@@ -367,7 +379,7 @@ namespace FAGui
             nk_layout_space_push(ctx, {157, y, 40, 21});
             menuText(ctx, value.c_str(), MenuFontColor::silver, 16, NK_TEXT_CENTERED);
         };
-        auto to_string = [&](int(characterInfo::*member)) { return mSelectedCharacterStats ? std::to_string((*mSelectedCharacterStats).*member) : "--"; };
+        auto to_string = [&](int(characterInfo::*member)) { return mSelectedCharacterInfo ? std::to_string((*mSelectedCharacterInfo).*member) : "--"; };
         draw_param_value("Level:", to_string(&characterInfo::level), 318);
         draw_param_value("Strength:", to_string(&characterInfo::strength), 354);
         draw_param_value("Magic:", to_string(&characterInfo::magic), 375);
@@ -387,8 +399,8 @@ namespace FAGui
         nk_layout_space_push(ctx, {26, 207, 180, 76});
         {
             auto renderer = FARender::Renderer::get();
-            auto heros_img = renderer->loadImage("ui_art/heros.pcx&vanim=76")
-                                 ->getNkImage(mSelectedCharacterStats ? static_cast<int>(mSelectedCharacterStats->charClass) : 3);
+            auto heros_img =
+                renderer->loadImage("ui_art/heros.pcx&vanim=76")->getNkImage(mSelectedCharacterInfo ? static_cast<int>(mSelectedCharacterInfo->charClass) : 3);
             nk_image(ctx, heros_img);
         }
         nk_layout_space_end(ctx);

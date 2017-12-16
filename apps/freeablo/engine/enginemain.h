@@ -31,6 +31,7 @@ namespace Engine
         void toggleNoclip();
         void notify(KeyboardInputAction action);
         void startGame();
+        const DiabloExe::DiabloExe &exe () const;
 
     private:
         void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);
@@ -38,6 +39,7 @@ namespace Engine
     private:
         std::unique_ptr<FAWorld::World> mWorld;
         std::shared_ptr<EngineInputManager> mInputManager;
+        std::unique_ptr<DiabloExe::DiabloExe> mExe;
         bool mDone = false;
         bool mPaused = false;
         bool mNoclip = false;

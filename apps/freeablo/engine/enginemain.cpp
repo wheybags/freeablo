@@ -17,6 +17,7 @@
 #include <misc/misc.h>
 #include <serial/textstream.h>
 #include <thread>
+#include <boost/make_unique.hpp>
 
 namespace bpo = boost::program_options;
 
@@ -65,16 +66,16 @@ namespace Engine
 
         std::string characterClass = variables["character"].as<std::string>();
 
-        DiabloExe::DiabloExe exe(pathEXE);
-        if (!exe.isLoaded())
+        mExe = boost::make_unique<DiabloExe::DiabloExe> (pathEXE);
+        if (!mExe->isLoaded())
         {
             renderer.stop();
             return;
         }
 
         FAWorld::ItemManager& itemManager = FAWorld::ItemManager::get();
-        FAWorld::PlayerFactory playerFactory(exe);
-        renderer.loadFonts(exe);
+        FAWorld::PlayerFactory playerFactory(*mExe);
+        renderer.loadFonts(*mExe);
 
         FILE* f = fopen("save.sav", "rb");
 
@@ -92,17 +93,17 @@ namespace Engine
             Serial::TextReadStream stream(tmp);
             FASaveGame::GameLoader loader(stream);
 
-            mWorld.reset(new FAWorld::World(loader, exe));
+            mWorld.reset(new FAWorld::World(loader, *mExe));
 
             player = mWorld->getCurrentPlayer();
             inGame = true;
         }
         else
         {
-            mWorld.reset(new FAWorld::World(exe));
+            mWorld.reset(new FAWorld::World(*mExe));
             mWorld->generateLevels();
 
-            itemManager.loadItems(&exe);
+            itemManager.loadItems(mExe.get ());
             player = playerFactory.create(characterClass);
             mWorld->addCurrentPlayer(player);
 
@@ -209,6 +210,10 @@ namespace Engine
         mInputManager->registerKeyboardObserver(mWorld.get());
         mInputManager->registerMouseObserver(mWorld.get());
         mWorld->setLevel(0);
+    }
+
+    const DiabloExe::DiabloExe& EngineMain::exe() const {
+        return *mExe;
     }
 
     void EngineMain::stop() { mDone = true; }

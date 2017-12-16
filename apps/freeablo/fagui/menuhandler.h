@@ -4,6 +4,11 @@
 #include <boost/optional/optional.hpp>
 #include <memory>
 
+namespace DiabloExe
+{
+    class CharacterStats;
+}
+
 namespace Engine
 {
     class EngineMain;
@@ -94,6 +99,8 @@ namespace FAGui
         class characterInfo
         {
         public:
+            characterInfo(ClassType charClassArg, const DiabloExe::CharacterStats& stats);
+
             int level;
             int strength;
             int magic;
@@ -113,7 +120,7 @@ namespace FAGui
         std::unique_ptr<FARender::AnimationPlayer> mFocus;
         std::unique_ptr<FARender::AnimationPlayer> mFocus16;
         ContentType mContentType = ContentType::chooseClass;
-        boost::optional<characterInfo> mSelectedCharacterStats;
+        boost::optional<characterInfo> mSelectedCharacterInfo;
         int activeItemIndex = 0;
     };
 
