@@ -16,6 +16,7 @@ namespace FAWorld
 
         Player();
         Player(const std::string& className, const DiabloExe::CharacterStats& charStats);
+        void initCommon();
         Player(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
 

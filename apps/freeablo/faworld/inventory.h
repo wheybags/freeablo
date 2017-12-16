@@ -7,6 +7,8 @@
 #include <set>
 #include <stdint.h>
 
+#include <boost/signals2/signal.hpp>
+
 namespace FAWorld
 {
     class Player;
@@ -92,6 +94,8 @@ namespace FAWorld
         // in general there's no need for safe function because items are placed either through exchange with cursor
         // or autoplacement. Currently it used externally only for placing starting items.
         void putItemUnsafe(const Item& item, const EquipTarget& target);
+
+        boost::signals2::signal<void()> equipChanged;
 
     private:
         void updateCursor();

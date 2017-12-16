@@ -242,6 +242,8 @@ namespace FAWorld
         if (item.getEquipLoc() == Item::eqTWOHAND && leftHand.isEmpty() && rightHand.isEmpty())
         {
             putItemUnsafe(item, MakeEquipTarget<Item::eqLEFTHAND>());
+            equipChanged();
+            return true;
         }
         // only for weapons, not shields
         if (item.getEquipLoc() == Item::eqONEHAND && item.getType() == Item::itWEAPON)
@@ -249,6 +251,7 @@ namespace FAWorld
                 if (hand_ptr->isEmpty())
                 {
                     *hand_ptr = item;
+                    equipChanged();
                     return true;
                 }
 
@@ -362,7 +365,11 @@ namespace FAWorld
         return true;
     }
 
-    void Inventory::itemSlotLeftMouseButtonDown(EquipTarget target) { exchangeWithCursor(target); }
+    void Inventory::itemSlotLeftMouseButtonDown(EquipTarget target)
+    {
+        if (exchangeWithCursor(target))
+            equipChanged();
+    }
 
     void Inventory::beltMouseLeftButtonDown(double x)
     {

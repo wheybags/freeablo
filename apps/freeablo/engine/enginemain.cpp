@@ -10,6 +10,7 @@
 #include "../faworld/world.h"
 #include "threadmanager.h"
 #include <boost/asio.hpp>
+#include <boost/make_unique.hpp>
 #include <enet/enet.h>
 #include <functional>
 #include <input/inputmanager.h>
@@ -23,6 +24,10 @@ namespace bpo = boost::program_options;
 namespace Engine
 {
     volatile bool renderDone = false;
+
+    EngineMain::EngineMain() {}
+
+    EngineMain::~EngineMain() {}
 
     EngineInputManager& EngineMain::inputManager() { return *(mInputManager.get()); }
 
@@ -56,7 +61,6 @@ namespace Engine
     {
         FALevelGen::FAsrand(static_cast<int>(time(nullptr)));
 
-        FAWorld::Player* player = nullptr;
         FARender::Renderer& renderer = *FARender::Renderer::get();
 
         Settings::Settings settings;
@@ -65,18 +69,20 @@ namespace Engine
 
         std::string characterClass = variables["character"].as<std::string>();
 
-        DiabloExe::DiabloExe exe(pathEXE);
-        if (!exe.isLoaded())
+        mExe = boost::make_unique<DiabloExe::DiabloExe>(pathEXE);
+        if (!mExe->isLoaded())
         {
             renderer.stop();
             return;
         }
 
         FAWorld::ItemManager& itemManager = FAWorld::ItemManager::get();
-        FAWorld::PlayerFactory playerFactory(exe);
-        renderer.loadFonts(exe);
+        mPlayerFactory = boost::make_unique<FAWorld::PlayerFactory>(*mExe);
+        renderer.loadFonts(*mExe);
 
         FILE* f = fopen("save.sav", "rb");
+        mGuiManager = boost::make_unique<FAGui::GuiManager>(*this);
+        mInputManager->setGuiManager(mGuiManager.get());
 
         if (f)
         {
@@ -92,38 +98,38 @@ namespace Engine
             Serial::TextReadStream stream(tmp);
             FASaveGame::GameLoader loader(stream);
 
-            mWorld.reset(new FAWorld::World(loader, exe));
+            mWorld.reset(new FAWorld::World(loader, *mExe));
+            mWorld->setGuiManager(mGuiManager.get());
 
-            player = mWorld->getCurrentPlayer();
+            mPlayer = mWorld->getCurrentPlayer();
+            setupNewPlayer(mPlayer);
             inGame = true;
         }
         else
         {
-            mWorld.reset(new FAWorld::World(exe));
-            mWorld->generateLevels();
+            mWorld.reset(new FAWorld::World(*mExe));
+            mWorld->setGuiManager(mGuiManager.get());
 
-            itemManager.loadItems(&exe);
-            player = playerFactory.create(characterClass);
-            mWorld->addCurrentPlayer(player);
-
-            if (variables["invuln"].as<std::string>() == "on")
-                player->setInvuln(true);
+            itemManager.loadItems(mExe.get());
 
             int32_t currentLevel = variables["level"].as<int32_t>();
+            mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
 
             if (currentLevel != -1)
             {
                 inGame = true;
+                setupNewPlayer(mPlayerFactory->create(characterClass));
                 mWorld->setLevel(currentLevel);
+                if (variables["invuln"].as<std::string>() == "on")
+                    mPlayer->setInvuln(true);
+                mWorld->addCurrentPlayer(mPlayer);
             }
         }
-
-        FAGui::GuiManager guiManager(*this, *player);
-        mWorld->setGuiManager(&guiManager);
-
-        mInputManager->setGuiManager(&guiManager);
-        mInputManager->registerKeyboardObserver(mWorld.get());
-        mInputManager->registerMouseObserver(mWorld.get());
+        if (inGame)
+        {
+            mInputManager->registerKeyboardObserver(mWorld.get());
+            mInputManager->registerMouseObserver(mWorld.get());
+        }
 
         boost::asio::io_service io;
 
@@ -138,18 +144,24 @@ namespace Engine
 
             nk_context* ctx = renderer.getNuklearContext();
             if (inGame)
-                guiManager.updateGameUI(mPaused, ctx);
+                mGuiManager->updateGameUI(mPaused, ctx);
             else
-                guiManager.updateMenuUI(ctx);
+                mGuiManager->updateMenuUI(ctx);
 
-            FAWorld::GameLevel* level = mWorld->getCurrentLevel();
             FARender::RenderState* state = renderer.getFreeState();
             if (state)
             {
-                state->mPos = player->getPos();
-                if (level != NULL)
-                    state->tileset = renderer.getTileset(*level);
-                state->level = level;
+                if (mPlayer)
+                {
+                    auto level = mWorld->getCurrentLevel();
+                    state->mPos = mPlayer->getPos();
+                    if (level != NULL)
+                        state->tileset = renderer.getTileset(*level);
+                    state->level = level;
+                    mWorld->fillRenderState(state);
+                }
+                else
+                    state->level = nullptr;
                 if (!FAGui::cursorPath.empty())
                     state->mCursorEmpty = false;
                 else
@@ -157,7 +169,6 @@ namespace Engine
                 state->mCursorFrame = FAGui::cursorFrame;
                 state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
                 state->mCursorHotspot = FAGui::cursorHotspot;
-                mWorld->fillRenderState(state);
                 state->nuklearData.fill(ctx);
             }
 
@@ -200,11 +211,24 @@ namespace Engine
         }
     }
 
-    void EngineMain::startGame()
+    void EngineMain::setupNewPlayer(FAWorld::Player* player)
+    {
+        mPlayer = player;
+        mWorld->addCurrentPlayer(mPlayer);
+        mWorld->setLevel(0);
+        mGuiManager->setPlayer(mPlayer);
+    }
+
+    void EngineMain::startGame(const std::string& characterClass)
     {
         inGame = true;
-        mWorld->setLevel(0);
+        mInputManager->registerKeyboardObserver(mWorld.get());
+        mInputManager->registerMouseObserver(mWorld.get());
+        // TODO: fix that variables like invuln are not applied in this case
+        setupNewPlayer(mPlayerFactory->create(characterClass));
     }
+
+    const DiabloExe::DiabloExe& EngineMain::exe() const { return *mExe; }
 
     void EngineMain::stop() { mDone = true; }
 
