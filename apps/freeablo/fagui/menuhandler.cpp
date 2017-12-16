@@ -307,8 +307,6 @@ namespace FAGui
             if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
             {
                 activeItemIndex = itemIndex;
-                if (action())
-                    return true;
             }
             if (activeItemIndex == itemIndex)
             {
