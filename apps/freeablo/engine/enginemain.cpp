@@ -81,6 +81,8 @@ namespace Engine
         renderer.loadFonts(*mExe);
 
         FILE* f = fopen("save.sav", "rb");
+        mGuiManager = boost::make_unique<FAGui::GuiManager>(*this);
+        mInputManager->setGuiManager(mGuiManager.get());
 
         if (f)
         {
@@ -97,13 +99,16 @@ namespace Engine
             FASaveGame::GameLoader loader(stream);
 
             mWorld.reset(new FAWorld::World(loader, *mExe));
+            mWorld->setGuiManager(mGuiManager.get());
 
             mPlayer = mWorld->getCurrentPlayer();
+            setupNewPlayer (mPlayer);
             inGame = true;
         }
         else
         {
             mWorld.reset(new FAWorld::World(*mExe));
+            mWorld->setGuiManager(mGuiManager.get());
 
             itemManager.loadItems(mExe.get());
 
@@ -113,23 +118,18 @@ namespace Engine
             if (currentLevel != -1)
             {
                 inGame = true;
+                setupNewPlayer(mPlayerFactory->create(characterClass));
                 mWorld->setLevel(currentLevel);
-                mPlayer = mPlayerFactory->create(characterClass);
                 if (variables["invuln"].as<std::string>() == "on")
                     mPlayer->setInvuln(true);
                 mWorld->addCurrentPlayer(mPlayer);
             }
         }
-        mGuiManager = boost::make_unique<FAGui::GuiManager>(*this);
-        mWorld->setGuiManager(mGuiManager.get());
-        mInputManager->setGuiManager(mGuiManager.get());
         if (inGame)
         {
             mInputManager->registerKeyboardObserver(mWorld.get());
             mInputManager->registerMouseObserver(mWorld.get());
         }
-        if (mPlayer)
-            setupNewPlayer(mPlayer);
 
         boost::asio::io_service io;
 
