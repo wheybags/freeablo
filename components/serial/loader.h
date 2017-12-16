@@ -3,11 +3,19 @@
 
 #include <cstdint>
 #include <string>
+#include <limits>
 
 namespace Serial
 {
     class ReadStreamInterface;
     class WriteStreamInterface;
+
+    static constexpr uint32_t CurrentSaveVersion = 1u;
+
+    // In future, this will be different, and any changes to the save format wothing the range min-(current-1)
+    // will be supported by special backward compat code. For now though, it's not worth the overhead, and noone's
+    // using saves except devs anyway.
+    static constexpr uint32_t MinimumSupportedSaveVersion = CurrentSaveVersion;
 
     class Loader
     {
@@ -19,8 +27,11 @@ namespace Serial
         void startCategory(const std::string& name);
         void endCategory(const std::string& name);
 
+        uint32_t getVersion() { return mVersion; }
+
     private:
         ReadStreamInterface& mStream;
+        uint32_t mVersion = std::numeric_limits<uint32_t>::max();
     };
 
     template <> bool Loader::load<bool>();
