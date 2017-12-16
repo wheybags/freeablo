@@ -1,7 +1,7 @@
 #include "dialogmanager.h"
 #include "../faworld/actor.h"
 #include "guimanager.h"
-#include <cassert>
+#include <misc/assert.h>
 
 namespace FAGui
 {
@@ -61,7 +61,7 @@ namespace FAGui
             auto it = std::find_if(mLines.begin(), mLines.end(), [](const DialogLineData& data) { return !!data.action; });
             if (it != mLines.end())
                 return mSelectedLine = it - mLines.begin();
-            assert(false);
+            release_assert(false);
         }
         return mSelectedLine;
     }

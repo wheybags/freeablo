@@ -3,15 +3,20 @@
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
 #include "player.h"
-
+#include <cstdlib>
 #include <iostream>
-
-#include <stdlib.h>
+#include <misc/assert.h>
 
 namespace FAWorld
 {
     const std::string BasicMonsterBehaviour::typeId = "basic-monster-behaviour";
     const std::string NullBehaviour::typeId = "null-behaviour";
+
+    void Behaviour::attach(Actor* actor)
+    {
+        release_assert(mActor == nullptr);
+        mActor = actor;
+    }
 
     static int32_t squaredDistance(const Position& a, const Position& b)
     {

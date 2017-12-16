@@ -44,11 +44,7 @@ public:
     void init(nk_gl_device& dev);
 
     void fill(nk_context* ctx);
-    nk_gl_device& getDevice()
-    {
-        assert(dev);
-        return *dev;
-    }
+    nk_gl_device& getDevice();
 
     nk_buffer vbuf; // vertices
     nk_buffer ebuf; // indices

@@ -1,6 +1,6 @@
 #include "spritecache.h"
 
-#include <assert.h>
+#include <misc/assert.h>
 
 #include <iostream>
 #include <sstream>
@@ -11,6 +11,13 @@
 
 namespace FARender
 {
+    struct nk_image FASpriteGroup::getNkImage(int32_t frame)
+    {
+        release_assert(frame >= 0 && frame < (int32_t)frameHandles.size());
+        auto ret = nk_image_handle(nk_handle_ptr(&frameHandles[frame]));
+        return ret;
+    }
+
     SpriteCache::SpriteCache(uint32_t size) : mNextCacheIndex(1), mCurrentSize(0), mMaxSize(size) {}
 
     SpriteCache::~SpriteCache()
@@ -35,7 +42,7 @@ namespace FARender
 
                 if (pair[0] == "vanim")
                 {
-                    assert(tmpAnimLength == 1);
+                    release_assert(tmpAnimLength == 1);
                     std::istringstream vanimss(pair[1]);
 
                     uint32_t vAnim;
@@ -257,7 +264,7 @@ namespace FARender
                 break;
         }
 
-        assert(it != mUsedList.rend() && "no evictable slots found. This should never happen");
+        release_assert(it != mUsedList.rend() && "no evictable slots found. This should never happen");
 
         CacheEntry toEvict = mCache[*it];
 

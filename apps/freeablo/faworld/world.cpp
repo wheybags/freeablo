@@ -1,7 +1,4 @@
-#include <algorithm>
-#include <iostream>
-#include <tuple>
-
+#include "world.h"
 #include "../engine/enginemain.h"
 #include "../engine/threadmanager.h"
 #include "../faaudio/audiomanager.h"
@@ -18,8 +15,11 @@
 #include "itemmap.h"
 #include "monster.h"
 #include "player.h"
-#include "world.h"
+#include <algorithm>
 #include <diabloexe/diabloexe.h>
+#include <iostream>
+#include <misc/assert.h>
+#include <tuple>
 
 namespace FAWorld
 {
@@ -27,7 +27,7 @@ namespace FAWorld
 
     World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
     {
-        assert(singletonInstance == nullptr);
+        release_assert(singletonInstance == nullptr);
         singletonInstance = this;
 
         this->setupObjectIdMappers();

@@ -1,7 +1,6 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include <assert.h>
 #include <stdint.h>
 
 #include <string>

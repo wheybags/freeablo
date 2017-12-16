@@ -1,8 +1,8 @@
 #include "widgets.h"
 
-#include <assert.h>
 #include <cstdlib>
 #include <cstring>
+#include <misc/assert.h>
 #include <nfd.h>
 
 namespace NuklearMisc
@@ -12,7 +12,7 @@ namespace NuklearMisc
         // TODO: replace nasty static buffer, we could use the more advanced api, but I'm not bothered right now
         char buf[4096];
 
-        assert(path.size() + 1 < 4096);
+        release_assert(path.size() + 1 < 4096);
         memcpy(buf, path.c_str(), path.size() + 1);
 
         bool retval = false;

@@ -1,7 +1,7 @@
 #include "itemmanager.h"
 #include "item.h"
-
 #include <iostream>
+#include <misc/assert.h>
 #include <sstream>
 #include <unordered_map>
 
@@ -127,7 +127,7 @@ namespace FAWorld
         if (it != mItemByName.end())
             return *it->second;
 
-        assert(false); // Item not found
+        release_assert(false); // Item not found
         return {};
     }
 

@@ -3,8 +3,8 @@
 
 #include "../../apps/freeablo/fagui/guimanager.h"
 #include "render.h"
-#include <assert.h>
 #include <iostream>
+#include <misc/assert.h>
 #include <string.h>
 
 struct nk_sdl_vertex
@@ -84,7 +84,7 @@ void nk_sdl_device_create(nk_gl_device& dev)
     glCompileShader(dev.vert_shdr);
     glCompileShader(dev.frag_shdr);
     glGetShaderiv(dev.vert_shdr, GL_COMPILE_STATUS, &status);
-    assert(status == GL_TRUE);
+    release_assert(status == GL_TRUE);
     glGetShaderiv(dev.frag_shdr, GL_COMPILE_STATUS, &status);
     if (!status)
     {
@@ -93,12 +93,12 @@ void nk_sdl_device_create(nk_gl_device& dev)
         glGetShaderInfoLog(dev.frag_shdr, length, &length, &errorLog[0]);
         std::cout << &errorLog[0] << std::endl;
     }
-    assert(status == GL_TRUE);
+    release_assert(status == GL_TRUE);
     glAttachShader(dev.prog, dev.vert_shdr);
     glAttachShader(dev.prog, dev.frag_shdr);
     glLinkProgram(dev.prog);
     glGetProgramiv(dev.prog, GL_LINK_STATUS, &status);
-    assert(status == GL_TRUE);
+    release_assert(status == GL_TRUE);
 
     dev.uniform_hcolor_r = glGetUniformLocation(dev.prog, "h_color_r");
     dev.uniform_hcolor_g = glGetUniformLocation(dev.prog, "h_color_g");
@@ -448,7 +448,7 @@ void NuklearFrameDump::init(nk_gl_device& dev)
 
 NuklearFrameDump::~NuklearFrameDump()
 {
-    assert(dev);
+    debug_assert(dev);
     nk_buffer_free(&vbuf);
     nk_buffer_free(&ebuf);
     nk_buffer_free(&cmds);
@@ -456,11 +456,17 @@ NuklearFrameDump::~NuklearFrameDump()
 
 void NuklearFrameDump::fill(nk_context* ctx)
 {
-    assert(dev);
+    debug_assert(dev);
     nk_convert(ctx, &cmds, &vbuf, &ebuf, &config);
 
     drawCommands.clear();
 
     const nk_draw_command* cmd;
     nk_draw_foreach(cmd, ctx, &cmds) { drawCommands.push_back(*cmd); }
+}
+
+nk_gl_device& NuklearFrameDump::getDevice()
+{
+    debug_assert(dev);
+    return *dev;
 }

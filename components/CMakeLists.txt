@@ -40,6 +40,7 @@ add_library(Misc
     misc/stdhashes.h
     misc/maxcurrentitem.cpp
     misc/maxcurrentitem.h
+    misc/assert.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)

@@ -6,6 +6,7 @@
 #include "diabloexe/characterstats.h"
 #include "itemmap.h"
 #include "world.h"
+#include <misc/assert.h>
 #include <misc/stringops.h>
 #include <string>
 
@@ -171,7 +172,7 @@ namespace FAWorld
             else if (mInventory.mLeftHand.getCode() == Item::icBlunt || mInventory.mRightHand.getCode() == Item::icBlunt)
                 weapon = "h";
 
-            assert(!weapon.empty()); // Empty weapon format
+            release_assert(!weapon.empty()); // Empty weapon format
         }
         weaponCode = weapon;
         armourCode = armour;
