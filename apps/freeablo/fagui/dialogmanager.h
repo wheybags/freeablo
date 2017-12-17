@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "textcolor.h"
+#include "../engine/inputobserverinterface.h"
 
 namespace FAWorld
 {
@@ -37,6 +38,7 @@ namespace FAGui
         void separator();
         void header(const std::vector<std::string>& text);
         int selectedLine();
+        void notify(Engine::KeyboardInputAction action, GuiManager &manager);
 
     private:
         std::array<DialogLineData, 24> mLines;

@@ -66,6 +66,42 @@ namespace FAGui
         return mSelectedLine;
     }
 
+    void DialogData::notify(Engine::KeyboardInputAction action, GuiManager& manager)
+    {
+        int dir = 0;
+        switch (action)
+        {
+            case Engine::KeyboardInputAction::nextOption:
+                dir = 1;
+                break;
+            case Engine::KeyboardInputAction::prevOption:
+                dir = -1;
+                break;
+            case Engine::KeyboardInputAction::reject:
+                manager.popDialogData();
+                return;
+            case Engine::KeyboardInputAction::accept:
+                mLines[mSelectedLine].action();
+                return;
+            default:
+                break;
+        }
+
+        if (dir != 0)
+        {
+            int i = mSelectedLine;
+            do
+            {
+                i += dir;
+                if (i < 0)
+                    i += mLines.size();
+                else if (i >= static_cast<int>(mLines.size()))
+                    i -= mLines.size();
+            } while (!mLines[i].action);
+            mSelectedLine = i;
+        }
+    }
+
     DialogManager::DialogManager(GuiManager& gui_manager, FAWorld::World& world) : mGuiManager(gui_manager), mWorld(world) {}
 
     void DialogManager::talkOgden(const FAWorld::Actor* npc)

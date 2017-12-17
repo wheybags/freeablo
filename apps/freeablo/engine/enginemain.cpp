@@ -82,6 +82,7 @@ namespace Engine
 
         FILE* f = fopen("save.sav", "rb");
         mGuiManager = boost::make_unique<FAGui::GuiManager>(*this);
+        mInputManager->registerKeyboardObserver(mGuiManager.get());
         mInputManager->setGuiManager(mGuiManager.get());
 
         if (f)
@@ -194,6 +195,8 @@ namespace Engine
 
     void EngineMain::notify(KeyboardInputAction action)
     {
+        if (mGuiManager->isModalDlgShown())
+            return;
         if (mPaused && action != KeyboardInputAction::pause)
             return;
 

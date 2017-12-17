@@ -80,12 +80,10 @@ namespace Engine
         hotkey.shift = modifiers.shift;
         hotkey.alt = modifiers.alt;
 
-        if (mGuiManager->isModalDlgShown())
-            return;
-
         for (int action = 0; action < static_cast<int>(KeyboardInputAction::max); action++)
         {
             KeyboardInputAction keyAction = (KeyboardInputAction)action;
+            // quite possibly certain hotkeys could actually be triggered on keyRelease rather than keyPress
             if (hotkey == getHotkey(keyAction))
             {
                 notifyKeyboardObservers(keyAction);
@@ -171,9 +169,9 @@ namespace Engine
             case KeyboardInputAction::prevOption:
                 return "PrevOption";
             case KeyboardInputAction::accept:
-                return "accept";
+                return "Accept";
             case KeyboardInputAction::reject:
-                return "reject";
+                return "Reject";
             case KeyboardInputAction::max:
                 break;
             default:

@@ -9,6 +9,7 @@
 #include <boost/variant/variant_fwd.hpp>
 #include <fa_nuklear.h>
 #include <memory>
+#include "../engine/inputobserverinterface.h"
 
 struct nk_context;
 typedef uint32_t nk_flags;
@@ -84,7 +85,7 @@ namespace FAGui
 
     class ScrollBox;
 
-    class GuiManager
+    class GuiManager : public Engine::KeyboardInputObserverInterface
     {
         using self = GuiManager;
 
@@ -125,6 +126,7 @@ namespace FAGui
         void descriptionPanel(nk_context* ctx);
         PanelType* panel(PanelPlacement placement);
         const PanelType* panel(PanelPlacement placement) const;
+        void notify(Engine::KeyboardInputAction action) override;
 
     private:
         Engine::EngineMain& mEngine;

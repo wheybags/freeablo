@@ -8,8 +8,6 @@ namespace Input
     class Hotkey
     {
     public:
-        static void initializePythonWrapper();
-
         Hotkey();
         Hotkey(const char* name);
         Hotkey(const std::string& name);
