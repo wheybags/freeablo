@@ -6,10 +6,10 @@
 #include <queue>
 #include <string>
 
+#include "../engine/inputobserverinterface.h"
 #include <boost/variant/variant_fwd.hpp>
 #include <fa_nuklear.h>
 #include <memory>
-#include "../engine/inputobserverinterface.h"
 
 struct nk_context;
 typedef uint32_t nk_flags;

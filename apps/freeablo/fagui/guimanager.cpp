@@ -19,11 +19,11 @@
 #include "boost/range/counting_range.hpp"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
+#include "menu/pausemenuscreen.h"
+#include "menu/startingmenuscreen.h"
 #include "menuhandler.h"
 #include "nkhelpers.h"
 #include <boost/variant/variant.hpp>
-#include "menu/startingmenuscreen.h"
-#include "menu/pausemenuscreen.h"
 
 namespace FAGui
 {

@@ -1,8 +1,8 @@
 #include "menuscreen.h"
 
-#include "../menuhandler.h"
 #include "../../engine/inputobserverinterface.h"
 #include "../../farender/renderer.h"
+#include "../menuhandler.h"
 
 namespace FAGui
 {

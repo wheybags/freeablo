@@ -1,9 +1,9 @@
 #include "menuhandler.h"
 
-#include "boost/make_unique.hpp"
-#include "../faworld/world.h"
-#include "menu/menuscreen.h"
 #include "../engine/enginemain.h"
+#include "../faworld/world.h"
+#include "boost/make_unique.hpp"
+#include "menu/menuscreen.h"
 
 namespace FAGui
 {
@@ -32,6 +32,4 @@ namespace FAGui
         if (mActiveScreen)
             mActiveScreen->notify(action);
     }
-
-  
 }

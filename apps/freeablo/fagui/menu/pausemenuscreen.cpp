@@ -67,7 +67,7 @@ namespace FAGui
         mMenuItems.push_back({drawItem("New Game"), []() { return ActionResult::continueDrawing; }});
         mMenuItems.push_back({drawItem("Load Game"), []() { return ActionResult::continueDrawing; }});
         mMenuItems.push_back({drawItem("Quit Diablo"), [this]() {
-                                  mMenuHandler.engine ().stop();
+                                  mMenuHandler.engine().stop();
                                   return ActionResult::stopDrawing;
                               }});
     }

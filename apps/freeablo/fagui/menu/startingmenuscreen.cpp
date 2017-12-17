@@ -1,9 +1,9 @@
 #include "startingmenuscreen.h"
-#include "../../faworld/world.h"
-#include "../../farender/animationplayer.h"
-#include "../nkhelpers.h"
-#include "../menuhandler.h"
 #include "../../engine/enginemain.h"
+#include "../../farender/animationplayer.h"
+#include "../../faworld/world.h"
+#include "../menuhandler.h"
+#include "../nkhelpers.h"
 #include "selectheromenuscreen.h"
 
 namespace FAGui
