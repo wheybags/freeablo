@@ -11,8 +11,8 @@ namespace DiabloExe
     class Npc
     {
     public:
-        std::string id;
-        std::string name;
+        std::string id;   ///< An internal id used in freeablo to identify this npc. Pulled from teh exe ini file
+        std::string name; ///< The npc's actual ingame name
         std::string celPath;
         uint8_t x;
         uint8_t y;

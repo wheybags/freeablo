@@ -573,7 +573,7 @@ namespace FAGui
                                    nk_image(ctx, bulbImage);
                                };
 
-                               FAWorld::ActorStats& stats = FAWorld::World::get()->getCurrentPlayer()->mStats;
+                               const FAWorld::ActorStats& stats = FAWorld::World::get()->getCurrentPlayer()->getStats();
                                // draw current hp into health bulb
                                drawBulb(stats.mHp.current, stats.mHp.max, healthBulbLeftOffset);
                                // and current mana

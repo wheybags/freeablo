@@ -1,8 +1,8 @@
 #include "gamelevel.h"
 #include "../fasavegame/gameloader.h"
+#include "actor.h"
 #include "actorstats.h"
 #include "itemmap.h"
-#include "monster.h"
 #include "world.h"
 #include <diabloexe/diabloexe.h>
 #include <misc/assert.h>
@@ -141,7 +141,7 @@ namespace FAWorld
 
         for (size_t i = 0; i < mActors.size(); i++)
         {
-            auto tmp = mActors[i]->getAnimationManager().getCurrentRealFrame();
+            auto tmp = mActors[i]->mAnimation.getCurrentRealFrame();
 
             FARender::FASpriteGroup* sprite = tmp.first;
             int32_t frame = tmp.second;

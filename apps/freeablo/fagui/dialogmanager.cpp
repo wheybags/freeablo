@@ -177,7 +177,7 @@ namespace FAGui
 
     void DialogManager::talk(const FAWorld::Actor* npc)
     {
-        auto npcId = npc->getActorId();
+        auto npcId = npc->getNpcId();
         if (npcId == "NPCsmith")
             talkGriswold(npc);
         else if (npcId == "NPCtavern")

@@ -12,12 +12,6 @@ namespace FAWorld
     const std::string BasicMonsterBehaviour::typeId = "basic-monster-behaviour";
     const std::string NullBehaviour::typeId = "null-behaviour";
 
-    void Behaviour::attach(Actor* actor)
-    {
-        release_assert(mActor == nullptr);
-        mActor = actor;
-    }
-
     static int32_t squaredDistance(const Position& a, const Position& b)
     {
         int32_t tmpX = abs(a.current().first - b.current().first);
@@ -64,7 +58,7 @@ namespace FAWorld
 
             if (dist <= std::pow(5, 2)) // we are close enough to engage the player
             {
-                mActor->setTarget(nearest);
+                mActor->mTarget = nearest;
             }
             else if (dist >= std::pow(100, 2)) // just freeze if we're miles away from anyone
             {

@@ -20,14 +20,16 @@ namespace FAWorld
     class Behaviour
     {
     public:
+        Behaviour(Actor* actor) { mActor = actor; }
+        Behaviour() = default;
+
         virtual const std::string& getTypeId() = 0;
         virtual void save(FASaveGame::GameSaver& saver) = 0;
-        virtual ~Behaviour() {}
-
-        void attach(Actor* actor);
-
         virtual void update() = 0;
 
+        virtual ~Behaviour() {}
+
+        void reAttach(Actor* actor) { mActor = actor; } ///< only for use immediately after being loaded from a save game
     protected:
         Actor* mActor = nullptr;
     };
@@ -39,23 +41,28 @@ namespace FAWorld
         static const std::string typeId;
         const std::string& getTypeId() override { return typeId; }
 
-        void save(FASaveGame::GameSaver&) {}
+        NullBehaviour(FAWorld::Actor* actor) : Behaviour(actor) {}
+        NullBehaviour() = default;
+
+        virtual void save(FASaveGame::GameSaver&) override {}
+        virtual void update() override {}
+
         ~NullBehaviour() {}
-        void update() {}
     };
 
     class BasicMonsterBehaviour : public Behaviour
     {
     public:
-        BasicMonsterBehaviour() = default;
-        BasicMonsterBehaviour(FASaveGame::GameLoader& loader);
-        void save(FASaveGame::GameSaver& saver) override;
-
         static const std::string typeId;
         const std::string& getTypeId() override { return typeId; }
 
+        BasicMonsterBehaviour(FAWorld::Actor* monster) : Behaviour(monster) {}
+        BasicMonsterBehaviour(FASaveGame::GameLoader& loader);
+
+        virtual void save(FASaveGame::GameSaver& saver) override;
+        virtual void update() override;
+
         ~BasicMonsterBehaviour() {}
-        void update();
 
     private:
         Tick mTicksSinceLastAction;

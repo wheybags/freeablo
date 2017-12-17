@@ -1,15 +1,5 @@
-#ifndef ACTOR_H
-#define ACTOR_H
-
-#include <map>
-
-#include <boost/format.hpp>
-
-#include <misc/misc.h>
-#include <statemachine/statemachine.h>
-
+#pragma once
 #include "../farender/animationplayer.h"
-
 #include "actoranimationmanager.h"
 #include "actorstats.h"
 #include "behaviour.h"
@@ -18,8 +8,12 @@
 #include "movementhandler.h"
 #include "position.h"
 #include "world.h"
+#include <boost/format.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
+#include <map>
+#include <misc/misc.h>
+#include <statemachine/statemachine.h>
 
 namespace FASaveGame
 {
@@ -33,114 +27,79 @@ namespace FAWorld
     class World;
     class ItemTarget;
 
-    namespace ActorState
-    {
-        class BaseState;
-    }
-
     class Actor
     {
     public:
-        void interact(Actor* actor);
-        void setIdleAnimSequence(const std::vector<int32_t>& sequence);
-        void setTalkData(const std::unordered_map<std::basic_string<char>, std::basic_string<char>>& talkData);
-        friend class ActorState::BaseState; // TODO: fix
+        using TargetType = boost::variant<boost::blank, Actor*, ItemTarget>;
 
-    public:
         Actor(const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
-
+        Actor(const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
+        Actor(const DiabloExe::Monster& monster);
         Actor(FASaveGame::GameLoader& loader);
+        virtual ~Actor();
+
         virtual void save(FASaveGame::GameSaver& saver);
 
         static const std::string typeId;
         virtual const std::string& getTypeId() { return typeId; }
 
-        virtual void update(bool noclip);
-        virtual ~Actor();
-        virtual std::string getDieWav() { return ""; }
-        virtual std::string getHitWav() { return ""; }
-        virtual void setSpriteClass(std::string className) { UNUSED_PARAM(className); }
-        virtual void takeDamage(double amount);
-        virtual int32_t getCurrentHP();
-        virtual void pickupItem(ItemTarget /*target*/) {}
-        bool hasTarget() const;
-
-        bool isAttacking = false;
-        bool isTalking = false;
-
-        StateMachine::StateMachine<Actor>* mActorStateMachine;
-
-        ActorAnimationManager& getAnimationManager() { return mAnimation; }
-
-        bool isPassable() { return mIsDead; }
-
-        int32_t getId() { return mId; }
-
-        std::string getName() const;
-        void setName(const std::string& name);
+        // TODO: atm, this is only implemented for Player, but it should be changed to
+        // a non-virtual method, and implemented in Actor. The reason I wrote this comment
+        // instead of doing that, is that Actors don't have inventories at the moment, just Players
+        virtual void pickupItem(ItemTarget target) { UNUSED_PARAM(target); }
 
         void teleport(GameLevel* level, Position pos);
         GameLevel* getLevel();
 
         bool attack(Actor* enemy);
 
-        virtual bool talk(Actor* actor)
-        {
-            UNUSED_PARAM(actor);
-            return false;
-        }
+        std::string getDieWav() const;
+        std::string getHitWav() const;
 
-        using TargetType = boost::variant<boost::blank, Actor*, ItemTarget>;
-        void setTarget(TargetType target);
+        bool canIAttack(Actor* actor);
+        void update(bool noclip);
+        void takeDamage(double amount);
 
-        MovementHandler mMoveHandler;
-        TargetType mTarget;
-
-        Position getPos() const { return mMoveHandler.getCurrentPosition(); }
-
-        void setInvuln(bool invuln) { mInvuln = invuln; }
-
-        // private: //TODO: fix this
-
-        virtual void die();
-
-        bool canTalk() const;
+        void die();
         bool isDead() const;
         bool isEnemy(Actor* other) const;
-        std::string getActorId() const;
-        void setActorId(const std::string& id);
-        void setCanTalk(bool canTalk);
-
-        bool canWalkTo(int32_t x, int32_t y);
-
-        void attachBehaviour(Behaviour* behaviour) { mBehaviour = behaviour; };
 
         const std::unordered_map<std::string, std::string>& getTalkData() const { return mTalkData; }
+        const std::string& getNpcId() const { return mNpcId; }
+        const std::string& getName() const { return mName; }
+        const ActorStats& getStats() const { return mStats; }
+        const Position& getPos() const { return mMoveHandler.getCurrentPosition(); }
+        int32_t getId() const { return mId; }
+        bool isPassable() const { return isDead(); }
+        bool hasTarget() const;
 
-        ActorStats mStats;
-
-    protected:
-        Behaviour* mBehaviour = nullptr;
-
-        bool mIsDead = false;
-        bool mCanTalk = false;
-        Faction mFaction;
-
-        ActorAnimationManager mAnimation;
-
-        virtual bool canIAttack(Actor* actor);
+        bool canTalk() const { return mCanTalk; }
         bool canInteractWith(Actor* actor);
         bool canTalkTo(Actor* actor);
+        virtual bool talk(Actor* actor);
 
+        // public member variables
+        MovementHandler mMoveHandler;
+        TargetType mTarget;
+        ActorAnimationManager mAnimation;
+        bool isTalking = false;
+        bool isAttacking = false;
         bool mInvuln = false;
 
-    private:
-        std::string mActorId; // TODO: this should be in an npc subclass
-        std::string mName;
+    protected:
+        // protected member variables
+        StateMachine::StateMachine<Actor>* mActorStateMachine;
+        ActorStats mStats;
+        std::string mSoundPath;
+        Behaviour* mBehaviour = nullptr;
+        bool mCanTalk = false;
+        Faction mFaction;
+        std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;
-        // lines of talk for npcs taken from original game exe
-        std::unordered_map<std::basic_string<char>, std::basic_string<char>> mTalkData;
+        std::unordered_map<std::string, std::string> mTalkData; ///< Lines of dialogue
+
+        // TODO: this var is only used for dialog code, which branches on which npc is being spoken to.
+        // Eventually, we should add a proper dialog specification system, and get rid of this.
+        std::string mNpcId;
     };
 }
-
-#endif

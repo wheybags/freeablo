@@ -31,13 +31,13 @@ namespace FAWorld
                                                             }
                                                             else if (actor.canTalkTo(target) && actor.talk(target))
                                                             {
-                                                                actor.setTarget(boost::blank{});
+                                                                actor.mTarget = boost::blank{};
                                                             }
                                                         }
                                                     }
                                                     else
                                                     {
-                                                        actor.setTarget(boost::blank{});
+                                                        actor.mTarget = boost::blank{};
                                                     }
                                                 },
                                                 [&actor](const ItemTarget& target) {
@@ -45,7 +45,7 @@ namespace FAWorld
                                                     if (actor.getPos().isNear({tile.x, tile.y}))
                                                     {
                                                         actor.pickupItem(target);
-                                                        actor.setTarget(boost::blank{});
+                                                        actor.mTarget = boost::blank{};
                                                     }
                                                     else
                                                         actor.mMoveHandler.setDestination({tile.x, tile.y}, true);

@@ -43,8 +43,6 @@ namespace FAWorld
         }
     }
 
-    int32_t Position::getDirection() const { return mDirection; }
-
     void Position::setDirection(int32_t mDirection)
     {
         if (mDirection >= 0)
@@ -53,21 +51,9 @@ namespace FAWorld
 
     std::pair<int32_t, int32_t> Position::current() const { return mCurrent; }
 
-    bool Position::isNear(const Position& other)
+    bool Position::isNear(const Position& other) const
     {
         return std::max(abs(mCurrent.first - other.mCurrent.first), abs(mCurrent.second - other.mCurrent.second)) <= 1;
-    }
-
-    double Position::distanceFrom(Position B)
-    {
-        int dx = mCurrent.first - B.mCurrent.first;
-        int dy = mCurrent.second - B.mCurrent.second;
-
-        double x = pow(dx, 2.0);
-        double y = pow(dy, 2.0);
-        double distance = sqrt(x + y);
-
-        return distance;
     }
 
     std::pair<int32_t, int32_t> Position::next() const
@@ -76,5 +62,17 @@ namespace FAWorld
             return mCurrent;
 
         return Misc::getNextPosByDir(mCurrent, mDirection);
+    }
+
+    void Position::stop()
+    {
+        mDist = 0;
+        mMoving = false;
+    }
+
+    void Position::start()
+    {
+        mDist = 0;
+        mMoving = true;
     }
 }

@@ -11,7 +11,7 @@ namespace FAWorld
         {
             UNUSED_PARAM(noclip);
 
-            auto& animManager = actor.getAnimationManager();
+            auto& animManager = actor.mAnimation;
             if (animManager.getCurrentAnimation() != AnimState::attack && animManager.getInterruptedAnimation() != AnimState::attack)
             {
                 actor.isAttacking = false;
@@ -24,7 +24,7 @@ namespace FAWorld
         void AttackState::onEnter(Actor& actor)
         {
             actor.isAttacking = true;
-            actor.getAnimationManager().playAnimation(AnimState::attack, FARender::AnimationPlayer::AnimationType::Once);
+            actor.mAnimation.playAnimation(AnimState::attack, FARender::AnimationPlayer::AnimationType::Once);
         }
     }
 }

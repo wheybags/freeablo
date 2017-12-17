@@ -26,7 +26,7 @@ namespace FAWorld
         void setDestination(std::pair<int32_t, int32_t> dest, bool adjacent = false);
 
         bool moving();
-        Position getCurrentPosition() const;
+        const Position& getCurrentPosition() const { return mCurrentPos; }
         GameLevel* getLevel();
         void update(int32_t actorId);
         void teleport(GameLevel* level, Position pos);
