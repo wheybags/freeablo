@@ -22,6 +22,8 @@
 #include "menuhandler.h"
 #include "nkhelpers.h"
 #include <boost/variant/variant.hpp>
+#include "menu/startingmenuscreen.h"
+#include "menu/pausemenuscreen.h"
 
 namespace FAGui
 {
@@ -552,7 +554,7 @@ namespace FAGui
                            false);
     }
 
-    void GuiManager::startingScreen() { mMenuHandler->setActiveScreen<StartingScreen>(); }
+    void GuiManager::startingScreen() { mMenuHandler->setActiveScreen<StartingMenuScreen>(); }
 
     void GuiManager::smallText(nk_context* ctx, const char* text, TextColor color, nk_flags alignment)
     {
