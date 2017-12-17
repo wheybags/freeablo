@@ -194,18 +194,18 @@ namespace Engine
 
     void EngineMain::notify(KeyboardInputAction action)
     {
-        if (mPaused && action != PAUSE)
+        if (mPaused && action != KeyboardInputAction::pause)
             return;
 
-        if (action == PAUSE)
+        if (action == KeyboardInputAction::pause)
         {
             togglePause();
         }
-        if (action == QUIT)
+        if (action == KeyboardInputAction::quit)
         {
             stop();
         }
-        else if (action == NOCLIP)
+        else if (action == KeyboardInputAction::noclip)
         {
             toggleNoclip();
         }
