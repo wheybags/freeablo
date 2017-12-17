@@ -13,7 +13,6 @@
 #include "findpath.h"
 #include "gamelevel.h"
 #include "itemmap.h"
-#include "monster.h"
 #include "player.h"
 #include <algorithm>
 #include <diabloexe/diabloexe.h>
@@ -80,7 +79,6 @@ namespace FAWorld
     void World::setupObjectIdMappers()
     {
         mObjectIdMapper.addClass(Actor::typeId, [](FASaveGame::GameLoader& loader) { return new Actor(loader); });
-        mObjectIdMapper.addClass(Monster::typeId, [](FASaveGame::GameLoader& loader) { return new Monster(loader); });
         mObjectIdMapper.addClass(Player::typeId, [](FASaveGame::GameLoader& loader) { return new Player(loader); });
 
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
@@ -212,13 +210,7 @@ namespace FAWorld
 
         for (auto npc : mDiabloExe.getNpcs())
         {
-            Actor* actor = new Actor(npc->celPath, npc->celPath);
-            if (auto id = npc->animationSequenceId)
-                actor->setIdleAnimSequence(mDiabloExe.getTownerAnimation()[*id]);
-            actor->setTalkData(npc->talkData);
-            actor->setCanTalk(true);
-            actor->setActorId(npc->id);
-            actor->setName(npc->name);
+            Actor* actor = new Actor(*npc, mDiabloExe);
             actor->teleport(townLevel, Position(npc->x, npc->y, npc->rotation));
         }
 
@@ -498,20 +490,20 @@ namespace FAWorld
             Actor* clickedActor = targetedActor(mousePosition);
             if (clickedActor)
             {
-                player->setTarget(clickedActor);
+                player->mTarget = clickedActor;
                 return;
             }
 
             if (auto item = targetedItem(mousePosition))
             {
-                player->setTarget(ItemTarget{mGuiManager->isInventoryShown() ? ItemTarget::ActionType::toCursor : ItemTarget::ActionType::autoEquip, item});
+                player->mTarget = ItemTarget{mGuiManager->isInventoryShown() ? ItemTarget::ActionType::toCursor : ItemTarget::ActionType::autoEquip, item};
                 return;
             }
         }
 
         if (!targetWasLocked || simpleMove)
         {
-            player->setTarget(boost::blank{});
+            player->mTarget = boost::blank{};
             player->mMoveHandler.setDestination({clickedTile.x, clickedTile.y});
             simpleMove = true;
         }

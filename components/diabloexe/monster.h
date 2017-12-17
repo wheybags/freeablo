@@ -25,7 +25,7 @@ namespace DiabloExe
         uint32_t specialSound;
 
         uint32_t usesTrn;
-        std::string trnPath; // uint32_t p
+        std::string trnPath; // uint32_t ptr in exe
 
         uint32_t idleFrameSet;
         uint32_t walkFrameSet;

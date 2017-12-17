@@ -1,25 +1,23 @@
 #include "actor.h"
-#include "behaviour.h"
-
-#include <misc/misc.h>
-
 #include "../engine/enginemain.h"
 #include "../engine/threadmanager.h"
 #include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
 #include "actor/basestate.h"
 #include "actorstats.h"
+#include "behaviour.h"
 #include "findpath.h"
 #include "player.h"
 #include "world.h"
+#include <boost/format.hpp>
+#include <diabloexe/diabloexe.h>
+#include <diabloexe/monster.h>
+#include <diabloexe/npc.h>
+#include <misc/misc.h>
 
 namespace FAWorld
 {
     const std::string Actor::typeId = "base_actor";
-
-    void Actor::setIdleAnimSequence(const std::vector<int32_t>& sequence) { mAnimation.setIdleFrameSequence(sequence); }
-
-    void Actor::setTalkData(const std::unordered_map<std::basic_string<char>, std::basic_string<char>>& talkData) { mTalkData = talkData; }
 
     void Actor::update(bool noclip)
     {
@@ -37,9 +35,9 @@ namespace FAWorld
         mAnimation.update();
     }
 
-    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath)
-        : mMoveHandler(World::getTicksInPeriod(1.0f)), mFaction(Faction::heaven())
+    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath) : mMoveHandler(World::getTicksInPeriod(1.0f))
     {
+        mFaction = Faction::heaven();
         if (!dieAnimPath.empty())
             mAnimation.setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage(dieAnimPath));
         if (!walkAnimPath.empty())
@@ -52,21 +50,46 @@ namespace FAWorld
         mId = FAWorld::World::get()->getNewId();
     }
 
-    Actor::Actor(FASaveGame::GameLoader& loader) : mMoveHandler(loader), mStats(loader), mAnimation(loader)
+    Actor::Actor(const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe) : Actor(npc.celPath, npc.celPath)
+    {
+        if (auto id = npc.animationSequenceId)
+            mAnimation.setIdleFrameSequence(exe.getTownerAnimation()[*id]);
+
+        mTalkData = npc.talkData;
+        mCanTalk = true;
+        mNpcId = npc.id;
+        mName = npc.name;
+    }
+
+    Actor::Actor(const DiabloExe::Monster& monster) : Actor("", "", "")
+    {
+        boost::format fmt(monster.cl2Path);
+        mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage((fmt % 'w').str()));
+        mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage((fmt % 'n').str()));
+        mAnimation.setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage((fmt % 'd').str()));
+        mAnimation.setAnimation(AnimState::attack, FARender::Renderer::get()->loadImage((fmt % 'a').str()));
+        mAnimation.setAnimation(AnimState::hit, FARender::Renderer::get()->loadImage((fmt % 'h').str()));
+
+        mBehaviour = new BasicMonsterBehaviour(this);
+        mFaction = Faction::hell();
+        mName = monster.monsterName;
+        mSoundPath = monster.soundPath;
+    }
+
+    Actor::Actor(FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(loader)
     {
         mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
-        mIsDead = loader.load<bool>();
 
         bool hasBehaviour = loader.load<bool>();
         if (hasBehaviour)
         {
             std::string typeId = loader.load<std::string>();
             mBehaviour = static_cast<Behaviour*>(World::get()->mObjectIdMapper.construct(typeId, loader));
-            mBehaviour->attach(this);
+            mBehaviour->reAttach(this);
         }
 
         mId = loader.load<int32_t>();
-        mActorId = loader.load<std::string>();
+        mNpcId = loader.load<std::string>();
         mName = loader.load<std::string>();
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this); // TODO: handle this
         // TODO: handle mTarget here
@@ -81,7 +104,6 @@ namespace FAWorld
         mAnimation.save(saver);
 
         saver.save(uint8_t(mFaction.getType()));
-        saver.save(mIsDead);
 
         bool hasBehaviour = mBehaviour != nullptr;
         saver.save(hasBehaviour);
@@ -93,7 +115,7 @@ namespace FAWorld
         }
 
         saver.save(mId);
-        saver.save(mActorId);
+        saver.save(mNpcId);
         saver.save(mName);
 
         // TODO: handle mActorStateMachine here
@@ -124,25 +146,19 @@ namespace FAWorld
         }
     }
 
-    int32_t Actor::getCurrentHP() { return mStats.mHp.current; }
-
     bool Actor::hasTarget() const { return mTarget.type() != typeid(boost::blank); }
 
     void Actor::die()
     {
         mMoveHandler.setDestination(getPos().current());
         mAnimation.playAnimation(AnimState::dead, FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
-        mIsDead = true;
+        mStats.mHp.current = 0;
         Engine::ThreadManager::get()->playSound(getDieWav());
     }
 
-    bool Actor::isDead() const { return mIsDead; }
+    bool Actor::isDead() const { return mStats.mHp.current <= 0; }
 
     bool Actor::isEnemy(Actor* other) const { return mFaction.canAttack(other->mFaction); }
-
-    std::string Actor::getName() const { return mName; }
-
-    void Actor::setName(const std::string& name) { mName = name; }
 
     void Actor::teleport(GameLevel* level, Position pos)
     {
@@ -155,6 +171,26 @@ namespace FAWorld
     }
 
     GameLevel* Actor::getLevel() { return mMoveHandler.getLevel(); }
+
+    std::string Actor::getDieWav() const
+    {
+        if (mSoundPath.empty())
+            return "";
+
+        boost::format fmt(mSoundPath);
+        fmt % 'd';
+        return (fmt % FALevelGen::randomInRange(1, 2)).str();
+    }
+
+    std::string Actor::getHitWav() const
+    {
+        if (mSoundPath.empty())
+            return "";
+
+        boost::format fmt(mSoundPath);
+        fmt % 'h';
+        return (fmt % FALevelGen::randomInRange(1, 2)).str();
+    }
 
     bool Actor::canIAttack(Actor* actor)
     {
@@ -206,15 +242,11 @@ namespace FAWorld
         return true;
     }
 
-    void Actor::setCanTalk(bool canTalk) { mCanTalk = canTalk; }
-
-    bool Actor::canTalk() const { return mCanTalk; }
-
-    bool Actor::canWalkTo(int32_t x, int32_t y) { return getLevel()->isPassable(x, y); }
-
-    std::string Actor::getActorId() const { return mActorId; }
-
-    void Actor::setActorId(const std::string& id) { mActorId = id; }
+    bool Actor::talk(Actor* actor)
+    {
+        UNUSED_PARAM(actor);
+        return false;
+    }
 
     bool Actor::attack(Actor* enemy)
     {
@@ -222,10 +254,8 @@ namespace FAWorld
             return false;
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
         enemy->takeDamage(mStats.getAttackDamage());
-        if (enemy->getCurrentHP() <= 0)
+        if (enemy->getStats().mHp.current <= 0)
             enemy->die();
         return true;
     }
-
-    void Actor::setTarget(TargetType target) { mTarget = target; }
 }

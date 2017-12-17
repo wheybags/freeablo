@@ -27,28 +27,17 @@ namespace FAWorld
 
         void update();                               ///< advances towards mNext
         std::pair<int32_t, int32_t> current() const; ///< where we are coming from
-        bool isNear(const Position& other);
+        bool isNear(const Position& other) const;
         std::pair<int32_t, int32_t> next() const; ///< where we are going to
 
-        int32_t getDirection() const;
+        int32_t getDirection() const { return mDirection; }
         void setDirection(int32_t mDirection);
-
-        double distanceFrom(Position B);
 
         bool isMoving() const { return mMoving; }
         int32_t getDist() const { return mDist; }
 
-        void stop()
-        {
-            mDist = 0;
-            mMoving = false;
-        }
-
-        void start()
-        {
-            mDist = 0;
-            mMoving = true;
-        }
+        void stop();
+        void start();
 
     private:
         std::pair<int32_t, int32_t> mCurrent = std::make_pair(0, 0);

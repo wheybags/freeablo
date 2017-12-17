@@ -195,19 +195,19 @@ namespace FAWorld
 
         auto renderer = FARender::Renderer::get();
 
-        getAnimationManager().setAnimation(AnimState::dead, renderer->loadImage((helper(true) % "dt").str()));
-        getAnimationManager().setAnimation(AnimState::attack, renderer->loadImage((helper(false) % "at").str()));
-        getAnimationManager().setAnimation(AnimState::hit, renderer->loadImage((helper(false) % "ht").str()));
+        mAnimation.setAnimation(AnimState::dead, renderer->loadImage((helper(true) % "dt").str()));
+        mAnimation.setAnimation(AnimState::attack, renderer->loadImage((helper(false) % "at").str()));
+        mAnimation.setAnimation(AnimState::hit, renderer->loadImage((helper(false) % "ht").str()));
 
         if (inDungeon)
         {
-            getAnimationManager().setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "aw").str()));
-            getAnimationManager().setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "as").str()));
+            mAnimation.setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "aw").str()));
+            mAnimation.setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "as").str()));
         }
         else
         {
-            getAnimationManager().setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "wl").str()));
-            getAnimationManager().setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "st").str()));
+            mAnimation.setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "wl").str()));
+            mAnimation.setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "st").str()));
         }
     }
 

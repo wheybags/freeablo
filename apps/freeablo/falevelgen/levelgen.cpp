@@ -1,25 +1,17 @@
 #include "levelgen.h"
-
-#include <stdlib.h>
-
-#include <algorithm>
-#include <sstream>
-#include <vector>
-
-#include <cmath>
-
-#include "../faworld/actorstats.h"
-#include "../faworld/behaviour.h"
-#include "../faworld/monster.h"
+#include "../faworld/actor.h"
 #include "mst.h"
 #include "random.h"
 #include "tileset.h"
-
+#include <algorithm>
+#include <cmath>
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
-
 #include <misc/assert.h>
 #include <misc/misc.h>
+#include <sstream>
+#include <stdlib.h>
+#include <vector>
 
 namespace FALevelGen
 {
@@ -913,11 +905,7 @@ namespace FALevelGen
             std::string name = possibleMonsters[randomInRange(0, possibleMonsters.size() - 1)]->monsterName;
             DiabloExe::Monster monster = exe.getMonster(name);
 
-            FAWorld::Monster* monsterObj = new FAWorld::Monster(monster);
-            FAWorld::Behaviour* behaviour = new FAWorld::BasicMonsterBehaviour();
-            behaviour->attach(monsterObj);
-            monsterObj->attachBehaviour(behaviour);
-            monsterObj->setName(name);
+            FAWorld::Actor* monsterObj = new FAWorld::Actor(monster);
             monsterObj->teleport(&level, FAWorld::Position(xPos, yPos));
         }
     }

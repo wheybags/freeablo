@@ -121,7 +121,7 @@ namespace Engine
                 setupNewPlayer(mPlayerFactory->create(characterClass));
                 mWorld->setLevel(currentLevel);
                 if (variables["invuln"].as<std::string>() == "on")
-                    mPlayer->setInvuln(true);
+                    mPlayer->mInvuln = true;
                 mWorld->addCurrentPlayer(mPlayer);
             }
         }
