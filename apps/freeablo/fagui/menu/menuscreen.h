@@ -45,6 +45,7 @@ namespace FAGui
     protected:
         static void menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment);
         ActionResult drawMenuItems(nk_context* ctx);
+        ActionResult executeActive();
 
     protected:
         MenuHandler& mMenuHandler;

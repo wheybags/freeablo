@@ -39,11 +39,10 @@ namespace FAGui
     {
         nk_layout_space_push(ctx, {262, 207, 320, 33});
         menuText(ctx, "Choose Class", MenuFontColor::silver, 30, NK_TEXT_ALIGN_CENTERED);
-        bool executeCurrent = false;
         nk_layout_space_push(ctx, {277, 422, 140, 35});
         menuText(ctx, "OK", MenuFontColor::gold, 30, NK_TEXT_ALIGN_CENTERED);
         if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
-            executeCurrent = true;
+            return executeActive();
         nk_layout_space_push(ctx, {427, 422, 140, 35});
         menuText(ctx, "Cancel", MenuFontColor::gold, 30, NK_TEXT_ALIGN_CENTERED);
         if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))

@@ -57,6 +57,9 @@ namespace FAGui
 
         return ActionResult::continueDrawing;
     }
+
+    MenuScreen::ActionResult MenuScreen::executeActive() { return mMenuItems[mActiveItemIndex].action(); }
+
     void MenuScreen::notify(Engine::KeyboardInputAction action)
     {
         if (mMenuItems.empty())
