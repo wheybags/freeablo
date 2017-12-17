@@ -38,6 +38,7 @@ namespace FAGui
         enum class DrawFunctionResult
         {
             executeAction,
+            setActive,
             noAction,
         };
         enum class ActionResult
@@ -64,7 +65,7 @@ namespace FAGui
 
     protected:
         MenuHandler& mMenuHandler;
-        std::function<void()> mRejectAction;
+        std::function<ActionResult()> mRejectAction;
         std::vector<MenuItem> mMenuItems;
         int mActiveItemIndex = 0;
     };
@@ -117,7 +118,7 @@ namespace FAGui
         {
             warrior = 0,
             rogue,
-            sorceror,
+            sorcerer,
         };
 
         class characterInfo
@@ -135,7 +136,9 @@ namespace FAGui
 
     public:
         explicit SelectHeroScreen(MenuHandler& menu);
-        bool chooseClass(nk_context* ctx);
+        ActionResult chooseClass(nk_context* ctx);
+        void generateChooseClassMenu();
+        void setType(ContentType type);
         void content(nk_context* ctx);
         void update(nk_context* ctx) override;
 

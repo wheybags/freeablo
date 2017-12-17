@@ -35,8 +35,9 @@ namespace FAGui
                 auto rect = nk_rect(screenW / 2 - textWidth / 2, y, textWidth, 45);
                 nk_layout_space_push(ctx, rect);
                 bigTGoldText(ctx, text, NK_TEXT_CENTERED);
+                DrawFunctionResult ret = DrawFunctionResult::noAction;
                 if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
-                    return DrawFunctionResult::executeAction;
+                    ret = DrawFunctionResult::executeAction;
                 rect.x -= (pentRect.w + pentOffset);
                 rect.w += (pentRect.w + pentOffset) * 2;
 
@@ -48,7 +49,7 @@ namespace FAGui
                     nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::right, valign_t::center));
                     nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
                 }
-                return DrawFunctionResult::noAction;
+                return ret;
             };
             y += itemHeight;
             return func;
@@ -132,6 +133,40 @@ namespace FAGui
                                 FAWorld::World::getTicksInPeriod(0.06f),
                                 FARender::AnimationPlayer::AnimationType::Looped);
         mSmLogo = menu.createSmLogo();
+
+        auto drawItem = [&](const char* text, const struct nk_rect& rect) {
+            return [=](nk_context* ctx, bool isActive) {
+                nk_layout_space_push(ctx, rect);
+                menuText(ctx, text, MenuFontColor::gold, 42, NK_TEXT_ALIGN_CENTERED);
+                auto ret = DrawFunctionResult::noAction;
+                if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                {
+                    ret = DrawFunctionResult::executeAction;
+                }
+                if (isActive)
+                {
+                    auto frame = mFocus42->getCurrentFrame();
+                    auto frameRect = nk_rect(0, 0, frame.first->getWidth(), frame.first->getHeight());
+                    nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::left, valign_t::center));
+                    nk_image(ctx, frame.first->getNkImage(frame.second));
+                    nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::right, valign_t::center));
+                    nk_image(ctx, frame.first->getNkImage(frame.second));
+                }
+                return ret;
+            };
+        };
+        mMenuItems.push_back({drawItem("Single Player", {65, 192, 510, 42}), [this]() {
+                                  mMenuHandler.setActiveScreen<SelectHeroScreen>();
+                                  return ActionResult::stopDrawing;
+                              }});
+        mMenuItems.push_back({drawItem("Multi Player", {65, 235, 510, 42}), [this]() { return ActionResult::continueDrawing; }});
+        mMenuItems.push_back({drawItem("Replay Intro", {65, 277, 510, 42}), [this]() { return ActionResult::continueDrawing; }});
+        mMenuItems.push_back({drawItem("Show Credits", {65, 320, 510, 42}), [this]() { return ActionResult::continueDrawing; }});
+        mRejectAction = [this]() {
+            mMenuHandler.engine().stop();
+            return ActionResult::stopDrawing;
+        };
+        mMenuItems.push_back({drawItem("Exit Diablo", {65, 363, 510, 42}), mRejectAction});
     }
 
     void StartingScreen::menuItems(nk_context* ctx)
@@ -144,55 +179,8 @@ namespace FAGui
                 nk_image(ctx, frame.first->getNkImage(frame.second));
             }
 
-            int itemIndex = 0;
-            auto addItem = [&](const char* text, const struct nk_rect& rect, std::function<bool()> action) {
-                nk_layout_space_push(ctx, rect);
-                menuText(ctx, text, MenuFontColor::gold, 42, NK_TEXT_ALIGN_CENTERED);
-                if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
-                {
-                    activeItemIndex = itemIndex;
-                    if (action())
-                        return true;
-                }
-                if (activeItemIndex == itemIndex)
-                {
-                    if (nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
-                    {
-                        if (action())
-                            return true;
-                    }
-                    auto frame = mFocus42->getCurrentFrame();
-                    auto frameRect = nk_rect(0, 0, frame.first->getWidth(), frame.first->getHeight());
-                    nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::left, valign_t::center));
-                    nk_image(ctx, frame.first->getNkImage(frame.second));
-                    nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::right, valign_t::center));
-                    nk_image(ctx, frame.first->getNkImage(frame.second));
-                }
-                ++itemIndex;
-                return false;
-            };
-            if (addItem("Single Player", {65, 192, 510, 42}, [this]() {
-                    mMenuHandler.setActiveScreen<SelectHeroScreen>();
-                    return true;
-                }))
+            if (drawMenuItems(ctx) == ActionResult::stopDrawing)
                 return;
-            if (addItem("Multi Player", {65, 235, 510, 42}, []() { return false; }))
-                return;
-            if (addItem("Replay Intro", {65, 277, 510, 42}, []() { return false; }))
-                return;
-            if (addItem("Show Credits", {65, 320, 510, 42}, []() { return false; }))
-                return;
-            if (addItem("Exit Diablo", {65, 363, 510, 42}, [this]() {
-                    mMenuHandler.quit();
-                    return true;
-                }))
-                return;
-            if (nk_input_is_key_pressed(&ctx->input, NK_KEY_UP))
-                --activeItemIndex;
-            if (nk_input_is_key_pressed(&ctx->input, NK_KEY_DOWN))
-                ++activeItemIndex;
-            activeItemIndex = (activeItemIndex + itemIndex) % itemIndex;
-
             nk_layout_space_push(ctx, {17, 442, 605, 21});
             menuText(ctx, "Freeablo", MenuFontColor::silver, 16, NK_TEXT_ALIGN_LEFT);
         }
@@ -241,13 +229,13 @@ namespace FAGui
         mFocus16->playAnimation(renderer->loadImage("ui_art/focus16.pcx&trans=0,255,0&vanim=20"),
                                 FAWorld::World::getTicksInPeriod(0.06f),
                                 FARender::AnimationPlayer::AnimationType::Looped);
+        setType (ContentType::chooseClass);
     }
 
-    bool SelectHeroScreen::chooseClass(nk_context* ctx)
+    MenuScreen::ActionResult SelectHeroScreen::chooseClass(nk_context* ctx)
     {
         nk_layout_space_push(ctx, {262, 207, 320, 33});
         menuText(ctx, "Choose Class", MenuFontColor::silver, 30, NK_TEXT_ALIGN_CENTERED);
-        int itemIndex = 0;
         bool executeCurrent = false;
         nk_layout_space_push(ctx, {277, 422, 140, 35});
         menuText(ctx, "OK", MenuFontColor::gold, 30, NK_TEXT_ALIGN_CENTERED);
@@ -255,69 +243,67 @@ namespace FAGui
             executeCurrent = true;
         nk_layout_space_push(ctx, {427, 422, 140, 35});
         menuText(ctx, "Cancel", MenuFontColor::gold, 30, NK_TEXT_ALIGN_CENTERED);
-        auto exitAction = [&]() {
-            mMenuHandler.setActiveScreen<StartingScreen>();
-            return true;
-        };
-
         if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
-            return exitAction();
-        auto addItem = [&](const char* text, const struct nk_rect& rect, std::function<bool()> action) {
-            nk_layout_space_push(ctx, rect);
-            menuText(ctx, text, MenuFontColor::gold, 24, NK_TEXT_ALIGN_CENTERED);
-            if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
-            {
-                activeItemIndex = itemIndex;
-            }
-            if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_DOUBLE, true))
-            {
-                activeItemIndex = itemIndex;
-                if (action())
-                    return true;
-            }
-            if (activeItemIndex == itemIndex)
-            {
-                mSelectedCharacterInfo = characterInfo{static_cast<ClassType>(itemIndex), mMenuHandler.engine().exe().getCharacterStat(text)};
-                if (executeCurrent || nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
-                {
-                    if (action())
-                        return true;
-                }
-                auto frame = mFocus->getCurrentFrame();
-                auto frameRect = nk_rect(0, 0, frame.first->getWidth(), frame.first->getHeight());
-                nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::left, valign_t::center));
-                nk_image(ctx, frame.first->getNkImage(frame.second));
-                nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::right, valign_t::center));
-                nk_image(ctx, frame.first->getNkImage(frame.second));
-            }
-            ++itemIndex;
-            return false;
-        };
-        if (addItem("Warrior", {262, 278, 320, 33}, [&]() {
-                mMenuHandler.engine().startGame("Warrior");
-                return true;
-            }))
-            return true;
-        if (addItem("Rogue", {262, 311, 320, 33}, [&]() {
-                mMenuHandler.engine().startGame("Rogue");
-                return true;
-            }))
-            return true;
-        if (addItem("Sorcerer", {262, 344, 320, 33}, [&]() {
-                mMenuHandler.engine().startGame("Sorcerer");
-                return true;
-            }))
-            return true;
-        nk_layout_space_push(ctx, {280, 425, 140, 35});
+            return mRejectAction();
+        return drawMenuItems(ctx);
+    }
 
-        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_TEXT_RESET_MODE))
-            return exitAction();
-        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_UP))
-            --activeItemIndex;
-        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_DOWN))
-            ++activeItemIndex;
-        activeItemIndex = (activeItemIndex + itemIndex) % itemIndex;
-        return false;
+    void SelectHeroScreen::generateChooseClassMenu()
+    {
+        mRejectAction = [&]() {
+            mMenuHandler.setActiveScreen<StartingScreen>();
+            return ActionResult::stopDrawing;
+        };
+        auto drawItem = [&](const char* text, const struct nk_rect& rect, ClassType type) {
+            return [=](nk_context* ctx, bool isActive) {
+                nk_layout_space_push(ctx, rect);
+                menuText(ctx, text, MenuFontColor::gold, 24, NK_TEXT_ALIGN_CENTERED);
+                DrawFunctionResult ret = DrawFunctionResult::noAction;
+                if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                    ret = DrawFunctionResult::setActive;
+                if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_DOUBLE, true))
+                    ret = DrawFunctionResult::executeAction;
+                if (isActive)
+                {
+                    mSelectedCharacterInfo = characterInfo{type, mMenuHandler.engine().exe().getCharacterStat(text)};
+                    auto frame = mFocus->getCurrentFrame();
+                    auto frameRect = nk_rect(0, 0, frame.first->getWidth(), frame.first->getHeight());
+                    nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::left, valign_t::center));
+                    nk_image(ctx, frame.first->getNkImage(frame.second));
+                    nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::right, valign_t::center));
+                    nk_image(ctx, frame.first->getNkImage(frame.second));
+                }
+                return ret;
+            };
+        };
+        mMenuItems.clear();
+        mMenuItems.push_back({drawItem("Warrior", {262, 278, 320, 33}, ClassType::warrior), [&]() {
+                                  mMenuHandler.engine().startGame("Warrior");
+                                  return ActionResult::stopDrawing;
+                              }});
+        mMenuItems.push_back({drawItem("Rogue", {262, 311, 320, 33}, ClassType::rogue), [&]() {
+                                  mMenuHandler.engine().startGame("Rogue");
+                                  return ActionResult::stopDrawing;
+                              }});
+        mMenuItems.push_back({drawItem("Sorcerer", {262, 344, 320, 33}, ClassType::sorcerer), [&]() {
+                                  mMenuHandler.engine().startGame("Sorcerer");
+                                  return ActionResult::stopDrawing;
+                              }});
+    }
+
+    void SelectHeroScreen::setType(ContentType type)
+    {
+        mContentType = type;
+        switch (type)
+        {
+            case ContentType::heroList:
+                break;
+            case ContentType::chooseClass:
+                generateChooseClassMenu();
+                break;
+            case ContentType::enterName:
+                break;
+        }
     }
 
     void SelectHeroScreen::content(nk_context* ctx)
@@ -364,7 +350,7 @@ namespace FAGui
             case ContentType::heroList:
                 break;
             case ContentType::chooseClass:
-                if (chooseClass(ctx))
+                if (chooseClass(ctx) == ActionResult::stopDrawing)
                     return;
             case ContentType::enterName:
                 break;
@@ -481,6 +467,7 @@ namespace FAGui
             {
                 case DrawFunctionResult::executeAction:
                 {
+                    mActiveItemIndex = index;
                     auto ret = item.action();
                     switch (ret)
                     {
@@ -491,6 +478,9 @@ namespace FAGui
                     }
                     break;
                 }
+                case DrawFunctionResult::setActive:
+                    mActiveItemIndex = index;
+                    break;
                 case DrawFunctionResult::noAction:
                     break;
             }
