@@ -172,6 +172,14 @@ namespace Engine
                 return "Accept";
             case KeyboardInputAction::reject:
                 return "Reject";
+            case KeyboardInputAction::toggleCharacterInfo:
+                return "ToggleCharacterInfo";
+            case KeyboardInputAction::toggleQuests:
+                return "ToggleQuests";
+            case KeyboardInputAction::toggleSpellbook:
+                return "ToggleSpellbook";
+            case KeyboardInputAction::toggleInventory:
+                return "ToggleInventory";
             case KeyboardInputAction::max:
                 break;
             default:

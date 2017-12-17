@@ -663,7 +663,28 @@ namespace FAGui
     void GuiManager::notify(Engine::KeyboardInputAction action)
     {
         if (!mDialogs.empty())
+        {
             mDialogs.back().notify(action, *this);
+            return;
+        }
+
+        switch (action)
+        {
+            case Engine::KeyboardInputAction::toggleQuests:
+                togglePanel(PanelType::quests);
+                break;
+            case Engine::KeyboardInputAction::toggleInventory:
+                togglePanel(PanelType::inventory);
+                break;
+            case Engine::KeyboardInputAction::toggleCharacterInfo:
+                togglePanel(PanelType::character);
+                break;
+            case Engine::KeyboardInputAction::toggleSpellbook:
+                togglePanel(PanelType::spells);
+                break;
+            default:
+                break;
+        }
 
         mMenuHandler->notify(action);
     }
