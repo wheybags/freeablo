@@ -308,6 +308,12 @@ namespace FAGui
             {
                 activeItemIndex = itemIndex;
             }
+            if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_DOUBLE, true))
+            {
+                activeItemIndex = itemIndex;
+                if (action())
+                    return true;
+            }
             if (activeItemIndex == itemIndex)
             {
                 mSelectedCharacterInfo = characterInfo{static_cast<ClassType>(itemIndex), mMenuHandler.engine().exe().getCharacterStat(text)};
@@ -381,17 +387,17 @@ namespace FAGui
                      NK_TEXT_ALIGN_CENTERED);
         }
         auto draw_param_value = [&](const std::string& param, const std::string& value, float y) {
-            nk_layout_space_push(ctx, {37, y, 110, 21});
+            nk_layout_space_push(ctx, {34, y, 110, 21});
             menuText(ctx, param.c_str(), MenuFontColor::silver, 16, NK_TEXT_ALIGN_RIGHT);
-            nk_layout_space_push(ctx, {157, y, 40, 21});
+            nk_layout_space_push(ctx, {154, y, 40, 21});
             menuText(ctx, value.c_str(), MenuFontColor::silver, 16, NK_TEXT_CENTERED);
         };
         auto to_string = [&](int(characterInfo::*member)) { return mSelectedCharacterInfo ? std::to_string((*mSelectedCharacterInfo).*member) : "--"; };
-        draw_param_value("Level:", to_string(&characterInfo::level), 318);
-        draw_param_value("Strength:", to_string(&characterInfo::strength), 354);
-        draw_param_value("Magic:", to_string(&characterInfo::magic), 375);
-        draw_param_value("Dexterity:", to_string(&characterInfo::dexterity), 396);
-        draw_param_value("Vitality:", to_string(&characterInfo::vitality), 417);
+        draw_param_value("Level:", to_string(&characterInfo::level), 315);
+        draw_param_value("Strength:", to_string(&characterInfo::strength), 351);
+        draw_param_value("Magic:", to_string(&characterInfo::magic), 372);
+        draw_param_value("Dexterity:", to_string(&characterInfo::dexterity), 393);
+        draw_param_value("Vitality:", to_string(&characterInfo::vitality), 414);
         switch (mContentType)
         {
             case ContentType::heroList:
