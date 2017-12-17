@@ -651,6 +651,8 @@ namespace FAGui
     {
         if (!mDialogs.empty())
             mDialogs.back().notify(action, *this);
+
+        mMenuHandler->notify(action);
     }
 
     void GuiManager::setPlayer(FAWorld::Player* player) { mPlayer = player; }

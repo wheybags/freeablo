@@ -20,8 +20,59 @@ namespace FAGui
     {
         auto renderer = FARender::Renderer::get();
         mBigPentagram.reset(new FARender::AnimationPlayer());
-        mBigPentagram->playAnimation(
-            renderer->loadImage("data/pentspin.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
+        auto pentImg = renderer->loadImage("data/pentspin.cel");
+        mBigPentagram->playAnimation(pentImg, FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
+        auto pentRect = nk_rect(0, 0, pentImg->getWidth(), pentImg->getHeight());
+
+        int y = 115;
+        constexpr float pentOffset = 4.0f;
+        constexpr int itemHeight = 45;
+        auto drawItem = [&](const char* text) {
+            auto func = [=](nk_context* ctx, bool isActive) {
+                auto textWidth = bigTGoldTextWidth(text);
+                int32_t screenW, screenH;
+                renderer->getWindowDimensions(screenW, screenH);
+                auto rect = nk_rect(screenW / 2 - textWidth / 2, y, textWidth, 45);
+                nk_layout_space_push(ctx, rect);
+                bigTGoldText(ctx, text, NK_TEXT_CENTERED);
+                if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                    return DrawFunctionResult::executeAction;
+                rect.x -= (pentRect.w + pentOffset);
+                rect.w += (pentRect.w + pentOffset) * 2;
+
+                if (isActive)
+                {
+                    auto pentFrame = mBigPentagram->getCurrentFrame();
+                    nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::left, valign_t::center));
+                    nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
+                    nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::right, valign_t::center));
+                    nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
+                }
+                return DrawFunctionResult::noAction;
+            };
+            y += itemHeight;
+            return func;
+        };
+        mMenuItems.push_back({drawItem("Save Game"), [this]() {
+                                  {
+                                      Serial::TextWriteStream writeStream;
+                                      FASaveGame::GameSaver saver(writeStream);
+                                      FAWorld::World::get()->save(saver);
+                                      std::pair<uint8_t*, size_t> writtenData = writeStream.getData();
+                                      FILE* f = fopen("save.sav", "wb");
+                                      fwrite(writtenData.first, 1, writtenData.second, f);
+                                      fclose(f);
+                                  }
+                                  mMenuHandler.engine().togglePause();
+                                  return ActionResult::stopDrawing;
+                              }});
+        mMenuItems.push_back({drawItem("Options"), []() { return ActionResult::continueDrawing; }});
+        mMenuItems.push_back({drawItem("New Game"), []() { return ActionResult::continueDrawing; }});
+        mMenuItems.push_back({drawItem("Load Game"), []() { return ActionResult::continueDrawing; }});
+        mMenuItems.push_back({drawItem("Quit Diablo"), [this]() {
+                                  mMenuHandler.quit();
+                                  return ActionResult::stopDrawing;
+                              }});
     }
 
     void PauseMenuScreen::bigTGoldText(nk_context* ctx, const char* text, nk_flags alignment)
@@ -44,106 +95,16 @@ namespace FAGui
     void PauseMenuScreen::menuItems(nk_context* ctx)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
-        int32_t screenW, screenH;
-        renderer->getWindowDimensions(screenW, screenH);
 
         nk_layout_space_begin(ctx, NK_STATIC, 0.0f, INT_MAX);
         {
             auto img = renderer->loadImage("data/diabsmal.cel");
+            int32_t screenW, screenH;
+            renderer->getWindowDimensions(screenW, screenH);
             nk_layout_space_push(ctx, nk_rect(screenW / 2 - img->getWidth() / 2, 0, img->getWidth(), img->getHeight()));
             nk_image(ctx, img->getNkImage());
-            int y = 115;
-            int itemIndex = 0;
-            constexpr int itemHeight = 45;
-            auto pentFrame = mBigPentagram->getCurrentFrame();
-            auto pentRect = nk_rect(0, 0, pentFrame.first->getWidth(), pentFrame.first->getHeight());
-            constexpr float pentOffset = 4.0f;
-            auto addItem = [&](const char* text, std::function<bool()> action) {
-                auto textWidth = bigTGoldTextWidth(text);
-                auto rect = nk_rect(screenW / 2 - textWidth / 2, y, textWidth, 45);
-                nk_layout_space_push(ctx, rect);
-                bigTGoldText(ctx, text, NK_TEXT_CENTERED);
-                if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
-                {
-                    activeItemIndex = itemIndex;
-                    if (action())
-                        return true;
-                }
-                rect.x -= (pentRect.w + pentOffset);
-                rect.w += (pentRect.w + pentOffset) * 2;
-
-                if (activeItemIndex == itemIndex)
-                {
-                    if (nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
-                    {
-                        if (action())
-                            return true;
-                    }
-                    nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::left, valign_t::center));
-                    nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
-                    nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::right, valign_t::center));
-                    nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
-                }
-
-                y += itemHeight;
-                ++itemIndex;
-                return false;
-            };
-            if (addItem("Save Game", [this]() {
-                    {
-                        /*std::vector<uint8_t> streamData;
-                        Serial::WriteBitStream stream(streamData);
-                        FASaveGame::GameSaver saver(stream);
-
-                        FAWorld::World::get()->save(saver);*/
-
-                        Serial::TextWriteStream writeStream;
-                        FASaveGame::GameSaver saver(writeStream);
-
-                        FAWorld::World::get()->save(saver);
-
-                        /*writeStream->write(true);
-                        writeStream->write(false);
-
-                        writeStream->write(int64_t(900));
-                        writeStream->write(uint8_t(253));*/
-
-                        std::pair<uint8_t*, size_t> writtenData = writeStream.getData();
-
-                        /*std::string readData = (char*)writtenData.first;
-
-                        std::unique_ptr<Serial::ReadStreamInterface> readStream(new Serial::TextReadStream(readData));
-
-                        bool b1 = readStream->read_bool();
-                        bool b2 = readStream->read_bool();
-                        int64_t i1 = readStream->read_int64_t();
-                        uint8_t i2 = readStream->read_uint8_t();*/
-
-                        FILE* f = fopen("save.sav", "wb");
-                        fwrite(writtenData.first, 1, writtenData.second, f);
-                        fclose(f);
-                    }
-                    mMenuHandler.engine().togglePause();
-                    return true;
-                }))
+            if (drawMenuItems(ctx) == ActionResult::stopDrawing)
                 return;
-            if (addItem("Options", []() { return false; }))
-                return;
-            if (addItem("New Game", []() { return false; }))
-                return;
-            if (addItem("Load Game", []() { return false; }))
-                return;
-            if (addItem("Quit Diablo", [this]() {
-                    mMenuHandler.quit();
-                    return true;
-                }))
-                return;
-            // TODO: support autorepeat
-            if (nk_input_is_key_pressed(&ctx->input, NK_KEY_UP))
-                --activeItemIndex;
-            if (nk_input_is_key_pressed(&ctx->input, NK_KEY_DOWN))
-                ++activeItemIndex;
-            activeItemIndex = (activeItemIndex + itemIndex) % itemIndex;
         }
         nk_layout_space_end(ctx);
     }
@@ -463,6 +424,36 @@ namespace FAGui
 
     void MenuHandler::disable() { mActiveScreen.reset(); }
 
+    void MenuHandler::notify(Engine::KeyboardInputAction action)
+    {
+        if (mActiveScreen)
+            mActiveScreen->notify(action);
+    }
+
+    void MenuScreen::notify(Engine::KeyboardInputAction action)
+    {
+        if (mMenuItems.empty())
+            return;
+        switch (action)
+        {
+            case Engine::KeyboardInputAction::accept:
+                mMenuItems[mActiveItemIndex].action();
+                return;
+            case Engine::KeyboardInputAction::reject:
+                if (mRejectAction)
+                    mRejectAction();
+                break;
+            case Engine::KeyboardInputAction::nextOption:
+                mActiveItemIndex = (mActiveItemIndex + 1) % mMenuItems.size();
+                break;
+            case Engine::KeyboardInputAction::prevOption:
+                mActiveItemIndex = (mActiveItemIndex - 1 + mMenuItems.size()) % mMenuItems.size();
+                break;
+            default:
+                break;
+        }
+    }
+
     void MenuScreen::menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
@@ -479,5 +470,33 @@ namespace FAGui
         nk_label(ctx, text, textAlignment);
         nk_style_pop_color(ctx);
         nk_style_pop_font(ctx);
+    }
+
+    MenuScreen::ActionResult MenuScreen::drawMenuItems(nk_context* ctx)
+    {
+        int index = 0;
+        for (auto& item : mMenuItems)
+        {
+            switch (item.drawFunction(ctx, mActiveItemIndex == index))
+            {
+                case DrawFunctionResult::executeAction:
+                {
+                    auto ret = item.action();
+                    switch (ret)
+                    {
+                        case ActionResult::stopDrawing:
+                            return ret;
+                        case ActionResult::continueDrawing:
+                            break;
+                    }
+                    break;
+                }
+                case DrawFunctionResult::noAction:
+                    break;
+            }
+            ++index;
+        }
+
+        return ActionResult::continueDrawing;
     }
 }

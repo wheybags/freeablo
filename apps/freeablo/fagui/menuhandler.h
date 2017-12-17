@@ -1,4 +1,5 @@
 #pragma once
+#include "../engine/inputobserverinterface.h"
 #include "../faworld/gamelevel.h"
 #include "fa_nuklear.h"
 #include <boost/optional/optional.hpp>
@@ -33,16 +34,39 @@ namespace FAGui
 
     class MenuScreen
     {
+    protected:
+        enum class DrawFunctionResult
+        {
+            executeAction,
+            noAction,
+        };
+        enum class ActionResult
+        {
+            stopDrawing,
+            continueDrawing,
+        };
+        class MenuItem
+        {
+        public:
+            std::function<DrawFunctionResult(nk_context* ctx, bool isActive)> drawFunction;
+            std::function<ActionResult()> action;
+        };
+
     public:
         explicit MenuScreen(MenuHandler& menu);
         virtual ~MenuScreen();
         virtual void update(nk_context* ctx) = 0;
+        void notify(Engine::KeyboardInputAction action);
 
     protected:
         static void menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment);
+        ActionResult drawMenuItems(nk_context* ctx);
 
     protected:
         MenuHandler& mMenuHandler;
+        std::function<void()> mRejectAction;
+        std::vector<MenuItem> mMenuItems;
+        int mActiveItemIndex = 0;
     };
 
     class PauseMenuScreen : public MenuScreen
@@ -141,6 +165,7 @@ namespace FAGui
         bool isActive() const { return !!mActiveScreen; }
         void disable();
         Engine::EngineMain& engine() { return mEngine; }
+        void notify(Engine::KeyboardInputAction action);
 
     private:
         Engine::EngineMain& mEngine;
