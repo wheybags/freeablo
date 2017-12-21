@@ -74,13 +74,13 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fagui/menuhandler.cpp
     fagui/autocomplete.h
     fagui/autocomplete.cpp
-	fagui/menu/menuscreen.cpp
+    fagui/menu/menuscreen.cpp
     fagui/menu/menuscreen.h
-	fagui/menu/pausemenuscreen.cpp
+    fagui/menu/pausemenuscreen.cpp
     fagui/menu/pausemenuscreen.h
-	fagui/menu/selectheromenuscreen.cpp
+    fagui/menu/selectheromenuscreen.cpp
     fagui/menu/selectheromenuscreen.h
-	fagui/menu/startingmenuscreen.cpp
+    fagui/menu/startingmenuscreen.cpp
     fagui/menu/startingmenuscreen.h
 
     engine/threadmanager.h
