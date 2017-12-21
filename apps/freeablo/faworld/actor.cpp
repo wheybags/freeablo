@@ -146,6 +146,8 @@ namespace FAWorld
         }
     }
 
+    void Actor::heal() { mStats.mHp = mStats.mHp.max; }
+
     bool Actor::hasTarget() const { return mTarget.type() != typeid(boost::blank); }
 
     void Actor::die()

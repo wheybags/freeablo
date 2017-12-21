@@ -2,6 +2,7 @@
 #include "../faworld/actor.h"
 #include "guimanager.h"
 #include <misc/assert.h>
+#include "../faworld/player.h"
 
 namespace FAGui
 {
@@ -176,7 +177,7 @@ namespace FAGui
         d.text_lines({td.at("introduction")}, TextColor::golden);
         d.skip_line();
         d.text_lines({td.at("talk")}, TextColor::blue).setAction([]() {});
-        d.text_lines({td.at("heal")}).setAction([]() {});
+        d.text_lines({td.at("heal")}).setAction([&]() { mWorld.getCurrentPlayer()->heal (); });
         d.text_lines({td.at("buy")}).setAction([]() {});
         d.text_lines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
