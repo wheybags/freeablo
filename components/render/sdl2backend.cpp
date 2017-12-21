@@ -1096,7 +1096,7 @@ namespace Render
 
     template <typename ProcessTileFunc> void drawObjectsByTiles(const Misc::Point& toScreen, ProcessTileFunc processTile)
     {
-        Misc::Point start{-tileWidth, -tileHeight};
+        Misc::Point start{-2 * tileWidth, -2 * tileHeight};
         auto startingTile = getTileFromScreenCoords(start, toScreen);
 
         auto startingPoint = tileTopPoint(startingTile) + toScreen;

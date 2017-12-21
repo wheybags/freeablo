@@ -18,7 +18,7 @@ namespace Engine
                                  nullptr,
                                  std::bind(&EngineInputManager::textInput, this, ph::_1))
     {
-        for (int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
+        for (int action = 0; action < static_cast<int>(KeyboardInputAction::max); action++)
         {
             KeyboardInputAction keyAction = (KeyboardInputAction)action;
             mHotkeys[keyAction] = Input::Hotkey(keyboardActionToString(keyAction));
@@ -80,12 +80,10 @@ namespace Engine
         hotkey.shift = modifiers.shift;
         hotkey.alt = modifiers.alt;
 
-        if (mGuiManager->isModalDlgShown())
-            return;
-
-        for (int action = 0; action < KEYBOARD_INPUT_ACTION_MAX; action++)
+        for (int action = 0; action < static_cast<int>(KeyboardInputAction::max); action++)
         {
             KeyboardInputAction keyAction = (KeyboardInputAction)action;
+            // quite possibly certain hotkeys could actually be triggered on keyRelease rather than keyPress
             if (hotkey == getHotkey(keyAction))
             {
                 notifyKeyboardObservers(keyAction);
@@ -152,34 +150,35 @@ namespace Engine
 
     std::string EngineInputManager::keyboardActionToString(KeyboardInputAction action) const
     {
-        std::string actionAsString;
-
         switch (action)
         {
-            case PAUSE:
-                actionAsString = "Pause";
-                break;
-            case QUIT:
-                actionAsString = "Quit";
-                break;
-            case NOCLIP:
-                actionAsString = "Noclip";
-                break;
-            case CHANGE_LEVEL_UP:
-                actionAsString = "Changelvlup";
-                break;
-            case CHANGE_LEVEL_DOWN:
-                actionAsString = "Changelvldwn";
-                break;
-            case TOGGLE_CONSOLE:
-                actionAsString = "ToggleConsole";
+            case KeyboardInputAction::pause:
+                return "Pause";
+            case KeyboardInputAction::quit:
+                return "Quit";
+            case KeyboardInputAction::noclip:
+                return "Noclip";
+            case KeyboardInputAction::changeLevelUp:
+                return "Changelvlup";
+            case KeyboardInputAction::changeLevelDown:
+                return "Changelvldwn";
+            case KeyboardInputAction::toggleConsole:
+                return "ToggleConsole";
+            case KeyboardInputAction::nextOption:
+                return "NextOption";
+            case KeyboardInputAction::prevOption:
+                return "PrevOption";
+            case KeyboardInputAction::accept:
+                return "Accept";
+            case KeyboardInputAction::reject:
+                return "Reject";
+            case KeyboardInputAction::max:
                 break;
             default:
-                release_assert(false && "Invalid enum value passed to keyboardActionToString");
                 break;
         }
-
-        return actionAsString;
+        release_assert(false && "Invalid enum value passed to keyboardActionToString");
+        return "";
     }
 
     void EngineInputManager::update(bool paused)
@@ -192,7 +191,7 @@ namespace Engine
 
         // TODO: bit nasty to use keybard observers for this, but meh
         if (quit)
-            notifyKeyboardObservers(KeyboardInputAction::QUIT);
+            notifyKeyboardObservers(KeyboardInputAction::quit);
 
         nk_input_end(mNkCtx);
 

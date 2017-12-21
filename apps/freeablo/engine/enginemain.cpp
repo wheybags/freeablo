@@ -82,6 +82,7 @@ namespace Engine
 
         FILE* f = fopen("save.sav", "rb");
         mGuiManager = boost::make_unique<FAGui::GuiManager>(*this);
+        mInputManager->registerKeyboardObserver(mGuiManager.get());
         mInputManager->setGuiManager(mGuiManager.get());
 
         if (f)
@@ -194,18 +195,20 @@ namespace Engine
 
     void EngineMain::notify(KeyboardInputAction action)
     {
-        if (mPaused && action != PAUSE)
+        if (mGuiManager->isModalDlgShown())
+            return;
+        if (mPaused && action != KeyboardInputAction::pause)
             return;
 
-        if (action == PAUSE)
+        if (action == KeyboardInputAction::pause)
         {
             togglePause();
         }
-        if (action == QUIT)
+        if (action == KeyboardInputAction::quit)
         {
             stop();
         }
-        else if (action == NOCLIP)
+        else if (action == KeyboardInputAction::noclip)
         {
             toggleNoclip();
         }

@@ -9,15 +9,20 @@ namespace Misc
 namespace Engine
 {
 
-    enum KeyboardInputAction
+    enum class KeyboardInputAction
     {
-        PAUSE,
-        QUIT,
-        NOCLIP,
-        CHANGE_LEVEL_DOWN,
-        CHANGE_LEVEL_UP,
-        TOGGLE_CONSOLE,
-        KEYBOARD_INPUT_ACTION_MAX
+        pause,
+        quit,
+        noclip,
+        changeLevelDown,
+        changeLevelUp,
+        toggleConsole,
+        nextOption,
+        prevOption,
+        accept,
+        reject,
+
+        max
     };
 
     enum MouseInputAction

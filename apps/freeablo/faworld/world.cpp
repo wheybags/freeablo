@@ -97,9 +97,11 @@ namespace FAWorld
 
     void World::notify(Engine::KeyboardInputAction action)
     {
-        if (action == Engine::CHANGE_LEVEL_UP || action == Engine::CHANGE_LEVEL_DOWN)
+        if (mGuiManager->isModalDlgShown())
+            return;
+        if (action == Engine::KeyboardInputAction::changeLevelUp || action == Engine::KeyboardInputAction::changeLevelDown)
         {
-            changeLevel(action == Engine::CHANGE_LEVEL_UP);
+            changeLevel(action == Engine::KeyboardInputAction::changeLevelUp);
         }
     }
 

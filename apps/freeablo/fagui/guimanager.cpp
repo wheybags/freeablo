@@ -19,6 +19,8 @@
 #include "boost/range/counting_range.hpp"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
+#include "menu/pausemenuscreen.h"
+#include "menu/startingmenuscreen.h"
 #include "menuhandler.h"
 #include "nkhelpers.h"
 #include <boost/variant/variant.hpp>
@@ -133,45 +135,10 @@ namespace FAGui
         if (mDialogs.empty())
             return;
 
-        if (mCurRightPanel != PanelType::none)
-            mCurRightPanel = PanelType::none;
-        if (mCurLeftPanel != PanelType::none)
-            mCurLeftPanel = PanelType::none;
+        mCurRightPanel = PanelType::none;
+        mCurLeftPanel = PanelType::none;
 
         auto& activeDialog = mDialogs.back();
-        int dir = 0;
-        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_UP))
-            dir = -1;
-        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_DOWN))
-            dir = 1;
-
-        // This is an escape key. Maybe later it should work through engineinputmanager
-        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_TEXT_RESET_MODE))
-        {
-            popDialogData();
-            if (mDialogs.empty())
-                return;
-        }
-
-        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
-        {
-            activeDialog.mLines[activeDialog.selectedLine()].action();
-            return;
-        }
-
-        if (dir != 0)
-        {
-            int i = activeDialog.mSelectedLine;
-            do
-            {
-                i += dir;
-                if (i < 0)
-                    i += activeDialog.mLines.size();
-                else if (i >= static_cast<int>(activeDialog.mLines.size()))
-                    i -= activeDialog.mLines.size();
-            } while (!activeDialog.mLines[i].action);
-            activeDialog.mSelectedLine = i;
-        }
 
         auto renderer = FARender::Renderer::get();
         auto boxTex = renderer->loadImage("data/textbox2.cel");
@@ -587,7 +554,7 @@ namespace FAGui
                            false);
     }
 
-    void GuiManager::startingScreen() { mMenuHandler->setActiveScreen<StartingScreen>(); }
+    void GuiManager::startingScreen() { mMenuHandler->setActiveScreen<StartingMenuScreen>(); }
 
     void GuiManager::smallText(nk_context* ctx, const char* text, TextColor color, nk_flags alignment)
     {
@@ -681,6 +648,14 @@ namespace FAGui
     }
 
     const PanelType* GuiManager::panel(PanelPlacement placement) const { return const_cast<self*>(this)->panel(placement); }
+
+    void GuiManager::notify(Engine::KeyboardInputAction action)
+    {
+        if (!mDialogs.empty())
+            mDialogs.back().notify(action, *this);
+
+        mMenuHandler->notify(action);
+    }
 
     void GuiManager::setPlayer(FAWorld::Player* player) { mPlayer = player; }
 
