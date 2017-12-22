@@ -1,3 +1,4 @@
+
 #pragma once
 
 namespace Serial
@@ -22,3 +23,4 @@ namespace Misc
         void reclamp(); ///< make sure the value is clamped into its range
     };
 }
+

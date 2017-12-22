@@ -1,5 +1,5 @@
-#ifndef WORLD_H
-#define WORLD_H
+
+#pragma once
 
 #include <map>
 #include <memory>
@@ -130,4 +130,3 @@ namespace FAWorld
     };
 }
 
-#endif

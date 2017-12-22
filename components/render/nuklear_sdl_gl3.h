@@ -1,6 +1,5 @@
 
-#ifndef NK_SDL_GL3_H_
-#define NK_SDL_GL3_H_
+#pragma once
 
 #include <vector>
 
@@ -66,4 +65,3 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
 void nk_sdl_device_destroy(nk_gl_device& dev);
 void nk_sdl_device_create(nk_gl_device& dev);
 
-#endif

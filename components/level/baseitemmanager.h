@@ -1,5 +1,6 @@
-#ifndef BASEITEMMANAGER_H
-#define BASEITEMMANAGER_H
+
+#pragma once
+
 #include <map>
 #include <stdint.h>
 
@@ -11,4 +12,3 @@ namespace Level
     };
 }
 
-#endif // BASEITEMMANAGER_H

@@ -1,5 +1,5 @@
-#ifndef BEHAVIOUR_H
-#define BEHAVIOUR_H
+
+#pragma once
 
 #include <misc/misc.h>
 
@@ -69,4 +69,3 @@ namespace FAWorld
     };
 }
 
-#endif

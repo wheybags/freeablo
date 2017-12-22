@@ -1,5 +1,5 @@
-#ifndef ACTORSTATS_H
-#define ACTORSTATS_H
+
+#pragma once
 
 #include <misc/maxcurrentitem.h>
 #include <stdint.h>
@@ -33,4 +33,3 @@ namespace FAWorld
     };
 }
 
-#endif // ACTORSTATS_H

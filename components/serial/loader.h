@@ -1,4 +1,6 @@
+
 #pragma once
+
 #include <cstdint>
 #include <string>
 
@@ -68,3 +70,4 @@ namespace Serial
 
     using ScopedCategorySaver = ScopedCategory<Saver>;
 }
+

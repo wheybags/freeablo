@@ -1,4 +1,6 @@
+
 #pragma once
+
 #include <array>
 #include <functional>
 #include <string>
@@ -69,3 +71,4 @@ namespace FAGui
         FAWorld::World& mWorld;
     };
 }
+

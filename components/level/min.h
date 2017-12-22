@@ -1,5 +1,5 @@
-#ifndef MIN_H
-#define MIN_H
+
+#pragma once
 
 #include <stdint.h>
 #include <string>
@@ -21,4 +21,3 @@ namespace Level
     };
 }
 
-#endif

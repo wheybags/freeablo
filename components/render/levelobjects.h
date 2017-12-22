@@ -1,5 +1,5 @@
-#ifndef LEVEL_OBJ_H
-#define LEVEL_OBJ_H
+
+#pragma once
 
 #include "render.h"
 
@@ -45,4 +45,3 @@ namespace Render
     };
 }
 
-#endif

@@ -1,5 +1,6 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+
+#pragma once
+
 #include "actor.h"
 #include "inventory.h"
 #include <boost/format.hpp>
@@ -44,4 +45,4 @@ namespace FAWorld
         boost::signals2::signal<void(Actor*)> talkRequested;
     };
 }
-#endif
+

@@ -1,5 +1,5 @@
-#ifndef HELPER_2D_H
-#define HELPER_2D_H
+
+#pragma once
 
 #include <cstdint>
 
@@ -23,4 +23,3 @@ namespace Misc
     };
 }
 
-#endif

@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <cstdint>
@@ -34,3 +35,4 @@ namespace FAGui
         int activeItemIndex = 0;
     };
 }
+

@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "itemmap.h"
@@ -33,3 +34,4 @@ namespace FAWorld
         HoverState(HoverType typeArg) : mType(typeArg) {}
     };
 }
+

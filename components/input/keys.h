@@ -1,5 +1,5 @@
-#ifndef KEYS_H
-#define KEYS_H
+
+#pragma once
 
 namespace Input
 {
@@ -151,4 +151,3 @@ namespace Input
     };
 }
 
-#endif

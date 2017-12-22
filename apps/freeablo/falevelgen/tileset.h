@@ -1,5 +1,5 @@
-#ifndef FA_TILESET_H
-#define FA_TILESET_H
+
+#pragma once
 
 #include <map>
 #include <settings/settings.h>
@@ -188,4 +188,3 @@ namespace FALevelGen
     };
 }
 
-#endif

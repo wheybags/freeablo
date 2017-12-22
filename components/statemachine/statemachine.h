@@ -1,5 +1,5 @@
-#ifndef STATEMACHINE_H
-#define STATEMACHINE_H
+
+#pragma once
 
 #include <boost/optional.hpp>
 #include <misc/misc.h>
@@ -74,4 +74,3 @@ namespace StateMachine
     };
 }
 
-#endif

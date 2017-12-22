@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <functional>
@@ -24,3 +25,4 @@ namespace FASaveGame
         GameSaver(Serial::WriteStreamInterface& stream) : Serial::Saver(stream) {}
     };
 }
+

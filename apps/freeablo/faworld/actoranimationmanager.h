@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <unordered_map>
@@ -66,3 +67,4 @@ namespace FAWorld
         int32_t mInterruptedAnimationFrame = 0;
     };
 }
+

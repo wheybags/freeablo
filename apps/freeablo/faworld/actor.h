@@ -1,4 +1,6 @@
+
 #pragma once
+
 #include "../farender/animationplayer.h"
 #include "actoranimationmanager.h"
 #include "actorstats.h"
@@ -103,3 +105,4 @@ namespace FAWorld
         std::string mNpcId;
     };
 }
+

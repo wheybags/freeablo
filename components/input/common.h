@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+
+#pragma once
 
 #include "hotkey.h"
 #include "keys.h"
@@ -31,4 +31,3 @@ namespace Input
     int convertAsciiToRocketKey(int asciik);
 }
 
-#endif /* COMMON_H */

@@ -1,5 +1,5 @@
-#ifndef POSITION_H
-#define POSITION_H
+
+#pragma once
 
 #include <cmath>
 #include <misc/misc.h>
@@ -47,4 +47,3 @@ namespace FAWorld
     };
 }
 
-#endif

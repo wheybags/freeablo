@@ -49,3 +49,4 @@ extern PFNGLACTIVETEXTUREPROC glActiveTexture;
 void initGlFuncs();
 
 #endif
+

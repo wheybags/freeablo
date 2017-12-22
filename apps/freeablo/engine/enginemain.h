@@ -1,5 +1,6 @@
-#ifndef ENGINEMAIN_H
-#define ENGINEMAIN_H
+
+#pragma once
+
 #include "../faworld/playerfactory.h"
 #include "engineinputmanager.h"
 #include <boost/program_options.hpp>
@@ -55,4 +56,3 @@ namespace Engine
     };
 }
 
-#endif // ENGINEMAIN_H
