@@ -124,7 +124,7 @@ namespace FAIO
                 return NULL;
             }
 
-            file->mode = FAFile::MPQFile;
+            file->mode = FAFile::FAFileMode::MPQFile;
 
             return file;
         }
@@ -135,7 +135,7 @@ namespace FAIO
                 return NULL;
 
             FAFile* file = new FAFile();
-            file->mode = FAFile::PlainFile;
+            file->mode = FAFile::FAFileMode::PlainFile;
             file->data.plainFile.file = plainFile;
             file->data.plainFile.filename = new std::string(filename);
 
@@ -147,10 +147,10 @@ namespace FAIO
     {
         switch (stream->mode)
         {
-            case FAFile::PlainFile:
+            case FAFile::FAFileMode::PlainFile:
                 return fread(ptr, size, count, stream->data.plainFile.file);
 
-            case FAFile::MPQFile:
+            case FAFile::FAFileMode::MPQFile:
             {
                 std::lock_guard<std::mutex> lock(m);
 
@@ -180,14 +180,14 @@ namespace FAIO
 
         switch (stream->mode)
         {
-            case FAFile::PlainFile:
+            case FAFile::FAFileMode::PlainFile:
             {
                 delete stream->data.plainFile.filename;
                 retval = fclose(stream->data.plainFile.file);
                 break;
             }
 
-            case FAFile::MPQFile:
+            case FAFile::FAFileMode::MPQFile:
             {
                 std::lock_guard<std::mutex> lock(m);
 
@@ -210,10 +210,10 @@ namespace FAIO
     {
         switch (stream->mode)
         {
-            case FAFile::PlainFile:
+            case FAFile::FAFileMode::PlainFile:
                 return fseek(stream->data.plainFile.file, offset, origin);
 
-            case FAFile::MPQFile:
+            case FAFile::FAFileMode::MPQFile:
             {
                 std::lock_guard<std::mutex> lock(m);
                 DWORD moveMethod;
@@ -251,10 +251,10 @@ namespace FAIO
     {
         switch (stream->mode)
         {
-            case FAFile::PlainFile:
+            case FAFile::FAFileMode::PlainFile:
                 return ftell(stream->data.plainFile.file);
 
-            case FAFile::MPQFile:
+            case FAFile::FAFileMode::MPQFile:
             {
                 std::lock_guard<std::mutex> lock(m);
                 return SFileSetFilePointer(*((HANDLE*)stream->data.mpqFile), 0, NULL, FILE_CURRENT);
@@ -269,10 +269,10 @@ namespace FAIO
     {
         switch (stream->mode)
         {
-            case FAFile::PlainFile:
+            case FAFile::FAFileMode::PlainFile:
                 return static_cast<size_t>(bfs::file_size(*(stream->data.plainFile.filename)));
 
-            case FAFile::MPQFile:
+            case FAFile::FAFileMode::MPQFile:
             {
                 std::lock_guard<std::mutex> lock(m);
                 return SFileGetFileSize(*((HANDLE*)stream->data.mpqFile), NULL);

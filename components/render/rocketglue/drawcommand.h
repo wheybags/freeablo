@@ -9,7 +9,7 @@
 
 struct DrawCommand
 {
-    enum
+    enum class
     {
         Draw,
         EnableScissor,
