@@ -135,7 +135,7 @@ namespace Engine
             mMouseDown = false;
 
         if (!nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
-            notifyMouseObservers(MOUSE_RELEASE, mMousePosition);
+            notifyMouseObservers(MouseInputAction::MOUSE_RELEASE, mMousePosition);
     }
 
     void EngineInputManager::mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel)
@@ -143,7 +143,7 @@ namespace Engine
         NuklearMisc::handleNuklearMouseMoveEvent(mNkCtx, x, y, xrel, yrel);
 
         if (!nk_item_is_any_active(mNkCtx))
-            notifyMouseObservers(MOUSE_MOVE, mMousePosition);
+            notifyMouseObservers(MouseInputAction::MOUSE_MOVE, mMousePosition);
 
         mMousePosition = Misc::Point{x, y};
     }
@@ -197,10 +197,10 @@ namespace Engine
 
         if (!paused && mMouseDown && !nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
         {
-            notifyMouseObservers(MOUSE_DOWN, mMousePosition);
+            notifyMouseObservers(MouseInputAction::MOUSE_DOWN, mMousePosition);
 
             if (mClick)
-                notifyMouseObservers(MOUSE_CLICK, mMousePosition);
+                notifyMouseObservers(MouseInputAction::MOUSE_CLICK, mMousePosition);
 
             mClick = false;
         }

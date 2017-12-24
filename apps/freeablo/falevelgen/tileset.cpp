@@ -219,7 +219,7 @@ namespace FALevelGen
         }
     }
 
-    int32_t TileSet::convert(TileSetEnum val)
+    int32_t TileSet::convert(int32_t val)
     {
         switch (val)
         {
@@ -360,6 +360,6 @@ namespace FALevelGen
         }
 
         release_assert(false && "tried to convert invalid tile");
-        return (int32_t)val;
+        return val;
     }
 }
