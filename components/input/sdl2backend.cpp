@@ -34,7 +34,7 @@ namespace Input
 
 #define CASE(val)                                                                                                                                              \
     case SDLK_##val:                                                                                                                                           \
-        key = Key::KEY_##val;                                                                                                                                       \
+        key = Key::KEY_##val;                                                                                                                                  \
         break;
 
     Key getKey(int sdlk)

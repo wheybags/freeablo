@@ -982,13 +982,15 @@ namespace FALevelGen
     {
         return level[x][y] == (int)TileSetEnum::insideYWall || level[x][y] == (int)TileSetEnum::yDoor || level[x][y] == (int)TileSetEnum::insideXWallEnd ||
                level[x][y] == (int)TileSetEnum::insideXWallEndBack || level[x][y] == (int)TileSetEnum::insideLeftCorner ||
-               level[x][y] == (int)TileSetEnum::insideRightCorner || level[x][y] == (int)TileSetEnum::insideTopCorner || level[x][y] == (int)TileSetEnum::insideBottomCorner;
+               level[x][y] == (int)TileSetEnum::insideRightCorner || level[x][y] == (int)TileSetEnum::insideTopCorner ||
+               level[x][y] == (int)TileSetEnum::insideBottomCorner;
     }
     bool connectHelperX(int32_t x, int32_t y, Level::Dun& level)
     {
         return level[x][y] == (int)TileSetEnum::insideXWall || level[x][y] == (int)TileSetEnum::xDoor || level[x][y] == (int)TileSetEnum::insideYWallEnd ||
                level[x][y] == (int)TileSetEnum::insideYWallEndBack || level[x][y] == (int)TileSetEnum::insideLeftCorner ||
-               level[x][y] == (int)TileSetEnum::insideRightCorner || level[x][y] == (int)TileSetEnum::insideTopCorner || level[x][y] == (int)TileSetEnum::insideBottomCorner;
+               level[x][y] == (int)TileSetEnum::insideRightCorner || level[x][y] == (int)TileSetEnum::insideTopCorner ||
+               level[x][y] == (int)TileSetEnum::insideBottomCorner;
     }
 
     void connectWalls(Level::Dun& level)
