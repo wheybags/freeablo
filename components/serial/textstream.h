@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "streaminterface.h"
@@ -59,3 +60,4 @@ namespace Serial
         std::string mTmp;
     };
 }
+

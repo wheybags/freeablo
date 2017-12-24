@@ -1,3 +1,4 @@
+
 #pragma once
 
 // hash functions for types that are missing them, so they can be sued as keys in std::unordered_map
@@ -21,3 +22,4 @@ struct EnumClassHash
 {
     template <typename T> std::size_t operator()(T t) const { return static_cast<std::size_t>(t); }
 };
+

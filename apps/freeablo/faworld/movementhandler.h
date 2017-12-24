@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "gamelevel.h"
@@ -43,3 +44,4 @@ namespace FAWorld
         bool mAdjacent = false;
     };
 }
+

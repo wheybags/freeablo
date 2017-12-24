@@ -1,5 +1,5 @@
-#ifndef ITEM_MAP_H
-#define ITEM_MAP_H
+
+#pragma once
 
 #include <map>
 #include <memory>
@@ -99,4 +99,3 @@ namespace FAWorld
     };
 }
 
-#endif

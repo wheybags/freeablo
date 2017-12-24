@@ -1,5 +1,5 @@
-#ifndef SOL_H
-#define SOL_H
+
+#pragma once
 
 #include <string>
 #include <vector>
@@ -23,4 +23,3 @@ namespace Level
     };
 }
 
-#endif

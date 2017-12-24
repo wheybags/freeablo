@@ -1,5 +1,6 @@
-#ifndef CHARACTERSTATS_H
-#define CHARACTERSTATS_H
+
+#pragma once
+
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -36,4 +37,4 @@ namespace DiabloExe
         std::vector<uint32_t> mNextLevelExp;
     };
 }
-#endif // CHARACTERSTATS_H
+

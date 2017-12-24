@@ -1,5 +1,5 @@
-#ifndef FA_RENDERER_H
-#define FA_RENDERER_H
+
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -150,4 +150,3 @@ namespace FARender
     };
 }
 
-#endif

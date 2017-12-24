@@ -1,5 +1,5 @@
-#ifndef INPUT_H
-#define INPUT_H
+
+#pragma once
 
 #include <functional>
 #include <stdint.h>
@@ -92,4 +92,3 @@ namespace Input
     };
 }
 
-#endif

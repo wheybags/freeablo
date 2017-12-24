@@ -1,5 +1,5 @@
-#ifndef FA_INPUT_OBSERVER_INTERFACE
-#define FA_INPUT_OBSERVER_INTERFACE
+
+#pragma once
 
 namespace Misc
 {
@@ -46,4 +46,3 @@ namespace Engine
     };
 }
 
-#endif

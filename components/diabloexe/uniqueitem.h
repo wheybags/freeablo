@@ -1,5 +1,6 @@
-#ifndef UNIQUEITEM_H
-#define UNIQUEITEM_H
+
+#pragma once
+
 #include <faio/fafileobject.h>
 #include <stdint.h>
 #include <string>
@@ -52,4 +53,4 @@ namespace DiabloExe
         friend class DiabloExe;
     };
 }
-#endif // UNIQUEITEM_H
+

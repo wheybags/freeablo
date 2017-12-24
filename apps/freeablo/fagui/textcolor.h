@@ -1,3 +1,4 @@
+
 #pragma once
 
 namespace FAGui
@@ -10,3 +11,4 @@ namespace FAGui
         red,
     };
 }
+

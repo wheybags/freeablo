@@ -1,5 +1,5 @@
-#ifndef FAIO_H
-#define FAIO_H
+
+#pragma once
 
 #include <stdint.h>
 #include <stdio.h>
@@ -64,4 +64,3 @@ namespace FAIO
     std::string getMPQFileName();
 }
 
-#endif
