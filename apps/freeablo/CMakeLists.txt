@@ -30,6 +30,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/actor.h
     faworld/behaviour.cpp
     faworld/behaviour.h
+    faworld/equiptarget.cpp
+    faworld/equiptarget.h
     faworld/hoverstate.cpp
     faworld/hoverstate.h
     faworld/player.h

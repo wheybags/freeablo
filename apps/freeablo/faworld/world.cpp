@@ -20,6 +20,7 @@
 #include <iostream>
 #include <misc/assert.h>
 #include <tuple>
+#include "equiptarget.h"
 
 namespace FAWorld
 {
@@ -147,7 +148,7 @@ namespace FAWorld
                 return mGuiManager->setDescription("");
         };
 
-        auto& cursorItem = mCurrentPlayer->getInventory().getItemAt(MakeEquipTarget<Item::eqCURSOR>());
+        auto& cursorItem = mCurrentPlayer->getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
         if (!cursorItem.isEmpty())
         {
             mGuiManager->setDescription(cursorItem.getName());

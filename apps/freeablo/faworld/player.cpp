@@ -10,6 +10,7 @@
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <string>
+#include "equiptarget.h"
 
 namespace FAWorld
 {
@@ -227,7 +228,7 @@ namespace FAWorld
                     dropBack();
                 break;
             case ItemTarget::ActionType::toCursor:
-                auto cursorItem = getInventory().getItemAt(MakeEquipTarget<Item::eqCURSOR>());
+                auto cursorItem = getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
                 if (!cursorItem.isEmpty())
                     return dropBack();
 
@@ -238,7 +239,7 @@ namespace FAWorld
 
     bool Player::dropItem(const FAWorld::Tile& clickedTile)
     {
-        auto cursorItem = getInventory().getItemAt(MakeEquipTarget<Item::eqCURSOR>());
+        auto cursorItem = getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
         auto initialDir = Misc::getVecDir(Misc::getVec(getPos().current(), {clickedTile.x, clickedTile.y}));
         auto curPos = getPos().current();
         auto tryDrop = [&](const std::pair<int32_t, int32_t>& pos) {

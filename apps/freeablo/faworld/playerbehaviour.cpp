@@ -3,6 +3,7 @@
 #include "../farender/renderer.h"
 #include "player.h"
 #include <misc/assert.h>
+#include "equiptarget.h"
 
 namespace FAWorld
 {
@@ -61,7 +62,7 @@ namespace FAWorld
 
                 mTargetLock = true;
 
-                auto cursorItem = mPlayer->getInventory().getItemAt(MakeEquipTarget<Item::eqCURSOR>());
+                auto cursorItem = mPlayer->getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
                 if (!cursorItem.isEmpty())
                 {
                     // What happens here is not actually true to original game but
