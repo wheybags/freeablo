@@ -27,7 +27,7 @@ namespace FAIO
             void* mpqFile; // This is a pointer to a StormLib HANDLE type, I jist didn't want to #include StormLib here
         } data;
 
-        enum FAFileMode
+        enum class FAFileMode
         {
             PlainFile,
             MPQFile
