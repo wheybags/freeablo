@@ -1,5 +1,4 @@
 // copied from: https://github.com/wheybags/simple_exec/blob/5a74c507c4ce1b2bb166177ead4cca7cfa23cb35/simple_exec.h
-// modified #ifndef SIMPLE_EXEC_H header guard to #pragma once
 
 // simple_exec.h, single header library to run external programs + retrieve their status code and output (unix only for now)
 //
