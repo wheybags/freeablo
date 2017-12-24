@@ -53,16 +53,16 @@ namespace Engine
 
         switch (key)
         {
-            case Input::Key::KEY_RSHIFT:;
-            case Input::Key::KEY_LSHIFT:;
-            case Input::Key::KEY_RCTRL:;
-            case Input::Key::KEY_LCTRL:;
-            case Input::Key::KEY_RALT:;
-            case Input::Key::KEY_LALT:;
-            case Input::Key::KEY_RSUPER:;
-            case Input::Key::KEY_LSUPER:;
-            case Input::Key::KEY_NUMLOCK:;
-            case Input::Key::KEY_SCROLLOCK:
+            case Input::KEY_RSHIFT:;
+            case Input::KEY_LSHIFT:;
+            case Input::KEY_RCTRL:;
+            case Input::KEY_LCTRL:;
+            case Input::KEY_RALT:;
+            case Input::KEY_LALT:;
+            case Input::KEY_RSUPER:;
+            case Input::KEY_LSUPER:;
+            case Input::KEY_NUMLOCK:;
+            case Input::KEY_SCROLLOCK:
                 return;
             default:
             {
@@ -71,7 +71,7 @@ namespace Engine
         }
 
         Input::Hotkey hotkey;
-        hotkey.key = (int)key;
+        hotkey.key = key;
         Input::InputManager& input = *Input::InputManager::get();
 
         Input::KeyboardModifiers modifiers = input.getModifiers();
@@ -119,7 +119,7 @@ namespace Engine
     {
         NuklearMisc::handleNuklearMouseEvent(mNkCtx, x, y, key, true, isDoubleClick);
 
-        if (key == Input::Key::KEY_LEFT_MOUSE)
+        if (key == Input::KEY_LEFT_MOUSE)
         {
             mMousePosition = Misc::Point{x, y};
             mMouseDown = true;
@@ -131,11 +131,11 @@ namespace Engine
     {
         NuklearMisc::handleNuklearMouseEvent(mNkCtx, x, y, key, false, false);
 
-        if (key == Input::Key::KEY_LEFT_MOUSE)
+        if (key == Input::KEY_LEFT_MOUSE)
             mMouseDown = false;
 
         if (!nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
-            notifyMouseObservers(MouseInputAction::MOUSE_RELEASE, mMousePosition);
+            notifyMouseObservers(MOUSE_RELEASE, mMousePosition);
     }
 
     void EngineInputManager::mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel)
@@ -143,7 +143,7 @@ namespace Engine
         NuklearMisc::handleNuklearMouseMoveEvent(mNkCtx, x, y, xrel, yrel);
 
         if (!nk_item_is_any_active(mNkCtx))
-            notifyMouseObservers(MouseInputAction::MOUSE_MOVE, mMousePosition);
+            notifyMouseObservers(MOUSE_MOVE, mMousePosition);
 
         mMousePosition = Misc::Point{x, y};
     }
@@ -197,10 +197,10 @@ namespace Engine
 
         if (!paused && mMouseDown && !nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
         {
-            notifyMouseObservers(MouseInputAction::MOUSE_DOWN, mMousePosition);
+            notifyMouseObservers(MOUSE_DOWN, mMousePosition);
 
             if (mClick)
-                notifyMouseObservers(MouseInputAction::MOUSE_CLICK, mMousePosition);
+                notifyMouseObservers(MOUSE_CLICK, mMousePosition);
 
             mClick = false;
         }

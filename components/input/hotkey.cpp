@@ -53,142 +53,142 @@ namespace Input
 
         switch (key)
         {
-            case (int)Input::Key::KEY_F1:
+            case Input::KEY_F1:
                 hotkeyName += "F1";
                 break;
-            case (int)Input::Key::KEY_F2:
+            case Input::KEY_F2:
                 hotkeyName += "F2";
                 break;
-            case (int)Input::Key::KEY_F3:
+            case Input::KEY_F3:
                 hotkeyName += "F3";
                 break;
-            case (int)Input::Key::KEY_F4:
+            case Input::KEY_F4:
                 hotkeyName += "F4";
                 break;
-            case (int)Input::Key::KEY_F5:
+            case Input::KEY_F5:
                 hotkeyName += "F5";
                 break;
-            case (int)Input::Key::KEY_F6:
+            case Input::KEY_F6:
                 hotkeyName += "F6";
                 break;
-            case (int)Input::Key::KEY_F7:
+            case Input::KEY_F7:
                 hotkeyName += "F7";
                 break;
-            case (int)Input::Key::KEY_F8:
+            case Input::KEY_F8:
                 hotkeyName += "F8";
                 break;
-            case (int)Input::Key::KEY_F9:
+            case Input::KEY_F9:
                 hotkeyName += "F9";
                 break;
-            case (int)Input::Key::KEY_F10:
+            case Input::KEY_F10:
                 hotkeyName += "F10";
                 break;
-            case (int)Input::Key::KEY_F11:
+            case Input::KEY_F11:
                 hotkeyName += "F11";
                 break;
-            case (int)Input::Key::KEY_F12:
+            case Input::KEY_F12:
                 hotkeyName += "F12";
                 break;
-            case (int)Input::Key::KEY_F13:
+            case Input::KEY_F13:
                 hotkeyName += "F13";
                 break;
-            case (int)Input::Key::KEY_F14:
+            case Input::KEY_F14:
                 hotkeyName += "F14";
                 break;
-            case (int)Input::Key::KEY_F15:
+            case Input::KEY_F15:
                 hotkeyName += "F15";
                 break;
 
-            case (int)Input::Key::KEY_BACKSPACE:
+            case Input::KEY_BACKSPACE:
                 hotkeyName += "BACKSPACE";
                 break;
-            case (int)Input::Key::KEY_TAB:
+            case Input::KEY_TAB:
                 hotkeyName += "TAB";
                 break;
-            case (int)Input::Key::KEY_CLEAR:
+            case Input::KEY_CLEAR:
                 hotkeyName += "CLEAR";
                 break;
-            case (int)Input::Key::KEY_SPACE:
+            case Input::KEY_SPACE:
                 hotkeyName += "SPACE";
                 break;
-            case (int)Input::Key::KEY_DELETE:
+            case Input::KEY_DELETE:
                 hotkeyName += "DELETE";
                 break;
 
-            case (int)Input::Key::KEY_KP0:
+            case Input::KEY_KP0:
                 hotkeyName += "KP0";
                 break;
-            case (int)Input::Key::KEY_KP1:
+            case Input::KEY_KP1:
                 hotkeyName += "KP1";
                 break;
-            case (int)Input::Key::KEY_KP2:
+            case Input::KEY_KP2:
                 hotkeyName += "KP2";
                 break;
-            case (int)Input::Key::KEY_KP3:
+            case Input::KEY_KP3:
                 hotkeyName += "KP3";
                 break;
-            case (int)Input::Key::KEY_KP4:
+            case Input::KEY_KP4:
                 hotkeyName += "KP4";
                 break;
-            case (int)Input::Key::KEY_KP5:
+            case Input::KEY_KP5:
                 hotkeyName += "KP5";
                 break;
-            case (int)Input::Key::KEY_KP6:
+            case Input::KEY_KP6:
                 hotkeyName += "KP6";
                 break;
-            case (int)Input::Key::KEY_KP7:
+            case Input::KEY_KP7:
                 hotkeyName += "KP7";
                 break;
-            case (int)Input::Key::KEY_KP8:
+            case Input::KEY_KP8:
                 hotkeyName += "KP8";
                 break;
-            case (int)Input::Key::KEY_KP9:
+            case Input::KEY_KP9:
                 hotkeyName += "KP9";
                 break;
-            case (int)Input::Key::KEY_KP_PERIOD:
+            case Input::KEY_KP_PERIOD:
                 hotkeyName += "KP_PERIOD";
                 break;
-            case (int)Input::Key::KEY_KP_DIVIDE:
+            case Input::KEY_KP_DIVIDE:
                 hotkeyName += "KP_DIVIDE";
                 break;
-            case (int)Input::Key::KEY_KP_MULTIPLY:
+            case Input::KEY_KP_MULTIPLY:
                 hotkeyName += "KP_MULTIPLY";
                 break;
-            case (int)Input::Key::KEY_KP_MINUS:
+            case Input::KEY_KP_MINUS:
                 hotkeyName += "KP_MINUS";
                 break;
-            case (int)Input::Key::KEY_KP_PLUS:
+            case Input::KEY_KP_PLUS:
                 hotkeyName += "KP_PLUS";
                 break;
-            case (int)Input::Key::KEY_KP_EQUALS:
+            case Input::KEY_KP_EQUALS:
                 hotkeyName += "KP_EQUALS";
                 break;
 
-            case (int)Input::Key::KEY_UP:
+            case Input::KEY_UP:
                 hotkeyName += "UP";
                 break;
-            case (int)Input::Key::KEY_DOWN:
+            case Input::KEY_DOWN:
                 hotkeyName += "DOWN";
                 break;
-            case (int)Input::Key::KEY_RIGHT:
+            case Input::KEY_RIGHT:
                 hotkeyName += "RIGHT";
                 break;
-            case (int)Input::Key::KEY_LEFT:
+            case Input::KEY_LEFT:
                 hotkeyName += "LEFT";
                 break;
-            case (int)Input::Key::KEY_INSERT:
+            case Input::KEY_INSERT:
                 hotkeyName += "INSERT";
                 break;
-            case (int)Input::Key::KEY_HOME:
+            case Input::KEY_HOME:
                 hotkeyName += "HOME";
                 break;
-            case (int)Input::Key::KEY_END:
+            case Input::KEY_END:
                 hotkeyName += "END";
                 break;
-            case (int)Input::Key::KEY_PAGEUP:
+            case Input::KEY_PAGEUP:
                 hotkeyName += "PAGEUP";
                 break;
-            case (int)Input::Key::KEY_PAGEDOWN:
+            case Input::KEY_PAGEDOWN:
                 hotkeyName += "PAGEDOWN";
                 break;
 

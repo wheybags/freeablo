@@ -8,17 +8,17 @@ namespace NuklearMisc
     {
         int down = isDown;
 
-        if (key == Input::Key::KEY_LEFT_MOUSE)
+        if (key == Input::KEY_LEFT_MOUSE)
         {
             if (isDoubleClick)
                 nk_input_button(ctx, NK_BUTTON_DOUBLE, x, y, down);
             nk_input_button(ctx, NK_BUTTON_LEFT, x, y, down);
         }
-        else if (key == Input::Key::KEY_MIDDLE_MOUSE)
+        else if (key == Input::KEY_MIDDLE_MOUSE)
         {
             nk_input_button(ctx, NK_BUTTON_MIDDLE, x, y, down);
         }
-        else if (key == Input::Key::KEY_RIGHT_MOUSE)
+        else if (key == Input::KEY_RIGHT_MOUSE)
         {
             nk_input_button(ctx, NK_BUTTON_RIGHT, x, y, down);
         }
@@ -43,62 +43,62 @@ namespace NuklearMisc
     {
         int down = isDown;
 
-        if (sym == Input::Key::KEY_RSHIFT || sym == Input::Key::KEY_LSHIFT)
+        if (sym == Input::KEY_RSHIFT || sym == Input::KEY_LSHIFT)
             nk_input_key(ctx, NK_KEY_SHIFT, down);
-        else if (sym == Input::Key::KEY_DELETE)
+        else if (sym == Input::KEY_DELETE)
             nk_input_key(ctx, NK_KEY_DEL, down);
-        else if (sym == Input::Key::KEY_RETURN)
+        else if (sym == Input::KEY_RETURN)
             nk_input_key(ctx, NK_KEY_ENTER, down);
-        else if (sym == Input::Key::KEY_ESCAPE)
+        else if (sym == Input::KEY_ESCAPE)
             nk_input_key(ctx, NK_KEY_TEXT_RESET_MODE, down);
-        else if (sym == Input::Key::KEY_TAB)
+        else if (sym == Input::KEY_TAB)
             nk_input_key(ctx, NK_KEY_TAB, down);
-        else if (sym == Input::Key::KEY_BACKSPACE)
+        else if (sym == Input::KEY_BACKSPACE)
             nk_input_key(ctx, NK_KEY_BACKSPACE, down);
-        else if (sym == Input::Key::KEY_HOME)
+        else if (sym == Input::KEY_HOME)
         {
             nk_input_key(ctx, NK_KEY_TEXT_START, down);
             nk_input_key(ctx, NK_KEY_SCROLL_START, down);
         }
-        else if (sym == Input::Key::KEY_END)
+        else if (sym == Input::KEY_END)
         {
             nk_input_key(ctx, NK_KEY_TEXT_END, down);
             nk_input_key(ctx, NK_KEY_SCROLL_END, down);
         }
-        else if (sym == Input::Key::KEY_PAGEDOWN)
+        else if (sym == Input::KEY_PAGEDOWN)
         {
             nk_input_key(ctx, NK_KEY_SCROLL_DOWN, down);
         }
-        else if (sym == Input::Key::KEY_PAGEUP)
+        else if (sym == Input::KEY_PAGEUP)
         {
             nk_input_key(ctx, NK_KEY_SCROLL_UP, down);
         }
-        else if (sym == Input::Key::KEY_z)
+        else if (sym == Input::KEY_z)
             nk_input_key(ctx, NK_KEY_TEXT_UNDO, down && mods.ctrl);
-        else if (sym == Input::Key::KEY_r)
+        else if (sym == Input::KEY_r)
             nk_input_key(ctx, NK_KEY_TEXT_REDO, down && mods.ctrl);
-        else if (sym == Input::Key::KEY_c)
+        else if (sym == Input::KEY_c)
             nk_input_key(ctx, NK_KEY_COPY, down && mods.ctrl);
-        else if (sym == Input::Key::KEY_v)
+        else if (sym == Input::KEY_v)
             nk_input_key(ctx, NK_KEY_PASTE, down && mods.ctrl);
-        else if (sym == Input::Key::KEY_x)
+        else if (sym == Input::KEY_x)
             nk_input_key(ctx, NK_KEY_CUT, down && mods.ctrl);
-        else if (sym == Input::Key::KEY_b)
+        else if (sym == Input::KEY_b)
             nk_input_key(ctx, NK_KEY_TEXT_LINE_START, down && mods.ctrl);
-        else if (sym == Input::Key::KEY_e)
+        else if (sym == Input::KEY_e)
             nk_input_key(ctx, NK_KEY_TEXT_LINE_END, down && mods.ctrl);
-        else if (sym == Input::Key::KEY_UP)
+        else if (sym == Input::KEY_UP)
             nk_input_key(ctx, NK_KEY_UP, down);
-        else if (sym == Input::Key::KEY_DOWN)
+        else if (sym == Input::KEY_DOWN)
             nk_input_key(ctx, NK_KEY_DOWN, down);
-        else if (sym == Input::Key::KEY_LEFT)
+        else if (sym == Input::KEY_LEFT)
         {
             if (mods.ctrl)
                 nk_input_key(ctx, NK_KEY_TEXT_WORD_LEFT, down);
             else
                 nk_input_key(ctx, NK_KEY_LEFT, down);
         }
-        else if (sym == Input::Key::KEY_RIGHT)
+        else if (sym == Input::KEY_RIGHT)
         {
             if (mods.ctrl)
                 nk_input_key(ctx, NK_KEY_TEXT_WORD_RIGHT, down);

@@ -11,7 +11,7 @@ namespace StateMachine
 
     template <typename E> struct StateChange;
 
-    enum class StateOperation
+    enum StateOperation
     {
         pop,
         push,

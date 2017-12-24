@@ -918,12 +918,12 @@ namespace FALevelGen
             {
                 if (tmpLevel[x][y] == upStairs)
                 {
-                    level[x][y] = (int32_t)TileSetEnum::upStairs;
+                    level[x][y] = (int)TileSetEnum::upStairs;
                     continue;
                 }
                 if (tmpLevel[x][y] == downStairs)
                 {
-                    level[x][y] = (int32_t)TileSetEnum::downStairs;
+                    level[x][y] = (int)TileSetEnum::downStairs;
                     continue;
                 }
 
@@ -958,11 +958,11 @@ namespace FALevelGen
                 else if (!ignoreNotWall)
                 {
                     if (tmpLevel[x][y] == blank)
-                        level[x][y] = (int32_t)TileSetEnum::blank;
+                        level[x][y] = (int)TileSetEnum::blank;
                     else if (tmpLevel[x][y] == insideWall)
-                        level[x][y] = (int32_t)TileSetEnum::insideXWall;
+                        level[x][y] = (int)TileSetEnum::insideXWall;
                     else
-                        level[x][y] = (int32_t)TileSetEnum::floor;
+                        level[x][y] = (int)TileSetEnum::floor;
                 }
             }
         }
@@ -970,15 +970,15 @@ namespace FALevelGen
 
     bool connectHelperY(int32_t x, int32_t y, Level::Dun& level)
     {
-        return level[x][y] == (int32_t)TileSetEnum::insideYWall || level[x][y] == (int32_t)TileSetEnum::yDoor || (int32_t)level[x][y] == (int32_t)TileSetEnum::insideXWallEnd ||
-               level[x][y] == (int32_t)TileSetEnum::insideXWallEndBack || level[x][y] == (int32_t)TileSetEnum::insideLeftCorner ||
-               level[x][y] == (int32_t)TileSetEnum::insideRightCorner || level[x][y] == (int32_t)TileSetEnum::insideTopCorner || level[x][y] == (int32_t)TileSetEnum::insideBottomCorner;
+        return level[x][y] == (int)TileSetEnum::insideYWall || level[x][y] == (int)TileSetEnum::yDoor || level[x][y] == (int)TileSetEnum::insideXWallEnd ||
+               level[x][y] == (int)TileSetEnum::insideXWallEndBack || level[x][y] == (int)TileSetEnum::insideLeftCorner ||
+               level[x][y] == (int)TileSetEnum::insideRightCorner || level[x][y] == (int)TileSetEnum::insideTopCorner || level[x][y] == (int)TileSetEnum::insideBottomCorner;
     }
     bool connectHelperX(int32_t x, int32_t y, Level::Dun& level)
     {
-        return level[x][y] == (int32_t)TileSetEnum::insideXWall || level[x][y] == (int32_t)TileSetEnum::xDoor || level[x][y] == (int32_t)TileSetEnum::insideYWallEnd ||
-               level[x][y] == (int32_t)TileSetEnum::insideYWallEndBack || level[x][y] == (int32_t)TileSetEnum::insideLeftCorner ||
-               level[x][y] == (int32_t)TileSetEnum::insideRightCorner || level[x][y] == (int32_t)TileSetEnum::insideTopCorner || level[x][y] == (int32_t)TileSetEnum::insideBottomCorner;
+        return level[x][y] == (int)TileSetEnum::insideXWall || level[x][y] == (int)TileSetEnum::xDoor || level[x][y] == (int)TileSetEnum::insideYWallEnd ||
+               level[x][y] == (int)TileSetEnum::insideYWallEndBack || level[x][y] == (int)TileSetEnum::insideLeftCorner ||
+               level[x][y] == (int)TileSetEnum::insideRightCorner || level[x][y] == (int)TileSetEnum::insideTopCorner || level[x][y] == (int)TileSetEnum::insideBottomCorner;
     }
 
     void connectWalls(Level::Dun& level)
@@ -989,94 +989,94 @@ namespace FALevelGen
             {
                 switch (level[x][y])
                 {
-                    case (int32_t)TileSetEnum::yWall:
+                    case (int)TileSetEnum::yWall:
                     {
                         if (connectHelperX(x + 1, y, level))
-                            level[x][y] = (int32_t)TileSetEnum::joinY;
+                            level[x][y] = (int)TileSetEnum::joinY;
                         break;
                     }
 
-                    case (int32_t)TileSetEnum::rightCorner:
+                    case (int)TileSetEnum::rightCorner:
                     {
                         if (connectHelperX(x + 1, y, level) && connectHelperY(x, y - 1, level))
                         {
-                            level[x][y] = (int32_t)TileSetEnum::joinRightCorner;
+                            level[x][y] = (int)TileSetEnum::joinRightCorner;
                         }
                         else
                         {
                             if (connectHelperX(x + 1, y, level))
-                                level[x][y] = (int32_t)TileSetEnum::joinYRightCorner;
+                                level[x][y] = (int)TileSetEnum::joinYRightCorner;
                             else if (connectHelperY(x, y - 1, level))
-                                level[x][y] = (int32_t)TileSetEnum::joinOutXRightCorner;
+                                level[x][y] = (int)TileSetEnum::joinOutXRightCorner;
                         }
                         break;
                     }
 
-                    case (int32_t)TileSetEnum::outsideXWall:
+                    case (int)TileSetEnum::outsideXWall:
                     {
                         if (connectHelperY(x, y - 1, level))
-                            level[x][y] = (int32_t)TileSetEnum::joinOutX;
+                            level[x][y] = (int)TileSetEnum::joinOutX;
                         break;
                     }
 
-                    case (int32_t)TileSetEnum::outsideTopCorner:
+                    case (int)TileSetEnum::outsideTopCorner:
                     {
                         if (connectHelperX(x - 1, y, level) && connectHelperY(x, y - 1, level))
                         {
-                            level[x][y] = (int32_t)TileSetEnum::joinTopCorner;
+                            level[x][y] = (int)TileSetEnum::joinTopCorner;
                         }
                         else
                         {
                             if (connectHelperX(x - 1, y, level))
-                                level[x][y] = (int32_t)TileSetEnum::joinOutYTopCorner;
+                                level[x][y] = (int)TileSetEnum::joinOutYTopCorner;
                             else if (connectHelperY(x, y - 1, level))
-                                level[x][y] = (int32_t)TileSetEnum::joinOutXTopCorner;
+                                level[x][y] = (int)TileSetEnum::joinOutXTopCorner;
                         }
                         break;
                     }
 
-                    case (int32_t)TileSetEnum::outsideYWall:
+                    case (int)TileSetEnum::outsideYWall:
                     {
                         if (connectHelperX(x - 1, y, level))
-                            level[x][y] = (int32_t)TileSetEnum::joinOutY;
+                            level[x][y] = (int)TileSetEnum::joinOutY;
                         break;
                     }
 
-                    case (int32_t)TileSetEnum::leftCorner:
+                    case (int)TileSetEnum::leftCorner:
                     {
                         if (connectHelperX(x - 1, y, level) && connectHelperY(x, y + 1, level))
                         {
-                            level[x][y] = (int32_t)TileSetEnum::joinLeftCorner;
+                            level[x][y] = (int)TileSetEnum::joinLeftCorner;
                         }
                         else
                         {
                             if (connectHelperX(x - 1, y, level))
-                                level[x][y] = (int32_t)TileSetEnum::joinOutYLeftCorner;
+                                level[x][y] = (int)TileSetEnum::joinOutYLeftCorner;
                             else if (connectHelperY(x, y + 1, level))
-                                level[x][y] = (int32_t)TileSetEnum::joinXLeftCorner;
+                                level[x][y] = (int)TileSetEnum::joinXLeftCorner;
                         }
                         break;
                     }
 
-                    case (int32_t)TileSetEnum::xWall:
+                    case (int)TileSetEnum::xWall:
                     {
                         if (connectHelperY(x, y + 1, level))
-                            level[x][y] = (int32_t)TileSetEnum::joinX;
+                            level[x][y] = (int)TileSetEnum::joinX;
                         break;
                     }
 
-                    case (int32_t)TileSetEnum::bottomCorner:
+                    case (int)TileSetEnum::bottomCorner:
                     {
                         if (connectHelperX(x + 1, y, level) && connectHelperY(x, y + 1, level))
                         {
-                            level[x][y] = (int32_t)TileSetEnum::joinBottomCorner;
+                            level[x][y] = (int)TileSetEnum::joinBottomCorner;
                         }
                         else
                         {
                             if (connectHelperX(x + 1, y, level))
-                                level[x][y] = (int32_t)TileSetEnum::joinYBottomCorner;
+                                level[x][y] = (int)TileSetEnum::joinYBottomCorner;
                             else if (connectHelperY(x, y + 1, level))
-                                level[x][y] = (int32_t)TileSetEnum::joinXBottomCorner;
+                                level[x][y] = (int)TileSetEnum::joinXBottomCorner;
                         }
                         break;
                     }
@@ -1103,7 +1103,7 @@ namespace FALevelGen
         TileSet tileset(ss.str());
 
         fillIsometric(tmpLevel, level, false, 0, false);
-        fillIsometric(tmpLevel, level, true, (int32_t)TileSetEnum::insideXWall, true);
+        fillIsometric(tmpLevel, level, true, (int)TileSetEnum::insideXWall, true);
 
         connectWalls(level);
 
@@ -1114,15 +1114,15 @@ namespace FALevelGen
         {
             for (int32_t y = 0; y < (int32_t)height; y++)
             {
-                if (level[x][y] == (int32_t)TileSetEnum::upStairs)
+                if (level[x][y] == (int)TileSetEnum::upStairs)
                 {
                     upStairsPoint = std::make_pair(x * 2, y * 2);
-                    level[x][y] = (int32_t)TileSetEnum::floor;
+                    level[x][y] = (int)TileSetEnum::floor;
                 }
-                else if (level[x][y] == (int32_t)TileSetEnum::downStairs)
+                else if (level[x][y] == (int)TileSetEnum::downStairs)
                 {
                     downStairsPoint = std::make_pair(x * 2, y * 2);
-                    level[x][y] = (int32_t)TileSetEnum::floor;
+                    level[x][y] = (int)TileSetEnum::floor;
                 }
                 else
                     level[x][y] = tileset.convert(((TileSetEnum)level[x][y]));

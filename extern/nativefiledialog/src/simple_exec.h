@@ -32,8 +32,8 @@ int runCommandArray(char** stdOut, int* stdOutByteCount, int* returnCode, int in
 
 enum PIPE_FILE_DESCRIPTORS
 {
-    READ_FD = 0,
-    WRITE_FD = 1
+  READ_FD  = 0,
+  WRITE_FD = 1
 };
 
 enum RUN_COMMAND_ERROR

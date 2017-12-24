@@ -25,7 +25,7 @@ namespace Engine
         max
     };
 
-    enum class MouseInputAction
+    enum MouseInputAction
     {
         MOUSE_RELEASE,
         MOUSE_DOWN,

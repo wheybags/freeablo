@@ -177,13 +177,13 @@ namespace FAWorld
     {
         switch (action)
         {
-            case Engine::MouseInputAction::MOUSE_RELEASE:
+            case Engine::MOUSE_RELEASE:
                 return onMouseRelease();
-            case Engine::MouseInputAction::MOUSE_DOWN:
+            case Engine::MOUSE_DOWN:
                 return onMouseDown(mousePosition);
-            case Engine::MouseInputAction::MOUSE_CLICK:
+            case Engine::MOUSE_CLICK:
                 return onMouseClick(mousePosition);
-            case Engine::MouseInputAction::MOUSE_MOVE:
+            case Engine::MOUSE_MOVE:
                 return onMouseMove(mousePosition);
             default:;
         }

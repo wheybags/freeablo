@@ -15,7 +15,6 @@ namespace FALevelGen
     {
         // this block and the block after it are related
         // eg insideYWall MUST be equal to yWall + insideXWall
-        //
         xWall,
         yWall,
         leftCorner,
