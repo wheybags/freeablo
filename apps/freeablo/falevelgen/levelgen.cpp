@@ -1137,7 +1137,7 @@ namespace FALevelGen
                     level[x][y] = (int)TileSetEnum::floor;
                 }
                 else
-                    level[x][y] = tileset.convert(level[x][y]);
+                    level[x][y] = tileset.convert((TileSetEnum)level[x][y]);
             }
         }
 

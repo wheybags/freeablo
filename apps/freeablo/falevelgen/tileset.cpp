@@ -219,147 +219,147 @@ namespace FALevelGen
         }
     }
 
-    int32_t TileSet::convert(int32_t val)
+    int32_t TileSet::convert(TileSetEnum val)
     {
         switch (val)
         {
-            case (int32_t)TileSetEnum::xWall:
+            case TileSetEnum::xWall:
                 return xWall;
-            case (int32_t)TileSetEnum::outsideXWall:
+            case TileSetEnum::outsideXWall:
                 return outsideXWall;
-            case (int32_t)TileSetEnum::yWall:
+            case TileSetEnum::yWall:
                 return yWall;
-            case (int32_t)TileSetEnum::outsideYWall:
+            case TileSetEnum::outsideYWall:
                 return outsideYWall;
-            case (int32_t)TileSetEnum::bottomCorner:
+            case TileSetEnum::bottomCorner:
                 return bottomCorner;
-            case (int32_t)TileSetEnum::outsideBottomCorner:
+            case TileSetEnum::outsideBottomCorner:
                 return outsideBottomCorner;
-            case (int32_t)TileSetEnum::rightCorner:
+            case TileSetEnum::rightCorner:
                 return rightCorner;
-            case (int32_t)TileSetEnum::outsideRightCorner:
+            case TileSetEnum::outsideRightCorner:
                 return outsideRightCorner;
-            case (int32_t)TileSetEnum::leftCorner:
+            case TileSetEnum::leftCorner:
                 return leftCorner;
-            case (int32_t)TileSetEnum::outsideLeftCorner:
+            case TileSetEnum::outsideLeftCorner:
                 return outsideLeftCorner;
-            case (int32_t)TileSetEnum::topCorner:
+            case TileSetEnum::topCorner:
                 return topCorner;
-            case (int32_t)TileSetEnum::outsideTopCorner:
+            case TileSetEnum::outsideTopCorner:
                 return outsideTopCorner;
-            case (int32_t)TileSetEnum::floor:
+            case TileSetEnum::floor:
                 return floor;
-            case (int32_t)TileSetEnum::blank:
+            case TileSetEnum::blank:
                 return blank;
-            case (int32_t)TileSetEnum::xDoor:
+            case TileSetEnum::xDoor:
                 return xDoor;
-            case (int32_t)TileSetEnum::yDoor:
+            case TileSetEnum::yDoor:
                 return yDoor;
 
-            case (int32_t)TileSetEnum::upStairs1:
+            case TileSetEnum::upStairs1:
                 return upStairs1;
-            case (int32_t)TileSetEnum::upStairs2:
+            case TileSetEnum::upStairs2:
                 return upStairs2;
-            case (int32_t)TileSetEnum::upStairs3:
+            case TileSetEnum::upStairs3:
                 return upStairs3;
 
-            case (int32_t)TileSetEnum::upStairs4:
+            case TileSetEnum::upStairs4:
                 return upStairs4;
-            case (int32_t)TileSetEnum::upStairs5:
+            case TileSetEnum::upStairs5:
                 return upStairs5;
-            case (int32_t)TileSetEnum::upStairs6:
+            case TileSetEnum::upStairs6:
                 return upStairs6;
 
-            case (int32_t)TileSetEnum::upStairs7:
+            case TileSetEnum::upStairs7:
                 return upStairs7;
-            case (int32_t)TileSetEnum::upStairs8:
+            case TileSetEnum::upStairs8:
                 return upStairs8;
-            case (int32_t)TileSetEnum::upStairs9:
+            case TileSetEnum::upStairs9:
                 return upStairs9;
 
-            case (int32_t)TileSetEnum::downStairs1:
+            case TileSetEnum::downStairs1:
                 return downStairs1;
-            case (int32_t)TileSetEnum::downStairs2:
+            case TileSetEnum::downStairs2:
                 return downStairs2;
-            case (int32_t)TileSetEnum::downStairs3:
+            case TileSetEnum::downStairs3:
                 return downStairs3;
 
-            case (int32_t)TileSetEnum::downStairs4:
+            case TileSetEnum::downStairs4:
                 return downStairs4;
-            case (int32_t)TileSetEnum::downStairs5:
+            case TileSetEnum::downStairs5:
                 return downStairs5;
-            case (int32_t)TileSetEnum::downStairs6:
+            case TileSetEnum::downStairs6:
                 return downStairs6;
 
-            case (int32_t)TileSetEnum::downStairs7:
+            case TileSetEnum::downStairs7:
                 return downStairs7;
-            case (int32_t)TileSetEnum::downStairs8:
+            case TileSetEnum::downStairs8:
                 return downStairs8;
-            case (int32_t)TileSetEnum::downStairs9:
+            case TileSetEnum::downStairs9:
                 return downStairs9;
 
-            case (int32_t)TileSetEnum::insideXWall:
+            case TileSetEnum::insideXWall:
                 return insideXWall;
-            case (int32_t)TileSetEnum::insideXWallEnd:
+            case TileSetEnum::insideXWallEnd:
                 return insideXWallEnd;
-            case (int32_t)TileSetEnum::insideXWallEndBack:
+            case TileSetEnum::insideXWallEndBack:
                 return insideXWallEndBack;
-            case (int32_t)TileSetEnum::insideYWall:
+            case TileSetEnum::insideYWall:
                 return insideYWall;
-            case (int32_t)TileSetEnum::insideYWallEnd:
+            case TileSetEnum::insideYWallEnd:
                 return insideYWallEnd;
-            case (int32_t)TileSetEnum::insideYWallEndBack:
+            case TileSetEnum::insideYWallEndBack:
                 return insideYWallEndBack;
-            case (int32_t)TileSetEnum::insideLeftCorner:
+            case TileSetEnum::insideLeftCorner:
                 return insideLeftCorner;
-            case (int32_t)TileSetEnum::insideRightCorner:
+            case TileSetEnum::insideRightCorner:
                 return insideRightCorner;
-            case (int32_t)TileSetEnum::insideBottomCorner:
+            case TileSetEnum::insideBottomCorner:
                 return insideBottomCorner;
-            case (int32_t)TileSetEnum::insideTopCorner:
+            case TileSetEnum::insideTopCorner:
                 return insideTopCorner;
 
-            case (int32_t)TileSetEnum::joinY:
+            case TileSetEnum::joinY:
                 return joinY;
-            case (int32_t)TileSetEnum::joinYRightCorner:
+            case TileSetEnum::joinYRightCorner:
                 return joinYRightCorner;
-            case (int32_t)TileSetEnum::joinRightCorner:
+            case TileSetEnum::joinRightCorner:
                 return joinRightCorner;
-            case (int32_t)TileSetEnum::joinOutXRightCorner:
+            case TileSetEnum::joinOutXRightCorner:
                 return joinOutXRightCorner;
-            case (int32_t)TileSetEnum::joinOutX:
+            case TileSetEnum::joinOutX:
                 return joinOutX;
-            case (int32_t)TileSetEnum::joinOutXTopCorner:
+            case TileSetEnum::joinOutXTopCorner:
                 return joinOutXTopCorner;
-            case (int32_t)TileSetEnum::joinTopCorner:
+            case TileSetEnum::joinTopCorner:
                 return joinTopCorner;
-            case (int32_t)TileSetEnum::joinOutYTopCorner:
+            case TileSetEnum::joinOutYTopCorner:
                 return joinOutYTopCorner;
-            case (int32_t)TileSetEnum::joinOutY:
+            case TileSetEnum::joinOutY:
                 return joinOutY;
-            case (int32_t)TileSetEnum::joinOutYLeftCorner:
+            case TileSetEnum::joinOutYLeftCorner:
                 return joinOutYLeftCorner;
-            case (int32_t)TileSetEnum::joinLeftCorner:
+            case TileSetEnum::joinLeftCorner:
                 return joinLeftCorner;
-            case (int32_t)TileSetEnum::joinXLeftCorner:
+            case TileSetEnum::joinXLeftCorner:
                 return joinXLeftCorner;
-            case (int32_t)TileSetEnum::joinX:
+            case TileSetEnum::joinX:
                 return joinX;
-            case (int32_t)TileSetEnum::joinXBottomCorner:
+            case TileSetEnum::joinXBottomCorner:
                 return joinXBottomCorner;
-            case (int32_t)TileSetEnum::joinBottomCorner:
+            case TileSetEnum::joinBottomCorner:
                 return joinBottomCorner;
-            case (int32_t)TileSetEnum::joinYBottomCorner:
+            case TileSetEnum::joinYBottomCorner:
                 return joinYBottomCorner;
 
             // these two just used internally in levelgen.cpp, not loaded from a file like the rest
-            case (int32_t)TileSetEnum::upStairs:
+            case TileSetEnum::upStairs:
                 break;
-            case (int32_t)TileSetEnum::downStairs:
+            case TileSetEnum::downStairs:
                 break;
         }
 
         release_assert(false && "tried to convert invalid tile");
-        return val;
+        return (int32_t)val;
     }
 }

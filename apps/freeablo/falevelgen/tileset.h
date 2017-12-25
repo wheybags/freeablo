@@ -172,7 +172,7 @@ namespace FALevelGen
         int32_t getRandomTile(int32_t tile);
         std::map<int32_t, int32_t> getDoorMap();
 
-        int32_t convert(int32_t val);
+        int32_t convert(TileSetEnum val);
 
     private:
         std::map<int32_t, std::pair<std::vector<std::pair<int32_t, int32_t>>, int32_t>> mAlternatives;
