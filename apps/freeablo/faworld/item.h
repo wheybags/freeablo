@@ -16,6 +16,20 @@ namespace FARender
 
 namespace FAWorld
 {
+    enum class ItemEquipType
+    {
+        none,
+        oneHanded,
+        twoHanded,
+        chest,
+        head,
+        ring,
+        amulet,
+        unequipable,
+        belt,
+        invalid,
+    };
+
     class Inventory;
     class ItemPosition;
     class Item
@@ -129,23 +143,6 @@ namespace FAWorld
         bool isBeltEquippable() const;
 
         bool mIsReal;
-        typedef enum {
-            eqINV,
-            eqONEHAND,
-            eqTWOHAND,
-            eqBODY,
-            eqHEAD,
-            eqRING,
-            eqAMULET,
-            eqUNEQUIP,
-            eqBELT,
-            eqFLOOR,
-            eqCURSOR,
-            eqRIGHTHAND,
-            eqLEFTHAND,
-            eqRIGHTRING,
-            eqLEFTRING
-        } equipLoc;
 
         typedef enum { itWEAPON = 1, itARMOUR = 2, itPOT = 3, itGOLD = 4, itNOVELTY = 5 } itemType;
 
@@ -196,7 +193,7 @@ namespace FAWorld
         uint32_t getMinRange5() const;
         uint32_t getMaxRange5() const;
         itemCode getCode() const;
-        equipLoc getEquipLoc() const;
+        ItemEquipType getEquipLoc() const;
         itemType getType() const;
         uint32_t getGraphicValue() const;
         static Item empty;
@@ -208,7 +205,7 @@ namespace FAWorld
 
         uint32_t mActiveTrigger;
         itemType mType;
-        equipLoc mEquipLoc;
+        ItemEquipType mEquipLoc;
         uint32_t mGraphicValue;
 
         itemCode mCode;

@@ -272,7 +272,7 @@ namespace FAGui
         auto& item = inv.getItemAt(target);
         if (!item.isReal())
         {
-            if (item.getEquipLoc() == FAWorld::Item::equipLoc::eqTWOHAND && target.type == FAWorld::EquipTargetType::rightHand)
+            if (item.getEquipLoc() == FAWorld::ItemEquipType::twoHanded && target.type == FAWorld::EquipTargetType::rightHand)
             {
                 checkerboarded = true;
                 highlight = ItemHighlightInfo::notHighlighed;

@@ -85,7 +85,6 @@ namespace FAWorld
         bool exchangeWithCursor(EquipTarget takeoutTarget, boost::optional<EquipTarget> maybePlacementTarget);
         bool exchangeWithCursor(EquipTarget takeoutTarget);
         bool fitsAt(Item item, uint8_t x, uint8_t y);
-        void removeItem(Item& item, Item::equipLoc from, uint8_t beltX = 0, uint8_t invX = 0, uint8_t invY = 0);
         static const uint8_t GOLD_PILE_MIN = 15;
         static const uint8_t GOLD_PILE_MID = 16;
         static const uint8_t GOLD_PILE_MAX = 17;

@@ -123,7 +123,7 @@ namespace FAWorld
             {
                 case Item::icAxe:
                 {
-                    if (hand.getEquipLoc() == Item::eqONEHAND)
+                    if (hand.getEquipLoc() == ItemEquipType::oneHanded)
                         weapon = "s";
                     else
                         weapon = "a";

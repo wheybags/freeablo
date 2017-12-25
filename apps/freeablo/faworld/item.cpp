@@ -47,7 +47,7 @@ namespace FAWorld
         mActiveTrigger = item.activTrigger;
 
         mType = static_cast<itemType>(item.itemType);
-        mEquipLoc = static_cast<equipLoc>(item.equipLoc);
+        mEquipLoc = static_cast<ItemEquipType>(item.equipLoc);
         mGraphicValue = item.graphicValue;
 
         mCode = static_cast<itemCode>(item.itemCode);
@@ -265,7 +265,7 @@ namespace FAWorld
 
     Item::itemCode Item::getCode() const { return mCode; }
 
-    Item::equipLoc Item::getEquipLoc() const { return mEquipLoc; }
+    ItemEquipType Item::getEquipLoc() const { return mEquipLoc; }
 
     Item::itemType Item::getType() const { return mType; }
     uint32_t Item::getGraphicValue() const { return mGraphicValue; }
