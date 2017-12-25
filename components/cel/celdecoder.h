@@ -71,4 +71,3 @@ namespace Cel
         static Settings::Settings mSettingsCl2;
     };
 }
-

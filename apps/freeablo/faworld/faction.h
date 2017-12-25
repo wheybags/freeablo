@@ -35,4 +35,3 @@ namespace FAWorld
         FactionType mFaction;
     };
 }
-

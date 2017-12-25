@@ -91,4 +91,3 @@ namespace DiabloExe
         std::unordered_map<std::string, FontData> mFontData;
     };
 }
-

@@ -22,4 +22,3 @@ namespace Level
         std::vector<uint8_t> mData;
     };
 }
-

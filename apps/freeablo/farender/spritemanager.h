@@ -78,4 +78,3 @@ namespace FARender
         std::set<uint32_t> mSpritesAlredyPreloaded;
     };
 }
-

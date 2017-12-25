@@ -22,4 +22,3 @@ namespace Level
         std::vector<TilBlock> mBlocks;
     };
 }
-

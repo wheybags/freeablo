@@ -60,4 +60,3 @@ namespace Serial
         std::string mTmp;
     };
 }
-

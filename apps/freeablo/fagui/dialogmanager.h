@@ -71,4 +71,3 @@ namespace FAGui
         FAWorld::World& mWorld;
     };
 }
-

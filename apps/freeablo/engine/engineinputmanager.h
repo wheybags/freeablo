@@ -64,4 +64,3 @@ namespace Engine
         std::vector<MouseInputObserverInterface*> mMouseObservers;
     };
 }
-

@@ -22,4 +22,3 @@ namespace Level
         property_type mProperty;
     };
 }
-

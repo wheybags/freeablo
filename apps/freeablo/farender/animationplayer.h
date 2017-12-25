@@ -53,4 +53,3 @@ namespace FARender
         std::vector<int32_t> mFrameSequence;
     };
 }
-

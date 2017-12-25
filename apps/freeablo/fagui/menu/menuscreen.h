@@ -55,4 +55,3 @@ namespace FAGui
         int mActiveItemIndex = 0;
     };
 }
-

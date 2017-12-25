@@ -53,4 +53,3 @@ namespace FARender
         friend class Renderer;
     };
 }
-

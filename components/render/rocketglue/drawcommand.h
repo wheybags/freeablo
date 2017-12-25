@@ -34,4 +34,3 @@ struct DrawCommand
 
     bool enableScissor;
 };
-

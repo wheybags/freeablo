@@ -58,4 +58,3 @@ namespace Engine
         std::vector<uint32_t> mSpritesToPreload;
     };
 }
-

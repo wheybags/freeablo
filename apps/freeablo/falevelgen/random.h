@@ -31,4 +31,3 @@ namespace FALevelGen
         int32_t mSeed;
     };
 }
-

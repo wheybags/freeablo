@@ -68,4 +68,3 @@ namespace FAWorld
         Tick mTicksSinceLastAction;
     };
 }
-

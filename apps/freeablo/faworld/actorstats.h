@@ -32,4 +32,3 @@ namespace FAWorld
         int32_t mAttackDamage = 3;
     };
 }
-

@@ -60,4 +60,3 @@ namespace FAWorld
         static uint32_t lastUnique;
     };
 }
-

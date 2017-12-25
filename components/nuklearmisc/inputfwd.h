@@ -13,4 +13,3 @@ namespace NuklearMisc
     void handleNuklearKeyboardEvent(nk_context* ctx, bool isDown, Input::Key sym, Input::KeyboardModifiers mods);
     void handleNuklearTextInputEvent(nk_context* ctx, const std::string& inp);
 }
-

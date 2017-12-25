@@ -45,4 +45,3 @@ namespace FAWorld
         boost::signals2::signal<void(Actor*)> talkRequested;
     };
 }
-

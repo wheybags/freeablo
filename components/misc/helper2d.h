@@ -22,4 +22,3 @@ namespace Misc
         Retval operator[](int32_t y) { return func(x, y, parent); }
     };
 }
-

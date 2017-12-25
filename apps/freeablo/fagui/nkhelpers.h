@@ -35,4 +35,3 @@ namespace FAGui
     // aligns inner_rect relatively to outer_rect using halign, valign as guides for positioning
     struct nk_rect alignRect(const struct nk_rect& inner_rect, const struct nk_rect& outer_rect, halign_t halign, valign_t valign);
 }
-

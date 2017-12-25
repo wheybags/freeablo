@@ -298,4 +298,3 @@ namespace FAWorld
         std::string mDropItemGraphicsPath;
     };
 }
-

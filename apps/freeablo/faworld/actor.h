@@ -105,4 +105,3 @@ namespace FAWorld
         std::string mNpcId;
     };
 }
-

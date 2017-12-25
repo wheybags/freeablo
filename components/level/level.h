@@ -104,4 +104,3 @@ namespace Level
         int32_t mNext;     ///< index of next level
     };
 }
-

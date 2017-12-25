@@ -24,4 +24,3 @@ namespace Audio
 
     bool channelPlaying(int32_t channel);
 }
-

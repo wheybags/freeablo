@@ -37,4 +37,3 @@ namespace DiabloExe
         std::vector<uint32_t> mNextLevelExp;
     };
 }
-

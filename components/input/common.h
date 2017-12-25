@@ -30,4 +30,3 @@ namespace Input
 
     int convertAsciiToRocketKey(int asciik);
 }
-

@@ -34,4 +34,3 @@ namespace FAWorld
         HoverState(HoverType typeArg) : mType(typeArg) {}
     };
 }
-

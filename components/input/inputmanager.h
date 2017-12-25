@@ -91,4 +91,3 @@ namespace Input
         KeyboardModifiers mModifiers;
     };
 }
-

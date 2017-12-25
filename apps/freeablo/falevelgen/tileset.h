@@ -187,4 +187,3 @@ namespace FALevelGen
         void loadDoorMap(Settings::Settings& settings);
     };
 }
-
