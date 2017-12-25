@@ -44,4 +44,3 @@ namespace FAWorld
         bool mAdjacent = false;
     };
 }
-

@@ -132,4 +132,3 @@ namespace FAWorld
         friend class CharacterStatsBase;
     };
 }
-

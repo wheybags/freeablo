@@ -26,4 +26,3 @@ namespace Cel
         std::vector<Colour> mRawImage;
     };
 }
-

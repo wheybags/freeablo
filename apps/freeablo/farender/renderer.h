@@ -149,4 +149,3 @@ namespace FARender
         boost::container::flat_map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
     };
 }
-

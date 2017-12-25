@@ -46,4 +46,3 @@ namespace Level
         friend int32_t& get(int32_t x, int32_t y, Dun& dun);
     };
 }
-

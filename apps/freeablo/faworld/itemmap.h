@@ -98,4 +98,3 @@ namespace FAWorld
         friend class GameLevel;
     };
 }
-

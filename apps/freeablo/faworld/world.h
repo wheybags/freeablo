@@ -129,4 +129,3 @@ namespace FAWorld
         int32_t mNextId = 1;
     };
 }
-

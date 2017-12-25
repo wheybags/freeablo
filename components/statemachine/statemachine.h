@@ -73,4 +73,3 @@ namespace StateMachine
         E* mEntity;
     };
 }
-

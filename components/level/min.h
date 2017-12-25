@@ -20,4 +20,3 @@ namespace Level
         std::vector<std::vector<int16_t>> mPillars;
     };
 }
-

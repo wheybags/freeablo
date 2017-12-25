@@ -20,4 +20,3 @@ namespace Input
         bool shift, ctrl, alt;
     };
 }
-

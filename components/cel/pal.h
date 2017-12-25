@@ -36,4 +36,3 @@ namespace Cel
         std::vector<Colour> contents;
     };
 }
-

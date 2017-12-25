@@ -53,4 +53,3 @@ namespace FAGui
         Engine::EngineMain& mEngine;
     };
 }
-

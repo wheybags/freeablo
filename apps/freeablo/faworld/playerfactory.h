@@ -26,4 +26,3 @@ namespace FAWorld
         const DiabloExe::DiabloExe& mExe;
     };
 }
-

@@ -145,4 +145,3 @@ namespace FARender
         uint32_t mSpriteGroupCurrentBlockIndex = 0;
     };
 }
-

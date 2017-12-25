@@ -128,4 +128,3 @@ namespace Settings
         boost::property_tree::ptree mUserPropertyTree;
     };
 }
-

@@ -100,4 +100,3 @@ namespace FAWorld
         std::unique_ptr<ItemMap> mItemMap;
     };
 }
-

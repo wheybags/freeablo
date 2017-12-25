@@ -51,4 +51,3 @@ namespace FAGui
         std::vector<std::string> mWords;
     };
 }
-

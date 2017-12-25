@@ -70,4 +70,3 @@ namespace Serial
 
     using ScopedCategorySaver = ScopedCategory<Saver>;
 }
-

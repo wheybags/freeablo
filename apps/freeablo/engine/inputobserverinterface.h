@@ -45,4 +45,3 @@ namespace Engine
         virtual void notify(MouseInputAction action, Misc::Point mousePosition) = 0;
     };
 }
-

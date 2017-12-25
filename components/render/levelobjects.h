@@ -44,4 +44,3 @@ namespace Render
         friend std::vector<LevelObject>& get(int32_t x, int32_t y, LevelObjects& obj);
     };
 }
-

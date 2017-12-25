@@ -38,4 +38,3 @@ namespace Render
         virtual void setImmortal(uint32_t index, bool immortal) = 0;
     };
 }
-

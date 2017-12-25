@@ -1,5 +1,5 @@
 
-# pragma once
+#pragma once
 
 #include <map>
 #include <settings/settings.h>
@@ -187,4 +187,3 @@ namespace FALevelGen
         void loadDoorMap(Settings::Settings& settings);
     };
 }
-

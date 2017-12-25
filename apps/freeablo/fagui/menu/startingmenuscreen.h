@@ -26,4 +26,3 @@ namespace FAGui
         std::unique_ptr<FARender::AnimationPlayer> mFocus42;
     };
 }
-

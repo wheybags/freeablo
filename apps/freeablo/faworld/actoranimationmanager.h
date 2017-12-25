@@ -67,4 +67,3 @@ namespace FAWorld
         int32_t mInterruptedAnimationFrame = 0;
     };
 }
-

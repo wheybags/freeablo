@@ -65,4 +65,3 @@ namespace NuklearMisc
         friend class GuiSprite;
     };
 }
-

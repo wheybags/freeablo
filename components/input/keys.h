@@ -150,4 +150,3 @@ namespace Input
         KEY_MIDDLE_MOUSE = 402
     };
 }
-

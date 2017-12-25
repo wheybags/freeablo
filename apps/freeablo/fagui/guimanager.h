@@ -140,4 +140,3 @@ namespace FAGui
         std::unique_ptr<MenuHandler> mMenuHandler;
     };
 }
-

@@ -26,4 +26,3 @@ namespace Cel
         CelDecoder mDecoder;
     };
 }
-

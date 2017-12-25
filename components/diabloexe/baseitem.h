@@ -56,4 +56,3 @@ namespace DiabloExe
         friend class DiabloExe;
     };
 }
-

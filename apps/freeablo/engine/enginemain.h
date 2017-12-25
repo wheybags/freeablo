@@ -55,4 +55,3 @@ namespace Engine
         bool inGame = false;
     };
 }
-

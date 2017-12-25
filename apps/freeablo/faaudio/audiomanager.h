@@ -44,4 +44,3 @@ namespace FAAudio
         Audio::Music* mCurrentMusic;
     };
 }
-
