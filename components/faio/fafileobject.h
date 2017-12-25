@@ -1,7 +1,6 @@
 /// this is just a RAII wrapper class for faio api functions.
 
-#ifndef FAFILEWRAPPER_H
-#define FAFILEWRAPPER_H
+#pragma once
 
 #include "faio.h"
 
@@ -39,4 +38,3 @@ namespace FAIO
     };
 }
 
-#endif

@@ -1,5 +1,5 @@
-#ifndef PAL_H
-#define PAL_H
+
+#pragma once
 
 #include <stdint.h>
 #include <string>
@@ -37,4 +37,3 @@ namespace Cel
     };
 }
 
-#endif

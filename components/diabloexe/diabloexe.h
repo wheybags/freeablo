@@ -1,5 +1,5 @@
-#ifndef DIABLO_EXE_H
-#define DIABLO_EXE_H
+
+#pragma once
 
 #include <array>
 #include <map>
@@ -92,4 +92,3 @@ namespace DiabloExe
     };
 }
 
-#endif

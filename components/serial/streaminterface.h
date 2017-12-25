@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <cstdint>
@@ -45,3 +46,4 @@ namespace Serial
         virtual void endCategory(const std::string& name) { UNUSED_PARAM(name); }
     };
 }
+

@@ -1,5 +1,5 @@
-#ifndef CEL_DECODING_H
-#define CEL_DECODING_H
+
+#pragma once
 
 #include "celframe.h"
 #include "pal.h"
@@ -72,4 +72,3 @@ namespace Cel
     };
 }
 
-#endif

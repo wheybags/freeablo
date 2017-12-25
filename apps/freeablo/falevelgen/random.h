@@ -1,7 +1,9 @@
-#ifndef FA_RANDOM_H
-#define FA_RANDOM_H
+
+#pragma once
+
 #include <initializer_list>
 #include <vector>
+
 namespace FALevelGen
 {
     void FAsrand(int seed);
@@ -31,4 +33,3 @@ namespace FALevelGen
     };
 }
 
-#endif

@@ -1,5 +1,6 @@
-#ifndef PREFIX_H
-#define PREFIX_H
+
+#pragma once
+
 #include <stdint.h>
 
 #include <faio/fafileobject.h>
@@ -38,4 +39,3 @@ namespace DiabloExe
     };
 }
 
-#endif // PREFIX_H

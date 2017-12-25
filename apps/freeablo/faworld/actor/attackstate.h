@@ -1,5 +1,5 @@
-#ifndef ACTOR_ATTACKSTATE_H
-#define ACTOR_ATTACKSTATE_H
+
+#pragma once
 
 #include <misc/misc.h>
 #include <statemachine/statemachine.h>
@@ -24,4 +24,3 @@ namespace FAWorld
     }
 }
 
-#endif

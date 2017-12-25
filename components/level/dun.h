@@ -1,5 +1,5 @@
-#ifndef DUN_FILE_H
-#define DUN_FILE_H
+
+#pragma once
 
 #include <stdint.h>
 #include <string>
@@ -47,4 +47,3 @@ namespace Level
     };
 }
 
-#endif

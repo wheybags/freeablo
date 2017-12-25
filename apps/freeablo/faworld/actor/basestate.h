@@ -1,5 +1,5 @@
-#ifndef ACTOR_BASESTATE_H
-#define ACTOR_BASESTATE_H
+
+#pragma once
 
 #include <boost/optional.hpp>
 #include <misc/misc.h>
@@ -23,4 +23,3 @@ namespace FAWorld
     }
 }
 
-#endif

@@ -1,5 +1,6 @@
-#ifndef ITEM_H
-#define ITEM_H
+
+#pragma once
+
 #include <cel/celfile.h>
 #include <cel/celframe.h>
 #include <diabloexe/affix.h>
@@ -297,4 +298,4 @@ namespace FAWorld
         std::string mDropItemGraphicsPath;
     };
 }
-#endif // ITEM_H
+

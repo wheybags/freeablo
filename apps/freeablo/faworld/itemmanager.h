@@ -1,5 +1,5 @@
-#ifndef ITEMMANAGER_H
-#define ITEMMANAGER_H
+
+#pragma once
 
 #include <boost/program_options.hpp>
 #include <diabloexe/diabloexe.h>
@@ -61,4 +61,3 @@ namespace FAWorld
     };
 }
 
-#endif // ITEMMANAGER_H

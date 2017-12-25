@@ -1,5 +1,5 @@
-#ifndef FAWORLD_LEVEL_H
-#define FAWORLD_LEVEL_H
+
+#pragma once
 
 #include <level/level.h>
 #include <unordered_map>
@@ -101,4 +101,3 @@ namespace FAWorld
     };
 }
 
-#endif

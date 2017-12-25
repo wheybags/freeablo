@@ -1,5 +1,5 @@
-#ifndef PLAYERFACTORY_H
-#define PLAYERFACTORY_H
+
+#pragma once
 
 #include "../components/diabloexe/diabloexe.h"
 #include <string>
@@ -27,4 +27,3 @@ namespace FAWorld
     };
 }
 
-#endif

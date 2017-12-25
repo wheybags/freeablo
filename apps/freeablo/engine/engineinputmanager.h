@@ -1,5 +1,5 @@
-#ifndef FA_INPUT_H
-#define FA_INPUT_H
+
+#pragma once
 
 #include "../components/misc/misc.h"
 #include "../faworld/actoranimationmanager.h"
@@ -65,4 +65,3 @@ namespace Engine
     };
 }
 
-#endif // FA_INPUT_H

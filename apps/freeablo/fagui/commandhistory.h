@@ -1,5 +1,5 @@
-#ifndef COMMAND_HISTORY_H
-#define COMMAND_HISTORY_H
+
+#pragma once
 
 #include <iterator>
 #include <list>
@@ -28,4 +28,3 @@ namespace FAGui
     };
 }
 
-#endif

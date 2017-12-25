@@ -1,4 +1,6 @@
+
 #pragma once
+
 #include <memory>
 
 namespace DiabloExe
@@ -51,3 +53,4 @@ namespace FAGui
         Engine::EngineMain& mEngine;
     };
 }
+

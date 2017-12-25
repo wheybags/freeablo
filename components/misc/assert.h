@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <stdio.h>
@@ -22,3 +23,4 @@
 #else
 #define debug_assert(cond) release_assert(cond)
 #endif
+

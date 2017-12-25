@@ -1,5 +1,5 @@
-#ifndef SPRITE_MANAGER_H
-#define SPRITE_MANAGER_H
+
+#pragma once
 
 #include "spritecache.h"
 
@@ -79,4 +79,3 @@ namespace FARender
     };
 }
 
-#endif

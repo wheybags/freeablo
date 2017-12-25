@@ -1,5 +1,6 @@
-#ifndef BASEITEM_H
-#define BASEITEM_H
+
+#pragma once
+
 #include <stdint.h>
 
 #include <faio/fafileobject.h>
@@ -56,4 +57,3 @@ namespace DiabloExe
     };
 }
 
-#endif // BASEITEM_H

@@ -1,5 +1,5 @@
-#ifndef AUTOCOMPLETE_H
-#define AUTOCOMPLETE_H
+
+#pragma once
 
 #include <iostream>
 #include <map>
@@ -52,4 +52,3 @@ namespace FAGui
     };
 }
 
-#endif

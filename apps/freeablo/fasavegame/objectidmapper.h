@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <cstdint>
@@ -19,3 +20,4 @@ namespace FASaveGame
         std::unordered_map<std::string, std::function<void*(GameLoader&)>> mMappings;
     };
 }
+

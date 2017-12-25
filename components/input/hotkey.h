@@ -1,5 +1,5 @@
-#ifndef HOTKEY_H
-#define HOTKEY_H
+
+#pragma once
 
 #include <string>
 
@@ -21,4 +21,3 @@ namespace Input
     };
 }
 
-#endif /* HOTKEY_H */

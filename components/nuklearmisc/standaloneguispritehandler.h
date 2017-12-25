@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <fa_nuklear.h>
@@ -64,3 +65,4 @@ namespace NuklearMisc
         friend class GuiSprite;
     };
 }
+

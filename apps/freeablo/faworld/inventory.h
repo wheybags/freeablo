@@ -1,5 +1,5 @@
-#ifndef INVENTORY_H
-#define INVENTORY_H
+
+#pragma once
 
 #include "item.h"
 #include <diabloexe/diabloexe.h>
@@ -133,4 +133,3 @@ namespace FAWorld
     };
 }
 
-#endif // INVENTORY_H

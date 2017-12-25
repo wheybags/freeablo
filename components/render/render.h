@@ -1,5 +1,5 @@
-#ifndef RENDER_H
-#define RENDER_H
+
+#pragma once
 
 #include <stdint.h>
 
@@ -139,4 +139,3 @@ namespace Render
     void clear(int r = 0, int g = 0, int b = 255);
 }
 
-#endif

@@ -1,4 +1,6 @@
+
 #pragma once
+
 #include "fa_nuklear.h"
 
 #include <array>
@@ -51,3 +53,4 @@ namespace FARender
         friend class Renderer;
     };
 }
+

@@ -1,5 +1,5 @@
-#ifndef FACTION_H
-#define FACTION_H
+
+#pragma once
 
 #include <cstdint>
 
@@ -36,4 +36,3 @@ namespace FAWorld
     };
 }
 
-#endif

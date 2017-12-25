@@ -1,4 +1,6 @@
+
 #pragma once
+
 #include "menuscreen.h"
 #include <memory>
 
@@ -24,3 +26,4 @@ namespace FAGui
         std::unique_ptr<FARender::AnimationPlayer> mFocus42;
     };
 }
+

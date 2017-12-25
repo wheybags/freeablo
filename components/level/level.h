@@ -1,5 +1,5 @@
-#ifndef LEVEL_H
-#define LEVEL_H
+
+#pragma once
 
 #include "baseitemmanager.h"
 #include "dun.h"
@@ -105,4 +105,3 @@ namespace Level
     };
 }
 
-#endif
