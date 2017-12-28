@@ -124,7 +124,6 @@ namespace Engine
                 mWorld->setLevel(currentLevel);
                 if (variables["invuln"].as<std::string>() == "on")
                     mPlayer->mInvuln = true;
-                mWorld->addCurrentPlayer(mPlayer);
             }
         }
         if (inGame)

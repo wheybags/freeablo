@@ -30,6 +30,24 @@ namespace FAWorld
         invalid,
     };
 
+    enum class ItemType
+    {
+        misc = 0,
+        sword,
+        axe,
+        bow,
+        mace,
+        shield,
+        lightArmor,
+        helm,
+        mediumArmor,
+        heavyArmor,
+        staff,
+        gold,
+        ring,
+        amulet,
+    };
+
     class Inventory;
     class ItemPosition;
     class Item
@@ -146,23 +164,6 @@ namespace FAWorld
 
         typedef enum { itWEAPON = 1, itARMOUR = 2, itPOT = 3, itGOLD = 4, itNOVELTY = 5 } itemType;
 
-        typedef enum {
-            icOther,
-            icSword,
-            icAxe,
-            icBow,
-            icBlunt,
-            icShield,
-            icLightArmour,
-            icHelm,
-            icMidArmour,
-            icHeavyArmour,
-            icStave,
-            icGold,
-            icRing,
-            icAmulet
-        } itemCode;
-
         uint32_t getActiveTrigger() const;
         uint8_t getReqStr() const;
         uint8_t getReqMagic() const;
@@ -192,7 +193,7 @@ namespace FAWorld
         uint32_t getEffect5() const;
         uint32_t getMinRange5() const;
         uint32_t getMaxRange5() const;
-        itemCode getCode() const;
+        ItemType type() const;
         ItemEquipType getEquipLoc() const;
         itemType getType() const;
         uint32_t getGraphicValue() const;
@@ -204,11 +205,11 @@ namespace FAWorld
         DiabloExe::Affix mAffix;
 
         uint32_t mActiveTrigger;
-        itemType mType;
+        itemType mClass;
         ItemEquipType mEquipLoc;
         uint32_t mGraphicValue;
 
-        itemCode mCode;
+        ItemType mType;
         uint8_t mUniqCode;
         std::string mName;
         std::string mSecondName;

@@ -14,14 +14,14 @@ namespace DiabloExe
     public:
         uint32_t activTrigger;
 
-        uint8_t itemType;
+        uint8_t itemClass;
         uint8_t equipLoc;
 
         uint16_t unknown0;
 
         uint32_t graphicValue;
 
-        uint8_t itemCode;
+        uint8_t type;
         uint8_t uniqCode;
         uint16_t unknown1;
 

@@ -46,11 +46,11 @@ namespace FAWorld
 
         mActiveTrigger = item.activTrigger;
 
-        mType = static_cast<itemType>(item.itemType);
+        mClass = static_cast<itemType>(item.itemClass);
         mEquipLoc = static_cast<ItemEquipType>(item.equipLoc);
         mGraphicValue = item.graphicValue;
 
-        mCode = static_cast<itemCode>(item.itemCode);
+        mType = static_cast<ItemType>(item.type);
         mUniqCode = item.uniqCode;
         mName = item.itemName;
         mSecondName = item.itemSecondName;
@@ -77,7 +77,7 @@ namespace FAWorld
         mSellPrice = item.price2;
         mDropItemGraphicsPath = item.dropItemGraphicsPath;
 
-        if (mType != itGOLD)
+        if (mClass != itGOLD)
         {
 
             mGraphicValue += 11;
@@ -171,34 +171,34 @@ namespace FAWorld
     std::string Item::getFlipSoundPath() const
     {
         // TODO: add book, pot, scroll
-        switch (getCode())
+        switch (type())
         {
-            case icOther:
+            case ItemType::misc:
                 return "";
-            case icSword:
+            case ItemType::sword:
                 return "sfx/items/flipswor.wav";
-            case icAxe:
+            case ItemType::axe:
                 return "sfx/items/flipaxe.wav";
-            case icBow:
+            case ItemType::bow:
                 return "sfx/items/flipbow.wav";
-            case icBlunt:
+            case ItemType::mace:
                 return "sfx/items/flipswor.wav"; // TODO: check
-            case icShield:
+            case ItemType::shield:
                 return "sfx/items/flipshld.wav";
-            case icLightArmour:
+            case ItemType::lightArmor:
                 return "sfx/items/fliplarm.wav";
-            case icHelm:
+            case ItemType::helm:
                 return "sfx/items/flipcap.wav";
-            case icMidArmour:
+            case ItemType::mediumArmor:
                 return "sfx/items/fliplarm.wav"; // TODO: check
-            case icHeavyArmour:
+            case ItemType::heavyArmor:
                 return "sfx/items/flipharm.wav";
-            case icStave:
+            case ItemType::staff:
                 return "sfx/items/flipstaf.wav";
-            case icGold:
+            case ItemType::gold:
                 return "sfx/items/gold.wav"; // also gold1.cel
-            case icRing:
-            case icAmulet:
+            case ItemType::ring:
+            case ItemType::amulet:
                 return "sfx/items/flipring.wav";
         }
         return "";
@@ -206,7 +206,7 @@ namespace FAWorld
 
     FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(getFlipAnimationPath()); }
 
-    bool Item::isBeltEquippable() const { return mSizeX == 1 && mSizeY == 1 && mUseOnce && mCode != icGold; }
+    bool Item::isBeltEquippable() const { return mSizeX == 1 && mSizeY == 1 && mUseOnce && mType != ItemType::gold; }
 
     uint32_t Item::getActiveTrigger() const { return mActiveTrigger; }
     uint8_t Item::getReqStr() const { return mReqStr; }
@@ -263,11 +263,11 @@ namespace FAWorld
 
     uint32_t Item::getMaxRange5() const { return mMaxRange5; }
 
-    Item::itemCode Item::getCode() const { return mCode; }
+    ItemType Item::type() const { return mType; }
 
     ItemEquipType Item::getEquipLoc() const { return mEquipLoc; }
 
-    Item::itemType Item::getType() const { return mType; }
+    Item::itemType Item::getType() const { return mClass; }
     uint32_t Item::getGraphicValue() const { return mGraphicValue; }
 
     void Item::setUniqueId(uint32_t mUniqueId) { this->mUniqueId = mUniqueId; }

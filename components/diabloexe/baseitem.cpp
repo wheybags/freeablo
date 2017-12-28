@@ -13,14 +13,14 @@ namespace DiabloExe
     {
         activTrigger = exe.read32();
 
-        itemType = exe.read8();
+        itemClass = exe.read8();
         equipLoc = exe.read8();
 
         unknown0 = exe.read16();
 
         graphicValue = exe.read32();
 
-        itemCode = exe.read8();
+        type = exe.read8();
         uniqCode = exe.read8();
 
         unknown1 = exe.read16();
@@ -63,10 +63,10 @@ namespace DiabloExe
         std::stringstream ss;
         ss << "{" << std::endl
            << "\tactiveTrigger: " << +activTrigger << "," << std::endl
-           << "\titemType: " << +itemType << "," << std::endl
+           << "\titemType: " << +itemClass << "," << std::endl
            << "\tequipLoc: " << +equipLoc << "," << std::endl
            << "\tgraphicValue: " << +graphicValue << "," << std::endl
-           << "\titemCode: " << +itemCode << "," << std::endl
+           << "\titemCode: " << +type << "," << std::endl
            << "\tuniqCode: " << +uniqCode << "," << std::endl
            << "\tunknown0: " << +unknown0 << "," << std::endl
            << "\tunknown1: " << +unknown1 << "," << std::endl

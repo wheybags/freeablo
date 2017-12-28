@@ -86,21 +86,21 @@ namespace FAWorld
         bool inDungeon = false;
 
         std::string armour, weapon;
-        switch (mInventory.mBody.getCode())
+        switch (mInventory.mBody.type())
         {
-            case Item::icHeavyArmour:
+            case ItemType::heavyArmor:
             {
                 armour = "h";
                 break;
             }
 
-            case Item::icMidArmour:
+            case ItemType::mediumArmor:
             {
                 armour = "m";
                 break;
             }
 
-            case Item::icLightArmour:
+            case ItemType::lightArmor:
             default:
             {
                 armour = "l";
@@ -119,9 +119,9 @@ namespace FAWorld
                 hand = mInventory.mLeftHand;
             else
                 hand = mInventory.mRightHand;
-            switch (hand.getCode())
+            switch (hand.type())
             {
-                case Item::icAxe:
+                case ItemType::axe:
                 {
                     if (hand.getEquipLoc() == ItemEquipType::oneHanded)
                         weapon = "s";
@@ -130,25 +130,25 @@ namespace FAWorld
                     break;
                 }
 
-                case Item::icBlunt:
+                case ItemType::mace:
                 {
                     weapon = "m";
                     break;
                 }
 
-                case Item::icBow:
+                case ItemType::bow:
                 {
                     weapon = "b";
                     break;
                 }
 
-                case Item::icShield:
+                case ItemType::shield:
                 {
                     weapon = "u";
                     break;
                 }
 
-                case Item::icSword:
+                case ItemType::sword:
                 {
                     weapon = "s";
                     break;
@@ -164,16 +164,16 @@ namespace FAWorld
 
         else if (!mInventory.mLeftHand.isEmpty() && !mInventory.mRightHand.isEmpty())
         {
-            if ((mInventory.mLeftHand.getCode() == Item::icSword && mInventory.mRightHand.getCode() == Item::icShield) ||
-                (mInventory.mLeftHand.getCode() == Item::icShield && mInventory.mRightHand.getCode() == Item::icSword))
+            if ((mInventory.mLeftHand.type() == ItemType::sword && mInventory.mRightHand.type() == ItemType::shield) ||
+                (mInventory.mLeftHand.type() == ItemType::shield && mInventory.mRightHand.type() == ItemType::sword))
                 weapon = "d";
 
-            else if (mInventory.mLeftHand.getCode() == Item::icBow && mInventory.mRightHand.getCode() == Item::icBow)
+            else if (mInventory.mLeftHand.type() == ItemType::bow && mInventory.mRightHand.type() == ItemType::bow)
                 weapon = "b";
 
-            else if (mInventory.mLeftHand.getCode() == Item::icStave && mInventory.mRightHand.getCode() == Item::icStave)
+            else if (mInventory.mLeftHand.type() == ItemType::staff && mInventory.mRightHand.type() == ItemType::staff)
                 weapon = "t";
-            else if (mInventory.mLeftHand.getCode() == Item::icBlunt || mInventory.mRightHand.getCode() == Item::icBlunt)
+            else if (mInventory.mLeftHand.type() == ItemType::mace || mInventory.mRightHand.type() == ItemType::mace)
                 weapon = "h";
 
             release_assert(!weapon.empty()); // Empty weapon format
