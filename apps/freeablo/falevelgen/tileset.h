@@ -11,7 +11,7 @@
 namespace FALevelGen
 {
 
-    enum class TileSetEnum
+    enum class TileSetEnum : int32_t
     {
         // this block and the block after it are related
         // eg insideYWall MUST be equal to yWall + insideXWall
