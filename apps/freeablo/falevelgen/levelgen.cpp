@@ -477,8 +477,8 @@ namespace FALevelGen
                     fixExternalT = wallCount > 2;
                 }
 
-                if ((level[x][y + 1] == (int32_t)Basic::wall && level[x + 1][y] == (int32_t)Basic::wall &&
-                     level[x + 1][y + 1] == (int32_t)Basic::wall) || fixExternalT)
+                if ((level[x][y + 1] == (int32_t)Basic::wall && level[x + 1][y] == (int32_t)Basic::wall && level[x + 1][y + 1] == (int32_t)Basic::wall) ||
+                    fixExternalT)
                 {
                     level[x][y] = (int32_t)Basic::floor;
                     retval = true;
@@ -582,7 +582,7 @@ namespace FALevelGen
                 hole = true;
             }
             else if ((xAxis && getXY(i, otherCoord + add, level) != (int32_t)Basic::floor) ||
-                    (!xAxis && getXY(otherCoord + add, i, level) != (int32_t)Basic::floor))
+                     (!xAxis && getXY(otherCoord + add, i, level) != (int32_t)Basic::floor))
             {
                 if (hole)
                     region.resize(0);
@@ -605,15 +605,13 @@ namespace FALevelGen
 
                     if (xAxis)
                     {
-                        if (getXY(i - 1, otherCoord, level) == (int32_t)Basic::wall &&
-                            getXY(i + 1, otherCoord, level) == (int32_t)Basic::wall)
+                        if (getXY(i - 1, otherCoord, level) == (int32_t)Basic::wall && getXY(i + 1, otherCoord, level) == (int32_t)Basic::wall)
 
                             region.push_back(std::pair<int32_t, int32_t>(i, otherCoord));
                     }
                     else
                     {
-                        if (getXY(otherCoord, i - 1, level) == (int32_t)Basic::wall &&
-                            getXY(otherCoord, i + 1, level) == (int32_t)Basic::wall)
+                        if (getXY(otherCoord, i - 1, level) == (int32_t)Basic::wall && getXY(otherCoord, i + 1, level) == (int32_t)Basic::wall)
 
                             region.push_back(std::pair<int32_t, int32_t>(otherCoord, i));
                     }
@@ -870,8 +868,7 @@ namespace FALevelGen
 
         else if (val == (int32_t)TileSetEnum::bottomCorner + wallOffset)
         {
-            if (!isInsideWall && (getXY(x + 1, y + 1, tmpLevel) == (int32_t)Basic::blank ||
-                                  getXY(x + 1, y, tmpLevel) == (int32_t)Basic::blank ||
+            if (!isInsideWall && (getXY(x + 1, y + 1, tmpLevel) == (int32_t)Basic::blank || getXY(x + 1, y, tmpLevel) == (int32_t)Basic::blank ||
                                   getXY(x, y + 1, tmpLevel) == (int32_t)Basic::blank))
             {
                 if (isWall(x, y + 1, tmpLevel, isInsideWall))
