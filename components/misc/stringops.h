@@ -1,8 +1,7 @@
 // Taken from OpenMW: https://github.com/zinnschlag/openmw/blob/6fd4cdb5fb94db503b5d3bf7ddc30160397862ec/components/misc/stringops.hpp
 // License: GPLv3 https://github.com/zinnschlag/openmw/blob/6fd4cdb5fb94db503b5d3bf7ddc30160397862ec/GPL3.txt
 
-#ifndef MISC_STRINGOPS_H
-#define MISC_STRINGOPS_H
+#pragma once
 
 #include <algorithm>
 #include <cctype>
@@ -149,4 +148,3 @@ namespace Misc
         }
     };
 }
-#endif

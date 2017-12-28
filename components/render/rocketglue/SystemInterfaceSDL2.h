@@ -24,8 +24,8 @@
  * THE SOFTWARE.
  *
  */
-#ifndef SYSTEMINTEFACESDL2_H
-#define SYSTEMINTEFACESDL2_H
+
+#pragma once
 
 #include <Rocket/Core/Input.h>
 #include <Rocket/Core/SystemInterface.h>
@@ -38,4 +38,3 @@ public:
     float GetElapsedTime();
     bool LogMessage(Rocket::Core::Log::Type type, const Rocket::Core::String& message);
 };
-#endif

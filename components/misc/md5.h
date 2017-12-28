@@ -41,8 +41,7 @@
   1999-05-03 lpd Original version.
  */
 
-#ifndef md5_INCLUDED
-#define md5_INCLUDED
+#pragma once
 
 namespace Misc
 {
@@ -95,4 +94,3 @@ namespace Misc
     //}  /* end extern "C" */
     //#endif
 }
-#endif /* md5_INCLUDED */

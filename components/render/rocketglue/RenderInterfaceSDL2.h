@@ -24,8 +24,8 @@
  * THE SOFTWARE.
  *
  */
-#ifndef RENDERINTERFACESDL2_H
-#define RENDERINTERFACESDL2_H
+
+#pragma once
 
 #include <Rocket/Core/RenderInterface.h>
 #include <misc/disablewarn.h>
@@ -112,5 +112,3 @@ private:
 #endif
     }
 };
-
-#endif
