@@ -48,6 +48,16 @@ namespace FAWorld
         amulet,
     };
 
+    enum class ItemClass
+    {
+        none = 0,
+        weapon,
+        armor,
+        jewelryAndConsumable,
+        gold,
+        quest,
+    };
+
     class Inventory;
     class ItemPosition;
     class Item
@@ -162,8 +172,6 @@ namespace FAWorld
 
         bool mIsReal;
 
-        typedef enum { itWEAPON = 1, itARMOUR = 2, itPOT = 3, itGOLD = 4, itNOVELTY = 5 } itemType;
-
         uint32_t getActiveTrigger() const;
         uint8_t getReqStr() const;
         uint8_t getReqMagic() const;
@@ -193,9 +201,9 @@ namespace FAWorld
         uint32_t getEffect5() const;
         uint32_t getMinRange5() const;
         uint32_t getMaxRange5() const;
-        ItemType type() const;
+        ItemType getType() const;
         ItemEquipType getEquipLoc() const;
-        itemType getType() const;
+        ItemClass getClass() const;
         uint32_t getGraphicValue() const;
         static Item empty;
 
@@ -205,7 +213,7 @@ namespace FAWorld
         DiabloExe::Affix mAffix;
 
         uint32_t mActiveTrigger;
-        itemType mClass;
+        ItemClass mClass;
         ItemEquipType mEquipLoc;
         uint32_t mGraphicValue;
 

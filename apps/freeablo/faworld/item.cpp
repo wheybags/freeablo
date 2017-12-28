@@ -46,7 +46,7 @@ namespace FAWorld
 
         mActiveTrigger = item.activTrigger;
 
-        mClass = static_cast<itemType>(item.itemClass);
+        mClass = static_cast<ItemClass>(item.itemClass);
         mEquipLoc = static_cast<ItemEquipType>(item.equipLoc);
         mGraphicValue = item.graphicValue;
 
@@ -77,9 +77,8 @@ namespace FAWorld
         mSellPrice = item.price2;
         mDropItemGraphicsPath = item.dropItemGraphicsPath;
 
-        if (mClass != itGOLD)
+        if (mClass != ItemClass::gold)
         {
-
             mGraphicValue += 11;
             Cel::CelFrame frame = (*mObjcurs)[mGraphicValue];
             mSizeX = static_cast<uint8_t>(frame.mWidth / 28);
@@ -267,7 +266,7 @@ namespace FAWorld
 
     ItemEquipType Item::getEquipLoc() const { return mEquipLoc; }
 
-    Item::itemType Item::getType() const { return mClass; }
+    ItemClass Item::getType() const { return mClass; }
     uint32_t Item::getGraphicValue() const { return mGraphicValue; }
 
     void Item::setUniqueId(uint32_t mUniqueId) { this->mUniqueId = mUniqueId; }

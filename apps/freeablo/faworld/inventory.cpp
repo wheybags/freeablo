@@ -130,7 +130,7 @@ namespace FAWorld
                         // if it's not possible then this item equipping should also be deemed impossible.
                         if (otherHandItem.isEmpty())
                             return ExchangeResult{{hand}, {}};
-                        else if (handItem.getType() == Item::itWEAPON)
+                        else if (handItem.getType() == ItemClass::weapon)
                             return ExchangeResult{{hand}, {getOtherHand(hand)}};
                     }
                     if (handItem.getType() == item.getType())
@@ -270,7 +270,7 @@ namespace FAWorld
             return true;
         }
         // only for weapons, not shields
-        if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getType() == Item::itWEAPON)
+        if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getType() == ItemClass::weapon)
             for (auto hand_ptr : {&leftHand, &rightHand})
                 if (hand_ptr->isEmpty())
                 {
@@ -284,14 +284,14 @@ namespace FAWorld
         auto requiredYOrder = yorder::fromTop;
         switch (item.getType())
         {
-            case Item::itARMOUR:
+            case ItemClass::armor:
                 if (item.getEquipLoc() == ItemEquipType::oneHanded)
                     requiredXOrder = xorder::fromRight;
                 break;
-            case Item::itPOT: // TODO: scrolls
+            case ItemClass::jewelryAndConsumable: // TODO: scrolls
                 requiredYOrder = yorder::fromBottom;
                 break;
-            case Item::itGOLD:
+            case ItemClass::gold:
                 requiredYOrder = yorder::fromBottom;
                 requiredXOrder = xorder::fromRight;
                 break;
@@ -359,7 +359,7 @@ namespace FAWorld
 
         if (!isFit(item, placementTarget))
             return false;
-        
+
         auto requirements = needsToBeExchanged(item, placementTarget);
         if (requirements.NeedsToBeReplaced.size() > 1)
             return false;
