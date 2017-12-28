@@ -1,5 +1,5 @@
-#ifndef MIN_H
-#define MIN_H
+
+#pragma once
 
 #include <stdint.h>
 #include <string>
@@ -20,5 +20,3 @@ namespace Level
         std::vector<std::vector<int16_t>> mPillars;
     };
 }
-
-#endif

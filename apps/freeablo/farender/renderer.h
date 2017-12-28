@@ -1,5 +1,5 @@
-#ifndef FA_RENDERER_H
-#define FA_RENDERER_H
+
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -149,5 +149,3 @@ namespace FARender
         boost::container::flat_map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
     };
 }
-
-#endif

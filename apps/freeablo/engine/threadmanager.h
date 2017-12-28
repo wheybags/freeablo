@@ -1,5 +1,5 @@
-#ifndef THREAD_MANAGER_H
-#define THREAD_MANAGER_H
+
+#pragma once
 
 #include <boost/lockfree/spsc_queue.hpp>
 #include <string>
@@ -58,5 +58,3 @@ namespace Engine
         std::vector<uint32_t> mSpritesToPreload;
     };
 }
-
-#endif

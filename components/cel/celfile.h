@@ -1,5 +1,5 @@
-#ifndef CEL_FILE_H
-#define CEL_FILE_H
+
+#pragma once
 
 #include "celdecoder.h"
 #include "celframe.h"
@@ -26,5 +26,3 @@ namespace Cel
         CelDecoder mDecoder;
     };
 }
-
-#endif

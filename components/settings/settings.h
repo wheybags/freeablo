@@ -1,5 +1,5 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+
+#pragma once
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -128,5 +128,3 @@ namespace Settings
         boost::property_tree::ptree mUserPropertyTree;
     };
 }
-
-#endif // SETTINGS_H

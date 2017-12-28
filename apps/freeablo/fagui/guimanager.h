@@ -1,5 +1,6 @@
-#ifndef GUIMANAGER_H
-#define GUIMANAGER_H
+
+#pragma once
+
 #include "textcolor.h"
 #include <chrono>
 #include <functional>
@@ -139,5 +140,3 @@ namespace FAGui
         std::unique_ptr<MenuHandler> mMenuHandler;
     };
 }
-
-#endif

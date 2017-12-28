@@ -1,5 +1,5 @@
-#ifndef AUTOCOMPLETE_H
-#define AUTOCOMPLETE_H
+
+#pragma once
 
 #include <iostream>
 #include <map>
@@ -51,5 +51,3 @@ namespace FAGui
         std::vector<std::string> mWords;
     };
 }
-
-#endif

@@ -1,5 +1,5 @@
-#ifndef EXE_NPC_H
-#define EXE_NPC_H
+
+#pragma once
 
 #include <boost/optional/optional.hpp>
 #include <faio/fafileobject.h>
@@ -30,5 +30,3 @@ namespace DiabloExe
         friend class DiabloExe;
     };
 }
-
-#endif

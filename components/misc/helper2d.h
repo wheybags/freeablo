@@ -1,5 +1,5 @@
-#ifndef HELPER_2D_H
-#define HELPER_2D_H
+
+#pragma once
 
 #include <cstdint>
 
@@ -22,5 +22,3 @@ namespace Misc
         Retval operator[](int32_t y) { return func(x, y, parent); }
     };
 }
-
-#endif

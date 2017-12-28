@@ -1,5 +1,5 @@
-#ifndef AUDIO_H
-#define AUDIO_H
+
+#pragma once
 
 #include <string>
 
@@ -24,5 +24,3 @@ namespace Audio
 
     bool channelPlaying(int32_t channel);
 }
-
-#endif

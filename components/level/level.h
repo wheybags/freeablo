@@ -1,5 +1,5 @@
-#ifndef LEVEL_H
-#define LEVEL_H
+
+#pragma once
 
 #include "baseitemmanager.h"
 #include "dun.h"
@@ -104,5 +104,3 @@ namespace Level
         int32_t mNext;     ///< index of next level
     };
 }
-
-#endif

@@ -1,5 +1,5 @@
-#ifndef DIABLO_EXE_H
-#define DIABLO_EXE_H
+
+#pragma once
 
 #include <array>
 #include <map>
@@ -91,5 +91,3 @@ namespace DiabloExe
         std::unordered_map<std::string, FontData> mFontData;
     };
 }
-
-#endif

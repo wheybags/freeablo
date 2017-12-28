@@ -1,5 +1,5 @@
-#ifndef INVENTORY_H
-#define INVENTORY_H
+
+#pragma once
 
 #include "item.h"
 #include <diabloexe/diabloexe.h>
@@ -132,5 +132,3 @@ namespace FAWorld
         friend class CharacterStatsBase;
     };
 }
-
-#endif // INVENTORY_H

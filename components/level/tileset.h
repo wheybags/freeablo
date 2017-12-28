@@ -1,5 +1,5 @@
-#ifndef TIL_H
-#define TIL_H
+
+#pragma once
 
 #include <stdint.h>
 #include <string>
@@ -22,5 +22,3 @@ namespace Level
         std::vector<TilBlock> mBlocks;
     };
 }
-
-#endif

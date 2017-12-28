@@ -1,5 +1,5 @@
-#ifndef KEYS_H
-#define KEYS_H
+
+#pragma once
 
 namespace Input
 {
@@ -150,5 +150,3 @@ namespace Input
         KEY_MIDDLE_MOUSE = 402
     };
 }
-
-#endif

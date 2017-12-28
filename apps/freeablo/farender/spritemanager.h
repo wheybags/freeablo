@@ -1,5 +1,5 @@
-#ifndef SPRITE_MANAGER_H
-#define SPRITE_MANAGER_H
+
+#pragma once
 
 #include "spritecache.h"
 
@@ -78,5 +78,3 @@ namespace FARender
         std::set<uint32_t> mSpritesAlredyPreloaded;
     };
 }
-
-#endif

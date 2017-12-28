@@ -1,5 +1,5 @@
-#ifndef ACTORSTATS_H
-#define ACTORSTATS_H
+
+#pragma once
 
 #include <misc/maxcurrentitem.h>
 #include <stdint.h>
@@ -32,5 +32,3 @@ namespace FAWorld
         int32_t mAttackDamage = 3;
     };
 }
-
-#endif // ACTORSTATS_H

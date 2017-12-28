@@ -1,5 +1,5 @@
-#ifndef CEL_FRAME_H
-#define CEL_FRAME_H
+
+#pragma once
 
 #include <misc/helper2d.h>
 #include <stdint.h>
@@ -26,5 +26,3 @@ namespace Cel
         std::vector<Colour> mRawImage;
     };
 }
-
-#endif

@@ -1,5 +1,5 @@
-#ifndef SPRITE_CACHE_H
-#define SPRITE_CACHE_H
+
+#pragma once
 
 #include <atomic>
 #include <list>
@@ -145,5 +145,3 @@ namespace FARender
         uint32_t mSpriteGroupCurrentBlockIndex = 0;
     };
 }
-
-#endif

@@ -1,5 +1,5 @@
-#ifndef FA_MISC_H
-#define FA_MISC_H
+
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -108,5 +108,3 @@ namespace Misc
 }
 
 #define UNUSED_PARAM(x) (void)(x)
-
-#endif

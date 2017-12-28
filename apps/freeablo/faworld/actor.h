@@ -1,4 +1,6 @@
+
 #pragma once
+
 #include "../farender/animationplayer.h"
 #include "actoranimationmanager.h"
 #include "actorstats.h"

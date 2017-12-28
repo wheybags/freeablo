@@ -1,5 +1,5 @@
-#ifndef DRAW_COMMAND_H
-#define DRAW_COMMAND_H
+
+#pragma once
 
 #include <Rocket/Core.h>
 #include <misc/disablewarn.h>
@@ -34,5 +34,3 @@ struct DrawCommand
 
     bool enableScissor;
 };
-
-#endif

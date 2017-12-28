@@ -1,5 +1,5 @@
-#ifndef FA_INPUT_H
-#define FA_INPUT_H
+
+#pragma once
 
 #include "../components/misc/misc.h"
 #include "../faworld/actoranimationmanager.h"
@@ -64,5 +64,3 @@ namespace Engine
         std::vector<MouseInputObserverInterface*> mMouseObservers;
     };
 }
-
-#endif // FA_INPUT_H

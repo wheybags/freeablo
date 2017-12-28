@@ -1,5 +1,5 @@
-#ifndef DUN_FILE_H
-#define DUN_FILE_H
+
+#pragma once
 
 #include <stdint.h>
 #include <string>
@@ -46,5 +46,3 @@ namespace Level
         friend int32_t& get(int32_t x, int32_t y, Dun& dun);
     };
 }
-
-#endif

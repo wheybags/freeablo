@@ -1,5 +1,5 @@
-#ifndef HOTKEY_H
-#define HOTKEY_H
+
+#pragma once
 
 #include <string>
 
@@ -20,5 +20,3 @@ namespace Input
         bool shift, ctrl, alt;
     };
 }
-
-#endif /* HOTKEY_H */

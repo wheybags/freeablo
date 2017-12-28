@@ -1,5 +1,5 @@
-#ifndef FAIO_H
-#define FAIO_H
+
+#pragma once
 
 #include <stdint.h>
 #include <stdio.h>
@@ -63,5 +63,3 @@ namespace FAIO
     std::string readCStringFromWin32Binary(FAFile* file, size_t ptr, size_t offset);
     std::string getMPQFileName();
 }
-
-#endif

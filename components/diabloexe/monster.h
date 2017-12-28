@@ -1,5 +1,5 @@
-#ifndef MONSTER_H
-#define MONSTER_H
+
+#pragma once
 
 #include <stdint.h>
 
@@ -98,5 +98,3 @@ namespace DiabloExe
         friend class DiabloExe;
     };
 }
-
-#endif

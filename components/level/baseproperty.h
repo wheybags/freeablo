@@ -1,5 +1,6 @@
-#ifndef ITEM_H
-#define ITEM_H
+
+#pragma once
+
 namespace FAWorld
 {
     class Inventory;
@@ -21,4 +22,3 @@ namespace Level
         property_type mProperty;
     };
 }
-#endif // ITEM_H
