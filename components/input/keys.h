@@ -4,7 +4,7 @@
 namespace Input
 {
     // This enum is pretty much just taken from SDL1.2
-    enum Key
+    enum class Key
     {
         KEY_BACKSPACE = 8,
         KEY_TAB = 9,

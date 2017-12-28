@@ -12,13 +12,13 @@ namespace Settings
     const std::string Settings::USER_PATH = "resources/settings-user.ini";
     const std::string Settings::USER_DIR = "resources/";
 
-    Settings::Settings() : mMode(STANDARD_FILE) {}
+    Settings::Settings() : mMode(Mode::STANDARD_FILE) {}
 
     bool Settings::loadUserSettings()
     {
         clearSettings();
 
-        mMode = STANDARD_FILE;
+        mMode = Mode::STANDARD_FILE;
 
         // Load defaults
 
@@ -54,7 +54,7 @@ namespace Settings
     {
         clearSettings();
 
-        mMode = STANDARD_FILE;
+        mMode = Mode::STANDARD_FILE;
 
         if (!boost::filesystem::exists(path))
         {
@@ -86,7 +86,7 @@ namespace Settings
 
     bool Settings::save()
     {
-        if (mMode == FA_FILE)
+        if (mMode == Mode::FA_FILE)
         {
             std::cout << "Cannot save FAFile." << std::endl;
             return false;

@@ -116,7 +116,7 @@ namespace Settings
         void createFile(const std::string& path);
         void clearSettings();
 
-        enum Mode
+        enum class Mode
         {
             STANDARD_FILE,
             FA_FILE

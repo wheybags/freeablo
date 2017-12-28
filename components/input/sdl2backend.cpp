@@ -34,7 +34,7 @@ namespace Input
 
 #define CASE(val)                                                                                                                                              \
     case SDLK_##val:                                                                                                                                           \
-        key = KEY_##val;                                                                                                                                       \
+        key = Key::KEY_##val;                                                                                                                                  \
         break;
 
     Key getKey(int sdlk)
@@ -164,57 +164,57 @@ namespace Input
             CASE(UNDO);
 
             case SDLK_KP_0:
-                key = KEY_KP0;
+                key = Key::KEY_KP0;
                 break;
             case SDLK_KP_1:
-                key = KEY_KP1;
+                key = Key::KEY_KP1;
                 break;
             case SDLK_KP_2:
-                key = KEY_KP2;
+                key = Key::KEY_KP2;
                 break;
             case SDLK_KP_3:
-                key = KEY_KP3;
+                key = Key::KEY_KP3;
                 break;
             case SDLK_KP_4:
-                key = KEY_KP4;
+                key = Key::KEY_KP4;
                 break;
             case SDLK_KP_5:
-                key = KEY_KP5;
+                key = Key::KEY_KP5;
                 break;
             case SDLK_KP_6:
-                key = KEY_KP6;
+                key = Key::KEY_KP6;
                 break;
             case SDLK_KP_7:
-                key = KEY_KP7;
+                key = Key::KEY_KP7;
                 break;
             case SDLK_KP_8:
-                key = KEY_KP8;
+                key = Key::KEY_KP8;
                 break;
             case SDLK_KP_9:
-                key = KEY_KP9;
+                key = Key::KEY_KP9;
                 break;
 
             case SDLK_NUMLOCKCLEAR:
-                key = KEY_NUMLOCK;
+                key = Key::KEY_NUMLOCK;
                 break;
             case SDLK_SCROLLLOCK:
-                key = KEY_SCROLLOCK;
+                key = Key::KEY_SCROLLOCK;
                 break;
 
             case SDLK_RGUI:
-                key = KEY_RSUPER;
+                key = Key::KEY_RSUPER;
                 break;
             case SDLK_LGUI:
-                key = KEY_LSUPER;
+                key = Key::KEY_LSUPER;
                 break;
 
             case SDLK_PRINTSCREEN:
-                key = KEY_PRINT;
+                key = Key::KEY_PRINT;
                 break;
 
             default:
             {
-                key = KEY_UNDEF;
+                key = Key::KEY_UNDEF;
                 break;
             }
         }
@@ -227,13 +227,13 @@ namespace Input
         switch (sdlk)
         {
             case SDL_BUTTON_LEFT:
-                return KEY_LEFT_MOUSE;
+                return Key::KEY_LEFT_MOUSE;
             case SDL_BUTTON_RIGHT:
-                return KEY_RIGHT_MOUSE;
+                return Key::KEY_RIGHT_MOUSE;
             case SDL_BUTTON_MIDDLE:
-                return KEY_MIDDLE_MOUSE;
+                return Key::KEY_MIDDLE_MOUSE;
             default:
-                return KEY_UNDEF;
+                return Key::KEY_UNDEF;
         }
     }
 
@@ -347,7 +347,7 @@ namespace Input
                 case SDL_KEYDOWN:
                 {
                     Key key = getKey(event.vals.key);
-                    if (key != KEY_UNDEF)
+                    if (key != Key::KEY_UNDEF)
                     {
                         mKeyPress(key);
                     }
@@ -356,7 +356,7 @@ namespace Input
                 case SDL_KEYUP:
                 {
                     Key key = getKey(event.vals.key);
-                    if (key != KEY_UNDEF)
+                    if (key != Key::KEY_UNDEF)
                     {
                         mKeyRelease(key);
                     }
@@ -374,7 +374,7 @@ namespace Input
                 {
                     Key key = getMouseKey(event.vals.mouseButton.key);
 
-                    if (key != KEY_UNDEF)
+                    if (key != Key::KEY_UNDEF)
                         mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key, event.vals.mouseButton.numClicks > 1);
 
                     break;
