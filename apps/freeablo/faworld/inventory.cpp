@@ -130,10 +130,10 @@ namespace FAWorld
                         // if it's not possible then this item equipping should also be deemed impossible.
                         if (otherHandItem.isEmpty())
                             return ExchangeResult{{hand}, {}};
-                        else if (handItem.getType() == ItemClass::weapon)
+                        else if (handItem.getClass() == ItemClass::weapon)
                             return ExchangeResult{{hand}, {getOtherHand(hand)}};
                     }
-                    if (handItem.getType() == item.getType())
+                    if (handItem.getClass() == item.getClass())
                     {
                         // if it's shield, it is replaced with shield, if it's 1h weapon, it's replaced with it
                         // no matter which slot we clicked
@@ -270,7 +270,7 @@ namespace FAWorld
             return true;
         }
         // only for weapons, not shields
-        if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getType() == ItemClass::weapon)
+        if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getClass() == ItemClass::weapon)
             for (auto hand_ptr : {&leftHand, &rightHand})
                 if (hand_ptr->isEmpty())
                 {
@@ -282,7 +282,7 @@ namespace FAWorld
         // different orders of placement for different item types as found in original game:
         auto requiredXOrder = xorder::fromLeft;
         auto requiredYOrder = yorder::fromTop;
-        switch (item.getType())
+        switch (item.getClass())
         {
             case ItemClass::armor:
                 if (item.getEquipLoc() == ItemEquipType::oneHanded)
@@ -532,31 +532,4 @@ namespace FAWorld
         }
         std::cout << printbelt.str() << std::endl;
     }
-
-    void Inventory::collectEffects()
-    {
-        if (mActor == NULL)
-            return;
-        mItemEffects.clear();
-        mArmourClassTotal = 0;
-        mAttackDamageTotal = 0;
-
-        auto addEffectsAndStats = [this](const Item& item) {
-            mItemEffects.insert(mItemEffects.end(), item.mEffects.begin(), item.mEffects.end());
-            if (!item.isEmpty())
-            {
-                mArmourClassTotal += item.mArmourClass;
-                mAttackDamageTotal += item.mAttackDamage;
-            }
-        };
-
-        for (auto item_ptr : {&mHead, &mBody, &mAmulet, &mRightRing, &mLeftRing, &mLeftHand})
-            addEffectsAndStats(*item_ptr);
-        if (!(mLeftHand == mRightHand))
-        {
-            addEffectsAndStats(mRightHand);
-        }
-    }
-
-    std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>>& Inventory::getTotalEffects() { return mItemEffects; }
 }

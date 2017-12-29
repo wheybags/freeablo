@@ -93,16 +93,6 @@ namespace FAWorld
             mSizeY = 1;
             mMaxCount = 5000;
         }
-
-        if (affix != NULL)
-        {
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect0), mMaxRange0, mMinRange0, id));
-            mIsMagic = true;
-            mEffect0 = affix->mEffect;
-            mMaxRange0 = affix->mMaxEffect;
-            mMinRange0 = affix->mMinEffect;
-            mIsIdentified = isIdentified;
-        }
     }
     Item::Item(const DiabloExe::UniqueItem& item, uint32_t id)
     {
@@ -119,42 +109,12 @@ namespace FAWorld
         mQualityLevel = item.mQualityLevel;
         mName = item.mName;
 
-        mEffect0 = item.mEffect0;
-        mMinRange0 = item.mMinRange0;
-        mMaxRange0 = item.mMaxRange0;
-
-        mEffect1 = item.mEffect1;
-        mMinRange1 = item.mMinRange1;
-        mMaxRange1 = item.mMaxRange1;
-
-        mEffect2 = item.mEffect2;
-        mMinRange2 = item.mMinRange2;
-        mMaxRange2 = item.mMaxRange2;
-
-        mEffect3 = item.mEffect3;
-        mMinRange3 = item.mMinRange3;
-        mMaxRange3 = item.mMaxRange3;
-
-        mEffect4 = item.mEffect4;
-        mMinRange4 = item.mMinRange4;
-        mMaxRange4 = item.mMaxRange4;
-
-        mEffect5 = item.mEffect5;
-        mMinRange5 = item.mMinRange5;
-        mMaxRange5 = item.mMaxRange5;
-
-        if (mMaxRange0 != 0 || mEffect0 != 0 || mMinRange0 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect0), mMaxRange0, mMinRange0, id));
-        if (mMaxRange1 != 0 || mEffect1 != 0 || mMinRange1 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect1), mMaxRange1, mMinRange1, id));
-        if (mMaxRange2 != 0 || mEffect2 != 0 || mMinRange2 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect2), mMaxRange2, mMinRange2, id));
-        if (mMaxRange3 != 0 || mEffect3 != 0 || mMinRange3 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect3), mMaxRange3, mMinRange3, id));
-        if (mMaxRange4 != 0 || mEffect4 != 0 || mMinRange4 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect4), mMaxRange4, mMinRange4, id));
-        if (mMaxRange5 != 0 || mEffect5 != 0 || mMinRange5 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect5), mMaxRange5, mMinRange5, id));
+        for (int i = 0; i < 6; ++i)
+            {
+                mEffects[i].type = static_cast<ItemEffectType> (item.mEffectData[i][0]);
+                mEffects[i].min = item.mEffectData[i][1];
+                mEffects[i].max = item.mEffectData[i][2];
+            }
     }
 
     bool Item::isEmpty() const { return mEmpty; }
@@ -170,7 +130,7 @@ namespace FAWorld
     std::string Item::getFlipSoundPath() const
     {
         // TODO: add book, pot, scroll
-        switch (type())
+        switch (getType())
         {
             case ItemType::misc:
                 return "";
@@ -226,47 +186,11 @@ namespace FAWorld
     uint32_t Item::getBuyPrice() const { return mBuyPrice; }
     uint32_t Item::getSellPrice() const { return mSellPrice; }
 
-    uint32_t Item::getEffect0() const { return mEffect0; }
-
-    uint32_t Item::getMinRange0() const { return mMinRange0; }
-
-    uint32_t Item::getMaxRange0() const { return mMaxRange0; }
-
-    uint32_t Item::getEffect1() const { return mEffect1; }
-
-    uint32_t Item::getMinRange1() const { return mMinRange1; }
-
-    uint32_t Item::getMaxRange1() const { return mMaxRange1; }
-
-    uint32_t Item::getEffect2() const { return mEffect2; }
-
-    uint32_t Item::getMinRange2() const { return mMinRange2; }
-
-    uint32_t Item::getMaxRange2() const { return mMaxRange2; }
-
-    uint32_t Item::getEffect3() const { return mEffect3; }
-
-    uint32_t Item::getMinRange3() const { return mMinRange3; }
-
-    uint32_t Item::getMaxRange3() const { return mMaxRange3; }
-
-    uint32_t Item::getEffect4() const { return mEffect4; }
-
-    uint32_t Item::getMinRange4() const { return mMinRange4; }
-
-    uint32_t Item::getMaxRange4() const { return mMaxRange4; }
-
-    uint32_t Item::getEffect5() const { return mEffect5; }
-
-    uint32_t Item::getMinRange5() const { return mMinRange5; }
-
-    uint32_t Item::getMaxRange5() const { return mMaxRange5; }
-
-    ItemType Item::type() const { return mType; }
+    ItemType Item::getType() const { return mType; }
 
     ItemEquipType Item::getEquipLoc() const { return mEquipLoc; }
 
-    ItemClass Item::getType() const { return mClass; }
+    ItemClass Item::getClass() const { return mClass; }
     uint32_t Item::getGraphicValue() const { return mGraphicValue; }
 
     void Item::setUniqueId(uint32_t mUniqueId) { this->mUniqueId = mUniqueId; }

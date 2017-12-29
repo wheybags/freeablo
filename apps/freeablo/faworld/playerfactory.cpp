@@ -21,8 +21,6 @@ namespace FAWorld
         else
             createSorcerer(player);
 
-        player->getInventory().collectEffects();
-
         return player;
     }
 

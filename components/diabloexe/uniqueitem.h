@@ -2,8 +2,9 @@
 #pragma once
 
 #include <faio/fafileobject.h>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
+#include <array>
 
 namespace DiabloExe
 {
@@ -23,29 +24,7 @@ namespace DiabloExe
 
         uint32_t mGoldValue;
 
-        uint32_t mEffect0;
-        uint32_t mMinRange0;
-        uint32_t mMaxRange0;
-
-        uint32_t mEffect1;
-        uint32_t mMinRange1;
-        uint32_t mMaxRange1;
-
-        uint32_t mEffect2;
-        uint32_t mMinRange2;
-        uint32_t mMaxRange2;
-
-        uint32_t mEffect3;
-        uint32_t mMinRange3;
-        uint32_t mMaxRange3;
-
-        uint32_t mEffect4;
-        uint32_t mMinRange4;
-        uint32_t mMaxRange4;
-
-        uint32_t mEffect5;
-        uint32_t mMinRange5;
-        uint32_t mMaxRange5;
+        std::array<std::array<uint32_t, 3>, 6> mEffectData;
         UniqueItem() {}
 
     private:

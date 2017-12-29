@@ -86,7 +86,7 @@ namespace FAWorld
         bool inDungeon = false;
 
         std::string armour, weapon;
-        switch (mInventory.mBody.type())
+        switch (mInventory.mBody.getType())
         {
             case ItemType::heavyArmor:
             {
@@ -119,7 +119,7 @@ namespace FAWorld
                 hand = mInventory.mLeftHand;
             else
                 hand = mInventory.mRightHand;
-            switch (hand.type())
+            switch (hand.getType())
             {
                 case ItemType::axe:
                 {
@@ -164,16 +164,16 @@ namespace FAWorld
 
         else if (!mInventory.mLeftHand.isEmpty() && !mInventory.mRightHand.isEmpty())
         {
-            if ((mInventory.mLeftHand.type() == ItemType::sword && mInventory.mRightHand.type() == ItemType::shield) ||
-                (mInventory.mLeftHand.type() == ItemType::shield && mInventory.mRightHand.type() == ItemType::sword))
+            if ((mInventory.mLeftHand.getType() == ItemType::sword && mInventory.mRightHand.getType() == ItemType::shield) ||
+                (mInventory.mLeftHand.getType() == ItemType::shield && mInventory.mRightHand.getType() == ItemType::sword))
                 weapon = "d";
 
-            else if (mInventory.mLeftHand.type() == ItemType::bow && mInventory.mRightHand.type() == ItemType::bow)
+            else if (mInventory.mLeftHand.getType() == ItemType::bow && mInventory.mRightHand.getType() == ItemType::bow)
                 weapon = "b";
 
-            else if (mInventory.mLeftHand.type() == ItemType::staff && mInventory.mRightHand.type() == ItemType::staff)
+            else if (mInventory.mLeftHand.getType() == ItemType::staff && mInventory.mRightHand.getType() == ItemType::staff)
                 weapon = "t";
-            else if (mInventory.mLeftHand.type() == ItemType::mace || mInventory.mRightHand.type() == ItemType::mace)
+            else if (mInventory.mLeftHand.getType() == ItemType::mace || mInventory.mRightHand.getType() == ItemType::mace)
                 weapon = "h";
 
             release_assert(!weapon.empty()); // Empty weapon format

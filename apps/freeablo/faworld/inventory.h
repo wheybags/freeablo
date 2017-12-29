@@ -40,12 +40,11 @@ namespace FAWorld
 
         void dump();
 
-        void collectEffects();
         const Item& getItemAt(const EquipTarget& target) const;
         Item& getItemAt(const EquipTarget& target);
         uint32_t getTotalAttackDamage();
         uint32_t getTotalArmourClass();
-        std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>>& getTotalEffects();
+        std::vector<std::tuple<ItemEffectType, uint32_t, uint32_t, uint32_t>>& getTotalEffects();
         void itemSlotLeftMouseButtonDown(EquipTarget target);
         void beltMouseLeftButtonDown(double x);
         void inventoryMouseLeftButtonDown(double x, double y);
@@ -74,7 +73,6 @@ namespace FAWorld
         uint32_t mArmourClassTotal;
         uint32_t mAttackDamageTotal;
         Player* mActor;
-        std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>> mItemEffects;
         bool checkStatsRequirement(const Item& item) const;
         bool isFit(const Item& item, const EquipTarget& target) const;
         auto needsToBeExchanged(const Item& item, const EquipTarget& target) const -> ExchangeResult;

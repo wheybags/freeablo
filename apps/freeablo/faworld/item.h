@@ -8,6 +8,7 @@
 #include <diabloexe/uniqueitem.h>
 #include <tuple>
 #include <vector>
+#include <array>
 
 namespace FARender
 {
@@ -58,6 +59,100 @@ namespace FAWorld
         quest,
     };
 
+    // TODO: synchronize names with:
+    // https://github.com/sanctuary/notes/blob/72a0772e0d187d29117c4ddd6e6265cafc774a50/enums.h#L128
+    enum class ItemEffectType
+    {
+        IncPercentChanceToHit,
+        DecPercentChanceToHit,
+        IncPercentDamageDone,
+        DecPercentDamageDone,
+        IncPercentDamageDoneChanceToHit,
+        DecPercentDamageDoneChanceToHit,
+        IncPercentArmourClass,
+        DecPercentArmourClass,
+        IncPercentResistFire,
+        IncPercentResistLightning,
+        IncPercentResistMagic,
+        IncPercentResistAll,
+        Unknown6,
+        Unknown7,
+        ModSpellLevel,
+        IncCharges,
+        IncFireDamage,
+        IncLightningDamage,
+        Unknown8,
+        IncStrength,
+        DecStrength,
+        IncMagic,
+        DecMagic,
+        IncDexterity,
+        DecDexterity,
+        IncVitality,
+        DecVitality,
+        IncAllBasicStats,
+        DecAllBasicStats,
+        IncDamageTaken,
+        DecDamageTaken,
+        IncHP,
+        DecHP,
+        IncMana,
+        DecMana,
+        IncPercentDurability,
+        DecPercentDurability,
+        Indestructible,
+        IncLightRadius,
+        DecLightRadius,
+        Unknown0,
+        MultipleArrows,
+        IncPercentFireArrowDamage,
+        IncPercentLightningArrowDamage,
+        UniquePicture,
+        Thorns,
+        AllMana,
+        PlayerNoHeal,
+        Unknown1,
+        Unknown2,
+        Unknown3,
+        Unknown4,
+        HalfTrapDamage,
+        Knockback,
+        MonsterNoHeal,
+        PercentManaSteal,
+        PercentLifeSteal,
+        ArmourPenetration,
+        AttackSpeed0,
+        HitRecovery,
+        FastBlock,
+        IncDamageDone,
+        RandomArrowSpeed,
+        UnusualDamage,
+        AlteredDurability,
+        NoStrengthRequirment,
+        Spell,
+        AttackSpeed1,
+        OneHanded,
+        AntiDemon,
+        ZeroAllResist,
+        Unknown5,
+        ConstantLifeDrain,
+        PercentFixedLifeSteal,
+        Infravision,
+        SpecifiedArmourClass,
+        IncHPWithArmourClass,
+        IncArmourClassWithMana,
+        IncFireResistWithLevel,
+        DecArmourClass
+    };
+
+    class ItemEffect
+    {
+    public:
+        ItemEffectType type;
+        int min;
+        int max;
+    };
+
     class Inventory;
     class ItemPosition;
     class Item
@@ -66,93 +161,10 @@ namespace FAWorld
         friend class ItemPosition;
 
     public:
-        typedef enum {
-            IncPercentChanceToHit,
-            DecPercentChanceToHit,
-            IncPercentDamageDone,
-            DecPercentDamageDone,
-            IncPercentDamageDoneChanceToHit,
-            DecPercentDamageDoneChanceToHit,
-            IncPercentArmourClass,
-            DecPercentArmourClass,
-            IncPercentResistFire,
-            IncPercentResistLightning,
-            IncPercentResistMagic,
-            IncPercentResistAll,
-            Unknown6,
-            Unknown7,
-            ModSpellLevel,
-            IncCharges,
-            IncFireDamage,
-            IncLightningDamage,
-            Unknown8,
-            IncStrength,
-            DecStrength,
-            IncMagic,
-            DecMagic,
-            IncDexterity,
-            DecDexterity,
-            IncVitality,
-            DecVitality,
-            IncAllBasicStats,
-            DecAllBasicStats,
-            IncDamageTaken,
-            DecDamageTaken,
-            IncHP,
-            DecHP,
-            IncMana,
-            DecMana,
-            IncPercentDurability,
-            DecPercentDurability,
-            Indestructible,
-            IncLightRadius,
-            DecLightRadius,
-            Unknown0,
-            MultipleArrows,
-            IncPercentFireArrowDamage,
-            IncPercentLightningArrowDamage,
-            UniquePicture,
-            Thorns,
-            AllMana,
-            PlayerNoHeal,
-            Unknown1,
-            Unknown2,
-            Unknown3,
-            Unknown4,
-            HalfTrapDamage,
-            Knockback,
-            MonsterNoHeal,
-            PercentManaSteal,
-            PercentLifeSteal,
-            ArmourPenetration,
-            AttackSpeed0,
-            HitRecovery,
-            FastBlock,
-            IncDamageDone,
-            RandomArrowSpeed,
-            UnusualDamage,
-            AlteredDurability,
-            NoStrengthRequirment,
-            Spell,
-            AttackSpeed1,
-            OneHanded,
-            AntiDemon,
-            ZeroAllResist,
-            Unknown5,
-            ConstantLifeDrain,
-            PercentFixedLifeSteal,
-            Infravision,
-            SpecifiedArmourClass,
-            IncHPWithArmourClass,
-            IncArmourClassWithMana,
-            IncFireResistWithLevel,
-            DecArmourClass
-        } ItemEffect;
-
         bool isEmpty() const;
         Item();
         ~Item();
-        Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix = NULL, bool isIdentified = true);
+        Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix = nullptr, bool isIdentified = true);
         Item(const DiabloExe::UniqueItem& item, uint32_t id);
         std::string getName() const;
         void setUniqueId(uint32_t mUniqueId);
@@ -209,7 +221,6 @@ namespace FAWorld
 
     private:
         static Cel::CelFile* mObjcurs;
-        std::vector<std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>> mEffects;
         DiabloExe::Affix mAffix;
 
         uint32_t mActiveTrigger;
@@ -248,35 +259,7 @@ namespace FAWorld
 
         uint8_t mNumEffects;
 
-        uint32_t mEffect0;
-        uint32_t mMinRange0;
-        uint32_t mMaxRange0;
-        uint32_t mRange0;
-
-        uint32_t mEffect1;
-        uint32_t mMinRange1;
-        uint32_t mMaxRange1;
-        uint32_t mRange1;
-
-        uint32_t mEffect2;
-        uint32_t mMinRange2;
-        uint32_t mMaxRange2;
-        uint32_t mRange2;
-
-        uint32_t mEffect3;
-        uint32_t mMinRange3;
-        uint32_t mMaxRange3;
-        uint32_t mRange3;
-
-        uint32_t mEffect4;
-        uint32_t mMinRange4;
-        uint32_t mMaxRange4;
-        uint32_t mRange4;
-
-        uint32_t mEffect5;
-        uint32_t mMinRange5;
-        uint32_t mMaxRange5;
-        uint32_t mRange5;
+        std::array<ItemEffect, 5> mEffects;
 
         uint8_t mBaseId;
         uint32_t mUniqueId;
