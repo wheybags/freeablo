@@ -53,7 +53,7 @@ namespace FAWorld
         void teleport(GameLevel* level, Position pos);
         GameLevel* getLevel();
 
-        bool attack(Actor* enemy);
+        void attack(Actor* enemy);
 
         std::string getDieWav() const;
         std::string getHitWav() const;
