@@ -130,7 +130,7 @@ namespace Engine
         if (inGame)
         {
             mInputManager->registerKeyboardObserver(mWorld.get());
-            //mInputManager->registerMouseObserver(mWorld.get());
+            // mInputManager->registerMouseObserver(mWorld.get());
         }
 
         boost::asio::io_service io;
@@ -225,7 +225,7 @@ namespace Engine
     {
         inGame = true;
         mInputManager->registerKeyboardObserver(mWorld.get());
-        //mInputManager->registerMouseObserver(mWorld.get());
+        // mInputManager->registerMouseObserver(mWorld.get());
 
         // TODO: fix that variables like invuln are not applied in this case
         setupNewPlayer(mPlayerFactory->create(characterClass));
@@ -235,10 +235,7 @@ namespace Engine
 
     void EngineMain::stop() { mDone = true; }
 
-    void EngineMain::togglePause()
-    {
-        mPaused = !mPaused;
-    }
+    void EngineMain::togglePause() { mPaused = !mPaused; }
 
     void EngineMain::toggleNoclip() { mNoclip = !mNoclip; }
 }

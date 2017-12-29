@@ -248,8 +248,5 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    void DialogManager::quitDialog() const
-    {
-        mGuiManager.popDialogData();
-    }
+    void DialogManager::quitDialog() const { mGuiManager.popDialogData(); }
 }

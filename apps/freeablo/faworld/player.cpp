@@ -5,8 +5,8 @@
 #include "actorstats.h"
 #include "diabloexe/characterstats.h"
 #include "itemmap.h"
-#include "world.h"
 #include "playerbehaviour.h"
+#include "world.h"
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <string>

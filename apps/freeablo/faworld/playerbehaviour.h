@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "behaviour.h"
 #include "../engine/inputobserverinterface.h"
+#include "behaviour.h"
 
 namespace FAWorld
 {

@@ -335,9 +335,7 @@ namespace FAWorld
     void World::addCurrentPlayer(Player* player)
     {
         mCurrentPlayer = player;
-        mCurrentPlayer->talkRequested.connect([&](Actor* actor) {
-            mDlgManager->talk(actor);
-        });
+        mCurrentPlayer->talkRequested.connect([&](Actor* actor) { mDlgManager->talk(actor); });
     }
 
     void World::registerPlayer(Player* player)

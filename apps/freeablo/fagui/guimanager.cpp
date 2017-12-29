@@ -674,15 +674,9 @@ namespace FAGui
 
     void GuiManager::popDialogData() { mDialogs.pop_back(); }
 
-    void GuiManager::pushDialogData(DialogData&& data)
-    {
-        mDialogs.push_back(std::move(data));
-    }
+    void GuiManager::pushDialogData(DialogData&& data) { mDialogs.push_back(std::move(data)); }
 
-    bool GuiManager::isModalDlgShown() const
-    {
-        return !mDialogs.empty();
-    }
+    bool GuiManager::isModalDlgShown() const { return !mDialogs.empty(); }
 
     void GuiManager::togglePanel(PanelType type)
     {

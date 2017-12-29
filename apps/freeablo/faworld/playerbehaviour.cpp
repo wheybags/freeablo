@@ -1,7 +1,7 @@
 #include "playerbehaviour.h"
-#include "player.h"
 #include "../fagui/guimanager.h"
 #include "../farender/renderer.h"
+#include "player.h"
 #include <misc/assert.h>
 
 namespace FAWorld
@@ -38,10 +38,7 @@ namespace FAWorld
         mUnblockInput = false;
     }
 
-    void PlayerBehaviour::unblockInput()
-    {
-        mUnblockInput = true;
-    }
+    void PlayerBehaviour::unblockInput() { mUnblockInput = true; }
 
     void PlayerBehaviour::notify(Engine::MouseInputAction action, Misc::Point mousePosition, bool mouseDown)
     {
@@ -87,7 +84,8 @@ namespace FAWorld
                 }
                 else if (auto item = FAWorld::World::get()->targetedItem(mousePosition))
                 {
-                    mPlayer->mTarget = ItemTarget{FAWorld::World::get()->mGuiManager->isInventoryShown() ? ItemTarget::ActionType::toCursor : ItemTarget::ActionType::autoEquip, item};
+                    mPlayer->mTarget = ItemTarget{
+                        FAWorld::World::get()->mGuiManager->isInventoryShown() ? ItemTarget::ActionType::toCursor : ItemTarget::ActionType::autoEquip, item};
                 }
                 else
                 {
