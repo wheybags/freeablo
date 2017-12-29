@@ -100,8 +100,8 @@ namespace FAWorld
         Serial::ScopedCategorySaver cat("Actor", saver);
 
         mMoveHandler.save(saver);
-        mStats.save(saver);
         mAnimation.save(saver);
+        mStats.save(saver);
 
         saver.save(uint8_t(mFaction.getType()));
 

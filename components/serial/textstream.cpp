@@ -101,10 +101,14 @@ namespace Serial
         {
             mData >> c;
             tmp += c;
+
+            if (c == '\n')
+                mLine++;
         }
 
         mData >> c;
         release_assert(c == '\n'); // trailing newline
+        mLine++;
 
         mData >> std::skipws;
 
