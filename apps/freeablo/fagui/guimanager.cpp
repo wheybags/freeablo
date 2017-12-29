@@ -601,29 +601,40 @@ namespace FAGui
         smallText(ctx, mDescription.c_str(), mDescriptionColor);
     }
 
-    void GuiManager::updateGameUI(bool paused, nk_context* ctx)
+    void GuiManager::update(bool inGame, bool paused, nk_context* ctx)
     {
-        if (paused)
+        if (inGame)
         {
-            if (!mMenuHandler->isActive())
+            if (paused)
             {
-                mMenuHandler->setActiveScreen<PauseMenuScreen>();
+                if (!mMenuHandler->isActive())
+                    mMenuHandler->setActiveScreen<PauseMenuScreen>();
+
+                mMenuHandler->update(ctx);
             }
+            else if (mMenuHandler->isActive())
+            {
+                mMenuHandler->disable();
+            }
+
+            updateAnimations();
+            inventoryPanel(ctx);
+            spellsPanel(ctx);
+            questsPanel(ctx);
+            characterPanel(ctx);
+            bottomMenu(ctx);
+            dialog(ctx);
+        }
+        else
+        {
             mMenuHandler->update(ctx);
         }
-        else if (mMenuHandler->isActive())
-            mMenuHandler->disable();
 
-        updateAnimations();
-        inventoryPanel(ctx);
-        spellsPanel(ctx);
-        questsPanel(ctx);
-        characterPanel(ctx);
-        bottomMenu(ctx);
-        dialog(ctx);
+        if (isModalDlgShown() || mMenuHandler->isActive())
+            FAWorld::World::get()->blockInput();
+        else
+            FAWorld::World::get()->unblockInput();
     }
-
-    void GuiManager::updateMenuUI(nk_context* ctx) { mMenuHandler->update(ctx); }
 
     void GuiManager::setDescription(std::string text, TextColor color)
     {
@@ -663,14 +674,14 @@ namespace FAGui
 
     void GuiManager::popDialogData() { mDialogs.pop_back(); }
 
-    void GuiManager::pushDialogData(DialogData&& data) { mDialogs.push_back(std::move(data)); }
+    void GuiManager::pushDialogData(DialogData&& data)
+    {
+        mDialogs.push_back(std::move(data));
+    }
 
     bool GuiManager::isModalDlgShown() const
     {
-        if (!mDialogs.empty())
-            return true;
-
-        return false;
+        return !mDialogs.empty();
     }
 
     void GuiManager::togglePanel(PanelType type)

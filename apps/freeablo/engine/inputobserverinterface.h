@@ -29,7 +29,6 @@ namespace Engine
     {
         MOUSE_RELEASE,
         MOUSE_DOWN,
-        MOUSE_CLICK,
         MOUSE_MOVE,
     };
 
@@ -42,6 +41,6 @@ namespace Engine
     class MouseInputObserverInterface
     {
     public:
-        virtual void notify(MouseInputAction action, Misc::Point mousePosition) = 0;
+        virtual void notify(MouseInputAction action, Misc::Point mousePosition, bool mouseDown) = 0;
     };
 }

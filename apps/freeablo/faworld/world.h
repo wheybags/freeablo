@@ -62,7 +62,7 @@ namespace FAWorld
         Actor* targetedActor(Misc::Point screenPosition);
         void updateHover(const Misc::Point& mousePosition);
         void onMouseMove(const Misc::Point& mouse_position);
-        void notify(Engine::MouseInputAction action, Misc::Point mousePosition);
+        void notify(Engine::MouseInputAction action, Misc::Point mousePosition, bool mouseDown);
         void generateLevels();
         GameLevel* getCurrentLevel();
         int32_t getCurrentLevelIndex();
@@ -89,8 +89,6 @@ namespace FAWorld
         static float getSecondsPerTick();
 
         Actor* getActorById(int32_t id);
-        void skipMousePressIfNeeded();
-        void onPause(bool pause);
 
         void getAllActors(std::vector<Actor*>& actors);
 
@@ -103,13 +101,16 @@ namespace FAWorld
 
         int32_t getNewId() { return mNextId++; }
 
+        void blockInput();
+        void unblockInput();
+
     private:
         void playLevelMusic(size_t level);
         void changeLevel(bool up);
-        void onMouseRelease();
-        void onMouseClick(Misc::Point mousePosition);
         PlacedItemData* targetedItem(Misc::Point screenPosition);
-        void onMouseDown(Misc::Point mousePosition);
+
+        int32_t mInputBlockedFramesLeft = 0;
+        bool mUnblockInput = false;
 
         std::map<int32_t, GameLevel*> mLevels;
         Tick mTicksPassed = 0;
@@ -118,13 +119,8 @@ namespace FAWorld
         std::vector<Player*> mPlayers; ///< This vector is sorted
         const DiabloExe::DiabloExe& mDiabloExe;
         FAGui::GuiManager* mGuiManager = nullptr;
-        // Target is locked once we pressed the mouse button. If it's locked then we can't change current action and can retarget
-        // only simple movement.
-        bool targetLock = false;
-        bool simpleMove = false;
-        // that's sadly another state required
-        // it means after dialog or pause menu we have to release button before doing next meaningful action
-        bool skipNextMousePress = false;
+
+        bool mTargetLock = false;
 
         int32_t mNextId = 1;
     };

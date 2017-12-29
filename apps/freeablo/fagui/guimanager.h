@@ -93,13 +93,9 @@ namespace FAGui
     public:
         GuiManager(Engine::EngineMain& engine);
         ~GuiManager();
-        void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void()> action, bool isModal);
-        void nk_fa_begin_image_window(
-            nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void()> action, bool isModal);
-        void dialog(nk_context* ctx);
-        void updateAnimations();
-        void updateGameUI(bool paused, nk_context* ctx);
-        void updateMenuUI(nk_context* ctx);
+
+        void update(bool inGame, bool paused, nk_context* ctx);
+
         void setDescription(std::string text, TextColor color = TextColor::white);
         void clearDescription();
         bool isInventoryShown() const;
@@ -107,10 +103,15 @@ namespace FAGui
         void pushDialogData(DialogData&& data);
         // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
         bool isModalDlgShown() const;
-        void startingScreen();
         void setPlayer(FAWorld::Player* player);
 
     private:
+        void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void()> action, bool isModal);
+        void nk_fa_begin_image_window(
+            nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void()> action, bool isModal);
+        void dialog(nk_context* ctx);
+        void updateAnimations();
+        void startingScreen();
         void togglePanel(PanelType type);
         template <class Function> void drawPanel(nk_context* ctx, PanelType panelType, Function op);
         void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highligh);

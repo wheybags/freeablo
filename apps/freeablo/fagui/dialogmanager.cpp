@@ -251,6 +251,5 @@ namespace FAGui
     void DialogManager::quitDialog() const
     {
         mGuiManager.popDialogData();
-        mWorld.skipMousePressIfNeeded();
     }
 }

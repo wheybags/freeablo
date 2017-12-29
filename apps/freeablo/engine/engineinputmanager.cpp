@@ -43,7 +43,7 @@ namespace Engine
     {
         for (auto observer : mMouseObservers)
         {
-            observer->notify(action, mousePosition);
+            observer->notify(action, mousePosition, mMouseDown);
         }
     }
 
@@ -197,10 +197,8 @@ namespace Engine
 
         if (!paused && mMouseDown && !nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
         {
-            notifyMouseObservers(MouseInputAction::MOUSE_DOWN, mMousePosition);
-
             if (mClick)
-                notifyMouseObservers(MouseInputAction::MOUSE_CLICK, mMousePosition);
+                notifyMouseObservers(MouseInputAction::MOUSE_DOWN, mMousePosition);
 
             mClick = false;
         }

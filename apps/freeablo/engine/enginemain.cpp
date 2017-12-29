@@ -144,10 +144,7 @@ namespace Engine
                 mWorld->update(mNoclip);
 
             nk_context* ctx = renderer.getNuklearContext();
-            if (inGame)
-                mGuiManager->updateGameUI(mPaused, ctx);
-            else
-                mGuiManager->updateMenuUI(ctx);
+            mGuiManager->update(inGame, mPaused, ctx);
 
             FARender::RenderState* state = renderer.getFreeState();
             if (state)
@@ -238,7 +235,6 @@ namespace Engine
     void EngineMain::togglePause()
     {
         mPaused = !mPaused;
-        mWorld->onPause(mPaused);
     }
 
     void EngineMain::toggleNoclip() { mNoclip = !mNoclip; }
