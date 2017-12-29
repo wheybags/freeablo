@@ -4,13 +4,14 @@
 #include "../fasavegame/gameloader.h"
 #include "actorstats.h"
 #include "diabloexe/characterstats.h"
+#include "equiptarget.h"
+#include "itemenums.h"
 #include "itemmap.h"
 #include "playerbehaviour.h"
 #include "world.h"
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <string>
-#include "equiptarget.h"
 
 namespace FAWorld
 {

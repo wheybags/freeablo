@@ -16,6 +16,8 @@
 #include "../faworld/player.h"
 #include "../faworld/world.h"
 
+#include "../faworld/equiptarget.h"
+#include "../faworld/itemenums.h"
 #include "boost/range/counting_range.hpp"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
@@ -24,7 +26,6 @@
 #include "menuhandler.h"
 #include "nkhelpers.h"
 #include <boost/variant/variant.hpp>
-#include "../faworld/equiptarget.h"
 
 namespace FAGui
 {
@@ -265,7 +266,7 @@ namespace FAGui
     {
         auto& inv = mPlayer->getInventory();
         using namespace FAWorld;
-        if (!inv.getItemAt(MakeEquipTarget<EquipTargetType::cursor> ()).isEmpty())
+        if (!inv.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
             highlight = ItemHighlightInfo::notHighlighed;
         bool checkerboarded = false;
 

@@ -1,149 +1,24 @@
 
 #pragma once
 
+#include <array>
 #include <cel/celfile.h>
-#include <cel/celframe.h>
 #include <diabloexe/affix.h>
 #include <diabloexe/baseitem.h>
 #include <diabloexe/uniqueitem.h>
-#include <tuple>
-#include <vector>
-#include <array>
 
 namespace FARender
 {
     class FASpriteGroup;
+    class ItemType;
 }
 
 namespace FAWorld
 {
-    enum class ItemEquipType
-    {
-        none,
-        oneHanded,
-        twoHanded,
-        chest,
-        head,
-        ring,
-        amulet,
-        unequipable,
-        belt,
-        invalid,
-    };
-
-    enum class ItemType
-    {
-        misc = 0,
-        sword,
-        axe,
-        bow,
-        mace,
-        shield,
-        lightArmor,
-        helm,
-        mediumArmor,
-        heavyArmor,
-        staff,
-        gold,
-        ring,
-        amulet,
-    };
-
-    enum class ItemClass
-    {
-        none = 0,
-        weapon,
-        armor,
-        jewelryAndConsumable,
-        gold,
-        quest,
-    };
-
-    // TODO: synchronize names with:
-    // https://github.com/sanctuary/notes/blob/72a0772e0d187d29117c4ddd6e6265cafc774a50/enums.h#L128
-    enum class ItemEffectType
-    {
-        IncPercentChanceToHit,
-        DecPercentChanceToHit,
-        IncPercentDamageDone,
-        DecPercentDamageDone,
-        IncPercentDamageDoneChanceToHit,
-        DecPercentDamageDoneChanceToHit,
-        IncPercentArmourClass,
-        DecPercentArmourClass,
-        IncPercentResistFire,
-        IncPercentResistLightning,
-        IncPercentResistMagic,
-        IncPercentResistAll,
-        Unknown6,
-        Unknown7,
-        ModSpellLevel,
-        IncCharges,
-        IncFireDamage,
-        IncLightningDamage,
-        Unknown8,
-        IncStrength,
-        DecStrength,
-        IncMagic,
-        DecMagic,
-        IncDexterity,
-        DecDexterity,
-        IncVitality,
-        DecVitality,
-        IncAllBasicStats,
-        DecAllBasicStats,
-        IncDamageTaken,
-        DecDamageTaken,
-        IncHP,
-        DecHP,
-        IncMana,
-        DecMana,
-        IncPercentDurability,
-        DecPercentDurability,
-        Indestructible,
-        IncLightRadius,
-        DecLightRadius,
-        Unknown0,
-        MultipleArrows,
-        IncPercentFireArrowDamage,
-        IncPercentLightningArrowDamage,
-        UniquePicture,
-        Thorns,
-        AllMana,
-        PlayerNoHeal,
-        Unknown1,
-        Unknown2,
-        Unknown3,
-        Unknown4,
-        HalfTrapDamage,
-        Knockback,
-        MonsterNoHeal,
-        PercentManaSteal,
-        PercentLifeSteal,
-        ArmourPenetration,
-        AttackSpeed0,
-        HitRecovery,
-        FastBlock,
-        IncDamageDone,
-        RandomArrowSpeed,
-        UnusualDamage,
-        AlteredDurability,
-        NoStrengthRequirment,
-        Spell,
-        AttackSpeed1,
-        OneHanded,
-        AntiDemon,
-        ZeroAllResist,
-        Unknown5,
-        ConstantLifeDrain,
-        PercentFixedLifeSteal,
-        Infravision,
-        SpecifiedArmourClass,
-        IncHPWithArmourClass,
-        IncArmourClassWithMana,
-        IncFireResistWithLevel,
-        DecArmourClass
-    };
+    enum class ItemEffectType;
+    enum class ItemType;
+    enum class ItemEquipType;
+    enum class ItemClass;
 
     class ItemEffect
     {
@@ -195,24 +70,6 @@ namespace FAWorld
         uint32_t getUseOnce() const;
         uint32_t getBuyPrice() const;
         uint32_t getSellPrice() const;
-        uint32_t getEffect0() const;
-        uint32_t getMinRange0() const;
-        uint32_t getMaxRange0() const;
-        uint32_t getEffect1() const;
-        uint32_t getMinRange1() const;
-        uint32_t getMaxRange1() const;
-        uint32_t getEffect2() const;
-        uint32_t getMinRange2() const;
-        uint32_t getMaxRange2() const;
-        uint32_t getEffect3() const;
-        uint32_t getMinRange3() const;
-        uint32_t getMaxRange3() const;
-        uint32_t getEffect4() const;
-        uint32_t getMinRange4() const;
-        uint32_t getMaxRange4() const;
-        uint32_t getEffect5() const;
-        uint32_t getMinRange5() const;
-        uint32_t getMaxRange5() const;
         ItemType getType() const;
         ItemEquipType getEquipLoc() const;
         ItemClass getClass() const;

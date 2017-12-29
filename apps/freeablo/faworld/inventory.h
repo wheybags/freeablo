@@ -3,8 +3,6 @@
 
 #include "item.h"
 #include <diabloexe/diabloexe.h>
-#include <map>
-#include <set>
 #include <stdint.h>
 
 #include <boost/signals2/signal.hpp>

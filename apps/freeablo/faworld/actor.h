@@ -61,7 +61,7 @@ namespace FAWorld
         bool canIAttack(Actor* actor);
         void update(bool noclip);
         void takeDamage(double amount);
-        void heal ();
+        void heal();
 
         void die();
         bool isDead() const;

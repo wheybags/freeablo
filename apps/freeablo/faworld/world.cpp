@@ -10,6 +10,7 @@
 #include "actor.h"
 #include "actorstats.h"
 #include "diabloexe/npc.h"
+#include "equiptarget.h"
 #include "findpath.h"
 #include "gamelevel.h"
 #include "itemmap.h"
@@ -20,7 +21,6 @@
 #include <iostream>
 #include <misc/assert.h>
 #include <tuple>
-#include "equiptarget.h"
 
 namespace FAWorld
 {
@@ -335,7 +335,7 @@ namespace FAWorld
 
     void World::addCurrentPlayer(Player* player)
     {
-        debug_assert (mCurrentPlayer == nullptr);
+        debug_assert(mCurrentPlayer == nullptr);
         mCurrentPlayer = player;
         mCurrentPlayer->talkRequested.connect([&](Actor* actor) { mDlgManager->talk(actor); });
     }

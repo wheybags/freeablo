@@ -1,6 +1,7 @@
 #include "item.h"
 #include "../falevelgen/random.h"
 #include "../farender/renderer.h"
+#include "itemenums.h"
 #include "itemmanager.h"
 #include <iostream>
 
@@ -36,6 +37,8 @@ namespace FAWorld
             mObjcursLoaded = true;
         }
 
+        mAffix = *affix;
+        mIsIdentified = isIdentified;
         mIsUnique = false;
         mEmpty = false;
         mBaseId = id;
@@ -110,11 +113,11 @@ namespace FAWorld
         mName = item.mName;
 
         for (int i = 0; i < 6; ++i)
-            {
-                mEffects[i].type = static_cast<ItemEffectType> (item.mEffectData[i][0]);
-                mEffects[i].min = item.mEffectData[i][1];
-                mEffects[i].max = item.mEffectData[i][2];
-            }
+        {
+            mEffects[i].type = static_cast<ItemEffectType>(item.mEffectData[i][0]);
+            mEffects[i].min = item.mEffectData[i][1];
+            mEffects[i].max = item.mEffectData[i][2];
+        }
     }
 
     bool Item::isEmpty() const { return mEmpty; }

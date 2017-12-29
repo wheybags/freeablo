@@ -1,10 +1,10 @@
 
 #pragma once
 
-#include <faio/fafileobject.h>
-#include <cstdint>
-#include <string>
 #include <array>
+#include <cstdint>
+#include <faio/fafileobject.h>
+#include <string>
 
 namespace DiabloExe
 {

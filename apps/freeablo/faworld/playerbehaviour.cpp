@@ -1,9 +1,9 @@
 #include "playerbehaviour.h"
 #include "../fagui/guimanager.h"
 #include "../farender/renderer.h"
+#include "equiptarget.h"
 #include "player.h"
 #include <misc/assert.h>
-#include "equiptarget.h"
 
 namespace FAWorld
 {

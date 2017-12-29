@@ -46,6 +46,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/inventory.cpp
     faworld/item.h
     faworld/item.cpp
+    faworld/itemenums.h
+    faworld/itemenums.cpp
     faworld/itemmanager.h
     faworld/itemmanager.cpp
     faworld/itemmap.h

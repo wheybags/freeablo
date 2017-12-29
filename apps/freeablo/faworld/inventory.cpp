@@ -11,6 +11,7 @@
 #include <string>
 
 #include "equiptarget.h"
+#include "itemenums.h"
 #include <boost/range/any_range.hpp>
 
 namespace FAWorld
