@@ -2,8 +2,8 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 #include <limits>
+#include <string>
 
 namespace Serial
 {

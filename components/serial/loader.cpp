@@ -4,8 +4,7 @@
 
 namespace Serial
 {
-    Loader::Loader(ReadStreamInterface& stream)
-        : mStream(stream)
+    Loader::Loader(ReadStreamInterface& stream) : mStream(stream)
     {
         mVersion = load<uint32_t>();
         release_assert(mVersion <= CurrentSaveVersion); // TODO: recoverable errors here
@@ -36,11 +35,7 @@ namespace Serial
 
     void Loader::endCategory(const std::string& name) { mStream.endCategory(name); }
 
-    Saver::Saver(WriteStreamInterface& stream)
-        : mStream(stream)
-    {
-        save(CurrentSaveVersion);
-    }
+    Saver::Saver(WriteStreamInterface& stream) : mStream(stream) { save(CurrentSaveVersion); }
 
     void Saver::save(bool val) { mStream.write(val); }
 
