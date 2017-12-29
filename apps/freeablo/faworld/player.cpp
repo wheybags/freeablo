@@ -6,6 +6,7 @@
 #include "diabloexe/characterstats.h"
 #include "itemmap.h"
 #include "world.h"
+#include "playerbehaviour.h"
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <string>
@@ -43,6 +44,8 @@ namespace FAWorld
         mMoveHandler = MovementHandler(World::getTicksInPeriod(0.1f)); // allow players to repath much more often than other actors
 
         mStats.mAttackDamage = 60;
+
+        mBehaviour = new PlayerBehaviour(this);
     }
 
     Player::Player(FASaveGame::GameLoader& loader) : Actor(loader), mInventory(this)

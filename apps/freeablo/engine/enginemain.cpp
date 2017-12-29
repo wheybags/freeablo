@@ -6,6 +6,7 @@
 #include "../fasavegame/gameloader.h"
 #include "../faworld/itemmanager.h"
 #include "../faworld/player.h"
+#include "../faworld/playerbehaviour.h"
 #include "../faworld/playerfactory.h"
 #include "../faworld/world.h"
 #include "threadmanager.h"
@@ -129,7 +130,7 @@ namespace Engine
         if (inGame)
         {
             mInputManager->registerKeyboardObserver(mWorld.get());
-            mInputManager->registerMouseObserver(mWorld.get());
+            //mInputManager->registerMouseObserver(mWorld.get());
         }
 
         boost::asio::io_service io;
@@ -217,13 +218,15 @@ namespace Engine
         mWorld->addCurrentPlayer(mPlayer);
         mWorld->setLevel(0);
         mGuiManager->setPlayer(mPlayer);
+        mInputManager->registerMouseObserver(mPlayer->getPlayerBehaviour());
     }
 
     void EngineMain::startGame(const std::string& characterClass)
     {
         inGame = true;
         mInputManager->registerKeyboardObserver(mWorld.get());
-        mInputManager->registerMouseObserver(mWorld.get());
+        //mInputManager->registerMouseObserver(mWorld.get());
+
         // TODO: fix that variables like invuln are not applied in this case
         setupNewPlayer(mPlayerFactory->create(characterClass));
     }

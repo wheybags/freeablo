@@ -14,6 +14,7 @@
 #include "gamelevel.h"
 #include "itemmap.h"
 #include "player.h"
+#include "playerbehaviour.h"
 #include <algorithm>
 #include <diabloexe/diabloexe.h>
 #include <iostream>
@@ -83,6 +84,7 @@ namespace FAWorld
 
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });
+        mObjectIdMapper.addClass(PlayerBehaviour::typeId, [](FASaveGame::GameLoader&) { return new PlayerBehaviour(); });
     }
 
     World::~World()
@@ -173,80 +175,14 @@ namespace FAWorld
 
     void World::blockInput()
     {
-        // This will block for two frames after unblockInput is called.
-        // This allows us to ignore clicks that happened on a now-closed dialogue.
-        mInputBlockedFramesLeft = 2;
-        mUnblockInput = false;
+        if (getCurrentPlayer())
+            getCurrentPlayer()->getPlayerBehaviour()->blockInput();
     }
 
     void World::unblockInput()
     {
-        mUnblockInput = true;
-    }
-
-    void World::notify(Engine::MouseInputAction action, Misc::Point mousePosition, bool mouseDown)
-    {
-        if (mInputBlockedFramesLeft != 0)
-            return;
-
-        Player* player = getCurrentPlayer();
-
-        switch (action)
-        {
-            case Engine::MouseInputAction::MOUSE_RELEASE:
-            {
-                mTargetLock = false;
-                getCurrentPlayer()->isTalking = false;
-                break;
-            }
-            case Engine::MouseInputAction::MOUSE_DOWN:
-            {
-                auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
-
-                auto level = getCurrentLevel();
-                level->activate(clickedTile.x, clickedTile.y);
-
-                mTargetLock = true;
-
-                auto cursorItem = player->getInventory().getItemAt(MakeEquipTarget<Item::eqCURSOR>());
-                if (!cursorItem.isEmpty())
-                {
-                    // What happens here is not actually true to original game but
-                    // It's a fair way to emulate it. Current data is that in all instances except interaction with inventory
-                    // cursor has topleft as it's hotspot even when cursor is item. Other 2 instances actually:
-                    // - dropping items
-                    // - moving cursor outside the screen / window
-                    // This shift by half cursor size emulates behavior during dropping items. And the only erroneous
-                    // part of behavior now can be spotted by moving cursor outside the window which is not so significant.
-                    // To emulate it totally true to original game we need to heavily hack interaction with inventory
-                    // which is possible
-                    auto clickedTileShifted = getTileByScreenPos(mousePosition - FARender::Renderer::get()->cursorSize() / 2);
-                    if (player->dropItem({clickedTileShifted.x, clickedTileShifted.y}))
-                        mGuiManager->clearDescription();
-                }
-                else if (Actor* clickedActor = targetedActor(mousePosition))
-                {
-                    player->mTarget = clickedActor;
-                }
-                else if (auto item = targetedItem(mousePosition))
-                {
-                    player->mTarget = ItemTarget{mGuiManager->isInventoryShown() ? ItemTarget::ActionType::toCursor : ItemTarget::ActionType::autoEquip, item};
-                }
-                else
-                {
-                    mTargetLock = false;
-                }
-            } // fallthrough
-            case Engine::MouseInputAction::MOUSE_MOVE:
-            {
-                if (mouseDown && !mTargetLock)
-                {
-                    auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
-                    player->mTarget = boost::blank{};
-                    player->mMoveHandler.setDestination({clickedTile.x, clickedTile.y});
-                }
-            }
-        }
+        if (getCurrentPlayer())
+            getCurrentPlayer()->getPlayerBehaviour()->unblockInput();
     }
 
     void World::generateLevels()
@@ -367,13 +303,6 @@ namespace FAWorld
     {
         mTicksPassed++;
 
-        if (mUnblockInput && mInputBlockedFramesLeft > 0)
-        {
-            mInputBlockedFramesLeft--;
-            if (mInputBlockedFramesLeft == 0)
-                mUnblockInput = false;
-        }
-
         std::set<GameLevel*> done;
 
         // only update levels that have players on them
@@ -407,9 +336,6 @@ namespace FAWorld
     {
         mCurrentPlayer = player;
         mCurrentPlayer->talkRequested.connect([&](Actor* actor) {
-            // This is important because mouse released becomes blocked by "modal" dialog
-            // Thus creating some uncomfortable effects
-            mTargetLock = false;
             mDlgManager->talk(actor);
         });
     }

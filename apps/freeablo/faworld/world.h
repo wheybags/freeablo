@@ -48,7 +48,7 @@ namespace FAWorld
     typedef int64_t Tick;
     static const Tick MAX_TICK = 9223372036854775807;
 
-    class World : public Engine::KeyboardInputObserverInterface, public Engine::MouseInputObserverInterface
+    class World : public Engine::KeyboardInputObserverInterface
     {
     public:
         World(const DiabloExe::DiabloExe& exe);
@@ -60,9 +60,8 @@ namespace FAWorld
         void notify(Engine::KeyboardInputAction action);
         Render::Tile getTileByScreenPos(Misc::Point screenPos);
         Actor* targetedActor(Misc::Point screenPosition);
+        PlacedItemData* targetedItem(Misc::Point screenPosition);
         void updateHover(const Misc::Point& mousePosition);
-        void onMouseMove(const Misc::Point& mouse_position);
-        void notify(Engine::MouseInputAction action, Misc::Point mousePosition, bool mouseDown);
         void generateLevels();
         GameLevel* getCurrentLevel();
         int32_t getCurrentLevelIndex();
@@ -84,7 +83,6 @@ namespace FAWorld
 
         void fillRenderState(FARender::RenderState* state);
 
-        static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
         static Tick getTicksInPeriod(float seconds);
         static float getSecondsPerTick();
 
@@ -97,30 +95,26 @@ namespace FAWorld
         HoverState& getHoverState();
 
         void setupObjectIdMappers();
-        FASaveGame::ObjectIdMapper mObjectIdMapper;
 
         int32_t getNewId() { return mNextId++; }
 
         void blockInput();
         void unblockInput();
 
+        static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
+        FASaveGame::ObjectIdMapper mObjectIdMapper;
+        FAGui::GuiManager* mGuiManager = nullptr;
+
     private:
         void playLevelMusic(size_t level);
         void changeLevel(bool up);
-        PlacedItemData* targetedItem(Misc::Point screenPosition);
-
-        int32_t mInputBlockedFramesLeft = 0;
-        bool mUnblockInput = false;
 
         std::map<int32_t, GameLevel*> mLevels;
         Tick mTicksPassed = 0;
-        Player* mCurrentPlayer;
+        Player* mCurrentPlayer = nullptr;
         std::unique_ptr<FAGui::DialogManager> mDlgManager;
         std::vector<Player*> mPlayers; ///< This vector is sorted
         const DiabloExe::DiabloExe& mDiabloExe;
-        FAGui::GuiManager* mGuiManager = nullptr;
-
-        bool mTargetLock = false;
 
         int32_t mNextId = 1;
     };

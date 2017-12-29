@@ -29,7 +29,7 @@ namespace FAWorld
 
         virtual ~Behaviour() {}
 
-        void reAttach(Actor* actor) { mActor = actor; } ///< only for use immediately after being loaded from a save game
+        virtual void reAttach(Actor* actor) { mActor = actor; } ///< only for use immediately after being loaded from a save game
     protected:
         Actor* mActor = nullptr;
     };
@@ -47,7 +47,7 @@ namespace FAWorld
         virtual void save(FASaveGame::GameSaver&) override {}
         virtual void update() override {}
 
-        ~NullBehaviour() {}
+        virtual ~NullBehaviour() {}
     };
 
     class BasicMonsterBehaviour : public Behaviour
@@ -62,7 +62,7 @@ namespace FAWorld
         virtual void save(FASaveGame::GameSaver& saver) override;
         virtual void update() override;
 
-        ~BasicMonsterBehaviour() {}
+        virtual ~BasicMonsterBehaviour() {}
 
     private:
         Tick mTicksSinceLastAction;
