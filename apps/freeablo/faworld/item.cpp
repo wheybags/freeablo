@@ -1,6 +1,7 @@
 #include "item.h"
 #include "../falevelgen/random.h"
 #include "../farender/renderer.h"
+#include "itemenums.h"
 #include "itemmanager.h"
 #include <iostream>
 
@@ -36,6 +37,8 @@ namespace FAWorld
             mObjcursLoaded = true;
         }
 
+        mAffix = *affix;
+        mIsIdentified = isIdentified;
         mIsUnique = false;
         mEmpty = false;
         mBaseId = id;
@@ -46,11 +49,11 @@ namespace FAWorld
 
         mActiveTrigger = item.activTrigger;
 
-        mType = static_cast<itemType>(item.itemType);
-        mEquipLoc = static_cast<equipLoc>(item.equipLoc);
+        mClass = static_cast<ItemClass>(item.itemClass);
+        mEquipLoc = static_cast<ItemEquipType>(item.equipLoc);
         mGraphicValue = item.graphicValue;
 
-        mCode = static_cast<itemCode>(item.itemCode);
+        mType = static_cast<ItemType>(item.type);
         mUniqCode = item.uniqCode;
         mName = item.itemName;
         mSecondName = item.itemSecondName;
@@ -77,9 +80,8 @@ namespace FAWorld
         mSellPrice = item.price2;
         mDropItemGraphicsPath = item.dropItemGraphicsPath;
 
-        if (mType != itGOLD)
+        if (mClass != ItemClass::gold)
         {
-
             mGraphicValue += 11;
             Cel::CelFrame frame = (*mObjcurs)[mGraphicValue];
             mSizeX = static_cast<uint8_t>(frame.mWidth / 28);
@@ -93,16 +95,6 @@ namespace FAWorld
             mSizeX = 1;
             mSizeY = 1;
             mMaxCount = 5000;
-        }
-
-        if (affix != NULL)
-        {
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect0), mMaxRange0, mMinRange0, id));
-            mIsMagic = true;
-            mEffect0 = affix->mEffect;
-            mMaxRange0 = affix->mMaxEffect;
-            mMinRange0 = affix->mMinEffect;
-            mIsIdentified = isIdentified;
         }
     }
     Item::Item(const DiabloExe::UniqueItem& item, uint32_t id)
@@ -120,42 +112,12 @@ namespace FAWorld
         mQualityLevel = item.mQualityLevel;
         mName = item.mName;
 
-        mEffect0 = item.mEffect0;
-        mMinRange0 = item.mMinRange0;
-        mMaxRange0 = item.mMaxRange0;
-
-        mEffect1 = item.mEffect1;
-        mMinRange1 = item.mMinRange1;
-        mMaxRange1 = item.mMaxRange1;
-
-        mEffect2 = item.mEffect2;
-        mMinRange2 = item.mMinRange2;
-        mMaxRange2 = item.mMaxRange2;
-
-        mEffect3 = item.mEffect3;
-        mMinRange3 = item.mMinRange3;
-        mMaxRange3 = item.mMaxRange3;
-
-        mEffect4 = item.mEffect4;
-        mMinRange4 = item.mMinRange4;
-        mMaxRange4 = item.mMaxRange4;
-
-        mEffect5 = item.mEffect5;
-        mMinRange5 = item.mMinRange5;
-        mMaxRange5 = item.mMaxRange5;
-
-        if (mMaxRange0 != 0 || mEffect0 != 0 || mMinRange0 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect0), mMaxRange0, mMinRange0, id));
-        if (mMaxRange1 != 0 || mEffect1 != 0 || mMinRange1 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect1), mMaxRange1, mMinRange1, id));
-        if (mMaxRange2 != 0 || mEffect2 != 0 || mMinRange2 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect2), mMaxRange2, mMinRange2, id));
-        if (mMaxRange3 != 0 || mEffect3 != 0 || mMinRange3 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect3), mMaxRange3, mMinRange3, id));
-        if (mMaxRange4 != 0 || mEffect4 != 0 || mMinRange4 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect4), mMaxRange4, mMinRange4, id));
-        if (mMaxRange5 != 0 || mEffect5 != 0 || mMinRange5 != 0)
-            mEffects.push_back(std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>(static_cast<ItemEffect>(mEffect5), mMaxRange5, mMinRange5, id));
+        for (int i = 0; i < 6; ++i)
+        {
+            mEffects[i].type = static_cast<ItemEffectType>(item.mEffectData[i][0]);
+            mEffects[i].min = item.mEffectData[i][1];
+            mEffects[i].max = item.mEffectData[i][2];
+        }
     }
 
     bool Item::isEmpty() const { return mEmpty; }
@@ -171,34 +133,34 @@ namespace FAWorld
     std::string Item::getFlipSoundPath() const
     {
         // TODO: add book, pot, scroll
-        switch (getCode())
+        switch (getType())
         {
-            case icOther:
+            case ItemType::misc:
                 return "";
-            case icSword:
+            case ItemType::sword:
                 return "sfx/items/flipswor.wav";
-            case icAxe:
+            case ItemType::axe:
                 return "sfx/items/flipaxe.wav";
-            case icBow:
+            case ItemType::bow:
                 return "sfx/items/flipbow.wav";
-            case icBlunt:
+            case ItemType::mace:
                 return "sfx/items/flipswor.wav"; // TODO: check
-            case icShield:
+            case ItemType::shield:
                 return "sfx/items/flipshld.wav";
-            case icLightArmour:
+            case ItemType::lightArmor:
                 return "sfx/items/fliplarm.wav";
-            case icHelm:
+            case ItemType::helm:
                 return "sfx/items/flipcap.wav";
-            case icMidArmour:
+            case ItemType::mediumArmor:
                 return "sfx/items/fliplarm.wav"; // TODO: check
-            case icHeavyArmour:
+            case ItemType::heavyArmor:
                 return "sfx/items/flipharm.wav";
-            case icStave:
+            case ItemType::staff:
                 return "sfx/items/flipstaf.wav";
-            case icGold:
+            case ItemType::gold:
                 return "sfx/items/gold.wav"; // also gold1.cel
-            case icRing:
-            case icAmulet:
+            case ItemType::ring:
+            case ItemType::amulet:
                 return "sfx/items/flipring.wav";
         }
         return "";
@@ -206,7 +168,7 @@ namespace FAWorld
 
     FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(getFlipAnimationPath()); }
 
-    bool Item::isBeltEquippable() const { return mSizeX == 1 && mSizeY == 1 && mUseOnce && mCode != icGold; }
+    bool Item::isBeltEquippable() const { return mSizeX == 1 && mSizeY == 1 && mUseOnce && mType != ItemType::gold; }
 
     uint32_t Item::getActiveTrigger() const { return mActiveTrigger; }
     uint8_t Item::getReqStr() const { return mReqStr; }
@@ -227,47 +189,11 @@ namespace FAWorld
     uint32_t Item::getBuyPrice() const { return mBuyPrice; }
     uint32_t Item::getSellPrice() const { return mSellPrice; }
 
-    uint32_t Item::getEffect0() const { return mEffect0; }
+    ItemType Item::getType() const { return mType; }
 
-    uint32_t Item::getMinRange0() const { return mMinRange0; }
+    ItemEquipType Item::getEquipLoc() const { return mEquipLoc; }
 
-    uint32_t Item::getMaxRange0() const { return mMaxRange0; }
-
-    uint32_t Item::getEffect1() const { return mEffect1; }
-
-    uint32_t Item::getMinRange1() const { return mMinRange1; }
-
-    uint32_t Item::getMaxRange1() const { return mMaxRange1; }
-
-    uint32_t Item::getEffect2() const { return mEffect2; }
-
-    uint32_t Item::getMinRange2() const { return mMinRange2; }
-
-    uint32_t Item::getMaxRange2() const { return mMaxRange2; }
-
-    uint32_t Item::getEffect3() const { return mEffect3; }
-
-    uint32_t Item::getMinRange3() const { return mMinRange3; }
-
-    uint32_t Item::getMaxRange3() const { return mMaxRange3; }
-
-    uint32_t Item::getEffect4() const { return mEffect4; }
-
-    uint32_t Item::getMinRange4() const { return mMinRange4; }
-
-    uint32_t Item::getMaxRange4() const { return mMaxRange4; }
-
-    uint32_t Item::getEffect5() const { return mEffect5; }
-
-    uint32_t Item::getMinRange5() const { return mMinRange5; }
-
-    uint32_t Item::getMaxRange5() const { return mMaxRange5; }
-
-    Item::itemCode Item::getCode() const { return mCode; }
-
-    Item::equipLoc Item::getEquipLoc() const { return mEquipLoc; }
-
-    Item::itemType Item::getType() const { return mType; }
+    ItemClass Item::getClass() const { return mClass; }
     uint32_t Item::getGraphicValue() const { return mGraphicValue; }
 
     void Item::setUniqueId(uint32_t mUniqueId) { this->mUniqueId = mUniqueId; }

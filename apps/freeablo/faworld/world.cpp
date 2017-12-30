@@ -10,6 +10,7 @@
 #include "actor.h"
 #include "actorstats.h"
 #include "diabloexe/npc.h"
+#include "equiptarget.h"
 #include "findpath.h"
 #include "gamelevel.h"
 #include "itemmap.h"
@@ -147,7 +148,7 @@ namespace FAWorld
                 return mGuiManager->setDescription("");
         };
 
-        auto& cursorItem = mCurrentPlayer->getInventory().getItemAt(MakeEquipTarget<Item::eqCURSOR>());
+        auto& cursorItem = mCurrentPlayer->getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
         if (!cursorItem.isEmpty())
         {
             mGuiManager->setDescription(cursorItem.getName());
@@ -334,6 +335,7 @@ namespace FAWorld
 
     void World::addCurrentPlayer(Player* player)
     {
+        debug_assert(mCurrentPlayer == nullptr);
         mCurrentPlayer = player;
         mCurrentPlayer->talkRequested.connect([&](Actor* actor) { mDlgManager->talk(actor); });
     }

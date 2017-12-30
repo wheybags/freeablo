@@ -1,21 +1,33 @@
 
 #pragma once
 
+#include <array>
 #include <cel/celfile.h>
-#include <cel/celframe.h>
 #include <diabloexe/affix.h>
 #include <diabloexe/baseitem.h>
 #include <diabloexe/uniqueitem.h>
-#include <tuple>
-#include <vector>
 
 namespace FARender
 {
     class FASpriteGroup;
+    class ItemType;
 }
 
 namespace FAWorld
 {
+    enum class ItemEffectType;
+    enum class ItemType;
+    enum class ItemEquipType;
+    enum class ItemClass;
+
+    class ItemEffect
+    {
+    public:
+        ItemEffectType type;
+        int min;
+        int max;
+    };
+
     class Inventory;
     class ItemPosition;
     class Item
@@ -24,93 +36,10 @@ namespace FAWorld
         friend class ItemPosition;
 
     public:
-        typedef enum {
-            IncPercentChanceToHit,
-            DecPercentChanceToHit,
-            IncPercentDamageDone,
-            DecPercentDamageDone,
-            IncPercentDamageDoneChanceToHit,
-            DecPercentDamageDoneChanceToHit,
-            IncPercentArmourClass,
-            DecPercentArmourClass,
-            IncPercentResistFire,
-            IncPercentResistLightning,
-            IncPercentResistMagic,
-            IncPercentResistAll,
-            Unknown6,
-            Unknown7,
-            ModSpellLevel,
-            IncCharges,
-            IncFireDamage,
-            IncLightningDamage,
-            Unknown8,
-            IncStrength,
-            DecStrength,
-            IncMagic,
-            DecMagic,
-            IncDexterity,
-            DecDexterity,
-            IncVitality,
-            DecVitality,
-            IncAllBasicStats,
-            DecAllBasicStats,
-            IncDamageTaken,
-            DecDamageTaken,
-            IncHP,
-            DecHP,
-            IncMana,
-            DecMana,
-            IncPercentDurability,
-            DecPercentDurability,
-            Indestructible,
-            IncLightRadius,
-            DecLightRadius,
-            Unknown0,
-            MultipleArrows,
-            IncPercentFireArrowDamage,
-            IncPercentLightningArrowDamage,
-            UniquePicture,
-            Thorns,
-            AllMana,
-            PlayerNoHeal,
-            Unknown1,
-            Unknown2,
-            Unknown3,
-            Unknown4,
-            HalfTrapDamage,
-            Knockback,
-            MonsterNoHeal,
-            PercentManaSteal,
-            PercentLifeSteal,
-            ArmourPenetration,
-            AttackSpeed0,
-            HitRecovery,
-            FastBlock,
-            IncDamageDone,
-            RandomArrowSpeed,
-            UnusualDamage,
-            AlteredDurability,
-            NoStrengthRequirment,
-            Spell,
-            AttackSpeed1,
-            OneHanded,
-            AntiDemon,
-            ZeroAllResist,
-            Unknown5,
-            ConstantLifeDrain,
-            PercentFixedLifeSteal,
-            Infravision,
-            SpecifiedArmourClass,
-            IncHPWithArmourClass,
-            IncArmourClassWithMana,
-            IncFireResistWithLevel,
-            DecArmourClass
-        } ItemEffect;
-
         bool isEmpty() const;
         Item();
         ~Item();
-        Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix = NULL, bool isIdentified = true);
+        Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix = nullptr, bool isIdentified = true);
         Item(const DiabloExe::UniqueItem& item, uint32_t id);
         std::string getName() const;
         void setUniqueId(uint32_t mUniqueId);
@@ -129,42 +58,6 @@ namespace FAWorld
         bool isBeltEquippable() const;
 
         bool mIsReal;
-        typedef enum {
-            eqINV,
-            eqONEHAND,
-            eqTWOHAND,
-            eqBODY,
-            eqHEAD,
-            eqRING,
-            eqAMULET,
-            eqUNEQUIP,
-            eqBELT,
-            eqFLOOR,
-            eqCURSOR,
-            eqRIGHTHAND,
-            eqLEFTHAND,
-            eqRIGHTRING,
-            eqLEFTRING
-        } equipLoc;
-
-        typedef enum { itWEAPON = 1, itARMOUR = 2, itPOT = 3, itGOLD = 4, itNOVELTY = 5 } itemType;
-
-        typedef enum {
-            icOther,
-            icSword,
-            icAxe,
-            icBow,
-            icBlunt,
-            icShield,
-            icLightArmour,
-            icHelm,
-            icMidArmour,
-            icHeavyArmour,
-            icStave,
-            icGold,
-            icRing,
-            icAmulet
-        } itemCode;
 
         uint32_t getActiveTrigger() const;
         uint8_t getReqStr() const;
@@ -177,41 +70,22 @@ namespace FAWorld
         uint32_t getUseOnce() const;
         uint32_t getBuyPrice() const;
         uint32_t getSellPrice() const;
-        uint32_t getEffect0() const;
-        uint32_t getMinRange0() const;
-        uint32_t getMaxRange0() const;
-        uint32_t getEffect1() const;
-        uint32_t getMinRange1() const;
-        uint32_t getMaxRange1() const;
-        uint32_t getEffect2() const;
-        uint32_t getMinRange2() const;
-        uint32_t getMaxRange2() const;
-        uint32_t getEffect3() const;
-        uint32_t getMinRange3() const;
-        uint32_t getMaxRange3() const;
-        uint32_t getEffect4() const;
-        uint32_t getMinRange4() const;
-        uint32_t getMaxRange4() const;
-        uint32_t getEffect5() const;
-        uint32_t getMinRange5() const;
-        uint32_t getMaxRange5() const;
-        itemCode getCode() const;
-        equipLoc getEquipLoc() const;
-        itemType getType() const;
+        ItemType getType() const;
+        ItemEquipType getEquipLoc() const;
+        ItemClass getClass() const;
         uint32_t getGraphicValue() const;
         static Item empty;
 
     private:
         static Cel::CelFile* mObjcurs;
-        std::vector<std::tuple<ItemEffect, uint32_t, uint32_t, uint32_t>> mEffects;
         DiabloExe::Affix mAffix;
 
         uint32_t mActiveTrigger;
-        itemType mType;
-        equipLoc mEquipLoc;
+        ItemClass mClass;
+        ItemEquipType mEquipLoc;
         uint32_t mGraphicValue;
 
-        itemCode mCode;
+        ItemType mType;
         uint8_t mUniqCode;
         std::string mName;
         std::string mSecondName;
@@ -242,35 +116,7 @@ namespace FAWorld
 
         uint8_t mNumEffects;
 
-        uint32_t mEffect0;
-        uint32_t mMinRange0;
-        uint32_t mMaxRange0;
-        uint32_t mRange0;
-
-        uint32_t mEffect1;
-        uint32_t mMinRange1;
-        uint32_t mMaxRange1;
-        uint32_t mRange1;
-
-        uint32_t mEffect2;
-        uint32_t mMinRange2;
-        uint32_t mMaxRange2;
-        uint32_t mRange2;
-
-        uint32_t mEffect3;
-        uint32_t mMinRange3;
-        uint32_t mMaxRange3;
-        uint32_t mRange3;
-
-        uint32_t mEffect4;
-        uint32_t mMinRange4;
-        uint32_t mMaxRange4;
-        uint32_t mRange4;
-
-        uint32_t mEffect5;
-        uint32_t mMinRange5;
-        uint32_t mMaxRange5;
-        uint32_t mRange5;
+        std::array<ItemEffect, 5> mEffects;
 
         uint8_t mBaseId;
         uint32_t mUniqueId;

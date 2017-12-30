@@ -21,6 +21,10 @@ namespace Engine
         prevOption,
         accept,
         reject,
+        toggleInventory,
+        toggleQuests,
+        toggleCharacterInfo,
+        toggleSpellbook,
 
         max
     };

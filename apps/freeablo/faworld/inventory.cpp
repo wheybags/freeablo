@@ -9,13 +9,30 @@
 #include <sstream>
 #include <stdint.h>
 #include <string>
-#pragma warning(push)
-#pragma warning(disable : 4172) // boost being naughty
+
+#include "equiptarget.h"
+#include "itemenums.h"
 #include <boost/range/any_range.hpp>
-#pragma warning(pop)
 
 namespace FAWorld
 {
+    struct ExchangeResult
+    {
+        std::set<EquipTarget> NeedsToBeReplaced;
+        std::set<EquipTarget> NeedsToBeReturned; // used only for equipping 2-handed weapon while wearing 1h weapon + shield
+        boost::optional<EquipTarget> newTarget;  // sometimes target changes during exchange
+        ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg,
+                       std::set<EquipTarget> NeedsToBeReturnedArg,
+                       const boost::optional<EquipTarget>& newTargetArg);
+    };
+
+    ExchangeResult::ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg = {},
+                                   std::set<EquipTarget> NeedsToBeReturnedArg = {},
+                                   const boost::optional<EquipTarget>& newTargetArg = {})
+        : NeedsToBeReplaced(std::move(NeedsToBeReplacedArg)), NeedsToBeReturned(std::move(NeedsToBeReturnedArg)), newTarget(newTargetArg)
+    {
+    }
+
     Inventory::Inventory(Player* actor)
     {
         mAttackDamageTotal = 0;
@@ -52,28 +69,28 @@ namespace FAWorld
         return true;
     }
 
-    static const std::map<Item::equipLoc, std::set<Item::equipLoc>> appropriateLocations = {
-        {Item::eqONEHAND, {Item::eqLEFTHAND, Item::eqRIGHTHAND}},
-        {Item::eqTWOHAND, {Item::eqLEFTHAND, Item::eqRIGHTHAND}},
-        {Item::eqRING, {Item::eqLEFTRING, Item::eqRIGHTRING}},
-        {Item::eqAMULET, {Item::eqAMULET}},
-        {Item::eqBODY, {Item::eqBODY}},
-        {Item::eqHEAD, {Item::eqHEAD}},
+    static const std::map<ItemEquipType, std::set<EquipTargetType>> appropriateLocations = {
+        {ItemEquipType::oneHanded, {EquipTargetType::leftHand, EquipTargetType::rightHand}},
+        {ItemEquipType::twoHanded, {EquipTargetType::leftHand, EquipTargetType::rightHand}},
+        {ItemEquipType::ring, {EquipTargetType::leftRing, EquipTargetType::rightRing}},
+        {ItemEquipType::amulet, {EquipTargetType::amulet}},
+        {ItemEquipType::chest, {EquipTargetType::body}},
+        {ItemEquipType::head, {EquipTargetType::head}},
     };
 
     bool Inventory::isFit(const Item& item, const EquipTarget& target) const
     {
-        switch (target.location)
+        switch (target.type)
         {
-            case Item::eqINV:
+            case EquipTargetType::inventory:
                 return target.posX + item.getInvSize().first <= inventoryWidth && target.posY + item.getInvSize().second <= inventoryHeight;
-            case Item::eqBELT:
+            case EquipTargetType::belt:
                 return item.isBeltEquippable();
             default:
             {
                 auto it = appropriateLocations.find(item.getEquipLoc());
                 if (it != appropriateLocations.end())
-                    return it->second.count(target.location) > 0;
+                    return it->second.count(target.type) > 0;
                 break;
             }
         }
@@ -82,21 +99,21 @@ namespace FAWorld
 
     auto Inventory::needsToBeExchanged(const Item& item, const EquipTarget& target) const -> ExchangeResult
     {
-        switch (target.location)
+        switch (target.type)
         {
-            case Item::eqLEFTHAND:
-            case Item::eqRIGHTHAND:
+            case EquipTargetType::leftHand:
+            case EquipTargetType::rightHand:
             {
                 auto& thisHand = getItemAt(target);
                 auto getOtherHand = [](const EquipTarget& target) -> EquipTarget {
-                    if (target.location == Item::eqLEFTHAND)
-                        return MakeEquipTarget<Item::eqRIGHTHAND>();
+                    if (target.type == EquipTargetType::leftHand)
+                        return MakeEquipTarget<EquipTargetType::rightHand>();
                     else
-                        return MakeEquipTarget<Item::eqLEFTHAND>();
+                        return MakeEquipTarget<EquipTargetType::leftHand>();
                 };
                 auto& otherHand = getItemAt(getOtherHand(target));
-                if (thisHand.getEquipLoc() == Item::eqTWOHAND)
-                    return {{MakeEquipTarget<Item::eqLEFTHAND>()}, {}};
+                if (thisHand.getEquipLoc() == ItemEquipType::twoHanded)
+                    return {{MakeEquipTarget<EquipTargetType::leftHand>()}, {}};
                 if (otherHand.isEmpty())
                 {
                     if (thisHand.isEmpty())
@@ -108,16 +125,16 @@ namespace FAWorld
                 auto checkHand = [&](const EquipTarget& hand) -> boost::optional<ExchangeResult> {
                     auto& handItem = getItemAt(hand);
                     auto& otherHandItem = getItemAt(getOtherHand(hand));
-                    if (item.getEquipLoc() == Item::eqTWOHAND)
+                    if (item.getEquipLoc() == ItemEquipType::twoHanded)
                     {
                         // in this case we need to exchange with weapon and place shield back to inventory if possible
                         // if it's not possible then this item equipping should also be deemed impossible.
                         if (otherHandItem.isEmpty())
                             return ExchangeResult{{hand}, {}};
-                        else if (handItem.getType() == Item::itWEAPON)
+                        else if (handItem.getClass() == ItemClass::weapon)
                             return ExchangeResult{{hand}, {getOtherHand(hand)}};
                     }
-                    if (handItem.getType() == item.getType())
+                    if (handItem.getClass() == item.getClass())
                     {
                         // if it's shield, it is replaced with shield, if it's 1h weapon, it's replaced with it
                         // no matter which slot we clicked
@@ -125,13 +142,13 @@ namespace FAWorld
                     }
                     return {};
                 };
-                if (auto res = checkHand(MakeEquipTarget<Item::eqLEFTHAND>()))
+                if (auto res = checkHand(MakeEquipTarget<EquipTargetType::leftHand>()))
                     return *res;
-                if (auto res = checkHand(MakeEquipTarget<Item::eqRIGHTHAND>()))
+                if (auto res = checkHand(MakeEquipTarget<EquipTargetType::rightHand>()))
                     return *res;
                 break;
             }
-            case Item::eqINV:
+            case EquipTargetType::inventory:
             {
                 ExchangeResult result;
                 for (auto i = target.posX; i < target.posX + item.getInvSize().first; ++i)
@@ -139,7 +156,7 @@ namespace FAWorld
                         if (!mInventoryBox[j][i].isEmpty())
                         {
                             auto cornerCoords = mInventoryBox[j][i].getCornerCoords();
-                            result.NeedsToBeReplaced.insert(MakeEquipTarget<Item::eqINV>(cornerCoords.first, cornerCoords.second));
+                            result.NeedsToBeReplaced.insert(MakeEquipTarget<EquipTargetType::inventory>(cornerCoords.first, cornerCoords.second));
                         }
                 return result;
             }
@@ -152,12 +169,12 @@ namespace FAWorld
 
     EquipTarget Inventory::avoidLinks(const EquipTarget& target)
     {
-        switch (target.location)
+        switch (target.type)
         {
-            case Item::eqINV:
+            case EquipTargetType::inventory:
             {
                 auto& item = getItemAt(target);
-                return MakeEquipTarget<Item::eqINV>(item.getCornerCoords().first, item.getCornerCoords().second);
+                return MakeEquipTarget<EquipTargetType::inventory>(item.getCornerCoords().first, item.getCornerCoords().second);
             }
             default:
                 return target;
@@ -168,16 +185,16 @@ namespace FAWorld
     {
         auto realTarget = avoidLinks(target);
         auto copy = getItemAt(realTarget);
-        if (copy.getEquipLoc() == Item::eqTWOHAND)
+        if (copy.getEquipLoc() == ItemEquipType::twoHanded)
         {
-            if (target.location == Item::eqLEFTHAND)
-                getItemAt(MakeEquipTarget<Item::eqRIGHTHAND>()) = {};
-            else if (target.location == Item::eqRIGHTHAND)
+            if (target.type == EquipTargetType::leftHand)
+                getItemAt(MakeEquipTarget<EquipTargetType::rightHand>()) = {};
+            else if (target.type == EquipTargetType::rightHand)
                 return {}; // Cancel the operation, you can't click on illusionary two-hand item on the right in diablo
         }
-        switch (target.location)
+        switch (target.type)
         {
-            case Item::eqINV:
+            case EquipTargetType::inventory:
                 for (int j = realTarget.posY; j < realTarget.posY + copy.getInvSize().second; ++j)
                     for (int i = realTarget.posX; i < realTarget.posX + copy.getInvSize().first; ++i)
                         mInventoryBox[j][i] = {};
@@ -188,22 +205,30 @@ namespace FAWorld
         return copy;
     }
 
-    std::set<Item::equipLoc> wearable = {Item::eqLEFTRING, Item::eqRIGHTRING, Item::eqAMULET, Item::eqLEFTHAND, Item::eqRIGHTHAND, Item::eqBODY, Item::eqHEAD};
+    std::set<EquipTargetType> wearable = {
+        EquipTargetType::leftHand,
+        EquipTargetType::rightHand,
+        EquipTargetType::leftRing,
+        EquipTargetType::rightRing,
+        EquipTargetType::amulet,
+        EquipTargetType::body,
+        EquipTargetType::head,
+    };
 
     void Inventory::putItemUnsafe(const Item& item, const EquipTarget& target)
     {
-        if (item.getEquipLoc() == Item::eqTWOHAND && target.location == Item::eqLEFTHAND)
+        if (item.getEquipLoc() == ItemEquipType::twoHanded && target.type == EquipTargetType::leftHand)
         {
-            auto& rightHand = getItemAt(MakeEquipTarget<Item::eqRIGHTHAND>());
+            auto& rightHand = getItemAt(MakeEquipTarget<EquipTargetType::rightHand>());
             rightHand = item;
             rightHand.mIsReal = false;
         }
-        switch (target.location)
+        switch (target.type)
         {
             default:
                 getItemAt(target) = item;
                 break;
-            case Item::eqINV:
+            case EquipTargetType::inventory:
                 layItem(item, target.posX, target.posY);
                 break;
         }
@@ -229,7 +254,7 @@ namespace FAWorld
         if (item.isBeltEquippable())
             for (auto i = 0; i < beltWidth; ++i)
             {
-                auto& place = getItemAt(MakeEquipTarget<Item::eqBELT>(i));
+                auto& place = getItemAt(MakeEquipTarget<EquipTargetType::belt>(i));
                 if (place.isEmpty())
                 {
                     place = item;
@@ -237,16 +262,16 @@ namespace FAWorld
                 }
             }
         // auto-equipping weapons
-        auto& leftHand = getItemAt(MakeEquipTarget<Item::eqLEFTHAND>());
-        auto& rightHand = getItemAt(MakeEquipTarget<Item::eqRIGHTHAND>());
-        if (item.getEquipLoc() == Item::eqTWOHAND && leftHand.isEmpty() && rightHand.isEmpty())
+        auto& leftHand = getItemAt(MakeEquipTarget<EquipTargetType::leftHand>());
+        auto& rightHand = getItemAt(MakeEquipTarget<EquipTargetType::rightHand>());
+        if (item.getEquipLoc() == ItemEquipType::twoHanded && leftHand.isEmpty() && rightHand.isEmpty())
         {
-            putItemUnsafe(item, MakeEquipTarget<Item::eqLEFTHAND>());
+            putItemUnsafe(item, MakeEquipTarget<EquipTargetType::leftHand>());
             equipChanged();
             return true;
         }
         // only for weapons, not shields
-        if (item.getEquipLoc() == Item::eqONEHAND && item.getType() == Item::itWEAPON)
+        if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getClass() == ItemClass::weapon)
             for (auto hand_ptr : {&leftHand, &rightHand})
                 if (hand_ptr->isEmpty())
                 {
@@ -258,16 +283,16 @@ namespace FAWorld
         // different orders of placement for different item types as found in original game:
         auto requiredXOrder = xorder::fromLeft;
         auto requiredYOrder = yorder::fromTop;
-        switch (item.getType())
+        switch (item.getClass())
         {
-            case Item::itARMOUR:
-                if (item.getEquipLoc() == Item::eqONEHAND)
+            case ItemClass::armor:
+                if (item.getEquipLoc() == ItemEquipType::oneHanded)
                     requiredXOrder = xorder::fromRight;
                 break;
-            case Item::itPOT: // TODO: scrolls
+            case ItemClass::jewelryAndConsumable: // TODO: scrolls
                 requiredYOrder = yorder::fromBottom;
                 break;
-            case Item::itGOLD:
+            case ItemClass::gold:
                 requiredYOrder = yorder::fromBottom;
                 requiredXOrder = xorder::fromRight;
                 break;
@@ -327,10 +352,10 @@ namespace FAWorld
         }
 
         auto& item = mCursorHeld;
-        if (item.getEquipLoc() == Item::eqTWOHAND && placementTarget.location == Item::eqRIGHTHAND)
-            placementTarget = MakeEquipTarget<Item::eqLEFTHAND>();
+        if (item.getEquipLoc() == ItemEquipType::twoHanded && placementTarget.type == EquipTargetType::rightHand)
+            placementTarget = MakeEquipTarget<EquipTargetType::leftHand>();
 
-        if (wearable.count(placementTarget.location) > 0 && !checkStatsRequirement(item))
+        if (wearable.count(placementTarget.type) > 0 && !checkStatsRequirement(item))
             return false;
 
         if (!isFit(item, placementTarget))
@@ -365,6 +390,8 @@ namespace FAWorld
         return true;
     }
 
+    bool Inventory::exchangeWithCursor(EquipTarget takeoutTarget) { return exchangeWithCursor(takeoutTarget, boost::none); }
+
     void Inventory::itemSlotLeftMouseButtonDown(EquipTarget target)
     {
         if (exchangeWithCursor(target))
@@ -374,7 +401,7 @@ namespace FAWorld
     void Inventory::beltMouseLeftButtonDown(double x)
     {
         int beltX = static_cast<int>(x * beltWidth);
-        exchangeWithCursor(MakeEquipTarget<Item::eqBELT>(beltX));
+        exchangeWithCursor(MakeEquipTarget<EquipTargetType::belt>(beltX));
     }
 
     void Inventory::inventoryMouseLeftButtonDown(double x, double y)
@@ -385,7 +412,8 @@ namespace FAWorld
         int placementCellY = static_cast<int>(y * inventoryHeight - mCursorHeld.getInvSize().second * 0.5 + 0.5);
         if (!isValidCell(takeoutCellX, takeoutCellY))
             return;
-        exchangeWithCursor(MakeEquipTarget<Item::eqINV>(takeoutCellX, takeoutCellY), MakeEquipTarget<Item::eqINV>(placementCellX, placementCellY));
+        exchangeWithCursor(MakeEquipTarget<EquipTargetType::inventory>(takeoutCellX, takeoutCellY),
+                           MakeEquipTarget<EquipTargetType::inventory>(placementCellX, placementCellY));
     }
 
     void Inventory::setCursorHeld(const Item& item)
@@ -412,126 +440,33 @@ namespace FAWorld
 
     Item& Inventory::getItemAt(const EquipTarget& target)
     {
-        switch (target.location)
+        switch (target.type)
         {
-            case Item::eqLEFTHAND:
+            case EquipTargetType::leftHand:
                 return mLeftHand;
-            case Item::eqLEFTRING:
+            case EquipTargetType::leftRing:
                 return mLeftRing;
-            case Item::eqRIGHTHAND:
+            case EquipTargetType::rightHand:
                 return mRightHand;
-            case Item::eqRIGHTRING:
+            case EquipTargetType::rightRing:
                 return mRightRing;
-            case Item::eqBODY:
+            case EquipTargetType::body:
                 return mBody;
-            case Item::eqHEAD:
+            case EquipTargetType::head:
                 return mHead;
-            case Item::eqAMULET:
+            case EquipTargetType::amulet:
                 return mAmulet;
-            case Item::eqINV:
+            case EquipTargetType::inventory:
                 return mInventoryBox[target.posY][target.posX];
-            case Item::eqBELT:
+            case EquipTargetType::belt:
                 return mBelt[target.posX];
-            case Item::eqCURSOR:
+            case EquipTargetType::cursor:
                 return mCursorHeld;
             default:
                 break;
         }
 
         return Item::empty;
-    }
-
-    void Inventory::removeItem(Item& item, Item::equipLoc from, uint8_t beltX, uint8_t invX, uint8_t invY)
-    {
-        switch (from)
-        {
-            case Item::eqLEFTHAND:
-            {
-                if (item.getEquipLoc() == Item::eqTWOHAND)
-                {
-                    mRightHand = Item();
-                }
-                mLeftHand = Item();
-                break;
-            }
-
-            case Item::eqRIGHTHAND:
-            {
-                if (item.getEquipLoc() == Item::eqTWOHAND)
-                {
-                    mLeftHand = Item();
-                }
-                mRightHand = Item();
-                break;
-            }
-
-            case Item::eqLEFTRING:
-            {
-                mLeftRing = Item();
-                break;
-            }
-            case Item::eqRIGHTRING:
-            {
-                mRightRing = Item();
-                break;
-            }
-
-            case Item::eqBELT:
-            {
-                mBelt[beltX] = Item();
-                break;
-            }
-
-            case Item::eqCURSOR:
-            {
-                setCursorHeld({});
-                break;
-            }
-
-            case Item::eqAMULET:
-            {
-                mAmulet = Item();
-                break;
-            }
-
-            case Item::eqHEAD:
-            {
-                mHead = Item();
-                break;
-            }
-
-            case Item::eqBODY:
-            {
-                mBody = Item();
-                break;
-            }
-
-            case Item::eqINV:
-            {
-                // TODO: refactor everything
-                auto sizeX = item.mSizeX;
-                auto sizeY = item.mSizeY;
-                for (uint8_t i = invY; i < invY + sizeY; i++)
-                {
-                    for (uint8_t j = invX; j < invX + sizeX; j++)
-                    {
-                        mInventoryBox[i][j] = Item();
-                        mInventoryBox[i][j].mInvY = i;
-                        mInventoryBox[i][j].mInvX = j;
-                    }
-                }
-                break;
-            }
-
-            case Item::eqONEHAND:
-            case Item::eqTWOHAND:
-            case Item::eqUNEQUIP:
-            case Item::eqFLOOR:
-            default:
-            {
-                return;
-            }
-        }
     }
 
     bool Inventory::fitsAt(Item item, uint8_t x, uint8_t y)
@@ -598,31 +533,4 @@ namespace FAWorld
         }
         std::cout << printbelt.str() << std::endl;
     }
-
-    void Inventory::collectEffects()
-    {
-        if (mActor == NULL)
-            return;
-        mItemEffects.clear();
-        mArmourClassTotal = 0;
-        mAttackDamageTotal = 0;
-
-        auto addEffectsAndStats = [this](const Item& item) {
-            mItemEffects.insert(mItemEffects.end(), item.mEffects.begin(), item.mEffects.end());
-            if (!item.isEmpty())
-            {
-                mArmourClassTotal += item.mArmourClass;
-                mAttackDamageTotal += item.mAttackDamage;
-            }
-        };
-
-        for (auto item_ptr : {&mHead, &mBody, &mAmulet, &mRightRing, &mLeftRing, &mLeftHand})
-            addEffectsAndStats(*item_ptr);
-        if (!(mLeftHand == mRightHand))
-        {
-            addEffectsAndStats(mRightHand);
-        }
-    }
-
-    std::vector<std::tuple<Item::ItemEffect, uint32_t, uint32_t, uint32_t>>& Inventory::getTotalEffects() { return mItemEffects; }
 }

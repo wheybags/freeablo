@@ -288,14 +288,7 @@ namespace DiabloExe
         {
             exe.FAfseek(itemOffset + 84 * i, SEEK_SET);
             UniqueItem tmp(exe, codeOffset);
-            if (tmp.mEffect0 > 79 || tmp.mEffect1 > 79 || tmp.mEffect2 > 79 || tmp.mEffect3 > 79 || tmp.mEffect4 > 79 || tmp.mEffect5 > 79)
-                continue;
             if (tmp.mItemType == 0 || tmp.mItemType > 68)
-                continue;
-            uint32_t maxRange = 50000;
-            if (tmp.mMaxRange0 > maxRange || tmp.mMaxRange1 > maxRange || tmp.mMaxRange2 > maxRange || tmp.mMaxRange3 > maxRange || tmp.mMaxRange4 > maxRange ||
-                tmp.mMaxRange5 > maxRange || tmp.mMinRange0 > maxRange || tmp.mMinRange1 > maxRange || tmp.mMinRange2 > maxRange || tmp.mMinRange3 > maxRange ||
-                tmp.mMinRange4 > maxRange || tmp.mMinRange5 > maxRange)
                 continue;
 
             if (Misc::StringUtils::containsNonPrint(tmp.mName))

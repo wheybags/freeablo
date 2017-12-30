@@ -16,6 +16,8 @@
 #include "../faworld/player.h"
 #include "../faworld/world.h"
 
+#include "../faworld/equiptarget.h"
+#include "../faworld/itemenums.h"
 #include "boost/range/counting_range.hpp"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
@@ -264,14 +266,14 @@ namespace FAGui
     {
         auto& inv = mPlayer->getInventory();
         using namespace FAWorld;
-        if (!inv.getItemAt(MakeEquipTarget<Item::equipLoc::eqCURSOR>()).isEmpty())
+        if (!inv.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
             highlight = ItemHighlightInfo::notHighlighed;
         bool checkerboarded = false;
 
         auto& item = inv.getItemAt(target);
         if (!item.isReal())
         {
-            if (item.getEquipLoc() == FAWorld::Item::equipLoc::eqTWOHAND && target.location == FAWorld::Item::equipLoc::eqRIGHTHAND)
+            if (item.getEquipLoc() == FAWorld::ItemEquipType::twoHanded && target.type == FAWorld::EquipTargetType::rightHand)
             {
                 checkerboarded = true;
                 highlight = ItemHighlightInfo::notHighlighed;
@@ -322,13 +324,13 @@ namespace FAGui
         using namespace FAWorld;
         drawPanel(ctx, PanelType::inventory, [&]() {
             static std::vector<std::pair<EquipTarget, struct nk_rect>> slot_rects = {
-                {MakeEquipTarget<Item::equipLoc::eqHEAD>(), nk_rect(133, 3, 56, 56)},
-                {MakeEquipTarget<Item::equipLoc::eqAMULET>(), nk_rect(205, 32, 28, 28)},
-                {MakeEquipTarget<Item::equipLoc::eqBODY>(), nk_rect(133, 75, 58, 87)},
-                {MakeEquipTarget<Item::equipLoc::eqLEFTHAND>(), nk_rect(18, 75, 56, 84)},
-                {MakeEquipTarget<Item::equipLoc::eqRIGHTHAND>(), nk_rect(249, 75, 56, 84)},
-                {MakeEquipTarget<Item::equipLoc::eqLEFTRING>(), nk_rect(47, 178, 28, 28)},
-                {MakeEquipTarget<Item::equipLoc::eqRIGHTRING>(), nk_rect(248, 178, 28, 28)}};
+                {MakeEquipTarget<FAWorld::EquipTargetType::head>(), nk_rect(133, 3, 56, 56)},
+                {MakeEquipTarget<FAWorld::EquipTargetType::amulet>(), nk_rect(205, 32, 28, 28)},
+                {MakeEquipTarget<FAWorld::EquipTargetType::body>(), nk_rect(133, 75, 58, 87)},
+                {MakeEquipTarget<FAWorld::EquipTargetType::leftHand>(), nk_rect(18, 75, 56, 84)},
+                {MakeEquipTarget<FAWorld::EquipTargetType::rightHand>(), nk_rect(249, 75, 56, 84)},
+                {MakeEquipTarget<FAWorld::EquipTargetType::leftRing>(), nk_rect(47, 178, 28, 28)},
+                {MakeEquipTarget<FAWorld::EquipTargetType::rightRing>(), nk_rect(248, 178, 28, 28)}};
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
             {
                 auto& inv = mPlayer->getInventory();
@@ -365,7 +367,7 @@ namespace FAGui
                 for (auto col : boost::counting_range(0, Inventory::inventoryWidth))
                 {
                     auto cell_top_left = nk_vec2(17 + col * cellSize, 222 + row * cellSize);
-                    item(ctx, MakeEquipTarget<Item::equipLoc::eqINV>(col, row), cell_top_left, ItemHighlightInfo::highlightIfHover);
+                    item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::inventory>(col, row), cell_top_left, ItemHighlightInfo::highlightIfHover);
                 }
             nk_layout_space_end(ctx);
         });
@@ -401,7 +403,7 @@ namespace FAGui
         for (auto num : boost::counting_range(0, Inventory::beltWidth))
         {
             auto cell_top_left = nk_vec2(beltTopLeft.x + num * cellSize, beltTopLeft.y);
-            item(ctx, MakeEquipTarget<Item::equipLoc::eqBELT>(num), cell_top_left, ItemHighlightInfo::highlightIfHover);
+            item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::belt>(num), cell_top_left, ItemHighlightInfo::highlightIfHover);
         }
         nk_layout_space_end(ctx);
     }
@@ -663,7 +665,28 @@ namespace FAGui
     void GuiManager::notify(Engine::KeyboardInputAction action)
     {
         if (!mDialogs.empty())
+        {
             mDialogs.back().notify(action, *this);
+            return;
+        }
+
+        switch (action)
+        {
+            case Engine::KeyboardInputAction::toggleQuests:
+                togglePanel(PanelType::quests);
+                break;
+            case Engine::KeyboardInputAction::toggleInventory:
+                togglePanel(PanelType::inventory);
+                break;
+            case Engine::KeyboardInputAction::toggleCharacterInfo:
+                togglePanel(PanelType::character);
+                break;
+            case Engine::KeyboardInputAction::toggleSpellbook:
+                togglePanel(PanelType::spells);
+                break;
+            default:
+                break;
+        }
 
         mMenuHandler->notify(action);
     }
