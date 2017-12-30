@@ -48,7 +48,7 @@ namespace FAWorld
     typedef int64_t Tick;
     static const Tick MAX_TICK = 9223372036854775807;
 
-    class World : public Engine::KeyboardInputObserverInterface, public Engine::MouseInputObserverInterface
+    class World : public Engine::KeyboardInputObserverInterface
     {
     public:
         World(const DiabloExe::DiabloExe& exe);
@@ -60,9 +60,8 @@ namespace FAWorld
         void notify(Engine::KeyboardInputAction action);
         Render::Tile getTileByScreenPos(Misc::Point screenPos);
         Actor* targetedActor(Misc::Point screenPosition);
+        PlacedItemData* targetedItem(Misc::Point screenPosition);
         void updateHover(const Misc::Point& mousePosition);
-        void onMouseMove(const Misc::Point& mouse_position);
-        void notify(Engine::MouseInputAction action, Misc::Point mousePosition);
         void generateLevels();
         GameLevel* getCurrentLevel();
         int32_t getCurrentLevelIndex();
@@ -84,13 +83,10 @@ namespace FAWorld
 
         void fillRenderState(FARender::RenderState* state);
 
-        static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
         static Tick getTicksInPeriod(float seconds);
         static float getSecondsPerTick();
 
         Actor* getActorById(int32_t id);
-        void skipMousePressIfNeeded();
-        void onPause(bool pause);
 
         void getAllActors(std::vector<Actor*>& actors);
 
@@ -99,32 +95,26 @@ namespace FAWorld
         HoverState& getHoverState();
 
         void setupObjectIdMappers();
-        FASaveGame::ObjectIdMapper mObjectIdMapper;
 
         int32_t getNewId() { return mNextId++; }
+
+        void blockInput();
+        void unblockInput();
+
+        static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
+        FASaveGame::ObjectIdMapper mObjectIdMapper;
+        FAGui::GuiManager* mGuiManager = nullptr;
 
     private:
         void playLevelMusic(size_t level);
         void changeLevel(bool up);
-        void onMouseRelease();
-        void onMouseClick(Misc::Point mousePosition);
-        PlacedItemData* targetedItem(Misc::Point screenPosition);
-        void onMouseDown(Misc::Point mousePosition);
 
         std::map<int32_t, GameLevel*> mLevels;
         Tick mTicksPassed = 0;
-        Player* mCurrentPlayer;
+        Player* mCurrentPlayer = nullptr;
         std::unique_ptr<FAGui::DialogManager> mDlgManager;
         std::vector<Player*> mPlayers; ///< This vector is sorted
         const DiabloExe::DiabloExe& mDiabloExe;
-        FAGui::GuiManager* mGuiManager = nullptr;
-        // Target is locked once we pressed the mouse button. If it's locked then we can't change current action and can retarget
-        // only simple movement.
-        bool targetLock = false;
-        bool simpleMove = false;
-        // that's sadly another state required
-        // it means after dialog or pause menu we have to release button before doing next meaningful action
-        bool skipNextMousePress = false;
 
         int32_t mNextId = 1;
     };

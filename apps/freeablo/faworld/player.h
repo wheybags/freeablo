@@ -9,6 +9,8 @@
 
 namespace FAWorld
 {
+    class PlayerBehaviour;
+
     class Player : public Actor
     {
     public:
@@ -32,6 +34,8 @@ namespace FAWorld
 
         const Inventory& getInventory() const { return mInventory; }
         Inventory& getInventory() { return mInventory; }
+
+        PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour; }
 
     private:
         void init(const std::string& className, const DiabloExe::CharacterStats& charStats);

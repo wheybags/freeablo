@@ -60,6 +60,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/movementhandler.h
     faworld/actoranimationmanager.h
     faworld/actoranimationmanager.cpp
+    faworld/playerbehaviour.cpp
+    faworld/playerbehaviour.h
 
     fagui/textcolor.h
     fagui/guimanager.h

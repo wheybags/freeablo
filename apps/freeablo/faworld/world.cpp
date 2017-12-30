@@ -14,6 +14,7 @@
 #include "gamelevel.h"
 #include "itemmap.h"
 #include "player.h"
+#include "playerbehaviour.h"
 #include <algorithm>
 #include <diabloexe/diabloexe.h>
 #include <iostream>
@@ -83,6 +84,7 @@ namespace FAWorld
 
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });
+        mObjectIdMapper.addClass(PlayerBehaviour::typeId, [](FASaveGame::GameLoader&) { return new PlayerBehaviour(); });
     }
 
     World::~World()
@@ -171,22 +173,16 @@ namespace FAWorld
         return nothingHovered();
     }
 
-    void World::onMouseMove(const Misc::Point& /*mousePosition*/) { return; }
-
-    void World::notify(Engine::MouseInputAction action, Misc::Point mousePosition)
+    void World::blockInput()
     {
-        switch (action)
-        {
-            case Engine::MouseInputAction::MOUSE_RELEASE:
-                return onMouseRelease();
-            case Engine::MouseInputAction::MOUSE_DOWN:
-                return onMouseDown(mousePosition);
-            case Engine::MouseInputAction::MOUSE_CLICK:
-                return onMouseClick(mousePosition);
-            case Engine::MouseInputAction::MOUSE_MOVE:
-                return onMouseMove(mousePosition);
-            default:;
-        }
+        if (getCurrentPlayer())
+            getCurrentPlayer()->getPlayerBehaviour()->blockInput();
+    }
+
+    void World::unblockInput()
+    {
+        if (getCurrentPlayer())
+            getCurrentPlayer()->getPlayerBehaviour()->unblockInput();
     }
 
     void World::generateLevels()
@@ -339,12 +335,7 @@ namespace FAWorld
     void World::addCurrentPlayer(Player* player)
     {
         mCurrentPlayer = player;
-        mCurrentPlayer->talkRequested.connect([&](Actor* actor) {
-            // This is important because mouse released becomes blocked by "modal" dialog
-            // Thus creating some uncomfortable effects
-            targetLock = false;
-            mDlgManager->talk(actor);
-        });
+        mCurrentPlayer->talkRequested.connect([&](Actor* actor) { mDlgManager->talk(actor); });
     }
 
     void World::registerPlayer(Player* player)
@@ -379,18 +370,6 @@ namespace FAWorld
         }
 
         return NULL;
-    }
-
-    void World::skipMousePressIfNeeded()
-    {
-        if (SDL_BUTTON(SDL_BUTTON_LEFT) & SDL_GetMouseState(nullptr, nullptr))
-            skipNextMousePress = true;
-    }
-
-    void World::onPause(bool pause)
-    {
-        if (!pause)
-            skipMousePressIfNeeded();
     }
 
     void World::getAllActors(std::vector<Actor*>& actors)
@@ -429,86 +408,10 @@ namespace FAWorld
             player->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
     }
 
-    void World::onMouseRelease()
-    {
-        skipNextMousePress = false;
-        targetLock = false;
-        simpleMove = false;
-        getCurrentPlayer()->isTalking = false;
-    }
-
-    void World::onMouseClick(Misc::Point mousePosition)
-    {
-        auto player = getCurrentPlayer();
-        auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
-
-        auto level = getCurrentLevel();
-        level->activate(clickedTile.x, clickedTile.y);
-    }
-
     PlacedItemData* World::targetedItem(Misc::Point screenPosition)
     {
         auto tile = getTileByScreenPos(screenPosition);
         return getCurrentLevel()->getItemMap().getItemAt({tile.x, tile.y});
-    }
-
-    void World::onMouseDown(Misc::Point mousePosition)
-    {
-        if (skipNextMousePress)
-            return;
-
-        auto player = getCurrentPlayer();
-        auto& inv = player->getInventory();
-        auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
-
-        bool targetWasLocked = targetLock; // better solution assign targetLock true at something like SCOPE_EXIT macro
-        targetLock = true;
-
-        if (!targetWasLocked)
-        {
-            auto cursorItem = inv.getItemAt(MakeEquipTarget<Item::eqCURSOR>());
-            if (!cursorItem.isEmpty())
-            {
-                // What happens here is not actually true to original game but
-                // It's a fair way to emulate it. Current data is that in all instances except interaction with inventory
-                // cursor has topleft as it's hotspot even when cursor is item. Other 2 instances actually:
-                // - dropping items
-                // - moving cursor outside the screen / window
-                // This shift by half cursor size emulates behavior during dropping items. And the only erroneous
-                // part of behavior now can be spotted by moving cursor outside the window which is not so significant.
-                // To emulate it totally true to original game we need to heavily hack interaction with inventory
-                // which is possible
-                auto clickedTileShifted = getTileByScreenPos(mousePosition - FARender::Renderer::get()->cursorSize() / 2);
-                if (player->dropItem({clickedTileShifted.x, clickedTileShifted.y}))
-                {
-                    mGuiManager->clearDescription();
-                }
-                return;
-            }
-        }
-
-        if (!targetWasLocked)
-        {
-            Actor* clickedActor = targetedActor(mousePosition);
-            if (clickedActor)
-            {
-                player->mTarget = clickedActor;
-                return;
-            }
-
-            if (auto item = targetedItem(mousePosition))
-            {
-                player->mTarget = ItemTarget{mGuiManager->isInventoryShown() ? ItemTarget::ActionType::toCursor : ItemTarget::ActionType::autoEquip, item};
-                return;
-            }
-        }
-
-        if (!targetWasLocked || simpleMove)
-        {
-            player->mTarget = boost::blank{};
-            player->mMoveHandler.setDestination({clickedTile.x, clickedTile.y});
-            simpleMove = true;
-        }
     }
 
     Tick World::getTicksInPeriod(float seconds) { return std::max((Tick)1, (Tick)round(((float)ticksPerSecond) * seconds)); }

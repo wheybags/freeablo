@@ -248,14 +248,11 @@ namespace FAWorld
         return false;
     }
 
-    bool Actor::attack(Actor* enemy)
+    void Actor::attack(Actor* enemy)
     {
-        if (enemy->isDead())
-            return false;
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
         enemy->takeDamage(mStats.getAttackDamage());
         if (enemy->getStats().mHp.current <= 0)
             enemy->die();
-        return true;
     }
 }

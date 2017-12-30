@@ -17,7 +17,6 @@ namespace FAWorld
 
             boost::apply_visitor(Misc::overload([](boost::blank) {},
                                                 [&actor, &ret](Actor* target) {
-                                                    Position pos;
                                                     if (actor.canInteractWith(target))
                                                     {
                                                         // move to the actor, if we're not already on our way
@@ -25,8 +24,9 @@ namespace FAWorld
                                                             actor.mMoveHandler.setDestination(target->getPos().current());
                                                         else // and interact them if in range
                                                         {
-                                                            if (actor.canIAttack(target) && actor.attack(target))
+                                                            if (actor.canIAttack(target))
                                                             {
+                                                                actor.attack(target);
                                                                 ret = StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
                                                             }
                                                             else if (actor.canTalkTo(target) && actor.talk(target))
