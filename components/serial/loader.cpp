@@ -1,9 +1,15 @@
 #include "loader.h"
 #include "streaminterface.h"
+#include <misc/assert.h>
 
 namespace Serial
 {
-    Loader::Loader(ReadStreamInterface& stream) : mStream(stream) {}
+    Loader::Loader(ReadStreamInterface& stream) : mStream(stream)
+    {
+        mVersion = load<uint32_t>();
+        release_assert(mVersion <= CurrentSaveVersion); // TODO: recoverable errors here
+        release_assert(mVersion >= MinimumSupportedSaveVersion);
+    }
 
     template <> bool Loader::load<bool>() { return mStream.read_bool(); }
 
@@ -29,7 +35,7 @@ namespace Serial
 
     void Loader::endCategory(const std::string& name) { mStream.endCategory(name); }
 
-    Saver::Saver(WriteStreamInterface& stream) : mStream(stream) {}
+    Saver::Saver(WriteStreamInterface& stream) : mStream(stream) { save(CurrentSaveVersion); }
 
     void Saver::save(bool val) { mStream.write(val); }
 
