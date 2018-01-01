@@ -1,5 +1,6 @@
 #include "player.h"
 #include "../engine/threadmanager.h"
+#include "../fagui/dialogmanager.h"
 #include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
 #include "actorstats.h"
@@ -65,12 +66,6 @@ namespace FAWorld
     }
 
     Player::~Player() { FAWorld::World::get()->deregisterPlayer(this); }
-
-    bool Player::talk(Actor* actor)
-    {
-        talkRequested(actor);
-        return true;
-    }
 
     void Player::setSpriteClass(std::string className)
     {
@@ -274,5 +269,42 @@ namespace FAWorld
         if (isPosOk(curPos))
             return tryDrop(curPos);
         return false;
+    }
+
+    bool Player::canTalkTo(Actor* actor)
+    {
+        if (actor == nullptr)
+            return false;
+
+        if (this == actor)
+            return false;
+
+        if (!actor->canTalk())
+            return false;
+
+        if (isTalking)
+            return false;
+
+        if (isEnemy(actor))
+            return false;
+
+        return true;
+    }
+
+    void Player::update(bool noclip)
+    {
+        Actor::update(noclip);
+
+        // handle talking to npcs
+        if (mTarget.which() == 1) // targeting actor
+        {
+            Actor* target = boost::get<Actor*>(mTarget);
+
+            if (target && target->getPos().isNear(this->getPos()) && canTalkTo(target))
+            {
+                World::get()->mDlgManager->talk(target);
+                mTarget = boost::blank{};
+            }
+        }
     }
 }

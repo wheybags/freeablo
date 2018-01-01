@@ -224,32 +224,6 @@ namespace FAWorld
         return true;
     }
 
-    bool Actor::canTalkTo(Actor* actor)
-    {
-        if (actor == nullptr)
-            return false;
-
-        if (this == actor)
-            return false;
-
-        if (!actor->canTalk())
-            return false;
-
-        if (isTalking)
-            return false;
-
-        if (isEnemy(actor))
-            return false;
-
-        return true;
-    }
-
-    bool Actor::talk(Actor* actor)
-    {
-        UNUSED_PARAM(actor);
-        return false;
-    }
-
     void Actor::attack(Actor* enemy)
     {
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));

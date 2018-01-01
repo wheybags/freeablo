@@ -59,7 +59,7 @@ namespace FAWorld
         std::string getHitWav() const;
 
         bool canIAttack(Actor* actor);
-        void update(bool noclip);
+        virtual void update(bool noclip);
         void takeDamage(double amount);
         void heal();
 
@@ -78,8 +78,6 @@ namespace FAWorld
 
         bool canTalk() const { return mCanTalk; }
         bool canInteractWith(Actor* actor);
-        bool canTalkTo(Actor* actor);
-        virtual bool talk(Actor* actor);
 
         // public member variables
         MovementHandler mMoveHandler;

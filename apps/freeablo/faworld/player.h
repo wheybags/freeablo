@@ -25,10 +25,11 @@ namespace FAWorld
 
         virtual ~Player();
         void setSpriteClass(std::string className);
-        bool talk(Actor* actor);
         void updateSprites();
         void pickupItem(ItemTarget target) override;
         bool dropItem(const FAWorld::Tile& clickedTile);
+
+        virtual void update(bool noclip) override;
 
         virtual size_t getBasePriority() { return 10; }
 
@@ -39,13 +40,11 @@ namespace FAWorld
 
     private:
         void init(const std::string& className, const DiabloExe::CharacterStats& charStats);
+        bool canTalkTo(Actor* actor);
 
         std::string mClassName;
         Inventory mInventory; // TODO: this should be a member of Actor, not Player
 
         friend class Inventory;
-
-    public:
-        boost::signals2::signal<void(Actor*)> talkRequested;
     };
 }

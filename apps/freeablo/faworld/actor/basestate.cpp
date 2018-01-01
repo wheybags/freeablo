@@ -29,10 +29,6 @@ namespace FAWorld
                                                                 actor.attack(target);
                                                                 ret = StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
                                                             }
-                                                            else if (actor.canTalkTo(target) && actor.talk(target))
-                                                            {
-                                                                actor.mTarget = boost::blank{};
-                                                            }
                                                         }
                                                     }
                                                     else

@@ -337,7 +337,6 @@ namespace FAWorld
     {
         debug_assert(mCurrentPlayer == nullptr);
         mCurrentPlayer = player;
-        mCurrentPlayer->talkRequested.connect([&](Actor* actor) { mDlgManager->talk(actor); });
     }
 
     void World::registerPlayer(Player* player)
