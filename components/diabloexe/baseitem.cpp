@@ -11,17 +11,17 @@ namespace DiabloExe
 
     BaseItem::BaseItem(FAIO::FAFileObject& exe, size_t codeOffset)
     {
-        activTrigger = exe.read32();
+        dropRate = exe.read32();
 
         itemClass = exe.read8();
-        equipLoc = exe.read8();
+        equipType = exe.read8();
 
         unknown0 = exe.read16();
 
-        graphicValue = exe.read32();
+        invGraphicsId = exe.read32();
 
         type = exe.read8();
-        uniqCode = exe.read8();
+        uniqueBaseItemId = exe.read8();
 
         unknown1 = exe.read16();
 
@@ -31,30 +31,30 @@ namespace DiabloExe
         durability = exe.read32();
         minAttackDamage = exe.read32();
         maxAttackDamage = exe.read32();
-        minArmourClass = exe.read32();
-        maxArmourClass = exe.read32();
+        minArmorClass = exe.read32();
+        maxArmorClass = exe.read32();
 
-        reqStr = exe.read8();
-        reqMagic = exe.read8();
-        reqDex = exe.read8();
-        reqVit = exe.read8();
+        requiredStrength = exe.read8();
+        requiredMagic = exe.read8();
+        requiredDexterity = exe.read8();
+        unused = exe.read8();
 
-        specialEffect = exe.read32();
-        magicCode = exe.read32();
-        spellCode = exe.read32();
-        useOnce = exe.read32();
-        price1 = exe.read32();
-        price2 = exe.read32();
+        specialEffectFlags = exe.read32();
+        miscId = exe.read32();
+        spellId = exe.read32();
+        isUsable = exe.read32();
+        price = exe.read32();
+        unusedPrice = exe.read32();
 
-        itemName = exe.readCStringFromWin32Binary(tempName, codeOffset);
+        name = exe.readCStringFromWin32Binary(tempName, codeOffset);
         if (tempSecondName)
         {
-            itemSecondName = exe.readCStringFromWin32Binary(tempSecondName, codeOffset);
+            shortName = exe.readCStringFromWin32Binary(tempSecondName, codeOffset);
         }
         else
         {
 
-            itemSecondName = std::string();
+            shortName = std::string();
         }
     }
 
@@ -62,39 +62,39 @@ namespace DiabloExe
     {
         std::stringstream ss;
         ss << "{" << std::endl
-           << "\tactiveTrigger: " << +activTrigger << "," << std::endl
-           << "\titemType: " << +itemClass << "," << std::endl
-           << "\tequipLoc: " << +equipLoc << "," << std::endl
-           << "\tgraphicValue: " << +graphicValue << "," << std::endl
-           << "\titemCode: " << +type << "," << std::endl
-           << "\tuniqCode: " << +uniqCode << "," << std::endl
+           << "\tactiveTrigger: " << +dropRate << "," << std::endl
+           << "\titemClass: " << +itemClass << "," << std::endl
+           << "\tequipType: " << +equipType << "," << std::endl
+           << "\tgraphicValue: " << +invGraphicsId << "," << std::endl
+           << "\ttype: " << +type << "," << std::endl
+           << "\tuniqCode: " << +uniqueBaseItemId << "," << std::endl
            << "\tunknown0: " << +unknown0 << "," << std::endl
            << "\tunknown1: " << +unknown1 << "," << std::endl
 
-           << "\titemName: " << itemName << "," << std::endl
-           << "\titemSecondName: " << itemSecondName << "," << std::endl
+           << "\titemName: " << name << "," << std::endl
+           << "\titemSecondName: " << shortName << "," << std::endl
            << "\tqualityLevel: " << +qualityLevel << "," << std::endl
            << "\tdurability: " << +durability << "," << std::endl
            << "\tminAttackDamage: " << +minAttackDamage << "," << std::endl
            << "\tmaxAttackDamage: " << +maxAttackDamage << "," << std::endl
 
-           << "\tminArmourClass: " << +minArmourClass << "," << std::endl
-           << "\tmaxArmourClass: " << +maxArmourClass << "," << std::endl
-           << "\treqStr: " << +reqStr << "," << std::endl
-           << "\treqMagic: " << +reqMagic << "," << std::endl
-           << "\treqDex: " << +reqDex << "," << std::endl
-           << "\treqVit: " << +reqVit << "," << std::endl
+           << "\tminArmourClass: " << +minArmorClass << "," << std::endl
+           << "\tmaxArmourClass: " << +maxArmorClass << "," << std::endl
+           << "\treqStr: " << +requiredStrength << "," << std::endl
+           << "\treqMagic: " << +requiredMagic << "," << std::endl
+           << "\treqDex: " << +requiredDexterity << "," << std::endl
+           << "\treqVit: " << +unused << "," << std::endl
 
-           << "\tspecialEffect : " << +specialEffect << "," << std::endl
+           << "\tspecialEffect : " << +specialEffectFlags << "," << std::endl
 
-           << "\tmagicCode: " << +magicCode << "," << std::endl
+           << "\tmagicCode: " << +miscId << "," << std::endl
 
-           << "\tspellCode: " << +spellCode << "," << std::endl
-           << "\tuseOnce: " << +useOnce << "," << std::endl
+           << "\tspellCode: " << +spellId << "," << std::endl
+           << "\tuseOnce: " << +isUsable << "," << std::endl
 
-           << "\tprice1: " << +price1 << "," << std::endl
+           << "\tprice1: " << +price << "," << std::endl
 
-           << "\tprice2: " << +price2 << "," << std::endl
+           << "\tprice2: " << +unusedPrice << "," << std::endl
 
            << "}" << std::endl;
         return ss.str();

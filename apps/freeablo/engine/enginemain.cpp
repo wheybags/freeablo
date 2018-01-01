@@ -4,7 +4,6 @@
 #include "../falevelgen/levelgen.h"
 #include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
-#include "../faworld/itemmanager.h"
 #include "../faworld/player.h"
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/playerfactory.h"
@@ -19,6 +18,7 @@
 #include <misc/misc.h>
 #include <serial/textstream.h>
 #include <thread>
+#include "../faworld/itemfactory.h"
 
 namespace bpo = boost::program_options;
 
@@ -77,8 +77,8 @@ namespace Engine
             return;
         }
 
-        FAWorld::ItemManager& itemManager = FAWorld::ItemManager::get();
-        mPlayerFactory = boost::make_unique<FAWorld::PlayerFactory>(*mExe);
+        FAWorld::ItemFactory itemFactory (*mExe);
+        mPlayerFactory = boost::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
         renderer.loadFonts(*mExe);
 
         FILE* f = fopen("save.sav", "rb");
@@ -111,8 +111,6 @@ namespace Engine
         {
             mWorld.reset(new FAWorld::World(*mExe));
             mWorld->setGuiManager(mGuiManager.get());
-
-            itemManager.loadItems(mExe.get());
 
             int32_t currentLevel = variables["level"].as<int32_t>();
             mWorld->generateLevels(); // TODO: not generate levels while game hasn't started

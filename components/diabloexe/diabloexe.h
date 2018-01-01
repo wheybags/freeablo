@@ -52,9 +52,6 @@ namespace DiabloExe
         std::vector<const Npc*> getNpcs() const;
         const std::vector<std::vector<int32_t>>& getTownerAnimation() const;
 
-        const BaseItem& getItem(const std::string& name) const;
-        std::map<std::string, BaseItem> getItemMap() const;
-        const std::map<std::string, UniqueItem>& getUniqueItemMap() const;
         const CharacterStats getCharacterStat(std::string character) const;
 
         std::string dump() const;
@@ -63,6 +60,9 @@ namespace DiabloExe
 
         uint32_t swapEndian(uint32_t arg);
         const FontData& getFontData(const char* fontName) const;
+        const std::vector<BaseItem> &getBaseItems() const { return mBaseItems; }
+        const std::vector<UniqueItem> &getUniqueItems() const { return mUniqueItems; }
+        const std::vector<Affix> &getAffixes() const { return mAffixes; }
 
     private:
         std::string getMD5(const std::string& pathEXE);
@@ -82,10 +82,10 @@ namespace DiabloExe
         std::string mVersion;
         std::map<std::string, Monster> mMonsters;
         std::map<std::string, Npc> mNpcs;
-        std::map<std::string, BaseItem> mBaseItems;
-        std::map<std::string, UniqueItem> mUniqueItems;
-        std::map<std::string, Affix> mAffixes;
         std::map<std::string, CharacterStats> mCharacters;
+        std::vector<BaseItem> mBaseItems;
+        std::vector<UniqueItem> mUniqueItems;
+        std::vector<Affix> mAffixes;
         std::vector<std::vector<int32_t>> mTownerAnimation;
         std::vector<std::string> itemDropGraphicsFilename;
         std::unordered_map<std::string, FontData> mFontData;

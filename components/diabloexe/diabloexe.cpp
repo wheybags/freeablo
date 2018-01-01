@@ -257,26 +257,15 @@ namespace DiabloExe
             exe.FAfseek(itemOffset + 76 * i, SEEK_SET);
             BaseItem tmp(exe, codeOffset);
 
-            if (tmp.useOnce > 1 || tmp.itemName == "")
+            if (tmp.isUsable > 1 || tmp.name.empty())
                 continue;
-            if (Misc::StringUtils::containsNonPrint(tmp.itemName))
+            if (Misc::StringUtils::containsNonPrint(tmp.name))
                 continue;
-            if (Misc::StringUtils::containsNonPrint(tmp.itemSecondName))
+            if (Misc::StringUtils::containsNonPrint(tmp.shortName))
                 continue;
 
-            tmp.dropItemGraphicsPath = "items/" + itemDropGraphicsFilename[itemGraphicsIdToDropGraphicsId[tmp.graphicValue]] + ".cel";
-            if (mBaseItems.find(tmp.itemName) != mBaseItems.end())
-            {
-                size_t j;
-                for (j = 1; mBaseItems.find(tmp.itemName + "_" + std::to_string(j)) != mBaseItems.end(); j++)
-                    ;
-
-                mBaseItems[tmp.itemName + "_" + std::to_string(j)] = tmp;
-            }
-            else
-            {
-                mBaseItems[tmp.itemName] = tmp;
-            }
+            tmp.dropItemGraphicsPath = "items/" + itemDropGraphicsFilename[itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId]] + ".cel";
+            mBaseItems.push_back(tmp);
         }
     }
     void DiabloExe::loadUniqueItems(FAIO::FAFileObject& exe, size_t codeOffset)
@@ -288,24 +277,13 @@ namespace DiabloExe
         {
             exe.FAfseek(itemOffset + 84 * i, SEEK_SET);
             UniqueItem tmp(exe, codeOffset);
-            if (tmp.mItemType == 0 || tmp.mItemType > 68)
+            if (tmp.mUniqueBaseItemId == 0 || tmp.mUniqueBaseItemId > 68)
                 continue;
 
             if (Misc::StringUtils::containsNonPrint(tmp.mName))
                 continue;
 
-            if (mUniqueItems.find(tmp.mName) != mUniqueItems.end())
-            {
-                size_t j;
-                for (j = 1; mUniqueItems.find(tmp.mName + "_" + std::to_string(j)) != mUniqueItems.end(); j++)
-                    ;
-
-                mUniqueItems[tmp.mName + "_" + std::to_string(j)] = tmp;
-            }
-            else
-            {
-                mUniqueItems[tmp.mName] = tmp;
-            }
+            mUniqueItems.push_back (tmp);
         }
     }
 
@@ -322,18 +300,7 @@ namespace DiabloExe
                 continue;
             if (tmp.mName.empty())
                 continue;
-            if (mAffixes.find(tmp.mName) != mAffixes.end())
-            {
-                size_t j;
-                for (j = 1; mAffixes.find(tmp.mName + "_" + std::to_string(j)) != mAffixes.end(); j++)
-                    ;
-
-                mAffixes[tmp.mName + "_" + std::to_string(j)] = tmp;
-            }
-            else
-            {
-                mAffixes[tmp.mName] = tmp;
-            }
+            mAffixes.push_back (tmp);
         }
     }
 
@@ -451,12 +418,6 @@ namespace DiabloExe
 
     const Monster& DiabloExe::getMonster(const std::string& name) const { return mMonsters.find(name)->second; }
 
-    const BaseItem& DiabloExe::getItem(const std::string& name) const { return mBaseItems.find(name)->second; }
-
-    std::map<std::string, BaseItem> DiabloExe::getItemMap() const { return mBaseItems; }
-
-    const std::map<std::string, UniqueItem>& DiabloExe::getUniqueItemMap() const { return mUniqueItems; }
-
     const CharacterStats DiabloExe::getCharacterStat(std::string character) const { return mCharacters.at(character); }
 
     std::vector<const Monster*> DiabloExe::getMonstersInLevel(size_t levelNum) const
@@ -513,22 +474,16 @@ namespace DiabloExe
            << mCharacters.at("Sorcerer").dump();
 
         ss << "Base Items: " << mBaseItems.size() << std::endl;
-        for (std::map<std::string, BaseItem>::const_iterator it = mBaseItems.begin(); it != mBaseItems.end(); ++it)
-        {
-            ss << it->first << std::endl << it->second.dump();
-        }
+        for (auto &baseItem : mBaseItems)
+            ss <<  baseItem.dump ();
 
         ss << "Unique Items: " << mUniqueItems.size() << std::endl;
-        for (std::map<std::string, UniqueItem>::const_iterator it = mUniqueItems.begin(); it != mUniqueItems.end(); ++it)
-        {
-            ss << it->first << std::endl << it->second.dump();
-        }
+        for (auto &uniqueItem : mUniqueItems)
+            ss << uniqueItem.dump ();
 
         ss << "Affixes: " << mAffixes.size() << std::endl;
-        for (std::map<std::string, Affix>::const_iterator it = mAffixes.begin(); it != mAffixes.end(); ++it)
-        {
-            ss << it->first << std::endl << it->second.dump();
-        }
+        for (auto &affix : mAffixes)
+            ss << affix.dump ();
 
         return ss.str();
     }

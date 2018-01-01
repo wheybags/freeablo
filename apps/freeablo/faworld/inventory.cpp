@@ -5,6 +5,7 @@
 #include "equiptarget.h"
 #include "itemenums.h"
 #include "itemmanager.h"
+
 #include "player.h"
 #include <algorithm>
 #include <boost/range/any_range.hpp>
