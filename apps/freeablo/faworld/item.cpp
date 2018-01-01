@@ -37,7 +37,9 @@ namespace FAWorld
             mObjcursLoaded = true;
         }
 
-        mAffix = *affix;
+        if (affix)
+            mAffix = *affix;
+
         mIsIdentified = isIdentified;
         mIsUnique = false;
         mEmpty = false;
