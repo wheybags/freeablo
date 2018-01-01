@@ -19,6 +19,7 @@ namespace FAWorld
     {
         release_assert(actor->getTypeId() == Player::typeId);
         Behaviour::reAttach(actor);
+        mPlayer = static_cast<Player*>(actor);
     }
 
     void PlayerBehaviour::update()
