@@ -56,7 +56,6 @@ namespace FAWorld
             mAnimation.setIdleFrameSequence(exe.getTownerAnimation()[*id]);
 
         mTalkData = npc.talkData;
-        mCanTalk = true;
         mNpcId = npc.id;
         mName = npc.name;
     }
@@ -92,6 +91,16 @@ namespace FAWorld
         mNpcId = loader.load<std::string>();
         mName = loader.load<std::string>();
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this); // TODO: handle this
+
+        // TODO: some sort of system here, so we don't need to save an npcs entire dialog
+        // data into the save file every time. Probably should be done when dialog is revisited.
+        uint32_t talkDataSize = loader.load<uint32_t>();
+        for (uint32_t i = 0; i < talkDataSize; i++)
+        {
+            std::string key = loader.load<std::string>();
+            mTalkData[key] = loader.load<std::string>();
+        }
+
         // TODO: handle mTarget here
     }
 
@@ -117,6 +126,13 @@ namespace FAWorld
         saver.save(mId);
         saver.save(mNpcId);
         saver.save(mName);
+
+        saver.save(uint32_t(mTalkData.size()));
+        for (const auto& pair : mTalkData)
+        {
+            saver.save(pair.first);
+            saver.save(pair.second);
+        }
 
         // TODO: handle mActorStateMachine here
         // TODO: handle mTarget here

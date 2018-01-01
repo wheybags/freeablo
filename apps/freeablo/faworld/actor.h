@@ -67,7 +67,7 @@ namespace FAWorld
         bool isDead() const;
         bool isEnemy(Actor* other) const;
 
-        const std::unordered_map<std::string, std::string>& getTalkData() const { return mTalkData; }
+        const std::map<std::string, std::string>& getTalkData() const { return mTalkData; }
         const std::string& getNpcId() const { return mNpcId; }
         const std::string& getName() const { return mName; }
         const ActorStats& getStats() const { return mStats; }
@@ -76,14 +76,13 @@ namespace FAWorld
         bool isPassable() const { return isDead(); }
         bool hasTarget() const;
 
-        bool canTalk() const { return mCanTalk; }
+        bool canTalk() const { return mTalkData.size() > 0; }
         bool canInteractWith(Actor* actor);
 
         // public member variables
         MovementHandler mMoveHandler;
         TargetType mTarget;
         ActorAnimationManager mAnimation;
-        bool isTalking = false;
         bool isAttacking = false;
         bool mInvuln = false;
 
@@ -93,11 +92,10 @@ namespace FAWorld
         ActorStats mStats;
         std::string mSoundPath;
         Behaviour* mBehaviour = nullptr;
-        bool mCanTalk = false;
         Faction mFaction;
         std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;
-        std::unordered_map<std::string, std::string> mTalkData; ///< Lines of dialogue
+        std::map<std::string, std::string> mTalkData; ///< Lines of dialogue
 
         // TODO: this var is only used for dialog code, which branches on which npc is being spoken to.
         // Eventually, we should add a proper dialog specification system, and get rid of this.

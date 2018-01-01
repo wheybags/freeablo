@@ -10,7 +10,7 @@ namespace Serial
     class ReadStreamInterface;
     class WriteStreamInterface;
 
-    static constexpr uint32_t CurrentSaveVersion = 1u;
+    static constexpr uint32_t CurrentSaveVersion = 2u;
 
     // In future, this will be different, and any changes to the save format wothing the range min-(current-1)
     // will be supported by special backward compat code. For now though, it's not worth the overhead, and noone's

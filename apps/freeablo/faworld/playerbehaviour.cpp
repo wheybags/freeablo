@@ -52,7 +52,6 @@ namespace FAWorld
             case Engine::MouseInputAction::MOUSE_RELEASE:
             {
                 mTargetLock = false;
-                mPlayer->isTalking = false;
                 break;
             }
             case Engine::MouseInputAction::MOUSE_DOWN:

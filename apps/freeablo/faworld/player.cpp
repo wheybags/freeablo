@@ -282,9 +282,6 @@ namespace FAWorld
         if (!actor->canTalk())
             return false;
 
-        if (isTalking)
-            return false;
-
         if (isEnemy(actor))
             return false;
 

@@ -4,7 +4,7 @@
 #include <boost/optional/optional.hpp>
 #include <faio/fafileobject.h>
 
-#include <unordered_map>
+#include <map>
 
 namespace DiabloExe
 {
@@ -18,7 +18,7 @@ namespace DiabloExe
         uint8_t y;
         size_t rotation;
         boost::optional<int32_t> animationSequenceId;
-        std::unordered_map<std::string, std::string> talkData;
+        std::map<std::string, std::string> talkData;
 
         Npc() {}
 
