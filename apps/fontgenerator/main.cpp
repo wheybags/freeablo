@@ -56,11 +56,11 @@ int main(int argc, char** argv)
     {
         Cel::CelFrame& frame = cel[i];
         int32_t maximumVisibleX = 0;
-        for (int32_t x = 0; x < frame.mWidth; x++)
+        for (int32_t x = 0; x < frame.width(); x++)
         {
-            for (int32_t y = 0; y < frame.mHeight; y++)
+            for (int32_t y = 0; y < frame.height(); y++)
             {
-                if (frame[x][y].visible)
+                if (frame.get(x, y).visible)
                     if (x > maximumVisibleX)
                         maximumVisibleX = x;
             }
@@ -72,8 +72,8 @@ int main(int argc, char** argv)
 
         // Additional 2 pixels for every letter
         maximumVisibleX += 2;
-        if (maximumVisibleX > frame.mWidth)
-            maximumVisibleX = frame.mWidth;
+        if (maximumVisibleX > frame.width())
+            maximumVisibleX = frame.width();
 
         // Convert values to string
         char buffer[10];

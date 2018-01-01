@@ -1,6 +1,6 @@
 add_library(Cel 
     cel/celfile.cpp cel/celfile.h  
-    cel/celframe.h cel/celframe.cpp
+    cel/celframe.h
     cel/pal.cpp cel/pal.h  
     cel/celdecoder.cpp cel/celdecoder.h)
 target_link_libraries(Cel FAIO)
@@ -41,6 +41,7 @@ add_library(Misc
     misc/maxcurrentitem.cpp
     misc/maxcurrentitem.h
     misc/assert.h
+    misc/array2d.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)

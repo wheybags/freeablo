@@ -34,7 +34,7 @@ std::string hashImageData(int32_t width, int32_t height, Cel::Colour* data)
     return s.str();
 }
 
-std::string hashCelFrame(Cel::CelFrame& frame) { return hashImageData(frame.mWidth, frame.mHeight, &frame.mRawImage[0]); }
+std::string hashCelFrame(Cel::CelFrame& frame) { return hashImageData(frame.width(), frame.height(), &(*frame.begin())); }
 
 std::vector<std::string> getCelsFromListfile(const std::string& path)
 {

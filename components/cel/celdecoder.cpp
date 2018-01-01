@@ -41,7 +41,9 @@ namespace Cel
         auto& frame = mFrames[index];
         CelFrame celFrame;
         decodeFrame(index, frame, celFrame);
-        return (mCache[index] = celFrame);
+
+        mCache[index] = std::move(celFrame);
+        return mCache[index];
     }
 
     int32_t CelDecoder::numFrames() const { return mFrames.size(); }
@@ -146,7 +148,7 @@ namespace Cel
 
             CelFrame celFrame;
             decodeFrame(frameNumber, frame, celFrame);
-            mCache[frameNumber] = celFrame;
+            mCache[frameNumber] = std::move(celFrame);
 
             frameNumber++;
         }
@@ -247,10 +249,8 @@ namespace Cel
             setCharbutCelDimensions(index);
         }
 
-        celFrame.mWidth = mFrameWidth;
-        celFrame.mHeight = mFrameHeight;
-        celFrame.mRawImage.resize(mFrameWidth * mFrameHeight);
-        auto it = celFrame.mRawImage.begin();
+        celFrame = CelFrame(mFrameWidth, mFrameHeight);
+        auto it = celFrame.begin();
         decoder(*this, frame, mPal, it);
         // assert (it == celFrame.mRawImage.end ());
     }

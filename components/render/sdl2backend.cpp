@@ -246,8 +246,8 @@ namespace Render
             heights.resize(cel.animLength());
             for (int i = 0; i < cel.animLength(); ++i)
             {
-                widths[i] = cel[i].mWidth;
-                heights[i] = cel[i].mHeight;
+                widths[i] = cel[i].width();
+                heights[i] = cel[i].height();
             }
             animLength = cel.animLength();
         }
@@ -424,8 +424,8 @@ namespace Render
 
         for (int32_t i = 0; i < cel.numFrames(); i++)
         {
-            width += cel[i].mWidth;
-            height = (cel[i].mHeight > height ? cel[i].mHeight : height);
+            width += cel[i].width();
+            height = (cel[i].height() > height ? cel[i].height() : height);
         }
 
         debug_assert(width > 0);
@@ -437,7 +437,7 @@ namespace Render
         for (int32_t i = 0; i < cel.numFrames(); i++)
         {
             drawFrame(surface, x, 0, cel[i]);
-            x += cel[i].mWidth;
+            x += cel[i].width();
         }
 
         std::vector<Sprite> vec(1);
@@ -771,7 +771,7 @@ namespace Render
 
         for (int32_t i = 0; i < cel.numFrames(); i++)
         {
-            SDL_Surface* s = createTransparentSurface(cel[i].mWidth, cel[i].mHeight);
+            SDL_Surface* s = createTransparentSurface(cel[i].width(), cel[i].height());
             drawFrame(s, 0, 0, cel[i]);
 
             mSprites.push_back((Render::Sprite)(intptr_t)getGLTexFromSurface(s)); // SDL_CreateTextureFromSurface(renderer, s));
@@ -800,9 +800,9 @@ namespace Render
         int32_t maxHeight = 0;
         for (int32_t i = 0; i < numFrames; i++)
         {
-            sumWidth += cel[i].mWidth;
-            if (cel[i].mHeight > maxHeight)
-                maxHeight = cel[i].mHeight;
+            sumWidth += cel[i].width();
+            if (cel[i].height() > maxHeight)
+                maxHeight = cel[i].height();
         }
 
         if (sumWidth == 0)
@@ -814,7 +814,7 @@ namespace Render
         for (int32_t i = 0; i < numFrames; i++)
         {
             drawFrame(s, x, 0, cel[i]);
-            dx = cel[i].mWidth;
+            dx = cel[i].width();
             x += dx;
         }
 
@@ -981,11 +981,11 @@ namespace Render
 
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)
     {
-        for (int32_t x = 0; x < frame.mWidth; x++)
+        for (int32_t x = 0; x < frame.width(); x++)
         {
-            for (int32_t y = 0; y < frame.mHeight; y++)
+            for (int32_t y = 0; y < frame.height(); y++)
             {
-                auto& c = frame[x][y];
+                auto& c = frame.get(x, y);
                 if (c.visible)
                     setpixel(s, start_x + x, start_y + y, c);
             }
