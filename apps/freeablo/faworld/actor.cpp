@@ -85,7 +85,7 @@ namespace FAWorld
         {
             std::string typeId = loader.load<std::string>();
             mBehaviour = static_cast<Behaviour*>(World::get()->mObjectIdMapper.construct(typeId, loader));
-            mBehaviour->reAttach(this);
+            loader.addFunctionToRunAtEnd([this]() { mBehaviour->reAttach(this); });
         }
 
         mId = loader.load<int32_t>();
