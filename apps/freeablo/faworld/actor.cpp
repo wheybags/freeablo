@@ -101,7 +101,7 @@ namespace FAWorld
             mTalkData[key] = loader.load<std::string>();
         }
 
-        // TODO: handle mTarget here
+        mTarget.load(loader);
     }
 
     void Actor::save(FASaveGame::GameSaver& saver)
@@ -134,8 +134,9 @@ namespace FAWorld
             saver.save(pair.second);
         }
 
+        mTarget.save(saver);
+
         // TODO: handle mActorStateMachine here
-        // TODO: handle mTarget here
     }
 
     Actor::~Actor()
@@ -164,7 +165,7 @@ namespace FAWorld
 
     void Actor::heal() { mStats.mHp = mStats.mHp.max; }
 
-    bool Actor::hasTarget() const { return mTarget.type() != typeid(boost::blank); }
+    bool Actor::hasTarget() const { return mTarget.getType() != Target::Type::None; }
 
     void Actor::die()
     {

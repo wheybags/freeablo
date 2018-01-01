@@ -85,8 +85,8 @@ namespace FAWorld
                 }
                 else if (auto item = FAWorld::World::get()->targetedItem(mousePosition))
                 {
-                    mPlayer->mTarget = ItemTarget{
-                        FAWorld::World::get()->mGuiManager->isInventoryShown() ? ItemTarget::ActionType::toCursor : ItemTarget::ActionType::autoEquip, item};
+                    mPlayer->mTarget = Target::ItemTarget{ FAWorld::World::get()->mGuiManager->isInventoryShown() ?
+                        Target::ItemTarget::ActionType::toCursor : Target::ItemTarget::ActionType::autoEquip, item};
                 }
                 else
                 {
@@ -98,7 +98,7 @@ namespace FAWorld
                 if (mouseDown && !mTargetLock)
                 {
                     auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, mPlayer->getPos());
-                    mPlayer->mTarget = boost::blank{};
+                    mPlayer->mTarget.clear();
                     mPlayer->mMoveHandler.setDestination({clickedTile.x, clickedTile.y});
                 }
             }

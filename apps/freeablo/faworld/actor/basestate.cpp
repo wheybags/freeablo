@@ -15,38 +15,53 @@ namespace FAWorld
             UNUSED_PARAM(noclip);
             boost::optional<StateMachine::StateChange<Actor>> ret;
 
-            boost::apply_visitor(Misc::overload([](boost::blank) {},
-                                                [&actor, &ret](Actor* target) {
-                                                    if (actor.canInteractWith(target))
-                                                    {
-                                                        // move to the actor, if we're not already on our way
-                                                        if (!actor.getPos().isNear(target->getPos()))
-                                                            actor.mMoveHandler.setDestination(target->getPos().current());
-                                                        else // and interact them if in range
-                                                        {
-                                                            if (actor.canIAttack(target))
-                                                            {
-                                                                actor.attack(target);
-                                                                ret = StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
-                                                            }
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        actor.mTarget = boost::blank{};
-                                                    }
-                                                },
-                                                [&actor](const ItemTarget& target) {
-                                                    auto tile = target.item->getTile();
-                                                    if (actor.getPos().isNear({tile.x, tile.y}))
-                                                    {
-                                                        actor.pickupItem(target);
-                                                        actor.mTarget = boost::blank{};
-                                                    }
-                                                    else
-                                                        actor.mMoveHandler.setDestination({tile.x, tile.y}, true);
-                                                }),
-                                 actor.mTarget);
+            switch (actor.mTarget.getType())
+            {
+                case Target::Type::Actor:
+                {
+                    Actor* target = actor.mTarget.get<Actor*>();
+
+                    if (actor.canInteractWith(target))
+                    {
+                        // move to the actor, if we're not already on our way
+                        if (!actor.getPos().isNear(target->getPos()))
+                            actor.mMoveHandler.setDestination(target->getPos().current());
+                        else // and interact them if in range
+                        {
+                            if (actor.canIAttack(target))
+                            {
+                                actor.attack(target);
+                                ret = StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
+                            }
+                        }
+                    }
+                    else
+                    {
+                        actor.mTarget.clear();
+                    }
+
+                    break;
+                }
+
+                case Target::Type::Item:
+                {
+                    Target::ItemTarget target = actor.mTarget.get<Target::ItemTarget>();
+
+                    auto tile = target.item->getTile();
+                    if (actor.getPos().isNear({tile.x, tile.y}))
+                    {
+                        actor.pickupItem(target);
+                        actor.mTarget.clear();
+                    }
+                    else
+                    {
+                        actor.mMoveHandler.setDestination({tile.x, tile.y}, true);
+                    }
+                }
+
+                case Target::Type::None:
+                    break;
+            }
 
             actor.mMoveHandler.update(actor.getId());
 

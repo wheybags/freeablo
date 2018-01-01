@@ -9,6 +9,7 @@
 #include "gamelevel.h"
 #include "movementhandler.h"
 #include "position.h"
+#include "target.h"
 #include "world.h"
 #include <boost/format.hpp>
 #include <boost/variant/get.hpp>
@@ -27,13 +28,10 @@ namespace FAWorld
 {
     class Behaviour;
     class World;
-    class ItemTarget;
 
     class Actor
     {
     public:
-        using TargetType = boost::variant<boost::blank, Actor*, ItemTarget>;
-
         Actor(const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
         Actor(const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
         Actor(const DiabloExe::Monster& monster);
@@ -48,7 +46,7 @@ namespace FAWorld
         // TODO: atm, this is only implemented for Player, but it should be changed to
         // a non-virtual method, and implemented in Actor. The reason I wrote this comment
         // instead of doing that, is that Actors don't have inventories at the moment, just Players
-        virtual void pickupItem(ItemTarget target) { UNUSED_PARAM(target); }
+        virtual void pickupItem(Target::ItemTarget target) { UNUSED_PARAM(target); }
 
         void teleport(GameLevel* level, Position pos);
         GameLevel* getLevel();
@@ -81,7 +79,7 @@ namespace FAWorld
 
         // public member variables
         MovementHandler mMoveHandler;
-        TargetType mTarget;
+        Target mTarget;
         ActorAnimationManager mAnimation;
         bool isAttacking = false;
         bool mInvuln = false;

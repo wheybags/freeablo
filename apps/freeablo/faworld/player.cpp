@@ -211,7 +211,7 @@ namespace FAWorld
         }
     }
 
-    void Player::pickupItem(ItemTarget target)
+    void Player::pickupItem(Target::ItemTarget target)
     {
         auto& itemMap = getLevel()->getItemMap();
         auto tile = target.item->getTile();
@@ -219,11 +219,11 @@ namespace FAWorld
         auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, tile); };
         switch (target.action)
         {
-            case ItemTarget::ActionType::autoEquip:
+            case Target::ItemTarget::ActionType::autoEquip:
                 if (!getInventory().autoPlaceItem(*item))
                     dropBack();
                 break;
-            case ItemTarget::ActionType::toCursor:
+            case Target::ItemTarget::ActionType::toCursor:
                 auto cursorItem = getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
                 if (!cursorItem.isEmpty())
                     return dropBack();
@@ -293,14 +293,14 @@ namespace FAWorld
         Actor::update(noclip);
 
         // handle talking to npcs
-        if (mTarget.which() == 1) // targeting actor
+        if (mTarget.getType() == Target::Type::Actor)
         {
-            Actor* target = boost::get<Actor*>(mTarget);
+            Actor* target = mTarget.get<Actor*>();
 
             if (target && target->getPos().isNear(this->getPos()) && canTalkTo(target))
             {
                 World::get()->mDlgManager->talk(target);
-                mTarget = boost::blank{};
+                mTarget.clear();
             }
         }
     }

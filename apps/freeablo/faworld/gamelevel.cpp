@@ -14,6 +14,9 @@ namespace FAWorld
     GameLevel::GameLevel(FASaveGame::GameLoader& loader)
         : mLevel(Level::Level(loader)), mLevelIndex(loader.load<int32_t>()), mItemMap(new ItemMap(loader, this))
     {
+        release_assert(loader.currentlyLoadingLevel == nullptr);
+        loader.currentlyLoadingLevel = this;
+
         uint32_t actorsSize = loader.load<uint32_t>();
 
         mActors.reserve(actorsSize);
@@ -23,6 +26,9 @@ namespace FAWorld
             Actor* actor = static_cast<Actor*>(World::get()->mObjectIdMapper.construct(actorTypeId, loader));
             mActors.push_back(actor);
         }
+
+        release_assert(loader.currentlyLoadingLevel == this);
+        loader.currentlyLoadingLevel = nullptr;
     }
 
     void GameLevel::save(FASaveGame::GameSaver& saver)
