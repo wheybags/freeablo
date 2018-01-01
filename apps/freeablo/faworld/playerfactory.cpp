@@ -27,13 +27,13 @@ namespace FAWorld
     void PlayerFactory::loadTestingKit(Player* player)
     {
         ItemManager& itemManager = ItemManager::get();
-        player->getInventory().putItemUnsafe(itemManager.getItemByName("Buckler"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(1, 0));
-        player->getInventory().putItemUnsafe(itemManager.getItemByName("Short Bow"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(3, 0));
-        player->getInventory().putItemUnsafe(itemManager.getItemByName("Ring"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(1, 2));
-        player->getInventory().putItemUnsafe(itemManager.getItemByName("Ring"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(2, 2));
-        player->getInventory().putItemUnsafe(itemManager.getItemByName("Amulet"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(1, 3));
-        player->getInventory().putItemUnsafe(itemManager.getItemByName("Helm"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(5, 0));
-        player->getInventory().putItemUnsafe(itemManager.getItemByName("Rags"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(7, 0));
+        player->mInventory.putItemUnsafe(itemManager.getItemByName("Buckler"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(1, 0));
+        player->mInventory.putItemUnsafe(itemManager.getItemByName("Short Bow"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(3, 0));
+        player->mInventory.putItemUnsafe(itemManager.getItemByName("Ring"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(1, 2));
+        player->mInventory.putItemUnsafe(itemManager.getItemByName("Ring"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(2, 2));
+        player->mInventory.putItemUnsafe(itemManager.getItemByName("Amulet"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(1, 3));
+        player->mInventory.putItemUnsafe(itemManager.getItemByName("Helm"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(5, 0));
+        player->mInventory.putItemUnsafe(itemManager.getItemByName("Rags"), FAWorld::MakeEquipTarget<EquipTargetType::inventory>(7, 0));
     }
 
     void PlayerFactory::createWarrior(Player* player) const
@@ -41,22 +41,22 @@ namespace FAWorld
         ItemManager& itemManager = ItemManager::get();
 
         FAWorld::Item item = itemManager.getItemByName("Short Sword");
-        player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::leftHand>());
+        player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::leftHand>());
 
         item = itemManager.getItemByName("Buckler");
-        player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::rightHand>());
+        player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::rightHand>());
 
         item = itemManager.getItemByName("Club");
-        player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 0));
+        player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 0));
 
         item = itemManager.getItemByName("Gold");
         item.setCount(100);
-        player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 3));
+        player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 3));
 
         for (auto i = 0; i < 2; ++i)
         {
             item = itemManager.getItemByName("Potion of Healing");
-            player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::belt>(i));
+            player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::belt>(i));
         }
 
         player->setSpriteClass("warrior");
@@ -69,16 +69,16 @@ namespace FAWorld
         ItemManager& itemManager = ItemManager::get();
 
         FAWorld::Item item = itemManager.getItemByName("Short Bow");
-        player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::leftHand>());
+        player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::leftHand>());
 
         item = itemManager.getItemByName("Gold");
         item.setCount(100);
-        player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 3));
+        player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 3));
 
         for (auto i = 0; i < 2; ++i)
         {
             item = itemManager.getItemByName("Potion of Healing");
-            player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::belt>(i));
+            player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::belt>(i));
         }
 
         player->setSpriteClass("rogue");
@@ -91,16 +91,16 @@ namespace FAWorld
         ItemManager& itemManager = ItemManager::get();
 
         FAWorld::Item item = itemManager.getItemByName("Short Staff of Charged Bolt");
-        player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::leftHand>());
+        player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::leftHand>());
 
         item = itemManager.getItemByName("Gold");
         item.setCount(100);
-        player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 3));
+        player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 3));
 
         for (auto i = 0; i < 2; ++i)
         {
             item = itemManager.getItemByName("Potion of Mana");
-            player->getInventory().putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::belt>(i));
+            player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::belt>(i));
         }
 
         player->setSpriteClass("sorceror");

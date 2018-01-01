@@ -264,7 +264,7 @@ namespace FAGui
 
     void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highlight)
     {
-        auto& inv = mPlayer->getInventory();
+        auto& inv = mPlayer->mInventory;
         using namespace FAWorld;
         if (!inv.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
             highlight = ItemHighlightInfo::notHighlighed;
@@ -333,7 +333,7 @@ namespace FAGui
                 {MakeEquipTarget<FAWorld::EquipTargetType::rightRing>(), nk_rect(248, 178, 28, 28)}};
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
             {
-                auto& inv = mPlayer->getInventory();
+                auto& inv = mPlayer->mInventory;
                 for (auto& p : slot_rects)
                 {
                     nk_layout_space_push(ctx, p.second);
@@ -355,7 +355,7 @@ namespace FAGui
             float invWidth = Inventory::inventoryWidth * cellSize;
             float invHeight = Inventory::inventoryHeight * cellSize;
             nk_layout_space_push(ctx, nk_recta(invTopLeft, {invWidth, invHeight}));
-            auto& inv = mPlayer->getInventory();
+            auto& inv = mPlayer->mInventory;
             nk_button_label_styled(ctx, &dummyStyle, "");
             if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
             {
@@ -393,7 +393,7 @@ namespace FAGui
         auto beltTopLeft = nk_vec2(205, 21);
         auto beltWidth = 232.0f, beltHeight = 29.0f, cellSize = 29.0f;
         nk_layout_space_push(ctx, nk_recta(beltTopLeft, {beltWidth, beltHeight}));
-        auto& inv = mPlayer->getInventory();
+        auto& inv = mPlayer->mInventory;
         if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
         {
             inv.beltMouseLeftButtonDown((ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / beltWidth);

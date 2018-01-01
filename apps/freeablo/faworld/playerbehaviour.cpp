@@ -62,7 +62,7 @@ namespace FAWorld
 
                 mTargetLock = true;
 
-                auto cursorItem = mPlayer->getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+                auto cursorItem = mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
                 if (!cursorItem.isEmpty())
                 {
                     // What happens here is not actually true to original game but

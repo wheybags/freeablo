@@ -7,6 +7,7 @@
 #include "behaviour.h"
 #include "faction.h"
 #include "gamelevel.h"
+#include "inventory.h"
 #include "movementhandler.h"
 #include "position.h"
 #include "target.h"
@@ -43,10 +44,7 @@ namespace FAWorld
         static const std::string typeId;
         virtual const std::string& getTypeId() { return typeId; }
 
-        // TODO: atm, this is only implemented for Player, but it should be changed to
-        // a non-virtual method, and implemented in Actor. The reason I wrote this comment
-        // instead of doing that, is that Actors don't have inventories at the moment, just Players
-        virtual void pickupItem(Target::ItemTarget target) { UNUSED_PARAM(target); }
+        void pickupItem(Target::ItemTarget target);
 
         void teleport(GameLevel* level, Position pos);
         GameLevel* getLevel();
@@ -83,6 +81,7 @@ namespace FAWorld
         ActorAnimationManager mAnimation;
         bool isAttacking = false;
         bool mInvuln = false;
+        Inventory mInventory;
 
     protected:
         // protected member variables

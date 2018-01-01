@@ -6,6 +6,7 @@
 #include "actor/basestate.h"
 #include "actorstats.h"
 #include "behaviour.h"
+#include "equiptarget.h"
 #include "findpath.h"
 #include "player.h"
 #include "world.h"
@@ -35,7 +36,8 @@ namespace FAWorld
         mAnimation.update();
     }
 
-    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath) : mMoveHandler(World::getTicksInPeriod(1.0f))
+    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath)
+        : mMoveHandler(World::getTicksInPeriod(1.0f))
     {
         mFaction = Faction::heaven();
         if (!dieAnimPath.empty())
@@ -75,7 +77,10 @@ namespace FAWorld
         mSoundPath = monster.soundPath;
     }
 
-    Actor::Actor(FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(loader)
+    Actor::Actor(FASaveGame::GameLoader& loader)
+        : mMoveHandler(loader)
+        , mAnimation(loader)
+        , mStats(loader)
     {
         mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
 
@@ -178,6 +183,28 @@ namespace FAWorld
     bool Actor::isDead() const { return mStats.mHp.current <= 0; }
 
     bool Actor::isEnemy(Actor* other) const { return mFaction.canAttack(other->mFaction); }
+
+    void Actor::pickupItem(Target::ItemTarget target)
+    {
+        auto& itemMap = getLevel()->getItemMap();
+        auto tile = target.item->getTile();
+        auto item = itemMap.takeItemAt(tile);
+        auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, tile); };
+        switch (target.action)
+        {
+            case Target::ItemTarget::ActionType::autoEquip:
+                if (!mInventory.autoPlaceItem(*item))
+                    dropBack();
+                break;
+            case Target::ItemTarget::ActionType::toCursor:
+                auto cursorItem = mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+                if (!cursorItem.isEmpty())
+                    return dropBack();
+
+                mInventory.setCursorHeld(*item);
+                break;
+        }
+    }
 
     void Actor::teleport(GameLevel* level, Position pos)
     {

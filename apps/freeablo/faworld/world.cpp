@@ -148,7 +148,7 @@ namespace FAWorld
                 return mGuiManager->setDescription("");
         };
 
-        auto& cursorItem = mCurrentPlayer->getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+        auto& cursorItem = mCurrentPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
         if (!cursorItem.isEmpty())
         {
             mGuiManager->setDescription(cursorItem.getName());

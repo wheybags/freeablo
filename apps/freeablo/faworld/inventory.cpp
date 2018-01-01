@@ -33,11 +33,10 @@ namespace FAWorld
     {
     }
 
-    Inventory::Inventory(Player* actor)
+    Inventory::Inventory()
     {
         mAttackDamageTotal = 0;
         mArmourClassTotal = 0;
-        mActor = actor;
         for (uint8_t i = 0; i < 4; i++)
         {
             for (uint8_t j = 0; j < 10; j++)
@@ -46,13 +45,6 @@ namespace FAWorld
                 mInventoryBox[i][j].mInvY = i;
             }
         }
-    }
-
-    uint32_t Inventory::getTotalArmourClass()
-    {
-        if (mActor == NULL)
-            return 0;
-        return mArmourClassTotal;
     }
 
     uint32_t Inventory::getTotalAttackDamage() { return mAttackDamageTotal; }

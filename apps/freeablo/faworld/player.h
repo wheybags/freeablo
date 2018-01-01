@@ -26,15 +26,9 @@ namespace FAWorld
         virtual ~Player();
         void setSpriteClass(std::string className);
         void updateSprites();
-        void pickupItem(Target::ItemTarget target) override;
         bool dropItem(const FAWorld::Tile& clickedTile);
 
         virtual void update(bool noclip) override;
-
-        virtual size_t getBasePriority() { return 10; }
-
-        const Inventory& getInventory() const { return mInventory; }
-        Inventory& getInventory() { return mInventory; }
 
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour; }
 
@@ -43,8 +37,5 @@ namespace FAWorld
         bool canTalkTo(Actor* actor);
 
         std::string mClassName;
-        Inventory mInventory; // TODO: this should be a member of Actor, not Player
-
-        friend class Inventory;
     };
 }
