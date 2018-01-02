@@ -101,7 +101,7 @@ namespace FAGui
     GuiManager::nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action, bool isModal)
     {
         nk_style_push_vec2(ctx, &ctx->style.window.padding, nk_vec2(0, 0));
-        if (isModalDlgShown() && !isModal)
+        if (mEngine.isPaused() || (isModalDlgShown() && !isModal))
             flags |= NK_WINDOW_NO_INPUT;
         if (nk_begin(ctx, title, bounds, flags))
         {
@@ -302,7 +302,7 @@ namespace FAGui
                     if (highlight == ItemHighlightInfo::highlightIfHover)
                     {
                         nk_button_label_styled(ctx, &dummyStyle, "");
-                        if (nk_inactive_widget_is_hovered(ctx))
+                        if (isLastWidgetHovered(ctx))
                         {
                             isHighlighted = true;
                         }
@@ -341,7 +341,7 @@ namespace FAGui
                     if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
                         inv.itemSlotLeftMouseButtonDown(p.first);
                     auto highlight = ItemHighlightInfo::notHighlighed;
-                    if (nk_inactive_widget_is_hovered(ctx))
+                    if (isLastWidgetHovered(ctx))
                     {
                         highlight = ItemHighlightInfo::highlited;
                     }
@@ -640,6 +640,9 @@ namespace FAGui
 
     void GuiManager::setDescription(std::string text, TextColor color)
     {
+        if (isModalDlgShown())
+            return;
+
         mDescription = text;
         mDescriptionColor = color;
     }
@@ -693,13 +696,20 @@ namespace FAGui
 
     void GuiManager::setPlayer(FAWorld::Player* player) { mPlayer = player; }
 
+    bool GuiManager::isLastWidgetHovered(nk_context* ctx) const { return nk_inactive_widget_is_hovered(ctx) && !mEngine.isPaused(); }
+
     bool GuiManager::isInventoryShown() const { return *panel(panelPlacementByType(PanelType::inventory)) == PanelType::inventory; }
 
     void GuiManager::popDialogData() { mDialogs.pop_back(); }
 
     void GuiManager::pushDialogData(DialogData&& data) { mDialogs.push_back(std::move(data)); }
 
-    bool GuiManager::isModalDlgShown() const { return !mDialogs.empty(); }
+    bool GuiManager::isModalDlgShown() const
+    {
+        if (!mDialogs.empty())
+            return true;
+        return false;
+    }
 
     void GuiManager::togglePanel(PanelType type)
     {
