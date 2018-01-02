@@ -50,7 +50,7 @@ namespace FAWorld
         player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 0));
 
         item = itemManager.getItemByName("Gold");
-        item.setCount(100);
+        item.mCount = 100;
         player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 3));
 
         for (auto i = 0; i < 2; ++i)
@@ -72,7 +72,7 @@ namespace FAWorld
         player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::leftHand>());
 
         item = itemManager.getItemByName("Gold");
-        item.setCount(100);
+        item.mCount = 100;
         player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 3));
 
         for (auto i = 0; i < 2; ++i)
@@ -94,7 +94,7 @@ namespace FAWorld
         player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::leftHand>());
 
         item = itemManager.getItemByName("Gold");
-        item.setCount(100);
+        item.mCount = 100;
         player->mInventory.putItemUnsafe(item, FAWorld::MakeEquipTarget<EquipTargetType::inventory>(0, 3));
 
         for (auto i = 0; i < 2; ++i)

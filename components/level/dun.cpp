@@ -47,7 +47,7 @@ namespace Level
     {
         Serial::ScopedCategorySaver cat("Dun", saver);
 
-        uint32_t size = mBlocks.begin() - mBlocks.end();
+        uint32_t size = mBlocks.width() * mBlocks.height();
         saver.save(size);
         for (int32_t val : mBlocks)
             saver.save(val);
