@@ -2,11 +2,27 @@
 
 ## What is this?
 See http://akazlou.com/posts/2015-11-09-every-project-should-have-decisions.html
-Bascially, the idea is to have a file in your projects repo, where you recod the
+Bascially, the idea is to have a file in your projects repo, where you record the
 decisions you make over the course of the project's lifetime.
 
 When adding entries here, please place them at the top of the list, preferably
 with the title of the entry being the output from `date`.
+
+## Tue Jan  2 17:39:15 CET 2018
+- These were actually decided a while ago, but I never wrote them down.
+- The existing multiplayer implementation was not working, decided to pursue
+  deterministic lockstep instead.
+- Hunter package manager is good, we shall use it (https://github.com/ruslo/hunter)
+- Qt is annoying, we shall no longer use it (huge dependency for almost not gain,
+  we barely used it).
+- We'll start using \#pragma once instead of include guards.
+- Using Nuklear (https://github.com/vurtun/nuklear) for gui, ditched librocket
+  (https://github.com/libRocket/libRocket). Librocket is buggy and dead and 
+  imgui systems are very appealing especially for games. Decided on nuklear
+  over the competition because it allowed easy enough skinning to resemble the
+  original diablo gui.
+- Along with librocket, we aslo ditched python. No scripting for now, that can
+  be reassessed later when we're ready for it.
 
 ## Sun Sep 18 19:43:49 IST 2016
 Start of the decisions.md file, so I'll just list all the decisions I can think
