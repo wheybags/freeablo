@@ -1,6 +1,6 @@
 add_library(Cel 
     cel/celfile.cpp cel/celfile.h  
-    cel/celframe.h cel/celframe.cpp
+    cel/celframe.h
     cel/pal.cpp cel/pal.h  
     cel/celdecoder.cpp cel/celdecoder.h)
 target_link_libraries(Cel FAIO)
@@ -28,7 +28,6 @@ set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Misc 
     misc/stringops.h
-    misc/helper2d.h
     misc/md5.h
     misc/md5.cpp
     misc/misc.h
@@ -41,6 +40,7 @@ add_library(Misc
     misc/maxcurrentitem.cpp
     misc/maxcurrentitem.h
     misc/assert.h
+    misc/array2d.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
@@ -49,7 +49,6 @@ set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 set(RenderFiles 
     render/render.h 
-    render/levelobjects.cpp 
     render/levelobjects.h
     render/sdl2backend.cpp
     render/sdl_gl_funcs.h

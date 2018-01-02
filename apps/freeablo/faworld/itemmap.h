@@ -1,12 +1,10 @@
 
 #pragma once
 
+#include <boost/optional/optional.hpp>
 #include <map>
 #include <memory>
 #include <vector>
-
-#include "misc/helper2d.h"
-#include <boost/optional/optional.hpp>
 
 namespace FARender
 {

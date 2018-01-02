@@ -9,7 +9,7 @@
 
 namespace FAWorld
 {
-    GameLevel::GameLevel(Level::Level level, size_t levelIndex) : mLevel(level), mLevelIndex(levelIndex), mItemMap(new ItemMap(this)) {}
+    GameLevel::GameLevel(Level::Level&& level, size_t levelIndex) : mLevel(std::move(level)), mLevelIndex(levelIndex), mItemMap(new ItemMap(this)) {}
 
     GameLevel::GameLevel(FASaveGame::GameLoader& loader)
         : mLevel(Level::Level(loader)), mLevelIndex(loader.load<int32_t>()), mItemMap(new ItemMap(loader, this))
@@ -55,15 +55,15 @@ namespace FAWorld
             delete mActors[i];
     }
 
-    Level::MinPillar GameLevel::getTile(size_t x, size_t y) { return mLevel[x][y]; }
+    Level::MinPillar GameLevel::getTile(size_t x, size_t y) { return mLevel.get(x, y); }
 
     int32_t GameLevel::width() const { return mLevel.width(); }
 
     int32_t GameLevel::height() const { return mLevel.height(); }
 
-    const std::pair<size_t, size_t> GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
+    const std::pair<int32_t, int32_t> GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
 
-    const std::pair<size_t, size_t> GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
+    const std::pair<int32_t, int32_t> GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
 
     void GameLevel::activate(size_t x, size_t y) { mLevel.activate(x, y); }
 
@@ -114,7 +114,7 @@ namespace FAWorld
 
     bool GameLevel::isPassable(int x, int y) const
     {
-        if (x > 0 && x < width() && y > 0 && y < height() && !mLevel[x][y].passable())
+        if (x > 0 && x < width() && y > 0 && y < height() && !mLevel.get(x, y).passable())
             return false;
 
         FAWorld::Actor* actor = getActorAt(x, y);
@@ -193,7 +193,7 @@ namespace FAWorld
     bool GameLevel::isPassableFor(int x, int y, const Actor* actor) const
     {
         auto actorAtPos = getActorAt(x, y);
-        return mLevel[x][y].passable() && (actorAtPos == nullptr || actorAtPos == actor || actorAtPos->isPassable());
+        return mLevel.get(x, y).passable() && (actorAtPos == nullptr || actorAtPos == actor || actorAtPos->isPassable());
     }
 
     bool GameLevel::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile) { return mItemMap->dropItem(move(item), actor, tile); }

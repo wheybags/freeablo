@@ -39,7 +39,7 @@ namespace FAWorld
     class GameLevel : public GameLevelImpl
     {
     public:
-        GameLevel(Level::Level level, size_t levelIndex);
+        GameLevel(Level::Level&& level, size_t levelIndex);
         GameLevel(FASaveGame::GameLoader& gameLoader);
 
         void save(FASaveGame::GameSaver& gameSaver);
@@ -51,8 +51,8 @@ namespace FAWorld
         int32_t width() const;
         int32_t height() const;
 
-        const std::pair<size_t, size_t> upStairsPos() const;
-        const std::pair<size_t, size_t> downStairsPos() const;
+        const std::pair<int32_t, int32_t> upStairsPos() const;
+        const std::pair<int32_t, int32_t> downStairsPos() const;
 
         void activate(size_t x, size_t y);
 

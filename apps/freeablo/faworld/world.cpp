@@ -204,7 +204,7 @@ namespace FAWorld
                                    static_cast<int32_t>(-1),
                                    1);
 
-        auto townLevel = new GameLevel(townLevelBase, 0);
+        auto townLevel = new GameLevel(std::move(townLevelBase), 0);
         mLevels[0] = townLevel;
 
         for (auto npc : mDiabloExe.getNpcs())

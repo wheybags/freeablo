@@ -1,20 +1,12 @@
 
 #pragma once
 
-#include "render.h"
-
 #include <boost/optional.hpp>
-#include <misc/helper2d.h>
-
-namespace Cel
-{
-    struct Colour;
-}
+#include <cel/pal.h>
+#include <misc/array2d.h>
 
 namespace Render
 {
-    class SpriteGroup;
-
     struct LevelObject
     {
         bool valid;
@@ -26,21 +18,5 @@ namespace Render
         boost::optional<Cel::Colour> hoverColor;
     };
 
-    class LevelObjects
-    {
-    public:
-        void resize(int32_t x, int32_t y);
-
-        Misc::Helper2D<LevelObjects, std::vector<LevelObject>&> operator[](int32_t x);
-
-        int32_t width();
-        int32_t height();
-
-    private:
-        std::vector<std::vector<LevelObject>> mData;
-        int32_t mWidth;
-        int32_t mHeight;
-
-        friend std::vector<LevelObject>& get(int32_t x, int32_t y, LevelObjects& obj);
-    };
+    typedef Misc::Array2D<std::vector<LevelObject>> LevelObjects;
 }

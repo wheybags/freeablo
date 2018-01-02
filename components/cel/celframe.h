@@ -1,28 +1,39 @@
 
 #pragma once
 
-#include <misc/helper2d.h>
-#include <stdint.h>
-#include <vector>
+#include "pal.h"
+#include <misc/array2d.h>
 
 namespace Cel
 {
-    struct Colour;
-    class CelFile;
-
+    /// This class just wraps Misc::Array2D with get() functions that reverse the y-axis.
+    /// This is because diablo cel files are encoded bottom-up.
     class CelFrame
     {
     public:
-        int32_t mWidth;
-        int32_t mHeight;
+        typedef typename Misc::Array2D<Colour>::iterator iterator;
+        typedef typename Misc::Array2D<Colour>::const_iterator const_iterator;
 
-        Misc::Helper2D<const CelFrame, const Colour&> operator[](int32_t x) const;
+        CelFrame() = default;
+        CelFrame(int32_t x, int32_t y) : mData(x, y) {}
+        CelFrame(int32_t width, int32_t height, std::vector<Colour>&& data) : mData(width, height, std::move(data)) {}
+        CelFrame(const CelFrame&) = delete;
+        CelFrame(CelFrame&&) = default;
+        CelFrame& operator=(CelFrame&&) = default;
+
+        const Colour& get(int32_t x, int32_t y) const { return mData.get(x, mData.height() - 1 - y); }
+
+        Colour& get(int32_t x, int32_t y) { return mData.get(x, mData.height() - 1 - y); }
+
+        iterator begin() { return mData.begin(); }
+        const_iterator begin() const { return mData.begin(); }
+        iterator end() { return mData.end(); }
+        const_iterator end() const { return mData.end(); }
+
+        int32_t width() const { return mData.width(); }
+        int32_t height() const { return mData.height(); }
 
     private:
-        friend class CelFile;
-        friend class CelDecoder;
-        friend const Colour& get(int32_t x, int32_t y, const CelFrame& frame);
-
-        std::vector<Colour> mRawImage;
+        Misc::Array2D<Colour> mData;
     };
 }
