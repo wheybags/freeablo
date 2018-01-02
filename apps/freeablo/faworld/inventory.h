@@ -2,16 +2,15 @@
 #pragma once
 
 #include "item.h"
-#include <diabloexe/diabloexe.h>
-#include <stdint.h>
-
 #include <boost/signals2/signal.hpp>
+#include <diabloexe/diabloexe.h>
+#include <misc/array2d.h>
+#include <stdint.h>
 
 namespace FAWorld
 {
     struct EquipTarget;
     class Actor;
-    class CharacterStatsBase;
     struct ExchangeResult;
 
     class Inventory
@@ -30,11 +29,8 @@ namespace FAWorld
 
     public:
         Inventory();
-        static constexpr auto inventoryWidth = 10;
-        static constexpr auto inventoryHeight = 4;
-        static constexpr auto beltWidth = 8;
 
-        static inline bool isValidCell(int x, int y) { return x >= 0 && x < inventoryWidth && y >= 0 && y < inventoryHeight; }
+        bool isValidCell(int x, int y) { return x >= 0 && x < mInventoryBox.width() && y >= 0 && y < mInventoryBox.height(); }
 
         void dump();
 
@@ -59,10 +55,16 @@ namespace FAWorld
         const Item& getBody() const { return mBody; }
         const Item& getLeftHand() const { return mLeftHand; }
         const Item& getRightHand() const { return mRightHand; }
+        const Misc::Array2D<Item>& getInventoryBox() const { return mInventoryBox; }
+        const std::vector<Item>& getBelt() const { return mBelt; }
 
     private:
-        Item mInventoryBox[inventoryHeight][inventoryWidth];
-        Item mBelt[beltWidth];
+        static constexpr int32_t inventoryWidth = 10;
+        static constexpr int32_t inventoryHeight = 4;
+        static constexpr int32_t beltWidth = 8;
+
+        Misc::Array2D<Item> mInventoryBox = Misc::Array2D<Item>(inventoryWidth, inventoryHeight);
+        std::vector<Item> mBelt = std::vector<Item>(beltWidth);
         Item mHead;
         Item mBody;
         Item mLeftRing;
@@ -80,7 +82,7 @@ namespace FAWorld
         auto needsToBeExchanged(const Item& item, const EquipTarget& target) const -> ExchangeResult;
         EquipTarget avoidLinks(const EquipTarget& target);
         Item takeOut(const EquipTarget& target);
-        void layItem(const Item& item, int i, int j);
+        void layItem(const Item& item, int32_t x, int32_t y);
         bool exchangeWithCursor(EquipTarget takeoutTarget, boost::optional<EquipTarget> maybePlacementTarget);
         bool exchangeWithCursor(EquipTarget takeoutTarget);
         bool fitsAt(Item item, uint8_t x, uint8_t y);
@@ -88,6 +90,5 @@ namespace FAWorld
         static const uint8_t GOLD_PILE_MIN = 15;
         static const uint8_t GOLD_PILE_MID = 16;
         static const uint8_t GOLD_PILE_MAX = 17;
-        friend class CharacterStatsBase;
     };
 }

@@ -37,12 +37,12 @@ namespace FAWorld
     {
         mAttackDamageTotal = 0;
         mArmourClassTotal = 0;
-        for (uint8_t i = 0; i < 4; i++)
+        for (uint8_t y = 0; y < mInventoryBox.height(); y++)
         {
-            for (uint8_t j = 0; j < 10; j++)
+            for (uint8_t x = 0; x < mInventoryBox.width(); x++)
             {
-                mInventoryBox[i][j].mInvX = j;
-                mInventoryBox[i][j].mInvY = i;
+                mInventoryBox.get(x, y).mInvX = x;
+                mInventoryBox.get(x, y).mInvY = y;
             }
         }
     }
@@ -75,7 +75,7 @@ namespace FAWorld
         switch (target.type)
         {
             case EquipTargetType::inventory:
-                return target.posX + item.getInvSize().first <= inventoryWidth && target.posY + item.getInvSize().second <= inventoryHeight;
+                return target.posX + item.getInvSize().first <= mInventoryBox.width() && target.posY + item.getInvSize().second <= mInventoryBox.height();
             case EquipTargetType::belt:
                 return item.isBeltEquippable();
             default:
@@ -143,13 +143,18 @@ namespace FAWorld
             case EquipTargetType::inventory:
             {
                 ExchangeResult result;
-                for (auto i = target.posX; i < target.posX + item.getInvSize().first; ++i)
-                    for (auto j = target.posY; j < target.posY + item.getInvSize().second; ++j)
-                        if (!mInventoryBox[j][i].isEmpty())
+                for (int32_t y = target.posY; y < target.posY + item.getInvSize().second; y++)
+                {
+                    for (int32_t x = target.posX; x < target.posX + item.getInvSize().first; x++)
+                    {
+                        if (!mInventoryBox.get(x, y).isEmpty())
                         {
-                            auto cornerCoords = mInventoryBox[j][i].getCornerCoords();
+                            auto cornerCoords = mInventoryBox.get(x, y).getCornerCoords();
                             result.NeedsToBeReplaced.insert(MakeEquipTarget<EquipTargetType::inventory>(cornerCoords.first, cornerCoords.second));
                         }
+                    }
+                }
+
                 return result;
             }
             default:
@@ -187,9 +192,9 @@ namespace FAWorld
         switch (target.type)
         {
             case EquipTargetType::inventory:
-                for (int j = realTarget.posY; j < realTarget.posY + copy.getInvSize().second; ++j)
-                    for (int i = realTarget.posX; i < realTarget.posX + copy.getInvSize().first; ++i)
-                        mInventoryBox[j][i] = {};
+                for (int y = realTarget.posY; y < realTarget.posY + copy.getInvSize().second; ++y)
+                    for (int x = realTarget.posX; x < realTarget.posX + copy.getInvSize().first; ++x)
+                        mInventoryBox.get(x, y) = {};
                 break;
             default:
                 getItemAt(realTarget) = {};
@@ -226,25 +231,28 @@ namespace FAWorld
         }
     }
 
-    void Inventory::layItem(const Item& item, int i, int j)
+    void Inventory::layItem(const Item& item, int32_t x, int32_t y)
     {
-        for (auto item_i = i; item_i < i + item.getInvSize().first; ++item_i)
-            for (auto item_j = j; item_j < j + item.getInvSize().second; ++item_j)
+        for (int32_t yy = y; yy < y + item.getInvSize().second; yy++)
+        {
+            for (int32_t xx = x; xx < x + item.getInvSize().first; xx++)
             {
-                auto& cell = mInventoryBox[item_j][item_i];
+                auto& cell = mInventoryBox.get(xx, yy);
                 cell = item;
                 cell.mIsReal = false;
-                cell.mCornerX = i;
-                cell.mCornerY = j;
+                cell.mCornerX = x;
+                cell.mCornerY = y;
             }
-        mInventoryBox[j][i].mIsReal = true;
+        }
+
+        mInventoryBox.get(x, y).mIsReal = true;
     }
 
     bool Inventory::autoPlaceItem(const Item& item, boost::optional<std::pair<Inventory::xorder, Inventory::yorder>> override_order)
     {
         // auto-placing in belt
         if (item.isBeltEquippable())
-            for (auto i = 0; i < beltWidth; ++i)
+            for (int32_t i = 0; i < int32_t(mBelt.size()); ++i)
             {
                 auto& place = getItemAt(MakeEquipTarget<EquipTargetType::belt>(i));
                 if (place.isEmpty())
@@ -296,35 +304,35 @@ namespace FAWorld
             requiredXOrder = override_order->first;
             requiredYOrder = override_order->second;
         }
-        boost::any_range<int, boost::single_pass_traversal_tag, int, std::ptrdiff_t> xrange, yrange;
+        boost::any_range<int32_t, boost::single_pass_traversal_tag, int32_t, std::ptrdiff_t> xrange, yrange;
         // that's a bit slow technique in general but I think it's fine
         if (requiredXOrder == xorder::fromLeft)
-            xrange = boost::irange(0, inventoryWidth, 1);
+            xrange = boost::irange(0, mInventoryBox.width(), 1);
         else
-            xrange = boost::irange(inventoryWidth - 1, -1, -1);
+            xrange = boost::irange(mInventoryBox.width() - 1, -1, -1);
         if (requiredYOrder == yorder::fromTop)
-            yrange = boost::irange(0, inventoryHeight, 1);
+            yrange = boost::irange(0, mInventoryBox.height(), 1);
         else
-            yrange = boost::irange(inventoryHeight - 1, -1, -1);
-        for (auto i : xrange)
+            yrange = boost::irange(mInventoryBox.height() - 1, -1, -1);
+        for (int32_t x : xrange)
         {
-            if (i + item.getInvSize().first > inventoryWidth)
+            if (x + item.getInvSize().first > mInventoryBox.width())
                 continue;
-            for (auto j : yrange)
+            for (int32_t y : yrange)
             {
-                if (j + item.getInvSize().second > inventoryHeight)
+                if (y + item.getInvSize().second > mInventoryBox.height())
                     continue;
 
                 if (![&] {
-                        for (auto item_i = i; item_i < i + item.getInvSize().first; ++item_i)
-                            for (auto item_j = j; item_j < j + item.getInvSize().second; ++item_j)
-                                if (!mInventoryBox[item_j][item_i].isEmpty())
+                        for (int32_t xx = x; xx < x + item.getInvSize().first; ++xx)
+                            for (int32_t yy = y; yy < y + item.getInvSize().second; ++yy)
+                                if (!mInventoryBox.get(xx, yy).isEmpty())
                                     return false;
                         return true;
                     }())
                     continue;
 
-                layItem(item, i, j);
+                layItem(item, x, y);
                 return true;
             }
         }
@@ -392,16 +400,16 @@ namespace FAWorld
 
     void Inventory::beltMouseLeftButtonDown(double x)
     {
-        int beltX = static_cast<int>(x * beltWidth);
+        int beltX = static_cast<int32_t>(x * mBelt.size());
         exchangeWithCursor(MakeEquipTarget<EquipTargetType::belt>(beltX));
     }
 
     void Inventory::inventoryMouseLeftButtonDown(double x, double y)
     {
-        int takeoutCellX = static_cast<int>(x * inventoryWidth);
-        int takeoutCellY = static_cast<int>(y * inventoryHeight);
-        int placementCellX = static_cast<int>(x * inventoryWidth - mCursorHeld.getInvSize().first * 0.5 + 0.5);
-        int placementCellY = static_cast<int>(y * inventoryHeight - mCursorHeld.getInvSize().second * 0.5 + 0.5);
+        int32_t takeoutCellX = static_cast<int32_t>(x * mInventoryBox.width());
+        int32_t takeoutCellY = static_cast<int32_t>(y * mInventoryBox.height());
+        int32_t placementCellX = static_cast<int32_t>(x * mInventoryBox.width() - mCursorHeld.getInvSize().first * 0.5 + 0.5);
+        int32_t placementCellY = static_cast<int32_t>(y * mInventoryBox.height() - mCursorHeld.getInvSize().second * 0.5 + 0.5);
         if (!isValidCell(takeoutCellX, takeoutCellY))
             return;
         exchangeWithCursor(MakeEquipTarget<EquipTargetType::inventory>(takeoutCellX, takeoutCellY),
@@ -449,7 +457,7 @@ namespace FAWorld
             case EquipTargetType::amulet:
                 return mAmulet;
             case EquipTargetType::inventory:
-                return mInventoryBox[target.posY][target.posX];
+                return mInventoryBox.get(target.posX, target.posY);
             case EquipTargetType::belt:
                 return mBelt[target.posX];
             case EquipTargetType::cursor:
@@ -465,22 +473,19 @@ namespace FAWorld
     {
         bool foundItem = false;
 
+        // TODO: wtf are these magic numbers, should do something nicer than this
         if (y + item.mSizeY < 5 && x + item.mSizeX < 11)
         {
-            for (uint8_t k = y; k < y + item.mSizeY; k++)
+            for (uint8_t yy = y; yy < y + item.mSizeY; yy++)
             {
-                for (uint8_t l = x; l < x + item.mSizeX; l++)
+                for (uint8_t xx = x; xx < x + item.mSizeX; xx++)
                 {
                     if (foundItem)
                         break;
-                    if (!mInventoryBox[k][l].isEmpty())
-                    {
+                    if (!mInventoryBox.get(xx, yy).isEmpty())
                         foundItem = true;
-                    }
-                    if (l == (x + item.mSizeX - 1) && k == (y + item.mSizeY - 1) && !foundItem)
-                    {
+                    if (xx == (x + item.mSizeX - 1) && yy == (y + item.mSizeY - 1) && !foundItem)
                         return true;
-                    }
                 }
             }
         }
@@ -490,16 +495,16 @@ namespace FAWorld
     void Inventory::dump()
     {
         std::stringstream ss;
-        for (uint8_t i = 0; i < 4; i++)
+        for (uint8_t y = 0; y < mInventoryBox.height(); y++)
         {
-            for (uint8_t j = 0; j < 10; j++)
+            for (uint8_t x = 0; x < mInventoryBox.width(); x++)
             {
-                if (mInventoryBox[i][j].isEmpty())
+                if (mInventoryBox.get(x, y).isEmpty())
                     ss << "| (empty)";
                 else
-                    ss << "| " << mInventoryBox[i][j].getName();
-                if (mInventoryBox[i][j].mCount > 1)
-                    ss << "(" << +mInventoryBox[i][j].mCount << ")";
+                    ss << "| " << mInventoryBox.get(x, y).getName();
+                if (mInventoryBox.get(x, y).mCount > 1)
+                    ss << "(" << +mInventoryBox.get(x, y).mCount << ")";
                 ss << "   ";
             }
             ss << " |" << std::endl;

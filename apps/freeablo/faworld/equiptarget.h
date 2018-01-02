@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace FAWorld
 {
     enum class EquipTargetType
@@ -27,8 +29,8 @@ namespace FAWorld
 
     public:
         EquipTargetType type;
-        int posX;
-        int posY;
+        int32_t posX;
+        int32_t posY;
     };
 
     template <EquipTargetType Location> struct MakeEquipTarget : EquipTarget

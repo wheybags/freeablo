@@ -352,10 +352,10 @@ namespace FAGui
             }
             constexpr auto cellSize = 29;
             auto invTopLeft = nk_vec2(17, 222);
-            float invWidth = Inventory::inventoryWidth * cellSize;
-            float invHeight = Inventory::inventoryHeight * cellSize;
+            FAWorld::Inventory& inv = mPlayer->mInventory;
+            float invWidth = inv.getInventoryBox().width() * cellSize;
+            float invHeight = inv.getInventoryBox().height() * cellSize;
             nk_layout_space_push(ctx, nk_recta(invTopLeft, {invWidth, invHeight}));
-            auto& inv = mPlayer->mInventory;
             nk_button_label_styled(ctx, &dummyStyle, "");
             if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
             {
@@ -363,8 +363,8 @@ namespace FAGui
                                                  (ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / invHeight);
             }
 
-            for (auto row : boost::counting_range(0, Inventory::inventoryHeight))
-                for (auto col : boost::counting_range(0, Inventory::inventoryWidth))
+            for (auto row : boost::counting_range(0, inv.getInventoryBox().height()))
+                for (auto col : boost::counting_range(0, inv.getInventoryBox().width()))
                 {
                     auto cell_top_left = nk_vec2(17 + col * cellSize, 222 + row * cellSize);
                     item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::inventory>(col, row), cell_top_left, ItemHighlightInfo::highlightIfHover);
@@ -400,7 +400,7 @@ namespace FAGui
         }
 
         using namespace FAWorld;
-        for (auto num : boost::counting_range(0, Inventory::beltWidth))
+        for (auto num : boost::counting_range(0, int32_t(inv.getBelt().size())))
         {
             auto cell_top_left = nk_vec2(beltTopLeft.x + num * cellSize, beltTopLeft.y);
             item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::belt>(num), cell_top_left, ItemHighlightInfo::highlightIfHover);
