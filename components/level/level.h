@@ -7,6 +7,7 @@
 #include "sol.h"
 #include "tileset.h"
 #include <map>
+#include <misc/helper2d.h>
 #include <misc/misc.h>
 #include <utility>
 
@@ -42,7 +43,7 @@ namespace Level
     class Level
     {
     public:
-        Level(const Dun& dun,
+        Level(Dun&& dun,
               const std::string& tilPath,
               const std::string& minPath,
               const std::string& solPath,

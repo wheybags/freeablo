@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <misc/helper2d.h>
+#include <misc/array2d.h>
 #include <misc/misc.h>
 
 namespace Serial
@@ -29,20 +29,15 @@ namespace Level
 
         static Dun getTown(const Dun& sector1, const Dun& sector2, const Dun& sector3, const Dun& sector4);
 
-        Misc::Helper2D<Dun, int32_t&> operator[](int32_t x);
-        Misc::Helper2D<const Dun, const int32_t&> operator[](int32_t x) const;
+        int32_t& get(int32_t x, int32_t y) { return mBlocks.get(x, y); }
+        const int32_t& get(int32_t x, int32_t y) const { return mBlocks.get(x, y); }
 
-        int32_t width() const;
-        int32_t height() const;
+        int32_t width() const { return mBlocks.width(); }
+        int32_t height() const { return mBlocks.height(); }
 
     private:
         void resize(int32_t width, int32_t height);
 
-        std::vector<int32_t> mBlocks;
-        int32_t mWidth;
-        int32_t mHeight;
-
-        friend const int32_t& get(int32_t x, int32_t y, const Dun& dun);
-        friend int32_t& get(int32_t x, int32_t y, Dun& dun);
+        Misc::Array2D<int32_t> mBlocks;
     };
 }

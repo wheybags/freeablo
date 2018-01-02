@@ -9,7 +9,7 @@
 
 namespace FAWorld
 {
-    GameLevel::GameLevel(Level::Level level, size_t levelIndex) : mLevel(level), mLevelIndex(levelIndex), mItemMap(new ItemMap(this)) {}
+    GameLevel::GameLevel(Level::Level&& level, size_t levelIndex) : mLevel(std::move(level)), mLevelIndex(levelIndex), mItemMap(new ItemMap(this)) {}
 
     GameLevel::GameLevel(FASaveGame::GameLoader& loader)
         : mLevel(Level::Level(loader)), mLevelIndex(loader.load<int32_t>()), mItemMap(new ItemMap(loader, this))
@@ -61,9 +61,9 @@ namespace FAWorld
 
     int32_t GameLevel::height() const { return mLevel.height(); }
 
-    const std::pair<size_t, size_t> GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
+    const std::pair<int32_t, int32_t> GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
 
-    const std::pair<size_t, size_t> GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
+    const std::pair<int32_t, int32_t> GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
 
     void GameLevel::activate(size_t x, size_t y) { mLevel.activate(x, y); }
 

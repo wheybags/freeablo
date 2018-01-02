@@ -5,7 +5,7 @@
 
 namespace Level
 {
-    Level::Level(const Dun& dun,
+    Level::Level(Dun&& dun,
                  const std::string& tilPath,
                  const std::string& minPath,
                  const std::string& solPath,
@@ -15,8 +15,8 @@ namespace Level
                  std::map<int32_t, int32_t> doorMap,
                  int32_t previous,
                  int32_t next)
-        : mTilesetCelPath(tileSetPath), mTilPath(tilPath), mMinPath(minPath), mSolPath(solPath), mDun(dun), mTil(mTilPath), mMin(mMinPath), mSol(mSolPath),
-          mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs), mPrevious(previous), mNext(next)
+        : mTilesetCelPath(tileSetPath), mTilPath(tilPath), mMinPath(minPath), mSolPath(solPath), mDun(std::move(dun)), mTil(mTilPath), mMin(mMinPath),
+          mSol(mSolPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs), mPrevious(previous), mNext(next)
     {
     }
 
@@ -123,7 +123,7 @@ namespace Level
                 tilIndex = 0; // top
         }
 
-        int32_t dunIndex = level.mDun[xDunIndex][yDunIndex] - 1;
+        int32_t dunIndex = level.mDun.get(xDunIndex, yDunIndex) - 1;
 
         if (dunIndex == -1)
             return MinPillar(Level::mEmpty, 0, -1);
@@ -147,11 +147,11 @@ namespace Level
             yDunIndex--;
         yDunIndex /= 2;
 
-        int32_t index = mDun[xDunIndex][yDunIndex];
+        int32_t index = mDun.get(xDunIndex, yDunIndex);
 
         // open doors when clicked on
         if (mDoorMap.find(index) != mDoorMap.end())
-            mDun[xDunIndex][yDunIndex] = mDoorMap[index];
+            mDun.get(xDunIndex, yDunIndex) = mDoorMap[index];
     }
 
     int32_t Level::minSize() const { return mMin.size(); }
