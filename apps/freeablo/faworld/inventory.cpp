@@ -1,18 +1,18 @@
 #include "inventory.h"
 #include "../fagui/guimanager.h"
+#include "../fasavegame/gameloader.h"
 #include "actorstats.h"
+#include "equiptarget.h"
+#include "itemenums.h"
 #include "itemmanager.h"
 #include "player.h"
 #include <algorithm>
+#include <boost/range/any_range.hpp>
 #include <boost/range/irange.hpp>
 #include <iostream>
 #include <sstream>
 #include <stdint.h>
 #include <string>
-
-#include "equiptarget.h"
-#include "itemenums.h"
-#include <boost/range/any_range.hpp>
 
 namespace FAWorld
 {
@@ -43,6 +43,56 @@ namespace FAWorld
                 mInventoryBox.get(x, y).mInvY = y;
             }
         }
+    }
+
+    void Inventory::save(FASaveGame::GameSaver& saver)
+    {
+        saver.save(mInventoryBox.width());
+        saver.save(mInventoryBox.height());
+
+        for (int32_t y = 0; y < mInventoryBox.height(); y++)
+            for (int32_t x = 0; x < mInventoryBox.width(); x++)
+                mInventoryBox.get(x, y).save(saver);
+
+        saver.save(uint32_t(mBelt.size()));
+
+        for (Item& item : mBelt)
+            item.save(saver);
+
+        mHead.save(saver);
+        mBody.save(saver);
+        mLeftRing.save(saver);
+        mRightRing.save(saver);
+        mAmulet.save(saver);
+        mLeftHand.save(saver);
+        mRightHand.save(saver);
+        mCursorHeld.save(saver);
+    }
+
+    void Inventory::load(FASaveGame::GameLoader& loader)
+    {
+        int32_t boxW = loader.load<int32_t>();
+        int32_t boxH = loader.load<int32_t>();
+        release_assert(boxW >= mInventoryBox.width() && boxH >= mInventoryBox.height());
+
+        for (int32_t y = 0; y < boxH; y++)
+            for (int32_t x = 0; x < boxW; x++)
+                mInventoryBox.get(x, y).load(loader);
+
+        uint32_t beltSize = loader.load<uint32_t>();
+        release_assert(beltSize >= mBelt.size());
+
+        for (uint32_t i = 0; i < beltSize; i++)
+            mBelt[i].load(loader);
+
+        mHead.load(loader);
+        mBody.load(loader);
+        mLeftRing.load(loader);
+        mRightRing.load(loader);
+        mAmulet.load(loader);
+        mLeftHand.load(loader);
+        mRightHand.load(loader);
+        mCursorHeld.load(loader);
     }
 
     bool Inventory::checkStatsRequirement(const Item& item) const

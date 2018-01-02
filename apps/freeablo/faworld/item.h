@@ -8,6 +8,12 @@
 #include <diabloexe/uniqueitem.h>
 #include <vector>
 
+namespace FASaveGame
+{
+    class GameSaver;
+    class GameLoader;
+}
+
 namespace FARender
 {
     class FASpriteGroup;
@@ -23,6 +29,9 @@ namespace FAWorld
         Item() = default;
         Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix = nullptr, bool isIdentified = true);
         Item(const DiabloExe::UniqueItem& item, uint32_t id);
+
+        void save(FASaveGame::GameSaver& saver);
+        void load(FASaveGame::GameLoader& loader);
 
         std::string getFlipSoundPath() const;
         FARender::FASpriteGroup* getFlipSpriteGroup();

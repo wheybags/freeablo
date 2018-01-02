@@ -103,6 +103,7 @@ namespace FAWorld
         }
 
         mTarget.load(loader);
+        mInventory.load(loader);
     }
 
     void Actor::save(FASaveGame::GameSaver& saver)
@@ -136,6 +137,7 @@ namespace FAWorld
         }
 
         mTarget.save(saver);
+        mInventory.save(saver);
 
         // TODO: handle mActorStateMachine here
     }

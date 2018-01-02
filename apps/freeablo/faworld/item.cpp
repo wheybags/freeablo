@@ -1,6 +1,7 @@
 #include "item.h"
 #include "../falevelgen/random.h"
 #include "../farender/renderer.h"
+#include "../fasavegame/gameloader.h"
 #include "itemenums.h"
 #include "itemmanager.h"
 #include <iostream>
@@ -101,6 +102,60 @@ namespace FAWorld
             mEffects[i].min = item.mEffectData[i][1];
             mEffects[i].max = item.mEffectData[i][2];
         }*/
+    }
+
+    void Item::save(FASaveGame::GameSaver& saver)
+    {
+        saver.save(mIsReal);
+        saver.save(mUniqueId);
+        saver.save(mCount);
+
+        saver.save(mName);
+        saver.save(uint8_t(mType));
+        saver.save(uint8_t(mClass));
+        saver.save(uint8_t(mEquipLocation));
+        saver.save(mGraphicValue);
+        saver.save(mUseOnce);
+        saver.save(mDropItemGraphicsPath);
+        saver.save(mMaxCount);
+        saver.save(mBaseId);
+        saver.save(mEmpty);
+
+        saver.save(mInvY);
+        saver.save(mInvX);
+
+        saver.save(mSizeX);
+        saver.save(mSizeY);
+
+        saver.save(mCornerX);
+        saver.save(mCornerY);
+    }
+
+    void Item::load(FASaveGame::GameLoader& loader)
+    {
+        mIsReal = loader.load<bool>();
+        mUniqueId = loader.load<uint32_t>();
+        mCount = loader.load<uint32_t>();
+
+        mName = loader.load<std::string>();
+        mType = ItemType(loader.load<uint8_t>());
+        mClass = ItemClass(loader.load<uint8_t>());
+        mEquipLocation = ItemEquipType(loader.load<uint8_t>());
+        mGraphicValue = loader.load<uint32_t>();
+        mUseOnce = loader.load<bool>();
+        mDropItemGraphicsPath = loader.load<std::string>();
+        mMaxCount = loader.load<uint32_t>();
+        mBaseId = loader.load<uint8_t>();
+        mEmpty = loader.load<bool>();
+
+        mInvY = loader.load<uint8_t>();
+        mInvX = loader.load<uint8_t>();
+
+        mSizeX = loader.load<uint8_t>();
+        mSizeY = loader.load<uint8_t>();
+
+        mCornerX = loader.load<uint8_t>();
+        mCornerY = loader.load<uint8_t>();
     }
 
     std::string Item::getFlipSoundPath() const
