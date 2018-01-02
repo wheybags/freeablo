@@ -1170,7 +1170,7 @@ namespace Render
             if (index < minTops->size())
                 drawAtTile((*minTops)[index], topLeft, tileWidth, staticObjectHeight);
 
-            auto& itemsForTile = items[tile.x][tile.y];
+            auto& itemsForTile = items.get(tile.x, tile.y);
             for (auto& item : itemsForTile)
             {
                 int32_t w, h;
@@ -1179,7 +1179,7 @@ namespace Render
                 drawAtTile(sprite, topLeft, w, h, item.hoverColor);
             }
 
-            auto& objsForTile = objs[tile.x][tile.y];
+            auto& objsForTile = objs.get(tile.x, tile.y);
             for (auto& obj : objsForTile)
             {
                 if (obj.valid)

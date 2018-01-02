@@ -16,7 +16,6 @@
 
 struct SDL_Cursor;
 struct SDL_Surface;
-class LevelObjects;
 class SpriteGroup;
 
 namespace Render

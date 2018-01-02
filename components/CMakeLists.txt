@@ -28,7 +28,6 @@ set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Misc 
     misc/stringops.h
-    misc/helper2d.h
     misc/md5.h
     misc/md5.cpp
     misc/misc.h
@@ -50,7 +49,6 @@ set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 set(RenderFiles 
     render/render.h 
-    render/levelobjects.cpp 
     render/levelobjects.h
     render/sdl2backend.cpp
     render/sdl_gl_funcs.h

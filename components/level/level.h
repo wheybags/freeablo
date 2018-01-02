@@ -7,7 +7,6 @@
 #include "sol.h"
 #include "tileset.h"
 #include <map>
-#include <misc/helper2d.h>
 #include <misc/misc.h>
 #include <utility>
 

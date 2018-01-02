@@ -1,22 +1,20 @@
 #include "renderer.h"
-
-#include <thread>
-
-#include <audio/audio.h>
-#include <functional>
-#include <input/inputmanager.h>
-#include <iostream>
-#include <misc/assert.h>
-#include <misc/stringops.h>
-
 #include "../engine/threadmanager.h"
 #include "../fagui/guimanager.h"
 #include "../faworld/gamelevel.h"
 #include "cel/celdecoder.h"
 #include "fontinfo.h"
+#include <audio/audio.h>
 #include <boost/format.hpp>
 #include <boost/range/irange.hpp>
+#include <functional>
+#include <input/inputmanager.h>
+#include <iostream>
+#include <misc/assert.h>
+#include <misc/stringops.h>
 #include <numeric>
+#include <render/levelobjects.h>
+#include <thread>
 
 namespace FARender
 {
@@ -197,15 +195,11 @@ namespace FARender
     static void fill(const FAWorld::GameLevel& level, const std::vector<ObjectToRender> src, Render::LevelObjects& dst)
     {
         if (dst.width() != level.width() || dst.height() != level.height())
-            dst.resize(level.width(), level.height());
+            dst = Render::LevelObjects(level.width(), level.height());
 
         for (int32_t x = 0; x < dst.width(); x++)
-        {
             for (int32_t y = 0; y < dst.height(); y++)
-            {
-                dst[x][y].clear();
-            }
-        }
+                dst.get(x, y).clear();
 
         for (size_t i = 0; i < src.size(); i++)
         {
@@ -221,9 +215,9 @@ namespace FARender
             obj.hoverColor = object.hoverColor;
             obj.valid = true;
 
-            size_t x = position.current().first;
-            size_t y = position.current().second;
-            dst[x][y].push_back(std::move(obj));
+            int32_t x = position.current().first;
+            int32_t y = position.current().second;
+            dst.get(x, y).push_back(std::move(obj));
         }
     }
 
@@ -254,18 +248,17 @@ namespace FARender
             if (state->level)
             {
                 if (mLevelObjects.width() != state->level->width() || mLevelObjects.height() != state->level->height())
-                    mLevelObjects.resize(state->level->width(), state->level->height());
+                    mLevelObjects = Render::LevelObjects(state->level->width(), state->level->height());
 
                 for (int32_t x = 0; x < mLevelObjects.width(); x++)
                 {
                     for (int32_t y = 0; y < mLevelObjects.height(); y++)
                     {
-                        if (mLevelObjects[x][y].size() > 0)
-                        {
-                            mLevelObjects[x][y].clear();
-                        }
+                        if (mLevelObjects.get(x, y).size() > 0)
+                            mLevelObjects.get(x, y).clear();
                     }
                 }
+
                 fill(*state->level, state->mObjects, mLevelObjects);
                 fill(*state->level, state->mItems, mItems);
 
