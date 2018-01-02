@@ -36,8 +36,7 @@ namespace FAWorld
         mAnimation.update();
     }
 
-    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath)
-        : mMoveHandler(World::getTicksInPeriod(1.0f))
+    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath) : mMoveHandler(World::getTicksInPeriod(1.0f))
     {
         mFaction = Faction::heaven();
         if (!dieAnimPath.empty())
@@ -77,10 +76,7 @@ namespace FAWorld
         mSoundPath = monster.soundPath;
     }
 
-    Actor::Actor(FASaveGame::GameLoader& loader)
-        : mMoveHandler(loader)
-        , mAnimation(loader)
-        , mStats(loader)
+    Actor::Actor(FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(loader)
     {
         mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
 

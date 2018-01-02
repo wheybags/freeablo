@@ -85,8 +85,9 @@ namespace FAWorld
                 }
                 else if (auto item = FAWorld::World::get()->targetedItem(mousePosition))
                 {
-                    mPlayer->mTarget = Target::ItemTarget{ FAWorld::World::get()->mGuiManager->isInventoryShown() ?
-                        Target::ItemTarget::ActionType::toCursor : Target::ItemTarget::ActionType::autoEquip, item};
+                    mPlayer->mTarget = Target::ItemTarget{FAWorld::World::get()->mGuiManager->isInventoryShown() ? Target::ItemTarget::ActionType::toCursor
+                                                                                                                 : Target::ItemTarget::ActionType::autoEquip,
+                                                          item};
                 }
                 else
                 {

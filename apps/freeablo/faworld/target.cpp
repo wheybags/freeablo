@@ -1,6 +1,6 @@
 #include "target.h"
-#include "actor.h"
 #include "../fasavegame/gameloader.h"
+#include "actor.h"
 #include <misc/assert.h>
 
 namespace FAWorld
@@ -21,7 +21,7 @@ namespace FAWorld
     {
         mType = Type(loader.load<uint8_t>());
 
-        switch(mType)
+        switch (mType)
         {
             case Type::Actor:
             {
@@ -47,7 +47,7 @@ namespace FAWorld
                     // TODO: uncomment this assert when we have items on the ground
                     // actually being saved. Atm, the above call will always return null
                     // because there's never anything on the ground after loading a save.
-                    //release_assert(mData.item.item);
+                    // release_assert(mData.item.item);
                 });
 
                 break;
@@ -62,7 +62,7 @@ namespace FAWorld
     {
         saver.save(uint8_t(mType));
 
-        switch(mType)
+        switch (mType)
         {
             case Type::Actor:
             {
@@ -95,8 +95,5 @@ namespace FAWorld
         return mData.item;
     }
 
-    void Target::clear()
-    {
-        mType = Type::None;
-    }
+    void Target::clear() { mType = Type::None; }
 }
