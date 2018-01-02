@@ -148,7 +148,7 @@ namespace FAWorld
                 return mGuiManager->setDescription("");
         };
 
-        auto& cursorItem = mCurrentPlayer->getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+        auto& cursorItem = mCurrentPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
         if (!cursorItem.isEmpty())
         {
             mGuiManager->setDescription(cursorItem.getName());
@@ -335,9 +335,8 @@ namespace FAWorld
 
     void World::addCurrentPlayer(Player* player)
     {
-        debug_assert(mCurrentPlayer == nullptr);
+        debug_assert(mCurrentPlayer == nullptr || mCurrentPlayer == player);
         mCurrentPlayer = player;
-        mCurrentPlayer->talkRequested.connect([&](Actor* actor) { mDlgManager->talk(actor); });
     }
 
     void World::registerPlayer(Player* player)

@@ -10,7 +10,7 @@
         if (!(cond))                                                                                                                                           \
         {                                                                                                                                                      \
             fprintf(stderr, "ASSERTION FAILED: (%s) in %s:%d\n", #cond, __FILE__, __LINE__);                                                                   \
-            exit(1);                                                                                                                                           \
+            abort();                                                                                                                                           \
         }                                                                                                                                                      \
     } while (0)
 

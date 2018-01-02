@@ -66,6 +66,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/actoranimationmanager.cpp
     faworld/playerbehaviour.cpp
     faworld/playerbehaviour.h
+    faworld/target.cpp
+    faworld/target.h
 
     fagui/textcolor.h
     fagui/guimanager.h
@@ -104,8 +106,6 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fasavegame/objectidmapper.cpp
     fasavegame/gameloader.h
     fasavegame/gameloader.cpp
-    fasavegame/gamesaver.h
-    fasavegame/gamesaver.cpp
 )
 
 target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input enet::enet)

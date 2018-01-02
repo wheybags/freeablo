@@ -104,6 +104,7 @@ namespace FAWorld
         static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
         FASaveGame::ObjectIdMapper mObjectIdMapper;
         FAGui::GuiManager* mGuiManager = nullptr;
+        std::unique_ptr<FAGui::DialogManager> mDlgManager;
 
     private:
         void playLevelMusic(size_t level);
@@ -112,7 +113,6 @@ namespace FAWorld
         std::map<int32_t, GameLevel*> mLevels;
         Tick mTicksPassed = 0;
         Player* mCurrentPlayer = nullptr;
-        std::unique_ptr<FAGui::DialogManager> mDlgManager;
         std::vector<Player*> mPlayers; ///< This vector is sorted
         const DiabloExe::DiabloExe& mDiabloExe;
 

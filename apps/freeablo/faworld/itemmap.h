@@ -63,18 +63,6 @@ namespace FAWorld
         friend class ItemMap;
     };
 
-    class ItemTarget
-    {
-    public:
-        enum class ActionType
-        {
-            autoEquip,
-            toCursor,
-        };
-        ActionType action;
-        PlacedItemData* item;
-    };
-
     class ItemMap
     {
         using self = ItemMap;

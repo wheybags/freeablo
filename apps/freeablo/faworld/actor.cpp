@@ -6,6 +6,7 @@
 #include "actor/basestate.h"
 #include "actorstats.h"
 #include "behaviour.h"
+#include "equiptarget.h"
 #include "findpath.h"
 #include "player.h"
 #include "world.h"
@@ -56,7 +57,6 @@ namespace FAWorld
             mAnimation.setIdleFrameSequence(exe.getTownerAnimation()[*id]);
 
         mTalkData = npc.talkData;
-        mCanTalk = true;
         mNpcId = npc.id;
         mName = npc.name;
     }
@@ -85,14 +85,24 @@ namespace FAWorld
         {
             std::string typeId = loader.load<std::string>();
             mBehaviour = static_cast<Behaviour*>(World::get()->mObjectIdMapper.construct(typeId, loader));
-            mBehaviour->reAttach(this);
+            loader.addFunctionToRunAtEnd([this]() { mBehaviour->reAttach(this); });
         }
 
         mId = loader.load<int32_t>();
         mNpcId = loader.load<std::string>();
         mName = loader.load<std::string>();
         mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this); // TODO: handle this
-        // TODO: handle mTarget here
+
+        // TODO: some sort of system here, so we don't need to save an npcs entire dialog
+        // data into the save file every time. Probably should be done when dialog is revisited.
+        uint32_t talkDataSize = loader.load<uint32_t>();
+        for (uint32_t i = 0; i < talkDataSize; i++)
+        {
+            std::string key = loader.load<std::string>();
+            mTalkData[key] = loader.load<std::string>();
+        }
+
+        mTarget.load(loader);
     }
 
     void Actor::save(FASaveGame::GameSaver& saver)
@@ -118,8 +128,16 @@ namespace FAWorld
         saver.save(mNpcId);
         saver.save(mName);
 
+        saver.save(uint32_t(mTalkData.size()));
+        for (const auto& pair : mTalkData)
+        {
+            saver.save(pair.first);
+            saver.save(pair.second);
+        }
+
+        mTarget.save(saver);
+
         // TODO: handle mActorStateMachine here
-        // TODO: handle mTarget here
     }
 
     Actor::~Actor()
@@ -148,7 +166,7 @@ namespace FAWorld
 
     void Actor::heal() { mStats.mHp = mStats.mHp.max; }
 
-    bool Actor::hasTarget() const { return mTarget.type() != typeid(boost::blank); }
+    bool Actor::hasTarget() const { return mTarget.getType() != Target::Type::None; }
 
     void Actor::die()
     {
@@ -161,6 +179,28 @@ namespace FAWorld
     bool Actor::isDead() const { return mStats.mHp.current <= 0; }
 
     bool Actor::isEnemy(Actor* other) const { return mFaction.canAttack(other->mFaction); }
+
+    void Actor::pickupItem(Target::ItemTarget target)
+    {
+        auto& itemMap = getLevel()->getItemMap();
+        auto tile = target.item->getTile();
+        auto item = itemMap.takeItemAt(tile);
+        auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, tile); };
+        switch (target.action)
+        {
+            case Target::ItemTarget::ActionType::autoEquip:
+                if (!mInventory.autoPlaceItem(*item))
+                    dropBack();
+                break;
+            case Target::ItemTarget::ActionType::toCursor:
+                auto cursorItem = mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+                if (!cursorItem.isEmpty())
+                    return dropBack();
+
+                mInventory.setCursorHeld(*item);
+                break;
+        }
+    }
 
     void Actor::teleport(GameLevel* level, Position pos)
     {
@@ -222,32 +262,6 @@ namespace FAWorld
             return false;
 
         return true;
-    }
-
-    bool Actor::canTalkTo(Actor* actor)
-    {
-        if (actor == nullptr)
-            return false;
-
-        if (this == actor)
-            return false;
-
-        if (!actor->canTalk())
-            return false;
-
-        if (isTalking)
-            return false;
-
-        if (isEnemy(actor))
-            return false;
-
-        return true;
-    }
-
-    bool Actor::talk(Actor* actor)
-    {
-        UNUSED_PARAM(actor);
-        return false;
     }
 
     void Actor::attack(Actor* enemy)

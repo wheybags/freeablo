@@ -1,5 +1,6 @@
 #include "player.h"
 #include "../engine/threadmanager.h"
+#include "../fagui/dialogmanager.h"
 #include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
 #include "actorstats.h"
@@ -17,7 +18,7 @@ namespace FAWorld
 {
     const std::string Player::typeId = "player";
 
-    Player::Player() : Actor(), mInventory(this)
+    Player::Player() : Actor()
     {
         // TODO: hack - need to think of some more elegant way of handling Actors in general
         DiabloExe::CharacterStats stats;
@@ -25,7 +26,7 @@ namespace FAWorld
         initCommon();
     }
 
-    Player::Player(const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor(), mInventory(this)
+    Player::Player(const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor()
     {
         init(className, charStats);
         initCommon();
@@ -50,7 +51,7 @@ namespace FAWorld
         mBehaviour = new PlayerBehaviour(this);
     }
 
-    Player::Player(FASaveGame::GameLoader& loader) : Actor(loader), mInventory(this)
+    Player::Player(FASaveGame::GameLoader& loader) : Actor(loader)
     {
         mClassName = loader.load<std::string>();
         FAWorld::World::get()->registerPlayer(this);
@@ -65,12 +66,6 @@ namespace FAWorld
     }
 
     Player::~Player() { FAWorld::World::get()->deregisterPlayer(this); }
-
-    bool Player::talk(Actor* actor)
-    {
-        talkRequested(actor);
-        return true;
-    }
 
     void Player::setSpriteClass(std::string className)
     {
@@ -87,7 +82,7 @@ namespace FAWorld
         bool inDungeon = false;
 
         std::string armour, weapon;
-        switch (mInventory.mBody.getType())
+        switch (mInventory.getBody().getType())
         {
             case ItemType::heavyArmor:
             {
@@ -108,23 +103,24 @@ namespace FAWorld
                 break;
             }
         }
-        if (mInventory.mLeftHand.isEmpty() && mInventory.mRightHand.isEmpty())
+        if (mInventory.getLeftHand().isEmpty() && mInventory.getRightHand().isEmpty())
         {
             weapon = "n";
         }
-        else if ((mInventory.mLeftHand.isEmpty() && !mInventory.mRightHand.isEmpty()) || (!mInventory.mLeftHand.isEmpty() && mInventory.mRightHand.isEmpty()))
+        else if ((mInventory.getLeftHand().isEmpty() && !mInventory.getRightHand().isEmpty()) ||
+                 (!mInventory.getLeftHand().isEmpty() && mInventory.getRightHand().isEmpty()))
         {
-            Item hand;
+            const Item* hand = nullptr;
 
-            if (mInventory.mRightHand.isEmpty())
-                hand = mInventory.mLeftHand;
+            if (mInventory.getLeftHand().isEmpty())
+                hand = &mInventory.getLeftHand();
             else
-                hand = mInventory.mRightHand;
-            switch (hand.getType())
+                hand = &mInventory.getRightHand();
+            switch (hand->getType())
             {
                 case ItemType::axe:
                 {
-                    if (hand.getEquipLoc() == ItemEquipType::oneHanded)
+                    if (hand->getEquipLoc() == ItemEquipType::oneHanded)
                         weapon = "s";
                     else
                         weapon = "a";
@@ -163,18 +159,18 @@ namespace FAWorld
             }
         }
 
-        else if (!mInventory.mLeftHand.isEmpty() && !mInventory.mRightHand.isEmpty())
+        else if (!mInventory.getLeftHand().isEmpty() && !mInventory.getRightHand().isEmpty())
         {
-            if ((mInventory.mLeftHand.getType() == ItemType::sword && mInventory.mRightHand.getType() == ItemType::shield) ||
-                (mInventory.mLeftHand.getType() == ItemType::shield && mInventory.mRightHand.getType() == ItemType::sword))
+            if ((mInventory.getLeftHand().getType() == ItemType::sword && mInventory.getRightHand().getType() == ItemType::shield) ||
+                (mInventory.getLeftHand().getType() == ItemType::shield && mInventory.getRightHand().getType() == ItemType::sword))
                 weapon = "d";
 
-            else if (mInventory.mLeftHand.getType() == ItemType::bow && mInventory.mRightHand.getType() == ItemType::bow)
+            else if (mInventory.getLeftHand().getType() == ItemType::bow && mInventory.getRightHand().getType() == ItemType::bow)
                 weapon = "b";
 
-            else if (mInventory.mLeftHand.getType() == ItemType::staff && mInventory.mRightHand.getType() == ItemType::staff)
+            else if (mInventory.getLeftHand().getType() == ItemType::staff && mInventory.getRightHand().getType() == ItemType::staff)
                 weapon = "t";
-            else if (mInventory.mLeftHand.getType() == ItemType::mace || mInventory.mRightHand.getType() == ItemType::mace)
+            else if (mInventory.getLeftHand().getType() == ItemType::mace || mInventory.getRightHand().getType() == ItemType::mace)
                 weapon = "h";
 
             release_assert(!weapon.empty()); // Empty weapon format
@@ -216,37 +212,15 @@ namespace FAWorld
         }
     }
 
-    void Player::pickupItem(ItemTarget target)
-    {
-        auto& itemMap = getLevel()->getItemMap();
-        auto tile = target.item->getTile();
-        auto item = itemMap.takeItemAt(tile);
-        auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, tile); };
-        switch (target.action)
-        {
-            case ItemTarget::ActionType::autoEquip:
-                if (!getInventory().autoPlaceItem(*item))
-                    dropBack();
-                break;
-            case ItemTarget::ActionType::toCursor:
-                auto cursorItem = getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
-                if (!cursorItem.isEmpty())
-                    return dropBack();
-
-                getInventory().setCursorHeld(*item);
-                break;
-        }
-    }
-
     bool Player::dropItem(const FAWorld::Tile& clickedTile)
     {
-        auto cursorItem = getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+        auto cursorItem = mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
         auto initialDir = Misc::getVecDir(Misc::getVec(getPos().current(), {clickedTile.x, clickedTile.y}));
         auto curPos = getPos().current();
         auto tryDrop = [&](const std::pair<int32_t, int32_t>& pos) {
             if (getLevel()->dropItem(std::unique_ptr<Item>{new Item(cursorItem)}, *this, FAWorld::Tile(pos.first, pos.second)))
             {
-                getInventory().setCursorHeld({});
+                mInventory.setCursorHeld({});
                 return true;
             }
             return false;
@@ -274,5 +248,39 @@ namespace FAWorld
         if (isPosOk(curPos))
             return tryDrop(curPos);
         return false;
+    }
+
+    bool Player::canTalkTo(Actor* actor)
+    {
+        if (actor == nullptr)
+            return false;
+
+        if (this == actor)
+            return false;
+
+        if (!actor->canTalk())
+            return false;
+
+        if (isEnemy(actor))
+            return false;
+
+        return true;
+    }
+
+    void Player::update(bool noclip)
+    {
+        Actor::update(noclip);
+
+        // handle talking to npcs
+        if (mTarget.getType() == Target::Type::Actor)
+        {
+            Actor* target = mTarget.get<Actor*>();
+
+            if (target && target->getPos().isNear(this->getPos()) && canTalkTo(target))
+            {
+                World::get()->mDlgManager->talk(target);
+                mTarget.clear();
+            }
+        }
     }
 }

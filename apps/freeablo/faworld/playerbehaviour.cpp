@@ -19,6 +19,7 @@ namespace FAWorld
     {
         release_assert(actor->getTypeId() == Player::typeId);
         Behaviour::reAttach(actor);
+        mPlayer = static_cast<Player*>(actor);
     }
 
     void PlayerBehaviour::update()
@@ -51,7 +52,6 @@ namespace FAWorld
             case Engine::MouseInputAction::MOUSE_RELEASE:
             {
                 mTargetLock = false;
-                mPlayer->isTalking = false;
                 break;
             }
             case Engine::MouseInputAction::MOUSE_DOWN:
@@ -62,7 +62,7 @@ namespace FAWorld
 
                 mTargetLock = true;
 
-                auto cursorItem = mPlayer->getInventory().getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+                auto cursorItem = mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
                 if (!cursorItem.isEmpty())
                 {
                     // What happens here is not actually true to original game but
@@ -85,8 +85,9 @@ namespace FAWorld
                 }
                 else if (auto item = FAWorld::World::get()->targetedItem(mousePosition))
                 {
-                    mPlayer->mTarget = ItemTarget{
-                        FAWorld::World::get()->mGuiManager->isInventoryShown() ? ItemTarget::ActionType::toCursor : ItemTarget::ActionType::autoEquip, item};
+                    mPlayer->mTarget = Target::ItemTarget{FAWorld::World::get()->mGuiManager->isInventoryShown() ? Target::ItemTarget::ActionType::toCursor
+                                                                                                                 : Target::ItemTarget::ActionType::autoEquip,
+                                                          item};
                 }
                 else
                 {
@@ -98,7 +99,7 @@ namespace FAWorld
                 if (mouseDown && !mTargetLock)
                 {
                     auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, mPlayer->getPos());
-                    mPlayer->mTarget = boost::blank{};
+                    mPlayer->mTarget.clear();
                     mPlayer->mMoveHandler.setDestination({clickedTile.x, clickedTile.y});
                 }
             }

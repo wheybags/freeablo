@@ -5,6 +5,11 @@
 #include <serial/loader.h>
 #include <vector>
 
+namespace FAWorld
+{
+    class GameLevel;
+}
+
 namespace FASaveGame
 {
     class GameLoader : public Serial::Loader
@@ -14,6 +19,8 @@ namespace FASaveGame
 
         void addFunctionToRunAtEnd(std::function<void()> func) { mFunctionsToRunAtEnd.push_back(func); }
         void runFunctionsToRunAtEnd();
+
+        FAWorld::GameLevel* currentlyLoadingLevel = nullptr;
 
     private:
         std::vector<std::function<void()>> mFunctionsToRunAtEnd;

@@ -7,8 +7,10 @@
 #include "behaviour.h"
 #include "faction.h"
 #include "gamelevel.h"
+#include "inventory.h"
 #include "movementhandler.h"
 #include "position.h"
+#include "target.h"
 #include "world.h"
 #include <boost/format.hpp>
 #include <boost/variant/get.hpp>
@@ -27,13 +29,10 @@ namespace FAWorld
 {
     class Behaviour;
     class World;
-    class ItemTarget;
 
     class Actor
     {
     public:
-        using TargetType = boost::variant<boost::blank, Actor*, ItemTarget>;
-
         Actor(const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
         Actor(const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
         Actor(const DiabloExe::Monster& monster);
@@ -45,10 +44,7 @@ namespace FAWorld
         static const std::string typeId;
         virtual const std::string& getTypeId() { return typeId; }
 
-        // TODO: atm, this is only implemented for Player, but it should be changed to
-        // a non-virtual method, and implemented in Actor. The reason I wrote this comment
-        // instead of doing that, is that Actors don't have inventories at the moment, just Players
-        virtual void pickupItem(ItemTarget target) { UNUSED_PARAM(target); }
+        void pickupItem(Target::ItemTarget target);
 
         void teleport(GameLevel* level, Position pos);
         GameLevel* getLevel();
@@ -59,7 +55,7 @@ namespace FAWorld
         std::string getHitWav() const;
 
         bool canIAttack(Actor* actor);
-        void update(bool noclip);
+        virtual void update(bool noclip);
         void takeDamage(double amount);
         void heal();
 
@@ -67,7 +63,7 @@ namespace FAWorld
         bool isDead() const;
         bool isEnemy(Actor* other) const;
 
-        const std::unordered_map<std::string, std::string>& getTalkData() const { return mTalkData; }
+        const std::map<std::string, std::string>& getTalkData() const { return mTalkData; }
         const std::string& getNpcId() const { return mNpcId; }
         const std::string& getName() const { return mName; }
         const ActorStats& getStats() const { return mStats; }
@@ -76,18 +72,16 @@ namespace FAWorld
         bool isPassable() const { return isDead(); }
         bool hasTarget() const;
 
-        bool canTalk() const { return mCanTalk; }
+        bool canTalk() const { return mTalkData.size() > 0; }
         bool canInteractWith(Actor* actor);
-        bool canTalkTo(Actor* actor);
-        virtual bool talk(Actor* actor);
 
         // public member variables
         MovementHandler mMoveHandler;
-        TargetType mTarget;
+        Target mTarget;
         ActorAnimationManager mAnimation;
-        bool isTalking = false;
         bool isAttacking = false;
         bool mInvuln = false;
+        Inventory mInventory;
 
     protected:
         // protected member variables
@@ -95,11 +89,10 @@ namespace FAWorld
         ActorStats mStats;
         std::string mSoundPath;
         Behaviour* mBehaviour = nullptr;
-        bool mCanTalk = false;
         Faction mFaction;
         std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;
-        std::unordered_map<std::string, std::string> mTalkData; ///< Lines of dialogue
+        std::map<std::string, std::string> mTalkData; ///< Lines of dialogue
 
         // TODO: this var is only used for dialog code, which branches on which npc is being spoken to.
         // Eventually, we should add a proper dialog specification system, and get rid of this.
