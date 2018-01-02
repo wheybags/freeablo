@@ -271,7 +271,7 @@ namespace FAGui
         bool checkerboarded = false;
 
         auto& item = inv.getItemAt(target);
-        if (!item.isReal())
+        if (!item.mIsReal)
         {
             if (item.getEquipLoc() == FAWorld::ItemEquipType::twoHanded && target.type == FAWorld::EquipTargetType::rightHand)
             {
@@ -296,7 +296,7 @@ namespace FAGui
             Misc::overload(
                 [&](const struct nk_rect& rect) { nk_layout_space_push(ctx, alignRect(nk_rect(0, 0, w, h), rect, halign_t::center, valign_t::center)); },
                 [&](const struct nk_vec2& point) {
-                    if (!item.isReal())
+                    if (!item.mIsReal)
                         return;
                     nk_layout_space_push(ctx, nk_rect(point.x, point.y, w, h));
                     if (highlight == ItemHighlightInfo::highlightIfHover)

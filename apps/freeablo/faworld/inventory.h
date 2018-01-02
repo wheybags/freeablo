@@ -36,7 +36,6 @@ namespace FAWorld
 
         const Item& getItemAt(const EquipTarget& target) const;
         Item& getItemAt(const EquipTarget& target);
-        uint32_t getTotalAttackDamage();
         std::vector<std::tuple<ItemEffectType, uint32_t, uint32_t, uint32_t>>& getTotalEffects();
         void itemSlotLeftMouseButtonDown(EquipTarget target);
         void beltMouseLeftButtonDown(double x);
@@ -73,8 +72,6 @@ namespace FAWorld
         Item mLeftHand;
         Item mRightHand;
         Item mCursorHeld;
-        uint32_t mArmourClassTotal;
-        uint32_t mAttackDamageTotal;
 
         void updateCursor();
         bool checkStatsRequirement(const Item& item) const;

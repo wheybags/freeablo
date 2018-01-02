@@ -58,7 +58,7 @@ namespace FAWorld
 
     void ItemManager::addItem(Item& item, std::pair<size_t, size_t> floorPosition, uint32_t count)
     {
-        item.setCount(count);
+        item.mCount = count;
         ItemPosition temp = ItemPosition(floorPosition);
         mItemPositionMap[temp] = item;
 
@@ -98,7 +98,7 @@ namespace FAWorld
         ss << "{" << std::endl;
         for (std::map<ItemPosition, Item>::const_iterator it = mItemPositionMap.begin(); it != mItemPositionMap.end(); ++it)
         {
-            ss << "\t" << (size_t)it->second.getUniqueId() << ": \t" << it->second.getName() << std::endl;
+            ss << "\t" << (size_t)it->second.mUniqueId << ": \t" << it->second.getName() << std::endl;
         }
         ss << "\tCount:\t" << (size_t)mItemPositionMap.size() << std::endl;
         ss << "}" << std::endl;
@@ -109,7 +109,7 @@ namespace FAWorld
     {
         uint32_t uniqueId = getUniqueItemCode();
         Item search = mRegisteredItems.find(id)->second;
-        search.setUniqueId(uniqueId);
+        search.mUniqueId = uniqueId;
         return search;
     }
 
@@ -117,7 +117,7 @@ namespace FAWorld
     {
         uint32_t uniqueId = getUniqueItemCode();
         Item search = mUniqueItems.find(id)->second;
-        search.setUniqueId(uniqueId);
+        search.mUniqueId = uniqueId;
         return search;
     }
 

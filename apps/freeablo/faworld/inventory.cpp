@@ -35,8 +35,6 @@ namespace FAWorld
 
     Inventory::Inventory()
     {
-        mAttackDamageTotal = 0;
-        mArmourClassTotal = 0;
         for (uint8_t y = 0; y < mInventoryBox.height(); y++)
         {
             for (uint8_t x = 0; x < mInventoryBox.width(); x++)
@@ -46,8 +44,6 @@ namespace FAWorld
             }
         }
     }
-
-    uint32_t Inventory::getTotalAttackDamage() { return mAttackDamageTotal; }
 
     bool Inventory::checkStatsRequirement(const Item& item) const
     {
