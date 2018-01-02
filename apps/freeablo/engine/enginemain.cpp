@@ -232,6 +232,8 @@ namespace Engine
 
     const DiabloExe::DiabloExe& EngineMain::exe() const { return *mExe; }
 
+    bool EngineMain::isPaused() const { return mPaused; }
+
     void EngineMain::stop() { mDone = true; }
 
     void EngineMain::togglePause() { mPaused = !mPaused; }

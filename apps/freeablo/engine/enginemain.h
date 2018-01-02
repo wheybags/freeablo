@@ -38,6 +38,7 @@ namespace Engine
         // TODO: replace with enums
         void startGame(const std::string& characterClass);
         const DiabloExe::DiabloExe& exe() const;
+        bool isPaused() const;
 
     private:
         void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);

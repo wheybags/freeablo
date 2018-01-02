@@ -104,6 +104,7 @@ namespace FAGui
         // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
         bool isModalDlgShown() const;
         void setPlayer(FAWorld::Player* player);
+        bool isLastWidgetHovered(nk_context* ctx) const;
 
     private:
         void nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void()> action, bool isModal);
