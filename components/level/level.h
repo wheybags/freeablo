@@ -60,12 +60,12 @@ namespace Level
 
         void save(Serial::Saver& saver);
 
-        Misc::Helper2D<const Level, const MinPillar> operator[](int32_t x) const;
-
         void activate(int32_t x, int32_t y);
 
         int32_t minSize() const;
         const MinPillar minPillar(int32_t i) const;
+
+        MinPillar get(int32_t x, int32_t y) const;
 
         int32_t width() const;
         int32_t height() const;

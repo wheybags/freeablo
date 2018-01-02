@@ -86,7 +86,7 @@ namespace Level
         return false;
     }
 
-    const MinPillar get(int32_t x, int32_t y, const Level& level)
+    MinPillar Level::get(int32_t x, int32_t y) const
     {
         int32_t xDunIndex = x;
         int32_t xTilIndex = 0;
@@ -123,17 +123,15 @@ namespace Level
                 tilIndex = 0; // top
         }
 
-        int32_t dunIndex = level.mDun.get(xDunIndex, yDunIndex) - 1;
+        int32_t dunIndex = mDun.get(xDunIndex, yDunIndex) - 1;
 
         if (dunIndex == -1)
             return MinPillar(Level::mEmpty, 0, -1);
 
-        int32_t minIndex = level.mTil[dunIndex][tilIndex];
+        int32_t minIndex = mTil[dunIndex][tilIndex];
 
-        return MinPillar(level.mMin[minIndex], level.mSol.passable(minIndex), minIndex);
+        return MinPillar(mMin[minIndex], mSol.passable(minIndex), minIndex);
     }
-
-    Misc::Helper2D<const Level, const MinPillar> Level::operator[](int32_t x) const { return Misc::Helper2D<const Level, const MinPillar>(*this, x, get); }
 
     void Level::activate(int32_t x, int32_t y)
     {

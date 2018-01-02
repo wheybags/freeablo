@@ -1153,7 +1153,7 @@ namespace Render
                 return drawAtTile((*minBottoms)[0], topLeft, tileWidth, staticObjectHeight);
             }
 
-            size_t index = level[tile.x][tile.y].index();
+            size_t index = level.get(tile.x, tile.y).index();
             if (index < minBottoms->size())
                 drawAtTile((*minBottoms)[index], topLeft, tileWidth, staticObjectHeight); // all static objects have the same sprite size
         });
@@ -1166,7 +1166,7 @@ namespace Render
             if (isInvalidTile(tile))
                 return;
 
-            size_t index = level[tile.x][tile.y].index();
+            size_t index = level.get(tile.x, tile.y).index();
             if (index < minTops->size())
                 drawAtTile((*minTops)[index], topLeft, tileWidth, staticObjectHeight);
 
