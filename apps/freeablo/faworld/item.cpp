@@ -8,9 +8,6 @@
 
 namespace FAWorld
 {
-    std::unique_ptr<Cel::CelFile> Item::mObjcurs;
-    Item Item::empty;
-
     void Item::save(FASaveGame::GameSaver& saver)
     {
         saver.save(mIsReal);
@@ -21,7 +18,7 @@ namespace FAWorld
         saver.save(uint8_t(mType));
         saver.save(uint8_t(mClass));
         saver.save(uint8_t(mEquipLocation));
-        saver.save(mGraphicValue);
+        saver.save(mObjCursFrame);
         saver.save(mUseOnce);
         saver.save(mDropItemGraphicsPath);
         saver.save(mMaxCount);
@@ -43,7 +40,7 @@ namespace FAWorld
         if (mType == ItemType::gold)
             return (boost::format("%1% gold %2%") % mCount % (mCount ? "pieces" : "piece")).str();
 
-        auto description = getFullName();
+        auto description = getName();
         if (mClass == ItemClass::weapon)
             description += (boost::format("\ndamage: %1% - %2%") % mMinAttackDamage % mMaxAttackDamage).str();
         if (mClass == ItemClass::armor)
@@ -93,7 +90,7 @@ namespace FAWorld
         mType = ItemType(loader.load<uint8_t>());
         mClass = ItemClass(loader.load<uint8_t>());
         mEquipLocation = ItemEquipType(loader.load<uint8_t>());
-        mGraphicValue = loader.load<uint32_t>();
+        mObjCursFrame = loader.load<uint32_t>();
         mUseOnce = loader.load<bool>();
         mDropItemGraphicsPath = loader.load<std::string>();
         mMaxCount = loader.load<uint32_t>();
@@ -108,6 +105,13 @@ namespace FAWorld
 
         mCornerX = loader.load<uint8_t>();
         mCornerY = loader.load<uint8_t>();
+    }
+
+    std::string Item::getName() const {
+        return mName;
+    }
+
+    Item::~Item() {
     }
 
     std::string Item::getFlipSoundPath() const
@@ -146,7 +150,7 @@ namespace FAWorld
         return "";
     }
 
-    FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(getFlipAnimationPath()); }
+    FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(mDropItemGraphicsPath); }
 
     bool Item::isBeltEquippable() const { return mSizeX == 1 && mSizeY == 1 && mIsUsable && mType != ItemType::gold; }
 
@@ -194,5 +198,4 @@ namespace FAWorld
     }
 
     bool Item::operator==(const Item rhs) const { return this->mUniqueId == rhs.mUniqueId; }
-    uint8_t Item::getBeltX() const { return mBeltX; }
 }

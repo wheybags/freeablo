@@ -4,7 +4,7 @@
 
 namespace FAWorld
 {
-    enum class ItemEquipType : uint8_t
+    enum class ItemEquipType
     {
         none,
         oneHanded,
@@ -18,7 +18,7 @@ namespace FAWorld
         invalid,
     };
 
-    enum class ItemType : uint8_t
+    enum class ItemType
     {
         misc = 0,
         sword,
@@ -36,7 +36,7 @@ namespace FAWorld
         amulet,
     };
 
-    enum class ItemClass : uint8_t
+    enum class ItemClass
     {
         none = 0,
         weapon,
@@ -48,7 +48,7 @@ namespace FAWorld
 
     // TODO: synchronize names with:
     // https://github.com/sanctuary/notes/blob/72a0772e0d187d29117c4ddd6e6265cafc774a50/enums.h#L128
-    enum class ItemEffectType : uint8_t
+    enum class ItemEffectType
     {
         IncPercentChanceToHit,
         DecPercentChanceToHit,

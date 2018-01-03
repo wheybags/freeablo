@@ -4,7 +4,6 @@
 #include "actorstats.h"
 #include "equiptarget.h"
 #include "itemenums.h"
-#include "itemmanager.h"
 
 #include "player.h"
 #include <algorithm>
@@ -512,8 +511,7 @@ namespace FAWorld
             default:
                 break;
         }
-
-        return Item::empty;
+        release_assert (false);
     }
 
     bool Inventory::fitsAt(Item item, uint8_t x, uint8_t y)

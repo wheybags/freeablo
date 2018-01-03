@@ -48,6 +48,8 @@ namespace FAWorld
         res.mRequiredMagic = info.requiredMagic;
         res.mRequiredDexterity = info.requiredDexterity;
 
+        res.mEmpty = false;
+        res.mIsReal = true;
         res.mMiscId = static_cast<ItemMiscId>(info.miscId);
         res.mSpellId = info.spellId;
         res.mIsUsable = info.isUsable;
@@ -81,16 +83,6 @@ namespace FAWorld
             return {};
         auto baseItemId = it->second;
         auto res = generateBaseItem(baseItemId);
-        res.mBuyPrice = info.mPrice;
-        res.mQuality = static_cast<ItemQuality>(info.mQualityLevel);
-        res.mName = info.mName;
-
-        for (int i = 0; i < 6; ++i)
-        {
-            res.mEffects[i].type = static_cast<ItemEffectType>(info.mEffectData[i][0]);
-            res.mEffects[i].min = info.mEffectData[i][1];
-            res.mEffects[i].max = info.mEffectData[i][2];
-        }
         return res;
     }
 }
