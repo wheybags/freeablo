@@ -72,13 +72,11 @@ namespace FAWorld
         uint8_t getReqStr() const;
         uint8_t getReqMagic() const;
         uint8_t getReqDex() const;
-        uint8_t getReqVit() const;
         uint32_t getSpecialEffect() const;
         ItemMiscId getMiscId() const;
         uint32_t getSpellCode() const;
         uint32_t getUseOnce() const;
         uint32_t getBuyPrice() const;
-        uint32_t getSellPrice() const;
         ItemType getType() const;
         ItemEquipType getEquipLoc() const;
         ItemClass getClass() const;
@@ -148,6 +146,7 @@ namespace FAWorld
 
         friend class Inventory;
         friend class ItemFactory;
+        friend class PlayerFactory;
     };
 }
 

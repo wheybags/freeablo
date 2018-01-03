@@ -23,9 +23,6 @@ namespace FAWorld
     {
     public:
         using thisType = BaseItemGenOptions;
-        bool defaultNumberOfCharges = false;
-
-        thisType &setDefaultNumberOfCharges(bool value) { defaultNumberOfCharges = value; return *this; }
     };
 
     class ItemFactory

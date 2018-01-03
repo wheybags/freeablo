@@ -150,10 +150,7 @@ namespace FAWorld
 
         auto& cursorItem = mCurrentPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
         if (!cursorItem.isEmpty())
-        {
-            mGuiManager->setDescription(cursorItem.getName());
             return nothingHovered();
-        }
 
         auto actor = targetedActor(mousePosition);
         if (actor != nullptr)
@@ -319,6 +316,10 @@ namespace FAWorld
         }
 
         {
+            auto& cursorItem = mCurrentPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+            if (!cursorItem.isEmpty())
+                mGuiManager->setDescription(cursorItem.getName());
+
             if (!nk_item_is_any_active(FARender::Renderer::get()->getNuklearContext()))
             {
                 // we need update hover not only on mouse move because viewport may move without mouse being moved

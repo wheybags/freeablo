@@ -28,7 +28,7 @@ namespace FAGui
     // returns center of nk_rect as nk_vec2
     struct nk_vec2 center(const struct nk_rect& rect);
     // performs nk_widget_has_mouse_click_down and checks that mouse button is down
-    bool nk_widget_is_mouse_click_down(nk_context* ctx, nk_buttons buttons, bool down);
+    bool nk_widget_is_mouse_click_down_inactive(nk_context* ctx, nk_buttons buttons, bool down);
     // nk_widget_hovered without regard to activity of window
     bool nk_inactive_widget_is_hovered(nk_context* ctx);
     // checks if cursor has left the widget and hover effect should become inactive

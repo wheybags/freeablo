@@ -179,7 +179,7 @@ namespace FAGui
                         continue;
                     }
                     nk_layout_space_push(ctx, lineRect);
-                    if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true) && line.action)
+                    if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true) && line.action)
                     {
                         activeDialog.mSelectedLine = i;
                         line.action();
@@ -339,7 +339,7 @@ namespace FAGui
                 {
                     nk_layout_space_push(ctx, p.second);
                     nk_button_label_styled(ctx, &dummyStyle, "");
-                    if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                    if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true))
                         inv.itemSlotLeftMouseButtonDown(p.first);
                     auto highlight = ItemHighlightInfo::notHighlighed;
                     if (isLastWidgetHovered(ctx))
@@ -358,7 +358,7 @@ namespace FAGui
             float invHeight = inv.getInventoryBox().height() * cellSize;
             nk_layout_space_push(ctx, nk_recta(invTopLeft, {invWidth, invHeight}));
             nk_button_label_styled(ctx, &dummyStyle, "");
-            if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+            if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true))
             {
                 inv.inventoryMouseLeftButtonDown((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / invWidth,
                                                  (ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / invHeight);
@@ -395,7 +395,7 @@ namespace FAGui
         auto beltWidth = 232.0f, beltHeight = 29.0f, cellSize = 29.0f;
         nk_layout_space_push(ctx, nk_recta(beltTopLeft, {beltWidth, beltHeight}));
         auto& inv = mPlayer->mInventory;
-        if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true))
         {
             inv.beltMouseLeftButtonDown((ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / beltWidth);
         }

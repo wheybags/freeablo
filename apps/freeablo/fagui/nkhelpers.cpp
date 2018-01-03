@@ -4,9 +4,10 @@
 
 struct nk_vec2 FAGui::center(const struct nk_rect& rect) { return {rect.x + rect.w / 2, rect.y + rect.h / 2}; }
 
-bool FAGui::nk_widget_is_mouse_click_down(nk_context* ctx, nk_buttons buttons, bool down)
+bool FAGui::nk_widget_is_mouse_click_down_inactive(nk_context* ctx, nk_buttons buttons, bool down)
 {
-    return nk_widget_has_mouse_click_down(ctx, buttons, down) && ctx->input.mouse.buttons[buttons].clicked;
+    return nk_inactive_widget_is_hovered(ctx) && nk_input_mouse_clicked(&ctx->input, buttons, nk_widget_bounds(ctx)) &&
+           ctx->input.mouse.buttons[buttons].clicked;
 }
 
 bool FAGui::nk_inactive_widget_is_hovered(nk_context* ctx) { return nk_input_is_mouse_hovering_rect(&ctx->input, nk_widget_bounds(ctx)); }

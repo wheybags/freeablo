@@ -79,7 +79,11 @@ namespace FAWorld
 
     void PlayerFactory::createSorcerer(Player* player) const
     {
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortStaffOfChargedBolt), MakeEquipTarget<EquipTargetType::leftHand>());
+        {
+            auto item = mItemFactory.generateBaseItem(ItemId::shortStaffOfChargedBolt);
+            item.mMaxCharges = item.mCurrentCharges = 40;
+            player->mInventory.putItemUnsafe(std::move (item), MakeEquipTarget<EquipTargetType::leftHand>());
+        }
         {
             auto item = mItemFactory.generateBaseItem(ItemId::gold);
             item.setCount(100);
