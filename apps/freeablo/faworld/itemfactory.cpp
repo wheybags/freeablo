@@ -36,16 +36,13 @@ namespace FAWorld
         res.mUniqueBaseItemId = info.uniqueBaseItemId;
         res.mName = info.name;
         res.mUnindentifiedName = info.name;
-        res.mQuality = static_cast<ItemQuality>(info.qualityLevel);
+        res.mQuality = ItemQuality::normal; // ItemQuality may be changed by other functions
         res.mMaxDurability = info.durability;
         res.mCurrentDurability = info.durability;
 
         res.mMinAttackDamage = info.minAttackDamage;
         res.mMaxAttackDamage = info.maxAttackDamage;
-        if (options.randomizeArmorClass)
-            res.mArmorClass = FALevelGen::randomInRange(info.minArmorClass, info.maxArmorClass);
-        else
-            res.mArmorClass = info.minArmorClass;
+        res.mArmorClass = FALevelGen::randomInRange(info.minArmorClass, info.maxArmorClass);
 
         res.mRequiredStrength = info.requiredStrength;
         res.mRequiredMagic = info.requiredMagic;

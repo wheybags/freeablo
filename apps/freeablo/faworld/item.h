@@ -117,9 +117,9 @@ namespace FAWorld
 
         uint32_t mArmorClass;
 
-        uint8_t mRequiredStrength;
-        uint8_t mRequiredMagic;
-        uint8_t mRequiredDexterity;
+        int32_t mRequiredStrength;
+        int32_t mRequiredMagic;
+        int32_t mRequiredDexterity;
 
         uint32_t mSpecialEffectFlags;
         ItemCode mCode;

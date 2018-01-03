@@ -45,9 +45,9 @@ namespace FAWorld
 
         auto description = getFullName();
         if (mClass == ItemClass::weapon)
-            description += (boost::format("damage: %1% - %2%") % mMinAttackDamage % mMaxAttackDamage).str();
+            description += (boost::format("\ndamage: %1% - %2%") % mMinAttackDamage % mMaxAttackDamage).str();
         if (mClass == ItemClass::armor)
-            description += (boost::format("armor: %1%") % mArmorClass).str();
+            description += (boost::format("\narmor: %1%") % mArmorClass).str();
 
         if (mClass == ItemClass::armor || mClass == ItemClass::weapon)
         {
@@ -56,16 +56,26 @@ namespace FAWorld
                 description += "Indestructible";
             else
                 description += (boost::format("Dur: %1%/%2%") % mCurrentDurability % mMaxDurability).str();
-            description += "\n";
         }
 
         if (mMiscId == ItemMiscId::staff && mMaxCharges > 0)
             {
-                description += (boost::format("Charges: %1%/%2%\n") % mCurrentCharges % mMaxCharges).str();
+                description += (boost::format("\nCharges: %1%/%2%") % mCurrentCharges % mMaxCharges).str();
             }
         if (mQuality == ItemQuality::unique)
-            description += "unique item\n";
+            description += "\nUnique Item";
         // TODO: affix/prefix description
+        if (mRequiredStrength + mRequiredDexterity + mRequiredMagic > 0)
+        {
+            description += "\nRequired:";
+            if (mRequiredStrength > 0)
+                description += (boost::format (" %1% Str") % mRequiredStrength).str ();
+            if (mRequiredMagic > 0)
+                description += (boost::format (" %1% Mag") % mRequiredMagic).str ();
+            if (mRequiredDexterity > 0)
+                description += (boost::format (" %1% Dex") % mRequiredDexterity).str ();
+        }
+
         return description;
     }
 

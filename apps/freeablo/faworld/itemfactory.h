@@ -23,10 +23,8 @@ namespace FAWorld
     {
     public:
         using thisType = BaseItemGenOptions;
-        bool randomizeArmorClass = true;
         bool defaultNumberOfCharges = false;
 
-        thisType &setRandomizeArmorClass(bool value) { randomizeArmorClass = value; return *this; }
         thisType &setDefaultNumberOfCharges(bool value) { defaultNumberOfCharges = value; return *this; }
     };
 

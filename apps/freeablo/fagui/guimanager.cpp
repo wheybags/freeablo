@@ -26,6 +26,7 @@
 #include "menuhandler.h"
 #include "nkhelpers.h"
 #include <boost/variant/variant.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 namespace FAGui
 {
@@ -314,7 +315,7 @@ namespace FAGui
         auto effectType = isHighlighted ? EffectType::highlighted : EffectType::none;
         effectType = checkerboarded ? EffectType::checkerboarded : effectType;
         if (isHighlighted)
-            setDescription(item.getName());
+            setDescription(item.getFullDescription());
         applyEffect effect(ctx, effectType);
         nk_image(ctx, img);
     }
@@ -599,8 +600,19 @@ namespace FAGui
 
     void GuiManager::descriptionPanel(nk_context* ctx)
     {
-        nk_layout_space_push(ctx, nk_rect(185, 66, 275, 60));
-        smallText(ctx, mDescription.c_str(), mDescriptionColor);
+        auto boxRect = nk_rect(185, 66, 275, 55);
+        std::vector<std::string> vec;
+        boost::split (vec, mDescription, boost::is_any_of ("\n"), boost::token_compress_on);
+        auto h_part = boxRect.h / vec.size ();
+        for (int i = 0; i < static_cast<int> (vec.size ()); ++i)
+            {
+                // TODO: copy precise location of several line positioning from exe
+                auto rect = boxRect;
+                rect.y = boxRect.y + h_part * i;
+                rect.h = h_part;
+                nk_layout_space_push(ctx, rect);
+                smallText(ctx, vec[i].c_str(), mDescriptionColor);
+            }
     }
 
     void GuiManager::update(bool inGame, bool paused, nk_context* ctx)

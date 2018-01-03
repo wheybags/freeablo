@@ -62,17 +62,18 @@ namespace DiabloExe
     {
         std::stringstream ss;
         ss << "{" << std::endl
-           << "\tactiveTrigger: " << +dropRate << "," << std::endl
+           << "\tid: " << + id << "," << std::endl
+           << "\tdropRate: " << +dropRate << "," << std::endl
            << "\titemClass: " << +itemClass << "," << std::endl
            << "\tequipType: " << +equipType << "," << std::endl
-           << "\tgraphicValue: " << +invGraphicsId << "," << std::endl
+           << "\tinvGraphicsId: " << +invGraphicsId << "," << std::endl
            << "\ttype: " << +type << "," << std::endl
            << "\tuniqCode: " << +uniqueBaseItemId << "," << std::endl
            << "\tunknown0: " << +unknown0 << "," << std::endl
            << "\tunknown1: " << +unknown1 << "," << std::endl
 
-           << "\titemName: " << name << "," << std::endl
-           << "\titemSecondName: " << shortName << "," << std::endl
+           << "\tname: " << name << "," << std::endl
+           << "\tshortName: " << shortName << "," << std::endl
            << "\tqualityLevel: " << +qualityLevel << "," << std::endl
            << "\tdurability: " << +durability << "," << std::endl
            << "\tminAttackDamage: " << +minAttackDamage << "," << std::endl
@@ -83,19 +84,16 @@ namespace DiabloExe
            << "\treqStr: " << +requiredStrength << "," << std::endl
            << "\treqMagic: " << +requiredMagic << "," << std::endl
            << "\treqDex: " << +requiredDexterity << "," << std::endl
-           << "\treqVit: " << +unused << "," << std::endl
 
            << "\tspecialEffect : " << +specialEffectFlags << "," << std::endl
 
            << "\tmagicCode: " << +miscId << "," << std::endl
 
            << "\tspellCode: " << +spellId << "," << std::endl
-           << "\tuseOnce: " << +isUsable << "," << std::endl
+           << "\tisUsable: " << +isUsable << "," << std::endl
 
-           << "\tprice1: " << +price << "," << std::endl
-
-           << "\tprice2: " << +unusedPrice << "," << std::endl
-
+           << "\tprice: " << +price << "," << std::endl
+           << "\tunusedPrice: " << +unusedPrice << "," << std::endl
            << "}" << std::endl;
         return ss.str();
     }

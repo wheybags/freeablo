@@ -28,7 +28,7 @@ namespace FAWorld
     void PlayerFactory::loadTestingKit(Player* player)
     {
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::buckler), MakeEquipTarget<EquipTargetType::inventory>(1, 0));
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseShortBow), MakeEquipTarget<EquipTargetType::inventory>(3, 0));
+        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortBow), MakeEquipTarget<EquipTargetType::inventory>(3, 0));
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseRingQlvl5), MakeEquipTarget<EquipTargetType::inventory>(1, 2));
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseRingQlvl5), MakeEquipTarget<EquipTargetType::inventory>(2, 2));
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseAmuletQlvl8), MakeEquipTarget<EquipTargetType::inventory>(1, 3));
@@ -39,7 +39,7 @@ namespace FAWorld
     void PlayerFactory::createWarrior(Player* player) const
     {
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortSword), MakeEquipTarget<EquipTargetType::leftHand>());
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::buckler, BaseItemGenOptions().setRandomizeArmorClass(false)),
+        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::buckler, BaseItemGenOptions()),
                                          MakeEquipTarget<EquipTargetType::rightHand>());
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::club), MakeEquipTarget<EquipTargetType::inventory>(0, 0));
         {
@@ -80,7 +80,6 @@ namespace FAWorld
     void PlayerFactory::createSorcerer(Player* player) const
     {
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortStaffOfChargedBolt), MakeEquipTarget<EquipTargetType::leftHand>());
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortBow), MakeEquipTarget<EquipTargetType::leftHand>());
         {
             auto item = mItemFactory.generateBaseItem(ItemId::gold);
             item.setCount(100);

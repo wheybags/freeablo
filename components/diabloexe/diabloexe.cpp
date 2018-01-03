@@ -256,14 +256,7 @@ namespace DiabloExe
         {
             exe.FAfseek(itemOffset + 76 * i, SEEK_SET);
             BaseItem tmp(exe, codeOffset);
-
-            if (tmp.isUsable > 1 || tmp.name.empty())
-                continue;
-            if (Misc::StringUtils::containsNonPrint(tmp.name))
-                continue;
-            if (Misc::StringUtils::containsNonPrint(tmp.shortName))
-                continue;
-
+            tmp.id = i;
             tmp.dropItemGraphicsPath = "items/" + itemDropGraphicsFilename[itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId]] + ".cel";
             mBaseItems.push_back(tmp);
         }
