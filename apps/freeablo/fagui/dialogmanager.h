@@ -22,7 +22,15 @@ namespace FAGui
     class DialogLineData
     {
     public:
+        DialogLineData(std::string text, TextColor color, bool alignCenter);
+        DialogLineData();
         DialogLineData& setAction(std::function<void()> actionArg);
+        static DialogLineData separator()
+        {
+            DialogLineData data;
+            data.isSeparator = true;
+            return data;
+        }
 
     public:
         std::function<void()> action;
@@ -34,17 +42,22 @@ namespace FAGui
 
     class DialogData
     {
+        static constexpr int maxLineVisible = 24;
+
     public:
-        DialogLineData& text_lines(const std::vector<std::string>& texts, TextColor color = TextColor::white, bool alignCenter = true);
+        static DialogLineData toLineData(const std::string& text, TextColor color, bool alignCenter);
+        DialogLineData& textLines(const std::vector<std::string>& texts, TextColor color = TextColor::white, bool alignCenter = true);
         void skip_line(int cnt = 1);
         void separator();
+        void footer(const std::string& text);
         void header(const std::vector<std::string>& text);
         int selectedLine();
         void notify(Engine::KeyboardInputAction action, GuiManager& manager);
 
     private:
-        std::array<DialogLineData, 24> mLines;
-        int mLastLine = 1;
+        std::vector<DialogLineData> mHeader;
+        std::vector<DialogLineData> mLines;
+        std::vector<DialogLineData> mFooter;
         int mSelectedLine = -1;
         friend class FAGui::GuiManager;
     };

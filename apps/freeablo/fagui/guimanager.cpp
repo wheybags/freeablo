@@ -25,8 +25,8 @@
 #include "menu/startingmenuscreen.h"
 #include "menuhandler.h"
 #include "nkhelpers.h"
-#include <boost/variant/variant.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/variant/variant.hpp>
 
 namespace FAGui
 {
@@ -151,7 +151,7 @@ namespace FAGui
         nk_fa_begin_image_window(
             ctx,
             "dialog",
-            nk_rect(screenW / 2, screenH - boxTex->getHeight() - 153, boxTex->getWidth(), boxTex->getHeight()),
+            nk_rect(screenW / 2., screenH - boxTex->getHeight() - 153, boxTex->getWidth(), boxTex->getHeight()),
             flags,
             boxTex->getNkImage(),
             [&]() {
@@ -166,9 +166,7 @@ namespace FAGui
 
                 int y = 5;
                 constexpr int textRowHeight = 12;
-                for (int i = 0; i < static_cast<int>(activeDialog.mLines.size()); ++i)
-                {
-                    auto& line = activeDialog.mLines[i];
+                auto drawLine = [&](const DialogLineData& line, int lineNum) {
                     auto lineRect = nk_rect(3, 3 + y, boxTex->getWidth() - 6, textRowHeight);
                     if (line.isSeparator)
                     {
@@ -176,17 +174,17 @@ namespace FAGui
                         nk_layout_space_push(ctx, alignRect(separatorRect, lineRect, halign_t::center, valign_t::center));
                         auto separator_image = nk_subimage_handle(boxTex->getNkImage().handle, boxTex->getWidth(), boxTex->getHeight(), separatorRect);
                         nk_image(ctx, separator_image);
-                        continue;
+                        return false;
                     }
                     nk_layout_space_push(ctx, lineRect);
                     if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true) && line.action)
                     {
-                        activeDialog.mSelectedLine = i;
+                        activeDialog.mSelectedLine = lineNum;
                         line.action();
-                        return;
+                        return true;
                     }
                     smallText(ctx, line.text.c_str(), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
-                    if (activeDialog.selectedLine() == i)
+                    if (activeDialog.selectedLine() == lineNum)
                     {
                         auto pent = renderer->loadImage("data/pentspn2.cel");
                         int pentOffset = 10;
@@ -210,7 +208,15 @@ namespace FAGui
                     }
 
                     y += textRowHeight;
-                }
+                    return false;
+                };
+
+                for (auto &line : activeDialog.mHeader)
+                    drawLine(line, -1);
+                for (int i = 0; i < activeDialog.mLines.size (); ++i)
+                    drawLine(activeDialog.mLines[i], i);
+                for (auto &line : activeDialog.mFooter)
+                    drawLine(line, -1);
             },
             true);
     }
@@ -595,24 +601,24 @@ namespace FAGui
     {
         auto renderer = FARender::Renderer::get();
         auto fnt = renderer->smallFont();
-        return fnt->width(fnt->userdata, 0.0f, text, strlen(text) - 1);
+        return fnt->width(fnt->userdata, 0.0f, text, strlen(text));
     }
 
     void GuiManager::descriptionPanel(nk_context* ctx)
     {
         auto boxRect = nk_rect(185, 66, 275, 55);
         std::vector<std::string> vec;
-        boost::split (vec, mDescription, boost::is_any_of ("\n"), boost::token_compress_on);
-        auto h_part = boxRect.h / vec.size ();
-        for (int i = 0; i < static_cast<int> (vec.size ()); ++i)
-            {
-                // TODO: copy precise location of several line positioning from exe
-                auto rect = boxRect;
-                rect.y = boxRect.y + h_part * i;
-                rect.h = h_part;
-                nk_layout_space_push(ctx, rect);
-                smallText(ctx, vec[i].c_str(), mDescriptionColor);
-            }
+        boost::split(vec, mDescription, boost::is_any_of("\n"), boost::token_compress_on);
+        auto h_part = boxRect.h / vec.size();
+        for (int i = 0; i < static_cast<int>(vec.size()); ++i)
+        {
+            // TODO: copy precise location of several line positioning from exe
+            auto rect = boxRect;
+            rect.y = boxRect.y + h_part * i;
+            rect.h = h_part;
+            nk_layout_space_push(ctx, rect);
+            smallText(ctx, vec[i].c_str(), mDescriptionColor);
+        }
     }
 
     void GuiManager::update(bool inGame, bool paused, nk_context* ctx)
