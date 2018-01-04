@@ -19,7 +19,7 @@ namespace FAGui
 
     DialogLineData& DialogData::textLines(const std::vector<std::string>& texts, TextColor color, bool alignCenter)
     {
-        auto index = mLines.size ();
+        auto index = mLines.size();
         for (auto& text : texts)
         {
             mLines.emplace_back(text, color, alignCenter);
@@ -28,11 +28,11 @@ namespace FAGui
         return mLines[index];
     }
 
-    void DialogData::skip_line(int cnt) { mLines.emplace_back (); }
+    void DialogData::skip_line(int cnt) { mLines.emplace_back(); }
 
     void DialogData::separator()
     {
-        mLines.emplace_back (DialogLineData::separator());
+        mLines.emplace_back(DialogLineData::separator());
         skip_line();
     }
 
@@ -101,12 +101,29 @@ namespace FAGui
             do
             {
                 i += dir;
-                if (i < 0)
-                    i += mLines.size();
-                else if (i >= static_cast<int>(mLines.size()))
-                    i -= mLines.size();
+                if (i < 0 || i >= static_cast<int>(mLines.size()))
+                {
+                    if (isScrollbarNeeded())
+                        return; // no looping if there's scroll bar
+                    i = (i + mLines.size()) % mLines.size();
+                }
             } while (!mLines[i].action);
             mSelectedLine = i;
+            if (!isVisible(mSelectedLine))
+                if (dir == -1)
+                    mFirstVisible = mSelectedLine;
+                else
+                {
+                    int firstInvisible = mSelectedLine;
+                    ++firstInvisible;
+                    if (firstInvisible >= mLines.size())
+                        return;
+                    while (firstInvisible < mLines.size() && !mLines[firstInvisible].action)
+                    {
+                        ++firstInvisible;
+                    }
+                    mFirstVisible = firstInvisible - visibleBodyLineCount();
+                }
         }
     }
 

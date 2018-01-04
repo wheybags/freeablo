@@ -42,7 +42,7 @@ namespace FAGui
 
     class DialogData
     {
-        static constexpr int maxLineVisible = 24;
+        static constexpr int linesVisible = 24;
 
     public:
         static DialogLineData toLineData(const std::string& text, TextColor color, bool alignCenter);
@@ -53,12 +53,18 @@ namespace FAGui
         void header(const std::vector<std::string>& text);
         int selectedLine();
         void notify(Engine::KeyboardInputAction action, GuiManager& manager);
+        void makeWide () { mIsWide = true; }
+        bool isScrollbarNeeded () const { return mHeader.size () + mLines.size () + mFooter.size () > linesVisible; }
+        int visibleBodyLineCount () const { return linesVisible - mHeader.size () - mFooter.size (); }
+        bool isVisible (int line) const { return line >= mFirstVisible && line < mFirstVisible + visibleBodyLineCount();}
 
     private:
         std::vector<DialogLineData> mHeader;
         std::vector<DialogLineData> mLines;
         std::vector<DialogLineData> mFooter;
-        int mSelectedLine = -1;
+        int mSelectedLine = -1; // -1 means the first selectable
+        int mFirstVisible = 0; // used in case if not all fit to the window
+        bool mIsWide = false;
         friend class FAGui::GuiManager;
     };
 

@@ -144,14 +144,17 @@ namespace FAGui
         auto& activeDialog = mDialogs.back();
 
         auto renderer = FARender::Renderer::get();
-        auto boxTex = renderer->loadImage("data/textbox2.cel");
+        auto boxTex = renderer->loadImage(activeDialog.mIsWide ? "data/textbox.cel" : "data/textbox2.cel");
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
         nk_fa_begin_image_window(
             ctx,
             "dialog",
-            nk_rect(screenW / 2., screenH - boxTex->getHeight() - 153, boxTex->getWidth(), boxTex->getHeight()),
+            nk_rect(screenW / 2. - (activeDialog.mIsWide ? boxTex->getWidth() / 2 : 0.0),
+                    screenH - boxTex->getHeight() - 153,
+                    boxTex->getWidth(),
+                    boxTex->getHeight()),
             flags,
             boxTex->getNkImage(),
             [&]() {
@@ -211,11 +214,11 @@ namespace FAGui
                     return false;
                 };
 
-                for (auto &line : activeDialog.mHeader)
+                for (auto& line : activeDialog.mHeader)
                     drawLine(line, -1);
-                for (int i = 0; i < activeDialog.mLines.size (); ++i)
+                for (int i = activeDialog.mFirstVisible; i < activeDialog.mFirstVisible + activeDialog.visibleBodyLineCount(); ++i)
                     drawLine(activeDialog.mLines[i], i);
-                for (auto &line : activeDialog.mFooter)
+                for (auto& line : activeDialog.mFooter)
                     drawLine(line, -1);
             },
             true);
