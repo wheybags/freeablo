@@ -25,6 +25,7 @@ namespace FAGui
         DialogLineData(std::string text, TextColor color, bool alignCenter);
         DialogLineData();
         DialogLineData& setAction(std::function<void()> actionArg);
+
         static DialogLineData separator()
         {
             DialogLineData data;
@@ -38,6 +39,7 @@ namespace FAGui
         bool alignCenter = false;
         bool isSeparator = false;
         TextColor color = TextColor::white;
+        int leftOffset = 0;
     };
 
     class DialogData
@@ -49,14 +51,15 @@ namespace FAGui
         DialogLineData& textLines(const std::vector<std::string>& texts, TextColor color = TextColor::white, bool alignCenter = true);
         void skip_line(int cnt = 1);
         void separator();
-        void footer(const std::string& text);
+        DialogLineData& footer(const std::string& text);
         void header(const std::vector<std::string>& text);
         int selectedLine();
         void notify(Engine::KeyboardInputAction action, GuiManager& manager);
-        void makeWide () { mIsWide = true; }
+        void widen () { mIsWide = true; }
         bool isScrollbarNeeded () const { return mHeader.size () + mLines.size () + mFooter.size () > linesVisible; }
-        int visibleBodyLineCount () const { return linesVisible - mHeader.size () - mFooter.size (); }
+        int visibleBodyLineCount () const { return std::min (linesVisible - mHeader.size () - mFooter.size (), mLines.size ());}
         bool isVisible (int line) const { return line >= mFirstVisible && line < mFirstVisible + visibleBodyLineCount();}
+        void setupItemOffsets();
 
     private:
         std::vector<DialogLineData> mHeader;
@@ -73,6 +76,7 @@ namespace FAGui
     public:
         explicit DialogManager(GuiManager& gui_manager, FAWorld::World& world);
         void talk(const FAWorld::Actor* npc);
+        void sellGriswold(const FAWorld::Actor* npc);
 
     private:
         void talkOgden(const FAWorld::Actor* npc);

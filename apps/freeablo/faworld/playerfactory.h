@@ -19,7 +19,7 @@ namespace FAWorld
         Player* create(const std::string& playerClass) const;
 
     private:
-        void loadTestingKit(Player* player);
+        void loadTestingKit(Player* player) const;
         void createWarrior(Player* player) const;
         void createRogue(Player* player) const;
         void createSorcerer(Player* player) const;

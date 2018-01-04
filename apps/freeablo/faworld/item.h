@@ -52,6 +52,7 @@ namespace FAWorld
         // name including affixes/prefixes/spells
         std::string getName() const;
         std::string getFullDescription () const;
+        std::vector<std::string> descriptionForMerchants() const;
 
         void setUniqueId(uint32_t mUniqueId);
         uint32_t getUniqueId() const;
@@ -81,6 +82,14 @@ namespace FAWorld
         ItemEquipType getEquipLoc() const;
         ItemClass getClass() const;
         uint32_t getGraphicValue() const;
+
+    private:
+        std::string chargesStr () const;
+        std::string damageStr() const;
+        std::string armorStr() const;
+        std::string damageOrArmorStr () const;
+        std::string durabilityStr() const;
+        std::string requirementsStr() const;
 
     private:
         static Cel::CelFile* mObjcurs;

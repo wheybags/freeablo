@@ -57,6 +57,7 @@ namespace FAWorld
         const Item& getRightHand() const { return mRightHand; }
         const Misc::Array2D<Item>& getInventoryBox() const { return mInventoryBox; }
         const std::vector<Item>& getBelt() const { return mBelt; }
+        std::vector<const Item *> getSellableItems () const;
 
     private:
         void updateCursor();

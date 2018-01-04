@@ -35,45 +35,101 @@ namespace FAWorld
         saver.save(mCornerY);
     }
 
+    std::string Item::damageStr() const { return (boost::format("damage: %1% - %2%") % mMinAttackDamage % mMaxAttackDamage).str(); }
+
+    std::string Item::armorStr() const { return (boost::format("armor: %1%") % mArmorClass).str(); }
+
+    std::string Item::damageOrArmorStr() const
+    {
+        if (mClass == ItemClass::armor)
+            return armorStr();
+
+        if (mClass == ItemClass::weapon)
+            return damageStr();
+        return {};
+    }
+
+    std::string Item::durabilityStr() const
+    {
+        if (mClass != ItemClass::armor && mClass != ItemClass::weapon)
+            return {};
+
+        if (mMaxDurability == indestructibleItemDurability)
+            return "Indestructible";
+        else
+            return (boost::format("Dur: %1%/%2%") % mCurrentDurability % mMaxDurability).str();
+    }
+
+    std::string Item::requirementsStr() const
+    {
+        if (mRequiredStrength + mRequiredDexterity + mRequiredMagic == 0)
+            return {};
+        std::string str = "Required:";
+        if (mRequiredStrength > 0)
+            str += (boost::format(" %1% Str") % mRequiredStrength).str();
+        if (mRequiredMagic > 0)
+            str += (boost::format(" %1% Mag") % mRequiredMagic).str();
+        if (mRequiredDexterity > 0)
+            str += (boost::format(" %1% Dex") % mRequiredDexterity).str();
+        return str;
+    }
+
     std::string Item::getFullDescription() const
     {
         if (mType == ItemType::gold)
             return (boost::format("%1% gold %2%") % mCount % (mCount ? "pieces" : "piece")).str();
 
         auto description = getName();
-        if (mClass == ItemClass::weapon)
-            description += (boost::format("\ndamage: %1% - %2%") % mMinAttackDamage % mMaxAttackDamage).str();
-        if (mClass == ItemClass::armor)
-            description += (boost::format("\narmor: %1%") % mArmorClass).str();
+        auto dmrOrArmor = damageOrArmorStr();
+        if (!dmrOrArmor.empty ())
+            description += '\n' + dmrOrArmor;
 
-        if (mClass == ItemClass::armor || mClass == ItemClass::weapon)
-        {
-            description += " ";
-            if (mMaxDurability == indestructibleItemDurability)
-                description += "Indestructible";
-            else
-                description += (boost::format("Dur: %1%/%2%") % mCurrentDurability % mMaxDurability).str();
-        }
+        auto dur = durabilityStr();
+        if (!dur.empty())
+            description += " " + dur;
 
-        if (mMiscId == ItemMiscId::staff && mMaxCharges > 0)
-            {
-                description += (boost::format("\nCharges: %1%/%2%") % mCurrentCharges % mMaxCharges).str();
-            }
+        description += chargesStr();
         if (mQuality == ItemQuality::unique)
             description += "\nUnique Item";
         // TODO: affix/prefix description
-        if (mRequiredStrength + mRequiredDexterity + mRequiredMagic > 0)
-        {
-            description += "\nRequired:";
-            if (mRequiredStrength > 0)
-                description += (boost::format (" %1% Str") % mRequiredStrength).str ();
-            if (mRequiredMagic > 0)
-                description += (boost::format (" %1% Mag") % mRequiredMagic).str ();
-            if (mRequiredDexterity > 0)
-                description += (boost::format (" %1% Dex") % mRequiredDexterity).str ();
-        }
+        auto reqs = requirementsStr();
+        if (!reqs.empty())
+            description += '\n' + reqs;
 
         return description;
+    }
+
+    std::vector<std::string> Item::descriptionForMerchants() const
+    {
+        std::vector<std::string> ret;
+        auto append = [](std::string& target, const std::string& new_part) {
+            if (!target.empty())
+                target += ",  ";
+            target += new_part;
+        };
+        ret.push_back(getName());
+        {
+            // first line - affixes + charges
+            std::string str;
+            if (mMaxCharges > 0)
+                append(str, chargesStr());
+            if (!str.empty())
+                ret.push_back(std::move(str));
+        }
+        {
+            std::string str;
+            str += damageOrArmorStr();
+            if (!str.empty())
+                str += "  ";
+            str += durabilityStr();
+            auto reqs = requirementsStr();
+            append(str, reqs.empty() ? "No Required Attributes" : reqs);
+            if (!str.empty())
+                ret.push_back(std::move(str));
+        }
+        while (ret.size() < 3)
+            ret.emplace_back();
+        return ret;
     }
 
     std::pair<uint8_t, uint8_t> Item::getInvSize() const { return {mSizeX, mSizeY}; }
@@ -107,12 +163,9 @@ namespace FAWorld
         mCornerY = loader.load<uint8_t>();
     }
 
-    std::string Item::getName() const {
-        return mName;
-    }
+    std::string Item::getName() const { return mName; }
 
-    Item::~Item() {
-    }
+    Item::~Item() {}
 
     std::string Item::getFlipSoundPath() const
     {
@@ -176,6 +229,14 @@ namespace FAWorld
 
     ItemClass Item::getClass() const { return mClass; }
     uint32_t Item::getGraphicValue() const { return mObjCursFrame; }
+
+    std::string Item::chargesStr() const
+    {
+        if (mMiscId == ItemMiscId::staff && mMaxCharges > 0)
+            return (boost::format("\nCharges: %1%/%2%") % mCurrentCharges % mMaxCharges).str();
+
+        return {};
+    }
 
     void Item::setUniqueId(uint32_t mUniqueId) { this->mUniqueId = mUniqueId; }
 

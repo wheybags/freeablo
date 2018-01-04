@@ -177,8 +177,10 @@ namespace FAGui
                         nk_layout_space_push(ctx, alignRect(separatorRect, lineRect, halign_t::center, valign_t::center));
                         auto separator_image = nk_subimage_handle(boxTex->getNkImage().handle, boxTex->getWidth(), boxTex->getHeight(), separatorRect);
                         nk_image(ctx, separator_image);
+                        y += textRowHeight;
                         return false;
                     }
+                    lineRect.x += line.leftOffset;
                     nk_layout_space_push(ctx, lineRect);
                     if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true) && line.action)
                     {
@@ -196,15 +198,18 @@ namespace FAGui
                         {
                             int offset = 0;
                             if (line.alignCenter)
-                                offset = ((boxTex->getWidth() - 6) / 2 - textWidth / 2 - pent->getWidth() - pentOffset);
-                            nk_layout_space_push(ctx, nk_rect(3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
+                                offset = 3 + ((boxTex->getWidth() - 6) / 2 - textWidth / 2 - pent->getWidth() - pentOffset);
+                            else
+                                offset = line.leftOffset - pent->getWidth ();
+                            nk_layout_space_push(ctx, nk_rect(offset, lineRect.y, pent->getWidth(), pent->getHeight()));
                             nk_image(ctx, pent->getNkImage(mSmallPentagram->getCurrentFrame().second));
                         }
                         // right pentagram
                         {
-                            int offset = textWidth + pentOffset;
+                            int offset = line.leftOffset + textWidth;
                             if (line.alignCenter)
                                 offset = ((boxTex->getWidth() - 6) / 2 + textWidth / 2 + pentOffset);
+
                             nk_layout_space_push(ctx, nk_rect(3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
                             nk_image(ctx, pent->getNkImage(mSmallPentagram->getCurrentFrame().second));
                         }

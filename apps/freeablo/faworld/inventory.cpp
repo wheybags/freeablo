@@ -468,6 +468,17 @@ namespace FAWorld
         updateCursor();
     }
 
+    std::vector<const Item*> Inventory::getSellableItems() const {
+        std::vector<const Item*> ret;
+        for (auto &item : mInventoryBox)
+            if (item.mIsReal && !item.isEmpty())
+                ret.push_back (&item);
+        for (auto &item : mBelt)
+            if (!item.isEmpty())
+                ret.push_back (&item);
+        return ret;
+    }
+
     void Inventory::updateCursor()
     {
         if (mCursorHeld.isEmpty())

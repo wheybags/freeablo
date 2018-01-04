@@ -25,7 +25,7 @@ namespace FAWorld
         return player;
     }
 
-    void PlayerFactory::loadTestingKit(Player* player)
+    void PlayerFactory::loadTestingKit(Player* player) const
     {
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::buckler), MakeEquipTarget<EquipTargetType::inventory>(1, 0));
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortBow), MakeEquipTarget<EquipTargetType::inventory>(3, 0));
@@ -56,6 +56,7 @@ namespace FAWorld
         player->setSpriteClass("warrior");
         player->mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldst.cl2"));
         player->mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldwl.cl2"));
+        loadTestingKit (player);
     }
 
     void PlayerFactory::createRogue(Player* player) const

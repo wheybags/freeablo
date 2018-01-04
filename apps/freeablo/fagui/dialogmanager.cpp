@@ -36,10 +36,12 @@ namespace FAGui
         skip_line();
     }
 
-    void DialogData::footer(const std::string& text)
+    DialogLineData& DialogData::footer(const std::string& text)
     {
-        mFooter.emplace_back();
+        mFooter.emplace_back(DialogLineData::separator());
         mFooter.emplace_back(text, TextColor::white, true);
+        mFooter.emplace_back();
+        return *std::prev (mFooter.end (), 2);
     }
 
     void DialogData::header(const std::vector<std::string>& text)
@@ -124,6 +126,17 @@ namespace FAGui
                     }
                     mFirstVisible = firstInvisible - visibleBodyLineCount();
                 }
+        }
+    }
+
+    void DialogData::setupItemOffsets()
+    {
+        for (int i = 0; i < mLines.size(); ++i)
+        {
+            if (i % 4 == 0)
+                mLines[i].leftOffset = 20;
+            else
+                mLines[i].leftOffset = 40;
         }
     }
 
@@ -257,6 +270,23 @@ namespace FAGui
             talkCain(npc);
     }
 
+    void DialogManager::sellGriswold(const FAWorld::Actor* npc)
+    {
+        DialogData d;
+        d.widen();
+        // auto& td = npc->getTalkData();
+        auto items = mWorld.getCurrentPlayer()->mInventory.getSellableItems();
+        // d.header({td.at("sellHeader")});
+        d.header({"Which item for sale LUL?"});
+        for (auto item : items)
+        {
+            d.textLines(item->descriptionForMerchants(), TextColor::white, false).setAction([]() {});
+            d.setupItemOffsets();
+        }
+        d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); });
+        mGuiManager.pushDialogData(std::move(d));
+    }
+
     void DialogManager::talkGriswold(const FAWorld::Actor* npc)
     {
         DialogData d;
@@ -267,7 +297,7 @@ namespace FAGui
         d.textLines({td.at("talk")}, TextColor::blue).setAction([]() {});
         d.textLines({td.at("buyBasic")}).setAction([]() {});
         d.textLines({td.at("buyPremium")}).setAction([]() {});
-        d.textLines({td.at("sell")}).setAction([]() {});
+        d.textLines({td.at("sell")}).setAction([&] { sellGriswold(npc); });
         d.textLines({td.at("repair")}).setAction([]() {});
         d.textLines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
