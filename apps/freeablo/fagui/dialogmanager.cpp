@@ -17,6 +17,11 @@ namespace FAGui
         return *this;
     }
 
+    DialogLineData& DialogLineData::setNumber(int number) {
+        mNumber = number;
+        return *this;
+    }
+
     DialogLineData& DialogData::textLines(const std::vector<std::string>& texts, TextColor color, bool alignCenter)
     {
         auto index = mLines.size();
@@ -280,7 +285,7 @@ namespace FAGui
         d.header({"Which item for sale LUL?"});
         for (auto item : items)
         {
-            d.textLines(item->descriptionForMerchants(), TextColor::white, false).setAction([]() {});
+            d.textLines(item->descriptionForMerchants(), TextColor::white, false).setAction([]() {}).setNumber(item->getBuyPrice() / 4);
             d.setupItemOffsets();
         }
         d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); });

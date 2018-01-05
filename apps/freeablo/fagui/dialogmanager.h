@@ -8,6 +8,7 @@
 
 #include "../engine/inputobserverinterface.h"
 #include "textcolor.h"
+#include <boost/optional.hpp>
 
 namespace FAWorld
 {
@@ -25,6 +26,7 @@ namespace FAGui
         DialogLineData(std::string text, TextColor color, bool alignCenter);
         DialogLineData();
         DialogLineData& setAction(std::function<void()> actionArg);
+        DialogLineData& setNumber(int number);
 
         static DialogLineData separator()
         {
@@ -40,6 +42,7 @@ namespace FAGui
         bool isSeparator = false;
         TextColor color = TextColor::white;
         int leftOffset = 0;
+        boost::optional<int> mNumber;
     };
 
     class DialogData

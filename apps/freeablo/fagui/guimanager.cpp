@@ -181,6 +181,9 @@ namespace FAGui
                         return false;
                     }
                     lineRect.x += line.leftOffset;
+                    lineRect.w -= line.leftOffset;
+                    if (line.mNumber)
+                        lineRect.w -= 20;
                     nk_layout_space_push(ctx, lineRect);
                     if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true) && line.action)
                     {
@@ -189,10 +192,12 @@ namespace FAGui
                         return true;
                     }
                     smallText(ctx, line.text.c_str(), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
+                    if (auto num = line.mNumber)
+                        smallText(ctx, std::to_string (*num).c_str(), line.color, NK_TEXT_ALIGN_RIGHT);
                     if (activeDialog.selectedLine() == lineNum)
                     {
                         auto pent = renderer->loadImage("data/pentspn2.cel");
-                        int pentOffset = 10;
+                        int pentOffset = 5;
                         auto textWidth = smallTextWidth(line.text.c_str());
                         // left pentagram
                         {
@@ -200,13 +205,13 @@ namespace FAGui
                             if (line.alignCenter)
                                 offset = 3 + ((boxTex->getWidth() - 6) / 2 - textWidth / 2 - pent->getWidth() - pentOffset);
                             else
-                                offset = line.leftOffset - pent->getWidth ();
+                                offset = line.leftOffset - pent->getWidth () - pentOffset;
                             nk_layout_space_push(ctx, nk_rect(offset, lineRect.y, pent->getWidth(), pent->getHeight()));
                             nk_image(ctx, pent->getNkImage(mSmallPentagram->getCurrentFrame().second));
                         }
                         // right pentagram
                         {
-                            int offset = line.leftOffset + textWidth;
+                            int offset = boxTex->getWidth() - 6 - pent->getWidth() - pentOffset;
                             if (line.alignCenter)
                                 offset = ((boxTex->getWidth() - 6) / 2 + textWidth / 2 + pentOffset);
 
