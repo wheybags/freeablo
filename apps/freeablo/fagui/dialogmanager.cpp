@@ -122,7 +122,7 @@ namespace FAGui
                 i += dir;
                 if (i < 0 || i >= static_cast<int>(mLines.size()))
                 {
-                    if (isScrollbarNeeded())
+                    if (isScrollbarShown())
                         return; // no looping if there's scroll bar
                     i = (i + mLines.size()) % mLines.size();
                 }
@@ -159,6 +159,18 @@ namespace FAGui
             else
                 mLines[i].mXOffset = 40;
         }
+    }
+
+    double DialogData::selectedLinePercent() {
+        int cnt = 0;
+        int selectedIndex = 0;
+        for (int i = 0; i < static_cast<int> (mLines.size ()); ++i) {
+            if (i == selectedLine())
+                selectedIndex = cnt;
+            if (mLines[i].action)
+                ++cnt;
+        }
+        return (selectedIndex + 0.0) / (cnt - 1);
     }
 
     DialogManager::DialogManager(GuiManager& gui_manager, FAWorld::World& world) : mGuiManager(gui_manager), mWorld(world) {}
@@ -315,10 +327,11 @@ namespace FAGui
             ++cnt;
         }
         d.header({(boost::format("%2%            Your gold : %1%") % mWorld.getCurrentPlayer()->getTotalGold() %
-                   (cnt > 0 ? "Which item is for sale?" : "Yo have nothing I want."))
+                   (cnt > 0 ? "Which item is for sale?" : "You have nothing I want."))
                       .str()});
         d.setupItemOffsets();
         d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); });
+        d.showScrollBar();
         mGuiManager.pushDialogData(std::move(d));
     }
 

@@ -167,34 +167,57 @@ namespace FAGui
                     nk_image(ctx, nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect));
                 }
 
-                int y = 5;
+                int startY = 5;
                 constexpr int textRowHeight = 12;
-                auto drawLine = [&](const DialogLineData& line, int lineNum) {
-                    auto lineRect = nk_rect(3, 3 + y + line.mYOffset, boxTex->getWidth() - 6, textRowHeight);
+                int rowNum = 0;
+                constexpr int sliderStartLine = 4, sliderEndLine = 20;
+
+                auto drawLine = [&](const DialogLineData& line, int lineIndex) {
+                    auto lineRect = nk_rect(3, 3 + startY + rowNum * textRowHeight + line.mYOffset, boxTex->getWidth() - 6, textRowHeight);
+
+                    if (activeDialog.isScrollbarShown())
+                    {
+                        auto sliderImg = renderer->loadImage("data/textslid.cel");
+                        auto arrowRect = nk_rect(0, 0, sliderImg->getWidth(), sliderImg->getHeight());
+                        if (rowNum >= sliderStartLine && rowNum <= sliderEndLine)
+                        {
+                            nk_layout_space_push(ctx, alignRect(arrowRect, lineRect, halign_t::right, valign_t::center));
+                            if (rowNum == sliderStartLine)
+                                nk_image(ctx, sliderImg->getNkImage(9)); // up arrow
+                            else if (rowNum == sliderEndLine)
+                                nk_image(ctx, sliderImg->getNkImage(8)); // down arrow
+                            else
+                                nk_image(ctx, sliderImg->getNkImage(13)); // grove
+                        }
+                    }
+
+                    ++rowNum;
+
                     if (line.isSeparator)
                     {
                         auto separatorRect = nk_rect(3, 0, boxTex->getWidth() - 6, 3);
                         nk_layout_space_push(ctx, alignRect(separatorRect, lineRect, halign_t::center, valign_t::center));
                         auto separator_image = nk_subimage_handle(boxTex->getNkImage().handle, boxTex->getWidth(), boxTex->getHeight(), separatorRect);
                         nk_image(ctx, separator_image);
-                        y += textRowHeight;
                         return false;
                     }
                     lineRect.x += line.mXOffset;
                     lineRect.w -= line.mXOffset;
+                    if (activeDialog.isScrollbarShown())
+                        lineRect.w -= 20; // for scrollbar
                     if (line.mNumber)
-                        lineRect.w -= 20;
+                        lineRect.w -= 20; // for pentagram
                     nk_layout_space_push(ctx, lineRect);
                     if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && line.action)
                     {
-                        activeDialog.mSelectedLine = lineNum;
+                        activeDialog.mSelectedLine = lineIndex;
                         line.action();
                         return true;
                     }
                     smallText(ctx, line.text.c_str(), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
                     if (auto num = line.mNumber)
                         smallText(ctx, std::to_string(*num).c_str(), line.color, NK_TEXT_ALIGN_RIGHT);
-                    if (lineNum != -1 && activeDialog.selectedLine() == lineNum)
+                    if (lineIndex != -1 && activeDialog.selectedLine() == lineIndex)
                     {
                         auto pent = renderer->loadImage("data/pentspn2.cel");
                         int pentOffset = 5;
@@ -212,6 +235,8 @@ namespace FAGui
                         // right pentagram
                         {
                             int offset = boxTex->getWidth() - 6 - pent->getWidth() - pentOffset;
+                            if (activeDialog.isScrollbarShown())
+                                offset -= 20;
                             if (line.alignCenter)
                                 offset = ((boxTex->getWidth() - 6) / 2 + textWidth / 2 + pentOffset);
 
@@ -220,7 +245,6 @@ namespace FAGui
                         }
                     }
 
-                    y += textRowHeight;
                     return false;
                 };
 
@@ -229,17 +253,24 @@ namespace FAGui
                         return;
                 for (int i = activeDialog.mFirstVisible; i < activeDialog.mFirstVisible + activeDialog.visibleBodyLineCount(); ++i)
                 {
-                    if (i >= static_cast<int>(activeDialog.mLines.size()))
-                    {
-                        y += textRowHeight;
-                        continue;
-                    }
-                    if (drawLine(activeDialog.mLines[i], i))
-                        return;
+                    if (i < static_cast<int>(activeDialog.mLines.size()))
+                        drawLine(activeDialog.mLines[i], i);
+                    else
+                        drawLine({}, i);
                 }
                 for (auto& line : activeDialog.mFooter)
                     if (drawLine(line, -1))
                         return;
+
+                if (activeDialog.isScrollbarShown())
+                {
+                    auto sliderImg = renderer->loadImage("data/textslid.cel");
+                    auto height = (sliderEndLine - sliderStartLine - 1) * textRowHeight - sliderImg->getHeight();
+                    auto y = startY + (sliderStartLine + 1) * textRowHeight + 3 + (activeDialog.selectedLinePercent () * height);
+                    nk_layout_space_push (ctx, nk_rect(boxTex->getWidth() - 3 - sliderImg->getWidth(), y, sliderImg->getWidth(), sliderImg->getHeight()));
+                    nk_image(ctx, sliderImg->getNkImage(12));
+                }
+
             },
             true);
     }
