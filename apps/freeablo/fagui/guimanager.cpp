@@ -28,6 +28,15 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/variant/variant.hpp>
 
+static nk_style_button dummyStyle = []() {
+        static nk_style_button buttonStyle;
+        buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_hide();
+        buttonStyle.border_color = {0, 0, 0, 0};
+        buttonStyle.border = 0;
+        buttonStyle.padding = {0, 0};
+        return buttonStyle;
+    }();
+
 namespace FAGui
 {
     PanelPlacement panelPlacementByType(PanelType type)
@@ -182,10 +191,18 @@ namespace FAGui
                         if (rowNum >= sliderStartLine && rowNum <= sliderEndLine)
                         {
                             nk_layout_space_push(ctx, alignRect(arrowRect, lineRect, halign_t::right, valign_t::center));
-                            if (rowNum == sliderStartLine)
-                                nk_image(ctx, sliderImg->getNkImage(9)); // up arrow
-                            else if (rowNum == sliderEndLine)
-                                nk_image(ctx, sliderImg->getNkImage(8)); // down arrow
+                            if (rowNum == sliderStartLine) {
+                                nk_button_label_styled(ctx, &dummyStyle, "");
+                                nk_image(ctx, sliderImg->getNkImage(nk_widget_has_mouse_click_down(ctx, NK_BUTTON_LEFT, true) ? 11 : 9)); // up arrow
+                                if (nk_widget_is_mouse_click_down_inactive (ctx, NK_BUTTON_LEFT))
+                                    activeDialog.notify(Engine::KeyboardInputAction::prevOption, *this);
+                            }
+                            else if (rowNum == sliderEndLine) {
+                                nk_button_label_styled(ctx, &dummyStyle, "");
+                                nk_image(ctx, sliderImg->getNkImage(nk_widget_has_mouse_click_down(ctx, NK_BUTTON_LEFT, true) ? 10 : 8)); // down arrow
+                                if (nk_widget_is_mouse_click_down_inactive (ctx, NK_BUTTON_LEFT))
+                                    activeDialog.notify(Engine::KeyboardInputAction::nextOption, *this);
+                            }
                             else
                                 nk_image(ctx, sliderImg->getNkImage(13)); // grove
                         }
@@ -313,15 +330,6 @@ namespace FAGui
 
         nk_fa_begin_image_window(ctx, panelName(panelType), dims, flags, invTex->getNkImage(), op, false);
     }
-
-    static nk_style_button dummyStyle = []() {
-        static nk_style_button buttonStyle;
-        buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_hide();
-        buttonStyle.border_color = {0, 0, 0, 0};
-        buttonStyle.border = 0;
-        buttonStyle.padding = {0, 0};
-        return buttonStyle;
-    }();
 
     void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highlight)
     {

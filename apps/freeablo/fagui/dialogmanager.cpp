@@ -93,6 +93,7 @@ namespace FAGui
     void DialogData::notify(Engine::KeyboardInputAction action, GuiManager& manager)
     {
         int dir = 0;
+        int i = selectedLine();
         switch (action)
         {
             case Engine::KeyboardInputAction::nextOption:
@@ -105,6 +106,8 @@ namespace FAGui
                 manager.popDialogData();
                 return;
             case Engine::KeyboardInputAction::accept:
+                if (i < 0)
+                    return;
                 mLines[mSelectedLine].action();
                 return;
             default:
@@ -113,7 +116,6 @@ namespace FAGui
 
         if (dir != 0)
         {
-            int i = selectedLine();
             if (i == -1)
                 return;
 
