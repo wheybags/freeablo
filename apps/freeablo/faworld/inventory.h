@@ -3,15 +3,15 @@
 
 #include "item.h"
 #include <boost/signals2/signal.hpp>
-#include <diabloexe/diabloexe.h>
 #include <misc/array2d.h>
 #include <stdint.h>
 
 namespace FAWorld
 {
-    struct EquipTarget;
+    class EquipTarget;
     class Actor;
     struct ExchangeResult;
+    class ItemFactory;
 
     class Inventory
     {
@@ -33,13 +33,12 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver);
         void load(FASaveGame::GameLoader& loader);
 
-        bool isValidCell(int x, int y) { return x >= 0 && x < mInventoryBox.width() && y >= 0 && y < mInventoryBox.height(); }
+        bool isValidCell(int x, int y) const { return x >= 0 && x < mInventoryBox.width() && y >= 0 && y < mInventoryBox.height(); }
 
         void dump();
 
         const Item& getItemAt(const EquipTarget& target) const;
         Item& getItemAt(const EquipTarget& target);
-        std::vector<std::tuple<ItemEffectType, uint32_t, uint32_t, uint32_t>>& getTotalEffects();
         void itemSlotLeftMouseButtonDown(EquipTarget target);
         void beltMouseLeftButtonDown(double x);
         void inventoryMouseLeftButtonDown(double x, double y);
@@ -57,7 +56,9 @@ namespace FAWorld
         const Item& getRightHand() const { return mRightHand; }
         const Misc::Array2D<Item>& getInventoryBox() const { return mInventoryBox; }
         const std::vector<Item>& getBelt() const { return mBelt; }
-        std::vector<const Item *> getSellableItems () const;
+        std::vector<EquipTarget> getBeltAndInventoryItemPositions() const;
+        Item takeOut(const EquipTarget& target);
+        void placeGold(int quantity, const ItemFactory& itemFactory);
 
     private:
         void updateCursor();
@@ -65,7 +66,6 @@ namespace FAWorld
         bool isFit(const Item& item, const EquipTarget& target) const;
         auto needsToBeExchanged(const Item& item, const EquipTarget& target) const -> ExchangeResult;
         EquipTarget avoidLinks(const EquipTarget& target);
-        Item takeOut(const EquipTarget& target);
         void layItem(const Item& item, int32_t x, int32_t y);
         bool exchangeWithCursor(EquipTarget takeoutTarget, boost::optional<EquipTarget> maybePlacementTarget);
         bool exchangeWithCursor(EquipTarget takeoutTarget);

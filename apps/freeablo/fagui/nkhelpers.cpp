@@ -4,7 +4,7 @@
 
 struct nk_vec2 FAGui::center(const struct nk_rect& rect) { return {rect.x + rect.w / 2, rect.y + rect.h / 2}; }
 
-bool FAGui::nk_widget_is_mouse_click_down_inactive(nk_context* ctx, nk_buttons buttons, bool down)
+bool FAGui::nk_widget_is_mouse_click_down_inactive(nk_context* ctx, nk_buttons buttons)
 {
     return nk_inactive_widget_is_hovered(ctx) && nk_input_mouse_clicked(&ctx->input, buttons, nk_widget_bounds(ctx)) &&
            ctx->input.mouse.buttons[buttons].clicked;

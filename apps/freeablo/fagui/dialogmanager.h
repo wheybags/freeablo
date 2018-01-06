@@ -27,6 +27,7 @@ namespace FAGui
         DialogLineData();
         DialogLineData& setAction(std::function<void()> actionArg);
         DialogLineData& setNumber(int number);
+        DialogLineData& setYOffset(int offset);
 
         static DialogLineData separator()
         {
@@ -41,7 +42,8 @@ namespace FAGui
         bool alignCenter = false;
         bool isSeparator = false;
         TextColor color = TextColor::white;
-        int leftOffset = 0;
+        int mXOffset = 0;
+        int mYOffset = 0;
         boost::optional<int> mNumber;
     };
 
@@ -58,10 +60,10 @@ namespace FAGui
         void header(const std::vector<std::string>& text);
         int selectedLine();
         void notify(Engine::KeyboardInputAction action, GuiManager& manager);
-        void widen () { mIsWide = true; }
-        bool isScrollbarNeeded () const { return mHeader.size () + mLines.size () + mFooter.size () > linesVisible; }
-        int visibleBodyLineCount () const { return std::min (linesVisible - mHeader.size () - mFooter.size (), mLines.size ());}
-        bool isVisible (int line) const { return line >= mFirstVisible && line < mFirstVisible + visibleBodyLineCount();}
+        void widen() { mIsWide = true; }
+        bool isScrollbarNeeded() const { return mHeader.size() + mLines.size() + mFooter.size() > linesVisible; }
+        int visibleBodyLineCount() const { return linesVisible - mHeader.size() - mFooter.size(); }
+        bool isVisible(int line) const { return line >= mFirstVisible && line < mFirstVisible + visibleBodyLineCount(); }
         void setupItemOffsets();
 
     private:
@@ -69,7 +71,7 @@ namespace FAGui
         std::vector<DialogLineData> mLines;
         std::vector<DialogLineData> mFooter;
         int mSelectedLine = -1; // -1 means the first selectable
-        int mFirstVisible = 0; // used in case if not all fit to the window
+        int mFirstVisible = 0;  // used in case if not all fit to the window
         bool mIsWide = false;
         friend class FAGui::GuiManager;
     };

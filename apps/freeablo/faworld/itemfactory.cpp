@@ -9,11 +9,11 @@ namespace FAWorld
 {
     ItemFactory::ItemFactory(const DiabloExe::DiabloExe& exe) : mExe(exe)
     {
-        for (int i = 0; i < mExe.getBaseItems().size(); ++i)
+        for (int i = 0; i < static_cast<int>(mExe.getBaseItems().size()); ++i)
             mUniqueBaseItemIdToItemId[mExe.getBaseItems()[i].uniqueBaseItemId] = static_cast<ItemId>(i);
     }
 
-    Item ItemFactory::generateBaseItem(ItemId id, const BaseItemGenOptions& options) const
+    Item ItemFactory::generateBaseItem(ItemId id, const BaseItemGenOptions& /*options*/) const
     {
         if (!mObjcursCel)
             mObjcursCel = boost::make_unique<Cel::CelFile>("data/inv/objcurs.cel");
@@ -53,7 +53,7 @@ namespace FAWorld
         res.mMiscId = static_cast<ItemMiscId>(info.miscId);
         res.mSpellId = info.spellId;
         res.mIsUsable = info.isUsable;
-        res.mBuyPrice = info.price;
+        res.mPrice = info.price;
         res.mDropItemGraphicsPath = info.dropItemGraphicsPath;
 
         if (res.mClass != ItemClass::gold)

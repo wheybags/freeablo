@@ -2,8 +2,8 @@
 #pragma once
 
 #include "../components/diabloexe/diabloexe.h"
-#include <string>
 #include "itemfactory.h"
+#include <string>
 
 namespace FAWorld
 {
@@ -14,7 +14,7 @@ namespace FAWorld
     class PlayerFactory
     {
     public:
-        PlayerFactory(const DiabloExe::DiabloExe& exe, const FAWorld::ItemFactory &itemFactory);
+        PlayerFactory(const DiabloExe::DiabloExe& exe, const FAWorld::ItemFactory& itemFactory);
 
         Player* create(const std::string& playerClass) const;
 
@@ -25,6 +25,6 @@ namespace FAWorld
         void createSorcerer(Player* player) const;
 
         const DiabloExe::DiabloExe& mExe;
-        const FAWorld::ItemFactory &mItemFactory;
+        const FAWorld::ItemFactory& mItemFactory;
     };
 }

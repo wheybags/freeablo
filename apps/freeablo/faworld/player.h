@@ -31,6 +31,7 @@ namespace FAWorld
         virtual void update(bool noclip) override;
 
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour; }
+        int getTotalGold() const;
 
     private:
         void init(const std::string& className, const DiabloExe::CharacterStats& charStats);

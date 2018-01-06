@@ -62,7 +62,7 @@ namespace DiabloExe
     {
         std::stringstream ss;
         ss << "{" << std::endl
-           << "\tid: " << + id << "," << std::endl
+           << "\tid: " << +id << "," << std::endl
            << "\tdropRate: " << +dropRate << "," << std::endl
            << "\titemClass: " << +itemClass << "," << std::endl
            << "\tequipType: " << +equipType << "," << std::endl

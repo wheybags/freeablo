@@ -43,6 +43,7 @@ namespace FAWorld
     class GameLevel;
     class HoverState;
     class PlacedItemData;
+    class ItemFactory;
 
     // at 125 ticks/second, it will take about 2 billion years to reach max (signed) value, so int64 will probably do :p
     typedef int64_t Tick;
@@ -100,6 +101,7 @@ namespace FAWorld
 
         void blockInput();
         void unblockInput();
+        const ItemFactory& getItemFactory() const;
 
         static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
         FASaveGame::ObjectIdMapper mObjectIdMapper;
@@ -115,6 +117,7 @@ namespace FAWorld
         Player* mCurrentPlayer = nullptr;
         std::vector<Player*> mPlayers; ///< This vector is sorted
         const DiabloExe::DiabloExe& mDiabloExe;
+        std::unique_ptr<ItemFactory> mItemFactory;
 
         int32_t mNextId = 1;
     };

@@ -35,7 +35,7 @@ namespace Render
 
 namespace FAWorld
 {
-    struct EquipTarget;
+    class EquipTarget;
     class Player;
 }
 

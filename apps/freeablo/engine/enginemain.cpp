@@ -4,6 +4,7 @@
 #include "../falevelgen/levelgen.h"
 #include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
+#include "../faworld/itemfactory.h"
 #include "../faworld/player.h"
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/playerfactory.h"
@@ -18,7 +19,6 @@
 #include <misc/misc.h>
 #include <serial/textstream.h>
 #include <thread>
-#include "../faworld/itemfactory.h"
 
 namespace bpo = boost::program_options;
 
@@ -77,7 +77,7 @@ namespace Engine
             return;
         }
 
-        FAWorld::ItemFactory itemFactory (*mExe);
+        FAWorld::ItemFactory itemFactory(*mExe);
         mPlayerFactory = boost::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
         renderer.loadFonts(*mExe);
 

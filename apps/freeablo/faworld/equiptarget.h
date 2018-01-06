@@ -18,7 +18,7 @@ namespace FAWorld
         cursor,
     };
 
-    struct EquipTarget
+    class EquipTarget
     {
     public:
         EquipTarget() = delete;

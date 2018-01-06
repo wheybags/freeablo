@@ -4,7 +4,7 @@
 #include "actorstats.h"
 #include "equiptarget.h"
 #include "itemenums.h"
-
+#include "itemfactory.h"
 #include "player.h"
 #include <algorithm>
 #include <boost/range/any_range.hpp>
@@ -248,6 +248,41 @@ namespace FAWorld
         return copy;
     }
 
+    void Inventory::placeGold(int quantity, const ItemFactory& itemFactory)
+    {
+        if (quantity == 0)
+            return;
+
+        // first part - filling existing gold piles
+        for (auto& item : mInventoryBox)
+        {
+            int room = item.mMaxCount - item.mCount;
+            if (room > 0)
+            {
+                auto toPlace = std::min(quantity, room);
+                item.setCount(item.getCount() + toPlace);
+                quantity -= toPlace;
+                if (quantity == 0)
+                    return;
+            }
+        }
+        // second part - filling the empty slots with gold
+        for (auto x : boost::irange(0, inventoryWidth, 1))
+            for (auto y : boost::irange(0, inventoryHeight, 1))
+            {
+                auto target = MakeEquipTarget<EquipTargetType::inventory>(x, y);
+                if (getItemAt(target).isEmpty())
+                {
+                    auto item = itemFactory.generateBaseItem(ItemId::gold);
+                    auto toPlace = std::min(quantity, item.mMaxCount);
+                    item.setCount(toPlace);
+                    quantity -= toPlace;
+                    if (quantity == 0)
+                        return;
+                }
+            }
+    }
+
     std::set<EquipTargetType> wearable = {
         EquipTargetType::leftHand,
         EquipTargetType::rightHand,
@@ -468,14 +503,20 @@ namespace FAWorld
         updateCursor();
     }
 
-    std::vector<const Item*> Inventory::getSellableItems() const {
-        std::vector<const Item*> ret;
-        for (auto &item : mInventoryBox)
+    std::vector<EquipTarget> Inventory::getBeltAndInventoryItemPositions() const
+    {
+        std::vector<EquipTarget> ret;
+        auto check_target = [&](const EquipTarget& target) {
+            auto item = getItemAt(target);
             if (item.mIsReal && !item.isEmpty())
-                ret.push_back (&item);
-        for (auto &item : mBelt)
-            if (!item.isEmpty())
-                ret.push_back (&item);
+                ret.push_back(target);
+        };
+
+        for (auto x : boost::irange(0, inventoryWidth, 1))
+            for (auto y : boost::irange(0, inventoryHeight, 1))
+                check_target(MakeEquipTarget<EquipTargetType::inventory>(x, y));
+        for (auto x : boost::irange(0, beltWidth, 1))
+            check_target(MakeEquipTarget<EquipTargetType::belt>(x));
         return ret;
     }
 
@@ -522,7 +563,7 @@ namespace FAWorld
             default:
                 break;
         }
-        release_assert (false);
+        release_assert(false);
     }
 
     bool Inventory::fitsAt(Item item, uint8_t x, uint8_t y)

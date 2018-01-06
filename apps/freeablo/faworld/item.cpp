@@ -76,12 +76,9 @@ namespace FAWorld
 
     std::string Item::getFullDescription() const
     {
-        if (mType == ItemType::gold)
-            return (boost::format("%1% gold %2%") % mCount % (mCount ? "pieces" : "piece")).str();
-
         auto description = getName();
         auto dmrOrArmor = damageOrArmorStr();
-        if (!dmrOrArmor.empty ())
+        if (!dmrOrArmor.empty())
             description += '\n' + dmrOrArmor;
 
         auto dur = durabilityStr();
@@ -163,7 +160,12 @@ namespace FAWorld
         mCornerY = loader.load<uint8_t>();
     }
 
-    std::string Item::getName() const { return mName; }
+    std::string Item::getName() const
+    {
+        if (mType == ItemType::gold)
+            return (boost::format("%1% gold %2%") % mCount % (mCount ? "pieces" : "piece")).str();
+        return mName;
+    }
 
     Item::~Item() {}
 
@@ -207,7 +209,6 @@ namespace FAWorld
 
     bool Item::isBeltEquippable() const { return mSizeX == 1 && mSizeY == 1 && mIsUsable && mType != ItemType::gold; }
 
-    uint32_t Item::getActiveTrigger() const { return isUsable; }
     uint8_t Item::getReqStr() const { return mRequiredStrength; }
     uint8_t Item::getReqMagic() const { return mRequiredMagic; }
 
@@ -219,9 +220,9 @@ namespace FAWorld
 
     uint32_t Item::getSpellCode() const { return mSpellId; }
 
-    uint32_t Item::getUseOnce() const { return mIsUsable; }
+    bool Item::isUsable() const { return mIsUsable; }
 
-    uint32_t Item::getBuyPrice() const { return mBuyPrice; }
+    uint32_t Item::getPrice() const { return mPrice; }
 
     ItemType Item::getType() const { return mType; }
 
@@ -244,7 +245,7 @@ namespace FAWorld
 
     uint32_t Item::getCount() const { return this->mCount; }
 
-    void Item::setCount(uint32_t count)
+    void Item::setCount(int32_t count)
     {
         if (count <= mMaxCount)
         {

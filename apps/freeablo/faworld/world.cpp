@@ -17,6 +17,7 @@
 #include "player.h"
 #include "playerbehaviour.h"
 #include <algorithm>
+#include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
 #include <iostream>
 #include <misc/assert.h>
@@ -26,7 +27,7 @@ namespace FAWorld
 {
     World* singletonInstance = nullptr;
 
-    World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
+    World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe))
     {
         release_assert(singletonInstance == nullptr);
         singletonInstance = this;
@@ -182,6 +183,8 @@ namespace FAWorld
         if (getCurrentPlayer())
             getCurrentPlayer()->getPlayerBehaviour()->unblockInput();
     }
+
+    const ItemFactory& World::getItemFactory() const { return *mItemFactory; }
 
     void World::generateLevels()
     {

@@ -39,8 +39,7 @@ namespace FAWorld
     void PlayerFactory::createWarrior(Player* player) const
     {
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortSword), MakeEquipTarget<EquipTargetType::leftHand>());
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::buckler, BaseItemGenOptions()),
-                                         MakeEquipTarget<EquipTargetType::rightHand>());
+        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::buckler, BaseItemGenOptions()), MakeEquipTarget<EquipTargetType::rightHand>());
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::club), MakeEquipTarget<EquipTargetType::inventory>(0, 0));
         {
             auto item = mItemFactory.generateBaseItem(ItemId::gold);
@@ -56,7 +55,7 @@ namespace FAWorld
         player->setSpriteClass("warrior");
         player->mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldst.cl2"));
         player->mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldwl.cl2"));
-        loadTestingKit (player);
+        // loadTestingKit (player);
     }
 
     void PlayerFactory::createRogue(Player* player) const
@@ -83,7 +82,7 @@ namespace FAWorld
         {
             auto item = mItemFactory.generateBaseItem(ItemId::shortStaffOfChargedBolt);
             item.mMaxCharges = item.mCurrentCharges = 40;
-            player->mInventory.putItemUnsafe(std::move (item), MakeEquipTarget<EquipTargetType::leftHand>());
+            player->mInventory.putItemUnsafe(std::move(item), MakeEquipTarget<EquipTargetType::leftHand>());
         }
         {
             auto item = mItemFactory.generateBaseItem(ItemId::gold);

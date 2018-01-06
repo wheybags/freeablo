@@ -28,6 +28,7 @@ namespace FAWorld
     enum class ItemCode;
     enum class ItemMiscId;
     enum class ItemQuality;
+    class EquipTarget;
     constexpr int indestructibleItemDurability = 255;
 
     class ItemEffect
@@ -51,12 +52,12 @@ namespace FAWorld
         // retrieve description which is shown when hovering over the items in your inventory
         // name including affixes/prefixes/spells
         std::string getName() const;
-        std::string getFullDescription () const;
+        std::string getFullDescription() const;
         std::vector<std::string> descriptionForMerchants() const;
 
         void setUniqueId(uint32_t mUniqueId);
         uint32_t getUniqueId() const;
-        void setCount(uint32_t count);
+        void setCount(int32_t count);
         uint32_t getCount() const;
         bool operator==(const Item rhs) const;
         std::pair<uint8_t, uint8_t> getInvSize() const;
@@ -69,25 +70,24 @@ namespace FAWorld
 
         bool mIsReal = false;
 
-        uint32_t getActiveTrigger() const;
         uint8_t getReqStr() const;
         uint8_t getReqMagic() const;
         uint8_t getReqDex() const;
         uint32_t getSpecialEffect() const;
         ItemMiscId getMiscId() const;
         uint32_t getSpellCode() const;
-        uint32_t getUseOnce() const;
-        uint32_t getBuyPrice() const;
+        bool isUsable() const;
+        uint32_t getPrice() const;
         ItemType getType() const;
         ItemEquipType getEquipLoc() const;
         ItemClass getClass() const;
         uint32_t getGraphicValue() const;
 
     private:
-        std::string chargesStr () const;
+        std::string chargesStr() const;
         std::string damageStr() const;
         std::string armorStr() const;
-        std::string damageOrArmorStr () const;
+        std::string damageOrArmorStr() const;
         std::string durabilityStr() const;
         std::string requirementsStr() const;
 
@@ -95,7 +95,6 @@ namespace FAWorld
         static Cel::CelFile* mObjcurs;
         DiabloExe::Affix mAffix;
 
-        uint32_t isUsable;
         ItemClass mClass;
         ItemEquipType mEquipLoc;
         uint32_t mObjCursFrame;
@@ -124,7 +123,7 @@ namespace FAWorld
         ItemCode mCode;
         uint32_t mSpellId;
         uint32_t mIsUsable;
-        uint32_t mBuyPrice;
+        uint32_t mPrice;
 
         bool operator==(const Item& rhs) const { return this->mUniqueId == rhs.mUniqueId; }
 
@@ -143,7 +142,7 @@ namespace FAWorld
         ItemEquipType mEquipLocation = ItemEquipType::none;
         bool mUseOnce = 0;
         std::string mDropItemGraphicsPath;
-        uint32_t mMaxCount = 0;
+        int32_t mMaxCount = 0;
         uint8_t mBaseId = 0;
 
         // TODO: these should be handled by inventory class, not item class
@@ -158,4 +157,3 @@ namespace FAWorld
         friend class PlayerFactory;
     };
 }
-

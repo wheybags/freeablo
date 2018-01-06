@@ -170,7 +170,7 @@ namespace FAGui
                 int y = 5;
                 constexpr int textRowHeight = 12;
                 auto drawLine = [&](const DialogLineData& line, int lineNum) {
-                    auto lineRect = nk_rect(3, 3 + y, boxTex->getWidth() - 6, textRowHeight);
+                    auto lineRect = nk_rect(3, 3 + y + line.mYOffset, boxTex->getWidth() - 6, textRowHeight);
                     if (line.isSeparator)
                     {
                         auto separatorRect = nk_rect(3, 0, boxTex->getWidth() - 6, 3);
@@ -180,12 +180,12 @@ namespace FAGui
                         y += textRowHeight;
                         return false;
                     }
-                    lineRect.x += line.leftOffset;
-                    lineRect.w -= line.leftOffset;
+                    lineRect.x += line.mXOffset;
+                    lineRect.w -= line.mXOffset;
                     if (line.mNumber)
                         lineRect.w -= 20;
                     nk_layout_space_push(ctx, lineRect);
-                    if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true) && line.action)
+                    if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && line.action)
                     {
                         activeDialog.mSelectedLine = lineNum;
                         line.action();
@@ -193,8 +193,8 @@ namespace FAGui
                     }
                     smallText(ctx, line.text.c_str(), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
                     if (auto num = line.mNumber)
-                        smallText(ctx, std::to_string (*num).c_str(), line.color, NK_TEXT_ALIGN_RIGHT);
-                    if (activeDialog.selectedLine() == lineNum)
+                        smallText(ctx, std::to_string(*num).c_str(), line.color, NK_TEXT_ALIGN_RIGHT);
+                    if (lineNum != -1 && activeDialog.selectedLine() == lineNum)
                     {
                         auto pent = renderer->loadImage("data/pentspn2.cel");
                         int pentOffset = 5;
@@ -205,7 +205,7 @@ namespace FAGui
                             if (line.alignCenter)
                                 offset = 3 + ((boxTex->getWidth() - 6) / 2 - textWidth / 2 - pent->getWidth() - pentOffset);
                             else
-                                offset = line.leftOffset - pent->getWidth () - pentOffset;
+                                offset = line.mXOffset - pent->getWidth() - pentOffset;
                             nk_layout_space_push(ctx, nk_rect(offset, lineRect.y, pent->getWidth(), pent->getHeight()));
                             nk_image(ctx, pent->getNkImage(mSmallPentagram->getCurrentFrame().second));
                         }
@@ -225,11 +225,21 @@ namespace FAGui
                 };
 
                 for (auto& line : activeDialog.mHeader)
-                    drawLine(line, -1);
+                    if (drawLine(line, -1))
+                        return;
                 for (int i = activeDialog.mFirstVisible; i < activeDialog.mFirstVisible + activeDialog.visibleBodyLineCount(); ++i)
-                    drawLine(activeDialog.mLines[i], i);
+                {
+                    if (i >= static_cast<int>(activeDialog.mLines.size()))
+                    {
+                        y += textRowHeight;
+                        continue;
+                    }
+                    if (drawLine(activeDialog.mLines[i], i))
+                        return;
+                }
                 for (auto& line : activeDialog.mFooter)
-                    drawLine(line, -1);
+                    if (drawLine(line, -1))
+                        return;
             },
             true);
     }
@@ -358,7 +368,7 @@ namespace FAGui
                 {
                     nk_layout_space_push(ctx, p.second);
                     nk_button_label_styled(ctx, &dummyStyle, "");
-                    if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true))
+                    if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
                         inv.itemSlotLeftMouseButtonDown(p.first);
                     auto highlight = ItemHighlightInfo::notHighlighed;
                     if (isLastWidgetHovered(ctx))
@@ -377,7 +387,7 @@ namespace FAGui
             float invHeight = inv.getInventoryBox().height() * cellSize;
             nk_layout_space_push(ctx, nk_recta(invTopLeft, {invWidth, invHeight}));
             nk_button_label_styled(ctx, &dummyStyle, "");
-            if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true))
+            if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
             {
                 inv.inventoryMouseLeftButtonDown((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / invWidth,
                                                  (ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / invHeight);
@@ -414,7 +424,7 @@ namespace FAGui
         auto beltWidth = 232.0f, beltHeight = 29.0f, cellSize = 29.0f;
         nk_layout_space_push(ctx, nk_recta(beltTopLeft, {beltWidth, beltHeight}));
         auto& inv = mPlayer->mInventory;
-        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true))
+        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
         {
             inv.beltMouseLeftButtonDown((ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / beltWidth);
         }

@@ -32,7 +32,7 @@ namespace FAGui
                 nk_layout_space_push(ctx, rect);
                 bigTGoldText(ctx, text, NK_TEXT_CENTERED);
                 DrawFunctionResult ret = DrawFunctionResult::noAction;
-                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT, true))
+                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
                     ret = DrawFunctionResult::executeAction;
                 rect.x -= (pentRect.w + pentOffset);
                 rect.w += (pentRect.w + pentOffset) * 2;

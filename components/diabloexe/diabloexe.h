@@ -60,9 +60,9 @@ namespace DiabloExe
 
         uint32_t swapEndian(uint32_t arg);
         const FontData& getFontData(const char* fontName) const;
-        const std::vector<BaseItem> &getBaseItems() const { return mBaseItems; }
-        const std::vector<UniqueItem> &getUniqueItems() const { return mUniqueItems; }
-        const std::vector<Affix> &getAffixes() const { return mAffixes; }
+        const std::vector<BaseItem>& getBaseItems() const { return mBaseItems; }
+        const std::vector<UniqueItem>& getUniqueItems() const { return mUniqueItems; }
+        const std::vector<Affix>& getAffixes() const { return mAffixes; }
 
     private:
         std::string getMD5(const std::string& pathEXE);

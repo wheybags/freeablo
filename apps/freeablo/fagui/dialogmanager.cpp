@@ -1,5 +1,6 @@
 #include "dialogmanager.h"
 #include "../faworld/actor.h"
+#include "../faworld/equiptarget.h"
 #include "../faworld/player.h"
 #include "guimanager.h"
 #include <misc/assert.h>
@@ -17,8 +18,15 @@ namespace FAGui
         return *this;
     }
 
-    DialogLineData& DialogLineData::setNumber(int number) {
+    DialogLineData& DialogLineData::setNumber(int number)
+    {
         mNumber = number;
+        return *this;
+    }
+
+    DialogLineData& DialogLineData::setYOffset(int offset)
+    {
+        mYOffset = offset;
         return *this;
     }
 
@@ -33,7 +41,7 @@ namespace FAGui
         return mLines[index];
     }
 
-    void DialogData::skip_line(int cnt) { mLines.emplace_back(); }
+    void DialogData::skip_line(int cnt) { mLines.insert(mLines.end(), cnt, {}); }
 
     void DialogData::separator()
     {
@@ -45,8 +53,9 @@ namespace FAGui
     {
         mFooter.emplace_back(DialogLineData::separator());
         mFooter.emplace_back(text, TextColor::white, true);
+        mFooter.back().setYOffset(6);
         mFooter.emplace_back();
-        return *std::prev (mFooter.end (), 2);
+        return *std::prev(mFooter.end(), 2);
     }
 
     void DialogData::header(const std::vector<std::string>& text)
@@ -76,7 +85,7 @@ namespace FAGui
             auto it = std::find_if(mLines.begin(), mLines.end(), [](const DialogLineData& data) { return !!data.action; });
             if (it != mLines.end())
                 return mSelectedLine = it - mLines.begin();
-            release_assert(false);
+            return -1;
         }
         return mSelectedLine;
     }
@@ -104,7 +113,10 @@ namespace FAGui
 
         if (dir != 0)
         {
-            int i = mSelectedLine;
+            int i = selectedLine();
+            if (i == -1)
+                return;
+
             do
             {
                 i += dir;
@@ -117,31 +129,35 @@ namespace FAGui
             } while (!mLines[i].action);
             mSelectedLine = i;
             if (!isVisible(mSelectedLine))
+            {
                 if (dir == -1)
+                {
                     mFirstVisible = mSelectedLine;
+                }
                 else
                 {
                     int firstInvisible = mSelectedLine;
                     ++firstInvisible;
-                    if (firstInvisible >= mLines.size())
+                    if (firstInvisible >= static_cast<int>(mLines.size()))
                         return;
-                    while (firstInvisible < mLines.size() && !mLines[firstInvisible].action)
+                    while (firstInvisible < static_cast<int>(mLines.size()) && !mLines[firstInvisible].action)
                     {
                         ++firstInvisible;
                     }
                     mFirstVisible = firstInvisible - visibleBodyLineCount();
                 }
+            }
         }
     }
 
     void DialogData::setupItemOffsets()
     {
-        for (int i = 0; i < mLines.size(); ++i)
+        for (int i = 0; i < static_cast<int>(mLines.size()); ++i)
         {
             if (i % 4 == 0)
-                mLines[i].leftOffset = 20;
+                mLines[i].mXOffset = 20;
             else
-                mLines[i].leftOffset = 40;
+                mLines[i].mXOffset = 40;
         }
     }
 
@@ -279,15 +295,29 @@ namespace FAGui
     {
         DialogData d;
         d.widen();
-        // auto& td = npc->getTalkData();
-        auto items = mWorld.getCurrentPlayer()->mInventory.getSellableItems();
-        // d.header({td.at("sellHeader")});
-        d.header({"Which item for sale LUL?"});
-        for (auto item : items)
+        int cnt = 0;
+        for (auto target : mWorld.getCurrentPlayer()->mInventory.getBeltAndInventoryItemPositions())
         {
-            d.textLines(item->descriptionForMerchants(), TextColor::white, false).setAction([]() {}).setNumber(item->getBuyPrice() / 4);
-            d.setupItemOffsets();
+            auto& inventory = mWorld.getCurrentPlayer()->mInventory;
+            auto& item = inventory.getItemAt(target);
+            if (item.getType() == FAWorld::ItemType::gold)
+                continue;
+            auto sellPrice = item.getPrice() / 4;
+            d.textLines(item.descriptionForMerchants(), TextColor::white, false)
+                .setAction([&inventory, target, this, sellPrice, npc]() {
+                    inventory.takeOut(target);
+                    inventory.placeGold(sellPrice, mWorld.getItemFactory());
+                    auto dlgMgr = this;
+                    mGuiManager.popDialogData();
+                    dlgMgr->sellGriswold(npc);
+                })
+                .setNumber(sellPrice);
+            ++cnt;
         }
+        d.header({(boost::format("%2%            Your gold : %1%") % mWorld.getCurrentPlayer()->getTotalGold() %
+                   (cnt > 0 ? "Which item is for sale?" : "Yo have nothing I want."))
+                      .str()});
+        d.setupItemOffsets();
         d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); });
         mGuiManager.pushDialogData(std::move(d));
     }

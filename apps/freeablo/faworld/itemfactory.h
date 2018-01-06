@@ -29,7 +29,7 @@ namespace FAWorld
     {
     public:
         explicit ItemFactory(const DiabloExe::DiabloExe& exe);
-        Item generateBaseItem(ItemId id, const BaseItemGenOptions &options = {}) const;
+        Item generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
         Item generateUniqueItem(UniqueItemId id) const;
 
     private:

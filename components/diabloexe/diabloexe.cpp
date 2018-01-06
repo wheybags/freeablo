@@ -276,7 +276,7 @@ namespace DiabloExe
             if (Misc::StringUtils::containsNonPrint(tmp.mName))
                 continue;
 
-            mUniqueItems.push_back (tmp);
+            mUniqueItems.push_back(tmp);
         }
     }
 
@@ -293,7 +293,7 @@ namespace DiabloExe
                 continue;
             if (tmp.mName.empty())
                 continue;
-            mAffixes.push_back (tmp);
+            mAffixes.push_back(tmp);
         }
     }
 
@@ -467,16 +467,16 @@ namespace DiabloExe
            << mCharacters.at("Sorcerer").dump();
 
         ss << "Base Items: " << mBaseItems.size() << std::endl;
-        for (auto &baseItem : mBaseItems)
-            ss <<  baseItem.dump ();
+        for (auto& baseItem : mBaseItems)
+            ss << baseItem.dump();
 
         ss << "Unique Items: " << mUniqueItems.size() << std::endl;
-        for (auto &uniqueItem : mUniqueItems)
-            ss << uniqueItem.dump ();
+        for (auto& uniqueItem : mUniqueItems)
+            ss << uniqueItem.dump();
 
         ss << "Affixes: " << mAffixes.size() << std::endl;
-        for (auto &affix : mAffixes)
-            ss << affix.dump ();
+        for (auto& affix : mAffixes)
+            ss << affix.dump();
 
         return ss.str();
     }

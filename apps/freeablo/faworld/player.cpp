@@ -38,6 +38,18 @@ namespace FAWorld
         mInventory.equipChanged.connect([this]() { updateSprites(); });
     }
 
+    int Player::getTotalGold() const
+    {
+        int totalCnt = 0;
+        for (auto target : mInventory.getBeltAndInventoryItemPositions())
+        {
+            auto& item = mInventory.getItemAt(target);
+            if (item.getType() == ItemType::gold)
+                totalCnt += item.getCount();
+        }
+        return totalCnt;
+    }
+
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
     {
         UNUSED_PARAM(className);
