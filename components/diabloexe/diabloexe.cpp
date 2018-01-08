@@ -252,12 +252,33 @@ namespace DiabloExe
         for (auto& el : itemGraphicsIdToDropGraphicsId)
             el = exe.read8();
 
+        std::array<std::array<int32_t, 2>, 180> objCursFrameSizes{{}};
+        auto objCursFrameToWidthOffset = mSettings->get<size_t>("BaseItems", "objCursFrameToWidth");
+        exe.FAfseek(objCursFrameToWidthOffset, SEEK_SET);
+        for (auto& el : objCursFrameSizes)
+            el[0] = exe.read32();
+        auto objCursFrameToHeightOffset = mSettings->get<size_t>("BaseItems", "objCursFrameToHeight");
+        exe.FAfseek(objCursFrameToHeightOffset, SEEK_SET);
+        for (auto& el : objCursFrameSizes)
+            el[1] = exe.read32();
+        constexpr auto invCellSize = 28;
         for (size_t i = 0; i < count; i++)
         {
             exe.FAfseek(itemOffset + 76 * i, SEEK_SET);
             BaseItem tmp(exe, codeOffset);
             tmp.id = i;
             tmp.dropItemGraphicsPath = "items/" + itemDropGraphicsFilename[itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId]] + ".cel";
+            auto& s = objCursFrameSizes[tmp.invGraphicsId + 11];
+            if (i == 0)
+            {
+                tmp.invSizeX = 1;
+                tmp.invSizeY = 1;
+            }
+            else
+            {
+                tmp.invSizeX = s[0] / invCellSize;
+                tmp.invSizeY = s[1] / invCellSize;
+            }
             mBaseItems.push_back(tmp);
         }
     }

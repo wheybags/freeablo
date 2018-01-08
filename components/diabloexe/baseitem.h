@@ -46,6 +46,8 @@ namespace DiabloExe
         uint32_t price;
         uint32_t unusedPrice;
         int32_t id;
+        int32_t invSizeX;
+        int32_t invSizeY;
 
         std::string dropItemGraphicsPath;
 

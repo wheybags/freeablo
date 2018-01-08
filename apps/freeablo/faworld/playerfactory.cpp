@@ -43,7 +43,7 @@ namespace FAWorld
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::club), MakeEquipTarget<EquipTargetType::inventory>(0, 0));
         {
             auto item = mItemFactory.generateBaseItem(ItemId::gold);
-            item.setCount(100);
+            item.mCount = 100;
             player->mInventory.putItemUnsafe(std::move(item), MakeEquipTarget<EquipTargetType::inventory>(0, 3));
         }
 
@@ -63,7 +63,7 @@ namespace FAWorld
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortBow), MakeEquipTarget<EquipTargetType::leftHand>());
         {
             auto item = mItemFactory.generateBaseItem(ItemId::gold);
-            item.setCount(100);
+            item.mCount = 100;
             player->mInventory.putItemUnsafe(std::move(item), MakeEquipTarget<EquipTargetType::inventory>(0, 3));
         }
 
@@ -86,7 +86,7 @@ namespace FAWorld
         }
         {
             auto item = mItemFactory.generateBaseItem(ItemId::gold);
-            item.setCount(100);
+            item.mCount = 100;
             player->mInventory.putItemUnsafe(std::move(item), MakeEquipTarget<EquipTargetType::inventory>(0, 3));
         }
 

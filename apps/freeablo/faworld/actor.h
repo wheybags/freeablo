@@ -36,7 +36,7 @@ namespace FAWorld
         Actor(const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
         Actor(const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
         Actor(const DiabloExe::Monster& monster);
-        Actor(FASaveGame::GameLoader& loader);
+        Actor(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
         virtual ~Actor();
 
         virtual void save(FASaveGame::GameSaver& saver);

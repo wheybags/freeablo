@@ -81,8 +81,9 @@ namespace FAWorld
 
     void World::setupObjectIdMappers()
     {
-        mObjectIdMapper.addClass(Actor::typeId, [](FASaveGame::GameLoader& loader) { return new Actor(loader); });
-        mObjectIdMapper.addClass(Player::typeId, [](FASaveGame::GameLoader& loader) { return new Player(loader); });
+        auto exe = &mDiabloExe;
+        mObjectIdMapper.addClass(Actor::typeId, [=](FASaveGame::GameLoader& loader) { return new Actor(loader, *exe); });
+        mObjectIdMapper.addClass(Player::typeId, [=](FASaveGame::GameLoader& loader) { return new Player(loader, *exe); });
 
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });

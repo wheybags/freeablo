@@ -29,13 +29,13 @@
 #include <boost/variant/variant.hpp>
 
 static nk_style_button dummyStyle = []() {
-        static nk_style_button buttonStyle;
-        buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_hide();
-        buttonStyle.border_color = {0, 0, 0, 0};
-        buttonStyle.border = 0;
-        buttonStyle.padding = {0, 0};
-        return buttonStyle;
-    }();
+    static nk_style_button buttonStyle;
+    buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_hide();
+    buttonStyle.border_color = {0, 0, 0, 0};
+    buttonStyle.border = 0;
+    buttonStyle.padding = {0, 0};
+    return buttonStyle;
+}();
 
 namespace FAGui
 {
@@ -191,16 +191,18 @@ namespace FAGui
                         if (rowNum >= sliderStartLine && rowNum <= sliderEndLine)
                         {
                             nk_layout_space_push(ctx, alignRect(arrowRect, lineRect, halign_t::right, valign_t::center));
-                            if (rowNum == sliderStartLine) {
+                            if (rowNum == sliderStartLine)
+                            {
                                 nk_button_label_styled(ctx, &dummyStyle, "");
                                 nk_image(ctx, sliderImg->getNkImage(nk_widget_has_mouse_click_down(ctx, NK_BUTTON_LEFT, true) ? 11 : 9)); // up arrow
-                                if (nk_widget_is_mouse_click_down_inactive (ctx, NK_BUTTON_LEFT))
+                                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
                                     activeDialog.notify(Engine::KeyboardInputAction::prevOption, *this);
                             }
-                            else if (rowNum == sliderEndLine) {
+                            else if (rowNum == sliderEndLine)
+                            {
                                 nk_button_label_styled(ctx, &dummyStyle, "");
                                 nk_image(ctx, sliderImg->getNkImage(nk_widget_has_mouse_click_down(ctx, NK_BUTTON_LEFT, true) ? 10 : 8)); // down arrow
-                                if (nk_widget_is_mouse_click_down_inactive (ctx, NK_BUTTON_LEFT))
+                                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
                                     activeDialog.notify(Engine::KeyboardInputAction::nextOption, *this);
                             }
                             else
@@ -283,8 +285,8 @@ namespace FAGui
                 {
                     auto sliderImg = renderer->loadImage("data/textslid.cel");
                     auto height = (sliderEndLine - sliderStartLine - 1) * textRowHeight - sliderImg->getHeight();
-                    auto y = startY + (sliderStartLine + 1) * textRowHeight + 3 + (activeDialog.selectedLinePercent () * height);
-                    nk_layout_space_push (ctx, nk_rect(boxTex->getWidth() - 3 - sliderImg->getWidth(), y, sliderImg->getWidth(), sliderImg->getHeight()));
+                    auto y = startY + (sliderStartLine + 1) * textRowHeight + 3 + (activeDialog.selectedLinePercent() * height);
+                    nk_layout_space_push(ctx, nk_rect(boxTex->getWidth() - 3 - sliderImg->getWidth(), y, sliderImg->getWidth(), sliderImg->getHeight()));
                     nk_image(ctx, sliderImg->getNkImage(12));
                 }
 
@@ -340,6 +342,8 @@ namespace FAGui
         bool checkerboarded = false;
 
         auto& item = inv.getItemAt(target);
+        if (item.isEmpty())
+            return;
         if (!item.mIsReal)
         {
             if (item.getEquipLoc() == FAWorld::ItemEquipType::twoHanded && target.type == FAWorld::EquipTargetType::rightHand)

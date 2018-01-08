@@ -19,6 +19,11 @@ namespace FARender
     class FASpriteGroup;
 }
 
+namespace DiabloExe
+{
+    class DiabloExe;
+}
+
 namespace FAWorld
 {
     enum class ItemEffectType;
@@ -47,32 +52,33 @@ namespace FAWorld
         Item() = default;
 
         void save(FASaveGame::GameSaver& saver);
-        void load(FASaveGame::GameLoader& loader);
+        void load(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
         ~Item();
         // retrieve description which is shown when hovering over the items in your inventory
         // name including affixes/prefixes/spells
         std::string getName() const;
+        ItemQuality getQuality() const;
         std::string getFullDescription() const;
         std::vector<std::string> descriptionForMerchants() const;
 
         void setUniqueId(uint32_t mUniqueId);
         uint32_t getUniqueId() const;
-        void setCount(int32_t count);
-        uint32_t getCount() const;
         bool operator==(const Item rhs) const;
-        std::pair<uint8_t, uint8_t> getInvSize() const;
         std::pair<uint8_t, uint8_t> getInvCoords() const;
         std::pair<uint8_t, uint8_t> getCornerCoords() const;
         bool isEmpty() const { return mEmpty; }
         std::string getFlipSoundPath() const;
         FARender::FASpriteGroup* getFlipSpriteGroup();
         bool isBeltEquippable() const;
+        int32_t getMaxCount() const;
+        std::array<int32_t, 2> getInvSize() const;
 
         bool mIsReal = false;
+        int32_t mCount = 1;
 
-        uint8_t getReqStr() const;
-        uint8_t getReqMagic() const;
-        uint8_t getReqDex() const;
+        int32_t getReqStr() const;
+        int32_t getReqMagic() const;
+        int32_t getReqDex() const;
         uint32_t getSpecialEffect() const;
         ItemMiscId getMiscId() const;
         uint32_t getSpellCode() const;
@@ -82,6 +88,8 @@ namespace FAWorld
         ItemEquipType getEquipLoc() const;
         ItemClass getClass() const;
         uint32_t getGraphicValue() const;
+        int32_t getMinAttackDamage() const;
+        int32_t getMaxAttackDamage() const;
 
     private:
         std::string chargesStr() const;
@@ -90,67 +98,34 @@ namespace FAWorld
         std::string damageOrArmorStr() const;
         std::string durabilityStr() const;
         std::string requirementsStr() const;
+        const DiabloExe::BaseItem& base() const;
 
     private:
         static Cel::CelFile* mObjcurs;
         DiabloExe::Affix mAffix;
 
-        ItemClass mClass;
-        ItemEquipType mEquipLoc;
-        uint32_t mObjCursFrame;
-        int32_t mCurrentCharges;
-        int32_t mMaxCharges;
-
-        ItemType mType;
-        uint8_t mUniqueBaseItemId;
-        std::string mName;
-        std::string mUnindentifiedName;
-        ItemQuality mQuality;
-        uint32_t mMaxDurability;
-        uint32_t mCurrentDurability;
-
-        uint32_t mMinAttackDamage;
-        uint32_t mMaxAttackDamage;
-        uint32_t mAttackDamage;
-
-        uint32_t mArmorClass;
-
-        int32_t mRequiredStrength;
-        int32_t mRequiredMagic;
-        int32_t mRequiredDexterity;
-
-        uint32_t mSpecialEffectFlags;
-        ItemCode mCode;
-        uint32_t mSpellId;
-        uint32_t mIsUsable;
-        uint32_t mPrice;
-
-        bool operator==(const Item& rhs) const { return this->mUniqueId == rhs.mUniqueId; }
+        ItemId mBaseId;
+        int32_t mMaxDurability;
+        int32_t mCurrentDurability;
+        int32_t mArmorClass;
 
         uint8_t mCornerX;
         uint8_t mCornerY;
-        ItemMiscId mMiscId;
 
         bool mEmpty = true;
         bool mIsIdentified;
 
-        // public members
-        uint32_t mUniqueId = 0;
-        uint32_t mCount = 0;
+        int32_t mUniqueId = 0;
 
     private:
-        ItemEquipType mEquipLocation = ItemEquipType::none;
-        bool mUseOnce = 0;
-        std::string mDropItemGraphicsPath;
-        int32_t mMaxCount = 0;
-        uint8_t mBaseId = 0;
+        int32_t mMaxCharges = 0;
+        int32_t mCurrentCharges = 0;
 
         // TODO: these should be handled by inventory class, not item class
         uint8_t mInvY = 0;
         uint8_t mInvX = 0;
 
-        uint8_t mSizeX = 0;
-        uint8_t mSizeY = 0;
+        const DiabloExe::DiabloExe* mExe = nullptr; // since we want to restore base info from exe data
 
         friend class Inventory;
         friend class ItemFactory;

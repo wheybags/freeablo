@@ -31,11 +31,9 @@ namespace FAWorld
         Inventory();
 
         void save(FASaveGame::GameSaver& saver);
-        void load(FASaveGame::GameLoader& loader);
+        void load(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
 
         bool isValidCell(int x, int y) const { return x >= 0 && x < mInventoryBox.width() && y >= 0 && y < mInventoryBox.height(); }
-
-        void dump();
 
         const Item& getItemAt(const EquipTarget& target) const;
         Item& getItemAt(const EquipTarget& target);
@@ -69,7 +67,6 @@ namespace FAWorld
         void layItem(const Item& item, int32_t x, int32_t y);
         bool exchangeWithCursor(EquipTarget takeoutTarget, boost::optional<EquipTarget> maybePlacementTarget);
         bool exchangeWithCursor(EquipTarget takeoutTarget);
-        bool fitsAt(Item item, uint8_t x, uint8_t y);
 
     public:
         // This is not serialised - it should be reconnected by other means

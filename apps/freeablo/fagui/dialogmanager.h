@@ -7,9 +7,9 @@
 #include <vector>
 
 #include "../engine/inputobserverinterface.h"
+#include "../farender/spritecache.h"
 #include "textcolor.h"
 #include <boost/optional.hpp>
-#include "../farender/spritecache.h"
 
 namespace FAWorld
 {
@@ -62,7 +62,7 @@ namespace FAGui
         int selectedLine();
         void notify(Engine::KeyboardInputAction action, GuiManager& manager);
         void widen() { mIsWide = true; }
-        void showScrollBar () { mScrollBarShown = true; }
+        void showScrollBar() { mScrollBarShown = true; }
         bool isScrollbarShown() const { return mScrollBarShown; }
         int visibleBodyLineCount() const { return linesVisible - mHeader.size() - mFooter.size(); }
         bool isVisible(int line) const { return line >= mFirstVisible && line < mFirstVisible + visibleBodyLineCount(); }

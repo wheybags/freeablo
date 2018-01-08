@@ -34,6 +34,7 @@ namespace FAWorld
         gold,
         ring,
         amulet,
+        none = -1,
     };
 
     enum class ItemClass

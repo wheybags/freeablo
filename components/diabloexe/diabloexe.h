@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 
+#include "../../apps/freeablo/faworld/itemenums.h"
 #include <faio/fafileobject.h>
 #include <unordered_map>
 

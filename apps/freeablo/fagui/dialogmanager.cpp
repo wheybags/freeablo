@@ -163,10 +163,12 @@ namespace FAGui
         }
     }
 
-    double DialogData::selectedLinePercent() {
+    double DialogData::selectedLinePercent()
+    {
         int cnt = 0;
         int selectedIndex = 0;
-        for (int i = 0; i < static_cast<int> (mLines.size ()); ++i) {
+        for (int i = 0; i < static_cast<int>(mLines.size()); ++i)
+        {
             if (i == selectedLine())
                 selectedIndex = cnt;
             if (mLines[i].action)

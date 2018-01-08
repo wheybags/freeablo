@@ -15,63 +15,17 @@ namespace FAWorld
 
     Item ItemFactory::generateBaseItem(ItemId id, const BaseItemGenOptions& /*options*/) const
     {
-        if (!mObjcursCel)
-            mObjcursCel = boost::make_unique<Cel::CelFile>("data/inv/objcurs.cel");
-
         Item res;
         res.mIsIdentified = true;
         res.mEmpty = false;
-        res.mUniqueId = 0;
         res.mIsReal = true;
         res.mInvX = 0;
         res.mInvY = 0;
-
+        res.mBaseId = id;
+        res.mExe = &mExe;
         auto info = mExe.getBaseItems()[static_cast<int>(id)];
-
-        res.mClass = static_cast<ItemClass>(info.itemClass);
-        res.mEquipLoc = static_cast<ItemEquipType>(info.equipType);
-        res.mObjCursFrame = info.invGraphicsId;
-
-        res.mType = static_cast<ItemType>(info.type);
-        res.mUniqueBaseItemId = info.uniqueBaseItemId;
-        res.mName = info.name;
-        res.mUnindentifiedName = info.name;
-        res.mQuality = ItemQuality::normal; // ItemQuality may be changed by other functions
-        res.mMaxDurability = info.durability;
-        res.mCurrentDurability = info.durability;
-
-        res.mMinAttackDamage = info.minAttackDamage;
-        res.mMaxAttackDamage = info.maxAttackDamage;
+        res.mMaxDurability = res.mCurrentDurability = info.durability;
         res.mArmorClass = FALevelGen::randomInRange(info.minArmorClass, info.maxArmorClass);
-
-        res.mRequiredStrength = info.requiredStrength;
-        res.mRequiredMagic = info.requiredMagic;
-        res.mRequiredDexterity = info.requiredDexterity;
-
-        res.mEmpty = false;
-        res.mIsReal = true;
-        res.mMiscId = static_cast<ItemMiscId>(info.miscId);
-        res.mSpellId = info.spellId;
-        res.mIsUsable = info.isUsable;
-        res.mPrice = info.price;
-        res.mDropItemGraphicsPath = info.dropItemGraphicsPath;
-
-        if (res.mClass != ItemClass::gold)
-        {
-            res.mObjCursFrame += 11;
-            auto& frame = (*mObjcursCel)[res.mObjCursFrame];
-            res.mSizeX = static_cast<uint8_t>(frame.width() / 28);
-            res.mSizeY = static_cast<uint8_t>(frame.height() / 28);
-            res.mMaxCount = 1;
-            res.mCount = 1;
-        }
-        else
-        {
-            res.mObjCursFrame = 15;
-            res.mSizeX = 1;
-            res.mSizeY = 1;
-            res.mMaxCount = 5000;
-        }
         return res;
     }
 

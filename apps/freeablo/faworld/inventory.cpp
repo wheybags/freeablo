@@ -69,7 +69,7 @@ namespace FAWorld
         mCursorHeld.save(saver);
     }
 
-    void Inventory::load(FASaveGame::GameLoader& loader)
+    void Inventory::load(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe)
     {
         int32_t boxW = loader.load<int32_t>();
         int32_t boxH = loader.load<int32_t>();
@@ -77,22 +77,16 @@ namespace FAWorld
 
         for (int32_t y = 0; y < boxH; y++)
             for (int32_t x = 0; x < boxW; x++)
-                mInventoryBox.get(x, y).load(loader);
+                mInventoryBox.get(x, y).load(loader, exe);
 
         uint32_t beltSize = loader.load<uint32_t>();
         release_assert(beltSize >= mBelt.size());
 
         for (uint32_t i = 0; i < beltSize; i++)
-            mBelt[i].load(loader);
+            mBelt[i].load(loader, exe);
 
-        mHead.load(loader);
-        mBody.load(loader);
-        mLeftRing.load(loader);
-        mRightRing.load(loader);
-        mAmulet.load(loader);
-        mLeftHand.load(loader);
-        mRightHand.load(loader);
-        mCursorHeld.load(loader);
+        for (auto ptr : {&mHead, &mBody, &mLeftRing, &mRightRing, &mAmulet, &mLeftHand, &mRightHand, &mCursorHeld})
+            ptr->load(loader, exe);
     }
 
     bool Inventory::checkStatsRequirement(const Item& item) const
@@ -121,7 +115,7 @@ namespace FAWorld
         switch (target.type)
         {
             case EquipTargetType::inventory:
-                return target.posX + item.getInvSize().first <= mInventoryBox.width() && target.posY + item.getInvSize().second <= mInventoryBox.height();
+                return target.posX + item.getInvSize()[0] <= mInventoryBox.width() && target.posY + item.getInvSize()[1] <= mInventoryBox.height();
             case EquipTargetType::belt:
                 return item.isBeltEquippable();
             default:
@@ -189,9 +183,9 @@ namespace FAWorld
             case EquipTargetType::inventory:
             {
                 ExchangeResult result;
-                for (int32_t y = target.posY; y < target.posY + item.getInvSize().second; y++)
+                for (int32_t y = target.posY; y < target.posY + item.getInvSize()[1]; y++)
                 {
-                    for (int32_t x = target.posX; x < target.posX + item.getInvSize().first; x++)
+                    for (int32_t x = target.posX; x < target.posX + item.getInvSize()[0]; x++)
                     {
                         if (!mInventoryBox.get(x, y).isEmpty())
                         {
@@ -238,8 +232,8 @@ namespace FAWorld
         switch (target.type)
         {
             case EquipTargetType::inventory:
-                for (int y = realTarget.posY; y < realTarget.posY + copy.getInvSize().second; ++y)
-                    for (int x = realTarget.posX; x < realTarget.posX + copy.getInvSize().first; ++x)
+                for (int y = realTarget.posY; y < realTarget.posY + copy.getInvSize()[1]; ++y)
+                    for (int x = realTarget.posX; x < realTarget.posX + copy.getInvSize()[0]; ++x)
                         mInventoryBox.get(x, y) = {};
                 break;
             default:
@@ -256,11 +250,13 @@ namespace FAWorld
         // first part - filling existing gold piles
         for (auto& item : mInventoryBox)
         {
-            int room = item.mMaxCount - item.mCount;
+            if (item.getType() != ItemType::gold)
+                continue;
+            int room = item.getMaxCount() - item.mCount;
             if (room > 0)
             {
                 auto toPlace = std::min(quantity, room);
-                item.setCount(item.getCount() + toPlace);
+                item.mCount += toPlace;
                 quantity -= toPlace;
                 if (quantity == 0)
                     return;
@@ -274,8 +270,8 @@ namespace FAWorld
                 if (getItemAt(target).isEmpty())
                 {
                     auto item = itemFactory.generateBaseItem(ItemId::gold);
-                    auto toPlace = std::min(quantity, item.mMaxCount);
-                    item.setCount(toPlace);
+                    auto toPlace = std::min(quantity, item.getMaxCount());
+                    item.mCount = toPlace;
                     quantity -= toPlace;
                     if (quantity == 0)
                         return;
@@ -314,9 +310,9 @@ namespace FAWorld
 
     void Inventory::layItem(const Item& item, int32_t x, int32_t y)
     {
-        for (int32_t yy = y; yy < y + item.getInvSize().second; yy++)
+        for (int32_t yy = y; yy < y + item.getInvSize()[1]; yy++)
         {
-            for (int32_t xx = x; xx < x + item.getInvSize().first; xx++)
+            for (int32_t xx = x; xx < x + item.getInvSize()[0]; xx++)
             {
                 auto& cell = mInventoryBox.get(xx, yy);
                 cell = item;
@@ -397,16 +393,16 @@ namespace FAWorld
             yrange = boost::irange(mInventoryBox.height() - 1, -1, -1);
         for (int32_t x : xrange)
         {
-            if (x + item.getInvSize().first > mInventoryBox.width())
+            if (x + item.getInvSize()[0] > mInventoryBox.width())
                 continue;
             for (int32_t y : yrange)
             {
-                if (y + item.getInvSize().second > mInventoryBox.height())
+                if (y + item.getInvSize()[1] > mInventoryBox.height())
                     continue;
 
                 if (![&] {
-                        for (int32_t xx = x; xx < x + item.getInvSize().first; ++xx)
-                            for (int32_t yy = y; yy < y + item.getInvSize().second; ++yy)
+                        for (int32_t xx = x; xx < x + item.getInvSize()[0]; ++xx)
+                            for (int32_t yy = y; yy < y + item.getInvSize()[1]; ++yy)
                                 if (!mInventoryBox.get(xx, yy).isEmpty())
                                     return false;
                         return true;
@@ -489,8 +485,8 @@ namespace FAWorld
     {
         int32_t takeoutCellX = static_cast<int32_t>(x * mInventoryBox.width());
         int32_t takeoutCellY = static_cast<int32_t>(y * mInventoryBox.height());
-        int32_t placementCellX = static_cast<int32_t>(x * mInventoryBox.width() - mCursorHeld.getInvSize().first * 0.5 + 0.5);
-        int32_t placementCellY = static_cast<int32_t>(y * mInventoryBox.height() - mCursorHeld.getInvSize().second * 0.5 + 0.5);
+        int32_t placementCellX = static_cast<int32_t>(x * mInventoryBox.width() - mCursorHeld.getInvSize()[0] * 0.5 + 0.5);
+        int32_t placementCellY = static_cast<int32_t>(y * mInventoryBox.height() - mCursorHeld.getInvSize()[1] * 0.5 + 0.5);
         if (!isValidCell(takeoutCellX, takeoutCellY))
             return;
         exchangeWithCursor(MakeEquipTarget<EquipTargetType::inventory>(takeoutCellX, takeoutCellY),
@@ -564,67 +560,5 @@ namespace FAWorld
                 break;
         }
         release_assert(false);
-    }
-
-    bool Inventory::fitsAt(Item item, uint8_t x, uint8_t y)
-    {
-        bool foundItem = false;
-
-        // TODO: wtf are these magic numbers, should do something nicer than this
-        if (y + item.mSizeY < 5 && x + item.mSizeX < 11)
-        {
-            for (uint8_t yy = y; yy < y + item.mSizeY; yy++)
-            {
-                for (uint8_t xx = x; xx < x + item.mSizeX; xx++)
-                {
-                    if (foundItem)
-                        break;
-                    if (!mInventoryBox.get(xx, yy).isEmpty())
-                        foundItem = true;
-                    if (xx == (x + item.mSizeX - 1) && yy == (y + item.mSizeY - 1) && !foundItem)
-                        return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    void Inventory::dump()
-    {
-        std::stringstream ss;
-        for (uint8_t y = 0; y < mInventoryBox.height(); y++)
-        {
-            for (uint8_t x = 0; x < mInventoryBox.width(); x++)
-            {
-                if (mInventoryBox.get(x, y).isEmpty())
-                    ss << "| (empty)";
-                else
-                    ss << "| " << mInventoryBox.get(x, y).getName();
-                if (mInventoryBox.get(x, y).mCount > 1)
-                    ss << "(" << +mInventoryBox.get(x, y).mCount << ")";
-                ss << "   ";
-            }
-            ss << " |" << std::endl;
-        }
-
-        size_t len = ss.str().length() / 4;
-        std::string tops = "";
-        tops.append(len, '-');
-        std::cout << tops << std::endl << ss.str() << tops << std::endl;
-        std::cout << "head: " << mHead.getName() << std::endl;
-        std::cout << "mBody: " << mBody.getName() << std::endl;
-        std::cout << "mAmulet: " << mAmulet.getName() << std::endl;
-        std::cout << "mRightHand: " << mRightHand.getName() << std::endl;
-        std::cout << "mLeftHand: " << mLeftHand.getName() << std::endl;
-        std::cout << "mLeftRing: " << mLeftRing.getName() << std::endl;
-        std::cout << "mRightRing: " << mRightRing.getName() << std::endl;
-        std::cout << "mCursorHeld: " << mCursorHeld.getName() << std::endl;
-        std::stringstream printbelt;
-        printbelt << "mBelt: ";
-        for (size_t i = 0; i < 8; i++)
-        {
-            printbelt << mBelt[i].getName() << ", ";
-        }
-        std::cout << printbelt.str() << std::endl;
     }
 }
