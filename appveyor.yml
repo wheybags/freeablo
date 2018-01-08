@@ -15,6 +15,13 @@ configuration: Debug
 cache:
   - C:\.hunter
 
+install:
+  - set NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip"
+  - appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
+  - 7z x ninja.zip -oC:\projects\deps\ninja > nul
+  - set PATH=C:\projects\deps\ninja;%PATH%
+  - ninja --version
+
 # scripts to run before build
 before_build:
   - echo Running cmake...
@@ -22,11 +29,14 @@ before_build:
   - mkdir build
   - cd build
   - mklink /j resources ..\resources
-  - cmake .. -G "Visual Studio 14 2015 Win64"
+  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+  - set CC=cl
+  - set CXX=cl
+  - cmake .. -GNinja & exit 0 # to fix some hunter bug
+  - cmake .. -GNinja
 
-build:
-  parallel: true
-  project: c:\projects\freeablo\build\Freeablo.sln # path to Visual Studio solution or project
+build_script:
+  - cmake --build .
 
 test_script:
   - cd c:\projects\freeablo\build
