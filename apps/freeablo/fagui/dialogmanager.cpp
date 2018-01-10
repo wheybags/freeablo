@@ -206,6 +206,13 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
+    static bool adriaSellFilter (const FAWorld::Item &item)
+    {
+        // TODO: add check for quest items
+        return item.getType () == FAWorld::ItemType::misc ||
+               item.getType () == FAWorld::ItemType::staff;
+    }
+
     void DialogManager::talkAdria(const FAWorld::Actor* npc)
     {
         DialogData d;
@@ -217,7 +224,7 @@ namespace FAGui
         d.skip_line();
         d.textLines({td.at("talk")}, TextColor::blue).setAction([]() {});
         d.textLines({td.at("buy")}).setAction([]() {});
-        d.textLines({td.at("sell")}).setAction([]() {});
+        d.textLines({td.at("sell")}).setAction([this]() { sellDialog(adriaSellFilter); });
         d.textLines({td.at("recharge")}).setAction([]() {});
         d.textLines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
@@ -323,12 +330,12 @@ namespace FAGui
         data.textLines({"No"}).setAction([this]() { mGuiManager.popDialogData(); });
     }
 
-    void DialogManager::sellGriswold(const FAWorld::Actor* npc)
+    template <typename FilterType>
+    void DialogManager::sellDialog(FilterType filter)
     {
         DialogData d;
         d.widen();
         int32_t cnt = 0;
-        auto filter = [](const FAWorld::Item& item) { return item.getType() != FAWorld::ItemType::gold; };
         auto& inventory = mWorld.getCurrentPlayer()->mInventory;
         auto positionFilter = [filter, &inventory](FAWorld::EquipTarget target) { return filter(inventory.getItemAt(target)); };
         auto positions = mWorld.getCurrentPlayer()->mInventory.getBeltAndInventoryItemPositions();
@@ -343,13 +350,13 @@ namespace FAGui
             auto& item = inventory.getItemAt(target);
             auto sellPrice = item.getPrice() / 4;
             d.textLines(item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
-                .setAction([&inventory, target, this, sellPrice, d, item, npc]() {
+                .setAction([&inventory, target, this, sellPrice, d, item, filter]() {
                     auto d_copy = d;
-                    fillConfirmDialog(d_copy, item, sellPrice, "Are you sure you want to sell this item?", [this, npc, &inventory, target, sellPrice]() {
+                    fillConfirmDialog(d_copy, item, sellPrice, "Are you sure you want to sell this item?", [this, filter, &inventory, target, sellPrice]() {
                         inventory.takeOut(target);
                         inventory.placeGold(sellPrice, mWorld.getItemFactory());
                         // This looks insansenly unsafe. TODO: think of better way.
-                        auto recreate = [this, npc] { sellGriswold(npc); };
+                        auto recreate = [this, filter] { sellDialog(filter); };
                         mGuiManager.popDialogData();
                         recreate();
                     });
@@ -363,6 +370,14 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
+    static bool griswoldSellFilter (const FAWorld::Item &item)
+    {
+        // TODO: add check for quest items
+        return item.getType () != FAWorld::ItemType::misc &&
+               item.getType () != FAWorld::ItemType::gold &&
+               item.getType () != FAWorld::ItemType::staff;
+    }
+
     void DialogManager::talkGriswold(const FAWorld::Actor* npc)
     {
         DialogData d;
@@ -373,7 +388,7 @@ namespace FAGui
         d.textLines({td.at("talk")}, TextColor::blue).setAction([]() {});
         d.textLines({td.at("buyBasic")}).setAction([]() {});
         d.textLines({td.at("buyPremium")}).setAction([]() {});
-        d.textLines({td.at("sell")}).setAction([&] { sellGriswold(npc); });
+        d.textLines({td.at("sell")}).setAction([&] { sellDialog(griswoldSellFilter); });
         d.textLines({td.at("repair")}).setAction([]() {});
         d.textLines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));

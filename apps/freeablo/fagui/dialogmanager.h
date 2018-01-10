@@ -88,9 +88,11 @@ namespace FAGui
     public:
         explicit DialogManager(GuiManager& gui_manager, FAWorld::World& world);
         void talk(const FAWorld::Actor* npc);
-        void sellGriswold(const FAWorld::Actor* npc);
 
     private:
+        template <typename FilterType>
+        void sellDialog(FilterType filter);
+
         void talkOgden(const FAWorld::Actor* npc);
         void talkFarnham(const FAWorld::Actor* npc);
         void talkAdria(const FAWorld::Actor* npc);
