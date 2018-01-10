@@ -222,10 +222,13 @@ namespace FAGui
                     }
                     lineRect.x += line.mXOffset;
                     lineRect.w -= line.mXOffset;
-                    if (activeDialog.isScrollbarShown())
-                        lineRect.w -= 20; // for scrollbar
-                    if (line.mNumber)
-                        lineRect.w -= 20; // for pentagram
+                    if (!line.alignCenter)
+                    {
+                        if (activeDialog.isScrollbarShown())
+                            lineRect.w -= 20; // for scrollbar
+                        if (line.mNumber)
+                            lineRect.w -= 20; // for pentagram
+                    }
                     nk_layout_space_push(ctx, lineRect);
                     if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && line.action)
                     {

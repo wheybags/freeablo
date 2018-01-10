@@ -30,12 +30,20 @@ namespace FAGui
         return *this;
     }
 
-    DialogLineData& DialogData::textLines(const std::vector<std::string>& texts, TextColor color, bool alignCenter)
+    DialogLineData& DialogLineData::setXOffset(int offset)
+    {
+        mXOffset = offset;
+        return *this;
+    }
+
+    DialogLineData& DialogData::textLines(const std::vector<std::string>& texts, TextColor color, bool alignCenter, std::vector<int> offsets)
     {
         auto index = mLines.size();
-        for (auto& text : texts)
+        for (int i = 0; i < static_cast<int>(texts.size()); ++i)
         {
-            mLines.emplace_back(text, color, alignCenter);
+            mLines.emplace_back(texts[i], color, alignCenter);
+            if (i < static_cast<int>(offsets.size()))
+                mLines.back().setXOffset(offsets[i]);
         }
         skip_line();
         return mLines[index];
@@ -152,17 +160,6 @@ namespace FAGui
         }
     }
 
-    void DialogData::setupItemOffsets()
-    {
-        for (int32_t i = 0; i < static_cast<int32_t>(mLines.size()); ++i)
-        {
-            if (i % 4 == 0)
-                mLines[i].mXOffset = 20;
-            else
-                mLines[i].mXOffset = 40;
-        }
-    }
-
     double DialogData::selectedLinePercent()
     {
         int32_t cnt = 0;
@@ -176,6 +173,8 @@ namespace FAGui
         }
         return (selectedIndex + 0.0) / (cnt - 1);
     }
+
+    void DialogData::clearLines() { mLines.clear(); }
 
     DialogManager::DialogManager(GuiManager& gui_manager, FAWorld::World& world) : mGuiManager(gui_manager), mWorld(world) {}
 
@@ -307,33 +306,58 @@ namespace FAGui
             talkCain(npc);
     }
 
+    void DialogManager::fillConfirmDialog(DialogData& data, const FAWorld::Item& item, int price, const char* question, std::function<void()> successAction)
+    {
+        data.showScrollBar(false);
+        data.clearLines();
+        data.skip_line(2);
+        data.textLines(item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40}).setNumber(price);
+        data.skip_line(2);
+        data.textLines({question});
+        data.skip_line();
+        data.textLines({"Yes"}).setAction([this, successAction]() {
+            auto action = successAction;
+            mGuiManager.popDialogData();
+            action();
+        });
+        data.textLines({"No"}).setAction([this]() { mGuiManager.popDialogData(); });
+    }
+
     void DialogManager::sellGriswold(const FAWorld::Actor* npc)
     {
         DialogData d;
         d.widen();
         int32_t cnt = 0;
-        for (auto target : mWorld.getCurrentPlayer()->mInventory.getBeltAndInventoryItemPositions())
+        auto filter = [](const FAWorld::Item& item) { return item.getType() != FAWorld::ItemType::gold; };
+        auto& inventory = mWorld.getCurrentPlayer()->mInventory;
+        auto positionFilter = [filter, &inventory](FAWorld::EquipTarget target) { return filter(inventory.getItemAt(target)); };
+        auto positions = mWorld.getCurrentPlayer()->mInventory.getBeltAndInventoryItemPositions();
+        d.header({(boost::format("%2%            Your gold : %1%") % mWorld.getCurrentPlayer()->getTotalGold() %
+                   (std::count_if(positions.begin(), positions.end(), positionFilter) > 0 ? "Which item is for sale?" : "You have nothing I want."))
+                      .str()});
+
+        for (auto target : positions)
         {
-            auto& inventory = mWorld.getCurrentPlayer()->mInventory;
-            auto& item = inventory.getItemAt(target);
-            if (item.getType() == FAWorld::ItemType::gold)
+            if (!positionFilter(target))
                 continue;
+            auto& item = inventory.getItemAt(target);
             auto sellPrice = item.getPrice() / 4;
-            d.textLines(item.descriptionForMerchants(), TextColor::white, false)
-                .setAction([&inventory, target, this, sellPrice, npc]() {
-                    inventory.takeOut(target);
-                    inventory.placeGold(sellPrice, mWorld.getItemFactory());
-                    auto dlgMgr = this;
-                    mGuiManager.popDialogData();
-                    dlgMgr->sellGriswold(npc);
+            d.textLines(item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
+                .setAction([&inventory, target, this, sellPrice, d, item, npc]() {
+                    auto d_copy = d;
+                    fillConfirmDialog(d_copy, item, sellPrice, "Are you sure you want to sell this item?", [this, npc, &inventory, target, sellPrice]() {
+                        inventory.takeOut(target);
+                        inventory.placeGold(sellPrice, mWorld.getItemFactory());
+                        // This looks insansenly unsafe. TODO: think of better way.
+                        auto recreate = [this, npc] { sellGriswold(npc); };
+                        mGuiManager.popDialogData();
+                        recreate();
+                    });
+                    mGuiManager.pushDialogData(std::move(d_copy));
                 })
                 .setNumber(sellPrice);
             ++cnt;
         }
-        d.header({(boost::format("%2%            Your gold : %1%") % mWorld.getCurrentPlayer()->getTotalGold() %
-                   (cnt > 0 ? "Which item is for sale?" : "You have nothing I want."))
-                      .str()});
-        d.setupItemOffsets();
         d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); });
         d.showScrollBar();
         mGuiManager.pushDialogData(std::move(d));
