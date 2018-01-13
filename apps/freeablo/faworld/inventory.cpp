@@ -272,6 +272,7 @@ namespace FAWorld
                     auto item = itemFactory.generateBaseItem(ItemId::gold);
                     auto toPlace = std::min(quantity, item.getMaxCount());
                     item.mCount = toPlace;
+                    putItemUnsafe(item, target);
                     quantity -= toPlace;
                     if (quantity == 0)
                         return;

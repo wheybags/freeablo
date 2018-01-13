@@ -31,7 +31,7 @@ namespace DiabloExe
         uint32_t durability;
         uint32_t minAttackDamage;
         uint32_t maxAttackDamage;
-        uint32_t minArmorClass; // LONG LIVE OUR GLORIOUS QUEEN
+        uint32_t minArmorClass;
         uint32_t maxArmorClass;
 
         uint8_t requiredStrength;

@@ -27,8 +27,8 @@ namespace FAGui
         DialogLineData(std::string text, TextColor color, bool alignCenter);
         DialogLineData();
         DialogLineData& setAction(std::function<void()> actionArg);
-        DialogLineData& setNumber(int number);
-        DialogLineData& setYOffset(int offset);
+        DialogLineData& setNumber(int32_t number);
+        DialogLineData& setYOffset(int32_t offset);
 
         static DialogLineData separator()
         {
@@ -43,29 +43,29 @@ namespace FAGui
         bool alignCenter = false;
         bool isSeparator = false;
         TextColor color = TextColor::white;
-        int mXOffset = 0;
-        int mYOffset = 0;
-        boost::optional<int> mNumber;
+        int32_t mXOffset = 0;
+        int32_t mYOffset = 0;
+        boost::optional<int32_t> mNumber;
     };
 
     class DialogData
     {
-        static constexpr int linesVisible = 24;
+        static constexpr int32_t linesVisible = 24;
 
     public:
         static DialogLineData toLineData(const std::string& text, TextColor color, bool alignCenter);
         DialogLineData& textLines(const std::vector<std::string>& texts, TextColor color = TextColor::white, bool alignCenter = true);
-        void skip_line(int cnt = 1);
+        void skip_line(int32_t cnt = 1);
         void separator();
         DialogLineData& footer(const std::string& text);
         void header(const std::vector<std::string>& text);
-        int selectedLine();
+        int32_t selectedLine();
         void notify(Engine::KeyboardInputAction action, GuiManager& manager);
         void widen() { mIsWide = true; }
         void showScrollBar() { mScrollBarShown = true; }
         bool isScrollbarShown() const { return mScrollBarShown; }
-        int visibleBodyLineCount() const { return linesVisible - mHeader.size() - mFooter.size(); }
-        bool isVisible(int line) const { return line >= mFirstVisible && line < mFirstVisible + visibleBodyLineCount(); }
+        int32_t visibleBodyLineCount() const { return linesVisible - mHeader.size() - mFooter.size(); }
+        bool isVisible(int32_t line) const { return line >= mFirstVisible && line < mFirstVisible + visibleBodyLineCount(); }
         void setupItemOffsets();
         double selectedLinePercent();
 

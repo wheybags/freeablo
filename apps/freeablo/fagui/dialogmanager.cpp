@@ -18,13 +18,13 @@ namespace FAGui
         return *this;
     }
 
-    DialogLineData& DialogLineData::setNumber(int number)
+    DialogLineData& DialogLineData::setNumber(int32_t number)
     {
         mNumber = number;
         return *this;
     }
 
-    DialogLineData& DialogLineData::setYOffset(int offset)
+    DialogLineData& DialogLineData::setYOffset(int32_t offset)
     {
         mYOffset = offset;
         return *this;
@@ -41,7 +41,7 @@ namespace FAGui
         return mLines[index];
     }
 
-    void DialogData::skip_line(int cnt) { mLines.insert(mLines.end(), cnt, {}); }
+    void DialogData::skip_line(int32_t cnt) { mLines.insert(mLines.end(), cnt, {}); }
 
     void DialogData::separator()
     {
@@ -78,7 +78,7 @@ namespace FAGui
         mHeader.emplace_back();
     }
 
-    int DialogData::selectedLine()
+    int32_t DialogData::selectedLine()
     {
         if (mSelectedLine == -1)
         {
@@ -92,8 +92,8 @@ namespace FAGui
 
     void DialogData::notify(Engine::KeyboardInputAction action, GuiManager& manager)
     {
-        int dir = 0;
-        int i = selectedLine();
+        int32_t dir = 0;
+        int32_t i = selectedLine();
         switch (action)
         {
             case Engine::KeyboardInputAction::nextOption:
@@ -122,7 +122,7 @@ namespace FAGui
             do
             {
                 i += dir;
-                if (i < 0 || i >= static_cast<int>(mLines.size()))
+                if (i < 0 || i >= static_cast<int32_t>(mLines.size()))
                 {
                     if (isScrollbarShown())
                         return; // no looping if there's scroll bar
@@ -138,11 +138,11 @@ namespace FAGui
                 }
                 else
                 {
-                    int firstInvisible = mSelectedLine;
+                    int32_t firstInvisible = mSelectedLine;
                     ++firstInvisible;
-                    if (firstInvisible >= static_cast<int>(mLines.size()))
+                    if (firstInvisible >= static_cast<int32_t>(mLines.size()))
                         return;
-                    while (firstInvisible < static_cast<int>(mLines.size()) && !mLines[firstInvisible].action)
+                    while (firstInvisible < static_cast<int32_t>(mLines.size()) && !mLines[firstInvisible].action)
                     {
                         ++firstInvisible;
                     }
@@ -154,7 +154,7 @@ namespace FAGui
 
     void DialogData::setupItemOffsets()
     {
-        for (int i = 0; i < static_cast<int>(mLines.size()); ++i)
+        for (int32_t i = 0; i < static_cast<int32_t>(mLines.size()); ++i)
         {
             if (i % 4 == 0)
                 mLines[i].mXOffset = 20;
@@ -165,9 +165,9 @@ namespace FAGui
 
     double DialogData::selectedLinePercent()
     {
-        int cnt = 0;
-        int selectedIndex = 0;
-        for (int i = 0; i < static_cast<int>(mLines.size()); ++i)
+        int32_t cnt = 0;
+        int32_t selectedIndex = 0;
+        for (int32_t i = 0; i < static_cast<int32_t>(mLines.size()); ++i)
         {
             if (i == selectedLine())
                 selectedIndex = cnt;
@@ -311,7 +311,7 @@ namespace FAGui
     {
         DialogData d;
         d.widen();
-        int cnt = 0;
+        int32_t cnt = 0;
         for (auto target : mWorld.getCurrentPlayer()->mInventory.getBeltAndInventoryItemPositions())
         {
             auto& inventory = mWorld.getCurrentPlayer()->mInventory;

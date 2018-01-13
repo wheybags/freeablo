@@ -273,7 +273,10 @@ namespace FAGui
                 for (int i = activeDialog.mFirstVisible; i < activeDialog.mFirstVisible + activeDialog.visibleBodyLineCount(); ++i)
                 {
                     if (i < static_cast<int>(activeDialog.mLines.size()))
-                        drawLine(activeDialog.mLines[i], i);
+                    {
+                        if (drawLine(activeDialog.mLines[i], i))
+                            return;
+                    }
                     else
                         drawLine({}, i);
                 }
