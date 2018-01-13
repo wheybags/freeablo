@@ -76,6 +76,7 @@ namespace FAWorld
         void update(bool noclip);
 
         void addCurrentPlayer(Player* player);
+        void setupCurrentPlayer();
         Player* getCurrentPlayer();
 
         void registerPlayer(Player* player);

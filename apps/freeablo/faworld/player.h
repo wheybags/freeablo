@@ -33,6 +33,8 @@ namespace FAWorld
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour; }
         int getTotalGold() const;
 
+        boost::signals2::signal<void(const std::pair<int32_t, int32_t>&)> positionReached;
+
     private:
         void init(const std::string& className, const DiabloExe::CharacterStats& charStats);
         bool canTalkTo(Actor* actor);

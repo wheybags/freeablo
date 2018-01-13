@@ -36,6 +36,7 @@ namespace FAWorld
     {
         FAWorld::World::get()->registerPlayer(this);
         mInventory.equipChanged.connect([this]() { updateSprites(); });
+        mMoveHandler.positionReached.connect (positionReached);
     }
 
     int Player::getTotalGold() const

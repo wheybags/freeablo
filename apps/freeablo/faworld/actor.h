@@ -56,6 +56,7 @@ namespace FAWorld
 
         bool canIAttack(Actor* actor);
         virtual void update(bool noclip);
+        void init();
         void takeDamage(double amount);
         void heal();
 
