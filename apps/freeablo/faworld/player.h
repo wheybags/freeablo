@@ -25,7 +25,7 @@ namespace FAWorld
 
         virtual ~Player();
         void setSpriteClass(std::string className);
-        void updateSprites();
+        void updateSprites() override;
         bool dropItem(const FAWorld::Tile& clickedTile);
 
         virtual void update(bool noclip) override;
