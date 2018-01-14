@@ -17,6 +17,7 @@
 #include "player.h"
 #include "playerbehaviour.h"
 #include <algorithm>
+#include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
 #include <iostream>
 #include <misc/assert.h>
@@ -26,7 +27,7 @@ namespace FAWorld
 {
     World* singletonInstance = nullptr;
 
-    World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe)
+    World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe))
     {
         release_assert(singletonInstance == nullptr);
         singletonInstance = this;
@@ -80,8 +81,9 @@ namespace FAWorld
 
     void World::setupObjectIdMappers()
     {
-        mObjectIdMapper.addClass(Actor::typeId, [](FASaveGame::GameLoader& loader) { return new Actor(loader); });
-        mObjectIdMapper.addClass(Player::typeId, [](FASaveGame::GameLoader& loader) { return new Player(loader); });
+        auto exe = &mDiabloExe;
+        mObjectIdMapper.addClass(Actor::typeId, [=](FASaveGame::GameLoader& loader) { return new Actor(loader, *exe); });
+        mObjectIdMapper.addClass(Player::typeId, [=](FASaveGame::GameLoader& loader) { return new Player(loader, *exe); });
 
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });
@@ -150,10 +152,7 @@ namespace FAWorld
 
         auto& cursorItem = mCurrentPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
         if (!cursorItem.isEmpty())
-        {
-            mGuiManager->setDescription(cursorItem.getName());
             return nothingHovered();
-        }
 
         auto actor = targetedActor(mousePosition);
         if (actor != nullptr)
@@ -185,6 +184,8 @@ namespace FAWorld
         if (getCurrentPlayer())
             getCurrentPlayer()->getPlayerBehaviour()->unblockInput();
     }
+
+    const ItemFactory& World::getItemFactory() const { return *mItemFactory; }
 
     void World::generateLevels()
     {
@@ -319,6 +320,10 @@ namespace FAWorld
         }
 
         {
+            auto& cursorItem = mCurrentPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+            if (!cursorItem.isEmpty())
+                mGuiManager->setDescription(cursorItem.getName());
+
             if (!nk_item_is_any_active(FARender::Renderer::get()->getNuklearContext()))
             {
                 // we need update hover not only on mouse move because viewport may move without mouse being moved

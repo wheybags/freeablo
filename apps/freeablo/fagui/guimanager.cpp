@@ -25,7 +25,17 @@
 #include "menu/startingmenuscreen.h"
 #include "menuhandler.h"
 #include "nkhelpers.h"
+#include <boost/algorithm/string/split.hpp>
 #include <boost/variant/variant.hpp>
+
+static nk_style_button dummyStyle = []() {
+    static nk_style_button buttonStyle;
+    buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_hide();
+    buttonStyle.border_color = {0, 0, 0, 0};
+    buttonStyle.border = 0;
+    buttonStyle.padding = {0, 0};
+    return buttonStyle;
+}();
 
 namespace FAGui
 {
@@ -143,14 +153,17 @@ namespace FAGui
         auto& activeDialog = mDialogs.back();
 
         auto renderer = FARender::Renderer::get();
-        auto boxTex = renderer->loadImage("data/textbox2.cel");
+        auto boxTex = renderer->loadImage(activeDialog.mIsWide ? "data/textbox.cel" : "data/textbox2.cel");
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
         nk_fa_begin_image_window(
             ctx,
             "dialog",
-            nk_rect(screenW / 2, screenH - boxTex->getHeight() - 153, boxTex->getWidth(), boxTex->getHeight()),
+            nk_rect(screenW / 2. - (activeDialog.mIsWide ? boxTex->getWidth() / 2 : 0.0),
+                    screenH - boxTex->getHeight() - 153,
+                    boxTex->getWidth(),
+                    boxTex->getHeight()),
             flags,
             boxTex->getNkImage(),
             [&]() {
@@ -163,53 +176,123 @@ namespace FAGui
                     nk_image(ctx, nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect));
                 }
 
-                int y = 5;
+                int startY = 5;
                 constexpr int textRowHeight = 12;
-                for (int i = 0; i < static_cast<int>(activeDialog.mLines.size()); ++i)
-                {
-                    auto& line = activeDialog.mLines[i];
-                    auto lineRect = nk_rect(3, 3 + y, boxTex->getWidth() - 6, textRowHeight);
+                int rowNum = 0;
+                constexpr int sliderStartLine = 4, sliderEndLine = 20;
+
+                auto drawLine = [&](const DialogLineData& line, int lineIndex) {
+                    auto lineRect = nk_rect(3, 3 + startY + rowNum * textRowHeight + line.mYOffset, boxTex->getWidth() - 6, textRowHeight);
+
+                    if (activeDialog.isScrollbarShown())
+                    {
+                        auto sliderImg = renderer->loadImage("data/textslid.cel");
+                        auto arrowRect = nk_rect(0, 0, sliderImg->getWidth(), sliderImg->getHeight());
+                        if (rowNum >= sliderStartLine && rowNum <= sliderEndLine)
+                        {
+                            nk_layout_space_push(ctx, alignRect(arrowRect, lineRect, halign_t::right, valign_t::center));
+                            if (rowNum == sliderStartLine)
+                            {
+                                nk_button_label_styled(ctx, &dummyStyle, "");
+                                nk_image(ctx, sliderImg->getNkImage(nk_widget_has_mouse_click_down(ctx, NK_BUTTON_LEFT, true) ? 11 : 9)); // up arrow
+                                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
+                                    activeDialog.notify(Engine::KeyboardInputAction::prevOption, *this);
+                            }
+                            else if (rowNum == sliderEndLine)
+                            {
+                                nk_button_label_styled(ctx, &dummyStyle, "");
+                                nk_image(ctx, sliderImg->getNkImage(nk_widget_has_mouse_click_down(ctx, NK_BUTTON_LEFT, true) ? 10 : 8)); // down arrow
+                                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
+                                    activeDialog.notify(Engine::KeyboardInputAction::nextOption, *this);
+                            }
+                            else
+                                nk_image(ctx, sliderImg->getNkImage(13)); // grove
+                        }
+                    }
+
+                    ++rowNum;
+
                     if (line.isSeparator)
                     {
                         auto separatorRect = nk_rect(3, 0, boxTex->getWidth() - 6, 3);
                         nk_layout_space_push(ctx, alignRect(separatorRect, lineRect, halign_t::center, valign_t::center));
                         auto separator_image = nk_subimage_handle(boxTex->getNkImage().handle, boxTex->getWidth(), boxTex->getHeight(), separatorRect);
                         nk_image(ctx, separator_image);
-                        continue;
+                        return false;
                     }
+                    lineRect.x += line.mXOffset;
+                    lineRect.w -= line.mXOffset;
+                    if (activeDialog.isScrollbarShown())
+                        lineRect.w -= 20; // for scrollbar
+                    if (line.mNumber)
+                        lineRect.w -= 20; // for pentagram
                     nk_layout_space_push(ctx, lineRect);
-                    if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true) && line.action)
+                    if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && line.action)
                     {
-                        activeDialog.mSelectedLine = i;
+                        activeDialog.mSelectedLine = lineIndex;
                         line.action();
-                        return;
+                        return true;
                     }
                     smallText(ctx, line.text.c_str(), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
-                    if (activeDialog.selectedLine() == i)
+                    if (auto num = line.mNumber)
+                        smallText(ctx, std::to_string(*num).c_str(), line.color, NK_TEXT_ALIGN_RIGHT);
+                    if (lineIndex != -1 && activeDialog.selectedLine() == lineIndex)
                     {
                         auto pent = renderer->loadImage("data/pentspn2.cel");
-                        int pentOffset = 10;
+                        int pentOffset = 5;
                         auto textWidth = smallTextWidth(line.text.c_str());
                         // left pentagram
                         {
                             int offset = 0;
                             if (line.alignCenter)
-                                offset = ((boxTex->getWidth() - 6) / 2 - textWidth / 2 - pent->getWidth() - pentOffset);
-                            nk_layout_space_push(ctx, nk_rect(3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
+                                offset = 3 + ((boxTex->getWidth() - 6) / 2 - textWidth / 2 - pent->getWidth() - pentOffset);
+                            else
+                                offset = line.mXOffset - pent->getWidth() - pentOffset;
+                            nk_layout_space_push(ctx, nk_rect(offset, lineRect.y, pent->getWidth(), pent->getHeight()));
                             nk_image(ctx, pent->getNkImage(mSmallPentagram->getCurrentFrame().second));
                         }
                         // right pentagram
                         {
-                            int offset = textWidth + pentOffset;
+                            int offset = boxTex->getWidth() - 6 - pent->getWidth() - pentOffset;
+                            if (activeDialog.isScrollbarShown())
+                                offset -= 20;
                             if (line.alignCenter)
                                 offset = ((boxTex->getWidth() - 6) / 2 + textWidth / 2 + pentOffset);
+
                             nk_layout_space_push(ctx, nk_rect(3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
                             nk_image(ctx, pent->getNkImage(mSmallPentagram->getCurrentFrame().second));
                         }
                     }
 
-                    y += textRowHeight;
+                    return false;
+                };
+
+                for (auto& line : activeDialog.mHeader)
+                    if (drawLine(line, -1))
+                        return;
+                for (int i = activeDialog.mFirstVisible; i < activeDialog.mFirstVisible + activeDialog.visibleBodyLineCount(); ++i)
+                {
+                    if (i < static_cast<int>(activeDialog.mLines.size()))
+                    {
+                        if (drawLine(activeDialog.mLines[i], i))
+                            return;
+                    }
+                    else
+                        drawLine({}, i);
                 }
+                for (auto& line : activeDialog.mFooter)
+                    if (drawLine(line, -1))
+                        return;
+
+                if (activeDialog.isScrollbarShown())
+                {
+                    auto sliderImg = renderer->loadImage("data/textslid.cel");
+                    auto height = (sliderEndLine - sliderStartLine - 1) * textRowHeight - sliderImg->getHeight();
+                    auto y = startY + (sliderStartLine + 1) * textRowHeight + 3 + (activeDialog.selectedLinePercent() * height);
+                    nk_layout_space_push(ctx, nk_rect(boxTex->getWidth() - 3 - sliderImg->getWidth(), y, sliderImg->getWidth(), sliderImg->getHeight()));
+                    nk_image(ctx, sliderImg->getNkImage(12));
+                }
+
             },
             true);
     }
@@ -253,15 +336,6 @@ namespace FAGui
         nk_fa_begin_image_window(ctx, panelName(panelType), dims, flags, invTex->getNkImage(), op, false);
     }
 
-    static nk_style_button dummyStyle = []() {
-        static nk_style_button buttonStyle;
-        buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_hide();
-        buttonStyle.border_color = {0, 0, 0, 0};
-        buttonStyle.border = 0;
-        buttonStyle.padding = {0, 0};
-        return buttonStyle;
-    }();
-
     void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highlight)
     {
         auto& inv = mPlayer->mInventory;
@@ -271,6 +345,8 @@ namespace FAGui
         bool checkerboarded = false;
 
         auto& item = inv.getItemAt(target);
+        if (item.isEmpty())
+            return;
         if (!item.mIsReal)
         {
             if (item.getEquipLoc() == FAWorld::ItemEquipType::twoHanded && target.type == FAWorld::EquipTargetType::rightHand)
@@ -314,7 +390,7 @@ namespace FAGui
         auto effectType = isHighlighted ? EffectType::highlighted : EffectType::none;
         effectType = checkerboarded ? EffectType::checkerboarded : effectType;
         if (isHighlighted)
-            setDescription(item.getName());
+            setDescription(item.getFullDescription());
         applyEffect effect(ctx, effectType);
         nk_image(ctx, img);
     }
@@ -338,7 +414,7 @@ namespace FAGui
                 {
                     nk_layout_space_push(ctx, p.second);
                     nk_button_label_styled(ctx, &dummyStyle, "");
-                    if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                    if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
                         inv.itemSlotLeftMouseButtonDown(p.first);
                     auto highlight = ItemHighlightInfo::notHighlighed;
                     if (isLastWidgetHovered(ctx))
@@ -357,7 +433,7 @@ namespace FAGui
             float invHeight = inv.getInventoryBox().height() * cellSize;
             nk_layout_space_push(ctx, nk_recta(invTopLeft, {invWidth, invHeight}));
             nk_button_label_styled(ctx, &dummyStyle, "");
-            if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+            if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
             {
                 inv.inventoryMouseLeftButtonDown((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / invWidth,
                                                  (ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / invHeight);
@@ -394,7 +470,7 @@ namespace FAGui
         auto beltWidth = 232.0f, beltHeight = 29.0f, cellSize = 29.0f;
         nk_layout_space_push(ctx, nk_recta(beltTopLeft, {beltWidth, beltHeight}));
         auto& inv = mPlayer->mInventory;
-        if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
         {
             inv.beltMouseLeftButtonDown((ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / beltWidth);
         }
@@ -594,13 +670,24 @@ namespace FAGui
     {
         auto renderer = FARender::Renderer::get();
         auto fnt = renderer->smallFont();
-        return fnt->width(fnt->userdata, 0.0f, text, strlen(text) - 1);
+        return fnt->width(fnt->userdata, 0.0f, text, strlen(text));
     }
 
     void GuiManager::descriptionPanel(nk_context* ctx)
     {
-        nk_layout_space_push(ctx, nk_rect(185, 66, 275, 60));
-        smallText(ctx, mDescription.c_str(), mDescriptionColor);
+        auto boxRect = nk_rect(185, 66, 275, 55);
+        std::vector<std::string> vec;
+        boost::split(vec, mDescription, boost::is_any_of("\n"), boost::token_compress_on);
+        auto h_part = boxRect.h / vec.size();
+        for (int i = 0; i < static_cast<int>(vec.size()); ++i)
+        {
+            // TODO: copy precise location of several line positioning from exe
+            auto rect = boxRect;
+            rect.y = boxRect.y + h_part * i;
+            rect.h = h_part;
+            nk_layout_space_push(ctx, rect);
+            smallText(ctx, vec[i].c_str(), mDescriptionColor);
+        }
     }
 
     void GuiManager::update(bool inGame, bool paused, nk_context* ctx)

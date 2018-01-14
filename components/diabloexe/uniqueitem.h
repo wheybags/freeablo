@@ -15,15 +15,10 @@ namespace DiabloExe
         std::string dump() const;
         uint32_t mNamePtr;
         std::string mName;
-
-        uint8_t mItemType;
-
+        uint8_t mUniqueBaseItemId;
         uint8_t mQualityLevel;
-
         uint16_t mNumEffects;
-
-        uint32_t mGoldValue;
-
+        uint32_t mPrice;
         std::array<std::array<uint32_t, 3>, 6> mEffectData;
         UniqueItem() {}
 

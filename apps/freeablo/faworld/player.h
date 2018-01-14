@@ -20,7 +20,7 @@ namespace FAWorld
         Player();
         Player(const std::string& className, const DiabloExe::CharacterStats& charStats);
         void initCommon();
-        Player(FASaveGame::GameLoader& loader);
+        Player(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
         void save(FASaveGame::GameSaver& saver);
 
         virtual ~Player();
@@ -31,6 +31,7 @@ namespace FAWorld
         virtual void update(bool noclip) override;
 
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour; }
+        int getTotalGold() const;
 
     private:
         void init(const std::string& className, const DiabloExe::CharacterStats& charStats);

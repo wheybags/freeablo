@@ -22,7 +22,7 @@ namespace FAGui
                 nk_layout_space_push(ctx, rect);
                 menuText(ctx, text, MenuFontColor::gold, 42, NK_TEXT_ALIGN_CENTERED);
                 auto ret = DrawFunctionResult::noAction;
-                if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
                 {
                     ret = DrawFunctionResult::executeAction;
                 }

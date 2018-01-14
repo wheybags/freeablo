@@ -41,11 +41,11 @@ namespace FAGui
         menuText(ctx, "Choose Class", MenuFontColor::silver, 30, NK_TEXT_ALIGN_CENTERED);
         nk_layout_space_push(ctx, {277, 422, 140, 35});
         menuText(ctx, "OK", MenuFontColor::gold, 30, NK_TEXT_ALIGN_CENTERED);
-        if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
             return executeActive();
         nk_layout_space_push(ctx, {427, 422, 140, 35});
         menuText(ctx, "Cancel", MenuFontColor::gold, 30, NK_TEXT_ALIGN_CENTERED);
-        if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
             return mRejectAction();
         return drawMenuItems(ctx);
     }
@@ -61,9 +61,9 @@ namespace FAGui
                 nk_layout_space_push(ctx, rect);
                 menuText(ctx, text, MenuFontColor::gold, 24, NK_TEXT_ALIGN_CENTERED);
                 DrawFunctionResult ret = DrawFunctionResult::noAction;
-                if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_LEFT, true))
+                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
                     ret = DrawFunctionResult::setActive;
-                if (nk_widget_is_mouse_click_down(ctx, NK_BUTTON_DOUBLE, true))
+                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_DOUBLE))
                     ret = DrawFunctionResult::executeAction;
                 if (isActive)
                 {

@@ -12,39 +12,42 @@ namespace DiabloExe
     class BaseItem
     {
     public:
-        uint32_t activTrigger;
+        uint32_t dropRate;
 
         uint8_t itemClass;
-        uint8_t equipLoc;
+        uint8_t equipType;
 
         uint16_t unknown0;
 
-        uint32_t graphicValue;
+        uint32_t invGraphicsId;
 
         uint8_t type;
-        uint8_t uniqCode;
+        uint8_t uniqueBaseItemId;
         uint16_t unknown1;
 
-        std::string itemName;
-        std::string itemSecondName;
+        std::string name;
+        std::string shortName;
         uint32_t qualityLevel;
         uint32_t durability;
         uint32_t minAttackDamage;
         uint32_t maxAttackDamage;
-        uint32_t minArmourClass; // LONG LIVE OUR GLORIOUS QUEEN
-        uint32_t maxArmourClass;
+        uint32_t minArmorClass;
+        uint32_t maxArmorClass;
 
-        uint8_t reqStr;
-        uint8_t reqMagic;
-        uint8_t reqDex;
-        uint8_t reqVit;
+        uint8_t requiredStrength;
+        uint8_t requiredMagic;
+        uint8_t requiredDexterity;
+        uint8_t unused;
 
-        uint32_t specialEffect;
-        uint32_t magicCode;
-        uint32_t spellCode;
-        uint32_t useOnce;
-        uint32_t price1;
-        uint32_t price2;
+        uint32_t specialEffectFlags;
+        uint32_t miscId;
+        uint32_t spellId;
+        uint32_t isUsable;
+        uint32_t price;
+        uint32_t unusedPrice;
+        int32_t id;
+        int32_t invSizeX;
+        int32_t invSizeY;
 
         std::string dropItemGraphicsPath;
 

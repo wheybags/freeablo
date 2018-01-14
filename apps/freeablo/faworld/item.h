@@ -19,121 +19,116 @@ namespace FARender
     class FASpriteGroup;
 }
 
+namespace DiabloExe
+{
+    class DiabloExe;
+}
+
 namespace FAWorld
 {
+    enum class ItemEffectType;
+    enum class ItemType;
+    enum class ItemEquipType;
+    enum class ItemClass;
+    enum class ItemCode;
+    enum class ItemMiscId;
+    enum class ItemQuality;
+    class EquipTarget;
+    constexpr int indestructibleItemDurability = 255;
+
+    class ItemEffect
+    {
+    public:
+        ItemEffectType type;
+        int min;
+        int max;
+    };
+
     class Inventory;
 
     class Item
     {
     public:
         Item() = default;
-        Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix = nullptr, bool isIdentified = true);
-        Item(const DiabloExe::UniqueItem& item, uint32_t id);
 
         void save(FASaveGame::GameSaver& saver);
-        void load(FASaveGame::GameLoader& loader);
+        void load(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
+        ~Item();
+        // retrieve description which is shown when hovering over the items in your inventory
+        // name including affixes/prefixes/spells
+        std::string getName() const;
+        ItemQuality getQuality() const;
+        std::string getFullDescription() const;
+        std::vector<std::string> descriptionForMerchants() const;
 
+        void setUniqueId(uint32_t mUniqueId);
+        uint32_t getUniqueId() const;
+        bool operator==(const Item rhs) const;
+        std::pair<uint8_t, uint8_t> getInvCoords() const;
+        std::pair<uint8_t, uint8_t> getCornerCoords() const;
+        bool isEmpty() const { return mEmpty; }
         std::string getFlipSoundPath() const;
         FARender::FASpriteGroup* getFlipSpriteGroup();
+        bool isBeltEquippable() const;
+        int32_t getMaxCount() const;
+        std::array<int32_t, 2> getInvSize() const;
 
-        bool operator==(const Item& rhs) const { return this->mUniqueId == rhs.mUniqueId; }
-
-        ItemType getType() const { return mType; }
-        ItemClass getClass() const { return mClass; }
-        ItemEquipType getEquipLoc() const { return mEquipLocation; }
-
-        uint32_t getGraphicValue() const { return mGraphicValue; }
-        const std::string& getName() const { return mName; }
-        const std::string& getFlipAnimationPath() const { return mDropItemGraphicsPath; }
-        bool isEmpty() const { return mEmpty; }
-        std::pair<uint8_t, uint8_t> getInvSize() const { return std::pair<uint8_t, uint8_t>(mSizeX, mSizeY); }
-        std::pair<uint8_t, uint8_t> getInvCoords() const { return std::pair<uint8_t, uint8_t>(mInvX, mInvY); }
-        std::pair<uint8_t, uint8_t> getCornerCoords() const { return std::pair<uint8_t, uint8_t>(mCornerX, mCornerY); }
-        bool isBeltEquippable() const { return mSizeX == 1 && mSizeY == 1 && mUseOnce && mType != ItemType::gold; }
-
-        // public members
         bool mIsReal = false;
-        uint32_t mUniqueId = 0;
-        uint32_t mCount = 0;
+        int32_t mCount = 1;
 
-        static Item empty;
+        int32_t getReqStr() const;
+        int32_t getReqMagic() const;
+        int32_t getReqDex() const;
+        uint32_t getSpecialEffect() const;
+        ItemMiscId getMiscId() const;
+        uint32_t getSpellCode() const;
+        bool isUsable() const;
+        uint32_t getPrice() const;
+        ItemType getType() const;
+        ItemEquipType getEquipLoc() const;
+        ItemClass getClass() const;
+        uint32_t getGraphicValue() const;
+        int32_t getMinAttackDamage() const;
+        int32_t getMaxAttackDamage() const;
 
     private:
-        static std::unique_ptr<Cel::CelFile> mObjcurs;
+        std::string chargesStr() const;
+        std::string damageStr() const;
+        std::string armorStr() const;
+        std::string damageOrArmorStr() const;
+        std::string durabilityStr() const;
+        std::string requirementsStr() const;
+        const DiabloExe::BaseItem& base() const;
 
-        std::string mName;
-        ItemType mType = ItemType::misc;
-        ItemClass mClass = ItemClass::none;
-        ItemEquipType mEquipLocation = ItemEquipType::none;
-        uint32_t mGraphicValue = 0;
-        bool mUseOnce = 0;
-        std::string mDropItemGraphicsPath;
-        uint32_t mMaxCount = 0;
-        uint8_t mBaseId = 0;
+    private:
+        static Cel::CelFile* mObjcurs;
+        DiabloExe::Affix mAffix;
+
+        ItemId mBaseId;
+        int32_t mMaxDurability;
+        int32_t mCurrentDurability;
+        int32_t mArmorClass;
+
+        uint8_t mCornerX;
+        uint8_t mCornerY;
+
         bool mEmpty = true;
+        bool mIsIdentified;
+
+        int32_t mUniqueId = 0;
+
+    private:
+        int32_t mMaxCharges = 0;
+        int32_t mCurrentCharges = 0;
 
         // TODO: these should be handled by inventory class, not item class
         uint8_t mInvY = 0;
         uint8_t mInvX = 0;
 
-        uint8_t mSizeX = 0;
-        uint8_t mSizeY = 0;
-
-        uint8_t mCornerX = 0;
-        uint8_t mCornerY = 0;
+        const DiabloExe::DiabloExe* mExe = nullptr; // since we want to restore base info from exe data
 
         friend class Inventory;
-
-        // variables that used to be in this class, loaded form the exe, but ommented out for now sine we don't use them.
-        // Several of them also have the wrong type (eq uint8_t which should be bool)
-        //
-        // DiabloExe::Affix mAffix;
-        //
-        // uint32_t mActiveTrigger = 0;
-        //
-        // uint8_t mUniqCode = 0;
-        // std::string mSecondName;
-        // uint32_t mQualityLevel = 0;
-        // uint32_t mDurability = 0;
-        // uint32_t mCurrentDurability = 0;
-        // bool mIsIndestructible = false;
-        //
-        // uint32_t mMinAttackDamage = 0;
-        // uint32_t mMaxAttackDamage = 0;
-        // uint32_t mAttackDamage = 0;
-        //
-        // uint32_t mMinArmourClass = 0;
-        // uint32_t mMaxArmourClass = 0;
-        // uint32_t mArmourClass = 0;
-        //
-        // uint8_t mReqStr = 0;
-        // uint8_t mReqMagic = 0;
-        // uint8_t mReqDex = 0;
-        // uint8_t mReqVit = 0;
-        //
-        // uint32_t mSpecialEffect = 0;
-        // uint32_t mMagicCode = 0;
-        // uint32_t mSpellCode = 0;
-        // uint32_t mBuyPrice = 0;
-        // uint32_t mSellPrice = 0;
-        //
-        // uint8_t mNumEffects = 0;
-        //
-        // class ItemEffect
-        // {
-        // public:
-        //     ItemEffectType type;
-        //     int min;
-        //     int max;
-        // };
-        //
-        // // why 5?
-        // std::vector<ItemEffect> mEffects = std::vector<ItemEffect>(5);
-        //
-        // bool mIsMagic = false;
-        // bool mIsIdentified = false;
-        // bool mIsUnique = false;
-        //
-        // uint8_t mBeltX = 0;
+        friend class ItemFactory;
+        friend class PlayerFactory;
     };
 }

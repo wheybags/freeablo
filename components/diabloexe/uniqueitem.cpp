@@ -7,13 +7,13 @@ namespace DiabloExe
     {
         mNamePtr = exe.read32();
 
-        mItemType = exe.read8();
+        mUniqueBaseItemId = exe.read8();
 
         mQualityLevel = exe.read8();
 
         mNumEffects = exe.read16();
 
-        mGoldValue = exe.read32();
+        mPrice = exe.read32();
 
         for (auto& effect : mEffectData)
             for (auto& param : effect)
@@ -26,10 +26,10 @@ namespace DiabloExe
         std::stringstream ss;
         ss << "{" << std::endl
            << "\tmName: " << mName << "," << std::endl
-           << "\tmItemType: " << +mItemType << "," << std::endl
+           << "\tmItemType: " << +mUniqueBaseItemId << "," << std::endl
            << "\tmQualityLevel: " << +mQualityLevel << "," << std::endl
            << "\tmNumEffects: " << +mNumEffects << "," << std::endl
-           << "\tmGoldValue: " << +mGoldValue << "," << std::endl;
+           << "\tmGoldValue: " << +mPrice << "," << std::endl;
         for (int i = 0; i < 6; ++i)
         {
             ss << "\tmEffect" << i << ": " << mEffectData[i][0] << '\n';

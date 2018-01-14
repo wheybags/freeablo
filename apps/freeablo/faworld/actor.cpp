@@ -76,7 +76,7 @@ namespace FAWorld
         mSoundPath = monster.soundPath;
     }
 
-    Actor::Actor(FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(loader)
+    Actor::Actor(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : mMoveHandler(loader), mAnimation(loader), mStats(loader)
     {
         mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
 
@@ -103,7 +103,7 @@ namespace FAWorld
         }
 
         mTarget.load(loader);
-        mInventory.load(loader);
+        mInventory.load(loader, exe);
     }
 
     void Actor::save(FASaveGame::GameSaver& saver)

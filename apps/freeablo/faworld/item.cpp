@@ -3,160 +3,176 @@
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "itemenums.h"
-#include "itemmanager.h"
+#include "itemfactory.h"
+#include <boost/format.hpp>
 #include <iostream>
 
 namespace FAWorld
 {
-    std::unique_ptr<Cel::CelFile> Item::mObjcurs;
-    Item Item::empty;
-
-    Item::Item(DiabloExe::BaseItem item, uint32_t id, DiabloExe::Affix* affix, bool isIdentified)
-    {
-        UNUSED_PARAM(affix);
-        UNUSED_PARAM(isIdentified);
-
-        if (!mObjcurs)
-            mObjcurs.reset(new Cel::CelFile("data/inv/objcurs.cel"));
-
-        mIsReal = true;
-        mEmpty = false;
-        mBaseId = id;
-        mClass = static_cast<ItemClass>(item.itemClass);
-        mEquipLocation = static_cast<ItemEquipType>(item.equipLoc);
-        mGraphicValue = item.graphicValue;
-        mType = static_cast<ItemType>(item.type);
-        mName = item.itemName;
-        mUseOnce = item.useOnce != 0;
-        mDropItemGraphicsPath = item.dropItemGraphicsPath;
-
-        if (mClass != ItemClass::gold)
-        {
-            mGraphicValue += 11;
-
-            // TODO: better image loading in general, but new system should support "peeking" at image sizes, without having to decode them
-            Cel::CelFrame& frame = (*mObjcurs)[mGraphicValue];
-            mSizeX = static_cast<uint8_t>(frame.width() / 28);
-            mSizeY = static_cast<uint8_t>(frame.height() / 28);
-            mMaxCount = 1;
-            mCount = 1;
-        }
-        else
-        {
-            mGraphicValue = 15;
-            mSizeX = 1;
-            mSizeY = 1;
-            mMaxCount = 5000;
-        }
-
-        // unused so-far attributes
-        // if (affix)
-        //     mAffix = *affix;
-        // mIsIdentified = isIdentified;
-        // mIsUnique = false;
-        // mActiveTrigger = item.activTrigger;
-        // mUniqCode = item.uniqCode;
-        // mSecondName = item.itemSecondName;
-        // mQualityLevel = item.qualityLevel;
-        // mDurability = item.durability;
-        // mCurrentDurability = mDurability;
-        // mMinAttackDamage = item.minAttackDamage;
-        // mMaxAttackDamage = item.maxAttackDamage;
-        // mAttackDamage = FALevelGen::randomInRange(mMinAttackDamage, mMaxAttackDamage);
-        // mMinArmourClass = item.minArmourClass;
-        // mMaxArmourClass = item.maxArmourClass;
-        // mArmourClass = FALevelGen::randomInRange(mMinArmourClass, mMaxArmourClass);
-        // mReqStr = item.reqStr;
-        // mReqMagic = item.reqMagic;
-        // mReqDex = item.reqDex;
-        // mReqVit = item.reqVit;
-        // mSpecialEffect = item.specialEffect;
-        // mMagicCode = item.magicCode;
-        // mSpellCode = item.spellCode;
-        // mBuyPrice = item.price1;
-        // mSellPrice = item.price2;
-    }
-
-    Item::Item(const DiabloExe::UniqueItem& item, uint32_t id)
-    {
-        UNUSED_PARAM(item);
-        UNUSED_PARAM(id);
-
-        release_assert(false && "unique items not implemented");
-        /*ItemManager& itemManager = ItemManager::get();
-
-        DiabloExe::BaseItem& baseItem = itemManager.getBaseItemByUniqueCode(item.mItemType);
-
-        Item base = Item(baseItem, id);
-        *this = base;
-        mIsUnique = true;
-        mIsMagic = false;
-        mSellPrice = item.mGoldValue;
-        mBuyPrice = item.mGoldValue;
-        mQualityLevel = item.mQualityLevel;
-        mName = item.mName;
-
-        for (int i = 0; i < 6; ++i)
-        {
-            mEffects[i].type = static_cast<ItemEffectType>(item.mEffectData[i][0]);
-            mEffects[i].min = item.mEffectData[i][1];
-            mEffects[i].max = item.mEffectData[i][2];
-        }*/
-    }
-
     void Item::save(FASaveGame::GameSaver& saver)
     {
         saver.save(mIsReal);
         saver.save(mUniqueId);
         saver.save(mCount);
 
-        saver.save(mName);
-        saver.save(uint8_t(mType));
-        saver.save(uint8_t(mClass));
-        saver.save(uint8_t(mEquipLocation));
-        saver.save(mGraphicValue);
-        saver.save(mUseOnce);
-        saver.save(mDropItemGraphicsPath);
-        saver.save(mMaxCount);
-        saver.save(mBaseId);
+        saver.save(mArmorClass);
+        saver.save(mCurrentDurability);
+        saver.save(mMaxDurability);
+        saver.save(mCurrentCharges);
+        saver.save(mMaxCharges);
+
+        saver.save(static_cast<int32_t>(mBaseId));
         saver.save(mEmpty);
 
         saver.save(mInvY);
         saver.save(mInvX);
 
-        saver.save(mSizeX);
-        saver.save(mSizeY);
-
         saver.save(mCornerX);
         saver.save(mCornerY);
     }
 
-    void Item::load(FASaveGame::GameLoader& loader)
+    std::string Item::damageStr() const { return (boost::format("damage: %1% - %2%") % getMinAttackDamage() % getMaxAttackDamage()).str(); }
+
+    std::string Item::armorStr() const { return (boost::format("armor: %1%") % mArmorClass).str(); }
+
+    std::string Item::damageOrArmorStr() const
+    {
+        if (getClass() == ItemClass::armor)
+            return armorStr();
+
+        if (getClass() == ItemClass::weapon)
+            return damageStr();
+        return {};
+    }
+
+    std::string Item::durabilityStr() const
+    {
+        if (getClass() != ItemClass::armor && getClass() != ItemClass::weapon)
+            return {};
+
+        if (mMaxDurability == indestructibleItemDurability)
+            return "Indestructible";
+        else
+            return (boost::format("Dur: %1%/%2%") % mCurrentDurability % mMaxDurability).str();
+    }
+
+    std::string Item::requirementsStr() const
+    {
+        if (getReqStr() + getReqDex() + getReqMagic() == 0)
+            return {};
+        std::string str = "Required:";
+        if (getReqStr() > 0)
+            str += (boost::format(" %1% Str") % getReqStr()).str();
+        if (getReqMagic() > 0)
+            str += (boost::format(" %1% Mag") % getReqMagic()).str();
+        if (getReqDex() > 0)
+            str += (boost::format(" %1% Dex") % getReqDex()).str();
+        return str;
+    }
+
+    const DiabloExe::BaseItem& Item::base() const { return mExe->getBaseItems()[static_cast<int32_t>(mBaseId)]; }
+
+    std::string Item::getFullDescription() const
+    {
+        auto description = getName();
+        auto dmrOrArmor = damageOrArmorStr();
+        if (!dmrOrArmor.empty())
+            description += '\n' + dmrOrArmor;
+
+        auto dur = durabilityStr();
+        if (!dur.empty())
+            description += " " + dur;
+
+        description += chargesStr();
+        if (getQuality() == ItemQuality::unique)
+            description += "\nUnique Item";
+        // TODO: affix/prefix description
+        auto reqs = requirementsStr();
+        if (!reqs.empty())
+            description += '\n' + reqs;
+
+        return description;
+    }
+
+    std::vector<std::string> Item::descriptionForMerchants() const
+    {
+        std::vector<std::string> ret;
+        auto append = [](std::string& target, const std::string& new_part) {
+            if (!target.empty())
+                target += ",  ";
+            target += new_part;
+        };
+        ret.push_back(getName());
+        {
+            // first line - affixes + charges
+            std::string str;
+            if (mMaxCharges > 0)
+                append(str, chargesStr());
+            if (!str.empty())
+                ret.push_back(std::move(str));
+        }
+        {
+            std::string str;
+            str += damageOrArmorStr();
+            if (!str.empty())
+                str += "  ";
+            str += durabilityStr();
+            auto reqs = requirementsStr();
+            append(str, reqs.empty() ? "No Required Attributes" : reqs);
+            if (!str.empty())
+                ret.push_back(std::move(str));
+        }
+        while (ret.size() < 3)
+            ret.emplace_back();
+        return ret;
+    }
+
+    std::array<int32_t, 2> Item::getInvSize() const
+    {
+        if (isEmpty())
+            return {0, 0};
+        return {base().invSizeX, base().invSizeY};
+    }
+    std::pair<uint8_t, uint8_t> Item::getInvCoords() const { return {mInvX, mInvY}; }
+    std::pair<uint8_t, uint8_t> Item::getCornerCoords() const { return {mCornerX, mCornerY}; }
+
+    void Item::load(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe)
     {
         mIsReal = loader.load<bool>();
-        mUniqueId = loader.load<uint32_t>();
-        mCount = loader.load<uint32_t>();
+        mUniqueId = loader.load<int32_t>();
+        mCount = loader.load<int32_t>();
 
-        mName = loader.load<std::string>();
-        mType = ItemType(loader.load<uint8_t>());
-        mClass = ItemClass(loader.load<uint8_t>());
-        mEquipLocation = ItemEquipType(loader.load<uint8_t>());
-        mGraphicValue = loader.load<uint32_t>();
-        mUseOnce = loader.load<bool>();
-        mDropItemGraphicsPath = loader.load<std::string>();
-        mMaxCount = loader.load<uint32_t>();
-        mBaseId = loader.load<uint8_t>();
+        mArmorClass = loader.load<int32_t>();
+        mCurrentDurability = loader.load<int32_t>();
+        mMaxDurability = loader.load<int32_t>();
+        mCurrentCharges = loader.load<int32_t>();
+        mMaxCharges = loader.load<int32_t>();
+
+        mBaseId = static_cast<ItemId>(loader.load<int32_t>());
         mEmpty = loader.load<bool>();
 
         mInvY = loader.load<uint8_t>();
         mInvX = loader.load<uint8_t>();
 
-        mSizeX = loader.load<uint8_t>();
-        mSizeY = loader.load<uint8_t>();
-
         mCornerX = loader.load<uint8_t>();
         mCornerY = loader.load<uint8_t>();
+        mExe = &exe;
     }
+
+    std::string Item::getName() const
+    {
+        if (getType() == ItemType::gold)
+            return (boost::format("%1% gold %2%") % mCount % (mCount ? "pieces" : "piece")).str();
+        return base().name;
+    }
+
+    ItemQuality Item::getQuality() const
+    {
+        // TODO: support other kinds of items
+        return ItemQuality::normal;
+    }
+
+    Item::~Item() {}
 
     std::string Item::getFlipSoundPath() const
     {
@@ -190,9 +206,87 @@ namespace FAWorld
             case ItemType::ring:
             case ItemType::amulet:
                 return "sfx/items/flipring.wav";
+            case ItemType::none:
+                break;
         }
         return "";
     }
 
-    FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(getFlipAnimationPath()); }
+    FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(base().dropItemGraphicsPath); }
+
+    bool Item::isBeltEquippable() const { return getInvSize() == std::array<int32_t, 2>{1, 1} && isUsable() && getType() != ItemType::gold; }
+
+    int32_t Item::getMaxCount() const
+    {
+        if (getType() == ItemType::gold)
+            return 5000;
+        return 1;
+    }
+
+    int32_t Item::getReqStr() const { return base().requiredStrength; }
+    int32_t Item::getReqMagic() const { return base().requiredMagic; }
+
+    int32_t Item::getReqDex() const { return base().requiredDexterity; }
+
+    uint32_t Item::getSpecialEffect() const { return base().specialEffectFlags; }
+
+    ItemMiscId Item::getMiscId() const { return static_cast<ItemMiscId>(base().miscId); }
+
+    uint32_t Item::getSpellCode() const { return base().spellId; }
+
+    bool Item::isUsable() const { return base().isUsable; }
+
+    uint32_t Item::getPrice() const { return base().price; }
+
+    ItemType Item::getType() const
+    {
+        if (isEmpty())
+            return ItemType::none;
+        return static_cast<ItemType>(base().type);
+    }
+
+    ItemEquipType Item::getEquipLoc() const
+    {
+        if (isEmpty())
+            return ItemEquipType::none;
+        return static_cast<ItemEquipType>(base().equipType);
+    }
+
+    ItemClass Item::getClass() const
+    {
+        if (isEmpty())
+            return ItemClass::none;
+        return static_cast<ItemClass>(base().itemClass);
+    }
+    uint32_t Item::getGraphicValue() const
+    {
+        if (getType() == ItemType::gold)
+        {
+            if (mCount <= 1000)
+                return 15;
+            if (mCount <= 2500)
+                return 16;
+
+            return 17;
+        }
+        return base().invGraphicsId + 11;
+    }
+
+    int32_t Item::getMinAttackDamage() const { return base().minAttackDamage; }
+
+    int32_t Item::getMaxAttackDamage() const { return base().maxAttackDamage; }
+
+    std::string Item::chargesStr() const
+    {
+        if (getMiscId() == ItemMiscId::staff && mMaxCharges > 0)
+            return (boost::format("\nCharges: %1%/%2%") % mCurrentCharges % mMaxCharges).str();
+
+        return {};
+    }
+
+    void Item::setUniqueId(uint32_t mUniqueId) { this->mUniqueId = mUniqueId; }
+
+    uint32_t Item::getUniqueId() const { return this->mUniqueId; }
+
+    bool Item::operator==(const Item rhs) const { return this->mUniqueId == rhs.mUniqueId; }
 }

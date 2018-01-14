@@ -38,6 +38,18 @@ namespace FAWorld
         mInventory.equipChanged.connect([this]() { updateSprites(); });
     }
 
+    int Player::getTotalGold() const
+    {
+        int totalCnt = 0;
+        for (auto target : mInventory.getBeltAndInventoryItemPositions())
+        {
+            auto& item = mInventory.getItemAt(target);
+            if (item.getType() == ItemType::gold)
+                totalCnt += item.mCount;
+        }
+        return totalCnt;
+    }
+
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
     {
         UNUSED_PARAM(className);
@@ -51,7 +63,7 @@ namespace FAWorld
         mBehaviour = new PlayerBehaviour(this);
     }
 
-    Player::Player(FASaveGame::GameLoader& loader) : Actor(loader)
+    Player::Player(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : Actor(loader, exe)
     {
         mClassName = loader.load<std::string>();
         FAWorld::World::get()->registerPlayer(this);
@@ -81,26 +93,29 @@ namespace FAWorld
         std::string weaponCode;
         bool inDungeon = false;
 
-        std::string armour, weapon;
-        switch (mInventory.getBody().getType())
+        std::string armour = "l", weapon;
+        if (!mInventory.getBody().isEmpty())
         {
-            case ItemType::heavyArmor:
+            switch (mInventory.getBody().getType())
             {
-                armour = "h";
-                break;
-            }
+                case ItemType::heavyArmor:
+                {
+                    armour = "h";
+                    break;
+                }
 
-            case ItemType::mediumArmor:
-            {
-                armour = "m";
-                break;
-            }
+                case ItemType::mediumArmor:
+                {
+                    armour = "m";
+                    break;
+                }
 
-            case ItemType::lightArmor:
-            default:
-            {
-                armour = "l";
-                break;
+                case ItemType::lightArmor:
+                default:
+                {
+                    armour = "l";
+                    break;
+                }
             }
         }
         if (mInventory.getLeftHand().isEmpty() && mInventory.getRightHand().isEmpty())
