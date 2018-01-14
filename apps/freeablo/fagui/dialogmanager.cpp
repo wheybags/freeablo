@@ -206,11 +206,10 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    static bool adriaSellFilter (const FAWorld::Item &item)
+    static bool adriaSellFilter(const FAWorld::Item& item)
     {
         // TODO: add check for quest items
-        return item.getType () == FAWorld::ItemType::misc ||
-               item.getType () == FAWorld::ItemType::staff;
+        return item.getType() == FAWorld::ItemType::misc || item.getType() == FAWorld::ItemType::staff;
     }
 
     void DialogManager::talkAdria(const FAWorld::Actor* npc)
@@ -330,8 +329,7 @@ namespace FAGui
         data.textLines({"No"}).setAction([this]() { mGuiManager.popDialogData(); });
     }
 
-    template <typename FilterType>
-    void DialogManager::sellDialog(FilterType filter)
+    template <typename FilterType> void DialogManager::sellDialog(FilterType filter)
     {
         DialogData d;
         d.widen();
@@ -370,12 +368,10 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    static bool griswoldSellFilter (const FAWorld::Item &item)
+    static bool griswoldSellFilter(const FAWorld::Item& item)
     {
         // TODO: add check for quest items
-        return item.getType () != FAWorld::ItemType::misc &&
-               item.getType () != FAWorld::ItemType::gold &&
-               item.getType () != FAWorld::ItemType::staff;
+        return item.getType() != FAWorld::ItemType::misc && item.getType() != FAWorld::ItemType::gold && item.getType() != FAWorld::ItemType::staff;
     }
 
     void DialogManager::talkGriswold(const FAWorld::Actor* npc)

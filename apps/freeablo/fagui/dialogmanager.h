@@ -90,8 +90,7 @@ namespace FAGui
         void talk(const FAWorld::Actor* npc);
 
     private:
-        template <typename FilterType>
-        void sellDialog(FilterType filter);
+        template <typename FilterType> void sellDialog(FilterType filter);
 
         void talkOgden(const FAWorld::Actor* npc);
         void talkFarnham(const FAWorld::Actor* npc);

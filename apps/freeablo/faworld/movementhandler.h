@@ -34,7 +34,7 @@ namespace FAWorld
         void update(int32_t actorId);
         void teleport(GameLevel* level, Position pos);
 
-        boost::signals2::signal<void (const std::pair<int32_t, int32_t>)> positionReached;
+        boost::signals2::signal<void(const std::pair<int32_t, int32_t>)> positionReached;
         bool positionReachedSent = false;
 
     private:

@@ -217,7 +217,5 @@ namespace FAWorld
 
     ItemMap& GameLevel::getItemMap() { return *mItemMap; }
 
-    bool GameLevel::isTown() const {
-        return mLevelIndex == 0;
-    }
+    bool GameLevel::isTown() const { return mLevelIndex == 0; }
 }

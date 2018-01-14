@@ -212,7 +212,7 @@ namespace FAWorld
 
         level->addActor(this);
         mMoveHandler.teleport(level, pos);
-        updateSprites ();
+        updateSprites();
     }
 
     GameLevel* Actor::getLevel() { return mMoveHandler.getLevel(); }

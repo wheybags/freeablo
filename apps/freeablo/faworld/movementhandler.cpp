@@ -107,7 +107,7 @@ namespace FAWorld
                 if (mCurrentPathIndex < (int32_t)mCurrentPath.size())
                 {
                     // If our destination hasn't changed, or we can't repath, keep moving along our current path
-                    if (mCurrentPath.back () == mDestination || !canRepath)
+                    if (mCurrentPath.back() == mDestination || !canRepath)
                     {
                         auto next = mCurrentPath[mCurrentPathIndex];
 

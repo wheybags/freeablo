@@ -47,7 +47,7 @@ namespace FAWorld
         void pickupItem(Target::ItemTarget target);
 
         void teleport(GameLevel* level, Position pos);
-        virtual void updateSprites () {}
+        virtual void updateSprites() {}
         GameLevel* getLevel();
 
         void attack(Actor* enemy);
