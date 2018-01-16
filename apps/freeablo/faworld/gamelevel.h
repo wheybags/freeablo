@@ -85,6 +85,7 @@ namespace FAWorld
         void getActors(std::vector<Actor*>& actors);
         HoverState& getHoverState();
         ItemMap& getItemMap();
+        bool isTown() const;
 
     private:
         GameLevel();

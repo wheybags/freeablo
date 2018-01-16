@@ -36,6 +36,7 @@ namespace FAWorld
     {
         FAWorld::World::get()->registerPlayer(this);
         mInventory.equipChanged.connect([this]() { updateSprites(); });
+        mMoveHandler.positionReached.connect(positionReached);
     }
 
     int Player::getTotalGold() const
@@ -89,9 +90,6 @@ namespace FAWorld
     {
         std::string classCode;
         classCode = mClassName[0];
-        std::string armourCode;
-        std::string weaponCode;
-        bool inDungeon = false;
 
         std::string armour = "l", weapon;
         if (!mInventory.getBody().isEmpty())
@@ -190,13 +188,8 @@ namespace FAWorld
 
             release_assert(!weapon.empty()); // Empty weapon format
         }
-        weaponCode = weapon;
-        armourCode = armour;
-
-        if (getLevel() && getLevel()->getLevelIndex() != 0)
-            inDungeon = true;
-        else
-            inDungeon = false;
+        auto weaponCode = weapon;
+        auto armourCode = armour;
 
         auto helper = [&](bool isDie) {
             std::string weapFormat = weaponCode;
@@ -215,15 +208,15 @@ namespace FAWorld
         mAnimation.setAnimation(AnimState::attack, renderer->loadImage((helper(false) % "at").str()));
         mAnimation.setAnimation(AnimState::hit, renderer->loadImage((helper(false) % "ht").str()));
 
-        if (inDungeon)
-        {
-            mAnimation.setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "aw").str()));
-            mAnimation.setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "as").str()));
-        }
-        else
+        if (getLevel() && getLevel()->isTown())
         {
             mAnimation.setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "wl").str()));
             mAnimation.setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "st").str()));
+        }
+        else
+        {
+            mAnimation.setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "aw").str()));
+            mAnimation.setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "as").str()));
         }
     }
 

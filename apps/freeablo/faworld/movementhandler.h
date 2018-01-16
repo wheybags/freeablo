@@ -5,6 +5,8 @@
 #include "position.h"
 #include "world.h"
 
+#include <boost/signals2/signal.hpp>
+
 namespace FASaveGame
 {
     class GameLoader;
@@ -31,6 +33,9 @@ namespace FAWorld
         GameLevel* getLevel();
         void update(int32_t actorId);
         void teleport(GameLevel* level, Position pos);
+
+        boost::signals2::signal<void(const std::pair<int32_t, int32_t>)> positionReached;
+        bool positionReachedSent = false;
 
     private:
         GameLevel* mLevel = nullptr;

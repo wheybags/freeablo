@@ -47,6 +47,7 @@ namespace FAWorld
         void pickupItem(Target::ItemTarget target);
 
         void teleport(GameLevel* level, Position pos);
+        virtual void updateSprites() {}
         GameLevel* getLevel();
 
         void attack(Actor* enemy);
@@ -56,6 +57,7 @@ namespace FAWorld
 
         bool canIAttack(Actor* actor);
         virtual void update(bool noclip);
+        void init();
         void takeDamage(double amount);
         void heal();
 

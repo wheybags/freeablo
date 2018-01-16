@@ -82,6 +82,11 @@ namespace FAWorld
     {
         if (mCurrentPos.getDist() == 0)
         {
+            if (!positionReachedSent)
+            {
+                positionReached(mCurrentPos.current());
+                positionReachedSent = true;
+            }
             // if we have arrived, stop moving
             if (mCurrentPos.current() == mDestination)
             {
@@ -102,7 +107,7 @@ namespace FAWorld
                 if (mCurrentPathIndex < (int32_t)mCurrentPath.size())
                 {
                     // If our destination hasn't changed, or we can't repath, keep moving along our current path
-                    if (mCurrentPath[mCurrentPath.size() - 1] == mDestination || !canRepath)
+                    if (mCurrentPath.back() == mDestination || !canRepath)
                     {
                         auto next = mCurrentPath[mCurrentPathIndex];
 
@@ -110,6 +115,7 @@ namespace FAWorld
                         if (mLevel->isPassable(next.first, next.second))
                         {
                             int32_t direction = Misc::getVecDir(Misc::getVec(mCurrentPos.current(), next));
+                            positionReachedSent = false;
                             mCurrentPos.setDirection(direction);
                             mCurrentPos.start();
                             needsRepath = false;
@@ -123,7 +129,7 @@ namespace FAWorld
                     mLastRepathed = World::get()->getCurrentTick();
 
                     bool _;
-                    mCurrentPath = std::move(pathFind(mLevel, mCurrentPos.current(), mDestination, _, mAdjacent));
+                    mCurrentPath = pathFind(mLevel, mCurrentPos.current(), mDestination, _, mAdjacent);
                     mCurrentPathIndex = 0;
 
                     update(actorId);

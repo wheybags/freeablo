@@ -25,13 +25,15 @@ namespace FAWorld
 
         virtual ~Player();
         void setSpriteClass(std::string className);
-        void updateSprites();
+        void updateSprites() override;
         bool dropItem(const FAWorld::Tile& clickedTile);
 
         virtual void update(bool noclip) override;
 
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour; }
         int getTotalGold() const;
+
+        boost::signals2::signal<void(const std::pair<int32_t, int32_t>&)> positionReached;
 
     private:
         void init(const std::string& className, const DiabloExe::CharacterStats& charStats);

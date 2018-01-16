@@ -15,6 +15,7 @@ namespace FAWorld
 {
     class World;
     class Actor;
+    class Item;
 }
 
 namespace FAGui
@@ -29,6 +30,7 @@ namespace FAGui
         DialogLineData& setAction(std::function<void()> actionArg);
         DialogLineData& setNumber(int32_t number);
         DialogLineData& setYOffset(int32_t offset);
+        DialogLineData& setXOffset(int32_t offset);
 
         static DialogLineData separator()
         {
@@ -54,7 +56,8 @@ namespace FAGui
 
     public:
         static DialogLineData toLineData(const std::string& text, TextColor color, bool alignCenter);
-        DialogLineData& textLines(const std::vector<std::string>& texts, TextColor color = TextColor::white, bool alignCenter = true);
+        DialogLineData&
+        textLines(const std::vector<std::string>& texts, TextColor color = TextColor::white, bool alignCenter = true, std::vector<int32_t> offsets = {});
         void skip_line(int32_t cnt = 1);
         void separator();
         DialogLineData& footer(const std::string& text);
@@ -62,12 +65,12 @@ namespace FAGui
         int32_t selectedLine();
         void notify(Engine::KeyboardInputAction action, GuiManager& manager);
         void widen() { mIsWide = true; }
-        void showScrollBar() { mScrollBarShown = true; }
+        void showScrollBar(bool show = true) { mScrollBarShown = show; }
         bool isScrollbarShown() const { return mScrollBarShown; }
         int32_t visibleBodyLineCount() const { return linesVisible - mHeader.size() - mFooter.size(); }
         bool isVisible(int32_t line) const { return line >= mFirstVisible && line < mFirstVisible + visibleBodyLineCount(); }
-        void setupItemOffsets();
         double selectedLinePercent();
+        void clearLines();
 
     private:
         std::vector<DialogLineData> mHeader;
@@ -85,9 +88,10 @@ namespace FAGui
     public:
         explicit DialogManager(GuiManager& gui_manager, FAWorld::World& world);
         void talk(const FAWorld::Actor* npc);
-        void sellGriswold(const FAWorld::Actor* npc);
 
     private:
+        template <typename FilterType> void sellDialog(FilterType filter);
+
         void talkOgden(const FAWorld::Actor* npc);
         void talkFarnham(const FAWorld::Actor* npc);
         void talkAdria(const FAWorld::Actor* npc);
@@ -97,6 +101,8 @@ namespace FAGui
         void talkGillian(const FAWorld::Actor* npc);
         void talkGriswold(const FAWorld::Actor* npc);
         void quitDialog() const;
+
+        void fillConfirmDialog(DialogData& data, const FAWorld::Item& item, int price, const char* question, std::function<void()> successAction);
 
     private:
         GuiManager& mGuiManager;
