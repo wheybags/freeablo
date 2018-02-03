@@ -35,9 +35,9 @@ namespace FAWorld
         void teleport(GameLevel* level, Position pos);
 
         boost::signals2::signal<void(const std::pair<int32_t, int32_t>)> positionReached;
-        bool positionReachedSent = false;
 
     private:
+        bool positionReachedSent = true;
         GameLevel* mLevel = nullptr;
         Position mCurrentPos;
         std::pair<int32_t, int32_t> mDestination;
