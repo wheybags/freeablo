@@ -168,6 +168,8 @@ namespace FAWorld
 
     void Actor::heal() { mStats.mHp = mStats.mHp.max; }
 
+    void Actor::setDirection(int32_t direction) { mMoveHandler.setDirection(direction); }
+
     bool Actor::hasTarget() const { return mTarget.getType() != Target::Type::None; }
 
     void Actor::die()
@@ -265,6 +267,14 @@ namespace FAWorld
             return false;
 
         return true;
+    }
+
+    void Actor::attack(const std::pair<int32_t, int32_t>& tile)
+    {
+        auto actor = getLevel()->getActorAt(tile.first, tile.second);
+        if (!canIAttack(actor))
+            return;
+        attack(actor);
     }
 
     void Actor::attack(Actor* enemy)

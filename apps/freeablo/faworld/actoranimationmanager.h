@@ -48,6 +48,7 @@ namespace FAWorld
 
         void update();
         void setIdleFrameSequence(const std::vector<int32_t>& sequence);
+        int32_t getCurrentAnimationLength() const;
 
     private:
         FARender::AnimationPlayer mAnimationPlayer;

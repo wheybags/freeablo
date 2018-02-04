@@ -11,7 +11,7 @@ namespace FAWorld
 
     namespace ActorState
     {
-        class AttackState : public AbstractState
+        class MeleeAttackState : public AbstractState
         {
         public:
             static const std::string typeId;
@@ -19,10 +19,14 @@ namespace FAWorld
 
             virtual void save(FASaveGame::GameSaver&) const override {}
 
+            explicit MeleeAttackState(int direction);
             virtual ~AttackState() = default;
             virtual boost::optional<StateChange> update(Actor& actor, bool noclip);
 
             virtual void onEnter(Actor& actor);
+
+        private:
+            int32_t mDirection;
         };
     }
 }

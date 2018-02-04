@@ -150,4 +150,6 @@ namespace FAWorld
         mCurrentPos = pos;
         mDestination = mCurrentPos.current();
     }
+
+    void MovementHandler::setDirection(int32_t direction) { mCurrentPos.setDirection(direction); }
 }

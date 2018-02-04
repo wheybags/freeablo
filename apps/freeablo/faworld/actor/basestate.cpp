@@ -30,7 +30,9 @@ namespace FAWorld
                             if (actor.canIAttack(target))
                             {
                                 actor.attack(target);
-                                ret = StateChange{StateOperation::push, new AttackState()};
+                                auto targetPos = target->getPos().current();
+                                auto myPos = actor.getPos().current();
+                                ret = StateChange{StateOperation::push, new MeleeAttackState(Misc::getVecDir({targetPos.first - myPos.first, targetPos.second - myPos.second}))};
                             }
                         }
                     }

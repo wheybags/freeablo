@@ -6,9 +6,11 @@ namespace FAWorld
 
     namespace ActorState
     {
-        const std::string AttackState::typeId = "actorstate-attack-state";
+        const std::string MeeleeAttackState::typeId = "actorstate-attack-state";
 
-        boost::optional<StateChange> AttackState::update(Actor& actor, bool noclip)
+        MeleeAttackState::MeleeAttackState(int direction) : mDirection(direction) {}
+
+        boost::optional<StateChange> MeleeAttackState::update(Actor& actor, bool noclip)
         {
             UNUSED_PARAM(noclip);
 
@@ -19,12 +21,22 @@ namespace FAWorld
                 return StateChange{StateOperation::pop};
             }
 
+            // NOTE: this is approximation
+            // in reality attack frame differs for each weapon for player
+            // and most likely also specified exactly for each monster
+            auto attackFrame = actor.mAnimation.getCurrentAnimationLength() / 2;
+            if (actor.mAnimation.getCurrentRealFrame().second == attackFrame)
+            {
+                actor.attack(Misc::getNextPosByDir(actor.getPos().current(), mDirection));
+            }
+
             return boost::none;
         }
 
-        void AttackState::onEnter(Actor& actor)
+        void MeleeAttackState::onEnter(Actor& actor)
         {
             actor.isAttacking = true;
+            actor.setDirection(mDirection);
             actor.mAnimation.playAnimation(AnimState::attack, FARender::AnimationPlayer::AnimationType::Once);
         }
     }

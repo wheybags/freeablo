@@ -43,6 +43,7 @@ namespace FARender
         void replaceAnimation(FARender::FASpriteGroup* anim);
 
         void update();
+        int32_t getAnimLength() const;
 
     private:
         FARender::FASpriteGroup* mCurrentAnim = nullptr;

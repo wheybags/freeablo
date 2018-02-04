@@ -52,6 +52,7 @@ namespace FAWorld
         World* getWorld() const { return &mWorld; }
 
         void attack(Actor* enemy);
+        void attack(const std::pair<int32_t, int32_t>& tile);
 
         std::string getDieWav() const;
         std::string getHitWav() const;
@@ -61,6 +62,7 @@ namespace FAWorld
         void init();
         void takeDamage(double amount);
         void heal();
+        void setDirection(int32_t direction);
 
         void die();
         bool isDead() const;

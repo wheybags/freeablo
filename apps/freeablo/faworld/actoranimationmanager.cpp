@@ -159,4 +159,6 @@ namespace FAWorld
     }
 
     void ActorAnimationManager::setIdleFrameSequence(const std::vector<int32_t>& sequence) { mIdleFrameSequence = sequence; }
+
+    int32_t ActorAnimationManager::getCurrentAnimationLength() const { return mAnimationPlayer.getAnimLength(); }
 }
