@@ -143,72 +143,8 @@ namespace FALevelGen
     // grid of size width * height
     void moveRoom(Room& room, const std::pair<float, float>& vector, int32_t width, int32_t height)
     {
-        int32_t xMove = 0, yMove = 0;
-
-        switch (Misc::getVecDir(vector))
-        {
-            case -1:
-            {
-                xMove = 0;
-                yMove = 0;
-                break;
-            }
-            case 0:
-            {
-                xMove = 1;
-                yMove = 1;
-                break;
-            }
-            case 1:
-            {
-                xMove = 0;
-                yMove = 1;
-                break;
-            }
-            case 2:
-            {
-                xMove = -1;
-                yMove = 1;
-                break;
-            }
-            case 3:
-            {
-                xMove = -1;
-                yMove = 0;
-                break;
-            }
-            case 4:
-            {
-                xMove = -1;
-                yMove = -1;
-                break;
-            }
-            case 5:
-            {
-                xMove = 0;
-                yMove = -1;
-                break;
-            }
-            case 6:
-            {
-                xMove = 1;
-                yMove = -1;
-                break;
-            }
-            case 7:
-            {
-                xMove = 1;
-                yMove = 0;
-                break;
-            }
-            default:
-            {
-                release_assert(false); // This should never happen
-            }
-        }
-
-        int32_t newX = room.xPos + xMove;
-        int32_t newY = room.yPos + yMove;
+        int32_t newX = 0, newY = 0;
+        std::tie (newX, newY) = Misc::getNextPosByDir({room.xPos, room.yPos}, Misc::getVecDir(vector));
 
         // Make sure not to move outside map
         if (newX >= 1 && newY >= 1 && newX + room.width < width - 1 && newY + room.height < height - 1)

@@ -8,7 +8,7 @@ namespace FAWorld
     {
         const std::string MeeleeAttackState::typeId = "actorstate-attack-state";
 
-        MeleeAttackState::MeleeAttackState(int direction) : mDirection(direction) {}
+        MeleeAttackState::MeleeAttackState(Misc::Direction direction) : mDirection(direction) {}
 
         boost::optional<StateChange> MeleeAttackState::update(Actor& actor, bool noclip)
         {

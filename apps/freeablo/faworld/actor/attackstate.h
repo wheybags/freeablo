@@ -5,6 +5,11 @@
 #include <misc/misc.h>
 #include <stddef.h>
 
+namespace Misc
+{
+    enum class Direction;
+}
+
 namespace FAWorld
 {
     class Actor;
@@ -19,14 +24,14 @@ namespace FAWorld
 
             virtual void save(FASaveGame::GameSaver&) const override {}
 
-            explicit MeleeAttackState(int direction);
+            explicit MeleeAttackState(Misc::Direction direction);
             virtual ~AttackState() = default;
             virtual boost::optional<StateChange> update(Actor& actor, bool noclip);
 
             virtual void onEnter(Actor& actor);
 
         private:
-            int32_t mDirection;
+            Misc::Direction mDirection;
         };
     }
 }

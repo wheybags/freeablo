@@ -62,7 +62,7 @@ namespace FAWorld
         void init();
         void takeDamage(double amount);
         void heal();
-        void setDirection(int32_t direction);
+        void setDirection(Misc::Direction direction);
 
         void die();
         bool isDead() const;

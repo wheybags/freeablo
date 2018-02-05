@@ -41,6 +41,8 @@ add_library(Misc
     misc/maxcurrentitem.h
     misc/assert.h
     misc/array2d.h
+    misc/direction.cpp
+    misc/direction.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)

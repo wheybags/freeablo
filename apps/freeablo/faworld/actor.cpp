@@ -168,7 +168,7 @@ namespace FAWorld
 
     void Actor::heal() { mStats.mHp = mStats.mHp.max; }
 
-    void Actor::setDirection(int32_t direction) { mMoveHandler.setDirection(direction); }
+    void Actor::setDirection(Misc::Direction direction) { mMoveHandler.setDirection(direction); }
 
     bool Actor::hasTarget() const { return mTarget.getType() != Target::Type::None; }
 

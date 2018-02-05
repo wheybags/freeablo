@@ -208,7 +208,7 @@ namespace FAWorld
         for (auto npc : mDiabloExe.getNpcs())
         {
             Actor* actor = new Actor(*this, *npc, mDiabloExe);
-            actor->teleport(townLevel, Position(npc->x, npc->y, npc->rotation));
+            actor->teleport(townLevel, Position(npc->x, npc->y, static_cast<Misc::Direction> (npc->rotation)));
         }
 
         for (int32_t i = 1; i < 17; i++)

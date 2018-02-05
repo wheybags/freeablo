@@ -242,12 +242,13 @@ namespace FAWorld
         {
             if (isPosOk(curPos))
                 return tryDrop(curPos);
-            initialDir = 7; // this is hack to emulate original game behavior, diablo's 0th direction is our 7th unfortunately
+            initialDir = Misc::Direction::south;
         }
 
+        constexpr auto directionCnt = 8;
         for (auto diff : {0, -1, 1})
         {
-            auto dir = (initialDir + diff + 8) % 8;
+            auto dir = static_cast<Misc::Direction> ((static_cast<int32_t> (initialDir) + diff + directionCnt) % directionCnt);
             auto pos = Misc::getNextPosByDir(curPos, dir);
             if (isPosOk(pos))
                 return tryDrop(pos);
