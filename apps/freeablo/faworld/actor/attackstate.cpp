@@ -27,7 +27,7 @@ namespace FAWorld
             auto attackFrame = actor.mAnimation.getCurrentAnimationLength() / 2;
             if (actor.mAnimation.getCurrentRealFrame().second == attackFrame)
             {
-                actor.attack(Misc::getNextPosByDir(actor.getPos().current(), mDirection));
+                actor.doMeleeHit(Misc::getNextPosByDir(actor.getPos().current(), mDirection));
             }
 
             return boost::none;

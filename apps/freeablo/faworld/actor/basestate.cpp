@@ -14,6 +14,12 @@ namespace FAWorld
             UNUSED_PARAM(noclip);
             boost::optional<StateChange> ret;
 
+            if (auto direction = actor.mMeleeAttackRequestedDirection)
+                {
+                   actor.mMeleeAttackRequestedDirection = boost::none;
+                   return StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new ActorState::MeleeAttackState(*direction)};
+                }
+
             switch (actor.mTarget.getType())
             {
                 case Target::Type::Actor:

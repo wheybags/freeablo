@@ -3,6 +3,7 @@
 #include "../engine/threadmanager.h"
 #include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
+#include "actor/attackstate.h"
 #include "actor/basestate.h"
 #include "actorstats.h"
 #include "behaviour.h"
@@ -269,15 +270,20 @@ namespace FAWorld
         return true;
     }
 
-    void Actor::attack(const std::pair<int32_t, int32_t>& tile)
+    void Actor::doMeleeHit(const std::pair<int32_t, int32_t>& tile)
     {
         auto actor = getLevel()->getActorAt(tile.first, tile.second);
         if (!canIAttack(actor))
             return;
-        attack(actor);
+        doMeleeHit(actor);
     }
 
-    void Actor::attack(Actor* enemy)
+    void Actor::startMeleeAttack(Misc::Direction direction)
+    {
+        mMeleeAttackRequestedDirection = direction;
+    }
+
+    void Actor::doMeleeHit(Actor* enemy)
     {
         Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
         enemy->takeDamage(mStats.getAttackDamage());

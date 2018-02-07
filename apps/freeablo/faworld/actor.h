@@ -25,6 +25,11 @@ namespace FASaveGame
     class Saver;
 }
 
+namespace Misc
+{
+    enum class Direction;
+}
+
 namespace FAWorld
 {
     class Behaviour;
@@ -51,8 +56,9 @@ namespace FAWorld
         GameLevel* getLevel();
         World* getWorld() const { return &mWorld; }
 
-        void attack(Actor* enemy);
-        void attack(const std::pair<int32_t, int32_t>& tile);
+        void doMeleeHit(Actor* enemy);
+        void doMeleeHit(const std::pair<int32_t, int32_t>& tile);
+        void startMeleeAttack (Misc::Direction direction);
 
         std::string getDieWav() const;
         std::string getHitWav() const;
@@ -87,6 +93,7 @@ namespace FAWorld
         bool isAttacking = false;
         bool mInvuln = false;
         Inventory mInventory;
+        boost::optional<Misc::Direction> mMeleeAttackRequestedDirection; // this is really stupid but I don't know how else to do it
 
     protected:
         // protected member variables

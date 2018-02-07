@@ -73,9 +73,10 @@ if(UNIX)
 endif()
 
 if(MSVC)
-    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /MP /W4 /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4100 /wd4611 /wd4458 /wd4459 /wd4127 /wd4800 /wd4267")
+    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /MP /W4 /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4100 /wd4611 /wd4458 /wd4459 /wd4127 /wd4800 /wd4267 /wd4172")
     # 4244 - e.g. 'argument': conversion from 'const long double' to 'double' -- boost headers
     # 4100 - unreferenced formal parameter -- boost headers
+    # 4172 - boost headers
     # 4611 - interaction between '_setjmp' and C++ object destruction is non-portable -- savepng.cpp
     # 4458 - shadow for class member -- librocket headers
     # 4459 - declaration of 'self' hides global declaration

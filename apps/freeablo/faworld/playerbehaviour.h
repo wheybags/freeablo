@@ -19,7 +19,7 @@ namespace FAWorld
         virtual void reAttach(Actor* actor) override;
         virtual void update() override;
 
-        virtual void notify(Engine::MouseInputAction action, Misc::Point mousePosition, bool mouseDown) override;
+        virtual void notify(Engine::MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers) override;
 
         virtual ~PlayerBehaviour() {}
 
