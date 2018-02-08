@@ -1,7 +1,7 @@
 #include <functional>
 #include <random>
 
-namespace FALevelGen
+namespace Random
 {
     std::mt19937 rng;
 

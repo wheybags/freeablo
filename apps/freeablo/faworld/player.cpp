@@ -1,7 +1,7 @@
 #include "player.h"
 #include "../engine/threadmanager.h"
 #include "../fagui/dialogmanager.h"
-#include "../falevelgen/random.h"
+#include "misc/random.h"
 #include "../fasavegame/gameloader.h"
 #include "actorstats.h"
 #include "diabloexe/characterstats.h"

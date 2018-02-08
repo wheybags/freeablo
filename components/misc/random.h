@@ -4,12 +4,12 @@
 #include <initializer_list>
 #include <vector>
 
-namespace FALevelGen
+namespace Random
 {
     void FAsrand(int seed);
     int normRand(int min, int max);
     int randomInRange(unsigned int min, unsigned int max);
-
+  
     template <typename T> T chooseOne(std::initializer_list<T> parameters)
     {
         int n = randomInRange(0, parameters.size() - 1);

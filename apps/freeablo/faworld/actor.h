@@ -59,6 +59,8 @@ namespace FAWorld
         void doMeleeHit(Actor* enemy);
         void doMeleeHit(const std::pair<int32_t, int32_t>& tile);
         void startMeleeAttack (Misc::Direction direction);
+        void checkDeath();
+        void checkHit(Actor* enemy);
 
         std::string getDieWav() const;
         std::string getHitWav() const;

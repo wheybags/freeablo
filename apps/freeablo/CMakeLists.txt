@@ -3,8 +3,6 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
 
     falevelgen/levelgen.h
     falevelgen/levelgen.cpp
-    falevelgen/random.cpp
-    falevelgen/random.h
     falevelgen/mst.cpp
     falevelgen/mst.h
     falevelgen/tileset.cpp

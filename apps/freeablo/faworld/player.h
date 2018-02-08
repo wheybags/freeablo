@@ -2,8 +2,6 @@
 #pragma once
 
 #include "actor.h"
-#include "inventory.h"
-#include <boost/format.hpp>
 
 #include <boost/signals2/signal.hpp>
 

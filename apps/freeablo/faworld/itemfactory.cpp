@@ -1,5 +1,5 @@
 #include "itemfactory.h"
-#include "../falevelgen/random.h"
+#include "misc/random.h"
 #include "diabloexe/diabloexe.h"
 #include "item.h"
 #include "itemenums.h"
@@ -25,7 +25,7 @@ namespace FAWorld
         res.mExe = &mExe;
         auto info = mExe.getBaseItems()[static_cast<int>(id)];
         res.mMaxDurability = res.mCurrentDurability = info.durability;
-        res.mArmorClass = FALevelGen::randomInRange(info.minArmorClass, info.maxArmorClass);
+        res.mArmorClass = Random::randomInRange(info.minArmorClass, info.maxArmorClass);
         return res;
     }
 

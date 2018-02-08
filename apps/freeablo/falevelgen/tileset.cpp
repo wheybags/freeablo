@@ -7,7 +7,7 @@
 #include <misc/assert.h>
 #include <settings/settings.h>
 
-#include "random.h"
+#include "misc/random.h"
 
 namespace FALevelGen
 {
@@ -182,7 +182,7 @@ namespace FALevelGen
         std::vector<std::pair<int32_t, int32_t>>& tileVec = mAlternatives[tile].first;
         int32_t normPercent = mAlternatives[tile].second;
 
-        int32_t random = randomInRange(0, 100);
+        int32_t random = Random::randomInRange(0, 100);
 
         if (random <= normPercent)
             return tile;
@@ -191,7 +191,7 @@ namespace FALevelGen
         for (int32_t i = 0; i < (int32_t)tileVec.size(); i++)
             max += tileVec[i].second;
 
-        random = randomInRange(0, max);
+        random = Random::randomInRange(0, max);
 
         int32_t i = 0;
         for (; i < (int32_t)tileVec.size() && random > tileVec[i].second; i++)

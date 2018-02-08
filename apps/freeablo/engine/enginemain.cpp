@@ -2,7 +2,6 @@
 #include "../faaudio/audiomanager.h"
 #include "../fagui/guimanager.h"
 #include "../falevelgen/levelgen.h"
-#include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
 #include "../faworld/itemfactory.h"
 #include "../faworld/player.h"
@@ -19,6 +18,7 @@
 #include <misc/misc.h>
 #include <serial/textstream.h>
 #include <thread>
+#include "misc/random.h"
 
 namespace bpo = boost::program_options;
 
@@ -60,7 +60,7 @@ namespace Engine
 
     void EngineMain::runGameLoop(const bpo::variables_map& variables, const std::string& pathEXE)
     {
-        FALevelGen::FAsrand(static_cast<int>(time(nullptr)));
+        Random::FAsrand(static_cast<int>(time(nullptr)));
 
         FARender::Renderer& renderer = *FARender::Renderer::get();
 

@@ -1,7 +1,6 @@
 #include "actor.h"
 #include "../engine/enginemain.h"
 #include "../engine/threadmanager.h"
-#include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
 #include "actor/attackstate.h"
 #include "actor/basestate.h"
@@ -16,6 +15,7 @@
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
 #include <misc/misc.h>
+#include "misc/random.h"
 
 namespace FAWorld
 {
@@ -227,7 +227,7 @@ namespace FAWorld
 
         boost::format fmt(mSoundPath);
         fmt % 'd';
-        return (fmt % FALevelGen::randomInRange(1, 2)).str();
+        return (fmt % Random::randomInRange(1, 2)).str();
     }
 
     std::string Actor::getHitWav() const
@@ -237,7 +237,7 @@ namespace FAWorld
 
         boost::format fmt(mSoundPath);
         fmt % 'h';
-        return (fmt % FALevelGen::randomInRange(1, 2)).str();
+        return (fmt % Random::randomInRange(1, 2)).str();
     }
 
     bool Actor::canIAttack(Actor* actor)
@@ -283,11 +283,20 @@ namespace FAWorld
         mMeleeAttackRequestedDirection = direction;
     }
 
+    void Actor::checkDeath() {
+        if (getStats().mHp.current <= 0)
+            die();
+    }
+
+    void Actor::checkHit (Actor *enemy)
+    {
+        // let's throw some formulas, some of parameters will be placeholders
+    }
+
     void Actor::doMeleeHit(Actor* enemy)
     {
-        Engine::ThreadManager::get()->playSound(FALevelGen::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
+        Engine::ThreadManager::get()->playSound(Random::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
         enemy->takeDamage(mStats.getAttackDamage());
-        if (enemy->getStats().mHp.current <= 0)
-            enemy->die();
+        enemy->checkDeath();
     }
 }

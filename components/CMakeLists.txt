@@ -43,6 +43,8 @@ add_library(Misc
     misc/array2d.h
     misc/direction.cpp
     misc/direction.h
+    misc/random.cpp
+    misc/random.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
