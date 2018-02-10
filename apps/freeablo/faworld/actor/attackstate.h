@@ -32,6 +32,7 @@ namespace FAWorld
 
         private:
             Misc::Direction mDirection;
+            bool mHitDone = false;
         };
     }
 }

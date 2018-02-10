@@ -25,9 +25,11 @@ namespace FAWorld
             // in reality attack frame differs for each weapon for player
             // and most likely also specified exactly for each monster
             auto attackFrame = actor.mAnimation.getCurrentAnimationLength() / 2;
-            if (actor.mAnimation.getCurrentRealFrame().second == attackFrame)
+            if (!mHitDone && // to fix the problem with several updates during a single frame
+                actor.mAnimation.getCurrentRealFrame().second == attackFrame)
             {
                 actor.doMeleeHit(Misc::getNextPosByDir(actor.getPos().current(), mDirection));
+                mHitDone = true;
             }
 
             return boost::none;

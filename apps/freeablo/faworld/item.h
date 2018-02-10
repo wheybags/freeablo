@@ -33,6 +33,8 @@ namespace FAWorld
     enum class ItemCode;
     enum class ItemMiscId;
     enum class ItemQuality;
+
+    class ItemBonus;
     class EquipTarget;
     constexpr int indestructibleItemDurability = 255;
 
@@ -90,6 +92,7 @@ namespace FAWorld
         uint32_t getGraphicValue() const;
         int32_t getMinAttackDamage() const;
         int32_t getMaxAttackDamage() const;
+        ItemBonus getBonus () const;
 
     private:
         std::string chargesStr() const;

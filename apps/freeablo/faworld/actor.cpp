@@ -158,9 +158,6 @@ namespace FAWorld
         if (mInvuln)
             return;
 
-        if (amount > 10)
-            amount = 60;
-
         mStats.takeDamage(static_cast<int32_t>(amount));
         if (!(mStats.mHp.current <= 0))
         {
@@ -226,7 +223,7 @@ namespace FAWorld
 
     double Actor::meleeDamageVs(const Actor* actor) const {
         /* placeholder */
-        return 1.0;
+        return 5.0;
     }
 
     std::string Actor::getDieWav() const

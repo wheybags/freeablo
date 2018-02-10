@@ -14,6 +14,7 @@
 #include <misc/stringops.h>
 #include <string>
 #include "boost/algorithm/clamp.hpp"
+#include "itembonus.h"
 
 namespace FAWorld
 {
@@ -53,7 +54,8 @@ namespace FAWorld
     }
 
     double Player::meleeDamageVs(const Actor* actor) const {
-        auto dmg = Random::randomInRange(getMinDamage(), getMaxDamage());
+        auto bonus = getItemBonus();
+        auto dmg = Random::randomInRange(bonus.minAttackDamage, bonus.maxAttackDamage);
         dmg += dmg * getPercentDamageBonus () / 100;
         dmg += getCharacterBaseDamage ();
         dmg += getDamageBonus ();
@@ -61,6 +63,10 @@ namespace FAWorld
         if (getClass () == PlayerClass::warrior && Random::randomInRange(0, 99) < getCharacterLevel ())
             dmg *= 2;
         return dmg;
+    }
+
+    ItemBonus Player::getItemBonus() const {
+        return mInventory.getTotalItemBonus();
     }
 
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
@@ -102,7 +108,7 @@ namespace FAWorld
         if (getClass () == PlayerClass::warrior)
             toHit += 20;
         toHit = boost::algorithm::clamp (toHit, 5, 95);
-        return roll > toHit;
+        return roll < toHit;
     }
 
     Player::~Player() { mWorld.deregisterPlayer(this); }

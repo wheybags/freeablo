@@ -1,11 +1,12 @@
 #include "item.h"
-#include "../falevelgen/random.h"
+#include "misc/random.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "itemenums.h"
 #include "itemfactory.h"
 #include <boost/format.hpp>
 #include <iostream>
+#include "itembonus.h"
 
 namespace FAWorld
 {
@@ -275,6 +276,11 @@ namespace FAWorld
     int32_t Item::getMinAttackDamage() const { return base().minAttackDamage; }
 
     int32_t Item::getMaxAttackDamage() const { return base().maxAttackDamage; }
+
+    ItemBonus Item::getBonus() const {
+        ItemBonus bonus (base ());
+        return bonus;
+    }
 
     std::string Item::chargesStr() const
     {
