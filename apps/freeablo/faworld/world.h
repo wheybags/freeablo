@@ -109,6 +109,8 @@ namespace FAWorld
         FAGui::GuiManager* mGuiManager = nullptr;
         std::unique_ptr<FAGui::DialogManager> mDlgManager;
 
+        const DiabloExe::DiabloExe& mDiabloExe; // TODO: something better than this
+
     private:
         void playLevelMusic(size_t level);
         void changeLevel(bool up);
@@ -117,7 +119,6 @@ namespace FAWorld
         Tick mTicksPassed = 0;
         Player* mCurrentPlayer = nullptr;
         std::vector<Player*> mPlayers; ///< This vector is sorted
-        const DiabloExe::DiabloExe& mDiabloExe;
         std::unique_ptr<ItemFactory> mItemFactory;
 
         int32_t mNextId = 1;

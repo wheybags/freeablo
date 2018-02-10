@@ -12,7 +12,7 @@ namespace FAWorld
 {
     Tile::Tile(FASaveGame::GameLoader& loader) : x(loader.load<int32_t>()), y(loader.load<int32_t>()) {}
 
-    void Tile::save(FASaveGame::GameSaver& saver)
+    void Tile::save(FASaveGame::GameSaver& saver) const
     {
         saver.save(x);
         saver.save(y);
@@ -22,6 +22,21 @@ namespace FAWorld
         : mItem(std::move(itemArg)), mAnimation(new FARender::AnimationPlayer()), mTile(tile)
     {
         mAnimation->playAnimation(mItem->getFlipSpriteGroup(), World::getTicksInPeriod(0.05f), FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
+    }
+
+    PlacedItemData::PlacedItemData(FASaveGame::GameLoader& loader)
+    {
+        mItem.reset(new Item());
+        mItem->load(loader, FAWorld::World::get()->mDiabloExe);
+        mAnimation.reset(new FARender::AnimationPlayer(loader));
+        mTile = Tile(loader);
+    }
+
+    void PlacedItemData::save(FASaveGame::GameSaver& saver) const
+    {
+        mItem->save(saver);
+        mAnimation->save(saver);
+        mTile.save(saver);
     }
 
     void PlacedItemData::update() { mAnimation->update(); }
@@ -34,14 +49,23 @@ namespace FAWorld
 
     ItemMap::ItemMap(FASaveGame::GameLoader& loader, const GameLevel* level) : ItemMap(level)
     {
-        UNUSED_PARAM(loader);
-        UNUSED_PARAM(level);
-        /*uint32_t itemsSize = loader.load<uint32_t>();
+        uint32_t itemsSize = loader.load<uint32_t>();
         for (uint32_t i; i < itemsSize; i++)
         {
             Tile key(loader);
-            mItems[key] =
-        }*/
+            mItems.emplace(key, PlacedItemData(loader));
+        }
+    }
+
+    void ItemMap::save(FASaveGame::GameSaver& saver)
+    {
+        uint32_t itemsSize = uint32_t(mItems.size());
+        saver.save(itemsSize);
+        for (const auto& pair : mItems)
+        {
+            pair.first.save(saver);
+            pair.second.save(saver);
+        }
     }
 
     ItemMap::~ItemMap() {}
