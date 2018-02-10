@@ -37,7 +37,7 @@ namespace FAWorld
 
         mLevel.save(saver);
         saver.save(mLevelIndex);
-        // mItemMap->save(saver);
+        mItemMap->save(saver);
 
         uint32_t actorsSize = mActors.size();
         saver.save(actorsSize);
