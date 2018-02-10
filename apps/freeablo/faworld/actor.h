@@ -43,8 +43,10 @@ namespace FAWorld
         Actor(World& world, const DiabloExe::Monster& monster);
         Actor(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
         virtual ~Actor();
+        virtual int getArmor () const { /*placeholder */ return 0; }
 
         virtual void save(FASaveGame::GameSaver& saver);
+        virtual bool checkHit(Actor* enemy);
 
         static const std::string typeId;
         virtual const std::string& getTypeId() { return typeId; }
@@ -56,11 +58,11 @@ namespace FAWorld
         GameLevel* getLevel();
         World* getWorld() const { return &mWorld; }
 
+        virtual double meleeDamageVs (const Actor* actor) const;
         void doMeleeHit(Actor* enemy);
         void doMeleeHit(const std::pair<int32_t, int32_t>& tile);
         void startMeleeAttack (Misc::Direction direction);
         void checkDeath();
-        void checkHit(Actor* enemy);
 
         std::string getDieWav() const;
         std::string getHitWav() const;

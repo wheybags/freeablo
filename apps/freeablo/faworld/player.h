@@ -9,6 +9,13 @@ namespace FAWorld
 {
     class PlayerBehaviour;
 
+    enum class PlayerClass
+    {
+        warrior = 0,
+        rogue,
+        sorcerer,
+    };
+
     class Player : public Actor
     {
     public:
@@ -20,6 +27,7 @@ namespace FAWorld
         void initCommon();
         Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
         void save(FASaveGame::GameSaver& saver);
+        virtual bool checkHit(Actor* enemy) override;
 
         virtual ~Player();
         void setSpriteClass(std::string className);
@@ -32,11 +40,22 @@ namespace FAWorld
         int getTotalGold() const;
 
         boost::signals2::signal<void(const std::pair<int32_t, int32_t>&)> positionReached;
+        int getDexterity () const { /*placeholder */ return 0; }
+        int getArmorPenetration () const { /* placeholder */ return 0; }
+        int getCharacterLevel () const { /* placeholder */ return 1; }
+        PlayerClass getClass () const { /* placeholder */ return PlayerClass::warrior; }
+        double meleeDamageVs(const Actor* actor) const override;
+        int getMinDamage () const { /* placeholder */ return 10; }
+        int getMaxDamage () const { /* placeholder */ return 20; }
+        int getPercentDamageBonus () const { /* placeholder */ return 0; }
+        int getCharacterBaseDamage () const { /* placeholder */ return 0; }
+        int getDamageBonus () const { /* placeholder */ return 0; }
 
     private:
         void init(const std::string& className, const DiabloExe::CharacterStats& charStats);
         bool canTalkTo(Actor* actor);
 
+    private:
         std::string mClassName;
     };
 }

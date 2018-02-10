@@ -149,6 +149,10 @@ namespace FAWorld
 
     Actor::~Actor() = default;
 
+    bool Actor::checkHit(Actor* enemy) {
+        return true;
+    }
+
     void Actor::takeDamage(double amount)
     {
         if (mInvuln)
@@ -220,6 +224,11 @@ namespace FAWorld
 
     GameLevel* Actor::getLevel() { return mMoveHandler.getLevel(); }
 
+    double Actor::meleeDamageVs(const Actor* actor) const {
+        /* placeholder */
+        return 1.0;
+    }
+
     std::string Actor::getDieWav() const
     {
         if (mSoundPath.empty())
@@ -288,15 +297,13 @@ namespace FAWorld
             die();
     }
 
-    void Actor::checkHit (Actor *enemy)
-    {
-        // let's throw some formulas, some of parameters will be placeholders
-    }
-
     void Actor::doMeleeHit(Actor* enemy)
     {
         Engine::ThreadManager::get()->playSound(Random::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-        enemy->takeDamage(mStats.getAttackDamage());
-        enemy->checkDeath();
+        if (checkHit (enemy))
+            {
+                enemy->takeDamage(meleeDamageVs (enemy));
+                enemy->checkDeath();
+            }
     }
 }

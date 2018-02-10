@@ -13,6 +13,7 @@
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <string>
+#include "boost/algorithm/clamp.hpp"
 
 namespace FAWorld
 {
@@ -51,6 +52,17 @@ namespace FAWorld
         return totalCnt;
     }
 
+    double Player::meleeDamageVs(const Actor* actor) const {
+        auto dmg = Random::randomInRange(getMinDamage(), getMaxDamage());
+        dmg += dmg * getPercentDamageBonus () / 100;
+        dmg += getCharacterBaseDamage ();
+        dmg += getDamageBonus ();
+        // critical hit for warriors:
+        if (getClass () == PlayerClass::warrior && Random::randomInRange(0, 99) < getCharacterLevel ())
+            dmg *= 2;
+        return dmg;
+    }
+
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
     {
         UNUSED_PARAM(className);
@@ -76,6 +88,21 @@ namespace FAWorld
 
         Actor::save(saver);
         saver.save(mClassName);
+    }
+
+    bool Player::checkHit (Actor *enemy)
+    {
+        // let's throw some formulas, parameters will be placeholders for now
+        auto roll = Random::randomInRange(0, 99);
+        auto toHit = getDexterity () / 2;
+        toHit += getArmorPenetration ();
+        toHit -= enemy->getArmor ();
+        toHit += getCharacterLevel ();
+        toHit += 50;
+        if (getClass () == PlayerClass::warrior)
+            toHit += 20;
+        toHit = boost::algorithm::clamp (toHit, 5, 95);
+        return roll > toHit;
     }
 
     Player::~Player() { mWorld.deregisterPlayer(this); }
