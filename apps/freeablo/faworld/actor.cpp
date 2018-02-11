@@ -76,6 +76,7 @@ namespace FAWorld
         mFaction = Faction::hell();
         mName = monster.monsterName;
         mSoundPath = monster.soundPath;
+        mStats.mHp = Random::randomInRange(monster.minHp, monster.maxHp);
     }
 
     Actor::Actor(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe)
@@ -150,7 +151,7 @@ namespace FAWorld
     Actor::~Actor() = default;
 
     bool Actor::checkHit(Actor* enemy) {
-        return true;
+        return (Random::randomInRange(1, 2) < 2);
     }
 
     void Actor::takeDamage(double amount)

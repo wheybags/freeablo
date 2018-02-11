@@ -85,7 +85,6 @@ namespace FAWorld
     Player::Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : Actor(world, loader, exe)
     {
         mClassName = loader.load<std::string>();
-        mWorld.registerPlayer(this);
     }
 
     void Player::save(FASaveGame::GameSaver& saver)
@@ -158,7 +157,7 @@ namespace FAWorld
         {
             const Item* hand = nullptr;
 
-            if (mInventory.getLeftHand().isEmpty())
+            if (!mInventory.getLeftHand().isEmpty())
                 hand = &mInventory.getLeftHand();
             else
                 hand = &mInventory.getRightHand();

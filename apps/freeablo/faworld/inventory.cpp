@@ -512,8 +512,8 @@ namespace FAWorld
     {
         int32_t takeoutCellX = static_cast<int32_t>(x * mInventoryBox.width());
         int32_t takeoutCellY = static_cast<int32_t>(y * mInventoryBox.height());
-        int32_t placementCellX = static_cast<int32_t>(std::round (x * mInventoryBox.width() - mCursorHeld.getInvSize()[0] * 0.5));
-        int32_t placementCellY = static_cast<int32_t>(std::round (y * mInventoryBox.height() - mCursorHeld.getInvSize()[1] * 0.5));
+        int32_t placementCellX = static_cast<int32_t>(x * mInventoryBox.width() - mCursorHeld.getInvSize()[0] * 0.5 + 0.5);
+        int32_t placementCellY = static_cast<int32_t>(y * mInventoryBox.height() - mCursorHeld.getInvSize()[1] * 0.5 + 0.5);
         if (!isValidCell(takeoutCellX, takeoutCellY))
             return;
         exchangeWithCursor(MakeEquipTarget<EquipTargetType::inventory>(takeoutCellX, takeoutCellY),
