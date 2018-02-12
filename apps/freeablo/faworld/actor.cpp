@@ -8,6 +8,7 @@
 #include "behaviour.h"
 #include "equiptarget.h"
 #include "findpath.h"
+#include "misc/random.h"
 #include "player.h"
 #include "world.h"
 #include <boost/format.hpp>
@@ -15,7 +16,6 @@
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
 #include <misc/misc.h>
-#include "misc/random.h"
 
 namespace FAWorld
 {
@@ -150,9 +150,7 @@ namespace FAWorld
 
     Actor::~Actor() = default;
 
-    bool Actor::checkHit(Actor* enemy) {
-        return (Random::randomInRange(1, 2) < 2);
-    }
+    bool Actor::checkHit(Actor* enemy) { return (Random::randomInRange(1, 2) < 2); }
 
     void Actor::takeDamage(double amount)
     {
@@ -222,7 +220,8 @@ namespace FAWorld
 
     GameLevel* Actor::getLevel() { return mMoveHandler.getLevel(); }
 
-    double Actor::meleeDamageVs(const Actor* actor) const {
+    double Actor::meleeDamageVs(const Actor* /*actor*/) const
+    {
         /* placeholder */
         return 5.0;
     }
@@ -285,12 +284,10 @@ namespace FAWorld
         doMeleeHit(actor);
     }
 
-    void Actor::startMeleeAttack(Misc::Direction direction)
-    {
-        mMeleeAttackRequestedDirection = direction;
-    }
+    void Actor::startMeleeAttack(Misc::Direction direction) { mMeleeAttackRequestedDirection = direction; }
 
-    void Actor::checkDeath() {
+    void Actor::checkDeath()
+    {
         if (getStats().mHp.current <= 0)
             die();
     }
@@ -298,10 +295,10 @@ namespace FAWorld
     void Actor::doMeleeHit(Actor* enemy)
     {
         Engine::ThreadManager::get()->playSound(Random::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-        if (checkHit (enemy))
-            {
-                enemy->takeDamage(meleeDamageVs (enemy));
-                enemy->checkDeath();
-            }
+        if (checkHit(enemy))
+        {
+            enemy->takeDamage(meleeDamageVs(enemy));
+            enemy->checkDeath();
+        }
     }
 }

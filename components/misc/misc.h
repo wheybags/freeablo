@@ -1,10 +1,10 @@
 
 #pragma once
 
+#include "direction.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <utility>
-#include "direction.h"
 
 namespace Misc
 {

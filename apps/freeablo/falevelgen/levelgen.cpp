@@ -1,7 +1,7 @@
 #include "levelgen.h"
 #include "../faworld/actor.h"
-#include "mst.h"
 #include "misc/random.h"
+#include "mst.h"
 #include "tileset.h"
 #include <algorithm>
 #include <cmath>
@@ -144,7 +144,7 @@ namespace FALevelGen
     void moveRoom(Room& room, const std::pair<float, float>& vector, int32_t width, int32_t height)
     {
         int32_t newX = 0, newY = 0;
-        std::tie (newX, newY) = Misc::getNextPosByDir({room.xPos, room.yPos}, Misc::getVecDir(vector));
+        std::tie(newX, newY) = Misc::getNextPosByDir({room.xPos, room.yPos}, Misc::getVecDir(vector));
 
         // Make sure not to move outside map
         if (newX >= 1 && newY >= 1 && newX + room.width < width - 1 && newY + room.height < height - 1)

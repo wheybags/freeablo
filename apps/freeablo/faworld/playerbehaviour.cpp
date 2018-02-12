@@ -2,9 +2,9 @@
 #include "../fagui/guimanager.h"
 #include "../farender/renderer.h"
 #include "equiptarget.h"
+#include "input/inputmanager.h"
 #include "player.h"
 #include <misc/assert.h>
-#include "input/inputmanager.h"
 
 namespace FAWorld
 {
@@ -82,7 +82,8 @@ namespace FAWorld
                 }
                 else if (modifiers.shift && !mPlayer->getLevel()->isTown())
                 {
-                    mPlayer->startMeleeAttack(Misc::getVecDir({clickedTile.x - mPlayer->getPos().current().first, clickedTile.y - mPlayer->getPos().current().second}));
+                    mPlayer->startMeleeAttack(
+                        Misc::getVecDir({clickedTile.x - mPlayer->getPos().current().first, clickedTile.y - mPlayer->getPos().current().second}));
                 }
                 else if (Actor* clickedActor = mPlayer->getWorld()->targetedActor(mousePosition))
                 {

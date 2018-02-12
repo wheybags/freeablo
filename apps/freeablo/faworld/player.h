@@ -40,16 +40,16 @@ namespace FAWorld
         int getTotalGold() const;
 
         boost::signals2::signal<void(const std::pair<int32_t, int32_t>&)> positionReached;
-        int getDexterity () const { /*placeholder */ return 0; }
-        int getArmorPenetration () const { /* placeholder */ return 0; }
-        int getCharacterLevel () const { /* placeholder */ return 1; }
-        PlayerClass getClass () const { /* placeholder */ return PlayerClass::warrior; }
+        int getDexterity() const { /*placeholder */ return 0; }
+        int getArmorPenetration() const { /* placeholder */ return 0; }
+        int getCharacterLevel() const { /* placeholder */ return 1; }
+        PlayerClass getClass() const { /* placeholder */ return PlayerClass::warrior; }
         double meleeDamageVs(const Actor* actor) const override;
-        int getMaxDamage () const { /* placeholder */ return 20; }
-        int getPercentDamageBonus () const { return 0; }
-        int getCharacterBaseDamage () const { /* placeholder */ return 0; }
-        int getDamageBonus () const { /* placeholder */ return 0; }
-        ItemBonus getItemBonus () const;
+        int getMaxDamage() const { /* placeholder */ return 20; }
+        int getPercentDamageBonus() const { return 0; }
+        int getCharacterBaseDamage() const { /* placeholder */ return 0; }
+        int getDamageBonus() const { /* placeholder */ return 0; }
+        ItemBonus getItemBonus() const;
 
     private:
         void init(const std::string& className, const DiabloExe::CharacterStats& charStats);

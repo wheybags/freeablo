@@ -2,12 +2,12 @@
 #include "../../engine/enginemain.h"
 #include "../../farender/animationplayer.h"
 #include "../../farender/renderer.h"
+#include "../../faworld/player.h"
 #include "../../faworld/world.h"
 #include "../menuhandler.h"
 #include "../nkhelpers.h"
 #include "diabloexe/characterstats.h"
 #include "startingmenuscreen.h"
-#include "../../faworld/player.h"
 
 namespace FAGui
 {

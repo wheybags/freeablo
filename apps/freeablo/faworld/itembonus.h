@@ -17,8 +17,8 @@ namespace FAWorld
         using selfType = ItemBonus;
 
     public:
-        explicit ItemBonus (const DiabloExe::BaseItem &item);
-        ItemBonus () = default;
+        explicit ItemBonus(const DiabloExe::BaseItem& item);
+        ItemBonus() = default;
 
         int32_t minAttackDamage = 0;
         int32_t maxAttackDamage = 0;

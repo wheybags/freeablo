@@ -1,9 +1,9 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include "assert.h"
 #include "direction.h"
 #include <array>
-#include "assert.h"
 
 namespace Misc
 {
@@ -22,10 +22,10 @@ namespace Misc
             return Direction::invalid;
 
         auto angle = std::atan2(vector.second, vector.first);
-        auto res = static_cast<int32_t> (round(angle / M_PI_4)) - 1;
+        auto res = static_cast<int32_t>(round(angle / M_PI_4)) - 1;
         if (res < 0)
             res += 8;
-        debug_assert (static_cast<int32_t> (res) >= 0 && static_cast<int32_t> (res) < 8);
-        return static_cast<Direction> (res);
+        debug_assert(static_cast<int32_t>(res) >= 0 && static_cast<int32_t>(res) < 8);
+        return static_cast<Direction>(res);
     }
 }

@@ -161,7 +161,7 @@ namespace FAWorld
 
             if (sprite)
             {
-                frame += static_cast<int32_t> (mActors[i]->getPos().getDirection()) * sprite->getAnimLength();
+                frame += static_cast<int32_t>(mActors[i]->getPos().getDirection()) * sprite->getAnimLength();
                 state->mObjects.push_back({sprite, static_cast<uint32_t>(frame), mActors[i]->getPos(), hoverColor});
             }
 

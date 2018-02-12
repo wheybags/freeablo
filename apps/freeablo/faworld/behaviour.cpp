@@ -1,11 +1,11 @@
 #include "behaviour.h"
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
+#include "misc/random.h"
 #include "player.h"
 #include <cstdlib>
 #include <iostream>
 #include <misc/assert.h>
-#include "misc/random.h"
 
 namespace FAWorld
 {

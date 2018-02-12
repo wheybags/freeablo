@@ -8,6 +8,7 @@
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/playerfactory.h"
 #include "../faworld/world.h"
+#include "misc/random.h"
 #include "threadmanager.h"
 #include <boost/asio.hpp>
 #include <boost/make_unique.hpp>
@@ -18,7 +19,6 @@
 #include <misc/misc.h>
 #include <serial/textstream.h>
 #include <thread>
-#include "misc/random.h"
 
 namespace bpo = boost::program_options;
 

@@ -1,8 +1,8 @@
 #include "itemfactory.h"
-#include "misc/random.h"
 #include "diabloexe/diabloexe.h"
 #include "item.h"
 #include "itemenums.h"
+#include "misc/random.h"
 #include <boost/make_unique.hpp>
 
 namespace FAWorld

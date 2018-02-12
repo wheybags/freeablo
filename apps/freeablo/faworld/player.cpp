@@ -1,20 +1,20 @@
 #include "player.h"
 #include "../engine/threadmanager.h"
 #include "../fagui/dialogmanager.h"
-#include "misc/random.h"
 #include "../fasavegame/gameloader.h"
 #include "actorstats.h"
+#include "boost/algorithm/clamp.hpp"
 #include "diabloexe/characterstats.h"
 #include "equiptarget.h"
+#include "itembonus.h"
 #include "itemenums.h"
 #include "itemmap.h"
+#include "misc/random.h"
 #include "playerbehaviour.h"
 #include "world.h"
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <string>
-#include "boost/algorithm/clamp.hpp"
-#include "itembonus.h"
 
 namespace FAWorld
 {
@@ -53,21 +53,20 @@ namespace FAWorld
         return totalCnt;
     }
 
-    double Player::meleeDamageVs(const Actor* actor) const {
+    double Player::meleeDamageVs(const Actor* /*actor*/) const
+    {
         auto bonus = getItemBonus();
         auto dmg = Random::randomInRange(bonus.minAttackDamage, bonus.maxAttackDamage);
-        dmg += dmg * getPercentDamageBonus () / 100;
-        dmg += getCharacterBaseDamage ();
-        dmg += getDamageBonus ();
+        dmg += dmg * getPercentDamageBonus() / 100;
+        dmg += getCharacterBaseDamage();
+        dmg += getDamageBonus();
         // critical hit for warriors:
-        if (getClass () == PlayerClass::warrior && Random::randomInRange(0, 99) < getCharacterLevel ())
+        if (getClass() == PlayerClass::warrior && Random::randomInRange(0, 99) < getCharacterLevel())
             dmg *= 2;
         return dmg;
     }
 
-    ItemBonus Player::getItemBonus() const {
-        return mInventory.getTotalItemBonus();
-    }
+    ItemBonus Player::getItemBonus() const { return mInventory.getTotalItemBonus(); }
 
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
     {
@@ -85,6 +84,7 @@ namespace FAWorld
     Player::Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : Actor(world, loader, exe)
     {
         mClassName = loader.load<std::string>();
+        initCommon();
     }
 
     void Player::save(FASaveGame::GameSaver& saver)
@@ -95,18 +95,18 @@ namespace FAWorld
         saver.save(mClassName);
     }
 
-    bool Player::checkHit (Actor *enemy)
+    bool Player::checkHit(Actor* enemy)
     {
         // let's throw some formulas, parameters will be placeholders for now
         auto roll = Random::randomInRange(0, 99);
-        auto toHit = getDexterity () / 2;
-        toHit += getArmorPenetration ();
-        toHit -= enemy->getArmor ();
-        toHit += getCharacterLevel ();
+        auto toHit = getDexterity() / 2;
+        toHit += getArmorPenetration();
+        toHit -= enemy->getArmor();
+        toHit += getCharacterLevel();
         toHit += 50;
-        if (getClass () == PlayerClass::warrior)
+        if (getClass() == PlayerClass::warrior)
             toHit += 20;
-        toHit = boost::algorithm::clamp (toHit, 5, 95);
+        toHit = boost::algorithm::clamp(toHit, 5, 95);
         return roll < toHit;
     }
 
@@ -280,7 +280,7 @@ namespace FAWorld
         constexpr auto directionCnt = 8;
         for (auto diff : {0, -1, 1})
         {
-            auto dir = static_cast<Misc::Direction> ((static_cast<int32_t> (initialDir) + diff + directionCnt) % directionCnt);
+            auto dir = static_cast<Misc::Direction>((static_cast<int32_t>(initialDir) + diff + directionCnt) % directionCnt);
             auto pos = Misc::getNextPosByDir(curPos, dir);
             if (isPosOk(pos))
                 return tryDrop(pos);

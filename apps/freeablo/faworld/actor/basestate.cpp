@@ -15,10 +15,10 @@ namespace FAWorld
             boost::optional<StateChange> ret;
 
             if (auto direction = actor.mMeleeAttackRequestedDirection)
-                {
-                   actor.mMeleeAttackRequestedDirection = boost::none;
-                   return StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new ActorState::MeleeAttackState(*direction)};
-                }
+            {
+                actor.mMeleeAttackRequestedDirection = boost::none;
+                return StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new ActorState::MeleeAttackState(*direction)};
+            }
 
             switch (actor.mTarget.getType())
             {
@@ -38,7 +38,8 @@ namespace FAWorld
                                 actor.attack(target);
                                 auto targetPos = target->getPos().current();
                                 auto myPos = actor.getPos().current();
-                                ret = StateChange{StateOperation::push, new MeleeAttackState(Misc::getVecDir({targetPos.first - myPos.first, targetPos.second - myPos.second}))};
+                                ret = StateChange{StateOperation::push,
+                                                  new MeleeAttackState(Misc::getVecDir({targetPos.first - myPos.first, targetPos.second - myPos.second}))};
                             }
                         }
                     }

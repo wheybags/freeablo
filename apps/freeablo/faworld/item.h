@@ -92,7 +92,7 @@ namespace FAWorld
         uint32_t getGraphicValue() const;
         int32_t getMinAttackDamage() const;
         int32_t getMaxAttackDamage() const;
-        ItemBonus getBonus () const;
+        ItemBonus getBonus() const;
 
     private:
         std::string chargesStr() const;

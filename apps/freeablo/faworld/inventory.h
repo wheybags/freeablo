@@ -57,7 +57,7 @@ namespace FAWorld
         std::vector<EquipTarget> getBeltAndInventoryItemPositions() const;
         Item takeOut(const EquipTarget& target);
         void placeGold(int quantity, const ItemFactory& itemFactory);
-        ItemBonus getTotalItemBonus () const;
+        ItemBonus getTotalItemBonus() const;
 
     private:
         void updateCursor();
