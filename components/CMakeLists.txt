@@ -31,7 +31,6 @@ add_library(Misc
     misc/md5.h
     misc/md5.cpp
     misc/misc.h
-    misc/misc.cpp
     misc/disablewarn.h
     misc/enablewarn.h
     misc/savePNG.h
