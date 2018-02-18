@@ -335,6 +335,26 @@ namespace FAWorld
         }
     }
 
+    bool Inventory::fillExistingGoldItems(Item& goldItem)
+    {
+        // TODO: write unit tests for inventory handling
+        release_assert(goldItem.getType() == ItemType::gold);
+        for (int32_t y = 0; y < inventoryHeight; ++y)
+            for (int32_t x = 0; x < inventoryWidth; ++x)
+            {
+                auto& item = mInventoryBox.get(x, y);
+                if (item.getType() == ItemType::gold)
+                {
+                    auto amount = std::min(goldItem.mCount, item.getMaxCount() - item.mCount);
+                    goldItem.mCount -= amount;
+                    item.mCount += amount;
+                    if (goldItem.mCount == 0)
+                        return true;
+                }
+            }
+        return goldItem.mCount == 0;
+    }
+
     void Inventory::layItem(const Item& item, int32_t x, int32_t y)
     {
         for (int32_t yy = y; yy < y + item.getInvSize()[1]; yy++)
@@ -352,8 +372,11 @@ namespace FAWorld
         mInventoryBox.get(x, y).mIsReal = true;
     }
 
-    bool Inventory::autoPlaceItem(const Item& item, boost::optional<std::pair<Inventory::xorder, Inventory::yorder>> override_order)
+    bool Inventory::autoPlaceItem(Item item, boost::optional<std::pair<Inventory::xorder, Inventory::yorder>> override_order)
     {
+        if (item.getType() == ItemType::gold)
+            if (fillExistingGoldItems(item))
+                return true;
         // auto-placing in belt
         if (item.isBeltEquippable())
             for (int32_t i = 0; i < int32_t(mBelt.size()); ++i)
@@ -488,6 +511,21 @@ namespace FAWorld
         }
 
         auto& exchangeeLocation = *requirements.NeedsToBeReplaced.begin();
+        {
+            auto& exchangeeRef = getItemAt(exchangeeLocation);
+            if (exchangeeRef.getType() == ItemType::gold)
+            {
+                if (exchangeeRef.mCount < exchangeeRef.getMaxCount())
+                {
+                    auto amount = std::min(item.mCount, exchangeeRef.getMaxCount() - exchangeeRef.mCount);
+                    exchangeeRef.mCount += amount;
+                    item.mCount -= amount;
+                    if (item.mCount == 0)
+                        setCursorHeld({});
+                    return true;
+                }
+            }
+        }
         auto exchangee = takeOut(exchangeeLocation);
         putItemUnsafe(item, placementTarget);
         setCursorHeld(exchangee);

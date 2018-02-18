@@ -45,7 +45,8 @@ namespace FAWorld
         // or autoplacement. Currently it used externally only for placing starting items.
         void putItemUnsafe(const Item& item, const EquipTarget& target);
 
-        bool autoPlaceItem(const Item& item, boost::optional<std::pair<xorder, yorder>> override_order = boost::none);
+        bool fillExistingGoldItems(Item& goldItem);
+        bool autoPlaceItem(Item item, boost::optional<std::pair<xorder, yorder>> override_order = boost::none);
 
         // if we ever need write access to these - just ditch the getters and make the vars public
         const Item& getBody() const { return mBody; }
@@ -55,6 +56,7 @@ namespace FAWorld
         const std::vector<Item>& getBelt() const { return mBelt; }
         std::vector<EquipTarget> getBeltAndInventoryItemPositions() const;
         Item takeOut(const EquipTarget& target);
+        // note: this function could not just call autoPlaceItem because quantity may include more than 5000 pieces
         void placeGold(int quantity, const ItemFactory& itemFactory);
         ItemBonus getTotalItemBonus() const;
 
