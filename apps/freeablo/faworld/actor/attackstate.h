@@ -22,10 +22,11 @@ namespace FAWorld
             static const std::string typeId;
             const std::string& getTypeId() const override { return typeId; }
 
-            virtual void save(FASaveGame::GameSaver&) const override {}
+            virtual void save(FASaveGame::GameSaver& saver) const override;
 
+            explicit MeleeAttackState(FASaveGame::GameLoader& loader);
             explicit MeleeAttackState(Misc::Direction direction);
-            virtual ~AttackState() = default;
+            virtual ~MeleeAttackState() = default;
             virtual boost::optional<StateChange> update(Actor& actor, bool noclip);
 
             virtual void onEnter(Actor& actor);

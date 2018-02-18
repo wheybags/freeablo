@@ -81,6 +81,7 @@ namespace Engine
         mPlayerFactory = boost::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
         renderer.loadFonts(*mExe);
 
+        int32_t currentLevel = -1;
         FILE* f = fopen("save.sav", "rb");
         if (f)
         {
@@ -104,15 +105,14 @@ namespace Engine
         else
         {
             mWorld.reset(new FAWorld::World(*mExe));
+            currentLevel = variables["level"].as<int32_t>();
 
-            int32_t currentLevel = variables["level"].as<int32_t>();
             mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
 
             if (currentLevel != -1)
             {
                 inGame = true;
                 mPlayer = mPlayerFactory->create(*mWorld, characterClass);
-                mWorld->setLevel(currentLevel);
                 if (variables["invuln"].as<std::string>() == "on")
                     mPlayer->mInvuln = true;
             }
@@ -122,7 +122,11 @@ namespace Engine
         mInputManager->registerKeyboardObserver(mGuiManager.get());
         mInputManager->setGuiManager(mGuiManager.get());
         mWorld->setGuiManager(mGuiManager.get());
-        setupNewPlayer(mPlayer);
+        if (mPlayer)
+            setupNewPlayer(mPlayer);
+
+        if (currentLevel != -1)
+            mWorld->setLevel(currentLevel);
 
         if (inGame)
         {

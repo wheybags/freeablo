@@ -150,7 +150,7 @@ namespace FAWorld
 
     Actor::~Actor() = default;
 
-    bool Actor::checkHit(Actor* enemy) { return (Random::randomInRange(1, 2) < 2); }
+    bool Actor::checkHit(Actor* /*enemy*/) { return (Random::randomInRange(1, 2) < 2); }
 
     void Actor::takeDamage(double amount)
     {

@@ -1,4 +1,5 @@
 #include "attackstate.h"
+#include "../../fasavegame/gameloader.h"
 #include "../actor.h"
 
 namespace FAWorld
@@ -6,7 +7,11 @@ namespace FAWorld
 
     namespace ActorState
     {
-        const std::string MeeleeAttackState::typeId = "actorstate-attack-state";
+        const std::string MeleeAttackState::typeId = "actorstate-attack-state";
+
+        void MeleeAttackState::save(FASaveGame::GameSaver& saver) const { saver.save(static_cast<int32_t>(mDirection)); }
+
+        MeleeAttackState::MeleeAttackState(FASaveGame::GameLoader& loader) { mDirection = static_cast<Misc::Direction>(loader.load<int32_t>()); }
 
         MeleeAttackState::MeleeAttackState(Misc::Direction direction) : mDirection(direction) {}
 

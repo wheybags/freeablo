@@ -50,7 +50,7 @@ namespace FAWorld
     ItemMap::ItemMap(FASaveGame::GameLoader& loader, const GameLevel* level) : ItemMap(level)
     {
         uint32_t itemsSize = loader.load<uint32_t>();
-        for (uint32_t i; i < itemsSize; i++)
+        for (uint32_t i = 0; i < itemsSize; i++)
         {
             Tile key(loader);
             mItems.emplace(key, PlacedItemData(loader));

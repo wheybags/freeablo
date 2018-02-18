@@ -17,7 +17,7 @@ namespace FAWorld
             if (auto direction = actor.mMeleeAttackRequestedDirection)
             {
                 actor.mMeleeAttackRequestedDirection = boost::none;
-                return StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new ActorState::MeleeAttackState(*direction)};
+                return StateChange{StateOperation::push, new ActorState::MeleeAttackState(*direction)};
             }
 
             switch (actor.mTarget.getType())
@@ -35,7 +35,6 @@ namespace FAWorld
                         {
                             if (actor.canIAttack(target))
                             {
-                                actor.attack(target);
                                 auto targetPos = target->getPos().current();
                                 auto myPos = actor.getPos().current();
                                 ret = StateChange{StateOperation::push,
