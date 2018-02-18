@@ -922,7 +922,7 @@ namespace FALevelGen
             std::string name = possibleMonsters[randomInRange(0, possibleMonsters.size() - 1)]->monsterName;
             DiabloExe::Monster monster = exe.getMonster(name);
 
-            FAWorld::Actor* monsterObj = new FAWorld::Actor(monster);
+            FAWorld::Actor* monsterObj = new FAWorld::Actor(*level.getWorld(), monster);
             monsterObj->teleport(&level, FAWorld::Position(xPos, yPos));
         }
     }
@@ -1109,7 +1109,8 @@ namespace FALevelGen
         }
     }
 
-    FAWorld::GameLevel* generate(int32_t width, int32_t height, int32_t dLvl, const DiabloExe::DiabloExe& exe, int32_t previous, int32_t next)
+    FAWorld::GameLevel*
+    generate(FAWorld::World& world, int32_t width, int32_t height, int32_t dLvl, const DiabloExe::DiabloExe& exe, int32_t previous, int32_t next)
     {
         int32_t levelNum = ((dLvl - 1) / 4) + 1;
 
@@ -1211,7 +1212,7 @@ namespace FALevelGen
         std::string solPath = ss.str();
 
         Level::Level levelBase(std::move(level), tilPath, minPath, solPath, celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap(), previous, next);
-        auto retval = new FAWorld::GameLevel(std::move(levelBase), dLvl);
+        auto retval = new FAWorld::GameLevel(world, std::move(levelBase), dLvl);
 
         placeMonsters(*retval, exe, dLvl);
 

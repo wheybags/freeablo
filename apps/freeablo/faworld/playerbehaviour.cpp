@@ -77,16 +77,16 @@ namespace FAWorld
                     auto pos = mousePosition - FARender::Renderer::get()->cursorSize() / 2;
                     auto clickedTileShifted = FARender::Renderer::get()->getTileByScreenPos(pos.x, pos.y, mPlayer->getPos());
                     if (mPlayer->dropItem({clickedTileShifted.x, clickedTileShifted.y}))
-                        FAWorld::World::get()->mGuiManager->clearDescription();
+                        mPlayer->getWorld()->mGuiManager->clearDescription();
                 }
-                else if (Actor* clickedActor = FAWorld::World::get()->targetedActor(mousePosition))
+                else if (Actor* clickedActor = mPlayer->getWorld()->targetedActor(mousePosition))
                 {
                     mPlayer->mTarget = clickedActor;
                 }
-                else if (auto item = FAWorld::World::get()->targetedItem(mousePosition))
+                else if (auto item = mPlayer->getWorld()->targetedItem(mousePosition))
                 {
-                    mPlayer->mTarget = Target::ItemTarget{FAWorld::World::get()->mGuiManager->isInventoryShown() ? Target::ItemTarget::ActionType::toCursor
-                                                                                                                 : Target::ItemTarget::ActionType::autoEquip,
+                    mPlayer->mTarget = Target::ItemTarget{mPlayer->getWorld()->mGuiManager->isInventoryShown() ? Target::ItemTarget::ActionType::toCursor
+                                                                                                               : Target::ItemTarget::ActionType::autoEquip,
                                                           item};
                 }
                 else

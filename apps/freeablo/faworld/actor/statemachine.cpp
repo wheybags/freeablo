@@ -27,7 +27,7 @@ namespace FAWorld
         for (uint32_t i = 0; i < stackSize; i++)
         {
             std::string typeId = loader.load<std::string>();
-            auto state = static_cast<AbstractState*>(FAWorld::World::get()->mObjectIdMapper.construct(typeId, loader));
+            auto state = static_cast<AbstractState*>(loader.currentlyLoadingWorld->mObjectIdMapper.construct(typeId, loader));
             mStateStack.emplace_back(state);
         }
     }

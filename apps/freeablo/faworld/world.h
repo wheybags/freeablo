@@ -57,7 +57,6 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver);
         ~World();
 
-        static World* get();
         void notify(Engine::KeyboardInputAction action);
         Render::Tile getTileByScreenPos(Misc::Point screenPos);
         Actor* targetedActor(Misc::Point screenPosition);

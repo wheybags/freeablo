@@ -27,7 +27,7 @@ namespace FAWorld
     PlacedItemData::PlacedItemData(FASaveGame::GameLoader& loader)
     {
         mItem.reset(new Item());
-        mItem->load(loader, FAWorld::World::get()->mDiabloExe);
+        mItem->load(loader, loader.currentlyLoadingWorld->mDiabloExe);
         mAnimation.reset(new FARender::AnimationPlayer(loader));
         mTile = Tile(loader);
     }

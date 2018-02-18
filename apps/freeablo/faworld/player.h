@@ -17,10 +17,10 @@ namespace FAWorld
         static const std::string typeId;
         const std::string& getTypeId() override { return typeId; }
 
-        Player();
-        Player(const std::string& className, const DiabloExe::CharacterStats& charStats);
+        Player(World& world);
+        Player(World& world, const std::string& className, const DiabloExe::CharacterStats& charStats);
         void initCommon();
-        Player(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
+        Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
         void save(FASaveGame::GameSaver& saver);
 
         virtual ~Player();

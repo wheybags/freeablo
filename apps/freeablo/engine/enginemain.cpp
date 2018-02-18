@@ -82,10 +82,6 @@ namespace Engine
         renderer.loadFonts(*mExe);
 
         FILE* f = fopen("save.sav", "rb");
-        mGuiManager = boost::make_unique<FAGui::GuiManager>(*this);
-        mInputManager->registerKeyboardObserver(mGuiManager.get());
-        mInputManager->setGuiManager(mGuiManager.get());
-
         if (f)
         {
             fseek(f, 0, SEEK_END);
@@ -101,16 +97,13 @@ namespace Engine
             FASaveGame::GameLoader loader(stream);
 
             mWorld.reset(new FAWorld::World(loader, *mExe));
-            mWorld->setGuiManager(mGuiManager.get());
 
             mPlayer = mWorld->getCurrentPlayer();
-            setupNewPlayer(mPlayer);
             inGame = true;
         }
         else
         {
             mWorld.reset(new FAWorld::World(*mExe));
-            mWorld->setGuiManager(mGuiManager.get());
 
             int32_t currentLevel = variables["level"].as<int32_t>();
             mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
@@ -118,12 +111,19 @@ namespace Engine
             if (currentLevel != -1)
             {
                 inGame = true;
-                setupNewPlayer(mPlayerFactory->create(characterClass));
+                mPlayer = mPlayerFactory->create(*mWorld, characterClass);
                 mWorld->setLevel(currentLevel);
                 if (variables["invuln"].as<std::string>() == "on")
                     mPlayer->mInvuln = true;
             }
         }
+
+        mGuiManager = boost::make_unique<FAGui::GuiManager>(*this, *mWorld);
+        mInputManager->registerKeyboardObserver(mGuiManager.get());
+        mInputManager->setGuiManager(mGuiManager.get());
+        mWorld->setGuiManager(mGuiManager.get());
+        setupNewPlayer(mPlayer);
+
         if (inGame)
         {
             mInputManager->registerKeyboardObserver(mWorld.get());
@@ -224,7 +224,7 @@ namespace Engine
         // mInputManager->registerMouseObserver(mWorld.get());
 
         // TODO: fix that variables like invuln are not applied in this case
-        auto player = mPlayerFactory->create(characterClass);
+        auto player = mPlayerFactory->create(*mWorld, characterClass);
         setupNewPlayer(player);
         mWorld->setLevel(0);
     }

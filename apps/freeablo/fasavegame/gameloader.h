@@ -8,6 +8,7 @@
 namespace FAWorld
 {
     class GameLevel;
+    class World;
 }
 
 namespace FASaveGame
@@ -21,6 +22,7 @@ namespace FASaveGame
         void runFunctionsToRunAtEnd();
 
         FAWorld::GameLevel* currentlyLoadingLevel = nullptr;
+        FAWorld::World* currentlyLoadingWorld = nullptr;
 
     private:
         std::vector<std::function<void()>> mFunctionsToRunAtEnd;

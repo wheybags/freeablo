@@ -9,10 +9,13 @@
 
 namespace FAWorld
 {
-    GameLevel::GameLevel(Level::Level&& level, size_t levelIndex) : mLevel(std::move(level)), mLevelIndex(levelIndex), mItemMap(new ItemMap(this)) {}
+    GameLevel::GameLevel(World& world, Level::Level&& level, size_t levelIndex)
+        : mWorld(world), mLevel(std::move(level)), mLevelIndex(levelIndex), mItemMap(new ItemMap(this))
+    {
+    }
 
-    GameLevel::GameLevel(FASaveGame::GameLoader& loader)
-        : mLevel(Level::Level(loader)), mLevelIndex(loader.load<int32_t>()), mItemMap(new ItemMap(loader, this))
+    GameLevel::GameLevel(World& world, FASaveGame::GameLoader& loader)
+        : mWorld(world), mLevel(Level::Level(loader)), mLevelIndex(loader.load<int32_t>()), mItemMap(new ItemMap(loader, this))
     {
         release_assert(loader.currentlyLoadingLevel == nullptr);
         loader.currentlyLoadingLevel = this;
@@ -23,7 +26,7 @@ namespace FAWorld
         for (uint32_t i = 0; i < actorsSize; i++)
         {
             std::string actorTypeId = loader.load<std::string>();
-            Actor* actor = static_cast<Actor*>(World::get()->mObjectIdMapper.construct(actorTypeId, loader));
+            Actor* actor = static_cast<Actor*>(mWorld.mObjectIdMapper.construct(actorTypeId, loader));
             mActors.push_back(actor);
         }
 
@@ -213,7 +216,7 @@ namespace FAWorld
 
     HoverState& GameLevel::getHoverState() { return mHoverState; }
 
-    GameLevel::GameLevel() {}
+    GameLevel::GameLevel(World& world) : mWorld(world) {}
 
     ItemMap& GameLevel::getItemMap() { return *mItemMap; }
 
