@@ -16,7 +16,7 @@ namespace FASaveGame
 namespace FAWorld
 {
     class Actor;
-    class StateChange;
+    struct StateChange;
 
     enum class StateOperation
     {
