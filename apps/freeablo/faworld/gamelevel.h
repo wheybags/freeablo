@@ -26,6 +26,7 @@ namespace FAWorld
     class Actor;
     class ItemMap;
     class Tile;
+    class World;
 
     class GameLevelImpl
     {
@@ -39,8 +40,8 @@ namespace FAWorld
     class GameLevel : public GameLevelImpl
     {
     public:
-        GameLevel(Level::Level&& level, size_t levelIndex);
-        GameLevel(FASaveGame::GameLoader& gameLoader);
+        GameLevel(World& world, Level::Level&& level, size_t levelIndex);
+        GameLevel(World& world, FASaveGame::GameLoader& gameLoader);
 
         void save(FASaveGame::GameSaver& gameSaver);
 
@@ -87,9 +88,12 @@ namespace FAWorld
         ItemMap& getItemMap();
         bool isTown() const;
 
-    private:
-        GameLevel();
+        World* getWorld() { return &mWorld; }
 
+    private:
+        GameLevel(World& world);
+
+        World& mWorld;
         Level::Level mLevel;
         int32_t mLevelIndex = 0;
 

@@ -27,18 +27,12 @@
 
 namespace FAWorld
 {
-    World* singletonInstance = nullptr;
-
-    World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe))
-    {
-        release_assert(singletonInstance == nullptr);
-        singletonInstance = this;
-
-        this->setupObjectIdMappers();
-    }
+    World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe)) { this->setupObjectIdMappers(); }
 
     World::World(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : World(exe)
     {
+        loader.currentlyLoadingWorld = this;
+
         uint32_t numLevels = loader.load<uint32_t>();
 
         for (uint32_t i = 0; i < numLevels; i++)
@@ -49,7 +43,7 @@ namespace FAWorld
             GameLevel* level = nullptr;
 
             if (hasThisLevel)
-                level = new GameLevel(loader);
+                level = new GameLevel(*this, loader);
 
             mLevels[levelIndex] = level;
         }
@@ -59,6 +53,8 @@ namespace FAWorld
 
         loader.runFunctionsToRunAtEnd();
         mCurrentPlayer = (Player*)getActorById(playerId);
+
+        loader.currentlyLoadingWorld = nullptr;
     }
 
     void World::save(FASaveGame::GameSaver& saver)
@@ -84,8 +80,8 @@ namespace FAWorld
     void World::setupObjectIdMappers()
     {
         auto exe = &mDiabloExe;
-        mObjectIdMapper.addClass(Actor::typeId, [=](FASaveGame::GameLoader& loader) { return new Actor(loader, *exe); });
-        mObjectIdMapper.addClass(Player::typeId, [=](FASaveGame::GameLoader& loader) { return new Player(loader, *exe); });
+        mObjectIdMapper.addClass(Actor::typeId, [=](FASaveGame::GameLoader& loader) { return new Actor(*this, loader, *exe); });
+        mObjectIdMapper.addClass(Player::typeId, [=](FASaveGame::GameLoader& loader) { return new Player(*this, loader, *exe); });
 
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });
@@ -99,11 +95,7 @@ namespace FAWorld
     {
         for (auto& pair : mLevels)
             delete pair.second;
-
-        singletonInstance = nullptr;
     }
-
-    World* World::get() { return singletonInstance; }
 
     void World::notify(Engine::KeyboardInputAction action)
     {
@@ -210,12 +202,12 @@ namespace FAWorld
                                    static_cast<int32_t>(-1),
                                    1);
 
-        auto townLevel = new GameLevel(std::move(townLevelBase), 0);
+        auto townLevel = new GameLevel(*this, std::move(townLevelBase), 0);
         mLevels[0] = townLevel;
 
         for (auto npc : mDiabloExe.getNpcs())
         {
-            Actor* actor = new Actor(*npc, mDiabloExe);
+            Actor* actor = new Actor(*this, *npc, mDiabloExe);
             actor->teleport(townLevel, Position(npc->x, npc->y, npc->rotation));
         }
 
@@ -297,7 +289,7 @@ namespace FAWorld
             return nullptr;
         if (p->second == nullptr)
         {
-            p->second = FALevelGen::generate(100, 100, level, mDiabloExe, level - 1, level + 1);
+            p->second = FALevelGen::generate(*this, 100, 100, level, mDiabloExe, level - 1, level + 1);
         }
         return p->second;
     }

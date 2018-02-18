@@ -13,7 +13,8 @@ namespace FAWorld
         if (levelIndex != -1)
         {
             // get the level at the end, because it doesn't exist yet
-            loader.addFunctionToRunAtEnd([this, levelIndex]() { this->mLevel = World::get()->getLevel(levelIndex); });
+            World* world = loader.currentlyLoadingWorld;
+            loader.addFunctionToRunAtEnd([this, levelIndex, world]() { this->mLevel = world->getLevel(levelIndex); });
         }
 
         mCurrentPos = Position(loader);
@@ -80,6 +81,8 @@ namespace FAWorld
 
     void MovementHandler::update(int32_t actorId)
     {
+        debug_assert(mLevel);
+
         if (mCurrentPos.getDist() == 0)
         {
             if (!positionReachedSent)
@@ -96,10 +99,10 @@ namespace FAWorld
             }
             else
             {
-                bool canRepath = std::abs(World::get()->getCurrentTick() - mLastRepathed) > mPathRateLimit;
+                bool canRepath = std::abs(mLevel->getWorld()->getCurrentTick() - mLastRepathed) > mPathRateLimit;
 
                 int32_t modNum = 3;
-                canRepath = canRepath && ((World::get()->getCurrentTick() % modNum) == (actorId % modNum));
+                canRepath = canRepath && ((mLevel->getWorld()->getCurrentTick() % modNum) == (actorId % modNum));
 
                 bool needsRepath = true;
                 mCurrentPos.stop();
@@ -126,7 +129,7 @@ namespace FAWorld
 
                 if (needsRepath && canRepath)
                 {
-                    mLastRepathed = World::get()->getCurrentTick();
+                    mLastRepathed = mLevel->getWorld()->getCurrentTick();
 
                     bool _;
                     mCurrentPath = pathFind(mLevel, mCurrentPos.current(), mDestination, _, mAdjacent);

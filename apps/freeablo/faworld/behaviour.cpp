@@ -24,7 +24,7 @@ namespace FAWorld
     {
         Player* nearest = nullptr;
         int minDistance = 99999999;
-        for (auto player : World::get()->getPlayers())
+        for (auto player : actor->getWorld()->getPlayers())
         {
             int32_t distance = FAWorld::squaredDistance(player->getPos(), actor->getPos());
             if (distance < minDistance)

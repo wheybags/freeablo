@@ -93,9 +93,9 @@ namespace FAGui
         return "";
     }
 
-    GuiManager::GuiManager(Engine::EngineMain& engine) : mEngine(engine)
+    GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::World& world) : mEngine(engine), mWorld(world)
     {
-        mMenuHandler.reset(new MenuHandler(engine));
+        mMenuHandler.reset(new MenuHandler(engine, mWorld));
 
         auto renderer = FARender::Renderer::get();
         mSmallPentagram.reset(new FARender::AnimationPlayer());
@@ -621,7 +621,7 @@ namespace FAGui
                                    nk_image(ctx, bulbImage);
                                };
 
-                               const FAWorld::ActorStats& stats = FAWorld::World::get()->getCurrentPlayer()->getStats();
+                               const FAWorld::ActorStats& stats = mWorld.getCurrentPlayer()->getStats();
                                // draw current hp into health bulb
                                drawBulb(stats.mHp.current, stats.mHp.max, healthBulbLeftOffset);
                                // and current mana
@@ -723,9 +723,9 @@ namespace FAGui
         }
 
         if (isModalDlgShown() || mMenuHandler->isActive())
-            FAWorld::World::get()->blockInput();
+            mWorld.blockInput();
         else
-            FAWorld::World::get()->unblockInput();
+            mWorld.unblockInput();
     }
 
     void GuiManager::setDescription(std::string text, TextColor color)

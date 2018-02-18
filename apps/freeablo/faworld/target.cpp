@@ -27,8 +27,9 @@ namespace FAWorld
             {
                 int32_t targetId = loader.load<int32_t>();
 
-                loader.addFunctionToRunAtEnd([this, targetId]() {
-                    mData.actor = World::get()->getActorById(targetId);
+                World* world = loader.currentlyLoadingWorld;
+                loader.addFunctionToRunAtEnd([this, targetId, world]() {
+                    mData.actor = world->getActorById(targetId);
                     release_assert(mData.actor);
                 });
                 break;

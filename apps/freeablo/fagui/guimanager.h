@@ -37,6 +37,7 @@ namespace FAWorld
 {
     class EquipTarget;
     class Player;
+    class World;
 }
 
 namespace FAGui
@@ -91,7 +92,7 @@ namespace FAGui
         using self = GuiManager;
 
     public:
-        GuiManager(Engine::EngineMain& engine);
+        GuiManager(Engine::EngineMain& engine, FAWorld::World& world);
         ~GuiManager();
 
         void update(bool inGame, bool paused, nk_context* ctx);
@@ -133,6 +134,7 @@ namespace FAGui
 
     private:
         Engine::EngineMain& mEngine;
+        FAWorld::World& mWorld;
         FAWorld::Player* mPlayer;
         std::string mDescription;
         TextColor mDescriptionColor = TextColor::white;

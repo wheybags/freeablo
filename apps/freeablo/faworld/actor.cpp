@@ -36,7 +36,8 @@ namespace FAWorld
         mAnimation.update();
     }
 
-    Actor::Actor(const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath) : mMoveHandler(World::getTicksInPeriod(1.0f))
+    Actor::Actor(World& world, const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath)
+        : mMoveHandler(World::getTicksInPeriod(1.0f)), mWorld(world)
     {
         mFaction = Faction::heaven();
         if (!dieAnimPath.empty())
@@ -48,10 +49,10 @@ namespace FAWorld
 
         mActorStateMachine.reset(new StateMachine(this, new ActorState::BaseState()));
 
-        mId = FAWorld::World::get()->getNewId();
+        mId = mWorld.getNewId();
     }
 
-    Actor::Actor(const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe) : Actor(npc.celPath, npc.celPath)
+    Actor::Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe) : Actor(world, npc.celPath, npc.celPath)
     {
         if (auto id = npc.animationSequenceId)
             mAnimation.setIdleFrameSequence(exe.getTownerAnimation()[*id]);
@@ -61,7 +62,7 @@ namespace FAWorld
         mName = npc.name;
     }
 
-    Actor::Actor(const DiabloExe::Monster& monster) : Actor("", "", "")
+    Actor::Actor(World& world, const DiabloExe::Monster& monster) : Actor(world, "", "", "")
     {
         boost::format fmt(monster.cl2Path);
         mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage((fmt % 'w').str()));
@@ -76,7 +77,8 @@ namespace FAWorld
         mSoundPath = monster.soundPath;
     }
 
-    Actor::Actor(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : mMoveHandler(loader), mAnimation(loader), mStats(loader)
+    Actor::Actor(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe)
+        : mMoveHandler(loader), mAnimation(loader), mStats(loader), mWorld(world)
     {
         mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
 
@@ -84,7 +86,7 @@ namespace FAWorld
         if (hasBehaviour)
         {
             std::string typeId = loader.load<std::string>();
-            mBehaviour.reset(static_cast<Behaviour*>(World::get()->mObjectIdMapper.construct(typeId, loader)));
+            mBehaviour.reset(static_cast<Behaviour*>(mWorld.mObjectIdMapper.construct(typeId, loader)));
             loader.addFunctionToRunAtEnd([this]() { mBehaviour->reAttach(this); });
         }
 

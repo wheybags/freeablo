@@ -10,10 +10,10 @@ namespace FAWorld
 
     PlayerFactory::PlayerFactory(const DiabloExe::DiabloExe& exe, const ItemFactory& itemFactory) : mExe(exe), mItemFactory(itemFactory) {}
 
-    Player* PlayerFactory::create(const std::string& playerClass) const
+    Player* PlayerFactory::create(World& world, const std::string& playerClass) const
     {
         auto charStats = mExe.getCharacterStat(playerClass);
-        auto player = new Player(playerClass, charStats);
+        auto player = new Player(world, playerClass, charStats);
 
         if (playerClass == "Warrior")
             createWarrior(player);

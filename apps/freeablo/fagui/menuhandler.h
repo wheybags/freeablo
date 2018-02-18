@@ -14,6 +14,11 @@ namespace Engine
     class EngineMain;
 }
 
+namespace FAWorld
+{
+    class World;
+}
+
 struct nk_context;
 
 namespace FARender
@@ -42,14 +47,16 @@ namespace FAGui
 
     public:
         std::unique_ptr<FARender::AnimationPlayer> createSmLogo();
-        explicit MenuHandler(Engine::EngineMain& engine);
+        explicit MenuHandler(Engine::EngineMain& engine, FAWorld::World& world);
         void update(nk_context* ctx) const;
         bool isActive() const { return !!mActiveScreen; }
         void disable();
         Engine::EngineMain& engine() { return mEngine; }
         void notify(Engine::KeyboardInputAction action);
+        FAWorld::World* getWorld() const { return &mWorld; }
 
     private:
         Engine::EngineMain& mEngine;
+        FAWorld::World& mWorld;
     };
 }

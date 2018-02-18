@@ -7,7 +7,7 @@
 
 namespace FAWorld
 {
-
+    class World;
     class Player;
     class ActorStats;
 
@@ -16,7 +16,7 @@ namespace FAWorld
     public:
         PlayerFactory(const DiabloExe::DiabloExe& exe, const FAWorld::ItemFactory& itemFactory);
 
-        Player* create(const std::string& playerClass) const;
+        Player* create(World& world, const std::string& playerClass) const;
 
     private:
         void loadTestingKit(Player* player) const;

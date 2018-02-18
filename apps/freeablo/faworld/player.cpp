@@ -18,7 +18,7 @@ namespace FAWorld
 {
     const std::string Player::typeId = "player";
 
-    Player::Player() : Actor()
+    Player::Player(World& world) : Actor(world)
     {
         // TODO: hack - need to think of some more elegant way of handling Actors in general
         DiabloExe::CharacterStats stats;
@@ -26,7 +26,7 @@ namespace FAWorld
         initCommon();
     }
 
-    Player::Player(const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor()
+    Player::Player(World& world, const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor(world)
     {
         init(className, charStats);
         initCommon();
@@ -34,7 +34,7 @@ namespace FAWorld
 
     void Player::initCommon()
     {
-        FAWorld::World::get()->registerPlayer(this);
+        mWorld.registerPlayer(this);
         mInventory.equipChanged.connect([this]() { updateSprites(); });
         mMoveHandler.positionReached.connect(positionReached);
     }
@@ -64,10 +64,10 @@ namespace FAWorld
         mBehaviour.reset(new PlayerBehaviour(this));
     }
 
-    Player::Player(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : Actor(loader, exe)
+    Player::Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : Actor(world, loader, exe)
     {
         mClassName = loader.load<std::string>();
-        FAWorld::World::get()->registerPlayer(this);
+        mWorld.registerPlayer(this);
     }
 
     void Player::save(FASaveGame::GameSaver& saver)
@@ -78,7 +78,7 @@ namespace FAWorld
         saver.save(mClassName);
     }
 
-    Player::~Player() { FAWorld::World::get()->deregisterPlayer(this); }
+    Player::~Player() { mWorld.deregisterPlayer(this); }
 
     void Player::setSpriteClass(std::string className)
     {
@@ -286,7 +286,7 @@ namespace FAWorld
 
             if (target && target->getPos().isNear(this->getPos()) && canTalkTo(target))
             {
-                World::get()->mDlgManager->talk(target);
+                mWorld.mDlgManager->talk(target);
                 mTarget.clear();
             }
         }

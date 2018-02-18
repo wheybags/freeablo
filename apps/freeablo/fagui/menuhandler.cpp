@@ -17,7 +17,7 @@ namespace FAGui
         return ret;
     }
 
-    MenuHandler::MenuHandler(Engine::EngineMain& engine) : mEngine(engine) {}
+    MenuHandler::MenuHandler(Engine::EngineMain& engine, FAWorld::World& world) : mEngine(engine), mWorld(world) {}
 
     void MenuHandler::update(nk_context* ctx) const
     {

@@ -50,11 +50,13 @@ namespace FAGui
             y += itemHeight;
             return func;
         };
-        mMenuItems.push_back({drawItem("Save Game"), [this]() {
+
+        FAWorld::World* world = menu.getWorld();
+        mMenuItems.push_back({drawItem("Save Game"), [this, world]() {
                                   {
                                       Serial::TextWriteStream writeStream;
                                       FASaveGame::GameSaver saver(writeStream);
-                                      FAWorld::World::get()->save(saver);
+                                      world->save(saver);
                                       std::pair<uint8_t*, size_t> writtenData = writeStream.getData();
                                       FILE* f = fopen("save.sav", "wb");
                                       fwrite(writtenData.first, 1, writtenData.second, f);

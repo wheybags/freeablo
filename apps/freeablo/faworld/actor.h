@@ -33,10 +33,10 @@ namespace FAWorld
     class Actor
     {
     public:
-        Actor(const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
-        Actor(const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
-        Actor(const DiabloExe::Monster& monster);
-        Actor(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
+        Actor(World& world, const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
+        Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
+        Actor(World& world, const DiabloExe::Monster& monster);
+        Actor(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
         virtual ~Actor();
 
         virtual void save(FASaveGame::GameSaver& saver);
@@ -49,6 +49,7 @@ namespace FAWorld
         void teleport(GameLevel* level, Position pos);
         virtual void updateSprites() {}
         GameLevel* getLevel();
+        World* getWorld() const { return &mWorld; }
 
         void attack(Actor* enemy);
 
@@ -95,6 +96,7 @@ namespace FAWorld
         std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;
         std::map<std::string, std::string> mTalkData; ///< Lines of dialogue
+        World& mWorld;
 
         // TODO: this var is only used for dialog code, which branches on which npc is being spoken to.
         // Eventually, we should add a proper dialog specification system, and get rid of this.
