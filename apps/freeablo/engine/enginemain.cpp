@@ -213,7 +213,6 @@ namespace Engine
     {
         mPlayer = player;
         mWorld->addCurrentPlayer(mPlayer);
-        mWorld->setLevel(0);
         mGuiManager->setPlayer(mPlayer);
         mInputManager->registerMouseObserver(mPlayer->getPlayerBehaviour());
     }
@@ -225,7 +224,9 @@ namespace Engine
         // mInputManager->registerMouseObserver(mWorld.get());
 
         // TODO: fix that variables like invuln are not applied in this case
-        setupNewPlayer(mPlayerFactory->create(characterClass));
+        auto player = mPlayerFactory->create(characterClass);
+        setupNewPlayer(player);
+        mWorld->setLevel(0);
     }
 
     const DiabloExe::DiabloExe& EngineMain::exe() const { return *mExe; }

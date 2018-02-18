@@ -114,5 +114,19 @@
    ...
 }
 
+{
+   feckinAlsa
+   Memcheck:Leak
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libasound.so.*
+   ...
+}
 
-
+{
+   nvidia_bs
+   Memcheck:Param
+   sendmsg(msg.msg_iov[0])
+   fun:sendmsg
+   obj:/usr/lib/x86_64-linux-gnu/nvidia/current/libGLX_nvidia.so.*
+   ...
+}

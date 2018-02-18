@@ -2,6 +2,7 @@
 #pragma once
 
 #include "../farender/animationplayer.h"
+#include "actor/statemachine.h"
 #include "actoranimationmanager.h"
 #include "actorstats.h"
 #include "behaviour.h"
@@ -17,7 +18,6 @@
 #include <boost/variant/variant.hpp>
 #include <map>
 #include <misc/misc.h>
-#include <statemachine/statemachine.h>
 
 namespace FASaveGame
 {
@@ -87,10 +87,10 @@ namespace FAWorld
 
     protected:
         // protected member variables
-        StateMachine::StateMachine<Actor>* mActorStateMachine;
+        std::unique_ptr<StateMachine> mActorStateMachine;
         ActorStats mStats;
         std::string mSoundPath;
-        Behaviour* mBehaviour = nullptr;
+        std::unique_ptr<Behaviour> mBehaviour;
         Faction mFaction;
         std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;

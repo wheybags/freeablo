@@ -8,6 +8,8 @@
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
+#include "actor/attackstate.h"
+#include "actor/basestate.h"
 #include "actorstats.h"
 #include "diabloexe/npc.h"
 #include "equiptarget.h"
@@ -88,6 +90,9 @@ namespace FAWorld
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });
         mObjectIdMapper.addClass(PlayerBehaviour::typeId, [](FASaveGame::GameLoader&) { return new PlayerBehaviour(); });
+
+        mObjectIdMapper.addClass(ActorState::AttackState::typeId, [](FASaveGame::GameLoader&) { return new ActorState::AttackState(); });
+        mObjectIdMapper.addClass(ActorState::BaseState::typeId, [](FASaveGame::GameLoader&) { return new ActorState::BaseState(); });
     }
 
     World::~World()

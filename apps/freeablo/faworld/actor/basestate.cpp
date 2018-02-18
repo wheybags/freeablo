@@ -1,19 +1,18 @@
 #include "basestate.h"
-
 #include "../actor.h"
 #include "../itemmap.h"
 #include "attackstate.h"
 
 namespace FAWorld
 {
-
     namespace ActorState
     {
+        const std::string BaseState::typeId = "actor-state-base-state";
 
-        boost::optional<StateMachine::StateChange<Actor>> BaseState::update(Actor& actor, bool noclip)
+        boost::optional<StateChange> BaseState::update(Actor& actor, bool noclip)
         {
             UNUSED_PARAM(noclip);
-            boost::optional<StateMachine::StateChange<Actor>> ret;
+            boost::optional<StateChange> ret;
 
             switch (actor.mTarget.getType())
             {
@@ -31,7 +30,7 @@ namespace FAWorld
                             if (actor.canIAttack(target))
                             {
                                 actor.attack(target);
-                                ret = StateMachine::StateChange<Actor>{StateMachine::StateOperation::push, new AttackState()};
+                                ret = StateChange{StateOperation::push, new AttackState()};
                             }
                         }
                     }
