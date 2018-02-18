@@ -6,8 +6,9 @@ namespace FAWorld
 
     namespace ActorState
     {
+        const std::string AttackState::typeId = "actorstate-attack-state";
 
-        boost::optional<StateMachine::StateChange<Actor>> AttackState::update(Actor& actor, bool noclip)
+        boost::optional<StateChange> AttackState::update(Actor& actor, bool noclip)
         {
             UNUSED_PARAM(noclip);
 
@@ -15,7 +16,7 @@ namespace FAWorld
             if (animManager.getCurrentAnimation() != AnimState::attack && animManager.getInterruptedAnimation() != AnimState::attack)
             {
                 actor.isAttacking = false;
-                return StateMachine::StateChange<Actor>{StateMachine::StateOperation::pop};
+                return StateChange{StateOperation::pop};
             }
 
             return boost::none;

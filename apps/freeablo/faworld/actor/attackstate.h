@@ -1,23 +1,26 @@
 
 #pragma once
 
+#include "statemachine.h"
 #include <misc/misc.h>
-#include <statemachine/statemachine.h>
 #include <stddef.h>
 
 namespace FAWorld
 {
-
     class Actor;
 
     namespace ActorState
     {
-
-        class AttackState : public StateMachine::AbstractState<Actor>
+        class AttackState : public AbstractState
         {
         public:
-            ~AttackState(){};
-            virtual boost::optional<StateMachine::StateChange<Actor>> update(Actor& actor, bool noclip);
+            static const std::string typeId;
+            const std::string& getTypeId() const override { return typeId; }
+
+            virtual void save(FASaveGame::GameSaver&) const override {}
+
+            virtual ~AttackState() = default;
+            virtual boost::optional<StateChange> update(Actor& actor, bool noclip);
 
             virtual void onEnter(Actor& actor);
         };

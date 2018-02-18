@@ -61,7 +61,7 @@ namespace FAWorld
 
         mStats.mAttackDamage = 60;
 
-        mBehaviour = new PlayerBehaviour(this);
+        mBehaviour.reset(new PlayerBehaviour(this));
     }
 
     Player::Player(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : Actor(loader, exe)

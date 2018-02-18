@@ -25,6 +25,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/actor/basestate.h
     faworld/actor/attackstate.cpp
     faworld/actor/attackstate.h
+    faworld/actor/statemachine.cpp
+    faworld/actor/statemachine.h
 
     faworld/actor.cpp
     faworld/actor.h

@@ -102,13 +102,6 @@ add_library(Settings
 target_link_libraries(Settings ${HUNTER_BOOST_LIBS})
 set_target_properties(Settings PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
-add_library(StateMachine
-    statemachine/statemachine.h
-    statemachine/statemachine.cpp
-)
-target_link_libraries(StateMachine ${HUNTER_BOOST_LIBS})
-set_target_properties(StateMachine PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
-
 add_library(Serial
     serial/loader.h
     serial/loader.cpp

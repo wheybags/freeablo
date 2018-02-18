@@ -46,7 +46,7 @@ namespace FAWorld
         if (!idleAnimPath.empty())
             mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage(idleAnimPath));
 
-        mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this);
+        mActorStateMachine.reset(new StateMachine(this, new ActorState::BaseState()));
 
         mId = FAWorld::World::get()->getNewId();
     }
@@ -70,7 +70,7 @@ namespace FAWorld
         mAnimation.setAnimation(AnimState::attack, FARender::Renderer::get()->loadImage((fmt % 'a').str()));
         mAnimation.setAnimation(AnimState::hit, FARender::Renderer::get()->loadImage((fmt % 'h').str()));
 
-        mBehaviour = new BasicMonsterBehaviour(this);
+        mBehaviour.reset(new BasicMonsterBehaviour(this));
         mFaction = Faction::hell();
         mName = monster.monsterName;
         mSoundPath = monster.soundPath;
@@ -84,14 +84,13 @@ namespace FAWorld
         if (hasBehaviour)
         {
             std::string typeId = loader.load<std::string>();
-            mBehaviour = static_cast<Behaviour*>(World::get()->mObjectIdMapper.construct(typeId, loader));
+            mBehaviour.reset(static_cast<Behaviour*>(World::get()->mObjectIdMapper.construct(typeId, loader)));
             loader.addFunctionToRunAtEnd([this]() { mBehaviour->reAttach(this); });
         }
 
         mId = loader.load<int32_t>();
         mNpcId = loader.load<std::string>();
         mName = loader.load<std::string>();
-        mActorStateMachine = new StateMachine::StateMachine<Actor>(new ActorState::BaseState(), this); // TODO: handle this
 
         // TODO: some sort of system here, so we don't need to save an npcs entire dialog
         // data into the save file every time. Probably should be done when dialog is revisited.
@@ -104,6 +103,9 @@ namespace FAWorld
 
         mTarget.load(loader);
         mInventory.load(loader, exe);
+
+        mActorStateMachine.reset(new StateMachine(this));
+        mActorStateMachine->load(loader);
     }
 
     void Actor::save(FASaveGame::GameSaver& saver)
@@ -139,14 +141,10 @@ namespace FAWorld
         mTarget.save(saver);
         mInventory.save(saver);
 
-        // TODO: handle mActorStateMachine here
+        mActorStateMachine->save(saver);
     }
 
-    Actor::~Actor()
-    {
-        if (mBehaviour != nullptr)
-            delete mBehaviour;
-    }
+    Actor::~Actor() = default;
 
     void Actor::takeDamage(double amount)
     {

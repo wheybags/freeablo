@@ -30,7 +30,7 @@ namespace FAWorld
 
         virtual void update(bool noclip) override;
 
-        PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour; }
+        PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour.get(); }
         int getTotalGold() const;
 
         boost::signals2::signal<void(const std::pair<int32_t, int32_t>&)> positionReached;
