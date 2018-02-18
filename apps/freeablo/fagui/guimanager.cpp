@@ -236,7 +236,7 @@ namespace FAGui
                     smallText(ctx, line.text.c_str(), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
                     if (auto num = line.mNumber)
                         smallText(ctx, std::to_string(*num).c_str(), line.color, NK_TEXT_ALIGN_RIGHT);
-                    if (lineIndex != -1 && activeDialog.selectedLine() == lineIndex)
+                    if (line.forceSelected || (lineIndex != -1 && activeDialog.selectedLine() == lineIndex))
                     {
                         auto pent = renderer->loadImage("data/pentspn2.cel");
                         int pentOffset = 5;

@@ -31,6 +31,11 @@ namespace FAGui
         DialogLineData& setNumber(int32_t number);
         DialogLineData& setYOffset(int32_t offset);
         DialogLineData& setXOffset(int32_t offset);
+        DialogLineData& setForceSelected(bool value = true)
+        {
+            forceSelected = value;
+            return *this;
+        }
 
         static DialogLineData separator()
         {
@@ -44,6 +49,7 @@ namespace FAGui
         std::string text;
         bool alignCenter = false;
         bool isSeparator = false;
+        bool forceSelected = false; /// display selection forcefully on this line (Used for back button in some cases)
         TextColor color = TextColor::white;
         int32_t mXOffset = 0;
         int32_t mYOffset = 0;
