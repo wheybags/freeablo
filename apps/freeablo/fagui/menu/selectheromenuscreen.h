@@ -15,6 +15,11 @@ namespace DiabloExe
     class CharacterStats;
 }
 
+namespace FAWorld
+{
+    enum class PlayerClass;
+}
+
 namespace FAGui
 {
     class SelectHeroMenuScreen : public MenuScreen
@@ -27,25 +32,18 @@ namespace FAGui
             chooseClass,
             enterName,
         };
-        // TODO: replace when appropriate enum will be program wide
-        enum class ClassType
-        {
-            warrior = 0,
-            rogue,
-            sorcerer,
-        };
 
         class characterInfo
         {
         public:
-            characterInfo(ClassType charClassArg, const DiabloExe::CharacterStats& stats);
+            characterInfo(FAWorld::PlayerClass charClassArg, const DiabloExe::CharacterStats& stats);
 
             int level;
             int strength;
             int magic;
             int dexterity;
             int vitality;
-            ClassType charClass;
+            FAWorld::PlayerClass charClass;
         };
 
     public:

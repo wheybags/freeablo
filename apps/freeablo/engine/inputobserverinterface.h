@@ -6,6 +6,11 @@ namespace Misc
     struct Point;
 }
 
+namespace Input
+{
+    struct KeyboardModifiers;
+}
+
 namespace Engine
 {
 
@@ -45,6 +50,6 @@ namespace Engine
     class MouseInputObserverInterface
     {
     public:
-        virtual void notify(MouseInputAction action, Misc::Point mousePosition, bool mouseDown) = 0;
+        virtual void notify(MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers) = 0;
     };
 }

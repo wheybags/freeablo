@@ -31,7 +31,6 @@ add_library(Misc
     misc/md5.h
     misc/md5.cpp
     misc/misc.h
-    misc/misc.cpp
     misc/disablewarn.h
     misc/enablewarn.h
     misc/savePNG.h
@@ -41,6 +40,10 @@ add_library(Misc
     misc/maxcurrentitem.h
     misc/assert.h
     misc/array2d.h
+    misc/direction.cpp
+    misc/direction.h
+    misc/random.cpp
+    misc/random.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
@@ -85,7 +88,7 @@ add_library(DiabloExe
     diabloexe/characterstats.cpp
     diabloexe/affix.cpp
     diabloexe/affix.h)
-target_link_libraries(DiabloExe Misc FAIO ${HUNTER_BOST_LIBS})
+target_link_libraries(DiabloExe Misc FAIO ${HUNTER_BOOST_LIBS})
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Audio

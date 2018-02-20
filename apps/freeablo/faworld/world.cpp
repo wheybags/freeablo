@@ -87,7 +87,7 @@ namespace FAWorld
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });
         mObjectIdMapper.addClass(PlayerBehaviour::typeId, [](FASaveGame::GameLoader&) { return new PlayerBehaviour(); });
 
-        mObjectIdMapper.addClass(ActorState::AttackState::typeId, [](FASaveGame::GameLoader&) { return new ActorState::AttackState(); });
+        mObjectIdMapper.addClass(ActorState::MeleeAttackState::typeId, [](FASaveGame::GameLoader& loader) { return new ActorState::MeleeAttackState(loader); });
         mObjectIdMapper.addClass(ActorState::BaseState::typeId, [](FASaveGame::GameLoader&) { return new ActorState::BaseState(); });
     }
 
@@ -208,7 +208,7 @@ namespace FAWorld
         for (auto npc : mDiabloExe.getNpcs())
         {
             Actor* actor = new Actor(*this, *npc, mDiabloExe);
-            actor->teleport(townLevel, Position(npc->x, npc->y, npc->rotation));
+            actor->teleport(townLevel, Position(npc->x, npc->y, static_cast<Misc::Direction>(npc->rotation)));
         }
 
         for (int32_t i = 1; i < 17; i++)

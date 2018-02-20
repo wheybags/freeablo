@@ -4,7 +4,7 @@
 #include <initializer_list>
 #include <vector>
 
-namespace FALevelGen
+namespace Random
 {
     void FAsrand(int seed);
     int normRand(int min, int max);

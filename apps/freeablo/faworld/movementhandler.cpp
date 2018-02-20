@@ -117,7 +117,7 @@ namespace FAWorld
                         // Make sure nothing has moved into the way
                         if (mLevel->isPassable(next.first, next.second))
                         {
-                            int32_t direction = Misc::getVecDir(Misc::getVec(mCurrentPos.current(), next));
+                            auto direction = Misc::getVecDir(Misc::getVec(mCurrentPos.current(), next));
                             positionReachedSent = false;
                             mCurrentPos.setDirection(direction);
                             mCurrentPos.start();
@@ -150,4 +150,6 @@ namespace FAWorld
         mCurrentPos = pos;
         mDestination = mCurrentPos.current();
     }
+
+    void MovementHandler::setDirection(Misc::Direction direction) { mCurrentPos.setDirection(direction); }
 }

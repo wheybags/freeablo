@@ -14,6 +14,12 @@ namespace FAWorld
             UNUSED_PARAM(noclip);
             boost::optional<StateChange> ret;
 
+            if (auto direction = actor.mMeleeAttackRequestedDirection)
+            {
+                actor.mMeleeAttackRequestedDirection = boost::none;
+                return StateChange{StateOperation::push, new ActorState::MeleeAttackState(*direction)};
+            }
+
             switch (actor.mTarget.getType())
             {
                 case Target::Type::Actor:
@@ -29,8 +35,10 @@ namespace FAWorld
                         {
                             if (actor.canIAttack(target))
                             {
-                                actor.attack(target);
-                                ret = StateChange{StateOperation::push, new AttackState()};
+                                auto targetPos = target->getPos().current();
+                                auto myPos = actor.getPos().current();
+                                ret = StateChange{StateOperation::push,
+                                                  new MeleeAttackState(Misc::getVecDir({targetPos.first - myPos.first, targetPos.second - myPos.second}))};
                             }
                         }
                     }

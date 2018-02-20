@@ -2,6 +2,7 @@
 #include "../fagui/guimanager.h"
 #include "../farender/renderer.h"
 #include "equiptarget.h"
+#include "input/inputmanager.h"
 #include "player.h"
 #include <misc/assert.h>
 
@@ -42,7 +43,7 @@ namespace FAWorld
 
     void PlayerBehaviour::unblockInput() { mUnblockInput = true; }
 
-    void PlayerBehaviour::notify(Engine::MouseInputAction action, Misc::Point mousePosition, bool mouseDown)
+    void PlayerBehaviour::notify(Engine::MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers)
     {
         if (mInputBlockedFramesLeft != 0)
             return;
@@ -78,6 +79,11 @@ namespace FAWorld
                     auto clickedTileShifted = FARender::Renderer::get()->getTileByScreenPos(pos.x, pos.y, mPlayer->getPos());
                     if (mPlayer->dropItem({clickedTileShifted.x, clickedTileShifted.y}))
                         mPlayer->getWorld()->mGuiManager->clearDescription();
+                }
+                else if (modifiers.shift && !mPlayer->getLevel()->isTown())
+                {
+                    mPlayer->startMeleeAttack(
+                        Misc::getVecDir({clickedTile.x - mPlayer->getPos().current().first, clickedTile.y - mPlayer->getPos().current().second}));
                 }
                 else if (Actor* clickedActor = mPlayer->getWorld()->targetedActor(mousePosition))
                 {

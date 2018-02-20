@@ -2,7 +2,9 @@
 #include "../fagui/guimanager.h"
 #include "../fasavegame/gameloader.h"
 #include "actorstats.h"
+#include "boost/container/flat_set.hpp"
 #include "equiptarget.h"
+#include "itembonus.h"
 #include "itemenums.h"
 #include "itemfactory.h"
 #include "player.h"
@@ -13,6 +15,7 @@
 #include <sstream>
 #include <stdint.h>
 #include <string>
+using namespace boost::container;
 
 namespace FAWorld
 {
@@ -280,15 +283,38 @@ namespace FAWorld
             }
     }
 
-    std::set<EquipTargetType> wearable = {
-        EquipTargetType::leftHand,
-        EquipTargetType::rightHand,
-        EquipTargetType::leftRing,
-        EquipTargetType::rightRing,
-        EquipTargetType::amulet,
-        EquipTargetType::body,
-        EquipTargetType::head,
-    };
+    static const EquipTarget slotEquipTargets[] = {MakeEquipTarget<EquipTargetType::leftHand>(),
+                                                   MakeEquipTarget<EquipTargetType::rightHand>(),
+                                                   MakeEquipTarget<EquipTargetType::leftRing>(),
+                                                   MakeEquipTarget<EquipTargetType::rightRing>(),
+                                                   MakeEquipTarget<EquipTargetType::amulet>(),
+                                                   MakeEquipTarget<EquipTargetType::body>(),
+                                                   MakeEquipTarget<EquipTargetType::head>()};
+
+    static const flat_set<EquipTarget> equipSlotsSet(std::begin(slotEquipTargets), std::end(slotEquipTargets));
+
+    ItemBonus Inventory::getTotalItemBonus() const
+    {
+        ItemBonus total;
+        for (auto slot : slotEquipTargets)
+        {
+            auto& item = getItemAt(slot);
+            if (!item.isEmpty())
+            {
+                // TODO: add stat recheck, because item may become invalid while equipped in Diablo thus becoming useless
+                total += item.getBonus();
+            }
+        }
+        if (total.minAttackDamage == 0 && total.maxAttackDamage == 0)
+        {
+            total.minAttackDamage = total.maxAttackDamage = 1;
+            // TODO: stat recheck for shield
+            if (getItemAt(MakeEquipTarget<EquipTargetType::leftHand>()).getType() == ItemType::shield ||
+                getItemAt(MakeEquipTarget<EquipTargetType::rightHand>()).getType() == ItemType::shield)
+                total.maxAttackDamage += 2;
+        }
+        return total;
+    }
 
     void Inventory::putItemUnsafe(const Item& item, const EquipTarget& target)
     {
@@ -433,7 +459,7 @@ namespace FAWorld
         if (item.getEquipLoc() == ItemEquipType::twoHanded && placementTarget.type == EquipTargetType::rightHand)
             placementTarget = MakeEquipTarget<EquipTargetType::leftHand>();
 
-        if (wearable.count(placementTarget.type) > 0 && !checkStatsRequirement(item))
+        if (equipSlotsSet.count(placementTarget) > 0 && !checkStatsRequirement(item))
             return false;
 
         if (!isFit(item, placementTarget))

@@ -2,6 +2,7 @@
 #include "../../engine/enginemain.h"
 #include "../../farender/animationplayer.h"
 #include "../../farender/renderer.h"
+#include "../../faworld/player.h"
 #include "../../faworld/world.h"
 #include "../menuhandler.h"
 #include "../nkhelpers.h"
@@ -10,7 +11,7 @@
 
 namespace FAGui
 {
-    SelectHeroMenuScreen::characterInfo::characterInfo(ClassType charClassArg, const DiabloExe::CharacterStats& stats)
+    SelectHeroMenuScreen::characterInfo::characterInfo(FAWorld::PlayerClass charClassArg, const DiabloExe::CharacterStats& stats)
     {
         level = 1;
         charClass = charClassArg;
@@ -56,7 +57,7 @@ namespace FAGui
             mMenuHandler.setActiveScreen<StartingMenuScreen>();
             return ActionResult::stopDrawing;
         };
-        auto drawItem = [&](const char* text, const struct nk_rect& rect, ClassType type) {
+        auto drawItem = [&](const char* text, const struct nk_rect& rect, FAWorld::PlayerClass type) {
             return [=](nk_context* ctx, bool isActive) {
                 nk_layout_space_push(ctx, rect);
                 menuText(ctx, text, MenuFontColor::gold, 24, NK_TEXT_ALIGN_CENTERED);
@@ -79,15 +80,15 @@ namespace FAGui
             };
         };
         mMenuItems.clear();
-        mMenuItems.push_back({drawItem("Warrior", {262, 278, 320, 33}, ClassType::warrior), [&]() {
+        mMenuItems.push_back({drawItem("Warrior", {262, 278, 320, 33}, FAWorld::PlayerClass::warrior), [&]() {
                                   mMenuHandler.engine().startGame("Warrior");
                                   return ActionResult::stopDrawing;
                               }});
-        mMenuItems.push_back({drawItem("Rogue", {262, 311, 320, 33}, ClassType::rogue), [&]() {
+        mMenuItems.push_back({drawItem("Rogue", {262, 311, 320, 33}, FAWorld::PlayerClass::rogue), [&]() {
                                   mMenuHandler.engine().startGame("Rogue");
                                   return ActionResult::stopDrawing;
                               }});
-        mMenuItems.push_back({drawItem("Sorcerer", {262, 344, 320, 33}, ClassType::sorcerer), [&]() {
+        mMenuItems.push_back({drawItem("Sorcerer", {262, 344, 320, 33}, FAWorld::PlayerClass::sorcerer), [&]() {
                                   mMenuHandler.engine().startGame("Sorcerer");
                                   return ActionResult::stopDrawing;
                               }});

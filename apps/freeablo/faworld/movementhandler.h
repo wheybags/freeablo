@@ -33,11 +33,12 @@ namespace FAWorld
         GameLevel* getLevel();
         void update(int32_t actorId);
         void teleport(GameLevel* level, Position pos);
+        void setDirection(Misc::Direction direction);
 
         boost::signals2::signal<void(const std::pair<int32_t, int32_t>)> positionReached;
-        bool positionReachedSent = false;
 
     private:
+        bool positionReachedSent = true;
         GameLevel* mLevel = nullptr;
         Position mCurrentPos;
         std::pair<int32_t, int32_t> mDestination;

@@ -105,4 +105,11 @@ namespace FARender
     void AnimationPlayer::replaceAnimation(FARender::FASpriteGroup* anim) { mCurrentAnim = anim; }
 
     void AnimationPlayer::update() { mTicksSinceAnimStarted++; }
+
+    int32_t AnimationPlayer::getAnimLength() const
+    {
+        if (!mCurrentAnim)
+            return -1;
+        return mCurrentAnim->getAnimLength();
+    }
 }

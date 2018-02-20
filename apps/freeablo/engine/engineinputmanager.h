@@ -21,6 +21,11 @@ namespace FAGui
     class GuiManager;
 }
 
+namespace Input
+{
+    struct KeyboardModifiers;
+}
+
 namespace Engine
 {
     class EngineMain;
@@ -49,7 +54,7 @@ namespace Engine
         void mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel);
         std::string keyboardActionToString(KeyboardInputAction action) const;
         void notifyKeyboardObservers(KeyboardInputAction action);
-        void notifyMouseObservers(MouseInputAction action, Misc::Point mousePosition);
+        void notifyMouseObservers(MouseInputAction action, Misc::Point mousePosition, const Input::KeyboardModifiers& modifiers);
 
         nk_context* mNkCtx = nullptr;
         Input::InputManager mInput;

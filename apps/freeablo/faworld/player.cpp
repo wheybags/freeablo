@@ -1,13 +1,15 @@
 #include "player.h"
 #include "../engine/threadmanager.h"
 #include "../fagui/dialogmanager.h"
-#include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
 #include "actorstats.h"
+#include "boost/algorithm/clamp.hpp"
 #include "diabloexe/characterstats.h"
 #include "equiptarget.h"
+#include "itembonus.h"
 #include "itemenums.h"
 #include "itemmap.h"
+#include "misc/random.h"
 #include "playerbehaviour.h"
 #include "world.h"
 #include <misc/assert.h>
@@ -51,6 +53,21 @@ namespace FAWorld
         return totalCnt;
     }
 
+    double Player::meleeDamageVs(const Actor* /*actor*/) const
+    {
+        auto bonus = getItemBonus();
+        auto dmg = Random::randomInRange(bonus.minAttackDamage, bonus.maxAttackDamage);
+        dmg += dmg * getPercentDamageBonus() / 100;
+        dmg += getCharacterBaseDamage();
+        dmg += getDamageBonus();
+        // critical hit for warriors:
+        if (getClass() == PlayerClass::warrior && Random::randomInRange(0, 99) < getCharacterLevel())
+            dmg *= 2;
+        return dmg;
+    }
+
+    ItemBonus Player::getItemBonus() const { return mInventory.getTotalItemBonus(); }
+
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
     {
         UNUSED_PARAM(className);
@@ -67,7 +84,7 @@ namespace FAWorld
     Player::Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : Actor(world, loader, exe)
     {
         mClassName = loader.load<std::string>();
-        mWorld.registerPlayer(this);
+        initCommon();
     }
 
     void Player::save(FASaveGame::GameSaver& saver)
@@ -76,6 +93,21 @@ namespace FAWorld
 
         Actor::save(saver);
         saver.save(mClassName);
+    }
+
+    bool Player::checkHit(Actor* enemy)
+    {
+        // let's throw some formulas, parameters will be placeholders for now
+        auto roll = Random::randomInRange(0, 99);
+        auto toHit = getDexterity() / 2;
+        toHit += getArmorPenetration();
+        toHit -= enemy->getArmor();
+        toHit += getCharacterLevel();
+        toHit += 50;
+        if (getClass() == PlayerClass::warrior)
+            toHit += 20;
+        toHit = boost::algorithm::clamp(toHit, 5, 95);
+        return roll < toHit;
     }
 
     Player::~Player() { mWorld.deregisterPlayer(this); }
@@ -125,7 +157,7 @@ namespace FAWorld
         {
             const Item* hand = nullptr;
 
-            if (mInventory.getLeftHand().isEmpty())
+            if (!mInventory.getLeftHand().isEmpty())
                 hand = &mInventory.getLeftHand();
             else
                 hand = &mInventory.getRightHand();
@@ -242,12 +274,13 @@ namespace FAWorld
         {
             if (isPosOk(curPos))
                 return tryDrop(curPos);
-            initialDir = 7; // this is hack to emulate original game behavior, diablo's 0th direction is our 7th unfortunately
+            initialDir = Misc::Direction::south;
         }
 
+        constexpr auto directionCnt = 8;
         for (auto diff : {0, -1, 1})
         {
-            auto dir = (initialDir + diff + 8) % 8;
+            auto dir = static_cast<Misc::Direction>((static_cast<int32_t>(initialDir) + diff + directionCnt) % directionCnt);
             auto pos = Misc::getNextPosByDir(curPos, dir);
             if (isPosOk(pos))
                 return tryDrop(pos);

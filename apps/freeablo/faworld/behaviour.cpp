@@ -1,7 +1,7 @@
 #include "behaviour.h"
-#include "../falevelgen/random.h"
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
+#include "misc/random.h"
 #include "player.h"
 #include <cstdlib>
 #include <iostream>
@@ -68,7 +68,7 @@ namespace FAWorld
             else if (mTicksSinceLastAction > World::getTicksInPeriod(0.5f) && !mActor->hasTarget() && !mActor->mMoveHandler.moving())
             {
                 // seed a simple RNG with some variables that should be stable across server and client
-                FALevelGen::RandLCG r(mTicksSinceLastAction + mActor->getId() + mActor->getPos().current().first);
+                Random::RandLCG r(mTicksSinceLastAction + mActor->getId() + mActor->getPos().current().first);
 
                 if ((r.get() % 100) > 80)
                 {

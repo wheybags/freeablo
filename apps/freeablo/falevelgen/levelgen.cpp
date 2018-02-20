@@ -1,7 +1,7 @@
 #include "levelgen.h"
 #include "../faworld/actor.h"
+#include "misc/random.h"
 #include "mst.h"
-#include "random.h"
 #include "tileset.h"
 #include <algorithm>
 #include <cmath>
@@ -143,72 +143,8 @@ namespace FALevelGen
     // grid of size width * height
     void moveRoom(Room& room, const std::pair<float, float>& vector, int32_t width, int32_t height)
     {
-        int32_t xMove = 0, yMove = 0;
-
-        switch (Misc::getVecDir(vector))
-        {
-            case -1:
-            {
-                xMove = 0;
-                yMove = 0;
-                break;
-            }
-            case 0:
-            {
-                xMove = 1;
-                yMove = 1;
-                break;
-            }
-            case 1:
-            {
-                xMove = 0;
-                yMove = 1;
-                break;
-            }
-            case 2:
-            {
-                xMove = -1;
-                yMove = 1;
-                break;
-            }
-            case 3:
-            {
-                xMove = -1;
-                yMove = 0;
-                break;
-            }
-            case 4:
-            {
-                xMove = -1;
-                yMove = -1;
-                break;
-            }
-            case 5:
-            {
-                xMove = 0;
-                yMove = -1;
-                break;
-            }
-            case 6:
-            {
-                xMove = 1;
-                yMove = -1;
-                break;
-            }
-            case 7:
-            {
-                xMove = 1;
-                yMove = 0;
-                break;
-            }
-            default:
-            {
-                release_assert(false); // This should never happen
-            }
-        }
-
-        int32_t newX = room.xPos + xMove;
-        int32_t newY = room.yPos + yMove;
+        int32_t newX = 0, newY = 0;
+        std::tie(newX, newY) = Misc::getNextPosByDir({room.xPos, room.yPos}, Misc::getVecDir(vector));
 
         // Make sure not to move outside map
         if (newX >= 1 && newY >= 1 && newX + room.width < width - 1 && newY + room.height < height - 1)
@@ -301,8 +237,8 @@ namespace FALevelGen
 
                         if (centre.first == currentCentre.first && centre.second == currentCentre.second)
                         {
-                            vector.first = static_cast<float>(randomInRange(0, 10));
-                            vector.second = static_cast<float>(randomInRange(0, 10));
+                            vector.first = static_cast<float>(Random::randomInRange(0, 10));
+                            vector.second = static_cast<float>(Random::randomInRange(0, 10));
                             neighbourCount++;
                             continue;
                         }
@@ -353,14 +289,14 @@ namespace FALevelGen
 
         while (placed < numRooms)
         {
-            Room newRoom(randomInRange(0, width - 4), randomInRange(0, height - 4), 0, 0);
+            Room newRoom(Random::randomInRange(0, width - 4), Random::randomInRange(0, height - 4), 0, 0);
 
             if (((centreX - newRoom.centre().first) * (centreX - newRoom.centre().first) +
                  (centreY - newRoom.centre().second) * (centreY - newRoom.centre().second)) > radius * radius)
                 continue;
 
-            newRoom.width = normRand(4, std::min(width - newRoom.xPos, maxDimension));
-            newRoom.height = normRand(4, std::min(height - newRoom.yPos, maxDimension));
+            newRoom.width = Random::normRand(4, std::min(width - newRoom.xPos, maxDimension));
+            newRoom.height = Random::normRand(4, std::min(height - newRoom.yPos, maxDimension));
 
             float ratio = ((float)newRoom.width) / ((float)newRoom.height);
 
@@ -792,8 +728,8 @@ namespace FALevelGen
 
             do
             {
-                a = randomInRange(0, rooms.size() - 1);
-                b = randomInRange(0, rooms.size() - 1);
+                a = Random::randomInRange(0, rooms.size() - 1);
+                b = Random::randomInRange(0, rooms.size() - 1);
             } while (a == b || parent[a] == b || parent[b] == a);
 
             connect(rooms[a], rooms[b], corridoorRooms, level);
@@ -914,12 +850,12 @@ namespace FALevelGen
 
             do
             {
-                xPos = randomInRange(1, level.width() - 1);
-                yPos = randomInRange(1, level.height() - 1);
+                xPos = Random::randomInRange(1, level.width() - 1);
+                yPos = Random::randomInRange(1, level.height() - 1);
             } while (!level.getTile(xPos, yPos).passable() && std::make_pair(xPos, yPos) != level.upStairsPos() &&
                      std::make_pair(xPos, yPos) != level.downStairsPos());
 
-            std::string name = possibleMonsters[randomInRange(0, possibleMonsters.size() - 1)]->monsterName;
+            std::string name = possibleMonsters[Random::randomInRange(0, possibleMonsters.size() - 1)]->monsterName;
             DiabloExe::Monster monster = exe.getMonster(name);
 
             FAWorld::Actor* monsterObj = new FAWorld::Actor(*level.getWorld(), monster);
