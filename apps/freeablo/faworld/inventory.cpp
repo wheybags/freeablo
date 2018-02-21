@@ -522,6 +522,8 @@ namespace FAWorld
                     item.mCount -= amount;
                     if (item.mCount == 0)
                         setCursorHeld({});
+                    else
+                        setCursorHeld(item);
                     return true;
                 }
             }
