@@ -4,6 +4,7 @@
 #include "itemenums.h"
 #include "itemfactory.h"
 #include "player.h"
+#include <boost/range/irange.hpp>
 
 namespace FAWorld
 {
@@ -36,6 +37,23 @@ namespace FAWorld
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseRags), MakeEquipTarget<EquipTargetType::inventory>(7, 0));
     }
 
+    void PlayerFactory::fillWithGold(Player* player) const
+    {
+        // function for testing
+        auto& box = player->mInventory.getInventoryBox();
+        for (auto i : boost::irange(0, box.width()))
+            for (auto j : boost::irange(0, box.height()))
+            {
+                auto target = MakeEquipTarget<EquipTargetType::inventory>(i, j);
+                if (player->mInventory.getItemAt(target).isEmpty())
+                {
+                    auto g = mItemFactory.generateBaseItem(ItemId::gold);
+                    g.mCount = 1000;
+                    player->mInventory.putItemUnsafe(g, target);
+                }
+            }
+    }
+
     void PlayerFactory::createWarrior(Player* player) const
     {
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortSword), MakeEquipTarget<EquipTargetType::leftHand>());
@@ -56,6 +74,7 @@ namespace FAWorld
         player->mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldst.cl2"));
         player->mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldwl.cl2"));
         // loadTestingKit (player);
+        // fillWithGold(player);
     }
 
     void PlayerFactory::createRogue(Player* player) const
