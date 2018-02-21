@@ -13,7 +13,7 @@ namespace Settings
 
     typedef std::vector<std::string> Container;
 
-    // adding custom translator to allwo reading hex valuess
+    // adding custom translator to allow reading hex values
     template <typename E> class stream_translator
     {
         typedef boost::property_tree::customize_stream<char, std::char_traits<char>, E> customized;
@@ -57,6 +57,12 @@ namespace Settings
     private:
         std::locale m_loc;
     };
+
+    template <>
+    inline boost::optional<std::string> stream_translator<std::string>::get_value(const std::string& v)
+    {
+        return v;
+    }
 
     class Settings
     {
