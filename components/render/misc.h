@@ -23,11 +23,14 @@ namespace Render
         size_t size() { return mSprites.size(); }
 
         size_t animLength() { return mAnimLength; }
+        int32_t getWidth () const { return mWidth; }
+        int32_t getHeight () const { return mHeight; }
 
         static void toPng(const std::string& celPath, const std::string& pngPath);
 
     private:
         std::vector<Sprite> mSprites;
+        int32_t mWidth, mHeight;
         size_t mAnimLength;
     };
 
