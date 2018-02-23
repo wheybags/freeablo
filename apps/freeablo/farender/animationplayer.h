@@ -44,6 +44,7 @@ namespace FARender
 
         void update();
         int32_t getAnimLength() const;
+        struct nk_image getCurrentNkImage();
 
     private:
         FARender::FASpriteGroup* mCurrentAnim = nullptr;

@@ -39,6 +39,7 @@ namespace FAWorld
     class Player;
     class World;
     class HoverStatus;
+    class Item;
 }
 
 namespace FAGui
@@ -103,6 +104,8 @@ namespace FAGui
         bool isInventoryShown() const;
         void popDialogData();
         void pushDialogData(DialogData&& data);
+        // so gold split dialog blocks pause but allows you to move around, that's why it should be separate function
+        bool isPauseBlocked() const;
         // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
         bool isModalDlgShown() const;
         void setPlayer(FAWorld::Player* player);
@@ -117,6 +120,7 @@ namespace FAGui
         void startingScreen();
         void togglePanel(PanelType type);
         template <class Function> void drawPanel(nk_context* ctx, PanelType panelType, Function op);
+        void triggerItem(const FAWorld::EquipTarget& target);
         void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highligh);
         void inventoryPanel(nk_context* ctx);
         void characterPanel(nk_context* ctx);
@@ -143,5 +147,7 @@ namespace FAGui
         std::vector<DialogData> mDialogs;
         std::unique_ptr<FARender::AnimationPlayer> mSmallPentagram;
         std::unique_ptr<MenuHandler> mMenuHandler;
+        FAWorld::Item* mGoldSplitTarget = nullptr;
+        int mGoldSplitCnt = 0;
     };
 }

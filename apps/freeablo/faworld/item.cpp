@@ -163,7 +163,7 @@ namespace FAWorld
     std::string Item::getName() const
     {
         if (getType() == ItemType::gold)
-            return (boost::format("%1% gold %2%") % mCount % (mCount ? "pieces" : "piece")).str();
+            return (boost::format("%1% gold %2%") % mCount % (mCount > 1 ? "pieces" : "piece")).str();
         return base().name;
     }
 

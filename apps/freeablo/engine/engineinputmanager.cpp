@@ -180,9 +180,30 @@ namespace Engine
                 return "ToggleSpellbook";
             case KeyboardInputAction::toggleInventory:
                 return "ToggleInventory";
+            case KeyboardInputAction::digit0:
+                return "Digit0";
+            case KeyboardInputAction::digit1:
+                return "Digit1";
+            case KeyboardInputAction::digit2:
+                return "Digit2";
+            case KeyboardInputAction::digit3:
+                return "Digit3";
+            case KeyboardInputAction::digit4:
+                return "Digit4";
+            case KeyboardInputAction::digit5:
+                return "Digit5";
+            case KeyboardInputAction::digit6:
+                return "Digit6";
+            case KeyboardInputAction::digit7:
+                return "Digit7";
+            case KeyboardInputAction::digit8:
+                return "Digit8";
+            case KeyboardInputAction::digit9:
+                return "Digit9";
+            case KeyboardInputAction::backspace:
+                return "Backspace";
+
             case KeyboardInputAction::max:
-                break;
-            default:
                 break;
         }
         release_assert(false && "Invalid enum value passed to keyboardActionToString");

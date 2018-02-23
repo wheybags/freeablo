@@ -144,8 +144,10 @@ namespace FAGui
         if (mDialogs.empty())
             return;
 
-        mCurRightPanel = PanelType::none;
-        mCurLeftPanel = PanelType::none;
+        if (mCurRightPanel != PanelType::none)
+            togglePanel(mCurRightPanel);
+        if (mCurLeftPanel != PanelType::none)
+            togglePanel(mCurLeftPanel);
 
         auto& activeDialog = mDialogs.back();
 
@@ -336,6 +338,27 @@ namespace FAGui
         nk_fa_begin_image_window(ctx, panelName(panelType), dims, flags, invTex->getNkImage(), op, false);
     }
 
+    void GuiManager::triggerItem(const FAWorld::EquipTarget& target)
+    {
+        auto& item = mPlayer->mInventory.getItemAt(target);
+        if (!item.isUsable())
+            return;
+
+        mGoldSplitTarget = nullptr;
+
+        switch (item.getType())
+        {
+            case FAWorld::ItemType::gold:
+            {
+                mGoldSplitTarget = &item;
+                mGoldSplitCnt = 0;
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
     void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highlight)
     {
         auto& inv = mPlayer->mInventory;
@@ -393,6 +416,8 @@ namespace FAGui
             setDescription(item.getFullDescription());
         applyEffect effect(ctx, effectType);
         nk_image(ctx, img);
+        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
+            triggerItem(target);
     }
 
     void GuiManager::inventoryPanel(nk_context* ctx)
@@ -433,7 +458,7 @@ namespace FAGui
             float invHeight = inv.getInventoryBox().height() * cellSize;
             nk_layout_space_push(ctx, nk_recta(invTopLeft, {invWidth, invHeight}));
             nk_button_label_styled(ctx, &dummyStyle, "");
-            if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
+            if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && !mGoldSplitTarget)
             {
                 inv.inventoryMouseLeftButtonDown(Misc::Point{int32_t((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / cellSize),
                                                              int32_t((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / cellSize)});
@@ -445,6 +470,34 @@ namespace FAGui
                     auto cell_top_left = nk_vec2(17 + col * cellSize, 222 + row * cellSize);
                     item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::inventory>(col, row), cell_top_left, ItemHighlightInfo::highlightIfHover);
                 }
+            if (mGoldSplitTarget)
+            {
+                int32_t screenW, screenH;
+                auto renderer = FARender::Renderer::get();
+                renderer->getWindowDimensions(screenW, screenH);
+                auto img = renderer->loadImage("ctrlpan/golddrop.cel");
+                double leftTopX = 31.0, leftTopY = 42.0;
+                nk_layout_space_push(ctx, nk_rect(leftTopX, leftTopY, img->getWidth(), img->getHeight()));
+                nk_image(ctx, img->getNkImage());
+                auto spacing = 28.0;
+                auto doTextLine = [&](const char* text, double y) {
+                    nk_layout_space_push(ctx, nk_rect(leftTopX + spacing, y, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
+                    smallText(ctx, text, TextColor::golden, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_TOP);
+                };
+                doTextLine((boost::format("You have %1% gold") % mGoldSplitTarget->mCount).str().c_str(), 76.0);
+                doTextLine((boost::format("%1%.  How many do") % (mGoldSplitTarget->mCount > 1 ? "pieces" : "piece")).str().c_str(), 92.0);
+                doTextLine("you want to remove?", 110.0);
+                {
+                    auto offset = 6;
+                    nk_layout_space_push(ctx, nk_rect(leftTopX + spacing + offset, 129.0, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
+                    auto text = mGoldSplitCnt ? std::to_string(mGoldSplitCnt) : "";
+                    smallText(ctx, text.c_str(), TextColor::white, NK_TEXT_ALIGN_LEFT | NK_TEXT_ALIGN_TOP);
+                    auto width = smallTextWidth(text.c_str());
+                    auto spr = mSmallPentagram->getCurrentFrame().first;
+                    nk_layout_space_push(ctx, nk_rect(leftTopX + spacing + offset + width, 129.0, spr->getWidth(), spr->getHeight()));
+                    nk_image(ctx, mSmallPentagram->getCurrentNkImage());
+                }
+            }
             nk_layout_space_end(ctx);
         });
     }
@@ -470,7 +523,7 @@ namespace FAGui
         auto beltWidth = 232.0f, beltHeight = 29.0f, cellSize = 29.0f;
         nk_layout_space_push(ctx, nk_recta(beltTopLeft, {beltWidth, beltHeight}));
         auto& inv = mPlayer->mInventory;
-        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
+        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && !mGoldSplitTarget)
         {
             inv.beltMouseLeftButtonDown((ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / beltWidth);
         }
@@ -763,17 +816,73 @@ namespace FAGui
         switch (action)
         {
             case Engine::KeyboardInputAction::toggleQuests:
+                // for unknown reasons Diablo doesn't let you use hotkeys for dialogs when gold split is open
+                // note that normal buttons are working.
+                if (mGoldSplitTarget)
+                    return;
                 togglePanel(PanelType::quests);
                 break;
             case Engine::KeyboardInputAction::toggleInventory:
+                if (mGoldSplitTarget)
+                    return;
                 togglePanel(PanelType::inventory);
                 break;
             case Engine::KeyboardInputAction::toggleCharacterInfo:
+                if (mGoldSplitTarget)
+                    return;
                 togglePanel(PanelType::character);
                 break;
             case Engine::KeyboardInputAction::toggleSpellbook:
+                if (mGoldSplitTarget)
+                    return;
                 togglePanel(PanelType::spells);
                 break;
+            case Engine::KeyboardInputAction::reject:
+                if (mGoldSplitTarget)
+                    mGoldSplitTarget = nullptr;
+                break;
+            case Engine::KeyboardInputAction::accept:
+                if (mGoldSplitTarget)
+                {
+                    if (mGoldSplitCnt > 0)
+                    {
+                        mGoldSplitTarget->mCount -= mGoldSplitCnt;
+                        if (mGoldSplitTarget->mCount == 0)
+                            *mGoldSplitTarget = {};
+                        auto cursorGold = mWorld.getItemFactory().generateBaseItem(FAWorld::ItemId::gold);
+                        cursorGold.mCount = mGoldSplitCnt;
+                        mPlayer->mInventory.setCursorHeld(cursorGold);
+                    }
+                    mGoldSplitTarget = nullptr;
+                }
+                break;
+            case Engine::KeyboardInputAction::digit0:
+            case Engine::KeyboardInputAction::digit1:
+            case Engine::KeyboardInputAction::digit2:
+            case Engine::KeyboardInputAction::digit3:
+            case Engine::KeyboardInputAction::digit4:
+            case Engine::KeyboardInputAction::digit5:
+            case Engine::KeyboardInputAction::digit6:
+            case Engine::KeyboardInputAction::digit7:
+            case Engine::KeyboardInputAction::digit8:
+            case Engine::KeyboardInputAction::digit9:
+            {
+                if (mGoldSplitTarget)
+                {
+                    int digit = static_cast<int32_t>(action) - static_cast<int32_t>(Engine::KeyboardInputAction::digit0);
+                    auto newCnt = mGoldSplitCnt * 10 + digit;
+                    if (newCnt <= mGoldSplitTarget->mCount)
+                        mGoldSplitCnt = newCnt;
+                }
+            }
+            break;
+            case Engine::KeyboardInputAction::backspace:
+                if (mGoldSplitTarget)
+                {
+                    mGoldSplitCnt /= 10;
+                }
+                break;
+
             default:
                 break;
         }
@@ -791,6 +900,15 @@ namespace FAGui
 
     void GuiManager::pushDialogData(DialogData&& data) { mDialogs.push_back(std::move(data)); }
 
+    bool GuiManager::isPauseBlocked() const
+    {
+        if (isModalDlgShown())
+            return true;
+        if (mGoldSplitTarget)
+            return true;
+        return false;
+    }
+
     bool GuiManager::isModalDlgShown() const
     {
         if (!mDialogs.empty())
@@ -805,6 +923,8 @@ namespace FAGui
             curPanel = PanelType::none;
         else
             curPanel = type;
+        if (mCurRightPanel != PanelType::inventory)
+            mGoldSplitTarget = nullptr;
     }
 
     std::string cursorPath = "data/inv/objcurs.cel";
