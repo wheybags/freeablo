@@ -58,11 +58,7 @@ namespace Settings
         std::locale m_loc;
     };
 
-    template <>
-    inline boost::optional<std::string> stream_translator<std::string>::get_value(const std::string& v)
-    {
-        return v;
-    }
+    template <> inline boost::optional<std::string> stream_translator<std::string>::get_value(const std::string& v) { return v; }
 
     class Settings
     {

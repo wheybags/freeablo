@@ -113,8 +113,9 @@ namespace FARender
         return mCurrentAnim->getAnimLength();
     }
 
-    struct nk_image AnimationPlayer::getCurrentNkImage() {
+    struct nk_image AnimationPlayer::getCurrentNkImage()
+    {
         auto p = getCurrentFrame();
-        return p.first->getNkImage (p.second);
+        return p.first->getNkImage(p.second);
     }
 }
