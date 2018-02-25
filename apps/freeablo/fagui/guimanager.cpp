@@ -1,23 +1,13 @@
 #include "guimanager.h"
-
-#include <cstdint>
-#include <cstdio>
-#include <iostream>
-#include <memory>
-#include <string>
-
-#include <misc/misc.h>
-#include <serial/textstream.h>
-
 #include "../engine/enginemain.h"
+#include "../engine/localinputhandler.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "../faworld/actorstats.h"
-#include "../faworld/player.h"
-#include "../faworld/world.h"
-
 #include "../faworld/equiptarget.h"
 #include "../faworld/itemenums.h"
+#include "../faworld/player.h"
+#include "../faworld/world.h"
 #include "boost/range/counting_range.hpp"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
@@ -27,6 +17,13 @@
 #include "nkhelpers.h"
 #include <boost/algorithm/string/split.hpp>
 #include <boost/variant/variant.hpp>
+#include <cstdint>
+#include <cstdio>
+#include <iostream>
+#include <memory>
+#include <misc/misc.h>
+#include <serial/textstream.h>
+#include <string>
 
 static nk_style_button dummyStyle = []() {
     static nk_style_button buttonStyle;
@@ -438,8 +435,8 @@ namespace FAGui
             nk_button_label_styled(ctx, &dummyStyle, "");
             if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
             {
-                inv.inventoryMouseLeftButtonDown((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / invWidth,
-                                                 (ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / invHeight);
+                inv.inventoryMouseLeftButtonDown(Misc::Point{int32_t((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / cellSize),
+                                                             int32_t((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / cellSize)});
             }
 
             for (auto row : boost::counting_range(0, inv.getInventoryBox().height()))
@@ -487,7 +484,7 @@ namespace FAGui
         nk_layout_space_end(ctx);
     }
 
-    void GuiManager::bottomMenu(nk_context* ctx)
+    void GuiManager::bottomMenu(nk_context* ctx, const FAWorld::HoverStatus& hoverStatus)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
 
@@ -628,7 +625,7 @@ namespace FAGui
                                drawBulb(stats.mMana.current, stats.mMana.current, manaBulbLeftOffset);
 
                                belt(ctx);
-                               descriptionPanel(ctx);
+                               descriptionPanel(ctx, hoverStatus.getDescription(*mWorld.getCurrentLevel()));
 
                                nk_layout_space_end(ctx);
                            },
@@ -676,11 +673,11 @@ namespace FAGui
         return fnt->width(fnt->userdata, 0.0f, text, strlen(text));
     }
 
-    void GuiManager::descriptionPanel(nk_context* ctx)
+    void GuiManager::descriptionPanel(nk_context* ctx, const std::string& description)
     {
         auto boxRect = nk_rect(185, 66, 275, 55);
         std::vector<std::string> vec;
-        boost::split(vec, mDescription, boost::is_any_of("\n"), boost::token_compress_on);
+        boost::split(vec, description, boost::is_any_of("\n"), boost::token_compress_on);
         auto h_part = boxRect.h / vec.size();
         for (int i = 0; i < static_cast<int>(vec.size()); ++i)
         {
@@ -693,7 +690,7 @@ namespace FAGui
         }
     }
 
-    void GuiManager::update(bool inGame, bool paused, nk_context* ctx)
+    void GuiManager::update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus)
     {
         if (inGame)
         {
@@ -714,7 +711,7 @@ namespace FAGui
             spellsPanel(ctx);
             questsPanel(ctx);
             characterPanel(ctx);
-            bottomMenu(ctx);
+            bottomMenu(ctx, hoverStatus);
             dialog(ctx);
         }
         else
@@ -723,9 +720,9 @@ namespace FAGui
         }
 
         if (isModalDlgShown() || mMenuHandler->isActive())
-            mWorld.blockInput();
+            Engine::EngineMain::get()->getLocalInputHandler()->blockInput();
         else
-            mWorld.unblockInput();
+            Engine::EngineMain::get()->getLocalInputHandler()->unblockInput();
     }
 
     void GuiManager::setDescription(std::string text, TextColor color)

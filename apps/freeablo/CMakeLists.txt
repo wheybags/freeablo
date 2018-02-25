@@ -70,6 +70,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/playerbehaviour.h
     faworld/target.cpp
     faworld/target.h
+    faworld/playerinput.h
+    faworld/playerinput.cpp
 
     fagui/textcolor.h
     fagui/guimanager.h
@@ -100,6 +102,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     engine/inputobserverinterface.h
     engine/enginemain.h
     engine/enginemain.cpp
+    engine/localinputhandler.cpp
+    engine/localinputhandler.h
 
     faaudio/audiomanager.h
     faaudio/audiomanager.cpp

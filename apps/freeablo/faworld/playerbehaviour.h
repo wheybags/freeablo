@@ -1,12 +1,10 @@
-
 #pragma once
-
-#include "../engine/inputobserverinterface.h"
 #include "behaviour.h"
+#include "playerinput.h"
 
 namespace FAWorld
 {
-    class PlayerBehaviour : public Behaviour, public Engine::MouseInputObserverInterface
+    class PlayerBehaviour : public Behaviour
     {
     public:
         static const std::string typeId;
@@ -19,7 +17,7 @@ namespace FAWorld
         virtual void reAttach(Actor* actor) override;
         virtual void update() override;
 
-        virtual void notify(Engine::MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers) override;
+        void addInput(const PlayerInput& input);
 
         virtual ~PlayerBehaviour() {}
 
@@ -30,6 +28,5 @@ namespace FAWorld
         FAWorld::Player* mPlayer = nullptr;
         int32_t mInputBlockedFramesLeft = 0;
         bool mUnblockInput = false;
-        bool mTargetLock = false;
     };
 }

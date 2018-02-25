@@ -143,7 +143,7 @@ namespace FAWorld
     static Cel::Colour enemyHoverColor() { return {164, 46, 46, true}; }
     static Cel::Colour itemHoverColor() { return {185, 170, 119, true}; }
 
-    void GameLevel::fillRenderState(FARender::RenderState* state, Actor* displayedActor)
+    void GameLevel::fillRenderState(FARender::RenderState* state, Actor* displayedActor, const HoverStatus& hoverStatus)
     {
         state->mObjects.clear();
         state->mItems.clear();
@@ -155,7 +155,7 @@ namespace FAWorld
             FARender::FASpriteGroup* sprite = tmp.first;
             int32_t frame = tmp.second;
             boost::optional<Cel::Colour> hoverColor;
-            if (mHoverState.isActorHovered(mActors[i]->getId()))
+            if (mActors[i]->getId() == hoverStatus.hoveredActorId)
                 hoverColor = mActors[i]->isEnemy(displayedActor) ? enemyHoverColor() : friendHoverColor();
             // offset the sprite for the current direction of the actor
 
@@ -172,7 +172,7 @@ namespace FAWorld
                 o.spriteGroup = sf.first;
                 o.frame = sf.second;
                 o.position = {p.first.x, p.first.y};
-                if (mHoverState.isItemHovered(p.first))
+                if (p.first == hoverStatus.hoveredItemTile)
                     o.hoverColor = itemHoverColor();
                 state->mItems.push_back(o);
             }
@@ -213,8 +213,6 @@ namespace FAWorld
     }
 
     void GameLevel::getActors(std::vector<Actor*>& actors) { actors.insert(actors.end(), mActors.begin(), mActors.end()); }
-
-    HoverState& GameLevel::getHoverState() { return mHoverState; }
 
     GameLevel::GameLevel(World& world) : mWorld(world) {}
 

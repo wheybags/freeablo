@@ -8,6 +8,7 @@
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/playerfactory.h"
 #include "../faworld/world.h"
+#include "localinputhandler.h"
 #include "misc/random.h"
 #include "threadmanager.h"
 #include <boost/asio.hpp>
@@ -24,11 +25,15 @@ namespace bpo = boost::program_options;
 
 namespace Engine
 {
-    volatile bool renderDone = false;
+    EngineMain* EngineMain::singletonInstance = nullptr;
 
-    EngineMain::EngineMain() {}
+    EngineMain::EngineMain()
+    {
+        release_assert(singletonInstance == nullptr);
+        singletonInstance = this;
+    }
 
-    EngineMain::~EngineMain() {}
+    EngineMain::~EngineMain() { singletonInstance = nullptr; }
 
     EngineInputManager& EngineMain::inputManager() { return *(mInputManager.get()); }
 
@@ -53,7 +58,6 @@ namespace Engine
         mInputManager->registerKeyboardObserver(this);
         std::thread mainThread(std::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
         threadManager.run();
-        renderDone = true;
 
         mainThread.join();
     }
@@ -100,7 +104,7 @@ namespace Engine
             mWorld.reset(new FAWorld::World(loader, *mExe));
 
             mPlayer = mWorld->getCurrentPlayer();
-            inGame = true;
+            mInGame = true;
         }
         else
         {
@@ -111,7 +115,7 @@ namespace Engine
 
             if (currentLevel != -1)
             {
-                inGame = true;
+                mInGame = true;
                 mPlayer = mPlayerFactory->create(*mWorld, characterClass);
                 if (variables["invuln"].as<std::string>() == "on")
                     mPlayer->mInvuln = true;
@@ -128,13 +132,13 @@ namespace Engine
         if (currentLevel != -1)
             mWorld->setLevel(currentLevel);
 
-        if (inGame)
-        {
-            mInputManager->registerKeyboardObserver(mWorld.get());
-            // mInputManager->registerMouseObserver(mWorld.get());
-        }
-
         boost::asio::io_service io;
+
+        mLocalInputHandler.reset(new LocalInputHandler(*mWorld));
+        mInputManager->registerMouseObserver(mLocalInputHandler.get());
+        mInputManager->registerKeyboardObserver(mLocalInputHandler.get());
+
+        int32_t lastLevelIndex = -1;
 
         // Main game logic loop
         while (!mDone)
@@ -142,11 +146,20 @@ namespace Engine
             boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000 / FAWorld::World::ticksPerSecond));
 
             mInputManager->update(mPaused);
-            if (!mPaused && inGame)
-                mWorld->update(mNoclip);
+            mLocalInputHandler->update();
+            if (!mPaused && mInGame)
+            {
+                mWorld->update(mNoclip, mLocalInputHandler->getAndClearInputs());
+
+                if (mWorld->getCurrentLevelIndex() != lastLevelIndex)
+                {
+                    mWorld->playLevelMusic(mWorld->getCurrentLevelIndex());
+                    lastLevelIndex = mWorld->getCurrentLevelIndex();
+                }
+            }
 
             nk_context* ctx = renderer.getNuklearContext();
-            mGuiManager->update(inGame, mPaused, ctx);
+            mGuiManager->update(mInGame, mPaused, ctx, mLocalInputHandler->getHoverStatus());
 
             FARender::RenderState* state = renderer.getFreeState();
             if (state)
@@ -158,7 +171,7 @@ namespace Engine
                     if (level != NULL)
                         state->tileset = renderer.getTileset(*level);
                     state->level = level;
-                    mWorld->fillRenderState(state);
+                    mWorld->fillRenderState(state, mLocalInputHandler->getHoverStatus());
                 }
                 else
                     state->level = nullptr;
@@ -218,14 +231,11 @@ namespace Engine
         mPlayer = player;
         mWorld->addCurrentPlayer(mPlayer);
         mGuiManager->setPlayer(mPlayer);
-        mInputManager->registerMouseObserver(mPlayer->getPlayerBehaviour());
     }
 
     void EngineMain::startGame(const std::string& characterClass)
     {
-        inGame = true;
-        mInputManager->registerKeyboardObserver(mWorld.get());
-        // mInputManager->registerMouseObserver(mWorld.get());
+        mInGame = true;
 
         // TODO: fix that variables like invuln are not applied in this case
         auto player = mPlayerFactory->create(*mWorld, characterClass);

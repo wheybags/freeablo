@@ -1,9 +1,8 @@
-
 #pragma once
-
 #include "item.h"
 #include <boost/signals2/signal.hpp>
 #include <misc/array2d.h>
+#include <misc/misc.h>
 #include <stdint.h>
 
 namespace FAWorld
@@ -39,7 +38,7 @@ namespace FAWorld
         Item& getItemAt(const EquipTarget& target);
         void itemSlotLeftMouseButtonDown(EquipTarget target);
         void beltMouseLeftButtonDown(double x);
-        void inventoryMouseLeftButtonDown(double x, double y);
+        void inventoryMouseLeftButtonDown(Misc::Point cell);
         void setCursorHeld(const Item& item);
         // this function uses no checks for placing item, may lead to erroneous result
         // in general there's no need for safe function because items are placed either through exchange with cursor

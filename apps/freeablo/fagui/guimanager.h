@@ -38,6 +38,7 @@ namespace FAWorld
     class EquipTarget;
     class Player;
     class World;
+    class HoverStatus;
 }
 
 namespace FAGui
@@ -95,7 +96,7 @@ namespace FAGui
         GuiManager(Engine::EngineMain& engine, FAWorld::World& world);
         ~GuiManager();
 
-        void update(bool inGame, bool paused, nk_context* ctx);
+        void update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
 
         void setDescription(std::string text, TextColor color = TextColor::white);
         void clearDescription();
@@ -122,12 +123,12 @@ namespace FAGui
         void questsPanel(nk_context* ctx);
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
-        void bottomMenu(nk_context* ctx);
+        void bottomMenu(nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
         static void bigTGoldText(nk_context* ctx, const char* text, nk_flags alignment);
         static void smallText(nk_context* ctx, const char* text, TextColor color, nk_flags alignment);
         static void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white);
         int smallTextWidth(const char* text);
-        void descriptionPanel(nk_context* ctx);
+        void descriptionPanel(nk_context* ctx, const std::string& description);
         PanelType* panel(PanelPlacement placement);
         const PanelType* panel(PanelPlacement placement) const;
         void notify(Engine::KeyboardInputAction action) override;
