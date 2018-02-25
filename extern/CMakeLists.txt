@@ -67,8 +67,8 @@ set(SRCS nativefiledialog/src/nfd_common.c nativefiledialog/src/include/nfd.h)
 set(EXTRA_LIBRARIES)
 
 if (APPLE)
-    set(SRCS ${SRCS} nativefiledialog/src/nfd_cocoa.mm)
-    set(EXTRA_LIBRARIES ${EXTRA_LIBRARIES} AppKit)
+    set(SRCS ${SRCS} nativefiledialog/src/nfd_cocoa.m)
+    set(EXTRA_LIBRARIES ${EXTRA_LIBRARIES} "-framework AppKit")
 endif()
 
 if (WIN32)

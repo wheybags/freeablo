@@ -56,7 +56,7 @@ namespace Render
     int32_t HEIGHT = 960;
 
     SDL_Window* screen;
-    SDL_Renderer* renderer;
+    //SDL_Renderer* renderer;
     SDL_GLContext glContext;
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
@@ -79,13 +79,13 @@ namespace Render
         if (screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
 
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
         glContext = SDL_GL_CreateContext(screen);
-        int oglIdx = -1;
+        /*int oglIdx = -1;
         int nRD = SDL_GetNumRenderDrivers();
         for (int i = 0; i < nRD; i++)
         {
@@ -97,9 +97,9 @@ namespace Render
                     oglIdx = i;
                 }
             }
-        }
+        }*/
 
-        renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        //renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
         initGlFuncs();
 
@@ -124,7 +124,7 @@ namespace Render
     void quit()
     {
         SDL_GL_DeleteContext(glContext);
-        SDL_DestroyRenderer(renderer);
+        //SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
         SDL_Quit();
     }
@@ -141,9 +141,9 @@ namespace Render
     RenderSettings getWindowSize()
     {
         RenderSettings settings;
-        settings.windowWidth = 0;
-        settings.windowHeight = 0;
-        SDL_GetRendererOutputSize(renderer, &settings.windowWidth, &settings.windowHeight);
+        settings.windowWidth = WIDTH;
+        settings.windowHeight = HEIGHT;
+        //SDL_GetRendererOutputSize(renderer, &settings.windowWidth, &settings.windowHeight);
         // SDL_GetWindowSize(screen, &settings.windowWidth, &settings.windowHeight);
         return settings;
     }
@@ -700,7 +700,8 @@ namespace Render
 
         // drawAt(texture, 0, 0);
 
-        SDL_RenderPresent(renderer);
+	SDL_GL_SwapWindow(screen);
+        //SDL_RenderPresent(renderer);
     }
 
     void drawSprite(GLuint sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor)

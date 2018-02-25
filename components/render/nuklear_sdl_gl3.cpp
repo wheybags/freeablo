@@ -84,14 +84,22 @@ void nk_sdl_device_create(nk_gl_device& dev)
     glCompileShader(dev.vert_shdr);
     glCompileShader(dev.frag_shdr);
     glGetShaderiv(dev.vert_shdr, GL_COMPILE_STATUS, &status);
+    if (status != GL_TRUE)
+    {
+        int length = 1024;
+        std::vector<GLchar> errorLog(length);
+        glGetShaderInfoLog(dev.vert_shdr, length, &length, &errorLog[0]);
+        std::cout << "SHADER ERROR: << " << &errorLog[0] << std::endl;
+    }
+
     release_assert(status == GL_TRUE);
     glGetShaderiv(dev.frag_shdr, GL_COMPILE_STATUS, &status);
-    if (!status)
+    if (status != GL_TRUE)
     {
         int length = 1024;
         std::vector<GLchar> errorLog(length);
         glGetShaderInfoLog(dev.frag_shdr, length, &length, &errorLog[0]);
-        std::cout << &errorLog[0] << std::endl;
+        std::cout << "SHADER ERROR: << " << &errorLog[0] << std::endl;
     }
     release_assert(status == GL_TRUE);
     glAttachShader(dev.prog, dev.vert_shdr);
