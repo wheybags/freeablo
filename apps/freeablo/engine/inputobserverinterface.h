@@ -45,11 +45,13 @@ namespace Engine
     {
     public:
         virtual void notify(KeyboardInputAction action) = 0;
+        virtual ~KeyboardInputObserverInterface() = default;
     };
 
     class MouseInputObserverInterface
     {
     public:
         virtual void notify(MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers) = 0;
+        virtual ~MouseInputObserverInterface() = default;
     };
 }

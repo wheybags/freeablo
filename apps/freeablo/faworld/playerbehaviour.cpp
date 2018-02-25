@@ -43,72 +43,76 @@ namespace FAWorld
 
     void PlayerBehaviour::unblockInput() { mUnblockInput = true; }
 
-    void PlayerBehaviour::notify(Engine::MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers)
+    void PlayerBehaviour::addInput(const PlayerInput& input)
     {
-        if (mInputBlockedFramesLeft != 0)
-            return;
-
-        switch (action)
+        switch (input.mType)
         {
-            case Engine::MouseInputAction::MOUSE_RELEASE:
+            case PlayerInput::Type::TargetTile:
             {
-                mTargetLock = false;
-                break;
-            }
-            case Engine::MouseInputAction::MOUSE_DOWN:
-            {
-                auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, mPlayer->getPos());
-
+                auto clickedTile = Render::Tile(input.mData.targetTile.x, input.mData.targetTile.y);
                 mPlayer->getLevel()->activate(clickedTile.x, clickedTile.y);
-
-                mTargetLock = true;
 
                 auto cursorItem = mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
                 if (!cursorItem.isEmpty())
                 {
-                    // What happens here is not actually true to original game but
-                    // It's a fair way to emulate it. Current data is that in all instances except interaction with inventory
-                    // cursor has topleft as it's hotspot even when cursor is item. Other 2 instances actually:
-                    // - dropping items
-                    // - moving cursor outside the screen / window
-                    // This shift by half cursor size emulates behavior during dropping items. And the only erroneous
-                    // part of behavior now can be spotted by moving cursor outside the window which is not so significant.
-                    // To emulate it totally true to original game we need to heavily hack interaction with inventory
-                    // which is possible
-                    auto pos = mousePosition - FARender::Renderer::get()->cursorSize() / 2;
-                    auto clickedTileShifted = FARender::Renderer::get()->getTileByScreenPos(pos.x, pos.y, mPlayer->getPos());
-                    if (mPlayer->dropItem({clickedTileShifted.x, clickedTileShifted.y}))
-                        mPlayer->getWorld()->mGuiManager->clearDescription();
-                }
-                else if (modifiers.shift && !mPlayer->getLevel()->isTown())
-                {
-                    mPlayer->startMeleeAttack(
-                        Misc::getVecDir({clickedTile.x - mPlayer->getPos().current().first, clickedTile.y - mPlayer->getPos().current().second}));
-                }
-                else if (Actor* clickedActor = mPlayer->getWorld()->targetedActor(mousePosition))
-                {
-                    mPlayer->mTarget = clickedActor;
-                }
-                else if (auto item = mPlayer->getWorld()->targetedItem(mousePosition))
-                {
-                    mPlayer->mTarget = Target::ItemTarget{mPlayer->getWorld()->mGuiManager->isInventoryShown() ? Target::ItemTarget::ActionType::toCursor
-                                                                                                               : Target::ItemTarget::ActionType::autoEquip,
-                                                          item};
+                    mPlayer->dropItem({clickedTile.x, clickedTile.y});
                 }
                 else
                 {
-                    mTargetLock = false;
-                }
-            } // fallthrough
-            case Engine::MouseInputAction::MOUSE_MOVE:
-            {
-                if (mouseDown && !mTargetLock)
-                {
-                    auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, mPlayer->getPos());
                     mPlayer->mTarget.clear();
                     mPlayer->mMoveHandler.setDestination({clickedTile.x, clickedTile.y});
                 }
+                return;
+            }
+            case PlayerInput::Type::DragOverTile:
+            {
+                mPlayer->mTarget.clear();
+                mPlayer->mMoveHandler.setDestination({input.mData.dragOverTile.x, input.mData.dragOverTile.y});
+                return;
+            }
+            case PlayerInput::Type::TargetActor:
+            {
+                mPlayer->mTarget = mPlayer->getWorld()->getActorById(input.mData.targetActor.actorId);
+                return;
+            }
+            case PlayerInput::Type::TargetItemOnFloor:
+            {
+                auto item = mPlayer->getLevel()->getItemMap().getItemAt({input.mData.targetItemOnFloor.x, input.mData.targetItemOnFloor.y});
+                mPlayer->mTarget = Target::ItemTarget{input.mData.targetItemOnFloor.type, item};
+                return;
+            }
+            case PlayerInput::Type::AttackDirection:
+            {
+                if (!mPlayer->getLevel()->isTown())
+                    mPlayer->startMeleeAttack(input.mData.attackDirection.direction);
+                return;
+            }
+            case PlayerInput::Type::ChangeLevel:
+            {
+                int32_t nextLevelIndex;
+                if (input.mData.changeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
+                    nextLevelIndex = mPlayer->getLevel()->getPreviousLevel();
+                else
+                    nextLevelIndex = mPlayer->getLevel()->getNextLevel();
+
+                // setLevel(nextLevelIndex);
+
+                GameLevel* level = mPlayer->getWorld()->getLevel(nextLevelIndex);
+
+                // Player* player = getCurrentPlayer();
+
+                if (level)
+                {
+                    if (input.mData.changeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
+                        mPlayer->teleport(level, Position(level->downStairsPos().first, level->downStairsPos().second));
+                    else
+                        mPlayer->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
+                }
+
+                return;
             }
         }
+
+        release_assert(false && "Invalid PlayerInput detected");
     }
 }

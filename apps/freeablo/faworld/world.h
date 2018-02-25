@@ -1,13 +1,11 @@
-
 #pragma once
-
+#include "../engine/inputobserverinterface.h"
+#include "../fasavegame/objectidmapper.h"
+#include "playerinput.h"
 #include <map>
 #include <memory>
 #include <utility>
 #include <vector>
-
-#include "../engine/inputobserverinterface.h"
-#include "../fasavegame/objectidmapper.h"
 
 namespace FARender
 {
@@ -41,15 +39,15 @@ namespace FAWorld
     class Actor;
     class Player;
     class GameLevel;
-    class HoverState;
     class PlacedItemData;
     class ItemFactory;
+    class HoverStatus;
 
     // at 125 ticks/second, it will take about 2 billion years to reach max (signed) value, so int64 will probably do :p
     typedef int64_t Tick;
     static const Tick MAX_TICK = 9223372036854775807;
 
-    class World : public Engine::KeyboardInputObserverInterface
+    class World
     {
     public:
         World(const DiabloExe::DiabloExe& exe);
@@ -57,7 +55,6 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver);
         ~World();
 
-        void notify(Engine::KeyboardInputAction action);
         Render::Tile getTileByScreenPos(Misc::Point screenPos);
         Actor* targetedActor(Misc::Point screenPosition);
         PlacedItemData* targetedItem(Misc::Point screenPosition);
@@ -72,7 +69,7 @@ namespace FAWorld
 
         Actor* getActorAt(size_t x, size_t y);
 
-        void update(bool noclip);
+        void update(bool noclip, const std::vector<PlayerInput>& inputs);
 
         void addCurrentPlayer(Player* player);
         void setupCurrentPlayer();
@@ -82,7 +79,7 @@ namespace FAWorld
         void deregisterPlayer(Player* player);
         const std::vector<Player*>& getPlayers();
 
-        void fillRenderState(FARender::RenderState* state);
+        void fillRenderState(FARender::RenderState* state, const HoverStatus& hoverStatus);
 
         static Tick getTicksInPeriod(float seconds);
         static float getSecondsPerTick();
@@ -93,7 +90,6 @@ namespace FAWorld
 
         Tick getCurrentTick();
         void setGuiManager(FAGui::GuiManager* manager);
-        HoverState& getHoverState();
 
         void setupObjectIdMappers();
 
@@ -103,6 +99,8 @@ namespace FAWorld
         void unblockInput();
         const ItemFactory& getItemFactory() const;
 
+        void playLevelMusic(size_t level);
+
         static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
         FASaveGame::ObjectIdMapper mObjectIdMapper;
         FAGui::GuiManager* mGuiManager = nullptr;
@@ -111,9 +109,6 @@ namespace FAWorld
         const DiabloExe::DiabloExe& mDiabloExe; // TODO: something better than this
 
     private:
-        void playLevelMusic(size_t level);
-        void changeLevel(bool up);
-
         std::map<int32_t, GameLevel*> mLevels;
         Tick mTicksPassed = 0;
         Player* mCurrentPlayer = nullptr;

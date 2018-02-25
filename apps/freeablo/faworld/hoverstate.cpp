@@ -1,55 +1,24 @@
 #include "hoverstate.h"
+#include "actor.h"
+#include "gamelevel.h"
+#include "world.h"
 
 namespace FAWorld
 {
-    class Tile;
-
-    bool HoverState::applyIfNeeded(const HoverState& newState)
+    std::string HoverStatus::getDescription(GameLevel& level) const
     {
-        if (*this == newState)
-            return false;
-        *this = newState;
-        return true;
-    }
+        if (hoveredActorId != -1)
+            return level.getWorld()->getActorById(hoveredActorId)->getName();
 
-    bool HoverState::setItemHovered(const FAWorld::Tile& tile)
-    {
-        HoverState newState(HoverType::item);
-        newState.mItemTile = tile;
-        return applyIfNeeded(newState);
-    }
-
-    bool HoverState::isItemHovered(const FAWorld::Tile& tile) const { return mType == HoverType::item && tile == mItemTile; }
-
-    bool HoverState::operator==(const HoverState& other) const
-    {
-        if (mType != other.mType)
-            return false;
-
-        switch (mType)
+        if (hoveredItemTile.isValid())
         {
-            case HoverType::actor:
-                return mActorId == other.mActorId;
-            case HoverType::item:
-                return mItemTile == other.mItemTile;
-            case HoverType::none:
-                break;
+            auto item = level.getItemMap().getItemAt(hoveredItemTile);
+
+            // we might have already picked the item up during this tick
+            if (item)
+                return item->item().getName();
         }
-        return true;
-    }
 
-    bool HoverState::setActorHovered(int32_t actorIdArg)
-    {
-        HoverState newState(HoverType::actor);
-        newState.mActorId = actorIdArg;
-        return applyIfNeeded(newState);
+        return "";
     }
-
-    bool HoverState::setNothingHovered()
-    {
-        HoverState newState(HoverType::none);
-        return applyIfNeeded(newState);
-    }
-
-    bool HoverState::isActorHovered(int32_t actorId) const { return mType == HoverType::actor && actorId == mActorId; }
 }

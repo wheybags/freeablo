@@ -97,16 +97,6 @@ namespace FAWorld
             delete pair.second;
     }
 
-    void World::notify(Engine::KeyboardInputAction action)
-    {
-        if (mGuiManager->isModalDlgShown())
-            return;
-        if (action == Engine::KeyboardInputAction::changeLevelUp || action == Engine::KeyboardInputAction::changeLevelDown)
-        {
-            changeLevel(action == Engine::KeyboardInputAction::changeLevelUp);
-        }
-    }
-
     Render::Tile World::getTileByScreenPos(Misc::Point screenPos)
     {
         return FARender::Renderer::get()->getTileByScreenPos(screenPos.x, screenPos.y, getCurrentPlayer()->getPos());
@@ -138,36 +128,6 @@ namespace FAWorld
             if (auto actor = actorStayingAt(tile.x, tile.y + 1))
                 return actor;
         return nullptr;
-    }
-
-    void World::updateHover(const Misc::Point& mousePosition)
-    {
-        auto nothingHovered = [&] {
-            if (getHoverState().setNothingHovered())
-                return mGuiManager->setDescription("");
-        };
-
-        auto& cursorItem = mCurrentPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
-        if (!cursorItem.isEmpty())
-            return nothingHovered();
-
-        auto actor = targetedActor(mousePosition);
-        if (actor != nullptr)
-        {
-            if (getHoverState().setActorHovered(actor->getId()))
-                mGuiManager->setDescription(actor->getName());
-
-            return;
-        }
-        if (auto item = targetedItem(mousePosition))
-        {
-            if (getHoverState().setItemHovered(item->getTile()))
-                mGuiManager->setDescription(item->item().getName());
-
-            return;
-        }
-
-        return nothingHovered();
     }
 
     void World::blockInput()
@@ -229,10 +189,7 @@ namespace FAWorld
         auto level = getLevel(levelNum);
 
         mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
-        playLevelMusic(levelNum);
     }
-
-    HoverState& World::getHoverState() { return getCurrentLevel()->getHoverState(); }
 
     void World::playLevelMusic(size_t level)
     {
@@ -298,9 +255,12 @@ namespace FAWorld
 
     Actor* World::getActorAt(size_t x, size_t y) { return getCurrentLevel()->getActorAt(x, y); }
 
-    void World::update(bool noclip)
+    void World::update(bool noclip, const std::vector<PlayerInput>& inputs)
     {
         mTicksPassed++;
+
+        for (const auto& input : inputs)
+            static_cast<Player*>(this->getActorById(input.mActorId))->getPlayerBehaviour()->addInput(input);
 
         std::set<GameLevel*> done;
 
@@ -315,22 +275,6 @@ namespace FAWorld
                 level->update(noclip);
             }
         }
-
-        {
-            auto& cursorItem = mCurrentPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
-            if (!cursorItem.isEmpty())
-                mGuiManager->setDescription(cursorItem.getName());
-
-            if (!nk_item_is_any_active(FARender::Renderer::get()->getNuklearContext()))
-            {
-                // we need update hover not only on mouse move because viewport may move without mouse being moved
-                int x, y;
-                SDL_GetMouseState(&x, &y);
-                updateHover(Misc::Point{x, y});
-            }
-            else if (getHoverState().setNothingHovered())
-                return mGuiManager->setDescription("");
-        }
     }
 
     Player* World::getCurrentPlayer() { return mCurrentPlayer; }
@@ -344,12 +288,12 @@ namespace FAWorld
 
     void World::setupCurrentPlayer()
     {
-        mCurrentPlayer->positionReached.connect([this](const std::pair<int32_t, int32_t>& pos) {
+        /*mCurrentPlayer->positionReached.connect([this](const std::pair<int32_t, int32_t>& pos) {
             if (!getCurrentLevel()->isTown() && pos == getCurrentLevel()->upStairsPos())
                 changeLevel(true);
             else if (pos == getCurrentLevel()->downStairsPos())
                 changeLevel(false);
-        });
+        });*/
     }
 
     void World::registerPlayer(Player* player)
@@ -364,10 +308,10 @@ namespace FAWorld
 
     const std::vector<Player*>& World::getPlayers() { return mPlayers; }
 
-    void World::fillRenderState(FARender::RenderState* state)
+    void World::fillRenderState(FARender::RenderState* state, const HoverStatus& hoverStatus)
     {
         if (getCurrentLevel())
-            getCurrentLevel()->fillRenderState(state, getCurrentPlayer());
+            getCurrentLevel()->fillRenderState(state, getCurrentPlayer(), hoverStatus);
     }
 
     Actor* World::getActorById(int32_t id)
@@ -401,25 +345,6 @@ namespace FAWorld
     {
         mGuiManager = manager;
         mDlgManager.reset(new FAGui::DialogManager(*mGuiManager, *this));
-    }
-
-    void World::changeLevel(bool up)
-    {
-        int32_t nextLevelIndex;
-        if (up)
-            nextLevelIndex = getCurrentLevel()->getPreviousLevel();
-        else
-            nextLevelIndex = getCurrentLevel()->getNextLevel();
-
-        setLevel(nextLevelIndex);
-
-        GameLevel* level = getCurrentLevel();
-        Player* player = getCurrentPlayer();
-
-        if (up)
-            player->teleport(level, Position(level->downStairsPos().first, level->downStairsPos().second));
-        else
-            player->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
     }
 
     PlacedItemData* World::targetedItem(Misc::Point screenPosition)

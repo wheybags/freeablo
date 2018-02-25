@@ -35,12 +35,15 @@ namespace FAWorld
         int32_t y;
 
         Tile(int32_t x, int32_t y) : x(x), y(y) {}
-        Tile() : x(0), y(0) {}
+        Tile() : x(std::numeric_limits<int32_t>::max()), y(std::numeric_limits<int32_t>::max()) {}
         Tile(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) const;
 
         bool operator==(const Tile& other) const { return std::tie(x, y) == std::tie(other.x, other.y); }
+        bool operator!=(const Tile& other) const { return !(*this == other); }
         bool operator<(const Tile& other) const { return std::tie(x, y) < std::tie(other.x, other.y); }
+
+        bool isValid() const { return *this != Tile(); }
     };
 
     class PlacedItemData
