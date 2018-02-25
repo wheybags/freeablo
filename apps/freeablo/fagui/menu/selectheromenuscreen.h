@@ -60,6 +60,5 @@ namespace FAGui
         std::unique_ptr<FARender::AnimationPlayer> mFocus16;
         ContentType mContentType = ContentType::chooseClass;
         boost::optional<characterInfo> mSelectedCharacterInfo;
-        int activeItemIndex = 0;
     };
 }

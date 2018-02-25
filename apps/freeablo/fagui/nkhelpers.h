@@ -3,11 +3,6 @@
 
 #include "nuklearmisc/inputfwd.h"
 
-struct nk_vec2;
-struct nk_rect;
-struct nk_context;
-enum nk_buttons;
-
 // file to host common functions useful for working with nuklear library
 
 namespace FAGui

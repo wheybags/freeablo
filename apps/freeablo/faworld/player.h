@@ -26,7 +26,7 @@ namespace FAWorld
         Player(World& world, const std::string& className, const DiabloExe::CharacterStats& charStats);
         void initCommon();
         Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) override;
         virtual bool checkHit(Actor* enemy) override;
 
         virtual ~Player();
