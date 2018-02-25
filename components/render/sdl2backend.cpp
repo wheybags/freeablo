@@ -56,7 +56,7 @@ namespace Render
     int32_t HEIGHT = 960;
 
     SDL_Window* screen;
-    //SDL_Renderer* renderer;
+    // SDL_Renderer* renderer;
     SDL_GLContext glContext;
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
@@ -99,7 +99,7 @@ namespace Render
             }
         }*/
 
-        //renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        // renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
         initGlFuncs();
 
@@ -124,7 +124,7 @@ namespace Render
     void quit()
     {
         SDL_GL_DeleteContext(glContext);
-        //SDL_DestroyRenderer(renderer);
+        // SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
         SDL_Quit();
     }
@@ -143,7 +143,7 @@ namespace Render
         RenderSettings settings;
         settings.windowWidth = WIDTH;
         settings.windowHeight = HEIGHT;
-        //SDL_GetRendererOutputSize(renderer, &settings.windowWidth, &settings.windowHeight);
+        // SDL_GetRendererOutputSize(renderer, &settings.windowWidth, &settings.windowHeight);
         // SDL_GetWindowSize(screen, &settings.windowWidth, &settings.windowHeight);
         return settings;
     }
@@ -700,8 +700,8 @@ namespace Render
 
         // drawAt(texture, 0, 0);
 
-	SDL_GL_SwapWindow(screen);
-        //SDL_RenderPresent(renderer);
+        SDL_GL_SwapWindow(screen);
+        // SDL_RenderPresent(renderer);
     }
 
     void drawSprite(GLuint sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor)
