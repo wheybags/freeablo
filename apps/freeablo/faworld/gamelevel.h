@@ -1,13 +1,9 @@
-
 #pragma once
-
-#include <level/level.h>
-#include <unordered_map>
-
-#include <enet/enet.h> // TODO: remove
-
 #include "hoverstate.h"
+#include "itemmap.h" // TODO: remove, only included for the Tile type
+#include <level/level.h>
 #include <misc/stdhashes.h>
+#include <unordered_map>
 
 namespace FARender
 {
@@ -72,7 +68,7 @@ namespace FAWorld
 
         void addActor(Actor* actor);
 
-        void fillRenderState(FARender::RenderState* state, Actor* displayedActor);
+        void fillRenderState(FARender::RenderState* state, Actor* displayedActor, const HoverStatus& hoverStatus);
 
         void removeActor(Actor* actor);
 
@@ -84,7 +80,6 @@ namespace FAWorld
         Actor* getActorById(int32_t id);
 
         void getActors(std::vector<Actor*>& actors);
-        HoverState& getHoverState();
         ItemMap& getItemMap();
         bool isTown() const;
 
@@ -101,7 +96,6 @@ namespace FAWorld
         std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D; ///< Map of points to actors.
                                                                              ///< Where an actor straddles two squares, they shall be placed in both.
         friend class FARender::Renderer;
-        HoverState mHoverState;
         std::unique_ptr<ItemMap> mItemMap;
     };
 }

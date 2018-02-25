@@ -508,16 +508,21 @@ namespace FAWorld
         exchangeWithCursor(MakeEquipTarget<EquipTargetType::belt>(beltX));
     }
 
-    void Inventory::inventoryMouseLeftButtonDown(double x, double y)
+    void Inventory::inventoryMouseLeftButtonDown(Misc::Point cell)
     {
-        int32_t takeoutCellX = static_cast<int32_t>(x * mInventoryBox.width());
+        /*int32_t takeoutCellX = static_cast<int32_t>(x * mInventoryBox.width());
         int32_t takeoutCellY = static_cast<int32_t>(y * mInventoryBox.height());
         int32_t placementCellX = static_cast<int32_t>(x * mInventoryBox.width() - mCursorHeld.getInvSize()[0] * 0.5 + 0.5);
-        int32_t placementCellY = static_cast<int32_t>(y * mInventoryBox.height() - mCursorHeld.getInvSize()[1] * 0.5 + 0.5);
-        if (!isValidCell(takeoutCellX, takeoutCellY))
+        int32_t placementCellY = static_cast<int32_t>(y * mInventoryBox.height() - mCursorHeld.getInvSize()[1] * 0.5 + 0.5);*/
+
+        Misc::Point placementCell{static_cast<int32_t>(cell.x - mCursorHeld.getInvSize()[0] * 0.5 + 0.5),
+                                  static_cast<int32_t>(cell.y - mCursorHeld.getInvSize()[1] * 0.5 + 0.5)};
+
+        if (!isValidCell(cell.x, cell.y))
             return;
-        exchangeWithCursor(MakeEquipTarget<EquipTargetType::inventory>(takeoutCellX, takeoutCellY),
-                           MakeEquipTarget<EquipTargetType::inventory>(placementCellX, placementCellY));
+
+        exchangeWithCursor(MakeEquipTarget<EquipTargetType::inventory>(cell.x, cell.y),
+                           MakeEquipTarget<EquipTargetType::inventory>(placementCell.x, placementCell.y));
     }
 
     void Inventory::setCursorHeld(const Item& item)
