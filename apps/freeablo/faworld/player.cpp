@@ -71,8 +71,7 @@ namespace FAWorld
     void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
     {
         UNUSED_PARAM(className);
-        UNUSED_PARAM(charStats);
-
+        mPlayerStats = {charStats};
         mFaction = Faction::heaven();
         mMoveHandler = MovementHandler(World::getTicksInPeriod(0.1f)); // allow players to repath much more often than other actors
 
@@ -84,6 +83,7 @@ namespace FAWorld
     Player::Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : Actor(world, loader, exe)
     {
         mClassName = loader.load<std::string>();
+        mPlayerStats = {loader};
         initCommon();
     }
 
@@ -93,13 +93,14 @@ namespace FAWorld
 
         Actor::save(saver);
         saver.save(mClassName);
+        mPlayerStats.save(saver);
     }
 
     bool Player::checkHit(Actor* enemy)
     {
         // let's throw some formulas, parameters will be placeholders for now
         auto roll = Random::randomInRange(0, 99);
-        auto toHit = getDexterity() / 2;
+        auto toHit = mPlayerStats.mDexterity / 2;
         toHit += getArmorPenetration();
         toHit -= enemy->getArmor();
         toHit += getCharacterLevel();

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "actor.h"
+#include "playerstats.h"
 
 #include <boost/signals2/signal.hpp>
 
@@ -40,7 +41,6 @@ namespace FAWorld
         int getTotalGold() const;
 
         boost::signals2::signal<void(const std::pair<int32_t, int32_t>&)> positionReached;
-        int getDexterity() const { /*placeholder */ return 0; }
         int getArmorPenetration() const { /* placeholder */ return 0; }
         int getCharacterLevel() const { /* placeholder */ return 1; }
         PlayerClass getClass() const { /* placeholder */ return PlayerClass::warrior; }
@@ -57,5 +57,6 @@ namespace FAWorld
 
     private:
         std::string mClassName;
+        PlayerStats mPlayerStats;
     };
 }

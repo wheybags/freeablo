@@ -68,6 +68,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/actoranimationmanager.cpp
     faworld/playerbehaviour.cpp
     faworld/playerbehaviour.h
+		faworld/playerstats.cpp
+    faworld/playerstats.h
     faworld/target.cpp
     faworld/target.h
     faworld/playerinput.h
