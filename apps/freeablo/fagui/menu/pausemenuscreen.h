@@ -32,6 +32,5 @@ namespace FAGui
 
     private:
         std::unique_ptr<FARender::AnimationPlayer> mBigPentagram;
-        int activeItemIndex = 0;
     };
 }

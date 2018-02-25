@@ -1,6 +1,4 @@
-language: cpp
-compiler:
-- gcc
+language: generic
 
 branches:
   only:
@@ -15,8 +13,12 @@ cache:
 
 matrix:
   include:
-    - env: JOB=build
-    - env: JOB=clang-format
+    - os: linux  
+      env: JOB=build
+    - os: linux
+      env: JOB=clang-format
+    - os: osx
+      env: JOB=build
 
 script: ./travis.sh
      

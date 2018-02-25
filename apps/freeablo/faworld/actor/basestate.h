@@ -23,7 +23,7 @@ namespace FAWorld
 
             virtual void save(FASaveGame::GameSaver&) const override {}
 
-            virtual boost::optional<StateChange> update(Actor& actor, bool noclip);
+            virtual boost::optional<StateChange> update(Actor& actor, bool noclip) override;
         };
     }
 }

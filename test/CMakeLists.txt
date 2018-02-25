@@ -12,7 +12,12 @@ if(FA_TESTS_ENABLED)
         target_compile_definitions("test_${test_name}" PRIVATE TEST_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
         target_link_libraries("test_${test_name}" GTest::main ${link_libs})
         
-        set_target_properties("test_${test_name}" PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+        set(flags "${FA_COMPILER_FLAGS}")
+        if (UNIX)
+            set(flags "${flags} -Wno-keyword-macro")
+        endif()
+        set_target_properties("test_${test_name}" PROPERTIES COMPILE_FLAGS "${flags}")
+
 
 		if(in_fatest)
 			list(APPEND all_tests COMMAND "test_${test_name}")

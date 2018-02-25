@@ -4,8 +4,9 @@
 namespace FAWorld
 {
     class GameLevel;
-    struct HoverStatus
+    class HoverStatus
     {
+    public:
         HoverStatus() : hoveredActorId(-1), hoveredItemTile(Tile()) {}
         explicit HoverStatus(int32_t actorId) : hoveredActorId(actorId), hoveredItemTile(Tile()) {}
         explicit HoverStatus(Tile itemTile) : hoveredActorId(-1), hoveredItemTile(itemTile) {}

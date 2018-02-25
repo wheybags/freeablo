@@ -3,6 +3,7 @@
 #include "../fasavegame/gameloader.h"
 #include "world.h"
 #include <algorithm>
+#include <cstdlib>
 
 namespace FAWorld
 {
@@ -49,7 +50,7 @@ namespace FAWorld
 
     bool Position::isNear(const Position& other) const
     {
-        return std::max(abs(mCurrent.first - other.mCurrent.first), abs(mCurrent.second - other.mCurrent.second)) <= 1;
+        return std::max(std::abs(mCurrent.first - other.mCurrent.first), std::abs(mCurrent.second - other.mCurrent.second)) <= 1;
     }
 
     std::pair<int32_t, int32_t> Position::next() const

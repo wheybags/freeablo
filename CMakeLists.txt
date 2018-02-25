@@ -65,7 +65,7 @@ endif()
 option (TREAT_WARNINGS_AS_ERRORS "Treat warnings as errors")
 
 if(UNIX)
-    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -Wno-unknown-pragmas")
+    set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -Wno-unknown-pragmas -Wno-missing-braces")
     SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
     if (TREAT_WARNINGS_AS_ERRORS)
         set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Werror")
