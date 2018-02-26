@@ -405,15 +405,13 @@ namespace FAGui
                         {
                             isHighlighted = true;
                         }
-                        else if (nk_widget_mouse_left(ctx))
-                            clearDescription();
                     }
                 }),
             placement);
         auto effectType = isHighlighted ? EffectType::highlighted : EffectType::none;
         effectType = checkerboarded ? EffectType::checkerboarded : effectType;
         if (isHighlighted)
-            setDescription(item.getFullDescription());
+            mHoveredInventoryItemText = item.getFullDescription();
         applyEffect effect(ctx, effectType);
         nk_image(ctx, img);
         if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
@@ -443,11 +441,8 @@ namespace FAGui
                         inv.itemSlotLeftMouseButtonDown(p.first);
                     auto highlight = ItemHighlightInfo::notHighlighed;
                     if (isLastWidgetHovered(ctx))
-                    {
                         highlight = ItemHighlightInfo::highlited;
-                    }
-                    else if (nk_widget_mouse_left(ctx))
-                        clearDescription();
+
                     item(ctx, p.first, p.second, highlight);
                 }
             }
@@ -728,9 +723,13 @@ namespace FAGui
 
     void GuiManager::descriptionPanel(nk_context* ctx, const std::string& description)
     {
+        const std::string* textToUse = &description;
+        if (!mHoveredInventoryItemText.empty())
+            textToUse = &mHoveredInventoryItemText;
+
         auto boxRect = nk_rect(185, 66, 275, 55);
         std::vector<std::string> vec;
-        boost::split(vec, description, boost::is_any_of("\n"), boost::token_compress_on);
+        boost::split(vec, *textToUse, boost::is_any_of("\n"), boost::token_compress_on);
         auto h_part = boxRect.h / vec.size();
         for (int i = 0; i < static_cast<int>(vec.size()); ++i)
         {
@@ -739,12 +738,14 @@ namespace FAGui
             rect.y = boxRect.y + h_part * i;
             rect.h = h_part;
             nk_layout_space_push(ctx, rect);
-            smallText(ctx, vec[i].c_str(), mDescriptionColor);
+            smallText(ctx, vec[i].c_str(), TextColor::white);
         }
     }
 
     void GuiManager::update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus)
     {
+        mHoveredInventoryItemText.clear();
+
         if (inGame)
         {
             if (paused)
@@ -777,17 +778,6 @@ namespace FAGui
         else
             Engine::EngineMain::get()->getLocalInputHandler()->unblockInput();
     }
-
-    void GuiManager::setDescription(std::string text, TextColor color)
-    {
-        if (isModalDlgShown())
-            return;
-
-        mDescription = text;
-        mDescriptionColor = color;
-    }
-
-    void GuiManager::clearDescription() { return setDescription(""); }
 
     PanelType* GuiManager::panel(PanelPlacement placement)
     {

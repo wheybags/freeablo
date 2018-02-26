@@ -99,8 +99,6 @@ namespace FAGui
 
         void update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
 
-        void setDescription(std::string text, TextColor color = TextColor::white);
-        void clearDescription();
         bool isInventoryShown() const;
         void popDialogData();
         void pushDialogData(DialogData&& data);
@@ -141,8 +139,7 @@ namespace FAGui
         Engine::EngineMain& mEngine;
         FAWorld::World& mWorld;
         FAWorld::Player* mPlayer;
-        std::string mDescription;
-        TextColor mDescriptionColor = TextColor::white;
+        std::string mHoveredInventoryItemText;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::vector<DialogData> mDialogs;
         std::unique_ptr<FARender::AnimationPlayer> mSmallPentagram;

@@ -16,7 +16,7 @@ namespace FAWorld
 
             // we might have already picked the item up during this tick
             if (item)
-                return item->item().getName();
+                return item->item().getFullDescription();
         }
 
         return "";
