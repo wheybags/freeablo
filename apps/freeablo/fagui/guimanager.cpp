@@ -446,7 +446,7 @@ namespace FAGui
                     item(ctx, p.first, p.second, highlight);
                 }
             }
-            constexpr auto cellSize = 29;
+            constexpr float cellSize = 29;
             auto invTopLeft = nk_vec2(17, 222);
             FAWorld::Inventory& inv = mPlayer->mInventory;
             float invWidth = inv.getInventoryBox().width() * cellSize;
@@ -455,8 +455,8 @@ namespace FAGui
             nk_button_label_styled(ctx, &dummyStyle, "");
             if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && !mGoldSplitTarget)
             {
-                inv.inventoryMouseLeftButtonDown(Misc::Point{int32_t((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / cellSize),
-                                                             int32_t((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / cellSize)});
+                inv.inventoryMouseLeftButtonDown(Misc::Point{int32_t(std::round((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / cellSize)),
+                                                             int32_t(std::round((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / cellSize))});
             }
 
             for (auto row : boost::counting_range(0, inv.getInventoryBox().height()))
