@@ -128,7 +128,6 @@ namespace FAGui
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
         void bottomMenu(nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
-        static void bigTGoldText(nk_context* ctx, const char* text, nk_flags alignment);
         static void smallText(nk_context* ctx, const char* text, TextColor color, nk_flags alignment);
         static void smallText(nk_context* ctx, const char* text, TextColor color = TextColor::white);
         int smallTextWidth(const char* text);
@@ -136,6 +135,7 @@ namespace FAGui
         PanelType* panel(PanelPlacement placement);
         const PanelType* panel(PanelPlacement placement) const;
         void notify(Engine::KeyboardInputAction action) override;
+        void keyPress(const Input::Hotkey&) override;
 
     private:
         Engine::EngineMain& mEngine;

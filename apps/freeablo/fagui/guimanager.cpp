@@ -856,38 +856,30 @@ namespace FAGui
                     mGoldSplitTarget = nullptr;
                 }
                 break;
-            case Engine::KeyboardInputAction::digit0:
-            case Engine::KeyboardInputAction::digit1:
-            case Engine::KeyboardInputAction::digit2:
-            case Engine::KeyboardInputAction::digit3:
-            case Engine::KeyboardInputAction::digit4:
-            case Engine::KeyboardInputAction::digit5:
-            case Engine::KeyboardInputAction::digit6:
-            case Engine::KeyboardInputAction::digit7:
-            case Engine::KeyboardInputAction::digit8:
-            case Engine::KeyboardInputAction::digit9:
-            {
-                if (mGoldSplitTarget)
-                {
-                    int digit = static_cast<int32_t>(action) - static_cast<int32_t>(Engine::KeyboardInputAction::digit0);
-                    auto newCnt = mGoldSplitCnt * 10 + digit;
-                    if (newCnt <= mGoldSplitTarget->mCount)
-                        mGoldSplitCnt = newCnt;
-                }
-            }
-            break;
-            case Engine::KeyboardInputAction::backspace:
-                if (mGoldSplitTarget)
-                {
-                    mGoldSplitCnt /= 10;
-                }
-                break;
 
             default:
                 break;
         }
 
         mMenuHandler->notify(action);
+    }
+
+    void GuiManager::keyPress(const Input::Hotkey& key)
+    {
+        if (mGoldSplitTarget && !key.has_modifiers())
+        {
+            if (key.key >= '0' && key.key <= '9')
+            {
+                int digit = key.key - '0';
+                auto newCnt = mGoldSplitCnt * 10 + digit;
+                if (newCnt <= mGoldSplitTarget->mCount)
+                    mGoldSplitCnt = newCnt;
+            }
+            else if (key.key == '\b')
+            {
+                mGoldSplitCnt /= 10;
+            }
+        }
     }
 
     void GuiManager::setPlayer(FAWorld::Player* player) { mPlayer = player; }

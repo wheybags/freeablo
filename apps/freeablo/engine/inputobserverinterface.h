@@ -9,6 +9,7 @@ namespace Misc
 namespace Input
 {
     struct KeyboardModifiers;
+    class Hotkey;
 }
 
 namespace Engine
@@ -30,17 +31,6 @@ namespace Engine
         toggleQuests,
         toggleCharacterInfo,
         toggleSpellbook,
-        digit0,
-        digit1,
-        digit2,
-        digit3,
-        digit4,
-        digit5,
-        digit6,
-        digit7,
-        digit8,
-        digit9,
-        backspace,
 
         max,
     };
@@ -57,6 +47,8 @@ namespace Engine
     public:
         virtual void notify(KeyboardInputAction action) = 0;
         virtual ~KeyboardInputObserverInterface() = default;
+        /// should be used for handling text input
+        virtual void keyPress(const Input::Hotkey&) {}
     };
 
     class MouseInputObserverInterface
