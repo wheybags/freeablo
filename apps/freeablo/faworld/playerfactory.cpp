@@ -35,6 +35,7 @@ namespace FAWorld
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseAmuletQlvl8), MakeEquipTarget<EquipTargetType::inventory>(1, 3));
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseHelm), MakeEquipTarget<EquipTargetType::inventory>(5, 0));
         player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseRags), MakeEquipTarget<EquipTargetType::inventory>(7, 0));
+        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseDagger), MakeEquipTarget<EquipTargetType::inventory>(9, 0));
     }
 
     void PlayerFactory::fillWithGold(Player* player) const
