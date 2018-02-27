@@ -75,7 +75,9 @@ int main(int, char**)
                 if (image)
                 {
                     nk_label(ctx, (boost::format("Number of Frames: %1%") % image.get()->getSprite()->size()).str().c_str(), NK_TEXT_LEFT);
-                    frame = nk_propertyi(ctx, "Frame", 0, frame, image.get()->getSprite()->size(), 1, 0.2f);
+                    nk_label(ctx, (boost::format("Width: %1%") % image->getSprite()->getWidth()).str().c_str(), NK_TEXT_LEFT);
+                    nk_label(ctx, (boost::format("Height: %1%") % image->getSprite()->getHeight()).str().c_str(), NK_TEXT_LEFT);
+                    frame = nk_propertyi(ctx, "Frame", 0, frame, image->getSprite()->size(), 1, 0.2f);
 
                     if (nk_button_label(ctx, "save as png"))
                     {

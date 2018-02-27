@@ -226,4 +226,6 @@ namespace Input
         hotkeySettings.set<int>(sname, "alt", int(alt));
         hotkeySettings.save();
     }
+
+    bool Hotkey::has_modifiers() const { return ctrl || shift || alt; }
 }

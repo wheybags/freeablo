@@ -114,6 +114,9 @@ namespace FAGui
                 manager.popDialogData();
                 return;
             case Engine::KeyboardInputAction::accept:
+                for (auto& line : mFooter)
+                    if (line.forceSelected)
+                        return line.action();
                 if (i < 0)
                     return;
                 mLines[mSelectedLine].action();
@@ -363,7 +366,7 @@ namespace FAGui
                 .setNumber(sellPrice);
             ++cnt;
         }
-        d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); });
+        d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); }).setForceSelected(cnt == 0);
         d.showScrollBar();
         mGuiManager.pushDialogData(std::move(d));
     }

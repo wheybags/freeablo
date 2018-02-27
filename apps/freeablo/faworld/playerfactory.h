@@ -20,6 +20,7 @@ namespace FAWorld
 
     private:
         void loadTestingKit(Player* player) const;
+        void fillWithGold(Player* player) const;
         void createWarrior(Player* player) const;
         void createRogue(Player* player) const;
         void createSorcerer(Player* player) const;

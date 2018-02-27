@@ -779,6 +779,8 @@ namespace Render
 
             SDL_FreeSurface(s);
         }
+        mWidth = cel[0].width();
+        mHeight = cel[0].height();
 
         mAnimLength = cel.animLength();
     }

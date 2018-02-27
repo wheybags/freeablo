@@ -79,6 +79,10 @@ namespace Engine
         hotkey.ctrl = modifiers.ctrl;
         hotkey.shift = modifiers.shift;
         hotkey.alt = modifiers.alt;
+        for (auto observer : mKeyboardObservers)
+        {
+            observer->keyPress(hotkey);
+        }
 
         for (int action = 0; action < static_cast<int>(KeyboardInputAction::max); action++)
         {
@@ -180,9 +184,8 @@ namespace Engine
                 return "ToggleSpellbook";
             case KeyboardInputAction::toggleInventory:
                 return "ToggleInventory";
+
             case KeyboardInputAction::max:
-                break;
-            default:
                 break;
         }
         release_assert(false && "Invalid enum value passed to keyboardActionToString");

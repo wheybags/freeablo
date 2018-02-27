@@ -207,7 +207,7 @@ namespace Engine
 
     void EngineMain::notify(KeyboardInputAction action)
     {
-        if (mGuiManager->isModalDlgShown())
+        if (mGuiManager->isPauseBlocked())
             return;
         if (mPaused && action != KeyboardInputAction::pause)
             return;
