@@ -17,6 +17,8 @@ namespace FAWorld
         sorcerer,
     };
 
+    const char* toString(PlayerClass value);
+
     class Player : public Actor
     {
     public:
@@ -39,6 +41,7 @@ namespace FAWorld
 
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour.get(); }
         int getTotalGold() const;
+        const PlayerStats& getPlayerStats() const { return mPlayerStats; }
 
         boost::signals2::signal<void(const std::pair<int32_t, int32_t>&)> positionReached;
         int getArmorPenetration() const { /* placeholder */ return 0; }

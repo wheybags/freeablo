@@ -504,7 +504,22 @@ namespace FAGui
 
     void GuiManager::characterPanel(nk_context* ctx)
     {
-        drawPanel(ctx, PanelType::character, [&]() {});
+        drawPanel(ctx, PanelType::character, [&]() {
+            nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
+
+            auto renderer = FARender::Renderer::get();
+            auto fillTextField = [&](float x, float y, float width, const char* text, TextColor color = TextColor::white) {
+                nk_layout_space_push(ctx, nk_rect(x, y, width, renderer->smallFont()->height));
+                smallText(ctx, text, color);
+            };
+            fillTextField(168, 21, 131, toString(mPlayer->getClass()));
+            fillTextField(95, 144, 31, std::to_string(mPlayer->getPlayerStats().mStrength).c_str());
+            fillTextField(95, 172, 31, std::to_string(mPlayer->getPlayerStats().mMagic).c_str());
+            fillTextField(95, 200, 31, std::to_string(mPlayer->getPlayerStats().mDexterity).c_str());
+            fillTextField(95, 228, 31, std::to_string(mPlayer->getPlayerStats().mVitality).c_str());
+
+            nk_layout_space_end(ctx);
+        });
     }
 
     void GuiManager::questsPanel(nk_context* ctx)

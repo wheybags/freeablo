@@ -20,6 +20,20 @@ namespace FAWorld
 {
     const std::string Player::typeId = "player";
 
+    const char* toString(PlayerClass value)
+    {
+        switch (value)
+        {
+            case PlayerClass::warrior:
+                return "Warrior";
+            case PlayerClass::rogue:
+                return "Rogue";
+            case PlayerClass::sorcerer:
+                return "Sorcerer";
+        }
+        return "Unknown";
+    }
+
     Player::Player(World& world) : Actor(world)
     {
         // TODO: hack - need to think of some more elegant way of handling Actors in general
