@@ -25,26 +25,26 @@ namespace FAWorld
         switch (value)
         {
             case PlayerClass::warrior:
-                return "Warrior";
+                return "warrior";
             case PlayerClass::rogue:
-                return "Rogue";
+                return "rogue";
             case PlayerClass::sorcerer:
-                return "Sorcerer";
+                return "sorceror";
         }
-        return "Unknown";
+        return "unknown";
     }
 
     Player::Player(World& world) : Actor(world)
     {
         // TODO: hack - need to think of some more elegant way of handling Actors in general
         DiabloExe::CharacterStats stats;
-        init("Warrior", stats);
+        init(stats);
         initCommon();
     }
 
     Player::Player(World& world, const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor(world)
     {
-        init(className, charStats);
+        init(charStats);
         initCommon();
     }
 
@@ -67,6 +67,12 @@ namespace FAWorld
         return totalCnt;
     }
 
+    void Player::setPlayerClass(PlayerClass playerClass)
+    {
+        mPlayerClass = playerClass;
+        updateSprites();
+    }
+
     double Player::meleeDamageVs(const Actor* /*actor*/) const
     {
         auto bonus = getItemBonus();
@@ -75,16 +81,15 @@ namespace FAWorld
         dmg += getCharacterBaseDamage();
         dmg += getDamageBonus();
         // critical hit for warriors:
-        if (getClass() == PlayerClass::warrior && Random::randomInRange(0, 99) < getCharacterLevel())
+        if (mPlayerClass == PlayerClass::warrior && Random::randomInRange(0, 99) < getCharacterLevel())
             dmg *= 2;
         return dmg;
     }
 
     ItemBonus Player::getItemBonus() const { return mInventory.getTotalItemBonus(); }
 
-    void Player::init(const std::string& className, const DiabloExe::CharacterStats& charStats)
+    void Player::init(const DiabloExe::CharacterStats& charStats)
     {
-        UNUSED_PARAM(className);
         mPlayerStats = {charStats};
         mFaction = Faction::heaven();
         mMoveHandler = MovementHandler(World::getTicksInPeriod(0.1f)); // allow players to repath much more often than other actors
@@ -96,7 +101,7 @@ namespace FAWorld
 
     Player::Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : Actor(world, loader, exe)
     {
-        mClassName = loader.load<std::string>();
+        mPlayerClass = static_cast<PlayerClass>(loader.load<int32_t>());
         mPlayerStats = {loader};
         initCommon();
     }
@@ -106,7 +111,7 @@ namespace FAWorld
         Serial::ScopedCategorySaver cat("Player", saver);
 
         Actor::save(saver);
-        saver.save(mClassName);
+        saver.save(static_cast<int32_t>(mPlayerClass));
         mPlayerStats.save(saver);
     }
 
@@ -119,7 +124,7 @@ namespace FAWorld
         toHit -= enemy->getArmor();
         toHit += getCharacterLevel();
         toHit += 50;
-        if (getClass() == PlayerClass::warrior)
+        if (mPlayerClass == PlayerClass::warrior)
             toHit += 20;
         toHit = boost::algorithm::clamp(toHit, 5, 95);
         return roll < toHit;
@@ -127,16 +132,24 @@ namespace FAWorld
 
     Player::~Player() { mWorld.deregisterPlayer(this); }
 
-    void Player::setSpriteClass(std::string className)
+    char getClassCode(PlayerClass playerClass)
     {
-        mClassName = className;
-        updateSprites();
+        switch (playerClass)
+        {
+            case PlayerClass::warrior:
+                return 'w';
+            case PlayerClass::rogue:
+                return 'r';
+            case PlayerClass::sorcerer:
+                return 's';
+        }
+        release_assert("Class unsupported");
+        return '\0';
     }
 
     void Player::updateSprites()
     {
-        std::string classCode;
-        classCode = mClassName[0];
+        auto classCode = getClassCode(mPlayerClass);
 
         std::string armour = "l", weapon;
         if (!mInventory.getBody().isEmpty())
@@ -245,7 +258,7 @@ namespace FAWorld
                 weapFormat = "n";
 
             boost::format fmt("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
-            fmt % mClassName % classCode % armourCode % weapFormat % classCode % armourCode % weapFormat;
+            fmt % toString(mPlayerClass) % classCode % armourCode % weapFormat % classCode % armourCode % weapFormat;
             return fmt;
         };
 
