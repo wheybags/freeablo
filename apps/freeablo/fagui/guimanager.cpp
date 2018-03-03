@@ -513,10 +513,18 @@ namespace FAGui
                 smallText(ctx, text, color);
             };
             fillTextField(168, 21, 131, toString(mPlayer->getClass()));
-            fillTextField(95, 144, 31, std::to_string(mPlayer->getPlayerStats().mStrength).c_str());
-            fillTextField(95, 172, 31, std::to_string(mPlayer->getPlayerStats().mMagic).c_str());
-            fillTextField(95, 200, 31, std::to_string(mPlayer->getPlayerStats().mDexterity).c_str());
-            fillTextField(95, 228, 31, std::to_string(mPlayer->getPlayerStats().mVitality).c_str());
+            auto &playerStats = mPlayer->getPlayerStats();
+            fillTextField(95, 144, 31, std::to_string(playerStats.mStrength).c_str());
+            fillTextField(95, 172, 31, std::to_string(playerStats.mMagic).c_str());
+            fillTextField(95, 200, 31, std::to_string(playerStats.mDexterity).c_str());
+            fillTextField(95, 228, 31, std::to_string(playerStats.mVitality).c_str());
+
+            fillTextField(216, 135, 84, std::to_string(mPlayer->getTotalGold()).c_str());
+            auto& stats = mPlayer->getStats();
+            fillTextField(95, 293, 31, std::to_string(stats.mHp.max).c_str());
+            fillTextField(143, 293, 31, std::to_string(stats.mHp.current).c_str(), stats.mHp.current < stats.mHp.max ? TextColor::red : TextColor::white);
+            fillTextField(95, 321, 31, std::to_string(stats.mMana.max).c_str());
+            fillTextField(143, 321, 31, std::to_string(stats.mMana.current).c_str(), stats.mMana.current < stats.mMana.max ? TextColor::red : TextColor::white);
 
             nk_layout_space_end(ctx);
         });
