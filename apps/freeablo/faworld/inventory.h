@@ -14,6 +14,14 @@ namespace FAWorld
 
     class Inventory
     {
+        enum class PlacementCheckOrder
+        {
+            fromLeftBottom,  // for 1x1 items
+            fromLeftTop,     // for 1x3, 2x3 items, returning shield
+            fromRightBottom, // for new piles of gold
+            specialFor1x2,
+            specialFor2x2,
+        };
         enum class xorder
         {
             fromLeft,
@@ -46,7 +54,7 @@ namespace FAWorld
         void putItemUnsafe(const Item& item, const EquipTarget& target);
 
         bool fillExistingGoldItems(Item& goldItem);
-        bool autoPlaceItem(Item item, boost::optional<std::pair<xorder, yorder>> override_order = boost::none);
+        bool autoPlaceItem(Item& item, boost::optional<PlacementCheckOrder> override_order = boost::none);
 
         // if we ever need write access to these - just ditch the getters and make the vars public
         const Item& getBody() const { return mBody; }
@@ -69,6 +77,8 @@ namespace FAWorld
         void layItem(const Item& item, int32_t x, int32_t y);
         bool exchangeWithCursor(EquipTarget takeoutTarget, boost::optional<EquipTarget> maybePlacementTarget);
         bool exchangeWithCursor(EquipTarget takeoutTarget);
+        // tries to place item so it top left corner is on x, y. returns false if it's impossible.
+        bool tryPlace(const Item& item, int32_t x, int32_t y);
 
     public:
         // This is not serialised - it should be reconnected by other means

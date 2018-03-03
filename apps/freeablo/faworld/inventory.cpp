@@ -372,7 +372,27 @@ namespace FAWorld
         mInventoryBox.get(x, y).mIsReal = true;
     }
 
-    bool Inventory::autoPlaceItem(Item item, boost::optional<std::pair<Inventory::xorder, Inventory::yorder>> override_order)
+    bool Inventory::tryPlace(const Item& item, int32_t x, int32_t y)
+    {
+        if (x + item.getInvSize()[0] > mInventoryBox.width())
+            return false;
+        if (y + item.getInvSize()[1] > mInventoryBox.height())
+            return false;
+
+        if (![&] {
+                for (int32_t xx = x; xx < x + item.getInvSize()[0]; ++xx)
+                    for (int32_t yy = y; yy < y + item.getInvSize()[1]; ++yy)
+                        if (!mInventoryBox.get(xx, yy).isEmpty())
+                            return false;
+                return true;
+            }())
+            return false;
+
+        layItem(item, x, y);
+        return true;
+    }
+
+    bool Inventory::autoPlaceItem(Item& item, boost::optional<PlacementCheckOrder> overrideOrder)
     {
         if (item.getType() == ItemType::gold)
             if (fillExistingGoldItems(item))
@@ -398,7 +418,8 @@ namespace FAWorld
             return true;
         }
         // only for weapons, not shields
-        if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getClass() == ItemClass::weapon)
+        if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getClass() == ItemClass::weapon && leftHand.getClass() != ItemClass::weapon &&
+            rightHand.getClass() != ItemClass::weapon)
             for (auto hand_ptr : {&leftHand, &rightHand})
                 if (hand_ptr->isEmpty())
                 {
@@ -407,61 +428,63 @@ namespace FAWorld
                     return true;
                 }
 
-        // different orders of placement for different item types as found in original game:
-        auto requiredXOrder = xorder::fromLeft;
-        auto requiredYOrder = yorder::fromTop;
-        switch (item.getClass())
+        auto order = PlacementCheckOrder::fromLeftTop;
+        using sizeType = std::array<int32_t, 2>;
+        if (item.getInvSize() == sizeType{1, 1})
+            order = PlacementCheckOrder::fromLeftBottom;
+        else if (item.getInvSize() == sizeType{2, 2})
+            order = PlacementCheckOrder::specialFor2x2;
+        else if (item.getInvSize() == sizeType{1, 2})
+            order = PlacementCheckOrder::specialFor1x2;
+        if (overrideOrder)
         {
-            case ItemClass::armor:
-                if (item.getEquipLoc() == ItemEquipType::oneHanded)
-                    requiredXOrder = xorder::fromRight;
-                break;
-            case ItemClass::jewelryAndConsumable: // TODO: scrolls
-                requiredYOrder = yorder::fromBottom;
-                break;
-            case ItemClass::gold:
-                requiredYOrder = yorder::fromBottom;
-                requiredXOrder = xorder::fromRight;
-                break;
-            default:
-                break;
+            order = *overrideOrder;
         }
-        if (override_order)
+        switch (order)
         {
-            requiredXOrder = override_order->first;
-            requiredYOrder = override_order->second;
-        }
-        boost::any_range<int32_t, boost::single_pass_traversal_tag, int32_t, std::ptrdiff_t> xrange, yrange;
-        // that's a bit slow technique in general but I think it's fine
-        if (requiredXOrder == xorder::fromLeft)
-            xrange = boost::irange(0, mInventoryBox.width(), 1);
-        else
-            xrange = boost::irange(mInventoryBox.width() - 1, -1, -1);
-        if (requiredYOrder == yorder::fromTop)
-            yrange = boost::irange(0, mInventoryBox.height(), 1);
-        else
-            yrange = boost::irange(mInventoryBox.height() - 1, -1, -1);
-        for (int32_t x : xrange)
-        {
-            if (x + item.getInvSize()[0] > mInventoryBox.width())
-                continue;
-            for (int32_t y : yrange)
-            {
-                if (y + item.getInvSize()[1] > mInventoryBox.height())
-                    continue;
-
-                if (![&] {
-                        for (int32_t xx = x; xx < x + item.getInvSize()[0]; ++xx)
-                            for (int32_t yy = y; yy < y + item.getInvSize()[1]; ++yy)
-                                if (!mInventoryBox.get(xx, yy).isEmpty())
-                                    return false;
-                        return true;
-                    }())
-                    continue;
-
-                layItem(item, x, y);
-                return true;
-            }
+            case PlacementCheckOrder::fromLeftBottom:
+                for (auto y : boost::irange(inventoryHeight - 1, -1, -1))
+                    for (auto x : boost::irange(0, inventoryWidth, 1))
+                        if (tryPlace(item, x, y))
+                            return true;
+                break;
+            case PlacementCheckOrder::fromLeftTop:
+                for (auto y : boost::irange(0, inventoryHeight, 1))
+                    for (auto x : boost::irange(0, inventoryWidth, 1))
+                        if (tryPlace(item, x, y))
+                            return true;
+                break;
+            case PlacementCheckOrder::fromRightBottom:
+                for (auto y : boost::irange(inventoryHeight - 1, -1, -1))
+                    for (auto x : boost::irange(inventoryWidth - 1, -1, -1))
+                        if (tryPlace(item, x, y))
+                            return true;
+                break;
+            case PlacementCheckOrder::specialFor1x2:
+                for (auto y : boost::irange(inventoryHeight - 2, -1, -2))
+                    for (auto x : boost::irange(inventoryWidth - 1, -1, -1))
+                        if (tryPlace(item, x, y))
+                            return true;
+                for (auto y : boost::irange(inventoryHeight - 3, -1, -2))
+                    for (auto x : boost::irange(inventoryWidth - 1, -1, -1))
+                        if (tryPlace(item, x, y))
+                            return true;
+                break;
+            case PlacementCheckOrder::specialFor2x2:
+                // this way lies madness
+                for (auto x : boost::irange(inventoryWidth - 2, -1, -2))
+                    for (auto y : boost::irange(0, inventoryHeight, 2))
+                        if (tryPlace(item, x, y))
+                            return true;
+                for (auto y : boost::irange(inventoryHeight - 2, -1, -2))
+                    for (auto x : boost::irange(1, inventoryWidth, 2))
+                        if (tryPlace(item, x, y))
+                            return true;
+                for (auto y : boost::irange(1, inventoryHeight, 2))
+                    for (auto x : boost::irange(0, inventoryWidth, 1))
+                        if (tryPlace(item, x, y))
+                            return true;
+                break;
         }
         return false;
     }
@@ -495,7 +518,7 @@ namespace FAWorld
         for (auto& location : requirements.NeedsToBeReturned)
         {
             // yes this is insanity but in this case order of auto placement differs from usual
-            if (!autoPlaceItem(getItemAt(location), std::make_pair(xorder::fromLeft, yorder::fromTop)))
+            if (!autoPlaceItem(getItemAt(location), PlacementCheckOrder::fromLeftTop))
                 return false;
 
             takeOut(location); // take out and discard
