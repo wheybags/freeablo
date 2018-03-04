@@ -2,6 +2,7 @@
 #include "../faworld/actor.h"
 #include "../faworld/equiptarget.h"
 #include "../faworld/player.h"
+#include "../faworld/storedata.h"
 #include "guimanager.h"
 #include <misc/assert.h>
 #include <utility>
@@ -315,10 +316,22 @@ namespace FAGui
             talkCain(npc);
     }
 
-    void DialogManager::fillConfirmDialog(DialogData& data, const FAWorld::Item& item, int price, const char* question, std::function<void()> successAction)
+    void DialogManager::fillMessageDialog(std::vector<DialogLineData> header, const char* text)
     {
-        data.showScrollBar(false);
-        data.clearLines();
+        DialogData data;
+        data.widen();
+        data.header(std::move(header));
+        data.skip_line(9);
+        data.textLines({text}).setForceSelected().setAction([&]() { mGuiManager.popDialogData(); });
+        mGuiManager.pushDialogData(std::move(data));
+    }
+
+    void DialogManager::confirmDialog(
+        std::vector<DialogLineData> header, const FAWorld::Item& item, int price, const char* question, std::function<void()> successAction)
+    {
+        DialogData data;
+        data.widen();
+        data.header(std::move(header));
         data.skip_line(2);
         data.textLines(item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40}).setNumber(price);
         data.skip_line(2);
@@ -330,6 +343,7 @@ namespace FAGui
             action();
         });
         data.textLines({"No"}).setAction([this]() { mGuiManager.popDialogData(); });
+        mGuiManager.pushDialogData(std::move(data));
     }
 
     template <typename FilterType> void DialogManager::sellDialog(FilterType filter)
@@ -351,9 +365,8 @@ namespace FAGui
             auto& item = inventory.getItemAt(target);
             auto sellPrice = item.getPrice() / 4;
             d.textLines(item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
-                .setAction([&inventory, target, this, sellPrice, d, item, filter]() {
-                    auto d_copy = d;
-                    fillConfirmDialog(d_copy, item, sellPrice, "Are you sure you want to sell this item?", [this, filter, &inventory, target, sellPrice]() {
+                .setAction([&inventory, target, this, sellPrice, header = d.getHeader(), item, filter ]() mutable {
+                    confirmDialog(header, item, sellPrice, "Are you sure you want to sell this item?", [this, filter, &inventory, target, sellPrice]() {
                         inventory.takeOut(target);
                         inventory.placeGold(sellPrice, mWorld.getItemFactory());
                         // This looks insansenly unsafe. TODO: think of better way.
@@ -361,12 +374,50 @@ namespace FAGui
                         mGuiManager.popDialogData();
                         recreate();
                     });
-                    mGuiManager.pushDialogData(std::move(d_copy));
                 })
                 .setNumber(sellPrice);
             ++cnt;
         }
         d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); }).setForceSelected(cnt == 0);
+        d.showScrollBar();
+        mGuiManager.pushDialogData(std::move(d));
+    }
+
+    // While there are some similiraties between buying and selling I do not consider them to be that similar to implement
+    // using single function. Identification dialog could probably be implemented like a sell dialog though.
+    void DialogManager::buyDialog(std::vector<FAWorld::Item>& items)
+    {
+        DialogData d;
+        d.widen();
+        int32_t cnt = 0;
+        d.header({(boost::format("%2%           Your gold : %1%") % mWorld.getCurrentPlayer()->getTotalGold() % "I have these items for sale :").str()});
+
+        for (auto it = items.begin(); it != items.end(); ++it)
+        {
+            auto& item = *it;
+            auto price = item.getPrice();
+            d.textLines(item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
+                .setAction([ this, price, header = d.getHeader(), it, &items ]() mutable {
+                    if (mWorld.getCurrentPlayer()->getTotalGold() < price)
+                        return fillMessageDialog(header, "You do not have enough gold");
+
+                    auto& inventory = mWorld.getCurrentPlayer()->mInventory;
+                    if (!inventory.couldBePlacedToInventory(*it))
+                        return fillMessageDialog(header, "You do not have enough room in inventory");
+
+                    confirmDialog(header, *it, price, "Are you sure you want to buy this item?", [this, price, it, &inventory, &items]() {
+                        inventory.takeOutGold(price);
+                        inventory.autoPlaceItem(*it);
+                        items.erase(it);
+                        auto recreate = [this, &items] { buyDialog(items); };
+                        mGuiManager.popDialogData();
+                        recreate();
+                    });
+                })
+                .setNumber(price);
+            ++cnt;
+        }
+        d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); }).setForceSelected(items.empty());
         d.showScrollBar();
         mGuiManager.pushDialogData(std::move(d));
     }
@@ -385,7 +436,7 @@ namespace FAGui
         d.textLines({td.at("introduction")}, TextColor::golden);
         d.skip_line();
         d.textLines({td.at("talk")}, TextColor::blue).setAction([]() {});
-        d.textLines({td.at("buyBasic")}).setAction([]() {});
+        d.textLines({td.at("buyBasic")}).setAction([&]() { buyDialog(mWorld.getStoreData().griswoldBasicItems); });
         d.textLines({td.at("buyPremium")}).setAction([]() {});
         d.textLines({td.at("sell")}).setAction([&] { sellDialog(griswoldSellFilter); });
         d.textLines({td.at("repair")}).setAction([]() {});

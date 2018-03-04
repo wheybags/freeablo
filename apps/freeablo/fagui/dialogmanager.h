@@ -68,6 +68,7 @@ namespace FAGui
         void separator();
         DialogLineData& footer(const std::string& text);
         void header(const std::vector<std::string>& text);
+        void header(std::vector<DialogLineData> data) { mHeader = std::move (data);}
         int32_t selectedLine();
         void notify(Engine::KeyboardInputAction action, GuiManager& manager);
         void widen() { mIsWide = true; }
@@ -77,6 +78,7 @@ namespace FAGui
         bool isVisible(int32_t line) const { return line >= mFirstVisible && line < mFirstVisible + visibleBodyLineCount(); }
         double selectedLinePercent();
         void clearLines();
+        std::vector<DialogLineData> getHeader () const { return mHeader; }
 
     private:
         std::vector<DialogLineData> mHeader;
@@ -94,9 +96,11 @@ namespace FAGui
     public:
         explicit DialogManager(GuiManager& gui_manager, FAWorld::World& world);
         void talk(const FAWorld::Actor* npc);
+        void fillMessageDialog(std::vector<DialogLineData> header, const char* text);
 
     private:
         template <typename FilterType> void sellDialog(FilterType filter);
+        void buyDialog (std::vector<FAWorld::Item> &items);
 
         void talkOgden(const FAWorld::Actor* npc);
         void talkFarnham(const FAWorld::Actor* npc);
@@ -108,7 +112,7 @@ namespace FAGui
         void talkGriswold(const FAWorld::Actor* npc);
         void quitDialog() const;
 
-        void fillConfirmDialog(DialogData& data, const FAWorld::Item& item, int price, const char* question, std::function<void()> successAction);
+        void confirmDialog(std::vector<DialogLineData> header, const FAWorld::Item& item, int price, const char* question, std::function<void()> successAction);
 
     private:
         GuiManager& mGuiManager;

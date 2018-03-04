@@ -149,5 +149,6 @@ namespace FAGui
         std::unique_ptr<MenuHandler> mMenuHandler;
         FAWorld::Item* mGoldSplitTarget = nullptr;
         int mGoldSplitCnt = 0;
+        bool mSkipDialogFrame = false;
     };
 }

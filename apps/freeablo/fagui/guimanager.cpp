@@ -141,6 +141,17 @@ namespace FAGui
 
     void GuiManager::dialog(nk_context* ctx)
     {
+        // This part is needed because dialog is triggered by mouse click
+        // and if nuklear gui will appear on the same frame as click happens -
+        // nuklear will treat dialog-triggering click as click on its window
+        // thus incorrectly triggering dialog action if your cursor is on it.
+        // This workaround seems to fully mitigate it.
+        if (mSkipDialogFrame)
+        {
+            mSkipDialogFrame = false;
+            return;
+        }
+
         if (mDialogs.empty())
             return;
 
@@ -513,7 +524,7 @@ namespace FAGui
                 smallText(ctx, text, color);
             };
             fillTextField(168, 21, 131, toString(mPlayer->getClass()));
-            auto &playerStats = mPlayer->getPlayerStats();
+            auto& playerStats = mPlayer->getPlayerStats();
             fillTextField(95, 144, 31, std::to_string(playerStats.mStrength).c_str());
             fillTextField(95, 172, 31, std::to_string(playerStats.mMagic).c_str());
             fillTextField(95, 200, 31, std::to_string(playerStats.mDexterity).c_str());
@@ -913,7 +924,11 @@ namespace FAGui
 
     void GuiManager::popDialogData() { mDialogs.pop_back(); }
 
-    void GuiManager::pushDialogData(DialogData&& data) { mDialogs.push_back(std::move(data)); }
+    void GuiManager::pushDialogData(DialogData&& data)
+    {
+        mDialogs.push_back(std::move(data));
+        mSkipDialogFrame = true;
+    }
 
     bool GuiManager::isPauseBlocked() const
     {

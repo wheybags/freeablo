@@ -237,7 +237,7 @@ namespace FAWorld
 
     bool Item::isUsable() const { return base().isUsable; }
 
-    uint32_t Item::getPrice() const { return base().price; }
+    int32_t Item::getPrice() const { return static_cast<int32_t> (base().price); }
 
     ItemType Item::getType() const
     {
