@@ -11,12 +11,14 @@ namespace FAWorld
     class StoreData
     {
     public:
-        explicit StoreData (const ItemFactory &itemFactory);
+        explicit StoreData(const ItemFactory& itemFactory);
 
-        void regenerateGriswoldBasicItems (int32_t ilvl);
+        void regenerateGriswoldBasicItems(int32_t ilvl);
+
     public:
         std::vector<Item> griswoldBasicItems;
+
     private:
-        const ItemFactory &mItemFactory;
+        const ItemFactory& mItemFactory;
     };
 }

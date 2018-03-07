@@ -23,7 +23,7 @@ namespace FAWorld
         res.mInvY = 0;
         res.mBaseId = id;
         res.mExe = &mExe;
-        auto info = getInfo (id);
+        auto info = getInfo(id);
         res.mMaxDurability = res.mCurrentDurability = info.durability;
         res.mArmorClass = Random::randomInRange(info.minArmorClass, info.maxArmorClass);
         return res;
@@ -40,7 +40,5 @@ namespace FAWorld
         return res;
     }
 
-    const DiabloExe::BaseItem& ItemFactory::getInfo(ItemId id) const {
-        return mExe.getBaseItems()[static_cast<int>(id)];
-    }
+    const DiabloExe::BaseItem& ItemFactory::getInfo(ItemId id) const { return mExe.getBaseItems()[static_cast<int>(id)]; }
 }

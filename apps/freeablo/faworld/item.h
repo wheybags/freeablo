@@ -93,7 +93,7 @@ namespace FAWorld
         int32_t getMinAttackDamage() const;
         int32_t getMaxAttackDamage() const;
         ItemBonus getBonus() const;
-        ItemId baseId () const { return mBaseId; }
+        ItemId baseId() const { return mBaseId; }
 
     private:
         std::string chargesStr() const;

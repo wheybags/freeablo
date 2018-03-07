@@ -23,6 +23,7 @@ namespace FAWorld
             specialFor1x2,
             specialFor2x2,
         };
+
     private:
         using self = Inventory;
 
@@ -61,7 +62,7 @@ namespace FAWorld
         ItemBonus getTotalItemBonus() const;
         void takeOutGold(int32_t quantity);
         bool tryPlace(const Item& item, int32_t x, int32_t y);
-        bool couldBePlacedToInventory(const Item &item) const;
+        bool couldBePlacedToInventory(const Item& item) const;
 
     private:
         void updateCursor();
@@ -73,7 +74,7 @@ namespace FAWorld
         bool exchangeWithCursor(EquipTarget takeoutTarget, boost::optional<EquipTarget> maybePlacementTarget);
         bool exchangeWithCursor(EquipTarget takeoutTarget);
         // tries to place item so it top left corner is on x, y. returns false if it's impossible.
-        bool couldBePlacedToInventory(const Item &item, int32_t x, int32_t y) const;
+        bool couldBePlacedToInventory(const Item& item, int32_t x, int32_t y) const;
 
     public:
         // This is not serialised - it should be reconnected by other means

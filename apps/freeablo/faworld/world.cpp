@@ -32,13 +32,10 @@ namespace FAWorld
         : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe)), mStoreData(std::make_unique<StoreData>(*mItemFactory))
     {
         this->setupObjectIdMappers();
-        regenerateStoreItems ();
+        regenerateStoreItems();
     }
 
-    void World::regenerateStoreItems ()
-    {
-      mStoreData->regenerateGriswoldBasicItems(10/*placeholder*/);
-    }
+    void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/); }
 
     World::World(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : World(exe)
     {
