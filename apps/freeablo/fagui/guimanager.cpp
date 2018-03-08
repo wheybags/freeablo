@@ -141,6 +141,17 @@ namespace FAGui
 
     void GuiManager::dialog(nk_context* ctx)
     {
+        // This part is needed because dialog is triggered by mouse click
+        // and if nuklear gui will appear on the same frame as click happens -
+        // nuklear will treat dialog-triggering click as click on its window
+        // thus incorrectly triggering dialog action if your cursor is on it.
+        // This workaround seems to fully mitigate it.
+        if (mSkipDialogFrame)
+        {
+            mSkipDialogFrame = false;
+            return;
+        }
+
         if (mDialogs.empty())
             return;
 
@@ -502,9 +513,34 @@ namespace FAGui
         });
     }
 
+    void GuiManager::fillTextField(nk_context* ctx, float x, float y, float width, const char* text, TextColor color)
+    {
+        nk_layout_space_push(ctx, nk_rect(x, y, width, FARender::Renderer::get()->smallFont()->height));
+        smallText(ctx, text, color);
+    }
+
     void GuiManager::characterPanel(nk_context* ctx)
     {
-        drawPanel(ctx, PanelType::character, [&]() {});
+        drawPanel(ctx, PanelType::character, [&]() {
+            nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
+
+            fillTextField(ctx, 168, 21, 131, toString(mPlayer->getClass()));
+            auto& playerStats = mPlayer->getPlayerStats();
+            fillTextField(ctx, 95, 144, 31, std::to_string(playerStats.mStrength).c_str());
+            fillTextField(ctx, 95, 172, 31, std::to_string(playerStats.mMagic).c_str());
+            fillTextField(ctx, 95, 200, 31, std::to_string(playerStats.mDexterity).c_str());
+            fillTextField(ctx, 95, 228, 31, std::to_string(playerStats.mVitality).c_str());
+
+            fillTextField(ctx, 216, 135, 84, std::to_string(mPlayer->getTotalGold()).c_str());
+            auto& stats = mPlayer->getStats();
+            fillTextField(ctx, 95, 293, 31, std::to_string(stats.mHp.max).c_str());
+            fillTextField(ctx, 143, 293, 31, std::to_string(stats.mHp.current).c_str(), stats.mHp.current < stats.mHp.max ? TextColor::red : TextColor::white);
+            fillTextField(ctx, 95, 321, 31, std::to_string(stats.mMana.max).c_str());
+            fillTextField(
+                ctx, 143, 321, 31, std::to_string(stats.mMana.current).c_str(), stats.mMana.current < stats.mMana.max ? TextColor::red : TextColor::white);
+
+            nk_layout_space_end(ctx);
+        });
     }
 
     void GuiManager::questsPanel(nk_context* ctx)
@@ -890,7 +926,11 @@ namespace FAGui
 
     void GuiManager::popDialogData() { mDialogs.pop_back(); }
 
-    void GuiManager::pushDialogData(DialogData&& data) { mDialogs.push_back(std::move(data)); }
+    void GuiManager::pushDialogData(DialogData&& data)
+    {
+        mDialogs.push_back(std::move(data));
+        mSkipDialogFrame = true;
+    }
 
     bool GuiManager::isPauseBlocked() const
     {

@@ -399,7 +399,7 @@ namespace FAGui
             auto price = item.getPrice();
             auto header = d.getHeader();
             d.textLines(item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
-                .setAction([this, price, header, it, &items]() mutable {
+                .setAction([ this, price, header, it, &items ]() mutable {
                     if (mWorld.getCurrentPlayer()->getTotalGold() < price)
                         return fillMessageDialog(header, "You do not have enough gold");
 

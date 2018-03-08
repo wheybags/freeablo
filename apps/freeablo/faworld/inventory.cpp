@@ -113,7 +113,7 @@ namespace FAWorld
         {ItemEquipType::head, {EquipTargetType::head}},
     };
 
-    bool Inventory::isFit(const Item& item, const EquipTarget& target) const
+    bool Inventory::couldBePlacedToInventory(const Item& item, const EquipTarget& target) const
     {
         switch (target.type)
         {
@@ -316,6 +316,34 @@ namespace FAWorld
         return total;
     }
 
+    void Inventory::takeOutGold(int32_t quantity)
+    {
+        for (auto row : boost::irange(mInventoryBox.height() - 1, -1, -1))
+            for (auto column : boost::irange(mInventoryBox.width() - 1, -1, -1))
+            {
+                auto& item = mInventoryBox.get(column, row);
+                if (item.getType() != ItemType::gold)
+                    continue;
+                auto toTake = std::min(quantity, item.mCount);
+                item.mCount -= toTake;
+                quantity -= toTake;
+                if (item.mCount == 0)
+                    item = {};
+                if (quantity == 0)
+                    return;
+            }
+        release_assert("Not enough gold");
+    }
+
+    bool Inventory::couldBePlacedToInventory(const Item& item) const
+    {
+        for (auto x : boost::irange(0, inventoryWidth, 1))
+            for (auto y : boost::irange(0, inventoryHeight, 1))
+                if (couldBePlacedToInventory(item, x, y))
+                    return true;
+        return false;
+    }
+
     void Inventory::putItemUnsafe(const Item& item, const EquipTarget& target)
     {
         if (item.getEquipLoc() == ItemEquipType::twoHanded && target.type == EquipTargetType::leftHand)
@@ -372,7 +400,7 @@ namespace FAWorld
         mInventoryBox.get(x, y).mIsReal = true;
     }
 
-    bool Inventory::tryPlace(const Item& item, int32_t x, int32_t y)
+    bool Inventory::couldBePlacedToInventory(const Item& item, int32_t x, int32_t y) const
     {
         if (x + item.getInvSize()[0] > mInventoryBox.width())
             return false;
@@ -388,6 +416,13 @@ namespace FAWorld
             }())
             return false;
 
+        return true;
+    }
+
+    bool Inventory::tryPlace(const Item& item, int32_t x, int32_t y)
+    {
+        if (!couldBePlacedToInventory(item, x, y))
+            return false;
         layItem(item, x, y);
         return true;
     }
@@ -508,7 +543,7 @@ namespace FAWorld
         if (equipSlotsSet.count(placementTarget) > 0 && !checkStatsRequirement(item))
             return false;
 
-        if (!isFit(item, placementTarget))
+        if (!couldBePlacedToInventory(item, placementTarget))
             return false;
 
         auto requirements = needsToBeExchanged(item, placementTarget);

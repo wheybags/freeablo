@@ -14,6 +14,7 @@ namespace FAWorld
 
     class Inventory
     {
+    public:
         enum class PlacementCheckOrder
         {
             fromLeftBottom,  // for 1x1 items
@@ -22,16 +23,8 @@ namespace FAWorld
             specialFor1x2,
             specialFor2x2,
         };
-        enum class xorder
-        {
-            fromLeft,
-            fromRight,
-        };
-        enum class yorder
-        {
-            fromTop,
-            fromBottom
-        };
+
+    private:
         using self = Inventory;
 
     public:
@@ -67,18 +60,21 @@ namespace FAWorld
         // note: this function could not just call autoPlaceItem because quantity may include more than 5000 pieces
         void placeGold(int quantity, const ItemFactory& itemFactory);
         ItemBonus getTotalItemBonus() const;
+        void takeOutGold(int32_t quantity);
+        bool tryPlace(const Item& item, int32_t x, int32_t y);
+        bool couldBePlacedToInventory(const Item& item) const;
 
     private:
         void updateCursor();
         bool checkStatsRequirement(const Item& item) const;
-        bool isFit(const Item& item, const EquipTarget& target) const;
+        bool couldBePlacedToInventory(const Item& item, const EquipTarget& target) const;
         auto needsToBeExchanged(const Item& item, const EquipTarget& target) const -> ExchangeResult;
         EquipTarget avoidLinks(const EquipTarget& target);
         void layItem(const Item& item, int32_t x, int32_t y);
         bool exchangeWithCursor(EquipTarget takeoutTarget, boost::optional<EquipTarget> maybePlacementTarget);
         bool exchangeWithCursor(EquipTarget takeoutTarget);
         // tries to place item so it top left corner is on x, y. returns false if it's impossible.
-        bool tryPlace(const Item& item, int32_t x, int32_t y);
+        bool couldBePlacedToInventory(const Item& item, int32_t x, int32_t y) const;
 
     public:
         // This is not serialised - it should be reconnected by other means

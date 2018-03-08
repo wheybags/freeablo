@@ -44,6 +44,7 @@ add_library(Misc
     misc/direction.h
     misc/random.cpp
     misc/random.h
+    misc/enum_range.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
