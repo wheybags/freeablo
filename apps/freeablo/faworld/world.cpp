@@ -29,7 +29,7 @@
 namespace FAWorld
 {
     World::World(const DiabloExe::DiabloExe& exe)
-        : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe)), mStoreData(std::make_unique<StoreData>(*mItemFactory))
+        : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe)), mStoreData(boost::make_unique<StoreData>(*mItemFactory))
     {
         this->setupObjectIdMappers();
         regenerateStoreItems();

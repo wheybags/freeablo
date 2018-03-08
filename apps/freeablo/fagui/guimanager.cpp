@@ -513,29 +513,31 @@ namespace FAGui
         });
     }
 
+    void GuiManager::fillTextField(nk_context* ctx, float x, float y, float width, const char* text, TextColor color)
+    {
+        nk_layout_space_push(ctx, nk_rect(x, y, width, FARender::Renderer::get()->smallFont()->height));
+        smallText(ctx, text, color);
+    }
+
     void GuiManager::characterPanel(nk_context* ctx)
     {
         drawPanel(ctx, PanelType::character, [&]() {
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
 
-            auto renderer = FARender::Renderer::get();
-            auto fillTextField = [&](float x, float y, float width, const char* text, TextColor color = TextColor::white) {
-                nk_layout_space_push(ctx, nk_rect(x, y, width, renderer->smallFont()->height));
-                smallText(ctx, text, color);
-            };
-            fillTextField(168, 21, 131, toString(mPlayer->getClass()));
+            fillTextField(ctx, 168, 21, 131, toString(mPlayer->getClass()));
             auto& playerStats = mPlayer->getPlayerStats();
-            fillTextField(95, 144, 31, std::to_string(playerStats.mStrength).c_str());
-            fillTextField(95, 172, 31, std::to_string(playerStats.mMagic).c_str());
-            fillTextField(95, 200, 31, std::to_string(playerStats.mDexterity).c_str());
-            fillTextField(95, 228, 31, std::to_string(playerStats.mVitality).c_str());
+            fillTextField(ctx, 95, 144, 31, std::to_string(playerStats.mStrength).c_str());
+            fillTextField(ctx, 95, 172, 31, std::to_string(playerStats.mMagic).c_str());
+            fillTextField(ctx, 95, 200, 31, std::to_string(playerStats.mDexterity).c_str());
+            fillTextField(ctx, 95, 228, 31, std::to_string(playerStats.mVitality).c_str());
 
-            fillTextField(216, 135, 84, std::to_string(mPlayer->getTotalGold()).c_str());
+            fillTextField(ctx, 216, 135, 84, std::to_string(mPlayer->getTotalGold()).c_str());
             auto& stats = mPlayer->getStats();
-            fillTextField(95, 293, 31, std::to_string(stats.mHp.max).c_str());
-            fillTextField(143, 293, 31, std::to_string(stats.mHp.current).c_str(), stats.mHp.current < stats.mHp.max ? TextColor::red : TextColor::white);
-            fillTextField(95, 321, 31, std::to_string(stats.mMana.max).c_str());
-            fillTextField(143, 321, 31, std::to_string(stats.mMana.current).c_str(), stats.mMana.current < stats.mMana.max ? TextColor::red : TextColor::white);
+            fillTextField(ctx, 95, 293, 31, std::to_string(stats.mHp.max).c_str());
+            fillTextField(ctx, 143, 293, 31, std::to_string(stats.mHp.current).c_str(), stats.mHp.current < stats.mHp.max ? TextColor::red : TextColor::white);
+            fillTextField(ctx, 95, 321, 31, std::to_string(stats.mMana.max).c_str());
+            fillTextField(
+                ctx, 143, 321, 31, std::to_string(stats.mMana.current).c_str(), stats.mMana.current < stats.mMana.max ? TextColor::red : TextColor::white);
 
             nk_layout_space_end(ctx);
         });

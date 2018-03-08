@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <vector>
@@ -33,19 +34,9 @@ namespace FAWorld
 
     namespace ItemFilter
     {
-        inline auto maxQLvl(int32_t value)
-        {
-            return [value](const DiabloExe::BaseItem& item) { return static_cast<int32_t>(item.qualityLevel) <= value; };
-        }
-
-        inline auto sellableGriswoldBasic()
-        {
-            return [](const DiabloExe::BaseItem& item) {
-                static const auto excludedTypes = {ItemType::misc, ItemType::gold, ItemType::staff, ItemType::ring, ItemType::amulet};
-                return std::count(excludedTypes.begin(), excludedTypes.end(), static_cast<ItemType>(item.type)) == 0;
-            };
-        }
-    };
+        std::function<bool(const DiabloExe::BaseItem& item)> maxQLvl(int32_t value);
+        std::function<bool(const DiabloExe::BaseItem& item)> sellableGriswoldBasic();
+    }
 
     class ItemFactory
     {
@@ -61,7 +52,7 @@ namespace FAWorld
             {
                 auto& info = getInfo(id);
                 bool filteredOut = false;
-                auto dummy = {(filteredOut = filteredOut || !filters(info), 0)...};
+                static_cast<void>(std::initializer_list<int>{(filteredOut = filteredOut || !filters(info), 0)...});
                 if (filteredOut)
                     continue;
                 for (int32_t i = 0; i < static_cast<int32_t>(info.dropRate); ++i)

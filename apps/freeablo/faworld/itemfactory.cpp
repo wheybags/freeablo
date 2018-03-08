@@ -7,6 +7,19 @@
 
 namespace FAWorld
 {
+    std::function<bool(const DiabloExe::BaseItem& item)> ItemFilter::maxQLvl(int32_t value)
+    {
+        return [value](const DiabloExe::BaseItem& item) { return static_cast<int32_t>(item.qualityLevel) <= value; };
+    }
+
+    std::function<bool(const DiabloExe::BaseItem& item)> ItemFilter::sellableGriswoldBasic()
+    {
+        return [](const DiabloExe::BaseItem& item) {
+            static const auto excludedTypes = {ItemType::misc, ItemType::gold, ItemType::staff, ItemType::ring, ItemType::amulet};
+            return std::count(excludedTypes.begin(), excludedTypes.end(), static_cast<ItemType>(item.type)) == 0;
+        };
+    }
+
     ItemFactory::ItemFactory(const DiabloExe::DiabloExe& exe) : mExe(exe)
     {
         for (int i = 0; i < static_cast<int>(mExe.getBaseItems().size()); ++i)

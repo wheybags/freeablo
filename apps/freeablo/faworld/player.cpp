@@ -42,7 +42,7 @@ namespace FAWorld
         initCommon();
     }
 
-    Player::Player(World& world, const std::string& className, const DiabloExe::CharacterStats& charStats) : Actor(world)
+    Player::Player(World& world, const DiabloExe::CharacterStats& charStats) : Actor(world)
     {
         init(charStats);
         initCommon();

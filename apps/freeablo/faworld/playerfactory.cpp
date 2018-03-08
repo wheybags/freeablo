@@ -14,7 +14,7 @@ namespace FAWorld
     Player* PlayerFactory::create(World& world, const std::string& playerClass) const
     {
         auto charStats = mExe.getCharacterStat(playerClass);
-        auto player = new Player(world, playerClass, charStats);
+        auto player = new Player(world, charStats);
 
         if (playerClass == "Warrior")
             createWarrior(player);
