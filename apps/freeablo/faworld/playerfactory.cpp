@@ -28,48 +28,42 @@ namespace FAWorld
 
     void PlayerFactory::loadTestingKit(Player* player) const
     {
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::buckler), MakeEquipTarget<EquipTargetType::inventory>(1, 0));
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortBow), MakeEquipTarget<EquipTargetType::inventory>(3, 0));
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseRingQlvl5), MakeEquipTarget<EquipTargetType::inventory>(1, 2));
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseRingQlvl5), MakeEquipTarget<EquipTargetType::inventory>(2, 2));
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseAmuletQlvl8), MakeEquipTarget<EquipTargetType::inventory>(1, 3));
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseHelm), MakeEquipTarget<EquipTargetType::inventory>(5, 0));
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseRags), MakeEquipTarget<EquipTargetType::inventory>(7, 0));
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::baseDagger), MakeEquipTarget<EquipTargetType::inventory>(9, 0));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::buckler));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortBow));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseRingQlvl5));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseRingQlvl5));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseAmuletQlvl8));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseHelm));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseRags));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseDagger));
     }
 
     void PlayerFactory::fillWithGold(Player* player) const
     {
         // function for testing
-        auto& box = player->mInventory.getInventoryBox();
-        for (auto i : boost::irange(0, box.width()))
-            for (auto j : boost::irange(0, box.height()))
-            {
-                auto target = MakeEquipTarget<EquipTargetType::inventory>(i, j);
-                if (player->mInventory.getItemAt(target).isEmpty())
-                {
-                    auto g = mItemFactory.generateBaseItem(ItemId::gold);
-                    g.mCount = 1000;
-                    player->mInventory.putItemUnsafe(g, target);
-                }
-            }
+        const BasicInventory& inv = player->mInventory.getInv(EquipTargetType::inventory);
+
+        bool hasSlots = true;
+        while(hasSlots)
+        {
+            player->mInventory.placeGold(1000, mItemFactory);
+
+            hasSlots = false;
+            for (const Item& slot: inv)
+                if (slot.isEmpty())
+                    hasSlots = true;
+        }
     }
 
     void PlayerFactory::createWarrior(Player* player) const
     {
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortSword), MakeEquipTarget<EquipTargetType::leftHand>());
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::buckler, BaseItemGenOptions()), MakeEquipTarget<EquipTargetType::rightHand>());
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::club), MakeEquipTarget<EquipTargetType::inventory>(0, 0));
-        {
-            auto item = mItemFactory.generateBaseItem(ItemId::gold);
-            item.mCount = 100;
-            player->mInventory.putItemUnsafe(std::move(item), MakeEquipTarget<EquipTargetType::inventory>(0, 3));
-        }
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortSword));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::buckler));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::club));
+        player->mInventory.placeGold(100, mItemFactory);
 
-        for (auto i = 0; i < 2; ++i)
-        {
-            player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::potionOfHealing), MakeEquipTarget<EquipTargetType::belt>(i));
-        }
+        for (int32_t i = 0; i < 2; ++i)
+            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
 
         player->setSpriteClass("warrior");
         player->mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldst.cl2"));
@@ -80,17 +74,11 @@ namespace FAWorld
 
     void PlayerFactory::createRogue(Player* player) const
     {
-        player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::shortBow), MakeEquipTarget<EquipTargetType::leftHand>());
-        {
-            auto item = mItemFactory.generateBaseItem(ItemId::gold);
-            item.mCount = 100;
-            player->mInventory.putItemUnsafe(std::move(item), MakeEquipTarget<EquipTargetType::inventory>(0, 3));
-        }
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortBow));
+        player->mInventory.placeGold(100, mItemFactory);
 
-        for (auto i = 0; i < 2; ++i)
-        {
-            player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::potionOfHealing), MakeEquipTarget<EquipTargetType::belt>(i));
-        }
+        for (int32_t i = 0; i < 2; ++i)
+            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
 
         player->setSpriteClass("rogue");
         player->mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/rogue/rlb/rlbst.cl2"));
@@ -102,18 +90,13 @@ namespace FAWorld
         {
             auto item = mItemFactory.generateBaseItem(ItemId::shortStaffOfChargedBolt);
             item.mMaxCharges = item.mCurrentCharges = 40;
-            player->mInventory.putItemUnsafe(std::move(item), MakeEquipTarget<EquipTargetType::leftHand>());
+            player->mInventory.autoPlaceItem(item);
         }
-        {
-            auto item = mItemFactory.generateBaseItem(ItemId::gold);
-            item.mCount = 100;
-            player->mInventory.putItemUnsafe(std::move(item), MakeEquipTarget<EquipTargetType::inventory>(0, 3));
-        }
+        player->mInventory.placeGold(100, mItemFactory);
 
-        for (auto i = 0; i < 2; ++i)
-        {
-            player->mInventory.putItemUnsafe(mItemFactory.generateBaseItem(ItemId::potionOfMana), MakeEquipTarget<EquipTargetType::belt>(i));
-        }
+        for (int32_t i = 0; i < 2; ++i)
+            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
+
 
         player->setSpriteClass("sorceror");
         player->mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/sorceror/slt/sltst.cl2"));

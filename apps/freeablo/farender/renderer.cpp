@@ -299,11 +299,11 @@ namespace FARender
         {
             Render::Sprite sprite = mSpriteManager.get(State->mCursorSpriteGroup->getCacheIndex())->operator[](State->mCursorFrame);
             Render::spriteSize(sprite, mCursorSize.x, mCursorSize.y);
-            Render::drawCursor(sprite, State->mCursorHotspot);
+            Render::drawCursor(sprite);
         }
         else
         {
-            Render::drawCursor(NULL, State->mCursorHotspot);
+            Render::drawCursor(nullptr);
         }
         return;
     }

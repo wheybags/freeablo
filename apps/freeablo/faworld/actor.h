@@ -41,7 +41,7 @@ namespace FAWorld
         Actor(World& world, const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
         Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
         Actor(World& world, const DiabloExe::Monster& monster);
-        Actor(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
+        Actor(World& world, FASaveGame::GameLoader& loader);
         virtual ~Actor();
         virtual int getArmor() const { /*placeholder */ return 0; }
 
@@ -96,7 +96,7 @@ namespace FAWorld
         ActorAnimationManager mAnimation;
         bool isAttacking = false;
         bool mInvuln = false;
-        Inventory mInventory;
+        CharacterInventory mInventory;
         boost::optional<Misc::Direction> mMeleeAttackRequestedDirection; // this is really stupid but I don't know how else to do it
 
     protected:

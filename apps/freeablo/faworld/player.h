@@ -25,7 +25,7 @@ namespace FAWorld
         Player(World& world);
         Player(World& world, const std::string& className, const DiabloExe::CharacterStats& charStats);
         void initCommon();
-        Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
+        Player(World& world, FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) override;
         virtual bool checkHit(Actor* enemy) override;
 
@@ -37,7 +37,6 @@ namespace FAWorld
         virtual void update(bool noclip) override;
 
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour.get(); }
-        int getTotalGold() const;
 
         boost::signals2::signal<void(const std::pair<int32_t, int32_t>&)> positionReached;
         int getDexterity() const { /*placeholder */ return 0; }
@@ -56,6 +55,6 @@ namespace FAWorld
         bool canTalkTo(Actor* actor);
 
     private:
-        std::string mClassName;
+        std::string mClassName = "warrior";
     };
 }

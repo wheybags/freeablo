@@ -46,7 +46,7 @@ namespace FAWorld
         int max;
     };
 
-    class Inventory;
+    class CharacterInventory;
 
     class Item
     {
@@ -54,7 +54,7 @@ namespace FAWorld
         Item() = default;
 
         void save(FASaveGame::GameSaver& saver);
-        void load(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
+        void load(FASaveGame::GameLoader& loader);
         ~Item();
         // retrieve description which is shown when hovering over the items in your inventory
         // name including affixes/prefixes/spells
@@ -94,7 +94,7 @@ namespace FAWorld
         int32_t getMaxAttackDamage() const;
         ItemBonus getBonus() const;
 
-    private:
+    //private:
         std::string chargesStr() const;
         std::string damageStr() const;
         std::string armorStr() const;
@@ -103,7 +103,7 @@ namespace FAWorld
         std::string requirementsStr() const;
         const DiabloExe::BaseItem& base() const;
 
-    private:
+    //private:
         static Cel::CelFile* mObjcurs;
         DiabloExe::Affix mAffix;
 
@@ -112,15 +112,16 @@ namespace FAWorld
         int32_t mCurrentDurability;
         int32_t mArmorClass;
 
-        uint8_t mCornerX;
-        uint8_t mCornerY;
+        // TODO: these should be handled by inventory class, not item class
+        uint8_t mCornerX = -1;
+        uint8_t mCornerY = -1;
 
         bool mEmpty = true;
         bool mIsIdentified;
 
         int32_t mUniqueId = 0;
 
-    private:
+    //private:
         int32_t mMaxCharges = 0;
         int32_t mCurrentCharges = 0;
 
@@ -128,9 +129,7 @@ namespace FAWorld
         uint8_t mInvY = 0;
         uint8_t mInvX = 0;
 
-        const DiabloExe::DiabloExe* mExe = nullptr; // since we want to restore base info from exe data
-
-        friend class Inventory;
+        friend class CharacterInventory;
         friend class ItemFactory;
         friend class PlayerFactory;
     };

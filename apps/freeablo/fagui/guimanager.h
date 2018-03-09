@@ -57,7 +57,6 @@ namespace FAGui
 
     // move all this to better place since cursor state is also dependent on spells etc.
     extern std::string cursorPath;
-    extern Render::CursorHotspotLocation cursorHotspot;
     extern uint32_t cursorFrame;
 
     enum class PanelType
@@ -144,7 +143,7 @@ namespace FAGui
         std::vector<DialogData> mDialogs;
         std::unique_ptr<FARender::AnimationPlayer> mSmallPentagram;
         std::unique_ptr<MenuHandler> mMenuHandler;
-        FAWorld::Item* mGoldSplitTarget = nullptr;
+        const FAWorld::Item* mGoldSplitTarget = nullptr;
         int mGoldSplitCnt = 0;
     };
 }

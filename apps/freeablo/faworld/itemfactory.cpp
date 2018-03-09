@@ -22,7 +22,6 @@ namespace FAWorld
         res.mInvX = 0;
         res.mInvY = 0;
         res.mBaseId = id;
-        res.mExe = &mExe;
         auto info = mExe.getBaseItems()[static_cast<int>(id)];
         res.mMaxDurability = res.mCurrentDurability = info.durability;
         res.mArmorClass = Random::randomInRange(info.minArmorClass, info.maxArmorClass);

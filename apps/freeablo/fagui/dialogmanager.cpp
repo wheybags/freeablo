@@ -339,22 +339,29 @@ namespace FAGui
         int32_t cnt = 0;
         auto& inventory = mWorld.getCurrentPlayer()->mInventory;
         auto positionFilter = [filter, &inventory](FAWorld::EquipTarget target) { return filter(inventory.getItemAt(target)); };
-        auto positions = mWorld.getCurrentPlayer()->mInventory.getBeltAndInventoryItemPositions();
-        d.header({(boost::format("%2%            Your gold : %1%") % mWorld.getCurrentPlayer()->getTotalGold() %
+
+        std::vector<FAWorld::EquipTarget> positions;
+        for (const FAWorld::Item& item : mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::inventory))
+            positions.push_back(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(item.mInvX, item.mInvY));
+        for (const FAWorld::Item& item : mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::belt))
+            positions.push_back(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(item.mInvX));
+
+        d.header({(boost::format("%2%            Your gold : %1%") % mWorld.getCurrentPlayer()->mInventory.getTotalGold() %
                    (std::count_if(positions.begin(), positions.end(), positionFilter) > 0 ? "Which item is for sale?" : "You have nothing I want."))
                       .str()});
 
         for (auto target : positions)
         {
-            if (!positionFilter(target))
+            const FAWorld::Item& item = inventory.getItemAt(target);
+            if (item.isEmpty() || !item.mIsReal || !positionFilter(target))
                 continue;
-            auto& item = inventory.getItemAt(target);
+
             auto sellPrice = item.getPrice() / 4;
             d.textLines(item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
                 .setAction([&inventory, target, this, sellPrice, d, item, filter]() {
                     auto d_copy = d;
                     fillConfirmDialog(d_copy, item, sellPrice, "Are you sure you want to sell this item?", [this, filter, &inventory, target, sellPrice]() {
-                        inventory.takeOut(target);
+                        inventory.remove(target);
                         inventory.placeGold(sellPrice, mWorld.getItemFactory());
                         // This looks insansenly unsafe. TODO: think of better way.
                         auto recreate = [this, filter] { sellDialog(filter); };

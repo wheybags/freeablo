@@ -159,10 +159,7 @@ namespace Cel
         // Open CEL file.
 
         FAIO::FAFileObject file(mCelPath);
-        if (!file.isValid())
-        {
-            return;
-        }
+        release_assert(file.isValid());
 
         // Read first word.
         uint32_t frameCount = 0;

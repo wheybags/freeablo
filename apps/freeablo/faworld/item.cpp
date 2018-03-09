@@ -7,6 +7,7 @@
 #include "misc/random.h"
 #include <boost/format.hpp>
 #include <iostream>
+#include "../engine/enginemain.h"
 
 namespace FAWorld
 {
@@ -71,7 +72,7 @@ namespace FAWorld
         return str;
     }
 
-    const DiabloExe::BaseItem& Item::base() const { return mExe->getBaseItems()[static_cast<int32_t>(mBaseId)]; }
+    const DiabloExe::BaseItem& Item::base() const { return Engine::EngineMain::get()->exe().getBaseItems()[static_cast<int32_t>(mBaseId)]; }
 
     std::string Item::getFullDescription() const
     {
@@ -137,7 +138,7 @@ namespace FAWorld
     std::pair<uint8_t, uint8_t> Item::getInvCoords() const { return {mInvX, mInvY}; }
     std::pair<uint8_t, uint8_t> Item::getCornerCoords() const { return {mCornerX, mCornerY}; }
 
-    void Item::load(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe)
+    void Item::load(FASaveGame::GameLoader& loader)
     {
         mIsReal = loader.load<bool>();
         mUniqueId = loader.load<int32_t>();
@@ -157,7 +158,6 @@ namespace FAWorld
 
         mCornerX = loader.load<uint8_t>();
         mCornerY = loader.load<uint8_t>();
-        mExe = &exe;
     }
 
     std::string Item::getName() const
@@ -261,6 +261,9 @@ namespace FAWorld
     }
     uint32_t Item::getGraphicValue() const
     {
+        if (isEmpty())
+            return 0;
+
         if (getType() == ItemType::gold)
         {
             if (mCount <= 1000)

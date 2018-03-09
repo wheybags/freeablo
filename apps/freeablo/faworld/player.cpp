@@ -41,18 +41,6 @@ namespace FAWorld
         mMoveHandler.positionReached.connect(positionReached);
     }
 
-    int Player::getTotalGold() const
-    {
-        int totalCnt = 0;
-        for (auto target : mInventory.getBeltAndInventoryItemPositions())
-        {
-            auto& item = mInventory.getItemAt(target);
-            if (item.getType() == ItemType::gold)
-                totalCnt += item.mCount;
-        }
-        return totalCnt;
-    }
-
     double Player::meleeDamageVs(const Actor* /*actor*/) const
     {
         auto bonus = getItemBonus();
@@ -81,7 +69,7 @@ namespace FAWorld
         mBehaviour.reset(new PlayerBehaviour(this));
     }
 
-    Player::Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : Actor(world, loader, exe)
+    Player::Player(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader)
     {
         mClassName = loader.load<std::string>();
         initCommon();
