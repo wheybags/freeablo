@@ -325,6 +325,7 @@ namespace FAWorld
         baseAmuletQlvl8 = 154,
         baseAmuletQlvl16 = 155,
         null14 = 156,
+        COUNT,
     };
 
     enum class UniqueItemId

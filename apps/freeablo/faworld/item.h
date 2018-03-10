@@ -85,7 +85,7 @@ namespace FAWorld
         ItemMiscId getMiscId() const;
         uint32_t getSpellCode() const;
         bool isUsable() const;
-        uint32_t getPrice() const;
+        int32_t getPrice() const;
         ItemType getType() const;
         ItemEquipType getEquipLoc() const;
         ItemClass getClass() const;
@@ -93,6 +93,7 @@ namespace FAWorld
         int32_t getMinAttackDamage() const;
         int32_t getMaxAttackDamage() const;
         ItemBonus getBonus() const;
+        ItemId baseId() const { return mBaseId; }
 
     //private:
         std::string chargesStr() const;

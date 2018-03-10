@@ -120,6 +120,7 @@ namespace FAGui
         void triggerItem(const FAWorld::EquipTarget& target);
         void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highligh);
         void inventoryPanel(nk_context* ctx);
+        void fillTextField(nk_context* ctx, float x, float y, float width, const char* text, TextColor color = TextColor::white);
         void characterPanel(nk_context* ctx);
         void questsPanel(nk_context* ctx);
         void spellsPanel(nk_context* ctx);
@@ -145,5 +146,6 @@ namespace FAGui
         std::unique_ptr<MenuHandler> mMenuHandler;
         const FAWorld::Item* mGoldSplitTarget = nullptr;
         int mGoldSplitCnt = 0;
+        bool mSkipDialogFrame = false;
     };
 }

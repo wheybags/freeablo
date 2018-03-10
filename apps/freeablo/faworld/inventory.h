@@ -51,6 +51,7 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver);
         void load(FASaveGame::GameLoader& loader);
 
+        bool canFitItem(const Item& item) const;
         bool autoPlaceItem(Item& item, PlacementCheckOrder order = PlacementCheckOrder::Automatic);
         PlaceItemResult placeItem(const Item& item, int32_t x, int32_t y);
 
@@ -107,6 +108,7 @@ namespace FAWorld
 
         /// Places gold, combining piles up to max pile amount. If total quantity can't fit, returns the remainder
         int32_t placeGold(int32_t quantity, const ItemFactory& itemFactory);
+        void takeOutGold(int32_t quantity);
         void splitGoldIntoCursor(int32_t x, int32_t y, int32_t amountToTransferToCursor, const ItemFactory& itemFactory);
         int32_t getTotalGold() const;
 

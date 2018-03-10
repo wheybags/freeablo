@@ -12,6 +12,9 @@ namespace DiabloExe
         CharacterStats() {}
 
         std::string dump() const;
+        // Looks like these all are actually frame counts for animations and not required to be read at all
+        // The only thing needed is attack frame by weapon/shield equipped and it can't be extracted from exe nicely
+        // since it's hardcoded
         uint8_t mIdleInDungeonFrameset;
         uint8_t mAttackFrameset;
         uint8_t mWalkInDungeonFrameset;

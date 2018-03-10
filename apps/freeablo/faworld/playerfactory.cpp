@@ -14,7 +14,7 @@ namespace FAWorld
     Player* PlayerFactory::create(World& world, const std::string& playerClass) const
     {
         auto charStats = mExe.getCharacterStat(playerClass);
-        auto player = new Player(world, playerClass, charStats);
+        auto player = new Player(world, charStats);
 
         if (playerClass == "Warrior")
             createWarrior(player);
@@ -65,7 +65,7 @@ namespace FAWorld
         for (int32_t i = 0; i < 2; ++i)
             player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
 
-        player->setSpriteClass("warrior");
+        player->setPlayerClass(PlayerClass::warrior);
         player->mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldst.cl2"));
         player->mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldwl.cl2"));
         // loadTestingKit (player);
@@ -80,7 +80,7 @@ namespace FAWorld
         for (int32_t i = 0; i < 2; ++i)
             player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
 
-        player->setSpriteClass("rogue");
+        player->setPlayerClass(PlayerClass::rogue);
         player->mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/rogue/rlb/rlbst.cl2"));
         player->mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/rogue/rlb/rlbwl.cl2"));
     }
@@ -98,7 +98,7 @@ namespace FAWorld
             player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
 
 
-        player->setSpriteClass("sorceror");
+        player->setPlayerClass(PlayerClass::sorcerer);
         player->mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/sorceror/slt/sltst.cl2"));
         player->mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/sorceror/slt/sltwl.cl2"));
     }

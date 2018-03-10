@@ -61,6 +61,40 @@ namespace FAWorld
         mTreatAllItemsAs1by1 = loader.load<bool>();
     }
 
+    bool BasicInventory::canFitItem(const Item& item) const
+    {
+        Misc::Point itemSize{item.getInvSize()[0], item.getInvSize()[1]};
+        if (mTreatAllItemsAs1by1)
+            itemSize = Misc::Point{1, 1};
+
+        for (auto y : boost::irange(0, mInventoryBox.height() - itemSize.y, 1))
+        {
+            for (auto x : boost::irange(0, mInventoryBox.width() - itemSize.x, 1))
+            {
+                bool success = true;
+
+                for (int32_t yy = y; yy < y + itemSize.y; yy++)
+                {
+                    for (int32_t xx = x; xx < x + itemSize.x; xx++)
+                    {
+                        auto& cell = mInventoryBox.get(xx, yy);
+
+                        if (!cell.isEmpty())
+                        {
+                            success = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (success)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     bool BasicInventory::autoPlaceItem(Item& item, PlacementCheckOrder order)
     {
         //if (item.getType() == ItemType::gold)
@@ -519,6 +553,29 @@ namespace FAWorld
         }
 
         return quantity;
+    }
+
+    void CharacterInventory::takeOutGold(int32_t quantity)
+    {
+        for (const Item& item: mMainInventory)
+        {
+            if (item.getType() != ItemType::gold)
+                continue;
+
+            Item copy = item;
+            auto toTake = std::min(quantity, copy.mCount);
+            copy.mCount -= toTake;
+            quantity -= toTake;
+
+            mMainInventory.remove(item.mInvX, item.mInvY);
+            if (copy.mCount > 0)
+                mMainInventory.placeItem(copy, item.mInvX, item.mInvY);
+
+            if (quantity == 0)
+                return;
+        }
+
+        message_and_abort("Not enough gold");
     }
 
     void CharacterInventory::splitGoldIntoCursor(int32_t x, int32_t y, int32_t amountToTransferToCursor, const ItemFactory& itemFactory)
