@@ -95,7 +95,7 @@ namespace FAWorld
         ItemBonus getBonus() const;
         ItemId baseId() const { return mBaseId; }
 
-    //private:
+        // private:
         std::string chargesStr() const;
         std::string damageStr() const;
         std::string armorStr() const;
@@ -104,7 +104,7 @@ namespace FAWorld
         std::string requirementsStr() const;
         const DiabloExe::BaseItem& base() const;
 
-    //private:
+        // private:
         static Cel::CelFile* mObjcurs;
         DiabloExe::Affix mAffix;
 
@@ -122,7 +122,7 @@ namespace FAWorld
 
         int32_t mUniqueId = 0;
 
-    //private:
+        // private:
         int32_t mMaxCharges = 0;
         int32_t mCurrentCharges = 0;
 

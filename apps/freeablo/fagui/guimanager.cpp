@@ -560,7 +560,8 @@ namespace FAGui
         nk_layout_space_push(ctx, nk_recta(beltTopLeft, {beltWidth, beltHeight}));
         auto& inv = mPlayer->mInventory;
         if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && !mGoldSplitTarget)
-            inv.slotClicked(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(int32_t(std::floor(ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / cellSize)));
+            inv.slotClicked(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(
+                int32_t(std::floor(ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / cellSize)));
 
         using namespace FAWorld;
         for (auto num : boost::counting_range(0, int32_t(inv.getInv(FAWorld::EquipTargetType::belt).width())))

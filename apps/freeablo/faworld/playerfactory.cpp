@@ -44,12 +44,12 @@ namespace FAWorld
         const BasicInventory& inv = player->mInventory.getInv(EquipTargetType::inventory);
 
         bool hasSlots = true;
-        while(hasSlots)
+        while (hasSlots)
         {
             player->mInventory.placeGold(1000, mItemFactory);
 
             hasSlots = false;
-            for (const Item& slot: inv)
+            for (const Item& slot : inv)
                 if (slot.isEmpty())
                     hasSlots = true;
         }
@@ -96,7 +96,6 @@ namespace FAWorld
 
         for (int32_t i = 0; i < 2; ++i)
             player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
-
 
         player->setPlayerClass(PlayerClass::sorcerer);
         player->mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/sorceror/slt/sltst.cl2"));

@@ -19,7 +19,8 @@ using namespace boost::container;
 
 namespace FAWorld
 {
-    BasicInventory::BasicInventory(int32_t width, int32_t height, bool treatAllIItemsAs1by1) : mInventoryBox(width, height), mTreatAllItemsAs1by1(treatAllIItemsAs1by1)
+    BasicInventory::BasicInventory(int32_t width, int32_t height, bool treatAllIItemsAs1by1)
+        : mInventoryBox(width, height), mTreatAllItemsAs1by1(treatAllIItemsAs1by1)
     {
         for (int32_t y = 0; y < mInventoryBox.height(); y++)
         {
@@ -97,7 +98,7 @@ namespace FAWorld
 
     bool BasicInventory::autoPlaceItem(Item& item, PlacementCheckOrder order)
     {
-        //if (item.getType() == ItemType::gold)
+        // if (item.getType() == ItemType::gold)
         //    if (fillExistingGoldItems(item))
         //        return true;
 
@@ -170,7 +171,7 @@ namespace FAWorld
         if (mTreatAllItemsAs1by1)
             itemSize = Misc::Point{1, 1};
 
-        if (x < 0 || y < 0 || x-1 + itemSize.x >= mInventoryBox.width() || y-1 + itemSize.y >= mInventoryBox.height())
+        if (x < 0 || y < 0 || x - 1 + itemSize.x >= mInventoryBox.width() || y - 1 + itemSize.y >= mInventoryBox.height())
             return PlaceItemResult{PlaceItemResult::Type::OutOfBounds, {}};
 
         std::set<Item*> blockingItems;
@@ -221,7 +222,7 @@ namespace FAWorld
 
         PlaceItemResult result = placeItem(item, x, y);
 
-        switch(result.type)
+        switch (result.type)
         {
             case PlaceItemResult::Type::Success:
             {
@@ -348,15 +349,9 @@ namespace FAWorld
         return mMainInventory.autoPlaceItem(item, order);
     }
 
-    const Item& CharacterInventory::getItemAt(const EquipTarget& target) const
-    {
-        return getInv(target.type).getItem(target.posX, target.posY);
-    }
+    const Item& CharacterInventory::getItemAt(const EquipTarget& target) const { return getInv(target.type).getItem(target.posX, target.posY); }
 
-    Item CharacterInventory::remove(const EquipTarget& target)
-    {
-        return getInvMutable(target.type).remove(target.posX, target.posY);
-    }
+    Item CharacterInventory::remove(const EquipTarget& target) { return getInvMutable(target.type).remove(target.posX, target.posY); }
 
     void CharacterInventory::setCursorHeld(const Item& item)
     {
@@ -364,14 +359,11 @@ namespace FAWorld
         mCursorHeld.placeItem(item, 0, 0).succeeded();
     }
 
-    const BasicInventory& CharacterInventory::getInv(EquipTargetType type) const
-    {
-        return const_cast<CharacterInventory*>(this)->getInvMutable(type);
-    }
+    const BasicInventory& CharacterInventory::getInv(EquipTargetType type) const { return const_cast<CharacterInventory*>(this)->getInvMutable(type); }
 
     BasicInventory& CharacterInventory::getInvMutable(EquipTargetType type)
     {
-        switch(type)
+        switch (type)
         {
             case EquipTargetType::inventory:
                 return mMainInventory;
@@ -424,10 +416,12 @@ namespace FAWorld
                     ok = cursor.getEquipLoc() == ItemEquipType::ring;
                     break;
                 case EquipTargetType::leftHand:
-                    ok = (cursor.getEquipLoc() == ItemEquipType::oneHanded && cursor.getClass() == ItemClass::weapon) || cursor.getEquipLoc() == ItemEquipType::twoHanded;
+                    ok = (cursor.getEquipLoc() == ItemEquipType::oneHanded && cursor.getClass() == ItemClass::weapon) ||
+                         cursor.getEquipLoc() == ItemEquipType::twoHanded;
                     break;
                 case EquipTargetType::rightHand:
-                    ok = (cursor.getEquipLoc() == ItemEquipType::oneHanded && cursor.getClass() == ItemClass::armor) || cursor.getEquipLoc() == ItemEquipType::twoHanded;
+                    ok = (cursor.getEquipLoc() == ItemEquipType::oneHanded && cursor.getClass() == ItemClass::armor) ||
+                         cursor.getEquipLoc() == ItemEquipType::twoHanded;
                     break;
                 case EquipTargetType::amulet:
                     ok = cursor.getEquipLoc() == ItemEquipType::amulet;
@@ -557,7 +551,7 @@ namespace FAWorld
 
     void CharacterInventory::takeOutGold(int32_t quantity)
     {
-        for (const Item& item: mMainInventory)
+        for (const Item& item : mMainInventory)
         {
             if (item.getType() != ItemType::gold)
                 continue;

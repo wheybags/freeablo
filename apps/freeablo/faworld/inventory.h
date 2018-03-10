@@ -1,11 +1,11 @@
 #pragma once
+#include "equiptarget.h"
 #include "item.h"
 #include <boost/signals2/signal.hpp>
 #include <misc/array2d.h>
 #include <misc/misc.h>
-#include <stdint.h>
 #include <set>
-#include "equiptarget.h"
+#include <stdint.h>
 
 namespace FAWorld
 {
@@ -36,10 +36,7 @@ namespace FAWorld
         Type type;
         std::set<Item*> blockingItems;
 
-        bool succeeded()
-        {
-            return type == Type::Success;
-        }
+        bool succeeded() { return type == Type::Success; }
     };
 
     /// A Simple grid inventory, with no concept of "equipping" gear

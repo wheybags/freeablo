@@ -1,4 +1,5 @@
 #include "item.h"
+#include "../engine/enginemain.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "itembonus.h"
@@ -7,7 +8,6 @@
 #include "misc/random.h"
 #include <boost/format.hpp>
 #include <iostream>
-#include "../engine/enginemain.h"
 
 namespace FAWorld
 {

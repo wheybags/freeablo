@@ -79,8 +79,7 @@ namespace FAWorld
         mStats.mHp = Random::randomInRange(monster.minHp, monster.maxHp);
     }
 
-    Actor::Actor(World& world, FASaveGame::GameLoader& loader)
-        : mMoveHandler(loader), mAnimation(loader), mStats(loader), mWorld(world)
+    Actor::Actor(World& world, FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(loader), mWorld(world)
     {
         mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
 
