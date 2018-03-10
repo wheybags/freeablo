@@ -42,6 +42,7 @@ namespace FAWorld
     class PlacedItemData;
     class ItemFactory;
     class HoverStatus;
+    class StoreData;
 
     // at 125 ticks/second, it will take about 2 billion years to reach max (signed) value, so int64 will probably do :p
     typedef int64_t Tick;
@@ -66,6 +67,7 @@ namespace FAWorld
         void setLevel(int32_t levelNum);
         GameLevel* getLevel(size_t level);
         void insertLevel(size_t level, GameLevel* gameLevel);
+        void regenerateStoreItems();
 
         Actor* getActorAt(size_t x, size_t y);
 
@@ -98,6 +100,7 @@ namespace FAWorld
         void blockInput();
         void unblockInput();
         const ItemFactory& getItemFactory() const;
+        StoreData& getStoreData() { return *mStoreData; }
 
         void playLevelMusic(size_t level);
 
@@ -114,6 +117,7 @@ namespace FAWorld
         Player* mCurrentPlayer = nullptr;
         std::vector<Player*> mPlayers; ///< This vector is sorted
         std::unique_ptr<ItemFactory> mItemFactory;
+        std::unique_ptr<StoreData> mStoreData;
 
         int32_t mNextId = 1;
     };

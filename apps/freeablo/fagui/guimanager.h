@@ -57,7 +57,6 @@ namespace FAGui
 
     // move all this to better place since cursor state is also dependent on spells etc.
     extern std::string cursorPath;
-    extern Render::CursorHotspotLocation cursorHotspot;
     extern uint32_t cursorFrame;
 
     enum class PanelType
@@ -99,8 +98,6 @@ namespace FAGui
 
         void update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
 
-        void setDescription(std::string text, TextColor color = TextColor::white);
-        void clearDescription();
         bool isInventoryShown() const;
         void popDialogData();
         void pushDialogData(DialogData&& data);
@@ -123,6 +120,7 @@ namespace FAGui
         void triggerItem(const FAWorld::EquipTarget& target);
         void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highligh);
         void inventoryPanel(nk_context* ctx);
+        void fillTextField(nk_context* ctx, float x, float y, float width, const char* text, TextColor color = TextColor::white);
         void characterPanel(nk_context* ctx);
         void questsPanel(nk_context* ctx);
         void spellsPanel(nk_context* ctx);
@@ -141,13 +139,13 @@ namespace FAGui
         Engine::EngineMain& mEngine;
         FAWorld::World& mWorld;
         FAWorld::Player* mPlayer;
-        std::string mDescription;
-        TextColor mDescriptionColor = TextColor::white;
+        std::string mHoveredInventoryItemText;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::vector<DialogData> mDialogs;
         std::unique_ptr<FARender::AnimationPlayer> mSmallPentagram;
         std::unique_ptr<MenuHandler> mMenuHandler;
-        FAWorld::Item* mGoldSplitTarget = nullptr;
+        const FAWorld::Item* mGoldSplitTarget = nullptr;
         int mGoldSplitCnt = 0;
+        bool mSkipDialogFrame = false;
     };
 }

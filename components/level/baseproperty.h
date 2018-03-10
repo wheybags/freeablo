@@ -3,7 +3,7 @@
 
 namespace FAWorld
 {
-    class Inventory;
+    class CharacterInventory;
 }
 
 namespace Level

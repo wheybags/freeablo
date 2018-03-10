@@ -494,7 +494,7 @@ namespace Render
         return new SpriteGroup(vec);
     }
 
-    void drawCursor(Sprite s, CursorHotspotLocation hotspotLocation)
+    void drawCursor(Sprite s)
     {
         if (s == NULL)
         {
@@ -509,18 +509,7 @@ namespace Render
             SDL_GetMouseState(&x, &y);
             int32_t w, h;
             spriteSize(s, w, h);
-            int shiftX = 0;
-            int shiftY = 0;
-            switch (hotspotLocation)
-            {
-                case CursorHotspotLocation::topLeft:
-                    break;
-                case CursorHotspotLocation::center:
-                    shiftX = w / 2;
-                    shiftY = h / 2;
-                    break;
-            }
-            drawSprite(s, x - shiftX, y - shiftY); // this shouldn't be the case for default cursor
+            drawSprite(s, x, y);
         }
     }
 

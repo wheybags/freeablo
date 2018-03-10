@@ -23,12 +23,6 @@ namespace Render
     typedef void* Sprite;
     typedef SDL_Cursor* FACursor;
     typedef SDL_Surface* FASurface;
-
-    enum class CursorHotspotLocation
-    {
-        topLeft,
-        center,
-    };
 }
 
 namespace Cel
@@ -92,7 +86,7 @@ namespace Render
     void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache);
 
     bool getImageInfo(const std::string& path, std::vector<int32_t>& widths, std::vector<int32_t>& heights, int32_t& animLength);
-    void drawCursor(Sprite s, CursorHotspotLocation hotspotLocation);
+    void drawCursor(Sprite s);
     SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadResizedSprite(

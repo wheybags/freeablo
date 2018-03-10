@@ -79,8 +79,7 @@ namespace FAWorld
         mStats.mHp = Random::randomInRange(monster.minHp, monster.maxHp);
     }
 
-    Actor::Actor(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe)
-        : mMoveHandler(loader), mAnimation(loader), mStats(loader), mWorld(world)
+    Actor::Actor(World& world, FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(loader), mWorld(world)
     {
         mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
 
@@ -106,7 +105,7 @@ namespace FAWorld
         }
 
         mTarget.load(loader);
-        mInventory.load(loader, exe);
+        mInventory.load(loader);
 
         mActorStateMachine.reset(new StateMachine(this));
         mActorStateMachine->load(loader);

@@ -44,6 +44,8 @@ namespace Engine
             return;
 
         auto player = mWorld.getCurrentPlayer();
+        if (!player)
+            return;
         switch (action)
         {
             case Engine::MouseInputAction::MOUSE_DOWN:

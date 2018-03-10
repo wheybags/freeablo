@@ -2,6 +2,7 @@
 #pragma once
 
 #include "actor.h"
+#include "playerstats.h"
 
 #include <boost/signals2/signal.hpp>
 
@@ -16,6 +17,10 @@ namespace FAWorld
         sorcerer,
     };
 
+    // note that this function features misspelling of sorcerer as sorceror
+    // because it's written this way on character panel
+    const char* toString(PlayerClass value);
+
     class Player : public Actor
     {
     public:
@@ -23,27 +28,26 @@ namespace FAWorld
         const std::string& getTypeId() override { return typeId; }
 
         Player(World& world);
-        Player(World& world, const std::string& className, const DiabloExe::CharacterStats& charStats);
+        Player(World& world, const DiabloExe::CharacterStats& charStats);
         void initCommon();
-        Player(World& world, FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
+        Player(World& world, FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) override;
         virtual bool checkHit(Actor* enemy) override;
 
         virtual ~Player();
-        void setSpriteClass(std::string className);
         void updateSprites() override;
         bool dropItem(const FAWorld::Tile& clickedTile);
 
         virtual void update(bool noclip) override;
 
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour.get(); }
-        int getTotalGold() const;
+        const PlayerStats& getPlayerStats() const { return mPlayerStats; }
+        void setPlayerClass(PlayerClass playerClass);
 
         boost::signals2::signal<void(const std::pair<int32_t, int32_t>&)> positionReached;
-        int getDexterity() const { /*placeholder */ return 0; }
         int getArmorPenetration() const { /* placeholder */ return 0; }
         int getCharacterLevel() const { /* placeholder */ return 1; }
-        PlayerClass getClass() const { /* placeholder */ return PlayerClass::warrior; }
+        PlayerClass getClass() const { return mPlayerClass; }
         double meleeDamageVs(const Actor* actor) const override;
         int getMaxDamage() const { /* placeholder */ return 20; }
         int getPercentDamageBonus() const { return 0; }
@@ -52,10 +56,11 @@ namespace FAWorld
         ItemBonus getItemBonus() const;
 
     private:
-        void init(const std::string& className, const DiabloExe::CharacterStats& charStats);
+        void init(const DiabloExe::CharacterStats& charStats);
         bool canTalkTo(Actor* actor);
 
     private:
-        std::string mClassName;
+        PlayerStats mPlayerStats;
+        PlayerClass mPlayerClass = PlayerClass::warrior;
     };
 }

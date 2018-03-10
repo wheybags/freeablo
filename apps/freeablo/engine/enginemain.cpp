@@ -179,9 +179,11 @@ namespace Engine
                     state->mCursorEmpty = false;
                 else
                     state->mCursorEmpty = true;
-                state->mCursorFrame = FAGui::cursorFrame;
+                if (mWorld->getCurrentPlayer())
+                    state->mCursorFrame = mWorld->getCurrentPlayer()->mInventory.getCursorHeld().getGraphicValue();
+                else
+                    state->mCursorFrame = 0;
                 state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
-                state->mCursorHotspot = FAGui::cursorHotspot;
                 state->nuklearData.fill(ctx);
             }
 

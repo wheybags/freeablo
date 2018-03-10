@@ -141,6 +141,17 @@ namespace FAGui
 
     void GuiManager::dialog(nk_context* ctx)
     {
+        // This part is needed because dialog is triggered by mouse click
+        // and if nuklear gui will appear on the same frame as click happens -
+        // nuklear will treat dialog-triggering click as click on its window
+        // thus incorrectly triggering dialog action if your cursor is on it.
+        // This workaround seems to fully mitigate it.
+        if (mSkipDialogFrame)
+        {
+            mSkipDialogFrame = false;
+            return;
+        }
+
         if (mDialogs.empty())
             return;
 
@@ -405,15 +416,13 @@ namespace FAGui
                         {
                             isHighlighted = true;
                         }
-                        else if (nk_widget_mouse_left(ctx))
-                            clearDescription();
                     }
                 }),
             placement);
         auto effectType = isHighlighted ? EffectType::highlighted : EffectType::none;
         effectType = checkerboarded ? EffectType::checkerboarded : effectType;
         if (isHighlighted)
-            setDescription(item.getFullDescription());
+            mHoveredInventoryItemText = item.getFullDescription();
         applyEffect effect(ctx, effectType);
         nk_image(ctx, img);
         if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
@@ -424,7 +433,7 @@ namespace FAGui
     {
         using namespace FAWorld;
         drawPanel(ctx, PanelType::inventory, [&]() {
-            static std::vector<std::pair<EquipTarget, struct nk_rect>> slot_rects = {
+            static std::vector<std::pair<EquipTarget, struct nk_rect>> slotRectangles = {
                 {MakeEquipTarget<FAWorld::EquipTargetType::head>(), nk_rect(133, 3, 56, 56)},
                 {MakeEquipTarget<FAWorld::EquipTargetType::amulet>(), nk_rect(205, 32, 28, 28)},
                 {MakeEquipTarget<FAWorld::EquipTargetType::body>(), nk_rect(133, 75, 58, 87)},
@@ -432,40 +441,42 @@ namespace FAGui
                 {MakeEquipTarget<FAWorld::EquipTargetType::rightHand>(), nk_rect(249, 75, 56, 84)},
                 {MakeEquipTarget<FAWorld::EquipTargetType::leftRing>(), nk_rect(47, 178, 28, 28)},
                 {MakeEquipTarget<FAWorld::EquipTargetType::rightRing>(), nk_rect(248, 178, 28, 28)}};
+
+            FAWorld::CharacterInventory& inv = mPlayer->mInventory;
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
             {
-                auto& inv = mPlayer->mInventory;
-                for (auto& p : slot_rects)
+                for (auto& p : slotRectangles)
                 {
                     nk_layout_space_push(ctx, p.second);
                     nk_button_label_styled(ctx, &dummyStyle, "");
                     if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
-                        inv.itemSlotLeftMouseButtonDown(p.first);
+                        inv.slotClicked(p.first);
                     auto highlight = ItemHighlightInfo::notHighlighed;
                     if (isLastWidgetHovered(ctx))
-                    {
                         highlight = ItemHighlightInfo::highlited;
-                    }
-                    else if (nk_widget_mouse_left(ctx))
-                        clearDescription();
+
                     item(ctx, p.first, p.second, highlight);
                 }
             }
-            constexpr auto cellSize = 29;
+            constexpr float cellSize = 29;
             auto invTopLeft = nk_vec2(17, 222);
-            FAWorld::Inventory& inv = mPlayer->mInventory;
-            float invWidth = inv.getInventoryBox().width() * cellSize;
-            float invHeight = inv.getInventoryBox().height() * cellSize;
+
+            const FAWorld::BasicInventory& mainInventory = inv.getInv(FAWorld::EquipTargetType::inventory);
+
+            float invWidth = mainInventory.width() * cellSize;
+            float invHeight = mainInventory.height() * cellSize;
             nk_layout_space_push(ctx, nk_recta(invTopLeft, {invWidth, invHeight}));
             nk_button_label_styled(ctx, &dummyStyle, "");
             if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && !mGoldSplitTarget)
             {
-                inv.inventoryMouseLeftButtonDown(Misc::Point{int32_t((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / cellSize),
-                                                             int32_t((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / cellSize)});
+                Misc::Point clickedPoint{int32_t(std::floor((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / cellSize)),
+                                         int32_t(std::floor((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / cellSize))};
+
+                inv.slotClicked(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(clickedPoint.x, clickedPoint.y));
             }
 
-            for (auto row : boost::counting_range(0, inv.getInventoryBox().height()))
-                for (auto col : boost::counting_range(0, inv.getInventoryBox().width()))
+            for (auto row : boost::counting_range(0, mainInventory.height()))
+                for (auto col : boost::counting_range(0, mainInventory.width()))
                 {
                     auto cell_top_left = nk_vec2(17 + col * cellSize, 222 + row * cellSize);
                     item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::inventory>(col, row), cell_top_left, ItemHighlightInfo::highlightIfHover);
@@ -502,9 +513,34 @@ namespace FAGui
         });
     }
 
+    void GuiManager::fillTextField(nk_context* ctx, float x, float y, float width, const char* text, TextColor color)
+    {
+        nk_layout_space_push(ctx, nk_rect(x, y, width, FARender::Renderer::get()->smallFont()->height));
+        smallText(ctx, text, color);
+    }
+
     void GuiManager::characterPanel(nk_context* ctx)
     {
-        drawPanel(ctx, PanelType::character, [&]() {});
+        drawPanel(ctx, PanelType::character, [&]() {
+            nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
+
+            fillTextField(ctx, 168, 21, 131, toString(mPlayer->getClass()));
+            auto& playerStats = mPlayer->getPlayerStats();
+            fillTextField(ctx, 95, 144, 31, std::to_string(playerStats.mStrength).c_str());
+            fillTextField(ctx, 95, 172, 31, std::to_string(playerStats.mMagic).c_str());
+            fillTextField(ctx, 95, 200, 31, std::to_string(playerStats.mDexterity).c_str());
+            fillTextField(ctx, 95, 228, 31, std::to_string(playerStats.mVitality).c_str());
+
+            fillTextField(ctx, 216, 135, 84, std::to_string(mPlayer->mInventory.getTotalGold()).c_str());
+            auto& stats = mPlayer->getStats();
+            fillTextField(ctx, 95, 293, 31, std::to_string(stats.mHp.max).c_str());
+            fillTextField(ctx, 143, 293, 31, std::to_string(stats.mHp.current).c_str(), stats.mHp.current < stats.mHp.max ? TextColor::red : TextColor::white);
+            fillTextField(ctx, 95, 321, 31, std::to_string(stats.mMana.max).c_str());
+            fillTextField(
+                ctx, 143, 321, 31, std::to_string(stats.mMana.current).c_str(), stats.mMana.current < stats.mMana.max ? TextColor::red : TextColor::white);
+
+            nk_layout_space_end(ctx);
+        });
     }
 
     void GuiManager::questsPanel(nk_context* ctx)
@@ -524,12 +560,11 @@ namespace FAGui
         nk_layout_space_push(ctx, nk_recta(beltTopLeft, {beltWidth, beltHeight}));
         auto& inv = mPlayer->mInventory;
         if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && !mGoldSplitTarget)
-        {
-            inv.beltMouseLeftButtonDown((ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / beltWidth);
-        }
+            inv.slotClicked(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(
+                int32_t(std::floor(ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / cellSize)));
 
         using namespace FAWorld;
-        for (auto num : boost::counting_range(0, int32_t(inv.getBelt().size())))
+        for (auto num : boost::counting_range(0, int32_t(inv.getInv(FAWorld::EquipTargetType::belt).width())))
         {
             auto cell_top_left = nk_vec2(beltTopLeft.x + num * cellSize, beltTopLeft.y);
             item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::belt>(num), cell_top_left, ItemHighlightInfo::highlightIfHover);
@@ -728,9 +763,13 @@ namespace FAGui
 
     void GuiManager::descriptionPanel(nk_context* ctx, const std::string& description)
     {
+        const std::string* textToUse = &description;
+        if (!mHoveredInventoryItemText.empty())
+            textToUse = &mHoveredInventoryItemText;
+
         auto boxRect = nk_rect(185, 66, 275, 55);
         std::vector<std::string> vec;
-        boost::split(vec, description, boost::is_any_of("\n"), boost::token_compress_on);
+        boost::split(vec, *textToUse, boost::is_any_of("\n"), boost::token_compress_on);
         auto h_part = boxRect.h / vec.size();
         for (int i = 0; i < static_cast<int>(vec.size()); ++i)
         {
@@ -739,12 +778,14 @@ namespace FAGui
             rect.y = boxRect.y + h_part * i;
             rect.h = h_part;
             nk_layout_space_push(ctx, rect);
-            smallText(ctx, vec[i].c_str(), mDescriptionColor);
+            smallText(ctx, vec[i].c_str(), TextColor::white);
         }
     }
 
     void GuiManager::update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus)
     {
+        mHoveredInventoryItemText.clear();
+
         if (inGame)
         {
             if (paused)
@@ -777,17 +818,6 @@ namespace FAGui
         else
             Engine::EngineMain::get()->getLocalInputHandler()->unblockInput();
     }
-
-    void GuiManager::setDescription(std::string text, TextColor color)
-    {
-        if (isModalDlgShown())
-            return;
-
-        mDescription = text;
-        mDescriptionColor = color;
-    }
-
-    void GuiManager::clearDescription() { return setDescription(""); }
 
     PanelType* GuiManager::panel(PanelPlacement placement)
     {
@@ -845,14 +875,8 @@ namespace FAGui
                 if (mGoldSplitTarget)
                 {
                     if (mGoldSplitCnt > 0)
-                    {
-                        mGoldSplitTarget->mCount -= mGoldSplitCnt;
-                        if (mGoldSplitTarget->mCount == 0)
-                            *mGoldSplitTarget = {};
-                        auto cursorGold = mWorld.getItemFactory().generateBaseItem(FAWorld::ItemId::gold);
-                        cursorGold.mCount = mGoldSplitCnt;
-                        mPlayer->mInventory.setCursorHeld(cursorGold);
-                    }
+                        mPlayer->mInventory.splitGoldIntoCursor(mGoldSplitTarget->mInvX, mGoldSplitTarget->mInvY, mGoldSplitCnt, mWorld.getItemFactory());
+
                     mGoldSplitTarget = nullptr;
                 }
                 break;
@@ -890,7 +914,11 @@ namespace FAGui
 
     void GuiManager::popDialogData() { mDialogs.pop_back(); }
 
-    void GuiManager::pushDialogData(DialogData&& data) { mDialogs.push_back(std::move(data)); }
+    void GuiManager::pushDialogData(DialogData&& data)
+    {
+        mDialogs.push_back(std::move(data));
+        mSkipDialogFrame = true;
+    }
 
     bool GuiManager::isPauseBlocked() const
     {
@@ -921,5 +949,4 @@ namespace FAGui
 
     std::string cursorPath = "data/inv/objcurs.cel";
     uint32_t cursorFrame = 0;
-    Render::CursorHotspotLocation cursorHotspot = Render::CursorHotspotLocation::topLeft;
 }

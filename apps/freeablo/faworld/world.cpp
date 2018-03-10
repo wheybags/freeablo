@@ -18,6 +18,7 @@
 #include "itemmap.h"
 #include "player.h"
 #include "playerbehaviour.h"
+#include "storedata.h"
 #include <algorithm>
 #include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
@@ -27,7 +28,14 @@
 
 namespace FAWorld
 {
-    World::World(const DiabloExe::DiabloExe& exe) : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe)) { this->setupObjectIdMappers(); }
+    World::World(const DiabloExe::DiabloExe& exe)
+        : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe)), mStoreData(boost::make_unique<StoreData>(*mItemFactory))
+    {
+        this->setupObjectIdMappers();
+        regenerateStoreItems();
+    }
+
+    void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/); }
 
     World::World(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : World(exe)
     {
@@ -79,9 +87,8 @@ namespace FAWorld
 
     void World::setupObjectIdMappers()
     {
-        auto exe = &mDiabloExe;
-        mObjectIdMapper.addClass(Actor::typeId, [=](FASaveGame::GameLoader& loader) { return new Actor(*this, loader, *exe); });
-        mObjectIdMapper.addClass(Player::typeId, [=](FASaveGame::GameLoader& loader) { return new Player(*this, loader, *exe); });
+        mObjectIdMapper.addClass(Actor::typeId, [=](FASaveGame::GameLoader& loader) { return new Actor(*this, loader); });
+        mObjectIdMapper.addClass(Player::typeId, [=](FASaveGame::GameLoader& loader) { return new Player(*this, loader); });
 
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });

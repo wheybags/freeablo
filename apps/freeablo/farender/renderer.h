@@ -70,7 +70,6 @@ namespace FARender
         FAWorld::GameLevel* level;
 
         FASpriteGroup* mCursorSpriteGroup;
-        Render::CursorHotspotLocation mCursorHotspot;
         uint32_t mCursorFrame;
 
         bool mCursorEmpty;
