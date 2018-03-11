@@ -114,8 +114,8 @@ namespace FAWorld
         int32_t mArmorClass;
 
         // TODO: these should be handled by inventory class, not item class
-        uint8_t mCornerX = -1;
-        uint8_t mCornerY = -1;
+        int32_t mCornerX = -1;
+        int32_t mCornerY = -1;
 
         bool mEmpty = true;
         bool mIsIdentified;
