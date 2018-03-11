@@ -62,12 +62,12 @@ if(WIN32)
 	add_definitions(-DNOMINMAX) # http://stackoverflow.com/questions/5004858/stdmin-gives-error
 endif()
 
-option (TREAT_WARNINGS_AS_ERRORS "Treat warnings as errors")
+option (FA_TREAT_WARNINGS_AS_ERRORS "Treat warnings as errors")
 
 if(UNIX)
     set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -Wno-unknown-pragmas -Wno-missing-braces")
     SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
-    if (TREAT_WARNINGS_AS_ERRORS)
+    if (FA_TREAT_WARNINGS_AS_ERRORS)
         set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Werror")
     endif()
 endif()
@@ -88,7 +88,7 @@ if(MSVC)
     add_definitions (-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
     # SCL - because current boost is too old and emits this warning
     # CRT - something in nuklear.h
-    if (TREAT_WARNINGS_AS_ERRORS)
+    if (FA_TREAT_WARNINGS_AS_ERRORS)
         set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /WX")
     endif()
 endif()
