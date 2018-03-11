@@ -349,6 +349,33 @@ namespace FAWorld
         return mMainInventory.autoPlaceItem(item, order);
     }
 
+    bool CharacterInventory::forcePlaceItem(const Item& item, const EquipTarget& target)
+    {
+        BasicInventory& inv = getInvMutable(target.type);
+        PlaceItemResult result = inv.placeItem(item, target.posX, target.posY);
+
+        switch (result.type)
+        {
+            case PlaceItemResult::Type::Success:
+                return true;
+
+            case PlaceItemResult::Type::OutOfBounds:
+                return false;
+
+            case PlaceItemResult::Type::BlockedByItems:
+            {
+                for (const Item* block : result.blockingItems)
+                    inv.remove(block->getCornerCoords().first, block->getCornerCoords().second);
+
+                result = inv.placeItem(item, target.posX, target.posY);
+                release_assert(result.succeeded());
+                return true;
+            }
+        }
+
+        invalid_enum(PlaceItemResult, result.type);
+    }
+
     const Item& CharacterInventory::getItemAt(const EquipTarget& target) const { return getInv(target.type).getItem(target.posX, target.posY); }
 
     Item CharacterInventory::remove(const EquipTarget& target) { return getInvMutable(target.type).remove(target.posX, target.posY); }
@@ -403,7 +430,7 @@ namespace FAWorld
                 case EquipTargetType::inventory:
                     break;
                 case EquipTargetType::belt:
-                    ok = !cursor.isBeltEquippable();
+                    ok = cursor.isBeltEquippable();
                     break;
                 case EquipTargetType::head:
                     ok = cursor.getEquipLoc() == ItemEquipType::head;
