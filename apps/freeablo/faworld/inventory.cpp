@@ -403,7 +403,7 @@ namespace FAWorld
                 case EquipTargetType::inventory:
                     break;
                 case EquipTargetType::belt:
-                    ok = !cursor.isBeltEquippable();
+                    ok = cursor.isBeltEquippable();
                     break;
                 case EquipTargetType::head:
                     ok = cursor.getEquipLoc() == ItemEquipType::head;
