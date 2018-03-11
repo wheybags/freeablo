@@ -83,6 +83,7 @@ namespace FAWorld
 
         bool autoPlaceItem(const Item& item);
         bool autoPlaceItem(Item& item, PlacementCheckOrder order = PlacementCheckOrder::Automatic);
+        bool forcePlaceItem(const Item& item, const EquipTarget& target); /// no checks except bounds, just overwrites whatever is there
         const Item& getItemAt(const EquipTarget& target) const;
         Item remove(const EquipTarget& target);
 

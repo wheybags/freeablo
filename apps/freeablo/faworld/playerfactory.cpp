@@ -58,7 +58,7 @@ namespace FAWorld
     void PlayerFactory::createWarrior(Player* player) const
     {
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortSword));
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::buckler));
+        player->mInventory.forcePlaceItem(mItemFactory.generateBaseItem(ItemId::buckler), MakeEquipTarget<EquipTargetType::rightHand>());
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::club));
         player->mInventory.placeGold(100, mItemFactory);
 
