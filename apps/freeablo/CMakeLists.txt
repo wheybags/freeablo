@@ -109,6 +109,15 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     engine/localinputhandler.cpp
     engine/localinputhandler.h
 
+    engine/net/server.h
+    engine/net/server.cpp
+    engine/net/client.h
+    engine/net/client.cpp
+    engine/net/multiplayerinterface.h
+    engine/net/multiplayerinterface.cpp
+    engine/net/netcommon.h
+    engine/net/netcommon.cpp
+
     faaudio/audiomanager.h
     faaudio/audiomanager.cpp
 

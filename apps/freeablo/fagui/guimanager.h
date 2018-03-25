@@ -93,7 +93,7 @@ namespace FAGui
         using self = GuiManager;
 
     public:
-        GuiManager(Engine::EngineMain& engine, FAWorld::World& world);
+        GuiManager(Engine::EngineMain& engine);
         ~GuiManager();
 
         void update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
@@ -137,8 +137,7 @@ namespace FAGui
 
     private:
         Engine::EngineMain& mEngine;
-        FAWorld::World& mWorld;
-        FAWorld::Player* mPlayer;
+        FAWorld::Player* mPlayer = nullptr;
         std::string mHoveredInventoryItemText;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::vector<DialogData> mDialogs;

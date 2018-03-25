@@ -10,6 +10,8 @@
 #include "../faworld/world.h"
 #include "localinputhandler.h"
 #include "misc/random.h"
+#include "net/client.h"
+#include "net/server.h"
 #include "threadmanager.h"
 #include <boost/asio.hpp>
 #include <boost/make_unique.hpp>
@@ -85,49 +87,52 @@ namespace Engine
         mPlayerFactory = boost::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
         renderer.loadFonts(*mExe);
 
+        FAWorld::Player* player = nullptr;
         int32_t currentLevel = -1;
-        FILE* f = fopen("save.sav", "rb");
-        if (f)
+
+        if (!variables["client"].as<bool>())
         {
-            fseek(f, 0, SEEK_END);
-            size_t size = ftell(f);
-            fseek(f, 0, SEEK_SET);
-
-            std::string tmp;
-            tmp.resize(size);
-
-            fread((void*)tmp.data(), 1, size, f);
-
-            Serial::TextReadStream stream(tmp);
-            FASaveGame::GameLoader loader(stream);
-
-            mWorld.reset(new FAWorld::World(loader, *mExe));
-
-            mPlayer = mWorld->getCurrentPlayer();
-            mInGame = true;
-        }
-        else
-        {
-            mWorld.reset(new FAWorld::World(*mExe));
-            currentLevel = variables["level"].as<int32_t>();
-
-            mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
-
-            if (currentLevel != -1)
+            FILE* f = fopen("save.sav", "rb");
+            if (f)
             {
+                fseek(f, 0, SEEK_END);
+                size_t size = ftell(f);
+                fseek(f, 0, SEEK_SET);
+
+                std::string tmp;
+                tmp.resize(size);
+
+                fread((void*)tmp.data(), 1, size, f);
+
+                Serial::TextReadStream stream(tmp);
+                FASaveGame::GameLoader loader(stream);
+
+                mWorld.reset(new FAWorld::World(loader, *mExe));
+
                 mInGame = true;
-                mPlayer = mPlayerFactory->create(*mWorld, characterClass);
-                if (variables["invuln"].as<std::string>() == "on")
-                    mPlayer->mInvuln = true;
+            }
+            else
+            {
+                mWorld.reset(new FAWorld::World(*mExe));
+                currentLevel = variables["level"].as<int32_t>();
+
+                mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
+
+                if (currentLevel != -1)
+                {
+                    mInGame = true;
+                    player = mPlayerFactory->create(*mWorld, characterClass);
+                    if (variables["invuln"].as<std::string>() == "on")
+                        player->mInvuln = true;
+                }
             }
         }
 
-        mGuiManager = boost::make_unique<FAGui::GuiManager>(*this, *mWorld);
+        mGuiManager.reset(new FAGui::GuiManager(*this));
         mInputManager->registerKeyboardObserver(mGuiManager.get());
         mInputManager->setGuiManager(mGuiManager.get());
-        mWorld->setGuiManager(mGuiManager.get());
-        if (mPlayer)
-            setupNewPlayer(mPlayer);
+        if (player)
+            setupNewPlayer(player);
 
         if (currentLevel != -1)
             mWorld->setLevel(currentLevel);
@@ -138,6 +143,16 @@ namespace Engine
         mInputManager->registerMouseObserver(mLocalInputHandler.get());
         mInputManager->registerKeyboardObserver(mLocalInputHandler.get());
 
+        if (variables["client"].as<bool>())
+        {
+            mMultiplayer.reset(new Client());
+            mInGame = false;
+        }
+        else
+        {
+            mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
+        }
+
         int32_t lastLevelIndex = -1;
 
         // Main game logic loop
@@ -147,9 +162,11 @@ namespace Engine
 
             mInputManager->update(mPaused);
             mLocalInputHandler->update();
+            mMultiplayer->update();
+
             if (!mPaused && mInGame)
             {
-                mWorld->update(mNoclip, mLocalInputHandler->getAndClearInputs());
+                mWorld->update(mNoclip, mMultiplayer->getAndClearInputs());
 
                 if (mWorld->getCurrentLevelIndex() != lastLevelIndex)
                 {
@@ -164,10 +181,10 @@ namespace Engine
             FARender::RenderState* state = renderer.getFreeState();
             if (state)
             {
-                if (mPlayer)
+                if (!mPaused && mWorld->getCurrentPlayer())
                 {
                     auto level = mWorld->getCurrentLevel();
-                    state->mPos = mPlayer->getPos();
+                    state->mPos = mWorld->getCurrentPlayer()->getPos();
                     if (level != NULL)
                         state->tileset = renderer.getTileset(*level);
                     state->level = level;
@@ -179,7 +196,7 @@ namespace Engine
                     state->mCursorEmpty = false;
                 else
                     state->mCursorEmpty = true;
-                if (mWorld->getCurrentPlayer())
+                if (!mPaused && mWorld->getCurrentPlayer())
                     state->mCursorFrame = mWorld->getCurrentPlayer()->mInventory.getCursorHeld().getGraphicValue();
                 else
                     state->mCursorFrame = 0;
@@ -230,9 +247,8 @@ namespace Engine
 
     void EngineMain::setupNewPlayer(FAWorld::Player* player)
     {
-        mPlayer = player;
-        mWorld->addCurrentPlayer(mPlayer);
-        mGuiManager->setPlayer(mPlayer);
+        mWorld->addCurrentPlayer(player);
+        mGuiManager->setPlayer(player);
     }
 
     void EngineMain::startGame(const std::string& characterClass)

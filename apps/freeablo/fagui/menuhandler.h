@@ -47,16 +47,14 @@ namespace FAGui
 
     public:
         std::unique_ptr<FARender::AnimationPlayer> createSmLogo();
-        explicit MenuHandler(Engine::EngineMain& engine, FAWorld::World& world);
+        explicit MenuHandler(Engine::EngineMain& engine);
         void update(nk_context* ctx) const;
         bool isActive() const { return !!mActiveScreen; }
         void disable();
         Engine::EngineMain& engine() { return mEngine; }
         void notify(Engine::KeyboardInputAction action);
-        FAWorld::World* getWorld() const { return &mWorld; }
 
     private:
         Engine::EngineMain& mEngine;
-        FAWorld::World& mWorld;
     };
 }

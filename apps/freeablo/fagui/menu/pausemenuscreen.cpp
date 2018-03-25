@@ -51,7 +51,7 @@ namespace FAGui
             return func;
         };
 
-        FAWorld::World* world = menu.getWorld();
+        FAWorld::World* world = Engine::EngineMain::get()->mWorld.get();
         mMenuItems.push_back({drawItem("Save Game"), [this, world]() {
                                   {
                                       Serial::TextWriteStream writeStream;

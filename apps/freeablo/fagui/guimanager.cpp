@@ -90,9 +90,9 @@ namespace FAGui
         return "";
     }
 
-    GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::World& world) : mEngine(engine), mWorld(world)
+    GuiManager::GuiManager(Engine::EngineMain& engine) : mEngine(engine)
     {
-        mMenuHandler.reset(new MenuHandler(engine, mWorld));
+        mMenuHandler.reset(new MenuHandler(engine));
 
         auto renderer = FARender::Renderer::get();
         mSmallPentagram.reset(new FARender::AnimationPlayer());
@@ -706,14 +706,14 @@ namespace FAGui
                                    nk_image(ctx, bulbImage);
                                };
 
-                               const FAWorld::ActorStats& stats = mWorld.getCurrentPlayer()->getStats();
+                               const FAWorld::ActorStats& stats = Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getStats();
                                // draw current hp into health bulb
                                drawBulb(stats.mHp.current, stats.mHp.max, healthBulbLeftOffset);
                                // and current mana
                                drawBulb(stats.mMana.current, stats.mMana.current, manaBulbLeftOffset);
 
                                belt(ctx);
-                               descriptionPanel(ctx, hoverStatus.getDescription(*mWorld.getCurrentLevel()));
+                               descriptionPanel(ctx, hoverStatus.getDescription(*Engine::EngineMain::get()->mWorld->getCurrentLevel()));
 
                                nk_layout_space_end(ctx);
                            },
@@ -784,10 +784,17 @@ namespace FAGui
 
     void GuiManager::update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus)
     {
+        // HACK FUCKING HACK
+        FAWorld::World* world = Engine::EngineMain::get()->mWorld.get();
+        mPlayer = world == nullptr ? nullptr : world->getCurrentPlayer();
+
         mHoveredInventoryItemText.clear();
 
         if (inGame)
         {
+            if (!mPlayer)
+                return;
+
             if (paused)
             {
                 if (!mMenuHandler->isActive())
@@ -875,7 +882,8 @@ namespace FAGui
                 if (mGoldSplitTarget)
                 {
                     if (mGoldSplitCnt > 0)
-                        mPlayer->mInventory.splitGoldIntoCursor(mGoldSplitTarget->mInvX, mGoldSplitTarget->mInvY, mGoldSplitCnt, mWorld.getItemFactory());
+                        mPlayer->mInventory.splitGoldIntoCursor(
+                            mGoldSplitTarget->mInvX, mGoldSplitTarget->mInvY, mGoldSplitCnt, Engine::EngineMain::get()->mWorld->getItemFactory());
 
                     mGoldSplitTarget = nullptr;
                 }

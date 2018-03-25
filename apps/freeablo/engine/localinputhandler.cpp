@@ -12,8 +12,8 @@ namespace Engine
 
     void LocalInputHandler::notify(KeyboardInputAction action)
     {
-        if (mWorld.mGuiManager->isModalDlgShown())
-            return;
+        //        if (mWorld.mGuiManager->isModalDlgShown())
+        //            return;
 
         auto player = mWorld.getCurrentPlayer();
 
@@ -58,9 +58,10 @@ namespace Engine
                 }
                 else if (auto item = mWorld.targetedItem(mousePosition))
                 {
-                    auto type = mWorld.mGuiManager->isInventoryShown() ? FAWorld::Target::ItemTarget::ActionType::toCursor
-                                                                       : FAWorld::Target::ItemTarget::ActionType::autoEquip;
-                    mInputs.emplace_back(FAWorld::PlayerInput::TargetItemOnFloorData{item->getTile().x, item->getTile().y, type}, player->getId());
+                    //                    auto type = mWorld.mGuiManager->isInventoryShown() ? FAWorld::Target::ItemTarget::ActionType::toCursor
+                    //                                                                       : FAWorld::Target::ItemTarget::ActionType::autoEquip;
+                    //                    mInputs.emplace_back(FAWorld::PlayerInput::TargetItemOnFloorData{item->getTile().x, item->getTile().y, type},
+                    //                    player->getId());
                 }
                 else if (modifiers.shift)
                 {

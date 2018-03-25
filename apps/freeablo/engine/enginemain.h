@@ -24,6 +24,7 @@ namespace DiabloExe
 namespace Engine
 {
     class LocalInputHandler;
+    class MultiplayerInterface;
 
     class EngineMain : public KeyboardInputObserverInterface
     {
@@ -52,12 +53,14 @@ namespace Engine
         static EngineMain* singletonInstance;
 
         std::unique_ptr<LocalInputHandler> mLocalInputHandler;
+
+    public: // HACK
         std::unique_ptr<FAWorld::World> mWorld;
+        std::unique_ptr<MultiplayerInterface> mMultiplayer;
         std::shared_ptr<EngineInputManager> mInputManager;
         std::unique_ptr<DiabloExe::DiabloExe> mExe;
         std::unique_ptr<FAWorld::PlayerFactory> mPlayerFactory;
         std::unique_ptr<FAGui::GuiManager> mGuiManager;
-        FAWorld::Player* mPlayer = nullptr;
         bool mDone = false;
         bool mPaused = false;
         bool mNoclip = false;

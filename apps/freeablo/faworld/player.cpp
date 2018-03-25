@@ -337,7 +337,7 @@ namespace FAWorld
 
             if (target && target->getPos().isNear(this->getPos()) && canTalkTo(target))
             {
-                mWorld.mDlgManager->talk(target);
+                //                mWorld.mDlgManager->talk(target);
                 mTarget.clear();
             }
         }

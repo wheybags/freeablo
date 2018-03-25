@@ -91,7 +91,6 @@ namespace FAWorld
         void getAllActors(std::vector<Actor*>& actors);
 
         Tick getCurrentTick();
-        void setGuiManager(FAGui::GuiManager* manager);
 
         void setupObjectIdMappers();
 
@@ -106,8 +105,6 @@ namespace FAWorld
 
         static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
         FASaveGame::ObjectIdMapper mObjectIdMapper;
-        FAGui::GuiManager* mGuiManager = nullptr;
-        std::unique_ptr<FAGui::DialogManager> mDlgManager;
 
         const DiabloExe::DiabloExe& mDiabloExe; // TODO: something better than this
 

@@ -348,12 +348,6 @@ namespace FAWorld
 
     Tick World::getCurrentTick() { return mTicksPassed; }
 
-    void World::setGuiManager(FAGui::GuiManager* manager)
-    {
-        mGuiManager = manager;
-        mDlgManager.reset(new FAGui::DialogManager(*mGuiManager, *this));
-    }
-
     PlacedItemData* World::targetedItem(Misc::Point screenPosition)
     {
         auto tile = getTileByScreenPos(screenPosition);
