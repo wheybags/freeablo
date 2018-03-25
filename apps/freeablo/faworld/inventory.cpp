@@ -263,9 +263,9 @@ namespace FAWorld
         if (mTreatAllItemsAs1by1)
             itemSize = Misc::Point{1, 1};
 
-        for (int y = result.getCornerCoords().second; y < result.getCornerCoords().second + itemSize.y; ++y)
-            for (int x = result.getCornerCoords().first; x < result.getCornerCoords().first + itemSize.x; ++x)
-                mInventoryBox.get(x, y) = {};
+        for (int yLocal = result.getCornerCoords().second; yLocal < result.getCornerCoords().second + itemSize.y; ++yLocal)
+            for (int xLocal = result.getCornerCoords().first; xLocal < result.getCornerCoords().first + itemSize.x; ++xLocal)
+                mInventoryBox.get(xLocal, yLocal) = {};
 
         return result;
     }
