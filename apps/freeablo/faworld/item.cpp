@@ -156,8 +156,8 @@ namespace FAWorld
         mInvY = loader.load<uint8_t>();
         mInvX = loader.load<uint8_t>();
 
-        mCornerX = loader.load<uint8_t>();
-        mCornerY = loader.load<uint8_t>();
+        mCornerX = loader.load<int32_t>();
+        mCornerY = loader.load<int32_t>();
     }
 
     std::string Item::getName() const
