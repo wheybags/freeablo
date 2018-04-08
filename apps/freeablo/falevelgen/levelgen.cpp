@@ -1048,6 +1048,7 @@ namespace FALevelGen
     FAWorld::GameLevel*
     generate(FAWorld::World& world, int32_t width, int32_t height, int32_t dLvl, const DiabloExe::DiabloExe& exe, int32_t previous, int32_t next)
     {
+        Random::FAsrand(123);
         int32_t levelNum = ((dLvl - 1) / 4) + 1;
 
         Level::Dun tmpLevel = generateTmp(width, height, levelNum);

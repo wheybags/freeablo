@@ -1,5 +1,6 @@
 #include "server.h"
 #include "../../fasavegame/gameloader.h"
+#include "../../faworld/player.h"
 #include "../../faworld/world.h"
 #include "../enginemain.h"
 #include "../localinputhandler.h"
@@ -21,7 +22,14 @@ namespace Engine
         mHost = nullptr;
     }
 
-    std::vector<FAWorld::PlayerInput> Server::getAndClearInputs() { return mLocalInputHandler.getAndClearInputs(); }
+    boost::optional<std::vector<FAWorld::PlayerInput>> Server::getAndClearInputs(FAWorld::Tick tick)
+    {
+        UNUSED_PARAM(tick);
+
+        std::vector<FAWorld::PlayerInput> retval;
+        mInputs.swap(retval);
+        return retval;
+    }
 
     void Server::update()
     {
@@ -66,6 +74,11 @@ namespace Engine
 
         if (allHaveMap)
             EngineMain::get()->mPaused = false;
+
+        auto localInputs = mLocalInputHandler.getAndClearInputs();
+        mInputs.insert(mInputs.begin(), localInputs.begin(), localInputs.end());
+
+        sendInputsToClients();
     }
 
     void Server::onPeerConnect(const ENetEvent& event)
@@ -76,7 +89,13 @@ namespace Engine
         Serial::TextWriteStream stream;
         FASaveGame::GameSaver saver(stream);
 
+        FAWorld::Player* newPlayer = EngineMain::get()->mPlayerFactory->create(mWorld, "Warrior");
+        mWorld.registerPlayer(newPlayer);
+        FAWorld::GameLevel* level = mWorld.getLevel(0);
+        newPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
+
         saver.save(uint8_t(MessageType::MapToClient));
+        saver.save(newPlayer->getId());
         mWorld.save(saver);
 
         auto data = stream.getData();
@@ -101,10 +120,44 @@ namespace Engine
                 return;
             }
 
+            case MessageType::InputsToServer:
+            {
+                receiveInputs(loader);
+                return;
+            }
+
             case MessageType::MapToClient:
                 invalid_enum(MessageType, type);
         }
 
         invalid_enum(MessageType, type);
+    }
+
+    void Server::sendInputsToClients()
+    {
+        Serial::TextWriteStream stream;
+        FASaveGame::GameSaver saver(stream);
+
+        saver.save(uint8_t(MessageType::InputsToClient));
+
+        saver.save(mWorld.getCurrentTick());
+        saver.save(uint32_t(mInputs.size()));
+        for (auto& input : mInputs)
+            input.save(saver);
+
+        auto data = stream.getData();
+
+        // does not take ownership of data
+        ENetPacket* packet = enet_packet_create(data.first, data.second, ENET_PACKET_FLAG_RELIABLE);
+        enet_host_broadcast(mHost, RELIABLE_CHANNEL_ID, packet);
+    }
+
+    void Server::receiveInputs(FASaveGame::GameLoader& loader)
+    {
+        uint32_t size = loader.load<uint32_t>();
+        size_t start = mInputs.size();
+        mInputs.resize(mInputs.size() + size);
+        for (uint32_t i = 0; i < size; i++)
+            mInputs[start + i].load(loader);
     }
 }

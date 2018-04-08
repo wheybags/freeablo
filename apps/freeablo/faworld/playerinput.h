@@ -79,6 +79,7 @@ namespace FAWorld
 #define GENERATE_ENUM_VALS(X) X,
         enum class Type : uint8_t
         {
+            None,
             CALL_ON_ALL_PLAYER_INPUTS(GENERATE_ENUM_VALS)
         };
 #undef GENERATE_ENUM_VALS
@@ -86,6 +87,8 @@ namespace FAWorld
 #define GENERATE_CONSTRUCTOR(X) PlayerInput(const X##Data& data, int32_t actorId);
         CALL_ON_ALL_PLAYER_INPUTS(GENERATE_CONSTRUCTOR)
 #undef GENERATE_CONSTRUCTOR
+
+        PlayerInput() = default;
 
         union
         {
@@ -97,8 +100,8 @@ namespace FAWorld
         void save(Serial::Saver& saver);
         void load(Serial::Loader& loader);
 
-        Type mType;
-        int32_t mActorId;
+        Type mType = Type::None;
+        int32_t mActorId = -1;
     };
 }
 

@@ -37,10 +37,18 @@ namespace FAWorld
 
     void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/); }
 
-    World::World(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : World(exe)
+    void World::load(FASaveGame::GameLoader& loader)
     {
+        // reconstruct in-place to reset to default state
+        {
+            const DiabloExe::DiabloExe& tmp = mDiabloExe;
+            this->~World();
+            new (this) World(tmp);
+        }
+
         loader.currentlyLoadingWorld = this;
 
+        this->mTicksPassed = loader.load<Tick>();
         uint32_t numLevels = loader.load<uint32_t>();
 
         for (uint32_t i = 0; i < numLevels; i++)
@@ -56,17 +64,16 @@ namespace FAWorld
             mLevels[levelIndex] = level;
         }
 
-        int32_t playerId = loader.load<int32_t>();
         mNextId = loader.load<int32_t>();
 
         loader.runFunctionsToRunAtEnd();
-        mCurrentPlayer = (Player*)getActorById(playerId);
 
         loader.currentlyLoadingWorld = nullptr;
     }
 
     void World::save(FASaveGame::GameSaver& saver)
     {
+        saver.save(this->mTicksPassed);
         uint32_t numLevels = mLevels.size();
         saver.save(numLevels);
 
@@ -81,14 +88,13 @@ namespace FAWorld
                 pair.second->save(saver);
         }
 
-        saver.save(mCurrentPlayer->getId());
         saver.save(mNextId);
     }
 
     void World::setupObjectIdMappers()
     {
-        mObjectIdMapper.addClass(Actor::typeId, [=](FASaveGame::GameLoader& loader) { return new Actor(*this, loader); });
-        mObjectIdMapper.addClass(Player::typeId, [=](FASaveGame::GameLoader& loader) { return new Player(*this, loader); });
+        mObjectIdMapper.addClass(Actor::typeId, [&](FASaveGame::GameLoader& loader) { return new Actor(*this, loader); });
+        mObjectIdMapper.addClass(Player::typeId, [&](FASaveGame::GameLoader& loader) { return new Player(*this, loader); });
 
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });
@@ -102,6 +108,12 @@ namespace FAWorld
     {
         for (auto& pair : mLevels)
             delete pair.second;
+    }
+
+    void World::setFirstPlayerAsCurrent()
+    {
+        release_assert(!mPlayers.empty());
+        this->mCurrentPlayer = mPlayers[0];
     }
 
     Render::Tile World::getTileByScreenPos(Misc::Point screenPos)

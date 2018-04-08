@@ -52,9 +52,13 @@ namespace FAWorld
     {
     public:
         World(const DiabloExe::DiabloExe& exe);
-        World(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
         void save(FASaveGame::GameSaver& saver);
+        void load(FASaveGame::GameLoader& loader);
         ~World();
+
+        World& operator=(World&& other) = default;
+
+        void setFirstPlayerAsCurrent();
 
         Render::Tile getTileByScreenPos(Misc::Point screenPos);
         Actor* targetedActor(Misc::Point screenPosition);

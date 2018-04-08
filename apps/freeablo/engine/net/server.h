@@ -18,12 +18,14 @@ namespace Engine
         Server(FAWorld::World& world, LocalInputHandler& localInputHandler);
         virtual ~Server();
 
-        virtual std::vector<FAWorld::PlayerInput> getAndClearInputs() override;
+        virtual boost::optional<std::vector<FAWorld::PlayerInput>> getAndClearInputs(FAWorld::Tick tick) override;
         virtual void update() override;
 
     private:
         void onPeerConnect(const ENetEvent& event);
         void readPeerPacket(const ENetEvent& event);
+        void sendInputsToClients();
+        void receiveInputs(FASaveGame::GameLoader& loader);
 
         struct Peer
         {
@@ -36,7 +38,7 @@ namespace Engine
 
         FAWorld::World& mWorld;
         LocalInputHandler& mLocalInputHandler;
-        //        std::vector<FAWorld::PlayerInput> mInputs;
+        std::vector<FAWorld::PlayerInput> mInputs;
 
         ENetHost* mHost = nullptr;
         ENetAddress mAddress = {};

@@ -66,7 +66,7 @@ namespace Engine
 
     void EngineMain::runGameLoop(const bpo::variables_map& variables, const std::string& pathEXE)
     {
-        Random::FAsrand(static_cast<int>(time(nullptr)));
+        Random::FAsrand(0); // static_cast<int>(time(nullptr)));
 
         FARender::Renderer& renderer = *FARender::Renderer::get();
 
@@ -89,6 +89,7 @@ namespace Engine
 
         FAWorld::Player* player = nullptr;
         int32_t currentLevel = -1;
+        mWorld.reset(new FAWorld::World(*mExe));
 
         if (!variables["client"].as<bool>())
         {
@@ -107,13 +108,13 @@ namespace Engine
                 Serial::TextReadStream stream(tmp);
                 FASaveGame::GameLoader loader(stream);
 
-                mWorld.reset(new FAWorld::World(loader, *mExe));
+                mWorld->load(loader);
+                mWorld->setFirstPlayerAsCurrent();
 
                 mInGame = true;
             }
             else
             {
-                mWorld.reset(new FAWorld::World(*mExe));
                 currentLevel = variables["level"].as<int32_t>();
 
                 mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
@@ -145,7 +146,7 @@ namespace Engine
 
         if (variables["client"].as<bool>())
         {
-            mMultiplayer.reset(new Client());
+            mMultiplayer.reset(new Client(*mLocalInputHandler.get()));
             mInGame = false;
         }
         else
@@ -166,12 +167,17 @@ namespace Engine
 
             if (!mPaused && mInGame)
             {
-                mWorld->update(mNoclip, mMultiplayer->getAndClearInputs());
+                auto inputs = mMultiplayer->getAndClearInputs(mWorld->getCurrentTick());
 
-                if (mWorld->getCurrentLevelIndex() != lastLevelIndex)
+                if (inputs)
                 {
-                    mWorld->playLevelMusic(mWorld->getCurrentLevelIndex());
-                    lastLevelIndex = mWorld->getCurrentLevelIndex();
+                    mWorld->update(mNoclip, inputs.get());
+
+                    if (mWorld->getCurrentLevelIndex() != lastLevelIndex)
+                    {
+                        mWorld->playLevelMusic(mWorld->getCurrentLevelIndex());
+                        lastLevelIndex = mWorld->getCurrentLevelIndex();
+                    }
                 }
             }
 

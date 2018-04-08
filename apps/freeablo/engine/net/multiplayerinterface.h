@@ -1,4 +1,6 @@
 #pragma once
+#include "../../faworld/world.h"
+#include <boost/optional.hpp>
 #include <cstdint>
 #include <vector>
 
@@ -14,7 +16,7 @@ namespace Engine
     public:
         virtual ~MultiplayerInterface() = default;
 
-        virtual std::vector<FAWorld::PlayerInput> getAndClearInputs() = 0;
+        virtual boost::optional<std::vector<FAWorld::PlayerInput>> getAndClearInputs(FAWorld::Tick tick) = 0;
         virtual void update() = 0;
 
         static constexpr int32_t RELIABLE_CHANNEL_ID = 0;
@@ -24,9 +26,11 @@ namespace Engine
         {
             // server-to-client
             MapToClient,
+            InputsToClient,
 
             // client-to-server
-            AcknowledgeMapToServer
+            AcknowledgeMapToServer,
+            InputsToServer
         };
     };
 }
