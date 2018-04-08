@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "../farender/animationplayer.h"
 #include "actor/statemachine.h"
 #include "actoranimationmanager.h"
@@ -17,17 +15,13 @@
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
 #include <map>
+#include <misc/direction.h>
 #include <misc/misc.h>
 
 namespace FASaveGame
 {
     class Loader;
     class Saver;
-}
-
-namespace Misc
-{
-    enum class Direction;
 }
 
 namespace FAWorld

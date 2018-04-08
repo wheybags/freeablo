@@ -6,7 +6,7 @@
 namespace Misc
 {
     /// Enum for direction is currently have the same numeric values as original game.
-    enum class Direction
+    enum class Direction : uint8_t
     {
         south = 0,
         sout_west,

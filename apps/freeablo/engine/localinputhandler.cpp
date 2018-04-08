@@ -19,13 +19,13 @@ namespace Engine
 
         switch (action)
         {
-            case Engine::KeyboardInputAction::changeLevelUp:
+            case Engine::KeyboardInputAction::dataChangeLevelUp:
             {
                 mInputs.emplace_back(FAWorld::PlayerInput::ChangeLevelData{FAWorld::PlayerInput::ChangeLevelData::Direction::Up}, player->getId());
                 return;
             }
 
-            case Engine::KeyboardInputAction::changeLevelDown:
+            case Engine::KeyboardInputAction::dataChangeLevelDown:
             {
                 mInputs.emplace_back(FAWorld::PlayerInput::ChangeLevelData{FAWorld::PlayerInput::ChangeLevelData::Direction::Down}, player->getId());
                 return;

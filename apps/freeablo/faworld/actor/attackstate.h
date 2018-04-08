@@ -1,14 +1,8 @@
-
 #pragma once
-
 #include "statemachine.h"
+#include <misc/direction.h>
 #include <misc/misc.h>
 #include <stddef.h>
-
-namespace Misc
-{
-    enum class Direction;
-}
 
 namespace FAWorld
 {
