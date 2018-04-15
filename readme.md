@@ -18,6 +18,8 @@ Build the engine yourself (instructions below), or grab a prebuilt binary for yo
 
 Copy DIABDAT.MPQ and Diablo.exe from your diablo install into the folder with the freeablo executable. (NOTE: only version 1.09 of diablo is currently supported, so please patch to that version)
 
+Before running freeablo for the first time make sure to run the launcher and select the location of Diablo.exe and DIABDAT.MPQ
+
 # Controls
 
 Mouse to walk around, just like the original, and click on doors to open them.
@@ -75,7 +77,7 @@ mklink /j resources ..\resources
 
 call cmake:
 ```bash
-cmake ../freeablo
+cmake ../../freeablo
 ```
 
 Now you're ready to go, cmake has generated a makefile/vs solution, just run make/open in vs to compile.
