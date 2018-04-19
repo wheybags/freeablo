@@ -1,13 +1,10 @@
 #include "tileset.h"
-
 #include <algorithm>
-#include <sstream>
-
 #include <faio/faio.h>
 #include <misc/assert.h>
+#include <random/random.h>
 #include <settings/settings.h>
-
-#include "misc/random.h"
+#include <sstream>
 
 namespace FALevelGen
 {
@@ -174,7 +171,7 @@ namespace FALevelGen
         mAlternatives[tile] = std::pair<std::vector<std::pair<int32_t, int32_t>>, int32_t>(tileVec, normPercent);
     }
 
-    int32_t TileSet::getRandomTile(int32_t tile)
+    int32_t TileSet::getRandomTile(Random::Rng& rng, int32_t tile)
     {
         if (mAlternatives.find(tile) == mAlternatives.end())
             return tile;
@@ -182,7 +179,7 @@ namespace FALevelGen
         std::vector<std::pair<int32_t, int32_t>>& tileVec = mAlternatives[tile].first;
         int32_t normPercent = mAlternatives[tile].second;
 
-        int32_t random = Random::randomInRange(0, 100);
+        int32_t random = rng.randomInRange(0, 100);
 
         if (random <= normPercent)
             return tile;
@@ -191,7 +188,7 @@ namespace FALevelGen
         for (int32_t i = 0; i < (int32_t)tileVec.size(); i++)
             max += tileVec[i].second;
 
-        random = Random::randomInRange(0, max);
+        random = rng.randomInRange(0, max);
 
         int32_t i = 0;
         for (; i < (int32_t)tileVec.size() && random > tileVec[i].second; i++)

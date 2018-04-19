@@ -24,18 +24,21 @@
 #include <diabloexe/diabloexe.h>
 #include <iostream>
 #include <misc/assert.h>
+#include <serial/textstream.h>
 #include <tuple>
 
 namespace FAWorld
 {
-    World::World(const DiabloExe::DiabloExe& exe)
-        : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe)), mStoreData(boost::make_unique<StoreData>(*mItemFactory))
+    World::World(const DiabloExe::DiabloExe& exe, uint32_t seed)
+        : mDiabloExe(exe), mRng(new Random::RngMersenneTwister(seed)),
+          mLevelRng(new Random::RngMersenneTwister(uint32_t(mRng->randomInRange(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max())))),
+          mItemFactory(boost::make_unique<ItemFactory>(exe, *mRng.get())), mStoreData(boost::make_unique<StoreData>(*mItemFactory))
     {
         this->setupObjectIdMappers();
         regenerateStoreItems();
     }
 
-    void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/); }
+    void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/, *mRng.get()); }
 
     void World::load(FASaveGame::GameLoader& loader)
     {
@@ -43,11 +46,13 @@ namespace FAWorld
         {
             const DiabloExe::DiabloExe& tmp = mDiabloExe;
             this->~World();
-            new (this) World(tmp);
+            new (this) World(tmp, 0U);
         }
 
         loader.currentlyLoadingWorld = this;
 
+        mRng->load(loader);
+        mLevelRng->load(loader);
         this->mTicksPassed = loader.load<Tick>();
         uint32_t numLevels = loader.load<uint32_t>();
 
@@ -73,6 +78,8 @@ namespace FAWorld
 
     void World::save(FASaveGame::GameSaver& saver)
     {
+        mRng->save(saver);
+        mLevelRng->save(saver);
         saver.save(this->mTicksPassed);
         uint32_t numLevels = mLevels.size();
         saver.save(numLevels);
@@ -265,7 +272,7 @@ namespace FAWorld
             return nullptr;
         if (p->second == nullptr)
         {
-            p->second = FALevelGen::generate(*this, 100, 100, level, mDiabloExe, level - 1, level + 1);
+            p->second = FALevelGen::generate(*this, *mLevelRng.get(), 100, 100, level, mDiabloExe, level - 1, level + 1);
         }
         return p->second;
     }

@@ -9,7 +9,6 @@
 #include "../faworld/playerfactory.h"
 #include "../faworld/world.h"
 #include "localinputhandler.h"
-#include "misc/random.h"
 #include "net/client.h"
 #include "net/server.h"
 #include "threadmanager.h"
@@ -20,6 +19,7 @@
 #include <input/inputmanager.h>
 #include <iostream>
 #include <misc/misc.h>
+#include <random/random.h>
 #include <serial/textstream.h>
 #include <thread>
 
@@ -66,8 +66,6 @@ namespace Engine
 
     void EngineMain::runGameLoop(const bpo::variables_map& variables, const std::string& pathEXE)
     {
-        Random::FAsrand(0); // static_cast<int>(time(nullptr)));
-
         FARender::Renderer& renderer = *FARender::Renderer::get();
 
         Settings::Settings settings;
@@ -83,13 +81,13 @@ namespace Engine
             return;
         }
 
-        FAWorld::ItemFactory itemFactory(*mExe);
+        FAWorld::ItemFactory itemFactory(*mExe, Random::DummyRng::instance);
         mPlayerFactory = boost::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
         renderer.loadFonts(*mExe);
 
         FAWorld::Player* player = nullptr;
         int32_t currentLevel = -1;
-        mWorld.reset(new FAWorld::World(*mExe));
+        mWorld.reset(new FAWorld::World(*mExe, uint32_t(time(nullptr))));
 
         if (!variables["client"].as<bool>())
         {

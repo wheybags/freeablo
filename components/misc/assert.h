@@ -11,7 +11,7 @@
         abort();                                                                                                                                               \
     } while (0)
 
-#define message_and_abort(message) message_and_abort_fmt("%s", message)
+#define message_and_abort(message) message_and_abort_fmt("%s\n", message)
 
 #define release_assert(cond)                                                                                                                                   \
     do                                                                                                                                                         \
@@ -30,4 +30,4 @@
 #define debug_assert(cond) release_assert(cond)
 #endif
 
-#define invalid_enum(enumType, val) message_and_abort_fmt("Invalid %s enum used at %s:%d, value %d", #enumType, __FILE__, __LINE__, int(val))
+#define invalid_enum(enumType, val) message_and_abort_fmt("Invalid %s enum used at %s:%d, value %d\n", #enumType, __FILE__, __LINE__, int(val))

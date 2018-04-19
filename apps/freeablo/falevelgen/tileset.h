@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include <map>
 #include <settings/settings.h>
 #include <stdlib.h>
@@ -8,9 +6,13 @@
 #include <utility>
 #include <vector>
 
+namespace Random
+{
+    class Rng;
+}
+
 namespace FALevelGen
 {
-
     enum class TileSetEnum : int32_t
     {
         // this block and the block after it are related
@@ -94,93 +96,92 @@ namespace FALevelGen
     class TileSet
     {
     public:
-        TileSet(const std::string& path);
+        explicit TileSet(const std::string& path);
 
-        int32_t xWall;
-        int32_t outsideXWall;
-        int32_t yWall;
-        int32_t outsideYWall;
-        int32_t bottomCorner;
-        int32_t outsideBottomCorner;
-        int32_t rightCorner;
-        int32_t outsideRightCorner;
-        int32_t leftCorner;
-        int32_t outsideLeftCorner;
-        int32_t topCorner;
-        int32_t outsideTopCorner;
-        int32_t floor;
-        int32_t blank;
-        int32_t xWallEnd;
-        int32_t xWallEndBack;
-        int32_t yWallEnd;
-        int32_t yWallEndBack;
-        int32_t xDoor;
-        int32_t yDoor;
-
-        int32_t upStairs1;
-        int32_t upStairs2;
-        int32_t upStairs3;
-
-        int32_t upStairs4;
-        int32_t upStairs5;
-        int32_t upStairs6;
-
-        int32_t upStairs7;
-        int32_t upStairs8;
-        int32_t upStairs9;
-
-        int32_t downStairs1;
-        int32_t downStairs2;
-        int32_t downStairs3;
-
-        int32_t downStairs4;
-        int32_t downStairs5;
-        int32_t downStairs6;
-
-        int32_t downStairs7;
-        int32_t downStairs8;
-        int32_t downStairs9;
-
-        int32_t insideXWall;
-        int32_t insideXWallEnd;
-        int32_t insideXWallEndBack;
-        int32_t insideYWall;
-        int32_t insideYWallEnd;
-        int32_t insideYWallEndBack;
-        int32_t insideLeftCorner;
-        int32_t insideRightCorner;
-        int32_t insideBottomCorner;
-        int32_t insideTopCorner;
-
-        int32_t joinY;
-        int32_t joinYRightCorner;
-        int32_t joinRightCorner;
-        int32_t joinOutXRightCorner;
-        int32_t joinOutX;
-        int32_t joinOutXTopCorner;
-        int32_t joinTopCorner;
-        int32_t joinOutYTopCorner;
-        int32_t joinOutY;
-        int32_t joinOutYLeftCorner;
-        int32_t joinLeftCorner;
-        int32_t joinXLeftCorner;
-        int32_t joinX;
-        int32_t joinXBottomCorner;
-        int32_t joinBottomCorner;
-        int32_t joinYBottomCorner;
-
-        int32_t getRandomTile(int32_t tile);
+        int32_t getRandomTile(Random::Rng& rng, int32_t tile);
         std::map<int32_t, int32_t> getDoorMap();
-
         int32_t convert(TileSetEnum val);
 
     private:
-        std::map<int32_t, std::pair<std::vector<std::pair<int32_t, int32_t>>, int32_t>> mAlternatives;
-
-        std::map<int32_t, int32_t> mDoorMap;
-
         void fillTile(int32_t tile, Settings::Settings& settings, const std::string& str);
-
         void loadDoorMap(Settings::Settings& settings);
+
+    public:
+        int32_t xWall = 0;
+        int32_t outsideXWall = 0;
+        int32_t yWall = 0;
+        int32_t outsideYWall = 0;
+        int32_t bottomCorner = 0;
+        int32_t outsideBottomCorner = 0;
+        int32_t rightCorner = 0;
+        int32_t outsideRightCorner = 0;
+        int32_t leftCorner = 0;
+        int32_t outsideLeftCorner = 0;
+        int32_t topCorner = 0;
+        int32_t outsideTopCorner = 0;
+        int32_t floor = 0;
+        int32_t blank = 0;
+        int32_t xWallEnd = 0;
+        int32_t xWallEndBack = 0;
+        int32_t yWallEnd = 0;
+        int32_t yWallEndBack = 0;
+        int32_t xDoor = 0;
+        int32_t yDoor = 0;
+
+        int32_t upStairs1 = 0;
+        int32_t upStairs2 = 0;
+        int32_t upStairs3 = 0;
+
+        int32_t upStairs4 = 0;
+        int32_t upStairs5 = 0;
+        int32_t upStairs6 = 0;
+
+        int32_t upStairs7 = 0;
+        int32_t upStairs8 = 0;
+        int32_t upStairs9 = 0;
+
+        int32_t downStairs1 = 0;
+        int32_t downStairs2 = 0;
+        int32_t downStairs3 = 0;
+
+        int32_t downStairs4 = 0;
+        int32_t downStairs5 = 0;
+        int32_t downStairs6 = 0;
+
+        int32_t downStairs7 = 0;
+        int32_t downStairs8 = 0;
+        int32_t downStairs9 = 0;
+
+        int32_t insideXWall = 0;
+        int32_t insideXWallEnd = 0;
+        int32_t insideXWallEndBack = 0;
+        int32_t insideYWall = 0;
+        int32_t insideYWallEnd = 0;
+        int32_t insideYWallEndBack = 0;
+        int32_t insideLeftCorner = 0;
+        int32_t insideRightCorner = 0;
+        int32_t insideBottomCorner = 0;
+        int32_t insideTopCorner = 0;
+
+        int32_t joinY = 0;
+        int32_t joinYRightCorner = 0;
+        int32_t joinRightCorner = 0;
+        int32_t joinOutXRightCorner = 0;
+        int32_t joinOutX = 0;
+        int32_t joinOutXTopCorner = 0;
+        int32_t joinTopCorner = 0;
+        int32_t joinOutYTopCorner = 0;
+        int32_t joinOutY = 0;
+        int32_t joinOutYLeftCorner = 0;
+        int32_t joinLeftCorner = 0;
+        int32_t joinXLeftCorner = 0;
+        int32_t joinX = 0;
+        int32_t joinXBottomCorner = 0;
+        int32_t joinBottomCorner = 0;
+        int32_t joinYBottomCorner = 0;
+
+    private:
+        std::map<int32_t, std::pair<std::vector<std::pair<int32_t, int32_t>>, int32_t>> mAlternatives;
+        std::map<int32_t, int32_t> mDoorMap;
     };
 }

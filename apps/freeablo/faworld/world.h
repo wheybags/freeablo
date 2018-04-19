@@ -7,6 +7,11 @@
 #include <utility>
 #include <vector>
 
+namespace Random
+{
+    class Rng;
+}
+
 namespace FARender
 {
     class RenderState;
@@ -51,7 +56,7 @@ namespace FAWorld
     class World
     {
     public:
-        World(const DiabloExe::DiabloExe& exe);
+        World(const DiabloExe::DiabloExe& exe, uint32_t seed);
         void save(FASaveGame::GameSaver& saver);
         void load(FASaveGame::GameLoader& loader);
         ~World();
@@ -107,12 +112,14 @@ namespace FAWorld
 
         void playLevelMusic(size_t level);
 
-        static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
+        static const Tick ticksPerSecond = 60; ///< number of times per second that game state will be updated
         FASaveGame::ObjectIdMapper mObjectIdMapper;
 
         const DiabloExe::DiabloExe& mDiabloExe; // TODO: something better than this
+        std::unique_ptr<Random::Rng> mRng;
 
     private:
+        std::unique_ptr<Random::Rng> mLevelRng;
         std::map<int32_t, GameLevel*> mLevels;
         Tick mTicksPassed = 0;
         Player* mCurrentPlayer = nullptr;

@@ -18,6 +18,11 @@
 #include <misc/direction.h>
 #include <misc/misc.h>
 
+namespace Random
+{
+    class Rng;
+}
+
 namespace FASaveGame
 {
     class Loader;
@@ -34,7 +39,7 @@ namespace FAWorld
     public:
         Actor(World& world, const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
         Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
-        Actor(World& world, const DiabloExe::Monster& monster);
+        Actor(World& world, Random::Rng& rng, const DiabloExe::Monster& monster);
         Actor(World& world, FASaveGame::GameLoader& loader);
         virtual ~Actor();
         virtual int getArmor() const { /*placeholder */ return 0; }

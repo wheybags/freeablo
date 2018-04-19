@@ -1,7 +1,11 @@
 #pragma once
-
 #include <cstdint>
 #include <vector>
+
+namespace Random
+{
+    class Rng;
+}
 
 namespace FAWorld
 {
@@ -14,7 +18,7 @@ namespace FAWorld
     public:
         explicit StoreData(const ItemFactory& itemFactory);
 
-        void regenerateGriswoldBasicItems(int32_t ilvl);
+        void regenerateGriswoldBasicItems(int32_t ilvl, Random::Rng& rng);
 
     public:
         std::vector<Item> griswoldBasicItems;

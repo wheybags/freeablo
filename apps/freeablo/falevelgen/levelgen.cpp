@@ -1,6 +1,5 @@
 #include "levelgen.h"
 #include "../faworld/actor.h"
-#include "misc/random.h"
 #include "mst.h"
 #include "tileset.h"
 #include <algorithm>
@@ -9,6 +8,7 @@
 #include <diabloexe/monster.h>
 #include <misc/assert.h>
 #include <misc/misc.h>
+#include <random/random.h>
 #include <sstream>
 #include <stdlib.h>
 #include <vector>
@@ -202,7 +202,7 @@ namespace FALevelGen
     // Separate rooms so they don't overlap, using flocking ai
     // based on the algorithm described here:
     // http://gamedevelopment.tutsplus.com/tutorials/the-three-simple-rules-of-flocking-behaviors-alignment-cohesion-and-separation--gamedev-3444
-    void separate(std::vector<Room>& rooms, int32_t width, int32_t height)
+    void separate(Random::Rng& rng, std::vector<Room>& rooms, int32_t width, int32_t height)
     {
         bool overlap = true;
 
@@ -237,8 +237,8 @@ namespace FALevelGen
 
                         if (centre.first == currentCentre.first && centre.second == currentCentre.second)
                         {
-                            vector.first = static_cast<float>(Random::randomInRange(0, 10));
-                            vector.second = static_cast<float>(Random::randomInRange(0, 10));
+                            vector.first = static_cast<float>(rng.randomInRange(0, 10));
+                            vector.second = static_cast<float>(rng.randomInRange(0, 10));
                             neighbourCount++;
                             continue;
                         }
@@ -273,7 +273,7 @@ namespace FALevelGen
             removeOverlaps(rooms);
     }
 
-    void generateRooms(std::vector<Room>& rooms, int32_t width, int32_t height)
+    void generateRooms(Random::Rng& rng, std::vector<Room>& rooms, int32_t width, int32_t height)
     {
         int32_t maxDimension = 10;
 
@@ -289,14 +289,14 @@ namespace FALevelGen
 
         while (placed < numRooms)
         {
-            Room newRoom(Random::randomInRange(0, width - 4), Random::randomInRange(0, height - 4), 0, 0);
+            Room newRoom(rng.randomInRange(0, width - 4), rng.randomInRange(0, height - 4), 0, 0);
 
             if (((centreX - newRoom.centre().first) * (centreX - newRoom.centre().first) +
                  (centreY - newRoom.centre().second) * (centreY - newRoom.centre().second)) > radius * radius)
                 continue;
 
-            newRoom.width = Random::normRand(4, std::min(width - newRoom.xPos, maxDimension));
-            newRoom.height = Random::normRand(4, std::min(height - newRoom.yPos, maxDimension));
+            newRoom.width = rng.squaredRand(4, std::min(width - newRoom.xPos, maxDimension));
+            newRoom.height = rng.squaredRand(4, std::min(height - newRoom.yPos, maxDimension));
 
             float ratio = ((float)newRoom.width) / ((float)newRoom.height);
 
@@ -307,7 +307,7 @@ namespace FALevelGen
             rooms.push_back(newRoom);
         }
 
-        separate(rooms, width, height);
+        separate(rng, rooms, width, height);
     }
 
     void drawRoom(const Room& room, Level::Dun& level)
@@ -680,7 +680,7 @@ namespace FALevelGen
     //        extra edges to allow for some loops.
     //     5. Connect the rooms according to the graph from the last step with l shaped corridoors, and
     //        also draw any corridoor rooms that the corridoors overlap as part of the corridoor.
-    Level::Dun generateTmp(int32_t width, int32_t height, int32_t levelNum)
+    Level::Dun generateTmp(Random::Rng& rng, int32_t width, int32_t height, int32_t levelNum)
     {
         Level::Dun level(width, height);
 
@@ -691,7 +691,7 @@ namespace FALevelGen
 
         std::vector<Room> rooms;
         std::vector<Room> corridoorRooms;
-        generateRooms(rooms, width, height);
+        generateRooms(rng, rooms, width, height);
 
         // Split rooms into real rooms, and corridoor rooms
         for (int32_t i = 0; i < (int32_t)rooms.size(); i++)
@@ -728,8 +728,8 @@ namespace FALevelGen
 
             do
             {
-                a = Random::randomInRange(0, rooms.size() - 1);
-                b = Random::randomInRange(0, rooms.size() - 1);
+                a = rng.randomInRange(0, rooms.size() - 1);
+                b = rng.randomInRange(0, rooms.size() - 1);
             } while (a == b || parent[a] == b || parent[b] == a);
 
             connect(rooms[a], rooms[b], corridoorRooms, level);
@@ -747,7 +747,7 @@ namespace FALevelGen
 
         // Make sure we always place stairs
         if (!(placeUpStairs(level, rooms, levelNum) && placeDownStairs(level, rooms, levelNum)))
-            return generateTmp(width, height, levelNum);
+            return generateTmp(rng, width, height, levelNum);
 
         // Separate internal from external walls
         for (int32_t x = 0; x < (int32_t)width; x++)
@@ -840,7 +840,7 @@ namespace FALevelGen
         level.get(x, y) = (int32_t)newVal;
     }
 
-    void placeMonsters(FAWorld::GameLevel& level, const DiabloExe::DiabloExe& exe, int32_t dLvl)
+    void placeMonsters(Random::Rng& rng, FAWorld::GameLevel& level, const DiabloExe::DiabloExe& exe, int32_t dLvl)
     {
         std::vector<const DiabloExe::Monster*> possibleMonsters = exe.getMonstersInLevel(dLvl);
 
@@ -850,15 +850,15 @@ namespace FALevelGen
 
             do
             {
-                xPos = Random::randomInRange(1, level.width() - 1);
-                yPos = Random::randomInRange(1, level.height() - 1);
+                xPos = rng.randomInRange(1, level.width() - 1);
+                yPos = rng.randomInRange(1, level.height() - 1);
             } while (!level.getTile(xPos, yPos).passable() && std::make_pair(xPos, yPos) != level.upStairsPos() &&
                      std::make_pair(xPos, yPos) != level.downStairsPos());
 
-            std::string name = possibleMonsters[Random::randomInRange(0, possibleMonsters.size() - 1)]->monsterName;
+            std::string name = possibleMonsters[rng.randomInRange(0, possibleMonsters.size() - 1)]->monsterName;
             DiabloExe::Monster monster = exe.getMonster(name);
 
-            FAWorld::Actor* monsterObj = new FAWorld::Actor(*level.getWorld(), monster);
+            FAWorld::Actor* monsterObj = new FAWorld::Actor(*level.getWorld(), rng, monster);
             monsterObj->teleport(&level, FAWorld::Position(xPos, yPos));
         }
     }
@@ -1045,13 +1045,12 @@ namespace FALevelGen
         }
     }
 
-    FAWorld::GameLevel*
-    generate(FAWorld::World& world, int32_t width, int32_t height, int32_t dLvl, const DiabloExe::DiabloExe& exe, int32_t previous, int32_t next)
+    FAWorld::GameLevel* generate(
+        FAWorld::World& world, Random::Rng& rng, int32_t width, int32_t height, int32_t dLvl, const DiabloExe::DiabloExe& exe, int32_t previous, int32_t next)
     {
-        Random::FAsrand(123);
         int32_t levelNum = ((dLvl - 1) / 4) + 1;
 
-        Level::Dun tmpLevel = generateTmp(width, height, levelNum);
+        Level::Dun tmpLevel = generateTmp(rng, width, height, levelNum);
 
         Level::Dun level(width, height);
 
@@ -1093,7 +1092,7 @@ namespace FALevelGen
             {
                 // else
                 {
-                    level.get(x, y) = tileset.getRandomTile(level.get(x, y));
+                    level.get(x, y) = tileset.getRandomTile(rng, level.get(x, y));
                 }
             }
         }
@@ -1151,7 +1150,7 @@ namespace FALevelGen
         Level::Level levelBase(std::move(level), tilPath, minPath, solPath, celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap(), previous, next);
         auto retval = new FAWorld::GameLevel(world, std::move(levelBase), dLvl);
 
-        placeMonsters(*retval, exe, dLvl);
+        placeMonsters(rng, *retval, exe, dLvl);
 
         return retval;
     }

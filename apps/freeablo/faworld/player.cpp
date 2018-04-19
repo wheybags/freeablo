@@ -9,11 +9,11 @@
 #include "itembonus.h"
 #include "itemenums.h"
 #include "itemmap.h"
-#include "misc/random.h"
 #include "playerbehaviour.h"
 #include "world.h"
 #include <misc/assert.h>
 #include <misc/stringops.h>
+#include <random/random.h>
 #include <string>
 
 namespace FAWorld
@@ -64,12 +64,12 @@ namespace FAWorld
     double Player::meleeDamageVs(const Actor* /*actor*/) const
     {
         auto bonus = getItemBonus();
-        auto dmg = Random::randomInRange(bonus.minAttackDamage, bonus.maxAttackDamage);
+        auto dmg = mWorld.mRng->randomInRange(bonus.minAttackDamage, bonus.maxAttackDamage);
         dmg += dmg * getPercentDamageBonus() / 100;
         dmg += getCharacterBaseDamage();
         dmg += getDamageBonus();
         // critical hit for warriors:
-        if (mPlayerClass == PlayerClass::warrior && Random::randomInRange(0, 99) < getCharacterLevel())
+        if (mPlayerClass == PlayerClass::warrior && mWorld.mRng->randomInRange(0, 99) < getCharacterLevel())
             dmg *= 2;
         return dmg;
     }
@@ -106,7 +106,7 @@ namespace FAWorld
     bool Player::checkHit(Actor* enemy)
     {
         // let's throw some formulas, parameters will be placeholders for now
-        auto roll = Random::randomInRange(0, 99);
+        auto roll = mWorld.mRng->randomInRange(0, 99);
         auto toHit = mPlayerStats.mDexterity / 2;
         toHit += getArmorPenetration();
         toHit -= enemy->getArmor();

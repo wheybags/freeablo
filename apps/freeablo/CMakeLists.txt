@@ -127,7 +127,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fasavegame/gameloader.cpp
 )
 
-target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input enet::enet)
+target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input Random enet::enet)
 
 add_executable(freeablo main.cpp)
 target_link_libraries(freeablo freeablo_lib)
