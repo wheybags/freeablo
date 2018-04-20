@@ -24,10 +24,18 @@ namespace Engine
 
     boost::optional<std::vector<FAWorld::PlayerInput>> Server::getAndClearInputs(FAWorld::Tick tick)
     {
-        UNUSED_PARAM(tick);
+        if (!mInputs.count(tick))
+            return boost::none;
+
+        for (const auto& pair: mPeers)
+        {
+            if (pair.second.lastTick + 10 < tick)
+                return boost::none;
+        }
 
         std::vector<FAWorld::PlayerInput> retval;
-        mInputs.swap(retval);
+        mInputs.at(tick).swap(retval);
+        mInputs.erase(tick);
         return retval;
     }
 
@@ -62,6 +70,7 @@ namespace Engine
             }
         }
 
+
         bool allHaveMap = true;
         for (const auto& pair : mPeers)
         {
@@ -75,10 +84,20 @@ namespace Engine
         if (allHaveMap)
             EngineMain::get()->mPaused = false;
 
-        auto localInputs = mLocalInputHandler.getAndClearInputs();
-        mInputs.insert(mInputs.begin(), localInputs.begin(), localInputs.end());
+        if (mWorld.getCurrentTick() != mLastSentTick)
+        {
+            auto localInputs = mLocalInputHandler.getAndClearInputs();
+            mInputsBuffer.insert(mInputsBuffer.begin(), localInputs.begin(), localInputs.end());
 
-        sendInputsToClients();
+            // We can't have the server pulling directly from mInputsBuffer because then it would
+            // execute inputs at an earlier tick than the clients. So what we do here is essentially
+            // sending the buffer to all the clients, then "sending" it to the server as well, by means
+            // of the mInputs map.
+            sendInputsToClients(mInputsBuffer);
+            mInputs[mWorld.getCurrentTick()] = std::move(mInputsBuffer);
+
+            mLastSentTick = mWorld.getCurrentTick();
+        }
     }
 
     void Server::onPeerConnect(const ENetEvent& event)
@@ -95,6 +114,7 @@ namespace Engine
         newPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
 
         saver.save(uint8_t(MessageType::MapToClient));
+        saver.save(mDoFullVerify);
         saver.save(newPlayer->getId());
         mWorld.save(saver);
 
@@ -120,12 +140,13 @@ namespace Engine
                 return;
             }
 
-            case MessageType::InputsToServer:
+            case MessageType::ClientUpdateToServer:
             {
-                receiveInputs(loader);
+                receiveClientUpdate(loader, mPeers.at(event.peer->connectID));
                 return;
             }
 
+            case MessageType::InputsToClient:
             case MessageType::MapToClient:
                 invalid_enum(MessageType, type);
         }
@@ -133,31 +154,46 @@ namespace Engine
         invalid_enum(MessageType, type);
     }
 
-    void Server::sendInputsToClients()
+    void Server::sendInputsToClients(std::vector<FAWorld::PlayerInput>& inputs)
     {
+
         Serial::TextWriteStream stream;
         FASaveGame::GameSaver saver(stream);
 
         saver.save(uint8_t(MessageType::InputsToClient));
 
         saver.save(mWorld.getCurrentTick());
-        saver.save(uint32_t(mInputs.size()));
-        for (auto& input : mInputs)
+        saver.save(uint32_t(inputs.size()));
+        for (auto& input : inputs)
             input.save(saver);
 
+
+        if (mDoFullVerify)
+        {
+            Serial::TextWriteStream worldStream;
+            FASaveGame::GameSaver worldSaver(worldStream);
+            mWorld.save(worldSaver);
+
+            auto worldData = worldStream.getData();
+            std::string strData((const char*)worldData.first, worldData.second);
+            saver.save(strData);
+        }
+
         auto data = stream.getData();
+
 
         // does not take ownership of data
         ENetPacket* packet = enet_packet_create(data.first, data.second, ENET_PACKET_FLAG_RELIABLE);
         enet_host_broadcast(mHost, RELIABLE_CHANNEL_ID, packet);
     }
 
-    void Server::receiveInputs(FASaveGame::GameLoader& loader)
+    void Server::receiveClientUpdate(FASaveGame::GameLoader& loader, Peer& peer)
     {
+        peer.lastTick = loader.load<FAWorld::Tick>();
         uint32_t size = loader.load<uint32_t>();
-        size_t start = mInputs.size();
-        mInputs.resize(mInputs.size() + size);
+        size_t start = mInputsBuffer.size();
+        mInputsBuffer.resize(mInputsBuffer.size() + size);
         for (uint32_t i = 0; i < size; i++)
-            mInputs[start + i].load(loader);
+            mInputsBuffer[start + i].load(loader);
     }
 }

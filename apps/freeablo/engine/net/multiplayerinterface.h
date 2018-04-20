@@ -18,6 +18,8 @@ namespace Engine
 
         virtual boost::optional<std::vector<FAWorld::PlayerInput>> getAndClearInputs(FAWorld::Tick tick) = 0;
         virtual void update() = 0;
+        virtual void verify(FAWorld::Tick tick) = 0;
+        virtual bool isServer() const = 0;
 
         static constexpr int32_t RELIABLE_CHANNEL_ID = 0;
         static constexpr int32_t UNRELIABLE_CHANNEL_ID = 0;
@@ -30,7 +32,7 @@ namespace Engine
 
             // client-to-server
             AcknowledgeMapToServer,
-            InputsToServer
+            ClientUpdateToServer
         };
     };
 }

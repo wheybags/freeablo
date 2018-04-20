@@ -165,18 +165,25 @@ namespace Engine
 
             if (!mPaused && mInGame)
             {
-                auto inputs = mMultiplayer->getAndClearInputs(mWorld->getCurrentTick());
+                boost::optional<std::vector<FAWorld::PlayerInput>> inputs;
 
-                if (inputs)
+                do
                 {
-                    mWorld->update(mNoclip, inputs.get());
+                    inputs = mMultiplayer->getAndClearInputs(mWorld->getCurrentTick());
 
-                    if (mWorld->getCurrentLevelIndex() != lastLevelIndex)
+                    if (inputs)
                     {
-                        mWorld->playLevelMusic(mWorld->getCurrentLevelIndex());
-                        lastLevelIndex = mWorld->getCurrentLevelIndex();
+                        mMultiplayer->verify(mWorld->getCurrentTick());
+                        mWorld->update(mNoclip, inputs.get());
+
+                        if (mWorld->getCurrentLevelIndex() != lastLevelIndex)
+                        {
+                            mWorld->playLevelMusic(mWorld->getCurrentLevelIndex());
+                            lastLevelIndex = mWorld->getCurrentLevelIndex();
+                        }
                     }
-                }
+
+                } while (inputs);
             }
 
             nk_context* ctx = renderer.getNuklearContext();

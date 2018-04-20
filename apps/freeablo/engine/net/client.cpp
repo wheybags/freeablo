@@ -14,7 +14,7 @@ namespace Engine
     {
         mAddress.port = 6666;
         enet_address_set_host(&mAddress, "127.0.0.1");
-        mHost = enet_host_create(NULL, 32, 2, 0, 0);
+        mHost = enet_host_create(nullptr, 32, 2, 0, 0);
         mServerPeer = enet_host_connect(mHost, &mAddress, 2, 0);
 
         EngineMain::get()->mPaused = true;
@@ -69,12 +69,40 @@ namespace Engine
             }
         }
 
-        sendInputs();
+        sendClientUpdate();
+    }
+
+    void Client::verify(FAWorld::Tick tick)
+    {
+        if (!mDoFullVerify)
+            return;
+
+        Serial::TextWriteStream worldStream;
+        FASaveGame::GameSaver saver(worldStream);
+        EngineMain::get()->mWorld->save(saver);
+
+        auto worldData = worldStream.getData();
+        std::string strData(reinterpret_cast<const char*>(worldData.first), worldData.second);
+
+        if (strData != mServerStatesForFullVerify[tick])
+        {
+            FILE* f = fopen("SERVER.txt", "wb");
+            fwrite(mServerStatesForFullVerify[tick].data(), 1, mServerStatesForFullVerify[tick].size(), f);
+            fclose(f);
+
+            f = fopen("CLIENT.txt", "wb");
+            fwrite(strData.data(), 1, strData.size(), f);
+            fclose(f);
+
+            message_and_abort("desync detected");
+        }
+
+        mServerStatesForFullVerify.erase(tick);
     }
 
     void Client::processServerPacket(const ENetEvent& event)
     {
-        Serial::TextReadStream stream(std::string((const char*)event.packet->data, event.packet->dataLength));
+        Serial::TextReadStream stream(std::string(reinterpret_cast<const char*>(event.packet->data), event.packet->dataLength));
         FASaveGame::GameLoader loader(stream);
 
         MessageType type = MessageType(loader.load<uint8_t>());
@@ -93,6 +121,7 @@ namespace Engine
                 return;
             }
 
+            case MessageType::ClientUpdateToServer:
             case MessageType::AcknowledgeMapToServer:
                 invalid_enum(MessageType, type);
         }
@@ -102,14 +131,10 @@ namespace Engine
 
     void Client::receiveMap(FASaveGame::GameLoader& loader)
     {
-        // HACKY BULLSHIT HERE
-        //        EngineMain::get()->mWorld.reset(new FAWorld::World(loader, *EngineMain::get()->mExe.get()));
-
+        mDoFullVerify = loader.load<bool>();
         int32_t myPlayerId = loader.load<int32_t>();
         EngineMain::get()->mWorld->load(loader);
         EngineMain::get()->mWorld->addCurrentPlayer(static_cast<FAWorld::Player*>(EngineMain::get()->mWorld->getActorById(myPlayerId)));
-        //        EngineMain::get()->mGuiManager.reset(new FAGui::GuiManager(*EngineMain::get(), *EngineMain::get()->mWorld.get()));
-        //        EngineMain::get()->mWorld->setGuiManager(EngineMain::get()->mGuiManager.get());
 
         Serial::TextWriteStream stream;
         FASaveGame::GameSaver saver(stream);
@@ -133,28 +158,29 @@ namespace Engine
         inputs.resize(size);
         for (uint32_t i = 0; i < size; i++)
             inputs[i].load(loader);
+
+        if (mDoFullVerify)
+            mServerStatesForFullVerify[tick] = loader.load<std::string>();
     }
 
-    void Client::sendInputs()
+    void Client::sendClientUpdate()
     {
         auto inputs = mLocalInputHandler.getAndClearInputs();
 
-        if (!inputs.empty())
-        {
-            Serial::TextWriteStream stream;
-            FASaveGame::GameSaver saver(stream);
+        Serial::TextWriteStream stream;
+        FASaveGame::GameSaver saver(stream);
 
-            saver.save(uint8_t(MessageType::InputsToServer));
+        saver.save(uint8_t(MessageType::ClientUpdateToServer));
+        saver.save(EngineMain::get()->mWorld->getCurrentTick());
 
-            saver.save(uint32_t(inputs.size()));
-            for (auto& input : inputs)
-                input.save(saver);
+        saver.save(uint32_t(inputs.size()));
+        for (auto& input : inputs)
+            input.save(saver);
 
-            auto data = stream.getData();
+        auto data = stream.getData();
 
-            // does not take ownership of data
-            ENetPacket* packet = enet_packet_create(data.first, data.second, ENET_PACKET_FLAG_RELIABLE);
-            enet_peer_send(mServerPeer, RELIABLE_CHANNEL_ID, packet);
-        }
+        // does not take ownership of data
+        ENetPacket* packet = enet_packet_create(data.first, data.second, ENET_PACKET_FLAG_RELIABLE);
+        enet_peer_send(mServerPeer, RELIABLE_CHANNEL_ID, packet);
     }
 }
