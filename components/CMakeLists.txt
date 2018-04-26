@@ -45,6 +45,8 @@ add_library(Misc
     misc/enum_range.h
     misc/fixedpoint.cpp
     misc/fixedpoint.h
+    misc/vec2fix.cpp
+    misc/vec2fix.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)

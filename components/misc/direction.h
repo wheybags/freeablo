@@ -9,7 +9,7 @@ namespace Misc
     enum class Direction : uint8_t
     {
         south = 0,
-        sout_west,
+        south_west,
         west,
         north_west,
         north,

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <misc/fixedpoint.h>
+#include <misc/vec2fix.h>
 
 #define ASSERT_ALMOST_EQ(expected, actual, delta) \
     do \
@@ -96,6 +97,19 @@ TEST(FixedPoint, PlainIntOperators)
 
     val = uint8_t(1) / FixedPoint("2");
     ASSERT_EQ(val, FixedPoint("0.5"));
+}
+
+TEST(FixedPoint, VectorToDirection)
+{
+    ASSERT_EQ(Vec2Fix(1,0).getDirection(), Misc::Direction::east);
+    ASSERT_EQ(Vec2Fix(-1,0).getDirection(), Misc::Direction::west);
+    ASSERT_EQ(Vec2Fix(0,1).getDirection(), Misc::Direction::north);
+    ASSERT_EQ(Vec2Fix(0,-1).getDirection(), Misc::Direction::south);
+
+    ASSERT_EQ(Vec2Fix(1, 1).getDirection(), Misc::Direction::north_east);
+    ASSERT_EQ(Vec2Fix(1,-1).getDirection(), Misc::Direction::south_east);
+    ASSERT_EQ(Vec2Fix(-1,-1).getDirection(), Misc::Direction::south_west);
+    ASSERT_EQ(Vec2Fix(-1,1).getDirection(), Misc::Direction::north_west);
 }
 
 
