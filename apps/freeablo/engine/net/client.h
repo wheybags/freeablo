@@ -36,6 +36,6 @@ namespace Engine
 
         ENetHost* mHost = nullptr;
         ENetPeer* mServerPeer = nullptr;
-        ENetAddress mAddress = {};
+        ENetAddress mAddress;
     };
 }

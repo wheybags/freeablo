@@ -41,7 +41,7 @@ namespace Engine
 
     void Server::update()
     {
-        ENetEvent event = {};
+        ENetEvent event;
 
         while (enet_host_service(mHost, &event, 0))
         {

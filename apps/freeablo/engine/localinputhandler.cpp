@@ -4,6 +4,7 @@
 #include "../faworld/player.h"
 #include "../faworld/target.h"
 #include "../faworld/world.h"
+#include "enginemain.h"
 #include "input/inputmanager.h"
 #include <misc/vec2fix.h>
 
@@ -59,10 +60,9 @@ namespace Engine
                 }
                 else if (auto item = mWorld.targetedItem(mousePosition))
                 {
-                    //                    auto type = mWorld.mGuiManager->isInventoryShown() ? FAWorld::Target::ItemTarget::ActionType::toCursor
-                    //                                                                       : FAWorld::Target::ItemTarget::ActionType::autoEquip;
-                    //                    mInputs.emplace_back(FAWorld::PlayerInput::TargetItemOnFloorData{item->getTile().x, item->getTile().y, type},
-                    //                    player->getId());
+                    auto type = EngineMain::get()->mGuiManager->isInventoryShown() ? FAWorld::Target::ItemTarget::ActionType::toCursor
+                                                                                   : FAWorld::Target::ItemTarget::ActionType::autoEquip;
+                    mInputs.emplace_back(FAWorld::PlayerInput::TargetItemOnFloorData{item->getTile().x, item->getTile().y, type}, player->getId());
                 }
                 else if (modifiers.shift)
                 {

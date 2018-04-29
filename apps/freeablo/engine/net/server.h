@@ -53,7 +53,7 @@ namespace Engine
         FAWorld::Tick mLastSentTick = -1;
 
         ENetHost* mHost = nullptr;
-        ENetAddress mAddress = {};
+        ENetAddress mAddress;
         std::map<uint32_t, Peer> mPeers;
     };
 }

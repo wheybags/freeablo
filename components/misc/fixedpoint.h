@@ -65,7 +65,11 @@ public:
     }
 
     FixedPoint sqrt() const;
-    FixedPoint abs() const { return fromRawValue(std::abs(mVal)); }
+    FixedPoint abs() const
+    {
+        // not using std::abs because of a libc++ bug https://github.com/Project-OSRM/osrm-backend/issues/1000
+        return fromRawValue(mVal >= 0 ? mVal : -mVal);
+    }
 
 private:
     // The scaling factor to use, as a power of 10.

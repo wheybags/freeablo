@@ -6,6 +6,9 @@
 
 using uint128_t = boost::multiprecision::uint128_t;
 
+constexpr int64_t FixedPoint::scalingFactorPowerOf10;
+constexpr int64_t FixedPoint::scalingFactor;
+
 static int64_t ipow(int64_t x, int64_t power)
 {
     int64_t result = 1;
@@ -13,6 +16,11 @@ static int64_t ipow(int64_t x, int64_t power)
         result *= x;
 
     return result;
+}
+
+static int64_t i64abs(int64_t i)
+{
+    return i >= 0 ? i : -i; // not using std::abs because of a libc++ bug https://github.com/Project-OSRM/osrm-backend/issues/1000
 }
 
 FixedPoint::FixedPoint(const std::string& str)
@@ -26,7 +34,6 @@ FixedPoint::FixedPoint(const std::string& str)
         std::stringstream ss(split[0]);
         ss >> integer;
     }
-
     int64_t fractional = 0;
     int64_t fractionalDigits = 0;
     if (split.size() == 2)
@@ -37,7 +44,7 @@ FixedPoint::FixedPoint(const std::string& str)
     }
 
     int64_t sign = integer >= 0 ? 1 : -1;
-    integer = std::abs(integer);
+    integer = i64abs(integer);
 
     int64_t tmpScalePow10 = fractionalDigits;
     int64_t tmpScale = ipow(10, tmpScalePow10);
@@ -86,7 +93,7 @@ int64_t FixedPoint::round() const
 FixedPoint FixedPoint::fractionPart() const
 {
     int64_t intPart = this->intPart();
-    int64_t rawVal = std::abs(mVal - (intPart * FixedPoint::scalingFactor));
+    int64_t rawVal = i64abs(mVal - (intPart * FixedPoint::scalingFactor));
     return fromRawValue(rawVal);
 }
 
@@ -144,8 +151,8 @@ FixedPoint FixedPoint::operator*(FixedPoint other) const
 {
     int64_t sign = (mVal >= 0 ? 1 : -1) * (other.mVal >= 0 ? 1 : -1);
 
-    uint128_t val1 = uint128_t(std::abs(mVal));
-    uint128_t val2 = uint128_t(std::abs(other.mVal));
+    uint128_t val1 = uint128_t(i64abs(mVal));
+    uint128_t val2 = uint128_t(i64abs(other.mVal));
     uint128_t scale = FixedPoint::scalingFactor;
 
     uint128_t temp = (val1 * val2) / scale;
@@ -163,8 +170,8 @@ FixedPoint FixedPoint::operator/(FixedPoint other) const
 {
     int64_t sign = (mVal >= 0 ? 1 : -1) * (other.mVal >= 0 ? 1 : -1);
 
-    uint128_t val1 = uint128_t(std::abs(mVal));
-    uint128_t val2 = uint128_t(std::abs(other.mVal));
+    uint128_t val1 = uint128_t(i64abs(mVal));
+    uint128_t val2 = uint128_t(i64abs(other.mVal));
     uint128_t scale = FixedPoint::scalingFactor;
 
     uint128_t temp = (val1 * scale) / val2;

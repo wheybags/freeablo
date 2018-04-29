@@ -111,6 +111,10 @@ namespace FAWorld
 
                 return;
             }
+            case PlayerInput::Type::None:
+            {
+                message_and_abort("received \"None\" type PlayerInput");
+            }
         }
 
         release_assert(false && "Invalid PlayerInput detected");
