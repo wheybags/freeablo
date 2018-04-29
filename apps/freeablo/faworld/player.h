@@ -48,7 +48,7 @@ namespace FAWorld
         int getArmorPenetration() const { /* placeholder */ return 0; }
         int getCharacterLevel() const { /* placeholder */ return 1; }
         PlayerClass getClass() const { return mPlayerClass; }
-        double meleeDamageVs(const Actor* actor) const override;
+        int32_t meleeDamageVs(const Actor* actor) const override;
         int getMaxDamage() const { /* placeholder */ return 20; }
         int getPercentDamageBonus() const { return 0; }
         int getCharacterBaseDamage() const { /* placeholder */ return 0; }

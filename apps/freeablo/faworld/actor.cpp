@@ -151,7 +151,7 @@ namespace FAWorld
 
     bool Actor::checkHit(Actor*) { return mWorld.mRng->randomInRange(1, 2) < 2; }
 
-    void Actor::takeDamage(double amount)
+    void Actor::takeDamage(int32_t amount)
     {
         if (mInvuln)
             return;
@@ -219,10 +219,10 @@ namespace FAWorld
 
     GameLevel* Actor::getLevel() { return mMoveHandler.getLevel(); }
 
-    double Actor::meleeDamageVs(const Actor* /*actor*/) const
+    int32_t Actor::meleeDamageVs(const Actor* /*actor*/) const
     {
         /* placeholder */
-        return 5.0;
+        return 5;
     }
 
     std::string Actor::getDieWav() const

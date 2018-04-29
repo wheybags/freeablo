@@ -57,7 +57,7 @@ namespace FAWorld
         GameLevel* getLevel();
         World* getWorld() const { return &mWorld; }
 
-        virtual double meleeDamageVs(const Actor* actor) const;
+        virtual int32_t meleeDamageVs(const Actor* actor) const;
         void doMeleeHit(Actor* enemy);
         void doMeleeHit(const std::pair<int32_t, int32_t>& tile);
         void startMeleeAttack(Misc::Direction direction);
@@ -69,7 +69,7 @@ namespace FAWorld
         bool canIAttack(Actor* actor);
         virtual void update(bool noclip);
         void init();
-        void takeDamage(double amount);
+        void takeDamage(int32_t amount);
         void heal();
         void setDirection(Misc::Direction direction);
 

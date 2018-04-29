@@ -62,7 +62,7 @@ namespace FAWorld
         updateSprites();
     }
 
-    double Player::meleeDamageVs(const Actor* /*actor*/) const
+    int32_t Player::meleeDamageVs(const Actor* /*actor*/) const
     {
         auto bonus = getItemBonus();
         auto dmg = mWorld.mRng->randomInRange(bonus.minAttackDamage, bonus.maxAttackDamage);
