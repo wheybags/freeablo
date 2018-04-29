@@ -145,7 +145,7 @@ namespace FALevelGen
     void moveRoom(Room& room, const Vec2Fix& vector, int32_t width, int32_t height)
     {
         int32_t newX = 0, newY = 0;
-        std::tie(newX, newY) = Misc::getNextPosByDir({room.xPos, room.yPos}, vector.getDirection());
+        std::tie(newX, newY) = Misc::getNextPosByDir({room.xPos, room.yPos}, vector.getIsometricDirection());
 
         // Make sure not to move outside map
         if (newX >= 1 && newY >= 1 && newX + room.width < width - 1 && newY + room.height < height - 1)

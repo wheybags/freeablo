@@ -13,6 +13,7 @@
 #include "world.h"
 #include <misc/assert.h>
 #include <misc/stringops.h>
+#include <misc/vec2fix.h>
 #include <random/random.h>
 #include <string>
 
@@ -273,7 +274,9 @@ namespace FAWorld
     bool Player::dropItem(const FAWorld::Tile& clickedTile)
     {
         auto cursorItem = mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
-        auto initialDir = Misc::getVecDir(Misc::getVec(getPos().current(), {clickedTile.x, clickedTile.y}));
+
+        auto initialDir = (Vec2Fix(clickedTile.x, clickedTile.y) - Vec2Fix(getPos().current().first, getPos().current().second)).getIsometricDirection();
+
         auto curPos = getPos().current();
         auto tryDrop = [&](const std::pair<int32_t, int32_t>& pos) {
             if (getLevel()->dropItem(std::unique_ptr<Item>{new Item(cursorItem)}, *this, FAWorld::Tile(pos.first, pos.second)))

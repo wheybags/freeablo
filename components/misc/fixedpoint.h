@@ -83,14 +83,3 @@ private:
     double mDebugVal = 0;
 #endif
 };
-
-template <typename T> FixedPoint operator+(T a, FixedPoint b) { return FixedPoint(a) + b; }
-template <typename T> FixedPoint operator-(T a, FixedPoint b) { return FixedPoint(a) - b; }
-template <typename T> FixedPoint operator*(T a, FixedPoint b) { return FixedPoint(a) * b; }
-template <typename T> FixedPoint operator/(T a, FixedPoint b) { return FixedPoint(a) / b; }
-template <typename T> bool operator==(T a, FixedPoint b) { return FixedPoint(a) == b; }
-template <typename T> bool operator!=(T a, FixedPoint b) { return FixedPoint(a) != b; }
-template <typename T> bool operator>(T a, FixedPoint b) { return FixedPoint(a) > b; }
-template <typename T> bool operator<(T a, FixedPoint b) { return FixedPoint(a) < b; }
-template <typename T> bool operator>=(T a, FixedPoint b) { return FixedPoint(a) >= b; }
-template <typename T> bool operator<=(T a, FixedPoint b) { return FixedPoint(a) <= b; }

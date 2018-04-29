@@ -9,7 +9,10 @@ public:
 
     FixedPoint magnitude() const;
     void normalise();
-    Misc::Direction getDirection() const;
+
+    /// NOTE: this function returns a direction in isometric space,
+    /// where positive x extends south east from the origin, and positive y south west
+    Misc::Direction getIsometricDirection() const;
 
     Vec2Fix operator-(const Vec2Fix& other) const;
 

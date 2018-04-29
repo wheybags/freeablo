@@ -186,7 +186,7 @@ FixedPoint FixedPoint::sqrt() const
     size_t i = 0;
     do
     {
-        h = ((x * x) - *this) / (2 * x);
+        h = ((x * x) - *this) / (FixedPoint(2) * x);
         x = x - h;
         i++;
     } while (h.abs() >= epsilon && i < iterationLimit);

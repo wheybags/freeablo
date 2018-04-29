@@ -87,27 +87,21 @@ TEST(FixedPoint, PlainIntOperators)
     val = FixedPoint("1.245") + int32_t(10);
     ASSERT_EQ(val, FixedPoint("11.245"));
 
-    val = int32_t(10) + FixedPoint("1.245");
-    ASSERT_EQ(val, FixedPoint("11.245"));
-
     val = FixedPoint("1.0") / uint8_t(2);
-    ASSERT_EQ(val, FixedPoint("0.5"));
-
-    val = uint8_t(1) / FixedPoint("2");
     ASSERT_EQ(val, FixedPoint("0.5"));
 }
 
 TEST(FixedPoint, VectorToDirection)
 {
-    ASSERT_EQ(Vec2Fix(1, 0).getDirection(), Misc::Direction::east);
-    ASSERT_EQ(Vec2Fix(-1, 0).getDirection(), Misc::Direction::west);
-    ASSERT_EQ(Vec2Fix(0, 1).getDirection(), Misc::Direction::north);
-    ASSERT_EQ(Vec2Fix(0, -1).getDirection(), Misc::Direction::south);
+    ASSERT_EQ(Vec2Fix(1, 0).getIsometricDirection(), Misc::Direction::south_east);
+    ASSERT_EQ(Vec2Fix(-1, 0).getIsometricDirection(), Misc::Direction::north_west);
+    ASSERT_EQ(Vec2Fix(0, 1).getIsometricDirection(), Misc::Direction::south_west);
+    ASSERT_EQ(Vec2Fix(0, -1).getIsometricDirection(), Misc::Direction::north_east);
 
-    ASSERT_EQ(Vec2Fix(1, 1).getDirection(), Misc::Direction::north_east);
-    ASSERT_EQ(Vec2Fix(1, -1).getDirection(), Misc::Direction::south_east);
-    ASSERT_EQ(Vec2Fix(-1, -1).getDirection(), Misc::Direction::south_west);
-    ASSERT_EQ(Vec2Fix(-1, 1).getDirection(), Misc::Direction::north_west);
+    ASSERT_EQ(Vec2Fix(1, 1).getIsometricDirection(), Misc::Direction::south);
+    ASSERT_EQ(Vec2Fix(1, -1).getIsometricDirection(), Misc::Direction::east);
+    ASSERT_EQ(Vec2Fix(-1, -1).getIsometricDirection(), Misc::Direction::north);
+    ASSERT_EQ(Vec2Fix(-1, 1).getIsometricDirection(), Misc::Direction::west);
 }
 
 int main(int argc, char** argv)

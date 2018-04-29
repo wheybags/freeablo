@@ -5,6 +5,7 @@
 #include "../faworld/target.h"
 #include "../faworld/world.h"
 #include "input/inputmanager.h"
+#include <misc/vec2fix.h>
 
 namespace Engine
 {
@@ -66,7 +67,7 @@ namespace Engine
                 else if (modifiers.shift)
                 {
                     Misc::Direction direction =
-                        Misc::getVecDir({clickedTile.x - player->getPos().current().first, clickedTile.y - player->getPos().current().second});
+                        Vec2Fix(clickedTile.x - player->getPos().current().first, clickedTile.y - player->getPos().current().second).getIsometricDirection();
                     mInputs.emplace_back(FAWorld::PlayerInput::AttackDirectionData{direction}, player->getId());
                 }
                 else
