@@ -22,6 +22,7 @@ namespace Engine
         virtual void update() override;
         virtual void verify(FAWorld::Tick) override {}
         virtual bool isServer() const override { return true; }
+        virtual bool isMultiplayer() const override { return !mPeers.empty(); }
 
     private:
         struct Peer

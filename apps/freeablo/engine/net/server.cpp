@@ -80,10 +80,7 @@ namespace Engine
             }
         }
 
-        if (allHaveMap)
-            EngineMain::get()->mPaused = false;
-
-        if (mWorld.getCurrentTick() != mLastSentTick)
+        if (mWorld.getCurrentTick() != mLastSentTick && allHaveMap)
         {
             auto localInputs = mLocalInputHandler.getAndClearInputs();
             mInputsBuffer.insert(mInputsBuffer.begin(), localInputs.begin(), localInputs.end());
@@ -102,7 +99,6 @@ namespace Engine
     void Server::onPeerConnect(const ENetEvent& event)
     {
         mPeers[event.peer->connectID] = Peer(event.peer);
-        EngineMain::get()->mPaused = true;
 
         Serial::TextWriteStream stream;
         FASaveGame::GameSaver saver(stream);

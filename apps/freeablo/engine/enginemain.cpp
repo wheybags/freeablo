@@ -163,7 +163,7 @@ namespace Engine
             mLocalInputHandler->update();
             mMultiplayer->update();
 
-            if (!mPaused && mInGame)
+            if ((!mPaused || mMultiplayer->isMultiplayer()) && mInGame)
             {
                 boost::optional<std::vector<FAWorld::PlayerInput>> inputs;
 
@@ -192,11 +192,11 @@ namespace Engine
             FARender::RenderState* state = renderer.getFreeState();
             if (state)
             {
-                if (!mPaused && mWorld->getCurrentPlayer())
+                if (mWorld->getCurrentPlayer())
                 {
                     auto level = mWorld->getCurrentLevel();
                     state->mPos = mWorld->getCurrentPlayer()->getPos();
-                    if (level != NULL)
+                    if (level != nullptr)
                         state->tileset = renderer.getTileset(*level);
                     state->level = level;
                     mWorld->fillRenderState(state, mLocalInputHandler->getHoverStatus());

@@ -16,8 +16,6 @@ namespace Engine
         enet_address_set_host(&mAddress, "127.0.0.1");
         mHost = enet_host_create(nullptr, 32, 2, 0, 0);
         mServerPeer = enet_host_connect(mHost, &mAddress, 2, 0);
-
-        EngineMain::get()->mPaused = true;
     }
 
     Client::~Client()
@@ -141,7 +139,6 @@ namespace Engine
         saver.save(uint8_t(MessageType::AcknowledgeMapToServer));
         auto data = stream.getData();
 
-        EngineMain::get()->mPaused = false;
         EngineMain::get()->mInGame = true;
 
         // does not take ownership of data
