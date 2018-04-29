@@ -62,7 +62,7 @@ Misc::Direction Vec2Fix::getDirection() const
             }
             else
             {
-                return  Misc::Direction::north;
+                return Misc::Direction::north;
             }
         }
         else
@@ -76,7 +76,7 @@ Misc::Direction Vec2Fix::getDirection() const
             }
             else
             {
-                return  Misc::Direction::south;
+                return Misc::Direction::south;
             }
         }
     }
@@ -93,7 +93,7 @@ Misc::Direction Vec2Fix::getDirection() const
             }
             else
             {
-                return  Misc::Direction::north;
+                return Misc::Direction::north;
             }
         }
         else
@@ -107,7 +107,7 @@ Misc::Direction Vec2Fix::getDirection() const
             }
             else
             {
-                return  Misc::Direction::south;
+                return Misc::Direction::south;
             }
         }
     }

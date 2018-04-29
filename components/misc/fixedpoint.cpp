@@ -1,8 +1,8 @@
 #include "fixedpoint.h"
 #include "assert.h"
 #include "stringops.h"
-#include <sstream>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <sstream>
 
 using uint128_t = boost::multiprecision::uint128_t;
 
@@ -60,10 +60,7 @@ FixedPoint::FixedPoint(const std::string& str)
 #endif
 }
 
-FixedPoint::FixedPoint(int64_t integerValue)
-{
-    *this = fromRawValue(integerValue * FixedPoint::scalingFactor);
-}
+FixedPoint::FixedPoint(int64_t integerValue) { *this = fromRawValue(integerValue * FixedPoint::scalingFactor); }
 
 FixedPoint FixedPoint::fromRawValue(int64_t rawValue)
 {
@@ -75,10 +72,7 @@ FixedPoint FixedPoint::fromRawValue(int64_t rawValue)
     return retval;
 }
 
-int64_t FixedPoint::intPart() const
-{
-    return mVal / FixedPoint::scalingFactor;
-}
+int64_t FixedPoint::intPart() const { return mVal / FixedPoint::scalingFactor; }
 
 FixedPoint FixedPoint::fractionPart() const
 {
@@ -110,7 +104,7 @@ std::string FixedPoint::str() const
         fractionalTemp /= 10;
     }
 
-    while (!fractionalTempStr.empty() && fractionalTempStr[fractionalTempStr.size() -1] == '0')
+    while (!fractionalTempStr.empty() && fractionalTempStr[fractionalTempStr.size() - 1] == '0')
         fractionalTempStr.pop_back();
 
     if (!fractionalTempStr.empty())
@@ -164,7 +158,7 @@ FixedPoint FixedPoint::operator/(FixedPoint other) const
     uint128_t val2 = uint128_t(std::abs(other.mVal));
     uint128_t scale = FixedPoint::scalingFactor;
 
-    uint128_t temp = (val1*scale) / val2;
+    uint128_t temp = (val1 * scale) / val2;
 
     int64_t val = sign * int64_t(temp);
     FixedPoint retval = fromRawValue(val);
@@ -186,7 +180,7 @@ FixedPoint FixedPoint::sqrt() const
 
     do
     {
-        h = ((x*x) - *this) / (FixedPoint("2") * x);
+        h = ((x * x) - *this) / (FixedPoint("2") * x);
         x = x - h;
     } while (h.abs() >= epsilon);
 

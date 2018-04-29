@@ -2,16 +2,15 @@
 #include <misc/fixedpoint.h>
 #include <misc/vec2fix.h>
 
-#define ASSERT_ALMOST_EQ(expected, actual, delta) \
-    do \
-    {\
-        auto assert_expected = (expected); \
-        auto assert_actual = (actual); \
-        auto assert_delta = (delta); \
-        ASSERT_GT(assert_expected, assert_actual - assert_delta); \
-        ASSERT_LT(assert_expected, assert_actual + assert_delta); \
-    } while(false)
-
+#define ASSERT_ALMOST_EQ(expected, actual, delta)                                                                                                              \
+    do                                                                                                                                                         \
+    {                                                                                                                                                          \
+        auto assert_expected = (expected);                                                                                                                     \
+        auto assert_actual = (actual);                                                                                                                         \
+        auto assert_delta = (delta);                                                                                                                           \
+        ASSERT_GT(assert_expected, assert_actual - assert_delta);                                                                                              \
+        ASSERT_LT(assert_expected, assert_actual + assert_delta);                                                                                              \
+    } while (false)
 
 TEST(FixedPoint, TestConstruction)
 {
@@ -64,7 +63,6 @@ TEST(FixedPoint, MultiplyDivide)
     ASSERT_EQ(val.str(), "2");
 }
 
-
 TEST(FixedPoint, sqrt)
 {
     for (auto x : {"16", "200", "7.6345", "9.122938", "0.000123123"})
@@ -101,17 +99,16 @@ TEST(FixedPoint, PlainIntOperators)
 
 TEST(FixedPoint, VectorToDirection)
 {
-    ASSERT_EQ(Vec2Fix(1,0).getDirection(), Misc::Direction::east);
-    ASSERT_EQ(Vec2Fix(-1,0).getDirection(), Misc::Direction::west);
-    ASSERT_EQ(Vec2Fix(0,1).getDirection(), Misc::Direction::north);
-    ASSERT_EQ(Vec2Fix(0,-1).getDirection(), Misc::Direction::south);
+    ASSERT_EQ(Vec2Fix(1, 0).getDirection(), Misc::Direction::east);
+    ASSERT_EQ(Vec2Fix(-1, 0).getDirection(), Misc::Direction::west);
+    ASSERT_EQ(Vec2Fix(0, 1).getDirection(), Misc::Direction::north);
+    ASSERT_EQ(Vec2Fix(0, -1).getDirection(), Misc::Direction::south);
 
     ASSERT_EQ(Vec2Fix(1, 1).getDirection(), Misc::Direction::north_east);
-    ASSERT_EQ(Vec2Fix(1,-1).getDirection(), Misc::Direction::south_east);
-    ASSERT_EQ(Vec2Fix(-1,-1).getDirection(), Misc::Direction::south_west);
-    ASSERT_EQ(Vec2Fix(-1,1).getDirection(), Misc::Direction::north_west);
+    ASSERT_EQ(Vec2Fix(1, -1).getDirection(), Misc::Direction::south_east);
+    ASSERT_EQ(Vec2Fix(-1, -1).getDirection(), Misc::Direction::south_west);
+    ASSERT_EQ(Vec2Fix(-1, 1).getDirection(), Misc::Direction::north_west);
 }
-
 
 int main(int argc, char** argv)
 {

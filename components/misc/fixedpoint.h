@@ -1,7 +1,7 @@
 #pragma once
+#include <cmath>
 #include <cstdint>
 #include <string>
-#include <cmath>
 
 class FixedPoint
 {
@@ -63,24 +63,13 @@ private:
 #endif
 };
 
-template <typename T>
-FixedPoint operator+(T a, FixedPoint b) { return FixedPoint(a) + b; }
-template <typename T>
-FixedPoint operator-(T a, FixedPoint b) { return FixedPoint(a) - b; }
-template <typename T>
-FixedPoint operator*(T a, FixedPoint b) { return FixedPoint(a) * b; }
-template <typename T>
-FixedPoint operator/(T a, FixedPoint b) { return FixedPoint(a) / b; }
-template <typename T>
-bool operator==(T a, FixedPoint b) { return FixedPoint(a) == b; }
-template <typename T>
-bool operator!=(T a, FixedPoint b) { return FixedPoint(a) != b; }
-template <typename T>
-bool operator>(T a, FixedPoint b) { return FixedPoint(a) > b; }
-template <typename T>
-bool operator<(T a, FixedPoint b) { return FixedPoint(a) < b; }
-template <typename T>
-bool operator>=(T a, FixedPoint b) { return FixedPoint(a) >= b; }
-template <typename T>
-bool operator<=(T a, FixedPoint b) { return FixedPoint(a) <= b; }
-
+template <typename T> FixedPoint operator+(T a, FixedPoint b) { return FixedPoint(a) + b; }
+template <typename T> FixedPoint operator-(T a, FixedPoint b) { return FixedPoint(a) - b; }
+template <typename T> FixedPoint operator*(T a, FixedPoint b) { return FixedPoint(a) * b; }
+template <typename T> FixedPoint operator/(T a, FixedPoint b) { return FixedPoint(a) / b; }
+template <typename T> bool operator==(T a, FixedPoint b) { return FixedPoint(a) == b; }
+template <typename T> bool operator!=(T a, FixedPoint b) { return FixedPoint(a) != b; }
+template <typename T> bool operator>(T a, FixedPoint b) { return FixedPoint(a) > b; }
+template <typename T> bool operator<(T a, FixedPoint b) { return FixedPoint(a) < b; }
+template <typename T> bool operator>=(T a, FixedPoint b) { return FixedPoint(a) >= b; }
+template <typename T> bool operator<=(T a, FixedPoint b) { return FixedPoint(a) <= b; }

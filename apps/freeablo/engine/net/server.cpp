@@ -27,7 +27,7 @@ namespace Engine
         if (!mInputs.count(tick))
             return boost::none;
 
-        for (const auto& pair: mPeers)
+        for (const auto& pair : mPeers)
         {
             if (pair.second.lastTick + 10 < tick)
                 return boost::none;
@@ -69,7 +69,6 @@ namespace Engine
                     invalid_enum(ENetEventType, event.type);
             }
         }
-
 
         bool allHaveMap = true;
         for (const auto& pair : mPeers)
@@ -167,7 +166,6 @@ namespace Engine
         for (auto& input : inputs)
             input.save(saver);
 
-
         if (mDoFullVerify)
         {
             Serial::TextWriteStream worldStream;
@@ -180,7 +178,6 @@ namespace Engine
         }
 
         auto data = stream.getData();
-
 
         // does not take ownership of data
         ENetPacket* packet = enet_packet_create(data.first, data.second, ENET_PACKET_FLAG_RELIABLE);
