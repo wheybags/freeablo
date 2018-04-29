@@ -6,6 +6,7 @@
 
 namespace FAWorld
 {
+    class Player;
     class PlayerInput;
 }
 
@@ -21,6 +22,7 @@ namespace Engine
         virtual void verify(FAWorld::Tick tick) = 0;
         virtual bool isServer() const = 0;
         virtual bool isMultiplayer() const = 0;
+        virtual void registerNewPlayer(FAWorld::Player* player, uint32_t peerId) = 0;
 
         static constexpr int32_t RELIABLE_CHANNEL_ID = 0;
         static constexpr int32_t UNRELIABLE_CHANNEL_ID = 0;

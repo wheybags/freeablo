@@ -117,4 +117,8 @@ namespace FAWorld
         invY = loader.load<int32_t>();
         splitCount = loader.load<int32_t>();
     }
+
+    void PlayerInput::PlayerJoinedData::save(Serial::Saver& saver) { saver.save(peerId); }
+
+    void PlayerInput::PlayerJoinedData::load(Serial::Loader& loader) { peerId = loader.load<uint32_t>(); }
 }

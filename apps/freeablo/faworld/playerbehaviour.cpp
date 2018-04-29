@@ -120,12 +120,17 @@ namespace FAWorld
                                                         mPlayer->getWorld()->getItemFactory());
                 return;
             }
+            case PlayerInput::Type::PlayerJoined:
+            case PlayerInput::Type::PlayerLeft:
+            {
+                invalid_enum(PlayerInput::Type, input.mType);
+            }
             case PlayerInput::Type::None:
             {
                 message_and_abort("received \"None\" type PlayerInput");
             }
         }
 
-        release_assert(false && "Invalid PlayerInput detected");
+        invalid_enum(PlayerInput::Type, input.mType);
     }
 }

@@ -29,7 +29,7 @@ namespace Engine
 
         for (const auto& pair : mPeers)
         {
-            if (pair.second.lastTick + 10 < tick)
+            if (pair.second.hasMap && pair.second.lastTick + 10 < tick)
                 return boost::none;
         }
 
@@ -59,6 +59,7 @@ namespace Engine
                 }
                 case ENET_EVENT_TYPE_DISCONNECT:
                 {
+                    onPeerDisconnect(event);
                     break;
                 }
                 case ENET_EVENT_TYPE_NONE:
@@ -70,18 +71,18 @@ namespace Engine
             }
         }
 
-        bool allHaveMap = true;
-        for (const auto& pair : mPeers)
+        if (mWorld.getCurrentTick() != mLastSentTick)
         {
-            if (!pair.second.hasMap)
+            // see onPeerConnect for an explanation of this
+            for (auto& peer : mPeers)
             {
-                allHaveMap = false;
-                break;
+                if (!peer.second.mapSent && peer.second.actorId != -1)
+                {
+                    sendMapToPeer(peer.second);
+                    peer.second.mapSent = true;
+                }
             }
-        }
 
-        if (mWorld.getCurrentTick() != mLastSentTick && allHaveMap)
-        {
             auto localInputs = mLocalInputHandler.getAndClearInputs();
             mInputsBuffer.insert(mInputsBuffer.begin(), localInputs.begin(), localInputs.end());
 
@@ -98,26 +99,46 @@ namespace Engine
 
     void Server::onPeerConnect(const ENetEvent& event)
     {
-        mPeers[event.peer->connectID] = Peer(event.peer);
+        mPeers[mNextPeerId] = Peer(event.peer);
+        event.peer->data = reinterpret_cast<void*>(mNextPeerId);
 
+        // We pass the player joining as a PlayerInput so that other clients will now about them connecting.
+        // Later on, the game will create an FAWorld::Player object for the player, and inform us of this through registerNewPlayer().
+        // Once that is done, we have an actor for the player, so we can send them the map, which we do from update() by checking for
+        // peers that haven't been sent a map yet, but do have an actor (actorId != -1).
+        EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(FAWorld::PlayerInput::PlayerJoinedData{mNextPeerId}, -1));
+        mNextPeerId++;
+    }
+
+    void Server::registerNewPlayer(FAWorld::Player* player, uint32_t peerId)
+    {
+        // see onPeerConnect for an explanation of this
+        Peer& peer = mPeers.at(peerId);
+        peer.actorId = player->getId();
+    }
+
+    void Server::onPeerDisconnect(const ENetEvent& event)
+    {
+        uint32_t peerId = uint32_t(size_t(event.peer->data));
+        EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(FAWorld::PlayerInput::PlayerLeftData{}, mPeers.at(peerId).actorId));
+        mPeers.erase(peerId);
+    }
+
+    void Server::sendMapToPeer(const Peer& peer)
+    {
         Serial::TextWriteStream stream;
         FASaveGame::GameSaver saver(stream);
 
-        FAWorld::Player* newPlayer = EngineMain::get()->mPlayerFactory->create(mWorld, "Warrior");
-        mWorld.registerPlayer(newPlayer);
-        FAWorld::GameLevel* level = mWorld.getLevel(0);
-        newPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
-
         saver.save(uint8_t(MessageType::MapToClient));
         saver.save(mDoFullVerify);
-        saver.save(newPlayer->getId());
+        saver.save(peer.actorId);
         mWorld.save(saver);
 
         auto data = stream.getData();
 
         // does not take ownership of data
         ENetPacket* packet = enet_packet_create(data.first, data.second, ENET_PACKET_FLAG_RELIABLE);
-        enet_peer_send(event.peer, RELIABLE_CHANNEL_ID, packet);
+        enet_peer_send(peer.peer, RELIABLE_CHANNEL_ID, packet);
     }
 
     void Server::readPeerPacket(const ENetEvent& event)
@@ -131,13 +152,13 @@ namespace Engine
         {
             case MessageType::AcknowledgeMapToServer:
             {
-                mPeers.at(event.peer->connectID).hasMap = true;
+                mPeers.at(uint32_t(size_t(event.peer->data))).hasMap = true;
                 return;
             }
 
             case MessageType::ClientUpdateToServer:
             {
-                receiveClientUpdate(loader, mPeers.at(event.peer->connectID));
+                receiveClientUpdate(loader, mPeers.at(uint32_t(size_t(event.peer->data))));
                 return;
             }
 

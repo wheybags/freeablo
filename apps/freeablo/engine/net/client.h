@@ -22,6 +22,7 @@ namespace Engine
         virtual void verify(FAWorld::Tick tick) override;
         virtual bool isServer() const override { return false; }
         virtual bool isMultiplayer() const override { return true; }
+        virtual void registerNewPlayer(FAWorld::Player*, uint32_t) override {}
 
     private:
         void processServerPacket(const ENetEvent& event);

@@ -1,5 +1,6 @@
 #include "world.h"
 #include "../engine/enginemain.h"
+#include "../engine/net/multiplayerinterface.h"
 #include "../engine/threadmanager.h"
 #include "../faaudio/audiomanager.h"
 #include "../fagui/dialogmanager.h"
@@ -286,7 +287,31 @@ namespace FAWorld
         mTicksPassed++;
 
         for (const auto& input : inputs)
-            static_cast<Player*>(this->getActorById(input.mActorId))->getPlayerBehaviour()->addInput(input);
+        {
+            switch (input.mType)
+            {
+                case PlayerInput::Type::PlayerJoined:
+                {
+                    FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, "Warrior");
+                    registerPlayer(newPlayer);
+                    FAWorld::GameLevel* level = getLevel(0);
+                    newPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
+                    Engine::EngineMain::get()->mMultiplayer->registerNewPlayer(newPlayer, input.mData.dataPlayerJoined.peerId);
+
+                    break;
+                }
+                case PlayerInput::Type::PlayerLeft:
+                {
+                    // a little unsubtle, but it'll do for now.
+                    getActorById(input.mActorId)->die();
+                    break;
+                }
+                default:
+                {
+                    static_cast<Player*>(this->getActorById(input.mActorId))->getPlayerBehaviour()->addInput(input);
+                }
+            }
+        }
 
         std::set<GameLevel*> done;
 

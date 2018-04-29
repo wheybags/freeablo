@@ -23,6 +23,7 @@ namespace Engine
         virtual void verify(FAWorld::Tick) override {}
         virtual bool isServer() const override { return true; }
         virtual bool isMultiplayer() const override { return !mPeers.empty(); }
+        virtual void registerNewPlayer(FAWorld::Player* player, uint32_t peerId) override;
 
     private:
         struct Peer
@@ -32,10 +33,14 @@ namespace Engine
 
             ENetPeer* peer = nullptr;
             bool hasMap = false;
+            bool mapSent = false;
             FAWorld::Tick lastTick = 0;
+            int32_t actorId = -1;
         };
 
         void onPeerConnect(const ENetEvent& event);
+        void onPeerDisconnect(const ENetEvent& event);
+        void sendMapToPeer(const Peer& peer);
         void readPeerPacket(const ENetEvent& event);
         void sendInputsToClients(std::vector<FAWorld::PlayerInput>& inputs);
         void receiveClientUpdate(FASaveGame::GameLoader& loader, Peer& peer);
@@ -55,6 +60,8 @@ namespace Engine
 
         ENetHost* mHost = nullptr;
         ENetAddress mAddress;
+
+        uint32_t mNextPeerId = 1;
         std::map<uint32_t, Peer> mPeers;
     };
 }
