@@ -74,6 +74,15 @@ FixedPoint FixedPoint::fromRawValue(int64_t rawValue)
 
 int64_t FixedPoint::intPart() const { return mVal / FixedPoint::scalingFactor; }
 
+int64_t FixedPoint::round() const
+{
+    FixedPoint frac = fractionPart();
+    int64_t i = intPart();
+    if (frac >= FixedPoint("0.5"))
+        i++;
+    return i;
+}
+
 FixedPoint FixedPoint::fractionPart() const
 {
     int64_t intPart = this->intPart();

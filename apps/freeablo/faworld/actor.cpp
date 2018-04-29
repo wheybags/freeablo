@@ -38,7 +38,7 @@ namespace FAWorld
     }
 
     Actor::Actor(World& world, const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath)
-        : mMoveHandler(World::getTicksInPeriod(1.0f)), mWorld(world)
+        : mMoveHandler(World::getTicksInPeriod(1)), mWorld(world)
     {
         mFaction = Faction::heaven();
         if (!dieAnimPath.empty())

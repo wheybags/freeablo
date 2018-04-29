@@ -4,6 +4,7 @@
 #include "playerinput.h"
 #include <map>
 #include <memory>
+#include <misc/fixedpoint.h>
 #include <utility>
 #include <vector>
 
@@ -92,8 +93,8 @@ namespace FAWorld
 
         void fillRenderState(FARender::RenderState* state, const HoverStatus& hoverStatus);
 
-        static Tick getTicksInPeriod(float seconds);
-        static float getSecondsPerTick();
+        static Tick getTicksInPeriod(FixedPoint seconds);
+        static FixedPoint getSecondsPerTick();
 
         Actor* getActorById(int32_t id);
 

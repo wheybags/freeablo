@@ -97,7 +97,7 @@ namespace FAGui
         auto renderer = FARender::Renderer::get();
         mSmallPentagram.reset(new FARender::AnimationPlayer());
         mSmallPentagram->playAnimation(
-            renderer->loadImage("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
+            renderer->loadImage("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod("0.06"), FARender::AnimationPlayer::AnimationType::Looped);
 
         startingScreen();
     }

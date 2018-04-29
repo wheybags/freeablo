@@ -65,7 +65,7 @@ namespace FAWorld
                 return;
             }
             // if no player is in sight, let's wander around a bit
-            else if (mTicksSinceLastAction > World::getTicksInPeriod(0.5f) && !mActor->hasTarget() && !mActor->mMoveHandler.moving())
+            else if (mTicksSinceLastAction > World::getTicksInPeriod("0.5") && !mActor->hasTarget() && !mActor->mMoveHandler.moving())
             {
                 if (mActor->getWorld()->mRng->randomInRange(0, 100) > 80)
                 {

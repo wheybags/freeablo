@@ -27,11 +27,11 @@ namespace FAGui
         mSmLogo = menu.createSmLogo();
         mFocus.reset(new FARender::AnimationPlayer());
         mFocus->playAnimation(renderer->loadImage("ui_art/focus.pcx&trans=0,255,0&vanim=30"),
-                              FAWorld::World::getTicksInPeriod(0.06f),
+                              FAWorld::World::getTicksInPeriod("0.06"),
                               FARender::AnimationPlayer::AnimationType::Looped);
         mFocus16.reset(new FARender::AnimationPlayer());
         mFocus16->playAnimation(renderer->loadImage("ui_art/focus16.pcx&trans=0,255,0&vanim=20"),
-                                FAWorld::World::getTicksInPeriod(0.06f),
+                                FAWorld::World::getTicksInPeriod("0.06"),
                                 FARender::AnimationPlayer::AnimationType::Looped);
         setType(ContentType::chooseClass);
     }

@@ -17,7 +17,7 @@ namespace FAGui
         auto renderer = FARender::Renderer::get();
         mBigPentagram.reset(new FARender::AnimationPlayer());
         auto pentImg = renderer->loadImage("data/pentspin.cel");
-        mBigPentagram->playAnimation(pentImg, FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
+        mBigPentagram->playAnimation(pentImg, FAWorld::World::getTicksInPeriod("0.06"), FARender::AnimationPlayer::AnimationType::Looped);
         auto pentRect = nk_rect(0, 0, pentImg->getWidth(), pentImg->getHeight());
 
         int y = 115;

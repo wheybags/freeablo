@@ -25,6 +25,7 @@ public:
     int64_t rawValue() const { return mVal; }
 
     int64_t intPart() const;
+    int64_t round() const;
     FixedPoint fractionPart() const;
 
     double toDouble() const; /// NOT to be used in the game simulation. For testing/gui only

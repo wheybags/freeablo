@@ -81,7 +81,7 @@ namespace FAWorld
     {
         mPlayerStats = {charStats};
         mFaction = Faction::heaven();
-        mMoveHandler = MovementHandler(World::getTicksInPeriod(0.1f)); // allow players to repath much more often than other actors
+        mMoveHandler = MovementHandler(World::getTicksInPeriod("0.1")); // allow players to repath much more often than other actors
 
         mStats.mAttackDamage = 60;
 

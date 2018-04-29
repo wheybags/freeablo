@@ -373,7 +373,7 @@ namespace FAWorld
         return getCurrentLevel()->getItemMap().getItemAt({tile.x, tile.y});
     }
 
-    Tick World::getTicksInPeriod(float seconds) { return std::max((Tick)1, (Tick)round(((float)ticksPerSecond) * seconds)); }
+    Tick World::getTicksInPeriod(FixedPoint seconds) { return std::max(Tick(1), Tick((FixedPoint(ticksPerSecond) * seconds).round())); }
 
-    float World::getSecondsPerTick() { return 1.0f / ((float)ticksPerSecond); }
+    FixedPoint World::getSecondsPerTick() { return FixedPoint(1) / FixedPoint(ticksPerSecond); }
 }
