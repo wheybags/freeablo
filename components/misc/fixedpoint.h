@@ -42,6 +42,27 @@ public:
     FixedPoint operator*(FixedPoint other) const;
     FixedPoint operator/(FixedPoint other) const;
 
+    FixedPoint& operator+=(FixedPoint other)
+    {
+        *this = *this + other;
+        return *this;
+    }
+    FixedPoint& operator-=(FixedPoint other)
+    {
+        *this = *this - other;
+        return *this;
+    }
+    FixedPoint& operator*=(FixedPoint other)
+    {
+        *this = *this * other;
+        return *this;
+    }
+    FixedPoint& operator/=(FixedPoint other)
+    {
+        *this = *this / other;
+        return *this;
+    }
+
     FixedPoint sqrt() const;
     FixedPoint abs() const { return fromRawValue(std::abs(mVal)); }
 

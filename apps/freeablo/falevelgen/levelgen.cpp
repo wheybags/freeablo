@@ -8,6 +8,7 @@
 #include <diabloexe/monster.h>
 #include <misc/assert.h>
 #include <misc/misc.h>
+#include <misc/vec2fix.h>
 #include <random/random.h>
 #include <sstream>
 #include <stdlib.h>
@@ -61,8 +62,8 @@ namespace FALevelGen
 
         int32_t distance(const Room& other) const
         {
-            return static_cast<int32_t>(sqrt(static_cast<float>((centre().first - other.centre().first) * (centre().first - other.centre().first) +
-                                                                (centre().second - other.centre().second) * (centre().second - other.centre().second))));
+            return static_cast<int32_t>(
+                (Vec2Fix(centre().first, centre().second) - Vec2Fix(other.centre().first, other.centre().second)).magnitude().intPart());
         }
     };
 
@@ -141,10 +142,10 @@ namespace FALevelGen
 
     // Move room in direction specified by normalised vector, making sure to keep within
     // grid of size width * height
-    void moveRoom(Room& room, const std::pair<float, float>& vector, int32_t width, int32_t height)
+    void moveRoom(Room& room, const Vec2Fix& vector, int32_t width, int32_t height)
     {
         int32_t newX = 0, newY = 0;
-        std::tie(newX, newY) = Misc::getNextPosByDir({room.xPos, room.yPos}, Misc::getVecDir(vector));
+        std::tie(newX, newY) = Misc::getNextPosByDir({room.xPos, room.yPos}, vector.getDirection());
 
         // Make sure not to move outside map
         if (newX >= 1 && newY >= 1 && newX + room.width < width - 1 && newY + room.height < height - 1)
@@ -152,13 +153,6 @@ namespace FALevelGen
             room.xPos = newX;
             room.yPos = newY;
         }
-    }
-
-    void normalise(std::pair<float, float>& vector)
-    {
-        float magnitude = sqrt(vector.first * vector.first + vector.second * vector.second);
-        vector.first /= (float)magnitude;
-        vector.second /= (float)magnitude;
     }
 
     // Removes the room overlapping the largest number of rooms repeatedly,
@@ -216,7 +210,7 @@ namespace FALevelGen
 
             for (int32_t i = 0; i < (int32_t)rooms.size(); i++)
             {
-                std::pair<float, float> vector(0.f, 0.f);
+                Vec2Fix vector;
 
                 std::pair<int32_t, int32_t> currentCentre = rooms[i].centre();
 
@@ -235,35 +229,33 @@ namespace FALevelGen
                     {
                         std::pair<int32_t, int32_t> centre = rooms[j].centre();
 
+                        neighbourCount++;
+
                         if (centre.first == currentCentre.first && centre.second == currentCentre.second)
                         {
-                            vector.first = static_cast<float>(rng.randomInRange(0, 10));
-                            vector.second = static_cast<float>(rng.randomInRange(0, 10));
-                            neighbourCount++;
+                            vector.x = rng.randomInRange(0, 10);
+                            vector.y = rng.randomInRange(0, 10);
                             continue;
                         }
 
-                        std::pair<float, float> iToJ = Misc::getVec(currentCentre, centre);
-                        normalise(iToJ);
-
-                        vector.first += iToJ.first * rooms[i].distance(rooms[j]);
-                        vector.second += iToJ.second * rooms[i].distance(rooms[j]);
-
-                        neighbourCount++;
+                        Vec2Fix iToJ = Vec2Fix(centre.first, centre.second) - Vec2Fix(currentCentre.first, currentCentre.second);
+                        vector.x += iToJ.x;
+                        vector.y += iToJ.y;
                     }
                 }
 
-                if (vector.first == 0 && vector.second == 0)
+                if (vector.x == 0 && vector.y == 0)
                     continue;
 
-                vector.first /= (float)neighbourCount;
-                vector.second /= (float)neighbourCount;
+                vector.x /= neighbourCount;
+                vector.y /= neighbourCount;
 
-                normalise(vector);
+                if (vector.x == 0 && vector.y == 0)
+                    continue;
 
                 // invert
-                vector.first *= -1;
-                vector.second *= -1;
+                vector.x *= -1;
+                vector.y *= -1;
 
                 moveRoom(rooms[i], vector, width, height);
             }
@@ -298,9 +290,9 @@ namespace FALevelGen
             newRoom.width = rng.squaredRand(4, std::min(width - newRoom.xPos, maxDimension));
             newRoom.height = rng.squaredRand(4, std::min(height - newRoom.yPos, maxDimension));
 
-            float ratio = ((float)newRoom.width) / ((float)newRoom.height);
+            FixedPoint ratio = FixedPoint(newRoom.width) / newRoom.height;
 
-            if (ratio < 0.5 || ratio > 2.0)
+            if (ratio < FixedPoint("0.5") || ratio > FixedPoint("2.0"))
                 continue;
 
             placed++;

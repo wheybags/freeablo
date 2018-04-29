@@ -171,18 +171,25 @@ FixedPoint FixedPoint::operator/(FixedPoint other) const
 
 FixedPoint FixedPoint::sqrt() const
 {
+    if (*this == 0)
+        return 0;
+
     // basic newton raphson
+
+    size_t iterationLimit = 10;
 
     FixedPoint x = *this;
     FixedPoint h;
 
-    const FixedPoint epsilon("0.000001");
+    static FixedPoint epsilon("0.000001");
 
+    size_t i = 0;
     do
     {
-        h = ((x * x) - *this) / (FixedPoint("2") * x);
+        h = ((x * x) - *this) / (2 * x);
         x = x - h;
-    } while (h.abs() >= epsilon);
+        i++;
+    } while (h.abs() >= epsilon && i < iterationLimit);
 
 #ifndef NDEBUG
     double floatSqrt = std::sqrt(mDebugVal);

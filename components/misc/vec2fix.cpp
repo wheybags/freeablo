@@ -1,10 +1,12 @@
 #include "vec2fix.h"
 
+FixedPoint Vec2Fix::magnitude() const { return FixedPoint(x * x + y * y).sqrt(); }
+
 void Vec2Fix::normalise()
 {
-    FixedPoint magnitude = (x * x + y * y).sqrt();
-    x = x / magnitude;
-    y = y / magnitude;
+    FixedPoint mag = magnitude();
+    x = x / mag;
+    y = y / mag;
 }
 
 Misc::Direction Vec2Fix::getDirection() const
@@ -39,8 +41,8 @@ Misc::Direction Vec2Fix::getDirection() const
     Vec2Fix n = *this;
     n.normalise();
 
-    FixedPoint n_ne_line_x = "0.382683";
-    FixedPoint e_ne_line_x = "0.9239";
+    static FixedPoint n_ne_line_x = "0.382683";
+    static FixedPoint e_ne_line_x = "0.9239";
     FixedPoint e_se_line_x = e_ne_line_x;
     FixedPoint s_se_line_x = n_ne_line_x;
 
@@ -112,3 +114,5 @@ Misc::Direction Vec2Fix::getDirection() const
         }
     }
 }
+
+Vec2Fix Vec2Fix::operator-(const Vec2Fix& other) const { return Vec2Fix(x - other.x, y - other.y); }
