@@ -99,4 +99,22 @@ namespace FAWorld
     void PlayerInput::ChangeLevelData::save(Serial::Saver& saver) { saver.save(uint8_t(direction)); }
 
     void PlayerInput::ChangeLevelData::load(Serial::Loader& loader) { direction = Direction(loader.load<uint8_t>()); }
+
+    void PlayerInput::InventorySlotClickedData::save(Serial::Saver& saver) { slot.save(saver); }
+
+    void PlayerInput::InventorySlotClickedData::load(Serial::Loader& loader) { slot.load(loader); }
+
+    void PlayerInput::SplitGoldStackIntoCursorData::save(Serial::Saver& saver)
+    {
+        saver.save(invX);
+        saver.save(invY);
+        saver.save(splitCount);
+    }
+
+    void PlayerInput::SplitGoldStackIntoCursorData::load(Serial::Loader& loader)
+    {
+        invX = loader.load<int32_t>();
+        invY = loader.load<int32_t>();
+        splitCount = loader.load<int32_t>();
+    }
 }

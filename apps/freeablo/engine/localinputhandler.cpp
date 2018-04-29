@@ -109,6 +109,8 @@ namespace Engine
         }
     }
 
+    void LocalInputHandler::addInput(const FAWorld::PlayerInput& input) { mInputs.push_back(input); }
+
     std::vector<FAWorld::PlayerInput> LocalInputHandler::getAndClearInputs()
     {
         std::vector<FAWorld::PlayerInput> retval;

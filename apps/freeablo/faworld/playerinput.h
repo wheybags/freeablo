@@ -1,4 +1,5 @@
 #pragma once
+#include "../faworld/equiptarget.h"
 #include "target.h"
 #include <cstdint>
 #include <misc/direction.h>
@@ -9,7 +10,9 @@
     MACRO(TargetActor)                                                                                                                                         \
     MACRO(TargetItemOnFloor)                                                                                                                                   \
     MACRO(AttackDirection)                                                                                                                                     \
-    MACRO(ChangeLevel)
+    MACRO(ChangeLevel)                                                                                                                                         \
+    MACRO(InventorySlotClicked)                                                                                                                                \
+    MACRO(SplitGoldStackIntoCursor)
 
 namespace Serial
 {
@@ -71,6 +74,21 @@ namespace FAWorld
             void save(Serial::Saver& saver);
             void load(Serial::Loader& loader);
         };
+        struct InventorySlotClickedData
+        {
+            EquipTarget slot;
+
+            void save(Serial::Saver& saver);
+            void load(Serial::Loader& loader);
+        };
+        struct SplitGoldStackIntoCursorData
+        {
+            int32_t invX, invY;
+            int32_t splitCount;
+
+            void save(Serial::Saver& saver);
+            void load(Serial::Loader& loader);
+        };
 
         // All this macro mess takes care of generating boilerplate code to wrap up the above structs into a union with a type enum, and
         // save/load functions. So, eg, if mType == TargetTile, then you can access mData.dataTargetType. You can also call .save() and .load()
@@ -90,11 +108,13 @@ namespace FAWorld
 
         PlayerInput() = default;
 
-        union
+        union DataUnionType
         {
 #define GENERATE_UNION_MEMBER(X) X##Data data##X;
             CALL_ON_ALL_PLAYER_INPUTS(GENERATE_UNION_MEMBER)
 #undef GENERATE_UNION_MEMBER
+
+            DataUnionType() {}
         } mData;
 
         void save(Serial::Saver& saver);

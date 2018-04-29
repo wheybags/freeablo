@@ -22,6 +22,7 @@ namespace Engine
         virtual void notify(KeyboardInputAction action) override;
         virtual void notify(MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers) override;
 
+        void addInput(const FAWorld::PlayerInput& input);
         std::vector<FAWorld::PlayerInput> getAndClearInputs();
 
         void blockInput();

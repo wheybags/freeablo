@@ -95,11 +95,7 @@ namespace FAWorld
                 else
                     nextLevelIndex = mPlayer->getLevel()->getNextLevel();
 
-                // setLevel(nextLevelIndex);
-
                 GameLevel* level = mPlayer->getWorld()->getLevel(nextLevelIndex);
-
-                // Player* player = getCurrentPlayer();
 
                 if (level)
                 {
@@ -109,6 +105,19 @@ namespace FAWorld
                         mPlayer->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
                 }
 
+                return;
+            }
+            case PlayerInput::Type::InventorySlotClicked:
+            {
+                mPlayer->mInventory.slotClicked(input.mData.dataInventorySlotClicked.slot);
+                return;
+            }
+            case PlayerInput::Type::SplitGoldStackIntoCursor:
+            {
+                mPlayer->mInventory.splitGoldIntoCursor(input.mData.dataSplitGoldStackIntoCursor.invX,
+                                                        input.mData.dataSplitGoldStackIntoCursor.invY,
+                                                        input.mData.dataSplitGoldStackIntoCursor.splitCount,
+                                                        mPlayer->getWorld()->getItemFactory());
                 return;
             }
             case PlayerInput::Type::None:

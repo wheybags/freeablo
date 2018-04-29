@@ -450,7 +450,10 @@ namespace FAGui
                     nk_layout_space_push(ctx, p.second);
                     nk_button_label_styled(ctx, &dummyStyle, "");
                     if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
-                        inv.slotClicked(p.first);
+                    {
+                        FAWorld::PlayerInput::InventorySlotClickedData input{p.first};
+                        Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
+                    }
                     auto highlight = ItemHighlightInfo::notHighlighed;
                     if (isLastWidgetHovered(ctx))
                         highlight = ItemHighlightInfo::highlited;
@@ -472,7 +475,9 @@ namespace FAGui
                 Misc::Point clickedPoint{int32_t(std::floor((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / cellSize)),
                                          int32_t(std::floor((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / cellSize))};
 
-                inv.slotClicked(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(clickedPoint.x, clickedPoint.y));
+                FAWorld::PlayerInput::InventorySlotClickedData input{
+                    FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(clickedPoint.x, clickedPoint.y)};
+                Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
             }
 
             for (auto row : boost::counting_range(0, mainInventory.height()))
@@ -560,8 +565,11 @@ namespace FAGui
         nk_layout_space_push(ctx, nk_recta(beltTopLeft, {beltWidth, beltHeight}));
         auto& inv = mPlayer->mInventory;
         if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && !mGoldSplitTarget)
-            inv.slotClicked(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(
-                int32_t(std::floor(ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / cellSize)));
+        {
+            FAWorld::PlayerInput::InventorySlotClickedData input{FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(
+                int32_t(std::floor(ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / cellSize))};
+            Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
+        }
 
         using namespace FAWorld;
         for (auto num : boost::counting_range(0, int32_t(inv.getInv(FAWorld::EquipTargetType::belt).width())))
@@ -882,8 +890,12 @@ namespace FAGui
                 if (mGoldSplitTarget)
                 {
                     if (mGoldSplitCnt > 0)
-                        mPlayer->mInventory.splitGoldIntoCursor(
-                            mGoldSplitTarget->mInvX, mGoldSplitTarget->mInvY, mGoldSplitCnt, Engine::EngineMain::get()->mWorld->getItemFactory());
+                    {
+                        FAWorld::PlayerInput input(
+                            FAWorld::PlayerInput::SplitGoldStackIntoCursorData{mGoldSplitTarget->mInvX, mGoldSplitTarget->mInvY, mGoldSplitCnt},
+                            mPlayer->getId());
+                        Engine::EngineMain::get()->getLocalInputHandler()->addInput(input);
+                    }
 
                     mGoldSplitTarget = nullptr;
                 }
