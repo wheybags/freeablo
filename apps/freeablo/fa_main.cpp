@@ -1,7 +1,9 @@
 #include <iostream>
 
+#include <misc/disablewarn.h>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
+#include <misc/enablewarn.h>
 
 #include <faio/fafileobject.h>
 #include <settings/settings.h>
