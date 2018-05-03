@@ -1,5 +1,5 @@
-#include "../../freeablo/apps/freeablo/faworld/findpath.h"
-#include "../../freeablo/apps/freeablo/faworld/gamelevel.h"
+#include "../freeablo/faworld/findpath.h"
+#include "../freeablo/faworld/gamelevel.h"
 #include <algorithm>
 #include <chrono>
 #include <iomanip>

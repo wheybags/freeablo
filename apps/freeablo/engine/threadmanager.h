@@ -1,6 +1,10 @@
 
 #pragma once
 
+// this header is included as a workaround for a bug in boost:
+// https://svn.boost.org/trac10/ticket/13497
+#include <boost/next_prior.hpp>
+
 #include <boost/lockfree/spsc_queue.hpp>
 #include <string>
 

@@ -465,6 +465,10 @@ NuklearFrameDump::~NuklearFrameDump()
 void NuklearFrameDump::fill(nk_context* ctx)
 {
     debug_assert(dev);
+
+    nk_buffer_clear(&vbuf);
+    nk_buffer_clear(&ebuf);
+    nk_buffer_clear(&cmds);
     nk_convert(ctx, &cmds, &vbuf, &ebuf, &config);
 
     drawCommands.clear();

@@ -14,6 +14,7 @@
     #define NK_INCLUDE_COMMAND_USERDATA
     #define NK_BUTTON_TRIGGER_ON_RELEASE
 
+    #include <stdarg.h>
     #include "nuklear.h"
 
 #endif
