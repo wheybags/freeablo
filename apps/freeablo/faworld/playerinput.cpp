@@ -121,4 +121,16 @@ namespace FAWorld
     void PlayerInput::PlayerJoinedData::save(Serial::Saver& saver) { saver.save(peerId); }
 
     void PlayerInput::PlayerJoinedData::load(Serial::Loader& loader) { peerId = loader.load<uint32_t>(); }
+
+    void PlayerInput::BuyItemData::save(Serial::Saver& saver)
+    {
+        saver.save(itemId);
+        saver.save(shopkeeperId);
+    }
+
+    void PlayerInput::BuyItemData::load(Serial::Loader& loader)
+    {
+        itemId = loader.load<uint32_t>();
+        shopkeeperId = loader.load<int32_t>();
+    }
 }

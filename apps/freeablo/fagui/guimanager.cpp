@@ -90,7 +90,7 @@ namespace FAGui
         return "";
     }
 
-    GuiManager::GuiManager(Engine::EngineMain& engine) : mEngine(engine)
+    GuiManager::GuiManager(Engine::EngineMain& engine) : mDialogManager(*this, *engine.mWorld.get()), mEngine(engine)
     {
         mMenuHandler.reset(new MenuHandler(engine));
 

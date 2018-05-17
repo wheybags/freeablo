@@ -1,9 +1,11 @@
+// clang-format off
+#include <misc/disablewarn.h>
 #include <StormLib.h>
+#include <misc/enablewarn.h>
+// clang-format on
 #include <cel/celdecoder.h>
 #include <faio/fafileobject.h>
 #include <iostream>
-#include <misc/disablewarn.h>
-#include <misc/enablewarn.h>
 #include <vector>
 
 void help(char** argv)

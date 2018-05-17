@@ -1,6 +1,8 @@
 #include "player.h"
+#include "../engine/enginemain.h"
 #include "../engine/threadmanager.h"
 #include "../fagui/dialogmanager.h"
+#include "../fagui/guimanager.h"
 #include "../fasavegame/gameloader.h"
 #include "actorstats.h"
 #include "boost/algorithm/clamp.hpp"
@@ -340,7 +342,8 @@ namespace FAWorld
 
             if (target && target->getPos().isNear(this->getPos()) && canTalkTo(target))
             {
-                //                mWorld.mDlgManager->talk(target);
+                if (mWorld.getCurrentPlayer() == this)
+                    Engine::EngineMain::get()->mGuiManager->mDialogManager.talk(target);
                 mTarget.clear();
             }
         }

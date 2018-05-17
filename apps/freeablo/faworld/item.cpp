@@ -11,7 +11,7 @@
 
 namespace FAWorld
 {
-    void Item::save(FASaveGame::GameSaver& saver)
+    void Item::save(FASaveGame::GameSaver& saver) const
     {
         saver.save(mIsReal);
         saver.save(mUniqueId);

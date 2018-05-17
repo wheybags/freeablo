@@ -1,4 +1,6 @@
 #include "dialogmanager.h"
+#include "../engine/enginemain.h"
+#include "../engine/localinputhandler.h"
 #include "../faworld/actor.h"
 #include "../faworld/equiptarget.h"
 #include "../faworld/player.h"
@@ -393,34 +395,56 @@ namespace FAGui
 
     // While there are some similiraties between buying and selling I do not consider them to be that similar to implement
     // using single function. Identification dialog could probably be implemented like a sell dialog though.
-    void DialogManager::buyDialog(std::vector<FAWorld::Item>& items)
+    void DialogManager::buyDialog(const FAWorld::Actor* shopkeeper, std::vector<FAWorld::StoreItem>& items)
     {
+        // TODO: this function is a mess, but ot sort of works right now, I'm planning on redoing dialog "soon", so it will do for now.
+        // Also note that after buying an item it will continue to show up as for sale after until you exit and re-enter dialog, is not fixed for the same
+        // reason as above.
+
         DialogData d;
         d.widen();
         int32_t cnt = 0;
-        auto& inventory = mWorld.getCurrentPlayer()->mInventory;
 
-        d.header({(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str()});
+        d.shopData.items = &items;
+        d.shopData.shopkeeper = shopkeeper;
+
+        d.header(
+            {(boost::format("%2%           Your gold : %1%") % mWorld.getCurrentPlayer()->mInventory.getTotalGold() % "I have these items for sale :").str()});
 
         for (auto it = items.begin(); it != items.end(); ++it)
         {
             auto& item = *it;
-            auto price = item.getPrice();
+            auto price = item.item.getPrice();
             auto header = d.getHeader();
-            d.textLines(item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
-                .setAction([this, price, header, it, &items, &inventory]() mutable {
-                    if (inventory.getTotalGold() < price)
-                        return fillMessageDialog(header, "You do not have enough gold");
+            d.textLines(item.item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
+                .setAction([it, price]() {
+                    auto& self = Engine::EngineMain::get()->mGuiManager->mDialogManager;
+                    FAWorld::CharacterInventory& inventory = self.mWorld.getCurrentPlayer()->mInventory;
 
-                    if (!inventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(*it))
-                        return fillMessageDialog(header, "You do not have enough room in inventory");
+                    //                if (inventory.getTotalGold() < price)
+                    //                    return fillMessageDialog(header, "You do not have enough gold");
 
-                    confirmDialog(header, *it, price, "Are you sure you want to buy this item?", [this, price, it, &inventory, &items]() {
-                        inventory.takeOutGold(price);
-                        inventory.autoPlaceItem(*it);
-                        items.erase(it);
-                        auto recreate = [this, &items] { buyDialog(items); };
-                        mGuiManager.popDialogData();
+                    //                if (!inventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(it->item))
+                    //                    return fillMessageDialog(header, "You do not have enough room in inventory");
+
+                    auto& data = Engine::EngineMain::get()->mGuiManager->mDialogs[Engine::EngineMain::get()->mGuiManager->mDialogs.size() - 1];
+
+                    data.shopData.itemId = it->storeId;
+
+                    auto header = data.getHeader();
+
+                    self.confirmDialog(header, it->item, price, "Are you sure you want to buy this item?", []() {
+                        //                        inventory.takeOutGold(price);
+                        //                        inventory.autoPlaceItem(it->item);
+                        //                        items.erase(it);
+
+                        auto& shopData = Engine::EngineMain::get()->mGuiManager->mDialogs[Engine::EngineMain::get()->mGuiManager->mDialogs.size() - 1].shopData;
+
+                        auto input = FAWorld::PlayerInput::BuyItemData{shopData.itemId, shopData.shopkeeper->getId()};
+                        Engine::EngineMain::get()->getLocalInputHandler()->addInput(
+                            FAWorld::PlayerInput(input, Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getId()));
+                        auto recreate = [=] { Engine::EngineMain::get()->mGuiManager->mDialogManager.buyDialog(shopData.shopkeeper, *shopData.items); };
+                        Engine::EngineMain::get()->mGuiManager->popDialogData();
                         recreate();
                     });
                 })
@@ -446,7 +470,7 @@ namespace FAGui
         d.textLines({td.at("introduction")}, TextColor::golden);
         d.skip_line();
         d.textLines({td.at("talk")}, TextColor::blue).setAction([]() {});
-        d.textLines({td.at("buyBasic")}).setAction([&]() { buyDialog(mWorld.getStoreData().griswoldBasicItems); });
+        d.textLines({td.at("buyBasic")}).setAction([&]() { buyDialog(npc, mWorld.getStoreData().griswoldBasicItems); });
         d.textLines({td.at("buyPremium")}).setAction([]() {});
         d.textLines({td.at("sell")}).setAction([&] { sellDialog(griswoldSellFilter); });
         d.textLines({td.at("repair")}).setAction([]() {});

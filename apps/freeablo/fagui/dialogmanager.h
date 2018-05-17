@@ -16,6 +16,7 @@ namespace FAWorld
     class World;
     class Actor;
     class Item;
+    class StoreItem;
 }
 
 namespace FAGui
@@ -80,6 +81,14 @@ namespace FAGui
         void clearLines();
         std::vector<DialogLineData> getHeader() const { return mHeader; }
 
+        // HACK
+        struct
+        {
+            const FAWorld::Actor* shopkeeper = nullptr;
+            std::vector<FAWorld::StoreItem>* items = nullptr;
+            uint32_t itemId = 0;
+        } shopData;
+
     private:
         std::vector<DialogLineData> mHeader;
         std::vector<DialogLineData> mLines;
@@ -100,7 +109,7 @@ namespace FAGui
 
     private:
         template <typename FilterType> void sellDialog(FilterType filter);
-        void buyDialog(std::vector<FAWorld::Item>& items);
+        void buyDialog(const FAWorld::Actor* shopkeeper, std::vector<FAWorld::StoreItem>& items);
 
         void talkOgden(const FAWorld::Actor* npc);
         void talkFarnham(const FAWorld::Actor* npc);

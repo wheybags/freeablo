@@ -71,6 +71,7 @@ namespace FAWorld
         }
 
         mNextId = loader.load<int32_t>();
+        mStoreData->load(loader);
 
         loader.runFunctionsToRunAtEnd();
 
@@ -97,6 +98,7 @@ namespace FAWorld
         }
 
         saver.save(mNextId);
+        mStoreData->save(saver);
     }
 
     void World::setupObjectIdMappers()

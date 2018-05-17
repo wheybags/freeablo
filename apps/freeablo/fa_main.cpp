@@ -1,10 +1,10 @@
-#include <iostream>
-
+// clang-format off
 #include <misc/disablewarn.h>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <misc/enablewarn.h>
-
+// clang-format on
+#include <iostream>
 #include <faio/fafileobject.h>
 #include <settings/settings.h>
 

@@ -1,16 +1,14 @@
-
 #pragma once
-
+#include "../engine/inputobserverinterface.h"
+#include "dialogmanager.h"
 #include "textcolor.h"
+#include <boost/variant/variant_fwd.hpp>
 #include <chrono>
+#include <fa_nuklear.h>
 #include <functional>
+#include <memory>
 #include <queue>
 #include <string>
-
-#include "../engine/inputobserverinterface.h"
-#include <boost/variant/variant_fwd.hpp>
-#include <fa_nuklear.h>
-#include <memory>
 
 struct nk_context;
 typedef uint32_t nk_flags;
@@ -135,7 +133,10 @@ namespace FAGui
         void notify(Engine::KeyboardInputAction action) override;
         void keyPress(const Input::Hotkey&) override;
 
-    private:
+    public:
+        DialogManager mDialogManager;
+
+        // private:
         Engine::EngineMain& mEngine;
         FAWorld::Player* mPlayer = nullptr;
         std::string mHoveredInventoryItemText;

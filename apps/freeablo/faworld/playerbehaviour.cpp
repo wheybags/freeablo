@@ -4,6 +4,7 @@
 #include "equiptarget.h"
 #include "input/inputmanager.h"
 #include "player.h"
+#include "storedata.h"
 #include <misc/assert.h>
 
 namespace FAWorld
@@ -118,6 +119,27 @@ namespace FAWorld
                                                         input.mData.dataSplitGoldStackIntoCursor.invY,
                                                         input.mData.dataSplitGoldStackIntoCursor.splitCount,
                                                         mPlayer->getWorld()->getItemFactory());
+                return;
+            }
+            case PlayerInput::Type::BuyItem:
+            {
+                auto items = mPlayer->getWorld()->getStoreData().griswoldBasicItems;
+                auto item = std::find_if(items.begin(), items.end(), [&](StoreItem& item) { return item.storeId == input.mData.dataBuyItem.itemId; });
+
+                if (item == items.end())
+                    return;
+
+                int32_t price = item->item.getPrice();
+                if (mPlayer->mInventory.getTotalGold() < price)
+                    return;
+
+                if (!mPlayer->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(item->item))
+                    return;
+
+                mPlayer->mInventory.takeOutGold(price);
+                mPlayer->mInventory.autoPlaceItem(item->item);
+                items.erase(item);
+
                 return;
             }
             case PlayerInput::Type::PlayerJoined:
