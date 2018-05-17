@@ -100,7 +100,7 @@ namespace Engine
     void Server::onPeerConnect(const ENetEvent& event)
     {
         mPeers[mNextPeerId] = Peer(event.peer);
-        event.peer->data = reinterpret_cast<void*>(mNextPeerId);
+        event.peer->data = reinterpret_cast<void*>(size_t(mNextPeerId));
 
         // We pass the player joining as a PlayerInput so that other clients will now about them connecting.
         // Later on, the game will create an FAWorld::Player object for the player, and inform us of this through registerNewPlayer().

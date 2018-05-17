@@ -16,7 +16,7 @@ namespace FAWorld
     class World;
     class Actor;
     class Item;
-    class StoreItem;
+    struct StoreItem;
 }
 
 namespace FAGui

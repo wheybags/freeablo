@@ -419,7 +419,6 @@ namespace FAGui
             d.textLines(item.item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
                 .setAction([it, price]() {
                     auto& self = Engine::EngineMain::get()->mGuiManager->mDialogManager;
-                    FAWorld::CharacterInventory& inventory = self.mWorld.getCurrentPlayer()->mInventory;
 
                     //                if (inventory.getTotalGold() < price)
                     //                    return fillMessageDialog(header, "You do not have enough gold");
