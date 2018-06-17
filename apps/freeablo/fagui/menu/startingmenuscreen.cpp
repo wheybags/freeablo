@@ -13,7 +13,7 @@ namespace FAGui
         auto renderer = FARender::Renderer::get();
         mFocus42.reset(new FARender::AnimationPlayer());
         mFocus42->playAnimation(renderer->loadImage("ui_art/focus42.pcx&trans=0,255,0&vanim=42"),
-                                FAWorld::World::getTicksInPeriod(0.06f),
+                                FAWorld::World::getTicksInPeriod("0.06"),
                                 FARender::AnimationPlayer::AnimationType::Looped);
         mSmLogo = menu.createSmLogo();
 

@@ -1,14 +1,12 @@
 #pragma once
-
-#include <functional>
-#include <map>
-#include <memory>
-#include <vector>
-
 #include "diabloexe/baseitem.h"
 #include "itemenums.h"
 #include "misc/enum_range.h"
-#include "misc/random.h"
+#include <functional>
+#include <map>
+#include <memory>
+#include <random/random.h>
+#include <vector>
 
 namespace DiabloExe
 {
@@ -41,7 +39,7 @@ namespace FAWorld
     class ItemFactory
     {
     public:
-        explicit ItemFactory(const DiabloExe::DiabloExe& exe);
+        explicit ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng);
         Item generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
         Item generateUniqueItem(UniqueItemId id) const;
         template <typename... FilterTypes> ItemId randomItemId(const FilterTypes&... filters) const
@@ -58,7 +56,7 @@ namespace FAWorld
                 for (int32_t i = 0; i < static_cast<int32_t>(info.dropRate); ++i)
                     pool.push_back(id);
             }
-            return pool[Random::randomInRange(0, pool.size() - 1)];
+            return pool[mRng.randomInRange(0, pool.size() - 1)];
         }
 
     private:
@@ -67,5 +65,6 @@ namespace FAWorld
         mutable std::unique_ptr<Cel::CelFile> mObjcursCel;
         std::map<int32_t, ItemId> mUniqueBaseItemIdToItemId;
         const DiabloExe::DiabloExe& mExe;
+        Random::Rng& mRng;
     };
 }

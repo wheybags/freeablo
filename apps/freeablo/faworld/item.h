@@ -53,7 +53,7 @@ namespace FAWorld
     public:
         Item() = default;
 
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
         void load(FASaveGame::GameLoader& loader);
         ~Item();
         // retrieve description which is shown when hovering over the items in your inventory

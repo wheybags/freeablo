@@ -1,10 +1,15 @@
 #pragma once
-
 #include <cstdint>
+
+namespace Serial
+{
+    class Saver;
+    class Loader;
+}
 
 namespace FAWorld
 {
-    enum class EquipTargetType
+    enum class EquipTargetType : uint8_t
     {
         inventory,
         belt,
@@ -21,16 +26,19 @@ namespace FAWorld
     class EquipTarget
     {
     public:
-        EquipTarget() = delete;
+        EquipTarget() = default;
+        void load(Serial::Loader& loader);
+        void save(Serial::Saver& saver) const;
+
         bool operator<(const EquipTarget& other) const;
 
     protected:
         EquipTarget(EquipTargetType typeArg, int32_t posXArg = 0, int32_t posYArg = 0) : type(typeArg), posX(posXArg), posY(posYArg) {}
 
     public:
-        EquipTargetType type;
-        int32_t posX;
-        int32_t posY;
+        EquipTargetType type = EquipTargetType::inventory;
+        int32_t posX = 0;
+        int32_t posY = 0;
     };
 
     template <EquipTargetType Location> struct MakeEquipTarget : EquipTarget

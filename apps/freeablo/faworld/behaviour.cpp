@@ -1,11 +1,11 @@
 #include "behaviour.h"
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
-#include "misc/random.h"
 #include "player.h"
 #include <cstdlib>
 #include <iostream>
 #include <misc/assert.h>
+#include <random/random.h>
 
 namespace FAWorld
 {
@@ -65,12 +65,9 @@ namespace FAWorld
                 return;
             }
             // if no player is in sight, let's wander around a bit
-            else if (mTicksSinceLastAction > World::getTicksInPeriod(0.5f) && !mActor->hasTarget() && !mActor->mMoveHandler.moving())
+            else if (mTicksSinceLastAction > World::getTicksInPeriod("0.5") && !mActor->hasTarget() && !mActor->mMoveHandler.moving())
             {
-                // seed a simple RNG with some variables that should be stable across server and client
-                Random::RandLCG r(mTicksSinceLastAction + mActor->getId() + mActor->getPos().current().first);
-
-                if ((r.get() % 100) > 80)
+                if (mActor->getWorld()->mRng->randomInRange(0, 100) > 80)
                 {
                     std::pair<int32_t, int32_t> next;
 
@@ -79,12 +76,21 @@ namespace FAWorld
                     {
                         ++its;
                         next = mActor->getPos().current();
-                        next.first += ((r.get() % 3) - 1) * (r.get() % 3 + 1);
-                        next.second += ((r.get() % 3) - 1) * (r.get() % 3 + 1);
+
+                        next.first += mActor->getWorld()->mRng->randomInRange(-5, 5);
+                        next.second += mActor->getWorld()->mRng->randomInRange(-5, 5);
                     } while (its < 10 && (!mActor->getLevel()->isPassable(next.first, next.second) || next == mActor->getPos().current()));
 
+                    static int no = 0;
+                    static int yes = 0;
+
                     if (its < 10)
+                    {
                         mActor->mMoveHandler.setDestination(next);
+                        yes++;
+                    }
+                    else
+                        no++;
 
                     mTicksSinceLastAction = 0;
                 }

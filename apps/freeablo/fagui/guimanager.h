@@ -1,16 +1,14 @@
-
 #pragma once
-
+#include "../engine/inputobserverinterface.h"
+#include "dialogmanager.h"
 #include "textcolor.h"
+#include <boost/variant/variant_fwd.hpp>
 #include <chrono>
+#include <fa_nuklear.h>
 #include <functional>
+#include <memory>
 #include <queue>
 #include <string>
-
-#include "../engine/inputobserverinterface.h"
-#include <boost/variant/variant_fwd.hpp>
-#include <fa_nuklear.h>
-#include <memory>
 
 struct nk_context;
 typedef uint32_t nk_flags;
@@ -93,7 +91,7 @@ namespace FAGui
         using self = GuiManager;
 
     public:
-        GuiManager(Engine::EngineMain& engine, FAWorld::World& world);
+        GuiManager(Engine::EngineMain& engine);
         ~GuiManager();
 
         void update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
@@ -135,10 +133,12 @@ namespace FAGui
         void notify(Engine::KeyboardInputAction action) override;
         void keyPress(const Input::Hotkey&) override;
 
-    private:
+    public:
+        DialogManager mDialogManager;
+
+        // private:
         Engine::EngineMain& mEngine;
-        FAWorld::World& mWorld;
-        FAWorld::Player* mPlayer;
+        FAWorld::Player* mPlayer = nullptr;
         std::string mHoveredInventoryItemText;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::vector<DialogData> mDialogs;

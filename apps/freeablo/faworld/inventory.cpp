@@ -588,9 +588,15 @@ namespace FAWorld
             copy.mCount -= toTake;
             quantity -= toTake;
 
-            mMainInventory.remove(item.mInvX, item.mInvY);
+            int32_t x = item.mInvX;
+            int32_t y = item.mInvY;
+
+            mMainInventory.remove(x, y);
             if (copy.mCount > 0)
-                mMainInventory.placeItem(copy, item.mInvX, item.mInvY);
+            {
+                PlaceItemResult result = mMainInventory.placeItem(copy, x, y);
+                release_assert(result.succeeded());
+            }
 
             if (quantity == 0)
                 return;

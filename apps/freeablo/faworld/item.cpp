@@ -5,13 +5,13 @@
 #include "itembonus.h"
 #include "itemenums.h"
 #include "itemfactory.h"
-#include "misc/random.h"
 #include <boost/format.hpp>
 #include <iostream>
+#include <random/random.h>
 
 namespace FAWorld
 {
-    void Item::save(FASaveGame::GameSaver& saver)
+    void Item::save(FASaveGame::GameSaver& saver) const
     {
         saver.save(mIsReal);
         saver.save(mUniqueId);

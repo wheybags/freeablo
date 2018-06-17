@@ -21,7 +21,7 @@ namespace FAWorld
     PlacedItemData::PlacedItemData(std::unique_ptr<Item> itemArg, const Tile& tile)
         : mItem(std::move(itemArg)), mAnimation(new FARender::AnimationPlayer()), mTile(tile)
     {
-        mAnimation->playAnimation(mItem->getFlipSpriteGroup(), World::getTicksInPeriod(0.05f), FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
+        mAnimation->playAnimation(mItem->getFlipSpriteGroup(), World::getTicksInPeriod("0.05"), FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
     }
 
     PlacedItemData::PlacedItemData(FASaveGame::GameLoader& loader)

@@ -7,10 +7,11 @@
 
 namespace bfs = boost::filesystem;
 
-// We don't want warnings from StormLibs headers
-#include <StormLib.h>
+// clang-format off
 #include <misc/disablewarn.h>
+#include <StormLib.h>
 #include <misc/enablewarn.h>
+// clang-format on
 
 namespace FAIO
 {

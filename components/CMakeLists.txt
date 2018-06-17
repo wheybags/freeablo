@@ -42,13 +42,22 @@ add_library(Misc
     misc/array2d.h
     misc/direction.cpp
     misc/direction.h
-    misc/random.cpp
-    misc/random.h
     misc/enum_range.h
+    misc/fixedpoint.cpp
+    misc/fixedpoint.h
+    misc/vec2fix.cpp
+    misc/vec2fix.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_library(Random
+    random/random.cpp
+    random/random.h
+)
+target_link_libraries(Random Serial)
+set_target_properties(Random PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 
 set(RenderFiles 

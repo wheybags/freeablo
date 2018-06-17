@@ -1,8 +1,10 @@
-#include <iostream>
-
+// clang-format off
+#include <misc/disablewarn.h>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
-
+#include <misc/enablewarn.h>
+// clang-format on
+#include <iostream>
 #include <faio/fafileobject.h>
 #include <settings/settings.h>
 
@@ -16,7 +18,7 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
         // -1 represents the main menu
         ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)")(
             "character,c", bpo::value<std::string>()->default_value("Warrior"), "Choose Warrior, Rogue or Sorcerer")(
-            "invuln", bpo::value<std::string>()->default_value("off"), "on or off");
+            "invuln", bpo::value<std::string>()->default_value("off"), "on or off")("client", bpo::bool_switch()->default_value(false));
 
     try
     {

@@ -1,6 +1,8 @@
 #include "player.h"
+#include "../engine/enginemain.h"
 #include "../engine/threadmanager.h"
 #include "../fagui/dialogmanager.h"
+#include "../fagui/guimanager.h"
 #include "../fasavegame/gameloader.h"
 #include "actorstats.h"
 #include "boost/algorithm/clamp.hpp"
@@ -9,11 +11,12 @@
 #include "itembonus.h"
 #include "itemenums.h"
 #include "itemmap.h"
-#include "misc/random.h"
 #include "playerbehaviour.h"
 #include "world.h"
 #include <misc/assert.h>
 #include <misc/stringops.h>
+#include <misc/vec2fix.h>
+#include <random/random.h>
 #include <string>
 
 namespace FAWorld
@@ -61,15 +64,15 @@ namespace FAWorld
         updateSprites();
     }
 
-    double Player::meleeDamageVs(const Actor* /*actor*/) const
+    int32_t Player::meleeDamageVs(const Actor* /*actor*/) const
     {
         auto bonus = getItemBonus();
-        auto dmg = Random::randomInRange(bonus.minAttackDamage, bonus.maxAttackDamage);
+        auto dmg = mWorld.mRng->randomInRange(bonus.minAttackDamage, bonus.maxAttackDamage);
         dmg += dmg * getPercentDamageBonus() / 100;
         dmg += getCharacterBaseDamage();
         dmg += getDamageBonus();
         // critical hit for warriors:
-        if (mPlayerClass == PlayerClass::warrior && Random::randomInRange(0, 99) < getCharacterLevel())
+        if (mPlayerClass == PlayerClass::warrior && mWorld.mRng->randomInRange(0, 99) < getCharacterLevel())
             dmg *= 2;
         return dmg;
     }
@@ -80,7 +83,7 @@ namespace FAWorld
     {
         mPlayerStats = {charStats};
         mFaction = Faction::heaven();
-        mMoveHandler = MovementHandler(World::getTicksInPeriod(0.1f)); // allow players to repath much more often than other actors
+        mMoveHandler = MovementHandler(World::getTicksInPeriod("0.1")); // allow players to repath much more often than other actors
 
         mStats.mAttackDamage = 60;
 
@@ -106,7 +109,7 @@ namespace FAWorld
     bool Player::checkHit(Actor* enemy)
     {
         // let's throw some formulas, parameters will be placeholders for now
-        auto roll = Random::randomInRange(0, 99);
+        auto roll = mWorld.mRng->randomInRange(0, 99);
         auto toHit = mPlayerStats.mDexterity / 2;
         toHit += getArmorPenetration();
         toHit -= enemy->getArmor();
@@ -273,7 +276,9 @@ namespace FAWorld
     bool Player::dropItem(const FAWorld::Tile& clickedTile)
     {
         auto cursorItem = mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
-        auto initialDir = Misc::getVecDir(Misc::getVec(getPos().current(), {clickedTile.x, clickedTile.y}));
+
+        auto initialDir = (Vec2Fix(clickedTile.x, clickedTile.y) - Vec2Fix(getPos().current().first, getPos().current().second)).getIsometricDirection();
+
         auto curPos = getPos().current();
         auto tryDrop = [&](const std::pair<int32_t, int32_t>& pos) {
             if (getLevel()->dropItem(std::unique_ptr<Item>{new Item(cursorItem)}, *this, FAWorld::Tile(pos.first, pos.second)))
@@ -337,7 +342,8 @@ namespace FAWorld
 
             if (target && target->getPos().isNear(this->getPos()) && canTalkTo(target))
             {
-                mWorld.mDlgManager->talk(target);
+                if (mWorld.getCurrentPlayer() == this)
+                    Engine::EngineMain::get()->mGuiManager->mDialogManager.talk(target);
                 mTarget.clear();
             }
         }

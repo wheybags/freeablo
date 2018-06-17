@@ -1,5 +1,6 @@
 #include "world.h"
 #include "../engine/enginemain.h"
+#include "../engine/net/multiplayerinterface.h"
 #include "../engine/threadmanager.h"
 #include "../faaudio/audiomanager.h"
 #include "../fagui/dialogmanager.h"
@@ -24,23 +25,36 @@
 #include <diabloexe/diabloexe.h>
 #include <iostream>
 #include <misc/assert.h>
+#include <serial/textstream.h>
 #include <tuple>
 
 namespace FAWorld
 {
-    World::World(const DiabloExe::DiabloExe& exe)
-        : mDiabloExe(exe), mItemFactory(boost::make_unique<ItemFactory>(exe)), mStoreData(boost::make_unique<StoreData>(*mItemFactory))
+    World::World(const DiabloExe::DiabloExe& exe, uint32_t seed)
+        : mDiabloExe(exe), mRng(new Random::RngMersenneTwister(seed)),
+          mLevelRng(new Random::RngMersenneTwister(uint32_t(mRng->randomInRange(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max())))),
+          mItemFactory(boost::make_unique<ItemFactory>(exe, *mRng.get())), mStoreData(boost::make_unique<StoreData>(*mItemFactory))
     {
         this->setupObjectIdMappers();
         regenerateStoreItems();
     }
 
-    void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/); }
+    void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/, *mRng.get()); }
 
-    World::World(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe) : World(exe)
+    void World::load(FASaveGame::GameLoader& loader)
     {
+        // reconstruct in-place to reset to default state
+        {
+            const DiabloExe::DiabloExe& tmp = mDiabloExe;
+            this->~World();
+            new (this) World(tmp, 0U);
+        }
+
         loader.currentlyLoadingWorld = this;
 
+        mRng->load(loader);
+        mLevelRng->load(loader);
+        this->mTicksPassed = loader.load<Tick>();
         uint32_t numLevels = loader.load<uint32_t>();
 
         for (uint32_t i = 0; i < numLevels; i++)
@@ -56,17 +70,19 @@ namespace FAWorld
             mLevels[levelIndex] = level;
         }
 
-        int32_t playerId = loader.load<int32_t>();
         mNextId = loader.load<int32_t>();
+        mStoreData->load(loader);
 
         loader.runFunctionsToRunAtEnd();
-        mCurrentPlayer = (Player*)getActorById(playerId);
 
         loader.currentlyLoadingWorld = nullptr;
     }
 
     void World::save(FASaveGame::GameSaver& saver)
     {
+        mRng->save(saver);
+        mLevelRng->save(saver);
+        saver.save(this->mTicksPassed);
         uint32_t numLevels = mLevels.size();
         saver.save(numLevels);
 
@@ -81,14 +97,14 @@ namespace FAWorld
                 pair.second->save(saver);
         }
 
-        saver.save(mCurrentPlayer->getId());
         saver.save(mNextId);
+        mStoreData->save(saver);
     }
 
     void World::setupObjectIdMappers()
     {
-        mObjectIdMapper.addClass(Actor::typeId, [=](FASaveGame::GameLoader& loader) { return new Actor(*this, loader); });
-        mObjectIdMapper.addClass(Player::typeId, [=](FASaveGame::GameLoader& loader) { return new Player(*this, loader); });
+        mObjectIdMapper.addClass(Actor::typeId, [&](FASaveGame::GameLoader& loader) { return new Actor(*this, loader); });
+        mObjectIdMapper.addClass(Player::typeId, [&](FASaveGame::GameLoader& loader) { return new Player(*this, loader); });
 
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });
@@ -102,6 +118,12 @@ namespace FAWorld
     {
         for (auto& pair : mLevels)
             delete pair.second;
+    }
+
+    void World::setFirstPlayerAsCurrent()
+    {
+        release_assert(!mPlayers.empty());
+        this->mCurrentPlayer = mPlayers[0];
     }
 
     Render::Tile World::getTileByScreenPos(Misc::Point screenPos)
@@ -253,7 +275,7 @@ namespace FAWorld
             return nullptr;
         if (p->second == nullptr)
         {
-            p->second = FALevelGen::generate(*this, 100, 100, level, mDiabloExe, level - 1, level + 1);
+            p->second = FALevelGen::generate(*this, *mLevelRng.get(), 100, 100, level, mDiabloExe, level - 1, level + 1);
         }
         return p->second;
     }
@@ -267,7 +289,31 @@ namespace FAWorld
         mTicksPassed++;
 
         for (const auto& input : inputs)
-            static_cast<Player*>(this->getActorById(input.mActorId))->getPlayerBehaviour()->addInput(input);
+        {
+            switch (input.mType)
+            {
+                case PlayerInput::Type::PlayerJoined:
+                {
+                    FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, "Warrior");
+                    registerPlayer(newPlayer);
+                    FAWorld::GameLevel* level = getLevel(0);
+                    newPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
+                    Engine::EngineMain::get()->mMultiplayer->registerNewPlayer(newPlayer, input.mData.dataPlayerJoined.peerId);
+
+                    break;
+                }
+                case PlayerInput::Type::PlayerLeft:
+                {
+                    // a little unsubtle, but it'll do for now.
+                    getActorById(input.mActorId)->die();
+                    break;
+                }
+                default:
+                {
+                    static_cast<Player*>(this->getActorById(input.mActorId))->getPlayerBehaviour()->addInput(input);
+                }
+            }
+        }
 
         std::set<GameLevel*> done;
 
@@ -348,19 +394,13 @@ namespace FAWorld
 
     Tick World::getCurrentTick() { return mTicksPassed; }
 
-    void World::setGuiManager(FAGui::GuiManager* manager)
-    {
-        mGuiManager = manager;
-        mDlgManager.reset(new FAGui::DialogManager(*mGuiManager, *this));
-    }
-
     PlacedItemData* World::targetedItem(Misc::Point screenPosition)
     {
         auto tile = getTileByScreenPos(screenPosition);
         return getCurrentLevel()->getItemMap().getItemAt({tile.x, tile.y});
     }
 
-    Tick World::getTicksInPeriod(float seconds) { return std::max((Tick)1, (Tick)round(((float)ticksPerSecond) * seconds)); }
+    Tick World::getTicksInPeriod(FixedPoint seconds) { return std::max(Tick(1), Tick((FixedPoint(ticksPerSecond) * seconds).round())); }
 
-    float World::getSecondsPerTick() { return 1.0f / ((float)ticksPerSecond); }
+    FixedPoint World::getSecondsPerTick() { return FixedPoint(1) / FixedPoint(ticksPerSecond); }
 }

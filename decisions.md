@@ -8,6 +8,16 @@ decisions you make over the course of the project's lifetime.
 When adding entries here, please place them at the top of the list, preferably
 with the title of the entry being the output from `date`.
 
+## Mon Apr 30 08:41:55 CEST 2018^M
+- Decided not to use floating point calculation in the game simulation in order to
+  preserve determinism. It is possible achieve this while still using floats, but
+  in my opinion it is easier and safer to just avoid it and use integer and fixed
+  point maths instead.
+
+## 19 Feb 2017 12:44:21
+- No more unsigned ints. They just cause problems (just finished spending several 
+  hours debugging a problem with a negative value being passed as a size_t).
+
 ## Tue Jan  2 17:39:15 CET 2018
 - These were actually decided a while ago, but I never wrote them down.
 - The existing multiplayer implementation was not working, decided to pursue
@@ -55,7 +65,3 @@ of that have already been made.
 - using qt for the launcher because it has good cross platform support (better
   than gtk), and besides, gtk is yucky. Also, gtk and qt are the only real
   options for cross platform gui libs in c/c++.
-  
-## 19 Feb 2017 12:44:21
-No more unsigned ints. They just cause problems (just finished spending several 
-hours debugging a problem with a negative value being passed as a size_t).

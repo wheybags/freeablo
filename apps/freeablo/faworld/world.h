@@ -4,8 +4,14 @@
 #include "playerinput.h"
 #include <map>
 #include <memory>
+#include <misc/fixedpoint.h>
 #include <utility>
 #include <vector>
+
+namespace Random
+{
+    class Rng;
+}
 
 namespace FARender
 {
@@ -51,10 +57,14 @@ namespace FAWorld
     class World
     {
     public:
-        World(const DiabloExe::DiabloExe& exe);
-        World(FASaveGame::GameLoader& loader, const DiabloExe::DiabloExe& exe);
+        World(const DiabloExe::DiabloExe& exe, uint32_t seed);
         void save(FASaveGame::GameSaver& saver);
+        void load(FASaveGame::GameLoader& loader);
         ~World();
+
+        World& operator=(World&& other) = default;
+
+        void setFirstPlayerAsCurrent();
 
         Render::Tile getTileByScreenPos(Misc::Point screenPos);
         Actor* targetedActor(Misc::Point screenPosition);
@@ -83,15 +93,14 @@ namespace FAWorld
 
         void fillRenderState(FARender::RenderState* state, const HoverStatus& hoverStatus);
 
-        static Tick getTicksInPeriod(float seconds);
-        static float getSecondsPerTick();
+        static Tick getTicksInPeriod(FixedPoint seconds);
+        static FixedPoint getSecondsPerTick();
 
         Actor* getActorById(int32_t id);
 
         void getAllActors(std::vector<Actor*>& actors);
 
         Tick getCurrentTick();
-        void setGuiManager(FAGui::GuiManager* manager);
 
         void setupObjectIdMappers();
 
@@ -104,14 +113,14 @@ namespace FAWorld
 
         void playLevelMusic(size_t level);
 
-        static const Tick ticksPerSecond = 125; ///< number of times per second that game state will be updated
+        static const Tick ticksPerSecond = 60; ///< number of times per second that game state will be updated
         FASaveGame::ObjectIdMapper mObjectIdMapper;
-        FAGui::GuiManager* mGuiManager = nullptr;
-        std::unique_ptr<FAGui::DialogManager> mDlgManager;
 
         const DiabloExe::DiabloExe& mDiabloExe; // TODO: something better than this
+        std::unique_ptr<Random::Rng> mRng;
 
     private:
+        std::unique_ptr<Random::Rng> mLevelRng;
         std::map<int32_t, GameLevel*> mLevels;
         Tick mTicksPassed = 0;
         Player* mCurrentPlayer = nullptr;

@@ -162,9 +162,9 @@ namespace Engine
                 return "Quit";
             case KeyboardInputAction::noclip:
                 return "Noclip";
-            case KeyboardInputAction::changeLevelUp:
+            case KeyboardInputAction::dataChangeLevelUp:
                 return "Changelvlup";
-            case KeyboardInputAction::changeLevelDown:
+            case KeyboardInputAction::dataChangeLevelDown:
                 return "Changelvldwn";
             case KeyboardInputAction::toggleConsole:
                 return "ToggleConsole";

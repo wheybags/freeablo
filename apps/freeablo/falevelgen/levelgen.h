@@ -13,9 +13,14 @@ namespace FAWorld
     class World;
 }
 
+namespace Random
+{
+    class Rng;
+}
+
 namespace FALevelGen
 {
 
-    FAWorld::GameLevel*
-    generate(FAWorld::World& world, int32_t width, int32_t height, int32_t dLvl, const DiabloExe::DiabloExe& exe, int32_t previous, int32_t next);
+    FAWorld::GameLevel* generate(
+        FAWorld::World& world, Random::Rng& rng, int32_t width, int32_t height, int32_t dLvl, const DiabloExe::DiabloExe& exe, int32_t previous, int32_t next);
 }

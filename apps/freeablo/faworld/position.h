@@ -1,16 +1,8 @@
-
 #pragma once
-
+#include "misc/direction.h"
 #include <cmath>
 #include <misc/misc.h>
 #include <utility>
-
-#include "misc/direction.h"
-
-namespace Misc
-{
-    enum class Direction;
-}
 
 namespace FASaveGame
 {

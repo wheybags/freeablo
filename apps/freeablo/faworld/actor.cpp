@@ -8,7 +8,6 @@
 #include "behaviour.h"
 #include "equiptarget.h"
 #include "findpath.h"
-#include "misc/random.h"
 #include "player.h"
 #include "world.h"
 #include <boost/format.hpp>
@@ -16,6 +15,7 @@
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
 #include <misc/misc.h>
+#include <random/random.h>
 
 namespace FAWorld
 {
@@ -38,7 +38,7 @@ namespace FAWorld
     }
 
     Actor::Actor(World& world, const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath)
-        : mMoveHandler(World::getTicksInPeriod(1.0f)), mWorld(world)
+        : mMoveHandler(World::getTicksInPeriod(1)), mWorld(world)
     {
         mFaction = Faction::heaven();
         if (!dieAnimPath.empty())
@@ -63,7 +63,7 @@ namespace FAWorld
         mName = npc.name;
     }
 
-    Actor::Actor(World& world, const DiabloExe::Monster& monster) : Actor(world, "", "", "")
+    Actor::Actor(World& world, Random::Rng& rng, const DiabloExe::Monster& monster) : Actor(world, "", "", "")
     {
         boost::format fmt(monster.cl2Path);
         mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage((fmt % 'w').str()));
@@ -76,7 +76,7 @@ namespace FAWorld
         mFaction = Faction::hell();
         mName = monster.monsterName;
         mSoundPath = monster.soundPath;
-        mStats.mHp = Random::randomInRange(monster.minHp, monster.maxHp);
+        mStats.mHp = rng.randomInRange(monster.minHp, monster.maxHp);
     }
 
     Actor::Actor(World& world, FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(loader), mWorld(world)
@@ -149,9 +149,9 @@ namespace FAWorld
 
     Actor::~Actor() = default;
 
-    bool Actor::checkHit(Actor* /*enemy*/) { return (Random::randomInRange(1, 2) < 2); }
+    bool Actor::checkHit(Actor*) { return mWorld.mRng->randomInRange(1, 2) < 2; }
 
-    void Actor::takeDamage(double amount)
+    void Actor::takeDamage(int32_t amount)
     {
         if (mInvuln)
             return;
@@ -219,10 +219,10 @@ namespace FAWorld
 
     GameLevel* Actor::getLevel() { return mMoveHandler.getLevel(); }
 
-    double Actor::meleeDamageVs(const Actor* /*actor*/) const
+    int32_t Actor::meleeDamageVs(const Actor* /*actor*/) const
     {
         /* placeholder */
-        return 5.0;
+        return 5;
     }
 
     std::string Actor::getDieWav() const
@@ -232,7 +232,7 @@ namespace FAWorld
 
         boost::format fmt(mSoundPath);
         fmt % 'd';
-        return (fmt % Random::randomInRange(1, 2)).str();
+        return (fmt % mWorld.mRng->randomInRange(1, 2)).str();
     }
 
     std::string Actor::getHitWav() const
@@ -242,7 +242,7 @@ namespace FAWorld
 
         boost::format fmt(mSoundPath);
         fmt % 'h';
-        return (fmt % Random::randomInRange(1, 2)).str();
+        return (fmt % mWorld.mRng->randomInRange(1, 2)).str();
     }
 
     bool Actor::canIAttack(Actor* actor)
@@ -293,7 +293,7 @@ namespace FAWorld
 
     void Actor::doMeleeHit(Actor* enemy)
     {
-        Engine::ThreadManager::get()->playSound(Random::chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
+        Engine::ThreadManager::get()->playSound(mWorld.mRng->chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
         if (checkHit(enemy))
         {
             enemy->takeDamage(meleeDamageVs(enemy));

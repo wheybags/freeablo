@@ -2,6 +2,7 @@
 #include "../actor.h"
 #include "../itemmap.h"
 #include "attackstate.h"
+#include <misc/vec2fix.h>
 
 namespace FAWorld
 {
@@ -37,8 +38,9 @@ namespace FAWorld
                             {
                                 auto targetPos = target->getPos().current();
                                 auto myPos = actor.getPos().current();
-                                ret = StateChange{StateOperation::push,
-                                                  new MeleeAttackState(Misc::getVecDir({targetPos.first - myPos.first, targetPos.second - myPos.second}))};
+                                ret = StateChange{
+                                    StateOperation::push,
+                                    new MeleeAttackState(Vec2Fix(targetPos.first - myPos.first, targetPos.second - myPos.second).getIsometricDirection())};
                             }
                         }
                     }

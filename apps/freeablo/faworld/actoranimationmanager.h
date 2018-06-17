@@ -64,7 +64,7 @@ namespace FAWorld
         // TODO: we could probably do with making this a stack, but it's good enough for now
         // At time of writing (5/Nov/17), it's just used for hit animations, which don't need a stack
         AnimState mInterruptedAnimationState = AnimState::none;
-        FARender::AnimationPlayer::AnimationType mInterruptedAnimationType;
+        FARender::AnimationPlayer::AnimationType mInterruptedAnimationType = FARender::AnimationPlayer::AnimationType::Once;
         int32_t mInterruptedAnimationFrame = 0;
     };
 }

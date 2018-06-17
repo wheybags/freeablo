@@ -90,14 +90,14 @@ namespace FAGui
         return "";
     }
 
-    GuiManager::GuiManager(Engine::EngineMain& engine, FAWorld::World& world) : mEngine(engine), mWorld(world)
+    GuiManager::GuiManager(Engine::EngineMain& engine) : mDialogManager(*this, *engine.mWorld.get()), mEngine(engine)
     {
-        mMenuHandler.reset(new MenuHandler(engine, mWorld));
+        mMenuHandler.reset(new MenuHandler(engine));
 
         auto renderer = FARender::Renderer::get();
         mSmallPentagram.reset(new FARender::AnimationPlayer());
         mSmallPentagram->playAnimation(
-            renderer->loadImage("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod(0.06f), FARender::AnimationPlayer::AnimationType::Looped);
+            renderer->loadImage("data/pentspn2.cel"), FAWorld::World::getTicksInPeriod("0.06"), FARender::AnimationPlayer::AnimationType::Looped);
 
         startingScreen();
     }
@@ -450,7 +450,10 @@ namespace FAGui
                     nk_layout_space_push(ctx, p.second);
                     nk_button_label_styled(ctx, &dummyStyle, "");
                     if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
-                        inv.slotClicked(p.first);
+                    {
+                        FAWorld::PlayerInput::InventorySlotClickedData input{p.first};
+                        Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
+                    }
                     auto highlight = ItemHighlightInfo::notHighlighed;
                     if (isLastWidgetHovered(ctx))
                         highlight = ItemHighlightInfo::highlited;
@@ -472,7 +475,9 @@ namespace FAGui
                 Misc::Point clickedPoint{int32_t(std::floor((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / cellSize)),
                                          int32_t(std::floor((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / cellSize))};
 
-                inv.slotClicked(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(clickedPoint.x, clickedPoint.y));
+                FAWorld::PlayerInput::InventorySlotClickedData input{
+                    FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(clickedPoint.x, clickedPoint.y)};
+                Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
             }
 
             for (auto row : boost::counting_range(0, mainInventory.height()))
@@ -560,8 +565,11 @@ namespace FAGui
         nk_layout_space_push(ctx, nk_recta(beltTopLeft, {beltWidth, beltHeight}));
         auto& inv = mPlayer->mInventory;
         if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && !mGoldSplitTarget)
-            inv.slotClicked(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(
-                int32_t(std::floor(ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / cellSize)));
+        {
+            FAWorld::PlayerInput::InventorySlotClickedData input{FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(
+                int32_t(std::floor(ctx->input.mouse.pos.x - beltTopLeft.x - ctx->current->bounds.x) / cellSize))};
+            Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
+        }
 
         using namespace FAWorld;
         for (auto num : boost::counting_range(0, int32_t(inv.getInv(FAWorld::EquipTargetType::belt).width())))
@@ -706,14 +714,14 @@ namespace FAGui
                                    nk_image(ctx, bulbImage);
                                };
 
-                               const FAWorld::ActorStats& stats = mWorld.getCurrentPlayer()->getStats();
+                               const FAWorld::ActorStats& stats = Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getStats();
                                // draw current hp into health bulb
                                drawBulb(stats.mHp.current, stats.mHp.max, healthBulbLeftOffset);
                                // and current mana
                                drawBulb(stats.mMana.current, stats.mMana.current, manaBulbLeftOffset);
 
                                belt(ctx);
-                               descriptionPanel(ctx, hoverStatus.getDescription(*mWorld.getCurrentLevel()));
+                               descriptionPanel(ctx, hoverStatus.getDescription(*Engine::EngineMain::get()->mWorld->getCurrentLevel()));
 
                                nk_layout_space_end(ctx);
                            },
@@ -784,10 +792,17 @@ namespace FAGui
 
     void GuiManager::update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus)
     {
+        // HACK FUCKING HACK
+        FAWorld::World* world = Engine::EngineMain::get()->mWorld.get();
+        mPlayer = world == nullptr ? nullptr : world->getCurrentPlayer();
+
         mHoveredInventoryItemText.clear();
 
         if (inGame)
         {
+            if (!mPlayer)
+                return;
+
             if (paused)
             {
                 if (!mMenuHandler->isActive())
@@ -875,7 +890,12 @@ namespace FAGui
                 if (mGoldSplitTarget)
                 {
                     if (mGoldSplitCnt > 0)
-                        mPlayer->mInventory.splitGoldIntoCursor(mGoldSplitTarget->mInvX, mGoldSplitTarget->mInvY, mGoldSplitCnt, mWorld.getItemFactory());
+                    {
+                        FAWorld::PlayerInput input(
+                            FAWorld::PlayerInput::SplitGoldStackIntoCursorData{mGoldSplitTarget->mInvX, mGoldSplitTarget->mInvY, mGoldSplitCnt},
+                            mPlayer->getId());
+                        Engine::EngineMain::get()->getLocalInputHandler()->addInput(input);
+                    }
 
                     mGoldSplitTarget = nullptr;
                 }

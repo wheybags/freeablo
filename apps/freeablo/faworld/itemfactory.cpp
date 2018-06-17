@@ -2,8 +2,8 @@
 #include "diabloexe/diabloexe.h"
 #include "item.h"
 #include "itemenums.h"
-#include "misc/random.h"
 #include <boost/make_unique.hpp>
+#include <random/random.h>
 
 namespace FAWorld
 {
@@ -20,7 +20,7 @@ namespace FAWorld
         };
     }
 
-    ItemFactory::ItemFactory(const DiabloExe::DiabloExe& exe) : mExe(exe)
+    ItemFactory::ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng) : mExe(exe), mRng(rng)
     {
         for (int i = 0; i < static_cast<int>(mExe.getBaseItems().size()); ++i)
             mUniqueBaseItemIdToItemId[mExe.getBaseItems()[i].uniqueBaseItemId] = static_cast<ItemId>(i);
@@ -37,7 +37,7 @@ namespace FAWorld
         res.mBaseId = id;
         auto info = getInfo(id);
         res.mMaxDurability = res.mCurrentDurability = info.durability;
-        res.mArmorClass = Random::randomInRange(info.minArmorClass, info.maxArmorClass);
+        res.mArmorClass = mRng.randomInRange(info.minArmorClass, info.maxArmorClass);
         return res;
     }
 

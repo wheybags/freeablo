@@ -1,6 +1,7 @@
 #include "animationplayer.h"
 #include "../fasavegame/gameloader.h"
 #include <misc/assert.h>
+#include <misc/fixedpoint.h>
 
 namespace FARender
 {
@@ -53,13 +54,13 @@ namespace FARender
             return std::make_pair<FARender::FASpriteGroup*, int32_t>(nullptr, 0);
 
         int32_t currentFrame;
-        float progress = ((float)mTicksSinceAnimStarted) / ((float)mPlayingAnimDuration);
+        FixedPoint progress = FixedPoint(mTicksSinceAnimStarted) / FixedPoint(mPlayingAnimDuration);
 
         if (mPlayingAnimType != AnimationType::BySequence)
         {
-            currentFrame = progress;
+            currentFrame = int32_t(progress.intPart());
 
-            if (currentFrame >= (int32_t)mCurrentAnim->getAnimLength())
+            if (currentFrame >= int32_t(mCurrentAnim->getAnimLength()))
             {
                 switch (mPlayingAnimType)
                 {
@@ -80,7 +81,7 @@ namespace FARender
             }
         }
         else
-            currentFrame = mFrameSequence[static_cast<int32_t>(progress) % mFrameSequence.size()];
+            currentFrame = mFrameSequence[size_t(progress.intPart()) % mFrameSequence.size()];
 
         return std::make_pair(mCurrentAnim, currentFrame);
     }

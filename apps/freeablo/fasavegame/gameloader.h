@@ -16,7 +16,7 @@ namespace FASaveGame
     class GameLoader : public Serial::Loader
     {
     public:
-        GameLoader(Serial::ReadStreamInterface& stream) : Serial::Loader(stream) {}
+        explicit GameLoader(Serial::ReadStreamInterface& stream) : Serial::Loader(stream) {}
 
         void addFunctionToRunAtEnd(std::function<void()> func) { mFunctionsToRunAtEnd.push_back(func); }
         void runFunctionsToRunAtEnd();
@@ -31,6 +31,6 @@ namespace FASaveGame
     class GameSaver : public Serial::Saver
     {
     public:
-        GameSaver(Serial::WriteStreamInterface& stream) : Serial::Saver(stream) {}
+        explicit GameSaver(Serial::WriteStreamInterface& stream) : Serial::Saver(stream) {}
     };
 }

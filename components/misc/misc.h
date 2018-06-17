@@ -8,11 +8,6 @@
 
 namespace Misc
 {
-    template <typename T> std::pair<float, float> getVec(const std::pair<T, T>& from, const std::pair<T, T>& to)
-    {
-        return std::make_pair(((float)to.first) - ((float)from.first), ((float)to.second) - ((float)from.second));
-    }
-
     // Point in pixels
     struct Point
     {

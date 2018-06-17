@@ -14,4 +14,9 @@
 #pragma GCC diagnostic ignored "-Wlong-long"
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4505) // unreferenced local function has been removed
 #endif

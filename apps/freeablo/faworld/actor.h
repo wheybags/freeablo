@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "../farender/animationplayer.h"
 #include "actor/statemachine.h"
 #include "actoranimationmanager.h"
@@ -17,17 +15,18 @@
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
 #include <map>
+#include <misc/direction.h>
 #include <misc/misc.h>
+
+namespace Random
+{
+    class Rng;
+}
 
 namespace FASaveGame
 {
     class Loader;
     class Saver;
-}
-
-namespace Misc
-{
-    enum class Direction;
 }
 
 namespace FAWorld
@@ -40,7 +39,7 @@ namespace FAWorld
     public:
         Actor(World& world, const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
         Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
-        Actor(World& world, const DiabloExe::Monster& monster);
+        Actor(World& world, Random::Rng& rng, const DiabloExe::Monster& monster);
         Actor(World& world, FASaveGame::GameLoader& loader);
         virtual ~Actor();
         virtual int getArmor() const { /*placeholder */ return 0; }
@@ -58,7 +57,7 @@ namespace FAWorld
         GameLevel* getLevel();
         World* getWorld() const { return &mWorld; }
 
-        virtual double meleeDamageVs(const Actor* actor) const;
+        virtual int32_t meleeDamageVs(const Actor* actor) const;
         void doMeleeHit(Actor* enemy);
         void doMeleeHit(const std::pair<int32_t, int32_t>& tile);
         void startMeleeAttack(Misc::Direction direction);
@@ -70,7 +69,7 @@ namespace FAWorld
         bool canIAttack(Actor* actor);
         virtual void update(bool noclip);
         void init();
-        void takeDamage(double amount);
+        void takeDamage(int32_t amount);
         void heal();
         void setDirection(Misc::Direction direction);
 

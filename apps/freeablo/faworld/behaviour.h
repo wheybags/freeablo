@@ -65,6 +65,6 @@ namespace FAWorld
         virtual ~BasicMonsterBehaviour() {}
 
     private:
-        Tick mTicksSinceLastAction;
+        Tick mTicksSinceLastAction = 0;
     };
 }

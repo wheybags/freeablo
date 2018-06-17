@@ -4,6 +4,7 @@
 #include "equiptarget.h"
 #include "input/inputmanager.h"
 #include "player.h"
+#include "storedata.h"
 #include <misc/assert.h>
 
 namespace FAWorld
@@ -49,7 +50,7 @@ namespace FAWorld
         {
             case PlayerInput::Type::TargetTile:
             {
-                auto clickedTile = Render::Tile(input.mData.targetTile.x, input.mData.targetTile.y);
+                auto clickedTile = Render::Tile(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
                 mPlayer->getLevel()->activate(clickedTile.x, clickedTile.y);
 
                 auto cursorItem = mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
@@ -67,43 +68,39 @@ namespace FAWorld
             case PlayerInput::Type::DragOverTile:
             {
                 mPlayer->mTarget.clear();
-                mPlayer->mMoveHandler.setDestination({input.mData.dragOverTile.x, input.mData.dragOverTile.y});
+                mPlayer->mMoveHandler.setDestination({input.mData.dataDragOverTile.x, input.mData.dataDragOverTile.y});
                 return;
             }
             case PlayerInput::Type::TargetActor:
             {
-                mPlayer->mTarget = mPlayer->getWorld()->getActorById(input.mData.targetActor.actorId);
+                mPlayer->mTarget = mPlayer->getWorld()->getActorById(input.mData.dataTargetActor.actorId);
                 return;
             }
             case PlayerInput::Type::TargetItemOnFloor:
             {
-                auto item = mPlayer->getLevel()->getItemMap().getItemAt({input.mData.targetItemOnFloor.x, input.mData.targetItemOnFloor.y});
-                mPlayer->mTarget = Target::ItemTarget{input.mData.targetItemOnFloor.type, item};
+                auto item = mPlayer->getLevel()->getItemMap().getItemAt({input.mData.dataTargetItemOnFloor.x, input.mData.dataTargetItemOnFloor.y});
+                mPlayer->mTarget = Target::ItemTarget{input.mData.dataTargetItemOnFloor.type, item};
                 return;
             }
             case PlayerInput::Type::AttackDirection:
             {
                 if (!mPlayer->getLevel()->isTown())
-                    mPlayer->startMeleeAttack(input.mData.attackDirection.direction);
+                    mPlayer->startMeleeAttack(input.mData.dataAttackDirection.direction);
                 return;
             }
             case PlayerInput::Type::ChangeLevel:
             {
                 int32_t nextLevelIndex;
-                if (input.mData.changeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
+                if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
                     nextLevelIndex = mPlayer->getLevel()->getPreviousLevel();
                 else
                     nextLevelIndex = mPlayer->getLevel()->getNextLevel();
 
-                // setLevel(nextLevelIndex);
-
                 GameLevel* level = mPlayer->getWorld()->getLevel(nextLevelIndex);
-
-                // Player* player = getCurrentPlayer();
 
                 if (level)
                 {
-                    if (input.mData.changeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
+                    if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
                         mPlayer->teleport(level, Position(level->downStairsPos().first, level->downStairsPos().second));
                     else
                         mPlayer->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
@@ -111,8 +108,51 @@ namespace FAWorld
 
                 return;
             }
+            case PlayerInput::Type::InventorySlotClicked:
+            {
+                mPlayer->mInventory.slotClicked(input.mData.dataInventorySlotClicked.slot);
+                return;
+            }
+            case PlayerInput::Type::SplitGoldStackIntoCursor:
+            {
+                mPlayer->mInventory.splitGoldIntoCursor(input.mData.dataSplitGoldStackIntoCursor.invX,
+                                                        input.mData.dataSplitGoldStackIntoCursor.invY,
+                                                        input.mData.dataSplitGoldStackIntoCursor.splitCount,
+                                                        mPlayer->getWorld()->getItemFactory());
+                return;
+            }
+            case PlayerInput::Type::BuyItem:
+            {
+                auto items = mPlayer->getWorld()->getStoreData().griswoldBasicItems;
+                auto item = std::find_if(items.begin(), items.end(), [&](StoreItem& item) { return item.storeId == input.mData.dataBuyItem.itemId; });
+
+                if (item == items.end())
+                    return;
+
+                int32_t price = item->item.getPrice();
+                if (mPlayer->mInventory.getTotalGold() < price)
+                    return;
+
+                if (!mPlayer->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(item->item))
+                    return;
+
+                mPlayer->mInventory.takeOutGold(price);
+                mPlayer->mInventory.autoPlaceItem(item->item);
+                items.erase(item);
+
+                return;
+            }
+            case PlayerInput::Type::PlayerJoined:
+            case PlayerInput::Type::PlayerLeft:
+            {
+                invalid_enum(PlayerInput::Type, input.mType);
+            }
+            case PlayerInput::Type::None:
+            {
+                message_and_abort("received \"None\" type PlayerInput");
+            }
         }
 
-        release_assert(false && "Invalid PlayerInput detected");
+        invalid_enum(PlayerInput::Type, input.mType);
     }
 }

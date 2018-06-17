@@ -1,7 +1,7 @@
 #include "movementhandler.h"
-
 #include "../fasavegame/gameloader.h"
 #include "findpath.h"
+#include <misc/vec2fix.h>
 
 namespace FAWorld
 {
@@ -117,7 +117,9 @@ namespace FAWorld
                         // Make sure nothing has moved into the way
                         if (mLevel->isPassable(next.first, next.second))
                         {
-                            auto direction = Misc::getVecDir(Misc::getVec(mCurrentPos.current(), next));
+                            auto vec = Vec2Fix(next.first, next.second) - Vec2Fix(mCurrentPos.current().first, mCurrentPos.current().second);
+                            Misc::Direction direction = vec.getIsometricDirection();
+
                             positionReachedSent = false;
                             mCurrentPos.setDirection(direction);
                             mCurrentPos.start();
