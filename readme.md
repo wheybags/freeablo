@@ -66,7 +66,7 @@ cd build
 
 symlink the resources folder (linux/unix):
 ```bash
-ln -s ../freeablo/resources
+ln -s ../resources
 ```
 symlink the resources folder (windows):
 ```
@@ -75,7 +75,7 @@ mklink /j resources ..\resources
 
 call cmake:
 ```bash
-cmake ../freeablo
+cmake ..
 ```
 
 Now you're ready to go, cmake has generated a makefile/vs solution, just run make/open in vs to compile.
