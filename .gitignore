@@ -11,4 +11,5 @@ resources/celview.ini
 build/
 .DS_Store
 .vscode
+.idea
 valgrind-local.supp
