@@ -137,7 +137,7 @@ namespace FAGui
 
             nk_context* mCtx;
         };
-    }
+    } // namespace
 
     void GuiManager::dialog(nk_context* ctx)
     {
@@ -305,7 +305,6 @@ namespace FAGui
                     nk_layout_space_push(ctx, nk_rect(boxTex->getWidth() - 3 - sliderImg->getWidth(), y, sliderImg->getWidth(), sliderImg->getHeight()));
                     nk_image(ctx, sliderImg->getNkImage(12));
                 }
-
             },
             true);
     }
@@ -341,7 +340,7 @@ namespace FAGui
                 }
                 return 0;
             }(),
-            screenH - 125 - invTex->getHeight(),
+            (screenH - 125 - invTex->getHeight()) / 2,
             invTex->getWidth(),
             invTex->getHeight());
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND;
@@ -969,4 +968,4 @@ namespace FAGui
 
     std::string cursorPath = "data/inv/objcurs.cel";
     uint32_t cursorFrame = 0;
-}
+} // namespace FAGui
