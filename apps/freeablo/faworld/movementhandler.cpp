@@ -154,4 +154,4 @@ namespace FAWorld
     }
 
     void MovementHandler::setDirection(Misc::Direction direction) { mCurrentPos.setDirection(direction); }
-}
+} // namespace FAWorld

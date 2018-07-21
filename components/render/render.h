@@ -23,7 +23,7 @@ namespace Render
     typedef void* Sprite;
     typedef SDL_Cursor* FACursor;
     typedef SDL_Surface* FASurface;
-}
+} // namespace Render
 
 namespace Cel
 {
@@ -129,4 +129,4 @@ namespace Render
     Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
 
     void clear(int r = 0, int g = 0, int b = 255);
-}
+} // namespace Render

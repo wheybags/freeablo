@@ -3,9 +3,9 @@
 #include "baseitemmanager.h"
 #include "dun.h"
 #include "min.h"
+#include "misc/point.h"
 #include "sol.h"
 #include "tileset.h"
-#include "misc/point.h"
 #include <map>
 #include <misc/misc.h>
 #include <utility>
@@ -14,7 +14,7 @@ namespace Serial
 {
     class Loader;
     class Saver;
-}
+} // namespace Serial
 
 namespace Level
 {
@@ -104,4 +104,4 @@ namespace Level
         int32_t mPrevious; ///< index of previous level
         int32_t mNext;     ///< index of next level
     };
-}
+} // namespace Level

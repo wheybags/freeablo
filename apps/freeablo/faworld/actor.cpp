@@ -300,4 +300,4 @@ namespace FAWorld
             enemy->checkDeath();
         }
     }
-}
+} // namespace FAWorld

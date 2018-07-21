@@ -6,7 +6,7 @@ namespace Input
 {
     struct KeyboardModifiers;
     class Hotkey;
-}
+} // namespace Input
 
 namespace Engine
 {
@@ -53,4 +53,4 @@ namespace Engine
         virtual void notify(MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers) = 0;
         virtual ~MouseInputObserverInterface() = default;
     };
-}
+} // namespace Engine

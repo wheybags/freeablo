@@ -61,8 +61,7 @@ namespace FALevelGen
 
         int32_t distance(const Room& other) const
         {
-            return static_cast<int32_t>(
-                (Vec2Fix(centre().x, centre().y) - Vec2Fix(other.centre().x, other.centre().y)).magnitude().intPart());
+            return static_cast<int32_t>((Vec2Fix(centre().x, centre().y) - Vec2Fix(other.centre().x, other.centre().y)).magnitude().intPart());
         }
     };
 
@@ -277,8 +276,8 @@ namespace FALevelGen
         {
             Room newRoom(rng.randomInRange(0, width - 4), rng.randomInRange(0, height - 4), 0, 0);
 
-            if (((centreX - newRoom.centre().x) * (centreX - newRoom.centre().x) +
-                 (centreY - newRoom.centre().y) * (centreY - newRoom.centre().y)) > radius * radius)
+            if (((centreX - newRoom.centre().x) * (centreX - newRoom.centre().x) + (centreY - newRoom.centre().y) * (centreY - newRoom.centre().y)) >
+                radius * radius)
                 continue;
 
             newRoom.width = rng.squaredRand(4, std::min(width - newRoom.pos.x, maxDimension));

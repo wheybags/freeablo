@@ -87,6 +87,6 @@ namespace Misc
         T mOriginal;
         T& mToSet;
     };
-}
+} // namespace Misc
 
 #define UNUSED_PARAM(x) (void)(x)

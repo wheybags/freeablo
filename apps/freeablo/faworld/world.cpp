@@ -403,4 +403,4 @@ namespace FAWorld
     Tick World::getTicksInPeriod(FixedPoint seconds) { return std::max(Tick(1), Tick((FixedPoint(ticksPerSecond) * seconds).round())); }
 
     FixedPoint World::getSecondsPerTick() { return FixedPoint(1) / FixedPoint(ticksPerSecond); }
-}
+} // namespace FAWorld

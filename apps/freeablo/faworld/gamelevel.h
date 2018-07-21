@@ -1,8 +1,8 @@
 #pragma once
 
-#include "misc/point.h"
 #include "hoverstate.h"
 #include "itemmap.h" // TODO: remove, only included for the Tile type
+#include "misc/point.h"
 #include <level/level.h>
 #include <misc/stdhashes.h>
 #include <unordered_map>

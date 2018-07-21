@@ -173,4 +173,4 @@ namespace FAWorld
 
         return reconstructPath(start, goal, cameFrom);
     }
-}
+} // namespace FAWorld

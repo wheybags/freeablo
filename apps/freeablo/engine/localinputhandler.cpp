@@ -137,4 +137,4 @@ namespace Engine
                 mUnblockInput = false;
         }
     }
-}
+} // namespace Engine

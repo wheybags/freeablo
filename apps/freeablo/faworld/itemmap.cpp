@@ -118,4 +118,4 @@ namespace FAWorld
         mItems.erase(it);
         return item;
     }
-}
+} // namespace FAWorld

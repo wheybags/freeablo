@@ -70,4 +70,4 @@ namespace FAWorld
         mDist = 0;
         mMoving = true;
     }
-}
+} // namespace FAWorld

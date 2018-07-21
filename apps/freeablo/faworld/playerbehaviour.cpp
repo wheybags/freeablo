@@ -155,4 +155,4 @@ namespace FAWorld
 
         invalid_enum(PlayerInput::Type, input.mType);
     }
-}
+} // namespace FAWorld

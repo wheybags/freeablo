@@ -10,8 +10,8 @@
 #include <mutex>
 #include <tuple>
 
-#include <render/render.h>
 #include <misc/point.h>
+#include <render/render.h>
 
 #include "../faworld/position.h"
 
@@ -147,4 +147,4 @@ namespace FARender
         std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;
         boost::container::flat_map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
     };
-}
+} // namespace FARender

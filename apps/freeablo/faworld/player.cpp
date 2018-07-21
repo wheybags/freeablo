@@ -289,9 +289,7 @@ namespace FAWorld
             return false;
         };
 
-        auto isPosOk = [&](Misc::Point pos) {
-            return getLevel()->isPassableFor(pos.x, pos.y, this) && !getLevel()->getItemMap().getItemAt(pos);
-        };
+        auto isPosOk = [&](Misc::Point pos) { return getLevel()->isPassableFor(pos.x, pos.y, this) && !getLevel()->getItemMap().getItemAt(pos); };
 
         if (clickedTile == FAWorld::Tile{curPos.x, curPos.y})
         {
@@ -348,4 +346,4 @@ namespace FAWorld
             }
         }
     }
-}
+} // namespace FAWorld
