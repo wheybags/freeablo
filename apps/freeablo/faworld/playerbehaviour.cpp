@@ -51,17 +51,17 @@ namespace FAWorld
             case PlayerInput::Type::TargetTile:
             {
                 auto clickedTile = Render::Tile(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
-                mPlayer->getLevel()->activate(clickedTile.x, clickedTile.y);
+                mPlayer->getLevel()->activate(clickedTile.pos.x, clickedTile.pos.y);
 
                 auto cursorItem = mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
                 if (!cursorItem.isEmpty())
                 {
-                    mPlayer->dropItem({clickedTile.x, clickedTile.y});
+                    mPlayer->dropItem({clickedTile.pos.x, clickedTile.pos.y});
                 }
                 else
                 {
                     mPlayer->mTarget.clear();
-                    mPlayer->mMoveHandler.setDestination({clickedTile.x, clickedTile.y});
+                    mPlayer->mMoveHandler.setDestination({clickedTile.pos.x, clickedTile.pos.y});
                 }
                 return;
             }
@@ -78,7 +78,7 @@ namespace FAWorld
             }
             case PlayerInput::Type::TargetItemOnFloor:
             {
-                auto item = mPlayer->getLevel()->getItemMap().getItemAt({input.mData.dataTargetItemOnFloor.x, input.mData.dataTargetItemOnFloor.y});
+                auto item = mPlayer->getLevel()->getItemMap().getItemAt(Misc::Point(input.mData.dataTargetItemOnFloor.x, input.mData.dataTargetItemOnFloor.y));
                 mPlayer->mTarget = Target::ItemTarget{input.mData.dataTargetItemOnFloor.type, item};
                 return;
             }
@@ -101,9 +101,9 @@ namespace FAWorld
                 if (level)
                 {
                     if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
-                        mPlayer->teleport(level, Position(level->downStairsPos().first, level->downStairsPos().second));
+                        mPlayer->teleport(level, Position(level->downStairsPos().x, level->downStairsPos().y));
                     else
-                        mPlayer->teleport(level, Position(level->upStairsPos().first, level->upStairsPos().second));
+                        mPlayer->teleport(level, Position(level->upStairsPos().x, level->upStairsPos().y));
                 }
 
                 return;

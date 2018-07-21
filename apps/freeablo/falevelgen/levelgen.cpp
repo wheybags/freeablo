@@ -19,17 +19,16 @@ namespace FALevelGen
     class Room
     {
     public:
-        int32_t xPos;
-        int32_t yPos;
+        Misc::Point pos;
         int32_t width;
         int32_t height;
 
-        Room(int32_t _xPos, int32_t _yPos, int32_t _width, int32_t _height) : xPos(_xPos), yPos(_yPos), width(_width), height(_height) {}
+        Room(int32_t x, int32_t y, int32_t width, int32_t height) : pos(x, y), width(width), height(height) {}
 
         bool intersects(const Room& other) const
         {
-            return !(yPos + height <= other.yPos + 1 || yPos >= other.yPos + other.height - 1 || xPos + width <= other.xPos + 1 ||
-                     xPos >= other.xPos + other.width - 1);
+            return !(pos.y + height <= other.pos.y + 1 || pos.y >= other.pos.y + other.height - 1 || pos.x + width <= other.pos.x + 1 ||
+                     pos.x >= other.pos.x + other.width - 1);
         }
 
         bool onBorder(int32_t xCoord, int32_t yCoord)
@@ -37,7 +36,7 @@ namespace FALevelGen
             // Draw x oriented walls
             for (int32_t x = 0; x < width; x++)
             {
-                if ((xCoord == x + xPos && yCoord == yPos) || (xCoord == x + xPos && yCoord == height - 1 + yPos))
+                if ((xCoord == x + pos.x && yCoord == pos.y) || (xCoord == x + pos.x && yCoord == height - 1 + pos.y))
                     return true;
                 // level[x + room.xPos][room.yPos] = wall;
                 // level[x + room.xPos][room.height-1 + room.yPos] = wall;
@@ -46,7 +45,7 @@ namespace FALevelGen
             // Draw y oriented walls
             for (int32_t y = 0; y < height; y++)
             {
-                if ((xCoord == xPos && yCoord == y + yPos) || (xCoord == width - 1 + xPos && yCoord == y + yPos))
+                if ((xCoord == pos.x && yCoord == y + pos.y) || (xCoord == width - 1 + pos.x && yCoord == y + pos.y))
                     return true;
 
                 // level[room.xPos][y + room.yPos] = wall;
@@ -56,14 +55,14 @@ namespace FALevelGen
             return false;
         }
 
-        std::pair<int32_t, int32_t> centre() const { return std::pair<int32_t, int32_t>(xPos + (width / 2), yPos + (height / 2)); }
+        Misc::Point centre() const { return Misc::Point(pos.x + (width / 2), pos.y + (height / 2)); }
 
         int32_t area() const { return width * height; }
 
         int32_t distance(const Room& other) const
         {
             return static_cast<int32_t>(
-                (Vec2Fix(centre().first, centre().second) - Vec2Fix(other.centre().first, other.centre().second)).magnitude().intPart());
+                (Vec2Fix(centre().x, centre().y) - Vec2Fix(other.centre().x, other.centre().y)).magnitude().intPart());
         }
     };
 
@@ -86,7 +85,7 @@ namespace FALevelGen
         {
             for (int32_t y = 0; y < room.height; y++)
             {
-                level.get(x + room.xPos, y + room.yPos) = (int32_t)Basic::floor;
+                level.get(x + room.pos.x, y + room.pos.y) = (int32_t)Basic::floor;
             }
         }
     }
@@ -106,35 +105,32 @@ namespace FALevelGen
     // also draws any rooms in rooms vector that the corridoor intersects
     void connect(const Room& a, const Room& b, const std::vector<Room>& rooms, Level::Dun& level)
     {
-        int32_t ax = a.centre().first;
-        int32_t ay = a.centre().second;
+        const auto posA = a.centre();
+        const auto posB = b.centre();
 
-        int32_t bx = b.centre().first;
-        int32_t by = b.centre().second;
-
-        if (bx != ax)
+        if (posA.x != posB.x)
         {
-            if (bx > ax)
+            if (posB.x > posA.x)
             {
-                Room x(ax, ay - 1, bx - ax, 3);
+                Room x(posA.x, posA.y - 1, posB.x - posA.x, 3);
                 drawCorridoorSegment(x, rooms, level);
             }
             else
             {
-                Room x(bx, ay - 1, ax - bx, 3);
+                Room x(posB.x, posA.y - 1, posA.x - posB.x, 3);
                 drawCorridoorSegment(x, rooms, level);
             }
         }
-        if (by != ay)
+        if (posB.y != posA.y)
         {
-            if (by > ay)
+            if (posB.y > posA.y)
             {
-                Room y(bx - 1, ay, 3, by - ay);
+                Room y(posB.x - 1, posA.y, 3, posB.y - posA.y);
                 drawCorridoorSegment(y, rooms, level);
             }
             else
             {
-                Room y(bx - 1, by, 3, ay - by + 2);
+                Room y(posB.x - 1, posB.y, 3, posA.y - posB.y + 2);
                 drawCorridoorSegment(y, rooms, level);
             }
         }
@@ -144,14 +140,12 @@ namespace FALevelGen
     // grid of size width * height
     void moveRoom(Room& room, const Vec2Fix& vector, int32_t width, int32_t height)
     {
-        int32_t newX = 0, newY = 0;
-        std::tie(newX, newY) = Misc::getNextPosByDir({room.xPos, room.yPos}, vector.getIsometricDirection());
+        auto pos = Misc::getNextPosByDir({room.pos.x, room.pos.y}, vector.getIsometricDirection());
 
         // Make sure not to move outside map
-        if (newX >= 1 && newY >= 1 && newX + room.width < width - 1 && newY + room.height < height - 1)
+        if (pos.x >= 1 && pos.y >= 1 && pos.x + room.width < width - 1 && pos.y + room.height < height - 1)
         {
-            room.xPos = newX;
-            room.yPos = newY;
+            room.pos = pos;
         }
     }
 
@@ -212,7 +206,7 @@ namespace FALevelGen
             {
                 Vec2Fix vector;
 
-                std::pair<int32_t, int32_t> currentCentre = rooms[i].centre();
+                const auto currentCentre = rooms[i].centre();
 
                 int32_t neighbourCount = 0;
 
@@ -227,18 +221,18 @@ namespace FALevelGen
 
                     if (intersects)
                     {
-                        std::pair<int32_t, int32_t> centre = rooms[j].centre();
+                        const auto centre = rooms[j].centre();
 
                         neighbourCount++;
 
-                        if (centre.first == currentCentre.first && centre.second == currentCentre.second)
+                        if (centre == currentCentre)
                         {
                             vector.x = rng.randomInRange(0, 10);
                             vector.y = rng.randomInRange(0, 10);
                             continue;
                         }
 
-                        Vec2Fix iToJ = Vec2Fix(centre.first, centre.second) - Vec2Fix(currentCentre.first, currentCentre.second);
+                        Vec2Fix iToJ = Vec2Fix(centre.x, centre.y) - Vec2Fix(currentCentre.x, currentCentre.y);
                         vector.x += iToJ.x;
                         vector.y += iToJ.y;
                     }
@@ -283,12 +277,12 @@ namespace FALevelGen
         {
             Room newRoom(rng.randomInRange(0, width - 4), rng.randomInRange(0, height - 4), 0, 0);
 
-            if (((centreX - newRoom.centre().first) * (centreX - newRoom.centre().first) +
-                 (centreY - newRoom.centre().second) * (centreY - newRoom.centre().second)) > radius * radius)
+            if (((centreX - newRoom.centre().x) * (centreX - newRoom.centre().x) +
+                 (centreY - newRoom.centre().y) * (centreY - newRoom.centre().y)) > radius * radius)
                 continue;
 
-            newRoom.width = rng.squaredRand(4, std::min(width - newRoom.xPos, maxDimension));
-            newRoom.height = rng.squaredRand(4, std::min(height - newRoom.yPos, maxDimension));
+            newRoom.width = rng.squaredRand(4, std::min(width - newRoom.pos.x, maxDimension));
+            newRoom.height = rng.squaredRand(4, std::min(height - newRoom.pos.y, maxDimension));
 
             FixedPoint ratio = FixedPoint(newRoom.width) / newRoom.height;
 
@@ -307,15 +301,15 @@ namespace FALevelGen
         // Draw x oriented walls
         for (int32_t x = 0; x < room.width; x++)
         {
-            level.get(x + room.xPos, room.yPos) = (int32_t)Basic::wall;
-            level.get(x + room.xPos, room.height - 1 + room.yPos) = (int32_t)Basic::wall;
+            level.get(x + room.pos.x, room.pos.y) = (int32_t)Basic::wall;
+            level.get(x + room.pos.x, room.height - 1 + room.pos.y) = (int32_t)Basic::wall;
         }
 
         // Draw y oriented walls
         for (int32_t y = 0; y < room.height; y++)
         {
-            level.get(room.xPos, y + room.yPos) = (int32_t)Basic::wall;
-            level.get(room.width - 1 + room.xPos, y + room.yPos) = (int32_t)Basic::wall;
+            level.get(room.pos.x, y + room.pos.y) = (int32_t)Basic::wall;
+            level.get(room.width - 1 + room.pos.x, y + room.pos.y) = (int32_t)Basic::wall;
         }
 
         // Fill ground
@@ -323,7 +317,7 @@ namespace FALevelGen
         {
             for (int32_t y = 1; y < room.height - 1; y++)
             {
-                level.get(x + room.xPos, y + room.yPos) = (int32_t)Basic::floor;
+                level.get(x + room.pos.x, y + room.pos.y) = (int32_t)Basic::floor;
             }
         }
     }
@@ -419,19 +413,19 @@ namespace FALevelGen
                             // Draw x oriented walls
                             for (int32_t i_x = 0; i_x < rooms[i].width; i_x++)
                             {
-                                if (includeBorders || !borders(i_x + rooms[i].xPos, rooms[i].yPos, Basic::blank, level))
-                                    level.get(i_x + rooms[i].xPos, rooms[i].yPos) = (int32_t)Basic::floor;
-                                if (includeBorders || !borders(i_x + rooms[i].xPos, rooms[i].height - 1 + rooms[i].yPos, Basic::blank, level))
-                                    level.get(i_x + rooms[i].xPos, rooms[i].height - 1 + rooms[i].yPos) = (int32_t)Basic::floor;
+                                if (includeBorders || !borders(i_x + rooms[i].pos.x, rooms[i].pos.y, Basic::blank, level))
+                                    level.get(i_x + rooms[i].pos.x, rooms[i].pos.y) = (int32_t)Basic::floor;
+                                if (includeBorders || !borders(i_x + rooms[i].pos.x, rooms[i].height - 1 + rooms[i].pos.y, Basic::blank, level))
+                                    level.get(i_x + rooms[i].pos.x, rooms[i].height - 1 + rooms[i].pos.y) = (int32_t)Basic::floor;
                             }
 
                             // Draw y oriented walls
                             for (int32_t i_y = 0; i_y < rooms[i].height; i_y++)
                             {
-                                if (includeBorders || !borders(rooms[i].xPos, i_y + rooms[i].yPos, Basic::blank, level))
-                                    level.get(rooms[i].xPos, i_y + rooms[i].yPos) = (int32_t)Basic::floor;
-                                if (includeBorders || !borders(rooms[i].width - 1 + rooms[i].xPos, i_y + rooms[i].yPos, Basic::blank, level))
-                                    level.get(rooms[i].width - 1 + rooms[i].xPos, i_y + rooms[i].yPos) = (int32_t)Basic::floor;
+                                if (includeBorders || !borders(rooms[i].pos.x, i_y + rooms[i].pos.y, Basic::blank, level))
+                                    level.get(rooms[i].pos.x, i_y + rooms[i].pos.y) = (int32_t)Basic::floor;
+                                if (includeBorders || !borders(rooms[i].width - 1 + rooms[i].pos.x, i_y + rooms[i].pos.y, Basic::blank, level))
+                                    level.get(rooms[i].width - 1 + rooms[i].pos.x, i_y + rooms[i].pos.y) = (int32_t)Basic::floor;
                             }
 
                             rooms.erase(rooms.begin() + i);
@@ -561,14 +555,14 @@ namespace FALevelGen
         for (int32_t i = 0; i < (int32_t)rooms.size(); i++)
         {
             // Top x wall
-            doorAddHelper(level, rooms[i].yPos, -1, rooms[i].xPos + 1, rooms[i].xPos + rooms[i].width - 1, true, levelNum);
+            doorAddHelper(level, rooms[i].pos.y, -1, rooms[i].pos.x + 1, rooms[i].pos.x + rooms[i].width - 1, true, levelNum);
             // Bottom x wall
-            doorAddHelper(level, rooms[i].yPos + rooms[i].height - 1, +1, rooms[i].xPos + 1, rooms[i].xPos + rooms[i].width - 1, true, levelNum);
+            doorAddHelper(level, rooms[i].pos.y + rooms[i].height - 1, +1, rooms[i].pos.x + 1, rooms[i].pos.x + rooms[i].width - 1, true, levelNum);
 
             // Left y wall
-            doorAddHelper(level, rooms[i].xPos, -1, rooms[i].yPos + 1, rooms[i].yPos + rooms[i].height - 1, false, levelNum);
+            doorAddHelper(level, rooms[i].pos.x, -1, rooms[i].pos.y + 1, rooms[i].pos.y + rooms[i].height - 1, false, levelNum);
             // Right y wall
-            doorAddHelper(level, rooms[i].xPos + rooms[i].width - 1, +1, rooms[i].yPos + 1, rooms[i].yPos + rooms[i].height - 1, false, levelNum);
+            doorAddHelper(level, rooms[i].pos.x + rooms[i].width - 1, +1, rooms[i].pos.y + 1, rooms[i].pos.y + rooms[i].height - 1, false, levelNum);
         }
     }
 
@@ -578,8 +572,8 @@ namespace FALevelGen
         {
             for (int32_t i = 0; i < (int32_t)rooms.size(); i++)
             {
-                int32_t baseX = rooms[i].xPos + (rooms[i].width / 2);
-                int32_t baseY = rooms[i].yPos;
+                int32_t baseX = rooms[i].pos.x + (rooms[i].width / 2);
+                int32_t baseY = rooms[i].pos.y;
 
                 // on a wall
                 if (level.get(baseX - 1, baseY - 2) == (int32_t)Basic::blank && level.get(baseX, baseY - 2) == (int32_t)Basic::blank &&
@@ -600,8 +594,8 @@ namespace FALevelGen
             {
                 if (rooms[i].width >= 6 && rooms[i].height >= 6)
                 {
-                    int32_t baseX = rooms[i].centre().first;
-                    int32_t baseY = rooms[i].centre().second;
+                    int32_t baseX = rooms[i].centre().x;
+                    int32_t baseY = rooms[i].centre().y;
 
                     if (level.get(baseX, baseY) != (int32_t)Basic::floor)
                         continue;
@@ -622,8 +616,8 @@ namespace FALevelGen
         {
             for (int32_t i = 0; i < (int32_t)rooms.size(); i++)
             {
-                int32_t baseX = rooms[i].xPos;
-                int32_t baseY = rooms[i].yPos + (rooms[i].width / 2);
+                int32_t baseX = rooms[i].pos.x;
+                int32_t baseY = rooms[i].pos.y + (rooms[i].width / 2);
 
                 // on a wall
                 if (level.get(baseX - 2, baseY + 1) == (int32_t)Basic::blank && level.get(baseX - 2, baseY) == (int32_t)Basic::blank &&
@@ -642,8 +636,8 @@ namespace FALevelGen
         {
             if (rooms[i].width >= 6 && rooms[i].height >= 6)
             {
-                int32_t baseX = rooms[i].centre().first;
-                int32_t baseY = rooms[i].centre().second;
+                int32_t baseX = rooms[i].centre().x;
+                int32_t baseY = rooms[i].centre().y;
 
                 if (level.get(baseX, baseY) != (int32_t)Basic::floor)
                     continue;
@@ -838,20 +832,19 @@ namespace FALevelGen
 
         for (int32_t i = 0; i < (level.height() + level.width()) / 2; i++)
         {
-            int32_t xPos, yPos;
+            Misc::Point pos;
 
             do
             {
-                xPos = rng.randomInRange(1, level.width() - 1);
-                yPos = rng.randomInRange(1, level.height() - 1);
-            } while (!level.getTile(xPos, yPos).passable() && std::make_pair(xPos, yPos) != level.upStairsPos() &&
-                     std::make_pair(xPos, yPos) != level.downStairsPos());
+                pos.x = rng.randomInRange(1, level.width() - 1);
+                pos.y = rng.randomInRange(1, level.height() - 1);
+            } while (!level.getTile(pos.x, pos.y).passable() && pos != level.upStairsPos() && pos != level.downStairsPos());
 
             std::string name = possibleMonsters[rng.randomInRange(0, possibleMonsters.size() - 1)]->monsterName;
             DiabloExe::Monster monster = exe.getMonster(name);
 
             FAWorld::Actor* monsterObj = new FAWorld::Actor(*level.getWorld(), rng, monster);
-            monsterObj->teleport(&level, FAWorld::Position(xPos, yPos));
+            monsterObj->teleport(&level, FAWorld::Position(pos.x, pos.y));
         }
     }
 
@@ -1055,8 +1048,8 @@ namespace FALevelGen
 
         connectWalls(level);
 
-        std::pair<int32_t, int32_t> downStairsPoint;
-        std::pair<int32_t, int32_t> upStairsPoint;
+        Misc::Point downStairsPoint;
+        Misc::Point upStairsPoint;
 
         for (int32_t x = 0; x < (int32_t)width; x++)
         {
@@ -1064,12 +1057,14 @@ namespace FALevelGen
             {
                 if (level.get(x, y) == (int32_t)TileSetEnum::upStairs)
                 {
-                    upStairsPoint = std::make_pair(x * 2, y * 2);
+                    upStairsPoint.x = x * 2;
+                    upStairsPoint.y = y * 2;
                     level.get(x, y) = (int32_t)TileSetEnum::floor;
                 }
                 else if (level.get(x, y) == (int32_t)TileSetEnum::downStairs)
                 {
-                    downStairsPoint = std::make_pair(x * 2, y * 2);
+                    downStairsPoint.x = x * 2;
+                    downStairsPoint.y = y * 2;
                     level.get(x, y) = (int32_t)TileSetEnum::floor;
                 }
                 else
@@ -1091,7 +1086,7 @@ namespace FALevelGen
 
         // place up stairs
         {
-            int32_t x = upStairsPoint.first / 2, y = upStairsPoint.second / 2;
+            int32_t x = upStairsPoint.x / 2, y = upStairsPoint.y / 2;
 
             level.get(x - 1, y - 1) = tileset.upStairs1;
             level.get(x, y - 1) = tileset.upStairs2;
@@ -1108,7 +1103,7 @@ namespace FALevelGen
 
         // place down stairs
         {
-            int32_t x = downStairsPoint.first / 2, y = downStairsPoint.second / 2;
+            int32_t x = downStairsPoint.x / 2, y = downStairsPoint.y / 2;
 
             level.get(x - 1, y - 1) = tileset.downStairs1;
             level.get(x, y - 1) = tileset.downStairs2;
@@ -1146,4 +1141,4 @@ namespace FALevelGen
 
         return retval;
     }
-}
+} // namespace FALevelGen

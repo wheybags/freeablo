@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <stdint.h>
@@ -10,6 +9,7 @@
 #include <functional>
 
 #include "misc.h"
+#include "misc/point.h"
 
 #include "cel/pal.h"
 #include <boost/optional.hpp>
@@ -53,10 +53,9 @@ namespace Render
     // Tile mesasured in indexes on tile grid
     struct Tile
     {
-        int32_t x;
-        int32_t y;
+        Misc::Point pos;
         TileHalf half;
-        Tile(int32_t xArg, int32_t yArg, TileHalf halfArg = TileHalf::left) : x(xArg), y(yArg), half(halfArg) {}
+        Tile(int32_t xArg, int32_t yArg, TileHalf halfArg = TileHalf::left) : pos(xArg, yArg), half(halfArg) {}
     };
     /**
      * @brief Render settings for initialization.

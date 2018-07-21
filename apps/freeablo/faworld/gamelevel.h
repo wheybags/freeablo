@@ -1,4 +1,6 @@
 #pragma once
+
+#include "misc/point.h"
 #include "hoverstate.h"
 #include "itemmap.h" // TODO: remove, only included for the Tile type
 #include <level/level.h>
@@ -9,13 +11,13 @@ namespace FARender
 {
     class Renderer;
     class RenderState;
-}
+} // namespace FARender
 
 namespace FASaveGame
 {
     class GameLoader;
     class GameSaver;
-}
+} // namespace FASaveGame
 
 namespace FAWorld
 {
@@ -48,8 +50,8 @@ namespace FAWorld
         int32_t width() const;
         int32_t height() const;
 
-        const std::pair<int32_t, int32_t> upStairsPos() const;
-        const std::pair<int32_t, int32_t> downStairsPos() const;
+        const Misc::Point upStairsPos() const;
+        const Misc::Point downStairsPos() const;
 
         void activate(size_t x, size_t y);
 
@@ -93,9 +95,9 @@ namespace FAWorld
         int32_t mLevelIndex = 0;
 
         std::vector<Actor*> mActors;
-        std::unordered_map<std::pair<int32_t, int32_t>, Actor*> mActorMap2D; ///< Map of points to actors.
-                                                                             ///< Where an actor straddles two squares, they shall be placed in both.
+        std::unordered_map<Misc::Point, Actor*> mActorMap2D; ///< Map of points to actors.
+                                                             ///< Where an actor straddles two squares, they shall be placed in both.
         friend class FARender::Renderer;
         std::unique_ptr<ItemMap> mItemMap;
     };
-}
+} // namespace FAWorld

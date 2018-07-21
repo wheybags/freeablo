@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <stddef.h>
@@ -12,6 +11,7 @@
 #include <tuple>
 
 #include <render/render.h>
+#include <misc/point.h>
 
 #include "../faworld/position.h"
 

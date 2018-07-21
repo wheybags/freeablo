@@ -96,6 +96,18 @@ namespace FAWorld
         return &it->second;
     }
 
+    PlacedItemData* ItemMap::getItemAt(const Misc::Point& pos)
+    {
+        auto it = mItems.find({pos.x, pos.y});
+        if (it == mItems.end())
+            return nullptr;
+
+        if (!it->second.onGround())
+            return nullptr;
+
+        return &it->second;
+    }
+
     std::unique_ptr<Item> ItemMap::takeItemAt(const Tile& tile)
     {
         auto it = mItems.find({tile.x, tile.y});

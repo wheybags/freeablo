@@ -1,14 +1,17 @@
 #pragma once
+
 #include "misc/direction.h"
+#include "misc/misc.h"
+#include "misc/point.h"
+
 #include <cmath>
-#include <misc/misc.h>
 #include <utility>
 
 namespace FASaveGame
 {
     class GameLoader;
     class GameSaver;
-}
+} // namespace FASaveGame
 
 namespace FAWorld
 {
@@ -22,10 +25,10 @@ namespace FAWorld
         Position(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
 
-        void update();                               ///< advances towards mNext
-        std::pair<int32_t, int32_t> current() const; ///< where we are coming from
+        void update();               ///< advances towards mNext
+        Misc::Point current() const; ///< where we are coming from
         bool isNear(const Position& other) const;
-        std::pair<int32_t, int32_t> next() const; ///< where we are going to
+        Misc::Point next() const; ///< where we are going to
 
         Misc::Direction getDirection() const { return mDirection; }
         void setDirection(Misc::Direction mDirection);
@@ -37,9 +40,9 @@ namespace FAWorld
         void start();
 
     private:
-        std::pair<int32_t, int32_t> mCurrent = std::make_pair(0, 0);
+        Misc::Point mCurrent;
         int32_t mDist = 0; ///< percentage of the way there
         Misc::Direction mDirection = Misc::Direction::south;
         bool mMoving = false;
     };
-}
+} // namespace FAWorld

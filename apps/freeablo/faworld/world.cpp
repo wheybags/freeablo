@@ -146,15 +146,15 @@ namespace FAWorld
         auto tile = getTileByScreenPos(screenPosition);
         // actors could be hovered/targeted by hexagonal pattern consisiting of two tiles on top of each other + halves of two adjacent tiles
         // the same logic seems to apply ot other tall objects
-        if (auto actor = actorStayingAt(tile.x, tile.y))
+        if (auto actor = actorStayingAt(tile.pos.x, tile.pos.y))
             return actor;
-        if (auto actor = actorStayingAt(tile.x + 1, tile.y + 1))
+        if (auto actor = actorStayingAt(tile.pos.x + 1, tile.pos.y + 1))
             return actor;
         if (tile.half == Render::TileHalf::right)
-            if (auto actor = actorStayingAt(tile.x + 1, tile.y))
+            if (auto actor = actorStayingAt(tile.pos.x + 1, tile.pos.y))
                 return actor;
         if (tile.half == Render::TileHalf::left)
-            if (auto actor = actorStayingAt(tile.x, tile.y + 1))
+            if (auto actor = actorStayingAt(tile.pos.x, tile.pos.y + 1))
                 return actor;
         return nullptr;
     }
@@ -185,8 +185,8 @@ namespace FAWorld
                                    "levels/towndata/town.min",
                                    "levels/towndata/town.sol",
                                    "levels/towndata/town.cel",
-                                   std::make_pair(25u, 29u),
-                                   std::make_pair(75u, 68u),
+                                   Misc::Point(25u, 29u),
+                                   Misc::Point(75u, 68u),
                                    std::map<int32_t, int32_t>(),
                                    static_cast<int32_t>(-1),
                                    1);
@@ -217,7 +217,7 @@ namespace FAWorld
 
         auto level = getLevel(levelNum);
 
-        mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
+        mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos().x, level->upStairsPos().y));
     }
 
     void World::playLevelMusic(size_t level)
@@ -297,7 +297,7 @@ namespace FAWorld
                     FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, "Warrior");
                     registerPlayer(newPlayer);
                     FAWorld::GameLevel* level = getLevel(0);
-                    newPlayer->teleport(level, FAWorld::Position(level->upStairsPos().first, level->upStairsPos().second));
+                    newPlayer->teleport(level, FAWorld::Position(level->upStairsPos().x, level->upStairsPos().y));
                     Engine::EngineMain::get()->mMultiplayer->registerNewPlayer(newPlayer, input.mData.dataPlayerJoined.peerId);
 
                     break;
@@ -397,7 +397,7 @@ namespace FAWorld
     PlacedItemData* World::targetedItem(Misc::Point screenPosition)
     {
         auto tile = getTileByScreenPos(screenPosition);
-        return getCurrentLevel()->getItemMap().getItemAt({tile.x, tile.y});
+        return getCurrentLevel()->getItemMap().getItemAt(tile.pos);
     }
 
     Tick World::getTicksInPeriod(FixedPoint seconds) { return std::max(Tick(1), Tick((FixedPoint(ticksPerSecond) * seconds).round())); }

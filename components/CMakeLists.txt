@@ -27,24 +27,26 @@ target_link_libraries(Levels FAIO DiabloExe Serial)
 set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Misc 
-    misc/stringops.h
-    misc/md5.h
-    misc/md5.cpp
-    misc/misc.h
-    misc/disablewarn.h
-    misc/enablewarn.h
-    misc/savePNG.h
-    misc/savePNG.cpp
-    misc/stdhashes.h
-    misc/maxcurrentitem.cpp
-    misc/maxcurrentitem.h
-    misc/assert.h
     misc/array2d.h
+    misc/assert.h
     misc/direction.cpp
     misc/direction.h
+    misc/disablewarn.h
+    misc/enablewarn.h
     misc/enum_range.h
     misc/fixedpoint.cpp
     misc/fixedpoint.h
+    misc/maxcurrentitem.cpp
+    misc/maxcurrentitem.h
+    misc/md5.cpp
+    misc/md5.h
+    misc/misc.h
+    misc/point.cpp
+    misc/point.h
+    misc/savePNG.cpp
+    misc/savePNG.h
+    misc/stdhashes.h
+    misc/stringops.h
     misc/vec2fix.cpp
     misc/vec2fix.h
 )

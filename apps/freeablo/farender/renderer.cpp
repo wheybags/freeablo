@@ -175,10 +175,8 @@ namespace FARender
 
     Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getTileByScreenPos(
-            x, y, screenPos.current().first, screenPos.current().second, screenPos.next().first, screenPos.next().second, screenPos.getDist());
+        return Render::getTileByScreenPos(x, y, screenPos.current().x, screenPos.current().y, screenPos.next().x, screenPos.next().y, screenPos.getDist());
     }
-
     void Renderer::waitUntilDone()
     {
         std::unique_lock<std::mutex> lk(mDoneMutex);
@@ -209,14 +207,14 @@ namespace FARender
             Render::LevelObject obj;
             obj.spriteCacheIndex = object.spriteGroup->getCacheIndex();
             obj.spriteFrame = object.frame;
-            obj.x2 = position.next().first;
-            obj.y2 = position.next().second;
+            obj.x2 = position.next().x;
+            obj.y2 = position.next().y;
             obj.dist = position.getDist();
             obj.hoverColor = object.hoverColor;
             obj.valid = true;
 
-            int32_t x = position.current().first;
-            int32_t y = position.current().second;
+            int32_t x = position.current().x;
+            int32_t y = position.current().y;
             dst.get(x, y).push_back(std::move(obj));
         }
     }
@@ -268,10 +266,10 @@ namespace FARender
                                   &mSpriteManager,
                                   mLevelObjects,
                                   mItems,
-                                  state->mPos.current().first,
-                                  state->mPos.current().second,
-                                  state->mPos.next().first,
-                                  state->mPos.next().second,
+                                  state->mPos.current().x,
+                                  state->mPos.current().y,
+                                  state->mPos.next().x,
+                                  state->mPos.next().y,
                                   state->mPos.getDist());
             }
 
@@ -341,4 +339,4 @@ namespace FARender
     nk_user_font* Renderer::goldFont(int height) const { return &mGoldFont.at(height)->nkFont; }
 
     nk_user_font* Renderer::silverFont(int height) const { return &mSilverFont.at(height)->nkFont; }
-}
+} // namespace FARender

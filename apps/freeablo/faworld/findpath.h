@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <algorithm>
@@ -15,9 +14,14 @@
 #include <unordered_set>
 #include <vector>
 
+namespace Misc
+{
+    class Point;
+} // namespace Misc
+
 namespace FAWorld
 {
     class GameLevelImpl;
-    std::vector<std::pair<int32_t, int32_t>>
-    pathFind(GameLevelImpl* level, std::pair<int32_t, int32_t> start, std::pair<int32_t, int32_t>& goal, bool& bArrivable, bool findAdjacent);
-}
+
+    std::vector<Misc::Point> pathFind(GameLevelImpl* level, const Misc::Point& start, Misc::Point& goal, bool& bArrivable, bool findAdjacent);
+} // namespace FAWorld

@@ -1,16 +1,16 @@
-
 #pragma once
 
 #include <boost/optional/optional.hpp>
 #include <map>
 #include <memory>
+#include <misc/point.h>
 #include <vector>
 
 namespace FARender
 {
     class AnimationPlayer;
     class FASpriteGroup;
-}
+} // namespace FARender
 
 namespace Render
 {
@@ -21,7 +21,7 @@ namespace FASaveGame
 {
     class GameLoader;
     class GameSaver;
-}
+} // namespace FASaveGame
 
 namespace FAWorld
 {
@@ -79,6 +79,7 @@ namespace FAWorld
         ~ItemMap();
         bool dropItem(std::unique_ptr<FAWorld::Item>&& item, const Actor& actor, const Tile& tile);
         PlacedItemData* getItemAt(const Tile& tile);
+        PlacedItemData* getItemAt(const Misc::Point& pos);
         std::unique_ptr<FAWorld::Item> takeItemAt(const Tile& tile);
 
     private:
@@ -88,4 +89,4 @@ namespace FAWorld
 
         friend class GameLevel;
     };
-}
+} // namespace FAWorld

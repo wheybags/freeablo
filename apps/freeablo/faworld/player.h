@@ -44,7 +44,7 @@ namespace FAWorld
         const PlayerStats& getPlayerStats() const { return mPlayerStats; }
         void setPlayerClass(PlayerClass playerClass);
 
-        boost::signals2::signal<void(const std::pair<int32_t, int32_t>&)> positionReached;
+        boost::signals2::signal<void(const Misc::Point&)> positionReached;
         int getArmorPenetration() const { /* placeholder */ return 0; }
         int getCharacterLevel() const { /* placeholder */ return 1; }
         PlayerClass getClass() const { return mPlayerClass; }

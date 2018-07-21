@@ -14,8 +14,8 @@ namespace FAWorld
 
     static int32_t squaredDistance(const Position& a, const Position& b)
     {
-        int32_t tmpX = abs(a.current().first - b.current().first);
-        int32_t tmpY = abs(a.current().second - b.current().second);
+        int32_t tmpX = abs(a.current().x - b.current().x);
+        int32_t tmpY = abs(a.current().y - b.current().y);
         return tmpX * tmpX + tmpY * tmpY;
     }
 
@@ -69,7 +69,7 @@ namespace FAWorld
             {
                 if (mActor->getWorld()->mRng->randomInRange(0, 100) > 80)
                 {
-                    std::pair<int32_t, int32_t> next;
+                    Misc::Point next;
 
                     int its = 0;
                     do
@@ -77,9 +77,9 @@ namespace FAWorld
                         ++its;
                         next = mActor->getPos().current();
 
-                        next.first += mActor->getWorld()->mRng->randomInRange(-5, 5);
-                        next.second += mActor->getWorld()->mRng->randomInRange(-5, 5);
-                    } while (its < 10 && (!mActor->getLevel()->isPassable(next.first, next.second) || next == mActor->getPos().current()));
+                        next.x += mActor->getWorld()->mRng->randomInRange(-5, 5);
+                        next.y += mActor->getWorld()->mRng->randomInRange(-5, 5);
+                    } while (its < 10 && (!mActor->getLevel()->isPassable(next.x, next.y) || next == mActor->getPos().current()));
 
                     static int no = 0;
                     static int yes = 0;

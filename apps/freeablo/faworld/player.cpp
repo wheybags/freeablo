@@ -277,11 +277,11 @@ namespace FAWorld
     {
         auto cursorItem = mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
 
-        auto initialDir = (Vec2Fix(clickedTile.x, clickedTile.y) - Vec2Fix(getPos().current().first, getPos().current().second)).getIsometricDirection();
+        auto initialDir = (Vec2Fix(clickedTile.x, clickedTile.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getIsometricDirection();
 
         auto curPos = getPos().current();
-        auto tryDrop = [&](const std::pair<int32_t, int32_t>& pos) {
-            if (getLevel()->dropItem(std::unique_ptr<Item>{new Item(cursorItem)}, *this, FAWorld::Tile(pos.first, pos.second)))
+        auto tryDrop = [&](const Misc::Point& pos) {
+            if (getLevel()->dropItem(std::unique_ptr<Item>{new Item(cursorItem)}, *this, FAWorld::Tile(pos.x, pos.y)))
             {
                 mInventory.setCursorHeld({});
                 return true;
@@ -289,11 +289,11 @@ namespace FAWorld
             return false;
         };
 
-        auto isPosOk = [&](std::pair<int32_t, int32_t> pos) {
-            return getLevel()->isPassableFor(pos.first, pos.second, this) && !getLevel()->getItemMap().getItemAt({pos.first, pos.second});
+        auto isPosOk = [&](Misc::Point pos) {
+            return getLevel()->isPassableFor(pos.x, pos.y, this) && !getLevel()->getItemMap().getItemAt(pos);
         };
 
-        if (clickedTile == FAWorld::Tile{curPos.first, curPos.second})
+        if (clickedTile == FAWorld::Tile{curPos.x, curPos.y})
         {
             if (isPosOk(curPos))
                 return tryDrop(curPos);

@@ -10,8 +10,8 @@ namespace Level
                  const std::string& minPath,
                  const std::string& solPath,
                  const std::string& tileSetPath,
-                 const std::pair<int32_t, int32_t>& downStairs,
-                 const std::pair<int32_t, int32_t>& upStairs,
+                 const Misc::Point& downStairs,
+                 const Misc::Point& upStairs,
                  std::map<int32_t, int32_t> doorMap,
                  int32_t previous,
                  int32_t next)
@@ -64,11 +64,11 @@ namespace Level
             saver.save(entry.second);
         }
 
-        saver.save(mUpStairs.first);
-        saver.save(mUpStairs.second);
+        saver.save(mUpStairs.x);
+        saver.save(mUpStairs.y);
 
-        saver.save(mDownStairs.first);
-        saver.save(mDownStairs.second);
+        saver.save(mDownStairs.x);
+        saver.save(mDownStairs.y);
 
         saver.save(mPrevious);
         saver.save(mNext);
@@ -78,9 +78,9 @@ namespace Level
 
     bool Level::isStairs(int32_t x, int32_t y) const
     {
-        if (mDownStairs.first == x && mDownStairs.second == y)
+        if (mDownStairs.x == x && mDownStairs.y == y)
             return true;
-        if (mUpStairs.first == x && mUpStairs.second == y)
+        if (mUpStairs.x == x && mUpStairs.y == y)
             return true;
 
         return false;
@@ -133,6 +133,8 @@ namespace Level
         return MinPillar(mMin[minIndex], mSol.passable(minIndex), minIndex);
     }
 
+    MinPillar Level::get(Misc::Point point) const { return get(point.x, point.y); }
+
     void Level::activate(int32_t x, int32_t y)
     {
         int32_t xDunIndex = x;
@@ -160,9 +162,9 @@ namespace Level
 
     int32_t Level::height() const { return mDun.height() * 2; }
 
-    const std::pair<int32_t, int32_t>& Level::upStairsPos() const { return mUpStairs; }
+    const Misc::Point& Level::upStairsPos() const { return mUpStairs; }
 
-    const std::pair<int32_t, int32_t>& Level::downStairsPos() const { return mDownStairs; }
+    const Misc::Point& Level::downStairsPos() const { return mDownStairs; }
 
     const std::string& Level::getTileSetPath() const { return mTilesetCelPath; }
 
@@ -177,4 +179,4 @@ namespace Level
     bool MinPillar::passable() const { return mPassable; }
 
     int32_t MinPillar::index() const { return mIndex; }
-}
+} // namespace Level

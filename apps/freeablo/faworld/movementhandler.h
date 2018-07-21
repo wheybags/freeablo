@@ -25,8 +25,8 @@ namespace FAWorld
         MovementHandler(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
 
-        std::pair<int32_t, int32_t> getDestination() const;
-        void setDestination(std::pair<int32_t, int32_t> dest, bool adjacent = false);
+        Misc::Point getDestination() const;
+        void setDestination(Misc::Point dest, bool adjacent = false);
 
         bool moving();
         const Position& getCurrentPosition() const { return mCurrentPos; }
@@ -35,16 +35,16 @@ namespace FAWorld
         void teleport(GameLevel* level, Position pos);
         void setDirection(Misc::Direction direction);
 
-        boost::signals2::signal<void(const std::pair<int32_t, int32_t>)> positionReached;
+        boost::signals2::signal<void(const Misc::Point)> positionReached;
 
     private:
         bool positionReachedSent = true;
         GameLevel* mLevel = nullptr;
         Position mCurrentPos;
-        std::pair<int32_t, int32_t> mDestination;
+        Misc::Point mDestination;
 
         int32_t mCurrentPathIndex = 0;
-        std::vector<std::pair<int32_t, int32_t>> mCurrentPath;
+        std::vector<Misc::Point> mCurrentPath;
         Tick mLastRepathed = std::numeric_limits<Tick>::min();
         Tick mPathRateLimit;
         bool mAdjacent = false;

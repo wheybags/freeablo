@@ -64,9 +64,9 @@ namespace FAWorld
 
     int32_t GameLevel::height() const { return mLevel.height(); }
 
-    const std::pair<int32_t, int32_t> GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
+    const Misc::Point GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
 
-    const std::pair<int32_t, int32_t> GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
+    const Misc::Point GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
 
     void GameLevel::activate(size_t x, size_t y) { mLevel.activate(x, y); }
 
@@ -126,7 +126,7 @@ namespace FAWorld
 
     Actor* GameLevel::getActorAt(int32_t x, int32_t y) const
     {
-        auto it = mActorMap2D.find(std::pair<int32_t, int32_t>(x, y));
+        auto it = mActorMap2D.find(Misc::Point(x, y));
         if (it == mActorMap2D.end())
             return nullptr;
 
