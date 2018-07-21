@@ -1,10 +1,9 @@
 #define _USE_MATH_DEFINES
-#include <cmath>
 
-#include "assert.h"
 #include "direction.h"
-#include "point.h"
+
 #include <array>
+#include <cmath>
 
 namespace Misc
 {
@@ -19,7 +18,7 @@ namespace Misc
         {{1, 0}}    // se
     }};
 
-    Misc::Point getNextPosByDir(Misc::Point pos, Direction dir)
+    Point getNextPosByDir(Point pos, Direction dir)
     {
         if (dir == Direction::invalid)
             return pos;
@@ -29,4 +28,4 @@ namespace Misc
 
         return {x, y};
     }
-}
+} // namespace Misc

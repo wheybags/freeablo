@@ -1,12 +1,12 @@
 #pragma once
 
+#include "point.h"
+
 #include <cstdint>
 #include <utility>
 
 namespace Misc
 {
-    class Point;
-
     /// Enum for direction.
     /// Currently has the same numeric values as original game.
     enum class Direction : uint8_t
@@ -22,5 +22,5 @@ namespace Misc
         invalid,
     };
 
-    Misc::Point getNextPosByDir(Misc::Point pos, Direction dir);
-}
+    Point getNextPosByDir(Point pos, Direction dir);
+} // namespace Misc
