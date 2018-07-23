@@ -12,9 +12,7 @@ namespace FAWorld
         mDist = loader.load<int32_t>();
         mDirection = static_cast<Misc::Direction>(loader.load<int32_t>());
         mMoving = loader.load<bool>();
-
-        mCurrent.x = loader.load<int32_t>();
-        mCurrent.y = loader.load<int32_t>();
+        mCurrent = loader.load<Misc::Point>();
     }
 
     void Position::save(FASaveGame::GameSaver& saver)
@@ -24,8 +22,7 @@ namespace FAWorld
         saver.save(mDist);
         saver.save(static_cast<int32_t>(mDirection));
         saver.save(mMoving);
-        saver.save(mCurrent.x);
-        saver.save(mCurrent.y);
+        saver.save(mCurrent);
     }
 
     void Position::update()
@@ -70,4 +67,4 @@ namespace FAWorld
         mDist = 0;
         mMoving = true;
     }
-} // namespace FAWorld
+}

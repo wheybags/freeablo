@@ -1,8 +1,8 @@
-
 #pragma once
 
 #include <cstdint>
 #include <limits>
+#include <misc/point.h>
 #include <string>
 
 namespace Serial
@@ -44,6 +44,7 @@ namespace Serial
     template <> int8_t Loader::load<int8_t>();
     template <> uint8_t Loader::load<uint8_t>();
     template <> std::string Loader::load<std::string>();
+    template <> Misc::Point Loader::load<Misc::Point>();
 
     class Saver
     {
@@ -60,6 +61,7 @@ namespace Serial
         void save(int8_t val);
         void save(uint8_t val);
         void save(const std::string& val);
+        void save(const Misc::Point& point);
 
         void startCategory(const std::string& name);
         void endCategory(const std::string& name);

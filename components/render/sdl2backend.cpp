@@ -1184,4 +1184,4 @@ namespace Render
 
         cache->setImmortal(minTopsHandle, false);
     }
-} // namespace Render
+}

@@ -20,4 +20,4 @@ namespace FAWorld
     class GameLevelImpl;
 
     std::vector<Misc::Point> pathFind(GameLevelImpl* level, const Misc::Point& start, Misc::Point& goal, bool& bArrivable, bool findAdjacent);
-} // namespace FAWorld
+}

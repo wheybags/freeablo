@@ -115,7 +115,7 @@ namespace FAWorld
                         auto next = mCurrentPath[mCurrentPathIndex];
 
                         // Make sure nothing has moved into the way
-                        if (mLevel->isPassable(next.x, next.y))
+                        if (mLevel->isPassable(next))
                         {
                             auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
                             Misc::Direction direction = vec.getIsometricDirection();
@@ -154,4 +154,4 @@ namespace FAWorld
     }
 
     void MovementHandler::setDirection(Misc::Direction direction) { mCurrentPos.setDirection(direction); }
-} // namespace FAWorld
+}

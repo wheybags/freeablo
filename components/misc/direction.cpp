@@ -28,4 +28,4 @@ namespace Misc
 
         return {x, y};
     }
-} // namespace Misc
+}

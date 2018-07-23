@@ -837,13 +837,13 @@ namespace FALevelGen
             {
                 pos.x = rng.randomInRange(1, level.width() - 1);
                 pos.y = rng.randomInRange(1, level.height() - 1);
-            } while (!level.getTile(pos.x, pos.y).passable() && pos != level.upStairsPos() && pos != level.downStairsPos());
+            } while (!level.getTile(pos).passable() && pos != level.upStairsPos() && pos != level.downStairsPos());
 
             std::string name = possibleMonsters[rng.randomInRange(0, possibleMonsters.size() - 1)]->monsterName;
             DiabloExe::Monster monster = exe.getMonster(name);
 
             FAWorld::Actor* monsterObj = new FAWorld::Actor(*level.getWorld(), rng, monster);
-            monsterObj->teleport(&level, FAWorld::Position(pos.x, pos.y));
+            monsterObj->teleport(&level, FAWorld::Position(pos));
         }
     }
 
@@ -1140,4 +1140,4 @@ namespace FALevelGen
 
         return retval;
     }
-} // namespace FALevelGen
+}

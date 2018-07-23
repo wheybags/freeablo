@@ -1,4 +1,5 @@
 #include "renderer.h"
+
 #include "../engine/threadmanager.h"
 #include "../fagui/guimanager.h"
 #include "../faworld/gamelevel.h"
@@ -339,4 +340,4 @@ namespace FARender
     nk_user_font* Renderer::goldFont(int height) const { return &mGoldFont.at(height)->nkFont; }
 
     nk_user_font* Renderer::silverFont(int height) const { return &mSilverFont.at(height)->nkFont; }
-} // namespace FARender
+}

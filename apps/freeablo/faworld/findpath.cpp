@@ -41,7 +41,7 @@ namespace FAWorld
             for (int32_t dx = -1; dx <= 1; dx++)
             {
                 Misc::Point next(x + dx, y + dy);
-                if (inBounds(level, next) && level->isPassable(next.x, next.y))
+                if (inBounds(level, next) && level->isPassable(next))
                     results.push_back(next);
             }
         }
@@ -78,7 +78,7 @@ namespace FAWorld
 
     bool AStarSearch(GameLevelImpl* level, Misc::Point start, Misc::Point& goal, std::unordered_map<Misc::Point, Misc::Point>& came_from, bool findAdjacent)
     {
-        auto goalPassable = level->isPassable(goal.x, goal.y);
+        auto goalPassable = level->isPassable(goal);
         PriorityQueue<Misc::Point> frontier;
         frontier.put(start, 0);
         came_from[start] = start;
@@ -173,4 +173,4 @@ namespace FAWorld
 
         return reconstructPath(start, goal, cameFrom);
     }
-} // namespace FAWorld
+}

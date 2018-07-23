@@ -35,7 +35,7 @@ namespace FAWorld
 
         int32_t height() const { return MAP_SIZE; }
 
-        bool isPassable(int x, int y) const { return gameMap[y][x] == 0; }
+        bool isPassable(const Misc::Point& point) const { return gameMap[point.y][point.x] == 0; }
 
     private:
         int gameMap[MAP_SIZE][MAP_SIZE];
@@ -80,7 +80,7 @@ namespace FAWorld
             }
         }
     };
-} // namespace FAWorld
+}
 
 using namespace FAWorld;
 
@@ -103,7 +103,7 @@ void drawPath(::GameLevel::GameLevelImpl& graph,
             Misc::Point id(x, y);
 
             cout << left << setw(field_width);
-            if (!graph.isPassable(x, y))
+            if (!graph.isPassable(id))
             {
                 cout << string(field_width, '#');
             }
@@ -157,7 +157,7 @@ int main()
     FAWorld::LevelImpl* level = new LevelImpl();
 
     Misc::Point start, goal;
-    vector<Misc::Point> path;
+    Misc::Points path;
 
     int caseId = 1;
     cout << "Select case ID [1-6]";

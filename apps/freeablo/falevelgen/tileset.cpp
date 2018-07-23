@@ -359,4 +359,4 @@ namespace FALevelGen
         release_assert(false && "tried to convert invalid tile");
         return (int32_t)val;
     }
-} // namespace FALevelGen
+}

@@ -86,9 +86,9 @@ namespace Level
         return false;
     }
 
-    MinPillar Level::get(int32_t x, int32_t y) const
+    MinPillar Level::get(const Misc::Point& point) const
     {
-        int32_t xDunIndex = x;
+        int32_t xDunIndex = point.x;
         int32_t xTilIndex = 0;
         if ((xDunIndex % 2) != 0)
         {
@@ -97,7 +97,7 @@ namespace Level
         }
         xDunIndex /= 2;
 
-        int32_t yDunIndex = y;
+        int32_t yDunIndex = point.y;
         int32_t yTilIndex = 0;
         if ((yDunIndex % 2) != 0)
         {
@@ -133,16 +133,14 @@ namespace Level
         return MinPillar(mMin[minIndex], mSol.passable(minIndex), minIndex);
     }
 
-    MinPillar Level::get(Misc::Point point) const { return get(point.x, point.y); }
-
-    void Level::activate(int32_t x, int32_t y)
+    void Level::activate(const Misc::Point& point)
     {
-        int32_t xDunIndex = x;
+        int32_t xDunIndex = point.x;
         if ((xDunIndex % 2) != 0)
             xDunIndex--;
         xDunIndex /= 2;
 
-        int32_t yDunIndex = y;
+        int32_t yDunIndex = point.y;
         if ((yDunIndex % 2) != 0)
             yDunIndex--;
         yDunIndex /= 2;
@@ -179,4 +177,4 @@ namespace Level
     bool MinPillar::passable() const { return mPassable; }
 
     int32_t MinPillar::index() const { return mIndex; }
-} // namespace Level
+}

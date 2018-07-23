@@ -56,14 +56,14 @@ namespace FAWorld
                     Target::ItemTarget target = actor.mTarget.get<Target::ItemTarget>();
 
                     auto tile = target.item->getTile();
-                    if (actor.getPos().isNear({tile.x, tile.y}))
+                    if (actor.getPos().isNear(Position(tile.position)))
                     {
                         actor.pickupItem(target);
                         actor.mTarget.clear();
                     }
                     else
                     {
-                        actor.mMoveHandler.setDestination({tile.x, tile.y}, true);
+                        actor.mMoveHandler.setDestination(tile.position, true);
                     }
                 }
 
@@ -81,5 +81,5 @@ namespace FAWorld
 
             return ret;
         }
-    } // namespace ActorState
-} // namespace FAWorld
+    }
+}

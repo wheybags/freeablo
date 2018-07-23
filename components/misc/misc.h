@@ -67,7 +67,7 @@ namespace Misc
         };
 
         template <typename T> using wrapper_for_t = typename wrapper_for<T>::type;
-    } // namespace detail
+    }
 
     // generate class overloading operator() of several function objects to ease the usage of variant classes
     template <typename RetType = void, typename... Args>
@@ -87,6 +87,6 @@ namespace Misc
         T mOriginal;
         T& mToSet;
     };
-} // namespace Misc
+}
 
 #define UNUSED_PARAM(x) (void)(x)

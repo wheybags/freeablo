@@ -51,7 +51,7 @@ namespace FAWorld
         };
         struct TargetItemOnFloorData
         {
-            int32_t x, y;
+            Misc::Point position;
             Target::ItemTarget::ActionType type;
 
             void save(Serial::Saver& saver);

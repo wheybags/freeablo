@@ -10,7 +10,7 @@ namespace FARender
 {
     class AnimationPlayer;
     class FASpriteGroup;
-} // namespace FARender
+}
 
 namespace Render
 {
@@ -21,7 +21,7 @@ namespace FASaveGame
 {
     class GameLoader;
     class GameSaver;
-} // namespace FASaveGame
+}
 
 namespace FAWorld
 {
@@ -31,17 +31,16 @@ namespace FAWorld
     class Tile
     {
     public:
-        int32_t x;
-        int32_t y;
+        Misc::Point position;
 
-        Tile(int32_t x, int32_t y) : x(x), y(y) {}
-        Tile() : x(std::numeric_limits<int32_t>::max()), y(std::numeric_limits<int32_t>::max()) {}
-        Tile(FASaveGame::GameLoader& loader);
+        Tile() : position(std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max()) {}
+        explicit Tile(Misc::Point position) : position(position) {}
+        explicit Tile(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) const;
 
-        bool operator==(const Tile& other) const { return std::tie(x, y) == std::tie(other.x, other.y); }
+        bool operator==(const Tile& other) const { return position == other.position; }
         bool operator!=(const Tile& other) const { return !(*this == other); }
-        bool operator<(const Tile& other) const { return std::tie(x, y) < std::tie(other.x, other.y); }
+        bool operator<(const Tile& other) const { return position < other.position; }
 
         bool isValid() const { return *this != Tile(); }
     };
@@ -89,4 +88,4 @@ namespace FAWorld
 
         friend class GameLevel;
     };
-} // namespace FAWorld
+}

@@ -36,7 +36,7 @@ namespace FAWorld
 
         virtual ~Player();
         void updateSprites() override;
-        bool dropItem(const FAWorld::Tile& clickedTile);
+        bool dropItem(const Misc::Point& clickedPoint);
 
         virtual void update(bool noclip) override;
 
@@ -45,29 +45,14 @@ namespace FAWorld
         void setPlayerClass(PlayerClass playerClass);
 
         boost::signals2::signal<void(const Misc::Point&)> positionReached;
-        int getArmorPenetration() const
-        { /* placeholder */
-            return 0;
-        }
-        int getCharacterLevel() const
-        { /* placeholder */
-            return 1;
-        }
+        int getArmorPenetration() const { /* placeholder */ return 0; }
+        int getCharacterLevel() const { /* placeholder */ return 1; }
         PlayerClass getClass() const { return mPlayerClass; }
         int32_t meleeDamageVs(const Actor* actor) const override;
-        int getMaxDamage() const
-        { /* placeholder */
-            return 20;
-        }
+        int getMaxDamage() const { /* placeholder */ return 20; }
         int getPercentDamageBonus() const { return 0; }
-        int getCharacterBaseDamage() const
-        { /* placeholder */
-            return 0;
-        }
-        int getDamageBonus() const
-        { /* placeholder */
-            return 0;
-        }
+        int getCharacterBaseDamage() const { /* placeholder */ return 0; }
+        int getDamageBonus() const { /* placeholder */ return 0; }
         ItemBonus getItemBonus() const;
 
     private:
@@ -78,4 +63,4 @@ namespace FAWorld
         PlayerStats mPlayerStats;
         PlayerClass mPlayerClass = PlayerClass::warrior;
     };
-} // namespace FAWorld
+}

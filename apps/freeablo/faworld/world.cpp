@@ -137,7 +137,7 @@ namespace FAWorld
             if (x >= static_cast<int32_t>(getCurrentLevel()->width()) || y >= static_cast<int32_t>(getCurrentLevel()->height()))
                 return nullptr;
 
-            auto actor = getActorAt(x, y);
+            auto actor = getActorAt(Misc::Point(x, y));
             if (actor && !actor->isDead() && actor != getCurrentPlayer())
                 return actor;
 
@@ -196,8 +196,8 @@ namespace FAWorld
 
         for (auto npc : mDiabloExe.getNpcs())
         {
-            Actor* actor = new Actor(*this, *npc, mDiabloExe);
-            actor->teleport(townLevel, Position(npc->x, npc->y, static_cast<Misc::Direction>(npc->rotation)));
+            auto actor = new Actor(*this, *npc, mDiabloExe);
+            actor->teleport(townLevel, Position(Misc::Point(npc->x, npc->y), static_cast<Misc::Direction>(npc->rotation)));
         }
 
         for (int32_t i = 1; i < 17; i++)
@@ -217,7 +217,7 @@ namespace FAWorld
 
         auto level = getLevel(levelNum);
 
-        mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos().x, level->upStairsPos().y));
+        mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos()));
     }
 
     void World::playLevelMusic(size_t level)
@@ -282,7 +282,7 @@ namespace FAWorld
 
     void World::insertLevel(size_t level, GameLevel* gameLevel) { mLevels[level] = gameLevel; }
 
-    Actor* World::getActorAt(size_t x, size_t y) { return getCurrentLevel()->getActorAt(x, y); }
+    Actor* World::getActorAt(const Misc::Point& point) { return getCurrentLevel()->getActorAt(point); }
 
     void World::update(bool noclip, const std::vector<PlayerInput>& inputs)
     {
@@ -297,7 +297,7 @@ namespace FAWorld
                     FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, "Warrior");
                     registerPlayer(newPlayer);
                     FAWorld::GameLevel* level = getLevel(0);
-                    newPlayer->teleport(level, FAWorld::Position(level->upStairsPos().x, level->upStairsPos().y));
+                    newPlayer->teleport(level, FAWorld::Position(level->upStairsPos()));
                     Engine::EngineMain::get()->mMultiplayer->registerNewPlayer(newPlayer, input.mData.dataPlayerJoined.peerId);
 
                     break;
@@ -310,7 +310,7 @@ namespace FAWorld
                 }
                 default:
                 {
-                    static_cast<Player*>(this->getActorById(input.mActorId))->getPlayerBehaviour()->addInput(input);
+                    dynamic_cast<Player*>(this->getActorById(input.mActorId))->getPlayerBehaviour()->addInput(input);
                 }
             }
         }
@@ -403,4 +403,4 @@ namespace FAWorld
     Tick World::getTicksInPeriod(FixedPoint seconds) { return std::max(Tick(1), Tick((FixedPoint(ticksPerSecond) * seconds).round())); }
 
     FixedPoint World::getSecondsPerTick() { return FixedPoint(1) / FixedPoint(ticksPerSecond); }
-} // namespace FAWorld
+}

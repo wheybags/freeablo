@@ -23,4 +23,4 @@ namespace Misc
     };
 
     Point getNextPosByDir(Point pos, Direction dir);
-} // namespace Misc
+}

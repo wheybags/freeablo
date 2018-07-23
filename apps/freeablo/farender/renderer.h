@@ -147,4 +147,4 @@ namespace FARender
         std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;
         boost::container::flat_map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
     };
-} // namespace FARender
+}

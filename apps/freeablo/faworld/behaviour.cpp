@@ -79,7 +79,7 @@ namespace FAWorld
 
                         next.x += mActor->getWorld()->mRng->randomInRange(-5, 5);
                         next.y += mActor->getWorld()->mRng->randomInRange(-5, 5);
-                    } while (its < 10 && (!mActor->getLevel()->isPassable(next.x, next.y) || next == mActor->getPos().current()));
+                    } while (its < 10 && (!mActor->getLevel()->isPassable(next) || next == mActor->getPos().current()));
 
                     static int no = 0;
                     static int yes = 0;
@@ -97,4 +97,4 @@ namespace FAWorld
             }
         }
     }
-} // namespace FAWorld
+}

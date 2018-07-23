@@ -11,7 +11,7 @@ namespace FASaveGame
 {
     class GameLoader;
     class GameSaver;
-} // namespace FASaveGame
+}
 
 namespace FAWorld
 {
@@ -19,8 +19,8 @@ namespace FAWorld
     {
     public:
         Position() = default;
-        Position(int32_t x, int32_t y) : mCurrent(x, y) {}
-        Position(int32_t x, int32_t y, Misc::Direction direction) : mCurrent(x, y), mDirection(direction) {}
+        explicit Position(Misc::Point point) : mCurrent(point) {}
+        Position(Misc::Point point, Misc::Direction direction) : mCurrent(point), mDirection(direction) {}
 
         Position(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
@@ -45,4 +45,4 @@ namespace FAWorld
         Misc::Direction mDirection = Misc::Direction::south;
         bool mMoving = false;
     };
-} // namespace FAWorld
+}

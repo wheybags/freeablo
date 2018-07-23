@@ -80,15 +80,13 @@ namespace FAWorld
 
     void PlayerInput::TargetItemOnFloorData::save(Serial::Saver& saver)
     {
-        saver.save(x);
-        saver.save(y);
+        saver.save(position);
         saver.save(uint8_t(type));
     }
 
     void PlayerInput::TargetItemOnFloorData::load(Serial::Loader& loader)
     {
-        x = loader.load<int32_t>();
-        y = loader.load<int32_t>();
+        position = loader.load<Misc::Point>();
         type = Target::ItemTarget::ActionType(loader.load<uint8_t>());
     }
 

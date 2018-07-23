@@ -11,7 +11,7 @@ namespace FASaveGame
 {
     class GameLoader;
     class GameSaver;
-} // namespace FASaveGame
+}
 
 namespace FAWorld
 {
@@ -49,4 +49,4 @@ namespace FAWorld
         Tick mPathRateLimit;
         bool mAdjacent = false;
     };
-} // namespace FAWorld
+}

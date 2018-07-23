@@ -277,8 +277,8 @@ namespace FAWorld
 
     void Actor::doMeleeHit(const Misc::Point& point)
     {
-        auto actor = getLevel()->getActorAt(point.x, point.y);
-        if (!canIAttack(actor))
+        auto actor = getLevel()->getActorAt(point);
+        if (canIAttack(actor))
             return;
         doMeleeHit(actor);
     }
@@ -300,4 +300,4 @@ namespace FAWorld
             enemy->checkDeath();
         }
     }
-} // namespace FAWorld
+}
