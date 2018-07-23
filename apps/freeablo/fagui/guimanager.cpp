@@ -137,7 +137,7 @@ namespace FAGui
 
             nk_context* mCtx;
         };
-    }
+    } // namespace
 
     void GuiManager::dialog(nk_context* ctx)
     {
@@ -968,4 +968,4 @@ namespace FAGui
 
     std::string cursorPath = "data/inv/objcurs.cel";
     uint32_t cursorFrame = 0;
-}
+} // namespace FAGui
