@@ -8,10 +8,10 @@ namespace Misc
 {
     struct Point
     {
-        int32_t x;
-        int32_t y;
+        int32_t x = 0;
+        int32_t y = 0;
 
-        Point() : Point(0, 0) {}
+        Point() = default;
         Point(int32_t x, int32_t y) : x(x), y(y) {}
 
         inline Point operator+(const Point& v) const { return {x + v.x, y + v.y}; }

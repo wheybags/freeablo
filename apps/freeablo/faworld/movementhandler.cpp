@@ -18,20 +18,14 @@ namespace FAWorld
         }
 
         mCurrentPos = Position(loader);
-
-        int32_t x, y;
-        x = loader.load<int32_t>();
-        y = loader.load<int32_t>();
-        mDestination = Misc::Point(x, y);
+        mDestination = loader.load<Misc::Point>();
 
         mCurrentPathIndex = loader.load<int32_t>();
         uint32_t pathSize = loader.load<uint32_t>();
         mCurrentPath.reserve(pathSize);
         for (uint32_t i = 0; i < pathSize; i++)
         {
-            x = loader.load<int32_t>();
-            y = loader.load<int32_t>();
-            mCurrentPath.push_back(Misc::Point(x, y));
+            mCurrentPath.push_back(loader.load<Misc::Point>());
         }
 
         mLastRepathed = loader.load<Tick>();
@@ -49,8 +43,7 @@ namespace FAWorld
 
         saver.save(levelIndex);
         mCurrentPos.save(saver);
-        saver.save(mDestination.x);
-        saver.save(mDestination.y);
+        saver.save(mDestination);
 
         saver.save(mCurrentPathIndex);
 
@@ -58,8 +51,7 @@ namespace FAWorld
         saver.save(pathSize);
         for (const auto& item : mCurrentPath)
         {
-            saver.save(item.x);
-            saver.save(item.y);
+            saver.save(item);
         }
 
         saver.save(mLastRepathed);

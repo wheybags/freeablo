@@ -1056,14 +1056,12 @@ namespace FALevelGen
             {
                 if (level.get(x, y) == (int32_t)TileSetEnum::upStairs)
                 {
-                    upStairsPoint.x = x * 2;
-                    upStairsPoint.y = y * 2;
+                    upStairsPoint = Misc::Point(x * 2, y * 2);
                     level.get(x, y) = (int32_t)TileSetEnum::floor;
                 }
                 else if (level.get(x, y) == (int32_t)TileSetEnum::downStairs)
                 {
-                    downStairsPoint.x = x * 2;
-                    downStairsPoint.y = y * 2;
+                    downStairsPoint = Misc::Point(x * 2, y * 2);
                     level.get(x, y) = (int32_t)TileSetEnum::floor;
                 }
                 else

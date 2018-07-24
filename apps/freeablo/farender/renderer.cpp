@@ -1,5 +1,4 @@
 #include "renderer.h"
-
 #include "../engine/threadmanager.h"
 #include "../fagui/guimanager.h"
 #include "../faworld/gamelevel.h"
@@ -176,8 +175,10 @@ namespace FARender
 
     Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getTileByScreenPos(x, y, screenPos.current().x, screenPos.current().y, screenPos.next().x, screenPos.next().y, screenPos.getDist());
+        return Render::getTileByScreenPos(
+            x, y, screenPos.current().x, screenPos.current().y, screenPos.next().x, screenPos.next().y, screenPos.getDist());
     }
+
     void Renderer::waitUntilDone()
     {
         std::unique_lock<std::mutex> lk(mDoneMutex);
