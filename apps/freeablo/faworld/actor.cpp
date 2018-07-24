@@ -278,7 +278,7 @@ namespace FAWorld
     void Actor::doMeleeHit(const Misc::Point& point)
     {
         auto actor = getLevel()->getActorAt(point);
-        if (canIAttack(actor))
+        if (!canIAttack(actor))
             return;
         doMeleeHit(actor);
     }
