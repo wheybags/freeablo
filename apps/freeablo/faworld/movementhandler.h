@@ -44,7 +44,7 @@ namespace FAWorld
         Misc::Point mDestination;
 
         int32_t mCurrentPathIndex = 0;
-        std::vector<Misc::Point> mCurrentPath;
+        Misc::Points mCurrentPath;
         Tick mLastRepathed = std::numeric_limits<Tick>::min();
         Tick mPathRateLimit;
         bool mAdjacent = false;

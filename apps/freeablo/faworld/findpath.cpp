@@ -28,13 +28,13 @@ namespace FAWorld
         return 0 <= x && x < (int)level->width() && 0 <= y && y < (int)level->height();
     }
 
-    std::vector<Misc::Point> neighbors(GameLevelImpl* level, Misc::Point location)
+    Misc::Points neighbors(GameLevelImpl* level, Misc::Point location)
     {
         int x = location.x;
         int y = location.y;
 
-        std::vector<Misc::Point> results(0);
-        results.reserve(9);
+        Misc::Points result;
+        result.reserve(9);
 
         for (int32_t dy = -1; dy <= 1; dy++)
         {
@@ -42,11 +42,11 @@ namespace FAWorld
             {
                 Misc::Point next(x + dx, y + dy);
                 if (inBounds(level, next) && level->isPassable(next))
-                    results.push_back(next);
+                    result.push_back(next);
             }
         }
 
-        return results;
+        return result;
     }
 
     int heuristic(Misc::Point a, Misc::Point b)
@@ -104,8 +104,8 @@ namespace FAWorld
                 }
             }
 
-            std::vector<Misc::Point> neighborsContainer = neighbors(level, current);
-            for (std::vector<Misc::Point>::iterator it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
+            Misc::Points neighborsContainer = neighbors(level, current);
+            for (auto it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
             {
                 int32_t new_cost = costSoFar.get(current.x, current.y) + 1; // graph.cost(current, next);
                 Misc::Point next = *it;
@@ -123,9 +123,9 @@ namespace FAWorld
         return false;
     }
 
-    std::vector<Misc::Point> reconstructPath(Misc::Point start, Misc::Point goal, std::unordered_map<Misc::Point, Misc::Point>& cameFrom)
+    Misc::Points reconstructPath(Misc::Point start, Misc::Point goal, std::unordered_map<Misc::Point, Misc::Point>& cameFrom)
     {
-        std::vector<Misc::Point> path;
+        Misc::Points path;
         Misc::Point current = goal;
         path.push_back(current);
         while (current != start)
@@ -147,7 +147,7 @@ namespace FAWorld
 
         Misc::Point result(-1, -1);
 
-        for (std::unordered_map<Misc::Point, Misc::Point>::iterator it = cameFrom.begin(); it != cameFrom.end(); it++)
+        for (auto it = cameFrom.begin(); it != cameFrom.end(); it++)
         {
             int tmpX = abs(it->first.x - goal.x);
             int tmpY = abs(it->first.y - goal.y);
@@ -163,7 +163,7 @@ namespace FAWorld
         return result;
     }
 
-    std::vector<Misc::Point> pathFind(GameLevelImpl* level, const Misc::Point& start, Misc::Point& goal, bool& bArrivable, bool findAdjacent)
+    Misc::Points pathFind(GameLevelImpl* level, const Misc::Point& start, Misc::Point& goal, bool& bArrivable, bool findAdjacent)
     {
         std::unordered_map<Misc::Point, Misc::Point> cameFrom;
 

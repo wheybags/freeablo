@@ -2,6 +2,7 @@
 
 #include <cinttypes>
 #include <functional>
+#include <serial/loader.h>
 #include <vector>
 
 namespace Misc
@@ -13,6 +14,9 @@ namespace Misc
 
         Point() = default;
         Point(int32_t x, int32_t y) : x(x), y(y) {}
+
+        explicit Point(Serial::Loader& loader);
+        void save(Serial::Saver& saver) const;
 
         inline Point operator+(const Point& v) const { return {x + v.x, y + v.y}; }
         inline Point operator-(const Point& v) const { return {x - v.x, y - v.y}; }

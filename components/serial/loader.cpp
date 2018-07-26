@@ -31,14 +31,6 @@ namespace Serial
 
     template <> std::string Loader::load<std::string>() { return mStream.read_string(); }
 
-    template <> Misc::Point Loader::load<Misc::Point>()
-    {
-        Misc::Point point;
-        point.x = mStream.read_int32_t();
-        point.y = mStream.read_int32_t();
-        return point;
-    }
-
     void Loader::startCategory(const std::string& name) { mStream.startCategory(name); }
 
     void Loader::endCategory(const std::string& name) { mStream.endCategory(name); }
@@ -64,12 +56,6 @@ namespace Serial
     void Saver::save(uint8_t val) { mStream.write(val); }
 
     void Saver::save(const std::string& val) { mStream.write(val); }
-
-    void Saver::save(const Misc::Point& point)
-    {
-        mStream.write(point.x);
-        mStream.write(point.y);
-    }
 
     void Saver::startCategory(const std::string& name) { mStream.startCategory(name); }
 

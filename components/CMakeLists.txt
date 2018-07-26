@@ -41,6 +41,7 @@ add_library(Misc
     misc/md5.cpp
     misc/md5.h
     misc/misc.h
+    misc/point.cpp
     misc/point.h
     misc/savePNG.cpp
     misc/savePNG.h

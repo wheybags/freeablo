@@ -10,9 +10,9 @@
 
 namespace FAWorld
 {
-    Tile::Tile(FASaveGame::GameLoader& loader) : position(loader.load<Misc::Point>()) {}
+    Tile::Tile(FASaveGame::GameLoader& loader) : position(loader) {}
 
-    void Tile::save(FASaveGame::GameSaver& saver) const { saver.save(position); }
+    void Tile::save(FASaveGame::GameSaver& saver) const { position.save(saver); }
 
     PlacedItemData::PlacedItemData(std::unique_ptr<Item> itemArg, const Tile& tile)
         : mItem(std::move(itemArg)), mAnimation(new FARender::AnimationPlayer()), mTile(tile)
