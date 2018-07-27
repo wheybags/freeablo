@@ -5,7 +5,7 @@ FixedPoint Vec2Fix::magnitude() const { return FixedPoint(x * x + y * y).sqrt();
 void Vec2Fix::normalise()
 {
     if (x == 0 && y == 0)
-      return;
+        return;
 
     FixedPoint mag = magnitude();
     x = x / mag;
