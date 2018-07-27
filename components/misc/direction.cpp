@@ -1,9 +1,9 @@
 #define _USE_MATH_DEFINES
-#include <cmath>
 
-#include "assert.h"
 #include "direction.h"
+
 #include <array>
+#include <cmath>
 
 namespace Misc
 {
@@ -18,13 +18,13 @@ namespace Misc
         {{1, 0}}    // se
     }};
 
-    std::pair<int32_t, int32_t> getNextPosByDir(std::pair<int32_t, int32_t> pos, Direction dir)
+    Point getNextPosByDir(Point pos, Direction dir)
     {
         if (dir == Direction::invalid)
             return pos;
 
-        int32_t x = pos.first + offsets[static_cast<size_t>(dir)][0];
-        int32_t y = pos.second + offsets[static_cast<size_t>(dir)][1];
+        int32_t x = pos.x + offsets[static_cast<size_t>(dir)][0];
+        int32_t y = pos.y + offsets[static_cast<size_t>(dir)][1];
 
         return {x, y};
     }

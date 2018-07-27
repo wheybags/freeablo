@@ -10,8 +10,8 @@ namespace Level
                  const std::string& minPath,
                  const std::string& solPath,
                  const std::string& tileSetPath,
-                 const std::pair<int32_t, int32_t>& downStairs,
-                 const std::pair<int32_t, int32_t>& upStairs,
+                 const Misc::Point& downStairs,
+                 const Misc::Point& upStairs,
                  std::map<int32_t, int32_t> doorMap,
                  int32_t previous,
                  int32_t next)
@@ -64,11 +64,11 @@ namespace Level
             saver.save(entry.second);
         }
 
-        saver.save(mUpStairs.first);
-        saver.save(mUpStairs.second);
+        saver.save(mUpStairs.x);
+        saver.save(mUpStairs.y);
 
-        saver.save(mDownStairs.first);
-        saver.save(mDownStairs.second);
+        saver.save(mDownStairs.x);
+        saver.save(mDownStairs.y);
 
         saver.save(mPrevious);
         saver.save(mNext);
@@ -78,17 +78,17 @@ namespace Level
 
     bool Level::isStairs(int32_t x, int32_t y) const
     {
-        if (mDownStairs.first == x && mDownStairs.second == y)
+        if (mDownStairs.x == x && mDownStairs.y == y)
             return true;
-        if (mUpStairs.first == x && mUpStairs.second == y)
+        if (mUpStairs.x == x && mUpStairs.y == y)
             return true;
 
         return false;
     }
 
-    MinPillar Level::get(int32_t x, int32_t y) const
+    MinPillar Level::get(const Misc::Point& point) const
     {
-        int32_t xDunIndex = x;
+        int32_t xDunIndex = point.x;
         int32_t xTilIndex = 0;
         if ((xDunIndex % 2) != 0)
         {
@@ -97,7 +97,7 @@ namespace Level
         }
         xDunIndex /= 2;
 
-        int32_t yDunIndex = y;
+        int32_t yDunIndex = point.y;
         int32_t yTilIndex = 0;
         if ((yDunIndex % 2) != 0)
         {
@@ -133,14 +133,14 @@ namespace Level
         return MinPillar(mMin[minIndex], mSol.passable(minIndex), minIndex);
     }
 
-    void Level::activate(int32_t x, int32_t y)
+    void Level::activate(const Misc::Point& point)
     {
-        int32_t xDunIndex = x;
+        int32_t xDunIndex = point.x;
         if ((xDunIndex % 2) != 0)
             xDunIndex--;
         xDunIndex /= 2;
 
-        int32_t yDunIndex = y;
+        int32_t yDunIndex = point.y;
         if ((yDunIndex % 2) != 0)
             yDunIndex--;
         yDunIndex /= 2;
@@ -160,9 +160,9 @@ namespace Level
 
     int32_t Level::height() const { return mDun.height() * 2; }
 
-    const std::pair<int32_t, int32_t>& Level::upStairsPos() const { return mUpStairs; }
+    const Misc::Point& Level::upStairsPos() const { return mUpStairs; }
 
-    const std::pair<int32_t, int32_t>& Level::downStairsPos() const { return mDownStairs; }
+    const Misc::Point& Level::downStairsPos() const { return mDownStairs; }
 
     const std::string& Level::getTileSetPath() const { return mTilesetCelPath; }
 

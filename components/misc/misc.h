@@ -8,17 +8,6 @@
 
 namespace Misc
 {
-    // Point in pixels
-    struct Point
-    {
-        int32_t x;
-        int32_t y;
-        Point operator+(const Point& v) const { return {x + v.x, y + v.y}; }
-        Point operator-(const Point& v) const { return {x - v.x, y - v.y}; }
-        Point operator*(double c) const { return {static_cast<int32_t>(x * c), static_cast<int32_t>(y * c)}; }
-        Point operator/(int c) const { return {x / c, y / c}; }
-    };
-
     namespace detail
     {
         template <typename RetType, typename... Args> class overload_class;
@@ -78,7 +67,7 @@ namespace Misc
         };
 
         template <typename T> using wrapper_for_t = typename wrapper_for<T>::type;
-    } // namespace detail
+    }
 
     // generate class overloading operator() of several function objects to ease the usage of variant classes
     template <typename RetType = void, typename... Args>

@@ -12,11 +12,7 @@ namespace FAWorld
         mDist = loader.load<int32_t>();
         mDirection = static_cast<Misc::Direction>(loader.load<int32_t>());
         mMoving = loader.load<bool>();
-
-        int32_t first, second;
-        first = loader.load<int32_t>();
-        second = loader.load<int32_t>();
-        mCurrent = std::make_pair(first, second);
+        mCurrent = Misc::Point(loader);
     }
 
     void Position::save(FASaveGame::GameSaver& saver)
@@ -26,8 +22,7 @@ namespace FAWorld
         saver.save(mDist);
         saver.save(static_cast<int32_t>(mDirection));
         saver.save(mMoving);
-        saver.save(mCurrent.first);
-        saver.save(mCurrent.second);
+        mCurrent.save(saver);
     }
 
     void Position::update()
@@ -46,14 +41,14 @@ namespace FAWorld
 
     void Position::setDirection(Misc::Direction mDirection) { this->mDirection = mDirection; }
 
-    std::pair<int32_t, int32_t> Position::current() const { return mCurrent; }
+    Misc::Point Position::current() const { return mCurrent; }
 
     bool Position::isNear(const Position& other) const
     {
-        return std::max(std::abs(mCurrent.first - other.mCurrent.first), std::abs(mCurrent.second - other.mCurrent.second)) <= 1;
+        return std::max(std::abs(mCurrent.x - other.mCurrent.x), std::abs(mCurrent.y - other.mCurrent.y)) <= 1;
     }
 
-    std::pair<int32_t, int32_t> Position::next() const
+    Misc::Point Position::next() const
     {
         if (!mMoving)
             return mCurrent;

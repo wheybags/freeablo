@@ -62,17 +62,17 @@ namespace Engine
                 {
                     auto type = EngineMain::get()->mGuiManager->isInventoryShown() ? FAWorld::Target::ItemTarget::ActionType::toCursor
                                                                                    : FAWorld::Target::ItemTarget::ActionType::autoEquip;
-                    mInputs.emplace_back(FAWorld::PlayerInput::TargetItemOnFloorData{item->getTile().x, item->getTile().y, type}, player->getId());
+                    mInputs.emplace_back(FAWorld::PlayerInput::TargetItemOnFloorData{item->getTile().position, type}, player->getId());
                 }
                 else if (modifiers.shift)
                 {
                     Misc::Direction direction =
-                        Vec2Fix(clickedTile.x - player->getPos().current().first, clickedTile.y - player->getPos().current().second).getIsometricDirection();
+                        Vec2Fix(clickedTile.pos.x - player->getPos().current().x, clickedTile.pos.y - player->getPos().current().y).getIsometricDirection();
                     mInputs.emplace_back(FAWorld::PlayerInput::AttackDirectionData{direction}, player->getId());
                 }
                 else
                 {
-                    mInputs.emplace_back(FAWorld::PlayerInput::TargetTileData{clickedTile.x, clickedTile.y}, player->getId());
+                    mInputs.emplace_back(FAWorld::PlayerInput::TargetTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
                 }
 
                 return;
@@ -82,7 +82,7 @@ namespace Engine
                 if (mouseDown)
                 {
                     auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
-                    mInputs.emplace_back(FAWorld::PlayerInput::DragOverTileData{clickedTile.x, clickedTile.y}, player->getId());
+                    mInputs.emplace_back(FAWorld::PlayerInput::DragOverTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
                 }
 
                 this->mHoverStatus = FAWorld::HoverStatus();

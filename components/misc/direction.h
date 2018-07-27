@@ -1,5 +1,7 @@
 #pragma once
 
+#include "point.h"
+
 #include <cstdint>
 #include <utility>
 
@@ -20,5 +22,5 @@ namespace Misc
         invalid,
     };
 
-    std::pair<int32_t, int32_t> getNextPosByDir(std::pair<int32_t, int32_t> pos, Direction dir);
+    Point getNextPosByDir(Point pos, Direction dir);
 }

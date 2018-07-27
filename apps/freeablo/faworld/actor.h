@@ -59,7 +59,7 @@ namespace FAWorld
 
         virtual int32_t meleeDamageVs(const Actor* actor) const;
         void doMeleeHit(Actor* enemy);
-        void doMeleeHit(const std::pair<int32_t, int32_t>& tile);
+        void doMeleeHit(const Misc::Point& point);
         void startMeleeAttack(Misc::Direction direction);
         void checkDeath();
 

@@ -58,17 +58,17 @@ namespace FAWorld
             delete mActors[i];
     }
 
-    Level::MinPillar GameLevel::getTile(size_t x, size_t y) { return mLevel.get(x, y); }
+    Level::MinPillar GameLevel::getTile(const Misc::Point& point) const { return mLevel.get(point); }
 
     int32_t GameLevel::width() const { return mLevel.width(); }
 
     int32_t GameLevel::height() const { return mLevel.height(); }
 
-    const std::pair<int32_t, int32_t> GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
+    const Misc::Point GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
 
-    const std::pair<int32_t, int32_t> GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
+    const Misc::Point GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
 
-    void GameLevel::activate(size_t x, size_t y) { mLevel.activate(x, y); }
+    void GameLevel::activate(const Misc::Point& point) { mLevel.activate(point); }
 
     int32_t GameLevel::getNextLevel() { return mLevel.getNextLevel(); }
 
@@ -115,18 +115,18 @@ namespace FAWorld
             actorMapInsert(mActors[i]);
     }
 
-    bool GameLevel::isPassable(int x, int y) const
+    bool GameLevel::isPassable(const Misc::Point& point) const
     {
-        if (x > 0 && x < width() && y > 0 && y < height() && !mLevel.get(x, y).passable())
+        if (point.x > 0 && point.x < width() && point.y > 0 && point.y < height() && !mLevel.get(point).passable())
             return false;
 
-        FAWorld::Actor* actor = getActorAt(x, y);
-        return actor == NULL || actor->isPassable();
+        FAWorld::Actor* actor = getActorAt(point);
+        return actor == nullptr || actor->isPassable();
     }
 
-    Actor* GameLevel::getActorAt(int32_t x, int32_t y) const
+    Actor* GameLevel::getActorAt(const Misc::Point& point) const
     {
-        auto it = mActorMap2D.find(std::pair<int32_t, int32_t>(x, y));
+        auto it = mActorMap2D.find(point);
         if (it == mActorMap2D.end())
             return nullptr;
 
@@ -171,7 +171,7 @@ namespace FAWorld
                 FARender::ObjectToRender o;
                 o.spriteGroup = sf.first;
                 o.frame = sf.second;
-                o.position = {p.first.x, p.first.y};
+                o.position = Position(p.first.position);
                 if (p.first == hoverStatus.hoveredItemTile)
                     o.hoverColor = itemHoverColor();
                 state->mItems.push_back(o);
@@ -193,10 +193,10 @@ namespace FAWorld
         release_assert(false && "tried to remove actor that isn't in level");
     }
 
-    bool GameLevel::isPassableFor(int x, int y, const Actor* actor) const
+    bool GameLevel::isPassableFor(const Misc::Point& point, const Actor* actor) const
     {
-        auto actorAtPos = getActorAt(x, y);
-        return mLevel.get(x, y).passable() && (actorAtPos == nullptr || actorAtPos == actor || actorAtPos->isPassable());
+        auto actorAtPos = getActorAt(point);
+        return mLevel.get(point).passable() && (actorAtPos == nullptr || actorAtPos == actor || actorAtPos->isPassable());
     }
 
     bool GameLevel::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile) { return mItemMap->dropItem(move(item), actor, tile); }
@@ -209,7 +209,7 @@ namespace FAWorld
                 return actor;
         }
 
-        return NULL;
+        return nullptr;
     }
 
     void GameLevel::getActors(std::vector<Actor*>& actors) { actors.insert(actors.end(), mActors.begin(), mActors.end()); }

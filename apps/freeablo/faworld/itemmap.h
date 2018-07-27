@@ -1,9 +1,9 @@
-
 #pragma once
 
 #include <boost/optional/optional.hpp>
 #include <map>
 #include <memory>
+#include <misc/point.h>
 #include <vector>
 
 namespace FARender
@@ -31,17 +31,16 @@ namespace FAWorld
     class Tile
     {
     public:
-        int32_t x;
-        int32_t y;
+        Misc::Point position;
 
-        Tile(int32_t x, int32_t y) : x(x), y(y) {}
-        Tile() : x(std::numeric_limits<int32_t>::max()), y(std::numeric_limits<int32_t>::max()) {}
-        Tile(FASaveGame::GameLoader& loader);
+        Tile() : position(std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max()) {}
+        explicit Tile(Misc::Point position) : position(position) {}
+        explicit Tile(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) const;
 
-        bool operator==(const Tile& other) const { return std::tie(x, y) == std::tie(other.x, other.y); }
+        bool operator==(const Tile& other) const { return position == other.position; }
         bool operator!=(const Tile& other) const { return !(*this == other); }
-        bool operator<(const Tile& other) const { return std::tie(x, y) < std::tie(other.x, other.y); }
+        bool operator<(const Tile& other) const { return position < other.position; }
 
         bool isValid() const { return *this != Tile(); }
     };
@@ -79,6 +78,7 @@ namespace FAWorld
         ~ItemMap();
         bool dropItem(std::unique_ptr<FAWorld::Item>&& item, const Actor& actor, const Tile& tile);
         PlacedItemData* getItemAt(const Tile& tile);
+        PlacedItemData* getItemAt(const Misc::Point& pos);
         std::unique_ptr<FAWorld::Item> takeItemAt(const Tile& tile);
 
     private:

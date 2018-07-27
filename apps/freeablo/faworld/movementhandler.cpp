@@ -18,20 +18,14 @@ namespace FAWorld
         }
 
         mCurrentPos = Position(loader);
-
-        int32_t first, second;
-        first = loader.load<int32_t>();
-        second = loader.load<int32_t>();
-        mDestination = std::make_pair(first, second);
+        mDestination = Misc::Point(loader);
 
         mCurrentPathIndex = loader.load<int32_t>();
         uint32_t pathSize = loader.load<uint32_t>();
         mCurrentPath.reserve(pathSize);
         for (uint32_t i = 0; i < pathSize; i++)
         {
-            first = loader.load<int32_t>();
-            second = loader.load<int32_t>();
-            mCurrentPath.push_back(std::make_pair(first, second));
+            mCurrentPath.emplace_back(Misc::Point(loader));
         }
 
         mLastRepathed = loader.load<Tick>();
@@ -49,8 +43,7 @@ namespace FAWorld
 
         saver.save(levelIndex);
         mCurrentPos.save(saver);
-        saver.save(mDestination.first);
-        saver.save(mDestination.second);
+        mDestination.save(saver);
 
         saver.save(mCurrentPathIndex);
 
@@ -58,8 +51,7 @@ namespace FAWorld
         saver.save(pathSize);
         for (const auto& item : mCurrentPath)
         {
-            saver.save(item.first);
-            saver.save(item.second);
+            item.save(saver);
         }
 
         saver.save(mLastRepathed);
@@ -67,9 +59,9 @@ namespace FAWorld
         saver.save(mAdjacent);
     }
 
-    std::pair<int32_t, int32_t> MovementHandler::getDestination() const { return mDestination; }
+    Misc::Point MovementHandler::getDestination() const { return mDestination; }
 
-    void MovementHandler::setDestination(std::pair<int32_t, int32_t> dest, bool adjacent)
+    void MovementHandler::setDestination(Misc::Point dest, bool adjacent)
     {
         mDestination = dest;
         mAdjacent = adjacent;
@@ -115,9 +107,9 @@ namespace FAWorld
                         auto next = mCurrentPath[mCurrentPathIndex];
 
                         // Make sure nothing has moved into the way
-                        if (mLevel->isPassable(next.first, next.second))
+                        if (mLevel->isPassable(next))
                         {
-                            auto vec = Vec2Fix(next.first, next.second) - Vec2Fix(mCurrentPos.current().first, mCurrentPos.current().second);
+                            auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
                             Misc::Direction direction = vec.getIsometricDirection();
 
                             positionReachedSent = false;

@@ -1,9 +1,9 @@
-
 #pragma once
 
 #include "baseitemmanager.h"
 #include "dun.h"
 #include "min.h"
+#include "misc/point.h"
 #include "sol.h"
 #include "tileset.h"
 #include <map>
@@ -47,8 +47,8 @@ namespace Level
               const std::string& minPath,
               const std::string& solPath,
               const std::string& tileSetPath,
-              const std::pair<int32_t, int32_t>& downStairs,
-              const std::pair<int32_t, int32_t>& upStairs,
+              const Misc::Point& downStairs,
+              const Misc::Point& upStairs,
               std::map<int32_t, int32_t> doorMap,
               int32_t previous,
               int32_t next);
@@ -59,18 +59,18 @@ namespace Level
 
         void save(Serial::Saver& saver);
 
-        void activate(int32_t x, int32_t y);
+        void activate(const Misc::Point& point);
 
         int32_t minSize() const;
         const MinPillar minPillar(int32_t i) const;
 
-        MinPillar get(int32_t x, int32_t y) const;
+        MinPillar get(const Misc::Point& point) const;
 
         int32_t width() const;
         int32_t height() const;
 
-        const std::pair<int32_t, int32_t>& upStairsPos() const;
-        const std::pair<int32_t, int32_t>& downStairsPos() const;
+        const Misc::Point& upStairsPos() const;
+        const Misc::Point& downStairsPos() const;
 
         const std::string& getTileSetPath() const;
         const std::string& getMinPath() const;
@@ -94,8 +94,8 @@ namespace Level
 
         std::map<int32_t, int32_t> mDoorMap; ///< Map from closed door indices to open door indices + vice-versa
 
-        std::pair<int32_t, int32_t> mUpStairs;
-        std::pair<int32_t, int32_t> mDownStairs;
+        Misc::Point mUpStairs;
+        Misc::Point mDownStairs;
 
         static std::vector<int16_t> mEmpty;
         friend const MinPillar get(int32_t x, int32_t y, const Level& level);

@@ -79,7 +79,7 @@ namespace FAWorld
         void insertLevel(size_t level, GameLevel* gameLevel);
         void regenerateStoreItems();
 
-        Actor* getActorAt(size_t x, size_t y);
+        Actor* getActorAt(const Misc::Point& point);
 
         void update(bool noclip, const std::vector<PlayerInput>& inputs);
 

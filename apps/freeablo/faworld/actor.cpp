@@ -275,9 +275,9 @@ namespace FAWorld
         return true;
     }
 
-    void Actor::doMeleeHit(const std::pair<int32_t, int32_t>& tile)
+    void Actor::doMeleeHit(const Misc::Point& point)
     {
-        auto actor = getLevel()->getActorAt(tile.first, tile.second);
+        auto actor = getLevel()->getActorAt(point);
         if (!canIAttack(actor))
             return;
         doMeleeHit(actor);

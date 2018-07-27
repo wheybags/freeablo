@@ -1,7 +1,7 @@
-add_library(Cel 
-    cel/celfile.cpp cel/celfile.h  
+add_library(Cel
+    cel/celfile.cpp cel/celfile.h
     cel/celframe.h
-    cel/pal.cpp cel/pal.h  
+    cel/pal.cpp cel/pal.h
     cel/celdecoder.cpp cel/celdecoder.h)
 target_link_libraries(Cel FAIO)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
@@ -10,12 +10,12 @@ add_library(FAIO faio/faio.cpp faio/faio.h faio/fafileobject.h faio/fafileobject
 target_link_libraries(FAIO stormlib::stormlib ${HUNTER_BOOST_LIBS})
 set_target_properties(FAIO PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
-add_library(Levels 
-    level/dun.cpp  
+add_library(Levels
+    level/dun.cpp
     level/dun.h
-    level/min.cpp  
-    level/min.h  
-    level/tileset.cpp  
+    level/min.cpp
+    level/min.h
+    level/tileset.cpp
     level/tileset.h
     level/level.h
     level/level.cpp
@@ -26,25 +26,27 @@ add_library(Levels
 target_link_libraries(Levels FAIO DiabloExe Serial)
 set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
-add_library(Misc 
-    misc/stringops.h
-    misc/md5.h
-    misc/md5.cpp
-    misc/misc.h
-    misc/disablewarn.h
-    misc/enablewarn.h
-    misc/savePNG.h
-    misc/savePNG.cpp
-    misc/stdhashes.h
-    misc/maxcurrentitem.cpp
-    misc/maxcurrentitem.h
-    misc/assert.h
+add_library(Misc
     misc/array2d.h
+    misc/assert.h
     misc/direction.cpp
     misc/direction.h
+    misc/disablewarn.h
+    misc/enablewarn.h
     misc/enum_range.h
     misc/fixedpoint.cpp
     misc/fixedpoint.h
+    misc/maxcurrentitem.cpp
+    misc/maxcurrentitem.h
+    misc/md5.cpp
+    misc/md5.h
+    misc/misc.h
+    misc/point.cpp
+    misc/point.h
+    misc/savePNG.cpp
+    misc/savePNG.h
+    misc/stdhashes.h
+    misc/stringops.h
     misc/vec2fix.cpp
     misc/vec2fix.h
 )
@@ -60,8 +62,8 @@ target_link_libraries(Random Serial)
 set_target_properties(Random PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 
-set(RenderFiles 
-    render/render.h 
+set(RenderFiles
+    render/render.h
     render/levelobjects.h
     render/sdl2backend.cpp
     render/sdl_gl_funcs.h

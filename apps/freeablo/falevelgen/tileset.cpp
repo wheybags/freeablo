@@ -185,8 +185,8 @@ namespace FALevelGen
             return tile;
 
         int32_t max = 0;
-        for (int32_t i = 0; i < (int32_t)tileVec.size(); i++)
-            max += tileVec[i].second;
+        for (const auto& item : tileVec)
+            max += item.second;
 
         random = rng.randomInRange(0, max);
 

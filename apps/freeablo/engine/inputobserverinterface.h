@@ -1,10 +1,6 @@
-
 #pragma once
 
-namespace Misc
-{
-    struct Point;
-}
+#include <misc/point.h>
 
 namespace Input
 {

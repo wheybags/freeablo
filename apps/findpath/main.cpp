@@ -35,7 +35,7 @@ namespace FAWorld
 
         int32_t height() const { return MAP_SIZE; }
 
-        bool isPassable(int x, int y) const { return gameMap[y][x] == 0 ? true : false; }
+        bool isPassable(const Misc::Point& point) const { return gameMap[point.y][point.x] == 0; }
 
     private:
         int gameMap[MAP_SIZE][MAP_SIZE];
@@ -92,27 +92,26 @@ ostream& operator<<(ostream& os, std::pair<int32_t, int32_t>& location)
 
 void drawPath(::GameLevel::GameLevelImpl& graph,
               int field_width,
-              unordered_map<std::pair<int32_t, int32_t>, int>* distances = 0,
-              unordered_map<std::pair<int32_t, int32_t>, std::pair<int32_t, int32_t>>* point_to = 0,
-              vector<std::pair<int32_t, int32_t>>* path = 0)
+              unordered_map<Misc::Point, int>* distances = nullptr,
+              unordered_map<Misc::Point, Misc::Point>* point_to = nullptr,
+              vector<Misc::Point>* path = nullptr)
 {
     for (int y = 0; y != LevelImpl::MAP_SIZE; ++y)
     {
         for (int x = 0; x != LevelImpl::MAP_SIZE; ++x)
         {
-            std::pair<int32_t, int32_t> id;
-            id.first = x;
-            id.second = y;
+            Misc::Point id(x, y);
+
             cout << left << setw(field_width);
-            if (!graph.isPassable(x, y))
+            if (!graph.isPassable(id))
             {
                 cout << string(field_width, '#');
             }
-            else if (point_to != 0 && point_to->count(id))
+            else if (point_to && point_to->count(id))
             {
                 int x2, y2;
-                x2 = (*point_to)[id].first;
-                y2 = (*point_to)[id].second;
+                x2 = (*point_to)[id].x;
+                y2 = (*point_to)[id].y;
 
                 if (x2 == x + 1)
                 {
@@ -135,11 +134,11 @@ void drawPath(::GameLevel::GameLevelImpl& graph,
                     cout << "* ";
                 }
             }
-            else if (distances != 0 && distances->count(id))
+            else if (distances && distances->count(id))
             {
                 cout << (*distances)[id];
             }
-            else if (path != 0 && find(path->begin(), path->end(), id) != path->end())
+            else if (path && find(path->begin(), path->end(), id) != path->end())
             {
                 cout << '@';
             }
@@ -157,8 +156,8 @@ int main()
     using namespace FAWorld;
     FAWorld::LevelImpl* level = new LevelImpl();
 
-    std::pair<int32_t, int32_t> start, goal;
-    vector<std::pair<int32_t, int32_t>> path;
+    Misc::Point start, goal;
+    Misc::Points path;
 
     int caseId = 1;
     cout << "Select case ID [1-6]";
@@ -167,31 +166,31 @@ int main()
     switch (caseId)
     {
         case 1:
-            start = std::pair<int32_t, int32_t>(2, 4);
-            goal = std::pair<int32_t, int32_t>(18, 5);
+            start = Misc::Point(2, 4);
+            goal = Misc::Point(18, 5);
             break;
         case 2:
-            start = std::pair<int32_t, int32_t>(18, 5);
-            goal = std::pair<int32_t, int32_t>(2, 3);
+            start = Misc::Point(18, 5);
+            goal = Misc::Point(2, 3);
             break;
         case 3:
-            start = std::pair<int32_t, int32_t>(3, 10);
-            goal = std::pair<int32_t, int32_t>(18, 10);
+            start = Misc::Point(3, 10);
+            goal = Misc::Point(18, 10);
             break;
         case 4:
             // This case uses "findClosesPointToGoal"
-            start = std::pair<int32_t, int32_t>(3, 10);
-            goal = std::pair<int32_t, int32_t>(15, 10);
+            start = Misc::Point(3, 10);
+            goal = Misc::Point(15, 10);
             break;
         case 5:
             // This case uses "findClosesPointToGoal"
-            start = std::pair<int32_t, int32_t>(18, 7);
-            goal = std::pair<int32_t, int32_t>(10, 10);
+            start = Misc::Point(18, 7);
+            goal = Misc::Point(10, 10);
             break;
         default:
             // This case uses "findClosesPointToGoal"
-            start = std::pair<int32_t, int32_t>(18, 10);
-            goal = std::pair<int32_t, int32_t>(10, 10);
+            start = Misc::Point(18, 10);
+            goal = Misc::Point(10, 10);
             break;
     }
 
@@ -201,7 +200,7 @@ int main()
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
-    drawPath(*level, 2, 0, 0, &path);
+    drawPath(*level, 2, nullptr, nullptr, &path);
 
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     cout << "Duration: " << duration << " us" << endl;

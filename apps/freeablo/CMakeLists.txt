@@ -28,54 +28,54 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
 
     faworld/actor.cpp
     faworld/actor.h
+    faworld/actoranimationmanager.cpp
+    faworld/actoranimationmanager.h
+    faworld/actorstats.cpp
+    faworld/actorstats.h
     faworld/behaviour.cpp
     faworld/behaviour.h
     faworld/equiptarget.cpp
     faworld/equiptarget.h
-    faworld/hoverstate.cpp
-    faworld/hoverstate.h
-    faworld/player.h
-    faworld/player.cpp
-    faworld/playerfactory.h
-    faworld/playerfactory.cpp
-    faworld/position.h
-    faworld/position.cpp
-    faworld/world.cpp
-    faworld/world.h
-    faworld/inventory.h
-    faworld/inventory.cpp
-    faworld/item.h
-    faworld/item.cpp
-    faworld/itembonus.h
-    faworld/itembonus.cpp
-    faworld/itemfactory.h
-    faworld/itemfactory.cpp
-    faworld/itemenums.h
-    faworld/itemenums.cpp
-    faworld/itemmap.h
-    faworld/itemmap.cpp
-    faworld/actorstats.h
-    faworld/actorstats.cpp
-    faworld/gamelevel.cpp
-    faworld/gamelevel.h
-    faworld/findpath.h
-    faworld/findpath.cpp
     faworld/faction.cpp
     faworld/faction.h
+    faworld/findpath.cpp
+    faworld/findpath.h
+    faworld/gamelevel.cpp
+    faworld/gamelevel.h
+    faworld/hoverstate.cpp
+    faworld/hoverstate.h
+    faworld/inventory.cpp
+    faworld/inventory.h
+    faworld/item.cpp
+    faworld/item.h
+    faworld/itembonus.cpp
+    faworld/itembonus.h
+    faworld/itemenums.cpp
+    faworld/itemenums.h
+    faworld/itemfactory.cpp
+    faworld/itemfactory.h
+    faworld/itemmap.cpp
+    faworld/itemmap.h
     faworld/movementhandler.cpp
     faworld/movementhandler.h
-    faworld/actoranimationmanager.h
-    faworld/actoranimationmanager.cpp
+    faworld/player.cpp
+    faworld/player.h
     faworld/playerbehaviour.cpp
     faworld/playerbehaviour.h
+    faworld/playerfactory.cpp
+    faworld/playerfactory.h
+    faworld/playerinput.cpp
+    faworld/playerinput.h
     faworld/playerstats.cpp
     faworld/playerstats.h
+    faworld/position.cpp
+    faworld/position.h
+    faworld/storedata.cpp
+    faworld/storedata.h
     faworld/target.cpp
     faworld/target.h
-    faworld/playerinput.h
-    faworld/playerinput.cpp
-    faworld/storedata.h
-    faworld/storedata.cpp
+    faworld/world.cpp
+    faworld/world.h
 
     fagui/textcolor.h
     fagui/guimanager.h

@@ -38,9 +38,8 @@ namespace FAWorld
                             {
                                 auto targetPos = target->getPos().current();
                                 auto myPos = actor.getPos().current();
-                                ret = StateChange{
-                                    StateOperation::push,
-                                    new MeleeAttackState(Vec2Fix(targetPos.first - myPos.first, targetPos.second - myPos.second).getIsometricDirection())};
+                                ret = StateChange{StateOperation::push,
+                                                  new MeleeAttackState(Vec2Fix(targetPos.x - myPos.x, targetPos.y - myPos.y).getIsometricDirection())};
                             }
                         }
                     }
@@ -57,14 +56,14 @@ namespace FAWorld
                     Target::ItemTarget target = actor.mTarget.get<Target::ItemTarget>();
 
                     auto tile = target.item->getTile();
-                    if (actor.getPos().isNear({tile.x, tile.y}))
+                    if (actor.getPos().isNear(Position(tile.position)))
                     {
                         actor.pickupItem(target);
                         actor.mTarget.clear();
                     }
                     else
                     {
-                        actor.mMoveHandler.setDestination({tile.x, tile.y}, true);
+                        actor.mMoveHandler.setDestination(tile.position, true);
                     }
                 }
 

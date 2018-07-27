@@ -1038,7 +1038,7 @@ namespace Render
     // basic transform of isometric grid to normal, (0, 0) tile coordinate maps to (0, 0) pixel coordinates
     // since eventually we're gonna shift coordinates to viewport center, it's better to keep transform itself
     // as simple as possible
-    static Misc::Point tileTopPoint(const Tile& tile) { return {(tileWidth / 2) * (tile.x - tile.y), (tile.y + tile.x) * (tileHeight / 2)}; }
+    static Misc::Point tileTopPoint(const Tile& tile) { return {(tileWidth / 2) * (tile.pos.x - tile.pos.y), (tile.pos.y + tile.pos.x) * (tileHeight / 2)}; }
 
     // this function simply does the reverse of the above function, could be found by solving linear equation system
     // it obviously uses the fact that ttileWidth = tileHeight * 2
@@ -1099,8 +1099,8 @@ namespace Render
             while (point.x < WIDTH + tileWidth / 2)
             {
                 point.x += tileWidth;
-                ++tile.x;
-                --tile.y;
+                ++tile.pos.x;
+                --tile.pos.y;
                 processTile(tile, point);
             }
         };
@@ -1108,11 +1108,11 @@ namespace Render
         // then from top left to top-bottom
         while (startingPoint.y < HEIGHT + staticObjectHeight - tileHeight)
         {
-            ++startingTile.y;
+            ++startingTile.pos.y;
             startingPoint.x -= tileWidth / 2;
             startingPoint.y += tileHeight / 2;
             processLine();
-            ++startingTile.x;
+            ++startingTile.pos.x;
             startingPoint.x += tileWidth / 2;
             startingPoint.y += tileHeight / 2;
             processLine();
@@ -1134,7 +1134,7 @@ namespace Render
         auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
         SpriteGroup* minBottoms = cache->get(minBottomsHandle);
         auto isInvalidTile = [&](const Tile& tile) {
-            return tile.x < 0 || tile.y < 0 || tile.x >= static_cast<int32_t>(level.width()) || tile.y >= static_cast<int32_t>(level.height());
+            return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
         };
 
         // drawing on the ground objects
@@ -1145,7 +1145,7 @@ namespace Render
                 return drawAtTile((*minBottoms)[0], topLeft, tileWidth, staticObjectHeight);
             }
 
-            size_t index = level.get(tile.x, tile.y).index();
+            size_t index = level.get(tile.pos).index();
             if (index < minBottoms->size())
                 drawAtTile((*minBottoms)[index], topLeft, tileWidth, staticObjectHeight); // all static objects have the same sprite size
         });
@@ -1158,11 +1158,11 @@ namespace Render
             if (isInvalidTile(tile))
                 return;
 
-            size_t index = level.get(tile.x, tile.y).index();
+            size_t index = level.get(tile.pos).index();
             if (index < minTops->size())
                 drawAtTile((*minTops)[index], topLeft, tileWidth, staticObjectHeight);
 
-            auto& itemsForTile = items.get(tile.x, tile.y);
+            auto& itemsForTile = items.get(tile.pos.x, tile.pos.y);
             for (auto& item : itemsForTile)
             {
                 int32_t w, h;
@@ -1171,7 +1171,7 @@ namespace Render
                 drawAtTile(sprite, topLeft, w, h, item.hoverColor);
             }
 
-            auto& objsForTile = objs.get(tile.x, tile.y);
+            auto& objsForTile = objs.get(tile.pos.x, tile.pos.y);
             for (auto& obj : objsForTile)
             {
                 if (obj.valid)

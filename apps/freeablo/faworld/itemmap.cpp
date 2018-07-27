@@ -10,13 +10,9 @@
 
 namespace FAWorld
 {
-    Tile::Tile(FASaveGame::GameLoader& loader) : x(loader.load<int32_t>()), y(loader.load<int32_t>()) {}
+    Tile::Tile(FASaveGame::GameLoader& loader) : position(loader) {}
 
-    void Tile::save(FASaveGame::GameSaver& saver) const
-    {
-        saver.save(x);
-        saver.save(y);
-    }
+    void Tile::save(FASaveGame::GameSaver& saver) const { position.save(saver); }
 
     PlacedItemData::PlacedItemData(std::unique_ptr<Item> itemArg, const Tile& tile)
         : mItem(std::move(itemArg)), mAnimation(new FARender::AnimationPlayer()), mTile(tile)
@@ -72,7 +68,7 @@ namespace FAWorld
 
     bool ItemMap::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile)
     {
-        if (!mLevel->isPassableFor(tile.x, tile.y, &actor))
+        if (!mLevel->isPassableFor(tile.position, &actor))
             return false;
 
         auto it = mItems.find(tile);
@@ -86,7 +82,19 @@ namespace FAWorld
 
     PlacedItemData* ItemMap::getItemAt(const Tile& tile)
     {
-        auto it = mItems.find({tile.x, tile.y});
+        auto it = mItems.find(tile);
+        if (it == mItems.end())
+            return nullptr;
+
+        if (!it->second.onGround())
+            return nullptr;
+
+        return &it->second;
+    }
+
+    PlacedItemData* ItemMap::getItemAt(const Misc::Point& pos)
+    {
+        auto it = mItems.find(Tile(pos));
         if (it == mItems.end())
             return nullptr;
 
@@ -98,7 +106,7 @@ namespace FAWorld
 
     std::unique_ptr<Item> ItemMap::takeItemAt(const Tile& tile)
     {
-        auto it = mItems.find({tile.x, tile.y});
+        auto it = mItems.find(tile);
         if (it == mItems.end())
             return nullptr;
 

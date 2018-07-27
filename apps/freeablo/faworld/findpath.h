@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <algorithm>
@@ -6,6 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <misc/point.h>
 #include <queue>
 #include <set>
 #include <stdio.h>
@@ -18,6 +18,6 @@
 namespace FAWorld
 {
     class GameLevelImpl;
-    std::vector<std::pair<int32_t, int32_t>>
-    pathFind(GameLevelImpl* level, std::pair<int32_t, int32_t> start, std::pair<int32_t, int32_t>& goal, bool& bArrivable, bool findAdjacent);
+
+    Misc::Points pathFind(GameLevelImpl* level, const Misc::Point& start, Misc::Point& goal, bool& bArrivable, bool findAdjacent);
 }
