@@ -52,11 +52,10 @@ struct FindPathPatternsTest : ::testing::TestWithParam<FindPathPatternsParams>
 
 TEST_P(FindPathPatternsTest, sample)
 {
-    auto goal = GetParam().goal;
     FAWorld::LevelImplStub level(GetParam().map);
 
     bool isReachable = false;
-    auto points = FAWorld::pathFind(&level, GetParam().start, goal, isReachable, false);
+    auto points = FAWorld::pathFind(&level, GetParam().start, GetParam().goal, isReachable, false);
 
     if (!isReachable || points != GetParam().expected)
     {
@@ -66,7 +65,6 @@ TEST_P(FindPathPatternsTest, sample)
 
     ASSERT_TRUE(isReachable);
     ASSERT_EQ(points, GetParam().expected);
-    ASSERT_EQ(goal, GetParam().expected.back());
 }
 
 INSTANTIATE_TEST_CASE_P(

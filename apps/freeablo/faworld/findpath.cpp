@@ -1,6 +1,10 @@
 #include "findpath.h"
+
 #include "gamelevel.h"
+
 #include <misc/stdhashes.h>
+
+#include <queue>
 
 namespace FAWorld
 {
@@ -163,14 +167,15 @@ namespace FAWorld
         return result;
     }
 
-    Misc::Points pathFind(GameLevelImpl* level, const Misc::Point& start, Misc::Point& goal, bool& bArrivable, bool findAdjacent)
+    Misc::Points pathFind(GameLevelImpl* level, const Misc::Point& start, const Misc::Point& goal, bool& bArrivable, bool findAdjacent)
     {
+        auto adjustedGoal = goal;
         std::unordered_map<Misc::Point, Misc::Point> cameFrom;
 
-        bArrivable = AStarSearch(level, start, goal, cameFrom, findAdjacent);
+        bArrivable = AStarSearch(level, start, adjustedGoal, cameFrom, findAdjacent);
         if (!bArrivable)
             return {};
 
-        return reconstructPath(start, goal, cameFrom);
+        return reconstructPath(start, adjustedGoal, cameFrom);
     }
 }
