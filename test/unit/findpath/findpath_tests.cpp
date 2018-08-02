@@ -60,7 +60,7 @@ TEST_P(FindPathPatternsTest, sample)
     if (!isReachable || points != GetParam().expected)
     {
         std::cout << GetParam().description << std::endl;
-        test_utils::drawPath(level, GetParam().start, &points, &GetParam().expected);
+        test_utils::drawPath(level, GetParam().start, points, GetParam().expected);
     }
 
     ASSERT_TRUE(isReachable);

@@ -4,8 +4,5 @@
 
 namespace test_utils
 {
-    void drawPath(FAWorld::GameLevel::GameLevelImpl& graph,
-                  const Misc::Point& start,
-                  const Misc::Points* actualPath = nullptr,
-                  const Misc::Points* expectedPath = nullptr);
+    void drawPath(FAWorld::GameLevel::GameLevelImpl& graph, const Misc::Point& start, const Misc::Points& actualPath, const Misc::Points& expectedPath);
 }
