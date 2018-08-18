@@ -4,11 +4,22 @@
 
 #include <misc/stdhashes.h>
 
+#include <cmath>
 #include <queue>
+
+namespace
+{
+    double distanceCost(const Misc::Point& a, const Misc::Point& b)
+    {
+        static const double diagonal_distance = sqrt(2.);
+
+        return (a.x != b.x && a.y != b.y) ? diagonal_distance : 1.;
+    }
+}
 
 namespace FAWorld
 {
-    template <typename T, typename Number = size_t> struct PriorityQueue
+    template <typename T, typename Number = double> struct PriorityQueue
     {
         typedef std::pair<Number, T> PQElement;
         std::priority_queue<PQElement, std::vector<PQElement>, std::greater<PQElement>> elements;
@@ -32,7 +43,7 @@ namespace FAWorld
         return 0 <= x && x < (int)level->width() && 0 <= y && y < (int)level->height();
     }
 
-    Misc::Points neighbors(GameLevelImpl* level, Misc::Point location)
+    Misc::Points neighbors(GameLevelImpl* level, const Misc::Point& location)
     {
         int x = location.x;
         int y = location.y;
@@ -53,14 +64,6 @@ namespace FAWorld
         return result;
     }
 
-    int heuristic(Misc::Point a, Misc::Point b)
-    {
-        int dx = abs(b.x - a.x);
-        int dy = abs(b.y - a.y);
-
-        return dx + dy;
-    }
-
     template <typename T> class Array2D
     {
     public:
@@ -68,7 +71,7 @@ namespace FAWorld
 
         Array2D(int32_t width, int32_t height, T defaultVal) : mData(width * height, defaultVal), mWidth(width), mHeight(height) {}
 
-        T& get(int32_t x, int32_t y) { return mData.at(x + y * mHeight); }
+        T& get(int32_t x, int32_t y) { return mData.at(x + y * mWidth); }
 
         int32_t width() { return mWidth; }
 
@@ -87,7 +90,7 @@ namespace FAWorld
         frontier.put(start, 0);
         came_from[start] = start;
 
-        Array2D<int32_t> costSoFar(level->width(), level->height(), -1);
+        Array2D<double> costSoFar(level->width(), level->height(), -1);
         costSoFar.get(start.x, start.y) = 0;
 
         int32_t iterations = 0;
@@ -108,17 +111,14 @@ namespace FAWorld
                 }
             }
 
-            Misc::Points neighborsContainer = neighbors(level, current);
-            for (auto it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
+            for (const auto& next : neighbors(level, current))
             {
-                int32_t new_cost = costSoFar.get(current.x, current.y) + 1; // graph.cost(current, next);
-                Misc::Point next = *it;
+                double new_cost = costSoFar.get(current.x, current.y) + distanceCost(current, next);
 
                 if (costSoFar.get(next.x, next.y) == -1 || new_cost < costSoFar.get(next.x, next.y))
                 {
                     costSoFar.get(next.x, next.y) = new_cost;
-                    int32_t priority = new_cost + heuristic(next, goal);
-                    frontier.put(next, priority);
+                    frontier.put(next, new_cost);
                     came_from[next] = current;
                 }
             }
@@ -140,31 +140,6 @@ namespace FAWorld
         }
         std::reverse(path.begin(), path.end());
         return path;
-    }
-
-    Misc::Point findClosesPointToGoal(GameLevelImpl* level, Misc::Point start, Misc::Point goal, std::unordered_map<Misc::Point, Misc::Point>& cameFrom)
-    {
-        // int dx = abs(goal.first - start.first);
-        // int dy = abs(goal.second - start.second);
-        UNUSED_PARAM(start);
-        int minDistance = level->width() * level->width() + level->height() * level->height();
-
-        Misc::Point result(-1, -1);
-
-        for (auto it = cameFrom.begin(); it != cameFrom.end(); it++)
-        {
-            int tmpX = abs(it->first.x - goal.x);
-            int tmpY = abs(it->first.y - goal.y);
-
-            int distance = tmpX * tmpX + tmpY * tmpY;
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                result = it->first;
-            }
-        }
-
-        return result;
     }
 
     Misc::Points pathFind(GameLevelImpl* level, const Misc::Point& start, const Misc::Point& goal, bool& bArrivable, bool findAdjacent)

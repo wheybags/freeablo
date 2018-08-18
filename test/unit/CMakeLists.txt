@@ -12,6 +12,7 @@ set(SOURCES
     findpath/drawpath.h
     findpath/findpath_tests.cpp
     findpath/levelimplstub.h
+    findpath/neighbors_tests.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
