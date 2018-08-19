@@ -42,9 +42,9 @@ namespace FAGui
                                   mMenuHandler.setActiveScreen<SelectHeroMenuScreen>();
                                   return ActionResult::stopDrawing;
                               }});
-        mMenuItems.push_back({drawItem("Multi Player", {65, 235, 510, 42}), [this]() { return ActionResult::continueDrawing; }});
-        mMenuItems.push_back({drawItem("Replay Intro", {65, 277, 510, 42}), [this]() { return ActionResult::continueDrawing; }});
-        mMenuItems.push_back({drawItem("Show Credits", {65, 320, 510, 42}), [this]() { return ActionResult::continueDrawing; }});
+        mMenuItems.push_back({drawItem("Multi Player", {65, 235, 510, 42}), []() { return ActionResult::continueDrawing; }});
+        mMenuItems.push_back({drawItem("Replay Intro", {65, 277, 510, 42}), []() { return ActionResult::continueDrawing; }});
+        mMenuItems.push_back({drawItem("Show Credits", {65, 320, 510, 42}), []() { return ActionResult::continueDrawing; }});
         mRejectAction = [this]() {
             mMenuHandler.engine().stop();
             return ActionResult::stopDrawing;

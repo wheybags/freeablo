@@ -64,7 +64,7 @@ namespace FAWorld
 
         Array2D(int32_t width, int32_t height, T defaultVal) : mData(width * height, defaultVal), mWidth(width), mHeight(height) {}
 
-        T& get(int32_t x, int32_t y) { return mData.at(x + y * mHeight); }
+        T& get(int32_t x, int32_t y) { return mData.at(x + y * mWidth); }
 
         int32_t width() { return mWidth; }
 
