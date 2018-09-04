@@ -129,6 +129,9 @@ namespace FAWorld
                     mCurrentPath = pathFind(mLevel, mCurrentPos.current(), mDestination, _, mAdjacent);
                     mCurrentPathIndex = 0;
 
+                    if (!mCurrentPath.empty())
+                        mDestination = mCurrentPath.back();
+
                     update(actorId);
                     return;
                 }
