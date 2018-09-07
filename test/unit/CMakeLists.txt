@@ -5,8 +5,6 @@ find_package(GTest CONFIG REQUIRED)
 
 set(SOURCES
     main.cpp
-    silentprinter.cpp
-    silentprinter.h
 
     findpath/drawpath.cpp
     findpath/drawpath.h

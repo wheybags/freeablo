@@ -9,17 +9,12 @@
 
 namespace
 {
-    double distanceCost(const Misc::Point& a, const Misc::Point& b)
-    {
-        static const double diagonal_distance = sqrt(2.);
-
-        return (a.x != b.x && a.y != b.y) ? diagonal_distance : 1.;
-    }
+    int32_t distanceCost(const Misc::Point& a, const Misc::Point& b) { return (a.x != b.x && a.y != b.y) ? 14 /* diagonal */ : 10 /* straight */; }
 }
 
 namespace FAWorld
 {
-    template <typename T, typename Number = double> struct PriorityQueue
+    template <typename T, typename Number = size_t> struct PriorityQueue
     {
         typedef std::pair<Number, T> PQElement;
         std::priority_queue<PQElement, std::vector<PQElement>, std::greater<PQElement>> elements;
@@ -90,7 +85,7 @@ namespace FAWorld
         frontier.put(start, 0);
         came_from[start] = start;
 
-        Array2D<double> costSoFar(level->width(), level->height(), -1);
+        Array2D<int32_t> costSoFar(level->width(), level->height(), -1);
         costSoFar.get(start.x, start.y) = 0;
 
         int32_t iterations = 0;
@@ -113,7 +108,7 @@ namespace FAWorld
 
             for (const auto& next : neighbors(level, current))
             {
-                double new_cost = costSoFar.get(current.x, current.y) + distanceCost(current, next);
+                auto new_cost = costSoFar.get(current.x, current.y) + distanceCost(current, next);
 
                 if (costSoFar.get(next.x, next.y) == -1 || new_cost < costSoFar.get(next.x, next.y))
                 {
