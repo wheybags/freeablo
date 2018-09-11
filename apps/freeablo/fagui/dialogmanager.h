@@ -1,15 +1,13 @@
-
 #pragma once
-
 #include <array>
 #include <functional>
 #include <string>
 #include <vector>
-
 #include "../engine/inputobserverinterface.h"
 #include "../farender/spritecache.h"
 #include "textcolor.h"
 #include <boost/optional.hpp>
+#include <memory>
 
 namespace FAWorld
 {
@@ -22,6 +20,7 @@ namespace FAWorld
 namespace FAGui
 {
     class GuiManager;
+    class CharacterDialoguePopup;
 
     class DialogLineData
     {
@@ -100,12 +99,18 @@ namespace FAGui
         bool mScrollBarShown = false;
     };
 
+
+
     class DialogManager
     {
     public:
         explicit DialogManager(GuiManager& gui_manager, FAWorld::World& world);
+        ~DialogManager();
+
         void talk(const FAWorld::Actor* npc);
         void fillMessageDialog(std::vector<DialogLineData> header, const char* text);
+
+        void update(struct nk_context* ctx);
 
     private:
         template <typename FilterType> void sellDialog(FilterType filter);
@@ -123,8 +128,10 @@ namespace FAGui
 
         void confirmDialog(std::vector<DialogLineData> header, const FAWorld::Item& item, int price, const char* question, std::function<void()> successAction);
 
-    private:
+    public:
         GuiManager& mGuiManager;
+//    private:
         FAWorld::World& mWorld;
+        std::vector<std::unique_ptr<CharacterDialoguePopup>> mDialogStack;
     };
 }

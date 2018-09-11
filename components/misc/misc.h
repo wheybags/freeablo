@@ -8,6 +8,12 @@
 
 namespace Misc
 {
+    template <typename T>
+    T clamp(T value, T min, T max)
+    {
+        return value < min ? min : (value > max ? max : value);
+    }
+
     namespace detail
     {
         template <typename RetType, typename... Args> class overload_class;
@@ -80,6 +86,7 @@ namespace Misc
     {
     public:
         ScopedSetter(T& toSet, T val) : mOriginal(toSet), mToSet(toSet) { mToSet = val; }
+        ScopedSetter(T& toSet) : mOriginal(toSet), mToSet(toSet) {}
 
         ~ScopedSetter() { mToSet = mOriginal; }
 

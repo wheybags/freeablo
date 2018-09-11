@@ -123,7 +123,7 @@ namespace FAWorld
             }
             case PlayerInput::Type::BuyItem:
             {
-                auto items = mPlayer->getWorld()->getStoreData().griswoldBasicItems;
+                auto& items = mPlayer->getWorld()->getStoreData().griswoldBasicItems;
                 auto item = std::find_if(items.begin(), items.end(), [&](StoreItem& item) { return item.storeId == input.mData.dataBuyItem.itemId; });
 
                 if (item == items.end())

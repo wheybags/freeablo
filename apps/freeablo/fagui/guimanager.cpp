@@ -34,6 +34,10 @@ static nk_style_button dummyStyle = []() {
     return buttonStyle;
 }();
 
+
+extern struct nk_image tmp;
+
+
 namespace FAGui
 {
     PanelPlacement panelPlacementByType(PanelType type)
@@ -128,17 +132,6 @@ namespace FAGui
         nk_style_pop_style_item(ctx);
     }
 
-    namespace
-    {
-        struct applyEffect
-        {
-            applyEffect(nk_context* ctx, EffectType type) : mCtx(ctx) { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(type))); }
-            ~applyEffect() { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(EffectType::none))); }
-
-            nk_context* mCtx;
-        };
-    }
-
     void GuiManager::dialog(nk_context* ctx)
     {
         // This part is needed because dialog is triggered by mouse click
@@ -182,7 +175,7 @@ namespace FAGui
                 nk_layout_space_push(ctx, cbRect);
                 auto blackTex = renderer->loadImage("resources/black.png");
                 {
-                    applyEffect effect(ctx, EffectType::checkerboarded);
+                    ScopedApplyEffect effect(ctx, EffectType::checkerboarded);
                     nk_image(ctx, nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect));
                 }
 
@@ -315,10 +308,11 @@ namespace FAGui
             anim->update();
     }
 
-    template <typename Function> void GuiManager::drawPanel(nk_context* ctx, PanelType panelType, Function op)
+    void GuiManager::drawPanel(nk_context* ctx, PanelType panelType, std::function<void(void)> op)
     {
-        auto placement = panelPlacementByType(panelType);
-        bool shown = *panel(placement) == panelType;
+        PanelPlacement placement = panelPlacementByType(panelType);
+        bool shown = *getPanelAtLocation(placement) == panelType;
+
         nk_window_show(ctx, panelName(panelType), shown ? NK_SHOWN : NK_HIDDEN);
         if (!shown)
             return;
@@ -422,7 +416,7 @@ namespace FAGui
         effectType = checkerboarded ? EffectType::checkerboarded : effectType;
         if (isHighlighted)
             mHoveredInventoryItemText = item.getFullDescription();
-        applyEffect effect(ctx, effectType);
+        ScopedApplyEffect effect(ctx, effectType);
         nk_image(ctx, img);
         if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
             triggerItem(target);
@@ -789,8 +783,25 @@ namespace FAGui
         }
     }
 
+
     void GuiManager::update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus)
     {
+//        FARender::Renderer* renderer = FARender::Renderer::get();
+
+//        auto sliderImg = renderer->loadImage("data/textslid.cel");
+//        tmp = sliderImg->getNkImage();
+//        ctx->style.scrollv.normal = nk_style_item_image(tmp);
+
+//        if (nk_begin(ctx, "title", nk_rect(50, 50, 100, 100), 0))
+//        {
+//            nk_layout_row_dynamic(ctx, 100, 1);
+//            nk_image(ctx, tmp);
+//        }
+
+//        nk_end(ctx);
+
+        nk_style_push_font(ctx, FARender::Renderer::get()->smallFont());
+
         // HACK FUCKING HACK
         FAWorld::World* world = Engine::EngineMain::get()->mWorld.get();
         mPlayer = world == nullptr ? nullptr : world->getCurrentPlayer();
@@ -820,7 +831,9 @@ namespace FAGui
             questsPanel(ctx);
             characterPanel(ctx);
             bottomMenu(ctx, hoverStatus);
-            dialog(ctx);
+
+            mDialogManager.update(ctx);
+//            dialog(ctx);
         }
         else
         {
@@ -831,9 +844,11 @@ namespace FAGui
             Engine::EngineMain::get()->getLocalInputHandler()->blockInput();
         else
             Engine::EngineMain::get()->getLocalInputHandler()->unblockInput();
+
+        nk_style_pop_font(ctx);
     }
 
-    PanelType* GuiManager::panel(PanelPlacement placement)
+    PanelType* GuiManager::getPanelAtLocation(PanelPlacement placement)
     {
         switch (placement)
         {
@@ -847,7 +862,7 @@ namespace FAGui
         return nullptr;
     }
 
-    const PanelType* GuiManager::panel(PanelPlacement placement) const { return const_cast<self*>(this)->panel(placement); }
+    const PanelType* GuiManager::getPanelAtLocation(PanelPlacement placement) const { return const_cast<self*>(this)->getPanelAtLocation(placement); }
 
     void GuiManager::notify(Engine::KeyboardInputAction action)
     {
@@ -929,7 +944,7 @@ namespace FAGui
 
     bool GuiManager::isLastWidgetHovered(nk_context* ctx) const { return nk_inactive_widget_is_hovered(ctx) && !mEngine.isPaused(); }
 
-    bool GuiManager::isInventoryShown() const { return *panel(panelPlacementByType(PanelType::inventory)) == PanelType::inventory; }
+    bool GuiManager::isInventoryShown() const { return *getPanelAtLocation(panelPlacementByType(PanelType::inventory)) == PanelType::inventory; }
 
     void GuiManager::popDialogData() { mDialogs.pop_back(); }
 
@@ -957,7 +972,7 @@ namespace FAGui
 
     void GuiManager::togglePanel(PanelType type)
     {
-        auto& curPanel = *panel(panelPlacementByType(type));
+        auto& curPanel = *getPanelAtLocation(panelPlacementByType(type));
         if (curPanel == type)
             curPanel = PanelType::none;
         else

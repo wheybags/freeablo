@@ -14,7 +14,10 @@ namespace FARender
     struct nk_image FASpriteGroup::getNkImage(int32_t frame)
     {
         release_assert(frame >= 0 && frame < (int32_t)frameHandles.size());
-        auto ret = nk_image_handle(nk_handle_ptr(&frameHandles[frame]));
+        auto ret = nk_subimage_handle(nk_handle_ptr(&frameHandles[frame]),
+                                      this->getWidth(frame),
+                                      this->getHeight(frame),
+                                      nk_rect(0, 0, this->getWidth(frame), this->getHeight(frame)));
         return ret;
     }
 

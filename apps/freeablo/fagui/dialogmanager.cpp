@@ -8,6 +8,9 @@
 #include "guimanager.h"
 #include <misc/assert.h>
 #include <utility>
+#include "nkhelpers.h"
+#include "mouseandclickmenu.h"
+#include "characterdialoguepopup.h"
 
 namespace FAGui
 {
@@ -183,6 +186,8 @@ namespace FAGui
     void DialogData::clearLines() { mLines.clear(); }
 
     DialogManager::DialogManager(GuiManager& gui_manager, FAWorld::World& world) : mGuiManager(gui_manager), mWorld(world) {}
+
+    DialogManager::~DialogManager() = default;
 
     void DialogManager::talkOgden(const FAWorld::Actor* npc)
     {
@@ -393,89 +398,145 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(d));
     }
 
-    // While there are some similiraties between buying and selling I do not consider them to be that similar to implement
-    // using single function. Identification dialog could probably be implemented like a sell dialog though.
-    void DialogManager::buyDialog(const FAWorld::Actor* shopkeeper, std::vector<FAWorld::StoreItem>& items)
+//    static bool griswoldSellFilter(const FAWorld::Item& item)
+//    {
+//        // TODO: add check for quest items
+//        return item.getType() != FAWorld::ItemType::misc && item.getType() != FAWorld::ItemType::gold && item.getType() != FAWorld::ItemType::staff;
+//    }
+
+    class MessagePopup : public CharacterDialoguePopup
     {
-        // TODO: this function is a mess, but ot sort of works right now, I'm planning on redoing dialog "soon", so it will do for now.
-        // Also note that after buying an item it will continue to show up as for sale after until you exit and re-enter dialog, is not fixed for the same
-        // reason as above.
+    public:
+        MessagePopup(GuiManager& guiManager, const std::string& message)
+            : CharacterDialoguePopup(guiManager, false)
+            , mMessage(message)
+        {}
+    protected:
 
-        DialogData d;
-        d.widen();
-        int32_t cnt = 0;
-
-        d.shopData.items = &items;
-        d.shopData.shopkeeper = shopkeeper;
-
-        d.header(
-            {(boost::format("%2%           Your gold : %1%") % mWorld.getCurrentPlayer()->mInventory.getTotalGold() % "I have these items for sale :").str()});
-
-        for (auto it = items.begin(); it != items.end(); ++it)
+        virtual DialogData getDialogData() override
         {
-            auto& item = *it;
-            auto price = item.item.getPrice();
-            auto header = d.getHeader();
-            d.textLines(item.item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
-                .setAction([it, price]() {
-                    auto& self = Engine::EngineMain::get()->mGuiManager->mDialogManager;
+            DialogData retval;
+            retval.introduction = {this->mMessage};
+            retval.addMenuOption({"OK"}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
-                    //                if (inventory.getTotalGold() < price)
-                    //                    return fillMessageDialog(header, "You do not have enough gold");
-
-                    //                if (!inventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(it->item))
-                    //                    return fillMessageDialog(header, "You do not have enough room in inventory");
-
-                    auto& data = Engine::EngineMain::get()->mGuiManager->mDialogs[Engine::EngineMain::get()->mGuiManager->mDialogs.size() - 1];
-
-                    data.shopData.itemId = it->storeId;
-
-                    auto header = data.getHeader();
-
-                    self.confirmDialog(header, it->item, price, "Are you sure you want to buy this item?", []() {
-                        //                        inventory.takeOutGold(price);
-                        //                        inventory.autoPlaceItem(it->item);
-                        //                        items.erase(it);
-
-                        auto& shopData = Engine::EngineMain::get()->mGuiManager->mDialogs[Engine::EngineMain::get()->mGuiManager->mDialogs.size() - 1].shopData;
-
-                        auto input = FAWorld::PlayerInput::BuyItemData{shopData.itemId, shopData.shopkeeper->getId()};
-                        Engine::EngineMain::get()->getLocalInputHandler()->addInput(
-                            FAWorld::PlayerInput(input, Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getId()));
-                        auto recreate = [=] { Engine::EngineMain::get()->mGuiManager->mDialogManager.buyDialog(shopData.shopkeeper, *shopData.items); };
-                        Engine::EngineMain::get()->mGuiManager->popDialogData();
-                        recreate();
-                    });
-                })
-                .setNumber(price);
-            ++cnt;
+            return retval;
         }
-        d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); }).setForceSelected(items.empty());
-        d.showScrollBar();
-        mGuiManager.pushDialogData(std::move(d));
-    }
 
-    static bool griswoldSellFilter(const FAWorld::Item& item)
+        std::string mMessage;
+    };
+
+    class ShopDialog : public CharacterDialoguePopup
     {
-        // TODO: add check for quest items
-        return item.getType() != FAWorld::ItemType::misc && item.getType() != FAWorld::ItemType::gold && item.getType() != FAWorld::ItemType::staff;
-    }
+    public:
+        ShopDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::vector<FAWorld::StoreItem>& items)
+            : CharacterDialoguePopup(guiManager, true)
+            , mItems(items)
+            , mShopkeeper(shopkeeper)
+        {}
+
+    protected:
+        virtual DialogData getDialogData() override
+        {
+            DialogData retval;
+
+            auto& inventory = mGuiManager.mPlayer->mInventory;
+            retval.introduction = {(boost::format("%2%           Your gold : %1%") %
+                                   inventory.getTotalGold() % "I have these items for sale :").str()};
+
+
+            for (size_t i = 0; i < mItems.size(); i++)
+            {
+                FAWorld::StoreItem& item = mItems[i];
+                retval.addMenuOption(item.item.descriptionForMerchants(), [this, i]()
+                {
+                    this->buyItem(i);
+                    return CharacterDialoguePopup::UpdateResult::DoNothing;
+                });
+            }
+
+            retval.addMenuOption({"Quit"}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+
+            return retval;
+        }
+
+        void buyItem(size_t index)
+        {
+            FAWorld::StoreItem& item = mItems[index];
+
+            auto& inventory = mGuiManager.mPlayer->mInventory;
+            if (inventory.getTotalGold() < item.item.getPrice())
+            {
+                this->mGuiManager.mDialogManager.mDialogStack.emplace_back(new MessagePopup(this->mGuiManager, "You do not have enough gold"));
+                return;
+            }
+
+            if (!inventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(item.item))
+            {
+                this->mGuiManager.mDialogManager.mDialogStack.emplace_back(new MessagePopup(this->mGuiManager, "You do not have enough room in inventory"));
+                return;
+            }
+
+            // send the buy action to the input handler
+            auto input = FAWorld::PlayerInput::BuyItemData{item.storeId, mShopkeeper.getId()};
+            Engine::EngineMain::get()->getLocalInputHandler()->addInput(
+                FAWorld::PlayerInput(input, Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getId()));
+        }
+
+        std::vector<FAWorld::StoreItem>& mItems;
+        const FAWorld::Actor& mShopkeeper;
+    };
+
+
+    class GriswoldDialog : public CharacterDialoguePopup
+    {
+    public:
+        GriswoldDialog(GuiManager& guiManager, const FAWorld::Actor* actor)
+            : CharacterDialoguePopup(guiManager, false)
+            , mActor(actor)
+        {}
+
+    protected:
+        virtual DialogData getDialogData() override
+        {
+            DialogData retval;
+            auto& td = mActor->getTalkData();
+
+            retval.introduction = {td.at("introductionHeader1"), td.at("introductionHeader2")};
+
+            retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({td.at("buyBasic")}, [this]() { this->openShop(); return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({td.at("buyPremium")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({td.at("sell")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({td.at("repair")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+
+            return retval;
+        }
+
+        void openShop()
+        {
+            auto dialog = new ShopDialog(mGuiManager, *mActor, mGuiManager.mDialogManager.mWorld.getStoreData().griswoldBasicItems);
+            mGuiManager.mDialogManager.mDialogStack.emplace_back(dialog);
+        }
+
+        const FAWorld::Actor* mActor = nullptr;
+    };
 
     void DialogManager::talkGriswold(const FAWorld::Actor* npc)
     {
-        DialogData d;
-        auto& td = npc->getTalkData();
-        d.header({td.at("introductionHeader1"), td.at("introductionHeader2")});
-        d.textLines({td.at("introduction")}, TextColor::golden);
-        d.skip_line();
-        d.textLines({td.at("talk")}, TextColor::blue).setAction([]() {});
-        d.textLines({td.at("buyBasic")}).setAction([&]() { buyDialog(npc, mWorld.getStoreData().griswoldBasicItems); });
-        d.textLines({td.at("buyPremium")}).setAction([]() {});
-        d.textLines({td.at("sell")}).setAction([&] { sellDialog(griswoldSellFilter); });
-        d.textLines({td.at("repair")}).setAction([]() {});
-        d.textLines({td.at("quit")}).setAction([&]() { quitDialog(); });
-        mGuiManager.pushDialogData(std::move(d));
+        auto dialog = new GriswoldDialog(mGuiManager, npc);
+        mDialogStack.emplace_back(dialog);
     }
 
     void DialogManager::quitDialog() const { mGuiManager.popDialogData(); }
+
+    void DialogManager::update(struct nk_context* ctx)
+    {
+        if (!mDialogStack.empty())
+        {
+            CharacterDialoguePopup::UpdateResult result = mDialogStack[mDialogStack.size()-1]->update(ctx);
+            if (result == CharacterDialoguePopup::UpdateResult::PopDialog)
+                mDialogStack.pop_back();
+        }
+    }
 }
