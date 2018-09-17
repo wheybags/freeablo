@@ -9,7 +9,10 @@
 
 namespace
 {
-    int32_t distanceCost(const Misc::Point& a, const Misc::Point& b) { return (a.x != b.x && a.y != b.y) ? 14 /* diagonal */ : 10 /* straight */; }
+    const int STRAIGHT_WEIGHT = 10;
+    const int DIAGONAL_WEIGHT = 14;
+
+    int distanceCost(const Misc::Point& a, const Misc::Point& b) { return (a.x != b.x && a.y != b.y) ? DIAGONAL_WEIGHT : STRAIGHT_WEIGHT; }
 }
 
 namespace FAWorld
@@ -78,6 +81,17 @@ namespace FAWorld
         int32_t mHeight;
     };
 
+    size_t heuristic(Misc::Point a, Misc::Point b)
+    {
+        auto dx = abs(b.x - a.x);
+        auto dy = abs(b.y - a.y);
+
+        auto straight = static_cast<size_t>(dx - dy);
+        auto diagonal = std::max(dx, dy) - straight;
+
+        return straight * STRAIGHT_WEIGHT + diagonal * DIAGONAL_WEIGHT;
+    }
+
     bool AStarSearch(GameLevelImpl* level, Misc::Point start, Misc::Point& goal, std::unordered_map<Misc::Point, Misc::Point>& came_from, bool findAdjacent)
     {
         auto goalPassable = level->isPassable(goal);
@@ -113,7 +127,7 @@ namespace FAWorld
                 if (costSoFar.get(next.x, next.y) == -1 || new_cost < costSoFar.get(next.x, next.y))
                 {
                     costSoFar.get(next.x, next.y) = new_cost;
-                    frontier.put(next, new_cost);
+                    frontier.put(next, new_cost + heuristic(next, goal));
                     came_from[next] = current;
                 }
             }

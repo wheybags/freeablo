@@ -3,6 +3,7 @@
 
 #include <faworld/findpath.h>
 
+#include <algorithm>
 #include <boost/make_unique.hpp>
 #include <gtest/gtest.h>
 
@@ -127,9 +128,36 @@ TEST(FindPathTests, walksStraightOnRectangleMap)
     FAWorld::LevelImplStub level(Map{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //
                                      {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0}, //
                                      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}});
+    const Points restrictedPositions{{2, 1}, {4, 1}, {6, 1}, {8, 1}, {10, 1}, {12, 1}};
 
     bool isReachable = false;
     auto path = FAWorld::pathFind(&level, start, goal, isReachable, false);
 
     ASSERT_EQ(path.size(), 14);
+
+    for (const auto& restrictedPosition : restrictedPositions)
+        ASSERT_TRUE(std::end(path) == std::find(path.begin(), path.end(), restrictedPosition));
+}
+
+TEST(FindPathTests, walksOnLargeMap)
+{
+    const size_t map_size = 100;
+    const size_t mask_size = 18;
+    const auto offset = 40;
+
+    const Point start{offset - 1, offset + mask_size / 2};
+    const Point goal{offset + mask_size, offset + mask_size / 2};
+
+    Map map{map_size, std::vector<int>(map_size, 0)};
+    Map mask{mask_size, std::vector<int>(mask_size, 1)};
+
+    for (size_t y = 0; y < mask.size(); ++y)
+        std::copy(mask[y].begin(), mask[y].end(), map[offset + y].begin() + offset);
+
+    FAWorld::LevelImplStub level(map);
+
+    bool isReachable = false;
+    auto path = FAWorld::pathFind(&level, start, goal, isReachable, false);
+
+    ASSERT_EQ(path.size(), 35);
 }
