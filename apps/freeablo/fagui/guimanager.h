@@ -1,4 +1,6 @@
 #pragma once
+#include "../engine/inputobserverinterface.h"
+#include "dialogmanager.h"
 #include "textcolor.h"
 #include <boost/variant/variant_fwd.hpp>
 #include <chrono>
@@ -7,11 +9,6 @@
 #include <memory>
 #include <queue>
 #include <string>
-#include "../engine/inputobserverinterface.h"
-#include <boost/variant/variant_fwd.hpp>
-#include <fa_nuklear.h>
-#include <memory>
-#include "dialogmanager.h"
 
 struct nk_context;
 typedef uint32_t nk_flags;
@@ -123,8 +120,6 @@ namespace FAGui
             nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void()> action, bool isModal);
 
     private:
-
-
         void dialog(nk_context* ctx);
         void updateAnimations();
         void startingScreen();
@@ -150,7 +145,7 @@ namespace FAGui
     public:
         DialogManager mDialogManager;
 
-//    private:
+        //    private:
         Engine::EngineMain& mEngine;
         FAWorld::Player* mPlayer = nullptr;
         std::string mHoveredInventoryItemText;

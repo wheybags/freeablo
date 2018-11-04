@@ -5,13 +5,13 @@
 #include "../faworld/equiptarget.h"
 #include "../faworld/player.h"
 #include "../faworld/storedata.h"
+#include "characterdialoguepopup.h"
 #include "guimanager.h"
+#include "mouseandclickmenu.h"
+#include "nkhelpers.h"
+#include "shopdialogs.h"
 #include <misc/assert.h>
 #include <utility>
-#include "nkhelpers.h"
-#include "mouseandclickmenu.h"
-#include "characterdialoguepopup.h"
-#include "shopdialogs.h"
 
 namespace FAGui
 {
@@ -22,10 +22,7 @@ namespace FAGui
     class OgdenDialog : public CharacterDialoguePopup
     {
     public:
-        OgdenDialog(GuiManager& guiManager, const FAWorld::Actor* actor)
-            : CharacterDialoguePopup(guiManager, false)
-            , mActor(actor)
-        {}
+        OgdenDialog(GuiManager& guiManager, const FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false), mActor(actor) {}
 
     protected:
         virtual DialogData getDialogData() override
@@ -49,10 +46,7 @@ namespace FAGui
     class FarnhamDialog : public CharacterDialoguePopup
     {
     public:
-        FarnhamDialog(GuiManager& guiManager, const FAWorld::Actor* actor)
-            : CharacterDialoguePopup(guiManager, false)
-            , mActor(actor)
-        {}
+        FarnhamDialog(GuiManager& guiManager, const FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false), mActor(actor) {}
 
     protected:
         virtual DialogData getDialogData() override
@@ -76,10 +70,7 @@ namespace FAGui
     class AdriaDialog : public CharacterDialoguePopup
     {
     public:
-        AdriaDialog(GuiManager& guiManager, const FAWorld::Actor* actor)
-            : CharacterDialoguePopup(guiManager, false)
-            , mActor(actor)
-        {}
+        AdriaDialog(GuiManager& guiManager, const FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false), mActor(actor) {}
 
     protected:
         virtual DialogData getDialogData() override
@@ -93,7 +84,10 @@ namespace FAGui
 
             retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({td.at("buy")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("sell")}, [this]() { this->openSellDialog(); return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({td.at("sell")}, [this]() {
+                this->openSellDialog();
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({td.at("recharge")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
@@ -118,10 +112,7 @@ namespace FAGui
     class WirtDialog : public CharacterDialoguePopup
     {
     public:
-        WirtDialog(GuiManager& guiManager, const FAWorld::Actor* actor)
-            : CharacterDialoguePopup(guiManager, false)
-            , mActor(actor)
-        {}
+        WirtDialog(GuiManager& guiManager, const FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false), mActor(actor) {}
 
     protected:
         virtual DialogData getDialogData() override
@@ -148,10 +139,7 @@ namespace FAGui
     class PepinDialog : public CharacterDialoguePopup
     {
     public:
-        PepinDialog(GuiManager& guiManager, const FAWorld::Actor* actor)
-            : CharacterDialoguePopup(guiManager, false)
-            , mActor(actor)
-        {}
+        PepinDialog(GuiManager& guiManager, const FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false), mActor(actor) {}
 
     protected:
         virtual DialogData getDialogData() override
@@ -177,10 +165,7 @@ namespace FAGui
     class CainDialog : public CharacterDialoguePopup
     {
     public:
-        CainDialog(GuiManager& guiManager, const FAWorld::Actor* actor)
-            : CharacterDialoguePopup(guiManager, false)
-            , mActor(actor)
-        {}
+        CainDialog(GuiManager& guiManager, const FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false), mActor(actor) {}
 
     protected:
         virtual DialogData getDialogData() override
@@ -205,10 +190,7 @@ namespace FAGui
     class GillianDialog : public CharacterDialoguePopup
     {
     public:
-        GillianDialog(GuiManager& guiManager, const FAWorld::Actor* actor)
-            : CharacterDialoguePopup(guiManager, false)
-            , mActor(actor)
-        {}
+        GillianDialog(GuiManager& guiManager, const FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false), mActor(actor) {}
 
     protected:
         virtual DialogData getDialogData() override
@@ -232,10 +214,7 @@ namespace FAGui
     class GriswoldDialog : public CharacterDialoguePopup
     {
     public:
-        GriswoldDialog(GuiManager& guiManager, const FAWorld::Actor* actor)
-            : CharacterDialoguePopup(guiManager, false)
-            , mActor(actor)
-        {}
+        GriswoldDialog(GuiManager& guiManager, const FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false), mActor(actor) {}
 
     protected:
         virtual DialogData getDialogData() override
@@ -248,9 +227,15 @@ namespace FAGui
             retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
             retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("buyBasic")}, [this]() { this->openBuyDialog(); return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({td.at("buyBasic")}, [this]() {
+                this->openBuyDialog();
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({td.at("buyPremium")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("sell")}, [this]() { this->openSellDialog(); return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({td.at("sell")}, [this]() {
+                this->openSellDialog();
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({td.at("repair")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
@@ -277,7 +262,6 @@ namespace FAGui
 
         const FAWorld::Actor* mActor = nullptr;
     };
-
 
     void DialogManager::talk(const FAWorld::Actor* npc)
     {
@@ -310,7 +294,7 @@ namespace FAGui
     {
         if (!mDialogStack.empty())
         {
-            CharacterDialoguePopup::UpdateResult result = mDialogStack[mDialogStack.size()-1]->update(ctx);
+            CharacterDialoguePopup::UpdateResult result = mDialogStack[mDialogStack.size() - 1]->update(ctx);
             if (result == CharacterDialoguePopup::UpdateResult::PopDialog)
                 mDialogStack.pop_back();
         }

@@ -1,8 +1,8 @@
 #pragma once
-#include <vector>
-#include <string>
-#include <fa_nuklear.h>
 #include "../farender/animationplayer.h"
+#include <fa_nuklear.h>
+#include <string>
+#include <vector>
 
 namespace FAGui
 {

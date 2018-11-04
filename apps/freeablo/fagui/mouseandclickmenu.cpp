@@ -24,7 +24,6 @@ namespace FAGui
         ctx->style.button.active = ctx->style.button.normal;
         ctx->style.button.text_active = ctx->style.button.text_normal;
 
-
         auto renderer = FARender::Renderer::get();
         auto pentagram = renderer->loadImage("data/pentspn2.cel");
         nk_layout_row_template_begin(ctx, lineHeight);
@@ -35,16 +34,13 @@ namespace FAGui
         }
         nk_layout_row_template_end(ctx);
 
-
         auto canvas = nk_window_get_canvas(ctx);
 
         mPentagramAnimation.update();
         auto tmp = mPentagramAnimation.getCurrentFrame();
         struct nk_image pentagramFrame = tmp.first->getNkImage(tmp.second);
 
-
-        auto drawPentagram = [&]()
-        {
+        auto drawPentagram = [&]() {
             struct nk_rect pentagramRect;
             nk_widget(&pentagramRect, ctx);
 
@@ -79,13 +75,12 @@ namespace FAGui
                     nk_widget(&dummy, ctx);
             }
         }
-//        nk_text_wrap()
+        //        nk_text_wrap()
 
         float areaHeight = nk_window_get_content_region(ctx).h;
         float fullLineHeight = lineHeight + ctx->style.window.spacing.y;
 
-        auto getEntryYPosition = [&](int32_t entryIndex)
-        {
+        auto getEntryYPosition = [&](int32_t entryIndex) {
             int32_t lineCount = 0;
             int32_t i = 0;
             for (; i < entryIndex && i < int32_t(options.size()); i++)

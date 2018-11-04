@@ -34,9 +34,7 @@ static nk_style_button dummyStyle = []() {
     return buttonStyle;
 }();
 
-
 extern struct nk_image tmp;
-
 
 namespace FAGui
 {
@@ -613,7 +611,6 @@ namespace FAGui
         }
     }
 
-
     void GuiManager::update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus)
     {
         nk_style_push_font(ctx, FARender::Renderer::get()->smallFont());
@@ -764,10 +761,7 @@ namespace FAGui
         return false;
     }
 
-    bool GuiManager::isModalDlgShown() const
-    {
-        return !mDialogManager.mDialogStack.empty();
-    }
+    bool GuiManager::isModalDlgShown() const { return !mDialogManager.mDialogStack.empty(); }
 
     void GuiManager::togglePanel(PanelType type)
     {

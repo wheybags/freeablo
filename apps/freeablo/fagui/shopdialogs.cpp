@@ -1,18 +1,15 @@
 #include "shopdialogs.h"
 
-#include "guimanager.h"
+#include "../engine/enginemain.h"
+#include "../engine/localinputhandler.h"
 #include "../faworld/item.h"
 #include "../faworld/player.h"
 #include "../faworld/storedata.h"
-#include "../engine/enginemain.h"
-#include "../engine/localinputhandler.h"
+#include "guimanager.h"
 
 namespace FAGui
 {
-    MessagePopup::MessagePopup(GuiManager& guiManager, const std::string& message)
-        : CharacterDialoguePopup(guiManager, false)
-        , mMessage(message)
-    {}
+    MessagePopup::MessagePopup(GuiManager& guiManager, const std::string& message) : CharacterDialoguePopup(guiManager, false), mMessage(message) {}
 
     CharacterDialoguePopup::DialogData MessagePopup::getDialogData()
     {
@@ -24,10 +21,9 @@ namespace FAGui
     }
 
     ShopSellDialog::ShopSellDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::function<bool(const FAWorld::Item& item)> filter)
-        : CharacterDialoguePopup(guiManager, true)
-        , mFilter(filter)
-        , mShopkeeper(shopkeeper)
-    {}
+        : CharacterDialoguePopup(guiManager, true), mFilter(filter), mShopkeeper(shopkeeper)
+    {
+    }
 
     CharacterDialoguePopup::DialogData ShopSellDialog::getDialogData()
     {
@@ -37,8 +33,7 @@ namespace FAGui
 
         std::vector<FAWorld::EquipTarget> sellableItems;
         {
-            auto addItem = [&](FAWorld::EquipTarget target)
-            {
+            auto addItem = [&](FAWorld::EquipTarget target) {
                 const FAWorld::Item& item = inventory.getItemAt(target);
                 if (!item.isEmpty() && item.mIsReal && mFilter(item) && item.getType() != FAWorld::ItemType::gold)
                     sellableItems.push_back(target);
@@ -52,13 +47,13 @@ namespace FAGui
 
         int32_t totalGold = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getTotalGold();
 
-        retval.introduction = {(boost::format("%2%            Your gold : %1%") % totalGold %
-                               (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?")).str()};
+        retval.introduction = {
+            (boost::format("%2%            Your gold : %1%") % totalGold % (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?"))
+                .str()};
 
-        for (FAWorld::EquipTarget item: sellableItems)
+        for (FAWorld::EquipTarget item : sellableItems)
         {
-            retval.addMenuOption(inventory.getItemAt(item).descriptionForMerchants(), [this, item]()
-            {
+            retval.addMenuOption(inventory.getItemAt(item).descriptionForMerchants(), [this, item]() {
                 this->sellItem(item);
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
@@ -77,25 +72,21 @@ namespace FAGui
     }
 
     ShopBuyDialog::ShopBuyDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::vector<FAWorld::StoreItem>& items)
-        : CharacterDialoguePopup(guiManager, true)
-        , mItems(items)
-        , mShopkeeper(shopkeeper)
-    {}
+        : CharacterDialoguePopup(guiManager, true), mItems(items), mShopkeeper(shopkeeper)
+    {
+    }
 
     CharacterDialoguePopup::DialogData ShopBuyDialog::getDialogData()
     {
         DialogData retval;
 
         auto& inventory = mGuiManager.mPlayer->mInventory;
-        retval.introduction = {(boost::format("%2%           Your gold : %1%") %
-                               inventory.getTotalGold() % "I have these items for sale :").str()};
-
+        retval.introduction = {(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str()};
 
         for (size_t i = 0; i < mItems.size(); i++)
         {
             FAWorld::StoreItem& item = mItems[i];
-            retval.addMenuOption(item.item.descriptionForMerchants(), [this, i]()
-            {
+            retval.addMenuOption(item.item.descriptionForMerchants(), [this, i]() {
                 this->buyItem(i);
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });

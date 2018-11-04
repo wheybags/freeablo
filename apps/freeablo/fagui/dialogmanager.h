@@ -1,13 +1,13 @@
 #pragma once
-#include <array>
-#include <functional>
-#include <string>
-#include <vector>
 #include "../engine/inputobserverinterface.h"
 #include "../farender/spritecache.h"
 #include "textcolor.h"
+#include <array>
 #include <boost/optional.hpp>
+#include <functional>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace FAWorld
 {
@@ -34,7 +34,7 @@ namespace FAGui
 
     public:
         GuiManager& mGuiManager;
-//    private:
+        //    private:
         FAWorld::World& mWorld;
         std::vector<std::unique_ptr<CharacterDialoguePopup>> mDialogStack;
     };

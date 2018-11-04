@@ -14,6 +14,7 @@ namespace FAGui
     {
     public:
         MessagePopup(GuiManager& guiManager, const std::string& message);
+
     protected:
         virtual DialogData getDialogData() override;
 
