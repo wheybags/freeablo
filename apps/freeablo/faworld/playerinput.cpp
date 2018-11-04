@@ -131,4 +131,16 @@ namespace FAWorld
         itemId = loader.load<uint32_t>();
         shopkeeperId = loader.load<int32_t>();
     }
+
+    void PlayerInput::SellItemData::save(Serial::Saver& saver)
+    {
+        itemLocation.save(saver);
+        saver.save(shopkeeperId);
+    }
+
+    void PlayerInput::SellItemData::load(Serial::Loader& loader)
+    {
+        itemLocation.load(loader);
+        shopkeeperId = loader.load<int32_t>();
+    }
 }

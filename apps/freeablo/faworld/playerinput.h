@@ -15,7 +15,8 @@
     MACRO(SplitGoldStackIntoCursor)                                                                                                                            \
     MACRO(PlayerJoined)                                                                                                                                        \
     MACRO(PlayerLeft)                                                                                                                                          \
-    MACRO(BuyItem)
+    MACRO(BuyItem)                                                                                                                                             \
+    MACRO(SellItem)
 
 namespace Serial
 {
@@ -111,6 +112,14 @@ namespace FAWorld
 
             void save(Serial::Saver& saver);
             void load(Serial::Loader& loader);
+        };
+        struct SellItemData
+        {
+          FAWorld::EquipTarget itemLocation;
+          int32_t shopkeeperId;
+
+          void save(Serial::Saver& saver);
+          void load(Serial::Loader& loader);
         };
 
         // All this macro mess takes care of generating boilerplate code to wrap up the above structs into a union with a type enum, and

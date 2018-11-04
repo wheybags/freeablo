@@ -142,6 +142,24 @@ namespace FAWorld
 
                 return;
             }
+            case PlayerInput::Type::SellItem:
+            {
+                int32_t price = 0;
+                {
+                    const Item& item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
+
+                    // TODO: validate sell filter here
+                    if (item.isEmpty() || !item.mIsReal || item.baseId() == ItemId::gold)
+                        return;
+
+                    price = item.getPrice();
+                }
+
+                release_assert(!mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation).isEmpty());
+                mPlayer->mInventory.placeGold(price, mPlayer->getWorld()->getItemFactory());
+
+                return;
+            }
             case PlayerInput::Type::PlayerJoined:
             case PlayerInput::Type::PlayerLeft:
             {

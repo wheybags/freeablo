@@ -234,7 +234,7 @@ namespace FAGui
         d.skip_line();
         d.textLines({td.at("talk")}, TextColor::blue).setAction([]() {});
         d.textLines({td.at("buy")}).setAction([]() {});
-        d.textLines({td.at("sell")}).setAction([this]() { sellDialog(adriaSellFilter); });
+//        d.textLines({td.at("sell")}).setAction([this]() { sellDialog(adriaSellFilter); });
         d.textLines({td.at("recharge")}).setAction([]() {});
         d.textLines({td.at("quit")}).setAction([&]() { quitDialog(); });
         mGuiManager.pushDialogData(std::move(d));
@@ -353,57 +353,6 @@ namespace FAGui
         mGuiManager.pushDialogData(std::move(data));
     }
 
-    template <typename FilterType> void DialogManager::sellDialog(FilterType filter)
-    {
-        DialogData d;
-        d.widen();
-        int32_t cnt = 0;
-        auto& inventory = mWorld.getCurrentPlayer()->mInventory;
-        auto positionFilter = [filter, &inventory](FAWorld::EquipTarget target) { return filter(inventory.getItemAt(target)); };
-
-        std::vector<FAWorld::EquipTarget> positions;
-        for (const FAWorld::Item& item : mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::inventory))
-            positions.push_back(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(item.mInvX, item.mInvY));
-        for (const FAWorld::Item& item : mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::belt))
-            positions.push_back(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(item.mInvX));
-
-        d.header({(boost::format("%2%            Your gold : %1%") % mWorld.getCurrentPlayer()->mInventory.getTotalGold() %
-                   (std::count_if(positions.begin(), positions.end(), positionFilter) > 0 ? "Which item is for sale?" : "You have nothing I want."))
-                      .str()});
-
-        for (auto target : positions)
-        {
-            const FAWorld::Item& item = inventory.getItemAt(target);
-            if (item.isEmpty() || !item.mIsReal || !positionFilter(target))
-                continue;
-
-            auto sellPrice = item.getPrice() / 4;
-            auto header = d.getHeader();
-            d.textLines(item.descriptionForMerchants(), TextColor::white, false, {20, 40, 40})
-                .setAction([&inventory, target, this, sellPrice, header, item, filter]() mutable {
-                    confirmDialog(header, item, sellPrice, "Are you sure you want to sell this item?", [this, filter, &inventory, target, sellPrice]() {
-                        inventory.remove(target);
-                        inventory.placeGold(sellPrice, mWorld.getItemFactory());
-                        // This looks insansenly unsafe. TODO: think of better way.
-                        auto recreate = [this, filter] { sellDialog(filter); };
-                        mGuiManager.popDialogData();
-                        recreate();
-                    });
-                })
-                .setNumber(sellPrice);
-            ++cnt;
-        }
-        d.footer({"Back"}).setAction([&]() { mGuiManager.popDialogData(); }).setForceSelected(cnt == 0);
-        d.showScrollBar();
-        mGuiManager.pushDialogData(std::move(d));
-    }
-
-//    static bool griswoldSellFilter(const FAWorld::Item& item)
-//    {
-//        // TODO: add check for quest items
-//        return item.getType() != FAWorld::ItemType::misc && item.getType() != FAWorld::ItemType::gold && item.getType() != FAWorld::ItemType::staff;
-//    }
-
     class MessagePopup : public CharacterDialoguePopup
     {
     public:
@@ -425,10 +374,72 @@ namespace FAGui
         std::string mMessage;
     };
 
-    class ShopDialog : public CharacterDialoguePopup
+    class ShopSellDialog : public CharacterDialoguePopup
     {
     public:
-        ShopDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::vector<FAWorld::StoreItem>& items)
+        ShopSellDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::function<bool(const FAWorld::Item& item)> filter)
+            : CharacterDialoguePopup(guiManager, true)
+            , mFilter(filter)
+            , mShopkeeper(shopkeeper)
+        {}
+
+    protected:
+
+        virtual DialogData getDialogData() override
+        {
+            DialogData retval;
+
+            auto& inventory = mGuiManager.mPlayer->mInventory;
+
+            std::vector<FAWorld::EquipTarget> sellableItems;
+            {
+                auto addItem = [&](FAWorld::EquipTarget target)
+                {
+                    const FAWorld::Item& item = inventory.getItemAt(target);
+                    if (!item.isEmpty() && item.mIsReal && mFilter(item) && item.getType() != FAWorld::ItemType::gold)
+                        sellableItems.push_back(target);
+                };
+
+                for (const FAWorld::Item& item : mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::inventory))
+                    addItem(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(item.mInvX, item.mInvY));
+                for (const FAWorld::Item& item : mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::belt))
+                    addItem(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(item.mInvX));
+            }
+
+            int32_t totalGold = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getTotalGold();
+
+            retval.introduction = {(boost::format("%2%            Your gold : %1%") % totalGold %
+                                   (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?")).str()};
+
+            for (FAWorld::EquipTarget item: sellableItems)
+            {
+                retval.addMenuOption(inventory.getItemAt(item).descriptionForMerchants(), [this, item]()
+                {
+                    this->sellItem(item);
+                    return CharacterDialoguePopup::UpdateResult::DoNothing;
+                });
+            }
+
+            retval.addMenuOption({"Quit"}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+
+            return retval;
+        }
+
+        void sellItem(FAWorld::EquipTarget item)
+        {
+            auto input = FAWorld::PlayerInput::SellItemData{item, mShopkeeper.getId()};
+            Engine::EngineMain::get()->getLocalInputHandler()->addInput(
+                FAWorld::PlayerInput(input, Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getId()));
+        }
+
+        std::function<bool(const FAWorld::Item& item)> mFilter;
+        const FAWorld::Actor& mShopkeeper;
+    };
+
+    class ShopBuyDialog : public CharacterDialoguePopup
+    {
+    public:
+        ShopBuyDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::vector<FAWorld::StoreItem>& items)
             : CharacterDialoguePopup(guiManager, true)
             , mItems(items)
             , mShopkeeper(shopkeeper)
@@ -504,19 +515,31 @@ namespace FAGui
             retval.introduction = {td.at("introductionHeader1"), td.at("introductionHeader2")};
 
             retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("buyBasic")}, [this]() { this->openShop(); return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({td.at("buyBasic")}, [this]() { this->openBuyDialog(); return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({td.at("buyPremium")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("sell")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({td.at("sell")}, [this]() { this->openSellDialog(); return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({td.at("repair")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
         }
 
-        void openShop()
+        void openBuyDialog()
         {
-            auto dialog = new ShopDialog(mGuiManager, *mActor, mGuiManager.mDialogManager.mWorld.getStoreData().griswoldBasicItems);
+            auto dialog = new ShopBuyDialog(mGuiManager, *mActor, mGuiManager.mDialogManager.mWorld.getStoreData().griswoldBasicItems);
             mGuiManager.mDialogManager.mDialogStack.emplace_back(dialog);
+        }
+
+        void openSellDialog()
+        {
+            auto dialog = new ShopSellDialog(mGuiManager, *mActor, griswoldSellFilter);
+            mGuiManager.mDialogManager.mDialogStack.emplace_back(dialog);
+        }
+
+        static bool griswoldSellFilter(const FAWorld::Item& item)
+        {
+            // TODO: add check for quest items
+            return item.getType() != FAWorld::ItemType::misc && item.getType() != FAWorld::ItemType::staff;
         }
 
         const FAWorld::Actor* mActor = nullptr;
