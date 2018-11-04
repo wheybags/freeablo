@@ -10,12 +10,6 @@ namespace FAGui
     {
     }
 
-//    void CharacterDialoguePopup::addMenuOption(const std::vector<std::string>& option, std::function<UpdateResult()> action)
-//    {
-//        mDialogOptions.push_back(option);
-//        mDialogActions.push_back(action);
-//    }
-
     CharacterDialoguePopup::UpdateResult CharacterDialoguePopup::update(struct nk_context* ctx)
     {
         auto renderer = FARender::Renderer::get();

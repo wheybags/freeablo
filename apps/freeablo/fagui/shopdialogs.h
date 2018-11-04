@@ -5,7 +5,7 @@
 namespace FAWorld
 {
     class Item;
-    class StoreItem;
+    struct StoreItem;
 }
 
 namespace FAGui

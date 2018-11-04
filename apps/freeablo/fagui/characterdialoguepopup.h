@@ -19,8 +19,6 @@ namespace FAGui
             PopDialog
         };
 
-//        void addMenuOption(const std::vector<std::string>& option, std::function<UpdateResult()> action);
-
         virtual UpdateResult update(struct nk_context* ctx);
 
         static UpdateResult actionQuit() { return UpdateResult::PopDialog; }
@@ -47,9 +45,5 @@ namespace FAGui
         nk_scroll mScroll = {};
         MouseAndClickMenu mDialogMenu;
         bool mWide = false;
-
-
-//        std::vector<std::vector<std::string>> mDialogOptions;
-//        std::vector<std::function<UpdateResult()>> mDialogActions;
     };
 }

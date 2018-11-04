@@ -46,7 +46,6 @@ namespace FAWorld
 namespace FAGui
 {
     class GuiManager;
-    class DialogData;
     class MenuHandler;
 
     enum class EffectType
@@ -109,8 +108,6 @@ namespace FAGui
         void update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
 
         bool isInventoryShown() const;
-        void popDialogData();
-        void pushDialogData(DialogData&& data);
         // so gold split dialog blocks pause but allows you to move around, that's why it should be separate function
         bool isPauseBlocked() const;
         // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
@@ -158,7 +155,6 @@ namespace FAGui
         FAWorld::Player* mPlayer = nullptr;
         std::string mHoveredInventoryItemText;
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
-        std::vector<DialogData> mDialogs;
         std::unique_ptr<FARender::AnimationPlayer> mSmallPentagram;
         std::unique_ptr<MenuHandler> mMenuHandler;
         const FAWorld::Item* mGoldSplitTarget = nullptr;
