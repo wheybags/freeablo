@@ -30,7 +30,7 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {{td.at("introductionHeader1"), td.at("introductionHeader2")}};
+            retval.introduction = {td.at("introductionHeader1"), td.at("introductionHeader2")};
 
             retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
@@ -54,7 +54,7 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {{td.at("introductionHeader")}};
+            retval.introduction = {td.at("introductionHeader")};
 
             retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
@@ -97,7 +97,7 @@ namespace FAGui
         void openSellDialog()
         {
             auto dialog = new ShopSellDialog(mGuiManager, *mActor, adriaSellFilter);
-            mGuiManager.mDialogManager.mDialogStack.emplace_back(dialog);
+            mGuiManager.mDialogManager.pushDialog(dialog);
         }
 
         static bool adriaSellFilter(const FAWorld::Item& item)
@@ -120,7 +120,7 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {{td.at("introductionHeader")}};
+            retval.introduction = {td.at("introductionHeader")};
 
             retval.addMenuOption({td.at("talk"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
@@ -147,7 +147,7 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {{td.at("introductionHeader1"), td.at("introductionHeader2")}};
+            retval.introduction = {td.at("introductionHeader1"), td.at("introductionHeader2")};
 
             retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
@@ -245,13 +245,13 @@ namespace FAGui
         void openBuyDialog()
         {
             auto dialog = new ShopBuyDialog(mGuiManager, *mActor, mGuiManager.mDialogManager.mWorld.getStoreData().griswoldBasicItems);
-            mGuiManager.mDialogManager.mDialogStack.emplace_back(dialog);
+            mGuiManager.mDialogManager.pushDialog(dialog);
         }
 
         void openSellDialog()
         {
             auto dialog = new ShopSellDialog(mGuiManager, *mActor, griswoldSellFilter);
-            mGuiManager.mDialogManager.mDialogStack.emplace_back(dialog);
+            mGuiManager.mDialogManager.pushDialog(dialog);
         }
 
         static bool griswoldSellFilter(const FAWorld::Item& item)
@@ -287,7 +287,7 @@ namespace FAGui
             dialog = new CainDialog(mGuiManager, npc);
 
         if (dialog)
-            mDialogStack.emplace_back(dialog);
+            pushDialog(dialog);
     }
 
     void DialogManager::update(struct nk_context* ctx)
@@ -299,4 +299,6 @@ namespace FAGui
                 mDialogStack.pop_back();
         }
     }
+
+    void DialogManager::pushDialog(CharacterDialoguePopup* dialog) { mDialogStack.emplace_back(dialog); }
 }

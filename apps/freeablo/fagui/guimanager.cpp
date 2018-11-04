@@ -34,8 +34,6 @@ static nk_style_button dummyStyle = []() {
     return buttonStyle;
 }();
 
-extern struct nk_image tmp;
-
 namespace FAGui
 {
     PanelPlacement panelPlacementByType(PanelType type)
@@ -761,7 +759,7 @@ namespace FAGui
         return false;
     }
 
-    bool GuiManager::isModalDlgShown() const { return !mDialogManager.mDialogStack.empty(); }
+    bool GuiManager::isModalDlgShown() const { return mDialogManager.hasDialog(); }
 
     void GuiManager::togglePanel(PanelType type)
     {

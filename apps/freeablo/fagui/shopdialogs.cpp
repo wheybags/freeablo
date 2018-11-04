@@ -29,7 +29,7 @@ namespace FAGui
     {
         DialogData retval;
 
-        auto& inventory = mGuiManager.mPlayer->mInventory;
+        auto& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
 
         std::vector<FAWorld::EquipTarget> sellableItems;
         {
@@ -80,7 +80,7 @@ namespace FAGui
     {
         DialogData retval;
 
-        auto& inventory = mGuiManager.mPlayer->mInventory;
+        auto& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
         retval.introduction = {(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str()};
 
         for (size_t i = 0; i < mItems.size(); i++)
@@ -101,16 +101,16 @@ namespace FAGui
     {
         FAWorld::StoreItem& item = mItems[index];
 
-        auto& inventory = mGuiManager.mPlayer->mInventory;
+        auto& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
         if (inventory.getTotalGold() < item.item.getPrice())
         {
-            this->mGuiManager.mDialogManager.mDialogStack.emplace_back(new MessagePopup(this->mGuiManager, "You do not have enough gold"));
+            this->mGuiManager.mDialogManager.pushDialog(new MessagePopup(this->mGuiManager, "You do not have enough gold"));
             return;
         }
 
         if (!inventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(item.item))
         {
-            this->mGuiManager.mDialogManager.mDialogStack.emplace_back(new MessagePopup(this->mGuiManager, "You do not have enough room in inventory"));
+            this->mGuiManager.mDialogManager.pushDialog(new MessagePopup(this->mGuiManager, "You do not have enough room in inventory"));
             return;
         }
 

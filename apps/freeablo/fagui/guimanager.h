@@ -145,7 +145,7 @@ namespace FAGui
     public:
         DialogManager mDialogManager;
 
-        //    private:
+    private:
         Engine::EngineMain& mEngine;
         FAWorld::Player* mPlayer = nullptr;
         std::string mHoveredInventoryItemText;
@@ -154,6 +154,5 @@ namespace FAGui
         std::unique_ptr<MenuHandler> mMenuHandler;
         const FAWorld::Item* mGoldSplitTarget = nullptr;
         int mGoldSplitCnt = 0;
-        bool mSkipDialogFrame = false;
     };
 }

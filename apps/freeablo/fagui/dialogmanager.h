@@ -29,13 +29,16 @@ namespace FAGui
         ~DialogManager();
 
         void talk(const FAWorld::Actor* npc);
-
         void update(struct nk_context* ctx);
+
+        void pushDialog(CharacterDialoguePopup* dialog);
+        bool hasDialog() const { return !mDialogStack.empty(); }
 
     public:
         GuiManager& mGuiManager;
-        //    private:
         FAWorld::World& mWorld;
+
+    private:
         std::vector<std::unique_ptr<CharacterDialoguePopup>> mDialogStack;
     };
 }

@@ -25,6 +25,6 @@ namespace FAGui
         int32_t mArrowKeyRepeatTimer = std::numeric_limits<int32_t>::max();
         int32_t mArrowKeyMovesGeneratedSinceKeydown = 0;
         FARender::AnimationPlayer mPentagramAnimation;
-        struct nk_vec2 mLastMousePosition = {};
+        struct nk_vec2 mLastMousePosition = {0, 0};
     };
 }

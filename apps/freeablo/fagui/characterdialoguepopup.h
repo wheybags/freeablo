@@ -42,7 +42,7 @@ namespace FAGui
         virtual DialogData getDialogData() = 0;
 
         GuiManager& mGuiManager;
-        nk_scroll mScroll = {};
+        nk_scroll mScroll = {0, 0};
         MouseAndClickMenu mDialogMenu;
         bool mWide = false;
     };

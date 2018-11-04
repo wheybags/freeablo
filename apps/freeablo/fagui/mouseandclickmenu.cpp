@@ -75,7 +75,6 @@ namespace FAGui
                     nk_widget(&dummy, ctx);
             }
         }
-        //        nk_text_wrap()
 
         float areaHeight = nk_window_get_content_region(ctx).h;
         float fullLineHeight = lineHeight + ctx->style.window.spacing.y;
