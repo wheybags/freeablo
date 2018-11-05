@@ -1,5 +1,9 @@
 #!/bin/bash -e
 
+if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+    pip3 install requests
+fi
+
 if [ "$TRAVIS_OS_NAME" == "osx" ] && [ $JOB != "build" ]; then
     exit 0;
 fi

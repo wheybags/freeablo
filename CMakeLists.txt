@@ -1,5 +1,28 @@
 cmake_minimum_required (VERSION 2.8.11)
 
+set(
+    HUNTER_CACHE_SERVERS
+    "https://github.com/wheybags/hunter-cache"
+    CACHE
+    STRING
+    "Default cache server"
+)
+
+set(
+    HUNTER_PASSWORDS_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Hunter/passwords.cmake"
+    CACHE
+    FILEPATH
+    "Hunter passwords"
+)
+
+string(COMPARE EQUAL "$ENV{GITHUB_USER_PASSWORD}" "" password_is_empty)
+
+if (NOT password_is_empty)
+    option(HUNTER_RUN_UPLOAD "Upload cache binaries" ON)
+endif()
+
+
 include("cmake/HunterGate.cmake")
 HunterGate(
     URL "https://github.com/ruslo/hunter/archive/v0.20.64.tar.gz"
