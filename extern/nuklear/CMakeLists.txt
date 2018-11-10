@@ -1,5 +1,6 @@
 add_library(nuklear
-    nuklear.h
+    nuklear_impl.h
+    nuklear_header.h
     fa_nuklear.h
     nuklear.c
 )

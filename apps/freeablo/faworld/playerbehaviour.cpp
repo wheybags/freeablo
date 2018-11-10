@@ -123,7 +123,7 @@ namespace FAWorld
             }
             case PlayerInput::Type::BuyItem:
             {
-                auto items = mPlayer->getWorld()->getStoreData().griswoldBasicItems;
+                auto& items = mPlayer->getWorld()->getStoreData().griswoldBasicItems;
                 auto item = std::find_if(items.begin(), items.end(), [&](StoreItem& item) { return item.storeId == input.mData.dataBuyItem.itemId; });
 
                 if (item == items.end())
@@ -139,6 +139,24 @@ namespace FAWorld
                 mPlayer->mInventory.takeOutGold(price);
                 mPlayer->mInventory.autoPlaceItem(item->item);
                 items.erase(item);
+
+                return;
+            }
+            case PlayerInput::Type::SellItem:
+            {
+                int32_t price = 0;
+                {
+                    const Item& item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
+
+                    // TODO: validate sell filter here
+                    if (item.isEmpty() || !item.mIsReal || item.baseId() == ItemId::gold)
+                        return;
+
+                    price = item.getPrice();
+                }
+
+                release_assert(!mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation).isEmpty());
+                mPlayer->mInventory.placeGold(price, mPlayer->getWorld()->getItemFactory());
 
                 return;
             }

@@ -128,197 +128,17 @@ namespace FAGui
         nk_style_pop_style_item(ctx);
     }
 
-    namespace
-    {
-        struct applyEffect
-        {
-            applyEffect(nk_context* ctx, EffectType type) : mCtx(ctx) { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(type))); }
-            ~applyEffect() { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(EffectType::none))); }
-
-            nk_context* mCtx;
-        };
-    }
-
-    void GuiManager::dialog(nk_context* ctx)
-    {
-        // This part is needed because dialog is triggered by mouse click
-        // and if nuklear gui will appear on the same frame as click happens -
-        // nuklear will treat dialog-triggering click as click on its window
-        // thus incorrectly triggering dialog action if your cursor is on it.
-        // This workaround seems to fully mitigate it.
-        if (mSkipDialogFrame)
-        {
-            mSkipDialogFrame = false;
-            return;
-        }
-
-        if (mDialogs.empty())
-            return;
-
-        if (mCurRightPanel != PanelType::none)
-            togglePanel(mCurRightPanel);
-        if (mCurLeftPanel != PanelType::none)
-            togglePanel(mCurLeftPanel);
-
-        auto& activeDialog = mDialogs.back();
-
-        auto renderer = FARender::Renderer::get();
-        auto boxTex = renderer->loadImage(activeDialog.mIsWide ? "data/textbox.cel" : "data/textbox2.cel");
-        nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
-        int32_t screenW, screenH;
-        renderer->getWindowDimensions(screenW, screenH);
-        nk_fa_begin_image_window(
-            ctx,
-            "dialog",
-            nk_rect(screenW / 2. - (activeDialog.mIsWide ? boxTex->getWidth() / 2 : 0.0),
-                    screenH - boxTex->getHeight() - 153,
-                    boxTex->getWidth(),
-                    boxTex->getHeight()),
-            flags,
-            boxTex->getNkImage(),
-            [&]() {
-                nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
-                auto cbRect = nk_rect(3, 3, boxTex->getWidth() - 6, boxTex->getHeight() - 6);
-                nk_layout_space_push(ctx, cbRect);
-                auto blackTex = renderer->loadImage("resources/black.png");
-                {
-                    applyEffect effect(ctx, EffectType::checkerboarded);
-                    nk_image(ctx, nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect));
-                }
-
-                int startY = 5;
-                constexpr int textRowHeight = 12;
-                int rowNum = 0;
-                constexpr int sliderStartLine = 4, sliderEndLine = 20;
-
-                auto drawLine = [&](const DialogLineData& line, int lineIndex) {
-                    auto lineRect = nk_rect(3, 3 + startY + rowNum * textRowHeight + line.mYOffset, boxTex->getWidth() - 6, textRowHeight);
-
-                    if (activeDialog.isScrollbarShown())
-                    {
-                        auto sliderImg = renderer->loadImage("data/textslid.cel");
-                        auto arrowRect = nk_rect(0, 0, sliderImg->getWidth(), sliderImg->getHeight());
-                        if (rowNum >= sliderStartLine && rowNum <= sliderEndLine)
-                        {
-                            nk_layout_space_push(ctx, alignRect(arrowRect, lineRect, halign_t::right, valign_t::center));
-                            if (rowNum == sliderStartLine)
-                            {
-                                nk_button_label_styled(ctx, &dummyStyle, "");
-                                nk_image(ctx, sliderImg->getNkImage(nk_widget_has_mouse_click_down(ctx, NK_BUTTON_LEFT, true) ? 11 : 9)); // up arrow
-                                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
-                                    activeDialog.notify(Engine::KeyboardInputAction::prevOption, *this);
-                            }
-                            else if (rowNum == sliderEndLine)
-                            {
-                                nk_button_label_styled(ctx, &dummyStyle, "");
-                                nk_image(ctx, sliderImg->getNkImage(nk_widget_has_mouse_click_down(ctx, NK_BUTTON_LEFT, true) ? 10 : 8)); // down arrow
-                                if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
-                                    activeDialog.notify(Engine::KeyboardInputAction::nextOption, *this);
-                            }
-                            else
-                                nk_image(ctx, sliderImg->getNkImage(13)); // grove
-                        }
-                    }
-
-                    ++rowNum;
-
-                    if (line.isSeparator)
-                    {
-                        auto separatorRect = nk_rect(3, 0, boxTex->getWidth() - 6, 3);
-                        nk_layout_space_push(ctx, alignRect(separatorRect, lineRect, halign_t::center, valign_t::center));
-                        auto separator_image = nk_subimage_handle(boxTex->getNkImage().handle, boxTex->getWidth(), boxTex->getHeight(), separatorRect);
-                        nk_image(ctx, separator_image);
-                        return false;
-                    }
-                    lineRect.x += line.mXOffset;
-                    lineRect.w -= line.mXOffset;
-                    if (!line.alignCenter)
-                    {
-                        if (activeDialog.isScrollbarShown())
-                            lineRect.w -= 20; // for scrollbar
-                        if (line.mNumber)
-                            lineRect.w -= 20; // for pentagram
-                    }
-                    nk_layout_space_push(ctx, lineRect);
-                    if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && line.action)
-                    {
-                        activeDialog.mSelectedLine = lineIndex;
-                        line.action();
-                        return true;
-                    }
-                    smallText(ctx, line.text.c_str(), line.color, (line.alignCenter ? NK_TEXT_ALIGN_CENTERED : NK_TEXT_ALIGN_LEFT) | NK_TEXT_ALIGN_MIDDLE);
-                    if (auto num = line.mNumber)
-                        smallText(ctx, std::to_string(*num).c_str(), line.color, NK_TEXT_ALIGN_RIGHT);
-                    if (line.forceSelected || (lineIndex != -1 && activeDialog.selectedLine() == lineIndex))
-                    {
-                        auto pent = renderer->loadImage("data/pentspn2.cel");
-                        int pentOffset = 5;
-                        auto textWidth = smallTextWidth(line.text.c_str());
-                        // left pentagram
-                        {
-                            int offset = 0;
-                            if (line.alignCenter)
-                                offset = 3 + ((boxTex->getWidth() - 6) / 2 - textWidth / 2 - pent->getWidth() - pentOffset);
-                            else
-                                offset = line.mXOffset - pent->getWidth() - pentOffset;
-                            nk_layout_space_push(ctx, nk_rect(offset, lineRect.y, pent->getWidth(), pent->getHeight()));
-                            nk_image(ctx, pent->getNkImage(mSmallPentagram->getCurrentFrame().second));
-                        }
-                        // right pentagram
-                        {
-                            int offset = boxTex->getWidth() - 6 - pent->getWidth() - pentOffset;
-                            if (activeDialog.isScrollbarShown())
-                                offset -= 20;
-                            if (line.alignCenter)
-                                offset = ((boxTex->getWidth() - 6) / 2 + textWidth / 2 + pentOffset);
-
-                            nk_layout_space_push(ctx, nk_rect(3 + offset, lineRect.y, pent->getWidth(), pent->getHeight()));
-                            nk_image(ctx, pent->getNkImage(mSmallPentagram->getCurrentFrame().second));
-                        }
-                    }
-
-                    return false;
-                };
-
-                for (auto& line : activeDialog.mHeader)
-                    if (drawLine(line, -1))
-                        return;
-                for (int i = activeDialog.mFirstVisible; i < activeDialog.mFirstVisible + activeDialog.visibleBodyLineCount(); ++i)
-                {
-                    if (i < static_cast<int>(activeDialog.mLines.size()))
-                    {
-                        if (drawLine(activeDialog.mLines[i], i))
-                            return;
-                    }
-                    else
-                        drawLine({}, i);
-                }
-                for (auto& line : activeDialog.mFooter)
-                    if (drawLine(line, -1))
-                        return;
-
-                if (activeDialog.isScrollbarShown())
-                {
-                    auto sliderImg = renderer->loadImage("data/textslid.cel");
-                    auto height = (sliderEndLine - sliderStartLine - 1) * textRowHeight - sliderImg->getHeight();
-                    auto y = startY + (sliderStartLine + 1) * textRowHeight + 3 + (activeDialog.selectedLinePercent() * height);
-                    nk_layout_space_push(ctx, nk_rect(boxTex->getWidth() - 3 - sliderImg->getWidth(), y, sliderImg->getWidth(), sliderImg->getHeight()));
-                    nk_image(ctx, sliderImg->getNkImage(12));
-                }
-            },
-            true);
-    }
-
     void GuiManager::updateAnimations()
     {
         for (auto& anim : {mSmallPentagram.get()})
             anim->update();
     }
 
-    template <typename Function> void GuiManager::drawPanel(nk_context* ctx, PanelType panelType, Function op)
+    void GuiManager::drawPanel(nk_context* ctx, PanelType panelType, std::function<void(void)> op)
     {
-        auto placement = panelPlacementByType(panelType);
-        bool shown = *panel(placement) == panelType;
+        PanelPlacement placement = panelPlacementByType(panelType);
+        bool shown = *getPanelAtLocation(placement) == panelType;
+
         nk_window_show(ctx, panelName(panelType), shown ? NK_SHOWN : NK_HIDDEN);
         if (!shown)
             return;
@@ -422,7 +242,7 @@ namespace FAGui
         effectType = checkerboarded ? EffectType::checkerboarded : effectType;
         if (isHighlighted)
             mHoveredInventoryItemText = item.getFullDescription();
-        applyEffect effect(ctx, effectType);
+        ScopedApplyEffect effect(ctx, effectType);
         nk_image(ctx, img);
         if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
             triggerItem(target);
@@ -791,6 +611,8 @@ namespace FAGui
 
     void GuiManager::update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus)
     {
+        nk_style_push_font(ctx, FARender::Renderer::get()->smallFont());
+
         // HACK FUCKING HACK
         FAWorld::World* world = Engine::EngineMain::get()->mWorld.get();
         mPlayer = world == nullptr ? nullptr : world->getCurrentPlayer();
@@ -820,7 +642,8 @@ namespace FAGui
             questsPanel(ctx);
             characterPanel(ctx);
             bottomMenu(ctx, hoverStatus);
-            dialog(ctx);
+
+            mDialogManager.update(ctx);
         }
         else
         {
@@ -831,9 +654,11 @@ namespace FAGui
             Engine::EngineMain::get()->getLocalInputHandler()->blockInput();
         else
             Engine::EngineMain::get()->getLocalInputHandler()->unblockInput();
+
+        nk_style_pop_font(ctx);
     }
 
-    PanelType* GuiManager::panel(PanelPlacement placement)
+    PanelType* GuiManager::getPanelAtLocation(PanelPlacement placement)
     {
         switch (placement)
         {
@@ -847,16 +672,10 @@ namespace FAGui
         return nullptr;
     }
 
-    const PanelType* GuiManager::panel(PanelPlacement placement) const { return const_cast<self*>(this)->panel(placement); }
+    const PanelType* GuiManager::getPanelAtLocation(PanelPlacement placement) const { return const_cast<self*>(this)->getPanelAtLocation(placement); }
 
     void GuiManager::notify(Engine::KeyboardInputAction action)
     {
-        if (!mDialogs.empty())
-        {
-            mDialogs.back().notify(action, *this);
-            return;
-        }
-
         switch (action)
         {
             case Engine::KeyboardInputAction::toggleQuests:
@@ -929,15 +748,7 @@ namespace FAGui
 
     bool GuiManager::isLastWidgetHovered(nk_context* ctx) const { return nk_inactive_widget_is_hovered(ctx) && !mEngine.isPaused(); }
 
-    bool GuiManager::isInventoryShown() const { return *panel(panelPlacementByType(PanelType::inventory)) == PanelType::inventory; }
-
-    void GuiManager::popDialogData() { mDialogs.pop_back(); }
-
-    void GuiManager::pushDialogData(DialogData&& data)
-    {
-        mDialogs.push_back(std::move(data));
-        mSkipDialogFrame = true;
-    }
+    bool GuiManager::isInventoryShown() const { return *getPanelAtLocation(panelPlacementByType(PanelType::inventory)) == PanelType::inventory; }
 
     bool GuiManager::isPauseBlocked() const
     {
@@ -948,16 +759,11 @@ namespace FAGui
         return false;
     }
 
-    bool GuiManager::isModalDlgShown() const
-    {
-        if (!mDialogs.empty())
-            return true;
-        return false;
-    }
+    bool GuiManager::isModalDlgShown() const { return mDialogManager.hasDialog(); }
 
     void GuiManager::togglePanel(PanelType type)
     {
-        auto& curPanel = *panel(panelPlacementByType(type));
+        auto& curPanel = *getPanelAtLocation(panelPlacementByType(type));
         if (curPanel == type)
             curPanel = PanelType::none;
         else
