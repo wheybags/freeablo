@@ -9,10 +9,12 @@
 
 namespace Engine
 {
+    const char* Server::SERVER_ADDRESS = "127.0.0.1";
+
     Server::Server(FAWorld::World& world, LocalInputHandler& localInputHandler) : mWorld(world), mLocalInputHandler(localInputHandler)
     {
         mAddress.port = 6666;
-        mAddress.host = ENET_HOST_ANY;
+        enet_address_set_host(&mAddress, SERVER_ADDRESS);
         mHost = enet_host_create(&mAddress, 32, 2, 0, 0);
     }
 

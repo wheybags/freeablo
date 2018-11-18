@@ -45,6 +45,8 @@ namespace Engine
         void sendInputsToClients(std::vector<FAWorld::PlayerInput>& inputs);
         void receiveClientUpdate(FASaveGame::GameLoader& loader, Peer& peer);
 
+        static const char* SERVER_ADDRESS;
+
         bool mDoFullVerify = false;
 
         FAWorld::World& mWorld;
