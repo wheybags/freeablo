@@ -184,19 +184,25 @@ namespace Settings
         return std::stoull(textValue, nullptr, 0);
     }
 
+    /// Needed for OSX
+    template <> unsigned long Settings::get<unsigned long>(const std::string& section, const std::string& name, unsigned long defaultValue)
+    {
+        return get<uint64_t>(section, name, defaultValue);
+    }
+
     template <> uint32_t Settings::get<uint32_t>(const std::string& section, const std::string& name, uint32_t defaultValue)
     {
-        return get<int64_t>(section, name, defaultValue);
+        return get<uint64_t>(section, name, defaultValue);
     }
 
     template <> uint16_t Settings::get<uint16_t>(const std::string& section, const std::string& name, uint16_t defaultValue)
     {
-        return get<int64_t>(section, name, defaultValue);
+        return get<uint64_t>(section, name, defaultValue);
     }
 
     template <> uint8_t Settings::get<uint8_t>(const std::string& section, const std::string& name, uint8_t defaultValue)
     {
-        return get<int64_t>(section, name, defaultValue);
+        return get<uint64_t>(section, name, defaultValue);
     }
 
     template <> long double Settings::get<long double>(const std::string& section, const std::string& name, long double defaultValue)
