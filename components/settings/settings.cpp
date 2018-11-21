@@ -184,11 +184,12 @@ namespace Settings
         return std::stoull(textValue, nullptr, 0);
     }
 
-    /// Needed for OSX
+#ifdef __APPLE__
     template <> unsigned long Settings::get<unsigned long>(const std::string& section, const std::string& name, unsigned long defaultValue)
     {
         return get<uint64_t>(section, name, defaultValue);
     }
+#endif
 
     template <> uint32_t Settings::get<uint32_t>(const std::string& section, const std::string& name, uint32_t defaultValue)
     {
