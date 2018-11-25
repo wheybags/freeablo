@@ -147,7 +147,7 @@ namespace DiabloExe
 
     void DiabloExe::loadDropGraphicsFilenames(FAIO::FAFileObject& exe, size_t codeOffset)
     {
-        auto offset = mSettings->get<size_t>("ItemDropGraphics", "filenames");
+        const uint64_t offset = mSettings->get<uint64_t>("ItemDropGraphics", "filenames");
         itemDropGraphicsFilename.resize(35);
         for (int i = 0; i < static_cast<int>(itemDropGraphicsFilename.size()); ++i)
         {
