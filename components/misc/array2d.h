@@ -41,11 +41,7 @@ namespace Misc
         Array2D(Array2D&&) = default;
         Array2D& operator=(Array2D&&) = default;
 
-        bool pointIsValid(int32_t x, int32_t y) const
-        {
-            return (x >= 0 && x < mWidth &&
-                    y >= 0 && y < mHeight);
-        }
+        bool pointIsValid(int32_t x, int32_t y) const { return (x >= 0 && x < mWidth && y >= 0 && y < mHeight); }
 
         const T& get(int32_t x, int32_t y) const
         {
