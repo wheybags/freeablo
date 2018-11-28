@@ -291,8 +291,18 @@ namespace FAGui
             nk_button_label_styled(ctx, &dummyStyle, "");
             if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && !mGoldSplitTarget)
             {
-                Misc::Point clickedPoint{int32_t(std::floor((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x) / cellSize)),
-                                         int32_t(std::floor((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y) / cellSize))};
+                // Adjust for cursor offset when items are held.
+                // When items are held, their sprites are centered around the cursor (rather then top left).
+                auto cursorOffset = nk_vec2(0, 0);
+                auto item = mPlayer->mInventory.getCursorHeld();
+                if (!item.isEmpty())
+                {
+                    auto invSize = item.getInvSize();
+                    cursorOffset = {(1 - invSize[0]) * cellSize / 2,
+                                    (1 - invSize[1]) * cellSize / 2};
+                }
+                Misc::Point clickedPoint{int32_t(std::floor((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x + cursorOffset.x) / cellSize)),
+                                         int32_t(std::floor((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y + cursorOffset.y) / cellSize))};
 
                 FAWorld::PlayerInput::InventorySlotClickedData input{
                     FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(clickedPoint.x, clickedPoint.y)};
