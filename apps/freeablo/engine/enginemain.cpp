@@ -203,10 +203,9 @@ namespace Engine
                 }
                 else
                     state->level = nullptr;
-                if (!FAGui::cursorPath.empty())
-                    state->mCursorEmpty = false;
-                else
-                    state->mCursorEmpty = true;
+
+                state->mCursorEmpty = FAGui::cursorPath.empty();
+
                 if (!mPaused && mWorld->getCurrentPlayer())
                 {
                     auto item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld();

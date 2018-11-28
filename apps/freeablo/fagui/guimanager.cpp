@@ -312,7 +312,7 @@ namespace FAGui
             for (auto row : boost::counting_range(0, mainInventory.height()))
                 for (auto col : boost::counting_range(0, mainInventory.width()))
                 {
-                    auto cell_top_left = nk_vec2(17 + col * cellSize, 222 + row * cellSize);
+                    auto cell_top_left = nk_vec2(invTopLeft.x + col * cellSize, invTopLeft.y + row * cellSize);
                     item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::inventory>(col, row), cell_top_left, ItemHighlightInfo::highlightIfHover);
                 }
             if (mGoldSplitTarget)
