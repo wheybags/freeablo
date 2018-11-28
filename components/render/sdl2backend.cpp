@@ -494,14 +494,13 @@ namespace Render
         return new SpriteGroup(vec);
     }
 
-    void drawCursor(Sprite s)
+    void drawCursor(Sprite s, bool drawCentered)
     {
         if (s == NULL)
         {
             SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW));
             SDL_ShowCursor(1);
         }
-
         else
         {
             SDL_ShowCursor(0);
@@ -509,6 +508,12 @@ namespace Render
             SDL_GetMouseState(&x, &y);
             int32_t w, h;
             spriteSize(s, w, h);
+
+            if (drawCentered)
+            {
+                x -= w/2;
+                y -= h/2;
+            }
             drawSprite(s, x, y);
         }
     }

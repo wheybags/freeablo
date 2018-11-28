@@ -71,6 +71,7 @@ namespace FARender
 
         FASpriteGroup* mCursorSpriteGroup;
         uint32_t mCursorFrame;
+        bool mCursorCentered;
 
         bool mCursorEmpty;
 

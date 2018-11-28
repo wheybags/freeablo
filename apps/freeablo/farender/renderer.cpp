@@ -298,7 +298,7 @@ namespace FARender
         {
             Render::Sprite sprite = mSpriteManager.get(State->mCursorSpriteGroup->getCacheIndex())->operator[](State->mCursorFrame);
             Render::spriteSize(sprite, mCursorSize.x, mCursorSize.y);
-            Render::drawCursor(sprite);
+            Render::drawCursor(sprite, State->mCursorCentered);
         }
         else
         {

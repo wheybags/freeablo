@@ -208,9 +208,17 @@ namespace Engine
                 else
                     state->mCursorEmpty = true;
                 if (!mPaused && mWorld->getCurrentPlayer())
-                    state->mCursorFrame = mWorld->getCurrentPlayer()->mInventory.getCursorHeld().getGraphicValue();
+                {
+                    auto item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld();
+                    state->mCursorFrame = item.getGraphicValue();
+                    // When items are held, their sprites are centered around the cursor (rather then top left).
+                    state->mCursorCentered = !item.isEmpty();
+                }
                 else
+                {
                     state->mCursorFrame = 0;
+                    state->mCursorCentered = false;
+                }
                 state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
                 state->nuklearData.fill(ctx);
             }
