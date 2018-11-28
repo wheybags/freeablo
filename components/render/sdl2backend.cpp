@@ -498,7 +498,7 @@ namespace Render
     {
         if (s == NULL)
         {
-            SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW));
+            SDL_SetCursor(SDL_GetDefaultCursor());
             SDL_ShowCursor(1);
         }
         else
