@@ -171,8 +171,13 @@ namespace FAWorld
         if (mTreatAllItemsAs1by1)
             itemSize = Misc::Point{1, 1};
 
-        if (x < 0 || y < 0 || x - 1 + itemSize.x >= mInventoryBox.width() || y - 1 + itemSize.y >= mInventoryBox.height())
-            return PlaceItemResult{PlaceItemResult::Type::OutOfBounds, {}};
+        // Shift item slot to the closest available that will fit the item.
+        // This removes the need for "out of bounds" placement and gives a more intuitive feel
+        // when placing an item near the edge of the inventory.
+        x = std::max(x, 0);
+        y = std::max(y, 0);
+        x = std::min(x, mInventoryBox.width() - itemSize.x);
+        y = std::min(y, mInventoryBox.height() - itemSize.y);
 
         std::set<Item*> blockingItems;
 
