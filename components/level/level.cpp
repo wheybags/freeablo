@@ -145,11 +145,15 @@ namespace Level
             yDunIndex--;
         yDunIndex /= 2;
 
-        int32_t index = mDun.get(xDunIndex, yDunIndex);
+        // Ensure point is within the bounds of the dungeon.
+        if (mDun.pointIsValid(xDunIndex, yDunIndex))
+        {
+            int32_t index = mDun.get(xDunIndex, yDunIndex);
 
-        // open doors when clicked on
-        if (mDoorMap.find(index) != mDoorMap.end())
-            mDun.get(xDunIndex, yDunIndex) = mDoorMap[index];
+            // open doors when clicked on
+            if (mDoorMap.find(index) != mDoorMap.end())
+                mDun.get(xDunIndex, yDunIndex) = mDoorMap[index];
+        }
     }
 
     int32_t Level::minSize() const { return mMin.size(); }
