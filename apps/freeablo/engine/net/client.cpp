@@ -5,9 +5,9 @@
 #include "../../faworld/world.h"
 #include "../enginemain.h"
 #include "../localinputhandler.h"
+#include <iostream>
 #include <misc/assert.h>
 #include <serial/textstream.h>
-#include <iostream>
 
 namespace Engine
 {
