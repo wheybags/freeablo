@@ -6,6 +6,7 @@
 #include "../localinputhandler.h"
 #include <misc/assert.h>
 #include <serial/textstream.h>
+#include <iostream>
 
 namespace Engine
 {
@@ -13,6 +14,10 @@ namespace Engine
 
     Server::Server(FAWorld::World& world, LocalInputHandler& localInputHandler) : mWorld(world), mLocalInputHandler(localInputHandler)
     {
+        if (0 != enet_initialize())
+        {
+            std::cerr << "Unable to initialize networking library." << std::endl;
+        }
         mAddress.port = 6666;
         enet_address_set_host(&mAddress, SERVER_ADDRESS);
         mHost = enet_host_create(&mAddress, 32, 2, 0, 0);
@@ -21,7 +26,7 @@ namespace Engine
     Server::~Server()
     {
         enet_host_destroy(mHost);
-        mHost = nullptr;
+        enet_deinitialize();
     }
 
     boost::optional<std::vector<FAWorld::PlayerInput>> Server::getAndClearInputs(FAWorld::Tick tick)

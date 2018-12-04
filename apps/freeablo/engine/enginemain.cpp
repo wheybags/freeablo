@@ -142,11 +142,6 @@ namespace Engine
         mInputManager->registerMouseObserver(mLocalInputHandler.get());
         mInputManager->registerKeyboardObserver(mLocalInputHandler.get());
 
-        if (0 != enet_initialize())
-        {
-            std::cerr << "Unable to initialize networking library." << std::endl;
-            return;
-        }
         if (variables["client"].as<bool>())
         {
             mMultiplayer.reset(new Client(*mLocalInputHandler.get()));
@@ -238,7 +233,6 @@ namespace Engine
 
         renderer.stop();
         renderer.waitUntilDone();
-        enet_deinitialize();
     }
 
     void EngineMain::notify(KeyboardInputAction action)
