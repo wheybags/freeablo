@@ -341,7 +341,11 @@ namespace FAWorld
             if (target && target->getPos().isNear(this->getPos()) && canTalkTo(target))
             {
                 if (mWorld.getCurrentPlayer() == this)
-                    Engine::EngineMain::get()->mGuiManager->mDialogManager.talk(target);
+                {
+                    auto& guiManager = Engine::EngineMain::get()->mGuiManager;
+                    guiManager->closeAllPanels();
+                    guiManager->mDialogManager.talk(target);
+                }
                 mTarget.clear();
             }
         }
