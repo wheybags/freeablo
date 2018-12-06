@@ -142,6 +142,7 @@ namespace FAGui
         void descriptionPanel(nk_context* ctx, const std::string& description);
         PanelType* getPanelAtLocation(PanelPlacement placement);
         const PanelType* getPanelAtLocation(PanelPlacement placement) const;
+        bool hotkeysEnabled() const;
         void notify(Engine::KeyboardInputAction action) override;
         void keyPress(const Input::Hotkey&) override;
 

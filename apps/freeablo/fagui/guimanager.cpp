@@ -674,29 +674,34 @@ namespace FAGui
 
     const PanelType* GuiManager::getPanelAtLocation(PanelPlacement placement) const { return const_cast<self*>(this)->getPanelAtLocation(placement); }
 
+    bool GuiManager::hotkeysEnabled() const
+    {
+        // Can't use hotkeys when dialogs are open.
+        // TODO: mGoldSplitTarget might be better as a standard dialog if possible?
+        return (!mGoldSplitTarget && !mDialogManager.hasDialog());
+    }
+
     void GuiManager::notify(Engine::KeyboardInputAction action)
     {
         switch (action)
         {
             case Engine::KeyboardInputAction::toggleQuests:
-                // for unknown reasons Diablo doesn't let you use hotkeys for dialogs when gold split is open
-                // note that normal buttons are working.
-                if (mGoldSplitTarget)
+                if (!hotkeysEnabled())
                     return;
                 togglePanel(PanelType::quests);
                 break;
             case Engine::KeyboardInputAction::toggleInventory:
-                if (mGoldSplitTarget)
+                if (!hotkeysEnabled())
                     return;
                 togglePanel(PanelType::inventory);
                 break;
             case Engine::KeyboardInputAction::toggleCharacterInfo:
-                if (mGoldSplitTarget)
+                if (!hotkeysEnabled())
                     return;
                 togglePanel(PanelType::character);
                 break;
             case Engine::KeyboardInputAction::toggleSpellbook:
-                if (mGoldSplitTarget)
+                if (!hotkeysEnabled())
                     return;
                 togglePanel(PanelType::spells);
                 break;
