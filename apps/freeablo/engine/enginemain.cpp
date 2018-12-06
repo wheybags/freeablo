@@ -242,7 +242,9 @@ namespace Engine
 
         if (action == KeyboardInputAction::pause)
         {
-            if (mGuiManager->isModalDlgShown())
+            if (mGuiManager->anyPanelIsOpen())
+                mGuiManager->closeAllPanels();
+            else if (mGuiManager->isModalDlgShown())
                 mGuiManager->popModalDlg();
             else
                 togglePause();

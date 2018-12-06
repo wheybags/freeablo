@@ -761,6 +761,18 @@ namespace FAGui
 
     void GuiManager::popModalDlg() { mDialogManager.popDialog(); }
 
+    bool GuiManager::anyPanelIsOpen() const
+    {
+        return (mCurLeftPanel != FAGui::PanelType::none || mCurRightPanel != FAGui::PanelType::none);
+    }
+
+    void GuiManager::closeAllPanels()
+    {
+        mCurLeftPanel = FAGui::PanelType::none;
+        mCurRightPanel = FAGui::PanelType::none;
+        mGoldSplitTarget = nullptr;
+    }
+
     void GuiManager::togglePanel(PanelType type)
     {
         auto& curPanel = *getPanelAtLocation(panelPlacementByType(type));

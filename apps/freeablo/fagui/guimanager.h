@@ -110,6 +110,8 @@ namespace FAGui
         // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
         bool isModalDlgShown() const;
         void popModalDlg();
+        bool anyPanelIsOpen() const;
+        void closeAllPanels();
         void setPlayer(FAWorld::Player* player);
         bool isLastWidgetHovered(nk_context* ctx) const;
 
