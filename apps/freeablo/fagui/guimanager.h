@@ -109,6 +109,7 @@ namespace FAGui
         bool isPauseBlocked() const;
         // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
         bool isModalDlgShown() const;
+        void popModalDlg();
         void setPlayer(FAWorld::Player* player);
         bool isLastWidgetHovered(nk_context* ctx) const;
 

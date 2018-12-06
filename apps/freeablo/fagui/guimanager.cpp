@@ -752,14 +752,14 @@ namespace FAGui
 
     bool GuiManager::isPauseBlocked() const
     {
-        if (isModalDlgShown())
-            return true;
         if (mGoldSplitTarget)
             return true;
         return false;
     }
 
     bool GuiManager::isModalDlgShown() const { return mDialogManager.hasDialog(); }
+
+    void GuiManager::popModalDlg() { mDialogManager.popDialog(); }
 
     void GuiManager::togglePanel(PanelType type)
     {

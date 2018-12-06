@@ -296,9 +296,11 @@ namespace FAGui
         {
             CharacterDialoguePopup::UpdateResult result = mDialogStack[mDialogStack.size() - 1]->update(ctx);
             if (result == CharacterDialoguePopup::UpdateResult::PopDialog)
-                mDialogStack.pop_back();
+                popDialog();
         }
     }
 
     void DialogManager::pushDialog(CharacterDialoguePopup* dialog) { mDialogStack.emplace_back(dialog); }
+
+    void DialogManager::popDialog() { mDialogStack.pop_back(); }
 }
