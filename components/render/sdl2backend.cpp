@@ -494,28 +494,29 @@ namespace Render
         return new SpriteGroup(vec);
     }
 
-    void drawCursor(Sprite s, bool drawCentered)
+    FACursor createCursor(const Cel::CelFrame& celFrame, int32_t hot_x, int32_t hot_y)
     {
-        if (s == NULL)
-        {
-            SDL_SetCursor(SDL_GetDefaultCursor());
-            SDL_ShowCursor(1);
-        }
-        else
-        {
-            SDL_ShowCursor(0);
-            int x, y;
-            SDL_GetMouseState(&x, &y);
-            int32_t w, h;
-            spriteSize(s, w, h);
+        auto surface = createTransparentSurface(celFrame.width(), celFrame.height());
+        drawFrame(surface, 0, 0, celFrame);
+        auto cursor = SDL_CreateColorCursor(surface, hot_x, hot_y);
+        SDL_FreeSurface(surface);
+        return (FACursor)cursor;
+    }
 
-            if (drawCentered)
-            {
-                x -= w/2;
-                y -= h/2;
-            }
-            drawSprite(s, x, y);
+    void freeCursor(FACursor cursor)
+    {
+        SDL_FreeCursor((SDL_Cursor*)cursor);
+    }
+
+    void drawCursor(FACursor cursor)
+    {
+        if (cursor == NULL)
+        {
+            cursor = (FACursor)SDL_GetDefaultCursor();
         }
+
+        SDL_SetCursor((SDL_Cursor*)cursor);
+        SDL_ShowCursor(SDL_ENABLE);
     }
 
     SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height)

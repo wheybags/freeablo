@@ -204,7 +204,7 @@ namespace Engine
                 else
                     state->level = nullptr;
 
-                state->mCursorEmpty = FAGui::cursorPath.empty();
+                state->mCursorPath = FAGui::cursorPath;
 
                 if (!mPaused && mWorld->getCurrentPlayer())
                 {
@@ -218,7 +218,6 @@ namespace Engine
                     state->mCursorFrame = 0;
                     state->mCursorCentered = false;
                 }
-                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
                 state->nuklearData.fill(ctx);
             }
 

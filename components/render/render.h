@@ -14,20 +14,20 @@
 #include "cel/pal.h"
 #include <boost/optional.hpp>
 
-struct SDL_Cursor;
 struct SDL_Surface;
 class SpriteGroup;
 
 namespace Render
 {
     typedef void* Sprite;
-    typedef SDL_Cursor* FACursor;
+    typedef void* FACursor;
     typedef SDL_Surface* FASurface;
 }
 
 namespace Cel
 {
     struct Colour;
+    class CelFrame;
 }
 
 #include "levelobjects.h"
@@ -85,7 +85,9 @@ namespace Render
     void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache);
 
     bool getImageInfo(const std::string& path, std::vector<int32_t>& widths, std::vector<int32_t>& heights, int32_t& animLength);
-    void drawCursor(Sprite s, bool drawCentered=false);
+    FACursor createCursor(const Cel::CelFrame& celFrame, int32_t hot_x = 0, int32_t hot_y = 0);
+    void freeCursor(FACursor cursor);
+    void drawCursor(FACursor cursor);
     SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB);
     SpriteGroup* loadResizedSprite(
