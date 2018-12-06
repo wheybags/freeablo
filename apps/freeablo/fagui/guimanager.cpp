@@ -766,10 +766,7 @@ namespace FAGui
 
     void GuiManager::popModalDlg() { mDialogManager.popDialog(); }
 
-    bool GuiManager::anyPanelIsOpen() const
-    {
-        return (mCurLeftPanel != FAGui::PanelType::none || mCurRightPanel != FAGui::PanelType::none);
-    }
+    bool GuiManager::anyPanelIsOpen() const { return (mCurLeftPanel != FAGui::PanelType::none || mCurRightPanel != FAGui::PanelType::none); }
 
     void GuiManager::closeAllPanels()
     {
