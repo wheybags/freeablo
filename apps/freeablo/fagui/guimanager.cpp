@@ -298,8 +298,7 @@ namespace FAGui
                 if (!item.isEmpty())
                 {
                     auto invSize = item.getInvSize();
-                    cursorOffset = {(1 - invSize[0]) * cellSize / 2,
-                                    (1 - invSize[1]) * cellSize / 2};
+                    cursorOffset = {(1 - invSize[0]) * cellSize / 2, (1 - invSize[1]) * cellSize / 2};
                 }
                 Misc::Point clickedPoint{int32_t(std::floor((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x + cursorOffset.x) / cellSize)),
                                          int32_t(std::floor((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y + cursorOffset.y) / cellSize))};

@@ -503,10 +503,7 @@ namespace Render
         return (FACursor)cursor;
     }
 
-    void freeCursor(FACursor cursor)
-    {
-        SDL_FreeCursor((SDL_Cursor*)cursor);
-    }
+    void freeCursor(FACursor cursor) { SDL_FreeCursor((SDL_Cursor*)cursor); }
 
     void drawCursor(FACursor cursor)
     {

@@ -297,12 +297,11 @@ namespace FARender
         Render::FACursor newCursor = mCurrentCursor;
 
         // Only need to update the cursor if it has changed.
-        if (!State->mCursorPath.empty() &&
-                (State->mCursorFrame != mCurrentCursorFrame))
+        if (!State->mCursorPath.empty() && (State->mCursorFrame != mCurrentCursorFrame))
         {
             Cel::CelFile cel(State->mCursorPath);
             Cel::CelFrame& celFrame = cel[State->mCursorFrame];
-            mCursorSize = { celFrame.width(), celFrame.height() };
+            mCursorSize = {celFrame.width(), celFrame.height()};
 
             int32_t hot_x = 0, hot_y = 0;
             if (State->mCursorCentered)
