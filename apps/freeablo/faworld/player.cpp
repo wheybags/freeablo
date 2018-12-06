@@ -275,7 +275,7 @@ namespace FAWorld
 
     bool Player::dropItem(const Misc::Point& clickedPoint)
     {
-        auto cursorItem = mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+        auto cursorItem = mInventory.getCursorHeld();
 
         auto initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getIsometricDirection();
 

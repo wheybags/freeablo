@@ -53,7 +53,7 @@ namespace FAWorld
                 auto clickedPoint = Misc::Point(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
                 mPlayer->getLevel()->activate(clickedPoint);
 
-                auto cursorItem = mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+                auto cursorItem = mPlayer->mInventory.getCursorHeld();
                 if (!cursorItem.isEmpty())
                 {
                     mPlayer->dropItem(clickedPoint);

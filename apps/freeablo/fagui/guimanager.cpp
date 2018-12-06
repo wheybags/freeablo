@@ -193,7 +193,7 @@ namespace FAGui
     {
         auto& inv = mPlayer->mInventory;
         using namespace FAWorld;
-        if (!inv.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
+        if (!inv.getCursorHeld().isEmpty())
             highlight = ItemHighlightInfo::notHighlighed;
         bool checkerboarded = false;
 
@@ -244,7 +244,7 @@ namespace FAGui
             mHoveredInventoryItemText = item.getFullDescription();
         ScopedApplyEffect effect(ctx, effectType);
         nk_image(ctx, img);
-        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
+        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && mPlayer->mInventory.getCursorHeld().isEmpty())
             triggerItem(target);
     }
 

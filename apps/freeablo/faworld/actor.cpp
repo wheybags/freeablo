@@ -197,7 +197,7 @@ namespace FAWorld
                     dropBack();
                 break;
             case Target::ItemTarget::ActionType::toCursor:
-                auto cursorItem = mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+                auto cursorItem = mInventory.getCursorHeld();
                 if (!cursorItem.isEmpty())
                     return dropBack();
 
