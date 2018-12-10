@@ -26,11 +26,6 @@ namespace FARender
     class AnimationPlayer;
 }
 
-namespace Render
-{
-    enum class CursorHotspotLocation;
-}
-
 namespace FAWorld
 {
     class EquipTarget;

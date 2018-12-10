@@ -203,15 +203,21 @@ namespace Engine
                 }
                 else
                     state->level = nullptr;
-                if (!FAGui::cursorPath.empty())
-                    state->mCursorEmpty = false;
-                else
-                    state->mCursorEmpty = true;
+
+                state->mCursorPath = FAGui::cursorPath;
+
                 if (!mPaused && mWorld->getCurrentPlayer())
-                    state->mCursorFrame = mWorld->getCurrentPlayer()->mInventory.getCursorHeld().getGraphicValue();
+                {
+                    auto item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld();
+                    state->mCursorFrame = item.getGraphicValue();
+                    // When items are held, their sprites are centered around the cursor (rather then top left).
+                    state->mCursorCentered = !item.isEmpty();
+                }
                 else
+                {
                     state->mCursorFrame = 0;
-                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
+                    state->mCursorCentered = false;
+                }
                 state->nuklearData.fill(ctx);
             }
 

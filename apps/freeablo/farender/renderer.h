@@ -21,11 +21,6 @@
 #include "spritemanager.h"
 #include <memory>
 
-namespace Render
-{
-    enum class CursorHotspotLocation;
-}
-
 namespace FAWorld
 {
     class GameLevel;
@@ -69,10 +64,9 @@ namespace FARender
 
         FAWorld::GameLevel* level;
 
-        FASpriteGroup* mCursorSpriteGroup;
+        std::string mCursorPath;
         uint32_t mCursorFrame;
-
-        bool mCursorEmpty;
+        bool mCursorCentered;
 
         RenderState(Render::NuklearGraphicsContext& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData.dev) {}
     };
@@ -134,6 +128,8 @@ namespace FARender
         RenderState* mStates;
 
         SpriteManager mSpriteManager;
+        Render::FACursor mCurrentCursor = NULL;
+        uint32_t mCurrentCursorFrame = UINT32_MAX;
         Misc::Point mCursorSize;
 
         volatile bool mAlreadyExited = false;

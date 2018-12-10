@@ -3,6 +3,7 @@
 #include "../fagui/guimanager.h"
 #include "../faworld/gamelevel.h"
 #include "cel/celdecoder.h"
+#include "cel/celfile.h"
 #include "fontinfo.h"
 #include <audio/audio.h>
 #include <boost/format.hpp>
@@ -293,18 +294,31 @@ namespace FARender
 
     void Renderer::drawCursor(RenderState* State)
     {
+        Render::FACursor newCursor = mCurrentCursor;
 
-        if (!State->mCursorEmpty)
+        // Only need to update the cursor if it has changed.
+        if (!State->mCursorPath.empty() && (State->mCursorFrame != mCurrentCursorFrame))
         {
-            Render::Sprite sprite = mSpriteManager.get(State->mCursorSpriteGroup->getCacheIndex())->operator[](State->mCursorFrame);
-            Render::spriteSize(sprite, mCursorSize.x, mCursorSize.y);
-            Render::drawCursor(sprite);
+            Cel::CelFile cel(State->mCursorPath);
+            Cel::CelFrame& celFrame = cel[State->mCursorFrame];
+            mCursorSize = {celFrame.width(), celFrame.height()};
+
+            int32_t hot_x = 0, hot_y = 0;
+            if (State->mCursorCentered)
+            {
+                hot_x = mCursorSize.x / 2;
+                hot_y = mCursorSize.y / 2;
+            }
+            newCursor = Render::createCursor(celFrame, hot_x, hot_y);
+
+            Render::drawCursor(newCursor);
+            if (mCurrentCursor != NULL)
+            {
+                Render::freeCursor(mCurrentCursor);
+            }
+            mCurrentCursor = newCursor;
+            mCurrentCursorFrame = State->mCursorFrame;
         }
-        else
-        {
-            Render::drawCursor(nullptr);
-        }
-        return;
     }
 
     void Renderer::cleanup() { mSpriteManager.clear(); }

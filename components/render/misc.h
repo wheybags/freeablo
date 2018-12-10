@@ -3,13 +3,11 @@
 
 #include <string>
 
-struct SDL_Cursor;
 struct SDL_Surface;
 
 namespace Render
 {
     typedef void* Sprite;
-    typedef SDL_Cursor* FACursor;
     typedef SDL_Surface* FASurface;
 
     class SpriteGroup
