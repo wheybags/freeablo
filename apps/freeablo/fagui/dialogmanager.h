@@ -32,6 +32,7 @@ namespace FAGui
         void update(struct nk_context* ctx);
 
         void pushDialog(CharacterDialoguePopup* dialog);
+        void popDialog();
         bool hasDialog() const { return !mDialogStack.empty(); }
 
     public:

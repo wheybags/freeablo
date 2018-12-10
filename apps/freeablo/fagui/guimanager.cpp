@@ -193,7 +193,7 @@ namespace FAGui
     {
         auto& inv = mPlayer->mInventory;
         using namespace FAWorld;
-        if (!inv.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
+        if (!inv.getCursorHeld().isEmpty())
             highlight = ItemHighlightInfo::notHighlighed;
         bool checkerboarded = false;
 
@@ -244,7 +244,7 @@ namespace FAGui
             mHoveredInventoryItemText = item.getFullDescription();
         ScopedApplyEffect effect(ctx, effectType);
         nk_image(ctx, img);
-        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>()).isEmpty())
+        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && mPlayer->mInventory.getCursorHeld().isEmpty())
             triggerItem(target);
     }
 
@@ -674,29 +674,34 @@ namespace FAGui
 
     const PanelType* GuiManager::getPanelAtLocation(PanelPlacement placement) const { return const_cast<self*>(this)->getPanelAtLocation(placement); }
 
+    bool GuiManager::hotkeysEnabled() const
+    {
+        // Can't use hotkeys when dialogs are open.
+        // TODO: mGoldSplitTarget might be better as a standard dialog if possible?
+        return (!mGoldSplitTarget && !mDialogManager.hasDialog());
+    }
+
     void GuiManager::notify(Engine::KeyboardInputAction action)
     {
         switch (action)
         {
             case Engine::KeyboardInputAction::toggleQuests:
-                // for unknown reasons Diablo doesn't let you use hotkeys for dialogs when gold split is open
-                // note that normal buttons are working.
-                if (mGoldSplitTarget)
+                if (!hotkeysEnabled())
                     return;
                 togglePanel(PanelType::quests);
                 break;
             case Engine::KeyboardInputAction::toggleInventory:
-                if (mGoldSplitTarget)
+                if (!hotkeysEnabled())
                     return;
                 togglePanel(PanelType::inventory);
                 break;
             case Engine::KeyboardInputAction::toggleCharacterInfo:
-                if (mGoldSplitTarget)
+                if (!hotkeysEnabled())
                     return;
                 togglePanel(PanelType::character);
                 break;
             case Engine::KeyboardInputAction::toggleSpellbook:
-                if (mGoldSplitTarget)
+                if (!hotkeysEnabled())
                     return;
                 togglePanel(PanelType::spells);
                 break;
@@ -752,14 +757,23 @@ namespace FAGui
 
     bool GuiManager::isPauseBlocked() const
     {
-        if (isModalDlgShown())
-            return true;
         if (mGoldSplitTarget)
             return true;
         return false;
     }
 
     bool GuiManager::isModalDlgShown() const { return mDialogManager.hasDialog(); }
+
+    void GuiManager::popModalDlg() { mDialogManager.popDialog(); }
+
+    bool GuiManager::anyPanelIsOpen() const { return (mCurLeftPanel != FAGui::PanelType::none || mCurRightPanel != FAGui::PanelType::none); }
+
+    void GuiManager::closeAllPanels()
+    {
+        mCurLeftPanel = FAGui::PanelType::none;
+        mCurRightPanel = FAGui::PanelType::none;
+        mGoldSplitTarget = nullptr;
+    }
 
     void GuiManager::togglePanel(PanelType type)
     {

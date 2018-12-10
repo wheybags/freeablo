@@ -239,13 +239,19 @@ namespace Engine
     {
         if (mGuiManager->isPauseBlocked())
             return;
-        if (mPaused && action != KeyboardInputAction::pause)
-            return;
 
         if (action == KeyboardInputAction::pause)
         {
-            togglePause();
+            if (mGuiManager->anyPanelIsOpen())
+                mGuiManager->closeAllPanels();
+            else if (mGuiManager->isModalDlgShown())
+                mGuiManager->popModalDlg();
+            else
+                togglePause();
         }
+        else if (mPaused)
+            return;
+
         if (action == KeyboardInputAction::quit)
         {
             stop();
