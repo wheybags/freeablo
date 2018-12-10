@@ -118,7 +118,7 @@ namespace Settings
         mImpl->mUserIni.GetAllSections(loadedSections);
 
         Container sectionContainer;
-        for (const CSimpleIniCaseA::Entry section : loadedSections)
+        for (const CSimpleIniCaseA::Entry& section : loadedSections)
         {
             sectionContainer.push_back(section.pItem);
         }
@@ -132,7 +132,7 @@ namespace Settings
         mImpl->mUserIni.GetAllKeys(section.c_str(), loadedKeys);
 
         Container properties;
-        for (const CSimpleIniCaseA::Entry key : loadedKeys)
+        for (const CSimpleIniCaseA::Entry& key : loadedKeys)
         {
             properties.push_back(key.pItem);
         }
@@ -198,6 +198,13 @@ namespace Settings
     {
         return get<uint64_t>(section, name, defaultValue);
     }
+
+#ifdef __clang__
+    template <> size_t Settings::get<size_t>(const std::string& section, const std::string& name, size_t defaultValue)
+    {
+        return get<uint64_t>(section, name, defaultValue);
+    }
+#endif
 
     template <> long double Settings::get<long double>(const std::string& section, const std::string& name, long double defaultValue)
     {
