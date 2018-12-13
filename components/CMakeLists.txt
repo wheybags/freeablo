@@ -110,6 +110,38 @@ add_library(Audio
 target_link_libraries(Audio FAIO SDL_mixer::SDL_mixer)
 set_target_properties(Audio PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
+include(FindLIBVLC)
+IF (LIBVLC_FOUND)
+    add_library(Video
+        video/video.h
+        video/vlc_sdl_backend.cpp
+    )
+    target_link_libraries(Video FAIO "${LIBVLC_LIBRARY}" SDL2::SDL2)
+    target_include_directories(Video PRIVATE "${LIBVLC_INCLUDE_DIR}")
+    set_target_properties(Video PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+    # Uncomment below to build video library for VIDEO_DIRECT_WINDOW_RENDER (not yet working properly...)
+    #set_target_properties(Video PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS} -DVIDEO_DIRECT_WINDOW_RENDER")
+    #if (APPLE)
+    #    target_sources(Video PRIVATE video/MacNSView.m)
+    #    set_source_files_properties(video/MacNSView.m PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS} -fobjc-arc")
+    #ENDIF (APPLE)
+
+ELSE (LIBVLC_FOUND)
+    message("LIBVLC not found, using stub implemenation, video disabled")
+    add_library(Video
+        video/video.h
+        video/stubbackend.cpp
+    )
+    set_target_properties(Video PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+ENDIF (LIBVLC_FOUND)
+
+add_executable(VideoTest
+    video/videotest.cpp
+)
+target_link_libraries(VideoTest Video SDL2::SDL2)
+set_target_properties(VideoTest PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
 add_library(Settings
     settings/settings.h
     settings/settings.cpp

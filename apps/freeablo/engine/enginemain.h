@@ -48,6 +48,7 @@ namespace Engine
 
     private:
         void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);
+        void playVideo(const std::string& path);
 
     private:
         static EngineMain* singletonInstance;
