@@ -58,10 +58,7 @@ namespace Engine
         void sendRenderState(FARender::RenderState* state);
         void sendSpritesForPreload(std::vector<uint32_t> sprites);
         bool waitForVideoComplete(int ms);
-        bool videoInProgress()
-        {
-            return !waitForVideoComplete(0);
-        }
+        bool videoInProgress() { return !waitForVideoComplete(0); }
 
     private:
         void handleMessage(const Message& message);

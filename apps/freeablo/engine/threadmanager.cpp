@@ -32,7 +32,8 @@ namespace Engine
             if (mvideoQueue.pop(message))
                 handleMessage(message);
 
-            while (!waitForVideoComplete(10)) {
+            while (!waitForVideoComplete(10))
+            {
                 // Don't render frames, or even pop normal queue messages while video in progress.
                 // However still need to listen for input and messages to start/stop video.
                 Video::update();
@@ -121,7 +122,7 @@ namespace Engine
     {
         auto tWait = std::chrono::milliseconds(ms);
         std::unique_lock<std::mutex> lk(mVideoPendingMutex);
-        if (mVideoStartedCV.wait_for(lk, tWait, [this]{return !mVideoPending;}))
+        if (mVideoStartedCV.wait_for(lk, tWait, [this] { return !mVideoPending; }))
         {
             lk.unlock();
             if (Video::waitForVideoComplete(ms))

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
 #include <stdint.h>
+#include <string>
 
 namespace Video
 {
@@ -15,8 +15,5 @@ namespace Video
 
     bool waitForVideoComplete(int ms); // Thread safe.
 
-    inline bool isVideoPlaying()
-    {
-        return !waitForVideoComplete(0);
-    }
+    inline bool isVideoPlaying() { return !waitForVideoComplete(0); }
 }

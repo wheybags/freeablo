@@ -4,23 +4,13 @@
 
 namespace Video
 {
-    void init()
-    {
-        std::cout << "No video backend supplied, video disabled" << std::endl;
-    }
+    void init() { std::cout << "No video backend supplied, video disabled" << std::endl; }
 
-    void quit()
-    {
-    }
+    void quit() {}
 
-    void update()
-    {
-    }
+    void update() {}
 
-    void playVideo(const std::string& path)
-    {
-        (void)path;
-    }
+    void playVideo(const std::string& path) { (void)path; }
 
     bool waitForVideoComplete(int ms)
     {
@@ -28,7 +18,5 @@ namespace Video
         return true;
     }
 
-    void stopVideo()
-    {
-    }
+    void stopVideo() {}
 }

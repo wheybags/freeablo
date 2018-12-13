@@ -8,8 +8,8 @@ extern "C" {
 /* Returns the NSView from a NSWindow (i.e. calls NSWindow->contentView).
  * MacNSViewFreeContentView should be called to release the pointer when finished.
  */
-void *MacNSViewGetContentViewFromWindow(void *window);
-void MacNSViewFreeContentView(void *contentView);
+void* MacNSViewGetContentViewFromWindow(void* window);
+void MacNSViewFreeContentView(void* contentView);
 
 #ifdef __cplusplus
 }
