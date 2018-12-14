@@ -110,6 +110,30 @@ add_library(Audio
 target_link_libraries(Audio FAIO SDL_mixer::SDL_mixer)
 set_target_properties(Audio PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
+include(FindMPV)
+IF (MPV_FOUND)
+    add_library(Video
+        video/video.h
+        video/mpv_sdl_backend.cpp
+    )
+    target_link_libraries(Video FAIO "${MPV_LIBRARIES}" SDL2::SDL2)
+    target_include_directories(Video PRIVATE "${MPV_INCLUDE_DIRS}")
+    set_target_properties(Video PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS} ${MPV_DEFINITIONS}")    
+ELSE (MPV_FOUND)
+    message("MPV not found, using stub implemenation, video disabled")
+    add_library(Video
+        video/video.h
+        video/stubbackend.cpp
+    )
+    set_target_properties(Video PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+ENDIF (MPV_FOUND)
+
+add_executable(VideoTest
+    video/videotest.cpp
+)
+target_link_libraries(VideoTest Video SDL2::SDL2)
+set_target_properties(VideoTest PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
 add_library(Settings
     settings/settings.h
     settings/settings.cpp

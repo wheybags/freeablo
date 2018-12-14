@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <input/inputmanager.h>
+#include <video/video.h>
 
 #include "../farender/renderer.h"
 
@@ -19,6 +20,7 @@ namespace Engine
         const int MAXIMUM_DURATION_IN_MS = 1000;
         Input::InputManager* inputManager = Input::InputManager::get();
         FARender::Renderer* renderer = FARender::Renderer::get();
+        Video::init();
 
         Message message;
 
@@ -27,6 +29,19 @@ namespace Engine
 
         while (true)
         {
+            if (mvideoQueue.pop(message))
+                handleMessage(message);
+
+            while (videoInProgress())
+            {
+                // Don't render frames, or even pop normal queue messages while video in progress.
+                // However still need to listen for input and messages to start/stop video.
+                Video::update();
+                inputManager->poll();
+                if (mvideoQueue.pop(message))
+                    handleMessage(message);
+            }
+
             mSpritesToPreload.clear();
 
             while (mQueue.pop(message))
@@ -52,6 +67,7 @@ namespace Engine
         }
 
         renderer->cleanup();
+        Video::quit();
     }
 
     void ThreadManager::playMusic(const std::string& path)
@@ -83,6 +99,36 @@ namespace Engine
         Message message;
         message.type = ThreadState::STOP_SOUND;
         mQueue.push(message);
+    }
+
+    void ThreadManager::playVideo(const std::string& path)
+    {
+        Message message;
+        message.type = ThreadState::PLAY_VIDEO;
+        message.data.videoPath = new std::string(path);
+        mVideoPending = true;
+
+        mvideoQueue.push(message);
+    }
+
+    void ThreadManager::stopVideo()
+    {
+        Message message;
+        message.type = ThreadState::STOP_VIDEO;
+        mvideoQueue.push(message);
+    }
+
+    bool ThreadManager::waitForVideoComplete(int ms)
+    {
+        auto tWait = std::chrono::milliseconds(ms);
+        std::unique_lock<std::mutex> lk(mVideoPendingMutex);
+        if (mVideoStartedCV.wait_for(lk, tWait, [this] { return !mVideoPending; }))
+        {
+            lk.unlock();
+            if (Video::waitForVideoComplete(ms))
+                return true;
+        }
+        return false;
     }
 
     void ThreadManager::sendRenderState(FARender::RenderState* state)
@@ -124,6 +170,25 @@ namespace Engine
             case ThreadState::STOP_SOUND:
             {
                 mAudioManager.stopSound();
+                break;
+            }
+
+            case ThreadState::PLAY_VIDEO:
+            {
+                mAudioManager.stopSound();
+
+                Video::playVideo(*message.data.videoPath);
+                delete message.data.videoPath;
+
+                std::unique_lock<std::mutex> lk(mVideoPendingMutex);
+                mVideoPending = false;
+                mVideoStartedCV.notify_all();
+                break;
+            }
+
+            case ThreadState::STOP_VIDEO:
+            {
+                Video::stopVideo();
                 break;
             }
 

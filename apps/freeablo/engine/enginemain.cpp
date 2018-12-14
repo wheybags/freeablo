@@ -64,6 +64,15 @@ namespace Engine
         mainThread.join();
     }
 
+    void EngineMain::playVideo(const std::string& path)
+    {
+        Engine::ThreadManager::get()->playVideo(std::string(path));
+        while (!Engine::ThreadManager::get()->waitForVideoComplete(100))
+        {
+            mInputManager->update(false);
+        }
+    }
+
     void EngineMain::runGameLoop(const bpo::variables_map& variables, const std::string& pathEXE)
     {
         FARender::Renderer& renderer = *FARender::Renderer::get();
@@ -80,6 +89,10 @@ namespace Engine
             renderer.stop();
             return;
         }
+
+        // Play the intro cinematics.
+        playVideo("gendata/logo.smk");
+        playVideo("gendata/diablo1.smk");
 
         FAWorld::ItemFactory itemFactory(*mExe, Random::DummyRng::instance);
         mPlayerFactory = boost::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
@@ -243,6 +256,14 @@ namespace Engine
 
     void EngineMain::notify(KeyboardInputAction action)
     {
+        // Only handle the esc key when playing video.
+        if (Engine::ThreadManager::get()->videoInProgress())
+        {
+            if (action == KeyboardInputAction::pause)
+                Engine::ThreadManager::get()->stopVideo();
+            return;
+        }
+
         if (mGuiManager->isPauseBlocked())
             return;
 
