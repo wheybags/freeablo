@@ -15,12 +15,10 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-     SDL_Window *window = SDL_CreateWindow(
-            "VideoTest",
-            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            1280, 960,
-            SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN /*|SDL_WINDOW_FULLSCREEN*/);
-    if (!window) {
+    SDL_Window* window = SDL_CreateWindow(
+        "VideoTest", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 960, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN /*|SDL_WINDOW_FULLSCREEN*/);
+    if (!window)
+    {
         return EXIT_FAILURE;
     }
     SDL_GLContext glContext = SDL_GL_CreateContext(window);

@@ -3,6 +3,7 @@
 //  https://github.com/mpv-player/mpv-examples/blob/master/libmpv/streamcb/simple-streamcb.c
 #include "video.h"
 
+#include <SDL.h>
 #include <condition_variable>
 #include <faio/fafileobject.h>
 #include <iostream>
@@ -10,24 +11,23 @@
 #include <mpv/render_gl.h>
 #include <mpv/stream_cb.h>
 #include <mutex>
-#include <SDL.h>
 
 namespace Video
 {
-    static mpv_handle *mpv;
-    static mpv_render_context *mpv_gl;
+    static mpv_handle* mpv;
+    static mpv_render_context* mpv_gl;
     static bool redraw;
     static std::mutex cvMutex;
     static bool videoPlaying;
     static std::condition_variable videoCompleteCV;
 
     static void check_error(int status);
-    static void *get_proc_address_mpv(void *fn_ctx, const char *name);
-    static void on_mpv_redraw(void *ctx);
-    static int media_open_fn(void *user_data, char *uri, mpv_stream_cb_info *info);
-    static int64_t media_read_fn(void *cookie, char *buf, uint64_t nbytes);
-    static int64_t media_seek_fn(void *cookie, int64_t offset);
-    static void media_close_fn(void *cookie);
+    static void* get_proc_address_mpv(void* fn_ctx, const char* name);
+    static void on_mpv_redraw(void* ctx);
+    static int media_open_fn(void* user_data, char* uri, mpv_stream_cb_info* info);
+    static int64_t media_read_fn(void* cookie, char* buf, uint64_t nbytes);
+    static int64_t media_seek_fn(void* cookie, int64_t offset);
+    static void media_close_fn(void* cookie);
 
     void init()
     {
@@ -42,10 +42,10 @@ namespace Video
         mpv_opengl_init_params mpvOpenglInitParams = {};
         mpvOpenglInitParams.get_proc_address = get_proc_address_mpv;
         mpv_render_param params[] = {
-                {MPV_RENDER_PARAM_API_TYPE, (void *)MPV_RENDER_API_TYPE_OPENGL},
-                {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &mpvOpenglInitParams},
-                {MPV_RENDER_PARAM_INVALID, NULL} // Terminate parameters.
-            };
+            {MPV_RENDER_PARAM_API_TYPE, (void*)MPV_RENDER_API_TYPE_OPENGL},
+            {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &mpvOpenglInitParams},
+            {MPV_RENDER_PARAM_INVALID, NULL} // Terminate parameters.
+        };
 
         // This makes mpv use the currently set GL context. It will use the callback
         // (passed via params) to resolve GL builtin functions, as well as extensions.
@@ -87,9 +87,7 @@ namespace Video
             // Flip rendering (needed due to flipped GL coordinate system).
             int flipY = 1;
             mpv_render_param params[] = {
-                {MPV_RENDER_PARAM_OPENGL_FBO, &openGlFbo},
-                {MPV_RENDER_PARAM_FLIP_Y, &flipY},
-                {MPV_RENDER_PARAM_INVALID, NULL} // Terminate parameters.
+                {MPV_RENDER_PARAM_OPENGL_FBO, &openGlFbo}, {MPV_RENDER_PARAM_FLIP_Y, &flipY}, {MPV_RENDER_PARAM_INVALID, NULL} // Terminate parameters.
             };
             // See render_gl.h on what OpenGL environment mpv expects, and
             // other API details.
@@ -100,7 +98,7 @@ namespace Video
         // Handle mpv events.
         while (1)
         {
-            mpv_event *mp_event = mpv_wait_event(mpv, 0);
+            mpv_event* mp_event = mpv_wait_event(mpv, 0);
             if (mp_event->event_id == MPV_EVENT_NONE)
                 break;
             if (mp_event->event_id == MPV_EVENT_END_FILE)
@@ -122,7 +120,7 @@ namespace Video
 
         std::string pathWithUri = std::string("fafile://") + path;
 
-        const char *cmd[] = {"loadfile", pathWithUri.c_str(), NULL};
+        const char* cmd[] = {"loadfile", pathWithUri.c_str(), NULL};
         check_error(mpv_command(mpv, cmd));
 
         videoPlaying = true;
@@ -130,8 +128,9 @@ namespace Video
         update();
     }
 
-    void stopVideo() {
-        const char *cmd[] = {"stop", NULL};
+    void stopVideo()
+    {
+        const char* cmd[] = {"stop", NULL};
         check_error(mpv_command(mpv, cmd));
     }
 
@@ -150,20 +149,20 @@ namespace Video
             std::cerr << "MPV API error: " << mpv_error_string(status) << std::endl;
     }
 
-    static void *get_proc_address_mpv(void *fn_ctx, const char *name)
+    static void* get_proc_address_mpv(void* fn_ctx, const char* name)
     {
         (void)fn_ctx;
         return SDL_GL_GetProcAddress(name);
     }
 
-    static void on_mpv_redraw(void *ctx)
+    static void on_mpv_redraw(void* ctx)
     {
         // Do the rendering in the main loop for thread safety.
         (void)ctx;
         redraw = true;
     }
 
-    static int media_open_fn(void *user_data, char *uri, mpv_stream_cb_info *info)
+    static int media_open_fn(void* user_data, char* uri, mpv_stream_cb_info* info)
     {
         (void)user_data;
         std::string prefix = "fafile://";
@@ -176,19 +175,19 @@ namespace Video
         return fp ? 0 : MPV_ERROR_LOADING_FAILED;
     }
 
-    static int64_t media_read_fn(void *cookie, char *buf, uint64_t nbytes)
+    static int64_t media_read_fn(void* cookie, char* buf, uint64_t nbytes)
     {
         FAIO::FAFileObject* fp = (FAIO::FAFileObject*)cookie;
         return fp->FAfread(buf, 1, nbytes);
     }
 
-    static int64_t media_seek_fn(void *cookie, int64_t offset)
+    static int64_t media_seek_fn(void* cookie, int64_t offset)
     {
         FAIO::FAFileObject* fp = (FAIO::FAFileObject*)cookie;
         return fp->FAfseek(offset, SEEK_SET);
     }
 
-    static void media_close_fn(void *cookie)
+    static void media_close_fn(void* cookie)
     {
         FAIO::FAFileObject* fp = (FAIO::FAFileObject*)cookie;
         delete fp;
