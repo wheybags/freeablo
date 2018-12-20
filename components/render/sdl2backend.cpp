@@ -1125,6 +1125,8 @@ namespace Render
     void drawLevel(const Level::Level& level,
                    size_t minTopsHandle,
                    size_t minBottomsHandle,
+                   size_t specialSpritesHandle,
+                   const std::map<int32_t, int32_t>& specialSpritesMap,
                    SpriteCacheBase* cache,
                    LevelObjects& objs,
                    LevelObjects& items,
@@ -1163,7 +1165,20 @@ namespace Render
 
             size_t index = level.get(tile.pos).index();
             if (index < minTops->size())
+            {
                 drawAtTile((*minTops)[index], topLeft, tileWidth, staticObjectHeight);
+
+                // Add special sprites (arches / open door frames) if required.
+                if (specialSpritesMap.count(index))
+                {
+                    int32_t specialSpriteIndex = specialSpritesMap.at(index);
+                    SpriteGroup* specialSpriteGroup = cache->get(specialSpritesHandle);
+                    Sprite& sprite = (*specialSpriteGroup)[specialSpriteIndex];
+                    int w, h;
+                    spriteSize(sprite, w, h);
+                    drawAtTile(sprite, topLeft, w, h);
+                }
+            }
 
             auto& itemsForTile = items.get(tile.pos.x, tile.pos.y);
             for (auto& item : itemsForTile)

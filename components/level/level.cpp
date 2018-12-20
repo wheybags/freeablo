@@ -10,20 +10,31 @@ namespace Level
                  const std::string& minPath,
                  const std::string& solPath,
                  const std::string& tileSetPath,
+                 const std::string& specialCelPath,
+                 const std::map<int32_t, int32_t>& specialCelMap,
                  const Misc::Point& downStairs,
                  const Misc::Point& upStairs,
                  std::map<int32_t, int32_t> doorMap,
                  int32_t previous,
                  int32_t next)
-        : mTilesetCelPath(tileSetPath), mTilPath(tilPath), mMinPath(minPath), mSolPath(solPath), mDun(std::move(dun)), mTil(mTilPath), mMin(mMinPath),
+        : mTilesetCelPath(tileSetPath), mSpecialCelPath(specialCelPath), mSpecialCelMap(specialCelMap),
+          mTilPath(tilPath), mMinPath(minPath), mSolPath(solPath), mDun(std::move(dun)), mTil(mTilPath), mMin(mMinPath),
           mSol(mSolPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs), mPrevious(previous), mNext(next)
     {
     }
 
     Level::Level(Serial::Loader& loader)
-        : mTilesetCelPath(loader.load<std::string>()), mTilPath(loader.load<std::string>()), mMinPath(loader.load<std::string>()),
-          mSolPath(loader.load<std::string>()), mDun(loader), mTil(mTilPath), mMin(mMinPath), mSol(mSolPath)
+        : mTilesetCelPath(loader.load<std::string>()), mSpecialCelPath(loader.load<std::string>()),
+          mTilPath(loader.load<std::string>()), mMinPath(loader.load<std::string>()), mSolPath(loader.load<std::string>()),
+          mDun(loader), mTil(mTilPath), mMin(mMinPath), mSol(mSolPath)
     {
+        uint32_t specialCelMapSize = loader.load<uint32_t>();
+        for (uint32_t i = 0; i < specialCelMapSize; i++)
+        {
+            int32_t key = loader.load<int32_t>();
+            mSpecialCelMap[key] = loader.load<int32_t>();
+        }
+
         uint32_t doorMapSize = loader.load<uint32_t>();
         for (uint32_t i = 0; i < doorMapSize; i++)
         {
@@ -50,10 +61,19 @@ namespace Level
         Serial::ScopedCategorySaver cat("Level", saver);
 
         saver.save(mTilesetCelPath);
+        saver.save(mSpecialCelPath);
         saver.save(mTilPath);
         saver.save(mMinPath);
         saver.save(mSolPath);
         mDun.save(saver);
+
+        uint32_t specialCelMapSize = mSpecialCelMap.size();
+        saver.save(specialCelMapSize);
+        for (const auto& entry : mSpecialCelMap)
+        {
+            saver.save(entry.first);
+            saver.save(entry.second);
+        }
 
         uint32_t doorMapSize = mDoorMap.size();
         saver.save(doorMapSize);
@@ -169,6 +189,10 @@ namespace Level
     const Misc::Point& Level::downStairsPos() const { return mDownStairs; }
 
     const std::string& Level::getTileSetPath() const { return mTilesetCelPath; }
+
+    const std::string& Level::getSpecialCelPath() const { return mSpecialCelPath; }
+
+    const std::map<int32_t, int32_t>& Level::getSpecialCelMap() const { return mSpecialCelMap; }
 
     const std::string& Level::getMinPath() const { return mMinPath; }
 
