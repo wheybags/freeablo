@@ -17,16 +17,15 @@ namespace Level
                  std::map<int32_t, int32_t> doorMap,
                  int32_t previous,
                  int32_t next)
-        : mTilesetCelPath(tileSetPath), mSpecialCelPath(specialCelPath), mSpecialCelMap(specialCelMap),
-          mTilPath(tilPath), mMinPath(minPath), mSolPath(solPath), mDun(std::move(dun)), mTil(mTilPath), mMin(mMinPath),
-          mSol(mSolPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs), mPrevious(previous), mNext(next)
+        : mTilesetCelPath(tileSetPath), mSpecialCelPath(specialCelPath), mSpecialCelMap(specialCelMap), mTilPath(tilPath), mMinPath(minPath), mSolPath(solPath),
+          mDun(std::move(dun)), mTil(mTilPath), mMin(mMinPath), mSol(mSolPath), mDoorMap(doorMap), mUpStairs(upStairs), mDownStairs(downStairs),
+          mPrevious(previous), mNext(next)
     {
     }
 
     Level::Level(Serial::Loader& loader)
-        : mTilesetCelPath(loader.load<std::string>()), mSpecialCelPath(loader.load<std::string>()),
-          mTilPath(loader.load<std::string>()), mMinPath(loader.load<std::string>()), mSolPath(loader.load<std::string>()),
-          mDun(loader), mTil(mTilPath), mMin(mMinPath), mSol(mSolPath)
+        : mTilesetCelPath(loader.load<std::string>()), mSpecialCelPath(loader.load<std::string>()), mTilPath(loader.load<std::string>()),
+          mMinPath(loader.load<std::string>()), mSolPath(loader.load<std::string>()), mDun(loader), mTil(mTilPath), mMin(mMinPath), mSol(mSolPath)
     {
         uint32_t specialCelMapSize = loader.load<uint32_t>();
         for (uint32_t i = 0; i < specialCelMapSize; i++)
