@@ -787,7 +787,8 @@ namespace Render
     {
         Cel::CelFile cel(celPath);
 
-        int32_t numFrames = cel.animLength();
+        int32_t numFrames = cel.numFrames();
+
         if (numFrames == 0)
             return;
 
