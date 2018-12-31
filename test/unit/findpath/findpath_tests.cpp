@@ -141,23 +141,33 @@ TEST(FindPathTests, walksStraightOnRectangleMap)
 
 TEST(FindPathTests, walksOnLargeMap)
 {
-    const size_t map_size = 100;
-    const size_t mask_size = 18;
-    const auto offset = 40;
-
-    const Point start{offset - 1, offset + mask_size / 2};
-    const Point goal{offset + mask_size, offset + mask_size / 2};
+    const size_t map_size = 500;
+    const Point start{0, 0};
+    const Point goal{map_size - 1, map_size - 1};
 
     Map map{map_size, std::vector<int>(map_size, 0)};
-    Map mask{mask_size, std::vector<int>(mask_size, 1)};
-
-    for (size_t y = 0; y < mask.size(); ++y)
-        std::copy(mask[y].begin(), mask[y].end(), map[offset + y].begin() + offset);
 
     FAWorld::LevelImplStub level(map);
 
     bool isReachable = false;
     auto path = FAWorld::pathFind(&level, start, goal, isReachable, false);
 
-    ASSERT_EQ(path.size(), 35);
+    ASSERT_EQ(path.size(), map_size - 1);
+}
+
+TEST(FindPathTests, pathfinderIsLimited)
+{
+    const size_t map_size = 5000;
+    const Point start{0, 0};
+    const Point goal{map_size - 1, map_size - 1};
+
+    Map map{map_size, std::vector<int>(map_size, 0)};
+
+    FAWorld::LevelImplStub level(map);
+
+    bool isReachable = false;
+    auto path = FAWorld::pathFind(&level, start, goal, isReachable, false);
+
+    EXPECT_EQ(path.size(), 0);
+    ASSERT_FALSE(isReachable);
 }
