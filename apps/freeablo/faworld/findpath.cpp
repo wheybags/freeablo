@@ -103,7 +103,7 @@ namespace FAWorld
         costSoFar.get(start.x, start.y) = 0;
 
         int32_t iterations = 0;
-        while (!frontier.empty() && iterations < 500)
+        while (!frontier.empty() && iterations < 1000)
         {
             iterations++;
             Misc::Point current = frontier.get();
