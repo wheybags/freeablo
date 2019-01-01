@@ -47,7 +47,7 @@ namespace Engine
 
         size_t resolutionWidth = settings.get<size_t>("Display", "resolutionWidth");
         size_t resolutionHeight = settings.get<size_t>("Display", "resolutionHeight");
-        std::string fullscreen = settings.get<std::string>("Display", "fullscreen");
+        const bool fullscreen = settings.get<bool>("Display", "fullscreen");
         std::string pathEXE = settings.get<std::string>("Game", "PathEXE");
         if (pathEXE == "")
         {
@@ -55,7 +55,7 @@ namespace Engine
         }
 
         Engine::ThreadManager threadManager;
-        FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen == "true");
+        FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen);
         mInputManager = std::make_shared<EngineInputManager>(renderer.getNuklearContext());
         mInputManager->registerKeyboardObserver(this);
         std::thread mainThread(std::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));

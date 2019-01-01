@@ -94,3 +94,9 @@ target_include_directories(${LIB} PUBLIC nativefiledialog/src/include)
 #else()
 #    set_property(TARGET ${LIB} PROPERTY C_STANDARD 99)
 #endif()
+
+# simpleini
+###################
+set(LIB simpleini)
+add_library(${LIB} INTERFACE)
+target_include_directories(${LIB} INTERFACE simpleini/)
