@@ -88,7 +88,7 @@ namespace Level
     private:
         std::string mTilesetCelPath;               ///< path to cel file for level
         std::string mSpecialCelPath;               ///< path to special cel file for level (mostly used for arches / open doors).
-        std::map<int32_t, int32_t> mSpecialCelMap; ///< Map from tileset frame number to special tileset frame number
+        std::map<int32_t, int32_t> mSpecialCelMap; ///< Map from tileset frame number to special cel frame number
         std::string mTilPath;                      ///< path to til file for level
         std::string mMinPath;                      ///< path to min file for level
         std::string mSolPath;                      ///< path to sol file for this level

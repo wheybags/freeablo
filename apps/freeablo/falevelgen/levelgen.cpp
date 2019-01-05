@@ -1115,9 +1115,12 @@ namespace FALevelGen
             level.get(x + 1, y + 1) = tileset.downStairs9;
         }
 
+        // Map from tileset frame number to special cel frame number.
+        // Special cel images are mostly used for arches / open doors.
+        // Special cel images currently only exist for levels 1, 2 and town.
+        // TODO: load specialCelMap from file.
         std::map<int32_t, int32_t> specialCelMap = {};
         std::string specialCelPath = "";
-        // Special Cels currently only exist for levels 1, 2 and town.
         switch (levelNum)
         {
             case 1:
