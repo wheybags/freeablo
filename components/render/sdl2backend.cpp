@@ -18,6 +18,8 @@
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
 
+#include "../../extern/jo_gif/jo_gif.cpp"
+
 /*#define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
 #define NK_INCLUDE_STANDARD_VARARGS
@@ -818,6 +820,43 @@ namespace Render
 
         SDL_FreeSurface(s);
     }
+
+    void SpriteGroup::toGif(const std::string& celPath, const std::string& gifPath)
+    {
+        Cel::CelFile cel(celPath);
+
+        int32_t width = cel[0].width();
+        int32_t height = cel[0].height();
+
+        int32_t numFrames = cel.numFrames();
+
+        if (numFrames == 0)
+            return;
+
+        jo_gif_t gif = jo_gif_start(gifPath.c_str(), width, height, 0, 256);
+
+        for (int32_t i = 0; i < numFrames; i++)
+        {
+            SDL_Surface* s = createTransparentSurface(width, height);
+            drawFrame(s, 0, 0, cel[i]);
+
+            uint8_t** gifImage = (uint8_t**)malloc(s->h * sizeof(uint8_t*));
+
+            for (int j = 0; j < s->h; j++)
+            {   
+                gifImage[j] = (uint8_t*)(uint8_t**)s->pixels + j * s->pitch;
+            }
+
+            jo_gif_frame(&gif, *gifImage, 10, true, 0x00, 0xFF, 0x00);
+
+            free(gifImage);
+
+            SDL_FreeSurface(s);
+        }
+
+        jo_gif_end(&gif);
+
+}
 
     void SpriteGroup::destroy()
     {

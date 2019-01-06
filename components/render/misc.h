@@ -25,6 +25,7 @@ namespace Render
         int32_t getHeight() const { return mHeight; }
 
         static void toPng(const std::string& celPath, const std::string& pngPath);
+        static void toGif(const std::string& celPath, const std::string& gifPath);
 
     private:
         std::vector<Sprite> mSprites;
