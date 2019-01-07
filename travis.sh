@@ -17,5 +17,5 @@ if [ $JOB == "build" ]; then
     cd build
     cmake -DFA_TREAT_WARNINGS_AS_ERRORS=ON -G "Unix Makefiles" ../
     make -k
-    make fatest -k
+    ./unit_tests
 fi

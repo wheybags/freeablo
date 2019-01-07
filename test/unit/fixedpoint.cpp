@@ -103,10 +103,3 @@ TEST(FixedPoint, VectorToDirection)
     ASSERT_EQ(Vec2Fix(-1, -1).getIsometricDirection(), Misc::Direction::north);
     ASSERT_EQ(Vec2Fix(-1, 1).getIsometricDirection(), Misc::Direction::west);
 }
-
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    int retval = RUN_ALL_TESTS();
-    return retval;
-}
