@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <functional>
+#include <map>
 
 #include "misc.h"
 #include "misc/point.h"
@@ -119,6 +120,8 @@ namespace Render
     void drawLevel(const Level::Level& level,
                    size_t minTopsHandle,
                    size_t minBottomsHandle,
+                   size_t specialSpritesHandle,
+                   const std::map<int32_t, int32_t>& specialSpritesMap,
                    SpriteCacheBase* cache,
                    LevelObjects& objs,
                    LevelObjects& items,

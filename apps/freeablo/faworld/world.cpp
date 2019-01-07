@@ -180,11 +180,21 @@ namespace FAWorld
         Level::Dun sector3("levels/towndata/sector3s.dun");
         Level::Dun sector4("levels/towndata/sector4s.dun");
 
+        // Map from tileset frame number to special cel frame number.
+        // Special cel images are mostly used for arches / open doors.
+        // The town special cel images overlay on trees, although do
+        // not seem to make any difference to the final output.
+        // TODO: load specialCelMap from file.
+        std::map<int32_t, int32_t> specialCelMap = {
+            {357, 1}, {128, 5}, {129, 6}, {127, 7}, {116, 8}, {156, 9}, {157, 10}, {155, 11}, {161, 12}, {159, 13}, {213, 14}, {211, 15}, {216, 16}, {215, 17}};
+
         Level::Level townLevelBase(Level::Dun::getTown(sector1, sector2, sector3, sector4),
                                    "levels/towndata/town.til",
                                    "levels/towndata/town.min",
                                    "levels/towndata/town.sol",
                                    "levels/towndata/town.cel",
+                                   "levels/towndata/towns.cel",
+                                   specialCelMap,
                                    Misc::Point(25u, 29u),
                                    Misc::Point(75u, 68u),
                                    std::map<int32_t, int32_t>(),

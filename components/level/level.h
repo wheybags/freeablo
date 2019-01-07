@@ -47,6 +47,8 @@ namespace Level
               const std::string& minPath,
               const std::string& solPath,
               const std::string& tileSetPath,
+              const std::string& specialCelPath,
+              const std::map<int32_t, int32_t>& specialCelMap,
               const Misc::Point& downStairs,
               const Misc::Point& upStairs,
               std::map<int32_t, int32_t> doorMap,
@@ -73,6 +75,8 @@ namespace Level
         const Misc::Point& downStairsPos() const;
 
         const std::string& getTileSetPath() const;
+        const std::string& getSpecialCelPath() const;
+        const std::map<int32_t, int32_t>& getSpecialCelMap() const;
         const std::string& getMinPath() const;
 
         bool isStairs(int32_t, int32_t) const;
@@ -82,10 +86,12 @@ namespace Level
         int32_t getPreviousLevel() const { return mPrevious; }
 
     private:
-        std::string mTilesetCelPath; ///< path to cel file for level
-        std::string mTilPath;        ///< path to til file for level
-        std::string mMinPath;        ///< path to min file for level
-        std::string mSolPath;        ///< path to sol file for this level
+        std::string mTilesetCelPath;               ///< path to cel file for level
+        std::string mSpecialCelPath;               ///< path to special cel file for level (mostly used for arches / open doors).
+        std::map<int32_t, int32_t> mSpecialCelMap; ///< Map from tileset frame number to special cel frame number
+        std::string mTilPath;                      ///< path to til file for level
+        std::string mMinPath;                      ///< path to min file for level
+        std::string mSolPath;                      ///< path to sol file for this level
 
         Dun mDun;
         TileSet mTil;

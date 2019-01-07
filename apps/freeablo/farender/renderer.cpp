@@ -147,6 +147,11 @@ namespace FARender
         Tileset tileset;
         tileset.minTops = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), true);
         tileset.minBottoms = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), false);
+        // Special Cels may not exist for certain levels.
+        tileset.mSpecialSprites = NULL;
+        if (!level.getSpecialCelPath().empty())
+            tileset.mSpecialSprites = mSpriteManager.get(level.getSpecialCelPath());
+        tileset.mSpecialSpriteMap = level.getSpecialCelMap();
         return tileset;
     }
 
@@ -265,6 +270,8 @@ namespace FARender
                 Render::drawLevel(state->level->mLevel,
                                   state->tileset.minTops->getCacheIndex(),
                                   state->tileset.minBottoms->getCacheIndex(),
+                                  state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->getCacheIndex() : 0,
+                                  state->tileset.mSpecialSpriteMap,
                                   &mSpriteManager,
                                   mLevelObjects,
                                   mItems,
