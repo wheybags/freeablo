@@ -275,7 +275,7 @@ namespace FAWorld
 
     bool Player::dropItem(const Misc::Point& clickedPoint)
     {
-        auto cursorItem = mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
+        auto cursorItem = mInventory.getCursorHeld();
 
         auto initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getIsometricDirection();
 
@@ -341,7 +341,11 @@ namespace FAWorld
             if (target && target->getPos().isNear(this->getPos()) && canTalkTo(target))
             {
                 if (mWorld.getCurrentPlayer() == this)
-                    Engine::EngineMain::get()->mGuiManager->mDialogManager.talk(target);
+                {
+                    auto& guiManager = Engine::EngineMain::get()->mGuiManager;
+                    guiManager->closeAllPanels();
+                    guiManager->mDialogManager.talk(target);
+                }
                 mTarget.clear();
             }
         }

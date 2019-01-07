@@ -47,7 +47,7 @@ namespace Engine
 
         size_t resolutionWidth = settings.get<size_t>("Display", "resolutionWidth");
         size_t resolutionHeight = settings.get<size_t>("Display", "resolutionHeight");
-        std::string fullscreen = settings.get<std::string>("Display", "fullscreen");
+        const bool fullscreen = settings.get<bool>("Display", "fullscreen");
         std::string pathEXE = settings.get<std::string>("Game", "PathEXE");
         if (pathEXE == "")
         {
@@ -55,7 +55,7 @@ namespace Engine
         }
 
         Engine::ThreadManager threadManager;
-        FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen == "true");
+        FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen);
         mInputManager = std::make_shared<EngineInputManager>(renderer.getNuklearContext());
         mInputManager->registerKeyboardObserver(this);
         std::thread mainThread(std::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
@@ -203,15 +203,21 @@ namespace Engine
                 }
                 else
                     state->level = nullptr;
-                if (!FAGui::cursorPath.empty())
-                    state->mCursorEmpty = false;
-                else
-                    state->mCursorEmpty = true;
+
+                state->mCursorPath = FAGui::cursorPath;
+
                 if (!mPaused && mWorld->getCurrentPlayer())
-                    state->mCursorFrame = mWorld->getCurrentPlayer()->mInventory.getCursorHeld().getGraphicValue();
+                {
+                    auto item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld();
+                    state->mCursorFrame = item.getGraphicValue();
+                    // When items are held, their sprites are centered around the cursor (rather then top left).
+                    state->mCursorCentered = !item.isEmpty();
+                }
                 else
+                {
                     state->mCursorFrame = 0;
-                state->mCursorSpriteGroup = renderer.loadImage("data/inv/objcurs.cel");
+                    state->mCursorCentered = false;
+                }
                 state->nuklearData.fill(ctx);
             }
 
@@ -239,13 +245,19 @@ namespace Engine
     {
         if (mGuiManager->isPauseBlocked())
             return;
-        if (mPaused && action != KeyboardInputAction::pause)
-            return;
 
         if (action == KeyboardInputAction::pause)
         {
-            togglePause();
+            if (mGuiManager->anyPanelIsOpen())
+                mGuiManager->closeAllPanels();
+            else if (mGuiManager->isModalDlgShown())
+                mGuiManager->popModalDlg();
+            else
+                togglePause();
         }
+        else if (mPaused)
+            return;
+
         if (action == KeyboardInputAction::quit)
         {
             stop();

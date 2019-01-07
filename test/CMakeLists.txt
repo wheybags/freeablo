@@ -26,8 +26,9 @@ if(FA_TESTS_ENABLED)
 
     # actual tests go here
     fa_add_test(cel "Cel;SDL2::SDL2;Misc;SDL_image::SDL_image" No)
-    fa_add_test(serial "Serial;freeablo_lib" Yes)
     fa_add_test(fixedpoint "Misc" Yes)
+    fa_add_test(serial "Serial;freeablo_lib" Yes)
+    fa_add_test(settings "Settings;Boost::filesystem;simpleini" Yes)
 
     add_custom_target(fatest ${all_tests})
     set_target_properties(fatest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)

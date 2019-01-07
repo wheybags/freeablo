@@ -15,7 +15,8 @@
     MACRO(SplitGoldStackIntoCursor)                                                                                                                            \
     MACRO(PlayerJoined)                                                                                                                                        \
     MACRO(PlayerLeft)                                                                                                                                          \
-    MACRO(BuyItem)
+    MACRO(BuyItem)                                                                                                                                             \
+    MACRO(SellItem)
 
 namespace Serial
 {
@@ -107,6 +108,14 @@ namespace FAWorld
         struct BuyItemData
         {
             uint32_t itemId;
+            int32_t shopkeeperId;
+
+            void save(Serial::Saver& saver);
+            void load(Serial::Loader& loader);
+        };
+        struct SellItemData
+        {
+            FAWorld::EquipTarget itemLocation;
             int32_t shopkeeperId;
 
             void save(Serial::Saver& saver);

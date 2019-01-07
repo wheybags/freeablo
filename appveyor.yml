@@ -15,6 +15,15 @@ configuration: Debug
 cache:
   - C:\.hunter
 
+environment:
+  global:
+    GITHUB_USER_PASSWORD:
+      secure: j7bhatwEDvl5hOfkBHyCIFZdn/x00TkF2qTaJMRn22CJeUr5NhXWPlUepQun7me9
+      
+install:
+  - cmd: set PATH=C:\Python34-x64;C:\Python34-x64\Scripts;%PATH%
+  - cmd: pip install requests
+
 # scripts to run before build
 before_build:
   - echo Running cmake...

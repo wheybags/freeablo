@@ -10,6 +10,11 @@ dist: trusty
 cache:
   directories:
   - $HOME/.hunter
+  
+addons:
+  apt:
+    packages:
+      - python3-pip
 
 matrix:
   include:

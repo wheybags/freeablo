@@ -25,7 +25,6 @@ namespace DiabloExe
 
 namespace FAGui
 {
-    class DialogManager;
     class GuiManager;
 }
 

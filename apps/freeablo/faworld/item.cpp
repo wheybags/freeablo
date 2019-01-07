@@ -124,7 +124,10 @@ namespace FAWorld
             if (!str.empty())
                 ret.push_back(std::move(str));
         }
-        while (ret.size() < 3)
+        {
+            ret.push_back("Price: " + std::to_string(this->getPrice()));
+        }
+        while (ret.size() < 4)
             ret.emplace_back();
         return ret;
     }

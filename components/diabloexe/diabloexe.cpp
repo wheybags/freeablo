@@ -121,14 +121,14 @@ namespace DiabloExe
         Settings::Settings settings;
         std::string version = "";
         settings.loadFromFile("resources/exeversions/versions.ini");
-        Settings::Container sections = settings.getSections();
+        const Settings::Container versionProperties = settings.getPropertiesInSection("");
 
-        for (Settings::Container::iterator it = sections.begin(); it != sections.end(); ++it)
+        for (const auto& versionProperty : versionProperties)
         {
-            std::string temporaryVersion = settings.get<std::string>("", *it);
+            const std::string temporaryVersion = settings.get<std::string>("", versionProperty);
             if (temporaryVersion == exeMD5)
             {
-                version = *it;
+                version = versionProperty;
                 break;
             }
         }
@@ -147,7 +147,7 @@ namespace DiabloExe
 
     void DiabloExe::loadDropGraphicsFilenames(FAIO::FAFileObject& exe, size_t codeOffset)
     {
-        auto offset = mSettings->get<size_t>("ItemDropGraphics", "filenames");
+        const uint64_t offset = mSettings->get<uint64_t>("ItemDropGraphics", "filenames");
         itemDropGraphicsFilename.resize(35);
         for (int i = 0; i < static_cast<int>(itemDropGraphicsFilename.size()); ++i)
         {

@@ -46,6 +46,8 @@ namespace FAWorld
 
     void PlayerBehaviour::addInput(const PlayerInput& input)
     {
+        auto cursorItem = mPlayer->mInventory.getCursorHeld();
+
         switch (input.mType)
         {
             case PlayerInput::Type::TargetTile:
@@ -53,7 +55,6 @@ namespace FAWorld
                 auto clickedPoint = Misc::Point(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
                 mPlayer->getLevel()->activate(clickedPoint);
 
-                auto cursorItem = mPlayer->mInventory.getItemAt(MakeEquipTarget<EquipTargetType::cursor>());
                 if (!cursorItem.isEmpty())
                 {
                     mPlayer->dropItem(clickedPoint);
@@ -73,7 +74,13 @@ namespace FAWorld
             }
             case PlayerInput::Type::TargetActor:
             {
-                mPlayer->mTarget = mPlayer->getWorld()->getActorById(input.mData.dataTargetActor.actorId);
+                if (!cursorItem.isEmpty())
+                {
+                    auto clickedPoint = Misc::Point(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
+                    mPlayer->dropItem(clickedPoint);
+                }
+                else
+                    mPlayer->mTarget = mPlayer->getWorld()->getActorById(input.mData.dataTargetActor.actorId);
                 return;
             }
             case PlayerInput::Type::TargetItemOnFloor:
@@ -123,7 +130,7 @@ namespace FAWorld
             }
             case PlayerInput::Type::BuyItem:
             {
-                auto items = mPlayer->getWorld()->getStoreData().griswoldBasicItems;
+                auto& items = mPlayer->getWorld()->getStoreData().griswoldBasicItems;
                 auto item = std::find_if(items.begin(), items.end(), [&](StoreItem& item) { return item.storeId == input.mData.dataBuyItem.itemId; });
 
                 if (item == items.end())
@@ -139,6 +146,24 @@ namespace FAWorld
                 mPlayer->mInventory.takeOutGold(price);
                 mPlayer->mInventory.autoPlaceItem(item->item);
                 items.erase(item);
+
+                return;
+            }
+            case PlayerInput::Type::SellItem:
+            {
+                int32_t price = 0;
+                {
+                    const Item& item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
+
+                    // TODO: validate sell filter here
+                    if (item.isEmpty() || !item.mIsReal || item.baseId() == ItemId::gold)
+                        return;
+
+                    price = item.getPrice();
+                }
+
+                release_assert(!mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation).isEmpty());
+                mPlayer->mInventory.placeGold(price, mPlayer->getWorld()->getItemFactory());
 
                 return;
             }
