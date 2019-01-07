@@ -168,11 +168,3 @@ TEST_F(SettingsTest, TestGetDefaultFromFile)
     ASSERT_FALSE(mSettings.get<bool>(sectionName, "falseProperty"));
     ASSERT_EQ(std::numeric_limits<int64_t>::max(), mSettings.get<int64_t>(sectionName, "hexProperty"));
 }
-
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    int retval = RUN_ALL_TESTS();
-
-    return retval;
-}
