@@ -131,6 +131,9 @@ endif()
 add_subdirectory (extern)
 add_subdirectory (components)
 
+ # This is currently only for the MSVC libmpv, might be a better place to put library or to link/find it
+link_directories(${CMAKE_CURRENT_BINARY_DIR}/components)
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(apps/freeablo)

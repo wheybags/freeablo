@@ -110,12 +110,66 @@ add_library(Audio
 target_link_libraries(Audio FAIO SDL_mixer::SDL_mixer)
 set_target_properties(Audio PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
+if (MSVC)
+    # Download and prepare MSYS2 libmpv for MSVC conversion.
+	# https://github.com/mpv-player/mpv/blob/master/DOCS/compile-windows.md#linking-libmpv-with-msvc-programs
+	set(MPV_MSYS2_VERSION "mpv-dev-20181002")
+	set(MPV_MSYS2_URL "https://mpv.srsfckn.biz/${MPV_MSYS2_VERSION}.7z")
+	set(MPV_MSYS2_BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}/${MPV_MSYS2_VERSION}")
+	set(MPV_MSYS2_7Z_FILE "${MPV_MSYS2_BASE_DIR}.7z")
+	
+	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+		# 64 bit
+		set(MPV_MSYS2_LIB_DIR "${MPV_MSYS2_BASE_DIR}/x86_64")
+		set(MSVC_LIB_MACHINE x64)
+	elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
+		# 32 bit
+		set(MPV_MSYS2_LIB_DIR "${MPV_MSYS2_BASE_DIR}/i686")
+		set(MSVC_LIB_MACHINE x86)
+	endif()
+
+	if (NOT EXISTS ${MPV_MSYS2_BASE_DIR})
+		message("Downloading MSYS2 mpv libraries ${MPV_MSYS2_URL}")
+		file(DOWNLOAD ${MPV_MSYS2_URL} ${MPV_MSYS2_7Z_FILE} SHOW_PROGRESS)
+		message("Extracting MSYS2 mpv libraries...")
+		file(MAKE_DIRECTORY ${MPV_MSYS2_BASE_DIR})
+		execute_process(
+			COMMAND ${CMAKE_COMMAND} -E tar xf ${MPV_MSYS2_7Z_FILE} --format=7zip
+			WORKING_DIRECTORY ${MPV_MSYS2_BASE_DIR}
+			RESULT_VARIABLE res)
+		if (res)
+			message(FATAL_ERROR "libmpv extraction failed: ${res}")
+		endif()
+
+		# Need to add "LIBRARY MPV-1\nEXPORTS\n" to the start of the def file
+		# https://github.com/mpv-player/mpv/issues/5007#issuecomment-337431977
+		file(READ ${MPV_MSYS2_LIB_DIR}/libmpv.def inital_libmpv_def_file)
+		file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/libmpv.def "LIBRARY MPV-1\nEXPORTS\n${inital_libmpv_def_file}" )
+
+		# Copy mpv-1.dll to build dir, this means exe's must be run from this location (otherwise could copy next to exe's or add to path).
+		file(COPY ${MPV_MSYS2_LIB_DIR}/mpv-1.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/..)
+	endif()
+
+	set(MPV_FOUND TRUE)
+	set(MPV_LIBRARIES libmpv)
+	set(MPV_INCLUDE_DIRS "${MPV_MSYS2_BASE_DIR}/include")
+	set(MPV_DEFINITIONS "")
+else (MSVC)
 include(FindMPV)
+endif(MSVC)
+
 IF (MPV_FOUND)
     add_library(Video
         video/video.h
         video/mpv_sdl_backend.cpp
     )
+	if (MSVC)
+		# Convert MSYS2 lib to MSVC format, possibly could use built in cmake module GNUtoMS_lib.cmake instead.
+		add_custom_command(
+			TARGET Video
+			PRE_BUILD
+			COMMAND lib ARGS /def:${CMAKE_CURRENT_BINARY_DIR}/libmpv.def /name:mpv-1.dll /out:${CMAKE_CURRENT_BINARY_DIR}/libmpv.lib /machine:${MSVC_LIB_MACHINE})
+	endif(MSVC)
     target_link_libraries(Video FAIO "${MPV_LIBRARIES}" SDL2::SDL2)
     target_include_directories(Video PRIVATE "${MPV_INCLUDE_DIRS}")
     set_target_properties(Video PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS} ${MPV_DEFINITIONS}")    
