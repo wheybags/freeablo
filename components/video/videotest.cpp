@@ -1,4 +1,7 @@
 #include "video.h"
+// Stop SDL from messing with MSVC main()
+// https://wiki.libsdl.org/SDL_SetMainReady
+#define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <iostream>
 
