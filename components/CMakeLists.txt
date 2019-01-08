@@ -192,7 +192,7 @@ add_library(Settings
     settings/settings.h
     settings/settings.cpp
 )
-target_link_libraries(Settings ${HUNTER_BOOST_LIBS})
+target_link_libraries(Settings simpleini ${HUNTER_BOOST_LIBS})
 set_target_properties(Settings PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Serial

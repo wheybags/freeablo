@@ -39,4 +39,4 @@ build:
 
 test_script:
   - cd c:\projects\freeablo\build
-  - cmake.exe --build . --config Debug --target fatest
+  - Debug\unit_tests.exe

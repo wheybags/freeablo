@@ -120,8 +120,12 @@ namespace Cel
         std::string palFilename;
         if (Misc::StringUtils::startsWith(filename, "levels") && Misc::StringUtils::endsWith(filename, "l1.cel"))
             palFilename = Misc::StringUtils::replaceEnd("l1.cel", "l1.pal", filename);
+        else if (Misc::StringUtils::startsWith(filename, "levels") && Misc::StringUtils::endsWith(filename, "l1s.cel"))
+            palFilename = Misc::StringUtils::replaceEnd("l1s.cel", "l1.pal", filename);
         else if (Misc::StringUtils::startsWith(filename, "levels") && Misc::StringUtils::endsWith(filename, "l2.cel"))
             palFilename = Misc::StringUtils::replaceEnd("l2.cel", "l2.pal", filename);
+        else if (Misc::StringUtils::startsWith(filename, "levels") && Misc::StringUtils::endsWith(filename, "l2s.cel"))
+            palFilename = Misc::StringUtils::replaceEnd("l2s.cel", "l2.pal", filename);
         else if (Misc::StringUtils::startsWith(filename, "levels") && Misc::StringUtils::endsWith(filename, "l3.cel"))
             palFilename = Misc::StringUtils::replaceEnd("l3.cel", "l3.pal", filename);
         else if (Misc::StringUtils::startsWith(filename, "levels") && Misc::StringUtils::endsWith(filename, "l4.cel"))

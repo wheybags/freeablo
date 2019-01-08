@@ -1,6 +1,19 @@
 #include "findpath.h"
+
 #include "gamelevel.h"
+
 #include <misc/stdhashes.h>
+
+#include <cmath>
+#include <queue>
+
+namespace
+{
+    const int STRAIGHT_WEIGHT = 10;
+    const int DIAGONAL_WEIGHT = 14;
+
+    int distanceCost(const Misc::Point& a, const Misc::Point& b) { return (a.x != b.x && a.y != b.y) ? DIAGONAL_WEIGHT : STRAIGHT_WEIGHT; }
+}
 
 namespace FAWorld
 {
@@ -28,7 +41,7 @@ namespace FAWorld
         return 0 <= x && x < (int)level->width() && 0 <= y && y < (int)level->height();
     }
 
-    Misc::Points neighbors(GameLevelImpl* level, Misc::Point location)
+    Misc::Points neighbors(GameLevelImpl* level, const Misc::Point& location)
     {
         int x = location.x;
         int y = location.y;
@@ -47,14 +60,6 @@ namespace FAWorld
         }
 
         return result;
-    }
-
-    int heuristic(Misc::Point a, Misc::Point b)
-    {
-        int dx = abs(b.x - a.x);
-        int dy = abs(b.y - a.y);
-
-        return dx + dy;
     }
 
     template <typename T> class Array2D
@@ -76,6 +81,17 @@ namespace FAWorld
         int32_t mHeight;
     };
 
+    size_t heuristic(Misc::Point a, Misc::Point b)
+    {
+        auto dx = abs(b.x - a.x);
+        auto dy = abs(b.y - a.y);
+
+        auto straight = static_cast<size_t>(dx - dy);
+        auto diagonal = std::max(dx, dy) - straight;
+
+        return straight * STRAIGHT_WEIGHT + diagonal * DIAGONAL_WEIGHT;
+    }
+
     bool AStarSearch(GameLevelImpl* level, Misc::Point start, Misc::Point& goal, std::unordered_map<Misc::Point, Misc::Point>& came_from, bool findAdjacent)
     {
         auto goalPassable = level->isPassable(goal);
@@ -87,7 +103,7 @@ namespace FAWorld
         costSoFar.get(start.x, start.y) = 0;
 
         int32_t iterations = 0;
-        while (!frontier.empty() && iterations < 500)
+        while (!frontier.empty() && iterations < 1000)
         {
             iterations++;
             Misc::Point current = frontier.get();
@@ -104,17 +120,14 @@ namespace FAWorld
                 }
             }
 
-            Misc::Points neighborsContainer = neighbors(level, current);
-            for (auto it = neighborsContainer.begin(); it != neighborsContainer.end(); it++)
+            for (const auto& next : neighbors(level, current))
             {
-                int32_t new_cost = costSoFar.get(current.x, current.y) + 1; // graph.cost(current, next);
-                Misc::Point next = *it;
+                auto new_cost = costSoFar.get(current.x, current.y) + distanceCost(current, next);
 
                 if (costSoFar.get(next.x, next.y) == -1 || new_cost < costSoFar.get(next.x, next.y))
                 {
                     costSoFar.get(next.x, next.y) = new_cost;
-                    int32_t priority = new_cost + heuristic(next, goal);
-                    frontier.put(next, priority);
+                    frontier.put(next, new_cost + heuristic(next, goal));
                     came_from[next] = current;
                 }
             }
@@ -138,39 +151,15 @@ namespace FAWorld
         return path;
     }
 
-    Misc::Point findClosesPointToGoal(GameLevelImpl* level, Misc::Point start, Misc::Point goal, std::unordered_map<Misc::Point, Misc::Point>& cameFrom)
+    Misc::Points pathFind(GameLevelImpl* level, const Misc::Point& start, const Misc::Point& goal, bool& bArrivable, bool findAdjacent)
     {
-        // int dx = abs(goal.first - start.first);
-        // int dy = abs(goal.second - start.second);
-        UNUSED_PARAM(start);
-        int minDistance = level->width() * level->width() + level->height() * level->height();
-
-        Misc::Point result(-1, -1);
-
-        for (auto it = cameFrom.begin(); it != cameFrom.end(); it++)
-        {
-            int tmpX = abs(it->first.x - goal.x);
-            int tmpY = abs(it->first.y - goal.y);
-
-            int distance = tmpX * tmpX + tmpY * tmpY;
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                result = it->first;
-            }
-        }
-
-        return result;
-    }
-
-    Misc::Points pathFind(GameLevelImpl* level, const Misc::Point& start, Misc::Point& goal, bool& bArrivable, bool findAdjacent)
-    {
+        auto adjustedGoal = goal;
         std::unordered_map<Misc::Point, Misc::Point> cameFrom;
 
-        bArrivable = AStarSearch(level, start, goal, cameFrom, findAdjacent);
+        bArrivable = AStarSearch(level, start, adjustedGoal, cameFrom, findAdjacent);
         if (!bArrivable)
             return {};
 
-        return reconstructPath(start, goal, cameFrom);
+        return reconstructPath(start, adjustedGoal, cameFrom);
     }
 }

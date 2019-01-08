@@ -134,6 +134,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
 )
 
 target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Video Serial Input Random enet::enet)
+target_include_directories(freeablo_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(freeablo main.cpp)
 target_link_libraries(freeablo freeablo_lib)

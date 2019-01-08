@@ -37,6 +37,8 @@ namespace FARender
     private:
         FASpriteGroup* minTops;
         FASpriteGroup* minBottoms;
+        FASpriteGroup* mSpecialSprites;
+        std::map<int32_t, int32_t> mSpecialSpriteMap;
         friend class Renderer;
     };
 

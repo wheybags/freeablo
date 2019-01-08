@@ -65,7 +65,7 @@ namespace FALevelGen
         }
     };
 
-    // the values here are not significant, these were just conventient when debugging level 3
+    // the values here are not significant, these were just convenient when debugging level 3
     // they must only be distinct
     enum class Basic : int32_t
     {
@@ -1115,6 +1115,53 @@ namespace FALevelGen
             level.get(x + 1, y + 1) = tileset.downStairs9;
         }
 
+        // Map from tileset frame number to special cel frame number.
+        // Special cel images are mostly used for arches / open doors.
+        // Special cel images currently only exist for levels 1, 2 and town.
+        // TODO: load specialCelMap from file.
+        std::map<int32_t, int32_t> specialCelMap = {};
+        std::string specialCelPath = "";
+        switch (levelNum)
+        {
+            case 1:
+                specialCelMap = {
+                    {11, 0},
+                    {70, 0},
+                    {210, 0},
+                    {320, 0},
+                    {340, 0},
+                    {417, 0},
+                    {10, 1},
+                    {248, 1},
+                    {324, 1},
+                    {330, 1},
+                    {343, 1},
+                    {420, 1},
+                    {254, 3},
+                    {258, 4},
+                    // Open door frames
+                    {392, 6},
+                    {407, 6},
+                    {394, 7},
+                };
+                specialCelPath = "levels/l1data/l1s.cel";
+                break;
+            case 2:
+                specialCelMap = {
+                    {540, 4},
+                    {177, 4},
+                    {550, 4},
+                    {12, 4},
+                    {541, 5},
+                    {552, 5},
+                    {16, 5},
+                };
+                specialCelPath = "levels/l2data/l2s.cel";
+                break;
+            default:
+                break;
+        }
+
         ss.str("");
         ss << "levels/l" << levelNum << "data/l" << levelNum << ".cel";
         std::string celPath = ss.str();
@@ -1131,7 +1178,18 @@ namespace FALevelGen
         ss << "levels/l" << levelNum << "data/l" << levelNum << ".sol";
         std::string solPath = ss.str();
 
-        Level::Level levelBase(std::move(level), tilPath, minPath, solPath, celPath, downStairsPoint, upStairsPoint, tileset.getDoorMap(), previous, next);
+        Level::Level levelBase(std::move(level),
+                               tilPath,
+                               minPath,
+                               solPath,
+                               celPath,
+                               specialCelPath,
+                               specialCelMap,
+                               downStairsPoint,
+                               upStairsPoint,
+                               tileset.getDoorMap(),
+                               previous,
+                               next);
         auto retval = new FAWorld::GameLevel(world, std::move(levelBase), dLvl);
 
         placeMonsters(rng, *retval, exe, dLvl);
