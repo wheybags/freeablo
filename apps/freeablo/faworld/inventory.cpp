@@ -298,11 +298,9 @@ namespace FAWorld
 
     CharacterInventory::CharacterInventory()
     {
-        BasicInventory* inventories[] = { &mMainInventory, &mBelt, &mHead, &mBody, &mLeftRing, &mRightRing, &mAmulet, &mLeftHand, &mRightHand };
+        BasicInventory* inventories[] = {&mMainInventory, &mBelt, &mHead, &mBody, &mLeftRing, &mRightRing, &mAmulet, &mLeftHand, &mRightHand};
         for (auto inv : inventories)
-        {
             inv->inventoryChanged.connect([this, inv](Item const& removed, Item const& added) { inventoryChanged(*inv, removed, added); });
-        }
     }
 
     void CharacterInventory::save(FASaveGame::GameSaver& saver)

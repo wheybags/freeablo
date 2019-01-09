@@ -178,15 +178,9 @@ namespace FAWorld
 
     Item::~Item() {}
 
-    std::string Item::getFlipSoundPath() const
-    {
-        return base().dropItemSoundPath;
-    }
+    std::string Item::getFlipSoundPath() const { return base().dropItemSoundPath; }
 
-    std::string Item::getInvPlaceSoundPath() const
-    {
-        return base().invPlaceItemSoundPath;
-    }
+    std::string Item::getInvPlaceSoundPath() const { return base().invPlaceItemSoundPath; }
 
     FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(base().dropItemGraphicsPath); }
 

@@ -69,7 +69,7 @@ namespace FAWorld
         const_iterator begin() const { return mInventoryBox.begin(); }
         const_iterator end() const { return mInventoryBox.end(); }
 
-        boost::signals2::signal<void (Item const& removed, Item const& added)> inventoryChanged;
+        boost::signals2::signal<void(Item const& removed, Item const& added)> inventoryChanged;
 
     private:
         Misc::Array2D<Item> mInventoryBox;
@@ -118,7 +118,7 @@ namespace FAWorld
 
     public:
         // This is not serialised - it should be reconnected by other means
-        boost::signals2::signal<void (BasicInventory const& inventory, Item const& removed, Item const& added)> inventoryChanged;
+        boost::signals2::signal<void(BasicInventory const& inventory, Item const& removed, Item const& added)> inventoryChanged;
 
     private:
         static constexpr int32_t inventoryWidth = 10;
