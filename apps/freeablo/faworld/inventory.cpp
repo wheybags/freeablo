@@ -214,6 +214,8 @@ namespace FAWorld
         }
 
         mInventoryBox.get(x, y).mIsReal = true;
+        inventoryChanged();
+
         return PlaceItemResult{PlaceItemResult::Type::Success, {}};
     }
 
@@ -272,6 +274,8 @@ namespace FAWorld
             for (int xLocal = result.getCornerCoords().first; xLocal < result.getCornerCoords().first + itemSize.x; ++xLocal)
                 mInventoryBox.get(xLocal, yLocal) = {};
 
+        inventoryChanged();
+
         return result;
     }
 
@@ -290,6 +294,15 @@ namespace FAWorld
                                    const boost::optional<EquipTarget>& newTargetArg)
         : NeedsToBeReplaced(std::move(NeedsToBeReplacedArg)), NeedsToBeReturned(std::move(NeedsToBeReturnedArg)), newTarget(newTargetArg)
     {
+    }
+
+    CharacterInventory::CharacterInventory()
+    {
+        BasicInventory* equipableInventories[] = { &mBelt, &mHead, &mBody, &mLeftRing, &mRightRing, &mAmulet, &mLeftHand, &mRightHand };
+        for (auto inv : equipableInventories)
+        {
+            inv->inventoryChanged.connect([this]() { equipChanged(); });
+        }
     }
 
     void CharacterInventory::save(FASaveGame::GameSaver& saver)
@@ -339,7 +352,6 @@ namespace FAWorld
         {
             release_assert(mLeftHand.autoPlaceItem(item));
             release_assert(mRightHand.autoPlaceItem(item));
-            equipChanged();
             return true;
         }
 
@@ -347,7 +359,6 @@ namespace FAWorld
         if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getClass() == ItemClass::weapon && leftHand.isEmpty())
         {
             mLeftHand.autoPlaceItem(item);
-            equipChanged();
             return true;
         }
 

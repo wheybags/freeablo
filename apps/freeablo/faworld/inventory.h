@@ -69,6 +69,8 @@ namespace FAWorld
         const_iterator begin() const { return mInventoryBox.begin(); }
         const_iterator end() const { return mInventoryBox.end(); }
 
+        boost::signals2::signal<void()> inventoryChanged;
+
     private:
         Misc::Array2D<Item> mInventoryBox;
         bool mTreatAllItemsAs1by1 = false;
@@ -78,6 +80,7 @@ namespace FAWorld
     class CharacterInventory
     {
     public:
+        CharacterInventory();
         void save(FASaveGame::GameSaver& saver);
         void load(FASaveGame::GameLoader& loader);
 
