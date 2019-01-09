@@ -65,6 +65,7 @@ namespace DiabloExe
         loadNpcs(exe);
         loadCharacterStats(exe);
         loadDropGraphicsFilenames(exe, codeOffset);
+        loadSoundFilenames(exe, codeOffset);
         loadBaseItems(exe, codeOffset);
         loadUniqueItems(exe, codeOffset);
         loadAffixes(exe, codeOffset);
@@ -155,6 +156,32 @@ namespace DiabloExe
             auto nameOffset = exe.read32();
             itemDropGraphicsFilename[i] = exe.readCStringFromWin32Binary(nameOffset, codeOffset);
         }
+    }
+
+    void DiabloExe::loadSoundFilenames(FAIO::FAFileObject& exe, size_t codeOffset)
+    {
+        uint64_t offset = mSettings->get<uint64_t>("Sounds", "filenameTable");
+        soundFilename.resize(858);
+        for (int i = 0; i < static_cast<int>(soundFilename.size()); ++i)
+        {
+            exe.FAfseek(offset + i * 9 + 1, SEEK_SET);
+            auto nameOffset = exe.read32();
+            soundFilename[i] = exe.readCStringFromWin32Binary(nameOffset, codeOffset);
+            soundFilename[i] = Misc::StringUtils::toLower(soundFilename[i]);
+            Misc::StringUtils::replace(soundFilename[i], "\\", "/");
+        }
+
+        offset = mSettings->get<uint64_t>("Sounds", "itemGraphicsIdToDropSfxId");
+        itemGraphicsIdToDropSfxId.resize(35);
+        exe.FAfseek(offset, SEEK_SET);
+        for (auto& sfxLookup : itemGraphicsIdToDropSfxId)
+            sfxLookup = exe.read32();
+
+        offset = mSettings->get<uint64_t>("Sounds", "itemGraphicsIdToInvPlaceSfxId");
+        itemGraphicsIdToInvPlaceSfxId.resize(35);
+        exe.FAfseek(offset, SEEK_SET);
+        for (auto& sfxLookup : itemGraphicsIdToInvPlaceSfxId)
+            sfxLookup = exe.read32();
     }
 
     void DiabloExe::loadMonsters(FAIO::FAFileObject& exe, size_t codeOffset)
@@ -267,7 +294,10 @@ namespace DiabloExe
             exe.FAfseek(itemOffset + 76 * i, SEEK_SET);
             BaseItem tmp(exe, codeOffset);
             tmp.id = i;
-            tmp.dropItemGraphicsPath = "items/" + itemDropGraphicsFilename[itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId]] + ".cel";
+            auto dropGraphicsId = itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId];
+            tmp.dropItemGraphicsPath = "items/" + itemDropGraphicsFilename[dropGraphicsId] + ".cel";
+            tmp.dropItemSoundPath = soundFilename[itemGraphicsIdToDropSfxId[dropGraphicsId]];
+            tmp.invPlaceItemSoundPath = soundFilename[itemGraphicsIdToInvPlaceSfxId[dropGraphicsId]];
             auto& s = objCursFrameSizes[tmp.invGraphicsId + 11];
             if (i == 0)
             {

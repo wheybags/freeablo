@@ -180,40 +180,12 @@ namespace FAWorld
 
     std::string Item::getFlipSoundPath() const
     {
-        // TODO: add book, pot, scroll
-        switch (getType())
-        {
-            case ItemType::misc:
-                return "";
-            case ItemType::sword:
-                return "sfx/items/flipswor.wav";
-            case ItemType::axe:
-                return "sfx/items/flipaxe.wav";
-            case ItemType::bow:
-                return "sfx/items/flipbow.wav";
-            case ItemType::mace:
-                return "sfx/items/flipswor.wav"; // TODO: check
-            case ItemType::shield:
-                return "sfx/items/flipshld.wav";
-            case ItemType::lightArmor:
-                return "sfx/items/fliplarm.wav";
-            case ItemType::helm:
-                return "sfx/items/flipcap.wav";
-            case ItemType::mediumArmor:
-                return "sfx/items/fliplarm.wav"; // TODO: check
-            case ItemType::heavyArmor:
-                return "sfx/items/flipharm.wav";
-            case ItemType::staff:
-                return "sfx/items/flipstaf.wav";
-            case ItemType::gold:
-                return "sfx/items/gold.wav"; // also gold1.cel
-            case ItemType::ring:
-            case ItemType::amulet:
-                return "sfx/items/flipring.wav";
-            case ItemType::none:
-                break;
-        }
-        return "";
+        return base().dropItemSoundPath;
+    }
+
+    std::string Item::getInvPlaceSoundPath() const
+    {
+        return base().invPlaceItemSoundPath;
     }
 
     FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(base().dropItemGraphicsPath); }
