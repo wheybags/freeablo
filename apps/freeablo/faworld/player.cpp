@@ -54,7 +54,20 @@ namespace FAWorld
     void Player::initCommon()
     {
         mWorld.registerPlayer(this);
-        mInventory.equipChanged.connect([this]() { updateSprites(); });
+        mInventory.inventoryChanged.connect([this](BasicInventory const& inventory, Item const& removed, Item const& added) {
+            (void)inventory;
+            (void)removed;
+
+            updateSprites();
+
+            // Play inventory grab/place sound.
+            std::string soundPath = "sfx/items/invgrab.wav";
+            if (!added.isEmpty())
+            {
+                soundPath = added.getInvPlaceSoundPath();
+            }
+            Engine::ThreadManager::get()->playSound(soundPath);
+        });
         mMoveHandler.positionReached.connect(positionReached);
     }
 

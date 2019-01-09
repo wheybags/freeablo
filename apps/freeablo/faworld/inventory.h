@@ -69,6 +69,8 @@ namespace FAWorld
         const_iterator begin() const { return mInventoryBox.begin(); }
         const_iterator end() const { return mInventoryBox.end(); }
 
+        boost::signals2::signal<void (Item const& removed, Item const& added)> inventoryChanged;
+
     private:
         Misc::Array2D<Item> mInventoryBox;
         bool mTreatAllItemsAs1by1 = false;
@@ -78,6 +80,7 @@ namespace FAWorld
     class CharacterInventory
     {
     public:
+        CharacterInventory();
         void save(FASaveGame::GameSaver& saver);
         void load(FASaveGame::GameLoader& loader);
 
@@ -115,7 +118,7 @@ namespace FAWorld
 
     public:
         // This is not serialised - it should be reconnected by other means
-        boost::signals2::signal<void()> equipChanged;
+        boost::signals2::signal<void (BasicInventory const& inventory, Item const& removed, Item const& added)> inventoryChanged;
 
     private:
         static constexpr int32_t inventoryWidth = 10;
