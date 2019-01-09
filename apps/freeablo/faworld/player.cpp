@@ -58,13 +58,21 @@ namespace FAWorld
             (void)inventory;
             (void)removed;
 
+            // Update player graphics.
             updateSprites();
 
-            // Play inventory grab/place sound.
-            std::string soundPath = "sfx/items/invgrab.wav";
             if (!added.isEmpty())
-                soundPath = added.getInvPlaceSoundPath();
-            Engine::ThreadManager::get()->playSound(soundPath);
+            {
+                // Play inventory place sound.
+                std::string soundPath = added.getInvPlaceSoundPath();
+                Engine::ThreadManager::get()->playSound(soundPath);
+            }
+        });
+        mInventory.cursorItemChanged.connect([](Item const& removed, Item const& added) {
+            (void)removed;
+            if (!added.isEmpty())
+                // Play cursor grab sound.
+                Engine::ThreadManager::get()->playSound("sfx/items/invgrab.wav");
         });
         mMoveHandler.positionReached.connect(positionReached);
     }

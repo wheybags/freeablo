@@ -301,6 +301,7 @@ namespace FAWorld
         BasicInventory* inventories[] = {&mMainInventory, &mBelt, &mHead, &mBody, &mLeftRing, &mRightRing, &mAmulet, &mLeftHand, &mRightHand};
         for (auto inv : inventories)
             inv->inventoryChanged.connect([this, inv](Item const& removed, Item const& added) { inventoryChanged(*inv, removed, added); });
+        mCursorHeld.inventoryChanged.connect([this](Item const& removed, Item const& added) { cursorItemChanged(removed, added); });
     }
 
     void CharacterInventory::save(FASaveGame::GameSaver& saver)
