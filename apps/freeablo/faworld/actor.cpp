@@ -301,5 +301,4 @@ namespace FAWorld
         // Players will get exp, Diablo may do a happy dance etc.
         (void)enemy;
     }
-
 }

@@ -5,7 +5,8 @@
 namespace FAWorld
 {
     PlayerStats::PlayerStats(const DiabloExe::CharacterStats& charStats)
-        : mStrength(charStats.mStrength), mDexterity(charStats.mDexterity), mMagic(charStats.mMagic), mVitality(charStats.mVitality), mNextLevelExp(charStats.mNextLevelExp)
+        : mStrength(charStats.mStrength), mDexterity(charStats.mDexterity), mMagic(charStats.mMagic), mVitality(charStats.mVitality),
+          mNextLevelExp(charStats.mNextLevelExp)
     {
     }
 
@@ -17,7 +18,7 @@ namespace FAWorld
         mVitality = loader.load<int32_t>();
         mExp = loader.load<uint32_t>();
         mNextLevelExp.resize(loader.load<uint32_t>());
-        for (auto& x: mNextLevelExp)
+        for (auto& x : mNextLevelExp)
             x = loader.load<uint32_t>();
 
         mLevel = expToLevel(mExp);
@@ -33,7 +34,7 @@ namespace FAWorld
         saver.save(mVitality);
         saver.save(mExp);
         saver.save((uint32_t)mNextLevelExp.size());
-        for (auto& x: mNextLevelExp)
+        for (auto& x : mNextLevelExp)
             saver.save(x);
     }
 

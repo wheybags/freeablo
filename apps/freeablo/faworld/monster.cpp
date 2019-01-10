@@ -24,9 +24,7 @@ namespace FAWorld
         mStats.mHp.current = rng.randomInRange(monsterStats.minHp, monsterStats.maxHp);
     }
 
-    Monster::Monster(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader), mMonsterStats(loader)
-    {
-    }
+    Monster::Monster(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader), mMonsterStats(loader) {}
 
     void Monster::save(FASaveGame::GameSaver& saver)
     {

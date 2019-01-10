@@ -2,8 +2,8 @@
 #pragma once
 
 #include "actor.h"
-#include "playerstats.h"
 #include "monster.h"
+#include "playerstats.h"
 
 #include <boost/signals2/signal.hpp>
 
