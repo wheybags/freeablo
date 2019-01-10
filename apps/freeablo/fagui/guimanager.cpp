@@ -364,6 +364,10 @@ namespace FAGui
             fillTextField(ctx, 95, 200, 31, std::to_string(playerStats.mDexterity).c_str());
             fillTextField(ctx, 95, 228, 31, std::to_string(playerStats.mVitality).c_str());
 
+            fillTextField(ctx, 73, 59, 31, std::to_string(playerStats.mLevel).c_str());
+            fillTextField(ctx, 216, 59, 84, std::to_string(playerStats.mExp).c_str());
+            fillTextField(ctx, 216, 87, 84, std::to_string(playerStats.nextLevelExp()).c_str());
+
             fillTextField(ctx, 216, 135, 84, std::to_string(mPlayer->mInventory.getTotalGold()).c_str());
             auto& stats = mPlayer->getStats();
             fillTextField(ctx, 95, 293, 31, std::to_string(stats.mHp.max).c_str());

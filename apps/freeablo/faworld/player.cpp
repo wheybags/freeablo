@@ -350,4 +350,56 @@ namespace FAWorld
             }
         }
     }
+
+    void Player::enemyKilled(Actor* enemy)
+    {
+        if (Monster* monster = dynamic_cast<Monster*>(enemy))
+        {
+            addExperience(*monster);
+            // TODO: chance to drop item.
+            // TODO: if enemy is Diablo game complete.
+        }
+    }
+
+    void Player::addExperience(Monster& enemy)
+    {
+        int32_t exp = enemy.getKillExp();
+        // Adjust exp based on difference in level between player and monster.
+        exp *= 1 + ((float)enemy.getMonsterStats().level - mPlayerStats.mLevel) / 10;
+        exp = std::max(0, exp);
+
+        mPlayerStats.mExp = std::min(mPlayerStats.mExp + exp, mPlayerStats.maxExp());
+        int32_t newLevel = mPlayerStats.expToLevel(mPlayerStats.mExp);
+        // Level up if applicable (it's possible to level up more than once).
+        for (int32_t i = mPlayerStats.mLevel; i < newLevel; i++)
+            levelUp(newLevel);
+    }
+
+    void Player::levelUp(int32_t newLevel)
+    {
+        mPlayerStats.mLevel = newLevel;
+
+        // Increase HP/Mana.
+        switch (mPlayerClass)
+        {
+        case PlayerClass::warrior:
+            mStats.mHp.max += 2;
+            mStats.mMana.max += 1;
+            break;
+        case PlayerClass::rogue:
+            // TODO: Check this is correct, the below forum reckons +1.5 each.
+            // https://www.diabloii.net/forums/threads/what-is-the-max-level-on-d1.744752/#post-7322937
+            mStats.mHp.max += 2;
+            mStats.mMana.max += 2;
+            break;
+        case PlayerClass::sorcerer:
+            mStats.mHp.max += 1;
+            mStats.mMana.max += 2;
+            break;
+        }
+
+        // Restore HP/Mana.
+        heal();
+        restoreMana();
+    }
 }

@@ -39,7 +39,6 @@ namespace FAWorld
     public:
         Actor(World& world, const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
         Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
-        Actor(World& world, Random::Rng& rng, const DiabloExe::Monster& monster);
         Actor(World& world, FASaveGame::GameLoader& loader);
         virtual ~Actor();
         virtual int getArmor() const { /*placeholder */ return 0; }
@@ -61,7 +60,7 @@ namespace FAWorld
         void doMeleeHit(Actor* enemy);
         void doMeleeHit(const Misc::Point& point);
         void startMeleeAttack(Misc::Direction direction);
-        void checkDeath();
+        bool checkDeath();
 
         std::string getDieWav() const;
         std::string getHitWav() const;
@@ -71,6 +70,7 @@ namespace FAWorld
         void init();
         void takeDamage(int32_t amount);
         void heal();
+        void restoreMana();
         void setDirection(Misc::Direction direction);
 
         void die();
@@ -99,6 +99,9 @@ namespace FAWorld
         boost::optional<Misc::Direction> mMeleeAttackRequestedDirection; // this is really stupid but I don't know how else to do it
 
     protected:
+        void inflictDamage(Actor* enemy, uint32_t damage);
+        virtual void enemyKilled(Actor* enemy);
+
         // protected member variables
         std::unique_ptr<StateMachine> mActorStateMachine;
         ActorStats mStats;
