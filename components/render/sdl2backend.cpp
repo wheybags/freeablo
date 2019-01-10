@@ -18,7 +18,11 @@
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
 
+// clang-format off
+#include <misc/disablewarn.h>
 #include "../../extern/jo_gif/jo_gif.cpp"
+#include <misc/enablewarn.h>
+// clang-format on
 
 /*#define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
@@ -843,7 +847,7 @@ namespace Render
             uint8_t** gifImage = (uint8_t**)malloc(s->h * sizeof(uint8_t*));
 
             for (int j = 0; j < s->h; j++)
-            {   
+            {
                 gifImage[j] = (uint8_t*)(uint8_t**)s->pixels + j * s->pitch;
             }
 
@@ -855,8 +859,7 @@ namespace Render
         }
 
         jo_gif_end(&gif);
-
-}
+    }
 
     void SpriteGroup::destroy()
     {
