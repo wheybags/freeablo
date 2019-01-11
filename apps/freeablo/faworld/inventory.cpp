@@ -298,8 +298,8 @@ namespace FAWorld
 
     CharacterInventory::CharacterInventory()
     {
-       for (auto inv : mInventoryTypes)
-           inv.second.mInventoryChanged.connect([this, inv](Item const& removed, Item const& added) { mInventoryChanged(inv.first, removed, added); });
+        for (auto inv : mInventoryTypes)
+            inv.second.mInventoryChanged.connect([this, inv](Item const& removed, Item const& added) { mInventoryChanged(inv.first, removed, added); });
     }
 
     void CharacterInventory::save(FASaveGame::GameSaver& saver)
@@ -403,8 +403,8 @@ namespace FAWorld
 
     BasicInventory& CharacterInventory::getInvMutable(EquipTargetType type)
     {
-        auto it = std::find_if(mInventoryTypes.begin(), mInventoryTypes.end(),
-            [type](const std::pair<EquipTargetType, BasicInventory&> & m) -> bool { return m.first == type; });
+        auto it = std::find_if(
+            mInventoryTypes.begin(), mInventoryTypes.end(), [type](const std::pair<EquipTargetType, BasicInventory&>& m) -> bool { return m.first == type; });
         return it->second;
     }
 
