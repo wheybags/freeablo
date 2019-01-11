@@ -1,8 +1,8 @@
 #include "monster.h"
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
-#include "itemfactory.h"
 #include "diabloexe/monster.h"
+#include "itemfactory.h"
 #include <boost/format.hpp>
 #include <random/random.h>
 
@@ -55,7 +55,7 @@ namespace FAWorld
         ItemId itemId = randomItem();
         if (itemId < ItemId::COUNT)
         {
-            Item item = mWorld.getItemFactory().generateBaseItem(itemId);\
+            Item item = mWorld.getItemFactory().generateBaseItem(itemId);
             getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), NULL);
         }
     }
