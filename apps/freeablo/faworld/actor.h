@@ -73,7 +73,7 @@ namespace FAWorld
         void restoreMana();
         void setDirection(Misc::Direction direction);
 
-        void die();
+        virtual void die();
         bool isDead() const;
         bool isEnemy(Actor* other) const;
 

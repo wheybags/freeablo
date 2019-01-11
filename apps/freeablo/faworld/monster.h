@@ -1,6 +1,7 @@
 #pragma once
 
 #include "actor.h"
+#include "item.h"
 #include "monsterstats.h"
 
 namespace FAWorld
@@ -15,9 +16,13 @@ namespace FAWorld
 
         const MonsterStats& getMonsterStats() const { return mMonsterStats; }
         int32_t meleeDamageVs(const Actor* actor) const override;
+        void die() override;
         int32_t getKillExp() const;
 
     private:
+        void spawItem();
+        ItemId randomItem();
+
         MonsterStats mMonsterStats;
     };
 }

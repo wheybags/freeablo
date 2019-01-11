@@ -1,6 +1,7 @@
 #include "monster.h"
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
+#include "itemfactory.h"
 #include "diabloexe/monster.h"
 #include <boost/format.hpp>
 #include <random/random.h>
@@ -40,5 +41,36 @@ namespace FAWorld
         return damage;
     }
 
+    void Monster::die()
+    {
+        Actor::die();
+        spawItem();
+    }
+
     int32_t Monster::getKillExp() const { return mMonsterStats.mExp; }
+
+    void Monster::spawItem()
+    {
+        // TODO: Spawn magic, unique and special/quest items.
+        ItemId itemId = randomItem();
+        if (itemId < ItemId::COUNT)
+        {
+            Item item = mWorld.getItemFactory().generateBaseItem(itemId);
+            // TODO: Drop on nearest free tile...
+            auto pos = getPos().current();
+            getLevel()->dropItem(std::unique_ptr<Item>{new Item(item)}, *this, FAWorld::Tile(pos));
+        }
+    }
+
+    ItemId Monster::randomItem()
+    {
+        if (mWorld.mRng->randomInRange(0, 99) > 40)
+            // No drop.
+            return ItemId::COUNT;
+
+        if (mWorld.mRng->randomInRange(0, 99) > 25)
+            return ItemId::gold;
+
+        return mWorld.getItemFactory().randomItemId(ItemFilter::maxQLvl(mMonsterStats.level));
+    }
 }

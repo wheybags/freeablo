@@ -356,7 +356,8 @@ namespace FAWorld
         if (Monster* monster = dynamic_cast<Monster*>(enemy))
         {
             addExperience(*monster);
-            // TODO: chance to drop item.
+            // TODO: intimidate close fallen demons.
+            // TODO: notify quests.
             // TODO: if enemy is Diablo game complete.
         }
     }

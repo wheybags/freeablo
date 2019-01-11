@@ -1,6 +1,7 @@
 #include "playerstats.h"
 #include "../fasavegame/gameloader.h"
 #include "diabloexe/characterstats.h"
+#include <algorithm>
 
 namespace FAWorld
 {
