@@ -214,7 +214,7 @@ namespace FAWorld
         }
 
         mInventoryBox.get(x, y).mIsReal = true;
-        inventoryChanged(Item(), item);
+        mInventoryChanged(Item(), item);
 
         return PlaceItemResult{PlaceItemResult::Type::Success, {}};
     }
@@ -274,7 +274,7 @@ namespace FAWorld
             for (int xLocal = result.getCornerCoords().first; xLocal < result.getCornerCoords().first + itemSize.x; ++xLocal)
                 mInventoryBox.get(xLocal, yLocal) = {};
 
-        inventoryChanged(result, Item());
+        mInventoryChanged(result, Item());
 
         return result;
     }
@@ -299,7 +299,7 @@ namespace FAWorld
     CharacterInventory::CharacterInventory()
     {
        for (auto inv : mInventoryTypes)
-           inv.second.inventoryChanged.connect([this, inv](Item const& removed, Item const& added) { inventoryChanged(inv.first, removed, added); });
+           inv.second.mInventoryChanged.connect([this, inv](Item const& removed, Item const& added) { mInventoryChanged(inv.first, removed, added); });
     }
 
     void CharacterInventory::save(FASaveGame::GameSaver& saver)

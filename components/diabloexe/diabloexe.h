@@ -89,10 +89,10 @@ namespace DiabloExe
         std::vector<UniqueItem> mUniqueItems;
         std::vector<Affix> mAffixes;
         std::vector<std::vector<int32_t>> mTownerAnimation;
-        std::vector<std::string> itemDropGraphicsFilename;
-        std::vector<std::string> soundFilename;
-        std::vector<uint32_t> itemGraphicsIdToDropSfxId;
-        std::vector<uint32_t> itemGraphicsIdToInvPlaceSfxId;
+        std::vector<std::string> mItemDropGraphicsFilename;
+        std::vector<std::string> mSoundFilename;
+        std::vector<uint32_t> mItemGraphicsIdToDropSfxId;
+        std::vector<uint32_t> mItemGraphicsIdToInvPlaceSfxId;
         std::unordered_map<std::string, FontData> mFontData;
     };
 }

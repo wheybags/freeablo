@@ -54,7 +54,7 @@ namespace FAWorld
     void Player::initCommon()
     {
         mWorld.registerPlayer(this);
-        mInventory.inventoryChanged.connect([this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
+        mInventory.mInventoryChanged.connect([this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
             (void)removed;
 
             // Update player graphics.
