@@ -72,7 +72,7 @@ namespace FAWorld
                     break;
             }
 
-            if (!added.isEmpty())
+            if (!added.isEmpty() && mPlayerInitialised)
             {
                 // Play inventory place/grab sound.
                 switch (inventoryType)
@@ -126,6 +126,7 @@ namespace FAWorld
         mPlayerClass = static_cast<PlayerClass>(loader.load<int32_t>());
         mPlayerStats = {loader};
         initCommon();
+        mPlayerInitialised = true;
     }
 
     void Player::save(FASaveGame::GameSaver& saver)
