@@ -91,11 +91,42 @@ namespace FAWorld
             p.second.update();
     }
 
+    void GameLevel::insertActor(Actor* actor)
+    {
+        bool found = false;
+        for (const auto actorInLevel : mActors)
+        {
+            if (actor == actorInLevel)
+                found = true;
+        }
+
+        if (!found)
+            mActors.push_back(actor);
+
+        actorMapInsert(actor);
+    }
+
     void GameLevel::actorMapInsert(Actor* actor)
     {
+        // TODO: maybe have some separate layer for dead actors if we need one?
+        if (actor->isDead())
+            return;
+
+        Actor* blocking = nullptr;
+        if (mActorMap2D.count(actor->getPos().current()))
+            blocking = mActorMap2D[actor->getPos().current()];
+        debug_assert(!blocking);
+
         mActorMap2D[actor->getPos().current()] = actor;
+
         if (actor->getPos().isMoving())
+        {
+            if (mActorMap2D.count(actor->getPos().next()))
+                blocking = mActorMap2D[actor->getPos().next()];
+            debug_assert(!blocking);
+
             mActorMap2D[actor->getPos().next()] = actor;
+        }
     }
 
     void GameLevel::actorMapRemove(Actor* actor)
@@ -115,13 +146,18 @@ namespace FAWorld
             actorMapInsert(mActors[i]);
     }
 
-    bool GameLevel::isPassable(const Misc::Point& point) const
+    bool GameLevel::isPassable(const Misc::Point& point, const FAWorld::Actor* forActor) const
     {
+        // Special hack because griswold spawns on an unpassable tile.
+        // TODO: This should be fixed later by a patch on the town level data.
+        if (forActor && forActor->mIsTowner)
+            return true;
+
         if (point.x > 0 && point.x < width() && point.y > 0 && point.y < height() && !mLevel.get(point).passable())
             return false;
 
         FAWorld::Actor* actor = getActorAt(point);
-        return actor == nullptr || actor->isPassable();
+        return actor == nullptr || actor == forActor || actor->isPassable();
     }
 
     Actor* GameLevel::getActorAt(const Misc::Point& point) const
@@ -131,12 +167,6 @@ namespace FAWorld
             return nullptr;
 
         return it->second;
-    }
-
-    void GameLevel::addActor(Actor* actor)
-    {
-        mActors.push_back(actor);
-        actorMapInsert(actor);
     }
 
     static Cel::Colour friendHoverColor() { return {180, 110, 110, true}; }
@@ -191,12 +221,6 @@ namespace FAWorld
             }
         }
         release_assert(false && "tried to remove actor that isn't in level");
-    }
-
-    bool GameLevel::isPassableFor(const Misc::Point& point, const Actor* actor) const
-    {
-        auto actorAtPos = getActorAt(point);
-        return mLevel.get(point).passable() && (actorAtPos == nullptr || actorAtPos == actor || actorAtPos->isPassable());
     }
 
     bool GameLevel::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile) { return mItemMap->dropItem(move(item), actor, tile); }

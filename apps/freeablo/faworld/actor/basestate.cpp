@@ -71,7 +71,8 @@ namespace FAWorld
                     break;
             }
 
-            actor.mMoveHandler.update(actor.getId());
+            actor.mMoveHandler.update(actor);
+            debug_assert(actor.getLevel()->isPassable(actor.mMoveHandler.getCurrentPosition().next(), &actor));
 
             AnimState anim = actor.mAnimation.getCurrentAnimation();
             if (actor.mMoveHandler.moving() && anim != AnimState::walk)

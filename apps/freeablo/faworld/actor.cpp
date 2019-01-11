@@ -61,6 +61,8 @@ namespace FAWorld
         mTalkData = npc.talkData;
         mNpcId = npc.id;
         mName = npc.name;
+
+        mIsTowner = true;
     }
 
     Actor::Actor(World& world, Random::Rng& rng, const DiabloExe::Monster& monster) : Actor(world, "", "", "")
@@ -168,7 +170,7 @@ namespace FAWorld
 
     void Actor::heal() { mStats.mHp = mStats.mHp.max; }
 
-    void Actor::setDirection(Misc::Direction direction) { mMoveHandler.setDirection(direction); }
+    void Actor::stopAndPointInDirection(Misc::Direction direction) { mMoveHandler.stopAndPointInDirection(direction); }
 
     bool Actor::hasTarget() const { return mTarget.getType() != Target::Type::None; }
 
@@ -212,8 +214,9 @@ namespace FAWorld
         if (currentLevel)
             currentLevel->removeActor(this);
 
-        level->addActor(this);
         mMoveHandler.teleport(level, pos);
+        level->insertActor(this);
+
         updateSprites();
     }
 

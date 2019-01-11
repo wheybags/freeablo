@@ -71,7 +71,7 @@ namespace FAWorld
         void init();
         void takeDamage(int32_t amount);
         void heal();
-        void setDirection(Misc::Direction direction);
+        void stopAndPointInDirection(Misc::Direction direction);
 
         void die();
         bool isDead() const;
@@ -97,6 +97,10 @@ namespace FAWorld
         bool mInvuln = false;
         CharacterInventory mInventory;
         boost::optional<Misc::Direction> mMeleeAttackRequestedDirection; // this is really stupid but I don't know how else to do it
+
+        // TODO: hack, this should eventually be removed.
+        // Try not to use it unless you have no other choice with the current structure.
+        bool mIsTowner = false;
 
     protected:
         // protected member variables
