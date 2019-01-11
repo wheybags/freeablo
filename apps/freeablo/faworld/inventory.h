@@ -118,8 +118,7 @@ namespace FAWorld
 
     public:
         // This is not serialised - it should be reconnected by other means
-        boost::signals2::signal<void(BasicInventory const& inventory, Item const& removed, Item const& added)> inventoryChanged;
-        boost::signals2::signal<void(Item const& removed, Item const& added)> cursorItemChanged;
+        boost::signals2::signal<void(EquipTargetType inventoryType, Item const& removed, Item const& added)> inventoryChanged;
 
     private:
         static constexpr int32_t inventoryWidth = 10;
@@ -136,5 +135,17 @@ namespace FAWorld
         BasicInventory mLeftHand = BasicInventory(1, 1, true);
         BasicInventory mRightHand = BasicInventory(1, 1, true);
         BasicInventory mCursorHeld = BasicInventory(1, 1, true);
+
+        const std::vector<std::pair<EquipTargetType, BasicInventory&>> mInventoryTypes = {
+            { EquipTargetType::inventory, mMainInventory },
+            { EquipTargetType::belt, mBelt },
+            { EquipTargetType::head, mHead },
+            { EquipTargetType::body, mBody },
+            { EquipTargetType::leftRing, mLeftRing },
+            { EquipTargetType::rightRing, mRightRing },
+            { EquipTargetType::leftHand, mLeftHand },
+            { EquipTargetType::rightHand, mRightHand },
+            { EquipTargetType::amulet, mAmulet },
+            { EquipTargetType::cursor, mCursorHeld } };
     };
 }

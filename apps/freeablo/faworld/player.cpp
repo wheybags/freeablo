@@ -54,27 +54,39 @@ namespace FAWorld
     void Player::initCommon()
     {
         mWorld.registerPlayer(this);
-        mInventory.inventoryChanged.connect([this](BasicInventory const& inventory, Item const& removed, Item const& added) {
-            (void)inventory;
+        mInventory.inventoryChanged.connect([this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
             (void)removed;
 
             // Update player graphics.
             updateSprites();
 
+            switch (inventoryType)
+            {
+                case EquipTargetType::body:
+                case EquipTargetType::leftHand:
+                case EquipTargetType::rightHand:
+                    // Update player graphics.
+                    updateSprites();
+                    break;
+                default:
+                    break;
+            }
+
             if (!added.isEmpty())
             {
-                // Play inventory place sound.
-                std::string soundPath = added.getInvPlaceSoundPath();
-                Engine::ThreadManager::get()->playSound(soundPath);
+                // Play inventory place/grab sound.
+                switch (inventoryType)
+                {
+                    case EquipTargetType::cursor:
+                        Engine::ThreadManager::get()->playSound("sfx/items/invgrab.wav");
+                        break;
+                    default:
+                        std::string soundPath = added.getInvPlaceSoundPath();
+                        Engine::ThreadManager::get()->playSound(soundPath);
+                        break;
+                }
             }
         });
-        mInventory.cursorItemChanged.connect([](Item const& removed, Item const& added) {
-            (void)removed;
-            if (!added.isEmpty())
-                // Play cursor grab sound.
-                Engine::ThreadManager::get()->playSound("sfx/items/invgrab.wav");
-        });
-        mMoveHandler.positionReached.connect(positionReached);
     }
 
     void Player::setPlayerClass(PlayerClass playerClass)

@@ -298,10 +298,8 @@ namespace FAWorld
 
     CharacterInventory::CharacterInventory()
     {
-        BasicInventory* inventories[] = {&mMainInventory, &mBelt, &mHead, &mBody, &mLeftRing, &mRightRing, &mAmulet, &mLeftHand, &mRightHand};
-        for (auto inv : inventories)
-            inv->inventoryChanged.connect([this, inv](Item const& removed, Item const& added) { inventoryChanged(*inv, removed, added); });
-        mCursorHeld.inventoryChanged.connect([this](Item const& removed, Item const& added) { cursorItemChanged(removed, added); });
+       for (auto inv : mInventoryTypes)
+           inv.second.inventoryChanged.connect([this, inv](Item const& removed, Item const& added) { inventoryChanged(inv.first, removed, added); });
     }
 
     void CharacterInventory::save(FASaveGame::GameSaver& saver)
@@ -405,31 +403,9 @@ namespace FAWorld
 
     BasicInventory& CharacterInventory::getInvMutable(EquipTargetType type)
     {
-        switch (type)
-        {
-            case EquipTargetType::inventory:
-                return mMainInventory;
-            case EquipTargetType::belt:
-                return mBelt;
-            case EquipTargetType::head:
-                return mHead;
-            case EquipTargetType::body:
-                return mBody;
-            case EquipTargetType::leftRing:
-                return mLeftRing;
-            case EquipTargetType::rightRing:
-                return mRightRing;
-            case EquipTargetType::leftHand:
-                return mLeftHand;
-            case EquipTargetType::rightHand:
-                return mRightHand;
-            case EquipTargetType::amulet:
-                return mAmulet;
-            case EquipTargetType::cursor:
-                return mCursorHeld;
-        }
-
-        invalid_enum(EquipTargetType, type);
+        auto it = std::find_if(mInventoryTypes.begin(), mInventoryTypes.end(),
+            [type](const std::pair<EquipTargetType, BasicInventory&> & m) -> bool { return m.first == type; });
+        return it->second;
     }
 
     void CharacterInventory::slotClicked(const EquipTarget& slot)
