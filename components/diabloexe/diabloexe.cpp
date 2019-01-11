@@ -161,7 +161,8 @@ namespace DiabloExe
     void DiabloExe::loadSoundFilenames(FAIO::FAFileObject& exe, size_t codeOffset)
     {
         uint64_t offset = mSettings->get<uint64_t>("Sounds", "filenameTable");
-        soundFilename.resize(858);
+        int32_t filenameTableSize = mSettings->get<int32_t>("Sounds", "filenameTableSize");
+        soundFilename.resize(filenameTableSize);
         for (int i = 0; i < static_cast<int>(soundFilename.size()); ++i)
         {
             exe.FAfseek(offset + i * 9 + 1, SEEK_SET);
