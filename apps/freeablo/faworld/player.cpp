@@ -72,7 +72,7 @@ namespace FAWorld
                     break;
             }
 
-            if (!added.isEmpty() && mPlayerInitialised)
+            if (!added.isEmpty() && mPlayerInitialised && this == mWorld.getCurrentPlayer())
             {
                 // Play inventory place/grab sound.
                 switch (inventoryType)
