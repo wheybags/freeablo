@@ -837,7 +837,7 @@ namespace FALevelGen
             {
                 pos.x = rng.randomInRange(1, level.width() - 1);
                 pos.y = rng.randomInRange(1, level.height() - 1);
-            } while (!level.getTile(pos).passable() && pos != level.upStairsPos() && pos != level.downStairsPos());
+            } while (!level.isPassable(pos, nullptr) || pos == level.upStairsPos() || pos == level.downStairsPos());
 
             std::string name = possibleMonsters[rng.randomInRange(0, possibleMonsters.size() - 1)]->monsterName;
             DiabloExe::Monster monster = exe.getMonster(name);

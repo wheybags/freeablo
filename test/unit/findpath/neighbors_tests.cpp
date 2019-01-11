@@ -39,7 +39,7 @@ struct NeighborsPatternsTest : ::testing::TestWithParam<NeighborsPatternsParams>
 
 TEST_P(NeighborsPatternsTest, equals)
 {
-    auto actual = FAWorld::neighbors(level.get(), GetParam().position);
+    auto actual = FAWorld::neighbors(level.get(), nullptr, GetParam().position);
     auto expected = GetParam().expected;
 
     std::sort(actual.begin(), actual.end());

@@ -58,34 +58,34 @@ struct FindPathPatternsTest : ::testing::TestWithParam<FindPathPatternsParams>
 
 TEST_P(FindPathPatternsTest, goalIsReachable)
 {
-    FAWorld::pathFind(level.get(), GetParam().start, GetParam().goal, isReachable, false);
+    FAWorld::pathFind(level.get(), nullptr, GetParam().start, GetParam().goal, isReachable, false);
 
     ASSERT_TRUE(isReachable);
 }
 
 TEST_P(FindPathPatternsTest, pathBeginsNearStartPosition)
 {
-    auto path = FAWorld::pathFind(level.get(), GetParam().start, GetParam().goal, isReachable, false);
-    auto expected = FAWorld::neighbors(level.get(), GetParam().start);
+    auto path = FAWorld::pathFind(level.get(), nullptr, GetParam().start, GetParam().goal, isReachable, false);
+    auto expected = FAWorld::neighbors(level.get(), nullptr, GetParam().start);
 
     ASSERT_NE(std::find(expected.begin(), expected.end(), path.front()), expected.end());
 }
 
 TEST_P(FindPathPatternsTest, pathEndsNearGoalPosition)
 {
-    auto path = FAWorld::pathFind(level.get(), GetParam().start, GetParam().goal, isReachable, false);
-    auto expected = FAWorld::neighbors(level.get(), GetParam().goal);
+    auto path = FAWorld::pathFind(level.get(), nullptr, GetParam().start, GetParam().goal, isReachable, false);
+    auto expected = FAWorld::neighbors(level.get(), nullptr, GetParam().goal);
 
     ASSERT_NE(std::find(expected.begin(), expected.end(), path.back()), expected.end());
 }
 
 TEST_P(FindPathPatternsTest, pathIsContinuous)
 {
-    const auto path = FAWorld::pathFind(level.get(), GetParam().start, GetParam().goal, isReachable, false);
+    const auto path = FAWorld::pathFind(level.get(), nullptr, GetParam().start, GetParam().goal, isReachable, false);
 
     for (size_t index = 0; index < path.size() - 1; ++index)
     {
-        auto possibleRoute = FAWorld::neighbors(level.get(), path.at(index));
+        auto possibleRoute = FAWorld::neighbors(level.get(), nullptr, path.at(index));
 
         ASSERT_NE(std::find(possibleRoute.begin(), possibleRoute.end(), path.at(index + 1)), possibleRoute.end());
     }
@@ -93,7 +93,7 @@ TEST_P(FindPathPatternsTest, pathIsContinuous)
 
 TEST_P(FindPathPatternsTest, pathIsShort)
 {
-    auto path = FAWorld::pathFind(level.get(), GetParam().start, GetParam().goal, isReachable, false);
+    auto path = FAWorld::pathFind(level.get(), nullptr, GetParam().start, GetParam().goal, isReachable, false);
 
     if (path.size() > GetParam().expectedStepsAmount)
     {
@@ -106,20 +106,20 @@ TEST_P(FindPathPatternsTest, pathIsShort)
 
 TEST_P(FindPathPatternsTest, pathIsWalkable)
 {
-    auto path = FAWorld::pathFind(level.get(), GetParam().start, GetParam().goal, isReachable, false);
+    auto path = FAWorld::pathFind(level.get(), nullptr, GetParam().start, GetParam().goal, isReachable, false);
 
     for (auto tile : path)
-        ASSERT_TRUE(level->isPassable(tile));
+        ASSERT_TRUE(level->isPassable(tile, nullptr));
 }
 
 INSTANTIATE_TEST_CASE_P(FindPathPatternsParams,
                         FindPathPatternsTest,
-                        ::testing::Values(FindPathPatternsParams{"Walk #1", basicMap(), Point(2, 3), Point{18, 5}, 16},
-                                          FindPathPatternsParams{"Walk #1 reverse", basicMap(), Point(18, 5), Point{2, 3}, 16},
-                                          FindPathPatternsParams{"Walk #2", basicMap(), Point(3, 10), Point{18, 10}, 18},
-                                          FindPathPatternsParams{"Walk #3", basicMap(), Point(3, 10), Point{15, 10}, 18},
-                                          FindPathPatternsParams{"Goal point is not passable #1", basicMap(), Point(18, 7), Point{10, 10}, 12},
-                                          FindPathPatternsParams{"Goal point is not passable #2", basicMap(), Point(18, 10), Point{10, 10}, 13}), );
+                        ::testing::Values(FindPathPatternsParams{"Walk #1", basicMap(), Point(2, 3), Point{18, 5}, 17},
+                                          FindPathPatternsParams{"Walk #1 reverse", basicMap(), Point(18, 5), Point{2, 3}, 17},
+                                          FindPathPatternsParams{"Walk #2", basicMap(), Point(3, 10), Point{18, 10}, 19},
+                                          FindPathPatternsParams{"Walk #3", basicMap(), Point(3, 10), Point{15, 10}, 19},
+                                          FindPathPatternsParams{"Goal point is not passable #1", basicMap(), Point(18, 7), Point{10, 10}, 13},
+                                          FindPathPatternsParams{"Goal point is not passable #2", basicMap(), Point(18, 10), Point{10, 10}, 14}), );
 
 TEST(FindPathTests, walksStraightOnRectangleMap)
 {
@@ -131,9 +131,9 @@ TEST(FindPathTests, walksStraightOnRectangleMap)
     const Points restrictedPositions{{2, 1}, {4, 1}, {6, 1}, {8, 1}, {10, 1}, {12, 1}};
 
     bool isReachable = false;
-    auto path = FAWorld::pathFind(&level, start, goal, isReachable, false);
+    auto path = FAWorld::pathFind(&level, nullptr, start, goal, isReachable, false);
 
-    ASSERT_EQ(path.size(), 14);
+    ASSERT_EQ(path.size(), 15);
 
     for (const auto& restrictedPosition : restrictedPositions)
         ASSERT_TRUE(std::end(path) == std::find(path.begin(), path.end(), restrictedPosition));
@@ -150,9 +150,9 @@ TEST(FindPathTests, walksOnLargeMap)
     FAWorld::LevelImplStub level(map);
 
     bool isReachable = false;
-    auto path = FAWorld::pathFind(&level, start, goal, isReachable, false);
+    auto path = FAWorld::pathFind(&level, nullptr, start, goal, isReachable, false);
 
-    ASSERT_EQ(path.size(), map_size - 1);
+    ASSERT_EQ(path.size(), map_size);
 }
 
 TEST(FindPathTests, pathfinderIsLimited)
@@ -166,7 +166,7 @@ TEST(FindPathTests, pathfinderIsLimited)
     FAWorld::LevelImplStub level(map);
 
     bool isReachable = false;
-    auto path = FAWorld::pathFind(&level, start, goal, isReachable, false);
+    auto path = FAWorld::pathFind(&level, nullptr, start, goal, isReachable, false);
 
     EXPECT_EQ(path.size(), 0);
     ASSERT_FALSE(isReachable);

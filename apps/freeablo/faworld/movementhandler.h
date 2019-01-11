@@ -31,9 +31,9 @@ namespace FAWorld
         bool moving();
         const Position& getCurrentPosition() const { return mCurrentPos; }
         GameLevel* getLevel();
-        void update(int32_t actorId);
+        void update(const FAWorld::Actor& actor);
         void teleport(GameLevel* level, Position pos);
-        void setDirection(Misc::Direction direction);
+        void stopAndPointInDirection(Misc::Direction direction);
 
         boost::signals2::signal<void(const Misc::Point)> positionReached;
 

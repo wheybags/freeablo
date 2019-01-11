@@ -26,6 +26,9 @@ namespace FAWorld
         int minDistance = 99999999;
         for (auto player : actor->getWorld()->getPlayers())
         {
+            if (player->isDead())
+                continue;
+
             int32_t distance = FAWorld::squaredDistance(player->getPos(), actor->getPos());
             if (distance < minDistance)
             {
@@ -54,9 +57,12 @@ namespace FAWorld
         {
             Player* nearest = FAWorld::findNearestPlayer(mActor);
 
-            int32_t dist = FAWorld::squaredDistance(nearest->getPos(), mActor->getPos());
+            int32_t dist = 0;
 
-            if (dist <= std::pow(5, 2)) // we are close enough to engage the player
+            if (nearest)
+                dist = FAWorld::squaredDistance(nearest->getPos(), mActor->getPos());
+
+            if (nearest && dist <= std::pow(5, 2)) // we are close enough to engage the player
             {
                 mActor->mTarget = nearest;
             }
@@ -79,7 +85,7 @@ namespace FAWorld
 
                         next.x += mActor->getWorld()->mRng->randomInRange(-5, 5);
                         next.y += mActor->getWorld()->mRng->randomInRange(-5, 5);
-                    } while (its < 10 && (!mActor->getLevel()->isPassable(next) || next == mActor->getPos().current()));
+                    } while (its < 10 && (!mActor->getLevel()->isPassable(next, mActor) || next == mActor->getPos().current()));
 
                     static int no = 0;
                     static int yes = 0;

@@ -289,7 +289,7 @@ namespace FAWorld
             return false;
         };
 
-        auto isPosOk = [&](Misc::Point pos) { return getLevel()->isPassableFor(pos, this) && !getLevel()->getItemMap().getItemAt(pos); };
+        auto isPosOk = [&](Misc::Point pos) { return getLevel()->isPassable(pos, this) && !getLevel()->getItemMap().getItemAt(pos); };
 
         if (clickedPoint == curPos)
         {

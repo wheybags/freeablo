@@ -38,7 +38,7 @@ namespace FAWorld
 
         virtual int32_t height() const = 0;
 
-        virtual bool isPassable(const Misc::Point& point) const = 0;
+        virtual bool isPassable(const Misc::Point& point, const FAWorld::Actor* forActor) const = 0;
     };
 
     class GameLevel : public GameLevelImpl
@@ -70,6 +70,7 @@ namespace FAWorld
 
         void update(bool noclip);
 
+        void insertActor(Actor* actor);
         void actorMapInsert(Actor* actor);
 
         void actorMapRemove(Actor* actor);
@@ -78,19 +79,15 @@ namespace FAWorld
 
         void actorMapRefresh();
 
-        virtual bool isPassable(const Misc::Point& point) const;
+        virtual bool isPassable(const Misc::Point& point, const FAWorld::Actor* forActor) const;
 
         Actor* getActorAt(const Misc::Point& point) const;
-
-        void addActor(Actor* actor);
 
         void fillRenderState(FARender::RenderState* state, Actor* displayedActor, const HoverStatus& hoverStatus);
 
         void removeActor(Actor* actor);
 
         int32_t getLevelIndex() { return mLevelIndex; }
-
-        bool isPassableFor(const Misc::Point& point, const Actor* actor) const;
 
         bool dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile);
 

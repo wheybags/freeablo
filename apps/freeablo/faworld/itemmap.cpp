@@ -68,7 +68,7 @@ namespace FAWorld
 
     bool ItemMap::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile)
     {
-        if (!mLevel->isPassableFor(tile.position, &actor))
+        if (!mLevel->isPassable(tile.position, &actor))
             return false;
 
         auto it = mItems.find(tile);
