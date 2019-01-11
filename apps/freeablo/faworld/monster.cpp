@@ -55,10 +55,8 @@ namespace FAWorld
         ItemId itemId = randomItem();
         if (itemId < ItemId::COUNT)
         {
-            Item item = mWorld.getItemFactory().generateBaseItem(itemId);
-            // TODO: Drop on nearest free tile...
-            auto pos = getPos().current();
-            getLevel()->dropItem(std::unique_ptr<Item>{new Item(item)}, *this, FAWorld::Tile(pos));
+            Item item = mWorld.getItemFactory().generateBaseItem(itemId);\
+            getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), NULL);
         }
     }
 

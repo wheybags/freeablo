@@ -276,39 +276,15 @@ namespace FAWorld
     bool Player::dropItem(const Misc::Point& clickedPoint)
     {
         auto cursorItem = mInventory.getCursorHeld();
-
         auto initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getIsometricDirection();
-
         auto curPos = getPos().current();
-        auto tryDrop = [&](const Misc::Point& pos) {
-            if (getLevel()->dropItem(std::unique_ptr<Item>{new Item(cursorItem)}, *this, FAWorld::Tile(pos)))
-            {
-                mInventory.setCursorHeld({});
-                return true;
-            }
-            return false;
-        };
+        bool clickedOnOwnPosition = (curPos == clickedPoint);
 
-        auto isPosOk = [&](Misc::Point pos) { return getLevel()->isPassableFor(pos, this) && !getLevel()->getItemMap().getItemAt(pos); };
-
-        if (clickedPoint == curPos)
+        if (getLevel()->dropItemClosestEmptyTile(cursorItem, *this, curPos, clickedOnOwnPosition ? NULL : &initialDir))
         {
-            if (isPosOk(curPos))
-                return tryDrop(curPos);
-            initialDir = Misc::Direction::south;
+            mInventory.setCursorHeld({});
+            return true;
         }
-
-        constexpr auto directionCnt = 8;
-        for (auto diff : {0, -1, 1})
-        {
-            auto dir = static_cast<Misc::Direction>((static_cast<int32_t>(initialDir) + diff + directionCnt) % directionCnt);
-            auto pos = Misc::getNextPosByDir(curPos, dir);
-            if (isPosOk(pos))
-                return tryDrop(pos);
-        }
-
-        if (isPosOk(curPos))
-            return tryDrop(curPos);
         return false;
     }
 

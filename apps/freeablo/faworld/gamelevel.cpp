@@ -117,7 +117,7 @@ namespace FAWorld
 
     bool GameLevel::isPassable(const Misc::Point& point) const
     {
-        if (point.x > 0 && point.x < width() && point.y > 0 && point.y < height() && !mLevel.get(point).passable())
+        if (point.x < 0 || point.x >= width() || point.y < 0 || point.y >= height() || !mLevel.get(point).passable())
             return false;
 
         FAWorld::Actor* actor = getActorAt(point);
@@ -200,6 +200,35 @@ namespace FAWorld
     }
 
     bool GameLevel::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile) { return mItemMap->dropItem(move(item), actor, tile); }
+
+    bool GameLevel::dropItemClosestEmptyTile(Item& item, const Actor& actor, const Misc::Point& position, Misc::Direction *direction)
+    {
+        auto tryDrop = [&](const Misc::Point& pos) {
+            bool res = false;
+            if (isPassableFor(pos, &actor) && !mItemMap->getItemAt(pos))
+                res = dropItem(std::unique_ptr<Item>{new Item(item)}, actor, FAWorld::Tile(pos));
+            return res;
+        };
+
+        auto defaultDirection = Misc::Direction::south;
+        if (!direction)
+        {
+            if (tryDrop(position))
+                return true;
+            direction = &defaultDirection;
+        }
+
+        constexpr auto directionCnt = 8;
+        for (auto diff : {0, -1, 1})
+        {
+            auto dir = static_cast<Misc::Direction>((static_cast<int32_t>(*direction) + diff + directionCnt) % directionCnt);
+            auto pos = Misc::getNextPosByDir(position, dir);
+            if (tryDrop(pos))
+                return true;
+        }
+
+        return tryDrop(position);
+    }
 
     Actor* GameLevel::getActorById(int32_t id)
     {
