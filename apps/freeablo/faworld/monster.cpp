@@ -46,12 +46,12 @@ namespace FAWorld
     void Monster::die()
     {
         Actor::die();
-        spawItem();
+        spawnItem();
     }
 
     int32_t Monster::getKillExp() const { return mMonsterStats.mExp; }
 
-    void Monster::spawItem()
+    void Monster::spawnItem()
     {
         // TODO: Spawn magic, unique and special/quest items.
         ItemId itemId = randomItem();

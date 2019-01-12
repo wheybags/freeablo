@@ -364,8 +364,6 @@ namespace FAWorld
                 mStats.mMana.max += 1;
                 break;
             case PlayerClass::rogue:
-                // TODO: Check this is correct, the below forum reckons +1.5 each.
-                // https://www.diabloii.net/forums/threads/what-is-the-max-level-on-d1.744752/#post-7322937
                 mStats.mHp.max += 2;
                 mStats.mMana.max += 2;
                 break;

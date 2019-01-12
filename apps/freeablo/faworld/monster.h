@@ -23,7 +23,7 @@ namespace FAWorld
         int32_t getKillExp() const;
 
     private:
-        void spawItem();
+        void spawnItem();
         ItemId randomItem();
 
         MonsterStats mMonsterStats;
