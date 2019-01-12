@@ -35,6 +35,7 @@ namespace FAWorld
             {
                 mCurrent = next();
                 mDist = 0;
+                mMoving = false;
             }
         }
     }

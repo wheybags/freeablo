@@ -90,6 +90,17 @@ int main(int, char**)
                         }
                     }
 
+                    if (nk_button_label(ctx, "save as gif"))
+                    {
+                        nfdchar_t* outPath = NULL;
+                        nfdresult_t result = NFD_SaveDialog("gif", NULL, &outPath);
+                        if (result == NFD_OKAY)
+                        {
+                            Render::SpriteGroup::toGif(selectedImage, outPath);
+                            free(outPath);
+                        }
+                    }
+
                     auto msSinceLastFrame = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrame).count();
                     if (animate && msSinceLastFrame > 100)
                     {

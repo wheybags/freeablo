@@ -43,7 +43,7 @@ namespace FAWorld
         void MeleeAttackState::onEnter(Actor& actor)
         {
             actor.isAttacking = true;
-            actor.setDirection(mDirection);
+            actor.stopAndPointInDirection(mDirection);
             actor.mAnimation.playAnimation(AnimState::attack, FARender::AnimationPlayer::AnimationType::Once);
         }
     }

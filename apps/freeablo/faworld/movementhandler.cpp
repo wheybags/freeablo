@@ -1,5 +1,6 @@
 #include "movementhandler.h"
 #include "../fasavegame/gameloader.h"
+#include "actor.h"
 #include "findpath.h"
 #include <misc/vec2fix.h>
 
@@ -71,9 +72,10 @@ namespace FAWorld
 
     GameLevel* MovementHandler::getLevel() { return mLevel; }
 
-    void MovementHandler::update(int32_t actorId)
+    void MovementHandler::update(const FAWorld::Actor& actor)
     {
         debug_assert(mLevel);
+        debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
 
         if (mCurrentPos.getDist() == 0)
         {
@@ -85,39 +87,59 @@ namespace FAWorld
             // if we have arrived, stop moving
             if (mCurrentPos.current() == mDestination)
             {
-                mCurrentPos.stop();
                 mCurrentPath.clear();
                 mCurrentPathIndex = 0;
             }
             else
             {
+                bool needsRepath = true;
                 bool canRepath = std::abs(mLevel->getWorld()->getCurrentTick() - mLastRepathed) > mPathRateLimit;
 
                 int32_t modNum = 3;
-                canRepath = canRepath && ((mLevel->getWorld()->getCurrentTick() % modNum) == (actorId % modNum));
+                canRepath = canRepath && ((mLevel->getWorld()->getCurrentTick() % modNum) == (actor.getId() % modNum));
 
-                bool needsRepath = true;
-                mCurrentPos.stop();
-
-                if (mCurrentPathIndex < (int32_t)mCurrentPath.size())
+                if (!mCurrentPath.empty())
                 {
-                    // If our destination hasn't changed, or we can't repath, keep moving along our current path
-                    if (mCurrentPath.back() == mDestination || !canRepath)
+                    // detect if we were blocked on our way and try to recover
+                    if (mCurrentPos.current() == mCurrentPath[mCurrentPathIndex - 1])
                     {
                         auto next = mCurrentPath[mCurrentPathIndex];
-
-                        // Make sure nothing has moved into the way
-                        if (mLevel->isPassable(next))
+                        if (mLevel->isPassable(next, &actor))
                         {
                             auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
                             Misc::Direction direction = vec.getIsometricDirection();
 
-                            positionReachedSent = false;
                             mCurrentPos.setDirection(direction);
                             mCurrentPos.start();
                             needsRepath = false;
-                            mCurrentPathIndex++;
                         }
+                    }
+                    // try to continue with our path
+                    else if (mCurrentPathIndex < int32_t(mCurrentPath.size()) - 1)
+                    {
+                        // If our destination hasn't changed, or we can't repath, keep moving along our current path
+                        if (mCurrentPath.back() == mDestination || !canRepath)
+                        {
+                            auto next = mCurrentPath[mCurrentPathIndex + 1];
+
+                            // Make sure nothing has moved into the way
+                            if (mLevel->isPassable(next, &actor))
+                            {
+                                auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
+                                Misc::Direction direction = vec.getIsometricDirection();
+
+                                positionReachedSent = false;
+                                mCurrentPos.setDirection(direction);
+                                mCurrentPos.start();
+                                needsRepath = false;
+                                mCurrentPathIndex++;
+
+                                debug_assert(getCurrentPosition().next() == next);
+                                debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
+                            }
+                        }
+
+                        debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
                     }
                 }
 
@@ -126,19 +148,28 @@ namespace FAWorld
                     mLastRepathed = mLevel->getWorld()->getCurrentTick();
 
                     bool _;
-                    mCurrentPath = pathFind(mLevel, mCurrentPos.current(), mDestination, _, mAdjacent);
-                    mCurrentPathIndex = 0;
+                    mCurrentPath = pathFind(mLevel, &actor, mCurrentPos.current(), mDestination, _, mAdjacent);
+                    mCurrentPathIndex = 1;
+
+                    if (mCurrentPath.size() <= 1)
+                    {
+                        mCurrentPath.clear();
+                        mCurrentPathIndex = 0;
+                    }
 
                     if (!mCurrentPath.empty())
                         mDestination = mCurrentPath.back();
 
-                    update(actorId);
+                    update(actor);
+
                     return;
                 }
             }
         }
 
         mCurrentPos.update();
+
+        debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
     }
 
     void MovementHandler::teleport(GameLevel* level, Position pos)
@@ -148,5 +179,9 @@ namespace FAWorld
         mDestination = mCurrentPos.current();
     }
 
-    void MovementHandler::setDirection(Misc::Direction direction) { mCurrentPos.setDirection(direction); }
+    void MovementHandler::stopAndPointInDirection(Misc::Direction direction)
+    {
+        mCurrentPos.setDirection(direction);
+        mCurrentPos.stop();
+    }
 }

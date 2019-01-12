@@ -25,7 +25,7 @@ namespace test_utils
 
                 bool containsActualPath = find(actualPath.begin(), actualPath.end(), id) != actualPath.end();
 
-                if (!graph.isPassable(id))
+                if (!graph.isPassable(id, nullptr))
                 {
                     std::cout << std::string(fieldWidth, '#');
                 }
