@@ -8,6 +8,8 @@
 
 namespace FAWorld
 {
+    const std::string Monster::typeId = "monster";
+
     Monster::Monster(World& world, Random::Rng& rng, const DiabloExe::Monster& monsterStats) : Actor(world), mMonsterStats(monsterStats)
     {
         boost::format fmt(monsterStats.cl2Path);

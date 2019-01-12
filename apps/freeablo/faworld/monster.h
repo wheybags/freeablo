@@ -9,6 +9,9 @@ namespace FAWorld
     class Monster : public Actor
     {
     public:
+        static const std::string typeId;
+        const std::string& getTypeId() override { return typeId; }
+
         Monster(World& world, Random::Rng& rng, const DiabloExe::Monster& monsterStats);
         Monster(World& world, FASaveGame::GameLoader& loader);
 
