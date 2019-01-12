@@ -58,7 +58,7 @@ namespace FAWorld
         if (itemId < ItemId::COUNT)
         {
             Item item = mWorld.getItemFactory().generateBaseItem(itemId);
-            getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), NULL);
+            getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction::none);
         }
     }
 

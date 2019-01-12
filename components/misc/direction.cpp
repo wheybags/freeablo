@@ -20,7 +20,7 @@ namespace Misc
 
     Point getNextPosByDir(Point pos, Direction dir)
     {
-        if (dir == Direction::invalid)
+        if (dir == Direction::none)
             return pos;
 
         int32_t x = pos.x + offsets[static_cast<size_t>(dir)][0];
