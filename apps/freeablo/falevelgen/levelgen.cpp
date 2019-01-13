@@ -565,9 +565,9 @@ namespace FALevelGen
         }
     }
 
-    bool placeUpStairs(Level::Dun& level, const std::vector<Room>& rooms, int32_t levelNum)
+    bool placeUpStairs(Level::Dun& level, const TileSet& tileset, const std::vector<Room>& rooms)
     {
-        if (levelNum == 1 || levelNum == 3)
+        if (tileset.upStairsOnWall)
         {
             for (int32_t i = 0; i < (int32_t)rooms.size(); i++)
             {
@@ -609,9 +609,9 @@ namespace FALevelGen
         return false;
     }
 
-    bool placeDownStairs(Level::Dun& level, const std::vector<Room>& rooms, int32_t levelNum)
+    bool placeDownStairs(Level::Dun& level, const TileSet& tileset, const std::vector<Room>& rooms)
     {
-        if (levelNum == 3)
+        if (tileset.downStairsOnWall)
         {
             for (int32_t i = 0; i < (int32_t)rooms.size(); i++)
             {
@@ -665,7 +665,7 @@ namespace FALevelGen
     //        extra edges to allow for some loops.
     //     5. Connect the rooms according to the graph from the last step with l shaped corridoors, and
     //        also draw any corridoor rooms that the corridoors overlap as part of the corridoor.
-    Level::Dun generateTmp(Random::Rng& rng, int32_t width, int32_t height, int32_t levelNum)
+    Level::Dun generateTmp(Random::Rng& rng, TileSet& tileset, int32_t width, int32_t height, int32_t levelNum)
     {
         Level::Dun level(width, height);
 
@@ -731,8 +731,8 @@ namespace FALevelGen
         addDoors(level, rooms, levelNum);
 
         // Make sure we always place stairs
-        if (!(placeUpStairs(level, rooms, levelNum) && placeDownStairs(level, rooms, levelNum)))
-            return generateTmp(rng, width, height, levelNum);
+        if (!(placeUpStairs(level, tileset, rooms) && placeDownStairs(level, tileset, rooms)))
+            return generateTmp(rng, tileset, width, height, levelNum);
 
         // Separate internal from external walls
         for (int32_t x = 0; x < (int32_t)width; x++)
@@ -1034,14 +1034,13 @@ namespace FALevelGen
     {
         int32_t levelNum = ((dLvl - 1) / 4) + 1;
 
-        Level::Dun tmpLevel = generateTmp(rng, width, height, levelNum);
-
-        Level::Dun level(width, height);
-
         std::stringstream ss;
         ss << "resources/tilesets/l" << levelNum << ".ini";
         TileSet tileset(ss.str());
 
+        Level::Dun tmpLevel = generateTmp(rng, tileset, width, height, levelNum);
+
+        Level::Dun level(width, height);
         fillIsometric(tmpLevel, level, false, 0, false);
         fillIsometric(tmpLevel, level, true, (int32_t)TileSetEnum::insideXWall, true);
 
@@ -1185,8 +1184,8 @@ namespace FALevelGen
                                celPath,
                                specialCelPath,
                                specialCelMap,
-                               downStairsPoint,
-                               upStairsPoint,
+                               downStairsPoint + Misc::Point(tileset.downStairsXOffset, tileset.downStairsYOffset),
+                               upStairsPoint + Misc::Point(tileset.upStairsXOffset, tileset.upStairsYOffset),
                                tileset.getDoorMap(),
                                previous,
                                next);

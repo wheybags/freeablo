@@ -128,6 +128,7 @@ namespace FALevelGen
         int32_t xDoor = 0;
         int32_t yDoor = 0;
 
+        bool upStairsOnWall = false;
         int32_t upStairs1 = 0;
         int32_t upStairs2 = 0;
         int32_t upStairs3 = 0;
@@ -140,6 +141,10 @@ namespace FALevelGen
         int32_t upStairs8 = 0;
         int32_t upStairs9 = 0;
 
+        int32_t upStairsXOffset = 0;
+        int32_t upStairsYOffset = 0;
+
+        bool downStairsOnWall = false;
         int32_t downStairs1 = 0;
         int32_t downStairs2 = 0;
         int32_t downStairs3 = 0;
@@ -151,6 +156,9 @@ namespace FALevelGen
         int32_t downStairs7 = 0;
         int32_t downStairs8 = 0;
         int32_t downStairs9 = 0;
+
+        int32_t downStairsXOffset = 0;
+        int32_t downStairsYOffset = 0;
 
         int32_t insideXWall = 0;
         int32_t insideXWallEnd = 0;
