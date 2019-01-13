@@ -399,14 +399,9 @@ namespace FAWorld
         mCursorHeld.placeItem(item, 0, 0).succeeded();
     }
 
-    const BasicInventory& CharacterInventory::getInv(EquipTargetType type) const { return const_cast<CharacterInventory*>(this)->getInvMutable(type); }
+    const BasicInventory& CharacterInventory::getInv(EquipTargetType type) const { return mInventoryTypes.at(type); }
 
-    BasicInventory& CharacterInventory::getInvMutable(EquipTargetType type)
-    {
-        auto it = std::find_if(
-            mInventoryTypes.begin(), mInventoryTypes.end(), [type](const std::pair<EquipTargetType, BasicInventory&>& m) -> bool { return m.first == type; });
-        return it->second;
-    }
+    BasicInventory& CharacterInventory::getInvMutable(EquipTargetType type) { return mInventoryTypes.at(type); }
 
     void CharacterInventory::slotClicked(const EquipTarget& slot)
     {

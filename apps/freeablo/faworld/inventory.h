@@ -136,15 +136,15 @@ namespace FAWorld
         BasicInventory mRightHand = BasicInventory(1, 1, true);
         BasicInventory mCursorHeld = BasicInventory(1, 1, true);
 
-        const std::vector<std::pair<EquipTargetType, BasicInventory&>> mInventoryTypes = {{EquipTargetType::inventory, mMainInventory},
-                                                                                          {EquipTargetType::belt, mBelt},
-                                                                                          {EquipTargetType::head, mHead},
-                                                                                          {EquipTargetType::body, mBody},
-                                                                                          {EquipTargetType::leftRing, mLeftRing},
-                                                                                          {EquipTargetType::rightRing, mRightRing},
-                                                                                          {EquipTargetType::leftHand, mLeftHand},
-                                                                                          {EquipTargetType::rightHand, mRightHand},
-                                                                                          {EquipTargetType::amulet, mAmulet},
-                                                                                          {EquipTargetType::cursor, mCursorHeld}};
+        std::map<EquipTargetType, BasicInventory&> mInventoryTypes = {{EquipTargetType::inventory, mMainInventory},
+                                                                      {EquipTargetType::belt, mBelt},
+                                                                      {EquipTargetType::head, mHead},
+                                                                      {EquipTargetType::body, mBody},
+                                                                      {EquipTargetType::leftRing, mLeftRing},
+                                                                      {EquipTargetType::rightRing, mRightRing},
+                                                                      {EquipTargetType::leftHand, mLeftHand},
+                                                                      {EquipTargetType::rightHand, mRightHand},
+                                                                      {EquipTargetType::amulet, mAmulet},
+                                                                      {EquipTargetType::cursor, mCursorHeld}};
     };
 }
