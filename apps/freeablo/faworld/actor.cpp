@@ -65,22 +65,6 @@ namespace FAWorld
         mIsTowner = true;
     }
 
-    Actor::Actor(World& world, Random::Rng& rng, const DiabloExe::Monster& monster) : Actor(world, "", "", "")
-    {
-        boost::format fmt(monster.cl2Path);
-        mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage((fmt % 'w').str()));
-        mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage((fmt % 'n').str()));
-        mAnimation.setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage((fmt % 'd').str()));
-        mAnimation.setAnimation(AnimState::attack, FARender::Renderer::get()->loadImage((fmt % 'a').str()));
-        mAnimation.setAnimation(AnimState::hit, FARender::Renderer::get()->loadImage((fmt % 'h').str()));
-
-        mBehaviour.reset(new BasicMonsterBehaviour(this));
-        mFaction = Faction::hell();
-        mName = monster.monsterName;
-        mSoundPath = monster.soundPath;
-        mStats.mHp = rng.randomInRange(monster.minHp, monster.maxHp);
-    }
-
     Actor::Actor(World& world, FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(loader), mWorld(world)
     {
         mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
@@ -169,6 +153,8 @@ namespace FAWorld
     }
 
     void Actor::heal() { mStats.mHp = mStats.mHp.max; }
+
+    void Actor::restoreMana() { mStats.mMana = mStats.mMana.max; }
 
     void Actor::stopAndPointInDirection(Misc::Direction direction) { mMoveHandler.stopAndPointInDirection(direction); }
 
@@ -288,19 +274,34 @@ namespace FAWorld
 
     void Actor::startMeleeAttack(Misc::Direction direction) { mMeleeAttackRequestedDirection = direction; }
 
-    void Actor::checkDeath()
+    bool Actor::checkDeath()
     {
         if (getStats().mHp.current <= 0)
+        {
             die();
+            return true;
+        }
+        return false;
     }
 
     void Actor::doMeleeHit(Actor* enemy)
     {
         Engine::ThreadManager::get()->playSound(mWorld.mRng->chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
         if (checkHit(enemy))
-        {
-            enemy->takeDamage(meleeDamageVs(enemy));
-            enemy->checkDeath();
-        }
+            inflictDamage(enemy, meleeDamageVs(enemy));
+    }
+
+    void Actor::inflictDamage(Actor* enemy, uint32_t damage)
+    {
+        enemy->takeDamage(damage);
+        if (enemy->checkDeath())
+            enemyKilled(enemy);
+    }
+
+    void Actor::enemyKilled(Actor* enemy)
+    {
+        // Nothing to do for base actor.
+        // Players will get exp, Diablo may do a happy dance etc.
+        (void)enemy;
     }
 }

@@ -276,39 +276,15 @@ namespace FAWorld
     bool Player::dropItem(const Misc::Point& clickedPoint)
     {
         auto cursorItem = mInventory.getCursorHeld();
-
         auto initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getIsometricDirection();
-
         auto curPos = getPos().current();
-        auto tryDrop = [&](const Misc::Point& pos) {
-            if (getLevel()->dropItem(std::unique_ptr<Item>{new Item(cursorItem)}, *this, FAWorld::Tile(pos)))
-            {
-                mInventory.setCursorHeld({});
-                return true;
-            }
-            return false;
-        };
+        auto direction = (curPos == clickedPoint) ? Misc::Direction::none : initialDir;
 
-        auto isPosOk = [&](Misc::Point pos) { return getLevel()->isPassable(pos, this) && !getLevel()->getItemMap().getItemAt(pos); };
-
-        if (clickedPoint == curPos)
+        if (getLevel()->dropItemClosestEmptyTile(cursorItem, *this, curPos, direction))
         {
-            if (isPosOk(curPos))
-                return tryDrop(curPos);
-            initialDir = Misc::Direction::south;
+            mInventory.setCursorHeld({});
+            return true;
         }
-
-        constexpr auto directionCnt = 8;
-        for (auto diff : {0, -1, 1})
-        {
-            auto dir = static_cast<Misc::Direction>((static_cast<int32_t>(initialDir) + diff + directionCnt) % directionCnt);
-            auto pos = Misc::getNextPosByDir(curPos, dir);
-            if (isPosOk(pos))
-                return tryDrop(pos);
-        }
-
-        if (isPosOk(curPos))
-            return tryDrop(curPos);
         return false;
     }
 
@@ -349,5 +325,56 @@ namespace FAWorld
                 mTarget.clear();
             }
         }
+    }
+
+    void Player::enemyKilled(Actor* enemy)
+    {
+        if (Monster* monster = dynamic_cast<Monster*>(enemy))
+        {
+            addExperience(*monster);
+            // TODO: intimidate close fallen demons.
+            // TODO: notify quests.
+            // TODO: if enemy is Diablo game complete.
+        }
+    }
+
+    void Player::addExperience(Monster& enemy)
+    {
+        int32_t exp = enemy.getKillExp();
+        // Adjust exp based on difference in level between player and monster.
+        exp *= 1 + ((float)enemy.getMonsterStats().level - mPlayerStats.mLevel) / 10;
+        exp = std::max(0, exp);
+
+        mPlayerStats.mExp = std::min(mPlayerStats.mExp + exp, mPlayerStats.maxExp());
+        int32_t newLevel = mPlayerStats.expToLevel(mPlayerStats.mExp);
+        // Level up if applicable (it's possible to level up more than once).
+        for (int32_t i = mPlayerStats.mLevel; i < newLevel; i++)
+            levelUp(newLevel);
+    }
+
+    void Player::levelUp(int32_t newLevel)
+    {
+        mPlayerStats.mLevel = newLevel;
+
+        // Increase HP/Mana.
+        switch (mPlayerClass)
+        {
+            case PlayerClass::warrior:
+                mStats.mHp.max += 2;
+                mStats.mMana.max += 1;
+                break;
+            case PlayerClass::rogue:
+                mStats.mHp.max += 2;
+                mStats.mMana.max += 2;
+                break;
+            case PlayerClass::sorcerer:
+                mStats.mHp.max += 1;
+                mStats.mMana.max += 2;
+                break;
+        }
+
+        // Restore HP/Mana.
+        heal();
+        restoreMana();
     }
 }

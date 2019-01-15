@@ -19,7 +19,7 @@ namespace Misc
         north_east,
         east,
         south_east,
-        invalid,
+        none,
     };
 
     Point getNextPosByDir(Point pos, Direction dir);
