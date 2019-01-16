@@ -29,10 +29,13 @@ FixedPoint::FixedPoint(const std::string& str)
     release_assert(split.size() <= 2);
     release_assert(split.size() > 0);
 
+    int64_t sign = split[0][0] == '-' ? -1 : 1;
+
     int64_t integer = 0;
     {
         std::stringstream ss(split[0]);
         ss >> integer;
+        integer = i64abs(integer);
     }
     int64_t fractional = 0;
     int64_t fractionalDigits = 0;
@@ -43,7 +46,6 @@ FixedPoint::FixedPoint(const std::string& str)
         ss >> fractional;
     }
 
-    int64_t sign = integer >= 0 ? 1 : -1;
     integer = i64abs(integer);
 
     int64_t tmpScalePow10 = fractionalDigits;
@@ -87,13 +89,17 @@ int64_t FixedPoint::round() const
     int64_t i = intPart();
     if (frac >= FixedPoint("0.5"))
         i++;
+    else if (frac <= FixedPoint("-0.5"))
+        i--;
     return i;
 }
 
 FixedPoint FixedPoint::fractionPart() const
 {
+    int64_t sign = (mVal >= 0 ? 1 : -1);
     int64_t intPart = this->intPart();
-    int64_t rawVal = i64abs(mVal - (intPart * FixedPoint::scalingFactor));
+    int64_t temp = i64abs(mVal - (intPart * FixedPoint::scalingFactor));
+    int64_t rawVal = sign * temp;
     return fromRawValue(rawVal);
 }
 
@@ -108,12 +114,16 @@ double FixedPoint::toDouble() const
 std::string FixedPoint::str() const
 {
     std::stringstream ss;
-    ss << intPart();
+
+    if (*this < 0)
+        ss << "-";
+
+    ss << this->abs().intPart();
 
     std::string fractionalTempStr;
     fractionalTempStr.resize(FixedPoint::scalingFactorPowerOf10);
 
-    int64_t fractionalTemp = fractionPart().mVal;
+    int64_t fractionalTemp = fractionPart().abs().mVal;
     for (int64_t i = 0; i < FixedPoint::scalingFactorPowerOf10; i++)
     {
         fractionalTempStr[size_t(FixedPoint::scalingFactorPowerOf10 - 1 - i)] = '0' + fractionalTemp % 10;

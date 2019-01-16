@@ -30,6 +30,11 @@ TEST(FixedPoint, TestConstruction)
     ASSERT_EQ(val.intPart(), 981);
     ASSERT_EQ(val.fractionPart(), FixedPoint("0.00006"));
     ASSERT_EQ(val.str(), "981.00006");
+
+    val = FixedPoint("-1.023");
+    ASSERT_EQ(val.intPart(), -1);
+    ASSERT_EQ(val.fractionPart(), FixedPoint("-0.023"));
+    ASSERT_EQ(val.str(), "-1.023");
 }
 
 TEST(FixedPoint, AddSubtract)
@@ -89,6 +94,14 @@ TEST(FixedPoint, PlainIntOperators)
 
     val = FixedPoint("1.0") / uint8_t(2);
     ASSERT_EQ(val, FixedPoint("0.5"));
+}
+
+TEST(FixedPoint, Rounding)
+{
+    ASSERT_EQ(1, FixedPoint("1.49").round());
+    ASSERT_EQ(2, FixedPoint("1.50").round());
+    ASSERT_EQ(-1, FixedPoint("-1.49").round());
+    ASSERT_EQ(-2, FixedPoint("-1.50").round());
 }
 
 TEST(FixedPoint, VectorToDirection)
