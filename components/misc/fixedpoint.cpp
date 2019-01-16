@@ -224,3 +224,25 @@ FixedPoint FixedPoint::sqrt() const
 
     return x;
 }
+
+// ***********************************************************
+// Temporary hack uses floating point.
+// TODO: Convert to fixed point implementation.
+#define _USE_MATH_DEFINES
+#include <math.h>
+FixedPoint FixedPoint::atan2_degrees(FixedPoint y, FixedPoint x)
+{
+    // TODO: Possible domain errors (0, 0)?
+    double res = atan2(y.toDouble(), x.toDouble()) * 180 / M_PI;
+    return FixedPoint::fromRawValue((uint64_t)(res * FixedPoint::scalingFactor));
+}
+
+FixedPoint FixedPoint::sin_degrees(FixedPoint deg)
+{
+
+    double res = sin(deg.toDouble() * M_PI / 180);
+    return FixedPoint::fromRawValue((uint64_t)(res * FixedPoint::scalingFactor));
+}
+
+FixedPoint FixedPoint::cos_degrees(FixedPoint deg) { return sin_degrees(deg + 90); }
+// ***********************************************************

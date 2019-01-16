@@ -71,6 +71,10 @@ public:
         return fromRawValue(mVal >= 0 ? mVal : -mVal);
     }
 
+    static FixedPoint atan2_degrees(FixedPoint y, FixedPoint x);
+    static FixedPoint sin_degrees(FixedPoint deg);
+    static FixedPoint cos_degrees(FixedPoint deg);
+
 private:
     // The scaling factor to use, as a power of 10.
     // Essentially the number of base 10 digits after the decimal point.
