@@ -131,6 +131,8 @@ namespace FAWorld
 
     void Player::save(FASaveGame::GameSaver& saver)
     {
+        release_assert(mPlayerInitialised);
+
         Serial::ScopedCategorySaver cat("Player", saver);
 
         Actor::save(saver);

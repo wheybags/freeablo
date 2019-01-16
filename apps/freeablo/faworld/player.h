@@ -55,6 +55,7 @@ namespace FAWorld
         int getDamageBonus() const { /* placeholder */ return 0; }
         ItemBonus getItemBonus() const;
 
+        // This isn't serialised as it must be set before saving can occur.
         bool mPlayerInitialised = false;
 
     private:
