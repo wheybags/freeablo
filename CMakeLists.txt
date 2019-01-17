@@ -38,8 +38,9 @@ endif()
 
 
 # cmake policies
-cmake_policy(SET CMP0074 NEW) # find_library calls use $LIB_ROOT variables. Shouldn't affect us much/at all, but silences warnings
-
+IF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.11)
+	cmake_policy(SET CMP0074 NEW) # find_library calls use $LIB_ROOT variables. Shouldn't affect us much/at all, but silences warnings
+ENDIF()
 
 include("cmake/HunterGate.cmake")
 HunterGate(
