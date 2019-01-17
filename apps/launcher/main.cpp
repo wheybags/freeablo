@@ -36,10 +36,6 @@ int main(int, char** argv)
         int32_t bannerW, bannerH;
         Render::spriteSize(banner->getSprite()->operator[](0), bannerW, bannerH);
 
-        renderSettings.windowWidth = bannerW;
-        renderSettings.windowHeight = bannerH * 5;
-        Render::setWindowSize(renderSettings);
-
         nk_style_button headerButtonStyle = ctx->style.button;
         headerButtonStyle.normal = nk_style_item_color(nk_rgba(0, 0, 0, 0));
         release_assert(headerButtonStyle.hover.type == NK_STYLE_ITEM_COLOR);
