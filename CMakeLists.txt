@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.8)
 
 set(
     HUNTER_CACHE_SERVERS
@@ -22,6 +22,24 @@ if (NOT password_is_empty)
     option(HUNTER_RUN_UPLOAD "Upload cache binaries" ON)
 endif()
 
+## Windows Config ##
+if (WIN32)
+    set (CMAKE_SYSTEM_VERSION 8.1 CACHE TYPE INTERNAL FORCE)
+
+    set(desired_generator "Visual Studio 14 2015 Win64")
+
+    string(COMPARE EQUAL "${CMAKE_GENERATOR}" "${desired_generator}" generator_is_correct)
+    if (NOT generator_is_correct)
+        message(FATAL_ERROR "Incorrect generator, please run cmake with: -G \"${desired_generator}\"")
+    endif()
+
+    set(HUNTER_CMAKE_GENERATOR "${desired_generator}")
+endif()
+
+
+# cmake policies
+cmake_policy(SET CMP0074 NEW) # find_library calls use $LIB_ROOT variables. Shouldn't affect us much/at all, but silences warnings
+
 
 include("cmake/HunterGate.cmake")
 HunterGate(
@@ -34,40 +52,30 @@ project (Freeablo)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-set(HUNTER_LIBS "")
-
 hunter_add_package(SDL2)
 find_Package(SDL2 CONFIG REQUIRED)
-set(HUNTER_LIBS ${HUNTER_LIBS} SDL2::SDL2)
 
 hunter_add_package(SDL_image)
 find_package(SDL_image CONFIG REQUIRED)
-set(HUNTER_LIBS ${HUNTER_LIBS} SDL_image::SDL_image)
 
 hunter_add_package(SDL_mixer)
 find_package(SDL_mixer CONFIG REQUIRED)
-set(HUNTER_LIBS ${HUNTER_LIBS} SDL_mixer::SDL_mixer)
 
 hunter_add_package(PNG)
 find_package(PNG CONFIG REQUIRED)
-set(HUNTER_LIBS ${HUNTER_LIBS} PNG::png)
 
 hunter_add_package(enet)
 find_package(enet CONFIG REQUIRED)
-set(HUNTER_LIBS ${HUNTER_LIBS} enet::enet)
 
 hunter_add_package(ZLIB)
 find_package(ZLIB CONFIG REQUIRED)
-set(HUNTER_LIBS ${HUNTER_LIBS} ZLIB::zlib)
 
 hunter_add_package(stormlib)
 find_package(stormlib CONFIG REQUIRED)
-set(HUNTER_LIBS ${HUNTER_LIBS} stormlib::stormlib)
 
 hunter_add_package(Boost COMPONENTS filesystem system program_options date_time regex)
 find_package(Boost CONFIG REQUIRED  filesystem system program_options date_time regex)
 set(HUNTER_BOOST_LIBS Boost::filesystem Boost::system Boost::program_options Boost::date_time Boost::regex)
-set(HUNTER_LIBS ${HUNTER_LIBS} ${HUNTER_BOOST_LIBS})
 
 Find_Package(OpenGL REQUIRED)
 
@@ -114,6 +122,7 @@ if(MSVC)
     if (FA_TREAT_WARNINGS_AS_ERRORS)
         set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} /WX")
     endif()
+
 endif()
 
 #TODO: get rid of this?
@@ -140,3 +149,11 @@ add_subdirectory(apps/exedump)
 add_subdirectory(apps/launcher)
 add_subdirectory(apps/fontgenerator)
 add_subdirectory(test)
+
+if(MSVC)
+    set_property(TARGET freeablo PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+    set_property(TARGET celview PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+    set_property(TARGET exedump PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+    set_property(TARGET launcher PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+    set_property(TARGET unit_tests PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+endif()
