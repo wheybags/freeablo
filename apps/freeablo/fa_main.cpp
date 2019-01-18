@@ -7,7 +7,7 @@
 #include <iostream>
 #include <faio/fafileobject.h>
 #include <settings/settings.h>
-
+#include <diabloexe/diabloexe.h>
 #include "engine/enginemain.h"
 
 namespace bpo = boost::program_options;
@@ -47,16 +47,36 @@ bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
     return true;
 }
 
+bool dataFilesSetUp(const Settings::Settings& settings)
+{
+    std::string mpqPath = settings.get<std::string>("Game", "PathMPQ");
+    std::string exePath = settings.get<std::string>("Game", "PathEXE");
+
+    if (mpqPath.empty() || exePath.empty())
+        return false;
+
+    if (DiabloExe::DiabloExe::getVersion(exePath).empty())
+        return false;
+
+    // TODO: validate mpq MD5 as well.
+    // Not sure if this changes across versions.
+
+    return true;
+}
+
 int fa_main(int argc, char** argv)
 {
     Settings::Settings settings;
-    if (!settings.loadUserSettings())
-        return EXIT_FAILURE;
+
+    // Check if we've been configured with data files, and if we haven't, run the launcher to prompt configuration
+    if (!(settings.loadUserSettings() && dataFilesSetUp(settings)))
+    {
+        system((boost::filesystem::system_complete(argv[0]).parent_path() / "launcher").string().c_str());
+        return EXIT_SUCCESS;
+    }
 
     if (!FAIO::init(settings.get<std::string>("Game", "PathMPQ")))
-    {
         return EXIT_FAILURE;
-    }
 
     Engine::EngineMain engine;
 

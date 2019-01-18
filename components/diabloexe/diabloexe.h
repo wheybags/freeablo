@@ -65,9 +65,10 @@ namespace DiabloExe
         const std::vector<UniqueItem>& getUniqueItems() const { return mUniqueItems; }
         const std::vector<Affix>& getAffixes() const { return mAffixes; }
 
+        static std::string getVersion(const std::string& pathEXE);
+
     private:
-        std::string getMD5(const std::string& pathEXE);
-        std::string getVersion(const std::string& pathEXE);
+        static std::string getMD5(const std::string& pathEXE);
 
         void loadDropGraphicsFilenames(FAIO::FAFileObject& exe, size_t codeOffset);
         void loadMonsters(FAIO::FAFileObject& exe, size_t codeOffset);
