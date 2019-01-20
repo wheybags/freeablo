@@ -145,7 +145,7 @@ namespace Settings
         return -1 < sectionSize;
     }
 
-    template <> std::string Settings::get<std::string>(const std::string& section, const std::string& name, std::string defaultValue)
+    template <> std::string Settings::get<std::string>(const std::string& section, const std::string& name, std::string defaultValue) const
     {
         if (!mImpl->isKeyExists(section, name))
         {
@@ -160,7 +160,7 @@ namespace Settings
     // don't match for a template. This is a pain in the ass, so in here we just explicitly instantiate for both long long and long, so it should
     // work either way. We don't assert the size of long, because on 32 bit machines it's actually still 4 bytes.
     static_assert(sizeof(long long int) == 8, "");
-    template <> long long int Settings::get<long long int>(const std::string& section, const std::string& name, long long int defaultValue)
+    template <> long long int Settings::get<long long int>(const std::string& section, const std::string& name, long long int defaultValue) const
     {
         /// Do not rely on CSimpleIniCaseA::GetLongValue(), as it has limited range.
         /// Hexadecimal numbers are auto-detected by std::stoll().
@@ -168,55 +168,55 @@ namespace Settings
         return std::stoll(textValue, nullptr, 0);
     }
 
-    template <> long int Settings::get<long int>(const std::string& section, const std::string& name, long int defaultValue)
+    template <> long int Settings::get<long int>(const std::string& section, const std::string& name, long int defaultValue) const
     {
         return get<long long int>(section, name, defaultValue);
     }
 
-    template <> int32_t Settings::get<int32_t>(const std::string& section, const std::string& name, int32_t defaultValue)
+    template <> int32_t Settings::get<int32_t>(const std::string& section, const std::string& name, int32_t defaultValue) const
     {
         return get<int64_t>(section, name, defaultValue);
     }
 
-    template <> int16_t Settings::get<int16_t>(const std::string& section, const std::string& name, int16_t defaultValue)
+    template <> int16_t Settings::get<int16_t>(const std::string& section, const std::string& name, int16_t defaultValue) const
     {
         return get<int64_t>(section, name, defaultValue);
     }
 
-    template <> int8_t Settings::get<int8_t>(const std::string& section, const std::string& name, int8_t defaultValue)
+    template <> int8_t Settings::get<int8_t>(const std::string& section, const std::string& name, int8_t defaultValue) const
     {
         return get<int64_t>(section, name, defaultValue);
     }
 
     static_assert(sizeof(long long unsigned int) == 8, "");
     template <>
-    long long unsigned int Settings::get<long long unsigned int>(const std::string& section, const std::string& name, long long unsigned int defaultValue)
+    long long unsigned int Settings::get<long long unsigned int>(const std::string& section, const std::string& name, long long unsigned int defaultValue) const
     {
         const std::string textValue = get<std::string>(section, name, std::to_string(defaultValue));
         return std::stoull(textValue, nullptr, 0);
     }
 
-    template <> long unsigned int Settings::get<long unsigned int>(const std::string& section, const std::string& name, long unsigned int defaultValue)
+    template <> long unsigned int Settings::get<long unsigned int>(const std::string& section, const std::string& name, long unsigned int defaultValue) const
     {
         return get<long long unsigned int>(section, name, defaultValue);
     }
 
-    template <> uint32_t Settings::get<uint32_t>(const std::string& section, const std::string& name, uint32_t defaultValue)
+    template <> uint32_t Settings::get<uint32_t>(const std::string& section, const std::string& name, uint32_t defaultValue) const
     {
         return get<uint64_t>(section, name, defaultValue);
     }
 
-    template <> uint16_t Settings::get<uint16_t>(const std::string& section, const std::string& name, uint16_t defaultValue)
+    template <> uint16_t Settings::get<uint16_t>(const std::string& section, const std::string& name, uint16_t defaultValue) const
     {
         return get<uint64_t>(section, name, defaultValue);
     }
 
-    template <> uint8_t Settings::get<uint8_t>(const std::string& section, const std::string& name, uint8_t defaultValue)
+    template <> uint8_t Settings::get<uint8_t>(const std::string& section, const std::string& name, uint8_t defaultValue) const
     {
         return get<uint64_t>(section, name, defaultValue);
     }
 
-    template <> long double Settings::get<long double>(const std::string& section, const std::string& name, long double defaultValue)
+    template <> long double Settings::get<long double>(const std::string& section, const std::string& name, long double defaultValue) const
     {
         /// Do not rely on CSimpleIniCaseA::GetDoubleValue(), as it has limited range.
         /// Hexadecimal numbers are auto-detected by std::stold().
@@ -224,17 +224,17 @@ namespace Settings
         return std::stold(textValue, nullptr);
     }
 
-    template <> double Settings::get<double>(const std::string& section, const std::string& name, double defaultValue)
+    template <> double Settings::get<double>(const std::string& section, const std::string& name, double defaultValue) const
     {
         return get<long double>(section, name, defaultValue);
     }
 
-    template <> float Settings::get<float>(const std::string& section, const std::string& name, float defaultValue)
+    template <> float Settings::get<float>(const std::string& section, const std::string& name, float defaultValue) const
     {
         return get<double>(section, name, defaultValue);
     }
 
-    template <> bool Settings::get<bool>(const std::string& section, const std::string& name, bool defaultValue)
+    template <> bool Settings::get<bool>(const std::string& section, const std::string& name, bool defaultValue) const
     {
         if (!mImpl->isKeyExists(section, name))
         {

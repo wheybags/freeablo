@@ -129,6 +129,13 @@ int main(int, char** argv)
                 {
                     if (currentTab == TabType::Play)
                     {
+                        nk_layout_row_dynamic(ctx, rowHeight * 3, 1);
+                        nk_label_wrap(ctx,
+                                      "Freeablo does not come with the original graphics and data files from Diablo. "
+                                      "These must be taken from an original installation of Diablo. "
+                                      "Currently, the only supported versions are v1.09, and v.109b, so please patch "
+                                      "to one of these before trying to use them.");
+
                         nk_layout_row_dynamic(ctx, rowHeight, 1);
                         NuklearMisc::nk_file_pick(ctx, "Diablo.exe", diabloExePath, "exe", rowHeight);
                         NuklearMisc::nk_file_pick(ctx, "DIABDAT.MPQ", mpqPath, "mpq,MPQ", rowHeight);

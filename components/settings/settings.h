@@ -27,7 +27,7 @@ namespace Settings
         Container getSections();
         Container getPropertiesInSection(const std::string& section);
 
-        template <class T> T get(const std::string& section, const std::string& name, T defaultValue = T());
+        template <class T> T get(const std::string& section, const std::string& name, T defaultValue = T()) const;
         template <class T> void set(const std::string& section, const std::string& name, T value);
 
     private:
