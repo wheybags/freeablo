@@ -21,6 +21,7 @@ namespace Engine
         mAddress.port = 6666;
         enet_address_set_host(&mAddress, "127.0.0.1");
         mHost = enet_host_create(nullptr, 32, 2, 0, 0);
+        mHost->checksum = enet_crc32;
         mServerPeer = enet_host_connect(mHost, &mAddress, 2, 0);
     }
 

@@ -21,6 +21,7 @@ namespace Engine
         mAddress.port = 6666;
         enet_address_set_host(&mAddress, SERVER_ADDRESS);
         mHost = enet_host_create(&mAddress, 32, 2, 0, 0);
+        mHost->checksum = enet_crc32;
     }
 
     Server::~Server()
