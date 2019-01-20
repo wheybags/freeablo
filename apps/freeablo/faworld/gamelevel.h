@@ -79,6 +79,8 @@ namespace FAWorld
 
         void actorMapRefresh();
 
+        Misc::Point getFreeSpotNear(Misc::Point point, int32_t radius = 100) const;
+
         virtual bool isPassable(const Misc::Point& point, const FAWorld::Actor* forActor) const;
 
         Actor* getActorAt(const Misc::Point& point) const;

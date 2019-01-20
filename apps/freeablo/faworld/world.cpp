@@ -308,7 +308,11 @@ namespace FAWorld
                     FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, "Warrior");
                     registerPlayer(newPlayer);
                     FAWorld::GameLevel* level = getLevel(0);
-                    newPlayer->teleport(level, FAWorld::Position(level->upStairsPos()));
+
+                    Misc::Point spawnPoint = level->getFreeSpotNear(level->upStairsPos());
+                    release_assert(spawnPoint.isValid()); // TODO: this should be handled more elegantly
+
+                    newPlayer->teleport(level, FAWorld::Position(spawnPoint));
                     Engine::EngineMain::get()->mMultiplayer->registerNewPlayer(newPlayer, input.mData.dataPlayerJoined.peerId);
 
                     break;

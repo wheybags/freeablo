@@ -30,6 +30,9 @@ namespace Misc
             // lexicographic comparison like in std::pair
             return x < other.x || (x <= other.x && y < other.y);
         }
+
+        static Point invalid() { return Point{std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max()}; }
+        bool isValid() const { return *this != Point::invalid(); }
     };
 
     using Points = std::vector<Point>;

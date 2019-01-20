@@ -75,6 +75,7 @@ namespace FAWorld
     void MovementHandler::update(const FAWorld::Actor& actor)
     {
         debug_assert(mLevel);
+        debug_assert(mLevel->isPassable(getCurrentPosition().current(), &actor));
         debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
 
         if (mCurrentPos.getDist() == 0)

@@ -146,6 +146,39 @@ namespace FAWorld
             actorMapInsert(mActors[i]);
     }
 
+    Misc::Point GameLevel::getFreeSpotNear(Misc::Point point, int32_t radius) const
+    {
+        // partially based on https://stackoverflow.com/a/398302
+
+        int32_t xOffset = 0;
+        int32_t yOffset = 0;
+
+        int32_t dx = 0;
+        int32_t dy = -1;
+
+        while (xOffset <= radius && yOffset <= radius)
+        {
+            Misc::Point targetPoint = point + Misc::Point{xOffset, yOffset};
+            if (targetPoint.x >= 0 && targetPoint.x < width() && targetPoint.y >= 0 && targetPoint.y < height())
+            {
+                if (isPassable(targetPoint, nullptr))
+                    return targetPoint;
+            }
+
+            if (xOffset == yOffset || (xOffset < 0 && xOffset == -yOffset) || (xOffset > 0 && xOffset == 1 - yOffset))
+            {
+                int32_t tmp = dx;
+                dx = -dy;
+                dy = tmp;
+            }
+
+            xOffset = xOffset + dx;
+            yOffset = yOffset + dy;
+        }
+
+        return Misc::Point::invalid();
+    }
+
     bool GameLevel::isPassable(const Misc::Point& point, const FAWorld::Actor* forActor) const
     {
         // Special hack because griswold spawns on an unpassable tile.

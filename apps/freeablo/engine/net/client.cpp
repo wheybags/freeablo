@@ -1,6 +1,7 @@
 #include "client.h"
 #include "../../fagui/guimanager.h"
 #include "../../fasavegame/gameloader.h"
+#include "../../faworld/gamelevel.h"
 #include "../../faworld/player.h"
 #include "../../faworld/world.h"
 #include "../enginemain.h"
@@ -140,6 +141,9 @@ namespace Engine
         int32_t myPlayerId = loader.load<int32_t>();
         EngineMain::get()->mWorld->load(loader);
         EngineMain::get()->mWorld->addCurrentPlayer(static_cast<FAWorld::Player*>(EngineMain::get()->mWorld->getActorById(myPlayerId)));
+
+        auto myPlayer = EngineMain::get()->mWorld->getCurrentPlayer();
+        release_assert(myPlayer->getLevel()->isPassable(myPlayer->mMoveHandler.getCurrentPosition().current(), myPlayer));
 
         Serial::TextWriteStream stream;
         FASaveGame::GameSaver saver(stream);
