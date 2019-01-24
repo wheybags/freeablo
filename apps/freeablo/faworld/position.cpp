@@ -10,7 +10,7 @@ namespace FAWorld
     Position::Position(FASaveGame::GameLoader& loader)
     {
         mDist = loader.load<int32_t>();
-        mDirection = static_cast<Misc::Direction>(loader.load<int32_t>());
+        mDirection = Misc::Direction(loader);
         mMoving = loader.load<bool>();
         mCurrent = Misc::Point(loader);
     }
@@ -20,7 +20,7 @@ namespace FAWorld
         Serial::ScopedCategorySaver cat("Position", saver);
 
         saver.save(mDist);
-        saver.save(static_cast<int32_t>(mDirection));
+        mDirection.save(saver);
         saver.save(mMoving);
         mCurrent.save(saver);
     }

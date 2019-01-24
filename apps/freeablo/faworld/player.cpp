@@ -312,7 +312,7 @@ namespace FAWorld
         auto cursorItem = mInventory.getCursorHeld();
         auto initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getIsometricDirection();
         auto curPos = getPos().current();
-        auto direction = (curPos == clickedPoint) ? Misc::Direction::none : initialDir;
+        auto direction = (curPos == clickedPoint) ? Misc::Direction(Misc::Direction8::none) : initialDir;
 
         if (getLevel()->dropItemClosestEmptyTile(cursorItem, *this, curPos, direction))
         {

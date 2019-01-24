@@ -98,9 +98,9 @@ namespace FAWorld
         type = Target::ItemTarget::ActionType(loader.load<uint8_t>());
     }
 
-    void PlayerInput::AttackDirectionData::save(Serial::Saver& saver) const { saver.save(uint8_t(direction)); }
+    void PlayerInput::AttackDirectionData::save(Serial::Saver& saver) const { direction.save(saver); }
 
-    void PlayerInput::AttackDirectionData::load(Serial::Loader& loader) { direction = Misc::Direction(loader.load<uint8_t>()); }
+    void PlayerInput::AttackDirectionData::load(Serial::Loader& loader) { direction = Misc::Direction(loader); }
 
     void PlayerInput::ChangeLevelData::save(Serial::Saver& saver) const { saver.save(uint8_t(direction)); }
 

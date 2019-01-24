@@ -151,7 +151,7 @@ namespace FALevelGen
     // grid of size width * height
     void moveRoom(Room& room, const Vec2Fix& vector, int32_t width, int32_t height)
     {
-        auto pos = Misc::getNextPosByDir({room.pos.x, room.pos.y}, vector.getIsometricDirection());
+        auto pos = Misc::getNextPosByDir({room.pos.x, room.pos.y}, vector.getIsometricDirection().getDirection8());
 
         // Make sure not to move outside map
         if (pos.x >= 1 && pos.y >= 1 && pos.x + room.width < width - 1 && pos.y + room.height < height - 1)

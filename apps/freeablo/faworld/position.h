@@ -42,7 +42,7 @@ namespace FAWorld
     private:
         Misc::Point mCurrent;
         int32_t mDist = 0; ///< percentage of the way there
-        Misc::Direction mDirection = Misc::Direction::south;
+        Misc::Direction mDirection =  Misc::Direction(Misc::Direction8::south);
         bool mMoving = false;
     };
 }
