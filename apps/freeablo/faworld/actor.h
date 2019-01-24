@@ -7,6 +7,7 @@
 #include "faction.h"
 #include "gamelevel.h"
 #include "inventory.h"
+#include "missile/missileenums.h"
 #include "movementhandler.h"
 #include "position.h"
 #include "target.h"
@@ -86,6 +87,7 @@ namespace FAWorld
 
         bool canTalk() const { return mTalkData.size() > 0; }
         bool canInteractWith(Actor* actor);
+        void inflictDamage(Actor* enemy, uint32_t damage);
 
         // public member variables
         MovementHandler mMoveHandler;
@@ -95,13 +97,14 @@ namespace FAWorld
         bool mInvuln = false;
         CharacterInventory mInventory;
         boost::optional<Misc::Direction> mMeleeAttackRequestedDirection; // this is really stupid but I don't know how else to do it
+        const std::vector<std::unique_ptr<Missile::Missile>>& getMissiles() const { return mMissiles; }
 
         // TODO: hack, this should eventually be removed.
         // Try not to use it unless you have no other choice with the current structure.
         bool mIsTowner = false;
 
     protected:
-        void inflictDamage(Actor* enemy, uint32_t damage);
+        void activateMissile(MissileId id, Misc::Point targetPoint);
         virtual void enemyKilled(Actor* enemy);
 
         // protected member variables
@@ -115,6 +118,7 @@ namespace FAWorld
         std::map<std::string, std::string> mTalkData; ///< Lines of dialogue
         bool mDeadLastTick = false;
         World& mWorld;
+        std::vector<std::unique_ptr<Missile::Missile>> mMissiles;
 
         // TODO: this var is only used for dialog code, which branches on which npc is being spoken to.
         // Eventually, we should add a proper dialog specification system, and get rid of this.

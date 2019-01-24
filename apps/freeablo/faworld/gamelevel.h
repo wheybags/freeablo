@@ -29,6 +29,11 @@ namespace FAWorld
 
     class World;
 
+    namespace Missile
+    {
+        class Missile;
+    }
+
     class GameLevelImpl
     {
     public:
