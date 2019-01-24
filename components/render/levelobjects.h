@@ -11,9 +11,8 @@ namespace Render
         bool valid;
         int32_t spriteCacheIndex;
         int32_t spriteFrame;
-        int32_t x2;
-        int32_t y2;
-        int32_t dist;
+        int32_t fractionalPosX;
+        int32_t fractionalPosY;
         boost::optional<Cel::Colour> hoverColor;
     };
 

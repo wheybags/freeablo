@@ -9,34 +9,71 @@ namespace FAWorld
 {
     Position::Position(FASaveGame::GameLoader& loader)
     {
-        mDist = loader.load<int32_t>();
         mDirection = Misc::Direction(loader);
-        mMoving = loader.load<bool>();
+        mMovementType = static_cast<MovementType>(loader.load<int32_t>());
         mCurrent = Misc::Point(loader);
+        mFractionalPos = Misc::Point(loader);
+        mSpeed = loader.load<int32_t>();
+        mDest = Misc::Point(loader);
     }
 
     void Position::save(FASaveGame::GameSaver& saver)
     {
         Serial::ScopedCategorySaver cat("Position", saver);
 
-        saver.save(mDist);
         mDirection.save(saver);
-        saver.save(mMoving);
+        saver.save(static_cast<int32_t>(mMovementType));
         mCurrent.save(saver);
+        mFractionalPos.save(saver);
+        saver.save(mSpeed);
+        mDest.save(saver);
     }
 
     void Position::update()
     {
-        if (mMoving)
+        if (isMoving() && !mDirection.isNone())
         {
-            mDist += static_cast<int32_t>((FAWorld::World::getSecondsPerTick() * 250).intPart());
+            auto vectorDist = FAWorld::World::getSecondsPerTick() * mSpeed;
+            int32_t disX = 0, disY = 0;
 
-            if (mDist >= 100)
+            if (mMovementType == MovementType::towardPointChebyshev)
             {
-                mCurrent = next();
-                mDist = 0;
-                mMoving = false;
+                // Chebyshev movement: movement to any neighboring tile takes the same time.
+                auto distToPoint = (mDest - mCurrent) * 100 - mFractionalPos;
+
+                // Move x and/or y by +- vectorDist.
+                if (distToPoint.x != 0)
+                    disX = vectorDist.round() * ((distToPoint.x > 0) ? 1 : -1);
+                if (distToPoint.y != 0)
+                    disY = vectorDist.round() * ((distToPoint.y > 0) ? 1 : -1);
+
+                // Don't move past the destination point.
+                if (std::abs(disX) > std::abs(distToPoint.x))
+                    disX = distToPoint.x;
+                if (std::abs(disY) > std::abs(distToPoint.y))
+                    disY = distToPoint.y;
             }
+            else
+            {
+                // Euclidean/Pythagorean movement, requires trigonometry calculation.
+                auto isometricDegrees = mDirection.getIsometricDegrees();
+                disX = (FixedPoint::cos_degrees(isometricDegrees) * vectorDist).round();
+                disY = (FixedPoint::sin_degrees(isometricDegrees) * vectorDist).round();
+            }
+
+            mFractionalPos.x += disX;
+            mFractionalPos.y += disY;
+
+            mCurrent = mCurrent + mFractionalPos / 100;
+            mFractionalPos.x %= 100;
+            mFractionalPos.y %= 100;
+
+            // Possible improvement: When you're over 50% of the way to next position
+            // you're technically in the next position.
+
+            // Stop at destination.
+            if (mMovementType == MovementType::towardPointChebyshev && mCurrent == mDest && mFractionalPos == Misc::Point(0, 0))
+                stopMoving();
         }
     }
 
@@ -51,21 +88,19 @@ namespace FAWorld
 
     Misc::Point Position::next() const
     {
-        if (!mMoving)
+        if (!isMoving())
             return mCurrent;
 
         return Misc::getNextPosByDir(mCurrent, mDirection);
     }
 
-    void Position::stop()
+    void Position::stopMoving() { mMovementType = MovementType::stopped; }
+
+    void Position::moveToPoint(const Misc::Point& dest)
     {
-        mDist = 0;
-        mMoving = false;
+        mDest = dest;
+        mMovementType = MovementType::towardPointChebyshev;
     }
 
-    void Position::start()
-    {
-        mDist = 0;
-        mMoving = true;
-    }
+    void Position::moveInDirection() { mMovementType = MovementType::inDirectionEuclidean; }
 }

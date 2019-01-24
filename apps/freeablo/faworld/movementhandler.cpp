@@ -80,7 +80,7 @@ namespace FAWorld
 
         Position oldPosition = mCurrentPos;
 
-        if (mCurrentPos.getDist() == 0)
+        if (!mCurrentPos.isMoving())
         {
             if (!positionReachedSent)
             {
@@ -113,7 +113,7 @@ namespace FAWorld
                             Misc::Direction direction = vec.getDirection();
 
                             mCurrentPos.setDirection(direction);
-                            mCurrentPos.start();
+                            mCurrentPos.moveToPoint(next);
                             needsRepath = false;
                         }
                     }
@@ -133,7 +133,7 @@ namespace FAWorld
 
                                 positionReachedSent = false;
                                 mCurrentPos.setDirection(direction);
-                                mCurrentPos.start();
+                                mCurrentPos.moveToPoint(next);
                                 needsRepath = false;
                                 mCurrentPathIndex++;
 
@@ -193,6 +193,6 @@ namespace FAWorld
     void MovementHandler::stopAndPointInDirection(Misc::Direction direction)
     {
         mCurrentPos.setDirection(direction);
-        mCurrentPos.stop();
+        mCurrentPos.stopMoving();
     }
 }

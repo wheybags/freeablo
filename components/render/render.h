@@ -127,11 +127,10 @@ namespace Render
                    LevelObjects& items,
                    int32_t x1,
                    int32_t y1,
-                   int32_t x2,
-                   int32_t y2,
-                   size_t dist);
+                   int32_t fractionalPosX,
+                   int32_t fractionalPosY);
 
-    Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t fractionalPosX, int32_t fractionalPosY);
 
     void clear(int r = 0, int g = 0, int b = 255);
 }

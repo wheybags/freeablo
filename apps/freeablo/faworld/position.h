@@ -19,8 +19,8 @@ namespace FAWorld
     {
     public:
         Position() = default;
-        explicit Position(Misc::Point point) : mCurrent(point) {}
-        Position(Misc::Point point, Misc::Direction direction) : mCurrent(point), mDirection(direction) {}
+        explicit Position(Misc::Point point, int32_t speed = 250) : mCurrent(point), mSpeed(speed) {}
+        Position(Misc::Point point, Misc::Direction direction, int32_t speed = 250) : mCurrent(point), mDirection(direction), mSpeed(speed) {}
 
         Position(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
@@ -33,16 +33,33 @@ namespace FAWorld
         Misc::Direction getDirection() const { return mDirection; }
         void setDirection(Misc::Direction mDirection);
 
-        bool isMoving() const { return mMoving; }
-        int32_t getDist() const { return mDist; }
+        bool isMoving() const { return mMovementType != MovementType::stopped; }
+        Misc::Point getFractionalPos() const { return mFractionalPos; }
 
-        void stop();
-        void start();
+        int32_t getSpeed() const { return mSpeed; }
+        void setSpeed(int32_t speed) { mSpeed = speed; }
+
+        void stopMoving();
+        void moveToPoint(const Misc::Point& dest);
+        void moveInDirection();
 
     private:
+        enum class MovementType
+        {
+            stopped,
+            // Chebyshev movement with a destination tile.
+            // Movement to any neighboring tile takes the same time.
+            towardPointChebyshev,
+            // Euclidean movement in any direction.
+            // Normal/Pythagorean directional movement.
+            inDirectionEuclidean
+        };
+
         Misc::Point mCurrent;
-        int32_t mDist = 0; ///< percentage of the way there
-        Misc::Direction mDirection =  Misc::Direction(Misc::Direction8::south);
-        bool mMoving = false;
+        Misc::Point mFractionalPos; ///< Higher resolution fraction percent between points (100ths)
+        Misc::Direction mDirection = Misc::Direction(Misc::Direction8::south);
+        Misc::Point mDest = {0, 0};
+        int32_t mSpeed = 250;
+        MovementType mMovementType = MovementType::stopped;
     };
 }

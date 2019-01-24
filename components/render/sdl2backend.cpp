@@ -1096,37 +1096,31 @@ namespace Render
         return {x.quot, y.quot, x.rem > y.rem ? TileHalf::right : TileHalf::left};
     }
 
-    static Misc::Point pointBetween(const Tile& start, const Tile& finish, const size_t& percent)
-    {
-        auto pointA = tileTopPoint(start);
-        auto pointB = tileTopPoint(finish);
-        return pointA + (pointB - pointA) * (percent * 0.01);
-    }
-
     static void drawMovingSprite(const Sprite& sprite,
-                                 const Tile& start,
-                                 const Tile& finish,
-                                 size_t dist,
+                                 const Tile& pos,
+                                 int32_t fractionalPosX,
+                                 int32_t fractionalPosY,
                                  const Misc::Point& toScreen,
                                  boost::optional<Cel::Colour> highlightColor = boost::none)
     {
         int32_t w, h;
         spriteSize(sprite, w, h);
-        auto point = pointBetween(start, finish, dist);
+        auto point = tileTopPoint(pos) + tileTopPoint({fractionalPosX, fractionalPosY}) / 100;
         auto res = point + toScreen;
         drawAtTile(sprite, res, w, h, highlightColor);
     }
 
     constexpr auto bottomMenuSize = 144; // TODO: pass it as a variable
-    Misc::Point worldToScreenVector(const Tile& start, const Tile& finish, size_t dist)
+    Misc::Point worldToScreenVector(const Tile& pos, const Tile& fractionalPos)
     {
         // centering takes in accord bottom menu size to be consistent with original game centering
-        return Misc::Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - pointBetween(start, finish, dist);
+        auto point = tileTopPoint(pos) + tileTopPoint(fractionalPos) / 100;
+        return Misc::Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - point;
     }
 
-    Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t fractionalPosX, int32_t fractionalPosY)
     {
-        auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
+        auto toScreen = worldToScreenVector({x1, y1}, {fractionalPosX, fractionalPosY});
         return getTileFromScreenCoords({static_cast<int32_t>(x), static_cast<int32_t>(y)}, toScreen);
     }
 
@@ -1175,11 +1169,10 @@ namespace Render
                    LevelObjects& items,
                    int32_t x1,
                    int32_t y1,
-                   int32_t x2,
-                   int32_t y2,
-                   size_t dist)
+                   int32_t fractionalPosX,
+                   int32_t fractionalPosY)
     {
-        auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
+        auto toScreen = worldToScreenVector({x1, y1}, {fractionalPosX, fractionalPosY});
         SpriteGroup* minBottoms = cache->get(minBottomsHandle);
         auto isInvalidTile = [&](const Tile& tile) {
             return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
@@ -1238,7 +1231,7 @@ namespace Render
                 if (obj.valid)
                 {
                     auto sprite = cache->get(obj.spriteCacheIndex);
-                    drawMovingSprite((*sprite)[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen, obj.hoverColor);
+                    drawMovingSprite((*sprite)[obj.spriteFrame], tile, obj.fractionalPosX, obj.fractionalPosY, toScreen, obj.hoverColor);
                 }
             }
         });
