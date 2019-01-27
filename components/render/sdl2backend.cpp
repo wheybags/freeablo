@@ -69,7 +69,7 @@ namespace Render
     {
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
-        int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
+        int flags = SDL_WINDOW_OPENGL;
 
         if (settings.fullscreen)
         {
