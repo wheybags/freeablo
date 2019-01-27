@@ -41,7 +41,10 @@ namespace FAWorld
         Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
         Actor(World& world, FASaveGame::GameLoader& loader);
         virtual ~Actor();
-        virtual int getArmor() const { /*placeholder */ return 0; }
+        virtual int getArmor() const
+        { /*placeholder */
+            return 0;
+        }
 
         virtual void save(FASaveGame::GameSaver& saver);
         virtual bool checkHit(Actor* enemy);

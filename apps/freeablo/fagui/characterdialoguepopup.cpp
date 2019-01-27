@@ -96,7 +96,6 @@ namespace FAGui
                                                          result = data.dialogActions[mDialogMenu.getSelectedIndex()]();
                                                  }
                                                  nk_group_scrolled_end(ctx);
-
                                              },
                                              true);
 

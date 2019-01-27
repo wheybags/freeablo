@@ -277,59 +277,59 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
     glDisable(GL_SCISSOR_TEST);
 }
 
-    /*
-    static void
-    nk_sdl_clipbard_paste(nk_handle usr, struct nk_text_edit *edit)
-    {
-        const char *text = SDL_GetClipboardText();
-        if (text) nk_textedit_paste(edit, text, nk_strlen(text));
-        (void)usr;
-    }
+/*
+static void
+nk_sdl_clipbard_paste(nk_handle usr, struct nk_text_edit *edit)
+{
+    const char *text = SDL_GetClipboardText();
+    if (text) nk_textedit_paste(edit, text, nk_strlen(text));
+    (void)usr;
+}
 
-    static void
-    nk_sdl_clipbard_copy(nk_handle usr, const char *text, int len)
-    {
-        char *str = 0;
-        (void)usr;
-        if (!len) return;
-        str = (char*)malloc((size_t)len+1);
-        if (!str) return;
-        memcpy(str, text, (size_t)len);
-        str[len] = '\0';
-        SDL_SetClipboardText(str);
-        free(str);
-    }
-    */
+static void
+nk_sdl_clipbard_copy(nk_handle usr, const char *text, int len)
+{
+    char *str = 0;
+    (void)usr;
+    if (!len) return;
+    str = (char*)malloc((size_t)len+1);
+    if (!str) return;
+    memcpy(str, text, (size_t)len);
+    str[len] = '\0';
+    SDL_SetClipboardText(str);
+    free(str);
+}
+*/
 
-    /*void nk_sdl_init(nk_sdl& nkSdl, SDL_Window *win)
-    {
-        sdl = nkSdl;
+/*void nk_sdl_init(nk_sdl& nkSdl, SDL_Window *win)
+{
+    sdl = nkSdl;
 
-        nkSdl.win = win;
-        nk_init_default(&nkSdl.ctx, 0);
-        sdl.ctx.clip.copy = nullptr;// nk_sdl_clipbard_copy;
-        sdl.ctx.clip.paste = nullptr;// nk_sdl_clipbard_paste;
-        sdl.ctx.clip.userdata = nk_handle_ptr(0);
-        nk_sdl_device_create();
-    }*/
+    nkSdl.win = win;
+    nk_init_default(&nkSdl.ctx, 0);
+    sdl.ctx.clip.copy = nullptr;// nk_sdl_clipbard_copy;
+    sdl.ctx.clip.paste = nullptr;// nk_sdl_clipbard_paste;
+    sdl.ctx.clip.userdata = nk_handle_ptr(0);
+    nk_sdl_device_create();
+}*/
 
-    /*void nk_sdl_font_stash_begin(nk_font_atlas& atlas)
-    {
-        nk_font_atlas_init_default(&atlas);
-        nk_font_atlas_begin(&atlas);
-    }
+/*void nk_sdl_font_stash_begin(nk_font_atlas& atlas)
+{
+    nk_font_atlas_init_default(&atlas);
+    nk_font_atlas_begin(&atlas);
+}
 
-    GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
-    {
-        const void *image; int w, h;
-        image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
-        GLuint font_tex = nk_sdl_device_upload_atlas(image, w, h);
-        nk_font_atlas_end(&atlas, nk_handle_id((int)font_tex), &nullTex);
-        if (atlas.default_font)
-            nk_style_set_font(ctx, &atlas.default_font->handle);
+GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
+{
+    const void *image; int w, h;
+    image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
+    GLuint font_tex = nk_sdl_device_upload_atlas(image, w, h);
+    nk_font_atlas_end(&atlas, nk_handle_id((int)font_tex), &nullTex);
+    if (atlas.default_font)
+        nk_style_set_font(ctx, &atlas.default_font->handle);
 
-        return font_tex;
-    }*/
+    return font_tex;
+}*/
 
 #if 0
 NK_API int
