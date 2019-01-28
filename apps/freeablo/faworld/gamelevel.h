@@ -73,7 +73,7 @@ namespace FAWorld
         void insertActor(Actor* actor);
         void actorMapInsert(Actor* actor);
 
-        void actorMapRemove(Actor* actor);
+        void actorMapRemove(const Actor* actor, Misc::Point point);
 
         void actorMapClear();
 

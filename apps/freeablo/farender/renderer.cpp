@@ -252,18 +252,6 @@ namespace FARender
         {
             if (state->level)
             {
-                if (mLevelObjects.width() != state->level->width() || mLevelObjects.height() != state->level->height())
-                    mLevelObjects = Render::LevelObjects(state->level->width(), state->level->height());
-
-                for (int32_t x = 0; x < mLevelObjects.width(); x++)
-                {
-                    for (int32_t y = 0; y < mLevelObjects.height(); y++)
-                    {
-                        if (mLevelObjects.get(x, y).size() > 0)
-                            mLevelObjects.get(x, y).clear();
-                    }
-                }
-
                 fill(*state->level, state->mObjects, mLevelObjects);
                 fill(*state->level, state->mItems, mItems);
 

@@ -72,11 +72,13 @@ namespace FAWorld
 
     GameLevel* MovementHandler::getLevel() { return mLevel; }
 
-    void MovementHandler::update(const FAWorld::Actor& actor)
+    void MovementHandler::update(FAWorld::Actor& actor)
     {
         debug_assert(mLevel);
         debug_assert(mLevel->isPassable(getCurrentPosition().current(), &actor));
         debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
+
+        Position oldPosition = mCurrentPos;
 
         if (mCurrentPos.getDist() == 0)
         {
@@ -169,6 +171,14 @@ namespace FAWorld
         }
 
         mCurrentPos.update();
+
+        if (mCurrentPos.current() != oldPosition.current() || mCurrentPos.next() != oldPosition.next())
+        {
+            mLevel->actorMapRemove(&actor, oldPosition.current());
+            mLevel->actorMapRemove(&actor, oldPosition.next());
+
+            mLevel->actorMapInsert(&actor);
+        }
 
         debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
     }

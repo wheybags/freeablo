@@ -63,6 +63,16 @@ namespace Misc
         int32_t width() const { return mWidth; }
         int32_t height() const { return mHeight; }
 
+        void resize(int32_t newWidth, int32_t newHeight)
+        {
+            mWidth = newWidth;
+            mHeight = newHeight;
+
+            mData.resize(mWidth * mHeight);
+        }
+
+        T* data() { return mData.data(); }
+
     private:
         std::vector<T> mData;
         int32_t mWidth;
