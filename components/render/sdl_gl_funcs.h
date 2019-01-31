@@ -11,9 +11,13 @@
 
 #define glBlendEquation glBlendEquation_BROKEN_SDL_DECLARATION
 #define glActiveTexture glActiveTexture_BROKEN_SDL_DECLARATION
+#define glTexImage3D glTexImage3D_MISSING_WINDOWS_IMPLEMENTATION
+#define glTexSubImage3D glTexSubImage3D_MISSING_WINDOWS_IMPLEMENTATION
 #include <SDL_opengl.h>
 #undef glBlendEquation
 #undef glActiveTexture
+#undef glTexImage3D
+#undef glTexSubImage3D
 
 extern PFNGLGENBUFFERSPROC glGenBuffers;
 extern PFNGLBINDBUFFERPROC glBindBuffer;
@@ -45,6 +49,10 @@ extern PFNGLMAPBUFFERPROC glMapBuffer;
 extern PFNGLUNMAPBUFFERPROC glUnmapBuffer;
 extern PFNGLBLENDEQUATIONPROC glBlendEquation;
 extern PFNGLACTIVETEXTUREPROC glActiveTexture;
+extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
+extern PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
+extern PFNGLTEXIMAGE3DPROC glTexImage3D;
+extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
 
 void initGlFuncs();
 

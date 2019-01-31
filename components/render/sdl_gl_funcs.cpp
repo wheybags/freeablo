@@ -32,6 +32,10 @@ PFNGLMAPBUFFERPROC glMapBuffer;
 PFNGLUNMAPBUFFERPROC glUnmapBuffer;
 PFNGLBLENDEQUATIONPROC glBlendEquation;
 PFNGLACTIVETEXTUREPROC glActiveTexture;
+PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
+PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
+PFNGLTEXIMAGE3DPROC glTexImage3D;
+PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
 
 void initGlFuncs()
 {
@@ -97,4 +101,12 @@ void initGlFuncs()
     memcpy(&glBlendEquation, &tmp, sizeof(void*));
     tmp = SDL_GL_GetProcAddress("glActiveTexture");
     memcpy(&glActiveTexture, &tmp, sizeof(void*));
+    tmp = SDL_GL_GetProcAddress("glDrawArraysInstanced");
+    memcpy(&glDrawArraysInstanced, &tmp, sizeof(void*));
+    tmp = SDL_GL_GetProcAddress("glVertexAttribDivisor");
+    memcpy(&glVertexAttribDivisor, &tmp, sizeof(void*));
+    tmp = SDL_GL_GetProcAddress("glTexImage3D");
+    memcpy(&glTexImage3D, &tmp, sizeof(void*));
+    tmp = SDL_GL_GetProcAddress("glTexSubImage3D");
+    memcpy(&glTexSubImage3D, &tmp, sizeof(void*));
 }
