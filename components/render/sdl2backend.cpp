@@ -92,13 +92,9 @@ namespace Render
             mTextureWidth = maxTextureSize;
             mTextureHeight = maxTextureSize;
 
-            // TODO: Uses too much video memory, increasing mMaxArrayTextureLayers
-            // by 1 at texture size 16384 adds 1GB (16384*16384*4) of video memory...
-            // Probably need to put level tiles into individual textures.
-
             // Limit array texture depth to a reasonable level (measured from testing).
             // Note: Increasing this has a severe impact on performance.
-            GLint estimatedRequiredTextures = (1 << 28) / (mTextureWidth * mTextureHeight);
+            GLint estimatedRequiredTextures = (1 << 29) / (mTextureWidth * mTextureHeight);
             // estimatedRequiredTextures *= 2; // Factor of safety for extending.
             mTextureLayers = std::min(estimatedRequiredTextures, maxArrayTextureLayers);
 
@@ -106,7 +102,8 @@ namespace Render
             glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureArrayId);
 
             // Allocate memory for texture array (by passing NULL).
-            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, mTextureWidth, mTextureHeight, mTextureLayers, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            // Used compressed format as this texture is very large.
+            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_COMPRESSED_RGBA, mTextureWidth, mTextureHeight, mTextureLayers, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -124,13 +121,13 @@ namespace Render
 
         size_t addTexture(size_t id, int32_t width, int32_t height, const void* data)
         {
-            // FIXME: Removed big textures (fonts can be several thousand pixels high) as they screw
-            // up the simple scan line layout.. Would need a more optimised algorithm for these.
-            if (width > 512 || height > 512)
-            {
-                printf("Sprite too big (%d, %d), dropping from texture atlas\n", width, height);
-                return 0;
-            }
+            // TODO: This simple simple scan line layout isn't very efficient for big
+            // textures (especially fonts textures which can be around 32x7000 pixels).
+            // if (width > 512 || height > 512)
+            // {
+            //     printf("Sprite too big (%d, %d), dropping from texture atlas\n", width, height);
+            //     return 0;
+            // }
 
             if (mX + width >= mTextureWidth)
             {
