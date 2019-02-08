@@ -79,6 +79,17 @@ namespace FALevelGen
         blank = 115
     };
 
+    typedef std::vector<std::pair<Misc::Point, Basic>> PlacementConstraints;
+
+    bool placementConstraintsSatisfied(const PlacementConstraints& constraints, const Level::Dun& level, int32_t baseX, int32_t baseY)
+    {
+        return std::all_of(constraints.begin(), constraints.end(), [&level, baseX, baseY](const std::pair<Misc::Point, Basic>& constraint) {
+            int32_t x = baseX + constraint.first.x;
+            int32_t y = baseY + constraint.first.y;
+            return level.pointIsValid(x, y) && level.get(x, y) == (int32_t)constraint.second;
+        });
+    }
+
     void fillRoom(const Room& room, Level::Dun& level)
     {
         for (int32_t x = 0; x < room.width; x++)
@@ -576,12 +587,19 @@ namespace FALevelGen
                 int32_t baseY = rooms[i].pos.y;
 
                 // on a wall
-                if (level.get(baseX - 1, baseY - 2) == (int32_t)Basic::blank && level.get(baseX, baseY - 2) == (int32_t)Basic::blank &&
-                    level.get(baseX + 1, baseY - 2) == (int32_t)Basic::blank && level.get(baseX - 1, baseY - 1) == (int32_t)Basic::blank &&
-                    level.get(baseX, baseY - 1) == (int32_t)Basic::blank && level.get(baseX + 1, baseY - 1) == (int32_t)Basic::blank &&
-                    level.get(baseX - 1, baseY) == (int32_t)Basic::wall && level.get(baseX, baseY) == (int32_t)Basic::wall &&
-                    level.get(baseX + 1, baseY) == (int32_t)Basic::wall && level.get(baseX - 1, baseY + 1) == (int32_t)Basic::floor &&
-                    level.get(baseX, baseY + 1) == (int32_t)Basic::floor && level.get(baseX + 1, baseY + 1) == (int32_t)Basic::floor)
+                PlacementConstraints constraints = {{{-1, -2}, Basic::blank},
+                                                    {{0, -2}, Basic::blank},
+                                                    {{1, -2}, Basic::blank},
+                                                    {{-1, -1}, Basic::blank},
+                                                    {{0, -1}, Basic::blank},
+                                                    {{1, -1}, Basic::blank},
+                                                    {{-1, 0}, Basic::wall},
+                                                    {{0, 0}, Basic::wall},
+                                                    {{1, 0}, Basic::wall},
+                                                    {{-1, 1}, Basic::floor},
+                                                    {{0, 1}, Basic::floor},
+                                                    {{1, 1}, Basic::floor}};
+                if (placementConstraintsSatisfied(constraints, level, baseX, baseY))
                 {
                     level.get(baseX, baseY) = (int32_t)Basic::upStairs;
                     return true;
@@ -620,12 +638,19 @@ namespace FALevelGen
                 int32_t baseY = rooms[i].pos.y + (rooms[i].width / 2);
 
                 // on a wall
-                if (level.get(baseX - 2, baseY + 1) == (int32_t)Basic::blank && level.get(baseX - 2, baseY) == (int32_t)Basic::blank &&
-                    level.get(baseX - 2, baseY + 1) == (int32_t)Basic::blank && level.get(baseX - 1, baseY + 1) == (int32_t)Basic::blank &&
-                    level.get(baseX - 1, baseY) == (int32_t)Basic::blank && level.get(baseX - 1, baseY + 1) == (int32_t)Basic::blank &&
-                    level.get(baseX, baseY - 1) == (int32_t)Basic::wall && level.get(baseX, baseY) == (int32_t)Basic::wall &&
-                    level.get(baseX, baseY + 1) == (int32_t)Basic::wall && level.get(baseX + 1, baseY - 1) == (int32_t)Basic::floor &&
-                    level.get(baseX + 1, baseY) == (int32_t)Basic::floor && level.get(baseX + 1, baseY + 1) == (int32_t)Basic::floor)
+                PlacementConstraints constraints = {{{-2, 1}, Basic::blank},
+                                                    {{-2, 0}, Basic::blank},
+                                                    {{-2, 1}, Basic::blank},
+                                                    {{-1, 1}, Basic::blank},
+                                                    {{-1, 0}, Basic::blank},
+                                                    {{-1, 1}, Basic::blank},
+                                                    {{0, -1}, Basic::wall},
+                                                    {{0, 0}, Basic::wall},
+                                                    {{0, 1}, Basic::wall},
+                                                    {{1, -1}, Basic::floor},
+                                                    {{1, 0}, Basic::floor},
+                                                    {{1, 1}, Basic::floor}};
+                if (placementConstraintsSatisfied(constraints, level, baseX, baseY))
                 {
                     level.get(baseX, baseY) = (int32_t)Basic::downStairs;
                     return true;
