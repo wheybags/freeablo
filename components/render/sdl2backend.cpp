@@ -60,9 +60,10 @@ namespace Render
 {
 #define GL_CHECK_ERROR()                                                                                                                                       \
     {                                                                                                                                                          \
-        while (GLenum err = glGetError() != GL_NO_ERROR)                                                                                                       \
+        GLenum err;                                                                                                                                            \
+        while ((err = glGetError()) != GL_NO_ERROR)                                                                                                            \
         {                                                                                                                                                      \
-            fprintf(stderr, "glError %s:%d, 0x%04X: %s\n", __FILE__, __LINE__, err, glGetString(err));                                                         \
+            fprintf(stderr, "glError %s:%d, 0x%04X\n", __FILE__, __LINE__, err);                                                                               \
         }                                                                                                                                                      \
     }
 
@@ -71,11 +72,11 @@ namespace Render
     class TextureAtlas
     {
     public:
-        class TextureAtlasInfo
+        class TextureAtlasEntry
         {
         public:
-            TextureAtlasInfo() = default;
-            TextureAtlasInfo(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height) : mX(x), mY(y), mLayer(layer), mWidth(width), mHeight(height)
+            TextureAtlasEntry() = default;
+            TextureAtlasEntry(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height) : mX(x), mY(y), mLayer(layer), mWidth(width), mHeight(height)
             {
             }
 
@@ -94,8 +95,7 @@ namespace Render
 
             // Limit array texture depth to a reasonable level (measured from testing).
             // Note: Increasing this has a severe impact on performance.
-            GLint estimatedRequiredTextures = (1 << 29) / (mTextureWidth * mTextureHeight);
-            // estimatedRequiredTextures *= 2; // Factor of safety for extending.
+            GLint estimatedRequiredTextures = (1uLL << 29) / (mTextureWidth * mTextureHeight);
             mTextureLayers = std::min(estimatedRequiredTextures, maxArrayTextureLayers);
 
             glGenTextures(1, &mTextureArrayId);
@@ -121,20 +121,14 @@ namespace Render
 
         size_t addTexture(size_t id, int32_t width, int32_t height, const void* data)
         {
-            // TODO: This simple simple scan line layout isn't very efficient for big
+            // Note: This simple simple scan line layout isn't very efficient for big
             // textures (especially fonts textures which can be around 32x7000 pixels).
-            // if (width > 512 || height > 512)
-            // {
-            //     printf("Sprite too big (%d, %d), dropping from texture atlas\n", width, height);
-            //     return 0;
-            // }
-
-            if (mX + width >= mTextureWidth)
+            if (mX + width > mTextureWidth)
             {
                 mX = 0;
                 mY = mNextY;
             }
-            if (mY + height >= mTextureHeight)
+            if (mY + height > mTextureHeight)
             {
                 mX = mY = mNextY = 0;
                 mLayer++;
@@ -145,26 +139,25 @@ namespace Render
             glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, mX, mY, mLayer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
             // auto id = mNextTextureId;
-            mLookupMap[id] = TextureAtlasInfo(mX, mY, mLayer, width, height);
+            mLookupMap[id] = TextureAtlasEntry(mX, mY, mLayer, width, height);
 
             // mNextTextureId++;
             mX += width;
             mNextY = std::max(mNextY, mY + height);
 
             // Diagnostic only.
-            if ((id % 1000) == 0)
-                printf("TextureAtlasInfo: %zu, %d, %d, %d, %d, %d\n", id, mX, mY, mLayer, width, height);
             mUtilisedArea += width * height;
 
             return id;
         }
 
-        GLuint getTextureArrayId() { return mTextureArrayId; }
-        GLint getTextureWidth() { return mTextureWidth; }
-        GLint getTextureHeight() { return mTextureHeight; }
-        /*const*/ std::map<size_t, TextureAtlasInfo>& getLookupMap() { return mLookupMap; }
+        void bind() { glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureArrayId); }
+        void free() { glDeleteTextures(1, &mTextureArrayId); }
+        GLint getTextureWidth() const { return mTextureWidth; }
+        GLint getTextureHeight() const { return mTextureHeight; }
+        const std::map<size_t, TextureAtlasEntry>& getLookupMap() const { return mLookupMap; }
 
-        float getEfficiency()
+        float getEfficiency() const
         {
             uint64_t usedArea = (uint64_t)mTextureWidth * mTextureHeight * mLayer + (uint64_t)mTextureWidth * mY + (uint64_t)mX * (mNextY - mY);
             return (float)mUtilisedArea / usedArea * 100;
@@ -176,7 +169,7 @@ namespace Render
         GLint mTextureHeight;
         GLint mTextureLayers;
         int32_t mX = 0, mY = 0, mLayer = 0, mNextY = 0;
-        std::map<size_t, TextureAtlasInfo> mLookupMap;
+        std::map<size_t, TextureAtlasEntry> mLookupMap;
         // size_t mNextTextureId = 1;
         uint64_t mUtilisedArea = 0;
     };
@@ -215,7 +208,7 @@ namespace Render
             }
         }
 
-        size_t size() { return mSprite.size(); }
+        size_t size() const { return mSprite.size(); }
 
         void clear()
         {
@@ -292,10 +285,6 @@ namespace Render
 
         initGlFuncs();
 
-        // Enable vsync, adaptive if available (TODO: test if this works).
-        // if (SDL_GL_SetSwapInterval(-1) != 0)
-        //     SDL_GL_SetSwapInterval(1);
-
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
 
@@ -318,6 +307,7 @@ namespace Render
 
     void quit()
     {
+        textureAtlas->free();
         SDL_GL_DeleteContext(glContext);
         // SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
@@ -955,13 +945,13 @@ namespace Render
         auto& lookupMap = textureAtlas->getLookupMap();
         for (size_t i = 0; i < spriteCount; i++)
         {
-            auto& texInfo = lookupMap[drawLevelCache.mSprite[i]];
+            auto& atlasEntry = lookupMap.at(drawLevelCache.mSprite[i]);
 
-            imageSize[i * 2] = texInfo.mWidth;
-            imageSize[i * 2 + 1] = texInfo.mHeight;
-            atlasOffset[i * 3] = texInfo.mX;
-            atlasOffset[i * 3 + 1] = texInfo.mY;
-            atlasOffset[i * 3 + 2] = texInfo.mLayer;
+            imageSize[i * 2] = atlasEntry.mWidth;
+            imageSize[i * 2 + 1] = atlasEntry.mHeight;
+            atlasOffset[i * 3] = atlasEntry.mX;
+            atlasOffset[i * 3 + 1] = atlasEntry.mY;
+            atlasOffset[i * 3 + 2] = atlasEntry.mLayer;
         }
 
         glBindVertexArray(vao);
@@ -969,15 +959,15 @@ namespace Render
         // Note: These VBOs use glVertexAttribDivisor(n, 1) which means they're
         // only updated once per instance (instead of once per vertex).
         glBindBuffer(GL_ARRAY_BUFFER, imageSize_vbo);
-        glBufferData(GL_ARRAY_BUFFER, 2 * spriteCount * sizeof(float), &imageSize[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 2 * spriteCount * sizeof(GLfloat), &imageSize[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, imageOffset_vbo);
-        glBufferData(GL_ARRAY_BUFFER, 2 * spriteCount * sizeof(float), &drawLevelCache.mImageOffset[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 2 * spriteCount * sizeof(GLfloat), &drawLevelCache.mImageOffset[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, hoverColor_vbo);
-        glBufferData(GL_ARRAY_BUFFER, 4 * spriteCount * sizeof(float), &drawLevelCache.mHoverColor[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 4 * spriteCount * sizeof(GLfloat), &drawLevelCache.mHoverColor[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, atlasOffset_vbo);
-        glBufferData(GL_ARRAY_BUFFER, 3 * spriteCount * sizeof(float), &atlasOffset[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 3 * spriteCount * sizeof(GLfloat), &atlasOffset[0], GL_STATIC_DRAW);
 
-        glBindTexture(GL_TEXTURE_2D_ARRAY, textureAtlas->getTextureArrayId());
+        textureAtlas->bind();
 
         // Draw the whole level in one batched operation.
         glDrawArraysInstanced(GL_TRIANGLES, 0, 6, spriteCount);
@@ -1498,6 +1488,16 @@ namespace Render
         // Diagnostic only.
         static size_t loop = 0;
         if ((loop++ % 1000) == 0)
-            printf("Texture atlas efficiency: %f\n", textureAtlas->getEfficiency());
+        {
+            printf("Texture atlas efficiency %.1f%%\n", textureAtlas->getEfficiency());
+            auto latest = textureAtlas->getLookupMap().rbegin();
+            printf("Latest texture atlas entry: %zu, %d, %d, %d, %d, %d\n",
+                   latest->first,
+                   latest->second.mX,
+                   latest->second.mY,
+                   latest->second.mLayer,
+                   latest->second.mWidth,
+                   latest->second.mHeight);
+        }
     }
 }
