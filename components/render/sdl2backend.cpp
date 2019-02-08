@@ -21,6 +21,7 @@
 // clang-format off
 #include <misc/disablewarn.h>
 #include "../../extern/jo_gif/jo_gif.cpp"
+#include "../../extern/RectangleBinPack/MaxRectsBinPack.h"
 #include <misc/enablewarn.h>
 // clang-format on
 
@@ -101,6 +102,9 @@ namespace Render
             // GLint estimatedRequiredTextures = (1uLL << 29) / (mTextureWidth * mTextureHeight);
             mTextureLayers = std::min(estimatedRequiredTextures, maxArrayTextureLayers);
 
+            for (int32_t layer = 0; layer < mTextureLayers; layer++)
+                mBinPacker.push_back(rbp::MaxRectsBinPack(mTextureWidth, mTextureHeight, false));
+
             glGenTextures(1, &mTextureArrayId);
             glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureArrayId);
 
@@ -138,40 +142,28 @@ namespace Render
 
         size_t addTexture(int32_t width, int32_t height, const void* data)
         {
-            // Note: This simple simple scan line layout isn't very efficient for big
-            // textures (especially fonts textures which can be around 32x7000 pixels).
-
             release_assert(width <= mTextureWidth && height <= mTextureHeight); // Texture size too small...
 
-            if (mX + width > mTextureWidth)
+            rbp::Rect packedPos;
+            int32_t layer;
+            for (layer = 0; layer < mTextureLayers; layer++)
             {
-                mX = 0;
-                mY = mNextY;
+                packedPos = mBinPacker[layer].Insert(width, height, rbp::MaxRectsBinPack::RectBestAreaFit);
+                if (packedPos.height != 0)
+                    break;
             }
-            if (mY + height > mTextureHeight)
-            {
-                mX = mY = mNextY = 0;
-                mLayer++;
-                release_assert(mLayer < mTextureLayers); // Run out of memory...
-            }
+            release_assert(layer < mTextureLayers); // Run out of memory...
 
             glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureArrayId);
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, mX, mY, mLayer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, packedPos.x, packedPos.y, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
             // TODO: Sometimes adding glFlush/glFinish fixes tiles a bit
             // when texture is compressed but not really sure why...
             // glFlush();
             // glFinish();
 
-            auto id = mNextTextureId;
-            mLookupMap[id] = TextureAtlasEntry(mX, mY, mLayer, width, height);
-
-            mNextTextureId++;
-            mX += width;
-            mNextY = std::max(mNextY, mY + height);
-
-            // Diagnostic only.
-            mUtilisedArea += width * height;
+            auto id = mNextTextureId++;
+            mLookupMap[id] = TextureAtlasEntry(packedPos.x, packedPos.y, layer, width, height);
 
             return id;
         }
@@ -182,10 +174,12 @@ namespace Render
         GLint getTextureHeight() const { return mTextureHeight; }
         const std::map<size_t, TextureAtlasEntry>& getLookupMap() const { return mLookupMap; }
 
-        float getEfficiency() const
+        float getOccupancy() const
         {
-            uint64_t usedArea = (uint64_t)mTextureWidth * mTextureHeight * mLayer + (uint64_t)mTextureWidth * mY + (uint64_t)mX * (mNextY - mY);
-            return (float)mUtilisedArea / usedArea * 100;
+            float summedOccupancy = 0;
+            for (auto& bp : mBinPacker)
+                summedOccupancy += bp.Occupancy();
+            return summedOccupancy / mBinPacker.size() * 100;
         }
 
     private:
@@ -193,10 +187,9 @@ namespace Render
         GLint mTextureWidth;
         GLint mTextureHeight;
         GLint mTextureLayers;
-        int32_t mX = 0, mY = 0, mLayer = 0, mNextY = 0;
         std::map<size_t, TextureAtlasEntry> mLookupMap;
         size_t mNextTextureId = 1;
-        uint64_t mUtilisedArea = 0;
+        std::vector<rbp::MaxRectsBinPack> mBinPacker;
     };
 
     /* Caches level sprites/positions etc in a format that can be directly injected into GL VBOs. */
@@ -1505,7 +1498,7 @@ namespace Render
         static size_t loop = 0;
         if ((loop++ % 1000) == 0)
         {
-            printf("Texture atlas efficiency %.1f%%\n", textureAtlas->getEfficiency());
+            printf("Texture atlas occupancy %.1f%%\n", textureAtlas->getOccupancy());
             auto latest = textureAtlas->getLookupMap().rbegin();
             printf("Latest texture atlas entry: %zu, %d, %d, %d, %d, %d\n",
                    latest->first,
