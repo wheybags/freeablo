@@ -41,7 +41,7 @@ void nk_sdl_device_create(nk_gl_device& dev)
                                                            "}\n";
     static const GLchar* fragment_shader = NK_SHADER_VERSION
         R"(precision mediump float;
-        uniform sampler2D Texture;
+        uniform sampler2DArray Texture;
         in vec2 Frag_UV;
         in vec4 Frag_Color;
         out vec4 Out_Color;
@@ -51,15 +51,20 @@ void nk_sdl_device_create(nk_gl_device& dev)
         uniform float h_color_a;
         uniform float imgW;
         uniform float imgH;
+        uniform float atlasOffsetX;
+        uniform float atlasOffsetY;
+        uniform float atlasOffsetZ;
+        uniform float atlasWidth;
+        uniform float atlasHeight;
         uniform int checkerboarded;
         void main(){
-             vec4 c = Frag_Color * texture(Texture, Frag_UV.st);
+             vec4 c = Frag_Color * texture(Texture, vec3((atlasOffsetX + Frag_UV.x * imgW) / atlasWidth, (atlasOffsetY + Frag_UV.y * imgH) / atlasHeight, atlasOffsetZ));
              if (c.w == 0. && h_color_a > 0.)
                 {
                   for (float i= -1.; i <= 1.; i++)
                     for (float j= -1.; j <= 1.; j++)
                         {
-                          vec4 n = texture(Texture, vec2 (Frag_UV.st.x + i/imgW, Frag_UV.st.y + j/imgH));
+                          vec4 n = texture(Texture, vec3((atlasOffsetX + i + Frag_UV.x * imgW) / atlasWidth, (atlasOffsetY + j + Frag_UV.y * imgH) / atlasHeight, atlasOffsetZ));
                           if (n.w > 0. && (n.x > 0. || n.y > 0. || n.z > 0.))
                             c = vec4 (h_color_r, h_color_g, h_color_b, h_color_a);
                         }
@@ -115,6 +120,11 @@ void nk_sdl_device_create(nk_gl_device& dev)
     dev.uniform_checkerboarded = glGetUniformLocation(dev.prog, "checkerboarded");
     dev.imgW = glGetUniformLocation(dev.prog, "imgW");
     dev.imgH = glGetUniformLocation(dev.prog, "imgH");
+    dev.atlasOffsetX = glGetUniformLocation(dev.prog, "atlasOffsetX");
+    dev.atlasOffsetY = glGetUniformLocation(dev.prog, "atlasOffsetY");
+    dev.atlasOffsetZ = glGetUniformLocation(dev.prog, "atlasOffsetZ");
+    dev.atlasWidth = glGetUniformLocation(dev.prog, "atlasWidth");
+    dev.atlasHeight = glGetUniformLocation(dev.prog, "atlasHeight");
     dev.uniform_tex = glGetUniformLocation(dev.prog, "Texture");
     dev.uniform_proj = glGetUniformLocation(dev.prog, "ProjMtx");
     dev.attrib_pos = glGetAttribLocation(dev.prog, "Position");
@@ -248,9 +258,9 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
 
             Render::SpriteGroup* sprite = cache->get(cacheIndex);
             auto s = sprite->operator[](frameNum);
-            glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)s);
-            int32_t w, h;
-            Render::spriteSize(s, w, h);
+            // TODO: bindSprite needs to be tidied up, was just a quick throw in for testing.
+            int32_t w, h, atlasOffsetX, atlasOffsetY, atlasOffsetZ, atlasWidth, atlasHeight;
+            Render::bindSprite(s, w, h, atlasOffsetX, atlasOffsetY, atlasOffsetZ, atlasWidth, atlasHeight);
             int item_hl_color[] = {0xB9, 0xAA, 0x77};
             glUniform1f(dev.uniform_hcolor_r, item_hl_color[0] / 255.f);
             glUniform1f(dev.uniform_hcolor_g, item_hl_color[1] / 255.f);
@@ -259,6 +269,11 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
             glUniform1i(dev.uniform_checkerboarded, effect == FAGui::EffectType::checkerboarded ? 1 : 0);
             glUniform1f(dev.imgW, w);
             glUniform1f(dev.imgH, h);
+            glUniform1f(dev.atlasOffsetX, atlasOffsetX);
+            glUniform1f(dev.atlasOffsetY, atlasOffsetY);
+            glUniform1f(dev.atlasOffsetZ, atlasOffsetZ);
+            glUniform1f(dev.atlasWidth, atlasWidth);
+            glUniform1f(dev.atlasHeight, atlasHeight);
 
             glScissor((GLint)(cmd.clip_rect.x * scale.x),
                       (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),

@@ -83,6 +83,15 @@ namespace Render
 
     void resize(size_t w, size_t h);
     RenderSettings getWindowSize();
+    // TODO: bindSprite needs to be tidied up, was just a quick throw in for testing.
+    void bindSprite(const Sprite& sprite,
+                    int32_t& width,
+                    int32_t& height,
+                    int32_t& atlasOffsetX,
+                    int32_t& atlasOffsetY,
+                    int32_t& atlasOffsetZ,
+                    int32_t& atlasWidth,
+                    int32_t& atlasHeight);
     void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache);
 
     bool getImageInfo(const std::string& path, std::vector<int32_t>& widths, std::vector<int32_t>& heights, int32_t& animLength);

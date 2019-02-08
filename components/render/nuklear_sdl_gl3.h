@@ -27,6 +27,11 @@ struct nk_gl_device
     GLint uniform_checkerboarded;
     GLint imgW;
     GLint imgH;
+    GLint atlasOffsetX;
+    GLint atlasOffsetY;
+    GLint atlasOffsetZ;
+    GLint atlasWidth;
+    GLint atlasHeight;
     GLint uniform_proj;
     nk_handle font_tex;
 };

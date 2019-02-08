@@ -95,15 +95,29 @@ namespace Render
 
             // Limit array texture depth to a reasonable level (measured from testing).
             // Note: Increasing this has a severe impact on performance.
-            GLint estimatedRequiredTextures = (1uLL << 29) / (mTextureWidth * mTextureHeight);
+            // TODO: Something is falling apart when texture has more than one layer.
+            //       Alpha seems to sometimes disappear, maybe blending on the z-axis?
+            GLint estimatedRequiredTextures = 1;
+            // GLint estimatedRequiredTextures = (1uLL << 29) / (mTextureWidth * mTextureHeight);
             mTextureLayers = std::min(estimatedRequiredTextures, maxArrayTextureLayers);
 
             glGenTextures(1, &mTextureArrayId);
             glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureArrayId);
 
             // Allocate memory for texture array (by passing NULL).
-            // Used compressed format as this texture is very large.
-            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_COMPRESSED_RGBA, mTextureWidth, mTextureHeight, mTextureLayers, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            // TODO: Use compressed format as this texture is very large.
+            // NOTE: For GL_COMPRESSED_RGBA image dimensions need to be padded to
+            // multiples of 4: https://forums.khronos.org/showthread.php/77554
+            glTexImage3D(GL_TEXTURE_2D_ARRAY,
+                         0,
+                         /*GL_RGBA8*/ GL_RGB5_A1 /*GL_COMPRESSED_RGBA*/,
+                         mTextureWidth,
+                         mTextureHeight,
+                         mTextureLayers,
+                         0,
+                         GL_RGBA,
+                         GL_UNSIGNED_BYTE,
+                         NULL);
 
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -111,18 +125,24 @@ namespace Render
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
             // Diagnostic only.
-            printf("MaxTextureSize %d, MaxArrayTextureLayers %d, used (%d, %d, %d)\n",
+            GLint internalFormat = 0;
+            glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFormat);
+            printf("MaxTextureSize %d, MaxArrayTextureLayers %d, used (%d, %d, %d), 0x%04X\n",
                    maxTextureSize,
                    maxArrayTextureLayers,
                    mTextureWidth,
                    mTextureHeight,
-                   mTextureLayers);
+                   mTextureLayers,
+                   internalFormat);
         }
 
-        size_t addTexture(size_t id, int32_t width, int32_t height, const void* data)
+        size_t addTexture(int32_t width, int32_t height, const void* data)
         {
             // Note: This simple simple scan line layout isn't very efficient for big
             // textures (especially fonts textures which can be around 32x7000 pixels).
+
+            release_assert(width <= mTextureWidth && height <= mTextureHeight); // Texture size too small...
+
             if (mX + width > mTextureWidth)
             {
                 mX = 0;
@@ -138,10 +158,15 @@ namespace Render
             glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureArrayId);
             glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, mX, mY, mLayer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-            // auto id = mNextTextureId;
+            // TODO: Sometimes adding glFlush/glFinish fixes tiles a bit
+            // when texture is compressed but not really sure why...
+            // glFlush();
+            // glFinish();
+
+            auto id = mNextTextureId;
             mLookupMap[id] = TextureAtlasEntry(mX, mY, mLayer, width, height);
 
-            // mNextTextureId++;
+            mNextTextureId++;
             mX += width;
             mNextY = std::max(mNextY, mY + height);
 
@@ -170,7 +195,7 @@ namespace Render
         GLint mTextureLayers;
         int32_t mX = 0, mY = 0, mLayer = 0, mNextY = 0;
         std::map<size_t, TextureAtlasEntry> mLookupMap;
-        // size_t mNextTextureId = 1;
+        size_t mNextTextureId = 1;
         uint64_t mUtilisedArea = 0;
     };
 
@@ -333,16 +358,29 @@ namespace Render
         return settings;
     }
 
+    // TODO: bindSprite needs to be tidied up, was just a quick throw in for testing.
+    void bindSprite(const Sprite& sprite,
+                    int32_t& width,
+                    int32_t& height,
+                    int32_t& atlasOffsetX,
+                    int32_t& atlasOffsetY,
+                    int32_t& atlasOffsetZ,
+                    int32_t& atlasWidth,
+                    int32_t& atlasHeight)
+    {
+        auto& atlasEntry = textureAtlas->getLookupMap().at((GLuint)(intptr_t)sprite);
+        width = atlasEntry.mWidth;
+        height = atlasEntry.mHeight;
+        atlasOffsetX = atlasEntry.mX;
+        atlasOffsetY = atlasEntry.mY;
+        atlasOffsetZ = atlasEntry.mLayer;
+        atlasWidth = textureAtlas->getTextureWidth();
+        atlasHeight = textureAtlas->getTextureHeight();
+        textureAtlas->bind();
+    }
+
     GLuint getGLTexFromSurface(SDL_Surface* surf)
     {
-        GLenum data_fmt = GL_RGBA;
-        /*Uint8 test = SDL_MapRGB(surf->format, 0xAA, 0xBB, 0xCC) & 0xFF;
-        if (test == 0xAA) data_fmt = GL_RGB;
-        else if (test == 0xCC) data_fmt = GL_BGR;//GL_BGR;
-        else {
-        printf("Error: \"Loaded surface was neither RGB or BGR!\""); return;
-        }*/
-
         bool validFormat = true;
         if (surf->format->BitsPerPixel != 24 && surf->format->BitsPerPixel != 32)
             validFormat = false;
@@ -359,24 +397,12 @@ namespace Render
 
         debug_assert(surf->pitch == 4 * surf->w);
 
-        GLuint tex = 0;
-
-        glGenTextures(1, &tex);
-        glBindTexture(GL_TEXTURE_2D, tex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surf->w, surf->h, 0, data_fmt, GL_UNSIGNED_BYTE, surf->pixels);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        int32_t w, h;
-        spriteSize((Sprite)(intptr_t)tex, w, h);
-
-        textureAtlas->addTexture(tex, surf->w, surf->h, surf->pixels);
+        GLuint id = textureAtlas->addTexture(surf->w, surf->h, surf->pixels);
 
         if (!validFormat)
             SDL_FreeSurface(surf);
 
-        return tex;
+        return id;
     }
 
     void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache)
@@ -1098,11 +1124,7 @@ namespace Render
 
     void SpriteGroup::destroy()
     {
-        for (size_t i = 0; i < mSprites.size(); i++)
-        {
-            GLuint tex = (GLuint)(intptr_t)mSprites[i];
-            glDeleteTextures(1, &tex);
-        }
+        // Sprites can no longer be removed from texture atlas.
     }
 
     void drawMinPillarTop(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
@@ -1136,15 +1158,9 @@ namespace Render
 
     void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h)
     {
-        GLint tmpW = 0, tmpH = 0;
-
-        glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)sprite);
-
-        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &tmpW);
-        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &tmpH);
-        // SDL_QueryTexture((SDL_Texture*)sprite, NULL, NULL, &tmpW, &tmpH);
-        w = tmpW;
-        h = tmpH;
+        auto& atlasEntry = textureAtlas->getLookupMap().at((size_t)(intptr_t)sprite);
+        w = atlasEntry.mWidth;
+        h = atlasEntry.mHeight;
     }
 
     void clear(int r, int g, int b)

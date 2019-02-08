@@ -240,13 +240,8 @@ namespace FARender
 
         Render::clear(0, 0, 0);
 
-        // force preloading of sprites by drawing them offscreen
         for (auto id : spritesToPreload)
-        {
-            Render::SpriteGroup* sprite = mSpriteManager.get(id);
-            for (size_t i = 0; i < sprite->size(); i++)
-                Render::drawSprite(sprite->operator[](i), Render::WIDTH + 10, 0);
-        }
+            mSpriteManager.get(id);
 
         if (state)
         {
