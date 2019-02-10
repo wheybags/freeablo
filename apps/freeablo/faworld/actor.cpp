@@ -80,6 +80,7 @@ namespace FAWorld
         mId = loader.load<int32_t>();
         mNpcId = loader.load<std::string>();
         mName = loader.load<std::string>();
+        mIsTowner = loader.load<bool>();
 
         // TODO: some sort of system here, so we don't need to save an npcs entire dialog
         // data into the save file every time. Probably should be done when dialog is revisited.
@@ -119,6 +120,7 @@ namespace FAWorld
         saver.save(mId);
         saver.save(mNpcId);
         saver.save(mName);
+        saver.save(mIsTowner);
 
         saver.save(uint32_t(mTalkData.size()));
         for (const auto& pair : mTalkData)
