@@ -50,6 +50,8 @@ namespace DiabloExe
         int32_t invSizeY;
 
         std::string dropItemGraphicsPath;
+        std::string dropItemSoundPath;
+        std::string invPlaceItemSoundPath;
 
         std::string dump() const;
         BaseItem();

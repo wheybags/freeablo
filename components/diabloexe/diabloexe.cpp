@@ -65,6 +65,7 @@ namespace DiabloExe
         loadNpcs(exe);
         loadCharacterStats(exe);
         loadDropGraphicsFilenames(exe, codeOffset);
+        loadSoundFilenames(exe, codeOffset);
         loadBaseItems(exe, codeOffset);
         loadUniqueItems(exe, codeOffset);
         loadAffixes(exe, codeOffset);
@@ -148,13 +149,40 @@ namespace DiabloExe
     void DiabloExe::loadDropGraphicsFilenames(FAIO::FAFileObject& exe, size_t codeOffset)
     {
         const uint64_t offset = mSettings->get<uint64_t>("ItemDropGraphics", "filenames");
-        itemDropGraphicsFilename.resize(35);
-        for (int i = 0; i < static_cast<int>(itemDropGraphicsFilename.size()); ++i)
+        mItemDropGraphicsFilename.resize(35);
+        for (int i = 0; i < static_cast<int>(mItemDropGraphicsFilename.size()); ++i)
         {
             exe.FAfseek(offset + i * 4, SEEK_SET);
             auto nameOffset = exe.read32();
-            itemDropGraphicsFilename[i] = exe.readCStringFromWin32Binary(nameOffset, codeOffset);
+            mItemDropGraphicsFilename[i] = exe.readCStringFromWin32Binary(nameOffset, codeOffset);
         }
+    }
+
+    void DiabloExe::loadSoundFilenames(FAIO::FAFileObject& exe, size_t codeOffset)
+    {
+        uint64_t offset = mSettings->get<uint64_t>("Sounds", "filenameTable");
+        int32_t filenameTableSize = mSettings->get<int32_t>("Sounds", "filenameTableSize");
+        mSoundFilename.resize(filenameTableSize);
+        for (int i = 0; i < static_cast<int>(mSoundFilename.size()); ++i)
+        {
+            exe.FAfseek(offset + i * 9 + 1, SEEK_SET);
+            auto nameOffset = exe.read32();
+            mSoundFilename[i] = exe.readCStringFromWin32Binary(nameOffset, codeOffset);
+            mSoundFilename[i] = Misc::StringUtils::toLower(mSoundFilename[i]);
+            Misc::StringUtils::replace(mSoundFilename[i], "\\", "/");
+        }
+
+        offset = mSettings->get<uint64_t>("Sounds", "itemGraphicsIdToDropSfxId");
+        mItemGraphicsIdToDropSfxId.resize(35);
+        exe.FAfseek(offset, SEEK_SET);
+        for (auto& sfxLookup : mItemGraphicsIdToDropSfxId)
+            sfxLookup = exe.read32();
+
+        offset = mSettings->get<uint64_t>("Sounds", "itemGraphicsIdToInvPlaceSfxId");
+        mItemGraphicsIdToInvPlaceSfxId.resize(35);
+        exe.FAfseek(offset, SEEK_SET);
+        for (auto& sfxLookup : mItemGraphicsIdToInvPlaceSfxId)
+            sfxLookup = exe.read32();
     }
 
     void DiabloExe::loadMonsters(FAIO::FAFileObject& exe, size_t codeOffset)
@@ -267,7 +295,10 @@ namespace DiabloExe
             exe.FAfseek(itemOffset + 76 * i, SEEK_SET);
             BaseItem tmp(exe, codeOffset);
             tmp.id = i;
-            tmp.dropItemGraphicsPath = "items/" + itemDropGraphicsFilename[itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId]] + ".cel";
+            auto dropGraphicsId = itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId];
+            tmp.dropItemGraphicsPath = "items/" + mItemDropGraphicsFilename[dropGraphicsId] + ".cel";
+            tmp.dropItemSoundPath = mSoundFilename[mItemGraphicsIdToDropSfxId[dropGraphicsId]];
+            tmp.invPlaceItemSoundPath = mSoundFilename[mItemGraphicsIdToInvPlaceSfxId[dropGraphicsId]];
             auto& s = objCursFrameSizes[tmp.invGraphicsId + 11];
             if (i == 0)
             {

@@ -70,6 +70,7 @@ namespace FAWorld
         std::pair<uint8_t, uint8_t> getCornerCoords() const;
         bool isEmpty() const { return mEmpty; }
         std::string getFlipSoundPath() const;
+        std::string getInvPlaceSoundPath() const;
         FARender::FASpriteGroup* getFlipSpriteGroup();
         bool isBeltEquippable() const;
         int32_t getMaxCount() const;

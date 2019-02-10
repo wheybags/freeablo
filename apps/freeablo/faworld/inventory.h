@@ -69,6 +69,8 @@ namespace FAWorld
         const_iterator begin() const { return mInventoryBox.begin(); }
         const_iterator end() const { return mInventoryBox.end(); }
 
+        boost::signals2::signal<void(Item const& removed, Item const& added)> mInventoryChanged;
+
     private:
         Misc::Array2D<Item> mInventoryBox;
         bool mTreatAllItemsAs1by1 = false;
@@ -78,6 +80,7 @@ namespace FAWorld
     class CharacterInventory
     {
     public:
+        CharacterInventory();
         void save(FASaveGame::GameSaver& saver);
         void load(FASaveGame::GameLoader& loader);
 
@@ -115,7 +118,7 @@ namespace FAWorld
 
     public:
         // This is not serialised - it should be reconnected by other means
-        boost::signals2::signal<void()> equipChanged;
+        boost::signals2::signal<void(EquipTargetType inventoryType, Item const& removed, Item const& added)> mInventoryChanged;
 
     private:
         static constexpr int32_t inventoryWidth = 10;
@@ -132,5 +135,16 @@ namespace FAWorld
         BasicInventory mLeftHand = BasicInventory(1, 1, true);
         BasicInventory mRightHand = BasicInventory(1, 1, true);
         BasicInventory mCursorHeld = BasicInventory(1, 1, true);
+
+        std::map<EquipTargetType, BasicInventory&> mInventoryTypes = {{EquipTargetType::inventory, mMainInventory},
+                                                                      {EquipTargetType::belt, mBelt},
+                                                                      {EquipTargetType::head, mHead},
+                                                                      {EquipTargetType::body, mBody},
+                                                                      {EquipTargetType::leftRing, mLeftRing},
+                                                                      {EquipTargetType::rightRing, mRightRing},
+                                                                      {EquipTargetType::leftHand, mLeftHand},
+                                                                      {EquipTargetType::rightHand, mRightHand},
+                                                                      {EquipTargetType::amulet, mAmulet},
+                                                                      {EquipTargetType::cursor, mCursorHeld}};
     };
 }

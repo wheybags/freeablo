@@ -54,8 +54,39 @@ namespace FAWorld
     void Player::initCommon()
     {
         mWorld.registerPlayer(this);
-        mInventory.equipChanged.connect([this]() { updateSprites(); });
-        mMoveHandler.positionReached.connect(positionReached);
+        mInventory.mInventoryChanged.connect([this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
+            (void)removed;
+
+            // Update player graphics.
+            updateSprites();
+
+            switch (inventoryType)
+            {
+                case EquipTargetType::body:
+                case EquipTargetType::leftHand:
+                case EquipTargetType::rightHand:
+                    // Update player graphics.
+                    updateSprites();
+                    break;
+                default:
+                    break;
+            }
+
+            if (!added.isEmpty() && mPlayerInitialised && this == mWorld.getCurrentPlayer())
+            {
+                // Play inventory place/grab sound.
+                switch (inventoryType)
+                {
+                    case EquipTargetType::cursor:
+                        Engine::ThreadManager::get()->playSound("sfx/items/invgrab.wav");
+                        break;
+                    default:
+                        std::string soundPath = added.getInvPlaceSoundPath();
+                        Engine::ThreadManager::get()->playSound(soundPath);
+                        break;
+                }
+            }
+        });
     }
 
     void Player::setPlayerClass(PlayerClass playerClass)
@@ -95,10 +126,13 @@ namespace FAWorld
         mPlayerClass = static_cast<PlayerClass>(loader.load<int32_t>());
         mPlayerStats = {loader};
         initCommon();
+        mPlayerInitialised = true;
     }
 
     void Player::save(FASaveGame::GameSaver& saver)
     {
+        release_assert(mPlayerInitialised);
+
         Serial::ScopedCategorySaver cat("Player", saver);
 
         Actor::save(saver);

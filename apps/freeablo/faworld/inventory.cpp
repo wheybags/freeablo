@@ -214,6 +214,8 @@ namespace FAWorld
         }
 
         mInventoryBox.get(x, y).mIsReal = true;
+        mInventoryChanged(Item(), item);
+
         return PlaceItemResult{PlaceItemResult::Type::Success, {}};
     }
 
@@ -272,6 +274,8 @@ namespace FAWorld
             for (int xLocal = result.getCornerCoords().first; xLocal < result.getCornerCoords().first + itemSize.x; ++xLocal)
                 mInventoryBox.get(xLocal, yLocal) = {};
 
+        mInventoryChanged(result, Item());
+
         return result;
     }
 
@@ -290,6 +294,12 @@ namespace FAWorld
                                    const boost::optional<EquipTarget>& newTargetArg)
         : NeedsToBeReplaced(std::move(NeedsToBeReplacedArg)), NeedsToBeReturned(std::move(NeedsToBeReturnedArg)), newTarget(newTargetArg)
     {
+    }
+
+    CharacterInventory::CharacterInventory()
+    {
+        for (auto inv : mInventoryTypes)
+            inv.second.mInventoryChanged.connect([this, inv](Item const& removed, Item const& added) { mInventoryChanged(inv.first, removed, added); });
     }
 
     void CharacterInventory::save(FASaveGame::GameSaver& saver)
@@ -339,7 +349,6 @@ namespace FAWorld
         {
             release_assert(mLeftHand.autoPlaceItem(item));
             release_assert(mRightHand.autoPlaceItem(item));
-            equipChanged();
             return true;
         }
 
@@ -347,7 +356,6 @@ namespace FAWorld
         if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getClass() == ItemClass::weapon && leftHand.isEmpty())
         {
             mLeftHand.autoPlaceItem(item);
-            equipChanged();
             return true;
         }
 
@@ -391,36 +399,9 @@ namespace FAWorld
         mCursorHeld.placeItem(item, 0, 0).succeeded();
     }
 
-    const BasicInventory& CharacterInventory::getInv(EquipTargetType type) const { return const_cast<CharacterInventory*>(this)->getInvMutable(type); }
+    const BasicInventory& CharacterInventory::getInv(EquipTargetType type) const { return mInventoryTypes.at(type); }
 
-    BasicInventory& CharacterInventory::getInvMutable(EquipTargetType type)
-    {
-        switch (type)
-        {
-            case EquipTargetType::inventory:
-                return mMainInventory;
-            case EquipTargetType::belt:
-                return mBelt;
-            case EquipTargetType::head:
-                return mHead;
-            case EquipTargetType::body:
-                return mBody;
-            case EquipTargetType::leftRing:
-                return mLeftRing;
-            case EquipTargetType::rightRing:
-                return mRightRing;
-            case EquipTargetType::leftHand:
-                return mLeftHand;
-            case EquipTargetType::rightHand:
-                return mRightHand;
-            case EquipTargetType::amulet:
-                return mAmulet;
-            case EquipTargetType::cursor:
-                return mCursorHeld;
-        }
-
-        invalid_enum(EquipTargetType, type);
-    }
+    BasicInventory& CharacterInventory::getInvMutable(EquipTargetType type) { return mInventoryTypes.at(type); }
 
     void CharacterInventory::slotClicked(const EquipTarget& slot)
     {

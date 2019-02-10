@@ -23,6 +23,8 @@ namespace FAWorld
         else
             createSorcerer(player);
 
+        player->mPlayerInitialised = true;
+
         return player;
     }
 
