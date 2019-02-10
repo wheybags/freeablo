@@ -29,7 +29,7 @@ namespace Level
 
         static Dun getTown(const Dun& sector1, const Dun& sector2, const Dun& sector3, const Dun& sector4);
 
-        bool pointIsValid(int32_t x, int32_t y) { return mBlocks.pointIsValid(x, y); }
+        bool pointIsValid(int32_t x, int32_t y) const { return mBlocks.pointIsValid(x, y); }
         int32_t& get(int32_t x, int32_t y) { return mBlocks.get(x, y); }
         const int32_t& get(int32_t x, int32_t y) const { return mBlocks.get(x, y); }
 
