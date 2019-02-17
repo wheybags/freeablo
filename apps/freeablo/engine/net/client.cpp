@@ -22,7 +22,9 @@ namespace Engine
         enet_address_set_host(&mAddress, "127.0.0.1");
         mHost = enet_host_create(nullptr, 32, 2, 0, 0);
         mHost->checksum = enet_crc32;
-        mServerPeer = enet_host_connect(mHost, &mAddress, 2, 0);
+        mServerPeer = enet_host_connect(mHost, &mAddress, CHANNEL_ID_END, 0);
+
+        enet_peer_timeout(mServerPeer, 99999, 99999, 99999);
     }
 
     Client::~Client()
@@ -40,9 +42,13 @@ namespace Engine
         if (!mInputs.count(tick))
             return boost::none;
 
+        if (mDoFullVerify && !mServerStatesForFullVerify.count(tick))
+            return boost::none;
+
         std::vector<FAWorld::PlayerInput> retval;
         retval.swap(mInputs[tick]);
         mInputs.erase(tick);
+
         return retval;
     }
 
@@ -76,7 +82,11 @@ namespace Engine
             }
         }
 
-        sendClientUpdate();
+        if (EngineMain::get()->mInGame && EngineMain::get()->mWorld->getCurrentTick() != mLastTickISentInputsOn)
+        {
+            sendClientUpdate();
+            mLastTickISentInputsOn = EngineMain::get()->mWorld->getCurrentTick();
+        }
     }
 
     void Client::verify(FAWorld::Tick tick)
@@ -124,7 +134,14 @@ namespace Engine
 
             case MessageType::InputsToClient:
             {
+                release_assert(!(event.packet->flags & ENET_PACKET_FLAG_RELIABLE));
                 receiveInputs(loader);
+                return;
+            }
+
+            case MessageType::VerifyToClient:
+            {
+                receiveVerifyPacket(loader);
                 return;
             }
 
@@ -138,6 +155,8 @@ namespace Engine
 
     void Client::receiveMap(FASaveGame::GameLoader& loader)
     {
+        puts("RECEIVED MAP\n");
+
         mDoFullVerify = loader.load<bool>();
         int32_t myPlayerId = loader.load<int32_t>();
         EngineMain::get()->mWorld->load(loader);
@@ -160,21 +179,29 @@ namespace Engine
 
     void Client::receiveInputs(FASaveGame::GameLoader& loader)
     {
+        while (loader.load<bool>())
+        {
+            FAWorld::Tick tick = loader.load<FAWorld::Tick>();
+
+            auto& inputs = mInputs[tick];
+            uint32_t size = loader.load<uint32_t>();
+            inputs.resize(size);
+            for (uint32_t i = 0; i < size; i++)
+                inputs[i].load(loader);
+        }
+    }
+
+    void Client::receiveVerifyPacket(FASaveGame::GameLoader& loader)
+    {
         FAWorld::Tick tick = loader.load<FAWorld::Tick>();
-
-        auto& inputs = mInputs[tick];
-        uint32_t size = loader.load<uint32_t>();
-        inputs.resize(size);
-        for (uint32_t i = 0; i < size; i++)
-            inputs[i].load(loader);
-
-        if (mDoFullVerify)
-            mServerStatesForFullVerify[tick] = loader.load<std::string>();
+        mServerStatesForFullVerify[tick] = loader.load<std::string>();
     }
 
     void Client::sendClientUpdate()
     {
-        auto inputs = mLocalInputHandler.getAndClearInputs();
+        mLastLocalInputId++;
+        mLocalInputsBuffer[mLastLocalInputId] = mLocalInputHandler.getAndClearInputs();
+        FAWorld::PlayerInput::removeUnnecessaryInputs(mLocalInputsBuffer[mLastLocalInputId]);
 
         Serial::TextWriteStream stream;
         FASaveGame::GameSaver saver(stream);
@@ -182,14 +209,45 @@ namespace Engine
         saver.save(uint8_t(MessageType::ClientUpdateToServer));
         saver.save(EngineMain::get()->mWorld->getCurrentTick());
 
-        saver.save(uint32_t(inputs.size()));
-        for (auto& input : inputs)
-            input.save(saver);
+        auto addInputs = [&](uint32_t id) {
+            saver.save(true); // There is another set of inputs here
+            saver.save(id);
+
+            const auto& inputs = mLocalInputsBuffer[id];
+
+            saver.save(uint32_t(inputs.size()));
+            for (size_t i = 0; i < inputs.size(); i++)
+                inputs[i].save(saver);
+
+            return stream.getCurrentSize() <= MAX_CLIENT_UPDATE_PACKET_SIZE;
+        };
+
+        // Send as many input sets as we can fit
+        size_t lastTickEndPosition = 0;
+        uint32_t inputSetNumber = mLastLocalInputId;
+        for (; mLocalInputsBuffer.count(inputSetNumber); inputSetNumber--)
+        {
+            // If we can't fit a set of inputs, just discard it.
+            // This should normally only happen to the last input set when we're sending a whole bunch of them.
+            // If it happens with the most recent tick, we were probably just frozen and generated a bunch of crap while
+            // the game was not responding, so it doesn't really matter if we don't actually send it.
+            if (!addInputs(inputSetNumber))
+                break;
+
+            lastTickEndPosition = stream.getCurrentSize();
+        }
+
+        // get rid of all the old inputs that didn't fit
+        for (; mLocalInputsBuffer.count(inputSetNumber); inputSetNumber--)
+            mLocalInputsBuffer.erase(inputSetNumber);
+
+        stream.resize(lastTickEndPosition);
+        saver.save(false); // there are no more inputs in this packet
 
         auto data = stream.getData();
 
         // does not take ownership of data
-        ENetPacket* packet = enet_packet_create(data.first, data.second, ENET_PACKET_FLAG_RELIABLE);
-        enet_peer_send(mServerPeer, RELIABLE_CHANNEL_ID, packet);
+        ENetPacket* packet = enet_packet_create(data.first, data.second, ENET_PACKET_FLAG_UNSEQUENCED);
+        enet_peer_send(mServerPeer, CLIENT_TO_SERVER_CHANNEL_ID, packet);
     }
 }

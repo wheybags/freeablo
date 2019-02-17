@@ -70,6 +70,7 @@ namespace FAWorld
 
     const Misc::Point GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
 
+    bool GameLevel::canActivate(const Misc::Point& point) const { return mLevel.canActivate(point); }
     void GameLevel::activate(const Misc::Point& point) { mLevel.activate(point); }
 
     int32_t GameLevel::getNextLevel() { return mLevel.getNextLevel(); }
@@ -90,6 +91,9 @@ namespace FAWorld
 
     void GameLevel::insertActor(Actor* actor)
     {
+        if (actor->isDead())
+            return;
+
         bool found = false;
         for (const auto actorInLevel : mActors)
         {

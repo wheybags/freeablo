@@ -1,7 +1,7 @@
-
 #pragma once
-
 #include "direction.h"
+#include <iomanip>
+#include <sstream>
 #include <stddef.h>
 #include <stdint.h>
 #include <utility>
@@ -90,6 +90,8 @@ namespace Misc
         T mOriginal;
         T& mToSet;
     };
+
+    std::string numberToHumanFileSize(double sizeInBytes);
 }
 
 #define UNUSED_PARAM(x) (void)(x)
