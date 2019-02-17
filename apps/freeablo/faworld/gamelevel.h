@@ -62,6 +62,7 @@ namespace FAWorld
 
         const Misc::Point downStairsPos() const;
 
+        bool canActivate(const Misc::Point& point) const;
         void activate(const Misc::Point& point);
 
         int32_t getNextLevel();
@@ -73,11 +74,13 @@ namespace FAWorld
         void insertActor(Actor* actor);
         void actorMapInsert(Actor* actor);
 
-        void actorMapRemove(Actor* actor);
+        void actorMapRemove(const Actor* actor, Misc::Point point);
 
         void actorMapClear();
 
         void actorMapRefresh();
+
+        Misc::Point getFreeSpotNear(Misc::Point point, int32_t radius = 100) const;
 
         virtual bool isPassable(const Misc::Point& point, const FAWorld::Actor* forActor) const;
 

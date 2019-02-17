@@ -61,6 +61,7 @@ namespace Level
 
         void save(Serial::Saver& saver);
 
+        bool canActivate(const Misc::Point& point) const;
         void activate(const Misc::Point& point);
 
         int32_t minSize() const;

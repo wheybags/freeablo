@@ -62,6 +62,8 @@ namespace FAWorld
             if (nearest)
                 dist = FAWorld::squaredDistance(nearest->getPos(), mActor->getPos());
 
+            static FAWorld::Tick halfSecond = World::getTicksInPeriod("0.5");
+
             if (nearest && dist <= std::pow(5, 2)) // we are close enough to engage the player
             {
                 mActor->mTarget = nearest;
@@ -71,7 +73,7 @@ namespace FAWorld
                 return;
             }
             // if no player is in sight, let's wander around a bit
-            else if (mTicksSinceLastAction > World::getTicksInPeriod("0.5") && !mActor->hasTarget() && !mActor->mMoveHandler.moving())
+            else if (mTicksSinceLastAction > halfSecond && !mActor->hasTarget() && !mActor->mMoveHandler.moving())
             {
                 if (mActor->getWorld()->mRng->randomInRange(0, 100) > 80)
                 {

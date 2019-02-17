@@ -32,6 +32,8 @@ namespace FAWorld
 
         release_assert(loader.currentlyLoadingLevel == this);
         loader.currentlyLoadingLevel = nullptr;
+
+        actorMapRefresh();
     }
 
     void GameLevel::save(FASaveGame::GameSaver& saver)
@@ -68,6 +70,7 @@ namespace FAWorld
 
     const Misc::Point GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
 
+    bool GameLevel::canActivate(const Misc::Point& point) const { return mLevel.canActivate(point); }
     void GameLevel::activate(const Misc::Point& point) { mLevel.activate(point); }
 
     int32_t GameLevel::getNextLevel() { return mLevel.getNextLevel(); }
@@ -79,13 +82,8 @@ namespace FAWorld
         for (size_t i = 0; i < mActors.size(); i++)
         {
             Actor* actor = mActors[i];
-
-            actorMapRemove(actor);
             actor->update(noclip);
-            actorMapInsert(actor);
         }
-
-        actorMapRefresh();
 
         for (auto& p : mItemMap->mItems)
             p.second.update();
@@ -93,6 +91,9 @@ namespace FAWorld
 
     void GameLevel::insertActor(Actor* actor)
     {
+        if (actor->isDead())
+            return;
+
         bool found = false;
         for (const auto actorInLevel : mActors)
         {
@@ -108,14 +109,10 @@ namespace FAWorld
 
     void GameLevel::actorMapInsert(Actor* actor)
     {
-        // TODO: maybe have some separate layer for dead actors if we need one?
-        if (actor->isDead())
-            return;
-
         Actor* blocking = nullptr;
         if (mActorMap2D.count(actor->getPos().current()))
             blocking = mActorMap2D[actor->getPos().current()];
-        debug_assert(!blocking);
+        debug_assert(blocking == actor || blocking == nullptr);
 
         mActorMap2D[actor->getPos().current()] = actor;
 
@@ -123,18 +120,19 @@ namespace FAWorld
         {
             if (mActorMap2D.count(actor->getPos().next()))
                 blocking = mActorMap2D[actor->getPos().next()];
-            debug_assert(!blocking);
+            debug_assert(blocking == actor || blocking == nullptr);
 
             mActorMap2D[actor->getPos().next()] = actor;
         }
     }
 
-    void GameLevel::actorMapRemove(Actor* actor)
+    void GameLevel::actorMapRemove(const Actor* actor, Misc::Point point)
     {
-        if (mActorMap2D[actor->getPos().current()] == actor)
-            mActorMap2D.erase(actor->getPos().current());
-        if (actor->getPos().isMoving() && mActorMap2D[actor->getPos().next()] == actor)
-            mActorMap2D.erase(actor->getPos().next());
+#ifndef NDEBUG
+        Actor* currentlyPresent = mActorMap2D[point];
+        debug_assert(currentlyPresent == actor || currentlyPresent == nullptr);
+#endif
+        mActorMap2D.erase(point);
     }
 
     void GameLevel::actorMapClear() { mActorMap2D.clear(); }
@@ -144,6 +142,39 @@ namespace FAWorld
         actorMapClear();
         for (size_t i = 0; i < mActors.size(); i++)
             actorMapInsert(mActors[i]);
+    }
+
+    Misc::Point GameLevel::getFreeSpotNear(Misc::Point point, int32_t radius) const
+    {
+        // partially based on https://stackoverflow.com/a/398302
+
+        int32_t xOffset = 0;
+        int32_t yOffset = 0;
+
+        int32_t dx = 0;
+        int32_t dy = -1;
+
+        while (xOffset <= radius && yOffset <= radius)
+        {
+            Misc::Point targetPoint = point + Misc::Point{xOffset, yOffset};
+            if (targetPoint.x >= 0 && targetPoint.x < width() && targetPoint.y >= 0 && targetPoint.y < height())
+            {
+                if (isPassable(targetPoint, nullptr))
+                    return targetPoint;
+            }
+
+            if (xOffset == yOffset || (xOffset < 0 && xOffset == -yOffset) || (xOffset > 0 && xOffset == 1 - yOffset))
+            {
+                int32_t tmp = dx;
+                dx = -dy;
+                dy = tmp;
+            }
+
+            xOffset = xOffset + dx;
+            yOffset = yOffset + dy;
+        }
+
+        return Misc::Point::invalid();
     }
 
     bool GameLevel::isPassable(const Misc::Point& point, const FAWorld::Actor* forActor) const
@@ -157,7 +188,7 @@ namespace FAWorld
             return false;
 
         FAWorld::Actor* actor = getActorAt(point);
-        return actor == nullptr || actor == forActor || actor->isPassable();
+        return actor == nullptr || actor == forActor;
     }
 
     Actor* GameLevel::getActorAt(const Misc::Point& point) const
@@ -216,7 +247,8 @@ namespace FAWorld
             if (*i == actor)
             {
                 mActors.erase(i);
-                actorMapRemove(actor);
+                actorMapRemove(actor, actor->getPos().current());
+                actorMapRemove(actor, actor->getPos().next());
                 return;
             }
         }

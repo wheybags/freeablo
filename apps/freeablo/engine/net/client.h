@@ -28,9 +28,14 @@ namespace Engine
         void processServerPacket(const ENetEvent& event);
         void receiveMap(FASaveGame::GameLoader& loader);
         void receiveInputs(FASaveGame::GameLoader& loader);
+        void receiveVerifyPacket(FASaveGame::GameLoader& loader);
         void sendClientUpdate();
 
+        FAWorld::Tick mLastTickISentInputsOn = 0;
         LocalInputHandler& mLocalInputHandler;
+        uint32_t mLastLocalInputId = 0;
+        std::map<uint32_t, std::vector<FAWorld::PlayerInput>> mLocalInputsBuffer;
+
         std::unordered_map<FAWorld::Tick, std::vector<FAWorld::PlayerInput>> mInputs;
 
         bool mDoFullVerify = false;
@@ -39,5 +44,7 @@ namespace Engine
         ENetHost* mHost = nullptr;
         ENetPeer* mServerPeer = nullptr;
         ENetAddress mAddress;
+
+        static constexpr size_t MAX_CLIENT_UPDATE_PACKET_SIZE = 500;
     };
 }

@@ -59,9 +59,12 @@ namespace Serial
         void save(int8_t val);
         void save(uint8_t val);
         void save(const std::string& val);
+        void save(const char* str) { save(std::string(str)); }
 
         void startCategory(const std::string& name);
         void endCategory(const std::string& name);
+
+        WriteStreamInterface& getStream() { return mStream; }
 
     private:
         WriteStreamInterface& mStream;

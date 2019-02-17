@@ -127,11 +127,15 @@ namespace Serial
         release_assert(name == data);
     }
 
-    std::pair<uint8_t*, size_t> TextWriteStream::getData()
+    size_t TextWriteStream::getCurrentSize() const
     {
-        mTmp = mData.str();
-        return std::make_pair((uint8_t*)mTmp.data(), mTmp.size());
+        // why is tell non-const??
+        return mData.size();
     }
+
+    void TextWriteStream::resize(size_t size) { mData.resize(size); }
+
+    std::pair<uint8_t*, size_t> TextWriteStream::getData() { return std::make_pair((uint8_t*)mData.data(), mData.size()); }
 
     void TextWriteStream::write(bool val) { writeTypedLine("BOOL", val ? "true" : "false"); }
 
@@ -154,7 +158,7 @@ namespace Serial
     void TextWriteStream::write(const std::string& val)
     {
         writeTypedLine("STRING", std::to_string(uint32_t(val.size())));
-        mData << val << "\n";
+        mData += val + "\n";
     }
 
     void TextWriteStream::startCategory(const std::string& name)
@@ -172,8 +176,8 @@ namespace Serial
     void TextWriteStream::writeTypedLine(const std::string& type, const std::string& data)
     {
         for (int32_t i = 0; i < mTabIndex; i++)
-            mData << "  ";
+            mData += "  ";
 
-        mData << type << " " << data << "\n";
+        mData += type + " " + data + "\n";
     }
 }

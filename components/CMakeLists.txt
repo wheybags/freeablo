@@ -41,6 +41,7 @@ add_library(Misc
     misc/md5.cpp
     misc/md5.h
     misc/misc.h
+    misc/misc.cpp
     misc/point.cpp
     misc/point.h
     misc/savePNG.cpp
@@ -49,6 +50,8 @@ add_library(Misc
     misc/stringops.h
     misc/vec2fix.cpp
     misc/vec2fix.h
+    misc/averager.cpp
+    misc/averager.h
 )
 target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)

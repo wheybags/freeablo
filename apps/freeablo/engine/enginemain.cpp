@@ -189,6 +189,9 @@ namespace Engine
             nk_context* ctx = renderer.getNuklearContext();
             mGuiManager->update(mInGame, mPaused, ctx, mLocalInputHandler->getHoverStatus());
 
+            if (mMultiplayer->isMultiplayer())
+                mMultiplayer->doMultiplayerGui(ctx);
+
             FARender::RenderState* state = renderer.getFreeState();
             if (state)
             {
@@ -227,7 +230,8 @@ namespace Engine
 
             nk_clear(ctx);
 
-            renderer.setCurrentState(state);
+            if (state)
+                renderer.setCurrentState(state);
 
             auto remainingTickTime = timer.expires_from_now().total_milliseconds();
 

@@ -152,6 +152,31 @@ namespace Level
         return MinPillar(mMin[minIndex], mSol.passable(minIndex), minIndex);
     }
 
+    bool Level::canActivate(const Misc::Point& point) const
+    {
+        int32_t xDunIndex = point.x;
+        if ((xDunIndex % 2) != 0)
+            xDunIndex--;
+        xDunIndex /= 2;
+
+        int32_t yDunIndex = point.y;
+        if ((yDunIndex % 2) != 0)
+            yDunIndex--;
+        yDunIndex /= 2;
+
+        // Ensure point is within the bounds of the dungeon.
+        if (mDun.pointIsValid(xDunIndex, yDunIndex))
+        {
+            int32_t index = mDun.get(xDunIndex, yDunIndex);
+
+            // open doors when clicked on
+            if (mDoorMap.find(index) != mDoorMap.end())
+                return true;
+        }
+
+        return false;
+    }
+
     void Level::activate(const Misc::Point& point)
     {
         int32_t xDunIndex = point.x;

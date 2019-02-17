@@ -67,7 +67,6 @@ namespace FAWorld
 
         bool canIAttack(Actor* actor);
         virtual void update(bool noclip);
-        void init();
         void takeDamage(int32_t amount);
         void heal();
         void restoreMana();
@@ -83,7 +82,6 @@ namespace FAWorld
         const ActorStats& getStats() const { return mStats; }
         const Position& getPos() const { return mMoveHandler.getCurrentPosition(); }
         int32_t getId() const { return mId; }
-        bool isPassable() const { return isDead(); }
         bool hasTarget() const;
 
         bool canTalk() const { return mTalkData.size() > 0; }
@@ -115,6 +113,7 @@ namespace FAWorld
         std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;
         std::map<std::string, std::string> mTalkData; ///< Lines of dialogue
+        bool mDeadLastTick = false;
         World& mWorld;
 
         // TODO: this var is only used for dialog code, which branches on which npc is being spoken to.
