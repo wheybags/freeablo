@@ -19,7 +19,7 @@ namespace FARender
         return ret;
     }
 
-    SpriteCache::SpriteCache(uint32_t size) : mNextCacheIndex(1), mCurrentSize(0), mMaxSize(size) { (void)mMaxSize; }
+    SpriteCache::SpriteCache(uint32_t size) : mNextCacheIndex(1), mCurrentSize(0), mMaxSize(size) {}
 
     SpriteCache::~SpriteCache()
     {
@@ -100,6 +100,9 @@ namespace FARender
 
     void SpriteCache::directInsert(Render::SpriteGroup* sprite, uint32_t cacheIndex)
     {
+        if (mCurrentSize >= mMaxSize)
+            evict();
+
         mUsedList.push_front(cacheIndex);
         mCache[cacheIndex] = CacheEntry(sprite, mUsedList.begin(), true);
 
@@ -110,6 +113,9 @@ namespace FARender
     {
         if (!mCache.count(index))
         {
+            if (mCurrentSize >= mMaxSize)
+                evict();
+
             Render::SpriteGroup* newSprite = NULL;
 
             if (mCacheToStr.count(index))
@@ -251,12 +257,39 @@ namespace FARender
 
     void SpriteCache::evict()
     {
-        // Sprites can no longer be removed from texture atlas.
+        if (!Render::SpriteGroup::canDelete())
+            return;
+
+        std::list<uint32_t>::reverse_iterator it;
+
+        for (it = mUsedList.rbegin(); it != mUsedList.rend(); it++)
+        {
+            if (!mCache[*it].immortal)
+                break;
+        }
+
+        release_assert(it != mUsedList.rend() && "no evictable slots found. This should never happen");
+
+        CacheEntry toEvict = mCache[*it];
+
+        toEvict.sprite->destroy();
+        delete toEvict.sprite;
+
+        mCache.erase(*it);
+        mUsedList.erase(--(it.base()));
+        mCurrentSize--;
     }
 
     void SpriteCache::clear()
     {
-        // Sprites can no longer be removed from texture atlas.
+        if (!Render::SpriteGroup::canDelete())
+            return;
+
+        for (std::list<uint32_t>::iterator it = mUsedList.begin(); it != mUsedList.end(); it++)
+        {
+            mCache[*it].sprite->destroy();
+            delete mCache[*it].sprite;
+        }
     }
 
     std::string SpriteCache::getPathForIndex(uint32_t index)

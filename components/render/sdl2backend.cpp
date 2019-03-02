@@ -7,6 +7,7 @@
 //#include <SDL_opengl.h>
 #include <SDL_image.h>
 
+#include "atlastexture.h"
 #include "sdl_gl_funcs.h"
 
 #include "../cel/celfile.h"
@@ -59,138 +60,8 @@ int AmdPowerXpressRequestHighPerformance = 1;
 
 namespace Render
 {
-#define GL_CHECK_ERROR()                                                                                                                                       \
-    {                                                                                                                                                          \
-        GLenum err;                                                                                                                                            \
-        while ((err = glGetError()) != GL_NO_ERROR)                                                                                                            \
-        {                                                                                                                                                      \
-            fprintf(stderr, "glError %s:%d, 0x%04X\n", __FILE__, __LINE__, err);                                                                               \
-        }                                                                                                                                                      \
-    }
-
-    /* Stores many small textures into a large texture (or array of textures)
-     * to allow batched drawing commands that increase performance. */
-    class TextureAtlas
-    {
-    public:
-        class TextureAtlasEntry
-        {
-        public:
-            TextureAtlasEntry() = default;
-            TextureAtlasEntry(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height) : mX(x), mY(y), mLayer(layer), mWidth(width), mHeight(height)
-            {
-            }
-
-            int32_t mX = 0, mY = 0, mLayer = 0, mWidth = 0, mHeight = 0;
-        };
-
-        TextureAtlas()
-        {
-            GLint maxTextureSize;
-            GLint maxArrayTextureLayers;
-            glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-            glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &maxArrayTextureLayers);
-
-            mTextureWidth = maxTextureSize;
-            mTextureHeight = maxTextureSize;
-
-            // Limit array texture depth to a reasonable level (measured from testing).
-            // Note: Increasing this has a severe impact on performance.
-            // TODO: Something is falling apart when texture has more than one layer.
-            //       Alpha seems to sometimes disappear, maybe blending on the z-axis?
-            GLint estimatedRequiredTextures = 1;
-            // GLint estimatedRequiredTextures = (1uLL << 29) / (mTextureWidth * mTextureHeight);
-            mTextureLayers = std::min(estimatedRequiredTextures, maxArrayTextureLayers);
-
-            for (int32_t layer = 0; layer < mTextureLayers; layer++)
-                mBinPacker.push_back(rbp::MaxRectsBinPack(mTextureWidth, mTextureHeight, false));
-
-            glGenTextures(1, &mTextureArrayId);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureArrayId);
-
-            // Allocate memory for texture array (by passing NULL).
-            // TODO: Use compressed format as this texture is very large.
-            // NOTE: For GL_COMPRESSED_RGBA image dimensions need to be padded to
-            // multiples of 4: https://forums.khronos.org/showthread.php/77554
-            glTexImage3D(GL_TEXTURE_2D_ARRAY,
-                         0,
-                         /*GL_RGBA8*/ GL_RGB5_A1 /*GL_COMPRESSED_RGBA*/,
-                         mTextureWidth,
-                         mTextureHeight,
-                         mTextureLayers,
-                         0,
-                         GL_RGBA,
-                         GL_UNSIGNED_BYTE,
-                         NULL);
-
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-            // Diagnostic only.
-            GLint internalFormat = 0;
-            glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFormat);
-            printf("MaxTextureSize %d, MaxArrayTextureLayers %d, used (%d, %d, %d), 0x%04X\n",
-                   maxTextureSize,
-                   maxArrayTextureLayers,
-                   mTextureWidth,
-                   mTextureHeight,
-                   mTextureLayers,
-                   internalFormat);
-        }
-
-        size_t addTexture(int32_t width, int32_t height, const void* data)
-        {
-            release_assert(width <= mTextureWidth && height <= mTextureHeight); // Texture size too small...
-
-            rbp::Rect packedPos;
-            int32_t layer;
-            for (layer = 0; layer < mTextureLayers; layer++)
-            {
-                packedPos = mBinPacker[layer].Insert(width, height, rbp::MaxRectsBinPack::RectBestAreaFit);
-                if (packedPos.height != 0)
-                    break;
-            }
-            release_assert(layer < mTextureLayers); // Run out of memory...
-
-            glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureArrayId);
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, packedPos.x, packedPos.y, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-            // TODO: Sometimes adding glFlush/glFinish fixes tiles a bit
-            // when texture is compressed but not really sure why...
-            // glFlush();
-            // glFinish();
-
-            auto id = mNextTextureId++;
-            mLookupMap[id] = TextureAtlasEntry(packedPos.x, packedPos.y, layer, width, height);
-
-            return id;
-        }
-
-        void bind() { glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureArrayId); }
-        void free() { glDeleteTextures(1, &mTextureArrayId); }
-        GLint getTextureWidth() const { return mTextureWidth; }
-        GLint getTextureHeight() const { return mTextureHeight; }
-        const std::map<size_t, TextureAtlasEntry>& getLookupMap() const { return mLookupMap; }
-
-        float getOccupancy() const
-        {
-            float summedOccupancy = 0;
-            for (auto& bp : mBinPacker)
-                summedOccupancy += bp.Occupancy();
-            return summedOccupancy / mBinPacker.size() * 100;
-        }
-
-    private:
-        GLuint mTextureArrayId;
-        GLint mTextureWidth;
-        GLint mTextureHeight;
-        GLint mTextureLayers;
-        std::map<size_t, TextureAtlasEntry> mLookupMap;
-        size_t mNextTextureId = 1;
-        std::vector<rbp::MaxRectsBinPack> mBinPacker;
-    };
+    // atlasTexture is optional as to not instantiate until opengl is setup.
+    boost::optional<AtlasTexture> atlasTexture = boost::none;
 
     /* Caches level sprites/positions etc in a format that can be directly injected into GL VBOs. */
     class DrawLevelCache
@@ -198,46 +69,55 @@ namespace Render
     public:
         DrawLevelCache(size_t initSize)
         {
-            mSprite.reserve(initSize);
             mImageOffset.reserve(2 * initSize);
             mHoverColor.reserve(4 * initSize);
+            mImageSize.reserve(2 * initSize);
+            mAtlasOffset.reserve(3 * initSize);
         }
 
         void addSprite(GLuint sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor)
         {
-            mSprite.push_back(sprite);
+            auto& lookupMap = atlasTexture->getLookupMap();
+            auto& atlasEntry = lookupMap.at(sprite);
 
+            mImageSize.push_back(atlasEntry.mWidth);
+            mImageSize.push_back(atlasEntry.mHeight);
+            mAtlasOffset.push_back(atlasEntry.mX);
+            mAtlasOffset.push_back(atlasEntry.mY);
+            mAtlasOffset.push_back(atlasEntry.mLayer);
             mImageOffset.push_back(x);
             mImageOffset.push_back(y);
 
             if (auto c = highlightColor)
             {
-                mHoverColor.push_back(c->r / 255.f);
-                mHoverColor.push_back(c->g / 255.f);
-                mHoverColor.push_back(c->b / 255.f);
-                mHoverColor.push_back(1.0f);
+                mHoverColor.push_back(c->r);
+                mHoverColor.push_back(c->g);
+                mHoverColor.push_back(c->b);
+                mHoverColor.push_back(255);
             }
             else
             {
-                mHoverColor.push_back(0.0f);
-                mHoverColor.push_back(0.0f);
-                mHoverColor.push_back(0.0f);
-                mHoverColor.push_back(0.0f);
+                mHoverColor.push_back(0.0);
+                mHoverColor.push_back(0.0);
+                mHoverColor.push_back(0.0);
+                mHoverColor.push_back(0.0);
             }
         }
 
-        size_t size() const { return mSprite.size(); }
+        size_t size() const { return mImageOffset.size() / 2; }
 
         void clear()
         {
-            mSprite.clear();
             mImageOffset.clear();
             mHoverColor.clear();
+            mImageSize.clear();
+            mAtlasOffset.clear();
         }
 
-        std::vector<GLuint> mSprite;
-        std::vector<GLfloat> mImageOffset;
-        std::vector<GLfloat> mHoverColor;
+        std::vector<GLshort> mImageOffset;
+        std::vector<GLubyte> mHoverColor;
+        std::vector<GLushort> mImageSize;
+        std::vector<GLushort> mAtlasOffset;
     };
 
     int32_t WIDTH = 1280;
@@ -247,8 +127,6 @@ namespace Render
     // SDL_Renderer* renderer;
     SDL_GLContext glContext;
 
-    // textureAtlas is optional as to not instantiate until opengl is setup.
-    boost::optional<TextureAtlas> textureAtlas = boost::none;
     DrawLevelCache drawLevelCache = DrawLevelCache(2000);
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
@@ -306,7 +184,7 @@ namespace Render
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
 
-        textureAtlas = TextureAtlas();
+        atlasTexture = AtlasTexture();
 
         if (nk_ctx)
         {
@@ -325,7 +203,7 @@ namespace Render
 
     void quit()
     {
-        textureAtlas->free();
+        atlasTexture->free();
         SDL_GL_DeleteContext(glContext);
         // SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
@@ -351,27 +229,6 @@ namespace Render
         return settings;
     }
 
-    // TODO: bindSprite needs to be tidied up, was just a quick throw in for testing.
-    void bindSprite(const Sprite& sprite,
-                    int32_t& width,
-                    int32_t& height,
-                    int32_t& atlasOffsetX,
-                    int32_t& atlasOffsetY,
-                    int32_t& atlasOffsetZ,
-                    int32_t& atlasWidth,
-                    int32_t& atlasHeight)
-    {
-        auto& atlasEntry = textureAtlas->getLookupMap().at((GLuint)(intptr_t)sprite);
-        width = atlasEntry.mWidth;
-        height = atlasEntry.mHeight;
-        atlasOffsetX = atlasEntry.mX;
-        atlasOffsetY = atlasEntry.mY;
-        atlasOffsetZ = atlasEntry.mLayer;
-        atlasWidth = textureAtlas->getTextureWidth();
-        atlasHeight = textureAtlas->getTextureHeight();
-        textureAtlas->bind();
-    }
-
     GLuint getGLTexFromSurface(SDL_Surface* surf)
     {
         bool validFormat = true;
@@ -390,7 +247,7 @@ namespace Render
 
         debug_assert(surf->pitch == 4 * surf->w);
 
-        GLuint id = textureAtlas->addTexture(surf->w, surf->h, surf->pixels);
+        GLuint id = atlasTexture->addTexture(surf->w, surf->h, surf->pixels);
 
         if (!validFormat)
             SDL_FreeSurface(surf);
@@ -405,7 +262,7 @@ namespace Render
         // defaults everything back into a default state.
         // Make sure to either a.) save and restore or b.) reset your own state after
         // rendering the UI.
-        nk_sdl_render_dump(cache, dump, screen);
+        nk_sdl_render_dump(cache, dump, screen, *atlasTexture);
 
         glEnable(GL_BLEND); // see above comment
     }
@@ -769,56 +626,6 @@ namespace Render
 
             once = true;
 
-            float points[] = {0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0};
-
-            float colours[] = {0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1};
-
-            GLuint vbo = 0;
-            glGenBuffers(1, &vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), points, GL_STATIC_DRAW);
-
-            GLuint uvs_vbo = 0;
-            glGenBuffers(1, &uvs_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, uvs_vbo);
-            glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), colours, GL_STATIC_DRAW);
-
-            glGenVertexArrays(1, &vao);
-            glBindVertexArray(vao);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-            glBindBuffer(GL_ARRAY_BUFFER, uvs_vbo);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
-            // Note: These VBOs use glVertexAttribDivisor(n, 1) which means they're
-            // only updated once per instance (instead of once per vertex).
-            glGenBuffers(1, &imageSize_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, imageSize_vbo);
-            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(2, 1);
-
-            glGenBuffers(1, &imageOffset_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, imageOffset_vbo);
-            glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(3, 1);
-
-            glGenBuffers(1, &hoverColor_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, hoverColor_vbo);
-            glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(4, 1);
-
-            glGenBuffers(1, &atlasOffset_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, atlasOffset_vbo);
-            glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(5, 1);
-
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glEnableVertexAttribArray(2);
-            glEnableVertexAttribArray(3);
-            glEnableVertexAttribArray(4);
-            glEnableVertexAttribArray(5);
-
             std::string src = Misc::StringUtils::readAsString("resources/shaders/basic.vert");
             const GLchar* srcPtr = src.c_str();
 
@@ -874,6 +681,74 @@ namespace Render
             glAttachShader(shader_programme, fs);
             glAttachShader(shader_programme, vs);
             glLinkProgram(shader_programme);
+
+            GLint status;
+            glGetProgramiv(shader_programme, GL_LINK_STATUS, &status);
+            release_assert(status == GL_TRUE);
+
+            GL_CHECK_ERROR();
+
+            GLfloat points[] = {0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0};
+
+            GLfloat colours[] = {0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1};
+
+            glGenVertexArrays(1, &vao);
+            glBindVertexArray(vao);
+
+            GLint vertex_position_id, uv_id, imageSize_id, imageOffset_id, hoverColor_id, atlasOffset_id;
+            vertex_position_id = glGetAttribLocation(shader_programme, "vertex_position");
+            uv_id = glGetAttribLocation(shader_programme, "v_uv");
+            imageSize_id = glGetAttribLocation(shader_programme, "v_imageSize");
+            imageOffset_id = glGetAttribLocation(shader_programme, "v_imageOffset");
+            hoverColor_id = glGetAttribLocation(shader_programme, "v_hoverColor");
+            atlasOffset_id = glGetAttribLocation(shader_programme, "v_atlasOffset");
+
+            // Not 100% sure if this is portable but vertex array buffers seem to
+            // loop so only have to supply one set of points/colors. Increases
+            // performance by a reasonable amount so will leave like this unless
+            // there's problems (if problems could just append sets of points/colors
+            // to vectors in the DrawLevelCache when each sprite added).
+            GLuint vbo = 0;
+            glGenBuffers(1, &vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+            glVertexAttribPointer(vertex_position_id, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+            glEnableVertexAttribArray(vertex_position_id);
+
+            GLuint uvs_vbo = 0;
+            glGenBuffers(1, &uvs_vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, uvs_vbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(colours), colours, GL_STATIC_DRAW);
+            glVertexAttribPointer(uv_id, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+            glEnableVertexAttribArray(uv_id);
+
+            // Note: These VBOs use glVertexAttribDivisor(n, 1) which means they're
+            // only updated once per instance (instead of once per vertex).
+            glGenBuffers(1, &imageSize_vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, imageSize_vbo);
+            glVertexAttribPointer(imageSize_id, 2, GL_UNSIGNED_SHORT, GL_FALSE, 0, NULL);
+            glVertexAttribDivisor(imageSize_id, 1);
+            glEnableVertexAttribArray(imageSize_id);
+
+            glGenBuffers(1, &imageOffset_vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, imageOffset_vbo);
+            glVertexAttribPointer(imageOffset_id, 2, GL_SHORT, GL_FALSE, 0, NULL);
+            glVertexAttribDivisor(imageOffset_id, 1);
+            glEnableVertexAttribArray(imageOffset_id);
+
+            glGenBuffers(1, &hoverColor_vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, hoverColor_vbo);
+            glVertexAttribPointer(hoverColor_id, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, NULL);
+            glVertexAttribDivisor(hoverColor_id, 1);
+            glEnableVertexAttribArray(hoverColor_id);
+
+            glGenBuffers(1, &atlasOffset_vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, atlasOffset_vbo);
+            glVertexAttribPointer(atlasOffset_id, 3, GL_UNSIGNED_SHORT, GL_FALSE, 0, NULL);
+            glVertexAttribDivisor(atlasOffset_id, 1);
+            glEnableVertexAttribArray(atlasOffset_id);
+
+            GL_CHECK_ERROR();
 
             /*SDL_Surface* surf = SDL_LoadBMP("E:\\tom.bmp");
 
@@ -943,56 +818,33 @@ namespace Render
     {
         glUseProgram(shader_programme);
 
-        auto setUniform = [](const char* name, GLfloat value) {
-            GLint loc = glGetUniformLocation(shader_programme, name);
-            if (loc != -1)
-            {
-                glUniform1f(loc, value);
-            }
-        };
-
-        setUniform("screenWidth", WIDTH);
-        setUniform("screenHeight", HEIGHT);
-        setUniform("atlasWidth", textureAtlas->getTextureWidth());
-        setUniform("atlasHeight", textureAtlas->getTextureHeight());
-
-        size_t spriteCount = drawLevelCache.size();
-
-        std::vector<GLfloat> imageSize(2 * spriteCount);
-        std::vector<GLfloat> atlasOffset(3 * spriteCount);
-
-        auto& lookupMap = textureAtlas->getLookupMap();
-        for (size_t i = 0; i < spriteCount; i++)
-        {
-            auto& atlasEntry = lookupMap.at(drawLevelCache.mSprite[i]);
-
-            imageSize[i * 2] = atlasEntry.mWidth;
-            imageSize[i * 2 + 1] = atlasEntry.mHeight;
-            atlasOffset[i * 3] = atlasEntry.mX;
-            atlasOffset[i * 3 + 1] = atlasEntry.mY;
-            atlasOffset[i * 3 + 2] = atlasEntry.mLayer;
-        }
+        GLint tex_ids[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+        glUniform1iv(glGetUniformLocation(shader_programme, "tex"), 8, tex_ids);
+        glUniform2f(glGetUniformLocation(shader_programme, "screenSize"), WIDTH, HEIGHT);
+        glUniform2f(glGetUniformLocation(shader_programme, "atlasSize"), atlasTexture->getTextureWidth(), atlasTexture->getTextureHeight());
 
         glBindVertexArray(vao);
+
+        size_t spriteCount = drawLevelCache.size();
 
         // Note: These VBOs use glVertexAttribDivisor(n, 1) which means they're
         // only updated once per instance (instead of once per vertex).
         glBindBuffer(GL_ARRAY_BUFFER, imageSize_vbo);
-        glBufferData(GL_ARRAY_BUFFER, 2 * spriteCount * sizeof(GLfloat), &imageSize[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, drawLevelCache.mImageSize.size() * sizeof(drawLevelCache.mImageSize[0]), &drawLevelCache.mImageSize[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, imageOffset_vbo);
-        glBufferData(GL_ARRAY_BUFFER, 2 * spriteCount * sizeof(GLfloat), &drawLevelCache.mImageOffset[0], GL_STATIC_DRAW);
+        glBufferData(
+            GL_ARRAY_BUFFER, drawLevelCache.mImageOffset.size() * sizeof(drawLevelCache.mImageOffset[0]), &drawLevelCache.mImageOffset[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, hoverColor_vbo);
-        glBufferData(GL_ARRAY_BUFFER, 4 * spriteCount * sizeof(GLfloat), &drawLevelCache.mHoverColor[0], GL_STATIC_DRAW);
+        glBufferData(
+            GL_ARRAY_BUFFER, drawLevelCache.mHoverColor.size() * sizeof(drawLevelCache.mHoverColor[0]), &drawLevelCache.mHoverColor[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, atlasOffset_vbo);
-        glBufferData(GL_ARRAY_BUFFER, 3 * spriteCount * sizeof(GLfloat), &atlasOffset[0], GL_STATIC_DRAW);
+        glBufferData(
+            GL_ARRAY_BUFFER, drawLevelCache.mAtlasOffset.size() * sizeof(drawLevelCache.mAtlasOffset[0]), &drawLevelCache.mAtlasOffset[0], GL_STATIC_DRAW);
 
-        textureAtlas->bind();
+        atlasTexture->bind();
 
         // Draw the whole level in one batched operation.
         glDrawArraysInstanced(GL_TRIANGLES, 0, 6, spriteCount);
-
-        // Clear cached level data after drawing.
-        drawLevelCache.clear();
     }
 
     void handleEvents()
@@ -1115,9 +967,22 @@ namespace Render
         jo_gif_end(&gif);
     }
 
+    bool SpriteGroup::canDelete()
+    {
+        // Sprites can not currently be removed from atlas texture.
+        return false;
+    }
+
     void SpriteGroup::destroy()
     {
-        // Sprites can no longer be removed from texture atlas.
+        // Sprites can not currently be removed from atlas texture.
+        release_assert(false);
+
+        // for (size_t i = 0; i < mSprites.size(); i++)
+        // {
+        //     GLuint tex = (GLuint)(intptr_t)mSprites[i];
+        //     glDeleteTextures(1, &tex);
+        // }
     }
 
     void drawMinPillarTop(SDL_Surface* s, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tileset);
@@ -1151,7 +1016,7 @@ namespace Render
 
     void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h)
     {
-        auto& atlasEntry = textureAtlas->getLookupMap().at((size_t)(intptr_t)sprite);
+        auto& atlasEntry = atlasTexture->getLookupMap().at((size_t)(intptr_t)sprite);
         w = atlasEntry.mWidth;
         h = atlasEntry.mHeight;
     }
@@ -1492,21 +1357,15 @@ namespace Render
 
         drawCachedLevel();
 
+        // Clear cached level data after drawing.
+        drawLevelCache.clear();
+
         GL_CHECK_ERROR();
 
-        // Diagnostic only.
+#ifdef DEBUG_ATLAS_TEXTURE
         static size_t loop = 0;
         if ((loop++ % 1000) == 0)
-        {
-            printf("Texture atlas occupancy %.1f%%\n", textureAtlas->getOccupancy());
-            auto latest = textureAtlas->getLookupMap().rbegin();
-            printf("Latest texture atlas entry: %zu, %d, %d, %d, %d, %d\n",
-                   latest->first,
-                   latest->second.mX,
-                   latest->second.mY,
-                   latest->second.mLayer,
-                   latest->second.mWidth,
-                   latest->second.mHeight);
-        }
+            printf("Atlas texture occupancy %.1f%%\n", atlasTexture->getOccupancy());
+#endif
     }
 }

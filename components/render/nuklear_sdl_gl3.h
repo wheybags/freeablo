@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "atlastexture.h"
 #include "misc.h"
 #include "sdl_gl_funcs.h"
 
@@ -20,18 +21,11 @@ struct nk_gl_device
     GLint attrib_uv;
     GLint attrib_col;
     GLint uniform_tex;
-    GLint uniform_hcolor_r;
-    GLint uniform_hcolor_g;
-    GLint uniform_hcolor_b;
-    GLint uniform_hcolor_a;
+    GLint uniform_hoverColor;
     GLint uniform_checkerboarded;
-    GLint imgW;
-    GLint imgH;
-    GLint atlasOffsetX;
-    GLint atlasOffsetY;
-    GLint atlasOffsetZ;
-    GLint atlasWidth;
-    GLint atlasHeight;
+    GLint uniform_imageSize;
+    GLint uniform_atlasOffset;
+    GLint uniform_atlasSize;
     GLint uniform_proj;
     nk_handle font_tex;
 };
@@ -65,7 +59,7 @@ private:
 void nk_sdl_font_stash_begin(nk_font_atlas& atlas);
 GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
 // NK_API int                  nk_sdl_handle_event(SDL_Event *evt);
-void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win);
+void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, const Render::AtlasTexture& atlasTexture);
 // NK_API void                 nk_sdl_shutdown(void);
 void nk_sdl_device_destroy(nk_gl_device& dev);
 void nk_sdl_device_create(nk_gl_device& dev);

@@ -41,42 +41,36 @@ void nk_sdl_device_create(nk_gl_device& dev)
                                                            "}\n";
     static const GLchar* fragment_shader = NK_SHADER_VERSION
         R"(precision mediump float;
-        uniform sampler2DArray Texture;
+        uniform sampler2D Texture;
         in vec2 Frag_UV;
         in vec4 Frag_Color;
         out vec4 Out_Color;
-        uniform float h_color_r;
-        uniform float h_color_g;
-        uniform float h_color_b;
-        uniform float h_color_a;
-        uniform float imgW;
-        uniform float imgH;
-        uniform float atlasOffsetX;
-        uniform float atlasOffsetY;
-        uniform float atlasOffsetZ;
-        uniform float atlasWidth;
-        uniform float atlasHeight;
+        uniform vec4 hoverColor;
+        uniform vec2 imageSize;
+        uniform vec3 atlasOffset;
+        uniform vec2 atlasSize;
         uniform int checkerboarded;
         void main(){
-             vec4 c = Frag_Color * texture(Texture, vec3((atlasOffsetX + Frag_UV.x * imgW) / atlasWidth, (atlasOffsetY + Frag_UV.y * imgH) / atlasHeight, atlasOffsetZ));
-             if (c.w == 0. && h_color_a > 0.)
+            vec4 c = Frag_Color * texture(Texture, (atlasOffset.xy + Frag_UV * imageSize) / atlasSize);
+            if (c.w == 0. && hoverColor.a > 0.)
+            {
+              for (float i= -1.; i <= 1.; i++)
+                for (float j= -1.; j <= 1.; j++)
                 {
-                  for (float i= -1.; i <= 1.; i++)
-                    for (float j= -1.; j <= 1.; j++)
-                        {
-                          vec4 n = texture(Texture, vec3((atlasOffsetX + i + Frag_UV.x * imgW) / atlasWidth, (atlasOffsetY + j + Frag_UV.y * imgH) / atlasHeight, atlasOffsetZ));
-                          if (n.w > 0. && (n.x > 0. || n.y > 0. || n.z > 0.))
-                            c = vec4 (h_color_r, h_color_g, h_color_b, h_color_a);
-                        }
+                  vec2 offset = vec2(i, j);
+                  vec4 n = texture(Texture, (atlasOffset.xy + offset + Frag_UV * imageSize) / atlasSize);
+                  if (n.w > 0. && (n.x > 0. || n.y > 0. || n.z > 0.))
+                    c = hoverColor;
                 }
-           if (checkerboarded != 0)
-           {
-             float vx = floor (Frag_UV.st.x * imgW);
-             float vy = floor (Frag_UV.st.y * imgH);
-             if (mod (vx + vy, 2.) == 1.)
-               c.w = 0.;
-           }
-           Out_Color = c;
+            }
+            if (checkerboarded != 0)
+            {
+              float vx = floor(Frag_UV.st.x * imageSize.x);
+              float vy = floor(Frag_UV.st.y * imageSize.y);
+              if (mod(vx + vy, 2.) == 1.)
+                c.w = 0.;
+            }
+            Out_Color = c;
         }
        )";
 
@@ -113,18 +107,11 @@ void nk_sdl_device_create(nk_gl_device& dev)
     glGetProgramiv(dev.prog, GL_LINK_STATUS, &status);
     release_assert(status == GL_TRUE);
 
-    dev.uniform_hcolor_r = glGetUniformLocation(dev.prog, "h_color_r");
-    dev.uniform_hcolor_g = glGetUniformLocation(dev.prog, "h_color_g");
-    dev.uniform_hcolor_b = glGetUniformLocation(dev.prog, "h_color_b");
-    dev.uniform_hcolor_a = glGetUniformLocation(dev.prog, "h_color_a");
+    dev.uniform_hoverColor = glGetUniformLocation(dev.prog, "hoverColor");
     dev.uniform_checkerboarded = glGetUniformLocation(dev.prog, "checkerboarded");
-    dev.imgW = glGetUniformLocation(dev.prog, "imgW");
-    dev.imgH = glGetUniformLocation(dev.prog, "imgH");
-    dev.atlasOffsetX = glGetUniformLocation(dev.prog, "atlasOffsetX");
-    dev.atlasOffsetY = glGetUniformLocation(dev.prog, "atlasOffsetY");
-    dev.atlasOffsetZ = glGetUniformLocation(dev.prog, "atlasOffsetZ");
-    dev.atlasWidth = glGetUniformLocation(dev.prog, "atlasWidth");
-    dev.atlasHeight = glGetUniformLocation(dev.prog, "atlasHeight");
+    dev.uniform_imageSize = glGetUniformLocation(dev.prog, "imageSize");
+    dev.uniform_atlasOffset = glGetUniformLocation(dev.prog, "atlasOffset");
+    dev.uniform_atlasSize = glGetUniformLocation(dev.prog, "atlasSize");
     dev.uniform_tex = glGetUniformLocation(dev.prog, "Texture");
     dev.uniform_proj = glGetUniformLocation(dev.prog, "ProjMtx");
     dev.attrib_pos = glGetAttribLocation(dev.prog, "Position");
@@ -186,7 +173,7 @@ void nk_sdl_device_destroy(nk_gl_device& dev)
     nk_buffer_free(&dev.cmds);
 }
 
-void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win)
+void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, const Render::AtlasTexture& atlasTexture)
 {
     int width, height;
     int display_width, display_height;
@@ -213,13 +200,14 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
-    glActiveTexture(GL_TEXTURE0);
 
     nk_gl_device& dev = dump.getDevice();
 
     // setup program
     glUseProgram(dev.prog);
-    glUniform1i(dev.uniform_tex, 0);
+
+    atlasTexture.bind();
+    auto& atlasLookupMap = atlasTexture.getLookupMap();
 
     glUniformMatrix4fv(dev.uniform_proj, 1, GL_FALSE, &ortho[0][0]);
     {
@@ -258,22 +246,20 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
 
             Render::SpriteGroup* sprite = cache->get(cacheIndex);
             auto s = sprite->operator[](frameNum);
-            // TODO: bindSprite needs to be tidied up, was just a quick throw in for testing.
-            int32_t w, h, atlasOffsetX, atlasOffsetY, atlasOffsetZ, atlasWidth, atlasHeight;
-            Render::bindSprite(s, w, h, atlasOffsetX, atlasOffsetY, atlasOffsetZ, atlasWidth, atlasHeight);
+
+            auto& atlasEntry = atlasLookupMap.at((GLuint)(intptr_t)s);
+            glUniform1i(dev.uniform_tex, atlasEntry.mLayer);
+
             int item_hl_color[] = {0xB9, 0xAA, 0x77};
-            glUniform1f(dev.uniform_hcolor_r, item_hl_color[0] / 255.f);
-            glUniform1f(dev.uniform_hcolor_g, item_hl_color[1] / 255.f);
-            glUniform1f(dev.uniform_hcolor_b, item_hl_color[2] / 255.f);
-            glUniform1f(dev.uniform_hcolor_a, effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f);
+            glUniform4f(dev.uniform_hoverColor,
+                        item_hl_color[0] / 255.f,
+                        item_hl_color[1] / 255.f,
+                        item_hl_color[2] / 255.f,
+                        effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f);
             glUniform1i(dev.uniform_checkerboarded, effect == FAGui::EffectType::checkerboarded ? 1 : 0);
-            glUniform1f(dev.imgW, w);
-            glUniform1f(dev.imgH, h);
-            glUniform1f(dev.atlasOffsetX, atlasOffsetX);
-            glUniform1f(dev.atlasOffsetY, atlasOffsetY);
-            glUniform1f(dev.atlasOffsetZ, atlasOffsetZ);
-            glUniform1f(dev.atlasWidth, atlasWidth);
-            glUniform1f(dev.atlasHeight, atlasHeight);
+            glUniform2f(dev.uniform_imageSize, atlasEntry.mWidth, atlasEntry.mHeight);
+            glUniform3f(dev.uniform_atlasOffset, atlasEntry.mX, atlasEntry.mY, atlasEntry.mLayer);
+            glUniform2f(dev.uniform_atlasSize, atlasTexture.getTextureWidth(), atlasTexture.getTextureHeight());
 
             glScissor((GLint)(cmd.clip_rect.x * scale.x),
                       (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),

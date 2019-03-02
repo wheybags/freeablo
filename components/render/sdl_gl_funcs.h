@@ -3,6 +3,15 @@
 #ifndef SDL_GL_FUNCS
 #define SDL_GL_FUNCS
 
+#define GL_CHECK_ERROR()                                                                                                                                       \
+    {                                                                                                                                                          \
+        GLenum err;                                                                                                                                            \
+        while ((err = glGetError()) != GL_NO_ERROR)                                                                                                            \
+        {                                                                                                                                                      \
+            fprintf(stderr, "glError %s:%d, 0x%04X\n", __FILE__, __LINE__, err);                                                                               \
+        }                                                                                                                                                      \
+    }
+
 #include <SDL.h>
 
 #ifdef GL_GLEXT_PROTOTYPES
@@ -38,12 +47,16 @@ extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 extern PFNGLDELETESHADERPROC glDeleteShader;
 extern PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 extern PFNGLUNIFORM1FPROC glUniform1f;
+extern PFNGLUNIFORM2FPROC glUniform2f;
+extern PFNGLUNIFORM3FPROC glUniform3f;
+extern PFNGLUNIFORM4FPROC glUniform4f;
 extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
 extern PFNGLGETATTRIBLOCATIONPROC glGetAttribLocation;
 extern PFNGLDETACHSHADERPROC glDetachShader;
 extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
 extern PFNGLDELETEBUFFERSPROC glDeleteBuffers;
 extern PFNGLUNIFORM1IPROC glUniform1i;
+extern PFNGLUNIFORM1IVPROC glUniform1iv;
 extern PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
 extern PFNGLMAPBUFFERPROC glMapBuffer;
 extern PFNGLUNMAPBUFFERPROC glUnmapBuffer;
@@ -53,6 +66,10 @@ extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
 extern PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
 extern PFNGLTEXIMAGE3DPROC glTexImage3D;
 extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
+extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
+extern PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
+extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
+extern PFNGLFRAMEBUFFERTEXTUREPROC glFramebufferTexture;
 
 void initGlFuncs();
 

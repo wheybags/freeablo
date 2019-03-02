@@ -71,6 +71,8 @@ set(RenderFiles
     render/nuklear_sdl_gl3.cpp
     render/nuklear_sdl_gl3.h
     render/misc.h
+    render/atlastexture.cpp
+    render/atlastexture.h
     ../extern/RectangleBinPack/MaxRectsBinPack.cpp
     ../extern/RectangleBinPack/MaxRectsBinPack.h
     ../extern/RectangleBinPack/Rect.cpp
