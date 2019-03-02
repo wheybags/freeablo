@@ -107,12 +107,11 @@ namespace Render
         // of graphics cards are limited to 8192, not quite sure how it ever worked..
         release_assert(paddedWidth <= mTextureWidth && paddedHeight <= mTextureHeight); // Texture size too small...
 
-        rbp::Rect packedPos;
+        rbp::Rect packedPos = rbp::Rect();
         int32_t layer;
         for (layer = 0; layer < mTextureLayers; layer++)
         {
             packedPos = mBinPacker[layer]->Insert(paddedWidth, paddedHeight, rbp::MaxRectsBinPack::RectBestAreaFit);
-            release_assert(packedPos.height != 0);
             if (packedPos.height != 0)
                 break;
         }

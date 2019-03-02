@@ -51,7 +51,7 @@ void MaxRectsBinPack::Init(int width, int height, bool allowFlip)
 
 Rect MaxRectsBinPack::Insert(int width, int height, FreeRectChoiceHeuristic method)
 {
-    Rect newNode;
+    Rect newNode = Rect();
     // Unused in this function. We don't need to know the score after finding the position.
     int score1 = std::numeric_limits<int>::max();
     int score2 = std::numeric_limits<int>::max();
@@ -139,7 +139,7 @@ void MaxRectsBinPack::PlaceRect(const Rect &node)
 
 Rect MaxRectsBinPack::ScoreRect(int width, int height, FreeRectChoiceHeuristic method, int &score1, int &score2) const
 {
-    Rect newNode;
+    Rect newNode = Rect();
     score1 = std::numeric_limits<int>::max();
     score2 = std::numeric_limits<int>::max();
     switch(method)
