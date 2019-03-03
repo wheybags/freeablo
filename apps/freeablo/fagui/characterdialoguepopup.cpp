@@ -17,7 +17,7 @@ namespace FAGui
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
 
         auto dialogRectangle = nk_rect(
-            screenW / 2.0f - (this->mWide ? boxTex->getWidth() / 2 : 0.0f), screenH - boxTex->getHeight() - 153, boxTex->getWidth(), boxTex->getHeight());
+            screenW / 2.0f - (boxTex->getWidth() / 2.0f), screenH / 2.0f - (boxTex->getHeight() / 2.0f), boxTex->getWidth(), boxTex->getHeight());
 
         UpdateResult result = UpdateResult::DoNothing;
 
