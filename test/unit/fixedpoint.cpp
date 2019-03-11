@@ -133,3 +133,36 @@ TEST(FixedPoint, VectorToDirection)
     ASSERT_EQ(Vec2Fix(-1, -1).getIsometricDirection(), Misc::Direction::north);
     ASSERT_EQ(Vec2Fix(-1, 1).getIsometricDirection(), Misc::Direction::west);
 }
+
+TEST(FixedPoint, sin)
+{
+    for (int deg = -360; deg <= 360; deg++)
+    {
+        double expected = sin(deg * M_PI / 180);
+        double result = FixedPoint::sin_degrees(deg).toDouble();
+        ASSERT_NEAR(expected, result, 0.002 * 2);
+    }
+}
+
+TEST(FixedPoint, cos)
+{
+    for (int deg = -360; deg <= 360; deg++)
+    {
+        double expected = cos(deg * M_PI / 180);
+        double result = FixedPoint::cos_degrees(deg).toDouble();
+        ASSERT_NEAR(expected, result, 0.002 * 2);
+    }
+}
+
+TEST(FixedPoint, atan2)
+{
+    for (int x = -10; x <= 10; x++)
+    {
+        for (int y = -10; y <= 10; y++)
+        {
+            double expected = atan2(y, x);
+            double result = FixedPoint::atan2(y, x).toDouble();
+            ASSERT_NEAR(expected, result, 0.002 * (2 * M_PI));
+        }
+    }
+}
