@@ -107,23 +107,20 @@ std::string FixedPoint::str() const
     if (*this < 0)
         ss << "-";
 
-    ss << i64abs(this->intPart());
+    ss << i64abs(intPart());
 
-    std::string fractionalTempStr;
-    fractionalTempStr.resize(FixedPoint::scalingFactorPowerOf10);
-
-    int64_t fractionalTemp = fractionPart().abs().mVal;
-    for (int64_t i = 0; i < FixedPoint::scalingFactorPowerOf10; i++)
+    int64_t fractional = i64abs(fractionPart().mVal);
+    if (fractional > 0)
     {
-        fractionalTempStr[size_t(FixedPoint::scalingFactorPowerOf10 - 1 - i)] = '0' + fractionalTemp % 10;
-        fractionalTemp /= 10;
+        // LEFT pad with zeros to scalingFactorPowerOf10 chars, then strip zeros to the right.
+        std::stringstream ssFractional;
+        ssFractional << std::setfill('0') << std::setw(scalingFactorPowerOf10) << std::right << fractional;
+
+        std::string fractionalStr = ssFractional.str();
+        Misc::StringUtils::rstrip(fractionalStr, "0");
+
+        ss << "." << fractionalStr;
     }
-
-    while (!fractionalTempStr.empty() && fractionalTempStr[fractionalTempStr.size() - 1] == '0')
-        fractionalTempStr.pop_back();
-
-    if (!fractionalTempStr.empty())
-        ss << "." << fractionalTempStr;
 
     return ss.str();
 }
