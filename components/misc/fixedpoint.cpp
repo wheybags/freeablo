@@ -4,7 +4,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <sstream>
 
-using uint128_t = boost::multiprecision::uint128_t;
+using int128_t = boost::multiprecision::int128_t;
 
 constexpr int64_t FixedPoint::scalingFactorPowerOf10;
 constexpr int64_t FixedPoint::scalingFactor;
@@ -140,15 +140,13 @@ FixedPoint FixedPoint::operator-(FixedPoint other) const
 
 FixedPoint FixedPoint::operator*(FixedPoint other) const
 {
-    int64_t sign = (mVal >= 0 ? 1 : -1) * (other.mVal >= 0 ? 1 : -1);
+    int128_t val1 = int128_t(mVal);
+    int128_t val2 = int128_t(other.mVal);
+    int128_t scale = FixedPoint::scalingFactor;
 
-    uint128_t val1 = uint128_t(i64abs(mVal));
-    uint128_t val2 = uint128_t(i64abs(other.mVal));
-    uint128_t scale = FixedPoint::scalingFactor;
+    int128_t temp = (val1 * val2) / scale;
 
-    uint128_t temp = (val1 * val2) / scale;
-
-    int64_t val = sign * int64_t(temp);
+    int64_t val = int64_t(temp);
     FixedPoint retval = fromRawValue(val);
 
 #ifndef NDEBUG
@@ -159,15 +157,13 @@ FixedPoint FixedPoint::operator*(FixedPoint other) const
 
 FixedPoint FixedPoint::operator/(FixedPoint other) const
 {
-    int64_t sign = (mVal >= 0 ? 1 : -1) * (other.mVal >= 0 ? 1 : -1);
+    int128_t val1 = int128_t(mVal);
+    int128_t val2 = int128_t(other.mVal);
+    int128_t scale = FixedPoint::scalingFactor;
 
-    uint128_t val1 = uint128_t(i64abs(mVal));
-    uint128_t val2 = uint128_t(i64abs(other.mVal));
-    uint128_t scale = FixedPoint::scalingFactor;
+    int128_t temp = (val1 * scale) / val2;
 
-    uint128_t temp = (val1 * scale) / val2;
-
-    int64_t val = sign * int64_t(temp);
+    int64_t val = int64_t(temp);
     FixedPoint retval = fromRawValue(val);
 
 #ifndef NDEBUG
