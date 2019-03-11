@@ -9,15 +9,6 @@ using uint128_t = boost::multiprecision::uint128_t;
 constexpr int64_t FixedPoint::scalingFactorPowerOf10;
 constexpr int64_t FixedPoint::scalingFactor;
 
-static int64_t ipow(int64_t x, int64_t power)
-{
-    int64_t result = 1;
-    for (int64_t i = 0; i < power; i++)
-        result *= x;
-
-    return result;
-}
-
 static int64_t i64abs(int64_t i)
 {
     return i >= 0 ? i : -i; // not using std::abs because of a libc++ bug https://github.com/Project-OSRM/osrm-backend/issues/1000
@@ -37,28 +28,18 @@ FixedPoint::FixedPoint(const std::string& str)
         ss >> integer;
         integer = i64abs(integer);
     }
+
     int64_t fractional = 0;
-    int64_t fractionalDigits = 0;
     if (split.size() == 2)
     {
-        fractionalDigits = int64_t(split[1].size()); // there could be leading zeros
-        std::stringstream ss(split[1]);
+        // Truncate and RIGHT pad with zeros to scalingFactorPowerOf10 chars.
+        // This is to handle leading zeros and any number of significant figures.
+        std::stringstream ss;
+        ss << std::setfill('0') << std::setw(scalingFactorPowerOf10) << std::left << split[1].substr(0, scalingFactorPowerOf10);
         ss >> fractional;
     }
 
-    integer = i64abs(integer);
-
-    int64_t tmpScalePow10 = fractionalDigits;
-    int64_t tmpScale = ipow(10, tmpScalePow10);
-    int64_t tmpFixed = (integer * tmpScale) + (fractional);
-
-    int64_t scaleDifference = FixedPoint::scalingFactorPowerOf10 - tmpScalePow10;
-
-    if (scaleDifference > 0)
-        mVal = tmpFixed * ipow(10, scaleDifference);
-    else
-        mVal = tmpFixed / ipow(10, -scaleDifference);
-
+    mVal = integer * scalingFactor + fractional;
     mVal *= sign;
 
 #ifndef NDEBUG
@@ -118,7 +99,7 @@ std::string FixedPoint::str() const
     if (*this < 0)
         ss << "-";
 
-    ss << this->abs().intPart();
+    ss << i64abs(this->intPart());
 
     std::string fractionalTempStr;
     fractionalTempStr.resize(FixedPoint::scalingFactorPowerOf10);

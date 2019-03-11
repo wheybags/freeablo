@@ -71,6 +71,9 @@ public:
         return fromRawValue(mVal >= 0 ? mVal : -mVal);
     }
 
+    static FixedPoint minVal() { return fromRawValue(INT64_MIN); }
+    static FixedPoint maxVal() { return fromRawValue(INT64_MAX); }
+
     static FixedPoint atan2_degrees(FixedPoint y, FixedPoint x);
     static FixedPoint sin_degrees(FixedPoint deg);
     static FixedPoint cos_degrees(FixedPoint deg);
