@@ -40,6 +40,7 @@ public:
 
     FixedPoint operator+(FixedPoint other) const;
     FixedPoint operator-(FixedPoint other) const;
+    FixedPoint operator-() const;
     FixedPoint operator*(FixedPoint other) const;
     FixedPoint operator/(FixedPoint other) const;
 

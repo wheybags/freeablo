@@ -138,6 +138,15 @@ FixedPoint FixedPoint::operator-(FixedPoint other) const
     return retval;
 }
 
+FixedPoint FixedPoint::operator-() const
+{
+    FixedPoint retval = fromRawValue(-mVal);
+#ifndef NDEBUG
+    retval.mDebugVal = -mDebugVal;
+#endif
+    return retval;
+}
+
 FixedPoint FixedPoint::operator*(FixedPoint other) const
 {
     int128_t val1 = int128_t(mVal);
