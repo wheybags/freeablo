@@ -135,6 +135,11 @@ namespace Misc
             }
         }
 
+        static void rstrip(std::string& s, const std::string chars = " \t\n\v\f\r")
+        {
+            s.erase(std::find_if(s.rbegin(), s.rend(), [chars](int ch) { return chars.find(ch) == std::string::npos; }).base(), s.end());
+        }
+
         static std::string readAsString(const std::string& path)
         {
             FAIO::FAFileObject f(path);

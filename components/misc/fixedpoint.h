@@ -40,6 +40,7 @@ public:
 
     FixedPoint operator+(FixedPoint other) const;
     FixedPoint operator-(FixedPoint other) const;
+    FixedPoint operator-() const;
     FixedPoint operator*(FixedPoint other) const;
     FixedPoint operator/(FixedPoint other) const;
 
@@ -71,6 +72,16 @@ public:
         return fromRawValue(mVal >= 0 ? mVal : -mVal);
     }
 
+    static FixedPoint minVal() { return fromRawValue(INT64_MIN); }
+    static FixedPoint maxVal() { return fromRawValue(INT64_MAX); }
+
+    static FixedPoint atan2(FixedPoint y, FixedPoint x);
+    static FixedPoint sin(FixedPoint rad);
+    static FixedPoint cos(FixedPoint rad);
+    static FixedPoint atan2_degrees(FixedPoint y, FixedPoint x);
+    static FixedPoint sin_degrees(FixedPoint deg);
+    static FixedPoint cos_degrees(FixedPoint deg);
+
 private:
     // The scaling factor to use, as a power of 10.
     // Essentially the number of base 10 digits after the decimal point.
@@ -82,6 +93,9 @@ private:
     // mVal is just the intended value multiplid by scalingFactor.
     // So, eg with scale 1000, 1.23 would have value 1230.
     static constexpr int64_t scalingFactor = 1000000000;
+
+    static FixedPoint PI;
+    static FixedPoint epsilon;
 
     int64_t mVal = 0;
 #ifndef NDEBUG
