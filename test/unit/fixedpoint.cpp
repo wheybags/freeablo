@@ -163,6 +163,8 @@ TEST(FixedPoint, atan2)
             double expected = atan2(y, x);
             double result = FixedPoint::atan2(y, x).toDouble();
             ASSERT_NEAR(expected, result, 0.002 * (2 * M_PI));
+            result = FixedPoint::atan2_degrees(y, x).toDouble() * M_PI / 180;
+            ASSERT_NEAR(expected, result, 0.002 * (2 * M_PI));
         }
     }
 }

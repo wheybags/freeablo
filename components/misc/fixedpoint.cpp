@@ -295,7 +295,7 @@ FixedPoint FixedPoint::cos(FixedPoint rad) { return sin(rad + PI / 2); }
 FixedPoint FixedPoint::atan2_degrees(FixedPoint y, FixedPoint x)
 {
     static const FixedPoint radToDeg = FixedPoint(180) / PI;
-    return atan2(x, y) * radToDeg;
+    return atan2(y, x) * radToDeg;
 }
 FixedPoint FixedPoint::sin_degrees(FixedPoint deg)
 {
