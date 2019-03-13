@@ -17,9 +17,20 @@ constexpr int64_t FixedPoint::scalingFactor;
 FixedPoint FixedPoint::PI("3.14159265359");
 FixedPoint FixedPoint::epsilon = fromRawValue(1);
 
-static int64_t i64abs(int64_t i)
+static inline int64_t i64abs(int64_t i)
 {
     return i >= 0 ? i : -i; // not using std::abs because of a libc++ bug https://github.com/Project-OSRM/osrm-backend/issues/1000
+}
+
+static inline int64_t muldiv(int64_t n1, int64_t n2, int64_t d)
+{
+    int64_t ret;
+    // Optimisation : Only use 128bit if 64bit will overflow.
+    if (n2 == 0 || i64abs(n1) <= INT64_MAX / i64abs(n2))
+        ret = n1 * n2 / d;
+    else
+        ret = int64_t(int128_t(n1) * n2 / d);
+    return ret;
 }
 
 FixedPoint::FixedPoint(const std::string& str)
@@ -154,13 +165,7 @@ FixedPoint FixedPoint::operator-() const
 
 FixedPoint FixedPoint::operator*(FixedPoint other) const
 {
-    int128_t val1 = int128_t(mVal);
-    int128_t val2 = int128_t(other.mVal);
-    int128_t scale = FixedPoint::scalingFactor;
-
-    int128_t temp = (val1 * val2) / scale;
-
-    int64_t val = int64_t(temp);
+    int64_t val = muldiv(mVal, other.mVal, scalingFactor);
     FixedPoint retval = fromRawValue(val);
 
 #ifndef NDEBUG
@@ -171,13 +176,7 @@ FixedPoint FixedPoint::operator*(FixedPoint other) const
 
 FixedPoint FixedPoint::operator/(FixedPoint other) const
 {
-    int128_t val1 = int128_t(mVal);
-    int128_t val2 = int128_t(other.mVal);
-    int128_t scale = FixedPoint::scalingFactor;
-
-    int128_t temp = (val1 * scale) / val2;
-
-    int64_t val = int64_t(temp);
+    int64_t val = muldiv(mVal, scalingFactor, other.mVal);
     FixedPoint retval = fromRawValue(val);
 
 #ifndef NDEBUG
@@ -293,6 +292,14 @@ FixedPoint FixedPoint::sin(FixedPoint rad)
 }
 
 FixedPoint FixedPoint::cos(FixedPoint rad) { return sin(rad + PI / 2); }
-FixedPoint FixedPoint::atan2_degrees(FixedPoint y, FixedPoint x) { return atan2(x, y) * 180 / PI; }
-FixedPoint FixedPoint::sin_degrees(FixedPoint deg) { return sin(deg * PI / 180); }
+FixedPoint FixedPoint::atan2_degrees(FixedPoint y, FixedPoint x)
+{
+    static const FixedPoint radToDeg = FixedPoint(180) / PI;
+    return atan2(x, y) * radToDeg;
+}
+FixedPoint FixedPoint::sin_degrees(FixedPoint deg)
+{
+    static const FixedPoint degToRad = PI / 180;
+    return sin(deg * degToRad);
+}
 FixedPoint FixedPoint::cos_degrees(FixedPoint deg) { return sin_degrees(deg + 90); }

@@ -166,3 +166,29 @@ TEST(FixedPoint, atan2)
         }
     }
 }
+
+TEST(FixedPoint, muldivOptimisations)
+{
+    // Multiply/divide operations currently have optimisations to only use 128bit if 64bit will overflow.
+    // NOTE: These are not black box tests, they require a bit of knowledge of the internal implementation.
+    // If the implementation changes and/or these tests become problematic to maintain just delete them.
+    const int64_t scalingFactor = 1000000000;
+
+    const int64_t divLimit = INT64_MAX / scalingFactor;
+    for (int64_t value = divLimit - 10; value <= divLimit + 10; value++)
+        for (int64_t sign1 : {-1, 1})
+            for (int64_t sign2 : {-1, 1})
+                ASSERT_EQ(FixedPoint::fromRawValue(sign1 * sign2 * value / 10), FixedPoint::fromRawValue(sign1 * value) / FixedPoint(sign2 * 10));
+
+    const int64_t mulLimit = 3037000500; // ~= sqrt(INT64_MAX) ~= 2^31.5
+    for (int64_t value = mulLimit - 10; value <= mulLimit + 10; value++)
+        for (int64_t sign1 : {-1, 1})
+            for (int64_t sign2 : {-1, 1})
+            {
+                // Working will fit in an UNSIGNED 64 bit, but not signed.
+                int64_t result = (uint64_t)mulLimit * value / scalingFactor;
+                result *= sign1 * sign2;
+                ASSERT_EQ(FixedPoint::fromRawValue(result), FixedPoint::fromRawValue(sign1 * value) * FixedPoint::fromRawValue(sign2 * mulLimit));
+                ASSERT_EQ(FixedPoint::fromRawValue(result), FixedPoint::fromRawValue(sign1 * mulLimit) * FixedPoint::fromRawValue(sign2 * value));
+            }
+}
