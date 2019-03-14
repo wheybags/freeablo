@@ -123,15 +123,15 @@ TEST(FixedPoint, Rounding)
 
 TEST(FixedPoint, VectorToDirection)
 {
-    ASSERT_EQ(Vec2Fix(1, 0).getIsometricDirection().getDirection8(), Misc::Direction8::south_east);
-    ASSERT_EQ(Vec2Fix(-1, 0).getIsometricDirection().getDirection8(), Misc::Direction8::north_west);
-    ASSERT_EQ(Vec2Fix(0, 1).getIsometricDirection().getDirection8(), Misc::Direction8::south_west);
-    ASSERT_EQ(Vec2Fix(0, -1).getIsometricDirection().getDirection8(), Misc::Direction8::north_east);
+    ASSERT_EQ(Vec2Fix(1, 0).getDirection().getDirection8(), Misc::Direction8::south_east);
+    ASSERT_EQ(Vec2Fix(-1, 0).getDirection().getDirection8(), Misc::Direction8::north_west);
+    ASSERT_EQ(Vec2Fix(0, 1).getDirection().getDirection8(), Misc::Direction8::south_west);
+    ASSERT_EQ(Vec2Fix(0, -1).getDirection().getDirection8(), Misc::Direction8::north_east);
 
-    ASSERT_EQ(Vec2Fix(1, 1).getIsometricDirection().getDirection8(), Misc::Direction8::south);
-    ASSERT_EQ(Vec2Fix(1, -1).getIsometricDirection().getDirection8(), Misc::Direction8::east);
-    ASSERT_EQ(Vec2Fix(-1, -1).getIsometricDirection().getDirection8(), Misc::Direction8::north);
-    ASSERT_EQ(Vec2Fix(-1, 1).getIsometricDirection().getDirection8(), Misc::Direction8::west);
+    ASSERT_EQ(Vec2Fix(1, 1).getDirection().getDirection8(), Misc::Direction8::south);
+    ASSERT_EQ(Vec2Fix(1, -1).getDirection().getDirection8(), Misc::Direction8::east);
+    ASSERT_EQ(Vec2Fix(-1, -1).getDirection().getDirection8(), Misc::Direction8::north);
+    ASSERT_EQ(Vec2Fix(-1, 1).getDirection().getDirection8(), Misc::Direction8::west);
 }
 
 TEST(FixedPoint, sin)

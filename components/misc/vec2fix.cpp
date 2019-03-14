@@ -12,7 +12,7 @@ void Vec2Fix::normalise()
     y = y / mag;
 }
 
-Misc::Direction Vec2Fix::getIsometricDirection() const
+Misc::Direction Vec2Fix::getDirection() const
 {
     // isometricDir 0° is east with respect to isometric tiles (i.e. south east).
     auto isometricDir = FixedPoint::atan2_degrees(y, x);

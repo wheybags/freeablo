@@ -310,7 +310,7 @@ namespace FAWorld
     bool Player::dropItem(const Misc::Point& clickedPoint)
     {
         auto cursorItem = mInventory.getCursorHeld();
-        auto initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getIsometricDirection();
+        auto initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getDirection();
         auto curPos = getPos().current();
         auto direction = (curPos == clickedPoint) ? Misc::Direction(Misc::Direction8::none) : initialDir;
 

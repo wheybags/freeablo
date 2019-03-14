@@ -110,7 +110,7 @@ namespace FAWorld
                         if (mLevel->isPassable(next, &actor))
                         {
                             auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
-                            Misc::Direction direction = vec.getIsometricDirection();
+                            Misc::Direction direction = vec.getDirection();
 
                             mCurrentPos.setDirection(direction);
                             mCurrentPos.start();
@@ -129,7 +129,7 @@ namespace FAWorld
                             if (mLevel->isPassable(next, &actor))
                             {
                                 auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
-                                Misc::Direction direction = vec.getIsometricDirection();
+                                Misc::Direction direction = vec.getDirection();
 
                                 positionReachedSent = false;
                                 mCurrentPos.setDirection(direction);
