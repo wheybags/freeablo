@@ -11,6 +11,7 @@
 #include "itembonus.h"
 #include "itemenums.h"
 #include "itemmap.h"
+#include "missile/missile.h"
 #include "playerbehaviour.h"
 #include "world.h"
 #include <misc/assert.h>
@@ -125,6 +126,7 @@ namespace FAWorld
     {
         mPlayerClass = static_cast<PlayerClass>(loader.load<int32_t>());
         mPlayerStats = {loader};
+        mActiveMissileIndex = loader.load<uint32_t>();
         initCommon();
         mPlayerInitialised = true;
     }
@@ -138,6 +140,7 @@ namespace FAWorld
         Actor::save(saver);
         saver.save(static_cast<int32_t>(mPlayerClass));
         mPlayerStats.save(saver);
+        saver.save(mActiveMissileIndex);
     }
 
     bool Player::checkHit(Actor* enemy)
@@ -291,6 +294,7 @@ namespace FAWorld
 
         auto renderer = FARender::Renderer::get();
 
+        // TODO: Spell animations: lightning "lm", fire "fm", other "qm"
         mAnimation.setAnimation(AnimState::dead, renderer->loadImage((helper(true) % "dt").str()));
         mAnimation.setAnimation(AnimState::attack, renderer->loadImage((helper(false) % "at").str()));
         mAnimation.setAnimation(AnimState::hit, renderer->loadImage((helper(false) % "ht").str()));
@@ -410,5 +414,36 @@ namespace FAWorld
         // Restore HP/Mana.
         heal();
         restoreMana();
+    }
+
+    static const std::vector<MissileId> mImplementedMissiles = {
+        MissileId::arrow, MissileId::firebolt, MissileId::firewall, MissileId::manashield, MissileId::farrow, MissileId::larrow};
+
+    void Player::setActiveSpellNumber(int32_t spellNumber)
+    {
+        (void)spellNumber;
+        // Hack for testing, loop through implemented missiles.
+        mActiveMissileIndex++;
+        if (mActiveMissileIndex >= mImplementedMissiles.size())
+            mActiveMissileIndex = 0;
+    }
+
+    void Player::castActiveSpell(Misc::Point targetPoint)
+    {
+        // Hack for testing, loop through implemented missiles.
+        auto missileId = mImplementedMissiles[mActiveMissileIndex];
+        switch (missileId)
+        {
+            case MissileId::arrow:
+            case MissileId::farrow:
+            case MissileId::larrow:
+                // Arrow sounds will need to be implemented like Actor::doMeleeHit().
+                Engine::ThreadManager::get()->playSound("sfx/misc/bfire.wav");
+                break;
+            default:
+                // Spell sounds will come from DiabloExe::getSpellsDataTable()[spellId].mSoundEffect.
+                break;
+        }
+        activateMissile(missileId, targetPoint);
     }
 }

@@ -27,6 +27,10 @@ namespace Engine
         toggleQuests,
         toggleCharacterInfo,
         toggleSpellbook,
+        prepareSpell1,
+        prepareSpell2,
+        prepareSpell3,
+        prepareSpell4,
 
         max,
     };
@@ -35,6 +39,8 @@ namespace Engine
     {
         MOUSE_RELEASE,
         MOUSE_DOWN,
+        RIGHT_MOUSE_RELEASE,
+        RIGHT_MOUSE_DOWN,
         MOUSE_MOVE,
     };
 

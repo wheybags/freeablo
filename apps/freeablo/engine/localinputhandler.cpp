@@ -33,6 +33,17 @@ namespace Engine
                 return;
             }
 
+            case Engine::KeyboardInputAction::prepareSpell1:
+            case Engine::KeyboardInputAction::prepareSpell2:
+            case Engine::KeyboardInputAction::prepareSpell3:
+            case Engine::KeyboardInputAction::prepareSpell4:
+            {
+                // Assume these enums entries are sequential.
+                int32_t spellNumber = (int32_t)action - (int32_t)Engine::KeyboardInputAction::prepareSpell1 + 1;
+                mInputs.emplace_back(FAWorld::PlayerInput::PrepareSpellData{spellNumber}, player->getId());
+                return;
+            }
+
             default:
             {
                 return;
@@ -78,6 +89,12 @@ namespace Engine
                         mInputs.emplace_back(FAWorld::PlayerInput::DragOverTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
                 }
 
+                return;
+            }
+            case Engine::MouseInputAction::RIGHT_MOUSE_DOWN:
+            {
+                auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
+                mInputs.emplace_back(FAWorld::PlayerInput::CastSpellData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
                 return;
             }
             case Engine::MouseInputAction::MOUSE_MOVE:
