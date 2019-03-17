@@ -101,10 +101,6 @@ namespace Render
         static const int32_t ALIGNMENT = 1; // Must be >= 1
         int32_t paddedWidth = (width + PADDING + ALIGNMENT - 1) / ALIGNMENT * ALIGNMENT;
         int32_t paddedHeight = (height + PADDING + ALIGNMENT - 1) / ALIGNMENT * ALIGNMENT;
-
-        // This assert may cause trouble as one of the Diablo 1 images is 10752 pixels high.
-        // However ~46% (https://feedback.wildfiregames.com/report/opengl/feature/GL_MAX_TEXTURE_SIZE)
-        // of graphics cards are limited to 8192, not quite sure how it ever worked..
         release_assert(paddedWidth <= mTextureWidth && paddedHeight <= mTextureHeight); // Texture size too small...
 
         rbp::Rect packedPos = rbp::Rect();

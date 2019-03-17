@@ -33,6 +33,20 @@ namespace FARender
         friend class Renderer;
     };
 
+    struct PcxFontInitData
+    {
+        int32_t fontSize;
+        int32_t textureWidth;
+        int32_t textureHeight;
+        int32_t spacingX;
+        int32_t spacingY;
+        enum class LayoutOrder
+        {
+            horizontal,
+            vertical
+        } fontDirection;
+    };
+
     class PcxFontInfo
     {
     private:
@@ -43,11 +57,10 @@ namespace FARender
 
     private:
         static const int charCount = 256;
-        std::array<int, charCount> widthPx;
-        std::array<float, charCount> uvWidth;
+        std::array<struct nk_user_font_glyph, charCount> mGlyphs;
 
     private:
-        void initWidths(const std::string& binPath, int textureWidth);
+        void init(const std::string& binPath, const PcxFontInitData& fontInitData);
         static float getWidth(nk_handle handle, float h, const char* s, int len);
         static void queryGlyph(nk_handle handle, float font_height, struct nk_user_font_glyph* glyph, nk_rune codepoint, nk_rune next_codepoint);
         friend class Renderer;

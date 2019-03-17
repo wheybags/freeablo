@@ -117,7 +117,7 @@ namespace FARender
 
     private:
         std::unique_ptr<CelFontInfo> generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData, int spacing);
-        std::unique_ptr<PcxFontInfo> generateFont(const std::string& pcxPath, const std::string& binPath);
+        std::unique_ptr<PcxFontInfo> generateFont(const std::string& pcxPath, const std::string& binPath, const PcxFontInitData& fontInitData);
 
     private:
         static Renderer* mRenderer; ///< Singleton instance
