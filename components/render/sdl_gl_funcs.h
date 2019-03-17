@@ -8,7 +8,7 @@
         GLenum err;                                                                                                                                            \
         while ((err = glGetError()) != GL_NO_ERROR)                                                                                                            \
         {                                                                                                                                                      \
-            fprintf(stderr, "glError %s:%d, 0x%04X\n", __FILE__, __LINE__, err);                                                                               \
+            message_and_abort_fmt("glError %s:%d, 0x%04X\n", __FILE__, __LINE__, err);                                                                         \
         }                                                                                                                                                      \
     }
 

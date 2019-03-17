@@ -48,10 +48,9 @@ namespace Render
             // Allocate memory for texture array (by passing NULL).
             // NOTE: For GL_COMPRESSED_RGBA image dimensions need to be padded to a
             // multiple/alignment of 4: https://forums.khronos.org/showthread.php/77554
-            // Also may need to clear texture if there are
             glTexImage2D(GL_TEXTURE_2D,
                          0,
-                         /*GL_RGBA8*/ GL_RGB5_A1 /*GL_COMPRESSED_RGBA*/,
+                         /*GL_RGB5_A1*/ GL_RGBA8 /*GL_COMPRESSED_RGBA*/,
                          mTextureWidth,
                          mTextureHeight,
                          0,

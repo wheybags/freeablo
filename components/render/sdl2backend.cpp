@@ -14,6 +14,7 @@
 #include "../cel/celframe.h"
 
 #include "../level/level.h"
+#include <boost/make_unique.hpp>
 #include <faio/fafileobject.h>
 #include <misc/assert.h>
 #include <misc/savePNG.h>
@@ -60,8 +61,8 @@ int AmdPowerXpressRequestHighPerformance = 1;
 
 namespace Render
 {
-    // atlasTexture is optional as to not instantiate until opengl is setup.
-    boost::optional<AtlasTexture> atlasTexture = boost::none;
+    // atlasTexture is unique_ptr as to not instantiate until opengl is setup.
+    std::unique_ptr<AtlasTexture> atlasTexture = nullptr;
 
     /* Caches level sprites/positions etc in a format that can be directly injected into GL VBOs. */
     class DrawLevelCache
@@ -161,7 +162,7 @@ namespace Render
         int major = glVersion[0] - '0';
         int minor = glVersion[2] - '0';
         if (major < 3 || (major == 3 && minor < 3))
-            std::cerr << "ERROR: Minimum OpenGL version is 3.3. Your current version is " << major << "." << minor << std::endl;
+            message_and_abort_fmt("ERROR: Minimum OpenGL version is 3.3. Your current version is %d.%d\n", major, minor);
 
         /*int oglIdx = -1;
         int nRD = SDL_GetNumRenderDrivers();
@@ -184,7 +185,7 @@ namespace Render
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
 
-        atlasTexture = AtlasTexture();
+        atlasTexture = boost::make_unique<AtlasTexture>();
 
         if (nk_ctx)
         {
@@ -967,7 +968,7 @@ namespace Render
         jo_gif_end(&gif);
     }
 
-    bool SpriteGroup::canDelete()
+    bool SpriteGroup::canDeleteSprites()
     {
         // Sprites can not currently be removed from atlas texture.
         return false;

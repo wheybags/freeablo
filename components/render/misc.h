@@ -15,7 +15,7 @@ namespace Render
     public:
         SpriteGroup(const std::string& path);
         SpriteGroup(const std::vector<Sprite> sprites) : mSprites(sprites), mAnimLength(sprites.size()) {}
-        static bool canDelete();
+        static bool canDeleteSprites();
         void destroy();
 
         Sprite& operator[](size_t index);

@@ -257,7 +257,7 @@ namespace FARender
 
     void SpriteCache::evict()
     {
-        if (!Render::SpriteGroup::canDelete())
+        if (!Render::SpriteGroup::canDeleteSprites())
             return;
 
         std::list<uint32_t>::reverse_iterator it;
@@ -282,7 +282,7 @@ namespace FARender
 
     void SpriteCache::clear()
     {
-        if (!Render::SpriteGroup::canDelete())
+        if (!Render::SpriteGroup::canDeleteSprites())
             return;
 
         for (std::list<uint32_t>::iterator it = mUsedList.begin(); it != mUsedList.end(); it++)
