@@ -6,7 +6,7 @@
  * be missing if the array texture was allocated with > 1 depth (layers)... */
 
 #include "atlastexture.h"
-#include "../../extern/RectangleBinPack/MaxRectsBinPack.h"
+#include "../../extern/RectangleBinPack/SkylineBinPack.h"
 
 #include <boost/make_unique.hpp>
 #include <misc/assert.h>
@@ -35,7 +35,7 @@ namespace Render
         glGenTextures(mTextureLayers, &mTextureArrayIds[0]);
 
         for (int32_t layer = 0; layer < mTextureLayers; layer++)
-            mBinPacker.push_back(boost::make_unique<rbp::MaxRectsBinPack>(mTextureWidth, mTextureHeight, false));
+            mBinPacker.push_back(boost::make_unique<rbp::SkylineBinPack>(mTextureWidth, mTextureHeight, false));
 
         GLuint fbo;
         glGenFramebuffers(1, &fbo);
@@ -106,7 +106,7 @@ namespace Render
         int32_t layer;
         for (layer = 0; layer < mTextureLayers; layer++)
         {
-            packedPos = mBinPacker[layer]->Insert(paddedWidth, paddedHeight, rbp::MaxRectsBinPack::RectBestAreaFit);
+            packedPos = mBinPacker[layer]->Insert(paddedWidth, paddedHeight, rbp::SkylineBinPack::LevelMinWasteFit);
             if (packedPos.height != 0)
                 break;
         }

@@ -12,7 +12,7 @@
 
 namespace rbp
 {
-    class MaxRectsBinPack;
+    class SkylineBinPack;
 }
 
 namespace Render
@@ -50,6 +50,6 @@ namespace Render
         GLint mTextureLayers;
         AtlasTextureLookupMap mLookupMap;
         size_t mNextTextureId = 1;
-        std::vector<std::unique_ptr<rbp::MaxRectsBinPack>> mBinPacker;
+        std::vector<std::unique_ptr<rbp::SkylineBinPack>> mBinPacker;
     };
 }

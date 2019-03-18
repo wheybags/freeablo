@@ -23,7 +23,7 @@
 // clang-format off
 #include <misc/disablewarn.h>
 #include "../../extern/jo_gif/jo_gif.cpp"
-#include "../../extern/RectangleBinPack/MaxRectsBinPack.h"
+#include "../../extern/RectangleBinPack/SkylineBinPack.h"
 #include <misc/enablewarn.h>
 // clang-format on
 

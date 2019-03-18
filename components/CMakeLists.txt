@@ -73,10 +73,10 @@ set(RenderFiles
     render/misc.h
     render/atlastexture.cpp
     render/atlastexture.h
-    ../extern/RectangleBinPack/MaxRectsBinPack.cpp
-    ../extern/RectangleBinPack/MaxRectsBinPack.h
     ../extern/RectangleBinPack/Rect.cpp
     ../extern/RectangleBinPack/Rect.h
+    ../extern/RectangleBinPack/SkylineBinPack.cpp
+    ../extern/RectangleBinPack/SkylineBinPack.h
 )
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2::SDL2 SDL_image::SDL_image ${OPENGL_LIBRARIES})
