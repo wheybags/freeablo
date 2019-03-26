@@ -188,7 +188,14 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
         {-1.0f, 1.0f, 0.0f, 1.0f},
     };
     SDL_GetWindowSize(win, &width, &height);
-    SDL_GL_GetDrawableSize(win, &display_width, &display_height);
+
+    // Note: if SDL_GL_GetDrawableSize() is used SDL_WINDOW_ALLOW_HIGHDPI option must
+    // also be enabled. However this seems to cause an issue where black lines appear
+    // between each tile on high-DPI displays so is currently disabled.
+    // SDL_GL_GetDrawableSize(win, &display_width, &display_height);
+    display_width = width;
+    display_height = height;
+
     ortho[0][0] /= (GLfloat)width;
     ortho[1][1] /= (GLfloat)height;
 
