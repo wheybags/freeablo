@@ -33,7 +33,7 @@ namespace FAWorld
         Misc::Direction getDirection() const { return mDirection; }
         void setDirection(Misc::Direction mDirection);
 
-        bool isMoving() const { return mMovementType != MovementType::stopped; }
+        bool isMoving() const { return mMovementType != MovementType::Stopped; }
         Misc::Point getFractionalPos() const { return mFractionalPos; }
 
         int32_t getSpeed() const { return mSpeed; }
@@ -46,13 +46,12 @@ namespace FAWorld
     private:
         enum class MovementType
         {
-            stopped,
-            // Chebyshev movement with a destination tile.
+            Stopped,
+            // GridLocked (Chebyshev) movement with a destination tile.
             // Movement to any neighboring tile takes the same time.
-            towardPointChebyshev,
-            // Euclidean movement in any direction.
-            // Normal/Pythagorean directional movement.
-            inDirectionEuclidean
+            GridLocked,
+            // Free (Euclidean) movement in any direction.
+            FreeMovement
         };
 
         Misc::Point mCurrent;
@@ -60,6 +59,6 @@ namespace FAWorld
         Misc::Direction mDirection = Misc::Direction(Misc::Direction8::south);
         Misc::Point mDest = {0, 0};
         int32_t mSpeed = 250;
-        MovementType mMovementType = MovementType::stopped;
+        MovementType mMovementType = MovementType::Stopped;
     };
 }

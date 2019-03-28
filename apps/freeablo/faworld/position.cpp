@@ -34,37 +34,36 @@ namespace FAWorld
         if (isMoving() && !mDirection.isNone())
         {
             auto vectorDist = FAWorld::World::getSecondsPerTick() * mSpeed;
-            int32_t disX = 0, disY = 0;
+            Misc::Point fractionalMovement;
 
-            if (mMovementType == MovementType::towardPointChebyshev)
+            if (mMovementType == MovementType::GridLocked)
             {
-                // Chebyshev movement: movement to any neighboring tile takes the same time.
+                // GridLocked (Chebyshev) movement: movement to any neighboring tile takes the same time.
                 auto distToPoint = (mDest - mCurrent) * 100 - mFractionalPos;
 
                 // Move x and/or y by +- vectorDist.
                 if (distToPoint.x != 0)
-                    disX = vectorDist.round() * ((distToPoint.x > 0) ? 1 : -1);
+                    fractionalMovement.x = vectorDist.round() * ((distToPoint.x > 0) ? 1 : -1);
                 if (distToPoint.y != 0)
-                    disY = vectorDist.round() * ((distToPoint.y > 0) ? 1 : -1);
+                    fractionalMovement.y = vectorDist.round() * ((distToPoint.y > 0) ? 1 : -1);
 
                 // Don't move past the destination point.
-                if (std::abs(disX) > std::abs(distToPoint.x))
-                    disX = distToPoint.x;
-                if (std::abs(disY) > std::abs(distToPoint.y))
-                    disY = distToPoint.y;
+                if (std::abs(fractionalMovement.x) > std::abs(distToPoint.x))
+                    fractionalMovement.x = distToPoint.x;
+                if (std::abs(fractionalMovement.y) > std::abs(distToPoint.y))
+                    fractionalMovement.y = distToPoint.y;
             }
             else
             {
-                // Euclidean/Pythagorean movement, requires trigonometry calculation.
+                // Free (Euclidean) movement, requires trigonometry calculation.
                 auto isometricDegrees = mDirection.getIsometricDegrees();
-                disX = (FixedPoint::cos_degrees(isometricDegrees) * vectorDist).round();
-                disY = (FixedPoint::sin_degrees(isometricDegrees) * vectorDist).round();
+                fractionalMovement.x = (FixedPoint::cos_degrees(isometricDegrees) * vectorDist).round();
+                fractionalMovement.y = (FixedPoint::sin_degrees(isometricDegrees) * vectorDist).round();
             }
 
-            mFractionalPos.x += disX;
-            mFractionalPos.y += disY;
+            mFractionalPos += fractionalMovement;
 
-            mCurrent = mCurrent + mFractionalPos / 100;
+            mCurrent += mFractionalPos / 100;
             mFractionalPos.x %= 100;
             mFractionalPos.y %= 100;
 
@@ -72,7 +71,7 @@ namespace FAWorld
             // you're technically in the next position.
 
             // Stop at destination.
-            if (mMovementType == MovementType::towardPointChebyshev && mCurrent == mDest && mFractionalPos == Misc::Point(0, 0))
+            if (mMovementType == MovementType::GridLocked && mCurrent == mDest && mFractionalPos == Misc::Point(0, 0))
                 stopMoving();
         }
     }
@@ -94,13 +93,13 @@ namespace FAWorld
         return Misc::getNextPosByDir(mCurrent, mDirection);
     }
 
-    void Position::stopMoving() { mMovementType = MovementType::stopped; }
+    void Position::stopMoving() { mMovementType = MovementType::Stopped; }
 
     void Position::moveToPoint(const Misc::Point& dest)
     {
         mDest = dest;
-        mMovementType = MovementType::towardPointChebyshev;
+        mMovementType = MovementType::GridLocked;
     }
 
-    void Position::moveInDirection() { mMovementType = MovementType::inDirectionEuclidean; }
+    void Position::moveInDirection() { mMovementType = MovementType::FreeMovement; }
 }
