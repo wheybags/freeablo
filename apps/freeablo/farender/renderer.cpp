@@ -181,7 +181,7 @@ namespace FARender
 
     Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getTileByScreenPos(x, y, screenPos.current().x, screenPos.current().y, screenPos.getFractionalPos().x, screenPos.getFractionalPos().y);
+        return Render::getTileByScreenPos(x, y, screenPos.current(), screenPos.getFractionalPos());
     }
 
     void Renderer::waitUntilDone()
@@ -214,9 +214,7 @@ namespace FARender
             Render::LevelObject obj;
             obj.spriteCacheIndex = object.spriteGroup->getCacheIndex();
             obj.spriteFrame = object.frame;
-            auto fp = position.getFractionalPos();
-            obj.fractionalPosX = fp.x;
-            obj.fractionalPosY = fp.y;
+            obj.fractionalPos = position.getFractionalPos();
             obj.hoverColor = object.hoverColor;
             obj.valid = true;
 
@@ -263,10 +261,8 @@ namespace FARender
                                   &mSpriteManager,
                                   mLevelObjects,
                                   mItems,
-                                  state->mPos.current().x,
-                                  state->mPos.current().y,
-                                  state->mPos.getFractionalPos().x,
-                                  state->mPos.getFractionalPos().y);
+                                  state->mPos.current(),
+                                  state->mPos.getFractionalPos());
             }
 
             Render::drawGui(state->nuklearData, &mSpriteManager);

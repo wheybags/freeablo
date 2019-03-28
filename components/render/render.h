@@ -57,6 +57,7 @@ namespace Render
         Misc::Point pos;
         TileHalf half;
         Tile(int32_t xArg, int32_t yArg, TileHalf halfArg = TileHalf::left) : pos(xArg, yArg), half(halfArg) {}
+        Tile(Misc::Point pos, TileHalf halfArg = TileHalf::left) : pos(pos), half(halfArg) {}
     };
     /**
      * @brief Render settings for initialization.
@@ -125,12 +126,10 @@ namespace Render
                    SpriteCacheBase* cache,
                    LevelObjects& objs,
                    LevelObjects& items,
-                   int32_t x1,
-                   int32_t y1,
-                   int32_t fractionalPosX,
-                   int32_t fractionalPosY);
+                   const Misc::Point& pos,
+                   const Misc::Point& fractionalPos);
 
-    Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t fractionalPosX, int32_t fractionalPosY);
+    Tile getTileByScreenPos(size_t x, size_t y, const Misc::Point& pos, const Misc::Point& fractionalPos);
 
     void clear(int r = 0, int g = 0, int b = 255);
 }

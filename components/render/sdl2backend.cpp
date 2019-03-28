@@ -1098,14 +1098,13 @@ namespace Render
 
     static void drawMovingSprite(const Sprite& sprite,
                                  const Tile& pos,
-                                 int32_t fractionalPosX,
-                                 int32_t fractionalPosY,
+                                 const Misc::Point& fractionalPos,
                                  const Misc::Point& toScreen,
                                  boost::optional<Cel::Colour> highlightColor = boost::none)
     {
         int32_t w, h;
         spriteSize(sprite, w, h);
-        auto point = tileTopPoint(pos) + tileTopPoint({fractionalPosX, fractionalPosY}) / 100;
+        auto point = tileTopPoint(pos) + tileTopPoint(fractionalPos) / 100;
         auto res = point + toScreen;
         drawAtTile(sprite, res, w, h, highlightColor);
     }
@@ -1118,9 +1117,9 @@ namespace Render
         return Misc::Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - point;
     }
 
-    Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t fractionalPosX, int32_t fractionalPosY)
+    Tile getTileByScreenPos(size_t x, size_t y, const Misc::Point& pos, const Misc::Point& fractionalPos)
     {
-        auto toScreen = worldToScreenVector({x1, y1}, {fractionalPosX, fractionalPosY});
+        auto toScreen = worldToScreenVector(pos, fractionalPos);
         return getTileFromScreenCoords({static_cast<int32_t>(x), static_cast<int32_t>(y)}, toScreen);
     }
 
@@ -1167,12 +1166,10 @@ namespace Render
                    SpriteCacheBase* cache,
                    LevelObjects& objs,
                    LevelObjects& items,
-                   int32_t x1,
-                   int32_t y1,
-                   int32_t fractionalPosX,
-                   int32_t fractionalPosY)
+                   const Misc::Point& pos,
+                   const Misc::Point& fractionalPos)
     {
-        auto toScreen = worldToScreenVector({x1, y1}, {fractionalPosX, fractionalPosY});
+        auto toScreen = worldToScreenVector(pos, fractionalPos);
         SpriteGroup* minBottoms = cache->get(minBottomsHandle);
         auto isInvalidTile = [&](const Tile& tile) {
             return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
@@ -1231,7 +1228,7 @@ namespace Render
                 if (obj.valid)
                 {
                     auto sprite = cache->get(obj.spriteCacheIndex);
-                    drawMovingSprite((*sprite)[obj.spriteFrame], tile, obj.fractionalPosX, obj.fractionalPosY, toScreen, obj.hoverColor);
+                    drawMovingSprite((*sprite)[obj.spriteFrame], tile, obj.fractionalPos, toScreen, obj.hoverColor);
                 }
             }
         });
