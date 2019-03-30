@@ -112,7 +112,7 @@ namespace FAWorld
         Actor* blocking = nullptr;
         if (mActorMap2D.count(actor->getPos().current()))
             blocking = mActorMap2D[actor->getPos().current()];
-        debug_assert(blocking == actor || blocking == nullptr);
+        debug_assert(blocking == actor || blocking == nullptr || blocking->isDead());
 
         mActorMap2D[actor->getPos().current()] = actor;
 
@@ -120,7 +120,7 @@ namespace FAWorld
         {
             if (mActorMap2D.count(actor->getPos().next()))
                 blocking = mActorMap2D[actor->getPos().next()];
-            debug_assert(blocking == actor || blocking == nullptr);
+            debug_assert(blocking == actor || blocking == nullptr || blocking->isDead());
 
             mActorMap2D[actor->getPos().next()] = actor;
         }

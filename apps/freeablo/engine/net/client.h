@@ -14,7 +14,7 @@ namespace Engine
     class Client : public MultiplayerInterface
     {
     public:
-        Client(LocalInputHandler& localInputHandler);
+        Client(LocalInputHandler& localInputHandler, const std::string& serverAddress);
         virtual ~Client() override;
 
         virtual boost::optional<std::vector<FAWorld::PlayerInput>> getAndClearInputs(FAWorld::Tick tick) override;
@@ -23,6 +23,9 @@ namespace Engine
         virtual bool isServer() const override { return false; }
         virtual bool isMultiplayer() const override { return true; }
         virtual void registerNewPlayer(FAWorld::Player*, uint32_t) override {}
+
+        bool isConnected() { return mConnected; }
+        bool didConnectionFail() { return mConnectionFailed; }
 
     private:
         void processServerPacket(const ENetEvent& event);
@@ -44,6 +47,9 @@ namespace Engine
         ENetHost* mHost = nullptr;
         ENetPeer* mServerPeer = nullptr;
         ENetAddress mAddress;
+
+        bool mConnected = false;
+        bool mConnectionFailed = false;
 
         static constexpr size_t MAX_CLIENT_UPDATE_PACKET_SIZE = 500;
     };

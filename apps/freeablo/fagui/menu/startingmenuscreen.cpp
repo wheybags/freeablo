@@ -4,6 +4,7 @@
 #include "../../faworld/world.h"
 #include "../menuhandler.h"
 #include "../nkhelpers.h"
+#include "multiplayermenu.h"
 #include "selectheromenuscreen.h"
 
 namespace FAGui
@@ -42,7 +43,10 @@ namespace FAGui
                                   mMenuHandler.setActiveScreen<SelectHeroMenuScreen>();
                                   return ActionResult::stopDrawing;
                               }});
-        mMenuItems.push_back({drawItem("Multi Player", {65, 235, 510, 42}), []() { return ActionResult::continueDrawing; }});
+        mMenuItems.push_back({drawItem("Multi Player", {65, 235, 510, 42}), [this]() {
+                                  mMenuHandler.setActiveScreen<MultiplayerMenu>();
+                                  return ActionResult::stopDrawing;
+                              }});
         mMenuItems.push_back({drawItem("Replay Intro", {65, 277, 510, 42}), []() { return ActionResult::continueDrawing; }});
         mMenuItems.push_back({drawItem("Show Credits", {65, 320, 510, 42}), []() { return ActionResult::continueDrawing; }});
         mRejectAction = [this]() {
