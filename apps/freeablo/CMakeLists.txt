@@ -102,6 +102,10 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fagui/menu/selectheromenuscreen.h
     fagui/menu/startingmenuscreen.cpp
     fagui/menu/startingmenuscreen.h
+    fagui/menu/multiplayermenu.cpp
+    fagui/menu/multiplayermenu.h
+    fagui/menu/multiplayerconnecting.cpp
+    fagui/menu/multiplayerconnecting.h
     fagui/mouseandclickmenu.cpp
     fagui/mouseandclickmenu.h
     fagui/characterdialoguepopup.cpp

@@ -62,7 +62,7 @@ namespace Engine
         bool mMouseDown = false;
         bool mClick = false;
         Input::KeyboardModifiers mKbMods;
-        FAGui::GuiManager* mGuiManager;
+        FAGui::GuiManager* mGuiManager = nullptr;
         bool mPaused;
         std::map<KeyboardInputAction, Input::Hotkey> mHotkeys;
         std::vector<KeyboardInputObserverInterface*> mKeyboardObservers;

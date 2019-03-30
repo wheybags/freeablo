@@ -117,6 +117,8 @@ namespace FAGui
         void nk_fa_begin_image_window(
             nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, struct nk_image background, std::function<void()> action, bool isModal);
 
+        void connectingScreen();
+
     private:
         void dialog(nk_context* ctx);
         void updateAnimations();

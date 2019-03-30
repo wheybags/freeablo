@@ -5,6 +5,7 @@
 #include "engineinputmanager.h"
 #include <boost/program_options.hpp>
 #include <memory>
+#include <settings/settings.h>
 
 namespace Level
 {
@@ -40,6 +41,7 @@ namespace Engine
         void setupNewPlayer(FAWorld::Player* player);
         // TODO: replace with enums
         void startGame(const std::string& characterClass);
+        void startMultiplayerGame(std::string serverAddress);
         const DiabloExe::DiabloExe& exe() const;
         bool isPaused() const;
 
@@ -65,5 +67,6 @@ namespace Engine
         bool mPaused = false;
         bool mNoclip = false;
         bool mInGame = false;
+        Settings::Settings mSettings;
     };
 }

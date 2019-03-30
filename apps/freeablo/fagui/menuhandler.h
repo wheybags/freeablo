@@ -42,7 +42,6 @@ namespace FAGui
     public:
         static const int menuWidth = 640;
         static const int menuHeight = 480;
-        std::unique_ptr<MenuScreen> mActiveScreen;
         template <typename ScreenType> void setActiveScreen() { mActiveScreen.reset(new ScreenType(*this)); }
 
     public:
@@ -55,6 +54,7 @@ namespace FAGui
         void notify(Engine::KeyboardInputAction action);
 
     private:
+        std::unique_ptr<MenuScreen> mActiveScreen;
         Engine::EngineMain& mEngine;
     };
 }

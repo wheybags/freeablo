@@ -11,6 +11,7 @@
 #include "boost/range/counting_range.hpp"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
+#include "menu/multiplayerconnecting.h"
 #include "menu/pausemenuscreen.h"
 #include "menu/startingmenuscreen.h"
 #include "menuhandler.h"
@@ -562,6 +563,8 @@ namespace FAGui
 
     void GuiManager::startingScreen() { mMenuHandler->setActiveScreen<StartingMenuScreen>(); }
 
+    void GuiManager::connectingScreen() { mMenuHandler->setActiveScreen<MultiplayerConnecting>(); }
+
     void GuiManager::smallText(nk_context* ctx, const char* text, TextColor color, nk_flags alignment)
     {
         FARender::Renderer* renderer = FARender::Renderer::get();
@@ -689,9 +692,15 @@ namespace FAGui
 
     bool GuiManager::hotkeysEnabled() const
     {
+        if (!mEngine.mInGame)
+            return false;
+
         // Can't use hotkeys when dialogs are open.
         // TODO: mGoldSplitTarget might be better as a standard dialog if possible?
-        return (!mGoldSplitTarget && !mDialogManager.hasDialog());
+        if (mGoldSplitTarget || mDialogManager.hasDialog())
+            return false;
+
+        return true;
     }
 
     void GuiManager::notify(Engine::KeyboardInputAction action)

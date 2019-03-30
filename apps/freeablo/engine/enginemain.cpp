@@ -41,14 +41,13 @@ namespace Engine
 
     void EngineMain::run(const bpo::variables_map& variables)
     {
-        Settings::Settings settings;
-        if (!settings.loadUserSettings())
+        if (!mSettings.loadUserSettings())
             return;
 
-        size_t resolutionWidth = settings.get<size_t>("Display", "resolutionWidth");
-        size_t resolutionHeight = settings.get<size_t>("Display", "resolutionHeight");
-        const bool fullscreen = settings.get<bool>("Display", "fullscreen");
-        std::string pathEXE = settings.get<std::string>("Game", "PathEXE");
+        size_t resolutionWidth = mSettings.get<size_t>("Display", "resolutionWidth");
+        size_t resolutionHeight = mSettings.get<size_t>("Display", "resolutionHeight");
+        const bool fullscreen = mSettings.get<bool>("Display", "fullscreen");
+        std::string pathEXE = mSettings.get<std::string>("Game", "PathEXE");
         if (pathEXE == "")
         {
             pathEXE = "Diablo.exe";
@@ -68,10 +67,6 @@ namespace Engine
     {
         FARender::Renderer& renderer = *FARender::Renderer::get();
 
-        Settings::Settings settings;
-        if (!settings.loadUserSettings())
-            return;
-
         std::string characterClass = variables["character"].as<std::string>();
 
         mExe = boost::make_unique<DiabloExe::DiabloExe>(pathEXE);
@@ -89,7 +84,11 @@ namespace Engine
         int32_t currentLevel = -1;
         mWorld.reset(new FAWorld::World(*mExe, uint32_t(time(nullptr))));
 
-        if (!variables["client"].as<bool>())
+        mLocalInputHandler.reset(new LocalInputHandler(*mWorld));
+        mInputManager->registerMouseObserver(mLocalInputHandler.get());
+        mInputManager->registerKeyboardObserver(mLocalInputHandler.get());
+
+        if (variables["connect"].as<std::string>().empty())
         {
             FILE* f = fopen("save.sav", "rb");
             if (f)
@@ -110,26 +109,37 @@ namespace Engine
                 mWorld->setFirstPlayerAsCurrent();
 
                 mInGame = true;
+                mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
             }
             else
             {
                 currentLevel = variables["level"].as<int32_t>();
 
-                mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
-
                 if (currentLevel != -1)
                 {
+                    mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
+
                     mInGame = true;
+                    mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
+
                     player = mPlayerFactory->create(*mWorld, characterClass);
                     if (variables["invuln"].as<std::string>() == "on")
                         player->mInvuln = true;
                 }
             }
         }
+        else
+        {
+            mMultiplayer.reset(new Client(*mLocalInputHandler.get(), variables["connect"].as<std::string>()));
+        }
 
         mGuiManager.reset(new FAGui::GuiManager(*this));
         mInputManager->registerKeyboardObserver(mGuiManager.get());
         mInputManager->setGuiManager(mGuiManager.get());
+
+        if (mMultiplayer && !mMultiplayer->isServer())
+            mGuiManager->connectingScreen();
+
         if (player)
             setupNewPlayer(player);
 
@@ -137,21 +147,6 @@ namespace Engine
             mWorld->setLevel(currentLevel);
 
         boost::asio::io_service io;
-
-        mLocalInputHandler.reset(new LocalInputHandler(*mWorld));
-        mInputManager->registerMouseObserver(mLocalInputHandler.get());
-        mInputManager->registerKeyboardObserver(mLocalInputHandler.get());
-
-        if (variables["client"].as<bool>())
-        {
-            mMultiplayer.reset(new Client(*mLocalInputHandler.get()));
-            mInGame = false;
-        }
-        else
-        {
-            mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
-        }
-
         int32_t lastLevelIndex = -1;
 
         // Main game logic loop
@@ -161,9 +156,11 @@ namespace Engine
 
             mInputManager->update(mPaused);
             mLocalInputHandler->update();
-            mMultiplayer->update();
 
-            if ((!mPaused || mMultiplayer->isMultiplayer()) && mInGame)
+            if (mMultiplayer)
+                mMultiplayer->update();
+
+            if (mInGame && (!mPaused || mMultiplayer->isMultiplayer()))
             {
                 boost::optional<std::vector<FAWorld::PlayerInput>> inputs;
 
@@ -189,7 +186,7 @@ namespace Engine
             nk_context* ctx = renderer.getNuklearContext();
             mGuiManager->update(mInGame, mPaused, ctx, mLocalInputHandler->getHoverStatus());
 
-            if (mMultiplayer->isMultiplayer())
+            if (mMultiplayer && mMultiplayer->isMultiplayer())
                 mMultiplayer->doMultiplayerGui(ctx);
 
             FARender::RenderState* state = renderer.getFreeState();
@@ -280,13 +277,19 @@ namespace Engine
 
     void EngineMain::startGame(const std::string& characterClass)
     {
+        mWorld->generateLevels();
+
         mInGame = true;
+        mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
 
         // TODO: fix that variables like invuln are not applied in this case
         auto player = mPlayerFactory->create(*mWorld, characterClass);
         setupNewPlayer(player);
+
         mWorld->setLevel(0);
     }
+
+    void EngineMain::startMultiplayerGame(std::string serverAddress) { mMultiplayer.reset(new Client(*mLocalInputHandler.get(), serverAddress)); }
 
     const DiabloExe::DiabloExe& EngineMain::exe() const { return *mExe; }
 
