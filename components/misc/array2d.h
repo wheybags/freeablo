@@ -72,6 +72,7 @@ namespace Misc
         }
 
         T* data() { return mData.data(); }
+        std::vector<T>& getFlatVector() { return mData; }
 
     private:
         std::vector<T> mData;

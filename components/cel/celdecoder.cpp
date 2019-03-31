@@ -635,17 +635,25 @@ namespace Cel
     // Type6 is the only type for CL2 images.
     void CelDecoder::decodeFrameType6(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        auto frameIterator = decodedFrame.begin();
+        int32_t frameIndex = 0;
 
         int32_t len = frame.size();
         for (int32_t pos = 0; pos < len;)
         {
-            int chunkSize = int(int8_t(frame[pos]));
+            // Some broken cl2s (afaik only firema.cl2) seem to have some rubbish tacked on the end of their frames
+            if (frameIndex == decodedFrame.width() * decodedFrame.height())
+                return;
+
+            int32_t chunkSize = int32_t(int8_t(frame[pos]));
             pos++;
             if (chunkSize >= 0)
             {
                 // Transparent pixels.
-                frameIterator = std::fill_n(frameIterator, chunkSize, Cel::Colour{0, 0, 0, false});
+                for (int32_t i = 0; i < chunkSize; i++)
+                {
+                    debug_assert(decodedFrame.getFlatVector().size() > size_t(frameIndex));
+                    decodedFrame.getFlatVector()[frameIndex++] = Cel::Colour{0, 0, 0, false};
+                }
             }
             else
             {
@@ -653,15 +661,25 @@ namespace Cel
                 if (chunkSize <= 65)
                 {
                     // Regular pixels.
-                    frameIterator = std::transform(frame.begin() + pos, frame.begin() + pos + chunkSize, frameIterator, DecodePal{pal});
+                    for (int32_t i = pos; i < pos + chunkSize; i++)
+                    {
+                        debug_assert(decodedFrame.getFlatVector().size() > size_t(frameIndex));
+                        decodedFrame.getFlatVector()[frameIndex++] = pal[frame[i]];
+                    }
+
                     pos += chunkSize;
                 }
                 else
                 {
                     chunkSize -= 65;
-                    // Run-length encoded pixels.
                     Colour c = pal[frame[pos]];
-                    frameIterator = std::fill_n(frameIterator, chunkSize, c);
+
+                    // Run-length encoded pixels.
+                    for (int32_t i = 0; i < chunkSize; i++)
+                    {
+                        debug_assert(decodedFrame.getFlatVector().size() > size_t(frameIndex));
+                        decodedFrame.getFlatVector()[frameIndex++] = c;
+                    }
                     pos++;
                 }
             }
