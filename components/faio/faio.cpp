@@ -3,6 +3,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <iostream>
+#include <misc/assert.h>
+#include <misc/stringops.h>
 #include <mutex>
 
 namespace bfs = boost::filesystem;
@@ -101,6 +103,15 @@ namespace FAIO
 
     FAFile* FAfopen(const std::string& filename)
     {
+        if (Misc::StringUtils::endsWith(filename, "banner2.dun") || Misc::StringUtils::endsWith(filename, "dmagew.cl2") ||
+            Misc::StringUtils::endsWith(filename, "unravw.cel"))
+        {
+            message_and_abort_fmt("Attempt to open broken file %s. This file is invalid in the original game MPQs, and "
+                                  "needs to be patched to be used, which we haven't implemented yet. See "
+                                  "https://github.com/mewrnd/blizzconv/blob/master/cmd/mpqfix/mpqfix.go for more information",
+                                  filename.c_str());
+        }
+
         bfs::path path(filename);
         path.make_preferred();
 
