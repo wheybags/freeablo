@@ -251,8 +251,7 @@ namespace Cel
         }
 
         celFrame = CelFrame(mFrameWidth, mFrameHeight);
-        auto it = celFrame.begin();
-        decoder(*this, frame, mPal, it);
+        decoder(*this, frame, mPal, celFrame);
         // assert (it == celFrame.mRawImage.end ());
     }
 
@@ -366,9 +365,9 @@ namespace Cel
     //
     // Type0 corresponds to a plain 32x32 images, with no transparency.
     //
-    void CelDecoder::decodeFrameType0(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame)
+    void CelDecoder::decodeFrameType0(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        std::transform(frame.begin(), frame.end(), decodedFrame, DecodePal{pal});
+        std::transform(frame.begin(), frame.end(), decodedFrame.begin(), DecodePal{pal});
     }
 
     // DecodeFrameType1 returns an image after decoding the frame in the following
@@ -384,8 +383,10 @@ namespace Cel
     //
     // Type1 corresponds to a regular CEL frame image of the specified dimensions.
     //
-    void CelDecoder::decodeFrameType1(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame)
+    void CelDecoder::decodeFrameType1(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
+        auto frameIterator = decodedFrame.begin();
+
         int32_t len = frame.size();
         for (int32_t pos = 0; pos < len;)
         {
@@ -394,12 +395,12 @@ namespace Cel
             if (chunkSize < 0)
             {
                 // Transparent pixels.
-                decodedFrame = std::fill_n(decodedFrame, -chunkSize, Cel::Colour{0, 0, 0, false});
+                frameIterator = std::fill_n(frameIterator, -chunkSize, Cel::Colour{0, 0, 0, false});
             }
             else
             {
                 // Regular pixels.
-                decodedFrame = std::transform(frame.begin() + pos, frame.begin() + pos + chunkSize, decodedFrame, DecodePal{pal});
+                frameIterator = std::transform(frame.begin() + pos, frame.begin() + pos + chunkSize, frameIterator, DecodePal{pal});
                 pos += chunkSize;
             }
         }
@@ -455,10 +456,7 @@ namespace Cel
     //
     // Type2 corresponds to a 32x32 images of a left facing triangle.
     //
-    void CelDecoder::decodeFrameType2(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame)
-    {
-        decodeFrameType2or3(frame, pal, decodedFrame, true);
-    }
+    void CelDecoder::decodeFrameType2(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame) { decodeFrameType2or3(frame, pal, decodedFrame, true); }
 
     // DecodeFrameType3 returns an image after decoding the frame in the following
     // way:
@@ -510,10 +508,7 @@ namespace Cel
     //    +--------------------------------+
     //
     // Type3 corresponds to a 32x32 images of a right facing triangle.
-    void CelDecoder::decodeFrameType3(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame)
-    {
-        decodeFrameType2or3(frame, pal, decodedFrame, false);
-    }
+    void CelDecoder::decodeFrameType3(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame) { decodeFrameType2or3(frame, pal, decodedFrame, false); }
 
     // DecodeFrameType4 returns an image after decoding the frame in the following
     // way:
@@ -565,10 +560,7 @@ namespace Cel
     //    +--------------------------------+
     //
     // Type4 corresponds to a 32x32 images of a left facing trapezoid.
-    void CelDecoder::decodeFrameType4(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame)
-    {
-        decodeFrameType4or5(frame, pal, decodedFrame, true);
-    }
+    void CelDecoder::decodeFrameType4(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame) { decodeFrameType4or5(frame, pal, decodedFrame, true); }
 
     // DecodeFrameType5 returns an image after decoding the frame in the following
     // way:
@@ -620,10 +612,7 @@ namespace Cel
     //    +--------------------------------+
     //
     // Type5 corresponds to a 32x32 images of a right facing trapezoid.
-    void CelDecoder::decodeFrameType5(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame)
-    {
-        decodeFrameType4or5(frame, pal, decodedFrame, false);
-    }
+    void CelDecoder::decodeFrameType5(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame) { decodeFrameType4or5(frame, pal, decodedFrame, false); }
 
     // DecodeFrameType6 returns an image after decoding the frame in the following
     // way:
@@ -644,8 +633,10 @@ namespace Cel
     //    4) goto 1 until EOF is reached.
     //
     // Type6 is the only type for CL2 images.
-    void CelDecoder::decodeFrameType6(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame)
+    void CelDecoder::decodeFrameType6(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
+        auto frameIterator = decodedFrame.begin();
+
         int32_t len = frame.size();
         for (int32_t pos = 0; pos < len;)
         {
@@ -654,7 +645,7 @@ namespace Cel
             if (chunkSize >= 0)
             {
                 // Transparent pixels.
-                decodedFrame = std::fill_n(decodedFrame, chunkSize, Cel::Colour{0, 0, 0, false});
+                frameIterator = std::fill_n(frameIterator, chunkSize, Cel::Colour{0, 0, 0, false});
             }
             else
             {
@@ -662,7 +653,7 @@ namespace Cel
                 if (chunkSize <= 65)
                 {
                     // Regular pixels.
-                    decodedFrame = std::transform(frame.begin() + pos, frame.begin() + pos + chunkSize, decodedFrame, DecodePal{pal});
+                    frameIterator = std::transform(frame.begin() + pos, frame.begin() + pos + chunkSize, frameIterator, DecodePal{pal});
                     pos += chunkSize;
                 }
                 else
@@ -670,15 +661,17 @@ namespace Cel
                     chunkSize -= 65;
                     // Run-length encoded pixels.
                     Colour c = pal[frame[pos]];
-                    decodedFrame = std::fill_n(decodedFrame, chunkSize, c);
+                    frameIterator = std::fill_n(frameIterator, chunkSize, c);
                     pos++;
                 }
             }
         }
     }
 
-    void CelDecoder::decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame, bool frameType2)
+    void CelDecoder::decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType2)
     {
+        auto frameIterator = decodedFrame.begin();
+
         // Select line decoding function
 
         auto decodeLineTransparency = &CelDecoder::decodeLineTransparencyRight;
@@ -722,12 +715,14 @@ namespace Cel
                 regularCount = 32 - ((row - 16) * 2);
             }
 
-            (this->*decodeLineTransparency)(&framePtr, pal, decodedFrame, regularCount);
+            (this->*decodeLineTransparency)(&framePtr, pal, frameIterator, regularCount);
         }
     }
 
-    void CelDecoder::decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame, bool frameType4)
+    void CelDecoder::decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType4)
     {
+        auto frameIterator = decodedFrame.begin();
+
         // Select line decoding function
 
         auto decodeLineTransparency = &CelDecoder::decodeLineTransparencyRight;
@@ -760,12 +755,12 @@ namespace Cel
 
             int regularCount = 2 + (row * 2);
 
-            (this->*decodeLineTransparency)(&framePtr, pal, decodedFrame, regularCount);
+            (this->*decodeLineTransparency)(&framePtr, pal, frameIterator, regularCount);
         }
 
         if (frame.size() > 256)
         {
-            decodedFrame = std::transform(frame.begin() + 256, frame.end(), decodedFrame, DecodePal{pal});
+            frameIterator = std::transform(frame.begin() + 256, frame.end(), frameIterator, DecodePal{pal});
         }
     }
 
