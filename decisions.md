@@ -8,7 +8,14 @@ decisions you make over the course of the project's lifetime.
 When adding entries here, please place them at the top of the list, preferably
 with the title of the entry being the output from `date`.
 
-## Mon Apr 30 08:41:55 CEST 2018^M
+## Thu 11 Apr 2019 09:25:16 AM CEST
+- Decided to switch to adding entries to the changelog as we go, instead of trying
+to look back at the github issue/git log to create one when preparing a release.
+- Related, but I also decided not to bother adding github issue numbers to the
+changelog anymore. If we add the changelog entry in the same PR, it should be
+easy to use git blame to find it anyway.
+
+## Mon Apr 30 08:41:55 CEST 2018
 - Decided not to use floating point calculation in the game simulation in order to
   preserve determinism. It is possible achieve this while still using floats, but
   in my opinion it is easier and safer to just avoid it and use integer and fixed
