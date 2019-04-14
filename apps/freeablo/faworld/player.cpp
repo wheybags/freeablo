@@ -33,6 +33,8 @@ namespace FAWorld
                 return "rogue";
             case PlayerClass::sorcerer:
                 return "sorceror";
+            case PlayerClass::none:
+                break;
         }
         return "unknown";
     }
@@ -167,6 +169,8 @@ namespace FAWorld
                 return 'r';
             case PlayerClass::sorcerer:
                 return 's';
+            case PlayerClass::none:
+                break;
         }
 
         invalid_enum(PlayerClass, playerClass);
@@ -405,6 +409,8 @@ namespace FAWorld
                 mStats.mHp.max += 1;
                 mStats.mMana.max += 2;
                 break;
+            case PlayerClass::none:
+                invalid_enum(PlayerClass, mPlayerClass);
         }
 
         // Restore HP/Mana.

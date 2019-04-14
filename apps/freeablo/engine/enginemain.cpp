@@ -90,42 +90,17 @@ namespace Engine
 
         if (variables["connect"].as<std::string>().empty())
         {
-            FILE* f = fopen("save.sav", "rb");
-            if (f)
+            currentLevel = variables["level"].as<int32_t>();
+            if (currentLevel != -1)
             {
-                fseek(f, 0, SEEK_END);
-                size_t size = ftell(f);
-                fseek(f, 0, SEEK_SET);
-
-                std::string tmp;
-                tmp.resize(size);
-
-                fread((void*)tmp.data(), 1, size, f);
-
-                Serial::TextReadStream stream(tmp);
-                FASaveGame::GameLoader loader(stream);
-
-                mWorld->load(loader);
-                mWorld->setFirstPlayerAsCurrent();
+                mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
 
                 mInGame = true;
                 mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
-            }
-            else
-            {
-                currentLevel = variables["level"].as<int32_t>();
 
-                if (currentLevel != -1)
-                {
-                    mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
-
-                    mInGame = true;
-                    mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
-
-                    player = mPlayerFactory->create(*mWorld, characterClass);
-                    if (variables["invuln"].as<std::string>() == "on")
-                        player->mInvuln = true;
-                }
+                player = mPlayerFactory->create(*mWorld, characterClass);
+                if (variables["invuln"].as<std::string>() == "on")
+                    player->mInvuln = true;
             }
         }
         else
@@ -287,6 +262,31 @@ namespace Engine
         setupNewPlayer(player);
 
         mWorld->setLevel(0);
+    }
+
+    void EngineMain::startGameFromSave(const std::string& savePath)
+    {
+        FILE* saveFile = fopen(savePath.c_str(), "rb");
+        release_assert(saveFile);
+
+        fseek(saveFile, 0, SEEK_END);
+        size_t size = ftell(saveFile);
+        fseek(saveFile, 0, SEEK_SET);
+
+        std::string tmp;
+        tmp.resize(size);
+
+        fread((void*)tmp.data(), 1, size, saveFile);
+        fclose(saveFile);
+
+        Serial::TextReadStream stream(tmp);
+        FASaveGame::GameLoader loader(stream);
+
+        mWorld->load(loader);
+        mWorld->setFirstPlayerAsCurrent();
+
+        mInGame = true;
+        mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
     }
 
     void EngineMain::startMultiplayerGame(std::string serverAddress) { mMultiplayer.reset(new Client(*mLocalInputHandler.get(), serverAddress)); }
