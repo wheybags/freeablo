@@ -41,6 +41,7 @@ namespace Engine
         void setupNewPlayer(FAWorld::Player* player);
         // TODO: replace with enums
         void startGame(const std::string& characterClass);
+        void startGameFromSave(const std::string& savePath);
         void startMultiplayerGame(std::string serverAddress);
         const DiabloExe::DiabloExe& exe() const;
         bool isPaused() const;
