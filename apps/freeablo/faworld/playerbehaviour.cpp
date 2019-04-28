@@ -108,9 +108,9 @@ namespace FAWorld
                 if (level)
                 {
                     if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
-                        mPlayer->teleport(level, Position(level->downStairsPos()));
+                        mPlayer->teleport(level, Position(level->getFreeSpotNear(level->downStairsPos())));
                     else
-                        mPlayer->teleport(level, Position(level->upStairsPos()));
+                        mPlayer->teleport(level, Position(level->getFreeSpotNear(level->upStairsPos())));
                 }
 
                 return;
