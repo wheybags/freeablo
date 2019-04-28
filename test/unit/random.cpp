@@ -2,7 +2,17 @@
 #include <random/random.h>
 #include <serial/textstream.h>
 
-TEST(Serialisation, TestSaveLoadRng)
+TEST(Random, TestBuiltinClz)
+{
+#ifdef __GNUC__
+    ASSERT_EQ(Random::__detail::builtin_clz_replacement(0), __builtin_clz(0));
+    ASSERT_EQ(Random::__detail::builtin_clz_replacement(0x000f563), __builtin_clz(0x000f563));
+    ASSERT_EQ(Random::__detail::builtin_clz_replacement(0x0000007f4dL), __builtin_clzl(0x0000007f4dL));
+    ASSERT_EQ(Random::__detail::builtin_clz_replacement(0x0000000000000084faLL), __builtin_clzll(0x0000000000000084faLL));
+#endif
+}
+
+TEST(Random, TestSaveLoadRng)
 {
     auto generateTestData = []() {
         Random::RngMersenneTwister random(1234);

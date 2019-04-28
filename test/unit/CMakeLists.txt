@@ -14,7 +14,7 @@ set(SOURCES
 
     fixedpoint.cpp
     settings.cpp
-    serialisation.cpp
+    random.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
