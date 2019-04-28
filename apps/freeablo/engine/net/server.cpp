@@ -11,7 +11,7 @@
 
 namespace Engine
 {
-    const char* Server::SERVER_ADDRESS = "127.0.0.1";
+    const char* Server::SERVER_ADDRESS = "0.0.0.0";
 
     Server::Server(FAWorld::World& world, LocalInputHandler& localInputHandler) : mWorld(world), mLocalInputHandler(localInputHandler)
     {
