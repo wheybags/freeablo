@@ -398,20 +398,20 @@ namespace FALevelGen
                 {
                     int wallCount = 0;
 
-                    if (level.get(x + 1, y) == (int32_t)Basic::wall && borders(x + 1, y, Basic::blank, level))
+                    if (getXY(x + 1, y, level) == (int32_t)Basic::wall && borders(x + 1, y, Basic::blank, level))
                         wallCount++;
-                    if (level.get(x - 1, y) == (int32_t)Basic::wall && borders(x - 1, y, Basic::blank, level))
+                    if (getXY(x - 1, y, level) == (int32_t)Basic::wall && borders(x - 1, y, Basic::blank, level))
                         wallCount++;
-                    if (level.get(x, y + 1) == (int32_t)Basic::wall && borders(x, y + 1, Basic::blank, level))
+                    if (getXY(x, y + 1, level) == (int32_t)Basic::wall && borders(x, y + 1, Basic::blank, level))
                         wallCount++;
-                    if (level.get(x, y - 1) == (int32_t)Basic::wall && borders(x, y - 1, Basic::blank, level))
+                    if (getXY(x, y - 1, level) == (int32_t)Basic::wall && borders(x, y - 1, Basic::blank, level))
                         wallCount++;
 
                     fixExternalT = wallCount > 2;
                 }
 
-                if ((level.get(x, y + 1) == (int32_t)Basic::wall && level.get(x + 1, y) == (int32_t)Basic::wall &&
-                     level.get(x + 1, y + 1) == (int32_t)Basic::wall) ||
+                if ((getXY(x, y + 1, level) == (int32_t)Basic::wall && getXY(x + 1, y, level) == (int32_t)Basic::wall &&
+                     getXY(x + 1, y + 1, level) == (int32_t)Basic::wall) ||
                     fixExternalT)
                 {
                     level.get(x, y) = (int32_t)Basic::floor;
