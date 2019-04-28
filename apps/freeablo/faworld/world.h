@@ -128,5 +128,6 @@ namespace FAWorld
         std::unique_ptr<StoreData> mStoreData;
 
         int32_t mNextId = 1;
+        int32_t mNextPlayerClass = 1;
     };
 }

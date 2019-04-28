@@ -71,6 +71,7 @@ namespace FAWorld
         }
 
         mNextId = loader.load<int32_t>();
+        mNextPlayerClass = loader.load<int32_t>();
         mStoreData->load(loader);
 
         loader.runFunctionsToRunAtEnd();
@@ -98,6 +99,7 @@ namespace FAWorld
         }
 
         saver.save(mNextId);
+        saver.save(mNextPlayerClass);
         mStoreData->save(saver);
     }
 
@@ -305,7 +307,19 @@ namespace FAWorld
             {
                 case PlayerInput::Type::PlayerJoined:
                 {
-                    FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, "Warrior");
+                    std::string nextPlayerClass;
+                    if (mNextPlayerClass == 0)
+                        nextPlayerClass = "Warrior";
+                    else if (mNextPlayerClass == 1)
+                        nextPlayerClass = "Rogue";
+                    else
+                        nextPlayerClass = "Sorcerer";
+
+                    // hacky method to make different players use differen classes
+                    // TODO: remove this when we have a proper character system
+                    mNextPlayerClass = (mNextPlayerClass + 1) % 3;
+
+                    FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, nextPlayerClass);
                     registerPlayer(newPlayer);
                     FAWorld::GameLevel* level = getLevel(0);
 
