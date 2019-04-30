@@ -286,7 +286,9 @@ namespace FALevelGen
 
         while (placed < numRooms)
         {
-            Room newRoom(rng.randomInRange(0, width - 4), rng.randomInRange(0, height - 4), 0, 0);
+            int32_t x = rng.randomInRange(0, width - 4);
+            int32_t y = rng.randomInRange(0, height - 4);
+            Room newRoom(x, y, 0, 0);
 
             if (((centreX - newRoom.centre().x) * (centreX - newRoom.centre().x) + (centreY - newRoom.centre().y) * (centreY - newRoom.centre().y)) >
                 radius * radius)
