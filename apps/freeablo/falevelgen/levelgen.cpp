@@ -691,7 +691,7 @@ namespace FALevelGen
     //        extra edges to allow for some loops.
     //     5. Connect the rooms according to the graph from the last step with l shaped corridoors, and
     //        also draw any corridoor rooms that the corridoors overlap as part of the corridoor.
-    Level::Dun generateTmp(Random::Rng& rng, TileSet& tileset, int32_t width, int32_t height, int32_t levelNum)
+    Level::Dun generateBasic(Random::Rng& rng, TileSet& tileset, int32_t width, int32_t height, int32_t levelNum)
     {
         Level::Dun level(width, height);
 
@@ -758,7 +758,7 @@ namespace FALevelGen
 
         // Make sure we always place stairs
         if (!(placeUpStairs(level, tileset, rooms) && placeDownStairs(level, tileset, rooms)))
-            return generateTmp(rng, tileset, width, height, levelNum);
+            return generateBasic(rng, tileset, width, height, levelNum);
 
         // Separate internal from external walls
         for (int32_t x = 0; x < (int32_t)width; x++)
@@ -1064,7 +1064,7 @@ namespace FALevelGen
         ss << "resources/tilesets/l" << levelNum << ".ini";
         TileSet tileset(ss.str());
 
-        Level::Dun tmpLevel = generateTmp(rng, tileset, width, height, levelNum);
+        Level::Dun tmpLevel = generateBasic(rng, tileset, width, height, levelNum);
 
         Level::Dun level(width, height);
         fillIsometric(tmpLevel, level, false, 0, false);

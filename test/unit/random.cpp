@@ -97,5 +97,4 @@ TEST(Random, TestSaveLoadRng)
 
     int32_t val = random.randomInRange(0, std::numeric_limits<int32_t>::max());
     ASSERT_EQ(val, 481516916);
-    printf("RAND %d\n", val);
 }
