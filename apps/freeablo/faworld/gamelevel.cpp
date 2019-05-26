@@ -70,8 +70,13 @@ namespace FAWorld
 
     const Misc::Point GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
 
-    bool GameLevel::canActivate(const Misc::Point& point) const { return mLevel.canActivate(point); }
-    void GameLevel::activate(const Misc::Point& point) { mLevel.activate(point); }
+    bool GameLevel::isDoor(const Misc::Point& point) const { return mLevel.isDoor(point); }
+    bool GameLevel::activateDoor(const Misc::Point& point)
+    {
+        if (getActorAt(point))
+            return false;
+        return mLevel.activateDoor(point);
+    }
 
     int32_t GameLevel::getNextLevel() { return mLevel.getNextLevel(); }
 

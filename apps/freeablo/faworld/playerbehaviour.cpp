@@ -53,7 +53,12 @@ namespace FAWorld
             case PlayerInput::Type::TargetTile:
             {
                 auto clickedPoint = Misc::Point(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
-                mPlayer->getLevel()->activate(clickedPoint);
+
+                if (mPlayer->getLevel()->isDoor(clickedPoint))
+                {
+                    mPlayer->mTarget = clickedPoint;
+                    return;
+                }
 
                 if (!cursorItem.isEmpty())
                 {

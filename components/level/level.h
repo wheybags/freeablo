@@ -61,8 +61,8 @@ namespace Level
 
         void save(Serial::Saver& saver);
 
-        bool canActivate(const Misc::Point& point) const;
-        void activate(const Misc::Point& point);
+        bool isDoor(const Misc::Point& point) const;
+        bool activateDoor(const Misc::Point& point); /// @return If the door was activated
 
         int32_t minSize() const;
         const MinPillar minPillar(int32_t i) const;

@@ -62,8 +62,8 @@ namespace FAWorld
 
         const Misc::Point downStairsPos() const;
 
-        bool canActivate(const Misc::Point& point) const;
-        void activate(const Misc::Point& point);
+        bool isDoor(const Misc::Point& point) const;
+        bool activateDoor(const Misc::Point& point);
 
         int32_t getNextLevel();
 
