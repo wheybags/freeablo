@@ -331,12 +331,15 @@ namespace FAWorld
                 case PlayerInput::Type::PlayerLeft:
                 {
                     // a little unsubtle, but it'll do for now.
-                    getActorById(input.mActorId)->die();
+                    if (Actor* actor = getActorById(input.mActorId))
+                        actor->die();
                     break;
                 }
                 default:
                 {
-                    dynamic_cast<Player*>(this->getActorById(input.mActorId))->getPlayerBehaviour()->addInput(input);
+                    if (Player* player = dynamic_cast<Player*>(this->getActorById(input.mActorId)))
+                        player->getPlayerBehaviour()->addInput(input);
+                    break;
                 }
             }
         }
