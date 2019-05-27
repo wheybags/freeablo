@@ -136,6 +136,8 @@ namespace Engine
         mNextPeerId++;
     }
 
+    bool Server::isPlayerRegistered(uint32_t peerId) const { return mPeers.at(peerId).actorId != -1; }
+
     void Server::registerNewPlayer(FAWorld::Player* player, uint32_t peerId)
     {
         // see onPeerConnect for an explanation of this

@@ -1,6 +1,7 @@
 #pragma once
 #include "multiplayerinterface.h"
 #include <enet/enet.h>
+#include <set>
 
 namespace FASaveGame
 {
@@ -22,7 +23,8 @@ namespace Engine
         virtual void verify(FAWorld::Tick tick) override;
         virtual bool isServer() const override { return false; }
         virtual bool isMultiplayer() const override { return true; }
-        virtual void registerNewPlayer(FAWorld::Player*, uint32_t) override {}
+        virtual bool isPlayerRegistered(uint32_t peerId) const override;
+        virtual void registerNewPlayer(FAWorld::Player*, uint32_t peerId) override;
 
         bool isConnected() { return mConnected; }
         bool didConnectionFail() { return mConnectionFailed; }
@@ -33,6 +35,8 @@ namespace Engine
         void receiveInputs(FASaveGame::GameLoader& loader);
         void receiveVerifyPacket(FASaveGame::GameLoader& loader);
         void sendClientUpdate();
+
+        std::set<uint32_t> mRegisteredClientIds;
 
         FAWorld::Tick mLastTickISentInputsOn = 0;
         LocalInputHandler& mLocalInputHandler;

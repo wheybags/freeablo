@@ -307,6 +307,9 @@ namespace FAWorld
             {
                 case PlayerInput::Type::PlayerJoined:
                 {
+                    if (Engine::EngineMain::get()->mMultiplayer->isPlayerRegistered(input.mData.dataPlayerJoined.peerId))
+                        break;
+
                     std::string nextPlayerClass;
                     if (mNextPlayerClass == 0)
                         nextPlayerClass = "Warrior";
@@ -315,7 +318,7 @@ namespace FAWorld
                     else
                         nextPlayerClass = "Sorcerer";
 
-                    // hacky method to make different players use differen classes
+                    // hacky method to make different players use different classes
                     // TODO: remove this when we have a proper character system
                     mNextPlayerClass = (mNextPlayerClass + 1) % 3;
 

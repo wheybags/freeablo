@@ -24,6 +24,7 @@ namespace Engine
         virtual void verify(FAWorld::Tick) override {}
         virtual bool isServer() const override { return true; }
         virtual bool isMultiplayer() const override { return !mPeers.empty(); }
+        virtual bool isPlayerRegistered(uint32_t peerId) const override;
         virtual void registerNewPlayer(FAWorld::Player* player, uint32_t peerId) override;
         virtual void doMultiplayerGui(nk_context* ctx) override;
 

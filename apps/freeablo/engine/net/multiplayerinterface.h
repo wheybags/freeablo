@@ -23,6 +23,7 @@ namespace Engine
         virtual void verify(FAWorld::Tick tick) = 0;
         virtual bool isServer() const = 0;
         virtual bool isMultiplayer() const = 0;
+        virtual bool isPlayerRegistered(uint32_t peerId) const = 0;
         virtual void registerNewPlayer(FAWorld::Player* player, uint32_t peerId) = 0;
         virtual void doMultiplayerGui(nk_context*){};
 
