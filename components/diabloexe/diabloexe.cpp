@@ -42,11 +42,9 @@ namespace DiabloExe
         mSettings.reset(new Settings::Settings());
         mVersion = getVersion(pathEXE);
         if (mVersion.empty())
-        {
             return;
-        }
 
-        if (!mSettings->loadFromFile("resources/exeversions/" + mVersion + ".ini"))
+        if (!mSettings->loadFromFile(mVersion.iniPath))
         {
             std::cout << "Cannot load settings file.";
             return;
@@ -54,9 +52,7 @@ namespace DiabloExe
 
         FAIO::FAFileObject exe(pathEXE);
         if (!exe.isValid())
-        {
             return;
-        }
 
         auto codeOffset = mSettings->get<size_t>("Common", "codeOffset");
         loadFontData(exe);
@@ -111,13 +107,11 @@ namespace DiabloExe
         return s.str();
     }
 
-    std::string DiabloExe::getVersion(const std::string& pathEXE)
+    DiabloExe::VersionResult DiabloExe::getVersion(const std::string& pathEXE)
     {
         std::string exeMD5 = getMD5(pathEXE);
         if (exeMD5.empty())
-        {
-            return std::string();
-        }
+            return {};
 
         Settings::Settings settings;
         std::string version = "";
@@ -137,13 +131,15 @@ namespace DiabloExe
         if (version == "")
         {
             std::cerr << "Unrecognised version of Diablo.exe" << std::endl;
-            return "";
+            return {};
         }
 
         else
             std::cout << "Diablo.exe " << version << " detected" << std::endl;
 
-        return version;
+        std::string iniPath = "resources/exeversions/" + settings.get<std::string>("", "ini_" + version, version + ".ini");
+
+        return {version, iniPath};
     }
 
     void DiabloExe::loadDropGraphicsFilenames(FAIO::FAFileObject& exe, size_t codeOffset)
