@@ -152,7 +152,7 @@ namespace Level
         return MinPillar(mMin[minIndex], mSol.passable(minIndex), minIndex);
     }
 
-    bool Level::canActivate(const Misc::Point& point) const
+    bool Level::isDoor(const Misc::Point& point) const
     {
         int32_t xDunIndex = point.x;
         if ((xDunIndex % 2) != 0)
@@ -177,7 +177,7 @@ namespace Level
         return false;
     }
 
-    void Level::activate(const Misc::Point& point)
+    bool Level::activateDoor(const Misc::Point& point)
     {
         int32_t xDunIndex = point.x;
         if ((xDunIndex % 2) != 0)
@@ -196,8 +196,13 @@ namespace Level
 
             // open doors when clicked on
             if (mDoorMap.find(index) != mDoorMap.end())
+            {
                 mDun.get(xDunIndex, yDunIndex) = mDoorMap[index];
+                return true;
+            }
         }
+
+        return false;
     }
 
     int32_t Level::minSize() const { return mMin.size(); }

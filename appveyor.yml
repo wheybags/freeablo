@@ -30,7 +30,6 @@ before_build:
   - cd c:\projects\freeablo
   - mkdir build
   - cd build
-  - mklink /j resources ..\resources
   - cmake .. -G "Visual Studio 14 2015 Win64" -DFA_TREAT_WARNINGS_AS_ERRORS=ON
 
 build_script:

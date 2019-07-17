@@ -120,6 +120,10 @@ namespace Engine
         mServerStatesForFullVerify.erase(tick);
     }
 
+    bool Client::isPlayerRegistered(uint32_t peerId) const { return mRegisteredClientIds.count(peerId) != 0; }
+
+    void Client::registerNewPlayer(FAWorld::Player*, uint32_t peerId) { mRegisteredClientIds.insert(peerId); }
+
     void Client::processServerPacket(const ENetEvent& event)
     {
         Serial::TextReadStream stream(std::string(reinterpret_cast<const char*>(event.packet->data), event.packet->dataLength));

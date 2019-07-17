@@ -64,15 +64,6 @@ mkdir build
 cd build
 ```
 
-symlink the resources folder (linux/unix):
-```bash
-ln -s ../resources
-```
-symlink the resources folder (windows):
-```
-mklink /j resources ..\resources
-```
-
 call cmake:
 ```bash
 cmake ..

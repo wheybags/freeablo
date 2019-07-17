@@ -1,8 +1,8 @@
 #pragma once
+#include "mersennetwister.h"
 #include <cstdint>
 #include <initializer_list>
 #include <misc/assert.h>
-#include <random>
 #include <vector>
 
 namespace Serial
@@ -36,7 +36,7 @@ namespace Random
     class RngMersenneTwister : public Rng
     {
     public:
-        explicit RngMersenneTwister() : mRng(0U) {}
+        explicit RngMersenneTwister() = default;
         explicit RngMersenneTwister(uint32_t seed) : mRng(seed) {}
         virtual ~RngMersenneTwister() override = default;
         RngMersenneTwister(const RngMersenneTwister&) = delete;
@@ -48,7 +48,7 @@ namespace Random
         virtual int32_t randomInRange(int32_t min, int32_t max) override;
 
     private:
-        std::mt19937 mRng;
+        mt19937 mRng;
     };
 
     class DummyRng : public Rng

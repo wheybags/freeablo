@@ -53,7 +53,12 @@ namespace FAWorld
             case PlayerInput::Type::TargetTile:
             {
                 auto clickedPoint = Misc::Point(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
-                mPlayer->getLevel()->activate(clickedPoint);
+
+                if (mPlayer->getLevel()->isDoor(clickedPoint))
+                {
+                    mPlayer->mTarget = clickedPoint;
+                    return;
+                }
 
                 if (!cursorItem.isEmpty())
                 {
@@ -108,9 +113,9 @@ namespace FAWorld
                 if (level)
                 {
                     if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
-                        mPlayer->teleport(level, Position(level->downStairsPos()));
+                        mPlayer->teleport(level, Position(level->getFreeSpotNear(level->downStairsPos())));
                     else
-                        mPlayer->teleport(level, Position(level->upStairsPos()));
+                        mPlayer->teleport(level, Position(level->getFreeSpotNear(level->upStairsPos())));
                 }
 
                 return;

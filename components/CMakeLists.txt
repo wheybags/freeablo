@@ -60,6 +60,7 @@ set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 add_library(Random
     random/random.cpp
     random/random.h
+    random/mersennetwister.h
 )
 target_link_libraries(Random Serial)
 set_target_properties(Random PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

@@ -17,6 +17,12 @@ namespace FAWorld
         mData.item = target;
     }
 
+    Target::Target(const Misc::Point& target)
+    {
+        mType = Type::Door;
+        mData.doorPosition = target;
+    }
+
     void Target::load(FASaveGame::GameLoader& loader)
     {
         mType = Type(loader.load<uint8_t>());
@@ -54,6 +60,12 @@ namespace FAWorld
                 break;
             }
 
+            case Type::Door:
+            {
+                mData.doorPosition = Misc::Point(loader);
+                break;
+            }
+
             case Type::None:
                 break;
         }
@@ -79,6 +91,12 @@ namespace FAWorld
                 break;
             }
 
+            case Type::Door:
+            {
+                get<Misc::Point>().save(saver);
+                break;
+            }
+
             case Type::None:
                 break;
         }
@@ -94,6 +112,12 @@ namespace FAWorld
     {
         debug_assert(mType == Type::Item);
         return mData.item;
+    }
+
+    template <> Misc::Point Target::get<Misc::Point>() const
+    {
+        debug_assert(mType == Type::Door);
+        return mData.doorPosition;
     }
 
     void Target::clear() { mType = Type::None; }
