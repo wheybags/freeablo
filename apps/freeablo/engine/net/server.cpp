@@ -11,7 +11,7 @@
 
 namespace Engine
 {
-    const char* Server::SERVER_ADDRESS = "127.0.0.1";
+    const char* Server::SERVER_ADDRESS = "0.0.0.0";
 
     Server::Server(FAWorld::World& world, LocalInputHandler& localInputHandler) : mWorld(world), mLocalInputHandler(localInputHandler)
     {
@@ -135,6 +135,8 @@ namespace Engine
         EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(FAWorld::PlayerInput::PlayerJoinedData{mNextPeerId}, -1));
         mNextPeerId++;
     }
+
+    bool Server::isPlayerRegistered(uint32_t peerId) const { return mPeers.at(peerId).actorId != -1; }
 
     void Server::registerNewPlayer(FAWorld::Player* player, uint32_t peerId)
     {

@@ -14,6 +14,8 @@ set(SOURCES
 
     fixedpoint.cpp
     settings.cpp
+    random.cpp
+    testlevelgen.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

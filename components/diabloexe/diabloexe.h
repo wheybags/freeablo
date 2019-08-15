@@ -65,7 +65,14 @@ namespace DiabloExe
         const std::vector<UniqueItem>& getUniqueItems() const { return mUniqueItems; }
         const std::vector<Affix>& getAffixes() const { return mAffixes; }
 
-        static std::string getVersion(const std::string& pathEXE);
+        struct VersionResult
+        {
+            std::string version;
+            std::string iniPath;
+
+            bool empty() const { return version.empty(); }
+        };
+        static VersionResult getVersion(const std::string& pathEXE);
 
     private:
         static std::string getMD5(const std::string& pathEXE);
@@ -82,7 +89,7 @@ namespace DiabloExe
 
         std::unique_ptr<Settings::Settings> mSettings;
 
-        std::string mVersion;
+        VersionResult mVersion;
         std::map<std::string, Monster> mMonsters;
         std::map<std::string, Npc> mNpcs;
         std::map<std::string, CharacterStats> mCharacters;
