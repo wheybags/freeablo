@@ -66,6 +66,19 @@ namespace FAGui
 
     void ShopSellDialog::sellItem(FAWorld::EquipTarget item)
     {
+        auto& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
+        auto& invItem = inventory.getItemAt(item);
+        const auto price = invItem.getPrice();
+
+        auto goldItem = mGuiManager.mDialogManager.mWorld.getItemFactory().generateBaseItem(FAWorld::ItemId::gold);
+        goldItem.mCount = price - invItem.getInvVolume() * goldItem.getMaxCount();
+
+        if (!mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(goldItem))
+        {
+            this->mGuiManager.mDialogManager.pushDialog(new MessagePopup(this->mGuiManager, "You do not have enough room in inventory"));
+            return;
+        }
+
         auto input = FAWorld::PlayerInput::SellItemData{item, mShopkeeper.getId()};
         Engine::EngineMain::get()->getLocalInputHandler()->addInput(
             FAWorld::PlayerInput(input, Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getId()));
