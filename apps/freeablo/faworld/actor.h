@@ -67,7 +67,6 @@ namespace FAWorld
         void doMeleeHit(Actor* enemy);
         void doMeleeHit(const Misc::Point& point);
         void startMeleeAttack(Misc::Direction direction);
-        bool checkDeath();
 
         std::string getDieWav() const;
         std::string getHitWav() const;
@@ -98,7 +97,7 @@ namespace FAWorld
 
         bool canTalk() const { return mMenuTalkData.size() > 0; }
         bool canInteractWith(Actor* actor);
-        void inflictDamage(Actor* enemy, uint32_t damage);
+        void dealDamageToEnemy(Actor* enemy, uint32_t damage);
 
         // public member variables
         MovementHandler mMoveHandler;
@@ -116,7 +115,7 @@ namespace FAWorld
 
     protected:
         void activateMissile(MissileId id, Misc::Point targetPoint);
-        virtual void enemyKilled(Actor* enemy);
+        virtual void onEnemyKilled(Actor* enemy) { UNUSED_PARAM(enemy); };
 
         // protected member variables
         std::unique_ptr<StateMachine> mActorStateMachine;

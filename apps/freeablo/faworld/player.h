@@ -66,7 +66,7 @@ namespace FAWorld
     private:
         void init(const DiabloExe::CharacterStats& charStats);
         bool canTalkTo(Actor* actor);
-        void enemyKilled(Actor* enemy) override;
+        void onEnemyKilled(Actor* enemy) override;
         void addExperience(Monster& enemy);
         void levelUp(int32_t newLevel);
 

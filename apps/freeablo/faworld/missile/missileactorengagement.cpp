@@ -30,7 +30,7 @@ namespace FAWorld
             const uint32_t damage = 10; // placeholder
             if (missile.mCreator->canIAttack(&actor))
             {
-                missile.mCreator->inflictDamage(&actor, damage);
+                missile.mCreator->dealDamageToEnemy(&actor, damage);
                 missile.playImpactSound();
             }
         }
