@@ -36,6 +36,7 @@ add_library(Misc
     misc/enum_range.h
     misc/fixedpoint.cpp
     misc/fixedpoint.h
+    misc/fixedpoint_internal.h
     misc/maxcurrentitem.cpp
     misc/maxcurrentitem.h
     misc/md5.cpp

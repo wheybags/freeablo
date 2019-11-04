@@ -1,7 +1,12 @@
 #pragma once
+#include "fixedpoint_internal.h"
 #include <cmath>
 #include <cstdint>
 #include <string>
+
+template <typename T> constexpr typename std::remove_reference<T>::type makeprval(T&& t) { return t; }
+
+#define is_constexpr(e) noexcept(makeprval(e))
 
 class FixedPoint
 {
@@ -20,13 +25,41 @@ public:
     FixedPoint(double) = delete;
     FixedPoint(float) = delete;
 
-    static FixedPoint fromRawValue(int64_t rawValue);
+private:
+    class RawConstructorTagType
+    {
+    };
+#ifdef NDEBUG
+    constexpr FixedPoint(int64_t rawValue, ConstructorTagType) : mVal(rawValue) {}
+#else
+    constexpr FixedPoint(int64_t rawValue, double debugVal, RawConstructorTagType) : mVal(rawValue), mDebugVal(debugVal) {}
+#endif
+
+public:
+    static constexpr FixedPoint fromRawValue(int64_t rawValue)
+    {
+#ifdef NDEBUG
+        return FixedPoint(rawValue, ConstructorTagType{});
+#else
+        return FixedPoint(rawValue, double(rawValue) / double(FixedPoint::scalingFactor), RawConstructorTagType{});
+#endif
+    }
+
+#define MakeFixed1(IntPart) FixedPoint::fromRawValue(FIXED_POINT_INTPART_##IntPart* FixedPoint::scalingFactor)
+#define MakeFixed2(IntPart, FractionPart)                                                                                                                      \
+    FixedPoint::fromRawValue(FIXED_POINT_INTPART_##IntPart* FixedPoint::scalingFactor + FIXED_POINT_FRACTION_##FractionPart)
+
+#define MakeFixedGetMacro(_1, _2, NAME, ...) NAME
+#define MakeFixed(...) MakeFixedGetMacro(__VA_ARGS__, MakeFixed2, MakeFixed1, _)(__VA_ARGS__)
 
     int64_t rawValue() const { return mVal; }
 
     int64_t intPart() const;
-    int64_t round() const;
     FixedPoint fractionPart() const;
+
+    int64_t round() const;
+    int64_t floor() const;
+    int64_t ceil() const;
 
     double toDouble() const; /// NOT to be used in the game simulation. For testing/gui only
     std::string str() const;
@@ -40,7 +73,8 @@ public:
 
     FixedPoint operator+(FixedPoint other) const;
     FixedPoint operator-(FixedPoint other) const;
-    FixedPoint operator-() const;
+    constexpr FixedPoint operator-() const { return fromRawValue(-mVal); }
+
     FixedPoint operator*(FixedPoint other) const;
     FixedPoint operator/(FixedPoint other) const;
 
@@ -82,7 +116,6 @@ public:
     static FixedPoint sin_degrees(FixedPoint deg);
     static FixedPoint cos_degrees(FixedPoint deg);
 
-private:
     // The scaling factor to use, as a power of 10.
     // Essentially the number of base 10 digits after the decimal point.
     // We're using a base 10 scaling factor becasue it makes things muccch easier to debug.
@@ -94,6 +127,7 @@ private:
     // So, eg with scale 1000, 1.23 would have value 1230.
     static constexpr int64_t scalingFactor = 1000000000;
 
+private:
     static FixedPoint PI;
     static FixedPoint epsilon;
 
