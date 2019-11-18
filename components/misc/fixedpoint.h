@@ -30,7 +30,7 @@ private:
     {
     };
 #ifdef NDEBUG
-    constexpr FixedPoint(int64_t rawValue, ConstructorTagType) : mVal(rawValue) {}
+    constexpr FixedPoint(int64_t rawValue, RawConstructorTagType) : mVal(rawValue) {}
 #else
     constexpr FixedPoint(int64_t rawValue, double debugVal, RawConstructorTagType) : mVal(rawValue), mDebugVal(debugVal) {}
 #endif
@@ -39,7 +39,7 @@ public:
     static constexpr FixedPoint fromRawValue(int64_t rawValue)
     {
 #ifdef NDEBUG
-        return FixedPoint(rawValue, ConstructorTagType{});
+        return FixedPoint(rawValue, RawConstructorTagType{});
 #else
         return FixedPoint(rawValue, double(rawValue) / double(FixedPoint::scalingFactor), RawConstructorTagType{});
 #endif
@@ -49,8 +49,11 @@ public:
 #define MakeFixed2(IntPart, FractionPart)                                                                                                                      \
     FixedPoint::fromRawValue(FIXED_POINT_INTPART_##IntPart* FixedPoint::scalingFactor + FIXED_POINT_FRACTION_##FractionPart)
 
+// https://stackoverflow.com/questions/11761703/overloading-macro-on-number-of-arguments
+// Just imagine this declares two overloads of MakeFixed, as above, one with one arg, the other with two.
 #define MakeFixedGetMacro(_1, _2, NAME, ...) NAME
-#define MakeFixed(...) MakeFixedGetMacro(__VA_ARGS__, MakeFixed2, MakeFixed1, _)(__VA_ARGS__)
+#define MakeFixedMsvcExpand(X) X // Unnecessary on anything but msvc. https://stackoverflow.com/questions/5134523/msvc-doesnt-expand-va-args-correctly
+#define MakeFixed(...) MakeFixedMsvcExpand(MakeFixedGetMacro(__VA_ARGS__, MakeFixed2, MakeFixed1, _)(__VA_ARGS__))
 
     int64_t rawValue() const { return mVal; }
 
