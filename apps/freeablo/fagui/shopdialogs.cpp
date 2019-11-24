@@ -80,7 +80,9 @@ namespace FAGui
     {
         DialogData retval;
 
-        auto& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
+        auto currPlayer = mGuiManager.mDialogManager.mWorld.getCurrentPlayer();
+        auto& playerStats = currPlayer->getPlayerStats();
+        auto& inventory = currPlayer->mInventory;
         retval.introduction = {{(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str(), TextColor::golden, false}};
 
         for (size_t i = 0; i < mItems.size(); i++)
@@ -89,7 +91,10 @@ namespace FAGui
             auto description = item.item.descriptionForMerchants();
             for (auto& desc : description)
             {
-                if (item.item.getPrice() > inventory.getTotalGold())
+                
+                if ((item.item.getReqDex() > playerStats.mDexterity) ||
+                    (item.item.getReqMagic() > playerStats.mMagic) ||
+                    (item.item.getReqStr() > playerStats.mMagic))
                 {
                     desc.textColor = TextColor::red;
                 }
