@@ -121,35 +121,35 @@ namespace FAGui
             static auto repeatWait = FAWorld::World::getTicksInPeriod(FixedPoint("0.05"));
 
             if (mArrowKeyRepeatTimer > (mArrowKeyMovesGeneratedSinceKeydown < 2 ? firstWait : repeatWait))
-                        {
-                            if (nk_input_is_key_down(&ctx->input, NK_KEY_DOWN))
-                                mSelection = (mSelection + 1) % int32_t(options.size());
-                            if (nk_input_is_key_down(&ctx->input, NK_KEY_UP))
-                                mSelection = mSelection - 1 >= 0 ? mSelection - 1 : int32_t(options.size()) - 1;
+            {
+                if (nk_input_is_key_down(&ctx->input, NK_KEY_DOWN))
+                    mSelection = (mSelection + 1) % int32_t(options.size());
+                if (nk_input_is_key_down(&ctx->input, NK_KEY_UP))
+                    mSelection = mSelection - 1 >= 0 ? mSelection - 1 : int32_t(options.size()) - 1;
 
-                            if (getEntryYPosition(mSelection) < scroll.y)
-                                scroll.y = getEntryYPosition(mSelection);
+                if (getEntryYPosition(mSelection) < scroll.y)
+                    scroll.y = getEntryYPosition(mSelection);
 
-                            if (getEntryYPosition(mSelection + 1) > areaHeight + scroll.y)
-                                scroll.y = getEntryYPosition(mSelection + 1) + ctx->style.window.group_padding.y - areaHeight;
+                if (getEntryYPosition(mSelection + 1) > areaHeight + scroll.y)
+                    scroll.y = getEntryYPosition(mSelection + 1) + ctx->style.window.group_padding.y - areaHeight;
 
-                            mArrowKeyRepeatTimer = 0;
-                            mArrowKeyMovesGeneratedSinceKeydown++;
-                        }
-
-                        mArrowKeyRepeatTimer++;
-                }
-                else
-                {
-                    mArrowKeyRepeatTimer = std::numeric_limits<int32_t>::max();
-                    mArrowKeyMovesGeneratedSinceKeydown = 0;
-                }
-
-                if (nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
-                    result = Result::Activated;
-
-                mLastMousePosition = ctx->input.mouse.pos;
-
-                return result;
+                mArrowKeyRepeatTimer = 0;
+                mArrowKeyMovesGeneratedSinceKeydown++;
             }
+
+            mArrowKeyRepeatTimer++;
         }
+        else
+        {
+            mArrowKeyRepeatTimer = std::numeric_limits<int32_t>::max();
+            mArrowKeyMovesGeneratedSinceKeydown = 0;
+        }
+
+        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
+            result = Result::Activated;
+
+        mLastMousePosition = ctx->input.mouse.pos;
+
+        return result;
+    }
+}
