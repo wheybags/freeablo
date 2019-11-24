@@ -17,12 +17,9 @@ namespace FAGui
 
         Misc::ScopedSetter<nk_style_button>(ctx->style.button);
         ctx->style.button.normal = nk_style_item_hide();
-        // ctx->style.button.text_normal = nk_rgb(255, 255, 255);
         ctx->style.button.border = 0;
         ctx->style.button.hover = ctx->style.button.normal;
-        // ctx->style.button.text_hover = ctx->style.button.text_normal;
         ctx->style.button.active = ctx->style.button.normal;
-        ctx->style.button.text_active = ctx->style.button.text_normal;
 
         auto renderer = FARender::Renderer::get();
         auto pentagram = renderer->loadImage("data/pentspn2.cel");
@@ -83,6 +80,7 @@ namespace FAGui
 
                 ctx->style.button.text_normal = nk_rgb(r, g, b);
                 ctx->style.button.text_hover = ctx->style.button.text_normal;
+                ctx->style.button.text_active = ctx->style.button.text_normal;
                 if (mSelection == i && j == 0 && entry.clickable)
                     drawPentagram();
                 else
