@@ -9,7 +9,7 @@ namespace FAGui
                                           FARender::AnimationPlayer::AnimationType::Looped);
     }
 
-    MouseAndClickMenu::Result MouseAndClickMenu::update(nk_context* ctx, std::vector<std::vector<std::string>>& options, struct nk_scroll& scroll)
+    MouseAndClickMenu::Result MouseAndClickMenu::update(nk_context* ctx, std::vector<std::vector<MenuEntry>>& options, struct nk_scroll& scroll)
     {
         mSelection = Misc::clamp(mSelection, 0, int32_t(options.size()));
 
@@ -17,10 +17,10 @@ namespace FAGui
 
         Misc::ScopedSetter<nk_style_button>(ctx->style.button);
         ctx->style.button.normal = nk_style_item_hide();
-        ctx->style.button.text_normal = nk_rgb(255, 255, 255);
+        // ctx->style.button.text_normal = nk_rgb(255, 255, 255);
         ctx->style.button.border = 0;
         ctx->style.button.hover = ctx->style.button.normal;
-        ctx->style.button.text_hover = ctx->style.button.text_normal;
+        // ctx->style.button.text_hover = ctx->style.button.text_normal;
         ctx->style.button.active = ctx->style.button.normal;
         ctx->style.button.text_active = ctx->style.button.text_normal;
 
@@ -55,10 +55,35 @@ namespace FAGui
         for (int32_t i = 0; i < int32_t(options.size()); i++)
         {
             struct nk_rect dummy;
+            auto& opt = options.at(i);
 
-            for (size_t j = 0; j < options.at(i).size(); j++)
+            for (size_t j = 0; j < opt.size(); j++)
             {
-                if (mSelection == i && j == 0)
+                MenuEntry& entry = opt.at(j);
+                int r = 255, g = 255, b = 255;
+                switch (entry.textColor)
+                {
+                    case TextColor::white:
+                        r = g = b = 255;
+                        break;
+                    case TextColor::blue:
+                        r = 170;
+                        g = 170;
+                        b = 255;
+                        break;
+                    case TextColor::golden:
+                        r = g = 225;
+                        b = 155;
+                        break;
+                    case TextColor::red:
+                        r = 255;
+                        g = b = 128;
+                        break;
+                }
+
+                ctx->style.button.text_normal = nk_rgb(r, g, b);
+                ctx->style.button.text_hover = ctx->style.button.text_normal;
+                if (mSelection == i && j == 0 && entry.clickable)
                     drawPentagram();
                 else
                     nk_widget(&dummy, ctx);
@@ -66,10 +91,10 @@ namespace FAGui
                 if (nk_widget_is_hovered(ctx) && (ctx->input.mouse.pos.x != mLastMousePosition.x || ctx->input.mouse.pos.y != mLastMousePosition.y))
                     mSelection = i;
 
-                if (nk_button_label(ctx, options.at(i).at(j).c_str()))
+                if (nk_button_label(ctx, entry.entry.c_str()))
                     result = Result::Activated;
 
-                if (mSelection == i && j == 0)
+                if (mSelection == i && j == 0 && entry.clickable)
                     drawPentagram();
                 else
                     nk_widget(&dummy, ctx);
@@ -96,35 +121,35 @@ namespace FAGui
             static auto repeatWait = FAWorld::World::getTicksInPeriod(FixedPoint("0.05"));
 
             if (mArrowKeyRepeatTimer > (mArrowKeyMovesGeneratedSinceKeydown < 2 ? firstWait : repeatWait))
-            {
-                if (nk_input_is_key_down(&ctx->input, NK_KEY_DOWN))
-                    mSelection = (mSelection + 1) % int32_t(options.size());
-                if (nk_input_is_key_down(&ctx->input, NK_KEY_UP))
-                    mSelection = mSelection - 1 >= 0 ? mSelection - 1 : int32_t(options.size()) - 1;
+                        {
+                            if (nk_input_is_key_down(&ctx->input, NK_KEY_DOWN))
+                                mSelection = (mSelection + 1) % int32_t(options.size());
+                            if (nk_input_is_key_down(&ctx->input, NK_KEY_UP))
+                                mSelection = mSelection - 1 >= 0 ? mSelection - 1 : int32_t(options.size()) - 1;
 
-                if (getEntryYPosition(mSelection) < scroll.y)
-                    scroll.y = getEntryYPosition(mSelection);
+                            if (getEntryYPosition(mSelection) < scroll.y)
+                                scroll.y = getEntryYPosition(mSelection);
 
-                if (getEntryYPosition(mSelection + 1) > areaHeight + scroll.y)
-                    scroll.y = getEntryYPosition(mSelection + 1) + ctx->style.window.group_padding.y - areaHeight;
+                            if (getEntryYPosition(mSelection + 1) > areaHeight + scroll.y)
+                                scroll.y = getEntryYPosition(mSelection + 1) + ctx->style.window.group_padding.y - areaHeight;
 
-                mArrowKeyRepeatTimer = 0;
-                mArrowKeyMovesGeneratedSinceKeydown++;
+                            mArrowKeyRepeatTimer = 0;
+                            mArrowKeyMovesGeneratedSinceKeydown++;
+                        }
+
+                        mArrowKeyRepeatTimer++;
+                }
+                else
+                {
+                    mArrowKeyRepeatTimer = std::numeric_limits<int32_t>::max();
+                    mArrowKeyMovesGeneratedSinceKeydown = 0;
+                }
+
+                if (nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
+                    result = Result::Activated;
+
+                mLastMousePosition = ctx->input.mouse.pos;
+
+                return result;
             }
-
-            mArrowKeyRepeatTimer++;
         }
-        else
-        {
-            mArrowKeyRepeatTimer = std::numeric_limits<int32_t>::max();
-            mArrowKeyMovesGeneratedSinceKeydown = 0;
-        }
-
-        if (nk_input_is_key_pressed(&ctx->input, NK_KEY_ENTER))
-            result = Result::Activated;
-
-        mLastMousePosition = ctx->input.mouse.pos;
-
-        return result;
-    }
-}

@@ -14,8 +14,8 @@ namespace FAGui
     CharacterDialoguePopup::DialogData MessagePopup::getDialogData()
     {
         DialogData retval;
-        retval.introduction = {this->mMessage};
-        retval.addMenuOption({"OK"}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+        retval.introduction = {{this->mMessage, TextColor::golden, false}};
+        retval.addMenuOption({{"OK", TextColor::white, true}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
         return retval;
     }
@@ -48,8 +48,8 @@ namespace FAGui
         int32_t totalGold = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getTotalGold();
 
         retval.introduction = {
-            (boost::format("%2%            Your gold : %1%") % totalGold % (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?"))
-                .str()};
+            {(boost::format("%2%            Your gold : %1%") % totalGold % (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?"))
+                 .str(), TextColor::golden, false}};
 
         for (FAWorld::EquipTarget item : sellableItems)
         {
@@ -59,7 +59,7 @@ namespace FAGui
             });
         }
 
-        retval.addMenuOption({"Quit"}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+        retval.addMenuOption({{"Quit"}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
         return retval;
     }
@@ -81,18 +81,27 @@ namespace FAGui
         DialogData retval;
 
         auto& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
-        retval.introduction = {(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str()};
+        retval.introduction = {{(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str(), TextColor::golden, false}};
 
         for (size_t i = 0; i < mItems.size(); i++)
         {
             FAWorld::StoreItem& item = mItems[i];
-            retval.addMenuOption(item.item.descriptionForMerchants(), [this, i]() {
+            auto description = item.item.descriptionForMerchants();
+            for (auto& desc : description)
+            {
+                if (item.item.getPrice() > inventory.getTotalGold())
+                {
+                    desc.textColor = TextColor::red;
+                }
+            }
+
+            retval.addMenuOption(description, [this, i]() {
                 this->buyItem(i);
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
         }
 
-        retval.addMenuOption({"Quit"}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+        retval.addMenuOption({{"Quit"}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
         return retval;
     }

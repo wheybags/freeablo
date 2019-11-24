@@ -1,5 +1,6 @@
 #pragma once
 #include "../farender/animationplayer.h"
+#include "menuentry.h"
 #include <fa_nuklear.h>
 #include <string>
 #include <vector>
@@ -17,7 +18,7 @@ namespace FAGui
             None
         };
 
-        Result update(nk_context* ctx, std::vector<std::vector<std::string>>& options, struct nk_scroll& scroll);
+        Result update(nk_context* ctx, std::vector<std::vector<MenuEntry>>& options, struct nk_scroll& scroll);
         int32_t getSelectedIndex() { return mSelection; }
 
     private:

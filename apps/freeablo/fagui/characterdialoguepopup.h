@@ -1,5 +1,6 @@
 #pragma once
 #include "mouseandclickmenu.h"
+#include "menuentry.h"
 #include <fa_nuklear.h>
 #include <vector>
 
@@ -27,12 +28,12 @@ namespace FAGui
     protected:
         struct DialogData
         {
-            std::vector<std::string> introduction;
+            std::vector<MenuEntry> introduction;
 
-            std::vector<std::vector<std::string>> dialogOptions;
+            std::vector<std::vector<MenuEntry>> dialogOptions;
             std::vector<std::function<UpdateResult()>> dialogActions;
 
-            void addMenuOption(const std::vector<std::string>& option, std::function<UpdateResult()> action)
+            void addMenuOption(const std::vector<MenuEntry>& option, std::function<UpdateResult()> action)
             {
                 dialogOptions.push_back(option);
                 dialogActions.push_back(action);
@@ -46,4 +47,4 @@ namespace FAGui
         MouseAndClickMenu mDialogMenu;
         bool mWide = false;
     };
-}
+} // namespace FAGui
