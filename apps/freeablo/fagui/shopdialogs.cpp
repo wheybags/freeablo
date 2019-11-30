@@ -20,8 +20,8 @@ namespace FAGui
         return retval;
     }
 
-    ConfirmTransactionPopup::ConfirmTransactionPopup(GuiManager& guiManager, const std::string& intro, const std::vector<std::string>&& desc, Transaction t)
-        : CharacterDialoguePopup(guiManager, true), mIntroduction(intro), mDescription(desc), mTransaction(t)
+    ConfirmTransactionPopup::ConfirmTransactionPopup(GuiManager& guiManager, const std::string& intro, const std::vector<std::string>& desc, Transaction t)
+        : CharacterDialoguePopup(guiManager, true), mTransaction(t), mIntroduction(intro), mDescription(desc)
     {
     }
 
@@ -75,10 +75,10 @@ namespace FAGui
 
         for (FAWorld::EquipTarget& item : sellableItems)
         {
-            retval.addMenuOption(inventory.getItemAt(item).descriptionForMerchants(), [this, &item, &intro, &inventory]() {
-                auto it = inventory.getItemAt(item);
-                ConfirmTransactionPopup::Transaction transaction = ConfirmTransactionPopup::Transaction::sell;
-                ConfirmTransactionPopup* confirmPopup = new ConfirmTransactionPopup(this->mGuiManager, intro, it.descriptionForMerchants(), transaction);
+            const auto& desc = inventory.getItemAt(item).descriptionForMerchants();
+            ConfirmTransactionPopup::Transaction transaction = ConfirmTransactionPopup::Transaction::sell;
+            ConfirmTransactionPopup* confirmPopup = new ConfirmTransactionPopup(this->mGuiManager, intro, desc, transaction);
+            retval.addMenuOption(desc, [this, item, confirmPopup]() {
                 this->sellItem(item, confirmPopup);
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
@@ -89,10 +89,10 @@ namespace FAGui
         return retval;
     }
 
-    void ShopSellDialog::sellItem(FAWorld::EquipTarget& item, ConfirmTransactionPopup* confirmPopup)
+    void ShopSellDialog::sellItem(const FAWorld::EquipTarget& item, ConfirmTransactionPopup* confirmPopup)
     {
-        auto sellAction = [this, &item]() {
-            auto input = FAWorld::PlayerInput::SellItemData{item, mShopkeeper.getId()};
+        auto sellAction = [this, item]() {
+            FAWorld::PlayerInput::SellItemData input{item, mShopkeeper.getId()};
             Engine::EngineMain::get()->getLocalInputHandler()->addInput(
                 FAWorld::PlayerInput(input, Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getId()));
 

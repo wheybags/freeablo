@@ -31,7 +31,7 @@ namespace FAGui
             sell
         };
 
-        ConfirmTransactionPopup(GuiManager& guiManager, const std::string& intro, const std::vector<std::string>&& desc, Transaction t);
+        ConfirmTransactionPopup(GuiManager& guiManager, const std::string& intro, const std::vector<std::string>& desc, Transaction t);
         void addAction(std::function<CharacterDialoguePopup::UpdateResult()> action);
 
     protected:
@@ -53,7 +53,7 @@ namespace FAGui
         virtual DialogData getDialogData() override;
 
     private:
-        void sellItem(FAWorld::EquipTarget& item, ConfirmTransactionPopup* confirmPopup);
+        void sellItem(const FAWorld::EquipTarget& item, ConfirmTransactionPopup* confirmPopup);
 
     private:
         std::function<bool(const FAWorld::Item& item)> mFilter;
