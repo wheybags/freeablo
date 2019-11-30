@@ -86,7 +86,7 @@ namespace FAGui
                 else
                     nk_widget(&dummy, ctx);
 
-                if (nk_widget_is_hovered(ctx) && (ctx->input.mouse.pos.x != mLastMousePosition.x || ctx->input.mouse.pos.y != mLastMousePosition.y))
+                if (nk_widget_is_hovered(ctx) && (ctx->input.mouse.pos.x != mLastMousePosition.x || ctx->input.mouse.pos.y != mLastMousePosition.y) && entry.clickable)
                     mSelection = i;
 
                 if (nk_button_label(ctx, entry.entry.c_str()))
