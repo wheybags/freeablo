@@ -1,5 +1,6 @@
-
 #pragma once
+
+struct nk_color;
 
 namespace FAGui
 {
@@ -10,4 +11,6 @@ namespace FAGui
         golden,
         red,
     };
+
+    nk_color getNkColor(TextColor color);
 }

@@ -57,31 +57,8 @@ namespace FAGui
             for (size_t j = 0; j < opt.size(); j++)
             {
                 MenuEntry& entry = opt.at(j);
-                int r = 255, g = 255, b = 255;
-                switch (entry.textColor)
-                {
-                    case TextColor::white:
-                        r = g = b = 255;
-                        break;
-                    case TextColor::blue:
-                        r = 170;
-                        g = 170;
-                        b = 255;
-                        break;
-                    case TextColor::golden:
-                        r = g = 225;
-                        b = 155;
-                        break;
-                    case TextColor::red:
-                        r = 255;
-                        g = b = 128;
-                        break;
-                }
 
-                ctx->style.button.text_normal = nk_rgb(r, g, b);
-                ctx->style.button.text_hover = ctx->style.button.text_normal;
-                ctx->style.button.text_active = ctx->style.button.text_normal;
-                if (mSelection == i && j == 0 && entry.clickable)
+                if (mSelection == i && entry.clickable)
                     drawPentagram();
                 else
                     nk_widget(&dummy, ctx);
@@ -89,10 +66,19 @@ namespace FAGui
                 if (nk_widget_is_hovered(ctx) && (ctx->input.mouse.pos.x != mLastMousePosition.x || ctx->input.mouse.pos.y != mLastMousePosition.y) && entry.clickable)
                     mSelection = i;
 
+                nk_color color = getNkColor(entry.textColor);
+                nk_style_push_color(ctx, &ctx->style.button.text_normal, color);
+                nk_style_push_color(ctx, &ctx->style.button.text_hover, color);
+                nk_style_push_color(ctx, &ctx->style.button.text_active, color);
+
                 if (nk_button_label(ctx, entry.entry.c_str()))
                     result = Result::Activated;
 
-                if (mSelection == i && j == 0 && entry.clickable)
+                nk_style_pop_color(ctx);
+                nk_style_pop_color(ctx);
+                nk_style_pop_color(ctx);
+
+                if (mSelection == i && entry.clickable)
                     drawPentagram();
                 else
                     nk_widget(&dummy, ctx);
