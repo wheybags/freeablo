@@ -2,15 +2,19 @@
 #include <misc/disablewarn.h>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
+#include <boost/uuid/detail/md5.hpp>
 #include <misc/enablewarn.h>
 // clang-format on
 #include <iostream>
+#include <fstream>
 #include <faio/fafileobject.h>
 #include <settings/settings.h>
 #include <diabloexe/diabloexe.h>
 #include "engine/enginemain.h"
 
 namespace bpo = boost::program_options;
+namespace bud = boost::uuids::detail;
+
 bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 {
     boost::program_options::options_description desc("Options");
@@ -59,10 +63,47 @@ bool dataFilesSetUp(const Settings::Settings& settings)
     if (DiabloExe::DiabloExe::getVersion(exePath).empty())
         return false;
 
-    // TODO: validate mpq MD5 as well.
-    // Not sure if this changes across versions.
+    constexpr bud::md5::digest_type hashes[] = {{0x68f04986, 0x6b44688a, 0x7af65ba7, 0x66bef75a},  // us version
+                                                {0x51c61b01, 0x2066618e, 0x0a083162, 0x73b34044}}; // eu version
 
-    return true;
+    bud::md5 mpqMD5;
+    bud::md5::digest_type mpqDigest;
+
+    std::ifstream mpqFile(mpqPath, std::ios::binary);
+    mpqFile.seekg(0, std::ios::end);
+    int fileSize = mpqFile.tellg();
+    mpqFile.seekg(0, std::ios::beg);
+    char* mpqContents = new char[fileSize];
+    mpqFile.read(mpqContents, fileSize);
+    mpqFile.close();
+
+    mpqMD5.process_bytes(mpqContents, fileSize);
+    mpqMD5.get_digest(mpqDigest);
+    delete[] mpqContents;
+
+    bool mpqValid = false;
+
+    auto md5Equal = [](const bud::md5::digest_type& m1, const bud::md5::digest_type& m2) {
+        for (int i = 0; i < 4; i++)
+        {
+            if (m1[i] != m2[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    for (const auto& hash : hashes)
+    {
+        mpqValid = md5Equal(hash, mpqDigest);
+    }
+
+    if (!mpqValid)
+        std::cerr << "Invalid MPQ file. Please select another.\n";
+
+    return mpqValid;
 }
 
 int fa_main(int argc, char** argv)
