@@ -3,6 +3,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/uuid/detail/md5.hpp>
+#include <boost/endian/conversion.hpp>
 #include <misc/enablewarn.h>
 // clang-format on
 #include <iostream>
@@ -14,6 +15,7 @@
 
 namespace bpo = boost::program_options;
 namespace bud = boost::uuids::detail;
+namespace be = boost::endian;
 
 bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 {
@@ -63,8 +65,20 @@ bool dataFilesSetUp(const Settings::Settings& settings)
     if (DiabloExe::DiabloExe::getVersion(exePath).empty())
         return false;
 
-    constexpr bud::md5::digest_type hashes[] = {{0x68f04986, 0x6b44688a, 0x7af65ba7, 0x66bef75a},  // us version
-                                                {0x51c61b01, 0x2066618e, 0x0a083162, 0x73b34044}}; // eu version
+    auto cond_reverse = [](unsigned int x)
+    {
+        return be::conditional_reverse(x, be::order::big, be::order::native);
+    };
+
+    const bud::md5::digest_type hashes[] = {{cond_reverse(0x68f04986),
+                                             cond_reverse(0x6b44688a),
+                                             cond_reverse(0x7af65ba7),
+                                             cond_reverse(0x66bef75a)}, // us version
+
+                                            {cond_reverse(0x011bc651),
+                                             cond_reverse(0x8e616620),
+                                             cond_reverse(0x6231080a),
+                                             cond_reverse(0x4440b373)}}; // eu version
 
     bud::md5 mpqMD5;
     bud::md5::digest_type mpqDigest;
