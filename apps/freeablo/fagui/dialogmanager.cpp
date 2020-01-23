@@ -303,4 +303,4 @@ namespace FAGui
     void DialogManager::pushDialog(CharacterDialoguePopup* dialog) { mDialogStack.emplace_back(dialog); }
 
     void DialogManager::popDialog() { mDialogStack.pop_back(); }
-} // namespace FAGui
+}

@@ -47,4 +47,4 @@ namespace FAGui
         MouseAndClickMenu mDialogMenu;
         bool mWide = false;
     };
-} // namespace FAGui
+}

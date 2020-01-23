@@ -276,4 +276,4 @@ namespace FAWorld
     uint32_t Item::getUniqueId() const { return this->mUniqueId; }
 
     bool Item::operator==(const Item rhs) const { return this->mUniqueId == rhs.mUniqueId; }
-} // namespace FAWorld
+}
