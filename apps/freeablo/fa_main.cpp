@@ -65,20 +65,12 @@ bool dataFilesSetUp(const Settings::Settings& settings)
     if (DiabloExe::DiabloExe::getVersion(exePath).empty())
         return false;
 
-    auto cond_reverse = [](unsigned int x)
-    {
-        return be::conditional_reverse(x, be::order::big, be::order::native);
-    };
+    auto cond_reverse = [](unsigned int x) { return be::conditional_reverse(x, be::order::big, be::order::native); };
 
-    const bud::md5::digest_type hashes[] = {{cond_reverse(0x68f04986),
-                                             cond_reverse(0x6b44688a),
-                                             cond_reverse(0x7af65ba7),
-                                             cond_reverse(0x66bef75a)}, // us version
+    const bud::md5::digest_type hashes[] = {
+        {cond_reverse(0x68f04986), cond_reverse(0x6b44688a), cond_reverse(0x7af65ba7), cond_reverse(0x66bef75a)}, // us version
 
-                                            {cond_reverse(0x011bc651),
-                                             cond_reverse(0x8e616620),
-                                             cond_reverse(0x6231080a),
-                                             cond_reverse(0x4440b373)}}; // eu version
+        {cond_reverse(0x011bc651), cond_reverse(0x8e616620), cond_reverse(0x6231080a), cond_reverse(0x4440b373)}}; // eu version
 
     bud::md5 mpqMD5;
     bud::md5::digest_type mpqDigest;
