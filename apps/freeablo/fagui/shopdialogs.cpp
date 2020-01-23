@@ -31,8 +31,15 @@ namespace FAGui
         std::string transaction = mTransaction == Transaction::buy ? "buy" : "sell";
         std::string message = "Are you sure you want to " + transaction + " this item?";
         retval.introduction = {mIntroduction};
+
+        // 3 lines per item
+        for (std::size_t i = 0; i < mDescription.size(); i += 3)
+        {
+            mDescription[i].clickable = false;
+        }
+
         retval.addMenuOption(mDescription, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-        retval.addMenuOption({{""}, {message}, {""}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+        retval.addMenuOption({{}, {message, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
         retval.addMenuOption({{"Yes"}}, mAction);
         retval.addMenuOption({{"No"}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 

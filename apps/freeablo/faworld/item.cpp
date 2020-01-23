@@ -105,7 +105,7 @@ namespace FAWorld
                 target += ",  ";
             target += new_part;
         };
-        ret.push_back({getName()});
+        ret.push_back({getName(), true});
         {
             // first line - affixes + charges
             std::string str;
@@ -123,7 +123,7 @@ namespace FAWorld
             auto reqs = requirementsStr();
             append(str, reqs.empty() ? "No Required Attributes" : reqs);
             if (!str.empty())
-                ret.push_back({std::move(str), FAGui::TextColor::white, false});
+                ret.push_back({std::move(str), false});
         }
         {
             ret.push_back({"Price: " + std::to_string(this->getPrice()), FAGui::TextColor::white, false});
