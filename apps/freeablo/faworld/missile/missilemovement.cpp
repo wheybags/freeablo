@@ -29,7 +29,7 @@ namespace FAWorld
 
         void MissileMovement::linear(Missile&, MissileGraphic& graphic)
         {
-            graphic.mCurPos.moveInDirection();
+            graphic.mCurPos.setFreeMovement();
             graphic.mCurPos.update();
         }
 

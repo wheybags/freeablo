@@ -41,7 +41,7 @@ namespace FAWorld
 
         void stopMoving();
         void moveToPoint(const Misc::Point& dest);
-        void moveInDirection();
+        void setFreeMovement();
 
     private:
         enum class MovementType
