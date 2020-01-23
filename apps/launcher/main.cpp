@@ -200,7 +200,15 @@ int main(int, char** argv)
     }
 
     if (runFreeablo)
-        system((boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string().c_str());
+    {
+#ifdef _WIN32
+        std::string path = "\"" + (boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string() + "\"";
+#else
+        std::string path = (boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string();
+#endif
+        system(path.c_str());
+    }
+    
 
     return 0;
 }

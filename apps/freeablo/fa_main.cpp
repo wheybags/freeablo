@@ -116,7 +116,12 @@ int fa_main(int argc, char** argv)
     // Check if we've been configured with data files, and if we haven't, run the launcher to prompt configuration
     if (!(settings.loadUserSettings() && dataFilesSetUp(settings)))
     {
-        system((boost::filesystem::system_complete(argv[0]).parent_path() / "launcher").string().c_str());
+#ifdef _WIN32
+        std::string path = "\"" + (boost::filesystem::system_complete(argv[0]).parent_path() / "launcher").string() + "\"";
+#else
+        std::string path = (boost::filesystem::system_complete(argv[0]).parent_path() / "launcher").string();
+#endif
+        system(path.c_str());
         return EXIT_SUCCESS;
     }
 
