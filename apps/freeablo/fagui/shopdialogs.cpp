@@ -161,4 +161,4 @@ namespace FAGui
         confirmPopup->addAction(buyAction);
         this->mGuiManager.mDialogManager.pushDialog(confirmPopup);
     }
-} // namespace FAGui
+}

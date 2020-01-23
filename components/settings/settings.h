@@ -34,4 +34,4 @@ namespace Settings
         struct Impl;
         std::unique_ptr<Impl> mImpl;
     };
-} // namespace Settings
+}

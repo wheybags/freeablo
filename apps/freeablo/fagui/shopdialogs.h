@@ -6,7 +6,7 @@ namespace FAWorld
 {
     class Item;
     struct StoreItem;
-} // namespace FAWorld
+}
 
 namespace FAGui
 {
@@ -75,4 +75,4 @@ namespace FAGui
         std::vector<FAWorld::StoreItem>& mItems;
         const FAWorld::Actor& mShopkeeper;
     };
-} // namespace FAGui
+}
