@@ -208,7 +208,6 @@ int main(int, char** argv)
 #endif
         system(path.c_str());
     }
-    
 
     return 0;
 }
