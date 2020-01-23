@@ -1,7 +1,7 @@
 # Decisions taken over the project lifetime
 
 ## What is this?
-See http://akazlou.com/posts/2015-11-09-every-project-should-have-decisions.html
+See https://akazlou.com/posts-output/2015-11-09-every-project-should-have-decisions/
 Bascially, the idea is to have a file in your projects repo, where you record the
 decisions you make over the course of the project's lifetime.
 

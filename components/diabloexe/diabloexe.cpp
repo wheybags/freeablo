@@ -111,7 +111,7 @@ namespace DiabloExe
     {
         std::string exeMD5 = getMD5(pathEXE);
         if (exeMD5.empty())
-            return {};
+            return {"", ""};
 
         Settings::Settings settings;
         std::string version = "";
@@ -131,7 +131,7 @@ namespace DiabloExe
         if (version == "")
         {
             std::cerr << "Unrecognised version of Diablo.exe" << std::endl;
-            return {};
+            return {"", ""};
         }
 
         else
