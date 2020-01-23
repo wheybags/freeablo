@@ -57,6 +57,23 @@ namespace FAWorld
         }
     }
 
+    void PlayerFactory::fillWithPotions(Player* player) const
+    {
+        // function for testing
+        const BasicInventory& inv = player->mInventory.getInv(EquipTargetType::inventory);
+
+        bool hasSlots = true;
+        while (hasSlots)
+        {
+            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
+
+            hasSlots = false;
+            for (const Item& slot : inv)
+                if (slot.isEmpty())
+                    hasSlots = true;
+        }
+    }
+
     void PlayerFactory::createWarrior(Player* player) const
     {
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortSword));

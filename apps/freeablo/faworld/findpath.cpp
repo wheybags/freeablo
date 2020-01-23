@@ -66,7 +66,7 @@ namespace FAWorld
         auto dx = abs(b.x - a.x);
         auto dy = abs(b.y - a.y);
 
-        auto straight = static_cast<size_t>(dx - dy);
+        auto straight = std::abs(dx - dy);
         auto diagonal = std::max(dx, dy) - straight;
 
         return straight * STRAIGHT_WEIGHT + diagonal * DIAGONAL_WEIGHT;

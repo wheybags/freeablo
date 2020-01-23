@@ -56,6 +56,14 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/itemfactory.h
     faworld/itemmap.cpp
     faworld/itemmap.h
+    faworld/missile/missile.cpp
+    faworld/missile/missile.h
+    faworld/missile/missileactorengagement.cpp
+    faworld/missile/missilecreation.cpp
+    faworld/missile/missileenums.h
+    faworld/missile/missilegraphic.cpp
+    faworld/missile/missilegraphic.h
+    faworld/missile/missilemovement.cpp
     faworld/monster.cpp
     faworld/monster.h
     faworld/monsterstats.cpp

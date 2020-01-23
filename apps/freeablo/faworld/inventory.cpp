@@ -64,6 +64,22 @@ namespace FAWorld
 
     bool BasicInventory::canFitItem(const Item& item) const
     {
+        if (item.getType() == ItemType::gold)
+        {
+            const auto maxGoldPerSlot = item.getMaxCount();
+            int32_t capacity = 0;
+
+            for (const auto& slot : mInventoryBox.getFlatVector())
+            {
+                if (slot.isEmpty())
+                    capacity += maxGoldPerSlot;
+                else if (slot.getType() == ItemType::gold)
+                    capacity += maxGoldPerSlot - slot.mCount;
+            }
+
+            return item.mCount <= capacity;
+        }
+
         Misc::Point itemSize{item.getInvSize()[0], item.getInvSize()[1]};
         if (mTreatAllItemsAs1by1)
             itemSize = Misc::Point{1, 1};

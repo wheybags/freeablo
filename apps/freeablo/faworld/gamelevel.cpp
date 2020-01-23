@@ -3,7 +3,9 @@
 #include "actor.h"
 #include "actorstats.h"
 #include "itemmap.h"
+#include "missile/missile.h"
 #include "world.h"
+#include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
 #include <misc/assert.h>
 
@@ -227,21 +229,39 @@ namespace FAWorld
 
             if (sprite)
             {
-                frame += static_cast<int32_t>(mActors[i]->getPos().getDirection()) * sprite->getAnimLength();
+                frame += static_cast<int32_t>(mActors[i]->getPos().getDirection().getDirection8()) * sprite->getAnimLength();
                 state->mObjects.push_back({sprite, static_cast<uint32_t>(frame), mActors[i]->getPos(), hoverColor});
             }
+        }
 
-            for (auto& p : mItemMap->mItems)
+        for (const auto& actor : mActors)
+        {
+            for (const auto& missile : actor->getMissiles())
             {
-                auto sf = p.second.getSpriteFrame();
-                FARender::ObjectToRender o;
-                o.spriteGroup = sf.first;
-                o.frame = sf.second;
-                o.position = Position(p.first.position);
-                if (p.first == hoverStatus.hoveredItemTile)
-                    o.hoverColor = itemHoverColor();
-                state->mItems.push_back(o);
+                // Only display missiles for this (the currently displayed) level.
+                if (missile->getLevel() != this)
+                    continue;
+                for (const auto& graphic : missile->mGraphics)
+                {
+                    auto tmp = graphic->getCurrentFrame();
+                    auto spriteGroup = tmp.first;
+                    auto frame = tmp.second;
+                    if (spriteGroup)
+                        state->mObjects.push_back({spriteGroup, static_cast<uint32_t>(frame), graphic->mCurPos, boost::none});
+                }
             }
+        }
+
+        for (auto& p : mItemMap->mItems)
+        {
+            auto sf = p.second.getSpriteFrame();
+            FARender::ObjectToRender o;
+            o.spriteGroup = sf.first;
+            o.frame = sf.second;
+            o.position = Position(p.first.position);
+            if (p.first == hoverStatus.hoveredItemTile)
+                o.hoverColor = itemHoverColor();
+            state->mItems.push_back(o);
         }
     }
 
@@ -271,17 +291,17 @@ namespace FAWorld
             return res;
         };
 
-        if (direction == Misc::Direction::none)
+        if (direction.isNone())
         {
             if (tryDrop(position))
                 return true;
-            direction = Misc::Direction::south;
+            direction = Misc::Direction(Misc::Direction8::south);
         }
 
-        constexpr auto directionCnt = 8;
-        for (auto diff : {0, -1, 1})
+        for (auto diffDegrees : {0, -45, 45})
         {
-            auto dir = static_cast<Misc::Direction>((static_cast<int32_t>(direction) + diff + directionCnt) % directionCnt);
+            Misc::Direction dir = direction;
+            dir.adjust(diffDegrees);
             auto pos = Misc::getNextPosByDir(position, dir);
             if (tryDrop(pos))
                 return true;

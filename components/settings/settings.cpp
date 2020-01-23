@@ -303,4 +303,4 @@ namespace Settings
         const bool hasKey = mUserIni.GetAllValues(section.c_str(), key.c_str(), keys);
         return hasKey;
     }
-} // namespace Settings
+}

@@ -76,6 +76,7 @@ namespace FAWorld
         bool isBeltEquippable() const;
         int32_t getMaxCount() const;
         std::array<int32_t, 2> getInvSize() const;
+        int32_t getInvVolume() const;
 
         bool mIsReal = false;
         int32_t mCount = 1;

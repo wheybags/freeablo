@@ -65,6 +65,9 @@ namespace DiabloExe
         loadBaseItems(exe, codeOffset);
         loadUniqueItems(exe, codeOffset);
         loadAffixes(exe, codeOffset);
+        loadMissileGraphicsTable(exe, codeOffset);
+        loadMissileDataTable(exe);
+        loadSpellsTable(exe, codeOffset);
     }
 
     DiabloExe::~DiabloExe() {}
@@ -111,7 +114,7 @@ namespace DiabloExe
     {
         std::string exeMD5 = getMD5(pathEXE);
         if (exeMD5.empty())
-            return {};
+            return {"", ""};
 
         Settings::Settings settings;
         std::string version = "";
@@ -131,7 +134,7 @@ namespace DiabloExe
         if (version == "")
         {
             std::cerr << "Unrecognised version of Diablo.exe" << std::endl;
-            return {};
+            return {"", ""};
         }
 
         else
@@ -455,6 +458,90 @@ namespace DiabloExe
         mCharacters["Warrior"] = meleeCharacter;
         mCharacters["Rogue"] = rangerCharacter;
         mCharacters["Sorcerer"] = mageCharacter;
+    }
+
+    void DiabloExe::loadMissileGraphicsTable(FAIO::FAFileObject& exe, size_t codeOffset)
+    {
+        const uint64_t offset = mSettings->get<uint64_t>("Missiles", "missileGraphicsOffset");
+        const int len = mSettings->get<uint64_t>("Missiles", "missileGraphicsTableLen");
+        const int rowSize = mSettings->get<uint64_t>("Missiles", "missileGraphicsRowSize");
+        for (int i = 0; i < len; i++)
+        {
+            exe.FAfseek(offset + i * rowSize, SEEK_SET);
+            auto missileGrapicsId = exe.read8();
+            auto& missileGraphics = mMissileGraphicsTable[missileGrapicsId];
+            missileGraphics.mNumAnimationFiles = exe.read8();
+            exe.read16(); // Padding
+            auto filenameOffset = exe.read32();
+            missileGraphics.mFlags = exe.read32();
+            for (int j = 0; j < 16; j++)
+                exe.read32(); // NULL pointer
+            for (auto& animationDelay : missileGraphics.mAnimationDelays)
+                animationDelay = exe.read8();
+            auto filename = exe.readCStringFromWin32Binary(filenameOffset, codeOffset);
+            missileGraphics.mFilename = Misc::StringUtils::toLower(filename);
+        }
+    }
+
+    void DiabloExe::loadMissileDataTable(FAIO::FAFileObject& exe)
+    {
+        const uint64_t offset = mSettings->get<uint64_t>("Missiles", "missileDataOffset");
+        const int len = mSettings->get<uint64_t>("Missiles", "missileDataTableLen");
+        const int rowSize = mSettings->get<uint64_t>("Missiles", "missileDataRowSize");
+        for (int i = 0; i < len; i++)
+        {
+            exe.FAfseek(offset + i * rowSize, SEEK_SET);
+            auto missileId = exe.read8();
+            auto& missileData = mMissileDataTable[missileId];
+            exe.read8();  // Padding
+            exe.read16(); // Padding
+            exe.read32(); // Function pointer
+            exe.read32(); // Function pointer
+            missileData.mDraw = exe.read32();
+            missileData.mType = exe.read8();
+            missileData.mResist = exe.read8();
+            missileData.mMissileGraphicsId = exe.read8();
+            exe.read8(); // Padding
+            int32_t soundEffectId = exe.read32();
+            missileData.mSoundEffect = soundEffectId == -1 ? "" : mSoundFilename[soundEffectId];
+            int32_t impactSoundEffectId = exe.read32();
+            missileData.mImpactSoundEffect = impactSoundEffectId == -1 ? "" : mSoundFilename[impactSoundEffectId];
+        }
+    }
+
+    void DiabloExe::loadSpellsTable(FAIO::FAFileObject& exe, size_t codeOffset)
+    {
+        const uint64_t offset = mSettings->get<uint64_t>("Spells", "spellsOffset");
+        const int len = mSettings->get<uint64_t>("Spells", "spellsTableLen");
+        const int rowSize = mSettings->get<uint64_t>("Spells", "spellsRowSize");
+        for (int i = 0; i < len; i++)
+        {
+            exe.FAfseek(offset + i * rowSize, SEEK_SET);
+            auto spellId = exe.read8();
+            auto& spellData = mSpellsDataTable[spellId];
+            spellData.mManaCost = exe.read8();
+            spellData.mType = exe.read8();
+            exe.read8(); // Padding
+            auto nameOffset = exe.read32();
+            auto skillTextOffset = exe.read32();
+            spellData.mBookLvl = exe.read32();
+            spellData.mStaffLvl = exe.read32();
+            spellData.mTargeted = (bool)exe.read32();
+            spellData.mTownSpell = (bool)exe.read32();
+            spellData.mMinMagic = exe.read32();
+            spellData.mSoundEffect = exe.read8();
+            for (auto& missile : spellData.mMissiles)
+                missile = exe.read8();
+            spellData.mManaAdj = exe.read8();
+            spellData.mMinMana = exe.read8();
+            exe.read16(); // Padding
+            spellData.mStaffMin = exe.read32();
+            spellData.mStaffMax = exe.read32();
+            spellData.mBookCost = exe.read32();
+            spellData.mStaffCost = exe.read32();
+            spellData.mNameText = exe.readCStringFromWin32Binary(nameOffset, codeOffset);
+            spellData.mSkillText = exe.readCStringFromWin32Binary(skillTextOffset, codeOffset);
+        }
     }
 
     const Monster& DiabloExe::getMonster(const std::string& name) const { return mMonsters.find(name)->second; }

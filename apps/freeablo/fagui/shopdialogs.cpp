@@ -20,6 +20,27 @@ namespace FAGui
         return retval;
     }
 
+    ConfirmTransactionPopup::ConfirmTransactionPopup(GuiManager& guiManager, const MenuEntry& intro, const std::vector<MenuEntry>& desc, Transaction t)
+        : CharacterDialoguePopup(guiManager, true), mTransaction(t), mIntroduction(intro), mDescription(desc)
+    {
+    }
+
+    CharacterDialoguePopup::DialogData ConfirmTransactionPopup::getDialogData()
+    {
+        DialogData retval;
+        std::string transaction = mTransaction == Transaction::buy ? "buy" : "sell";
+        std::string message = "Are you sure you want to " + transaction + " this item?";
+        retval.introduction = {mIntroduction};
+        retval.addMenuOption(mDescription, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+        retval.addMenuOption({{""}, {message}, {""}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+        retval.addMenuOption({{"Yes"}}, mAction);
+        retval.addMenuOption({{"No"}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+
+        return retval;
+    }
+
+    void ConfirmTransactionPopup::addAction(std::function<CharacterDialoguePopup::UpdateResult()> act) { mAction = act; }
+
     ShopSellDialog::ShopSellDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::function<bool(const FAWorld::Item& item)> filter)
         : CharacterDialoguePopup(guiManager, true), mFilter(filter), mShopkeeper(shopkeeper)
     {
@@ -51,10 +72,15 @@ namespace FAGui
             {(boost::format("%2%            Your gold : %1%") % totalGold % (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?"))
                  .str(), TextColor::golden, false}};
 
-        for (FAWorld::EquipTarget item : sellableItems)
+        const MenuEntry& intro = retval.introduction[0];
+
+        for (FAWorld::EquipTarget& item : sellableItems)
         {
-            retval.addMenuOption(inventory.getItemAt(item).descriptionForMerchants(), [this, item]() {
-                this->sellItem(item);
+            const auto& desc = inventory.getItemAt(item).descriptionForMerchants();
+            ConfirmTransactionPopup::Transaction transaction = ConfirmTransactionPopup::Transaction::sell;
+            ConfirmTransactionPopup* confirmPopup = new ConfirmTransactionPopup(this->mGuiManager, intro, desc, transaction);
+            retval.addMenuOption(desc, [this, item, confirmPopup]() {
+                this->sellItem(item, confirmPopup);
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
         }
@@ -64,11 +90,31 @@ namespace FAGui
         return retval;
     }
 
-    void ShopSellDialog::sellItem(FAWorld::EquipTarget item)
+    void ShopSellDialog::sellItem(const FAWorld::EquipTarget& item, ConfirmTransactionPopup* confirmPopup)
     {
-        auto input = FAWorld::PlayerInput::SellItemData{item, mShopkeeper.getId()};
-        Engine::EngineMain::get()->getLocalInputHandler()->addInput(
-            FAWorld::PlayerInput(input, Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getId()));
+        auto& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
+        auto& invItem = inventory.getItemAt(item);
+        const auto price = invItem.getPrice();
+
+        auto goldItem = mGuiManager.mDialogManager.mWorld.getItemFactory().generateBaseItem(FAWorld::ItemId::gold);
+        goldItem.mCount = price - invItem.getInvVolume() * goldItem.getMaxCount();
+
+        if (!mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(goldItem))
+        {
+            this->mGuiManager.mDialogManager.pushDialog(new MessagePopup(this->mGuiManager, "You do not have enough room in inventory"));
+            return;
+        }
+
+        auto sellAction = [this, item]() {
+            FAWorld::PlayerInput::SellItemData input{item, mShopkeeper.getId()};
+            Engine::EngineMain::get()->getLocalInputHandler()->addInput(
+                FAWorld::PlayerInput(input, Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getId()));
+
+            return CharacterDialoguePopup::UpdateResult::PopDialog;
+        };
+
+        confirmPopup->addAction(sellAction);
+        this->mGuiManager.mDialogManager.pushDialog(confirmPopup);
     }
 
     ShopBuyDialog::ShopBuyDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::vector<FAWorld::StoreItem>& items)
@@ -84,6 +130,7 @@ namespace FAGui
         auto& playerStats = currPlayer->getPlayerStats();
         auto& inventory = currPlayer->mInventory;
         retval.introduction = {{(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str(), TextColor::golden, false}};
+        const auto& intro = retval.introduction[0];
 
         for (size_t i = 0; i < mItems.size(); i++)
         {
@@ -100,8 +147,10 @@ namespace FAGui
                 }
             }
 
-            retval.addMenuOption(description, [this, i]() {
-                this->buyItem(i);
+            retval.addMenuOption(item.item.descriptionForMerchants(), [this, i, &item, &intro]() {
+                ConfirmTransactionPopup::Transaction transaction = ConfirmTransactionPopup::Transaction::buy;
+                ConfirmTransactionPopup* confirmPopup = new ConfirmTransactionPopup(this->mGuiManager, intro, item.item.descriptionForMerchants(), transaction);
+                this->buyItem(i, confirmPopup);
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
         }
@@ -111,7 +160,7 @@ namespace FAGui
         return retval;
     }
 
-    void ShopBuyDialog::buyItem(size_t index)
+    void ShopBuyDialog::buyItem(size_t index, ConfirmTransactionPopup* confirmPopup)
     {
         FAWorld::StoreItem& item = mItems[index];
 
@@ -128,9 +177,16 @@ namespace FAGui
             return;
         }
 
-        // send the buy action to the input handler
-        auto input = FAWorld::PlayerInput::BuyItemData{item.storeId, mShopkeeper.getId()};
-        Engine::EngineMain::get()->getLocalInputHandler()->addInput(
-            FAWorld::PlayerInput(input, Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getId()));
+        auto buyAction = [&]() {
+            // send the buy action to the input handler
+            auto input = FAWorld::PlayerInput::BuyItemData{item.storeId, mShopkeeper.getId()};
+            Engine::EngineMain::get()->getLocalInputHandler()->addInput(
+                FAWorld::PlayerInput(input, Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getId()));
+
+            return CharacterDialoguePopup::UpdateResult::PopDialog;
+        };
+
+        confirmPopup->addAction(buyAction);
+        this->mGuiManager.mDialogManager.pushDialog(confirmPopup);
     }
 }

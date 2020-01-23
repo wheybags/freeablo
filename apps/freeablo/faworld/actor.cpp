@@ -8,9 +8,11 @@
 #include "behaviour.h"
 #include "equiptarget.h"
 #include "findpath.h"
+#include "missile/missile.h"
 #include "player.h"
 #include "world.h"
 #include <boost/format.hpp>
+#include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
@@ -45,6 +47,12 @@ namespace FAWorld
         }
 
         mAnimation.update();
+
+        for (auto& missile : mMissiles)
+            missile->update();
+        mMissiles.erase(
+            std::remove_if(mMissiles.begin(), mMissiles.end(), [](const std::unique_ptr<Missile::Missile>& missile) { return missile->isComplete(); }),
+            mMissiles.end());
     }
 
     Actor::Actor(World& world, const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath)
@@ -107,6 +115,11 @@ namespace FAWorld
 
         mActorStateMachine.reset(new StateMachine(this));
         mActorStateMachine->load(loader);
+
+        uint32_t missilesSize = loader.load<uint32_t>();
+        mMissiles.reserve(missilesSize);
+        for (uint32_t i = 0; i < missilesSize; i++)
+            mMissiles.push_back(boost::make_unique<Missile::Missile>(loader));
     }
 
     void Actor::save(FASaveGame::GameSaver& saver)
@@ -145,6 +158,10 @@ namespace FAWorld
         mInventory.save(saver);
 
         mActorStateMachine->save(saver);
+
+        saver.save(static_cast<uint32_t>(mMissiles.size()));
+        for (auto& missile : mMissiles)
+            missile->save(saver);
     }
 
     Actor::~Actor() = default;
@@ -317,5 +334,11 @@ namespace FAWorld
         // Nothing to do for base actor.
         // Players will get exp, Diablo may do a happy dance etc.
         (void)enemy;
+    }
+
+    void Actor::activateMissile(MissileId id, Misc::Point targetPoint)
+    {
+        auto missile = boost::make_unique<Missile::Missile>(id, *this, targetPoint);
+        mMissiles.push_back(std::move(missile));
     }
 }
