@@ -16,6 +16,7 @@ namespace FAWorld
         warrior = 0,
         rogue,
         sorcerer,
+        none,
     };
 
     // note that this function features misspelling of sorcerer as sorceror

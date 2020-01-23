@@ -67,8 +67,8 @@ namespace FAWorld
 
         const Misc::Point downStairsPos() const;
 
-        bool canActivate(const Misc::Point& point) const;
-        void activate(const Misc::Point& point);
+        bool isDoor(const Misc::Point& point) const;
+        bool activateDoor(const Misc::Point& point);
 
         int32_t getNextLevel();
 
@@ -85,7 +85,7 @@ namespace FAWorld
 
         void actorMapRefresh();
 
-        Misc::Point getFreeSpotNear(Misc::Point point, int32_t radius = 100) const;
+        Misc::Point getFreeSpotNear(Misc::Point point, int32_t radius = std::numeric_limits<int32_t>::max()) const;
 
         virtual bool isPassable(const Misc::Point& point, const FAWorld::Actor* forActor) const;
 

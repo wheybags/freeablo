@@ -22,6 +22,28 @@ namespace FAGui
         std::string mMessage;
     };
 
+    class ConfirmTransactionPopup : public CharacterDialoguePopup
+    {
+    public:
+        enum class Transaction
+        {
+            buy,
+            sell
+        };
+
+        ConfirmTransactionPopup(GuiManager& guiManager, const std::string& intro, const std::vector<std::string>& desc, Transaction t);
+        void addAction(std::function<CharacterDialoguePopup::UpdateResult()> action);
+
+    protected:
+        virtual DialogData getDialogData() override;
+
+    private:
+        Transaction mTransaction;
+        std::string mIntroduction;
+        std::vector<std::string> mDescription;
+        std::function<CharacterDialoguePopup::UpdateResult()> mAction;
+    };
+
     class ShopSellDialog : public CharacterDialoguePopup
     {
     public:
@@ -31,7 +53,7 @@ namespace FAGui
         virtual DialogData getDialogData() override;
 
     private:
-        void sellItem(FAWorld::EquipTarget item);
+        void sellItem(const FAWorld::EquipTarget& item, ConfirmTransactionPopup* confirmPopup);
 
     private:
         std::function<bool(const FAWorld::Item& item)> mFilter;
@@ -47,7 +69,7 @@ namespace FAGui
         virtual DialogData getDialogData() override;
 
     private:
-        void buyItem(size_t index);
+        void buyItem(size_t index, ConfirmTransactionPopup* confirmPopup);
 
     private:
         std::vector<FAWorld::StoreItem>& mItems;

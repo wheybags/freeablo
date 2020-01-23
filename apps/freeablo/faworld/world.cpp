@@ -71,6 +71,7 @@ namespace FAWorld
         }
 
         mNextId = loader.load<int32_t>();
+        mNextPlayerClass = loader.load<int32_t>();
         mStoreData->load(loader);
 
         loader.runFunctionsToRunAtEnd();
@@ -98,6 +99,7 @@ namespace FAWorld
         }
 
         saver.save(mNextId);
+        saver.save(mNextPlayerClass);
         mStoreData->save(saver);
     }
 
@@ -305,14 +307,26 @@ namespace FAWorld
             {
                 case PlayerInput::Type::PlayerJoined:
                 {
-                    FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, "Warrior");
+                    if (Engine::EngineMain::get()->mMultiplayer->isPlayerRegistered(input.mData.dataPlayerJoined.peerId))
+                        break;
+
+                    std::string nextPlayerClass;
+                    if (mNextPlayerClass == 0)
+                        nextPlayerClass = "Warrior";
+                    else if (mNextPlayerClass == 1)
+                        nextPlayerClass = "Rogue";
+                    else
+                        nextPlayerClass = "Sorcerer";
+
+                    // hacky method to make different players use different classes
+                    // TODO: remove this when we have a proper character system
+                    mNextPlayerClass = (mNextPlayerClass + 1) % 3;
+
+                    FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, nextPlayerClass);
                     registerPlayer(newPlayer);
                     FAWorld::GameLevel* level = getLevel(0);
 
-                    Misc::Point spawnPoint = level->getFreeSpotNear(level->upStairsPos());
-                    release_assert(spawnPoint.isValid()); // TODO: this should be handled more elegantly
-
-                    newPlayer->teleport(level, FAWorld::Position(spawnPoint));
+                    newPlayer->teleport(level, FAWorld::Position(level->getFreeSpotNear(level->upStairsPos())));
                     Engine::EngineMain::get()->mMultiplayer->registerNewPlayer(newPlayer, input.mData.dataPlayerJoined.peerId);
 
                     break;
@@ -320,12 +334,15 @@ namespace FAWorld
                 case PlayerInput::Type::PlayerLeft:
                 {
                     // a little unsubtle, but it'll do for now.
-                    getActorById(input.mActorId)->die();
+                    if (Actor* actor = getActorById(input.mActorId))
+                        actor->die();
                     break;
                 }
                 default:
                 {
-                    dynamic_cast<Player*>(this->getActorById(input.mActorId))->getPlayerBehaviour()->addInput(input);
+                    if (Player* player = dynamic_cast<Player*>(this->getActorById(input.mActorId)))
+                        player->getPlayerBehaviour()->addInput(input);
+                    break;
                 }
             }
         }

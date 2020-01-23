@@ -83,7 +83,7 @@ namespace Engine
                 }
                 else
                 {
-                    if (player->getLevel()->canActivate(clickedTile.pos) || !player->mInventory.getCursorHeld().isEmpty())
+                    if (player->getLevel()->isDoor(clickedTile.pos) || !player->mInventory.getCursorHeld().isEmpty())
                         mInputs.emplace_back(FAWorld::PlayerInput::TargetTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
                     else
                         mInputs.emplace_back(FAWorld::PlayerInput::DragOverTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());

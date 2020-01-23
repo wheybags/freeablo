@@ -26,14 +26,15 @@ endif()
 if (WIN32)
     set (CMAKE_SYSTEM_VERSION 8.1 CACHE TYPE INTERNAL FORCE)
 
-    set(desired_generator "Visual Studio 14 2015 Win64")
+    set(desired_generators "Visual Studio 14 2015 Win64" "Visual Studio 15 2017 Win64")
 
-    string(COMPARE EQUAL "${CMAKE_GENERATOR}" "${desired_generator}" generator_is_correct)
-    if (NOT generator_is_correct)
-        message(FATAL_ERROR "Incorrect generator, please run cmake with: -G \"${desired_generator}\"")
+    if (NOT "${CMAKE_GENERATOR}" IN_LIST desired_generators)
+        list(GET desired_generators 0 VS2015)
+        list(GET desired_generators 1 VS2017)
+        message(FATAL_ERROR "Incorrect generator, please run cmake with: -G \"${VS2015}\"\nor with -G \"${VS2017}\"")
     endif()
 
-    set(HUNTER_CMAKE_GENERATOR "${desired_generator}")
+    set(HUNTER_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 endif()
 
 
@@ -158,3 +159,19 @@ if(MSVC)
     set_property(TARGET launcher PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
     set_property(TARGET unit_tests PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 endif()
+
+
+# TODO: use the new FILE(CREATE_LINK) comand in newer cmake (+upgrade cmake on ci workers)
+if (WIN32)
+    string(REPLACE "/" "\\" SYM_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}\\resources")
+    string(REPLACE "/" "\\" SYM_DEST "${CMAKE_CURRENT_BINARY_DIR}\\resources")
+    
+    if (NOT EXISTS "${SYM_DEST}")
+        exec_program("cmd" ARGS "/wait" "/c" "mklink" "/j" "${SYM_DEST}" "${SYM_SOURCE}")
+    endif()
+else()
+    if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/resources")
+        execute_process(COMMAND "ln" "-s" "${CMAKE_CURRENT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources")
+    endif()
+endif()
+

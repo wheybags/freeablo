@@ -121,7 +121,7 @@ INSTANTIATE_TEST_CASE_P(FindPathPatternsParams,
                                           FindPathPatternsParams{"Goal point is not passable #1", basicMap(), Point(18, 7), Point{10, 10}, 13},
                                           FindPathPatternsParams{"Goal point is not passable #2", basicMap(), Point(18, 10), Point{10, 10}, 14}), );
 
-TEST(FindPathTests, walksStraightOnRectangleMap)
+TEST(FindPathTests, walksStraight_whenSomeWallsInTheMiddle)
 {
     const Point start{0, 1};
     const Point goal{14, 1};
@@ -137,6 +137,24 @@ TEST(FindPathTests, walksStraightOnRectangleMap)
 
     for (const auto& restrictedPosition : restrictedPositions)
         ASSERT_TRUE(std::end(path) == std::find(path.begin(), path.end(), restrictedPosition));
+}
+
+TEST(FindPathTests, walksStraight_vertically)
+{
+    FAWorld::LevelImplStub level(Map{{0, 0, 0, 0, 0}, //
+                                     {0, 0, 0, 0, 0}, //
+                                     {0, 0, 0, 0, 0}, //
+                                     {0, 0, 0, 0, 0}, //
+                                     {0, 0, 0, 0, 0}, //
+                                     {0, 0, 0, 0, 0}});
+    const Point start{2, 0};
+    const Point goal{2, 5};
+    const Points expected{{2, 0}, {2, 1}, {2, 2}, {2, 3}, {2, 4}, {2, 5}};
+
+    bool isReachable = false;
+    auto actual = FAWorld::pathFind(&level, nullptr, start, goal, isReachable, false);
+
+    ASSERT_EQ(actual, expected);
 }
 
 TEST(FindPathTests, walksOnLargeMap)

@@ -72,8 +72,13 @@ namespace FAWorld
 
     const Misc::Point GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
 
-    bool GameLevel::canActivate(const Misc::Point& point) const { return mLevel.canActivate(point); }
-    void GameLevel::activate(const Misc::Point& point) { mLevel.activate(point); }
+    bool GameLevel::isDoor(const Misc::Point& point) const { return mLevel.isDoor(point); }
+    bool GameLevel::activateDoor(const Misc::Point& point)
+    {
+        if (getActorAt(point))
+            return false;
+        return mLevel.activateDoor(point);
+    }
 
     int32_t GameLevel::getNextLevel() { return mLevel.getNextLevel(); }
 
@@ -114,7 +119,7 @@ namespace FAWorld
         Actor* blocking = nullptr;
         if (mActorMap2D.count(actor->getPos().current()))
             blocking = mActorMap2D[actor->getPos().current()];
-        debug_assert(blocking == actor || blocking == nullptr);
+        debug_assert(blocking == actor || blocking == nullptr || blocking->isDead());
 
         mActorMap2D[actor->getPos().current()] = actor;
 
@@ -122,7 +127,7 @@ namespace FAWorld
         {
             if (mActorMap2D.count(actor->getPos().next()))
                 blocking = mActorMap2D[actor->getPos().next()];
-            debug_assert(blocking == actor || blocking == nullptr);
+            debug_assert(blocking == actor || blocking == nullptr || blocking->isDead());
 
             mActorMap2D[actor->getPos().next()] = actor;
         }

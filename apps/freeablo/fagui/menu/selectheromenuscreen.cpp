@@ -66,9 +66,34 @@ namespace FAGui
                     ret = DrawFunctionResult::setActive;
                 if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_DOUBLE))
                     ret = DrawFunctionResult::executeAction;
+
                 if (isActive)
                 {
-                    mSelectedCharacterInfo = characterInfo{type, mMenuHandler.engine().exe().getCharacterStat(text)};
+                    if (type != FAWorld::PlayerClass::none)
+                    {
+                        std::string classLookup;
+                        switch (type)
+                        {
+                            case FAWorld::PlayerClass::warrior:
+                                classLookup = "Warrior";
+                                break;
+                            case FAWorld::PlayerClass::rogue:
+                                classLookup = "Rogue";
+                                break;
+                            case FAWorld::PlayerClass::sorcerer:
+                                classLookup = "Sorcerer";
+                                break;
+                            case FAWorld::PlayerClass::none:
+                                break;
+                        }
+
+                        mSelectedCharacterInfo = characterInfo{type, mMenuHandler.engine().exe().getCharacterStat(classLookup)};
+                    }
+                    else
+                    {
+                        mSelectedCharacterInfo = boost::none;
+                    }
+
                     auto frame = mFocus->getCurrentFrame();
                     auto frameRect = nk_rect(0, 0, frame.first->getWidth(), frame.first->getHeight());
                     nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::left, valign_t::center));
@@ -76,6 +101,7 @@ namespace FAGui
                     nk_layout_space_push(ctx, alignRect(frameRect, rect, halign_t::right, valign_t::center));
                     nk_image(ctx, frame.first->getNkImage(frame.second));
                 }
+
                 return ret;
             };
         };
@@ -92,6 +118,17 @@ namespace FAGui
                                   mMenuHandler.engine().startGame("Sorcerer");
                                   return ActionResult::stopDrawing;
                               }});
+
+        // TODO: this is hacky, we should recreate the original character select gui
+        FILE* saveFile = fopen("save.sav", "rb");
+        if (saveFile)
+        {
+            fclose(saveFile);
+            mMenuItems.push_back({drawItem("Load Game", {262, 377, 320, 33}, FAWorld::PlayerClass::none), [&]() {
+                                      mMenuHandler.engine().startGameFromSave("save.sav");
+                                      return ActionResult::stopDrawing;
+                                  }});
+        }
     }
 
     void SelectHeroMenuScreen::setType(ContentType type)

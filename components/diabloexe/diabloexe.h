@@ -110,7 +110,14 @@ namespace DiabloExe
         const std::map<uint8_t, MissileData>& getMissileDataTable() const { return mMissileDataTable; }
         const std::map<uint8_t, SpellData>& getSpellsDataTable() const { return mSpellsDataTable; }
 
-        static std::string getVersion(const std::string& pathEXE);
+        struct VersionResult
+        {
+            std::string version;
+            std::string iniPath;
+
+            bool empty() const { return version.empty(); }
+        };
+        static VersionResult getVersion(const std::string& pathEXE);
 
     private:
         static std::string getMD5(const std::string& pathEXE);
@@ -130,7 +137,7 @@ namespace DiabloExe
 
         std::unique_ptr<Settings::Settings> mSettings;
 
-        std::string mVersion;
+        VersionResult mVersion;
         std::map<std::string, Monster> mMonsters;
         std::map<std::string, Npc> mNpcs;
         std::map<std::string, CharacterStats> mCharacters;

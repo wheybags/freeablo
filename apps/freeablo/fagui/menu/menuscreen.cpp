@@ -62,17 +62,17 @@ namespace FAGui
 
     void MenuScreen::notify(Engine::KeyboardInputAction action)
     {
+        if (action == Engine::KeyboardInputAction::reject && mRejectAction)
+            mRejectAction();
+
         if (mMenuItems.empty())
             return;
+
         switch (action)
         {
             case Engine::KeyboardInputAction::accept:
                 mMenuItems[mActiveItemIndex].action();
                 return;
-            case Engine::KeyboardInputAction::reject:
-                if (mRejectAction)
-                    mRejectAction();
-                break;
             case Engine::KeyboardInputAction::nextOption:
                 mActiveItemIndex = (mActiveItemIndex + 1) % mMenuItems.size();
                 break;

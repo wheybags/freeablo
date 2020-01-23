@@ -64,15 +64,6 @@ mkdir build
 cd build
 ```
 
-symlink the resources folder (linux/unix):
-```bash
-ln -s ../resources
-```
-symlink the resources folder (windows):
-```
-mklink /j resources ..\resources
-```
-
 call cmake:
 ```bash
 cmake ..
@@ -91,47 +82,4 @@ Please feel free to submit bug reports on the github issue tracker at https://gi
 
 
 # Changelog
-
-## v0.3 [5 Aug 2015]
-
-- Bugfix - monsters spawn on level stairs #112
-- Threading refactor #107
-- Hotkey selection GUI #106
-- level 3 dungeon generation #103
-- UI chroma key transparency #96
-- UI animation #95
-- Bugfix - gui clicks register as movement clicks #88
-- Initial version of launcher #33
-- sound #26
-- better celview gui #134
-- Bugfix - music memory leak #111
-- Bugfix - exit when DIABDAT.MPQ not found #114, #115
-
-## v0.2 [3 Dec 2014]
-
-- Bugfix - MPQ filename case sensitivity #78, #76
-- Bugfix - Deadlock on caertain command line args
-- Bugfix - Player-npc clipping #97
-- Bugfix - Reading freed memory in FAIO 6f098b1
-- Config File parsing #81
-- LibRocket Gui framework #82, #86
-- Improved CEL rendering #85, #91
-- Inventory and char menu placeholders #86
-- Pause menu #90
-- Main menu #94
-- Keybinding configuration framework #98
-- Music #99
-- SDL1 support removed d4da725
-- Dungeon level 2 generation #93
-
-## v0.1 [24 Apr 2014]
-
-- CEL / CL2 decoding
-- Level rendering
-- Level Generation
-- Level switching
-- Town NPCS
-- Mouse movement
-- Animation
-- Doors
-- Basic collision
+See [changelog.md](changelog.md)

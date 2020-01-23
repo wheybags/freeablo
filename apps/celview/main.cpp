@@ -12,8 +12,11 @@
 #include <nuklearmisc/widgets.h>
 #include <render/render.h>
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
+    if (argc > 2)
+        message_and_abort_fmt("Usage: %s [filename]", argv[0]);
+
     Render::RenderSettings renderSettings;
     renderSettings.windowWidth = 800;
     renderSettings.windowHeight = 600;
@@ -158,6 +161,13 @@ int main(int, char**)
                         settings.save();
 
                         faioInitDone = true;
+
+                        if (argc > 1)
+                        {
+                            selectedImage = argv[1];
+                            frame = 0;
+                            nextImage = std::unique_ptr<NuklearMisc::GuiSprite>(guiHandler.getSprite(new Render::SpriteGroup(selectedImage)));
+                        }
                     }
                 }
 

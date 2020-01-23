@@ -65,6 +65,31 @@ namespace FAWorld
                     {
                         actor.mMoveHandler.setDestination(tile.position, true);
                     }
+
+                    break;
+                }
+
+                case Target::Type::Door:
+                {
+                    Misc::Point targetDoor = actor.mTarget.get<Misc::Point>();
+
+                    if (!actor.getLevel()->isDoor(targetDoor))
+                    {
+                        actor.mTarget.clear();
+                        break;
+                    }
+
+                    if (actor.getPos().isNear(Position(targetDoor)))
+                    {
+                        actor.getLevel()->activateDoor(targetDoor);
+                        actor.mTarget.clear();
+                    }
+                    else
+                    {
+                        actor.mMoveHandler.setDestination(targetDoor, true);
+                    }
+
+                    break;
                 }
 
                 case Target::Type::None:

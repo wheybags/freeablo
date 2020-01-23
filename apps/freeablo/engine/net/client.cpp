@@ -12,19 +12,17 @@
 
 namespace Engine
 {
-    Client::Client(LocalInputHandler& localInputHandler) : mLocalInputHandler(localInputHandler)
+    Client::Client(LocalInputHandler& localInputHandler, const std::string& serverAddress) : mLocalInputHandler(localInputHandler)
     {
         if (0 != enet_initialize())
         {
             std::cerr << "Unable to initialize networking library." << std::endl;
         }
         mAddress.port = 6666;
-        enet_address_set_host(&mAddress, "127.0.0.1");
+        enet_address_set_host(&mAddress, serverAddress.c_str());
         mHost = enet_host_create(nullptr, 32, 2, 0, 0);
         mHost->checksum = enet_crc32;
         mServerPeer = enet_host_connect(mHost, &mAddress, CHANNEL_ID_END, 0);
-
-        enet_peer_timeout(mServerPeer, 99999, 99999, 99999);
     }
 
     Client::~Client()
@@ -67,6 +65,9 @@ namespace Engine
                 }
                 case ENET_EVENT_TYPE_DISCONNECT:
                 {
+                    if (!mConnected)
+                        mConnectionFailed = true;
+                    mConnected = false;
                     break;
                 }
                 case ENET_EVENT_TYPE_NONE:
@@ -75,6 +76,8 @@ namespace Engine
                 }
                 case ENET_EVENT_TYPE_CONNECT:
                 {
+                    mConnected = true;
+                    enet_peer_timeout(mServerPeer, 99999, 99999, 99999);
                     break;
                 }
                 default:
@@ -116,6 +119,10 @@ namespace Engine
 
         mServerStatesForFullVerify.erase(tick);
     }
+
+    bool Client::isPlayerRegistered(uint32_t peerId) const { return mRegisteredClientIds.count(peerId) != 0; }
+
+    void Client::registerNewPlayer(FAWorld::Player*, uint32_t peerId) { mRegisteredClientIds.insert(peerId); }
 
     void Client::processServerPacket(const ENetEvent& event)
     {

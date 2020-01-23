@@ -85,6 +85,10 @@ namespace Render
         if (screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
 
+        // Update screen with/height, as starting full screen window in
+        // Windows does not trigger a SDL_WINDOWEVENT_RESIZED event.
+        SDL_GetWindowSize(screen, &WIDTH, &HEIGHT);
+
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
