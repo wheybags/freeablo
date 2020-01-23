@@ -32,7 +32,8 @@ namespace FAGui
 
             retval.introduction = {{td.at("introductionHeader1"), TextColor::golden, false}, {td.at("introductionHeader2"), TextColor::golden, false}};
 
-            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}},
+                                 []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
             retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
@@ -56,7 +57,8 @@ namespace FAGui
 
             retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}},
+                                 []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
             retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
@@ -80,11 +82,10 @@ namespace FAGui
 
             retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}},
+                                 []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() {
-                return CharacterDialoguePopup::UpdateResult::DoNothing;
-            });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("buy")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("sell")}}, [this]() {
                 this->openSellDialog();
@@ -124,9 +125,11 @@ namespace FAGui
 
             retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({{td.at("talk"), TextColor::blue}, {"", TextColor::white, false}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}, {"", TextColor::white, false}},
+                                 []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({{td.at("introduction1")}, {td.at("introduction2")}, {td.at("introduction3")}, {"", TextColor::white, false}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction1")}, {td.at("introduction2")}, {td.at("introduction3")}, {"", TextColor::white, false}},
+                                 []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
             retval.addMenuOption({{td.at("look")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
@@ -150,7 +153,8 @@ namespace FAGui
 
             retval.introduction = {{td.at("introductionHeader1"), TextColor::golden, false}, {td.at("introductionHeader2"), TextColor::golden, false}};
 
-            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}},
+                                 []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
             retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("heal")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
@@ -176,7 +180,8 @@ namespace FAGui
 
             retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}},
+                                 []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
             retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("identify")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
@@ -201,7 +206,8 @@ namespace FAGui
 
             retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}},
+                                 []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
             retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
@@ -225,7 +231,8 @@ namespace FAGui
 
             retval.introduction = {{td.at("introductionHeader1"), TextColor::golden, false}, {td.at("introductionHeader2"), TextColor::golden, false}};
 
-            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {"", TextColor::white, false}},
+                                 []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
             retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("buyBasic")}}, [this]() {

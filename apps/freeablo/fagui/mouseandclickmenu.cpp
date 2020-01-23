@@ -63,7 +63,8 @@ namespace FAGui
                 else
                     nk_widget(&dummy, ctx);
 
-                if (nk_widget_is_hovered(ctx) && (ctx->input.mouse.pos.x != mLastMousePosition.x || ctx->input.mouse.pos.y != mLastMousePosition.y) && entry.clickable)
+                if (nk_widget_is_hovered(ctx) && (ctx->input.mouse.pos.x != mLastMousePosition.x || ctx->input.mouse.pos.y != mLastMousePosition.y) &&
+                    entry.clickable)
                     mSelection = i;
 
                 nk_color color = getNkColor(entry.textColor);
