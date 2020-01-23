@@ -140,6 +140,13 @@ namespace FAWorld
     }
     std::pair<uint8_t, uint8_t> Item::getInvCoords() const { return {mInvX, mInvY}; }
     std::pair<uint8_t, uint8_t> Item::getCornerCoords() const { return {mCornerX, mCornerY}; }
+    int32_t Item::getInvVolume() const
+    {
+        if (isEmpty())
+            return 0;
+
+        return base().invSizeX * base().invSizeY;
+    }
 
     void Item::load(FASaveGame::GameLoader& loader)
     {
