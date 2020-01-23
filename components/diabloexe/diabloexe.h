@@ -39,6 +39,48 @@ namespace DiabloExe
         int frameCount;
     };
 
+    class MissileGraphics
+    {
+    public:
+        uint8_t mNumAnimationFiles;
+        std::string mFilename;
+        uint32_t mFlags;
+        int32_t mAnimationDelays[16];
+    };
+
+    class MissileData
+    {
+    public:
+        bool mDraw;
+        uint8_t mType;
+        uint8_t mResist;
+        uint8_t mMissileGraphicsId;
+        std::string mSoundEffect;
+        std::string mImpactSoundEffect;
+    };
+
+    class SpellData
+    {
+    public:
+        int32_t mManaCost;
+        int32_t mType; // Fire=0, lightning=1, magic=2
+        std::string mNameText;
+        std::string mSkillText;
+        int32_t mBookLvl;
+        int32_t mStaffLvl;
+        bool mTargeted;
+        bool mTownSpell;
+        int32_t mMinMagic;
+        int32_t mSoundEffect;
+        int32_t mMissiles[3];
+        int32_t mManaAdj;
+        int32_t mMinMana;
+        int32_t mStaffMin;
+        int32_t mStaffMax;
+        int32_t mBookCost;
+        int32_t mStaffCost;
+    };
+
     class DiabloExe
     {
     public:
@@ -64,6 +106,9 @@ namespace DiabloExe
         const std::vector<BaseItem>& getBaseItems() const { return mBaseItems; }
         const std::vector<UniqueItem>& getUniqueItems() const { return mUniqueItems; }
         const std::vector<Affix>& getAffixes() const { return mAffixes; }
+        const std::map<uint8_t, MissileGraphics>& getMissileGraphicsTable() const { return mMissileGraphicsTable; }
+        const std::map<uint8_t, MissileData>& getMissileDataTable() const { return mMissileDataTable; }
+        const std::map<uint8_t, SpellData>& getSpellsDataTable() const { return mSpellsDataTable; }
 
         struct VersionResult
         {
@@ -86,6 +131,9 @@ namespace DiabloExe
         void loadAffixes(FAIO::FAFileObject& exe, size_t codeOffset);
         void loadCharacterStats(FAIO::FAFileObject& exe);
         void loadTownerAnimation(FAIO::FAFileObject& exe);
+        void loadMissileGraphicsTable(FAIO::FAFileObject& exe, size_t codeOffset);
+        void loadMissileDataTable(FAIO::FAFileObject& exe);
+        void loadSpellsTable(FAIO::FAFileObject& exe, size_t codeOffset);
 
         std::unique_ptr<Settings::Settings> mSettings;
 
@@ -102,5 +150,8 @@ namespace DiabloExe
         std::vector<uint32_t> mItemGraphicsIdToDropSfxId;
         std::vector<uint32_t> mItemGraphicsIdToInvPlaceSfxId;
         std::unordered_map<std::string, FontData> mFontData;
+        std::map<uint8_t, MissileGraphics> mMissileGraphicsTable;
+        std::map<uint8_t, MissileData> mMissileDataTable;
+        std::map<uint8_t, SpellData> mSpellsDataTable;
     };
 }

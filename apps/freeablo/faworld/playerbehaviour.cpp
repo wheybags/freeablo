@@ -100,6 +100,17 @@ namespace FAWorld
                     mPlayer->startMeleeAttack(input.mData.dataAttackDirection.direction);
                 return;
             }
+            case PlayerInput::Type::CastSpell:
+            {
+                auto clickedPoint = Misc::Point(input.mData.dataCastSpell.x, input.mData.dataCastSpell.y);
+                mPlayer->castActiveSpell(clickedPoint);
+                return;
+            }
+            case PlayerInput::Type::PrepareSpell:
+            {
+                mPlayer->setActiveSpellNumber(input.mData.dataPrepareSpell.spellNumber);
+                return;
+            }
             case PlayerInput::Type::ChangeLevel:
             {
                 int32_t nextLevelIndex;

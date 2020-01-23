@@ -57,6 +57,9 @@ namespace FAWorld
         int getDamageBonus() const { /* placeholder */ return 0; }
         ItemBonus getItemBonus() const;
 
+        void setActiveSpellNumber(int32_t spellNumber);
+        void castActiveSpell(Misc::Point targetPoint);
+
         // This isn't serialised as it must be set before saving can occur.
         bool mPlayerInitialised = false;
 
@@ -70,5 +73,7 @@ namespace FAWorld
     private:
         PlayerStats mPlayerStats;
         PlayerClass mPlayerClass = PlayerClass::warrior;
+
+        uint32_t mActiveMissileIndex = 0; // Temporary for testing missiles.
     };
 }

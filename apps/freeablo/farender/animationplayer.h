@@ -35,6 +35,9 @@ namespace FARender
         void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationType type, int32_t startFrame = 0);
         void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int32_t> frameSequence);
 
+        void stopAnimation();
+        bool isPlaying() { return mCurrentAnim != nullptr; }
+
         //!
         //! Simply replaces the currently running animation.
         //! The difference from playAnimation is that it will not start at the start of the new animation,

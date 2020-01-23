@@ -101,5 +101,5 @@ namespace FAWorld
         mMovementType = MovementType::GridLocked;
     }
 
-    void Position::moveInDirection() { mMovementType = MovementType::FreeMovement; }
+    void Position::setFreeMovement() { mMovementType = MovementType::FreeMovement; }
 }

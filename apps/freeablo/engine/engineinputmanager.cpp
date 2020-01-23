@@ -39,11 +39,11 @@ namespace Engine
         }
     }
 
-    void EngineInputManager::notifyMouseObservers(MouseInputAction action, Misc::Point mousePosition, const Input::KeyboardModifiers& modifiers)
+    void EngineInputManager::notifyMouseObservers(MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers)
     {
         for (auto observer : mMouseObservers)
         {
-            observer->notify(action, mousePosition, mMouseDown, modifiers);
+            observer->notify(action, mousePosition, mouseDown, modifiers);
         }
     }
 
@@ -129,6 +129,12 @@ namespace Engine
             mMouseDown = true;
             mClick = true;
         }
+        if (key == Input::Key::KEY_RIGHT_MOUSE)
+        {
+            mMousePosition = Misc::Point{x, y};
+            mRightMouseDown = true;
+            mRightClick = true;
+        }
     }
 
     void EngineInputManager::mouseRelease(int32_t x, int32_t y, Input::Key key)
@@ -136,10 +142,17 @@ namespace Engine
         NuklearMisc::handleNuklearMouseEvent(mNkCtx, x, y, key, false, false);
 
         if (key == Input::Key::KEY_LEFT_MOUSE)
+        {
             mMouseDown = false;
-
-        if (!nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
-            notifyMouseObservers(MouseInputAction::MOUSE_RELEASE, mMousePosition, mKbMods);
+            if (!nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
+                notifyMouseObservers(MouseInputAction::MOUSE_RELEASE, mMousePosition, mMouseDown, mKbMods);
+        }
+        if (key == Input::Key::KEY_RIGHT_MOUSE)
+        {
+            mRightMouseDown = false;
+            if (!nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
+                notifyMouseObservers(MouseInputAction::RIGHT_MOUSE_RELEASE, mMousePosition, mRightMouseDown, mKbMods);
+        }
     }
 
     void EngineInputManager::mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel)
@@ -147,7 +160,7 @@ namespace Engine
         NuklearMisc::handleNuklearMouseMoveEvent(mNkCtx, x, y, xrel, yrel);
 
         if (!nk_item_is_any_active(mNkCtx))
-            notifyMouseObservers(MouseInputAction::MOUSE_MOVE, mMousePosition, mKbMods);
+            notifyMouseObservers(MouseInputAction::MOUSE_MOVE, mMousePosition, mMouseDown, mKbMods);
 
         mMousePosition = Misc::Point{x, y};
     }
@@ -184,6 +197,14 @@ namespace Engine
                 return "ToggleSpellbook";
             case KeyboardInputAction::toggleInventory:
                 return "ToggleInventory";
+            case KeyboardInputAction::prepareSpell1:
+                return "PrepareSpell1";
+            case KeyboardInputAction::prepareSpell2:
+                return "PrepareSpell2";
+            case KeyboardInputAction::prepareSpell3:
+                return "PrepareSpell3";
+            case KeyboardInputAction::prepareSpell4:
+                return "PrepareSpell4";
 
             case KeyboardInputAction::max:
                 break;
@@ -206,12 +227,18 @@ namespace Engine
 
         nk_input_end(mNkCtx);
 
-        if (!paused && mMouseDown && !nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
+        if (!paused && !nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
         {
-            if (mClick)
-                notifyMouseObservers(MouseInputAction::MOUSE_DOWN, mMousePosition, mKbMods);
-
-            mClick = false;
+            if (mMouseDown && mClick)
+            {
+                notifyMouseObservers(MouseInputAction::MOUSE_DOWN, mMousePosition, mMouseDown, mKbMods);
+                mClick = false;
+            }
+            if (mRightMouseDown && mRightClick)
+            {
+                notifyMouseObservers(MouseInputAction::RIGHT_MOUSE_DOWN, mMousePosition, mRightMouseDown, mKbMods);
+                mRightClick = false;
+            }
         }
     }
 }
