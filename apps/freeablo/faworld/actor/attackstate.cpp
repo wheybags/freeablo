@@ -9,9 +9,9 @@ namespace FAWorld
     {
         const std::string MeleeAttackState::typeId = "actorstate-attack-state";
 
-        void MeleeAttackState::save(FASaveGame::GameSaver& saver) const { saver.save(static_cast<int32_t>(mDirection)); }
+        void MeleeAttackState::save(FASaveGame::GameSaver& saver) const { mDirection.save(saver); }
 
-        MeleeAttackState::MeleeAttackState(FASaveGame::GameLoader& loader) { mDirection = static_cast<Misc::Direction>(loader.load<int32_t>()); }
+        MeleeAttackState::MeleeAttackState(FASaveGame::GameLoader& loader) { mDirection = Misc::Direction(loader); }
 
         MeleeAttackState::MeleeAttackState(Misc::Direction direction) : mDirection(direction) {}
 

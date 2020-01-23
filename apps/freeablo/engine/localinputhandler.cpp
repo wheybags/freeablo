@@ -67,7 +67,7 @@ namespace Engine
                 else if (modifiers.shift)
                 {
                     Misc::Direction direction =
-                        Vec2Fix(clickedTile.pos.x - player->getPos().current().x, clickedTile.pos.y - player->getPos().current().y).getIsometricDirection();
+                        Vec2Fix(clickedTile.pos.x - player->getPos().current().x, clickedTile.pos.y - player->getPos().current().y).getDirection();
                     mInputs.emplace_back(FAWorld::PlayerInput::AttackDirectionData{direction}, player->getId());
                 }
                 else

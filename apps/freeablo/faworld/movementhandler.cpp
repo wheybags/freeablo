@@ -80,7 +80,7 @@ namespace FAWorld
 
         Position oldPosition = mCurrentPos;
 
-        if (mCurrentPos.getDist() == 0)
+        if (!mCurrentPos.isMoving())
         {
             if (!positionReachedSent)
             {
@@ -110,10 +110,10 @@ namespace FAWorld
                         if (mLevel->isPassable(next, &actor))
                         {
                             auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
-                            Misc::Direction direction = vec.getIsometricDirection();
+                            Misc::Direction direction = vec.getDirection();
 
                             mCurrentPos.setDirection(direction);
-                            mCurrentPos.start();
+                            mCurrentPos.moveToPoint(next);
                             needsRepath = false;
                         }
                     }
@@ -129,11 +129,11 @@ namespace FAWorld
                             if (mLevel->isPassable(next, &actor))
                             {
                                 auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
-                                Misc::Direction direction = vec.getIsometricDirection();
+                                Misc::Direction direction = vec.getDirection();
 
                                 positionReachedSent = false;
                                 mCurrentPos.setDirection(direction);
-                                mCurrentPos.start();
+                                mCurrentPos.moveToPoint(next);
                                 needsRepath = false;
                                 mCurrentPathIndex++;
 
@@ -193,6 +193,6 @@ namespace FAWorld
     void MovementHandler::stopAndPointInDirection(Misc::Direction direction)
     {
         mCurrentPos.setDirection(direction);
-        mCurrentPos.stop();
+        mCurrentPos.stopMoving();
     }
 }

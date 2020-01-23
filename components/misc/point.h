@@ -20,6 +20,12 @@ namespace Misc
 
         inline Point operator+(const Point& v) const { return {x + v.x, y + v.y}; }
         inline Point operator-(const Point& v) const { return {x - v.x, y - v.y}; }
+        inline Point& operator+=(const Point& v)
+        {
+            x += v.x;
+            y += v.y;
+            return *this;
+        }
         inline Point operator*(double c) const { return {static_cast<int32_t>(x * c), static_cast<int32_t>(y * c)}; }
         inline Point operator/(int c) const { return {x / c, y / c}; }
         bool operator==(const Point& other) const { return x == other.x && y == other.y; }

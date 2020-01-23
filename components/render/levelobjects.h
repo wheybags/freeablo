@@ -3,6 +3,7 @@
 #include <boost/optional.hpp>
 #include <cel/pal.h>
 #include <misc/array2d.h>
+#include <misc/point.h>
 
 namespace Render
 {
@@ -11,9 +12,7 @@ namespace Render
         bool valid;
         int32_t spriteCacheIndex;
         int32_t spriteFrame;
-        int32_t x2;
-        int32_t y2;
-        int32_t dist;
+        Misc::Point fractionalPos;
         boost::optional<Cel::Colour> hoverColor;
     };
 
