@@ -32,10 +32,9 @@ namespace FAGui
         std::string message = "Are you sure you want to " + transaction + " this item?";
         retval.introduction = {mIntroduction};
 
-        // 3 lines per item
-        for (std::size_t i = 0; i < mDescription.size(); i += 3)
+        for (auto& desc : mDescription)
         {
-            mDescription[i].clickable = false;
+            desc.clickable = false;
         }
 
         retval.addMenuOption(mDescription, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
