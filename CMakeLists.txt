@@ -26,14 +26,15 @@ endif()
 if (WIN32)
     set (CMAKE_SYSTEM_VERSION 8.1 CACHE TYPE INTERNAL FORCE)
 
-    set(desired_generator "Visual Studio 14 2015 Win64")
+    set(desired_generators "Visual Studio 14 2015 Win64" "Visual Studio 15 2017 Win64")
 
-    string(COMPARE EQUAL "${CMAKE_GENERATOR}" "${desired_generator}" generator_is_correct)
-    if (NOT generator_is_correct)
-        message(FATAL_ERROR "Incorrect generator, please run cmake with: -G \"${desired_generator}\"")
+    if (NOT "${CMAKE_GENERATOR}" IN_LIST desired_generators)
+        list(GET desired_generators 0 VS2015)
+        list(GET desired_generators 1 VS2017)
+        message(FATAL_ERROR "Incorrect generator, please run cmake with: -G \"${VS2015}\"\nor with -G \"${VS2017}\"")
     endif()
 
-    set(HUNTER_CMAKE_GENERATOR "${desired_generator}")
+    set(HUNTER_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 endif()
 
 
