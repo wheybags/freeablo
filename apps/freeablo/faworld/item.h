@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "itemenums.h"
 #include "../fagui/menuentry.h"
+#include "itemenums.h"
 #include <cel/celfile.h>
 #include <diabloexe/affix.h>
 #include <diabloexe/baseitem.h>

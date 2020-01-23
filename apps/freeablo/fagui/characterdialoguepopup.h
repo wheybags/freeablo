@@ -1,6 +1,6 @@
 #pragma once
-#include "mouseandclickmenu.h"
 #include "menuentry.h"
+#include "mouseandclickmenu.h"
 #include <fa_nuklear.h>
 #include <vector>
 

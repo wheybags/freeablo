@@ -70,7 +70,9 @@ namespace FAGui
 
         retval.introduction = {
             {(boost::format("%2%            Your gold : %1%") % totalGold % (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?"))
-                 .str(), TextColor::golden, false}};
+                 .str(),
+             TextColor::golden,
+             false}};
 
         const MenuEntry& intro = retval.introduction[0];
 
@@ -129,6 +131,7 @@ namespace FAGui
         auto currPlayer = mGuiManager.mDialogManager.mWorld.getCurrentPlayer();
         auto& playerStats = currPlayer->getPlayerStats();
         auto& inventory = currPlayer->mInventory;
+
         retval.introduction = {{(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str(), TextColor::golden, false}};
         const auto& intro = retval.introduction[0];
 
@@ -138,9 +141,8 @@ namespace FAGui
             auto description = item.item.descriptionForMerchants();
             for (auto& desc : description)
             {
-                
-                if ((item.item.getReqDex() > playerStats.mDexterity) ||
-                    (item.item.getReqMagic() > playerStats.mMagic) ||
+
+                if ((item.item.getReqDex() > playerStats.mDexterity) || (item.item.getReqMagic() > playerStats.mMagic) ||
                     (item.item.getReqStr() > playerStats.mMagic))
                 {
                     desc.textColor = TextColor::red;
