@@ -57,7 +57,7 @@ namespace FAWorld
         }
     }
 
-    void PlayerFactory::fillWithPotions(Player *player) const
+    void PlayerFactory::fillWithPotions(Player* player) const
     {
         // function for testing
         const BasicInventory& inv = player->mInventory.getInv(EquipTargetType::inventory);
