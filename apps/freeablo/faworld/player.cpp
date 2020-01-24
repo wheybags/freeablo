@@ -113,6 +113,75 @@ namespace FAWorld
 
     ItemBonus Player::getItemBonus() const { return mInventory.getTotalItemBonus(); }
 
+    void Player::calculateStats(LiveActorStats& stats) const
+    {
+        BaseStats charStats = mStats.baseStats;
+
+        ItemStats itemStats; // TODO: fetch this from the items for real
+
+        stats.baseStats.strength = charStats.strength + itemStats.baseStats.strength;
+        stats.baseStats.magic = charStats.magic + itemStats.baseStats.magic;
+        stats.baseStats.dexterity = charStats.dexterity + itemStats.baseStats.dexterity;
+        stats.baseStats.vitality = charStats.vitality + itemStats.baseStats.vitality;
+
+        stats.toHitMelee.bonus = 0;
+        stats.toHitRanged.bonus = 0;
+        stats.toHitMagic.bonus = 0;
+
+        // TODO: make sure all the following calculations should be rounded
+
+        switch (mPlayerClass)
+        {
+            case PlayerClass::warrior:
+            {
+                stats.maxLife = (int32_t)(MakeFixed(2) * FixedPoint(charStats.vitality) + MakeFixed(2) * FixedPoint(itemStats.baseStats.vitality) +
+                                          MakeFixed(2) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxLife) + 18)
+                                    .round();
+
+                stats.maxMana = (int32_t)(MakeFixed(1) * FixedPoint(charStats.magic) + MakeFixed(1) * FixedPoint(itemStats.baseStats.magic) +
+                                          MakeFixed(1) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxMana) - 1)
+                                    .round();
+
+                stats.toHitMelee.bonus = 20;
+                stats.toHitRanged.bonus = 10;
+                break;
+            }
+            case PlayerClass::rogue:
+            {
+                stats.maxLife = (int32_t)(MakeFixed(1) * FixedPoint(charStats.vitality) + MakeFixed(1, 5) * FixedPoint(itemStats.baseStats.vitality) +
+                                          MakeFixed(2) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxLife) + 23)
+                                    .round();
+
+                stats.maxMana = (int32_t)(MakeFixed(1) * FixedPoint(charStats.magic) + MakeFixed(1, 5) * FixedPoint(itemStats.baseStats.magic) +
+                                          MakeFixed(2) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxMana) + 5)
+                                    .round();
+
+                stats.toHitRanged.bonus = 20;
+                break;
+            }
+            case PlayerClass::sorcerer:
+            {
+                stats.maxLife = (int32_t)(MakeFixed(1) * FixedPoint(charStats.vitality) + MakeFixed(1) * FixedPoint(itemStats.baseStats.vitality) +
+                                          MakeFixed(1) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
+                                    .round();
+
+                stats.maxMana = (int32_t)(MakeFixed(2) * FixedPoint(charStats.magic) + MakeFixed(2) * FixedPoint(itemStats.baseStats.magic) +
+                                          MakeFixed(2) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxMana) - 2)
+                                    .round();
+
+                stats.toHitMagic.bonus = 20;
+                break;
+            }
+            case PlayerClass::none:
+                invalid_enum(PlayerClass, mPlayerClass);
+        }
+
+        stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / MakeFixed(5) + itemStats.armorClass).round();
+        stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / MakeFixed(2) + itemStats.toHit).round();
+        stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.toHit).round();
+        stats.toHitMagic.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.magic)).round();
+    }
+
     void Player::init(const DiabloExe::CharacterStats& charStats)
     {
         mPlayerStats = {charStats};

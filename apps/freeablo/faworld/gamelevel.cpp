@@ -86,11 +86,11 @@ namespace FAWorld
 
     void GameLevel::update(bool noclip)
     {
-        for (size_t i = 0; i < mActors.size(); i++)
-        {
-            Actor* actor = mActors[i];
+        for (auto& actor : mActors)
+            actor->recalculateStats();
+
+        for (auto& actor : mActors)
             actor->update(noclip);
-        }
 
         for (auto& p : mItemMap->mItems)
             p.second.update();

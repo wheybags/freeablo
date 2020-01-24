@@ -19,7 +19,8 @@ namespace Misc
         MaxCurrentItem(Serial::Loader& loader);
         void save(Serial::Saver& saver);
 
-        bool change(T delta, bool allowClamp = true);
+        void add(T delta);
+        void setMax(T max);
         void reclamp(); ///< make sure the value is clamped into its range
     };
 }

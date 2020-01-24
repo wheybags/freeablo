@@ -56,7 +56,7 @@ namespace FAWorld
     }
 
     Actor::Actor(World& world, const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath)
-        : mMoveHandler(World::getTicksInPeriod(1)), mWorld(world)
+        : mMoveHandler(World::getTicksInPeriod(1)), mStats(*this), mWorld(world)
     {
         mFaction = Faction::heaven();
         if (!dieAnimPath.empty())
@@ -86,7 +86,7 @@ namespace FAWorld
         mIsTowner = true;
     }
 
-    Actor::Actor(World& world, FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(loader), mWorld(world)
+    Actor::Actor(World& world, FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(*this, loader), mWorld(world)
     {
         mFaction = FAWorld::Faction(FAWorld::FactionType(loader.load<uint8_t>()));
 
@@ -301,11 +301,17 @@ namespace FAWorld
         return true;
     }
 
-    void Actor::dealDamageToEnemy(Actor *enemy, uint32_t damage)
+    void Actor::dealDamageToEnemy(Actor* enemy, uint32_t damage)
     {
         enemy->takeDamage(damage);
         if (enemy->isDead())
             onEnemyKilled(enemy);
+    }
+
+    void Actor::calculateStats(LiveActorStats& stats) const
+    {
+        stats = LiveActorStats();
+        stats.maxLife = 10;
     }
 
     void Actor::doMeleeHit(const Misc::Point& point)
