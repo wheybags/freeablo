@@ -90,6 +90,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/world.h
 
     fagui/textcolor.h
+    fagui/textcolor.cpp
     fagui/guimanager.h
     fagui/guimanager.cpp
     fagui/dialogmanager.h
@@ -98,6 +99,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fagui/commandhistory.cpp
     fagui/nkhelpers.h
     fagui/nkhelpers.cpp
+    fagui/menuentry.h
     fagui/menuhandler.h
     fagui/menuhandler.cpp
     fagui/autocomplete.h

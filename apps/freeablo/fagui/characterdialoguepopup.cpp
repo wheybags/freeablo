@@ -44,7 +44,7 @@ namespace FAGui
                                                  DialogData data = getDialogData();
 
                                                  for (const auto& line : data.introduction)
-                                                     GuiManager::smallText(ctx, line.c_str());
+                                                     GuiManager::smallText(ctx, line.entry.c_str(), line.textColor);
 
                                                  // fill the rest of the window
                                                  struct nk_rect bounds = nk_widget_bounds(ctx);

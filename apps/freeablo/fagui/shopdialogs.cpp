@@ -14,13 +14,13 @@ namespace FAGui
     CharacterDialoguePopup::DialogData MessagePopup::getDialogData()
     {
         DialogData retval;
-        retval.introduction = {this->mMessage};
-        retval.addMenuOption({"OK"}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+        retval.introduction = {{this->mMessage, TextColor::golden, false}};
+        retval.addMenuOption({{"OK", TextColor::white, true}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
         return retval;
     }
 
-    ConfirmTransactionPopup::ConfirmTransactionPopup(GuiManager& guiManager, const std::string& intro, const std::vector<std::string>& desc, Transaction t)
+    ConfirmTransactionPopup::ConfirmTransactionPopup(GuiManager& guiManager, const MenuEntry& intro, const std::vector<MenuEntry>& desc, Transaction t)
         : CharacterDialoguePopup(guiManager, true), mTransaction(t), mIntroduction(intro), mDescription(desc)
     {
     }
@@ -31,10 +31,16 @@ namespace FAGui
         std::string transaction = mTransaction == Transaction::buy ? "buy" : "sell";
         std::string message = "Are you sure you want to " + transaction + " this item?";
         retval.introduction = {mIntroduction};
+
+        for (auto& desc : mDescription)
+        {
+            desc.clickable = false;
+        }
+
         retval.addMenuOption(mDescription, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-        retval.addMenuOption({"", message, ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-        retval.addMenuOption({"Yes"}, mAction);
-        retval.addMenuOption({"No"}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+        retval.addMenuOption({{}, {message, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+        retval.addMenuOption({{"Yes"}}, mAction);
+        retval.addMenuOption({{"No"}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
         return retval;
     }
@@ -69,9 +75,12 @@ namespace FAGui
         int32_t totalGold = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getTotalGold();
 
         retval.introduction = {
-            (boost::format("%2%            Your gold : %1%") % totalGold % (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?"))
-                .str()};
-        const std::string& intro = retval.introduction[0];
+            {(boost::format("%2%            Your gold : %1%") % totalGold % (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?"))
+                 .str(),
+             TextColor::golden,
+             false}};
+
+        const MenuEntry& intro = retval.introduction[0];
 
         for (FAWorld::EquipTarget& item : sellableItems)
         {
@@ -84,7 +93,7 @@ namespace FAGui
             });
         }
 
-        retval.addMenuOption({"Quit"}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+        retval.addMenuOption({{"Quit"}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
         return retval;
     }
@@ -125,13 +134,28 @@ namespace FAGui
     {
         DialogData retval;
 
-        auto& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
-        retval.introduction = {(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str()};
-        const std::string& intro = retval.introduction[0];
+        auto currPlayer = mGuiManager.mDialogManager.mWorld.getCurrentPlayer();
+        auto& playerStats = currPlayer->getPlayerStats();
+        auto& inventory = currPlayer->mInventory;
+
+        retval.introduction = {
+            {(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str(), TextColor::golden, false}};
+        const auto& intro = retval.introduction[0];
 
         for (size_t i = 0; i < mItems.size(); i++)
         {
             FAWorld::StoreItem& item = mItems[i];
+            auto description = item.item.descriptionForMerchants();
+            for (auto& desc : description)
+            {
+
+                if ((item.item.getReqDex() > playerStats.mDexterity) || (item.item.getReqMagic() > playerStats.mMagic) ||
+                    (item.item.getReqStr() > playerStats.mMagic))
+                {
+                    desc.textColor = TextColor::red;
+                }
+            }
+
             retval.addMenuOption(item.item.descriptionForMerchants(), [this, i, &item, &intro]() {
                 ConfirmTransactionPopup::Transaction transaction = ConfirmTransactionPopup::Transaction::buy;
                 ConfirmTransactionPopup* confirmPopup = new ConfirmTransactionPopup(this->mGuiManager, intro, item.item.descriptionForMerchants(), transaction);
@@ -140,7 +164,7 @@ namespace FAGui
             });
         }
 
-        retval.addMenuOption({"Quit"}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+        retval.addMenuOption({{"Quit"}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
         return retval;
     }

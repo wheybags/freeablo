@@ -30,12 +30,12 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {td.at("introductionHeader1"), td.at("introductionHeader2")};
+            retval.introduction = {{td.at("introductionHeader1"), TextColor::golden, false}, {td.at("introductionHeader2"), TextColor::golden, false}};
 
-            retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
         }
@@ -54,12 +54,12 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {td.at("introductionHeader")};
+            retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
         }
@@ -78,18 +78,18 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {td.at("introductionHeader")};
+            retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("buy")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("sell")}, [this]() {
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("buy")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("sell")}}, [this]() {
                 this->openSellDialog();
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
-            retval.addMenuOption({td.at("recharge")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+            retval.addMenuOption({{td.at("recharge")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
         }
@@ -120,15 +120,15 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {td.at("introductionHeader")};
+            retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({td.at("talk"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({td.at("introduction1"), td.at("introduction2"), td.at("introduction3"), ""},
+            retval.addMenuOption({{td.at("introduction1")}, {td.at("introduction2")}, {td.at("introduction3")}, {}},
                                  []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({td.at("look")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+            retval.addMenuOption({{td.at("look")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
         }
@@ -147,14 +147,14 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {td.at("introductionHeader1"), td.at("introductionHeader2")};
+            retval.introduction = {{td.at("introductionHeader1"), TextColor::golden, false}, {td.at("introductionHeader2"), TextColor::golden, false}};
 
-            retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("heal")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("buy")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("heal")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("buy")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
         }
@@ -173,13 +173,13 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {td.at("introductionHeader")};
+            retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("identify")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("identify")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
         }
@@ -198,12 +198,12 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {td.at("introductionHeader")};
+            retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
         }
@@ -222,22 +222,22 @@ namespace FAGui
             DialogData retval;
             auto& td = mActor->getTalkData();
 
-            retval.introduction = {td.at("introductionHeader1"), td.at("introductionHeader2")};
+            retval.introduction = {{td.at("introductionHeader1"), TextColor::golden, false}, {td.at("introductionHeader2"), TextColor::golden, false}};
 
-            retval.addMenuOption({td.at("introduction"), ""}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({td.at("talk")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("buyBasic")}, [this]() {
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("buyBasic")}}, [this]() {
                 this->openBuyDialog();
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
-            retval.addMenuOption({td.at("buyPremium")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("sell")}, [this]() {
+            retval.addMenuOption({{td.at("buyPremium")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("sell")}}, [this]() {
                 this->openSellDialog();
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
-            retval.addMenuOption({td.at("repair")}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-            retval.addMenuOption({td.at("quit")}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
+            retval.addMenuOption({{td.at("repair")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
         }

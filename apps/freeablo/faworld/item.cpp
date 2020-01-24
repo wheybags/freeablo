@@ -1,5 +1,6 @@
 #include "item.h"
 #include "../engine/enginemain.h"
+#include "../fagui/textcolor.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "itembonus.h"
@@ -96,22 +97,22 @@ namespace FAWorld
         return description;
     }
 
-    std::vector<std::string> Item::descriptionForMerchants() const
+    std::vector<FAGui::MenuEntry> Item::descriptionForMerchants() const
     {
-        std::vector<std::string> ret;
+        std::vector<FAGui::MenuEntry> ret;
         auto append = [](std::string& target, const std::string& new_part) {
             if (!target.empty())
                 target += ",  ";
             target += new_part;
         };
-        ret.push_back(getName());
+        ret.push_back({getName(), true});
         {
             // first line - affixes + charges
             std::string str;
             if (mMaxCharges > 0)
                 append(str, chargesStr());
             if (!str.empty())
-                ret.push_back(std::move(str));
+                ret.push_back({std::move(str), FAGui::TextColor::white, false});
         }
         {
             std::string str;
@@ -122,10 +123,10 @@ namespace FAWorld
             auto reqs = requirementsStr();
             append(str, reqs.empty() ? "No Required Attributes" : reqs);
             if (!str.empty())
-                ret.push_back(std::move(str));
+                ret.push_back({std::move(str), false});
         }
         {
-            ret.push_back("Price: " + std::to_string(this->getPrice()));
+            ret.push_back({"Price: " + std::to_string(this->getPrice()), FAGui::TextColor::white, false});
         }
         while (ret.size() < 4)
             ret.emplace_back();

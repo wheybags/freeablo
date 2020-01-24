@@ -31,7 +31,7 @@ namespace FAGui
             sell
         };
 
-        ConfirmTransactionPopup(GuiManager& guiManager, const std::string& intro, const std::vector<std::string>& desc, Transaction t);
+        ConfirmTransactionPopup(GuiManager& guiManager, const MenuEntry& intro, const std::vector<MenuEntry>& desc, Transaction t);
         void addAction(std::function<CharacterDialoguePopup::UpdateResult()> action);
 
     protected:
@@ -39,8 +39,8 @@ namespace FAGui
 
     private:
         Transaction mTransaction;
-        std::string mIntroduction;
-        std::vector<std::string> mDescription;
+        MenuEntry mIntroduction;
+        std::vector<MenuEntry> mDescription;
         std::function<CharacterDialoguePopup::UpdateResult()> mAction;
     };
 

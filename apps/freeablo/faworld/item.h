@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "../fagui/menuentry.h"
 #include "itemenums.h"
 #include <cel/celfile.h>
 #include <diabloexe/affix.h>
@@ -61,7 +62,7 @@ namespace FAWorld
         std::string getName() const;
         ItemQuality getQuality() const;
         std::string getFullDescription() const;
-        std::vector<std::string> descriptionForMerchants() const;
+        std::vector<FAGui::MenuEntry> descriptionForMerchants() const;
 
         void setUniqueId(uint32_t mUniqueId);
         uint32_t getUniqueId() const;
