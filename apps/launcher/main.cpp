@@ -10,9 +10,9 @@
 #include <climits>
 #include <faio/faio.h>
 #include <misc/assert.h>
+#include <misc/misc.h>
 #include <nuklearmisc/standaloneguispritehandler.h>
 #include <nuklearmisc/widgets.h>
-#include <misc/misc.h>
 
 int main(int, char** argv)
 {
