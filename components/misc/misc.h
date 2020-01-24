@@ -92,6 +92,8 @@ namespace Misc
     };
 
     std::string numberToHumanFileSize(double sizeInBytes);
+
+    std::string escapeSpacesOnPath(const std::string& str);
 }
 
 #define UNUSED_PARAM(x) (void)(x)
