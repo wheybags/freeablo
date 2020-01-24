@@ -2,8 +2,6 @@
 #include <misc/disablewarn.h>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
-#include <boost/uuid/detail/md5.hpp>
-#include <boost/endian/conversion.hpp>
 #include <misc/enablewarn.h>
 // clang-format on
 #include <iostream>
@@ -11,11 +9,10 @@
 #include <faio/fafileobject.h>
 #include <settings/settings.h>
 #include <diabloexe/diabloexe.h>
+#include <misc/md5.h>
 #include "engine/enginemain.h"
 
 namespace bpo = boost::program_options;
-namespace bud = boost::uuids::detail;
-namespace be = boost::endian;
 
 bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
 {
@@ -65,32 +62,32 @@ bool dataFilesSetUp(const Settings::Settings& settings)
     if (DiabloExe::DiabloExe::getVersion(exePath).empty())
         return false;
 
-    auto cond_reverse = [](unsigned int x) { return be::conditional_reverse(x, be::order::big, be::order::native); };
+    using digest_type = Misc::md5_byte_t[16];
 
-    const bud::md5::digest_type hashes[] = {
-        {cond_reverse(0x68f04986), cond_reverse(0x6b44688a), cond_reverse(0x7af65ba7), cond_reverse(0x66bef75a)}, // us version
+    constexpr digest_type hashes[] = {{0x68, 0xf0, 0x49, 0x86, 0x6b, 0x44, 0x68, 0x8a, 0x7a, 0xf6, 0x5b, 0xa7, 0x66, 0xbe, 0xf7, 0x5a}, // us version
 
-        {cond_reverse(0x011bc651), cond_reverse(0x8e616620), cond_reverse(0x6231080a), cond_reverse(0x4440b373)}}; // eu version
-
-    bud::md5 mpqMD5;
-    bud::md5::digest_type mpqDigest;
+                                      {0x01, 0x1b, 0xc6, 0x51, 0x8e, 0x61, 0x66, 0x20, 0x62, 0x31, 0x08, 0x0a, 0x44, 0x40, 0xb3, 0x73}}; // eu version
 
     std::ifstream mpqFile(mpqPath, std::ios::binary);
     mpqFile.seekg(0, std::ios::end);
-    int fileSize = mpqFile.tellg();
+    std::size_t fileSize = mpqFile.tellg();
     mpqFile.seekg(0, std::ios::beg);
     char* mpqContents = new char[fileSize];
     mpqFile.read(mpqContents, fileSize);
     mpqFile.close();
 
-    mpqMD5.process_bytes(mpqContents, fileSize);
-    mpqMD5.get_digest(mpqDigest);
+    Misc::md5_state_t state;
+    Misc::md5_byte_t digest[16];
+
+    Misc::md5_init(&state);
+    Misc::md5_append(&state, reinterpret_cast<Misc::md5_byte_t*>(mpqContents), fileSize);
+    Misc::md5_finish(&state, digest);
     delete[] mpqContents;
 
     bool mpqValid = false;
 
-    auto md5Equal = [](const bud::md5::digest_type& m1, const bud::md5::digest_type& m2) {
-        for (int i = 0; i < 4; i++)
+    auto md5Equal = [](const digest_type& m1, const digest_type& m2) {
+        for (int i = 0; i < 16; i++)
         {
             if (m1[i] != m2[i])
             {
@@ -103,7 +100,10 @@ bool dataFilesSetUp(const Settings::Settings& settings)
 
     for (const auto& hash : hashes)
     {
-        mpqValid = md5Equal(hash, mpqDigest);
+        mpqValid = md5Equal(hash, digest);
+
+        if (mpqValid)
+            break;
     }
 
     if (!mpqValid)
@@ -119,7 +119,18 @@ int fa_main(int argc, char** argv)
     // Check if we've been configured with data files, and if we haven't, run the launcher to prompt configuration
     if (!(settings.loadUserSettings() && dataFilesSetUp(settings)))
     {
-        system((boost::filesystem::system_complete(argv[0]).parent_path() / "launcher").string().c_str());
+        std::string temp = (boost::filesystem::system_complete(argv[0]).parent_path() / "launcher").string();
+
+        std::stringstream path;
+        for (char c : temp)
+        {
+            if (c == ' ')
+                path << "\\ ";
+            else
+                path << c;
+        }
+
+        system(path.str().c_str());
         return EXIT_SUCCESS;
     }
 

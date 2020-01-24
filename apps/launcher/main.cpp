@@ -12,6 +12,7 @@
 #include <misc/assert.h>
 #include <nuklearmisc/standaloneguispritehandler.h>
 #include <nuklearmisc/widgets.h>
+#include <sstream>
 
 int main(int, char** argv)
 {
@@ -200,7 +201,20 @@ int main(int, char** argv)
     }
 
     if (runFreeablo)
-        system((boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string().c_str());
+    {
+        std::string temp = (boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string();
+
+        std::stringstream path;
+        for (char c : temp)
+        {
+            if (c == ' ')
+                path << "\\ ";
+            else
+                path << c;
+        }
+
+        system(path.str().c_str());
+    }
 
     return 0;
 }
