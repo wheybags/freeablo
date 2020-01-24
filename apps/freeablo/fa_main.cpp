@@ -101,6 +101,9 @@ bool dataFilesSetUp(const Settings::Settings& settings)
     for (const auto& hash : hashes)
     {
         mpqValid = md5Equal(hash, digest);
+
+        if (mpqValid)
+            break;
     }
 
     if (!mpqValid)
