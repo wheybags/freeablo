@@ -135,7 +135,7 @@ namespace FAGui
         DialogData retval;
 
         auto currPlayer = mGuiManager.mDialogManager.mWorld.getCurrentPlayer();
-        auto& playerStats = currPlayer->getPlayerStats();
+        auto& playerStats = currPlayer->getStats().getCalculatedStats();
         auto& inventory = currPlayer->mInventory;
 
         retval.introduction = {
@@ -149,8 +149,8 @@ namespace FAGui
             for (auto& desc : description)
             {
 
-                if ((item.item.getReqDex() > playerStats.mDexterity) || (item.item.getReqMagic() > playerStats.mMagic) ||
-                    (item.item.getReqStr() > playerStats.mMagic))
+                if ((item.item.getRequiredDexterity() > playerStats.baseStats.dexterity) || (item.item.getRequiredMagic() > playerStats.baseStats.magic) ||
+                    (item.item.getRequiredStrength() > playerStats.baseStats.strength))
                 {
                     desc.textColor = TextColor::red;
                 }

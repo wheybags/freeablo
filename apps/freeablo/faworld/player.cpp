@@ -8,7 +8,6 @@
 #include "boost/algorithm/clamp.hpp"
 #include "diabloexe/characterstats.h"
 #include "equiptarget.h"
-#include "itembonus.h"
 #include "itemenums.h"
 #include "itemmap.h"
 #include "missile/missile.h"
@@ -100,24 +99,22 @@ namespace FAWorld
 
     int32_t Player::meleeDamageVs(const Actor* /*actor*/) const
     {
-        auto bonus = getItemBonus();
-        auto dmg = mWorld.mRng->randomInRange(bonus.minAttackDamage, bonus.maxAttackDamage);
-        dmg += dmg * getPercentDamageBonus() / 100;
-        dmg += getCharacterBaseDamage();
-        dmg += getDamageBonus();
-        // critical hit for warriors:
-        if (mPlayerClass == PlayerClass::warrior && mWorld.mRng->randomInRange(0, 99) < getCharacterLevel())
-            dmg *= 2;
-        return dmg;
-    }
+        const LiveActorStats& stats = mStats.getCalculatedStats();
+        int32_t damage = stats.meleeDamage;
+        damage += mWorld.mRng->randomInRange(stats.meleeDamageBonusRange.start, stats.meleeDamageBonusRange.end);
 
-    ItemBonus Player::getItemBonus() const { return mInventory.getTotalItemBonus(); }
+        if (mPlayerClass == PlayerClass::warrior && mWorld.mRng->randomInRange(0, 99) < mStats.mLevel)
+            damage *= 2;
+
+        return damage;
+    }
 
     void Player::calculateStats(LiveActorStats& stats) const
     {
         BaseStats charStats = mStats.baseStats;
 
-        ItemStats itemStats; // TODO: fetch this from the items for real
+        ItemStats itemStats;
+        mInventory.calculateItemBonuses(itemStats);
 
         stats.baseStats.strength = charStats.strength + itemStats.baseStats.strength;
         stats.baseStats.magic = charStats.magic + itemStats.baseStats.magic;
@@ -135,12 +132,15 @@ namespace FAWorld
             case PlayerClass::warrior:
             {
                 stats.maxLife = (int32_t)(MakeFixed(2) * FixedPoint(charStats.vitality) + MakeFixed(2) * FixedPoint(itemStats.baseStats.vitality) +
-                                          MakeFixed(2) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxLife) + 18)
+                                          MakeFixed(2) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxLife) + 18)
                                     .round();
 
                 stats.maxMana = (int32_t)(MakeFixed(1) * FixedPoint(charStats.magic) + MakeFixed(1) * FixedPoint(itemStats.baseStats.magic) +
-                                          MakeFixed(1) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxMana) - 1)
+                                          MakeFixed(1) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxMana) - 1)
                                     .round();
+
+                stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * mStats.mLevel) / FixedPoint(100)).round();
+                stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * mStats.mLevel) / FixedPoint(200)).round();
 
                 stats.toHitMelee.bonus = 20;
                 stats.toHitRanged.bonus = 10;
@@ -149,12 +149,15 @@ namespace FAWorld
             case PlayerClass::rogue:
             {
                 stats.maxLife = (int32_t)(MakeFixed(1) * FixedPoint(charStats.vitality) + MakeFixed(1, 5) * FixedPoint(itemStats.baseStats.vitality) +
-                                          MakeFixed(2) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxLife) + 23)
+                                          MakeFixed(2) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxLife) + 23)
                                     .round();
 
                 stats.maxMana = (int32_t)(MakeFixed(1) * FixedPoint(charStats.magic) + MakeFixed(1, 5) * FixedPoint(itemStats.baseStats.magic) +
-                                          MakeFixed(2) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxMana) + 5)
+                                          MakeFixed(2) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxMana) + 5)
                                     .round();
+
+                stats.meleeDamage = (int32_t)(((FixedPoint(charStats.strength) + FixedPoint(charStats.dexterity)) * mStats.mLevel) / FixedPoint(100)).round();
+                stats.rangedDamage = (int32_t)(((FixedPoint(charStats.strength) + FixedPoint(charStats.dexterity)) * mStats.mLevel) / FixedPoint(100)).round();
 
                 stats.toHitRanged.bonus = 20;
                 break;
@@ -162,12 +165,15 @@ namespace FAWorld
             case PlayerClass::sorcerer:
             {
                 stats.maxLife = (int32_t)(MakeFixed(1) * FixedPoint(charStats.vitality) + MakeFixed(1) * FixedPoint(itemStats.baseStats.vitality) +
-                                          MakeFixed(1) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
+                                          MakeFixed(1) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
                                     .round();
 
                 stats.maxMana = (int32_t)(MakeFixed(2) * FixedPoint(charStats.magic) + MakeFixed(2) * FixedPoint(itemStats.baseStats.magic) +
-                                          MakeFixed(2) * FixedPoint(mPlayerStats.mLevel) + FixedPoint(itemStats.maxMana) - 2)
+                                          MakeFixed(2) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxMana) - 2)
                                     .round();
+
+                stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * mStats.mLevel) / FixedPoint(100)).round();
+                stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * mStats.mLevel) / FixedPoint(200)).round();
 
                 stats.toHitMagic.bonus = 20;
                 break;
@@ -180,23 +186,23 @@ namespace FAWorld
         stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / MakeFixed(2) + itemStats.toHit).round();
         stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.toHit).round();
         stats.toHitMagic.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.magic)).round();
+
+        stats.meleeDamageBonusRange = itemStats.meleeDamageBonusRange;
+        stats.rangedDamageBonusRange = itemStats.rangedDamageBonusRange;
     }
 
     void Player::init(const DiabloExe::CharacterStats& charStats)
     {
-        mPlayerStats = {charStats};
+        initialiseActorStats(mStats, charStats);
+
         mFaction = Faction::heaven();
         mMoveHandler = MovementHandler(World::getTicksInPeriod("0.1")); // allow players to repath much more often than other actors
-
-        mStats.mAttackDamage = 60;
-
         mBehaviour.reset(new PlayerBehaviour(this));
     }
 
     Player::Player(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader)
     {
         mPlayerClass = static_cast<PlayerClass>(loader.load<int32_t>());
-        mPlayerStats = {loader};
         mActiveMissileIndex = loader.load<uint32_t>();
         initCommon();
         mPlayerInitialised = true;
@@ -210,22 +216,16 @@ namespace FAWorld
 
         Actor::save(saver);
         saver.save(static_cast<int32_t>(mPlayerClass));
-        mPlayerStats.save(saver);
         saver.save(mActiveMissileIndex);
     }
 
     bool Player::checkHit(Actor* enemy)
     {
-        // let's throw some formulas, parameters will be placeholders for now
-        auto roll = mWorld.mRng->randomInRange(0, 99);
-        auto toHit = mPlayerStats.mDexterity / 2;
-        toHit += getArmorPenetration();
-        toHit -= enemy->getArmor();
-        toHit += getCharacterLevel();
-        toHit += 50;
-        if (mPlayerClass == PlayerClass::warrior)
-            toHit += 20;
-        toHit = boost::algorithm::clamp(toHit, 5, 95);
+        UNUSED_PARAM(enemy); // TODO: this should take into account target's AC when attacking a player
+
+        int32_t roll = mWorld.mRng->randomInRange(0, 99);
+        int32_t toHit = boost::algorithm::clamp(mStats.getCalculatedStats().toHitMelee.getCombined(), 5, 95);
+
         return roll < toHit;
     }
 
@@ -452,20 +452,22 @@ namespace FAWorld
     void Player::addExperience(Monster& enemy)
     {
         int32_t exp = enemy.getKillExp();
+
         // Adjust exp based on difference in level between player and monster.
-        exp *= 1 + ((float)enemy.getMonsterStats().level - mPlayerStats.mLevel) / 10;
+        exp = (int32_t)(FixedPoint(exp) * (MakeFixed(1) + (FixedPoint(enemy.getMonsterStats().level) - mStats.mLevel) / 10)).round();
         exp = std::max(0, exp);
 
-        mPlayerStats.mExp = std::min(mPlayerStats.mExp + exp, mPlayerStats.maxExp());
-        int32_t newLevel = mPlayerStats.expToLevel(mPlayerStats.mExp);
+        mStats.mExperience = std::min(mStats.mExperience + exp, ActorStats::MAXIMUM_EXPERIENCE_POINTS);
+        int32_t newLevel = mStats.experiencePointsToLevel(mStats.mExperience);
+
         // Level up if applicable (it's possible to level up more than once).
-        for (int32_t i = mPlayerStats.mLevel; i < newLevel; i++)
+        for (int32_t i = mStats.mLevel; i < newLevel; i++)
             levelUp(newLevel);
     }
 
     void Player::levelUp(int32_t newLevel)
     {
-        mPlayerStats.mLevel = newLevel;
+        mStats.mLevel = newLevel;
 
         // Increase HP/Mana.
         switch (mPlayerClass)
@@ -489,6 +491,16 @@ namespace FAWorld
         // Restore HP/Mana.
         heal();
         restoreMana();
+    }
+
+    void Player::initialiseActorStats(ActorStats& stats, const DiabloExe::CharacterStats& from)
+    {
+        BaseStats baseStats;
+        baseStats.strength = from.mStrength;
+        baseStats.dexterity = from.mDexterity;
+        baseStats.magic = from.mMagic;
+
+        stats = ActorStats(*stats.mActor, baseStats, from.mNextLevelExp);
     }
 
     static const std::vector<MissileId> mImplementedMissiles = {

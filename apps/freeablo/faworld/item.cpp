@@ -3,7 +3,6 @@
 #include "../fagui/textcolor.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
-#include "itembonus.h"
 #include "itemenums.h"
 #include "itemfactory.h"
 #include <boost/format.hpp>
@@ -61,19 +60,71 @@ namespace FAWorld
 
     std::string Item::requirementsStr() const
     {
-        if (getReqStr() + getReqDex() + getReqMagic() == 0)
+        if (getRequiredStrength() + getRequiredDexterity() + getRequiredMagic() == 0)
             return {};
         std::string str = "Required:";
-        if (getReqStr() > 0)
-            str += (boost::format(" %1% Str") % getReqStr()).str();
-        if (getReqMagic() > 0)
-            str += (boost::format(" %1% Mag") % getReqMagic()).str();
-        if (getReqDex() > 0)
-            str += (boost::format(" %1% Dex") % getReqDex()).str();
+        if (getRequiredStrength() > 0)
+            str += (boost::format(" %1% Str") % getRequiredStrength()).str();
+        if (getRequiredMagic() > 0)
+            str += (boost::format(" %1% Mag") % getRequiredMagic()).str();
+        if (getRequiredDexterity() > 0)
+            str += (boost::format(" %1% Dex") % getRequiredDexterity()).str();
         return str;
     }
 
     const DiabloExe::BaseItem& Item::base() const { return Engine::EngineMain::get()->exe().getBaseItems()[static_cast<int32_t>(mBaseId)]; }
+
+    bool Item::isItemAMeleeWeapon(ItemType type)
+    {
+        switch (type)
+        {
+            case ItemType::sword:
+            case ItemType::axe:
+            case ItemType::mace:
+            case ItemType::staff:
+                return true;
+            case ItemType::misc:
+            case ItemType::bow:
+            case ItemType::shield:
+            case ItemType::lightArmor:
+            case ItemType::helm:
+            case ItemType::mediumArmor:
+            case ItemType::heavyArmor:
+            case ItemType::gold:
+            case ItemType::ring:
+            case ItemType::amulet:
+            case ItemType::none:
+                return false;
+        }
+
+        invalid_enum(ItemType, type);
+    }
+
+    bool Item::isItemARangedWeapon(ItemType type)
+    {
+        switch (type)
+        {
+            case ItemType::bow:
+                return true;
+            case ItemType::sword:
+            case ItemType::axe:
+            case ItemType::mace:
+            case ItemType::staff:
+            case ItemType::misc:
+            case ItemType::shield:
+            case ItemType::lightArmor:
+            case ItemType::helm:
+            case ItemType::mediumArmor:
+            case ItemType::heavyArmor:
+            case ItemType::gold:
+            case ItemType::ring:
+            case ItemType::amulet:
+            case ItemType::none:
+                return false;
+        }
+
+        invalid_enum(ItemType, type);
+    }
 
     std::string Item::getFullDescription() const
     {
@@ -201,10 +252,9 @@ namespace FAWorld
         return 1;
     }
 
-    int32_t Item::getReqStr() const { return base().requiredStrength; }
-    int32_t Item::getReqMagic() const { return base().requiredMagic; }
-
-    int32_t Item::getReqDex() const { return base().requiredDexterity; }
+    int32_t Item::getRequiredStrength() const { return base().requiredStrength; }
+    int32_t Item::getRequiredMagic() const { return base().requiredMagic; }
+    int32_t Item::getRequiredDexterity() const { return base().requiredDexterity; }
 
     uint32_t Item::getSpecialEffect() const { return base().specialEffectFlags; }
 
@@ -256,12 +306,6 @@ namespace FAWorld
     int32_t Item::getMinAttackDamage() const { return base().minAttackDamage; }
 
     int32_t Item::getMaxAttackDamage() const { return base().maxAttackDamage; }
-
-    ItemBonus Item::getBonus() const
-    {
-        ItemBonus bonus(base());
-        return bonus;
-    }
 
     std::string Item::chargesStr() const
     {

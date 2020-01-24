@@ -1,8 +1,9 @@
-
 #pragma once
-
 #include <misc/maxcurrentitem.h>
+#include <misc/misc.h>
+#include <misc/simplevec2.h>
 #include <stdint.h>
+#include <vector>
 
 namespace DiabloExe
 {
@@ -19,6 +20,9 @@ namespace FAWorld
 {
     struct BaseStats
     {
+        void save(FASaveGame::GameSaver& saver);
+        void load(FASaveGame::GameLoader& loader);
+
         int32_t strength = 0;
         int32_t magic = 0;
         int32_t dexterity = 0;
@@ -32,12 +36,16 @@ namespace FAWorld
         int32_t maxMana = 0;
         int32_t armorClass = 0;
         int32_t toHit = 0;
+        IntRange meleeDamageBonusRange = {0, 0};
+        IntRange rangedDamageBonusRange = {0, 0};
     };
 
     struct ToHitChance
     {
         int32_t base = 0;
         int32_t bonus = 0;
+
+        int32_t getCombined() const { return base + bonus; }
     };
 
     struct LiveActorStats
@@ -49,36 +57,51 @@ namespace FAWorld
         ToHitChance toHitMelee;
         ToHitChance toHitRanged;
         ToHitChance toHitMagic;
+        int32_t meleeDamage = 0;
+        int32_t rangedDamage = 0;
+        IntRange meleeDamageBonusRange = {0, 0};
+        IntRange rangedDamageBonusRange = {0, 0};
     };
 
     class Actor;
     class ActorStats
     {
     public:
-        ActorStats(const Actor& actor) : mHp(100), mMana(100), mActor(actor) {}
+        ActorStats(const Actor& actor, BaseStats baseStats = {}, std::vector<uint32_t> levelXpCounts = {})
+            : baseStats(baseStats), mActor(actor), mLevelXpCounts(levelXpCounts)
+        {
+            recalculateStats();
+            mHp.current = mHp.max;
+            mMana.current = mMana.max;
+        }
 
         ActorStats(const Actor& actor, FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
 
-        void takeDamage(int32_t damage) { mHp.add(-damage); }
-        int32_t getAttackDamage() { return mAttackDamage; }
+        ActorStats& operator=(const ActorStats& other) = default;
 
+        void takeDamage(int32_t damage) { mHp.add(-damage); }
+
+        int32_t nextLevelExperience() const { return mLevelXpCounts.at(mLevel - 1); };
+        int32_t experiencePointsToLevel(uint32_t experience) const;
+
+        void recalculateStats();
+        const LiveActorStats& getCalculatedStats() const { return mCalculatedStats; }
+
+        static constexpr int32_t MAXIMUM_EXPERIENCE_POINTS = 2000000000;
+
+    public:
         BaseStats baseStats;
         Misc::MaxCurrentItem<int32_t> mHp;
         Misc::MaxCurrentItem<int32_t> mMana;
 
         int32_t mLevel = 1;
         int32_t mExperience = 0;
-        int32_t nextLevelExperience() const { return 1; };
 
-        int32_t mAttackDamage = 3;
-
-        void recalculateStats();
-        const LiveActorStats& getCalculatedStats() const { return mCalculatedStats; }
-
+        NonNullConstPtr<Actor> mActor; // not serialised
     private:
-        const Actor& mActor;
-        LiveActorStats mCalculatedStats;
-        bool mHasBeenCalculated = false;
+        LiveActorStats mCalculatedStats; // not serialised, this is recalculated every frame
+        bool mHasBeenCalculated = false; // also not serialised
+        std::vector<uint32_t> mLevelXpCounts;
     };
 }

@@ -1,10 +1,10 @@
 #include "inventory.h"
 #include "../fagui/guimanager.h"
 #include "../fasavegame/gameloader.h"
+#include "../faworld/actorstats.h"
 #include "actorstats.h"
 #include "boost/container/flat_set.hpp"
 #include "equiptarget.h"
-#include "itembonus.h"
 #include "itemenums.h"
 #include "itemfactory.h"
 #include "player.h"
@@ -15,6 +15,7 @@
 #include <sstream>
 #include <stdint.h>
 #include <string>
+
 using namespace boost::container;
 
 namespace FAWorld
@@ -496,37 +497,32 @@ namespace FAWorld
         setCursorHeld(tmp);
     }
 
-    static const EquipTarget slotEquipTargets[] = {MakeEquipTarget<EquipTargetType::leftHand>(),
-                                                   MakeEquipTarget<EquipTargetType::rightHand>(),
-                                                   MakeEquipTarget<EquipTargetType::leftRing>(),
-                                                   MakeEquipTarget<EquipTargetType::rightRing>(),
-                                                   MakeEquipTarget<EquipTargetType::amulet>(),
-                                                   MakeEquipTarget<EquipTargetType::body>(),
-                                                   MakeEquipTarget<EquipTargetType::head>()};
-
-    static const flat_set<EquipTarget> equipSlotsSet(std::begin(slotEquipTargets), std::end(slotEquipTargets));
-
-    ItemBonus CharacterInventory::getTotalItemBonus() const
+    void CharacterInventory::calculateItemBonuses(ItemStats& stats) const
     {
-        ItemBonus total;
-        for (auto slot : slotEquipTargets)
+        EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
+        for (auto& slot : hands)
         {
-            auto& item = getItemAt(slot);
-            if (!item.isEmpty())
-            {
-                // TODO: add stat recheck, because item may become invalid while equipped in Diablo thus becoming useless
-                total += item.getBonus();
-            }
+            const Item& item = getItemAt(slot);
+            if (Item::isItemAMeleeWeapon(item.getType()))
+                stats.meleeDamageBonusRange += {item.getMinAttackDamage(), item.getMaxAttackDamage()};
+            else if (Item::isItemARangedWeapon(item.getType()))
+                stats.rangedDamageBonusRange += {item.getMinAttackDamage(), item.getMaxAttackDamage()};
+
+            // TODO: other stats
         }
-        if (total.minAttackDamage == 0 && total.maxAttackDamage == 0)
+    }
+
+    bool CharacterInventory::isRangedWeaponEquipped() const
+    {
+        EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
+        for (auto& slot : hands)
         {
-            total.minAttackDamage = total.maxAttackDamage = 1;
-            // TODO: stat recheck for shield
-            if (getItemAt(MakeEquipTarget<EquipTargetType::leftHand>()).getType() == ItemType::shield ||
-                getItemAt(MakeEquipTarget<EquipTargetType::rightHand>()).getType() == ItemType::shield)
-                total.maxAttackDamage += 2;
+            const Item& item = getItemAt(slot);
+            if (Item::isItemARangedWeapon(item.getType()))
+                return true;
         }
-        return total;
+
+        return false;
     }
 
     int32_t CharacterInventory::placeGold(int32_t quantity, const ItemFactory& itemFactory)

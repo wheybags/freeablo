@@ -396,7 +396,12 @@ namespace FAGui
                           playerStats.mMana.current < playerStats.mMana.max ? TextColor::red : TextColor::white);
 
             fillTextField(ctx, 257, 172, 43, std::to_string(liveStats.armorClass).c_str());
-            fillTextField(ctx, 257, 200, 43, std::to_string(liveStats.toHitMelee.base).c_str());
+            fillTextField(ctx, 257, 200, 43, (std::to_string(liveStats.toHitMelee.base) + "%").c_str());
+
+            int32_t damageBase = mPlayer->mInventory.isRangedWeaponEquipped() ? liveStats.rangedDamage : liveStats.meleeDamage;
+            IntRange damageBonusRange = mPlayer->mInventory.isRangedWeaponEquipped() ? liveStats.rangedDamageBonusRange : liveStats.meleeDamageBonusRange;
+            std::string damageText = std::to_string(damageBase + damageBonusRange.start) + "-" + std::to_string(damageBase + damageBonusRange.end);
+            fillTextField(ctx, 257, 228, 43, damageText.c_str());
 
             nk_layout_space_end(ctx);
         });

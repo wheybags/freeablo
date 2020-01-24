@@ -1,10 +1,6 @@
-
 #pragma once
-
 #include "actor.h"
 #include "monster.h"
-#include "playerstats.h"
-
 #include <boost/signals2/signal.hpp>
 
 namespace FAWorld
@@ -43,19 +39,11 @@ namespace FAWorld
         virtual void update(bool noclip) override;
 
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour.get(); }
-        const PlayerStats& getPlayerStats() const { return mPlayerStats; }
         void setPlayerClass(PlayerClass playerClass);
 
         boost::signals2::signal<void(const Misc::Point&)> positionReached;
-        int getArmorPenetration() const { /* placeholder */ return 0; }
-        int getCharacterLevel() const { /* placeholder */ return 1; }
         PlayerClass getClass() const { return mPlayerClass; }
         int32_t meleeDamageVs(const Actor* actor) const override;
-        int getMaxDamage() const { /* placeholder */ return 20; }
-        int getPercentDamageBonus() const { return 0; }
-        int getCharacterBaseDamage() const { /* placeholder */ return 0; }
-        int getDamageBonus() const { /* placeholder */ return 0; }
-        ItemBonus getItemBonus() const;
 
         void setActiveSpellNumber(int32_t spellNumber);
         void castActiveSpell(Misc::Point targetPoint);
@@ -73,8 +61,9 @@ namespace FAWorld
         void addExperience(Monster& enemy);
         void levelUp(int32_t newLevel);
 
+        static void initialiseActorStats(ActorStats& stats, const DiabloExe::CharacterStats& from);
+
     private:
-        PlayerStats mPlayerStats;
         PlayerClass mPlayerClass = PlayerClass::warrior;
 
         uint32_t mActiveMissileIndex = 0; // Temporary for testing missiles.

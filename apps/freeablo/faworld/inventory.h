@@ -13,6 +13,7 @@ namespace FAWorld
     class Actor;
     struct ExchangeResult;
     class ItemFactory;
+    struct ItemStats;
 
     enum class PlacementCheckOrder
     {
@@ -92,7 +93,8 @@ namespace FAWorld
 
         void setCursorHeld(const Item& item);
 
-        ItemBonus getTotalItemBonus() const;
+        void calculateItemBonuses(ItemStats& stats) const;
+        bool isRangedWeaponEquipped() const;
 
         const Item& getHead() const { return mHead.getItem(0, 0); }
         const Item& getBody() const { return mBody.getItem(0, 0); }
