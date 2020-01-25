@@ -77,6 +77,8 @@ namespace FAWorld
             mAnimation.setIdleFrameSequence(exe.getTownerAnimation()[*id]);
 
         mTalkData = npc.talkData;
+        mGossipData = npc.gossipData;
+        mBeforeDungeonTalkData = npc.beforeDungeonTalkData;
         mNpcId = npc.id;
         mName = npc.name;
 

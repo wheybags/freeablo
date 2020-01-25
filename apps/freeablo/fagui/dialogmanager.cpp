@@ -34,7 +34,10 @@ namespace FAGui
 
             retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, [this]() {
+                openTalkDialog(mActor);
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
@@ -58,7 +61,10 @@ namespace FAGui
 
             retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, [this]() {
+                openTalkDialog(mActor);
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
@@ -82,7 +88,10 @@ namespace FAGui
 
             retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, [this]() {
+                openTalkDialog(mActor);
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({{td.at("buy")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("sell")}}, [this]() {
                 this->openSellDialog();
@@ -122,8 +131,10 @@ namespace FAGui
 
             retval.introduction = {{td.at("introductionHeader"), TextColor::golden, false}};
 
-            retval.addMenuOption({{td.at("talk"), TextColor::blue}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
-
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, [this]() {
+                openTalkDialog(mActor);
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({{td.at("introduction1")}, {td.at("introduction2")}, {td.at("introduction3")}, {}},
                                  []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
@@ -151,7 +162,10 @@ namespace FAGui
 
             retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, [this]() {
+                openTalkDialog(mActor);
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({{td.at("heal")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("buy")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
@@ -177,7 +191,10 @@ namespace FAGui
 
             retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, [this]() {
+                openTalkDialog(mActor);
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({{td.at("identify")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
             retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
@@ -202,7 +219,10 @@ namespace FAGui
 
             retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, [this]() {
+                openTalkDialog(mActor);
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
             return retval;
@@ -226,7 +246,10 @@ namespace FAGui
 
             retval.addMenuOption({{td.at("introduction"), TextColor::golden, false}, {}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
 
-            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+            retval.addMenuOption({{td.at("talk"), TextColor::blue}}, [this]() {
+                openTalkDialog(mActor);
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
             retval.addMenuOption({{td.at("buyBasic")}}, [this]() {
                 this->openBuyDialog();
                 return CharacterDialoguePopup::UpdateResult::DoNothing;

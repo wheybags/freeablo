@@ -41,6 +41,7 @@ namespace FAGui
         };
 
         virtual DialogData getDialogData() = 0;
+        void openTalkDialog(const FAWorld::Actor* actor);
 
         GuiManager& mGuiManager;
         nk_scroll mScroll = {0, 0};

@@ -15,9 +15,9 @@
 #include <boost/format.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
-#include <map>
 #include <misc/direction.h>
 #include <misc/misc.h>
+#include <unordered_map>
 
 namespace Random
 {
@@ -42,7 +42,11 @@ namespace FAWorld
         Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
         Actor(World& world, FASaveGame::GameLoader& loader);
         virtual ~Actor();
-        virtual int getArmor() const { /*placeholder */ return 0; }
+        virtual int getArmor() const
+        {
+            /*placeholder */
+            return 0;
+        }
 
         virtual void save(FASaveGame::GameSaver& saver);
         virtual bool checkHit(Actor* enemy);
@@ -77,7 +81,9 @@ namespace FAWorld
         bool isDead() const;
         bool isEnemy(Actor* other) const;
 
-        const std::map<std::string, std::string>& getTalkData() const { return mTalkData; }
+        const std::unordered_map<std::string, std::string>& getTalkData() const { return mTalkData; }
+        const std::unordered_map<std::string, std::string>& getGossipData() const { return mGossipData; }
+        const std::string& getBeforeDungeonTalkData() const { return mBeforeDungeonTalkData; }
         const std::string& getNpcId() const { return mNpcId; }
         const std::string& getName() const { return mName; }
         const ActorStats& getStats() const { return mStats; }
@@ -115,7 +121,9 @@ namespace FAWorld
         Faction mFaction;
         std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;
-        std::map<std::string, std::string> mTalkData; ///< Lines of dialogue
+        std::unordered_map<std::string, std::string> mTalkData;   ///< Lines of dialogue
+        std::unordered_map<std::string, std::string> mGossipData; ///< Gossip dialogues
+        std::string mBeforeDungeonTalkData;
         bool mDeadLastTick = false;
         World& mWorld;
         std::vector<std::unique_ptr<Missile::Missile>> mMissiles;

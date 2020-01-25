@@ -4,21 +4,23 @@
 #include <boost/optional/optional.hpp>
 #include <faio/fafileobject.h>
 
-#include <map>
+#include <unordered_map>
 
 namespace DiabloExe
 {
     class Npc
     {
     public:
-        std::string id;   ///< An internal id used in freeablo to identify this npc. Pulled from teh exe ini file
+        std::string id;   ///< An internal id used in freeablo to identify this npc. Pulled from the exe ini file
         std::string name; ///< The npc's actual ingame name
         std::string celPath;
         uint8_t x;
         uint8_t y;
         size_t rotation;
         boost::optional<int32_t> animationSequenceId;
-        std::map<std::string, std::string> talkData;
+        std::unordered_map<std::string, std::string> talkData;
+        std::unordered_map<std::string, std::string> gossipData;
+        std::string beforeDungeonTalkData;
 
         Npc() {}
 
