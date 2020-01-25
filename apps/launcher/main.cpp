@@ -10,9 +10,9 @@
 #include <climits>
 #include <faio/faio.h>
 #include <misc/assert.h>
+#include <misc/misc.h>
 #include <nuklearmisc/standaloneguispritehandler.h>
 #include <nuklearmisc/widgets.h>
-#include <sstream>
 
 int main(int, char** argv)
 {
@@ -202,18 +202,9 @@ int main(int, char** argv)
 
     if (runFreeablo)
     {
-        std::string temp = (boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string();
+        std::string path = (boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string();
 
-        std::stringstream path;
-        for (char c : temp)
-        {
-            if (c == ' ')
-                path << "\\ ";
-            else
-                path << c;
-        }
-
-        system(path.str().c_str());
+        system(Misc::escapeSpacesOnPath(path).c_str());
     }
 
     return 0;

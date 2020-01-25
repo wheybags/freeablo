@@ -10,6 +10,7 @@
 #include <settings/settings.h>
 #include <diabloexe/diabloexe.h>
 #include <misc/md5.h>
+#include <misc/misc.h>
 #include "engine/enginemain.h"
 
 namespace bpo = boost::program_options;
@@ -119,18 +120,9 @@ int fa_main(int argc, char** argv)
     // Check if we've been configured with data files, and if we haven't, run the launcher to prompt configuration
     if (!(settings.loadUserSettings() && dataFilesSetUp(settings)))
     {
-        std::string temp = (boost::filesystem::system_complete(argv[0]).parent_path() / "launcher").string();
+        std::string path = (boost::filesystem::system_complete(argv[0]).parent_path() / "launcher").string();
 
-        std::stringstream path;
-        for (char c : temp)
-        {
-            if (c == ' ')
-                path << "\\ ";
-            else
-                path << c;
-        }
-
-        system(path.str().c_str());
+        system(Misc::escapeSpacesOnPath(path).c_str());
         return EXIT_SUCCESS;
     }
 
