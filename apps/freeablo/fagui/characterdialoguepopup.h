@@ -42,6 +42,7 @@ namespace FAGui
 
         virtual DialogData getDialogData() = 0;
         void openTalkDialog(const FAWorld::Actor* actor);
+        void drawBackgroundCheckerboard(FARender::Renderer* renderer, struct nk_context* ctx, struct nk_rect dialogRectangle);
 
         GuiManager& mGuiManager;
         nk_scroll mScroll = {0, 0};
