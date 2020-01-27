@@ -15,6 +15,7 @@
 #include "monster.h"
 #include "npc.h"
 #include "settings/settings.h"
+#include "talkdata.h"
 
 namespace DiabloExe
 {
@@ -269,16 +270,16 @@ namespace DiabloExe
                     else if (Misc::StringUtils::startsWith(property, gossipPrefix))
                     {
                         auto addr = mSettings->get<size_t>(section, property);
-                        std::string gossipData = exe.readCString(addr);
-                        gossipData.pop_back();
+                        TalkData gossipData = {exe.readCString(addr), ""};
+                        gossipData.text.pop_back();
                         curNpc.gossipData[property.substr(gossipPrefix.length())] = gossipData;
                     }
 
                     else if (property == beforeDungeonPrefix)
                     {
                         auto addr = mSettings->get<size_t>(section, property);
-                        curNpc.beforeDungeonTalkData = exe.readCString(addr);
-                        curNpc.beforeDungeonTalkData.pop_back();
+                        curNpc.beforeDungeonTalkData = {exe.readCString(addr), ""};
+                        curNpc.beforeDungeonTalkData.text.pop_back();
                     }
                 }
             }

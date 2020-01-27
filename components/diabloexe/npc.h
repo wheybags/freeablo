@@ -6,6 +6,8 @@
 
 #include <unordered_map>
 
+#include "talkdata.h"
+
 namespace DiabloExe
 {
     class Npc
@@ -19,8 +21,8 @@ namespace DiabloExe
         size_t rotation;
         boost::optional<int32_t> animationSequenceId;
         std::unordered_map<std::string, std::string> talkData;
-        std::unordered_map<std::string, std::string> gossipData;
-        std::string beforeDungeonTalkData;
+        std::unordered_map<std::string, TalkData> gossipData;
+        TalkData beforeDungeonTalkData;
 
         Npc() {}
 

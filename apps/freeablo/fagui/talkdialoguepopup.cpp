@@ -3,7 +3,7 @@
 
 namespace FAGui
 {
-    TalkDialoguePopup::TalkDialoguePopup(GuiManager& guiManager, const std::string& text) : CharacterDialoguePopup(guiManager, true), mText(text) {}
+    TalkDialoguePopup::TalkDialoguePopup(GuiManager& guiManager, DiabloExe::TalkData talk) : CharacterDialoguePopup(guiManager, true), mTalkData(talk) {}
 
     CharacterDialoguePopup::UpdateResult TalkDialoguePopup::update(struct nk_context* ctx)
     {
@@ -46,7 +46,7 @@ namespace FAGui
 
                 auto& world = mGuiManager.mDialogManager.mWorld;
                 static auto startTime = world.getCurrentTick();
-                wrapText(ctx, mText.c_str(), TextColor::white);
+                wrapText(ctx, mTalkData.text.c_str(), TextColor::white);
                 auto currentTime = world.getCurrentTick();
                 if (currentTime - startTime >= world.getTicksInPeriod("0.1"))
                 {
@@ -67,4 +67,6 @@ namespace FAGui
 
         return retval;
     }
+
+    const DiabloExe::TalkData& TalkDialoguePopup::getTalkData() const { return mTalkData; }
 }

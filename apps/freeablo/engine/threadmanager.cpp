@@ -85,6 +85,8 @@ namespace Engine
         mQueue.push(message);
     }
 
+    bool ThreadManager::isPlayingSound() const { return mAudioManager.isPlayingSound(); }
+
     void ThreadManager::sendRenderState(FARender::RenderState* state)
     {
         Message message;
@@ -107,36 +109,31 @@ namespace Engine
     {
         switch (message.type)
         {
-            case ThreadState::PLAY_MUSIC:
-            {
+            case ThreadState::PLAY_MUSIC: {
                 mAudioManager.playMusic(*message.data.musicPath);
                 delete message.data.musicPath;
                 break;
             }
 
-            case ThreadState::PLAY_SOUND:
-            {
+            case ThreadState::PLAY_SOUND: {
                 mAudioManager.playSound(*message.data.soundPath);
                 delete message.data.soundPath;
                 break;
             }
 
-            case ThreadState::STOP_SOUND:
-            {
+            case ThreadState::STOP_SOUND: {
                 mAudioManager.stopSound();
                 break;
             }
 
-            case ThreadState::RENDER_STATE:
-            {
+            case ThreadState::RENDER_STATE: {
                 if (mRenderState && mRenderState != message.data.renderState)
                     mRenderState->ready = true;
 
                 mRenderState = message.data.renderState;
                 break;
             }
-            case ThreadState::PRELOAD_SPRITES:
-            {
+            case ThreadState::PRELOAD_SPRITES: {
                 mSpritesToPreload.insert(mSpritesToPreload.end(), message.data.preloadSpriteIds->begin(), message.data.preloadSpriteIds->end());
                 delete message.data.preloadSpriteIds;
                 break;

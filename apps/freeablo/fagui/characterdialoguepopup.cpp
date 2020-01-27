@@ -1,11 +1,17 @@
 #include "characterdialoguepopup.h"
 #include "../faworld/actor.h"
+#include "../engine/threadmanager.h"
 #include "guimanager.h"
 #include "talkdialoguepopup.h"
+#include <random/random.h>
 
 namespace FAGui
 {
-    CharacterDialoguePopup::CharacterDialoguePopup(GuiManager& guiManager, bool wide) : mGuiManager(guiManager), mWide(wide) {}
+    CharacterDialoguePopup::CharacterDialoguePopup(GuiManager& guiManager, bool wide, const std::string& greeting)
+        : mGuiManager(guiManager), mWide(wide), mSoundPaths({})
+    {
+        mSoundPaths["greeting"] = greeting;
+    }
 
     CharacterDialoguePopup::UpdateResult CharacterDialoguePopup::update(struct nk_context* ctx)
     {
@@ -117,9 +123,8 @@ namespace FAGui
             retval.introduction = {{mActor->getTalkData().at("talk"), TextColor::golden, false}};
             retval.addMenuOption({{"Gossip", TextColor::blue, true}}, [this]() {
                 auto data = mActor->getGossipData();
-                auto iterator = data.begin();
-                std::advance(iterator, rand() % data.size());
-                TalkDialoguePopup* popup = new TalkDialoguePopup(mGuiManager, iterator->second);
+                const auto& randomText = mGuiManager.mDialogManager.mWorld.mRng->chooseOneInContainer(data.cbegin(), data.cend());
+                TalkDialoguePopup* popup = new TalkDialoguePopup(mGuiManager, randomText->second);
                 openTalkPopup(popup);
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
@@ -130,7 +135,11 @@ namespace FAGui
         const FAWorld::Actor* mActor = nullptr;
 
     private:
-        void openTalkPopup(TalkDialoguePopup* popup) { mGuiManager.mDialogManager.pushDialog(popup); }
+        void openTalkPopup(TalkDialoguePopup* popup)
+        {
+            mGuiManager.mDialogManager.pushDialog(popup);
+            Engine::ThreadManager::get()->playSound(popup->getTalkData().talkAudioPath);
+        }
     };
 
     void CharacterDialoguePopup::openTalkDialog(const FAWorld::Actor* actor)
