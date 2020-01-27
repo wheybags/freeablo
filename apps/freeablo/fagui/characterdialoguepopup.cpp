@@ -119,7 +119,7 @@ namespace FAGui
         {
             DialogData retval;
 
-            retval.introduction = {{mActor->getTalkData().at("talk"), TextColor::golden, false}};
+            retval.introduction = {{mActor->getMenuTalkData().at("talk"), TextColor::golden, false}};
             retval.addMenuOption({{"Gossip", TextColor::blue, true}}, [this]() {
                 auto data = mActor->getGossipData();
                 const auto& randomText = mGuiManager.mDialogManager.mWorld.mRng->chooseOneInContainer(data.cbegin(), data.cend());
@@ -137,7 +137,10 @@ namespace FAGui
         void openTalkPopup(TalkDialoguePopup* popup)
         {
             mGuiManager.mDialogManager.pushDialog(popup);
-            Engine::ThreadManager::get()->playSound(popup->getTalkData().talkAudioPath);
+            auto thread = Engine::ThreadManager::get();
+            if (thread->isPlayingSound())
+                thread->stopSound();
+            thread->playSound(popup->getTalkData().talkAudioPath);
         }
     };
 
