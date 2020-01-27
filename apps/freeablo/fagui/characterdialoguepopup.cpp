@@ -1,6 +1,7 @@
 #include "characterdialoguepopup.h"
 #include "../faworld/actor.h"
 #include "guimanager.h"
+#include "talkdialoguepopup.h"
 
 namespace FAGui
 {
@@ -103,79 +104,6 @@ namespace FAGui
         nk_draw_image(nk_window_get_canvas(ctx), cbRect, &nkImage, nk_rgb(0, 0, 0));
     }
 
-    class TalkDialogPopup : public CharacterDialoguePopup
-    {
-    public:
-        TalkDialogPopup(GuiManager& guiManager, const std::string& text) : CharacterDialoguePopup(guiManager, true), mText(text) {}
-
-        virtual UpdateResult update(struct nk_context* ctx) override
-        {
-            auto renderer = FARender::Renderer::get();
-
-            auto boxTex = renderer->loadImage("data/textbox.cel");
-            int32_t screenW, screenH;
-            renderer->getWindowDimensions(screenW, screenH);
-
-            nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
-
-            auto dialogRectangle =
-                nk_rect(screenW / 2.0f - (boxTex->getWidth() / 2.0f), screenH / 2.0f - (boxTex->getHeight() / 2.0f), boxTex->getWidth(), boxTex->getHeight());
-
-            UpdateResult result = UpdateResult::DoNothing;
-
-            mGuiManager.nk_fa_begin_image_window(
-                ctx,
-                "talkPopup",
-                dialogRectangle,
-                flags,
-                boxTex->getNkImage(),
-                [&]() {
-                    drawBackgroundCheckerboard(renderer, ctx, dialogRectangle);
-
-                    // fill the rest of the window
-                    struct nk_rect bounds = nk_widget_bounds(ctx);
-                    struct nk_rect panelSize = nk_window_get_bounds(ctx);
-                    float contentHeight = panelSize.h + panelSize.y - bounds.y;
-                    nk_layout_row_dynamic(ctx, contentHeight, 1);
-
-                    auto wrapText = [](nk_context* ctx, const char* text, TextColor color) {
-                        FARender::Renderer* renderer = FARender::Renderer::get();
-                        nk_style_push_font(ctx, renderer->bigTGoldFont());
-                        nk_style_push_color(ctx, &ctx->style.text.color, getNkColor(color));
-                        nk_label_wrap(ctx, text);
-                        nk_style_pop_color(ctx);
-                        nk_style_pop_font(ctx);
-                    };
-
-                    auto& world = mGuiManager.mDialogManager.mWorld;
-                    static auto startTime = world.getCurrentTick();
-                    wrapText(ctx, mText.c_str(), TextColor::white);
-                    auto currentTime = world.getCurrentTick();
-                    if (currentTime - startTime >= world.getTicksInPeriod("0.1"))
-                    {
-                        ctx->active->scrollbar.y++;
-                        startTime = currentTime;
-                    }
-                },
-                true);
-
-            return result;
-        }
-
-    protected:
-        virtual DialogData getDialogData() override
-        {
-            DialogData retval;
-
-            retval.introduction = {};
-
-            return retval;
-        }
-
-    private:
-        std::string mText;
-    };
-
     class TalkDialog : public CharacterDialoguePopup
     {
     public:
@@ -191,7 +119,7 @@ namespace FAGui
                 auto data = mActor->getGossipData();
                 auto iterator = data.begin();
                 std::advance(iterator, rand() % data.size());
-                TalkDialogPopup* popup = new TalkDialogPopup(mGuiManager, iterator->second);
+                TalkDialoguePopup* popup = new TalkDialoguePopup(mGuiManager, iterator->second);
                 openTalkPopup(popup);
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
@@ -202,7 +130,7 @@ namespace FAGui
         const FAWorld::Actor* mActor = nullptr;
 
     private:
-        void openTalkPopup(TalkDialogPopup* popup) { mGuiManager.mDialogManager.pushDialog(popup); }
+        void openTalkPopup(TalkDialoguePopup* popup) { mGuiManager.mDialogManager.pushDialog(popup); }
     };
 
     void CharacterDialoguePopup::openTalkDialog(const FAWorld::Actor* actor)

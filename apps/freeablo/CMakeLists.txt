@@ -122,6 +122,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fagui/characterdialoguepopup.h
     fagui/shopdialogs.cpp
     fagui/shopdialogs.h
+    fagui/talkdialoguepopup.h
+    fagui/talkdialoguepopup.cpp
 
     engine/threadmanager.h
     engine/threadmanager.cpp
