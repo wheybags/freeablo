@@ -1,4 +1,6 @@
 #pragma once
+#include "../components/diabloexe/talkdata.h"
+#include "../fagui/talkdialoguepopup.h"
 #include "../farender/animationplayer.h"
 #include "actor/statemachine.h"
 #include "actoranimationmanager.h"
@@ -12,14 +14,12 @@
 #include "position.h"
 #include "target.h"
 #include "world.h"
-#include "../fagui/talkdialoguepopup.h"
 #include <boost/format.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
 #include <misc/direction.h>
 #include <misc/misc.h>
 #include <unordered_map>
-#include "../components/diabloexe/talkdata.h"
 
 namespace Random
 {
@@ -125,7 +125,7 @@ namespace FAWorld
         Faction mFaction;
         std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;
-        std::unordered_map<std::string, std::string> mTalkData;   ///< Lines of dialogue
+        std::unordered_map<std::string, std::string> mTalkData;           ///< Lines of dialogue
         std::unordered_map<std::string, DiabloExe::TalkData> mGossipData; ///< Gossip dialogues
         DiabloExe::TalkData mBeforeDungeonTalkData;
         bool mDeadLastTick = false;

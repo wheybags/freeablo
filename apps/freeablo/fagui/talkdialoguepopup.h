@@ -1,7 +1,7 @@
 #pragma once
 
-#include "characterdialoguepopup.h"
 #include "..\components\diabloexe\talkdata.h"
+#include "characterdialoguepopup.h"
 
 namespace FAGui
 {
@@ -18,6 +18,6 @@ namespace FAGui
         virtual DialogData getDialogData() override;
 
     private:
-         DiabloExe::TalkData mTalkData;
+        DiabloExe::TalkData mTalkData;
     };
 }
