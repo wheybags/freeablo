@@ -125,7 +125,7 @@ namespace FAGui
 
             mGuiManager.nk_fa_begin_image_window(
                 ctx,
-                "dialog",
+                "talkPopup",
                 dialogRectangle,
                 flags,
                 boxTex->getNkImage(),
@@ -138,21 +138,24 @@ namespace FAGui
                     float contentHeight = panelSize.h + panelSize.y - bounds.y;
                     nk_layout_row_dynamic(ctx, contentHeight, 1);
 
-                    Misc::ScopedSetter<nk_style> styleSetter(ctx->style);
-
                     auto wrapText = [](nk_context* ctx, const char* text, TextColor color) {
                         FARender::Renderer* renderer = FARender::Renderer::get();
-                        nk_style_push_font(ctx, renderer->goldFont(42));
+                        nk_style_push_font(ctx, renderer->bigTGoldFont());
                         nk_style_push_color(ctx, &ctx->style.text.color, getNkColor(color));
                         nk_label_wrap(ctx, text);
                         nk_style_pop_color(ctx);
                         nk_style_pop_font(ctx);
                     };
-                    // nk_group_scrolled_begin(ctx, &mScroll, "dialog_main", 0);
-                    //{
-                    wrapText(ctx, mText.c_str(), TextColor::golden);
-                    //}
-                    // nk_group_scrolled_end(ctx);
+
+                    auto& world = mGuiManager.mDialogManager.mWorld;
+                    static auto startTime = world.getCurrentTick();
+                    wrapText(ctx, mText.c_str(), TextColor::white);
+                    auto currentTime = world.getCurrentTick();
+                    if (currentTime - startTime >= world.getTicksInPeriod("0.1"))
+                    {
+                        ctx->active->scrollbar.y++;
+                        startTime = currentTime;
+                    }
                 },
                 true);
 
