@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../characterdialoguepopup.h"
 #include "../../faworld/actor.h"
+#include "../characterdialoguepopup.h"
 
 namespace FAGui
 {

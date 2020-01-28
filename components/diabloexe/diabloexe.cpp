@@ -261,10 +261,11 @@ namespace DiabloExe
                     std::string talkPrefix = "talk#";
                     std::string gossipPrefix = "gossip#";
                     std::string beforeDungeonPrefix = "beforeDungeon";
+                    std::string questPrefix = "quest#";
                     if (Misc::StringUtils::startsWith(property, talkPrefix))
                     {
                         auto addr = mSettings->get<size_t>(section, property);
-                        curNpc.talkData[property.substr(talkPrefix.length())] = exe.readCString(addr);
+                        curNpc.menuTalkData[property.substr(talkPrefix.length())] = exe.readCString(addr);
                     }
 
                     else if (Misc::StringUtils::startsWith(property, gossipPrefix))
@@ -281,6 +282,31 @@ namespace DiabloExe
                         curNpc.beforeDungeonTalkData = {exe.readCString(addr), ""};
                         curNpc.beforeDungeonTalkData.text.pop_back();
                     }
+
+                    /*else if (Misc::StringUtils::startsWith(property, questPrefix))
+                    {
+                        std::string quest = property.substr(questPrefix.size());
+                        auto temp = Misc::StringUtils::split(quest, '#');
+                        std::string questName = temp[0];
+                        std::string questPhase = temp[1];
+                        auto addr = mSettings->get<size_t>(section, property);
+                        TalkData data = {exe.readCString(addr), ""};
+
+                        if (questPhase == "info")
+                            curNpc.questTalkData[questName].info = data;
+
+                        else if (questPhase == "activation")
+                            curNpc.questTalkData[questName].activation = data;
+
+                        else if (questPhase == "return")
+                            curNpc.questTalkData[questName].returned = {data};
+
+                        else if (questPhase == "completion")
+                            curNpc.questTalkData[questName].completion = data;
+
+                        else
+                            curNpc.questTalkData[questName].returned.push_back(data);
+                    }*/
                 }
             }
         }

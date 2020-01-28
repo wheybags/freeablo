@@ -1,5 +1,3 @@
-#pragma once
-
 #include "wirtdialog.h"
 
 namespace FAGui

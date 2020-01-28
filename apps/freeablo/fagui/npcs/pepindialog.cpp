@@ -1,10 +1,9 @@
-#pragma once
-
 #include "pepindialog.h"
 
 namespace FAGui
 {
-    PepinDialog::PepinDialog(GuiManager& guiManager, FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false, "sfx/towners/Healer37.wav"), mActor(actor)
+    PepinDialog::PepinDialog(GuiManager& guiManager, FAWorld::Actor* actor)
+        : CharacterDialoguePopup(guiManager, false, "sfx/towners/Healer37.wav"), mActor(actor)
     {
         auto& gossipData = mActor->getGossipData();
         for (auto& gossip : gossipData)
@@ -96,7 +95,7 @@ namespace FAGui
             }
         }
     }
-    
+
     CharacterDialoguePopup::DialogData PepinDialog::getDialogData()
     {
         DialogData retval;

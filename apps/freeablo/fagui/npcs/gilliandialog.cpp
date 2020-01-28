@@ -1,10 +1,9 @@
-#pragma once
-
 #include "gilliandialog.h"
 
 namespace FAGui
 {
-    GillianDialog::GillianDialog(GuiManager& guiManager, FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false, "sfx/towners/Bmaid31.wav"), mActor(actor)
+    GillianDialog::GillianDialog(GuiManager& guiManager, FAWorld::Actor* actor)
+        : CharacterDialoguePopup(guiManager, false, "sfx/towners/Bmaid31.wav"), mActor(actor)
     {
         auto& gossipData = mActor->getGossipData();
         for (auto& gossip : gossipData)
@@ -93,7 +92,7 @@ namespace FAGui
             }
         }
     }
-    
+
     CharacterDialoguePopup::DialogData GillianDialog::getDialogData()
     {
         DialogData retval;

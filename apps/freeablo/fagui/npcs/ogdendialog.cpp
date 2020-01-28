@@ -1,10 +1,9 @@
-#pragma once
-
 #include "ogdendialog.h"
 
 namespace FAGui
 {
-    OgdenDialog::OgdenDialog(GuiManager& guiManager, FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false, "sfx/towners/tavown36.wav"), mActor(actor)
+    OgdenDialog::OgdenDialog(GuiManager& guiManager, FAWorld::Actor* actor)
+        : CharacterDialoguePopup(guiManager, false, "sfx/towners/tavown36.wav"), mActor(actor)
     {
         mActor->getBeforeDungeonTalkData().talkAudioPath = "sfx/towners/Tavown00.wav";
         auto& gossipData = mActor->getGossipData();

@@ -1,9 +1,7 @@
-#pragma once
-
 #include "griswolddialog.h"
+#include "../../faworld/storedata.h"
 #include "../guimanager.h"
 #include "../shopdialogs.h"
-#include "../../faworld/storedata.h"
 
 namespace FAGui
 {

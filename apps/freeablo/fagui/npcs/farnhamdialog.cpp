@@ -1,10 +1,9 @@
-#pragma once
-
 #include "farnhamdialog.h"
 
 namespace FAGui
 {
-    FarnhamDialog::FarnhamDialog(GuiManager& guiManager, FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false, "sfx/towners/Drunk27.wav"), mActor(actor)
+    FarnhamDialog::FarnhamDialog(GuiManager& guiManager, FAWorld::Actor* actor)
+        : CharacterDialoguePopup(guiManager, false, "sfx/towners/Drunk27.wav"), mActor(actor)
     {
         auto& gossipData = mActor->getGossipData();
         for (auto& gossip : gossipData)

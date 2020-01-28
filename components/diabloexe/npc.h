@@ -20,8 +20,9 @@ namespace DiabloExe
         uint8_t y;
         size_t rotation;
         boost::optional<int32_t> animationSequenceId;
-        std::unordered_map<std::string, std::string> talkData;
+        std::unordered_map<std::string, std::string> menuTalkData;
         std::unordered_map<std::string, TalkData> gossipData;
+        std::unordered_map<std::string, QuestTalkData> questTalkData;
         TalkData beforeDungeonTalkData;
 
         Npc() {}

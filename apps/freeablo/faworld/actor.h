@@ -83,9 +83,10 @@ namespace FAWorld
         bool isDead() const;
         bool isEnemy(Actor* other) const;
 
-        const std::unordered_map<std::string, std::string>& getTalkData() const { return mTalkData; }
+        const std::unordered_map<std::string, std::string>& getMenuTalkData() const { return mMenuTalkData; }
         std::unordered_map<std::string, DiabloExe::TalkData>& getGossipData() { return mGossipData; }
         const std::unordered_map<std::string, DiabloExe::TalkData>& getGossipData() const { return mGossipData; }
+        std::unordered_map<std::string, DiabloExe::QuestTalkData>& getQuestTalkData() { return mQuestTalkData; }
         DiabloExe::TalkData& getBeforeDungeonTalkData() { return mBeforeDungeonTalkData; }
         const DiabloExe::TalkData& getBeforeDungeonTalkData() const { return mBeforeDungeonTalkData; }
         const std::string& getNpcId() const { return mNpcId; }
@@ -95,7 +96,7 @@ namespace FAWorld
         int32_t getId() const { return mId; }
         bool hasTarget() const;
 
-        bool canTalk() const { return mTalkData.size() > 0; }
+        bool canTalk() const { return mMenuTalkData.size() > 0; }
         bool canInteractWith(Actor* actor);
         void inflictDamage(Actor* enemy, uint32_t damage);
 
@@ -125,8 +126,9 @@ namespace FAWorld
         Faction mFaction;
         std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;
-        std::unordered_map<std::string, std::string> mTalkData;           ///< Lines of dialogue
-        std::unordered_map<std::string, DiabloExe::TalkData> mGossipData; ///< Gossip dialogues
+        std::unordered_map<std::string, std::string> mMenuTalkData;               ///< Lines of dialogue
+        std::unordered_map<std::string, DiabloExe::TalkData> mGossipData;         ///< Gossip dialogues
+        std::unordered_map<std::string, DiabloExe::QuestTalkData> mQuestTalkData; ///< Quest dialogues
         DiabloExe::TalkData mBeforeDungeonTalkData;
         bool mDeadLastTick = false;
         World& mWorld;
