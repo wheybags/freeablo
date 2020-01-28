@@ -76,7 +76,10 @@ namespace FAWorld
         if (auto id = npc.animationSequenceId)
             mAnimation.setIdleFrameSequence(exe.getTownerAnimation()[*id]);
 
-        mTalkData = npc.talkData;
+        mMenuTalkData = npc.menuTalkData;
+        mGossipData = npc.gossipData;
+        mQuestTalkData = npc.questTalkData;
+        mBeforeDungeonTalkData = npc.beforeDungeonTalkData;
         mNpcId = npc.id;
         mName = npc.name;
 
@@ -107,7 +110,7 @@ namespace FAWorld
         for (uint32_t i = 0; i < talkDataSize; i++)
         {
             std::string key = loader.load<std::string>();
-            mTalkData[key] = loader.load<std::string>();
+            mMenuTalkData[key] = loader.load<std::string>();
         }
 
         mTarget.load(loader);
@@ -147,8 +150,8 @@ namespace FAWorld
         saver.save(mIsTowner);
         saver.save(mDeadLastTick);
 
-        saver.save(uint32_t(mTalkData.size()));
-        for (const auto& pair : mTalkData)
+        saver.save(uint32_t(mMenuTalkData.size()));
+        for (const auto& pair : mMenuTalkData)
         {
             saver.save(pair.first);
             saver.save(pair.second);

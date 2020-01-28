@@ -103,7 +103,8 @@ add_library(DiabloExe
     diabloexe/characterstats.h
     diabloexe/characterstats.cpp
     diabloexe/affix.cpp
-    diabloexe/affix.h)
+    diabloexe/affix.h
+	diabloexe/talkdata.h)
 target_link_libraries(DiabloExe Misc FAIO ${HUNTER_BOOST_LIBS})
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

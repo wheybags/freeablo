@@ -1,4 +1,6 @@
 #pragma once
+#include "../components/diabloexe/talkdata.h"
+#include "../fagui/talkdialoguepopup.h"
 #include "../farender/animationplayer.h"
 #include "actor/statemachine.h"
 #include "actoranimationmanager.h"
@@ -15,9 +17,9 @@
 #include <boost/format.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
-#include <map>
 #include <misc/direction.h>
 #include <misc/misc.h>
+#include <unordered_map>
 
 namespace Random
 {
@@ -42,7 +44,11 @@ namespace FAWorld
         Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
         Actor(World& world, FASaveGame::GameLoader& loader);
         virtual ~Actor();
-        virtual int getArmor() const { /*placeholder */ return 0; }
+        virtual int getArmor() const
+        {
+            /*placeholder */
+            return 0;
+        }
 
         virtual void save(FASaveGame::GameSaver& saver);
         virtual bool checkHit(Actor* enemy);
@@ -77,7 +83,12 @@ namespace FAWorld
         bool isDead() const;
         bool isEnemy(Actor* other) const;
 
-        const std::map<std::string, std::string>& getTalkData() const { return mTalkData; }
+        const std::unordered_map<std::string, std::string>& getMenuTalkData() const { return mMenuTalkData; }
+        std::unordered_map<std::string, DiabloExe::TalkData>& getGossipData() { return mGossipData; }
+        const std::unordered_map<std::string, DiabloExe::TalkData>& getGossipData() const { return mGossipData; }
+        std::unordered_map<std::string, DiabloExe::QuestTalkData>& getQuestTalkData() { return mQuestTalkData; }
+        DiabloExe::TalkData& getBeforeDungeonTalkData() { return mBeforeDungeonTalkData; }
+        const DiabloExe::TalkData& getBeforeDungeonTalkData() const { return mBeforeDungeonTalkData; }
         const std::string& getNpcId() const { return mNpcId; }
         const std::string& getName() const { return mName; }
         const ActorStats& getStats() const { return mStats; }
@@ -85,7 +96,7 @@ namespace FAWorld
         int32_t getId() const { return mId; }
         bool hasTarget() const;
 
-        bool canTalk() const { return mTalkData.size() > 0; }
+        bool canTalk() const { return mMenuTalkData.size() > 0; }
         bool canInteractWith(Actor* actor);
         void inflictDamage(Actor* enemy, uint32_t damage);
 
@@ -115,7 +126,10 @@ namespace FAWorld
         Faction mFaction;
         std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;
-        std::map<std::string, std::string> mTalkData; ///< Lines of dialogue
+        std::unordered_map<std::string, std::string> mMenuTalkData;               ///< Lines of dialogue
+        std::unordered_map<std::string, DiabloExe::TalkData> mGossipData;         ///< Gossip dialogues
+        std::unordered_map<std::string, DiabloExe::QuestTalkData> mQuestTalkData; ///< Quest dialogues
+        DiabloExe::TalkData mBeforeDungeonTalkData;
         bool mDeadLastTick = false;
         World& mWorld;
         std::vector<std::unique_ptr<Missile::Missile>> mMissiles;

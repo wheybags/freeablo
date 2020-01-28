@@ -11,7 +11,7 @@ namespace FAGui
     class CharacterDialoguePopup
     {
     public:
-        CharacterDialoguePopup(GuiManager& guiManager, bool wide);
+        CharacterDialoguePopup(GuiManager& guiManager, bool wide, const std::string& greeting = "");
         virtual ~CharacterDialoguePopup() = default;
 
         enum class UpdateResult
@@ -24,6 +24,8 @@ namespace FAGui
 
         static UpdateResult actionQuit() { return UpdateResult::PopDialog; }
         static UpdateResult actionDoNothing() { return UpdateResult::DoNothing; }
+
+        const std::string& getGreetingPath() const { return mSoundPaths.at("greeting"); }
 
     protected:
         struct DialogData
@@ -41,10 +43,13 @@ namespace FAGui
         };
 
         virtual DialogData getDialogData() = 0;
+        void openTalkDialog(const FAWorld::Actor* actor);
+        void drawBackgroundCheckerboard(FARender::Renderer* renderer, struct nk_context* ctx, struct nk_rect dialogRectangle);
 
         GuiManager& mGuiManager;
         nk_scroll mScroll = {0, 0};
         MouseAndClickMenu mDialogMenu;
         bool mWide = false;
+        std::unordered_map<std::string, std::string> mSoundPaths;
     };
 }

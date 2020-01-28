@@ -5,7 +5,7 @@
 
 namespace FAAudio
 {
-    AudioManager::AudioManager(int32_t channelCount, size_t cacheSize) : mCacheSize(cacheSize), mCount(0), mCurrentMusic(NULL)
+    AudioManager::AudioManager(int32_t channelCount, size_t cacheSize) : mCacheSize(cacheSize), mCount(0), mCurrentMusic(NULL), mIsPlayingSound(false)
     {
         Audio::init(channelCount);
         mPlaying.resize(channelCount);
@@ -24,6 +24,8 @@ namespace FAAudio
 
     void AudioManager::playSound(const std::string& path)
     {
+        mIsPlayingSound = true;
+
         if (mCache.find(path) == mCache.end())
         {
             if (mCount >= mCacheSize)
@@ -80,7 +82,13 @@ namespace FAAudio
             mPlaying[channel] = path;
     }
 
-    void AudioManager::stopSound() { Audio::stopSound(); }
+    void AudioManager::stopSound()
+    {
+        mIsPlayingSound = false;
+        Audio::stopSound();
+    }
+
+    bool AudioManager::isPlayingSound() const { return mIsPlayingSound; }
 
     void AudioManager::playMusic(const std::string& path)
     {

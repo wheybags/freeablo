@@ -2,6 +2,7 @@
 #include "mersennetwister.h"
 #include <cstdint>
 #include <initializer_list>
+#include <iterator>
 #include <misc/assert.h>
 #include <vector>
 
@@ -30,6 +31,13 @@ namespace Random
         {
             int32_t n = randomInRange(0, parameters.size() - 1);
             return *(parameters.begin() + n);
+        }
+
+        template <typename Iter> Iter chooseOneInContainer(Iter begin, Iter end)
+        {
+            int32_t n = randomInRange(0, std::distance(begin, end) - 1);
+            std::advance(begin, n);
+            return begin;
         }
     };
 

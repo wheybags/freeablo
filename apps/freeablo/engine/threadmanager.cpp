@@ -85,6 +85,8 @@ namespace Engine
         mQueue.push(message);
     }
 
+    bool ThreadManager::isPlayingSound() const { return mAudioManager.isPlayingSound(); }
+
     void ThreadManager::sendRenderState(FARender::RenderState* state)
     {
         Message message;

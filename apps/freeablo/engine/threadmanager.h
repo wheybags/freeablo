@@ -48,6 +48,7 @@ namespace Engine
         void playMusic(const std::string& path);
         void playSound(const std::string& path);
         void stopSound();
+        bool isPlayingSound() const;
         void sendRenderState(FARender::RenderState* state);
         void sendSpritesForPreload(std::vector<uint32_t> sprites);
 
