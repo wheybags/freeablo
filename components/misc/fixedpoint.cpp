@@ -71,16 +71,6 @@ FixedPoint::FixedPoint(const std::string& str)
 
 FixedPoint::FixedPoint(int64_t integerValue) { *this = fromRawValue(integerValue * FixedPoint::scalingFactor); }
 
-FixedPoint FixedPoint::fromRawValue(int64_t rawValue)
-{
-    FixedPoint retval;
-    retval.mVal = rawValue;
-#ifndef NDEBUG
-    retval.mDebugVal = retval.toDouble();
-#endif
-    return retval;
-}
-
 int64_t FixedPoint::intPart() const { return mVal / FixedPoint::scalingFactor; }
 
 int64_t FixedPoint::round() const
@@ -91,6 +81,28 @@ int64_t FixedPoint::round() const
         i++;
     else if (frac <= FixedPoint("-0.5"))
         i--;
+    return i;
+}
+
+int64_t FixedPoint::floor() const
+{
+    FixedPoint frac = fractionPart();
+    int64_t i = intPart();
+
+    if (frac != 0 && i < 0)
+        return i - 1;
+
+    return i;
+}
+
+int64_t FixedPoint::ceil() const
+{
+    FixedPoint frac = fractionPart();
+    int64_t i = intPart();
+
+    if (frac != 0 && i >= 0)
+        return i + 1;
+
     return i;
 }
 
@@ -150,15 +162,6 @@ FixedPoint FixedPoint::operator-(FixedPoint other) const
     FixedPoint retval = fromRawValue(mVal - other.mVal);
 #ifndef NDEBUG
     retval.mDebugVal = mDebugVal - other.mDebugVal;
-#endif
-    return retval;
-}
-
-FixedPoint FixedPoint::operator-() const
-{
-    FixedPoint retval = fromRawValue(-mVal);
-#ifndef NDEBUG
-    retval.mDebugVal = -mDebugVal;
 #endif
     return retval;
 }

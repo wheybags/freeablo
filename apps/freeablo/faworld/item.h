@@ -35,7 +35,6 @@ namespace FAWorld
     enum class ItemMiscId;
     enum class ItemQuality;
 
-    class ItemBonus;
     class EquipTarget;
     constexpr int indestructibleItemDurability = 255;
 
@@ -81,9 +80,9 @@ namespace FAWorld
         bool mIsReal = false;
         int32_t mCount = 1;
 
-        int32_t getReqStr() const;
-        int32_t getReqMagic() const;
-        int32_t getReqDex() const;
+        int32_t getRequiredStrength() const;
+        int32_t getRequiredMagic() const;
+        int32_t getRequiredDexterity() const;
         uint32_t getSpecialEffect() const;
         ItemMiscId getMiscId() const;
         uint32_t getSpellCode() const;
@@ -95,7 +94,6 @@ namespace FAWorld
         uint32_t getGraphicValue() const;
         int32_t getMinAttackDamage() const;
         int32_t getMaxAttackDamage() const;
-        ItemBonus getBonus() const;
         ItemId baseId() const { return mBaseId; }
 
         // private:
@@ -132,6 +130,9 @@ namespace FAWorld
         // TODO: these should be handled by inventory class, not item class
         uint8_t mInvY = 0;
         uint8_t mInvX = 0;
+
+        static bool isItemAMeleeWeapon(ItemType type);
+        static bool isItemARangedWeapon(ItemType type);
 
         friend class CharacterInventory;
         friend class ItemFactory;

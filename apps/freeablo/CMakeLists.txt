@@ -48,8 +48,6 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/inventory.h
     faworld/item.cpp
     faworld/item.h
-    faworld/itembonus.cpp
-    faworld/itembonus.h
     faworld/itemenums.cpp
     faworld/itemenums.h
     faworld/itemfactory.cpp
@@ -78,8 +76,6 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/playerfactory.h
     faworld/playerinput.cpp
     faworld/playerinput.h
-    faworld/playerstats.cpp
-    faworld/playerstats.h
     faworld/position.cpp
     faworld/position.h
     faworld/storedata.cpp

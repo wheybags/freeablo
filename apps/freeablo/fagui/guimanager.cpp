@@ -358,24 +358,50 @@ namespace FAGui
         drawPanel(ctx, PanelType::character, [&]() {
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
 
+            const FAWorld::ActorStats& playerStats = mPlayer->getStats();
+            const FAWorld::LiveActorStats& liveStats = playerStats.getCalculatedStats();
+
             fillTextField(ctx, 168, 21, 131, toString(mPlayer->getClass()));
-            auto& playerStats = mPlayer->getPlayerStats();
-            fillTextField(ctx, 95, 144, 31, std::to_string(playerStats.mStrength).c_str());
-            fillTextField(ctx, 95, 172, 31, std::to_string(playerStats.mMagic).c_str());
-            fillTextField(ctx, 95, 200, 31, std::to_string(playerStats.mDexterity).c_str());
-            fillTextField(ctx, 95, 228, 31, std::to_string(playerStats.mVitality).c_str());
+
+            fillTextField(ctx, 95, 144, 31, std::to_string(playerStats.baseStats.strength).c_str());
+            fillTextField(ctx, 142, 144, 31, std::to_string(liveStats.baseStats.strength).c_str());
+
+            fillTextField(ctx, 95, 172, 31, std::to_string(playerStats.baseStats.magic).c_str());
+            fillTextField(ctx, 142, 172, 31, std::to_string(liveStats.baseStats.magic).c_str());
+
+            fillTextField(ctx, 95, 200, 31, std::to_string(playerStats.baseStats.dexterity).c_str());
+            fillTextField(ctx, 142, 200, 31, std::to_string(liveStats.baseStats.dexterity).c_str());
+
+            fillTextField(ctx, 95, 228, 31, std::to_string(playerStats.baseStats.vitality).c_str());
+            fillTextField(ctx, 142, 228, 31, std::to_string(playerStats.baseStats.vitality).c_str());
 
             fillTextField(ctx, 73, 59, 31, std::to_string(playerStats.mLevel).c_str());
-            fillTextField(ctx, 216, 59, 84, std::to_string(playerStats.mExp).c_str());
-            fillTextField(ctx, 216, 87, 84, std::to_string(playerStats.nextLevelExp()).c_str());
+            fillTextField(ctx, 216, 59, 84, std::to_string(playerStats.mExperience).c_str());
+            fillTextField(ctx, 216, 87, 84, std::to_string(playerStats.nextLevelExperience()).c_str());
 
             fillTextField(ctx, 216, 135, 84, std::to_string(mPlayer->mInventory.getTotalGold()).c_str());
-            auto& stats = mPlayer->getStats();
-            fillTextField(ctx, 95, 293, 31, std::to_string(stats.mHp.max).c_str());
-            fillTextField(ctx, 143, 293, 31, std::to_string(stats.mHp.current).c_str(), stats.mHp.current < stats.mHp.max ? TextColor::red : TextColor::white);
-            fillTextField(ctx, 95, 321, 31, std::to_string(stats.mMana.max).c_str());
-            fillTextField(
-                ctx, 143, 321, 31, std::to_string(stats.mMana.current).c_str(), stats.mMana.current < stats.mMana.max ? TextColor::red : TextColor::white);
+            fillTextField(ctx, 95, 293, 31, std::to_string(playerStats.mHp.max).c_str());
+            fillTextField(ctx,
+                          143,
+                          293,
+                          31,
+                          std::to_string(playerStats.mHp.current).c_str(),
+                          playerStats.mHp.current < playerStats.mHp.max ? TextColor::red : TextColor::white);
+            fillTextField(ctx, 95, 321, 31, std::to_string(playerStats.mMana.max).c_str());
+            fillTextField(ctx,
+                          143,
+                          321,
+                          31,
+                          std::to_string(playerStats.mMana.current).c_str(),
+                          playerStats.mMana.current < playerStats.mMana.max ? TextColor::red : TextColor::white);
+
+            fillTextField(ctx, 257, 172, 43, std::to_string(liveStats.armorClass).c_str());
+            fillTextField(ctx, 257, 200, 43, (std::to_string(liveStats.toHitMelee.base) + "%").c_str());
+
+            int32_t damageBase = mPlayer->mInventory.isRangedWeaponEquipped() ? liveStats.rangedDamage : liveStats.meleeDamage;
+            IntRange damageBonusRange = mPlayer->mInventory.isRangedWeaponEquipped() ? liveStats.rangedDamageBonusRange : liveStats.meleeDamageBonusRange;
+            std::string damageText = std::to_string(damageBase + damageBonusRange.start) + "-" + std::to_string(damageBase + damageBonusRange.end);
+            fillTextField(ctx, 257, 228, 43, damageText.c_str());
 
             nk_layout_space_end(ctx);
         });
