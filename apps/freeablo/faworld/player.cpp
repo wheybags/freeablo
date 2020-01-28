@@ -55,6 +55,7 @@ namespace FAWorld
 
     void Player::initCommon()
     {
+        mName = "Player";
         mWorld.registerPlayer(this);
         mInventory.mInventoryChanged.connect([this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
             (void)removed;
@@ -109,9 +110,9 @@ namespace FAWorld
         return damage;
     }
 
-    void Player::calculateStats(LiveActorStats& stats) const
+    void Player::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
     {
-        BaseStats charStats = mStats.baseStats;
+        BaseStats charStats = actorStats.baseStats;
 
         ItemStats itemStats;
         mInventory.calculateItemBonuses(itemStats);
@@ -499,6 +500,7 @@ namespace FAWorld
         baseStats.strength = from.mStrength;
         baseStats.dexterity = from.mDexterity;
         baseStats.magic = from.mMagic;
+        baseStats.vitality = from.mVitality;
 
         stats = ActorStats(*stats.mActor, baseStats, from.mNextLevelExp);
     }

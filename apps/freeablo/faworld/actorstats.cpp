@@ -49,7 +49,7 @@ namespace FAWorld
     {
         if (mActor->needsToRecalculateStats() || !mHasBeenCalculated)
         {
-            mActor->calculateStats(mCalculatedStats);
+            mActor->calculateStats(mCalculatedStats, *this);
             mHp.setMax(mCalculatedStats.maxLife);
             mMana.setMax(mCalculatedStats.maxMana);
 

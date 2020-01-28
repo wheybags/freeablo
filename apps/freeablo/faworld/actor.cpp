@@ -308,7 +308,7 @@ namespace FAWorld
             onEnemyKilled(enemy);
     }
 
-    void Actor::calculateStats(LiveActorStats& stats) const
+    void Actor::calculateStats(LiveActorStats& stats, const ActorStats&) const
     {
         stats = LiveActorStats();
         stats.maxLife = 10;

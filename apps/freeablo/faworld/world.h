@@ -61,8 +61,6 @@ namespace FAWorld
         void load(FASaveGame::GameLoader& loader);
         ~World();
 
-        World& operator=(World&& other) = default;
-
         void setFirstPlayerAsCurrent();
 
         Render::Tile getTileByScreenPos(Misc::Point screenPos);

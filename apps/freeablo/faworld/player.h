@@ -49,7 +49,7 @@ namespace FAWorld
         void castActiveSpell(Misc::Point targetPoint);
 
         virtual bool needsToRecalculateStats() const override { return true; };
-        virtual void calculateStats(LiveActorStats& stats) const override;
+        virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const override;
 
         // This isn't serialised as it must be set before saving can occur.
         bool mPlayerInitialised = false;
