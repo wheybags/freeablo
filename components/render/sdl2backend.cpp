@@ -157,6 +157,11 @@ namespace Render
 
         glContext = SDL_GL_CreateContext(screen);
 
+#ifdef DEBUG_ATLAS_TEXTURE
+        // Ensure VSYNC is disabled to get actual FPS.
+        SDL_GL_SetSwapInterval(0);
+#endif
+
         // Check opengl version is at least 3.3.
         const GLubyte* glVersion(glGetString(GL_VERSION));
         int major = glVersion[0] - '0';
@@ -617,6 +622,11 @@ namespace Render
     GLuint hoverColor_vbo;
     GLuint atlasOffset_vbo;
 
+    void deleteAllSprites()
+    {
+        atlasTexture->clear();
+    }
+
     void draw()
     {
         if (!once)
@@ -819,8 +829,7 @@ namespace Render
     {
         glUseProgram(shader_programme);
 
-        GLint tex_ids[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-        glUniform1iv(glGetUniformLocation(shader_programme, "tex"), 8, tex_ids);
+        glUniform1i(glGetUniformLocation(shader_programme, "tex"), 0);
         glUniform2f(glGetUniformLocation(shader_programme, "screenSize"), WIDTH, HEIGHT);
         glUniform2f(glGetUniformLocation(shader_programme, "atlasSize"), atlasTexture->getTextureWidth(), atlasTexture->getTextureHeight());
 
@@ -968,7 +977,7 @@ namespace Render
         jo_gif_end(&gif);
     }
 
-    bool SpriteGroup::canDeleteSprites()
+    bool SpriteGroup::canDeleteIndividualSprites()
     {
         // Sprites can not currently be removed from atlas texture.
         return false;

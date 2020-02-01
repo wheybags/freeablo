@@ -41,7 +41,7 @@ void nk_sdl_device_create(nk_gl_device& dev)
                                                            "}\n";
     static const GLchar* fragment_shader = NK_SHADER_VERSION
         R"(precision mediump float;
-        uniform sampler2D Texture;
+        uniform sampler2DArray Texture;
         in vec2 Frag_UV;
         in vec4 Frag_Color;
         out vec4 Out_Color;
@@ -51,14 +51,14 @@ void nk_sdl_device_create(nk_gl_device& dev)
         uniform vec2 atlasSize;
         uniform int checkerboarded;
         void main(){
-            vec4 c = Frag_Color * texture(Texture, (atlasOffset.xy + Frag_UV * imageSize) / atlasSize);
+            vec4 c = Frag_Color * texture(Texture, vec3((atlasOffset.xy + Frag_UV * imageSize) / atlasSize, int(atlasOffset.z)));
             if (c.w == 0. && hoverColor.a > 0.)
             {
               for (float i= -1.; i <= 1.; i++)
                 for (float j= -1.; j <= 1.; j++)
                 {
                   vec2 offset = vec2(i, j);
-                  vec4 n = texture(Texture, (atlasOffset.xy + offset + Frag_UV * imageSize) / atlasSize);
+                  vec4 n = texture(Texture, vec3((atlasOffset.xy + offset + Frag_UV * imageSize) / atlasSize, int(atlasOffset.z)));
                   if (n.w > 0. && (n.x > 0. || n.y > 0. || n.z > 0.))
                     c = hoverColor;
                 }
@@ -207,6 +207,7 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
     glUseProgram(dev.prog);
 
     atlasTexture.bind();
+    glUniform1i(dev.uniform_tex, 0);
     auto& atlasLookupMap = atlasTexture.getLookupMap();
 
     glUniformMatrix4fv(dev.uniform_proj, 1, GL_FALSE, &ortho[0][0]);
@@ -248,7 +249,6 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
             auto s = sprite->operator[](frameNum);
 
             auto& atlasEntry = atlasLookupMap.at((GLuint)(intptr_t)s);
-            glUniform1i(dev.uniform_tex, atlasEntry.mLayer);
 
             int item_hl_color[] = {0xB9, 0xAA, 0x77};
             glUniform4f(dev.uniform_hoverColor,

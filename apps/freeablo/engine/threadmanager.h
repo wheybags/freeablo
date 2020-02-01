@@ -23,7 +23,8 @@ namespace Engine
         PLAY_SOUND,
         STOP_SOUND,
         RENDER_STATE,
-        PRELOAD_SPRITES
+        PRELOAD_SPRITES,
+        CLEAR_SPRITES
     };
 
     struct Message
@@ -50,6 +51,7 @@ namespace Engine
         void stopSound();
         void sendRenderState(FARender::RenderState* state);
         void sendSpritesForPreload(std::vector<uint32_t> sprites);
+        void clearSprites();
 
     private:
         void handleMessage(const Message& message);

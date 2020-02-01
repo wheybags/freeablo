@@ -40,11 +40,10 @@ namespace Render
         GLint getTextureHeight() const { return mTextureHeight; }
         const AtlasTextureLookupMap& getLookupMap() const { return mLookupMap; }
         float getOccupancy() const;
+        void clear();
 
     private:
-        void bind(GLuint layer) const;
-
-        std::vector<GLuint> mTextureArrayIds;
+        GLuint mTextureArrayId;
         GLint mTextureWidth;
         GLint mTextureHeight;
         GLint mTextureLayers;

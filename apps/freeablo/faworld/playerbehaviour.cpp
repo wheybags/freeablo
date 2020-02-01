@@ -103,15 +103,8 @@ namespace FAWorld
                 else
                     nextLevelIndex = mPlayer->getLevel()->getNextLevel();
 
-                GameLevel* level = mPlayer->getWorld()->getLevel(nextLevelIndex);
-
-                if (level)
-                {
-                    if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
-                        mPlayer->teleport(level, Position(level->downStairsPos()));
-                    else
-                        mPlayer->teleport(level, Position(level->upStairsPos()));
-                }
+                bool upStairsPos = input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Down;
+                mPlayer->getWorld()->setLevel(nextLevelIndex, upStairsPos);
 
                 return;
             }

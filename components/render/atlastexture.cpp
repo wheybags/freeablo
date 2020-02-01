@@ -1,9 +1,5 @@
 /* Stores many small textures into a large texture (or array of textures)
- * to allow batched drawing commands that increase performance.
- * Currently implemented as an array of 2D textures, would be simpler with much
- * better performance if a proper 2D texture array (GL_TEXTURE_2D_ARRAY) was
- * used. Author couldn't quite get it to work, parts of the Nuklear GUI would
- * be missing if the array texture was allocated with > 1 depth (layers)... */
+ * to allow batched drawing commands that increase performance. */
 
 #include "atlastexture.h"
 #include "../../extern/RectangleBinPack/SkylineBinPack.h"
@@ -16,66 +12,57 @@ namespace Render
     AtlasTexture::AtlasTexture()
     {
         GLint maxTextureSize;
-        GLint maxTextures = 8; // Hardcoded in fragment shader, GL 3.x minimum is 16.
+        GLint maxArrayTextureLayers;
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+        glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &maxArrayTextureLayers);
 
-        mTextureWidth = maxTextureSize;
-        mTextureHeight = maxTextureSize;
-
-        // Limit number of textures to a reasonable level (measured from testing).
-        // Note: Increasing this has a severe impact on performance.
-        GLint estimatedRequiredTextures = (1uLL << 29) / (mTextureWidth * mTextureHeight);
-        mTextureLayers = std::min(estimatedRequiredTextures, maxTextures);
+        // According to this source GL_MAX_TEXTURE_SIZE is still 8192 for a lot of devices:
+        //      https://feedback.wildfiregames.com/report/opengl/feature/GL_MAX_TEXTURE_SIZE
+        // A single 8192*8192 texture isn't quite enough to store all the sprites in a level,
+        // so a 2D texture array with 2 layers is used.
+        static const GLint requiredTextureSize = 8192;
+        static const GLint requiredTextureLayers = 2;
+        release_assert(maxTextureSize >= requiredTextureSize);
+        release_assert(maxArrayTextureLayers >= requiredTextureLayers);
+        mTextureWidth = requiredTextureSize;
+        mTextureHeight = requiredTextureSize;
+        mTextureLayers = requiredTextureLayers;
 
         // Atlas texture is currently packed so reduce alignment requirements.
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        mTextureArrayIds.resize(mTextureLayers);
-        glGenTextures(mTextureLayers, &mTextureArrayIds[0]);
+        glGenTextures(1, &mTextureArrayId);
 
         for (int32_t layer = 0; layer < mTextureLayers; layer++)
             mBinPacker.push_back(boost::make_unique<rbp::SkylineBinPack>(mTextureWidth, mTextureHeight, false));
 
-        GLuint fbo;
-        glGenFramebuffers(1, &fbo);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+        bind();
 
-        for (int i = 0; i < mTextureLayers; i++)
-        {
-            bind(i);
+        // Allocate memory for texture array (by passing NULL).
+        // NOTE: For GL_COMPRESSED_RGBA image dimensions need to be padded to a
+        // multiple/alignment of 4: https://forums.khronos.org/showthread.php/77554
+        glTexImage3D(GL_TEXTURE_2D_ARRAY,
+                     0,
+                     /*GL_RGB5_A1*/ GL_RGBA8 /*GL_COMPRESSED_RGBA*/,
+                     mTextureWidth,
+                     mTextureHeight,
+                     mTextureLayers,
+                     0,
+                     GL_RGBA,
+                     GL_UNSIGNED_BYTE,
+                     NULL);
 
-            // Allocate memory for texture array (by passing NULL).
-            // NOTE: For GL_COMPRESSED_RGBA image dimensions need to be padded to a
-            // multiple/alignment of 4: https://forums.khronos.org/showthread.php/77554
-            glTexImage2D(GL_TEXTURE_2D,
-                         0,
-                         /*GL_RGB5_A1*/ GL_RGBA8 /*GL_COMPRESSED_RGBA*/,
-                         mTextureWidth,
-                         mTextureHeight,
-                         0,
-                         GL_RGBA,
-                         GL_UNSIGNED_BYTE,
-                         NULL);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-            // Clear the texture, it is undefined upon initialisation and we want any
-            // unused padded areas to be transparent (especially for highlighting edges).
-            glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mTextureArrayIds[i], 0);
-            glClearColor(0, 0, 0, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        }
-
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        glDeleteFramebuffers(1, &fbo);
+        clear();
 
 #ifdef DEBUG_ATLAS_TEXTURE
         GLint internalFormat = 0;
-        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFormat);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFormat);
         printf("MaxTextureSize %d, used (%d, %d, %d), 0x%04X\n", maxTextureSize, mTextureWidth, mTextureHeight, mTextureLayers, internalFormat);
 #endif
     }
@@ -112,8 +99,8 @@ namespace Render
         }
         release_assert(layer < mTextureLayers); // Run out of layers...
 
-        bind(layer);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, packedPos.x, packedPos.y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        bind();
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, packedPos.x, packedPos.y, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
         // NOTE: when using compressed textures sometimes adding a
         // glFlush/glFinish here fixes tiles a bit, not sure why..
@@ -124,19 +111,13 @@ namespace Render
         return id;
     }
 
-    void AtlasTexture::bind(GLuint layer) const
-    {
-        glActiveTexture(GL_TEXTURE0 + layer);
-        glBindTexture(GL_TEXTURE_2D, mTextureArrayIds[layer]);
-    }
-
     void AtlasTexture::bind() const
     {
-        for (int i = 0; i < mTextureLayers; i++)
-            bind(i);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureArrayId);
     }
 
-    void AtlasTexture::free() { glDeleteTextures(mTextureLayers, &mTextureArrayIds[0]); }
+    void AtlasTexture::free() { glDeleteTextures(1, &mTextureArrayId); }
 
     float AtlasTexture::getOccupancy() const
     {
@@ -144,5 +125,26 @@ namespace Render
         for (auto& bp : mBinPacker)
             summedOccupancy += bp->Occupancy();
         return summedOccupancy / mBinPacker.size() * 100;
+    }
+
+    void AtlasTexture::clear()
+    {
+        for (int32_t layer = 0; layer < mTextureLayers; layer++)
+            mBinPacker[layer]->Init(mTextureWidth, mTextureHeight, false);
+        mNextTextureId = 1;
+
+        // Clear the texture, we want any unused padded areas to be transparent (especially for highlighting edges).
+        GLuint fbo;
+        glGenFramebuffers(1, &fbo);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+
+        bind();
+
+        glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mTextureArrayId, 0);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glDeleteFramebuffers(1, &fbo);
     }
 }
