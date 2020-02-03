@@ -6,7 +6,7 @@ namespace FAWorld
 {
     constexpr int32_t ActorStats::MAXIMUM_EXPERIENCE_POINTS;
 
-    ActorStats::ActorStats(const Actor& actor, FASaveGame::GameLoader& loader) : mHp(loader.load<int32_t>()), mMana(loader.load<int32_t>()), mActor(actor)
+    ActorStats::ActorStats(const Actor& actor, FASaveGame::GameLoader& loader) : mActor(actor), mHp(loader.load<int32_t>()), mMana(loader.load<int32_t>())
     {
         baseStats.load(loader);
         mLevel = loader.load<int32_t>();
@@ -45,16 +45,17 @@ namespace FAWorld
         return std::min(i + 1, int32_t(mLevelXpCounts.size()));
     }
 
-    void ActorStats::recalculateStats()
+    const LiveActorStats& ActorStats::getCalculatedStats() const
     {
-        if (mActor->needsToRecalculateStats() || !mHasBeenCalculated)
-        {
-            mActor->calculateStats(mCalculatedStats, *this);
-            mHp.setMax(mCalculatedStats.maxLife);
-            mMana.setMax(mCalculatedStats.maxMana);
+        recalculateStats();
+        return mCalculatedStats;
+    }
 
-            mHasBeenCalculated = true;
-        }
+    void ActorStats::recalculateStats() const
+    {
+        mActor->calculateStats(mCalculatedStats, *this);
+        mHp.setMax(mCalculatedStats.maxLife);
+        mMana.setMax(mCalculatedStats.maxMana);
     }
 
     void BaseStats::save(FASaveGame::GameSaver& saver)

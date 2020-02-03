@@ -100,6 +100,19 @@ namespace FAWorld
 
     void Player::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
     {
+        CalculateStatsCacheKey statsCacheKey;
+        memset(&statsCacheKey, 0, sizeof(CalculateStatsCacheKey)); // force all padding to zero, to make sure memcmp will work
+
+        statsCacheKey.baseStats = actorStats.baseStats;
+        statsCacheKey.gameLevel = getLevel();
+        statsCacheKey.inventoryChangedCallCount = mInventoryChangedCallCount;
+
+        // using memcmp because I didn't want to manually implement operator==
+        if (memcmp(&statsCacheKey, &mLastStatsKey, sizeof(CalculateStatsCacheKey)) == 0)
+            return;
+
+        memcpy(&mLastStatsKey, &statsCacheKey, sizeof(CalculateStatsCacheKey));
+
         BaseStats charStats = actorStats.baseStats;
 
         ItemStats itemStats;
@@ -446,25 +459,6 @@ namespace FAWorld
     void Player::levelUp(int32_t newLevel)
     {
         mStats.mLevel = newLevel;
-
-        // Increase HP/Mana.
-        switch (mPlayerClass)
-        {
-            case PlayerClass::warrior:
-                mStats.mHp.max += 2;
-                mStats.mMana.max += 1;
-                break;
-            case PlayerClass::rogue:
-                mStats.mHp.max += 2;
-                mStats.mMana.max += 2;
-                break;
-            case PlayerClass::sorcerer:
-                mStats.mHp.max += 1;
-                mStats.mMana.max += 2;
-                break;
-            case PlayerClass::none:
-                invalid_enum(PlayerClass, mPlayerClass);
-        }
 
         // Restore HP/Mana.
         heal();

@@ -24,5 +24,13 @@ namespace FAWorld
     private:
         void spawnItem();
         ItemId randomItem();
+
+    private:
+        struct CalculateStatsCacheKey
+        {
+            BaseStats baseStats;
+            const GameLevel* gameLevel = nullptr;
+        };
+        mutable CalculateStatsCacheKey mLastStatsKey; // not serialised, only used to determine if we need to recalculate stats
     };
 }

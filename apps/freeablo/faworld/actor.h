@@ -97,9 +97,7 @@ namespace FAWorld
         bool canInteractWith(Actor* actor);
         void dealDamageToEnemy(Actor* enemy, uint32_t damage);
 
-        virtual bool needsToRecalculateStats() const { return false; };
         virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const;
-        void recalculateStats() { mStats.recalculateStats(); }
 
         // public member variables
         MovementHandler mMoveHandler;

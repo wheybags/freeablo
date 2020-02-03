@@ -86,23 +86,47 @@ namespace FAWorld
         int32_t nextLevelExperience() const { return mLevelXpCounts.at(mLevel - 1); };
         int32_t experiencePointsToLevel(uint32_t experience) const;
 
-        void recalculateStats();
-        const LiveActorStats& getCalculatedStats() const { return mCalculatedStats; }
+        const LiveActorStats& getCalculatedStats() const;
 
         static constexpr int32_t MAXIMUM_EXPERIENCE_POINTS = 2000000000;
 
+        Misc::MaxCurrentItem<int32_t>& getHp()
+        {
+            recalculateStats();
+            return mHp;
+        }
+        const Misc::MaxCurrentItem<int32_t>& getHp() const
+        {
+            recalculateStats();
+            return mHp;
+        }
+
+        Misc::MaxCurrentItem<int32_t>& getMana()
+        {
+            recalculateStats();
+            return mMana;
+        }
+        const Misc::MaxCurrentItem<int32_t>& getMana() const
+        {
+            recalculateStats();
+            return mMana;
+        }
+
+    private:
+        void recalculateStats() const;
+
     public:
         BaseStats baseStats;
-        Misc::MaxCurrentItem<int32_t> mHp;
-        Misc::MaxCurrentItem<int32_t> mMana;
 
         int32_t mLevel = 1;
         int32_t mExperience = 0;
 
         NonNullConstPtr<Actor> mActor; // not serialised
     private:
-        LiveActorStats mCalculatedStats; // not serialised, this is recalculated every frame
-        bool mHasBeenCalculated = false; // also not serialised
+        mutable Misc::MaxCurrentItem<int32_t> mHp;
+        mutable Misc::MaxCurrentItem<int32_t> mMana;
+
+        mutable LiveActorStats mCalculatedStats; // not serialised, this is recalculated on access
         std::vector<uint32_t> mLevelXpCounts;
     };
 }

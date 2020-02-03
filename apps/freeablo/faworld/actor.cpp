@@ -187,7 +187,7 @@ namespace FAWorld
             return;
 
         mStats.takeDamage(static_cast<int32_t>(amount));
-        if (!(mStats.mHp.current <= 0))
+        if (mStats.getHp().current > 0)
         {
             Engine::ThreadManager::get()->playSound(getHitWav());
 
@@ -195,13 +195,13 @@ namespace FAWorld
                 mAnimation.interruptAnimation(AnimState::hit, FARender::AnimationPlayer::AnimationType::Once);
         }
 
-        if (getStats().mHp.current <= 0)
+        if (getStats().getHp().current <= 0)
             die();
     }
 
-    void Actor::heal() { mStats.mHp = mStats.mHp.max; }
+    void Actor::heal() { mStats.getHp() = mStats.getHp().max; }
 
-    void Actor::restoreMana() { mStats.mMana = mStats.mMana.max; }
+    void Actor::restoreMana() { mStats.getMana() = mStats.getMana().max; }
 
     void Actor::stopAndPointInDirection(Misc::Direction direction) { mMoveHandler.stopAndPointInDirection(direction); }
 
@@ -211,11 +211,11 @@ namespace FAWorld
     {
         mMoveHandler.setDestination(getPos().current());
         mAnimation.playAnimation(AnimState::dead, FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
-        mStats.mHp.current = 0;
+        mStats.getHp().current = 0;
         Engine::ThreadManager::get()->playSound(getDieWav());
     }
 
-    bool Actor::isDead() const { return mStats.mHp.current <= 0; }
+    bool Actor::isDead() const { return mStats.getHp().current <= 0; }
 
     bool Actor::isEnemy(Actor* other) const { return mFaction.canAttack(other->mFaction); }
 

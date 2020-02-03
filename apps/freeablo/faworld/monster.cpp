@@ -35,8 +35,20 @@ namespace FAWorld
         Actor::save(saver);
     }
 
-    void Monster::calculateStats(LiveActorStats& stats, const ActorStats&) const
+    void Monster::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
     {
+        CalculateStatsCacheKey statsCacheKey;
+        memset(&statsCacheKey, 0, sizeof(CalculateStatsCacheKey)); // force all padding to zero, to make sure memcmp will work
+
+        statsCacheKey.baseStats = actorStats.baseStats;
+        statsCacheKey.gameLevel = getLevel();
+
+        // using memcmp because I didn't want to manually implement operator==
+        if (memcmp(&statsCacheKey, &mLastStatsKey, sizeof(CalculateStatsCacheKey)) == 0)
+            return;
+
+        memcpy(&mLastStatsKey, &statsCacheKey, sizeof(CalculateStatsCacheKey));
+
         const DiabloExe::Monster& monsterProperties = mWorld.mDiabloExe.getMonster(mName);
 
         stats = LiveActorStats(); // clear everything to zero before we start
