@@ -102,9 +102,12 @@ namespace FAWorld
 
     void ActorAnimationManager::interruptAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type)
     {
-        mInterruptedAnimationState = mPlayingAnim;
-        mInterruptedAnimationFrame = mAnimationPlayer.getCurrentFrame().second;
-        mInterruptedAnimationType = mAnimationPlayer.getCurrentAnimationType();
+        if (mPlayingAnim != animation)
+        {
+            mInterruptedAnimationState = mPlayingAnim;
+            mInterruptedAnimationFrame = mAnimationPlayer.getCurrentFrame().second;
+            mInterruptedAnimationType = mAnimationPlayer.getCurrentAnimationType();
+        }
 
         playAnimation(animation, type);
     }

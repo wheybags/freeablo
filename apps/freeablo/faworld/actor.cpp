@@ -187,11 +187,12 @@ namespace FAWorld
             return;
 
         mStats.takeDamage(static_cast<int32_t>(amount));
+
         if (mStats.getHp().current > 0)
         {
-            Engine::ThreadManager::get()->playSound(getHitWav());
+            Engine::ThreadManager::get()->playSound(getHitWav()); // TODO: should this only play when doing hit recovery?
 
-            if (mAnimation.getCurrentAnimation() != AnimState::hit)
+            if (amount >= mStats.getCalculatedStats().hitRecoveryDamageThreshold)
                 mAnimation.interruptAnimation(AnimState::hit, FARender::AnimationPlayer::AnimationType::Once);
         }
 

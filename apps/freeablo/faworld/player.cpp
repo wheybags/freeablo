@@ -193,6 +193,8 @@ namespace FAWorld
 
         stats.meleeDamageBonusRange = itemStats.meleeDamageBonusRange;
         stats.rangedDamageBonusRange = itemStats.rangedDamageBonusRange;
+
+        stats.hitRecoveryDamageThreshold = actorStats.mLevel;
     }
 
     void Player::init(const DiabloExe::CharacterStats& charStats)
