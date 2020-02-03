@@ -171,8 +171,10 @@ namespace FAWorld
                 invalid_enum(PlayerClass, mPlayerClass);
         }
 
+        // TODOHELLFIRE: Add in bonuses for barbarians and monks here, see Jarulf's guide section 6.2.3
         stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / MakeFixed(5) + itemStats.armorClass).round();
         stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / MakeFixed(2) + itemStats.toHit).round();
+        stats.toHitMeleeMinMaxCap = {5, 95};
         stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.toHit).round();
         stats.toHitMagic.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.magic)).round();
 

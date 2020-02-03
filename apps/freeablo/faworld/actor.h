@@ -57,6 +57,7 @@ namespace FAWorld
         void teleport(GameLevel* level, Position pos);
         virtual void updateSprites() {}
         GameLevel* getLevel();
+        const GameLevel* getLevel() const;
         World* getWorld() const { return &mWorld; }
 
         int32_t meleeDamageVs(const Actor* target) const;

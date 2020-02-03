@@ -47,6 +47,18 @@ namespace FAWorld
         stats.toHitMelee.base = int32_t(monsterProperties.toHit) + 2 * int32_t(monsterProperties.level);
         stats.toHitMelee.bonus = 30;
 
+        const GameLevel* dungeonLevel = getLevel();
+        release_assert(dungeonLevel);
+
+        if (dungeonLevel->getLevelIndex() >= 16)
+            stats.toHitMeleeMinMaxCap.min = 30;
+        else if (dungeonLevel->getLevelIndex() >= 15)
+            stats.toHitMeleeMinMaxCap.min = 25;
+        else if (dungeonLevel->getLevelIndex() >= 14)
+            stats.toHitMeleeMinMaxCap.min = 20;
+        else
+            stats.toHitMeleeMinMaxCap.min = 15;
+
         stats.meleeDamageBonusRange = IntRange(monsterProperties.minDamage, monsterProperties.maxDamage);
     }
 

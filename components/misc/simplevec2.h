@@ -21,6 +21,7 @@ public:
         T x;
         T u;
         T start;
+        T min;
     };
 
     union
@@ -28,6 +29,7 @@ public:
         T y;
         T v;
         T end;
+        T max;
     };
 };
 

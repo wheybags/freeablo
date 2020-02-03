@@ -55,6 +55,7 @@ namespace FAWorld
         int32_t maxMana = 0;
         int32_t armorClass = 0;
         ToHitChance toHitMelee;
+        IntRange toHitMeleeMinMaxCap = {0, 100};
         ToHitChance toHitRanged;
         ToHitChance toHitMagic;
         int32_t meleeDamage = 0;

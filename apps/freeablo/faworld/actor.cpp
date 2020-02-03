@@ -171,12 +171,12 @@ namespace FAWorld
 
     bool Actor::checkHit(Actor* target)
     {
-        UNUSED_PARAM(target); // TODO: this should take into account target's AC
+        const LiveActorStats& stats = mStats.getCalculatedStats();
+        int32_t toHit = stats.toHitMelee.getCombined();
+        toHit -= target->getStats().getCalculatedStats().armorClass;
+        toHit = Misc::clamp(toHit, stats.toHitMeleeMinMaxCap.min, stats.toHitMeleeMinMaxCap.max);
 
         int32_t roll = mWorld.mRng->randomInRange(0, 99); // TODO: should this be (1,100) instead of (0, 99)?
-        int32_t toHit = Misc::clamp(mStats.getCalculatedStats().toHitMelee.getCombined(), 5, 95);
-
-        // TODO: account for per-level minimum hit chacnces, as described in Jarulf's guide, section 6.2.3
 
         return roll < toHit;
     }
@@ -254,6 +254,7 @@ namespace FAWorld
     }
 
     GameLevel* Actor::getLevel() { return mMoveHandler.getLevel(); }
+    const GameLevel* Actor::getLevel() const { return mMoveHandler.getLevel(); }
 
     int32_t Actor::meleeDamageVs(const Actor* /*target*/) const
     {
