@@ -10,7 +10,7 @@ namespace FAWorld
 {
     const std::string Monster::typeId = "monster";
 
-    Monster::Monster(World& world, Random::Rng& rng, const DiabloExe::Monster& monsterStats) : Actor(world), mMonsterStats(monsterStats)
+    Monster::Monster(World& world, const DiabloExe::Monster& monsterStats) : Actor(world)
     {
         boost::format fmt(monsterStats.cl2Path);
         mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage((fmt % 'w').str()));
@@ -23,33 +23,40 @@ namespace FAWorld
         mFaction = Faction::hell();
         mName = monsterStats.monsterName;
         mSoundPath = monsterStats.soundPath;
-        mStats.mHp.max = monsterStats.maxHp;
-        mStats.mHp.current = rng.randomInRange(monsterStats.minHp, monsterStats.maxHp);
+
+        mStats.mLevel = monsterStats.level;
     }
 
-    Monster::Monster(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader), mMonsterStats(loader) {}
+    Monster::Monster(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader) {}
 
     void Monster::save(FASaveGame::GameSaver& saver)
     {
         Serial::ScopedCategorySaver cat("Monster", saver);
         Actor::save(saver);
-        mMonsterStats.save(saver);
     }
 
-    int32_t Monster::meleeDamageVs(const Actor* actor) const
+    void Monster::calculateStats(LiveActorStats& stats, const ActorStats&) const
     {
-        (void)actor;
-        int32_t damage = mWorld.mRng->randomInRange(mMonsterStats.minDamage, mMonsterStats.maxDamage);
-        return damage;
+        const DiabloExe::Monster& monsterProperties = mWorld.mDiabloExe.getMonster(mName);
+
+        stats = LiveActorStats(); // clear everything to zero before we start
+
+        stats.maxLife = monsterProperties.maxHp; // TODO: should this be randomised per-spawn between minHp and maxHp?
+        stats.armorClass = monsterProperties.armourClass;
+
+        stats.toHitMelee.base = int32_t(monsterProperties.toHit) + 2 * int32_t(monsterProperties.level);
+        stats.toHitMelee.bonus = 30;
+
+        stats.meleeDamageBonusRange = IntRange(monsterProperties.minDamage, monsterProperties.maxDamage);
     }
 
     void Monster::die()
     {
-        Actor::die();
+        super::die();
         spawnItem();
     }
 
-    int32_t Monster::getKillExp() const { return mMonsterStats.mExp; }
+    int32_t Monster::getOnKilledExperience() const { return mWorld.mDiabloExe.getMonster(mName).exp; }
 
     void Monster::spawnItem()
     {
@@ -71,6 +78,6 @@ namespace FAWorld
         if (mWorld.mRng->randomInRange(0, 99) > 25)
             return ItemId::gold;
 
-        return mWorld.getItemFactory().randomItemId(ItemFilter::maxQLvl(mMonsterStats.level));
+        return mWorld.getItemFactory().randomItemId(ItemFilter::maxQLvl(mStats.mLevel));
     }
 }

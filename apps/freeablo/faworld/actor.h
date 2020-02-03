@@ -46,7 +46,8 @@ namespace FAWorld
         virtual ~Actor();
 
         virtual void save(FASaveGame::GameSaver& saver);
-        virtual bool checkHit(Actor* enemy);
+        bool checkHit(Actor* target);
+        virtual int32_t getOnKilledExperience() const { return 0; }
 
         static const std::string typeId;
         virtual const std::string& getTypeId() { return typeId; }
@@ -58,7 +59,8 @@ namespace FAWorld
         GameLevel* getLevel();
         World* getWorld() const { return &mWorld; }
 
-        virtual int32_t meleeDamageVs(const Actor* actor) const;
+        int32_t meleeDamageVs(const Actor* target) const;
+        virtual bool canCriticalHit() const { return false; }
         void doMeleeHit(Actor* enemy);
         void doMeleeHit(const Misc::Point& point);
         void startMeleeAttack(Misc::Direction direction);

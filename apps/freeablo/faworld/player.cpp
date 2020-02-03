@@ -98,18 +98,6 @@ namespace FAWorld
         updateSprites();
     }
 
-    int32_t Player::meleeDamageVs(const Actor* /*actor*/) const
-    {
-        const LiveActorStats& stats = mStats.getCalculatedStats();
-        int32_t damage = stats.meleeDamage;
-        damage += mWorld.mRng->randomInRange(stats.meleeDamageBonusRange.start, stats.meleeDamageBonusRange.end);
-
-        if (mPlayerClass == PlayerClass::warrior && mWorld.mRng->randomInRange(0, 99) < mStats.mLevel)
-            damage *= 2;
-
-        return damage;
-    }
-
     void Player::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
     {
         BaseStats charStats = actorStats.baseStats;
@@ -218,16 +206,6 @@ namespace FAWorld
         Actor::save(saver);
         saver.save(static_cast<int32_t>(mPlayerClass));
         saver.save(mActiveMissileIndex);
-    }
-
-    bool Player::checkHit(Actor* enemy)
-    {
-        UNUSED_PARAM(enemy); // TODO: this should take into account target's AC when attacking a player
-
-        int32_t roll = mWorld.mRng->randomInRange(0, 99);
-        int32_t toHit = boost::algorithm::clamp(mStats.getCalculatedStats().toHitMelee.getCombined(), 5, 95);
-
-        return roll < toHit;
     }
 
     Player::~Player() { mWorld.deregisterPlayer(this); }
@@ -441,21 +419,18 @@ namespace FAWorld
 
     void Player::onEnemyKilled(Actor* enemy)
     {
-        if (Monster* monster = dynamic_cast<Monster*>(enemy))
-        {
-            addExperience(*monster);
-            // TODO: intimidate close fallen demons.
-            // TODO: notify quests.
-            // TODO: if enemy is Diablo game complete.
-        }
+        addExperience(*enemy);
+        // TODO: intimidate close fallen demons.
+        // TODO: notify quests.
+        // TODO: if enemy is Diablo game complete.
     }
 
-    void Player::addExperience(Monster& enemy)
+    void Player::addExperience(Actor& enemy)
     {
-        int32_t exp = enemy.getKillExp();
+        int32_t exp = enemy.getOnKilledExperience();
 
         // Adjust exp based on difference in level between player and monster.
-        exp = (int32_t)(FixedPoint(exp) * (MakeFixed(1) + (FixedPoint(enemy.getMonsterStats().level) - mStats.mLevel) / 10)).round();
+        exp = (int32_t)(FixedPoint(exp) * (MakeFixed(1) + (FixedPoint(enemy.getStats().mLevel) - mStats.mLevel) / 10)).round();
         exp = std::max(0, exp);
 
         mStats.mExperience = std::min(mStats.mExperience + exp, ActorStats::MAXIMUM_EXPERIENCE_POINTS);

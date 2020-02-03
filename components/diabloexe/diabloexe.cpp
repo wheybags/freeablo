@@ -588,7 +588,7 @@ namespace DiabloExe
         }
     }
 
-    const Monster& DiabloExe::getMonster(const std::string& name) const { return mMonsters.find(name)->second; }
+    const Monster& DiabloExe::getMonster(const std::string& name) const { return mMonsters.at(name); }
 
     const CharacterStats DiabloExe::getCharacterStat(std::string character) const { return mCharacters.at(character); }
 
