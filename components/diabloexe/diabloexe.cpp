@@ -40,6 +40,9 @@ namespace DiabloExe
 
     DiabloExe::DiabloExe(const std::string& pathEXE)
     {
+        if (pathEXE.empty())
+            return;
+
         mSettings.reset(new Settings::Settings());
         mVersion = getVersion(pathEXE);
         if (mVersion.empty())

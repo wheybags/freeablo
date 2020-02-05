@@ -60,7 +60,8 @@ namespace FAWorld
         mInventory.mInventoryChanged.connect([this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
             (void)removed;
 
-            // Update player graphics.
+            mInventoryChangedCallCount++;
+
             updateSprites();
 
             switch (inventoryType)
@@ -105,6 +106,7 @@ namespace FAWorld
 
         statsCacheKey.baseStats = actorStats.baseStats;
         statsCacheKey.gameLevel = getLevel();
+        statsCacheKey.level = actorStats.mLevel;
         statsCacheKey.inventoryChangedCallCount = mInventoryChangedCallCount;
 
         // using memcmp because I didn't want to manually implement operator==
@@ -127,22 +129,24 @@ namespace FAWorld
         stats.toHitRanged.bonus = 0;
         stats.toHitMagic.bonus = 0;
 
-        // TODO: make sure all the following calculations should be rounded
+        // TODO: make sure all the following calculations should be floored.
+        // Flooring for melee damage produces the same numbers as displayed in the character GUI in the original game.
+        // I'm not sure if a higher precision is used in the actual game update code.
 
         switch (mPlayerClass)
         {
             case PlayerClass::warrior:
             {
                 stats.maxLife = (int32_t)(MakeFixed(2) * FixedPoint(charStats.vitality) + MakeFixed(2) * FixedPoint(itemStats.baseStats.vitality) +
-                                          MakeFixed(2) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxLife) + 18)
-                                    .round();
+                                          MakeFixed(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 18)
+                                    .floor();
 
                 stats.maxMana = (int32_t)(MakeFixed(1) * FixedPoint(charStats.magic) + MakeFixed(1) * FixedPoint(itemStats.baseStats.magic) +
-                                          MakeFixed(1) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxMana) - 1)
-                                    .round();
+                                          MakeFixed(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) - 1)
+                                    .floor();
 
-                stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * mStats.mLevel) / FixedPoint(100)).round();
-                stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * mStats.mLevel) / FixedPoint(200)).round();
+                stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(100)).floor();
+                stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(200)).floor();
 
                 stats.toHitMelee.bonus = 20;
                 stats.toHitRanged.bonus = 10;
@@ -151,15 +155,17 @@ namespace FAWorld
             case PlayerClass::rogue:
             {
                 stats.maxLife = (int32_t)(MakeFixed(1) * FixedPoint(charStats.vitality) + MakeFixed(1, 5) * FixedPoint(itemStats.baseStats.vitality) +
-                                          MakeFixed(2) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxLife) + 23)
-                                    .round();
+                                          MakeFixed(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 23)
+                                    .floor();
 
                 stats.maxMana = (int32_t)(MakeFixed(1) * FixedPoint(charStats.magic) + MakeFixed(1, 5) * FixedPoint(itemStats.baseStats.magic) +
-                                          MakeFixed(2) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxMana) + 5)
-                                    .round();
+                                          MakeFixed(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) + 5)
+                                    .floor();
 
-                stats.meleeDamage = (int32_t)(((FixedPoint(charStats.strength) + FixedPoint(charStats.dexterity)) * mStats.mLevel) / FixedPoint(100)).round();
-                stats.rangedDamage = (int32_t)(((FixedPoint(charStats.strength) + FixedPoint(charStats.dexterity)) * mStats.mLevel) / FixedPoint(100)).round();
+                stats.meleeDamage =
+                    (int32_t)(((FixedPoint(charStats.strength) + FixedPoint(charStats.dexterity)) * actorStats.mLevel) / FixedPoint(100)).floor();
+                stats.rangedDamage =
+                    (int32_t)(((FixedPoint(charStats.strength) + FixedPoint(charStats.dexterity)) * actorStats.mLevel) / FixedPoint(100)).floor();
 
                 stats.toHitRanged.bonus = 20;
                 break;
@@ -167,15 +173,15 @@ namespace FAWorld
             case PlayerClass::sorcerer:
             {
                 stats.maxLife = (int32_t)(MakeFixed(1) * FixedPoint(charStats.vitality) + MakeFixed(1) * FixedPoint(itemStats.baseStats.vitality) +
-                                          MakeFixed(1) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
-                                    .round();
+                                          MakeFixed(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
+                                    .floor();
 
                 stats.maxMana = (int32_t)(MakeFixed(2) * FixedPoint(charStats.magic) + MakeFixed(2) * FixedPoint(itemStats.baseStats.magic) +
-                                          MakeFixed(2) * FixedPoint(mStats.mLevel) + FixedPoint(itemStats.maxMana) - 2)
-                                    .round();
+                                          MakeFixed(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) - 2)
+                                    .floor();
 
-                stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * mStats.mLevel) / FixedPoint(100)).round();
-                stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * mStats.mLevel) / FixedPoint(200)).round();
+                stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(100)).floor();
+                stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(200)).floor();
 
                 stats.toHitMagic.bonus = 20;
                 break;
@@ -185,13 +191,17 @@ namespace FAWorld
         }
 
         // TODOHELLFIRE: Add in bonuses for barbarians and monks here, see Jarulf's guide section 6.2.3
-        stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / MakeFixed(5) + itemStats.armorClass).round();
-        stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / MakeFixed(2) + itemStats.toHit).round();
+        stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / MakeFixed(5) + itemStats.armorClass).floor();
+        stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / MakeFixed(2) + itemStats.toHit).floor();
         stats.toHitMeleeMinMaxCap = {5, 95};
-        stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.toHit).round();
-        stats.toHitMagic.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.magic)).round();
+        stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.toHit).floor();
+        stats.toHitMagic.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.magic)).floor();
 
+        // TODO: account for shields. I'm not sure how exactly, but if you have a shield and no weapon equipped, it should affect your damage.
         stats.meleeDamageBonusRange = itemStats.meleeDamageBonusRange;
+        if (stats.meleeDamageBonusRange.isZero())
+            stats.meleeDamageBonusRange = IntRange(1, 1);
+
         stats.rangedDamageBonusRange = itemStats.rangedDamageBonusRange;
 
         stats.hitRecoveryDamageThreshold = actorStats.mLevel;
@@ -362,6 +372,8 @@ namespace FAWorld
         };
 
         auto renderer = FARender::Renderer::get();
+        if (!renderer) // TODO: some sort of headless mode for tests
+            return;
 
         // TODO: Spell animations: lightning "lm", fire "fm", other "qm"
         mAnimation.setAnimation(AnimState::dead, renderer->loadImage((helper(true) % "dt").str()));

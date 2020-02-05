@@ -42,6 +42,7 @@ namespace FAWorld
 
         statsCacheKey.baseStats = actorStats.baseStats;
         statsCacheKey.gameLevel = getLevel();
+        statsCacheKey.level = actorStats.mLevel;
 
         // using memcmp because I didn't want to manually implement operator==
         if (memcmp(&statsCacheKey, &mLastStatsKey, sizeof(CalculateStatsCacheKey)) == 0)

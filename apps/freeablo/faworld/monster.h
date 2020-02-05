@@ -30,6 +30,7 @@ namespace FAWorld
         {
             BaseStats baseStats;
             const GameLevel* gameLevel = nullptr;
+            int32_t level = 0;
         };
         mutable CalculateStatsCacheKey mLastStatsKey; // not serialised, only used to determine if we need to recalculate stats
     };

@@ -16,6 +16,7 @@ set(SOURCES
     settings.cpp
     random.cpp
     testlevelgen.cpp
+    testcombatformulas.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

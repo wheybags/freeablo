@@ -52,5 +52,5 @@ namespace FAWorld
         return res;
     }
 
-    const DiabloExe::BaseItem& ItemFactory::getInfo(ItemId id) const { return mExe.getBaseItems()[static_cast<int>(id)]; }
+    const DiabloExe::BaseItem& ItemFactory::getInfo(ItemId id) const { return mExe.getBaseItems().at(static_cast<int>(id)); }
 }

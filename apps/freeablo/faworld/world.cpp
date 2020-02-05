@@ -36,7 +36,9 @@ namespace FAWorld
           mItemFactory(boost::make_unique<ItemFactory>(exe, *mRng.get())), mStoreData(boost::make_unique<StoreData>(*mItemFactory))
     {
         this->setupObjectIdMappers();
-        regenerateStoreItems();
+
+        if (mDiabloExe.isLoaded())
+            regenerateStoreItems();
     }
 
     void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/, *mRng.get()); }

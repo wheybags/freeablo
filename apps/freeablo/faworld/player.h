@@ -66,6 +66,7 @@ namespace FAWorld
         {
             BaseStats baseStats;
             const GameLevel* gameLevel = nullptr;
+            int32_t level = 0;
             int32_t inventoryChangedCallCount = -1;
         };
         mutable CalculateStatsCacheKey mLastStatsKey; // not serialised, only used to determine if we need to recalculate stats
