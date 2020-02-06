@@ -380,20 +380,20 @@ namespace FAGui
             fillTextField(ctx, 216, 87, 84, std::to_string(playerStats.nextLevelExperience()).c_str());
 
             fillTextField(ctx, 216, 135, 84, std::to_string(mPlayer->mInventory.getTotalGold()).c_str());
-            fillTextField(ctx, 95, 293, 31, std::to_string(playerStats.mHp.max).c_str());
+            fillTextField(ctx, 95, 293, 31, std::to_string(playerStats.getHp().max).c_str());
             fillTextField(ctx,
                           143,
                           293,
                           31,
-                          std::to_string(playerStats.mHp.current).c_str(),
-                          playerStats.mHp.current < playerStats.mHp.max ? TextColor::red : TextColor::white);
-            fillTextField(ctx, 95, 321, 31, std::to_string(playerStats.mMana.max).c_str());
+                          std::to_string(playerStats.getHp().current).c_str(),
+                          playerStats.getHp().current < playerStats.getHp().max ? TextColor::red : TextColor::white);
+            fillTextField(ctx, 95, 321, 31, std::to_string(playerStats.getHp().max).c_str());
             fillTextField(ctx,
                           143,
                           321,
                           31,
-                          std::to_string(playerStats.mMana.current).c_str(),
-                          playerStats.mMana.current < playerStats.mMana.max ? TextColor::red : TextColor::white);
+                          std::to_string(playerStats.getMana().current).c_str(),
+                          playerStats.getMana().current < playerStats.getMana().max ? TextColor::red : TextColor::white);
 
             fillTextField(ctx, 257, 172, 43, std::to_string(liveStats.armorClass).c_str());
             fillTextField(ctx, 257, 200, 43, (std::to_string(liveStats.toHitMelee.base) + "%").c_str());
@@ -575,9 +575,9 @@ namespace FAGui
 
                                const FAWorld::ActorStats& stats = Engine::EngineMain::get()->mWorld->getCurrentPlayer()->getStats();
                                // draw current hp into health bulb
-                               drawBulb(stats.mHp.current, stats.mHp.max, healthBulbLeftOffset);
+                               drawBulb(stats.getHp().current, stats.getHp().max, healthBulbLeftOffset);
                                // and current mana
-                               drawBulb(stats.mMana.current, stats.mMana.current, manaBulbLeftOffset);
+                               drawBulb(stats.getMana().current, stats.getMana().current, manaBulbLeftOffset);
 
                                belt(ctx);
                                descriptionPanel(ctx, hoverStatus.getDescription(*Engine::EngineMain::get()->mWorld->getCurrentLevel()));

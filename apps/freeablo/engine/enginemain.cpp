@@ -82,7 +82,12 @@ namespace Engine
 
         FAWorld::Player* player = nullptr;
         int32_t currentLevel = -1;
-        mWorld.reset(new FAWorld::World(*mExe, uint32_t(time(nullptr))));
+
+        auto seed = uint32_t(time(nullptr));
+        if (variables["seed"].as<uint32_t>() != 0)
+            seed = variables["seed"].as<uint32_t>();
+
+        mWorld.reset(new FAWorld::World(*mExe, seed));
 
         mLocalInputHandler.reset(new LocalInputHandler(*mWorld));
         mInputManager->registerMouseObserver(mLocalInputHandler.get());

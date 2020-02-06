@@ -71,6 +71,7 @@ namespace FAWorld
     bool MovementHandler::moving() { return mCurrentPos.isMoving(); }
 
     GameLevel* MovementHandler::getLevel() { return mLevel; }
+    const GameLevel* MovementHandler::getLevel() const { return mLevel; }
 
     void MovementHandler::update(FAWorld::Actor& actor)
     {

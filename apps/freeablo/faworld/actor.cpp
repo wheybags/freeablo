@@ -169,7 +169,17 @@ namespace FAWorld
 
     Actor::~Actor() = default;
 
-    bool Actor::checkHit(Actor*) { return mWorld.mRng->randomInRange(1, 2) < 2; }
+    bool Actor::checkHit(Actor* target)
+    {
+        const LiveActorStats& stats = mStats.getCalculatedStats();
+        int32_t toHit = stats.toHitMelee.getCombined();
+        toHit -= target->getStats().getCalculatedStats().armorClass;
+        toHit = Misc::clamp(toHit, stats.toHitMeleeMinMaxCap.min, stats.toHitMeleeMinMaxCap.max);
+
+        int32_t roll = mWorld.mRng->randomInRange(0, 99); // TODO: should this be (1,100) instead of (0, 99)?
+
+        return roll < toHit;
+    }
 
     void Actor::takeDamage(int32_t amount)
     {
@@ -177,21 +187,22 @@ namespace FAWorld
             return;
 
         mStats.takeDamage(static_cast<int32_t>(amount));
-        if (!(mStats.mHp.current <= 0))
-        {
-            Engine::ThreadManager::get()->playSound(getHitWav());
 
-            if (mAnimation.getCurrentAnimation() != AnimState::hit)
+        if (mStats.getHp().current > 0)
+        {
+            Engine::ThreadManager::get()->playSound(getHitWav()); // TODO: should this only play when doing hit recovery?
+
+            if (amount >= mStats.getCalculatedStats().hitRecoveryDamageThreshold)
                 mAnimation.interruptAnimation(AnimState::hit, FARender::AnimationPlayer::AnimationType::Once);
         }
 
-        if (getStats().mHp.current <= 0)
+        if (getStats().getHp().current <= 0)
             die();
     }
 
-    void Actor::heal() { mStats.mHp = mStats.mHp.max; }
+    void Actor::heal() { mStats.getHp() = mStats.getHp().max; }
 
-    void Actor::restoreMana() { mStats.mMana = mStats.mMana.max; }
+    void Actor::restoreMana() { mStats.getMana() = mStats.getMana().max; }
 
     void Actor::stopAndPointInDirection(Misc::Direction direction) { mMoveHandler.stopAndPointInDirection(direction); }
 
@@ -201,11 +212,11 @@ namespace FAWorld
     {
         mMoveHandler.setDestination(getPos().current());
         mAnimation.playAnimation(AnimState::dead, FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
-        mStats.mHp.current = 0;
+        mStats.getHp().current = 0;
         Engine::ThreadManager::get()->playSound(getDieWav());
     }
 
-    bool Actor::isDead() const { return mStats.mHp.current <= 0; }
+    bool Actor::isDead() const { return mStats.getHp().current <= 0; }
 
     bool Actor::isEnemy(Actor* other) const { return mFaction.canAttack(other->mFaction); }
 
@@ -244,11 +255,18 @@ namespace FAWorld
     }
 
     GameLevel* Actor::getLevel() { return mMoveHandler.getLevel(); }
+    const GameLevel* Actor::getLevel() const { return mMoveHandler.getLevel(); }
 
-    int32_t Actor::meleeDamageVs(const Actor* /*actor*/) const
+    int32_t Actor::meleeDamageVs(const Actor* /*target*/) const
     {
-        /* placeholder */
-        return 5;
+        const LiveActorStats& stats = mStats.getCalculatedStats();
+        int32_t damage = stats.meleeDamage;
+        damage += mWorld.mRng->randomInRange(stats.meleeDamageBonusRange.start, stats.meleeDamageBonusRange.end);
+
+        if (canCriticalHit() && mWorld.mRng->randomInRange(0, 99) < mStats.mLevel)
+            damage *= 2;
+
+        return damage;
     }
 
     std::string Actor::getDieWav() const

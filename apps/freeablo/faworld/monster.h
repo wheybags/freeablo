@@ -1,31 +1,37 @@
 #pragma once
-
 #include "actor.h"
 #include "item.h"
-#include "monsterstats.h"
 
 namespace FAWorld
 {
     class Monster : public Actor
     {
+        using super = Actor;
+
     public:
         static const std::string typeId;
         const std::string& getTypeId() override { return typeId; }
 
-        Monster(World& world, Random::Rng& rng, const DiabloExe::Monster& monsterStats);
+        Monster(World& world, const DiabloExe::Monster& monsterStats);
         Monster(World& world, FASaveGame::GameLoader& loader);
 
         void save(FASaveGame::GameSaver& saver) override;
 
-        const MonsterStats& getMonsterStats() const { return mMonsterStats; }
-        int32_t meleeDamageVs(const Actor* actor) const override;
+        virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const override;
         void die() override;
-        int32_t getKillExp() const;
+        virtual int32_t getOnKilledExperience() const override;
 
     private:
         void spawnItem();
         ItemId randomItem();
 
-        MonsterStats mMonsterStats;
+    private:
+        struct CalculateStatsCacheKey
+        {
+            BaseStats baseStats;
+            const GameLevel* gameLevel = nullptr;
+            int32_t level = 0;
+        };
+        mutable CalculateStatsCacheKey mLastStatsKey; // not serialised, only used to determine if we need to recalculate stats
     };
 }

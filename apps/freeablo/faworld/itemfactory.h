@@ -48,7 +48,7 @@ namespace FAWorld
             pool.clear();
             for (auto id : enum_range<ItemId>())
             {
-                auto& info = getInfo(id);
+                const DiabloExe::BaseItem& info = getInfo(id);
                 bool filteredOut = false;
                 static_cast<void>(std::initializer_list<int>{(filteredOut = filteredOut || !filters(info), 0)...});
                 if (filteredOut)

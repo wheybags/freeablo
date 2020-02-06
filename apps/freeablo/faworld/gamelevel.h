@@ -95,7 +95,7 @@ namespace FAWorld
 
         void removeActor(Actor* actor);
 
-        int32_t getLevelIndex() { return mLevelIndex; }
+        int32_t getLevelIndex() const { return mLevelIndex; }
 
         bool dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile);
         bool dropItemClosestEmptyTile(Item& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction);

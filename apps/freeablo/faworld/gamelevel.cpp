@@ -87,9 +87,6 @@ namespace FAWorld
     void GameLevel::update(bool noclip)
     {
         for (auto& actor : mActors)
-            actor->recalculateStats();
-
-        for (auto& actor : mActors)
             actor->update(noclip);
 
         for (auto& p : mItemMap->mItems)

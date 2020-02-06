@@ -30,7 +30,6 @@ namespace FAWorld
         void initCommon();
         Player(World& world, FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) override;
-        virtual bool checkHit(Actor* enemy) override;
 
         virtual ~Player();
         void updateSprites() override;
@@ -43,12 +42,11 @@ namespace FAWorld
 
         boost::signals2::signal<void(const Misc::Point&)> positionReached;
         PlayerClass getClass() const { return mPlayerClass; }
-        int32_t meleeDamageVs(const Actor* actor) const override;
+        virtual bool canCriticalHit() const override { return mPlayerClass == PlayerClass::warrior; }
 
         void setActiveSpellNumber(int32_t spellNumber);
         void castActiveSpell(Misc::Point targetPoint);
 
-        virtual bool needsToRecalculateStats() const override { return true; };
         virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const override;
 
         // This isn't serialised as it must be set before saving can occur.
@@ -58,14 +56,23 @@ namespace FAWorld
         void init(const DiabloExe::CharacterStats& charStats);
         bool canTalkTo(Actor* actor);
         void onEnemyKilled(Actor* enemy) override;
-        void addExperience(Monster& enemy);
+        void addExperience(Actor& enemy);
         void levelUp(int32_t newLevel);
 
         static void initialiseActorStats(ActorStats& stats, const DiabloExe::CharacterStats& from);
 
     private:
-        PlayerClass mPlayerClass = PlayerClass::warrior;
+        struct CalculateStatsCacheKey
+        {
+            BaseStats baseStats;
+            const GameLevel* gameLevel = nullptr;
+            int32_t level = 0;
+            int32_t inventoryChangedCallCount = -1;
+        };
+        mutable CalculateStatsCacheKey mLastStatsKey; // not serialised, only used to determine if we need to recalculate stats
 
+        int32_t mInventoryChangedCallCount = 0; // not serialised, only used to determine if inventory changed since we last calculated stats
+        PlayerClass mPlayerClass = PlayerClass::warrior;
         uint32_t mActiveMissileIndex = 0; // Temporary for testing missiles.
     };
 }

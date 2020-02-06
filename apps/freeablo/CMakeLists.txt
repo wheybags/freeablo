@@ -64,8 +64,6 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/missile/missilemovement.cpp
     faworld/monster.cpp
     faworld/monster.h
-    faworld/monsterstats.cpp
-    faworld/monsterstats.h
     faworld/movementhandler.cpp
     faworld/movementhandler.h
     faworld/player.cpp
