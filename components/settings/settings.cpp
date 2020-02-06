@@ -4,6 +4,7 @@
 #include <faio/faio.h>
 #include <fstream>
 #include <iostream>
+#include <filesystem/path.h>
 
 namespace Settings
 {
@@ -46,7 +47,7 @@ namespace Settings
 
         // Load defaults
 
-        if (!boost::filesystem::exists(mImpl->mDefaultPath))
+        if (!filesystem::exists(mImpl->mDefaultPath))
             return false;
 
         mImpl->mDefaultsIni.LoadFile(mImpl->mDefaultPath.c_str());
@@ -55,7 +56,7 @@ namespace Settings
 
         mImpl->mPath = mImpl->mUserPath;
 
-        if (!boost::filesystem::exists(mImpl->mUserPath))
+        if (!filesystem::exists(mImpl->mUserPath))
         {
             mImpl->createFile(mImpl->mUserPath);
             return true;
@@ -77,7 +78,7 @@ namespace Settings
 
         mImpl->mMode = Mode::STANDARD_FILE;
 
-        if (!boost::filesystem::exists(path))
+        if (!filesystem::exists(path))
         {
             std::cout << "Settings file \"" << path << "\" does not exists. Creating file..." << std::endl;
             mImpl->createFile(path);

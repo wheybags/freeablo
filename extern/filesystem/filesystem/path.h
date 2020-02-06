@@ -25,11 +25,19 @@
 # include <ShlObj.h>
 #else
 # include <unistd.h>
+# include <fcntl.h>
 #endif
 #include <sys/stat.h>
 
 #if defined(__linux)
 # include <linux/limits.h>
+#endif
+
+#if defined(__APPLE__) || defined(__FreeBSD__)
+# include <copyfile.h>
+#endif
+#if defined(__linux)
+# include <sys/sendfile.h>
 #endif
 
 NAMESPACE_BEGIN(filesystem)
@@ -258,7 +266,7 @@ public:
         return os;
     }
 
-    bool remove_file() {
+    bool remove_file() const {
 #if !defined(_WIN32)
         return std::remove(str().c_str()) == 0;
 #else
@@ -382,6 +390,60 @@ inline bool create_directories(const path& p) {
             return false;
     }
     return false;
+#endif
+}
+
+inline bool remove(const path& path)
+{
+    return path.remove_file();
+}
+
+inline bool exists(const path& path)
+{
+    return path.exists();
+}
+
+inline bool copy_file(const path& source, const path& destination)
+{
+#if defined(_WIN32)
+    return CopyFileW(source.wstr().c_str(), destination.wstr().c_str(), FALSE) != 0;
+#else
+    int input = 0;
+    int output = 0;
+    bool result = false;
+
+    if ((input = open(source.str().c_str(), O_RDONLY)) == -1)
+        goto copy_file_end;
+    if ((output = creat(destination.str().c_str(), 0660)) == -1)
+        goto copy_file_end;
+
+    //Here we use kernel-space copying for performance reasons
+# if defined(__APPLE__) || defined(__FreeBSD__)
+    //fcopyfile works on FreeBSD and OS X 10.5+
+    result = fcopyfile(input, output, 0, COPYFILE_ALL) == 0;
+# else
+    //sendfile will work with non-socket output (i.e. regular file) on Linux 2.6.33+
+    off_t bytesCopied;
+    struct stat fileinfo;
+
+    if (fstat(input, &fileinfo) != 0)
+        goto copy_file_end;
+
+    int written;
+    do
+    {
+        written = sendfile(output, input, &bytesCopied, fileinfo.st_size);
+        if (written == -1)
+            goto copy_file_end;
+
+    } while (written != 0);
+# endif
+
+    copy_file_end:
+    close(input);
+    close(output);
+
+    return result;
 #endif
 }
 

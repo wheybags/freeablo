@@ -106,6 +106,4 @@ std::string FAIO::FAFileObject::readCStringFromWin32Binary(size_t ptr, size_t of
     return FAIO::readCStringFromWin32Binary(faFile, ptr, offset);
 }
 
-std::string FAIO::FAFileObject::getMPQFileName() { return FAIO::getMPQFileName(); }
-
 void FAIO::FAFileObject::quit() { FAIO::quit(); }

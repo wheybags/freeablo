@@ -12,6 +12,7 @@
 #include <misc/md5.h>
 #include <misc/misc.h>
 #include "engine/enginemain.h"
+#include <filesystem/path.h>
 
 namespace bpo = boost::program_options;
 
@@ -121,9 +122,8 @@ int fa_main(int argc, char** argv)
     // Check if we've been configured with data files, and if we haven't, run the launcher to prompt configuration
     if (!(settings.loadUserSettings() && dataFilesSetUp(settings)))
     {
-        std::string path = (boost::filesystem::system_complete(argv[0]).parent_path() / "launcher").string();
-
-        system(Misc::escapeSpacesOnPath(path).c_str());
+        filesystem::path path = (filesystem::path(argv[0]).parent_path() / "launcher").make_absolute();
+        system(Misc::escapeSpacesOnPath(path.str()).c_str());
         return EXIT_SUCCESS;
     }
 

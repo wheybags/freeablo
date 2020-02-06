@@ -7,7 +7,7 @@ target_link_libraries(Cel FAIO)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(FAIO faio/faio.cpp faio/faio.h faio/fafileobject.h faio/fafileobject.cpp)
-target_link_libraries(FAIO stormlib::stormlib ${HUNTER_BOOST_LIBS})
+target_link_libraries(FAIO stormlib::stormlib Filesystem ${HUNTER_BOOST_LIBS})
 set_target_properties(FAIO PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Levels
@@ -121,7 +121,7 @@ add_library(Settings
     settings/settings.h
     settings/settings.cpp
 )
-target_link_libraries(Settings simpleini ${HUNTER_BOOST_LIBS})
+target_link_libraries(Settings simpleini Filesystem ${HUNTER_BOOST_LIBS})
 set_target_properties(Settings PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Serial

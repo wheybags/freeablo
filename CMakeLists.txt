@@ -77,7 +77,7 @@ find_package(stormlib CONFIG REQUIRED)
 
 hunter_add_package(Boost COMPONENTS filesystem system program_options date_time regex)
 find_package(Boost CONFIG REQUIRED  filesystem system program_options date_time regex)
-set(HUNTER_BOOST_LIBS Boost::filesystem Boost::system Boost::program_options Boost::date_time Boost::regex)
+set(HUNTER_BOOST_LIBS Boost::system Boost::program_options Boost::date_time Boost::regex)
 
 Find_Package(OpenGL REQUIRED)
 

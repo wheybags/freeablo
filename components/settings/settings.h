@@ -1,11 +1,9 @@
-
 #pragma once
-
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/filesystem.hpp>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace Settings
 {

@@ -43,3 +43,5 @@ target_include_directories(${LIB} PUBLIC nativefiledialog/src/include)
 set(LIB simpleini)
 add_library(${LIB} INTERFACE)
 target_include_directories(${LIB} INTERFACE simpleini/)
+
+add_subdirectory(filesystem)
