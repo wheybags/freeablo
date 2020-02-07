@@ -89,7 +89,7 @@ add_library(Input
     input/keys.h
     input/sdl2backend.cpp)
 set_target_properties(Input PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
-target_link_libraries(Input nuklear Settings Render SDL2::SDL2)
+target_link_libraries(Input nuklear Settings Render SDL2::SDL2 SPSCQueue)
 
 add_library(DiabloExe
     diabloexe/diabloexe.h

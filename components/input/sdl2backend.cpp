@@ -25,7 +25,7 @@ namespace Input
                                std::function<void(uint32_t, uint32_t, uint32_t, uint32_t)> mouseMove,
                                std::function<void(int32_t, int32_t)> mouseWheel,
                                std::function<void(std::string)> textInput)
-        : mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)), mMouseRelease(getFunc(mouseRelease)),
+        : mQueue(500), mKeyPress(getFunc(keyPress)), mKeyRelease(getFunc(keyRelease)), mMouseClick(getFunc(mouseClick)), mMouseRelease(getFunc(mouseRelease)),
           mMouseMove(getFunc(mouseMove)), mMouseWheel(getFunc(mouseWheel)), mTextInput(getFunc(textInput))
     {
         release_assert(!instance);
@@ -311,9 +311,7 @@ namespace Input
                 }
             }
 
-            while (!mQueue.push(e))
-            {
-            } // push, or wait until buffer not full, then push
+            mQueue.push(e);
         }
 
         SDL_Keymod sdlMods = SDL_GetModState();
@@ -336,17 +334,17 @@ namespace Input
 
     bool InputManager::processInput()
     {
-        Event event;
-
         bool quit = false;
 
-        while (mQueue.pop(event))
+        while (mQueue.front())
         {
-            switch (event.type)
+            Event* event = mQueue.front();
+
+            switch (event->type)
             {
                 case SDL_KEYDOWN:
                 {
-                    Key key = getKey(event.vals.key);
+                    Key key = getKey(event->vals.key);
                     if (key != Key::KEY_UNDEF)
                     {
                         mKeyPress(key);
@@ -355,7 +353,7 @@ namespace Input
                 }
                 case SDL_KEYUP:
                 {
-                    Key key = getKey(event.vals.key);
+                    Key key = getKey(event->vals.key);
                     if (key != Key::KEY_UNDEF)
                     {
                         mKeyRelease(key);
@@ -365,38 +363,38 @@ namespace Input
 
                 case SDL_TEXTINPUT:
                 {
-                    mTextInput(*event.vals.textInput.text);
-                    delete event.vals.textInput.text;
+                    mTextInput(*event->vals.textInput.text);
+                    delete event->vals.textInput.text;
                     break;
                 }
 
                 case SDL_MOUSEBUTTONDOWN:
                 {
-                    Key key = getMouseKey(event.vals.mouseButton.key);
+                    Key key = getMouseKey(event->vals.mouseButton.key);
 
                     if (key != Key::KEY_UNDEF)
-                        mMouseClick(event.vals.mouseButton.x, event.vals.mouseButton.y, key, event.vals.mouseButton.numClicks > 1);
+                        mMouseClick(event->vals.mouseButton.x, event->vals.mouseButton.y, key, event->vals.mouseButton.numClicks > 1);
 
                     break;
                 }
 
                 case SDL_MOUSEBUTTONUP:
                 {
-                    Key key = getMouseKey(event.vals.mouseButton.key);
-                    mMouseRelease(event.vals.mouseButton.x, event.vals.mouseButton.y, key);
+                    Key key = getMouseKey(event->vals.mouseButton.key);
+                    mMouseRelease(event->vals.mouseButton.x, event->vals.mouseButton.y, key);
 
                     break;
                 }
 
                 case SDL_MOUSEMOTION:
                 {
-                    mMouseMove(event.vals.mouseMove.x, event.vals.mouseMove.y, event.vals.mouseMove.xrel, event.vals.mouseMove.yrel);
+                    mMouseMove(event->vals.mouseMove.x, event->vals.mouseMove.y, event->vals.mouseMove.xrel, event->vals.mouseMove.yrel);
                     break;
                 }
 
                 case SDL_MOUSEWHEEL:
                 {
-                    mMouseWheel(event.vals.mouseWheel.x, event.vals.mouseWheel.y);
+                    mMouseWheel(event->vals.mouseWheel.x, event->vals.mouseWheel.y);
                     break;
                 }
 
@@ -411,6 +409,8 @@ namespace Input
                     break;
                 }
             }
+
+            mQueue.pop();
         }
 
         return quit;
