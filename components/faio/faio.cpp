@@ -1,5 +1,4 @@
 #include "faio.h"
-#include <boost/algorithm/string.hpp>
 #include <filesystem/path.h>
 #include <iostream>
 #include <misc/assert.h>

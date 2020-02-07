@@ -107,13 +107,22 @@ namespace Misc
             return retval;
         }
 
-        static std::vector<std::string> split(const std::string& s, char delim)
+        enum class SplitEmptyBehavior
+        {
+            StripEmpties, // "a,,,b,c" => "a" "b" "c"
+            YieldEmpties, // "a,,,b,c" => "a" "" "" "b" "c"
+        };
+
+        static std::vector<std::string> split(const std::string& s, char delim, SplitEmptyBehavior emptyBehavior = SplitEmptyBehavior::YieldEmpties)
         {
             std::vector<std::string> elems;
             std::stringstream ss(s);
             std::string item;
             while (std::getline(ss, item, delim))
             {
+                if (emptyBehavior == SplitEmptyBehavior::StripEmpties && item.empty())
+                    continue;
+
                 elems.push_back(item);
             }
             return elems;

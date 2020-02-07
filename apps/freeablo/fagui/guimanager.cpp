@@ -16,7 +16,6 @@
 #include "menu/startingmenuscreen.h"
 #include "menuhandler.h"
 #include "nkhelpers.h"
-#include <boost/algorithm/string/split.hpp>
 #include <boost/variant/variant.hpp>
 #include <cstdint>
 #include <cstdio>
@@ -25,6 +24,7 @@
 #include <misc/misc.h>
 #include <serial/textstream.h>
 #include <string>
+#include <misc/stringops.h>
 
 static nk_style_button dummyStyle = []() {
     static nk_style_button buttonStyle;
@@ -621,7 +621,7 @@ namespace FAGui
 
         auto boxRect = nk_rect(185, 66, 275, 55);
         std::vector<std::string> vec;
-        boost::split(vec, *textToUse, boost::is_any_of("\n"), boost::token_compress_on);
+        Misc::StringUtils::split(*textToUse, '\n', Misc::StringUtils::SplitEmptyBehavior::StripEmpties);
         auto h_part = boxRect.h / vec.size();
         for (int i = 0; i < static_cast<int>(vec.size()); ++i)
         {
