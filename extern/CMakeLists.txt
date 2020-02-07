@@ -45,3 +45,4 @@ add_library(${LIB} INTERFACE)
 target_include_directories(${LIB} INTERFACE simpleini/)
 
 add_subdirectory(filesystem)
+add_subdirectory(cxxopts)

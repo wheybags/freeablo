@@ -1,9 +1,3 @@
-// clang-format off
-#include <misc/disablewarn.h>
-#include <boost/program_options.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <misc/enablewarn.h>
-// clang-format on
 #include <iostream>
 #include <fstream>
 #include <faio/fafileobject.h>
@@ -13,41 +7,38 @@
 #include <misc/misc.h>
 #include "engine/enginemain.h"
 #include <filesystem/path.h>
+#include <cxxopts.hpp>
 
-namespace bpo = boost::program_options;
-
-bool parseOptions(int argc, char** argv, bpo::variables_map& variables)
+bool parseOptions(int argc, char** argv, cxxopts::ParseResult& variables)
 {
-    boost::program_options::options_description desc("Options");
-    desc.add_options()("help,h", "Print help")
+    cxxopts::Options desc("Options");
+    desc.add_options()("h,help", "Print help")
         // -1 represents the main menu
-        ("level,l", bpo::value<int32_t>()->default_value(-1), "Level number to load (0-16)")(
-            "character,c", bpo::value<std::string>()->default_value("Warrior"), "Choose Warrior, Rogue or Sorcerer")(
-            "invuln", bpo::value<std::string>()->default_value("off"), "on or off")(
-            "connect", bpo::value<std::string>()->default_value(""), "Ip Address or hostname to connect to")(
-            "seed", bpo::value<uint32_t>()->default_value(0), "Seed for level generation");
+        ("l,level", "Level number to load (0-16)", cxxopts::value<int32_t>()->default_value("-1"))(
+            "c,character", "Choose Warrior, Rogue or Sorcerer", cxxopts::value<std::string>()->default_value("Warrior"))(
+            "invuln", "on or off", cxxopts::value<std::string>()->default_value("off"))(
+            "connect", "Ip Address or hostname to connect to", cxxopts::value<std::string>()->default_value(""))(
+            "seed", "Seed for level generation", cxxopts::value<uint32_t>()->default_value("0"));
 
     try
     {
-        bpo::store(bpo::parse_command_line(argc, argv, desc), variables);
+        variables = desc.parse(argc, argv);
 
         if (variables.count("help"))
         {
-            std::cout << desc << std::endl;
+            std::cout << desc.help() << std::endl;
             return false;
         }
-
-        bpo::notify(variables);
 
         const int32_t dLvl = variables["level"].as<int32_t>();
 
         if (dLvl > 16)
-            throw bpo::error("There is no level after 16");
+            throw cxxopts::OptionParseException("There is no level after 16");
     }
-    catch (bpo::error& e)
+    catch (cxxopts::OptionParseException& e)
     {
         std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
-        std::cerr << desc << std::endl;
+        std::cerr << desc.help() << std::endl;
         return false;
     }
 
@@ -134,7 +125,7 @@ int fa_main(int argc, char** argv)
 
     int retval = EXIT_SUCCESS;
 
-    boost::program_options::variables_map variables;
+    cxxopts::ParseResult variables;
     if (parseOptions(argc, argv, variables))
         engine.run(variables);
     else

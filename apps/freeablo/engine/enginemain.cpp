@@ -22,8 +22,7 @@
 #include <random/random.h>
 #include <serial/textstream.h>
 #include <thread>
-
-namespace bpo = boost::program_options;
+#include <cxxopts.hpp>
 
 namespace Engine
 {
@@ -39,7 +38,7 @@ namespace Engine
 
     EngineInputManager& EngineMain::inputManager() { return *(mInputManager.get()); }
 
-    void EngineMain::run(const bpo::variables_map& variables)
+    void EngineMain::run(const cxxopts::ParseResult& variables)
     {
         if (!mSettings.loadUserSettings())
             return;
@@ -57,13 +56,13 @@ namespace Engine
         FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen);
         mInputManager = std::make_shared<EngineInputManager>(renderer.getNuklearContext());
         mInputManager->registerKeyboardObserver(this);
-        std::thread mainThread(std::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
+        std::thread mainThread([&] { this->runGameLoop(variables, pathEXE); });
         threadManager.run();
 
         mainThread.join();
     }
 
-    void EngineMain::runGameLoop(const bpo::variables_map& variables, const std::string& pathEXE)
+    void EngineMain::runGameLoop(const cxxopts::ParseResult& variables, const std::string& pathEXE)
     {
         FARender::Renderer& renderer = *FARender::Renderer::get();
 
