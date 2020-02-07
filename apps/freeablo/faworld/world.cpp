@@ -21,7 +21,6 @@
 #include "playerbehaviour.h"
 #include "storedata.h"
 #include <algorithm>
-#include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
 #include <iostream>
 #include <misc/assert.h>
@@ -33,7 +32,7 @@ namespace FAWorld
     World::World(const DiabloExe::DiabloExe& exe, uint32_t seed)
         : mDiabloExe(exe), mRng(new Random::RngMersenneTwister(seed)),
           mLevelRng(new Random::RngMersenneTwister(uint32_t(mRng->randomInRange(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max())))),
-          mItemFactory(boost::make_unique<ItemFactory>(exe, *mRng.get())), mStoreData(boost::make_unique<StoreData>(*mItemFactory))
+          mItemFactory(nonstd::make_unique<ItemFactory>(exe, *mRng.get())), mStoreData(nonstd::make_unique<StoreData>(*mItemFactory))
     {
         this->setupObjectIdMappers();
 

@@ -1,10 +1,7 @@
 #include "drawpath.h"
 #include "levelimplstub.h"
-
-#include <faworld/findpath.h>
-
 #include <algorithm>
-#include <boost/make_unique.hpp>
+#include <faworld/findpath.h>
 #include <gtest/gtest.h>
 
 using Point = Misc::Point;
@@ -53,7 +50,7 @@ struct FindPathPatternsTest : ::testing::TestWithParam<FindPathPatternsParams>
     std::unique_ptr<FAWorld::LevelImplStub> level;
     bool isReachable = false;
 
-    void SetUp() override { level = boost::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
+    void SetUp() override { level = nonstd::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
 };
 
 TEST_P(FindPathPatternsTest, goalIsReachable)

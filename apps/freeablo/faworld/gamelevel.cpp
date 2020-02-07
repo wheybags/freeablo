@@ -5,7 +5,6 @@
 #include "itemmap.h"
 #include "missile/missile.h"
 #include "world.h"
-#include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
 #include <misc/assert.h>
 

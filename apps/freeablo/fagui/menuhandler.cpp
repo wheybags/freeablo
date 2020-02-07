@@ -1,15 +1,13 @@
 #include "menuhandler.h"
-
 #include "../engine/enginemain.h"
 #include "../faworld/world.h"
-#include "boost/make_unique.hpp"
 #include "menu/menuscreen.h"
 
 namespace FAGui
 {
     std::unique_ptr<FARender::AnimationPlayer> MenuHandler::createSmLogo()
     {
-        auto ret = boost::make_unique<FARender::AnimationPlayer>();
+        auto ret = nonstd::make_unique<FARender::AnimationPlayer>();
         auto renderer = FARender::Renderer::get();
         ret->playAnimation(renderer->loadImage("ui_art/smlogo.pcx&trans=0,255,0&vanim=154"),
                            FAWorld::World::getTicksInPeriod("0.06"),

@@ -2,7 +2,6 @@
 #include "diabloexe/diabloexe.h"
 #include "item.h"
 #include "itemenums.h"
-#include <boost/make_unique.hpp>
 #include <random/random.h>
 
 namespace FAWorld

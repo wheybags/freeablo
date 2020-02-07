@@ -13,7 +13,6 @@
 #include "net/server.h"
 #include "threadmanager.h"
 #include <boost/asio.hpp>
-#include <boost/make_unique.hpp>
 #include <cxxopts.hpp>
 #include <enet/enet.h>
 #include <functional>
@@ -68,7 +67,7 @@ namespace Engine
 
         std::string characterClass = variables["character"].as<std::string>();
 
-        mExe = boost::make_unique<DiabloExe::DiabloExe>(pathEXE);
+        mExe = nonstd::make_unique<DiabloExe::DiabloExe>(pathEXE);
         if (!mExe->isLoaded())
         {
             renderer.stop();
@@ -76,7 +75,7 @@ namespace Engine
         }
 
         FAWorld::ItemFactory itemFactory(*mExe, Random::DummyRng::instance);
-        mPlayerFactory = boost::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
+        mPlayerFactory = nonstd::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
         renderer.loadFonts(*mExe);
 
         FAWorld::Player* player = nullptr;

@@ -12,7 +12,6 @@
 #include "player.h"
 #include "world.h"
 #include <boost/format.hpp>
-#include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
@@ -122,7 +121,7 @@ namespace FAWorld
         uint32_t missilesSize = loader.load<uint32_t>();
         mMissiles.reserve(missilesSize);
         for (uint32_t i = 0; i < missilesSize; i++)
-            mMissiles.push_back(boost::make_unique<Missile::Missile>(loader));
+            mMissiles.push_back(nonstd::make_unique<Missile::Missile>(loader));
     }
 
     void Actor::save(FASaveGame::GameSaver& saver)
@@ -351,7 +350,7 @@ namespace FAWorld
 
     void Actor::activateMissile(MissileId id, Misc::Point targetPoint)
     {
-        auto missile = boost::make_unique<Missile::Missile>(id, *this, targetPoint);
+        auto missile = nonstd::make_unique<Missile::Missile>(id, *this, targetPoint);
         mMissiles.push_back(std::move(missile));
     }
 }
