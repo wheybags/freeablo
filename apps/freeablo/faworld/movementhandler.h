@@ -1,11 +1,8 @@
-
 #pragma once
-
 #include "gamelevel.h"
 #include "position.h"
 #include "world.h"
 
-#include <boost/signals2/signal.hpp>
 
 namespace FASaveGame
 {
@@ -36,10 +33,7 @@ namespace FAWorld
         void teleport(GameLevel* level, Position pos);
         void stopAndPointInDirection(Misc::Direction direction);
 
-        boost::signals2::signal<void(const Misc::Point)> positionReached;
-
     private:
-        bool positionReachedSent = true;
         GameLevel* mLevel = nullptr;
         Position mCurrentPos;
         Misc::Point mDestination;

@@ -369,17 +369,6 @@ namespace FAWorld
     {
         debug_assert(mCurrentPlayer == nullptr || mCurrentPlayer == player);
         mCurrentPlayer = player;
-        setupCurrentPlayer();
-    }
-
-    void World::setupCurrentPlayer()
-    {
-        /*mCurrentPlayer->positionReached.connect([this](const std::pair<int32_t, int32_t>& pos) {
-            if (!getCurrentLevel()->isTown() && pos == getCurrentLevel()->upStairsPos())
-                changeLevel(true);
-            else if (pos == getCurrentLevel()->downStairsPos())
-                changeLevel(false);
-        });*/
     }
 
     void World::registerPlayer(Player* player)

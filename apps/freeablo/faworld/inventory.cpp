@@ -315,8 +315,11 @@ namespace FAWorld
 
     CharacterInventory::CharacterInventory()
     {
-        for (auto inv : mInventoryTypes)
-            inv.second.mInventoryChanged.connect([this, inv](Item const& removed, Item const& added) { mInventoryChanged(inv.first, removed, added); });
+        for (const auto& pair : mInventoryTypes)
+        {
+            EquipTargetType type = pair.first;
+            pair.second.mInventoryChanged = [this, type](Item const& removed, Item const& added) { mInventoryChanged(type, removed, added); };
+        }
     }
 
     void CharacterInventory::save(FASaveGame::GameSaver& saver)

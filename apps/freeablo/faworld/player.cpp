@@ -57,7 +57,7 @@ namespace FAWorld
     {
         mName = "Player";
         mWorld.registerPlayer(this);
-        mInventory.mInventoryChanged.connect([this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
+        mInventory.mInventoryChanged = [this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
             (void)removed;
 
             mInventoryChangedCallCount++;
@@ -90,7 +90,7 @@ namespace FAWorld
                         break;
                 }
             }
-        });
+        };
     }
 
     void Player::setPlayerClass(PlayerClass playerClass)

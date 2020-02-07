@@ -1,7 +1,6 @@
 #pragma once
 #include "equiptarget.h"
 #include "item.h"
-#include <boost/signals2/signal.hpp>
 #include <misc/array2d.h>
 #include <misc/misc.h>
 #include <set>
@@ -70,7 +69,7 @@ namespace FAWorld
         const_iterator begin() const { return mInventoryBox.begin(); }
         const_iterator end() const { return mInventoryBox.end(); }
 
-        boost::signals2::signal<void(Item const& removed, Item const& added)> mInventoryChanged;
+        std::function<void(Item const& removed, Item const& added)> mInventoryChanged;
 
     private:
         Misc::Array2D<Item> mInventoryBox;
@@ -120,7 +119,7 @@ namespace FAWorld
 
     public:
         // This is not serialised - it should be reconnected by other means
-        boost::signals2::signal<void(EquipTargetType inventoryType, Item const& removed, Item const& added)> mInventoryChanged;
+        std::function<void(EquipTargetType inventoryType, Item const& removed, Item const& added)> mInventoryChanged;
 
     private:
         static constexpr int32_t inventoryWidth = 10;
