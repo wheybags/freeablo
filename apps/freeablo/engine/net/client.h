@@ -18,7 +18,7 @@ namespace Engine
         Client(LocalInputHandler& localInputHandler, const std::string& serverAddress);
         virtual ~Client() override;
 
-        virtual boost::optional<std::vector<FAWorld::PlayerInput>> getAndClearInputs(FAWorld::Tick tick) override;
+        virtual nonstd::optional<std::vector<FAWorld::PlayerInput>> getAndClearInputs(FAWorld::Tick tick) override;
         virtual void update() override;
         virtual void verify(FAWorld::Tick tick) override;
         virtual bool isServer() const override { return false; }

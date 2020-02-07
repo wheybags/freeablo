@@ -13,7 +13,7 @@
 #include "misc/point.h"
 
 #include "cel/pal.h"
-#include <boost/optional.hpp>
+#include <nonstd/optional.hpp>
 
 struct SDL_Surface;
 class SpriteGroup;
@@ -105,7 +105,7 @@ namespace Render
 
     void handleEvents();
 
-    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor = boost::none);
+    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, nonstd::optional<Cel::Colour> highlightColor = nonstd::nullopt);
 
     struct RocketFATex
     {

@@ -1,5 +1,6 @@
 #include "findpath.h"
 #include "gamelevel.h"
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <misc/array2d.h>

@@ -1,7 +1,7 @@
 #pragma once
 #include "menuscreen.h"
-#include <boost/optional.hpp>
 #include <memory>
+#include <nonstd/optional.hpp>
 
 namespace FAGui
 {

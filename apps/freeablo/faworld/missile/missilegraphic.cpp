@@ -11,7 +11,7 @@ namespace FAWorld
 {
     namespace Missile
     {
-        MissileGraphic::MissileGraphic(std::string initialGraphicPath, std::string mainGraphicPath, boost::optional<int32_t> singleFrame, Position position)
+        MissileGraphic::MissileGraphic(std::string initialGraphicPath, std::string mainGraphicPath, nonstd::optional<int32_t> singleFrame, Position position)
             : mCurPos(position), mMainGraphicPath(mainGraphicPath), mSingleFrame(singleFrame)
         {
             playAnimation(initialGraphicPath, FARender::AnimationPlayer::AnimationType::Once);
@@ -21,7 +21,7 @@ namespace FAWorld
         {
             mCurPos = Position(loader);
             mMainGraphicPath = loader.load<std::string>();
-            mSingleFrame = (mSingleFrame = loader.load<int32_t>()) == -1 ? boost::none : mSingleFrame;
+            mSingleFrame = (mSingleFrame = loader.load<int32_t>()) == -1 ? nonstd::nullopt : mSingleFrame;
             mAnimationPlayer = FARender::AnimationPlayer(loader);
             mTicksSinceStarted = loader.load<Tick>();
             mComplete = loader.load<bool>();
@@ -31,7 +31,7 @@ namespace FAWorld
         {
             mCurPos.save(saver);
             saver.save(mMainGraphicPath);
-            saver.save(static_cast<int32_t>(mSingleFrame == boost::none ? -1 : mSingleFrame.get()));
+            saver.save(static_cast<int32_t>(mSingleFrame == nonstd::nullopt ? -1 : *mSingleFrame));
             mAnimationPlayer.save(saver);
             saver.save(mTicksSinceStarted);
             saver.save(mComplete);
@@ -56,7 +56,7 @@ namespace FAWorld
             // Some animations just use a single offset frame.
             // e.g. arrows have a single frame for each of the 16 directions.
             if (mSingleFrame)
-                frame.second = mSingleFrame.get();
+                frame.second = *mSingleFrame;
             return frame;
         }
 

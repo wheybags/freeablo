@@ -107,7 +107,7 @@ add_library(DiabloExe
     diabloexe/affix.cpp
     diabloexe/affix.h
 	diabloexe/talkdata.h)
-target_link_libraries(DiabloExe Misc FAIO ${HUNTER_BOOST_LIBS})
+target_link_libraries(DiabloExe Misc FAIO ${HUNTER_BOOST_LIBS} nonstd::optional-lite)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Audio

@@ -2,8 +2,8 @@
 
 #include "farender/animationplayer.h"
 #include "missileenums.h"
-#include <boost/optional.hpp>
 #include <misc/misc.h>
+#include <nonstd/optional.hpp>
 
 namespace FASaveGame
 {
@@ -20,7 +20,7 @@ namespace FAWorld
         public:
             virtual ~MissileGraphic() = default;
 
-            MissileGraphic(std::string initialGraphicPath, std::string mainGraphicPath, boost::optional<int32_t> singleFrame, Position position);
+            MissileGraphic(std::string initialGraphicPath, std::string mainGraphicPath, nonstd::optional<int32_t> singleFrame, Position position);
             MissileGraphic(FASaveGame::GameLoader& loader);
 
             virtual void save(FASaveGame::GameSaver& saver);
@@ -37,7 +37,7 @@ namespace FAWorld
             void playAnimation(std::string path, FARender::AnimationPlayer::AnimationType animationType);
 
             std::string mMainGraphicPath;
-            boost::optional<int32_t> mSingleFrame;
+            nonstd::optional<int32_t> mSingleFrame;
             FARender::AnimationPlayer mAnimationPlayer;
             Tick mTicksSinceStarted = 0;
             bool mComplete = false;

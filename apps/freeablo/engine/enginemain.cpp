@@ -141,7 +141,7 @@ namespace Engine
 
             if (mInGame && (!mPaused || mMultiplayer->isMultiplayer()))
             {
-                boost::optional<std::vector<FAWorld::PlayerInput>> inputs;
+                nonstd::optional<std::vector<FAWorld::PlayerInput>> inputs;
 
                 do
                 {
@@ -150,7 +150,7 @@ namespace Engine
                     if (inputs)
                     {
                         mMultiplayer->verify(mWorld->getCurrentTick());
-                        mWorld->update(mNoclip, inputs.get());
+                        mWorld->update(mNoclip, *inputs);
 
                         if (mWorld->getCurrentLevelIndex() != lastLevelIndex)
                         {
