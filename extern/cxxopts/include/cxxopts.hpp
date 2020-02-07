@@ -1133,6 +1133,8 @@ namespace cxxopts
   {
     public:
 
+    ParseResult() = default;
+
     ParseResult(
       const std::shared_ptr<
         std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
@@ -1208,7 +1210,7 @@ namespace cxxopts
       const std::string& name
     );
 
-    const std::shared_ptr<
+    std::shared_ptr<
       std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
     > m_options;
     std::vector<std::string> m_positional;
