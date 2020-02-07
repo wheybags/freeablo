@@ -25,6 +25,7 @@
 #include <serial/textstream.h>
 #include <string>
 #include <misc/stringops.h>
+#include <fmt/format.h>
 
 static nk_style_button dummyStyle = []() {
     static nk_style_button buttonStyle;
@@ -329,8 +330,8 @@ namespace FAGui
                     nk_layout_space_push(ctx, nk_rect(leftTopX + spacing, y, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
                     smallText(ctx, text, TextColor::golden, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_TOP);
                 };
-                doTextLine((boost::format("You have %1% gold") % mGoldSplitTarget->mCount).str().c_str(), 76.0);
-                doTextLine((boost::format("%1%.  How many do") % (mGoldSplitTarget->mCount > 1 ? "pieces" : "piece")).str().c_str(), 92.0);
+                doTextLine(fmt::format("You have {} gold", mGoldSplitTarget->mCount).c_str(), 76.0);
+                doTextLine(fmt::format("{}.  How many do", (mGoldSplitTarget->mCount > 1 ? "pieces" : "piece")).c_str(), 92.0);
                 doTextLine("you want to remove?", 110.0);
                 {
                     auto offset = 6;

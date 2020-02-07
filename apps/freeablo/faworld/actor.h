@@ -14,7 +14,6 @@
 #include "position.h"
 #include "target.h"
 #include "world.h"
-#include <boost/format.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
 #include <misc/direction.h>

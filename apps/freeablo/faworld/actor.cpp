@@ -11,12 +11,12 @@
 #include "missile/missile.h"
 #include "player.h"
 #include "world.h"
-#include <boost/format.hpp>
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
 #include <misc/misc.h>
 #include <random/random.h>
+#include <fmt/format.h>
 
 namespace FAWorld
 {
@@ -273,9 +273,7 @@ namespace FAWorld
         if (mSoundPath.empty())
             return "";
 
-        boost::format fmt(mSoundPath);
-        fmt % 'd';
-        return (fmt % mWorld.mRng->randomInRange(1, 2)).str();
+        return fmt::format(mSoundPath, 'd', mWorld.mRng->randomInRange(1, 2));
     }
 
     std::string Actor::getHitWav() const
@@ -283,9 +281,7 @@ namespace FAWorld
         if (mSoundPath.empty())
             return "";
 
-        boost::format fmt(mSoundPath);
-        fmt % 'h';
-        return (fmt % mWorld.mRng->randomInRange(1, 2)).str();
+       return fmt::format(mSoundPath, 'h', mWorld.mRng->randomInRange(1, 2));
     }
 
     bool Actor::canIAttack(Actor* actor)
