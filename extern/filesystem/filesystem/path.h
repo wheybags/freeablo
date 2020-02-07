@@ -408,42 +408,36 @@ inline bool copy_file(const path& source, const path& destination)
 #if defined(_WIN32)
     return CopyFileW(source.wstr().c_str(), destination.wstr().c_str(), FALSE) != 0;
 #else
-    int input = 0;
-    int output = 0;
-    bool result = false;
+    bool retval = false;
+    std::vector<char> buffer(1024 * 1024 * 5);
+    size_t lastWriteSize = 0;
 
-    if ((input = open(source.str().c_str(), O_RDONLY)) == -1)
-        goto copy_file_end;
-    if ((output = creat(destination.str().c_str(), 0660)) == -1)
-        goto copy_file_end;
+    FILE* sourceFile = fopen(source.str().c_str(), "rb");
+    FILE* destFile = fopen(destination.str().c_str(), "wb");
+    if (!sourceFile || !destFile)
+        goto done;
 
-    //Here we use kernel-space copying for performance reasons
-# if defined(__APPLE__) || defined(__FreeBSD__)
-    //fcopyfile works on FreeBSD and OS X 10.5+
-    result = fcopyfile(input, output, 0, COPYFILE_ALL) == 0;
-# else
-    //sendfile will work with non-socket output (i.e. regular file) on Linux 2.6.33+
-    off_t bytesCopied;
-    struct stat fileinfo;
-
-    if (fstat(input, &fileinfo) != 0)
-        goto copy_file_end;
-
-    int written;
     do
     {
-        written = sendfile(output, input, &bytesCopied, fileinfo.st_size);
-        if (written == -1)
-            goto copy_file_end;
+        size_t read = fread(buffer.data(), 1, buffer.size(), sourceFile);
+        if (ferror(sourceFile))
+            goto done;
 
-    } while (written != 0);
-# endif
+        lastWriteSize = fwrite(buffer.data(), 1, read, destFile);
+        if (ferror(destFile))
+            goto done;
 
-    copy_file_end:
-    close(input);
-    close(output);
+    } while(lastWriteSize);
 
-    return result;
+    retval = true;
+
+    done:
+    if (sourceFile)
+        fclose(sourceFile);
+    if (destFile)
+        fclose(destFile);
+
+    return retval;
 #endif
 }
 
