@@ -1,0 +1,16 @@
+cxx_binary(
+  name = 'test',
+  header_namespace = '',
+  headers = glob([
+    '*.h',
+  ]),
+  srcs = glob([
+    '*.cpp',
+  ]),
+  compiler_flags = [
+    '-std=c++11',
+  ],
+  deps = [
+    '//:optional-lite',
+  ],
+)

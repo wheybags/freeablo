@@ -1,0 +1,161 @@
+os: linux
+dist: trusty
+sudo: false
+group: travis_latest
+language: c++
+cache: ccache
+
+addons:
+  apt:
+    sources: &apt_sources
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.5
+      - llvm-toolchain-precise-3.6
+      - llvm-toolchain-precise-3.7
+      - llvm-toolchain-precise-3.8
+      - llvm-toolchain-trusty-3.9
+      - llvm-toolchain-trusty-4.0
+      - llvm-toolchain-trusty-5.0
+      - llvm-toolchain-trusty-6.0
+
+matrix:
+  include:
+    - os: linux
+      env: COMPILER=g++-4.8
+      compiler: gcc
+      addons: &gcc4_8
+        apt:
+          packages: ["g++-4.8", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=g++-4.9
+      compiler: gcc
+      addons: &gcc4_9
+        apt:
+          packages: ["g++-4.9", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=g++-5
+      compiler: gcc
+      addons: &gcc5
+        apt:
+          packages: ["g++-5", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=g++-6
+      compiler: gcc
+      addons: &gcc6
+        apt:
+          packages: ["g++-6", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=g++-7
+      compiler: gcc
+      addons: &gcc7
+        apt:
+          packages: ["g++-7", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=g++-8
+      compiler: gcc
+      addons: &gcc8
+        apt:
+          packages: ["g++-8", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=clang++-3.5
+      compiler: clang
+      addons: &clang3_5
+        apt:
+          packages: ["clang-3.5", "g++-7", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=clang++-3.6
+      compiler: clang
+      addons: &clang3_6
+        apt:
+          packages: ["clang-3.6", "g++-7", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=clang++-3.7
+      compiler: clang
+      addons: &clang3-7
+        apt:
+          packages: ["clang-3.7", "g++-7", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=clang++-3.8
+      compiler: clang
+      addons: &clang3_8
+        apt:
+          packages: ["clang-3.8", "g++-7", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=clang++-3.9
+      compiler: clang
+      addons: &clang3_9
+        apt:
+          packages: ["clang-3.9", "g++-7", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=clang++-4.0
+      compiler: clang
+      addons: &clang4_0
+        apt:
+          packages: ["clang-4.0", "g++-7", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=clang++-5.0
+      compiler: clang
+      addons: &clang5_0
+        apt:
+          packages: ["clang-5.0", "g++-7", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: linux
+      env: COMPILER=clang++-6.0
+      compiler: clang
+      addons: &clang6_0
+        apt:
+          packages: ["clang-6.0", "g++-7", "python3-pip", "lcov"]
+          sources: *apt_sources
+
+    - os: osx
+      osx_image: xcode7.3
+      compiler: clang
+      env: COMPILER='clang++'
+
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: COMPILER='clang++'
+
+    - os: osx
+      osx_image: xcode9
+      compiler: clang
+      env: COMPILER='clang++'
+
+    - os: osx
+      osx_image: xcode10
+      compiler: clang
+      env: COMPILER='clang++'
+
+script:
+  - export CXX=${COMPILER}
+  - JOBS=2 # Travis machines have 2 cores.
+  - mkdir build && cd build
+  - cmake -G "Unix Makefiles" -DOPTIONAL_LITE_OPT_SELECT_NONSTD=ON -DOPTIONAL_LITE_OPT_BUILD_TESTS=ON -DOPTIONAL_LITE_OPT_BUILD_EXAMPLES=OFF ..
+  - cmake --build . -- -j${JOBS}
+  - ctest --output-on-failure -j${JOBS}
