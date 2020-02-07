@@ -2,9 +2,9 @@
 #include <SimpleIni.h>
 #include <cstdint>
 #include <faio/faio.h>
+#include <filesystem/path.h>
 #include <fstream>
 #include <iostream>
-#include <filesystem/path.h>
 
 namespace Settings
 {

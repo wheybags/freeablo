@@ -2,6 +2,7 @@
 #include <SDL_image.h>
 #include <boost/range.hpp>
 #include <faio/fafileobject.h>
+#include <filesystem/path.h>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <iostream>
@@ -9,7 +10,6 @@
 #include <misc/md5.h>
 #include <misc/stringops.h>
 #include <string>
-#include <filesystem/path.h>
 
 #define private public
 #include <cel/celfile.h>
@@ -143,17 +143,17 @@ void hashPngFolder(const std::string& folderPath, std::ofstream& out)
     (void)folderPath;
     (void)out;
     // TODO: Commented out for now, fix later
-//    std::vector<std::string> paths;
-//    for (bfs::directory_iterator it(folderPath); it != bfs::directory_iterator(); it++)
-//        paths.push_back((*it).path().string());
+    //    std::vector<std::string> paths;
+    //    for (bfs::directory_iterator it(folderPath); it != bfs::directory_iterator(); it++)
+    //        paths.push_back((*it).path().string());
 
-//    std::sort(paths.begin(), paths.end());
+    //    std::sort(paths.begin(), paths.end());
 
-//    for (auto p : paths)
-//    {
-//        if (Misc::StringUtils::ciEndsWith(p, ".png"))
-//            out << "," << hashOneFramePng(p);
-//    }
+    //    for (auto p : paths)
+    //    {
+    //        if (Misc::StringUtils::ciEndsWith(p, ".png"))
+    //            out << "," << hashOneFramePng(p);
+    //    }
 }
 
 ///< blizzconv: https://github.com/mewrnd/blizzconv

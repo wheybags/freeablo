@@ -1,8 +1,8 @@
+#include <filesystem/path.h>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <limits>
 #include <settings/settings.h>
-#include <filesystem/path.h>
 
 namespace bfs = filesystem;
 

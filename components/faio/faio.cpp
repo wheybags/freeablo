@@ -1,10 +1,10 @@
 #include "faio.h"
 #include <boost/algorithm/string.hpp>
+#include <filesystem/path.h>
 #include <iostream>
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <mutex>
-#include <filesystem/path.h>
 
 namespace bfs = filesystem;
 
@@ -22,10 +22,7 @@ namespace FAIO
     std::mutex m;
 
     // StormLib needs paths with windows style \'s
-    std::string getStormLibPath(const bfs::path& path)
-    {
-        return path.str(filesystem::path::path_type::windows_path);
-    }
+    std::string getStormLibPath(const bfs::path& path) { return path.str(filesystem::path::path_type::windows_path); }
 
     HANDLE diabdat = NULL;
 

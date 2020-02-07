@@ -1,13 +1,13 @@
-#include <iostream>
-#include <fstream>
-#include <faio/fafileobject.h>
-#include <settings/settings.h>
+#include "engine/enginemain.h"
+#include <cxxopts.hpp>
 #include <diabloexe/diabloexe.h>
+#include <faio/fafileobject.h>
+#include <filesystem/path.h>
+#include <fstream>
+#include <iostream>
 #include <misc/md5.h>
 #include <misc/misc.h>
-#include "engine/enginemain.h"
-#include <filesystem/path.h>
-#include <cxxopts.hpp>
+#include <settings/settings.h>
 
 bool parseOptions(int argc, char** argv, cxxopts::ParseResult& variables)
 {

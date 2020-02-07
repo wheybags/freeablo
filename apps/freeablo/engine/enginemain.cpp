@@ -14,6 +14,7 @@
 #include "threadmanager.h"
 #include <boost/asio.hpp>
 #include <boost/make_unique.hpp>
+#include <cxxopts.hpp>
 #include <enet/enet.h>
 #include <functional>
 #include <input/inputmanager.h>
@@ -22,7 +23,6 @@
 #include <random/random.h>
 #include <serial/textstream.h>
 #include <thread>
-#include <cxxopts.hpp>
 
 namespace Engine
 {

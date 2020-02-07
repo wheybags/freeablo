@@ -1,11 +1,11 @@
 #include "../components/settings/settings.h"
 #include <climits>
 #include <faio/faio.h>
+#include <filesystem/path.h>
 #include <misc/assert.h>
 #include <misc/misc.h>
 #include <nuklearmisc/standaloneguispritehandler.h>
 #include <nuklearmisc/widgets.h>
-#include <filesystem/path.h>
 
 int main(int, char** argv)
 {
