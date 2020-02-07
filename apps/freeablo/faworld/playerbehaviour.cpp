@@ -6,6 +6,7 @@
 #include "player.h"
 #include "storedata.h"
 #include <misc/assert.h>
+#include <algorithm>
 
 namespace FAWorld
 {

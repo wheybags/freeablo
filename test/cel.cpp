@@ -1,6 +1,5 @@
 #include <SDL.h>
 #include <SDL_image.h>
-#include <boost/range.hpp>
 #include <faio/fafileobject.h>
 #include <filesystem/path.h>
 #include <fstream>

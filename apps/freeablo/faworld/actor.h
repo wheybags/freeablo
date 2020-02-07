@@ -14,8 +14,6 @@
 #include "position.h"
 #include "target.h"
 #include "world.h"
-#include <boost/variant/get.hpp>
-#include <boost/variant/variant.hpp>
 #include <misc/direction.h>
 #include <misc/misc.h>
 #include <unordered_map>

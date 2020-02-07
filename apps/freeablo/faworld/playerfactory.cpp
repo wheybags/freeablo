@@ -4,7 +4,6 @@
 #include "itemenums.h"
 #include "itemfactory.h"
 #include "player.h"
-#include <boost/range/irange.hpp>
 
 namespace FAWorld
 {

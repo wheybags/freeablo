@@ -6,7 +6,6 @@
 #include "cel/celfile.h"
 #include "fontinfo.h"
 #include <audio/audio.h>
-#include <boost/range/irange.hpp>
 #include <functional>
 #include <input/inputmanager.h>
 #include <iostream>

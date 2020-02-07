@@ -1,5 +1,4 @@
 #include "celdecoder.h"
-#include <boost/range/adaptor/transformed.hpp>
 #include <faio/fafileobject.h>
 #include <functional>
 #include <iostream>
