@@ -18,13 +18,13 @@
 #include "nkhelpers.h"
 #include <cstdint>
 #include <cstdio>
+#include <fmt/format.h>
 #include <iostream>
 #include <memory>
 #include <misc/misc.h>
+#include <misc/stringops.h>
 #include <serial/textstream.h>
 #include <string>
-#include <misc/stringops.h>
-#include <fmt/format.h>
 
 static nk_style_button dummyStyle = []() {
     static nk_style_button buttonStyle;
@@ -222,7 +222,7 @@ namespace FAGui
         auto h = sprite->getHeight(frame);
         bool isHighlighted = (highlight == ItemHighlightInfo::highlited);
 
-        switch(placement.type)
+        switch (placement.type)
         {
             case RectOrVec2::Type::Rect:
             {

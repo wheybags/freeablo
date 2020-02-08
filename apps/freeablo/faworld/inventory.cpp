@@ -132,7 +132,7 @@ namespace FAWorld
         switch (order)
         {
             case PlacementCheckOrder::FromLeftBottom:
-                for (int32_t y = mInventoryBox.height() - 1; y != -1; y --)
+                for (int32_t y = mInventoryBox.height() - 1; y != -1; y--)
                     for (int32_t x = 0; x != mInventoryBox.width(); x++)
                         if (placeItem(item, x, y).succeeded())
                             return true;
@@ -162,11 +162,11 @@ namespace FAWorld
             case PlacementCheckOrder::SpecialFor2x2:
                 // this way lies madness
                 for (int32_t x = mInventoryBox.width() - 2; x != -1; x -= 2)
-                    for (int32_t y = 0; y != mInventoryBox.height(); x+= 2)
+                    for (int32_t y = 0; y != mInventoryBox.height(); x += 2)
                         if (placeItem(item, x, y).succeeded())
                             return true;
-                for (int32_t y = mInventoryBox.height() - 2; y != -1; y -=2)
-                    for (int32_t x = 1; x != mInventoryBox.width(); x+= 2)
+                for (int32_t y = mInventoryBox.height() - 2; y != -1; y -= 2)
+                    for (int32_t x = 1; x != mInventoryBox.width(); x += 2)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 for (int32_t y = 1; y != mInventoryBox.height(); y += 2)

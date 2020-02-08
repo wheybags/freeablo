@@ -1,8 +1,8 @@
 #pragma once
-#include <functional>
-#include <stdint.h>
 #include "keys.h"
+#include <functional>
 #include <rigtorp/SPSCQueue.h>
+#include <stdint.h>
 
 namespace Input
 {

@@ -1,7 +1,7 @@
 #pragma once
-#include <string>
 #include "../faaudio/audiomanager.h"
 #include <rigtorp/SPSCQueue.h>
+#include <string>
 
 namespace FARender
 {

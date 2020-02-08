@@ -5,9 +5,9 @@
 #include "../fasavegame/gameloader.h"
 #include "itemenums.h"
 #include "itemfactory.h"
+#include <fmt/format.h>
 #include <iostream>
 #include <random/random.h>
-#include <fmt/format.h>
 
 namespace FAWorld
 {

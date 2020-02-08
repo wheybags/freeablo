@@ -5,8 +5,8 @@
 #include "input/inputmanager.h"
 #include "player.h"
 #include "storedata.h"
-#include <misc/assert.h>
 #include <algorithm>
+#include <misc/assert.h>
 
 namespace FAWorld
 {

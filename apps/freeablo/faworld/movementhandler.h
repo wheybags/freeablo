@@ -3,7 +3,6 @@
 #include "position.h"
 #include "world.h"
 
-
 namespace FASaveGame
 {
     class GameLoader;

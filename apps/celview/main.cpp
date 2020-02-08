@@ -1,13 +1,13 @@
 #include "../components/settings/settings.h"
 #include <chrono>
 #include <faio/fafileobject.h>
+#include <fmt/format.h>
 #include <input/inputmanager.h>
 #include <nfd.h>
 #include <nuklearmisc/inputfwd.h>
 #include <nuklearmisc/standaloneguispritehandler.h>
 #include <nuklearmisc/widgets.h>
 #include <render/render.h>
-#include <fmt/format.h>
 
 int main(int argc, char** argv)
 {

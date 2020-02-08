@@ -1,9 +1,9 @@
 #include "fixedpoint.h"
 #include "assert.h"
-#include "stringops.h"
-#include <sstream>
 #include "int128.h"
+#include "stringops.h"
 #include <iomanip>
+#include <sstream>
 
 #ifndef NDEBUG
 #define _USE_MATH_DEFINES

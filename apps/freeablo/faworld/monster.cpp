@@ -3,9 +3,9 @@
 #include "actor.h"
 #include "diabloexe/monster.h"
 #include "itemfactory.h"
-#include <random/random.h>
-#include <misc/stringops.h>
 #include <fmt/format.h>
+#include <misc/stringops.h>
+#include <random/random.h>
 
 namespace FAWorld
 {

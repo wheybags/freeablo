@@ -14,9 +14,9 @@
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
+#include <fmt/format.h>
 #include <misc/misc.h>
 #include <random/random.h>
-#include <fmt/format.h>
 
 namespace FAWorld
 {
@@ -281,7 +281,7 @@ namespace FAWorld
         if (mSoundPath.empty())
             return "";
 
-       return fmt::format(mSoundPath, 'h', mWorld.mRng->randomInRange(1, 2));
+        return fmt::format(mSoundPath, 'h', mWorld.mRng->randomInRange(1, 2));
     }
 
     bool Actor::canIAttack(Actor* actor)

@@ -13,12 +13,12 @@
 #include "missile/missile.h"
 #include "playerbehaviour.h"
 #include "world.h"
+#include <fmt/format.h>
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <misc/vec2fix.h>
 #include <random/random.h>
 #include <string>
-#include <fmt/format.h>
 
 namespace FAWorld
 {
@@ -367,7 +367,15 @@ namespace FAWorld
             if (isDie)
                 weapFormat = "n";
 
-            return fmt::format(FMT_STRING("plrgfx/{}/{}{}{}/{}{}{}{}.cl2"), toString(mPlayerClass), classCode, armourCode, weapFormat, classCode, armourCode, weapFormat, animCode);
+            return fmt::format(FMT_STRING("plrgfx/{}/{}{}{}/{}{}{}{}.cl2"),
+                               toString(mPlayerClass),
+                               classCode,
+                               armourCode,
+                               weapFormat,
+                               classCode,
+                               armourCode,
+                               weapFormat,
+                               animCode);
         };
 
         auto renderer = FARender::Renderer::get();
