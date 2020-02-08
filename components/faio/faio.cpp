@@ -1,13 +1,11 @@
 #include "faio.h"
-
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem/path.h>
 #include <iostream>
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <mutex>
 
-namespace bfs = boost::filesystem;
+namespace bfs = filesystem;
 
 // clang-format off
 #include <misc/disablewarn.h>
@@ -23,19 +21,7 @@ namespace FAIO
     std::mutex m;
 
     // StormLib needs paths with windows style \'s
-    std::string getStormLibPath(const bfs::path& path)
-    {
-        std::string retval = "";
-
-        for (bfs::path::iterator it = path.begin(); it != path.end(); ++it)
-        {
-            retval += it->string() + "\\";
-        }
-
-        retval = retval.substr(0, retval.size() - 1);
-
-        return retval;
-    }
+    std::string getStormLibPath(const bfs::path& path) { return path.str(filesystem::path::path_type::windows_path); }
 
     HANDLE diabdat = NULL;
 
@@ -89,14 +75,11 @@ namespace FAIO
 
     bool exists(const std::string& filename)
     {
-        bfs::path path(filename);
-        path.make_preferred();
-
         if (bfs::exists(filename))
             return true;
 
         std::lock_guard<std::mutex> lock(m);
-        std::string stormPath = getStormLibPath(path);
+        std::string stormPath = getStormLibPath(filename);
 
         return SFileHasFile(diabdat, stormPath.c_str());
     }
@@ -113,9 +96,8 @@ namespace FAIO
         }
 
         bfs::path path(filename);
-        path.make_preferred();
 
-        if (!bfs::exists(filename))
+        if (!bfs::exists(path))
         {
             std::lock_guard<std::mutex> lock(m);
             std::string stormPath = getStormLibPath(path);
@@ -282,7 +264,7 @@ namespace FAIO
         switch (stream->mode)
         {
             case FAFile::FAFileMode::PlainFile:
-                return static_cast<size_t>(bfs::file_size(*(stream->data.plainFile.filename)));
+                return bfs::path(*(stream->data.plainFile.filename)).file_size();
 
             case FAFile::FAFileMode::MPQFile:
             {
@@ -341,24 +323,6 @@ namespace FAIO
         if (ptr)
             return readCString(file, ptr - offset);
 
-        return "";
-    }
-
-    std::string getMPQFileName()
-    {
-        bfs::directory_iterator end;
-        for (bfs::directory_iterator entry("."); entry != end; entry++)
-        {
-            if (!bfs::is_directory(*entry))
-            {
-                if (boost::iequals(entry->path().leaf().generic_string(), DIABDAT_MPQ))
-                {
-                    return entry->path().leaf().generic_string();
-                }
-            }
-        }
-
-        std::cout << "Failed to find " << DIABDAT_MPQ << " in current directory" << std::endl;
         return "";
     }
 }

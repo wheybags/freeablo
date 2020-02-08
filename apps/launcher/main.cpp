@@ -1,14 +1,7 @@
-/*#include <QApplication>
-#include <QDesktopWidget>
-#include <QDir>
-#include <QStyle>
-#include <SDL.h>*
-
-#include "mainwindow.h"*/
-
 #include "../components/settings/settings.h"
 #include <climits>
 #include <faio/faio.h>
+#include <filesystem/path.h>
 #include <misc/assert.h>
 #include <misc/misc.h>
 #include <nuklearmisc/standaloneguispritehandler.h>
@@ -202,9 +195,8 @@ int main(int, char** argv)
 
     if (runFreeablo)
     {
-        std::string path = (boost::filesystem::system_complete(argv[0]).parent_path() / "freeablo").string();
-
-        system(Misc::escapeSpacesOnPath(path).c_str());
+        filesystem::path path = (filesystem::path(argv[0]).parent_path() / "freeablo").make_absolute();
+        system(Misc::escapeSpacesOnPath(path.str()).c_str());
     }
 
     return 0;

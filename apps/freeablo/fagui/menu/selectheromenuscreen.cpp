@@ -91,7 +91,7 @@ namespace FAGui
                     }
                     else
                     {
-                        mSelectedCharacterInfo = boost::none;
+                        mSelectedCharacterInfo = nonstd::nullopt;
                     }
 
                     auto frame = mFocus->getCurrentFrame();

@@ -5,7 +5,6 @@
 #include "itemmap.h"
 #include "missile/missile.h"
 #include "world.h"
-#include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
 #include <misc/assert.h>
 
@@ -219,7 +218,7 @@ namespace FAWorld
 
             FARender::FASpriteGroup* sprite = tmp.first;
             int32_t frame = tmp.second;
-            boost::optional<Cel::Colour> hoverColor;
+            nonstd::optional<Cel::Colour> hoverColor;
             if (mActors[i]->getId() == hoverStatus.hoveredActorId)
                 hoverColor = mActors[i]->isEnemy(displayedActor) ? enemyHoverColor() : friendHoverColor();
             // offset the sprite for the current direction of the actor
@@ -244,7 +243,7 @@ namespace FAWorld
                     auto spriteGroup = tmp.first;
                     auto frame = tmp.second;
                     if (spriteGroup)
-                        state->mObjects.push_back({spriteGroup, static_cast<uint32_t>(frame), graphic->mCurPos, boost::none});
+                        state->mObjects.push_back({spriteGroup, static_cast<uint32_t>(frame), graphic->mCurPos, nonstd::nullopt});
                 }
             }
         }

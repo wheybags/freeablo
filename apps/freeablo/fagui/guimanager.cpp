@@ -16,13 +16,13 @@
 #include "menu/startingmenuscreen.h"
 #include "menuhandler.h"
 #include "nkhelpers.h"
-#include <boost/algorithm/string/split.hpp>
-#include <boost/variant/variant.hpp>
 #include <cstdint>
 #include <cstdio>
+#include <fmt/format.h>
 #include <iostream>
 #include <memory>
 #include <misc/misc.h>
+#include <misc/stringops.h>
 #include <serial/textstream.h>
 #include <string>
 
@@ -190,7 +190,7 @@ namespace FAGui
         }
     }
 
-    void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highlight)
+    void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight)
     {
         auto& inv = mPlayer->mInventory;
         using namespace FAWorld;
@@ -222,23 +222,31 @@ namespace FAGui
         auto h = sprite->getHeight(frame);
         bool isHighlighted = (highlight == ItemHighlightInfo::highlited);
 
-        boost::apply_visitor(
-            Misc::overload(
-                [&](const struct nk_rect& rect) { nk_layout_space_push(ctx, alignRect(nk_rect(0, 0, w, h), rect, halign_t::center, valign_t::center)); },
-                [&](const struct nk_vec2& point) {
-                    if (!item.mIsReal)
-                        return;
+        switch (placement.type)
+        {
+            case RectOrVec2::Type::Rect:
+            {
+                struct nk_rect rect = placement.data.rect;
+                nk_layout_space_push(ctx, alignRect(nk_rect(0, 0, w, h), rect, halign_t::center, valign_t::center));
+                break;
+            }
+            case RectOrVec2::Type::Vec2:
+            {
+                struct nk_vec2 point = placement.data.vec2;
+
+                if (item.mIsReal)
+                {
                     nk_layout_space_push(ctx, nk_rect(point.x, point.y, w, h));
                     if (highlight == ItemHighlightInfo::highlightIfHover)
                     {
                         nk_button_label_styled(ctx, &dummyStyle, "");
                         if (isLastWidgetHovered(ctx))
-                        {
                             isHighlighted = true;
-                        }
                     }
-                }),
-            placement);
+                }
+                break;
+            }
+        }
         auto effectType = isHighlighted ? EffectType::highlighted : EffectType::none;
         effectType = checkerboarded ? EffectType::checkerboarded : effectType;
         if (isHighlighted)
@@ -329,8 +337,8 @@ namespace FAGui
                     nk_layout_space_push(ctx, nk_rect(leftTopX + spacing, y, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
                     smallText(ctx, text, TextColor::golden, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_TOP);
                 };
-                doTextLine((boost::format("You have %1% gold") % mGoldSplitTarget->mCount).str().c_str(), 76.0);
-                doTextLine((boost::format("%1%.  How many do") % (mGoldSplitTarget->mCount > 1 ? "pieces" : "piece")).str().c_str(), 92.0);
+                doTextLine(fmt::format("You have {} gold", mGoldSplitTarget->mCount).c_str(), 76.0);
+                doTextLine(fmt::format("{}.  How many do", (mGoldSplitTarget->mCount > 1 ? "pieces" : "piece")).c_str(), 92.0);
                 doTextLine("you want to remove?", 110.0);
                 {
                     auto offset = 6;
@@ -621,7 +629,7 @@ namespace FAGui
 
         auto boxRect = nk_rect(185, 66, 275, 55);
         std::vector<std::string> vec;
-        boost::split(vec, *textToUse, boost::is_any_of("\n"), boost::token_compress_on);
+        Misc::StringUtils::split(*textToUse, '\n', Misc::StringUtils::SplitEmptyBehavior::StripEmpties);
         auto h_part = boxRect.h / vec.size();
         for (int i = 0; i < static_cast<int>(vec.size()); ++i)
         {

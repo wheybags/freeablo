@@ -1,8 +1,6 @@
 #pragma once
-
 #include "missileenums.h"
 #include "missilegraphic.h"
-#include <boost/make_unique.hpp>
 #include <misc/misc.h>
 #include <vector>
 

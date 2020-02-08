@@ -1,11 +1,11 @@
 #include "shopdialogs.h"
-
 #include "../engine/enginemain.h"
 #include "../engine/localinputhandler.h"
 #include "../faworld/item.h"
 #include "../faworld/player.h"
 #include "../faworld/storedata.h"
 #include "guimanager.h"
+#include <fmt/format.h>
 
 namespace FAGui
 {
@@ -75,8 +75,7 @@ namespace FAGui
         int32_t totalGold = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getTotalGold();
 
         retval.introduction = {
-            {(boost::format("%2%            Your gold : %1%") % totalGold % (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?"))
-                 .str(),
+            {fmt::format("{}            Your gold : {}", totalGold, (sellableItems.empty() ? "You have nothing I want." : "Which item is for sale?")),
              TextColor::golden,
              false}};
 
@@ -139,7 +138,7 @@ namespace FAGui
         auto& inventory = currPlayer->mInventory;
 
         retval.introduction = {
-            {(boost::format("%2%           Your gold : %1%") % inventory.getTotalGold() % "I have these items for sale :").str(), TextColor::golden, false}};
+            {fmt::format("{}           Your gold : {}", inventory.getTotalGold(), "I have these items for sale :"), TextColor::golden, false}};
         const auto& intro = retval.introduction[0];
 
         for (size_t i = 0; i < mItems.size(); i++)

@@ -13,6 +13,7 @@
 #include "missile/missile.h"
 #include "playerbehaviour.h"
 #include "world.h"
+#include <fmt/format.h>
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <misc/vec2fix.h>
@@ -57,7 +58,7 @@ namespace FAWorld
     {
         mName = "Player";
         mWorld.registerPlayer(this);
-        mInventory.mInventoryChanged.connect([this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
+        mInventory.mInventoryChanged = [this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
             (void)removed;
 
             mInventoryChangedCallCount++;
@@ -90,7 +91,7 @@ namespace FAWorld
                         break;
                 }
             }
-        });
+        };
     }
 
     void Player::setPlayerClass(PlayerClass playerClass)
@@ -360,15 +361,21 @@ namespace FAWorld
         auto weaponCode = weapon;
         auto armourCode = armour;
 
-        auto helper = [&](bool isDie) {
+        auto helper = [&](bool isDie, const char* animCode) {
             std::string weapFormat = weaponCode;
 
             if (isDie)
                 weapFormat = "n";
 
-            boost::format fmt("plrgfx/%s/%s%s%s/%s%s%s%s.cl2");
-            fmt % toString(mPlayerClass) % classCode % armourCode % weapFormat % classCode % armourCode % weapFormat;
-            return fmt;
+            return fmt::format(FMT_STRING("plrgfx/{}/{}{}{}/{}{}{}{}.cl2"),
+                               toString(mPlayerClass),
+                               classCode,
+                               armourCode,
+                               weapFormat,
+                               classCode,
+                               armourCode,
+                               weapFormat,
+                               animCode);
         };
 
         auto renderer = FARender::Renderer::get();
@@ -376,19 +383,19 @@ namespace FAWorld
             return;
 
         // TODO: Spell animations: lightning "lm", fire "fm", other "qm"
-        mAnimation.setAnimation(AnimState::dead, renderer->loadImage((helper(true) % "dt").str()));
-        mAnimation.setAnimation(AnimState::attack, renderer->loadImage((helper(false) % "at").str()));
-        mAnimation.setAnimation(AnimState::hit, renderer->loadImage((helper(false) % "ht").str()));
+        mAnimation.setAnimation(AnimState::dead, renderer->loadImage(helper(true, "dt")));
+        mAnimation.setAnimation(AnimState::attack, renderer->loadImage(helper(false, "at")));
+        mAnimation.setAnimation(AnimState::hit, renderer->loadImage(helper(false, "ht")));
 
         if (getLevel() && getLevel()->isTown())
         {
-            mAnimation.setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "wl").str()));
-            mAnimation.setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "st").str()));
+            mAnimation.setAnimation(AnimState::walk, renderer->loadImage(helper(false, "wl")));
+            mAnimation.setAnimation(AnimState::idle, renderer->loadImage(helper(false, "st")));
         }
         else
         {
-            mAnimation.setAnimation(AnimState::walk, renderer->loadImage((helper(false) % "aw").str()));
-            mAnimation.setAnimation(AnimState::idle, renderer->loadImage((helper(false) % "as").str()));
+            mAnimation.setAnimation(AnimState::walk, renderer->loadImage(helper(false, "aw")));
+            mAnimation.setAnimation(AnimState::idle, renderer->loadImage(helper(false, "as")));
         }
     }
 

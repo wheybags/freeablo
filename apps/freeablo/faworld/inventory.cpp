@@ -9,8 +9,6 @@
 #include "itemfactory.h"
 #include "player.h"
 #include <algorithm>
-#include <boost/range/any_range.hpp>
-#include <boost/range/irange.hpp>
 #include <iostream>
 #include <sstream>
 #include <stdint.h>
@@ -85,9 +83,9 @@ namespace FAWorld
         if (mTreatAllItemsAs1by1)
             itemSize = Misc::Point{1, 1};
 
-        for (auto y : boost::irange(0, mInventoryBox.height() - itemSize.y, 1))
+        for (int32_t y = 0; y < mInventoryBox.height() - itemSize.y; y++)
         {
-            for (auto x : boost::irange(0, mInventoryBox.width() - itemSize.x, 1))
+            for (int32_t x = 0; x < mInventoryBox.width() - itemSize.x; x++)
             {
                 bool success = true;
 
@@ -134,45 +132,45 @@ namespace FAWorld
         switch (order)
         {
             case PlacementCheckOrder::FromLeftBottom:
-                for (auto y : boost::irange(mInventoryBox.height() - 1, -1, -1))
-                    for (auto x : boost::irange(0, mInventoryBox.width(), 1))
+                for (int32_t y = mInventoryBox.height() - 1; y != -1; y--)
+                    for (int32_t x = 0; x != mInventoryBox.width(); x++)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 break;
             case PlacementCheckOrder::FromLeftTop:
-                for (auto y : boost::irange(0, mInventoryBox.height(), 1))
-                    for (auto x : boost::irange(0, mInventoryBox.width(), 1))
+                for (int32_t y = 0; y != mInventoryBox.height(); y++)
+                    for (int32_t x = 0; x != mInventoryBox.width(); x++)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 break;
             case PlacementCheckOrder::FromRightBottom:
-                for (auto y : boost::irange(mInventoryBox.height() - 1, -1, -1))
-                    for (auto x : boost::irange(mInventoryBox.width() - 1, -1, -1))
+                for (int32_t y = mInventoryBox.height() - 1; y != -1; y--)
+                    for (int32_t x = mInventoryBox.width() - 1; x != -1; x--)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 break;
             case PlacementCheckOrder::SpecialFor1x2:
-                for (auto y : boost::irange(mInventoryBox.height() - 2, -1, -2))
-                    for (auto x : boost::irange(mInventoryBox.width() - 1, -1, -1))
+                for (int32_t y = mInventoryBox.height() - 2; y != -1; y -= 2)
+                    for (int32_t x = mInventoryBox.width() - 1; x != -1; x--)
                         if (placeItem(item, x, y).succeeded())
                             return true;
-                for (auto y : boost::irange(mInventoryBox.height() - 3, -1, -2))
-                    for (auto x : boost::irange(mInventoryBox.width() - 1, -1, -1))
+                for (int32_t y = mInventoryBox.height() - 3; y != -1; y -= 2)
+                    for (int32_t x = mInventoryBox.width() - 1; x != -1; x--)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 break;
             case PlacementCheckOrder::SpecialFor2x2:
                 // this way lies madness
-                for (auto x : boost::irange(mInventoryBox.width() - 2, -1, -2))
-                    for (auto y : boost::irange(0, mInventoryBox.height(), 2))
+                for (int32_t x = mInventoryBox.width() - 2; x != -1; x -= 2)
+                    for (int32_t y = 0; y != mInventoryBox.height(); x += 2)
                         if (placeItem(item, x, y).succeeded())
                             return true;
-                for (auto y : boost::irange(mInventoryBox.height() - 2, -1, -2))
-                    for (auto x : boost::irange(1, mInventoryBox.width(), 2))
+                for (int32_t y = mInventoryBox.height() - 2; y != -1; y -= 2)
+                    for (int32_t x = 1; x != mInventoryBox.width(); x += 2)
                         if (placeItem(item, x, y).succeeded())
                             return true;
-                for (auto y : boost::irange(1, mInventoryBox.height(), 2))
-                    for (auto x : boost::irange(0, mInventoryBox.width(), 1))
+                for (int32_t y = 1; y != mInventoryBox.height(); y += 2)
+                    for (int32_t x = 0; x != mInventoryBox.width(); x++)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 break;
@@ -300,23 +298,26 @@ namespace FAWorld
     {
         std::set<EquipTarget> NeedsToBeReplaced;
         std::set<EquipTarget> NeedsToBeReturned; // used only for equipping 2-handed weapon while wearing 1h weapon + shield
-        boost::optional<EquipTarget> newTarget;  // sometimes target changes during exchange
+        nonstd::optional<EquipTarget> newTarget; // sometimes target changes during exchange
         ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg = {},
                        std::set<EquipTarget> NeedsToBeReturnedArg = {},
-                       const boost::optional<EquipTarget>& newTargetArg = {});
+                       const nonstd::optional<EquipTarget>& newTargetArg = {});
     };
 
     ExchangeResult::ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg,
                                    std::set<EquipTarget> NeedsToBeReturnedArg,
-                                   const boost::optional<EquipTarget>& newTargetArg)
+                                   const nonstd::optional<EquipTarget>& newTargetArg)
         : NeedsToBeReplaced(std::move(NeedsToBeReplacedArg)), NeedsToBeReturned(std::move(NeedsToBeReturnedArg)), newTarget(newTargetArg)
     {
     }
 
     CharacterInventory::CharacterInventory()
     {
-        for (auto inv : mInventoryTypes)
-            inv.second.mInventoryChanged.connect([this, inv](Item const& removed, Item const& added) { mInventoryChanged(inv.first, removed, added); });
+        for (const auto& pair : mInventoryTypes)
+        {
+            EquipTargetType type = pair.first;
+            pair.second.mInventoryChanged = [this, type](Item const& removed, Item const& added) { mInventoryChanged(type, removed, added); };
+        }
     }
 
     void CharacterInventory::save(FASaveGame::GameSaver& saver)
@@ -554,9 +555,9 @@ namespace FAWorld
             }
         }
         // second part - filling the empty slots with gold
-        for (auto x : boost::irange(0, mMainInventory.width(), 1))
+        for (int32_t x = 0; x != mMainInventory.width(); x++)
         {
-            for (auto y : boost::irange(0, mMainInventory.height(), 1))
+            for (int32_t y = 0; y != mMainInventory.height(); x++)
             {
                 if (mMainInventory.getItem(x, y).isEmpty())
                 {

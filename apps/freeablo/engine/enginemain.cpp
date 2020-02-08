@@ -12,8 +12,7 @@
 #include "net/client.h"
 #include "net/server.h"
 #include "threadmanager.h"
-#include <boost/asio.hpp>
-#include <boost/make_unique.hpp>
+#include <cxxopts.hpp>
 #include <enet/enet.h>
 #include <functional>
 #include <input/inputmanager.h>
@@ -22,8 +21,6 @@
 #include <random/random.h>
 #include <serial/textstream.h>
 #include <thread>
-
-namespace bpo = boost::program_options;
 
 namespace Engine
 {
@@ -39,7 +36,7 @@ namespace Engine
 
     EngineInputManager& EngineMain::inputManager() { return *(mInputManager.get()); }
 
-    void EngineMain::run(const bpo::variables_map& variables)
+    void EngineMain::run(const cxxopts::ParseResult& variables)
     {
         if (!mSettings.loadUserSettings())
             return;
@@ -57,19 +54,19 @@ namespace Engine
         FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen);
         mInputManager = std::make_shared<EngineInputManager>(renderer.getNuklearContext());
         mInputManager->registerKeyboardObserver(this);
-        std::thread mainThread(std::bind(&EngineMain::runGameLoop, this, &variables, pathEXE));
+        std::thread mainThread([&] { this->runGameLoop(variables, pathEXE); });
         threadManager.run();
 
         mainThread.join();
     }
 
-    void EngineMain::runGameLoop(const bpo::variables_map& variables, const std::string& pathEXE)
+    void EngineMain::runGameLoop(const cxxopts::ParseResult& variables, const std::string& pathEXE)
     {
         FARender::Renderer& renderer = *FARender::Renderer::get();
 
         std::string characterClass = variables["character"].as<std::string>();
 
-        mExe = boost::make_unique<DiabloExe::DiabloExe>(pathEXE);
+        mExe = nonstd::make_unique<DiabloExe::DiabloExe>(pathEXE);
         if (!mExe->isLoaded())
         {
             renderer.stop();
@@ -77,7 +74,7 @@ namespace Engine
         }
 
         FAWorld::ItemFactory itemFactory(*mExe, Random::DummyRng::instance);
-        mPlayerFactory = boost::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
+        mPlayerFactory = nonstd::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
         renderer.loadFonts(*mExe);
 
         FAWorld::Player* player = nullptr;
@@ -126,13 +123,14 @@ namespace Engine
         if (currentLevel != -1)
             mWorld->setLevel(currentLevel);
 
-        boost::asio::io_service io;
+        using clock = std::chrono::high_resolution_clock;
+
         int32_t lastLevelIndex = -1;
 
         // Main game logic loop
         while (!mDone)
         {
-            boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000 / FAWorld::World::ticksPerSecond));
+            clock::time_point frameStartTime = clock::now();
 
             mInputManager->update(mPaused);
             mLocalInputHandler->update();
@@ -142,7 +140,7 @@ namespace Engine
 
             if (mInGame && (!mPaused || mMultiplayer->isMultiplayer()))
             {
-                boost::optional<std::vector<FAWorld::PlayerInput>> inputs;
+                nonstd::optional<std::vector<FAWorld::PlayerInput>> inputs;
 
                 do
                 {
@@ -151,7 +149,7 @@ namespace Engine
                     if (inputs)
                     {
                         mMultiplayer->verify(mWorld->getCurrentTick());
-                        mWorld->update(mNoclip, inputs.get());
+                        mWorld->update(mNoclip, *inputs);
 
                         if (mWorld->getCurrentLevelIndex() != lastLevelIndex)
                         {
@@ -210,12 +208,14 @@ namespace Engine
             if (state)
                 renderer.setCurrentState(state);
 
-            auto remainingTickTime = timer.expires_from_now().total_milliseconds();
+            clock::time_point frameEndTargetTime = frameStartTime + std::chrono::milliseconds(1000 / FAWorld::World::ticksPerSecond);
+            clock::duration remainingTickTime = frameEndTargetTime - clock::now();
+            auto remainingMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(remainingTickTime);
 
-            if (remainingTickTime < 0)
-                std::cerr << "tick time exceeded by " << -remainingTickTime << "ms" << std::endl;
-
-            timer.wait();
+            if (remainingMilliseconds.count() < 0)
+                std::cerr << "tick time exceeded by " << -remainingMilliseconds.count() << "ms" << std::endl;
+            else
+                std::this_thread::sleep_until(frameEndTargetTime);
         }
 
         renderer.stop();

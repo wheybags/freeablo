@@ -1,9 +1,9 @@
 #pragma once
-#include <boost/container/small_vector.hpp>
-#include <boost/optional.hpp>
 #include <cel/pal.h>
 #include <misc/array2d.h>
 #include <misc/point.h>
+#include <nonstd/optional.hpp>
+#include <vector>
 
 namespace Render
 {
@@ -13,8 +13,8 @@ namespace Render
         int32_t spriteCacheIndex;
         int32_t spriteFrame;
         Misc::Point fractionalPos;
-        boost::optional<Cel::Colour> hoverColor;
+        nonstd::optional<Cel::Colour> hoverColor;
     };
 
-    typedef Misc::Array2D<boost::container::small_vector<LevelObject, 2>> LevelObjects;
+    typedef Misc::Array2D<std::vector<LevelObject>> LevelObjects; // TODO: get a custom small vector class + use it here
 }

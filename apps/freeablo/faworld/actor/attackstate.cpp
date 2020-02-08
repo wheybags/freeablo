@@ -15,7 +15,7 @@ namespace FAWorld
 
         MeleeAttackState::MeleeAttackState(Misc::Direction direction) : mDirection(direction) {}
 
-        boost::optional<StateChange> MeleeAttackState::update(Actor& actor, bool noclip)
+        nonstd::optional<StateChange> MeleeAttackState::update(Actor& actor, bool noclip)
         {
             UNUSED_PARAM(noclip);
 
@@ -37,7 +37,7 @@ namespace FAWorld
                 mHitDone = true;
             }
 
-            return boost::none;
+            return nonstd::nullopt;
         }
 
         void MeleeAttackState::onEnter(Actor& actor)

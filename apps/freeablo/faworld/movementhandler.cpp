@@ -83,11 +83,6 @@ namespace FAWorld
 
         if (!mCurrentPos.isMoving())
         {
-            if (!positionReachedSent)
-            {
-                positionReached(mCurrentPos.current());
-                positionReachedSent = true;
-            }
             // if we have arrived, stop moving
             if (mCurrentPos.current() == mDestination)
             {
@@ -132,7 +127,6 @@ namespace FAWorld
                                 auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
                                 Misc::Direction direction = vec.getDirection();
 
-                                positionReachedSent = false;
                                 mCurrentPos.setDirection(direction);
                                 mCurrentPos.moveToPoint(next);
                                 needsRepath = false;

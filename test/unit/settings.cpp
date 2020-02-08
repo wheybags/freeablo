@@ -1,10 +1,10 @@
-#include <boost/filesystem.hpp>
+#include <filesystem/path.h>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <limits>
 #include <settings/settings.h>
 
-namespace bfs = boost::filesystem;
+namespace bfs = filesystem;
 
 class SettingsTest : public ::testing::Test
 {
@@ -23,7 +23,7 @@ const bfs::path SettingsTest::THIS_FOLDER = bfs::path(__FILE__).parent_path();
 const bfs::path SettingsTest::DEFAULT_INI_PATH = SettingsTest::THIS_FOLDER / "testdefault.ini";
 const bfs::path SettingsTest::USER_INI_PATH = SettingsTest::THIS_FOLDER / "testuser.ini";
 
-SettingsTest::SettingsTest() : mSettings(DEFAULT_INI_PATH.string(), USER_INI_PATH.string()) { mSettings.loadUserSettings(); }
+SettingsTest::SettingsTest() : mSettings(DEFAULT_INI_PATH.str(), USER_INI_PATH.str()) { mSettings.loadUserSettings(); }
 
 bool SettingsTest::isContains(const Settings::Container& container, const std::string& entry)
 {
@@ -57,10 +57,10 @@ testProperty1=testValue1
 )";
 
     const bfs::path saveTestOriginalPath = THIS_FOLDER / "testsaveoriginal.ini";
-    std::ofstream originalFile(saveTestOriginalPath.string());
+    std::ofstream originalFile(saveTestOriginalPath.str());
     originalFile << originalContent;
     originalFile.close();
-    mSettings.loadFromFile(saveTestOriginalPath.string());
+    mSettings.loadFromFile(saveTestOriginalPath.str());
 
     const std::string sectionName = "Section0";
     mSettings.set<std::string>(sectionName, "testProperty0", "SaveTestValue0");
@@ -77,7 +77,7 @@ testProperty0 = SaveTestValue0
 testProperty1 = SaveTestValue1
 )";
 
-    std::ifstream modifiedFile(saveTestModifiedPath.string());
+    std::ifstream modifiedFile(saveTestModifiedPath.str());
     const std::string actualContent((std::istreambuf_iterator<char>(modifiedFile)), (std::istreambuf_iterator<char>()));
     modifiedFile.close();
     bfs::remove(saveTestOriginalPath);

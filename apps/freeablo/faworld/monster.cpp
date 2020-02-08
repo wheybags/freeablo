@@ -3,7 +3,8 @@
 #include "actor.h"
 #include "diabloexe/monster.h"
 #include "itemfactory.h"
-#include <boost/format.hpp>
+#include <fmt/format.h>
+#include <misc/stringops.h>
 #include <random/random.h>
 
 namespace FAWorld
@@ -12,17 +13,22 @@ namespace FAWorld
 
     Monster::Monster(World& world, const DiabloExe::Monster& monsterStats) : Actor(world)
     {
-        boost::format fmt(monsterStats.cl2Path);
-        mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage((fmt % 'w').str()));
-        mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage((fmt % 'n').str()));
-        mAnimation.setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage((fmt % 'd').str()));
-        mAnimation.setAnimation(AnimState::attack, FARender::Renderer::get()->loadImage((fmt % 'a').str()));
-        mAnimation.setAnimation(AnimState::hit, FARender::Renderer::get()->loadImage((fmt % 'h').str()));
+        std::string cl2PathFormat = monsterStats.cl2Path;
+        Misc::StringUtils::replace(cl2PathFormat, "%c", "{}");
+
+        mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'w')));
+        mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'n')));
+        mAnimation.setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'd')));
+        mAnimation.setAnimation(AnimState::attack, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'a')));
+        mAnimation.setAnimation(AnimState::hit, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'h')));
 
         mBehaviour.reset(new BasicMonsterBehaviour(this));
         mFaction = Faction::hell();
         mName = monsterStats.monsterName;
+
         mSoundPath = monsterStats.soundPath;
+        Misc::StringUtils::replace(mSoundPath, "%c", "{}");
+        Misc::StringUtils::replace(mSoundPath, "%i", "{}");
 
         mStats.mLevel = monsterStats.level;
     }

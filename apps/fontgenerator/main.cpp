@@ -7,6 +7,7 @@
 #include <faio/fafileobject.h>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 void help(char** argv)
 {

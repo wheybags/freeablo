@@ -1,5 +1,4 @@
 #pragma once
-
 #include <faworld/gamelevel.h>
 
 namespace test_utils

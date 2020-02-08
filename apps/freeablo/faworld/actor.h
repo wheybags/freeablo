@@ -14,9 +14,6 @@
 #include "position.h"
 #include "target.h"
 #include "world.h"
-#include <boost/format.hpp>
-#include <boost/variant/get.hpp>
-#include <boost/variant/variant.hpp>
 #include <misc/direction.h>
 #include <misc/misc.h>
 #include <unordered_map>
@@ -103,7 +100,7 @@ namespace FAWorld
         bool isAttacking = false;
         bool mInvuln = false;
         CharacterInventory mInventory;
-        boost::optional<Misc::Direction> mMeleeAttackRequestedDirection; // this is really stupid but I don't know how else to do it
+        nonstd::optional<Misc::Direction> mMeleeAttackRequestedDirection; // this is really stupid but I don't know how else to do it
 
         // TODO: hack, this should eventually be removed.
         // Try not to use it unless you have no other choice with the current structure.

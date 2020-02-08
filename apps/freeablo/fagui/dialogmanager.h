@@ -3,9 +3,9 @@
 #include "../farender/spritecache.h"
 #include "textcolor.h"
 #include <array>
-#include <boost/optional.hpp>
 #include <functional>
 #include <memory>
+#include <nonstd/optional.hpp>
 #include <string>
 #include <vector>
 

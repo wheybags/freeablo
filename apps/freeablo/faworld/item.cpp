@@ -5,7 +5,7 @@
 #include "../fasavegame/gameloader.h"
 #include "itemenums.h"
 #include "itemfactory.h"
-#include <boost/format.hpp>
+#include <fmt/format.h>
 #include <iostream>
 #include <random/random.h>
 
@@ -33,9 +33,9 @@ namespace FAWorld
         saver.save(mCornerY);
     }
 
-    std::string Item::damageStr() const { return (boost::format("damage: %1% - %2%") % getMinAttackDamage() % getMaxAttackDamage()).str(); }
+    std::string Item::damageStr() const { return fmt::format("damage: {} - {}", getMinAttackDamage(), getMaxAttackDamage()); }
 
-    std::string Item::armorStr() const { return (boost::format("armor: %1%") % mArmorClass).str(); }
+    std::string Item::armorStr() const { return fmt::format("armor: {}", mArmorClass); }
 
     std::string Item::damageOrArmorStr() const
     {
@@ -55,7 +55,7 @@ namespace FAWorld
         if (mMaxDurability == indestructibleItemDurability)
             return "Indestructible";
         else
-            return (boost::format("Dur: %1%/%2%") % mCurrentDurability % mMaxDurability).str();
+            return fmt::format("Dur: {}/{}", mCurrentDurability, mMaxDurability);
     }
 
     std::string Item::requirementsStr() const
@@ -64,11 +64,11 @@ namespace FAWorld
             return {};
         std::string str = "Required:";
         if (getRequiredStrength() > 0)
-            str += (boost::format(" %1% Str") % getRequiredStrength()).str();
+            str += fmt::format(" {} Str", getRequiredStrength());
         if (getRequiredMagic() > 0)
-            str += (boost::format(" %1% Mag") % getRequiredMagic()).str();
+            str += fmt::format(" {} Mag", getRequiredMagic());
         if (getRequiredDexterity() > 0)
-            str += (boost::format(" %1% Dex") % getRequiredDexterity()).str();
+            str += fmt::format(" {} Dex", getRequiredDexterity());
         return str;
     }
 
@@ -225,7 +225,7 @@ namespace FAWorld
     std::string Item::getName() const
     {
         if (getType() == ItemType::gold)
-            return (boost::format("%1% gold %2%") % mCount % (mCount > 1 ? "pieces" : "piece")).str();
+            return fmt::format("{} gold {}", mCount, (mCount > 1 ? "pieces" : "piece"));
         return base().name;
     }
 
@@ -310,7 +310,7 @@ namespace FAWorld
     std::string Item::chargesStr() const
     {
         if (getMiscId() == ItemMiscId::staff && mMaxCharges > 0)
-            return (boost::format("\nCharges: %1%/%2%") % mCurrentCharges % mMaxCharges).str();
+            return fmt::format("\nCharges: {}/{}", mCurrentCharges, mMaxCharges);
 
         return {};
     }

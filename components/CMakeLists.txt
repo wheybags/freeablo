@@ -7,7 +7,7 @@ target_link_libraries(Cel FAIO)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(FAIO faio/faio.cpp faio/faio.h faio/fafileobject.h faio/fafileobject.cpp)
-target_link_libraries(FAIO stormlib::stormlib ${HUNTER_BOOST_LIBS})
+target_link_libraries(FAIO stormlib::stormlib Filesystem)
 set_target_properties(FAIO PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Levels
@@ -37,6 +37,10 @@ add_library(Misc
     misc/fixedpoint.cpp
     misc/fixedpoint.h
     misc/fixedpoint_internal.h
+    misc/int128.cpp
+    misc/int128.h
+    misc/int128_have_intrinsic.inc
+    misc/int128_no_intrinsic.inc
     misc/maxcurrentitem.cpp
     misc/maxcurrentitem.h
     misc/md5.cpp
@@ -89,7 +93,7 @@ add_library(Input
     input/keys.h
     input/sdl2backend.cpp)
 set_target_properties(Input PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
-target_link_libraries(Input nuklear Settings Render SDL2::SDL2)
+target_link_libraries(Input nuklear Settings Render SDL2::SDL2 SPSCQueue)
 
 add_library(DiabloExe
     diabloexe/diabloexe.h
@@ -107,7 +111,7 @@ add_library(DiabloExe
     diabloexe/affix.cpp
     diabloexe/affix.h
 	diabloexe/talkdata.h)
-target_link_libraries(DiabloExe Misc FAIO ${HUNTER_BOOST_LIBS})
+target_link_libraries(DiabloExe Misc FAIO nonstd::optional-lite)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Audio
@@ -121,7 +125,7 @@ add_library(Settings
     settings/settings.h
     settings/settings.cpp
 )
-target_link_libraries(Settings simpleini ${HUNTER_BOOST_LIBS})
+target_link_libraries(Settings simpleini Filesystem)
 set_target_properties(Settings PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Serial

@@ -47,7 +47,7 @@ namespace FARender
         FASpriteGroup* spriteGroup;
         uint32_t frame;
         FAWorld::Position position;
-        boost::optional<Cel::Colour> hoverColor;
+        nonstd::optional<Cel::Colour> hoverColor;
     };
 
     class RenderState

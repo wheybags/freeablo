@@ -81,7 +81,6 @@ namespace FAWorld
         void update(bool noclip, const std::vector<PlayerInput>& inputs);
 
         void addCurrentPlayer(Player* player);
-        void setupCurrentPlayer();
         Player* getCurrentPlayer();
 
         void registerPlayer(Player* player);

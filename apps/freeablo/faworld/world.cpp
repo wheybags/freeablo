@@ -21,7 +21,6 @@
 #include "playerbehaviour.h"
 #include "storedata.h"
 #include <algorithm>
-#include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
 #include <iostream>
 #include <misc/assert.h>
@@ -33,7 +32,7 @@ namespace FAWorld
     World::World(const DiabloExe::DiabloExe& exe, uint32_t seed)
         : mDiabloExe(exe), mRng(new Random::RngMersenneTwister(seed)),
           mLevelRng(new Random::RngMersenneTwister(uint32_t(mRng->randomInRange(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max())))),
-          mItemFactory(boost::make_unique<ItemFactory>(exe, *mRng.get())), mStoreData(boost::make_unique<StoreData>(*mItemFactory))
+          mItemFactory(nonstd::make_unique<ItemFactory>(exe, *mRng.get())), mStoreData(nonstd::make_unique<StoreData>(*mItemFactory))
     {
         this->setupObjectIdMappers();
 
@@ -370,17 +369,6 @@ namespace FAWorld
     {
         debug_assert(mCurrentPlayer == nullptr || mCurrentPlayer == player);
         mCurrentPlayer = player;
-        setupCurrentPlayer();
-    }
-
-    void World::setupCurrentPlayer()
-    {
-        /*mCurrentPlayer->positionReached.connect([this](const std::pair<int32_t, int32_t>& pos) {
-            if (!getCurrentLevel()->isTown() && pos == getCurrentLevel()->upStairsPos())
-                changeLevel(true);
-            else if (pos == getCurrentLevel()->downStairsPos())
-                changeLevel(false);
-        });*/
     }
 
     void World::registerPlayer(Player* player)

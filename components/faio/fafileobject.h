@@ -33,7 +33,6 @@ namespace FAIO
         std::string readCString(size_t ptr);
         std::string readCStringFromWin32Binary(size_t ptr, size_t offset);
 
-        static std::string getMPQFileName();
         static void quit();
     };
 }

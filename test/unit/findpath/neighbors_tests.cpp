@@ -1,8 +1,5 @@
 #include "levelimplstub.h"
-
 #include <faworld/findpath.h>
-
-#include <boost/make_unique.hpp>
 #include <gtest/gtest.h>
 
 using Point = Misc::Point;
@@ -34,7 +31,7 @@ struct NeighborsPatternsTest : ::testing::TestWithParam<NeighborsPatternsParams>
 {
     std::unique_ptr<FAWorld::LevelImplStub> level;
 
-    void SetUp() override { level = boost::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
+    void SetUp() override { level = nonstd::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
 };
 
 TEST_P(NeighborsPatternsTest, equals)

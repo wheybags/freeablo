@@ -1,9 +1,6 @@
-
 #pragma once
-
 #include "../faworld/playerfactory.h"
 #include "engineinputmanager.h"
-#include <boost/program_options.hpp>
 #include <memory>
 #include <settings/settings.h>
 
@@ -22,6 +19,11 @@ namespace DiabloExe
     class DiabloExe;
 }
 
+namespace cxxopts
+{
+    class ParseResult;
+}
+
 namespace Engine
 {
     class LocalInputHandler;
@@ -33,7 +35,7 @@ namespace Engine
         EngineMain();
         ~EngineMain();
         EngineInputManager& inputManager();
-        void run(const boost::program_options::variables_map& variables);
+        void run(const cxxopts::ParseResult& variables);
         void stop();
         void togglePause();
         void toggleNoclip();
@@ -50,7 +52,7 @@ namespace Engine
         LocalInputHandler* getLocalInputHandler() { return mLocalInputHandler.get(); }
 
     private:
-        void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);
+        void runGameLoop(const cxxopts::ParseResult& variables, const std::string& pathEXE);
 
     private:
         static EngineMain* singletonInstance;

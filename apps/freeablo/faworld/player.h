@@ -1,7 +1,6 @@
 #pragma once
 #include "actor.h"
 #include "monster.h"
-#include <boost/signals2/signal.hpp>
 
 namespace FAWorld
 {
@@ -40,7 +39,6 @@ namespace FAWorld
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour.get(); }
         void setPlayerClass(PlayerClass playerClass);
 
-        boost::signals2::signal<void(const Misc::Point&)> positionReached;
         PlayerClass getClass() const { return mPlayerClass; }
         virtual bool canCriticalHit() const override { return mPlayerClass == PlayerClass::warrior; }
 

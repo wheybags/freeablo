@@ -61,5 +61,4 @@ namespace FAIO
     uint8_t read8(FAFile* file);
     std::string readCString(FAFile* file, size_t ptr);
     std::string readCStringFromWin32Binary(FAFile* file, size_t ptr, size_t offset);
-    std::string getMPQFileName();
 }
