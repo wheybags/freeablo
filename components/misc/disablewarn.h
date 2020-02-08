@@ -19,4 +19,5 @@
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4505) // unreferenced local function has been removed
+#pragma warning(disable : 4324) // structure was padded due to alignment specifier
 #endif

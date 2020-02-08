@@ -1,7 +1,13 @@
 #pragma once
 #include "../faaudio/audiomanager.h"
-#include <rigtorp/SPSCQueue.h>
 #include <string>
+
+// clang-format off
+#include <misc/disablewarn.h>
+#include <rigtorp/SPSCQueue.h>
+#include <misc/enablewarn.h>
+// clang-format on
+
 
 namespace FARender
 {

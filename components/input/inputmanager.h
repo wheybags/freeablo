@@ -1,8 +1,13 @@
 #pragma once
 #include "keys.h"
 #include <functional>
-#include <rigtorp/SPSCQueue.h>
 #include <stdint.h>
+
+// clang-format off
+#include <misc/disablewarn.h>
+#include <rigtorp/SPSCQueue.h>
+#include <misc/enablewarn.h>
+// clang-format on
 
 namespace Input
 {
