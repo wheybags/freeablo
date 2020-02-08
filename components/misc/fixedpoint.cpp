@@ -1,15 +1,14 @@
 #include "fixedpoint.h"
 #include "assert.h"
 #include "stringops.h"
-#include <boost/multiprecision/cpp_int.hpp>
 #include <sstream>
+#include "int128.h"
+#include <iomanip>
 
 #ifndef NDEBUG
 #define _USE_MATH_DEFINES
 #include "math.h"
 #endif
-
-using int128_t = boost::multiprecision::int128_t;
 
 constexpr int64_t FixedPoint::scalingFactorPowerOf10;
 constexpr int64_t FixedPoint::scalingFactor;
@@ -29,7 +28,7 @@ static inline int64_t muldiv(int64_t n1, int64_t n2, int64_t d)
     if (n2 == 0 || i64abs(n1) <= INT64_MAX / i64abs(n2))
         ret = n1 * n2 / d;
     else
-        ret = int64_t(int128_t(n1) * n2 / d);
+        ret = int64_t(absl::int128(n1) * n2 / d);
     return ret;
 }
 

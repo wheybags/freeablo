@@ -37,6 +37,10 @@ add_library(Misc
     misc/fixedpoint.cpp
     misc/fixedpoint.h
     misc/fixedpoint_internal.h
+    misc/int128.cpp
+    misc/int128.h
+    misc/int128_have_intrinsic.inc
+    misc/int128_no_intrinsic.inc
     misc/maxcurrentitem.cpp
     misc/maxcurrentitem.h
     misc/md5.cpp
