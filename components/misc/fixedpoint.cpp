@@ -76,9 +76,9 @@ int64_t FixedPoint::round() const
 {
     FixedPoint frac = fractionPart();
     int64_t i = intPart();
-    if (frac >= FixedPoint("0.5"))
+    if (frac >= MakeFixed(0, 5))
         i++;
-    else if (frac <= FixedPoint("-0.5"))
+    else if (frac <= -MakeFixed(0, 5))
         i--;
     return i;
 }

@@ -8,7 +8,6 @@
 #include <misc/enablewarn.h>
 // clang-format on
 
-
 namespace FARender
 {
     class RenderState;
