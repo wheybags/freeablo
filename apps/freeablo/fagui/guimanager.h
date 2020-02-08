@@ -2,7 +2,6 @@
 #include "../engine/inputobserverinterface.h"
 #include "dialogmanager.h"
 #include "textcolor.h"
-#include <boost/variant/variant_fwd.hpp>
 #include <chrono>
 #include <fa_nuklear.h>
 #include <functional>
@@ -126,7 +125,37 @@ namespace FAGui
         void togglePanel(PanelType type);
         void drawPanel(nk_context* ctx, PanelType panelType, std::function<void(void)> op);
         void triggerItem(const FAWorld::EquipTarget& target);
-        void item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highligh);
+
+        // TODO: remove this + use std::variant when we switch to c++17
+        struct RectOrVec2
+        {
+            enum class Type
+            {
+                Rect,
+                Vec2
+            };
+
+            union
+            {
+                struct nk_rect rect;
+                struct nk_vec2 vec2;
+            } data;
+            Type type;
+
+            RectOrVec2(struct nk_rect rect)
+            {
+                data.rect = rect;
+                type = Type::Rect;
+            }
+
+            RectOrVec2(struct nk_vec2 vec2)
+            {
+                data.vec2 = vec2;
+                type = Type::Vec2;
+            }
+        };
+
+        void item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highligh);
         void inventoryPanel(nk_context* ctx);
         void fillTextField(nk_context* ctx, float x, float y, float width, const char* text, TextColor color = TextColor::white);
         void characterPanel(nk_context* ctx);

@@ -16,7 +16,6 @@
 #include "menu/startingmenuscreen.h"
 #include "menuhandler.h"
 #include "nkhelpers.h"
-#include <boost/variant/variant.hpp>
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
@@ -191,7 +190,7 @@ namespace FAGui
         }
     }
 
-    void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, boost::variant<struct nk_rect, struct nk_vec2> placement, ItemHighlightInfo highlight)
+    void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight)
     {
         auto& inv = mPlayer->mInventory;
         using namespace FAWorld;
@@ -223,23 +222,31 @@ namespace FAGui
         auto h = sprite->getHeight(frame);
         bool isHighlighted = (highlight == ItemHighlightInfo::highlited);
 
-        boost::apply_visitor(
-            Misc::overload(
-                [&](const struct nk_rect& rect) { nk_layout_space_push(ctx, alignRect(nk_rect(0, 0, w, h), rect, halign_t::center, valign_t::center)); },
-                [&](const struct nk_vec2& point) {
-                    if (!item.mIsReal)
-                        return;
+        switch(placement.type)
+        {
+            case RectOrVec2::Type::Rect:
+            {
+                struct nk_rect rect = placement.data.rect;
+                nk_layout_space_push(ctx, alignRect(nk_rect(0, 0, w, h), rect, halign_t::center, valign_t::center));
+                break;
+            }
+            case RectOrVec2::Type::Vec2:
+            {
+                struct nk_vec2 point = placement.data.vec2;
+
+                if (item.mIsReal)
+                {
                     nk_layout_space_push(ctx, nk_rect(point.x, point.y, w, h));
                     if (highlight == ItemHighlightInfo::highlightIfHover)
                     {
                         nk_button_label_styled(ctx, &dummyStyle, "");
                         if (isLastWidgetHovered(ctx))
-                        {
                             isHighlighted = true;
-                        }
                     }
-                }),
-            placement);
+                }
+                break;
+            }
+        }
         auto effectType = isHighlighted ? EffectType::highlighted : EffectType::none;
         effectType = checkerboarded ? EffectType::checkerboarded : effectType;
         if (isHighlighted)
