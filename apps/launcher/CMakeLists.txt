@@ -2,7 +2,7 @@ add_executable(launcher
     main.cpp
 )
 
-target_link_libraries(launcher SDL2::SDL2 Cel NuklearMisc ${HUNTER_BOOST_LIBS})
+target_link_libraries(launcher SDL2::SDL2 Cel NuklearMisc)
 if (MINGW)
 target_link_libraries(launcher -lmingw32 SDL2::SDL2main)
 else ()

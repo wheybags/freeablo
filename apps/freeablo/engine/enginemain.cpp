@@ -12,7 +12,6 @@
 #include "net/client.h"
 #include "net/server.h"
 #include "threadmanager.h"
-#include <boost/asio.hpp>
 #include <cxxopts.hpp>
 #include <enet/enet.h>
 #include <functional>
@@ -124,13 +123,14 @@ namespace Engine
         if (currentLevel != -1)
             mWorld->setLevel(currentLevel);
 
-        boost::asio::io_service io;
+        using clock = std::chrono::high_resolution_clock;
+
         int32_t lastLevelIndex = -1;
 
         // Main game logic loop
         while (!mDone)
         {
-            boost::asio::deadline_timer timer(io, boost::posix_time::milliseconds(1000 / FAWorld::World::ticksPerSecond));
+            clock::time_point frameStartTime = clock::now();
 
             mInputManager->update(mPaused);
             mLocalInputHandler->update();
@@ -208,12 +208,14 @@ namespace Engine
             if (state)
                 renderer.setCurrentState(state);
 
-            auto remainingTickTime = timer.expires_from_now().total_milliseconds();
+            clock::time_point frameEndTargetTime = frameStartTime + std::chrono::milliseconds(1000 / FAWorld::World::ticksPerSecond);
+            clock::duration remainingTickTime = frameEndTargetTime - clock::now();
+            auto remainingMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(remainingTickTime);
 
-            if (remainingTickTime < 0)
-                std::cerr << "tick time exceeded by " << -remainingTickTime << "ms" << std::endl;
-
-            timer.wait();
+            if (remainingMilliseconds.count() < 0)
+                std::cerr << "tick time exceeded by " << -remainingMilliseconds.count() << "ms" << std::endl;
+            else
+                std::this_thread::sleep_until(frameEndTargetTime);
         }
 
         renderer.stop();

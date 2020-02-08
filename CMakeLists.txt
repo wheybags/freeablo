@@ -75,10 +75,6 @@ find_package(ZLIB CONFIG REQUIRED)
 hunter_add_package(stormlib)
 find_package(stormlib CONFIG REQUIRED)
 
-hunter_add_package(Boost COMPONENTS filesystem system date_time regex)
-find_package(Boost CONFIG REQUIRED  filesystem system date_time regex)
-set(HUNTER_BOOST_LIBS Boost::system Boost::date_time Boost::regex)
-
 set(OpenGL_GL_PREFERENCE LEGACY)
 Find_Package(OpenGL REQUIRED)
 
