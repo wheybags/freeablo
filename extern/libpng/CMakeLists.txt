@@ -359,6 +359,7 @@ endif(MSVC)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(png ${libpng_sources})
+target_include_directories(png PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsStore")
   # ExitProcess not available
