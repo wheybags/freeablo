@@ -7,10 +7,6 @@ branches:
 sudo: false
 dist: bionic
 
-cache:
-  directories:
-  - $HOME/.hunter
-  
 addons:
   apt:
     packages:

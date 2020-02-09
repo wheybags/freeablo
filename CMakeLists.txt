@@ -1,27 +1,5 @@
 cmake_minimum_required (VERSION 3.8)
 
-set(
-    HUNTER_CACHE_SERVERS
-    "https://github.com/wheybags/hunter-cache"
-    CACHE
-    STRING
-    "Default cache server"
-)
-
-set(
-    HUNTER_PASSWORDS_PATH
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Hunter/passwords.cmake"
-    CACHE
-    FILEPATH
-    "Hunter passwords"
-)
-
-string(COMPARE EQUAL "$ENV{GITHUB_USER_PASSWORD}" "" password_is_empty)
-
-if (NOT password_is_empty)
-    option(HUNTER_RUN_UPLOAD "Upload cache binaries" ON)
-endif()
-
 ## Windows Config ##
 if (WIN32)
     set (CMAKE_SYSTEM_VERSION 8.1 CACHE TYPE INTERNAL FORCE)
@@ -43,37 +21,7 @@ IF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.11)
 	cmake_policy(SET CMP0074 NEW) # find_library calls use $LIB_ROOT variables. Shouldn't affect us much/at all, but silences warnings
 ENDIF()
 
-include("cmake/HunterGate.cmake")
-HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.20.64.tar.gz"
-    SHA1 "7b830dfda7a094b2af15f44b24ebd2489404d880"
-    LOCAL
-)
-
 project (Freeablo)
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-
-hunter_add_package(SDL2)
-find_Package(SDL2 CONFIG REQUIRED)
-
-hunter_add_package(SDL_image)
-find_package(SDL_image CONFIG REQUIRED)
-
-hunter_add_package(SDL_mixer)
-find_package(SDL_mixer CONFIG REQUIRED)
-
-hunter_add_package(PNG)
-find_package(PNG CONFIG REQUIRED)
-
-hunter_add_package(enet)
-find_package(enet CONFIG REQUIRED)
-
-hunter_add_package(ZLIB)
-find_package(ZLIB CONFIG REQUIRED)
-
-hunter_add_package(stormlib)
-find_package(stormlib CONFIG REQUIRED)
 
 set(OpenGL_GL_PREFERENCE LEGACY)
 Find_Package(OpenGL REQUIRED)

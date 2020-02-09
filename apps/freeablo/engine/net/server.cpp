@@ -4,6 +4,7 @@
 #include "../../faworld/world.h"
 #include "../enginemain.h"
 #include "../localinputhandler.h"
+#include <cstring>
 #include <iostream>
 #include <misc/assert.h>
 #include <misc/misc.h>

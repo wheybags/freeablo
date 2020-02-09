@@ -45,11 +45,11 @@ TEST_P(NeighborsPatternsTest, equals)
     ASSERT_EQ(actual, expected);
 }
 
-INSTANTIATE_TEST_CASE_P(FindPathPatternsParams,
-                        NeighborsPatternsTest,
-                        ::testing::Values(NeighborsPatternsParams{basicMap(), Point(-2, -2), Points{}},
-                                          NeighborsPatternsParams{basicMap(), Point(0, 0), Points{{0, 0}, {1, 0}, {0, 1}, {1, 1}}},
-                                          NeighborsPatternsParams{basicMap(), Point(5, 5), Points{{4, 4}, {5, 4}, {4, 5}, {5, 5}}},
-                                          NeighborsPatternsParams{basicMap(), Point(6, 6), Points{{5, 5}}},
-                                          NeighborsPatternsParams{
-                                              basicMap(), Point(1, 1), Points{{0, 0}, {1, 0}, {2, 0}, {0, 1}, {1, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}}}), );
+INSTANTIATE_TEST_SUITE_P(FindPathPatternsParams,
+                         NeighborsPatternsTest,
+                         ::testing::Values(NeighborsPatternsParams{basicMap(), Point(-2, -2), Points{}},
+                                           NeighborsPatternsParams{basicMap(), Point(0, 0), Points{{0, 0}, {1, 0}, {0, 1}, {1, 1}}},
+                                           NeighborsPatternsParams{basicMap(), Point(5, 5), Points{{4, 4}, {5, 4}, {4, 5}, {5, 5}}},
+                                           NeighborsPatternsParams{basicMap(), Point(6, 6), Points{{5, 5}}},
+                                           NeighborsPatternsParams{
+                                               basicMap(), Point(1, 1), Points{{0, 0}, {1, 0}, {2, 0}, {0, 1}, {1, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}}}));

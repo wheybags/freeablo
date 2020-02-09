@@ -7,7 +7,7 @@ target_link_libraries(Cel FAIO)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(FAIO faio/faio.cpp faio/faio.h faio/fafileobject.h faio/fafileobject.cpp)
-target_link_libraries(FAIO stormlib::stormlib Filesystem)
+target_link_libraries(FAIO storm Filesystem)
 set_target_properties(FAIO PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Levels
@@ -59,7 +59,7 @@ add_library(Misc
     misc/averager.cpp
     misc/averager.h
 )
-target_link_libraries(Misc Settings PNG::png SDL2::SDL2)
+target_link_libraries(Misc Settings png SDL2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
@@ -83,7 +83,7 @@ set(RenderFiles
     render/misc.h
 )
 add_library(Render ${RenderFiles})
-target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2::SDL2 SDL_image::SDL_image ${OPENGL_LIBRARIES})
+target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image ${OPENGL_LIBRARIES})
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
@@ -93,7 +93,7 @@ add_library(Input
     input/keys.h
     input/sdl2backend.cpp)
 set_target_properties(Input PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
-target_link_libraries(Input nuklear Settings Render SDL2::SDL2 SPSCQueue)
+target_link_libraries(Input nuklear Settings Render SDL2 SPSCQueue)
 
 add_library(DiabloExe
     diabloexe/diabloexe.h
@@ -118,7 +118,7 @@ add_library(Audio
     audio/audio.h
     audio/sdl2backend.cpp
 )
-target_link_libraries(Audio FAIO SDL_mixer::SDL_mixer)
+target_link_libraries(Audio FAIO SDL_mixer)
 set_target_properties(Audio PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Settings

@@ -12,9 +12,6 @@ clone_folder: c:\projects\freeablo
 platform: x64
 configuration: Debug
 
-cache:
-  - C:\.hunter
-
 environment:
   global:
     GITHUB_USER_PASSWORD:
@@ -32,10 +29,9 @@ before_build:
   - cd build
   - cmake .. -G "Visual Studio 14 2015 Win64" -DFA_TREAT_WARNINGS_AS_ERRORS=ON
 
-build_script:
-  - cd c:\projects\freeablo\build
-  # Ignore these unsilencable warnings
-  - C:\Progra~1\Git\usr\bin\bash.exe -c "cmake --build . --config Debug | /usr/bin/grep -v  'linking object as if no debug info'"
+build:
+  parallel: true
+  project: c:\projects\freeablo\build\Freeablo.sln
 
 test_script:
   - cd c:\projects\freeablo\build

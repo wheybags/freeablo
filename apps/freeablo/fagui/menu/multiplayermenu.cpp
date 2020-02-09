@@ -5,6 +5,7 @@
 #include "multiplayerconnecting.h"
 #include "startingmenuscreen.h"
 #include <climits>
+#include <cstring>
 #include <fa_nuklear.h>
 #include <misc/misc.h>
 
