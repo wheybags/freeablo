@@ -36,7 +36,6 @@ add_library(Misc
     misc/enum_range.h
     misc/fixedpoint.cpp
     misc/fixedpoint.h
-    misc/fixedpoint_internal.h
     misc/int128.cpp
     misc/int128.h
     misc/int128_have_intrinsic.inc

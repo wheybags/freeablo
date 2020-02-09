@@ -32,42 +32,6 @@ static inline int64_t muldiv(int64_t n1, int64_t n2, int64_t d)
     return ret;
 }
 
-FixedPoint::FixedPoint(const std::string& str)
-{
-    auto split = Misc::StringUtils::split(str, '.');
-    release_assert(split.size() <= 2);
-    release_assert(split.size() > 0);
-
-    int64_t sign = split[0][0] == '-' ? -1 : 1;
-
-    int64_t integer = 0;
-    {
-        std::stringstream ss(split[0]);
-        ss >> integer;
-        integer = i64abs(integer);
-    }
-
-    int64_t fractional = 0;
-    if (split.size() == 2)
-    {
-        // Truncate and RIGHT pad with zeros to scalingFactorPowerOf10 chars.
-        // This is to handle leading zeros and any number of significant figures.
-        std::stringstream ss;
-        ss << std::setfill('0') << std::setw(scalingFactorPowerOf10) << std::left << split[1].substr(0, scalingFactorPowerOf10);
-        ss >> fractional;
-    }
-
-    mVal = integer * scalingFactor + fractional;
-    mVal *= sign;
-
-#ifndef NDEBUG
-    {
-        std::stringstream ss(str);
-        ss >> mDebugVal;
-    }
-#endif
-}
-
 FixedPoint::FixedPoint(int64_t integerValue) { *this = fromRawValue(integerValue * FixedPoint::scalingFactor); }
 
 int64_t FixedPoint::intPart() const { return mVal / FixedPoint::scalingFactor; }
@@ -76,9 +40,9 @@ int64_t FixedPoint::round() const
 {
     FixedPoint frac = fractionPart();
     int64_t i = intPart();
-    if (frac >= MakeFixed(0, 5))
+    if (frac >= FixedPoint("0.5"))
         i++;
-    else if (frac <= -MakeFixed(0, 5))
+    else if (frac <= FixedPoint("-0.5"))
         i--;
     return i;
 }

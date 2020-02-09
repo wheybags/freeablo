@@ -1,19 +1,116 @@
 #pragma once
-#include "fixedpoint_internal.h"
 #include <cmath>
 #include <cstdint>
+#include <misc/assert.h>
+#include <stdexcept>
 #include <string>
-
-template <typename T> constexpr typename std::remove_reference<T>::type makeprval(T&& t) { return t; }
-
-#define is_constexpr(e) noexcept(makeprval(e))
 
 class FixedPoint
 {
 public:
     FixedPoint() = default;
-    FixedPoint(const std::string& str);
-    FixedPoint(const char* str) : FixedPoint(std::string(str)) {}
+
+    constexpr FixedPoint(const char* input)
+    {
+        class Helpers
+        {
+        public:
+            static constexpr bool isDigit(char c) { return c <= '9' && c >= '0'; }
+
+            static constexpr int64_t stoi(const char* str)
+            {
+                int64_t value = 0;
+
+                while (*str)
+                {
+                    if (isDigit(*str))
+                        value = value * 10 + (int64_t(*str) - int64_t('0'));
+                    else
+                        throw std::runtime_error("not a digit");
+
+                    str++;
+                }
+
+                return value;
+            }
+
+            static constexpr size_t strlen(const char* str)
+            {
+                size_t result = 0;
+                while (*str)
+                {
+                    result++;
+                    str++;
+                }
+                return result;
+            }
+
+            // copies in to out, and stops if it sees NUL or '.'
+            static constexpr const char* copyIntString(const char* in, char* out, size_t outSize, bool writeNul)
+            {
+                size_t outIndex = 0;
+
+                while (true)
+                {
+                    if (*in == '\0' || *in == '.')
+                        break;
+
+                    if (!isDigit(*in))
+                        throw std::runtime_error("not a digit");
+
+                    out[outIndex] = *in;
+
+                    in++;
+
+                    // always leave room for a NUL terminator
+                    outIndex = outIndex + 1;
+                    if (outIndex > outSize - 2)
+                        outIndex = outSize - 2;
+                }
+
+                if (writeNul)
+                    out[outIndex] = '\0';
+
+                return in;
+            }
+        };
+
+        const char* inputPtr = input;
+
+        int64_t sign = *inputPtr == '-' ? -1 : 1;
+        if (sign == -1)
+            inputPtr++;
+
+        constexpr size_t beforeDecimalBufferSize = FixedPoint::scalingFactorPowerOf10 * 2;
+        char beforeDecimal[beforeDecimalBufferSize] = {};
+
+        constexpr size_t afterDecimalBufferSize = FixedPoint::scalingFactorPowerOf10 + 1;
+        char afterDecimal[afterDecimalBufferSize] = {};
+
+        // Zero pad before we copy in
+        for (size_t i = 0; i < afterDecimalBufferSize - 1; i++)
+            afterDecimal[i] = '0';
+        afterDecimal[afterDecimalBufferSize - 1] = '\0';
+
+        inputPtr = Helpers::copyIntString(inputPtr, beforeDecimal, beforeDecimalBufferSize, true);
+        if (*inputPtr == '.')
+        {
+            inputPtr++;
+            Helpers::copyIntString(inputPtr, afterDecimal, afterDecimalBufferSize, false);
+        }
+
+        // At this point, afterDecimal contains the string of digits after the decimal point,
+        // truncated and RIGHT padded with zeros to scalingFactorPowerOf10 chars.
+        // This is to handle leading zeros and any number of significant figures.
+
+        mVal = sign * (Helpers::stoi(beforeDecimal) * FixedPoint::scalingFactor + Helpers::stoi(afterDecimal));
+
+#ifndef NDEBUG
+        mDebugVal = double(mVal) / double(FixedPoint::scalingFactor);
+#endif
+    }
+    FixedPoint(const std::string& str) : FixedPoint(str.c_str()) {}
+
     FixedPoint(int64_t integerValue);
     FixedPoint(uint64_t integerValue) : FixedPoint(int64_t(integerValue)) {}
     FixedPoint(int32_t integerValue) : FixedPoint(int64_t(integerValue)) {}
@@ -44,16 +141,6 @@ public:
         return FixedPoint(rawValue, double(rawValue) / double(FixedPoint::scalingFactor), RawConstructorTagType{});
 #endif
     }
-
-#define MakeFixed1(IntPart) FixedPoint::fromRawValue(FIXED_POINT_INTPART_##IntPart* FixedPoint::scalingFactor)
-#define MakeFixed2(IntPart, FractionPart)                                                                                                                      \
-    FixedPoint::fromRawValue(FIXED_POINT_INTPART_##IntPart* FixedPoint::scalingFactor + FIXED_POINT_FRACTION_##FractionPart)
-
-// https://stackoverflow.com/questions/11761703/overloading-macro-on-number-of-arguments
-// Just imagine this declares two overloads of MakeFixed, as above, one with one arg, the other with two.
-#define MakeFixedGetMacro(_1, _2, NAME, ...) NAME
-#define MakeFixedMsvcExpand(X) X // Unnecessary on anything but msvc. https://stackoverflow.com/questions/5134523/msvc-doesnt-expand-va-args-correctly
-#define MakeFixed(...) MakeFixedMsvcExpand(MakeFixedGetMacro(__VA_ARGS__, MakeFixed2, MakeFixed1, _)(__VA_ARGS__))
 
     int64_t rawValue() const { return mVal; }
 
@@ -135,6 +222,7 @@ private:
     static FixedPoint epsilon;
 
     int64_t mVal = 0;
+
 #ifndef NDEBUG
     double mDebugVal = 0;
 #endif

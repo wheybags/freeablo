@@ -137,12 +137,12 @@ namespace FAWorld
         {
             case PlayerClass::warrior:
             {
-                stats.maxLife = (int32_t)(MakeFixed(2) * FixedPoint(charStats.vitality) + MakeFixed(2) * FixedPoint(itemStats.baseStats.vitality) +
-                                          MakeFixed(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 18)
+                stats.maxLife = (int32_t)(FixedPoint(2) * FixedPoint(charStats.vitality) + FixedPoint(2) * FixedPoint(itemStats.baseStats.vitality) +
+                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 18)
                                     .floor();
 
-                stats.maxMana = (int32_t)(MakeFixed(1) * FixedPoint(charStats.magic) + MakeFixed(1) * FixedPoint(itemStats.baseStats.magic) +
-                                          MakeFixed(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) - 1)
+                stats.maxMana = (int32_t)(FixedPoint(1) * FixedPoint(charStats.magic) + FixedPoint(1) * FixedPoint(itemStats.baseStats.magic) +
+                                          FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) - 1)
                                     .floor();
 
                 stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(100)).floor();
@@ -154,12 +154,12 @@ namespace FAWorld
             }
             case PlayerClass::rogue:
             {
-                stats.maxLife = (int32_t)(MakeFixed(1) * FixedPoint(charStats.vitality) + MakeFixed(1, 5) * FixedPoint(itemStats.baseStats.vitality) +
-                                          MakeFixed(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 23)
+                stats.maxLife = (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint("1.5") * FixedPoint(itemStats.baseStats.vitality) +
+                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 23)
                                     .floor();
 
-                stats.maxMana = (int32_t)(MakeFixed(1) * FixedPoint(charStats.magic) + MakeFixed(1, 5) * FixedPoint(itemStats.baseStats.magic) +
-                                          MakeFixed(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) + 5)
+                stats.maxMana = (int32_t)(FixedPoint(1) * FixedPoint(charStats.magic) + FixedPoint("1.5") * FixedPoint(itemStats.baseStats.magic) +
+                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) + 5)
                                     .floor();
 
                 stats.meleeDamage =
@@ -172,12 +172,12 @@ namespace FAWorld
             }
             case PlayerClass::sorcerer:
             {
-                stats.maxLife = (int32_t)(MakeFixed(1) * FixedPoint(charStats.vitality) + MakeFixed(1) * FixedPoint(itemStats.baseStats.vitality) +
-                                          MakeFixed(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
+                stats.maxLife = (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint(1) * FixedPoint(itemStats.baseStats.vitality) +
+                                          FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
                                     .floor();
 
-                stats.maxMana = (int32_t)(MakeFixed(2) * FixedPoint(charStats.magic) + MakeFixed(2) * FixedPoint(itemStats.baseStats.magic) +
-                                          MakeFixed(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) - 2)
+                stats.maxMana = (int32_t)(FixedPoint(2) * FixedPoint(charStats.magic) + FixedPoint(2) * FixedPoint(itemStats.baseStats.magic) +
+                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) - 2)
                                     .floor();
 
                 stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(100)).floor();
@@ -191,8 +191,8 @@ namespace FAWorld
         }
 
         // TODOHELLFIRE: Add in bonuses for barbarians and monks here, see Jarulf's guide section 6.2.3
-        stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / MakeFixed(5) + itemStats.armorClass).floor();
-        stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / MakeFixed(2) + itemStats.toHit).floor();
+        stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / FixedPoint(5) + itemStats.armorClass).floor();
+        stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / FixedPoint(2) + itemStats.toHit).floor();
         stats.toHitMeleeMinMaxCap = {5, 95};
         stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.toHit).floor();
         stats.toHitMagic.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.magic)).floor();
@@ -465,7 +465,7 @@ namespace FAWorld
         int32_t exp = enemy.getOnKilledExperience();
 
         // Adjust exp based on difference in level between player and monster.
-        exp = (int32_t)(FixedPoint(exp) * (MakeFixed(1) + (FixedPoint(enemy.getStats().mLevel) - mStats.mLevel) / 10)).round();
+        exp = (int32_t)(FixedPoint(exp) * (FixedPoint(1) + (FixedPoint(enemy.getStats().mLevel) - mStats.mLevel) / 10)).round();
         exp = std::max(0, exp);
 
         mStats.mExperience = std::min(mStats.mExperience + exp, ActorStats::MAXIMUM_EXPERIENCE_POINTS);
