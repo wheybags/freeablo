@@ -113,4 +113,4 @@ target_link_libraries(SDL_image PUBLIC ${LINK_LIBS} SDL2)
 include_directories(${INCLUDE_DIRS})
 target_include_directories(SDL_image INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_compile_definitions(SDL_image PUBLIC "${ENABLE_DEFS}")
+target_compile_definitions(SDL_image PUBLIC "${ENABLE_DEFS}" SDL_IMAGE_USE_COMMON_BACKEND)
