@@ -89,6 +89,6 @@ add_library(enet
 
 target_include_directories(enet PUBLIC include)
 
-if (MINGW)
+if (WIN32)
     target_link_libraries(enet winmm ws2_32)
 endif()
