@@ -1,0 +1,1 @@
+This is official repository for the StomLib library, an open-source project that can work with Blizzard MPQ archives.
