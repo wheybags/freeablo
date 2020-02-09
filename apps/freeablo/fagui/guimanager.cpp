@@ -8,7 +8,6 @@
 #include "../faworld/itemenums.h"
 #include "../faworld/player.h"
 #include "../faworld/world.h"
-#include "boost/range/counting_range.hpp"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
 #include "menu/multiplayerconnecting.h"
@@ -317,12 +316,15 @@ namespace FAGui
                 Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
             }
 
-            for (auto row : boost::counting_range(0, mainInventory.height()))
-                for (auto col : boost::counting_range(0, mainInventory.width()))
+            for (int32_t row = 0; row != mainInventory.height(); row++)
+            {
+                for (int32_t col = 0; col != mainInventory.width(); col++)
                 {
                     auto cell_top_left = nk_vec2(invTopLeft.x + col * cellSize, invTopLeft.y + row * cellSize);
                     item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::inventory>(col, row), cell_top_left, ItemHighlightInfo::highlightIfHover);
                 }
+            }
+
             if (mGoldSplitTarget)
             {
                 int32_t screenW, screenH;
@@ -439,7 +441,7 @@ namespace FAGui
         }
 
         using namespace FAWorld;
-        for (auto num : boost::counting_range(0, int32_t(inv.getInv(FAWorld::EquipTargetType::belt).width())))
+        for (int32_t num = 0; num != inv.getInv(FAWorld::EquipTargetType::belt).width(); num++)
         {
             auto cell_top_left = nk_vec2(beltTopLeft.x + num * cellSize, beltTopLeft.y);
             item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::belt>(num), cell_top_left, ItemHighlightInfo::highlightIfHover);

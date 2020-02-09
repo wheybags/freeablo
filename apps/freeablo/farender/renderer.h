@@ -1,25 +1,18 @@
 #pragma once
-
-#include <stddef.h>
-#include <stdint.h>
-
+#include "../faworld/position.h"
+#include "diabloexe/diabloexe.h"
+#include "fontinfo.h"
+#include "spritemanager.h"
 #include <atomic>
 #include <condition_variable>
 #include <map>
 #include <memory>
-#include <mutex>
-#include <tuple>
-
 #include <misc/point.h>
+#include <mutex>
 #include <render/render.h>
-
-#include "../faworld/position.h"
-
-#include "boost/container/flat_map.hpp"
-#include "diabloexe/diabloexe.h"
-#include "fontinfo.h"
-#include "spritemanager.h"
-#include <memory>
+#include <stddef.h>
+#include <stdint.h>
+#include <tuple>
 
 namespace FAWorld
 {
@@ -143,6 +136,6 @@ namespace FARender
 
         std::atomic<std::int64_t> mWidthHeightTmp;
         std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;
-        boost::container::flat_map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
+        std::map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
     };
 }

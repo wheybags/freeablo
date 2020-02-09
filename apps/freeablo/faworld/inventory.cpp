@@ -3,7 +3,6 @@
 #include "../fasavegame/gameloader.h"
 #include "../faworld/actorstats.h"
 #include "actorstats.h"
-#include "boost/container/flat_set.hpp"
 #include "equiptarget.h"
 #include "itemenums.h"
 #include "itemfactory.h"
@@ -13,8 +12,6 @@
 #include <sstream>
 #include <stdint.h>
 #include <string>
-
-using namespace boost::container;
 
 namespace FAWorld
 {

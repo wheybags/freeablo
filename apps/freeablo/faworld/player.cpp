@@ -5,7 +5,6 @@
 #include "../fagui/guimanager.h"
 #include "../fasavegame/gameloader.h"
 #include "actorstats.h"
-#include "boost/algorithm/clamp.hpp"
 #include "diabloexe/characterstats.h"
 #include "equiptarget.h"
 #include "itemenums.h"
