@@ -66,9 +66,6 @@ find_package(SDL_mixer CONFIG REQUIRED)
 hunter_add_package(PNG)
 find_package(PNG CONFIG REQUIRED)
 
-hunter_add_package(enet)
-find_package(enet CONFIG REQUIRED)
-
 hunter_add_package(ZLIB)
 find_package(ZLIB CONFIG REQUIRED)
 
