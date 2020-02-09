@@ -7,7 +7,7 @@ target_link_libraries(Cel FAIO)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(FAIO faio/faio.cpp faio/faio.h faio/fafileobject.h faio/fafileobject.cpp)
-target_link_libraries(FAIO stormlib::stormlib Filesystem)
+target_link_libraries(FAIO storm Filesystem)
 set_target_properties(FAIO PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Levels

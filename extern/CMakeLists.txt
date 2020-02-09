@@ -21,5 +21,6 @@ add_subdirectory(SDL_mixer)
 add_subdirectory(zlib)
 add_subdirectory(libpng)
 add_subdirectory(SDL_image)
+add_subdirectory(StormLib)
 
 unset(MESSAGE_QUIET)

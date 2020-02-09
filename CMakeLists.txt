@@ -54,9 +54,6 @@ project (Freeablo)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-hunter_add_package(stormlib)
-find_package(stormlib CONFIG REQUIRED)
-
 set(OpenGL_GL_PREFERENCE LEGACY)
 Find_Package(OpenGL REQUIRED)
 
