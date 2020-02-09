@@ -109,14 +109,14 @@ TEST_P(FindPathPatternsTest, pathIsWalkable)
         ASSERT_TRUE(level->isPassable(tile, nullptr));
 }
 
-INSTANTIATE_TEST_CASE_P(FindPathPatternsParams,
-                        FindPathPatternsTest,
-                        ::testing::Values(FindPathPatternsParams{"Walk #1", basicMap(), Point(2, 3), Point{18, 5}, 17},
-                                          FindPathPatternsParams{"Walk #1 reverse", basicMap(), Point(18, 5), Point{2, 3}, 17},
-                                          FindPathPatternsParams{"Walk #2", basicMap(), Point(3, 10), Point{18, 10}, 19},
-                                          FindPathPatternsParams{"Walk #3", basicMap(), Point(3, 10), Point{15, 10}, 19},
-                                          FindPathPatternsParams{"Goal point is not passable #1", basicMap(), Point(18, 7), Point{10, 10}, 13},
-                                          FindPathPatternsParams{"Goal point is not passable #2", basicMap(), Point(18, 10), Point{10, 10}, 14}), );
+INSTANTIATE_TEST_SUITE_P(FindPathPatternsParams,
+                         FindPathPatternsTest,
+                         ::testing::Values(FindPathPatternsParams{"Walk #1", basicMap(), Point(2, 3), Point{18, 5}, 17},
+                                           FindPathPatternsParams{"Walk #1 reverse", basicMap(), Point(18, 5), Point{2, 3}, 17},
+                                           FindPathPatternsParams{"Walk #2", basicMap(), Point(3, 10), Point{18, 10}, 19},
+                                           FindPathPatternsParams{"Walk #3", basicMap(), Point(3, 10), Point{15, 10}, 19},
+                                           FindPathPatternsParams{"Goal point is not passable #1", basicMap(), Point(18, 7), Point{10, 10}, 13},
+                                           FindPathPatternsParams{"Goal point is not passable #2", basicMap(), Point(18, 10), Point{10, 10}, 14}));
 
 TEST(FindPathTests, walksStraight_whenSomeWallsInTheMiddle)
 {

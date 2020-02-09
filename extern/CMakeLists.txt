@@ -22,5 +22,6 @@ add_subdirectory(zlib)
 add_subdirectory(libpng)
 add_subdirectory(SDL_image)
 add_subdirectory(StormLib)
+add_subdirectory(gtest)
 
 unset(MESSAGE_QUIET)
