@@ -12,9 +12,6 @@ clone_folder: c:\projects\freeablo
 platform: x64
 configuration: Debug
 
-cache:
-  - C:\.hunter
-
 environment:
   global:
     GITHUB_USER_PASSWORD:
