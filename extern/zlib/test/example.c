@@ -15,6 +15,13 @@
 
 #if defined(VMS) || defined(RISCOS)
 #  define TESTFILE "foo-gz"
+#elif defined(__APPLE__)
+#  include "TargetConditionals.h"
+#  if (TARGET_OS_IPHONE)
+#    define TESTFILE "/tmp/foo.gz"
+#  else
+#    define TESTFILE "foo.gz"
+#  endif
 #else
 #  define TESTFILE "foo.gz"
 #endif

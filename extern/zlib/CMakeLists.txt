@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 2.4.4)
+cmake_minimum_required(VERSION 3.0)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
-project(zlib C)
+project(ZLIB VERSION "1.2.8" LANGUAGES C)
 
-set(VERSION "1.2.8")
+set(VERSION "${PROJECT_VERSION}")
+
+set(SKIP_INSTALL_ALL ON)
 
 option(ASM686 "Enable building i686 assembly implementation")
 option(AMD64 "Enable building amd64 assembly implementation")
@@ -18,7 +20,7 @@ include(CheckTypeSize)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckCSourceCompiles)
-enable_testing()
+#enable_testing()
 
 check_include_file(sys/types.h HAVE_SYS_TYPES_H)
 check_include_file(stdint.h    HAVE_STDINT_H)
@@ -80,9 +82,9 @@ endif()
 
 set(ZLIB_PC ${CMAKE_CURRENT_BINARY_DIR}/zlib.pc)
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/zlib.pc.cmakein
-		${ZLIB_PC} @ONLY)
-configure_file(	${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.cmakein
-		${CMAKE_CURRENT_BINARY_DIR}/zconf.h @ONLY)
+    ${ZLIB_PC} @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.cmakein
+    ${CMAKE_CURRENT_BINARY_DIR}/zconf.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR})
 
 
@@ -136,30 +138,30 @@ if(CMAKE_COMPILER_IS_GNUCC)
         set(ZLIB_ASMS contrib/amd64/amd64-match.S)
     endif ()
 
-	if(ZLIB_ASMS)
-		add_definitions(-DASMV)
-		set_source_files_properties(${ZLIB_ASMS} PROPERTIES LANGUAGE C COMPILE_FLAGS -DNO_UNDERLINE)
-	endif()
+  if(ZLIB_ASMS)
+    add_definitions(-DASMV)
+    set_source_files_properties(${ZLIB_ASMS} PROPERTIES LANGUAGE C COMPILE_FLAGS -DNO_UNDERLINE)
+  endif()
 endif()
 
 if(MSVC)
     if(ASM686)
-		ENABLE_LANGUAGE(ASM_MASM)
+    ENABLE_LANGUAGE(ASM_MASM)
         set(ZLIB_ASMS
-			contrib/masmx86/inffas32.asm
-			contrib/masmx86/match686.asm
-		)
+      contrib/masmx86/inffas32.asm
+      contrib/masmx86/match686.asm
+    )
     elseif (AMD64)
-		ENABLE_LANGUAGE(ASM_MASM)
+    ENABLE_LANGUAGE(ASM_MASM)
         set(ZLIB_ASMS
-			contrib/masmx64/gvmat64.asm
-			contrib/masmx64/inffasx64.asm
-		)
+      contrib/masmx64/gvmat64.asm
+      contrib/masmx64/inffasx64.asm
+    )
     endif()
 
-	if(ZLIB_ASMS)
-		add_definitions(-DASMV -DASMINF)
-	endif()
+  if(ZLIB_ASMS)
+    add_definitions(-DASMV -DASMINF)
+  endif()
 endif()
 
 # parse the full version number from zlib.h and include in ZLIB_FULL_VERSION
@@ -183,8 +185,16 @@ if(MINGW)
     set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
 endif(MINGW)
 
-add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+if(ZLIB_BUILD_SHARED)
+  set(BUILD_SHARED_LIBS ON)
+endif()
+
+if(NOT BUILD_SHARED_LIBS)
+  set(ZLIB_DLL_SRCS "")
+endif()
+
+add_library(zlib ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+target_include_directories(zlib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
 set_target_properties(zlib PROPERTIES SOVERSION 1)
 
@@ -201,7 +211,7 @@ endif()
 
 if(UNIX)
     # On unix-like platforms the library is almost always called libz
-   set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)
+   set_target_properties(zlib PROPERTIES OUTPUT_NAME z)
    if(NOT APPLE)
      set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
    endif()
@@ -211,10 +221,48 @@ elseif(BUILD_SHARED_LIBS AND WIN32)
 endif()
 
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
-    install(TARGETS zlib zlibstatic
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+  ####
+  # Installation (https://github.com/forexample/package-example)
+
+  set(config_install_dir "lib/cmake/${PROJECT_NAME}")
+  set(include_install_dir "include")
+
+  set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+  set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+  set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+  set(targets_export_name "${PROJECT_NAME}Targets")
+  set(namespace "${PROJECT_NAME}::")
+
+  include(CMakePackageConfigHelpers)
+
+  # Note: PROJECT_VERSION is used as a VERSION
+  write_basic_package_version_file(
+      "${version_config}" COMPATIBILITY SameMajorVersion
+  )
+
+  # Note: variable 'targets_export_name' used
+  configure_file("cmake/Config.cmake.in" "${project_config}" @ONLY)
+
+  install(
+      TARGETS zlib
+      EXPORT "${targets_export_name}"
+      LIBRARY DESTINATION "lib"
+      ARCHIVE DESTINATION "lib"
+      RUNTIME DESTINATION "bin"
+      INCLUDES DESTINATION "${include_install_dir}"
+  )
+
+  install(
+      FILES "${project_config}" "${version_config}"
+      DESTINATION "${config_install_dir}"
+  )
+
+  install(
+      EXPORT "${targets_export_name}"
+      NAMESPACE "${namespace}"
+      DESTINATION "${config_install_dir}"
+  )
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
@@ -230,20 +278,20 @@ endif()
 # Example binaries
 #============================================================================
 
-add_executable(example test/example.c)
-target_link_libraries(example zlib)
-add_test(example example)
+#add_executable(example test/example.c)
+#target_link_libraries(example zlib)
+#add_test(example example)
 
-add_executable(minigzip test/minigzip.c)
-target_link_libraries(minigzip zlib)
-
-if(HAVE_OFF64_T)
-    add_executable(example64 test/example.c)
-    target_link_libraries(example64 zlib)
-    set_target_properties(example64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
-    add_test(example64 example64)
-
-    add_executable(minigzip64 test/minigzip.c)
-    target_link_libraries(minigzip64 zlib)
-    set_target_properties(minigzip64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
-endif()
+#add_executable(minigzip test/minigzip.c)
+#target_link_libraries(minigzip zlib)
+#
+#if(HAVE_OFF64_T)
+#    add_executable(example64 test/example.c)
+#    target_link_libraries(example64 zlib)
+#    set_target_properties(example64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
+#    add_test(example64 example64)
+#
+#    add_executable(minigzip64 test/minigzip.c)
+#    target_link_libraries(minigzip64 zlib)
+#    set_target_properties(minigzip64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
+#endif()

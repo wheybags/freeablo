@@ -24,10 +24,6 @@ set(PNGLIB_RELEASE ${PROJECT_VERSION_PATCH})
 set(PNGLIB_NAME libpng${PNGLIB_MAJOR}${PNGLIB_MINOR})
 set(PNGLIB_VERSION ${PNGLIB_MAJOR}.${PNGLIB_MINOR}.${PNGLIB_RELEASE})
 
-# needed packages
-hunter_add_package(ZLIB)
-find_package(ZLIB CONFIG REQUIRED)
-
 # COMMAND LINE OPTIONS
 option(PNG_TESTS  "Build libpng tests" NO)
 
@@ -397,7 +393,7 @@ if(PNG_FRAMEWORK)
   target_link_libraries(png_framework ${ZLIB_LIBRARY} ${M_LIBRARY})
 endif()
 
-target_link_libraries(png PRIVATE ZLIB::zlib ${M_LIBRARY})
+target_link_libraries(png PRIVATE zlib ${M_LIBRARY})
 
 target_compile_definitions(png PUBLIC "$<$<CONFIG:Debug>:PNG_DEBUG>")
 
