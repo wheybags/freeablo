@@ -8,6 +8,7 @@
 #include <misc/assert.h>
 #include <misc/misc.h>
 #include <serial/textstream.h>
+#include <cstring>
 
 namespace Engine
 {

@@ -1,5 +1,4 @@
 #include "pausemenuscreen.h"
-
 #include "../../engine/enginemain.h"
 #include "../../farender/animationplayer.h"
 #include "../../farender/renderer.h"
@@ -8,6 +7,7 @@
 #include "../menuhandler.h"
 #include "../nkhelpers.h"
 #include "serial/textstream.h"
+#include <cstring>
 
 namespace FAGui
 {

@@ -50,7 +50,7 @@ set(SRC_H_FILES
 set(SRC_FILES ${SRC_C_FILES} ${SRC_H_FILES})
 
 add_library(SDL_mixer ${SRC_FILES})
-target_link_libraries(SDL_mixer SDL2::SDL2)
+target_link_libraries(SDL_mixer SDL2)
 target_include_directories(SDL_mixer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(SDL_mixer PRIVATE
     MUSIC_WAV

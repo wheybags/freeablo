@@ -109,7 +109,7 @@ set(SRC_FILES ${SRC_C_FILES} ${SRC_H_FILES})
 add_library(SDL_image ${SRC_FILES})
 
 
-target_link_libraries(SDL_image PUBLIC ${LINK_LIBS} SDL2::SDL2)
+target_link_libraries(SDL_image PUBLIC ${LINK_LIBS} SDL2)
 include_directories(${INCLUDE_DIRS})
 target_include_directories(SDL_image INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 

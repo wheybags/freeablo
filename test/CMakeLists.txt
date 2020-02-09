@@ -25,7 +25,7 @@ if(FA_TESTS_ENABLED)
     endfunction(fa_add_test)
 
     # TODO: simplify this (and maybe travis?)
-    fa_add_test(cel "Cel;SDL2::SDL2;Misc;SDL_image;Filesystem" No)
+    fa_add_test(cel "Cel;SDL2;Misc;SDL_image;Filesystem" No)
 
     add_custom_target(fatest ${all_tests})
     set_target_properties(fatest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)

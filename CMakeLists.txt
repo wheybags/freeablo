@@ -54,9 +54,6 @@ project (Freeablo)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-hunter_add_package(SDL2)
-find_Package(SDL2 CONFIG REQUIRED)
-
 hunter_add_package(stormlib)
 find_package(stormlib CONFIG REQUIRED)
 

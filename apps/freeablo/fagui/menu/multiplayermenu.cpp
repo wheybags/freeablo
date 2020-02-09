@@ -7,6 +7,7 @@
 #include <climits>
 #include <fa_nuklear.h>
 #include <misc/misc.h>
+#include <cstring>
 
 namespace FAGui
 {
