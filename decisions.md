@@ -8,6 +8,17 @@ decisions you make over the course of the project's lifetime.
 When adding entries here, please place them at the top of the list, preferably
 with the title of the entry being the output from `date`.
 
+## Sun Feb  9 11:25:55 CET 2020
+- Decided to stop using a package manager. We will just include our dependencies
+in the repo. This is largely because the Hunter project kind of died, but also
+because of some awkwardness around having libraries built before the actual
+build of the game code. Hunter would build libs during the configure stage, and
+sometimes ended up with mismacthed toolchains and pain. If we just vendor deps +
+use cmake for everything, this is much easier.
+- Actually, boost is not so great. Decided to not use boost any more, since most
+of what we used it for is now in the stdlib in c++17. Also, it is a pain to build,
+and we want to vendor all our deps now, as discussed in the point above.
+
 ## Thu 11 Apr 2019 09:25:16 AM CEST
 - Decided to switch to adding entries to the changelog as we go, instead of trying
 to look back at the github issue/git log to create one when preparing a release.
