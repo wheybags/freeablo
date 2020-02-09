@@ -1,3 +1,12 @@
+CMake build system for SDL_mixer
+mirrored from http://hg.libsdl.org/SDL_mixer/
+converted to git using https://github.com/frej/fast-export
+
+
+
+
+
+
 
 SDL_mixer 2.0
 

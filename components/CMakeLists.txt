@@ -118,7 +118,7 @@ add_library(Audio
     audio/audio.h
     audio/sdl2backend.cpp
 )
-target_link_libraries(Audio FAIO SDL_mixer::SDL_mixer)
+target_link_libraries(Audio FAIO SDL_mixer)
 set_target_properties(Audio PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Settings

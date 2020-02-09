@@ -60,9 +60,6 @@ find_Package(SDL2 CONFIG REQUIRED)
 hunter_add_package(SDL_image)
 find_package(SDL_image CONFIG REQUIRED)
 
-hunter_add_package(SDL_mixer)
-find_package(SDL_mixer CONFIG REQUIRED)
-
 hunter_add_package(PNG)
 find_package(PNG CONFIG REQUIRED)
 
