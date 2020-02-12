@@ -7,7 +7,7 @@ namespace FAGui
 {
     std::unique_ptr<FARender::AnimationPlayer> MenuHandler::createSmLogo()
     {
-        auto ret = nonstd::make_unique<FARender::AnimationPlayer>();
+        auto ret = std::make_unique<FARender::AnimationPlayer>();
         auto renderer = FARender::Renderer::get();
         ret->playAnimation(renderer->loadImage("ui_art/smlogo.pcx&trans=0,255,0&vanim=154"),
                            FAWorld::World::getTicksInPeriod("0.06"),

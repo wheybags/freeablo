@@ -31,7 +31,7 @@ struct NeighborsPatternsTest : ::testing::TestWithParam<NeighborsPatternsParams>
 {
     std::unique_ptr<FAWorld::LevelImplStub> level;
 
-    void SetUp() override { level = nonstd::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
+    void SetUp() override { level = std::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
 };
 
 TEST_P(NeighborsPatternsTest, equals)

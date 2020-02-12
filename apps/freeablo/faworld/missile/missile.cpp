@@ -36,7 +36,7 @@ namespace FAWorld
             auto graphicsSize = loader.load<uint32_t>();
             mGraphics.reserve(graphicsSize);
             for (uint32_t i = 0; i < graphicsSize; i++)
-                mGraphics.push_back(nonstd::make_unique<MissileGraphic>(loader));
+                mGraphics.push_back(std::make_unique<MissileGraphic>(loader));
         }
 
         void Missile::save(FASaveGame::GameSaver& saver)

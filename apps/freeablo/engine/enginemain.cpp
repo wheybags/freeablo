@@ -66,7 +66,7 @@ namespace Engine
 
         std::string characterClass = variables["character"].as<std::string>();
 
-        mExe = nonstd::make_unique<DiabloExe::DiabloExe>(pathEXE);
+        mExe = std::make_unique<DiabloExe::DiabloExe>(pathEXE);
         if (!mExe->isLoaded())
         {
             renderer.stop();
@@ -74,7 +74,7 @@ namespace Engine
         }
 
         FAWorld::ItemFactory itemFactory(*mExe, Random::DummyRng::instance);
-        mPlayerFactory = nonstd::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
+        mPlayerFactory = std::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
         renderer.loadFonts(*mExe);
 
         FAWorld::Player* player = nullptr;

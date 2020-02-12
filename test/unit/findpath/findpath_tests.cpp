@@ -50,7 +50,7 @@ struct FindPathPatternsTest : ::testing::TestWithParam<FindPathPatternsParams>
     std::unique_ptr<FAWorld::LevelImplStub> level;
     bool isReachable = false;
 
-    void SetUp() override { level = nonstd::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
+    void SetUp() override { level = std::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
 };
 
 TEST_P(FindPathPatternsTest, goalIsReachable)
