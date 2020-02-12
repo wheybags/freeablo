@@ -140,7 +140,7 @@ namespace Engine
 
             if (mInGame && (!mPaused || mMultiplayer->isMultiplayer()))
             {
-                nonstd::optional<std::vector<FAWorld::PlayerInput>> inputs;
+                std::optional<std::vector<FAWorld::PlayerInput>> inputs;
 
                 do
                 {

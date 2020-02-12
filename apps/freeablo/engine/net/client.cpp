@@ -35,13 +35,13 @@ namespace Engine
         enet_deinitialize();
     }
 
-    nonstd::optional<std::vector<FAWorld::PlayerInput>> Client::getAndClearInputs(FAWorld::Tick tick)
+    std::optional<std::vector<FAWorld::PlayerInput>> Client::getAndClearInputs(FAWorld::Tick tick)
     {
         if (!mInputs.count(tick))
-            return nonstd::nullopt;
+            return std::nullopt;
 
         if (mDoFullVerify && !mServerStatesForFullVerify.count(tick))
-            return nonstd::nullopt;
+            return std::nullopt;
 
         std::vector<FAWorld::PlayerInput> retval;
         retval.swap(mInputs[tick]);

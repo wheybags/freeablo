@@ -295,15 +295,15 @@ namespace FAWorld
     {
         std::set<EquipTarget> NeedsToBeReplaced;
         std::set<EquipTarget> NeedsToBeReturned; // used only for equipping 2-handed weapon while wearing 1h weapon + shield
-        nonstd::optional<EquipTarget> newTarget; // sometimes target changes during exchange
+        std::optional<EquipTarget> newTarget;    // sometimes target changes during exchange
         ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg = {},
                        std::set<EquipTarget> NeedsToBeReturnedArg = {},
-                       const nonstd::optional<EquipTarget>& newTargetArg = {});
+                       const std::optional<EquipTarget>& newTargetArg = {});
     };
 
     ExchangeResult::ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg,
                                    std::set<EquipTarget> NeedsToBeReturnedArg,
-                                   const nonstd::optional<EquipTarget>& newTargetArg)
+                                   const std::optional<EquipTarget>& newTargetArg)
         : NeedsToBeReplaced(std::move(NeedsToBeReplacedArg)), NeedsToBeReturned(std::move(NeedsToBeReturnedArg)), newTarget(newTargetArg)
     {
     }

@@ -3,7 +3,7 @@
 
 #include "statemachine.h"
 #include <misc/misc.h>
-#include <nonstd/optional.hpp>
+#include <optional>
 #include <stddef.h>
 
 namespace FAWorld
@@ -23,7 +23,7 @@ namespace FAWorld
 
             virtual void save(FASaveGame::GameSaver&) const override {}
 
-            virtual nonstd::optional<StateChange> update(Actor& actor, bool noclip) override;
+            virtual std::optional<StateChange> update(Actor& actor, bool noclip) override;
         };
     }
 }

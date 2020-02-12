@@ -218,7 +218,7 @@ namespace FAWorld
 
             FARender::FASpriteGroup* sprite = tmp.first;
             int32_t frame = tmp.second;
-            nonstd::optional<Cel::Colour> hoverColor;
+            std::optional<Cel::Colour> hoverColor;
             if (mActors[i]->getId() == hoverStatus.hoveredActorId)
                 hoverColor = mActors[i]->isEnemy(displayedActor) ? enemyHoverColor() : friendHoverColor();
             // offset the sprite for the current direction of the actor
@@ -243,7 +243,7 @@ namespace FAWorld
                     auto spriteGroup = tmp.first;
                     auto frame = tmp.second;
                     if (spriteGroup)
-                        state->mObjects.push_back({spriteGroup, static_cast<uint32_t>(frame), graphic->mCurPos, nonstd::nullopt});
+                        state->mObjects.push_back({spriteGroup, static_cast<uint32_t>(frame), graphic->mCurPos, std::nullopt});
                 }
             }
         }

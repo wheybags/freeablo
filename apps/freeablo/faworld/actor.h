@@ -100,7 +100,7 @@ namespace FAWorld
         bool isAttacking = false;
         bool mInvuln = false;
         CharacterInventory mInventory;
-        nonstd::optional<Misc::Direction> mMeleeAttackRequestedDirection; // this is really stupid but I don't know how else to do it
+        std::optional<Misc::Direction> mMeleeAttackRequestedDirection; // this is really stupid but I don't know how else to do it
 
         // TODO: hack, this should eventually be removed.
         // Try not to use it unless you have no other choice with the current structure.
