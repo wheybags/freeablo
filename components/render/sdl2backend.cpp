@@ -706,7 +706,7 @@ namespace Render
         // SDL_RenderPresent(renderer);
     }
 
-    void drawSprite(GLuint sprite, int32_t x, int32_t y, nonstd::optional<Cel::Colour> highlightColor)
+    void drawSprite(GLuint sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
     {
         glUseProgram(shader_programme);
 
@@ -754,7 +754,7 @@ namespace Render
         }
     }
 
-    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, nonstd::optional<Cel::Colour> highlightColor)
+    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
     {
         drawSprite((GLuint)(intptr_t)sprite, x, y, highlightColor);
     }
@@ -762,7 +762,7 @@ namespace Render
     constexpr auto tileHeight = 32;
     constexpr auto tileWidth = tileHeight * 2;
 
-    void drawAtTile(const Sprite& sprite, const Misc::Point& tileTop, int spriteW, int spriteH, nonstd::optional<Cel::Colour> highlightColor = nonstd::nullopt)
+    void drawAtTile(const Sprite& sprite, const Misc::Point& tileTop, int spriteW, int spriteH, std::optional<Cel::Colour> highlightColor = std::nullopt)
     {
         // centering spright at the center of tile by width and at the bottom of tile by height
         drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight, highlightColor);
@@ -1104,7 +1104,7 @@ namespace Render
                                  const Tile& pos,
                                  const Misc::Point& fractionalPos,
                                  const Misc::Point& toScreen,
-                                 nonstd::optional<Cel::Colour> highlightColor = nonstd::nullopt)
+                                 std::optional<Cel::Colour> highlightColor = std::nullopt)
     {
         int32_t w, h;
         spriteSize(sprite, w, h);

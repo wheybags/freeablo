@@ -1,25 +1,17 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.11)
 
 ## Windows Config ##
 if (WIN32)
-    set (CMAKE_SYSTEM_VERSION 8.1 CACHE TYPE INTERNAL FORCE)
+    set (CMAKE_SYSTEM_VERSION 8.1 CACHE STRING INTERNAL FORCE)
 
-    set(desired_generators "Visual Studio 14 2015 Win64" "Visual Studio 15 2017 Win64")
+    set(desired_generators "Visual Studio 16 2019")
 
     if (NOT "${CMAKE_GENERATOR}" IN_LIST desired_generators)
-        list(GET desired_generators 0 VS2015)
-        list(GET desired_generators 1 VS2017)
-        message(FATAL_ERROR "Incorrect generator, please run cmake with: -G \"${VS2015}\"\nor with -G \"${VS2017}\"")
+        message(FATAL_ERROR "Incorrect generator, please run cmake with: -G GENERATOR, where GENERATOR is one of: ${desired_generators}")
     endif()
 
     set(HUNTER_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 endif()
-
-
-# cmake policies
-IF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.11)
-	cmake_policy(SET CMP0074 NEW) # find_library calls use $LIB_ROOT variables. Shouldn't affect us much/at all, but silences warnings
-ENDIF()
 
 project (Freeablo)
 
@@ -28,14 +20,8 @@ Find_Package(OpenGL REQUIRED)
 
 set(FA_COMPILER_FLAGS "")
 
-# Use C++11
-if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
-    endif ()
-else ()
-    set (CMAKE_CXX_STANDARD 11)
-endif ()
+set (CMAKE_CXX_STANDARD 17)
+
 if(WIN32)
 	add_definitions(-DNOMINMAX) # http://stackoverflow.com/questions/5004858/stdmin-gives-error
 endif()

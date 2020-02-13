@@ -197,48 +197,48 @@ TEST(FixedPoint, muldivOptimisations)
 
 TEST(FixedPoint, ConstExprConstruct)
 {
-    constexpr FixedPoint one = MakeFixed(1);
+    constexpr FixedPoint one = FixedPoint("1");
     ASSERT_EQ(one.str(), "1");
 
-    constexpr FixedPoint onePointFive = MakeFixed(1, 5);
+    constexpr FixedPoint onePointFive = FixedPoint("1.5");
     ASSERT_EQ(onePointFive.str(), "1.5");
 
-    constexpr FixedPoint zeroPointZeroZeroFive = MakeFixed(0, 005);
+    constexpr FixedPoint zeroPointZeroZeroFive = FixedPoint("0.005");
     ASSERT_EQ(zeroPointZeroZeroFive.str(), "0.005");
 
-    constexpr FixedPoint onePointZeroZeroFive = MakeFixed(1, 005);
+    constexpr FixedPoint onePointZeroZeroFive = FixedPoint("1.005");
     ASSERT_EQ(onePointZeroZeroFive.str(), "1.005");
 
-    constexpr FixedPoint minusOne = -MakeFixed(1);
+    constexpr FixedPoint minusOne = FixedPoint("-1");
     ASSERT_EQ(minusOne.str(), "-1");
 
-    constexpr FixedPoint minusOnePointFive = -MakeFixed(1, 5);
+    constexpr FixedPoint minusOnePointFive = FixedPoint("-1.5");
     ASSERT_EQ(minusOnePointFive.str(), "-1.5");
 
-    constexpr FixedPoint minusZeroPointZeroZeroFive = -MakeFixed(0, 005);
+    constexpr FixedPoint minusZeroPointZeroZeroFive = FixedPoint("-0.005");
     ASSERT_EQ(minusZeroPointZeroZeroFive.str(), "-0.005");
 
-    constexpr FixedPoint minusOnePointZeroZeroFive = -MakeFixed(1, 005);
+    constexpr FixedPoint minusOnePointZeroZeroFive = FixedPoint("-1.005");
     ASSERT_EQ(minusOnePointZeroZeroFive.str(), "-1.005");
 }
 
 TEST(FixedPoint, FloorCeil)
 {
-    ASSERT_EQ(MakeFixed(1, 5).floor(), 1);
-    ASSERT_EQ(MakeFixed(1, 5).ceil(), 2);
+    ASSERT_EQ(FixedPoint("1.5").floor(), 1);
+    ASSERT_EQ(FixedPoint("1.5").ceil(), 2);
 
-    ASSERT_EQ(MakeFixed(1).floor(), 1);
-    ASSERT_EQ(MakeFixed(1).ceil(), 1);
+    ASSERT_EQ(FixedPoint(1).floor(), 1);
+    ASSERT_EQ(FixedPoint(1).ceil(), 1);
 
-    ASSERT_EQ(MakeFixed(0, 5).floor(), 0);
-    ASSERT_EQ(MakeFixed(0, 5).ceil(), 1);
+    ASSERT_EQ(FixedPoint("0.5").floor(), 0);
+    ASSERT_EQ(FixedPoint("0.5").ceil(), 1);
 
-    ASSERT_EQ(MakeFixed(0).floor(), 0);
-    ASSERT_EQ(MakeFixed(0).ceil(), 0);
+    ASSERT_EQ(FixedPoint(0).floor(), 0);
+    ASSERT_EQ(FixedPoint(0).ceil(), 0);
 
-    ASSERT_EQ((-MakeFixed(1, 5)).floor(), -2);
-    ASSERT_EQ((-MakeFixed(1, 5)).ceil(), -1);
+    ASSERT_EQ((FixedPoint("-1.5")).floor(), -2);
+    ASSERT_EQ((FixedPoint("-1.5")).ceil(), -1);
 
-    ASSERT_EQ((-MakeFixed(1)).floor(), -1);
-    ASSERT_EQ((-MakeFixed(1)).ceil(), -1);
+    ASSERT_EQ((FixedPoint(-1)).floor(), -1);
+    ASSERT_EQ((FixedPoint(-1)).ceil(), -1);
 }

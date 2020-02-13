@@ -91,7 +91,7 @@ namespace FAGui
                     }
                     else
                     {
-                        mSelectedCharacterInfo = nonstd::nullopt;
+                        mSelectedCharacterInfo = std::nullopt;
                     }
 
                     auto frame = mFocus->getCurrentFrame();

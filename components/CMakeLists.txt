@@ -36,7 +36,6 @@ add_library(Misc
     misc/enum_range.h
     misc/fixedpoint.cpp
     misc/fixedpoint.h
-    misc/fixedpoint_internal.h
     misc/int128.cpp
     misc/int128.h
     misc/int128_have_intrinsic.inc
@@ -111,7 +110,7 @@ add_library(DiabloExe
     diabloexe/affix.cpp
     diabloexe/affix.h
 	diabloexe/talkdata.h)
-target_link_libraries(DiabloExe Misc FAIO nonstd::optional-lite)
+target_link_libraries(DiabloExe Misc FAIO)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Audio

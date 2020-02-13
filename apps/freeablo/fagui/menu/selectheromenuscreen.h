@@ -1,7 +1,7 @@
 #pragma once
 #include "menuscreen.h"
 #include <memory>
-#include <nonstd/optional.hpp>
+#include <optional>
 
 namespace FARender
 {
@@ -57,6 +57,6 @@ namespace FAGui
         std::unique_ptr<FARender::AnimationPlayer> mFocus;
         std::unique_ptr<FARender::AnimationPlayer> mFocus16;
         ContentType mContentType = ContentType::chooseClass;
-        nonstd::optional<characterInfo> mSelectedCharacterInfo;
+        std::optional<characterInfo> mSelectedCharacterInfo;
     };
 }

@@ -19,7 +19,7 @@ namespace Engine
         Server(FAWorld::World& world, LocalInputHandler& localInputHandler);
         virtual ~Server();
 
-        virtual nonstd::optional<std::vector<FAWorld::PlayerInput>> getAndClearInputs(FAWorld::Tick tick) override;
+        virtual std::optional<std::vector<FAWorld::PlayerInput>> getAndClearInputs(FAWorld::Tick tick) override;
         virtual void update() override;
         virtual void verify(FAWorld::Tick) override {}
         virtual bool isServer() const override { return true; }

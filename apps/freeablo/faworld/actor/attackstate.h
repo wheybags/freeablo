@@ -21,7 +21,7 @@ namespace FAWorld
             explicit MeleeAttackState(FASaveGame::GameLoader& loader);
             explicit MeleeAttackState(Misc::Direction direction);
             virtual ~MeleeAttackState() = default;
-            virtual nonstd::optional<StateChange> update(Actor& actor, bool noclip) override;
+            virtual std::optional<StateChange> update(Actor& actor, bool noclip) override;
 
             virtual void onEnter(Actor& actor) override;
 

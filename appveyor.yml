@@ -4,7 +4,7 @@ branches:
     - master
 
 # Operating system (build VM template)
-os: Visual Studio 2015
+os: Visual Studio 2019
 
 # clone directory
 clone_folder: c:\projects\freeablo
@@ -27,7 +27,7 @@ before_build:
   - cd c:\projects\freeablo
   - mkdir build
   - cd build
-  - cmake .. -G "Visual Studio 14 2015 Win64" -DFA_TREAT_WARNINGS_AS_ERRORS=ON
+  - cmake .. -G "Visual Studio 16 2019" -DFA_TREAT_WARNINGS_AS_ERRORS=ON
 
 build:
   parallel: true

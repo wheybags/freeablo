@@ -32,15 +32,15 @@ namespace Engine
         enet_deinitialize();
     }
 
-    nonstd::optional<std::vector<FAWorld::PlayerInput>> Server::getAndClearInputs(FAWorld::Tick tick)
+    std::optional<std::vector<FAWorld::PlayerInput>> Server::getAndClearInputs(FAWorld::Tick tick)
     {
         if (!mInputs.count(tick))
-            return nonstd::nullopt;
+            return std::nullopt;
 
         /* for (const auto& pair : mPeers)
          {
              if (pair.second.hasMap && pair.second.lastTick + 10 < tick)
-                 return nonstd::nullopt;
+                 return std::nullopt;
          }*/
 
         std::vector<FAWorld::PlayerInput> retval;

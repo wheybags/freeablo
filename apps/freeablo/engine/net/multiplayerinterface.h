@@ -2,7 +2,7 @@
 #include "../../faworld/world.h"
 #include <cstdint>
 #include <fa_nuklear.h>
-#include <nonstd/optional.hpp>
+#include <optional>
 #include <vector>
 
 namespace FAWorld
@@ -18,7 +18,7 @@ namespace Engine
     public:
         virtual ~MultiplayerInterface() = default;
 
-        virtual nonstd::optional<std::vector<FAWorld::PlayerInput>> getAndClearInputs(FAWorld::Tick tick) = 0;
+        virtual std::optional<std::vector<FAWorld::PlayerInput>> getAndClearInputs(FAWorld::Tick tick) = 0;
         virtual void update() = 0;
         virtual void verify(FAWorld::Tick tick) = 0;
         virtual bool isServer() const = 0;

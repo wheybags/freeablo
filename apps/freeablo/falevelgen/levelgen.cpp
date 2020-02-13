@@ -299,7 +299,7 @@ namespace FALevelGen
 
             FixedPoint ratio = FixedPoint(newRoom.width) / newRoom.height;
 
-            if (ratio < MakeFixed(0, 5) || ratio > MakeFixed(2, 0))
+            if (ratio < FixedPoint("0.5") || ratio > FixedPoint("2.0"))
                 continue;
 
             placed++;

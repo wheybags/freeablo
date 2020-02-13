@@ -5,7 +5,7 @@ namespace FAGui
     MouseAndClickMenu::MouseAndClickMenu()
     {
         mPentagramAnimation.playAnimation(FARender::Renderer::get()->loadImage("data/pentspn2.cel"),
-                                          FAWorld::World::getTicksInPeriod(MakeFixed(0, 1)),
+                                          FAWorld::World::getTicksInPeriod(FixedPoint("0.1")),
                                           FARender::AnimationPlayer::AnimationType::Looped);
     }
 
@@ -102,8 +102,8 @@ namespace FAGui
 
         if (nk_input_is_key_down(&ctx->input, NK_KEY_DOWN) || nk_input_is_key_down(&ctx->input, NK_KEY_UP))
         {
-            FAWorld::Tick firstWait = FAWorld::World::getTicksInPeriod(MakeFixed(0, 5));
-            FAWorld::Tick repeatWait = FAWorld::World::getTicksInPeriod(MakeFixed(0, 05));
+            FAWorld::Tick firstWait = FAWorld::World::getTicksInPeriod(FixedPoint("0.5"));
+            FAWorld::Tick repeatWait = FAWorld::World::getTicksInPeriod(FixedPoint("0.05"));
 
             if (mArrowKeyRepeatTimer > (mArrowKeyMovesGeneratedSinceKeydown < 2 ? firstWait : repeatWait))
             {

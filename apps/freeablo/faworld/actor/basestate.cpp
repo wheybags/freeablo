@@ -10,14 +10,14 @@ namespace FAWorld
     {
         const std::string BaseState::typeId = "actor-state-base-state";
 
-        nonstd::optional<StateChange> BaseState::update(Actor& actor, bool noclip)
+        std::optional<StateChange> BaseState::update(Actor& actor, bool noclip)
         {
             UNUSED_PARAM(noclip);
-            nonstd::optional<StateChange> ret;
+            std::optional<StateChange> ret;
 
             if (auto direction = actor.mMeleeAttackRequestedDirection)
             {
-                actor.mMeleeAttackRequestedDirection = nonstd::nullopt;
+                actor.mMeleeAttackRequestedDirection = std::nullopt;
                 return StateChange{StateOperation::push, new ActorState::MeleeAttackState(*direction)};
             }
 

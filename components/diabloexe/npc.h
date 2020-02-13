@@ -1,7 +1,7 @@
 #pragma once
 #include "talkdata.h"
 #include <faio/fafileobject.h>
-#include <nonstd/optional.hpp>
+#include <optional>
 #include <unordered_map>
 
 namespace DiabloExe
@@ -15,7 +15,7 @@ namespace DiabloExe
         uint8_t x;
         uint8_t y;
         size_t rotation;
-        nonstd::optional<int32_t> animationSequenceId;
+        std::optional<int32_t> animationSequenceId;
         std::unordered_map<std::string, std::string> menuTalkData;
         std::unordered_map<std::string, TalkData> gossipData;
         std::unordered_map<std::string, QuestTalkData> questTalkData;
