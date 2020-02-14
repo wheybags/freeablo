@@ -32,8 +32,8 @@ namespace FAWorld
 
         void initAnimMaps();
 
-        AnimState getCurrentAnimation();
-        AnimState getInterruptedAnimation() { return mInterruptedAnimationState; }
+        AnimState getCurrentAnimation() const { return mPlayingAnim; }
+        AnimState getInterruptedAnimation() const { return mInterruptedAnimationState; }
 
         std::pair<FARender::FASpriteGroup*, int32_t> getCurrentRealFrame();
 
@@ -53,8 +53,8 @@ namespace FAWorld
 
         // TODO: some template class for an array of T with EnumType::ENUM_END size array, to eliminate the casting used
         // for accessing these two arrays (call it EnumMap or something)
-        FARender::FASpriteGroup* mAnimations[size_t(AnimState::ENUM_END)]; ///< "map" from AnimState to animation
-        Tick mAnimTimeMap[size_t(AnimState::ENUM_END)];                    ///< "map" from AnimState to Tick
+        FARender::FASpriteGroup* mAnimations[size_t(AnimState::ENUM_END)] = {}; ///< "map" from AnimState to animation
+        Tick mAnimTimeMap[size_t(AnimState::ENUM_END)] = {};                    ///< "map" from AnimState to Tick
 
         std::vector<int32_t> mIdleFrameSequence;
 

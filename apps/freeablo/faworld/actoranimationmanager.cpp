@@ -96,8 +96,6 @@ namespace FAWorld
         }
     }
 
-    AnimState ActorAnimationManager::getCurrentAnimation() { return mPlayingAnim; }
-
     std::pair<FARender::FASpriteGroup*, int32_t> ActorAnimationManager::getCurrentRealFrame() { return mAnimationPlayer.getCurrentFrame(); }
 
     void ActorAnimationManager::interruptAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type)

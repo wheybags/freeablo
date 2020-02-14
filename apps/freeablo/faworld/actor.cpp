@@ -27,10 +27,8 @@ namespace FAWorld
     {
         if (!isDead())
         {
-            if (getLevel())
-            {
+            if (getLevel() && !isRecoveringFromHit())
                 mActorStateMachine->update(noclip);
-            }
 
             if (mBehaviour)
                 mBehaviour->update();
@@ -317,6 +315,8 @@ namespace FAWorld
         stats = LiveActorStats();
         stats.maxLife = 10;
     }
+
+    bool Actor::isRecoveringFromHit() const { return mAnimation.getCurrentAnimation() == AnimState::hit; }
 
     void Actor::doMeleeHit(const Misc::Point& point)
     {

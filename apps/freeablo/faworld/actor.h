@@ -89,6 +89,7 @@ namespace FAWorld
         const std::vector<std::unique_ptr<Missile::Missile>>& getMissiles() const { return mMissiles; }
         virtual bool castSpell(SpellId spell, Misc::Point targetPoint);
         ActorType getType() const { return mType; }
+        bool isRecoveringFromHit() const;
 
     protected:
         void activateMissile(MissileId id, Misc::Point targetPoint);
