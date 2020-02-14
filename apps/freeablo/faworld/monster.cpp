@@ -79,7 +79,7 @@ namespace FAWorld
             stats.toHitMeleeMinMaxCap.min = 15;
 
         stats.meleeDamageBonusRange = IntRange(monsterProperties.minDamage, monsterProperties.maxDamage);
-        stats.hitRecoveryDamageThreshold = actorStats.mLevel + 3; // Jarulf's guide, section 5.3.4
+        stats.hitRecoveryDamageThreshold = actorStats.mLevel + 3; // https://wheybags.gitlab.io/jarulfs-guide/#timing-information
     }
 
     void Monster::die()

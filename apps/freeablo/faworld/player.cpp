@@ -191,7 +191,7 @@ namespace FAWorld
                 invalid_enum(PlayerClass, mPlayerClass);
         }
 
-        // TODOHELLFIRE: Add in bonuses for barbarians and monks here, see Jarulf's guide section 6.2.3
+        // TODOHELLFIRE: Add in bonuses for barbarians and monks here, see https://wheybags.gitlab.io/jarulfs-guide/#monster-versus-player
         stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / FixedPoint(5) + itemStats.armorClass).floor();
         stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / FixedPoint(2) + itemStats.toHit).floor();
         stats.toHitMeleeMinMaxCap = {5, 95};
