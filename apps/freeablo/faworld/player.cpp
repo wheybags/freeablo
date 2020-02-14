@@ -198,10 +198,17 @@ namespace FAWorld
         stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.toHit).floor();
         stats.toHitMagic.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.magic)).floor();
 
-        // TODO: account for shields. I'm not sure how exactly, but if you have a shield and no weapon equipped, it should affect your damage.
         stats.meleeDamageBonusRange = itemStats.meleeDamageBonusRange;
-        if (stats.meleeDamageBonusRange.isZero())
-            stats.meleeDamageBonusRange = IntRange(1, 1);
+
+        // https://wheybags.gitlab.io/jarulfs-guide/#damage-done
+        if (!Item::isItemAWeapon(mInventory.getLeftHand().getType()) && !Item::isItemAWeapon(mInventory.getRightHand().getType()))
+        {
+            // TODOHELLFIRE: monks get a bonus here
+            if (mInventory.getLeftHand().getType() == ItemType::shield || mInventory.getRightHand().getType() == ItemType::shield)
+                stats.meleeDamageBonusRange = IntRange(1, 3);
+            else
+                stats.meleeDamageBonusRange = IntRange(1, 1);
+        }
 
         stats.rangedDamageBonusRange = itemStats.rangedDamageBonusRange;
 

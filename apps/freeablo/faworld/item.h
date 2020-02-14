@@ -133,6 +133,7 @@ namespace FAWorld
 
         static bool isItemAMeleeWeapon(ItemType type);
         static bool isItemARangedWeapon(ItemType type);
+        static bool isItemAWeapon(ItemType type) { return isItemAMeleeWeapon(type) || isItemARangedWeapon(type); }
 
         friend class CharacterInventory;
         friend class ItemFactory;
