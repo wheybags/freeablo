@@ -34,21 +34,19 @@ namespace Engine
 
     EngineMain::~EngineMain() { singletonInstance = nullptr; }
 
-    EngineInputManager& EngineMain::inputManager() { return *(mInputManager.get()); }
+    EngineInputManager& EngineMain::inputManager() { return *mInputManager; }
 
     void EngineMain::run(const cxxopts::ParseResult& variables)
     {
         if (!mSettings.loadUserSettings())
             return;
 
-        size_t resolutionWidth = mSettings.get<size_t>("Display", "resolutionWidth");
-        size_t resolutionHeight = mSettings.get<size_t>("Display", "resolutionHeight");
+        auto resolutionWidth = mSettings.get<size_t>("Display", "resolutionWidth");
+        auto resolutionHeight = mSettings.get<size_t>("Display", "resolutionHeight");
         const bool fullscreen = mSettings.get<bool>("Display", "fullscreen");
-        std::string pathEXE = mSettings.get<std::string>("Game", "PathEXE");
-        if (pathEXE == "")
-        {
+        auto pathEXE = mSettings.get<std::string>("Game", "PathEXE");
+        if (pathEXE.empty())
             pathEXE = "Diablo.exe";
-        }
 
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen);
@@ -84,9 +82,9 @@ namespace Engine
         if (variables["seed"].as<uint32_t>() != 0)
             seed = variables["seed"].as<uint32_t>();
 
-        mWorld.reset(new FAWorld::World(*mExe, seed));
+        mWorld = std::make_unique<FAWorld::World>(*mExe, seed);
 
-        mLocalInputHandler.reset(new LocalInputHandler(*mWorld));
+        mLocalInputHandler = std::make_unique<LocalInputHandler>(*mWorld);
         mInputManager->registerMouseObserver(mLocalInputHandler.get());
         mInputManager->registerKeyboardObserver(mLocalInputHandler.get());
 
@@ -98,7 +96,7 @@ namespace Engine
                 mWorld->generateLevels(); // TODO: not generate levels while game hasn't started
 
                 mInGame = true;
-                mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
+                mMultiplayer = std::make_unique<Server>(*mWorld, *mLocalInputHandler);
 
                 player = mPlayerFactory->create(*mWorld, characterClass);
                 if (variables["invuln"].as<std::string>() == "on")
@@ -107,10 +105,10 @@ namespace Engine
         }
         else
         {
-            mMultiplayer.reset(new Client(*mLocalInputHandler.get(), variables["connect"].as<std::string>()));
+            mMultiplayer = std::make_unique<Client>(*mLocalInputHandler, variables["connect"].as<std::string>());
         }
 
-        mGuiManager.reset(new FAGui::GuiManager(*this));
+        mGuiManager = std::make_unique<FAGui::GuiManager>(*this);
         mInputManager->registerKeyboardObserver(mGuiManager.get());
         mInputManager->setGuiManager(mGuiManager.get());
 
@@ -260,7 +258,7 @@ namespace Engine
         mWorld->generateLevels();
 
         mInGame = true;
-        mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
+        mMultiplayer = std::make_unique<Server>(*mWorld, *mLocalInputHandler);
 
         // TODO: fix that variables like invuln are not applied in this case
         auto player = mPlayerFactory->create(*mWorld, characterClass);
@@ -291,10 +289,10 @@ namespace Engine
         mWorld->setFirstPlayerAsCurrent();
 
         mInGame = true;
-        mMultiplayer.reset(new Server(*mWorld.get(), *mLocalInputHandler.get()));
+        mMultiplayer = std::make_unique<Server>(*mWorld, *mLocalInputHandler);
     }
 
-    void EngineMain::startMultiplayerGame(std::string serverAddress) { mMultiplayer.reset(new Client(*mLocalInputHandler.get(), serverAddress)); }
+    void EngineMain::startMultiplayerGame(const std::string& serverAddress) { mMultiplayer = std::make_unique<Client>(*mLocalInputHandler, serverAddress); }
 
     const DiabloExe::DiabloExe& EngineMain::exe() const { return *mExe; }
 
