@@ -1,5 +1,4 @@
 #pragma once
-
 #include "hoverstate.h"
 #include "itemmap.h" // TODO: remove, only included for the Tile type
 #include "misc/point.h"

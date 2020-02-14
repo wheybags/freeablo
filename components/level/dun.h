@@ -1,12 +1,9 @@
-
 #pragma once
-
+#include <misc/array2d.h>
+#include <misc/misc.h>
 #include <stdint.h>
 #include <string>
 #include <vector>
-
-#include <misc/array2d.h>
-#include <misc/misc.h>
 
 namespace Serial
 {

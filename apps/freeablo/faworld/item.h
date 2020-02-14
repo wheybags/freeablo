@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "../fagui/menuentry.h"
 #include "itemenums.h"
 #include <cel/celfile.h>

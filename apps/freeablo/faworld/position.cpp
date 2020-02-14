@@ -1,5 +1,4 @@
 #include "position.h"
-
 #include "../fasavegame/gameloader.h"
 #include "world.h"
 #include <algorithm>

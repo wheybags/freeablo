@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include <audio/audio.h>
 #include <list>
 #include <map>

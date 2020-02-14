@@ -1,5 +1,4 @@
 #pragma once
-
 #include "../components/diabloexe/talkdata.h"
 #include "characterdialoguepopup.h"
 

@@ -1,16 +1,13 @@
-
 #pragma once
-
 #include <atomic>
+#include <fa_nuklear.h>
 #include <list>
 #include <map>
+#include <render/render.h>
 #include <stdlib.h>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <fa_nuklear.h>
-#include <render/render.h>
 
 namespace FARender
 {

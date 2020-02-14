@@ -1,9 +1,7 @@
 #pragma once
-
 #include "misc/direction.h"
 #include "misc/misc.h"
 #include "misc/point.h"
-
 #include <cmath>
 #include <utility>
 

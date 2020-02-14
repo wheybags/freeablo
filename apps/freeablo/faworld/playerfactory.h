@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "../components/diabloexe/diabloexe.h"
 #include "itemfactory.h"
 #include <string>

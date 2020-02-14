@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "../faworld/world.h"
 #include "renderer.h"
 

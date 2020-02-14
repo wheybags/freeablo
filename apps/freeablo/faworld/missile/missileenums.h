@@ -1,5 +1,4 @@
 #pragma once
-
 namespace FAWorld
 {
     enum class MissileId

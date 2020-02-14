@@ -1,9 +1,6 @@
-
 #pragma once
-
-#include <misc/misc.h>
-
 #include "world.h"
+#include <misc/misc.h>
 
 namespace FASaveGame
 {

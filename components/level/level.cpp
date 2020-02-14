@@ -1,5 +1,4 @@
 #include "level.h"
-
 #include <iostream>
 #include <serial/loader.h>
 

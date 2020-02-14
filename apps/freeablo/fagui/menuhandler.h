@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include <memory>
 
 namespace DiabloExe

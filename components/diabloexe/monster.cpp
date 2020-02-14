@@ -1,5 +1,4 @@
 #include "monster.h"
-
 #include <faio/fafileobject.h>
 
 #include <iostream>

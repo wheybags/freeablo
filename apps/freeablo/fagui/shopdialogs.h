@@ -1,5 +1,4 @@
 #pragma once
-
 #include "characterdialoguepopup.h"
 
 namespace FAWorld

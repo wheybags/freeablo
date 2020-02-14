@@ -1,5 +1,4 @@
 #pragma once
-
 #include <misc/point.h>
 
 namespace FAWorld

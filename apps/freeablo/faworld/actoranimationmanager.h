@@ -1,9 +1,6 @@
-
 #pragma once
-
-#include <unordered_map>
-
 #include "../farender/animationplayer.h"
+#include <unordered_map>
 
 #include <misc/stdhashes.h>
 

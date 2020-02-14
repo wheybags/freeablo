@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "pal.h"
 #include <misc/array2d.h>
 

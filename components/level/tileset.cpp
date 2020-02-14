@@ -1,5 +1,4 @@
 #include "tileset.h"
-
 #include <stdio.h>
 
 #include <faio/fafileobject.h>

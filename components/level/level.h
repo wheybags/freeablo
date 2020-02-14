@@ -1,5 +1,4 @@
 #pragma once
-
 #include "baseitemmanager.h"
 #include "dun.h"
 #include "min.h"

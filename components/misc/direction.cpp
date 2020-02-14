@@ -1,5 +1,4 @@
 #include "direction.h"
-
 #include "fixedpoint.h"
 #include <array>
 #include <serial/loader.h>
