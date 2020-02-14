@@ -630,8 +630,7 @@ namespace FAGui
             textToUse = &mHoveredInventoryItemText;
 
         auto boxRect = nk_rect(185, 66, 275, 55);
-        std::vector<std::string> vec;
-        Misc::StringUtils::split(*textToUse, '\n', Misc::StringUtils::SplitEmptyBehavior::StripEmpties);
+        std::vector<std::string> vec = Misc::StringUtils::split(*textToUse, '\n', Misc::StringUtils::SplitEmptyBehavior::StripEmpties);
         auto h_part = boxRect.h / vec.size();
         for (int i = 0; i < static_cast<int>(vec.size()); ++i)
         {
