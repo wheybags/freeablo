@@ -31,6 +31,7 @@ namespace FAWorld
         Misc::StringUtils::replace(mSoundPath, "%i", "{}");
 
         mStats.mLevel = monsterStats.level;
+        mType = ActorType(monsterStats.type);
     }
 
     Monster::Monster(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader) {}

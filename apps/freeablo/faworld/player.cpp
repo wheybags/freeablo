@@ -208,6 +208,25 @@ namespace FAWorld
         stats.hitRecoveryDamageThreshold = actorStats.mLevel;
     }
 
+    DamageType Player::getMeleeDamageType() const
+    {
+        const Item& left = mInventory.getLeftHand();
+        const Item& right = mInventory.getRightHand();
+
+        if (left.getType() == ItemType::mace || right.getType() == ItemType::mace)
+            return DamageType::Club;
+        if (left.getType() == ItemType::sword || right.getType() == ItemType::sword)
+            return DamageType::Sword;
+        if (left.getType() == ItemType::axe || right.getType() == ItemType::axe)
+            return DamageType::Axe;
+        if (left.getType() == ItemType::bow || right.getType() == ItemType::bow)
+            return DamageType::Bow;
+        if (left.getType() == ItemType::staff || right.getType() == ItemType::staff)
+            return DamageType::Staff;
+
+        return DamageType::Unarmed;
+    }
+
     void Player::init(const DiabloExe::CharacterStats& charStats)
     {
         initialiseActorStats(mStats, charStats);

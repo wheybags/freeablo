@@ -123,6 +123,8 @@ namespace FAWorld
         mMissiles.reserve(missilesSize);
         for (uint32_t i = 0; i < missilesSize; i++)
             mMissiles.push_back(std::make_unique<Missile::Missile>(loader));
+
+        mType = ActorType(loader.load<uint8_t>());
     }
 
     void Actor::save(FASaveGame::GameSaver& saver)
@@ -165,26 +167,26 @@ namespace FAWorld
         saver.save(static_cast<uint32_t>(mMissiles.size()));
         for (auto& missile : mMissiles)
             missile->save(saver);
+
+        saver.save(uint8_t(mType));
     }
 
     Actor::~Actor() = default;
 
-    bool Actor::checkHit(Actor* target)
-    {
-        const LiveActorStats& stats = mStats.getCalculatedStats();
-        int32_t toHit = stats.toHitMelee.getCombined();
-        toHit -= target->getStats().getCalculatedStats().armorClass;
-        toHit = Misc::clamp(toHit, stats.toHitMeleeMinMaxCap.min, stats.toHitMeleeMinMaxCap.max);
-
-        int32_t roll = mWorld.mRng->randomInRange(0, 99); // TODO: should this be (1,100) instead of (0, 99)?
-
-        return roll < toHit;
-    }
-
-    void Actor::takeDamage(int32_t amount)
+    void Actor::takeDamage(int32_t amount, DamageType type)
     {
         if (mInvuln)
             return;
+
+        // https://wheybags.gitlab.io/jarulfs-guide/#how-to-calculate-monster-data
+        if (mType == ActorType::Undead && type == DamageType::Club)
+            amount += amount / 2;
+        if (mType == ActorType::Undead && type == DamageType::Sword)
+            amount -= amount / 2;
+        if (mType == ActorType::Animal && type == DamageType::Club)
+            amount -= amount / 2;
+        if (mType == ActorType::Animal && type == DamageType::Sword)
+            amount += amount / 2;
 
         mStats.takeDamage(static_cast<int32_t>(amount));
 
@@ -257,18 +259,6 @@ namespace FAWorld
     GameLevel* Actor::getLevel() { return mMoveHandler.getLevel(); }
     const GameLevel* Actor::getLevel() const { return mMoveHandler.getLevel(); }
 
-    int32_t Actor::meleeDamageVs(const Actor* /*target*/) const
-    {
-        const LiveActorStats& stats = mStats.getCalculatedStats();
-        int32_t damage = stats.meleeDamage;
-        damage += mWorld.mRng->randomInRange(stats.meleeDamageBonusRange.start, stats.meleeDamageBonusRange.end);
-
-        if (canCriticalHit() && mWorld.mRng->randomInRange(0, 99) < mStats.mLevel)
-            damage *= 2;
-
-        return damage;
-    }
-
     std::string Actor::getDieWav() const
     {
         if (mSoundPath.empty())
@@ -315,9 +305,9 @@ namespace FAWorld
         return true;
     }
 
-    void Actor::dealDamageToEnemy(Actor* enemy, uint32_t damage)
+    void Actor::dealDamageToEnemy(Actor* enemy, uint32_t damage, DamageType type)
     {
-        enemy->takeDamage(damage);
+        enemy->takeDamage(damage, type);
         if (enemy->isDead())
             onEnemyKilled(enemy);
     }
@@ -341,8 +331,22 @@ namespace FAWorld
     void Actor::doMeleeHit(Actor* enemy)
     {
         Engine::ThreadManager::get()->playSound(mWorld.mRng->chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
-        if (checkHit(enemy))
-            dealDamageToEnemy(enemy, meleeDamageVs(enemy));
+
+        const LiveActorStats& stats = mStats.getCalculatedStats();
+        int32_t toHit = stats.toHitMelee.getCombined();
+        toHit -= enemy->getStats().getCalculatedStats().armorClass;
+        toHit = Misc::clamp(toHit, stats.toHitMeleeMinMaxCap.min, stats.toHitMeleeMinMaxCap.max);
+        int32_t roll = mWorld.mRng->randomInRange(0, 99); // TODO: should this be (1,100) instead of (0, 99)?
+
+        if (roll < toHit)
+        {
+            int32_t damage = stats.meleeDamage;
+            damage += mWorld.mRng->randomInRange(stats.meleeDamageBonusRange.start, stats.meleeDamageBonusRange.end);
+            if (canCriticalHit() && mWorld.mRng->randomInRange(0, 99) < mStats.mLevel)
+                damage *= 2;
+
+            dealDamageToEnemy(enemy, damage, getMeleeDamageType());
+        }
     }
 
     bool Actor::castSpell(SpellId spell, Misc::Point targetPoint)
