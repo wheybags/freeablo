@@ -163,10 +163,10 @@ namespace Engine
     {
         NuklearMisc::handleNuklearMouseMoveEvent(mNkCtx, x, y, xrel, yrel);
 
+        mMousePosition = Misc::Point{x, y};
+
         if (!nk_item_is_any_active(mNkCtx))
             notifyMouseObservers(MouseInputAction::MOUSE_MOVE, mMousePosition, mMouseDown, mKbMods);
-
-        mMousePosition = Misc::Point{x, y};
     }
 
     std::string EngineInputManager::keyboardActionToString(KeyboardInputAction action) const
