@@ -15,7 +15,7 @@ namespace FAWorld
         size_t size = size_t(loader.load<int32_t>());
         mLevelXpCounts.reserve(size);
         for (size_t i = 0; i < size; i++)
-            mLevelXpCounts.push_back(loader.load<int32_t>());
+            mLevelXpCounts.push_back(loader.load<uint32_t>());
     }
 
     void ActorStats::save(FASaveGame::GameSaver& saver)
