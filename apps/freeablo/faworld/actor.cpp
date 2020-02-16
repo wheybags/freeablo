@@ -345,7 +345,8 @@ namespace FAWorld
             dealDamageToEnemy(enemy, meleeDamageVs(enemy));
     }
 
-    bool Actor::castSpell(SpellId spell, Misc::Point targetPoint) {
+    bool Actor::castSpell(SpellId spell, Misc::Point targetPoint)
+    {
         auto spellData = SpellData(spell);
         Engine::ThreadManager::get()->playSound(spellData.soundEffect());
         for (auto missileId : spellData.missiles())

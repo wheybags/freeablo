@@ -497,7 +497,8 @@ namespace FAWorld
         stats = ActorStats(*stats.mActor, baseStats, from.mNextLevelExp);
     }
 
-    bool Player::castSpell(SpellId spell, Misc::Point targetPoint) {
+    bool Player::castSpell(SpellId spell, Misc::Point targetPoint)
+    {
         auto spellData = SpellData(spell);
         auto& mana = mStats.getMana();
         auto manaCost = spellData.manaCost();
@@ -506,7 +507,8 @@ namespace FAWorld
         // if (!getLevel() || (getLevel()->isTown() && !spellData.canCastInTown()) || mana.current < manaCost)
         //    return false;
 
-        if (Actor::castSpell(spell, targetPoint)) {
+        if (Actor::castSpell(spell, targetPoint))
+        {
             mana.add(-manaCost);
             return true;
         }
@@ -515,13 +517,10 @@ namespace FAWorld
 
     void Player::setActiveSpellNumber(int32_t spellNumber)
     {
-        // TODO: This are coming from Hotkeys (F5 -> F8).
+        // TODO: This is coming from Hotkeys (F5 -> F8).
         //  This is probably the wrong place to be handling this input.
         (void)spellNumber;
     }
 
-    void Player::castActiveSpell(Misc::Point targetPoint)
-    {
-        castSpell(mActiveSpell, targetPoint);
-    }
+    void Player::castActiveSpell(Misc::Point targetPoint) { castSpell(mActiveSpell, targetPoint); }
 }

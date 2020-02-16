@@ -1,7 +1,9 @@
 #pragma once
 
-namespace FAWorld {
-    enum class SpellId {
+namespace FAWorld
+{
+    enum class SpellId
+    {
         null = 0x0,
         firebolt = 0x1,
         heal = 0x2,

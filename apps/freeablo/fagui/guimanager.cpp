@@ -438,7 +438,8 @@ namespace FAGui
             int32_t iconHeight = icons->getHeight();
 
             nk_style_button buttonStyle = dummyStyle;
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < 7; i++)
+            {
                 auto spell = FAWorld::SpellData::spellbookLUT[mCurSpellbookTab][i];
 
                 auto spellData = FAWorld::SpellData(spell);
@@ -448,18 +449,22 @@ namespace FAGui
 
                 // Temporary quirk to only allow implemented spells to be used.
                 bool spellImplemented = false;
-                for (auto sp :FAWorld::SpellData::implementedSpells) {
-                    if (spell == sp) {
+                for (auto sp : FAWorld::SpellData::implementedSpells)
+                {
+                    if (spell == sp)
+                    {
                         spellImplemented = true;
                         break;
                     }
                 }
-                if (spellImplemented) {
-                    buttonStyle.normal = buttonStyle.hover = buttonStyle.active =
-                            nk_style_item_image(icons->getNkImage(frame));
+                if (spellImplemented)
+                {
+                    buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_image(icons->getNkImage(frame));
                     if (nk_button_label_styled(ctx, &buttonStyle, "") && spellImplemented)
                         mPlayer->mActiveSpell = spell;
-                } else {
+                }
+                else
+                {
                     // Grey out unimplemented spells.
                     nk_image_color(ctx, icons->getNkImage(frame), {64, 64, 64, 255});
                 }
@@ -475,7 +480,8 @@ namespace FAGui
                 smallText(ctx, "Skill", TextColor::white, NK_TEXT_ALIGN_LEFT | NK_TEXT_ALIGN_TOP);
             }
 
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++)
+            {
                 int32_t xPos = 8 + i * 76;
                 nk_layout_space_push(ctx, nk_rect(xPos, 320, buttonWidth, buttonHeight));
                 buttonStyle.active = nk_style_item_image(selectedTabButtons->getNkImage(i));
@@ -483,7 +489,8 @@ namespace FAGui
                     buttonStyle.normal = buttonStyle.hover = buttonStyle.active;
                 else
                     buttonStyle.normal = buttonStyle.hover = nk_style_item_hide();
-                if (nk_button_label_styled(ctx, &buttonStyle, "")) {
+                if (nk_button_label_styled(ctx, &buttonStyle, ""))
+                {
                     mCurSpellbookTab = i;
                     // This could probably be done better better:
                     // As soon as button is released it returns to buttonStyle.hover (unselected), the next loop
