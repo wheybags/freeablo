@@ -49,7 +49,7 @@ namespace FAGui
         nk_end(ctx);
 
         if (exit)
-            mRejectAction();
+            (void)mRejectAction();
 
         auto multiplayer = static_cast<Engine::Client*>(mMenuHandler.engine().mMultiplayer.get());
 

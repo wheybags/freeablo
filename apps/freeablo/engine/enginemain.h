@@ -33,18 +33,18 @@ namespace Engine
     {
     public:
         EngineMain();
-        ~EngineMain();
+        ~EngineMain() override;
         EngineInputManager& inputManager();
         void run(const cxxopts::ParseResult& variables);
         void stop();
         void togglePause();
         void toggleNoclip();
-        void notify(KeyboardInputAction action);
+        void notify(KeyboardInputAction action) override;
         void setupNewPlayer(FAWorld::Player* player);
         // TODO: replace with enums
         void startGame(const std::string& characterClass);
         void startGameFromSave(const std::string& savePath);
-        void startMultiplayerGame(std::string serverAddress);
+        void startMultiplayerGame(const std::string& serverAddress);
         const DiabloExe::DiabloExe& exe() const;
         bool isPaused() const;
 
