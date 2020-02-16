@@ -71,7 +71,7 @@ namespace DiabloExe
         bool mTargeted;
         bool mTownSpell;
         int32_t mMinMagic;
-        int32_t mSoundEffect;
+        std::string mSoundEffect;
         int32_t mMissiles[3];
         int32_t mManaAdj;
         int32_t mMinMana;

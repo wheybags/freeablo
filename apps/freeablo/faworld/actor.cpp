@@ -10,6 +10,7 @@
 #include "findpath.h"
 #include "missile/missile.h"
 #include "player.h"
+#include "spells.h"
 #include "world.h"
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
@@ -342,6 +343,14 @@ namespace FAWorld
         Engine::ThreadManager::get()->playSound(mWorld.mRng->chooseOne({"sfx/misc/swing2.wav", "sfx/misc/swing.wav"}));
         if (checkHit(enemy))
             dealDamageToEnemy(enemy, meleeDamageVs(enemy));
+    }
+
+    bool Actor::castSpell(SpellId spell, Misc::Point targetPoint) {
+        auto spellData = SpellData(spell);
+        Engine::ThreadManager::get()->playSound(spellData.soundEffect());
+        for (auto missileId : spellData.missiles())
+            activateMissile(missileId, targetPoint);
+        return true;
     }
 
     void Actor::activateMissile(MissileId id, Misc::Point targetPoint)

@@ -16,6 +16,8 @@ namespace FAWorld
                 case MissileId::larrow:
                     return animated16Direction;
                 case MissileId::firewall:
+                case MissileId::firewalla:
+                case MissileId::firewallc:
                     return firewall;
                 case MissileId::manashield:
                     return basicAnimated;

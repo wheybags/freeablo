@@ -42,6 +42,7 @@ namespace FAWorld
         PlayerClass getClass() const { return mPlayerClass; }
         virtual bool canCriticalHit() const override { return mPlayerClass == PlayerClass::warrior; }
 
+        bool castSpell(SpellId spell, Misc::Point targetPoint) override;
         void setActiveSpellNumber(int32_t spellNumber);
         void castActiveSpell(Misc::Point targetPoint);
 
@@ -49,6 +50,8 @@ namespace FAWorld
 
         // This isn't serialised as it must be set before saving can occur.
         bool mPlayerInitialised = false;
+
+        SpellId mActiveSpell = SpellId::firebolt;
 
     private:
         void init(const DiabloExe::CharacterStats& charStats);
@@ -71,6 +74,5 @@ namespace FAWorld
 
         int32_t mInventoryChangedCallCount = 0; // not serialised, only used to determine if inventory changed since we last calculated stats
         PlayerClass mPlayerClass = PlayerClass::warrior;
-        uint32_t mActiveMissileIndex = 0; // Temporary for testing missiles.
     };
 }

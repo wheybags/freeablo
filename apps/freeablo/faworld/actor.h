@@ -12,6 +12,7 @@
 #include "missile/missileenums.h"
 #include "movementhandler.h"
 #include "position.h"
+#include "spellenums.h"
 #include "target.h"
 #include "world.h"
 #include <misc/direction.h>
@@ -88,6 +89,7 @@ namespace FAWorld
 
         virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const;
         const std::vector<std::unique_ptr<Missile::Missile>>& getMissiles() const { return mMissiles; }
+        virtual bool castSpell(SpellId spell, Misc::Point targetPoint);
 
     protected:
         void activateMissile(MissileId id, Misc::Point targetPoint);

@@ -576,7 +576,8 @@ namespace DiabloExe
             spellData.mTargeted = (bool)exe.read32();
             spellData.mTownSpell = (bool)exe.read32();
             spellData.mMinMagic = exe.read32();
-            spellData.mSoundEffect = exe.read8();
+            int32_t soundEffectId = exe.read8();
+            spellData.mSoundEffect = soundEffectId == -1 ? "" : mSoundFilename[soundEffectId];
             for (auto& missile : spellData.mMissiles)
                 missile = exe.read8();
             spellData.mManaAdj = exe.read8();
