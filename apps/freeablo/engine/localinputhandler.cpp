@@ -65,7 +65,9 @@ namespace Engine
             {
                 auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
 
-                if (auto clickedActor = mWorld.targetedActor(mousePosition))
+                auto cursorItem = player->mInventory.getCursorHeld();
+                auto clickedActor = mWorld.targetedActor(mousePosition);
+                if (cursorItem.isEmpty() && clickedActor)
                 {
                     mInputs.emplace_back(FAWorld::PlayerInput::TargetActorData{clickedActor->getId()}, player->getId());
                 }
@@ -81,25 +83,28 @@ namespace Engine
                         Vec2Fix(clickedTile.pos.x - player->getPos().current().x, clickedTile.pos.y - player->getPos().current().y).getDirection();
                     mInputs.emplace_back(FAWorld::PlayerInput::AttackDirectionData{direction}, player->getId());
                 }
+                else if (player->getLevel()->isDoor(clickedTile.pos) || !cursorItem.isEmpty())
+                {
+                    mInputs.emplace_back(FAWorld::PlayerInput::TargetTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
+                }
                 else
                 {
-                    if (player->getLevel()->isDoor(clickedTile.pos) || !player->mInventory.getCursorHeld().isEmpty())
-                        mInputs.emplace_back(FAWorld::PlayerInput::TargetTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
-                    else
-                        mInputs.emplace_back(FAWorld::PlayerInput::DragOverTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
+                    mInputs.emplace_back(FAWorld::PlayerInput::DragOverTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
                 }
-
                 return;
             }
             case Engine::MouseInputAction::RIGHT_MOUSE_DOWN:
             {
                 auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
-                mInputs.emplace_back(FAWorld::PlayerInput::CastSpellData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
+                if (player->mInventory.getCursorHeld().isEmpty())
+                    mInputs.emplace_back(FAWorld::PlayerInput::CastSpellData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
+                else
+                    mInputs.emplace_back(FAWorld::PlayerInput::TargetTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
                 return;
             }
             case Engine::MouseInputAction::MOUSE_MOVE:
             {
-                if (mouseDown)
+                if (mouseDown && player->mInventory.getCursorHeld().isEmpty())
                 {
                     auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
                     mInputs.emplace_back(FAWorld::PlayerInput::DragOverTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());

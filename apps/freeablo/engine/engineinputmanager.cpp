@@ -123,17 +123,21 @@ namespace Engine
     {
         NuklearMisc::handleNuklearMouseEvent(mNkCtx, x, y, key, true, isDoubleClick);
 
-        if (key == Input::Key::KEY_LEFT_MOUSE)
+        mMousePosition = Misc::Point{x, y};
+
+        // Only pass relevant mouse clicks to game engine.
+        if (!mPaused && !nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
         {
-            mMousePosition = Misc::Point{x, y};
-            mMouseDown = true;
-            mClick = true;
-        }
-        if (key == Input::Key::KEY_RIGHT_MOUSE)
-        {
-            mMousePosition = Misc::Point{x, y};
-            mRightMouseDown = true;
-            mRightClick = true;
+            if (key == Input::Key::KEY_LEFT_MOUSE)
+            {
+                mMouseDown = true;
+                mClick = true;
+            }
+            if (key == Input::Key::KEY_RIGHT_MOUSE)
+            {
+                mRightMouseDown = true;
+                mRightClick = true;
+            }
         }
     }
 
@@ -141,13 +145,13 @@ namespace Engine
     {
         NuklearMisc::handleNuklearMouseEvent(mNkCtx, x, y, key, false, false);
 
-        if (key == Input::Key::KEY_LEFT_MOUSE)
+        if (key == Input::Key::KEY_LEFT_MOUSE && mMouseDown)
         {
             mMouseDown = false;
             if (!nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
                 notifyMouseObservers(MouseInputAction::MOUSE_RELEASE, mMousePosition, mMouseDown, mKbMods);
         }
-        if (key == Input::Key::KEY_RIGHT_MOUSE)
+        if (key == Input::Key::KEY_RIGHT_MOUSE && mRightMouseDown)
         {
             mRightMouseDown = false;
             if (!nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
@@ -159,10 +163,10 @@ namespace Engine
     {
         NuklearMisc::handleNuklearMouseMoveEvent(mNkCtx, x, y, xrel, yrel);
 
+        mMousePosition = Misc::Point{x, y};
+
         if (!nk_item_is_any_active(mNkCtx))
             notifyMouseObservers(MouseInputAction::MOUSE_MOVE, mMousePosition, mMouseDown, mKbMods);
-
-        mMousePosition = Misc::Point{x, y};
     }
 
     std::string EngineInputManager::keyboardActionToString(KeyboardInputAction action) const
@@ -221,24 +225,18 @@ namespace Engine
         nk_input_begin(mNkCtx);
         bool quit = mInput.processInput();
 
-        // TODO: bit nasty to use keybard observers for this, but meh
+        // TODO: bit nasty to use keyboard observers for this, but meh
         if (quit)
             notifyKeyboardObservers(KeyboardInputAction::quit);
 
         nk_input_end(mNkCtx);
 
-        if (!paused && !nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
-        {
-            if (mMouseDown && mClick)
-            {
-                notifyMouseObservers(MouseInputAction::MOUSE_DOWN, mMousePosition, mMouseDown, mKbMods);
-                mClick = false;
-            }
-            if (mRightMouseDown && mRightClick)
-            {
-                notifyMouseObservers(MouseInputAction::RIGHT_MOUSE_DOWN, mMousePosition, mRightMouseDown, mKbMods);
-                mRightClick = false;
-            }
-        }
+        if (mMouseDown && mClick)
+            notifyMouseObservers(MouseInputAction::MOUSE_DOWN, mMousePosition, mMouseDown, mKbMods);
+        mClick = false;
+
+        if (mRightMouseDown && mRightClick)
+            notifyMouseObservers(MouseInputAction::RIGHT_MOUSE_DOWN, mMousePosition, mRightMouseDown, mKbMods);
+        mRightClick = false;
     }
 }

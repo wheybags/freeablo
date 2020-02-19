@@ -47,8 +47,6 @@ namespace FAWorld
 
     void PlayerBehaviour::addInput(const PlayerInput& input)
     {
-        auto cursorItem = mPlayer->mInventory.getCursorHeld();
-
         switch (input.mType)
         {
             case PlayerInput::Type::TargetTile:
@@ -61,6 +59,7 @@ namespace FAWorld
                     return;
                 }
 
+                auto cursorItem = mPlayer->mInventory.getCursorHeld();
                 if (!cursorItem.isEmpty())
                 {
                     mPlayer->dropItem(clickedPoint);
@@ -80,13 +79,7 @@ namespace FAWorld
             }
             case PlayerInput::Type::TargetActor:
             {
-                if (!cursorItem.isEmpty())
-                {
-                    auto clickedPoint = Misc::Point(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
-                    mPlayer->dropItem(clickedPoint);
-                }
-                else
-                    mPlayer->mTarget = mPlayer->getWorld()->getActorById(input.mData.dataTargetActor.actorId);
+                mPlayer->mTarget = mPlayer->getWorld()->getActorById(input.mData.dataTargetActor.actorId);
                 return;
             }
             case PlayerInput::Type::TargetItemOnFloor:
