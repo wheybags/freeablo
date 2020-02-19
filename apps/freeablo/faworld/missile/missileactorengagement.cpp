@@ -16,6 +16,8 @@ namespace FAWorld
                 case MissileId::larrow:
                     return damageEnemyAndStop;
                 case MissileId::firewall:
+                case MissileId::firewalla:
+                case MissileId::firewallc:
                     return damageEnemy;
                 case MissileId::manashield: // TODO
                 default:

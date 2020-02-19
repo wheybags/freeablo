@@ -11,6 +11,7 @@
 #include "itemmap.h"
 #include "missile/missile.h"
 #include "playerbehaviour.h"
+#include "spells.h"
 #include "world.h"
 #include <fmt/format.h>
 #include <misc/assert.h>
@@ -219,7 +220,7 @@ namespace FAWorld
     Player::Player(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader)
     {
         mPlayerClass = static_cast<PlayerClass>(loader.load<int32_t>());
-        mActiveMissileIndex = loader.load<uint32_t>();
+        mActiveSpell = (SpellId)loader.load<int32_t>();
         initCommon();
         mPlayerInitialised = true;
     }
@@ -232,7 +233,7 @@ namespace FAWorld
 
         Actor::save(saver);
         saver.save(static_cast<int32_t>(mPlayerClass));
-        saver.save(mActiveMissileIndex);
+        saver.save((int32_t)mActiveSpell);
     }
 
     Player::~Player() { mWorld.deregisterPlayer(this); }
@@ -496,34 +497,30 @@ namespace FAWorld
         stats = ActorStats(*stats.mActor, baseStats, from.mNextLevelExp);
     }
 
-    static const std::vector<MissileId> mImplementedMissiles = {
-        MissileId::arrow, MissileId::firebolt, MissileId::firewall, MissileId::manashield, MissileId::farrow, MissileId::larrow};
+    bool Player::castSpell(SpellId spell, Misc::Point targetPoint)
+    {
+        auto spellData = SpellData(spell);
+        auto& mana = mStats.getMana();
+        auto manaCost = spellData.manaCost();
+
+        // Note: These checks have temporarily been removed for easier testing/development
+        // if (!getLevel() || (getLevel()->isTown() && !spellData.canCastInTown()) || mana.current < manaCost)
+        //    return false;
+
+        if (Actor::castSpell(spell, targetPoint))
+        {
+            mana.add(-manaCost);
+            return true;
+        }
+        return false;
+    }
 
     void Player::setActiveSpellNumber(int32_t spellNumber)
     {
+        // TODO: This is coming from Hotkeys (F5 -> F8).
+        //  This is probably the wrong place to be handling this input.
         (void)spellNumber;
-        // Hack for testing, loop through implemented missiles.
-        mActiveMissileIndex++;
-        if (mActiveMissileIndex >= mImplementedMissiles.size())
-            mActiveMissileIndex = 0;
     }
 
-    void Player::castActiveSpell(Misc::Point targetPoint)
-    {
-        // Hack for testing, loop through implemented missiles.
-        auto missileId = mImplementedMissiles[mActiveMissileIndex];
-        switch (missileId)
-        {
-            case MissileId::arrow:
-            case MissileId::farrow:
-            case MissileId::larrow:
-                // Arrow sounds will need to be implemented like Actor::doMeleeHit().
-                Engine::ThreadManager::get()->playSound("sfx/misc/bfire.wav");
-                break;
-            default:
-                // Spell sounds will come from DiabloExe::getSpellsDataTable()[spellId].mSoundEffect.
-                break;
-        }
-        activateMissile(missileId, targetPoint);
-    }
+    void Player::castActiveSpell(Misc::Point targetPoint) { castSpell(mActiveSpell, targetPoint); }
 }

@@ -115,6 +115,8 @@ namespace FAWorld
                 switch (missileId)
                 {
                     case MissileId::firewall:
+                    case MissileId::firewalla:
+                    case MissileId::firewallc:
                     case MissileId::manashield:
                         return World::getTicksInPeriod("8"); // placeholder
                     default:

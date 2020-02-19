@@ -184,5 +184,6 @@ namespace FAGui
         std::unique_ptr<MenuHandler> mMenuHandler;
         const FAWorld::Item* mGoldSplitTarget = nullptr;
         int mGoldSplitCnt = 0;
+        int mCurSpellbookTab = 0;
     };
 }

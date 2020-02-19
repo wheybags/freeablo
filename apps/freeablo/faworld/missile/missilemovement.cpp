@@ -16,6 +16,8 @@ namespace FAWorld
                 case MissileId::larrow:
                     return linear;
                 case MissileId::firewall:
+                case MissileId::firewalla:
+                case MissileId::firewallc:
                     return fixed;
                 case MissileId::manashield:
                     return hoverOverCreator;

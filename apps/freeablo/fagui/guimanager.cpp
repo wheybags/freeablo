@@ -7,6 +7,7 @@
 #include "../faworld/equiptarget.h"
 #include "../faworld/itemenums.h"
 #include "../faworld/player.h"
+#include "../faworld/spells.h"
 #include "../faworld/world.h"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
@@ -397,7 +398,7 @@ namespace FAGui
                           31,
                           std::to_string(playerStats.getHp().current).c_str(),
                           playerStats.getHp().current < playerStats.getHp().max ? TextColor::red : TextColor::white);
-            fillTextField(ctx, 95, 321, 31, std::to_string(playerStats.getHp().max).c_str());
+            fillTextField(ctx, 95, 321, 31, std::to_string(playerStats.getMana().max).c_str());
             fillTextField(ctx,
                           143,
                           321,
@@ -424,7 +425,88 @@ namespace FAGui
 
     void GuiManager::spellsPanel(nk_context* ctx)
     {
-        drawPanel(ctx, PanelType::spells, [&]() {});
+        drawPanel(ctx, PanelType::spells, [&]() {
+            nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
+
+            FARender::Renderer* renderer = FARender::Renderer::get();
+            FARender::FASpriteGroup* selectedTabButtons = renderer->loadImage("data/spellbkb.cel");
+            FARender::FASpriteGroup* icons = renderer->loadImage("data/spelli2.cel");
+
+            int32_t buttonWidth = selectedTabButtons->getWidth();
+            int32_t buttonHeight = selectedTabButtons->getHeight();
+            int32_t iconWidth = icons->getWidth();
+            int32_t iconHeight = icons->getHeight();
+
+            nk_style_button buttonStyle = dummyStyle;
+
+            // Add the spell icons on the left of the panel
+            for (int i = 0; i < 7; i++)
+            {
+                auto spell = FAWorld::SpellData::spellbookLUT[mCurSpellbookTab][i];
+
+                auto spellData = FAWorld::SpellData(spell);
+                int frame = spellData.getFrameIndex();
+                int32_t yPos = 19 + i * 43;
+                nk_layout_space_push(ctx, nk_rect(10, yPos, iconHeight, iconWidth));
+
+                // Temporary quirk to only allow implemented spells to be used.
+                bool spellImplemented = false;
+                for (auto sp : FAWorld::SpellData::implementedSpells)
+                {
+                    if (spell == sp)
+                    {
+                        spellImplemented = true;
+                        break;
+                    }
+                }
+                if (spellImplemented)
+                {
+                    buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_image(icons->getNkImage(frame));
+                    if (nk_button_label_styled(ctx, &buttonStyle, "") && spellImplemented)
+                    {
+                        // Set active spell
+                        FAWorld::PlayerInput::SetActiveSpellData input{spell};
+                        Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
+                    }
+                }
+                else
+                {
+                    // Grey out unimplemented spells.
+                    nk_image_color(ctx, icons->getNkImage(frame), {64, 64, 64, 255});
+                }
+
+                // Highlight selected spell
+                if (spell == mPlayer->getActiveSpell())
+                    nk_image(ctx, icons->getNkImage(42));
+
+                nk_layout_space_push(ctx, nk_rect(65, yPos + 3, 131, FARender::Renderer::get()->smallFont()->height));
+                smallText(ctx, spellData.name().c_str(), TextColor::white, NK_TEXT_ALIGN_LEFT | NK_TEXT_ALIGN_TOP);
+
+                nk_layout_space_push(ctx, nk_rect(65, yPos + 14, 131, FARender::Renderer::get()->smallFont()->height));
+                smallText(ctx, "Skill", TextColor::white, NK_TEXT_ALIGN_LEFT | NK_TEXT_ALIGN_TOP);
+            }
+
+            // Add the buttons at the bottom of the panel
+            for (int i = 0; i < 4; i++)
+            {
+                int32_t xPos = 8 + i * 76;
+                nk_layout_space_push(ctx, nk_rect(xPos, 320, buttonWidth, buttonHeight));
+                buttonStyle.active = nk_style_item_image(selectedTabButtons->getNkImage(i));
+                if (mCurSpellbookTab == i)
+                    buttonStyle.normal = buttonStyle.hover = buttonStyle.active;
+                else
+                    buttonStyle.normal = buttonStyle.hover = nk_style_item_hide();
+                if (nk_button_label_styled(ctx, &buttonStyle, ""))
+                {
+                    mCurSpellbookTab = i;
+                    // As soon as button is released it returns to buttonStyle.hover (unselected), the next loop
+                    // though here updates buttonStyle.hover to "selected", but there is a slight flicker between
+                    // frames without the following:
+                    nk_image(ctx, selectedTabButtons->getNkImage(i));
+                }
+            }
+            nk_layout_space_end(ctx);
+        });
     }
 
     void GuiManager::belt(nk_context* ctx)
@@ -587,7 +669,7 @@ namespace FAGui
                                // draw current hp into health bulb
                                drawBulb(stats.getHp().current, stats.getHp().max, healthBulbLeftOffset);
                                // and current mana
-                               drawBulb(stats.getMana().current, stats.getMana().current, manaBulbLeftOffset);
+                               drawBulb(stats.getMana().current, stats.getMana().max, manaBulbLeftOffset);
 
                                belt(ctx);
                                descriptionPanel(ctx, hoverStatus.getDescription(*Engine::EngineMain::get()->mWorld->getCurrentLevel()));

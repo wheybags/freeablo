@@ -126,6 +126,10 @@ namespace FAWorld
 
     void PlayerInput::InventorySlotClickedData::load(Serial::Loader& loader) { slot.load(loader); }
 
+    void PlayerInput::SetActiveSpellData::save(Serial::Saver& saver) const { saver.save((int32_t)spell); }
+
+    void PlayerInput::SetActiveSpellData::load(Serial::Loader& loader) { spell = (SpellId)loader.load<int32_t>(); }
+
     void PlayerInput::SplitGoldStackIntoCursorData::save(Serial::Saver& saver) const
     {
         saver.save(invX);

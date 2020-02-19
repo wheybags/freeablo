@@ -138,6 +138,11 @@ namespace FAWorld
                                                         mPlayer->getWorld()->getItemFactory());
                 return;
             }
+            case PlayerInput::Type::SetActiveSpell:
+            {
+                mPlayer->setActiveSpell(input.mData.dataSetActiveSpell.spell);
+                return;
+            }
             case PlayerInput::Type::BuyItem:
             {
                 auto& items = mPlayer->getWorld()->getStoreData().griswoldBasicItems;

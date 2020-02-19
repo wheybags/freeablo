@@ -1,5 +1,6 @@
 #pragma once
 #include "../faworld/equiptarget.h"
+#include "../faworld/spellenums.h"
 #include "target.h"
 #include <cstdint>
 #include <misc/direction.h>
@@ -14,6 +15,7 @@
     MACRO(PrepareSpell)                                                                                                                                        \
     MACRO(ChangeLevel)                                                                                                                                         \
     MACRO(InventorySlotClicked)                                                                                                                                \
+    MACRO(SetActiveSpell)                                                                                                                                      \
     MACRO(SplitGoldStackIntoCursor)                                                                                                                            \
     MACRO(PlayerJoined)                                                                                                                                        \
     MACRO(PlayerLeft)                                                                                                                                          \
@@ -97,6 +99,13 @@ namespace FAWorld
         struct InventorySlotClickedData
         {
             EquipTarget slot;
+
+            void save(Serial::Saver& saver) const;
+            void load(Serial::Loader& loader);
+        };
+        struct SetActiveSpellData
+        {
+            SpellId spell;
 
             void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
