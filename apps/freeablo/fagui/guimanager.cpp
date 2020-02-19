@@ -438,6 +438,8 @@ namespace FAGui
             int32_t iconHeight = icons->getHeight();
 
             nk_style_button buttonStyle = dummyStyle;
+
+            // Add the spell icons on the left of the panel
             for (int i = 0; i < 7; i++)
             {
                 auto spell = FAWorld::SpellData::spellbookLUT[mCurSpellbookTab][i];
@@ -461,7 +463,11 @@ namespace FAGui
                 {
                     buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_image(icons->getNkImage(frame));
                     if (nk_button_label_styled(ctx, &buttonStyle, "") && spellImplemented)
-                        mPlayer->mActiveSpell = spell;
+                    {
+                        // Set active spell
+                        FAWorld::PlayerInput::SetActiveSpellData input{spell};
+                        Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
+                    }
                 }
                 else
                 {
@@ -470,7 +476,7 @@ namespace FAGui
                 }
 
                 // Highlight selected spell
-                if (spell == mPlayer->mActiveSpell)
+                if (spell == mPlayer->getActiveSpell())
                     nk_image(ctx, icons->getNkImage(42));
 
                 nk_layout_space_push(ctx, nk_rect(65, yPos + 3, 131, FARender::Renderer::get()->smallFont()->height));
@@ -480,6 +486,7 @@ namespace FAGui
                 smallText(ctx, "Skill", TextColor::white, NK_TEXT_ALIGN_LEFT | NK_TEXT_ALIGN_TOP);
             }
 
+            // Add the buttons at the bottom of the panel
             for (int i = 0; i < 4; i++)
             {
                 int32_t xPos = 8 + i * 76;
@@ -492,7 +499,6 @@ namespace FAGui
                 if (nk_button_label_styled(ctx, &buttonStyle, ""))
                 {
                     mCurSpellbookTab = i;
-                    // This could probably be done better better:
                     // As soon as button is released it returns to buttonStyle.hover (unselected), the next loop
                     // though here updates buttonStyle.hover to "selected", but there is a slight flicker between
                     // frames without the following:

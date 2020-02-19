@@ -44,14 +44,14 @@ namespace FAWorld
 
         bool castSpell(SpellId spell, Misc::Point targetPoint) override;
         void setActiveSpellNumber(int32_t spellNumber);
+        SpellId getActiveSpell() const { return mActiveSpell; }
+        void setActiveSpell(SpellId spell) { mActiveSpell = spell; }
         void castActiveSpell(Misc::Point targetPoint);
 
         virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const override;
 
         // This isn't serialised as it must be set before saving can occur.
         bool mPlayerInitialised = false;
-
-        SpellId mActiveSpell = SpellId::firebolt;
 
     private:
         void init(const DiabloExe::CharacterStats& charStats);
@@ -74,5 +74,6 @@ namespace FAWorld
 
         int32_t mInventoryChangedCallCount = 0; // not serialised, only used to determine if inventory changed since we last calculated stats
         PlayerClass mPlayerClass = PlayerClass::warrior;
+        SpellId mActiveSpell = SpellId::firebolt;
     };
 }
