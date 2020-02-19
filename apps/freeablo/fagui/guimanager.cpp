@@ -51,6 +51,8 @@ namespace FAGui
                 return PanelPlacement::left;
             case PanelType::quests:
                 return PanelPlacement::left;
+            case PanelType::console:
+                return PanelPlacement::right;
         }
         return PanelPlacement::none;
     }
@@ -60,6 +62,7 @@ namespace FAGui
         switch (type)
         {
             case PanelType::none:
+            case PanelType::console:
                 break;
             case PanelType::inventory:
                 return "data/inv/inv.cel";
@@ -87,6 +90,8 @@ namespace FAGui
                 return "character";
             case PanelType::quests:
                 return "quests";
+            case PanelType::console:
+                return "console";
         }
         return "";
     }
@@ -135,7 +140,7 @@ namespace FAGui
             anim->update();
     }
 
-    void GuiManager::drawPanel(nk_context* ctx, PanelType panelType, std::function<void(void)> op)
+    void GuiManager::drawPanel(nk_context* ctx, PanelType panelType, std::function<void(void)> op, int32_t panelW, int32_t panelH)
     {
         PanelPlacement placement = panelPlacementByType(panelType);
         bool shown = *getPanelAtLocation(placement) == panelType;
@@ -144,7 +149,15 @@ namespace FAGui
         if (!shown)
             return;
         auto renderer = FARender::Renderer::get();
-        auto invTex = renderer->loadImage(bgImgPath(panelType));
+        const auto bgImg = bgImgPath(panelType);
+        FARender::FASpriteGroup* invTex = nullptr;
+        if (bgImg)
+        {
+            invTex = renderer->loadImage(bgImgPath(panelType));
+            panelW = invTex->getWidth();
+            panelH = invTex->getHeight();
+        }
+
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
         struct nk_rect dims = nk_rect(
@@ -157,16 +170,24 @@ namespace FAGui
                     case PanelPlacement::left:
                         return 0;
                     case PanelPlacement::right:
-                        return screenW - invTex->getWidth();
+                        return screenW - panelW;
                 }
                 return 0;
             }(),
-            (screenH - 125 - invTex->getHeight()) / 2,
-            invTex->getWidth(),
-            invTex->getHeight());
+            (screenH - 125 - panelH) / 2,
+            panelW,
+            panelH);
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND;
 
-        nk_fa_begin_image_window(ctx, panelName(panelType), dims, flags, invTex->getNkImage(), op, false);
+        if (invTex)
+        {
+            nk_fa_begin_image_window(ctx, panelName(panelType), dims, flags, invTex->getNkImage(), op, false);
+        }
+
+        else
+        {
+            nk_fa_begin_window(ctx, panelName(panelType), dims, flags, op, false);
+        }
     }
 
     void GuiManager::triggerItem(const FAWorld::EquipTarget& target)
@@ -509,6 +530,38 @@ namespace FAGui
         });
     }
 
+    void GuiManager::consolePanel(nk_context* ctx)
+    {
+        static constexpr size_t bufferSize = 1024 * 1024;
+        static std::string boxBuffer;
+        static int boxLen;
+        static constexpr size_t inputSize = 512;
+        static char input[inputSize];
+        static int inputLen;
+        drawPanel(ctx,
+                  PanelType::console,
+                  [&]() {
+                      nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
+                      nk_layout_space_push(ctx, nk_rect(5, 5, 490, 250));
+                      nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_READ_ONLY, const_cast<char*>(boxBuffer.c_str()), &boxLen, bufferSize, nk_filter_default);
+                      const int32_t height = FARender::Renderer::get()->smallFont()->height + 15;
+                      nk_layout_space_push(ctx, nk_rect(5, 270, 490, height));
+                      nk_flags active = nk_edit_string(ctx, NK_EDIT_FIELD | NK_EDIT_SIG_ENTER, input, &inputLen, inputSize, nk_filter_ascii);
+
+                      if (active & NK_EDIT_COMMITED)
+                      {
+                          input[inputLen] = '\n';
+                          ++inputLen;
+                          boxBuffer.append(input, inputLen);
+                          boxLen += inputLen;
+                          inputLen = 0;
+                      }
+                      nk_layout_space_end(ctx);
+                  },
+                  500,
+                  300);
+    }
+
     void GuiManager::belt(nk_context* ctx)
     {
         auto beltTopLeft = nk_vec2(205, 21);
@@ -757,6 +810,7 @@ namespace FAGui
             spellsPanel(ctx);
             questsPanel(ctx);
             characterPanel(ctx);
+            consolePanel(ctx);
             bottomMenu(ctx, hoverStatus);
 
             mDialogManager.update(ctx);
@@ -766,7 +820,7 @@ namespace FAGui
             mMenuHandler->update(ctx);
         }
 
-        if (isModalDlgShown() || mMenuHandler->isActive())
+        if (isModalDlgShown() || mMenuHandler->isActive() || *getPanelAtLocation(PanelPlacement::right) == PanelType::console)
             Engine::EngineMain::get()->getLocalInputHandler()->blockInput();
         else
             Engine::EngineMain::get()->getLocalInputHandler()->unblockInput();
@@ -797,7 +851,7 @@ namespace FAGui
 
         // Can't use hotkeys when dialogs are open.
         // TODO: mGoldSplitTarget might be better as a standard dialog if possible?
-        if (mGoldSplitTarget || mDialogManager.hasDialog())
+        if (mGoldSplitTarget || mDialogManager.hasDialog() || *getPanelAtLocation(PanelPlacement::right) == PanelType::console)
             return false;
 
         return true;
@@ -826,6 +880,11 @@ namespace FAGui
                 if (!hotkeysEnabled())
                     return;
                 togglePanel(PanelType::spells);
+                break;
+            case Engine::KeyboardInputAction::toggleConsole:
+                if (!hotkeysEnabled())
+                    return;
+                togglePanel(PanelType::console);
                 break;
             case Engine::KeyboardInputAction::reject:
                 if (mGoldSplitTarget)

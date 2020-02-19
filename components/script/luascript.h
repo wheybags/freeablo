@@ -85,7 +85,7 @@ namespace Script
             release_assert(lua_isnumber(mState, -1) && "Not a number");
 
             return static_cast<T>(lua_tonumber(mState, -1));
-        };
+        }
 
         template <typename T> T luaGetDefault() { return {}; }
     };
