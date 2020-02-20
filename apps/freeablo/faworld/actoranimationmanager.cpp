@@ -92,7 +92,9 @@ namespace FAWorld
         for (AnimState s = (AnimState)0; s < AnimState::ENUM_END; s = AnimState(size_t(s) + 1))
         {
             mAnimations[size_t(s)] = FARender::getDefaultSprite();
-            mAnimTimeMap[size_t(s)] = World::getTicksInPeriod("0.06");
+
+            // Diablo 1 animations are 20 fps
+            mAnimTimeMap[size_t(s)] = World::getTicksInPeriod(FixedPoint(1) / FixedPoint(20));
         }
     }
 
