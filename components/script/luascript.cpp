@@ -4,12 +4,21 @@
 
 namespace Script
 {
+    std::unique_ptr<LuaScript> LuaScript::mInstance = nullptr;
     LuaScript::LuaScript() : mState(luaL_newstate()) { luaL_openlibs(mState); }
 
     LuaScript::~LuaScript()
     {
         if (mState)
             lua_close(mState);
+    }
+
+    std::unique_ptr<LuaScript>& LuaScript::getInstance()
+    {
+        if (!mInstance)
+            mInstance = std::unique_ptr<LuaScript>(new LuaScript());
+
+        return mInstance;
     }
 
     void LuaScript::printError(const std::string& variable, const std::string& reason)
@@ -105,6 +114,18 @@ namespace Script
         lua_settop(mState, 0);
 
         if (luaL_dofile(mState, path.c_str()))
+        {
+            std::cerr << "Lua error: " << lua_tostring(mState, -1) << "\n";
+            lua_pop(mState, 1);
+            exit(1);
+        }
+    }
+
+    void LuaScript::eval(const char* script)
+    {
+        lua_settop(mState, 0);
+
+        if (luaL_dostring(mState, script))
         {
             std::cerr << "Lua error: " << lua_tostring(mState, -1) << "\n";
             lua_pop(mState, 1);

@@ -3,6 +3,7 @@
 #include <misc/assert.h>
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -14,14 +15,22 @@ namespace Script
     {
         lua_State* mState;
         int mLevel;
+        static std::unique_ptr<LuaScript> mInstance;
 
     public:
-        LuaScript();
         ~LuaScript();
+
+        static std::unique_ptr<LuaScript>& getInstance();
 
         void printError(const std::string& variable, const std::string& reason);
 
         template <typename T> void registerType(const std::string& metatable_name);
+
+        template <typename Func> void registerGlobalFunction(const std::string& functionName, Func func)
+        {
+            lua_pushcfunction(mState, func);
+            lua_setglobal(mState, functionName.c_str());
+        }
 
         template <typename T> T get(const std::string& variable)
         {
@@ -74,8 +83,11 @@ namespace Script
         }
 
         void runScript(const std::string& path);
+        void eval(const char* script);
 
     private:
+        LuaScript();
+
         bool luaGetToStack(const std::string& variable);
 
         void clean();

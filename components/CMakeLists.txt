@@ -109,7 +109,7 @@ add_library(DiabloExe
     diabloexe/characterstats.cpp
     diabloexe/affix.cpp
     diabloexe/affix.h
-	diabloexe/talkdata.h)
+    diabloexe/talkdata.h)
 target_link_libraries(DiabloExe Misc FAIO)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
@@ -144,5 +144,18 @@ add_library(NuklearMisc
     nuklearmisc/standaloneguispritehandler.cpp
     nuklearmisc/standaloneguispritehandler.h
 )
+
 set_target_properties(NuklearMisc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 target_link_libraries(NuklearMisc nuklear nativefiledialog Input Render)
+
+add_library(Script
+  script/luascript.cpp
+  script/luascript.h
+  script/console.cpp
+  script/console.h
+)
+
+find_package(Lua REQUIRED)
+
+target_link_libraries(Script ${LUA_LIBRARIES} Filesystem)
+set_target_properties(Script PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
