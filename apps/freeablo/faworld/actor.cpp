@@ -180,11 +180,18 @@ namespace FAWorld
         int32_t blockChance = getStats().getCalculatedStats().blockChance;
         blockChance += 2 * (getStats().mLevel - attacker->getStats().mLevel);
 
-        if (!mMoveHandler.moving() && mWorld.mRng->randomInRange(0, 99) >= blockChance)
+        if (!mMoveHandler.moving() && mWorld.mRng->randomInRange(0, 99) < blockChance)
         {
             mAnimation.interruptAnimation(AnimState::block, FARender::AnimationPlayer::AnimationType::Once);
+#ifdef DEBUG_MELEE_COMBAT
+            puts("blocked");
+#endif
             return;
         }
+
+#ifdef DEBUG_MELEE_COMBAT
+        puts("hit");
+#endif
 
         // https://wheybags.gitlab.io/jarulfs-guide/#how-to-calculate-monster-data
         if (mType == ActorType::Undead && type == DamageType::Club)
@@ -351,14 +358,35 @@ namespace FAWorld
         toHit = Misc::clamp(toHit, stats.toHitMeleeMinMaxCap.min, stats.toHitMeleeMinMaxCap.max);
         int32_t roll = mWorld.mRng->randomInRange(0, 99); // TODO: should this be (1,100) instead of (0, 99)?
 
+#ifdef DEBUG_MELEE_COMBAT
+        printf("%s melee attacks %s - ", mName.c_str(), enemy->mName.c_str());
+#endif
+
         if (roll < toHit)
         {
             int32_t damage = stats.meleeDamage;
             damage += mWorld.mRng->randomInRange(stats.meleeDamageBonusRange.start, stats.meleeDamageBonusRange.end);
             if (canCriticalHit() && mWorld.mRng->randomInRange(0, 99) < mStats.mLevel)
+            {
                 damage *= 2;
+#ifdef DEBUG_MELEE_COMBAT
+                printf("critical hit for %d - ", damage);
+#endif
+            }
+            else
+            {
+#ifdef DEBUG_MELEE_COMBAT
+                printf("hit for %d - ", damage);
+#endif
+            }
 
             dealDamageToEnemy(enemy, damage, getMeleeDamageType());
+        }
+        else
+        {
+#ifdef DEBUG_MELEE_COMBAT
+            puts("miss");
+#endif
         }
     }
 
