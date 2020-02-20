@@ -86,6 +86,16 @@ namespace Level
         int32_t getPreviousLevel() const { return mPrevious; }
 
     private:
+        struct InternalLocationData
+        {
+            int32_t xDunIndex = 0;
+            int32_t yDunIndex = 0;
+            int32_t tilIndex = 0;
+        };
+
+        InternalLocationData getInternalLocationData(const Misc::Point& point) const;
+
+    private:
         std::string mTilesetCelPath;               ///< path to cel file for level
         std::string mSpecialCelPath;               ///< path to special cel file for level (mostly used for arches / open doors).
         std::map<int32_t, int32_t> mSpecialCelMap; ///< Map from tileset frame number to special cel frame number

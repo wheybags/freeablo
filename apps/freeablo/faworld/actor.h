@@ -66,7 +66,7 @@ namespace FAWorld
         void takeDamage(int32_t amount, Actor* attacker, DamageType type);
         void heal();
         void restoreMana();
-        void stopAndPointInDirection(Misc::Direction direction);
+        void stopMoving(std::optional<Misc::Direction> direction = std::nullopt);
         virtual void die();
         bool isDead() const;
         bool isEnemy(Actor* other) const;

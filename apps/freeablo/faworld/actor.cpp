@@ -221,7 +221,7 @@ namespace FAWorld
 
     void Actor::restoreMana() { mStats.getMana() = mStats.getMana().max; }
 
-    void Actor::stopAndPointInDirection(Misc::Direction direction) { mMoveHandler.stopAndPointInDirection(direction); }
+    void Actor::stopMoving(std::optional<Misc::Direction> direction) { mMoveHandler.stopMoving(*this, direction); }
 
     bool Actor::hasTarget() const { return mTarget.getType() != Target::Type::None; }
 
