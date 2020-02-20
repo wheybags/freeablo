@@ -313,7 +313,6 @@ namespace FAWorld
         }
 
         stats.rangedDamageBonusRange = itemStats.rangedDamageBonusRange;
-
         stats.hitRecoveryDamageThreshold = actorStats.mLevel;
     }
 
@@ -511,25 +510,29 @@ namespace FAWorld
             return;
 
         // TODO: Spell animations: lightning "lm", fire "fm", other "qm"
-        mAnimation.setAnimation(AnimState::dead, renderer->loadImage(helper(true, "dt")));
-        mAnimation.setAnimation(AnimState::attack, renderer->loadImage(helper(false, "at")));
-        mAnimation.setAnimation(AnimState::hit, renderer->loadImage(helper(false, "ht")));
+        mAnimation.setAnimationSprites(AnimState::dead, renderer->loadImage(helper(true, "dt")));
+        mAnimation.setAnimationSprites(AnimState::attack, renderer->loadImage(helper(false, "at")));
+        mAnimation.setAnimationSprites(AnimState::hit, renderer->loadImage(helper(false, "ht")));
 
         if (mInventory.isShieldEquipped())
-            mAnimation.setAnimation(AnimState::block, renderer->loadImage(helper(false, "bl")));
+            mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "bl")));
         else
-            mAnimation.setAnimation(AnimState::block, renderer->loadImage(helper(false, "ht")));
+            mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "ht")));
 
         if (getLevel() && getLevel()->isTown())
         {
-            mAnimation.setAnimation(AnimState::walk, renderer->loadImage(helper(false, "wl")));
-            mAnimation.setAnimation(AnimState::idle, renderer->loadImage(helper(false, "st")));
+            mAnimation.setAnimationSprites(AnimState::walk, renderer->loadImage(helper(false, "wl")));
+            mAnimation.setAnimationSprites(AnimState::idle, renderer->loadImage(helper(false, "st")));
         }
         else
         {
-            mAnimation.setAnimation(AnimState::walk, renderer->loadImage(helper(false, "aw")));
-            mAnimation.setAnimation(AnimState::idle, renderer->loadImage(helper(false, "as")));
+            mAnimation.setAnimationSprites(AnimState::walk, renderer->loadImage(helper(false, "aw")));
+            mAnimation.setAnimationSprites(AnimState::idle, renderer->loadImage(helper(false, "as")));
         }
+
+        // TODO: Is this actually correct? It seems kind of odd, but it is what is listed in Jarulf's guide
+        // https://wheybags.gitlab.io/jarulfs-guide/#timing-information
+        mMeleeHitFrame = mAnimation.getAnimationSprites(AnimState::attack)->getAnimLength() - 1;
     }
 
     bool Player::dropItem(const Misc::Point& clickedPoint)

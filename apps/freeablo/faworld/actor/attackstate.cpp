@@ -20,16 +20,13 @@ namespace FAWorld
             UNUSED_PARAM(noclip);
 
             auto& animManager = actor.mAnimation;
-            if (animManager.getCurrentAnimation() != AnimState::attack && animManager.getInterruptedAnimation() != AnimState::attack)
+            if (animManager.getCurrentAnimation() != AnimState::attack)
             {
                 actor.isAttacking = false;
                 return StateChange{StateOperation::pop};
             }
 
-            // NOTE: this is approximation
-            // in reality attack frame differs for each weapon for player
-            // and most likely also specified exactly for each monster
-            auto attackFrame = actor.mAnimation.getCurrentAnimationLength() / 2;
+            int32_t attackFrame = actor.getMeleeHitFrame();
             if (!mHitDone && // to fix the problem with several updates during a single frame
                 actor.mAnimation.getCurrentRealFrame().second == attackFrame)
             {

@@ -16,11 +16,11 @@ namespace FAWorld
         std::string cl2PathFormat = monsterStats.cl2Path;
         Misc::StringUtils::replace(cl2PathFormat, "%c", "{}");
 
-        mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'w')));
-        mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'n')));
-        mAnimation.setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'd')));
-        mAnimation.setAnimation(AnimState::attack, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'a')));
-        mAnimation.setAnimation(AnimState::hit, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'h')));
+        mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'w')));
+        mAnimation.setAnimationSprites(AnimState::idle, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'n')));
+        mAnimation.setAnimationSprites(AnimState::dead, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'd')));
+        mAnimation.setAnimationSprites(AnimState::attack, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'a')));
+        mAnimation.setAnimationSprites(AnimState::hit, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'h')));
 
         mBehaviour.reset(new BasicMonsterBehaviour(this));
         mFaction = Faction::hell();
@@ -32,9 +32,17 @@ namespace FAWorld
 
         mStats.mLevel = monsterStats.level;
         mType = ActorType(monsterStats.type);
+
+        commonInit();
     }
 
-    Monster::Monster(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader) {}
+    Monster::Monster(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader) { commonInit(); }
+
+    void Monster::commonInit()
+    {
+        const DiabloExe::Monster& monsterProperties = mWorld.mDiabloExe.getMonster(mName);
+        mMeleeHitFrame = monsterProperties.hitFrame;
+    }
 
     void Monster::save(FASaveGame::GameSaver& saver)
     {

@@ -42,7 +42,8 @@ namespace FAWorld
         void playAnimation(AnimState animation, std::vector<int32_t> frameSequence);
         void interruptAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type);
 
-        void setAnimation(AnimState animation, FARender::FASpriteGroup* sprite);
+        void setAnimationSprites(AnimState animation, FARender::FASpriteGroup* sprite);
+        const FARender::FASpriteGroup* getAnimationSprites(AnimState type) const { return mAnimations[size_t(type)]; }
 
         void update();
         void setIdleFrameSequence(const std::vector<int32_t>& sequence);

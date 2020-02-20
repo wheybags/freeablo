@@ -90,6 +90,7 @@ namespace FAWorld
         virtual bool castSpell(SpellId spell, Misc::Point targetPoint);
         ActorType getType() const { return mType; }
         bool isRecoveringFromHit() const;
+        int32_t getMeleeHitFrame() const { return mMeleeHitFrame; }
 
     protected:
         void activateMissile(MissileId id, Misc::Point targetPoint);
@@ -126,6 +127,7 @@ namespace FAWorld
         World& mWorld;
         std::vector<std::unique_ptr<Missile::Missile>> mMissiles;
         ActorType mType = ActorType::Normal;
+        int32_t mMeleeHitFrame = 0; // not serialised, should be set automatically
 
         // TODO: this var is only used for dialog code, which branches on which npc is being spoken to.
         // Eventually, we should add a proper dialog specification system, and get rid of this.

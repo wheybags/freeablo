@@ -22,6 +22,7 @@ namespace FAWorld
         virtual int32_t getOnKilledExperience() const override;
 
     private:
+        void commonInit();
         void spawnItem();
         ItemId randomItem();
 

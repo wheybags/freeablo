@@ -124,7 +124,7 @@ namespace FAWorld
         mAnimationPlayer.playAnimation(mAnimations[size_t(animation)], mAnimTimeMap[size_t(animation)], frameSequence);
     }
 
-    void ActorAnimationManager::setAnimation(AnimState animation, FARender::FASpriteGroup* sprite)
+    void ActorAnimationManager::setAnimationSprites(AnimState animation, FARender::FASpriteGroup* sprite)
     {
         auto playingSprite = mAnimationPlayer.getCurrentFrame().first;
 

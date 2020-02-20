@@ -58,11 +58,11 @@ namespace FAWorld
     {
         mFaction = Faction::heaven();
         if (!dieAnimPath.empty())
-            mAnimation.setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage(dieAnimPath));
+            mAnimation.setAnimationSprites(AnimState::dead, FARender::Renderer::get()->loadImage(dieAnimPath));
         if (!walkAnimPath.empty())
-            mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage(walkAnimPath));
+            mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage(walkAnimPath));
         if (!idleAnimPath.empty())
-            mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage(idleAnimPath));
+            mAnimation.setAnimationSprites(AnimState::idle, FARender::Renderer::get()->loadImage(idleAnimPath));
 
         mActorStateMachine.reset(new StateMachine(this, new ActorState::BaseState()));
 
