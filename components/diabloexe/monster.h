@@ -11,6 +11,41 @@ namespace FAIO
 
 namespace DiabloExe
 {
+    // Names are taken from https://wheybags.gitlab.io/jarulfs-guide/#attack-types, where available
+    enum class MonsterAttackType : uint8_t
+    {
+        Zombie = 0,
+        Overlord = 1,
+        Skeleton = 2,
+        SkeletonArcher = 3,
+        Scavenger = 4,
+        HornedDemon = 5,
+        GoatMan = 6,
+        GoatManArcher = 7,
+        FallenOne = 8,
+        MagmaDemon = 9,
+        SkeletonCaptain = 10,
+        WingedFiend = 11,
+        Gargoyle = 12,
+        Butcher = 13,
+        Succubus = 14,
+        Hidden = 15,
+        LightningDemon = 16,
+        Fireman = 17,
+        GharbadTheWeak = 18,
+        SpittingTerror = 19,
+        FastSpittingTerror = 20,
+        Golem = 21,
+        ZharTheMad = 22,
+        Snotspill = 23,
+        Viper = 24,
+        Mage = 25,
+        Balrog = 26,
+        Diablo = 27,
+
+        ENUM_END
+    };
+
     class Monster
     {
     public:
@@ -48,7 +83,7 @@ namespace DiabloExe
         uint32_t minHp;
         uint32_t maxHp;
 
-        uint8_t attackType;
+        MonsterAttackType attackType;
 
         uint8_t unknown1;
         uint8_t unknown2;

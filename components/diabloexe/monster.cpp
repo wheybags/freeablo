@@ -42,7 +42,7 @@ namespace DiabloExe
         minHp = exe.read32();
         maxHp = exe.read32();
 
-        attackType = exe.read8();
+        attackType = MonsterAttackType(exe.read8());
 
         unknown1 = exe.read8();
         unknown2 = exe.read8();
