@@ -116,6 +116,8 @@ namespace FAWorld
 
         memcpy(&mLastStatsKey, &statsCacheKey, sizeof(CalculateStatsCacheKey));
 
+        stats = LiveActorStats(); // clear before we start
+
         BaseStats charStats = actorStats.baseStats;
 
         ItemStats itemStats;
@@ -129,6 +131,8 @@ namespace FAWorld
         stats.toHitMelee.bonus = 0;
         stats.toHitRanged.bonus = 0;
         stats.toHitMagic.bonus = 0;
+
+        EquippedInHandsItems handItems = mInventory.getItemsInHands();
 
         // TODO: make sure all the following calculations should be floored.
         // Flooring for melee damage produces the same numbers as displayed in the character GUI in the original game.
@@ -153,6 +157,36 @@ namespace FAWorld
                 stats.toHitRanged.bonus = 10;
                 stats.blockChance =
                     mInventory.isShieldEquipped() ? stats.baseStats.dexterity + 30 : 0; // TODOHELLFIRE: monks can block with staffs and hand to hand
+
+                // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
+                if (handItems.meleeWeapon)
+                {
+                    switch (handItems.meleeWeapon->item->getType())
+                    {
+                        case ItemType::sword:
+                        case ItemType::mace:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.45"));
+                            break;
+                        case ItemType::axe:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.5"));
+                            break;
+                        case ItemType::staff:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
+                            break;
+                        default:
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                    }
+                }
+                else
+                {
+                    stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.45"));
+                }
+
+                if (handItems.rangedWeapon)
+                    stats.rangedAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
+
+                stats.spellAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.7"));
+
                 break;
             }
             case PlayerClass::rogue:
@@ -172,6 +206,36 @@ namespace FAWorld
 
                 stats.toHitRanged.bonus = 20;
                 stats.blockChance = mInventory.isShieldEquipped() ? stats.baseStats.dexterity + 20 : 0;
+
+                // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
+                if (handItems.meleeWeapon)
+                {
+                    switch (handItems.meleeWeapon->item->getType())
+                    {
+                        case ItemType::sword:
+                        case ItemType::mace:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.5"));
+                            break;
+                        case ItemType::axe:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.65"));
+                            break;
+                        case ItemType::staff:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
+                            break;
+                        default:
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                    }
+                }
+                else
+                {
+                    stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.5"));
+                }
+
+                if (handItems.rangedWeapon)
+                    stats.rangedAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
+
+                stats.spellAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.6"));
+
                 break;
             }
             case PlayerClass::sorcerer:
@@ -189,6 +253,40 @@ namespace FAWorld
 
                 stats.toHitMagic.bonus = 20;
                 stats.blockChance = mInventory.isShieldEquipped() ? stats.baseStats.dexterity + 10 : 0;
+
+                // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
+                if (handItems.meleeWeapon)
+                {
+                    switch (handItems.meleeWeapon->item->getType())
+                    {
+                        case ItemType::sword:
+                        case ItemType::mace:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.6"));
+                            break;
+                        case ItemType::axe:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.8"));
+                            break;
+                        case ItemType::staff:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.6"));
+                            break;
+                        default:
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                    }
+                }
+                else if (handItems.shield)
+                {
+                    stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.45"));
+                }
+                else
+                {
+                    stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.6"));
+                }
+
+                if (handItems.rangedWeapon)
+                    stats.rangedAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.8"));
+
+                stats.spellAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.4"));
+
                 break;
             }
             case PlayerClass::none:

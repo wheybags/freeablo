@@ -1,4 +1,5 @@
 #pragma once
+#include "world.h"
 #include <misc/maxcurrentitem.h>
 #include <misc/misc.h>
 #include <misc/simplevec2.h>
@@ -62,6 +63,9 @@ namespace FAWorld
         int32_t rangedDamage = 0;
         IntRange meleeDamageBonusRange = {0, 0};
         IntRange rangedDamageBonusRange = {0, 0};
+        Tick meleeAttackSpeedInTicks = 0;
+        Tick rangedAttackSpeedInTicks = 0;
+        Tick spellAttackSpeedInTicks = 0;
         int32_t hitRecoveryDamageThreshold = 0;
         int32_t blockChance = 0;
     };

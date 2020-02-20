@@ -525,6 +525,26 @@ namespace FAWorld
 
     bool CharacterInventory::isShieldEquipped() const { return getLeftHand().getType() == ItemType::shield || getRightHand().getType() == ItemType::shield; }
 
+    EquippedInHandsItems CharacterInventory::getItemsInHands() const
+    {
+        EquippedInHandsItems retval = {};
+
+        EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
+        for (auto& slot : hands)
+        {
+            const Item& item = getItemAt(slot);
+
+            if (Item::isItemARangedWeapon(item.getType()))
+                retval.rangedWeapon = EquippedInHandsItems::TypeData{item, slot.type};
+            else if (Item::isItemAMeleeWeapon(item.getType()))
+                retval.meleeWeapon = EquippedInHandsItems::TypeData{item, slot.type};
+            else if (item.getType() == ItemType::shield)
+                retval.shield = EquippedInHandsItems::TypeData{item, slot.type};
+        }
+
+        return retval;
+    }
+
     int32_t CharacterInventory::placeGold(int32_t quantity, const ItemFactory& itemFactory)
     {
         if (quantity == 0)
