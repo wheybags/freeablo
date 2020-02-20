@@ -523,6 +523,8 @@ namespace FAWorld
         return false;
     }
 
+    bool CharacterInventory::isShieldEquipped() const { return getLeftHand().getType() == ItemType::shield || getRightHand().getType() == ItemType::shield; }
+
     int32_t CharacterInventory::placeGold(int32_t quantity, const ItemFactory& itemFactory)
     {
         if (quantity == 0)

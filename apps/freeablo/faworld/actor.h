@@ -63,7 +63,7 @@ namespace FAWorld
         std::string getHitWav() const;
         bool canIAttack(Actor* actor);
         virtual void update(bool noclip);
-        void takeDamage(int32_t amount, DamageType type);
+        void takeDamage(int32_t amount, Actor* attacker, DamageType type);
         void heal();
         void restoreMana();
         void stopAndPointInDirection(Misc::Direction direction);

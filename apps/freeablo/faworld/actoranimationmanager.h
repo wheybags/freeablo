@@ -19,6 +19,7 @@ namespace FAWorld
         attack,
         dead,
         hit,
+        block,
         none,
         ENUM_END // always leave this as the last entry, and don't set explicit values for any of the entries
     };

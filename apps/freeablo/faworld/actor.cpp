@@ -171,10 +171,20 @@ namespace FAWorld
 
     Actor::~Actor() = default;
 
-    void Actor::takeDamage(int32_t amount, DamageType type)
+    void Actor::takeDamage(int32_t amount, Actor* attacker, DamageType type)
     {
         if (mInvuln)
             return;
+
+        // https://wheybags.gitlab.io/jarulfs-guide/#getting-hit
+        int32_t blockChance = getStats().getCalculatedStats().blockChance;
+        blockChance += 2 * (getStats().mLevel - attacker->getStats().mLevel);
+
+        if (!mMoveHandler.moving() && mWorld.mRng->randomInRange(0, 99) >= blockChance)
+        {
+            mAnimation.interruptAnimation(AnimState::block, FARender::AnimationPlayer::AnimationType::Once);
+            return;
+        }
 
         // https://wheybags.gitlab.io/jarulfs-guide/#how-to-calculate-monster-data
         if (mType == ActorType::Undead && type == DamageType::Club)
@@ -305,7 +315,7 @@ namespace FAWorld
 
     void Actor::dealDamageToEnemy(Actor* enemy, uint32_t damage, DamageType type)
     {
-        enemy->takeDamage(damage, type);
+        enemy->takeDamage(damage, this, type);
         if (enemy->isDead())
             onEnemyKilled(enemy);
     }
@@ -316,7 +326,10 @@ namespace FAWorld
         stats.maxLife = 10;
     }
 
-    bool Actor::isRecoveringFromHit() const { return mAnimation.getCurrentAnimation() == AnimState::hit; }
+    bool Actor::isRecoveringFromHit() const
+    {
+        return mAnimation.getCurrentAnimation() == AnimState::hit || mAnimation.getCurrentAnimation() == AnimState::block;
+    }
 
     void Actor::doMeleeHit(const Misc::Point& point)
     {

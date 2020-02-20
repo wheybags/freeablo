@@ -94,6 +94,7 @@ namespace FAWorld
 
         void calculateItemBonuses(ItemStats& stats) const;
         bool isRangedWeaponEquipped() const;
+        bool isShieldEquipped() const;
 
         const Item& getHead() const { return mHead.getItem(0, 0); }
         const Item& getBody() const { return mBody.getItem(0, 0); }

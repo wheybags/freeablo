@@ -151,6 +151,8 @@ namespace FAWorld
 
                 stats.toHitMelee.bonus = 20;
                 stats.toHitRanged.bonus = 10;
+                stats.blockChance =
+                    mInventory.isShieldEquipped() ? stats.baseStats.dexterity + 30 : 0; // TODOHELLFIRE: monks can block with staffs and hand to hand
                 break;
             }
             case PlayerClass::rogue:
@@ -169,6 +171,7 @@ namespace FAWorld
                     (int32_t)(((FixedPoint(charStats.strength) + FixedPoint(charStats.dexterity)) * actorStats.mLevel) / FixedPoint(100)).floor();
 
                 stats.toHitRanged.bonus = 20;
+                stats.blockChance = mInventory.isShieldEquipped() ? stats.baseStats.dexterity + 20 : 0;
                 break;
             }
             case PlayerClass::sorcerer:
@@ -185,6 +188,7 @@ namespace FAWorld
                 stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(200)).floor();
 
                 stats.toHitMagic.bonus = 20;
+                stats.blockChance = mInventory.isShieldEquipped() ? stats.baseStats.dexterity + 10 : 0;
                 break;
             }
             case PlayerClass::none:
@@ -412,6 +416,11 @@ namespace FAWorld
         mAnimation.setAnimation(AnimState::dead, renderer->loadImage(helper(true, "dt")));
         mAnimation.setAnimation(AnimState::attack, renderer->loadImage(helper(false, "at")));
         mAnimation.setAnimation(AnimState::hit, renderer->loadImage(helper(false, "ht")));
+
+        if (mInventory.isShieldEquipped())
+            mAnimation.setAnimation(AnimState::block, renderer->loadImage(helper(false, "bl")));
+        else
+            mAnimation.setAnimation(AnimState::block, renderer->loadImage(helper(false, "ht")));
 
         if (getLevel() && getLevel()->isTown())
         {

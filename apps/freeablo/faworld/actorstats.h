@@ -63,6 +63,7 @@ namespace FAWorld
         IntRange meleeDamageBonusRange = {0, 0};
         IntRange rangedDamageBonusRange = {0, 0};
         int32_t hitRecoveryDamageThreshold = 0;
+        int32_t blockChance = 0;
     };
 
     class Actor;
