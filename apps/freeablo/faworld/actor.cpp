@@ -180,7 +180,7 @@ namespace FAWorld
         int32_t blockChance = getStats().getCalculatedStats().blockChance;
         blockChance += 2 * (getStats().mLevel - attacker->getStats().mLevel);
 
-        if (!mMoveHandler.moving() && mWorld.mRng->randomInRange(0, 99) < blockChance)
+        if (!mMoveHandler.moving() && mAnimation.getCurrentAnimation() != AnimState::hit && mWorld.mRng->randomInRange(0, 99) < blockChance)
         {
             mAnimation.interruptAnimation(AnimState::block, FARender::AnimationPlayer::AnimationType::Once);
 #ifdef DEBUG_MELEE_COMBAT
