@@ -1,5 +1,8 @@
 #include "simplevec2.h"
 
+#define _USE_MATH_DEFINES
+#include "math.h"
+
 namespace Vec2Helper
 {
     template <typename T> T sqrt(T val) { return T(FixedPoint(val).sqrt().floor()); }
