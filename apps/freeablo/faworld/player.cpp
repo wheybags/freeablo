@@ -16,7 +16,6 @@
 #include <fmt/format.h>
 #include <misc/assert.h>
 #include <misc/stringops.h>
-#include <misc/vec2fix.h>
 #include <random/random.h>
 #include <string>
 

@@ -6,7 +6,6 @@
 #include "../faworld/world.h"
 #include "enginemain.h"
 #include "input/inputmanager.h"
-#include <misc/vec2fix.h>
 
 namespace Engine
 {

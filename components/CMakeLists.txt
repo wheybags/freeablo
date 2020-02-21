@@ -52,9 +52,8 @@ add_library(Misc
     misc/savePNG.h
     misc/stdhashes.h
     misc/stringops.h
-    misc/vec2fix.cpp
-    misc/vec2fix.h
     misc/simplevec2.h
+    misc/simplevec2.cpp
     misc/averager.cpp
     misc/averager.h
 )

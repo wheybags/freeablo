@@ -1,5 +1,5 @@
 #include "missile.h"
-#include <misc/vec2fix.h>
+#include <misc/simplevec2.h>
 
 namespace FAWorld
 {

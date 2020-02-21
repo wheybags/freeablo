@@ -2,7 +2,6 @@
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
 #include "findpath.h"
-#include <misc/vec2fix.h>
 
 namespace FAWorld
 {

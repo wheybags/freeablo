@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
-#include <misc/fixedpoint.h>
-#include <misc/vec2fix.h>
+#include <misc/simplevec2.h>
 
 #define _USE_MATH_DEFINES
 #include "math.h"

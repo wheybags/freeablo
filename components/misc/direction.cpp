@@ -45,7 +45,7 @@ namespace Misc
 
         // Adding 45° converts from isometric to normal direction,
         // subtracting 90° converts from East to South based.
-        auto normalDirSouthBased = isometricDegrees + (45 - 90);
+        FixedPoint normalDirSouthBased = isometricDegrees + (45 - 90);
 
         return Direction(normalDirSouthBased);
     }
