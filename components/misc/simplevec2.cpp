@@ -61,9 +61,52 @@ template <typename T> Vec2<T>& Vec2<T>::operator-=(const Vec2& other)
     return *this;
 }
 
+template <typename T> Vec2<T>& Vec2<T>::operator*=(const Vec2& other)
+{
+    x *= other.x;
+    y *= other.y;
+    return *this;
+}
+
+template <typename T> Vec2<T>& Vec2<T>::operator/=(const Vec2& other)
+{
+    x /= other.x;
+    y /= other.y;
+    return *this;
+}
+
+template <typename T> Vec2<T>& Vec2<T>::operator+=(T scalar)
+{
+    x += scalar;
+    y += scalar;
+    return *this;
+}
+
+template <typename T> Vec2<T>& Vec2<T>::operator-=(T scalar)
+{
+    x -= scalar;
+    y -= scalar;
+    return *this;
+}
+
+template <typename T> Vec2<T>& Vec2<T>::operator*=(T scalar)
+{
+    x *= scalar;
+    y *= scalar;
+    return *this;
+}
+
+template <typename T> Vec2<T>& Vec2<T>::operator/=(T scalar)
+{
+    x /= scalar;
+    y /= scalar;
+    return *this;
+}
 template <typename T> Vec2<T> Vec2<T>::invalid() { return Vec2<T>(Vec2Helper::invalid<T>(), Vec2Helper::invalid<T>()); }
 
 template <typename T> T Vec2<T>::magnitude() const { return Vec2Helper::sqrt(x * x + y * y); }
+
+template <typename T> T Vec2<T>::magnitudeSquared() const { return x * x + y * y; }
 
 template <typename T> void Vec2<T>::normalise()
 {
@@ -71,6 +114,10 @@ template <typename T> void Vec2<T>::normalise()
         return;
 
     T mag = magnitude();
+
+    if (mag == 0)
+        return;
+
     x = x / mag;
     y = y / mag;
 }

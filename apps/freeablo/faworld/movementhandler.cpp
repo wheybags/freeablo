@@ -101,14 +101,15 @@ namespace FAWorld
                     // detect if we were blocked on our way and try to recover
                     if (mCurrentPos.current() == mCurrentPath[mCurrentPathIndex - 1])
                     {
-                        auto next = mCurrentPath[mCurrentPathIndex];
+                        Misc::Point next = mCurrentPath[mCurrentPathIndex];
                         if (mLevel->isPassable(next, &actor))
                         {
-                            auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
-                            Misc::Direction direction = vec.getDirection();
+                            Vec2Fix vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
 
-                            mCurrentPos.setDirection(direction);
-                            mCurrentPos.moveToPoint(next);
+                            Misc::Direction8 direction = vec.getDirection().getDirection8();
+                            debug_assert(next == Misc::getNextPosByDir(mCurrentPos.current(), direction));
+
+                            mCurrentPos.gridMoveInDirection(direction);
                             needsRepath = false;
                         }
                     }
@@ -124,10 +125,10 @@ namespace FAWorld
                             if (mLevel->isPassable(next, &actor))
                             {
                                 auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
-                                Misc::Direction direction = vec.getDirection();
+                                Misc::Direction8 direction = vec.getDirection().getDirection8();
+                                debug_assert(next == Misc::getNextPosByDir(mCurrentPos.current(), direction));
 
-                                mCurrentPos.setDirection(direction);
-                                mCurrentPos.moveToPoint(next);
+                                mCurrentPos.gridMoveInDirection(direction);
                                 needsRepath = false;
                                 mCurrentPathIndex++;
 
