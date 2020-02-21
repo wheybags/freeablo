@@ -185,9 +185,14 @@ namespace FAWorld
         mDestination = mCurrentPos.current();
     }
 
-    void MovementHandler::stopAndPointInDirection(Misc::Direction direction)
+    void MovementHandler::stopMoving(FAWorld::Actor& actor, std::optional<Misc::Direction> pointInDirection)
     {
-        mCurrentPos.setDirection(direction);
+        mLevel->actorMapRemove(&actor, getCurrentPosition().next());
+
+        if (pointInDirection)
+            mCurrentPos.setDirection(*pointInDirection);
+
         mCurrentPos.stopMoving();
+        mLevel->actorMapInsert(&actor);
     }
 }

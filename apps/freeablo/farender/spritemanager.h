@@ -1,8 +1,5 @@
-
 #pragma once
-
 #include "spritecache.h"
-
 #include <set>
 
 namespace FARender

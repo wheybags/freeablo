@@ -1,5 +1,4 @@
 #include "spritemanager.h"
-
 #include <cstring>
 
 namespace FARender

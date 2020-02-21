@@ -13,6 +13,7 @@ addons:
     packages:
       - python3-pip
       - libgl1-mesa-dev
+      - clang-format-7
 
 matrix:
   include:

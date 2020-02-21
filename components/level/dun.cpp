@@ -1,7 +1,6 @@
+#include "dun.h"
 #include <iostream>
 #include <stdio.h>
-
-#include "dun.h"
 
 #include <faio/fafileobject.h>
 #include <serial/loader.h>

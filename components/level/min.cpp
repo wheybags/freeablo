@@ -1,10 +1,8 @@
 #include "min.h"
-
-#include <iostream>
-#include <stdio.h>
-
 #include <faio/fafileobject.h>
+#include <iostream>
 #include <misc/stringops.h>
+#include <stdio.h>
 
 namespace Level
 {

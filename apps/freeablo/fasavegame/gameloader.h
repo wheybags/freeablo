@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include <functional>
 #include <serial/loader.h>
 #include <vector>

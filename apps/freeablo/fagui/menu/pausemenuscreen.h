@@ -1,10 +1,7 @@
-
 #pragma once
-
+#include "menuscreen.h"
 #include <cstdint>
 #include <memory>
-
-#include "menuscreen.h"
 
 struct nk_context;
 typedef uint32_t nk_flags;

@@ -54,8 +54,11 @@ namespace FAWorld
     void ActorStats::recalculateStats() const
     {
         mActor->calculateStats(mCalculatedStats, *this);
-        mHp.setMax(mCalculatedStats.maxLife);
-        mMana.setMax(mCalculatedStats.maxMana);
+
+        if (mCalculatedStats.maxLife != -1)
+            mHp.setMax(mCalculatedStats.maxLife);
+        if (mCalculatedStats.maxMana != -1)
+            mMana.setMax(mCalculatedStats.maxMana);
     }
 
     void BaseStats::save(FASaveGame::GameSaver& saver)

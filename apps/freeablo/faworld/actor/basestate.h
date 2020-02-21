@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "statemachine.h"
 #include <misc/misc.h>
 #include <optional>

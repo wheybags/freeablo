@@ -3,6 +3,7 @@
 #include "item.h"
 #include <misc/array2d.h>
 #include <misc/misc.h>
+#include <optional>
 #include <set>
 #include <stdint.h>
 
@@ -37,6 +38,21 @@ namespace FAWorld
         std::set<Item*> blockingItems;
 
         bool succeeded() { return type == Type::Success; }
+    };
+
+    // A representation of the weapons / shield a player has equipped,
+    // but normalised so we don't need to check left/right everywhere
+    struct EquippedInHandsItems
+    {
+        struct TypeData
+        {
+            NonNullConstPtr<Item> item;
+            EquipTargetType location;
+        };
+
+        std::optional<TypeData> meleeWeapon;
+        std::optional<TypeData> rangedWeapon;
+        std::optional<TypeData> shield;
     };
 
     /// A Simple grid inventory, with no concept of "equipping" gear
@@ -94,6 +110,8 @@ namespace FAWorld
 
         void calculateItemBonuses(ItemStats& stats) const;
         bool isRangedWeaponEquipped() const;
+        bool isShieldEquipped() const;
+        EquippedInHandsItems getItemsInHands() const;
 
         const Item& getHead() const { return mHead.getItem(0, 0); }
         const Item& getBody() const { return mBody.getItem(0, 0); }

@@ -52,6 +52,9 @@ namespace FAWorld
         // This isn't serialised as it must be set before saving can occur.
         bool mPlayerInitialised = false;
 
+    protected:
+        virtual DamageType getMeleeDamageType() const override;
+
     private:
         void init(const DiabloExe::CharacterStats& charStats);
         bool canTalkTo(Actor* actor);

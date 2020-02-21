@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "celdecoder.h"
 #include "celframe.h"
 #include <stdint.h>

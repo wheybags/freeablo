@@ -1,6 +1,4 @@
-
 #pragma once
-
 namespace Input
 {
     // This enum is pretty much just taken from SDL1.2

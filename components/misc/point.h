@@ -1,5 +1,4 @@
 #pragma once
-
 #include <cinttypes>
 #include <functional>
 #include <serial/loader.h>

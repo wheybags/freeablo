@@ -1,5 +1,4 @@
 #include "missilegraphic.h"
-
 #include "diabloexe/diabloexe.h"
 #include "engine/enginemain.h"
 #include "engine/threadmanager.h"

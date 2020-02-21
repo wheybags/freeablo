@@ -51,6 +51,9 @@ namespace FAWorld
 
     void BasicMonsterBehaviour::update()
     {
+        if (mActor->mTarget.getType() != Target::Type::None)
+            return;
+
         mTicksSinceLastAction++;
 
         if (!mActor->isDead())
@@ -62,18 +65,24 @@ namespace FAWorld
             if (nearest)
                 dist = FAWorld::squaredDistance(nearest->getPos(), mActor->getPos());
 
-            static FAWorld::Tick halfSecond = World::getTicksInPeriod("0.5");
-
             if (nearest && dist <= std::pow(5, 2)) // we are close enough to engage the player
             {
-                mActor->mTarget = nearest;
+                if (mTicksSinceLastAction >= World::getTicksInPeriod("1"))
+                {
+                    mActor->mTarget = nearest;
+                    mTicksSinceLastAction = 0;
+                }
+                else
+                {
+                    mActor->mTarget = mActor->getPos().current();
+                }
             }
             else if (dist >= std::pow(100, 2)) // just freeze if we're miles away from anyone
             {
                 return;
             }
             // if no player is in sight, let's wander around a bit
-            else if (mTicksSinceLastAction > halfSecond && !mActor->hasTarget() && !mActor->mMoveHandler.moving())
+            else if (mTicksSinceLastAction > World::getTicksInPeriod("0.5") && !mActor->hasTarget() && !mActor->mMoveHandler.moving())
             {
                 if (mActor->getWorld()->mRng->randomInRange(0, 100) > 80)
                 {

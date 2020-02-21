@@ -1,13 +1,5 @@
 #include "diabloexe.h"
-
 #include <stdint.h>
-
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-
-#include <misc/md5.h>
-#include <misc/stringops.h>
 
 #include "../../apps/freeablo/faworld/item.h"
 #include "baseitem.h"
@@ -16,6 +8,11 @@
 #include "npc.h"
 #include "settings/settings.h"
 #include "talkdata.h"
+#include <iomanip>
+#include <iostream>
+#include <misc/md5.h>
+#include <misc/stringops.h>
+#include <sstream>
 
 namespace DiabloExe
 {

@@ -30,7 +30,7 @@ namespace FAWorld
         const GameLevel* getLevel() const;
         void update(FAWorld::Actor& actor);
         void teleport(GameLevel* level, Position pos);
-        void stopAndPointInDirection(Misc::Direction direction);
+        void stopMoving(FAWorld::Actor& actor, std::optional<Misc::Direction> pointInDirection = std::nullopt);
 
     private:
         GameLevel* mLevel = nullptr;

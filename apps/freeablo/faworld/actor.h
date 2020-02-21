@@ -6,6 +6,7 @@
 #include "actoranimationmanager.h"
 #include "actorstats.h"
 #include "behaviour.h"
+#include "enums.h"
 #include "faction.h"
 #include "gamelevel.h"
 #include "inventory.h"
@@ -47,7 +48,6 @@ namespace FAWorld
         virtual ~Actor();
         virtual void save(FASaveGame::GameSaver& saver);
 
-        bool checkHit(Actor* target);
         virtual int32_t getOnKilledExperience() const { return 0; }
         void pickupItem(Target::ItemTarget target);
         void teleport(GameLevel* level, Position pos);
@@ -55,7 +55,6 @@ namespace FAWorld
         GameLevel* getLevel();
         const GameLevel* getLevel() const;
         World* getWorld() const { return &mWorld; }
-        int32_t meleeDamageVs(const Actor* target) const;
         virtual bool canCriticalHit() const { return false; }
         void doMeleeHit(Actor* enemy);
         void doMeleeHit(const Misc::Point& point);
@@ -64,10 +63,10 @@ namespace FAWorld
         std::string getHitWav() const;
         bool canIAttack(Actor* actor);
         virtual void update(bool noclip);
-        void takeDamage(int32_t amount);
+        void takeDamage(int32_t amount, Actor* attacker, DamageType type);
         void heal();
         void restoreMana();
-        void stopAndPointInDirection(Misc::Direction direction);
+        void stopMoving(std::optional<Misc::Direction> direction = std::nullopt);
         virtual void die();
         bool isDead() const;
         bool isEnemy(Actor* other) const;
@@ -85,15 +84,18 @@ namespace FAWorld
         bool hasTarget() const;
         bool canTalk() const { return mMenuTalkData.size() > 0; }
         bool canInteractWith(Actor* actor);
-        void dealDamageToEnemy(Actor* enemy, uint32_t damage);
-
+        void dealDamageToEnemy(Actor* enemy, uint32_t damage, DamageType type);
         virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const;
         const std::vector<std::unique_ptr<Missile::Missile>>& getMissiles() const { return mMissiles; }
         virtual bool castSpell(SpellId spell, Misc::Point targetPoint);
+        ActorType getType() const { return mType; }
+        bool isRecoveringFromHit() const;
+        int32_t getMeleeHitFrame() const { return mMeleeHitFrame; }
 
     protected:
         void activateMissile(MissileId id, Misc::Point targetPoint);
         virtual void onEnemyKilled(Actor* enemy) { UNUSED_PARAM(enemy); };
+        virtual DamageType getMeleeDamageType() const { return DamageType::Unarmed; }
 
     public:
         MovementHandler mMoveHandler;
@@ -124,6 +126,8 @@ namespace FAWorld
         bool mDeadLastTick = false;
         World& mWorld;
         std::vector<std::unique_ptr<Missile::Missile>> mMissiles;
+        ActorType mType = ActorType::Normal;
+        int32_t mMeleeHitFrame = 0; // not serialised, should be set automatically
 
         // TODO: this var is only used for dialog code, which branches on which npc is being spoken to.
         // Eventually, we should add a proper dialog specification system, and get rid of this.

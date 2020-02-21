@@ -1,6 +1,5 @@
-#include "missile.h"
-
 #include "faworld/actor.h"
+#include "missile.h"
 
 namespace FAWorld
 {

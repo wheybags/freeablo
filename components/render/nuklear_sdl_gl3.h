@@ -1,12 +1,8 @@
-
 #pragma once
-
-#include <vector>
-
 #include "misc.h"
 #include "sdl_gl_funcs.h"
-
 #include <fa_nuklear.h>
+#include <vector>
 
 struct nk_gl_device
 {

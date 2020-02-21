@@ -1,17 +1,13 @@
 #include "render.h"
-
+#include <SDL.h>
 #include <complex>
 #include <iostream>
-
-#include <SDL.h>
 //#include <SDL_opengl.h>
-#include <SDL_image.h>
-
 #include "sdl_gl_funcs.h"
+#include <SDL_image.h>
 
 #include "../cel/celfile.h"
 #include "../cel/celframe.h"
-
 #include "../level/level.h"
 #include <faio/fafileobject.h>
 #include <misc/assert.h>

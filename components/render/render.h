@@ -1,19 +1,14 @@
 #pragma once
-
+#include "cel/pal.h"
+#include "misc.h"
+#include "misc/point.h"
+#include <functional>
+#include <map>
+#include <optional>
 #include <stdint.h>
-
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <functional>
-#include <map>
-
-#include "misc.h"
-#include "misc/point.h"
-
-#include "cel/pal.h"
-#include <optional>
 
 struct SDL_Surface;
 class SpriteGroup;
@@ -32,7 +27,6 @@ namespace Cel
 }
 
 #include "levelobjects.h"
-
 #include "nuklear_sdl_gl3.h"
 
 namespace Level

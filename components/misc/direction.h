@@ -1,8 +1,6 @@
 #pragma once
-
 #include "fixedpoint.h"
 #include "point.h"
-
 #include <cstdint>
 #include <utility>
 

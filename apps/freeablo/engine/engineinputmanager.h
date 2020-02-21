@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "../components/misc/misc.h"
 #include "../faworld/actoranimationmanager.h"
 #include "inputobserverinterface.h"

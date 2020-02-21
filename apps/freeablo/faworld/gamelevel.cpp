@@ -74,9 +74,39 @@ namespace FAWorld
     bool GameLevel::isDoor(const Misc::Point& point) const { return mLevel.isDoor(point); }
     bool GameLevel::activateDoor(const Misc::Point& point)
     {
-        if (getActorAt(point))
+#ifndef NDEBUG
+        for (const auto& actor : mActors)
+        {
+            if (!actor->isDead())
+            {
+                debug_assert(isPassable(actor->mMoveHandler.getCurrentPosition().current(), actor));
+                debug_assert(isPassable(actor->mMoveHandler.getCurrentPosition().next(), actor));
+                debug_assert(getActorAt(actor->mMoveHandler.getCurrentPosition().current()) == actor);
+                debug_assert(getActorAt(actor->mMoveHandler.getCurrentPosition().next()) == actor);
+            }
+        }
+#endif
+
+        Actor* actorInDoorway = getActorAt(point);
+        if (actorInDoorway)
             return false;
-        return mLevel.activateDoor(point);
+
+        bool retval = mLevel.activateDoor(point);
+
+#ifndef NDEBUG
+        for (const auto& actor : mActors)
+        {
+            if (!actor->isDead())
+            {
+                debug_assert(isPassable(actor->mMoveHandler.getCurrentPosition().current(), actor));
+                debug_assert(isPassable(actor->mMoveHandler.getCurrentPosition().next(), actor));
+                debug_assert(getActorAt(actor->mMoveHandler.getCurrentPosition().current()) == actor);
+                debug_assert(getActorAt(actor->mMoveHandler.getCurrentPosition().next()) == actor);
+            }
+        }
+#endif
+
+        return retval;
     }
 
     int32_t GameLevel::getNextLevel() { return mLevel.getNextLevel(); }

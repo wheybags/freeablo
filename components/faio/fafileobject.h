@@ -1,12 +1,10 @@
-/// this is just a RAII wrapper class for faio api functions.
-
 #pragma once
-
 #include "faio.h"
 
 namespace FAIO
 {
 
+    /// this is just a RAII wrapper class for faio api functions.
     class FAFileObject
     {
 

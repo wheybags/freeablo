@@ -16,11 +16,11 @@ namespace FAWorld
         std::string cl2PathFormat = monsterStats.cl2Path;
         Misc::StringUtils::replace(cl2PathFormat, "%c", "{}");
 
-        mAnimation.setAnimation(AnimState::walk, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'w')));
-        mAnimation.setAnimation(AnimState::idle, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'n')));
-        mAnimation.setAnimation(AnimState::dead, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'd')));
-        mAnimation.setAnimation(AnimState::attack, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'a')));
-        mAnimation.setAnimation(AnimState::hit, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'h')));
+        mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'w')));
+        mAnimation.setAnimationSprites(AnimState::idle, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'n')));
+        mAnimation.setAnimationSprites(AnimState::dead, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'd')));
+        mAnimation.setAnimationSprites(AnimState::attack, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'a')));
+        mAnimation.setAnimationSprites(AnimState::hit, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'h')));
 
         mBehaviour.reset(new BasicMonsterBehaviour(this));
         mFaction = Faction::hell();
@@ -31,9 +31,21 @@ namespace FAWorld
         Misc::StringUtils::replace(mSoundPath, "%i", "{}");
 
         mStats.mLevel = monsterStats.level;
+        mType = ActorType(monsterStats.type);
+        mStats.getHp() = Misc::MaxCurrentItem(world.mRng->randomInRange(monsterStats.minHp, monsterStats.maxHp));
+
+        commonInit();
     }
 
-    Monster::Monster(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader) {}
+    Monster::Monster(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader) { commonInit(); }
+
+    void Monster::commonInit()
+    {
+        const DiabloExe::Monster& monsterProperties = mWorld.mDiabloExe.getMonster(mName);
+        mMeleeHitFrame = monsterProperties.hitFrame;
+
+        mInitialised = true;
+    }
 
     void Monster::save(FASaveGame::GameSaver& saver)
     {
@@ -43,6 +55,9 @@ namespace FAWorld
 
     void Monster::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
     {
+        if (!mInitialised)
+            return;
+
         CalculateStatsCacheKey statsCacheKey;
         memset(&statsCacheKey, 0, sizeof(CalculateStatsCacheKey)); // force all padding to zero, to make sure memcmp will work
 
@@ -60,7 +75,7 @@ namespace FAWorld
 
         stats = LiveActorStats(); // clear everything to zero before we start
 
-        stats.maxLife = monsterProperties.maxHp; // TODO: should this be randomised per-spawn between minHp and maxHp?
+        stats.maxLife = -1; // don't change
         stats.armorClass = monsterProperties.armourClass;
 
         stats.toHitMelee.base = int32_t(monsterProperties.toHit) + 2 * int32_t(monsterProperties.level);
@@ -79,7 +94,7 @@ namespace FAWorld
             stats.toHitMeleeMinMaxCap.min = 15;
 
         stats.meleeDamageBonusRange = IntRange(monsterProperties.minDamage, monsterProperties.maxDamage);
-        stats.hitRecoveryDamageThreshold = actorStats.mLevel + 3; // Jarulf's guide, section 5.3.4
+        stats.hitRecoveryDamageThreshold = actorStats.mLevel + 3; // https://wheybags.gitlab.io/jarulfs-guide/#timing-information
     }
 
     void Monster::die()

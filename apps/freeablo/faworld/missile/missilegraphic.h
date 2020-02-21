@@ -1,5 +1,4 @@
 #pragma once
-
 #include "farender/animationplayer.h"
 #include "missileenums.h"
 #include <misc/misc.h>
