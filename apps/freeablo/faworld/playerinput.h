@@ -12,7 +12,6 @@
     MACRO(TargetItemOnFloor)                                                                                                                                   \
     MACRO(AttackDirection)                                                                                                                                     \
     MACRO(CastSpell)                                                                                                                                           \
-    MACRO(PrepareSpell)                                                                                                                                        \
     MACRO(ChangeLevel)                                                                                                                                         \
     MACRO(InventorySlotClicked)                                                                                                                                \
     MACRO(SetActiveSpell)                                                                                                                                      \
@@ -72,13 +71,6 @@ namespace FAWorld
         struct CastSpellData
         {
             int32_t x, y;
-
-            void save(Serial::Saver& saver) const;
-            void load(Serial::Loader& loader);
-        };
-        struct PrepareSpellData
-        {
-            int32_t spellNumber;
 
             void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);

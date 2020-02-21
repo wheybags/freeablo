@@ -27,10 +27,10 @@ namespace Engine
         toggleQuests,
         toggleCharacterInfo,
         toggleSpellbook,
-        prepareSpell1,
-        prepareSpell2,
-        prepareSpell3,
-        prepareSpell4,
+        spellHotkeyF5,
+        spellHotkeyF6,
+        spellHotkeyF7,
+        spellHotkeyF8,
 
         max,
     };
