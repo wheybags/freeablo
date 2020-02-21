@@ -32,6 +32,7 @@ namespace FAWorld
 
         mStats.mLevel = monsterStats.level;
         mType = ActorType(monsterStats.type);
+        mStats.getHp() = Misc::MaxCurrentItem(world.mRng->randomInRange(monsterStats.minHp, monsterStats.maxHp));
 
         commonInit();
     }
@@ -42,6 +43,8 @@ namespace FAWorld
     {
         const DiabloExe::Monster& monsterProperties = mWorld.mDiabloExe.getMonster(mName);
         mMeleeHitFrame = monsterProperties.hitFrame;
+
+        mInitialised = true;
     }
 
     void Monster::save(FASaveGame::GameSaver& saver)
@@ -52,6 +55,9 @@ namespace FAWorld
 
     void Monster::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
     {
+        if (!mInitialised)
+            return;
+
         CalculateStatsCacheKey statsCacheKey;
         memset(&statsCacheKey, 0, sizeof(CalculateStatsCacheKey)); // force all padding to zero, to make sure memcmp will work
 
@@ -69,7 +75,7 @@ namespace FAWorld
 
         stats = LiveActorStats(); // clear everything to zero before we start
 
-        stats.maxLife = monsterProperties.maxHp; // TODO: should this be randomised per-spawn between minHp and maxHp?
+        stats.maxLife = -1; // don't change
         stats.armorClass = monsterProperties.armourClass;
 
         stats.toHitMelee.base = int32_t(monsterProperties.toHit) + 2 * int32_t(monsterProperties.level);

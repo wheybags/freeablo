@@ -34,5 +34,7 @@ namespace FAWorld
             int32_t level = 0;
         };
         mutable CalculateStatsCacheKey mLastStatsKey; // not serialised, only used to determine if we need to recalculate stats
+
+        bool mInitialised = false; // not serialised
     };
 }

@@ -217,9 +217,9 @@ namespace FAWorld
             die();
     }
 
-    void Actor::heal() { mStats.getHp() = mStats.getHp().max; }
+    void Actor::heal() { mStats.getHp().current = mStats.getHp().max; }
 
-    void Actor::restoreMana() { mStats.getMana() = mStats.getMana().max; }
+    void Actor::restoreMana() { mStats.getMana().current = mStats.getMana().max; }
 
     void Actor::stopMoving(std::optional<Misc::Direction> direction) { mMoveHandler.stopMoving(*this, direction); }
 
