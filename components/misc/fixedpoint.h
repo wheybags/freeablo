@@ -5,6 +5,12 @@
 #include <stdexcept>
 #include <string>
 
+namespace Serial
+{
+    class Saver;
+    class Loader;
+}
+
 class FixedPoint
 {
 public:
@@ -121,6 +127,9 @@ public:
     FixedPoint(uint8_t integerValue) : FixedPoint(int64_t(integerValue)) {}
     FixedPoint(double) = delete;
     FixedPoint(float) = delete;
+
+    void save(Serial::Saver& saver) const;
+    void load(Serial::Loader& loader);
 
 private:
     class RawConstructorTagType

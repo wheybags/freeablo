@@ -1,5 +1,5 @@
 #pragma once
-#include <misc/point.h>
+#include <misc/simplevec2.h>
 
 namespace FAWorld
 {

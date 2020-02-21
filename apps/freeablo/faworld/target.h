@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include <misc/point.h>
+#include <misc/simplevec2.h>
 
 namespace FASaveGame
 {

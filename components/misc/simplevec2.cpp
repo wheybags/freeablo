@@ -15,6 +15,33 @@ namespace Vec2Helper
     template <typename T> FixedPoint forceFixedPoint(T val) { return val; }
     template <> FixedPoint forceFixedPoint(float val) { return FixedPoint::fromRawValue(int64_t(val * FixedPoint::scalingFactor)); }
     template <> FixedPoint forceFixedPoint(double val) { return FixedPoint::fromRawValue(int64_t(val * FixedPoint::scalingFactor)); }
+
+    template <typename T> T invalid() { return std::numeric_limits<T>::max(); }
+    template <> FixedPoint invalid() { return FixedPoint::fromRawValue(std::numeric_limits<int64_t>::max()); }
+}
+
+template <> Vec2<FixedPoint>::Vec2(Serial::Loader& loader)
+{
+    x.load(loader);
+    y.load(loader);
+}
+
+template <typename T> Vec2<T>::Vec2(Serial::Loader& loader)
+{
+    x = loader.load<T>();
+    y = loader.load<T>();
+}
+
+template <> void Vec2<FixedPoint>::save(Serial::Saver& saver) const
+{
+    x.save(saver);
+    y.save(saver);
+}
+
+template <typename T> void Vec2<T>::save(Serial::Saver& saver) const
+{
+    saver.save(x);
+    saver.save(y);
 }
 
 template <typename T> Vec2<T>& Vec2<T>::operator+=(const Vec2& other)
@@ -30,6 +57,8 @@ template <typename T> Vec2<T>& Vec2<T>::operator-=(const Vec2& other)
     y -= other.y;
     return *this;
 }
+
+template <typename T> Vec2<T> Vec2<T>::invalid() { return Vec2<T>(Vec2Helper::invalid<T>(), Vec2Helper::invalid<T>()); }
 
 template <typename T> T Vec2<T>::magnitude() const { return Vec2Helper::sqrt(x * x + y * y); }
 

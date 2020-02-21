@@ -46,8 +46,6 @@ add_library(Misc
     misc/md5.h
     misc/misc.h
     misc/misc.cpp
-    misc/point.cpp
-    misc/point.h
     misc/savePNG.cpp
     misc/savePNG.h
     misc/stdhashes.h
@@ -57,7 +55,7 @@ add_library(Misc
     misc/averager.cpp
     misc/averager.h
 )
-target_link_libraries(Misc Settings png SDL2)
+target_link_libraries(Misc Settings png SDL2 Serial)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

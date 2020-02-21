@@ -3,6 +3,7 @@
 #include "int128.h"
 #include "stringops.h"
 #include <iomanip>
+#include <serial/loader.h>
 #include <sstream>
 
 #ifndef NDEBUG
@@ -33,6 +34,10 @@ static inline int64_t muldiv(int64_t n1, int64_t n2, int64_t d)
 }
 
 FixedPoint::FixedPoint(int64_t integerValue) { *this = fromRawValue(integerValue * FixedPoint::scalingFactor); }
+
+void FixedPoint::save(Serial::Saver& saver) const { saver.save(mVal); }
+
+void FixedPoint::load(Serial::Loader& loader) { *this = fromRawValue(loader.load<int64_t>()); }
 
 int64_t FixedPoint::intPart() const { return mVal / FixedPoint::scalingFactor; }
 

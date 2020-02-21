@@ -1,7 +1,7 @@
 #pragma once
 #include <cel/pal.h>
 #include <misc/array2d.h>
-#include <misc/point.h>
+#include <misc/simplevec2.h>
 #include <optional>
 #include <vector>
 

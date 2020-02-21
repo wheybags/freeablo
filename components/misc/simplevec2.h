@@ -3,23 +3,39 @@
 #include "fixedpoint.h"
 #include <cstdint>
 #include <ostream>
+#include <serial/loader.h>
+#include <vector>
+
+namespace Misc
+{
+    class Direction;
+}
 
 template <typename T> class Vec2
 {
 public:
     Vec2() : x(0), y(0) {}
     Vec2(T x, T y) : x(x), y(y) {}
+    Vec2(Serial::Loader& loader);
+
+    void save(Serial::Saver& saver) const;
 
     Vec2<T> operator-(Vec2<T> other) const { return Vec2(x - other.x, y - other.y); }
     Vec2<T> operator+(Vec2<T> other) const { return Vec2(x + other.x, y + other.y); }
+
+    Vec2<T> operator*(T c) const { return Vec2(x * c, y * c); }
+    Vec2<T> operator/(T c) const { return Vec2(x / c, y / c); }
 
     Vec2& operator+=(const Vec2& other);
     Vec2& operator-=(const Vec2& other);
 
     bool operator==(const Vec2<T>& other) const { return x == other.x && y == other.y; }
     bool operator!=(const Vec2<T>& other) const { return x != other.x || y != other.y; }
+    bool operator<(const Vec2<T>& other) const { return x < other.x || (x <= other.x && y < other.y); }
 
     bool isZero() { return x == 0 && y == 0; }
+    static Vec2 invalid();
+    bool isValid() { return *this == invalid(); }
 
     T magnitude() const;
     void normalise();
@@ -46,6 +62,11 @@ public:
     };
 };
 
+template <> void Vec2<float>::save(Serial::Saver&) const = delete;
+template <> void Vec2<double>::save(Serial::Saver&) const = delete;
+template <> Vec2<float>::Vec2(Serial::Loader&) = delete;
+template <> Vec2<double>::Vec2(Serial::Loader&) = delete;
+
 template <typename T> std::ostream& operator<<(std::ostream& stream, const Vec2<T>& vec) { return stream << "{" << vec.x << "," << vec.y << "}"; }
 
 using Vec2i = Vec2<int32_t>;
@@ -54,3 +75,17 @@ using Vec2f64 = Vec2<double>;
 using Vec2Fix = Vec2<FixedPoint>;
 
 using IntRange = Vec2i;
+
+namespace std
+{
+    template <> struct hash<Vec2i>
+    {
+        std::size_t operator()(const Vec2i& k) const { return std::hash<int32_t>{}(k.x) ^ (std::hash<int32_t>{}(k.y) << 1); }
+    };
+}
+
+namespace Misc
+{
+    using Point = Vec2i;
+    using Points = std::vector<Point>;
+}

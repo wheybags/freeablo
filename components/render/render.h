@@ -1,7 +1,6 @@
 #pragma once
 #include "cel/pal.h"
 #include "misc.h"
-#include "misc/point.h"
 #include <functional>
 #include <map>
 #include <optional>
