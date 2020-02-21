@@ -40,6 +40,7 @@ namespace FAWorld
                                 auto myPos = actor.getPos().current();
                                 ret = StateChange{StateOperation::push,
                                                   new MeleeAttackState(Vec2Fix(targetPos.x - myPos.x, targetPos.y - myPos.y).getDirection())};
+                                actor.mTarget.clear();
                             }
                         }
                     }
