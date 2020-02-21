@@ -16,6 +16,6 @@ if [ $JOB == "build" ]; then
     mkdir build
     cd build
     cmake -DFA_TREAT_WARNINGS_AS_ERRORS=ON -G "Unix Makefiles" ../
-    make -k
+    make -k -j2
     ./unit_tests
 fi
