@@ -31,7 +31,7 @@ namespace FAWorld
         void setDirection(Misc::Direction mDirection);
 
         bool isMoving() const { return mMovementType != MovementType::Stopped; }
-        Misc::Point getFractionalPos() const { return mFractionalPos; }
+        Vec2Fix getFractionalPos() const { return Vec2Fix(current()) + (Vec2Fix(mFractionalPos) / 100); }
 
         int32_t getSpeed() const { return mSpeed; }
         void setSpeed(int32_t speed) { mSpeed = speed; }

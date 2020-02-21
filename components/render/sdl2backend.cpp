@@ -1084,7 +1084,10 @@ namespace Render
     // basic transform of isometric grid to normal, (0, 0) tile coordinate maps to (0, 0) pixel coordinates
     // since eventually we're gonna shift coordinates to viewport center, it's better to keep transform itself
     // as simple as possible
-    static Misc::Point tileTopPoint(const Tile& tile) { return {(tileWidth / 2) * (tile.pos.x - tile.pos.y), (tile.pos.y + tile.pos.x) * (tileHeight / 2)}; }
+    template <typename T> static Vec2i tileTopPoint(Vec2<T> tile)
+    {
+        return Vec2i(Vec2<T>(T(tileWidth / 2) * (tile.x - tile.y), (tile.y + tile.x) * (tileHeight / 2)));
+    }
 
     // this function simply does the reverse of the above function, could be found by solving linear equation system
     // it obviously uses the fact that ttileWidth = tileHeight * 2
@@ -1096,30 +1099,29 @@ namespace Render
         return {x.quot, y.quot, x.rem > y.rem ? TileHalf::right : TileHalf::left};
     }
 
-    static void drawMovingSprite(const Sprite& sprite,
-                                 const Tile& pos,
-                                 const Misc::Point& fractionalPos,
-                                 const Misc::Point& toScreen,
-                                 std::optional<Cel::Colour> highlightColor = std::nullopt)
+    static void
+    drawMovingSprite(const Sprite& sprite, const Vec2Fix& fractionalPos, const Misc::Point& toScreen, std::optional<Cel::Colour> highlightColor = std::nullopt)
     {
         int32_t w, h;
         spriteSize(sprite, w, h);
-        auto point = tileTopPoint(pos) + tileTopPoint(fractionalPos) / 100;
-        auto res = point + toScreen;
-        drawAtTile(sprite, res, w, h, highlightColor);
+        Vec2i point = tileTopPoint(fractionalPos);
+        Vec2i res = point + toScreen;
+
+        drawAtTile(sprite, Vec2i(res), w, h, highlightColor);
     }
 
     constexpr auto bottomMenuSize = 144; // TODO: pass it as a variable
-    Misc::Point worldToScreenVector(const Tile& pos, const Tile& fractionalPos)
+    Misc::Point worldToScreenVector(const Vec2Fix& fractionalPos)
     {
         // centering takes in accord bottom menu size to be consistent with original game centering
-        auto point = tileTopPoint(pos) + tileTopPoint(fractionalPos) / 100;
+        Vec2i point = tileTopPoint(fractionalPos);
+
         return Misc::Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - point;
     }
 
-    Tile getTileByScreenPos(size_t x, size_t y, const Misc::Point& pos, const Misc::Point& fractionalPos)
+    Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& fractionalPos)
     {
-        auto toScreen = worldToScreenVector(pos, fractionalPos);
+        Misc::Point toScreen = worldToScreenVector(fractionalPos);
         return getTileFromScreenCoords({static_cast<int32_t>(x), static_cast<int32_t>(y)}, toScreen);
     }
 
@@ -1128,12 +1130,12 @@ namespace Render
     template <typename ProcessTileFunc> void drawObjectsByTiles(const Misc::Point& toScreen, ProcessTileFunc processTile)
     {
         Misc::Point start{-2 * tileWidth, -2 * tileHeight};
-        auto startingTile = getTileFromScreenCoords(start, toScreen);
+        Tile startingTile = getTileFromScreenCoords(start, toScreen);
 
-        auto startingPoint = tileTopPoint(startingTile) + toScreen;
+        Misc::Point startingPoint = tileTopPoint(startingTile.pos) + toScreen;
         auto processLine = [&]() {
-            auto point = startingPoint;
-            auto tile = startingTile;
+            Misc::Point point = startingPoint;
+            Tile tile = startingTile;
 
             while (point.x < WIDTH + tileWidth / 2)
             {
@@ -1166,10 +1168,9 @@ namespace Render
                    SpriteCacheBase* cache,
                    LevelObjects& objs,
                    LevelObjects& items,
-                   const Misc::Point& pos,
-                   const Misc::Point& fractionalPos)
+                   const Vec2Fix& fractionalPos)
     {
-        auto toScreen = worldToScreenVector(pos, fractionalPos);
+        auto toScreen = worldToScreenVector(fractionalPos);
         SpriteGroup* minBottoms = cache->get(minBottomsHandle);
         auto isInvalidTile = [&](const Tile& tile) {
             return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
@@ -1228,7 +1229,7 @@ namespace Render
                 if (obj.valid)
                 {
                     auto sprite = cache->get(obj.spriteCacheIndex);
-                    drawMovingSprite((*sprite)[obj.spriteFrame], tile, obj.fractionalPos, toScreen, obj.hoverColor);
+                    drawMovingSprite((*sprite)[obj.spriteFrame], obj.fractionalPos, toScreen, obj.hoverColor);
                 }
             }
         });

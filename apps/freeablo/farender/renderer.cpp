@@ -179,7 +179,7 @@ namespace FARender
 
     Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getTileByScreenPos(x, y, screenPos.current(), screenPos.getFractionalPos());
+        return Render::getTileByScreenPos(x, y, screenPos.getFractionalPos());
     }
 
     void Renderer::waitUntilDone()
@@ -259,7 +259,6 @@ namespace FARender
                                   &mSpriteManager,
                                   mLevelObjects,
                                   mItems,
-                                  state->mPos.current(),
                                   state->mPos.getFractionalPos());
             }
 
