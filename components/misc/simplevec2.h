@@ -11,12 +11,22 @@ namespace Misc
     class Direction;
 }
 
+template <typename T> class Vec2;
+
+namespace Vec2Helper
+{
+    template <typename X, typename Y> void initFromOtherType(Vec2<X>& vec, Vec2<Y> other);
+    template <typename X> inline void initFromOtherType(Vec2<X>& vec, Vec2<FixedPoint> other);
+};
+
 template <typename T> class Vec2
 {
 public:
     Vec2() : x(0), y(0) {}
     Vec2(T x, T y) : x(x), y(y) {}
     Vec2(Serial::Loader& loader);
+
+    template <typename OtherT> explicit Vec2(Vec2<OtherT> other) { Vec2Helper::initFromOtherType(*this, other); }
 
     void save(Serial::Saver& saver) const;
 
@@ -61,6 +71,21 @@ public:
         T max;
     };
 };
+
+namespace Vec2Helper
+{
+    template <typename X> inline void initFromOtherType(Vec2<X>& vec, Vec2<FixedPoint> other)
+    {
+        vec.x = other.x.floor();
+        vec.y = other.y.floor();
+    }
+
+    template <typename X, typename Y> inline void initFromOtherType(Vec2<X>& vec, Vec2<Y> other)
+    {
+        vec.x = other.x;
+        vec.y = other.y;
+    }
+}
 
 template <> void Vec2<float>::save(Serial::Saver&) const = delete;
 template <> void Vec2<double>::save(Serial::Saver&) const = delete;
