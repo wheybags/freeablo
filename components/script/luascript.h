@@ -24,7 +24,7 @@ namespace Script
 
         void printError(const std::string& variable, const std::string& reason);
 
-        template <typename T> void registerType(const std::string& metatable_name);
+        template <typename T> void registerGlobalType();
 
         template <typename Func> void registerGlobalFunction(const std::string& functionName, Func func)
         {
@@ -92,12 +92,7 @@ namespace Script
 
         void clean();
 
-        template <typename T> T luaGet(const std::string& variable = "")
-        {
-            release_assert(lua_isnumber(mState, -1) && "Not a number");
-
-            return static_cast<T>(lua_tonumber(mState, -1));
-        }
+        template <typename T> T luaGet(const std::string& variable = "");
 
         template <typename T> T luaGetDefault() { return {}; }
     };

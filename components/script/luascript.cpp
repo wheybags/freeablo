@@ -28,11 +28,14 @@ namespace Script
 #endif
     }
 
-    template <> std::string LuaScript::luaGetDefault() { return "null"; }
+    template <> std::string LuaScript::luaGetDefault<std::string>() { return "null"; }
 
-    template <> bool LuaScript::luaGet(const std::string& variable) { return static_cast<bool>(lua_toboolean(mState, -1)); }
+    template <> bool LuaScript::luaGet<bool>(const std::string& variable) { return static_cast<bool>(lua_toboolean(mState, -1)); }
+    template <> int LuaScript::luaGet<int>(const std::string& variable) { return static_cast<int>(lua_tointeger(mState, -1)); }
+    template <> int64_t LuaScript::luaGet<int64_t>(const std::string& variable) { return static_cast<int64_t>(lua_tointeger(mState, -1)); }
+    template <> double LuaScript::luaGet<double>(const std::string& variable) { return static_cast<double>(lua_tonumber(mState, -1)); }
 
-    template <> std::string LuaScript::luaGet(const std::string& variable)
+    template <> std::string LuaScript::luaGet<std::string>(const std::string& variable)
     {
         std::string ret = "null";
 

@@ -3,12 +3,378 @@
 #include "int128.h"
 #include "stringops.h"
 #include <iomanip>
+#include <script/luascript.h>
 #include <sstream>
 
 #ifndef NDEBUG
 #define _USE_MATH_DEFINES
 #include "math.h"
 #endif
+
+namespace Script
+{
+    template <> void LuaScript::registerGlobalType<FixedPoint>()
+    {
+        luaL_newmetatable(mState, "FixedPoint");
+        auto constructor = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            if (lua_isstring(state, -2))
+            {
+                std::string str = lua_tostring(state, -2);
+                *self = new FixedPoint(str);
+            }
+
+            else if (lua_isinteger(state, -2))
+            {
+                int64_t integer = lua_tointeger(state, -2);
+                *self = new FixedPoint(integer);
+            }
+
+            luaL_setmetatable(state, "FixedPoint");
+
+            return 1;
+        };
+
+        auto destructor = [](lua_State* state) -> int {
+            delete *static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            return 0;
+        };
+
+        auto fromRawValue = [](lua_State* state) -> int {
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            int64_t val = luaL_checkinteger(state, 1);
+            *ret = new FixedPoint();
+            **ret = FixedPoint::fromRawValue(val);
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto rawValue = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            lua_pushinteger(state, (*self)->rawValue());
+            return 1;
+        };
+
+        auto intPart = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            lua_pushinteger(state, (*self)->intPart());
+            return 1;
+        };
+
+        auto fractionPart = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = (*self)->fractionPart();
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto round = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            lua_pushinteger(state, (*self)->round());
+            return 1;
+        };
+
+        auto floor = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            lua_pushinteger(state, (*self)->floor());
+            return 1;
+        };
+
+        auto ceil = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            lua_pushinteger(state, (*self)->ceil());
+            return 1;
+        };
+
+        auto str = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            lua_pushstring(state, (*self)->str().c_str());
+            return 1;
+        };
+
+        auto toDouble = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            lua_pushnumber(state, (*self)->toDouble());
+            return 1;
+        };
+
+        auto maxVal = [](lua_State* state) -> int {
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = FixedPoint::maxVal();
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto minVal = [](lua_State* state) -> int {
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = FixedPoint::minVal();
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto sqrt = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = (*self)->sqrt();
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto abs = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = (*self)->abs();
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto atan2 = [](lua_State* state) -> int {
+            FixedPoint** y = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** x = static_cast<FixedPoint**>(luaL_checkudata(state, 2, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = FixedPoint::atan2(**y, **x);
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto sin = [](lua_State* state) -> int {
+            FixedPoint** rad = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = FixedPoint::sin(**rad);
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto cos = [](lua_State* state) -> int {
+            FixedPoint** rad = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = FixedPoint::cos(**rad);
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto atan2_degrees = [](lua_State* state) -> int {
+            FixedPoint** y = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** x = static_cast<FixedPoint**>(luaL_checkudata(state, 2, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = FixedPoint::atan2_degrees(**y, **x);
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto sin_degrees = [](lua_State* state) -> int {
+            FixedPoint** deg = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = FixedPoint::sin_degrees(**deg);
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto cos_degrees = [](lua_State* state) -> int {
+            FixedPoint** deg = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = FixedPoint::cos_degrees(**deg);
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto add = [](lua_State* state) -> int {
+            int64_t intOp = 0;
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            if (lua_isinteger(state, -2))
+            {
+                intOp = lua_tointeger(state, -2);
+                **ret = (*self)->operator+(intOp);
+            }
+
+            else
+            {
+                FixedPoint** other = static_cast<FixedPoint**>(luaL_checkudata(state, 2, "FixedPoint"));
+                **ret = (*self)->operator+(**other);
+            }
+
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto sub = [](lua_State* state) -> int {
+            int64_t intOp = 0;
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            if (lua_isinteger(state, -2))
+            {
+                intOp = lua_tointeger(state, -2);
+                **ret = (*self)->operator-(intOp);
+            }
+
+            else
+            {
+                FixedPoint** other = static_cast<FixedPoint**>(luaL_checkudata(state, 2, "FixedPoint"));
+                **ret = (*self)->operator-(**other);
+            }
+
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto mul = [](lua_State* state) -> int {
+            int64_t intOp = 0;
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            if (lua_isinteger(state, -2))
+            {
+                intOp = lua_tointeger(state, -2);
+                **ret = (*self)->operator*(intOp);
+            }
+
+            else
+            {
+                FixedPoint** other = static_cast<FixedPoint**>(luaL_checkudata(state, 2, "FixedPoint"));
+                **ret = (*self)->operator*(**other);
+            }
+
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto div = [](lua_State* state) -> int {
+            int64_t intOp = 0;
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            if (lua_isinteger(state, -2))
+            {
+                intOp = lua_tointeger(state, -2);
+                **ret = (*self)->operator/(intOp);
+            }
+
+            else
+            {
+                FixedPoint** other = static_cast<FixedPoint**>(luaL_checkudata(state, 2, "FixedPoint"));
+                **ret = (*self)->operator/(**other);
+            }
+
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto unm = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
+            *ret = new FixedPoint();
+            **ret = (*self)->operator-();
+            luaL_setmetatable(state, "FixedPoint");
+            return 1;
+        };
+
+        auto eq = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** other = static_cast<FixedPoint**>(luaL_checkudata(state, 2, "FixedPoint"));
+            lua_pushboolean(state, **self == **other);
+            return 1;
+        };
+
+        auto lt = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** other = static_cast<FixedPoint**>(luaL_checkudata(state, 2, "FixedPoint"));
+            lua_pushboolean(state, (*self)->operator<(**other));
+            return 1;
+        };
+
+        auto le = [](lua_State* state) -> int {
+            FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
+            FixedPoint** other = static_cast<FixedPoint**>(luaL_checkudata(state, 2, "FixedPoint"));
+            lua_pushboolean(state, (*self)->operator<=(**other));
+            return 1;
+        };
+
+        lua_newtable(mState);
+
+        // constructor and static functions
+        lua_pushcfunction(mState, constructor);
+        lua_setfield(mState, -2, "new");
+        lua_pushcfunction(mState, fromRawValue);
+        lua_setfield(mState, -2, "fromRawValue");
+        lua_pushcfunction(mState, maxVal);
+        lua_setfield(mState, -2, "maxVal");
+        lua_pushcfunction(mState, minVal);
+        lua_setfield(mState, -2, "minVal");
+        lua_pushcfunction(mState, atan2);
+        lua_setfield(mState, -2, "atan2");
+        lua_pushcfunction(mState, sin);
+        lua_setfield(mState, -2, "sin");
+        lua_pushcfunction(mState, cos);
+        lua_setfield(mState, -2, "cos");
+        lua_pushcfunction(mState, atan2_degrees);
+        lua_setfield(mState, -2, "atan2_degrees");
+        lua_pushcfunction(mState, sin_degrees);
+        lua_setfield(mState, -2, "sin_degrees");
+        lua_pushcfunction(mState, cos_degrees);
+        lua_setfield(mState, -2, "cos_degrees");
+        lua_setglobal(mState, "FixedPoint");
+
+        // member functions
+        lua_pushvalue(mState, -1);
+        lua_setfield(mState, -2, "__index");
+        lua_pushcfunction(mState, rawValue);
+        lua_setfield(mState, -2, "rawValue");
+        lua_pushcfunction(mState, intPart);
+        lua_setfield(mState, -2, "intPart");
+        lua_pushcfunction(mState, fractionPart);
+        lua_setfield(mState, -2, "fractionPart");
+        lua_pushcfunction(mState, str);
+        lua_setfield(mState, -2, "str");
+        lua_pushcfunction(mState, toDouble);
+        lua_setfield(mState, -2, "toDouble");
+        lua_pushcfunction(mState, round);
+        lua_setfield(mState, -2, "round");
+        lua_pushcfunction(mState, floor);
+        lua_setfield(mState, -2, "floor");
+        lua_pushcfunction(mState, ceil);
+        lua_setfield(mState, -2, "ceil");
+        lua_pushcfunction(mState, sqrt);
+        lua_setfield(mState, -2, "sqrt");
+        lua_pushcfunction(mState, abs);
+        lua_setfield(mState, -2, "abs");
+
+        // operators
+        lua_pushcfunction(mState, add);
+        lua_setfield(mState, -2, "__add");
+        lua_pushcfunction(mState, sub);
+        lua_setfield(mState, -2, "__sub");
+        lua_pushcfunction(mState, mul);
+        lua_setfield(mState, -2, "__mul");
+        lua_pushcfunction(mState, div);
+        lua_setfield(mState, -2, "__div");
+        lua_pushcfunction(mState, unm); // unary - (negation)
+        lua_setfield(mState, -2, "__unm");
+        lua_pushcfunction(mState, eq);
+        lua_setfield(mState, -2, "__eq");
+        lua_pushcfunction(mState, lt);
+        lua_setfield(mState, -2, "__lt");
+        lua_pushcfunction(mState, le);
+        lua_setfield(mState, -2, "__le");
+
+        lua_pushcfunction(mState, destructor);
+        lua_setfield(mState, -2, "__gc");
+    }
+}
 
 constexpr int64_t FixedPoint::scalingFactorPowerOf10;
 constexpr int64_t FixedPoint::scalingFactor;

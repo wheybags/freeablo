@@ -29,6 +29,7 @@ namespace Script
         int* getInputLen() { return &inputLen; }
         constexpr size_t getInputSize() const { return inputSize; }
 
+        void appendStdOut(const std::string& msg);
         void inputCommited();
 
     private:
