@@ -43,7 +43,6 @@ namespace FAWorld
         virtual bool canCriticalHit() const override { return mPlayerClass == PlayerClass::warrior; }
 
         bool castSpell(SpellId spell, Misc::Point targetPoint) override;
-        void setActiveSpellNumber(int32_t spellNumber);
         SpellId getActiveSpell() const { return mActiveSpell; }
         void setActiveSpell(SpellId spell) { mActiveSpell = spell; }
         void castActiveSpell(Misc::Point targetPoint);

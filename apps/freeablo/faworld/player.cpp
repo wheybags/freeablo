@@ -515,12 +515,5 @@ namespace FAWorld
         return false;
     }
 
-    void Player::setActiveSpellNumber(int32_t spellNumber)
-    {
-        // TODO: This is coming from Hotkeys (F5 -> F8).
-        //  This is probably the wrong place to be handling this input.
-        (void)spellNumber;
-    }
-
     void Player::castActiveSpell(Misc::Point targetPoint) { castSpell(mActiveSpell, targetPoint); }
 }

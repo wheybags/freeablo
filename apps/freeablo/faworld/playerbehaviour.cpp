@@ -100,11 +100,6 @@ namespace FAWorld
                 mPlayer->castActiveSpell(clickedPoint);
                 return;
             }
-            case PlayerInput::Type::PrepareSpell:
-            {
-                mPlayer->setActiveSpellNumber(input.mData.dataPrepareSpell.spellNumber);
-                return;
-            }
             case PlayerInput::Type::ChangeLevel:
             {
                 int32_t nextLevelIndex;

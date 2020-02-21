@@ -201,14 +201,14 @@ namespace Engine
                 return "ToggleSpellbook";
             case KeyboardInputAction::toggleInventory:
                 return "ToggleInventory";
-            case KeyboardInputAction::prepareSpell1:
-                return "PrepareSpell1";
-            case KeyboardInputAction::prepareSpell2:
-                return "PrepareSpell2";
-            case KeyboardInputAction::prepareSpell3:
-                return "PrepareSpell3";
-            case KeyboardInputAction::prepareSpell4:
-                return "PrepareSpell4";
+            case KeyboardInputAction::spellHotkeyF5:
+                return "SpellHotkeyF5";
+            case KeyboardInputAction::spellHotkeyF6:
+                return "SpellHotkeyF6";
+            case KeyboardInputAction::spellHotkeyF7:
+                return "SpellHotkeyF7";
+            case KeyboardInputAction::spellHotkeyF8:
+                return "SpellHotkeyF8";
 
             case KeyboardInputAction::max:
                 break;
