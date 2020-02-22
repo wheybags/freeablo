@@ -216,9 +216,9 @@ public:
     // mVal is just the intended value multiplid by scalingFactor.
     // So, eg with scale 1000, 1.23 would have value 1230.
     static constexpr int64_t scalingFactor = 1000000000;
+    static FixedPoint PI;
 
 private:
-    static FixedPoint PI;
     static FixedPoint epsilon;
 
     int64_t mVal = 0;
