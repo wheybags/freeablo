@@ -33,14 +33,12 @@ namespace Engine
                 return;
             }
 
-            case Engine::KeyboardInputAction::prepareSpell1:
-            case Engine::KeyboardInputAction::prepareSpell2:
-            case Engine::KeyboardInputAction::prepareSpell3:
-            case Engine::KeyboardInputAction::prepareSpell4:
+            case Engine::KeyboardInputAction::spellHotkeyF5:
+            case Engine::KeyboardInputAction::spellHotkeyF6:
+            case Engine::KeyboardInputAction::spellHotkeyF7:
+            case Engine::KeyboardInputAction::spellHotkeyF8:
             {
-                // Assume these enums entries are sequential.
-                int32_t spellNumber = (int32_t)action - (int32_t)Engine::KeyboardInputAction::prepareSpell1 + 1;
-                mInputs.emplace_back(FAWorld::PlayerInput::PrepareSpellData{spellNumber}, player->getId());
+                // TODO: Spell hotkeys
                 return;
             }
 

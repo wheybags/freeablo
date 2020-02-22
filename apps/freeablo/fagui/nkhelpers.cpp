@@ -1,5 +1,4 @@
 #include "nkhelpers.h"
-
 #include "fa_nuklear.h"
 
 struct nk_vec2 FAGui::center(const struct nk_rect& rect) { return {rect.x + rect.w / 2, rect.y + rect.h / 2}; }

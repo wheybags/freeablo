@@ -114,10 +114,6 @@ namespace FAWorld
         y = loader.load<int32_t>();
     }
 
-    void PlayerInput::PrepareSpellData::save(Serial::Saver& saver) const { saver.save(spellNumber); }
-
-    void PlayerInput::PrepareSpellData::load(Serial::Loader& loader) { spellNumber = loader.load<int32_t>(); }
-
     void PlayerInput::ChangeLevelData::save(Serial::Saver& saver) const { saver.save(uint8_t(direction)); }
 
     void PlayerInput::ChangeLevelData::load(Serial::Loader& loader) { direction = Direction(loader.load<uint8_t>()); }

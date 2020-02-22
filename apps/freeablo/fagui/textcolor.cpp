@@ -1,5 +1,4 @@
 #include "textcolor.h"
-
 #include <fa_nuklear.h>
 
 namespace FAGui

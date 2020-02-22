@@ -1,6 +1,4 @@
-
 #pragma once
-
 // hash functions for types that are missing them, so they can be sued as keys in std::unordered_map
 
 namespace std

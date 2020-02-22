@@ -1,5 +1,4 @@
 #include "sol.h"
-
 #include <faio/fafileobject.h>
 
 namespace Level

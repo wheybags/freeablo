@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "int128.h"
-
 #include <cassert>
 #include <iomanip>
 #include <ostream> // NOLINT(readability/streams)

@@ -1,11 +1,16 @@
 #!/bin/bash -e
 
-clang-format -version
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd "$DIR"
+
+FMT_COMMAND=clang-format-7
+
+$FMT_COMMAND -version
 
 paths="apps components test"
 
 for x in $paths; do 
-    find $x -name *.h -o -name *.cpp | xargs clang-format -i -style=file
+    find $x -name *.h -o -name *.cpp | xargs $FMT_COMMAND -i -style=file
 done
 
 if [ ! -z "$TRAVIS" ]; then

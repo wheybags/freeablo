@@ -6,11 +6,10 @@
 
 #include <algorithm>
 #include <cctype>
+#include <faio/fafileobject.h>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <faio/fafileobject.h>
 
 namespace Misc
 {

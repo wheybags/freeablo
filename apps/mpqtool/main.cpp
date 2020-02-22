@@ -1,11 +1,9 @@
 
 #include <iostream>
-
 #include <stdint.h>
 
-#include <stdio.h>
-
 #include <faio/fafileobject.h>
+#include <stdio.h>
 
 int main(int argc, char** argv)
 {

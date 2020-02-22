@@ -1,5 +1,4 @@
 #pragma once
-
 #include "baseitemmanager.h"
 #include "dun.h"
 #include "min.h"
@@ -85,6 +84,16 @@ namespace Level
         int32_t getNextLevel() const { return mNext; }
 
         int32_t getPreviousLevel() const { return mPrevious; }
+
+    private:
+        struct InternalLocationData
+        {
+            int32_t xDunIndex = 0;
+            int32_t yDunIndex = 0;
+            int32_t tilIndex = 0;
+        };
+
+        InternalLocationData getInternalLocationData(const Misc::Point& point) const;
 
     private:
         std::string mTilesetCelPath;               ///< path to cel file for level

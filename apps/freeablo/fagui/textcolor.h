@@ -1,5 +1,4 @@
 #pragma once
-
 struct nk_color;
 
 namespace FAGui

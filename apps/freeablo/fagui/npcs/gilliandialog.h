@@ -1,5 +1,4 @@
 #pragma once
-
 #include "../../faworld/actor.h"
 #include "../characterdialoguepopup.h"
 

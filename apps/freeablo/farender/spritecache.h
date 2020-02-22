@@ -1,16 +1,13 @@
-
 #pragma once
-
 #include <atomic>
+#include <fa_nuklear.h>
 #include <list>
 #include <map>
+#include <render/render.h>
 #include <stdlib.h>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <fa_nuklear.h>
-#include <render/render.h>
 
 namespace FARender
 {
@@ -19,11 +16,11 @@ namespace FARender
     class FASpriteGroup
     {
     public:
-        bool isValid() { return spriteCacheIndex != 0; }
-        int32_t getAnimLength() { return animLength; }
+        bool isValid() const { return spriteCacheIndex != 0; }
+        int32_t getAnimLength() const { return animLength; }
         int32_t getWidth(int frame = 0) const { return width[frame]; }
         int32_t getHeight(int frame = 0) const { return height[frame]; }
-        int32_t getCacheIndex() { return spriteCacheIndex; }
+        int32_t getCacheIndex() const { return spriteCacheIndex; }
         struct nk_image getNkImage(int32_t frame = 0);
 
     private:

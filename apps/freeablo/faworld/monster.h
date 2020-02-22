@@ -22,6 +22,7 @@ namespace FAWorld
         virtual int32_t getOnKilledExperience() const override;
 
     private:
+        void commonInit();
         void spawnItem();
         ItemId randomItem();
 
@@ -33,5 +34,7 @@ namespace FAWorld
             int32_t level = 0;
         };
         mutable CalculateStatsCacheKey mLastStatsKey; // not serialised, only used to determine if we need to recalculate stats
+
+        bool mInitialised = false; // not serialised
     };
 }

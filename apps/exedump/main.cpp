@@ -1,5 +1,4 @@
 #include <diabloexe/diabloexe.h>
-
 #include <iostream>
 
 #include "settings/settings.h"

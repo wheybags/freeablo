@@ -92,17 +92,17 @@ namespace FAWorld
         for (AnimState s = (AnimState)0; s < AnimState::ENUM_END; s = AnimState(size_t(s) + 1))
         {
             mAnimations[size_t(s)] = FARender::getDefaultSprite();
-            mAnimTimeMap[size_t(s)] = World::getTicksInPeriod("0.06");
+
+            // Diablo 1 animations are 20 fps
+            mAnimTimeMap[size_t(s)] = World::getTicksInPeriod(FixedPoint(1) / FixedPoint(20));
         }
     }
-
-    AnimState ActorAnimationManager::getCurrentAnimation() { return mPlayingAnim; }
 
     std::pair<FARender::FASpriteGroup*, int32_t> ActorAnimationManager::getCurrentRealFrame() { return mAnimationPlayer.getCurrentFrame(); }
 
     void ActorAnimationManager::interruptAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type)
     {
-        if (mPlayingAnim != animation)
+        if (mPlayingAnim != animation && mPlayingAnim != AnimState::attack)
         {
             mInterruptedAnimationState = mPlayingAnim;
             mInterruptedAnimationFrame = mAnimationPlayer.getCurrentFrame().second;
@@ -124,7 +124,7 @@ namespace FAWorld
         mAnimationPlayer.playAnimation(mAnimations[size_t(animation)], mAnimTimeMap[size_t(animation)], frameSequence);
     }
 
-    void ActorAnimationManager::setAnimation(AnimState animation, FARender::FASpriteGroup* sprite)
+    void ActorAnimationManager::setAnimationSprites(AnimState animation, FARender::FASpriteGroup* sprite)
     {
         auto playingSprite = mAnimationPlayer.getCurrentFrame().first;
 

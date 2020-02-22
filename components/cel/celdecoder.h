@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "celframe.h"
 #include "pal.h"
 #include <functional>

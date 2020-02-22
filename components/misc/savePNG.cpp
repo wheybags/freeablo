@@ -5,9 +5,8 @@
  * http://www.libpng.org/pub/png/src/libpng-LICENSE.txt
  */
 
-#include <misc/disablewarn.h> // don't want warnings for third party files
-
 #include <SDL.h>
+#include <misc/disablewarn.h> // don't want warnings for third party files
 #include <png.h>
 
 #define SUCCESS 0

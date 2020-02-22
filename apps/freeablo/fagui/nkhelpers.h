@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "nuklearmisc/inputfwd.h"
 
 // file to host common functions useful for working with nuklear library

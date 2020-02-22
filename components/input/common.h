@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "hotkey.h"
 #include "keys.h"
 

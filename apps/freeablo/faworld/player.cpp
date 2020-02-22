@@ -116,6 +116,8 @@ namespace FAWorld
 
         memcpy(&mLastStatsKey, &statsCacheKey, sizeof(CalculateStatsCacheKey));
 
+        stats = LiveActorStats(); // clear before we start
+
         BaseStats charStats = actorStats.baseStats;
 
         ItemStats itemStats;
@@ -129,6 +131,8 @@ namespace FAWorld
         stats.toHitMelee.bonus = 0;
         stats.toHitRanged.bonus = 0;
         stats.toHitMagic.bonus = 0;
+
+        EquippedInHandsItems handItems = mInventory.getItemsInHands();
 
         // TODO: make sure all the following calculations should be floored.
         // Flooring for melee damage produces the same numbers as displayed in the character GUI in the original game.
@@ -151,6 +155,38 @@ namespace FAWorld
 
                 stats.toHitMelee.bonus = 20;
                 stats.toHitRanged.bonus = 10;
+                stats.blockChance =
+                    mInventory.isShieldEquipped() ? stats.baseStats.dexterity + 30 : 0; // TODOHELLFIRE: monks can block with staffs and hand to hand
+
+                // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
+                if (handItems.meleeWeapon)
+                {
+                    switch (handItems.meleeWeapon->item->getType())
+                    {
+                        case ItemType::sword:
+                        case ItemType::mace:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.45"));
+                            break;
+                        case ItemType::axe:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.5"));
+                            break;
+                        case ItemType::staff:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
+                            break;
+                        default:
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                    }
+                }
+                else
+                {
+                    stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.45"));
+                }
+
+                if (handItems.rangedWeapon)
+                    stats.rangedAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
+
+                stats.spellAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.7"));
+
                 break;
             }
             case PlayerClass::rogue:
@@ -169,6 +205,37 @@ namespace FAWorld
                     (int32_t)(((FixedPoint(charStats.strength) + FixedPoint(charStats.dexterity)) * actorStats.mLevel) / FixedPoint(100)).floor();
 
                 stats.toHitRanged.bonus = 20;
+                stats.blockChance = mInventory.isShieldEquipped() ? stats.baseStats.dexterity + 20 : 0;
+
+                // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
+                if (handItems.meleeWeapon)
+                {
+                    switch (handItems.meleeWeapon->item->getType())
+                    {
+                        case ItemType::sword:
+                        case ItemType::mace:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.5"));
+                            break;
+                        case ItemType::axe:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.65"));
+                            break;
+                        case ItemType::staff:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
+                            break;
+                        default:
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                    }
+                }
+                else
+                {
+                    stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.5"));
+                }
+
+                if (handItems.rangedWeapon)
+                    stats.rangedAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
+
+                stats.spellAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.6"));
+
                 break;
             }
             case PlayerClass::sorcerer:
@@ -185,27 +252,87 @@ namespace FAWorld
                 stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(200)).floor();
 
                 stats.toHitMagic.bonus = 20;
+                stats.blockChance = mInventory.isShieldEquipped() ? stats.baseStats.dexterity + 10 : 0;
+
+                // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
+                if (handItems.meleeWeapon)
+                {
+                    switch (handItems.meleeWeapon->item->getType())
+                    {
+                        case ItemType::sword:
+                        case ItemType::mace:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.6"));
+                            break;
+                        case ItemType::axe:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.8"));
+                            break;
+                        case ItemType::staff:
+                            stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.6"));
+                            break;
+                        default:
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                    }
+                }
+                else if (handItems.shield)
+                {
+                    stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.45"));
+                }
+                else
+                {
+                    stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.6"));
+                }
+
+                if (handItems.rangedWeapon)
+                    stats.rangedAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.8"));
+
+                stats.spellAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.4"));
+
                 break;
             }
             case PlayerClass::none:
                 invalid_enum(PlayerClass, mPlayerClass);
         }
 
-        // TODOHELLFIRE: Add in bonuses for barbarians and monks here, see Jarulf's guide section 6.2.3
+        // TODOHELLFIRE: Add in bonuses for barbarians and monks here, see https://wheybags.gitlab.io/jarulfs-guide/#monster-versus-player
         stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / FixedPoint(5) + itemStats.armorClass).floor();
         stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / FixedPoint(2) + itemStats.toHit).floor();
         stats.toHitMeleeMinMaxCap = {5, 95};
         stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.toHit).floor();
         stats.toHitMagic.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.magic)).floor();
 
-        // TODO: account for shields. I'm not sure how exactly, but if you have a shield and no weapon equipped, it should affect your damage.
         stats.meleeDamageBonusRange = itemStats.meleeDamageBonusRange;
-        if (stats.meleeDamageBonusRange.isZero())
-            stats.meleeDamageBonusRange = IntRange(1, 1);
+
+        // https://wheybags.gitlab.io/jarulfs-guide/#damage-done
+        if (!Item::isItemAWeapon(mInventory.getLeftHand().getType()) && !Item::isItemAWeapon(mInventory.getRightHand().getType()))
+        {
+            // TODOHELLFIRE: monks get a bonus here
+            if (mInventory.getLeftHand().getType() == ItemType::shield || mInventory.getRightHand().getType() == ItemType::shield)
+                stats.meleeDamageBonusRange = IntRange(1, 3);
+            else
+                stats.meleeDamageBonusRange = IntRange(1, 1);
+        }
 
         stats.rangedDamageBonusRange = itemStats.rangedDamageBonusRange;
-
         stats.hitRecoveryDamageThreshold = actorStats.mLevel;
+    }
+
+    DamageType Player::getMeleeDamageType() const
+    {
+        const Item& left = mInventory.getLeftHand();
+        const Item& right = mInventory.getRightHand();
+
+        if (left.getType() == ItemType::mace || right.getType() == ItemType::mace)
+            return DamageType::Club;
+        if (left.getType() == ItemType::sword || right.getType() == ItemType::sword)
+            return DamageType::Sword;
+        if (left.getType() == ItemType::axe || right.getType() == ItemType::axe)
+            return DamageType::Axe;
+        if (left.getType() == ItemType::bow || right.getType() == ItemType::bow)
+            return DamageType::Bow;
+        if (left.getType() == ItemType::staff || right.getType() == ItemType::staff)
+            return DamageType::Staff;
+
+        return DamageType::Unarmed;
     }
 
     void Player::init(const DiabloExe::CharacterStats& charStats)
@@ -383,20 +510,29 @@ namespace FAWorld
             return;
 
         // TODO: Spell animations: lightning "lm", fire "fm", other "qm"
-        mAnimation.setAnimation(AnimState::dead, renderer->loadImage(helper(true, "dt")));
-        mAnimation.setAnimation(AnimState::attack, renderer->loadImage(helper(false, "at")));
-        mAnimation.setAnimation(AnimState::hit, renderer->loadImage(helper(false, "ht")));
+        mAnimation.setAnimationSprites(AnimState::dead, renderer->loadImage(helper(true, "dt")));
+        mAnimation.setAnimationSprites(AnimState::attack, renderer->loadImage(helper(false, "at")));
+        mAnimation.setAnimationSprites(AnimState::hit, renderer->loadImage(helper(false, "ht")));
+
+        if (mInventory.isShieldEquipped())
+            mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "bl")));
+        else
+            mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "ht")));
 
         if (getLevel() && getLevel()->isTown())
         {
-            mAnimation.setAnimation(AnimState::walk, renderer->loadImage(helper(false, "wl")));
-            mAnimation.setAnimation(AnimState::idle, renderer->loadImage(helper(false, "st")));
+            mAnimation.setAnimationSprites(AnimState::walk, renderer->loadImage(helper(false, "wl")));
+            mAnimation.setAnimationSprites(AnimState::idle, renderer->loadImage(helper(false, "st")));
         }
         else
         {
-            mAnimation.setAnimation(AnimState::walk, renderer->loadImage(helper(false, "aw")));
-            mAnimation.setAnimation(AnimState::idle, renderer->loadImage(helper(false, "as")));
+            mAnimation.setAnimationSprites(AnimState::walk, renderer->loadImage(helper(false, "aw")));
+            mAnimation.setAnimationSprites(AnimState::idle, renderer->loadImage(helper(false, "as")));
         }
+
+        // TODO: Is this actually correct? It seems kind of odd, but it is what is listed in Jarulf's guide
+        // https://wheybags.gitlab.io/jarulfs-guide/#timing-information
+        mMeleeHitFrame = mAnimation.getAnimationSprites(AnimState::attack)->getAnimLength() - 1;
     }
 
     bool Player::dropItem(const Misc::Point& clickedPoint)
@@ -513,13 +649,6 @@ namespace FAWorld
             return true;
         }
         return false;
-    }
-
-    void Player::setActiveSpellNumber(int32_t spellNumber)
-    {
-        // TODO: This is coming from Hotkeys (F5 -> F8).
-        //  This is probably the wrong place to be handling this input.
-        (void)spellNumber;
     }
 
     void Player::castActiveSpell(Misc::Point targetPoint) { castSpell(mActiveSpell, targetPoint); }

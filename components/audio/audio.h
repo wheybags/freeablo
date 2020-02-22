@@ -1,9 +1,6 @@
-
 #pragma once
-
-#include <string>
-
 #include <stdint.h>
+#include <string>
 
 namespace Audio
 {
