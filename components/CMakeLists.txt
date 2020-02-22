@@ -58,7 +58,7 @@ add_library(Misc
     misc/averager.cpp
     misc/averager.h
 )
-target_link_libraries(Misc Settings png SDL2)
+target_link_libraries(Misc Settings png SDL2 lua)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
@@ -155,7 +155,5 @@ add_library(Script
   script/console.h
 )
 
-find_package(Lua REQUIRED)
-
-target_link_libraries(Script ${LUA_LIBRARIES} Filesystem)
 set_target_properties(Script PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+target_link_libraries(Script lua Filesystem)

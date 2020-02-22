@@ -7,7 +7,9 @@
 #include <string>
 #include <vector>
 
-#include <lua.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 namespace Script
 {
