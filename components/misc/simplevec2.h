@@ -17,7 +17,7 @@ namespace Vec2Helper
 {
     template <typename X, typename Y> void initFromOtherType(Vec2<X>& vec, Vec2<Y> other);
     template <typename X> inline void initFromOtherType(Vec2<X>& vec, Vec2<FixedPoint> other);
-};
+}
 
 template <typename T> class Vec2
 {

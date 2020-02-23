@@ -6,6 +6,10 @@
 #include <serial/loader.h>
 #include <sstream>
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
 #ifndef NDEBUG
 #define _USE_MATH_DEFINES
 #include "math.h"
@@ -24,6 +28,32 @@ static inline int64_t i64abs(int64_t i)
 
 static inline int64_t muldiv(int64_t n1, int64_t n2, int64_t d)
 {
+    // This function is designed to return int64_t((int128_t(n1) * int128_t(n2)) / int128_t(d))
+
+// 64-bit gcc or clang
+#if defined(__GNUC__) && defined(__LP64__)
+    // AMD64 instruction set actually allows some limited 128-bit arithmetic.
+    // We can:
+    //   - Multiply two 64-bit numbers to get a 128 bit result (imulq)
+    //   - Divide a 128-bit number by a 64-bit number to get a 128-bit result (idivq)
+    // This is enough to implement our muldiv.
+    int64_t retval;
+    asm("imulq %1\n"   // multiply %1 (n1) by rax (n2), stores 128-bit result in rdx:rax
+        "idivq %3\n"   // divide rdx:rax by %3 (d), stores 128-bit result in rdx:rax
+        : "=a"(retval) // retval will be stored in rax (which is good, since that's the register it needs to be in to return it from this function)
+        : "r"(n1),
+          "a"(n2), // n2 will be loaded into rax before starting the block
+          "r"(d)
+        : "rdx", "cc"); // rdx register will be used, and condition codes will be overwritten
+
+    return retval;
+#elif defined(_MSC_VER)
+    // These msvc intrinsics do the same thing as the above assembly
+    int64_t high;
+    int64_t low = _mul128(n1, n2, &high);
+    return _div128(high, low, d, nullptr);
+#else
+    // fall back to a naive implementation using the int128_t class from Abseil
     int64_t ret;
     // Optimisation : Only use 128bit if 64bit will overflow.
     if (n2 == 0 || i64abs(n1) <= INT64_MAX / i64abs(n2))
@@ -31,6 +61,7 @@ static inline int64_t muldiv(int64_t n1, int64_t n2, int64_t d)
     else
         ret = int64_t(absl::int128(n1) * n2 / d);
     return ret;
+#endif
 }
 
 FixedPoint::FixedPoint(int64_t integerValue) { *this = fromRawValue(integerValue * FixedPoint::scalingFactor); }
