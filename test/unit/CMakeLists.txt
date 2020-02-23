@@ -18,4 +18,4 @@ set(SOURCES
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
-target_link_libraries(${PROJECT_NAME} gtest_main freeablo_lib Misc Settings Filesystem Script lua)
+target_link_libraries(${PROJECT_NAME} gtest_main freeablo_lib Misc Settings Filesystem Script)
