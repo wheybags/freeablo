@@ -1,6 +1,7 @@
 #include "playerbehaviour.h"
 #include "../fagui/guimanager.h"
 #include "../farender/renderer.h"
+#include "fasavegame/gameloader.h"
 #include "equiptarget.h"
 #include "input/inputmanager.h"
 #include "player.h"
@@ -16,6 +17,21 @@ namespace FAWorld
     {
         release_assert(actor->getTypeId() == Player::typeId);
         mPlayer = static_cast<Player*>(actor);
+    }
+
+    PlayerBehaviour::PlayerBehaviour(FASaveGame::GameLoader& loader)
+    {
+        mActiveSpell = (SpellId)loader.load<int32_t>();
+
+        for (auto& hotkey : mSpellHotkey)
+            hotkey = (SpellId)loader.load<int32_t>();
+    }
+
+    void PlayerBehaviour::save(FASaveGame::GameSaver& saver) {
+        saver.save((int32_t)mActiveSpell);
+
+        for (auto& hotkey : mSpellHotkey)
+            saver.save((int32_t)hotkey);
     }
 
     void PlayerBehaviour::reAttach(Actor* actor)
@@ -97,7 +113,7 @@ namespace FAWorld
             case PlayerInput::Type::CastSpell:
             {
                 auto clickedPoint = Misc::Point(input.mData.dataCastSpell.x, input.mData.dataCastSpell.y);
-                mPlayer->castActiveSpell(clickedPoint);
+                mPlayer->castSpell(mActiveSpell, clickedPoint);
                 return;
             }
             case PlayerInput::Type::ChangeLevel:
@@ -135,7 +151,22 @@ namespace FAWorld
             }
             case PlayerInput::Type::SetActiveSpell:
             {
-                mPlayer->setActiveSpell(input.mData.dataSetActiveSpell.spell);
+                mActiveSpell = input.mData.dataSetActiveSpell.spell;
+                return;
+            }
+            case PlayerInput::Type::ConfigureSpellHotkey:
+            {
+                for (auto& hk : mSpellHotkey)
+                {
+                    if (hk == input.mData.dataConfigureSpellHotkey.spell)
+                        hk = SpellId::null;
+                }
+                mSpellHotkey[input.mData.dataConfigureSpellHotkey.hotkey] = input.mData.dataConfigureSpellHotkey.spell;
+                return;
+            }
+            case PlayerInput::Type::SpellHotkey:
+            {
+                mActiveSpell = mSpellHotkey[input.mData.dataSpellHotkey.hotkey];
                 return;
             }
             case PlayerInput::Type::BuyItem:

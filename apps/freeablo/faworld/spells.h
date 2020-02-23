@@ -45,8 +45,27 @@ namespace FAWorld
             {SpellId::rndteleport, SpellId::manashield, SpellId::element, SpellId::fireball, SpellId::wave, SpellId::chain, SpellId::guardian},
             {SpellId::nova, SpellId::golem, SpellId::teleport, SpellId::apoca, SpellId::bonespirit, SpellId::flare, SpellId::etherealize}};
 
+        enum class SpellHighlightFrame {
+            blank = 26,
+            highlight = 42,
+            scroll = 43,
+            staff = 44,
+            skill = 45,
+            spell = 46,
+            hotkeyF5 = 47,
+            hotkeyF6 = 48,
+            hotkeyF7 = 49,
+            hotkeyF8 = 50
+        };
+
         // Temporary quirk to only allow implemented spells to be used.
-        constexpr static const SpellId implementedSpells[] = {SpellId::firebolt, SpellId::firewall, SpellId::manashield};
+        static bool isSpellImplemented(SpellId spell) {
+            static const SpellId implementedSpells[] = {SpellId::firebolt, SpellId::firewall, SpellId::manashield};
+            for (auto sp : implementedSpells)
+                if (spell == sp)
+                    return true;
+            return false;
+        }
 
     private:
         SpellId mId;

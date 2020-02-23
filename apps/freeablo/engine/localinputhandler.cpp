@@ -2,6 +2,7 @@
 #include "../fagui/guimanager.h"
 #include "../farender/renderer.h"
 #include "../faworld/player.h"
+#include "../faworld/playerbehaviour.h"
 #include "../faworld/target.h"
 #include "../faworld/world.h"
 #include "enginemain.h"
@@ -38,7 +39,15 @@ namespace Engine
             case Engine::KeyboardInputAction::spellHotkeyF7:
             case Engine::KeyboardInputAction::spellHotkeyF8:
             {
-                // TODO: Spell hotkeys
+                if (EngineMain::get()->mGuiManager->isSpellSelectionMenuShown())
+                    return;
+                // Assume these enum entries are sequential.
+                int index = (int)action - (int)Engine::KeyboardInputAction::spellHotkeyF5;
+                auto spell = player->getPlayerBehaviour()->mSpellHotkey[index];
+                if (spell != FAWorld::SpellId::null) {
+                    auto input = FAWorld::PlayerInput::SetActiveSpellData{spell};
+                    mInputs.emplace_back(input, player->getId());
+                }
                 return;
             }
 
