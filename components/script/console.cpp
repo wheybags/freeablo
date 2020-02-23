@@ -25,9 +25,14 @@ namespace Script
                         luaStdOut += lua_toboolean(state, -i) != 0 ? "true" : "false";
                     }
 
+                    else if (lua_isnumber(state, -i))
+                    {
+                        luaStdOut += luaL_checknumber(state, i).str();
+                    }
+
                     else
                     {
-                        const char* str = lua_tostring(state, -i);
+                        const char* str = luaL_checkstring(state, i);
                         luaStdOut += str;
                     }
                 }

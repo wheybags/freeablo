@@ -155,5 +155,5 @@ add_library(Script
   script/console.h
 )
 
-target_link_libraries(Script lua Filesystem)
+target_link_libraries(Script lua Filesystem Misc)
 set_target_properties(Script PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

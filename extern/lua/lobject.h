@@ -51,7 +51,7 @@ typedef union Value {
   lua_Integer i;   /* integer numbers */
   lua_Number n;    /* float numbers */
   Value() { new (&n) lua_Number(); }
-  Value(struct GCObject* g) : gc(g) { new (&n) lua_Number(); }
+  Value(struct GCObject* g) : gc(g) {}
 } Value;
 
 
