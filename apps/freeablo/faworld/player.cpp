@@ -635,6 +635,9 @@ namespace FAWorld
 
     bool Player::castSpell(SpellId spell, Misc::Point targetPoint)
     {
+        if (spell == SpellId::null || spell == SpellId::invalid)
+            return false;
+
         auto spellData = SpellData(spell);
         auto& mana = mStats.getMana();
         auto manaCost = spellData.manaCost();
@@ -652,4 +655,18 @@ namespace FAWorld
     }
 
     void Player::castActiveSpell(Misc::Point targetPoint) { castSpell(mActiveSpell, targetPoint); }
+
+    SpellId Player::defaultSkill() {
+        switch (mPlayerClass)
+        {
+            case PlayerClass::warrior:
+                return SpellId::repair;
+            case PlayerClass::rogue:
+                return SpellId::disarm;
+            case PlayerClass::sorcerer:
+                return SpellId::recharge;
+            case PlayerClass::none:
+                invalid_enum(PlayerClass, mPlayerClass);
+        }
+    }
 }

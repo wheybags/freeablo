@@ -163,6 +163,7 @@ namespace FAGui
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
         void bottomMenu(nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
+        void spellSelectionMenu(nk_context* ctx);
 
         int smallTextWidth(const char* text);
         void descriptionPanel(nk_context* ctx, const std::string& description);
@@ -185,5 +186,6 @@ namespace FAGui
         const FAWorld::Item* mGoldSplitTarget = nullptr;
         int mGoldSplitCnt = 0;
         int mCurSpellbookTab = 0;
+        bool mShowSpellSelectionMenu = false;
     };
 }
