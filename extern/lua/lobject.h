@@ -43,6 +43,9 @@ typedef union Value
     lua_CFunction f;     /* light C functions */
     lua_Integer i;       /* integer numbers */
     lua_Number n;        /* float numbers */
+
+    Value() { new (&n) lua_Number(); }
+    Value(struct GCObject* g) : gc(g) { new (&n) lua_Number(); }
 } Value;
 
 /*
@@ -175,7 +178,7 @@ typedef StackValue* StkId;
 #define isempty(v) ttisnil(v)
 
 /* macro defining a value corresponding to an absent key */
-#define ABSTKEYCONSTANT {NULL}, LUA_VABSTKEY
+#define ABSTKEYCONSTANT {nullptr}, LUA_VABSTKEY
 
 /* mark an entry as empty */
 #define setempty(v) settt_(v, LUA_VEMPTY)

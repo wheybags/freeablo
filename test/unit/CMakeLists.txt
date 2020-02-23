@@ -10,7 +10,6 @@ set(SOURCES
     findpath/neighbors_tests.cpp
 
     fixedpoint.cpp
-    fixedpoint_lua.cpp
     settings.cpp
     random.cpp
     testlevelgen.cpp

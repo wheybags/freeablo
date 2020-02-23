@@ -99,12 +99,12 @@ int luaV_tonumber_(const TValue* obj, lua_Number* n)
     TValue v;
     if (ttisinteger(obj))
     {
-        *n = cast_num(ivalue(obj));
+        *n = lua_Number{(int64_t)obj->value_.i};
         return 1;
     }
     else if (l_strton(obj, &v))
     {                    /* string coercible to number? */
-        *n = nvalue(&v); /* convert result of 'luaO_str2num' to a float */
+        *n = v.value_.n;; /* convert result of 'luaO_str2num' to a float */
         return 1;
     }
     else
@@ -116,7 +116,7 @@ int luaV_tonumber_(const TValue* obj, lua_Number* n)
 */
 int luaV_flttointeger(lua_Number n, lua_Integer* p, F2Imod mode)
 {
-    lua_Number f = l_floor(n);
+    lua_Number f = n.floor();
     if (n != f)
     { /* not an integral value? */
         if (mode == F2Ieq)
@@ -124,7 +124,8 @@ int luaV_flttointeger(lua_Number n, lua_Integer* p, F2Imod mode)
         else if (mode == F2Iceil) /* needs ceil? */
             f += 1;               /* convert floor to ceil (remember: n != f) */
     }
-    return lua_numbertointeger(f, p);
+    *p = f.intPart();
+    return 1;
 }
 
 /*
@@ -181,7 +182,7 @@ static int forlimit(lua_State* L, lua_Integer init, const TValue* lim, lua_Integ
         if (!tonumber(lim, &flim)) /* cannot convert to float? */
             luaG_forerror(L, lim, "limit");
         /* else 'flim' is a float out of integer bounds */
-        if (luai_numlt(0, flim))
+        if (luai_numlt(lua_Number("0"), flim))
         { /* if it is positive, it is too large */
             if (step < 0)
                 return 1;        /* initial value must be less than it */
@@ -254,7 +255,7 @@ static int forprep(lua_State* L, StkId ra)
             luaG_forerror(L, pinit, "initial value");
         if (step == 0)
             luaG_runerror(L, "'for' step is zero");
-        if (luai_numlt(0, step) ? luai_numlt(limit, init) : luai_numlt(init, limit))
+        if (luai_numlt(lua_Number("0"), step) ? luai_numlt(limit, init) : luai_numlt(init, limit))
             return 1; /* skip the loop */
         else
         {
@@ -279,7 +280,7 @@ static int floatforloop(StkId ra)
     lua_Number limit = fltvalue(s2v(ra + 1));
     lua_Number idx = fltvalue(s2v(ra)); /* internal index */
     idx = luai_numadd(L, idx, step);    /* increment index */
-    if (luai_numlt(0, step) ? luai_numle(idx, limit) : luai_numle(limit, idx))
+    if (luai_numlt(lua_Number("0"), step) ? luai_numle(idx, limit) : luai_numle(limit, idx))
     {
         chgfltvalue(s2v(ra), idx);     /* update internal index */
         setfltvalue(s2v(ra + 3), idx); /* and control variable */
@@ -437,7 +438,7 @@ static int l_strcmp(const TString* ls, const TString* rs)
 static int LTintfloat(lua_Integer i, lua_Number f)
 {
     if (l_intfitsf(i))
-        return luai_numlt(cast_num(i), f); /* compare them as floats */
+        return luai_numlt(lua_Number((int64_t) i), f); /* compare them as floats */
     else
     { /* i < f <=> i < ceil(f) */
         lua_Integer fi;
@@ -455,7 +456,7 @@ static int LTintfloat(lua_Integer i, lua_Number f)
 static int LEintfloat(lua_Integer i, lua_Number f)
 {
     if (l_intfitsf(i))
-        return luai_numle(cast_num(i), f); /* compare them as floats */
+        return luai_numle(lua_Number((int64_t) i), f); /* compare them as floats */
     else
     { /* i <= f <=> i <= floor(f) */
         lua_Integer fi;
@@ -473,7 +474,7 @@ static int LEintfloat(lua_Integer i, lua_Number f)
 static int LTfloatint(lua_Number f, lua_Integer i)
 {
     if (l_intfitsf(i))
-        return luai_numlt(f, cast_num(i)); /* compare them as floats */
+        return luai_numlt(f, lua_Number((int64_t) i)); /* compare them as floats */
     else
     { /* f < i <=> floor(f) < i */
         lua_Integer fi;
@@ -491,7 +492,7 @@ static int LTfloatint(lua_Number f, lua_Integer i)
 static int LEfloatint(lua_Number f, lua_Integer i)
 {
     if (l_intfitsf(i))
-        return luai_numle(f, cast_num(i)); /* compare them as floats */
+        return luai_numle(f, lua_Number((int64_t) i)); /* compare them as floats */
     else
     { /* f <= i <=> ceil(f) <= i */
         lua_Integer fi;
@@ -815,8 +816,8 @@ lua_Integer luaV_mod(lua_State* L, lua_Integer m, lua_Integer n)
 */
 lua_Number luaV_modf(lua_State* L, lua_Number m, lua_Number n)
 {
-    lua_Number r;
-    luai_nummod(L, m, n, r);
+    lua_Number r = 0;
+    //luai_nummod(L, m, n, r); // TODO
     return r;
 }
 
@@ -1526,12 +1527,13 @@ tailcall:
             }
             vmcase(OP_MODK)
             {
-                op_arithK(L, luaV_mod, luaV_modf);
+                //op_arithK(L, luaV_mod, luaV_modf);
+                printf("OP_MODK not supported.\n");
                 vmbreak;
             }
             vmcase(OP_POWK)
             {
-                op_arithfK(L, luai_numpow);
+                //op_arithfK(L, luai_numpow);
                 vmbreak;
             }
             vmcase(OP_DIVK)
@@ -1605,7 +1607,8 @@ tailcall:
             }
             vmcase(OP_POW)
             {
-                op_arithf(L, luai_numpow);
+                //op_arithf(L, luai_numpow);
+                printf("OP_POW not supported.");
                 vmbreak;
             }
             vmcase(OP_DIV)

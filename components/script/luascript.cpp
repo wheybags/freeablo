@@ -23,6 +23,8 @@ namespace Script
 
     void LuaScript::printError(const std::string& variable, const std::string& reason)
     {
+        (void)variable;
+        (void)reason;
 #ifndef NDEBUG
         std::cerr << "Can't get variable " << variable << ".\nReason: " << reason << "\n";
 #endif
@@ -30,10 +32,21 @@ namespace Script
 
     template <> std::string LuaScript::luaGetDefault<std::string>() { return "null"; }
 
-    template <> bool LuaScript::luaGet<bool>(const std::string& variable) { return static_cast<bool>(lua_toboolean(mState, -1)); }
-    template <> int LuaScript::luaGet<int>(const std::string& variable) { return static_cast<int>(lua_tointeger(mState, -1)); }
-    template <> int64_t LuaScript::luaGet<int64_t>(const std::string& variable) { return static_cast<int64_t>(lua_tointeger(mState, -1)); }
-    template <> double LuaScript::luaGet<double>(const std::string& variable) { return static_cast<double>(lua_tonumber(mState, -1)); }
+    template <> bool LuaScript::luaGet<bool>(const std::string& variable)
+    {
+        (void)variable;
+        return static_cast<bool>(lua_toboolean(mState, -1));
+    }
+    template <> int LuaScript::luaGet<int>(const std::string& variable)
+    {
+        (void)variable;
+        return static_cast<int>(lua_tointeger(mState, -1));
+    }
+    template <> int64_t LuaScript::luaGet<int64_t>(const std::string& variable)
+    {
+        (void)variable;
+        return static_cast<int64_t>(lua_tointeger(mState, -1));
+    }
 
     template <> std::string LuaScript::luaGet<std::string>(const std::string& variable)
     {

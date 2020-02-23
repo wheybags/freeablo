@@ -94,11 +94,11 @@ namespace Script
             return 1;
         };
 
-        auto toDouble = [](lua_State* state) -> int {
+        /*auto toDouble = [](lua_State* state) -> int {
             FixedPoint** self = static_cast<FixedPoint**>(luaL_checkudata(state, 1, "FixedPoint"));
             lua_pushnumber(state, (*self)->toDouble());
             return 1;
-        };
+            };*/
 
         auto maxVal = [](lua_State* state) -> int {
             FixedPoint** ret = static_cast<FixedPoint**>(lua_newuserdata(state, sizeof(FixedPoint)));
@@ -340,8 +340,8 @@ namespace Script
         lua_setfield(mState, -2, "fractionPart");
         lua_pushcfunction(mState, str);
         lua_setfield(mState, -2, "str");
-        lua_pushcfunction(mState, toDouble);
-        lua_setfield(mState, -2, "toDouble");
+        // lua_pushcfunction(mState, toDouble);
+        // lua_setfield(mState, -2, "toDouble");
         lua_pushcfunction(mState, round);
         lua_setfield(mState, -2, "round");
         lua_pushcfunction(mState, floor);

@@ -10,7 +10,7 @@
 
 #define vmdispatch(x) goto* disptab[x];
 
-#define vmcase(l) L_##l:
+#define vmcase(l) L_##l: printf("%s\n", #l);
 
 #define vmbreak                                                                                                                                                \
     vmfetch();                                                                                                                                                 \

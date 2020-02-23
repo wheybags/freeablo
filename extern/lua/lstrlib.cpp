@@ -1197,24 +1197,28 @@ static void addquoted(luaL_Buffer* b, const char* s, size_t len)
 static int quotefloat(lua_State* L, char* buff, lua_Number n)
 {
     const char* s;                 /* for the fixed representations */
-    if (n == (lua_Number)HUGE_VAL) /* inf? */
+    //if (n == (lua_Number)HUGE_VAL) /* inf? */ // TODO: handle inf
+    if (n == lua_Number::maxVal())
         s = "1e9999";
-    else if (n == -(lua_Number)HUGE_VAL) /* -inf? */
+    else if (n == -lua_Number::maxVal())
+        //else if (n == -(lua_Number)HUGE_VAL) /* -inf? */
         s = "-1e9999";
     else if (n != n) /* NaN? */
         s = "(0/0)";
     else
     { /* format number as hexadecimal */
-        int nb = lua_number2strx(L, buff, MAX_ITEM, "%" LUA_NUMBER_FRMLEN "a", n);
-        /* ensures that 'buff' string uses a dot as the radix character */
+        /*int nb = lua_number2strx(L, buff, MAX_ITEM, "%llda", n);
+        // ensures that 'buff' string uses a dot as the radix character
         if (memchr(buff, '.', nb) == NULL)
-        {                                         /* no dot? */
-            char point = lua_getlocaledecpoint(); /* try locale point */
+        {                                         // no dot?
+            char point = lua_getlocaledecpoint(); // try locale point
             char* ppoint = (char*)memchr(buff, point, nb);
             if (ppoint)
-                *ppoint = '.'; /* change it to a dot */
+                *ppoint = '.'; // change it to a dot
         }
-        return nb;
+        return nb;*/
+        buff = const_cast<char*>(n.str().c_str());
+        return n.str().length();
     }
     /* for the fixed representations */
     return l_sprintf(buff, MAX_ITEM, "%s", s);
@@ -1340,16 +1344,17 @@ static int str_format(lua_State* L)
                     nb = l_sprintf(buff, maxitem, form, (LUAI_UACINT)n);
                     break;
                 }
-                case 'a':
+                    /*case 'a': // TODO: handle hex
                 case 'A':
                     addlenmod(form, LUA_NUMBER_FRMLEN);
                     nb = lua_number2strx(L, buff, maxitem, form, luaL_checknumber(L, arg));
-                    break;
+                    break;*/
                 case 'f':
-                    maxitem = MAX_ITEMF; /* extra space for '%f' */
+                    maxitem = MAX_ITEMF; // extra space for '%f'
                     buff = luaL_prepbuffsize(&b, maxitem);
-                    /* FALLTHROUGH */
-                case 'e':
+                    break; // TODO: handle scientific notation
+                    // FALLTHROUGH
+                    /*case 'e':
                 case 'E':
                 case 'g':
                 case 'G': {
@@ -1357,7 +1362,7 @@ static int str_format(lua_State* L)
                     addlenmod(form, LUA_NUMBER_FRMLEN);
                     nb = snprintf(buff, maxitem, form, (LUAI_UACNUMBER)n);
                     break;
-                }
+                    }*/
                 case 'p': {
                     const void* p = lua_topointer(L, arg);
                     if (p == NULL)
@@ -1460,6 +1465,8 @@ typedef union Ftypes
     double d;
     lua_Number n;
     char buff[5 * sizeof(lua_Number)]; /* enough for any float type */
+
+    Ftypes() { new (&n) lua_Number(); }
 } Ftypes;
 
 /*
@@ -1729,15 +1736,10 @@ static int str_pack(lua_State* L)
                 break;
             }
             case Kfloat: { /* floating-point options */
-                volatile Ftypes u;
+                Ftypes u;
                 char* buff = luaL_prepbuffsize(&b, size);
                 lua_Number n = luaL_checknumber(L, arg); /* get argument */
-                if (size == sizeof(u.f))
-                    u.f = (float)n; /* copy it into 'u' */
-                else if (size == sizeof(u.d))
-                    u.d = (double)n;
-                else
-                    u.n = n;
+                u.n = n;
                 /* move 'u' to final result, correcting endianness if needed */
                 copywithendian(buff, u.buff, size, h.islittle);
                 luaL_addsize(&b, size);
@@ -1867,15 +1869,10 @@ static int str_unpack(lua_State* L)
                 break;
             }
             case Kfloat: {
-                volatile Ftypes u;
+                Ftypes u;
                 lua_Number num;
                 copywithendian(u.buff, data + pos, size, h.islittle);
-                if (size == sizeof(u.f))
-                    num = (lua_Number)u.f;
-                else if (size == sizeof(u.d))
-                    num = (lua_Number)u.d;
-                else
-                    num = u.n;
+                num = u.n;
                 lua_pushnumber(L, num);
                 break;
             }

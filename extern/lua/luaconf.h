@@ -10,6 +10,8 @@
 #include <limits.h>
 #include <stddef.h>
 
+#include "../../components/misc/fixedpoint.h"
+
 /*
 ** ===================================================================
 ** General Configuration File for Lua
@@ -399,56 +401,9 @@
 
 /* now the variable definitions */
 
-#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT /* { single float */
-
-#define LUA_NUMBER float
-
-#define l_floatatt(n) (FLT_##n)
-
-#define LUAI_UACNUMBER double
-
-#define LUA_NUMBER_FRMLEN ""
-#define LUA_NUMBER_FMT "%.7g"
-
-#define l_mathop(op) op##f
-
-#define lua_str2number(s, p) strtof((s), (p))
-
-#elif LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE /* }{ long double */
-
-#define LUA_NUMBER long double
-
-#define l_floatatt(n) (LDBL_##n)
-
-#define LUAI_UACNUMBER long double
-
-#define LUA_NUMBER_FRMLEN "L"
-#define LUA_NUMBER_FMT "%.19Lg"
-
-#define l_mathop(op) op##l
-
-#define lua_str2number(s, p) strtold((s), (p))
-
-#elif LUA_FLOAT_TYPE == LUA_FLOAT_DOUBLE /* }{ double */
-
-#define LUA_NUMBER double
-
+#define LUA_NUMBER FixedPoint
+#define LUAI_UACNUMBER FixedPoint
 #define l_floatatt(n) (DBL_##n)
-
-#define LUAI_UACNUMBER double
-
-#define LUA_NUMBER_FRMLEN ""
-#define LUA_NUMBER_FMT "%.14g"
-
-#define l_mathop(op) op
-
-#define lua_str2number(s, p) strtod((s), (p))
-
-#else /* }{ */
-
-#error "numeric float type not defined"
-
-#endif /* } */
 
 /*
 @@ LUA_INTEGER is the integer type used by Lua.

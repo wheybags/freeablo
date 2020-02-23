@@ -1371,7 +1371,8 @@ static int validop(int op, TValue* v1, TValue* v2)
         case LUA_OPDIV:
         case LUA_OPIDIV:
         case LUA_OPMOD: /* division by 0 */
-            return (nvalue(v2) != 0);
+            return v2->value_.n != lua_Number("0.0");
+            //return (nvalue(v2) != 0);
         default:
             return 1; /* everything else is valid */
     }

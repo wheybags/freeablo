@@ -10,7 +10,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
-
+#include <stdio.h>
 #include "luaconf.h"
 
 #define LUA_VERSION_MAJOR "5"

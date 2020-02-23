@@ -99,7 +99,7 @@ typedef LUAI_UACINT l_uacInt;
 
 #define cast_void(i) cast(void, (i))
 #define cast_voidp(i) cast(void*, (i))
-#define cast_num(i) cast(lua_Number, (i))
+#define cast_num(i) lua_Number((int64_t) i)//cast(lua_Number, (i))
 #define cast_int(i) cast(int, (i))
 #define cast_uint(i) cast(unsigned int, (i))
 #define cast_byte(i) cast(lu_byte, (i))
@@ -254,7 +254,7 @@ typedef l_uint32 Instruction;
 
 /* floor division (defined as 'floor(a/b)') */
 #if !defined(luai_numidiv)
-#define luai_numidiv(L, a, b) ((void)L, l_floor(luai_numdiv(L, a, b)))
+#define luai_numidiv(L, a, b) ((void)L, luai_numdiv(L, a, b).floor())
 #endif
 
 /* float division */

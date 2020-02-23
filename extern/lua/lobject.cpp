@@ -97,9 +97,10 @@ static lua_Number numarith(lua_State* L, int op, lua_Number v1, lua_Number v2)
         case LUA_OPDIV:
             return luai_numdiv(L, v1, v2);
         case LUA_OPPOW:
-            return luai_numpow(L, v1, v2);
+            return lua_Number("0.0"); // TODO
+            //return luai_numpow(L, v1, v2);
         case LUA_OPIDIV:
-            return luai_numidiv(L, v1, v2);
+            return (v1 / v2).floor();
         case LUA_OPUNM:
             return luai_numunm(L, v1);
         case LUA_OPMOD:
@@ -131,15 +132,15 @@ int luaO_rawarith(lua_State* L, int op, const TValue* p1, const TValue* p2, TVal
                 return 0; /* fail */
         }
         case LUA_OPDIV:
-        case LUA_OPPOW: { /* operate only on floats */
-            lua_Number n1;
+        case LUA_OPPOW: { /* operate only on floats */ // TODO
+            /*lua_Number n1;
             lua_Number n2;
             if (tonumberns(p1, n1) && tonumberns(p2, n2))
             {
                 setfltvalue(res, numarith(L, op, n1, n2));
                 return 1;
             }
-            else
+            else*/
                 return 0; /* fail */
         }
         default: { /* other operations */
@@ -150,7 +151,7 @@ int luaO_rawarith(lua_State* L, int op, const TValue* p1, const TValue* p2, TVal
                 setivalue(res, intarith(L, op, ivalue(p1), ivalue(p2)));
                 return 1;
             }
-            else if (tonumberns(p1, n1) && tonumberns(p2, n2))
+            else if (true)//(tonumberns(p1, n1) && tonumberns(p2, n2))
             {
                 setfltvalue(res, numarith(L, op, n1, n2));
                 return 1;
@@ -276,16 +277,16 @@ static lua_Number lua_strx2number(const char* s, char** endptr)
 #define L_MAXLENNUM 200
 #endif
 
-static const char* l_str2dloc(const char* s, lua_Number* result, int mode)
+static const char* l_str2dloc(const char* s, lua_Number* result, int mode) // TODO: handle hex
 {
     char* endptr;
-    *result = (mode == 'x') ? lua_strx2number(s, &endptr) /* try to convert */
-                            : lua_str2number(s, &endptr);
+    *result = lua_Number(s);
     if (endptr == s)
         return NULL; /* nothing recognized? */
-    while (lisspace(cast_uchar(*endptr)))
-        endptr++;                             /* skip trailing spaces */
-    return (*endptr == '\0') ? endptr : NULL; /* OK if no trailing characters */
+    /*while (lisspace(cast_uchar(*endptr)))
+        endptr++;                              //skip trailing spaces
+        return (*endptr == '\0') ? endptr : NULL; // OK if no trailing characters */
+    return result->str().c_str();
 }
 
 /*
@@ -368,20 +369,18 @@ static const char* l_str2int(const char* s, lua_Integer* result)
 
 size_t luaO_str2num(const char* s, TValue* o)
 {
-    lua_Integer i;
-    lua_Number n;
-    const char* e;
-    if ((e = l_str2int(s, &i)) != NULL)
+    size_t size;
+    lua_Number fp(s);
+    if (fp.fractionPart() == lua_Number("0.0"))
     { /* try as an integer */
-        setivalue(o, i);
-    }
-    else if ((e = l_str2d(s, &n)) != NULL)
-    { /* else try as a float */
-        setfltvalue(o, n);
+        setivalue(o, fp.intPart());
     }
     else
-        return 0;       /* conversion failed */
-    return (e - s) + 1; /* success; return string size */
+    { /* else try as a float */
+        setfltvalue(o, fp);
+    }
+    size = fp.str().length();
+    return size; /* success; return string size */
 }
 
 int luaO_utf8esc(char* buff, unsigned long x)
@@ -418,7 +417,9 @@ static int tostringbuff(TValue* obj, char* buff)
         len = lua_integer2str(buff, MAXNUMBER2STR, ivalue(obj));
     else
     {
-        len = lua_number2str(buff, MAXNUMBER2STR, fltvalue(obj));
+        std::string aux = obj->value_.n.str();
+        buff = const_cast<char*>(aux.c_str());
+        len = aux.length();
         if (buff[strspn(buff, "-0123456789")] == '\0')
         { /* looks like an int? */
             buff[len++] = lua_getlocaledecpoint();
@@ -567,7 +568,7 @@ const char* luaO_pushvfstring(lua_State* L, const char* fmt, va_list argp)
             }
             case 'f': { /* a 'lua_Number' */
                 TValue num;
-                setfltvalue(&num, cast_num(va_arg(argp, l_uacNumber)));
+                setfltvalue(&num, va_arg(argp, l_uacNumber));
                 addnum2buff(&buff, &num);
                 break;
             }

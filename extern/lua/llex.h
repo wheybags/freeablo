@@ -66,11 +66,13 @@ enum RESERVED
 /* number of reserved words */
 #define NUM_RESERVED (cast_int(TK_WHILE - FIRST_RESERVED + 1))
 
-typedef union
+typedef union SemInfo
 {
     lua_Number r;
     lua_Integer i;
     TString* ts;
+
+    SemInfo() { new (&r) lua_Number(); }
 } SemInfo; /* semantics information */
 
 typedef struct Token

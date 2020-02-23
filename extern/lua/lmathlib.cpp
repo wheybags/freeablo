@@ -20,8 +20,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-#undef PI
-#define PI (l_mathop(3.141592653589793238462643383279502884))
+#include "../../components/misc/fixedpoint.h"
 
 static int math_abs(lua_State* L)
 {
@@ -33,28 +32,28 @@ static int math_abs(lua_State* L)
         lua_pushinteger(L, n);
     }
     else
-        lua_pushnumber(L, l_mathop(fabs)(luaL_checknumber(L, 1)));
+        lua_pushstring(L, FixedPoint(luaL_checkstring(L, 1)).abs().str().c_str());
     return 1;
 }
 
 static int math_sin(lua_State* L)
 {
-    lua_pushnumber(L, l_mathop(sin)(luaL_checknumber(L, 1)));
+    lua_pushstring(L, FixedPoint::sin(luaL_checkstring(L, 1)).str().c_str());
     return 1;
 }
 
 static int math_cos(lua_State* L)
 {
-    lua_pushnumber(L, l_mathop(cos)(luaL_checknumber(L, 1)));
+    lua_pushstring(L, FixedPoint::cos(luaL_checkstring(L, 1)).str().c_str());
     return 1;
 }
 
 static int math_tan(lua_State* L)
 {
-    lua_pushnumber(L, l_mathop(tan)(luaL_checknumber(L, 1)));
+    lua_pushstring(L, FixedPoint::tan(luaL_checkstring(L, 1)).str().c_str());
     return 1;
 }
-
+/*
 static int math_asin(lua_State* L)
 {
     lua_pushnumber(L, l_mathop(asin)(luaL_checknumber(L, 1)));
@@ -66,21 +65,20 @@ static int math_acos(lua_State* L)
     lua_pushnumber(L, l_mathop(acos)(luaL_checknumber(L, 1)));
     return 1;
 }
-
+*/
 static int math_atan(lua_State* L)
 {
-    lua_Number y = luaL_checknumber(L, 1);
-    lua_Number x = luaL_optnumber(L, 2, 1);
-    lua_pushnumber(L, l_mathop(atan2)(y, x));
+    FixedPoint y(luaL_checkstring(L, 1));
+    FixedPoint x(luaL_optstring(L, 2, "1"));
+    lua_pushstring(L, FixedPoint::atan2(y, x).str().c_str());
     return 1;
 }
 
 static int math_toint(lua_State* L)
 {
-    int valid;
-    lua_Integer n = lua_tointegerx(L, 1, &valid);
-    if (valid)
-        lua_pushinteger(L, n);
+    FixedPoint n(luaL_checkstring(L, 1));
+    if (n.fractionPart() == FixedPoint("0.0"))
+        lua_pushinteger(L, n.intPart());
     else
     {
         luaL_checkany(L, 1);
@@ -89,23 +87,13 @@ static int math_toint(lua_State* L)
     return 1;
 }
 
-static void pushnumint(lua_State* L, lua_Number d)
-{
-    lua_Integer n;
-    if (lua_numbertointeger(d, &n)) /* does 'd' fit in an integer? */
-        lua_pushinteger(L, n);      /* result is integer */
-    else
-        lua_pushnumber(L, d); /* result is float */
-}
-
 static int math_floor(lua_State* L)
 {
     if (lua_isinteger(L, 1))
         lua_settop(L, 1); /* integer is its own floor */
     else
     {
-        lua_Number d = l_mathop(floor)(luaL_checknumber(L, 1));
-        pushnumint(L, d);
+        lua_pushinteger(L, luaL_checknumber(L, 1).floor());
     }
     return 1;
 }
@@ -116,21 +104,20 @@ static int math_ceil(lua_State* L)
         lua_settop(L, 1); /* integer is its own ceil */
     else
     {
-        lua_Number d = l_mathop(ceil)(luaL_checknumber(L, 1));
-        pushnumint(L, d);
+        lua_pushinteger(L, luaL_checknumber(L, 1).ceil());
     }
     return 1;
 }
-
+/*
 static int math_fmod(lua_State* L)
 {
     if (lua_isinteger(L, 1) && lua_isinteger(L, 2))
     {
         lua_Integer d = lua_tointeger(L, 2);
         if ((lua_Unsigned)d + 1u <= 1u)
-        { /* special cases: -1 or 0 */
+        { // special cases: -1 or 0
             luaL_argcheck(L, d != 0, 2, "zero");
-            lua_pushinteger(L, 0); /* avoid overflow with 0x80000... / -1 */
+            lua_pushinteger(L, 0); // avoid overflow with 0x80000... / -1
         }
         else
             lua_pushinteger(L, lua_tointeger(L, 1) % d);
@@ -138,35 +125,36 @@ static int math_fmod(lua_State* L)
     else
         lua_pushnumber(L, l_mathop(fmod)(luaL_checknumber(L, 1), luaL_checknumber(L, 2)));
     return 1;
-}
+}*/
 
 /*
 ** next function does not use 'modf', avoiding problems with 'double*'
 ** (which is not compatible with 'float*') when lua_Number is not
 ** 'double'.
 */
+/*
 static int math_modf(lua_State* L)
 {
     if (lua_isinteger(L, 1))
     {
-        lua_settop(L, 1);     /* number is its own integer part */
-        lua_pushnumber(L, 0); /* no fractional part */
+        lua_settop(L, 1);     // number is its own integer part
+        lua_pushnumber(L, 0); // no fractional part
     }
     else
     {
         lua_Number n = luaL_checknumber(L, 1);
-        /* integer part (rounds toward zero) */
+        // integer part (rounds toward zero)
         lua_Number ip = (n < 0) ? l_mathop(ceil)(n) : l_mathop(floor)(n);
         pushnumint(L, ip);
-        /* fractional part (test needed for inf/-inf) */
+        // fractional part (test needed for inf/-inf)
         lua_pushnumber(L, (n == ip) ? l_mathop(0.0) : (n - ip));
     }
     return 2;
 }
-
+*/
 static int math_sqrt(lua_State* L)
 {
-    lua_pushnumber(L, l_mathop(sqrt)(luaL_checknumber(L, 1)));
+    lua_pushnumber(L, luaL_checknumber(L, 1).sqrt());
     return 1;
 }
 
@@ -178,6 +166,7 @@ static int math_ult(lua_State* L)
     return 1;
 }
 
+/*
 static int math_log(lua_State* L)
 {
     lua_Number x = luaL_checknumber(L, 1);
@@ -201,28 +190,29 @@ static int math_log(lua_State* L)
     return 1;
 }
 
+
 static int math_exp(lua_State* L)
 {
     lua_pushnumber(L, l_mathop(exp)(luaL_checknumber(L, 1)));
     return 1;
-}
+    }*/
 
 static int math_deg(lua_State* L)
 {
-    lua_pushnumber(L, luaL_checknumber(L, 1) * (l_mathop(180.0) / PI));
+    lua_pushstring(L, (FixedPoint(luaL_checkstring(L, 1)) * (FixedPoint("180.0") / FixedPoint::PI)).str().c_str());
     return 1;
 }
 
 static int math_rad(lua_State* L)
 {
-    lua_pushnumber(L, luaL_checknumber(L, 1) * (PI / l_mathop(180.0)));
+    lua_pushstring(L, (FixedPoint(luaL_checkstring(L, 1)) * (FixedPoint::PI / FixedPoint("180.0"))).str().c_str());
     return 1;
 }
 
 static int math_min(lua_State* L)
 {
-    int n = lua_gettop(L); /* number of arguments */
-    int imin = 1;          /* index of current minimum value */
+    int n = lua_gettop(L); // number of arguments
+    int imin = 1;          // index of current minimum value
     int i;
     luaL_argcheck(L, n >= 1, 1, "value expected");
     for (i = 2; i <= n; i++)
@@ -252,7 +242,7 @@ static int math_max(lua_State* L)
 static int math_type(lua_State* L)
 {
     if (lua_type(L, 1) == LUA_TNUMBER)
-        lua_pushstring(L, (lua_isinteger(L, 1)) ? "integer" : "float");
+        lua_pushstring(L, (lua_isinteger(L, 1)) ? "integer" : "FixedPoint");
     else
     {
         luaL_checkany(L, 1);
@@ -344,7 +334,7 @@ static Rand64 nextrand(Rand64* state)
 #define shift64_FIG (64 - FIGS)
 
 /* to scale to [0, 1), multiply by scaleFIG = 2^(-FIGS) */
-#define scaleFIG (l_mathop(0.5) / ((Rand64)1 << (FIGS - 1)))
+#define scaleFIG (FixedPoint("0.5") / ((Rand64)1 << (FIGS - 1)))
 
 static lua_Number I2d(Rand64 x) { return (lua_Number)(trim64(x) >> shift64_FIG) * scaleFIG; }
 
@@ -705,21 +695,21 @@ static int math_log10(lua_State* L)
 /* }================================================================== */
 
 static const luaL_Reg mathlib[] = {{"abs", math_abs},
-                                   {"acos", math_acos},
-                                   {"asin", math_asin},
+                                   //{"acos", math_acos}, // TODO
+                                   //{"asin", math_asin}, // TODO
                                    {"atan", math_atan},
                                    {"ceil", math_ceil},
                                    {"cos", math_cos},
                                    {"deg", math_deg},
-                                   {"exp", math_exp},
+                                   //{"exp", math_exp}, // TODO
                                    {"tointeger", math_toint},
                                    {"floor", math_floor},
-                                   {"fmod", math_fmod},
+                                   //{"fmod", math_fmod}, // TODO
                                    {"ult", math_ult},
-                                   {"log", math_log},
+                                   //{"log", math_log}, // TODO
                                    {"max", math_max},
                                    {"min", math_min},
-                                   {"modf", math_modf},
+                                   //{"modf", math_modf}, // TODO
                                    {"rad", math_rad},
                                    {"sin", math_sin},
                                    {"sqrt", math_sqrt},
@@ -750,9 +740,10 @@ static const luaL_Reg mathlib[] = {{"abs", math_abs},
 LUAMOD_API int luaopen_math(lua_State* L)
 {
     luaL_newlib(L, mathlib);
-    lua_pushnumber(L, PI);
+    lua_pushstring(L, FixedPoint::PI.str().c_str());
     lua_setfield(L, -2, "pi");
-    lua_pushnumber(L, (lua_Number)HUGE_VAL);
+    //lua_pushnumber(L, (lua_Number)HUGE_VAL); // TODO: handle inf
+    lua_pushnumber(L, lua_Number::maxVal());
     lua_setfield(L, -2, "huge");
     lua_pushinteger(L, LUA_MAXINTEGER);
     lua_setfield(L, -2, "maxinteger");

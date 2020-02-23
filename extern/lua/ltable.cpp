@@ -22,6 +22,8 @@
 ** Hence even when the load factor reaches 100%, performance remains good.
 */
 
+#include <functional>
+
 #include <limits.h>
 #include <math.h>
 
@@ -80,11 +82,11 @@
 #define dummynode (&dummynode_)
 
 static const Node dummynode_ = {
-    {{NULL},
+    {{nullptr},
      LUA_VEMPTY, /* value's value and type */
      LUA_VNIL,
      0,
-     {NULL}} /* key type, next, and key value */
+     {nullptr}} /* key type, next, and key value */
 };
 
 static const TValue absentkey = {ABSTKEYCONSTANT};
@@ -105,19 +107,7 @@ static const TValue absentkey = {ABSTKEYCONSTANT};
 #if !defined(l_hashfloat)
 static int l_hashfloat(lua_Number n)
 {
-    int i;
-    lua_Integer ni;
-    n = l_mathop(frexp)(n, &i) * -cast_num(INT_MIN);
-    if (!lua_numbertointeger(n, &ni))
-    { /* is 'n' inf/-inf/NaN? */
-        lua_assert(luai_numisnan(n) || l_mathop(fabs)(n) == cast_num(HUGE_VAL));
-        return 0;
-    }
-    else
-    { /* normal case */
-        unsigned int u = cast_uint(i) + cast_uint(ni);
-        return cast_int(u <= cast_uint(INT_MAX) ? u : ~u);
-    }
+    return std::hash<std::string>{}(n.str());
 }
 #endif
 

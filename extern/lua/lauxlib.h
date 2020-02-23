@@ -140,10 +140,12 @@ struct luaL_Buffer
     size_t size; /* buffer size */
     size_t n;    /* number of characters in buffer */
     lua_State* L;
-    union
+    union Init
     {
         LUAI_MAXALIGN;           /* ensure maximum alignment for buffer */
         char b[LUAL_BUFFERSIZE]; /* initial buffer */
+
+        Init() { new (&n) lua_Number(); }
     } init;
 };
 

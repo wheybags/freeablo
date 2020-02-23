@@ -65,7 +65,7 @@ typedef enum
 typedef struct expdesc
 {
     expkind k;
-    union
+    union U
     {
         lua_Integer ival; /* for VKINT */
         lua_Number nval;  /* for VKFLT */
@@ -81,6 +81,9 @@ typedef struct expdesc
             lu_byte sidx;        /* index in the stack */
             unsigned short vidx; /* index in 'actvar.arr'  */
         } var;
+
+        U() { new (&nval) lua_Number(); }
+        U(lua_Integer i) : ival(i) { new (&nval) lua_Number(); }
     } u;
     int t; /* patch list of 'exit when true' */
     int f; /* patch list of 'exit when false' */
