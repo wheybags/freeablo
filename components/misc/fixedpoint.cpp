@@ -624,6 +624,8 @@ FixedPoint FixedPoint::sin(FixedPoint rad)
 }
 
 FixedPoint FixedPoint::cos(FixedPoint rad) { return sin(rad + PI / 2); }
+FixedPoint FixedPoint::tan(FixedPoint rad) { return sin(rad) / cos(rad); }
+
 FixedPoint FixedPoint::atan2_degrees(FixedPoint y, FixedPoint x)
 {
     static const FixedPoint radToDeg = FixedPoint(180) / PI;
@@ -635,3 +637,4 @@ FixedPoint FixedPoint::sin_degrees(FixedPoint deg)
     return sin(deg * degToRad);
 }
 FixedPoint FixedPoint::cos_degrees(FixedPoint deg) { return sin_degrees(deg + 90); }
+FixedPoint FixedPoint::tan_degrees(FixedPoint deg) { return sin_degrees(deg) / cos_degrees(deg); }

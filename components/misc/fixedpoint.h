@@ -202,9 +202,11 @@ public:
     static FixedPoint atan2(FixedPoint y, FixedPoint x);
     static FixedPoint sin(FixedPoint rad);
     static FixedPoint cos(FixedPoint rad);
+    static FixedPoint tan(FixedPoint rad);
     static FixedPoint atan2_degrees(FixedPoint y, FixedPoint x);
     static FixedPoint sin_degrees(FixedPoint deg);
     static FixedPoint cos_degrees(FixedPoint deg);
+    static FixedPoint tan_degrees(FixedPoint deg);
 
     // The scaling factor to use, as a power of 10.
     // Essentially the number of base 10 digits after the decimal point.

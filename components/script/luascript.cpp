@@ -48,6 +48,12 @@ namespace Script
         return static_cast<int64_t>(lua_tointeger(mState, -1));
     }
 
+    template <> FixedPoint LuaScript::luaGet<FixedPoint>(const std::string& variable)
+    {
+        (void)variable;
+        return static_cast<FixedPoint>(luaL_checknumber(mState, 1));
+    }
+
     template <> std::string LuaScript::luaGet<std::string>(const std::string& variable)
     {
         std::string ret = "null";
