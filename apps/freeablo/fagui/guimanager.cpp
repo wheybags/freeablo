@@ -956,6 +956,11 @@ namespace FAGui
                     return;
                 togglePanel(PanelType::spells);
                 break;
+            case Engine::KeyboardInputAction::toggleSpellSelection:
+                if (!hotkeysEnabled())
+                    return;
+                mShowSpellSelectionMenu = !mShowSpellSelectionMenu;
+                break;
             case Engine::KeyboardInputAction::reject:
                 if (mGoldSplitTarget)
                     mGoldSplitTarget = nullptr;

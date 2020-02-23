@@ -201,6 +201,8 @@ namespace Engine
                 return "ToggleSpellbook";
             case KeyboardInputAction::toggleInventory:
                 return "ToggleInventory";
+            case KeyboardInputAction::toggleSpellSelection:
+                return "ToggleSpellSelection";
             case KeyboardInputAction::spellHotkeyF5:
                 return "SpellHotkeyF5";
             case KeyboardInputAction::spellHotkeyF6:
