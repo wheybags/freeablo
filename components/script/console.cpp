@@ -69,7 +69,7 @@ namespace Script
 
         if (Misc::StringUtils::ciStartsWith(command, "eval"))
         {
-            std::string arg = command.substr(6, command.length() - 7);
+            std::string arg = command.substr(4, command.length() - 4);
             mScript->eval(arg.c_str());
             std::string msg = ">> " + luaStdOut;
             appendStdOut(msg);
