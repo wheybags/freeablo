@@ -755,9 +755,7 @@ lua_Integer luaV_mod (lua_State *L, lua_Integer m, lua_Integer n) {
 ** Float modulus
 */
 lua_Number luaV_modf(lua_State* L, lua_Number m, lua_Number n) {
-  lua_Number r = 0;
-  //luai_nummod(L, m, n, r); // TODO
-  return r;
+  return (m - lua_Number((m / n).floor()) * n);
 }
 
 
@@ -1371,11 +1369,11 @@ tailcall:
         vmbreak;
       }
       vmcase(OP_MODK) {
-        //op_arithK(L, luaV_mod, luaV_modf);
-        printf("OP_MODK not supported.\n");
+        op_arithK(L, luaV_mod, luaV_modf);
         vmbreak;
       }
       vmcase(OP_POWK) {
+        printf("OP_POWK not supported.\n");
         //op_arithfK(L, luai_numpow);
         vmbreak;
       }

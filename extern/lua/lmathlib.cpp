@@ -99,21 +99,21 @@ static int math_ceil (lua_State *L) {
 }
 
 
-//static int math_fmod (lua_State *L) {
-//  if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-//    lua_Integer d = lua_tointeger(L, 2);
-//    if ((lua_Unsigned)d + 1u <= 1u) {  /* special cases: -1 or 0 */
-//      luaL_argcheck(L, d != 0, 2, "zero");
-//      lua_pushinteger(L, 0);  /* avoid overflow with 0x80000... / -1 */
-//    }
-//   else
-//     lua_pushinteger(L, lua_tointeger(L, 1) % d);
-//}
-//else
-//  lua_pushnumber(L, l_mathop(fmod)(luaL_checknumber(L, 1),
-//                                   luaL_checknumber(L, 2)));
-//return 1;
-//}
+static int math_fmod (lua_State *L) {
+  if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+    lua_Integer d = lua_tointeger(L, 2);
+    if ((lua_Unsigned)d + 1u <= 1u) {  /* special cases: -1 or 0 */
+      luaL_argcheck(L, d != 0, 2, "zero");
+      lua_pushinteger(L, 0);  /* avoid overflow with 0x80000... / -1 */
+    }
+   else
+     lua_pushinteger(L, lua_tointeger(L, 1) % d);
+  }
+  else {
+    lua_pushnumber(L, (luaL_checknumber(L, 1) / luaL_checknumber(L, 2)).floor());
+  }
+  return 1;
+}
 
 
 /*
@@ -121,21 +121,19 @@ static int math_ceil (lua_State *L) {
 ** (which is not compatible with 'float*') when lua_Number is not
 ** 'double'.
 */
-//static int math_modf (lua_State *L) {
-//  if (lua_isinteger(L ,1)) {
-//  lua_settop(L, 1);  /* number is its own integer part */
-//  lua_pushnumber(L, 0);  /* no fractional part */
-//}
-//else {
-//  lua_Number n = luaL_checknumber(L, 1);
-//  /* integer part (rounds toward zero) */
-//  lua_Number ip = (n < 0) ? l_mathop(ceil)(n) : l_mathop(floor)(n);
-//  pushnumint(L, ip);
-//  /* fractional part (test needed for inf/-inf) */
-//  lua_pushnumber(L, (n == ip) ? l_mathop(0.0) : (n - ip));
-//}
-//return 2;
-//}
+static int math_modf (lua_State *L) {
+  if (lua_isinteger(L ,1)) {
+    lua_settop(L, 1);  /* number is its own integer part */
+    lua_pushnumber(L, 0);  /* no fractional part */
+  }
+  else {
+    lua_Number n = luaL_checknumber(L, 1);
+    lua_pushinteger(L, n.intPart());
+    /* fractional part (test needed for inf/-inf) */
+    lua_pushnumber(L, n.fractionPart());
+  }
+  return 2;
+}
 
 
 static int math_sqrt (lua_State *L) {
@@ -694,12 +692,12 @@ static const luaL_Reg mathlib[] = {
   //{"exp",   math_exp}, // TODO
   {"tointeger", math_toint},
   {"floor", math_floor},
-  //{"fmod",   math_fmod}, // TODO
+  {"fmod",   math_fmod},
   {"ult",   math_ult},
   //{"log",   math_log}, // TODO
   {"max",   math_max},
   {"min",   math_min},
-  //{"modf",   math_modf}, // TODO
+  {"modf",   math_modf},
   {"rad",   math_rad},
   {"sin",   math_sin},
   {"sqrt",  math_sqrt},
