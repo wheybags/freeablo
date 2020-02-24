@@ -110,7 +110,10 @@ static int math_fmod (lua_State *L) {
      lua_pushinteger(L, lua_tointeger(L, 1) % d);
   }
   else {
-    lua_pushnumber(L, (luaL_checknumber(L, 1) / luaL_checknumber(L, 2)).floor());
+    lua_Number x = luaL_checknumber(L, 1);
+    lua_Number y = luaL_checknumber(L, 2).abs();
+    lua_Number n = x - lua_Number((x / y).intPart()) * y;
+    lua_pushnumber(L, n);
   }
   return 1;
 }
@@ -314,10 +317,10 @@ static Rand64 nextrand (Rand64 *state) {
 #define shift64_FIG  	(64 - FIGS)
 
 /* to scale to [0, 1), multiply by scaleFIG = 2^(-FIGS) */
-#define scaleFIG (FixedPoint("0.5") / ((Rand64)1 << (FIGS - 1)))
+#define scaleFIG (FixedPoint("0.5") / FixedPoint((int64_t)((Rand64)1 << (FIGS - 1))))
 
 static lua_Number I2d (Rand64 x) {
-  return (lua_Number)(trim64(x) >> shift64_FIG) * scaleFIG;
+  return lua_Number((int64_t)(trim64(x) >> shift64_FIG)) * scaleFIG;
 }
 
 /* convert a 'Rand64' to a 'lua_Unsigned' */
