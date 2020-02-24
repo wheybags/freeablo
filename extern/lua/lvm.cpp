@@ -656,7 +656,7 @@ void luaV_concat (lua_State *L, int total) {
       TString *ts;
       /* collect total length and number of strings */
       for (n = 1; n < total && tostring(L, s2v(top - n - 1)); n++) {
-        size_t l = vslen(s2v(top - n - 1));
+        size_t l = vslen(s2v(top - n));
         if (unlikely(l >= (MAX_SIZE/sizeof(char)) - tl))
           luaG_runerror(L, "string length overflow");
         tl += l;
