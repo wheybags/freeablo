@@ -78,8 +78,8 @@ typedef struct expdesc {
       lu_byte sidx;  /* index in the stack */
       unsigned short vidx;  /* index in 'actvar.arr'  */
     } var;
-    U() { new (&nval) lua_Number(); }
-    U(lua_Integer i) : ival(i) { new (&nval) lua_Number(); }
+    U() : ival(0) {}
+    U(lua_Integer i) : ival(i) {}
   } u;
   int t;  /* patch list of 'exit when true' */
   int f;  /* patch list of 'exit when false' */

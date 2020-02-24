@@ -1375,8 +1375,7 @@ typedef union Ftypes {
   double d;
   lua_Number n;
   char buff[5 * sizeof(lua_Number)]; /* enough for any float type */
-
-  Ftypes() { new (&n) lua_Number(); }
+  Ftypes() : f(0.0) {}
 } Ftypes;
 
 
@@ -1694,8 +1693,8 @@ static lua_Integer unpackint (lua_State *L, const char *str,
       if ((unsigned char)str[islittle ? i : size - 1 - i] != mask)
         luaL_error(L, "%d-byte integer does not fit into Lua Integer", size);
     }
-    return (lua_Integer)res;
   }
+  return (lua_Integer)res;
 }
 
 static int str_unpack (lua_State *L) {

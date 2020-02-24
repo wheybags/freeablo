@@ -171,7 +171,7 @@ struct luaL_Buffer {
   union Init {
     LUAI_MAXALIGN;  /* ensure maximum alignment for buffer */
     char b[LUAL_BUFFERSIZE];  /* initial buffer */
-    Init() { new (&n) lua_Number(); }
+    Init() : n("0.0") {}
   } init;
 };
 

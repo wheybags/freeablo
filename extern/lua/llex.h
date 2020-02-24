@@ -44,7 +44,7 @@ typedef union SemInfo {
   lua_Number r;
   lua_Integer i;
   TString *ts;
-  SemInfo() { new (&r) lua_Number(); }
+  SemInfo() : r("0.0") {}
 } SemInfo;  /* semantics information */
 
 
