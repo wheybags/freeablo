@@ -711,10 +711,6 @@ namespace FAGui
     {
         // This is the menu that pops up when the spell icon on the bottom menu in clicked (or 's' hotkey).
         // It allows the player to select the active spell, as well as configure F5->F8 hotkeys.
-
-        // TODO: Selecting a spell with a panel open then blocks input to the bottom menu buttons?
-        //  Also hover doesn't work sometimes when opening/closing other panels...
-
         if (!mShowSpellSelectionMenu)
             return;
 
@@ -737,11 +733,9 @@ namespace FAGui
         nk_fa_begin_window(ctx,
                            "spell_selection_menu",
                            dims,
-                           NK_WINDOW_NO_SCROLLBAR,
+                           NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND,
                            [&]() {
                                nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
-
-                               nk_style_button buttonStyle = dummyStyle;
 
                                static const int32_t spellbookCount = sizeof(FAWorld::SpellData::spellbookLUT) / sizeof(FAWorld::SpellData::spellbookLUT[0][0]);
                                static const int32_t spellbookStride =
@@ -770,9 +764,7 @@ namespace FAGui
                                    if (FAWorld::SpellData::isSpellImplemented(spell))
                                    {
                                        nk_image(ctx, spellIcons->getNkImage(frame));
-                                       // Use the hover highlight/overlay as the actual button
-                                       buttonStyle.hover = nk_style_item_image(spellIcons->getNkImage((int)FAWorld::SpellData::SpellHighlightFrame::spell));
-                                       if (nk_button_label_styled(ctx, &buttonStyle, ""))
+                                       if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
                                        {
                                            // Set active spell and hide, spell selection menu
                                            FAWorld::PlayerInput::SetActiveSpellData input{spell};
@@ -780,9 +772,13 @@ namespace FAGui
                                            mShowSpellSelectionMenu = false;
                                        }
 
-                                       // Keep track of current hovered spell, this is used to set active spell when spell hotkeys (F5->F8) are pressed
-                                       if (nk_widget_is_hovered(ctx))
+                                       if (isLastWidgetHovered(ctx))
+                                       {
+                                           // Highlight when hovered
+                                           nk_image(ctx, spellIcons->getNkImage((int)FAWorld::SpellData::SpellHighlightFrame::spell));
+                                           // Keep track of current hovered spell, this is used to set active spell when spell hotkeys (F5->F8) are pressed
                                            mCurrentHoveredSpell = spell;
+                                       }
 
                                        // Highlight selected spell
                                        if (spell == mPlayer->getPlayerBehaviour()->mActiveSpell)
