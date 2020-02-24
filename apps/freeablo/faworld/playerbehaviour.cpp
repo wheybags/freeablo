@@ -1,8 +1,8 @@
 #include "playerbehaviour.h"
 #include "../fagui/guimanager.h"
 #include "../farender/renderer.h"
-#include "fasavegame/gameloader.h"
 #include "equiptarget.h"
+#include "fasavegame/gameloader.h"
 #include "input/inputmanager.h"
 #include "player.h"
 #include "storedata.h"
@@ -27,7 +27,8 @@ namespace FAWorld
             hotkey = (SpellId)loader.load<int32_t>();
     }
 
-    void PlayerBehaviour::save(FASaveGame::GameSaver& saver) {
+    void PlayerBehaviour::save(FASaveGame::GameSaver& saver)
+    {
         saver.save((int32_t)mActiveSpell);
 
         for (auto& hotkey : mSpellHotkey)

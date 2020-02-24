@@ -652,7 +652,8 @@ namespace FAWorld
         return false;
     }
 
-    SpellId Player::defaultSkill() const {
+    SpellId Player::defaultSkill() const
+    {
         switch (mPlayerClass)
         {
             case PlayerClass::warrior:

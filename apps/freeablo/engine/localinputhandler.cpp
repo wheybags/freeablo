@@ -44,7 +44,8 @@ namespace Engine
                 // Assume these enum entries are sequential.
                 int index = (int)action - (int)Engine::KeyboardInputAction::spellHotkeyF5;
                 auto spell = player->getPlayerBehaviour()->mSpellHotkey[index];
-                if (spell != FAWorld::SpellId::null) {
+                if (spell != FAWorld::SpellId::null)
+                {
                     auto input = FAWorld::PlayerInput::SetActiveSpellData{spell};
                     mInputs.emplace_back(input, player->getId());
                 }

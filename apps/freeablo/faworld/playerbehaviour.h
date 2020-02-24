@@ -28,12 +28,7 @@ namespace FAWorld
         SpellId mActiveSpell = SpellId::null;
 
         // Spell hotkeys (F5->F8)
-        FAWorld::SpellId mSpellHotkey[4] = {
-            FAWorld::SpellId::null,
-            FAWorld::SpellId::null,
-            FAWorld::SpellId::null,
-            FAWorld::SpellId::null
-        };
+        FAWorld::SpellId mSpellHotkey[4] = {FAWorld::SpellId::null, FAWorld::SpellId::null, FAWorld::SpellId::null, FAWorld::SpellId::null};
 
     private:
         FAWorld::Player* mPlayer = nullptr;

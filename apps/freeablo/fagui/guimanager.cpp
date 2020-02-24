@@ -672,45 +672,43 @@ namespace FAGui
                                drawBulb(stats.getMana().current, stats.getMana().max, manaBulbLeftOffset);
 
                                belt(ctx);
-                               descriptionPanel(ctx, hoverStatus.getDescription(
-                                       *Engine::EngineMain::get()->mWorld->getCurrentLevel()));
+                               descriptionPanel(ctx, hoverStatus.getDescription(*Engine::EngineMain::get()->mWorld->getCurrentLevel()));
 
                                // Active spell
                                int frame = (int)FAWorld::SpellData::SpellHighlightFrame::blank;
                                auto activeSpell = mPlayer->getPlayerBehaviour()->mActiveSpell;
 
-                               if (activeSpell != FAWorld::SpellId::null) {
+                               if (activeSpell != FAWorld::SpellId::null)
+                               {
                                    auto spellData = FAWorld::SpellData(activeSpell);
                                    frame = spellData.getFrameIndex();
                                }
-                               buttonStyle.normal = buttonStyle.hover = buttonStyle.active =
-                                       nk_style_item_image(spellIcons->getNkImage(frame));
-                               nk_layout_space_push(ctx, nk_rect(
-                                       activeSpellLeftOffset, activeSpellTopIndent,
-                                       spellIcons->getWidth(), spellIcons->getHeight()));
+                               buttonStyle.normal = buttonStyle.hover = buttonStyle.active = nk_style_item_image(spellIcons->getNkImage(frame));
+                               nk_layout_space_push(ctx, nk_rect(activeSpellLeftOffset, activeSpellTopIndent, spellIcons->getWidth(), spellIcons->getHeight()));
                                if (nk_button_label_styled(ctx, &buttonStyle, ""))
                                    // Toggle spell selection menu
                                    mShowSpellSelectionMenu = !mShowSpellSelectionMenu;
 
-                                // Overlay selected hotkey symbol (F5->F8)
-                                if (activeSpell != FAWorld::SpellId::null)
-                                {
-                                    for (int j = 0; j < 4; j++)
-                                    {
-                                        if (activeSpell == mPlayer->getPlayerBehaviour()->mSpellHotkey[j])
-                                        {
-                                            int hotkeyFrame = (int)FAWorld::SpellData::SpellHighlightFrame::hotkeyF5 + j;
-                                            nk_image(ctx, spellIcons->getNkImage(hotkeyFrame));
-                                        }
-                                    }
-                                }
+                               // Overlay selected hotkey symbol (F5->F8)
+                               if (activeSpell != FAWorld::SpellId::null)
+                               {
+                                   for (int j = 0; j < 4; j++)
+                                   {
+                                       if (activeSpell == mPlayer->getPlayerBehaviour()->mSpellHotkey[j])
+                                       {
+                                           int hotkeyFrame = (int)FAWorld::SpellData::SpellHighlightFrame::hotkeyF5 + j;
+                                           nk_image(ctx, spellIcons->getNkImage(hotkeyFrame));
+                                       }
+                                   }
+                               }
 
                                nk_layout_space_end(ctx);
                            },
                            false);
     }
 
-    void GuiManager::spellSelectionMenu(nk_context* ctx) {
+    void GuiManager::spellSelectionMenu(nk_context* ctx)
+    {
         // This is the menu that pops up when the spell icon on the bottom menu in clicked (or 's' hotkey).
         // It allows the player to select the active spell, as well as configure F5->F8 hotkeys.
 
@@ -731,81 +729,84 @@ namespace FAGui
         // Centre the bottom menu on the bottom of the screen
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
-        struct nk_rect dims = nk_rect((screenW / 2) - (menuWidth / 2),
-                screenH - menuHeight - 144, menuWidth, menuHeight);
+        struct nk_rect dims = nk_rect((screenW / 2) - (menuWidth / 2), screenH - menuHeight - 144, menuWidth, menuHeight);
 
         Misc::ScopedSetter<float> setter(ctx->style.button.border, 0);
         Misc::ScopedSetter<struct nk_style_item> setter2(ctx->style.window.fixed_background, nk_style_item_hide());
 
-        nk_fa_begin_window(ctx, "spell_selection_menu", dims, NK_WINDOW_NO_SCROLLBAR, [&]() {
-            nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
+        nk_fa_begin_window(ctx,
+                           "spell_selection_menu",
+                           dims,
+                           NK_WINDOW_NO_SCROLLBAR,
+                           [&]() {
+                               nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
 
-            nk_style_button buttonStyle = dummyStyle;
+                               nk_style_button buttonStyle = dummyStyle;
 
-            static const int32_t spellbookCount = sizeof(FAWorld::SpellData::spellbookLUT) / sizeof(FAWorld::SpellData::spellbookLUT[0][0]);
-            static const int32_t spellbookStride = sizeof(FAWorld::SpellData::spellbookLUT[0]) / sizeof(FAWorld::SpellData::spellbookLUT[0][0]);
-            static const int32_t numXIcons = 11;
-            static const int32_t numYIcons = 3;
+                               static const int32_t spellbookCount = sizeof(FAWorld::SpellData::spellbookLUT) / sizeof(FAWorld::SpellData::spellbookLUT[0][0]);
+                               static const int32_t spellbookStride =
+                                   sizeof(FAWorld::SpellData::spellbookLUT[0]) / sizeof(FAWorld::SpellData::spellbookLUT[0][0]);
+                               static const int32_t numXIcons = 11;
+                               static const int32_t numYIcons = 3;
 
-            for (int i = 0; i < spellbookCount; i++)
-            {
-                FAWorld::SpellId spell;
-                if (i == 0)
-                    spell = mPlayer->defaultSkill();
-                else
-                    spell = FAWorld::SpellData::spellbookLUT[i / spellbookStride][i % spellbookStride];
+                               for (int i = 0; i < spellbookCount; i++)
+                               {
+                                   FAWorld::SpellId spell;
+                                   if (i == 0)
+                                       spell = mPlayer->defaultSkill();
+                                   else
+                                       spell = FAWorld::SpellData::spellbookLUT[i / spellbookStride][i % spellbookStride];
 
-                auto spellData = FAWorld::SpellData(spell);
-                int frame = spellData.getFrameIndex();
-                // Centre horizontally
-                int32_t xOffset = (menuWidth - numXIcons * iconWidth) / 2;
-                // Start from bottom right, move left 11 icons, then move up and reset
-                int32_t xPos = ((numXIcons - 1) - (i % numXIcons)) * iconWidth + xOffset;
-                int32_t yPos = ((numYIcons - 1) - (i / numXIcons)) * iconHeight;
-                nk_layout_space_push(ctx, nk_rect(xPos, yPos, iconWidth, iconHeight));
+                                   auto spellData = FAWorld::SpellData(spell);
+                                   int frame = spellData.getFrameIndex();
+                                   // Centre horizontally
+                                   int32_t xOffset = (menuWidth - numXIcons * iconWidth) / 2;
+                                   // Start from bottom right, move left 11 icons, then move up and reset
+                                   int32_t xPos = ((numXIcons - 1) - (i % numXIcons)) * iconWidth + xOffset;
+                                   int32_t yPos = ((numYIcons - 1) - (i / numXIcons)) * iconHeight;
+                                   nk_layout_space_push(ctx, nk_rect(xPos, yPos, iconWidth, iconHeight));
 
-                // Temporary quirk to only allow implemented spells to be used.
-                if (FAWorld::SpellData::isSpellImplemented(spell))
-                {
-                    nk_image(ctx, spellIcons->getNkImage(frame));
-                    // Use the hover highlight/overlay as the actual button
-                    buttonStyle.hover = nk_style_item_image(spellIcons->getNkImage(
-                        (int)FAWorld::SpellData::SpellHighlightFrame::spell));
-                    if (nk_button_label_styled(ctx, &buttonStyle, ""))
-                    {
-                        // Set active spell and hide, spell selection menu
-                        FAWorld::PlayerInput::SetActiveSpellData input{spell};
-                        Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
-                        mShowSpellSelectionMenu = false;
-                    }
+                                   // Temporary quirk to only allow implemented spells to be used.
+                                   if (FAWorld::SpellData::isSpellImplemented(spell))
+                                   {
+                                       nk_image(ctx, spellIcons->getNkImage(frame));
+                                       // Use the hover highlight/overlay as the actual button
+                                       buttonStyle.hover = nk_style_item_image(spellIcons->getNkImage((int)FAWorld::SpellData::SpellHighlightFrame::spell));
+                                       if (nk_button_label_styled(ctx, &buttonStyle, ""))
+                                       {
+                                           // Set active spell and hide, spell selection menu
+                                           FAWorld::PlayerInput::SetActiveSpellData input{spell};
+                                           Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
+                                           mShowSpellSelectionMenu = false;
+                                       }
 
-                    // Keep track of current hovered spell, this is used to set active spell when spell hotkeys (F5->F8) are pressed
-                    if (nk_widget_is_hovered(ctx))
-                        mCurrentHoveredSpell = spell;
+                                       // Keep track of current hovered spell, this is used to set active spell when spell hotkeys (F5->F8) are pressed
+                                       if (nk_widget_is_hovered(ctx))
+                                           mCurrentHoveredSpell = spell;
 
-                    // Highlight selected spell
-                    if (spell == mPlayer->getPlayerBehaviour()->mActiveSpell)
-                        nk_image(ctx, spellIcons->getNkImage(
-                                          (int)FAWorld::SpellData::SpellHighlightFrame::highlight));
+                                       // Highlight selected spell
+                                       if (spell == mPlayer->getPlayerBehaviour()->mActiveSpell)
+                                           nk_image(ctx, spellIcons->getNkImage((int)FAWorld::SpellData::SpellHighlightFrame::highlight));
 
-                    // Overlay selected hotkey symbol (F5->F8)
-                    for (int j = 0; j < 4; j++)
-                    {
-                        if (spell == mPlayer->getPlayerBehaviour()->mSpellHotkey[j])
-                        {
-                            int hotkeyFrame = (int)FAWorld::SpellData::SpellHighlightFrame::hotkeyF5 + j;
-                            nk_image(ctx, spellIcons->getNkImage(hotkeyFrame));
-                        }
-                    }
-                }
-                else
-                {
-                    // Grey out unimplemented spells.
-                    nk_image_color(ctx, spellIcons->getNkImage(frame), {64, 64, 64, 255});
-                }
-            }
-            nk_layout_space_end(ctx);
-       }, false);
+                                       // Overlay selected hotkey symbol (F5->F8)
+                                       for (int j = 0; j < 4; j++)
+                                       {
+                                           if (spell == mPlayer->getPlayerBehaviour()->mSpellHotkey[j])
+                                           {
+                                               int hotkeyFrame = (int)FAWorld::SpellData::SpellHighlightFrame::hotkeyF5 + j;
+                                               nk_image(ctx, spellIcons->getNkImage(hotkeyFrame));
+                                           }
+                                       }
+                                   }
+                                   else
+                                   {
+                                       // Grey out unimplemented spells.
+                                       nk_image_color(ctx, spellIcons->getNkImage(frame), {64, 64, 64, 255});
+                                   }
+                               }
+                               nk_layout_space_end(ctx);
+                           },
+                           false);
     }
 
     void GuiManager::startingScreen() { mMenuHandler->setActiveScreen<StartingMenuScreen>(); }
@@ -984,13 +985,13 @@ namespace FAGui
             case Engine::KeyboardInputAction::spellHotkeyF6:
             case Engine::KeyboardInputAction::spellHotkeyF7:
             case Engine::KeyboardInputAction::spellHotkeyF8:
-                if (mShowSpellSelectionMenu) {
-                    if (mCurrentHoveredSpell != FAWorld::SpellId::null) {
+                if (mShowSpellSelectionMenu)
+                {
+                    if (mCurrentHoveredSpell != FAWorld::SpellId::null)
+                    {
                         // Assume these enum entries are sequential.
                         int index = (int)action - (int)Engine::KeyboardInputAction::spellHotkeyF5;
-                        FAWorld::PlayerInput input(
-                            FAWorld::PlayerInput::ConfigureSpellHotkeyData{index, mCurrentHoveredSpell},
-                            mPlayer->getId());
+                        FAWorld::PlayerInput input(FAWorld::PlayerInput::ConfigureSpellHotkeyData{index, mCurrentHoveredSpell}, mPlayer->getId());
                         Engine::EngineMain::get()->getLocalInputHandler()->addInput(input);
                     }
                 }
@@ -1039,7 +1040,10 @@ namespace FAGui
 
     void GuiManager::popModalDlg() { mDialogManager.popDialog(); }
 
-    bool GuiManager::anyPanelIsOpen() const { return (mCurLeftPanel != FAGui::PanelType::none || mCurRightPanel != FAGui::PanelType::none) || mShowSpellSelectionMenu; }
+    bool GuiManager::anyPanelIsOpen() const
+    {
+        return (mCurLeftPanel != FAGui::PanelType::none || mCurRightPanel != FAGui::PanelType::none) || mShowSpellSelectionMenu;
+    }
 
     void GuiManager::closeAllPanels()
     {
