@@ -115,7 +115,7 @@ static const TValue absentkey = {ABSTKEYCONSTANT};
 */
 #if !defined(l_hashfloat)
 static int l_hashfloat(lua_Number n) {
-  return std::hash<int>{}(n.rawValue());
+  return std::hash<int>{}(n.intPart() >= 0 ? n.rawValue() : -n.rawValue());
 }
 #endif
 
