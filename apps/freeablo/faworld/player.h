@@ -43,9 +43,7 @@ namespace FAWorld
         virtual bool canCriticalHit() const override { return mPlayerClass == PlayerClass::warrior; }
 
         bool castSpell(SpellId spell, Misc::Point targetPoint) override;
-        SpellId getActiveSpell() const { return mActiveSpell; }
-        void setActiveSpell(SpellId spell) { mActiveSpell = spell; }
-        void castActiveSpell(Misc::Point targetPoint);
+        SpellId defaultSkill() const;
 
         virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const override;
 
@@ -76,6 +74,5 @@ namespace FAWorld
 
         int32_t mInventoryChangedCallCount = 0; // not serialised, only used to determine if inventory changed since we last calculated stats
         PlayerClass mPlayerClass = PlayerClass::warrior;
-        SpellId mActiveSpell = SpellId::firebolt;
     };
 }

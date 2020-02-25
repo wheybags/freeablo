@@ -126,6 +126,22 @@ namespace FAWorld
 
     void PlayerInput::SetActiveSpellData::load(Serial::Loader& loader) { spell = (SpellId)loader.load<int32_t>(); }
 
+    void PlayerInput::ConfigureSpellHotkeyData::save(Serial::Saver& saver) const
+    {
+        saver.save(hotkey);
+        saver.save((int32_t)spell);
+    }
+
+    void PlayerInput::ConfigureSpellHotkeyData::load(Serial::Loader& loader)
+    {
+        hotkey = loader.load<int32_t>();
+        spell = (SpellId)loader.load<int32_t>();
+    }
+
+    void PlayerInput::SpellHotkeyData::save(Serial::Saver& saver) const { saver.save(hotkey); }
+
+    void PlayerInput::SpellHotkeyData::load(Serial::Loader& loader) { hotkey = loader.load<int32_t>(); }
+
     void PlayerInput::SplitGoldStackIntoCursorData::save(Serial::Saver& saver) const
     {
         saver.save(invX);

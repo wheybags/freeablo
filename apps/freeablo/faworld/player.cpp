@@ -347,7 +347,6 @@ namespace FAWorld
     Player::Player(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader)
     {
         mPlayerClass = static_cast<PlayerClass>(loader.load<int32_t>());
-        mActiveSpell = (SpellId)loader.load<int32_t>();
         initCommon();
         mPlayerInitialised = true;
     }
@@ -360,7 +359,6 @@ namespace FAWorld
 
         Actor::save(saver);
         saver.save(static_cast<int32_t>(mPlayerClass));
-        saver.save((int32_t)mActiveSpell);
     }
 
     Player::~Player() { mWorld.deregisterPlayer(this); }
@@ -635,6 +633,9 @@ namespace FAWorld
 
     bool Player::castSpell(SpellId spell, Misc::Point targetPoint)
     {
+        if (spell == SpellId::null)
+            return false;
+
         auto spellData = SpellData(spell);
         auto& mana = mStats.getMana();
         auto manaCost = spellData.manaCost();
@@ -651,5 +652,19 @@ namespace FAWorld
         return false;
     }
 
-    void Player::castActiveSpell(Misc::Point targetPoint) { castSpell(mActiveSpell, targetPoint); }
+    SpellId Player::defaultSkill() const
+    {
+        switch (mPlayerClass)
+        {
+            case PlayerClass::warrior:
+                return SpellId::repair;
+            case PlayerClass::rogue:
+                return SpellId::disarm;
+            case PlayerClass::sorcerer:
+                return SpellId::recharge;
+            case PlayerClass::none:
+                invalid_enum(PlayerClass, mPlayerClass);
+        }
+        return SpellId::null;
+    }
 }

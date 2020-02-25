@@ -73,6 +73,9 @@ namespace Render
 
     void setWindowSize(const RenderSettings& settings);
 
+    const std::string& getWindowTitle();
+    void setWindowTitle(const std::string& title);
+
     void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics);
     void quit();
 

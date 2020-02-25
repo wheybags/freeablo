@@ -43,7 +43,9 @@ namespace Engine
 
             if (duration >= MAXIMUM_DURATION_IN_MS)
             {
-                std::cout << "FPS: " << ((float)numFrames) / (((float)duration) / MAXIMUM_DURATION_IN_MS) << std::endl;
+                std::stringstream ss;
+                ss << "(" << ((float)numFrames) / (((float)duration) / MAXIMUM_DURATION_IN_MS) << " FPS)";
+                Render::setWindowTitle(Render::getWindowTitle() + " " + ss.str());
                 numFrames = 0;
                 last = now;
             }
