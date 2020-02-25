@@ -1,5 +1,6 @@
 #pragma once
 #include "../engine/inputobserverinterface.h"
+#include "../faworld/spellenums.h"
 #include "dialogmanager.h"
 #include "textcolor.h"
 #include <chrono>
@@ -99,6 +100,7 @@ namespace FAGui
         void update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
 
         bool isInventoryShown() const;
+        bool isSpellSelectionMenuShown() const;
         // so gold split dialog blocks pause but allows you to move around, that's why it should be separate function
         bool isPauseBlocked() const;
         // current support for modal dialogs seem to be non-existant, so here'll be some workarounds:
@@ -163,6 +165,7 @@ namespace FAGui
         void spellsPanel(nk_context* ctx);
         void belt(nk_context* ctx);
         void bottomMenu(nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
+        void spellSelectionMenu(nk_context* ctx);
 
         int smallTextWidth(const char* text);
         void descriptionPanel(nk_context* ctx, const std::string& description);
@@ -185,5 +188,7 @@ namespace FAGui
         const FAWorld::Item* mGoldSplitTarget = nullptr;
         int mGoldSplitCnt = 0;
         int mCurSpellbookTab = 0;
+        bool mShowSpellSelectionMenu = false;
+        FAWorld::SpellId mCurrentHoveredSpell = FAWorld::SpellId::null;
     };
 }

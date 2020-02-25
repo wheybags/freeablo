@@ -26,6 +26,7 @@ namespace Engine
         toggleQuests,
         toggleCharacterInfo,
         toggleSpellbook,
+        toggleSpellSelection,
         spellHotkeyF5,
         spellHotkeyF6,
         spellHotkeyF7,

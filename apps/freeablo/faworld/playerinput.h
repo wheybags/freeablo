@@ -15,6 +15,8 @@
     MACRO(ChangeLevel)                                                                                                                                         \
     MACRO(InventorySlotClicked)                                                                                                                                \
     MACRO(SetActiveSpell)                                                                                                                                      \
+    MACRO(ConfigureSpellHotkey)                                                                                                                                \
+    MACRO(SpellHotkey)                                                                                                                                         \
     MACRO(SplitGoldStackIntoCursor)                                                                                                                            \
     MACRO(PlayerJoined)                                                                                                                                        \
     MACRO(PlayerLeft)                                                                                                                                          \
@@ -98,6 +100,21 @@ namespace FAWorld
         struct SetActiveSpellData
         {
             SpellId spell;
+
+            void save(Serial::Saver& saver) const;
+            void load(Serial::Loader& loader);
+        };
+        struct ConfigureSpellHotkeyData
+        {
+            int32_t hotkey;
+            SpellId spell;
+
+            void save(Serial::Saver& saver) const;
+            void load(Serial::Loader& loader);
+        };
+        struct SpellHotkeyData
+        {
+            int32_t hotkey;
 
             void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
