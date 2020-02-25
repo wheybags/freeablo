@@ -135,6 +135,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fagui/npcs/pepindialog.h
     fagui/npcs/wirtdialog.cpp
     fagui/npcs/wirtdialog.h
+    fagui/console/console.cpp
+    fagui/console/console.h
 
     engine/threadmanager.h
     engine/threadmanager.cpp

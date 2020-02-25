@@ -151,8 +151,6 @@ target_link_libraries(NuklearMisc nuklear nativefiledialog Input Render)
 add_library(Script
   script/luascript.cpp
   script/luascript.h
-  script/console.cpp
-  script/console.h
 )
 
 target_link_libraries(Script lua Filesystem Misc)

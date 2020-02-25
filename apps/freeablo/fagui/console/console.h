@@ -1,12 +1,12 @@
 #pragma once
 
-#include "luascript.h"
+#include <script/luascript.h>
 
 #include <filesystem/path.h>
 #include <memory>
 #include <string>
 
-namespace Script
+namespace FAGui
 {
     class Console
     {
@@ -15,7 +15,7 @@ namespace Script
         static constexpr size_t inputSize = 512;
         char mInput[inputSize];
         int inputLen;
-        std::unique_ptr<LuaScript>& mScript;
+        std::unique_ptr<Script::LuaScript>& mScript;
         filesystem::path mCommandsPath;
         static std::unique_ptr<Console> mInstance;
 

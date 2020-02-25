@@ -1,16 +1,16 @@
 #include "console.h"
-#include "luascript.h"
+#include <script/luascript.h>
 
 #include <filesystem/resolver.h>
 #include <misc/fixedpoint.h>
 #include <misc/stringops.h>
 
-namespace Script
+namespace FAGui
 {
     static std::string luaStdOut;
     std::unique_ptr<Console> Console::mInstance = nullptr;
 
-    Console::Console() : mBuffer({}), bufferLen(0), inputLen(0), mScript(LuaScript::getInstance()), mCommandsPath("resources/commands/")
+    Console::Console() : mBuffer({}), bufferLen(0), inputLen(0), mScript(Script::LuaScript::getInstance()), mCommandsPath("resources/commands/")
     {
         // Hack. Redirects the print output to the console.
         mScript->registerGlobalFunction("print", [](lua_State* state) -> int {
@@ -41,8 +41,6 @@ namespace Script
             luaStdOut += "\"\n";
             return 0;
         });
-
-        mScript->registerGlobalType<FixedPoint>();
     }
 
     std::unique_ptr<Console>& Console::getInstance()

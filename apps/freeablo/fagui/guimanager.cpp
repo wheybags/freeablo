@@ -10,6 +10,7 @@
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/spells.h"
 #include "../faworld/world.h"
+#include "console/console.h"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
 #include "menu/multiplayerconnecting.h"
@@ -24,7 +25,6 @@
 #include <memory>
 #include <misc/misc.h>
 #include <misc/stringops.h>
-#include <script/console.h>
 #include <script/luascript.h>
 #include <serial/textstream.h>
 #include <string>
@@ -530,13 +530,13 @@ namespace FAGui
 
     void GuiManager::consolePanel(nk_context* ctx)
     {
-        auto& c = Script::Console::getInstance();
+        auto& c = Console::getInstance();
         drawPanel(ctx,
                   PanelType::console,
                   [&]() {
                       nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
                       nk_layout_space_push(ctx, nk_rect(5, 5, 490, 250));
-                      nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_READ_ONLY, c->getBufferPtr(), c->getBufferLen(), c->getBuffer().length(), nk_filter_default);
+                      nk_edit_string(ctx, NK_EDIT_BOX, c->getBufferPtr(), c->getBufferLen(), c->getBuffer().length(), nk_filter_default);
                       const int32_t height = FARender::Renderer::get()->smallFont()->height + 15;
                       nk_layout_space_push(ctx, nk_rect(5, 270, 490, height));
                       nk_flags active =
