@@ -311,7 +311,7 @@ size_t luaO_str2num(const char* s, TValue* o) {
   else { /* else try as a float */
     setfltvalue(o, fp);
   }
-  size = fp.str().length();
+  size = fp.str().length() + 1;
   return size; /* success; return string size */
 }
 

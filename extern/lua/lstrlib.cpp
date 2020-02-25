@@ -1148,7 +1148,7 @@ static int quotefloat(lua_State* L, char* buff, lua_Number n) {
       *ppoint = '.'; // change it to a dot
     }
     return nb;*/
-    buff = const_cast<char*>(n.str().c_str());
+    buff = strcpy(buff, n.str().c_str());
     return n.str().length();
   }
   /* for the fixed representations */
