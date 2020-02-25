@@ -61,11 +61,14 @@ namespace Render
     // SDL_Renderer* renderer;
     SDL_GLContext glContext;
 
+    std::string windowTitle;
+
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
     {
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
         int flags = SDL_WINDOW_OPENGL;
+        windowTitle = title;
 
         if (settings.fullscreen)
         {
@@ -120,6 +123,9 @@ namespace Render
     }
 
     void setWindowSize(const RenderSettings& settings) { SDL_SetWindowSize(screen, settings.windowWidth, settings.windowHeight); }
+
+    const std::string& getWindowTitle() { return windowTitle; }
+    void setWindowTitle(const std::string& title) { SDL_SetWindowTitle(screen, title.c_str()); }
 
     void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics)
     {
