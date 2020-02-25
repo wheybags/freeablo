@@ -536,6 +536,8 @@ namespace FAGui
                   [&]() {
                       nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
                       nk_layout_space_push(ctx, nk_rect(5, 5, 490, 250));
+                      nk_style_push_font(ctx, FARender::Renderer::get()->freeMono());
+                      nk_style_push_color(ctx, &ctx->style.text.color, getNkColor(TextColor::white));
                       nk_edit_string(ctx, NK_EDIT_BOX, c->getBufferPtr(), c->getBufferLen(), c->getBuffer().length(), nk_filter_default);
                       const int32_t height = FARender::Renderer::get()->smallFont()->height + 15;
                       nk_layout_space_push(ctx, nk_rect(5, 270, 490, height));
@@ -546,6 +548,9 @@ namespace FAGui
                       {
                           c->inputCommited();
                       }
+
+                      nk_style_pop_color(ctx);
+                      nk_style_pop_font(ctx);
                       nk_layout_space_end(ctx);
                   },
                   500,

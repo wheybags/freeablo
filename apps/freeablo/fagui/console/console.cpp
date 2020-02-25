@@ -12,35 +12,7 @@ namespace FAGui
 
     Console::Console() : mBuffer({}), bufferLen(0), inputLen(0), mScript(Script::LuaScript::getInstance()), mCommandsPath("resources/commands/")
     {
-        // Hack. Redirects the print output to the console.
-        mScript->registerGlobalFunction("print", [](lua_State* state) -> int {
-            int n = lua_gettop(state);
-            luaStdOut += "\"";
-            if (n >= 1)
-            {
-                for (int i = n; i > 0; --i)
-                {
-                    if (lua_isboolean(state, -i))
-                    {
-                        luaStdOut += lua_toboolean(state, -i) != 0 ? "true" : "false";
-                    }
-
-                    else if (lua_isnumber(state, -i))
-                    {
-                        luaStdOut += luaL_checknumber(state, i).str();
-                    }
-
-                    else
-                    {
-                        const char* str = luaL_checkstring(state, i);
-                        luaStdOut += str;
-                    }
-                }
-            }
-
-            luaStdOut += "\"\n";
-            return 0;
-        });
+        // TODO: redirect stdout/cout to the console.
     }
 
     std::unique_ptr<Console>& Console::getInstance()
