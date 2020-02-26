@@ -21,6 +21,7 @@ namespace FAGui
 
     public:
         static std::unique_ptr<Console>& getInstance();
+        ~Console();
 
         char* getInput() { return mInput; };
         std::string& getBuffer() { return mBuffer; };
@@ -29,7 +30,7 @@ namespace FAGui
         int* getInputLen() { return &inputLen; }
         constexpr size_t getInputSize() const { return inputSize; }
 
-        void appendStdOut(const std::string& msg);
+        void appendStdOut();
         void inputCommited();
 
     private:

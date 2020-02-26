@@ -7,12 +7,27 @@
 
 namespace FAGui
 {
-    static std::string luaStdOut;
+    static auto oldCout = std::cout.rdbuf();
+#ifdef _WIN32
+    static const char* nullFile = "nul";
+#else
+    static const char* nullFile = "/dev/null";
+#endif
+    static char consoleStdoutBuffer[BUFSIZ];
     std::unique_ptr<Console> Console::mInstance = nullptr;
+    static std::stringstream consoleCout;
 
     Console::Console() : mBuffer({}), bufferLen(0), inputLen(0), mScript(Script::LuaScript::getInstance()), mCommandsPath("resources/commands/")
     {
-        // TODO: redirect stdout/cout to the console.
+        std::cout.rdbuf(consoleCout.rdbuf());
+        freopen(nullFile, "a", stdout);
+        setbuf(stdout, consoleStdoutBuffer);
+    }
+
+    Console::~Console()
+    {
+        std::cout.rdbuf(oldCout);
+        fclose(stdout);
     }
 
     std::unique_ptr<Console>& Console::getInstance()
@@ -25,11 +40,21 @@ namespace FAGui
         return mInstance;
     }
 
-    void Console::appendStdOut(const std::string& msg)
+    void Console::appendStdOut()
     {
-        mBuffer += msg;
-        bufferLen += msg.length();
-        luaStdOut = "";
+        if (auto size = strlen(consoleStdoutBuffer); size > 0)
+        {
+            mBuffer.append(consoleStdoutBuffer, size);
+            bufferLen = mBuffer.length();
+            std::memset(consoleStdoutBuffer, '\0', BUFSIZ);
+        }
+
+        if (consoleCout.tellp() > 0)
+        {
+            mBuffer += consoleCout.str();
+            bufferLen = mBuffer.length();
+            consoleCout.str({});
+        }
     }
 
     void Console::inputCommited()
@@ -46,8 +71,10 @@ namespace FAGui
         {
             std::string arg = command.substr(4, command.length() - 4);
             mScript->eval(arg.c_str());
-            std::string msg = ">> " + luaStdOut;
-            appendStdOut(msg);
+            std::string msg = ">> ";
+            msg.append(consoleStdoutBuffer, strlen(consoleStdoutBuffer));
+            std::memset(consoleStdoutBuffer, '\0', BUFSIZ);
+            std::cout << msg;
         }
 
         else
@@ -57,14 +84,16 @@ namespace FAGui
             if (scriptPath.exists())
             {
                 mScript->runScript(scriptPath.str());
-                std::string msg = luaStdOut.empty() ? ">> nil\n" : (">> " + luaStdOut);
-                appendStdOut(msg);
+                std::string msg = ">> ";
+                msg.append(consoleStdoutBuffer, strlen(consoleStdoutBuffer));
+                std::memset(consoleStdoutBuffer, '\0', BUFSIZ);
+                std::cout << msg;
             }
 
             else
             {
                 std::string msg = ">> Command '" + command + "' not found\n";
-                appendStdOut(msg);
+                std::cout << msg;
             }
         }
     }

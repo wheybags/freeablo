@@ -552,6 +552,7 @@ namespace FAGui
                       nk_style_pop_color(ctx);
                       nk_style_pop_font(ctx);
                       nk_layout_space_end(ctx);
+                      c->appendStdOut();
                   },
                   500,
                   300);

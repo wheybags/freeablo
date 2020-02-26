@@ -149,9 +149,8 @@ namespace Script
 
         if (luaL_dostring(mState, script))
         {
-            std::cerr << "Lua error: " << lua_tostring(mState, -1) << "\n";
+            std::cout << "Lua error: " << lua_tostring(mState, -1) << "\n";
             lua_pop(mState, 1);
-            exit(1);
         }
     }
 }
