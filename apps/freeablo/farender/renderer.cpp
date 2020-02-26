@@ -5,7 +5,7 @@
 #include "cel/celdecoder.h"
 #include "cel/celfile.h"
 #include "fontinfo.h"
-#include <audio/audio.h>
+#include <audio/fa_audio.h>
 #include <functional>
 #include <input/inputmanager.h>
 #include <iostream>
