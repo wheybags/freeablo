@@ -17,8 +17,11 @@ namespace FAGui
 
     MenuHandler::MenuHandler(Engine::EngineMain& engine) : mEngine(engine) {}
 
-    void MenuHandler::update(nk_context* ctx) const
+    void MenuHandler::update(nk_context* ctx)
     {
+        if (mNextMenu)
+            mActiveScreen.reset(mNextMenu.release());
+
         if (mActiveScreen)
             mActiveScreen->update(ctx);
     }
