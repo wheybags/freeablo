@@ -28,7 +28,7 @@ namespace FAWorld
 
     FixedPoint Position::update(FixedPoint moveDistance)
     {
-        if (isMoving() && !mDirection.isNone())
+        if (isMoving())
         {
             Vec2Fix vectorToDest;
             if (mMovementType == MovementType::GridLocked)
