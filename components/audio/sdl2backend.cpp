@@ -1,4 +1,4 @@
-#include "audio.h"
+#include "fa_audio.h"
 #include <SDL.h>
 #include <SDL_mixer.h>
 #include <faio/fafileobject.h>

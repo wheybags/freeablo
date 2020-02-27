@@ -114,7 +114,7 @@ target_link_libraries(DiabloExe Misc FAIO)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Audio
-    audio/audio.h
+    audio/fa_audio.h
     audio/sdl2backend.cpp
 )
 target_link_libraries(Audio FAIO SDL_mixer)
