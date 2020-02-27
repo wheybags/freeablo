@@ -31,6 +31,7 @@ namespace FAWorld
         mLastRepathed = loader.load<Tick>();
         mPathRateLimit = loader.load<Tick>();
         mAdjacent = loader.load<bool>();
+        mSpeedTilesPerSecond.load(loader);
     }
 
     void MovementHandler::save(FASaveGame::GameSaver& saver)
@@ -57,6 +58,7 @@ namespace FAWorld
         saver.save(mLastRepathed);
         saver.save(mPathRateLimit);
         saver.save(mAdjacent);
+        mSpeedTilesPerSecond.save(saver);
     }
 
     Misc::Point MovementHandler::getDestination() const { return mDestination; }
@@ -165,7 +167,7 @@ namespace FAWorld
             }
         }
 
-        mCurrentPos.update();
+        mCurrentPos.update(mSpeedTilesPerSecond);
 
         if (mCurrentPos.current() != oldPosition.current() || mCurrentPos.next() != oldPosition.next())
         {

@@ -15,14 +15,12 @@ namespace FAWorld
     class Position
     {
     public:
-        explicit Position(Misc::Point point = Misc::Point::zero(),
-                          Misc::Direction direction = Misc::Direction(Misc::Direction8::south),
-                          FixedPoint speed = FixedPoint(1) / FixedPoint("0.4"));
+        explicit Position(Misc::Point point = Misc::Point::zero(), Misc::Direction direction = Misc::Direction(Misc::Direction8::south));
 
         Position(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
 
-        void update();
+        void update(FixedPoint tilesPerSecond);
         Misc::Point current() const; ///< where we are coming from
         bool isNear(const Position& other) const;
         Misc::Point next() const; ///< where we are going to
@@ -32,8 +30,6 @@ namespace FAWorld
 
         bool isMoving() const { return mMovementType != MovementType::Stopped; }
         Vec2Fix getFractionalPos() const { return mFractionalPos; }
-
-        void setSpeed(FixedPoint tilesPerSecond);
 
         void stopMoving();
         void gridMoveInDirection(Misc::Direction8 direction);
@@ -53,7 +49,6 @@ namespace FAWorld
         Misc::Point mCurrent;
         Vec2Fix mFractionalPos;
         Misc::Direction mDirection = Misc::Direction(Misc::Direction8::south);
-        FixedPoint mMoveDistance;
         MovementType mMovementType = MovementType::Stopped;
     };
 }

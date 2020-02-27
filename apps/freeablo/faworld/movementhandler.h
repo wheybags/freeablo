@@ -32,6 +32,8 @@ namespace FAWorld
         void teleport(GameLevel* level, Position pos);
         void stopMoving(FAWorld::Actor& actor, std::optional<Misc::Direction> pointInDirection = std::nullopt);
 
+        FixedPoint mSpeedTilesPerSecond;
+
     private:
         GameLevel* mLevel = nullptr;
         Position mCurrentPos;

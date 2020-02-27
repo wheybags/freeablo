@@ -6,10 +6,7 @@
 
 namespace FAWorld
 {
-    Position::Position(Misc::Point point, Misc::Direction direction, FixedPoint speed) : mCurrent(point), mFractionalPos(Vec2Fix(point)), mDirection(direction)
-    {
-        setSpeed(speed);
-    }
+    Position::Position(Misc::Point point, Misc::Direction direction) : mCurrent(point), mFractionalPos(Vec2Fix(point)), mDirection(direction) {}
 
     Position::Position(FASaveGame::GameLoader& loader)
     {
@@ -17,7 +14,6 @@ namespace FAWorld
         mMovementType = static_cast<MovementType>(loader.load<int32_t>());
         mCurrent = Misc::Point(loader);
         mFractionalPos = Vec2Fix(loader);
-        mMoveDistance.load(loader);
     }
 
     void Position::save(FASaveGame::GameSaver& saver)
@@ -28,11 +24,12 @@ namespace FAWorld
         saver.save(static_cast<int32_t>(mMovementType));
         mCurrent.save(saver);
         mFractionalPos.save(saver);
-        mMoveDistance.save(saver);
     }
 
-    void Position::update()
+    void Position::update(FixedPoint tilesPerSecond)
     {
+        FixedPoint moveDistance = tilesPerSecond / FixedPoint(World::ticksPerSecond);
+
         if (isMoving() && !mDirection.isNone())
         {
             Vec2Fix vectorToDest;
@@ -52,7 +49,7 @@ namespace FAWorld
 
             Vec2Fix movement = vectorToDest;
             movement.normalise();
-            movement *= mMoveDistance;
+            movement *= moveDistance;
 
             mFractionalPos += movement;
 
@@ -74,8 +71,6 @@ namespace FAWorld
     }
 
     void Position::setDirection(Misc::Direction mDirection) { this->mDirection = mDirection; }
-
-    void Position::setSpeed(FixedPoint tilesPerSecond) { mMoveDistance = tilesPerSecond / FixedPoint(World::ticksPerSecond); }
 
     Misc::Point Position::current() const { return mCurrent; }
 
