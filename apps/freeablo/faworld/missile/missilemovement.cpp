@@ -31,7 +31,7 @@ namespace FAWorld
         void MissileMovement::linear(Missile&, MissileGraphic& graphic)
         {
             graphic.mCurPos.setFreeMovement();
-            graphic.mCurPos.update(7);
+            graphic.mCurPos.update(FixedPoint(7) / FixedPoint(World::ticksPerSecond));
         }
 
         void MissileMovement::hoverOverCreator(Missile& missile, MissileGraphic& graphic)

@@ -74,7 +74,15 @@ namespace FAWorld
     GameLevel* MovementHandler::getLevel() { return mLevel; }
     const GameLevel* MovementHandler::getLevel() const { return mLevel; }
 
-    void MovementHandler::update(FAWorld::Actor& actor)
+    void MovementHandler::update(Actor& actor)
+    {
+        FixedPoint moveDistance = mSpeedTilesPerSecond / FixedPoint(World::ticksPerSecond);
+
+        while (moveDistance > 0)
+            moveDistance = updateInternal(actor, moveDistance);
+    }
+
+    FixedPoint MovementHandler::updateInternal(Actor& actor, FixedPoint moveDistance)
     {
         debug_assert(mLevel);
         debug_assert(mLevel->isPassable(getCurrentPosition().current(), &actor));
@@ -160,14 +168,15 @@ namespace FAWorld
                     if (!mCurrentPath.empty())
                         mDestination = mCurrentPath.back();
 
-                    update(actor);
-
-                    return;
+                    return moveDistance; // By returning the full amount we will force the function to start again
                 }
             }
         }
 
-        mCurrentPos.update(mSpeedTilesPerSecond);
+        FixedPoint movementRemaining = 0;
+
+        if (mCurrentPos.isMoving())
+            movementRemaining = mCurrentPos.update(moveDistance);
 
         if (mCurrentPos.current() != oldPosition.current() || mCurrentPos.next() != oldPosition.next())
         {
@@ -178,6 +187,8 @@ namespace FAWorld
         }
 
         debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
+
+        return movementRemaining;
     }
 
     void MovementHandler::teleport(GameLevel* level, Position pos)

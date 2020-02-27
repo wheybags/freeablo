@@ -28,10 +28,14 @@ namespace FAWorld
         const Position& getCurrentPosition() const { return mCurrentPos; }
         GameLevel* getLevel();
         const GameLevel* getLevel() const;
-        void update(FAWorld::Actor& actor);
+        void update(Actor& actor);
         void teleport(GameLevel* level, Position pos);
         void stopMoving(FAWorld::Actor& actor, std::optional<Misc::Direction> pointInDirection = std::nullopt);
 
+    private:
+        FixedPoint updateInternal(Actor& actor, FixedPoint moveDistance);
+
+    public:
         FixedPoint mSpeedTilesPerSecond;
 
     private:

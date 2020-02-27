@@ -20,7 +20,7 @@ namespace FAWorld
         Position(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
 
-        void update(FixedPoint tilesPerSecond);
+        FixedPoint update(FixedPoint moveDistance);
         Misc::Point current() const; ///< where we are coming from
         bool isNear(const Position& other) const;
         Misc::Point next() const; ///< where we are going to

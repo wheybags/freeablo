@@ -20,7 +20,7 @@ namespace Vec2Helper
     template <> FixedPoint forceFixedPoint(double val) { return FixedPoint::fromRawValue(int64_t(val * FixedPoint::scalingFactor)); }
 
     template <typename T> T invalid() { return std::numeric_limits<T>::max(); }
-    template <> FixedPoint invalid() { return FixedPoint::fromRawValue(std::numeric_limits<int64_t>::max()); }
+    template <> FixedPoint invalid() { return FixedPoint::invalid(); }
 }
 
 template <> Vec2<FixedPoint>::Vec2(Serial::Loader& loader)

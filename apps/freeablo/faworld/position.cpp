@@ -26,10 +26,8 @@ namespace FAWorld
         mFractionalPos.save(saver);
     }
 
-    void Position::update(FixedPoint tilesPerSecond)
+    FixedPoint Position::update(FixedPoint moveDistance)
     {
-        FixedPoint moveDistance = tilesPerSecond / FixedPoint(World::ticksPerSecond);
-
         if (isMoving() && !mDirection.isNone())
         {
             Vec2Fix vectorToDest;
@@ -55,19 +53,26 @@ namespace FAWorld
 
             if (mMovementType == MovementType::GridLocked)
             {
-                if (movement.magnitudeSquared() >= vectorToDest.magnitudeSquared())
+                FixedPoint vectorToDestMagnitudeSquared = vectorToDest.magnitudeSquared();
+                if (movement.magnitudeSquared() >= vectorToDestMagnitudeSquared)
                 {
                     Misc::Point nextPositon = next();
                     mCurrent = nextPositon;
                     mFractionalPos = Vec2Fix(nextPositon);
                     stopMoving();
+
+                    return moveDistance - vectorToDestMagnitudeSquared.sqrt();
                 }
             }
             else
             {
                 mCurrent = Misc::Point(mFractionalPos);
             }
+
+            return 0;
         }
+
+        return moveDistance;
     }
 
     void Position::setDirection(Misc::Direction mDirection) { this->mDirection = mDirection; }
