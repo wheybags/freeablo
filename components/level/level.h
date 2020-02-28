@@ -2,7 +2,6 @@
 #include "baseitemmanager.h"
 #include "dun.h"
 #include "min.h"
-#include "misc/point.h"
 #include "sol.h"
 #include "tileset.h"
 #include <map>

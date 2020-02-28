@@ -2,7 +2,6 @@
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
 #include "findpath.h"
-#include <misc/vec2fix.h>
 
 namespace FAWorld
 {
@@ -32,6 +31,7 @@ namespace FAWorld
         mLastRepathed = loader.load<Tick>();
         mPathRateLimit = loader.load<Tick>();
         mAdjacent = loader.load<bool>();
+        mSpeedTilesPerSecond.load(loader);
     }
 
     void MovementHandler::save(FASaveGame::GameSaver& saver)
@@ -58,6 +58,7 @@ namespace FAWorld
         saver.save(mLastRepathed);
         saver.save(mPathRateLimit);
         saver.save(mAdjacent);
+        mSpeedTilesPerSecond.save(saver);
     }
 
     Misc::Point MovementHandler::getDestination() const { return mDestination; }
@@ -73,7 +74,15 @@ namespace FAWorld
     GameLevel* MovementHandler::getLevel() { return mLevel; }
     const GameLevel* MovementHandler::getLevel() const { return mLevel; }
 
-    void MovementHandler::update(FAWorld::Actor& actor)
+    void MovementHandler::update(Actor& actor)
+    {
+        FixedPoint moveDistance = mSpeedTilesPerSecond / FixedPoint(World::ticksPerSecond);
+
+        while (moveDistance > 0)
+            moveDistance = updateInternal(actor, moveDistance);
+    }
+
+    FixedPoint MovementHandler::updateInternal(Actor& actor, FixedPoint moveDistance)
     {
         debug_assert(mLevel);
         debug_assert(mLevel->isPassable(getCurrentPosition().current(), &actor));
@@ -102,14 +111,15 @@ namespace FAWorld
                     // detect if we were blocked on our way and try to recover
                     if (mCurrentPos.current() == mCurrentPath[mCurrentPathIndex - 1])
                     {
-                        auto next = mCurrentPath[mCurrentPathIndex];
+                        Misc::Point next = mCurrentPath[mCurrentPathIndex];
                         if (mLevel->isPassable(next, &actor))
                         {
-                            auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
-                            Misc::Direction direction = vec.getDirection();
+                            Vec2Fix vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
 
-                            mCurrentPos.setDirection(direction);
-                            mCurrentPos.moveToPoint(next);
+                            Misc::Direction8 direction = vec.getDirection().getDirection8();
+                            debug_assert(next == Misc::getNextPosByDir(mCurrentPos.current(), direction));
+
+                            mCurrentPos.gridMoveInDirection(direction);
                             needsRepath = false;
                         }
                     }
@@ -125,10 +135,10 @@ namespace FAWorld
                             if (mLevel->isPassable(next, &actor))
                             {
                                 auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
-                                Misc::Direction direction = vec.getDirection();
+                                Misc::Direction8 direction = vec.getDirection().getDirection8();
+                                debug_assert(next == Misc::getNextPosByDir(mCurrentPos.current(), direction));
 
-                                mCurrentPos.setDirection(direction);
-                                mCurrentPos.moveToPoint(next);
+                                mCurrentPos.gridMoveInDirection(direction);
                                 needsRepath = false;
                                 mCurrentPathIndex++;
 
@@ -158,14 +168,15 @@ namespace FAWorld
                     if (!mCurrentPath.empty())
                         mDestination = mCurrentPath.back();
 
-                    update(actor);
-
-                    return;
+                    return moveDistance; // By returning the full amount we will force the function to start again
                 }
             }
         }
 
-        mCurrentPos.update();
+        FixedPoint movementRemaining = 0;
+
+        if (mCurrentPos.isMoving())
+            movementRemaining = mCurrentPos.update(moveDistance);
 
         if (mCurrentPos.current() != oldPosition.current() || mCurrentPos.next() != oldPosition.next())
         {
@@ -176,6 +187,8 @@ namespace FAWorld
         }
 
         debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
+
+        return movementRemaining;
     }
 
     void MovementHandler::teleport(GameLevel* level, Position pos)

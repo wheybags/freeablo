@@ -9,7 +9,6 @@
 #include <diabloexe/monster.h>
 #include <misc/assert.h>
 #include <misc/misc.h>
-#include <misc/vec2fix.h>
 #include <random/random.h>
 #include <sstream>
 #include <stdlib.h>

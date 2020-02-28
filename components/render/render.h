@@ -1,7 +1,6 @@
 #pragma once
 #include "cel/pal.h"
 #include "misc.h"
-#include "misc/point.h"
 #include <functional>
 #include <map>
 #include <optional>
@@ -123,10 +122,9 @@ namespace Render
                    SpriteCacheBase* cache,
                    LevelObjects& objs,
                    LevelObjects& items,
-                   const Misc::Point& pos,
-                   const Misc::Point& fractionalPos);
+                   const Vec2Fix& fractionalPos);
 
-    Tile getTileByScreenPos(size_t x, size_t y, const Misc::Point& pos, const Misc::Point& fractionalPos);
+    Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& fractionalPos);
 
     void clear(int r = 0, int g = 0, int b = 255);
 }

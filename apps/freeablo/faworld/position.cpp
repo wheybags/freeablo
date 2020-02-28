@@ -6,14 +6,14 @@
 
 namespace FAWorld
 {
+    Position::Position(Misc::Point point, Misc::Direction direction) : mCurrent(point), mFractionalPos(Vec2Fix(point)), mDirection(direction) {}
+
     Position::Position(FASaveGame::GameLoader& loader)
     {
         mDirection = Misc::Direction(loader);
         mMovementType = static_cast<MovementType>(loader.load<int32_t>());
         mCurrent = Misc::Point(loader);
-        mFractionalPos = Misc::Point(loader);
-        mSpeed = loader.load<int32_t>();
-        mDest = Misc::Point(loader);
+        mFractionalPos = Vec2Fix(loader);
     }
 
     void Position::save(FASaveGame::GameSaver& saver)
@@ -24,55 +24,55 @@ namespace FAWorld
         saver.save(static_cast<int32_t>(mMovementType));
         mCurrent.save(saver);
         mFractionalPos.save(saver);
-        saver.save(mSpeed);
-        mDest.save(saver);
     }
 
-    void Position::update()
+    FixedPoint Position::update(FixedPoint moveDistance)
     {
-        if (isMoving() && !mDirection.isNone())
+        if (isMoving())
         {
-            auto vectorDist = FAWorld::World::getSecondsPerTick() * mSpeed;
-            Misc::Point fractionalMovement;
-
+            Vec2Fix vectorToDest;
             if (mMovementType == MovementType::GridLocked)
             {
-                // GridLocked (Chebyshev) movement: movement to any neighboring tile takes the same time.
-                auto distToPoint = (mDest - mCurrent) * 100 - mFractionalPos;
-
-                // Move x and/or y by +- vectorDist.
-                if (distToPoint.x != 0)
-                    fractionalMovement.x = vectorDist.round() * ((distToPoint.x > 0) ? 1 : -1);
-                if (distToPoint.y != 0)
-                    fractionalMovement.y = vectorDist.round() * ((distToPoint.y > 0) ? 1 : -1);
-
-                // Don't move past the destination point.
-                if (std::abs(fractionalMovement.x) > std::abs(distToPoint.x))
-                    fractionalMovement.x = distToPoint.x;
-                if (std::abs(fractionalMovement.y) > std::abs(distToPoint.y))
-                    fractionalMovement.y = distToPoint.y;
+                vectorToDest = Vec2Fix(next()) - mFractionalPos;
             }
             else
             {
-                // Free (Euclidean) movement, requires trigonometry calculation.
-                auto isometricDegrees = mDirection.getIsometricDegrees();
-                fractionalMovement.x = (FixedPoint::cos_degrees(isometricDegrees) * vectorDist).round();
-                fractionalMovement.y = (FixedPoint::sin_degrees(isometricDegrees) * vectorDist).round();
+                // https://wheybags.gitlab.io/jarulfs-guide/#spell-and-arrow-speeds
+                // Techhnically, this isn't quite correct, as in the original game projectiles essentially
+                // moved through the world in "screen coordinates", and we move in the game's isometric
+                // space, but honestly I think this way is better anyway.
+                FixedPoint isometricDegrees = mDirection.getIsometricDegrees();
+                vectorToDest = Vec2Fix(FixedPoint::cos_degrees(isometricDegrees), FixedPoint::sin_degrees(isometricDegrees));
             }
 
-            mFractionalPos += fractionalMovement;
+            Vec2Fix movement = vectorToDest;
+            movement.normalise();
+            movement *= moveDistance;
 
-            mCurrent += mFractionalPos / 100;
-            mFractionalPos.x %= 100;
-            mFractionalPos.y %= 100;
+            mFractionalPos += movement;
 
-            // Possible improvement: When you're over 50% of the way to next position
-            // you're technically in the next position.
+            if (mMovementType == MovementType::GridLocked)
+            {
+                FixedPoint vectorToDestMagnitudeSquared = vectorToDest.magnitudeSquared();
+                if (movement.magnitudeSquared() >= vectorToDestMagnitudeSquared)
+                {
+                    Misc::Point nextPositon = next();
+                    mCurrent = nextPositon;
+                    mFractionalPos = Vec2Fix(nextPositon);
+                    stopMoving();
 
-            // Stop at destination.
-            if (mMovementType == MovementType::GridLocked && mCurrent == mDest && mFractionalPos == Misc::Point(0, 0))
-                stopMoving();
+                    return moveDistance - vectorToDestMagnitudeSquared.sqrt();
+                }
+            }
+            else
+            {
+                mCurrent = Misc::Point(mFractionalPos);
+            }
+
+            return 0;
         }
+
+        return moveDistance;
     }
 
     void Position::setDirection(Misc::Direction mDirection) { this->mDirection = mDirection; }
@@ -81,22 +81,22 @@ namespace FAWorld
 
     bool Position::isNear(const Position& other) const
     {
-        return std::max(std::abs(mCurrent.x - other.mCurrent.x), std::abs(mCurrent.y - other.mCurrent.y)) <= 1;
+        return std::max(std::abs(current().x - other.current().x), std::abs(current().y - other.current().y)) <= 1;
     }
 
     Misc::Point Position::next() const
     {
         if (!isMoving())
-            return mCurrent;
+            return current();
 
-        return Misc::getNextPosByDir(mCurrent, mDirection);
+        return Misc::getNextPosByDir(current(), mDirection);
     }
 
     void Position::stopMoving() { mMovementType = MovementType::Stopped; }
 
-    void Position::moveToPoint(const Misc::Point& dest)
+    void Position::gridMoveInDirection(Misc::Direction8 direction)
     {
-        mDest = dest;
+        setDirection(direction);
         mMovementType = MovementType::GridLocked;
     }
 

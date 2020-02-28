@@ -1,6 +1,6 @@
 #pragma once
 #include "fixedpoint.h"
-#include "point.h"
+#include "simplevec2.h"
 #include <cstdint>
 #include <utility>
 
@@ -9,6 +9,8 @@ namespace Serial
     class Loader;
     class Saver;
 }
+
+template <typename T> class Vec2;
 
 namespace Misc
 {
@@ -46,6 +48,8 @@ namespace Misc
         south_south_east,
         none,
     };
+
+    using Point = Vec2<int32_t>;
 
     class Direction
     {

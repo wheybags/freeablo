@@ -2,7 +2,6 @@
 #include "../actor.h"
 #include "../itemmap.h"
 #include "attackstate.h"
-#include <misc/vec2fix.h>
 
 namespace FAWorld
 {
