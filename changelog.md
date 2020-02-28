@@ -4,12 +4,25 @@
 
 - Added multiplayer
 - Added save/load
-- Added basic melee combat
+- Added monster attack animations
+- Added melee combat
 - Added basic monster AI (walk to player and melee attack)
+- Added town NPCs
 - Added NPC dialogue system
+- Added Griswold shop
 - Added player inventory
 - Added player gear equipping
 - Added NPC loot drops
+- Added pick up / put down items from / on the ground
+- Added basic spells
+- Added spellbook gui
+- Added accurate movement timing
+- Added dungeon generation for all dungeon levels
+- Added nicer gui for Diablo image viewing program
+- Added leveling / XP
+- Added original Diablo fonts
+- Added working character GUI
+- Nicer launcher gui
 - Many improvements to renderer
 - Highlight hovered NPC
 - Walls above doors now are now rendered
