@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdint>
 #include <misc/assert.h>
+#include <optional>
 #include <stdexcept>
 #include <string>
 
@@ -149,6 +150,22 @@ public:
 #else
         return FixedPoint(rawValue, double(rawValue) / double(FixedPoint::scalingFactor), RawConstructorTagType{});
 #endif
+    }
+
+    static std::optional<FixedPoint> tryParseFromString(const char* str)
+    {
+        try
+        {
+            return FixedPoint(str);
+        }
+
+        catch (std::runtime_error& err)
+        {
+#ifndef NDEBUG
+            std::cerr << err.what() << "\n";
+#endif
+            return std::nullopt;
+        }
     }
 
     int64_t rawValue() const { return mVal; }

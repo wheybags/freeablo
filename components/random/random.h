@@ -52,8 +52,12 @@ namespace Random
         virtual void load(Serial::Loader& loader) override;
         virtual void save(Serial::Saver& saver) override;
 
+        void setSeed(uint64_t s1, uint64_t s2);
+
         virtual int32_t squaredRand(int32_t min, int32_t max) override;
         virtual int32_t randomInRange(int32_t min, int32_t max) override;
+
+        static constexpr uint64_t maxVal() { return mt19937::max(); }
 
     private:
         mt19937 mRng;

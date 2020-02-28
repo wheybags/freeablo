@@ -68,16 +68,16 @@ namespace Script
         return ret;
     }
 
-    bool LuaScript::luaGetToStack(const std::string& variable)
+    bool LuaScript::luaGetToStack(const std::string& variable, int& level)
     {
-        mLevel = 0;
+        level = 0;
         std::string var{};
 
         for (char c : variable)
         {
             if (c == '.')
             {
-                if (mLevel == 0)
+                if (level == 0)
                 {
                     lua_getglobal(mState, var.c_str());
                 }
@@ -96,7 +96,7 @@ namespace Script
                 else
                 {
                     var = "";
-                    ++mLevel;
+                    ++level;
                 }
             }
 
@@ -106,7 +106,7 @@ namespace Script
             }
         }
 
-        if (mLevel == 0)
+        if (level == 0)
         {
             lua_getglobal(mState, var.c_str());
         }

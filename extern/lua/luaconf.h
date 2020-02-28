@@ -427,16 +427,15 @@
 ** may have an ill-defined value.)
 */
 #define lua_numbertointeger(n,p) \
-  ((n) >= (LUA_NUMBER)(LUA_MININTEGER) && \
-   (n) < -(LUA_NUMBER)(LUA_MININTEGER) && \
-      (*(p) = (LUA_INTEGER)(n), 1))
+  ((n) >= LUA_NUMBER((int64_t)LUA_MININTEGER) && \
+   (n) < -LUA_NUMBER((int64_t)LUA_MININTEGER) && \
+     (*(p) = n.intPart()), 1)
 
 
 /* now the variable definitions */
 
 #define LUA_NUMBER FixedPoint
 #define LUAI_UACNUMBER FixedPoint
-#define l_floatatt(n) (DBL_##n)
 
 /*
 @@ LUA_INTEGER is the integer type used by Lua.

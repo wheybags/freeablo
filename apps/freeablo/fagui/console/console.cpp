@@ -67,34 +67,10 @@ namespace FAGui
         bufferLen += inputLen;
         inputLen = 0;
 
-        if (Misc::StringUtils::ciStartsWith(command, "eval"))
-        {
-            std::string arg = command.substr(4, command.length() - 4);
-            mScript->eval(arg.c_str());
-            std::string msg = ">> ";
-            msg.append(consoleStdoutBuffer, strlen(consoleStdoutBuffer));
-            std::memset(consoleStdoutBuffer, '\0', BUFSIZ);
-            std::cout << msg;
-        }
-
-        else
-        {
-            auto args = Misc::StringUtils::split(command, ' '); // TODO: parse args and pass them to the script
-            filesystem::path scriptPath = filesystem::resolver().resolve(mCommandsPath / (args[0] + ".lua"));
-            if (scriptPath.exists())
-            {
-                mScript->runScript(scriptPath.str());
-                std::string msg = ">> ";
-                msg.append(consoleStdoutBuffer, strlen(consoleStdoutBuffer));
-                std::memset(consoleStdoutBuffer, '\0', BUFSIZ);
-                std::cout << msg;
-            }
-
-            else
-            {
-                std::string msg = ">> Command '" + command + "' not found\n";
-                std::cout << msg;
-            }
-        }
+        mScript->eval(command.c_str());
+        std::string msg = ">> ";
+        msg.append(consoleStdoutBuffer, strlen(consoleStdoutBuffer));
+        std::memset(consoleStdoutBuffer, '\0', BUFSIZ);
+        std::cout << msg;
     }
 }

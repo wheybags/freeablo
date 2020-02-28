@@ -16,7 +16,6 @@ namespace Script
     class LuaScript
     {
         lua_State* mState;
-        int mLevel;
         static std::unique_ptr<LuaScript> mInstance;
 
     public:
@@ -37,9 +36,10 @@ namespace Script
         template <typename T> T get(const std::string& variable)
         {
             release_assert(mState);
+            int level;
 
             T result;
-            if (luaGetToStack(variable))
+            if (luaGetToStack(variable, level))
             {
                 result = luaGet<T>(variable);
             }
@@ -49,7 +49,7 @@ namespace Script
                 result = luaGetDefault<T>();
             }
 
-            lua_pop(mState, mLevel + 1);
+            lua_pop(mState, level + 1);
             return result;
         }
 
@@ -90,7 +90,7 @@ namespace Script
     private:
         LuaScript();
 
-        bool luaGetToStack(const std::string& variable);
+        bool luaGetToStack(const std::string& variable, int& level);
 
         void clean();
 

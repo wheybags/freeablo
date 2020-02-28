@@ -536,10 +536,11 @@ namespace FAGui
                   [&]() {
                       nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
                       nk_layout_space_push(ctx, nk_rect(5, 5, 490, 250));
-                      nk_style_push_font(ctx, FARender::Renderer::get()->freeMono());
+                      auto consoleFont = FARender::Renderer::get()->consoleFont();
+                      nk_style_push_font(ctx, consoleFont);
                       nk_style_push_color(ctx, &ctx->style.text.color, getNkColor(TextColor::white));
                       nk_edit_string(ctx, NK_EDIT_BOX, c->getBufferPtr(), c->getBufferLen(), c->getBuffer().length(), nk_filter_default);
-                      const int32_t height = FARender::Renderer::get()->smallFont()->height + 15;
+                      const int32_t height = consoleFont->height + 10;
                       nk_layout_space_push(ctx, nk_rect(5, 270, 490, height));
                       nk_flags active =
                           nk_edit_string(ctx, NK_EDIT_FIELD | NK_EDIT_SIG_ENTER, c->getInput(), c->getInputLen(), c->getInputSize(), nk_filter_ascii);

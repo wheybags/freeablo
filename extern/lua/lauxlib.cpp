@@ -867,7 +867,7 @@ LUALIB_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len) {
         if (lua_isinteger(L, idx))
           lua_pushfstring(L, "%I", (LUAI_UACINT)lua_tointeger(L, idx));
         else
-          lua_pushfstring(L, "%s", lua_tonumber(L, idx).str().c_str());
+          lua_pushfstring(L, "%f", lua_tonumber(L, idx).str().c_str());
         break;
       }
       case LUA_TSTRING:

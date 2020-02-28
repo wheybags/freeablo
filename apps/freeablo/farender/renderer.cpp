@@ -107,6 +107,7 @@ namespace FARender
                 // struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
                 // struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
                 // struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
+                mConsoleFont = nk_font_atlas_add_from_file(&mNuklearGraphicsData.atlas, "resources/fonts/FreeMono/FreeMonoBold.ttf", 14, 0);
                 mNuklearGraphicsData.dev.font_tex =
                     nk_fa_font_stash_end(mSpriteManager, &mNuklearContext, mNuklearGraphicsData.atlas, mNuklearGraphicsData.dev.null);
                 // nk_style_load_all_cursors(ctx, atlas->cursors);
@@ -341,4 +342,6 @@ namespace FARender
     nk_user_font* Renderer::goldFont(int height) const { return &mGoldFont.at(height)->nkFont; }
 
     nk_user_font* Renderer::silverFont(int height) const { return &mSilverFont.at(height)->nkFont; }
+
+    nk_user_font* Renderer::consoleFont() const { return &mConsoleFont->handle; }
 }

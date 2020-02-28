@@ -1072,7 +1072,7 @@ static int lua_number2strx (lua_State *L, char *buff, int sz,
 ** and '\0') + number of decimal digits to represent maxfloat (which
 ** is maximum exponent + 1). (99+3+1, adding some extra, 110)
 */
-#define MAX_ITEMF	(110 + l_floatatt(MAX_10_EXP))
+#define MAX_ITEMF	(110)// + l_floatatt(MAX_10_EXP))
 
 
 /*
@@ -1224,7 +1224,7 @@ static void addlenmod (char *form, const char *lenmod) {
   form[l + lm] = '\0';
 }
 
-static int str_format(lua_State* L) {
+static int str_format (lua_State* L) {
   int top = lua_gettop(L);
   int arg = 1;
   size_t sfl;
@@ -1236,12 +1236,12 @@ static int str_format(lua_State* L) {
     if (*strfrmt != L_ESC)
       luaL_addchar(&b, *strfrmt++);
     else if (*++strfrmt == L_ESC)
-      luaL_addchar(&b, *strfrmt++); /* %% */
-    else {                          /* format item */
-      char form[MAX_FORMAT]; /* to store the format ('%...') */
+      luaL_addchar(&b, *strfrmt++);  /* %% */
+    else {  /* format item */
+      char form[MAX_FORMAT];  /* to store the format ('%...') */
       int maxitem = MAX_ITEM;
-      char* buff = luaL_prepbuffsize(&b, maxitem); /* to put formatted item */
-      int nb = 0;                                  /* number of bytes in added item */
+      char* buff = luaL_prepbuffsize(&b, maxitem);  /* to put formatted item */
+      int nb = 0;  /* number of bytes in added item */
       if (++arg > top)
         return luaL_argerror(L, arg, "no value");
       strfrmt = scanformat(L, strfrmt, form);
@@ -1266,20 +1266,16 @@ static int str_format(lua_State* L) {
         addlenmod(form, LUA_NUMBER_FRMLEN);
         nb = lua_number2strx(L, buff, maxitem, form, luaL_checknumber(L, arg));
         break;*/
-        case 'f':
+        case 'f': {
           maxitem = MAX_ITEMF; // extra space for '%f'
           buff = luaL_prepbuffsize(&b, maxitem);
-          break; // TODO: handle scientific notation
         // FALLTHROUGH
-        /*case 'e':
-        case 'E':
-        case 'g':
-        case 'G': {
+        //case 'e': case 'E': case 'g': case 'G': { // TODO: handle scientific notation
           lua_Number n = luaL_checknumber(L, arg);
-          addlenmod(form, LUA_NUMBER_FRMLEN);
-          nb = snprintf(buff, maxitem, form, (LUAI_UACNUMBER)n);
+          //addlenmod(form, LUA_NUMBER_FRMLEN);
+          nb = snprintf(buff, maxitem, form, n.toDouble());
           break;
-        }*/
+        }
         case 'p': {
           const void* p = lua_topointer(L, arg);
           if (p == NULL)
@@ -1296,22 +1292,22 @@ static int str_format(lua_State* L) {
         case 's': {
           size_t l;
           const char* s = luaL_tolstring(L, arg, &l);
-          if (form[2] == '\0')   /* no modifiers? */
-            luaL_addvalue(&b); /* keep entire string */
+          if (form[2] == '\0')  /* no modifiers? */
+            luaL_addvalue(&b);  /* keep entire string */
           else {
             luaL_argcheck(L, l == strlen(s), arg, "string contains zeros");
             if (!strchr(form, '.') && l >= 100) {
               /* no precision and string is too long to be formatted */
-              luaL_addvalue(&b); /* keep entire string */
+              luaL_addvalue(&b);  /* keep entire string */
             }
-            else { /* format the string into 'buff' */
+            else {  /* format the string into 'buff' */
               nb = l_sprintf(buff, maxitem, form, s);
-              lua_pop(L, 1); /* remove result from 'luaL_tolstring' */
+              lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
             }
           }
           break;
         }
-        default: { /* also treat cases 'pnLlh' */
+        default: {  /* also treat cases 'pnLlh' */
           return luaL_error(L, "invalid conversion '%s' to 'format'", form);
         }
       }

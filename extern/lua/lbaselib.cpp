@@ -87,7 +87,7 @@ static int luaB_tonumber (lua_State *L) {
     else {
       size_t l;
       const char *s = lua_tolstring(L, 1, &l);
-      if (s != NULL && lua_stringtonumber(L, s) == l + 1)
+      if (s != NULL && lua_stringtonumber(L, s) == l)
         return 1;  /* successful conversion to number */
       /* else not a number */
       luaL_checkany(L, 1);  /* (but there must be some parameter) */
