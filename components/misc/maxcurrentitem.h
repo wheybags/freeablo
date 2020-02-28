@@ -10,8 +10,8 @@ namespace Misc
     template <typename T> class MaxCurrentItem
     {
     public:
-        T max;
-        T current;
+        T max = 0;
+        T current = 0;
 
         MaxCurrentItem() = default;
         explicit MaxCurrentItem(T max) : max(max), current(max) {}

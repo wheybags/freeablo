@@ -16,9 +16,8 @@ namespace FAWorld
     class MovementHandler
     {
     public:
-        MovementHandler(Tick pathRateLimit);
-
-        MovementHandler(FASaveGame::GameLoader& loader);
+        MovementHandler() = default;
+        explicit MovementHandler(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
 
         Misc::Point getDestination() const;
@@ -37,6 +36,7 @@ namespace FAWorld
 
     public:
         FixedPoint mSpeedTilesPerSecond;
+        Tick mPathRateLimit = World::getTicksInPeriod(1);
 
     private:
         GameLevel* mLevel = nullptr;
@@ -46,7 +46,6 @@ namespace FAWorld
         int32_t mCurrentPathIndex = 0;
         Misc::Points mCurrentPath;
         Tick mLastRepathed = std::numeric_limits<Tick>::min();
-        Tick mPathRateLimit;
         bool mAdjacent = false;
     };
 }

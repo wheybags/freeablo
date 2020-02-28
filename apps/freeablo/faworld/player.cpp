@@ -39,17 +39,15 @@ namespace FAWorld
         return "unknown";
     }
 
-    Player::Player(World& world) : Actor(world)
-    {
-        // TODO: hack - need to think of some more elegant way of handling Actors in general
-        DiabloExe::CharacterStats stats;
-        init(stats);
-        initCommon();
-    }
-
     Player::Player(World& world, const DiabloExe::CharacterStats& charStats) : Actor(world)
     {
-        init(charStats);
+        mStats.initialise(initialiseActorStats(charStats));
+        mStats.mLevelXpCounts = charStats.mNextLevelExp;
+
+        mFaction = Faction::heaven();
+        mMoveHandler.mPathRateLimit = World::getTicksInPeriod("0.1"); // allow players to repath much more often than other actors
+        mBehaviour.reset(new PlayerBehaviour(this));
+
         initCommon();
     }
 
@@ -103,18 +101,14 @@ namespace FAWorld
     void Player::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
     {
         CalculateStatsCacheKey statsCacheKey;
-        memset(&statsCacheKey, 0, sizeof(CalculateStatsCacheKey)); // force all padding to zero, to make sure memcmp will work
-
         statsCacheKey.baseStats = actorStats.baseStats;
         statsCacheKey.gameLevel = getLevel();
         statsCacheKey.level = actorStats.mLevel;
         statsCacheKey.inventoryChangedCallCount = mInventoryChangedCallCount;
 
-        // using memcmp because I didn't want to manually implement operator==
-        if (memcmp(&statsCacheKey, &mLastStatsKey, sizeof(CalculateStatsCacheKey)) == 0)
+        if (statsCacheKey == mLastStatsKey)
             return;
-
-        memcpy(&mLastStatsKey, &statsCacheKey, sizeof(CalculateStatsCacheKey));
+        mLastStatsKey = statsCacheKey;
 
         stats = LiveActorStats(); // clear before we start
 
@@ -333,15 +327,6 @@ namespace FAWorld
             return DamageType::Staff;
 
         return DamageType::Unarmed;
-    }
-
-    void Player::init(const DiabloExe::CharacterStats& charStats)
-    {
-        initialiseActorStats(mStats, charStats);
-
-        mFaction = Faction::heaven();
-        mMoveHandler = MovementHandler(World::getTicksInPeriod("0.1")); // allow players to repath much more often than other actors
-        mBehaviour.reset(new PlayerBehaviour(this));
     }
 
     Player::Player(World& world, FASaveGame::GameLoader& loader) : Actor(world, loader)
@@ -620,7 +605,7 @@ namespace FAWorld
         restoreMana();
     }
 
-    void Player::initialiseActorStats(ActorStats& stats, const DiabloExe::CharacterStats& from)
+    BaseStats Player::initialiseActorStats(const DiabloExe::CharacterStats& from)
     {
         BaseStats baseStats;
         baseStats.strength = from.mStrength;
@@ -628,7 +613,7 @@ namespace FAWorld
         baseStats.magic = from.mMagic;
         baseStats.vitality = from.mVitality;
 
-        stats = ActorStats(*stats.mActor, baseStats, from.mNextLevelExp);
+        return baseStats;
     }
 
     bool Player::castSpell(SpellId spell, Misc::Point targetPoint)

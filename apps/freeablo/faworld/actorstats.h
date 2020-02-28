@@ -28,6 +28,11 @@ namespace FAWorld
         int32_t magic = 0;
         int32_t dexterity = 0;
         int32_t vitality = 0;
+
+        bool operator==(const BaseStats& other)
+        {
+            return strength == other.strength && magic == other.magic && dexterity == other.dexterity && vitality == other.vitality;
+        }
     };
 
     struct ItemStats
@@ -74,13 +79,9 @@ namespace FAWorld
     class ActorStats
     {
     public:
-        ActorStats(const Actor& actor, BaseStats baseStats = {}, std::vector<uint32_t> levelXpCounts = {})
-            : baseStats(baseStats), mActor(actor), mLevelXpCounts(levelXpCounts)
-        {
-            recalculateStats();
-            mHp.current = mHp.max;
-            mMana.current = mMana.max;
-        }
+        ActorStats(const Actor& actor) : mActor(actor) {}
+
+        void initialise(const BaseStats& baseStats);
 
         ActorStats(const Actor& actor, FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
@@ -123,6 +124,7 @@ namespace FAWorld
 
     public:
         BaseStats baseStats;
+        std::vector<uint32_t> mLevelXpCounts;
 
         int32_t mLevel = 1;
         int32_t mExperience = 0;
@@ -133,6 +135,5 @@ namespace FAWorld
         mutable Misc::MaxCurrentItem<int32_t> mMana;
 
         mutable LiveActorStats mCalculatedStats; // not serialised, this is recalculated on access
-        std::vector<uint32_t> mLevelXpCounts;
     };
 }

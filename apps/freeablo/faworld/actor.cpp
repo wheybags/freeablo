@@ -53,9 +53,10 @@ namespace FAWorld
             mMissiles.end());
     }
 
-    Actor::Actor(World& world, const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath)
-        : mMoveHandler(World::getTicksInPeriod(1)), mStats(*this), mWorld(world)
+    Actor::Actor(World& world, const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath) : mStats(*this), mWorld(world)
     {
+        mStats.initialise(BaseStats());
+
         mFaction = Faction::heaven();
         if (!dieAnimPath.empty())
             mAnimation.setAnimationSprites(AnimState::dead, FARender::Renderer::get()->loadImage(dieAnimPath));

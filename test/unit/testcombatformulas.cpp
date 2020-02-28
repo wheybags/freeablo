@@ -1,10 +1,11 @@
+#include <diabloexe/characterstats.h>
 #include <faworld/player.h>
 #include <gtest/gtest.h>
 
 class TestWorld
 {
 public:
-    TestWorld(FAWorld::PlayerClass playerClass) : exe(""), world(exe, 0), player(world) { player.setPlayerClass(playerClass); }
+    TestWorld(FAWorld::PlayerClass playerClass) : exe(""), world(exe, 0), player(world, DiabloExe::CharacterStats()) { player.setPlayerClass(playerClass); }
 
     DiabloExe::DiabloExe exe;
     FAWorld::World world;
