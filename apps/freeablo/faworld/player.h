@@ -24,7 +24,6 @@ namespace FAWorld
         static const std::string typeId;
         const std::string& getTypeId() override { return typeId; }
 
-        Player(World& world);
         Player(World& world, const DiabloExe::CharacterStats& charStats);
         void initCommon();
         Player(World& world, FASaveGame::GameLoader& loader);
@@ -54,13 +53,12 @@ namespace FAWorld
         virtual DamageType getMeleeDamageType() const override;
 
     private:
-        void init(const DiabloExe::CharacterStats& charStats);
         bool canTalkTo(Actor* actor);
         void onEnemyKilled(Actor* enemy) override;
         void addExperience(Actor& enemy);
         void levelUp(int32_t newLevel);
 
-        static void initialiseActorStats(ActorStats& stats, const DiabloExe::CharacterStats& from);
+        static BaseStats initialiseActorStats(const DiabloExe::CharacterStats& from);
 
     private:
         struct CalculateStatsCacheKey
@@ -69,6 +67,12 @@ namespace FAWorld
             const GameLevel* gameLevel = nullptr;
             int32_t level = 0;
             int32_t inventoryChangedCallCount = -1;
+
+            bool operator==(const CalculateStatsCacheKey& other)
+            {
+                return baseStats == other.baseStats && gameLevel == other.gameLevel && level == other.level &&
+                       inventoryChangedCallCount == other.inventoryChangedCallCount;
+            }
         };
         mutable CalculateStatsCacheKey mLastStatsKey; // not serialised, only used to determine if we need to recalculate stats
 

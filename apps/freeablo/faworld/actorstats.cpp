@@ -6,6 +6,14 @@ namespace FAWorld
 {
     constexpr int32_t ActorStats::MAXIMUM_EXPERIENCE_POINTS;
 
+    void ActorStats::initialise(const BaseStats& baseStats)
+    {
+        this->baseStats = baseStats;
+
+        getHp().current = getHp().max;
+        getMana().current = getMana().max;
+    }
+
     ActorStats::ActorStats(const Actor& actor, FASaveGame::GameLoader& loader) : mActor(actor), mHp(loader.load<int32_t>()), mMana(loader.load<int32_t>())
     {
         baseStats.load(loader);
@@ -22,8 +30,8 @@ namespace FAWorld
     {
         Serial::ScopedCategorySaver cat("ActorStats", saver);
 
-        saver.save(mHp.current);
-        saver.save(mMana.current);
+        saver.save(getHp().current);
+        saver.save(getMana().current);
         baseStats.save(saver);
         saver.save(mLevel);
         saver.save(mExperience);

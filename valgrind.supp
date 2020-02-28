@@ -130,3 +130,35 @@
    obj:/usr/lib/x86_64-linux-gnu/nvidia/current/libGLX_nvidia.so.*
    ...
 }
+
+{
+    radeon_drivers
+    Memcheck:Leak
+    ...
+    obj:/opt/amdgpu/lib/*
+    ...
+}
+
+{
+    sdl_audio
+    Memcheck:Leak
+    ...
+    fun:SDL_AudioInit_REAL
+    ...
+}
+
+{
+    sdl_audio2
+    Memcheck:Leak
+    ...
+    fun:Mix_OpenAudioDevice
+    ...
+}
+
+{ 
+    sdl_dynamic_loading
+    Memcheck:Leak
+    ...
+    fun:_dl_catch_exception
+    ...
+}

@@ -32,8 +32,13 @@ namespace FAWorld
             BaseStats baseStats;
             const GameLevel* gameLevel = nullptr;
             int32_t level = 0;
+
+            bool operator==(const CalculateStatsCacheKey& other)
+            {
+                return baseStats == other.baseStats && gameLevel == other.gameLevel && level == other.level;
+            }
         };
-        mutable CalculateStatsCacheKey mLastStatsKey; // not serialised, only used to determine if we need to recalculate stats
+        mutable CalculateStatsCacheKey mLastStatsKey = {}; // not serialised, only used to determine if we need to recalculate stats
 
         bool mInitialised = false; // not serialised
     };

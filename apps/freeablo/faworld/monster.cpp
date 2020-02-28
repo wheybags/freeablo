@@ -13,6 +13,8 @@ namespace FAWorld
 
     Monster::Monster(World& world, const DiabloExe::Monster& monsterData) : Actor(world)
     {
+        mStats.initialise(BaseStats());
+
         std::string cl2PathFormat = monsterData.cl2Path;
         Misc::StringUtils::replace(cl2PathFormat, "%c", "{}");
 
@@ -60,17 +62,13 @@ namespace FAWorld
             return;
 
         CalculateStatsCacheKey statsCacheKey;
-        memset(&statsCacheKey, 0, sizeof(CalculateStatsCacheKey)); // force all padding to zero, to make sure memcmp will work
-
         statsCacheKey.baseStats = actorStats.baseStats;
         statsCacheKey.gameLevel = getLevel();
         statsCacheKey.level = actorStats.mLevel;
 
-        // using memcmp because I didn't want to manually implement operator==
-        if (memcmp(&statsCacheKey, &mLastStatsKey, sizeof(CalculateStatsCacheKey)) == 0)
+        if (statsCacheKey == mLastStatsKey)
             return;
-
-        memcpy(&mLastStatsKey, &statsCacheKey, sizeof(CalculateStatsCacheKey));
+        mLastStatsKey = statsCacheKey;
 
         const DiabloExe::Monster& monsterProperties = mWorld.mDiabloExe.getMonster(mName);
 

@@ -5,8 +5,6 @@
 
 namespace FAWorld
 {
-    MovementHandler::MovementHandler(Tick pathRateLimit) : mPathRateLimit(pathRateLimit) {}
-
     MovementHandler::MovementHandler(FASaveGame::GameLoader& loader)
     {
         int32_t levelIndex = loader.load<int32_t>();

@@ -6,6 +6,10 @@
 #include <stdexcept>
 #include <string>
 
+#ifndef NDEBUG
+#include <iostream>
+#endif
+
 namespace Serial
 {
     class Saver;

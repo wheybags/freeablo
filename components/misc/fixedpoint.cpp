@@ -3,7 +3,6 @@
 #include "int128.h"
 #include "stringops.h"
 #include <iomanip>
-#include <script/luascript.h>
 #include <serial/loader.h>
 #include <sstream>
 

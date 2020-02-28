@@ -26,7 +26,11 @@ namespace FAGui
             mActiveScreen->update(ctx);
     }
 
-    void MenuHandler::disable() { mActiveScreen.reset(); }
+    void MenuHandler::disable()
+    {
+        mActiveScreen.reset();
+        mNextMenu.reset();
+    }
 
     void MenuHandler::notify(Engine::KeyboardInputAction action)
     {
