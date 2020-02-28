@@ -11,9 +11,9 @@ namespace FAWorld
 {
     const std::string Monster::typeId = "monster";
 
-    Monster::Monster(World& world, const DiabloExe::Monster& monsterStats) : Actor(world)
+    Monster::Monster(World& world, const DiabloExe::Monster& monsterData) : Actor(world)
     {
-        std::string cl2PathFormat = monsterStats.cl2Path;
+        std::string cl2PathFormat = monsterData.cl2Path;
         Misc::StringUtils::replace(cl2PathFormat, "%c", "{}");
 
         mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'w')));
@@ -24,15 +24,16 @@ namespace FAWorld
 
         mBehaviour.reset(new BasicMonsterBehaviour(this));
         mFaction = Faction::hell();
-        mName = monsterStats.monsterName;
+        mName = monsterData.monsterName;
 
-        mSoundPath = monsterStats.soundPath;
+        mSoundPath = monsterData.soundPath;
         Misc::StringUtils::replace(mSoundPath, "%c", "{}");
         Misc::StringUtils::replace(mSoundPath, "%i", "{}");
 
-        mStats.mLevel = monsterStats.level;
-        mType = ActorType(monsterStats.type);
-        mStats.getHp() = Misc::MaxCurrentItem(world.mRng->randomInRange(monsterStats.minHp, monsterStats.maxHp));
+        mStats.mLevel = monsterData.level;
+        mType = ActorType(monsterData.type);
+        mStats.getHp() = Misc::MaxCurrentItem(world.mRng->randomInRange(monsterData.minHp, monsterData.maxHp));
+        mMoveHandler.mSpeedTilesPerSecond = DiabloExe::getSpeedByMonsterAttackType(monsterData.attackType);
 
         commonInit();
     }
@@ -94,7 +95,7 @@ namespace FAWorld
             stats.toHitMeleeMinMaxCap.min = 15;
 
         stats.meleeDamageBonusRange = IntRange(monsterProperties.minDamage, monsterProperties.maxDamage);
-        stats.hitRecoveryDamageThreshold = actorStats.mLevel + 3; // https://wheybags.gitlab.io/jarulfs-guide/#timing-information
+        stats.hitRecoveryDamageThreshold = actorStats.mLevel + 3; // https://wheybags.gitlab.io/jarulfs-guide/#monster-timing-information
     }
 
     void Monster::die()

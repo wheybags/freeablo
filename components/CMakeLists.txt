@@ -46,19 +46,16 @@ add_library(Misc
     misc/md5.h
     misc/misc.h
     misc/misc.cpp
-    misc/point.cpp
-    misc/point.h
     misc/savePNG.cpp
     misc/savePNG.h
     misc/stdhashes.h
     misc/stringops.h
-    misc/vec2fix.cpp
-    misc/vec2fix.h
     misc/simplevec2.h
+    misc/simplevec2.cpp
     misc/averager.cpp
     misc/averager.h
 )
-target_link_libraries(Misc Settings png SDL2 lua Script)
+target_link_libraries(Misc Settings png SDL2 Serial)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
@@ -114,7 +111,7 @@ target_link_libraries(DiabloExe Misc FAIO)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Audio
-    audio/audio.h
+    audio/fa_audio.h
     audio/sdl2backend.cpp
 )
 target_link_libraries(Audio FAIO SDL_mixer)

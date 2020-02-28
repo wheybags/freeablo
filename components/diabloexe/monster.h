@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <misc/fixedpoint.h>
 #include <stdint.h>
 #include <string>
 
@@ -45,6 +46,8 @@ namespace DiabloExe
 
         ENUM_END
     };
+
+    FixedPoint getSpeedByMonsterAttackType(MonsterAttackType type);
 
     class Monster
     {

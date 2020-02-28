@@ -5,6 +5,12 @@
 #include <stdexcept>
 #include <string>
 
+namespace Serial
+{
+    class Saver;
+    class Loader;
+}
+
 class FixedPoint
 {
 public:
@@ -122,6 +128,9 @@ public:
     FixedPoint(double) = delete;
     FixedPoint(float) = delete;
 
+    void save(Serial::Saver& saver) const;
+    void load(Serial::Loader& loader);
+
 private:
     class RawConstructorTagType
     {
@@ -207,6 +216,9 @@ public:
     static FixedPoint sin_degrees(FixedPoint deg);
     static FixedPoint cos_degrees(FixedPoint deg);
     static FixedPoint tan_degrees(FixedPoint deg);
+
+    static FixedPoint invalid() { return FixedPoint::fromRawValue(std::numeric_limits<uint64_t>::max()); }
+    bool isInvalid() const { return *this == invalid(); }
 
     // The scaling factor to use, as a power of 10.
     // Essentially the number of base 10 digits after the decimal point.

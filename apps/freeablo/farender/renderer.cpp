@@ -5,7 +5,7 @@
 #include "cel/celdecoder.h"
 #include "cel/celfile.h"
 #include "fontinfo.h"
-#include <audio/audio.h>
+#include <audio/fa_audio.h>
 #include <functional>
 #include <input/inputmanager.h>
 #include <iostream>
@@ -107,7 +107,6 @@ namespace FARender
                 // struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
                 // struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
                 // struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
-                mFreeMono = nk_font_atlas_add_from_file(&mNuklearGraphicsData.atlas, "resources/fonts/FreeMono/FreeMonoBold.ttf", 14, 0);
                 mNuklearGraphicsData.dev.font_tex =
                     nk_fa_font_stash_end(mSpriteManager, &mNuklearContext, mNuklearGraphicsData.atlas, mNuklearGraphicsData.dev.null);
                 // nk_style_load_all_cursors(ctx, atlas->cursors);
@@ -180,7 +179,7 @@ namespace FARender
 
     Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getTileByScreenPos(x, y, screenPos.current(), screenPos.getFractionalPos());
+        return Render::getTileByScreenPos(x, y, screenPos.getFractionalPos());
     }
 
     void Renderer::waitUntilDone()
@@ -260,7 +259,6 @@ namespace FARender
                                   &mSpriteManager,
                                   mLevelObjects,
                                   mItems,
-                                  state->mPos.current(),
                                   state->mPos.getFractionalPos());
             }
 
@@ -343,6 +341,4 @@ namespace FARender
     nk_user_font* Renderer::goldFont(int height) const { return &mGoldFont.at(height)->nkFont; }
 
     nk_user_font* Renderer::silverFont(int height) const { return &mSilverFont.at(height)->nkFont; }
-
-    nk_user_font* Renderer::freeMono() const { return &mFreeMono->handle; }
 }

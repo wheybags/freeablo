@@ -4,7 +4,6 @@
 #include "engine/threadmanager.h"
 #include "fasavegame/gameloader.h"
 #include "faworld/actor.h"
-#include <misc/vec2fix.h>
 
 namespace FAWorld
 {

@@ -16,7 +16,6 @@
 #include <fmt/format.h>
 #include <misc/assert.h>
 #include <misc/stringops.h>
-#include <misc/vec2fix.h>
 #include <random/random.h>
 #include <string>
 
@@ -56,6 +55,7 @@ namespace FAWorld
 
     void Player::initCommon()
     {
+        mMoveHandler.mSpeedTilesPerSecond = FixedPoint(1) / FixedPoint("0.4"); // https://wheybags.gitlab.io/jarulfs-guide/#player-timing-information
         mName = "Player";
         mWorld.registerPlayer(this);
         mInventory.mInventoryChanged = [this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
@@ -529,7 +529,7 @@ namespace FAWorld
         }
 
         // TODO: Is this actually correct? It seems kind of odd, but it is what is listed in Jarulf's guide
-        // https://wheybags.gitlab.io/jarulfs-guide/#timing-information
+        // https://wheybags.gitlab.io/jarulfs-guide/#player-timing-information
         mMeleeHitFrame = mAnimation.getAnimationSprites(AnimState::attack)->getAnimLength() - 1;
     }
 

@@ -1,7 +1,7 @@
 #pragma once
 #include <cel/pal.h>
 #include <misc/array2d.h>
-#include <misc/point.h>
+#include <misc/simplevec2.h>
 #include <optional>
 #include <vector>
 
@@ -12,7 +12,7 @@ namespace Render
         bool valid;
         int32_t spriteCacheIndex;
         int32_t spriteFrame;
-        Misc::Point fractionalPos;
+        Vec2Fix fractionalPos;
         std::optional<Cel::Colour> hoverColor;
     };
 

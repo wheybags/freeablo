@@ -1,5 +1,5 @@
 #include "missile.h"
-#include <misc/vec2fix.h>
+#include <misc/simplevec2.h>
 
 namespace FAWorld
 {
@@ -32,7 +32,6 @@ namespace FAWorld
             auto direction = (Vec2Fix(dest.x, dest.y) - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).getDirection();
             auto srcPos = Position(missile.mSrcPoint, direction);
             int32_t direction16 = static_cast<int32_t>(direction.getDirection16());
-            srcPos.setSpeed(3536);
             missile.mGraphics.push_back(std::make_unique<MissileGraphic>("", missile.getGraphicsPath(0), direction16, srcPos));
         }
 
@@ -41,7 +40,6 @@ namespace FAWorld
             auto direction = (Vec2Fix(dest.x, dest.y) - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).getDirection();
             auto srcPos = Position(missile.mSrcPoint, direction);
             int32_t direction16 = static_cast<int32_t>(direction.getDirection16());
-            srcPos.setSpeed(3536);
             missile.mGraphics.push_back(std::make_unique<MissileGraphic>("", missile.getGraphicsPath(direction16), std::nullopt, srcPos));
         }
 

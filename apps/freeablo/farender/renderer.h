@@ -7,7 +7,6 @@
 #include <condition_variable>
 #include <map>
 #include <memory>
-#include <misc/point.h>
 #include <mutex>
 #include <render/render.h>
 #include <stddef.h>
