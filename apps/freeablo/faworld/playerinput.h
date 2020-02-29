@@ -10,7 +10,7 @@
     MACRO(DragOverTile)                                                                                                                                        \
     MACRO(TargetActor)                                                                                                                                         \
     MACRO(TargetItemOnFloor)                                                                                                                                   \
-    MACRO(AttackDirection)                                                                                                                                     \
+    MACRO(ForceAttack)                                                                                                                                         \
     MACRO(CastSpell)                                                                                                                                           \
     MACRO(ChangeLevel)                                                                                                                                         \
     MACRO(InventorySlotClicked)                                                                                                                                \
@@ -63,9 +63,9 @@ namespace FAWorld
             void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
-        struct AttackDirectionData
+        struct ForceAttackData
         {
-            Misc::Direction direction;
+            Misc::Point pos;
 
             void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);

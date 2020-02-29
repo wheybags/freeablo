@@ -86,9 +86,7 @@ namespace Engine
                 }
                 else if (modifiers.shift)
                 {
-                    Misc::Direction direction =
-                        Vec2Fix(clickedTile.pos.x - player->getPos().current().x, clickedTile.pos.y - player->getPos().current().y).getDirection();
-                    mInputs.emplace_back(FAWorld::PlayerInput::AttackDirectionData{direction}, player->getId());
+                    mInputs.emplace_back(FAWorld::PlayerInput::ForceAttackData{clickedTile.pos}, player->getId());
                 }
                 else if (player->getLevel()->isDoor(clickedTile.pos) || !cursorItem.isEmpty())
                 {

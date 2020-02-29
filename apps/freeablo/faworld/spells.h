@@ -1,10 +1,18 @@
 #pragma once
 #include "diabloexe/diabloexe.h"
+#include "engine/enginemain.h"
 #include "missile/missileenums.h"
 #include "spellenums.h"
 
 namespace FAWorld
 {
+    enum class SpellType
+    {
+        fire,
+        lightning,
+        magic
+    };
+
     class SpellData
     {
     public:
@@ -17,6 +25,20 @@ namespace FAWorld
         int32_t manaCost() const { return mSpellData.mManaCost; }
 
         const std::string& soundEffect() const { return mSpellData.mSoundEffect; }
+
+        SpellType getType() const
+        {
+            switch (mSpellData.mType)
+            {
+                case 0:
+                    return SpellType::fire;
+                case 1:
+                    return SpellType::lightning;
+                case 2:
+                default:
+                    return SpellType::magic;
+            }
+        }
 
         std::vector<MissileId> missiles() const
         {

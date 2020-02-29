@@ -42,6 +42,7 @@ namespace FAWorld
         virtual bool canCriticalHit() const override { return mPlayerClass == PlayerClass::warrior; }
 
         bool castSpell(SpellId spell, Misc::Point targetPoint) override;
+        void doSpellEffect(SpellId spell, Misc::Point targetPoint) override;
         SpellId defaultSkill() const;
 
         virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const override;

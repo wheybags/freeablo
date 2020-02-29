@@ -21,6 +21,9 @@ namespace FAWorld
         hit,
         block,
         none,
+        spellLightning,
+        spellFire,
+        spellOther,
         ENUM_END // always leave this as the last entry, and don't set explicit values for any of the entries
     };
 

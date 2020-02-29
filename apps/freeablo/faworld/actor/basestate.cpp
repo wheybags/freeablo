@@ -14,10 +14,17 @@ namespace FAWorld
             UNUSED_PARAM(noclip);
             std::optional<StateChange> ret;
 
-            if (auto direction = actor.mMeleeAttackRequestedDirection)
+            if (auto pos = actor.mForceAttackRequestedPoint)
             {
-                actor.mMeleeAttackRequestedDirection = std::nullopt;
-                return StateChange{StateOperation::push, new ActorState::MeleeAttackState(*direction)};
+                actor.mForceAttackRequestedPoint = std::nullopt;
+                auto attackState = actor.hasRangedWeaponEquipped() ? new RangedAttackState(*pos) : new MeleeAttackState(*pos);
+                return StateChange{StateOperation::push, attackState};
+            }
+
+            if (auto req = actor.mCastSpellRequest)
+            {
+                actor.mCastSpellRequest = std::nullopt;
+                return StateChange{StateOperation::push, new SpellAttackState(req->first, req->second)};
             }
 
             switch (actor.mTarget.getType())
@@ -28,17 +35,23 @@ namespace FAWorld
 
                     if (actor.canInteractWith(target))
                     {
+                        // Attack with ranged
+                        if (actor.canIAttack(target) && actor.hasRangedWeaponEquipped())
+                        {
+                            auto targetPos = target->getPos().current();
+                            ret = StateChange{StateOperation::push, new RangedAttackState(targetPos)};
+                            actor.mTarget.clear();
+                        }
                         // move to the actor, if we're not already on our way
-                        if (!actor.getPos().isNear(target->getPos()))
+                        else if (!actor.getPos().isNear(target->getPos()))
                             actor.mMoveHandler.setDestination(target->getPos().current());
                         else // and interact them if in range
                         {
                             if (actor.canIAttack(target))
                             {
                                 auto targetPos = target->getPos().current();
-                                auto myPos = actor.getPos().current();
-                                ret = StateChange{StateOperation::push,
-                                                  new MeleeAttackState(Vec2Fix(targetPos.x - myPos.x, targetPos.y - myPos.y).getDirection())};
+                                auto attackState = actor.hasRangedWeaponEquipped() ? new RangedAttackState(targetPos) : new MeleeAttackState(targetPos);
+                                ret = StateChange{StateOperation::push, attackState};
                                 actor.mTarget.clear();
                             }
                         }

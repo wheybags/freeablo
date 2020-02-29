@@ -115,6 +115,9 @@ namespace FAWorld
         mObjectIdMapper.addClass(PlayerBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new PlayerBehaviour(loader); });
 
         mObjectIdMapper.addClass(ActorState::MeleeAttackState::typeId, [](FASaveGame::GameLoader& loader) { return new ActorState::MeleeAttackState(loader); });
+        mObjectIdMapper.addClass(ActorState::RangedAttackState::typeId,
+                                 [](FASaveGame::GameLoader& loader) { return new ActorState::RangedAttackState(loader); });
+        mObjectIdMapper.addClass(ActorState::SpellAttackState::typeId, [](FASaveGame::GameLoader& loader) { return new ActorState::SpellAttackState(loader); });
         mObjectIdMapper.addClass(ActorState::BaseState::typeId, [](FASaveGame::GameLoader&) { return new ActorState::BaseState(); });
     }
 
