@@ -238,6 +238,9 @@ public:
     static FixedPoint cos_degrees(FixedPoint deg);
     static FixedPoint tan_degrees(FixedPoint deg);
 
+    static FixedPoint ln(FixedPoint x);
+    static FixedPoint exp(FixedPoint x);
+
     static FixedPoint invalid() { return FixedPoint::fromRawValue(std::numeric_limits<uint64_t>::max()); }
     bool isInvalid() const { return *this == invalid(); }
 
@@ -255,6 +258,7 @@ public:
 
 private:
     static FixedPoint epsilon;
+    static FixedPoint LN10;
 
     int64_t mVal = 0;
 

@@ -153,32 +153,25 @@ static int math_ult (lua_State *L) {
   lua_pushboolean(L, (lua_Unsigned)a < (lua_Unsigned)b);
   return 1;
 }
-/*
+
 static int math_log (lua_State *L) {
   lua_Number x = luaL_checknumber(L, 1);
   lua_Number res;
   if (lua_isnoneornil(L, 2))
-    res = l_mathop(log)(x);
+    res = lua_Number::ln(x);
   else {
     lua_Number base = luaL_checknumber(L, 2);
-#if !defined(LUA_USE_C89)
-    if (base == l_mathop(2.0))
-      res = l_mathop(log2)(x); else
-#endif
-    if (base == l_mathop(10.0))
-      res = l_mathop(log10)(x);
-    else
-      res = l_mathop(log)(x)/l_mathop(log)(base);
+    res = lua_Number::ln(x)/lua_Number::ln(base);
   }
   lua_pushnumber(L, res);
   return 1;
 }
 
 static int math_exp (lua_State *L) {
-  lua_pushnumber(L, l_mathop(exp)(luaL_checknumber(L, 1)));
+  lua_pushnumber(L, lua_Number::exp(luaL_checknumber(L, 1)));
   return 1;
 }
-*/
+
 static int math_deg (lua_State *L) {
   lua_pushnumber(L, luaL_checknumber(L, 1) * (lua_Number("180.0") / lua_Number::PI));
   return 1;
@@ -354,12 +347,12 @@ static const luaL_Reg mathlib[] = {
   {"ceil",  math_ceil},
   {"cos",   math_cos},
   {"deg",   math_deg},
-  //{"exp",   math_exp}, // TODO
+  {"exp",   math_exp},
   {"tointeger", math_toint},
   {"floor", math_floor},
   {"fmod",   math_fmod},
   {"ult",   math_ult},
-  //{"log",   math_log}, // TODO
+  {"log",   math_log},
   {"max",   math_max},
   {"min",   math_min},
   {"modf",   math_modf},
