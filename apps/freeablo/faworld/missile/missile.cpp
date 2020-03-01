@@ -8,8 +8,7 @@
 namespace FAWorld::Missile
 {
     Missile::Missile(MissileId missileId, Actor& creator, Misc::Point dest)
-        : mCreator(&creator), mMissileId(missileId), mLevel(creator.getLevel()),
-          mSrcPoint(creator.getPos().current()), mAttr(Attributes::fromId(missileId))
+        : mCreator(&creator), mMissileId(missileId), mLevel(creator.getLevel()), mSrcPoint(creator.getPos().current()), mAttr(Attributes::fromId(missileId))
     {
         mAttr.mCreation(*this, dest);
 
@@ -17,9 +16,7 @@ namespace FAWorld::Missile
             Engine::ThreadManager::get()->playSound(missileData().mSoundEffect);
     }
 
-    Missile::Missile(FASaveGame::GameLoader& loader)
-        : mMissileId(static_cast<MissileId>(loader.load<int32_t>())),
-          mAttr(Attributes::fromId(mMissileId))
+    Missile::Missile(FASaveGame::GameLoader& loader) : mMissileId(static_cast<MissileId>(loader.load<int32_t>())), mAttr(Attributes::fromId(mMissileId))
     {
         auto creatorId = loader.load<int32_t>();
         auto levelIndex = loader.load<int32_t>();

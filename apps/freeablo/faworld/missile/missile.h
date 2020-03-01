@@ -38,7 +38,7 @@ namespace FAWorld::Missile
         {
         public:
             Creation() = delete;
-            typedef std::function<void (Missile& missile, Misc::Point dest)> Method;
+            typedef std::function<void(Missile& missile, Misc::Point dest)> Method;
 
             static void singleFrame16Direction(Missile& missile, Misc::Point dest);
             static void animated16Direction(Missile& missile, Misc::Point dest);
@@ -50,7 +50,7 @@ namespace FAWorld::Missile
         {
         public:
             Movement() = delete;
-            typedef std::function<void (Missile& missile, MissileGraphic& graphic)> Method;
+            typedef std::function<void(Missile& missile, MissileGraphic& graphic)> Method;
 
             static void stationary(Missile& missile, MissileGraphic& graphic);
             static Method linear(FixedPoint speed);
@@ -64,7 +64,7 @@ namespace FAWorld::Missile
         {
         public:
             ActorEngagement() = delete;
-            typedef std::function<void (Missile& missile, MissileGraphic& graphic, Actor& actor)> Method;
+            typedef std::function<void(Missile& missile, MissileGraphic& graphic, Actor& actor)> Method;
 
             static void none(Missile& missile, MissileGraphic& graphic, Actor& actor);
             static void damageEnemy(Missile& missile, MissileGraphic& graphic, Actor& actor);
