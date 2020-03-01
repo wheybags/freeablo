@@ -18,7 +18,8 @@ namespace FAWorld::Missile
 
     void Missile::Movement::hoverOverCreator(Missile& missile, MissileGraphic& graphic)
     {
-        // TODO: change level with actor.
+        if (graphic.getLevel() != missile.mCreator->getLevel())
+            graphic.setLevel(missile.mCreator->getLevel());
         graphic.mCurPos = missile.mCreator->getPos();
     }
 }

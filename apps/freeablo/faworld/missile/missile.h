@@ -1,6 +1,7 @@
 #pragma once
 #include "missileenums.h"
 #include "missilegraphic.h"
+#include <functional>
 #include <misc/misc.h>
 #include <vector>
 
@@ -29,7 +30,6 @@ namespace FAWorld::Missile
         virtual void update();
         virtual bool isComplete() const { return mComplete; }
         MissileId getMissileId() const { return mMissileId; }
-        const GameLevel* getLevel() const { return mLevel; }
         const std::vector<std::unique_ptr<MissileGraphic>>& getGraphics() const { return mGraphics; }
 
     protected:
@@ -38,12 +38,12 @@ namespace FAWorld::Missile
         {
         public:
             Creation() = delete;
-            typedef std::function<void(Missile& missile, Misc::Point dest)> Method;
+            typedef std::function<void(Missile& missile, Misc::Point dest, GameLevel* level)> Method;
 
-            static void singleFrame16Direction(Missile& missile, Misc::Point dest);
-            static void animated16Direction(Missile& missile, Misc::Point dest);
-            static void firewall(Missile& missile, Misc::Point dest);
-            static void basicAnimated(Missile& missile, Misc::Point dest);
+            static void singleFrame16Direction(Missile& missile, Misc::Point dest, GameLevel* level);
+            static void animated16Direction(Missile& missile, Misc::Point dest, GameLevel* level);
+            static void firewall(Missile& missile, Misc::Point dest, GameLevel* level);
+            static void basicAnimated(Missile& missile, Misc::Point dest, GameLevel* level);
         };
 
         class Movement
@@ -92,7 +92,6 @@ namespace FAWorld::Missile
 
         Actor* mCreator;
         MissileId mMissileId;
-        GameLevel* mLevel;
         Misc::Point mSrcPoint;
         Missile::Attributes mAttr;
         std::vector<std::unique_ptr<MissileGraphic>> mGraphics;

@@ -260,22 +260,13 @@ namespace FAWorld
             }
         }
 
-        for (const auto& actor : mActors)
+        for (const auto& graphic : mMissileGraphics)
         {
-            for (const auto& missile : actor->getMissiles())
-            {
-                // Only display missiles for this (the currently displayed) level.
-                if (missile->getLevel() != this)
-                    continue;
-                for (const auto& graphic : missile->getGraphics())
-                {
-                    auto tmp = graphic->getCurrentFrame();
-                    auto spriteGroup = tmp.first;
-                    auto frame = tmp.second;
-                    if (spriteGroup)
-                        state->mObjects.push_back({spriteGroup, static_cast<uint32_t>(frame), graphic->mCurPos, std::nullopt});
-                }
-            }
+            auto tmp = graphic->getCurrentFrame();
+            auto spriteGroup = tmp.first;
+            auto frame = tmp.second;
+            if (spriteGroup)
+                state->mObjects.push_back({spriteGroup, static_cast<uint32_t>(frame), graphic->mCurPos, std::nullopt});
         }
 
         for (auto& p : mItemMap->mItems)

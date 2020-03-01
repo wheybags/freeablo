@@ -8,9 +8,9 @@
 namespace FAWorld::Missile
 {
     Missile::Missile(MissileId missileId, Actor& creator, Misc::Point dest)
-        : mCreator(&creator), mMissileId(missileId), mLevel(creator.getLevel()), mSrcPoint(creator.getPos().current()), mAttr(Attributes::fromId(missileId))
+        : mCreator(&creator), mMissileId(missileId), mSrcPoint(creator.getPos().current()), mAttr(Attributes::fromId(missileId))
     {
-        mAttr.mCreation(*this, dest);
+        mAttr.mCreation(*this, dest, creator.getLevel());
 
         if (!missileData().mSoundEffect.empty())
             Engine::ThreadManager::get()->playSound(missileData().mSoundEffect);
@@ -19,12 +19,8 @@ namespace FAWorld::Missile
     Missile::Missile(FASaveGame::GameLoader& loader) : mMissileId(static_cast<MissileId>(loader.load<int32_t>())), mAttr(Attributes::fromId(mMissileId))
     {
         auto creatorId = loader.load<int32_t>();
-        auto levelIndex = loader.load<int32_t>();
         auto world = loader.currentlyLoadingWorld;
-        loader.addFunctionToRunAtEnd([this, world, creatorId, levelIndex]() {
-            mCreator = world->getActorById(creatorId);
-            mLevel = world->getLevel(levelIndex);
-        });
+        loader.addFunctionToRunAtEnd([this, world, creatorId]() { mCreator = world->getActorById(creatorId); });
 
         mSrcPoint = Misc::Point(loader);
         mComplete = loader.load<bool>();
@@ -41,7 +37,6 @@ namespace FAWorld::Missile
 
         saver.save(static_cast<int32_t>(mMissileId));
         saver.save(mCreator->getId());
-        saver.save(mLevel->getLevelIndex());
 
         mSrcPoint.save(saver);
         saver.save(mComplete);
@@ -94,12 +89,12 @@ namespace FAWorld::Missile
             auto curPoint = graphic->mCurPos.current();
 
             // Check if actor is hit.
-            auto actor = mLevel->getActorAt(curPoint);
+            auto actor = graphic->getLevel()->getActorAt(curPoint);
             if (actor)
                 mAttr.mActorEngagement(*this, *graphic, *actor);
 
             // Stop when walls are hit.
-            if (!actor && !mLevel->isPassable(curPoint, mCreator))
+            if (!actor && !graphic->getLevel()->isPassable(curPoint, mCreator))
             {
                 playImpactSound();
                 graphic->stop();

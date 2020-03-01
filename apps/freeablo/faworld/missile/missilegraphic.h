@@ -15,9 +15,13 @@ namespace FAWorld::Missile
     class MissileGraphic
     {
     public:
-        virtual ~MissileGraphic() = default;
+        virtual ~MissileGraphic();
 
-        MissileGraphic(std::string initialGraphicPath, std::string mainGraphicPath, std::optional<int32_t> singleFrame, Position position);
+        MissileGraphic(std::string initialGraphicPath,
+                       std::string mainGraphicPath,
+                       std::optional<int32_t> singleFrame,
+                       Position position,
+                       GameLevel* level);
         MissileGraphic(FASaveGame::GameLoader& loader);
 
         virtual void save(FASaveGame::GameSaver& saver);
@@ -27,6 +31,8 @@ namespace FAWorld::Missile
         void stop();
         bool isComplete() const { return mComplete; }
         Tick getTicksSinceStarted() const { return mTicksSinceStarted; }
+        GameLevel* getLevel() { return mLevel; }
+        void setLevel(GameLevel* level);
 
         Position mCurPos;
 
@@ -35,6 +41,7 @@ namespace FAWorld::Missile
 
         std::string mMainGraphicPath;
         std::optional<int32_t> mSingleFrame;
+        GameLevel* mLevel;
         FARender::AnimationPlayer mAnimationPlayer;
         Tick mTicksSinceStarted = 0;
         bool mComplete = false;

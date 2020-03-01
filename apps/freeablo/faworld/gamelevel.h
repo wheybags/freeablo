@@ -30,6 +30,7 @@ namespace FAWorld
     namespace Missile
     {
         class Missile;
+        class MissileGraphic;
     }
 
     class GameLevelImpl
@@ -107,6 +108,10 @@ namespace FAWorld
         bool isTown() const;
 
         World* getWorld() { return &mWorld; }
+
+        // These are not saved, they are added/remove in MissileGraphic constructor/destructor
+        // This avoids having to check every actor in world to find missile graphics on a level
+        std::vector<Missile::MissileGraphic*> mMissileGraphics;
 
     private:
         GameLevel(World& world);

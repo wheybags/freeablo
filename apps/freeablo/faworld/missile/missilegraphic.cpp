@@ -7,9 +7,14 @@
 
 namespace FAWorld::Missile
 {
-    MissileGraphic::MissileGraphic(std::string initialGraphicPath, std::string mainGraphicPath, std::optional<int32_t> singleFrame, Position position)
-        : mCurPos(position), mMainGraphicPath(mainGraphicPath), mSingleFrame(singleFrame)
+    MissileGraphic::MissileGraphic(std::string initialGraphicPath,
+                                   std::string mainGraphicPath,
+                                   std::optional<int32_t> singleFrame,
+                                   Position position,
+                                   GameLevel* level)
+        : mCurPos(position), mMainGraphicPath(mainGraphicPath), mSingleFrame(singleFrame), mLevel(level)
     {
+        level->mMissileGraphics.push_back(this);
         playAnimation(initialGraphicPath, FARender::AnimationPlayer::AnimationType::Once);
     }
 
@@ -19,8 +24,19 @@ namespace FAWorld::Missile
         mMainGraphicPath = loader.load<std::string>();
         mSingleFrame = (mSingleFrame = loader.load<int32_t>()) == -1 ? std::nullopt : mSingleFrame;
         mAnimationPlayer = FARender::AnimationPlayer(loader);
+        auto levelIndex = loader.load<int32_t>();
+        auto world = loader.currentlyLoadingWorld;
+        loader.addFunctionToRunAtEnd([this, world, levelIndex]() {
+            mLevel = world->getLevel(levelIndex);
+            mLevel->mMissileGraphics.push_back(this);
+        });
         mTicksSinceStarted = loader.load<Tick>();
         mComplete = loader.load<bool>();
+    }
+
+    MissileGraphic::~MissileGraphic()
+    {
+        mLevel->mMissileGraphics.erase(std::remove(mLevel->mMissileGraphics.begin(), mLevel->mMissileGraphics.end(), this), mLevel->mMissileGraphics.end());
     }
 
     void MissileGraphic::save(FASaveGame::GameSaver& saver)
@@ -29,6 +45,7 @@ namespace FAWorld::Missile
         saver.save(mMainGraphicPath);
         saver.save(static_cast<int32_t>(mSingleFrame == std::nullopt ? -1 : *mSingleFrame));
         mAnimationPlayer.save(saver);
+        saver.save(mLevel->getLevelIndex());
         saver.save(mTicksSinceStarted);
         saver.save(mComplete);
     }
@@ -60,6 +77,13 @@ namespace FAWorld::Missile
     {
         mAnimationPlayer.stopAnimation();
         mComplete = true;
+    }
+
+    void MissileGraphic::setLevel(GameLevel* level)
+    {
+        mLevel->mMissileGraphics.erase(std::remove(mLevel->mMissileGraphics.begin(), mLevel->mMissileGraphics.end(), this), mLevel->mMissileGraphics.end());
+        mLevel = level;
+        mLevel->mMissileGraphics.push_back(this);
     }
 
     void MissileGraphic::playAnimation(std::string path, FARender::AnimationPlayer::AnimationType animationType)
