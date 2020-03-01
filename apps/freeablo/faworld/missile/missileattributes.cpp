@@ -16,12 +16,12 @@ namespace FAWorld::Missile
         switch (missileId)
         {
             case MissileId::arrow:
-                return Attributes(Creation::singleFrame16Direction, Movement::linear, ActorEngagement::damageEnemyAndStop, 15, ttlIgnore);
+                return Attributes(Creation::singleFrame16Direction, Movement::linear(30), ActorEngagement::damageEnemyAndStop, 15, ttlIgnore);
             case MissileId::firebolt:
-                return Attributes(Creation::animated16Direction, Movement::linear, ActorEngagement::damageEnemyAndStop, 15, ttlIgnore);
+                return Attributes(Creation::animated16Direction, Movement::linear(15), ActorEngagement::damageEnemyAndStop, 15, ttlIgnore);
             case MissileId::farrow:
             case MissileId::larrow:
-                return Attributes(Creation::animated16Direction, Movement::linear, ActorEngagement::damageEnemyAndStop, 15, ttlIgnore);
+                return Attributes(Creation::animated16Direction, Movement::linear(30), ActorEngagement::damageEnemyAndStop, 15, ttlIgnore);
             case MissileId::firewall:
             case MissileId::firewalla:
             case MissileId::firewallc:

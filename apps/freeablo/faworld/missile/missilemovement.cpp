@@ -5,10 +5,15 @@ namespace FAWorld::Missile
 {
     void Missile::Movement::stationary(Missile&, MissileGraphic&) {}
 
-    void Missile::Movement::linear(Missile&, MissileGraphic& graphic)
+    Missile::Movement::Method Missile::Movement::linear(FixedPoint speed)
+    {
+        return [=](Missile&, MissileGraphic& graphic) { linear(graphic, speed); };
+    }
+
+    void Missile::Movement::linear(MissileGraphic& graphic, FixedPoint speed)
     {
         graphic.mCurPos.setFreeMovement();
-        graphic.mCurPos.update(FixedPoint(7) / FixedPoint(World::ticksPerSecond));
+        graphic.mCurPos.update(speed / FixedPoint(World::ticksPerSecond));
     }
 
     void Missile::Movement::hoverOverCreator(Missile& missile, MissileGraphic& graphic)
