@@ -10,15 +10,18 @@ namespace FAWorld
     namespace Missile
     {
         Missile::Missile(MissileId missileId, Actor& creator, Misc::Point dest)
-            : mCreator(&creator), mMissileId(missileId), mLevel(creator.getLevel()), mSrcPoint(creator.getPos().current())
+            : mCreator(&creator), mMissileId(missileId), mLevel(creator.getLevel()),
+              mSrcPoint(creator.getPos().current()), mAttr(Attributes::fromId(missileId))
         {
-            MissileCreation::get(missileId)(*this, dest);
+            mAttr.mCreation(*this, dest);
 
             if (!missileData().mSoundEffect.empty())
                 Engine::ThreadManager::get()->playSound(missileData().mSoundEffect);
         }
 
         Missile::Missile(FASaveGame::GameLoader& loader)
+            : mMissileId(static_cast<MissileId>(loader.load<int32_t>())),
+              mAttr(Attributes::fromId(mMissileId))
         {
             auto creatorId = loader.load<int32_t>();
             auto levelIndex = loader.load<int32_t>();
@@ -28,7 +31,6 @@ namespace FAWorld
                 mLevel = world->getLevel(levelIndex);
             });
 
-            mMissileId = static_cast<MissileId>(loader.load<int32_t>());
             mSrcPoint = Misc::Point(loader);
             mComplete = loader.load<bool>();
 
@@ -42,10 +44,10 @@ namespace FAWorld
         {
             Serial::ScopedCategorySaver cat("Missile", saver);
 
+            saver.save(static_cast<int32_t>(mMissileId));
             saver.save(mCreator->getId());
             saver.save(mLevel->getLevelIndex());
 
-            saver.save(static_cast<int32_t>(mMissileId));
             mSrcPoint.save(saver);
             saver.save(mComplete);
 
@@ -92,14 +94,14 @@ namespace FAWorld
 
                 graphic->update();
 
-                MissileMovement::get(mMissileId)(*this, *graphic);
+                mAttr.mMovement(*this, *graphic);
 
                 auto curPoint = graphic->mCurPos.current();
 
                 // Check if actor is hit.
                 auto actor = mLevel->getActorAt(curPoint);
                 if (actor)
-                    MissileActorEngagement::get(mMissileId)(*this, *graphic, *actor);
+                    mAttr.mActorEngagement(*this, *graphic, *actor);
 
                 // Stop when walls are hit.
                 if (!actor && !mLevel->isPassable(curPoint, mCreator))
@@ -110,11 +112,11 @@ namespace FAWorld
 
                 // Stop after max range is exceeded.
                 auto distance = (Vec2Fix(curPoint.x, curPoint.y) - Vec2Fix(mSrcPoint.x, mSrcPoint.y)).magnitude();
-                if (distance > MissileMaxRange::get(mMissileId))
+                if (distance > mAttr.mMaxRange)
                     graphic->stop();
 
                 // Stop after "time to live" has expired.
-                if (graphic->getTicksSinceStarted() > MissileTimeToLive::get(mMissileId))
+                if (graphic->getTicksSinceStarted() > mAttr.mTimeToLive)
                     graphic->stop();
             }
             // Set complete flag when all graphics are finished.

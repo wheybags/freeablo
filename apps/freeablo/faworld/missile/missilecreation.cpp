@@ -5,29 +5,7 @@ namespace FAWorld
 {
     namespace Missile
     {
-        MissileCreation::MissileCreationMethod MissileCreation::get(MissileId missileId)
-        {
-            switch (missileId)
-            {
-                case MissileId::arrow:
-                    return singleFrame16Direction;
-                case MissileId::firebolt:
-                case MissileId::farrow:
-                case MissileId::larrow:
-                    return animated16Direction;
-                case MissileId::firewall:
-                case MissileId::firewalla:
-                case MissileId::firewallc:
-                    return firewall;
-                case MissileId::manashield:
-                    return basicAnimated;
-                default:
-                    invalid_enum(MissileId, missileId);
-                    // return nullptr;  // MSVC generates C4702 unreachable code.
-            }
-        }
-
-        void MissileCreation::singleFrame16Direction(Missile& missile, Misc::Point dest)
+        void Missile::Creation::singleFrame16Direction(Missile& missile, Misc::Point dest)
         {
             auto direction = (Vec2Fix(dest.x, dest.y) - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).getDirection();
             auto srcPos = Position(missile.mSrcPoint, direction);
@@ -35,7 +13,7 @@ namespace FAWorld
             missile.mGraphics.push_back(std::make_unique<MissileGraphic>("", missile.getGraphicsPath(0), direction16, srcPos));
         }
 
-        void MissileCreation::animated16Direction(Missile& missile, Misc::Point dest)
+        void Missile::Creation::animated16Direction(Missile& missile, Misc::Point dest)
         {
             auto direction = (Vec2Fix(dest.x, dest.y) - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).getDirection();
             auto srcPos = Position(missile.mSrcPoint, direction);
@@ -43,7 +21,7 @@ namespace FAWorld
             missile.mGraphics.push_back(std::make_unique<MissileGraphic>("", missile.getGraphicsPath(direction16), std::nullopt, srcPos));
         }
 
-        void MissileCreation::firewall(Missile& missile, Misc::Point dest)
+        void Missile::Creation::firewall(Missile& missile, Misc::Point dest)
         {
             // Flames are placed at -5 -> +5 perpendicular to the clicked point, and
             // two flames are placed at the clicked point (for double damage).
@@ -62,7 +40,7 @@ namespace FAWorld
             }
         }
 
-        void MissileCreation::basicAnimated(Missile& missile, Misc::Point)
+        void Missile::Creation::basicAnimated(Missile& missile, Misc::Point)
         {
             missile.mGraphics.push_back(std::make_unique<MissileGraphic>("", missile.getGraphicsPath(0), std::nullopt, Position(missile.mSrcPoint)));
         }

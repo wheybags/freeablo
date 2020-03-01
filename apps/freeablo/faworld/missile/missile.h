@@ -18,15 +18,8 @@ namespace FAWorld
     {
         class Missile
         {
-            friend class MissileCreation;
-            friend class MissileMovement;
-            friend class MissileActorEngagement;
-            friend class MissileMaxRange;
-            friend class MissileTimeToLive;
-
         public:
             virtual ~Missile() = default;
-            Missile() = default;
 
             Missile(MissileId missileId, Actor& creator, Misc::Point dest);
             Missile(FASaveGame::GameLoader& loader);
@@ -36,93 +29,70 @@ namespace FAWorld
             virtual bool isComplete() const { return mComplete; }
             MissileId getMissileId() const { return mMissileId; }
             const GameLevel* getLevel() const { return mLevel; }
-
-            std::vector<std::unique_ptr<MissileGraphic>> mGraphics;
+            const std::vector<std::unique_ptr<MissileGraphic>>& getGraphics() const { return mGraphics; }
 
         protected:
-            Actor* mCreator = nullptr;
-            MissileId mMissileId = MissileId(0);
-            GameLevel* mLevel = nullptr;
-            Misc::Point mSrcPoint;
-            bool mComplete = false;
+            // Static inner classes for missile attribute composition.
+            class Creation
+            {
+            public:
+                Creation() = delete;
+                typedef void (*Method)(Missile& missile, Misc::Point dest);
+
+                static void singleFrame16Direction(Missile& missile, Misc::Point dest);
+                static void animated16Direction(Missile& missile, Misc::Point dest);
+                static void firewall(Missile& missile, Misc::Point dest);
+                static void basicAnimated(Missile& missile, Misc::Point dest);
+            };
+
+            class Movement
+            {
+            public:
+                Movement() = delete;
+                typedef void (*Method)(Missile& missile, MissileGraphic& graphic);
+
+                static void stationary(Missile& missile, MissileGraphic& graphic);
+                static void linear(Missile& missile, MissileGraphic& graphic);
+                static void hoverOverCreator(Missile& missile, MissileGraphic& graphic);
+            };
+
+            class ActorEngagement
+            {
+            public:
+                ActorEngagement() = delete;
+                typedef void (*Method)(Missile& missile, MissileGraphic& graphic, Actor& actor);
+
+                static void none(Missile& missile, MissileGraphic& graphic, Actor& actor);
+                static void damageEnemy(Missile& missile, MissileGraphic& graphic, Actor& actor);
+                static void damageEnemyAndStop(Missile& missile, MissileGraphic& graphic, Actor& actor);
+            };
+
+            // Inner class that holds reference to all missile attributes.
+            class Attributes
+            {
+            public:
+                Attributes(Creation::Method creation, Movement::Method movement, ActorEngagement::Method actorEngagement, FixedPoint maxRange, Tick timeToLive);
+                static Attributes fromId(MissileId missileId);
+
+                const Missile::Creation::Method mCreation;
+                const Missile::Movement::Method mMovement;
+                const Missile::ActorEngagement::Method mActorEngagement;
+                const FixedPoint mMaxRange;
+                const Tick mTimeToLive;
+            };
 
             const DiabloExe::MissileData& missileData() const;
             const DiabloExe::MissileGraphics& missileGraphics() const;
             std::string getGraphicsPath(int32_t i) const;
             void playImpactSound();
-        };
 
-        class MissileCreation
-        {
-        public:
-            typedef void (*MissileCreationMethod)(Missile& missile, Misc::Point dest);
-            static MissileCreationMethod get(MissileId missileId);
-
-        protected:
-            static void singleFrame16Direction(Missile& missile, Misc::Point dest);
-            static void animated16Direction(Missile& missile, Misc::Point dest);
-            static void firewall(Missile& missile, Misc::Point dest);
-            static void basicAnimated(Missile& missile, Misc::Point dest);
-        };
-
-        class MissileMovement
-        {
-        public:
-            typedef void (*MissileMovementMethod)(Missile& missile, MissileGraphic& graphic);
-            static MissileMovementMethod get(MissileId missileId);
-
-        protected:
-            static void fixed(Missile& missile, MissileGraphic& graphic);
-            static void linear(Missile& missile, MissileGraphic& graphic);
-            static void hoverOverCreator(Missile& missile, MissileGraphic& graphic);
-        };
-
-        class MissileActorEngagement
-        {
-        public:
-            typedef void (*MissileActorEngagementMethod)(Missile& missile, MissileGraphic& graphic, Actor& actor);
-            static MissileActorEngagementMethod get(MissileId missileId);
-
-        protected:
-            static void none(Missile& missile, MissileGraphic& graphic, Actor& actor);
-            static void damageEnemy(Missile& missile, MissileGraphic& graphic, Actor& actor);
-            static void damageEnemyAndStop(Missile& missile, MissileGraphic& graphic, Actor& actor);
-        };
-
-        class MissileMaxRange
-        {
-        public:
-            static FixedPoint get(MissileId missileId)
-            {
-                switch (missileId)
-                {
-                    case MissileId::arrow:
-                    case MissileId::firebolt:
-                    case MissileId::farrow:
-                    case MissileId::larrow:
-                        return 15; // placeholder
-                    default:
-                        return FixedPoint::fromRawValue(INT64_MAX);
-                }
-            }
-        };
-
-        class MissileTimeToLive
-        {
-        public:
-            static Tick get(MissileId missileId)
-            {
-                switch (missileId)
-                {
-                    case MissileId::firewall:
-                    case MissileId::firewalla:
-                    case MissileId::firewallc:
-                    case MissileId::manashield:
-                        return World::getTicksInPeriod("8"); // placeholder
-                    default:
-                        return std::numeric_limits<Tick>::max();
-                }
-            }
+            Actor* mCreator;
+            MissileId mMissileId;
+            GameLevel* mLevel;
+            Misc::Point mSrcPoint;
+            Missile::Attributes mAttr;
+            std::vector<std::unique_ptr<MissileGraphic>> mGraphics;
+            bool mComplete = false;
         };
     }
 }
