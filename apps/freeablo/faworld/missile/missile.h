@@ -13,86 +13,86 @@ namespace FASaveGame
 namespace FAWorld
 {
     class Actor;
+}
 
-    namespace Missile
+namespace FAWorld::Missile
+{
+    class Missile
     {
-        class Missile
+    public:
+        virtual ~Missile() = default;
+
+        Missile(MissileId missileId, Actor& creator, Misc::Point dest);
+        Missile(FASaveGame::GameLoader& loader);
+
+        virtual void save(FASaveGame::GameSaver& saver);
+        virtual void update();
+        virtual bool isComplete() const { return mComplete; }
+        MissileId getMissileId() const { return mMissileId; }
+        const GameLevel* getLevel() const { return mLevel; }
+        const std::vector<std::unique_ptr<MissileGraphic>>& getGraphics() const { return mGraphics; }
+
+    protected:
+        // Static inner classes for missile attribute composition.
+        class Creation
         {
         public:
-            virtual ~Missile() = default;
+            Creation() = delete;
+            typedef void (*Method)(Missile& missile, Misc::Point dest);
 
-            Missile(MissileId missileId, Actor& creator, Misc::Point dest);
-            Missile(FASaveGame::GameLoader& loader);
-
-            virtual void save(FASaveGame::GameSaver& saver);
-            virtual void update();
-            virtual bool isComplete() const { return mComplete; }
-            MissileId getMissileId() const { return mMissileId; }
-            const GameLevel* getLevel() const { return mLevel; }
-            const std::vector<std::unique_ptr<MissileGraphic>>& getGraphics() const { return mGraphics; }
-
-        protected:
-            // Static inner classes for missile attribute composition.
-            class Creation
-            {
-            public:
-                Creation() = delete;
-                typedef void (*Method)(Missile& missile, Misc::Point dest);
-
-                static void singleFrame16Direction(Missile& missile, Misc::Point dest);
-                static void animated16Direction(Missile& missile, Misc::Point dest);
-                static void firewall(Missile& missile, Misc::Point dest);
-                static void basicAnimated(Missile& missile, Misc::Point dest);
-            };
-
-            class Movement
-            {
-            public:
-                Movement() = delete;
-                typedef void (*Method)(Missile& missile, MissileGraphic& graphic);
-
-                static void stationary(Missile& missile, MissileGraphic& graphic);
-                static void linear(Missile& missile, MissileGraphic& graphic);
-                static void hoverOverCreator(Missile& missile, MissileGraphic& graphic);
-            };
-
-            class ActorEngagement
-            {
-            public:
-                ActorEngagement() = delete;
-                typedef void (*Method)(Missile& missile, MissileGraphic& graphic, Actor& actor);
-
-                static void none(Missile& missile, MissileGraphic& graphic, Actor& actor);
-                static void damageEnemy(Missile& missile, MissileGraphic& graphic, Actor& actor);
-                static void damageEnemyAndStop(Missile& missile, MissileGraphic& graphic, Actor& actor);
-            };
-
-            // Inner class that holds reference to all missile attributes.
-            class Attributes
-            {
-            public:
-                Attributes(Creation::Method creation, Movement::Method movement, ActorEngagement::Method actorEngagement, FixedPoint maxRange, Tick timeToLive);
-                static Attributes fromId(MissileId missileId);
-
-                const Missile::Creation::Method mCreation;
-                const Missile::Movement::Method mMovement;
-                const Missile::ActorEngagement::Method mActorEngagement;
-                const FixedPoint mMaxRange;
-                const Tick mTimeToLive;
-            };
-
-            const DiabloExe::MissileData& missileData() const;
-            const DiabloExe::MissileGraphics& missileGraphics() const;
-            std::string getGraphicsPath(int32_t i) const;
-            void playImpactSound();
-
-            Actor* mCreator;
-            MissileId mMissileId;
-            GameLevel* mLevel;
-            Misc::Point mSrcPoint;
-            Missile::Attributes mAttr;
-            std::vector<std::unique_ptr<MissileGraphic>> mGraphics;
-            bool mComplete = false;
+            static void singleFrame16Direction(Missile& missile, Misc::Point dest);
+            static void animated16Direction(Missile& missile, Misc::Point dest);
+            static void firewall(Missile& missile, Misc::Point dest);
+            static void basicAnimated(Missile& missile, Misc::Point dest);
         };
-    }
+
+        class Movement
+        {
+        public:
+            Movement() = delete;
+            typedef void (*Method)(Missile& missile, MissileGraphic& graphic);
+
+            static void stationary(Missile& missile, MissileGraphic& graphic);
+            static void linear(Missile& missile, MissileGraphic& graphic);
+            static void hoverOverCreator(Missile& missile, MissileGraphic& graphic);
+        };
+
+        class ActorEngagement
+        {
+        public:
+            ActorEngagement() = delete;
+            typedef void (*Method)(Missile& missile, MissileGraphic& graphic, Actor& actor);
+
+            static void none(Missile& missile, MissileGraphic& graphic, Actor& actor);
+            static void damageEnemy(Missile& missile, MissileGraphic& graphic, Actor& actor);
+            static void damageEnemyAndStop(Missile& missile, MissileGraphic& graphic, Actor& actor);
+        };
+
+        // Inner class that holds reference to all missile attributes.
+        class Attributes
+        {
+        public:
+            Attributes(Creation::Method creation, Movement::Method movement, ActorEngagement::Method actorEngagement, FixedPoint maxRange, Tick timeToLive);
+            static Attributes fromId(MissileId missileId);
+
+            const Missile::Creation::Method mCreation;
+            const Missile::Movement::Method mMovement;
+            const Missile::ActorEngagement::Method mActorEngagement;
+            const FixedPoint mMaxRange;
+            const Tick mTimeToLive;
+        };
+
+        const DiabloExe::MissileData& missileData() const;
+        const DiabloExe::MissileGraphics& missileGraphics() const;
+        std::string getGraphicsPath(int32_t i) const;
+        void playImpactSound();
+
+        Actor* mCreator;
+        MissileId mMissileId;
+        GameLevel* mLevel;
+        Misc::Point mSrcPoint;
+        Missile::Attributes mAttr;
+        std::vector<std::unique_ptr<MissileGraphic>> mGraphics;
+        bool mComplete = false;
+    };
 }
