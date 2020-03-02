@@ -28,6 +28,8 @@ namespace FAWorld::Missile
                 return Attributes(Creation::firewall, Movement::stationary, ActorEngagement::damageEnemy, maxRangeIgnore, World::getTicksInPeriod(8));
             case MissileId::manashield:
                 return Attributes(Creation::basicAnimated, Movement::hoverOverCreator, ActorEngagement::none, maxRangeIgnore, World::getTicksInPeriod(8));
+            case MissileId::town:
+                return Attributes(Creation::townPortal, Movement::stationary, ActorEngagement::townPortal, maxRangeIgnore, ttlIgnore);
             default:
                 invalid_enum(MissileId, missileId);
         }

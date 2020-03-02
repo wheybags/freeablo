@@ -44,6 +44,7 @@ namespace FAWorld::Missile
             static void animated16Direction(Missile& missile, Misc::Point dest, GameLevel* level);
             static void firewall(Missile& missile, Misc::Point dest, GameLevel* level);
             static void basicAnimated(Missile& missile, Misc::Point dest, GameLevel* level);
+            static void townPortal(Missile& missile, Misc::Point dest, GameLevel* level);
         };
 
         class Movement
@@ -69,6 +70,7 @@ namespace FAWorld::Missile
             static void none(Missile& missile, MissileGraphic& graphic, Actor& actor);
             static void damageEnemy(Missile& missile, MissileGraphic& graphic, Actor& actor);
             static void damageEnemyAndStop(Missile& missile, MissileGraphic& graphic, Actor& actor);
+            static void townPortal(Missile& missile, MissileGraphic& graphic, Actor& actor);
         };
 
         // Inner class that holds reference to all missile attributes.

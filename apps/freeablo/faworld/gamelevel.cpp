@@ -177,7 +177,7 @@ namespace FAWorld
             actorMapInsert(mActors[i]);
     }
 
-    Misc::Point GameLevel::getFreeSpotNear(Misc::Point point, int32_t radius) const
+    Misc::Point GameLevel::getFreeSpotNear(Misc::Point point, int32_t radius, const std::function<bool(const Misc::Point& point)>& additionalConstraints) const
     {
         // partially based on https://stackoverflow.com/a/398302
 
@@ -192,7 +192,7 @@ namespace FAWorld
             Misc::Point targetPoint = point + Misc::Point{xOffset, yOffset};
             if (targetPoint.x >= 0 && targetPoint.x < width() && targetPoint.y >= 0 && targetPoint.y < height())
             {
-                if (isPassable(targetPoint, nullptr))
+                if (isPassable(targetPoint, nullptr) && (additionalConstraints == nullptr || additionalConstraints(targetPoint)))
                     return targetPoint;
             }
 

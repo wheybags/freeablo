@@ -62,7 +62,7 @@ namespace FAWorld
         // Temporary quirk to only allow implemented spells to be used.
         static bool isSpellImplemented(SpellId spell)
         {
-            static const SpellId implementedSpells[] = {SpellId::firebolt, SpellId::firewall, SpellId::manashield};
+            static const SpellId implementedSpells[] = {SpellId::firebolt, SpellId::firewall, SpellId::manashield, SpellId::town};
             for (auto sp : implementedSpells)
                 if (spell == sp)
                     return true;
