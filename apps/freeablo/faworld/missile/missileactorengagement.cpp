@@ -30,9 +30,9 @@ namespace FAWorld::Missile
             // Teleport to other portal
             auto& otherPortal = missile.mGraphics[0].get() != &graphic ? missile.mGraphics[0] : missile.mGraphics[1];
             auto noMissilesAtPoint = [&otherPortal](const Misc::Point& p) {
-                return std::none_of(
-                    otherPortal->getLevel()->mMissileGraphics.begin(), otherPortal->getLevel()->mMissileGraphics.end(),
-                    [&p](const MissileGraphic* g) { return p == g->mCurPos.current();});
+                return std::none_of(otherPortal->getLevel()->mMissileGraphics.begin(),
+                                    otherPortal->getLevel()->mMissileGraphics.end(),
+                                    [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
             };
             auto point = otherPortal->getLevel()->getFreeSpotNear(otherPortal->mCurPos.current(), INT32_MAX, noMissilesAtPoint);
             actor.teleport(otherPortal->getLevel(), Position(point));

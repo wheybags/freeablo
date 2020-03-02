@@ -7,11 +7,8 @@
 
 namespace FAWorld::Missile
 {
-    MissileGraphic::MissileGraphic(std::string initialGraphicPath,
-                                   std::string mainGraphicPath,
-                                   std::optional<int32_t> singleFrame,
-                                   Position position,
-                                   GameLevel* level)
+    MissileGraphic::MissileGraphic(
+        std::string initialGraphicPath, std::string mainGraphicPath, std::optional<int32_t> singleFrame, Position position, GameLevel* level)
         : mCurPos(position), mMainGraphicPath(mainGraphicPath), mSingleFrame(singleFrame), mLevel(level)
     {
         level->mMissileGraphics.push_back(this);

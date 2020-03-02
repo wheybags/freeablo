@@ -49,23 +49,21 @@ namespace FAWorld::Missile
     {
         // Add portal near player
         auto noMissilesAtPoint = [&level](const Misc::Point& p) {
-          return std::none_of(
-              level->mMissileGraphics.begin(), level->mMissileGraphics.end(),
-              [&p](const MissileGraphic* g) { return p == g->mCurPos.current();});
+            return std::none_of(
+                level->mMissileGraphics.begin(), level->mMissileGraphics.end(), [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
         };
         auto point = level->getFreeSpotNear(missile.mSrcPoint, INT32_MAX, noMissilesAtPoint);
-        missile.mGraphics.push_back(std::make_unique<MissileGraphic>(
-            missile.getGraphicsPath(0), missile.getGraphicsPath(1), std::nullopt, Position(point), level));
+        missile.mGraphics.push_back(
+            std::make_unique<MissileGraphic>(missile.getGraphicsPath(0), missile.getGraphicsPath(1), std::nullopt, Position(point), level));
         // Add portal in town
         auto town = Engine::EngineMain::get()->mWorld->getLevel(0);
         static const Misc::Point townPortalPoint = Misc::Point(60, 80);
         auto noMissilesAtTownPoint = [&town](const Misc::Point& p) {
-          return std::none_of(
-              town->mMissileGraphics.begin(), town->mMissileGraphics.end(),
-              [&p](const MissileGraphic* g) { return p == g->mCurPos.current();});
+            return std::none_of(
+                town->mMissileGraphics.begin(), town->mMissileGraphics.end(), [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
         };
         point = town->getFreeSpotNear(townPortalPoint, INT32_MAX, noMissilesAtTownPoint);
-        missile.mGraphics.push_back(std::make_unique<MissileGraphic>(
-            missile.getGraphicsPath(0), missile.getGraphicsPath(1), std::nullopt, Position(point), town));
+        missile.mGraphics.push_back(
+            std::make_unique<MissileGraphic>(missile.getGraphicsPath(0), missile.getGraphicsPath(1), std::nullopt, Position(point), town));
     }
 }
