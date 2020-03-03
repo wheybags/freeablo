@@ -7,8 +7,6 @@ namespace FAWorld
 {
     namespace ActorState
     {
-        const std::string BaseAttackState::typeId = "actorstate-base-attack-state";
-
         void BaseAttackState::save(FASaveGame::GameSaver& saver) const
         {
             mTargetPoint.save(saver);
@@ -88,11 +86,11 @@ namespace FAWorld
             auto spellData = SpellData(mSpell);
             switch (spellData.getType())
             {
-                case SpellType::fire:
+                case DiabloExe::SpellData::SpellType::fire:
                     return AnimState::spellFire;
-                case SpellType::lightning:
+                case DiabloExe::SpellData::SpellType::lightning:
                     return AnimState::spellLightning;
-                case SpellType::magic:
+                case DiabloExe::SpellData::SpellType::magic:
                 default:
                     return AnimState::spellOther;
             }

@@ -6,13 +6,6 @@
 
 namespace FAWorld
 {
-    enum class SpellType
-    {
-        fire,
-        lightning,
-        magic
-    };
-
     class SpellData
     {
     public:
@@ -26,19 +19,7 @@ namespace FAWorld
 
         const std::string& soundEffect() const { return mSpellData.mSoundEffect; }
 
-        SpellType getType() const
-        {
-            switch (mSpellData.mType)
-            {
-                case 0:
-                    return SpellType::fire;
-                case 1:
-                    return SpellType::lightning;
-                case 2:
-                default:
-                    return SpellType::magic;
-            }
-        }
+        DiabloExe::SpellData::SpellType getType() const { return mSpellData.mType; }
 
         std::vector<MissileId> missiles() const
         {

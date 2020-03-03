@@ -14,9 +14,6 @@ namespace FAWorld
         class BaseAttackState : public AbstractState
         {
         public:
-            static const std::string typeId;
-            const std::string& getTypeId() const override { return typeId; }
-
             virtual void save(FASaveGame::GameSaver& saver) const override;
 
             explicit BaseAttackState(FASaveGame::GameLoader& loader);
@@ -39,6 +36,7 @@ namespace FAWorld
         {
         public:
             static const std::string typeId;
+            const std::string& getTypeId() const override { return typeId; }
 
             explicit MeleeAttackState(FASaveGame::GameLoader& loader) : BaseAttackState(loader) {}
             explicit MeleeAttackState(Misc::Point targetPoint) : BaseAttackState(targetPoint) {}
@@ -53,6 +51,7 @@ namespace FAWorld
         {
         public:
             static const std::string typeId;
+            const std::string& getTypeId() const override { return typeId; }
 
             explicit RangedAttackState(FASaveGame::GameLoader& loader) : MeleeAttackState(loader) {}
             explicit RangedAttackState(Misc::Point targetPoint) : MeleeAttackState(targetPoint) {}
@@ -65,6 +64,7 @@ namespace FAWorld
         {
         public:
             static const std::string typeId;
+            const std::string& getTypeId() const override { return typeId; }
 
             void save(FASaveGame::GameSaver& saver) const override;
 
