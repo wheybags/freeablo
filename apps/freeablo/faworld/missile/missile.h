@@ -54,11 +54,11 @@ namespace FAWorld::Missile
             typedef std::function<void(Missile& missile, MissileGraphic& graphic)> Method;
 
             static void stationary(Missile& missile, MissileGraphic& graphic);
-            static Method linear(FixedPoint speed);
+            static Method linear(FixedPoint speed, FixedPoint maxRange);
             static void hoverOverCreator(Missile& missile, MissileGraphic& graphic);
 
         private:
-            static void linear(MissileGraphic& graphic, FixedPoint speed);
+            static void linear(Missile& missile, MissileGraphic& graphic, FixedPoint speed, FixedPoint maxRange);
         };
 
         class ActorEngagement
@@ -77,13 +77,12 @@ namespace FAWorld::Missile
         class Attributes
         {
         public:
-            Attributes(Creation::Method creation, Movement::Method movement, ActorEngagement::Method actorEngagement, FixedPoint maxRange, Tick timeToLive);
+            Attributes(Creation::Method creation, Movement::Method movement, ActorEngagement::Method actorEngagement, Tick timeToLive);
             static Attributes fromId(MissileId missileId);
 
             const Missile::Creation::Method mCreation;
             const Missile::Movement::Method mMovement;
             const Missile::ActorEngagement::Method mActorEngagement;
-            const FixedPoint mMaxRange;
             const Tick mTimeToLive;
         };
 

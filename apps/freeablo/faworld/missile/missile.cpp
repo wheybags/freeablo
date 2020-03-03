@@ -100,11 +100,6 @@ namespace FAWorld::Missile
                 graphic->stop();
             }
 
-            // Stop after max range is exceeded.
-            auto distance = (Vec2Fix(curPoint.x, curPoint.y) - Vec2Fix(mSrcPoint.x, mSrcPoint.y)).magnitude();
-            if (distance > mAttr.mMaxRange)
-                graphic->stop();
-
             // Stop after "time to live" has expired.
             if (graphic->getTicksSinceStarted() > mAttr.mTimeToLive)
                 graphic->stop();
