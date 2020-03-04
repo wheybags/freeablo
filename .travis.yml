@@ -6,7 +6,6 @@ branches:
 
 sudo: false
 dist: bionic
-osx_image: xcode11.3 # macos 10.14 + xcode 11.3
 
 addons:
   apt:
@@ -22,6 +21,7 @@ matrix:
     - os: linux
       env: JOB=clang-format
     - os: osx
+      osx_image: xcode11.3 # macos 10.14 + xcode 11.3
       env: JOB=build
 
 script: ./travis.sh
