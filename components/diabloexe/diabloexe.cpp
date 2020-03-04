@@ -564,7 +564,20 @@ namespace DiabloExe
             auto spellId = exe.read8();
             auto& spellData = mSpellsDataTable[spellId];
             spellData.mManaCost = exe.read8();
-            spellData.mType = exe.read8();
+            int8_t type = exe.read8();
+            switch (type)
+            {
+                case 0:
+                    spellData.mType = SpellData::SpellType::fire;
+                    break;
+                case 1:
+                    spellData.mType = SpellData::SpellType::lightning;
+                    break;
+                case 2:
+                default:
+                    spellData.mType = SpellData::SpellType::magic;
+                    break;
+            }
             exe.read8(); // Padding
             auto nameOffset = exe.read32();
             auto skillTextOffset = exe.read32();
@@ -573,8 +586,8 @@ namespace DiabloExe
             spellData.mTargeted = (bool)exe.read32();
             spellData.mTownSpell = (bool)exe.read32();
             spellData.mMinMagic = exe.read32();
-            int32_t soundEffectId = exe.read8();
-            spellData.mSoundEffect = soundEffectId == -1 ? "" : mSoundFilename[soundEffectId];
+            int8_t soundEffectId = exe.read8();
+            spellData.mSoundEffect = mSoundFilename[soundEffectId];
             for (auto& missile : spellData.mMissiles)
                 missile = exe.read8();
             spellData.mManaAdj = exe.read8();

@@ -347,7 +347,7 @@ namespace FAWorld
         doMeleeHit(actor);
     }
 
-    void Actor::startMeleeAttack(Misc::Direction direction) { mMeleeAttackRequestedDirection = direction; }
+    void Actor::forceAttack(Misc::Point pos) { mForceAttackRequestedPoint = pos; }
 
     void Actor::doMeleeHit(Actor* enemy)
     {
@@ -391,13 +391,27 @@ namespace FAWorld
         }
     }
 
+    bool Actor::hasRangedWeaponEquipped() const { return mInventory.isRangedWeaponEquipped(); }
+
+    void Actor::doRangedAttack(Misc::Point targetPoint)
+    {
+        Engine::ThreadManager::get()->playSound("sfx/misc/bfire.wav");
+        // Note: Fire and lightning arrows are also possible.
+        activateMissile(MissileId::arrow, targetPoint);
+    }
+
     bool Actor::castSpell(SpellId spell, Misc::Point targetPoint)
+    {
+        mCastSpellRequest = std::pair(spell, targetPoint);
+        return true;
+    }
+
+    void Actor::doSpellEffect(SpellId spell, Misc::Point targetPoint)
     {
         auto spellData = SpellData(spell);
         Engine::ThreadManager::get()->playSound(spellData.soundEffect());
         for (auto missileId : spellData.missiles())
             activateMissile(missileId, targetPoint);
-        return true;
     }
 
     void Actor::activateMissile(MissileId id, Misc::Point targetPoint)

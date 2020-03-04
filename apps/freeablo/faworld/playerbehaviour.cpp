@@ -105,10 +105,10 @@ namespace FAWorld
                 mPlayer->mTarget = Target::ItemTarget{input.mData.dataTargetItemOnFloor.type, item};
                 return;
             }
-            case PlayerInput::Type::AttackDirection:
+            case PlayerInput::Type::ForceAttack:
             {
                 if (!mPlayer->getLevel()->isTown())
-                    mPlayer->startMeleeAttack(input.mData.dataAttackDirection.direction);
+                    mPlayer->forceAttack(input.mData.dataForceAttack.pos);
                 return;
             }
             case PlayerInput::Type::CastSpell:

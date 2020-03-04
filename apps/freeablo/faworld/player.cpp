@@ -492,10 +492,12 @@ namespace FAWorld
         if (!renderer) // TODO: some sort of headless mode for tests
             return;
 
-        // TODO: Spell animations: lightning "lm", fire "fm", other "qm"
         mAnimation.setAnimationSprites(AnimState::dead, renderer->loadImage(helper(true, "dt")));
         mAnimation.setAnimationSprites(AnimState::attack, renderer->loadImage(helper(false, "at")));
         mAnimation.setAnimationSprites(AnimState::hit, renderer->loadImage(helper(false, "ht")));
+        mAnimation.setAnimationSprites(AnimState::spellLightning, renderer->loadImage(helper(false, "lm")));
+        mAnimation.setAnimationSprites(AnimState::spellFire, renderer->loadImage(helper(false, "fm")));
+        mAnimation.setAnimationSprites(AnimState::spellOther, renderer->loadImage(helper(false, "qm")));
 
         if (mInventory.isShieldEquipped())
             mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "bl")));
@@ -619,22 +621,37 @@ namespace FAWorld
     bool Player::castSpell(SpellId spell, Misc::Point targetPoint)
     {
         if (spell == SpellId::null)
+        {
+            // TODO: Play player sound #34: "I don't have a spell ready"
             return false;
+        }
 
         auto spellData = SpellData(spell);
         auto& mana = mStats.getMana();
         auto manaCost = spellData.manaCost();
 
         // Note: These checks have temporarily been removed for easier testing/development
-        // if (!getLevel() || (getLevel()->isTown() && !spellData.canCastInTown()) || mana.current < manaCost)
-        //    return false;
-
-        if (Actor::castSpell(spell, targetPoint))
+        if (!getLevel() || (getLevel()->isTown() && !spellData.canCastInTown()))
         {
-            mana.add(-manaCost);
-            return true;
+            // TODO: Play player sound #27: "I can't cast that here"
+            // return false;
         }
-        return false;
+        if (mana.current < manaCost)
+        {
+            // TODO: Play player sound #35: "Not enough mana"
+            // return false;
+        }
+
+        return Actor::castSpell(spell, targetPoint);
+    }
+
+    void Player::doSpellEffect(SpellId spell, Misc::Point targetPoint)
+    {
+        auto spellData = SpellData(spell);
+        auto& mana = mStats.getMana();
+        auto manaCost = spellData.manaCost();
+        mana.add(-manaCost);
+        Actor::doSpellEffect(spell, targetPoint);
     }
 
     SpellId Player::defaultSkill() const
