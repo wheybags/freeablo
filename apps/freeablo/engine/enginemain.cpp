@@ -3,6 +3,7 @@
 #include "../fagui/guimanager.h"
 #include "../falevelgen/levelgen.h"
 #include "../fasavegame/gameloader.h"
+#include "../faworld/enums.h"
 #include "../faworld/itemfactory.h"
 #include "../faworld/player.h"
 #include "../faworld/playerbehaviour.h"
@@ -62,7 +63,7 @@ namespace Engine
     {
         FARender::Renderer& renderer = *FARender::Renderer::get();
 
-        std::string characterClass = variables["character"].as<std::string>();
+        FAWorld::PlayerClass characterClass = FAWorld::playerClassFromString(variables["character"].as<std::string>());
 
         mExe = std::make_unique<DiabloExe::DiabloExe>(pathEXE);
         if (!mExe->isLoaded())
@@ -253,7 +254,7 @@ namespace Engine
         mGuiManager->setPlayer(player);
     }
 
-    void EngineMain::startGame(const std::string& characterClass)
+    void EngineMain::startGame(FAWorld::PlayerClass characterClass)
     {
         mWorld->generateLevels();
 

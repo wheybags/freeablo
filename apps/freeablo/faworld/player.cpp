@@ -23,23 +23,7 @@ namespace FAWorld
 {
     const std::string Player::typeId = "player";
 
-    const char* toString(PlayerClass value)
-    {
-        switch (value)
-        {
-            case PlayerClass::warrior:
-                return "warrior";
-            case PlayerClass::rogue:
-                return "rogue";
-            case PlayerClass::sorcerer:
-                return "sorceror";
-            case PlayerClass::none:
-                break;
-        }
-        return "unknown";
-    }
-
-    Player::Player(World& world, const DiabloExe::CharacterStats& charStats) : Actor(world)
+    Player::Player(World& world, PlayerClass playerClass, const DiabloExe::CharacterStats& charStats) : Actor(world), mPlayerClass(playerClass)
     {
         mStats.initialise(initialiseActorStats(charStats));
         mStats.mLevelXpCounts = charStats.mNextLevelExp;
@@ -90,12 +74,6 @@ namespace FAWorld
                 }
             }
         };
-    }
-
-    void Player::setPlayerClass(PlayerClass playerClass)
-    {
-        mPlayerClass = playerClass;
-        updateSprites();
     }
 
     void Player::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
@@ -478,7 +456,7 @@ namespace FAWorld
                 weapFormat = "n";
 
             return fmt::format(FMT_STRING("plrgfx/{}/{}{}{}/{}{}{}{}.cl2"),
-                               toString(mPlayerClass),
+                               playerClassToString(mPlayerClass),
                                classCode,
                                armourCode,
                                weapFormat,

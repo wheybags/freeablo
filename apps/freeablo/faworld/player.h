@@ -1,22 +1,11 @@
 #pragma once
 #include "actor.h"
+#include "enums.h"
 #include "monster.h"
 
 namespace FAWorld
 {
     class PlayerBehaviour;
-
-    enum class PlayerClass
-    {
-        warrior = 0,
-        rogue,
-        sorcerer,
-        none,
-    };
-
-    // note that this function features misspelling of sorcerer as sorceror
-    // because it's written this way on character panel
-    const char* toString(PlayerClass value);
 
     class Player : public Actor
     {
@@ -24,7 +13,7 @@ namespace FAWorld
         static const std::string typeId;
         const std::string& getTypeId() override { return typeId; }
 
-        Player(World& world, const DiabloExe::CharacterStats& charStats);
+        Player(World& world, PlayerClass playerClass, const DiabloExe::CharacterStats& charStats);
         void initCommon();
         Player(World& world, FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) override;
@@ -36,7 +25,6 @@ namespace FAWorld
         virtual void update(bool noclip) override;
 
         PlayerBehaviour* getPlayerBehaviour() { return (PlayerBehaviour*)mBehaviour.get(); }
-        void setPlayerClass(PlayerClass playerClass);
 
         PlayerClass getClass() const { return mPlayerClass; }
         virtual bool canCriticalHit() const override { return mPlayerClass == PlayerClass::warrior; }
