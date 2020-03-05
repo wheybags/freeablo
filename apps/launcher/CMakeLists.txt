@@ -7,3 +7,5 @@ if (MINGW)
     target_link_libraries(launcher -lmingw32)
 endif ()
 set_target_properties(launcher PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+install(TARGETS launcher DESTINATION bin)

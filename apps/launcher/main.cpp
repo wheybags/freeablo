@@ -9,6 +9,8 @@
 
 int main(int, char** argv)
 {
+    Misc::saveArgv0(argv[0]);
+
     Render::RenderSettings renderSettings;
     renderSettings.windowWidth = 800;
     renderSettings.windowHeight = 600;
@@ -23,9 +25,11 @@ int main(int, char** argv)
 
         FAIO::init("");
 
-        std::unique_ptr<NuklearMisc::GuiSprite> banner(guiHandler.getSprite(Render::loadNonCelSprite("resources/launcher/banner.png")));
-        std::unique_ptr<NuklearMisc::GuiSprite> graphicsHeader(guiHandler.getSprite(Render::loadNonCelSprite("resources/launcher/graphics.png")));
-        std::unique_ptr<NuklearMisc::GuiSprite> playHeader(guiHandler.getSprite(Render::loadNonCelSprite("resources/launcher/play.png")));
+        std::unique_ptr<NuklearMisc::GuiSprite> banner(guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/banner.png")));
+        std::unique_ptr<NuklearMisc::GuiSprite> graphicsHeader(
+            guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/graphics.png")));
+        std::unique_ptr<NuklearMisc::GuiSprite> playHeader(
+            guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/play.png")));
 
         int32_t bannerW, bannerH;
         Render::spriteSize(banner->getSprite()->operator[](0), bannerW, bannerH);

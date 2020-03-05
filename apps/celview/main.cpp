@@ -11,6 +11,8 @@
 
 int main(int argc, char** argv)
 {
+    Misc::saveArgv0(argv[0]);
+
     if (argc > 2)
         message_and_abort_fmt("Usage: %s [filename]", argv[0]);
 
@@ -24,7 +26,7 @@ int main(int argc, char** argv)
     nk_context* ctx = guiHandler.getNuklearContext();
 
     Settings::Settings settings;
-    settings.loadFromFile("resources/celview.ini");
+    settings.loadFromFile(Misc::getResourcesPath().str() + "/celview.ini");
 
     bool faioInitDone = false;
     std::string listFile = settings.get<std::string>("celview", "listFile", "Diablo I.txt");
