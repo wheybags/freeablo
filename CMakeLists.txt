@@ -97,4 +97,6 @@ if(MSVC)
 endif()
 
 install(DIRECTORY resources/ DESTINATION resources
-        PATTERN "resources/settings-user" EXCLUDE)
+        PATTERN "settings-user.ini" EXCLUDE)
+
+install(FILES changelog.md DESTINATION .)
