@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <misc/misc.h>
 #include <string>
 #include <vector>
 
@@ -10,7 +11,8 @@ namespace Settings
     class Settings
     {
     public:
-        Settings(const std::string& defaultPath = "resources/settings-default.ini", const std::string& userPath = "resources/settings-user.ini");
+        Settings(const std::string& defaultPath = Misc::getResourcesPath().str() + "/settings-default.ini",
+                 const std::string& userPath = Misc::getResourcesPath().str() + "/settings-user.ini");
         ~Settings();
         Settings(const Settings&) = delete;
         Settings& operator=(const Settings&) = delete;

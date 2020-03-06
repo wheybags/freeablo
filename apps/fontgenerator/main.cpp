@@ -17,6 +17,8 @@ void help(char** argv)
 
 int main(int argc, char** argv)
 {
+    Misc::saveArgv0(argv[0]);
+
     if (argc < 2)
     {
         help(argv);

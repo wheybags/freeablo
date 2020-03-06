@@ -19,7 +19,7 @@ namespace Input
     Hotkey::Hotkey(const std::string& name)
     {
         Settings::Settings hotkeySettings;
-        hotkeySettings.loadFromFile("resources/hotkeys.ini");
+        hotkeySettings.loadFromFile(Misc::getResourcesPath().str() + "/hotkeys.ini");
 
         key = hotkeySettings.get<int>(name, "key");
         shift = hotkeySettings.get<int>(name, "shift");
@@ -218,7 +218,7 @@ namespace Input
         std::string sname = name;
 
         Settings::Settings hotkeySettings;
-        hotkeySettings.loadFromFile("resources/hotkeys.ini");
+        hotkeySettings.loadFromFile(Misc::getResourcesPath().str() + "/hotkeys.ini");
 
         hotkeySettings.set<int>(sname, "key", key);
         hotkeySettings.set<int>(sname, "shift", int(shift));

@@ -1,4 +1,6 @@
 #include "misc.h"
+#include <iostream>
+#include <misc/assert.h>
 
 #ifndef _WIN32
 #include <sstream>
@@ -50,4 +52,39 @@ namespace Misc
         return ret.str();
 #endif
     }
+
+    std::string argv0;
+
+    filesystem::path getResourcesPath()
+    {
+        static filesystem::path resourcesPath;
+
+        if (resourcesPath.empty())
+        {
+            release_assert(!argv0.empty());
+
+            filesystem::path thisBinary = filesystem::path(argv0).make_absolute();
+            filesystem::path folder = thisBinary.parent_path();
+
+            for (size_t i = 0; i < 5; i++)
+            {
+                if ((folder / "resources").exists())
+                {
+                    resourcesPath = folder / "resources";
+                    break;
+                }
+
+                folder = folder.parent_path();
+            }
+
+            if (resourcesPath.empty())
+                message_and_abort(("Unable to find resources path, binary path: " + thisBinary.str()).c_str());
+
+            std::cout << "Using resources path: \"" << resourcesPath << "\"" << std::endl;
+        }
+
+        return resourcesPath;
+    }
+
+    void saveArgv0(const char* _argv0) { argv0 = _argv0; }
 }

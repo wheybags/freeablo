@@ -65,7 +65,7 @@ namespace Cel
         int mFrameHeight;
         int mHeaderSize;
         int32_t mAnimationLength;
-        static Settings::Settings mSettingsCel;
-        static Settings::Settings mSettingsCl2;
+        static std::unique_ptr<Settings::Settings> mSettingsCel;
+        static std::unique_ptr<Settings::Settings> mSettingsCl2;
     };
 }

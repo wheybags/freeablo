@@ -108,6 +108,8 @@ bool dataFilesSetUp(const Settings::Settings& settings)
 
 int fa_main(int argc, char** argv)
 {
+    Misc::saveArgv0(argv[0]);
+
     Settings::Settings settings;
 
     // Check if we've been configured with data files, and if we haven't, run the launcher to prompt configuration

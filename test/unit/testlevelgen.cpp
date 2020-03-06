@@ -9,7 +9,7 @@ TEST(LevelGen, BasicDeterminism)
 {
     Random::RngMersenneTwister random(1234);
 
-    FALevelGen::TileSet tileset("resources/tilesets/l1.ini");
+    FALevelGen::TileSet tileset(Misc::getResourcesPath().str() + "/tilesets/l1.ini");
     Level::Dun level = FALevelGen::generateBasic(random, tileset, 100, 100, 1);
 
     Serial::TextWriteStream saveStream;
