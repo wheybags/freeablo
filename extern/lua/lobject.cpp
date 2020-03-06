@@ -360,7 +360,7 @@ static int tostringbuff(TValue* obj, char* buff) {
     len = lua_integer2str(buff, MAXNUMBER2STR, ivalue(obj));
   else {
     std::string aux = obj->value_.n.str();
-    strcpy(buff, aux.c_str());
+    snprintf(buff, MAXNUMBER2STR, aux.c_str(), "%s");
     len = aux.length();
     if (buff[strspn(buff, "-0123456789")] == '\0') { /* looks like an int? */
       buff[len++] = lua_getlocaledecpoint();
