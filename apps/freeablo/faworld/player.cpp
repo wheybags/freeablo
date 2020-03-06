@@ -210,7 +210,7 @@ namespace FAWorld
 
                 break;
             }
-            case PlayerClass::sorcerer:
+            case PlayerClass::sorceror:
             {
                 stats.maxLife = (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint(1) * FixedPoint(itemStats.baseStats.vitality) +
                                           FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
@@ -334,7 +334,7 @@ namespace FAWorld
                 return 'w';
             case PlayerClass::rogue:
                 return 'r';
-            case PlayerClass::sorcerer:
+            case PlayerClass::sorceror:
                 return 's';
             case PlayerClass::none:
                 break;
@@ -640,7 +640,7 @@ namespace FAWorld
                 return SpellId::repair;
             case PlayerClass::rogue:
                 return SpellId::disarm;
-            case PlayerClass::sorcerer:
+            case PlayerClass::sorceror:
                 return SpellId::recharge;
             case PlayerClass::none:
                 invalid_enum(PlayerClass, mPlayerClass);

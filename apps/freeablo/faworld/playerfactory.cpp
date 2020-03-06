@@ -24,7 +24,7 @@ namespace FAWorld
             case PlayerClass::rogue:
                 addRogueItems(player);
                 break;
-            case PlayerClass::sorcerer:
+            case PlayerClass::sorceror:
                 addSorcerorItems(player);
                 break;
             case PlayerClass::none:

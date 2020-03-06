@@ -28,7 +28,7 @@ namespace FAWorld
     {
         warrior = 0,
         rogue,
-        sorcerer,
+        sorceror,
         none,
     };
 

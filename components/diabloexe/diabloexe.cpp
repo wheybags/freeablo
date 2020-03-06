@@ -501,7 +501,7 @@ namespace DiabloExe
 
         mCharacters["Warrior"] = meleeCharacter;
         mCharacters["Rogue"] = rangerCharacter;
-        mCharacters["Sorcerer"] = mageCharacter;
+        mCharacters["Sorceror"] = mageCharacter;
     }
 
     void DiabloExe::loadMissileGraphicsTable(FAIO::FAFileObject& exe, size_t codeOffset)
@@ -656,8 +656,8 @@ namespace DiabloExe
         ss << "Character Stats: " << mCharacters.size() << std::endl
            << "Warrior" << std::endl
            << mCharacters.at("Warrior").dump() << "Rogue" << std::endl
-           << mCharacters.at("Rogue").dump() << "Sorcerer" << std::endl
-           << mCharacters.at("Sorcerer").dump();
+           << mCharacters.at("Rogue").dump() << "Sorceror" << std::endl
+           << mCharacters.at("Sorceror").dump();
 
         ss << "Base Items: " << mBaseItems.size() << std::endl;
         for (auto& baseItem : mBaseItems)
