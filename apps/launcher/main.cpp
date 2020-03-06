@@ -200,7 +200,7 @@ int main(int, char** argv)
     if (runFreeablo)
     {
         filesystem::path path = (filesystem::path(argv[0]).parent_path() / "freeablo").make_absolute();
-        system(Misc::escapeSpacesOnPath(path.str()).c_str());
+        system(Misc::escapePathForShell(path.str()).c_str());
     }
 
     return 0;

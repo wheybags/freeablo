@@ -30,7 +30,7 @@ namespace Misc
 
     std::string numberToHumanFileSize(double sizeInBytes);
 
-    std::string escapeSpacesOnPath(const std::string& str);
+    std::string escapePathForShell(const std::string& str);
 }
 
 template <typename T> class NonNullPtr

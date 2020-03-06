@@ -116,7 +116,7 @@ int fa_main(int argc, char** argv)
     if (!(settings.loadUserSettings() && dataFilesSetUp(settings)))
     {
         filesystem::path path = (filesystem::path(argv[0]).parent_path() / "launcher").make_absolute();
-        system(Misc::escapeSpacesOnPath(path.str()).c_str());
+        system(Misc::escapePathForShell(path.str()).c_str());
         return EXIT_SUCCESS;
     }
 

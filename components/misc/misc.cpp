@@ -35,22 +35,21 @@ namespace Misc
         return ss.str() + suffix;
     }
 
-    std::string escapeSpacesOnPath(const std::string& path)
+    std::string escapePathForShell(const std::string& path)
     {
-#ifdef _WIN32
-        return "\"" + path + "\"";
-#else
         std::stringstream ret;
+
+        ret << '"';
         for (char c : path)
         {
-            if (c == ' ')
-                ret << "\\ ";
+            if (c == '"')
+                ret << "\\\"";
             else
                 ret << c;
         }
+        ret << '"';
 
         return ret.str();
-#endif
     }
 
     std::string argv0;
