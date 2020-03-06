@@ -13,10 +13,12 @@
 #ifndef NDEBUG
 #define _USE_MATH_DEFINES
 #include "math.h"
+#include <iostream>
 #endif
 
 constexpr int64_t FixedPoint::scalingFactorPowerOf10;
 constexpr int64_t FixedPoint::scalingFactor;
+constexpr int64_t FixedPoint::maxStringLength;
 
 FixedPoint FixedPoint::PI("3.14159265359");
 FixedPoint FixedPoint::epsilon = fromRawValue(1);
@@ -66,6 +68,83 @@ static inline int64_t muldiv(int64_t n1, int64_t n2, int64_t d)
 }
 
 FixedPoint::FixedPoint(int64_t integerValue) { *this = fromRawValue(integerValue * FixedPoint::scalingFactor); }
+
+static constexpr FixedPoint pow(FixedPoint x, size_t k)
+{
+    FixedPoint ret("1.0");
+
+    while (k > 0)
+    {
+        if (k & 1)
+            ret *= x;
+
+        k >>= 1;
+        x *= x;
+    }
+
+    return ret;
+}
+
+std::optional<FixedPoint> FixedPoint::tryParseFromString(const char* str, char mode)
+{
+    std::stringstream ss;
+
+    if (mode == 'i')
+        ss << str;
+
+    else if (mode == 'x')
+    {
+        const std::string aux(str);
+        if (size_t pos = aux.find('.'); pos != std::string::npos)
+        {
+            const std::string beforePoint = aux.substr(0, pos);
+            const std::string afterPoint = aux.substr(pos+1);
+            ss << strtol(beforePoint.c_str(), nullptr, 16) << ".";
+            auto hexToInt = [](char c) -> FixedPoint
+                            {
+                                if (c >= '0' && c <= '9')
+                                    return c - '0';
+                                else if (c >= 'A' && c <= 'F')
+                                    return c - 'A' + 10;
+                                else if (c >= 'a' && c <= 'f')
+                                    return c - 'a' + 10;
+                                return 0;
+                            };
+
+            FixedPoint aux("0.0");
+            int64_t exp = 1;
+            for (char c : afterPoint)
+                aux += hexToInt(c) / pow("16", exp++);
+
+            ss << aux.str().substr(2);
+        }
+
+        else
+            ss << strtol(aux.c_str(), nullptr, 16);
+    }
+
+    else
+    {
+#ifndef NDEBUG
+        std::cerr << "Invalid mode '" << mode << "'\n";
+#endif
+        return std::nullopt;
+    }
+
+    try
+    {
+        return FixedPoint(ss.str().c_str());
+    }
+
+    catch (std::runtime_error& err)
+    {
+#ifndef NDEBUG
+        std::cerr << "FixedPoint error: " << err.what() << "\n";
+#endif
+        return std::nullopt;
+    }
+}
+
 
 void FixedPoint::save(Serial::Saver& saver) const { saver.save(mVal); }
 
@@ -309,22 +388,6 @@ FixedPoint FixedPoint::sin_degrees(FixedPoint deg)
 }
 FixedPoint FixedPoint::cos_degrees(FixedPoint deg) { return sin_degrees(deg + 90); }
 FixedPoint FixedPoint::tan_degrees(FixedPoint deg) { return sin_degrees(deg) / cos_degrees(deg); }
-
-static FixedPoint pow(FixedPoint x, size_t k)
-{
-    FixedPoint ret("1.0");
-
-    while (k > 0)
-    {
-        if (k % 2 == 1)
-            ret *= x;
-
-        k >>= 1;
-        x *= x;
-    }
-
-    return ret;
-}
 
 FixedPoint FixedPoint::ln(FixedPoint x)
 {

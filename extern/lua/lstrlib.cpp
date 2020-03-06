@@ -1072,7 +1072,7 @@ static int lua_number2strx (lua_State *L, char *buff, int sz,
 ** and '\0') + number of decimal digits to represent maxfloat (which
 ** is maximum exponent + 1). (99+3+1, adding some extra, 110)
 */
-#define MAX_ITEMF	(110)// + l_floatatt(MAX_10_EXP))
+#define MAX_ITEMF	(110 + FixedPoint::maxStringLength)
 
 
 /*
@@ -1250,31 +1250,27 @@ static int str_format (lua_State* L) {
           nb = l_sprintf(buff, maxitem, form, (int)luaL_checkinteger(L, arg));
           break;
         }
-        case 'd':
-        case 'i':
-        case 'o':
-        case 'u':
-        case 'x':
-        case 'X': {
+        case 'd': case 'i':
+        case 'o': case 'u': case 'x': case 'X': {
           lua_Integer n = luaL_checkinteger(L, arg);
           addlenmod(form, LUA_INTEGER_FRMLEN);
           nb = l_sprintf(buff, maxitem, form, (LUAI_UACINT)n);
           break;
         }
-        /*case 'a': // TODO: handle hex
-        case 'A':
-        addlenmod(form, LUA_NUMBER_FRMLEN);
-        nb = lua_number2strx(L, buff, maxitem, form, luaL_checknumber(L, arg));
-        break;*/
+        case 'a': case 'A':
+          //addlenmod(form, LUA_NUMBER_FRMLEN);
+          nb = lua_number2strx(L, buff, maxitem, form, luaL_checknumber(L, arg));
+          break;
         case 'f': {
           maxitem = MAX_ITEMF; // extra space for '%f'
           buff = luaL_prepbuffsize(&b, maxitem);
-        // FALLTHROUGH
-        //case 'e': case 'E': case 'g': case 'G': { // TODO: handle scientific notation
           lua_Number n = luaL_checknumber(L, arg);
           //addlenmod(form, LUA_NUMBER_FRMLEN);
           nb = snprintf(buff, maxitem, form, n.toDouble());
           break;
+        }
+        case 'e': case 'E': case 'g': case 'G': {
+          return luaL_error(L, "Scientific notation is not supported.");
         }
         case 'p': {
           const void* p = lua_topointer(L, arg);

@@ -225,16 +225,17 @@ static size_t l_str2dloc(const char* s, lua_Number* result, int mode) {
   const char *endptr = s + len;
 
   for (size_t i = len - 1; i > 0; --i) {
-      if (lisspace(cast_uchar(*endptr))) {
-        --endptr;
-        continue;
-      }
-      else if (!lisdigit(cast_uchar(*endptr)) && *endptr != '.')
-        return 0;
+    if (lisspace(cast_uchar(*endptr))) {
+      --endptr;
+      continue;
+    }
+    else if (!lisdigit(cast_uchar(*endptr)) && *endptr != '.')
+      return 0;
   }
 
   const std::string parsed(s, endptr - s + 1);
-  auto parsedNumber = lua_Number::tryParseFromString(parsed.c_str());
+  auto parsedNumber = mode == 'x' ? lua_Number::tryParseFromString(parsed.c_str(), 'x')
+                                  : lua_Number::tryParseFromString(parsed.c_str());
   if (!parsedNumber.has_value())
     return 0;
 

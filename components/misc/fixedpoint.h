@@ -6,10 +6,6 @@
 #include <stdexcept>
 #include <string>
 
-#ifndef NDEBUG
-#include <iostream>
-#endif
-
 namespace Serial
 {
     class Saver;
@@ -156,21 +152,7 @@ public:
 #endif
     }
 
-    static std::optional<FixedPoint> tryParseFromString(const char* str)
-    {
-        try
-        {
-            return FixedPoint(str);
-        }
-
-        catch (std::runtime_error& err)
-        {
-#ifndef NDEBUG
-            std::cerr << err.what() << "\n";
-#endif
-            return std::nullopt;
-        }
-    }
+    static std::optional<FixedPoint> tryParseFromString(const char* str, char mode = 'i');
 
     int64_t rawValue() const { return mVal; }
 
@@ -254,6 +236,13 @@ public:
     // mVal is just the intended value multiplid by scalingFactor.
     // So, eg with scale 1000, 1.23 would have value 1230.
     static constexpr int64_t scalingFactor = 1000000000;
+
+    // Max string length for use in format functions.
+    // Primarily for use in Lua.
+    // Calculated using this formula:
+    // ceil(log10(INT64_MAX / FixedPoint::scalingFactor)) + FixedPoint::scalingFactorPowerOf10 + 2
+    static constexpr int64_t maxStringLength = 21;
+
     static FixedPoint PI;
 
 private:
