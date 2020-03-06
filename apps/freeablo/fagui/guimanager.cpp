@@ -396,7 +396,7 @@ namespace FAGui
             const FAWorld::ActorStats& playerStats = mPlayer->getStats();
             const FAWorld::LiveActorStats& liveStats = playerStats.getCalculatedStats();
 
-            fillTextField(ctx, 168, 21, 131, toString(mPlayer->getClass()));
+            fillTextField(ctx, 168, 21, 131, playerClassToString(mPlayer->getClass()));
 
             fillTextField(ctx, 95, 144, 31, std::to_string(playerStats.baseStats.strength).c_str());
             fillTextField(ctx, 142, 144, 31, std::to_string(liveStats.baseStats.strength).c_str());

@@ -83,6 +83,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/world.cpp
     faworld/world.h
     faworld/enums.h
+    faworld/enums.cpp
 
     fagui/textcolor.h
     fagui/textcolor.cpp

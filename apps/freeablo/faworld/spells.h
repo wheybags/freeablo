@@ -1,5 +1,6 @@
 #pragma once
 #include "diabloexe/diabloexe.h"
+#include "engine/enginemain.h"
 #include "missile/missileenums.h"
 #include "spellenums.h"
 
@@ -17,6 +18,8 @@ namespace FAWorld
         int32_t manaCost() const { return mSpellData.mManaCost; }
 
         const std::string& soundEffect() const { return mSpellData.mSoundEffect; }
+
+        DiabloExe::SpellData::SpellType getType() const { return mSpellData.mType; }
 
         std::vector<MissileId> missiles() const
         {

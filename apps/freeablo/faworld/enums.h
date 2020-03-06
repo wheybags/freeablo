@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+#include <misc/assert.h>
+#include <string_view>
 
 namespace FAWorld
 {
@@ -21,4 +23,17 @@ namespace FAWorld
         Staff,
         Unarmed,
     };
+
+    enum class PlayerClass
+    {
+        warrior = 0,
+        rogue,
+        sorcerer,
+        none,
+    };
+
+    // note that this function features misspelling of sorcerer as sorceror
+    // because it's written this way on character panel
+    const char* playerClassToString(PlayerClass value);
+    PlayerClass playerClassFromString(std::string_view str);
 }

@@ -58,7 +58,7 @@ namespace FAWorld
         virtual bool canCriticalHit() const { return false; }
         void doMeleeHit(Actor* enemy);
         void doMeleeHit(const Misc::Point& point);
-        void startMeleeAttack(Misc::Direction direction);
+        void forceAttack(Misc::Point pos);
         std::string getDieWav() const;
         std::string getHitWav() const;
         bool canIAttack(Actor* actor);
@@ -87,7 +87,10 @@ namespace FAWorld
         void dealDamageToEnemy(Actor* enemy, uint32_t damage, DamageType type);
         virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const;
         const std::vector<std::unique_ptr<Missile::Missile>>& getMissiles() const { return mMissiles; }
+        bool hasRangedWeaponEquipped() const;
+        void doRangedAttack(Misc::Point targetPoint);
         virtual bool castSpell(SpellId spell, Misc::Point targetPoint);
+        virtual void doSpellEffect(SpellId spell, Misc::Point targetPoint);
         ActorType getType() const { return mType; }
         bool isRecoveringFromHit() const;
         int32_t getMeleeHitFrame() const { return mMeleeHitFrame; }
@@ -104,7 +107,8 @@ namespace FAWorld
         bool isAttacking = false;
         bool mInvuln = false;
         CharacterInventory mInventory;
-        std::optional<Misc::Direction> mMeleeAttackRequestedDirection; // this is really stupid but I don't know how else to do it
+        std::optional<Misc::Point> mForceAttackRequestedPoint; // this is really stupid but I don't know how else to do it
+        std::optional<std::pair<SpellId, Misc::Point>> mCastSpellRequest;
 
         // TODO: hack, this should eventually be removed.
         // Try not to use it unless you have no other choice with the current structure.

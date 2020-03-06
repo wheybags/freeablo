@@ -9,8 +9,6 @@ if (WIN32)
     if (NOT "${CMAKE_GENERATOR}" IN_LIST desired_generators)
         message(FATAL_ERROR "Incorrect generator, please run cmake with: -G GENERATOR, where GENERATOR is one of: ${desired_generators}")
     endif()
-
-    set(HUNTER_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 endif()
 
 project (Freeablo)
@@ -28,12 +26,19 @@ endif()
 
 option (FA_TREAT_WARNINGS_AS_ERRORS "Treat warnings as errors")
 
-if(UNIX)
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -Wno-unknown-pragmas -Wno-missing-braces")
     SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
     if (FA_TREAT_WARNINGS_AS_ERRORS)
         set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Werror")
     endif()
+endif()
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    SET(GCC_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
+
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GCC_LINKER_FLAGS}")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GCC_LINKER_FLAGS}")
 endif()
 
 if(MSVC)

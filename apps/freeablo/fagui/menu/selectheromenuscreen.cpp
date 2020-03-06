@@ -107,15 +107,15 @@ namespace FAGui
         };
         mMenuItems.clear();
         mMenuItems.push_back({drawItem("Warrior", {262, 278, 320, 33}, FAWorld::PlayerClass::warrior), [&]() {
-                                  mMenuHandler.engine().startGame("Warrior");
+                                  mMenuHandler.engine().startGame(FAWorld::PlayerClass::warrior);
                                   return ActionResult::stopDrawing;
                               }});
         mMenuItems.push_back({drawItem("Rogue", {262, 311, 320, 33}, FAWorld::PlayerClass::rogue), [&]() {
-                                  mMenuHandler.engine().startGame("Rogue");
+                                  mMenuHandler.engine().startGame(FAWorld::PlayerClass::rogue);
                                   return ActionResult::stopDrawing;
                               }});
         mMenuItems.push_back({drawItem("Sorcerer", {262, 344, 320, 33}, FAWorld::PlayerClass::sorcerer), [&]() {
-                                  mMenuHandler.engine().startGame("Sorcerer");
+                                  mMenuHandler.engine().startGame(FAWorld::PlayerClass::sorcerer);
                                   return ActionResult::stopDrawing;
                               }});
 
