@@ -10,17 +10,26 @@ namespace FAWorld
 
     PlayerFactory::PlayerFactory(const DiabloExe::DiabloExe& exe, const ItemFactory& itemFactory) : mExe(exe), mItemFactory(itemFactory) {}
 
-    Player* PlayerFactory::create(World& world, const std::string& playerClass) const
+    Player* PlayerFactory::create(World& world, PlayerClass playerClass) const
     {
-        auto charStats = mExe.getCharacterStat(playerClass);
-        auto player = new Player(world, charStats);
+        auto charStats = mExe.getCharacterStat(playerClassToString(playerClass));
 
-        if (playerClass == "Warrior")
-            createWarrior(player);
-        else if (playerClass == "Rogue")
-            createRogue(player);
-        else
-            createSorcerer(player);
+        auto player = new Player(world, playerClass, charStats);
+
+        switch (playerClass)
+        {
+            case PlayerClass::warrior:
+                addWarriorItems(player);
+                break;
+            case PlayerClass::rogue:
+                addRogueItems(player);
+                break;
+            case PlayerClass::sorceror:
+                addSorcerorItems(player);
+                break;
+            case PlayerClass::none:
+                invalid_enum(PlayerClass, playerClass);
+        }
 
         player->mPlayerInitialised = true;
 
@@ -73,7 +82,7 @@ namespace FAWorld
         }
     }
 
-    void PlayerFactory::createWarrior(Player* player) const
+    void PlayerFactory::addWarriorItems(Player* player) const
     {
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortSword));
         player->mInventory.forcePlaceItem(mItemFactory.generateBaseItem(ItemId::buckler), MakeEquipTarget<EquipTargetType::rightHand>());
@@ -82,28 +91,18 @@ namespace FAWorld
 
         for (int32_t i = 0; i < 2; ++i)
             player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
-
-        player->setPlayerClass(PlayerClass::warrior);
-        player->mAnimation.setAnimationSprites(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldst.cl2"));
-        player->mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/warrior/wld/wldwl.cl2"));
-        // loadTestingKit (player);
-        // fillWithGold(player);
     }
 
-    void PlayerFactory::createRogue(Player* player) const
+    void PlayerFactory::addRogueItems(Player* player) const
     {
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortBow));
         player->mInventory.placeGold(100, mItemFactory);
 
         for (int32_t i = 0; i < 2; ++i)
             player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
-
-        player->setPlayerClass(PlayerClass::rogue);
-        player->mAnimation.setAnimationSprites(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/rogue/rlb/rlbst.cl2"));
-        player->mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/rogue/rlb/rlbwl.cl2"));
     }
 
-    void PlayerFactory::createSorcerer(Player* player) const
+    void PlayerFactory::addSorcerorItems(Player* player) const
     {
         {
             auto item = mItemFactory.generateBaseItem(ItemId::shortStaffOfChargedBolt);
@@ -114,9 +113,5 @@ namespace FAWorld
 
         for (int32_t i = 0; i < 2; ++i)
             player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
-
-        player->setPlayerClass(PlayerClass::sorcerer);
-        player->mAnimation.setAnimationSprites(AnimState::idle, FARender::Renderer::get()->loadImage("plrgfx/sorceror/slt/sltst.cl2"));
-        player->mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage("plrgfx/sorceror/slt/sltwl.cl2"));
     }
 }

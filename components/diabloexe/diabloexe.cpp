@@ -1,6 +1,4 @@
 #include "diabloexe.h"
-#include <stdint.h>
-
 #include "../../apps/freeablo/faworld/item.h"
 #include "baseitem.h"
 #include "characterstats.h"
@@ -11,8 +9,10 @@
 #include <iomanip>
 #include <iostream>
 #include <misc/md5.h>
+#include <misc/misc.h>
 #include <misc/stringops.h>
 #include <sstream>
+#include <stdint.h>
 
 namespace DiabloExe
 {
@@ -119,7 +119,7 @@ namespace DiabloExe
 
         Settings::Settings settings;
         std::string version = "";
-        settings.loadFromFile("resources/exeversions/versions.ini");
+        settings.loadFromFile(Misc::getResourcesPath().str() + "/exeversions/versions.ini");
         const Settings::Container versionProperties = settings.getPropertiesInSection("");
 
         for (const auto& versionProperty : versionProperties)
@@ -141,7 +141,7 @@ namespace DiabloExe
         else
             std::cout << "Diablo.exe " << version << " detected" << std::endl;
 
-        std::string iniPath = "resources/exeversions/" + settings.get<std::string>("", "ini_" + version, version + ".ini");
+        std::string iniPath = Misc::getResourcesPath().str() + "/exeversions/" + settings.get<std::string>("", "ini_" + version, version + ".ini");
 
         return {version, iniPath};
     }
@@ -501,7 +501,7 @@ namespace DiabloExe
 
         mCharacters["Warrior"] = meleeCharacter;
         mCharacters["Rogue"] = rangerCharacter;
-        mCharacters["Sorcerer"] = mageCharacter;
+        mCharacters["Sorceror"] = mageCharacter;
     }
 
     void DiabloExe::loadMissileGraphicsTable(FAIO::FAFileObject& exe, size_t codeOffset)
@@ -564,7 +564,20 @@ namespace DiabloExe
             auto spellId = exe.read8();
             auto& spellData = mSpellsDataTable[spellId];
             spellData.mManaCost = exe.read8();
-            spellData.mType = exe.read8();
+            int8_t type = exe.read8();
+            switch (type)
+            {
+                case 0:
+                    spellData.mType = SpellData::SpellType::fire;
+                    break;
+                case 1:
+                    spellData.mType = SpellData::SpellType::lightning;
+                    break;
+                case 2:
+                default:
+                    spellData.mType = SpellData::SpellType::magic;
+                    break;
+            }
             exe.read8(); // Padding
             auto nameOffset = exe.read32();
             auto skillTextOffset = exe.read32();
@@ -573,8 +586,8 @@ namespace DiabloExe
             spellData.mTargeted = (bool)exe.read32();
             spellData.mTownSpell = (bool)exe.read32();
             spellData.mMinMagic = exe.read32();
-            int32_t soundEffectId = exe.read8();
-            spellData.mSoundEffect = soundEffectId == -1 ? "" : mSoundFilename[soundEffectId];
+            int8_t soundEffectId = exe.read8();
+            spellData.mSoundEffect = mSoundFilename[soundEffectId];
             for (auto& missile : spellData.mMissiles)
                 missile = exe.read8();
             spellData.mManaAdj = exe.read8();
@@ -643,8 +656,8 @@ namespace DiabloExe
         ss << "Character Stats: " << mCharacters.size() << std::endl
            << "Warrior" << std::endl
            << mCharacters.at("Warrior").dump() << "Rogue" << std::endl
-           << mCharacters.at("Rogue").dump() << "Sorcerer" << std::endl
-           << mCharacters.at("Sorcerer").dump();
+           << mCharacters.at("Rogue").dump() << "Sorceror" << std::endl
+           << mCharacters.at("Sorceror").dump();
 
         ss << "Base Items: " << mBaseItems.size() << std::endl;
         for (auto& baseItem : mBaseItems)

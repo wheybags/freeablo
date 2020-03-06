@@ -23,23 +23,7 @@ namespace FAWorld
 {
     const std::string Player::typeId = "player";
 
-    const char* toString(PlayerClass value)
-    {
-        switch (value)
-        {
-            case PlayerClass::warrior:
-                return "warrior";
-            case PlayerClass::rogue:
-                return "rogue";
-            case PlayerClass::sorcerer:
-                return "sorceror";
-            case PlayerClass::none:
-                break;
-        }
-        return "unknown";
-    }
-
-    Player::Player(World& world, const DiabloExe::CharacterStats& charStats) : Actor(world)
+    Player::Player(World& world, PlayerClass playerClass, const DiabloExe::CharacterStats& charStats) : Actor(world), mPlayerClass(playerClass)
     {
         mStats.initialise(initialiseActorStats(charStats));
         mStats.mLevelXpCounts = charStats.mNextLevelExp;
@@ -90,12 +74,6 @@ namespace FAWorld
                 }
             }
         };
-    }
-
-    void Player::setPlayerClass(PlayerClass playerClass)
-    {
-        mPlayerClass = playerClass;
-        updateSprites();
     }
 
     void Player::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
@@ -232,7 +210,7 @@ namespace FAWorld
 
                 break;
             }
-            case PlayerClass::sorcerer:
+            case PlayerClass::sorceror:
             {
                 stats.maxLife = (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint(1) * FixedPoint(itemStats.baseStats.vitality) +
                                           FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
@@ -356,7 +334,7 @@ namespace FAWorld
                 return 'w';
             case PlayerClass::rogue:
                 return 'r';
-            case PlayerClass::sorcerer:
+            case PlayerClass::sorceror:
                 return 's';
             case PlayerClass::none:
                 break;
@@ -478,7 +456,7 @@ namespace FAWorld
                 weapFormat = "n";
 
             return fmt::format(FMT_STRING("plrgfx/{}/{}{}{}/{}{}{}{}.cl2"),
-                               toString(mPlayerClass),
+                               playerClassToString(mPlayerClass),
                                classCode,
                                armourCode,
                                weapFormat,
@@ -492,10 +470,12 @@ namespace FAWorld
         if (!renderer) // TODO: some sort of headless mode for tests
             return;
 
-        // TODO: Spell animations: lightning "lm", fire "fm", other "qm"
         mAnimation.setAnimationSprites(AnimState::dead, renderer->loadImage(helper(true, "dt")));
         mAnimation.setAnimationSprites(AnimState::attack, renderer->loadImage(helper(false, "at")));
         mAnimation.setAnimationSprites(AnimState::hit, renderer->loadImage(helper(false, "ht")));
+        mAnimation.setAnimationSprites(AnimState::spellLightning, renderer->loadImage(helper(false, "lm")));
+        mAnimation.setAnimationSprites(AnimState::spellFire, renderer->loadImage(helper(false, "fm")));
+        mAnimation.setAnimationSprites(AnimState::spellOther, renderer->loadImage(helper(false, "qm")));
 
         if (mInventory.isShieldEquipped())
             mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "bl")));
@@ -619,22 +599,37 @@ namespace FAWorld
     bool Player::castSpell(SpellId spell, Misc::Point targetPoint)
     {
         if (spell == SpellId::null)
+        {
+            // TODO: Play player sound #34: "I don't have a spell ready"
             return false;
+        }
 
         auto spellData = SpellData(spell);
         auto& mana = mStats.getMana();
         auto manaCost = spellData.manaCost();
 
         // Note: These checks have temporarily been removed for easier testing/development
-        // if (!getLevel() || (getLevel()->isTown() && !spellData.canCastInTown()) || mana.current < manaCost)
-        //    return false;
-
-        if (Actor::castSpell(spell, targetPoint))
+        if (!getLevel() || (getLevel()->isTown() && !spellData.canCastInTown()))
         {
-            mana.add(-manaCost);
-            return true;
+            // TODO: Play player sound #27: "I can't cast that here"
+            // return false;
         }
-        return false;
+        if (mana.current < manaCost)
+        {
+            // TODO: Play player sound #35: "Not enough mana"
+            // return false;
+        }
+
+        return Actor::castSpell(spell, targetPoint);
+    }
+
+    void Player::doSpellEffect(SpellId spell, Misc::Point targetPoint)
+    {
+        auto spellData = SpellData(spell);
+        auto& mana = mStats.getMana();
+        auto manaCost = spellData.manaCost();
+        mana.add(-manaCost);
+        Actor::doSpellEffect(spell, targetPoint);
     }
 
     SpellId Player::defaultSkill() const
@@ -645,7 +640,7 @@ namespace FAWorld
                 return SpellId::repair;
             case PlayerClass::rogue:
                 return SpellId::disarm;
-            case PlayerClass::sorcerer:
+            case PlayerClass::sorceror:
                 return SpellId::recharge;
             case PlayerClass::none:
                 invalid_enum(PlayerClass, mPlayerClass);

@@ -72,7 +72,7 @@ namespace FAWorld
         }
 
         mNextId = loader.load<int32_t>();
-        mNextPlayerClass = loader.load<int32_t>();
+        mNextPlayerClass = PlayerClass(loader.load<uint8_t>());
         mStoreData->load(loader);
 
         loader.runFunctionsToRunAtEnd();
@@ -100,7 +100,7 @@ namespace FAWorld
         }
 
         saver.save(mNextId);
-        saver.save(mNextPlayerClass);
+        saver.save(uint8_t(mNextPlayerClass));
         mStoreData->save(saver);
     }
 
@@ -115,6 +115,9 @@ namespace FAWorld
         mObjectIdMapper.addClass(PlayerBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new PlayerBehaviour(loader); });
 
         mObjectIdMapper.addClass(ActorState::MeleeAttackState::typeId, [](FASaveGame::GameLoader& loader) { return new ActorState::MeleeAttackState(loader); });
+        mObjectIdMapper.addClass(ActorState::RangedAttackState::typeId,
+                                 [](FASaveGame::GameLoader& loader) { return new ActorState::RangedAttackState(loader); });
+        mObjectIdMapper.addClass(ActorState::SpellAttackState::typeId, [](FASaveGame::GameLoader& loader) { return new ActorState::SpellAttackState(loader); });
         mObjectIdMapper.addClass(ActorState::BaseState::typeId, [](FASaveGame::GameLoader&) { return new ActorState::BaseState(); });
     }
 
@@ -311,19 +314,13 @@ namespace FAWorld
                     if (Engine::EngineMain::get()->mMultiplayer->isPlayerRegistered(input.mData.dataPlayerJoined.peerId))
                         break;
 
-                    std::string nextPlayerClass;
-                    if (mNextPlayerClass == 0)
-                        nextPlayerClass = "Warrior";
-                    else if (mNextPlayerClass == 1)
-                        nextPlayerClass = "Rogue";
-                    else
-                        nextPlayerClass = "Sorcerer";
+                    PlayerClass playerClass = mNextPlayerClass;
 
                     // hacky method to make different players use different classes
                     // TODO: remove this when we have a proper character system
-                    mNextPlayerClass = (mNextPlayerClass + 1) % 3;
+                    mNextPlayerClass = PlayerClass((int32_t(mNextPlayerClass) + 1) % 3);
 
-                    FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, nextPlayerClass);
+                    FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, playerClass);
                     registerPlayer(newPlayer);
                     FAWorld::GameLevel* level = getLevel(0);
 

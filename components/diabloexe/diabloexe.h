@@ -59,8 +59,15 @@ namespace DiabloExe
     class SpellData
     {
     public:
+        enum class SpellType
+        {
+            fire,
+            lightning,
+            magic
+        };
+
         int32_t mManaCost;
-        int32_t mType; // Fire=0, lightning=1, magic=2
+        SpellType mType;
         std::string mNameText;
         std::string mSkillText;
         int32_t mBookLvl;

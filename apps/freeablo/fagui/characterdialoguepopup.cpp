@@ -101,7 +101,7 @@ namespace FAGui
 
     void CharacterDialoguePopup::drawBackgroundCheckerboard(FARender::Renderer* renderer, struct nk_context* ctx, struct nk_rect dialogRectangle)
     {
-        auto blackTex = renderer->loadImage("resources/black.png");
+        auto blackTex = renderer->loadImage(Misc::getResourcesPath().str() + "/black.png");
         auto cbRect = nk_rect(dialogRectangle.x + 3, dialogRectangle.y + 3, dialogRectangle.w - 6, dialogRectangle.h - 6);
 
         ScopedApplyEffect effect(ctx, EffectType::checkerboarded);

@@ -1,6 +1,7 @@
 #pragma once
 #include "../engine/inputobserverinterface.h"
 #include "../fasavegame/objectidmapper.h"
+#include "enums.h"
 #include "playerinput.h"
 #include <map>
 #include <memory>
@@ -125,6 +126,6 @@ namespace FAWorld
         std::unique_ptr<StoreData> mStoreData;
 
         int32_t mNextId = 1;
-        int32_t mNextPlayerClass = 1;
+        PlayerClass mNextPlayerClass = PlayerClass::warrior;
     };
 }

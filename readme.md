@@ -6,7 +6,7 @@ Hello my friend, stay a while and listen!
 freeablo is a modern cross platform reimplementation of the game engine used in Diablo 1.
 As it is just an engine, you will need the original data files to play the game.
 
-Currently, you can run around town, players and NPCs animate, and you can go down into the first few levels of the dungeon (which is randomly generated), and a couple of other things.
+Currently, you can run around town, players and NPCs animate, you can go through the dungeon and fight monsters with melee (and limited ranged and magic), monsters drop loot, you can buy and sell items, and a bunch more stuff.
 This is just a base for a game so far, so if you can help, please see the contributing section below!
 
 

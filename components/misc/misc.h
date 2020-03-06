@@ -1,6 +1,7 @@
 #pragma once
 #include "assert.h"
 #include "direction.h"
+#include <filesystem/path.h>
 #include <iomanip>
 #include <sstream>
 #include <stddef.h>
@@ -9,6 +10,9 @@
 
 namespace Misc
 {
+    void saveArgv0(const char* argv0);
+    filesystem::path getResourcesPath();
+
     template <typename T> T clamp(T value, T min, T max) { return value < min ? min : (value > max ? max : value); }
 
     template <typename T> class ScopedSetter
@@ -26,7 +30,7 @@ namespace Misc
 
     std::string numberToHumanFileSize(double sizeInBytes);
 
-    std::string escapeSpacesOnPath(const std::string& str);
+    std::string escapePathForShell(const std::string& str);
 }
 
 template <typename T> class NonNullPtr

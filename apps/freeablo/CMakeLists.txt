@@ -84,6 +84,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/world.cpp
     faworld/world.h
     faworld/enums.h
+    faworld/enums.cpp
 
     fagui/textcolor.h
     fagui/textcolor.cpp
@@ -172,3 +173,5 @@ add_executable(freeablo main.cpp)
 target_link_libraries(freeablo freeablo_lib)
 
 set_target_properties(freeablo_lib PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+install(TARGETS freeablo DESTINATION bin)
