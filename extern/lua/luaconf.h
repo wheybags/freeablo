@@ -428,8 +428,8 @@
 */
 #define lua_numbertointeger(n,p) \
   ((n) >= LUA_NUMBER((int64_t)LUA_MININTEGER) && \
-   (n) < -LUA_NUMBER((int64_t)LUA_MININTEGER) && \
-     (*(p) = n.intPart()), 1)
+   (n.intPart()) < (int64_t)LUA_MAXINTEGER && \
+     (*(p) = (int32_t)n.intPart()), 1)
 
 
 /* now the variable definitions */
