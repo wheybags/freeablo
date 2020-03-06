@@ -220,7 +220,7 @@ static lua_Number lua_strx2number (const char *s, char **endptr) {
 #define L_MAXLENNUM	200
 #endif
 
-static size_t l_str2dloc(const char* s, lua_Number* result, int mode) {
+static size_t l_str2dloc (const char* s, lua_Number* result, int mode) {
   const size_t len = strlen(s) - 1;
   const char *endptr = s + len;
 
@@ -231,6 +231,8 @@ static size_t l_str2dloc(const char* s, lua_Number* result, int mode) {
     }
     else if (!lisdigit(cast_uchar(*endptr)) && *endptr != '.')
       return 0;
+    else
+      break;
   }
 
   const std::string parsed(s, endptr - s + 1);
@@ -241,7 +243,7 @@ static size_t l_str2dloc(const char* s, lua_Number* result, int mode) {
 
   *result = parsedNumber.value();
 
-  return endptr - s + len;
+  return len + 2;
 }
 
 
@@ -313,7 +315,7 @@ static const char *l_str2int (const char *s, lua_Integer *result) {
 }
 
 
-size_t luaO_str2num(const char* s, TValue* o) {
+size_t luaO_str2num (const char* s, TValue* o) {
   lua_Integer i; lua_Number n;
   const char *e;
   if ((e = l_str2int(s, &i)) != NULL) {  /* try as an integer */
@@ -354,14 +356,14 @@ int luaO_utf8esc (char *buff, unsigned long x) {
 /*
 ** Convert a number object to a string, adding it to a buffer
 */
-static int tostringbuff(TValue* obj, char* buff) {
+static int tostringbuff (TValue* obj, char* buff) {
   int len;
   lua_assert(ttisnumber(obj));
   if (ttisinteger(obj))
     len = lua_integer2str(buff, MAXNUMBER2STR, ivalue(obj));
   else {
     std::string aux = obj->value_.n.str();
-    snprintf(buff, MAXNUMBER2STR, aux.c_str(), "%s");
+    snprintf(buff, MAXNUMBER2STR, "%s", aux.c_str());
     len = aux.length();
     if (buff[strspn(buff, "-0123456789")] == '\0') { /* looks like an int? */
       buff[len++] = lua_getlocaledecpoint();
