@@ -80,8 +80,8 @@ namespace FAGui
                             case FAWorld::PlayerClass::rogue:
                                 classLookup = "Rogue";
                                 break;
-                            case FAWorld::PlayerClass::sorcerer:
-                                classLookup = "Sorcerer";
+                            case FAWorld::PlayerClass::sorceror:
+                                classLookup = "Sorceror";
                                 break;
                             case FAWorld::PlayerClass::none:
                                 break;
@@ -114,8 +114,8 @@ namespace FAGui
                                   mMenuHandler.engine().startGame(FAWorld::PlayerClass::rogue);
                                   return ActionResult::stopDrawing;
                               }});
-        mMenuItems.push_back({drawItem("Sorcerer", {262, 344, 320, 33}, FAWorld::PlayerClass::sorcerer), [&]() {
-                                  mMenuHandler.engine().startGame(FAWorld::PlayerClass::sorcerer);
+        mMenuItems.push_back({drawItem("Sorceror", {262, 344, 320, 33}, FAWorld::PlayerClass::sorceror), [&]() {
+                                  mMenuHandler.engine().startGame(FAWorld::PlayerClass::sorceror);
                                   return ActionResult::stopDrawing;
                               }});
 

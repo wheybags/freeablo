@@ -594,7 +594,7 @@ namespace Render
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
 
-            std::string src = Misc::StringUtils::readAsString("resources/shaders/basic.vert");
+            std::string src = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/basic.vert");
             const GLchar* srcPtr = src.c_str();
 
             GLuint vs = glCreateShader(GL_VERTEX_SHADER);
@@ -620,7 +620,7 @@ namespace Render
                 return;
             }
 
-            src = Misc::StringUtils::readAsString("resources/shaders/basic.frag");
+            src = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/basic.frag");
             srcPtr = src.c_str();
 
             GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);

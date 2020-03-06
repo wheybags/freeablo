@@ -11,7 +11,7 @@ namespace FAWorld
                 return "Warrior";
             case PlayerClass::rogue:
                 return "Rogue";
-            case PlayerClass::sorcerer:
+            case PlayerClass::sorceror:
                 return "Sorceror";
             case PlayerClass::none:
                 break;
@@ -26,7 +26,7 @@ namespace FAWorld
         else if (str == "Rogue")
             return PlayerClass::rogue;
         else if (str == "Sorceror")
-            return PlayerClass::sorcerer;
+            return PlayerClass::sorceror;
 
         message_and_abort_fmt("Invalid character class string: \"%s\"", std::string(str).c_str());
     }

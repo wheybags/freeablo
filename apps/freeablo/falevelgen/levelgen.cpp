@@ -1062,7 +1062,7 @@ namespace FALevelGen
         int32_t levelNum = ((dLvl - 1) / 4) + 1;
 
         std::stringstream ss;
-        ss << "resources/tilesets/l" << levelNum << ".ini";
+        ss << Misc::getResourcesPath().str() + "/tilesets/l" << levelNum << ".ini";
         TileSet tileset(ss.str());
 
         Level::Dun tmpLevel = generateBasic(rng, tileset, width, height, levelNum);

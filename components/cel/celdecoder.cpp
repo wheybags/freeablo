@@ -17,8 +17,8 @@ namespace Cel
         };
     }
 
-    Settings::Settings CelDecoder::mSettingsCel;
-    Settings::Settings CelDecoder::mSettingsCl2;
+    std::unique_ptr<Settings::Settings> CelDecoder::mSettingsCel;
+    std::unique_ptr<Settings::Settings> CelDecoder::mSettingsCl2;
 
     CelDecoder::CelDecoder(const std::string& celPath) : mCelPath(celPath), mAnimationLength(0)
     {
@@ -76,18 +76,21 @@ namespace Cel
 
         if (!isConfigurationRead)
         {
-            mSettingsCel.loadFromFile("resources/cel.ini");
-            mSettingsCl2.loadFromFile("resources/cl2.ini");
+            mSettingsCel = std::make_unique<Settings::Settings>();
+            mSettingsCl2 = std::make_unique<Settings::Settings>();
+
+            mSettingsCel->loadFromFile(Misc::getResourcesPath().str() + "/cel.ini");
+            mSettingsCl2->loadFromFile(Misc::getResourcesPath().str() + "/cl2.ini");
             isConfigurationRead = true;
         }
 
-        Settings::Settings* settings = &mSettingsCel;
+        Settings::Settings* settings = mSettingsCel.get();
         std::string celNameWithoutExtension = mCelName;
         std::string extension = "cel";
 
         if (Misc::StringUtils::ciEndsWith(mCelPath, "cl2"))
         {
-            settings = &mSettingsCl2;
+            settings = mSettingsCl2.get();
             extension = "cl2";
             mIsCl2 = true;
         }

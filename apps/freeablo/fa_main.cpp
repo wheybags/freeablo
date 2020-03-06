@@ -15,7 +15,7 @@ bool parseOptions(int argc, char** argv, cxxopts::ParseResult& variables)
     desc.add_options()("h,help", "Print help")
         // -1 represents the main menu
         ("l,level", "Level number to load (0-16)", cxxopts::value<int32_t>()->default_value("-1"))(
-            "c,character", "Choose Warrior, Rogue or Sorcerer", cxxopts::value<std::string>()->default_value("Warrior"))(
+            "c,character", "Choose Warrior, Rogue or Sorceror", cxxopts::value<std::string>()->default_value("Warrior"))(
             "invuln", "on or off", cxxopts::value<std::string>()->default_value("off"))(
             "connect", "Ip Address or hostname to connect to", cxxopts::value<std::string>()->default_value(""))(
             "seed", "Seed for level generation", cxxopts::value<uint32_t>()->default_value("0"));
@@ -108,13 +108,15 @@ bool dataFilesSetUp(const Settings::Settings& settings)
 
 int fa_main(int argc, char** argv)
 {
+    Misc::saveArgv0(argv[0]);
+
     Settings::Settings settings;
 
     // Check if we've been configured with data files, and if we haven't, run the launcher to prompt configuration
     if (!(settings.loadUserSettings() && dataFilesSetUp(settings)))
     {
         filesystem::path path = (filesystem::path(argv[0]).parent_path() / "launcher").make_absolute();
-        system(Misc::escapeSpacesOnPath(path.str()).c_str());
+        system(Misc::escapePathForShell(path.str()).c_str());
         return EXIT_SUCCESS;
     }
 

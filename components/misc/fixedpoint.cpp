@@ -69,7 +69,7 @@ static inline int64_t muldiv(int64_t n1, int64_t n2, int64_t d)
 
 FixedPoint::FixedPoint(int64_t integerValue) { *this = fromRawValue(integerValue * FixedPoint::scalingFactor); }
 
-static constexpr FixedPoint pow(FixedPoint x, size_t k)
+static FixedPoint pow(FixedPoint x, size_t k)
 {
     FixedPoint ret("1.0");
 
@@ -98,25 +98,24 @@ std::optional<FixedPoint> FixedPoint::tryParseFromString(const char* str, char m
         if (size_t pos = aux.find('.'); pos != std::string::npos)
         {
             const std::string beforePoint = aux.substr(0, pos);
-            const std::string afterPoint = aux.substr(pos+1);
+            const std::string afterPoint = aux.substr(pos + 1);
             ss << strtol(beforePoint.c_str(), nullptr, 16) << ".";
-            auto hexToInt = [](char c) -> FixedPoint
-                            {
-                                if (c >= '0' && c <= '9')
-                                    return c - '0';
-                                else if (c >= 'A' && c <= 'F')
-                                    return c - 'A' + 10;
-                                else if (c >= 'a' && c <= 'f')
-                                    return c - 'a' + 10;
-                                return 0;
-                            };
+            auto hexToInt = [](char c) -> FixedPoint {
+                if (c >= '0' && c <= '9')
+                    return c - '0';
+                else if (c >= 'A' && c <= 'F')
+                    return c - 'A' + 10;
+                else if (c >= 'a' && c <= 'f')
+                    return c - 'a' + 10;
+                return 0;
+            };
 
-            FixedPoint aux("0.0");
+            FixedPoint fp("0.0");
             int64_t exp = 1;
             for (char c : afterPoint)
-                aux += hexToInt(c) / pow("16", exp++);
+                fp += hexToInt(c) / pow("16", exp++);
 
-            ss << aux.str().substr(2);
+            ss << fp.str().substr(2);
         }
 
         else
@@ -144,7 +143,6 @@ std::optional<FixedPoint> FixedPoint::tryParseFromString(const char* str, char m
         return std::nullopt;
     }
 }
-
 
 void FixedPoint::save(Serial::Saver& saver) const { saver.save(mVal); }
 

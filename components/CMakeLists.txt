@@ -3,7 +3,7 @@ add_library(Cel
     cel/celframe.h
     cel/pal.cpp cel/pal.h
     cel/celdecoder.cpp cel/celdecoder.h)
-target_link_libraries(Cel FAIO)
+target_link_libraries(Cel FAIO Misc)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(FAIO faio/faio.cpp faio/faio.h faio/fafileobject.h faio/fafileobject.cpp)
@@ -55,7 +55,7 @@ add_library(Misc
     misc/averager.cpp
     misc/averager.h
 )
-target_link_libraries(Misc Settings png SDL2 Serial)
+target_link_libraries(Misc PUBLIC Settings png SDL2 Serial Filesystem)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
@@ -131,6 +131,7 @@ add_library(Serial
     serial/textstream.h
     serial/textstream.cpp
 )
+target_link_libraries(Serial Misc)
 set_target_properties(Serial PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(NuklearMisc

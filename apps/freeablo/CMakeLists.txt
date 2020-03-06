@@ -174,3 +174,5 @@ add_executable(freeablo main.cpp)
 target_link_libraries(freeablo freeablo_lib)
 
 set_target_properties(freeablo_lib PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+install(TARGETS freeablo DESTINATION bin)
