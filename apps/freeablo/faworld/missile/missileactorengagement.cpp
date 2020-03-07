@@ -1,4 +1,4 @@
-#include "faworld/actor.h"
+#include "faworld/player.h"
 #include "missile.h"
 
 namespace FAWorld::Missile
@@ -25,7 +25,8 @@ namespace FAWorld::Missile
 
     void Missile::ActorEngagement::townPortal(Missile& missile, MissileGraphic& graphic, Actor& actor)
     {
-        if (&actor == missile.mCreator)
+        // Any player can use a town portal
+        if (auto player = dynamic_cast<Player*>(&actor))
         {
             // Teleport to other portal
             auto& otherPortal = missile.mGraphics[0].get() != &graphic ? missile.mGraphics[0] : missile.mGraphics[1];
@@ -34,10 +35,10 @@ namespace FAWorld::Missile
                                     otherPortal->getLevel()->mMissileGraphics.end(),
                                     [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
             };
-            auto point = otherPortal->getLevel()->getFreeSpotNear(otherPortal->mCurPos.current(), INT32_MAX, noMissilesAtPoint);
-            actor.teleport(otherPortal->getLevel(), Position(point));
-            // Close the portal if teleporting back through the 2nd (town located) portal
-            if (&graphic == missile.mGraphics[1].get())
+            auto point = otherPortal->getLevel()->getFreeSpotNear(otherPortal->mCurPos.current(), std::numeric_limits<int32_t>::max(), noMissilesAtPoint);
+            player->teleport(otherPortal->getLevel(), Position(point));
+            // Close the portal if the creator is teleporting back through the 2nd (town located) portal
+            if (player == missile.mCreator && &graphic == missile.mGraphics[1].get())
             {
                 graphic.stop();
                 otherPortal->stop();

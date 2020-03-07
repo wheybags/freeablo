@@ -5,6 +5,7 @@
 #include <level/level.h>
 #include <misc/stdhashes.h>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace FARender
 {
@@ -85,6 +86,8 @@ namespace FAWorld
 
         void actorMapRefresh();
 
+        // TODO: Remove the additionalConstraints parameter, it is currently only used as a bit of a hack to not
+        //  place a player on a town portal when teleporting (see https://github.com/wheybags/freeablo/issues/478)
         Misc::Point getFreeSpotNear(Misc::Point point,
                                     int32_t radius = std::numeric_limits<int32_t>::max(),
                                     const std::function<bool(const Misc::Point& point)>& additionalConstraints = nullptr) const;
@@ -112,9 +115,11 @@ namespace FAWorld
 
         World* getWorld() { return &mWorld; }
 
-        // These are not saved, they are added/remove in MissileGraphic constructor/destructor
-        // This avoids having to check every actor in world to find missile graphics on a level
-        std::vector<Missile::MissileGraphic*> mMissileGraphics;
+        // This list avoids having to check every actor in world to find missile graphics on a level.
+        // It is not saved, items are added/removed in MissileGraphic constructor/destructor.
+        // This is currently only intended for rendering so order is unimportant, hence using std::unordered_set
+        // and not saving/loading. Since order is not maintained this should not use be used for game logic!
+        std::unordered_set<Missile::MissileGraphic*> mMissileGraphics;
 
     private:
         GameLevel(World& world);

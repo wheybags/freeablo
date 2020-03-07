@@ -52,7 +52,7 @@ namespace FAWorld::Missile
             return std::none_of(
                 level->mMissileGraphics.begin(), level->mMissileGraphics.end(), [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
         };
-        auto point = level->getFreeSpotNear(missile.mSrcPoint, INT32_MAX, noMissilesAtPoint);
+        auto point = level->getFreeSpotNear(missile.mSrcPoint, std::numeric_limits<int32_t>::max(), noMissilesAtPoint);
         missile.mGraphics.push_back(
             std::make_unique<MissileGraphic>(missile.getGraphicsPath(0), missile.getGraphicsPath(1), std::nullopt, Position(point), level));
         // Add portal in town
@@ -62,7 +62,7 @@ namespace FAWorld::Missile
             return std::none_of(
                 town->mMissileGraphics.begin(), town->mMissileGraphics.end(), [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
         };
-        point = town->getFreeSpotNear(townPortalPoint, INT32_MAX, noMissilesAtTownPoint);
+        point = town->getFreeSpotNear(townPortalPoint, std::numeric_limits<int32_t>::max(), noMissilesAtTownPoint);
         missile.mGraphics.push_back(
             std::make_unique<MissileGraphic>(missile.getGraphicsPath(0), missile.getGraphicsPath(1), std::nullopt, Position(point), town));
     }
