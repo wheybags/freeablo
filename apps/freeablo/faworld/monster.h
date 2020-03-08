@@ -15,7 +15,7 @@ namespace FAWorld
         Monster(World& world, const DiabloExe::Monster& monsterStats);
         Monster(World& world, FASaveGame::GameLoader& loader);
 
-        void save(FASaveGame::GameSaver& saver) override;
+        void save(FASaveGame::GameSaver& saver) const override;
 
         virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const override;
         void die() override;

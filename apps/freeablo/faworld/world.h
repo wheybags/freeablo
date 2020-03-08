@@ -58,7 +58,7 @@ namespace FAWorld
     {
     public:
         World(const DiabloExe::DiabloExe& exe, uint32_t seed);
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
         void load(FASaveGame::GameLoader& loader);
         ~World();
 

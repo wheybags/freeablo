@@ -72,7 +72,7 @@ namespace FAWorld
         ItemMap(const GameLevel* level);
         ItemMap(FASaveGame::GameLoader& loader, const GameLevel* level);
 
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
 
         ~ItemMap();
         bool dropItem(std::unique_ptr<FAWorld::Item>&& item, const Actor& actor, const Tile& tile);

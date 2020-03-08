@@ -27,7 +27,7 @@ namespace FAWorld
             hotkey = (SpellId)loader.load<int32_t>();
     }
 
-    void PlayerBehaviour::save(FASaveGame::GameSaver& saver)
+    void PlayerBehaviour::save(FASaveGame::GameSaver& saver) const
     {
         saver.save((int32_t)mActiveSpell);
 

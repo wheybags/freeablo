@@ -71,7 +71,7 @@ namespace FAWorld
         }
     }
 
-    void Target::save(FASaveGame::GameSaver& saver)
+    void Target::save(FASaveGame::GameSaver& saver) const
     {
         saver.save(uint8_t(mType));
 

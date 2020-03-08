@@ -126,7 +126,7 @@ namespace FAWorld
         mType = ActorType(loader.load<uint8_t>());
     }
 
-    void Actor::save(FASaveGame::GameSaver& saver)
+    void Actor::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("Actor", saver);
 

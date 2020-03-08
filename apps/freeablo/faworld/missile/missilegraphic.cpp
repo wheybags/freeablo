@@ -33,7 +33,7 @@ namespace FAWorld::Missile
 
     MissileGraphic::~MissileGraphic() { mLevel->mMissileGraphics.erase(this); }
 
-    void MissileGraphic::save(FASaveGame::GameSaver& saver)
+    void MissileGraphic::save(FASaveGame::GameSaver& saver) const
     {
         mCurPos.save(saver);
         saver.save(mMainGraphicPath);

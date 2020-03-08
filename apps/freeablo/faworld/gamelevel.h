@@ -54,7 +54,7 @@ namespace FAWorld
 
         GameLevel(World& world, FASaveGame::GameLoader& gameLoader);
 
-        void save(FASaveGame::GameSaver& gameSaver);
+        void save(FASaveGame::GameSaver& gameSaver) const;
 
         ~GameLevel();
 

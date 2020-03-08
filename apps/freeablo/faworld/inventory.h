@@ -61,7 +61,7 @@ namespace FAWorld
     public:
         BasicInventory(int32_t width, int32_t height, bool treatAllItemsAs1By1 = false);
 
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
         void load(FASaveGame::GameLoader& loader);
 
         bool canFitItem(const Item& item) const;
@@ -97,7 +97,7 @@ namespace FAWorld
     {
     public:
         CharacterInventory();
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
         void load(FASaveGame::GameLoader& loader);
 
         bool autoPlaceItem(const Item& item);

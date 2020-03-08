@@ -21,7 +21,7 @@ namespace FAWorld
 {
     struct BaseStats
     {
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
         void load(FASaveGame::GameLoader& loader);
 
         int32_t strength = 0;
@@ -84,7 +84,7 @@ namespace FAWorld
         void initialise(const BaseStats& baseStats);
 
         ActorStats(const Actor& actor, FASaveGame::GameLoader& loader);
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
 
         ActorStats& operator=(const ActorStats& other) = default;
 

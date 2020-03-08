@@ -52,7 +52,7 @@ namespace FAWorld
         }
     }
 
-    void ItemMap::save(FASaveGame::GameSaver& saver)
+    void ItemMap::save(FASaveGame::GameSaver& saver) const
     {
         uint32_t itemsSize = uint32_t(mItems.size());
         saver.save(itemsSize);
