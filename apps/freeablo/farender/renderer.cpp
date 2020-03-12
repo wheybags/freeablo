@@ -108,6 +108,7 @@ namespace FARender
                 // struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
                 // struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
                 mConsoleFont = nk_font_atlas_add_from_file(&mNuklearGraphicsData.atlas, "resources/fonts/FreeMono/FreeMonoBold.ttf", 14, 0);
+
                 mNuklearGraphicsData.dev.font_tex =
                     nk_fa_font_stash_end(mSpriteManager, &mNuklearContext, mNuklearGraphicsData.atlas, mNuklearGraphicsData.dev.null);
                 // nk_style_load_all_cursors(ctx, atlas->cursors);

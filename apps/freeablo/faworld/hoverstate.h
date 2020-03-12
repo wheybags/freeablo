@@ -7,12 +7,12 @@ namespace FAWorld
     class HoverStatus
     {
     public:
-        HoverStatus() : hoveredActorId(-1), hoveredItemTile(Tile()) {}
-        explicit HoverStatus(int32_t actorId) : hoveredActorId(actorId), hoveredItemTile(Tile()) {}
-        explicit HoverStatus(Tile itemTile) : hoveredActorId(-1), hoveredItemTile(itemTile) {}
+        HoverStatus() = default;
+        explicit HoverStatus(int32_t actorId) : hoveredActorId(actorId) {}
+        explicit HoverStatus(Misc::Point itemTile) : hoveredActorId(-1), hoveredItemTile(itemTile) {}
         std::string getDescription(GameLevel& level) const;
 
-        int32_t hoveredActorId;
-        Tile hoveredItemTile;
+        int32_t hoveredActorId = -1;
+        Misc::Point hoveredItemTile = Misc::Point::invalid();
     };
 }

@@ -18,7 +18,7 @@ namespace FAWorld
         explicit Position(Misc::Point point = Misc::Point::zero(), Misc::Direction direction = Misc::Direction(Misc::Direction8::south));
 
         Position(FASaveGame::GameLoader& loader);
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
 
         FixedPoint update(FixedPoint moveDistance);
         Misc::Point current() const; ///< where we are coming from

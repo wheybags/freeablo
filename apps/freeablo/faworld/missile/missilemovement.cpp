@@ -1,43 +1,31 @@
 #include "faworld/actor.h"
 #include "missile.h"
 
-namespace FAWorld
+namespace FAWorld::Missile
 {
-    namespace Missile
+    void Missile::Movement::stationary(Missile&, MissileGraphic&) {}
+
+    Missile::Movement::Method Missile::Movement::linear(FixedPoint speed, FixedPoint maxRange)
     {
-        MissileMovement::MissileMovementMethod MissileMovement::get(MissileId missileId)
-        {
-            switch (missileId)
-            {
-                case MissileId::arrow:
-                case MissileId::firebolt:
-                case MissileId::farrow:
-                case MissileId::larrow:
-                    return linear;
-                case MissileId::firewall:
-                case MissileId::firewalla:
-                case MissileId::firewallc:
-                    return fixed;
-                case MissileId::manashield:
-                    return hoverOverCreator;
-                default:
-                    invalid_enum(MissileId, missileId);
-                    // return nullptr;  // MSVC generates C4702 unreachable code.
-            }
-        }
+        return [=](Missile& missile, MissileGraphic& graphic) { linear(missile, graphic, speed, maxRange); };
+    }
 
-        void MissileMovement::fixed(Missile&, MissileGraphic&) {}
+    void Missile::Movement::linear(Missile& missile, MissileGraphic& graphic, FixedPoint speed, FixedPoint maxRange)
+    {
+        graphic.mCurPos.setFreeMovement();
+        graphic.mCurPos.update(speed / FixedPoint(World::ticksPerSecond));
 
-        void MissileMovement::linear(Missile&, MissileGraphic& graphic)
-        {
-            graphic.mCurPos.setFreeMovement();
-            graphic.mCurPos.update(FixedPoint(7) / FixedPoint(World::ticksPerSecond));
-        }
+        // Stop after max range is exceeded.
+        auto curPoint = graphic.mCurPos.current();
+        auto distance = (Vec2Fix(curPoint.x, curPoint.y) - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).magnitude();
+        if (distance > maxRange)
+            graphic.stop();
+    }
 
-        void MissileMovement::hoverOverCreator(Missile& missile, MissileGraphic& graphic)
-        {
-            // TODO: change level with actor.
-            graphic.mCurPos = missile.mCreator->getPos();
-        }
+    void Missile::Movement::hoverOverCreator(Missile& missile, MissileGraphic& graphic)
+    {
+        if (graphic.getLevel() != missile.mCreator->getLevel())
+            graphic.setLevel(missile.mCreator->getLevel());
+        graphic.mCurPos = missile.mCreator->getPos();
     }
 }

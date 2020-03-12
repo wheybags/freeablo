@@ -2,6 +2,8 @@
 
 ## v0.5 [?? ??? ????] 
 
+- Added town portal spell
+
 ## v0.4 [6 Mar 2020]
 
 - Added multiplayer

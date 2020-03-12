@@ -23,7 +23,7 @@ namespace FARender
             mFrameSequence.push_back(loader.load<int32_t>());
     }
 
-    void AnimationPlayer::save(FASaveGame::GameSaver& saver)
+    void AnimationPlayer::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("AnimationPlayer", saver);
 

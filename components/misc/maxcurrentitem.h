@@ -16,7 +16,7 @@ namespace Misc
         MaxCurrentItem() = default;
         explicit MaxCurrentItem(T max) : max(max), current(max) {}
         explicit MaxCurrentItem(Serial::Loader& loader);
-        void save(Serial::Saver& saver);
+        void save(Serial::Saver& saver) const;
 
         void add(T delta);
         void setMax(T max);

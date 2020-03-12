@@ -18,7 +18,7 @@ namespace FAWorld
     public:
         MovementHandler() = default;
         explicit MovementHandler(FASaveGame::GameLoader& loader);
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
 
         Misc::Point getDestination() const;
         void setDestination(Misc::Point dest, bool adjacent = false);

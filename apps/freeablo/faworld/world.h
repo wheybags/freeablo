@@ -58,7 +58,7 @@ namespace FAWorld
     {
     public:
         World(const DiabloExe::DiabloExe& exe, uint32_t seed);
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
         void load(FASaveGame::GameLoader& loader);
         ~World();
 
@@ -94,8 +94,6 @@ namespace FAWorld
         static FixedPoint getSecondsPerTick();
 
         Actor* getActorById(int32_t id);
-
-        void getAllActors(std::vector<Actor*>& actors);
 
         Tick getCurrentTick();
 

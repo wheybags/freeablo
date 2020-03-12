@@ -57,7 +57,7 @@ namespace Level
 
         Level() {}
 
-        void save(Serial::Saver& saver);
+        void save(Serial::Saver& saver) const;
 
         bool isDoor(const Misc::Point& point) const;
         bool activateDoor(const Misc::Point& point); /// @return If the door was activated

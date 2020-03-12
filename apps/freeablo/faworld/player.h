@@ -16,7 +16,7 @@ namespace FAWorld
         Player(World& world, PlayerClass playerClass, const DiabloExe::CharacterStats& charStats);
         void initCommon();
         Player(World& world, FASaveGame::GameLoader& loader);
-        void save(FASaveGame::GameSaver& saver) override;
+        void save(FASaveGame::GameSaver& saver) const override;
 
         virtual ~Player();
         void updateSprites() override;

@@ -33,7 +33,7 @@ namespace FAWorld
                 toCursor,
             };
             ActionType action;
-            PlacedItemData* item;
+            Misc::Point itemLocation;
         };
 
         Target(const ItemTarget& target);
@@ -42,7 +42,7 @@ namespace FAWorld
         Target() = default;
 
         void load(FASaveGame::GameLoader& loader);
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
 
         void clear();
 

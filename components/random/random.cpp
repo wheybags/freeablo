@@ -21,7 +21,7 @@ namespace Random
         ss >> mRng;
     }
 
-    void RngMersenneTwister::save(Serial::Saver& saver)
+    void RngMersenneTwister::save(Serial::Saver& saver) const
     {
         std::stringstream ss;
         ss.imbue(std::locale::classic());

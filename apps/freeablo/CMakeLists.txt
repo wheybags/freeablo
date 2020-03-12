@@ -57,6 +57,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/missile/missile.cpp
     faworld/missile/missile.h
     faworld/missile/missileactorengagement.cpp
+    faworld/missile/missileattributes.cpp
     faworld/missile/missilecreation.cpp
     faworld/missile/missileenums.h
     faworld/missile/missilegraphic.cpp

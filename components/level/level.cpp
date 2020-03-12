@@ -54,7 +54,7 @@ namespace Level
         mNext = loader.load<int32_t>();
     }
 
-    void Level::save(Serial::Saver& saver)
+    void Level::save(Serial::Saver& saver) const
     {
         Serial::ScopedCategorySaver cat("Level", saver);
 

@@ -37,7 +37,7 @@ namespace FAWorld
         actorMapRefresh();
     }
 
-    void GameLevel::save(FASaveGame::GameSaver& saver)
+    void GameLevel::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("GameLevel", saver);
 
@@ -177,7 +177,7 @@ namespace FAWorld
             actorMapInsert(mActors[i]);
     }
 
-    Misc::Point GameLevel::getFreeSpotNear(Misc::Point point, int32_t radius) const
+    Misc::Point GameLevel::getFreeSpotNear(Misc::Point point, int32_t radius, const std::function<bool(const Misc::Point& point)>& additionalConstraints) const
     {
         // partially based on https://stackoverflow.com/a/398302
 
@@ -192,7 +192,7 @@ namespace FAWorld
             Misc::Point targetPoint = point + Misc::Point{xOffset, yOffset};
             if (targetPoint.x >= 0 && targetPoint.x < width() && targetPoint.y >= 0 && targetPoint.y < height())
             {
-                if (isPassable(targetPoint, nullptr))
+                if (isPassable(targetPoint, nullptr) && (additionalConstraints == nullptr || additionalConstraints(targetPoint)))
                     return targetPoint;
             }
 
@@ -260,22 +260,13 @@ namespace FAWorld
             }
         }
 
-        for (const auto& actor : mActors)
+        for (const auto& graphic : mMissileGraphics)
         {
-            for (const auto& missile : actor->getMissiles())
-            {
-                // Only display missiles for this (the currently displayed) level.
-                if (missile->getLevel() != this)
-                    continue;
-                for (const auto& graphic : missile->mGraphics)
-                {
-                    auto tmp = graphic->getCurrentFrame();
-                    auto spriteGroup = tmp.first;
-                    auto frame = tmp.second;
-                    if (spriteGroup)
-                        state->mObjects.push_back({spriteGroup, static_cast<uint32_t>(frame), graphic->mCurPos, std::nullopt});
-                }
-            }
+            auto tmp = graphic->getCurrentFrame();
+            auto spriteGroup = tmp.first;
+            auto frame = tmp.second;
+            if (spriteGroup)
+                state->mObjects.push_back({spriteGroup, static_cast<uint32_t>(frame), graphic->mCurPos, std::nullopt});
         }
 
         for (auto& p : mItemMap->mItems)
@@ -284,7 +275,7 @@ namespace FAWorld
             FARender::ObjectToRender o;
             o.spriteGroup = sf.first;
             o.frame = sf.second;
-            o.position = Position(p.first.position);
+            o.position = Position(p.first);
             if (p.first == hoverStatus.hoveredItemTile)
                 o.hoverColor = itemHoverColor();
             state->mItems.push_back(o);
@@ -306,14 +297,14 @@ namespace FAWorld
         release_assert(false && "tried to remove actor that isn't in level");
     }
 
-    bool GameLevel::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile) { return mItemMap->dropItem(move(item), actor, tile); }
+    bool GameLevel::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, Misc::Point tile) { return mItemMap->dropItem(move(item), actor, tile); }
 
     bool GameLevel::dropItemClosestEmptyTile(Item& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction)
     {
-        auto tryDrop = [&](const Misc::Point& pos) {
+        auto tryDrop = [&](Misc::Point pos) {
             bool res = false;
             if (isPassable(pos, &actor) && !mItemMap->getItemAt(pos))
-                res = dropItem(std::unique_ptr<Item>{new Item(item)}, actor, FAWorld::Tile(pos));
+                res = dropItem(std::unique_ptr<Item>{new Item(item)}, actor, pos);
             return res;
         };
 
@@ -328,7 +319,7 @@ namespace FAWorld
         {
             Misc::Direction dir = direction;
             dir.adjust(diffDegrees);
-            auto pos = Misc::getNextPosByDir(position, dir);
+            Misc::Point pos = Misc::getNextPosByDir(position, dir);
             if (tryDrop(pos))
                 return true;
         }
@@ -346,8 +337,6 @@ namespace FAWorld
 
         return nullptr;
     }
-
-    void GameLevel::getActors(std::vector<Actor*>& actors) { actors.insert(actors.end(), mActors.begin(), mActors.end()); }
 
     GameLevel::GameLevel(World& world) : mWorld(world) {}
 

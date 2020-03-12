@@ -32,7 +32,7 @@ namespace FAWorld
     public:
         ActorAnimationManager();
         ActorAnimationManager(FASaveGame::GameLoader& loader);
-        void save(FASaveGame::GameSaver& saver);
+        void save(FASaveGame::GameSaver& saver) const;
 
         void initAnimMaps();
 

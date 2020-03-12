@@ -75,7 +75,7 @@ static FixedPoint pow(FixedPoint x, size_t k)
 
     while (k > 0)
     {
-        if (k & 1)
+        if ((k % 2) == 1)
             ret *= x;
 
         k >>= 1;

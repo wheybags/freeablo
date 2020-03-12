@@ -14,7 +14,7 @@ namespace FAWorld
         PlayerBehaviour(FASaveGame::GameLoader& loader);
         PlayerBehaviour() = default;
 
-        virtual void save(FASaveGame::GameSaver& saver) override;
+        virtual void save(FASaveGame::GameSaver& saver) const override;
         virtual void reAttach(Actor* actor) override;
         virtual void update() override;
 

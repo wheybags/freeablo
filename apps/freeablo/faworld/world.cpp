@@ -80,7 +80,7 @@ namespace FAWorld
         loader.currentlyLoadingWorld = nullptr;
     }
 
-    void World::save(FASaveGame::GameSaver& saver)
+    void World::save(FASaveGame::GameSaver& saver) const
     {
         mRng->save(saver);
         mLevelRng->save(saver);
@@ -400,15 +400,6 @@ namespace FAWorld
         }
 
         return NULL;
-    }
-
-    void World::getAllActors(std::vector<Actor*>& actors)
-    {
-        for (auto pair : mLevels)
-        {
-            if (pair.second)
-                pair.second->getActors(actors);
-        }
     }
 
     Tick World::getCurrentTick() { return mTicksPassed; }

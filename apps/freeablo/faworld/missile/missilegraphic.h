@@ -10,36 +10,36 @@ namespace FASaveGame
     class GameSaver;
 }
 
-namespace FAWorld
+namespace FAWorld::Missile
 {
-    namespace Missile
+    class MissileGraphic
     {
-        class MissileGraphic
-        {
-        public:
-            virtual ~MissileGraphic() = default;
+    public:
+        virtual ~MissileGraphic();
 
-            MissileGraphic(std::string initialGraphicPath, std::string mainGraphicPath, std::optional<int32_t> singleFrame, Position position);
-            MissileGraphic(FASaveGame::GameLoader& loader);
+        MissileGraphic(std::string initialGraphicPath, std::string mainGraphicPath, std::optional<int32_t> singleFrame, Position position, GameLevel* level);
+        MissileGraphic(FASaveGame::GameLoader& loader);
 
-            virtual void save(FASaveGame::GameSaver& saver);
-            virtual void update();
+        virtual void save(FASaveGame::GameSaver& saver) const;
+        virtual void update();
 
-            std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame();
-            void stop();
-            bool isComplete() const { return mComplete; }
-            Tick getTicksSinceStarted() const { return mTicksSinceStarted; }
+        std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame();
+        void stop();
+        bool isComplete() const { return mComplete; }
+        Tick getTicksSinceStarted() const { return mTicksSinceStarted; }
+        GameLevel* getLevel() { return mLevel; }
+        void setLevel(GameLevel* level);
 
-            Position mCurPos;
+        Position mCurPos;
 
-        protected:
-            void playAnimation(std::string path, FARender::AnimationPlayer::AnimationType animationType);
+    protected:
+        void playAnimation(std::string path, FARender::AnimationPlayer::AnimationType animationType);
 
-            std::string mMainGraphicPath;
-            std::optional<int32_t> mSingleFrame;
-            FARender::AnimationPlayer mAnimationPlayer;
-            Tick mTicksSinceStarted = 0;
-            bool mComplete = false;
-        };
-    }
+        std::string mMainGraphicPath;
+        std::optional<int32_t> mSingleFrame;
+        GameLevel* mLevel;
+        FARender::AnimationPlayer mAnimationPlayer;
+        Tick mTicksSinceStarted = 0;
+        bool mComplete = false;
+    };
 }
