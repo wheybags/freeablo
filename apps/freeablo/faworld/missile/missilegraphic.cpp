@@ -19,7 +19,11 @@ namespace FAWorld::Missile
     {
         mCurPos = Position(loader);
         mMainGraphicPath = loader.load<std::string>();
-        mSingleFrame = (mSingleFrame = loader.load<int32_t>()) == -1 ? std::nullopt : mSingleFrame;
+
+        mSingleFrame = loader.load<int32_t>();
+        if (mSingleFrame == -1)
+            mSingleFrame = std::nullopt;
+
         mAnimationPlayer = FARender::AnimationPlayer(loader);
         auto levelIndex = loader.load<int32_t>();
         auto world = loader.currentlyLoadingWorld;
