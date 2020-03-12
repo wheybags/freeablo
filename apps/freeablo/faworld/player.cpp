@@ -314,7 +314,7 @@ namespace FAWorld
         mPlayerInitialised = true;
     }
 
-    void Player::save(FASaveGame::GameSaver& saver)
+    void Player::save(FASaveGame::GameSaver& saver) const
     {
         release_assert(mPlayerInitialised);
 

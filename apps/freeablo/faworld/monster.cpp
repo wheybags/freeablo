@@ -50,7 +50,7 @@ namespace FAWorld
         mInitialised = true;
     }
 
-    void Monster::save(FASaveGame::GameSaver& saver)
+    void Monster::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("Monster", saver);
         Actor::save(saver);

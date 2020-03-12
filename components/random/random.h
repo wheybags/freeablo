@@ -25,7 +25,7 @@ namespace Random
         virtual int32_t randomInRange(int32_t min, int32_t max) = 0;
 
         virtual void load(Serial::Loader& loader) = 0;
-        virtual void save(Serial::Saver& saver) = 0;
+        virtual void save(Serial::Saver& saver) const = 0;
 
         template <typename T> T chooseOne(std::initializer_list<T> parameters)
         {
@@ -50,7 +50,7 @@ namespace Random
         RngMersenneTwister(const RngMersenneTwister&) = delete;
 
         virtual void load(Serial::Loader& loader) override;
-        virtual void save(Serial::Saver& saver) override;
+        virtual void save(Serial::Saver& saver) const override;
 
         virtual int32_t squaredRand(int32_t min, int32_t max) override;
         virtual int32_t randomInRange(int32_t min, int32_t max) override;
@@ -68,7 +68,7 @@ namespace Random
         virtual int32_t randomInRange(int32_t min, int32_t max) override { return min + (max - min) / 2; }
 
         virtual void load(Serial::Loader&) override { message_and_abort("cannot load DummRng"); }
-        virtual void save(Serial::Saver&) override { message_and_abort("cannot save DummRng"); }
+        virtual void save(Serial::Saver&) const override { message_and_abort("cannot save DummRng"); }
 
         static DummyRng instance;
 

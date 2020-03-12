@@ -31,7 +31,7 @@ namespace FAWorld::Missile
             mGraphics.push_back(std::make_unique<MissileGraphic>(loader));
     }
 
-    void Missile::save(FASaveGame::GameSaver& saver)
+    void Missile::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("Missile", saver);
 

@@ -20,7 +20,7 @@ namespace FAWorld::Missile
         MissileGraphic(std::string initialGraphicPath, std::string mainGraphicPath, std::optional<int32_t> singleFrame, Position position, GameLevel* level);
         MissileGraphic(FASaveGame::GameLoader& loader);
 
-        virtual void save(FASaveGame::GameSaver& saver);
+        virtual void save(FASaveGame::GameSaver& saver) const;
         virtual void update();
 
         std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame();

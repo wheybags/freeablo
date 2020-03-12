@@ -11,7 +11,7 @@ namespace Misc
         current = loader.load<T>();
     }
 
-    template <typename T> void MaxCurrentItem<T>::save(Serial::Saver& saver)
+    template <typename T> void MaxCurrentItem<T>::save(Serial::Saver& saver) const
     {
         saver.save(max);
         saver.save(current);

@@ -126,7 +126,7 @@ namespace FAWorld
         mType = ActorType(loader.load<uint8_t>());
     }
 
-    void Actor::save(FASaveGame::GameSaver& saver)
+    void Actor::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("Actor", saver);
 
@@ -240,10 +240,13 @@ namespace FAWorld
 
     void Actor::pickupItem(Target::ItemTarget target)
     {
-        auto& itemMap = getLevel()->getItemMap();
-        auto tile = target.item->getTile();
-        auto item = itemMap.takeItemAt(tile);
-        auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, tile); };
+        ItemMap& itemMap = getLevel()->getItemMap();
+        std::unique_ptr<Item> item = itemMap.takeItemAt(target.itemLocation);
+
+        if (!item)
+            return;
+
+        auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, target.itemLocation); };
         switch (target.action)
         {
             case Target::ItemTarget::ActionType::autoEquip:

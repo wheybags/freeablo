@@ -46,7 +46,7 @@ namespace FAWorld
         mInterruptedAnimationFrame = loader.load<int32_t>();
     }
 
-    void ActorAnimationManager::save(FASaveGame::GameSaver& saver)
+    void ActorAnimationManager::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("ActorAnimationManager", saver);
 

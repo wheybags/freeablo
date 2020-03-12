@@ -26,7 +26,7 @@ namespace FAWorld
             mLevelXpCounts.push_back(loader.load<uint32_t>());
     }
 
-    void ActorStats::save(FASaveGame::GameSaver& saver)
+    void ActorStats::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("ActorStats", saver);
 
@@ -69,7 +69,7 @@ namespace FAWorld
             mMana.setMax(mCalculatedStats.maxMana);
     }
 
-    void BaseStats::save(FASaveGame::GameSaver& saver)
+    void BaseStats::save(FASaveGame::GameSaver& saver) const
     {
         saver.save(strength);
         saver.save(magic);

@@ -16,7 +16,7 @@ namespace FAWorld
         mFractionalPos = Vec2Fix(loader);
     }
 
-    void Position::save(FASaveGame::GameSaver& saver)
+    void Position::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("Position", saver);
 

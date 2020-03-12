@@ -51,9 +51,9 @@ public:
     bool operator<(const Vec2<T>& other) const { return x < other.x || (x <= other.x && y < other.y); }
 
     static Vec2 zero() { return Vec2(0, 0); }
-    bool isZero() { return x == 0 && y == 0; }
+    bool isZero() const { return x == 0 && y == 0; }
     static Vec2 invalid();
-    bool isValid() { return *this == invalid(); }
+    bool isValid() const { return *this == invalid(); }
 
     T magnitude() const;
     T magnitudeSquared() const;

@@ -44,19 +44,7 @@ namespace FAWorld
             case Type::Item:
             {
                 mData.item.action = ItemTarget::ActionType(loader.load<uint8_t>());
-                Tile itemLocation(loader);
-                GameLevel* level = loader.currentlyLoadingLevel;
-                release_assert(level);
-
-                loader.addFunctionToRunAtEnd([this, itemLocation, level]() {
-                    mData.item.item = level->getItemMap().getItemAt(itemLocation);
-
-                    // TODO: uncomment this assert when we have items on the ground
-                    // actually being saved. Atm, the above call will always return null
-                    // because there's never anything on the ground after loading a save.
-                    // release_assert(mData.item.item);
-                });
-
+                mData.item.itemLocation = Misc::Point(loader);
                 break;
             }
 
@@ -71,7 +59,7 @@ namespace FAWorld
         }
     }
 
-    void Target::save(FASaveGame::GameSaver& saver)
+    void Target::save(FASaveGame::GameSaver& saver) const
     {
         saver.save(uint8_t(mType));
 
@@ -87,7 +75,7 @@ namespace FAWorld
             {
                 ItemTarget target = get<ItemTarget>();
                 saver.save(uint8_t(target.action));
-                target.item->getTile().save(saver);
+                target.itemLocation.save(saver);
                 break;
             }
 

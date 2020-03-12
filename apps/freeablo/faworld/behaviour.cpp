@@ -42,7 +42,7 @@ namespace FAWorld
 
     BasicMonsterBehaviour::BasicMonsterBehaviour(FASaveGame::GameLoader& loader) { mTicksSinceLastAction = loader.load<Tick>(); }
 
-    void BasicMonsterBehaviour::save(FASaveGame::GameSaver& saver)
+    void BasicMonsterBehaviour::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("BasicMonsterBehaviour", saver);
 
