@@ -1,47 +1,48 @@
-#include "faworld/actor.h"
+#include "faworld/player.h"
 #include "missile.h"
 
-namespace FAWorld
+namespace FAWorld::Missile
 {
-    namespace Missile
+    void Missile::ActorEngagement::none(Missile&, MissileGraphic&, Actor&) {}
+
+    void Missile::ActorEngagement::damageEnemy(Missile& missile, MissileGraphic&, Actor& actor)
     {
-        MissileActorEngagement::MissileActorEngagementMethod MissileActorEngagement::get(MissileId missileId)
+        const uint32_t damage = 10; // placeholder
+        if (missile.mCreator->canIAttack(&actor))
         {
-            switch (missileId)
-            {
-                case MissileId::arrow:
-                case MissileId::firebolt:
-                case MissileId::farrow:
-                case MissileId::larrow:
-                    return damageEnemyAndStop;
-                case MissileId::firewall:
-                case MissileId::firewalla:
-                case MissileId::firewallc:
-                    return damageEnemy;
-                case MissileId::manashield: // TODO
-                default:
-                    return none;
-            }
+            missile.mCreator->dealDamageToEnemy(&actor, damage, DamageType::Bow);
+            missile.playImpactSound();
         }
+    }
 
-        void MissileActorEngagement::none(Missile&, MissileGraphic&, Actor&) {}
+    void Missile::ActorEngagement::damageEnemyAndStop(Missile& missile, MissileGraphic& graphic, Actor& actor)
+    {
+        damageEnemy(missile, graphic, actor);
+        // Stop on friendlies too.
+        if (&actor != missile.mCreator)
+            graphic.stop();
+    }
 
-        void MissileActorEngagement::damageEnemy(Missile& missile, MissileGraphic&, Actor& actor)
+    void Missile::ActorEngagement::townPortal(Missile& missile, MissileGraphic& graphic, Actor& actor)
+    {
+        // Any player can use a town portal
+        if (auto player = dynamic_cast<Player*>(&actor))
         {
-            const uint32_t damage = 10; // placeholder
-            if (missile.mCreator->canIAttack(&actor))
+            // Teleport to other portal
+            auto& otherPortal = missile.mGraphics[0].get() != &graphic ? missile.mGraphics[0] : missile.mGraphics[1];
+            auto noMissilesAtPoint = [&otherPortal](const Misc::Point& p) {
+                return std::none_of(otherPortal->getLevel()->mMissileGraphics.begin(),
+                                    otherPortal->getLevel()->mMissileGraphics.end(),
+                                    [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
+            };
+            auto point = otherPortal->getLevel()->getFreeSpotNear(otherPortal->mCurPos.current(), std::numeric_limits<int32_t>::max(), noMissilesAtPoint);
+            player->teleport(otherPortal->getLevel(), Position(point));
+            // Close the portal if the creator is teleporting back through the 2nd (town located) portal
+            if (player == missile.mCreator && &graphic == missile.mGraphics[1].get())
             {
-                missile.mCreator->dealDamageToEnemy(&actor, damage, DamageType::Bow);
-                missile.playImpactSound();
-            }
-        }
-
-        void MissileActorEngagement::damageEnemyAndStop(Missile& missile, MissileGraphic& graphic, Actor& actor)
-        {
-            damageEnemy(missile, graphic, actor);
-            // Stop on friendlies too.
-            if (&actor != missile.mCreator)
                 graphic.stop();
+                otherPortal->stop();
+            }
         }
     }
 }
