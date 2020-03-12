@@ -64,14 +64,11 @@ namespace FAWorld
 
     void PlayerBehaviour::addInput(const PlayerInput& input)
     {
-        auto cursorItem = mPlayer->mInventory.getCursorHeld();
-
         switch (input.mType)
         {
             case PlayerInput::Type::TargetTile:
             {
                 auto clickedPoint = Misc::Point(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
-                mPlayer->getLevel()->activateDoor(clickedPoint);
 
                 if (mPlayer->getLevel()->isDoor(clickedPoint))
                 {
