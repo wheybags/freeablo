@@ -338,8 +338,6 @@ namespace FAWorld
         return nullptr;
     }
 
-    void GameLevel::getActors(std::vector<Actor*>& actors) { actors.insert(actors.end(), mActors.begin(), mActors.end()); }
-
     GameLevel::GameLevel(World& world) : mWorld(world) {}
 
     ItemMap& GameLevel::getItemMap() { return *mItemMap; }

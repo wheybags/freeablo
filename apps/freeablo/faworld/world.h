@@ -95,8 +95,6 @@ namespace FAWorld
 
         Actor* getActorById(int32_t id);
 
-        void getAllActors(std::vector<Actor*>& actors);
-
         Tick getCurrentTick();
 
         void setupObjectIdMappers();

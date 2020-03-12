@@ -107,8 +107,6 @@ namespace FAWorld
 
         Actor* getActorById(int32_t id);
 
-        void getActors(std::vector<Actor*>& actors);
-
         ItemMap& getItemMap();
 
         bool isTown() const;
