@@ -1,8 +1,8 @@
 #include "threadmanager.h"
 #include "../farender/renderer.h"
 #include <chrono>
-#include <iostream>
 #include <input/inputmanager.h>
+#include <iostream>
 
 namespace Engine
 {

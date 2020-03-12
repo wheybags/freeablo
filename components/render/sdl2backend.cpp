@@ -1,14 +1,14 @@
 #include "render.h"
+#include <SDL.h>
 #include <complex>
 #include <iostream>
-#include <SDL.h>
 //#include <SDL_opengl.h>
-#include <SDL_image.h>
-#include "atlastexture.h"
-#include "sdl_gl_funcs.h"
 #include "../cel/celfile.h"
 #include "../cel/celframe.h"
 #include "../level/level.h"
+#include "atlastexture.h"
+#include "sdl_gl_funcs.h"
+#include <SDL_image.h>
 #include <faio/fafileobject.h>
 #include <misc/assert.h>
 #include <misc/savePNG.h>
@@ -625,10 +625,7 @@ namespace Render
     GLuint hoverColor_vbo;
     GLuint atlasOffset_vbo;
 
-    void deleteAllSprites()
-    {
-        atlasTexture->clear();
-    }
+    void deleteAllSprites() { atlasTexture->clear(); }
 
     void draw()
     {

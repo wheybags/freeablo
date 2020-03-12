@@ -24,7 +24,6 @@ static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_
 //#define NK_SHADER_VERSION "#version 300 es\n"
 //#endif
 
-
 #define NK_SHADER_VERSION "#version 330\n"
 
 void nk_sdl_device_create(nk_gl_device& dev)
