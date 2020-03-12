@@ -9,11 +9,7 @@
 
 namespace FAWorld
 {
-    Tile::Tile(FASaveGame::GameLoader& loader) : position(loader) {}
-
-    void Tile::save(FASaveGame::GameSaver& saver) const { position.save(saver); }
-
-    PlacedItemData::PlacedItemData(std::unique_ptr<Item> itemArg, const Tile& tile)
+    PlacedItemData::PlacedItemData(std::unique_ptr<Item> itemArg, Misc::Point tile)
         : mItem(std::move(itemArg)), mAnimation(new FARender::AnimationPlayer()), mTile(tile)
     {
         mAnimation->playAnimation(mItem->getFlipSpriteGroup(), World::getTicksInPeriod("0.05"), FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
@@ -24,7 +20,7 @@ namespace FAWorld
         mItem.reset(new Item());
         mItem->load(loader);
         mAnimation.reset(new FARender::AnimationPlayer(loader));
-        mTile = Tile(loader);
+        mTile = Misc::Point(loader);
     }
 
     void PlacedItemData::save(FASaveGame::GameSaver& saver) const
@@ -47,7 +43,7 @@ namespace FAWorld
         uint32_t itemsSize = loader.load<uint32_t>();
         for (uint32_t i = 0; i < itemsSize; i++)
         {
-            Tile key(loader);
+            Misc::Point key(loader);
             mItems.emplace(key, PlacedItemData(loader));
         }
     }
@@ -65,9 +61,9 @@ namespace FAWorld
 
     ItemMap::~ItemMap() {}
 
-    bool ItemMap::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile)
+    bool ItemMap::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, Misc::Point tile)
     {
-        if (!mLevel->isPassable(tile.position, &actor))
+        if (!mLevel->isPassable(tile, &actor))
             return false;
 
         auto it = mItems.find(tile);
@@ -79,9 +75,9 @@ namespace FAWorld
         return true;
     }
 
-    PlacedItemData* ItemMap::getItemAt(const Tile& tile)
+    PlacedItemData* ItemMap::getItemAt(Misc::Point pos)
     {
-        auto it = mItems.find(tile);
+        auto it = mItems.find(pos);
         if (it == mItems.end())
             return nullptr;
 
@@ -91,19 +87,7 @@ namespace FAWorld
         return &it->second;
     }
 
-    PlacedItemData* ItemMap::getItemAt(const Misc::Point& pos)
-    {
-        auto it = mItems.find(Tile(pos));
-        if (it == mItems.end())
-            return nullptr;
-
-        if (!it->second.onGround())
-            return nullptr;
-
-        return &it->second;
-    }
-
-    std::unique_ptr<Item> ItemMap::takeItemAt(const Tile& tile)
+    std::unique_ptr<Item> ItemMap::takeItemAt(Misc::Point tile)
     {
         auto it = mItems.find(tile);
         if (it == mItems.end())

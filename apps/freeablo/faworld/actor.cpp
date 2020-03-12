@@ -241,13 +241,12 @@ namespace FAWorld
     void Actor::pickupItem(Target::ItemTarget target)
     {
         ItemMap& itemMap = getLevel()->getItemMap();
-        Tile tile(target.itemLocation);
-        std::unique_ptr<Item> item = itemMap.takeItemAt(tile);
+        std::unique_ptr<Item> item = itemMap.takeItemAt(target.itemLocation);
 
         if (!item)
             return;
 
-        auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, tile); };
+        auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, target.itemLocation); };
         switch (target.action)
         {
             case Target::ItemTarget::ActionType::autoEquip:
