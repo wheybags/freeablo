@@ -86,7 +86,7 @@ namespace Engine
                 {
                     auto type = EngineMain::get()->mGuiManager->isInventoryShown() ? FAWorld::Target::ItemTarget::ActionType::toCursor
                                                                                    : FAWorld::Target::ItemTarget::ActionType::autoEquip;
-                    mInputs.emplace_back(FAWorld::PlayerInput::TargetItemOnFloorData{item->getTile().position, type}, player->getId());
+                    mInputs.emplace_back(FAWorld::PlayerInput::TargetItemOnFloorData{item->getTile(), type}, player->getId());
                 }
                 else if (player->getLevel()->isDoor(clickedTile.pos) || !cursorItem.isEmpty())
                 {

@@ -33,7 +33,7 @@ namespace FAWorld
                 toCursor,
             };
             ActionType action;
-            PlacedItemData* item;
+            Misc::Point itemLocation;
         };
 
         Target(const ItemTarget& target);

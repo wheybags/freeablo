@@ -402,15 +402,6 @@ namespace FAWorld
         return NULL;
     }
 
-    void World::getAllActors(std::vector<Actor*>& actors)
-    {
-        for (auto pair : mLevels)
-        {
-            if (pair.second)
-                pair.second->getActors(actors);
-        }
-    }
-
     Tick World::getCurrentTick() { return mTicksPassed; }
 
     PlacedItemData* World::targetedItem(Misc::Point screenPosition)

@@ -102,12 +102,10 @@ namespace FAWorld
 
         int32_t getLevelIndex() const { return mLevelIndex; }
 
-        bool dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile);
+        bool dropItem(std::unique_ptr<Item>&& item, const Actor& actor, Misc::Point tile);
         bool dropItemClosestEmptyTile(Item& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction);
 
         Actor* getActorById(int32_t id);
-
-        void getActors(std::vector<Actor*>& actors);
 
         ItemMap& getItemMap();
 
