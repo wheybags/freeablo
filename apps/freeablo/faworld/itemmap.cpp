@@ -109,6 +109,9 @@ namespace FAWorld
         if (it == mItems.end())
             return nullptr;
 
+        if (!it->second.onGround())
+            return nullptr;
+
         auto item = std::move(it->second.mItem);
         mItems.erase(it);
         return item;

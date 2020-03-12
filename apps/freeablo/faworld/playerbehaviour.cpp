@@ -101,8 +101,7 @@ namespace FAWorld
             }
             case PlayerInput::Type::TargetItemOnFloor:
             {
-                auto item = mPlayer->getLevel()->getItemMap().getItemAt(input.mData.dataTargetItemOnFloor.position);
-                mPlayer->mTarget = Target::ItemTarget{input.mData.dataTargetItemOnFloor.type, item};
+                mPlayer->mTarget = Target::ItemTarget{input.mData.dataTargetItemOnFloor.type, input.mData.dataTargetItemOnFloor.position};
                 return;
             }
             case PlayerInput::Type::ForceAttack:

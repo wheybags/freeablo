@@ -240,9 +240,13 @@ namespace FAWorld
 
     void Actor::pickupItem(Target::ItemTarget target)
     {
-        auto& itemMap = getLevel()->getItemMap();
-        auto tile = target.item->getTile();
-        auto item = itemMap.takeItemAt(tile);
+        ItemMap& itemMap = getLevel()->getItemMap();
+        Tile tile(target.itemLocation);
+        std::unique_ptr<Item> item = itemMap.takeItemAt(tile);
+
+        if (!item)
+            return;
+
         auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, tile); };
         switch (target.action)
         {
