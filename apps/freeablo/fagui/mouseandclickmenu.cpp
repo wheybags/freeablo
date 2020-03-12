@@ -9,7 +9,7 @@ namespace FAGui
                                           FARender::AnimationPlayer::AnimationType::Looped);
     }
 
-    MouseAndClickMenu::Result MouseAndClickMenu::update(nk_context* ctx, std::vector<std::vector<std::string>>& options, struct nk_scroll& scroll)
+    MouseAndClickMenu::Result MouseAndClickMenu::update(nk_context* ctx, std::vector<std::vector<MenuEntry>>& options, struct nk_scroll& scroll)
     {
         mSelection = Misc::clamp(mSelection, 0, int32_t(options.size()));
 
@@ -17,12 +17,9 @@ namespace FAGui
 
         Misc::ScopedSetter<nk_style_button>(ctx->style.button);
         ctx->style.button.normal = nk_style_item_hide();
-        ctx->style.button.text_normal = nk_rgb(255, 255, 255);
         ctx->style.button.border = 0;
         ctx->style.button.hover = ctx->style.button.normal;
-        ctx->style.button.text_hover = ctx->style.button.text_normal;
         ctx->style.button.active = ctx->style.button.normal;
-        ctx->style.button.text_active = ctx->style.button.text_normal;
 
         auto renderer = FARender::Renderer::get();
         auto pentagram = renderer->loadImage("data/pentspn2.cel");
@@ -55,21 +52,34 @@ namespace FAGui
         for (int32_t i = 0; i < int32_t(options.size()); i++)
         {
             struct nk_rect dummy;
+            auto& opt = options.at(i);
 
-            for (size_t j = 0; j < options.at(i).size(); j++)
+            for (size_t j = 0; j < opt.size(); j++)
             {
-                if (mSelection == i && j == 0)
+                MenuEntry& entry = opt.at(j);
+
+                if (mSelection == i && entry.clickable)
                     drawPentagram();
                 else
                     nk_widget(&dummy, ctx);
 
-                if (nk_widget_is_hovered(ctx) && (ctx->input.mouse.pos.x != mLastMousePosition.x || ctx->input.mouse.pos.y != mLastMousePosition.y))
+                if (nk_widget_is_hovered(ctx) && (ctx->input.mouse.pos.x != mLastMousePosition.x || ctx->input.mouse.pos.y != mLastMousePosition.y) &&
+                    entry.clickable)
                     mSelection = i;
 
-                if (nk_button_label(ctx, options.at(i).at(j).c_str()))
+                nk_color color = getNkColor(entry.textColor);
+                nk_style_push_color(ctx, &ctx->style.button.text_normal, color);
+                nk_style_push_color(ctx, &ctx->style.button.text_hover, color);
+                nk_style_push_color(ctx, &ctx->style.button.text_active, color);
+
+                if (nk_button_label(ctx, entry.entry.c_str()))
                     result = Result::Activated;
 
-                if (mSelection == i && j == 0)
+                nk_style_pop_color(ctx);
+                nk_style_pop_color(ctx);
+                nk_style_pop_color(ctx);
+
+                if (mSelection == i && entry.clickable)
                     drawPentagram();
                 else
                     nk_widget(&dummy, ctx);
@@ -92,8 +102,8 @@ namespace FAGui
 
         if (nk_input_is_key_down(&ctx->input, NK_KEY_DOWN) || nk_input_is_key_down(&ctx->input, NK_KEY_UP))
         {
-            static auto firstWait = FAWorld::World::getTicksInPeriod(FixedPoint("0.5"));
-            static auto repeatWait = FAWorld::World::getTicksInPeriod(FixedPoint("0.05"));
+            FAWorld::Tick firstWait = FAWorld::World::getTicksInPeriod(FixedPoint("0.5"));
+            FAWorld::Tick repeatWait = FAWorld::World::getTicksInPeriod(FixedPoint("0.05"));
 
             if (mArrowKeyRepeatTimer > (mArrowKeyMovesGeneratedSinceKeydown < 2 ? firstWait : repeatWait))
             {

@@ -2,12 +2,9 @@
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
 #include "findpath.h"
-#include <misc/vec2fix.h>
 
 namespace FAWorld
 {
-    MovementHandler::MovementHandler(Tick pathRateLimit) : mPathRateLimit(pathRateLimit) {}
-
     MovementHandler::MovementHandler(FASaveGame::GameLoader& loader)
     {
         int32_t levelIndex = loader.load<int32_t>();
@@ -32,6 +29,7 @@ namespace FAWorld
         mLastRepathed = loader.load<Tick>();
         mPathRateLimit = loader.load<Tick>();
         mAdjacent = loader.load<bool>();
+        mSpeedTilesPerSecond.load(loader);
     }
 
     void MovementHandler::save(FASaveGame::GameSaver& saver)
@@ -58,6 +56,7 @@ namespace FAWorld
         saver.save(mLastRepathed);
         saver.save(mPathRateLimit);
         saver.save(mAdjacent);
+        mSpeedTilesPerSecond.save(saver);
     }
 
     Misc::Point MovementHandler::getDestination() const { return mDestination; }
@@ -71,19 +70,26 @@ namespace FAWorld
     bool MovementHandler::moving() { return mCurrentPos.isMoving(); }
 
     GameLevel* MovementHandler::getLevel() { return mLevel; }
+    const GameLevel* MovementHandler::getLevel() const { return mLevel; }
 
-    void MovementHandler::update(const FAWorld::Actor& actor)
+    void MovementHandler::update(Actor& actor)
+    {
+        FixedPoint moveDistance = mSpeedTilesPerSecond / FixedPoint(World::ticksPerSecond);
+
+        while (moveDistance > 0)
+            moveDistance = updateInternal(actor, moveDistance);
+    }
+
+    FixedPoint MovementHandler::updateInternal(Actor& actor, FixedPoint moveDistance)
     {
         debug_assert(mLevel);
+        debug_assert(mLevel->isPassable(getCurrentPosition().current(), &actor));
         debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
 
-        if (mCurrentPos.getDist() == 0)
+        Position oldPosition = mCurrentPos;
+
+        if (!mCurrentPos.isMoving())
         {
-            if (!positionReachedSent)
-            {
-                positionReached(mCurrentPos.current());
-                positionReachedSent = true;
-            }
             // if we have arrived, stop moving
             if (mCurrentPos.current() == mDestination)
             {
@@ -103,14 +109,15 @@ namespace FAWorld
                     // detect if we were blocked on our way and try to recover
                     if (mCurrentPos.current() == mCurrentPath[mCurrentPathIndex - 1])
                     {
-                        auto next = mCurrentPath[mCurrentPathIndex];
+                        Misc::Point next = mCurrentPath[mCurrentPathIndex];
                         if (mLevel->isPassable(next, &actor))
                         {
-                            auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
-                            Misc::Direction direction = vec.getIsometricDirection();
+                            Vec2Fix vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
 
-                            mCurrentPos.setDirection(direction);
-                            mCurrentPos.start();
+                            Misc::Direction8 direction = vec.getDirection().getDirection8();
+                            debug_assert(next == Misc::getNextPosByDir(mCurrentPos.current(), direction));
+
+                            mCurrentPos.gridMoveInDirection(direction);
                             needsRepath = false;
                         }
                     }
@@ -126,11 +133,10 @@ namespace FAWorld
                             if (mLevel->isPassable(next, &actor))
                             {
                                 auto vec = Vec2Fix(next.x, next.y) - Vec2Fix(mCurrentPos.current().x, mCurrentPos.current().y);
-                                Misc::Direction direction = vec.getIsometricDirection();
+                                Misc::Direction8 direction = vec.getDirection().getDirection8();
+                                debug_assert(next == Misc::getNextPosByDir(mCurrentPos.current(), direction));
 
-                                positionReachedSent = false;
-                                mCurrentPos.setDirection(direction);
-                                mCurrentPos.start();
+                                mCurrentPos.gridMoveInDirection(direction);
                                 needsRepath = false;
                                 mCurrentPathIndex++;
 
@@ -160,16 +166,27 @@ namespace FAWorld
                     if (!mCurrentPath.empty())
                         mDestination = mCurrentPath.back();
 
-                    update(actor);
-
-                    return;
+                    return moveDistance; // By returning the full amount we will force the function to start again
                 }
             }
         }
 
-        mCurrentPos.update();
+        FixedPoint movementRemaining = 0;
+
+        if (mCurrentPos.isMoving())
+            movementRemaining = mCurrentPos.update(moveDistance);
+
+        if (mCurrentPos.current() != oldPosition.current() || mCurrentPos.next() != oldPosition.next())
+        {
+            mLevel->actorMapRemove(&actor, oldPosition.current());
+            mLevel->actorMapRemove(&actor, oldPosition.next());
+
+            mLevel->actorMapInsert(&actor);
+        }
 
         debug_assert(mLevel->isPassable(getCurrentPosition().next(), &actor));
+
+        return movementRemaining;
     }
 
     void MovementHandler::teleport(GameLevel* level, Position pos)
@@ -179,9 +196,14 @@ namespace FAWorld
         mDestination = mCurrentPos.current();
     }
 
-    void MovementHandler::stopAndPointInDirection(Misc::Direction direction)
+    void MovementHandler::stopMoving(FAWorld::Actor& actor, std::optional<Misc::Direction> pointInDirection)
     {
-        mCurrentPos.setDirection(direction);
-        mCurrentPos.stop();
+        mLevel->actorMapRemove(&actor, getCurrentPosition().next());
+
+        if (pointInDirection)
+            mCurrentPos.setDirection(*pointInDirection);
+
+        mCurrentPos.stopMoving();
+        mLevel->actorMapInsert(&actor);
     }
 }

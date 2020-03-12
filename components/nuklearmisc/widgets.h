@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include <fa_nuklear.h>
 #include <string>
 

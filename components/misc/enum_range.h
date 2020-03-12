@@ -1,5 +1,4 @@
 #pragma once
-
 #include <iterator>
 
 template <typename EnumT> class enum_range_t;

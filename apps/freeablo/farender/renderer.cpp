@@ -5,9 +5,7 @@
 #include "cel/celdecoder.h"
 #include "cel/celfile.h"
 #include "fontinfo.h"
-#include <audio/audio.h>
-#include <boost/format.hpp>
-#include <boost/range/irange.hpp>
+#include <audio/fa_audio.h>
 #include <functional>
 #include <input/inputmanager.h>
 #include <iostream>
@@ -180,7 +178,7 @@ namespace FARender
 
     Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getTileByScreenPos(x, y, screenPos.current().x, screenPos.current().y, screenPos.next().x, screenPos.next().y, screenPos.getDist());
+        return Render::getTileByScreenPos(x, y, screenPos.getFractionalPos());
     }
 
     void Renderer::waitUntilDone()
@@ -213,9 +211,7 @@ namespace FARender
             Render::LevelObject obj;
             obj.spriteCacheIndex = object.spriteGroup->getCacheIndex();
             obj.spriteFrame = object.frame;
-            obj.x2 = position.next().x;
-            obj.y2 = position.next().y;
-            obj.dist = position.getDist();
+            obj.fractionalPos = position.getFractionalPos();
             obj.hoverColor = object.hoverColor;
             obj.valid = true;
 
@@ -246,18 +242,6 @@ namespace FARender
         {
             if (state->level)
             {
-                if (mLevelObjects.width() != state->level->width() || mLevelObjects.height() != state->level->height())
-                    mLevelObjects = Render::LevelObjects(state->level->width(), state->level->height());
-
-                for (int32_t x = 0; x < mLevelObjects.width(); x++)
-                {
-                    for (int32_t y = 0; y < mLevelObjects.height(); y++)
-                    {
-                        if (mLevelObjects.get(x, y).size() > 0)
-                            mLevelObjects.get(x, y).clear();
-                    }
-                }
-
                 fill(*state->level, state->mObjects, mLevelObjects);
                 fill(*state->level, state->mItems, mItems);
 
@@ -269,11 +253,7 @@ namespace FARender
                                   &mSpriteManager,
                                   mLevelObjects,
                                   mItems,
-                                  state->mPos.current().x,
-                                  state->mPos.current().y,
-                                  state->mPos.next().x,
-                                  state->mPos.next().y,
-                                  state->mPos.getDist());
+                                  state->mPos.getFractionalPos());
             }
 
             Render::drawGui(state->nuklearData, &mSpriteManager);

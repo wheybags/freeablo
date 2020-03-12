@@ -1,10 +1,7 @@
-//#include "mainwindow.h"
-//#include <QApplication>
-
 #include "../components/settings/settings.h"
-#include <boost/format.hpp>
 #include <chrono>
 #include <faio/fafileobject.h>
+#include <fmt/format.h>
 #include <input/inputmanager.h>
 #include <nfd.h>
 #include <nuklearmisc/inputfwd.h>
@@ -12,8 +9,13 @@
 #include <nuklearmisc/widgets.h>
 #include <render/render.h>
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
+    Misc::saveArgv0(argv[0]);
+
+    if (argc > 2)
+        message_and_abort_fmt("Usage: %s [filename]", argv[0]);
+
     Render::RenderSettings renderSettings;
     renderSettings.windowWidth = 800;
     renderSettings.windowHeight = 600;
@@ -24,7 +26,7 @@ int main(int, char**)
     nk_context* ctx = guiHandler.getNuklearContext();
 
     Settings::Settings settings;
-    settings.loadFromFile("resources/celview.ini");
+    settings.loadFromFile(Misc::getResourcesPath().str() + "/celview.ini");
 
     bool faioInitDone = false;
     std::string listFile = settings.get<std::string>("celview", "listFile", "Diablo I.txt");
@@ -74,9 +76,9 @@ int main(int, char**)
 
                 if (image)
                 {
-                    nk_label(ctx, (boost::format("Number of Frames: %1%") % image.get()->getSprite()->size()).str().c_str(), NK_TEXT_LEFT);
-                    nk_label(ctx, (boost::format("Width: %1%") % image->getSprite()->getWidth()).str().c_str(), NK_TEXT_LEFT);
-                    nk_label(ctx, (boost::format("Height: %1%") % image->getSprite()->getHeight()).str().c_str(), NK_TEXT_LEFT);
+                    nk_label(ctx, fmt::format("Number of Frames: {}", image.get()->getSprite()->size()).c_str(), NK_TEXT_LEFT);
+                    nk_label(ctx, fmt::format("Width: {}", image->getSprite()->getWidth()).c_str(), NK_TEXT_LEFT);
+                    nk_label(ctx, fmt::format("Height: {}", image->getSprite()->getHeight()).c_str(), NK_TEXT_LEFT);
                     frame = nk_propertyi(ctx, "Frame", 0, frame, image->getSprite()->size(), 1, 0.2f);
 
                     if (nk_button_label(ctx, "save as png"))
@@ -158,6 +160,13 @@ int main(int, char**)
                         settings.save();
 
                         faioInitDone = true;
+
+                        if (argc > 1)
+                        {
+                            selectedImage = argv[1];
+                            frame = 0;
+                            nextImage = std::unique_ptr<NuklearMisc::GuiSprite>(guiHandler.getSprite(new Render::SpriteGroup(selectedImage)));
+                        }
                     }
                 }
 

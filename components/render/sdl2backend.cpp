@@ -1,20 +1,14 @@
 #include "render.h"
-
 #include <complex>
 #include <iostream>
-
 #include <SDL.h>
 //#include <SDL_opengl.h>
 #include <SDL_image.h>
-
 #include "atlastexture.h"
 #include "sdl_gl_funcs.h"
-
 #include "../cel/celfile.h"
 #include "../cel/celframe.h"
-
 #include "../level/level.h"
-#include <boost/make_unique.hpp>
 #include <faio/fafileobject.h>
 #include <misc/assert.h>
 #include <misc/savePNG.h>
@@ -76,7 +70,7 @@ namespace Render
             mAtlasOffset.reserve(3 * initSize);
         }
 
-        void addSprite(GLuint sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor)
+        void addSprite(GLuint sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
         {
             auto& lookupMap = atlasTexture->getLookupMap();
             auto& atlasEntry = lookupMap.at(sprite);
@@ -129,12 +123,14 @@ namespace Render
     SDL_GLContext glContext;
 
     DrawLevelCache drawLevelCache = DrawLevelCache(2000);
+    std::string windowTitle;
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
     {
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
         int flags = SDL_WINDOW_OPENGL;
+        windowTitle = title;
 
         if (settings.fullscreen)
         {
@@ -149,6 +145,10 @@ namespace Render
         screen = SDL_CreateWindow(title.c_str(), 20, 20, WIDTH, HEIGHT, flags);
         if (screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
+
+        // Update screen with/height, as starting full screen window in
+        // Windows does not trigger a SDL_WINDOWEVENT_RESIZED event.
+        SDL_GetWindowSize(screen, &WIDTH, &HEIGHT);
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -190,7 +190,7 @@ namespace Render
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
 
-        atlasTexture = boost::make_unique<AtlasTexture>();
+        atlasTexture = std::make_unique<AtlasTexture>();
 
         if (nk_ctx)
         {
@@ -200,6 +200,9 @@ namespace Render
     }
 
     void setWindowSize(const RenderSettings& settings) { SDL_SetWindowSize(screen, settings.windowWidth, settings.windowHeight); }
+
+    const std::string& getWindowTitle() { return windowTitle; }
+    void setWindowTitle(const std::string& title) { SDL_SetWindowTitle(screen, title.c_str()); }
 
     void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics)
     {
@@ -637,7 +640,7 @@ namespace Render
 
             once = true;
 
-            std::string src = Misc::StringUtils::readAsString("resources/shaders/basic.vert");
+            std::string src = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/basic.vert");
             const GLchar* srcPtr = src.c_str();
 
             GLuint vs = glCreateShader(GL_VERTEX_SHADER);
@@ -663,7 +666,7 @@ namespace Render
                 return;
             }
 
-            src = Misc::StringUtils::readAsString("resources/shaders/basic.frag");
+            src = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/basic.frag");
             srcPtr = src.c_str();
 
             GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
@@ -819,7 +822,7 @@ namespace Render
         // SDL_RenderPresent(renderer);
     }
 
-    void drawSprite(GLuint sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor)
+    void drawSprite(GLuint sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
     {
         // Add to level cache, will be drawn in a batch later.
         drawLevelCache.addSprite(sprite, x, y, highlightColor);
@@ -866,7 +869,7 @@ namespace Render
         }
     }
 
-    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor)
+    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
     {
         drawSprite((GLuint)(intptr_t)sprite, x, y, highlightColor);
     }
@@ -874,7 +877,7 @@ namespace Render
     constexpr auto tileHeight = 32;
     constexpr auto tileWidth = tileHeight * 2;
 
-    void drawAtTile(const Sprite& sprite, const Misc::Point& tileTop, int spriteW, int spriteH, boost::optional<Cel::Colour> highlightColor = boost::none)
+    void drawAtTile(const Sprite& sprite, const Misc::Point& tileTop, int spriteW, int spriteH, std::optional<Cel::Colour> highlightColor = std::nullopt)
     {
         // centering spright at the center of tile by width and at the bottom of tile by height
         drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight, highlightColor);
@@ -1203,7 +1206,10 @@ namespace Render
     // basic transform of isometric grid to normal, (0, 0) tile coordinate maps to (0, 0) pixel coordinates
     // since eventually we're gonna shift coordinates to viewport center, it's better to keep transform itself
     // as simple as possible
-    static Misc::Point tileTopPoint(const Tile& tile) { return {(tileWidth / 2) * (tile.pos.x - tile.pos.y), (tile.pos.y + tile.pos.x) * (tileHeight / 2)}; }
+    template <typename T> static Vec2i tileTopPoint(Vec2<T> tile)
+    {
+        return Vec2i(Vec2<T>(T(tileWidth / 2) * (tile.x - tile.y), (tile.y + tile.x) * (tileHeight / 2)));
+    }
 
     // this function simply does the reverse of the above function, could be found by solving linear equation system
     // it obviously uses the fact that ttileWidth = tileHeight * 2
@@ -1215,37 +1221,29 @@ namespace Render
         return {x.quot, y.quot, x.rem > y.rem ? TileHalf::right : TileHalf::left};
     }
 
-    static Misc::Point pointBetween(const Tile& start, const Tile& finish, const size_t& percent)
-    {
-        auto pointA = tileTopPoint(start);
-        auto pointB = tileTopPoint(finish);
-        return pointA + (pointB - pointA) * (percent * 0.01);
-    }
-
-    static void drawMovingSprite(const Sprite& sprite,
-                                 const Tile& start,
-                                 const Tile& finish,
-                                 size_t dist,
-                                 const Misc::Point& toScreen,
-                                 boost::optional<Cel::Colour> highlightColor = boost::none)
+    static void
+    drawMovingSprite(const Sprite& sprite, const Vec2Fix& fractionalPos, const Misc::Point& toScreen, std::optional<Cel::Colour> highlightColor = std::nullopt)
     {
         int32_t w, h;
         spriteSize(sprite, w, h);
-        auto point = pointBetween(start, finish, dist);
-        auto res = point + toScreen;
-        drawAtTile(sprite, res, w, h, highlightColor);
+        Vec2i point = tileTopPoint(fractionalPos);
+        Vec2i res = point + toScreen;
+
+        drawAtTile(sprite, Vec2i(res), w, h, highlightColor);
     }
 
     constexpr auto bottomMenuSize = 144; // TODO: pass it as a variable
-    Misc::Point worldToScreenVector(const Tile& start, const Tile& finish, size_t dist)
+    Misc::Point worldToScreenVector(const Vec2Fix& fractionalPos)
     {
         // centering takes in accord bottom menu size to be consistent with original game centering
-        return Misc::Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - pointBetween(start, finish, dist);
+        Vec2i point = tileTopPoint(fractionalPos);
+
+        return Misc::Point{WIDTH / 2, (HEIGHT - bottomMenuSize) / 2} - point;
     }
 
-    Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist)
+    Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& fractionalPos)
     {
-        auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
+        Misc::Point toScreen = worldToScreenVector(fractionalPos);
         return getTileFromScreenCoords({static_cast<int32_t>(x), static_cast<int32_t>(y)}, toScreen);
     }
 
@@ -1254,12 +1252,12 @@ namespace Render
     template <typename ProcessTileFunc> void drawObjectsByTiles(const Misc::Point& toScreen, ProcessTileFunc processTile)
     {
         Misc::Point start{-2 * tileWidth, -2 * tileHeight};
-        auto startingTile = getTileFromScreenCoords(start, toScreen);
+        Tile startingTile = getTileFromScreenCoords(start, toScreen);
 
-        auto startingPoint = tileTopPoint(startingTile) + toScreen;
+        Misc::Point startingPoint = tileTopPoint(startingTile.pos) + toScreen;
         auto processLine = [&]() {
-            auto point = startingPoint;
-            auto tile = startingTile;
+            Misc::Point point = startingPoint;
+            Tile tile = startingTile;
 
             while (point.x < WIDTH + tileWidth / 2)
             {
@@ -1292,13 +1290,9 @@ namespace Render
                    SpriteCacheBase* cache,
                    LevelObjects& objs,
                    LevelObjects& items,
-                   int32_t x1,
-                   int32_t y1,
-                   int32_t x2,
-                   int32_t y2,
-                   size_t dist)
+                   const Vec2Fix& fractionalPos)
     {
-        auto toScreen = worldToScreenVector({x1, y1}, {x2, y2}, dist);
+        auto toScreen = worldToScreenVector(fractionalPos);
         SpriteGroup* minBottoms = cache->get(minBottomsHandle);
         auto isInvalidTile = [&](const Tile& tile) {
             return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
@@ -1358,7 +1352,7 @@ namespace Render
                 if (obj.valid)
                 {
                     auto sprite = cache->get(obj.spriteCacheIndex);
-                    drawMovingSprite((*sprite)[obj.spriteFrame], tile, {obj.x2, obj.y2}, obj.dist, toScreen, obj.hoverColor);
+                    drawMovingSprite((*sprite)[obj.spriteFrame], obj.fractionalPos, toScreen, obj.hoverColor);
                 }
             }
         });

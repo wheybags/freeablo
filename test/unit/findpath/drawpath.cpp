@@ -1,5 +1,5 @@
 #include "drawpath.h"
-
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 
@@ -23,7 +23,7 @@ namespace test_utils
 
                 std::cout << std::left << std::setw(fieldWidth);
 
-                bool containsActualPath = find(actualPath.begin(), actualPath.end(), id) != actualPath.end();
+                bool containsActualPath = std::find(actualPath.begin(), actualPath.end(), id) != actualPath.end();
 
                 if (!graph.isPassable(id, nullptr))
                 {

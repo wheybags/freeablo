@@ -1,9 +1,9 @@
 #pragma once
 #include "equiptarget.h"
 #include "item.h"
-#include <boost/signals2/signal.hpp>
 #include <misc/array2d.h>
 #include <misc/misc.h>
+#include <optional>
 #include <set>
 #include <stdint.h>
 
@@ -13,6 +13,7 @@ namespace FAWorld
     class Actor;
     struct ExchangeResult;
     class ItemFactory;
+    struct ItemStats;
 
     enum class PlacementCheckOrder
     {
@@ -37,6 +38,21 @@ namespace FAWorld
         std::set<Item*> blockingItems;
 
         bool succeeded() { return type == Type::Success; }
+    };
+
+    // A representation of the weapons / shield a player has equipped,
+    // but normalised so we don't need to check left/right everywhere
+    struct EquippedInHandsItems
+    {
+        struct TypeData
+        {
+            NonNullConstPtr<Item> item;
+            EquipTargetType location;
+        };
+
+        std::optional<TypeData> meleeWeapon;
+        std::optional<TypeData> rangedWeapon;
+        std::optional<TypeData> shield;
     };
 
     /// A Simple grid inventory, with no concept of "equipping" gear
@@ -69,6 +85,8 @@ namespace FAWorld
         const_iterator begin() const { return mInventoryBox.begin(); }
         const_iterator end() const { return mInventoryBox.end(); }
 
+        std::function<void(Item const& removed, Item const& added)> mInventoryChanged;
+
     private:
         Misc::Array2D<Item> mInventoryBox;
         bool mTreatAllItemsAs1by1 = false;
@@ -78,6 +96,7 @@ namespace FAWorld
     class CharacterInventory
     {
     public:
+        CharacterInventory();
         void save(FASaveGame::GameSaver& saver);
         void load(FASaveGame::GameLoader& loader);
 
@@ -89,7 +108,10 @@ namespace FAWorld
 
         void setCursorHeld(const Item& item);
 
-        ItemBonus getTotalItemBonus() const;
+        void calculateItemBonuses(ItemStats& stats) const;
+        bool isRangedWeaponEquipped() const;
+        bool isShieldEquipped() const;
+        EquippedInHandsItems getItemsInHands() const;
 
         const Item& getHead() const { return mHead.getItem(0, 0); }
         const Item& getBody() const { return mBody.getItem(0, 0); }
@@ -115,7 +137,7 @@ namespace FAWorld
 
     public:
         // This is not serialised - it should be reconnected by other means
-        boost::signals2::signal<void()> equipChanged;
+        std::function<void(EquipTargetType inventoryType, Item const& removed, Item const& added)> mInventoryChanged;
 
     private:
         static constexpr int32_t inventoryWidth = 10;
@@ -132,5 +154,16 @@ namespace FAWorld
         BasicInventory mLeftHand = BasicInventory(1, 1, true);
         BasicInventory mRightHand = BasicInventory(1, 1, true);
         BasicInventory mCursorHeld = BasicInventory(1, 1, true);
+
+        std::map<EquipTargetType, BasicInventory&> mInventoryTypes = {{EquipTargetType::inventory, mMainInventory},
+                                                                      {EquipTargetType::belt, mBelt},
+                                                                      {EquipTargetType::head, mHead},
+                                                                      {EquipTargetType::body, mBody},
+                                                                      {EquipTargetType::leftRing, mLeftRing},
+                                                                      {EquipTargetType::rightRing, mRightRing},
+                                                                      {EquipTargetType::leftHand, mLeftHand},
+                                                                      {EquipTargetType::rightHand, mRightHand},
+                                                                      {EquipTargetType::amulet, mAmulet},
+                                                                      {EquipTargetType::cursor, mCursorHeld}};
     };
 }

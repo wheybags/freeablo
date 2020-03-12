@@ -1,19 +1,13 @@
 #pragma once
-
+#include "cel/pal.h"
+#include "misc.h"
+#include <functional>
+#include <map>
+#include <optional>
 #include <stdint.h>
-
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <functional>
-#include <map>
-
-#include "misc.h"
-#include "misc/point.h"
-
-#include "cel/pal.h"
-#include <boost/optional.hpp>
 
 struct SDL_Surface;
 class SpriteGroup;
@@ -32,7 +26,6 @@ namespace Cel
 }
 
 #include "levelobjects.h"
-
 #include "nuklear_sdl_gl3.h"
 
 namespace Level
@@ -57,6 +50,7 @@ namespace Render
         Misc::Point pos;
         TileHalf half;
         Tile(int32_t xArg, int32_t yArg, TileHalf halfArg = TileHalf::left) : pos(xArg, yArg), half(halfArg) {}
+        Tile(Misc::Point pos, TileHalf halfArg = TileHalf::left) : pos(pos), half(halfArg) {}
     };
     /**
      * @brief Render settings for initialization.
@@ -77,6 +71,9 @@ namespace Render
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);
 
     void setWindowSize(const RenderSettings& settings);
+
+    const std::string& getWindowTitle();
+    void setWindowTitle(const std::string& title);
 
     void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics);
     void quit();
@@ -105,7 +102,7 @@ namespace Render
 
     void handleEvents();
 
-    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, boost::optional<Cel::Colour> highlightColor = boost::none);
+    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor = std::nullopt);
 
     struct RocketFATex
     {
@@ -126,13 +123,9 @@ namespace Render
                    SpriteCacheBase* cache,
                    LevelObjects& objs,
                    LevelObjects& items,
-                   int32_t x1,
-                   int32_t y1,
-                   int32_t x2,
-                   int32_t y2,
-                   size_t dist);
+                   const Vec2Fix& fractionalPos);
 
-    Tile getTileByScreenPos(size_t x, size_t y, int32_t x1, int32_t y1, int32_t x2, int32_t y2, size_t dist);
+    Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& fractionalPos);
 
     void clear(int r = 0, int g = 0, int b = 255);
 }

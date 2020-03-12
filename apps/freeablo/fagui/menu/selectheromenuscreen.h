@@ -1,9 +1,7 @@
-
 #pragma once
-
 #include "menuscreen.h"
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace FARender
 {
@@ -59,6 +57,6 @@ namespace FAGui
         std::unique_ptr<FARender::AnimationPlayer> mFocus;
         std::unique_ptr<FARender::AnimationPlayer> mFocus16;
         ContentType mContentType = ContentType::chooseClass;
-        boost::optional<characterInfo> mSelectedCharacterInfo;
+        std::optional<characterInfo> mSelectedCharacterInfo;
     };
 }

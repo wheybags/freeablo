@@ -1,11 +1,11 @@
 #pragma once
-
 #include "hoverstate.h"
 #include "itemmap.h" // TODO: remove, only included for the Tile type
-#include "misc/point.h"
+#include <functional>
 #include <level/level.h>
 #include <misc/stdhashes.h>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace FARender
 {
@@ -28,6 +28,12 @@ namespace FAWorld
     class Tile;
 
     class World;
+
+    namespace Missile
+    {
+        class Missile;
+        class MissileGraphic;
+    }
 
     class GameLevelImpl
     {
@@ -62,7 +68,8 @@ namespace FAWorld
 
         const Misc::Point downStairsPos() const;
 
-        void activate(const Misc::Point& point);
+        bool isDoor(const Misc::Point& point) const;
+        bool activateDoor(const Misc::Point& point);
 
         int32_t getNextLevel();
 
@@ -73,11 +80,17 @@ namespace FAWorld
         void insertActor(Actor* actor);
         void actorMapInsert(Actor* actor);
 
-        void actorMapRemove(Actor* actor);
+        void actorMapRemove(const Actor* actor, Misc::Point point);
 
         void actorMapClear();
 
         void actorMapRefresh();
+
+        // TODO: Remove the additionalConstraints parameter, it is currently only used as a bit of a hack to not
+        //  place a player on a town portal when teleporting (see https://github.com/wheybags/freeablo/issues/478)
+        Misc::Point getFreeSpotNear(Misc::Point point,
+                                    int32_t radius = std::numeric_limits<int32_t>::max(),
+                                    const std::function<bool(const Misc::Point& point)>& additionalConstraints = nullptr) const;
 
         virtual bool isPassable(const Misc::Point& point, const FAWorld::Actor* forActor) const;
 
@@ -87,7 +100,7 @@ namespace FAWorld
 
         void removeActor(Actor* actor);
 
-        int32_t getLevelIndex() { return mLevelIndex; }
+        int32_t getLevelIndex() const { return mLevelIndex; }
 
         bool dropItem(std::unique_ptr<Item>&& item, const Actor& actor, const Tile& tile);
         bool dropItemClosestEmptyTile(Item& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction);
@@ -101,6 +114,12 @@ namespace FAWorld
         bool isTown() const;
 
         World* getWorld() { return &mWorld; }
+
+        // This list avoids having to check every actor in world to find missile graphics on a level.
+        // It is not saved, items are added/removed in MissileGraphic constructor/destructor.
+        // This is currently only intended for rendering so order is unimportant, hence using std::unordered_set
+        // and not saving/loading. Since order is not maintained this should not use be used for game logic!
+        std::unordered_set<Missile::MissileGraphic*> mMissileGraphics;
 
     private:
         GameLevel(World& world);

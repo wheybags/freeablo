@@ -1,5 +1,4 @@
 #include "itemmap.h"
-
 #include "item.h"
 
 #include "../engine/threadmanager.h"

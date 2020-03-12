@@ -1,9 +1,8 @@
 #pragma once
-
-#include <boost/optional/optional.hpp>
 #include <map>
 #include <memory>
-#include <misc/point.h>
+#include <misc/simplevec2.h>
+#include <optional>
 #include <vector>
 
 namespace FARender

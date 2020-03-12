@@ -1,5 +1,4 @@
 #include "npc.h"
-
 #include <sstream>
 
 namespace DiabloExe

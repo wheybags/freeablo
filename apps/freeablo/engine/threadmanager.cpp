@@ -1,26 +1,21 @@
 #include "threadmanager.h"
-
+#include "../farender/renderer.h"
 #include <chrono>
 #include <iostream>
-
 #include <input/inputmanager.h>
-
-#include "../farender/renderer.h"
 
 namespace Engine
 {
     ThreadManager* ThreadManager::mThreadManager = NULL;
     ThreadManager* ThreadManager::get() { return mThreadManager; }
 
-    ThreadManager::ThreadManager() : mRenderState(NULL), mAudioManager(50, 100) { mThreadManager = this; }
+    ThreadManager::ThreadManager() : mQueue(100), mRenderState(NULL), mAudioManager(50, 100) { mThreadManager = this; }
 
     void ThreadManager::run()
     {
         const int MAXIMUM_DURATION_IN_MS = 1000;
         Input::InputManager* inputManager = Input::InputManager::get();
         FARender::Renderer* renderer = FARender::Renderer::get();
-
-        Message message;
 
         auto last = std::chrono::system_clock::now();
         size_t numFrames = 0;
@@ -29,8 +24,11 @@ namespace Engine
         {
             mSpritesToPreload.clear();
 
-            while (mQueue.pop(message))
-                handleMessage(message);
+            while (mQueue.front())
+            {
+                handleMessage(*mQueue.front());
+                mQueue.pop();
+            }
 
             inputManager->poll();
 
@@ -46,7 +44,9 @@ namespace Engine
 
             if (duration >= MAXIMUM_DURATION_IN_MS)
             {
-                std::cout << "FPS: " << ((float)numFrames) / (((float)duration) / MAXIMUM_DURATION_IN_MS) << std::endl;
+                std::stringstream ss;
+                ss << "(" << ((float)numFrames) / (((float)duration) / MAXIMUM_DURATION_IN_MS) << " FPS)";
+                Render::setWindowTitle(Render::getWindowTitle() + " " + ss.str());
                 numFrames = 0;
                 last = now;
             }
@@ -85,6 +85,8 @@ namespace Engine
         message.type = ThreadState::STOP_SOUND;
         mQueue.push(message);
     }
+
+    bool ThreadManager::isPlayingSound() const { return mAudioManager.isPlayingSound(); }
 
     void ThreadManager::sendRenderState(FARender::RenderState* state)
     {

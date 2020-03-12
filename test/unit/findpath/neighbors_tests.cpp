@@ -1,8 +1,5 @@
 #include "levelimplstub.h"
-
 #include <faworld/findpath.h>
-
-#include <boost/make_unique.hpp>
 #include <gtest/gtest.h>
 
 using Point = Misc::Point;
@@ -34,7 +31,7 @@ struct NeighborsPatternsTest : ::testing::TestWithParam<NeighborsPatternsParams>
 {
     std::unique_ptr<FAWorld::LevelImplStub> level;
 
-    void SetUp() override { level = boost::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
+    void SetUp() override { level = std::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
 };
 
 TEST_P(NeighborsPatternsTest, equals)
@@ -48,11 +45,11 @@ TEST_P(NeighborsPatternsTest, equals)
     ASSERT_EQ(actual, expected);
 }
 
-INSTANTIATE_TEST_CASE_P(FindPathPatternsParams,
-                        NeighborsPatternsTest,
-                        ::testing::Values(NeighborsPatternsParams{basicMap(), Point(-2, -2), Points{}},
-                                          NeighborsPatternsParams{basicMap(), Point(0, 0), Points{{0, 0}, {1, 0}, {0, 1}, {1, 1}}},
-                                          NeighborsPatternsParams{basicMap(), Point(5, 5), Points{{4, 4}, {5, 4}, {4, 5}, {5, 5}}},
-                                          NeighborsPatternsParams{basicMap(), Point(6, 6), Points{{5, 5}}},
-                                          NeighborsPatternsParams{
-                                              basicMap(), Point(1, 1), Points{{0, 0}, {1, 0}, {2, 0}, {0, 1}, {1, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}}}), );
+INSTANTIATE_TEST_SUITE_P(FindPathPatternsParams,
+                         NeighborsPatternsTest,
+                         ::testing::Values(NeighborsPatternsParams{basicMap(), Point(-2, -2), Points{}},
+                                           NeighborsPatternsParams{basicMap(), Point(0, 0), Points{{0, 0}, {1, 0}, {0, 1}, {1, 1}}},
+                                           NeighborsPatternsParams{basicMap(), Point(5, 5), Points{{4, 4}, {5, 4}, {4, 5}, {5, 5}}},
+                                           NeighborsPatternsParams{basicMap(), Point(6, 6), Points{{5, 5}}},
+                                           NeighborsPatternsParams{
+                                               basicMap(), Point(1, 1), Points{{0, 0}, {1, 0}, {2, 0}, {0, 1}, {1, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}}}));

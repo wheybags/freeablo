@@ -58,7 +58,9 @@ AlignAfterOpenBracket: Align
 DerivePointerAlignment: false
 PointerAlignment: Left
 
-# WISHLIST: for all the below, and "allow" option, instead of just true or false
+FixNamespaceComments: false
+
+# WISHLIST: for all the below, an "allow" option, instead of just true or false
 # This would preserve alignment if it's already aligned, but not force it if it
 # wasn't. Without that option, the amount of false positives make these useless
 #AlignConsecutiveAssignments

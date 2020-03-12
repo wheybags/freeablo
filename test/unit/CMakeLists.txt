@@ -1,8 +1,5 @@
 project(unit_tests)
 
-hunter_add_package(GTest)
-find_package(GTest CONFIG REQUIRED)
-
 set(SOURCES
     main.cpp
 
@@ -14,8 +11,11 @@ set(SOURCES
 
     fixedpoint.cpp
     settings.cpp
+    random.cpp
+    testlevelgen.cpp
+    testcombatformulas.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
-target_link_libraries(${PROJECT_NAME} GTest::gtest freeablo_lib Misc Settings)
+target_link_libraries(${PROJECT_NAME} gtest_main freeablo_lib Misc Settings Filesystem)

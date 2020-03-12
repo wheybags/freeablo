@@ -1,6 +1,5 @@
 #pragma once
-
-#include <misc/point.h>
+#include <misc/simplevec2.h>
 
 namespace Input
 {
@@ -27,6 +26,11 @@ namespace Engine
         toggleQuests,
         toggleCharacterInfo,
         toggleSpellbook,
+        toggleSpellSelection,
+        spellHotkeyF5,
+        spellHotkeyF6,
+        spellHotkeyF7,
+        spellHotkeyF8,
 
         max,
     };
@@ -35,6 +39,8 @@ namespace Engine
     {
         MOUSE_RELEASE,
         MOUSE_DOWN,
+        RIGHT_MOUSE_RELEASE,
+        RIGHT_MOUSE_DOWN,
         MOUSE_MOVE,
     };
 

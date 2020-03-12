@@ -1,11 +1,8 @@
-
 #pragma once
-
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/filesystem.hpp>
 #include <memory>
+#include <misc/misc.h>
 #include <string>
+#include <vector>
 
 namespace Settings
 {
@@ -14,7 +11,8 @@ namespace Settings
     class Settings
     {
     public:
-        Settings(const std::string& defaultPath = "resources/settings-default.ini", const std::string& userPath = "resources/settings-user.ini");
+        Settings(const std::string& defaultPath = Misc::getResourcesPath().str() + "/settings-default.ini",
+                 const std::string& userPath = Misc::getResourcesPath().str() + "/settings-user.ini");
         ~Settings();
         Settings(const Settings&) = delete;
         Settings& operator=(const Settings&) = delete;
@@ -34,4 +32,4 @@ namespace Settings
         struct Impl;
         std::unique_ptr<Impl> mImpl;
     };
-} // namespace Settings
+}

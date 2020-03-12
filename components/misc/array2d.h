@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include <cstdint>
 #include <misc/assert.h>
 #include <vector>
@@ -62,6 +60,18 @@ namespace Misc
 
         int32_t width() const { return mWidth; }
         int32_t height() const { return mHeight; }
+
+        void resize(int32_t newWidth, int32_t newHeight)
+        {
+            mWidth = newWidth;
+            mHeight = newHeight;
+
+            mData.resize(mWidth * mHeight);
+        }
+
+        T* data() { return mData.data(); }
+        std::vector<T>& getFlatVector() { return mData; }
+        const std::vector<T>& getFlatVector() const { return mData; }
 
     private:
         std::vector<T> mData;

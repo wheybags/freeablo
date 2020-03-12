@@ -1,9 +1,7 @@
 #pragma once
-
 #include "baseitemmanager.h"
 #include "dun.h"
 #include "min.h"
-#include "misc/point.h"
 #include "sol.h"
 #include "tileset.h"
 #include <map>
@@ -61,7 +59,8 @@ namespace Level
 
         void save(Serial::Saver& saver);
 
-        void activate(const Misc::Point& point);
+        bool isDoor(const Misc::Point& point) const;
+        bool activateDoor(const Misc::Point& point); /// @return If the door was activated
 
         int32_t minSize() const;
         const MinPillar minPillar(int32_t i) const;
@@ -84,6 +83,16 @@ namespace Level
         int32_t getNextLevel() const { return mNext; }
 
         int32_t getPreviousLevel() const { return mPrevious; }
+
+    private:
+        struct InternalLocationData
+        {
+            int32_t xDunIndex = 0;
+            int32_t yDunIndex = 0;
+            int32_t tilIndex = 0;
+        };
+
+        InternalLocationData getInternalLocationData(const Misc::Point& point) const;
 
     private:
         std::string mTilesetCelPath;               ///< path to cel file for level

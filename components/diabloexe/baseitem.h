@@ -1,10 +1,7 @@
-
 #pragma once
-
-#include <stdint.h>
-
 #include <faio/fafileobject.h>
 #include <map>
+#include <stdint.h>
 #include <string>
 
 namespace DiabloExe
@@ -50,6 +47,8 @@ namespace DiabloExe
         int32_t invSizeY;
 
         std::string dropItemGraphicsPath;
+        std::string dropItemSoundPath;
+        std::string invPlaceItemSoundPath;
 
         std::string dump() const;
         BaseItem();

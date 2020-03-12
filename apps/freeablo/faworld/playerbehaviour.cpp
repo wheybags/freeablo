@@ -2,9 +2,11 @@
 #include "../fagui/guimanager.h"
 #include "../farender/renderer.h"
 #include "equiptarget.h"
+#include "fasavegame/gameloader.h"
 #include "input/inputmanager.h"
 #include "player.h"
 #include "storedata.h"
+#include <algorithm>
 #include <misc/assert.h>
 
 namespace FAWorld
@@ -15,6 +17,22 @@ namespace FAWorld
     {
         release_assert(actor->getTypeId() == Player::typeId);
         mPlayer = static_cast<Player*>(actor);
+    }
+
+    PlayerBehaviour::PlayerBehaviour(FASaveGame::GameLoader& loader)
+    {
+        mActiveSpell = (SpellId)loader.load<int32_t>();
+
+        for (auto& hotkey : mSpellHotkey)
+            hotkey = (SpellId)loader.load<int32_t>();
+    }
+
+    void PlayerBehaviour::save(FASaveGame::GameSaver& saver)
+    {
+        saver.save((int32_t)mActiveSpell);
+
+        for (auto& hotkey : mSpellHotkey)
+            saver.save((int32_t)hotkey);
     }
 
     void PlayerBehaviour::reAttach(Actor* actor)
@@ -53,8 +71,15 @@ namespace FAWorld
             case PlayerInput::Type::TargetTile:
             {
                 auto clickedPoint = Misc::Point(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
-                mPlayer->getLevel()->activate(clickedPoint);
+                mPlayer->getLevel()->activateDoor(clickedPoint);
 
+                if (mPlayer->getLevel()->isDoor(clickedPoint))
+                {
+                    mPlayer->mTarget = clickedPoint;
+                    return;
+                }
+
+                auto cursorItem = mPlayer->mInventory.getCursorHeld();
                 if (!cursorItem.isEmpty())
                 {
                     mPlayer->dropItem(clickedPoint);
@@ -74,13 +99,7 @@ namespace FAWorld
             }
             case PlayerInput::Type::TargetActor:
             {
-                if (!cursorItem.isEmpty())
-                {
-                    auto clickedPoint = Misc::Point(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
-                    mPlayer->dropItem(clickedPoint);
-                }
-                else
-                    mPlayer->mTarget = mPlayer->getWorld()->getActorById(input.mData.dataTargetActor.actorId);
+                mPlayer->mTarget = mPlayer->getWorld()->getActorById(input.mData.dataTargetActor.actorId);
                 return;
             }
             case PlayerInput::Type::TargetItemOnFloor:
@@ -89,10 +108,16 @@ namespace FAWorld
                 mPlayer->mTarget = Target::ItemTarget{input.mData.dataTargetItemOnFloor.type, item};
                 return;
             }
-            case PlayerInput::Type::AttackDirection:
+            case PlayerInput::Type::ForceAttack:
             {
                 if (!mPlayer->getLevel()->isTown())
-                    mPlayer->startMeleeAttack(input.mData.dataAttackDirection.direction);
+                    mPlayer->forceAttack(input.mData.dataForceAttack.pos);
+                return;
+            }
+            case PlayerInput::Type::CastSpell:
+            {
+                auto clickedPoint = Misc::Point(input.mData.dataCastSpell.x, input.mData.dataCastSpell.y);
+                mPlayer->castSpell(mActiveSpell, clickedPoint);
                 return;
             }
             case PlayerInput::Type::ChangeLevel:
@@ -103,8 +128,15 @@ namespace FAWorld
                 else
                     nextLevelIndex = mPlayer->getLevel()->getNextLevel();
 
-                bool upStairsPos = input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Down;
-                mPlayer->getWorld()->setLevel(nextLevelIndex, upStairsPos);
+                GameLevel* level = mPlayer->getWorld()->getLevel(nextLevelIndex);
+
+                if (level)
+                {
+                    if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
+                        mPlayer->teleport(level, Position(level->getFreeSpotNear(level->downStairsPos())));
+                    else
+                        mPlayer->teleport(level, Position(level->getFreeSpotNear(level->upStairsPos())));
+                }
 
                 return;
             }
@@ -119,6 +151,26 @@ namespace FAWorld
                                                         input.mData.dataSplitGoldStackIntoCursor.invY,
                                                         input.mData.dataSplitGoldStackIntoCursor.splitCount,
                                                         mPlayer->getWorld()->getItemFactory());
+                return;
+            }
+            case PlayerInput::Type::SetActiveSpell:
+            {
+                mActiveSpell = input.mData.dataSetActiveSpell.spell;
+                return;
+            }
+            case PlayerInput::Type::ConfigureSpellHotkey:
+            {
+                for (auto& hk : mSpellHotkey)
+                {
+                    if (hk == input.mData.dataConfigureSpellHotkey.spell)
+                        hk = SpellId::null;
+                }
+                mSpellHotkey[input.mData.dataConfigureSpellHotkey.hotkey] = input.mData.dataConfigureSpellHotkey.spell;
+                return;
+            }
+            case PlayerInput::Type::SpellHotkey:
+            {
+                mActiveSpell = mSpellHotkey[input.mData.dataSpellHotkey.hotkey];
                 return;
             }
             case PlayerInput::Type::BuyItem:

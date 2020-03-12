@@ -1,5 +1,6 @@
 #pragma once
 #include "../faworld/equiptarget.h"
+#include "../faworld/spellenums.h"
 #include "target.h"
 #include <cstdint>
 #include <misc/direction.h>
@@ -9,9 +10,13 @@
     MACRO(DragOverTile)                                                                                                                                        \
     MACRO(TargetActor)                                                                                                                                         \
     MACRO(TargetItemOnFloor)                                                                                                                                   \
-    MACRO(AttackDirection)                                                                                                                                     \
+    MACRO(ForceAttack)                                                                                                                                         \
+    MACRO(CastSpell)                                                                                                                                           \
     MACRO(ChangeLevel)                                                                                                                                         \
     MACRO(InventorySlotClicked)                                                                                                                                \
+    MACRO(SetActiveSpell)                                                                                                                                      \
+    MACRO(ConfigureSpellHotkey)                                                                                                                                \
+    MACRO(SpellHotkey)                                                                                                                                         \
     MACRO(SplitGoldStackIntoCursor)                                                                                                                            \
     MACRO(PlayerJoined)                                                                                                                                        \
     MACRO(PlayerLeft)                                                                                                                                          \
@@ -33,21 +38,21 @@ namespace FAWorld
         {
             int32_t x, y;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
         struct DragOverTileData
         {
             int32_t x, y;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
         struct TargetActorData
         {
             int32_t actorId;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
         struct TargetItemOnFloorData
@@ -55,14 +60,21 @@ namespace FAWorld
             Misc::Point position;
             Target::ItemTarget::ActionType type;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
-        struct AttackDirectionData
+        struct ForceAttackData
         {
-            Misc::Direction direction;
+            Misc::Point pos;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
+            void load(Serial::Loader& loader);
+        };
+        struct CastSpellData
+        {
+            int32_t x, y;
+
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
         struct ChangeLevelData
@@ -75,14 +87,36 @@ namespace FAWorld
 
             Direction direction;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
         struct InventorySlotClickedData
         {
             EquipTarget slot;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
+            void load(Serial::Loader& loader);
+        };
+        struct SetActiveSpellData
+        {
+            SpellId spell;
+
+            void save(Serial::Saver& saver) const;
+            void load(Serial::Loader& loader);
+        };
+        struct ConfigureSpellHotkeyData
+        {
+            int32_t hotkey;
+            SpellId spell;
+
+            void save(Serial::Saver& saver) const;
+            void load(Serial::Loader& loader);
+        };
+        struct SpellHotkeyData
+        {
+            int32_t hotkey;
+
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
         struct SplitGoldStackIntoCursorData
@@ -90,19 +124,19 @@ namespace FAWorld
             int32_t invX, invY;
             int32_t splitCount;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
         struct PlayerJoinedData
         {
             uint32_t peerId;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
         struct PlayerLeftData
         {
-            void save(Serial::Saver&) {}
+            void save(Serial::Saver&) const {}
             void load(Serial::Loader&) {}
         };
         struct BuyItemData
@@ -110,7 +144,7 @@ namespace FAWorld
             uint32_t itemId;
             int32_t shopkeeperId;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
         struct SellItemData
@@ -118,7 +152,7 @@ namespace FAWorld
             FAWorld::EquipTarget itemLocation;
             int32_t shopkeeperId;
 
-            void save(Serial::Saver& saver);
+            void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
 
@@ -149,11 +183,15 @@ namespace FAWorld
             DataUnionType() {}
         } mData;
 
-        void save(Serial::Saver& saver);
+        void save(Serial::Saver& saver) const;
         void load(Serial::Loader& loader);
 
         Type mType = Type::None;
         int32_t mActorId = -1;
+
+        static void removeUnnecessaryInputs(std::vector<PlayerInput>& inputs);
+
+        static constexpr int32_t MAX_SERIALISED_INPUT_SIZE = 50;
     };
 }
 

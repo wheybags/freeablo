@@ -3,9 +3,9 @@
 #include "../farender/spritecache.h"
 #include "textcolor.h"
 #include <array>
-#include <boost/optional.hpp>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -28,7 +28,7 @@ namespace FAGui
         explicit DialogManager(GuiManager& gui_manager, FAWorld::World& world);
         ~DialogManager();
 
-        void talk(const FAWorld::Actor* npc);
+        void talk(FAWorld::Actor* npc);
         void update(struct nk_context* ctx);
 
         void pushDialog(CharacterDialoguePopup* dialog);

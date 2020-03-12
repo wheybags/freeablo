@@ -1,7 +1,5 @@
-
 #pragma once
-
-#include <audio/audio.h>
+#include <audio/fa_audio.h>
 #include <list>
 #include <map>
 #include <stdint.h>
@@ -34,6 +32,7 @@ namespace FAAudio
         void playSound(const std::string& path);
         void stopSound();
         void playMusic(const std::string& path);
+        bool isPlayingSound() const;
 
     private:
         std::vector<std::string> mPlaying;
@@ -42,5 +41,6 @@ namespace FAAudio
         size_t mCacheSize;
         size_t mCount;
         Audio::Music* mCurrentMusic;
+        bool mIsPlayingSound;
     };
 }

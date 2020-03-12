@@ -1,10 +1,8 @@
-
 #pragma once
-
 #include "../faworld/playerfactory.h"
 #include "engineinputmanager.h"
-#include <boost/program_options.hpp>
 #include <memory>
+#include <settings/settings.h>
 
 namespace Level
 {
@@ -21,6 +19,11 @@ namespace DiabloExe
     class DiabloExe;
 }
 
+namespace cxxopts
+{
+    class ParseResult;
+}
+
 namespace Engine
 {
     class LocalInputHandler;
@@ -30,16 +33,18 @@ namespace Engine
     {
     public:
         EngineMain();
-        ~EngineMain();
+        ~EngineMain() override;
         EngineInputManager& inputManager();
-        void run(const boost::program_options::variables_map& variables);
+        void run(const cxxopts::ParseResult& variables);
         void stop();
         void togglePause();
         void toggleNoclip();
-        void notify(KeyboardInputAction action);
+        void notify(KeyboardInputAction action) override;
         void setupNewPlayer(FAWorld::Player* player);
         // TODO: replace with enums
-        void startGame(const std::string& characterClass);
+        void startGame(FAWorld::PlayerClass characterClass);
+        void startGameFromSave(const std::string& savePath);
+        void startMultiplayerGame(const std::string& serverAddress);
         const DiabloExe::DiabloExe& exe() const;
         bool isPaused() const;
 
@@ -47,7 +52,7 @@ namespace Engine
         LocalInputHandler* getLocalInputHandler() { return mLocalInputHandler.get(); }
 
     private:
-        void runGameLoop(const boost::program_options::variables_map& variables, const std::string& pathEXE);
+        void runGameLoop(const cxxopts::ParseResult& variables, const std::string& pathEXE);
 
     private:
         static EngineMain* singletonInstance;
@@ -65,5 +70,6 @@ namespace Engine
         bool mPaused = false;
         bool mNoclip = false;
         bool mInGame = false;
+        Settings::Settings mSettings;
     };
 }

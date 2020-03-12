@@ -1,8 +1,7 @@
 #include "monster.h"
-
 #include <faio/fafileobject.h>
-
 #include <iostream>
+#include <misc/assert.h>
 #include <sstream>
 
 namespace DiabloExe
@@ -43,7 +42,7 @@ namespace DiabloExe
         minHp = exe.read32();
         maxHp = exe.read32();
 
-        attackType = exe.read8();
+        attackType = MonsterAttackType(exe.read8());
 
         unknown1 = exe.read8();
         unknown2 = exe.read8();
@@ -162,5 +161,73 @@ namespace DiabloExe
            << "}" << std::endl;
 
         return ss.str();
+    }
+
+    FixedPoint getSpeedByMonsterAttackType(MonsterAttackType type)
+    {
+        // https://wheybags.gitlab.io/jarulfs-guide/#monster-timing-information
+        switch (type)
+        {
+            case MonsterAttackType::Zombie:
+                return FixedPoint(1) / FixedPoint("1.2");
+            case MonsterAttackType::Overlord:
+                return FixedPoint(1) / FixedPoint("0.5");
+            case MonsterAttackType::Skeleton:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::SkeletonArcher:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::Scavenger:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::HornedDemon:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::GoatMan:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::GoatManArcher:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::FallenOne:
+                return FixedPoint(1) / FixedPoint("0.55"); // TODO: This should be different for Fallen Ones with spears / swords
+            case MonsterAttackType::MagmaDemon:
+                return FixedPoint(1) / FixedPoint("0.5");
+            case MonsterAttackType::SkeletonCaptain:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::WingedFiend:
+                return FixedPoint(1) / FixedPoint("0.65");
+            case MonsterAttackType::Gargoyle:
+                return FixedPoint(1) / FixedPoint("0.7");
+            case MonsterAttackType::Butcher:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::Succubus:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::Hidden:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::LightningDemon:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::Fireman:
+                return FixedPoint(1) / FixedPoint("0.4"); // Missing from the guide
+            case MonsterAttackType::GharbadTheWeak:
+                return FixedPoint(1) / FixedPoint("0.4"); // Missing from the guide
+            case MonsterAttackType::SpittingTerror:
+                return FixedPoint(1) / FixedPoint("0.4");
+            case MonsterAttackType::FastSpittingTerror:
+                return FixedPoint(1) / FixedPoint("0.4"); // Missing from the guide
+            case MonsterAttackType::Golem:
+                return FixedPoint(1) / FixedPoint("0.8");
+            case MonsterAttackType::ZharTheMad:
+                return FixedPoint(1) / FixedPoint("0.4"); // Missing from the guide
+            case MonsterAttackType::Snotspill:
+                return FixedPoint(1) / FixedPoint("0.4"); // Missing from the guide
+            case MonsterAttackType::Viper:
+                return FixedPoint(1) / FixedPoint("0.55");
+            case MonsterAttackType::Mage:
+                return FixedPoint(1) / FixedPoint("0.05");
+            case MonsterAttackType::Balrog:
+                return FixedPoint(1) / FixedPoint("0.35");
+            case MonsterAttackType::Diablo:
+                return FixedPoint(1) / FixedPoint("0.3");
+            case MonsterAttackType::ENUM_END:
+                break;
+        }
+
+        invalid_enum(MonsterAttackType, type);
     }
 }

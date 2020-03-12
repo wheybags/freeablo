@@ -6,11 +6,10 @@
 
 #include <algorithm>
 #include <cctype>
+#include <faio/fafileobject.h>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <faio/fafileobject.h>
 
 namespace Misc
 {
@@ -107,13 +106,22 @@ namespace Misc
             return retval;
         }
 
-        static std::vector<std::string> split(const std::string& s, char delim)
+        enum class SplitEmptyBehavior
+        {
+            StripEmpties, // "a,,,b,c" => "a" "b" "c"
+            YieldEmpties, // "a,,,b,c" => "a" "" "" "b" "c"
+        };
+
+        static std::vector<std::string> split(const std::string& s, char delim, SplitEmptyBehavior emptyBehavior = SplitEmptyBehavior::YieldEmpties)
         {
             std::vector<std::string> elems;
             std::stringstream ss(s);
             std::string item;
             while (std::getline(ss, item, delim))
             {
+                if (emptyBehavior == SplitEmptyBehavior::StripEmpties && item.empty())
+                    continue;
+
                 elems.push_back(item);
             }
             return elems;
@@ -133,6 +141,11 @@ namespace Misc
             while (replaceOne(str, from, to))
             {
             }
+        }
+
+        static void rstrip(std::string& s, const std::string chars = " \t\n\v\f\r")
+        {
+            s.erase(std::find_if(s.rbegin(), s.rend(), [chars](int ch) { return chars.find(ch) == std::string::npos; }).base(), s.end());
         }
 
         static std::string readAsString(const std::string& path)

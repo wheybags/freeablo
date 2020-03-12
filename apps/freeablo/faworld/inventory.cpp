@@ -1,21 +1,17 @@
 #include "inventory.h"
 #include "../fagui/guimanager.h"
 #include "../fasavegame/gameloader.h"
+#include "../faworld/actorstats.h"
 #include "actorstats.h"
-#include "boost/container/flat_set.hpp"
 #include "equiptarget.h"
-#include "itembonus.h"
 #include "itemenums.h"
 #include "itemfactory.h"
 #include "player.h"
 #include <algorithm>
-#include <boost/range/any_range.hpp>
-#include <boost/range/irange.hpp>
 #include <iostream>
 #include <sstream>
 #include <stdint.h>
 #include <string>
-using namespace boost::container;
 
 namespace FAWorld
 {
@@ -64,13 +60,29 @@ namespace FAWorld
 
     bool BasicInventory::canFitItem(const Item& item) const
     {
+        if (item.getType() == ItemType::gold)
+        {
+            const auto maxGoldPerSlot = item.getMaxCount();
+            int32_t capacity = 0;
+
+            for (const auto& slot : mInventoryBox.getFlatVector())
+            {
+                if (slot.isEmpty())
+                    capacity += maxGoldPerSlot;
+                else if (slot.getType() == ItemType::gold)
+                    capacity += maxGoldPerSlot - slot.mCount;
+            }
+
+            return item.mCount <= capacity;
+        }
+
         Misc::Point itemSize{item.getInvSize()[0], item.getInvSize()[1]};
         if (mTreatAllItemsAs1by1)
             itemSize = Misc::Point{1, 1};
 
-        for (auto y : boost::irange(0, mInventoryBox.height() - itemSize.y, 1))
+        for (int32_t y = 0; y < mInventoryBox.height() - itemSize.y; y++)
         {
-            for (auto x : boost::irange(0, mInventoryBox.width() - itemSize.x, 1))
+            for (int32_t x = 0; x < mInventoryBox.width() - itemSize.x; x++)
             {
                 bool success = true;
 
@@ -117,45 +129,45 @@ namespace FAWorld
         switch (order)
         {
             case PlacementCheckOrder::FromLeftBottom:
-                for (auto y : boost::irange(mInventoryBox.height() - 1, -1, -1))
-                    for (auto x : boost::irange(0, mInventoryBox.width(), 1))
+                for (int32_t y = mInventoryBox.height() - 1; y != -1; y--)
+                    for (int32_t x = 0; x != mInventoryBox.width(); x++)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 break;
             case PlacementCheckOrder::FromLeftTop:
-                for (auto y : boost::irange(0, mInventoryBox.height(), 1))
-                    for (auto x : boost::irange(0, mInventoryBox.width(), 1))
+                for (int32_t y = 0; y != mInventoryBox.height(); y++)
+                    for (int32_t x = 0; x != mInventoryBox.width(); x++)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 break;
             case PlacementCheckOrder::FromRightBottom:
-                for (auto y : boost::irange(mInventoryBox.height() - 1, -1, -1))
-                    for (auto x : boost::irange(mInventoryBox.width() - 1, -1, -1))
+                for (int32_t y = mInventoryBox.height() - 1; y != -1; y--)
+                    for (int32_t x = mInventoryBox.width() - 1; x != -1; x--)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 break;
             case PlacementCheckOrder::SpecialFor1x2:
-                for (auto y : boost::irange(mInventoryBox.height() - 2, -1, -2))
-                    for (auto x : boost::irange(mInventoryBox.width() - 1, -1, -1))
+                for (int32_t y = mInventoryBox.height() - 2; y != -1; y -= 2)
+                    for (int32_t x = mInventoryBox.width() - 1; x != -1; x--)
                         if (placeItem(item, x, y).succeeded())
                             return true;
-                for (auto y : boost::irange(mInventoryBox.height() - 3, -1, -2))
-                    for (auto x : boost::irange(mInventoryBox.width() - 1, -1, -1))
+                for (int32_t y = mInventoryBox.height() - 3; y != -1; y -= 2)
+                    for (int32_t x = mInventoryBox.width() - 1; x != -1; x--)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 break;
             case PlacementCheckOrder::SpecialFor2x2:
                 // this way lies madness
-                for (auto x : boost::irange(mInventoryBox.width() - 2, -1, -2))
-                    for (auto y : boost::irange(0, mInventoryBox.height(), 2))
+                for (int32_t x = mInventoryBox.width() - 2; x != -1; x -= 2)
+                    for (int32_t y = 0; y != mInventoryBox.height(); x += 2)
                         if (placeItem(item, x, y).succeeded())
                             return true;
-                for (auto y : boost::irange(mInventoryBox.height() - 2, -1, -2))
-                    for (auto x : boost::irange(1, mInventoryBox.width(), 2))
+                for (int32_t y = mInventoryBox.height() - 2; y != -1; y -= 2)
+                    for (int32_t x = 1; x != mInventoryBox.width(); x += 2)
                         if (placeItem(item, x, y).succeeded())
                             return true;
-                for (auto y : boost::irange(1, mInventoryBox.height(), 2))
-                    for (auto x : boost::irange(0, mInventoryBox.width(), 1))
+                for (int32_t y = 1; y != mInventoryBox.height(); y += 2)
+                    for (int32_t x = 0; x != mInventoryBox.width(); x++)
                         if (placeItem(item, x, y).succeeded())
                             return true;
                 break;
@@ -214,6 +226,8 @@ namespace FAWorld
         }
 
         mInventoryBox.get(x, y).mIsReal = true;
+        mInventoryChanged(Item(), item);
+
         return PlaceItemResult{PlaceItemResult::Type::Success, {}};
     }
 
@@ -272,6 +286,8 @@ namespace FAWorld
             for (int xLocal = result.getCornerCoords().first; xLocal < result.getCornerCoords().first + itemSize.x; ++xLocal)
                 mInventoryBox.get(xLocal, yLocal) = {};
 
+        mInventoryChanged(result, Item());
+
         return result;
     }
 
@@ -279,17 +295,26 @@ namespace FAWorld
     {
         std::set<EquipTarget> NeedsToBeReplaced;
         std::set<EquipTarget> NeedsToBeReturned; // used only for equipping 2-handed weapon while wearing 1h weapon + shield
-        boost::optional<EquipTarget> newTarget;  // sometimes target changes during exchange
+        std::optional<EquipTarget> newTarget;    // sometimes target changes during exchange
         ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg = {},
                        std::set<EquipTarget> NeedsToBeReturnedArg = {},
-                       const boost::optional<EquipTarget>& newTargetArg = {});
+                       const std::optional<EquipTarget>& newTargetArg = {});
     };
 
     ExchangeResult::ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg,
                                    std::set<EquipTarget> NeedsToBeReturnedArg,
-                                   const boost::optional<EquipTarget>& newTargetArg)
+                                   const std::optional<EquipTarget>& newTargetArg)
         : NeedsToBeReplaced(std::move(NeedsToBeReplacedArg)), NeedsToBeReturned(std::move(NeedsToBeReturnedArg)), newTarget(newTargetArg)
     {
+    }
+
+    CharacterInventory::CharacterInventory()
+    {
+        for (const auto& pair : mInventoryTypes)
+        {
+            EquipTargetType type = pair.first;
+            pair.second.mInventoryChanged = [this, type](Item const& removed, Item const& added) { mInventoryChanged(type, removed, added); };
+        }
     }
 
     void CharacterInventory::save(FASaveGame::GameSaver& saver)
@@ -339,7 +364,6 @@ namespace FAWorld
         {
             release_assert(mLeftHand.autoPlaceItem(item));
             release_assert(mRightHand.autoPlaceItem(item));
-            equipChanged();
             return true;
         }
 
@@ -347,7 +371,6 @@ namespace FAWorld
         if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getClass() == ItemClass::weapon && leftHand.isEmpty())
         {
             mLeftHand.autoPlaceItem(item);
-            equipChanged();
             return true;
         }
 
@@ -391,36 +414,9 @@ namespace FAWorld
         mCursorHeld.placeItem(item, 0, 0).succeeded();
     }
 
-    const BasicInventory& CharacterInventory::getInv(EquipTargetType type) const { return const_cast<CharacterInventory*>(this)->getInvMutable(type); }
+    const BasicInventory& CharacterInventory::getInv(EquipTargetType type) const { return mInventoryTypes.at(type); }
 
-    BasicInventory& CharacterInventory::getInvMutable(EquipTargetType type)
-    {
-        switch (type)
-        {
-            case EquipTargetType::inventory:
-                return mMainInventory;
-            case EquipTargetType::belt:
-                return mBelt;
-            case EquipTargetType::head:
-                return mHead;
-            case EquipTargetType::body:
-                return mBody;
-            case EquipTargetType::leftRing:
-                return mLeftRing;
-            case EquipTargetType::rightRing:
-                return mRightRing;
-            case EquipTargetType::leftHand:
-                return mLeftHand;
-            case EquipTargetType::rightHand:
-                return mRightHand;
-            case EquipTargetType::amulet:
-                return mAmulet;
-            case EquipTargetType::cursor:
-                return mCursorHeld;
-        }
-
-        invalid_enum(EquipTargetType, type);
-    }
+    BasicInventory& CharacterInventory::getInvMutable(EquipTargetType type) { return mInventoryTypes.at(type); }
 
     void CharacterInventory::slotClicked(const EquipTarget& slot)
     {
@@ -499,37 +495,54 @@ namespace FAWorld
         setCursorHeld(tmp);
     }
 
-    static const EquipTarget slotEquipTargets[] = {MakeEquipTarget<EquipTargetType::leftHand>(),
-                                                   MakeEquipTarget<EquipTargetType::rightHand>(),
-                                                   MakeEquipTarget<EquipTargetType::leftRing>(),
-                                                   MakeEquipTarget<EquipTargetType::rightRing>(),
-                                                   MakeEquipTarget<EquipTargetType::amulet>(),
-                                                   MakeEquipTarget<EquipTargetType::body>(),
-                                                   MakeEquipTarget<EquipTargetType::head>()};
-
-    static const flat_set<EquipTarget> equipSlotsSet(std::begin(slotEquipTargets), std::end(slotEquipTargets));
-
-    ItemBonus CharacterInventory::getTotalItemBonus() const
+    void CharacterInventory::calculateItemBonuses(ItemStats& stats) const
     {
-        ItemBonus total;
-        for (auto slot : slotEquipTargets)
+        EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
+        for (auto& slot : hands)
         {
-            auto& item = getItemAt(slot);
-            if (!item.isEmpty())
-            {
-                // TODO: add stat recheck, because item may become invalid while equipped in Diablo thus becoming useless
-                total += item.getBonus();
-            }
+            const Item& item = getItemAt(slot);
+            if (Item::isItemAMeleeWeapon(item.getType()))
+                stats.meleeDamageBonusRange += {item.getMinAttackDamage(), item.getMaxAttackDamage()};
+            else if (Item::isItemARangedWeapon(item.getType()))
+                stats.rangedDamageBonusRange += {item.getMinAttackDamage(), item.getMaxAttackDamage()};
+
+            // TODO: other stats
         }
-        if (total.minAttackDamage == 0 && total.maxAttackDamage == 0)
+    }
+
+    bool CharacterInventory::isRangedWeaponEquipped() const
+    {
+        EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
+        for (auto& slot : hands)
         {
-            total.minAttackDamage = total.maxAttackDamage = 1;
-            // TODO: stat recheck for shield
-            if (getItemAt(MakeEquipTarget<EquipTargetType::leftHand>()).getType() == ItemType::shield ||
-                getItemAt(MakeEquipTarget<EquipTargetType::rightHand>()).getType() == ItemType::shield)
-                total.maxAttackDamage += 2;
+            const Item& item = getItemAt(slot);
+            if (Item::isItemARangedWeapon(item.getType()))
+                return true;
         }
-        return total;
+
+        return false;
+    }
+
+    bool CharacterInventory::isShieldEquipped() const { return getLeftHand().getType() == ItemType::shield || getRightHand().getType() == ItemType::shield; }
+
+    EquippedInHandsItems CharacterInventory::getItemsInHands() const
+    {
+        EquippedInHandsItems retval = {};
+
+        EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
+        for (auto& slot : hands)
+        {
+            const Item& item = getItemAt(slot);
+
+            if (Item::isItemARangedWeapon(item.getType()))
+                retval.rangedWeapon = EquippedInHandsItems::TypeData{item, slot.type};
+            else if (Item::isItemAMeleeWeapon(item.getType()))
+                retval.meleeWeapon = EquippedInHandsItems::TypeData{item, slot.type};
+            else if (item.getType() == ItemType::shield)
+                retval.shield = EquippedInHandsItems::TypeData{item, slot.type};
+        }
+
+        return retval;
     }
 
     int32_t CharacterInventory::placeGold(int32_t quantity, const ItemFactory& itemFactory)
@@ -561,9 +574,9 @@ namespace FAWorld
             }
         }
         // second part - filling the empty slots with gold
-        for (auto x : boost::irange(0, mMainInventory.width(), 1))
+        for (int32_t x = 0; x != mMainInventory.width(); x++)
         {
-            for (auto y : boost::irange(0, mMainInventory.height(), 1))
+            for (int32_t y = 0; y != mMainInventory.height(); x++)
             {
                 if (mMainInventory.getItem(x, y).isEmpty())
                 {

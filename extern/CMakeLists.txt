@@ -1,45 +1,26 @@
-# nuklear
-###################
-add_subdirectory(nuklear)
-
-# nativefiledialog
-###################
-set(LIB nativefiledialog)
-set(SRCS nativefiledialog/src/nfd_common.c nativefiledialog/src/include/nfd.h)
-
-set(EXTRA_LIBRARIES)
-
-if (APPLE)
-    set(SRCS ${SRCS} nativefiledialog/src/nfd_cocoa.m)
-    set(EXTRA_LIBRARIES ${EXTRA_LIBRARIES} "-framework AppKit")
-endif()
-
-if (WIN32)
-    set(SRCS ${SRCS} nativefiledialog/src/nfd_win.cpp)
-endif()
-
-if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux" OR "${CMAKE_SYSTEM_NAME}" MATCHES "OpenBSD")
-    set(SRCS ${SRCS} nativefiledialog/src/nfd_zenity.c)
-endif()
-
-add_library(${LIB} ${SRCS})
-
-if (EXTRA_LIBRARIES)
-    target_link_libraries(${LIB} ${EXTRA_LIBRARIES})
-endif()
-
-target_include_directories(${LIB} PUBLIC nativefiledialog/src/include)
-
-#if(CMAKE_VERSION VERSION_LESS "3.1")
-    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        set_target_properties(${LIB} PROPERTIES COMPILE_FLAGS "-std=gnu99")
+function(message)
+    if (NOT MESSAGE_QUIET)
+        _message(${ARGN})
     endif()
-#else()
-#    set_property(TARGET ${LIB} PROPERTY C_STANDARD 99)
-#endif()
+endfunction()
 
-# simpleini
-###################
-set(LIB simpleini)
-add_library(${LIB} INTERFACE)
-target_include_directories(${LIB} INTERFACE simpleini/)
+# some of these external projects have very noise CMake code
+set(MESSAGE_QUIET ON)
+
+add_subdirectory(nuklear)
+add_subdirectory(nativefiledialog)
+add_subdirectory(simpleini)
+add_subdirectory(filesystem)
+add_subdirectory(cxxopts)
+add_subdirectory(fmt)
+add_subdirectory(SPSCQueue)
+add_subdirectory(enet)
+add_subdirectory(SDL2)
+add_subdirectory(SDL_mixer)
+add_subdirectory(zlib)
+add_subdirectory(libpng)
+add_subdirectory(SDL_image)
+add_subdirectory(StormLib)
+add_subdirectory(gtest)
+
+unset(MESSAGE_QUIET)

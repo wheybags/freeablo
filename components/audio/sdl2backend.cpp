@@ -1,13 +1,10 @@
-#include "audio.h"
-
+#include "fa_audio.h"
+#include <SDL.h>
+#include <SDL_mixer.h>
+#include <faio/fafileobject.h>
 #include <iostream>
 #include <stdint.h>
 #include <utility>
-
-#include <SDL.h>
-#include <SDL_mixer.h>
-
-#include <faio/fafileobject.h>
 
 namespace Audio
 {

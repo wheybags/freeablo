@@ -1,7 +1,6 @@
-
 #pragma once
-
 #include <cstdint>
+#include <misc/simplevec2.h>
 
 namespace FASaveGame
 {
@@ -22,6 +21,7 @@ namespace FAWorld
             None,
             Actor,
             Item,
+            Door,
         };
 
         class ItemTarget
@@ -38,6 +38,7 @@ namespace FAWorld
 
         Target(const ItemTarget& target);
         Target(Actor* target);
+        Target(const Misc::Point& target);
         Target() = default;
 
         void load(FASaveGame::GameLoader& loader);
@@ -49,10 +50,13 @@ namespace FAWorld
         template <typename T> T get() const;
 
     private:
-        union
+        union Data
         {
             Actor* actor;
             ItemTarget item;
+            Misc::Point doorPosition;
+
+            Data() {}
         } mData;
 
         Type mType = Type::None;
@@ -60,4 +64,5 @@ namespace FAWorld
 
     template <> Actor* Target::get<Actor*>() const;
     template <> Target::ItemTarget Target::get<Target::ItemTarget>() const;
+    template <> Misc::Point Target::get<Misc::Point>() const;
 }

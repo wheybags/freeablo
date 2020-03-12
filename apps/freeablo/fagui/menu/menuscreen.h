@@ -1,7 +1,6 @@
-
 #pragma once
-
 #include <functional>
+#include <queue>
 #include <vector>
 
 struct nk_context;
@@ -19,14 +18,12 @@ namespace FAGui
     class MenuScreen
     {
     protected:
-        enum class DrawFunctionResult
-        {
+        enum class [[nodiscard]] DrawFunctionResult{
             executeAction,
             setActive,
             noAction,
         };
-        enum class ActionResult
-        {
+        enum class [[nodiscard]] ActionResult{
             stopDrawing,
             continueDrawing,
         };
@@ -47,11 +44,13 @@ namespace FAGui
         static void menuText(nk_context* ctx, const char* text, MenuFontColor color, int fontSize, uint32_t textAlignment);
         ActionResult drawMenuItems(nk_context* ctx);
         ActionResult executeActive();
+        ActionResult applyInputAction(Engine::KeyboardInputAction action);
 
     protected:
         MenuHandler& mMenuHandler;
         std::function<ActionResult()> mRejectAction;
         std::vector<MenuItem> mMenuItems;
+        std::queue<Engine::KeyboardInputAction> mInputActions;
         int mActiveItemIndex = 0;
     };
 }

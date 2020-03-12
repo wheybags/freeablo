@@ -1,10 +1,7 @@
 #include "drawpath.h"
 #include "levelimplstub.h"
-
-#include <faworld/findpath.h>
-
 #include <algorithm>
-#include <boost/make_unique.hpp>
+#include <faworld/findpath.h>
 #include <gtest/gtest.h>
 
 using Point = Misc::Point;
@@ -53,7 +50,7 @@ struct FindPathPatternsTest : ::testing::TestWithParam<FindPathPatternsParams>
     std::unique_ptr<FAWorld::LevelImplStub> level;
     bool isReachable = false;
 
-    void SetUp() override { level = boost::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
+    void SetUp() override { level = std::make_unique<FAWorld::LevelImplStub>(GetParam().map); }
 };
 
 TEST_P(FindPathPatternsTest, goalIsReachable)
@@ -112,16 +109,16 @@ TEST_P(FindPathPatternsTest, pathIsWalkable)
         ASSERT_TRUE(level->isPassable(tile, nullptr));
 }
 
-INSTANTIATE_TEST_CASE_P(FindPathPatternsParams,
-                        FindPathPatternsTest,
-                        ::testing::Values(FindPathPatternsParams{"Walk #1", basicMap(), Point(2, 3), Point{18, 5}, 17},
-                                          FindPathPatternsParams{"Walk #1 reverse", basicMap(), Point(18, 5), Point{2, 3}, 17},
-                                          FindPathPatternsParams{"Walk #2", basicMap(), Point(3, 10), Point{18, 10}, 19},
-                                          FindPathPatternsParams{"Walk #3", basicMap(), Point(3, 10), Point{15, 10}, 19},
-                                          FindPathPatternsParams{"Goal point is not passable #1", basicMap(), Point(18, 7), Point{10, 10}, 13},
-                                          FindPathPatternsParams{"Goal point is not passable #2", basicMap(), Point(18, 10), Point{10, 10}, 14}), );
+INSTANTIATE_TEST_SUITE_P(FindPathPatternsParams,
+                         FindPathPatternsTest,
+                         ::testing::Values(FindPathPatternsParams{"Walk #1", basicMap(), Point(2, 3), Point{18, 5}, 17},
+                                           FindPathPatternsParams{"Walk #1 reverse", basicMap(), Point(18, 5), Point{2, 3}, 17},
+                                           FindPathPatternsParams{"Walk #2", basicMap(), Point(3, 10), Point{18, 10}, 19},
+                                           FindPathPatternsParams{"Walk #3", basicMap(), Point(3, 10), Point{15, 10}, 19},
+                                           FindPathPatternsParams{"Goal point is not passable #1", basicMap(), Point(18, 7), Point{10, 10}, 13},
+                                           FindPathPatternsParams{"Goal point is not passable #2", basicMap(), Point(18, 10), Point{10, 10}, 14}));
 
-TEST(FindPathTests, walksStraightOnRectangleMap)
+TEST(FindPathTests, walksStraight_whenSomeWallsInTheMiddle)
 {
     const Point start{0, 1};
     const Point goal{14, 1};
@@ -137,6 +134,24 @@ TEST(FindPathTests, walksStraightOnRectangleMap)
 
     for (const auto& restrictedPosition : restrictedPositions)
         ASSERT_TRUE(std::end(path) == std::find(path.begin(), path.end(), restrictedPosition));
+}
+
+TEST(FindPathTests, walksStraight_vertically)
+{
+    FAWorld::LevelImplStub level(Map{{0, 0, 0, 0, 0}, //
+                                     {0, 0, 0, 0, 0}, //
+                                     {0, 0, 0, 0, 0}, //
+                                     {0, 0, 0, 0, 0}, //
+                                     {0, 0, 0, 0, 0}, //
+                                     {0, 0, 0, 0, 0}});
+    const Point start{2, 0};
+    const Point goal{2, 5};
+    const Points expected{{2, 0}, {2, 1}, {2, 2}, {2, 3}, {2, 4}, {2, 5}};
+
+    bool isReachable = false;
+    auto actual = FAWorld::pathFind(&level, nullptr, start, goal, isReachable, false);
+
+    ASSERT_EQ(actual, expected);
 }
 
 TEST(FindPathTests, walksOnLargeMap)

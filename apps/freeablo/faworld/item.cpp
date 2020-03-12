@@ -1,11 +1,11 @@
 #include "item.h"
 #include "../engine/enginemain.h"
+#include "../fagui/textcolor.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
-#include "itembonus.h"
 #include "itemenums.h"
 #include "itemfactory.h"
-#include <boost/format.hpp>
+#include <fmt/format.h>
 #include <iostream>
 #include <random/random.h>
 
@@ -33,9 +33,9 @@ namespace FAWorld
         saver.save(mCornerY);
     }
 
-    std::string Item::damageStr() const { return (boost::format("damage: %1% - %2%") % getMinAttackDamage() % getMaxAttackDamage()).str(); }
+    std::string Item::damageStr() const { return fmt::format("damage: {} - {}", getMinAttackDamage(), getMaxAttackDamage()); }
 
-    std::string Item::armorStr() const { return (boost::format("armor: %1%") % mArmorClass).str(); }
+    std::string Item::armorStr() const { return fmt::format("armor: {}", mArmorClass); }
 
     std::string Item::damageOrArmorStr() const
     {
@@ -55,24 +55,76 @@ namespace FAWorld
         if (mMaxDurability == indestructibleItemDurability)
             return "Indestructible";
         else
-            return (boost::format("Dur: %1%/%2%") % mCurrentDurability % mMaxDurability).str();
+            return fmt::format("Dur: {}/{}", mCurrentDurability, mMaxDurability);
     }
 
     std::string Item::requirementsStr() const
     {
-        if (getReqStr() + getReqDex() + getReqMagic() == 0)
+        if (getRequiredStrength() + getRequiredDexterity() + getRequiredMagic() == 0)
             return {};
         std::string str = "Required:";
-        if (getReqStr() > 0)
-            str += (boost::format(" %1% Str") % getReqStr()).str();
-        if (getReqMagic() > 0)
-            str += (boost::format(" %1% Mag") % getReqMagic()).str();
-        if (getReqDex() > 0)
-            str += (boost::format(" %1% Dex") % getReqDex()).str();
+        if (getRequiredStrength() > 0)
+            str += fmt::format(" {} Str", getRequiredStrength());
+        if (getRequiredMagic() > 0)
+            str += fmt::format(" {} Mag", getRequiredMagic());
+        if (getRequiredDexterity() > 0)
+            str += fmt::format(" {} Dex", getRequiredDexterity());
         return str;
     }
 
     const DiabloExe::BaseItem& Item::base() const { return Engine::EngineMain::get()->exe().getBaseItems()[static_cast<int32_t>(mBaseId)]; }
+
+    bool Item::isItemAMeleeWeapon(ItemType type)
+    {
+        switch (type)
+        {
+            case ItemType::sword:
+            case ItemType::axe:
+            case ItemType::mace:
+            case ItemType::staff:
+                return true;
+            case ItemType::misc:
+            case ItemType::bow:
+            case ItemType::shield:
+            case ItemType::lightArmor:
+            case ItemType::helm:
+            case ItemType::mediumArmor:
+            case ItemType::heavyArmor:
+            case ItemType::gold:
+            case ItemType::ring:
+            case ItemType::amulet:
+            case ItemType::none:
+                return false;
+        }
+
+        invalid_enum(ItemType, type);
+    }
+
+    bool Item::isItemARangedWeapon(ItemType type)
+    {
+        switch (type)
+        {
+            case ItemType::bow:
+                return true;
+            case ItemType::sword:
+            case ItemType::axe:
+            case ItemType::mace:
+            case ItemType::staff:
+            case ItemType::misc:
+            case ItemType::shield:
+            case ItemType::lightArmor:
+            case ItemType::helm:
+            case ItemType::mediumArmor:
+            case ItemType::heavyArmor:
+            case ItemType::gold:
+            case ItemType::ring:
+            case ItemType::amulet:
+            case ItemType::none:
+                return false;
+        }
+
+        invalid_enum(ItemType, type);
+    }
 
     std::string Item::getFullDescription() const
     {
@@ -96,22 +148,22 @@ namespace FAWorld
         return description;
     }
 
-    std::vector<std::string> Item::descriptionForMerchants() const
+    std::vector<FAGui::MenuEntry> Item::descriptionForMerchants() const
     {
-        std::vector<std::string> ret;
+        std::vector<FAGui::MenuEntry> ret;
         auto append = [](std::string& target, const std::string& new_part) {
             if (!target.empty())
                 target += ",  ";
             target += new_part;
         };
-        ret.push_back(getName());
+        ret.push_back({getName(), true});
         {
             // first line - affixes + charges
             std::string str;
             if (mMaxCharges > 0)
                 append(str, chargesStr());
             if (!str.empty())
-                ret.push_back(std::move(str));
+                ret.push_back({std::move(str), FAGui::TextColor::white, false});
         }
         {
             std::string str;
@@ -122,10 +174,10 @@ namespace FAWorld
             auto reqs = requirementsStr();
             append(str, reqs.empty() ? "No Required Attributes" : reqs);
             if (!str.empty())
-                ret.push_back(std::move(str));
+                ret.push_back({std::move(str), false});
         }
         {
-            ret.push_back("Price: " + std::to_string(this->getPrice()));
+            ret.push_back({"Price: " + std::to_string(this->getPrice()), FAGui::TextColor::white, false});
         }
         while (ret.size() < 4)
             ret.emplace_back();
@@ -140,6 +192,13 @@ namespace FAWorld
     }
     std::pair<uint8_t, uint8_t> Item::getInvCoords() const { return {mInvX, mInvY}; }
     std::pair<uint8_t, uint8_t> Item::getCornerCoords() const { return {mCornerX, mCornerY}; }
+    int32_t Item::getInvVolume() const
+    {
+        if (isEmpty())
+            return 0;
+
+        return base().invSizeX * base().invSizeY;
+    }
 
     void Item::load(FASaveGame::GameLoader& loader)
     {
@@ -166,7 +225,7 @@ namespace FAWorld
     std::string Item::getName() const
     {
         if (getType() == ItemType::gold)
-            return (boost::format("%1% gold %2%") % mCount % (mCount > 1 ? "pieces" : "piece")).str();
+            return fmt::format("{} gold {}", mCount, (mCount > 1 ? "pieces" : "piece"));
         return base().name;
     }
 
@@ -178,43 +237,9 @@ namespace FAWorld
 
     Item::~Item() {}
 
-    std::string Item::getFlipSoundPath() const
-    {
-        // TODO: add book, pot, scroll
-        switch (getType())
-        {
-            case ItemType::misc:
-                return "";
-            case ItemType::sword:
-                return "sfx/items/flipswor.wav";
-            case ItemType::axe:
-                return "sfx/items/flipaxe.wav";
-            case ItemType::bow:
-                return "sfx/items/flipbow.wav";
-            case ItemType::mace:
-                return "sfx/items/flipswor.wav"; // TODO: check
-            case ItemType::shield:
-                return "sfx/items/flipshld.wav";
-            case ItemType::lightArmor:
-                return "sfx/items/fliplarm.wav";
-            case ItemType::helm:
-                return "sfx/items/flipcap.wav";
-            case ItemType::mediumArmor:
-                return "sfx/items/fliplarm.wav"; // TODO: check
-            case ItemType::heavyArmor:
-                return "sfx/items/flipharm.wav";
-            case ItemType::staff:
-                return "sfx/items/flipstaf.wav";
-            case ItemType::gold:
-                return "sfx/items/gold.wav"; // also gold1.cel
-            case ItemType::ring:
-            case ItemType::amulet:
-                return "sfx/items/flipring.wav";
-            case ItemType::none:
-                break;
-        }
-        return "";
-    }
+    std::string Item::getFlipSoundPath() const { return base().dropItemSoundPath; }
+
+    std::string Item::getInvPlaceSoundPath() const { return base().invPlaceItemSoundPath; }
 
     FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(base().dropItemGraphicsPath); }
 
@@ -227,10 +252,9 @@ namespace FAWorld
         return 1;
     }
 
-    int32_t Item::getReqStr() const { return base().requiredStrength; }
-    int32_t Item::getReqMagic() const { return base().requiredMagic; }
-
-    int32_t Item::getReqDex() const { return base().requiredDexterity; }
+    int32_t Item::getRequiredStrength() const { return base().requiredStrength; }
+    int32_t Item::getRequiredMagic() const { return base().requiredMagic; }
+    int32_t Item::getRequiredDexterity() const { return base().requiredDexterity; }
 
     uint32_t Item::getSpecialEffect() const { return base().specialEffectFlags; }
 
@@ -283,16 +307,10 @@ namespace FAWorld
 
     int32_t Item::getMaxAttackDamage() const { return base().maxAttackDamage; }
 
-    ItemBonus Item::getBonus() const
-    {
-        ItemBonus bonus(base());
-        return bonus;
-    }
-
     std::string Item::chargesStr() const
     {
         if (getMiscId() == ItemMiscId::staff && mMaxCharges > 0)
-            return (boost::format("\nCharges: %1%/%2%") % mCurrentCharges % mMaxCharges).str();
+            return fmt::format("\nCharges: {}/{}", mCurrentCharges, mMaxCharges);
 
         return {};
     }

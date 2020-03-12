@@ -1,9 +1,7 @@
-
 #pragma once
-
 #include "statemachine.h"
-#include <boost/optional.hpp>
 #include <misc/misc.h>
+#include <optional>
 #include <stddef.h>
 
 namespace FAWorld
@@ -23,7 +21,7 @@ namespace FAWorld
 
             virtual void save(FASaveGame::GameSaver&) const override {}
 
-            virtual boost::optional<StateChange> update(Actor& actor, bool noclip) override;
+            virtual std::optional<StateChange> update(Actor& actor, bool noclip) override;
         };
     }
 }

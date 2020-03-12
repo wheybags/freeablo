@@ -1,8 +1,9 @@
 #pragma once
+#include "mersennetwister.h"
 #include <cstdint>
 #include <initializer_list>
+#include <iterator>
 #include <misc/assert.h>
-#include <random>
 #include <vector>
 
 namespace Serial
@@ -31,12 +32,19 @@ namespace Random
             int32_t n = randomInRange(0, parameters.size() - 1);
             return *(parameters.begin() + n);
         }
+
+        template <typename Iter> Iter chooseOneInContainer(Iter begin, Iter end)
+        {
+            int32_t n = randomInRange(0, std::distance(begin, end) - 1);
+            std::advance(begin, n);
+            return begin;
+        }
     };
 
     class RngMersenneTwister : public Rng
     {
     public:
-        explicit RngMersenneTwister() : mRng(0U) {}
+        explicit RngMersenneTwister() = default;
         explicit RngMersenneTwister(uint32_t seed) : mRng(seed) {}
         virtual ~RngMersenneTwister() override = default;
         RngMersenneTwister(const RngMersenneTwister&) = delete;
@@ -48,7 +56,7 @@ namespace Random
         virtual int32_t randomInRange(int32_t min, int32_t max) override;
 
     private:
-        std::mt19937 mRng;
+        mt19937 mRng;
     };
 
     class DummyRng : public Rng

@@ -1,8 +1,7 @@
 #include "nuklear_sdl_gl3.h"
-#include "sdl_gl_funcs.h"
-
 #include "../../apps/freeablo/fagui/guimanager.h"
 #include "render.h"
+#include "sdl_gl_funcs.h"
 #include <iostream>
 #include <misc/assert.h>
 #include <string.h>
@@ -19,11 +18,14 @@ static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_
                                                                      {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct nk_sdl_vertex, col)},
                                                                      {NK_VERTEX_LAYOUT_END}};
 
-#ifdef __APPLE__
-#define NK_SHADER_VERSION "#version 150\n"
-#else
-#define NK_SHADER_VERSION "#version 300 es\n"
-#endif
+//#ifdef __APPLE__
+//#define NK_SHADER_VERSION "#version 150\n"
+//#else
+//#define NK_SHADER_VERSION "#version 300 es\n"
+//#endif
+
+
+#define NK_SHADER_VERSION "#version 330\n"
 
 void nk_sdl_device_create(nk_gl_device& dev)
 {
@@ -185,7 +187,14 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
         {-1.0f, 1.0f, 0.0f, 1.0f},
     };
     SDL_GetWindowSize(win, &width, &height);
-    SDL_GL_GetDrawableSize(win, &display_width, &display_height);
+
+    // Note: if SDL_GL_GetDrawableSize() is used SDL_WINDOW_ALLOW_HIGHDPI option must
+    // also be enabled. However this seems to cause an issue where black lines appear
+    // between each tile on high-DPI displays so is currently disabled.
+    // SDL_GL_GetDrawableSize(win, &display_width, &display_height);
+    display_width = width;
+    display_height = height;
+
     ortho[0][0] /= (GLfloat)width;
     ortho[1][1] /= (GLfloat)height;
 
@@ -278,59 +287,59 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
     glDisable(GL_SCISSOR_TEST);
 }
 
-    /*
-    static void
-    nk_sdl_clipbard_paste(nk_handle usr, struct nk_text_edit *edit)
-    {
-        const char *text = SDL_GetClipboardText();
-        if (text) nk_textedit_paste(edit, text, nk_strlen(text));
-        (void)usr;
-    }
+/*
+static void
+nk_sdl_clipbard_paste(nk_handle usr, struct nk_text_edit *edit)
+{
+    const char *text = SDL_GetClipboardText();
+    if (text) nk_textedit_paste(edit, text, nk_strlen(text));
+    (void)usr;
+}
 
-    static void
-    nk_sdl_clipbard_copy(nk_handle usr, const char *text, int len)
-    {
-        char *str = 0;
-        (void)usr;
-        if (!len) return;
-        str = (char*)malloc((size_t)len+1);
-        if (!str) return;
-        memcpy(str, text, (size_t)len);
-        str[len] = '\0';
-        SDL_SetClipboardText(str);
-        free(str);
-    }
-    */
+static void
+nk_sdl_clipbard_copy(nk_handle usr, const char *text, int len)
+{
+    char *str = 0;
+    (void)usr;
+    if (!len) return;
+    str = (char*)malloc((size_t)len+1);
+    if (!str) return;
+    memcpy(str, text, (size_t)len);
+    str[len] = '\0';
+    SDL_SetClipboardText(str);
+    free(str);
+}
+*/
 
-    /*void nk_sdl_init(nk_sdl& nkSdl, SDL_Window *win)
-    {
-        sdl = nkSdl;
+/*void nk_sdl_init(nk_sdl& nkSdl, SDL_Window *win)
+{
+    sdl = nkSdl;
 
-        nkSdl.win = win;
-        nk_init_default(&nkSdl.ctx, 0);
-        sdl.ctx.clip.copy = nullptr;// nk_sdl_clipbard_copy;
-        sdl.ctx.clip.paste = nullptr;// nk_sdl_clipbard_paste;
-        sdl.ctx.clip.userdata = nk_handle_ptr(0);
-        nk_sdl_device_create();
-    }*/
+    nkSdl.win = win;
+    nk_init_default(&nkSdl.ctx, 0);
+    sdl.ctx.clip.copy = nullptr;// nk_sdl_clipbard_copy;
+    sdl.ctx.clip.paste = nullptr;// nk_sdl_clipbard_paste;
+    sdl.ctx.clip.userdata = nk_handle_ptr(0);
+    nk_sdl_device_create();
+}*/
 
-    /*void nk_sdl_font_stash_begin(nk_font_atlas& atlas)
-    {
-        nk_font_atlas_init_default(&atlas);
-        nk_font_atlas_begin(&atlas);
-    }
+/*void nk_sdl_font_stash_begin(nk_font_atlas& atlas)
+{
+    nk_font_atlas_init_default(&atlas);
+    nk_font_atlas_begin(&atlas);
+}
 
-    GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
-    {
-        const void *image; int w, h;
-        image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
-        GLuint font_tex = nk_sdl_device_upload_atlas(image, w, h);
-        nk_font_atlas_end(&atlas, nk_handle_id((int)font_tex), &nullTex);
-        if (atlas.default_font)
-            nk_style_set_font(ctx, &atlas.default_font->handle);
+GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
+{
+    const void *image; int w, h;
+    image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
+    GLuint font_tex = nk_sdl_device_upload_atlas(image, w, h);
+    nk_font_atlas_end(&atlas, nk_handle_id((int)font_tex), &nullTex);
+    if (atlas.default_font)
+        nk_style_set_font(ctx, &atlas.default_font->handle);
 
-        return font_tex;
-    }*/
+    return font_tex;
+}*/
 
 #if 0
 NK_API int

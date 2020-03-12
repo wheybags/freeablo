@@ -1,10 +1,7 @@
-
 #pragma once
-
-#include <stdint.h>
-
 #include <faio/fafileobject.h>
 #include <map>
+#include <stdint.h>
 #include <string>
 
 namespace DiabloExe

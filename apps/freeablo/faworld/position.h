@@ -1,9 +1,6 @@
 #pragma once
-
 #include "misc/direction.h"
 #include "misc/misc.h"
-#include "misc/point.h"
-
 #include <cmath>
 #include <utility>
 
@@ -18,14 +15,12 @@ namespace FAWorld
     class Position
     {
     public:
-        Position() = default;
-        explicit Position(Misc::Point point) : mCurrent(point) {}
-        Position(Misc::Point point, Misc::Direction direction) : mCurrent(point), mDirection(direction) {}
+        explicit Position(Misc::Point point = Misc::Point::zero(), Misc::Direction direction = Misc::Direction(Misc::Direction8::south));
 
         Position(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
 
-        void update();               ///< advances towards mNext
+        FixedPoint update(FixedPoint moveDistance);
         Misc::Point current() const; ///< where we are coming from
         bool isNear(const Position& other) const;
         Misc::Point next() const; ///< where we are going to
@@ -33,16 +28,27 @@ namespace FAWorld
         Misc::Direction getDirection() const { return mDirection; }
         void setDirection(Misc::Direction mDirection);
 
-        bool isMoving() const { return mMoving; }
-        int32_t getDist() const { return mDist; }
+        bool isMoving() const { return mMovementType != MovementType::Stopped; }
+        Vec2Fix getFractionalPos() const { return mFractionalPos; }
 
-        void stop();
-        void start();
+        void stopMoving();
+        void gridMoveInDirection(Misc::Direction8 direction);
+        void setFreeMovement();
 
     private:
+        enum class MovementType
+        {
+            Stopped,
+            // GridLocked (Chebyshev) movement with a destination tile.
+            // Movement to any neighboring tile takes the same time.
+            GridLocked,
+            // Free (Euclidean) movement in any direction.
+            FreeMovement
+        };
+
         Misc::Point mCurrent;
-        int32_t mDist = 0; ///< percentage of the way there
-        Misc::Direction mDirection = Misc::Direction::south;
-        bool mMoving = false;
+        Vec2Fix mFractionalPos;
+        Misc::Direction mDirection = Misc::Direction(Misc::Direction8::south);
+        MovementType mMovementType = MovementType::Stopped;
     };
 }

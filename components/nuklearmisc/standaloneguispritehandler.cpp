@@ -1,5 +1,4 @@
 #include "standaloneguispritehandler.h"
-
 #include "inputfwd.h"
 
 namespace NuklearMisc

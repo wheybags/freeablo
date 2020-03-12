@@ -1,10 +1,17 @@
 #include "characterdialoguepopup.h"
+#include "../engine/threadmanager.h"
 #include "../faworld/actor.h"
 #include "guimanager.h"
+#include "talkdialoguepopup.h"
+#include <random/random.h>
 
 namespace FAGui
 {
-    CharacterDialoguePopup::CharacterDialoguePopup(GuiManager& guiManager, bool wide) : mGuiManager(guiManager), mWide(wide) {}
+    CharacterDialoguePopup::CharacterDialoguePopup(GuiManager& guiManager, bool wide, const std::string& greeting)
+        : mGuiManager(guiManager), mWide(wide), mSoundPaths({})
+    {
+        mSoundPaths["greeting"] = greeting;
+    }
 
     CharacterDialoguePopup::UpdateResult CharacterDialoguePopup::update(struct nk_context* ctx)
     {
@@ -16,8 +23,8 @@ namespace FAGui
 
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR;
 
-        auto dialogRectangle = nk_rect(
-            screenW / 2.0f - (this->mWide ? boxTex->getWidth() / 2 : 0.0f), screenH - boxTex->getHeight() - 153, boxTex->getWidth(), boxTex->getHeight());
+        auto dialogRectangle =
+            nk_rect(screenW / 2.0f - (boxTex->getWidth() / 2.0f), screenH / 2.0f - (boxTex->getHeight() / 2.0f), boxTex->getWidth(), boxTex->getHeight());
 
         UpdateResult result = UpdateResult::DoNothing;
 
@@ -27,24 +34,14 @@ namespace FAGui
                                              flags,
                                              boxTex->getNkImage(),
                                              [&]() {
-                                                 // apply black checkerboard in background
-                                                 {
-                                                     auto blackTex = renderer->loadImage("resources/black.png");
-                                                     auto cbRect =
-                                                         nk_rect(dialogRectangle.x + 3, dialogRectangle.y + 3, dialogRectangle.w - 6, dialogRectangle.h - 6);
-
-                                                     ScopedApplyEffect effect(ctx, EffectType::checkerboarded);
-                                                     auto nkImage =
-                                                         nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect);
-                                                     nk_draw_image(nk_window_get_canvas(ctx), cbRect, &nkImage, nk_rgb(0, 0, 0));
-                                                 }
+                                                 drawBackgroundCheckerboard(renderer, ctx, dialogRectangle);
 
                                                  nk_layout_row_dynamic(ctx, 30, 1);
 
                                                  DialogData data = getDialogData();
 
                                                  for (const auto& line : data.introduction)
-                                                     GuiManager::smallText(ctx, line.c_str());
+                                                     GuiManager::smallText(ctx, line.entry.c_str(), line.textColor);
 
                                                  // fill the rest of the window
                                                  struct nk_rect bounds = nk_widget_bounds(ctx);
@@ -96,10 +93,60 @@ namespace FAGui
                                                          result = data.dialogActions[mDialogMenu.getSelectedIndex()]();
                                                  }
                                                  nk_group_scrolled_end(ctx);
-
                                              },
                                              true);
 
         return result;
+    }
+
+    void CharacterDialoguePopup::drawBackgroundCheckerboard(FARender::Renderer* renderer, struct nk_context* ctx, struct nk_rect dialogRectangle)
+    {
+        auto blackTex = renderer->loadImage(Misc::getResourcesPath().str() + "/black.png");
+        auto cbRect = nk_rect(dialogRectangle.x + 3, dialogRectangle.y + 3, dialogRectangle.w - 6, dialogRectangle.h - 6);
+
+        ScopedApplyEffect effect(ctx, EffectType::checkerboarded);
+        auto nkImage = nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect);
+        nk_draw_image(nk_window_get_canvas(ctx), cbRect, &nkImage, nk_rgb(0, 0, 0));
+    }
+
+    class TalkDialog : public CharacterDialoguePopup
+    {
+    public:
+        TalkDialog(GuiManager& guiManager, const FAWorld::Actor* actor) : CharacterDialoguePopup(guiManager, false), mActor(actor) {}
+
+    protected:
+        virtual DialogData getDialogData() override
+        {
+            DialogData retval;
+
+            retval.introduction = {{mActor->getMenuTalkData().at("talk"), TextColor::golden, false}};
+            retval.addMenuOption({{"Gossip", TextColor::blue, true}}, [this]() {
+                auto data = mActor->getGossipData();
+                const auto& randomText = mGuiManager.mDialogManager.mWorld.mRng->chooseOneInContainer(data.cbegin(), data.cend());
+                TalkDialoguePopup* popup = new TalkDialoguePopup(mGuiManager, randomText->second);
+                openTalkPopup(popup);
+                return CharacterDialoguePopup::UpdateResult::DoNothing;
+            });
+
+            return retval;
+        }
+
+        const FAWorld::Actor* mActor = nullptr;
+
+    private:
+        void openTalkPopup(TalkDialoguePopup* popup)
+        {
+            mGuiManager.mDialogManager.pushDialog(popup);
+            auto thread = Engine::ThreadManager::get();
+            if (thread->isPlayingSound())
+                thread->stopSound();
+            thread->playSound(popup->getTalkData().talkAudioPath);
+        }
+    };
+
+    void CharacterDialoguePopup::openTalkDialog(const FAWorld::Actor* actor)
+    {
+        TalkDialog* dialog = new TalkDialog(mGuiManager, actor);
+        mGuiManager.mDialogManager.pushDialog(dialog);
     }
 }

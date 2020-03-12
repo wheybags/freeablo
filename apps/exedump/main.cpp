@@ -1,12 +1,13 @@
-#include <diabloexe/diabloexe.h>
-
-#include <iostream>
-
 #include "settings/settings.h"
+#include <diabloexe/diabloexe.h>
 #include <faio/fafileobject.h>
+#include <iostream>
+#include <misc/misc.h>
 
-int main(int, char**)
+int main(int, char** argv)
 {
+    Misc::saveArgv0(argv[0]);
+
     Settings::Settings settings;
     settings.loadUserSettings();
 

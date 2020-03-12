@@ -1,5 +1,4 @@
 #include "level.h"
-
 #include <iostream>
 #include <serial/loader.h>
 
@@ -105,7 +104,7 @@ namespace Level
         return false;
     }
 
-    MinPillar Level::get(const Misc::Point& point) const
+    Level::InternalLocationData Level::getInternalLocationData(const Misc::Point& point) const
     {
         int32_t xDunIndex = point.x;
         int32_t xTilIndex = 0;
@@ -142,17 +141,47 @@ namespace Level
                 tilIndex = 0; // top
         }
 
-        int32_t dunIndex = mDun.get(xDunIndex, yDunIndex) - 1;
+        return {xDunIndex, yDunIndex, tilIndex};
+    }
+
+    MinPillar Level::get(const Misc::Point& point) const
+    {
+        InternalLocationData locationData = getInternalLocationData(point);
+
+        int32_t dunIndex = mDun.get(locationData.xDunIndex, locationData.yDunIndex) - 1;
 
         if (dunIndex == -1)
             return MinPillar(Level::mEmpty, 0, -1);
 
-        int32_t minIndex = mTil[dunIndex][tilIndex];
+        int32_t minIndex = mTil[dunIndex][locationData.tilIndex];
 
         return MinPillar(mMin[minIndex], mSol.passable(minIndex), minIndex);
     }
 
-    void Level::activate(const Misc::Point& point)
+    bool Level::isDoor(const Misc::Point& point) const
+    {
+        InternalLocationData locationData = getInternalLocationData(point);
+
+        int32_t dunIndex = mDun.get(locationData.xDunIndex, locationData.yDunIndex);
+
+        // Ensure point is within the bounds of the dungeon.
+        if (mDun.pointIsValid(locationData.xDunIndex, locationData.yDunIndex))
+        {
+            // open doors when clicked on
+            if (mDoorMap.find(dunIndex) != mDoorMap.end())
+            {
+                bool passableNow = mSol.passable(mTil[dunIndex - 1][locationData.tilIndex]);
+                bool passableWhenToggled = mSol.passable(mTil[mDoorMap.at(dunIndex) - 1][locationData.tilIndex]);
+
+                // Only mark the tile(s) that actually change as a door tile
+                return passableNow != passableWhenToggled;
+            }
+        }
+
+        return false;
+    }
+
+    bool Level::activateDoor(const Misc::Point& point)
     {
         int32_t xDunIndex = point.x;
         if ((xDunIndex % 2) != 0)
@@ -171,8 +200,13 @@ namespace Level
 
             // open doors when clicked on
             if (mDoorMap.find(index) != mDoorMap.end())
+            {
                 mDun.get(xDunIndex, yDunIndex) = mDoorMap[index];
+                return true;
+            }
         }
+
+        return false;
     }
 
     int32_t Level::minSize() const { return mMin.size(); }

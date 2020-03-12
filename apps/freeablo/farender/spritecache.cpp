@@ -1,13 +1,11 @@
 #include "spritecache.h"
-
 #include <misc/assert.h>
 
-#include <iostream>
-#include <sstream>
-
 #include <cel/celfile.h>
+#include <iostream>
 #include <misc/stringops.h>
 #include <numeric>
+#include <sstream>
 
 namespace FARender
 {

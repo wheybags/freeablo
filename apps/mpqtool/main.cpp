@@ -1,14 +1,13 @@
-
-#include <iostream>
-
-#include <stdint.h>
-
-#include <stdio.h>
-
 #include <faio/fafileobject.h>
+#include <iostream>
+#include <misc/misc.h>
+#include <stdint.h>
+#include <stdio.h>
 
 int main(int argc, char** argv)
 {
+    Misc::saveArgv0(argv[0]);
+
     if (argc != 3)
     {
         std::cout << "The Freeablo MPQ tool accepts two parameters: " << std::endl;

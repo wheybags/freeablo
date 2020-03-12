@@ -1,9 +1,7 @@
-
 #pragma once
-
-#include <boost/optional.hpp>
 #include <memory>
 #include <misc/misc.h>
+#include <optional>
 #include <stddef.h>
 #include <vector>
 
@@ -30,7 +28,7 @@ namespace FAWorld
         virtual void save(FASaveGame::GameSaver& saver) const = 0;
         virtual const std::string& getTypeId() const = 0;
         virtual ~AbstractState() = default;
-        virtual boost::optional<StateChange> update(Actor& entity, bool noclip) = 0;
+        virtual std::optional<StateChange> update(Actor& entity, bool noclip) = 0;
         virtual void onEnter(Actor& entity) { UNUSED_PARAM(entity); }
         virtual void onExit(Actor& entity) { UNUSED_PARAM(entity); }
     };

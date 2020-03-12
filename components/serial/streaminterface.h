@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include <cstdint>
 #include <misc/misc.h>
 #include <string>
@@ -29,6 +27,8 @@ namespace Serial
     class WriteStreamInterface
     {
     public:
+        virtual size_t getCurrentSize() const = 0;
+        virtual void resize(size_t size) = 0;
         virtual std::pair<uint8_t*, size_t> getData() = 0;
 
         virtual void write(bool val) = 0;

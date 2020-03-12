@@ -48,18 +48,23 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/inventory.h
     faworld/item.cpp
     faworld/item.h
-    faworld/itembonus.cpp
-    faworld/itembonus.h
     faworld/itemenums.cpp
     faworld/itemenums.h
     faworld/itemfactory.cpp
     faworld/itemfactory.h
     faworld/itemmap.cpp
     faworld/itemmap.h
+    faworld/missile/missile.cpp
+    faworld/missile/missile.h
+    faworld/missile/missileactorengagement.cpp
+    faworld/missile/missileattributes.cpp
+    faworld/missile/missilecreation.cpp
+    faworld/missile/missileenums.h
+    faworld/missile/missilegraphic.cpp
+    faworld/missile/missilegraphic.h
+    faworld/missile/missilemovement.cpp
     faworld/monster.cpp
     faworld/monster.h
-    faworld/monsterstats.cpp
-    faworld/monsterstats.h
     faworld/movementhandler.cpp
     faworld/movementhandler.h
     faworld/player.cpp
@@ -70,8 +75,6 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/playerfactory.h
     faworld/playerinput.cpp
     faworld/playerinput.h
-    faworld/playerstats.cpp
-    faworld/playerstats.h
     faworld/position.cpp
     faworld/position.h
     faworld/storedata.cpp
@@ -80,8 +83,11 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/target.h
     faworld/world.cpp
     faworld/world.h
+    faworld/enums.h
+    faworld/enums.cpp
 
     fagui/textcolor.h
+    fagui/textcolor.cpp
     fagui/guimanager.h
     fagui/guimanager.cpp
     fagui/dialogmanager.h
@@ -90,6 +96,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fagui/commandhistory.cpp
     fagui/nkhelpers.h
     fagui/nkhelpers.cpp
+    fagui/menuentry.h
     fagui/menuhandler.h
     fagui/menuhandler.cpp
     fagui/autocomplete.h
@@ -102,12 +109,34 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fagui/menu/selectheromenuscreen.h
     fagui/menu/startingmenuscreen.cpp
     fagui/menu/startingmenuscreen.h
+    fagui/menu/multiplayermenu.cpp
+    fagui/menu/multiplayermenu.h
+    fagui/menu/multiplayerconnecting.cpp
+    fagui/menu/multiplayerconnecting.h
     fagui/mouseandclickmenu.cpp
     fagui/mouseandclickmenu.h
     fagui/characterdialoguepopup.cpp
     fagui/characterdialoguepopup.h
     fagui/shopdialogs.cpp
     fagui/shopdialogs.h
+    fagui/talkdialoguepopup.h
+    fagui/talkdialoguepopup.cpp
+    fagui/npcs/adriadialog.cpp
+    fagui/npcs/adriadialog.h
+    fagui/npcs/caindialog.cpp
+    fagui/npcs/caindialog.h
+    fagui/npcs/farnhamdialog.cpp
+    fagui/npcs/farnhamdialog.h
+    fagui/npcs/gilliandialog.cpp
+    fagui/npcs/gilliandialog.h
+    fagui/npcs/griswolddialog.cpp
+    fagui/npcs/griswolddialog.h
+    fagui/npcs/ogdendialog.cpp
+    fagui/npcs/ogdendialog.h
+    fagui/npcs/pepindialog.cpp
+    fagui/npcs/pepindialog.h
+    fagui/npcs/wirtdialog.cpp
+    fagui/npcs/wirtdialog.h
 
     engine/threadmanager.h
     engine/threadmanager.cpp
@@ -137,10 +166,12 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fasavegame/gameloader.cpp
 )
 
-target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input Random enet::enet)
+target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input Random enet cxxopts fmt::fmt)
 target_include_directories(freeablo_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(freeablo main.cpp)
 target_link_libraries(freeablo freeablo_lib)
 
 set_target_properties(freeablo_lib PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+install(TARGETS freeablo DESTINATION bin)

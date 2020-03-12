@@ -1,16 +1,13 @@
-
 #pragma once
-
+#include "keys.h"
 #include <functional>
 #include <stdint.h>
 
-// this header is included as a workaround for a bug in boost:
-// https://svn.boost.org/trac10/ticket/13497
-#include <boost/next_prior.hpp>
-
-#include <boost/lockfree/spsc_queue.hpp>
-
-#include "keys.h"
+// clang-format off
+#include <misc/disablewarn.h>
+#include <rigtorp/SPSCQueue.h>
+#include <misc/enablewarn.h>
+// clang-format on
 
 namespace Input
 {
@@ -81,7 +78,7 @@ namespace Input
             } vals;
         };
 
-        boost::lockfree::spsc_queue<Event, boost::lockfree::capacity<500>> mQueue;
+        rigtorp::SPSCQueue<Event> mQueue;
         std::function<void(Key)> mKeyPress;
         std::function<void(Key)> mKeyRelease;
         std::function<void(uint32_t, uint32_t, Key, bool)> mMouseClick;

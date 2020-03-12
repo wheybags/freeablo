@@ -1,7 +1,6 @@
-
 #pragma once
-
 #include "streaminterface.h"
+#include <limits>
 #include <sstream>
 #include <string>
 
@@ -36,6 +35,10 @@ namespace Serial
     class TextWriteStream : public WriteStreamInterface
     {
     public:
+        TextWriteStream() = default;
+
+        virtual size_t getCurrentSize() const override;
+        virtual void resize(size_t size) override;
         virtual std::pair<uint8_t*, size_t> getData() override;
 
         virtual void write(bool val) override;
@@ -56,7 +59,6 @@ namespace Serial
         void writeTypedLine(const std::string& type, const std::string& data);
 
         int32_t mTabIndex = 0;
-        std::ostringstream mData;
-        std::string mTmp;
+        std::string mData;
     };
 }

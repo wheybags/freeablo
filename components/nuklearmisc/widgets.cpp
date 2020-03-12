@@ -1,5 +1,4 @@
 #include "widgets.h"
-
 #include <cstdlib>
 #include <cstring>
 #include <misc/assert.h>

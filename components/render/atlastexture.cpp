@@ -1,11 +1,10 @@
-/* Stores many small textures into a large texture (or array of textures)
- * to allow batched drawing commands that increase performance. */
-
 #include "atlastexture.h"
 #include "../../extern/RectangleBinPack/SkylineBinPack.h"
-
-#include <boost/make_unique.hpp>
+#include <memory>
 #include <misc/assert.h>
+
+/* Stores many small textures into a large texture (or array of textures)
+ * to allow batched drawing commands that increase performance. */
 
 namespace Render
 {
@@ -35,7 +34,7 @@ namespace Render
         glGenTextures(1, &mTextureArrayId);
 
         for (int32_t layer = 0; layer < mTextureLayers; layer++)
-            mBinPacker.push_back(boost::make_unique<rbp::SkylineBinPack>(mTextureWidth, mTextureHeight, false));
+            mBinPacker.push_back(std::make_unique<rbp::SkylineBinPack>(mTextureWidth, mTextureHeight, false));
 
         bind();
 

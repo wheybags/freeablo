@@ -1,8 +1,5 @@
 #include "fontinfo.h"
-
 #include "cel/celdecoder.h"
-#include <boost/range/irange.hpp>
-
 #include "diabloexe/diabloexe.h"
 #include "faio/fafileobject.h"
 #include "render/levelobjects.h"

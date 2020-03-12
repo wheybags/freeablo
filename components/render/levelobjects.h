@@ -1,9 +1,9 @@
-
 #pragma once
-
-#include <boost/optional.hpp>
 #include <cel/pal.h>
 #include <misc/array2d.h>
+#include <misc/simplevec2.h>
+#include <optional>
+#include <vector>
 
 namespace Render
 {
@@ -12,11 +12,9 @@ namespace Render
         bool valid;
         int32_t spriteCacheIndex;
         int32_t spriteFrame;
-        int32_t x2;
-        int32_t y2;
-        int32_t dist;
-        boost::optional<Cel::Colour> hoverColor;
+        Vec2Fix fractionalPos;
+        std::optional<Cel::Colour> hoverColor;
     };
 
-    typedef Misc::Array2D<std::vector<LevelObject>> LevelObjects;
+    typedef Misc::Array2D<std::vector<LevelObject>> LevelObjects; // TODO: get a custom small vector class + use it here
 }

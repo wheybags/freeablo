@@ -1,5 +1,4 @@
 #include "pausemenuscreen.h"
-
 #include "../../engine/enginemain.h"
 #include "../../farender/animationplayer.h"
 #include "../../farender/renderer.h"
@@ -8,6 +7,7 @@
 #include "../menuhandler.h"
 #include "../nkhelpers.h"
 #include "serial/textstream.h"
+#include <cstring>
 
 namespace FAGui
 {
@@ -20,14 +20,16 @@ namespace FAGui
         mBigPentagram->playAnimation(pentImg, FAWorld::World::getTicksInPeriod("0.06"), FARender::AnimationPlayer::AnimationType::Looped);
         auto pentRect = nk_rect(0, 0, pentImg->getWidth(), pentImg->getHeight());
 
-        int y = 115;
+        int32_t screenW, screenH;
+        renderer->getWindowDimensions(screenW, screenH);
         constexpr float pentOffset = 4.0f;
         constexpr int itemHeight = 45;
+        constexpr int menuItemCount = 5;
+        int y = screenH / 2.0f - (menuItemCount * itemHeight) / 2.0f;
+
         auto drawItem = [&](const char* text) {
             auto func = [=](nk_context* ctx, bool isActive) {
                 auto textWidth = bigTGoldTextWidth(text);
-                int32_t screenW, screenH;
-                renderer->getWindowDimensions(screenW, screenH);
                 auto rect = nk_rect(screenW / 2 - textWidth / 2, y, textWidth, 45);
                 nk_layout_space_push(ctx, rect);
                 bigTGoldText(ctx, text, NK_TEXT_CENTERED);
@@ -100,7 +102,11 @@ namespace FAGui
             auto img = renderer->loadImage("data/diabsmal.cel");
             int32_t screenW, screenH;
             renderer->getWindowDimensions(screenW, screenH);
-            nk_layout_space_push(ctx, nk_rect(screenW / 2 - img->getWidth() / 2, 0, img->getWidth(), img->getHeight()));
+            constexpr int itemHeight = 45;
+            constexpr int imgToMenuOffset = itemHeight;
+            int menuItemCount = mMenuItems.size();
+            int y = screenH / 2.0f - ((menuItemCount * itemHeight) / 2.0f) - img->getHeight() - imgToMenuOffset;
+            nk_layout_space_push(ctx, nk_rect(screenW / 2 - img->getWidth() / 2, y, img->getWidth(), img->getHeight()));
             nk_image(ctx, img->getNkImage());
             if (drawMenuItems(ctx) == ActionResult::stopDrawing)
                 return;

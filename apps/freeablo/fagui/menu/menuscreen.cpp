@@ -1,5 +1,4 @@
 #include "menuscreen.h"
-
 #include "../../engine/inputobserverinterface.h"
 #include "../../farender/renderer.h"
 #include "../menuhandler.h"
@@ -28,6 +27,14 @@ namespace FAGui
 
     MenuScreen::ActionResult MenuScreen::drawMenuItems(nk_context* ctx)
     {
+        while (!mInputActions.empty())
+        {
+            auto ret = applyInputAction(mInputActions.front());
+            mInputActions.pop();
+            if (ret == ActionResult::stopDrawing)
+                return ret;
+        }
+
         int index = 0;
         for (auto& item : mMenuItems)
         {
@@ -60,18 +67,20 @@ namespace FAGui
 
     MenuScreen::ActionResult MenuScreen::executeActive() { return mMenuItems[mActiveItemIndex].action(); }
 
-    void MenuScreen::notify(Engine::KeyboardInputAction action)
+    MenuScreen::ActionResult MenuScreen::applyInputAction(Engine::KeyboardInputAction action)
     {
+        if (action == Engine::KeyboardInputAction::reject && mRejectAction)
+            return mRejectAction();
+
         if (mMenuItems.empty())
-            return;
+            return ActionResult::stopDrawing;
+
+        auto ret = ActionResult::continueDrawing;
+
         switch (action)
         {
             case Engine::KeyboardInputAction::accept:
-                mMenuItems[mActiveItemIndex].action();
-                return;
-            case Engine::KeyboardInputAction::reject:
-                if (mRejectAction)
-                    mRejectAction();
+                ret = executeActive();
                 break;
             case Engine::KeyboardInputAction::nextOption:
                 mActiveItemIndex = (mActiveItemIndex + 1) % mMenuItems.size();
@@ -82,5 +91,9 @@ namespace FAGui
             default:
                 break;
         }
+
+        return ret;
     }
+
+    void MenuScreen::notify(Engine::KeyboardInputAction action) { mInputActions.push(action); }
 }

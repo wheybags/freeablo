@@ -5,16 +5,14 @@ branches:
   - master
 
 sudo: false
-dist: trusty
+dist: bionic
 
-cache:
-  directories:
-  - $HOME/.hunter
-  
 addons:
   apt:
     packages:
       - python3-pip
+      - libgl1-mesa-dev
+      - clang-format-7
 
 matrix:
   include:
@@ -23,6 +21,7 @@ matrix:
     - os: linux
       env: JOB=clang-format
     - os: osx
+      osx_image: xcode11.3 # macos 10.14 + xcode 11.3
       env: JOB=build
 
 script: ./travis.sh
@@ -36,6 +35,3 @@ notifications:
   email:
     on_success: change
     on_failure: always
-env:
-  global:
-    secure: b9143BbjFmQvaxruDHiUy1sW4InyZGejs4S/xgb4W1fFTzea9EMpzjWgwospBI3NPpe6xadctdypL9UbzJMXfD0PAZ39FbMIgl56pFkoZv1G9vwLOjG6ka0wXT7Pr6yP2FHkIdrQWECvvc1shTFXU9Yeystl0ISPwgphWUlwFZU=

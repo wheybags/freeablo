@@ -1,11 +1,7 @@
-
 #pragma once
-
 #include "gamelevel.h"
 #include "position.h"
 #include "world.h"
-
-#include <boost/signals2/signal.hpp>
 
 namespace FASaveGame
 {
@@ -20,9 +16,8 @@ namespace FAWorld
     class MovementHandler
     {
     public:
-        MovementHandler(Tick pathRateLimit);
-
-        MovementHandler(FASaveGame::GameLoader& loader);
+        MovementHandler() = default;
+        explicit MovementHandler(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver);
 
         Misc::Point getDestination() const;
@@ -31,14 +26,19 @@ namespace FAWorld
         bool moving();
         const Position& getCurrentPosition() const { return mCurrentPos; }
         GameLevel* getLevel();
-        void update(const FAWorld::Actor& actor);
+        const GameLevel* getLevel() const;
+        void update(Actor& actor);
         void teleport(GameLevel* level, Position pos);
-        void stopAndPointInDirection(Misc::Direction direction);
-
-        boost::signals2::signal<void(const Misc::Point)> positionReached;
+        void stopMoving(FAWorld::Actor& actor, std::optional<Misc::Direction> pointInDirection = std::nullopt);
 
     private:
-        bool positionReachedSent = true;
+        FixedPoint updateInternal(Actor& actor, FixedPoint moveDistance);
+
+    public:
+        FixedPoint mSpeedTilesPerSecond;
+        Tick mPathRateLimit = World::getTicksInPeriod(1);
+
+    private:
         GameLevel* mLevel = nullptr;
         Position mCurrentPos;
         Misc::Point mDestination;
@@ -46,7 +46,6 @@ namespace FAWorld
         int32_t mCurrentPathIndex = 0;
         Misc::Points mCurrentPath;
         Tick mLastRepathed = std::numeric_limits<Tick>::min();
-        Tick mPathRateLimit;
         bool mAdjacent = false;
     };
 }

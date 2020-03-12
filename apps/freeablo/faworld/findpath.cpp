@@ -1,10 +1,10 @@
 #include "findpath.h"
-
 #include "gamelevel.h"
-
-#include <misc/stdhashes.h>
-
+#include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <misc/array2d.h>
+#include <misc/stdhashes.h>
 #include <queue>
 
 namespace
@@ -62,31 +62,12 @@ namespace FAWorld
         return result;
     }
 
-    template <typename T> class Array2D
-    {
-    public:
-        Array2D(int32_t width, int32_t height) : mData(width * height), mWidth(width), mHeight(height) {}
-
-        Array2D(int32_t width, int32_t height, T defaultVal) : mData(width * height, defaultVal), mWidth(width), mHeight(height) {}
-
-        T& get(int32_t x, int32_t y) { return mData.at(x + y * mWidth); }
-
-        int32_t width() { return mWidth; }
-
-        int32_t height() { return mHeight; }
-
-    private:
-        std::vector<T> mData;
-        int32_t mWidth;
-        int32_t mHeight;
-    };
-
     size_t heuristic(Misc::Point a, Misc::Point b)
     {
         auto dx = abs(b.x - a.x);
         auto dy = abs(b.y - a.y);
 
-        auto straight = static_cast<size_t>(dx - dy);
+        auto straight = std::abs(dx - dy);
         auto diagonal = std::max(dx, dy) - straight;
 
         return straight * STRAIGHT_WEIGHT + diagonal * DIAGONAL_WEIGHT;
@@ -104,7 +85,10 @@ namespace FAWorld
         frontier.put(start, 0);
         came_from[start] = start;
 
-        Array2D<int32_t> costSoFar(level->width(), level->height(), -1);
+        static Misc::Array2D<int32_t> costSoFar;
+        costSoFar.resize(level->width(), level->height());
+        memset(costSoFar.data(), 0xff, level->width() * level->height() * sizeof(int32_t));
+
         costSoFar.get(start.x, start.y) = 0;
 
         int32_t iterations = 0;

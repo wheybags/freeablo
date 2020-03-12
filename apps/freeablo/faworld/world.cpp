@@ -21,7 +21,6 @@
 #include "playerbehaviour.h"
 #include "storedata.h"
 #include <algorithm>
-#include <boost/make_unique.hpp>
 #include <diabloexe/diabloexe.h>
 #include <iostream>
 #include <misc/assert.h>
@@ -33,10 +32,12 @@ namespace FAWorld
     World::World(const DiabloExe::DiabloExe& exe, uint32_t seed)
         : mDiabloExe(exe), mRng(new Random::RngMersenneTwister(seed)),
           mLevelRng(new Random::RngMersenneTwister(uint32_t(mRng->randomInRange(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max())))),
-          mItemFactory(boost::make_unique<ItemFactory>(exe, *mRng.get())), mStoreData(boost::make_unique<StoreData>(*mItemFactory))
+          mItemFactory(std::make_unique<ItemFactory>(exe, *mRng.get())), mStoreData(std::make_unique<StoreData>(*mItemFactory))
     {
         this->setupObjectIdMappers();
-        regenerateStoreItems();
+
+        if (mDiabloExe.isLoaded())
+            regenerateStoreItems();
     }
 
     void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/, *mRng.get()); }
@@ -71,6 +72,7 @@ namespace FAWorld
         }
 
         mNextId = loader.load<int32_t>();
+        mNextPlayerClass = PlayerClass(loader.load<uint8_t>());
         mStoreData->load(loader);
 
         loader.runFunctionsToRunAtEnd();
@@ -98,6 +100,7 @@ namespace FAWorld
         }
 
         saver.save(mNextId);
+        saver.save(uint8_t(mNextPlayerClass));
         mStoreData->save(saver);
     }
 
@@ -109,9 +112,12 @@ namespace FAWorld
 
         mObjectIdMapper.addClass(NullBehaviour::typeId, [](FASaveGame::GameLoader&) { return new NullBehaviour(); });
         mObjectIdMapper.addClass(BasicMonsterBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new BasicMonsterBehaviour(loader); });
-        mObjectIdMapper.addClass(PlayerBehaviour::typeId, [](FASaveGame::GameLoader&) { return new PlayerBehaviour(); });
+        mObjectIdMapper.addClass(PlayerBehaviour::typeId, [](FASaveGame::GameLoader& loader) { return new PlayerBehaviour(loader); });
 
         mObjectIdMapper.addClass(ActorState::MeleeAttackState::typeId, [](FASaveGame::GameLoader& loader) { return new ActorState::MeleeAttackState(loader); });
+        mObjectIdMapper.addClass(ActorState::RangedAttackState::typeId,
+                                 [](FASaveGame::GameLoader& loader) { return new ActorState::RangedAttackState(loader); });
+        mObjectIdMapper.addClass(ActorState::SpellAttackState::typeId, [](FASaveGame::GameLoader& loader) { return new ActorState::SpellAttackState(loader); });
         mObjectIdMapper.addClass(ActorState::BaseState::typeId, [](FASaveGame::GameLoader&) { return new ActorState::BaseState(); });
     }
 
@@ -208,7 +214,7 @@ namespace FAWorld
         for (auto npc : mDiabloExe.getNpcs())
         {
             auto actor = new Actor(*this, *npc, mDiabloExe);
-            actor->teleport(townLevel, Position(Misc::Point(npc->x, npc->y), static_cast<Misc::Direction>(npc->rotation)));
+            actor->teleport(townLevel, Position(Misc::Point(npc->x, npc->y), Misc::Direction(static_cast<Misc::Direction8>(npc->rotation))));
         }
 
         for (int32_t i = 1; i < 17; i++)
@@ -309,10 +315,20 @@ namespace FAWorld
             {
                 case PlayerInput::Type::PlayerJoined:
                 {
-                    FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, "Warrior");
+                    if (Engine::EngineMain::get()->mMultiplayer->isPlayerRegistered(input.mData.dataPlayerJoined.peerId))
+                        break;
+
+                    PlayerClass playerClass = mNextPlayerClass;
+
+                    // hacky method to make different players use different classes
+                    // TODO: remove this when we have a proper character system
+                    mNextPlayerClass = PlayerClass((int32_t(mNextPlayerClass) + 1) % 3);
+
+                    FAWorld::Player* newPlayer = Engine::EngineMain::get()->mPlayerFactory->create(*this, playerClass);
                     registerPlayer(newPlayer);
                     FAWorld::GameLevel* level = getLevel(0);
-                    newPlayer->teleport(level, FAWorld::Position(level->upStairsPos()));
+
+                    newPlayer->teleport(level, FAWorld::Position(level->getFreeSpotNear(level->upStairsPos())));
                     Engine::EngineMain::get()->mMultiplayer->registerNewPlayer(newPlayer, input.mData.dataPlayerJoined.peerId);
 
                     break;
@@ -320,12 +336,15 @@ namespace FAWorld
                 case PlayerInput::Type::PlayerLeft:
                 {
                     // a little unsubtle, but it'll do for now.
-                    getActorById(input.mActorId)->die();
+                    if (Actor* actor = getActorById(input.mActorId))
+                        actor->die();
                     break;
                 }
                 default:
                 {
-                    dynamic_cast<Player*>(this->getActorById(input.mActorId))->getPlayerBehaviour()->addInput(input);
+                    if (Player* player = dynamic_cast<Player*>(this->getActorById(input.mActorId)))
+                        player->getPlayerBehaviour()->addInput(input);
+                    break;
                 }
             }
         }
@@ -351,17 +370,6 @@ namespace FAWorld
     {
         debug_assert(mCurrentPlayer == nullptr || mCurrentPlayer == player);
         mCurrentPlayer = player;
-        setupCurrentPlayer();
-    }
-
-    void World::setupCurrentPlayer()
-    {
-        /*mCurrentPlayer->positionReached.connect([this](const std::pair<int32_t, int32_t>& pos) {
-            if (!getCurrentLevel()->isTown() && pos == getCurrentLevel()->upStairsPos())
-                changeLevel(true);
-            else if (pos == getCurrentLevel()->downStairsPos())
-                changeLevel(false);
-        });*/
     }
 
     void World::registerPlayer(Player* player)

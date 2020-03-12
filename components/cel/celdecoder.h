@@ -1,6 +1,4 @@
-
 #pragma once
-
 #include "celframe.h"
 #include "pal.h"
 #include <functional>
@@ -26,7 +24,7 @@ namespace Cel
         typedef const std::vector<uint8_t>& FrameBytesRef;
         typedef std::vector<Colour>& ColoursRef;
         typedef std::vector<Colour>::iterator ColoursRefIterator;
-        typedef std::function<void(CelDecoder&, FrameBytesRef, const Pal&, ColoursRefIterator&)> FrameDecoder;
+        typedef std::function<void(CelDecoder&, FrameBytesRef, const Pal&, CelFrame&)> FrameDecoder;
 
         void readConfiguration();
         void readCelName();
@@ -39,15 +37,15 @@ namespace Cel
         bool isType2or4(FrameBytesRef frame);
         bool isType3or5(FrameBytesRef frame);
 
-        void decodeFrameType0(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame);
-        void decodeFrameType1(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame);
-        void decodeFrameType2(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame);
-        void decodeFrameType3(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame);
-        void decodeFrameType4(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame);
-        void decodeFrameType5(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame);
-        void decodeFrameType6(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame);
-        void decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame, bool frameType2);
-        void decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, ColoursRefIterator& decodedFrame, bool frameType4);
+        void decodeFrameType0(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame);
+        void decodeFrameType1(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame);
+        void decodeFrameType2(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame);
+        void decodeFrameType3(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame);
+        void decodeFrameType4(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame);
+        void decodeFrameType5(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame);
+        void decodeFrameType6(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame);
+        void decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType2);
+        void decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType4);
 
         void decodeLineTransparencyLeft(const uint8_t** framePtr, const Pal& pal, ColoursRefIterator& decodedFrame, int);
         void decodeLineTransparencyRight(const uint8_t** framePtr, const Pal& pal, ColoursRefIterator& decodedFrame, int);
@@ -67,7 +65,7 @@ namespace Cel
         int mFrameHeight;
         int mHeaderSize;
         int32_t mAnimationLength;
-        static Settings::Settings mSettingsCel;
-        static Settings::Settings mSettingsCl2;
+        static std::unique_ptr<Settings::Settings> mSettingsCel;
+        static std::unique_ptr<Settings::Settings> mSettingsCl2;
     };
 }

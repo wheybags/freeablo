@@ -1,12 +1,10 @@
-/// this is just a RAII wrapper class for faio api functions.
-
 #pragma once
-
 #include "faio.h"
 
 namespace FAIO
 {
 
+    /// this is just a RAII wrapper class for faio api functions.
     class FAFileObject
     {
 
@@ -33,7 +31,6 @@ namespace FAIO
         std::string readCString(size_t ptr);
         std::string readCStringFromWin32Binary(size_t ptr, size_t offset);
 
-        static std::string getMPQFileName();
         static void quit();
     };
 }

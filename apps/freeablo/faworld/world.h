@@ -1,6 +1,7 @@
 #pragma once
 #include "../engine/inputobserverinterface.h"
 #include "../fasavegame/objectidmapper.h"
+#include "enums.h"
 #include "playerinput.h"
 #include <map>
 #include <memory>
@@ -61,8 +62,6 @@ namespace FAWorld
         void load(FASaveGame::GameLoader& loader);
         ~World();
 
-        World& operator=(World&& other) = default;
-
         void setFirstPlayerAsCurrent();
 
         Render::Tile getTileByScreenPos(Misc::Point screenPos);
@@ -83,7 +82,6 @@ namespace FAWorld
         void update(bool noclip, const std::vector<PlayerInput>& inputs);
 
         void addCurrentPlayer(Player* player);
-        void setupCurrentPlayer();
         Player* getCurrentPlayer();
 
         void registerPlayer(Player* player);
@@ -128,5 +126,6 @@ namespace FAWorld
         std::unique_ptr<StoreData> mStoreData;
 
         int32_t mNextId = 1;
+        PlayerClass mNextPlayerClass = PlayerClass::warrior;
     };
 }
