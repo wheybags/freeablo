@@ -37,7 +37,7 @@ namespace FAWorld
         actorMapRefresh();
     }
 
-    void GameLevel::save(FASaveGame::GameSaver& saver)
+    void GameLevel::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("GameLevel", saver);
 

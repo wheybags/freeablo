@@ -26,7 +26,7 @@ namespace FAWorld::Missile
         Missile(MissileId missileId, Actor& creator, Misc::Point dest);
         Missile(FASaveGame::GameLoader& loader);
 
-        virtual void save(FASaveGame::GameSaver& saver);
+        virtual void save(FASaveGame::GameSaver& saver) const;
         virtual void update();
         virtual bool isComplete() const { return mComplete; }
         MissileId getMissileId() const { return mMissileId; }

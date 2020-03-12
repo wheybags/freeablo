@@ -80,7 +80,7 @@ namespace FAWorld
         loader.currentlyLoadingWorld = nullptr;
     }
 
-    void World::save(FASaveGame::GameSaver& saver)
+    void World::save(FASaveGame::GameSaver& saver) const
     {
         mRng->save(saver);
         mLevelRng->save(saver);

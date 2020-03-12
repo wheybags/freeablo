@@ -46,7 +46,7 @@ namespace FAWorld
         Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
         Actor(World& world, FASaveGame::GameLoader& loader);
         virtual ~Actor();
-        virtual void save(FASaveGame::GameSaver& saver);
+        virtual void save(FASaveGame::GameSaver& saver) const;
 
         virtual int32_t getOnKilledExperience() const { return 0; }
         void pickupItem(Target::ItemTarget target);

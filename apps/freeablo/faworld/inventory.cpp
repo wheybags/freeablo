@@ -28,7 +28,7 @@ namespace FAWorld
         }
     }
 
-    void BasicInventory::save(FASaveGame::GameSaver& saver)
+    void BasicInventory::save(FASaveGame::GameSaver& saver) const
     {
         saver.save(mInventoryBox.width());
         saver.save(mInventoryBox.height());
@@ -317,7 +317,7 @@ namespace FAWorld
         }
     }
 
-    void CharacterInventory::save(FASaveGame::GameSaver& saver)
+    void CharacterInventory::save(FASaveGame::GameSaver& saver) const
     {
         mMainInventory.save(saver);
         mBelt.save(saver);

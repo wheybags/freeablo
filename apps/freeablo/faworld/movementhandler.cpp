@@ -32,7 +32,7 @@ namespace FAWorld
         mSpeedTilesPerSecond.load(loader);
     }
 
-    void MovementHandler::save(FASaveGame::GameSaver& saver)
+    void MovementHandler::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("MovementHandler", saver);
 

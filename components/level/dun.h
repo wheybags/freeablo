@@ -22,7 +22,7 @@ namespace Level
         Dun();
         Dun(int32_t width, int32_t height);
 
-        void save(Serial::Saver& saver);
+        void save(Serial::Saver& saver) const;
 
         static Dun getTown(const Dun& sector1, const Dun& sector2, const Dun& sector3, const Dun& sector4);
 
