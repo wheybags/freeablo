@@ -16,21 +16,33 @@ namespace Script
     class LuaScript
     {
         lua_State* mState;
-        static std::unique_ptr<LuaScript> mInstance;
 
     public:
+        LuaScript();
         ~LuaScript();
-
-        static std::unique_ptr<LuaScript>& getInstance();
-
-        void printError(const std::string& variable, const std::string& reason);
 
         template <typename T> void registerGlobalType();
 
-        template <typename Func> void registerGlobalFunction(const std::string& functionName, Func func)
+        template <typename Func> void registerGlobalFunction(const std::string& functionName, Func&& func)
         {
             lua_pushcfunction(mState, func);
             lua_setglobal(mState, functionName.c_str());
+        }
+
+        template <typename T> void pushObject(T& obj, const char* varName)
+        {
+            static bool registered = false;
+            if (!registered)
+            {
+                registerGlobalType<T>();
+                registered = true;
+            }
+
+            T** udata = reinterpret_cast<T**>(lua_newuserdata(mState, sizeof(T*)));
+            (*udata) = &obj;
+            const std::string typeName = typeid(T).name();
+            luaL_setmetatable(mState, typeName.substr(1).c_str());
+            lua_setglobal(mState, varName);
         }
 
         template <typename T> T get(const std::string& variable)
@@ -40,14 +52,10 @@ namespace Script
 
             T result;
             if (luaGetToStack(variable, level))
-            {
                 result = luaGet<T>(variable);
-            }
 
             else
-            {
                 result = luaGetDefault<T>();
-            }
 
             lua_pop(mState, level + 1);
             return result;
@@ -88,14 +96,20 @@ namespace Script
         void eval(const char* script);
 
     private:
-        LuaScript();
-
         bool luaGetToStack(const std::string& variable, int& level);
 
         void clean();
 
+        void printError(const std::string& variable, const std::string& reason);
+
         template <typename T> T luaGet(const std::string& variable = "");
 
         template <typename T> T luaGetDefault() { return {}; }
+
+        template <typename Func> void pushFunction(Func&& f, const char* funcName)
+        {
+            lua_pushcfunction(mState, f);
+            lua_setfield(mState, -2, funcName);
+        }
     };
 }

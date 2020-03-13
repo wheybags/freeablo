@@ -1,10 +1,6 @@
 #include "console.h"
 #include <script/luascript.h>
 
-#include <filesystem/resolver.h>
-#include <misc/fixedpoint.h>
-#include <misc/stringops.h>
-
 namespace FAGui
 {
     static auto oldCout = std::cout.rdbuf();
@@ -17,7 +13,7 @@ namespace FAGui
     std::unique_ptr<Console> Console::mInstance = nullptr;
     static std::stringstream consoleCout;
 
-    Console::Console() : mBuffer({}), bufferLen(0), inputLen(0), mScript(Script::LuaScript::getInstance()), mCommandsPath("resources/commands/")
+    Console::Console() : mBuffer({}), bufferLen(0), inputLen(0), mScript({})
     {
         std::cout.rdbuf(consoleCout.rdbuf());
         freopen(nullFile, "a", stdout);
@@ -33,9 +29,7 @@ namespace FAGui
     std::unique_ptr<Console>& Console::getInstance()
     {
         if (!mInstance)
-        {
             mInstance = std::unique_ptr<Console>(new Console());
-        }
 
         return mInstance;
     }
@@ -67,7 +61,7 @@ namespace FAGui
         bufferLen += inputLen;
         inputLen = 0;
 
-        mScript->eval(command.c_str());
+        mScript.eval(command.c_str());
         std::string msg = ">> ";
         msg.append(consoleStdoutBuffer, strlen(consoleStdoutBuffer));
         std::memset(consoleStdoutBuffer, '\0', BUFSIZ);

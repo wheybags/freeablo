@@ -1,10 +1,10 @@
 #include "luascript.h"
 
+#include <type_traits>
 #include <vector>
 
 namespace Script
 {
-    std::unique_ptr<LuaScript> LuaScript::mInstance = nullptr;
     LuaScript::LuaScript() : mState(luaL_newstate()) { luaL_openlibs(mState); }
 
     LuaScript::~LuaScript()
@@ -13,19 +13,12 @@ namespace Script
             lua_close(mState);
     }
 
-    std::unique_ptr<LuaScript>& LuaScript::getInstance()
-    {
-        if (!mInstance)
-            mInstance = std::unique_ptr<LuaScript>(new LuaScript());
-
-        return mInstance;
-    }
-
     void LuaScript::printError(const std::string& variable, const std::string& reason)
     {
+#ifdef NDEBUG
         (void)variable;
         (void)reason;
-#ifndef NDEBUG
+#else
         std::cerr << "Can't get variable " << variable << ".\nReason: " << reason << "\n";
 #endif
     }
