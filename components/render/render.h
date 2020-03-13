@@ -96,6 +96,7 @@ namespace Render
     SpriteGroup* loadNonCelSprite(const std::string& path);
     SDL_Surface* loadNonCelImageTrans(const std::string& path, const std::string& extension, bool hasTrans, size_t transR, size_t transG, size_t transB);
     Cel::Colour getPixel(const SDL_Surface* s, int x, int y);
+    void deleteAllSprites();
 
     void draw();
 

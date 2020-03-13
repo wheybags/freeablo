@@ -227,14 +227,18 @@ namespace FAWorld
 
     int32_t World::getCurrentLevelIndex() { return mCurrentPlayer->getLevel()->getLevelIndex(); }
 
-    void World::setLevel(int32_t levelNum)
+    void World::setLevel(int32_t levelNum, bool upStairsPos)
     {
         if (levelNum >= int32_t(mLevels.size()) || levelNum < 0 || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
             return;
 
+        // Clear atlas texture
+        Engine::ThreadManager::get()->clearSprites();
+
         auto level = getLevel(levelNum);
 
-        mCurrentPlayer->teleport(level, FAWorld::Position(level->upStairsPos()));
+        auto pos = upStairsPos ? level->upStairsPos() : level->downStairsPos();
+        mCurrentPlayer->teleport(level, FAWorld::Position(pos));
     }
 
     void World::playLevelMusic(size_t level)
