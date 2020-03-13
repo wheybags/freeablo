@@ -84,10 +84,10 @@ namespace Render
 
             if (auto c = highlightColor)
             {
-                vertexData.v_hoverColor[0] = float(c->r) / 255.0f;
-                vertexData.v_hoverColor[1] = float(c->g) / 255.0f;
-                vertexData.v_hoverColor[2] = float(c->b) / 255.0f;
-                vertexData.v_hoverColor[3] = 1.0f;
+                vertexData.v_hoverColor[0] = c->r;
+                vertexData.v_hoverColor[1] = c->g;
+                vertexData.v_hoverColor[2] = c->b;
+                vertexData.v_hoverColor[3] = 255;
             }
 
             mInstanceData.push_back(vertexData);

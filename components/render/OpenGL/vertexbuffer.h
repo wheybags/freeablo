@@ -12,10 +12,17 @@ namespace Render
     enum class Format
     {
         RGBA8U,
+        RGBA8UNorm,
         RGBA32F,
         RGB32F,
         RG32F,
         R32F,
+        RGBA16U,
+        RGB16U,
+        RG16U,
+        RGBA16I,
+        RGB16I,
+        RG16I,
     };
 
     static size_t formatSize(Format format)
@@ -23,6 +30,8 @@ namespace Render
         switch (format)
         {
             case Format::RGBA8U:
+                return 4;
+            case Format::RGBA8UNorm:
                 return 4;
             case Format::RGBA32F:
                 return 4 * 4;
@@ -32,6 +41,18 @@ namespace Render
                 return 4 * 2;
             case Format::R32F:
                 return 4;
+            case Format::RGBA16U:
+                return 2 * 4;
+            case Format::RGB16U:
+                return 2 * 3;
+            case Format::RG16U:
+                return 2 * 2;
+            case Format::RGBA16I:
+                return 2 * 4;
+            case Format::RGB16I:
+                return 2 * 3;
+            case Format::RG16I:
+                return 2 * 2;
         }
 
         invalid_enum(Format, format);
@@ -84,18 +105,18 @@ namespace Render
 
     struct SpriteVertexPerInstance
     {
-        float v_imageSize[2];
-        float v_imageOffset[2];
-        float v_hoverColor[4];
-        float v_atlasOffset[3];
+        uint16_t v_imageSize[2];
+        int16_t v_imageOffset[2];
+        uint8_t v_hoverColor[4];
+        uint16_t v_atlasOffset[3];
 
         static const VertexLayout& layout()
         {
             static VertexLayout layout{{
-                                           Format::RG32F,
-                                           Format::RG32F,
-                                           Format::RGBA32F,
-                                           Format::RGB32F,
+                                           Format::RG16U,
+                                           Format::RG16I,
+                                           Format::RGBA8UNorm,
+                                           Format::RGB16U,
                                        },
                                        VertexInputRate::ByInstance};
 

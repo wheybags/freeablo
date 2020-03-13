@@ -25,7 +25,15 @@ namespace Render
             switch (element)
             {
                 case Format::RGBA8U:
-                    invalid_enum(Format, element);
+                    type = GL_UNSIGNED_BYTE;
+                    normalized = GL_FALSE;
+                    size = 4;
+                    break;
+                case Format::RGBA8UNorm:
+                    type = GL_UNSIGNED_BYTE;
+                    normalized = GL_TRUE;
+                    size = 4;
+                    break;
                 case Format::RGBA32F:
                     type = GL_FLOAT;
                     normalized = GL_FALSE;
@@ -45,6 +53,36 @@ namespace Render
                     type = GL_FLOAT;
                     normalized = GL_FALSE;
                     size = 1;
+                    break;
+                case Format::RGBA16U:
+                    type = GL_UNSIGNED_SHORT;
+                    normalized = GL_FALSE;
+                    size = 4;
+                    break;
+                case Format::RGB16U:
+                    type = GL_UNSIGNED_SHORT;
+                    normalized = GL_FALSE;
+                    size = 3;
+                    break;
+                case Format::RG16U:
+                    type = GL_UNSIGNED_SHORT;
+                    normalized = GL_FALSE;
+                    size = 2;
+                    break;
+                case Format::RGBA16I:
+                    type = GL_SHORT;
+                    normalized = GL_FALSE;
+                    size = 4;
+                    break;
+                case Format::RGB16I:
+                    type = GL_SHORT;
+                    normalized = GL_FALSE;
+                    size = 3;
+                    break;
+                case Format::RG16I:
+                    type = GL_SHORT;
+                    normalized = GL_FALSE;
+                    size = 2;
                     break;
             }
 
