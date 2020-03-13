@@ -1,8 +1,6 @@
 #pragma once
-
-#include "sdl_gl_funcs.h"
-
 #include <algorithm>
+#include <glad/glad.h>
 #include <map>
 #include <memory>
 #include <stdint.h>

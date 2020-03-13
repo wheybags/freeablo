@@ -1,7 +1,7 @@
 #include "nuklear_sdl_gl3.h"
 #include "../../apps/freeablo/fagui/guimanager.h"
 #include "render.h"
-#include "sdl_gl_funcs.h"
+#include <glad/glad.h>
 #include <iostream>
 #include <misc/assert.h>
 #include <string.h>

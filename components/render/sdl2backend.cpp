@@ -7,9 +7,9 @@
 #include "../cel/celframe.h"
 #include "../level/level.h"
 #include "atlastexture.h"
-#include "sdl_gl_funcs.h"
 #include <SDL_image.h>
 #include <faio/fafileobject.h>
+#include <glad/glad.h>
 #include <misc/assert.h>
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
@@ -157,6 +157,9 @@ namespace Render
 
         glContext = SDL_GL_CreateContext(screen);
 
+        if (!gladLoadGL())
+            message_and_abort("gladLoadGL failed");
+
 #ifdef DEBUG_ATLAS_TEXTURE
         // Ensure VSYNC is disabled to get actual FPS.
         SDL_GL_SetSwapInterval(0);
@@ -185,7 +188,7 @@ namespace Render
 
         // renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-        initGlFuncs();
+        //        initGlFuncs();
 
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
@@ -697,7 +700,7 @@ namespace Render
             glGetProgramiv(shader_programme, GL_LINK_STATUS, &status);
             release_assert(status == GL_TRUE);
 
-            GL_CHECK_ERROR();
+            //            GL_CHECK_ERROR();
 
             GLfloat points[] = {0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0};
 
@@ -759,7 +762,7 @@ namespace Render
             glVertexAttribDivisor(atlasOffset_id, 1);
             glEnableVertexAttribArray(atlasOffset_id);
 
-            GL_CHECK_ERROR();
+            //            GL_CHECK_ERROR();
 
             /*SDL_Surface* surf = SDL_LoadBMP("E:\\tom.bmp");
 
@@ -1361,7 +1364,7 @@ namespace Render
         // Clear cached level data after drawing.
         drawLevelCache.clear();
 
-        GL_CHECK_ERROR();
+        //        GL_CHECK_ERROR();
 
 #ifdef DEBUG_ATLAS_TEXTURE
         static size_t loop = 0;

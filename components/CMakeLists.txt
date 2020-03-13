@@ -72,8 +72,6 @@ set(RenderFiles
     render/render.h
     render/levelobjects.h
     render/sdl2backend.cpp
-    render/sdl_gl_funcs.h
-    render/sdl_gl_funcs.cpp
     render/nuklear_sdl_gl3.cpp
     render/nuklear_sdl_gl3.h
     render/misc.h
@@ -85,7 +83,7 @@ set(RenderFiles
     ../extern/RectangleBinPack/SkylineBinPack.h
 )
 add_library(Render ${RenderFiles})
-target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image ${OPENGL_LIBRARIES})
+target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input

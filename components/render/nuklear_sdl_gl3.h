@@ -1,8 +1,9 @@
 #pragma once
 #include "atlastexture.h"
 #include "misc.h"
-#include "sdl_gl_funcs.h"
+#include <SDL.h>
 #include <fa_nuklear.h>
+#include <glad/glad.h>
 #include <vector>
 
 struct nk_gl_device

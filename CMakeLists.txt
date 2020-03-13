@@ -13,9 +13,6 @@ endif()
 
 project (Freeablo)
 
-set(OpenGL_GL_PREFERENCE LEGACY)
-Find_Package(OpenGL REQUIRED)
-
 set(FA_COMPILER_FLAGS "")
 
 set (CMAKE_CXX_STANDARD 17)
