@@ -13,6 +13,7 @@
 #include <misc/assert.h>
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
+#include <render/OpenGL/vertexbuffer.h>
 
 // clang-format off
 #include <misc/disablewarn.h>
@@ -62,57 +63,43 @@ namespace Render
     class DrawLevelCache
     {
     public:
-        DrawLevelCache(size_t initSize)
-        {
-            mImageOffset.reserve(2 * initSize);
-            mHoverColor.reserve(4 * initSize);
-            mImageSize.reserve(2 * initSize);
-            mAtlasOffset.reserve(3 * initSize);
-        }
+        DrawLevelCache(size_t initSize) { mInstanceData.resize(initSize); }
 
         void addSprite(GLuint sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
         {
             auto& lookupMap = atlasTexture->getLookupMap();
             auto& atlasEntry = lookupMap.at(sprite);
 
-            mImageSize.push_back(atlasEntry.mWidth);
-            mImageSize.push_back(atlasEntry.mHeight);
-            mAtlasOffset.push_back(atlasEntry.mX);
-            mAtlasOffset.push_back(atlasEntry.mY);
-            mAtlasOffset.push_back(atlasEntry.mLayer);
-            mImageOffset.push_back(x);
-            mImageOffset.push_back(y);
+            SpriteVertexPerInstance vertexData = {};
+
+            vertexData.v_imageSize[0] = atlasEntry.mWidth;
+            vertexData.v_imageSize[1] = atlasEntry.mHeight;
+
+            vertexData.v_atlasOffset[0] = atlasEntry.mX;
+            vertexData.v_atlasOffset[1] = atlasEntry.mY;
+            vertexData.v_atlasOffset[2] = atlasEntry.mLayer;
+
+            vertexData.v_imageOffset[0] = x;
+            vertexData.v_imageOffset[1] = y;
 
             if (auto c = highlightColor)
             {
-                mHoverColor.push_back(c->r);
-                mHoverColor.push_back(c->g);
-                mHoverColor.push_back(c->b);
-                mHoverColor.push_back(255);
+                vertexData.v_hoverColor[0] = float(c->r) / 255.0f;
+                vertexData.v_hoverColor[1] = float(c->g) / 255.0f;
+                vertexData.v_hoverColor[2] = float(c->b) / 255.0f;
+                vertexData.v_hoverColor[3] = 1.0f;
             }
-            else
-            {
-                mHoverColor.push_back(0.0);
-                mHoverColor.push_back(0.0);
-                mHoverColor.push_back(0.0);
-                mHoverColor.push_back(0.0);
-            }
+
+            mInstanceData.push_back(vertexData);
         }
 
-        size_t size() const { return mImageOffset.size() / 2; }
+        size_t instanceCount() const { return mInstanceData.size(); }
 
-        void clear()
-        {
-            mImageOffset.clear();
-            mHoverColor.clear();
-            mImageSize.clear();
-            mAtlasOffset.clear();
-        }
+        std::pair<void*, size_t> getData() { return {mInstanceData.data(), mInstanceData.size() * sizeof(SpriteVertexPerInstance)}; }
 
-        std::vector<GLshort> mImageOffset;
-        std::vector<GLubyte> mHoverColor;
-        std::vector<GLushort> mImageSize;
-        std::vector<GLushort> mAtlasOffset;
+        void clear() { mInstanceData.clear(); }
+
+        std::vector<SpriteVertexPerInstance> mInstanceData;
     };
 
     int32_t WIDTH = 1280;
@@ -124,6 +111,20 @@ namespace Render
 
     DrawLevelCache drawLevelCache = DrawLevelCache(2000);
     std::string windowTitle;
+
+#ifdef DEBUG_GRAPHICS
+    void gladDebugPostCallCallback(const char* name, void*, int, ...)
+    {
+        GLenum error_code;
+        error_code = glad_glGetError();
+
+        if (error_code != GL_NO_ERROR)
+        {
+            fprintf(stderr, "ERROR %d in %s\n", error_code, name);
+            DEBUG_BREAK;
+        }
+    }
+#endif
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
     {
@@ -160,7 +161,9 @@ namespace Render
         if (!gladLoadGL())
             message_and_abort("gladLoadGL failed");
 
-#ifdef DEBUG_ATLAS_TEXTURE
+#ifdef DEBUG_GRAPHICS
+        glad_set_post_callback(gladDebugPostCallCallback);
+
         // Ensure VSYNC is disabled to get actual FPS.
         SDL_GL_SetSwapInterval(0);
 #endif
@@ -619,14 +622,10 @@ namespace Render
 
     bool once = false;
 
-    GLuint vao = 0;
+    VertexArrayObject* vertexArrayObject = nullptr;
+
     GLuint shader_programme = 0;
     GLuint texture = 0;
-
-    GLuint imageSize_vbo;
-    GLuint imageOffset_vbo;
-    GLuint hoverColor_vbo;
-    GLuint atlasOffset_vbo;
 
     void deleteAllSprites() { atlasTexture->clear(); }
 
@@ -700,126 +699,28 @@ namespace Render
             glGetProgramiv(shader_programme, GL_LINK_STATUS, &status);
             release_assert(status == GL_TRUE);
 
-            //            GL_CHECK_ERROR();
+            // clang-format off
+            SpriteVertexMain baseVertices[] =
+            {
+                {{0, 0, 0},  {0, 0}},
+                {{1, 0, 0},  {1, 0}},
+                {{1, 1, 0},  {1, 1}},
+                {{0, 0, 0},  {0, 0}},
+                {{1, 1, 0},  {1, 1}},
+                {{0, 1, 0},  {0, 1}}
+            };
+            // clang-format on
 
-            GLfloat points[] = {0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0};
-
-            GLfloat colours[] = {0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1};
-
-            glGenVertexArrays(1, &vao);
-            glBindVertexArray(vao);
-
-            GLint vertex_position_id, uv_id, imageSize_id, imageOffset_id, hoverColor_id, atlasOffset_id;
-            vertex_position_id = glGetAttribLocation(shader_programme, "vertex_position");
-            uv_id = glGetAttribLocation(shader_programme, "v_uv");
-            imageSize_id = glGetAttribLocation(shader_programme, "v_imageSize");
-            imageOffset_id = glGetAttribLocation(shader_programme, "v_imageOffset");
-            hoverColor_id = glGetAttribLocation(shader_programme, "v_hoverColor");
-            atlasOffset_id = glGetAttribLocation(shader_programme, "v_atlasOffset");
-
-            // Not 100% sure if this is portable but vertex array buffers seem to
-            // loop so only have to supply one set of points/colors. Increases
-            // performance by a reasonable amount so will leave like this unless
-            // there's problems (if problems could just append sets of points/colors
-            // to vectors in the DrawLevelCache when each sprite added).
-            GLuint vbo = 0;
-            glGenBuffers(1, &vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-            glVertexAttribPointer(vertex_position_id, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-            glEnableVertexAttribArray(vertex_position_id);
-
-            GLuint uvs_vbo = 0;
-            glGenBuffers(1, &uvs_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, uvs_vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(colours), colours, GL_STATIC_DRAW);
-            glVertexAttribPointer(uv_id, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-            glEnableVertexAttribArray(uv_id);
-
-            // Note: These VBOs use glVertexAttribDivisor(n, 1) which means they're
-            // only updated once per instance (instead of once per vertex).
-            glGenBuffers(1, &imageSize_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, imageSize_vbo);
-            glVertexAttribPointer(imageSize_id, 2, GL_UNSIGNED_SHORT, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(imageSize_id, 1);
-            glEnableVertexAttribArray(imageSize_id);
-
-            glGenBuffers(1, &imageOffset_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, imageOffset_vbo);
-            glVertexAttribPointer(imageOffset_id, 2, GL_SHORT, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(imageOffset_id, 1);
-            glEnableVertexAttribArray(imageOffset_id);
-
-            glGenBuffers(1, &hoverColor_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, hoverColor_vbo);
-            glVertexAttribPointer(hoverColor_id, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(hoverColor_id, 1);
-            glEnableVertexAttribArray(hoverColor_id);
-
-            glGenBuffers(1, &atlasOffset_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, atlasOffset_vbo);
-            glVertexAttribPointer(atlasOffset_id, 3, GL_UNSIGNED_SHORT, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(atlasOffset_id, 1);
-            glEnableVertexAttribArray(atlasOffset_id);
-
-            //            GL_CHECK_ERROR();
-
-            /*SDL_Surface* surf = SDL_LoadBMP("E:\\tom.bmp");
-
-            SDL_Surface* s = createTransparentSurface(surf->w, surf->h);
-            SDL_BlitSurface(surf, NULL, s, NULL);
-
-            texture = getGLTexFromSurface(s);
-
-            SDL_FreeSurface(s);
-            SDL_FreeSurface(surf);*/
+            vertexArrayObject = new VertexArrayObject(
+                {
+                    0,
+                    0,
+                },
+                {SpriteVertexMain::layout(), SpriteVertexPerInstance::layout()});
+            vertexArrayObject->mBuffers[0]->setData(baseVertices, sizeof(baseVertices));
         }
-
-        /*GLint loc = glGetUniformLocation(shader_programme, "width");
-        if (loc != -1)
-        {
-            glUniform1f(loc, WIDTH);
-        }
-        loc = glGetUniformLocation(shader_programme, "height");
-        if (loc != -1)
-        {
-            glUniform1f(loc, HEIGHT);
-        }
-
-        loc = glGetUniformLocation(shader_programme, "imgW");
-        if (loc != -1)
-        {
-            glUniform1f(loc, 150);
-        }
-        loc = glGetUniformLocation(shader_programme, "imgH");
-        if (loc != -1)
-        {
-            glUniform1f(loc, 100);
-        }
-
-        loc = glGetUniformLocation(shader_programme, "offsetX");
-        if (loc != -1)
-        {
-            glUniform1f(loc, 150);
-        }
-        loc = glGetUniformLocation(shader_programme, "offsetY");
-        if (loc != -1)
-        {
-            glUniform1f(loc, 100);
-        }
-
-        //glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glUseProgram(shader_programme);
-        glBindVertexArray(vao);
-        // draw points 0-3 from the currently bound VAO with current in-use shader
-        glDrawArrays(GL_TRIANGLES, 0, 6);*/
-
-        // drawAt(texture, 0, 0);
 
         SDL_GL_SwapWindow(screen);
-        // SDL_RenderPresent(renderer);
     }
 
     void drawSprite(GLuint sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
@@ -836,28 +737,14 @@ namespace Render
         glUniform2f(glGetUniformLocation(shader_programme, "screenSize"), WIDTH, HEIGHT);
         glUniform2f(glGetUniformLocation(shader_programme, "atlasSize"), atlasTexture->getTextureWidth(), atlasTexture->getTextureHeight());
 
-        glBindVertexArray(vao);
+        std::pair<void*, size_t> instanceData = drawLevelCache.getData();
+        vertexArrayObject->mBuffers[1]->setData(instanceData.first, instanceData.second);
 
-        size_t spriteCount = drawLevelCache.size();
-
-        // Note: These VBOs use glVertexAttribDivisor(n, 1) which means they're
-        // only updated once per instance (instead of once per vertex).
-        glBindBuffer(GL_ARRAY_BUFFER, imageSize_vbo);
-        glBufferData(GL_ARRAY_BUFFER, drawLevelCache.mImageSize.size() * sizeof(drawLevelCache.mImageSize[0]), &drawLevelCache.mImageSize[0], GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, imageOffset_vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER, drawLevelCache.mImageOffset.size() * sizeof(drawLevelCache.mImageOffset[0]), &drawLevelCache.mImageOffset[0], GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, hoverColor_vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER, drawLevelCache.mHoverColor.size() * sizeof(drawLevelCache.mHoverColor[0]), &drawLevelCache.mHoverColor[0], GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, atlasOffset_vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER, drawLevelCache.mAtlasOffset.size() * sizeof(drawLevelCache.mAtlasOffset[0]), &drawLevelCache.mAtlasOffset[0], GL_STATIC_DRAW);
-
+        ScopedBind vaoBind(vertexArrayObject);
         atlasTexture->bind();
 
         // Draw the whole level in one batched operation.
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, spriteCount);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, drawLevelCache.instanceCount());
     }
 
     void handleEvents()

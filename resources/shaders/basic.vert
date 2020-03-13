@@ -1,12 +1,11 @@
 #version 330
-precision mediump float;
 
-in vec3 vertex_position;
-in vec2 v_uv;
-in vec2 v_imageSize;
-in vec2 v_imageOffset;
-in vec4 v_hoverColor;
-in vec3 v_atlasOffset;
+layout(location = 0) in vec3 vertex_position;
+layout(location = 1) in vec2 v_uv;
+layout(location = 2) in vec2 v_imageSize;
+layout(location = 3) in vec2 v_imageOffset;
+layout(location = 4) in vec4 v_hoverColor;
+layout(location = 5) in vec3 v_atlasOffset;
 
 out vec2 uv;
 flat out vec2 imageSize;

@@ -1,5 +1,4 @@
 #version 330
-precision mediump float;
 
 in vec2 uv;
 flat in vec2 imageSize;

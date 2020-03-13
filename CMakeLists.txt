@@ -21,7 +21,12 @@ if(WIN32)
 	add_definitions(-DNOMINMAX) # http://stackoverflow.com/questions/5004858/stdmin-gives-error
 endif()
 
-option (FA_TREAT_WARNINGS_AS_ERRORS "Treat warnings as errors")
+option (FA_TREAT_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
+option (DEBUG_GRAPHICS "Debug graphics code" OFF)
+
+if (DEBUG_GRAPHICS)
+  set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -DDEBUG_GRAPHICS")
+endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(FA_COMPILER_FLAGS "${FA_COMPILER_FLAGS} -Wall -pedantic -Wextra -Wno-unknown-pragmas -Wno-missing-braces")
