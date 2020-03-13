@@ -6,24 +6,10 @@
 #include <misc/assert.h>
 #include <string.h>
 
-struct nk_sdl_vertex
-{
-    float position[2];
-    float uv[2];
-    nk_byte col[4];
-};
-
-static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, position)},
-                                                                     {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, uv)},
-                                                                     {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct nk_sdl_vertex, col)},
+static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, position)},
+                                                                     {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, uv)},
+                                                                     {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct Render::NuklearVertex, color)},
                                                                      {NK_VERTEX_LAYOUT_END}};
-
-//#ifdef __APPLE__
-//#define NK_SHADER_VERSION "#version 150\n"
-//#else
-//#define NK_SHADER_VERSION "#version 300 es\n"
-//#endif
-
 #define NK_SHADER_VERSION "#version 330\n"
 
 void nk_sdl_device_create(nk_gl_device& dev)
@@ -119,34 +105,7 @@ void nk_sdl_device_create(nk_gl_device& dev)
     dev.attrib_uv = glGetAttribLocation(dev.prog, "TexCoord");
     dev.attrib_col = glGetAttribLocation(dev.prog, "Color");
 
-    {
-        // buffer setup
-        GLsizei vs = sizeof(struct nk_sdl_vertex);
-        size_t vp = offsetof(struct nk_sdl_vertex, position);
-        size_t vt = offsetof(struct nk_sdl_vertex, uv);
-        size_t vc = offsetof(struct nk_sdl_vertex, col);
-
-        glGenBuffers(1, &dev.vbo);
-        glGenBuffers(1, &dev.ebo);
-        glGenVertexArrays(1, &dev.vao);
-
-        glBindVertexArray(dev.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, dev.vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, dev.ebo);
-
-        glEnableVertexAttribArray((GLuint)dev.attrib_pos);
-        glEnableVertexAttribArray((GLuint)dev.attrib_uv);
-        glEnableVertexAttribArray((GLuint)dev.attrib_col);
-
-        glVertexAttribPointer((GLuint)dev.attrib_pos, 2, GL_FLOAT, GL_FALSE, vs, (void*)vp);
-        glVertexAttribPointer((GLuint)dev.attrib_uv, 2, GL_FLOAT, GL_FALSE, vs, (void*)vt);
-        glVertexAttribPointer((GLuint)dev.attrib_col, 4, GL_UNSIGNED_BYTE, GL_TRUE, vs, (void*)vc);
-    }
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    dev.vertexArrayObject = new Render::VertexArrayObject({0}, {Render::NuklearVertex::layout()}, 1);
 }
 
 /*GLuint nk_sdl_device_upload_atlas(const void *image, int width, int height)
@@ -168,9 +127,7 @@ void nk_sdl_device_destroy(nk_gl_device& dev)
     glDeleteShader(dev.vert_shdr);
     glDeleteShader(dev.frag_shdr);
     glDeleteProgram(dev.prog);
-    // glDeleteTextures(1, &dev.font_tex);
-    glDeleteBuffers(1, &dev.vbo);
-    glDeleteBuffers(1, &dev.ebo);
+    delete dev.vertexArrayObject;
     nk_buffer_free(&dev.cmds);
 }
 
@@ -221,26 +178,13 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
     glUniformMatrix4fv(dev.uniform_proj, 1, GL_FALSE, &ortho[0][0]);
     {
         // convert from command queue into draw list and draw to screen
-        void *vertices, *elements;
         const nk_draw_index* offset = NULL;
 
-        // allocate vertex and element buffer
-        glBindVertexArray(dev.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, dev.vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, dev.ebo);
+        dev.vertexArrayObject->mBuffers[0]->mBuffer.setData(dump.vbuf.memory.ptr, dump.vbuf.size);
+        dev.vertexArrayObject->mIndexBuffer->setData(static_cast<uint16_t*>(dump.ebuf.memory.ptr), dump.ebuf.size / sizeof(uint16_t));
 
-        glBufferData(GL_ARRAY_BUFFER, dump.vbuf.size, NULL, GL_STREAM_DRAW);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, dump.ebuf.size, NULL, GL_STREAM_DRAW);
-
-        // load vertices/elements directly into vertex/element buffer
-        vertices = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        elements = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-        {
-            memcpy(vertices, dump.vbuf.memory.ptr, dump.vbuf.size);
-            memcpy(elements, dump.ebuf.memory.ptr, dump.ebuf.size);
-        }
-        glUnmapBuffer(GL_ARRAY_BUFFER);
-        glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+        Render::ScopedBind vaoBind(dev.vertexArrayObject);
+        Render::ScopedBind indexBind(*dev.vertexArrayObject->mIndexBuffer);
 
         // iterate over and execute each draw command
         for (size_t i = 0; i < dump.drawCommands.size(); i++)
@@ -452,8 +396,8 @@ void NuklearFrameDump::init(nk_gl_device& dev)
 
     memset(&config, 0, sizeof(config));
     config.vertex_layout = vertex_layout;
-    config.vertex_size = sizeof(struct nk_sdl_vertex);
-    config.vertex_alignment = NK_ALIGNOF(struct nk_sdl_vertex);
+    config.vertex_size = sizeof(Render::NuklearVertex);
+    config.vertex_alignment = NK_ALIGNOF(Render::NuklearVertex);
     config.null = dev.null;
     config.circle_segment_count = 22;
     config.curve_segment_count = 22;

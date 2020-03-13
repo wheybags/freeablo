@@ -4,13 +4,14 @@
 #include <SDL.h>
 #include <fa_nuklear.h>
 #include <glad/glad.h>
+#include <render/OpenGL/vertexbuffer.h>
 #include <vector>
 
 struct nk_gl_device
 {
     nk_buffer cmds;
     nk_draw_null_texture null;
-    GLuint vbo, vao, ebo;
+    Render::VertexArrayObject* vertexArrayObject = nullptr;
     GLuint prog;
     GLuint vert_shdr;
     GLuint frag_shdr;

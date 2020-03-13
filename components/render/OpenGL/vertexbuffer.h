@@ -126,6 +126,27 @@ namespace Render
         }
     };
 
+    struct NuklearVertex
+    {
+        float position[2];
+        float uv[2];
+        uint8_t color[4];
+
+        static const VertexLayout& layout()
+        {
+            static VertexLayout layout{{
+                                           Format::RG32F,
+                                           Format::RG32F,
+                                           Format::RGBA8UNorm,
+                                       },
+                                       VertexInputRate::ByVertex};
+
+            debug_assert(layout.getSizeInBytes() == sizeof(NuklearVertex));
+
+            return layout;
+        }
+    };
+
     class Bindable
     {
     public:
@@ -146,33 +167,58 @@ namespace Render
         Bindable& mResource;
     };
 
-    class VertexBuffer : public Bindable
+    class Buffer
     {
     public:
-        VertexBuffer(size_t count, const VertexLayout& layout);
-        virtual ~VertexBuffer();
-
-        // This method presumes that you have bound a VAO before calling it
-        GLint setupAttributes(GLint locationIndex);
+        Buffer(size_t sizeInBytes);
+        ~Buffer();
 
         GLuint getId() { return mId; }
         size_t getSizeInBytes() { return mSizeInBytes; }
 
         void setData(void* data, size_t dataSizeInBytes);
 
-        virtual void bind() override;
-        virtual void unbind() override;
-
     private:
         GLuint mId = 0;
         size_t mSizeInBytes = 0;
+    };
+
+    class IndexBuffer final : public Bindable
+    {
+    public:
+        IndexBuffer(size_t count);
+        virtual ~IndexBuffer() = default;
+
+        void setData(uint16_t* indices, size_t count);
+
+        virtual void bind() override;
+        virtual void unbind() override;
+
+    public:
+        Buffer mBuffer;
+    };
+
+    class VertexBuffer final : public Bindable
+    {
+    public:
+        VertexBuffer(size_t count, const VertexLayout& layout);
+        virtual ~VertexBuffer() = default;
+
+        // This method presumes that you have bound a VAO before calling it
+        GLint setupAttributes(GLint locationIndex);
+
+        virtual void bind() override;
+        virtual void unbind() override;
+
+    public:
+        Buffer mBuffer;
         const VertexLayout& mLayout;
     };
 
     class VertexArrayObject : public Bindable
     {
     public:
-        VertexArrayObject(std::vector<size_t> bufferSizeCounts, std::vector<NonNullConstPtr<VertexLayout>> bindings);
+        VertexArrayObject(std::vector<size_t> bufferSizeCounts, std::vector<NonNullConstPtr<VertexLayout>> bindings, size_t indexBufferSizeInElements);
         virtual ~VertexArrayObject();
 
         virtual void bind() override;
@@ -180,6 +226,7 @@ namespace Render
 
         std::vector<NonNullConstPtr<VertexLayout>> mBindings;
         std::vector<std::unique_ptr<VertexBuffer>> mBuffers;
+        std::unique_ptr<IndexBuffer> mIndexBuffer;
         GLuint mVaoId;
 
 #ifndef NDEBUG

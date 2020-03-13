@@ -2,12 +2,31 @@
 
 namespace Render
 {
-    VertexBuffer::VertexBuffer(size_t count, const VertexLayout& layout) : mSizeInBytes(count * layout.getSizeInBytes()), mLayout(layout)
+    Buffer::Buffer(size_t sizeInBytes) : mSizeInBytes(sizeInBytes) { glGenBuffers(1, &mId); }
+
+    Buffer::~Buffer() { glDeleteBuffers(1, &mId); }
+
+    void Buffer::setData(void* data, size_t dataSizeInBytes)
     {
-        glGenBuffers(1, &mId);
+        // TODO: check mSizeInBytes to make sure this buffer can fit the data
+        // In opengl this doesn't actually matter, the buffers are dynamically resized,
+        // but it would be nice to enforce anyway.
+        // Will do this once we have batch-splitting implemented.
+
+        glBindBuffer(GL_COPY_WRITE_BUFFER, mId);
+        glBufferData(GL_COPY_WRITE_BUFFER, dataSizeInBytes, data, GL_STATIC_DRAW);
+        glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
     }
 
-    VertexBuffer::~VertexBuffer() { glDeleteBuffers(1, &mId); }
+    IndexBuffer::IndexBuffer(size_t count) : mBuffer(count * sizeof(uint16_t)) {}
+
+    void IndexBuffer::setData(uint16_t* indices, size_t count) { mBuffer.setData(indices, count * sizeof(uint16_t)); }
+
+    void IndexBuffer::bind() { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBuffer.getId()); }
+
+    void IndexBuffer::unbind() { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); }
+
+    VertexBuffer::VertexBuffer(size_t count, const VertexLayout& layout) : mBuffer(count * layout.getSizeInBytes()), mLayout(layout) {}
 
     GLint VertexBuffer::setupAttributes(GLint locationIndex)
     {
@@ -99,22 +118,14 @@ namespace Render
         return locationIndex;
     }
 
-    void VertexBuffer::setData(void* data, size_t dataSizeInBytes)
-    {
-        // TODO: check mSizeInBytes to make sure this buffer can fit the data
-        // In opengl this doesn't actually matter, the buffers are dynamically resized,
-        // but it would be nice to enforce anyway.
-        // Will do this once we have batch-splitting implemented.
-
-        ScopedBind binder(this);
-        glBufferData(GL_ARRAY_BUFFER, dataSizeInBytes, data, GL_STATIC_DRAW);
-    }
-
-    void VertexBuffer::bind() { glBindBuffer(GL_ARRAY_BUFFER, mId); }
+    void VertexBuffer::bind() { glBindBuffer(GL_ARRAY_BUFFER, mBuffer.getId()); }
 
     void VertexBuffer::unbind() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
 
-    VertexArrayObject::VertexArrayObject(std::vector<size_t> bufferSizeCounts, std::vector<NonNullConstPtr<VertexLayout>> bindings) : mBindings(bindings)
+    VertexArrayObject::VertexArrayObject(std::vector<size_t> bufferSizeCounts,
+                                         std::vector<NonNullConstPtr<VertexLayout>> bindings,
+                                         size_t indexBufferSizeInElements)
+        : mBindings(bindings)
     {
         debug_assert(bufferSizeCounts.size() == bindings.size());
 
@@ -128,6 +139,9 @@ namespace Render
             locationIndex = buffer->setupAttributes(locationIndex);
             mBuffers.emplace_back(buffer.release());
         }
+
+        if (indexBufferSizeInElements > 0)
+            mIndexBuffer = std::make_unique<IndexBuffer>(indexBufferSizeInElements);
     }
 
     VertexArrayObject::~VertexArrayObject() { glDeleteVertexArrays(1, &mVaoId); }
