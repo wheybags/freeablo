@@ -150,6 +150,7 @@ namespace Render
     {
     public:
         VertexBuffer(size_t count, const VertexLayout& layout);
+        virtual ~VertexBuffer();
 
         // This method presumes that you have bound a VAO before calling it
         GLint setupAttributes(GLint locationIndex);
@@ -172,6 +173,7 @@ namespace Render
     {
     public:
         VertexArrayObject(std::vector<size_t> bufferSizeCounts, std::vector<NonNullConstPtr<VertexLayout>> bindings);
+        virtual ~VertexArrayObject();
 
         virtual void bind() override;
         virtual void unbind() override;

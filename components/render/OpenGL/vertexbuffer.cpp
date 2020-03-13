@@ -7,6 +7,8 @@ namespace Render
         glGenBuffers(1, &mId);
     }
 
+    VertexBuffer::~VertexBuffer() { glDeleteBuffers(1, &mId); }
+
     GLint VertexBuffer::setupAttributes(GLint locationIndex)
     {
 #ifndef NDEBUG
@@ -127,6 +129,8 @@ namespace Render
             mBuffers.emplace_back(buffer.release());
         }
     }
+
+    VertexArrayObject::~VertexArrayObject() { glDeleteVertexArrays(1, &mVaoId); }
 
     void VertexArrayObject::bind()
     {
