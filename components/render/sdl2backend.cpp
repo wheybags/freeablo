@@ -40,10 +40,10 @@
 
 #if defined(WIN32) || defined(_WIN32)
 extern "C" {
-__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) unsigned NvOptimusEnablement = 0x00000001;
 }
 extern "C" {
-__declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
+__declspec(dllexport) unsigned AmdPowerXpressRequestHighPerformance = 0x00000001;
 }
 #else
 extern "C" {
