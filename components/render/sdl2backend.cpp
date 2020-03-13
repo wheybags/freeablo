@@ -200,7 +200,7 @@ namespace Render
 
         if (nk_ctx)
         {
-            memset(&nuklearGraphics, 0, sizeof(nuklearGraphics));
+            nuklearGraphics = {};
             nk_sdl_device_create(nuklearGraphics.dev);
         }
     }
@@ -622,7 +622,7 @@ namespace Render
 
     bool once = false;
 
-    VertexArrayObject* vertexArrayObject = nullptr;
+    VertexArrayObjectOpenGL* vertexArrayObject = nullptr;
 
     GLuint shader_programme = 0;
     GLuint texture = 0;
@@ -711,14 +711,14 @@ namespace Render
             };
             // clang-format on
 
-            vertexArrayObject = new VertexArrayObject(
+            vertexArrayObject = new VertexArrayObjectOpenGL(
                 {
                     0,
                     0,
                 },
                 {SpriteVertexMain::layout(), SpriteVertexPerInstance::layout()},
                 0);
-            vertexArrayObject->mBuffers[0]->mBuffer.setData(baseVertices, sizeof(baseVertices));
+            vertexArrayObject->getVertexBuffer(0)->setData(baseVertices, sizeof(baseVertices));
         }
 
         SDL_GL_SwapWindow(screen);
@@ -739,9 +739,9 @@ namespace Render
         glUniform2f(glGetUniformLocation(shader_programme, "atlasSize"), atlasTexture->getTextureWidth(), atlasTexture->getTextureHeight());
 
         std::pair<void*, size_t> instanceData = drawLevelCache.getData();
-        vertexArrayObject->mBuffers[1]->mBuffer.setData(instanceData.first, instanceData.second);
+        vertexArrayObject->getVertexBuffer(1)->setData(instanceData.first, instanceData.second);
 
-        ScopedBind vaoBind(vertexArrayObject);
+        ScopedBindGL vaoBind(vertexArrayObject);
         atlasTexture->bind();
 
         // Draw the whole level in one batched operation.

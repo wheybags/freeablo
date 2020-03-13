@@ -64,8 +64,8 @@ namespace Render
 
     struct NuklearGraphicsContext
     {
-        nk_gl_device dev;
-        nk_font_atlas atlas;
+        nk_gl_device dev = {};
+        nk_font_atlas atlas = {};
     };
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);

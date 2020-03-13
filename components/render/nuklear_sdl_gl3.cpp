@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <iostream>
 #include <misc/assert.h>
+#include <render/OpenGL/vertexbuffer.h>
 #include <string.h>
 
 static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, position)},
@@ -105,7 +106,7 @@ void nk_sdl_device_create(nk_gl_device& dev)
     dev.attrib_uv = glGetAttribLocation(dev.prog, "TexCoord");
     dev.attrib_col = glGetAttribLocation(dev.prog, "Color");
 
-    dev.vertexArrayObject = new Render::VertexArrayObject({0}, {Render::NuklearVertex::layout()}, 1);
+    dev.vertexArrayObject = new Render::VertexArrayObjectOpenGL({0}, {Render::NuklearVertex::layout()}, 1);
 }
 
 /*GLuint nk_sdl_device_upload_atlas(const void *image, int width, int height)
@@ -180,11 +181,10 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
         // convert from command queue into draw list and draw to screen
         const nk_draw_index* offset = NULL;
 
-        dev.vertexArrayObject->mBuffers[0]->mBuffer.setData(dump.vbuf.memory.ptr, dump.vbuf.size);
-        dev.vertexArrayObject->mIndexBuffer->setData(static_cast<uint16_t*>(dump.ebuf.memory.ptr), dump.ebuf.size / sizeof(uint16_t));
+        dev.vertexArrayObject->getVertexBuffer(0)->setData(dump.vbuf.memory.ptr, dump.vbuf.size);
+        dev.vertexArrayObject->getIndexBuffer()->setData(dump.ebuf.memory.ptr, dump.ebuf.size);
 
-        Render::ScopedBind vaoBind(dev.vertexArrayObject);
-        Render::ScopedBind indexBind(*dev.vertexArrayObject->mIndexBuffer);
+        Render::ScopedBindGL vaoBind(static_cast<Render::VertexArrayObjectOpenGL*>(dev.vertexArrayObject));
 
         // iterate over and execute each draw command
         for (size_t i = 0; i < dump.drawCommands.size(); i++)

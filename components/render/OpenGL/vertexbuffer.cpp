@@ -2,11 +2,11 @@
 
 namespace Render
 {
-    Buffer::Buffer(size_t sizeInBytes) : mSizeInBytes(sizeInBytes) { glGenBuffers(1, &mId); }
+    BufferOpenGL::BufferOpenGL(size_t sizeInBytes) : super(RenderInstance::tmpHack(), sizeInBytes) { glGenBuffers(1, &mId); }
 
-    Buffer::~Buffer() { glDeleteBuffers(1, &mId); }
+    BufferOpenGL::~BufferOpenGL() { glDeleteBuffers(1, &mId); }
 
-    void Buffer::setData(void* data, size_t dataSizeInBytes)
+    void BufferOpenGL::setData(void* data, size_t dataSizeInBytes)
     {
         // TODO: check mSizeInBytes to make sure this buffer can fit the data
         // In opengl this doesn't actually matter, the buffers are dynamically resized,
@@ -18,26 +18,49 @@ namespace Render
         glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
     }
 
-    IndexBuffer::IndexBuffer(size_t count) : mBuffer(count * sizeof(uint16_t)) {}
-
-    void IndexBuffer::setData(uint16_t* indices, size_t count) { mBuffer.setData(indices, count * sizeof(uint16_t)); }
-
-    void IndexBuffer::bind() { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBuffer.getId()); }
-
-    void IndexBuffer::unbind() { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); }
-
-    VertexBuffer::VertexBuffer(size_t count, const VertexLayout& layout) : mBuffer(count * layout.getSizeInBytes()), mLayout(layout) {}
-
-    GLint VertexBuffer::setupAttributes(GLint locationIndex)
+    VertexArrayObjectOpenGL::VertexArrayObjectOpenGL(std::vector<size_t> bufferSizeCounts,
+                                                     std::vector<NonNullConstPtr<VertexLayout>> bindings,
+                                                     size_t indexBufferSizeInElements)
+        : super(bindings)
     {
-#ifndef NDEBUG
-        debug_assert(VertexArrayObject::currentlyBound);
-#endif
+        debug_assert(bufferSizeCounts.size() == bindings.size());
 
-        ScopedBind binder(this);
+        glGenVertexArrays(1, &mVaoId);
+        ScopedBindGL binder(this);
+
+        GLint locationIndex = 0;
+        for (size_t bindingIndex = 0; bindingIndex < mBindings.size(); bindingIndex++)
+        {
+            auto buffer = std::make_unique<BufferOpenGL>(bufferSizeCounts[bindingIndex]);
+            locationIndex = VertexArrayObjectOpenGL::setupAttributes(locationIndex, *buffer, *bindings[bindingIndex]);
+            mBuffers.emplace_back(buffer.release());
+        }
+
+        if (indexBufferSizeInElements > 0)
+            mIndexBuffer = std::make_unique<BufferOpenGL>(indexBufferSizeInElements);
+    }
+
+    VertexArrayObjectOpenGL::~VertexArrayObjectOpenGL() { glDeleteVertexArrays(1, &mVaoId); }
+
+    void VertexArrayObjectOpenGL::bind()
+    {
+        glBindVertexArray(mVaoId);
+        if (mIndexBuffer)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer->getId());
+    }
+
+    void VertexArrayObjectOpenGL::unbind()
+    {
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+
+    GLint VertexArrayObjectOpenGL::setupAttributes(GLint locationIndex, BufferOpenGL& buffer, const VertexLayout& layout)
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, buffer.getId());
 
         size_t offset = 0;
-        for (Format element : mLayout.getElements())
+        for (Format element : layout.getElements())
         {
             GLenum type = 0;
             GLint size = 0;
@@ -107,8 +130,8 @@ namespace Render
                     break;
             }
 
-            glVertexAttribPointer(locationIndex, size, type, normalized, mLayout.getSizeInBytes(), reinterpret_cast<void*>(offset));
-            glVertexAttribDivisor(locationIndex, mLayout.getRate() == VertexInputRate::ByVertex ? 0 : 1);
+            glVertexAttribPointer(locationIndex, size, type, normalized, layout.getSizeInBytes(), reinterpret_cast<void*>(offset));
+            glVertexAttribDivisor(locationIndex, layout.getRate() == VertexInputRate::ByVertex ? 0 : 1);
             glEnableVertexAttribArray(locationIndex);
 
             offset += formatSize(element);
@@ -117,54 +140,4 @@ namespace Render
 
         return locationIndex;
     }
-
-    void VertexBuffer::bind() { glBindBuffer(GL_ARRAY_BUFFER, mBuffer.getId()); }
-
-    void VertexBuffer::unbind() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
-
-    VertexArrayObject::VertexArrayObject(std::vector<size_t> bufferSizeCounts,
-                                         std::vector<NonNullConstPtr<VertexLayout>> bindings,
-                                         size_t indexBufferSizeInElements)
-        : mBindings(bindings)
-    {
-        debug_assert(bufferSizeCounts.size() == bindings.size());
-
-        glGenVertexArrays(1, &mVaoId);
-        ScopedBind binder(this);
-
-        GLint locationIndex = 0;
-        for (size_t bindingIndex = 0; bindingIndex < mBindings.size(); bindingIndex++)
-        {
-            auto buffer = std::make_unique<VertexBuffer>(bufferSizeCounts[bindingIndex], *bindings[bindingIndex]);
-            locationIndex = buffer->setupAttributes(locationIndex);
-            mBuffers.emplace_back(buffer.release());
-        }
-
-        if (indexBufferSizeInElements > 0)
-            mIndexBuffer = std::make_unique<IndexBuffer>(indexBufferSizeInElements);
-    }
-
-    VertexArrayObject::~VertexArrayObject() { glDeleteVertexArrays(1, &mVaoId); }
-
-    void VertexArrayObject::bind()
-    {
-        glBindVertexArray(mVaoId);
-
-#ifndef NDEBUG
-        VertexArrayObject::currentlyBound = this;
-#endif
-    }
-
-    void VertexArrayObject::unbind()
-    {
-        glBindVertexArray(0);
-
-#ifndef NDEBUG
-        VertexArrayObject::currentlyBound = nullptr;
-#endif
-    }
-
-#ifndef NDEBUG
-    VertexArrayObject* VertexArrayObject::currentlyBound = nullptr;
-#endif
 }

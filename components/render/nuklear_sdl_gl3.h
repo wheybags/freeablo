@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include <fa_nuklear.h>
 #include <glad/glad.h>
-#include <render/OpenGL/vertexbuffer.h>
+#include <render/renderinstance.h>
 #include <vector>
 
 struct nk_gl_device

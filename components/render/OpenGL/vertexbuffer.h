@@ -5,85 +5,11 @@
 #include <memory>
 #include <misc/assert.h>
 #include <misc/misc.h>
-#include <vector>
+#include <render/renderinstance.h>
+#include <render/vertexlayout.h>
 
 namespace Render
 {
-    enum class Format
-    {
-        RGBA8U,
-        RGBA8UNorm,
-        RGBA32F,
-        RGB32F,
-        RG32F,
-        R32F,
-        RGBA16U,
-        RGB16U,
-        RG16U,
-        RGBA16I,
-        RGB16I,
-        RG16I,
-    };
-
-    static size_t formatSize(Format format)
-    {
-        switch (format)
-        {
-            case Format::RGBA8U:
-                return 4;
-            case Format::RGBA8UNorm:
-                return 4;
-            case Format::RGBA32F:
-                return 4 * 4;
-            case Format::RGB32F:
-                return 4 * 3;
-            case Format::RG32F:
-                return 4 * 2;
-            case Format::R32F:
-                return 4;
-            case Format::RGBA16U:
-                return 2 * 4;
-            case Format::RGB16U:
-                return 2 * 3;
-            case Format::RG16U:
-                return 2 * 2;
-            case Format::RGBA16I:
-                return 2 * 4;
-            case Format::RGB16I:
-                return 2 * 3;
-            case Format::RG16I:
-                return 2 * 2;
-        }
-
-        invalid_enum(Format, format);
-    }
-
-    enum class VertexInputRate
-    {
-        ByVertex,
-        ByInstance,
-    };
-
-    class VertexLayout
-    {
-    public:
-        VertexLayout(std::initializer_list<Format> elements, VertexInputRate rate) : mElements(elements), mRate(rate)
-        {
-            mSizeInBytes = 0;
-            for (const auto& elem : mElements)
-                mSizeInBytes += formatSize(elem);
-        }
-
-        const std::vector<Format>& getElements() const { return mElements; }
-        VertexInputRate getRate() const { return mRate; }
-        size_t getSizeInBytes() const { return mSizeInBytes; }
-
-    private:
-        std::vector<Format> mElements;
-        size_t mSizeInBytes = 0;
-        VertexInputRate mRate = VertexInputRate::ByVertex;
-    };
-
     struct SpriteVertexMain
     {
         float vertex_position[3];
@@ -147,90 +73,62 @@ namespace Render
         }
     };
 
-    class Bindable
+    class BindableGL
     {
     public:
         virtual void bind() = 0;
         virtual void unbind() = 0;
     };
 
-    class ScopedBind
+    class ScopedBindGL
     {
     public:
-        ScopedBind(Bindable& resource) : mResource(resource) { mResource.bind(); }
+        ScopedBindGL(BindableGL& resource) : mResource(resource) { mResource.bind(); }
 
-        ScopedBind(Bindable* resource) : ScopedBind(*resource) {}
+        ScopedBindGL(BindableGL* resource) : ScopedBindGL(*resource) {}
 
-        ~ScopedBind() { mResource.unbind(); }
+        ~ScopedBindGL() { mResource.unbind(); }
 
     private:
-        Bindable& mResource;
+        BindableGL& mResource;
     };
 
-    class Buffer
+    class BufferOpenGL final : public Buffer
     {
+        using super = Buffer;
+
     public:
-        Buffer(size_t sizeInBytes);
-        ~Buffer();
+        BufferOpenGL(size_t sizeInBytes);
+        ~BufferOpenGL();
 
         GLuint getId() { return mId; }
-        size_t getSizeInBytes() { return mSizeInBytes; }
 
-        void setData(void* data, size_t dataSizeInBytes);
+        virtual void setData(void* data, size_t dataSizeInBytes) override;
 
     private:
         GLuint mId = 0;
-        size_t mSizeInBytes = 0;
     };
 
-    class IndexBuffer final : public Bindable
+    class VertexArrayObjectOpenGL final : public BindableGL, public VertexArrayObject
     {
-    public:
-        IndexBuffer(size_t count);
-        virtual ~IndexBuffer() = default;
+        using super = VertexArrayObject;
 
-        void setData(uint16_t* indices, size_t count);
+    public:
+        VertexArrayObjectOpenGL(std::vector<size_t> bufferSizeCounts, std::vector<NonNullConstPtr<VertexLayout>> bindings, size_t indexBufferSizeInElements);
+        virtual ~VertexArrayObjectOpenGL();
+
+        virtual Buffer* getVertexBuffer(size_t index) override { return mBuffers[index].get(); }
+        virtual Buffer* getIndexBuffer() override { return mIndexBuffer.get(); }
 
         virtual void bind() override;
         virtual void unbind() override;
 
-    public:
-        Buffer mBuffer;
-    };
+    private:
+        static GLint setupAttributes(GLint locationIndex, BufferOpenGL& buffer, const VertexLayout& layout);
 
-    class VertexBuffer final : public Bindable
-    {
-    public:
-        VertexBuffer(size_t count, const VertexLayout& layout);
-        virtual ~VertexBuffer() = default;
-
-        // This method presumes that you have bound a VAO before calling it
-        GLint setupAttributes(GLint locationIndex);
-
-        virtual void bind() override;
-        virtual void unbind() override;
-
-    public:
-        Buffer mBuffer;
-        const VertexLayout& mLayout;
-    };
-
-    class VertexArrayObject : public Bindable
-    {
-    public:
-        VertexArrayObject(std::vector<size_t> bufferSizeCounts, std::vector<NonNullConstPtr<VertexLayout>> bindings, size_t indexBufferSizeInElements);
-        virtual ~VertexArrayObject();
-
-        virtual void bind() override;
-        virtual void unbind() override;
-
-        std::vector<NonNullConstPtr<VertexLayout>> mBindings;
-        std::vector<std::unique_ptr<VertexBuffer>> mBuffers;
-        std::unique_ptr<IndexBuffer> mIndexBuffer;
+    private:
+        std::vector<std::unique_ptr<BufferOpenGL>> mBuffers;
+        std::unique_ptr<BufferOpenGL> mIndexBuffer;
         GLuint mVaoId;
-
-#ifndef NDEBUG
-        static VertexArrayObject* currentlyBound;
-#endif
     };
 }

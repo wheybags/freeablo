@@ -79,6 +79,10 @@ set(RenderFiles
     render/atlastexture.h
     render/OpenGL/vertexbuffer.cpp
     render/OpenGL/vertexbuffer.h
+    render/renderinstance.cpp
+    render/renderinstance.h
+    render/vertexlayout.h
+    render/vertexlayout.cpp
     ../extern/RectangleBinPack/Rect.cpp
     ../extern/RectangleBinPack/Rect.h
     ../extern/RectangleBinPack/SkylineBinPack.cpp
