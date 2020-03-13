@@ -36,7 +36,8 @@ namespace Engine
                 break;
 
             auto now = std::chrono::system_clock::now();
-            numFrames++;
+            if (mRenderState)
+                numFrames++;
 
             size_t duration =
                 static_cast<size_t>(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch() - last.time_since_epoch()).count());
@@ -105,6 +106,17 @@ namespace Engine
         mQueue.push(message);
     }
 
+    void ThreadManager::clearSprites()
+    {
+        auto renderer = FARender::Renderer::get();
+        std::vector<uint32_t> sprites;
+        renderer->getAndClearSpritesNeedingPreloading(sprites);
+
+        Message message;
+        message.type = ThreadState::CLEAR_SPRITES;
+        mQueue.push(message);
+    }
+
     void ThreadManager::handleMessage(const Message& message)
     {
         switch (message.type)
@@ -141,6 +153,19 @@ namespace Engine
             {
                 mSpritesToPreload.insert(mSpritesToPreload.end(), message.data.preloadSpriteIds->begin(), message.data.preloadSpriteIds->end());
                 delete message.data.preloadSpriteIds;
+                break;
+            }
+
+            case ThreadState::CLEAR_SPRITES:
+            {
+                auto renderer = FARender::Renderer::get();
+                renderer->cleanup();
+                mSpritesToPreload.clear();
+                // Clear the current render state, and wait for the next one.
+                // This is to avoid reloading the old level sprites when switching levels.
+                if (mRenderState)
+                    mRenderState->ready = true;
+                mRenderState = nullptr;
                 break;
             }
         }

@@ -72,7 +72,7 @@ namespace FAWorld
         GameLevel* getCurrentLevel();
         int32_t getCurrentLevelIndex();
 
-        void setLevel(int32_t levelNum);
+        void setLevel(int32_t levelNum, bool upStairsPos = true);
         GameLevel* getLevel(size_t level);
         void insertLevel(size_t level, GameLevel* gameLevel);
         void regenerateStoreItems();

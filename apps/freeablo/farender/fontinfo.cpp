@@ -45,23 +45,47 @@ namespace FARender
         glyph->offset.y = 0.f;
     }
 
-    void PcxFontInfo::initWidths(const std::string& binPath, int textureWidth)
+    void PcxFontInfo::init(const std::string& binPath, const PcxFontInitData& fontInitData)
     {
         FAIO::FAFileObject file_handle(binPath);
         std::vector<unsigned char> buf(file_handle.FAsize());
         file_handle.FAfread(buf.data(), 1, buf.size());
+
         for (int i = 0; i < charCount; ++i)
         {
-            widthPx[i] = buf[i + 2];
-            uvWidth[i] = (widthPx[i] + 0.0) / textureWidth;
+            auto& glyph = mGlyphs[i];
+            int32_t charWidth = buf[i + 2];
+            if (i == ' ')
+                charWidth = buf[0];
+
+            int32_t x, y;
+            if (fontInitData.fontDirection == PcxFontInitData::LayoutOrder::horizontal)
+            {
+                x = (i * fontInitData.spacingX) % fontInitData.textureWidth;
+                y = (i * fontInitData.spacingX) / fontInitData.textureWidth * fontInitData.spacingY;
+            }
+            else
+            {
+                x = (i * fontInitData.spacingY) / fontInitData.textureHeight * fontInitData.spacingX;
+                y = (i * fontInitData.spacingY) % fontInitData.textureHeight;
+            }
+
+            glyph.width = charWidth;
+            glyph.height = fontInitData.spacingY;
+            glyph.xadvance = charWidth;
+            glyph.uv[0].x = (float)x / fontInitData.textureWidth;
+            glyph.uv[0].y = (float)y / fontInitData.textureHeight;
+            glyph.uv[1].x = (float)(x + charWidth) / fontInitData.textureWidth;
+            glyph.uv[1].y = (float)(y + fontInitData.spacingY) / fontInitData.textureHeight;
+            glyph.offset.x = 0.f;
+            glyph.offset.y = 0.f;
         }
-        widthPx[' '] = buf[0];
     }
 
     float PcxFontInfo::getWidth(nk_handle handle, float /*h*/, const char* s, int len)
     {
         auto info = static_cast<self*>(handle.ptr);
-        return std::accumulate(s, s + len, 0, [info](int sum, char c) { return sum += info->widthPx[static_cast<unsigned char>(c)]; });
+        return std::accumulate(s, s + len, 0, [info](float sum, char c) { return sum += info->mGlyphs[static_cast<unsigned char>(c)].width; });
     }
 
     void PcxFontInfo::queryGlyph(nk_handle handle, float /*font_height*/, nk_user_font_glyph* glyph, nk_rune codepoint, nk_rune /*next_codepoint*/)
@@ -69,14 +93,7 @@ namespace FARender
         if (codepoint > 255)
             return;
         auto info = static_cast<self*>(handle.ptr);
-        glyph->width = info->widthPx[codepoint];
-        glyph->height = info->nkFont.height;
-        glyph->xadvance = info->widthPx[codepoint];
-        glyph->uv[0].x = 0.0f;
-        glyph->uv[0].y = (codepoint + 0.f) / charCount;
-        glyph->uv[1].x = 0.0f + info->uvWidth[codepoint];
-        glyph->uv[1].y = (codepoint + 1.f) / charCount;
-        glyph->offset.x = 0.f;
-        glyph->offset.y = 0.f;
+
+        *glyph = info->mGlyphs[codepoint];
     }
 }
