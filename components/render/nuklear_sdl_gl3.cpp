@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <iostream>
 #include <misc/assert.h>
+#include <misc/misc.h>
+#include <misc/stringops.h>
 #include <render/OpenGL/vertexbuffer.h>
 #include <render/renderinstance.h>
 #include <render/vertextypes.h>
@@ -17,58 +19,23 @@ static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_
 void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance)
 {
     GLint status;
-    static const GLchar* vertex_shader = NK_SHADER_VERSION "uniform mat4 ProjMtx;\n"
-                                                           "in vec2 Position;\n"
-                                                           "in vec2 TexCoord;\n"
-                                                           "in vec4 Color;\n"
-                                                           "out vec2 Frag_UV;\n"
-                                                           "out vec4 Frag_Color;\n"
-                                                           "void main() {\n"
-                                                           "   Frag_UV = TexCoord;\n"
-                                                           "   Frag_Color = Color;\n"
-                                                           "   gl_Position = ProjMtx * vec4(Position.xy, 0, 1);\n"
-                                                           "}\n";
-    static const GLchar* fragment_shader = NK_SHADER_VERSION
-        R"(precision mediump float;
-        uniform sampler2DArray Texture;
-        in vec2 Frag_UV;
-        in vec4 Frag_Color;
-        out vec4 Out_Color;
-        uniform vec4 hoverColor;
-        uniform vec2 imageSize;
-        uniform vec3 atlasOffset;
-        uniform vec2 atlasSize;
-        uniform int checkerboarded;
-        void main(){
-            vec4 c = Frag_Color * texture(Texture, vec3((atlasOffset.xy + Frag_UV * imageSize) / atlasSize, int(atlasOffset.z)));
-            if (c.w == 0. && hoverColor.a > 0.)
-            {
-              for (float i= -1.; i <= 1.; i++)
-                for (float j= -1.; j <= 1.; j++)
-                {
-                  vec2 offset = vec2(i, j);
-                  vec4 n = texture(Texture, vec3((atlasOffset.xy + offset + Frag_UV * imageSize) / atlasSize, int(atlasOffset.z)));
-                  if (n.w > 0. && (n.x > 0. || n.y > 0. || n.z > 0.))
-                    c = hoverColor;
-                }
-            }
-            if (checkerboarded != 0)
-            {
-              float vx = floor(Frag_UV.st.x * imageSize.x);
-              float vy = floor(Frag_UV.st.y * imageSize.y);
-              if (mod(vx + vy, 2.) == 1.)
-                c.w = 0.;
-            }
-            Out_Color = c;
-        }
-       )";
+
+    std::string vertexShaderSource = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/gui.vert");
+    std::string fragmentShaderSource = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/gui.frag");
 
     nk_buffer_init_default(&dev.cmds);
     dev.prog = glCreateProgram();
     dev.vert_shdr = glCreateShader(GL_VERTEX_SHADER);
     dev.frag_shdr = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(dev.vert_shdr, 1, &vertex_shader, 0);
-    glShaderSource(dev.frag_shdr, 1, &fragment_shader, 0);
+
+    const GLchar* srcPtr = nullptr;
+
+    srcPtr = vertexShaderSource.c_str();
+    glShaderSource(dev.vert_shdr, 1, &srcPtr, nullptr);
+
+    srcPtr = fragmentShaderSource.c_str();
+    glShaderSource(dev.frag_shdr, 1, &srcPtr, nullptr);
+
     glCompileShader(dev.vert_shdr);
     glCompileShader(dev.frag_shdr);
     glGetShaderiv(dev.vert_shdr, GL_COMPILE_STATUS, &status);
