@@ -2,7 +2,7 @@
 
 namespace Render
 {
-    BufferOpenGL::BufferOpenGL(size_t sizeInBytes) : super(RenderInstance::tmpHack(), sizeInBytes) { glGenBuffers(1, &mId); }
+    BufferOpenGL::BufferOpenGL(size_t sizeInBytes) : super(sizeInBytes) { glGenBuffers(1, &mId); }
 
     BufferOpenGL::~BufferOpenGL() { glDeleteBuffers(1, &mId); }
 
@@ -18,7 +18,8 @@ namespace Render
         glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
     }
 
-    VertexArrayObjectOpenGL::VertexArrayObjectOpenGL(std::vector<size_t> bufferSizeCounts,
+    VertexArrayObjectOpenGL::VertexArrayObjectOpenGL(RenderInstanceOpenGL& renderInstance,
+                                                     std::vector<size_t> bufferSizeCounts,
                                                      std::vector<NonNullConstPtr<VertexLayout>> bindings,
                                                      size_t indexBufferSizeInElements)
         : super(bindings)
@@ -31,7 +32,7 @@ namespace Render
         GLint locationIndex = 0;
         for (size_t bindingIndex = 0; bindingIndex < mBindings.size(); bindingIndex++)
         {
-            auto buffer = std::make_unique<BufferOpenGL>(bufferSizeCounts[bindingIndex]);
+            std::unique_ptr<BufferOpenGL> buffer(static_cast<BufferOpenGL*>(renderInstance.createBuffer(bufferSizeCounts[bindingIndex]).release()));
             locationIndex = VertexArrayObjectOpenGL::setupAttributes(locationIndex, *buffer, *bindings[bindingIndex]);
             mBuffers.emplace_back(buffer.release());
         }

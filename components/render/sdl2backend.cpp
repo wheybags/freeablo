@@ -13,7 +13,7 @@
 #include <misc/assert.h>
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
-#include <render/OpenGL/vertexbuffer.h>
+#include <render/buffer.h>
 
 // clang-format off
 #include <misc/disablewarn.h>
@@ -34,6 +34,10 @@
 
 #define NK_SDL_GL3_IMPLEMENTATION
 #include "nuklear_sdl_gl3.h"
+#include "vertextypes.h"
+#include <render/renderinstance.h>
+#include <render/OpenGL/scopedbindgl.h>
+#include <render/OpenGL/vertexbuffer.h>
 
 #define MAX_VERTEX_MEMORY 512 * 1024
 #define MAX_ELEMENT_MEMORY 128 * 1024
@@ -107,24 +111,10 @@ namespace Render
 
     SDL_Window* screen;
     // SDL_Renderer* renderer;
-    SDL_GLContext glContext;
+    RenderInstance* renderInstance = nullptr;
 
     DrawLevelCache drawLevelCache = DrawLevelCache(2000);
     std::string windowTitle;
-
-#ifdef DEBUG_GRAPHICS
-    void gladDebugPostCallCallback(const char* name, void*, int, ...)
-    {
-        GLenum error_code;
-        error_code = glad_glGetError();
-
-        if (error_code != GL_NO_ERROR)
-        {
-            fprintf(stderr, "ERROR %d in %s\n", error_code, name);
-            DEBUG_BREAK;
-        }
-    }
-#endif
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
     {
@@ -147,61 +137,18 @@ namespace Render
         if (screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
 
+        renderInstance = RenderInstance::createRenderInstance(RenderInstance::Type::OpenGL, screen);
+
         // Update screen with/height, as starting full screen window in
         // Windows does not trigger a SDL_WINDOWEVENT_RESIZED event.
         SDL_GetWindowSize(screen, &WIDTH, &HEIGHT);
-
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-        glContext = SDL_GL_CreateContext(screen);
-
-        if (!gladLoadGL())
-            message_and_abort("gladLoadGL failed");
-
-#ifdef DEBUG_GRAPHICS
-        glad_set_post_callback(gladDebugPostCallCallback);
-
-        // Ensure VSYNC is disabled to get actual FPS.
-        SDL_GL_SetSwapInterval(0);
-#endif
-
-        // Check opengl version is at least 3.3.
-        const GLubyte* glVersion(glGetString(GL_VERSION));
-        int major = glVersion[0] - '0';
-        int minor = glVersion[2] - '0';
-        if (major < 3 || (major == 3 && minor < 3))
-            message_and_abort_fmt("ERROR: Minimum OpenGL version is 3.3. Your current version is %d.%d\n", major, minor);
-
-        /*int oglIdx = -1;
-        int nRD = SDL_GetNumRenderDrivers();
-        for (int i = 0; i < nRD; i++)
-        {
-            SDL_RendererInfo info;
-            if (!SDL_GetRenderDriverInfo(i, &info))
-            {
-                if (!strcmp(info.name, "opengl"))
-                {
-                    oglIdx = i;
-                }
-            }
-        }*/
-
-        // renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-        //        initGlFuncs();
-
-        glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
 
         atlasTexture = std::make_unique<AtlasTexture>();
 
         if (nk_ctx)
         {
             nuklearGraphics = {};
-            nk_sdl_device_create(nuklearGraphics.dev);
+            nk_sdl_device_create(nuklearGraphics.dev, *renderInstance);
         }
     }
 
@@ -219,7 +166,7 @@ namespace Render
     void quit()
     {
         atlasTexture->free();
-        SDL_GL_DeleteContext(glContext);
+        delete renderInstance;
         // SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
         SDL_Quit();
@@ -622,7 +569,7 @@ namespace Render
 
     bool once = false;
 
-    VertexArrayObjectOpenGL* vertexArrayObject = nullptr;
+    VertexArrayObject* vertexArrayObject = nullptr;
 
     GLuint shader_programme = 0;
     GLuint texture = 0;
@@ -711,13 +658,15 @@ namespace Render
             };
             // clang-format on
 
-            vertexArrayObject = new VertexArrayObjectOpenGL(
-                {
-                    0,
-                    0,
-                },
-                {SpriteVertexMain::layout(), SpriteVertexPerInstance::layout()},
-                0);
+            vertexArrayObject = renderInstance
+                                    ->createVertexArrayObject(
+                                        {
+                                            0,
+                                            0,
+                                        },
+                                        {SpriteVertexMain::layout(), SpriteVertexPerInstance::layout()},
+                                        0)
+                                    .release();
             vertexArrayObject->getVertexBuffer(0)->setData(baseVertices, sizeof(baseVertices));
         }
 
@@ -741,7 +690,7 @@ namespace Render
         std::pair<void*, size_t> instanceData = drawLevelCache.getData();
         vertexArrayObject->getVertexBuffer(1)->setData(instanceData.first, instanceData.second);
 
-        ScopedBindGL vaoBind(vertexArrayObject);
+        ScopedBindGL vaoBind(static_cast<VertexArrayObjectOpenGL*>(vertexArrayObject));
         atlasTexture->bind();
 
         // Draw the whole level in one batched operation.

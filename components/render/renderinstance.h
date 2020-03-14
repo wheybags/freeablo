@@ -1,9 +1,10 @@
 #pragma once
 #include <cstdint>
-#include <filesystem/path.h>
 #include <memory>
 #include <misc/misc.h>
 #include <render/vertexlayout.h>
+
+struct SDL_Window;
 
 namespace Render
 {
@@ -38,36 +39,6 @@ namespace Render
     //        RenderInstance& mInstance;
     //        BaseTextureInfo mInfo;
     //    };
-
-    class Buffer
-    {
-    public:
-        Buffer(size_t sizeInBytes) : mSizeInBytes(sizeInBytes) {}
-
-        virtual ~Buffer() = default;
-
-        size_t getSizeInBytes() { return mSizeInBytes; }
-
-        virtual void setData(void* data, size_t dataSizeInBytes) = 0;
-
-    protected:
-        size_t mSizeInBytes = 0;
-    };
-
-    class VertexArrayObject
-    {
-    public:
-        VertexArrayObject(std::vector<NonNullConstPtr<VertexLayout>> bindings) : mBindings(bindings) {}
-
-        virtual ~VertexArrayObject() = default;
-
-        size_t getVertexBufferCount() { return mBindings.size(); }
-        virtual Buffer* getVertexBuffer(size_t index) = 0;
-        virtual Buffer* getIndexBuffer() = 0;
-
-    public:
-        std::vector<NonNullConstPtr<VertexLayout>> mBindings;
-    };
 
     //    class DescriptorSet
     //    {
@@ -112,11 +83,25 @@ namespace Render
     //        virtual void cmdPresent() = 0;
     //    };
 
-    //    class RenderInstance
-    //    {
-    //    public:
-    //        virtual ~RenderInstance() {}
+    class Buffer;
+    class VertexArrayObject;
 
-    //        virtual std::unique_ptr<Texture> createTexture(const BaseTextureInfo& info) = 0;
-    //    };
+    class RenderInstance
+    {
+    public:
+        virtual ~RenderInstance() = default;
+
+        // virtual std::unique_ptr<Texture> createTexture(const BaseTextureInfo& info) = 0;
+
+        virtual std::unique_ptr<Buffer> createBuffer(size_t sizeInBytes) = 0;
+        virtual std::unique_ptr<VertexArrayObject> createVertexArrayObject(std::vector<size_t> bufferSizeCounts,
+                                                                           std::vector<NonNullConstPtr<VertexLayout>> bindings,
+                                                                           size_t indexBufferSizeInElements) = 0;
+
+        enum class Type
+        {
+            OpenGL
+        };
+        static RenderInstance* createRenderInstance(Type type, SDL_Window* window);
+    };
 }

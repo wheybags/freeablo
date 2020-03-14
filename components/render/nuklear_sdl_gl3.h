@@ -60,4 +60,4 @@ GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null
 void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, const Render::AtlasTexture& atlasTexture);
 // NK_API void                 nk_sdl_shutdown(void);
 void nk_sdl_device_destroy(nk_gl_device& dev);
-void nk_sdl_device_create(nk_gl_device& dev);
+void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance);

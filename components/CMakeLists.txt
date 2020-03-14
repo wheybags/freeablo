@@ -79,6 +79,8 @@ set(RenderFiles
     render/atlastexture.h
     render/OpenGL/vertexbuffer.cpp
     render/OpenGL/vertexbuffer.h
+    render/OpenGL/renderinstanceopengl.cpp
+    render/OpenGL/renderinstanceopengl.h
     render/renderinstance.cpp
     render/renderinstance.h
     render/vertexlayout.h
@@ -87,14 +89,15 @@ set(RenderFiles
     ../extern/RectangleBinPack/Rect.h
     ../extern/RectangleBinPack/SkylineBinPack.cpp
     ../extern/RectangleBinPack/SkylineBinPack.h
-)
+    render/buffer.h
+    render/vertexarrayobject.h render/vertextypes.h render/OpenGL/scopedbindgl.h)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
     input/hotkey.cpp
-    input/hotkey.h
+    input/hotkey.h 
     input/inputmanager.h
     input/keys.h
     input/sdl2backend.cpp)
@@ -116,7 +119,7 @@ add_library(DiabloExe
     diabloexe/characterstats.cpp
     diabloexe/affix.cpp
     diabloexe/affix.h
-	diabloexe/talkdata.h)
+    diabloexe/talkdata.h)
 target_link_libraries(DiabloExe Misc FAIO)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

@@ -1,10 +1,11 @@
 #include "nuklear_sdl_gl3.h"
 #include "../../apps/freeablo/fagui/guimanager.h"
-#include "render.h"
 #include <glad/glad.h>
 #include <iostream>
 #include <misc/assert.h>
 #include <render/OpenGL/vertexbuffer.h>
+#include <render/renderinstance.h>
+#include <render/vertextypes.h>
 #include <string.h>
 
 static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, position)},
@@ -13,7 +14,7 @@ static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_
                                                                      {NK_VERTEX_LAYOUT_END}};
 #define NK_SHADER_VERSION "#version 330\n"
 
-void nk_sdl_device_create(nk_gl_device& dev)
+void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance)
 {
     GLint status;
     static const GLchar* vertex_shader = NK_SHADER_VERSION "uniform mat4 ProjMtx;\n"
@@ -106,7 +107,7 @@ void nk_sdl_device_create(nk_gl_device& dev)
     dev.attrib_uv = glGetAttribLocation(dev.prog, "TexCoord");
     dev.attrib_col = glGetAttribLocation(dev.prog, "Color");
 
-    dev.vertexArrayObject = new Render::VertexArrayObjectOpenGL({0}, {Render::NuklearVertex::layout()}, 1);
+    dev.vertexArrayObject = renderInstance.createVertexArrayObject({0}, {Render::NuklearVertex::layout()}, 1).release();
 }
 
 /*GLuint nk_sdl_device_upload_atlas(const void *image, int width, int height)
