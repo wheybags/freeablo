@@ -1,23 +1,7 @@
-#include "vertexbuffer.h"
+#include "vertexarrayobjectopengl.h"
 
 namespace Render
 {
-    BufferOpenGL::BufferOpenGL(size_t sizeInBytes) : super(sizeInBytes) { glGenBuffers(1, &mId); }
-
-    BufferOpenGL::~BufferOpenGL() { glDeleteBuffers(1, &mId); }
-
-    void BufferOpenGL::setData(void* data, size_t dataSizeInBytes)
-    {
-        // TODO: check mSizeInBytes to make sure this buffer can fit the data
-        // In opengl this doesn't actually matter, the buffers are dynamically resized,
-        // but it would be nice to enforce anyway.
-        // Will do this once we have batch-splitting implemented.
-
-        glBindBuffer(GL_COPY_WRITE_BUFFER, mId);
-        glBufferData(GL_COPY_WRITE_BUFFER, dataSizeInBytes, data, GL_STATIC_DRAW);
-        glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-    }
-
     VertexArrayObjectOpenGL::VertexArrayObjectOpenGL(RenderInstanceOpenGL& renderInstance,
                                                      std::vector<size_t> bufferSizeCounts,
                                                      std::vector<NonNullConstPtr<VertexLayout>> bindings,
@@ -43,14 +27,14 @@ namespace Render
 
     VertexArrayObjectOpenGL::~VertexArrayObjectOpenGL() { glDeleteVertexArrays(1, &mVaoId); }
 
-    void VertexArrayObjectOpenGL::bind()
+    void VertexArrayObjectOpenGL::bind(std::optional<GLenum>)
     {
         glBindVertexArray(mVaoId);
         if (mIndexBuffer)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer->getId());
     }
 
-    void VertexArrayObjectOpenGL::unbind()
+    void VertexArrayObjectOpenGL::unbind(std::optional<GLenum>)
     {
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

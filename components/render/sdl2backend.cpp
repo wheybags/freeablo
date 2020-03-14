@@ -37,7 +37,7 @@
 #include "vertextypes.h"
 #include <render/renderinstance.h>
 #include <render/OpenGL/scopedbindgl.h>
-#include <render/OpenGL/vertexbuffer.h>
+#include <render/OpenGL/vertexarrayobjectopengl.h>
 
 #define MAX_VERTEX_MEMORY 512 * 1024
 #define MAX_ELEMENT_MEMORY 128 * 1024

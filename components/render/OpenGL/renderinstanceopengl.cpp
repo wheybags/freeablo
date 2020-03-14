@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 #include <render/OpenGL/renderinstanceopengl.h>
-#include <render/OpenGL/vertexbuffer.h>
+#include <render/OpenGL/vertexarrayobjectopengl.h>
 
 namespace Render
 {

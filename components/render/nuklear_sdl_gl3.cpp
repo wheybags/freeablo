@@ -5,7 +5,7 @@
 #include <misc/assert.h>
 #include <misc/misc.h>
 #include <misc/stringops.h>
-#include <render/OpenGL/vertexbuffer.h>
+#include <render/OpenGL/vertexarrayobjectopengl.h>
 #include <render/renderinstance.h>
 #include <render/vertextypes.h>
 #include <string.h>

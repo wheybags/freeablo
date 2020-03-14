@@ -77,8 +77,8 @@ set(RenderFiles
     render/misc.h
     render/atlastexture.cpp
     render/atlastexture.h
-    render/OpenGL/vertexbuffer.cpp
-    render/OpenGL/vertexbuffer.h
+    render/OpenGL/vertexarrayobjectopengl.cpp
+    render/OpenGL/vertexarrayobjectopengl.h
     render/OpenGL/renderinstanceopengl.cpp
     render/OpenGL/renderinstanceopengl.h
     render/renderinstance.cpp
@@ -90,7 +90,11 @@ set(RenderFiles
     ../extern/RectangleBinPack/SkylineBinPack.cpp
     ../extern/RectangleBinPack/SkylineBinPack.h
     render/buffer.h
-    render/vertexarrayobject.h render/vertextypes.h render/OpenGL/scopedbindgl.h)
+    render/vertexarrayobject.h
+    render/vertextypes.h
+    render/OpenGL/scopedbindgl.h
+    render/OpenGL/bufferopengl.cpp
+    render/OpenGL/bufferopengl.h)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

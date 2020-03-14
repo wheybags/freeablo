@@ -5,31 +5,15 @@
 #include <memory>
 #include <misc/assert.h>
 #include <misc/misc.h>
+#include <render/OpenGL/bufferopengl.h>
 #include <render/OpenGL/renderinstanceopengl.h>
 #include <render/OpenGL/scopedbindgl.h>
-#include <render/buffer.h>
 #include <render/renderinstance.h>
 #include <render/vertexarrayobject.h>
 #include <render/vertexlayout.h>
 
 namespace Render
 {
-    class BufferOpenGL final : public Buffer
-    {
-        using super = Buffer;
-
-    public:
-        BufferOpenGL(size_t sizeInBytes);
-        ~BufferOpenGL();
-
-        GLuint getId() { return mId; }
-
-        virtual void setData(void* data, size_t dataSizeInBytes) override;
-
-    private:
-        GLuint mId = 0;
-    };
-
     class VertexArrayObjectOpenGL final : public BindableGL, public VertexArrayObject
     {
         using super = VertexArrayObject;
@@ -44,8 +28,8 @@ namespace Render
         virtual Buffer* getVertexBuffer(size_t index) override { return mBuffers[index].get(); }
         virtual Buffer* getIndexBuffer() override { return mIndexBuffer.get(); }
 
-        virtual void bind() override;
-        virtual void unbind() override;
+        virtual void bind(std::optional<GLenum> binding) override;
+        virtual void unbind(std::optional<GLenum> binding) override;
 
     private:
         static GLint setupAttributes(GLint locationIndex, BufferOpenGL& buffer, const VertexLayout& layout);
