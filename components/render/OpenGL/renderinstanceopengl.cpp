@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+#include <render/OpenGL/commandqueueopengl.h>
 #include <render/OpenGL/renderinstanceopengl.h>
 #include <render/OpenGL/vertexarrayobjectopengl.h>
 
@@ -18,14 +19,14 @@ namespace Render
     }
 #endif
 
-    RenderInstanceOpenGL::RenderInstanceOpenGL(SDL_Window* window)
+    RenderInstanceOpenGL::RenderInstanceOpenGL(SDL_Window& window) : super(window)
     {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-        mGlContext = SDL_GL_CreateContext(window);
+        mGlContext = SDL_GL_CreateContext(&mWindow);
 
         if (!gladLoadGL())
             message_and_abort("gladLoadGL failed");
@@ -59,4 +60,6 @@ namespace Render
         return std::unique_ptr<VertexArrayObject>(
             new VertexArrayObjectOpenGL(*this, std::move(bufferSizeCounts), std::move(bindings), indexBufferSizeInElements));
     }
+
+    std::unique_ptr<CommandQueue> RenderInstanceOpenGL::createCommandQueue() { return std::unique_ptr<CommandQueue>(new CommandQueueOpenGL(*this)); }
 }

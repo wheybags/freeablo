@@ -66,29 +66,15 @@ namespace Render
     //        const PipelineSpec& mSpec;
     //    };
 
-    //    class CommandQueue
-    //    {
-    //    public:
-    //        virtual ~CommandQueue() {}
-
-    //        virtual void begin() = 0;
-    //        virtual void end() = 0;
-
-    //        virtual void cmdBindPipeline(Pipeline* pipeline) = 0;
-    //        virtual void cmdBindVertexBuffer(VertexBuffer* buffer) = 0;
-    //        virtual void cmdBindDescriptorSet(DescriptorSet* descriptorSet) = 0;
-
-    //        virtual void cmdDraw(size_t firstVertex, size_t vertexCount) = 0;
-
-    //        virtual void cmdPresent() = 0;
-    //    };
-
     class Buffer;
     class VertexArrayObject;
+    class CommandQueue;
 
     class RenderInstance
     {
     public:
+        RenderInstance(RenderInstance&) = delete;
+        explicit RenderInstance(SDL_Window& window) : mWindow(window) {}
         virtual ~RenderInstance() = default;
 
         // virtual std::unique_ptr<Texture> createTexture(const BaseTextureInfo& info) = 0;
@@ -97,11 +83,15 @@ namespace Render
         virtual std::unique_ptr<VertexArrayObject> createVertexArrayObject(std::vector<size_t> bufferSizeCounts,
                                                                            std::vector<NonNullConstPtr<VertexLayout>> bindings,
                                                                            size_t indexBufferSizeInElements) = 0;
+        virtual std::unique_ptr<CommandQueue> createCommandQueue() = 0;
 
         enum class Type
         {
             OpenGL
         };
-        static RenderInstance* createRenderInstance(Type type, SDL_Window* window);
+        static RenderInstance* createRenderInstance(Type type, SDL_Window& window);
+
+    public:
+        SDL_Window& mWindow;
     };
 }

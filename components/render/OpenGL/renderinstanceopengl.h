@@ -6,14 +6,17 @@ namespace Render
 {
     class RenderInstanceOpenGL final : public RenderInstance
     {
-    public:
-        explicit RenderInstanceOpenGL(SDL_Window* window);
-        virtual ~RenderInstanceOpenGL();
+        using super = RenderInstance;
 
-        virtual std::unique_ptr<Buffer> createBuffer(size_t sizeInBytes) override;
-        virtual std::unique_ptr<VertexArrayObject> createVertexArrayObject(std::vector<size_t> bufferSizeCounts,
-                                                                           std::vector<NonNullConstPtr<VertexLayout>> bindings,
-                                                                           size_t indexBufferSizeInElements) override;
+    public:
+        explicit RenderInstanceOpenGL(SDL_Window& window);
+        ~RenderInstanceOpenGL() override;
+
+        std::unique_ptr<Buffer> createBuffer(size_t sizeInBytes) override;
+        std::unique_ptr<VertexArrayObject> createVertexArrayObject(std::vector<size_t> bufferSizeCounts,
+                                                                   std::vector<NonNullConstPtr<VertexLayout>> bindings,
+                                                                   size_t indexBufferSizeInElements) override;
+        std::unique_ptr<CommandQueue> createCommandQueue() override;
 
     private:
         SDL_GLContext mGlContext = nullptr;

@@ -4,7 +4,7 @@
 
 namespace Render
 {
-    Render::RenderInstance* RenderInstance::createRenderInstance(Type type, SDL_Window* window)
+    Render::RenderInstance* RenderInstance::createRenderInstance(Type type, SDL_Window& window)
     {
         switch (type)
         {

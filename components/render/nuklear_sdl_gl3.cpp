@@ -1,14 +1,14 @@
 #include "nuklear_sdl_gl3.h"
 #include "../../apps/freeablo/fagui/guimanager.h"
+#include <cstring>
 #include <glad/glad.h>
 #include <iostream>
 #include <misc/assert.h>
 #include <misc/misc.h>
 #include <misc/stringops.h>
-#include <render/OpenGL/vertexarrayobjectopengl.h>
+#include <render/commandqueue.h>
 #include <render/renderinstance.h>
 #include <render/vertextypes.h>
-#include <string.h>
 
 static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, position)},
                                                                      {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, uv)},
@@ -100,7 +100,8 @@ void nk_sdl_device_destroy(nk_gl_device& dev)
     nk_buffer_free(&dev.cmds);
 }
 
-void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, const Render::AtlasTexture& atlasTexture)
+void nk_sdl_render_dump(
+    Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, const Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue)
 {
     int width, height;
     int display_width, display_height;
@@ -147,12 +148,10 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
     glUniformMatrix4fv(dev.uniform_proj, 1, GL_FALSE, &ortho[0][0]);
     {
         // convert from command queue into draw list and draw to screen
-        const nk_draw_index* offset = NULL;
+        size_t offset = 0;
 
         dev.vertexArrayObject->getVertexBuffer(0)->setData(dump.vbuf.memory.ptr, dump.vbuf.size);
         dev.vertexArrayObject->getIndexBuffer()->setData(dump.ebuf.memory.ptr, dump.ebuf.size);
-
-        Render::ScopedBindGL vaoBind(static_cast<Render::VertexArrayObjectOpenGL*>(dev.vertexArrayObject));
 
         // iterate over and execute each draw command
         for (size_t i = 0; i < dump.drawCommands.size(); i++)
@@ -185,8 +184,13 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
                       (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),
                       (GLint)(cmd.clip_rect.w * scale.x),
                       (GLint)(cmd.clip_rect.h * scale.y));
-            glDrawElements(GL_TRIANGLES, (GLsizei)cmd.elem_count, GL_UNSIGNED_SHORT, offset);
-            offset += cmd.elem_count;
+
+            Render::Bindings bindings;
+            bindings.vao = dev.vertexArrayObject;
+
+            commandQueue.cmdDrawIndexed(size_t(offset), cmd.elem_count, bindings);
+
+            offset += cmd.elem_count * sizeof(nk_draw_index);
         }
     }
 

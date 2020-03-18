@@ -1,19 +1,17 @@
-#include "render.h"
-#include <SDL.h>
-#include <complex>
-#include <iostream>
-//#include <SDL_opengl.h>
 #include "../cel/celfile.h"
-#include "../cel/celframe.h"
 #include "../level/level.h"
 #include "atlastexture.h"
+#include "render.h"
+#include <SDL.h>
 #include <SDL_image.h>
 #include <faio/fafileobject.h>
 #include <glad/glad.h>
+#include <iostream>
 #include <misc/assert.h>
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
 #include <render/buffer.h>
+#include <render/commandqueue.h>
 
 // clang-format off
 #include <misc/disablewarn.h>
@@ -22,25 +20,12 @@
 #include <misc/enablewarn.h>
 // clang-format on
 
-/*#define NK_INCLUDE_FIXED_TYPES
-#define NK_INCLUDE_STANDARD_IO
-#define NK_INCLUDE_STANDARD_VARARGS
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
-#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#define NK_INCLUDE_FONT_BAKING
-#define NK_INCLUDE_DEFAULT_FONT
-#define NK_IMPLEMENTATION*/
 #include <fa_nuklear.h>
 
 #define NK_SDL_GL3_IMPLEMENTATION
 #include "nuklear_sdl_gl3.h"
 #include "vertextypes.h"
 #include <render/renderinstance.h>
-#include <render/OpenGL/scopedbindgl.h>
-#include <render/OpenGL/vertexarrayobjectopengl.h>
-
-#define MAX_VERTEX_MEMORY 512 * 1024
-#define MAX_ELEMENT_MEMORY 128 * 1024
 
 #if defined(WIN32) || defined(_WIN32)
 extern "C" {
@@ -112,6 +97,7 @@ namespace Render
     SDL_Window* screen;
     // SDL_Renderer* renderer;
     RenderInstance* renderInstance = nullptr;
+    CommandQueue* mainCommandQueue = nullptr;
 
     DrawLevelCache drawLevelCache = DrawLevelCache(2000);
     std::string windowTitle;
@@ -137,7 +123,10 @@ namespace Render
         if (screen == NULL)
             printf("Could not create window: %s\n", SDL_GetError());
 
-        renderInstance = RenderInstance::createRenderInstance(RenderInstance::Type::OpenGL, screen);
+        renderInstance = RenderInstance::createRenderInstance(RenderInstance::Type::OpenGL, *screen);
+        mainCommandQueue = renderInstance->createCommandQueue().release();
+
+        mainCommandQueue->begin();
 
         // Update screen with/height, as starting full screen window in
         // Windows does not trigger a SDL_WINDOWEVENT_RESIZED event.
@@ -166,6 +155,7 @@ namespace Render
     void quit()
     {
         atlasTexture->free();
+        delete mainCommandQueue;
         delete renderInstance;
         // SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
@@ -224,7 +214,7 @@ namespace Render
         // defaults everything back into a default state.
         // Make sure to either a.) save and restore or b.) reset your own state after
         // rendering the UI.
-        nk_sdl_render_dump(cache, dump, screen, *atlasTexture);
+        nk_sdl_render_dump(cache, dump, screen, *atlasTexture, *mainCommandQueue);
 
         glEnable(GL_BLEND); // see above comment
     }
@@ -670,7 +660,10 @@ namespace Render
             vertexArrayObject->getVertexBuffer(0)->setData(baseVertices, sizeof(baseVertices));
         }
 
-        SDL_GL_SwapWindow(screen);
+        mainCommandQueue->cmdPresent();
+        mainCommandQueue->end();
+        mainCommandQueue->submit();
+        mainCommandQueue->begin();
     }
 
     void drawSprite(GLuint sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
@@ -690,11 +683,13 @@ namespace Render
         std::pair<void*, size_t> instanceData = drawLevelCache.getData();
         vertexArrayObject->getVertexBuffer(1)->setData(instanceData.first, instanceData.second);
 
-        ScopedBindGL vaoBind(static_cast<VertexArrayObjectOpenGL*>(vertexArrayObject));
         atlasTexture->bind();
 
+        Bindings bindings;
+        bindings.vao = vertexArrayObject;
+
         // Draw the whole level in one batched operation.
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, drawLevelCache.instanceCount());
+        mainCommandQueue->cmdDrawInstances(0, 6, drawLevelCache.instanceCount(), bindings);
     }
 
     void handleEvents()
