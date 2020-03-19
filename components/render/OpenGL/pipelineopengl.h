@@ -1,7 +1,7 @@
 #pragma once
-#include <render/pipeline.h>
 #include <glad/glad.h>
 #include <render/OpenGL/scopedbindgl.h>
+#include <render/pipeline.h>
 
 namespace Render
 {
@@ -12,7 +12,7 @@ namespace Render
         using super = Pipeline;
 
     public:
-        PipelineOpenGL(RenderInstanceOpenGL& instance, const PipelineSpec& spec);
+        PipelineOpenGL(RenderInstanceOpenGL& instance, PipelineSpec spec);
         ~PipelineOpenGL() override;
 
     public:

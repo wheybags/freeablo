@@ -1,7 +1,9 @@
 #pragma once
 #include <filesystem/path.h>
-#include <render/vertexlayout.h>
 #include <misc/misc.h>
+#include <render/vertexlayout.h>
+
+#include <utility>
 
 namespace Render
 {
@@ -19,11 +21,13 @@ namespace Render
     {
     public:
         Pipeline(Pipeline&) = delete;
-        Pipeline(RenderInstance& instance, const PipelineSpec& spec) : mInstance(instance), mSpec(spec) {}
+        Pipeline(RenderInstance& instance, PipelineSpec spec) : mSpec(std::move(spec)), mInstance(instance) {}
         virtual ~Pipeline() = default;
+
+    public:
+        const PipelineSpec mSpec;
 
     protected:
         RenderInstance& mInstance;
-        const PipelineSpec& mSpec;
     };
 }

@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <render/OpenGL/commandqueueopengl.h>
+#include <render/OpenGL/pipelineopengl.h>
 #include <render/OpenGL/textureopengl.h>
 #include <render/OpenGL/vertexarrayobjectopengl.h>
 
@@ -29,7 +30,8 @@ namespace Render
     {
         super::cmdDraw(firstVertex, vertexCount, bindings);
 
-        ScopedBindGL vaoBind(static_cast<VertexArrayObjectOpenGL*>(bindings.vao));
+        ScopedBindGL vaoBind(safe_downcast<VertexArrayObjectOpenGL*>(bindings.vao));
+        ScopedBindGL pipelineBind(safe_downcast<PipelineOpenGL*>(bindings.pipeline));
         glDrawArrays(GL_TRIANGLES, firstVertex, vertexCount);
     }
 
@@ -37,7 +39,8 @@ namespace Render
     {
         super::cmdDrawIndexed(firstIndex, vertexCount, bindings);
 
-        ScopedBindGL vaoBind(static_cast<VertexArrayObjectOpenGL*>(bindings.vao));
+        ScopedBindGL vaoBind(safe_downcast<VertexArrayObjectOpenGL*>(bindings.vao));
+        ScopedBindGL pipelineBind(safe_downcast<PipelineOpenGL*>(bindings.pipeline));
         glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_SHORT, reinterpret_cast<GLvoid*>(firstIndex));
     }
 
@@ -45,7 +48,8 @@ namespace Render
     {
         super::cmdDrawInstances(firstVertex, vertexCount, instanceCount, bindings);
 
-        ScopedBindGL vaoBind(static_cast<VertexArrayObjectOpenGL*>(bindings.vao));
+        ScopedBindGL vaoBind(safe_downcast<VertexArrayObjectOpenGL*>(bindings.vao));
+        ScopedBindGL pipelineBind(safe_downcast<PipelineOpenGL*>(bindings.pipeline));
         glDrawArraysInstanced(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
     }
 

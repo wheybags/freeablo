@@ -1,17 +1,21 @@
 #pragma once
 #include "color.h"
-#include <render/pipeline.h>
-#include <render/vertexarrayobject.h>
+#include <cstddef>
+#include <misc/assert.h>
 
 namespace Render
 {
     class Texture;
+    class VertexArrayObject;
+    class Pipeline;
+    class RenderInstance;
 
     struct Bindings
     {
+        Pipeline* pipeline = nullptr;
         VertexArrayObject* vao = nullptr;
 
-        void assertFilled() { debug_assert(vao); }
+        void assertBindingsCorrect();
     };
 
     class CommandQueue

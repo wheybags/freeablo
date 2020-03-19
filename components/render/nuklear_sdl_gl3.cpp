@@ -11,6 +11,7 @@
 #include <render/commandqueue.h>
 #include <render/renderinstance.h>
 #include <render/texture.h>
+#include <render/vertexarrayobject.h>
 #include <render/vertextypes.h>
 
 static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, position)},
@@ -40,7 +41,6 @@ void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInsta
     dev.attrib_pos = glGetAttribLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "Position");
     dev.attrib_uv = glGetAttribLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "TexCoord");
     dev.attrib_col = glGetAttribLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "Color");
-
 }
 
 void nk_sdl_device_destroy(nk_gl_device& dev)
@@ -79,76 +79,66 @@ void nk_sdl_render_dump(
 
     // setup global state
     glViewport(0, 0, display_width, display_height);
-    glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
+
     glEnable(GL_SCISSOR_TEST);
 
     nk_gl_device& dev = dump.getDevice();
 
-    Render::ScopedBindGL pipelineBind(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline));
-
-    glUniform1i(dev.uniform_tex, 0);
     auto& atlasLookupMap = atlasTexture.getLookupMap();
 
-    glUniformMatrix4fv(dev.uniform_proj, 1, GL_FALSE, &ortho[0][0]);
+    // convert from command queue into draw list and draw to screen
+    size_t offset = 0;
+
+    dev.vertexArrayObject->getVertexBuffer(0)->setData(dump.vbuf.memory.ptr, dump.vbuf.size);
+    dev.vertexArrayObject->getIndexBuffer()->setData(dump.ebuf.memory.ptr, dump.ebuf.size);
+
+    // iterate over and execute each draw command
+    for (const auto& cmd : dump.drawCommands)
     {
-        // convert from command queue into draw list and draw to screen
-        size_t offset = 0;
+        if (!cmd.elem_count)
+            continue;
 
-        dev.vertexArrayObject->getVertexBuffer(0)->setData(dump.vbuf.memory.ptr, dump.vbuf.size);
-        dev.vertexArrayObject->getIndexBuffer()->setData(dump.ebuf.memory.ptr, dump.ebuf.size);
+        uint32_t cacheIndex = ((uint32_t*)cmd.texture.ptr)[0];
+        uint32_t frameNum = ((uint32_t*)cmd.texture.ptr)[1];
+        auto effect = static_cast<FAGui::EffectType>(cmd.userdata.id);
 
-        // iterate over and execute each draw command
-        for (const auto& cmd : dump.drawCommands)
-        {
-            if (!cmd.elem_count)
-                continue;
+        Render::SpriteGroup* sprite = cache->get(cacheIndex);
+        auto s = sprite->operator[](frameNum);
 
-            uint32_t cacheIndex = ((uint32_t*)cmd.texture.ptr)[0];
-            uint32_t frameNum = ((uint32_t*)cmd.texture.ptr)[1];
-            auto effect = static_cast<FAGui::EffectType>(cmd.userdata.id);
+        auto& atlasEntry = atlasLookupMap.at((GLuint)(intptr_t)s);
 
-            Render::SpriteGroup* sprite = cache->get(cacheIndex);
-            auto s = sprite->operator[](frameNum);
+        int item_hl_color[] = {0xB9, 0xAA, 0x77};
 
-            auto& atlasEntry = atlasLookupMap.at((GLuint)(intptr_t)s);
+        Render::ScopedBindGL pipelineBind(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline));
 
-            int item_hl_color[] = {0xB9, 0xAA, 0x77};
-            glUniform4f(dev.uniform_hoverColor,
-                        item_hl_color[0] / 255.f,
-                        item_hl_color[1] / 255.f,
-                        item_hl_color[2] / 255.f,
-                        effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f);
-            glUniform1i(dev.uniform_checkerboarded, effect == FAGui::EffectType::checkerboarded ? 1 : 0);
-            glUniform2f(dev.uniform_imageSize, atlasEntry.mWidth, atlasEntry.mHeight);
-            glUniform3f(dev.uniform_atlasOffset, atlasEntry.mX, atlasEntry.mY, atlasEntry.mLayer);
-            glUniform2f(dev.uniform_atlasSize, atlasTexture.getTextureArray().width(), atlasTexture.getTextureArray().height());
+        glUniformMatrix4fv(dev.uniform_proj, 1, GL_FALSE, &ortho[0][0]);
+        glUniform4f(dev.uniform_hoverColor,
+                    item_hl_color[0] / 255.f,
+                    item_hl_color[1] / 255.f,
+                    item_hl_color[2] / 255.f,
+                    effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f);
+        glUniform1i(dev.uniform_checkerboarded, effect == FAGui::EffectType::checkerboarded ? 1 : 0);
+        glUniform2f(dev.uniform_imageSize, atlasEntry.mWidth, atlasEntry.mHeight);
+        glUniform3f(dev.uniform_atlasOffset, atlasEntry.mX, atlasEntry.mY, atlasEntry.mLayer);
+        glUniform2f(dev.uniform_atlasSize, atlasTexture.getTextureArray().width(), atlasTexture.getTextureArray().height());
 
-            glScissor((GLint)(cmd.clip_rect.x * scale.x),
-                      (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),
-                      (GLint)(cmd.clip_rect.w * scale.x),
-                      (GLint)(cmd.clip_rect.h * scale.y));
+        glScissor((GLint)(cmd.clip_rect.x * scale.x),
+                  (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),
+                  (GLint)(cmd.clip_rect.w * scale.x),
+                  (GLint)(cmd.clip_rect.h * scale.y));
 
-            Render::Bindings bindings;
-            bindings.vao = dev.vertexArrayObject;
+        Render::Bindings bindings;
+        bindings.vao = dev.vertexArrayObject;
+        bindings.pipeline = dev.pipeline;
 
-            glActiveTexture(GL_TEXTURE0);
-            Render::ScopedBindGL texBinder(safe_downcast<Render::TextureOpenGL&>(atlasTexture.getTextureArray()));
+        glActiveTexture(GL_TEXTURE0);
+        Render::ScopedBindGL texBinder(safe_downcast<Render::TextureOpenGL&>(atlasTexture.getTextureArray()));
 
-            commandQueue.cmdDrawIndexed(size_t(offset), cmd.elem_count, bindings);
+        commandQueue.cmdDrawIndexed(size_t(offset), cmd.elem_count, bindings);
 
-            offset += cmd.elem_count * sizeof(nk_draw_index);
-        }
+        offset += cmd.elem_count * sizeof(nk_draw_index);
     }
 
-    glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    glDisable(GL_BLEND);
     glDisable(GL_SCISSOR_TEST);
 }
 

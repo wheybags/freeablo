@@ -14,11 +14,12 @@ namespace Render
         virtual ~VertexArrayObject() = default;
 
         size_t getVertexBufferCount() { return mBindings.size(); }
+        const std::vector<NonNullConstPtr<VertexLayout>>& getBindings() const { return mBindings; }
 
         virtual Buffer* getVertexBuffer(size_t index) = 0;
         virtual Buffer* getIndexBuffer() = 0;
 
-    public:
+    protected:
         std::vector<NonNullConstPtr<VertexLayout>> mBindings;
     };
 }

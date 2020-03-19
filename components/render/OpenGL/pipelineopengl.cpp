@@ -5,7 +5,7 @@
 
 namespace Render
 {
-    PipelineOpenGL::PipelineOpenGL(RenderInstanceOpenGL& instance, const PipelineSpec& spec) : super(instance, spec)
+    PipelineOpenGL::PipelineOpenGL(RenderInstanceOpenGL& instance, PipelineSpec spec) : super(instance, std::move(spec))
     {
         auto compileShader = [](GLenum type, const filesystem::path& path) {
             std::string src = Misc::StringUtils::readAsString(path.str());
@@ -32,8 +32,8 @@ namespace Render
             return shaderId;
         };
 
-        mVertexShaderId = compileShader(GL_VERTEX_SHADER, spec.vertexShaderPath);
-        mFragmentShaderId = compileShader(GL_FRAGMENT_SHADER, spec.fragmentShaderPath);
+        mVertexShaderId = compileShader(GL_VERTEX_SHADER, mSpec.vertexShaderPath);
+        mFragmentShaderId = compileShader(GL_FRAGMENT_SHADER, mSpec.fragmentShaderPath);
 
         mShaderProgramId = glCreateProgram();
         glAttachShader(mShaderProgramId, mVertexShaderId);
@@ -52,7 +52,6 @@ namespace Render
         glDeleteShader(mVertexShaderId);
         glDeleteShader(mFragmentShaderId);
         glDeleteProgram(mShaderProgramId);
-
     }
 
     void PipelineOpenGL::bind(std::optional<GLenum>) { glUseProgram(mShaderProgramId); }

@@ -16,13 +16,13 @@ namespace Render
         GLint locationIndex = 0;
         for (size_t bindingIndex = 0; bindingIndex < mBindings.size(); bindingIndex++)
         {
-            std::unique_ptr<BufferOpenGL> buffer(static_cast<BufferOpenGL*>(renderInstance.createBuffer(bufferSizeCounts[bindingIndex]).release()));
+            std::unique_ptr<BufferOpenGL> buffer(safe_downcast<BufferOpenGL*>(renderInstance.createBuffer(bufferSizeCounts[bindingIndex]).release()));
             locationIndex = VertexArrayObjectOpenGL::setupAttributes(locationIndex, *buffer, *bindings[bindingIndex]);
             mBuffers.emplace_back(buffer.release());
         }
 
         if (indexBufferSizeInElements > 0)
-            mIndexBuffer.reset(static_cast<BufferOpenGL*>(renderInstance.createBuffer(indexBufferSizeInElements).release()));
+            mIndexBuffer.reset(safe_downcast<BufferOpenGL*>(renderInstance.createBuffer(indexBufferSizeInElements).release()));
     }
 
     VertexArrayObjectOpenGL::~VertexArrayObjectOpenGL() { glDeleteVertexArrays(1, &mVaoId); }

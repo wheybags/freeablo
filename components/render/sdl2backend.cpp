@@ -1,18 +1,25 @@
 #include "../cel/celfile.h"
 #include "../level/level.h"
 #include "atlastexture.h"
+#include "nuklear_sdl_gl3.h"
 #include "render.h"
+#include "vertextypes.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <fa_nuklear.h>
 #include <faio/fafileobject.h>
 #include <glad/glad.h>
 #include <iostream>
 #include <misc/assert.h>
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
+#include <render/OpenGL/pipelineopengl.h>
+#include <render/OpenGL/textureopengl.h>
 #include <render/buffer.h>
 #include <render/commandqueue.h>
+#include <render/renderinstance.h>
 #include <render/texture.h>
+#include <render/vertexarrayobject.h>
 
 // clang-format off
 #include <misc/disablewarn.h>
@@ -20,15 +27,6 @@
 #include "../../extern/RectangleBinPack/SkylineBinPack.h"
 #include <misc/enablewarn.h>
 // clang-format on
-
-#include <fa_nuklear.h>
-
-#define NK_SDL_GL3_IMPLEMENTATION
-#include "nuklear_sdl_gl3.h"
-#include "vertextypes.h"
-#include <render/renderinstance.h>
-#include <render/OpenGL/textureopengl.h>
-#include <render/OpenGL/pipelineopengl.h>
 
 #if defined(WIN32) || defined(_WIN32)
 extern "C" {
@@ -234,17 +232,7 @@ namespace Render
         return id;
     }
 
-    void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache)
-    {
-        // IMPORTANT: `nk_sdl_render` modifies some global OpenGL state
-        // with blending, scissor, face culling, depth test and viewport and
-        // defaults everything back into a default state.
-        // Make sure to either a.) save and restore or b.) reset your own state after
-        // rendering the UI.
-        nk_sdl_render_dump(cache, dump, screen, *atlasTexture, *mainCommandQueue);
-
-        glEnable(GL_BLEND); // see above comment
-    }
+    void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache) { nk_sdl_render_dump(cache, dump, screen, *atlasTexture, *mainCommandQueue); }
 
     SDL_Surface* loadNonCelImage(const std::string& sourcePath, const std::string& extension)
     {
@@ -620,6 +608,7 @@ namespace Render
 
         Bindings bindings;
         bindings.vao = vertexArrayObject;
+        bindings.pipeline = drawLevelPipeline;
 
         // Draw the whole level in one batched operation.
         mainCommandQueue->cmdDrawInstances(0, 6, drawLevelCache.instanceCount(), bindings);

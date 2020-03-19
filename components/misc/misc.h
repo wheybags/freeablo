@@ -59,6 +59,7 @@ public:
     const T* get() const { return ptr; }
     const T* operator*() const { return ptr; }
     const T* operator->() const { return ptr; }
+    bool operator==(const NonNullPtr& other) const { return ptr == other.ptr; }
 
 private:
     T* ptr = nullptr;
@@ -87,6 +88,7 @@ public:
     const T* get() const { return ptr; }
     const T& operator*() const { return *ptr; }
     const T* operator->() const { return ptr; }
+    bool operator==(const NonNullConstPtr& other) const { return ptr == other.ptr; }
 
 private:
     const T* ptr = nullptr;
