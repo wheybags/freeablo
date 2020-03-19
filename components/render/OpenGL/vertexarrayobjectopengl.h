@@ -23,13 +23,13 @@ namespace Render
                                 std::vector<size_t> bufferSizeCounts,
                                 std::vector<NonNullConstPtr<VertexLayout>> bindings,
                                 size_t indexBufferSizeInElements);
-        virtual ~VertexArrayObjectOpenGL();
+        ~VertexArrayObjectOpenGL() override;
 
-        virtual Buffer* getVertexBuffer(size_t index) override { return mBuffers[index].get(); }
-        virtual Buffer* getIndexBuffer() override { return mIndexBuffer.get(); }
+        Buffer* getVertexBuffer(size_t index) override { return mBuffers[index].get(); }
+        Buffer* getIndexBuffer() override { return mIndexBuffer.get(); }
 
-        virtual void bind(std::optional<GLenum> binding = std::nullopt) override;
-        virtual void unbind(std::optional<GLenum> binding = std::nullopt) override;
+        void bind(std::optional<GLenum> binding = std::nullopt) override;
+        void unbind(std::optional<GLenum> binding = std::nullopt) override;
 
     private:
         static GLint setupAttributes(GLint locationIndex, BufferOpenGL& buffer, const VertexLayout& layout);
@@ -37,6 +37,6 @@ namespace Render
     private:
         std::vector<std::unique_ptr<BufferOpenGL>> mBuffers;
         std::unique_ptr<BufferOpenGL> mIndexBuffer;
-        GLuint mVaoId;
+        GLuint mVaoId = 0;
     };
 }

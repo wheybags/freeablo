@@ -58,7 +58,7 @@ void nk_sdl_font_stash_begin(nk_font_atlas& atlas);
 GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
 // NK_API int                  nk_sdl_handle_event(SDL_Event *evt);
 void nk_sdl_render_dump(
-    Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, const Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue);
+    Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue);
 // NK_API void                 nk_sdl_shutdown(void);
 void nk_sdl_device_destroy(nk_gl_device& dev);
 void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance);

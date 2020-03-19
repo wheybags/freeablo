@@ -5,9 +5,10 @@ flat in vec2 imageSize;
 flat in vec4 hoverColor;
 flat in vec3 atlasOffset;
 
-out vec4 frag_colour;
 uniform sampler2DArray tex;
 uniform vec2 atlasSize;
+
+out vec4 frag_colour;
 
 void main() {
     vec4 c = texture(tex, vec3((atlasOffset.xy + uv * imageSize) / atlasSize, int(atlasOffset.z)));

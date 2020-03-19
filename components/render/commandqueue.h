@@ -1,9 +1,12 @@
 #pragma once
+#include "color.h"
 #include <render/pipeline.h>
 #include <render/vertexarrayobject.h>
 
 namespace Render
 {
+    class Texture;
+
     struct Bindings
     {
         VertexArrayObject* vao = nullptr;
@@ -23,6 +26,7 @@ namespace Render
         virtual void end();
         virtual void submit();
 
+        virtual void cmdClearTexture(Texture& texture, const Color& clearColor) = 0;
         virtual void cmdDraw(size_t firstVertex, size_t vertexCount, Bindings& bindings);
         virtual void cmdDrawIndexed(size_t firstIndex, size_t vertexCount, Bindings& bindings);
         virtual void cmdDrawInstances(size_t firstVertex, size_t vertexCount, size_t instanceCount, Bindings& bindings);

@@ -13,33 +13,6 @@ namespace Render
     //        TriangleList,
     //    };
 
-    //    struct BaseTextureInfo
-    //    {
-    //        int32_t width = 0;
-    //        int32_t height = 0;
-    //        Format format = Format::RGBA8U;
-    //    };
-
-    //    class RenderInstance;
-
-    //    class Texture
-    //    {
-    //    public:
-    //        Texture(RenderInstance& instance, const BaseTextureInfo& info) : mInstance(instance), mInfo(info) {}
-    //        virtual ~Texture(){};
-
-    //        const BaseTextureInfo& info() const { return mInfo; }
-    //        int32_t width() const { return mInfo.width; }
-    //        int32_t height() const { return mInfo.height; }
-
-    //        virtual void* map() = 0;
-    //        virtual void unmap() = 0;
-
-    //    protected:
-    //        RenderInstance& mInstance;
-    //        BaseTextureInfo mInfo;
-    //    };
-
     //    class DescriptorSet
     //    {
     //    public:
@@ -69,6 +42,8 @@ namespace Render
     class Buffer;
     class VertexArrayObject;
     class CommandQueue;
+    class Texture;
+    struct BaseTextureInfo;
 
     class RenderInstance
     {
@@ -77,8 +52,7 @@ namespace Render
         explicit RenderInstance(SDL_Window& window) : mWindow(window) {}
         virtual ~RenderInstance() = default;
 
-        // virtual std::unique_ptr<Texture> createTexture(const BaseTextureInfo& info) = 0;
-
+        virtual std::unique_ptr<Texture> createTexture(const BaseTextureInfo& info) = 0;
         virtual std::unique_ptr<Buffer> createBuffer(size_t sizeInBytes) = 0;
         virtual std::unique_ptr<VertexArrayObject> createVertexArrayObject(std::vector<size_t> bufferSizeCounts,
                                                                            std::vector<NonNullConstPtr<VertexLayout>> bindings,

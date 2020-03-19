@@ -98,7 +98,11 @@ set(RenderFiles
     render/commandqueue.cpp
     render/commandqueue.h
     render/OpenGL/commandqueueopengl.cpp
-    render/OpenGL/commandqueueopengl.h)
+    render/OpenGL/commandqueueopengl.h
+    render/texture.h
+    render/OpenGL/textureopengl.cpp
+    render/OpenGL/textureopengl.h
+    render/color.h)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

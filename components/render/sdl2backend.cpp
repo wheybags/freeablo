@@ -12,6 +12,7 @@
 #include <misc/stringops.h>
 #include <render/buffer.h>
 #include <render/commandqueue.h>
+#include <render/texture.h>
 
 // clang-format off
 #include <misc/disablewarn.h>
@@ -26,6 +27,7 @@
 #include "nuklear_sdl_gl3.h"
 #include "vertextypes.h"
 #include <render/renderinstance.h>
+#include <render/OpenGL/textureopengl.h>
 
 #if defined(WIN32) || defined(_WIN32)
 extern "C" {
@@ -132,7 +134,7 @@ namespace Render
         // Windows does not trigger a SDL_WINDOWEVENT_RESIZED event.
         SDL_GetWindowSize(screen, &WIDTH, &HEIGHT);
 
-        atlasTexture = std::make_unique<AtlasTexture>();
+        atlasTexture = std::make_unique<AtlasTexture>(*renderInstance, *mainCommandQueue);
 
         if (nk_ctx)
         {
@@ -154,7 +156,7 @@ namespace Render
 
     void quit()
     {
-        atlasTexture->free();
+        atlasTexture.reset();
         delete mainCommandQueue;
         delete renderInstance;
         // SDL_DestroyRenderer(renderer);
@@ -564,7 +566,7 @@ namespace Render
     GLuint shader_programme = 0;
     GLuint texture = 0;
 
-    void deleteAllSprites() { atlasTexture->clear(); }
+    void deleteAllSprites() { atlasTexture->clear(*mainCommandQueue); }
 
     void draw()
     {
@@ -678,12 +680,13 @@ namespace Render
 
         glUniform1i(glGetUniformLocation(shader_programme, "tex"), 0);
         glUniform2f(glGetUniformLocation(shader_programme, "screenSize"), WIDTH, HEIGHT);
-        glUniform2f(glGetUniformLocation(shader_programme, "atlasSize"), atlasTexture->getTextureWidth(), atlasTexture->getTextureHeight());
+        glUniform2f(glGetUniformLocation(shader_programme, "atlasSize"), atlasTexture->getTextureArray().width(), atlasTexture->getTextureArray().height());
 
         std::pair<void*, size_t> instanceData = drawLevelCache.getData();
         vertexArrayObject->getVertexBuffer(1)->setData(instanceData.first, instanceData.second);
 
-        atlasTexture->bind();
+        glActiveTexture(GL_TEXTURE0);
+        ScopedBindGL texBinder(safe_downcast<TextureOpenGL&>(atlasTexture->getTextureArray()));
 
         Bindings bindings;
         bindings.vao = vertexArrayObject;

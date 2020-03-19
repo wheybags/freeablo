@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <render/OpenGL/commandqueueopengl.h>
 #include <render/OpenGL/renderinstanceopengl.h>
+#include <render/OpenGL/textureopengl.h>
 #include <render/OpenGL/vertexarrayobjectopengl.h>
 
 namespace Render
@@ -47,9 +48,18 @@ namespace Render
 
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
+
+        // For now, we will just force all pixel transfers to be tightly packed
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     }
 
     RenderInstanceOpenGL::~RenderInstanceOpenGL() { SDL_GL_DeleteContext(mGlContext); }
+
+    std::unique_ptr<Texture> RenderInstanceOpenGL::createTexture(const BaseTextureInfo& info)
+    {
+        return std::unique_ptr<Texture>(new TextureOpenGL(*this, info));
+    }
 
     std::unique_ptr<Buffer> RenderInstanceOpenGL::createBuffer(size_t sizeInBytes) { return std::unique_ptr<Buffer>(new BufferOpenGL(sizeInBytes)); }
 

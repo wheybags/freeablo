@@ -1,11 +1,10 @@
 #pragma once
 #include <algorithm>
+#include <cstdint>
 #include <glad/glad.h>
 #include <map>
 #include <memory>
-#include <stdint.h>
 #include <vector>
-
 //#define DEBUG_ATLAS_TEXTURE
 
 namespace rbp
@@ -15,6 +14,10 @@ namespace rbp
 
 namespace Render
 {
+    class Texture;
+    class RenderInstance;
+    class CommandQueue;
+
     class AtlasTextureEntry
     {
     public:
@@ -29,22 +32,23 @@ namespace Render
     class AtlasTexture
     {
     public:
-        AtlasTexture();
+        explicit AtlasTexture(RenderInstance& instance, CommandQueue& commandQueue);
+        ~AtlasTexture();
 
         size_t addTexture(int32_t width, int32_t height, const void* data);
-        void bind() const;
-        void free();
-        GLint getTextureWidth() const { return mTextureWidth; }
-        GLint getTextureHeight() const { return mTextureHeight; }
         const AtlasTextureLookupMap& getLookupMap() const { return mLookupMap; }
         float getOccupancy() const;
-        void clear();
+        void clear(CommandQueue& commandQueue);
+
+        Texture& getTextureArray() { return *mTextureArray; }
 
     private:
-        GLuint mTextureArrayId;
-        GLint mTextureWidth;
-        GLint mTextureHeight;
-        GLint mTextureLayers;
+        static constexpr int32_t PADDING = 1;
+
+    private:
+        RenderInstance& mInstance;
+        std::unique_ptr<Texture> mTextureArray;
+
         AtlasTextureLookupMap mLookupMap;
         size_t mNextTextureId = 1;
         std::vector<std::unique_ptr<rbp::SkylineBinPack>> mBinPacker;

@@ -22,7 +22,7 @@ namespace Render
         }
 
         if (indexBufferSizeInElements > 0)
-            mIndexBuffer = std::make_unique<BufferOpenGL>(indexBufferSizeInElements);
+            mIndexBuffer.reset(static_cast<BufferOpenGL*>(renderInstance.createBuffer(indexBufferSizeInElements).release()));
     }
 
     VertexArrayObjectOpenGL::~VertexArrayObjectOpenGL() { glDeleteVertexArrays(1, &mVaoId); }
@@ -53,11 +53,6 @@ namespace Render
 
             switch (element)
             {
-                case Format::RGBA8U:
-                    type = GL_UNSIGNED_BYTE;
-                    normalized = GL_FALSE;
-                    size = 4;
-                    break;
                 case Format::RGBA8UNorm:
                     type = GL_UNSIGNED_BYTE;
                     normalized = GL_TRUE;

@@ -6,8 +6,10 @@
 #include <misc/assert.h>
 #include <misc/misc.h>
 #include <misc/stringops.h>
+#include <render/OpenGL/textureopengl.h>
 #include <render/commandqueue.h>
 #include <render/renderinstance.h>
+#include <render/texture.h>
 #include <render/vertextypes.h>
 
 static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, position)},
@@ -77,18 +79,6 @@ void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInsta
     dev.vertexArrayObject = renderInstance.createVertexArrayObject({0}, {Render::NuklearVertex::layout()}, 1).release();
 }
 
-/*GLuint nk_sdl_device_upload_atlas(const void *image, int width, int height)
-{
-    GLuint font_tex;
-    glGenTextures(1, &font_tex);
-    glBindTexture(GL_TEXTURE_2D, font_tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)width, (GLsizei)height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-
-    return font_tex;
-}*/
-
 void nk_sdl_device_destroy(nk_gl_device& dev)
 {
     glDetachShader(dev.prog, dev.vert_shdr);
@@ -101,7 +91,7 @@ void nk_sdl_device_destroy(nk_gl_device& dev)
 }
 
 void nk_sdl_render_dump(
-    Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, const Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue)
+    Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue)
 {
     int width, height;
     int display_width, display_height;
@@ -141,7 +131,6 @@ void nk_sdl_render_dump(
     // setup program
     glUseProgram(dev.prog);
 
-    atlasTexture.bind();
     glUniform1i(dev.uniform_tex, 0);
     auto& atlasLookupMap = atlasTexture.getLookupMap();
 
@@ -154,9 +143,8 @@ void nk_sdl_render_dump(
         dev.vertexArrayObject->getIndexBuffer()->setData(dump.ebuf.memory.ptr, dump.ebuf.size);
 
         // iterate over and execute each draw command
-        for (size_t i = 0; i < dump.drawCommands.size(); i++)
+        for (const auto& cmd : dump.drawCommands)
         {
-            const struct nk_draw_command& cmd = dump.drawCommands[i];
             if (!cmd.elem_count)
                 continue;
 
@@ -178,7 +166,7 @@ void nk_sdl_render_dump(
             glUniform1i(dev.uniform_checkerboarded, effect == FAGui::EffectType::checkerboarded ? 1 : 0);
             glUniform2f(dev.uniform_imageSize, atlasEntry.mWidth, atlasEntry.mHeight);
             glUniform3f(dev.uniform_atlasOffset, atlasEntry.mX, atlasEntry.mY, atlasEntry.mLayer);
-            glUniform2f(dev.uniform_atlasSize, atlasTexture.getTextureWidth(), atlasTexture.getTextureHeight());
+            glUniform2f(dev.uniform_atlasSize, atlasTexture.getTextureArray().width(), atlasTexture.getTextureArray().height());
 
             glScissor((GLint)(cmd.clip_rect.x * scale.x),
                       (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),
@@ -187,6 +175,9 @@ void nk_sdl_render_dump(
 
             Render::Bindings bindings;
             bindings.vao = dev.vertexArrayObject;
+
+            glActiveTexture(GL_TEXTURE0);
+            Render::ScopedBindGL texBinder(safe_downcast<Render::TextureOpenGL&>(atlasTexture.getTextureArray()));
 
             commandQueue.cmdDrawIndexed(size_t(offset), cmd.elem_count, bindings);
 

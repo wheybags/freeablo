@@ -7,8 +7,6 @@ namespace Render
     {
         switch (format)
         {
-            case Format::RGBA8U:
-                return 4;
             case Format::RGBA8UNorm:
                 return 4;
             case Format::RGBA32F:

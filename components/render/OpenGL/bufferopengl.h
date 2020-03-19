@@ -11,16 +11,17 @@ namespace Render
 
     public:
         explicit BufferOpenGL(size_t sizeInBytes);
-        virtual ~BufferOpenGL();
+        ~BufferOpenGL() override;
 
         GLuint getId() { return mId; }
 
-        virtual void setData(void* data, size_t dataSizeInBytes) override;
+        void setData(void* data, size_t dataSizeInBytes) override;
 
-        virtual void bind(std::optional<GLenum> binding) override;
-        virtual void unbind(std::optional<GLenum> binding) override;
+        void bind(std::optional<GLenum> binding) override;
+        void unbind(std::optional<GLenum> binding) override;
 
     private:
         GLuint mId = 0;
+        GLuint mBufferTextureId = 0;
     };
 }

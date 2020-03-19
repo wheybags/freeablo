@@ -6,7 +6,6 @@ namespace Render
 {
     enum class Format
     {
-        RGBA8U,
         RGBA8UNorm,
         RGBA32F,
         RGB32F,
