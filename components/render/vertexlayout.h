@@ -30,6 +30,7 @@ namespace Render
     class VertexLayout
     {
     public:
+        VertexLayout(VertexLayout&) = delete;
         VertexLayout(std::initializer_list<Format> elements, VertexInputRate rate);
 
         const std::vector<Format>& getElements() const { return mElements; }

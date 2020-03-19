@@ -95,6 +95,7 @@ set(RenderFiles
     render/OpenGL/scopedbindgl.h
     render/OpenGL/bufferopengl.cpp
     render/OpenGL/bufferopengl.h
+    render/pipeline.h
     render/commandqueue.cpp
     render/commandqueue.h
     render/OpenGL/commandqueueopengl.cpp
@@ -102,7 +103,9 @@ set(RenderFiles
     render/texture.h
     render/OpenGL/textureopengl.cpp
     render/OpenGL/textureopengl.h
-    render/color.h)
+    render/color.h
+    render/OpenGL/pipelineopengl.cpp
+    render/OpenGL/pipelineopengl.h)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

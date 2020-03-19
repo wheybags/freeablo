@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <render/OpenGL/commandqueueopengl.h>
+#include <render/OpenGL/pipelineopengl.h>
 #include <render/OpenGL/renderinstanceopengl.h>
 #include <render/OpenGL/textureopengl.h>
 #include <render/OpenGL/vertexarrayobjectopengl.h>
@@ -46,15 +47,29 @@ namespace Render
         if (major < 3 || (major == 3 && minor < 3))
             message_and_abort_fmt("ERROR: Minimum OpenGL version is 3.3. Your current version is %d.%d\n", major, minor);
 
+        setupGlobalState();
+    }
+
+    void RenderInstanceOpenGL::setupGlobalState()
+    {
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
 
         // For now, we will just force all pixel transfers to be tightly packed
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        // Use normal alpha blending
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     RenderInstanceOpenGL::~RenderInstanceOpenGL() { SDL_GL_DeleteContext(mGlContext); }
+
+    std::unique_ptr<Pipeline> RenderInstanceOpenGL::createPipeline(const PipelineSpec& spec)
+    {
+        return std::unique_ptr<Pipeline>(new PipelineOpenGL(*this, spec));
+    }
 
     std::unique_ptr<Texture> RenderInstanceOpenGL::createTexture(const BaseTextureInfo& info)
     {

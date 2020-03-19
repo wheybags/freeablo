@@ -4,17 +4,21 @@
 #include <SDL.h>
 #include <fa_nuklear.h>
 #include <glad/glad.h>
-#include <render/renderinstance.h>
 #include <vector>
+
+namespace Render
+{
+    class RenderInstance;
+    class Pipeline;
+    class VertexArrayObject;
+}
 
 struct nk_gl_device
 {
     nk_buffer cmds;
     nk_draw_null_texture null;
     Render::VertexArrayObject* vertexArrayObject = nullptr;
-    GLuint prog;
-    GLuint vert_shdr;
-    GLuint frag_shdr;
+    Render::Pipeline* pipeline = nullptr;
     GLint attrib_pos;
     GLint attrib_uv;
     GLint attrib_col;

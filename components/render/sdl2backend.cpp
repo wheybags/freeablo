@@ -28,6 +28,7 @@
 #include "vertextypes.h"
 #include <render/renderinstance.h>
 #include <render/OpenGL/textureopengl.h>
+#include <render/OpenGL/pipelineopengl.h>
 
 #if defined(WIN32) || defined(_WIN32)
 extern "C" {
@@ -100,6 +101,8 @@ namespace Render
     // SDL_Renderer* renderer;
     RenderInstance* renderInstance = nullptr;
     CommandQueue* mainCommandQueue = nullptr;
+    VertexArrayObject* vertexArrayObject = nullptr;
+    Pipeline* drawLevelPipeline = nullptr;
 
     DrawLevelCache drawLevelCache = DrawLevelCache(2000);
     std::string windowTitle;
@@ -127,14 +130,34 @@ namespace Render
 
         renderInstance = RenderInstance::createRenderInstance(RenderInstance::Type::OpenGL, *screen);
         mainCommandQueue = renderInstance->createCommandQueue().release();
-
         mainCommandQueue->begin();
+
+        PipelineSpec drawLevelPipelineSpec;
+        drawLevelPipelineSpec.vertexLayouts = {SpriteVertexMain::layout(), SpriteVertexPerInstance::layout()};
+        drawLevelPipelineSpec.vertexShaderPath = Misc::getResourcesPath().str() + "/shaders/basic.vert";
+        drawLevelPipelineSpec.fragmentShaderPath = Misc::getResourcesPath().str() + "/shaders/basic.frag";
+
+        drawLevelPipeline = renderInstance->createPipeline(drawLevelPipelineSpec).release();
+        vertexArrayObject = renderInstance->createVertexArrayObject({0, 0}, drawLevelPipelineSpec.vertexLayouts, 0).release();
+
+        // clang-format off
+        SpriteVertexMain baseVertices[] =
+        {
+            {{0, 0, 0},  {0, 0}},
+            {{1, 0, 0},  {1, 0}},
+            {{1, 1, 0},  {1, 1}},
+            {{0, 0, 0},  {0, 0}},
+            {{1, 1, 0},  {1, 1}},
+            {{0, 1, 0},  {0, 1}}
+        };
+        // clang-format on
+        vertexArrayObject->getVertexBuffer(0)->setData(baseVertices, sizeof(baseVertices));
+
+        atlasTexture = std::make_unique<AtlasTexture>(*renderInstance, *mainCommandQueue);
 
         // Update screen with/height, as starting full screen window in
         // Windows does not trigger a SDL_WINDOWEVENT_RESIZED event.
         SDL_GetWindowSize(screen, &WIDTH, &HEIGHT);
-
-        atlasTexture = std::make_unique<AtlasTexture>(*renderInstance, *mainCommandQueue);
 
         if (nk_ctx)
         {
@@ -157,6 +180,8 @@ namespace Render
     void quit()
     {
         atlasTexture.reset();
+        delete vertexArrayObject;
+        delete drawLevelPipeline;
         delete mainCommandQueue;
         delete renderInstance;
         // SDL_DestroyRenderer(renderer);
@@ -561,107 +586,10 @@ namespace Render
 
     bool once = false;
 
-    VertexArrayObject* vertexArrayObject = nullptr;
-
-    GLuint shader_programme = 0;
-    GLuint texture = 0;
-
     void deleteAllSprites() { atlasTexture->clear(*mainCommandQueue); }
 
     void draw()
     {
-        if (!once)
-        {
-
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            once = true;
-
-            std::string src = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/basic.vert");
-            const GLchar* srcPtr = src.c_str();
-
-            GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-            glShaderSource(vs, 1, &srcPtr, NULL);
-            glCompileShader(vs);
-
-            GLint isCompiled = 0;
-            glGetShaderiv(vs, GL_COMPILE_STATUS, &isCompiled);
-            if (isCompiled == GL_FALSE)
-            {
-                GLint maxLength = 0;
-                glGetShaderiv(vs, GL_INFO_LOG_LENGTH, &maxLength);
-
-                // The maxLength includes the NULL character
-                std::vector<GLchar> errorLog(maxLength);
-                glGetShaderInfoLog(vs, maxLength, &maxLength, &errorLog[0]);
-
-                std::cout << &errorLog[0] << std::endl;
-
-                // Provide the infolog in whatever manor you deem best.
-                // Exit with failure.
-                glDeleteShader(vs); // Don't leak the shader.
-                return;
-            }
-
-            src = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/basic.frag");
-            srcPtr = src.c_str();
-
-            GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-            glShaderSource(fs, 1, &srcPtr, NULL);
-            glCompileShader(fs);
-
-            glGetShaderiv(fs, GL_COMPILE_STATUS, &isCompiled);
-            if (isCompiled == GL_FALSE)
-            {
-                GLint maxLength = 0;
-                glGetShaderiv(fs, GL_INFO_LOG_LENGTH, &maxLength);
-
-                // The maxLength includes the NULL character
-                std::vector<GLchar> errorLog(maxLength);
-                glGetShaderInfoLog(fs, maxLength, &maxLength, &errorLog[0]);
-
-                std::cout << &errorLog[0] << std::endl;
-
-                // Provide the infolog in whatever manor you deem best.
-                // Exit with failure.
-                glDeleteShader(fs); // Don't leak the shader.
-                return;
-            }
-
-            shader_programme = glCreateProgram();
-            glAttachShader(shader_programme, fs);
-            glAttachShader(shader_programme, vs);
-            glLinkProgram(shader_programme);
-
-            GLint status;
-            glGetProgramiv(shader_programme, GL_LINK_STATUS, &status);
-            release_assert(status == GL_TRUE);
-
-            // clang-format off
-            SpriteVertexMain baseVertices[] =
-            {
-                {{0, 0, 0},  {0, 0}},
-                {{1, 0, 0},  {1, 0}},
-                {{1, 1, 0},  {1, 1}},
-                {{0, 0, 0},  {0, 0}},
-                {{1, 1, 0},  {1, 1}},
-                {{0, 1, 0},  {0, 1}}
-            };
-            // clang-format on
-
-            vertexArrayObject = renderInstance
-                                    ->createVertexArrayObject(
-                                        {
-                                            0,
-                                            0,
-                                        },
-                                        {SpriteVertexMain::layout(), SpriteVertexPerInstance::layout()},
-                                        0)
-                                    .release();
-            vertexArrayObject->getVertexBuffer(0)->setData(baseVertices, sizeof(baseVertices));
-        }
-
         mainCommandQueue->cmdPresent();
         mainCommandQueue->end();
         mainCommandQueue->submit();
@@ -676,11 +604,13 @@ namespace Render
 
     static void drawCachedLevel()
     {
-        glUseProgram(shader_programme);
+        ScopedBindGL pipelineBind(safe_downcast<PipelineOpenGL*>(drawLevelPipeline));
 
-        glUniform1i(glGetUniformLocation(shader_programme, "tex"), 0);
-        glUniform2f(glGetUniformLocation(shader_programme, "screenSize"), WIDTH, HEIGHT);
-        glUniform2f(glGetUniformLocation(shader_programme, "atlasSize"), atlasTexture->getTextureArray().width(), atlasTexture->getTextureArray().height());
+        glUniform1i(glGetUniformLocation(safe_downcast<PipelineOpenGL*>(drawLevelPipeline)->mShaderProgramId, "tex"), 0);
+        glUniform2f(glGetUniformLocation(safe_downcast<PipelineOpenGL*>(drawLevelPipeline)->mShaderProgramId, "screenSize"), WIDTH, HEIGHT);
+        glUniform2f(glGetUniformLocation(safe_downcast<PipelineOpenGL*>(drawLevelPipeline)->mShaderProgramId, "atlasSize"),
+                    atlasTexture->getTextureArray().width(),
+                    atlasTexture->getTextureArray().height());
 
         std::pair<void*, size_t> instanceData = drawLevelCache.getData();
         vertexArrayObject->getVertexBuffer(1)->setData(instanceData.first, instanceData.second);

@@ -8,37 +8,14 @@ struct SDL_Window;
 
 namespace Render
 {
-    //    enum class Topology
-    //    {
-    //        TriangleList,
-    //    };
-
     //    class DescriptorSet
     //    {
     //    public:
     //        virtual ~DescriptorSet() {}
     //    };
 
-    //    struct PipelineSpec
-    //    {
-    //        Topology topology = Topology::TriangleList;
-    //        const VertexLayout* vertexLayout = nullptr;
-    //        filesystem::path vertexShaderPath;
-    //        filesystem::path fragmentShaderPath;
-    //        // target framebuffer format
-    //    };
-
-    //    class Pipeline
-    //    {
-    //    public:
-    //        Pipeline(RenderInstance& instance, const PipelineSpec& spec) : mInstance(instance), mSpec(spec) {}
-    //        virtual ~Pipeline() {}
-
-    //    protected:
-    //        RenderInstance& mInstance;
-    //        const PipelineSpec& mSpec;
-    //    };
-
+    class Pipeline;
+    struct PipelineSpec;
     class Buffer;
     class VertexArrayObject;
     class CommandQueue;
@@ -52,6 +29,7 @@ namespace Render
         explicit RenderInstance(SDL_Window& window) : mWindow(window) {}
         virtual ~RenderInstance() = default;
 
+        virtual std::unique_ptr<Pipeline> createPipeline(const PipelineSpec& spec) = 0;
         virtual std::unique_ptr<Texture> createTexture(const BaseTextureInfo& info) = 0;
         virtual std::unique_ptr<Buffer> createBuffer(size_t sizeInBytes) = 0;
         virtual std::unique_ptr<VertexArrayObject> createVertexArrayObject(std::vector<size_t> bufferSizeCounts,

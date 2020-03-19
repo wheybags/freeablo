@@ -6,6 +6,7 @@
 #include <misc/assert.h>
 #include <misc/misc.h>
 #include <misc/stringops.h>
+#include <render/OpenGL/pipelineopengl.h>
 #include <render/OpenGL/textureopengl.h>
 #include <render/commandqueue.h>
 #include <render/renderinstance.h>
@@ -16,76 +17,35 @@ static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_
                                                                      {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, uv)},
                                                                      {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct Render::NuklearVertex, color)},
                                                                      {NK_VERTEX_LAYOUT_END}};
-#define NK_SHADER_VERSION "#version 330\n"
 
 void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance)
 {
-    GLint status;
-
-    std::string vertexShaderSource = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/gui.vert");
-    std::string fragmentShaderSource = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/gui.frag");
-
     nk_buffer_init_default(&dev.cmds);
-    dev.prog = glCreateProgram();
-    dev.vert_shdr = glCreateShader(GL_VERTEX_SHADER);
-    dev.frag_shdr = glCreateShader(GL_FRAGMENT_SHADER);
 
-    const GLchar* srcPtr = nullptr;
+    Render::PipelineSpec pipelineSpec;
+    pipelineSpec.vertexLayouts = {Render::NuklearVertex::layout()};
+    pipelineSpec.vertexShaderPath = Misc::getResourcesPath().str() + "/shaders/gui.vert";
+    pipelineSpec.fragmentShaderPath = Misc::getResourcesPath().str() + "/shaders/gui.frag";
 
-    srcPtr = vertexShaderSource.c_str();
-    glShaderSource(dev.vert_shdr, 1, &srcPtr, nullptr);
+    dev.pipeline = renderInstance.createPipeline(pipelineSpec).release();
+    dev.vertexArrayObject = renderInstance.createVertexArrayObject({0}, pipelineSpec.vertexLayouts, 1).release();
 
-    srcPtr = fragmentShaderSource.c_str();
-    glShaderSource(dev.frag_shdr, 1, &srcPtr, nullptr);
+    dev.uniform_hoverColor = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "hoverColor");
+    dev.uniform_checkerboarded = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "checkerboarded");
+    dev.uniform_imageSize = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "imageSize");
+    dev.uniform_atlasOffset = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "atlasOffset");
+    dev.uniform_atlasSize = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "atlasSize");
+    dev.uniform_tex = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "Texture");
+    dev.uniform_proj = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "ProjMtx");
+    dev.attrib_pos = glGetAttribLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "Position");
+    dev.attrib_uv = glGetAttribLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "TexCoord");
+    dev.attrib_col = glGetAttribLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "Color");
 
-    glCompileShader(dev.vert_shdr);
-    glCompileShader(dev.frag_shdr);
-    glGetShaderiv(dev.vert_shdr, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE)
-    {
-        int length = 1024;
-        std::vector<GLchar> errorLog(length);
-        glGetShaderInfoLog(dev.vert_shdr, length, &length, &errorLog[0]);
-        std::cout << "SHADER ERROR: << " << &errorLog[0] << std::endl;
-    }
-
-    release_assert(status == GL_TRUE);
-    glGetShaderiv(dev.frag_shdr, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE)
-    {
-        int length = 1024;
-        std::vector<GLchar> errorLog(length);
-        glGetShaderInfoLog(dev.frag_shdr, length, &length, &errorLog[0]);
-        std::cout << "SHADER ERROR: << " << &errorLog[0] << std::endl;
-    }
-    release_assert(status == GL_TRUE);
-    glAttachShader(dev.prog, dev.vert_shdr);
-    glAttachShader(dev.prog, dev.frag_shdr);
-    glLinkProgram(dev.prog);
-    glGetProgramiv(dev.prog, GL_LINK_STATUS, &status);
-    release_assert(status == GL_TRUE);
-
-    dev.uniform_hoverColor = glGetUniformLocation(dev.prog, "hoverColor");
-    dev.uniform_checkerboarded = glGetUniformLocation(dev.prog, "checkerboarded");
-    dev.uniform_imageSize = glGetUniformLocation(dev.prog, "imageSize");
-    dev.uniform_atlasOffset = glGetUniformLocation(dev.prog, "atlasOffset");
-    dev.uniform_atlasSize = glGetUniformLocation(dev.prog, "atlasSize");
-    dev.uniform_tex = glGetUniformLocation(dev.prog, "Texture");
-    dev.uniform_proj = glGetUniformLocation(dev.prog, "ProjMtx");
-    dev.attrib_pos = glGetAttribLocation(dev.prog, "Position");
-    dev.attrib_uv = glGetAttribLocation(dev.prog, "TexCoord");
-    dev.attrib_col = glGetAttribLocation(dev.prog, "Color");
-
-    dev.vertexArrayObject = renderInstance.createVertexArrayObject({0}, {Render::NuklearVertex::layout()}, 1).release();
 }
 
 void nk_sdl_device_destroy(nk_gl_device& dev)
 {
-    glDetachShader(dev.prog, dev.vert_shdr);
-    glDetachShader(dev.prog, dev.frag_shdr);
-    glDeleteShader(dev.vert_shdr);
-    glDeleteShader(dev.frag_shdr);
-    glDeleteProgram(dev.prog);
+    delete dev.pipeline;
     delete dev.vertexArrayObject;
     nk_buffer_free(&dev.cmds);
 }
@@ -128,8 +88,7 @@ void nk_sdl_render_dump(
 
     nk_gl_device& dev = dump.getDevice();
 
-    // setup program
-    glUseProgram(dev.prog);
+    Render::ScopedBindGL pipelineBind(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline));
 
     glUniform1i(dev.uniform_tex, 0);
     auto& atlasLookupMap = atlasTexture.getLookupMap();
