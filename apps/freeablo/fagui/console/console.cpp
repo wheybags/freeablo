@@ -10,10 +10,10 @@ namespace FAGui
     static const char* nullFile = "/dev/null";
 #endif
     static char consoleStdoutBuffer[BUFSIZ];
-    std::unique_ptr<Console> Console::mInstance = nullptr;
+    std::shared_ptr<Console> Console::mInstance = nullptr;
     static std::stringstream consoleCout;
 
-    Console::Console() : mBuffer({}), bufferLen(0), inputLen(0), mScript({})
+    Console::Console() : mBuffer({}), bufferLen(0), inputLen(0), mScript(Script::LuaScript::getInstance())
     {
         std::cout.rdbuf(consoleCout.rdbuf());
         freopen(nullFile, "a", stdout);
@@ -26,7 +26,7 @@ namespace FAGui
         fclose(stdout);
     }
 
-    std::unique_ptr<Console>& Console::getInstance()
+    std::shared_ptr<Console> Console::getInstance()
     {
         if (!mInstance)
             mInstance = std::unique_ptr<Console>(new Console());
@@ -61,7 +61,7 @@ namespace FAGui
         bufferLen += inputLen;
         inputLen = 0;
 
-        mScript.eval(command.c_str());
+        mScript->eval(command.c_str());
         std::string msg = ">> ";
         msg.append(consoleStdoutBuffer, strlen(consoleStdoutBuffer));
         std::memset(consoleStdoutBuffer, '\0', BUFSIZ);

@@ -530,7 +530,7 @@ namespace FAGui
 
     void GuiManager::consolePanel(nk_context* ctx)
     {
-        auto& c = Console::getInstance();
+        auto c = Console::getInstance();
         drawPanel(ctx,
                   PanelType::console,
                   [&]() {

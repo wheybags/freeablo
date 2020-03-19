@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
   https://github.com/vinniefalco/LuaBridge
-  
+
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
   Copyright 2007, Nathan Reed
 
@@ -94,7 +94,7 @@ inline int get_length (lua_State* L, int idx)
 inline int get_length (lua_State* L, int idx)
 {
   lua_len (L, idx);
-  int len = int (luaL_checknumber (L, -1));
+  int len = int (luaL_checknumber (L, -1).intPart());
   lua_pop (L, 1);
   return len;
 }
@@ -108,7 +108,7 @@ inline int get_length (lua_State* L, int idx)
 #endif
 
 /** Get a table value, bypassing metamethods.
-*/  
+*/
 inline void rawgetfield (lua_State* L, int index, char const* key)
 {
   assert (lua_istable (L, index));
@@ -118,7 +118,7 @@ inline void rawgetfield (lua_State* L, int index, char const* key)
 }
 
 /** Set a table value, bypassing metamethods.
-*/  
+*/
 inline void rawsetfield (lua_State* L, int index, char const* key)
 {
   assert (lua_istable (L, index));

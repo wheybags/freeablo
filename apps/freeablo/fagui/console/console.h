@@ -15,11 +15,11 @@ namespace FAGui
         static constexpr size_t inputSize = 512;
         char mInput[inputSize];
         int inputLen;
-        Script::LuaScript mScript;
-        static std::unique_ptr<Console> mInstance;
+        std::shared_ptr<Script::LuaScript> mScript;
+        static std::shared_ptr<Console> mInstance;
 
     public:
-        static std::unique_ptr<Console>& getInstance();
+        static std::shared_ptr<Console> getInstance();
         ~Console();
 
         char* getInput() { return mInput; };

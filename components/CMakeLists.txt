@@ -157,5 +157,5 @@ add_library(Script
   script/luascript.h
 )
 
-target_link_libraries(Script lua Filesystem Misc)
+target_link_libraries(Script lua LuaBridge Misc)
 set_target_properties(Script PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

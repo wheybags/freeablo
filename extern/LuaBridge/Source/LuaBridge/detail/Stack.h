@@ -95,7 +95,7 @@ struct Stack <int>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static int get (lua_State* L, int index)
   {
     return static_cast <int> (luaL_checkinteger (L, index));
@@ -118,7 +118,7 @@ struct Stack <unsigned int>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static unsigned int get (lua_State* L, int index)
   {
     return static_cast <unsigned int> (luaL_checkinteger (L, index));
@@ -141,7 +141,7 @@ struct Stack <unsigned char>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static unsigned char get (lua_State* L, int index)
   {
     return static_cast <unsigned char> (luaL_checkinteger (L, index));
@@ -164,7 +164,7 @@ struct Stack <short>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static short get (lua_State* L, int index)
   {
     return static_cast <short> (luaL_checkinteger (L, index));
@@ -187,7 +187,7 @@ struct Stack <unsigned short>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static unsigned short get (lua_State* L, int index)
   {
     return static_cast <unsigned short> (luaL_checkinteger (L, index));
@@ -210,7 +210,7 @@ struct Stack <long>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static long get (lua_State* L, int index)
   {
     return static_cast <long> (luaL_checkinteger (L, index));
@@ -233,7 +233,7 @@ struct Stack <unsigned long>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static unsigned long get (lua_State* L, int index)
   {
     return static_cast <unsigned long> (luaL_checkinteger (L, index));
@@ -292,42 +292,19 @@ struct Stack <unsigned long long>
 
 //------------------------------------------------------------------------------
 /**
-    Stack specialization for `float`.
-*/
-template <>
-struct Stack <float>
-{
-  static void push (lua_State* L, float value)
-  {
-    lua_pushnumber (L, static_cast <lua_Number> (value));
-  }
-  
-  static float get (lua_State* L, int index)
-  {
-    return static_cast <float> (luaL_checknumber (L, index));
-  }
-
-  static bool isInstance (lua_State* L, int index)
-  {
-    return lua_type (L, index) == LUA_TNUMBER;
-  }
-};
-
-//------------------------------------------------------------------------------
-/**
     Stack specialization for `double`.
 */
 template <>
-struct Stack <double>
+struct Stack <FixedPoint>
 {
-  static void push (lua_State* L, double value)
+  static void push (lua_State* L, FixedPoint value)
   {
-    lua_pushnumber (L, static_cast <lua_Number> (value));
+    lua_pushnumber (L, value);
   }
-  
-  static double get (lua_State* L, int index)
+
+  static FixedPoint get (lua_State* L, int index)
   {
-    return static_cast <double> (luaL_checknumber (L, index));
+    return luaL_checknumber (L, index);
   }
 
   static bool isInstance (lua_State* L, int index)
@@ -347,7 +324,7 @@ struct Stack <bool>
   {
     lua_pushboolean (L, value ? 1 : 0);
   }
-  
+
   static bool get (lua_State* L, int index)
   {
     return lua_toboolean (L, index) ? true : false;
@@ -370,7 +347,7 @@ struct Stack <char>
   {
     lua_pushlstring (L, &value, 1);
   }
-  
+
   static char get (lua_State* L, int index)
   {
     return luaL_checkstring (L, index) [0];

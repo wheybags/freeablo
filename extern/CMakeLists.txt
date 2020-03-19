@@ -23,5 +23,6 @@ add_subdirectory(SDL_image)
 add_subdirectory(StormLib)
 add_subdirectory(gtest)
 add_subdirectory(lua)
+add_subdirectory(LuaBridge)
 
 unset(MESSAGE_QUIET)

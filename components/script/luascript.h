@@ -11,105 +11,53 @@
 #include "lua.h"
 #include "lualib.h"
 
+#include "LuaBridge/LuaBridge.h"
+#include "LuaBridge/Vector.h"
+
 namespace Script
 {
     class LuaScript
     {
         lua_State* mState;
+        static std::shared_ptr<LuaScript> mInstance;
 
     public:
-        LuaScript();
         ~LuaScript();
 
-        template <typename T> void registerGlobalType();
+        template <typename T> void registerType();
 
         template <typename Func> void registerGlobalFunction(const std::string& functionName, Func&& func)
         {
-            lua_pushcfunction(mState, func);
-            lua_setglobal(mState, functionName.c_str());
+            luabridge::getGlobalNamespace(mState).addFunction(functionName.c_str(), func);
         }
 
-        template <typename T> void pushObject(T& obj, const char* varName)
+        template <typename T> void pushGlobalObject(T& obj, const char* varName)
         {
-            static bool registered = false;
-            if (!registered)
-            {
-                registerGlobalType<T>();
-                registered = true;
-            }
-
-            T** udata = reinterpret_cast<T**>(lua_newuserdata(mState, sizeof(T*)));
-            (*udata) = &obj;
-            const std::string typeName = typeid(T).name();
-            luaL_setmetatable(mState, typeName.substr(1).c_str());
+            registerType<T>();
+            luabridge::push(mState, obj);
             lua_setglobal(mState, varName);
         }
 
         template <typename T> T get(const std::string& variable)
         {
-            release_assert(mState);
-            int level;
-
-            T result;
-            if (luaGetToStack(variable, level))
-                result = luaGet<T>(variable);
-
-            else
-                result = luaGetDefault<T>();
-
-            lua_pop(mState, level + 1);
-            return result;
-        }
-
-        template <typename T> std::vector<T> getVector(const std::string& variable)
-        {
-            std::vector<T> ret;
-            lua_getglobal(mState, variable.c_str());
-            if (lua_isnil(mState, -1))
-            {
-                return {};
-            }
-
-            lua_pushnil(mState);
-
-            while (lua_next(mState, -2))
-            {
-                T aux;
-                if constexpr (std::is_same<T, std::string>::value)
-                {
-                    ret.push_back(lua_tostring(mState, -1));
-                }
-
-                else
-                {
-                    ret.push_back(static_cast<T>(lua_tonumber(mState, -1)));
-                }
-
-                lua_pop(mState, 1);
-            }
-
-            clean();
-            return ret;
+            luabridge::LuaRef ret = luabridge::getGlobal(mState, variable.c_str());
+            return ret.cast<T>();
         }
 
         void runScript(const std::string& path);
         void eval(const char* script);
 
-    private:
-        bool luaGetToStack(const std::string& variable, int& level);
-
-        void clean();
-
-        void printError(const std::string& variable, const std::string& reason);
-
-        template <typename T> T luaGet(const std::string& variable = "");
-
-        template <typename T> T luaGetDefault() { return {}; }
-
-        template <typename Func> void pushFunction(Func&& f, const char* funcName)
+        static std::shared_ptr<LuaScript> getInstance()
         {
-            lua_pushcfunction(mState, f);
-            lua_setfield(mState, -2, funcName);
+            if (!mInstance)
+                mInstance = std::shared_ptr<LuaScript>(new LuaScript());
+
+            return mInstance;
         }
+
+        operator lua_State*() { return mState; }
+
+    private:
+        LuaScript();
     };
 }
