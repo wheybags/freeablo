@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="k9UFlc" name="LuaBridgeTests" projectType="consoleapp" version="1.0.0"
+              jucerVersion="3.0.0">
+  <EXPORTFORMATS>
+    <VS2010 targetFolder="Builds/VisualStudio2010" libraryType="1" juceFolder="">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="LuaBridgeTests" libraryPath=""
+                       headerPath="../../../Lua"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="2" targetName="LuaBridgeTests" libraryPath=""
+                       headerPath="../../../Lua"/>
+      </CONFIGURATIONS>
+    </VS2010>
+    <VS2008 targetFolder="Builds/VisualStudio2008" libraryType="1" juceFolder="..\..\..\AppletJUCE\AppletJUCE\JUCE\modules">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" isDebug="1"
+                       optimisation="1" targetName="LuaBridgeTests" headerPath="../../../Lua"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" isDebug="0"
+                       optimisation="2" targetName="LuaBridgeTests" headerPath="../../../Lua"/>
+      </CONFIGURATIONS>
+    </VS2008>
+    <XCODE_MAC targetFolder="Builds/MacOSX" objCExtraSuffix="EriIOm" juceFolder="..\..\..\AppletJUCE\AppletJUCE\JUCE\modules">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="LuaBridgeTests"
+                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       headerPath="../../../Lua"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="LuaBridgeTests"
+                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       headerPath="../../../Lua"/>
+      </CONFIGURATIONS>
+    </XCODE_MAC>
+    <LINUX_MAKE targetFolder="Builds/Linux" juceFolder="..\..\..\AppletJUCE\AppletJUCE\JUCE\modules">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
+                       targetName="LuaBridgeTests" headerPath="../../../Lua"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="2"
+                       targetName="LuaBridgeTests" headerPath="../../../Lua"/>
+      </CONFIGURATIONS>
+    </LINUX_MAKE>
+    <XCODE_IPHONE targetFolder="Builds/iOS" objCExtraSuffix="OWVkUx" juceFolder="..\..\..\AppletJUCE\AppletJUCE\JUCE\modules">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="LuaBridgeTests"
+                       iosCompatibility="default" headerPath="../../../Lua"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="LuaBridgeTests"
+                       iosCompatibility="default" headerPath="../../../Lua"/>
+      </CONFIGURATIONS>
+    </XCODE_IPHONE>
+  </EXPORTFORMATS>
+  <MAINGROUP id="kYv0Du" name="LuaBridgeTests">
+    <GROUP id="{55AED8F4-5137-470B-5691-B54E0FC42E4C}" name="Lua">
+      <FILE id="bYVpxI" name="LuaLibrary.h" compile="0" resource="0" file="../Lua/LuaLibrary.h"/>
+      <FILE id="W6VAVJ" name="LuaLibrary5.1.5.cpp" compile="1" resource="0"
+            file="../Lua/LuaLibrary5.1.5.cpp"/>
+      <FILE id="ababvZ" name="LuaLibrary5.2.0.cpp" compile="1" resource="0"
+            file="../Lua/LuaLibrary5.2.0.cpp"/>
+    </GROUP>
+    <GROUP id="{3FF76B2F-00BF-EB5F-76E0-C07F30498B91}" name="LuaBridge">
+      <FILE id="IGA3Cq" name="LuaBridge.h" compile="0" resource="0" file="../LuaBridge/LuaBridge.h"/>
+      <FILE id="tSrWTv" name="RefCountedObject.h" compile="0" resource="0"
+            file="../LuaBridge/RefCountedObject.h"/>
+      <FILE id="elDjma" name="RefCountedPtr.h" compile="0" resource="0" file="../LuaBridge/RefCountedPtr.h"/>
+    </GROUP>
+    <GROUP id="{077A9A84-32D7-C467-DD50-0CC70DE4B5EE}" name="Source">
+      <FILE id="pzeo5J" name="Performance.cpp" compile="1" resource="0" file="Source/Performance.cpp"/>
+      <FILE id="F47jBG" name="Performance.h" compile="0" resource="0" file="Source/Performance.h"/>
+      <FILE id="B21XbB" name="Tests.cpp" compile="0" resource="0" file="Source/Tests.cpp"/>
+      <FILE id="tT3RVM" name="Tests.h" compile="0" resource="0" file="Source/Tests.h"/>
+      <FILE id="PlJyT6" name="Tests.lua" compile="0" resource="1" file="Source/Tests.lua"/>
+      <FILE id="yhQDiV" name="TestsMain.cpp" compile="1" resource="0" file="Source/TestsMain.cpp"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_gui_audio" showAllCode="1" useLocalCopy="1"/>
+  </MODULES>
+  <JUCEOPTIONS/>
+</JUCERPROJECT>
