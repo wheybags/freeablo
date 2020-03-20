@@ -80,8 +80,18 @@ namespace Render
         glDeleteProgram(mShaderProgramId);
     }
 
-    void PipelineOpenGL::bind(std::optional<GLuint>, std::optional<GLuint>) { glUseProgram(mShaderProgramId); }
-    void PipelineOpenGL::unbind(std::optional<GLuint>, std::optional<GLuint>) { glUseProgram(0); }
+    void PipelineOpenGL::bind(std::optional<GLuint>, std::optional<GLuint>)
+    {
+        if (mSpec.scissor)
+            glEnable(GL_SCISSOR_TEST);
+
+        glUseProgram(mShaderProgramId);
+    }
+    void PipelineOpenGL::unbind(std::optional<GLuint>, std::optional<GLuint>)
+    {
+        glDisable(GL_SCISSOR_TEST);
+        glUseProgram(0);
+    }
 
     GLuint PipelineOpenGL::getUniformLocation(uint32_t bindingIndex) const
     {

@@ -9,11 +9,10 @@ namespace Render
 #ifndef NDEBUG
         debug_assert(pipeline);
         debug_assert(vao);
+        debug_assert(descriptorSet);
 
         debug_assert(pipeline->mSpec.vertexLayouts == vao->getBindings());
-
-        if (descriptorSet)
-            debug_assert(pipeline->mSpec.descriptorSetSpec == descriptorSet->getSpec());
+        debug_assert(pipeline->mSpec.descriptorSetSpec == descriptorSet->getSpec());
 #endif
     }
 

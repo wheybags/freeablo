@@ -30,15 +30,9 @@ namespace Render
 
     VertexArrayObjectOpenGL::~VertexArrayObjectOpenGL() { glDeleteVertexArrays(1, &mVaoId); }
 
-    void VertexArrayObjectOpenGL::bind(std::optional<GLuint>, std::optional<GLuint>)
-    {
-        glBindVertexArray(mVaoId);
-    }
+    void VertexArrayObjectOpenGL::bind(std::optional<GLuint>, std::optional<GLuint>) { glBindVertexArray(mVaoId); }
 
-    void VertexArrayObjectOpenGL::unbind(std::optional<GLuint>, std::optional<GLuint>)
-    {
-        glBindVertexArray(0);
-    }
+    void VertexArrayObjectOpenGL::unbind(std::optional<GLuint>, std::optional<GLuint>) { glBindVertexArray(0); }
 
     GLint VertexArrayObjectOpenGL::setupAttributes(GLint locationIndex, BufferOpenGL& buffer, const VertexLayout& layout)
     {

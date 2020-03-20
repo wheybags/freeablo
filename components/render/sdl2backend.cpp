@@ -8,7 +8,6 @@
 #include <SDL_image.h>
 #include <fa_nuklear.h>
 #include <faio/fafileobject.h>
-#include <glad/glad.h>
 #include <iostream>
 #include <misc/assert.h>
 #include <misc/savePNG.h>

@@ -13,6 +13,7 @@ namespace Render
         std::vector<NonNullConstPtr<VertexLayout>> vertexLayouts;
         filesystem::path vertexShaderPath;
         filesystem::path fragmentShaderPath;
+        bool scissor = false;
         // target framebuffer format
     };
 

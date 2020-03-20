@@ -1,18 +1,23 @@
 #version 330
 
+layout(std140) uniform fragmentUniforms
+{
+    vec4 hoverColor;
+    vec2 imageSize;
+    vec2 atlasSize;
+    vec4 atlasOffset;
+    float checkerboarded;
+};
+
 uniform sampler2DArray Texture;
-uniform vec4 hoverColor;
-uniform vec2 imageSize;
-uniform vec3 atlasOffset;
-uniform vec2 atlasSize;
-uniform int checkerboarded;
 
 in vec2 Frag_UV;
 in vec4 Frag_Color;
 
 out vec4 Out_Color;
 
-void main(){
+void main()
+{
     vec4 c = Frag_Color * texture(Texture, vec3((atlasOffset.xy + Frag_UV * imageSize) / atlasSize, int(atlasOffset.z)));
     if (c.w == 0. && hoverColor.a > 0.)
     {

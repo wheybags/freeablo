@@ -17,6 +17,25 @@ static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_
                                                                      {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct Render::NuklearVertex, color)},
                                                                      {NK_VERTEX_LAYOUT_END}};
 
+struct GuiUniforms
+{
+    struct Vertex
+    {
+        float ProjMtx[4][4];
+    } vertex;
+
+    struct Fragment
+    {
+        float hoverColor[4];
+        float imageSize[2];
+        float atlasSize[2];
+        float atlasOffset[4];
+        float checkerboarded;
+
+        float _pad[3];
+    } fragment;
+};
+
 void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance)
 {
     nk_buffer_init_default(&dev.cmds);
@@ -25,24 +44,24 @@ void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInsta
     pipelineSpec.vertexLayouts = {Render::NuklearVertex::layout()};
     pipelineSpec.vertexShaderPath = Misc::getResourcesPath().str() + "/shaders/gui.vert";
     pipelineSpec.fragmentShaderPath = Misc::getResourcesPath().str() + "/shaders/gui.frag";
+    pipelineSpec.descriptorSetSpec = {{
+        {Render::DescriptorType::UniformBuffer, "vertexUniforms"},
+        {Render::DescriptorType::UniformBuffer, "fragmentUniforms"},
+        {Render::DescriptorType::Texture, "Texture"},
+    }};
+    pipelineSpec.scissor = true;
 
     dev.pipeline = renderInstance.createPipeline(pipelineSpec).release();
     dev.vertexArrayObject = renderInstance.createVertexArrayObject({0}, pipelineSpec.vertexLayouts, 1).release();
+    dev.descriptorSet = renderInstance.createDescriptorSet(pipelineSpec.descriptorSetSpec).release();
 
-    dev.uniform_hoverColor = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "hoverColor");
-    dev.uniform_checkerboarded = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "checkerboarded");
-    dev.uniform_imageSize = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "imageSize");
-    dev.uniform_atlasOffset = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "atlasOffset");
-    dev.uniform_atlasSize = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "atlasSize");
-    dev.uniform_tex = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "Texture");
-    dev.uniform_proj = glGetUniformLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "ProjMtx");
-    dev.attrib_pos = glGetAttribLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "Position");
-    dev.attrib_uv = glGetAttribLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "TexCoord");
-    dev.attrib_col = glGetAttribLocation(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline)->mShaderProgramId, "Color");
+    dev.uniformBuffer = renderInstance.createBuffer(sizeof(GuiUniforms)).release();
 }
 
 void nk_sdl_device_destroy(nk_gl_device& dev)
 {
+    delete dev.descriptorSet;
+    delete dev.uniformBuffer;
     delete dev.pipeline;
     delete dev.vertexArrayObject;
     nk_buffer_free(&dev.cmds);
@@ -54,7 +73,7 @@ void nk_sdl_render_dump(
     int width, height;
     int display_width, display_height;
     struct nk_vec2 scale;
-    GLfloat ortho[4][4] = {
+    float ortho[4][4] = {
         {2.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, -2.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, -1.0f, 0.0f},
@@ -78,8 +97,6 @@ void nk_sdl_render_dump(
     // setup global state
     glViewport(0, 0, display_width, display_height);
 
-    glEnable(GL_SCISSOR_TEST);
-
     nk_gl_device& dev = dump.getDevice();
 
     auto& atlasLookupMap = atlasTexture.getLookupMap();
@@ -89,6 +106,13 @@ void nk_sdl_render_dump(
 
     dev.vertexArrayObject->getVertexBuffer(0)->setData(dump.vbuf.memory.ptr, dump.vbuf.size);
     dev.vertexArrayObject->getIndexBuffer()->setData(dump.ebuf.memory.ptr, dump.ebuf.size);
+
+    // TODO: we don't need to update this every frame
+    dev.descriptorSet->updateItems({
+        {0, Render::BufferSlice{dev.uniformBuffer, offsetof(GuiUniforms, vertex), sizeof(GuiUniforms::Vertex)}},
+        {1, Render::BufferSlice{dev.uniformBuffer, offsetof(GuiUniforms, fragment), sizeof(GuiUniforms::Fragment)}},
+        {2, &atlasTexture.getTextureArray()},
+    });
 
     // iterate over and execute each draw command
     for (const auto& cmd : dump.drawCommands)
@@ -107,37 +131,41 @@ void nk_sdl_render_dump(
 
         int item_hl_color[] = {0xB9, 0xAA, 0x77};
 
-        Render::ScopedBindGL pipelineBind(safe_downcast<Render::PipelineOpenGL*>(dev.pipeline));
+        GuiUniforms uniforms = {};
+        memcpy(uniforms.vertex.ProjMtx, ortho, sizeof(ortho));
 
-        glUniformMatrix4fv(dev.uniform_proj, 1, GL_FALSE, &ortho[0][0]);
-        glUniform4f(dev.uniform_hoverColor,
-                    item_hl_color[0] / 255.f,
-                    item_hl_color[1] / 255.f,
-                    item_hl_color[2] / 255.f,
-                    effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f);
-        glUniform1i(dev.uniform_checkerboarded, effect == FAGui::EffectType::checkerboarded ? 1 : 0);
-        glUniform2f(dev.uniform_imageSize, atlasEntry.mWidth, atlasEntry.mHeight);
-        glUniform3f(dev.uniform_atlasOffset, atlasEntry.mX, atlasEntry.mY, atlasEntry.mLayer);
-        glUniform2f(dev.uniform_atlasSize, atlasTexture.getTextureArray().width(), atlasTexture.getTextureArray().height());
+        uniforms.fragment.hoverColor[0] = float(item_hl_color[0]) / 255.0f;
+        uniforms.fragment.hoverColor[1] = float(item_hl_color[1]) / 255.0f;
+        uniforms.fragment.hoverColor[2] = float(item_hl_color[2]) / 255.0f;
+        uniforms.fragment.hoverColor[3] = effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f;
+        uniforms.fragment.imageSize[0] = atlasEntry.mWidth;
+        uniforms.fragment.imageSize[1] = atlasEntry.mHeight;
+        uniforms.fragment.atlasSize[0] = atlasTexture.getTextureArray().width();
+        uniforms.fragment.atlasSize[1] = atlasTexture.getTextureArray().height();
+        uniforms.fragment.atlasOffset[0] = atlasEntry.mX;
+        uniforms.fragment.atlasOffset[1] = atlasEntry.mY;
+        uniforms.fragment.atlasOffset[2] = atlasEntry.mLayer;
+        uniforms.fragment.checkerboarded = effect == FAGui::EffectType::checkerboarded ? 1.0f : 0.0f;
 
-        glScissor((GLint)(cmd.clip_rect.x * scale.x),
-                  (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),
-                  (GLint)(cmd.clip_rect.w * scale.x),
-                  (GLint)(cmd.clip_rect.h * scale.y));
+        dev.uniformBuffer->setData(&uniforms, sizeof(GuiUniforms));
+
+        Render::ScissorRect scissor = {};
+        scissor.x = int32_t(cmd.clip_rect.x * scale.x);
+        scissor.y = int32_t((float(height) - (cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y);
+        scissor.w = int32_t(cmd.clip_rect.w * scale.x);
+        scissor.h = int32_t(cmd.clip_rect.h * scale.y);
+
+        commandQueue.cmdScissor(scissor);
 
         Render::Bindings bindings;
         bindings.vao = dev.vertexArrayObject;
         bindings.pipeline = dev.pipeline;
-
-        glActiveTexture(GL_TEXTURE0);
-        Render::ScopedBindGL texBinder(safe_downcast<Render::TextureOpenGL&>(atlasTexture.getTextureArray()));
+        bindings.descriptorSet = dev.descriptorSet;
 
         commandQueue.cmdDrawIndexed(size_t(offset), cmd.elem_count, bindings);
 
         offset += cmd.elem_count * sizeof(nk_draw_index);
     }
-
-    glDisable(GL_SCISSOR_TEST);
 }
 
 /*
@@ -174,24 +202,6 @@ nk_sdl_clipbard_copy(nk_handle usr, const char *text, int len)
     sdl.ctx.clip.paste = nullptr;// nk_sdl_clipbard_paste;
     sdl.ctx.clip.userdata = nk_handle_ptr(0);
     nk_sdl_device_create();
-}*/
-
-/*void nk_sdl_font_stash_begin(nk_font_atlas& atlas)
-{
-    nk_font_atlas_init_default(&atlas);
-    nk_font_atlas_begin(&atlas);
-}
-
-GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
-{
-    const void *image; int w, h;
-    image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
-    GLuint font_tex = nk_sdl_device_upload_atlas(image, w, h);
-    nk_font_atlas_end(&atlas, nk_handle_id((int)font_tex), &nullTex);
-    if (atlas.default_font)
-        nk_style_set_font(ctx, &atlas.default_font->handle);
-
-    return font_tex;
 }*/
 
 #if 0

@@ -23,6 +23,23 @@ namespace Render
         RenderInstanceOpenGL& getInstance() { return static_cast<RenderInstanceOpenGL&>(mInstance); }
 
     private:
+        // Binds the whole state necessary for a draw in its constructor, and unbinds it all in its (auto-generated) destructor.
+        class DrawScopedBinderGL
+        {
+        public:
+            DrawScopedBinderGL() = delete;
+            DrawScopedBinderGL(DrawScopedBinderGL&) = delete;
+
+            explicit DrawScopedBinderGL(Bindings bindings);
+
+        private:
+            std::vector<std::unique_ptr<BindableGL>> mTempBindables;
+            std::vector<ScopedBindGL> mBinders;
+        };
+
+        DrawScopedBinderGL setupState(Bindings& bindings);
+
+    private:
         VertexArrayObject* mBoundVao = nullptr;
     };
 }

@@ -7,21 +7,7 @@
 
 namespace Render
 {
-    // Binds the whole state necessary for a draw in its constructor, and unbinds it all in its (auto-generated) destructor.
-    class DrawScopedBinderGL
-    {
-    public:
-        DrawScopedBinderGL() = delete;
-        DrawScopedBinderGL(DrawScopedBinderGL&) = delete;
-
-        explicit DrawScopedBinderGL(Bindings bindings);
-
-    private:
-        std::vector<std::unique_ptr<BindableGL>> mTempBindables;
-        std::vector<ScopedBindGL> mBinders;
-    };
-
-    DrawScopedBinderGL::DrawScopedBinderGL(Bindings bindings)
+    CommandQueueOpenGL::DrawScopedBinderGL::DrawScopedBinderGL(Bindings bindings)
     {
         auto pipeline = safe_downcast<PipelineOpenGL*>(bindings.pipeline);
         auto vao = safe_downcast<VertexArrayObjectOpenGL*>(bindings.vao);
@@ -30,31 +16,28 @@ namespace Render
         mBinders.emplace_back(vao);
         mBinders.emplace_back(pipeline);
 
-        if (bindings.descriptorSet)
+        for (uint32_t bindingIndex = 0; bindingIndex < bindings.descriptorSet->size(); bindingIndex++)
         {
-            for (uint32_t bindingIndex = 0; bindingIndex < bindings.descriptorSet->size(); bindingIndex++)
+            const DescriptorSet::Item& item = descriptorSet->getItem(bindingIndex);
+
+            switch (bindings.descriptorSet->getSpec().items[item.bindingIndex].type)
             {
-                const DescriptorSet::Item& item = descriptorSet->getItem(bindingIndex);
-
-                switch (bindings.descriptorSet->getSpec().items[item.bindingIndex].type)
+                case DescriptorType::Texture:
                 {
-                    case DescriptorType::Texture:
-                    {
-                        auto texture = safe_downcast<TextureOpenGL*>(std::get<Texture*>(item.item));
-                        mBinders.emplace_back(texture, GL_TEXTURE0 + pipeline->getUniformLocation(bindingIndex));
-                        break;
-                    }
-                    case DescriptorType::UniformBuffer:
-                    {
-                        auto bufferSlice = std::get<BufferSlice>(item.item);
+                    auto texture = safe_downcast<TextureOpenGL*>(std::get<Texture*>(item.item));
+                    mBinders.emplace_back(texture, GL_TEXTURE0 + pipeline->getUniformLocation(bindingIndex));
+                    break;
+                }
+                case DescriptorType::UniformBuffer:
+                {
+                    auto bufferSlice = std::get<BufferSlice>(item.item);
 
-                        GLuint uniformBlockIndex = pipeline->getUniformLocation(bindingIndex);
-                        glUniformBlockBinding(pipeline->mShaderProgramId, uniformBlockIndex, bindingIndex);
+                    GLuint uniformBlockIndex = pipeline->getUniformLocation(bindingIndex);
+                    glUniformBlockBinding(pipeline->mShaderProgramId, uniformBlockIndex, bindingIndex);
 
-                        auto slice = new BufferSliceOpenGL(bufferSlice);
-                        mTempBindables.emplace_back(slice);
-                        mBinders.emplace_back(slice, GL_UNIFORM_BUFFER, bindingIndex);
-                    }
+                    auto slice = new BufferSliceOpenGL(bufferSlice);
+                    mTempBindables.emplace_back(slice);
+                    mBinders.emplace_back(slice, GL_UNIFORM_BUFFER, bindingIndex);
                 }
             }
         }
@@ -84,7 +67,7 @@ namespace Render
     {
         super::cmdDraw(firstVertex, vertexCount, bindings);
 
-        DrawScopedBinderGL binder(bindings);
+        DrawScopedBinderGL binder = this->setupState(bindings);
         glDrawArrays(GL_TRIANGLES, firstVertex, vertexCount);
     }
 
@@ -92,7 +75,7 @@ namespace Render
     {
         super::cmdDrawIndexed(firstIndex, vertexCount, bindings);
 
-        DrawScopedBinderGL binder(bindings);
+        DrawScopedBinderGL binder = this->setupState(bindings);
         glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_SHORT, reinterpret_cast<GLvoid*>(firstIndex));
     }
 
@@ -100,9 +83,17 @@ namespace Render
     {
         super::cmdDrawInstances(firstVertex, vertexCount, instanceCount, bindings);
 
-        DrawScopedBinderGL binder(bindings);
+        DrawScopedBinderGL binder = this->setupState(bindings);
         glDrawArraysInstanced(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
     }
 
     void CommandQueueOpenGL::cmdPresent() { SDL_GL_SwapWindow(&getInstance().mWindow); }
+
+    CommandQueueOpenGL::DrawScopedBinderGL CommandQueueOpenGL::setupState(Bindings& bindings)
+    {
+        if (bindings.pipeline->mSpec.scissor)
+            glScissor(mScissor.x, mScissor.y, uint32_t(mScissor.w), uint32_t(mScissor.h));
+
+        return DrawScopedBinderGL(bindings);
+    }
 }

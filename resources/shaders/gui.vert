@@ -1,6 +1,9 @@
 #version 330
 
-uniform mat4 ProjMtx;
+layout(std140) uniform vertexUniforms
+{
+    mat4 ProjMtx;
+};
 
 layout(location = 0) in vec2 Position;
 layout(location = 1) in vec2 TexCoord;

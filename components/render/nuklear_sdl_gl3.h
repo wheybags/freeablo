@@ -3,7 +3,6 @@
 #include "misc.h"
 #include <SDL.h>
 #include <fa_nuklear.h>
-#include <glad/glad.h>
 #include <vector>
 
 namespace Render
@@ -11,6 +10,8 @@ namespace Render
     class RenderInstance;
     class Pipeline;
     class VertexArrayObject;
+    class Buffer;
+    class DescriptorSet;
 }
 
 struct nk_gl_device
@@ -19,16 +20,8 @@ struct nk_gl_device
     nk_draw_null_texture null;
     Render::VertexArrayObject* vertexArrayObject = nullptr;
     Render::Pipeline* pipeline = nullptr;
-    GLint attrib_pos;
-    GLint attrib_uv;
-    GLint attrib_col;
-    GLint uniform_tex;
-    GLint uniform_hoverColor;
-    GLint uniform_checkerboarded;
-    GLint uniform_imageSize;
-    GLint uniform_atlasOffset;
-    GLint uniform_atlasSize;
-    GLint uniform_proj;
+    Render::DescriptorSet* descriptorSet = nullptr;
+    Render::Buffer* uniformBuffer = nullptr;
     nk_handle font_tex;
 };
 
@@ -57,12 +50,7 @@ private:
     nk_buffer cmds; // draw commands temp storage
 };
 
-// void nk_sdl_init(nk_sdl& nkSdl, SDL_Window *win);
-void nk_sdl_font_stash_begin(nk_font_atlas& atlas);
-GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
-// NK_API int                  nk_sdl_handle_event(SDL_Event *evt);
 void nk_sdl_render_dump(
     Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue);
-// NK_API void                 nk_sdl_shutdown(void);
 void nk_sdl_device_destroy(nk_gl_device& dev);
 void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance);

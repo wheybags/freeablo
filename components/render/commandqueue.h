@@ -20,6 +20,14 @@ namespace Render
         void assertBindingsCorrect();
     };
 
+    struct ScissorRect
+    {
+        int32_t x;
+        int32_t y;
+        int32_t w;
+        int32_t h;
+    };
+
     class CommandQueue
     {
     public:
@@ -36,6 +44,7 @@ namespace Render
         virtual void cmdDraw(size_t firstVertex, size_t vertexCount, Bindings& bindings);
         virtual void cmdDrawIndexed(size_t firstIndex, size_t vertexCount, Bindings& bindings);
         virtual void cmdDrawInstances(size_t firstVertex, size_t vertexCount, size_t instanceCount, Bindings& bindings);
+        void cmdScissor(ScissorRect scissorRect) { mScissor = scissorRect; }
 
         virtual void cmdPresent() = 0;
 
@@ -43,5 +52,6 @@ namespace Render
         RenderInstance& mInstance;
         bool mBegun = false;
         bool mSubmitted = true;
+        ScissorRect mScissor = {};
     };
 }
