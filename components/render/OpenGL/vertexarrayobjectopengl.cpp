@@ -22,7 +22,10 @@ namespace Render
         }
 
         if (indexBufferSizeInElements > 0)
+        {
             mIndexBuffer.reset(safe_downcast<BufferOpenGL*>(renderInstance.createBuffer(indexBufferSizeInElements).release()));
+            mIndexBuffer->bind(GL_ELEMENT_ARRAY_BUFFER, std::nullopt); // This binding point is not global, it's stored in the vao, so we don't ever unbind
+        }
     }
 
     VertexArrayObjectOpenGL::~VertexArrayObjectOpenGL() { glDeleteVertexArrays(1, &mVaoId); }
@@ -30,19 +33,16 @@ namespace Render
     void VertexArrayObjectOpenGL::bind(std::optional<GLuint>, std::optional<GLuint>)
     {
         glBindVertexArray(mVaoId);
-        if (mIndexBuffer)
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer->getId());
     }
 
     void VertexArrayObjectOpenGL::unbind(std::optional<GLuint>, std::optional<GLuint>)
     {
         glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     GLint VertexArrayObjectOpenGL::setupAttributes(GLint locationIndex, BufferOpenGL& buffer, const VertexLayout& layout)
     {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer.getId());
+        ScopedBindGL bufferBind(buffer, GL_ARRAY_BUFFER);
 
         size_t offset = 0;
         for (Format element : layout.getElements())
