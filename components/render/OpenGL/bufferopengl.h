@@ -17,11 +17,22 @@ namespace Render
 
         void setData(void* data, size_t dataSizeInBytes) override;
 
-        void bind(std::optional<GLenum> binding) override;
-        void unbind(std::optional<GLenum> binding) override;
+        void bind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
+        void unbind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
 
     private:
         GLuint mId = 0;
         GLuint mBufferTextureId = 0;
+    };
+
+    class BufferSliceOpenGL final : public BindableGL
+    {
+    public:
+        explicit BufferSliceOpenGL(BufferSlice slice) : slice(slice) {}
+
+        BufferSlice slice;
+
+        void bind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
+        void unbind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
     };
 }

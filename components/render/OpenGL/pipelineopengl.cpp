@@ -80,8 +80,8 @@ namespace Render
         glDeleteProgram(mShaderProgramId);
     }
 
-    void PipelineOpenGL::bind(std::optional<GLenum>) { glUseProgram(mShaderProgramId); }
-    void PipelineOpenGL::unbind(std::optional<GLenum>) { glUseProgram(0); }
+    void PipelineOpenGL::bind(std::optional<GLuint>, std::optional<GLuint>) { glUseProgram(mShaderProgramId); }
+    void PipelineOpenGL::unbind(std::optional<GLuint>, std::optional<GLuint>) { glUseProgram(0); }
 
     GLuint PipelineOpenGL::getUniformLocation(uint32_t bindingIndex) const
     {

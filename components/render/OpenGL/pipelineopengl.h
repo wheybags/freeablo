@@ -17,8 +17,8 @@ namespace Render
         ~PipelineOpenGL() override;
 
     public:
-        void bind(std::optional<GLenum> binding) override;
-        void unbind(std::optional<GLenum> binding) override;
+        void bind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
+        void unbind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
 
         GLuint getUniformLocation(uint32_t bindingIndex) const;
 

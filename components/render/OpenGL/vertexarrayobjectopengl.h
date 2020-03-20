@@ -28,8 +28,8 @@ namespace Render
         Buffer* getVertexBuffer(size_t index) override { return mBuffers[index].get(); }
         Buffer* getIndexBuffer() override { return mIndexBuffer.get(); }
 
-        void bind(std::optional<GLenum> binding = std::nullopt) override;
-        void unbind(std::optional<GLenum> binding = std::nullopt) override;
+        void bind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
+        void unbind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
 
     private:
         static GLint setupAttributes(GLint locationIndex, BufferOpenGL& buffer, const VertexLayout& layout);

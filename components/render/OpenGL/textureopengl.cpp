@@ -60,8 +60,20 @@ namespace Render
 
     TextureOpenGL::~TextureOpenGL() { glDeleteTextures(1, &mId); }
 
-    void TextureOpenGL::unbind(std::optional<GLenum>) { glBindTexture(getBindPoint(), mId); }
-    void TextureOpenGL::bind(std::optional<GLenum>) { glBindTexture(getBindPoint(), mId); }
+    void TextureOpenGL::unbind(std::optional<GLuint> extra1, std::optional<GLuint>)
+    {
+        if (extra1)
+            glActiveTexture(*extra1);
+
+        glBindTexture(getBindPoint(), mId);
+    }
+    void TextureOpenGL::bind(std::optional<GLuint> extra1, std::optional<GLuint>)
+    {
+        if (extra1)
+            glActiveTexture(*extra1);
+
+        glBindTexture(getBindPoint(), mId);
+    }
 
     GLenum TextureOpenGL::getBindPoint() const { return mInfo.arrayLayers == 1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_ARRAY; }
 }

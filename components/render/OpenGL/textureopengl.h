@@ -15,8 +15,8 @@ namespace Render
         TextureOpenGL(RenderInstanceOpenGL& instance, const BaseTextureInfo& info);
         ~TextureOpenGL() override;
 
-        void bind(std::optional<GLenum> binding) override;
-        void unbind(std::optional<GLenum> binding) override;
+        void bind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
+        void unbind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
 
     private:
         GLenum getBindPoint() const;

@@ -27,14 +27,14 @@ namespace Render
 
     VertexArrayObjectOpenGL::~VertexArrayObjectOpenGL() { glDeleteVertexArrays(1, &mVaoId); }
 
-    void VertexArrayObjectOpenGL::bind(std::optional<GLenum>)
+    void VertexArrayObjectOpenGL::bind(std::optional<GLuint>, std::optional<GLuint>)
     {
         glBindVertexArray(mVaoId);
         if (mIndexBuffer)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer->getId());
     }
 
-    void VertexArrayObjectOpenGL::unbind(std::optional<GLenum>)
+    void VertexArrayObjectOpenGL::unbind(std::optional<GLuint>, std::optional<GLuint>)
     {
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
