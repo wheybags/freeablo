@@ -21,7 +21,7 @@ namespace Render
         void cmdPresent() override;
 
     public:
-        RenderInstanceOpenGL& getInstance() { return static_cast<RenderInstanceOpenGL&>(mInstance); }
+        RenderInstanceOpenGL& getInstance() { return safe_downcast<RenderInstanceOpenGL&>(mInstance); }
 
     private:
         // Binds the whole state necessary for a draw in its constructor, and unbinds it all in its (auto-generated) destructor.
@@ -39,8 +39,5 @@ namespace Render
         };
 
         DrawScopedBinderGL setupState(Bindings& bindings);
-
-    private:
-        VertexArrayObject* mBoundVao = nullptr;
     };
 }

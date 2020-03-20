@@ -1,6 +1,7 @@
 #pragma once
 #include "color.h"
 #include <cstddef>
+#include <cstdint>
 #include <misc/assert.h>
 
 namespace Render

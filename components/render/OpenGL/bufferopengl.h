@@ -22,7 +22,6 @@ namespace Render
 
     private:
         GLuint mId = 0;
-        GLuint mBufferTextureId = 0;
     };
 
     class BufferSliceOpenGL final : public BindableGL
