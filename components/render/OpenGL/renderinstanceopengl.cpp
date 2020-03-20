@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <render/OpenGL/commandqueueopengl.h>
+#include <render/OpenGL/descriptorsetopengl.h>
 #include <render/OpenGL/pipelineopengl.h>
 #include <render/OpenGL/renderinstanceopengl.h>
 #include <render/OpenGL/textureopengl.h>
@@ -65,6 +66,11 @@ namespace Render
     }
 
     RenderInstanceOpenGL::~RenderInstanceOpenGL() { SDL_GL_DeleteContext(mGlContext); }
+
+    std::unique_ptr<DescriptorSet> RenderInstanceOpenGL::createDescriptorSet(DescriptorSetSpec spec)
+    {
+        return std::unique_ptr<DescriptorSet>(new DescriptorSetOpenGL(std::move(spec)));
+    }
 
     std::unique_ptr<Pipeline> RenderInstanceOpenGL::createPipeline(const PipelineSpec& spec)
     {

@@ -13,10 +13,9 @@
 #include <misc/assert.h>
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
-#include <render/OpenGL/pipelineopengl.h>
-#include <render/OpenGL/textureopengl.h>
 #include <render/buffer.h>
 #include <render/commandqueue.h>
+#include <render/pipeline.h>
 #include <render/renderinstance.h>
 #include <render/texture.h>
 #include <render/vertexarrayobject.h>
@@ -26,6 +25,7 @@
 #include "../../extern/jo_gif/jo_gif.cpp"
 #include "../../extern/RectangleBinPack/SkylineBinPack.h"
 #include <misc/enablewarn.h>
+#include <render/OpenGL/bufferopengl.h>
 // clang-format on
 
 #if defined(WIN32) || defined(_WIN32)
@@ -101,6 +101,25 @@ namespace Render
     CommandQueue* mainCommandQueue = nullptr;
     VertexArrayObject* vertexArrayObject = nullptr;
     Pipeline* drawLevelPipeline = nullptr;
+    Buffer* drawLevelVertexUniformBuffer = nullptr;
+    DescriptorSet* drawLevelDescriptorSet = nullptr;
+
+    struct DrawLevelUniforms
+    {
+        struct Vertex
+        {
+            float screenSize[2];
+
+            float _pad[2];
+        } vertex;
+
+        struct Fragment
+        {
+            float atlasSize[2];
+
+            float _pad[2];
+        } fragment;
+    };
 
     DrawLevelCache drawLevelCache = DrawLevelCache(2000);
     std::string windowTitle;
@@ -123,7 +142,7 @@ namespace Render
 
         SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
         screen = SDL_CreateWindow(title.c_str(), 20, 20, WIDTH, HEIGHT, flags);
-        if (screen == NULL)
+        if (screen == nullptr)
             printf("Could not create window: %s\n", SDL_GetError());
 
         renderInstance = RenderInstance::createRenderInstance(RenderInstance::Type::OpenGL, *screen);
@@ -134,9 +153,23 @@ namespace Render
         drawLevelPipelineSpec.vertexLayouts = {SpriteVertexMain::layout(), SpriteVertexPerInstance::layout()};
         drawLevelPipelineSpec.vertexShaderPath = Misc::getResourcesPath().str() + "/shaders/basic.vert";
         drawLevelPipelineSpec.fragmentShaderPath = Misc::getResourcesPath().str() + "/shaders/basic.frag";
+        drawLevelPipelineSpec.descriptorSetSpec = {{
+            {DescriptorType::UniformBuffer, "vertexUniforms"},
+            {DescriptorType::UniformBuffer, "fragmentUniforms"},
+            {DescriptorType::Texture, "tex"},
+        }};
 
         drawLevelPipeline = renderInstance->createPipeline(drawLevelPipelineSpec).release();
         vertexArrayObject = renderInstance->createVertexArrayObject({0, 0}, drawLevelPipelineSpec.vertexLayouts, 0).release();
+        drawLevelVertexUniformBuffer = renderInstance->createBuffer(sizeof(DrawLevelUniforms)).release();
+        drawLevelDescriptorSet = renderInstance->createDescriptorSet(drawLevelPipelineSpec.descriptorSetSpec).release();
+        atlasTexture = std::make_unique<AtlasTexture>(*renderInstance, *mainCommandQueue);
+
+        drawLevelDescriptorSet->updateItems({
+            {0, BufferSlice{drawLevelVertexUniformBuffer, offsetof(DrawLevelUniforms, vertex), sizeof(DrawLevelUniforms::Vertex)}},
+            {1, BufferSlice{drawLevelVertexUniformBuffer, offsetof(DrawLevelUniforms, fragment), sizeof(DrawLevelUniforms::Fragment)}},
+            {2, &atlasTexture->getTextureArray()},
+        });
 
         // clang-format off
         SpriteVertexMain baseVertices[] =
@@ -150,8 +183,6 @@ namespace Render
         };
         // clang-format on
         vertexArrayObject->getVertexBuffer(0)->setData(baseVertices, sizeof(baseVertices));
-
-        atlasTexture = std::make_unique<AtlasTexture>(*renderInstance, *mainCommandQueue);
 
         // Update screen with/height, as starting full screen window in
         // Windows does not trigger a SDL_WINDOWEVENT_RESIZED event.
@@ -178,6 +209,8 @@ namespace Render
     void quit()
     {
         atlasTexture.reset();
+        delete drawLevelDescriptorSet;
+        delete drawLevelVertexUniformBuffer;
         delete vertexArrayObject;
         delete drawLevelPipeline;
         delete mainCommandQueue;
@@ -592,23 +625,20 @@ namespace Render
 
     static void drawCachedLevel()
     {
-        ScopedBindGL pipelineBind(safe_downcast<PipelineOpenGL*>(drawLevelPipeline));
-
-        glUniform1i(glGetUniformLocation(safe_downcast<PipelineOpenGL*>(drawLevelPipeline)->mShaderProgramId, "tex"), 0);
-        glUniform2f(glGetUniformLocation(safe_downcast<PipelineOpenGL*>(drawLevelPipeline)->mShaderProgramId, "screenSize"), WIDTH, HEIGHT);
-        glUniform2f(glGetUniformLocation(safe_downcast<PipelineOpenGL*>(drawLevelPipeline)->mShaderProgramId, "atlasSize"),
-                    atlasTexture->getTextureArray().width(),
-                    atlasTexture->getTextureArray().height());
+        DrawLevelUniforms uniforms = {};
+        uniforms.vertex.screenSize[0] = WIDTH;
+        uniforms.vertex.screenSize[1] = HEIGHT;
+        uniforms.fragment.atlasSize[0] = atlasTexture->getTextureArray().width();
+        uniforms.fragment.atlasSize[1] = atlasTexture->getTextureArray().height();
+        drawLevelVertexUniformBuffer->setData(&uniforms, sizeof(DrawLevelUniforms));
 
         std::pair<void*, size_t> instanceData = drawLevelCache.getData();
         vertexArrayObject->getVertexBuffer(1)->setData(instanceData.first, instanceData.second);
 
-        glActiveTexture(GL_TEXTURE0);
-        ScopedBindGL texBinder(safe_downcast<TextureOpenGL&>(atlasTexture->getTextureArray()));
-
         Bindings bindings;
         bindings.vao = vertexArrayObject;
         bindings.pipeline = drawLevelPipeline;
+        bindings.descriptorSet = drawLevelDescriptorSet;
 
         // Draw the whole level in one batched operation.
         mainCommandQueue->cmdDrawInstances(0, 6, drawLevelCache.instanceCount(), bindings);

@@ -24,9 +24,9 @@ namespace Render
 
                 // The maxLength includes the NUL character
                 std::vector<GLchar> errorLog(maxLength);
-                glGetShaderInfoLog(shaderId, maxLength, &maxLength, &errorLog[0]);
+                glGetShaderInfoLog(shaderId, maxLength, &maxLength, errorLog.data());
 
-                message_and_abort(errorLog.data());
+                message_and_abort_fmt("Shader compile error: %s\n", errorLog.data());
             }
 
             return shaderId;
@@ -42,7 +42,33 @@ namespace Render
 
         GLint status;
         glGetProgramiv(mShaderProgramId, GL_LINK_STATUS, &status);
-        release_assert(status == GL_TRUE);
+        if (status != GL_TRUE)
+        {
+            GLint maxLength = 0;
+            glGetProgramiv(mShaderProgramId, GL_INFO_LOG_LENGTH, &maxLength);
+
+            // The maxLength includes the NUL character
+            std::vector<GLchar> errorLog(maxLength);
+            glGetProgramInfoLog(mShaderProgramId, maxLength, &maxLength, errorLog.data());
+
+            message_and_abort_fmt("Shader link error: %s\n", errorLog.data());
+        }
+
+        mUniformLocations.resize(mSpec.descriptorSetSpec.items.size());
+        for (uint32_t bindingIndex = 0; bindingIndex < uint32_t(mSpec.descriptorSetSpec.items.size()); bindingIndex++)
+        {
+            const DescriptorSetSpec::Item& item = mSpec.descriptorSetSpec.items[bindingIndex];
+
+            switch (item.type)
+            {
+                case DescriptorType::UniformBuffer:
+                    mUniformLocations[bindingIndex] = glGetUniformBlockIndex(mShaderProgramId, item.glName.c_str());
+                    break;
+                case DescriptorType::Texture:
+                    mUniformLocations[bindingIndex] = glGetUniformLocation(mShaderProgramId, item.glName.c_str());
+                    break;
+            }
+        }
     }
 
     PipelineOpenGL::~PipelineOpenGL()
@@ -56,4 +82,10 @@ namespace Render
 
     void PipelineOpenGL::bind(std::optional<GLenum>) { glUseProgram(mShaderProgramId); }
     void PipelineOpenGL::unbind(std::optional<GLenum>) { glUseProgram(0); }
+
+    GLuint PipelineOpenGL::getUniformLocation(uint32_t bindingIndex) const
+    {
+        debug_assert(mUniformLocations[bindingIndex] != std::numeric_limits<GLuint>::max());
+        return mUniformLocations[bindingIndex];
+    }
 }

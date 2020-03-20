@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <render/OpenGL/scopedbindgl.h>
 #include <render/pipeline.h>
+#include <unordered_map>
 
 namespace Render
 {
@@ -19,9 +20,12 @@ namespace Render
         void bind(std::optional<GLenum> binding) override;
         void unbind(std::optional<GLenum> binding) override;
 
+        GLuint getUniformLocation(uint32_t bindingIndex) const;
+
     private:
         GLuint mVertexShaderId = 0;
         GLuint mFragmentShaderId = 0;
+        std::vector<GLuint> mUniformLocations;
 
     public:
         GLuint mShaderProgramId = 0;

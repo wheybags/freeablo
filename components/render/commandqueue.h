@@ -9,11 +9,13 @@ namespace Render
     class VertexArrayObject;
     class Pipeline;
     class RenderInstance;
+    class DescriptorSet;
 
     struct Bindings
     {
         Pipeline* pipeline = nullptr;
         VertexArrayObject* vao = nullptr;
+        DescriptorSet* descriptorSet = nullptr;
 
         void assertBindingsCorrect();
     };

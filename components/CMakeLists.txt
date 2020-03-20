@@ -105,7 +105,11 @@ set(RenderFiles
     render/OpenGL/textureopengl.h
     render/color.h
     render/OpenGL/pipelineopengl.cpp
-    render/OpenGL/pipelineopengl.h)
+    render/OpenGL/pipelineopengl.h
+    render/descriptorset.h
+    render/descriptorset.cpp
+    render/OpenGL/descriptorsetopengl.cpp
+    render/OpenGL/descriptorsetopengl.h)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

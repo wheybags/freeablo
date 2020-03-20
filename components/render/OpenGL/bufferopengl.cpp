@@ -15,7 +15,7 @@ namespace Render
         // Will do this once we have batch-splitting implemented.
 
         ScopedBindGL thisBind(this, GL_COPY_WRITE_BUFFER);
-        glBufferData(GL_COPY_WRITE_BUFFER, dataSizeInBytes, data, GL_STATIC_DRAW);
+        glBufferData(GL_COPY_WRITE_BUFFER, dataSizeInBytes, data, GL_DYNAMIC_DRAW);
     }
 
     void BufferOpenGL::bind(std::optional<GLenum> binding)

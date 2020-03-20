@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <render/OpenGL/commandqueueopengl.h>
+#include <render/OpenGL/descriptorsetopengl.h>
 #include <render/OpenGL/pipelineopengl.h>
 #include <render/OpenGL/textureopengl.h>
 #include <render/OpenGL/vertexarrayobjectopengl.h>
@@ -48,8 +49,42 @@ namespace Render
     {
         super::cmdDrawInstances(firstVertex, vertexCount, instanceCount, bindings);
 
-        ScopedBindGL vaoBind(safe_downcast<VertexArrayObjectOpenGL*>(bindings.vao));
-        ScopedBindGL pipelineBind(safe_downcast<PipelineOpenGL*>(bindings.pipeline));
+        auto pipeline = safe_downcast<PipelineOpenGL*>(bindings.pipeline);
+        auto vao = safe_downcast<VertexArrayObjectOpenGL*>(bindings.vao);
+
+        ScopedBindGL vaoBind(vao);
+        ScopedBindGL pipelineBind(pipeline);
+
+        if (bindings.descriptorSet)
+        {
+            debug_assert(pipeline->mSpec.descriptorSetSpec == bindings.descriptorSet->getSpec());
+
+            for (uint32_t bindingIndex = 0; bindingIndex < bindings.descriptorSet->size(); bindingIndex++)
+            {
+                const DescriptorSet::Item& item = safe_downcast<DescriptorSetOpenGL*>(bindings.descriptorSet)->getItem(bindingIndex);
+
+                switch (bindings.descriptorSet->getSpec().items[item.bindingIndex].type)
+                {
+                    case DescriptorType::Texture:
+                    {
+                        auto texture = safe_downcast<TextureOpenGL*>(std::get<Texture*>(item.item));
+                        glActiveTexture(GL_TEXTURE0 + pipeline->getUniformLocation(bindingIndex));
+                        texture->bind(std::nullopt);
+                        break;
+                    }
+                    case DescriptorType::UniformBuffer:
+                    {
+                        auto bufferSlice = std::get<BufferSlice>(item.item);
+                        auto buffer = safe_downcast<BufferOpenGL*>(bufferSlice.buffer);
+
+                        GLuint uniformBlockIndex = pipeline->getUniformLocation(bindingIndex);
+                        glUniformBlockBinding(pipeline->mShaderProgramId, uniformBlockIndex, bindingIndex);
+                        glBindBufferRange(GL_UNIFORM_BUFFER, bindingIndex, buffer->getId(), bufferSlice.offset, bufferSlice.length);
+                    }
+                }
+            }
+        }
+
         glDrawArraysInstanced(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
     }
 

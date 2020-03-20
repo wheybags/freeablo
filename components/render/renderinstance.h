@@ -8,12 +8,8 @@ struct SDL_Window;
 
 namespace Render
 {
-    //    class DescriptorSet
-    //    {
-    //    public:
-    //        virtual ~DescriptorSet() {}
-    //    };
-
+    class DescriptorSet;
+    class DescriptorSetSpec;
     class Pipeline;
     struct PipelineSpec;
     class Buffer;
@@ -29,6 +25,7 @@ namespace Render
         explicit RenderInstance(SDL_Window& window) : mWindow(window) {}
         virtual ~RenderInstance() = default;
 
+        virtual std::unique_ptr<DescriptorSet> createDescriptorSet(DescriptorSetSpec spec) = 0;
         virtual std::unique_ptr<Pipeline> createPipeline(const PipelineSpec& spec) = 0;
         virtual std::unique_ptr<Texture> createTexture(const BaseTextureInfo& info) = 0;
         virtual std::unique_ptr<Buffer> createBuffer(size_t sizeInBytes) = 0;

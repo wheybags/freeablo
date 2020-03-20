@@ -1,14 +1,15 @@
 #pragma once
 #include <filesystem/path.h>
 #include <misc/misc.h>
+#include <render/descriptorset.h>
 #include <render/vertexlayout.h>
-
 #include <utility>
 
 namespace Render
 {
     struct PipelineSpec
     {
+        DescriptorSetSpec descriptorSetSpec;
         std::vector<NonNullConstPtr<VertexLayout>> vertexLayouts;
         filesystem::path vertexShaderPath;
         filesystem::path fragmentShaderPath;

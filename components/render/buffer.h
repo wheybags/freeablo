@@ -6,7 +6,8 @@ namespace Render
     class Buffer
     {
     public:
-        Buffer(size_t sizeInBytes) : mSizeInBytes(sizeInBytes) {}
+        Buffer(Buffer&) = delete;
+        explicit Buffer(size_t sizeInBytes) : mSizeInBytes(sizeInBytes) {}
 
         virtual ~Buffer() = default;
 
@@ -16,5 +17,12 @@ namespace Render
 
     protected:
         size_t mSizeInBytes = 0;
+    };
+
+    struct BufferSlice
+    {
+        Buffer* buffer;
+        size_t offset;
+        size_t length;
     };
 }

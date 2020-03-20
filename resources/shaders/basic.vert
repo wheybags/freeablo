@@ -7,14 +7,20 @@ layout(location = 3) in vec2 v_imageOffset;
 layout(location = 4) in vec4 v_hoverColor;
 layout(location = 5) in vec3 v_atlasOffset;
 
+layout(std140) uniform vertexUniforms
+{
+    vec2 screenSize;
+
+    vec2 _pad;
+};
+
 out vec2 uv;
 flat out vec2 imageSize;
 flat out vec4 hoverColor;
 flat out vec3 atlasOffset;
 
-uniform vec2 screenSize;
-
-void main() {
+void main()
+{
     uv = v_uv;
     imageSize = v_imageSize;
     hoverColor = v_hoverColor;
