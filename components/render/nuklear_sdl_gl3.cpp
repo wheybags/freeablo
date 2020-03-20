@@ -1,7 +1,6 @@
 #include "nuklear_sdl_gl3.h"
 #include "../../apps/freeablo/fagui/guimanager.h"
 #include <cstring>
-#include <glad/glad.h>
 #include <misc/assert.h>
 #include <misc/misc.h>
 #include <render/OpenGL/pipelineopengl.h>
@@ -93,9 +92,6 @@ void nk_sdl_render_dump(
 
     scale.x = (float)display_width / (float)width;
     scale.y = (float)display_height / (float)height;
-
-    // setup global state
-    glViewport(0, 0, display_width, display_height);
 
     nk_gl_device& dev = dump.getDevice();
 

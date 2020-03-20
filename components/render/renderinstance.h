@@ -34,6 +34,8 @@ namespace Render
                                                                            size_t indexBufferSizeInElements) = 0;
         virtual std::unique_ptr<CommandQueue> createCommandQueue() = 0;
 
+        virtual void onWindowResized(int32_t width, int32_t height) = 0;
+
         enum class Type
         {
             OpenGL

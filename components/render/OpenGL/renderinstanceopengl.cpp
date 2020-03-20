@@ -93,4 +93,6 @@ namespace Render
     }
 
     std::unique_ptr<CommandQueue> RenderInstanceOpenGL::createCommandQueue() { return std::unique_ptr<CommandQueue>(new CommandQueueOpenGL(*this)); }
+
+    void RenderInstanceOpenGL::onWindowResized(int32_t width, int32_t height) { glViewport(0, 0, width, height); }
 }

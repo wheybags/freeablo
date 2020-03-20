@@ -24,7 +24,6 @@
 #include "../../extern/jo_gif/jo_gif.cpp"
 #include "../../extern/RectangleBinPack/SkylineBinPack.h"
 #include <misc/enablewarn.h>
-#include <render/OpenGL/bufferopengl.h>
 // clang-format on
 
 #if defined(WIN32) || defined(_WIN32)
@@ -54,7 +53,7 @@ namespace Render
     public:
         DrawLevelCache(size_t initSize) { mInstanceData.resize(initSize); }
 
-        void addSprite(GLuint sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
+        void addSprite(uint32_t sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
         {
             auto& lookupMap = atlasTexture->getLookupMap();
             auto& atlasEntry = lookupMap.at(sprite);
@@ -226,6 +225,8 @@ namespace Render
         WIDTH = w;
         HEIGHT = h;
         resized = true;
+
+        renderInstance->onWindowResized(WIDTH, HEIGHT);
     }
 
     RenderSettings getWindowSize()
@@ -238,7 +239,7 @@ namespace Render
         return settings;
     }
 
-    GLuint getGLTexFromSurface(SDL_Surface* surf)
+    uint32_t getGLTexFromSurface(SDL_Surface* surf)
     {
         bool validFormat = true;
         if (surf->format->BitsPerPixel != 24 && surf->format->BitsPerPixel != 32)
@@ -256,7 +257,7 @@ namespace Render
 
         debug_assert(surf->pitch == 4 * surf->w);
 
-        GLuint id = atlasTexture->addTexture(surf->w, surf->h, surf->pixels);
+        uint32_t id = atlasTexture->addTexture(surf->w, surf->h, surf->pixels);
 
         if (!validFormat)
             SDL_FreeSurface(surf);
@@ -616,7 +617,7 @@ namespace Render
         mainCommandQueue->begin();
     }
 
-    void drawSprite(GLuint sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
+    void drawSprite(uint32_t sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
     {
         // Add to level cache, will be drawn in a batch later.
         drawLevelCache.addSprite(sprite, x, y, highlightColor);
@@ -654,7 +655,7 @@ namespace Render
 
     void drawSprite(const Sprite& sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
     {
-        drawSprite((GLuint)(intptr_t)sprite, x, y, highlightColor);
+        drawSprite((uint32_t)(intptr_t)sprite, x, y, highlightColor);
     }
 
     constexpr auto tileHeight = 32;
@@ -817,11 +818,7 @@ namespace Render
         h = atlasEntry.mHeight;
     }
 
-    void clear(int r, int g, int b)
-    {
-        glClearColor(((float)r) / 255.0, ((float)g) / 255.0, ((float)b) / 255.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-    }
+    void clear(int r, int g, int b) { mainCommandQueue->cmdClearCurrentFramebuffer(Color(float(r) / 255.0f, float(g) / 255.0f, float(b) / 255.0f, 1.0f)); }
 
 #define BPP 4
 #define DEPTH 32

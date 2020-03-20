@@ -16,6 +16,7 @@ namespace Render
         void cmdDraw(size_t firstVertex, size_t vertexCount, Bindings& bindings) override;
         void cmdDrawIndexed(size_t firstIndex, size_t vertexCount, Bindings& bindings) override;
         void cmdDrawInstances(size_t firstVertex, size_t vertexCount, size_t instanceCount, Bindings& bindings) override;
+        void cmdClearCurrentFramebuffer(Color color) override;
 
         void cmdPresent() override;
 

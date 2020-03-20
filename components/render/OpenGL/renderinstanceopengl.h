@@ -21,6 +21,8 @@ namespace Render
                                                                    size_t indexBufferSizeInElements) override;
         std::unique_ptr<CommandQueue> createCommandQueue() override;
 
+        void onWindowResized(int32_t width, int32_t height) override;
+
     private:
         static void setupGlobalState();
 

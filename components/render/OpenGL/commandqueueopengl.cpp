@@ -87,6 +87,12 @@ namespace Render
         glDrawArraysInstanced(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
     }
 
+    void CommandQueueOpenGL::cmdClearCurrentFramebuffer(Color color)
+    {
+        glClearColor(color.r, color.g, color.b, color.a);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+
     void CommandQueueOpenGL::cmdPresent() { SDL_GL_SwapWindow(&getInstance().mWindow); }
 
     CommandQueueOpenGL::DrawScopedBinderGL CommandQueueOpenGL::setupState(Bindings& bindings)
