@@ -3,7 +3,6 @@
 #include "texture.h"
 #include <memory>
 #include <misc/assert.h>
-#include <render/OpenGL/textureopengl.h>
 #include <render/commandqueue.h>
 #include <render/renderinstance.h>
 
@@ -16,8 +15,8 @@ namespace Render
     {
         // TODO: dynamic configuration of atlas size
 
-        static constexpr GLint requiredTextureSize = 8192;
-        static constexpr GLint requiredTextureLayers = 2;
+        static constexpr int32_t requiredTextureSize = 8192;
+        static constexpr int32_t requiredTextureLayers = 2;
 
         BaseTextureInfo textureInfo{};
         textureInfo.width = requiredTextureSize;
@@ -58,8 +57,7 @@ namespace Render
             release_assert(layer != -1);
         }
 
-        ScopedBindGL texBinder(safe_downcast<TextureOpenGL*>(mTextureArray.get()));
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, dataDestinationRect.x, dataDestinationRect.y, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        mTextureArray->updateImageData(dataDestinationRect.x, dataDestinationRect.y, layer, width, height, reinterpret_cast<const uint8_t*>(data));
 
         auto id = mNextTextureId++;
         mLookupMap[id] = AtlasTextureEntry(dataDestinationRect.x, dataDestinationRect.y, layer, width, height);
