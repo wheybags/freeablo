@@ -34,7 +34,7 @@ namespace GuiUniforms
     };
 
     using CpuBufferType = Render::TypedAlignedCpuBuffer<Vertex, Fragment>;
-};
+}
 
 struct nk_gl_device
 {

@@ -7,6 +7,7 @@ namespace Render
     class BindableGL
     {
     public:
+        virtual ~BindableGL() = default;
         virtual void bind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) = 0;
         virtual void unbind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) = 0;
     };

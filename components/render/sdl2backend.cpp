@@ -108,7 +108,7 @@ namespace Render
         };
 
         using CpuBufferType = TypedAlignedCpuBuffer<Vertex, Fragment>;
-    };
+    }
 
     int32_t WIDTH = 1280;
     int32_t HEIGHT = 960;
