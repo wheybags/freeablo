@@ -1,18 +1,24 @@
-#include "render.h"
-#include <SDL.h>
-#include <complex>
-#include <iostream>
-//#include <SDL_opengl.h>
 #include "../cel/celfile.h"
-#include "../cel/celframe.h"
 #include "../level/level.h"
 #include "atlastexture.h"
-#include "sdl_gl_funcs.h"
+#include "nuklear_sdl_gl3.h"
+#include "render.h"
+#include "vertextypes.h"
+#include <SDL.h>
 #include <SDL_image.h>
+#include <fa_nuklear.h>
 #include <faio/fafileobject.h>
+#include <iostream>
 #include <misc/assert.h>
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
+#include <render/alignedcpubuffer.h>
+#include <render/buffer.h>
+#include <render/commandqueue.h>
+#include <render/pipeline.h>
+#include <render/renderinstance.h>
+#include <render/texture.h>
+#include <render/vertexarrayobject.h>
 
 // clang-format off
 #include <misc/disablewarn.h>
@@ -21,28 +27,12 @@
 #include <misc/enablewarn.h>
 // clang-format on
 
-/*#define NK_INCLUDE_FIXED_TYPES
-#define NK_INCLUDE_STANDARD_IO
-#define NK_INCLUDE_STANDARD_VARARGS
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
-#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#define NK_INCLUDE_FONT_BAKING
-#define NK_INCLUDE_DEFAULT_FONT
-#define NK_IMPLEMENTATION*/
-#include <fa_nuklear.h>
-
-#define NK_SDL_GL3_IMPLEMENTATION
-#include "nuklear_sdl_gl3.h"
-
-#define MAX_VERTEX_MEMORY 512 * 1024
-#define MAX_ELEMENT_MEMORY 128 * 1024
-
 #if defined(WIN32) || defined(_WIN32)
 extern "C" {
-__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) unsigned NvOptimusEnablement = 0x00000001;
 }
 extern "C" {
-__declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
+__declspec(dllexport) unsigned AmdPowerXpressRequestHighPerformance = 0x00000001;
 }
 #else
 extern "C" {
@@ -62,65 +52,76 @@ namespace Render
     class DrawLevelCache
     {
     public:
-        DrawLevelCache(size_t initSize)
-        {
-            mImageOffset.reserve(2 * initSize);
-            mHoverColor.reserve(4 * initSize);
-            mImageSize.reserve(2 * initSize);
-            mAtlasOffset.reserve(3 * initSize);
-        }
+        DrawLevelCache(size_t initSize) { mInstanceData.resize(initSize); }
 
-        void addSprite(GLuint sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
+        void addSprite(uint32_t sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
         {
             auto& lookupMap = atlasTexture->getLookupMap();
             auto& atlasEntry = lookupMap.at(sprite);
 
-            mImageSize.push_back(atlasEntry.mWidth);
-            mImageSize.push_back(atlasEntry.mHeight);
-            mAtlasOffset.push_back(atlasEntry.mX);
-            mAtlasOffset.push_back(atlasEntry.mY);
-            mAtlasOffset.push_back(atlasEntry.mLayer);
-            mImageOffset.push_back(x);
-            mImageOffset.push_back(y);
+            SpriteVertexPerInstance vertexData = {};
+
+            vertexData.v_imageSize[0] = atlasEntry.mWidth;
+            vertexData.v_imageSize[1] = atlasEntry.mHeight;
+
+            vertexData.v_atlasOffset[0] = atlasEntry.mX;
+            vertexData.v_atlasOffset[1] = atlasEntry.mY;
+            vertexData.v_atlasOffset[2] = atlasEntry.mLayer;
+
+            vertexData.v_imageOffset[0] = x;
+            vertexData.v_imageOffset[1] = y;
 
             if (auto c = highlightColor)
             {
-                mHoverColor.push_back(c->r);
-                mHoverColor.push_back(c->g);
-                mHoverColor.push_back(c->b);
-                mHoverColor.push_back(255);
+                vertexData.v_hoverColor[0] = c->r;
+                vertexData.v_hoverColor[1] = c->g;
+                vertexData.v_hoverColor[2] = c->b;
+                vertexData.v_hoverColor[3] = 255;
             }
-            else
-            {
-                mHoverColor.push_back(0.0);
-                mHoverColor.push_back(0.0);
-                mHoverColor.push_back(0.0);
-                mHoverColor.push_back(0.0);
-            }
+
+            mInstanceData.push_back(vertexData);
         }
 
-        size_t size() const { return mImageOffset.size() / 2; }
+        size_t instanceCount() const { return mInstanceData.size(); }
 
-        void clear()
-        {
-            mImageOffset.clear();
-            mHoverColor.clear();
-            mImageSize.clear();
-            mAtlasOffset.clear();
-        }
+        std::pair<void*, size_t> getData() { return {mInstanceData.data(), mInstanceData.size() * sizeof(SpriteVertexPerInstance)}; }
 
-        std::vector<GLshort> mImageOffset;
-        std::vector<GLubyte> mHoverColor;
-        std::vector<GLushort> mImageSize;
-        std::vector<GLushort> mAtlasOffset;
+        void clear() { mInstanceData.clear(); }
+
+        std::vector<SpriteVertexPerInstance> mInstanceData;
     };
+
+    namespace DrawLevelUniforms
+    {
+        struct Vertex
+        {
+            float screenSize[2];
+
+            float _pad[2];
+        };
+
+        struct Fragment
+        {
+            float atlasSize[2];
+
+            float _pad[2];
+        };
+
+        using CpuBufferType = TypedAlignedCpuBuffer<Vertex, Fragment>;
+    }
 
     int32_t WIDTH = 1280;
     int32_t HEIGHT = 960;
 
     SDL_Window* screen;
     // SDL_Renderer* renderer;
-    SDL_GLContext glContext;
+    RenderInstance* renderInstance = nullptr;
+    CommandQueue* mainCommandQueue = nullptr;
+    VertexArrayObject* vertexArrayObject = nullptr;
+    Pipeline* drawLevelPipeline = nullptr;
+    Buffer* drawLevelUniformBuffer = nullptr;
+    DrawLevelUniforms::CpuBufferType* drawLevelUniformCpuBuffer = nullptr;
+    DescriptorSet* drawLevelDescriptorSet = nullptr;
 
     DrawLevelCache drawLevelCache = DrawLevelCache(2000);
     std::string windowTitle;
@@ -143,59 +144,60 @@ namespace Render
 
         SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
         screen = SDL_CreateWindow(title.c_str(), 20, 20, WIDTH, HEIGHT, flags);
-        if (screen == NULL)
+        if (screen == nullptr)
             printf("Could not create window: %s\n", SDL_GetError());
+
+        renderInstance = RenderInstance::createRenderInstance(RenderInstance::Type::OpenGL, *screen);
+        mainCommandQueue = renderInstance->createCommandQueue().release();
+        mainCommandQueue->begin();
+
+        PipelineSpec drawLevelPipelineSpec;
+        drawLevelPipelineSpec.vertexLayouts = {SpriteVertexMain::layout(), SpriteVertexPerInstance::layout()};
+        drawLevelPipelineSpec.vertexShaderPath = Misc::getResourcesPath().str() + "/shaders/basic.vert";
+        drawLevelPipelineSpec.fragmentShaderPath = Misc::getResourcesPath().str() + "/shaders/basic.frag";
+        drawLevelPipelineSpec.descriptorSetSpec = {{
+            {DescriptorType::UniformBuffer, "vertexUniforms"},
+            {DescriptorType::UniformBuffer, "fragmentUniforms"},
+            {DescriptorType::Texture, "tex"},
+        }};
+
+        drawLevelPipeline = renderInstance->createPipeline(drawLevelPipelineSpec).release();
+        vertexArrayObject = renderInstance->createVertexArrayObject({0, 0}, drawLevelPipelineSpec.vertexLayouts, 0).release();
+
+        drawLevelUniformCpuBuffer = new DrawLevelUniforms::CpuBufferType(renderInstance->getUniformBufferOffsetAlignment());
+
+        drawLevelUniformBuffer = renderInstance->createBuffer(drawLevelUniformCpuBuffer->getSizeInBytes()).release();
+        drawLevelDescriptorSet = renderInstance->createDescriptorSet(drawLevelPipelineSpec.descriptorSetSpec).release();
+        atlasTexture = std::make_unique<AtlasTexture>(*renderInstance, *mainCommandQueue);
+
+        // clang-format off
+
+        drawLevelDescriptorSet->updateItems({
+            {0, BufferSlice{drawLevelUniformBuffer, drawLevelUniformCpuBuffer->getMemberOffset<DrawLevelUniforms::Vertex>(), sizeof(DrawLevelUniforms::Vertex)}},
+            {1, BufferSlice{drawLevelUniformBuffer, drawLevelUniformCpuBuffer->getMemberOffset<DrawLevelUniforms::Fragment>(), sizeof(DrawLevelUniforms::Fragment)}},
+            {2, &atlasTexture->getTextureArray()},
+        });
+
+        SpriteVertexMain baseVertices[] =
+        {
+            {{0, 0, 0},  {0, 0}},
+            {{1, 0, 0},  {1, 0}},
+            {{1, 1, 0},  {1, 1}},
+            {{0, 0, 0},  {0, 0}},
+            {{1, 1, 0},  {1, 1}},
+            {{0, 1, 0},  {0, 1}}
+        };
+        // clang-format on
+        vertexArrayObject->getVertexBuffer(0)->setData(baseVertices, sizeof(baseVertices));
 
         // Update screen with/height, as starting full screen window in
         // Windows does not trigger a SDL_WINDOWEVENT_RESIZED event.
         SDL_GetWindowSize(screen, &WIDTH, &HEIGHT);
 
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-        glContext = SDL_GL_CreateContext(screen);
-
-#ifdef DEBUG_ATLAS_TEXTURE
-        // Ensure VSYNC is disabled to get actual FPS.
-        SDL_GL_SetSwapInterval(0);
-#endif
-
-        // Check opengl version is at least 3.3.
-        const GLubyte* glVersion(glGetString(GL_VERSION));
-        int major = glVersion[0] - '0';
-        int minor = glVersion[2] - '0';
-        if (major < 3 || (major == 3 && minor < 3))
-            message_and_abort_fmt("ERROR: Minimum OpenGL version is 3.3. Your current version is %d.%d\n", major, minor);
-
-        /*int oglIdx = -1;
-        int nRD = SDL_GetNumRenderDrivers();
-        for (int i = 0; i < nRD; i++)
-        {
-            SDL_RendererInfo info;
-            if (!SDL_GetRenderDriverInfo(i, &info))
-            {
-                if (!strcmp(info.name, "opengl"))
-                {
-                    oglIdx = i;
-                }
-            }
-        }*/
-
-        // renderer = SDL_CreateRenderer(screen, oglIdx, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-        initGlFuncs();
-
-        glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
-
-        atlasTexture = std::make_unique<AtlasTexture>();
-
         if (nk_ctx)
         {
-            memset(&nuklearGraphics, 0, sizeof(nuklearGraphics));
-            nk_sdl_device_create(nuklearGraphics.dev);
+            nuklearGraphics = {};
+            nk_sdl_device_create(nuklearGraphics.dev, *renderInstance);
         }
     }
 
@@ -212,8 +214,14 @@ namespace Render
 
     void quit()
     {
-        atlasTexture->free();
-        SDL_GL_DeleteContext(glContext);
+        atlasTexture.reset();
+        delete drawLevelUniformCpuBuffer;
+        delete drawLevelDescriptorSet;
+        delete drawLevelUniformBuffer;
+        delete vertexArrayObject;
+        delete drawLevelPipeline;
+        delete mainCommandQueue;
+        delete renderInstance;
         // SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(screen);
         SDL_Quit();
@@ -226,6 +234,8 @@ namespace Render
         WIDTH = w;
         HEIGHT = h;
         resized = true;
+
+        renderInstance->onWindowResized(WIDTH, HEIGHT);
     }
 
     RenderSettings getWindowSize()
@@ -238,7 +248,7 @@ namespace Render
         return settings;
     }
 
-    GLuint getGLTexFromSurface(SDL_Surface* surf)
+    uint32_t getGLTexFromSurface(SDL_Surface* surf)
     {
         bool validFormat = true;
         if (surf->format->BitsPerPixel != 24 && surf->format->BitsPerPixel != 32)
@@ -256,7 +266,7 @@ namespace Render
 
         debug_assert(surf->pitch == 4 * surf->w);
 
-        GLuint id = atlasTexture->addTexture(surf->w, surf->h, surf->pixels);
+        uint32_t id = atlasTexture->addTexture(surf->w, surf->h, surf->pixels);
 
         if (!validFormat)
             SDL_FreeSurface(surf);
@@ -264,17 +274,7 @@ namespace Render
         return id;
     }
 
-    void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache)
-    {
-        // IMPORTANT: `nk_sdl_render` modifies some global OpenGL state
-        // with blending, scissor, face culling, depth test and viewport and
-        // defaults everything back into a default state.
-        // Make sure to either a.) save and restore or b.) reset your own state after
-        // rendering the UI.
-        nk_sdl_render_dump(cache, dump, screen, *atlasTexture);
-
-        glEnable(GL_BLEND); // see above comment
-    }
+    void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache) { nk_sdl_render_dump(cache, dump, screen, *atlasTexture, *mainCommandQueue); }
 
     SDL_Surface* loadNonCelImage(const std::string& sourcePath, const std::string& extension)
     {
@@ -616,210 +616,17 @@ namespace Render
 
     bool once = false;
 
-    GLuint vao = 0;
-    GLuint shader_programme = 0;
-    GLuint texture = 0;
-
-    GLuint imageSize_vbo;
-    GLuint imageOffset_vbo;
-    GLuint hoverColor_vbo;
-    GLuint atlasOffset_vbo;
-
-    void deleteAllSprites() { atlasTexture->clear(); }
+    void deleteAllSprites() { atlasTexture->clear(*mainCommandQueue); }
 
     void draw()
     {
-        if (!once)
-        {
-
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            once = true;
-
-            std::string src = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/basic.vert");
-            const GLchar* srcPtr = src.c_str();
-
-            GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-            glShaderSource(vs, 1, &srcPtr, NULL);
-            glCompileShader(vs);
-
-            GLint isCompiled = 0;
-            glGetShaderiv(vs, GL_COMPILE_STATUS, &isCompiled);
-            if (isCompiled == GL_FALSE)
-            {
-                GLint maxLength = 0;
-                glGetShaderiv(vs, GL_INFO_LOG_LENGTH, &maxLength);
-
-                // The maxLength includes the NULL character
-                std::vector<GLchar> errorLog(maxLength);
-                glGetShaderInfoLog(vs, maxLength, &maxLength, &errorLog[0]);
-
-                std::cout << &errorLog[0] << std::endl;
-
-                // Provide the infolog in whatever manor you deem best.
-                // Exit with failure.
-                glDeleteShader(vs); // Don't leak the shader.
-                return;
-            }
-
-            src = Misc::StringUtils::readAsString(Misc::getResourcesPath().str() + "/shaders/basic.frag");
-            srcPtr = src.c_str();
-
-            GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-            glShaderSource(fs, 1, &srcPtr, NULL);
-            glCompileShader(fs);
-
-            glGetShaderiv(fs, GL_COMPILE_STATUS, &isCompiled);
-            if (isCompiled == GL_FALSE)
-            {
-                GLint maxLength = 0;
-                glGetShaderiv(fs, GL_INFO_LOG_LENGTH, &maxLength);
-
-                // The maxLength includes the NULL character
-                std::vector<GLchar> errorLog(maxLength);
-                glGetShaderInfoLog(fs, maxLength, &maxLength, &errorLog[0]);
-
-                std::cout << &errorLog[0] << std::endl;
-
-                // Provide the infolog in whatever manor you deem best.
-                // Exit with failure.
-                glDeleteShader(fs); // Don't leak the shader.
-                return;
-            }
-
-            shader_programme = glCreateProgram();
-            glAttachShader(shader_programme, fs);
-            glAttachShader(shader_programme, vs);
-            glLinkProgram(shader_programme);
-
-            GLint status;
-            glGetProgramiv(shader_programme, GL_LINK_STATUS, &status);
-            release_assert(status == GL_TRUE);
-
-            GL_CHECK_ERROR();
-
-            GLfloat points[] = {0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0};
-
-            GLfloat colours[] = {0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1};
-
-            glGenVertexArrays(1, &vao);
-            glBindVertexArray(vao);
-
-            GLint vertex_position_id, uv_id, imageSize_id, imageOffset_id, hoverColor_id, atlasOffset_id;
-            vertex_position_id = glGetAttribLocation(shader_programme, "vertex_position");
-            uv_id = glGetAttribLocation(shader_programme, "v_uv");
-            imageSize_id = glGetAttribLocation(shader_programme, "v_imageSize");
-            imageOffset_id = glGetAttribLocation(shader_programme, "v_imageOffset");
-            hoverColor_id = glGetAttribLocation(shader_programme, "v_hoverColor");
-            atlasOffset_id = glGetAttribLocation(shader_programme, "v_atlasOffset");
-
-            // Not 100% sure if this is portable but vertex array buffers seem to
-            // loop so only have to supply one set of points/colors. Increases
-            // performance by a reasonable amount so will leave like this unless
-            // there's problems (if problems could just append sets of points/colors
-            // to vectors in the DrawLevelCache when each sprite added).
-            GLuint vbo = 0;
-            glGenBuffers(1, &vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-            glVertexAttribPointer(vertex_position_id, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-            glEnableVertexAttribArray(vertex_position_id);
-
-            GLuint uvs_vbo = 0;
-            glGenBuffers(1, &uvs_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, uvs_vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(colours), colours, GL_STATIC_DRAW);
-            glVertexAttribPointer(uv_id, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-            glEnableVertexAttribArray(uv_id);
-
-            // Note: These VBOs use glVertexAttribDivisor(n, 1) which means they're
-            // only updated once per instance (instead of once per vertex).
-            glGenBuffers(1, &imageSize_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, imageSize_vbo);
-            glVertexAttribPointer(imageSize_id, 2, GL_UNSIGNED_SHORT, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(imageSize_id, 1);
-            glEnableVertexAttribArray(imageSize_id);
-
-            glGenBuffers(1, &imageOffset_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, imageOffset_vbo);
-            glVertexAttribPointer(imageOffset_id, 2, GL_SHORT, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(imageOffset_id, 1);
-            glEnableVertexAttribArray(imageOffset_id);
-
-            glGenBuffers(1, &hoverColor_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, hoverColor_vbo);
-            glVertexAttribPointer(hoverColor_id, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(hoverColor_id, 1);
-            glEnableVertexAttribArray(hoverColor_id);
-
-            glGenBuffers(1, &atlasOffset_vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, atlasOffset_vbo);
-            glVertexAttribPointer(atlasOffset_id, 3, GL_UNSIGNED_SHORT, GL_FALSE, 0, NULL);
-            glVertexAttribDivisor(atlasOffset_id, 1);
-            glEnableVertexAttribArray(atlasOffset_id);
-
-            GL_CHECK_ERROR();
-
-            /*SDL_Surface* surf = SDL_LoadBMP("E:\\tom.bmp");
-
-            SDL_Surface* s = createTransparentSurface(surf->w, surf->h);
-            SDL_BlitSurface(surf, NULL, s, NULL);
-
-            texture = getGLTexFromSurface(s);
-
-            SDL_FreeSurface(s);
-            SDL_FreeSurface(surf);*/
-        }
-
-        /*GLint loc = glGetUniformLocation(shader_programme, "width");
-        if (loc != -1)
-        {
-            glUniform1f(loc, WIDTH);
-        }
-        loc = glGetUniformLocation(shader_programme, "height");
-        if (loc != -1)
-        {
-            glUniform1f(loc, HEIGHT);
-        }
-
-        loc = glGetUniformLocation(shader_programme, "imgW");
-        if (loc != -1)
-        {
-            glUniform1f(loc, 150);
-        }
-        loc = glGetUniformLocation(shader_programme, "imgH");
-        if (loc != -1)
-        {
-            glUniform1f(loc, 100);
-        }
-
-        loc = glGetUniformLocation(shader_programme, "offsetX");
-        if (loc != -1)
-        {
-            glUniform1f(loc, 150);
-        }
-        loc = glGetUniformLocation(shader_programme, "offsetY");
-        if (loc != -1)
-        {
-            glUniform1f(loc, 100);
-        }
-
-        //glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glUseProgram(shader_programme);
-        glBindVertexArray(vao);
-        // draw points 0-3 from the currently bound VAO with current in-use shader
-        glDrawArrays(GL_TRIANGLES, 0, 6);*/
-
-        // drawAt(texture, 0, 0);
-
-        SDL_GL_SwapWindow(screen);
-        // SDL_RenderPresent(renderer);
+        mainCommandQueue->cmdPresent();
+        mainCommandQueue->end();
+        mainCommandQueue->submit();
+        mainCommandQueue->begin();
     }
 
-    void drawSprite(GLuint sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
+    void drawSprite(uint32_t sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
     {
         // Add to level cache, will be drawn in a batch later.
         drawLevelCache.addSprite(sprite, x, y, highlightColor);
@@ -827,34 +634,26 @@ namespace Render
 
     static void drawCachedLevel()
     {
-        glUseProgram(shader_programme);
+        DrawLevelUniforms::Vertex* vertexUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Vertex>();
+        vertexUniforms->screenSize[0] = WIDTH;
+        vertexUniforms->screenSize[1] = HEIGHT;
 
-        glUniform1i(glGetUniformLocation(shader_programme, "tex"), 0);
-        glUniform2f(glGetUniformLocation(shader_programme, "screenSize"), WIDTH, HEIGHT);
-        glUniform2f(glGetUniformLocation(shader_programme, "atlasSize"), atlasTexture->getTextureWidth(), atlasTexture->getTextureHeight());
+        DrawLevelUniforms::Fragment* fragmentUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Fragment>();
+        fragmentUniforms->atlasSize[0] = atlasTexture->getTextureArray().width();
+        fragmentUniforms->atlasSize[1] = atlasTexture->getTextureArray().height();
 
-        glBindVertexArray(vao);
+        drawLevelUniformBuffer->setData(drawLevelUniformCpuBuffer->data(), drawLevelUniformCpuBuffer->getSizeInBytes());
 
-        size_t spriteCount = drawLevelCache.size();
+        std::pair<void*, size_t> instanceData = drawLevelCache.getData();
+        vertexArrayObject->getVertexBuffer(1)->setData(instanceData.first, instanceData.second);
 
-        // Note: These VBOs use glVertexAttribDivisor(n, 1) which means they're
-        // only updated once per instance (instead of once per vertex).
-        glBindBuffer(GL_ARRAY_BUFFER, imageSize_vbo);
-        glBufferData(GL_ARRAY_BUFFER, drawLevelCache.mImageSize.size() * sizeof(drawLevelCache.mImageSize[0]), &drawLevelCache.mImageSize[0], GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, imageOffset_vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER, drawLevelCache.mImageOffset.size() * sizeof(drawLevelCache.mImageOffset[0]), &drawLevelCache.mImageOffset[0], GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, hoverColor_vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER, drawLevelCache.mHoverColor.size() * sizeof(drawLevelCache.mHoverColor[0]), &drawLevelCache.mHoverColor[0], GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, atlasOffset_vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER, drawLevelCache.mAtlasOffset.size() * sizeof(drawLevelCache.mAtlasOffset[0]), &drawLevelCache.mAtlasOffset[0], GL_STATIC_DRAW);
-
-        atlasTexture->bind();
+        Bindings bindings;
+        bindings.vao = vertexArrayObject;
+        bindings.pipeline = drawLevelPipeline;
+        bindings.descriptorSet = drawLevelDescriptorSet;
 
         // Draw the whole level in one batched operation.
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, spriteCount);
+        mainCommandQueue->cmdDrawInstances(0, 6, drawLevelCache.instanceCount(), bindings);
     }
 
     void handleEvents()
@@ -868,7 +667,7 @@ namespace Render
 
     void drawSprite(const Sprite& sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
     {
-        drawSprite((GLuint)(intptr_t)sprite, x, y, highlightColor);
+        drawSprite((uint32_t)(intptr_t)sprite, x, y, highlightColor);
     }
 
     constexpr auto tileHeight = 32;
@@ -1031,11 +830,7 @@ namespace Render
         h = atlasEntry.mHeight;
     }
 
-    void clear(int r, int g, int b)
-    {
-        glClearColor(((float)r) / 255.0, ((float)g) / 255.0, ((float)b) / 255.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-    }
+    void clear(int r, int g, int b) { mainCommandQueue->cmdClearCurrentFramebuffer(Color(float(r) / 255.0f, float(g) / 255.0f, float(b) / 255.0f, 1.0f)); }
 
 #define BPP 4
 #define DEPTH 32
@@ -1361,7 +1156,7 @@ namespace Render
         // Clear cached level data after drawing.
         drawLevelCache.clear();
 
-        GL_CHECK_ERROR();
+        //        GL_CHECK_ERROR();
 
 #ifdef DEBUG_ATLAS_TEXTURE
         static size_t loop = 0;

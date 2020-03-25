@@ -72,25 +72,53 @@ set(RenderFiles
     render/render.h
     render/levelobjects.h
     render/sdl2backend.cpp
-    render/sdl_gl_funcs.h
-    render/sdl_gl_funcs.cpp
     render/nuklear_sdl_gl3.cpp
     render/nuklear_sdl_gl3.h
     render/misc.h
     render/atlastexture.cpp
     render/atlastexture.h
+    render/OpenGL/vertexarrayobjectopengl.cpp
+    render/OpenGL/vertexarrayobjectopengl.h
+    render/OpenGL/renderinstanceopengl.cpp
+    render/OpenGL/renderinstanceopengl.h
+    render/renderinstance.cpp
+    render/renderinstance.h
+    render/vertexlayout.h
+    render/vertexlayout.cpp
     ../extern/RectangleBinPack/Rect.cpp
     ../extern/RectangleBinPack/Rect.h
     ../extern/RectangleBinPack/SkylineBinPack.cpp
     ../extern/RectangleBinPack/SkylineBinPack.h
-)
+    render/buffer.h
+    render/vertexarrayobject.h
+    render/vertextypes.h
+    render/OpenGL/scopedbindgl.h
+    render/OpenGL/bufferopengl.cpp
+    render/OpenGL/bufferopengl.h
+    render/pipeline.h
+    render/commandqueue.cpp
+    render/commandqueue.h
+    render/OpenGL/commandqueueopengl.cpp
+    render/OpenGL/commandqueueopengl.h
+    render/texture.h
+    render/OpenGL/textureopengl.cpp
+    render/OpenGL/textureopengl.h
+    render/color.h
+    render/OpenGL/pipelineopengl.cpp
+    render/OpenGL/pipelineopengl.h
+    render/descriptorset.h
+    render/descriptorset.cpp
+    render/OpenGL/descriptorsetopengl.cpp
+    render/OpenGL/descriptorsetopengl.h
+    render/alignedcpubuffer.h
+    render/alignedcpubuffer.cpp)
 add_library(Render ${RenderFiles})
-target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image ${OPENGL_LIBRARIES})
+target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
     input/hotkey.cpp
-    input/hotkey.h
+    input/hotkey.h 
     input/inputmanager.h
     input/keys.h
     input/sdl2backend.cpp)
@@ -112,7 +140,7 @@ add_library(DiabloExe
     diabloexe/characterstats.cpp
     diabloexe/affix.cpp
     diabloexe/affix.h
-	diabloexe/talkdata.h)
+    diabloexe/talkdata.h)
 target_link_libraries(DiabloExe Misc FAIO)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

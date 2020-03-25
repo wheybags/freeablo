@@ -1,185 +1,60 @@
 #include "nuklear_sdl_gl3.h"
 #include "../../apps/freeablo/fagui/guimanager.h"
-#include "render.h"
-#include "sdl_gl_funcs.h"
-#include <iostream>
+#include <cstring>
 #include <misc/assert.h>
-#include <string.h>
+#include <misc/misc.h>
+#include <render/OpenGL/pipelineopengl.h>
+#include <render/OpenGL/textureopengl.h>
+#include <render/commandqueue.h>
+#include <render/renderinstance.h>
+#include <render/texture.h>
+#include <render/vertexarrayobject.h>
+#include <render/vertextypes.h>
 
-struct nk_sdl_vertex
-{
-    float position[2];
-    float uv[2];
-    nk_byte col[4];
-};
-
-static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, position)},
-                                                                     {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, uv)},
-                                                                     {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct nk_sdl_vertex, col)},
+static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, position)},
+                                                                     {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct Render::NuklearVertex, uv)},
+                                                                     {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct Render::NuklearVertex, color)},
                                                                      {NK_VERTEX_LAYOUT_END}};
 
-//#ifdef __APPLE__
-//#define NK_SHADER_VERSION "#version 150\n"
-//#else
-//#define NK_SHADER_VERSION "#version 300 es\n"
-//#endif
-
-#define NK_SHADER_VERSION "#version 330\n"
-
-void nk_sdl_device_create(nk_gl_device& dev)
+void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance)
 {
-    GLint status;
-    static const GLchar* vertex_shader = NK_SHADER_VERSION "uniform mat4 ProjMtx;\n"
-                                                           "in vec2 Position;\n"
-                                                           "in vec2 TexCoord;\n"
-                                                           "in vec4 Color;\n"
-                                                           "out vec2 Frag_UV;\n"
-                                                           "out vec4 Frag_Color;\n"
-                                                           "void main() {\n"
-                                                           "   Frag_UV = TexCoord;\n"
-                                                           "   Frag_Color = Color;\n"
-                                                           "   gl_Position = ProjMtx * vec4(Position.xy, 0, 1);\n"
-                                                           "}\n";
-    static const GLchar* fragment_shader = NK_SHADER_VERSION
-        R"(precision mediump float;
-        uniform sampler2DArray Texture;
-        in vec2 Frag_UV;
-        in vec4 Frag_Color;
-        out vec4 Out_Color;
-        uniform vec4 hoverColor;
-        uniform vec2 imageSize;
-        uniform vec3 atlasOffset;
-        uniform vec2 atlasSize;
-        uniform int checkerboarded;
-        void main(){
-            vec4 c = Frag_Color * texture(Texture, vec3((atlasOffset.xy + Frag_UV * imageSize) / atlasSize, int(atlasOffset.z)));
-            if (c.w == 0. && hoverColor.a > 0.)
-            {
-              for (float i= -1.; i <= 1.; i++)
-                for (float j= -1.; j <= 1.; j++)
-                {
-                  vec2 offset = vec2(i, j);
-                  vec4 n = texture(Texture, vec3((atlasOffset.xy + offset + Frag_UV * imageSize) / atlasSize, int(atlasOffset.z)));
-                  if (n.w > 0. && (n.x > 0. || n.y > 0. || n.z > 0.))
-                    c = hoverColor;
-                }
-            }
-            if (checkerboarded != 0)
-            {
-              float vx = floor(Frag_UV.st.x * imageSize.x);
-              float vy = floor(Frag_UV.st.y * imageSize.y);
-              if (mod(vx + vy, 2.) == 1.)
-                c.w = 0.;
-            }
-            Out_Color = c;
-        }
-       )";
-
     nk_buffer_init_default(&dev.cmds);
-    dev.prog = glCreateProgram();
-    dev.vert_shdr = glCreateShader(GL_VERTEX_SHADER);
-    dev.frag_shdr = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(dev.vert_shdr, 1, &vertex_shader, 0);
-    glShaderSource(dev.frag_shdr, 1, &fragment_shader, 0);
-    glCompileShader(dev.vert_shdr);
-    glCompileShader(dev.frag_shdr);
-    glGetShaderiv(dev.vert_shdr, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE)
-    {
-        int length = 1024;
-        std::vector<GLchar> errorLog(length);
-        glGetShaderInfoLog(dev.vert_shdr, length, &length, &errorLog[0]);
-        std::cout << "SHADER ERROR: << " << &errorLog[0] << std::endl;
-    }
 
-    release_assert(status == GL_TRUE);
-    glGetShaderiv(dev.frag_shdr, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE)
-    {
-        int length = 1024;
-        std::vector<GLchar> errorLog(length);
-        glGetShaderInfoLog(dev.frag_shdr, length, &length, &errorLog[0]);
-        std::cout << "SHADER ERROR: << " << &errorLog[0] << std::endl;
-    }
-    release_assert(status == GL_TRUE);
-    glAttachShader(dev.prog, dev.vert_shdr);
-    glAttachShader(dev.prog, dev.frag_shdr);
-    glLinkProgram(dev.prog);
-    glGetProgramiv(dev.prog, GL_LINK_STATUS, &status);
-    release_assert(status == GL_TRUE);
+    Render::PipelineSpec pipelineSpec;
+    pipelineSpec.vertexLayouts = {Render::NuklearVertex::layout()};
+    pipelineSpec.vertexShaderPath = Misc::getResourcesPath().str() + "/shaders/gui.vert";
+    pipelineSpec.fragmentShaderPath = Misc::getResourcesPath().str() + "/shaders/gui.frag";
+    pipelineSpec.descriptorSetSpec = {{
+        {Render::DescriptorType::UniformBuffer, "vertexUniforms"},
+        {Render::DescriptorType::UniformBuffer, "fragmentUniforms"},
+        {Render::DescriptorType::Texture, "Texture"},
+    }};
+    pipelineSpec.scissor = true;
 
-    dev.uniform_hoverColor = glGetUniformLocation(dev.prog, "hoverColor");
-    dev.uniform_checkerboarded = glGetUniformLocation(dev.prog, "checkerboarded");
-    dev.uniform_imageSize = glGetUniformLocation(dev.prog, "imageSize");
-    dev.uniform_atlasOffset = glGetUniformLocation(dev.prog, "atlasOffset");
-    dev.uniform_atlasSize = glGetUniformLocation(dev.prog, "atlasSize");
-    dev.uniform_tex = glGetUniformLocation(dev.prog, "Texture");
-    dev.uniform_proj = glGetUniformLocation(dev.prog, "ProjMtx");
-    dev.attrib_pos = glGetAttribLocation(dev.prog, "Position");
-    dev.attrib_uv = glGetAttribLocation(dev.prog, "TexCoord");
-    dev.attrib_col = glGetAttribLocation(dev.prog, "Color");
+    dev.pipeline = renderInstance.createPipeline(pipelineSpec).release();
+    dev.vertexArrayObject = renderInstance.createVertexArrayObject({0}, pipelineSpec.vertexLayouts, 1).release();
+    dev.descriptorSet = renderInstance.createDescriptorSet(pipelineSpec.descriptorSetSpec).release();
 
-    {
-        // buffer setup
-        GLsizei vs = sizeof(struct nk_sdl_vertex);
-        size_t vp = offsetof(struct nk_sdl_vertex, position);
-        size_t vt = offsetof(struct nk_sdl_vertex, uv);
-        size_t vc = offsetof(struct nk_sdl_vertex, col);
-
-        glGenBuffers(1, &dev.vbo);
-        glGenBuffers(1, &dev.ebo);
-        glGenVertexArrays(1, &dev.vao);
-
-        glBindVertexArray(dev.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, dev.vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, dev.ebo);
-
-        glEnableVertexAttribArray((GLuint)dev.attrib_pos);
-        glEnableVertexAttribArray((GLuint)dev.attrib_uv);
-        glEnableVertexAttribArray((GLuint)dev.attrib_col);
-
-        glVertexAttribPointer((GLuint)dev.attrib_pos, 2, GL_FLOAT, GL_FALSE, vs, (void*)vp);
-        glVertexAttribPointer((GLuint)dev.attrib_uv, 2, GL_FLOAT, GL_FALSE, vs, (void*)vt);
-        glVertexAttribPointer((GLuint)dev.attrib_col, 4, GL_UNSIGNED_BYTE, GL_TRUE, vs, (void*)vc);
-    }
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    dev.uniformCpuBuffer = new GuiUniforms::CpuBufferType(renderInstance.getUniformBufferOffsetAlignment());
+    dev.uniformBuffer = renderInstance.createBuffer(dev.uniformCpuBuffer->getSizeInBytes()).release();
 }
-
-/*GLuint nk_sdl_device_upload_atlas(const void *image, int width, int height)
-{
-    GLuint font_tex;
-    glGenTextures(1, &font_tex);
-    glBindTexture(GL_TEXTURE_2D, font_tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)width, (GLsizei)height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-
-    return font_tex;
-}*/
 
 void nk_sdl_device_destroy(nk_gl_device& dev)
 {
-    glDetachShader(dev.prog, dev.vert_shdr);
-    glDetachShader(dev.prog, dev.frag_shdr);
-    glDeleteShader(dev.vert_shdr);
-    glDeleteShader(dev.frag_shdr);
-    glDeleteProgram(dev.prog);
-    // glDeleteTextures(1, &dev.font_tex);
-    glDeleteBuffers(1, &dev.vbo);
-    glDeleteBuffers(1, &dev.ebo);
+    delete dev.descriptorSet;
+    delete dev.uniformBuffer;
+    delete dev.pipeline;
+    delete dev.vertexArrayObject;
     nk_buffer_free(&dev.cmds);
 }
 
-void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, const Render::AtlasTexture& atlasTexture)
+void nk_sdl_render_dump(
+    Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue)
 {
     int width, height;
     int display_width, display_height;
     struct nk_vec2 scale;
-    GLfloat ortho[4][4] = {
+    float ortho[4][4] = {
         {2.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, -2.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, -1.0f, 0.0f},
@@ -200,90 +75,76 @@ void nk_sdl_render_dump(Render::SpriteCacheBase* cache, NuklearFrameDump& dump, 
     scale.x = (float)display_width / (float)width;
     scale.y = (float)display_height / (float)height;
 
-    // setup global state
-    glViewport(0, 0, display_width, display_height);
-    glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_SCISSOR_TEST);
-
     nk_gl_device& dev = dump.getDevice();
 
-    // setup program
-    glUseProgram(dev.prog);
-
-    atlasTexture.bind();
-    glUniform1i(dev.uniform_tex, 0);
     auto& atlasLookupMap = atlasTexture.getLookupMap();
 
-    glUniformMatrix4fv(dev.uniform_proj, 1, GL_FALSE, &ortho[0][0]);
+    // convert from command queue into draw list and draw to screen
+    size_t offset = 0;
+
+    dev.vertexArrayObject->getVertexBuffer(0)->setData(dump.vbuf.memory.ptr, dump.vbuf.size);
+    dev.vertexArrayObject->getIndexBuffer()->setData(dump.ebuf.memory.ptr, dump.ebuf.size);
+
+    // TODO: we don't need to update this every frame
+    dev.descriptorSet->updateItems({
+        {0, Render::BufferSlice{dev.uniformBuffer, dev.uniformCpuBuffer->getMemberOffset<GuiUniforms::Vertex>(), sizeof(GuiUniforms::Vertex)}},
+        {1, Render::BufferSlice{dev.uniformBuffer, dev.uniformCpuBuffer->getMemberOffset<GuiUniforms::Fragment>(), sizeof(GuiUniforms::Fragment)}},
+        {2, &atlasTexture.getTextureArray()},
+    });
+
+    // iterate over and execute each draw command
+    for (const auto& cmd : dump.drawCommands)
     {
-        // convert from command queue into draw list and draw to screen
-        void *vertices, *elements;
-        const nk_draw_index* offset = NULL;
+        if (!cmd.elem_count)
+            continue;
 
-        // allocate vertex and element buffer
-        glBindVertexArray(dev.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, dev.vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, dev.ebo);
+        uint32_t cacheIndex = ((uint32_t*)cmd.texture.ptr)[0];
+        uint32_t frameNum = ((uint32_t*)cmd.texture.ptr)[1];
+        auto effect = static_cast<FAGui::EffectType>(cmd.userdata.id);
 
-        glBufferData(GL_ARRAY_BUFFER, dump.vbuf.size, NULL, GL_STREAM_DRAW);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, dump.ebuf.size, NULL, GL_STREAM_DRAW);
+        Render::SpriteGroup* sprite = cache->get(cacheIndex);
+        auto s = sprite->operator[](frameNum);
 
-        // load vertices/elements directly into vertex/element buffer
-        vertices = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        elements = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-        {
-            memcpy(vertices, dump.vbuf.memory.ptr, dump.vbuf.size);
-            memcpy(elements, dump.ebuf.memory.ptr, dump.ebuf.size);
-        }
-        glUnmapBuffer(GL_ARRAY_BUFFER);
-        glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+        auto& atlasEntry = atlasLookupMap.at((GLuint)(intptr_t)s);
 
-        // iterate over and execute each draw command
-        for (size_t i = 0; i < dump.drawCommands.size(); i++)
-        {
-            const struct nk_draw_command& cmd = dump.drawCommands[i];
-            if (!cmd.elem_count)
-                continue;
+        int item_hl_color[] = {0xB9, 0xAA, 0x77};
 
-            uint32_t cacheIndex = ((uint32_t*)cmd.texture.ptr)[0];
-            uint32_t frameNum = ((uint32_t*)cmd.texture.ptr)[1];
-            auto effect = static_cast<FAGui::EffectType>(cmd.userdata.id);
+        GuiUniforms::Vertex* vertex = dev.uniformCpuBuffer->getMemberPointer<GuiUniforms::Vertex>();
+        memcpy(vertex->ProjMtx, ortho, sizeof(ortho));
 
-            Render::SpriteGroup* sprite = cache->get(cacheIndex);
-            auto s = sprite->operator[](frameNum);
+        GuiUniforms::Fragment* fragment = dev.uniformCpuBuffer->getMemberPointer<GuiUniforms::Fragment>();
+        fragment->hoverColor[0] = float(item_hl_color[0]) / 255.0f;
+        fragment->hoverColor[1] = float(item_hl_color[1]) / 255.0f;
+        fragment->hoverColor[2] = float(item_hl_color[2]) / 255.0f;
+        fragment->hoverColor[3] = effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f;
+        fragment->imageSize[0] = atlasEntry.mWidth;
+        fragment->imageSize[1] = atlasEntry.mHeight;
+        fragment->atlasSize[0] = atlasTexture.getTextureArray().width();
+        fragment->atlasSize[1] = atlasTexture.getTextureArray().height();
+        fragment->atlasOffset[0] = atlasEntry.mX;
+        fragment->atlasOffset[1] = atlasEntry.mY;
+        fragment->atlasOffset[2] = atlasEntry.mLayer;
+        fragment->checkerboarded = effect == FAGui::EffectType::checkerboarded ? 1.0f : 0.0f;
 
-            auto& atlasEntry = atlasLookupMap.at((GLuint)(intptr_t)s);
+        dev.uniformBuffer->setData(dev.uniformCpuBuffer->data(), dev.uniformCpuBuffer->getSizeInBytes());
 
-            int item_hl_color[] = {0xB9, 0xAA, 0x77};
-            glUniform4f(dev.uniform_hoverColor,
-                        item_hl_color[0] / 255.f,
-                        item_hl_color[1] / 255.f,
-                        item_hl_color[2] / 255.f,
-                        effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f);
-            glUniform1i(dev.uniform_checkerboarded, effect == FAGui::EffectType::checkerboarded ? 1 : 0);
-            glUniform2f(dev.uniform_imageSize, atlasEntry.mWidth, atlasEntry.mHeight);
-            glUniform3f(dev.uniform_atlasOffset, atlasEntry.mX, atlasEntry.mY, atlasEntry.mLayer);
-            glUniform2f(dev.uniform_atlasSize, atlasTexture.getTextureWidth(), atlasTexture.getTextureHeight());
+        Render::ScissorRect scissor = {};
+        scissor.x = int32_t(cmd.clip_rect.x * scale.x);
+        scissor.y = int32_t((float(height) - (cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y);
+        scissor.w = int32_t(cmd.clip_rect.w * scale.x);
+        scissor.h = int32_t(cmd.clip_rect.h * scale.y);
 
-            glScissor((GLint)(cmd.clip_rect.x * scale.x),
-                      (GLint)((height - (GLint)(cmd.clip_rect.y + cmd.clip_rect.h)) * scale.y),
-                      (GLint)(cmd.clip_rect.w * scale.x),
-                      (GLint)(cmd.clip_rect.h * scale.y));
-            glDrawElements(GL_TRIANGLES, (GLsizei)cmd.elem_count, GL_UNSIGNED_SHORT, offset);
-            offset += cmd.elem_count;
-        }
+        commandQueue.cmdScissor(scissor);
+
+        Render::Bindings bindings;
+        bindings.vao = dev.vertexArrayObject;
+        bindings.pipeline = dev.pipeline;
+        bindings.descriptorSet = dev.descriptorSet;
+
+        commandQueue.cmdDrawIndexed(size_t(offset), cmd.elem_count, bindings);
+
+        offset += cmd.elem_count * sizeof(nk_draw_index);
     }
-
-    glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    glDisable(GL_BLEND);
-    glDisable(GL_SCISSOR_TEST);
 }
 
 /*
@@ -320,24 +181,6 @@ nk_sdl_clipbard_copy(nk_handle usr, const char *text, int len)
     sdl.ctx.clip.paste = nullptr;// nk_sdl_clipbard_paste;
     sdl.ctx.clip.userdata = nk_handle_ptr(0);
     nk_sdl_device_create();
-}*/
-
-/*void nk_sdl_font_stash_begin(nk_font_atlas& atlas)
-{
-    nk_font_atlas_init_default(&atlas);
-    nk_font_atlas_begin(&atlas);
-}
-
-GLuint nk_sdl_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
-{
-    const void *image; int w, h;
-    image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
-    GLuint font_tex = nk_sdl_device_upload_atlas(image, w, h);
-    nk_font_atlas_end(&atlas, nk_handle_id((int)font_tex), &nullTex);
-    if (atlas.default_font)
-        nk_style_set_font(ctx, &atlas.default_font->handle);
-
-    return font_tex;
 }*/
 
 #if 0
@@ -452,8 +295,8 @@ void NuklearFrameDump::init(nk_gl_device& dev)
 
     memset(&config, 0, sizeof(config));
     config.vertex_layout = vertex_layout;
-    config.vertex_size = sizeof(struct nk_sdl_vertex);
-    config.vertex_alignment = NK_ALIGNOF(struct nk_sdl_vertex);
+    config.vertex_size = sizeof(Render::NuklearVertex);
+    config.vertex_alignment = NK_ALIGNOF(Render::NuklearVertex);
     config.null = dev.null;
     config.circle_segment_count = 22;
     config.curve_segment_count = 22;

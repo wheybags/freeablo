@@ -19,7 +19,7 @@ namespace Misc
     {
     public:
         ScopedSetter(T& toSet, T val) : mOriginal(toSet), mToSet(toSet) { mToSet = val; }
-        ScopedSetter(T& toSet) : mOriginal(toSet), mToSet(toSet) {}
+        explicit ScopedSetter(T& toSet) : mOriginal(toSet), mToSet(toSet) {}
 
         ~ScopedSetter() { mToSet = mOriginal; }
 
@@ -59,6 +59,7 @@ public:
     const T* get() const { return ptr; }
     const T* operator*() const { return ptr; }
     const T* operator->() const { return ptr; }
+    bool operator==(const NonNullPtr& other) const { return ptr == other.ptr; }
 
 private:
     T* ptr = nullptr;
@@ -87,9 +88,45 @@ public:
     const T* get() const { return ptr; }
     const T& operator*() const { return *ptr; }
     const T* operator->() const { return ptr; }
+    bool operator==(const NonNullConstPtr& other) const { return ptr == other.ptr; }
 
 private:
     const T* ptr = nullptr;
 };
 
 #define UNUSED_PARAM(x) (void)(x)
+
+template <class Derived, class Base> Derived&& safe_downcast(Base&& object)
+{
+    static_assert(std::is_reference<Base>::value, "invalid cast");
+    static_assert(std::is_reference<Derived>::value, "invalid cast");
+
+    typedef typename std::remove_reference<Base>::type UnrefBase;
+    typedef typename std::remove_reference<Derived>::type UnrefDerived;
+
+    static_assert(std::is_base_of<UnrefBase, UnrefDerived>::value, "invalid cast");
+
+    debug_assert(dynamic_cast<UnrefDerived*>(&object));
+    return static_cast<Derived>(object);
+}
+
+template <class Derived, class Base> Derived safe_downcast(Base* object)
+{
+    static_assert(std::is_pointer<Derived>::value, "invalid cast");
+
+    typedef typename std::remove_pointer<Base>::type UnrefBase;
+    typedef typename std::remove_pointer<Derived>::type UnrefDerived;
+
+    static_assert(std::is_base_of<UnrefBase, UnrefDerived>::value, "invalid cast");
+
+    debug_assert(object == nullptr || dynamic_cast<Derived>(object));
+    return static_cast<Derived>(object);
+}
+
+template <typename Target, typename ListHead, typename... ListTails> constexpr size_t getTypeIndexInTemplateList()
+{
+    if constexpr (std::is_same<Target, ListHead>::value)
+        return 0;
+    else
+        return 1 + getTypeIndexInTemplateList<Target, ListTails...>();
+}
