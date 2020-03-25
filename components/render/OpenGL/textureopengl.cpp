@@ -35,7 +35,7 @@ namespace Render
                 break;
             case Format::R32F:
                 internalFormat = GL_R32F;
-                format = GL_R;
+                format = GL_RED;
                 type = GL_FLOAT;
                 break;
             case Format::RGBA16U:
