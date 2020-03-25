@@ -3,6 +3,7 @@
 #include "misc.h"
 #include <SDL.h>
 #include <fa_nuklear.h>
+#include <render/alignedcpubuffer.h>
 #include <vector>
 
 namespace Render
@@ -14,6 +15,27 @@ namespace Render
     class DescriptorSet;
 }
 
+namespace GuiUniforms
+{
+    struct Vertex
+    {
+        float ProjMtx[4][4];
+    };
+
+    struct Fragment
+    {
+        float hoverColor[4];
+        float imageSize[2];
+        float atlasSize[2];
+        float atlasOffset[4];
+        float checkerboarded;
+
+        float _pad[3];
+    };
+
+    using CpuBufferType = Render::TypedAlignedCpuBuffer<Vertex, Fragment>;
+};
+
 struct nk_gl_device
 {
     nk_buffer cmds;
@@ -22,6 +44,7 @@ struct nk_gl_device
     Render::Pipeline* pipeline = nullptr;
     Render::DescriptorSet* descriptorSet = nullptr;
     Render::Buffer* uniformBuffer = nullptr;
+    GuiUniforms::CpuBufferType* uniformCpuBuffer = nullptr;
     nk_handle font_tex;
 };
 

@@ -16,25 +16,6 @@ static const struct nk_draw_vertex_layout_element vertex_layout[] = {{NK_VERTEX_
                                                                      {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct Render::NuklearVertex, color)},
                                                                      {NK_VERTEX_LAYOUT_END}};
 
-struct GuiUniforms
-{
-    struct Vertex
-    {
-        float ProjMtx[4][4];
-    } vertex;
-
-    struct Fragment
-    {
-        float hoverColor[4];
-        float imageSize[2];
-        float atlasSize[2];
-        float atlasOffset[4];
-        float checkerboarded;
-
-        float _pad[3];
-    } fragment;
-};
-
 void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance)
 {
     nk_buffer_init_default(&dev.cmds);
@@ -54,7 +35,8 @@ void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInsta
     dev.vertexArrayObject = renderInstance.createVertexArrayObject({0}, pipelineSpec.vertexLayouts, 1).release();
     dev.descriptorSet = renderInstance.createDescriptorSet(pipelineSpec.descriptorSetSpec).release();
 
-    dev.uniformBuffer = renderInstance.createBuffer(sizeof(GuiUniforms)).release();
+    dev.uniformCpuBuffer = new GuiUniforms::CpuBufferType(renderInstance.getUniformBufferOffsetAlignment());
+    dev.uniformBuffer = renderInstance.createBuffer(dev.uniformCpuBuffer->getSizeInBytes()).release();
 }
 
 void nk_sdl_device_destroy(nk_gl_device& dev)
@@ -105,8 +87,8 @@ void nk_sdl_render_dump(
 
     // TODO: we don't need to update this every frame
     dev.descriptorSet->updateItems({
-        {0, Render::BufferSlice{dev.uniformBuffer, offsetof(GuiUniforms, vertex), sizeof(GuiUniforms::Vertex)}},
-        {1, Render::BufferSlice{dev.uniformBuffer, offsetof(GuiUniforms, fragment), sizeof(GuiUniforms::Fragment)}},
+        {0, Render::BufferSlice{dev.uniformBuffer, dev.uniformCpuBuffer->getMemberOffset<GuiUniforms::Vertex>(), sizeof(GuiUniforms::Vertex)}},
+        {1, Render::BufferSlice{dev.uniformBuffer, dev.uniformCpuBuffer->getMemberOffset<GuiUniforms::Fragment>(), sizeof(GuiUniforms::Fragment)}},
         {2, &atlasTexture.getTextureArray()},
     });
 
@@ -127,23 +109,24 @@ void nk_sdl_render_dump(
 
         int item_hl_color[] = {0xB9, 0xAA, 0x77};
 
-        GuiUniforms uniforms = {};
-        memcpy(uniforms.vertex.ProjMtx, ortho, sizeof(ortho));
+        GuiUniforms::Vertex* vertex = dev.uniformCpuBuffer->getMemberPointer<GuiUniforms::Vertex>();
+        memcpy(vertex->ProjMtx, ortho, sizeof(ortho));
 
-        uniforms.fragment.hoverColor[0] = float(item_hl_color[0]) / 255.0f;
-        uniforms.fragment.hoverColor[1] = float(item_hl_color[1]) / 255.0f;
-        uniforms.fragment.hoverColor[2] = float(item_hl_color[2]) / 255.0f;
-        uniforms.fragment.hoverColor[3] = effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f;
-        uniforms.fragment.imageSize[0] = atlasEntry.mWidth;
-        uniforms.fragment.imageSize[1] = atlasEntry.mHeight;
-        uniforms.fragment.atlasSize[0] = atlasTexture.getTextureArray().width();
-        uniforms.fragment.atlasSize[1] = atlasTexture.getTextureArray().height();
-        uniforms.fragment.atlasOffset[0] = atlasEntry.mX;
-        uniforms.fragment.atlasOffset[1] = atlasEntry.mY;
-        uniforms.fragment.atlasOffset[2] = atlasEntry.mLayer;
-        uniforms.fragment.checkerboarded = effect == FAGui::EffectType::checkerboarded ? 1.0f : 0.0f;
+        GuiUniforms::Fragment* fragment = dev.uniformCpuBuffer->getMemberPointer<GuiUniforms::Fragment>();
+        fragment->hoverColor[0] = float(item_hl_color[0]) / 255.0f;
+        fragment->hoverColor[1] = float(item_hl_color[1]) / 255.0f;
+        fragment->hoverColor[2] = float(item_hl_color[2]) / 255.0f;
+        fragment->hoverColor[3] = effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f;
+        fragment->imageSize[0] = atlasEntry.mWidth;
+        fragment->imageSize[1] = atlasEntry.mHeight;
+        fragment->atlasSize[0] = atlasTexture.getTextureArray().width();
+        fragment->atlasSize[1] = atlasTexture.getTextureArray().height();
+        fragment->atlasOffset[0] = atlasEntry.mX;
+        fragment->atlasOffset[1] = atlasEntry.mY;
+        fragment->atlasOffset[2] = atlasEntry.mLayer;
+        fragment->checkerboarded = effect == FAGui::EffectType::checkerboarded ? 1.0f : 0.0f;
 
-        dev.uniformBuffer->setData(&uniforms, sizeof(GuiUniforms));
+        dev.uniformBuffer->setData(dev.uniformCpuBuffer->data(), dev.uniformCpuBuffer->getSizeInBytes());
 
         Render::ScissorRect scissor = {};
         scissor.x = int32_t(cmd.clip_rect.x * scale.x);

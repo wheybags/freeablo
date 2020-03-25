@@ -12,6 +12,7 @@
 #include <misc/assert.h>
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
+#include <render/alignedcpubuffer.h>
 #include <render/buffer.h>
 #include <render/commandqueue.h>
 #include <render/pipeline.h>
@@ -90,6 +91,25 @@ namespace Render
         std::vector<SpriteVertexPerInstance> mInstanceData;
     };
 
+    namespace DrawLevelUniforms
+    {
+        struct Vertex
+        {
+            float screenSize[2];
+
+            float _pad[2];
+        };
+
+        struct Fragment
+        {
+            float atlasSize[2];
+
+            float _pad[2];
+        };
+
+        using CpuBufferType = TypedAlignedCpuBuffer<Vertex, Fragment>;
+    };
+
     int32_t WIDTH = 1280;
     int32_t HEIGHT = 960;
 
@@ -99,25 +119,9 @@ namespace Render
     CommandQueue* mainCommandQueue = nullptr;
     VertexArrayObject* vertexArrayObject = nullptr;
     Pipeline* drawLevelPipeline = nullptr;
-    Buffer* drawLevelVertexUniformBuffer = nullptr;
+    Buffer* drawLevelUniformBuffer = nullptr;
+    DrawLevelUniforms::CpuBufferType* drawLevelUniformCpuBuffer = nullptr;
     DescriptorSet* drawLevelDescriptorSet = nullptr;
-
-    struct DrawLevelUniforms
-    {
-        struct Vertex
-        {
-            float screenSize[2];
-
-            float _pad[2];
-        } vertex;
-
-        struct Fragment
-        {
-            float atlasSize[2];
-
-            float _pad[2];
-        } fragment;
-    };
 
     DrawLevelCache drawLevelCache = DrawLevelCache(2000);
     std::string windowTitle;
@@ -159,17 +163,21 @@ namespace Render
 
         drawLevelPipeline = renderInstance->createPipeline(drawLevelPipelineSpec).release();
         vertexArrayObject = renderInstance->createVertexArrayObject({0, 0}, drawLevelPipelineSpec.vertexLayouts, 0).release();
-        drawLevelVertexUniformBuffer = renderInstance->createBuffer(sizeof(DrawLevelUniforms)).release();
+
+        drawLevelUniformCpuBuffer = new DrawLevelUniforms::CpuBufferType(renderInstance->getUniformBufferOffsetAlignment());
+
+        drawLevelUniformBuffer = renderInstance->createBuffer(drawLevelUniformCpuBuffer->getSizeInBytes()).release();
         drawLevelDescriptorSet = renderInstance->createDescriptorSet(drawLevelPipelineSpec.descriptorSetSpec).release();
         atlasTexture = std::make_unique<AtlasTexture>(*renderInstance, *mainCommandQueue);
 
+        // clang-format off
+
         drawLevelDescriptorSet->updateItems({
-            {0, BufferSlice{drawLevelVertexUniformBuffer, offsetof(DrawLevelUniforms, vertex), sizeof(DrawLevelUniforms::Vertex)}},
-            {1, BufferSlice{drawLevelVertexUniformBuffer, offsetof(DrawLevelUniforms, fragment), sizeof(DrawLevelUniforms::Fragment)}},
+            {0, BufferSlice{drawLevelUniformBuffer, drawLevelUniformCpuBuffer->getMemberOffset<DrawLevelUniforms::Vertex>(), sizeof(DrawLevelUniforms::Vertex)}},
+            {1, BufferSlice{drawLevelUniformBuffer, drawLevelUniformCpuBuffer->getMemberOffset<DrawLevelUniforms::Fragment>(), sizeof(DrawLevelUniforms::Fragment)}},
             {2, &atlasTexture->getTextureArray()},
         });
 
-        // clang-format off
         SpriteVertexMain baseVertices[] =
         {
             {{0, 0, 0},  {0, 0}},
@@ -207,8 +215,9 @@ namespace Render
     void quit()
     {
         atlasTexture.reset();
+        delete drawLevelUniformCpuBuffer;
         delete drawLevelDescriptorSet;
-        delete drawLevelVertexUniformBuffer;
+        delete drawLevelUniformBuffer;
         delete vertexArrayObject;
         delete drawLevelPipeline;
         delete mainCommandQueue;
@@ -625,12 +634,15 @@ namespace Render
 
     static void drawCachedLevel()
     {
-        DrawLevelUniforms uniforms = {};
-        uniforms.vertex.screenSize[0] = WIDTH;
-        uniforms.vertex.screenSize[1] = HEIGHT;
-        uniforms.fragment.atlasSize[0] = atlasTexture->getTextureArray().width();
-        uniforms.fragment.atlasSize[1] = atlasTexture->getTextureArray().height();
-        drawLevelVertexUniformBuffer->setData(&uniforms, sizeof(DrawLevelUniforms));
+        DrawLevelUniforms::Vertex* vertexUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Vertex>();
+        vertexUniforms->screenSize[0] = WIDTH;
+        vertexUniforms->screenSize[1] = HEIGHT;
+
+        DrawLevelUniforms::Fragment* fragmentUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Fragment>();
+        fragmentUniforms->atlasSize[0] = atlasTexture->getTextureArray().width();
+        fragmentUniforms->atlasSize[1] = atlasTexture->getTextureArray().height();
+
+        drawLevelUniformBuffer->setData(drawLevelUniformCpuBuffer->data(), drawLevelUniformCpuBuffer->getSizeInBytes());
 
         std::pair<void*, size_t> instanceData = drawLevelCache.getData();
         vertexArrayObject->getVertexBuffer(1)->setData(instanceData.first, instanceData.second);

@@ -109,7 +109,9 @@ set(RenderFiles
     render/descriptorset.h
     render/descriptorset.cpp
     render/OpenGL/descriptorsetopengl.cpp
-    render/OpenGL/descriptorsetopengl.h)
+    render/OpenGL/descriptorsetopengl.h
+    render/alignedcpubuffer.h
+    render/alignedcpubuffer.cpp)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

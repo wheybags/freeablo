@@ -41,12 +41,15 @@ namespace Render
         SDL_GL_SetSwapInterval(0);
 #endif
 
-        // Check opengl version is at least 3.3.
         const GLubyte* glVersion(glGetString(GL_VERSION));
         int major = glVersion[0] - '0';
         int minor = glVersion[2] - '0';
         if (major < 3 || (major == 3 && minor < 3))
             message_and_abort_fmt("ERROR: Minimum OpenGL version is 3.3. Your current version is %d.%d\n", major, minor);
+
+        GLint tmp = 0;
+        glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &tmp);
+        mUniformBufferOffsetAlignment = size_t(tmp);
 
         setupGlobalState();
     }

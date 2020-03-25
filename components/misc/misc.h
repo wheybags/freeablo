@@ -122,3 +122,11 @@ template <class Derived, class Base> Derived safe_downcast(Base* object)
     debug_assert(object == nullptr || dynamic_cast<Derived>(object));
     return static_cast<Derived>(object);
 }
+
+template <typename Target, typename ListHead, typename... ListTails> constexpr size_t getTypeIndexInTemplateList()
+{
+    if constexpr (std::is_same<Target, ListHead>::value)
+        return 0;
+    else
+        return 1 + getTypeIndexInTemplateList<Target, ListTails...>();
+}

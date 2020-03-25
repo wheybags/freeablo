@@ -21,6 +21,7 @@ namespace Render
                                                                    size_t indexBufferSizeInElements) override;
         std::unique_ptr<CommandQueue> createCommandQueue() override;
 
+        size_t getUniformBufferOffsetAlignment() override { return mUniformBufferOffsetAlignment; }
         void onWindowResized(int32_t width, int32_t height) override;
 
     private:
@@ -28,5 +29,6 @@ namespace Render
 
     private:
         SDL_GLContext mGlContext = nullptr;
+        size_t mUniformBufferOffsetAlignment = 0;
     };
 }

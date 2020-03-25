@@ -1,10 +1,11 @@
 #include "renderinstance.h"
+#include <glad/glad.h>
 #include <misc/misc.h>
 #include <render/OpenGL/renderinstanceopengl.h>
 
 namespace Render
 {
-    Render::RenderInstance* RenderInstance::createRenderInstance(Type type, SDL_Window& window)
+    RenderInstance* RenderInstance::createRenderInstance(Type type, SDL_Window& window)
     {
         switch (type)
         {
