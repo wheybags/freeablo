@@ -4,8 +4,6 @@
 
 namespace Cel
 {
-    /// This class just wraps Misc::Array2D with get() functions that reverse the y-axis.
-    /// This is because diablo cel files are encoded bottom-up.
     class CelFrame
     {
     public:
@@ -19,9 +17,9 @@ namespace Cel
         CelFrame(CelFrame&&) = default;
         CelFrame& operator=(CelFrame&&) = default;
 
-        const Colour& get(int32_t x, int32_t y) const { return mData.get(x, mFlipped ? mData.height() - 1 - y : y); }
+        const Colour& get(int32_t x, int32_t y) const { return mData.get(x, y); }
 
-        Colour& get(int32_t x, int32_t y) { return mData.get(x, mFlipped ? mData.height() - 1 - y : y); }
+        Colour& get(int32_t x, int32_t y) { return mData.get(x, y); }
 
         iterator begin() { return mData.begin(); }
         const_iterator begin() const { return mData.begin(); }
@@ -32,7 +30,6 @@ namespace Cel
         int32_t height() const { return mData.height(); }
 
     public:
-        bool mFlipped = true;
         Misc::Array2D<Colour> mData;
     };
 }

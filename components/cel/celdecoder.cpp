@@ -348,8 +348,6 @@ namespace Cel
     //
     void CelDecoder::decodeFrameType0(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        decodedFrame.mFlipped = false;
-
         for (int32_t y = 0; y < decodedFrame.height(); y++)
         {
             int32_t lineStartIndex = int32_t(frame.size()) - decodedFrame.width() * (y + 1);
@@ -405,9 +403,7 @@ namespace Cel
     //
     void CelDecoder::decodeFrameType1(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        decodedFrame.mFlipped = false;
-
-        XYIterator it(decodedFrame.width(), decodedFrame.height(), !decodedFrame.mFlipped);
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), true);
 
         int32_t len = frame.size();
         for (int32_t pos = 0; pos < len;)
@@ -666,8 +662,7 @@ namespace Cel
     // Type6 is the only type for CL2 images.
     void CelDecoder::decodeFrameType6(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        decodedFrame.mFlipped = false;
-        XYIterator it(decodedFrame.width(), decodedFrame.height(), !decodedFrame.mFlipped);
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), true);
 
         int32_t len = frame.size();
         for (int32_t pos = 0; pos < len;)
@@ -723,8 +718,7 @@ namespace Cel
 
     void CelDecoder::decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType2)
     {
-        decodedFrame.mFlipped = false;
-        XYIterator it(decodedFrame.width(), decodedFrame.height(), !decodedFrame.mFlipped);
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), true);
         const uint8_t* framePtr = &frame[0];
 
         for (int row = 0; row <= 32; row++)
@@ -758,8 +752,7 @@ namespace Cel
 
     void CelDecoder::decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType4)
     {
-        decodedFrame.mFlipped = false;
-        XYIterator it(decodedFrame.width(), decodedFrame.height(), !decodedFrame.mFlipped);
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), true);
         const uint8_t* framePtr = &frame[0];
 
         for (int row = 0; row < 15; row++)
