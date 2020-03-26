@@ -348,7 +348,15 @@ namespace Cel
     //
     void CelDecoder::decodeFrameType0(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        std::transform(frame.begin(), frame.end(), decodedFrame.begin(), DecodePal{pal});
+        decodedFrame.mFlipped = false;
+
+        for (int32_t y = 0; y < decodedFrame.height(); y++)
+        {
+            int32_t lineStartIndex = int32_t(frame.size()) - decodedFrame.width() * (y + 1);
+
+            for (int32_t x = 0; x < decodedFrame.height(); x++)
+                decodedFrame.mData.get(x, y) = pal[frame[lineStartIndex + x]];
+        }
     }
 
     // DecodeFrameType1 returns an image after decoding the frame in the following

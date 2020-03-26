@@ -19,9 +19,9 @@ namespace Cel
         CelFrame(CelFrame&&) = default;
         CelFrame& operator=(CelFrame&&) = default;
 
-        const Colour& get(int32_t x, int32_t y) const { return mData.get(x, mData.height() - 1 - y); }
+        const Colour& get(int32_t x, int32_t y) const { return mData.get(x, mFlipped ? mData.height() - 1 - y : y); }
 
-        Colour& get(int32_t x, int32_t y) { return mData.get(x, mData.height() - 1 - y); }
+        Colour& get(int32_t x, int32_t y) { return mData.get(x, mFlipped ? mData.height() - 1 - y : y); }
 
         iterator begin() { return mData.begin(); }
         const_iterator begin() const { return mData.begin(); }
@@ -33,7 +33,8 @@ namespace Cel
 
         std::vector<Colour>& getFlatVector() { return mData.getFlatVector(); }
 
-    private:
+    public:
+        bool mFlipped = true;
         Misc::Array2D<Colour> mData;
     };
 }
