@@ -666,13 +666,14 @@ namespace Cel
     // Type6 is the only type for CL2 images.
     void CelDecoder::decodeFrameType6(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        int32_t frameIndex = 0;
+        decodedFrame.mFlipped = false;
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), !decodedFrame.mFlipped);
 
         int32_t len = frame.size();
         for (int32_t pos = 0; pos < len;)
         {
             // Some broken cl2s (afaik only firema.cl2) seem to have some rubbish tacked on the end of their frames
-            if (frameIndex == decodedFrame.width() * decodedFrame.height())
+            if (it.y >= decodedFrame.height())
                 return;
 
             int32_t chunkSize = int32_t(int8_t(frame[pos]));
@@ -682,8 +683,9 @@ namespace Cel
                 // Transparent pixels.
                 for (int32_t i = 0; i < chunkSize; i++)
                 {
-                    debug_assert(decodedFrame.getFlatVector().size() > size_t(frameIndex));
-                    decodedFrame.getFlatVector()[frameIndex++] = Cel::Colour{0, 0, 0, false};
+                    debug_assert(decodedFrame.height() > it.y);
+                    decodedFrame.mData.get(it.x, it.y) = Cel::Colour{0, 0, 0, false};
+                    it++;
                 }
             }
             else
@@ -694,8 +696,9 @@ namespace Cel
                     // Regular pixels.
                     for (int32_t i = pos; i < pos + chunkSize; i++)
                     {
-                        debug_assert(decodedFrame.getFlatVector().size() > size_t(frameIndex));
-                        decodedFrame.getFlatVector()[frameIndex++] = pal[frame[i]];
+                        debug_assert(decodedFrame.height() > it.y);
+                        decodedFrame.mData.get(it.x, it.y) = pal[frame[i]];
+                        it++;
                     }
 
                     pos += chunkSize;
@@ -708,8 +711,9 @@ namespace Cel
                     // Run-length encoded pixels.
                     for (int32_t i = 0; i < chunkSize; i++)
                     {
-                        debug_assert(decodedFrame.getFlatVector().size() > size_t(frameIndex));
-                        decodedFrame.getFlatVector()[frameIndex++] = c;
+                        debug_assert(decodedFrame.height() > it.y);
+                        decodedFrame.mData.get(it.x, it.y) = c;
+                        it++;
                     }
                     pos++;
                 }
