@@ -1,8 +1,6 @@
 #include "min.h"
 #include <faio/fafileobject.h>
-#include <iostream>
 #include <misc/stringops.h>
-#include <stdio.h>
 
 namespace Level
 {
@@ -21,12 +19,11 @@ namespace Level
 
         minF.FAfseek(0, SEEK_SET);
 
-        std::vector<int16_t> temp(minSize);
-
         for (size_t i = 0; i < numPillars; i++)
         {
+            std::vector<int16_t> temp(minSize);
             minF.FAfread(&temp[0], 2, minSize);
-            mPillars.push_back(std::vector<int16_t>(temp));
+            mPillars.emplace_back(std::move(temp));
         }
     }
 

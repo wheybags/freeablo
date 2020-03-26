@@ -9,7 +9,7 @@ namespace FAIO
     {
 
     public:
-        FAFileObject(const std::string pathFile);
+        explicit FAFileObject(const std::string& pathFile);
         FAFileObject(const FAFileObject&) = delete;
         ~FAFileObject();
 

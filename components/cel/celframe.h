@@ -29,6 +29,8 @@ namespace Cel
         int32_t width() const { return mData.width(); }
         int32_t height() const { return mData.height(); }
 
+        void blitTo(CelFrame& other, int32_t destOffsetX, int32_t destOffsetY);
+
     public:
         Misc::Array2D<Colour> mData;
     };

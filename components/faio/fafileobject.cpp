@@ -1,7 +1,7 @@
 #include "fafileobject.h"
 #include <iostream>
 
-FAIO::FAFileObject::FAFileObject(const std::string pathFile) { faFile = FAIO::FAfopen(pathFile); }
+FAIO::FAFileObject::FAFileObject(const std::string& pathFile) { faFile = FAIO::FAfopen(pathFile); }
 
 FAIO::FAFileObject::~FAFileObject()
 {
