@@ -274,6 +274,32 @@ namespace Render
         return id;
     }
 
+    uint32_t getTextureHandleFromFrame(const Cel::CelFrame& frame)
+    {
+        //        bool validFormat = true;
+        //        if (surf->format->BitsPerPixel != 24 && surf->format->BitsPerPixel != 32)
+        //            validFormat = false;
+        //        if (surf->format->Rmask != 0x000000FF || surf->format->Gmask != 0x0000FF00 || surf->format->Bmask != 0x00FF0000)
+        //            validFormat = false;
+        //        if (surf->format->BitsPerPixel != 32 || surf->format->Amask != 0xFF000000)
+        //            validFormat = false;
+        //        if (surf->pitch != 4 * surf->w)
+        //            validFormat = false;
+        //
+        //        if (!validFormat)
+        //            surf = SDL_ConvertSurfaceFormat(
+        //                surf, SDL_PIXELFORMAT_ABGR8888, 0); // SDL is stupid and interprets pixel formats by endianness, so on LE, it calls RGBA ABGR...
+        //
+        //        debug_assert(surf->pitch == 4 * surf->w);
+
+        uint32_t id = atlasTexture->addTexture(frame.width(), frame.height(), frame.mData.data());
+
+        //        if (!validFormat)
+        //            SDL_FreeSurface(surf);
+
+        return id;
+    }
+
     void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache) { nk_sdl_render_dump(cache, dump, screen, *atlasTexture, *mainCommandQueue); }
 
     SDL_Surface* loadNonCelImage(const std::string& sourcePath, const std::string& extension)
@@ -685,12 +711,12 @@ namespace Render
 
         for (int32_t i = 0; i < cel.numFrames(); i++)
         {
-            SDL_Surface* s = createTransparentSurface(cel[i].width(), cel[i].height());
-            drawFrame(s, 0, 0, cel[i]);
+            // SDL_Surface* s = createTransparentSurface(cel[i].width(), cel[i].height());
+            // drawFrame(s, 0, 0, cel[i]);
 
-            mSprites.push_back((Render::Sprite)(intptr_t)getGLTexFromSurface(s)); // SDL_CreateTextureFromSurface(renderer, s));
+            mSprites.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(cel[i])); // SDL_CreateTextureFromSurface(renderer, s));
 
-            SDL_FreeSurface(s);
+            // SDL_FreeSurface(s);
         }
         mWidth = cel[0].width();
         mHeight = cel[0].height();

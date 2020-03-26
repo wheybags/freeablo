@@ -31,8 +31,6 @@ namespace Cel
         int32_t width() const { return mData.width(); }
         int32_t height() const { return mData.height(); }
 
-        std::vector<Colour>& getFlatVector() { return mData.getFlatVector(); }
-
     public:
         bool mFlipped = true;
         Misc::Array2D<Colour> mData;
