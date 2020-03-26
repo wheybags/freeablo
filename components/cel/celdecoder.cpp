@@ -359,6 +359,37 @@ namespace Cel
         }
     }
 
+    class XYIterator
+    {
+    public:
+        XYIterator(int32_t width, int32_t height, bool flipped = false) : mWidth(width), mFlipped(flipped)
+        {
+            if (mFlipped)
+                y = height - 1;
+        }
+
+        void operator++(int)
+        {
+            x++;
+            if (x >= mWidth)
+            {
+                x = 0;
+
+                if (mFlipped)
+                    y--;
+                else
+                    y++;
+            }
+        }
+
+        int32_t x = 0;
+        int32_t y = 0;
+
+    private:
+        int32_t mWidth = 0;
+        bool mFlipped = false;
+    };
+
     // DecodeFrameType1 returns an image after decoding the frame in the following
     // way:
     //
@@ -374,7 +405,9 @@ namespace Cel
     //
     void CelDecoder::decodeFrameType1(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        auto frameIterator = decodedFrame.begin();
+        decodedFrame.mFlipped = false;
+
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), !decodedFrame.mFlipped);
 
         int32_t len = frame.size();
         for (int32_t pos = 0; pos < len;)
@@ -384,12 +417,21 @@ namespace Cel
             if (chunkSize < 0)
             {
                 // Transparent pixels.
-                frameIterator = std::fill_n(frameIterator, -chunkSize, Cel::Colour{0, 0, 0, false});
+                for (int32_t i = 0; i < std::abs(chunkSize); i++)
+                {
+                    decodedFrame.mData.get(it.x, it.y) = Cel::Colour(0, 0, 0, false);
+                    it++;
+                }
             }
             else
             {
                 // Regular pixels.
-                frameIterator = std::transform(frame.begin() + pos, frame.begin() + pos + chunkSize, frameIterator, DecodePal{pal});
+                for (int32_t i = 0; i < std::abs(chunkSize); i++)
+                {
+                    decodedFrame.mData.get(it.x, it.y) = pal[frame[pos + i]];
+                    it++;
+                }
+
                 pos += chunkSize;
             }
         }
