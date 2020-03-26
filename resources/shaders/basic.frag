@@ -29,7 +29,7 @@ void main()
                 vec2 offset = vec2(i, j);
                 vec4 n = texture(tex, vec3((atlasOffset.xy + offset + uv * imageSize) / atlasSize, int(atlasOffset.z)));
                 if (n.w > 0. && (n.x > 0. || n.y > 0. || n.z > 0.))
-                c = hoverColor / 255;
+                    c = hoverColor;
             }
         }
     }
