@@ -10,6 +10,8 @@
 namespace Cel
 {
     class Pal;
+    class XYIterator;
+
     class CelDecoder
     {
     public:
@@ -48,8 +50,8 @@ namespace Cel
         static void decodeFrameType6(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame);
         static void decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType2);
         static void decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType4);
-        static void decodeLineTransparencyLeft(const uint8_t*& framePtr, const Pal& pal, ColoursRefIterator& decodedFrame, int32_t regularCount);
-        static void decodeLineTransparencyRight(const uint8_t*& framePtr, const Pal& pal, ColoursRefIterator& decodedFrame, int32_t regularCount);
+        static void decodeLineTransparencyLeft(const uint8_t*& framePtr, const Pal& pal, CelFrame& decodedFrame, XYIterator& it, int32_t regularCount);
+        static void decodeLineTransparencyRight(const uint8_t*& framePtr, const Pal& pal, CelFrame& decodedFrame, XYIterator& it, int32_t regularCount);
 
     private:
         std::vector<FrameBytes> mFrames;

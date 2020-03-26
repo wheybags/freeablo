@@ -723,7 +723,8 @@ namespace Cel
 
     void CelDecoder::decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType2)
     {
-        auto frameIterator = decodedFrame.begin();
+        decodedFrame.mFlipped = false;
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), !decodedFrame.mFlipped);
         const uint8_t* framePtr = &frame[0];
 
         for (int row = 0; row <= 32; row++)
@@ -749,15 +750,16 @@ namespace Cel
                 regularCount = 32 - ((row - 16) * 2);
 
             if (frameType2)
-                CelDecoder::decodeLineTransparencyLeft(framePtr, pal, frameIterator, regularCount);
+                CelDecoder::decodeLineTransparencyLeft(framePtr, pal, decodedFrame, it, regularCount);
             else
-                CelDecoder::decodeLineTransparencyRight(framePtr, pal, frameIterator, regularCount);
+                CelDecoder::decodeLineTransparencyRight(framePtr, pal, decodedFrame, it, regularCount);
         }
     }
 
     void CelDecoder::decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType4)
     {
-        auto frameIterator = decodedFrame.begin();
+        decodedFrame.mFlipped = false;
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), !decodedFrame.mFlipped);
         const uint8_t* framePtr = &frame[0];
 
         for (int row = 0; row < 15; row++)
@@ -776,47 +778,60 @@ namespace Cel
             int regularCount = 2 + (row * 2);
 
             if (frameType4)
-                CelDecoder::decodeLineTransparencyLeft(framePtr, pal, frameIterator, regularCount);
+                CelDecoder::decodeLineTransparencyLeft(framePtr, pal, decodedFrame, it, regularCount);
             else
-                CelDecoder::decodeLineTransparencyRight(framePtr, pal, frameIterator, regularCount);
+                CelDecoder::decodeLineTransparencyRight(framePtr, pal, decodedFrame, it, regularCount);
         }
 
         if (frame.size() > 256)
-            frameIterator = std::transform(frame.begin() + 256, frame.end(), frameIterator, DecodePal{pal});
+        {
+            for (size_t i = 256; i < frame.size(); i++)
+            {
+                decodedFrame.mData.get(it.x, it.y) = pal[frame[i]];
+                it++;
+            }
+        }
     }
 
-    void CelDecoder::decodeLineTransparencyLeft(const uint8_t*& framePtr, const Pal& pal, ColoursRefIterator& decodedFrame, int32_t regularCount)
+    void CelDecoder::decodeLineTransparencyLeft(const uint8_t*& framePtr, const Pal& pal, CelFrame& decodedFrame, XYIterator& it, int32_t regularCount)
     {
         int transparentCount = 32 - regularCount;
 
         // Implicit transparent pixels.
-        decodedFrame = std::fill_n(decodedFrame, transparentCount, Cel::Colour{0, 0, 0, false});
+        for (int32_t i = 0; i < transparentCount; i++)
+        {
+            decodedFrame.mData.get(it.x, it.y) = Cel::Colour{0, 0, 0, false};
+            it++;
+        }
 
         // Explicit regular pixels.
         for (int32_t i = 0; i < regularCount; i++)
         {
-            Colour color = pal[framePtr[0]];
-            *decodedFrame = color;
-            ++decodedFrame;
+            decodedFrame.mData.get(it.x, it.y) = pal[*framePtr];
             framePtr++;
+            it++;
         }
     }
 
-    void CelDecoder::decodeLineTransparencyRight(const uint8_t*& framePtr, const Pal& pal, ColoursRefIterator& decodedFrame, int32_t regularCount)
+    void CelDecoder::decodeLineTransparencyRight(const uint8_t*& framePtr, const Pal& pal, CelFrame& decodedFrame, XYIterator& it, int32_t regularCount)
     {
         int transparentCount = 32 - regularCount;
 
         // Explicit regular pixels.
         for (int32_t i = 0; i < regularCount; i++)
         {
-            Colour color = pal[framePtr[0]];
-            *decodedFrame = color;
-            ++decodedFrame;
+            decodedFrame.mData.get(it.x, it.y) = pal[*framePtr];
             framePtr++;
+            it++;
         }
 
         // Transparent pixels.
-        decodedFrame = std::fill_n(decodedFrame, transparentCount, Cel::Colour{0, 0, 0, false});
+        for (int32_t i = 0; i < transparentCount; i++)
+        {
+            decodedFrame.mData.get(it.x, it.y) = Cel::Colour{0, 0, 0, false};
+            decodedFrame.mData.get(it.x, it.y).g = 255;
+            it++;
+        }
     }
 
     void CelDecoder::setObjcursCelDimensions(int frameNumber)

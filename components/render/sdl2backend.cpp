@@ -855,7 +855,7 @@ namespace Render
 
     void setpixel(SDL_Surface* surface, int x, int y, Cel::Colour c)
     {
-        Uint32 pixel = SDL_MapRGBA(surface->format, c.r, c.g, c.b, ((int)c.visible) * 255);
+        Uint32 pixel = SDL_MapRGBA(surface->format, c.r, c.g, c.b, c.a);
 
         int bpp = surface->format->BytesPerPixel;
         // Here p is the address to the pixel we want to set
@@ -938,7 +938,7 @@ namespace Render
             for (int32_t y = 0; y < frame.height(); y++)
             {
                 auto& c = frame.get(x, y);
-                if (c.visible)
+                if (c.a)
                     setpixel(s, start_x + x, start_y + y, c);
             }
         }
