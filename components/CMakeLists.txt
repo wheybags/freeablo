@@ -5,8 +5,8 @@ add_library(Cel
     cel/celdecoder.cpp
     cel/celdecoder.h
     cel/tilesetimage.cpp
-    cel/tilesetimage.h cel/celframe.cpp)
-target_link_libraries(Cel FAIO Misc Levels)
+    cel/tilesetimage.h)
+target_link_libraries(Cel FAIO Misc Levels Image)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(FAIO faio/faio.cpp faio/faio.h faio/fafileobject.h faio/fafileobject.cpp)
@@ -181,3 +181,10 @@ add_library(NuklearMisc
 )
 set_target_properties(NuklearMisc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 target_link_libraries(NuklearMisc nuklear nativefiledialog Input Render)
+
+add_library(Image
+        Image/image.h
+        Image/image.cpp
+)
+set_target_properties(Image PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+target_link_libraries(Image Misc SDL_image)

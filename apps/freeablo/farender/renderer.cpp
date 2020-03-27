@@ -5,6 +5,7 @@
 #include "cel/celdecoder.h"
 #include "cel/celfile.h"
 #include "fontinfo.h"
+#include <Image/image.h>
 #include <audio/fa_audio.h>
 #include <functional>
 #include <input/inputmanager.h>
@@ -66,7 +67,7 @@ namespace FARender
         int w, h;
         image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
 
-        FASpriteGroup* sprite = spriteManager.getFromRaw((uint8_t*)image, w, h);
+        FASpriteGroup* sprite = spriteManager.getFromRaw(Image(w, h, reinterpret_cast<ByteColour*>(const_cast<void*>(image)), PointerDataType::Copy));
         spriteManager.setImmortal(sprite->getCacheIndex(), true);
 
         nk_handle handle = sprite->getNkImage().handle;

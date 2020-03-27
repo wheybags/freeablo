@@ -25,6 +25,8 @@ namespace FAIO
         size_t FAftell();
         size_t FAsize();
 
+        std::vector<uint8_t> readAll();
+
         uint32_t read32();
         uint16_t read16();
         uint8_t read8();

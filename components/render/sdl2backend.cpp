@@ -277,48 +277,11 @@ namespace Render
 
     uint32_t getTextureHandleFromFrame(const Cel::CelFrame& frame)
     {
-        //        bool validFormat = true;
-        //        if (surf->format->BitsPerPixel != 24 && surf->format->BitsPerPixel != 32)
-        //            validFormat = false;
-        //        if (surf->format->Rmask != 0x000000FF || surf->format->Gmask != 0x0000FF00 || surf->format->Bmask != 0x00FF0000)
-        //            validFormat = false;
-        //        if (surf->format->BitsPerPixel != 32 || surf->format->Amask != 0xFF000000)
-        //            validFormat = false;
-        //        if (surf->pitch != 4 * surf->w)
-        //            validFormat = false;
-        //
-        //        if (!validFormat)
-        //            surf = SDL_ConvertSurfaceFormat(
-        //                surf, SDL_PIXELFORMAT_ABGR8888, 0); // SDL is stupid and interprets pixel formats by endianness, so on LE, it calls RGBA ABGR...
-        //
-        //        debug_assert(surf->pitch == 4 * surf->w);
-
         uint32_t id = atlasTexture->addTexture(frame.width(), frame.height(), frame.mData.data());
-
-        //        if (!validFormat)
-        //            SDL_FreeSurface(surf);
-
         return id;
     }
 
     void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache) { nk_sdl_render_dump(cache, dump, screen, *atlasTexture, *mainCommandQueue); }
-
-    SDL_Surface* loadNonCelImage(const std::string& sourcePath, const std::string& extension)
-    {
-        FAIO::FAFileObject file_handle(sourcePath);
-        if (!file_handle.isValid())
-            return NULL;
-
-        size_t buffer_size = file_handle.FAsize();
-
-        char* buffer = new char[buffer_size];
-        file_handle.FAfread(buffer, 1, buffer_size);
-
-        SDL_Surface* s = IMG_LoadTyped_RW(SDL_RWFromMem(buffer, buffer_size), 1, extension.c_str());
-        delete[] buffer;
-
-        return s;
-    }
 
     std::string getImageExtension(const std::string& path)
     {
@@ -352,54 +315,38 @@ namespace Render
         }
         else
         {
-            SDL_Surface* surface = loadNonCelImage(path, extension);
+            Image image = Image::loadFromFile(path);
 
-            if (surface)
-            {
-                widths = {surface->w};
-                heights = {surface->h};
-                animLength = 1;
-
-                SDL_FreeSurface(surface);
-            }
-            else
-            {
-                return false;
-            }
+            widths = {image.width()};
+            heights = {image.height()};
+            animLength = 1;
         }
 
         return true;
     }
 
-    Cel::Colour getPixel(const SDL_Surface* s, int x, int y);
     void setpixel(SDL_Surface* s, int x, int y, Cel::Colour c);
     SDL_Surface* createTransparentSurface(size_t width, size_t height);
     void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
 
-    SDL_Surface* loadNonCelImageTrans(const std::string& path, const std::string& extension, bool hasTrans, size_t transR, size_t transG, size_t transB)
+    Image loadNonCelImageTrans(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB)
     {
-        SDL_Surface* tmp = loadNonCelImage(path, extension);
+        Image image = Image::loadFromFile(path);
 
         if (hasTrans)
         {
-            SDL_Surface* src = tmp;
-            tmp = createTransparentSurface(src->w, src->h);
-
-            for (int x = 0; x < src->w; x++)
+            for (int x = 0; x < image.width(); x++)
             {
-                for (int y = 0; y < src->h; y++)
+                for (int y = 0; y < image.height(); y++)
                 {
-                    Cel::Colour px = getPixel(src, x, y);
-                    if (!(px.r == transR && px.g == transG && px.b == transB))
-                    {
-                        setpixel(tmp, x, y, px);
-                    }
+                    Cel::Colour& px = image.get(x, y);
+                    if (px.r == transR && px.g == transG && px.b == transB)
+                        px.a = 0;
                 }
             }
-            SDL_FreeSurface(src);
         }
 
-        return tmp;
+        return image;
     }
 
     SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB)
@@ -412,12 +359,10 @@ namespace Render
         }
         else
         {
-            SDL_Surface* tmp = loadNonCelImageTrans(path, extension, hasTrans, transR, transG, transB);
+            Image tmp = loadNonCelImageTrans(path, hasTrans, transR, transG, transB);
 
             std::vector<Sprite> vec(1);
-            vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(tmp);
-
-            SDL_FreeSurface(tmp);
+            vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(tmp);
 
             return new SpriteGroup(std::move(vec));
         }
@@ -427,36 +372,28 @@ namespace Render
 
     SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB)
     {
-        std::string extension = getImageExtension(path);
-        SDL_Surface* original = loadNonCelImageTrans(path, extension, hasTrans, transR, transG, transB);
-
-        SDL_Surface* tmp = createTransparentSurface(original->w, vAnim);
-
-        std::cout << original->w;
+        Image original = loadNonCelImageTrans(path, hasTrans, transR, transG, transB);
 
         std::vector<Sprite> vec;
 
-        for (size_t srcY = 0; srcY < (size_t)original->h - 1; srcY += vAnim)
+        for (size_t srcY = 0; srcY < (size_t)original.height() - 1; srcY += vAnim)
         {
-            for (size_t x = 0; x < (size_t)original->w; x++)
+            Image tmp(original.width(), vAnim);
+
+            for (size_t x = 0; x < (size_t)original.width(); x++)
             {
                 for (size_t y = 0; y < vAnim; y++)
                 {
-                    if (srcY + y < (size_t)original->h)
+                    if (srcY + y < (size_t)original.height())
                     {
-                        Cel::Colour px = getPixel(original, x, srcY + y);
-                        setpixel(tmp, x, y, px);
+                        Cel::Colour px = original.get(x, srcY + y);
+                        tmp.get(x, y) = px;
                     }
                 }
             }
 
-            vec.push_back((Render::Sprite)(intptr_t)getGLTexFromSurface(tmp));
-
-            clearTransparentSurface(tmp);
+            vec.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(tmp));
         }
-
-        SDL_FreeSurface(original);
-        SDL_FreeSurface(tmp);
 
         return new SpriteGroup(std::move(vec));
     }
@@ -464,9 +401,9 @@ namespace Render
     SpriteGroup* loadResizedSprite(
         const std::string& path, size_t width, size_t height, size_t tileWidth, size_t tileHeight, bool hasTrans, size_t transR, size_t transG, size_t transB)
     {
-        std::string extension = getImageExtension(path);
-        SDL_Surface* original = loadNonCelImageTrans(path, extension, hasTrans, transR, transG, transB);
-        SDL_Surface* tmp = createTransparentSurface(width, height);
+        Image original = loadNonCelImageTrans(path, hasTrans, transR, transG, transB);
+
+        Image tmp(width, height);
 
         size_t srcX = 0;
         size_t srcY = 0;
@@ -479,19 +416,19 @@ namespace Render
             {
                 for (size_t x = 0; x < tileWidth; x += 1)
                 {
-                    Cel::Colour px = getPixel(original, srcX + x, srcY + y);
-                    setpixel(tmp, dstX + x, dstY + y, px);
+                    Cel::Colour px = original.get(srcX + x, srcY + y);
+                    tmp.get(dstX + x, dstY + y) = px;
                 }
             }
 
             srcX += tileWidth;
-            if (srcX >= (size_t)original->w)
+            if (srcX >= (size_t)original.width())
             {
                 srcX = 0;
                 srcY += tileHeight;
             }
 
-            if (srcY >= (size_t)original->h)
+            if (srcY >= (size_t)original.height())
                 break;
 
             dstX += tileWidth;
@@ -506,10 +443,7 @@ namespace Render
         }
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(tmp);
-
-        SDL_FreeSurface(original);
-        SDL_FreeSurface(tmp);
+        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(tmp);
 
         return new SpriteGroup(std::move(vec));
     }
@@ -530,65 +464,27 @@ namespace Render
         debug_assert(width > 0);
         debug_assert(height > 0);
 
-        SDL_Surface* surface = createTransparentSurface(width, height);
+        Image image(width, height);
 
         int32_t x = 0;
         for (int32_t i = 0; i < cel.numFrames(); i++)
         {
-            drawFrame(surface, x, 0, cel[i]);
+            cel[i].blitTo(image, x, 0);
             x += cel[i].width();
         }
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(surface);
-
-        SDL_FreeSurface(surface);
-
-        return new SpriteGroup(std::move(vec));
-    }
-
-    SpriteGroup* loadTiledTexture(const std::string& sourcePath, size_t width, size_t height, bool hasTrans, size_t transR, size_t transG, size_t transB)
-    {
-        std::string extension = getImageExtension(sourcePath);
-        SDL_Surface* tile = loadNonCelImageTrans(sourcePath, extension, hasTrans, transR, transG, transB);
-        SDL_Surface* texture = createTransparentSurface(width, height);
-
-        int dx = tile->w;
-        int dy = tile->h;
-
-        for (size_t y = 0; y < height; y += dy)
-        {
-            for (size_t x = 0; x < width; x += dx)
-            {
-                for (size_t sy = 0; sy < (size_t)tile->h && (y + sy) < height; sy++)
-                {
-                    for (size_t sx = 0; sx < (size_t)tile->w && (x + sx) < width; sx++)
-                    {
-                        Cel::Colour px = getPixel(tile, sx, sy);
-                        setpixel(texture, x + sx, y + sy, px);
-                    }
-                }
-            }
-        }
-
-        std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(texture);
-
-        SDL_FreeSurface(texture);
-        SDL_FreeSurface(tile);
+        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(image);
 
         return new SpriteGroup(std::move(vec));
     }
 
     SpriteGroup* loadNonCelSprite(const std::string& path)
     {
-        std::string extension = getImageExtension(path);
-        SDL_Surface* image = loadNonCelImage(path, extension);
+        Image image = Image::loadFromFile(path);
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(image);
-
-        SDL_FreeSurface(image);
+        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(image);
 
         return new SpriteGroup(std::move(vec));
     }
@@ -615,33 +511,13 @@ namespace Render
         SDL_ShowCursor(SDL_ENABLE);
     }
 
-    SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height)
+    SpriteGroup* loadSprite(const Image& image)
     {
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        Uint32 rmask = 0xff000000;
-        Uint32 gmask = 0x00ff0000;
-        Uint32 bmask = 0x0000ff00;
-        Uint32 amask = 0x000000ff;
-#else
-        Uint32 rmask = 0x000000ff;
-        Uint32 gmask = 0x0000ff00;
-        Uint32 bmask = 0x00ff0000;
-        Uint32 amask = 0xff000000;
-#endif
-
-        SDL_Surface* surface = SDL_CreateRGBSurfaceFrom((void*)source, width, height, 32, width * 4, rmask, gmask, bmask, amask);
-        // SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, surface);
-        // SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
-
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)(intptr_t)getGLTexFromSurface(surface);
-
-        SDL_FreeSurface(surface);
+        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(image);
 
         return new SpriteGroup(std::move(vec));
     }
-
-    bool once = false;
 
     void deleteAllSprites() { atlasTexture->clear(*mainCommandQueue); }
 
@@ -661,11 +537,11 @@ namespace Render
 
     static void drawCachedLevel()
     {
-        DrawLevelUniforms::Vertex* vertexUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Vertex>();
+        auto vertexUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Vertex>();
         vertexUniforms->screenSize[0] = WIDTH;
         vertexUniforms->screenSize[1] = HEIGHT;
 
-        DrawLevelUniforms::Fragment* fragmentUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Fragment>();
+        auto fragmentUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Fragment>();
         fragmentUniforms->atlasSize[0] = atlasTexture->getTextureArray().width();
         fragmentUniforms->atlasSize[1] = atlasTexture->getTextureArray().height();
 
@@ -711,14 +587,8 @@ namespace Render
         Cel::CelFile cel(path);
 
         for (int32_t i = 0; i < cel.numFrames(); i++)
-        {
-            // SDL_Surface* s = createTransparentSurface(cel[i].width(), cel[i].height());
-            // drawFrame(s, 0, 0, cel[i]);
+            mSprites.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(cel[i]));
 
-            mSprites.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(cel[i])); // SDL_CreateTextureFromSurface(renderer, s));
-
-            // SDL_FreeSurface(s);
-        }
         mWidth = cel[0].width();
         mHeight = cel[0].height();
 

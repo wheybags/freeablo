@@ -89,7 +89,8 @@ namespace NuklearMisc
         int w, h;
         image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
 
-        GuiSprite* sprite = getSprite(Render::loadSprite((uint8_t*)image, w, h));
+        GuiSprite* sprite =
+            getSprite(Render::loadSprite(Image(w, h, reinterpret_cast<ByteColour*>(const_cast<void*>(image)), PointerDataType::NonOwningReference)));
 
         nk_handle handle = sprite->getNkImage(0).handle;
         nk_font_atlas_end(&atlas, handle, &nullTex);

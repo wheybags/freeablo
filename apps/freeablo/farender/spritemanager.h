@@ -2,15 +2,10 @@
 #include "spritecache.h"
 #include <set>
 
+class Image;
+
 namespace FARender
 {
-    struct RawCacheTmp
-    {
-        uint8_t* buffer;
-        uint32_t width;
-        uint32_t height;
-    };
-
     ///
     /// @brief Manager for game sprites. Mostly just a wrapper for SpriteCache, see that for documentation of members.
     ///
@@ -45,7 +40,7 @@ namespace FARender
 
         /// Like get(const std::string&), but for use directly with a pixel buffer
         /// @brief To be called from the game thread
-        FASpriteGroup* getFromRaw(const uint8_t* source, uint32_t width, uint32_t height);
+        FASpriteGroup* getFromRaw(Image&& image);
 
         bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites); ///< To be called from the game thread
 
@@ -68,7 +63,7 @@ namespace FARender
 
         void addToPreloadList(uint32_t index); ///< To be called from the game thread
 
-        std::map<uint32_t, RawCacheTmp> mRawCache;
+        std::map<uint32_t, Image> mRawCache;
         std::vector<FASpriteGroup*> mRawSpriteGroups;
         std::map<uint32_t, FASpriteGroup*> mServerSpriteMap;
         std::vector<uint32_t> mSpritesNeedingPreloading;

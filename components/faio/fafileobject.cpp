@@ -56,6 +56,15 @@ size_t FAIO::FAFileObject::FAsize()
     return FAIO::FAsize(faFile);
 }
 
+std::vector<uint8_t> FAIO::FAFileObject::readAll()
+{
+    std::vector<uint8_t> retval;
+    size_t size = FAsize();
+    retval.resize(size);
+    FAfread(retval.data(), 1, size);
+    return retval;
+}
+
 uint32_t FAIO::FAFileObject::read32()
 {
     if (!faFile)

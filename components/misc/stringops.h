@@ -160,6 +160,20 @@ namespace Misc
 
             return retval;
         }
+
+        static std::string getFileExtension(std::string_view path)
+        {
+            size_t i;
+            for (i = path.length() - 1; i > 0; i--)
+            {
+                if (path[i] == '.')
+                    break;
+            }
+
+            std::string extension = std::string(path.substr(i + 1, path.length() - i));
+            std::transform(extension.begin(), extension.end(), extension.begin(), [](char c) { return std::tolower(c); });
+            return extension;
+        }
     };
 }
 #endif

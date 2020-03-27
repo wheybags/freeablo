@@ -1,4 +1,5 @@
 #include "spritemanager.h"
+#include <Image/image.h>
 #include <cstring>
 
 namespace FARender
@@ -44,23 +45,16 @@ namespace FARender
         *dest = *source;
     }
 
-    FASpriteGroup* SpriteManager::getFromRaw(const uint8_t* source, uint32_t width, uint32_t height)
+    FASpriteGroup* SpriteManager::getFromRaw(Image&& image)
     {
-        uint32_t size = (width * 4) * height;
-
-        uint8_t* buffer = new uint8_t[size];
-        memcpy(buffer, source, size);
+        release_assert(image.mData.ownsData());
 
         uint32_t index = mCache.newUniqueIndex();
-        RawCacheTmp rawTmp;
-        rawTmp.buffer = buffer;
-        rawTmp.width = width;
-        rawTmp.height = height;
-
-        mRawCache[index] = rawTmp;
 
         FASpriteGroup* retval = mCache.allocNewSpriteGroup();
-        retval->init(1, {static_cast<int32_t>(width)}, {static_cast<int32_t>(height)}, index);
+        retval->init(1, {image.width()}, {image.height()}, index);
+
+        mRawCache[index] = std::move(image);
 
         // put it in a member vector because we need to return a persistent pointer
         mRawSpriteGroups.push_back(retval);
@@ -94,13 +88,11 @@ namespace FARender
     {
         if (mRawCache.count(index))
         {
-            RawCacheTmp tmp = mRawCache[index];
-
-            Render::SpriteGroup* newSprite = Render::loadSprite(tmp.buffer, tmp.width, tmp.height);
-            delete[] tmp.buffer;
-
-            mCache.directInsert(newSprite, index);
+            Image image = std::move(mRawCache[index]);
             mRawCache.erase(index);
+
+            Render::SpriteGroup* newSprite = Render::loadSprite(image);
+            mCache.directInsert(newSprite, index);
 
             return newSprite;
         }
