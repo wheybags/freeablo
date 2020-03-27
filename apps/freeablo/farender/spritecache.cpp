@@ -25,7 +25,7 @@ namespace FARender
             delete[] block;
     }
 
-    FASpriteGroup* SpriteCache::get(const std::string& path)
+    FASpriteGroup* SpriteCache::get(const std::string& path, bool trim)
     {
         if (!mStrToCache.count(path))
         {
@@ -70,13 +70,13 @@ namespace FARender
             newCacheEntry->init(tmpAnimLength, tmpWidth, tmpHeight, cacheIndex);
 
             mStrToCache[path] = newCacheEntry;
-            mCacheToStr[cacheIndex] = path;
+            mCacheToStr[cacheIndex] = {path, trim};
         }
 
         return mStrToCache[path];
     }
 
-    FASpriteGroup* SpriteCache::getTileset(const std::string& celPath, const std::string& minPath, bool top)
+    FASpriteGroup* SpriteCache::getTileset(const std::string& celPath, const std::string& minPath, bool top, bool trim)
     {
         std::stringstream ss;
         ss << celPath << ":::" << minPath << ":::" << top;
@@ -88,7 +88,7 @@ namespace FARender
             uint32_t cacheIndex = newUniqueIndex();
             newCacheEntry->init(0, {}, {}, cacheIndex);
             mStrToTilesetCache[key] = newCacheEntry;
-            mCacheToTilesetPath[cacheIndex] = TilesetPath(celPath, minPath, top);
+            mCacheToTilesetPath[cacheIndex] = TilesetPath(celPath, minPath, top, trim);
         }
 
         return mStrToTilesetCache[key];
@@ -118,18 +118,15 @@ namespace FARender
 
             if (mCacheToStr.count(index))
             {
-                // TODO: replace mCacheToStr[index] with map.at(), to guarantee thread safety (once we switch to c++11)
-                // until then, it is safe in practice.
-                std::string cachePath = mCacheToStr.at(index);
+                const LoadSpec& loadSpec = mCacheToStr.at(index);
 
-                std::vector<std::string> components = Misc::StringUtils::split(cachePath, '&');
+                std::vector<std::string> components = Misc::StringUtils::split(loadSpec.path, '&');
                 std::string sourcePath = components[0];
 
                 uint32_t vAnim = 0;
                 bool hasTrans = false;
                 bool resize = false;
                 bool convertToSingleTexture = false;
-                bool generateTiledTexture = false;
                 uint32_t tileWidth = 0;
                 uint32_t tileHeight = 0;
                 uint32_t newWidth = 0;
@@ -188,18 +185,6 @@ namespace FARender
                     {
                         convertToSingleTexture = true;
                     }
-                    else if (pair[0] == "generateTiledTexture")
-                    {
-                        generateTiledTexture = true;
-
-                        std::vector<std::string> size = Misc::StringUtils::split(pair[1], 'x');
-
-                        std::istringstream wss(size[0]);
-                        wss >> newWidth;
-
-                        std::istringstream hss(size[1]);
-                        hss >> newHeight;
-                    }
                     else if (pair[0] == "frame")
                     {
                         std::istringstream ss(pair[1]);
@@ -208,20 +193,18 @@ namespace FARender
                 }
 
                 if (vAnim != 0)
-                    newSprite = Render::loadVanimSprite(sourcePath, vAnim, hasTrans, r, g, b);
+                    newSprite = Render::loadVanimSprite(sourcePath, vAnim, hasTrans, r, g, b, loadSpec.trim);
                 else if (resize)
-                    newSprite = Render::loadResizedSprite(sourcePath, newWidth, newHeight, tileWidth, tileHeight, hasTrans, r, g, b);
+                    newSprite = Render::loadResizedSprite(sourcePath, newWidth, newHeight, tileWidth, tileHeight, hasTrans, r, g, b, loadSpec.trim);
                 else if (convertToSingleTexture)
-                    newSprite = Render::loadCelToSingleTexture(sourcePath);
-                else if (generateTiledTexture)
-                    newSprite = Render::loadTiledTexture(sourcePath, newWidth, newHeight, hasTrans, r, g, b);
+                    newSprite = Render::loadCelToSingleTexture(sourcePath, loadSpec.trim);
                 else
-                    newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b);
+                    newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b, loadSpec.trim);
             }
             else if (mCacheToTilesetPath.count(index))
             {
                 TilesetPath p = mCacheToTilesetPath[index]; // TODO: same as above
-                newSprite = Render::loadTilesetSprite(p.celPath, p.minPath, p.top);
+                newSprite = Render::loadTilesetSprite(p.celPath, p.minPath, p.top, p.trim);
             }
             else
             {
@@ -299,7 +282,7 @@ namespace FARender
     {
         auto it = mCacheToStr.find(index);
         if (it != mCacheToStr.end())
-            return it->second;
+            return it->second.path;
         return "";
     }
 

@@ -16,7 +16,7 @@ namespace FAGui
     {
         auto renderer = FARender::Renderer::get();
         mBigPentagram.reset(new FARender::AnimationPlayer());
-        auto pentImg = renderer->loadImage("data/pentspin.cel");
+        auto pentImg = renderer->loadImage("data/pentspin.cel", false);
         mBigPentagram->playAnimation(pentImg, FAWorld::World::getTicksInPeriod("0.06"), FARender::AnimationPlayer::AnimationType::Looped);
         auto pentRect = nk_rect(0, 0, pentImg->getWidth(), pentImg->getHeight());
 
@@ -99,7 +99,7 @@ namespace FAGui
 
         nk_layout_space_begin(ctx, NK_STATIC, 0.0f, INT_MAX);
         {
-            auto img = renderer->loadImage("data/diabsmal.cel");
+            auto img = renderer->loadImage("data/diabsmal.cel", false);
             int32_t screenW, screenH;
             renderer->getWindowDimensions(screenW, screenH);
             constexpr int itemHeight = 45;

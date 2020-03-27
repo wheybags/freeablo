@@ -1,13 +1,9 @@
 #pragma once
-
-#include "sdl_gl_funcs.h"
-
 #include <algorithm>
+#include <cstdint>
 #include <map>
 #include <memory>
-#include <stdint.h>
 #include <vector>
-
 //#define DEBUG_ATLAS_TEXTURE
 
 namespace rbp
@@ -15,15 +11,27 @@ namespace rbp
     class SkylineBinPack;
 }
 
+class Image;
+
 namespace Render
 {
+    class Texture;
+    class RenderInstance;
+    class CommandQueue;
+
     class AtlasTextureEntry
     {
     public:
-        AtlasTextureEntry() = default;
-        AtlasTextureEntry(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height) : mX(x), mY(y), mLayer(layer), mWidth(width), mHeight(height) {}
+        int32_t mX = 0;
+        int32_t mY = 0;
+        int32_t mLayer = 0;
+        int32_t mWidth = 0;
+        int32_t mHeight = 0;
 
-        int32_t mX = 0, mY = 0, mLayer = 0, mWidth = 0, mHeight = 0;
+        int32_t mTrimmedOffsetX = 0;
+        int32_t mTrimmedOffsetY = 0;
+        int32_t mTrimmedWidth = 0;
+        int32_t mTrimmedHeight = 0;
     };
 
     typedef std::map<size_t, AtlasTextureEntry> AtlasTextureLookupMap;
@@ -31,22 +39,25 @@ namespace Render
     class AtlasTexture
     {
     public:
-        AtlasTexture();
+        explicit AtlasTexture(RenderInstance& instance, CommandQueue& commandQueue);
+        ~AtlasTexture();
 
-        size_t addTexture(int32_t width, int32_t height, const void* data);
-        void bind() const;
-        void free();
-        GLint getTextureWidth() const { return mTextureWidth; }
-        GLint getTextureHeight() const { return mTextureHeight; }
+        size_t addTexture(const Image& image, bool trim = true);
         const AtlasTextureLookupMap& getLookupMap() const { return mLookupMap; }
         float getOccupancy() const;
-        void clear();
+        void clear(CommandQueue& commandQueue);
+
+        Texture& getTextureArray() { return *mTextureArray; }
 
     private:
-        GLuint mTextureArrayId;
-        GLint mTextureWidth;
-        GLint mTextureHeight;
-        GLint mTextureLayers;
+        static constexpr int32_t PADDING = 1;
+
+    private:
+        RenderInstance& mInstance;
+        std::unique_ptr<Texture> mTextureArray;
+
+        size_t mEmptySpriteId = 0;
+
         AtlasTextureLookupMap mLookupMap;
         size_t mNextTextureId = 1;
         std::vector<std::unique_ptr<rbp::SkylineBinPack>> mBinPacker;

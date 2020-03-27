@@ -470,27 +470,27 @@ namespace FAWorld
         if (!renderer) // TODO: some sort of headless mode for tests
             return;
 
-        mAnimation.setAnimationSprites(AnimState::dead, renderer->loadImage(helper(true, "dt")));
-        mAnimation.setAnimationSprites(AnimState::attack, renderer->loadImage(helper(false, "at")));
-        mAnimation.setAnimationSprites(AnimState::hit, renderer->loadImage(helper(false, "ht")));
-        mAnimation.setAnimationSprites(AnimState::spellLightning, renderer->loadImage(helper(false, "lm")));
-        mAnimation.setAnimationSprites(AnimState::spellFire, renderer->loadImage(helper(false, "fm")));
-        mAnimation.setAnimationSprites(AnimState::spellOther, renderer->loadImage(helper(false, "qm")));
+        mAnimation.setAnimationSprites(AnimState::dead, renderer->loadImage(helper(true, "dt"), true));
+        mAnimation.setAnimationSprites(AnimState::attack, renderer->loadImage(helper(false, "at"), true));
+        mAnimation.setAnimationSprites(AnimState::hit, renderer->loadImage(helper(false, "ht"), true));
+        mAnimation.setAnimationSprites(AnimState::spellLightning, renderer->loadImage(helper(false, "lm"), true));
+        mAnimation.setAnimationSprites(AnimState::spellFire, renderer->loadImage(helper(false, "fm"), true));
+        mAnimation.setAnimationSprites(AnimState::spellOther, renderer->loadImage(helper(false, "qm"), true));
 
         if (mInventory.isShieldEquipped())
-            mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "bl")));
+            mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "bl"), true));
         else
-            mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "ht")));
+            mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "ht"), true));
 
         if (getLevel() && getLevel()->isTown())
         {
-            mAnimation.setAnimationSprites(AnimState::walk, renderer->loadImage(helper(false, "wl")));
-            mAnimation.setAnimationSprites(AnimState::idle, renderer->loadImage(helper(false, "st")));
+            mAnimation.setAnimationSprites(AnimState::walk, renderer->loadImage(helper(false, "wl"), true));
+            mAnimation.setAnimationSprites(AnimState::idle, renderer->loadImage(helper(false, "st"), true));
         }
         else
         {
-            mAnimation.setAnimationSprites(AnimState::walk, renderer->loadImage(helper(false, "aw")));
-            mAnimation.setAnimationSprites(AnimState::idle, renderer->loadImage(helper(false, "as")));
+            mAnimation.setAnimationSprites(AnimState::walk, renderer->loadImage(helper(false, "aw"), true));
+            mAnimation.setAnimationSprites(AnimState::idle, renderer->loadImage(helper(false, "as"), true));
         }
 
         // TODO: Is this actually correct? It seems kind of odd, but it is what is listed in Jarulf's guide

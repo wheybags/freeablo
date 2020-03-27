@@ -7,6 +7,7 @@
 #include "player.h"
 #include "storedata.h"
 #include <algorithm>
+#include <engine/threadmanager.h>
 #include <misc/assert.h>
 
 namespace FAWorld
@@ -128,6 +129,12 @@ namespace FAWorld
 
                 if (level)
                 {
+                    if (mPlayer == mPlayer->getWorld()->getCurrentPlayer())
+                    {
+                        // Clear atlas texture
+                        //                        Engine::ThreadManager::get()->clearSprites();
+                    }
+
                     if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
                         mPlayer->teleport(level, Position(level->getFreeSpotNear(level->downStairsPos())));
                     else

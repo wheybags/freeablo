@@ -25,11 +25,12 @@ int main(int, char** argv)
 
         FAIO::init("");
 
-        std::unique_ptr<NuklearMisc::GuiSprite> banner(guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/banner.png")));
+        std::unique_ptr<NuklearMisc::GuiSprite> banner(
+            guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/banner.png", false)));
         std::unique_ptr<NuklearMisc::GuiSprite> graphicsHeader(
-            guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/graphics.png")));
+            guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/graphics.png", false)));
         std::unique_ptr<NuklearMisc::GuiSprite> playHeader(
-            guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/play.png")));
+            guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/play.png", false)));
 
         int32_t bannerW, bannerH;
         Render::spriteSize(banner->getSprite()->operator[](0), bannerW, bannerH);

@@ -65,7 +65,7 @@ int main(int argc, char** argv)
         {
             for (int32_t y = 0; y < frame.height(); y++)
             {
-                if (frame.get(x, y).visible)
+                if (frame.get(x, y).a)
                     if (x > maximumVisibleX)
                         maximumVisibleX = x;
             }

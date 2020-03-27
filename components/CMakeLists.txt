@@ -2,8 +2,11 @@ add_library(Cel
     cel/celfile.cpp cel/celfile.h
     cel/celframe.h
     cel/pal.cpp cel/pal.h
-    cel/celdecoder.cpp cel/celdecoder.h)
-target_link_libraries(Cel FAIO Misc)
+    cel/celdecoder.cpp
+    cel/celdecoder.h
+    cel/tilesetimage.cpp
+    cel/tilesetimage.h)
+target_link_libraries(Cel FAIO Misc Levels Image)
 set_target_properties(Cel PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(FAIO faio/faio.cpp faio/faio.h faio/fafileobject.h faio/fafileobject.cpp)
@@ -72,25 +75,53 @@ set(RenderFiles
     render/render.h
     render/levelobjects.h
     render/sdl2backend.cpp
-    render/sdl_gl_funcs.h
-    render/sdl_gl_funcs.cpp
     render/nuklear_sdl_gl3.cpp
     render/nuklear_sdl_gl3.h
     render/misc.h
     render/atlastexture.cpp
     render/atlastexture.h
+    render/OpenGL/vertexarrayobjectopengl.cpp
+    render/OpenGL/vertexarrayobjectopengl.h
+    render/OpenGL/renderinstanceopengl.cpp
+    render/OpenGL/renderinstanceopengl.h
+    render/renderinstance.cpp
+    render/renderinstance.h
+    render/vertexlayout.h
+    render/vertexlayout.cpp
     ../extern/RectangleBinPack/Rect.cpp
     ../extern/RectangleBinPack/Rect.h
     ../extern/RectangleBinPack/SkylineBinPack.cpp
     ../extern/RectangleBinPack/SkylineBinPack.h
-)
+    render/buffer.h
+    render/vertexarrayobject.h
+    render/vertextypes.h
+    render/OpenGL/scopedbindgl.h
+    render/OpenGL/bufferopengl.cpp
+    render/OpenGL/bufferopengl.h
+    render/pipeline.h
+    render/commandqueue.cpp
+    render/commandqueue.h
+    render/OpenGL/commandqueueopengl.cpp
+    render/OpenGL/commandqueueopengl.h
+    render/texture.h
+    render/OpenGL/textureopengl.cpp
+    render/OpenGL/textureopengl.h
+    render/color.h
+    render/OpenGL/pipelineopengl.cpp
+    render/OpenGL/pipelineopengl.h
+    render/descriptorset.h
+    render/descriptorset.cpp
+    render/OpenGL/descriptorsetopengl.cpp
+    render/OpenGL/descriptorsetopengl.h
+    render/alignedcpubuffer.h
+    render/alignedcpubuffer.cpp)
 add_library(Render ${RenderFiles})
-target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image ${OPENGL_LIBRARIES})
+target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
     input/hotkey.cpp
-    input/hotkey.h
+    input/hotkey.h 
     input/inputmanager.h
     input/keys.h
     input/sdl2backend.cpp)
@@ -156,6 +187,12 @@ add_library(Script
   script/luascript.cpp
   script/luascript.h
 )
-
 target_link_libraries(Script lua LuaBridge Misc)
 set_target_properties(Script PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+
+add_library(Image
+        Image/image.h
+        Image/image.cpp
+)
+set_target_properties(Image PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
+target_link_libraries(Image Misc SDL_image)

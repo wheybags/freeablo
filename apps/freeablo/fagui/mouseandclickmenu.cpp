@@ -4,7 +4,7 @@ namespace FAGui
 {
     MouseAndClickMenu::MouseAndClickMenu()
     {
-        mPentagramAnimation.playAnimation(FARender::Renderer::get()->loadImage("data/pentspn2.cel"),
+        mPentagramAnimation.playAnimation(FARender::Renderer::get()->loadImage("data/pentspn2.cel", false),
                                           FAWorld::World::getTicksInPeriod(FixedPoint("0.1")),
                                           FARender::AnimationPlayer::AnimationType::Looped);
     }
@@ -22,7 +22,7 @@ namespace FAGui
         ctx->style.button.active = ctx->style.button.normal;
 
         auto renderer = FARender::Renderer::get();
-        auto pentagram = renderer->loadImage("data/pentspn2.cel");
+        auto pentagram = renderer->loadImage("data/pentspn2.cel", false);
         nk_layout_row_template_begin(ctx, lineHeight);
         {
             nk_layout_row_template_push_static(ctx, pentagram->getWidth());

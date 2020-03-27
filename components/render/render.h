@@ -1,10 +1,11 @@
 #pragma once
 #include "cel/pal.h"
 #include "misc.h"
+#include <cel/celframe.h>
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <optional>
-#include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,12 +18,6 @@ namespace Render
     typedef void* Sprite;
     typedef void* FACursor;
     typedef SDL_Surface* FASurface;
-}
-
-namespace Cel
-{
-    struct Colour;
-    class CelFrame;
 }
 
 #include "levelobjects.h"
@@ -64,8 +59,8 @@ namespace Render
 
     struct NuklearGraphicsContext
     {
-        nk_gl_device dev;
-        nk_font_atlas atlas;
+        nk_gl_device dev = {};
+        nk_font_atlas atlas = {};
     };
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);
@@ -86,15 +81,22 @@ namespace Render
     FACursor createCursor(const Cel::CelFrame& celFrame, int32_t hot_x = 0, int32_t hot_y = 0);
     void freeCursor(FACursor cursor);
     void drawCursor(FACursor cursor);
-    SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    SpriteGroup* loadResizedSprite(
-        const std::string& path, size_t width, size_t height, size_t tileWidth, size_t tileHeight, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    SpriteGroup* loadCelToSingleTexture(const std::string& path);
-    SpriteGroup* loadSprite(const uint8_t* source, size_t width, size_t height);
-    SpriteGroup* loadTiledTexture(const std::string& sourcePath, size_t width, size_t height, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    SpriteGroup* loadNonCelSprite(const std::string& path);
-    SDL_Surface* loadNonCelImageTrans(const std::string& path, const std::string& extension, bool hasTrans, size_t transR, size_t transG, size_t transB);
+    SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB, bool trim);
+    SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB, bool trim);
+    SpriteGroup* loadResizedSprite(const std::string& path,
+                                   size_t width,
+                                   size_t height,
+                                   size_t tileWidth,
+                                   size_t tileHeight,
+                                   bool hasTrans,
+                                   size_t transR,
+                                   size_t transG,
+                                   size_t transB,
+                                   bool trim);
+    SpriteGroup* loadCelToSingleTexture(const std::string& path, bool trim);
+    SpriteGroup* loadSprite(const Image& image, bool trim);
+    SpriteGroup* loadNonCelSprite(const std::string& path, bool trim);
+    Image loadNonCelImageTrans(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
     Cel::Colour getPixel(const SDL_Surface* s, int x, int y);
     void deleteAllSprites();
 
@@ -104,17 +106,9 @@ namespace Render
 
     void drawSprite(const Sprite& sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor = std::nullopt);
 
-    struct RocketFATex
-    {
-        size_t animLength;
-        size_t spriteIndex;
-        size_t index;
-        bool needsImmortal;
-    };
-
     void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h);
 
-    SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top);
+    SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top, bool trim);
     void drawLevel(const Level::Level& level,
                    size_t minTopsHandle,
                    size_t minBottomsHandle,

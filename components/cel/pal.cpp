@@ -1,6 +1,5 @@
 #include "pal.h"
 #include <faio/fafileobject.h>
-#include <stdio.h>
 
 namespace Cel
 {
@@ -15,8 +14,9 @@ namespace Cel
             pal_file.FAfread(&contents[i].r, 1, 1);
             pal_file.FAfread(&contents[i].g, 1, 1);
             pal_file.FAfread(&contents[i].b, 1, 1);
+            contents[i].a = 255;
         }
     }
 
-    const Colour& Pal::operator[](size_t index) const { return contents.data()[index]; }
+    const Colour& Pal::operator[](size_t index) const { return contents[index]; }
 }

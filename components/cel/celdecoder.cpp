@@ -1,9 +1,9 @@
 #include "celdecoder.h"
 #include <faio/fafileobject.h>
 #include <functional>
-#include <iostream>
 #include <misc/stringops.h>
 #include <set>
+#include <utility>
 
 namespace Cel
 {
@@ -11,7 +11,7 @@ namespace Cel
     {
         struct DecodePal
         {
-            DecodePal(const Pal& pal) : mPal(pal) {}
+            explicit DecodePal(const Pal& pal) : mPal(pal) {}
             Colour operator()(uint8_t code) const { return mPal[code]; }
             const Pal& mPal;
         };
@@ -20,7 +20,7 @@ namespace Cel
     std::unique_ptr<Settings::Settings> CelDecoder::mSettingsCel;
     std::unique_ptr<Settings::Settings> CelDecoder::mSettingsCl2;
 
-    CelDecoder::CelDecoder(const std::string& celPath) : mCelPath(celPath), mAnimationLength(0)
+    CelDecoder::CelDecoder(std::string celPath) : mCelPath(std::move(celPath))
     {
         readCelName();
         readConfiguration();
@@ -50,21 +50,15 @@ namespace Cel
 
     void CelDecoder::readCelName()
     {
-        if (mCelPath.size() == 0)
-        {
-            throw "Cel path is empty";
-        }
+        if (mCelPath.empty())
+            message_and_abort("Cel path is empty");
 
         std::vector<std::string> celPathComponents;
 
         if (mCelPath.find_first_of('/') != std::string::npos)
-        {
             celPathComponents = Misc::StringUtils::split(mCelPath, '/');
-        }
         else
-        {
             celPathComponents = Misc::StringUtils::split(mCelPath, '\\');
-        }
 
         mCelName = celPathComponents[celPathComponents.size() - 1];
         mCelName = Misc::StringUtils::toLower(mCelName);
@@ -92,7 +86,6 @@ namespace Cel
         {
             settings = mSettingsCl2.get();
             extension = "cl2";
-            mIsCl2 = true;
         }
 
         int32_t pos = celNameWithoutExtension.find_last_of(extension) - 3;
@@ -144,7 +137,6 @@ namespace Cel
         int frameNumber = 0;
         for (FrameBytesRef frame : mFrames)
         {
-
             if (mCache.count(frameNumber))
             {
                 frameNumber++;
@@ -228,7 +220,7 @@ namespace Cel
                     return;
                 }
 
-                mFrames.push_back(std::vector<uint8_t>(static_cast<int32_t>(frameSize)));
+                mFrames.emplace_back(static_cast<int32_t>(frameSize));
                 uint32_t idx = mFrames.size() - 1;
                 file.FAfseek(mHeaderSize, SEEK_CUR);
                 file.FAfread(&mFrames[idx][0], 1, static_cast<int32_t>(frameSize));
@@ -252,7 +244,7 @@ namespace Cel
         }
 
         celFrame = CelFrame(mFrameWidth, mFrameHeight);
-        decoder(*this, frame, mPal, celFrame);
+        decoder(frame, mPal, celFrame);
         // assert (it == celFrame.mRawImage.end ());
     }
 
@@ -268,28 +260,28 @@ namespace Cel
             {
                 case 0x400:
                     if (isType0(celName, frameNumber))
-                        return &CelDecoder::decodeFrameType0;
+                        return CelDecoder::decodeFrameType0;
                     break;
                 case 0x220:
                     if (isType2or4(frame))
-                        return &CelDecoder::decodeFrameType2;
+                        return CelDecoder::decodeFrameType2;
                     else if (isType3or5(frame))
-                        return &CelDecoder::decodeFrameType3;
+                        return CelDecoder::decodeFrameType3;
                     break;
                 case 0x320:
                     if (isType2or4(frame))
-                        return &CelDecoder::decodeFrameType4;
+                        return CelDecoder::decodeFrameType4;
                     else if (isType3or5(frame))
-                        return &CelDecoder::decodeFrameType5;
+                        return CelDecoder::decodeFrameType5;
                     break;
             }
         }
         else if (Misc::StringUtils::endsWith(celName, "cl2"))
         {
-            return &CelDecoder::decodeFrameType6;
+            return CelDecoder::decodeFrameType6;
         }
 
-        return &CelDecoder::decodeFrameType1;
+        return CelDecoder::decodeFrameType1;
     }
 
     // isType0 returns true if the image is a plain 32x32.
@@ -298,21 +290,13 @@ namespace Cel
         std::set<int> numbers;
 
         if (celName == "l1.cel")
-        {
             numbers = {148, 159, 181, 186, 188};
-        }
         else if (celName == "l2.cel")
-        {
             numbers = {47, 1397, 1399, 1411};
-        }
         else if (celName == "l4.cel")
-        {
             numbers = {336, 639};
-        }
         else if (celName == "town.cel")
-        {
             numbers = {2328, 2367, 2593};
-        }
 
         if (numbers.find(frameNumber) != numbers.end())
         {
@@ -331,9 +315,7 @@ namespace Cel
         for (int i : zeroPositions)
         {
             if (frame[i] != 0)
-            {
                 return false;
-            }
         }
 
         return true;
@@ -348,9 +330,7 @@ namespace Cel
         for (int i : zeroPositions)
         {
             if (frame[i] != 0)
-            {
                 return false;
-            }
         }
 
         return true;
@@ -368,8 +348,45 @@ namespace Cel
     //
     void CelDecoder::decodeFrameType0(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        std::transform(frame.begin(), frame.end(), decodedFrame.begin(), DecodePal{pal});
+        for (int32_t y = 0; y < decodedFrame.height(); y++)
+        {
+            int32_t lineStartIndex = int32_t(frame.size()) - decodedFrame.width() * (y + 1);
+
+            for (int32_t x = 0; x < decodedFrame.height(); x++)
+                decodedFrame.mData.get(x, y) = pal[frame[lineStartIndex + x]];
+        }
     }
+
+    class XYIterator
+    {
+    public:
+        XYIterator(int32_t width, int32_t height, bool flipped = false) : mWidth(width), mFlipped(flipped)
+        {
+            if (mFlipped)
+                y = height - 1;
+        }
+
+        void operator++(int)
+        {
+            x++;
+            if (x >= mWidth)
+            {
+                x = 0;
+
+                if (mFlipped)
+                    y--;
+                else
+                    y++;
+            }
+        }
+
+        int32_t x = 0;
+        int32_t y = 0;
+
+    private:
+        int32_t mWidth = 0;
+        bool mFlipped = false;
+    };
 
     // DecodeFrameType1 returns an image after decoding the frame in the following
     // way:
@@ -386,7 +403,7 @@ namespace Cel
     //
     void CelDecoder::decodeFrameType1(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        auto frameIterator = decodedFrame.begin();
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), true);
 
         int32_t len = frame.size();
         for (int32_t pos = 0; pos < len;)
@@ -396,12 +413,21 @@ namespace Cel
             if (chunkSize < 0)
             {
                 // Transparent pixels.
-                frameIterator = std::fill_n(frameIterator, -chunkSize, Cel::Colour{0, 0, 0, false});
+                for (int32_t i = 0; i < std::abs(chunkSize); i++)
+                {
+                    decodedFrame.mData.get(it.x, it.y) = Cel::Colour(0, 0, 0, false);
+                    it++;
+                }
             }
             else
             {
                 // Regular pixels.
-                frameIterator = std::transform(frame.begin() + pos, frame.begin() + pos + chunkSize, frameIterator, DecodePal{pal});
+                for (int32_t i = 0; i < std::abs(chunkSize); i++)
+                {
+                    decodedFrame.mData.get(it.x, it.y) = pal[frame[pos + i]];
+                    it++;
+                }
+
                 pos += chunkSize;
             }
         }
@@ -636,13 +662,13 @@ namespace Cel
     // Type6 is the only type for CL2 images.
     void CelDecoder::decodeFrameType6(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame)
     {
-        int32_t frameIndex = 0;
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), true);
 
         int32_t len = frame.size();
         for (int32_t pos = 0; pos < len;)
         {
             // Some broken cl2s (afaik only firema.cl2) seem to have some rubbish tacked on the end of their frames
-            if (frameIndex == decodedFrame.width() * decodedFrame.height())
+            if (it.y < 0)
                 return;
 
             int32_t chunkSize = int32_t(int8_t(frame[pos]));
@@ -652,8 +678,9 @@ namespace Cel
                 // Transparent pixels.
                 for (int32_t i = 0; i < chunkSize; i++)
                 {
-                    debug_assert(decodedFrame.getFlatVector().size() > size_t(frameIndex));
-                    decodedFrame.getFlatVector()[frameIndex++] = Cel::Colour{0, 0, 0, false};
+                    debug_assert(decodedFrame.height() > it.y);
+                    decodedFrame.mData.get(it.x, it.y) = Cel::Colour{0, 0, 0, false};
+                    it++;
                 }
             }
             else
@@ -664,8 +691,9 @@ namespace Cel
                     // Regular pixels.
                     for (int32_t i = pos; i < pos + chunkSize; i++)
                     {
-                        debug_assert(decodedFrame.getFlatVector().size() > size_t(frameIndex));
-                        decodedFrame.getFlatVector()[frameIndex++] = pal[frame[i]];
+                        debug_assert(decodedFrame.height() > it.y);
+                        decodedFrame.mData.get(it.x, it.y) = pal[frame[i]];
+                        it++;
                     }
 
                     pos += chunkSize;
@@ -678,8 +706,9 @@ namespace Cel
                     // Run-length encoded pixels.
                     for (int32_t i = 0; i < chunkSize; i++)
                     {
-                        debug_assert(decodedFrame.getFlatVector().size() > size_t(frameIndex));
-                        decodedFrame.getFlatVector()[frameIndex++] = c;
+                        debug_assert(decodedFrame.height() > it.y);
+                        decodedFrame.mData.get(it.x, it.y) = c;
+                        it++;
                     }
                     pos++;
                 }
@@ -689,19 +718,7 @@ namespace Cel
 
     void CelDecoder::decodeFrameType2or3(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType2)
     {
-        auto frameIterator = decodedFrame.begin();
-
-        // Select line decoding function
-
-        auto decodeLineTransparency = &CelDecoder::decodeLineTransparencyRight;
-
-        if (frameType2)
-        {
-            decodeLineTransparency = &CelDecoder::decodeLineTransparencyLeft;
-        }
-
-        // Decode
-
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), true);
         const uint8_t* framePtr = &frame[0];
 
         for (int row = 0; row <= 32; row++)
@@ -712,47 +729,30 @@ namespace Cel
             if (frameType2)
             {
                 if ((row < 16 && row % 2 == 0) || (row >= 16 && row % 2 != 0))
-                {
                     framePtr += 2;
-                }
             }
             else
             {
                 if ((row < 16 && row % 2 != 0) || (row >= 16 && row % 2 == 0))
-                {
                     framePtr += 2;
-                }
             }
 
             int regularCount = 0;
             if (row < 16)
-            {
                 regularCount = 2 + (row * 2);
-            }
             else
-            {
                 regularCount = 32 - ((row - 16) * 2);
-            }
 
-            (this->*decodeLineTransparency)(&framePtr, pal, frameIterator, regularCount);
+            if (frameType2)
+                CelDecoder::decodeLineTransparencyLeft(framePtr, pal, decodedFrame, it, regularCount);
+            else
+                CelDecoder::decodeLineTransparencyRight(framePtr, pal, decodedFrame, it, regularCount);
         }
     }
 
     void CelDecoder::decodeFrameType4or5(FrameBytesRef frame, const Pal& pal, CelFrame& decodedFrame, bool frameType4)
     {
-        auto frameIterator = decodedFrame.begin();
-
-        // Select line decoding function
-
-        auto decodeLineTransparency = &CelDecoder::decodeLineTransparencyRight;
-
-        if (frameType4)
-        {
-            decodeLineTransparency = &CelDecoder::decodeLineTransparencyLeft;
-        }
-
-        // Decode
-
+        XYIterator it(decodedFrame.width(), decodedFrame.height(), true);
         const uint8_t* framePtr = &frame[0];
 
         for (int row = 0; row < 15; row++)
@@ -760,62 +760,71 @@ namespace Cel
             if (frameType4)
             {
                 if (row % 2 == 0)
-                {
                     framePtr += 2;
-                }
             }
             else
             {
                 if (row % 2 != 0)
-                {
                     framePtr += 2;
-                }
             }
 
             int regularCount = 2 + (row * 2);
 
-            (this->*decodeLineTransparency)(&framePtr, pal, frameIterator, regularCount);
+            if (frameType4)
+                CelDecoder::decodeLineTransparencyLeft(framePtr, pal, decodedFrame, it, regularCount);
+            else
+                CelDecoder::decodeLineTransparencyRight(framePtr, pal, decodedFrame, it, regularCount);
         }
 
         if (frame.size() > 256)
         {
-            frameIterator = std::transform(frame.begin() + 256, frame.end(), frameIterator, DecodePal{pal});
+            for (size_t i = 256; i < frame.size(); i++)
+            {
+                decodedFrame.mData.get(it.x, it.y) = pal[frame[i]];
+                it++;
+            }
         }
     }
 
-    void CelDecoder::decodeLineTransparencyLeft(const uint8_t** framePtr, const Pal& pal, ColoursRefIterator& decodedFrame, int regularCount)
+    void CelDecoder::decodeLineTransparencyLeft(const uint8_t*& framePtr, const Pal& pal, CelFrame& decodedFrame, XYIterator& it, int32_t regularCount)
     {
         int transparentCount = 32 - regularCount;
 
         // Implicit transparent pixels.
-        decodedFrame = std::fill_n(decodedFrame, transparentCount, Cel::Colour{0, 0, 0, false});
+        for (int32_t i = 0; i < transparentCount; i++)
+        {
+            decodedFrame.mData.get(it.x, it.y) = Cel::Colour{0, 0, 0, false};
+            it++;
+        }
 
         // Explicit regular pixels.
-        for (int i = 0; i < regularCount; i++)
+        for (int32_t i = 0; i < regularCount; i++)
         {
-            Colour color = pal[(*framePtr)[0]];
-            *decodedFrame = color;
-            ++decodedFrame;
-            (*framePtr)++;
+            decodedFrame.mData.get(it.x, it.y) = pal[*framePtr];
+            framePtr++;
+            it++;
         }
     }
 
-    void CelDecoder::decodeLineTransparencyRight(const uint8_t** framePtr, const Pal& pal, ColoursRefIterator& decodedFrame, int regularCount)
+    void CelDecoder::decodeLineTransparencyRight(const uint8_t*& framePtr, const Pal& pal, CelFrame& decodedFrame, XYIterator& it, int32_t regularCount)
     {
         int transparentCount = 32 - regularCount;
 
         // Explicit regular pixels.
-        for (int i = 0; i < regularCount; i++)
+        for (int32_t i = 0; i < regularCount; i++)
         {
-            Colour color = pal[(*framePtr)[0]];
-            *decodedFrame = color;
-            ++decodedFrame;
-            (*framePtr)++;
+            decodedFrame.mData.get(it.x, it.y) = pal[*framePtr];
+            framePtr++;
+            it++;
         }
 
         // Transparent pixels.
-
-        decodedFrame = std::fill_n(decodedFrame, transparentCount, Cel::Colour{0, 0, 0, false});
+        for (int32_t i = 0; i < transparentCount; i++)
+        {
+            decodedFrame.mData.get(it.x, it.y) = Cel::Colour{0, 0, 0, false};
+            decodedFrame.mData.get(it.x, it.y).g = 255;
+            it++;
+        }
     }
 
     void CelDecoder::setObjcursCelDimensions(int frameNumber)
@@ -825,55 +834,31 @@ namespace Cel
 
         // Width
         if (frameNumber == 0)
-        {
             mFrameWidth = 33;
-        }
         else if (frameNumber > 0 && frameNumber < 10)
-        {
             mFrameWidth = 32;
-        }
         else if (frameNumber == 10)
-        {
             mFrameWidth = 23;
-        }
         else if (frameNumber > 10 && frameNumber < 86)
-        {
             mFrameWidth = 28;
-        }
         else if (frameNumber >= 86 && frameNumber < 111)
-        {
             mFrameWidth = 56;
-        }
 
         // Height
         if (frameNumber == 0)
-        {
             mFrameHeight = 29;
-        }
         else if (frameNumber > 0 && frameNumber < 10)
-        {
             mFrameHeight = 32;
-        }
         else if (frameNumber == 10)
-        {
             mFrameHeight = 35;
-        }
         else if (frameNumber >= 11 && frameNumber < 61)
-        {
             mFrameHeight = 28;
-        }
         else if (frameNumber >= 61 && frameNumber < 67)
-        {
             mFrameHeight = 56;
-        }
         else if (frameNumber >= 67 && frameNumber < 86)
-        {
             mFrameHeight = 84;
-        }
         else if (frameNumber >= 86 && frameNumber < 111)
-        {
             mFrameHeight = 56;
-        }
     }
 
     void CelDecoder::setCharbutCelDimensions(int frameNumber)
@@ -881,8 +866,6 @@ namespace Cel
         mFrameWidth = 41;
 
         if (frameNumber == 0)
-        {
             mFrameWidth = 95;
-        }
     }
 }

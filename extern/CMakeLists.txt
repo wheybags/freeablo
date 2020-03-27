@@ -24,5 +24,6 @@ add_subdirectory(StormLib)
 add_subdirectory(gtest)
 add_subdirectory(lua)
 add_subdirectory(LuaBridge)
+add_subdirectory(glad)
 
 unset(MESSAGE_QUIET)

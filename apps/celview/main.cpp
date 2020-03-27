@@ -165,7 +165,7 @@ int main(int argc, char** argv)
                         {
                             selectedImage = argv[1];
                             frame = 0;
-                            nextImage = std::unique_ptr<NuklearMisc::GuiSprite>(guiHandler.getSprite(new Render::SpriteGroup(selectedImage)));
+                            nextImage = std::unique_ptr<NuklearMisc::GuiSprite>(guiHandler.getSprite(new Render::SpriteGroup(selectedImage, false)));
                         }
                     }
                 }
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
                     {
                         selectedImage = celFiles[i];
                         frame = 0;
-                        nextImage = std::unique_ptr<NuklearMisc::GuiSprite>(guiHandler.getSprite(new Render::SpriteGroup(selectedImage)));
+                        nextImage = std::unique_ptr<NuklearMisc::GuiSprite>(guiHandler.getSprite(new Render::SpriteGroup(selectedImage, false)));
                     }
                 }
 

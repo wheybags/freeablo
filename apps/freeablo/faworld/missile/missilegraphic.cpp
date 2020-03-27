@@ -88,7 +88,7 @@ namespace FAWorld::Missile
     {
         if (!path.empty())
         {
-            auto spriteGroup = FARender::Renderer::get()->loadImage(path);
+            auto spriteGroup = FARender::Renderer::get()->loadImage(path, true);
             mAnimationPlayer.playAnimation(spriteGroup, World::getTicksInPeriod("0.06"), animationType);
         }
     }

@@ -10,7 +10,7 @@ namespace FARender
         bool hasCurrentAnim = loader.load<bool>();
 
         if (hasCurrentAnim)
-            mCurrentAnim = Renderer::get()->loadImage(loader.load<std::string>());
+            mCurrentAnim = Renderer::get()->loadImage(loader.load<std::string>(), true);
 
         mPlayingAnimDuration = loader.load<FAWorld::Tick>();
         mPlayingAnimType = AnimationType(loader.load<uint8_t>());

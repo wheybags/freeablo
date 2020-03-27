@@ -12,8 +12,8 @@ namespace Render
     class SpriteGroup
     {
     public:
-        SpriteGroup(const std::string& path);
-        SpriteGroup(const std::vector<Sprite> sprites) : mSprites(sprites), mAnimLength(sprites.size()) {}
+        explicit SpriteGroup(const std::string& path, bool trim);
+        explicit SpriteGroup(std::vector<Sprite>&& sprites) : mSprites(std::move(sprites)), mAnimLength(sprites.size()) {}
         static bool canDeleteIndividualSprites();
         void destroy();
 
@@ -29,7 +29,7 @@ namespace Render
 
     private:
         std::vector<Sprite> mSprites;
-        int32_t mWidth, mHeight;
+        int32_t mWidth = 0, mHeight = 0;
         size_t mAnimLength;
     };
 
