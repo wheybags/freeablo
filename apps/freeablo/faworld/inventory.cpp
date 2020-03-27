@@ -65,7 +65,7 @@ namespace FAWorld
             const auto maxGoldPerSlot = item.getMaxCount();
             int32_t capacity = 0;
 
-            for (const auto& slot : mInventoryBox.getFlatVector())
+            for (const auto& slot : mInventoryBox)
             {
                 if (slot.isEmpty())
                     capacity += maxGoldPerSlot;

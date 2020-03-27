@@ -1,6 +1,7 @@
 #include "atlastexture.h"
 #include "../../extern/RectangleBinPack/SkylineBinPack.h"
 #include "texture.h"
+#include <Image/image.h>
 #include <memory>
 #include <misc/assert.h>
 #include <render/commandqueue.h>
@@ -29,17 +30,62 @@ namespace Render
         mTextureArray = mInstance.createTexture(textureInfo);
 
         this->clear(commandQueue);
+
+        Image blankImage(2, 2);
+        this->mEmptySpriteId = this->addTexture(blankImage, false);
     }
 
     AtlasTexture::~AtlasTexture() = default;
 
-    size_t AtlasTexture::addTexture(int32_t width, int32_t height, const void* data)
+    size_t AtlasTexture::addTexture(const Image& image, bool trim)
     {
+        std::unique_ptr<Image> imageTmp;
+
+        const Image* useImage = &image;
+        int32_t trimmedOffsetX = 0;
+        int32_t trimmedOffsetY = 0;
+
+        if (trim)
+        {
+            bool isEmpty = true;
+
+            int32_t left = image.width() - 1;
+            int32_t right = 0;
+            int32_t top = image.height() - 1;
+            int32_t bottom = 0;
+
+            for (int32_t y = 0; y < image.height(); y++)
+            {
+                for (int32_t x = 0; x < image.width(); x++)
+                {
+                    if (image.get(x, y).a != 0)
+                    {
+                        isEmpty = false;
+
+                        left = std::min(left, x);
+                        right = std::max(right, x);
+                        top = std::min(top, y);
+                        bottom = std::max(bottom, y);
+                    }
+                }
+            }
+
+            if (isEmpty)
+                return mEmptySpriteId;
+
+            imageTmp = std::make_unique<Image>(right - left + 1, bottom - top + 1);
+            image.blitTo(*imageTmp, left, top, imageTmp->width(), imageTmp->height(), 0, 0);
+
+            useImage = imageTmp.get();
+            trimmedOffsetX = left;
+            trimmedOffsetY = top;
+        }
+
         rbp::Rect dataDestinationRect = {};
         int32_t layer = -1;
         {
-            int32_t paddedWidth = width + PADDING;
-            int32_t paddedHeight = height + PADDING;
+            int32_t paddedWidth = useImage->width() + PADDING;
+            int32_t paddedHeight = useImage->height() + PADDING;
 
             release_assert(paddedWidth <= mTextureArray->width() + PADDING * 2 && paddedHeight <= mTextureArray->height() + PADDING * 2);
 
@@ -48,7 +94,7 @@ namespace Render
                 rbp::Rect packedPos = mBinPacker[layerTmp]->Insert(paddedWidth, paddedHeight, rbp::SkylineBinPack::LevelMinWasteFit);
                 if (packedPos.height != 0)
                 {
-                    dataDestinationRect = {packedPos.x + PADDING, packedPos.y + PADDING, width, height};
+                    dataDestinationRect = {packedPos.x + PADDING, packedPos.y + PADDING, useImage->width(), useImage->height()};
                     layer = layerTmp;
                     break;
                 }
@@ -57,11 +103,26 @@ namespace Render
             release_assert(layer != -1);
         }
 
-        mTextureArray->updateImageData(dataDestinationRect.x, dataDestinationRect.y, layer, width, height, reinterpret_cast<const uint8_t*>(data));
+        mTextureArray->updateImageData(dataDestinationRect.x,
+                                       dataDestinationRect.y,
+                                       layer,
+                                       useImage->width(),
+                                       useImage->height(),
+                                       reinterpret_cast<const uint8_t*>(useImage->mData.data()));
 
-        auto id = mNextTextureId++;
-        mLookupMap[id] = AtlasTextureEntry(dataDestinationRect.x, dataDestinationRect.y, layer, width, height);
+        AtlasTextureEntry atlasEntry = {};
+        atlasEntry.mX = dataDestinationRect.x;
+        atlasEntry.mY = dataDestinationRect.y;
+        atlasEntry.mLayer = layer;
+        atlasEntry.mWidth = image.width();
+        atlasEntry.mHeight = image.height();
+        atlasEntry.mTrimmedOffsetX = trimmedOffsetX;
+        atlasEntry.mTrimmedOffsetY = trimmedOffsetY;
+        atlasEntry.mTrimmedWidth = useImage->width();
+        atlasEntry.mTrimmedHeight = useImage->height();
 
+        size_t id = mNextTextureId++;
+        mLookupMap[id] = atlasEntry;
         return id;
     }
 
@@ -77,7 +138,7 @@ namespace Render
     {
         mBinPacker.clear();
         for (int32_t layer = 0; layer < mTextureArray->getInfo().arrayLayers; layer++)
-            mBinPacker.push_back(std::make_unique<rbp::SkylineBinPack>(mTextureArray->width() + PADDING * 2, mTextureArray->height() + PADDING * 2, false));
+            mBinPacker.push_back(std::make_unique<rbp::SkylineBinPack>(mTextureArray->width() - PADDING * 2, mTextureArray->height() - PADDING * 2, false));
 
         commandQueue.cmdClearTexture(*mTextureArray, Colors::transparent);
     }

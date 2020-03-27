@@ -17,7 +17,7 @@ namespace FAGui
     {
         auto renderer = FARender::Renderer::get();
 
-        auto boxTex = renderer->loadImage(this->mWide ? "data/textbox.cel" : "data/textbox2.cel");
+        auto boxTex = renderer->loadImage(this->mWide ? "data/textbox.cel" : "data/textbox2.cel", false);
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
 
@@ -59,7 +59,7 @@ namespace FAGui
 
                                                      // TODO: the "cursor" of the scrollbar is still the default nuklear look, which should change
 
-                                                     auto sliderImg = renderer->loadImage("data/textslid.cel");
+                                                     auto sliderImg = renderer->loadImage("data/textslid.cel", false);
 
                                                      // TODO: this image should repeat, not stretch
                                                      ctx->style.scrollv.normal = nk_style_item_image(sliderImg->getNkImage(scrollbarBackgroundIndex));
@@ -101,7 +101,7 @@ namespace FAGui
 
     void CharacterDialoguePopup::drawBackgroundCheckerboard(FARender::Renderer* renderer, struct nk_context* ctx, struct nk_rect dialogRectangle)
     {
-        auto blackTex = renderer->loadImage(Misc::getResourcesPath().str() + "/black.png");
+        auto blackTex = renderer->loadImage(Misc::getResourcesPath().str() + "/black.png", false);
         auto cbRect = nk_rect(dialogRectangle.x + 3, dialogRectangle.y + 3, dialogRectangle.w - 6, dialogRectangle.h - 6);
 
         ScopedApplyEffect effect(ctx, EffectType::checkerboarded);

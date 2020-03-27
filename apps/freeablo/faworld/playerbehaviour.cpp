@@ -132,7 +132,7 @@ namespace FAWorld
                     if (mPlayer == mPlayer->getWorld()->getCurrentPlayer())
                     {
                         // Clear atlas texture
-                        Engine::ThreadManager::get()->clearSprites();
+                        //                        Engine::ThreadManager::get()->clearSprites();
                     }
 
                     if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
