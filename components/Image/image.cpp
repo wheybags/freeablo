@@ -4,17 +4,18 @@
 #include <faio/fafileobject.h>
 #include <misc/stringops.h>
 
-void Image::blitTo(Image& other, int32_t destOffsetX, int32_t destOffsetY)
+void Image::blitTo(Image& other, int32_t srcOffsetX, int32_t srcOffsetY, int32_t srcW, int32_t srcH, int32_t destOffsetX, int32_t destOffsetY) const
 {
     release_assert(destOffsetX >= 0 && destOffsetY >= 0);
-    release_assert(destOffsetX + width() <= other.width() && destOffsetY + height() <= other.height());
+    release_assert(destOffsetX + srcW <= other.width() && destOffsetY + srcH <= other.height());
+    release_assert(srcOffsetX + srcW <= this->width() && srcOffsetY + srcH <= this->height());
 
-    for (int32_t line = 0; line < height(); line++)
+    for (int32_t y = 0; y < srcH; y++)
     {
-        ByteColour* src = &get(0, line);
-        ByteColour* dest = &other.get(destOffsetX, line + destOffsetY);
+        const ByteColour* src = &this->get(srcOffsetX, y + srcOffsetY);
+        ByteColour* dest = &other.get(destOffsetX, y + destOffsetY);
 
-        memcpy(dest, src, sizeof(ByteColour) * width());
+        memcpy(dest, src, sizeof(ByteColour) * srcW);
     }
 }
 

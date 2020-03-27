@@ -55,8 +55,9 @@ namespace FARender
         std::string celPath;
         std::string minPath;
         bool top;
+        bool trim;
 
-        TilesetPath(std::string _c, std::string _m, bool _t) : celPath(_c), minPath(_m), top(_t) {}
+        TilesetPath(std::string _c, std::string _m, bool _t, bool _trim) : celPath(_c), minPath(_m), top(_t), trim(_trim) {}
 
         TilesetPath() {}
     };
@@ -82,14 +83,14 @@ namespace FARender
     class SpriteCache
     {
     public:
-        SpriteCache(uint32_t size);
+        explicit SpriteCache(uint32_t size);
         ~SpriteCache();
 
-        FASpriteGroup* get(const std::string& path); ///< To be called from the game thread
+        FASpriteGroup* get(const std::string& path, bool trim); ///< To be called from the game thread
 
         /// Same as get(const std::string&), but for tileset sprites
         /// @brief To be called from the game thread
-        FASpriteGroup* getTileset(const std::string& celPath, const std::string& minPath, bool top);
+        FASpriteGroup* getTileset(const std::string& celPath, const std::string& minPath, bool top, bool trim);
 
         uint32_t newUniqueIndex(); ///< Can be called from any thread
 
@@ -122,7 +123,13 @@ namespace FARender
         void evict();
 
         std::map<std::string, FASpriteGroup*> mStrToCache;
-        std::map<uint32_t, std::string> mCacheToStr;
+
+        struct LoadSpec
+        {
+            std::string path;
+            bool trim = true;
+        };
+        std::map<uint32_t, LoadSpec> mCacheToStr;
 
         std::map<std::string, FASpriteGroup*> mStrToTilesetCache;
         std::map<uint32_t, TilesetPath> mCacheToTilesetPath;

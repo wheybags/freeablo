@@ -18,11 +18,11 @@ namespace FAWorld
         std::string cl2PathFormat = monsterData.cl2Path;
         Misc::StringUtils::replace(cl2PathFormat, "%c", "{}");
 
-        mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'w')));
-        mAnimation.setAnimationSprites(AnimState::idle, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'n')));
-        mAnimation.setAnimationSprites(AnimState::dead, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'd')));
-        mAnimation.setAnimationSprites(AnimState::attack, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'a')));
-        mAnimation.setAnimationSprites(AnimState::hit, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'h')));
+        mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'w'), true));
+        mAnimation.setAnimationSprites(AnimState::idle, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'n'), true));
+        mAnimation.setAnimationSprites(AnimState::dead, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'd'), true));
+        mAnimation.setAnimationSprites(AnimState::attack, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'a'), true));
+        mAnimation.setAnimationSprites(AnimState::hit, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'h'), true));
 
         mBehaviour.reset(new BasicMonsterBehaviour(this));
         mFaction = Faction::hell();

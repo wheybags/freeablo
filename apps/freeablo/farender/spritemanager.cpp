@@ -10,40 +10,21 @@ namespace FARender
     // game thread functions //
     ///////////////////////////
 
-    FASpriteGroup* SpriteManager::get(const std::string& path)
+    FASpriteGroup* SpriteManager::get(const std::string& path, bool trim)
     {
-        auto tmp = mCache.get(path);
+        auto tmp = mCache.get(path, trim);
         addToPreloadList(tmp->spriteCacheIndex);
         return tmp;
     }
 
-    FASpriteGroup* SpriteManager::getTileset(const std::string& celPath, const std::string& minPath, bool top)
+    FASpriteGroup* SpriteManager::getTileset(const std::string& celPath, const std::string& minPath, bool top, bool trim)
     {
-        auto tmp = mCache.getTileset(celPath, minPath, top);
+        auto tmp = mCache.getTileset(celPath, minPath, top, trim);
         addToPreloadList(tmp->spriteCacheIndex);
         return tmp;
-    }
-
-    FASpriteGroup* SpriteManager::getByServerSpriteIndex(uint32_t index)
-    {
-        if (!mServerSpriteMap.count(index))
-        {
-            FASpriteGroup* newSprite = mCache.allocNewSpriteGroup();
-            mServerSpriteMap[index] = newSprite;
-        }
-
-        return mServerSpriteMap[index];
     }
 
     std::string SpriteManager::getPathForIndex(uint32_t index) { return mCache.getPathForIndex(index); }
-
-    void SpriteManager::fillServerSprite(uint32_t serverIndex, const std::string& path)
-    {
-        auto source = get(path);
-        auto dest = getByServerSpriteIndex(serverIndex);
-
-        *dest = *source;
-    }
 
     FASpriteGroup* SpriteManager::getFromRaw(Image&& image)
     {
@@ -91,7 +72,7 @@ namespace FARender
             Image image = std::move(mRawCache[index]);
             mRawCache.erase(index);
 
-            Render::SpriteGroup* newSprite = Render::loadSprite(image);
+            Render::SpriteGroup* newSprite = Render::loadSprite(image, false);
             mCache.directInsert(newSprite, index);
 
             return newSprite;

@@ -241,7 +241,7 @@ namespace FAWorld
 
     std::string Item::getInvPlaceSoundPath() const { return base().invPlaceItemSoundPath; }
 
-    FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(base().dropItemGraphicsPath); }
+    FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(base().dropItemGraphicsPath, true); }
 
     bool Item::isBeltEquippable() const { return getInvSize() == std::array<int32_t, 2>{1, 1} && isUsable() && getType() != ItemType::gold; }
 

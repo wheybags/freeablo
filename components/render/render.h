@@ -81,13 +81,21 @@ namespace Render
     FACursor createCursor(const Cel::CelFrame& celFrame, int32_t hot_x = 0, int32_t hot_y = 0);
     void freeCursor(FACursor cursor);
     void drawCursor(FACursor cursor);
-    SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    SpriteGroup* loadResizedSprite(
-        const std::string& path, size_t width, size_t height, size_t tileWidth, size_t tileHeight, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    SpriteGroup* loadCelToSingleTexture(const std::string& path);
-    SpriteGroup* loadSprite(const Image& image);
-    SpriteGroup* loadNonCelSprite(const std::string& path);
+    SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB, bool trim);
+    SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB, bool trim);
+    SpriteGroup* loadResizedSprite(const std::string& path,
+                                   size_t width,
+                                   size_t height,
+                                   size_t tileWidth,
+                                   size_t tileHeight,
+                                   bool hasTrans,
+                                   size_t transR,
+                                   size_t transG,
+                                   size_t transB,
+                                   bool trim);
+    SpriteGroup* loadCelToSingleTexture(const std::string& path, bool trim);
+    SpriteGroup* loadSprite(const Image& image, bool trim);
+    SpriteGroup* loadNonCelSprite(const std::string& path, bool trim);
     Image loadNonCelImageTrans(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
     Cel::Colour getPixel(const SDL_Surface* s, int x, int y);
     void deleteAllSprites();
@@ -100,7 +108,7 @@ namespace Render
 
     void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h);
 
-    SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top);
+    SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top, bool trim);
     void drawLevel(const Level::Level& level,
                    size_t minTopsHandle,
                    size_t minBottomsHandle,

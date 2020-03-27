@@ -23,7 +23,7 @@ namespace FAWorld
                 AnimState type = AnimState(loader.load<uint8_t>());
                 std::string path = loader.load<std::string>();
 
-                mAnimations[size_t(type)] = FARender::Renderer::get()->loadImage(path);
+                mAnimations[size_t(type)] = FARender::Renderer::get()->loadImage(path, true);
             }
         }
 

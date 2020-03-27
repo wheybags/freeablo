@@ -26,11 +26,11 @@ namespace FAGui
         auto renderer = FARender::Renderer::get();
         mSmLogo = menu.createSmLogo();
         mFocus.reset(new FARender::AnimationPlayer());
-        mFocus->playAnimation(renderer->loadImage("ui_art/focus.pcx&trans=0,255,0&vanim=30"),
+        mFocus->playAnimation(renderer->loadImage("ui_art/focus.pcx&trans=0,255,0&vanim=30", false),
                               FAWorld::World::getTicksInPeriod("0.06"),
                               FARender::AnimationPlayer::AnimationType::Looped);
         mFocus16.reset(new FARender::AnimationPlayer());
-        mFocus16->playAnimation(renderer->loadImage("ui_art/focus16.pcx&trans=0,255,0&vanim=20"),
+        mFocus16->playAnimation(renderer->loadImage("ui_art/focus16.pcx&trans=0,255,0&vanim=20", false),
                                 FAWorld::World::getTicksInPeriod("0.06"),
                                 FARender::AnimationPlayer::AnimationType::Looped);
         setType(ContentType::chooseClass);
@@ -199,8 +199,8 @@ namespace FAGui
         nk_layout_space_push(ctx, {26, 207, 180, 76});
         {
             auto renderer = FARender::Renderer::get();
-            auto heros_img =
-                renderer->loadImage("ui_art/heros.pcx&vanim=76")->getNkImage(mSelectedCharacterInfo ? static_cast<int>(mSelectedCharacterInfo->charClass) : 3);
+            auto heros_img = renderer->loadImage("ui_art/heros.pcx&vanim=76", false)
+                                 ->getNkImage(mSelectedCharacterInfo ? static_cast<int>(mSelectedCharacterInfo->charClass) : 3);
             nk_image(ctx, heros_img);
         }
         nk_layout_space_end(ctx);
@@ -214,7 +214,7 @@ namespace FAGui
         auto renderer = FARender::Renderer::get();
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
-        auto bg = renderer->loadImage("ui_art/selhero.pcx")->getNkImage();
+        auto bg = renderer->loadImage("ui_art/selhero.pcx", false)->getNkImage();
         nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(bg));
         if (nk_begin(
                 ctx,

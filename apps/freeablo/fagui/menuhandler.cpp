@@ -9,7 +9,7 @@ namespace FAGui
     {
         auto ret = std::make_unique<FARender::AnimationPlayer>();
         auto renderer = FARender::Renderer::get();
-        ret->playAnimation(renderer->loadImage("ui_art/smlogo.pcx&trans=0,255,0&vanim=154"),
+        ret->playAnimation(renderer->loadImage("ui_art/smlogo.pcx&trans=0,255,0&vanim=154", false),
                            FAWorld::World::getTicksInPeriod("0.06"),
                            FARender::AnimationPlayer::AnimationType::Looped);
         return ret;

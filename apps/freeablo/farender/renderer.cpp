@@ -29,12 +29,12 @@ namespace FARender
     std::unique_ptr<CelFontInfo> Renderer::generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData, int spacing)
     {
         std::unique_ptr<CelFontInfo> ret(new CelFontInfo());
-        auto mergedTex = mSpriteManager.get(texturePath + "&convertToSingleTexture");
+        auto mergedTex = mSpriteManager.get(texturePath + "&convertToSingleTexture", false);
         ret->initByFontData(fontData, mergedTex->getWidth(), spacing);
         ret->nkFont.userdata.ptr = ret.get();
         ret->nkFont.height = mergedTex->getHeight();
         ret->nkFont.width = &CelFontInfo::getWidth;
-        mSpriteManager.get(texturePath);
+        //        mSpriteManager.get(texturePath);
         ret->nkFont.query = &CelFontInfo::queryGlyph;
         ret->nkFont.texture = mergedTex->getNkImage().handle;
         return ret;
@@ -43,7 +43,7 @@ namespace FARender
     std::unique_ptr<PcxFontInfo> Renderer::generateFont(const std::string& pcxPath, const std::string& binPath, const PcxFontInitData& fontInitData)
     {
         std::unique_ptr<PcxFontInfo> ret(new PcxFontInfo());
-        auto tex = mSpriteManager.get(pcxPath);
+        auto tex = mSpriteManager.get(pcxPath, false);
         ret->init(binPath, fontInitData);
         ret->nkFont.userdata.ptr = ret.get();
         ret->nkFont.height = fontInitData.spacingY;
@@ -143,12 +143,12 @@ namespace FARender
         const Level::Level& level = gameLevel.mLevel;
 
         Tileset tileset;
-        tileset.minTops = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), true);
-        tileset.minBottoms = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), false);
+        tileset.minTops = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), true, true);
+        tileset.minBottoms = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), false, true);
         // Special Cels may not exist for certain levels.
         tileset.mSpecialSprites = NULL;
         if (!level.getSpecialCelPath().empty())
-            tileset.mSpecialSprites = mSpriteManager.get(level.getSpecialCelPath());
+            tileset.mSpecialSprites = mSpriteManager.get(level.getSpecialCelPath(), true);
         tileset.mSpecialSpriteMap = level.getSpecialCelMap();
         return tileset;
     }
@@ -169,11 +169,7 @@ namespace FARender
 
     void Renderer::setCurrentState(RenderState* current) { Engine::ThreadManager::get()->sendRenderState(current); }
 
-    FASpriteGroup* Renderer::loadImage(const std::string& path) { return mSpriteManager.get(path); }
-
-    FASpriteGroup* Renderer::loadServerImage(uint32_t index) { return mSpriteManager.getByServerSpriteIndex(index); }
-
-    void Renderer::fillServerSprite(uint32_t index, const std::string& path) { mSpriteManager.fillServerSprite(index, path); }
+    FASpriteGroup* Renderer::loadImage(const std::string& path, bool trim) { return mSpriteManager.get(path, trim); }
 
     std::string Renderer::getPathForIndex(uint32_t index) { return mSpriteManager.getPathForIndex(index); }
 

@@ -53,7 +53,7 @@ namespace Render
     class DrawLevelCache
     {
     public:
-        DrawLevelCache(size_t initSize) { mInstanceData.resize(initSize); }
+        explicit DrawLevelCache(size_t initSize) { mInstanceData.resize(initSize); }
 
         void addSprite(uint32_t sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
         {
@@ -62,15 +62,15 @@ namespace Render
 
             SpriteVertexPerInstance vertexData = {};
 
-            vertexData.v_imageSize[0] = atlasEntry.mWidth;
-            vertexData.v_imageSize[1] = atlasEntry.mHeight;
+            vertexData.v_imageSize[0] = atlasEntry.mTrimmedWidth;
+            vertexData.v_imageSize[1] = atlasEntry.mTrimmedHeight;
 
             vertexData.v_atlasOffset[0] = atlasEntry.mX;
             vertexData.v_atlasOffset[1] = atlasEntry.mY;
             vertexData.v_atlasOffset[2] = atlasEntry.mLayer;
 
-            vertexData.v_imageOffset[0] = x;
-            vertexData.v_imageOffset[1] = y;
+            vertexData.v_imageOffset[0] = x + atlasEntry.mTrimmedOffsetX;
+            vertexData.v_imageOffset[1] = y + atlasEntry.mTrimmedOffsetY;
 
             if (auto c = highlightColor)
             {
@@ -249,35 +249,9 @@ namespace Render
         return settings;
     }
 
-    uint32_t getGLTexFromSurface(SDL_Surface* surf)
+    uint32_t getTextureHandleFromFrame(const Cel::CelFrame& frame, bool trim)
     {
-        bool validFormat = true;
-        if (surf->format->BitsPerPixel != 24 && surf->format->BitsPerPixel != 32)
-            validFormat = false;
-        if (surf->format->Rmask != 0x000000FF || surf->format->Gmask != 0x0000FF00 || surf->format->Bmask != 0x00FF0000)
-            validFormat = false;
-        if (surf->format->BitsPerPixel != 32 || surf->format->Amask != 0xFF000000)
-            validFormat = false;
-        if (surf->pitch != 4 * surf->w)
-            validFormat = false;
-
-        if (!validFormat)
-            surf = SDL_ConvertSurfaceFormat(
-                surf, SDL_PIXELFORMAT_ABGR8888, 0); // SDL is stupid and interprets pixel formats by endianness, so on LE, it calls RGBA ABGR...
-
-        debug_assert(surf->pitch == 4 * surf->w);
-
-        uint32_t id = atlasTexture->addTexture(surf->w, surf->h, surf->pixels);
-
-        if (!validFormat)
-            SDL_FreeSurface(surf);
-
-        return id;
-    }
-
-    uint32_t getTextureHandleFromFrame(const Cel::CelFrame& frame)
-    {
-        uint32_t id = atlasTexture->addTexture(frame.width(), frame.height(), frame.mData.data());
+        uint32_t id = atlasTexture->addTexture(frame, trim);
         return id;
     }
 
@@ -349,20 +323,20 @@ namespace Render
         return image;
     }
 
-    SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB)
+    SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB, bool trim)
     {
         std::string extension = getImageExtension(path);
 
         if (Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
         {
-            return new SpriteGroup(path);
+            return new SpriteGroup(path, trim);
         }
         else
         {
             Image tmp = loadNonCelImageTrans(path, hasTrans, transR, transG, transB);
 
             std::vector<Sprite> vec(1);
-            vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(tmp);
+            vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(tmp, trim);
 
             return new SpriteGroup(std::move(vec));
         }
@@ -370,7 +344,7 @@ namespace Render
 
     void clearTransparentSurface(SDL_Surface* s);
 
-    SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB)
+    SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB, bool trim)
     {
         Image original = loadNonCelImageTrans(path, hasTrans, transR, transG, transB);
 
@@ -392,14 +366,22 @@ namespace Render
                 }
             }
 
-            vec.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(tmp));
+            vec.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(tmp, trim));
         }
 
         return new SpriteGroup(std::move(vec));
     }
 
-    SpriteGroup* loadResizedSprite(
-        const std::string& path, size_t width, size_t height, size_t tileWidth, size_t tileHeight, bool hasTrans, size_t transR, size_t transG, size_t transB)
+    SpriteGroup* loadResizedSprite(const std::string& path,
+                                   size_t width,
+                                   size_t height,
+                                   size_t tileWidth,
+                                   size_t tileHeight,
+                                   bool hasTrans,
+                                   size_t transR,
+                                   size_t transG,
+                                   size_t transB,
+                                   bool trim)
     {
         Image original = loadNonCelImageTrans(path, hasTrans, transR, transG, transB);
 
@@ -443,12 +425,12 @@ namespace Render
         }
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(tmp);
+        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(tmp, trim);
 
         return new SpriteGroup(std::move(vec));
     }
 
-    SpriteGroup* loadCelToSingleTexture(const std::string& path)
+    SpriteGroup* loadCelToSingleTexture(const std::string& path, bool trim)
     {
         Cel::CelFile cel(path);
 
@@ -474,17 +456,17 @@ namespace Render
         }
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(image);
+        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(image, trim);
 
         return new SpriteGroup(std::move(vec));
     }
 
-    SpriteGroup* loadNonCelSprite(const std::string& path)
+    SpriteGroup* loadNonCelSprite(const std::string& path, bool trim)
     {
         Image image = Image::loadFromFile(path);
 
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(image);
+        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(image, trim);
 
         return new SpriteGroup(std::move(vec));
     }
@@ -511,10 +493,10 @@ namespace Render
         SDL_ShowCursor(SDL_ENABLE);
     }
 
-    SpriteGroup* loadSprite(const Image& image)
+    SpriteGroup* loadSprite(const Image& image, bool trim)
     {
         std::vector<Sprite> vec(1);
-        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(image);
+        vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(image, trim);
 
         return new SpriteGroup(std::move(vec));
     }
@@ -582,12 +564,12 @@ namespace Render
         drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight, highlightColor);
     }
 
-    SpriteGroup::SpriteGroup(const std::string& path)
+    SpriteGroup::SpriteGroup(const std::string& path, bool trim)
     {
         Cel::CelFile cel(path);
 
         for (int32_t i = 0; i < cel.numFrames(); i++)
-            mSprites.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(cel[i]));
+            mSprites.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(cel[i], trim));
 
         mWidth = cel[0].width();
         mHeight = cel[0].height();
@@ -691,13 +673,13 @@ namespace Render
         // }
     }
 
-    SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top)
+    SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top, bool trim)
     {
         std::vector<Cel::CelFrame> frames = Cel::loadTilesetImage(celPath, minPath, top);
         std::vector<Sprite> retval;
 
         for (const auto& frame : frames)
-            retval.push_back((Sprite)(intptr_t)getTextureHandleFromFrame(frame));
+            retval.push_back((Sprite)(intptr_t)getTextureHandleFromFrame(frame, trim));
 
         return new SpriteGroup(std::move(retval));
     }

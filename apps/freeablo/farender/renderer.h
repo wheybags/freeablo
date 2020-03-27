@@ -83,9 +83,7 @@ namespace FARender
         RenderState* getFreeState(); // ooh ah up de ra
         void setCurrentState(RenderState* current);
 
-        FASpriteGroup* loadImage(const std::string& path);
-        FASpriteGroup* loadServerImage(uint32_t index);
-        void fillServerSprite(uint32_t index, const std::string& path);
+        FASpriteGroup* loadImage(const std::string& path, bool trim);
         std::string getPathForIndex(uint32_t index);
 
         Render::Tile getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos);

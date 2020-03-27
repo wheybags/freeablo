@@ -668,7 +668,7 @@ namespace Cel
         for (int32_t pos = 0; pos < len;)
         {
             // Some broken cl2s (afaik only firema.cl2) seem to have some rubbish tacked on the end of their frames
-            if (it.y >= decodedFrame.height())
+            if (it.y < 0)
                 return;
 
             int32_t chunkSize = int32_t(int8_t(frame[pos]));
