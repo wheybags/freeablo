@@ -233,7 +233,7 @@ namespace FAWorld
             return;
 
         // Clear atlas texture
-        Engine::ThreadManager::get()->clearSprites();
+        // Engine::ThreadManager::get()->clearSprites();
 
         auto level = getLevel(levelNum);
 
