@@ -17,7 +17,7 @@ namespace FARender
         return ret;
     }
 
-    SpriteCache::SpriteCache(uint32_t size) : mNextCacheIndex(1), mCurrentSize(0), mMaxSize(size) {}
+    SpriteCache::SpriteCache(uint32_t size) : mMaxSize(size) {}
 
     SpriteCache::~SpriteCache()
     {
@@ -208,7 +208,7 @@ namespace FARender
             }
             else
             {
-                std::cerr << "ERROR INVALID SPRITE CACHE REQUEST " << index << std::endl;
+                message_and_abort_fmt("ERROR INVALID SPRITE CACHE REQUEST %d", index);
             }
 
             mUsedList.push_front(index);

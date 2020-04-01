@@ -128,7 +128,10 @@ namespace FARender
         size_t mNumRenderStates = 15;
         RenderState* mStates;
 
+    public:
         SpriteManager mSpriteManager;
+
+    private:
         Render::FACursor mCurrentCursor = nullptr;
         uint32_t mCurrentCursorFrame = std::numeric_limits<uint32_t>::max();
         Misc::Point mCursorSize;

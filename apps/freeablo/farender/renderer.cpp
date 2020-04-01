@@ -142,12 +142,12 @@ namespace FARender
         const Level::Level& level = gameLevel.mLevel;
 
         Tileset tileset;
-        tileset.minTops = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), true, true);
-        tileset.minBottoms = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), false, true);
+        tileset.minTops = mSpriteLoader.getSprite(mSpriteLoader.mTilesetTops[level.getTilesetId()]);
+        tileset.minBottoms = mSpriteLoader.getSprite(mSpriteLoader.mTilesetBottoms[level.getTilesetId()]);
         // Special Cels may not exist for certain levels.
         tileset.mSpecialSprites = nullptr;
-        if (!level.getSpecialCelPath().empty())
-            tileset.mSpecialSprites = mSpriteManager.get(level.getSpecialCelPath(), true);
+        if (mSpriteLoader.mTilesetSpecials.count(level.getTilesetId()) != 0)
+            tileset.mSpecialSprites = mSpriteLoader.getSprite(mSpriteLoader.mTilesetSpecials[level.getTilesetId()]);
         tileset.mSpecialSpriteMap = level.getSpecialCelMap();
         return tileset;
     }

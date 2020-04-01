@@ -139,10 +139,10 @@ namespace FARender
         std::map<uint32_t, CacheEntry> mCache;
         std::list<uint32_t> mUsedList;
 
-        std::atomic<uint32_t> mNextCacheIndex;
+        std::atomic<uint32_t> mNextCacheIndex = 99;
 
-        uint32_t mCurrentSize;
-        uint32_t mMaxSize;
+        uint32_t mCurrentSize = 0;
+        uint32_t mMaxSize = 0;
 
         static constexpr uint32_t SPRITEGROUP_STORE_BLOCK_SIZE = 256;
         std::vector<FASpriteGroup*> mSpriteGroupStore;

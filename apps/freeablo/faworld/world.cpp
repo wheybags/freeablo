@@ -2,16 +2,13 @@
 #include "../engine/enginemain.h"
 #include "../engine/net/multiplayerinterface.h"
 #include "../engine/threadmanager.h"
-#include "../faaudio/audiomanager.h"
 #include "../fagui/dialogmanager.h"
 #include "../fagui/guimanager.h"
 #include "../falevelgen/levelgen.h"
-#include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "actor.h"
 #include "actor/attackstate.h"
 #include "actor/basestate.h"
-#include "actorstats.h"
 #include "diabloexe/npc.h"
 #include "equiptarget.h"
 #include "findpath.h"
@@ -20,7 +17,6 @@
 #include "player.h"
 #include "playerbehaviour.h"
 #include "storedata.h"
-#include <algorithm>
 #include <diabloexe/diabloexe.h>
 #include <iostream>
 #include <misc/assert.h>
@@ -196,6 +192,7 @@ namespace FAWorld
             {357, 1}, {128, 5}, {129, 6}, {127, 7}, {116, 8}, {156, 9}, {157, 10}, {155, 11}, {161, 12}, {159, 13}, {213, 14}, {211, 15}, {216, 16}, {215, 17}};
 
         Level::Level townLevelBase(Level::Dun::getTown(sector1, sector2, sector3, sector4),
+                                   0,
                                    "levels/towndata/town.til",
                                    "levels/towndata/town.min",
                                    "levels/towndata/town.sol",

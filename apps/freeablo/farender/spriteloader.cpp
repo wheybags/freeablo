@@ -31,6 +31,17 @@ namespace FARender
 
             mMonsterSpriteDefinitions[pair.first] = std::move(definition);
         }
+
+        for (int32_t i = 0; i <= 2; i++)
+        {
+            std::string specialPath = fmt::format("levels/l{}data/l{}s.cel", i, i);
+            if (i == 0)
+                specialPath = "levels/towndata/towns.cel";
+
+            SpriteDefinition definition{specialPath, true};
+            mTilesetSpecials[i] = definition;
+            mSpritesToLoad.insert(definition);
+        }
     }
 
     void SpriteLoader::load()
@@ -58,5 +69,32 @@ namespace FARender
         }
 
         mSpritesToLoad.clear();
+
+        for (int32_t i = 0; i <= 4; i++)
+        {
+            std::string celPath = fmt::format("levels/l{}data/l{}.cel", i, i);
+            std::string minPath = fmt::format("levels/l{}data/l{}.min", i, i);
+
+            if (i == 0)
+            {
+                celPath = "levels/towndata/town.cel";
+                minPath = "levels/towndata/town.min";
+            }
+
+            {
+                SpriteDefinition definition = {};
+                definition.path = "virtual_diablo_tileset/top/" + std::to_string(i);
+                definition.trim = true;
+                mTilesetTops[i] = definition;
+                mLoadedSprites[definition] = renderer->mSpriteManager.getTileset(celPath, minPath, true, definition.trim);
+            }
+            {
+                SpriteDefinition definition = {};
+                definition.path = "virtual_diablo_tileset/bottom/" + std::to_string(i);
+                definition.trim = true;
+                mTilesetBottoms[i] = definition;
+                mLoadedSprites[definition] = renderer->mSpriteManager.getTileset(celPath, minPath, false, definition.trim);
+            }
+        }
     }
 }

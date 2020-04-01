@@ -1205,6 +1205,7 @@ namespace FALevelGen
         std::string solPath = ss.str();
 
         Level::Level levelBase(std::move(level),
+                               levelNum,
                                tilPath,
                                minPath,
                                solPath,

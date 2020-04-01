@@ -20,7 +20,7 @@ namespace FARender
         struct SpriteDefinition
         {
             std::string path;
-            bool trim = false;
+            bool trim = true;
 
             bool operator==(const SpriteDefinition& other) const { return path == other.path && trim == other.trim; }
             struct Hash
@@ -41,6 +41,10 @@ namespace FARender
             SpriteDefinition hit;
         };
         std::unordered_map<std::string, MonsterSpriteDefinition> mMonsterSpriteDefinitions;
+
+        std::unordered_map<int32_t, SpriteDefinition> mTilesetTops;
+        std::unordered_map<int32_t, SpriteDefinition> mTilesetBottoms;
+        std::unordered_map<int32_t, SpriteDefinition> mTilesetSpecials;
 
     private:
         std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> mSpritesToLoad;
