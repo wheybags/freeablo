@@ -2,16 +2,22 @@
 #include "../faworld/position.h"
 #include "diabloexe/diabloexe.h"
 #include "fontinfo.h"
+#include "spriteloader.h"
 #include "spritemanager.h"
 #include <atomic>
 #include <condition_variable>
+#include <cstddef>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <render/render.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <tuple>
+
+namespace DiabloExe
+{
+    class DiabloExe;
+}
 
 namespace FAWorld
 {
@@ -27,17 +33,17 @@ namespace FARender
     class Tileset
     {
     private:
-        FASpriteGroup* minTops;
-        FASpriteGroup* minBottoms;
-        FASpriteGroup* mSpecialSprites;
+        FASpriteGroup* minTops = nullptr;
+        FASpriteGroup* minBottoms = nullptr;
+        FASpriteGroup* mSpecialSprites = nullptr;
         std::map<int32_t, int32_t> mSpecialSpriteMap;
         friend class Renderer;
     };
 
     struct ObjectToRender
     {
-        FASpriteGroup* spriteGroup;
-        uint32_t frame;
+        FASpriteGroup* spriteGroup = nullptr;
+        uint32_t frame = 0;
         FAWorld::Position position;
         std::optional<Cel::Colour> hoverColor;
     };
@@ -56,13 +62,13 @@ namespace FARender
 
         Tileset tileset;
 
-        FAWorld::GameLevel* level;
+        FAWorld::GameLevel* level{};
 
         std::string mCursorPath;
-        uint32_t mCursorFrame;
-        bool mCursorCentered;
+        uint32_t mCursorFrame = 0;
+        bool mCursorCentered = false;
 
-        RenderState(Render::NuklearGraphicsContext& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData.dev) {}
+        explicit RenderState(Render::NuklearGraphicsContext& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData.dev) {}
     };
 
     FASpriteGroup* getDefaultSprite();
@@ -72,7 +78,7 @@ namespace FARender
     public:
         static Renderer* get();
 
-        Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen);
+        Renderer(const DiabloExe::DiabloExe& exe, int32_t windowWidth, int32_t windowHeight, bool fullscreen);
         ~Renderer();
 
         void stop();
@@ -109,6 +115,9 @@ namespace FARender
         std::unique_ptr<CelFontInfo> generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData, int spacing);
         std::unique_ptr<PcxFontInfo> generateFont(const std::string& pcxPath, const std::string& binPath, const PcxFontInitData& fontInitData);
 
+    public:
+        SpriteLoader mSpriteLoader;
+
     private:
         static Renderer* mRenderer; ///< Singleton instance
 
@@ -120,8 +129,8 @@ namespace FARender
         RenderState* mStates;
 
         SpriteManager mSpriteManager;
-        Render::FACursor mCurrentCursor = NULL;
-        uint32_t mCurrentCursorFrame = UINT32_MAX;
+        Render::FACursor mCurrentCursor = nullptr;
+        uint32_t mCurrentCursorFrame = std::numeric_limits<uint32_t>::max();
         Misc::Point mCursorSize;
 
         volatile bool mAlreadyExited = false;

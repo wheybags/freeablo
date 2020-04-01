@@ -89,11 +89,12 @@ namespace DiabloExe
     {
     public:
         void loadFontData(FAIO::FAFileObject& exe);
-        DiabloExe(const std::string& pathEXE = "Diablo.exe");
+        explicit DiabloExe(const std::string& pathEXE = "Diablo.exe");
         ~DiabloExe();
 
         const Monster& getMonster(const std::string& name) const;
         std::vector<const Monster*> getMonstersInLevel(size_t levelNum) const;
+        const std::map<std::string, Monster>& getMonsters() const { return mMonsters; }
 
         const Npc& getNpc(const std::string& name) const;
         std::vector<const Npc*> getNpcs() const;

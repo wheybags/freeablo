@@ -52,7 +52,7 @@ namespace Engine
         LocalInputHandler* getLocalInputHandler() { return mLocalInputHandler.get(); }
 
     private:
-        void runGameLoop(const cxxopts::ParseResult& variables, const std::string& pathEXE);
+        void runGameLoop(const cxxopts::ParseResult& variables);
 
     private:
         static EngineMain* singletonInstance;

@@ -8,10 +8,8 @@
 #include <Image/image.h>
 #include <audio/fa_audio.h>
 #include <functional>
-#include <input/inputmanager.h>
 #include <iostream>
 #include <misc/assert.h>
-#include <misc/stringops.h>
 #include <numeric>
 #include <render/levelobjects.h>
 #include <thread>
@@ -24,7 +22,7 @@ namespace FARender
         return &defaultSprite;
     }
 
-    Renderer* Renderer::mRenderer = NULL;
+    Renderer* Renderer::mRenderer = nullptr;
 
     std::unique_ptr<CelFontInfo> Renderer::generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData, int spacing)
     {
@@ -79,20 +77,21 @@ namespace FARender
         return handle;
     }
 
-    Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen) : mDone(false), mSpriteManager(1024), mWidthHeightTmp(0)
+    Renderer::Renderer(const DiabloExe::DiabloExe& exe, int32_t windowWidth, int32_t windowHeight, bool fullscreen)
+        : mSpriteLoader(exe), mDone(false), mSpriteManager(1024), mWidthHeightTmp(0)
     {
         release_assert(!mRenderer); // singleton, only one instance
 
         // Render initialization.
         {
-            Render::RenderSettings settings;
+            Render::RenderSettings settings = {};
             settings.windowWidth = windowWidth;
             settings.windowHeight = windowHeight;
             settings.fullscreen = fullscreen;
 
             nk_init_default(&mNuklearContext, nullptr);
-            mNuklearContext.clip.copy = nullptr;  // nk_sdl_clipbard_copy;
-            mNuklearContext.clip.paste = nullptr; // nk_sdl_clipbard_paste;
+            mNuklearContext.clip.copy = nullptr;  // nk_sdl_clipboard_copy;
+            mNuklearContext.clip.paste = nullptr; // nk_sdl_clipboard_paste;
             mNuklearContext.clip.userdata = nk_handle_ptr(0);
 
             Render::init("Freeablo", settings, mNuklearGraphicsData, &mNuklearContext);
@@ -124,7 +123,7 @@ namespace FARender
 
     Renderer::~Renderer()
     {
-        mRenderer = NULL;
+        mRenderer = nullptr;
 
         for (size_t i = 0; i < mNumRenderStates; ++i)
             mStates[i].~RenderState();
@@ -146,7 +145,7 @@ namespace FARender
         tileset.minTops = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), true, true);
         tileset.minBottoms = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), false, true);
         // Special Cels may not exist for certain levels.
-        tileset.mSpecialSprites = NULL;
+        tileset.mSpecialSprites = nullptr;
         if (!level.getSpecialCelPath().empty())
             tileset.mSpecialSprites = mSpriteManager.get(level.getSpecialCelPath(), true);
         tileset.mSpecialSpriteMap = level.getSpecialCelMap();
@@ -164,7 +163,7 @@ namespace FARender
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 
     void Renderer::setCurrentState(RenderState* current) { Engine::ThreadManager::get()->sendRenderState(current); }

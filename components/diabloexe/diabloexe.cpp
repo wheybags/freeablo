@@ -202,10 +202,12 @@ namespace DiabloExe
                 for (j = 1; mMonsters.find(tmp.monsterName + "_" + std::to_string(j)) != mMonsters.end(); j++)
                     ;
 
-                mMonsters[tmp.monsterName + "_" + std::to_string(j)] = tmp;
+                tmp.idName = tmp.monsterName + "_" + std::to_string(j);
+                mMonsters[tmp.idName] = std::move(tmp);
             }
             else
             {
+                tmp.idName = tmp.monsterName;
                 mMonsters[tmp.monsterName] = tmp;
             }
         }

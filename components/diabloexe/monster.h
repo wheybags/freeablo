@@ -77,6 +77,7 @@ namespace DiabloExe
         uint32_t secondAttackPlayback;
 
         std::string monsterName; // uint32_t ptr in exe
+        std::string idName;
 
         uint8_t minDunLevel;
         uint8_t maxDunLevel;

@@ -164,7 +164,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fasavegame/objectidmapper.cpp
     fasavegame/gameloader.h
     fasavegame/gameloader.cpp
-)
+    farender/spriteloader.cpp
+    farender/spriteloader.h)
 
 target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input Random Image enet cxxopts fmt::fmt)
 target_include_directories(freeablo_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

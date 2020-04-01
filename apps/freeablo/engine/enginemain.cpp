@@ -45,32 +45,30 @@ namespace Engine
         auto resolutionWidth = mSettings.get<size_t>("Display", "resolutionWidth");
         auto resolutionHeight = mSettings.get<size_t>("Display", "resolutionHeight");
         const bool fullscreen = mSettings.get<bool>("Display", "fullscreen");
+
         auto pathEXE = mSettings.get<std::string>("Game", "PathEXE");
         if (pathEXE.empty())
             pathEXE = "Diablo.exe";
+        mExe = std::make_unique<DiabloExe::DiabloExe>(pathEXE);
+        if (!mExe->isLoaded())
+            return;
 
         Engine::ThreadManager threadManager;
-        FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen);
+        FARender::Renderer renderer(*mExe, resolutionWidth, resolutionHeight, fullscreen);
         mInputManager = std::make_shared<EngineInputManager>(renderer.getNuklearContext());
         mInputManager->registerKeyboardObserver(this);
-        std::thread mainThread([&] { this->runGameLoop(variables, pathEXE); });
+        std::thread mainThread([&] { this->runGameLoop(variables); });
         threadManager.run();
 
         mainThread.join();
     }
 
-    void EngineMain::runGameLoop(const cxxopts::ParseResult& variables, const std::string& pathEXE)
+    void EngineMain::runGameLoop(const cxxopts::ParseResult& variables)
     {
         FARender::Renderer& renderer = *FARender::Renderer::get();
+        renderer.mSpriteLoader.load();
 
         FAWorld::PlayerClass characterClass = FAWorld::playerClassFromString(variables["character"].as<std::string>());
-
-        mExe = std::make_unique<DiabloExe::DiabloExe>(pathEXE);
-        if (!mExe->isLoaded())
-        {
-            renderer.stop();
-            return;
-        }
 
         FAWorld::ItemFactory itemFactory(*mExe, Random::DummyRng::instance);
         mPlayerFactory = std::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);

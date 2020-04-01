@@ -3,9 +3,8 @@
 #include "actor.h"
 #include "diabloexe/monster.h"
 #include "itemfactory.h"
-#include <fmt/format.h>
+#include <memory>
 #include <misc/stringops.h>
-#include <random/random.h>
 
 namespace FAWorld
 {
@@ -18,13 +17,16 @@ namespace FAWorld
         std::string cl2PathFormat = monsterData.cl2Path;
         Misc::StringUtils::replace(cl2PathFormat, "%c", "{}");
 
-        mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'w'), true));
-        mAnimation.setAnimationSprites(AnimState::idle, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'n'), true));
-        mAnimation.setAnimationSprites(AnimState::dead, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'd'), true));
-        mAnimation.setAnimationSprites(AnimState::attack, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'a'), true));
-        mAnimation.setAnimationSprites(AnimState::hit, FARender::Renderer::get()->loadImage(fmt::format(cl2PathFormat, 'h'), true));
+        FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
+        FARender::SpriteLoader::MonsterSpriteDefinition spriteDefinitions = spriteLoader.mMonsterSpriteDefinitions[monsterData.idName];
 
-        mBehaviour.reset(new BasicMonsterBehaviour(this));
+        mAnimation.setAnimationSprites(AnimState::walk, spriteLoader.getSprite(spriteDefinitions.walk));
+        mAnimation.setAnimationSprites(AnimState::idle, spriteLoader.getSprite(spriteDefinitions.idle));
+        mAnimation.setAnimationSprites(AnimState::dead, spriteLoader.getSprite(spriteDefinitions.dead));
+        mAnimation.setAnimationSprites(AnimState::attack, spriteLoader.getSprite(spriteDefinitions.attack));
+        mAnimation.setAnimationSprites(AnimState::hit, spriteLoader.getSprite(spriteDefinitions.hit));
+
+        mBehaviour = std::make_unique<BasicMonsterBehaviour>(this);
         mFaction = Faction::hell();
         mName = monsterData.monsterName;
 
