@@ -345,152 +345,101 @@ namespace FAWorld
 
     void Player::updateSprites()
     {
-        auto classCode = getClassCode(mPlayerClass);
+        std::string classCode = Misc::StringUtils::toLower(playerClassToString(this->getClass()));
 
-        std::string armour = "l", weapon;
-        if (!mInventory.getBody().isEmpty())
+        std::string armor;
         {
-            switch (mInventory.getBody().getType())
+            if (mInventory.getBody().isEmpty())
             {
-                case ItemType::heavyArmor:
-                {
-                    armour = "h";
-                    break;
-                }
-
-                case ItemType::mediumArmor:
-                {
-                    armour = "m";
-                    break;
-                }
-
-                case ItemType::lightArmor:
-                default:
-                {
-                    armour = "l";
-                    break;
-                }
+                armor = "none";
             }
-        }
-        if (mInventory.getLeftHand().isEmpty() && mInventory.getRightHand().isEmpty())
-        {
-            weapon = "n";
-        }
-        else if ((mInventory.getLeftHand().isEmpty() && !mInventory.getRightHand().isEmpty()) ||
-                 (!mInventory.getLeftHand().isEmpty() && mInventory.getRightHand().isEmpty()))
-        {
-            const Item* hand = nullptr;
-
-            if (!mInventory.getLeftHand().isEmpty())
-                hand = &mInventory.getLeftHand();
             else
-                hand = &mInventory.getRightHand();
-            switch (hand->getType())
             {
-                case ItemType::axe:
+                switch (mInventory.getBody().getType())
                 {
-                    if (hand->getEquipLoc() == ItemEquipType::oneHanded)
-                        weapon = "s";
-                    else
-                        weapon = "a";
-                    break;
-                }
+                    case ItemType::heavyArmor:
+                        armor = "heavy";
+                        break;
 
-                case ItemType::mace:
-                {
-                    weapon = "m";
-                    break;
-                }
+                    case ItemType::mediumArmor:
+                        armor = "medium";
+                        break;
 
-                case ItemType::bow:
-                {
-                    weapon = "b";
-                    break;
-                }
+                    case ItemType::lightArmor:
+                        armor = "light";
+                        break;
 
-                case ItemType::shield:
-                {
-                    weapon = "u";
-                    break;
-                }
-
-                case ItemType::sword:
-                {
-                    weapon = "s";
-                    break;
-                }
-
-                default:
-                {
-                    weapon = "n";
-                    break;
+                    default:
+                        invalid_enum(ItemType, mInventory.getBody().getType());
                 }
             }
         }
 
-        else if (!mInventory.getLeftHand().isEmpty() && !mInventory.getRightHand().isEmpty())
+        std::string weapon;
         {
-            if ((mInventory.getLeftHand().getType() == ItemType::sword && mInventory.getRightHand().getType() == ItemType::shield) ||
-                (mInventory.getLeftHand().getType() == ItemType::shield && mInventory.getRightHand().getType() == ItemType::sword))
-                weapon = "d";
+            EquippedInHandsItems handsItems = mInventory.getItemsInHands();
 
-            else if (mInventory.getLeftHand().getType() == ItemType::bow && mInventory.getRightHand().getType() == ItemType::bow)
-                weapon = "b";
-            else if (mInventory.getLeftHand().getType() == ItemType::axe && mInventory.getRightHand().getType() == ItemType::axe)
-                weapon = "a";
+            if (!handsItems.weapon)
+                weapon = "none";
+            else
+            {
+                switch (handsItems.weapon.value().item->getType())
+                {
+                    case ItemType::sword:
+                        weapon = "sword";
+                        break;
+                    case ItemType::mace:
+                        weapon = "mace";
+                        break;
+                    case ItemType::axe:
+                        weapon = "axe";
+                        break;
+                    case ItemType::staff:
+                        weapon = "staff";
+                        break;
+                    case ItemType::bow:
+                        weapon = "bow";
+                        break;
+                    default:
+                        invalid_enum(ItemType, handsItems.weapon.value().item->getType());
+                }
 
-            else if (mInventory.getLeftHand().getType() == ItemType::staff && mInventory.getRightHand().getType() == ItemType::staff)
-                weapon = "t";
-            else if (mInventory.getLeftHand().getType() == ItemType::mace || mInventory.getRightHand().getType() == ItemType::mace)
-                weapon = "h";
+                if (handsItems.weapon.value().item->getEquipLoc() == ItemEquipType::twoHanded)
+                    weapon = weapon + "-2h";
+                else
+                    weapon = weapon + "-1h";
+            }
 
-            release_assert(!weapon.empty()); // Empty weapon format
+            if (handsItems.shield)
+                weapon = weapon + "-shield";
         }
-        auto weaponCode = weapon;
-        auto armourCode = armour;
-
-        auto helper = [&](bool isDie, const char* animCode) {
-            std::string weapFormat = weaponCode;
-
-            if (isDie)
-                weapFormat = "n";
-
-            return fmt::format(FMT_STRING("plrgfx/{}/{}{}{}/{}{}{}{}.cl2"),
-                               playerClassToString(mPlayerClass),
-                               classCode,
-                               armourCode,
-                               weapFormat,
-                               classCode,
-                               armourCode,
-                               weapFormat,
-                               animCode);
-        };
 
         auto renderer = FARender::Renderer::get();
         if (!renderer) // TODO: some sort of headless mode for tests
             return;
 
-        mAnimation.setAnimationSprites(AnimState::dead, renderer->loadImage(helper(true, "dt"), true));
-        mAnimation.setAnimationSprites(AnimState::attack, renderer->loadImage(helper(false, "at"), true));
-        mAnimation.setAnimationSprites(AnimState::hit, renderer->loadImage(helper(false, "ht"), true));
-        mAnimation.setAnimationSprites(AnimState::spellLightning, renderer->loadImage(helper(false, "lm"), true));
-        mAnimation.setAnimationSprites(AnimState::spellFire, renderer->loadImage(helper(false, "fm"), true));
-        mAnimation.setAnimationSprites(AnimState::spellOther, renderer->loadImage(helper(false, "qm"), true));
+        auto getAnimation = [&](const std::string& animation) {
+            FARender::SpriteLoader::PlayerSpriteKey spriteLookupKey({{"animation", animation}, {"class", classCode}, {"armor", armor}, {"weapon", weapon}});
+            return renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mPlayerSpriteDefinitions[spriteLookupKey]);
+        };
 
-        if (mInventory.isShieldEquipped())
-            mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "bl"), true));
-        else
-            mAnimation.setAnimationSprites(AnimState::block, renderer->loadImage(helper(false, "ht"), true));
+        mAnimation.setAnimationSprites(AnimState::dead, getAnimation("dead"));
+        mAnimation.setAnimationSprites(AnimState::attack, getAnimation("attack"));
+        mAnimation.setAnimationSprites(AnimState::hit, getAnimation("hit"));
+        mAnimation.setAnimationSprites(AnimState::spellLightning, getAnimation("cast-lightning"));
+        mAnimation.setAnimationSprites(AnimState::spellFire, getAnimation("cast-fire"));
+        mAnimation.setAnimationSprites(AnimState::spellOther, getAnimation("cast-magic"));
+        mAnimation.setAnimationSprites(AnimState::block, getAnimation("block"));
 
         if (getLevel() && getLevel()->isTown())
         {
-            mAnimation.setAnimationSprites(AnimState::walk, renderer->loadImage(helper(false, "wl"), true));
-            mAnimation.setAnimationSprites(AnimState::idle, renderer->loadImage(helper(false, "st"), true));
+            mAnimation.setAnimationSprites(AnimState::walk, getAnimation("walk-town"));
+            mAnimation.setAnimationSprites(AnimState::idle, getAnimation("idle-town"));
         }
         else
         {
-            mAnimation.setAnimationSprites(AnimState::walk, renderer->loadImage(helper(false, "aw"), true));
-            mAnimation.setAnimationSprites(AnimState::idle, renderer->loadImage(helper(false, "as"), true));
+            mAnimation.setAnimationSprites(AnimState::walk, getAnimation("walk-dungeon"));
+            mAnimation.setAnimationSprites(AnimState::idle, getAnimation("idle-dungeon"));
         }
 
         // TODO: Is this actually correct? It seems kind of odd, but it is what is listed in Jarulf's guide

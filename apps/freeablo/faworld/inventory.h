@@ -50,8 +50,12 @@ namespace FAWorld
             EquipTargetType location;
         };
 
+        std::optional<TypeData> weapon;
+
+        // will contain the same value as weapon above, if the type matches
         std::optional<TypeData> meleeWeapon;
         std::optional<TypeData> rangedWeapon;
+
         std::optional<TypeData> shield;
     };
 

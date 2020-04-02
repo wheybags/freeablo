@@ -68,6 +68,13 @@ namespace Misc
             return inout;
         }
 
+        static std::string toLower(std::string_view in)
+        {
+            std::string retval(in);
+            std::transform(retval.begin(), retval.end(), retval.begin(), (int (*)(int))std::tolower);
+            return retval;
+        }
+
         /// Returns lower case copy of input string
         static std::string lowerCase(const std::string& in)
         {

@@ -17,7 +17,7 @@ namespace Render
         // TODO: dynamic configuration of atlas size
 
         static constexpr int32_t requiredTextureSize = 8192;
-        static constexpr int32_t requiredTextureLayers = 3;
+        static constexpr int32_t requiredTextureLayers = 4;
 
         BaseTextureInfo textureInfo{};
         textureInfo.width = requiredTextureSize;

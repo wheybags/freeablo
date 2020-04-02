@@ -42,6 +42,86 @@ namespace FARender
             mTilesetSpecials[i] = definition;
             mSpritesToLoad.insert(definition);
         }
+
+        static std::vector<std::pair<std::string, std::string>> classes{{"warrior", "w"}, {"rogue", "r"}, {"sorceror", "s"}};
+        static std::vector<std::pair<std::string, std::string>> armors{{"none", "l"}, {"heavy-armor", "h"}, {"medium-armor", "m"}, {"light-armor", "l"}};
+        static std::vector<std::pair<std::string, std::string>> weapons{{"none", "n"},
+                                                                        {"sword-1h", "s"},
+                                                                        {"axe-1h", "s"},
+                                                                        {"mace-1h", "m"},
+                                                                        {"none-shield", "u"},
+                                                                        {"sword-1h-shield", "d"},
+                                                                        {"axe-1h-shield", "d"},
+                                                                        {"mace-1h-shield", "h"},
+                                                                        {"bow-2h", "b"},
+                                                                        {"axe-2h", "a"},
+                                                                        {"staff-2h", "t"}};
+
+        static std::vector<std::pair<std::string, std::string>> animations{{"dead", "dt"},
+                                                                           {"attack", "at"},
+                                                                           {"hit", "ht"},
+                                                                           {"cast-lightning", "lm"},
+                                                                           {"cast-fire", "fm"},
+                                                                           {"cast-magic", "qm"},
+                                                                           {"block", "bl"},
+                                                                           {"walk-town", "wl"},
+                                                                           {"walk-dungeon", "aw"},
+                                                                           {"idle-town", "st"},
+                                                                           {"idle-dungeon", "as"}};
+
+        for (const auto& classPair : classes)
+        {
+            for (const auto& armorPair : armors)
+            {
+                for (const auto& weaponPair : weapons)
+                {
+                    for (const auto& animationPair : animations)
+                    {
+                        const std::string& className = classPair.first;
+                        std::string classNameSpriteCode = classPair.first;
+                        std::string classSpriteCode = classPair.second;
+
+                        const std::string& armorName = armorPair.first;
+                        std::string armorSpriteCode = armorPair.second;
+
+                        const std::string& weaponName = weaponPair.first;
+                        std::string weaponSpriteCode = weaponPair.second;
+
+                        const std::string& animationName = animationPair.first;
+                        std::string animationSpriteCode = animationPair.second;
+
+                        // temporary hack
+                        classNameSpriteCode = "warrior";
+                        classSpriteCode = "w";
+                        armorSpriteCode = "l";
+
+                        if (animationName == "dead")
+                            weaponSpriteCode = "n"; // no weapons in death anims
+
+                        if (animationName == "block" && !Misc::StringUtils::endsWith(weaponName, "-shield"))
+                            animationSpriteCode = "ht"; // There are no block animations without shields, use hit as a placeholder
+
+                        std::string spritePath = fmt::format(FMT_STRING("plrgfx/{}/{}{}{}/{}{}{}{}.cl2"),
+                                                             classNameSpriteCode,
+
+                                                             classSpriteCode,
+                                                             armorSpriteCode,
+                                                             weaponSpriteCode,
+
+                                                             classSpriteCode,
+                                                             armorSpriteCode,
+                                                             weaponSpriteCode,
+                                                             animationSpriteCode);
+
+                        PlayerSpriteKey spriteKey{{{"class", className}, {"armor", armorName}, {"weapon", weaponName}, {"animation", animationName}}};
+                        SpriteDefinition definition{spritePath, true};
+
+                        mPlayerSpriteDefinitions[spriteKey] = definition;
+                        mSpritesToLoad.insert(definition);
+                    }
+                }
+            }
+        }
     }
 
     void SpriteLoader::load()
