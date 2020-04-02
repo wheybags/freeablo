@@ -3,6 +3,7 @@
 #include <faio/fafileobject.h>
 #include <fmt/format.h>
 #include <input/inputmanager.h>
+#include <misc/stringops.h>
 #include <nfd.h>
 #include <nuklearmisc/inputfwd.h>
 #include <nuklearmisc/standaloneguispritehandler.h>
@@ -153,7 +154,9 @@ int main(int argc, char** argv)
                         auto tmp = FAIO::listMpqFiles("*.cl2");
                         celFiles.insert(celFiles.end(), tmp.begin(), tmp.end());
 
-                        std::sort(celFiles.begin(), celFiles.end());
+                        std::sort(celFiles.begin(), celFiles.end(), [](const std::string& l, const std::string& r) {
+                            return Misc::StringUtils::toLower(l) < Misc::StringUtils::toLower(r);
+                        });
 
                         settings.set<std::string>("celview", "listFile", listFile);
                         settings.set<std::string>("celview", "mpqFile", mpqFile);

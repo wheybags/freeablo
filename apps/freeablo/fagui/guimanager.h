@@ -1,5 +1,6 @@
 #pragma once
 #include "../engine/inputobserverinterface.h"
+#include "../farender/spriteloader.h"
 #include "../faworld/spellenums.h"
 #include "dialogmanager.h"
 #include "textcolor.h"
@@ -84,7 +85,7 @@ namespace FAGui
     };
 
     PanelPlacement panelPlacementByType(PanelType type);
-    const char* bgImgPath(PanelType type);
+    const FARender::SpriteLoader::SpriteDefinition& getBackgroundForPanel(PanelType type);
     const char* panelName(PanelType type);
 
     class ScrollBox;
@@ -94,8 +95,8 @@ namespace FAGui
         using self = GuiManager;
 
     public:
-        GuiManager(Engine::EngineMain& engine);
-        ~GuiManager();
+        explicit GuiManager(Engine::EngineMain& engine);
+        ~GuiManager() override;
 
         void update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
 

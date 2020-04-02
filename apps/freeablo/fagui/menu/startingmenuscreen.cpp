@@ -13,7 +13,7 @@ namespace FAGui
     {
         auto renderer = FARender::Renderer::get();
         mFocus42.reset(new FARender::AnimationPlayer());
-        mFocus42->playAnimation(renderer->loadImage("ui_art/focus42.pcx&trans=0,255,0&vanim=42", false),
+        mFocus42->playAnimation(renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bigPentagramSpin),
                                 FAWorld::World::getTicksInPeriod("0.06"),
                                 FARender::AnimationPlayer::AnimationType::Looped);
         mSmLogo = menu.createSmLogo();
@@ -82,8 +82,8 @@ namespace FAGui
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
         Misc::ScopedSetter<float> setter(ctx->style.window.border, 0);
-        auto bg = renderer->loadImage("ui_art/mainmenu.pcx", false)->getNkImage();
-        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(bg));
+        struct nk_image background = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.mainMenuBackground)->getNkImage();
+        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(background));
         if (nk_begin(
                 ctx,
                 "startingScreen",

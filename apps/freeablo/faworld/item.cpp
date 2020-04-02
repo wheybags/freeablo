@@ -235,7 +235,7 @@ namespace FAWorld
         return ItemQuality::normal;
     }
 
-    Item::~Item() {}
+    Item::~Item() = default;
 
     std::string Item::getFlipSoundPath() const { return base().dropItemSoundPath; }
 

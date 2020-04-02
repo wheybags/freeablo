@@ -56,22 +56,23 @@ namespace FAGui
         return PanelPlacement::none;
     }
 
-    const char* bgImgPath(PanelType type)
+    const FARender::SpriteLoader::SpriteDefinition& getBackgroundForPanel(PanelType type)
     {
         switch (type)
         {
             case PanelType::none:
-                break;
+                invalid_enum(PanelType, type);
             case PanelType::inventory:
-                return "data/inv/inv.cel";
+                return FARender::Renderer::get()->mSpriteLoader.mGuiSprites.inventoryBackground;
             case PanelType::spells:
-                return "data/spellbk.cel";
+                return FARender::Renderer::get()->mSpriteLoader.mGuiSprites.spellsBackground;
             case PanelType::character:
-                return "data/char.cel";
+                return FARender::Renderer::get()->mSpriteLoader.mGuiSprites.characterBackground;
             case PanelType::quests:
-                return "data/quest.cel";
+                return FARender::Renderer::get()->mSpriteLoader.mGuiSprites.questsBackground;
         }
-        return nullptr;
+
+        invalid_enum(PanelType, type);
     }
 
     const char* panelName(PanelType type)
@@ -92,19 +93,20 @@ namespace FAGui
         return "";
     }
 
-    GuiManager::GuiManager(Engine::EngineMain& engine) : mDialogManager(*this, *engine.mWorld.get()), mEngine(engine)
+    GuiManager::GuiManager(Engine::EngineMain& engine) : mDialogManager(*this, *engine.mWorld), mEngine(engine)
     {
-        mMenuHandler.reset(new MenuHandler(engine));
+        mMenuHandler = std::make_unique<MenuHandler>(engine);
 
         auto renderer = FARender::Renderer::get();
-        mSmallPentagram.reset(new FARender::AnimationPlayer());
-        mSmallPentagram->playAnimation(
-            renderer->loadImage("data/pentspn2.cel", false), FAWorld::World::getTicksInPeriod("0.06"), FARender::AnimationPlayer::AnimationType::Looped);
+        mSmallPentagram = std::make_unique<FARender::AnimationPlayer>();
+        mSmallPentagram->playAnimation(renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.smallPentagramSpin),
+                                       FAWorld::World::getTicksInPeriod("0.06"),
+                                       FARender::AnimationPlayer::AnimationType::Looped);
 
         startingScreen();
     }
 
-    GuiManager::~GuiManager() {}
+    GuiManager::~GuiManager() = default;
 
     void
     GuiManager::nk_fa_begin_window(nk_context* ctx, const char* title, struct nk_rect bounds, nk_flags flags, std::function<void(void)> action, bool isModal)
@@ -145,7 +147,7 @@ namespace FAGui
         if (!shown)
             return;
         auto renderer = FARender::Renderer::get();
-        auto invTex = renderer->loadImage(bgImgPath(panelType), false);
+        auto invTex = renderer->mSpriteLoader.getSprite(getBackgroundForPanel(panelType));
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
         struct nk_rect dims = nk_rect(
@@ -332,7 +334,7 @@ namespace FAGui
                 int32_t screenW, screenH;
                 auto renderer = FARender::Renderer::get();
                 renderer->getWindowDimensions(screenW, screenH);
-                auto img = renderer->loadImage("ctrlpan/golddrop.cel", false);
+                FARender::FASpriteGroup* img = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.goldSplitBackground);
                 double leftTopX = 31.0, leftTopY = 42.0;
                 nk_layout_space_push(ctx, nk_rect(leftTopX, leftTopY, img->getWidth(), img->getHeight()));
                 nk_image(ctx, img->getNkImage());
@@ -430,8 +432,8 @@ namespace FAGui
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
 
             FARender::Renderer* renderer = FARender::Renderer::get();
-            FARender::FASpriteGroup* selectedTabButtons = renderer->loadImage("data/spellbkb.cel", false);
-            FARender::FASpriteGroup* icons = renderer->loadImage("data/spelli2.cel", false);
+            FARender::FASpriteGroup* selectedTabButtons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellsButtons);
+            FARender::FASpriteGroup* icons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIconsSmall);
 
             int32_t buttonWidth = selectedTabButtons->getWidth();
             int32_t buttonHeight = selectedTabButtons->getHeight();
@@ -534,10 +536,10 @@ namespace FAGui
         // The bottom menu is made of two sprites: panel8.cel, which is the background,
         // and panel8bu.cel, which contains overlays for each button. It's pretty primitive,
         // the buttons are baked into the background image.
-        FARender::FASpriteGroup* bottomMenuTex = renderer->loadImage("ctrlpan/panel8.cel", false);
-        FARender::FASpriteGroup* bottomMenuButtonsTex = renderer->loadImage("ctrlpan/panel8bu.cel", false);
-        FARender::FASpriteGroup* healthAndManaEmptyBulbs = renderer->loadImage("ctrlpan/p8bulbs.cel", false);
-        FARender::FASpriteGroup* spellIcons = renderer->loadImage("ctrlpan/spelicon.cel", false);
+        FARender::FASpriteGroup* bottomMenuTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenu);
+        FARender::FASpriteGroup* bottomMenuButtonsTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenuButtons);
+        FARender::FASpriteGroup* healthAndManaEmptyBulbs = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenuBulbs);
+        FARender::FASpriteGroup* spellIcons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIcons);
 
         int32_t bulbWidth = healthAndManaEmptyBulbs->getWidth();
         int32_t bulbHeight = healthAndManaEmptyBulbs->getHeight();
@@ -715,7 +717,7 @@ namespace FAGui
             return;
 
         FARender::Renderer* renderer = FARender::Renderer::get();
-        FARender::FASpriteGroup* spellIcons = renderer->loadImage("ctrlpan/spelicon.cel", false);
+        FARender::FASpriteGroup* spellIcons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIcons);
         int32_t iconWidth = spellIcons->getWidth();
         int32_t iconHeight = spellIcons->getHeight();
 

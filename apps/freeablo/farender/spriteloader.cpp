@@ -122,6 +122,9 @@ namespace FARender
                 }
             }
         }
+
+        for (auto guiSpriteIt = reinterpret_cast<SpriteDefinition*>(&mGuiSprites); guiSpriteIt != &mGuiSprites.end__; guiSpriteIt++)
+            mSpritesToLoad.insert(*guiSpriteIt);
     }
 
     void SpriteLoader::load()
