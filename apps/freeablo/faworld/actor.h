@@ -42,7 +42,7 @@ namespace FAWorld
         static const std::string typeId;
         virtual const std::string& getTypeId() { return typeId; }
 
-        Actor(World& world, const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
+        explicit Actor(World& world);
         Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
         Actor(World& world, FASaveGame::GameLoader& loader);
         virtual ~Actor();

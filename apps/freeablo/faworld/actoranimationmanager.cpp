@@ -20,10 +20,10 @@ namespace FAWorld
 
             if (haveThisAnim)
             {
-                AnimState type = AnimState(loader.load<uint8_t>());
-                std::string path = loader.load<std::string>();
-
-                mAnimations[size_t(type)] = FARender::Renderer::get()->loadImage(path, true);
+                //                AnimState type = AnimState(loader.load<uint8_t>());
+                //                std::string path = loader.load<std::string>();
+                //
+                //                mAnimations[size_t(type)] = FARender::Renderer::get()->loadImage(path, true);
             }
         }
 
@@ -61,11 +61,12 @@ namespace FAWorld
 
             if (haveThisAnim)
             {
-                std::string animPath = FARender::Renderer::get()->getPathForIndex(mAnimations[size_t(s)]->getCacheIndex());
-                release_assert(animPath.size());
-
-                saver.save(uint8_t(s));
-                saver.save(animPath);
+                message_and_abort("fixme");
+                //                std::string animPath = FARender::Renderer::get()->getPathForIndex(mAnimations[size_t(s)]->getCacheIndex());
+                //                release_assert(animPath.size());
+                //
+                //                saver.save(uint8_t(s));
+                //                saver.save(animPath);
             }
         }
 

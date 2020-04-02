@@ -58,15 +58,14 @@ namespace FAWorld::Missile
         return missileGraphicsTable.at((size_t)missileData().mMissileGraphicsId);
     }
 
-    std::string Missile::getGraphicsPath(int32_t i) const
+    FARender::FASpriteGroup* Missile::getGraphic(int32_t i) const
     {
-        release_assert(i >= 0 && i < missileGraphics().mNumAnimationFiles);
-        std::stringstream path;
-        path << "missiles/" << missileGraphics().mFilename;
-        if (missileGraphics().mNumAnimationFiles > 1)
-            path << i + 1;
-        path << ".cl2";
-        return path.str();
+        FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
+
+        const std::vector<FARender::SpriteLoader::SpriteDefinition> directions = spriteLoader.mMissileAnimations[missileData().mMissileGraphicsId];
+        release_assert(i >=0 && i < int32_t(directions.size()));
+
+        return spriteLoader.getSprite(directions[i]);
     }
 
     void Missile::playImpactSound()

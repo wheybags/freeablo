@@ -8,17 +8,17 @@
 namespace FAWorld::Missile
 {
     MissileGraphic::MissileGraphic(
-        std::string initialGraphicPath, std::string mainGraphicPath, std::optional<int32_t> singleFrame, Position position, GameLevel* level)
-        : mCurPos(position), mMainGraphicPath(mainGraphicPath), mSingleFrame(singleFrame), mLevel(level)
+        FARender::FASpriteGroup* initialGraphic, FARender::FASpriteGroup* mainGraphic, std::optional<int32_t> singleFrame, Position position, GameLevel* level)
+        : mCurPos(position), mMainGraphic(mainGraphic), mSingleFrame(singleFrame), mLevel(level)
     {
         level->mMissileGraphics.insert(this);
-        playAnimation(initialGraphicPath, FARender::AnimationPlayer::AnimationType::Once);
+        playAnimation(initialGraphic, FARender::AnimationPlayer::AnimationType::Once);
     }
 
     MissileGraphic::MissileGraphic(FASaveGame::GameLoader& loader)
     {
         mCurPos = Position(loader);
-        mMainGraphicPath = loader.load<std::string>();
+        //        mMainGraphicPath = loader.load<std::string>();
 
         mSingleFrame = loader.load<int32_t>();
         if (mSingleFrame == -1)
@@ -40,7 +40,9 @@ namespace FAWorld::Missile
     void MissileGraphic::save(FASaveGame::GameSaver& saver) const
     {
         mCurPos.save(saver);
-        saver.save(mMainGraphicPath);
+
+        message_and_abort("fixme");
+        //        saver.save(mMainGraphicPath);
         saver.save(static_cast<int32_t>(mSingleFrame == std::nullopt ? -1 : *mSingleFrame));
         mAnimationPlayer.save(saver);
         saver.save(mLevel->getLevelIndex());
@@ -56,7 +58,7 @@ namespace FAWorld::Missile
             return;
 
         if (!mAnimationPlayer.isPlaying())
-            playAnimation(mMainGraphicPath, FARender::AnimationPlayer::AnimationType::Looped);
+            playAnimation(mMainGraphic, FARender::AnimationPlayer::AnimationType::Looped);
 
         mAnimationPlayer.update();
     }
@@ -84,12 +86,9 @@ namespace FAWorld::Missile
         mLevel->mMissileGraphics.insert(this);
     }
 
-    void MissileGraphic::playAnimation(std::string path, FARender::AnimationPlayer::AnimationType animationType)
+    void MissileGraphic::playAnimation(FARender::FASpriteGroup* spriteGroup, FARender::AnimationPlayer::AnimationType animationType)
     {
-        if (!path.empty())
-        {
-            auto spriteGroup = FARender::Renderer::get()->loadImage(path, true);
+        if (spriteGroup)
             mAnimationPlayer.playAnimation(spriteGroup, World::getTicksInPeriod("0.06"), animationType);
-        }
     }
 }

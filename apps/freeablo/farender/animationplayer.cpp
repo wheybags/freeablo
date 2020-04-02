@@ -9,8 +9,8 @@ namespace FARender
     {
         bool hasCurrentAnim = loader.load<bool>();
 
-        if (hasCurrentAnim)
-            mCurrentAnim = Renderer::get()->loadImage(loader.load<std::string>(), true);
+        //        if (hasCurrentAnim)
+        //            mCurrentAnim = Renderer::get()->loadImage(loader.load<std::string>(), true);
 
         mPlayingAnimDuration = loader.load<FAWorld::Tick>();
         mPlayingAnimType = AnimationType(loader.load<uint8_t>());
@@ -32,9 +32,10 @@ namespace FARender
 
         if (hasCurrentAnim)
         {
-            std::string spritePath = Renderer::get()->getPathForIndex(mCurrentAnim->getCacheIndex());
-            release_assert(spritePath.size());
-            saver.save(spritePath);
+            message_and_abort("fixme");
+            //            std::string spritePath = Renderer::get()->getPathForIndex(mCurrentAnim->getCacheIndex());
+            //            release_assert(spritePath.size());
+            //            saver.save(spritePath);
         }
 
         saver.save(mPlayingAnimDuration);

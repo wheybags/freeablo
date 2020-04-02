@@ -30,6 +30,6 @@ namespace FAWorld
         FactionType getType() const { return mFaction; }
 
     private:
-        FactionType mFaction;
+        FactionType mFaction = FactionType::heaven;
     };
 }

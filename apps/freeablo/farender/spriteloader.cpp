@@ -2,6 +2,7 @@
 #include "renderer.h"
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
+#include <diabloexe/npc.h>
 #include <fmt/format.h>
 #include <misc/stringops.h>
 
@@ -30,6 +31,37 @@ namespace FARender
             mSpritesToLoad.insert(definition.hit);
 
             mMonsterSpriteDefinitions[pair.first] = std::move(definition);
+        }
+
+        for (const DiabloExe::Npc* npc : exe.getNpcs())
+        {
+            SpriteDefinition definition{npc->celPath, true};
+            mNpcIdleAnimations[npc->name] = definition;
+            mSpritesToLoad.insert(definition);
+        }
+
+        for (const auto& pair : exe.getMissileGraphicsTable())
+        {
+            const DiabloExe::MissileGraphics& missileGraphics = pair.second;
+            if (missileGraphics.mNumAnimationFiles == 0 || missileGraphics.mFilename == " ")
+                continue;
+
+            std::vector<SpriteDefinition> missileDirections;
+
+            if (missileGraphics.mNumAnimationFiles > 1)
+            {
+                for (uint32_t i = 0; i < missileGraphics.mNumAnimationFiles; i++)
+                    missileDirections.emplace_back(SpriteDefinition{"missiles/" + missileGraphics.mFilename + std::to_string(i + 1) + ".cl2", true});
+            }
+            else
+            {
+                missileDirections.emplace_back(SpriteDefinition{"missiles/" + missileGraphics.mFilename + ".cl2", true});
+            }
+
+            for (const auto& definition : missileDirections)
+                mSpritesToLoad.insert(definition);
+
+            mMissileAnimations[pair.first] = std::move(missileDirections);
         }
 
         for (int32_t i = 0; i <= 2; i++)

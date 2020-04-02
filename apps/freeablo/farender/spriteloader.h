@@ -43,6 +43,10 @@ namespace FARender
         };
         std::unordered_map<std::string, MonsterSpriteDefinition> mMonsterSpriteDefinitions;
 
+        std::unordered_map<std::string, SpriteDefinition> mNpcIdleAnimations;
+
+        std::unordered_map<uint8_t, std::vector<SpriteDefinition>> mMissileAnimations;
+
         std::unordered_map<int32_t, SpriteDefinition> mTilesetTops;
         std::unordered_map<int32_t, SpriteDefinition> mTilesetBottoms;
         std::unordered_map<int32_t, SpriteDefinition> mTilesetSpecials;
@@ -109,6 +113,7 @@ namespace FARender
             SpriteDefinition characterSelectPortraits{"ui_art/heros.pcx&vanim=76", false};
             SpriteDefinition characterSelectBackground{"ui_art/selhero.pcx", false};
             SpriteDefinition mainMenuBackground{"ui_art/mainmenu.pcx", false};
+            SpriteDefinition itemCursors{"data/inv/objcurs.cel", false};
 
             SpriteDefinition end__;
         } mGuiSprites;

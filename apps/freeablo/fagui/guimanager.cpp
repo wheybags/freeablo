@@ -218,8 +218,7 @@ namespace FAGui
         auto renderer = FARender::Renderer::get();
 
         auto frame = item.getGraphicValue();
-        auto imgPath = "data/inv/objcurs.cel";
-        auto sprite = renderer->loadImage(imgPath, false);
+        auto sprite = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.itemCursors);
         auto img = sprite->getNkImage(frame);
         auto w = sprite->getWidth(frame);
         auto h = sprite->getHeight(frame);
