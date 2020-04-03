@@ -164,39 +164,39 @@ namespace FARender
         }
 
         for (auto guiSpriteIt = reinterpret_cast<SpriteDefinition*>(&mGuiSprites); guiSpriteIt != &mGuiSprites.end__; guiSpriteIt++)
-            mSpritesToLoad2.insert(*guiSpriteIt);
+            mSpritesToLoad.insert(*guiSpriteIt);
     }
 
     void SpriteLoader::load()
     {
-        Renderer* renderer = Renderer::get();
-
-        for (const auto& definition : mSpritesToLoad)
-        {
-            // TODO: This is a temporary hack, once we have a proper data loader, we just won't specify these
-            static std::unordered_set<std::string> badCelNames{
-                "Monsters\\Golem\\Golemh.CL2",
-                "Monsters\\Worm\\Wormh.CL2",
-                "Monsters\\Unrav\\Unravw.CL2",
-                "Monsters\\Golem\\Golemn.CL2",
-                "Monsters\\Worm\\Wormd.CL2",
-                "Monsters\\Worm\\Wormw.CL2",
-                "Monsters\\Worm\\Wormn.CL2",
-                "Monsters\\Worm\\Worma.CL2",
-            };
-
-            if (badCelNames.count(definition.path))
-                continue;
-
-            mLoadedSprites[definition] = renderer->mSpriteManager.get(definition.path, definition.trim);
-        }
-
-        mSpritesToLoad.clear();
+        //        Renderer* renderer = Renderer::get();
+        //
+        //        for (const auto& definition : mSpritesToLoad)
+        //        {
+        //            // TODO: This is a temporary hack, once we have a proper data loader, we just won't specify these
+        //            static std::unordered_set<std::string> badCelNames{
+        //                "Monsters\\Golem\\Golemh.CL2",
+        //                "Monsters\\Worm\\Wormh.CL2",
+        //                "Monsters\\Unrav\\Unravw.CL2",
+        //                "Monsters\\Golem\\Golemn.CL2",
+        //                "Monsters\\Worm\\Wormd.CL2",
+        //                "Monsters\\Worm\\Wormw.CL2",
+        //                "Monsters\\Worm\\Wormn.CL2",
+        //                "Monsters\\Worm\\Worma.CL2",
+        //            };
+        //
+        //            if (badCelNames.count(definition.path))
+        //                continue;
+        //
+        //            mLoadedSprites[definition] = renderer->mSpriteManager.get(definition.path, definition.trim);
+        //        }
+        //
+        //        mSpritesToLoad.clear();
     }
 
     void SpriteLoader::load2()
     {
-        for (const auto& definition : mSpritesToLoad2)
+        for (const auto& definition : mSpritesToLoad)
         {
             // TODO: This is a temporary hack, once we have a proper data loader, we just won't specify these
             static std::unordered_set<std::string> badCelNames{
@@ -301,7 +301,7 @@ namespace FARender
             mLoadedSprites[definition] = spriteGroup;
         }
 
-        mSpritesToLoad2.clear();
+        mSpritesToLoad.clear();
 
         for (int32_t i = 0; i <= 4; i++)
         {

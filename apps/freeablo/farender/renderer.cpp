@@ -198,7 +198,7 @@ namespace FARender
             auto& position = object.position;
 
             Render::LevelObject obj;
-            obj.spriteCacheIndex = object.spriteGroup->getCacheIndex();
+            obj.sprite = object.spriteGroup->mRealSpriteGroup;
             obj.spriteFrame = object.frame;
             obj.fractionalPos = position.getFractionalPos();
             obj.hoverColor = object.hoverColor;
@@ -237,7 +237,7 @@ namespace FARender
                 Render::drawLevel(state->level->mLevel,
                                   state->tileset.minTops->mRealSpriteGroup,
                                   state->tileset.minBottoms->mRealSpriteGroup,
-                                  state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->getCacheIndex() : 0,
+                                  state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->mRealSpriteGroup : nullptr,
                                   state->tileset.mSpecialSpriteMap,
                                   &mSpriteManager,
                                   mLevelObjects,

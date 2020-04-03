@@ -893,7 +893,7 @@ namespace Render
     void drawLevel(const Level::Level& level,
                    SpriteGroup* minTops,
                    SpriteGroup* minBottoms,
-                   size_t specialSpritesHandle,
+                   SpriteGroup* specialSprites,
                    const std::map<int32_t, int32_t>& specialSpritesMap,
                    SpriteCacheBase* cache,
                    LevelObjects& objs,
@@ -933,8 +933,7 @@ namespace Render
                 if (specialSpritesMap.count(index))
                 {
                     int32_t specialSpriteIndex = specialSpritesMap.at(index);
-                    SpriteGroup* specialSpriteGroup = cache->get(specialSpritesHandle);
-                    Sprite& sprite = (*specialSpriteGroup)[specialSpriteIndex];
+                    Sprite& sprite = (*specialSprites)[specialSpriteIndex];
                     int w, h;
                     spriteSize(sprite, w, h);
                     drawAtTile(sprite, topLeft, w, h);
@@ -945,7 +944,7 @@ namespace Render
             for (auto& item : itemsForTile)
             {
                 int32_t w, h;
-                auto sprite = (*cache->get(item.spriteCacheIndex))[item.spriteFrame];
+                const Sprite& sprite = item.sprite->operator[](item.spriteFrame);
                 spriteSize(sprite, w, h);
                 drawAtTile(sprite, topLeft, w, h, item.hoverColor);
             }
@@ -955,8 +954,8 @@ namespace Render
             {
                 if (obj.valid)
                 {
-                    auto sprite = cache->get(obj.spriteCacheIndex);
-                    drawMovingSprite((*sprite)[obj.spriteFrame], obj.fractionalPos, toScreen, obj.hoverColor);
+                    const Sprite& sprite = obj.sprite->operator[](obj.spriteFrame);
+                    drawMovingSprite(sprite, obj.fractionalPos, toScreen, obj.hoverColor);
                 }
             }
         });

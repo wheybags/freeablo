@@ -10,15 +10,6 @@ namespace FARender
     // game thread functions //
     ///////////////////////////
 
-    FASpriteGroup* SpriteManager::get(const std::string& path, bool trim)
-    {
-        auto tmp = mCache.get(path, trim);
-        addToPreloadList(tmp->spriteCacheIndex);
-        return tmp;
-    }
-
-    std::string SpriteManager::getPathForIndex(uint32_t index) { return mCache.getPathForIndex(index); }
-
     FASpriteGroup* SpriteManager::getFromRaw(Image&& image)
     {
         release_assert(image.mData.ownsData());
@@ -42,7 +33,7 @@ namespace FARender
     {
         sprites = mSpritesNeedingPreloading;
         mSpritesNeedingPreloading.clear();
-        return sprites.size() != 0;
+        return !sprites.empty();
     }
 
     void SpriteManager::addToPreloadList(uint32_t index)

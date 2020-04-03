@@ -112,7 +112,7 @@ namespace Render
     void drawLevel(const Level::Level& level,
                    SpriteGroup* minTops,
                    SpriteGroup* minBottoms,
-                   size_t specialSpritesHandle,
+                   SpriteGroup* specialSprites,
                    const std::map<int32_t, int32_t>& specialSpritesMap,
                    SpriteCacheBase* cache,
                    LevelObjects& objs,

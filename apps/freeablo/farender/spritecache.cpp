@@ -23,64 +23,10 @@ namespace FARender
             delete[] block;
     }
 
-    FASpriteGroup* SpriteCache::get(const std::string& path, bool trim)
-    {
-        if (!mStrToCache.count(path))
-        {
-            std::vector<std::string> components = Misc::StringUtils::split(path, '&');
-
-            std::vector<int32_t> tmpWidth, tmpHeight;
-            int32_t tmpAnimLength;
-            Render::getImageInfo(components[0], tmpWidth, tmpHeight, tmpAnimLength);
-
-            for (uint32_t i = 1; i < components.size(); i++)
-            {
-                std::vector<std::string> pair = Misc::StringUtils::split(components[i], '=');
-
-                if (pair[0] == "vanim")
-                {
-                    release_assert(tmpAnimLength == 1);
-                    std::istringstream vanimss(pair[1]);
-
-                    uint32_t vAnim;
-                    vanimss >> vAnim;
-
-                    tmpAnimLength = (tmpHeight[0] + vAnim - 1) / vAnim;
-                    tmpHeight.resize(tmpAnimLength);
-                    tmpWidth.resize(tmpAnimLength);
-                    for (int j = 0; j < tmpAnimLength; ++j)
-                    {
-                        tmpHeight[j] = vAnim;
-                        tmpWidth[j] = tmpWidth[0];
-                    }
-                }
-                else if (pair[0] == "convertToSingleTexture")
-                {
-                    tmpAnimLength = 1;
-                    tmpWidth = {std::accumulate(tmpWidth.begin(), tmpWidth.end(), 0)};
-                    tmpHeight = {*std::max_element(tmpHeight.begin(), tmpHeight.end())};
-                }
-            }
-
-            FASpriteGroup* newCacheEntry = allocNewSpriteGroup();
-            uint32_t cacheIndex = newUniqueIndex();
-
-            newCacheEntry->init(tmpAnimLength, tmpWidth, tmpHeight, cacheIndex);
-
-            mStrToCache[path] = newCacheEntry;
-            mCacheToStr[cacheIndex] = {path, trim};
-        }
-
-        return mStrToCache[path];
-    }
-
     uint32_t SpriteCache::newUniqueIndex() { return mNextCacheIndex++; }
 
     void SpriteCache::directInsert(Render::SpriteGroup* sprite, uint32_t cacheIndex)
     {
-        if (mCurrentSize >= mMaxSize)
-            evict();
-
         mUsedList.push_front(cacheIndex);
         mCache[cacheIndex] = CacheEntry(sprite, mUsedList.begin(), true);
 
@@ -90,150 +36,15 @@ namespace FARender
     Render::SpriteGroup* SpriteCache::get(uint32_t index)
     {
         if (!mCache.count(index))
-        {
-            if (mCurrentSize >= mMaxSize)
-                evict();
-
-            Render::SpriteGroup* newSprite = NULL;
-
-            if (mCacheToStr.count(index))
-            {
-                const LoadSpec& loadSpec = mCacheToStr.at(index);
-
-                std::vector<std::string> components = Misc::StringUtils::split(loadSpec.path, '&');
-                std::string sourcePath = components[0];
-
-                uint32_t vAnim = 0;
-                bool hasTrans = false;
-                bool resize = false;
-                bool convertToSingleTexture = false;
-                uint32_t tileWidth = 0;
-                uint32_t tileHeight = 0;
-                uint32_t newWidth = 0;
-                uint32_t newHeight = 0;
-                uint32_t r = 0, g = 0, b = 0;
-                int32_t celIndex;
-
-                for (uint32_t i = 1; i < components.size(); i++)
-                {
-                    std::vector<std::string> pair = Misc::StringUtils::split(components[i], '=');
-
-                    if (pair[0] == "trans")
-                    {
-                        std::vector<std::string> rgbStr = Misc::StringUtils::split(pair[1], ',');
-
-                        hasTrans = true;
-
-                        std::istringstream rss(rgbStr[0]);
-                        rss >> r;
-
-                        std::istringstream gss(rgbStr[1]);
-                        gss >> g;
-
-                        std::istringstream bss(rgbStr[2]);
-                        bss >> b;
-                    }
-                    else if (pair[0] == "vanim")
-                    {
-                        std::istringstream vanimss(pair[1]);
-
-                        vanimss >> vAnim;
-                    }
-                    else if (pair[0] == "resize")
-                    {
-                        resize = true;
-
-                        std::vector<std::string> newSize = Misc::StringUtils::split(pair[1], 'x');
-
-                        std::istringstream wss(newSize[0]);
-                        wss >> newWidth;
-
-                        std::istringstream hss(newSize[1]);
-                        hss >> newHeight;
-                    }
-                    else if (pair[0] == "tileSize")
-                    {
-                        std::vector<std::string> tileSize = Misc::StringUtils::split(pair[1], 'x');
-
-                        std::istringstream wss(tileSize[0]);
-                        wss >> tileWidth;
-
-                        std::istringstream hss(tileSize[1]);
-                        hss >> tileHeight;
-                    }
-                    else if (pair[0] == "convertToSingleTexture")
-                    {
-                        convertToSingleTexture = true;
-                    }
-                    else if (pair[0] == "frame")
-                    {
-                        std::istringstream ss(pair[1]);
-                        ss >> celIndex;
-                    }
-                }
-
-                if (vAnim != 0)
-                    newSprite = Render::loadVanimSprite(sourcePath, vAnim, hasTrans, r, g, b, loadSpec.trim);
-                else if (resize)
-                    newSprite = Render::loadResizedSprite(sourcePath, newWidth, newHeight, tileWidth, tileHeight, hasTrans, r, g, b, loadSpec.trim);
-                else if (convertToSingleTexture)
-                    newSprite = Render::loadCelToSingleTexture(sourcePath, loadSpec.trim);
-                else
-                    newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b, loadSpec.trim);
-            }
-            else
-            {
-                message_and_abort_fmt("ERROR INVALID SPRITE CACHE REQUEST %d", index);
-            }
-
-            mUsedList.push_front(index);
-            mCache[index] = CacheEntry(newSprite, mUsedList.begin(), false);
-            mCurrentSize++;
-        }
-        else
-        {
-            moveToFront(index);
-        }
+            message_and_abort_fmt("ERROR INVALID SPRITE CACHE REQUEST %d", index);
 
         return mCache[index].sprite;
-    }
-
-    void SpriteCache::moveToFront(uint32_t index)
-    {
-        mUsedList.erase(mCache.at(index).it);
-        mUsedList.push_front(index);
-        mCache[index].it = mUsedList.begin();
     }
 
     void SpriteCache::setImmortal(uint32_t index, bool immortal)
     {
         get(index);
         mCache[index].immortal = immortal;
-    }
-
-    void SpriteCache::evict()
-    {
-        if (!Render::SpriteGroup::canDeleteIndividualSprites())
-            return;
-
-        std::list<uint32_t>::reverse_iterator it;
-
-        for (it = mUsedList.rbegin(); it != mUsedList.rend(); it++)
-        {
-            if (!mCache[*it].immortal)
-                break;
-        }
-
-        release_assert(it != mUsedList.rend() && "no evictable slots found. This should never happen");
-
-        CacheEntry toEvict = mCache[*it];
-
-        toEvict.sprite->destroy();
-        delete toEvict.sprite;
-
-        mCache.erase(*it);
-        mUsedList.erase(--(it.base()));
-        mCurrentSize--;
     }
 
     void SpriteCache::clear()
@@ -251,14 +62,6 @@ namespace FARender
 
         if (!Render::SpriteGroup::canDeleteIndividualSprites())
             Render::deleteAllSprites();
-    }
-
-    std::string SpriteCache::getPathForIndex(uint32_t index)
-    {
-        auto it = mCacheToStr.find(index);
-        if (it != mCacheToStr.end())
-            return it->second.path;
-        return "";
     }
 
     FASpriteGroup* SpriteCache::allocNewSpriteGroup()

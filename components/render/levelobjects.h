@@ -7,11 +7,13 @@
 
 namespace Render
 {
+    class SpriteGroup;
+
     struct LevelObject
     {
-        bool valid;
-        int32_t spriteCacheIndex;
-        int32_t spriteFrame;
+        bool valid = false;
+        Render::SpriteGroup* sprite = nullptr;
+        int32_t spriteFrame = 0;
         Vec2Fix fractionalPos;
         std::optional<Cel::Colour> hoverColor;
     };

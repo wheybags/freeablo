@@ -14,18 +14,11 @@ namespace FARender
     class SpriteManager : public Render::SpriteCacheBase
     {
     public:
-        SpriteManager(uint32_t cacheSize);
+        explicit SpriteManager(uint32_t cacheSize);
 
         //////////////////////////////////
         // game thread public functions //
         //////////////////////////////////
-
-        FASpriteGroup* get(const std::string& path, bool trim); ///< To be called from the game thread
-
-        /// Used by NetManager on the server to get the paths to send to clients
-        /// for them to user with fillServerSprite
-        /// @brief To be called from the game thread
-        std::string getPathForIndex(uint32_t index);
 
         /// Like get(const std::string&), but for use directly with a pixel buffer
         /// @brief To be called from the game thread
@@ -41,9 +34,9 @@ namespace FARender
         /// When loading a normal sprite reference, will just pass through, otherwise the reference is a raw load reference from getFromRaw above,
         /// so will load that and inject it into mCache with SpriteCache::directInsert
         /// @brief To be called from the render thread
-        Render::SpriteGroup* get(uint32_t index);
+        Render::SpriteGroup* get(uint32_t index) override;
 
-        void setImmortal(uint32_t index, bool immortal); ///< To be called from the render thread
+        void setImmortal(uint32_t index, bool immortal) override; ///< To be called from the render thread
 
         void clear(); ///< To be called from the render thread
 

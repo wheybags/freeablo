@@ -105,8 +105,6 @@ namespace FARender
         explicit SpriteCache(uint32_t size);
         ~SpriteCache();
 
-        FASpriteGroup* get(const std::string& path, bool trim); ///< To be called from the game thread
-
         uint32_t newUniqueIndex(); ///< Can be called from any thread
 
         /// Directly inserts a sprite into the cache at the specified index.
@@ -124,9 +122,6 @@ namespace FARender
         /// @brief To be called from the render thread
         void setImmortal(uint32_t index, bool immortal);
 
-        /// @brief To be called from the game thread
-        std::string getPathForIndex(uint32_t index);
-
         /// The only creation point for FASpriteGroups
         /// @brief To be called from the game thread
         FASpriteGroup* allocNewSpriteGroup();
@@ -134,21 +129,12 @@ namespace FARender
         void clear(); //< To be called from the render thread
 
     private:
-        void moveToFront(uint32_t index);
-        void evict();
-
-        std::map<std::string, FASpriteGroup*> mStrToCache;
-
         struct LoadSpec
         {
             std::string path;
             bool trim = true;
         };
         std::map<uint32_t, LoadSpec> mCacheToStr;
-
-        std::map<std::string, FASpriteGroup*> mStrToTilesetCache;
-
-        std::map<uint32_t, uint32_t> mCacheToSprite;
 
         std::map<uint32_t, CacheEntry> mCache;
         std::list<uint32_t> mUsedList;
