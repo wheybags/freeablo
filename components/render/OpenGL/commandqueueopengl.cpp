@@ -67,7 +67,7 @@ namespace Render
     {
         super::cmdDraw(firstVertex, vertexCount, bindings);
 
-        DrawScopedBinderGL binder = this->setupState(bindings);
+        std::unique_ptr<DrawScopedBinderGL> binder = this->setupState(bindings);
         glDrawArrays(GL_TRIANGLES, firstVertex, vertexCount);
     }
 
@@ -75,7 +75,7 @@ namespace Render
     {
         super::cmdDrawIndexed(firstIndex, vertexCount, bindings);
 
-        DrawScopedBinderGL binder = this->setupState(bindings);
+        std::unique_ptr<DrawScopedBinderGL> binder = this->setupState(bindings);
         glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_SHORT, reinterpret_cast<GLvoid*>(firstIndex));
     }
 
@@ -83,7 +83,7 @@ namespace Render
     {
         super::cmdDrawInstances(firstVertex, vertexCount, instanceCount, bindings);
 
-        DrawScopedBinderGL binder = this->setupState(bindings);
+        std::unique_ptr<DrawScopedBinderGL> binder = this->setupState(bindings);
         glDrawArraysInstanced(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
     }
 
@@ -95,11 +95,13 @@ namespace Render
 
     void CommandQueueOpenGL::cmdPresent() { SDL_GL_SwapWindow(&getInstance().mWindow); }
 
-    CommandQueueOpenGL::DrawScopedBinderGL CommandQueueOpenGL::setupState(Bindings& bindings)
+    std::unique_ptr<CommandQueueOpenGL::DrawScopedBinderGL> CommandQueueOpenGL::setupState(Bindings& bindings)
     {
+        auto binder = std::make_unique<DrawScopedBinderGL>(bindings);
+
         if (bindings.pipeline->mSpec.scissor)
             glScissor(mScissor.x, mScissor.y, uint32_t(mScissor.w), uint32_t(mScissor.h));
 
-        return DrawScopedBinderGL(bindings);
+        return binder;
     }
 }

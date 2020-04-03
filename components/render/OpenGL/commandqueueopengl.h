@@ -38,6 +38,6 @@ namespace Render
             std::vector<ScopedBindGL> mBinders;
         };
 
-        DrawScopedBinderGL setupState(Bindings& bindings);
+        std::unique_ptr<DrawScopedBinderGL> setupState(Bindings& bindings);
     };
 }
