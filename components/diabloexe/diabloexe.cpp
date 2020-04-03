@@ -347,7 +347,6 @@ namespace DiabloExe
             if (tmp.name.empty())
                 continue;
 
-
             std::string idBase = tmp.name;
             Misc::StringUtils::toLower(idBase);
             Misc::StringUtils::replace(idBase, " ", "_");

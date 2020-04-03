@@ -53,8 +53,7 @@ namespace FAWorld::Missile
                 level->mMissileGraphics.begin(), level->mMissileGraphics.end(), [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
         };
         auto point = level->getFreeSpotNear(missile.mSrcPoint, std::numeric_limits<int32_t>::max(), noMissilesAtPoint);
-        missile.mGraphics.push_back(
-            std::make_unique<MissileGraphic>(missile.getGraphic(0), missile.getGraphic(1), std::nullopt, Position(point), level));
+        missile.mGraphics.push_back(std::make_unique<MissileGraphic>(missile.getGraphic(0), missile.getGraphic(1), std::nullopt, Position(point), level));
         // Add portal in town
         auto town = Engine::EngineMain::get()->mWorld->getLevel(0);
         static const Misc::Point townPortalPoint = Misc::Point(60, 80);
@@ -63,7 +62,6 @@ namespace FAWorld::Missile
                 town->mMissileGraphics.begin(), town->mMissileGraphics.end(), [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
         };
         point = town->getFreeSpotNear(townPortalPoint, std::numeric_limits<int32_t>::max(), noMissilesAtTownPoint);
-        missile.mGraphics.push_back(
-            std::make_unique<MissileGraphic>(missile.getGraphic(0), missile.getGraphic(1), std::nullopt, Position(point), town));
+        missile.mGraphics.push_back(std::make_unique<MissileGraphic>(missile.getGraphic(0), missile.getGraphic(1), std::nullopt, Position(point), town));
     }
 }

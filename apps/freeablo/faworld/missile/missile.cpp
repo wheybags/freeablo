@@ -63,7 +63,7 @@ namespace FAWorld::Missile
         FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
 
         const std::vector<FARender::SpriteLoader::SpriteDefinition> directions = spriteLoader.mMissileAnimations[missileData().mMissileGraphicsId];
-        release_assert(i >=0 && i < int32_t(directions.size()));
+        release_assert(i >= 0 && i < int32_t(directions.size()));
 
         return spriteLoader.getSprite(directions[i]);
     }

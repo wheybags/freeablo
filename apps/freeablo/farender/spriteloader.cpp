@@ -1,11 +1,11 @@
 #include "spriteloader.h"
 #include "renderer.h"
+#include <diabloexe/baseitem.h>
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
 #include <fmt/format.h>
 #include <misc/stringops.h>
-#include <diabloexe/baseitem.h>
 
 namespace FARender
 {

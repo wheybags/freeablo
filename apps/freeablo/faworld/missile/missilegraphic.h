@@ -17,7 +17,11 @@ namespace FAWorld::Missile
     public:
         virtual ~MissileGraphic();
 
-        MissileGraphic(FARender::FASpriteGroup* initialGraphic, FARender::FASpriteGroup* mainGraphic, std::optional<int32_t> singleFrame, Position position, GameLevel* level);
+        MissileGraphic(FARender::FASpriteGroup* initialGraphic,
+                       FARender::FASpriteGroup* mainGraphic,
+                       std::optional<int32_t> singleFrame,
+                       Position position,
+                       GameLevel* level);
         explicit MissileGraphic(FASaveGame::GameLoader& loader);
 
         virtual void save(FASaveGame::GameSaver& saver) const;

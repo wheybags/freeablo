@@ -325,7 +325,8 @@ namespace FARender
 
             mGoldFont[initData.fontSize] = generateFont(mSpriteLoader.getSprite(*((&mSpriteLoader.mGuiSprites.fontGold16) + i)), prefix + ".bin", initData);
             if (initData.fontSize != 42)
-                mSilverFont[initData.fontSize] = generateFont(mSpriteLoader.getSprite(*((&mSpriteLoader.mGuiSprites.fontSilver16) + i)), prefix + ".bin", initData);
+                mSilverFont[initData.fontSize] =
+                    generateFont(mSpriteLoader.getSprite(*((&mSpriteLoader.mGuiSprites.fontSilver16) + i)), prefix + ".bin", initData);
         }
     }
 
