@@ -117,6 +117,8 @@ namespace Render
     SDL_Window* screen;
     // SDL_Renderer* renderer;
     RenderInstance* renderInstance = nullptr;
+    RenderInstance* mainRenderInstance = nullptr;
+
     CommandQueue* mainCommandQueue = nullptr;
     VertexArrayObject* vertexArrayObject = nullptr;
     Pipeline* drawLevelPipeline = nullptr;
@@ -151,6 +153,8 @@ namespace Render
         renderInstance = RenderInstance::createRenderInstance(RenderInstance::Type::OpenGL, *screen);
         mainCommandQueue = renderInstance->createCommandQueue().release();
         mainCommandQueue->begin();
+
+        mainRenderInstance = renderInstance;
 
         PipelineSpec drawLevelPipelineSpec;
         drawLevelPipelineSpec.vertexLayouts = {SpriteVertexMain::layout(), SpriteVertexPerInstance::layout()};
@@ -255,7 +259,7 @@ namespace Render
         return id;
     }
 
-    void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache) { nk_sdl_render_dump(cache, dump, screen, *atlasTexture, *mainCommandQueue); }
+    void drawGui(NuklearFrameDump& dump) { nk_sdl_render_dump(dump, screen, *atlasTexture, *mainCommandQueue); }
 
     std::string getImageExtension(const std::string& path)
     {
@@ -661,12 +665,6 @@ namespace Render
         jo_gif_end(&gif);
     }
 
-    bool SpriteGroup::canDeleteIndividualSprites()
-    {
-        // Sprites can not currently be removed from atlas texture.
-        return false;
-    }
-
     void SpriteGroup::destroy()
     {
         // Sprites can not currently be removed from atlas texture.
@@ -895,7 +893,6 @@ namespace Render
                    SpriteGroup* minBottoms,
                    SpriteGroup* specialSprites,
                    const std::map<int32_t, int32_t>& specialSpritesMap,
-                   SpriteCacheBase* cache,
                    LevelObjects& objs,
                    LevelObjects& items,
                    const Vec2Fix& fractionalPos)

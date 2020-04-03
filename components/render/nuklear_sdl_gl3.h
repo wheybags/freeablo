@@ -14,12 +14,13 @@ namespace Render
     class Buffer;
     class DescriptorSet;
     class SpriteGroup;
+    class Texture;
 }
 
 struct FANuklearTextureHandle
 {
-    uint32_t cacheIndex = 0;
-    Render::SpriteGroup* spriteGroup = 0;
+    Render::SpriteGroup* spriteGroup = nullptr;
+    Render::Texture* texture = nullptr;
 
     uint32_t frameNumber = 0;
 };
@@ -82,7 +83,6 @@ private:
     nk_buffer cmds; // draw commands temp storage
 };
 
-void nk_sdl_render_dump(
-    Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue);
+void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue);
 void nk_sdl_device_destroy(nk_gl_device& dev);
 void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance);

@@ -17,7 +17,7 @@ int main(int argc, char** argv)
     if (argc > 2)
         message_and_abort_fmt("Usage: %s [filename]", argv[0]);
 
-    Render::RenderSettings renderSettings;
+    Render::RenderSettings renderSettings = {};
     renderSettings.windowWidth = 800;
     renderSettings.windowHeight = 600;
     renderSettings.fullscreen = false;
@@ -30,12 +30,12 @@ int main(int argc, char** argv)
     settings.loadFromFile(Misc::getResourcesPath().str() + "/celview.ini");
 
     bool faioInitDone = false;
-    std::string listFile = settings.get<std::string>("celview", "listFile", "Diablo I.txt");
-    std::string mpqFile = settings.get<std::string>("celview", "mpqFile", "DIABDAT.MPQ");
+    auto listFile = settings.get<std::string>("celview", "listFile", "Diablo I.txt");
+    auto mpqFile = settings.get<std::string>("celview", "mpqFile", "DIABDAT.MPQ");
 
     std::vector<std::string> celFiles;
 
-    std::string selectedImage = "";
+    std::string selectedImage;
     std::unique_ptr<NuklearMisc::GuiSprite> image;
 
     std::unique_ptr<NuklearMisc::GuiSprite> nextImage;
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 
                 std::string label = selectedImage;
 
-                if (selectedImage == "")
+                if (selectedImage.empty())
                     label = "No image selected";
 
                 nk_label(ctx, label.c_str(), NK_TEXT_CENTERED);
@@ -77,15 +77,15 @@ int main(int argc, char** argv)
 
                 if (image)
                 {
-                    nk_label(ctx, fmt::format("Number of Frames: {}", image.get()->getSprite()->size()).c_str(), NK_TEXT_LEFT);
+                    nk_label(ctx, fmt::format("Number of Frames: {}", image->getSprite()->size()).c_str(), NK_TEXT_LEFT);
                     nk_label(ctx, fmt::format("Width: {}", image->getSprite()->getWidth()).c_str(), NK_TEXT_LEFT);
                     nk_label(ctx, fmt::format("Height: {}", image->getSprite()->getHeight()).c_str(), NK_TEXT_LEFT);
                     frame = nk_propertyi(ctx, "Frame", 0, frame, image->getSprite()->size(), 1, 0.2f);
 
                     if (nk_button_label(ctx, "save as png"))
                     {
-                        nfdchar_t* outPath = NULL;
-                        nfdresult_t result = NFD_SaveDialog("png", NULL, &outPath);
+                        nfdchar_t* outPath = nullptr;
+                        nfdresult_t result = NFD_SaveDialog("png", nullptr, &outPath);
                         if (result == NFD_OKAY)
                         {
                             Render::SpriteGroup::toPng(selectedImage, outPath);
@@ -95,8 +95,8 @@ int main(int argc, char** argv)
 
                     if (nk_button_label(ctx, "save as gif"))
                     {
-                        nfdchar_t* outPath = NULL;
-                        nfdresult_t result = NFD_SaveDialog("gif", NULL, &outPath);
+                        nfdchar_t* outPath = nullptr;
+                        nfdresult_t result = NFD_SaveDialog("gif", nullptr, &outPath);
                         if (result == NFD_OKAY)
                         {
                             Render::SpriteGroup::toGif(selectedImage, outPath);
@@ -111,10 +111,10 @@ int main(int argc, char** argv)
                         frame++;
                     }
 
-                    if (frame >= (int32_t)image.get()->getSprite()->size())
+                    if (frame >= (int32_t)image->getSprite()->size())
                         frame = 0;
 
-                    Render::Sprite sprite = image.get()->getSprite()->operator[](frame);
+                    Render::Sprite sprite = image->getSprite()->operator[](frame);
 
                     int32_t w, h;
                     Render::spriteSize(sprite, w, h);
@@ -125,11 +125,11 @@ int main(int argc, char** argv)
 
                         auto canvas = nk_window_get_canvas(ctx);
 
-                        struct nk_rect imageRect;
+                        struct nk_rect imageRect = {};
                         nk_widget(&imageRect, ctx);
                         nk_fill_rect(canvas, imageRect, 0.0, nk_rgb(0, 255, 0));
 
-                        auto img = image.get()->getNkImage(frame);
+                        auto img = image->getNkImage(frame);
                         nk_draw_image(canvas, imageRect, &img, nk_rgb(255, 255, 255));
                     }
                     nk_layout_space_end(ctx);
@@ -168,25 +168,25 @@ int main(int argc, char** argv)
                         {
                             selectedImage = argv[1];
                             frame = 0;
-                            nextImage = std::unique_ptr<NuklearMisc::GuiSprite>(guiHandler.getSprite(new Render::SpriteGroup(selectedImage, false)));
+                            nextImage = std::make_unique<NuklearMisc::GuiSprite>(new Render::SpriteGroup(selectedImage, false));
                         }
                     }
                 }
 
                 nk_layout_row_dynamic(ctx, rowHeight, 1);
 
-                for (size_t i = 0; i < celFiles.size(); i++)
+                for (auto& celFile : celFiles)
                 {
                     auto buttonStyle = ctx->style.button;
 
-                    if (selectedImage == celFiles[i])
+                    if (selectedImage == celFile)
                         buttonStyle.normal = buttonStyle.hover;
 
-                    if (nk_button_label_styled(ctx, &buttonStyle, celFiles[i].c_str()))
+                    if (nk_button_label_styled(ctx, &buttonStyle, celFile.c_str()))
                     {
-                        selectedImage = celFiles[i];
+                        selectedImage = celFile;
                         frame = 0;
-                        nextImage = std::unique_ptr<NuklearMisc::GuiSprite>(guiHandler.getSprite(new Render::SpriteGroup(selectedImage, false)));
+                        nextImage = std::make_unique<NuklearMisc::GuiSprite>(new Render::SpriteGroup(selectedImage, false));
                     }
                 }
 

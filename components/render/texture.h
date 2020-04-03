@@ -15,7 +15,9 @@ namespace Render
         int32_t width = 0;
         int32_t height = 0;
         int32_t arrayLayers = 1;
-        Format format = {};
+        bool forceTextureToBeATextureArray = false;
+
+        Format format = Format::RGBA8UNorm;
 
         Filter minFilter = Filter::Linear;
         Filter magFilter = Filter::Linear;

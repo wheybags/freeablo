@@ -1,28 +1,28 @@
 #include "standaloneguispritehandler.h"
 #include "inputfwd.h"
+#include <render/renderinstance.h>
+#include <render/texture.h>
 
 namespace NuklearMisc
 {
-    GuiSprite::GuiSprite(Render::SpriteGroup* sprite, uint32_t cacheIndex, StandaloneGuiHandler* handler)
-        : mSprite(sprite), mHandler(handler), mCacheIndex(cacheIndex)
+    GuiSprite::GuiSprite(Render::SpriteGroup* sprite) : mSprite(sprite)
     {
-        for (uint32_t i = 0; i < sprite->size(); i++)
+        mFrameIds.resize(mSprite->size());
+        for (uint32_t i = 0; i < mSprite->size(); i++)
         {
-            id id;
-            id.cacheIndex = cacheIndex;
-            id.frameIndex = i;
-
-            mFrameIds.push_back(id);
+            mFrameIds[i].spriteGroup = mSprite.get();
+            mFrameIds[i].frameNumber = i;
         }
     }
 
-    GuiSprite::~GuiSprite()
+    GuiSprite::GuiSprite(std::unique_ptr<Render::Texture>&& texture) : mTexture(std::move(texture))
     {
-        delete mSprite;
-        mSprite = nullptr;
-
-        mHandler->mSprites.erase(mCacheIndex);
+        mFrameIds.resize(1);
+        mFrameIds[0].texture = mTexture.get();
+        mFrameIds[0].frameNumber = 1;
     }
+
+    GuiSprite::~GuiSprite() = default;
 
     StandaloneGuiHandler::StandaloneGuiHandler(const std::string& title, const Render::RenderSettings& renderSettings)
         : mInput(
@@ -50,7 +50,8 @@ namespace NuklearMisc
             // struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
             // struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
             // struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
-            mNuklearGraphicsContext.dev.font_tex = fontStashEnd(mNuklearGraphicsContext.atlas, mNuklearGraphicsContext.dev.null);
+            mNuklearFontTexture = fontStashEnd(mNuklearGraphicsContext.atlas, mNuklearGraphicsContext.dev.null);
+            mNuklearGraphicsContext.dev.font_tex = mNuklearFontTexture->getNkImage().handle;
             // nk_style_load_all_cursors(ctx, atlas->cursors);
             // nk_style_set_font(ctx, &roboto->handle);
         }
@@ -60,21 +61,10 @@ namespace NuklearMisc
 
     StandaloneGuiHandler::~StandaloneGuiHandler()
     {
-        while (!mSprites.empty())
-            delete mSprites.begin()->second;
-
         destroyNuklearGraphicsContext(mNuklearGraphicsContext);
         nk_free(&mCtx);
 
         Render::quit();
-    }
-
-    GuiSprite* StandaloneGuiHandler::getSprite(Render::SpriteGroup* sprite)
-    {
-        auto retval = new GuiSprite(sprite, mNextFrameId, this);
-        mSprites[mNextFrameId] = retval;
-        mNextFrameId++;
-        return retval;
     }
 
     void StandaloneGuiHandler::fontStashBegin(nk_font_atlas& atlas)
@@ -83,22 +73,31 @@ namespace NuklearMisc
         nk_font_atlas_begin(&atlas);
     }
 
-    nk_handle StandaloneGuiHandler::fontStashEnd(nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
+    std::unique_ptr<GuiSprite> StandaloneGuiHandler::fontStashEnd(nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
     {
-        const void* image;
-        int w, h;
-        image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
+        const void* imageData;
+        int width, height;
+        imageData = nk_font_atlas_bake(&atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
 
-        GuiSprite* sprite =
-            getSprite(Render::loadSprite(Image(w, h, reinterpret_cast<ByteColour*>(const_cast<void*>(image)), PointerDataType::NonOwningReference), false));
+        std::unique_ptr<GuiSprite> sprite;
+        {
+            Render::BaseTextureInfo textureInfo;
+            textureInfo.width = width;
+            textureInfo.height = height;
+            textureInfo.forceTextureToBeATextureArray = true;
+            textureInfo.format = Render::Format::RGBA8UNorm;
+            std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
+            texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData));
 
-        nk_handle handle = sprite->getNkImage(0).handle;
-        nk_font_atlas_end(&atlas, handle, &nullTex);
+            sprite = std::make_unique<GuiSprite>(std::move(texture));
+        }
+
+        nk_font_atlas_end(&atlas, sprite->getNkImage().handle, &nullTex);
 
         if (atlas.default_font)
             nk_style_set_font(&mCtx, &atlas.default_font->handle);
 
-        return handle;
+        return sprite;
     }
 
     bool StandaloneGuiHandler::update()
@@ -112,7 +111,7 @@ namespace NuklearMisc
         nk_clear(&mCtx);
 
         Render::clear();
-        Render::drawGui(mNuklearData, this);
+        Render::drawGui(mNuklearData);
         Render::draw();
 
         return quit;

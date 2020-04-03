@@ -75,7 +75,7 @@ namespace Render
 
     void resize(size_t w, size_t h);
     RenderSettings getWindowSize();
-    void drawGui(NuklearFrameDump& dump, SpriteCacheBase* cache);
+    void drawGui(NuklearFrameDump& dump);
 
     bool getImageInfo(const std::string& path, std::vector<int32_t>& widths, std::vector<int32_t>& heights, int32_t& animLength);
     FACursor createCursor(const Cel::CelFrame& celFrame, int32_t hot_x = 0, int32_t hot_y = 0);
@@ -114,7 +114,6 @@ namespace Render
                    SpriteGroup* minBottoms,
                    SpriteGroup* specialSprites,
                    const std::map<int32_t, int32_t>& specialSpritesMap,
-                   SpriteCacheBase* cache,
                    LevelObjects& objs,
                    LevelObjects& items,
                    const Vec2Fix& fractionalPos);
@@ -122,4 +121,6 @@ namespace Render
     Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& fractionalPos);
 
     void clear(int r = 0, int g = 0, int b = 255);
+
+    extern RenderInstance* mainRenderInstance;
 }

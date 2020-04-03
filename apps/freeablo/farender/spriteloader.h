@@ -1,5 +1,5 @@
 #pragma once
-#include "spritecache.h"
+#include "spritegroup.h"
 #include <misc/misc.h>
 #include <string>
 #include <unordered_map>

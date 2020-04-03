@@ -11,7 +11,7 @@ int main(int, char** argv)
 {
     Misc::saveArgv0(argv[0]);
 
-    Render::RenderSettings renderSettings;
+    Render::RenderSettings renderSettings = {};
     renderSettings.windowWidth = 800;
     renderSettings.windowHeight = 600;
     renderSettings.fullscreen = false;
@@ -25,12 +25,12 @@ int main(int, char** argv)
 
         FAIO::init("");
 
-        std::unique_ptr<NuklearMisc::GuiSprite> banner(
-            guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/banner.png", false)));
-        std::unique_ptr<NuklearMisc::GuiSprite> graphicsHeader(
-            guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/graphics.png", false)));
-        std::unique_ptr<NuklearMisc::GuiSprite> playHeader(
-            guiHandler.getSprite(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/play.png", false)));
+        std::unique_ptr<NuklearMisc::GuiSprite> banner =
+            std::make_unique<NuklearMisc::GuiSprite>(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/banner.png", false));
+        std::unique_ptr<NuklearMisc::GuiSprite> graphicsHeader =
+            std::make_unique<NuklearMisc::GuiSprite>(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/graphics.png", false));
+        std::unique_ptr<NuklearMisc::GuiSprite> playHeader =
+            std::make_unique<NuklearMisc::GuiSprite>(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/play.png", false));
 
         int32_t bannerW, bannerH;
         Render::spriteSize(banner->getSprite()->operator[](0), bannerW, bannerH);
@@ -55,8 +55,8 @@ int main(int, char** argv)
         Settings::Settings settings;
         settings.loadUserSettings();
 
-        std::string diabloExePath = settings.get<std::string>("Game", "PathEXE");
-        std::string mpqPath = settings.get<std::string>("Game", "PathMPQ");
+        auto diabloExePath = settings.get<std::string>("Game", "PathEXE");
+        auto mpqPath = settings.get<std::string>("Game", "PathMPQ");
 
         ctx->style.window.padding = nk_vec2(0, 0);
         ctx->style.window.group_padding = nk_vec2(0, 0);
@@ -86,31 +86,31 @@ int main(int, char** argv)
                             float buttonSize = 0.7f;
                             nk_color selectedColor = nk_rgb(255, 255, 255);
 
-                            nk_layout_space_push(ctx,
-                                                 nk_rect(0.1 * headerBounds.h, 0.1 * headerBounds.h, buttonSize * headerBounds.h, buttonSize * headerBounds.h));
+                            nk_layout_space_push(
+                                ctx, nk_rect(0.1f * headerBounds.h, 0.1f * headerBounds.h, buttonSize * headerBounds.h, buttonSize * headerBounds.h));
                             if (nk_button_image_styled(ctx, &headerButtonStyle, playHeader->getNkImage(0)))
                                 currentTab = TabType::Play;
 
                             nk_layout_space_push(ctx,
-                                                 nk_rect(0.1 * headerBounds.h,
-                                                         0.1 * headerBounds.h + buttonSize * headerBounds.h,
+                                                 nk_rect(0.1f * headerBounds.h,
+                                                         0.1f * headerBounds.h + buttonSize * headerBounds.h,
                                                          buttonSize * headerBounds.h,
-                                                         0.25 * headerBounds.h));
+                                                         0.25f * headerBounds.h));
 
                             nk_label_colored(ctx, "PLAY", NK_TEXT_CENTERED, currentTab == TabType::Play ? selectedColor : ctx->style.text.color);
 
                             nk_layout_space_push(
                                 ctx,
-                                nk_rect((buttonSize + 0.2) * headerBounds.h, 0.1 * headerBounds.h, buttonSize * headerBounds.h, buttonSize * headerBounds.h));
+                                nk_rect((buttonSize + 0.2f) * headerBounds.h, 0.1f * headerBounds.h, buttonSize * headerBounds.h, buttonSize * headerBounds.h));
 
                             if (nk_button_image_styled(ctx, &headerButtonStyle, graphicsHeader->getNkImage(0)))
                                 currentTab = TabType::Graphics;
 
                             nk_layout_space_push(ctx,
-                                                 nk_rect((buttonSize + 0.2) * headerBounds.h,
-                                                         0.1 * headerBounds.h + buttonSize * headerBounds.h,
+                                                 nk_rect((buttonSize + 0.2f) * headerBounds.h,
+                                                         0.1f * headerBounds.h + buttonSize * headerBounds.h,
                                                          buttonSize * headerBounds.h,
-                                                         0.25 * headerBounds.h));
+                                                         0.25f * headerBounds.h));
 
                             nk_label_colored(ctx, "GRAPHICS", NK_TEXT_CENTERED, currentTab == TabType::Graphics ? selectedColor : ctx->style.text.color);
                         }
@@ -154,10 +154,11 @@ int main(int, char** argv)
 
                     nk_layout_space_begin(ctx, NK_STATIC, remainingSpace, INT_MAX);
                     {
-                        nk_layout_space_push(
-                            ctx,
-                            nk_rect(
-                                bottomSectionBounds.w - bottomSectionBounds.w / 4.0, remainingSpace - rowHeight - 10, bottomSectionBounds.w / 4.0, rowHeight));
+                        nk_layout_space_push(ctx,
+                                             nk_rect(bottomSectionBounds.w - bottomSectionBounds.w / 4.0f,
+                                                     remainingSpace - rowHeight - 10,
+                                                     bottomSectionBounds.w / 4.0f,
+                                                     rowHeight));
                         nk_style_push_vec2(ctx, &ctx->style.window.group_padding, nk_vec2(0, 0));
 
                         if (nk_group_begin(ctx, "bottom_menu", NK_WINDOW_NO_SCROLLBAR))

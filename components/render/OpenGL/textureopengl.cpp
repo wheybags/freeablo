@@ -49,10 +49,10 @@ namespace Render
 
         ScopedBindGL thisBind(this);
 
-        if (mInfo.arrayLayers == 1)
-            glTexImage2D(getBindPoint(), 0, internalFormat, mInfo.width, mInfo.height, 0, format, type, nullptr);
-        else
+        if (isTextureArray())
             glTexImage3D(getBindPoint(), 0, internalFormat, mInfo.width, mInfo.height, mInfo.arrayLayers, 0, format, type, nullptr);
+        else
+            glTexImage2D(getBindPoint(), 0, internalFormat, mInfo.width, mInfo.height, 0, format, type, nullptr);
 
         glTexParameteri(getBindPoint(), GL_TEXTURE_MIN_FILTER, mInfo.minFilter == Filter::Nearest ? GL_NEAREST : GL_LINEAR);
         glTexParameteri(getBindPoint(), GL_TEXTURE_MAG_FILTER, mInfo.magFilter == Filter::Nearest ? GL_NEAREST : GL_LINEAR);
@@ -64,10 +64,10 @@ namespace Render
     {
         ScopedBindGL thisBind(this);
 
-        if (mInfo.arrayLayers == 1)
-            glTexSubImage2D(getBindPoint(), 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, rgba8UnormData);
-        else
+        if (isTextureArray())
             glTexSubImage3D(getBindPoint(), 0, x, y, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, rgba8UnormData);
+        else
+            glTexSubImage2D(getBindPoint(), 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, rgba8UnormData);
     }
 
     void TextureOpenGL::unbind(std::optional<GLuint> extra1, std::optional<GLuint>)
@@ -85,5 +85,5 @@ namespace Render
         glBindTexture(getBindPoint(), mId);
     }
 
-    GLenum TextureOpenGL::getBindPoint() const { return mInfo.arrayLayers == 1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_ARRAY; }
+    GLenum TextureOpenGL::getBindPoint() const { return isTextureArray() ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D; }
 }

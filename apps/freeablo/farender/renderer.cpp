@@ -12,6 +12,8 @@
 #include <misc/assert.h>
 #include <numeric>
 #include <render/levelobjects.h>
+#include <render/renderinstance.h>
+#include <render/texture.h>
 #include <thread>
 
 namespace FARender
@@ -56,26 +58,34 @@ namespace FARender
         nk_font_atlas_begin(&atlas);
     }
 
-    nk_handle nk_fa_font_stash_end(SpriteManager& spriteManager, nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
+    std::unique_ptr<FASpriteGroup> nk_fa_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
     {
-        const void* image;
-        int w, h;
-        image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
+        int width, height;
+        const void* imageData = nk_font_atlas_bake(&atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
 
-        FASpriteGroup* sprite = spriteManager.getFromRaw(Image(w, h, reinterpret_cast<ByteColour*>(const_cast<void*>(image)), PointerDataType::Copy));
-        spriteManager.setImmortal(sprite->getCacheIndex(), true);
+        std::unique_ptr<FASpriteGroup> sprite = std::make_unique<FASpriteGroup>();
+        {
+            Render::BaseTextureInfo textureInfo;
+            textureInfo.width = width;
+            textureInfo.height = height;
+            textureInfo.forceTextureToBeATextureArray = true;
+            textureInfo.format = Render::Format::RGBA8UNorm;
+            std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
+            texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData));
 
-        nk_handle handle = sprite->getNkImage().handle;
-        nk_font_atlas_end(&atlas, handle, &nullTex);
+            sprite->init(std::move(texture));
+        }
+
+        nk_font_atlas_end(&atlas, sprite->getNkImage().handle, &nullTex);
 
         if (atlas.default_font)
             nk_style_set_font(ctx, &atlas.default_font->handle);
 
-        return handle;
+        return sprite;
     }
 
     Renderer::Renderer(const DiabloExe::DiabloExe& exe, int32_t windowWidth, int32_t windowHeight, bool fullscreen)
-        : mSpriteLoader(exe), mDone(false), mSpriteManager(1024), mWidthHeightTmp(0)
+        : mSpriteLoader(exe), mDone(false), mWidthHeightTmp(0)
     {
         release_assert(!mRenderer); // singleton, only one instance
 
@@ -103,8 +113,8 @@ namespace FARender
                 // struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
                 // struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
                 // struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
-                mNuklearGraphicsData.dev.font_tex =
-                    nk_fa_font_stash_end(mSpriteManager, &mNuklearContext, mNuklearGraphicsData.atlas, mNuklearGraphicsData.dev.null);
+                mNuklearFontTexture = nk_fa_font_stash_end(&mNuklearContext, mNuklearGraphicsData.atlas, mNuklearGraphicsData.dev.null);
+                mNuklearGraphicsData.dev.font_tex = mNuklearFontTexture->getNkImage().handle;
                 // nk_style_load_all_cursors(ctx, atlas->cursors);
                 // nk_style_set_font(ctx, &roboto->handle);
             }
@@ -198,7 +208,7 @@ namespace FARender
             auto& position = object.position;
 
             Render::LevelObject obj;
-            obj.sprite = object.spriteGroup->mRealSpriteGroup;
+            obj.sprite = object.spriteGroup->getSpriteGroup();
             obj.spriteFrame = object.frame;
             obj.fractionalPos = position.getFractionalPos();
             obj.hoverColor = object.hoverColor;
@@ -210,7 +220,7 @@ namespace FARender
         }
     }
 
-    bool Renderer::renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload)
+    bool Renderer::renderFrame(RenderState* state)
     {
         if (mDone)
         {
@@ -224,9 +234,6 @@ namespace FARender
 
         Render::clear(0, 0, 0);
 
-        for (auto id : spritesToPreload)
-            mSpriteManager.get(id);
-
         if (state)
         {
             if (state->level)
@@ -235,17 +242,16 @@ namespace FARender
                 fill(*state->level, state->mItems, mItems);
 
                 Render::drawLevel(state->level->mLevel,
-                                  state->tileset.minTops->mRealSpriteGroup,
-                                  state->tileset.minBottoms->mRealSpriteGroup,
-                                  state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->mRealSpriteGroup : nullptr,
+                                  state->tileset.minTops->getSpriteGroup(),
+                                  state->tileset.minBottoms->getSpriteGroup(),
+                                  state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->getSpriteGroup() : nullptr,
                                   state->tileset.mSpecialSpriteMap,
-                                  &mSpriteManager,
                                   mLevelObjects,
                                   mItems,
                                   state->mPos.getFractionalPos());
             }
 
-            Render::drawGui(state->nuklearData, &mSpriteManager);
+            Render::drawGui(state->nuklearData);
             {
                 Renderer::drawCursor(state);
             }
@@ -291,8 +297,6 @@ namespace FARender
         }
     }
 
-    void Renderer::cleanup() { mSpriteManager.clear(); }
-
     void Renderer::getWindowDimensions(int32_t& w, int32_t& h)
     {
         I32sAs64 tmp;
@@ -329,8 +333,6 @@ namespace FARender
                     generateFont(mSpriteLoader.getSprite(*((&mSpriteLoader.mGuiSprites.fontSilver16) + i)), prefix + ".bin", initData);
         }
     }
-
-    bool Renderer::getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites) { return mSpriteManager.getAndClearSpritesNeedingPreloading(sprites); }
 
     nk_user_font* Renderer::smallFont() const { return &mSmallTextFont->nkFont; }
 

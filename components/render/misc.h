@@ -14,7 +14,6 @@ namespace Render
     public:
         explicit SpriteGroup(const std::string& path, bool trim);
         explicit SpriteGroup(std::vector<Sprite>&& sprites);
-        static bool canDeleteIndividualSprites();
         void destroy();
 
         Sprite& operator[](size_t index);
@@ -31,12 +30,5 @@ namespace Render
         std::vector<Sprite> mSprites;
         int32_t mWidth = 0, mHeight = 0;
         size_t mAnimLength;
-    };
-
-    class SpriteCacheBase
-    {
-    public:
-        virtual SpriteGroup* get(uint32_t key) = 0;
-        virtual void setImmortal(uint32_t index, bool immortal) = 0;
     };
 }

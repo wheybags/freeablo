@@ -3,7 +3,6 @@
 #include "diabloexe/diabloexe.h"
 #include "fontinfo.h"
 #include "spriteloader.h"
-#include "spritemanager.h"
 #include <atomic>
 #include <condition_variable>
 #include <cstddef>
@@ -93,8 +92,7 @@ namespace FARender
 
         void drawCursor(RenderState* State);
 
-        bool renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload); ///< To be called only by Engine::ThreadManager
-        void cleanup();                                                                      ///< To be called only by Engine::ThreadManager
+        bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
         Misc::Point cursorSize() const { return mCursorSize; }
 
         nk_context* getNuklearContext() { return &mNuklearContext; }
@@ -102,7 +100,6 @@ namespace FARender
         void getWindowDimensions(int32_t& w, int32_t& h);
         void loadFonts(const DiabloExe::DiabloExe& exe);
 
-        bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites);
         nk_user_font* smallFont() const;
         nk_user_font* bigTGoldFont() const;
         nk_user_font* goldFont(int height) const;
@@ -125,10 +122,6 @@ namespace FARender
         size_t mNumRenderStates = 15;
         RenderState* mStates;
 
-    public:
-        SpriteManager mSpriteManager;
-
-    private:
         Render::FACursor mCurrentCursor = nullptr;
         uint32_t mCurrentCursorFrame = std::numeric_limits<uint32_t>::max();
         Misc::Point mCursorSize;
@@ -139,6 +132,7 @@ namespace FARender
 
         nk_context mNuklearContext = nk_context();
         Render::NuklearGraphicsContext mNuklearGraphicsData = Render::NuklearGraphicsContext();
+        std::unique_ptr<FASpriteGroup> mNuklearFontTexture;
 
         std::atomic<std::int64_t> mWidthHeightTmp;
         std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;

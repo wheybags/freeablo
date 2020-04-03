@@ -45,11 +45,11 @@ void nk_sdl_device_destroy(nk_gl_device& dev)
     delete dev.uniformBuffer;
     delete dev.pipeline;
     delete dev.vertexArrayObject;
+    delete dev.uniformCpuBuffer;
     nk_buffer_free(&dev.cmds);
 }
 
-void nk_sdl_render_dump(
-    Render::SpriteCacheBase* cache, NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue)
+void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue)
 {
     int width, height;
     int display_width, display_height;
@@ -77,7 +77,7 @@ void nk_sdl_render_dump(
 
     nk_gl_device& dev = dump.getDevice();
 
-    auto& atlasLookupMap = atlasTexture.getLookupMap();
+    const Render::AtlasTextureLookupMap& atlasLookupMap = atlasTexture.getLookupMap();
 
     // convert from command queue into draw list and draw to screen
     size_t offset = 0;
@@ -85,11 +85,9 @@ void nk_sdl_render_dump(
     dev.vertexArrayObject->getVertexBuffer(0)->setData(dump.vbuf.memory.ptr, dump.vbuf.size);
     dev.vertexArrayObject->getIndexBuffer()->setData(dump.ebuf.memory.ptr, dump.ebuf.size);
 
-    // TODO: we don't need to update this every frame
     dev.descriptorSet->updateItems({
         {0, Render::BufferSlice{dev.uniformBuffer, dev.uniformCpuBuffer->getMemberOffset<GuiUniforms::Vertex>(), sizeof(GuiUniforms::Vertex)}},
         {1, Render::BufferSlice{dev.uniformBuffer, dev.uniformCpuBuffer->getMemberOffset<GuiUniforms::Fragment>(), sizeof(GuiUniforms::Fragment)}},
-        {2, &atlasTexture.getTextureArray()},
     });
 
     // iterate over and execute each draw command
@@ -98,16 +96,19 @@ void nk_sdl_render_dump(
         if (!cmd.elem_count)
             continue;
 
-        auto* textureHandle = reinterpret_cast<FANuklearTextureHandle*>(cmd.texture.ptr);
+        auto* nuklearTextureHandle = reinterpret_cast<FANuklearTextureHandle*>(cmd.texture.ptr);
 
-        uint32_t cacheIndex = textureHandle->cacheIndex;
-        uint32_t frameNum = textureHandle->frameNumber;
+        const Render::AtlasTextureEntry* atlasEntry = nullptr;
+        if (nuklearTextureHandle->texture == nullptr)
+        {
+            uint32_t frameNum = nuklearTextureHandle->frameNumber;
+
+            Render::SpriteGroup* spriteGroup = nuklearTextureHandle->spriteGroup;
+            Render::Sprite sprite = spriteGroup->operator[](frameNum);
+            atlasEntry = &atlasLookupMap.at((GLuint)(intptr_t)sprite);
+        }
+
         auto effect = static_cast<FAGui::EffectType>(cmd.userdata.id);
-
-        Render::SpriteGroup* sprite = textureHandle->spriteGroup ? textureHandle->spriteGroup : cache->get(cacheIndex);
-        auto s = sprite->operator[](frameNum);
-
-        auto& atlasEntry = atlasLookupMap.at((GLuint)(intptr_t)s);
 
         int item_hl_color[] = {0xB9, 0xAA, 0x77};
 
@@ -119,14 +120,36 @@ void nk_sdl_render_dump(
         fragment->hoverColor[1] = float(item_hl_color[1]) / 255.0f;
         fragment->hoverColor[2] = float(item_hl_color[2]) / 255.0f;
         fragment->hoverColor[3] = effect == FAGui::EffectType::highlighted ? 1.0f : 0.0f;
-        fragment->imageSize[0] = atlasEntry.mWidth;
-        fragment->imageSize[1] = atlasEntry.mHeight;
-        fragment->atlasSize[0] = atlasTexture.getTextureArray().width();
-        fragment->atlasSize[1] = atlasTexture.getTextureArray().height();
-        fragment->atlasOffset[0] = atlasEntry.mX;
-        fragment->atlasOffset[1] = atlasEntry.mY;
-        fragment->atlasOffset[2] = atlasEntry.mLayer;
         fragment->checkerboarded = effect == FAGui::EffectType::checkerboarded ? 1.0f : 0.0f;
+
+        if (atlasEntry)
+        {
+            dev.descriptorSet->updateItems({
+                {2, &atlasTexture.getTextureArray()},
+            });
+
+            fragment->imageSize[0] = atlasEntry->mWidth;
+            fragment->imageSize[1] = atlasEntry->mHeight;
+            fragment->atlasSize[0] = atlasTexture.getTextureArray().width();
+            fragment->atlasSize[1] = atlasTexture.getTextureArray().height();
+            fragment->atlasOffset[0] = atlasEntry->mX;
+            fragment->atlasOffset[1] = atlasEntry->mY;
+            fragment->atlasOffset[2] = atlasEntry->mLayer;
+        }
+        else
+        {
+            dev.descriptorSet->updateItems({
+                {2, nuklearTextureHandle->texture},
+            });
+
+            fragment->imageSize[0] = nuklearTextureHandle->texture->width();
+            fragment->imageSize[1] = nuklearTextureHandle->texture->height();
+            fragment->atlasSize[0] = nuklearTextureHandle->texture->width();
+            fragment->atlasSize[1] = nuklearTextureHandle->texture->height();
+            fragment->atlasOffset[0] = 0;
+            fragment->atlasOffset[1] = 0;
+            fragment->atlasOffset[2] = 0;
+        }
 
         dev.uniformBuffer->setData(dev.uniformCpuBuffer->data(), dev.uniformCpuBuffer->getSizeInBytes());
 

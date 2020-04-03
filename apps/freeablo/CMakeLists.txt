@@ -10,14 +10,14 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
 
     farender/renderer.cpp
     farender/renderer.h
-    farender/spritecache.cpp
-    farender/spritecache.h
-    farender/spritemanager.cpp
-    farender/spritemanager.h
     farender/animationplayer.cpp
     farender/animationplayer.h
     farender/fontinfo.cpp
     farender/fontinfo.h
+    farender/spriteloader.cpp
+    farender/spriteloader.h
+    farender/spritegroup.cpp
+    farender/spritegroup.h
 
     faworld/actor/basestate.cpp
     faworld/actor/basestate.h
@@ -163,9 +163,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fasavegame/objectidmapper.h
     fasavegame/objectidmapper.cpp
     fasavegame/gameloader.h
-    fasavegame/gameloader.cpp
-    farender/spriteloader.cpp
-    farender/spriteloader.h)
+    fasavegame/gameloader.cpp)
 
 target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input Random Image enet cxxopts fmt::fmt)
 target_include_directories(freeablo_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
