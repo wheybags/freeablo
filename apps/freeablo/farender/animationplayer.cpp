@@ -7,7 +7,7 @@ namespace FARender
 {
     AnimationPlayer::AnimationPlayer(FASaveGame::GameLoader& loader)
     {
-        bool hasCurrentAnim = loader.load<bool>();
+        //        bool hasCurrentAnim = loader.load<bool>();
 
         //        if (hasCurrentAnim)
         //            mCurrentAnim = Renderer::get()->loadImage(loader.load<std::string>(), true);

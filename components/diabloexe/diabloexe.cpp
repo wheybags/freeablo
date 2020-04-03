@@ -13,6 +13,7 @@
 #include <misc/stringops.h>
 #include <sstream>
 #include <stdint.h>
+#include <unordered_set>
 
 namespace DiabloExe
 {
@@ -335,11 +336,33 @@ namespace DiabloExe
         for (auto& el : objCursFrameSizes)
             el[1] = exe.read32();
         constexpr auto invCellSize = 28;
+
+        std::unordered_set<std::string> usedIds;
+
         for (size_t i = 0; i < count; i++)
         {
             exe.FAfseek(itemOffset + 76 * i, SEEK_SET);
             BaseItem tmp(exe, codeOffset);
-            tmp.id = i;
+
+            if (tmp.name.empty())
+                continue;
+
+
+            std::string idBase = tmp.name;
+            Misc::StringUtils::toLower(idBase);
+            Misc::StringUtils::replace(idBase, " ", "_");
+            Misc::StringUtils::replace(idBase, "-", "_");
+
+            std::string idName = idBase;
+            for (int32_t j = 1; usedIds.count(idName); j++)
+            {
+                idName = idBase + "_" + std::to_string(j);
+                Misc::StringUtils::replace(idName, "__", "_");
+            }
+
+            usedIds.insert(idName);
+            tmp.idName = idName;
+
             auto dropGraphicsId = itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId];
             tmp.dropItemGraphicsPath = "items/" + mItemDropGraphicsFilename[dropGraphicsId] + ".cel";
             tmp.dropItemSoundPath = mSoundFilename[mItemGraphicsIdToDropSfxId[dropGraphicsId]];

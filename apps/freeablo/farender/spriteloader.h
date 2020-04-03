@@ -44,8 +44,8 @@ namespace FARender
         std::unordered_map<std::string, MonsterSpriteDefinition> mMonsterSpriteDefinitions;
 
         std::unordered_map<std::string, SpriteDefinition> mNpcIdleAnimations;
-
         std::unordered_map<uint8_t, std::vector<SpriteDefinition>> mMissileAnimations;
+        std::unordered_map<std::string, SpriteDefinition> mItemDrops;
 
         std::unordered_map<int32_t, SpriteDefinition> mTilesetTops;
         std::unordered_map<int32_t, SpriteDefinition> mTilesetBottoms;

@@ -5,6 +5,7 @@
 #include <diabloexe/npc.h>
 #include <fmt/format.h>
 #include <misc/stringops.h>
+#include <diabloexe/baseitem.h>
 
 namespace FARender
 {
@@ -62,6 +63,13 @@ namespace FARender
                 mSpritesToLoad.insert(definition);
 
             mMissileAnimations[pair.first] = std::move(missileDirections);
+        }
+
+        for (const auto& item : exe.getBaseItems())
+        {
+            SpriteDefinition definition{item.dropItemGraphicsPath, true};
+            mItemDrops[item.idName] = definition;
+            mSpritesToLoad.insert(definition);
         }
 
         for (int32_t i = 0; i <= 2; i++)
