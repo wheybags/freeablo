@@ -24,30 +24,27 @@ namespace FARender
 
     Renderer* Renderer::mRenderer = nullptr;
 
-    std::unique_ptr<CelFontInfo> Renderer::generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData, int spacing)
+    std::unique_ptr<CelFontInfo> Renderer::generateCelFont(FASpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing)
     {
         std::unique_ptr<CelFontInfo> ret(new CelFontInfo());
-        auto mergedTex = mSpriteManager.get(texturePath + "&convertToSingleTexture", false);
-        ret->initByFontData(fontData, mergedTex->getWidth(), spacing);
+        ret->initByFontData(fontData, fontTexture->getWidth(), spacing);
         ret->nkFont.userdata.ptr = ret.get();
-        ret->nkFont.height = mergedTex->getHeight();
+        ret->nkFont.height = fontTexture->getHeight();
         ret->nkFont.width = &CelFontInfo::getWidth;
-        //        mSpriteManager.get(texturePath);
         ret->nkFont.query = &CelFontInfo::queryGlyph;
-        ret->nkFont.texture = mergedTex->getNkImage().handle;
+        ret->nkFont.texture = fontTexture->getNkImage().handle;
         return ret;
     }
 
-    std::unique_ptr<PcxFontInfo> Renderer::generateFont(const std::string& pcxPath, const std::string& binPath, const PcxFontInitData& fontInitData)
+    std::unique_ptr<PcxFontInfo> Renderer::generateFont(FASpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData)
     {
         std::unique_ptr<PcxFontInfo> ret(new PcxFontInfo());
-        auto tex = mSpriteManager.get(pcxPath, false);
         ret->init(binPath, fontInitData);
         ret->nkFont.userdata.ptr = ret.get();
         ret->nkFont.height = fontInitData.spacingY;
         ret->nkFont.width = &PcxFontInfo::getWidth;
         ret->nkFont.query = &PcxFontInfo::queryGlyph;
-        ret->nkFont.texture = tex->getNkImage().handle;
+        ret->nkFont.texture = fontTexture->getNkImage().handle;
         return ret;
     }
 
@@ -167,10 +164,6 @@ namespace FARender
     }
 
     void Renderer::setCurrentState(RenderState* current) { Engine::ThreadManager::get()->sendRenderState(current); }
-
-    FASpriteGroup* Renderer::loadImage(const std::string& path, bool trim) { return mSpriteManager.get(path, trim); }
-
-    std::string Renderer::getPathForIndex(uint32_t index) { return mSpriteManager.getPathForIndex(index); }
 
     Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
@@ -311,8 +304,8 @@ namespace FARender
 
     void Renderer::loadFonts(const DiabloExe::DiabloExe& exe)
     {
-        mSmallTextFont = generateCelFont("ctrlpan/smaltext.cel", exe.getFontData("smaltext"), 1);
-        mBigTGoldFont = generateCelFont("data/bigtgold.cel", exe.getFontData("bigtgold"), 2);
+        mSmallTextFont = generateCelFont(mSpriteLoader.getSprite(mSpriteLoader.mGuiSprites.smallTextFont), exe.getFontData("smaltext"), 1);
+        mBigTGoldFont = generateCelFont(mSpriteLoader.getSprite(mSpriteLoader.mGuiSprites.bigTGoldFont), exe.getFontData("bigtgold"), 2);
 
         // Font textures are resized as they are very tall (some GPUs don't support textures larger than 8192x8192).
         // Resizing the font image also transposes the sub images (LayoutOrder vertical -> horizontal) in this case i.e.
@@ -325,16 +318,14 @@ namespace FARender
                                           {30, 512, 496, 32, 31, PcxFontInitData::LayoutOrder::horizontal},
                                           {42, 640, 672, 40, 42, PcxFontInitData::LayoutOrder::horizontal}};
 
-        for (auto& initData : fontInitData)
+        for (size_t i = 0; i < sizeof(fontInitData) / sizeof(*fontInitData); i++)
         {
+            const PcxFontInitData& initData = fontInitData[i];
             std::string prefix = "ui_art/font" + std::to_string(initData.fontSize);
-            std::stringstream postfix;
-            postfix << "&trans=0,255,0";
-            postfix << "&resize=" << initData.textureWidth << "x" << initData.textureHeight;
-            postfix << "&tileSize=" << initData.spacingX << "x" << initData.spacingY;
-            mGoldFont[initData.fontSize] = generateFont(prefix + "g.pcx" + postfix.str(), prefix + ".bin", initData);
+
+            mGoldFont[initData.fontSize] = generateFont(mSpriteLoader.getSprite(*((&mSpriteLoader.mGuiSprites.fontGold16) + i)), prefix + ".bin", initData);
             if (initData.fontSize != 42)
-                mSilverFont[initData.fontSize] = generateFont(prefix + "s.pcx" + postfix.str(), prefix + ".bin", initData);
+                mSilverFont[initData.fontSize] = generateFont(mSpriteLoader.getSprite(*((&mSpriteLoader.mGuiSprites.fontSilver16) + i)), prefix + ".bin", initData);
         }
     }
 

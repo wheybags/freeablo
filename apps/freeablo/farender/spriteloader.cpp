@@ -188,7 +188,7 @@ namespace FARender
             if (badCelNames.count(definition.path))
                 continue;
 
-            mLoadedSprites[definition] = renderer->loadImage(definition.path, definition.trim);
+            mLoadedSprites[definition] = renderer->mSpriteManager.get(definition.path, definition.trim);
         }
 
         mSpritesToLoad.clear();

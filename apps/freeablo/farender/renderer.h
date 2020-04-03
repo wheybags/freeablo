@@ -89,9 +89,6 @@ namespace FARender
         RenderState* getFreeState(); // ooh ah up de ra
         void setCurrentState(RenderState* current);
 
-        FASpriteGroup* loadImage(const std::string& path, bool trim);
-        std::string getPathForIndex(uint32_t index);
-
         Render::Tile getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos);
 
         void drawCursor(RenderState* State);
@@ -112,8 +109,8 @@ namespace FARender
         nk_user_font* silverFont(int height) const;
 
     private:
-        std::unique_ptr<CelFontInfo> generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData, int spacing);
-        std::unique_ptr<PcxFontInfo> generateFont(const std::string& pcxPath, const std::string& binPath, const PcxFontInitData& fontInitData);
+        std::unique_ptr<CelFontInfo> generateCelFont(FASpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing);
+        std::unique_ptr<PcxFontInfo> generateFont(FASpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData);
 
     public:
         SpriteLoader mSpriteLoader;

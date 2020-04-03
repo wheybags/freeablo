@@ -114,6 +114,15 @@ namespace FARender
             SpriteDefinition characterSelectBackground{"ui_art/selhero.pcx", false};
             SpriteDefinition mainMenuBackground{"ui_art/mainmenu.pcx", false};
             SpriteDefinition itemCursors{"data/inv/objcurs.cel", false};
+            SpriteDefinition smallTextFont{"ctrlpan/smaltext.cel&convertToSingleTexture", false};
+            SpriteDefinition bigTGoldFont{"data/bigtgold.cel&convertToSingleTexture", false};
+            SpriteDefinition fontGold16 {"ui_art/font16g.pcx&trans=0,255,0&resize=256x256&tileSize=16x16", false};
+            SpriteDefinition fontGold24 {"ui_art/font24g.pcx&trans=0,255,0&resize=384x416&tileSize=24x26", false};
+            SpriteDefinition fontGold30 {"ui_art/font30g.pcx&trans=0,255,0&resize=512x496&tileSize=32x31", false};
+            SpriteDefinition fontGold42 {"ui_art/font42g.pcx&trans=0,255,0&resize=640x672&tileSize=40x42", false};
+            SpriteDefinition fontSilver16 {"ui_art/font16s.pcx&trans=0,255,0&resize=256x256&tileSize=16x16", false};
+            SpriteDefinition fontSilver24 {"ui_art/font24s.pcx&trans=0,255,0&resize=384x416&tileSize=24x26", false};
+            SpriteDefinition fontSilver30 {"ui_art/font30s.pcx&trans=0,255,0&resize=512x496&tileSize=32x31", false};
 
             SpriteDefinition end__;
         } mGuiSprites;
