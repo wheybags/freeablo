@@ -17,13 +17,6 @@ namespace FARender
         return tmp;
     }
 
-    FASpriteGroup* SpriteManager::getTileset(const std::string& celPath, const std::string& minPath, bool top, bool trim)
-    {
-        auto tmp = mCache.getTileset(celPath, minPath, top, trim);
-        addToPreloadList(tmp->spriteCacheIndex);
-        return tmp;
-    }
-
     std::string SpriteManager::getPathForIndex(uint32_t index) { return mCache.getPathForIndex(index); }
 
     FASpriteGroup* SpriteManager::getFromRaw(Image&& image)

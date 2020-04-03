@@ -1,11 +1,9 @@
 #include "spritecache.h"
-#include <misc/assert.h>
-
 #include <cel/celfile.h>
 #include <iostream>
+#include <misc/assert.h>
 #include <misc/stringops.h>
 #include <numeric>
-#include <sstream>
 
 namespace FARender
 {
@@ -74,24 +72,6 @@ namespace FARender
         }
 
         return mStrToCache[path];
-    }
-
-    FASpriteGroup* SpriteCache::getTileset(const std::string& celPath, const std::string& minPath, bool top, bool trim)
-    {
-        std::stringstream ss;
-        ss << celPath << ":::" << minPath << ":::" << top;
-        std::string key = ss.str();
-
-        if (!mStrToTilesetCache.count(key))
-        {
-            FASpriteGroup* newCacheEntry = allocNewSpriteGroup();
-            uint32_t cacheIndex = newUniqueIndex();
-            newCacheEntry->init(0, {}, {}, cacheIndex);
-            mStrToTilesetCache[key] = newCacheEntry;
-            mCacheToTilesetPath[cacheIndex] = TilesetPath(celPath, minPath, top, trim);
-        }
-
-        return mStrToTilesetCache[key];
     }
 
     uint32_t SpriteCache::newUniqueIndex() { return mNextCacheIndex++; }
@@ -200,11 +180,6 @@ namespace FARender
                     newSprite = Render::loadCelToSingleTexture(sourcePath, loadSpec.trim);
                 else
                     newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b, loadSpec.trim);
-            }
-            else if (mCacheToTilesetPath.count(index))
-            {
-                TilesetPath p = mCacheToTilesetPath[index]; // TODO: same as above
-                newSprite = Render::loadTilesetSprite(p.celPath, p.minPath, p.top, p.trim);
             }
             else
             {

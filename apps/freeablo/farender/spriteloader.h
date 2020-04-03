@@ -17,6 +17,7 @@ namespace FARender
     public:
         explicit SpriteLoader(const DiabloExe::DiabloExe& exe);
         void load();
+        void load2();
 
         struct SpriteDefinition
         {

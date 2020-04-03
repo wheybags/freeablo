@@ -192,7 +192,10 @@ namespace FARender
         }
 
         mSpritesToLoad.clear();
+    }
 
+    void SpriteLoader::load2()
+    {
         for (int32_t i = 0; i <= 4; i++)
         {
             std::string celPath = fmt::format("levels/l{}data/l{}.cel", i, i);
@@ -209,14 +212,22 @@ namespace FARender
                 definition.path = "virtual_diablo_tileset/top/" + std::to_string(i);
                 definition.trim = true;
                 mTilesetTops[i] = definition;
-                mLoadedSprites[definition] = renderer->mSpriteManager.getTileset(celPath, minPath, true, definition.trim);
+
+                auto* spriteGroup = new FASpriteGroup();
+                Render::SpriteGroup* realSpriteGroup = Render::loadTilesetSprite(celPath, minPath, true, definition.trim);
+                spriteGroup->init(realSpriteGroup);
+                mLoadedSprites[definition] = spriteGroup;
             }
             {
                 SpriteDefinition definition = {};
                 definition.path = "virtual_diablo_tileset/bottom/" + std::to_string(i);
                 definition.trim = true;
                 mTilesetBottoms[i] = definition;
-                mLoadedSprites[definition] = renderer->mSpriteManager.getTileset(celPath, minPath, false, definition.trim);
+
+                auto* spriteGroup = new FASpriteGroup();
+                Render::SpriteGroup* realSpriteGroup = Render::loadTilesetSprite(celPath, minPath, false, definition.trim);
+                spriteGroup->init(realSpriteGroup);
+                mLoadedSprites[definition] = spriteGroup;
             }
         }
     }

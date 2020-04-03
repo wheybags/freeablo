@@ -55,6 +55,8 @@ namespace Engine
 
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(*mExe, resolutionWidth, resolutionHeight, fullscreen);
+        renderer.mSpriteLoader.load2();
+
         mInputManager = std::make_shared<EngineInputManager>(renderer.getNuklearContext());
         mInputManager->registerKeyboardObserver(this);
         std::thread mainThread([&] { this->runGameLoop(variables); });

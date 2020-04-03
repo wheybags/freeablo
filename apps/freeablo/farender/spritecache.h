@@ -20,10 +20,39 @@ namespace FARender
         int32_t getAnimLength() const { return animLength; }
         int32_t getWidth(int frame = 0) const { return width[frame]; }
         int32_t getHeight(int frame = 0) const { return height[frame]; }
-        int32_t getCacheIndex() const { return spriteCacheIndex; }
+        int32_t getCacheIndex() const
+        {
+            release_assert(spriteCacheIndex != -1);
+            return spriteCacheIndex;
+        }
         struct nk_image getNkImage(int32_t frame = 0);
 
-    private:
+        void init(Render::SpriteGroup* realSpriteGroup)
+        {
+            spriteCacheIndex = -1;
+            mRealSpriteGroup = realSpriteGroup;
+            animLength = mRealSpriteGroup->animLength();
+
+            for (size_t i = 0; i < mRealSpriteGroup->size(); i++)
+            {
+                const Render::Sprite& sprite = mRealSpriteGroup->operator[](i);
+
+                int32_t w, h;
+                Render::spriteSize(sprite, w, h);
+
+                width.push_back(w);
+                height.push_back(h);
+            }
+
+            frameHandles.resize(animLength);
+            for (uint32_t i = 0; i < frameHandles.size(); i++)
+            {
+                frameHandles[i].spriteGroup = realSpriteGroup;
+                frameHandles[i].frameNumber = i;
+            }
+        }
+
+        // private:
         void init(int32_t _animLength, const std::vector<int32_t>& _width, const std::vector<int32_t>& _height, int32_t _spriteCacheIndex)
         {
             animLength = _animLength;
@@ -34,32 +63,22 @@ namespace FARender
             frameHandles.resize(animLength);
             for (uint32_t i = 0; i < frameHandles.size(); i++)
             {
-                frameHandles[i].first = spriteCacheIndex;
-                frameHandles[i].second = i;
+                frameHandles[i].cacheIndex = spriteCacheIndex;
+                frameHandles[i].frameNumber = i;
             }
         }
 
         int32_t animLength = 0;
         std::vector<int32_t> width = {};
         std::vector<int32_t> height = {};
-        int32_t spriteCacheIndex = 0;
 
-        std::vector<std::pair<int32_t, int32_t>> frameHandles;
+        int32_t spriteCacheIndex = 0;
+        Render::SpriteGroup* mRealSpriteGroup = nullptr;
+
+        std::vector<FANuklearTextureHandle> frameHandles;
 
         friend class SpriteCache;
         friend class SpriteManager;
-    };
-
-    struct TilesetPath
-    {
-        std::string celPath;
-        std::string minPath;
-        bool top;
-        bool trim;
-
-        TilesetPath(std::string _c, std::string _m, bool _t, bool _trim) : celPath(_c), minPath(_m), top(_t), trim(_trim) {}
-
-        TilesetPath() {}
     };
 
     struct CacheEntry
@@ -87,10 +106,6 @@ namespace FARender
         ~SpriteCache();
 
         FASpriteGroup* get(const std::string& path, bool trim); ///< To be called from the game thread
-
-        /// Same as get(const std::string&), but for tileset sprites
-        /// @brief To be called from the game thread
-        FASpriteGroup* getTileset(const std::string& celPath, const std::string& minPath, bool top, bool trim);
 
         uint32_t newUniqueIndex(); ///< Can be called from any thread
 
@@ -132,7 +147,6 @@ namespace FARender
         std::map<uint32_t, LoadSpec> mCacheToStr;
 
         std::map<std::string, FASpriteGroup*> mStrToTilesetCache;
-        std::map<uint32_t, TilesetPath> mCacheToTilesetPath;
 
         std::map<uint32_t, uint32_t> mCacheToSprite;
 

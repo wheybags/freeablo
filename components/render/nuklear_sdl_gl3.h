@@ -13,7 +13,16 @@ namespace Render
     class VertexArrayObject;
     class Buffer;
     class DescriptorSet;
+    class SpriteGroup;
 }
+
+struct FANuklearTextureHandle
+{
+    uint32_t cacheIndex = 0;
+    Render::SpriteGroup* spriteGroup = 0;
+
+    uint32_t frameNumber = 0;
+};
 
 namespace GuiUniforms
 {

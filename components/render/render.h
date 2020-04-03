@@ -110,8 +110,8 @@ namespace Render
 
     SpriteGroup* loadTilesetSprite(const std::string& celPath, const std::string& minPath, bool top, bool trim);
     void drawLevel(const Level::Level& level,
-                   size_t minTopsHandle,
-                   size_t minBottomsHandle,
+                   SpriteGroup* minTops,
+                   SpriteGroup* minBottoms,
                    size_t specialSpritesHandle,
                    const std::map<int32_t, int32_t>& specialSpritesMap,
                    SpriteCacheBase* cache,

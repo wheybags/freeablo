@@ -98,11 +98,13 @@ void nk_sdl_render_dump(
         if (!cmd.elem_count)
             continue;
 
-        uint32_t cacheIndex = ((uint32_t*)cmd.texture.ptr)[0];
-        uint32_t frameNum = ((uint32_t*)cmd.texture.ptr)[1];
+        auto* textureHandle = reinterpret_cast<FANuklearTextureHandle*>(cmd.texture.ptr);
+
+        uint32_t cacheIndex = textureHandle->cacheIndex;
+        uint32_t frameNum = textureHandle->frameNumber;
         auto effect = static_cast<FAGui::EffectType>(cmd.userdata.id);
 
-        Render::SpriteGroup* sprite = cache->get(cacheIndex);
+        Render::SpriteGroup* sprite = textureHandle->spriteGroup ? textureHandle->spriteGroup : cache->get(cacheIndex);
         auto s = sprite->operator[](frameNum);
 
         auto& atlasEntry = atlasLookupMap.at((GLuint)(intptr_t)s);

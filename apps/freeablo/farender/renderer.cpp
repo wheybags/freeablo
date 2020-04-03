@@ -235,8 +235,8 @@ namespace FARender
                 fill(*state->level, state->mItems, mItems);
 
                 Render::drawLevel(state->level->mLevel,
-                                  state->tileset.minTops->getCacheIndex(),
-                                  state->tileset.minBottoms->getCacheIndex(),
+                                  state->tileset.minTops->mRealSpriteGroup,
+                                  state->tileset.minBottoms->mRealSpriteGroup,
                                   state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->getCacheIndex() : 0,
                                   state->tileset.mSpecialSpriteMap,
                                   &mSpriteManager,

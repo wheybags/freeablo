@@ -885,8 +885,8 @@ namespace Render
     }
 
     void drawLevel(const Level::Level& level,
-                   size_t minTopsHandle,
-                   size_t minBottomsHandle,
+                   SpriteGroup* minTops,
+                   SpriteGroup* minBottoms,
                    size_t specialSpritesHandle,
                    const std::map<int32_t, int32_t>& specialSpritesMap,
                    SpriteCacheBase* cache,
@@ -895,7 +895,6 @@ namespace Render
                    const Vec2Fix& fractionalPos)
     {
         auto toScreen = worldToScreenVector(fractionalPos);
-        SpriteGroup* minBottoms = cache->get(minBottomsHandle);
         auto isInvalidTile = [&](const Tile& tile) {
             return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
         };
@@ -913,9 +912,6 @@ namespace Render
             if (index < minBottoms->size())
                 drawAtTile((*minBottoms)[index], topLeft, tileWidth, staticObjectHeight); // all static objects have the same sprite size
         });
-
-        SpriteGroup* minTops = cache->get(minTopsHandle);
-        cache->setImmortal(minTopsHandle, true);
 
         // drawing above the ground and moving object
         drawObjectsByTiles(toScreen, [&](const Tile& tile, const Misc::Point& topLeft) {
@@ -958,8 +954,6 @@ namespace Render
                 }
             }
         });
-
-        cache->setImmortal(minTopsHandle, false);
 
         drawCachedLevel();
 

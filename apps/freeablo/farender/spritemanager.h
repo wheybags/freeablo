@@ -20,8 +20,7 @@ namespace FARender
         // game thread public functions //
         //////////////////////////////////
 
-        FASpriteGroup* get(const std::string& path, bool trim);                                                 ///< To be called from the game thread
-        FASpriteGroup* getTileset(const std::string& celPath, const std::string& minPath, bool top, bool trim); ///< To be called from the game thread
+        FASpriteGroup* get(const std::string& path, bool trim); ///< To be called from the game thread
 
         /// Used by NetManager on the server to get the paths to send to clients
         /// for them to user with fillServerSprite
