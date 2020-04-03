@@ -54,6 +54,8 @@ namespace Render
             message_and_abort_fmt("Shader link error: %s\n", errorLog.data());
         }
 
+        uint32_t textureIndex = 0;
+
         mUniformLocations.resize(mSpec.descriptorSetSpec.items.size());
         for (uint32_t bindingIndex = 0; bindingIndex < uint32_t(mSpec.descriptorSetSpec.items.size()); bindingIndex++)
         {
@@ -65,8 +67,15 @@ namespace Render
                     mUniformLocations[bindingIndex] = glGetUniformBlockIndex(mShaderProgramId, item.glName.c_str());
                     break;
                 case DescriptorType::Texture:
-                    mUniformLocations[bindingIndex] = glGetUniformLocation(mShaderProgramId, item.glName.c_str());
+                {
+                    ScopedBindGL thisBind(this);
+
+                    GLint location = glGetUniformLocation(mShaderProgramId, item.glName.c_str());
+                    glUniform1i(location, textureIndex);
+                    mUniformLocations[bindingIndex] = textureIndex;
+                    textureIndex++;
                     break;
+                }
             }
         }
     }

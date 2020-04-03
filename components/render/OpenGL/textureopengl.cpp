@@ -75,7 +75,7 @@ namespace Render
         if (extra1)
             glActiveTexture(*extra1);
 
-        glBindTexture(getBindPoint(), mId);
+        glBindTexture(getBindPoint(), 0);
     }
     void TextureOpenGL::bind(std::optional<GLuint> extra1, std::optional<GLuint>)
     {
