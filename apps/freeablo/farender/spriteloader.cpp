@@ -164,7 +164,7 @@ namespace FARender
         }
 
         for (auto guiSpriteIt = reinterpret_cast<SpriteDefinition*>(&mGuiSprites); guiSpriteIt != &mGuiSprites.end__; guiSpriteIt++)
-            mSpritesToLoad.insert(*guiSpriteIt);
+            mSpritesToLoad2.insert(*guiSpriteIt);
     }
 
     void SpriteLoader::load()
@@ -196,6 +196,113 @@ namespace FARender
 
     void SpriteLoader::load2()
     {
+        for (const auto& definition : mSpritesToLoad2)
+        {
+            // TODO: This is a temporary hack, once we have a proper data loader, we just won't specify these
+            static std::unordered_set<std::string> badCelNames{
+                "Monsters\\Golem\\Golemh.CL2",
+                "Monsters\\Worm\\Wormh.CL2",
+                "Monsters\\Unrav\\Unravw.CL2",
+                "Monsters\\Golem\\Golemn.CL2",
+                "Monsters\\Worm\\Wormd.CL2",
+                "Monsters\\Worm\\Wormw.CL2",
+                "Monsters\\Worm\\Wormn.CL2",
+                "Monsters\\Worm\\Worma.CL2",
+            };
+
+            if (badCelNames.count(definition.path))
+                continue;
+
+            std::vector<std::string> components = Misc::StringUtils::split(definition.path, '&');
+            std::string sourcePath = components[0];
+
+            uint32_t vAnim = 0;
+            bool hasTrans = false;
+            bool resize = false;
+            bool convertToSingleTexture = false;
+            uint32_t tileWidth = 0;
+            uint32_t tileHeight = 0;
+            uint32_t newWidth = 0;
+            uint32_t newHeight = 0;
+            uint32_t r = 0, g = 0, b = 0;
+            int32_t celIndex;
+
+            for (uint32_t i = 1; i < components.size(); i++)
+            {
+                std::vector<std::string> pair = Misc::StringUtils::split(components[i], '=');
+
+                if (pair[0] == "trans")
+                {
+                    std::vector<std::string> rgbStr = Misc::StringUtils::split(pair[1], ',');
+
+                    hasTrans = true;
+
+                    std::istringstream rss(rgbStr[0]);
+                    rss >> r;
+
+                    std::istringstream gss(rgbStr[1]);
+                    gss >> g;
+
+                    std::istringstream bss(rgbStr[2]);
+                    bss >> b;
+                }
+                else if (pair[0] == "vanim")
+                {
+                    std::istringstream vanimss(pair[1]);
+
+                    vanimss >> vAnim;
+                }
+                else if (pair[0] == "resize")
+                {
+                    resize = true;
+
+                    std::vector<std::string> newSize = Misc::StringUtils::split(pair[1], 'x');
+
+                    std::istringstream wss(newSize[0]);
+                    wss >> newWidth;
+
+                    std::istringstream hss(newSize[1]);
+                    hss >> newHeight;
+                }
+                else if (pair[0] == "tileSize")
+                {
+                    std::vector<std::string> tileSize = Misc::StringUtils::split(pair[1], 'x');
+
+                    std::istringstream wss(tileSize[0]);
+                    wss >> tileWidth;
+
+                    std::istringstream hss(tileSize[1]);
+                    hss >> tileHeight;
+                }
+                else if (pair[0] == "convertToSingleTexture")
+                {
+                    convertToSingleTexture = true;
+                }
+                else if (pair[0] == "frame")
+                {
+                    std::istringstream ss(pair[1]);
+                    ss >> celIndex;
+                }
+            }
+
+            Render::SpriteGroup* newSprite = nullptr;
+
+            if (vAnim != 0)
+                newSprite = Render::loadVanimSprite(sourcePath, vAnim, hasTrans, r, g, b, definition.trim);
+            else if (resize)
+                newSprite = Render::loadResizedSprite(sourcePath, newWidth, newHeight, tileWidth, tileHeight, hasTrans, r, g, b, definition.trim);
+            else if (convertToSingleTexture)
+                newSprite = Render::loadCelToSingleTexture(sourcePath, definition.trim);
+            else
+                newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b, definition.trim);
+
+            auto* spriteGroup = new FASpriteGroup();
+            spriteGroup->init(newSprite);
+            mLoadedSprites[definition] = spriteGroup;
+        }
+
+        mSpritesToLoad2.clear();
+
         for (int32_t i = 0; i <= 4; i++)
         {
             std::string celPath = fmt::format("levels/l{}data/l{}.cel", i, i);

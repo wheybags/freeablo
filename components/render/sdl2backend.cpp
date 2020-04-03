@@ -577,6 +577,12 @@ namespace Render
         mAnimLength = cel.animLength();
     }
 
+    SpriteGroup::SpriteGroup(std::vector<Sprite>&& sprites) : mSprites(std::move(sprites)), mAnimLength(mSprites.size())
+    {
+        debug_assert(!mSprites.empty());
+        spriteSize(mSprites[0], mWidth, mHeight);
+    }
+
     Sprite& SpriteGroup::operator[](size_t index)
     {
         debug_assert(index < mSprites.size());

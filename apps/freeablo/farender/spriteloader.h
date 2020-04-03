@@ -130,6 +130,7 @@ namespace FARender
 
     private:
         std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> mSpritesToLoad;
+        std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> mSpritesToLoad2;
         std::unordered_map<SpriteDefinition, FASpriteGroup*, SpriteDefinition::Hash> mLoadedSprites;
     };
 }
