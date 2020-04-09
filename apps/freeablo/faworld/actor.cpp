@@ -58,9 +58,6 @@ namespace FAWorld
 
     Actor::Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe) : Actor(world)
     {
-        FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
-        mAnimation.setAnimationSprites(AnimState::idle, spriteLoader.getSprite(spriteLoader.mNpcIdleAnimations[npc.name]));
-
         if (npc.animationSequenceId)
             mAnimation.setIdleFrameSequence(exe.getTownerAnimation()[*npc.animationSequenceId]);
 
@@ -72,6 +69,8 @@ namespace FAWorld
         mName = npc.name;
 
         mIsTowner = true;
+
+        this->restoreAnimationsForNpc();
     }
 
     Actor::Actor(World& world, FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(*this, loader), mWorld(world)
@@ -113,6 +112,9 @@ namespace FAWorld
             mMissiles.push_back(std::make_unique<Missile::Missile>(loader));
 
         mType = ActorType(loader.load<uint8_t>());
+
+        if (!mNpcId.empty())
+            this->restoreAnimationsForNpc();
     }
 
     void Actor::save(FASaveGame::GameSaver& saver) const
@@ -410,5 +412,12 @@ namespace FAWorld
     {
         auto missile = std::make_unique<Missile::Missile>(id, *this, targetPoint);
         mMissiles.push_back(std::move(missile));
+    }
+
+    void Actor::restoreAnimationsForNpc()
+    {
+        FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
+        mAnimation.setAnimationSprites(AnimState::idle, spriteLoader.getSprite(spriteLoader.mNpcIdleAnimations[mNpcId]));
+        mAnimation.markAnimationsRestoredAfterGameLoad();
     }
 }

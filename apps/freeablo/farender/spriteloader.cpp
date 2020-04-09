@@ -37,7 +37,7 @@ namespace FARender
         for (const DiabloExe::Npc* npc : exe.getNpcs())
         {
             SpriteDefinition definition{npc->celPath, true};
-            mNpcIdleAnimations[npc->name] = definition;
+            mNpcIdleAnimations[npc->id] = definition;
             mSpritesToLoad.insert(definition);
         }
 
@@ -167,34 +167,19 @@ namespace FARender
             mSpritesToLoad.insert(*guiSpriteIt);
     }
 
-    void SpriteLoader::load()
+    FASpriteGroup* SpriteLoader::getSprite(const SpriteDefinition& definition, GetSpriteFailAction fail)
     {
-        //        Renderer* renderer = Renderer::get();
-        //
-        //        for (const auto& definition : mSpritesToLoad)
-        //        {
-        //            // TODO: This is a temporary hack, once we have a proper data loader, we just won't specify these
-        //            static std::unordered_set<std::string> badCelNames{
-        //                "Monsters\\Golem\\Golemh.CL2",
-        //                "Monsters\\Worm\\Wormh.CL2",
-        //                "Monsters\\Unrav\\Unravw.CL2",
-        //                "Monsters\\Golem\\Golemn.CL2",
-        //                "Monsters\\Worm\\Wormd.CL2",
-        //                "Monsters\\Worm\\Wormw.CL2",
-        //                "Monsters\\Worm\\Wormn.CL2",
-        //                "Monsters\\Worm\\Worma.CL2",
-        //            };
-        //
-        //            if (badCelNames.count(definition.path))
-        //                continue;
-        //
-        //            mLoadedSprites[definition] = renderer->mSpriteManager.get(definition.path, definition.trim);
-        //        }
-        //
-        //        mSpritesToLoad.clear();
+        if (fail == GetSpriteFailAction::Error)
+            return mLoadedSprites.at(definition);
+
+        auto it = mLoadedSprites.find(definition);
+        if (it == mLoadedSprites.end())
+            return nullptr;
+
+        return it->second;
     }
 
-    void SpriteLoader::load2()
+    void SpriteLoader::load()
     {
         for (const auto& definition : mSpritesToLoad)
         {

@@ -5,13 +5,8 @@
 
 namespace FARender
 {
-    AnimationPlayer::AnimationPlayer(FASaveGame::GameLoader& loader)
+    void AnimationPlayer::load(FASaveGame::GameLoader& loader)
     {
-        //        bool hasCurrentAnim = loader.load<bool>();
-
-        //        if (hasCurrentAnim)
-        //            mCurrentAnim = Renderer::get()->loadImage(loader.load<std::string>(), true);
-
         mPlayingAnimDuration = loader.load<FAWorld::Tick>();
         mPlayingAnimType = AnimationType(loader.load<uint8_t>());
         mTicksSinceAnimStarted = loader.load<FAWorld::Tick>();
@@ -21,22 +16,13 @@ namespace FARender
         mFrameSequence.reserve(frameSequenceSize);
         for (uint32_t i = 0; i < frameSequenceSize; i++)
             mFrameSequence.push_back(loader.load<int32_t>());
+
+        loader.addFunctionToRunAtEnd([this]() { release_assert(animationRestoredAfterSave); });
     }
 
     void AnimationPlayer::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("AnimationPlayer", saver);
-
-        bool hasCurrentAnim = mCurrentAnim != nullptr;
-        saver.save(hasCurrentAnim);
-
-        if (hasCurrentAnim)
-        {
-            message_and_abort("fixme");
-            //            std::string spritePath = Renderer::get()->getPathForIndex(mCurrentAnim->getCacheIndex());
-            //            release_assert(spritePath.size());
-            //            saver.save(spritePath);
-        }
 
         saver.save(mPlayingAnimDuration);
         saver.save(uint8_t(mPlayingAnimType));
@@ -104,7 +90,11 @@ namespace FARender
         mFrameSequence = frameSequence;
     }
 
-    void AnimationPlayer::replaceAnimation(FARender::FASpriteGroup* anim) { mCurrentAnim = anim; }
+    void AnimationPlayer::replaceAnimation(FARender::FASpriteGroup* anim)
+    {
+        if (mPlayingAnimDuration)
+            mCurrentAnim = anim;
+    }
 
     void AnimationPlayer::stopAnimation() { playAnimation(nullptr, 0, AnimationType::Looped); }
 

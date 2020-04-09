@@ -1,4 +1,5 @@
 #pragma once
+#include "../fasavegame/gameloader.h"
 #include "spritegroup.h"
 #include <misc/misc.h>
 #include <string>
@@ -17,7 +18,6 @@ namespace FARender
     public:
         explicit SpriteLoader(const DiabloExe::DiabloExe& exe);
         void load();
-        void load2();
 
         struct SpriteDefinition
         {
@@ -29,9 +29,31 @@ namespace FARender
             {
                 std::size_t operator()(const SpriteDefinition& def) const { return std::hash<std::string>{}(def.path); }
             };
+
+            bool empty() const { return path.empty(); }
+            void clear() { path.clear(); }
+
+            // TODO: these really shouldn't be saved / loaded, we are just using it as a temporary workaround until
+            // a proper mod-based asset loading pipeline is built
+            void save(FASaveGame::GameSaver& saver) const
+            {
+                saver.save(path);
+                saver.save(trim);
+            }
+
+            void load(FASaveGame::GameLoader& loader)
+            {
+                path = loader.load<std::string>();
+                trim = loader.load<bool>();
+            }
         };
 
-        FASpriteGroup* getSprite(const SpriteDefinition& definition) { return mLoadedSprites.at(definition); }
+        enum class GetSpriteFailAction
+        {
+            Error,
+            ReturnNull,
+        };
+        FASpriteGroup* getSprite(const SpriteDefinition& definition, GetSpriteFailAction fail = GetSpriteFailAction::Error);
 
         // TODO: monster sprite definitions are here for now, this stuff will all be moved somewhere more appropriate when we have a modding layer
         struct MonsterSpriteDefinition

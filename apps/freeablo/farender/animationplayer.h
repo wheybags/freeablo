@@ -23,8 +23,8 @@ namespace FARender
             ENUM_END
         };
 
-        AnimationPlayer() {}
-        AnimationPlayer(FASaveGame::GameLoader& loader);
+        AnimationPlayer() = default;
+        void load(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) const;
 
         std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame();
@@ -46,6 +46,10 @@ namespace FARender
         void update();
         int32_t getAnimLength() const;
         struct nk_image getCurrentNkImage();
+
+        // This is not used for the game simulation, just for asserts to make sure we restore animations correctly.
+        // Setting it to true basically signals "I didn't forget that I have to manually restore animations here"
+        bool animationRestoredAfterSave = false;
 
     private:
         FARender::FASpriteGroup* mCurrentAnim = nullptr;

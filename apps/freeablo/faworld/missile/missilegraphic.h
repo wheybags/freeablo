@@ -17,8 +17,8 @@ namespace FAWorld::Missile
     public:
         virtual ~MissileGraphic();
 
-        MissileGraphic(FARender::FASpriteGroup* initialGraphic,
-                       FARender::FASpriteGroup* mainGraphic,
+        MissileGraphic(FARender::SpriteLoader::SpriteDefinition initialGraphic,
+                       FARender::SpriteLoader::SpriteDefinition mainGraphic,
                        std::optional<int32_t> singleFrame,
                        Position position,
                        GameLevel* level);
@@ -39,7 +39,9 @@ namespace FAWorld::Missile
     protected:
         void playAnimation(FARender::FASpriteGroup* spriteGroup, FARender::AnimationPlayer::AnimationType animationType);
 
-        FARender::FASpriteGroup* mMainGraphic = nullptr;
+        FARender::SpriteLoader::SpriteDefinition mInitialGraphic;
+        FARender::SpriteLoader::SpriteDefinition mMainGraphic;
+
         std::optional<int32_t> mSingleFrame;
         GameLevel* mLevel;
         FARender::AnimationPlayer mAnimationPlayer;

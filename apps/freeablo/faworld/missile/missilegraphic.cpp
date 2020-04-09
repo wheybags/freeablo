@@ -1,30 +1,35 @@
 #include "missilegraphic.h"
-#include "diabloexe/diabloexe.h"
+
 #include "engine/enginemain.h"
 #include "engine/threadmanager.h"
-#include "fasavegame/gameloader.h"
 #include "faworld/actor.h"
+#include <utility>
 
 namespace FAWorld::Missile
 {
-    MissileGraphic::MissileGraphic(
-        FARender::FASpriteGroup* initialGraphic, FARender::FASpriteGroup* mainGraphic, std::optional<int32_t> singleFrame, Position position, GameLevel* level)
-        : mCurPos(position), mMainGraphic(mainGraphic), mSingleFrame(singleFrame), mLevel(level)
+    MissileGraphic::MissileGraphic(FARender::SpriteLoader::SpriteDefinition initialGraphic,
+                                   FARender::SpriteLoader::SpriteDefinition mainGraphic,
+                                   std::optional<int32_t> singleFrame,
+                                   Position position,
+                                   GameLevel* level)
+        : mCurPos(position), mInitialGraphic(std::move(initialGraphic)), mMainGraphic(std::move(mainGraphic)), mSingleFrame(singleFrame), mLevel(level)
     {
         level->mMissileGraphics.insert(this);
-        playAnimation(initialGraphic, FARender::AnimationPlayer::AnimationType::Once);
+
+        FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
+        FARender::FASpriteGroup* sprite = spriteLoader.getSprite(mInitialGraphic, FARender::SpriteLoader::GetSpriteFailAction::ReturnNull);
+        playAnimation(sprite, FARender::AnimationPlayer::AnimationType::Once);
     }
 
     MissileGraphic::MissileGraphic(FASaveGame::GameLoader& loader)
     {
         mCurPos = Position(loader);
-        //        mMainGraphicPath = loader.load<std::string>();
 
         mSingleFrame = loader.load<int32_t>();
         if (mSingleFrame == -1)
             mSingleFrame = std::nullopt;
 
-        mAnimationPlayer = FARender::AnimationPlayer(loader);
+        mAnimationPlayer.load(loader);
         auto levelIndex = loader.load<int32_t>();
         auto world = loader.currentlyLoadingWorld;
         loader.addFunctionToRunAtEnd([this, world, levelIndex]() {
@@ -33,6 +38,18 @@ namespace FAWorld::Missile
         });
         mTicksSinceStarted = loader.load<Tick>();
         mComplete = loader.load<bool>();
+
+        mInitialGraphic.load(loader);
+        mMainGraphic.load(loader);
+
+        // restore animation
+        {
+            if (!mInitialGraphic.empty())
+                mAnimationPlayer.replaceAnimation(FARender::Renderer::get()->mSpriteLoader.getSprite(mInitialGraphic));
+            else if (!mMainGraphic.empty())
+                mAnimationPlayer.replaceAnimation(FARender::Renderer::get()->mSpriteLoader.getSprite(mMainGraphic));
+            mAnimationPlayer.animationRestoredAfterSave = true;
+        }
     }
 
     MissileGraphic::~MissileGraphic() { mLevel->mMissileGraphics.erase(this); }
@@ -41,13 +58,14 @@ namespace FAWorld::Missile
     {
         mCurPos.save(saver);
 
-        message_and_abort("fixme");
-        //        saver.save(mMainGraphicPath);
         saver.save(static_cast<int32_t>(mSingleFrame == std::nullopt ? -1 : *mSingleFrame));
         mAnimationPlayer.save(saver);
         saver.save(mLevel->getLevelIndex());
         saver.save(mTicksSinceStarted);
         saver.save(mComplete);
+
+        mInitialGraphic.save(saver);
+        mMainGraphic.save(saver);
     }
 
     void MissileGraphic::update()
@@ -58,7 +76,10 @@ namespace FAWorld::Missile
             return;
 
         if (!mAnimationPlayer.isPlaying())
-            playAnimation(mMainGraphic, FARender::AnimationPlayer::AnimationType::Looped);
+        {
+            mInitialGraphic.clear();
+            playAnimation(FARender::Renderer::get()->mSpriteLoader.getSprite(mMainGraphic), FARender::AnimationPlayer::AnimationType::Looped);
+        }
 
         mAnimationPlayer.update();
     }

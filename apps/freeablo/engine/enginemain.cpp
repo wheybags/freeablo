@@ -55,7 +55,7 @@ namespace Engine
 
         Engine::ThreadManager threadManager;
         FARender::Renderer renderer(*mExe, resolutionWidth, resolutionHeight, fullscreen);
-        renderer.mSpriteLoader.load2();
+        renderer.mSpriteLoader.load();
 
         mInputManager = std::make_shared<EngineInputManager>(renderer.getNuklearContext());
         mInputManager->registerKeyboardObserver(this);
@@ -68,8 +68,6 @@ namespace Engine
     void EngineMain::runGameLoop(const cxxopts::ParseResult& variables)
     {
         FARender::Renderer& renderer = *FARender::Renderer::get();
-        renderer.mSpriteLoader.load();
-
         FAWorld::PlayerClass characterClass = FAWorld::playerClassFromString(variables["character"].as<std::string>());
 
         FAWorld::ItemFactory itemFactory(*mExe, Random::DummyRng::instance);

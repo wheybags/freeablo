@@ -74,6 +74,8 @@ namespace FAWorld
                 }
             }
         };
+
+        updateSprites();
     }
 
     void Player::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
@@ -312,6 +314,9 @@ namespace FAWorld
         mPlayerClass = static_cast<PlayerClass>(loader.load<int32_t>());
         initCommon();
         mPlayerInitialised = true;
+
+        mAnimation.markAnimationsRestoredAfterGameLoad();
+        loader.addFunctionToRunAtEnd([this]() { updateSprites(); });
     }
 
     void Player::save(FASaveGame::GameSaver& saver) const

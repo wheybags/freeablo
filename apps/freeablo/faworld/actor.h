@@ -99,6 +99,7 @@ namespace FAWorld
         void activateMissile(MissileId id, Misc::Point targetPoint);
         virtual void onEnemyKilled(Actor* enemy) { UNUSED_PARAM(enemy); };
         virtual DamageType getMeleeDamageType() const { return DamageType::Unarmed; }
+        void restoreAnimationsForNpc();
 
     public:
         MovementHandler mMoveHandler;
