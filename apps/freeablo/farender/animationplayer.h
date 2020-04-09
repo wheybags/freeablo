@@ -27,7 +27,7 @@ namespace FARender
         void load(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) const;
 
-        std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame();
+        std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame() const;
         AnimationType getCurrentAnimationType() { return mPlayingAnimType; }
 
         void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationType type, int32_t startFrame = 0);

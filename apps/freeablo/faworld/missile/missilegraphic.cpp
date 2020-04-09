@@ -17,8 +17,16 @@ namespace FAWorld::Missile
         level->mMissileGraphics.insert(this);
 
         FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
-        FARender::FASpriteGroup* sprite = spriteLoader.getSprite(mInitialGraphic, FARender::SpriteLoader::GetSpriteFailAction::ReturnNull);
-        playAnimation(sprite, FARender::AnimationPlayer::AnimationType::Once);
+        if (!mInitialGraphic.empty())
+        {
+            FARender::FASpriteGroup* sprite = spriteLoader.getSprite(mInitialGraphic);
+            playAnimation(sprite, FARender::AnimationPlayer::AnimationType::Once);
+        }
+        else if (!mMainGraphic.empty())
+        {
+            FARender::FASpriteGroup* sprite = spriteLoader.getSprite(mMainGraphic);
+            playAnimation(sprite, FARender::AnimationPlayer::AnimationType::Looped);
+        }
     }
 
     MissileGraphic::MissileGraphic(FASaveGame::GameLoader& loader)
@@ -43,19 +51,27 @@ namespace FAWorld::Missile
         mMainGraphic.load(loader);
 
         // restore animation
+        if (!mComplete)
         {
             if (!mInitialGraphic.empty())
                 mAnimationPlayer.replaceAnimation(FARender::Renderer::get()->mSpriteLoader.getSprite(mInitialGraphic));
             else if (!mMainGraphic.empty())
                 mAnimationPlayer.replaceAnimation(FARender::Renderer::get()->mSpriteLoader.getSprite(mMainGraphic));
-            mAnimationPlayer.animationRestoredAfterSave = true;
         }
+        else
+        {
+            mAnimationPlayer.stopAnimation();
+        }
+
+        mAnimationPlayer.animationRestoredAfterSave = true;
     }
 
     MissileGraphic::~MissileGraphic() { mLevel->mMissileGraphics.erase(this); }
 
     void MissileGraphic::save(FASaveGame::GameSaver& saver) const
     {
+        Serial::ScopedCategorySaver cat("MissileGraphic", saver);
+
         mCurPos.save(saver);
 
         saver.save(static_cast<int32_t>(mSingleFrame == std::nullopt ? -1 : *mSingleFrame));
@@ -75,13 +91,13 @@ namespace FAWorld::Missile
         if (mComplete)
             return;
 
+        mAnimationPlayer.update();
+
         if (!mAnimationPlayer.isPlaying())
         {
             mInitialGraphic.clear();
             playAnimation(FARender::Renderer::get()->mSpriteLoader.getSprite(mMainGraphic), FARender::AnimationPlayer::AnimationType::Looped);
         }
-
-        mAnimationPlayer.update();
     }
 
     std::pair<FARender::FASpriteGroup*, int32_t> MissileGraphic::getCurrentFrame()
@@ -109,7 +125,7 @@ namespace FAWorld::Missile
 
     void MissileGraphic::playAnimation(FARender::FASpriteGroup* spriteGroup, FARender::AnimationPlayer::AnimationType animationType)
     {
-        if (spriteGroup)
-            mAnimationPlayer.playAnimation(spriteGroup, World::getTicksInPeriod("0.06"), animationType);
+        debug_assert(spriteGroup);
+        mAnimationPlayer.playAnimation(spriteGroup, World::getTicksInPeriod("0.06"), animationType);
     }
 }

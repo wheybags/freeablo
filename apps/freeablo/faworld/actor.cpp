@@ -63,8 +63,7 @@ namespace FAWorld
 
         mMenuTalkData = npc.menuTalkData;
         mGossipData = npc.gossipData;
-        mQuestTalkData = npc.questTalkData;
-        mBeforeDungeonTalkData = npc.beforeDungeonTalkData;
+        // mQuestTalkData = npc.questTalkData;
         mNpcId = npc.id;
         mName = npc.name;
 
@@ -98,6 +97,13 @@ namespace FAWorld
         {
             std::string key = loader.load<std::string>();
             mMenuTalkData[key] = loader.load<std::string>();
+        }
+
+        uint32_t gossipDataSize = loader.load<uint32_t>();
+        for (uint32_t i = 0; i < gossipDataSize; i++)
+        {
+            std::string key = loader.load<std::string>();
+            mGossipData[key].load(loader);
         }
 
         mTarget.load(loader);
@@ -147,6 +153,13 @@ namespace FAWorld
         {
             saver.save(pair.first);
             saver.save(pair.second);
+        }
+
+        saver.save(uint32_t(mGossipData.size()));
+        for (const auto& pair : mGossipData)
+        {
+            saver.save(pair.first);
+            pair.second.save(saver);
         }
 
         mTarget.save(saver);
