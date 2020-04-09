@@ -7,16 +7,6 @@
 
 namespace Cel
 {
-    namespace
-    {
-        struct DecodePal
-        {
-            explicit DecodePal(const Pal& pal) : mPal(pal) {}
-            Colour operator()(uint8_t code) const { return mPal[code]; }
-            const Pal& mPal;
-        };
-    }
-
     std::unique_ptr<Settings::Settings> CelDecoder::mSettingsCel;
     std::unique_ptr<Settings::Settings> CelDecoder::mSettingsCl2;
 
@@ -26,22 +16,6 @@ namespace Cel
         readConfiguration();
         readPalette();
         getFrames();
-    }
-
-    CelFrame& CelDecoder::operator[](int32_t index)
-    {
-        auto it = mCache.find(index);
-        if (it != mCache.end())
-        {
-            return it->second;
-        }
-
-        auto& frame = mFrames[index];
-        CelFrame celFrame;
-        decodeFrame(index, frame, celFrame);
-
-        mCache[index] = std::move(celFrame);
-        return mCache[index];
     }
 
     int32_t CelDecoder::numFrames() const { return mFrames.size(); }
@@ -132,23 +106,22 @@ namespace Cel
         mPal = Pal(palFilename);
     }
 
-    void CelDecoder::decode()
+    std::vector<Image> CelDecoder::decode()
     {
+        std::vector<Image> images;
+        images.reserve(mFrames.size());
+
         int frameNumber = 0;
         for (FrameBytesRef frame : mFrames)
         {
-            if (mCache.count(frameNumber))
-            {
-                frameNumber++;
-                continue;
-            }
-
             CelFrame celFrame;
             decodeFrame(frameNumber, frame, celFrame);
-            mCache[frameNumber] = std::move(celFrame);
+            images.emplace_back(std::move(celFrame));
 
             frameNumber++;
         }
+
+        return images;
     }
 
     void CelDecoder::getFrames()

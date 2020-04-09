@@ -4,9 +4,10 @@
 
 namespace FARender
 {
-    void FASpriteGroup::init(Render::SpriteGroup* realSpriteGroup)
+    void FASpriteGroup::init(std::unique_ptr<Render::SpriteGroup>&& realSpriteGroup)
     {
-        mRealSpriteGroup = realSpriteGroup;
+        mRealSpriteGroup = std::move(realSpriteGroup);
+
         animLength = mRealSpriteGroup->animLength();
 
         for (size_t i = 0; i < mRealSpriteGroup->size(); i++)
@@ -23,7 +24,7 @@ namespace FARender
         frameHandles.resize(animLength);
         for (uint32_t i = 0; i < frameHandles.size(); i++)
         {
-            frameHandles[i].spriteGroup = realSpriteGroup;
+            frameHandles[i].spriteGroup = mRealSpriteGroup.get();
             frameHandles[i].frameNumber = i;
         }
     }

@@ -1,5 +1,7 @@
 #include "spriteloader.h"
 #include "renderer.h"
+#include <cel/celfile.h>
+#include <cel/tilesetimage.h>
 #include <diabloexe/baseitem.h>
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
@@ -163,6 +165,24 @@ namespace FARender
             }
         }
 
+        for (int32_t i = 0; i <= 4; i++)
+        {
+            {
+                SpriteDefinition definition = {};
+                definition.path = "virtual_diablo_tileset/top/" + std::to_string(i);
+                definition.trim = true;
+                mTilesetTops[i] = definition;
+                mSpritesToLoad.insert(definition);
+            }
+            {
+                SpriteDefinition definition = {};
+                definition.path = "virtual_diablo_tileset/bottom/" + std::to_string(i);
+                definition.trim = true;
+                mTilesetBottoms[i] = definition;
+                mSpritesToLoad.insert(definition);
+            }
+        }
+
         for (auto guiSpriteIt = reinterpret_cast<SpriteDefinition*>(&mGuiSprites); guiSpriteIt != &mGuiSprites.end__; guiSpriteIt++)
             mSpritesToLoad.insert(*guiSpriteIt);
     }
@@ -181,7 +201,55 @@ namespace FARender
 
     void SpriteLoader::load()
     {
-        for (const auto& definition : mSpritesToLoad)
+        // Load and trim all the sprites
+        LoadedImagesData loadedImagesData = loadImagesIntoCpuMemory(mSpritesToLoad);
+        mSpritesToLoad.clear();
+
+        // Sort the images by size
+        std::sort(loadedImagesData.allImages.begin(),
+                  loadedImagesData.allImages.end(),
+                  [](const std::unique_ptr<FinalImageData>& a, const std::unique_ptr<FinalImageData>& b) {
+                      if (a->image.width() != b->image.width())
+                          return a->image.width() > b->image.width();
+                      return a->image.height() > b->image.height();
+                  });
+
+        // Upload the sprites into the texture atlas
+        for (auto& image : loadedImagesData.allImages)
+        {
+            auto sprite = (Render::Sprite)(intptr_t)Render::atlasTexture->addTexture(image->image, false, image->trimmedData);
+            loadedImagesData.imagesToSprites[image.get()] = sprite;
+        }
+
+        // Rebuild the sprite groups into collections of frames (where each frame is a reference to the atlas)
+        for (auto& pair : loadedImagesData.definitionToImageMap)
+        {
+            const SpriteDefinition& definition = pair.first;
+            FinalImageDataFrames& definitionFrames = pair.second;
+
+            std::vector<Render::Sprite> finalSprites;
+
+            for (FinalImageData* frame : definitionFrames.frames)
+            {
+                Render::Sprite sprite = loadedImagesData.imagesToSprites[frame];
+                finalSprites.push_back(sprite);
+            }
+
+            auto newSprite = std::make_unique<Render::SpriteGroup>(std::move(finalSprites), definitionFrames.animationLength);
+
+            auto* spriteGroup = new FASpriteGroup();
+            spriteGroup->init(std::move(newSprite));
+            mLoadedSprites[definition] = spriteGroup;
+        }
+    }
+
+    SpriteLoader::LoadedImagesData SpriteLoader::loadImagesIntoCpuMemory(const std::unordered_set<SpriteDefinition, SpriteDefinition::Hash>& spritesToLoad)
+    {
+        std::vector<std::unique_ptr<FinalImageData>> allImages;
+        std::unordered_map<FinalImageData*, Render::Sprite> imagesToSprites;
+        std::unordered_map<SpriteDefinition, FinalImageDataFrames, SpriteDefinition::Hash> definitionToImageMap;
+
+        for (const auto& definition : spritesToLoad)
         {
             // TODO: This is a temporary hack, once we have a proper data loader, we just won't specify these
             static std::unordered_set<std::string> badCelNames{
@@ -270,57 +338,171 @@ namespace FARender
                 }
             }
 
-            Render::SpriteGroup* newSprite = nullptr;
+            std::vector<Image> finalImages;
+            int32_t animationLength = 0;
 
-            if (vAnim != 0)
-                newSprite = Render::loadVanimSprite(sourcePath, vAnim, hasTrans, r, g, b, definition.trim);
+            if (Misc::StringUtils::startsWith(definition.path, "virtual_diablo_tileset/"))
+            {
+                std::vector<std::string> tilesetComponents = Misc::StringUtils::split(definition.path, '/');
+                release_assert(tilesetComponents.size() == 3);
+
+                bool top = tilesetComponents[1] == "top";
+                int32_t i = std::stoi(tilesetComponents[2]);
+
+                std::string celPath = fmt::format("levels/l{}data/l{}.cel", i, i);
+                std::string minPath = fmt::format("levels/l{}data/l{}.min", i, i);
+
+                if (i == 0)
+                {
+                    celPath = "levels/towndata/town.cel";
+                    minPath = "levels/towndata/town.min";
+                }
+
+                finalImages = Cel::loadTilesetImage(celPath, minPath, top);
+                //                auto* spriteGroup = new FASpriteGroup();
+                //                auto realSpriteGroup = std::unique_ptr<Render::SpriteGroup>(Render::loadTilesetSprite(celPath, minPath, true,
+                //                definition.trim)); spriteGroup->init(std::move(realSpriteGroup)); mLoadedSprites[definition] = spriteGroup;
+            }
+            else if (vAnim != 0)
+            {
+                Image original = Render::loadNonCelImageTrans(sourcePath, hasTrans, r, g, b);
+
+                std::vector<Render::Sprite> vec;
+
+                for (size_t srcY = 0; srcY < (size_t)original.height() - 1; srcY += vAnim)
+                {
+                    Image tmp(original.width(), vAnim);
+
+                    for (size_t x = 0; x < (size_t)original.width(); x++)
+                    {
+                        for (size_t y = 0; y < vAnim; y++)
+                        {
+                            if (srcY + y < (size_t)original.height())
+                            {
+                                Cel::Colour px = original.get(x, srcY + y);
+                                tmp.get(x, y) = px;
+                            }
+                        }
+                    }
+
+                    finalImages.push_back(std::move(tmp));
+                }
+                animationLength = int32_t(finalImages.size());
+            }
             else if (resize)
-                newSprite = Render::loadResizedSprite(sourcePath, newWidth, newHeight, tileWidth, tileHeight, hasTrans, r, g, b, definition.trim);
+            {
+                Image original = Render::loadNonCelImageTrans(sourcePath, hasTrans, r, g, b);
+
+                Image tmp(newWidth, newHeight);
+
+                size_t srcX = 0;
+                size_t srcY = 0;
+                size_t dstX = 0;
+                size_t dstY = 0;
+
+                while (true)
+                {
+                    for (size_t y = 0; y < tileHeight; y += 1)
+                    {
+                        for (size_t x = 0; x < tileWidth; x += 1)
+                        {
+                            Cel::Colour px = original.get(srcX + x, srcY + y);
+                            tmp.get(dstX + x, dstY + y) = px;
+                        }
+                    }
+
+                    srcX += tileWidth;
+                    if (srcX >= (size_t)original.width())
+                    {
+                        srcX = 0;
+                        srcY += tileHeight;
+                    }
+
+                    if (srcY >= (size_t)original.height())
+                        break;
+
+                    dstX += tileWidth;
+                    if (dstX >= newWidth)
+                    {
+                        dstX = 0;
+                        dstY += tileHeight;
+                    }
+
+                    if (dstY >= newHeight)
+                        break;
+                }
+
+                finalImages.push_back(std::move(tmp));
+                animationLength = 1;
+            }
             else if (convertToSingleTexture)
-                newSprite = Render::loadCelToSingleTexture(sourcePath, definition.trim);
+            {
+                Cel::CelFile cel(sourcePath);
+                std::vector<Image> images = cel.decode();
+
+                int32_t width = 0;
+                int32_t height = 0;
+
+                for (int32_t i = 0; i < cel.numFrames(); i++)
+                {
+                    width += images[i].width();
+                    height = (images[i].height() > height ? images[i].height() : height);
+                }
+
+                debug_assert(width > 0);
+                debug_assert(height > 0);
+
+                Image finalImage(width, height);
+
+                int32_t x = 0;
+                for (int32_t i = 0; i < cel.numFrames(); i++)
+                {
+                    images[i].blitTo(finalImage, x, 0);
+                    x += images[i].width();
+                }
+
+                finalImages.push_back(std::move(finalImage));
+                animationLength = 1;
+            }
             else
-                newSprite = Render::loadSprite(sourcePath, hasTrans, r, g, b, definition.trim);
-
-            auto* spriteGroup = new FASpriteGroup();
-            spriteGroup->init(newSprite);
-            mLoadedSprites[definition] = spriteGroup;
-        }
-
-        mSpritesToLoad.clear();
-
-        for (int32_t i = 0; i <= 4; i++)
-        {
-            std::string celPath = fmt::format("levels/l{}data/l{}.cel", i, i);
-            std::string minPath = fmt::format("levels/l{}data/l{}.min", i, i);
-
-            if (i == 0)
             {
-                celPath = "levels/towndata/town.cel";
-                minPath = "levels/towndata/town.min";
+                std::string extension = Misc::StringUtils::getFileExtension(sourcePath);
+                if (Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
+                {
+                    Cel::CelFile cel(sourcePath);
+                    finalImages = cel.decode();
+                    animationLength = cel.animLength();
+                }
+                else
+                {
+                    animationLength = 1;
+                    finalImages.push_back(Render::loadNonCelImageTrans(sourcePath, hasTrans, r, g, b));
+                }
             }
 
-            {
-                SpriteDefinition definition = {};
-                definition.path = "virtual_diablo_tileset/top/" + std::to_string(i);
-                definition.trim = true;
-                mTilesetTops[i] = definition;
+            FinalImageDataFrames& definitionFrames = definitionToImageMap[definition];
+            definitionFrames.animationLength = animationLength;
 
-                auto* spriteGroup = new FASpriteGroup();
-                Render::SpriteGroup* realSpriteGroup = Render::loadTilesetSprite(celPath, minPath, true, definition.trim);
-                spriteGroup->init(realSpriteGroup);
-                mLoadedSprites[definition] = spriteGroup;
-            }
+            for (auto& image : finalImages)
             {
-                SpriteDefinition definition = {};
-                definition.path = "virtual_diablo_tileset/bottom/" + std::to_string(i);
-                definition.trim = true;
-                mTilesetBottoms[i] = definition;
+                std::unique_ptr<FinalImageData> finalImageData = std::make_unique<FinalImageData>();
 
-                auto* spriteGroup = new FASpriteGroup();
-                Render::SpriteGroup* realSpriteGroup = Render::loadTilesetSprite(celPath, minPath, false, definition.trim);
-                spriteGroup->init(realSpriteGroup);
-                mLoadedSprites[definition] = spriteGroup;
+                if (definition.trim)
+                {
+                    std::pair<Image, Image::TrimmedData> tmp = image.trimTransparentEdges();
+                    finalImageData->image = std::move(tmp.first);
+                    finalImageData->trimmedData = tmp.second;
+                }
+                else
+                {
+                    finalImageData->image = std::move(image);
+                }
+
+                definitionFrames.frames.push_back(finalImageData.get());
+                allImages.emplace_back(std::move(finalImageData));
             }
         }
+
+        return LoadedImagesData{std::move(allImages), std::move(imagesToSprites), std::move(definitionToImageMap)};
     }
 }

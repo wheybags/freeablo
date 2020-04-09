@@ -151,6 +151,28 @@ namespace FARender
         } mGuiSprites;
 
     private:
+        struct FinalImageData
+        {
+            Image image;
+            std::optional<Image::TrimmedData> trimmedData;
+        };
+
+        struct FinalImageDataFrames
+        {
+            std::vector<FinalImageData*> frames;
+            int32_t animationLength = 0;
+        };
+
+        struct LoadedImagesData
+        {
+            std::vector<std::unique_ptr<FinalImageData>> allImages;
+            std::unordered_map<FinalImageData*, Render::Sprite> imagesToSprites;
+            std::unordered_map<SpriteDefinition, FinalImageDataFrames, SpriteDefinition::Hash> definitionToImageMap;
+        };
+
+        static LoadedImagesData loadImagesIntoCpuMemory(const std::unordered_set<SpriteDefinition, SpriteDefinition::Hash>& spritesToLoad);
+
+    private:
         std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> mSpritesToLoad;
         std::unordered_map<SpriteDefinition, FASpriteGroup*, SpriteDefinition::Hash> mLoadedSprites;
     };

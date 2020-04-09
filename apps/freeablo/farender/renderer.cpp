@@ -276,7 +276,9 @@ namespace FARender
         if (!State->mCursorPath.empty() && (State->mCursorFrame != mCurrentCursorFrame))
         {
             Cel::CelFile cel(State->mCursorPath);
-            Cel::CelFrame& celFrame = cel[State->mCursorFrame];
+            std::vector<Image> images = cel.decode();
+
+            Cel::CelFrame& celFrame = images[State->mCursorFrame];
             mCursorSize = {celFrame.width(), celFrame.height()};
 
             int32_t hot_x = 0, hot_y = 0;

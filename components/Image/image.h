@@ -45,6 +45,16 @@ public:
     void blitTo(Image& other, int32_t srcOffsetX, int32_t srcOffsetY, int32_t srcW, int32_t srcH, int32_t destOffsetX, int32_t destOffsetY) const;
     void blitTo(Image& other, int32_t destOffsetX, int32_t destOffsetY) const { blitTo(other, 0, 0, this->width(), this->height(), destOffsetX, destOffsetY); }
 
+    struct TrimmedData
+    {
+        int32_t trimmedOffsetX = 0;
+        int32_t trimmedOffsetY = 0;
+        int32_t originalWidth = 0;
+        int32_t originalHeight = 0;
+    };
+
+    std::pair<Image, TrimmedData> trimTransparentEdges() const;
+
     static Image loadFromFile(const std::string& path);
 
 public:

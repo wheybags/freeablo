@@ -1,7 +1,6 @@
 #include "atlastexture.h"
 #include "../../extern/RectangleBinPack/SkylineBinPack.h"
 #include "texture.h"
-#include <Image/image.h>
 #include <memory>
 #include <misc/assert.h>
 #include <render/commandqueue.h>
@@ -37,15 +36,29 @@ namespace Render
 
     AtlasTexture::~AtlasTexture() = default;
 
-    size_t AtlasTexture::addTexture(const Image& image, bool trim)
+    size_t AtlasTexture::addTexture(const Image& image, bool trim, std::optional<Image::TrimmedData> _trimmedData)
     {
         std::unique_ptr<Image> imageTmp;
 
         const Image* useImage = &image;
         int32_t trimmedOffsetX = 0;
         int32_t trimmedOffsetY = 0;
+        int32_t originalWidth = image.width();
+        int32_t originalHeight = image.height();
 
-        if (trim)
+        if (_trimmedData)
+        {
+            if (image.width() == 0 || image.height() == 0)
+                return mEmptySpriteId;
+
+            const Image::TrimmedData& trimmedData = _trimmedData.value();
+
+            trimmedOffsetX = trimmedData.trimmedOffsetX;
+            trimmedOffsetY = trimmedData.trimmedOffsetY;
+            originalWidth = trimmedData.originalWidth;
+            originalHeight = trimmedData.originalHeight;
+        }
+        else if (trim)
         {
             bool isEmpty = true;
 
@@ -114,8 +127,8 @@ namespace Render
         atlasEntry.mX = dataDestinationRect.x;
         atlasEntry.mY = dataDestinationRect.y;
         atlasEntry.mLayer = layer;
-        atlasEntry.mWidth = image.width();
-        atlasEntry.mHeight = image.height();
+        atlasEntry.mWidth = originalWidth;
+        atlasEntry.mHeight = originalHeight;
         atlasEntry.mTrimmedOffsetX = trimmedOffsetX;
         atlasEntry.mTrimmedOffsetY = trimmedOffsetY;
         atlasEntry.mTrimmedWidth = useImage->width();

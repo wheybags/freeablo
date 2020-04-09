@@ -12,7 +12,7 @@ namespace FARender
     public:
         ~FASpriteGroup();
 
-        void init(Render::SpriteGroup* realSpriteGroup);
+        void init(std::unique_ptr<Render::SpriteGroup>&& realSpriteGroup);
         void init(std::unique_ptr<Render::Texture>&& texture);
 
         bool isValid() const { return mRealSpriteGroup || mStandaloneTexture.get(); }
@@ -21,14 +21,14 @@ namespace FARender
         int32_t getHeight(int frame = 0) const { return height[frame]; }
         struct nk_image getNkImage(int32_t frame = 0);
 
-        Render::SpriteGroup* getSpriteGroup() { return mRealSpriteGroup; }
+        Render::SpriteGroup* getSpriteGroup() { return mRealSpriteGroup.get(); }
 
     private:
         int32_t animLength = 0;
         std::vector<int32_t> width = {};
         std::vector<int32_t> height = {};
 
-        Render::SpriteGroup* mRealSpriteGroup = nullptr;
+        std::unique_ptr<Render::SpriteGroup> mRealSpriteGroup = nullptr;
         std::unique_ptr<Render::Texture> mStandaloneTexture;
 
         std::vector<FANuklearTextureHandle> frameHandles;

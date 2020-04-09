@@ -83,3 +83,44 @@ Image Image::loadFromFile(const std::string& path)
 
     return image;
 }
+
+std::pair<Image, Image::TrimmedData> Image::trimTransparentEdges() const
+{
+    bool isEmpty = true;
+
+    int32_t left = width() - 1;
+    int32_t right = 0;
+    int32_t top = height() - 1;
+    int32_t bottom = 0;
+
+    for (int32_t y = 0; y < height(); y++)
+    {
+        for (int32_t x = 0; x < width(); x++)
+        {
+            if (get(x, y).a != 0)
+            {
+                isEmpty = false;
+
+                left = std::min(left, x);
+                right = std::max(right, x);
+                top = std::min(top, y);
+                bottom = std::max(bottom, y);
+            }
+        }
+    }
+
+    Image::TrimmedData trimmedData;
+    trimmedData.originalWidth = width();
+    trimmedData.originalHeight = height();
+
+    if (isEmpty)
+        return {Image(), trimmedData};
+
+    Image imageTmp(right - left + 1, bottom - top + 1);
+    blitTo(imageTmp, left, top, imageTmp.width(), imageTmp.height(), 0, 0);
+
+    trimmedData.trimmedOffsetX = left;
+    trimmedData.trimmedOffsetY = top;
+
+    return {std::move(imageTmp), trimmedData};
+}

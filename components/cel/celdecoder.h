@@ -16,8 +16,7 @@ namespace Cel
     {
     public:
         explicit CelDecoder(std::string celPath);
-        void decode();
-        CelFrame& operator[](int32_t index);
+        std::vector<Image> decode();
         int32_t numFrames() const;
         int32_t animationLength() const;
 
@@ -55,7 +54,6 @@ namespace Cel
 
     private:
         std::vector<FrameBytes> mFrames;
-        std::map<int32_t, CelFrame> mCache;
         std::string mCelPath;
         std::string mCelName;
         Pal mPal;

@@ -1,9 +1,11 @@
 #pragma once
+#include <Image/image.h>
 #include <algorithm>
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <vector>
+
 //#define DEBUG_ATLAS_TEXTURE
 
 namespace rbp
@@ -42,7 +44,7 @@ namespace Render
         explicit AtlasTexture(RenderInstance& instance, CommandQueue& commandQueue);
         ~AtlasTexture();
 
-        size_t addTexture(const Image& image, bool trim = true);
+        size_t addTexture(const Image& image, bool trim = true, std::optional<Image::TrimmedData> trimmedData = std::nullopt);
         const AtlasTextureLookupMap& getLookupMap() const { return mLookupMap; }
         float getOccupancy() const;
         void clear(CommandQueue& commandQueue);

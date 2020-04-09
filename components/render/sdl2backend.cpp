@@ -47,7 +47,7 @@ int AmdPowerXpressRequestHighPerformance = 1;
 namespace Render
 {
     // atlasTexture is unique_ptr as to not instantiate until opengl is setup.
-    std::unique_ptr<AtlasTexture> atlasTexture = nullptr;
+    std::unique_ptr<AtlasTexture> atlasTexture;
 
     /* Caches level sprites/positions etc in a format that can be directly injected into GL VBOs. */
     class DrawLevelCache
@@ -253,7 +253,7 @@ namespace Render
         return settings;
     }
 
-    uint32_t getTextureHandleFromFrame(const Cel::CelFrame& frame, bool trim)
+    uint32_t getTextureHandleFromFrame(const Image& frame, bool trim)
     {
         uint32_t id = atlasTexture->addTexture(frame, trim);
         return id;
@@ -271,36 +271,6 @@ namespace Render
         }
 
         return path.substr(i + 1, path.length() - i);
-    }
-
-    bool getImageInfo(const std::string& path, std::vector<int32_t>& widths, std::vector<int32_t>& heights, int32_t& animLength)
-    {
-        // TODO: get better image decoders that allow you to peek image dimensions without loading full image
-
-        std::string extension = getImageExtension(path);
-
-        if (Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
-        {
-            Cel::CelFile cel(path);
-            widths.resize(cel.animLength());
-            heights.resize(cel.animLength());
-            for (int i = 0; i < cel.animLength(); ++i)
-            {
-                widths[i] = cel[i].width();
-                heights[i] = cel[i].height();
-            }
-            animLength = cel.animLength();
-        }
-        else
-        {
-            Image image = Image::loadFromFile(path);
-
-            widths = {image.width()};
-            heights = {image.height()};
-            animLength = 1;
-        }
-
-        return true;
     }
 
     void setpixel(SDL_Surface* s, int x, int y, Cel::Colour c);
@@ -329,21 +299,29 @@ namespace Render
 
     SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB, bool trim)
     {
-        std::string extension = getImageExtension(path);
+        std::vector<Sprite> vec;
+        int32_t animationLength = 0;
 
+        std::string extension = getImageExtension(path);
         if (Misc::StringUtils::ciEqual(extension, "cel") || Misc::StringUtils::ciEqual(extension, "cl2"))
         {
-            return new SpriteGroup(path, trim);
+            Cel::CelFile cel(path);
+            std::vector<Image> images = cel.decode();
+
+            animationLength = cel.animLength();
+            for (int32_t i = 0; i < cel.numFrames(); i++)
+                vec.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(images[i], trim));
         }
         else
         {
             Image tmp = loadNonCelImageTrans(path, hasTrans, transR, transG, transB);
 
-            std::vector<Sprite> vec(1);
+            animationLength = 1;
+            vec.resize(1);
             vec[0] = (Sprite)(intptr_t)getTextureHandleFromFrame(tmp, trim);
-
-            return new SpriteGroup(std::move(vec));
         }
+
+        return new SpriteGroup(std::move(vec), animationLength);
     }
 
     void clearTransparentSurface(SDL_Surface* s);
@@ -437,14 +415,15 @@ namespace Render
     SpriteGroup* loadCelToSingleTexture(const std::string& path, bool trim)
     {
         Cel::CelFile cel(path);
+        std::vector<Image> images = cel.decode();
 
         int32_t width = 0;
         int32_t height = 0;
 
         for (int32_t i = 0; i < cel.numFrames(); i++)
         {
-            width += cel[i].width();
-            height = (cel[i].height() > height ? cel[i].height() : height);
+            width += images[i].width();
+            height = (images[i].height() > height ? images[i].height() : height);
         }
 
         debug_assert(width > 0);
@@ -455,8 +434,8 @@ namespace Render
         int32_t x = 0;
         for (int32_t i = 0; i < cel.numFrames(); i++)
         {
-            cel[i].blitTo(image, x, 0);
-            x += cel[i].width();
+            images[i].blitTo(image, x, 0);
+            x += images[i].width();
         }
 
         std::vector<Sprite> vec(1);
@@ -568,21 +547,26 @@ namespace Render
         drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight, highlightColor);
     }
 
-    SpriteGroup::SpriteGroup(const std::string& path, bool trim)
+    //    SpriteGroup::SpriteGroup(const std::string& path, bool trim)
+    //    {
+    //        Cel::CelFile cel(path);
+    //
+    //        for (int32_t i = 0; i < cel.numFrames(); i++)
+    //            mSprites.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(cel[i], trim));
+    //
+    //        mWidth = cel[0].width();
+    //        mHeight = cel[0].height();
+    //
+    //        mAnimLength = cel.animLength();
+    //    }
+
+    SpriteGroup::SpriteGroup(std::vector<Sprite>&& sprites, int32_t animLength) : mSprites(std::move(sprites))
     {
-        Cel::CelFile cel(path);
+        if (animLength != -1)
+            mAnimLength = animLength;
+        else
+            mAnimLength = mSprites.size();
 
-        for (int32_t i = 0; i < cel.numFrames(); i++)
-            mSprites.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(cel[i], trim));
-
-        mWidth = cel[0].width();
-        mHeight = cel[0].height();
-
-        mAnimLength = cel.animLength();
-    }
-
-    SpriteGroup::SpriteGroup(std::vector<Sprite>&& sprites) : mSprites(std::move(sprites)), mAnimLength(mSprites.size())
-    {
         debug_assert(!mSprites.empty());
         spriteSize(mSprites[0], mWidth, mHeight);
     }
@@ -596,6 +580,7 @@ namespace Render
     void SpriteGroup::toPng(const std::string& celPath, const std::string& pngPath)
     {
         Cel::CelFile cel(celPath);
+        std::vector<Image> images = cel.decode();
 
         int32_t numFrames = cel.numFrames();
 
@@ -606,9 +591,9 @@ namespace Render
         int32_t maxHeight = 0;
         for (int32_t i = 0; i < numFrames; i++)
         {
-            sumWidth += cel[i].width();
-            if (cel[i].height() > maxHeight)
-                maxHeight = cel[i].height();
+            sumWidth += images[i].width();
+            if (images[i].height() > maxHeight)
+                maxHeight = images[i].height();
         }
 
         if (sumWidth == 0)
@@ -619,8 +604,8 @@ namespace Render
         unsigned int dx = 0;
         for (int32_t i = 0; i < numFrames; i++)
         {
-            drawFrame(s, x, 0, cel[i]);
-            dx = cel[i].width();
+            drawFrame(s, x, 0, images[i]);
+            dx = images[i].width();
             x += dx;
         }
 
@@ -632,9 +617,10 @@ namespace Render
     void SpriteGroup::toGif(const std::string& celPath, const std::string& gifPath)
     {
         Cel::CelFile cel(celPath);
+        std::vector<Image> images = cel.decode();
 
-        int32_t width = cel[0].width();
-        int32_t height = cel[0].height();
+        int32_t width = images[0].width();
+        int32_t height = images[0].height();
 
         int32_t numFrames = cel.numFrames();
 
@@ -646,7 +632,7 @@ namespace Render
         for (int32_t i = 0; i < numFrames; i++)
         {
             SDL_Surface* s = createTransparentSurface(width, height);
-            drawFrame(s, 0, 0, cel[i]);
+            drawFrame(s, 0, 0, images[i]);
 
             uint8_t** gifImage = (uint8_t**)malloc(s->h * sizeof(uint8_t*));
 

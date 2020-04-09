@@ -12,8 +12,7 @@ namespace Render
     class SpriteGroup
     {
     public:
-        explicit SpriteGroup(const std::string& path, bool trim);
-        explicit SpriteGroup(std::vector<Sprite>&& sprites);
+        explicit SpriteGroup(std::vector<Sprite>&& sprites, int32_t animLength = -1);
         void destroy();
 
         Sprite& operator[](size_t index);

@@ -77,7 +77,6 @@ namespace Render
     RenderSettings getWindowSize();
     void drawGui(NuklearFrameDump& dump);
 
-    bool getImageInfo(const std::string& path, std::vector<int32_t>& widths, std::vector<int32_t>& heights, int32_t& animLength);
     FACursor createCursor(const Cel::CelFrame& celFrame, int32_t hot_x = 0, int32_t hot_y = 0);
     void freeCursor(FACursor cursor);
     void drawCursor(FACursor cursor);
@@ -122,5 +121,8 @@ namespace Render
 
     void clear(int r = 0, int g = 0, int b = 255);
 
+    uint32_t getTextureHandleFromFrame(const Image& frame, bool trim);
+
     extern RenderInstance* mainRenderInstance;
+    extern std::unique_ptr<AtlasTexture> atlasTexture;
 }
