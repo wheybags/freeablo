@@ -1,17 +1,11 @@
 #pragma once
+#include "rectpack.h"
 #include <Image/image.h>
 #include <algorithm>
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <vector>
-
-//#define DEBUG_ATLAS_TEXTURE
-
-namespace rbp
-{
-    class SkylineBinPack;
-}
 
 class Image;
 
@@ -46,7 +40,7 @@ namespace Render
 
         size_t addTexture(const Image& image, bool trim = true, std::optional<Image::TrimmedData> trimmedData = std::nullopt);
         const AtlasTextureLookupMap& getLookupMap() const { return mLookupMap; }
-        float getOccupancy() const;
+        void printUtilisation() const;
         void clear(CommandQueue& commandQueue);
 
         Texture& getTextureArray() { return *mTextureArray; }
@@ -62,6 +56,7 @@ namespace Render
 
         AtlasTextureLookupMap mLookupMap;
         size_t mNextTextureId = 1;
-        std::vector<std::unique_ptr<rbp::SkylineBinPack>> mBinPacker;
+
+        std::vector<std::unique_ptr<RectPacker>> mRectPacker;
     };
 }

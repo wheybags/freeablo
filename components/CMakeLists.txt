@@ -88,10 +88,6 @@ set(RenderFiles
     render/renderinstance.h
     render/vertexlayout.h
     render/vertexlayout.cpp
-    ../extern/RectangleBinPack/Rect.cpp
-    ../extern/RectangleBinPack/Rect.h
-    ../extern/RectangleBinPack/SkylineBinPack.cpp
-    ../extern/RectangleBinPack/SkylineBinPack.h
     render/buffer.h
     render/vertexarrayobject.h
     render/vertextypes.h
@@ -114,7 +110,9 @@ set(RenderFiles
     render/OpenGL/descriptorsetopengl.cpp
     render/OpenGL/descriptorsetopengl.h
     render/alignedcpubuffer.h
-    render/alignedcpubuffer.cpp)
+    render/alignedcpubuffer.cpp
+    render/rectpack.cpp
+    render/rectpack.h)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

@@ -201,25 +201,29 @@ namespace FARender
 
     void SpriteLoader::load()
     {
+        printf("Decoding + trimming sprites...\n");
         // Load and trim all the sprites
         LoadedImagesData loadedImagesData = loadImagesIntoCpuMemory(mSpritesToLoad);
         mSpritesToLoad.clear();
+        printf("done\n");
 
+        printf("Sorting sprites...\n");
         // Sort the images by size
         std::sort(loadedImagesData.allImages.begin(),
                   loadedImagesData.allImages.end(),
-                  [](const std::unique_ptr<FinalImageData>& a, const std::unique_ptr<FinalImageData>& b) {
-                      if (a->image.width() != b->image.width())
-                          return a->image.width() > b->image.width();
-                      return a->image.height() > b->image.height();
-                  });
+                  [](const std::unique_ptr<FinalImageData>& a, const std::unique_ptr<FinalImageData>& b) { return a->image.height() > b->image.height(); });
+        printf("done\n");
 
+        printf("Uploading sprites to texture atlas...\n");
         // Upload the sprites into the texture atlas
         for (auto& image : loadedImagesData.allImages)
         {
             auto sprite = (Render::Sprite)(intptr_t)Render::atlasTexture->addTexture(image->image, false, image->trimmedData);
             loadedImagesData.imagesToSprites[image.get()] = sprite;
         }
+        printf("done\n");
+
+        Render::atlasTexture->printUtilisation();
 
         // Rebuild the sprite groups into collections of frames (where each frame is a reference to the atlas)
         for (auto& pair : loadedImagesData.definitionToImageMap)

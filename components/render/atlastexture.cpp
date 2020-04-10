@@ -1,5 +1,4 @@
 #include "atlastexture.h"
-#include "../../extern/RectangleBinPack/SkylineBinPack.h"
 #include "texture.h"
 #include <memory>
 #include <misc/assert.h>
@@ -16,7 +15,7 @@ namespace Render
         // TODO: dynamic configuration of atlas size
 
         static constexpr int32_t requiredTextureSize = 8192;
-        static constexpr int32_t requiredTextureLayers = 4;
+        static constexpr int32_t requiredTextureLayers = 3;
 
         BaseTextureInfo textureInfo{};
         textureInfo.width = requiredTextureSize;
@@ -94,7 +93,7 @@ namespace Render
             trimmedOffsetY = top;
         }
 
-        rbp::Rect dataDestinationRect = {};
+        RectPacker::Rect dataDestinationRect = {};
         int32_t layer = -1;
         {
             int32_t paddedWidth = useImage->width() + PADDING;
@@ -104,8 +103,8 @@ namespace Render
 
             for (int32_t layerTmp = 0; layerTmp < mTextureArray->getInfo().arrayLayers; layerTmp++)
             {
-                rbp::Rect packedPos = mBinPacker[layerTmp]->Insert(paddedWidth, paddedHeight, rbp::SkylineBinPack::LevelMinWasteFit);
-                if (packedPos.height != 0)
+                RectPacker::Rect packedPos{0, 0, paddedWidth, paddedHeight};
+                if (mRectPacker[layerTmp]->addRect(packedPos))
                 {
                     dataDestinationRect = {packedPos.x + PADDING, packedPos.y + PADDING, useImage->width(), useImage->height()};
                     layer = layerTmp;
@@ -139,19 +138,24 @@ namespace Render
         return id;
     }
 
-    float AtlasTexture::getOccupancy() const
+    void AtlasTexture::printUtilisation() const
     {
         float summedOccupancy = 0;
-        for (auto& bp : mBinPacker)
-            summedOccupancy += bp->Occupancy();
-        return summedOccupancy / mBinPacker.size() * 100;
+        for (int32_t i = 0; i < int32_t(mRectPacker.size()); i++)
+        {
+            const auto& bp = mRectPacker[i];
+            printf("Atlas texture layer %d occupancy %.1f%%\n", i, bp->utilisation() * 100.0f);
+            summedOccupancy += bp->utilisation();
+        }
+
+        printf("Atlas texture total occupancy %.1f%%\n", (summedOccupancy / mRectPacker.size()) * 100.0f);
     }
 
     void AtlasTexture::clear(CommandQueue& commandQueue)
     {
-        mBinPacker.clear();
+        mRectPacker.clear();
         for (int32_t layer = 0; layer < mTextureArray->getInfo().arrayLayers; layer++)
-            mBinPacker.push_back(std::make_unique<rbp::SkylineBinPack>(mTextureArray->width() - PADDING * 2, mTextureArray->height() - PADDING * 2, false));
+            mRectPacker.push_back(std::make_unique<RectPacker>(mTextureArray->width() - PADDING * 2, mTextureArray->height() - PADDING * 2));
 
         commandQueue.cmdClearTexture(*mTextureArray, Colors::transparent);
     }

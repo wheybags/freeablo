@@ -24,7 +24,6 @@
 // clang-format off
 #include <misc/disablewarn.h>
 #include "../../extern/jo_gif/jo_gif.cpp"
-#include "../../extern/RectangleBinPack/SkylineBinPack.h"
 #include <misc/enablewarn.h>
 // clang-format on
 
@@ -949,11 +948,5 @@ namespace Render
         drawLevelCache.clear();
 
         //        GL_CHECK_ERROR();
-
-#ifdef DEBUG_ATLAS_TEXTURE
-        static size_t loop = 0;
-        if ((loop++ % 1000) == 0)
-            printf("Atlas texture occupancy %.1f%%\n", atlasTexture->getOccupancy());
-#endif
     }
 }
