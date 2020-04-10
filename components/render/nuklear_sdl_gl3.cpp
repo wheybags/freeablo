@@ -168,6 +168,18 @@ void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTe
 
         commandQueue.cmdDrawIndexed(size_t(offset), cmd.elem_count, bindings);
 
+        // Useful if we ever need to debug the generated vertices:
+
+        // std::vector<nk_draw_index> indices;
+        // indices.resize(cmd.elem_count);
+        // memcpy(indices.data(), ((char*)dump.ebuf.memory.ptr) + offset, cmd.elem_count);
+        //
+        // auto* allVertices = (Render::NuklearVertex*)dump.vbuf.memory.ptr;
+        // std::vector<Render::NuklearVertex> vertices;
+        // vertices.resize(indices.size());
+        // for (int32_t i = 0; i < int32_t(vertices.size()); i++)
+        //     vertices[i] = allVertices[indices[i]];
+
         offset += cmd.elem_count * sizeof(nk_draw_index);
     }
 }

@@ -26,14 +26,14 @@ int main(int, char** argv)
         FAIO::init("");
 
         std::unique_ptr<NuklearMisc::GuiSprite> banner =
-            std::make_unique<NuklearMisc::GuiSprite>(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/banner.png", false));
+            std::make_unique<NuklearMisc::GuiSprite>(Image::loadFromFile(Misc::getResourcesPath().str() + "/launcher/banner.png"));
         std::unique_ptr<NuklearMisc::GuiSprite> graphicsHeader =
-            std::make_unique<NuklearMisc::GuiSprite>(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/graphics.png", false));
+            std::make_unique<NuklearMisc::GuiSprite>(Image::loadFromFile(Misc::getResourcesPath().str() + "/launcher/graphics.png"));
         std::unique_ptr<NuklearMisc::GuiSprite> playHeader =
-            std::make_unique<NuklearMisc::GuiSprite>(Render::loadNonCelSprite(Misc::getResourcesPath().str() + "/launcher/play.png", false));
+            std::make_unique<NuklearMisc::GuiSprite>(Image::loadFromFile(Misc::getResourcesPath().str() + "/launcher/play.png"));
 
-        int32_t bannerW, bannerH;
-        Render::spriteSize(banner->getSprite()->operator[](0), bannerW, bannerH);
+        int32_t bannerW = banner->getNkImage(0).w;
+        int32_t bannerH = banner->getNkImage(0).h;
 
         nk_style_button headerButtonStyle = ctx->style.button;
         headerButtonStyle.normal = nk_style_item_color(nk_rgba(0, 0, 0, 0));

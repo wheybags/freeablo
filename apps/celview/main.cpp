@@ -1,4 +1,5 @@
 #include "../components/settings/settings.h"
+#include <cel/celfile.h>
 #include <chrono>
 #include <faio/fafileobject.h>
 #include <fmt/format.h>
@@ -77,10 +78,10 @@ int main(int argc, char** argv)
 
                 if (image)
                 {
-                    nk_label(ctx, fmt::format("Number of Frames: {}", image->getSprite()->size()).c_str(), NK_TEXT_LEFT);
-                    nk_label(ctx, fmt::format("Width: {}", image->getSprite()->getWidth()).c_str(), NK_TEXT_LEFT);
-                    nk_label(ctx, fmt::format("Height: {}", image->getSprite()->getHeight()).c_str(), NK_TEXT_LEFT);
-                    frame = nk_propertyi(ctx, "Frame", 0, frame, image->getSprite()->size(), 1, 0.2f);
+                    nk_label(ctx, fmt::format("Number of Frames: {}", image->size()).c_str(), NK_TEXT_LEFT);
+                    nk_label(ctx, fmt::format("Width: {}", image->getNkImage(frame).w).c_str(), NK_TEXT_LEFT);
+                    nk_label(ctx, fmt::format("Height: {}", image->getNkImage(frame).h).c_str(), NK_TEXT_LEFT);
+                    frame = nk_propertyi(ctx, "Frame", 0, frame, image->size(), 1, 0.2f);
 
                     if (nk_button_label(ctx, "save as png"))
                     {
@@ -111,13 +112,11 @@ int main(int argc, char** argv)
                         frame++;
                     }
 
-                    if (frame >= (int32_t)image->getSprite()->size())
+                    if (frame >= (int32_t)image->size())
                         frame = 0;
 
-                    Render::Sprite sprite = image->getSprite()->operator[](frame);
-
-                    int32_t w, h;
-                    Render::spriteSize(sprite, w, h);
+                    int32_t w = image->getNkImage(frame).w;
+                    int32_t h = image->getNkImage(frame).h;
 
                     nk_layout_space_begin(ctx, NK_STATIC, h, 1);
                     {
@@ -168,7 +167,9 @@ int main(int argc, char** argv)
                         {
                             selectedImage = argv[1];
                             frame = 0;
-                            nextImage = std::make_unique<NuklearMisc::GuiSprite>(new Render::SpriteGroup(selectedImage, false));
+
+                            Cel::CelFile cel(selectedImage);
+                            nextImage = std::make_unique<NuklearMisc::GuiSprite>(cel.decode());
                         }
                     }
                 }
@@ -186,7 +187,9 @@ int main(int argc, char** argv)
                     {
                         selectedImage = celFile;
                         frame = 0;
-                        nextImage = std::make_unique<NuklearMisc::GuiSprite>(new Render::SpriteGroup(selectedImage, false));
+
+                        Cel::CelFile cel(selectedImage);
+                        nextImage = std::make_unique<NuklearMisc::GuiSprite>(cel.decode());
                     }
                 }
 

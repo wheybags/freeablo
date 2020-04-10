@@ -87,7 +87,6 @@ add_subdirectory(apps/celview)
 add_subdirectory(apps/mpqtool)
 add_subdirectory(apps/exedump)
 add_subdirectory(apps/launcher)
-add_subdirectory(apps/fontgenerator)
 add_subdirectory(test)
 
 if(MSVC)

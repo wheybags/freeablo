@@ -5,21 +5,54 @@
 
 namespace NuklearMisc
 {
-    GuiSprite::GuiSprite(Render::SpriteGroup* sprite) : mSprite(sprite)
+    GuiSprite::GuiSprite(std::vector<std::unique_ptr<Render::Texture>>&& textures) : mTextures(std::move(textures))
     {
-        mFrameIds.resize(mSprite->size());
-        for (uint32_t i = 0; i < mSprite->size(); i++)
+        mFrameIds.resize(mTextures.size());
+        for (uint32_t i = 0; i < mTextures.size(); i++)
         {
-            mFrameIds[i].spriteGroup = mSprite.get();
+            mFrameIds[i].texture = mTextures[i].get();
             mFrameIds[i].frameNumber = i;
         }
     }
 
-    GuiSprite::GuiSprite(std::unique_ptr<Render::Texture>&& texture) : mTexture(std::move(texture))
+    GuiSprite::GuiSprite(std::unique_ptr<Render::Texture>&& texture) : GuiSprite(moveToVector(std::move(texture))) {}
+
+    static std::vector<std::unique_ptr<Render::Texture>> imagesToTextures(const std::vector<Image>& images)
     {
-        mFrameIds.resize(1);
-        mFrameIds[0].texture = mTexture.get();
-        mFrameIds[0].frameNumber = 1;
+        std::vector<std::unique_ptr<Render::Texture>> retval;
+        retval.reserve(images.size());
+
+        for (const auto& image : images)
+        {
+            Render::BaseTextureInfo textureInfo;
+            textureInfo.width = image.width();
+            textureInfo.height = image.height();
+            textureInfo.forceTextureToBeATextureArray = true;
+            textureInfo.format = Render::Format::RGBA8UNorm;
+            std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
+            texture->updateImageData(0, 0, 0, image.width(), image.height(), reinterpret_cast<const uint8_t*>(image.mData.data()));
+            retval.emplace_back(texture.release());
+        }
+
+        return retval;
+    }
+
+    GuiSprite::GuiSprite(const std::vector<Image>& images) : GuiSprite(imagesToTextures(images)) {}
+
+    GuiSprite::GuiSprite(Image&& image) : GuiSprite(moveToVector(std::move(image))) {}
+
+    struct nk_image GuiSprite::getNkImage(int32_t frame)
+    {
+        struct nk_image image = nk_image_handle(nk_handle_ptr(&mFrameIds[frame]));
+
+        image.w = mTextures[frame]->width();
+        image.h = mTextures[frame]->height();
+        image.region[0] = 0;
+        image.region[1] = 1;
+        image.region[2] = image.w;
+        image.region[3] = image.h;
+
+        return image;
     }
 
     GuiSprite::~GuiSprite() = default;

@@ -1,9 +1,10 @@
 #pragma once
+#include <cstdint>
 #include <fa_nuklear.h>
 #include <input/inputmanager.h>
 #include <map>
 #include <render/render.h>
-#include <stdint.h>
+#include <render/texture.h>
 #include <vector>
 
 namespace NuklearMisc
@@ -13,18 +14,17 @@ namespace NuklearMisc
     class GuiSprite
     {
     public:
-        explicit GuiSprite(Render::SpriteGroup* sprite);
+        explicit GuiSprite(const std::vector<Image>& images);
+        explicit GuiSprite(Image&& image);
+        explicit GuiSprite(std::vector<std::unique_ptr<Render::Texture>>&& textures);
         explicit GuiSprite(std::unique_ptr<Render::Texture>&& texture);
         ~GuiSprite();
 
-        struct nk_image getNkImage(int32_t frame = 0) { return nk_image_handle(nk_handle_ptr(&mFrameIds[frame])); }
-
-        Render::SpriteGroup* getSprite() { return mSprite.get(); }
+        int32_t size() const { return int32_t(mFrameIds.size()); }
+        struct nk_image getNkImage(int32_t frame = 0);
 
     private:
-        std::unique_ptr<Render::SpriteGroup> mSprite;
-        std::unique_ptr<Render::Texture> mTexture;
-
+        std::vector<std::unique_ptr<Render::Texture>> mTextures;
         std::vector<FANuklearTextureHandle> mFrameIds;
     };
 
