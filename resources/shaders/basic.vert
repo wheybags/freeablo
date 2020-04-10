@@ -11,7 +11,7 @@ layout(std140) uniform vertexUniforms
 {
     vec2 screenSize;
 
-    vec2 _pad;
+    vec2 pad2;
 };
 
 out vec2 uv;

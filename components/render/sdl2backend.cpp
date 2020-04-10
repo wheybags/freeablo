@@ -97,14 +97,14 @@ namespace Render
         {
             float screenSize[2];
 
-            float _pad[2];
+            float pad1[2];
         };
 
         struct Fragment
         {
             float atlasSize[2];
 
-            float _pad[2];
+            float pad2[2];
         };
 
         using CpuBufferType = TypedAlignedCpuBuffer<Vertex, Fragment>;

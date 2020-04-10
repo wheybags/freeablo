@@ -9,7 +9,7 @@ layout(std140) uniform fragmentUniforms
 {
     vec2 atlasSize;
 
-    vec2 __pad;
+    vec2 pad1;
 };
 
 uniform sampler2DArray tex;
