@@ -38,10 +38,14 @@ namespace Script
             lua_setglobal(mState, varName);
         }
 
+        luabridge::LuaRef get(const std::string& variable)
+        {
+            return luabridge::getGlobal(mState, variable.c_str());
+        }
+
         template <typename T> T get(const std::string& variable)
         {
-            luabridge::LuaRef ret = luabridge::getGlobal(mState, variable.c_str());
-            return ret.cast<T>();
+            return get(variable).cast<T>();
         }
 
         void runScript(const std::string& path);
