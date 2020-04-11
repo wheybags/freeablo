@@ -48,49 +48,6 @@ namespace Render
     // atlasTexture is unique_ptr as to not instantiate until opengl is setup.
     std::unique_ptr<AtlasTexture> atlasTexture;
 
-    /* Caches level sprites/positions etc in a format that can be directly injected into GL VBOs. */
-    class DrawLevelCache
-    {
-    public:
-        explicit DrawLevelCache(size_t initSize) { mInstanceData.resize(initSize); }
-
-        void addSprite(uint32_t sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
-        {
-            auto& lookupMap = atlasTexture->getLookupMap();
-            auto& atlasEntry = lookupMap.at(sprite);
-
-            SpriteVertexPerInstance vertexData = {};
-
-            vertexData.v_imageSize[0] = atlasEntry.mTrimmedWidth;
-            vertexData.v_imageSize[1] = atlasEntry.mTrimmedHeight;
-
-            vertexData.v_atlasOffset[0] = atlasEntry.mX;
-            vertexData.v_atlasOffset[1] = atlasEntry.mY;
-            vertexData.v_atlasOffset[2] = atlasEntry.mLayer;
-
-            vertexData.v_imageOffset[0] = x + atlasEntry.mTrimmedOffsetX;
-            vertexData.v_imageOffset[1] = y + atlasEntry.mTrimmedOffsetY;
-
-            if (auto c = highlightColor)
-            {
-                vertexData.v_hoverColor[0] = c->r;
-                vertexData.v_hoverColor[1] = c->g;
-                vertexData.v_hoverColor[2] = c->b;
-                vertexData.v_hoverColor[3] = 255;
-            }
-
-            mInstanceData.push_back(vertexData);
-        }
-
-        size_t instanceCount() const { return mInstanceData.size(); }
-
-        std::pair<void*, size_t> getData() { return {mInstanceData.data(), mInstanceData.size() * sizeof(SpriteVertexPerInstance)}; }
-
-        void clear() { mInstanceData.clear(); }
-
-        std::vector<SpriteVertexPerInstance> mInstanceData;
-    };
-
     namespace DrawLevelUniforms
     {
         struct Vertex
@@ -125,7 +82,113 @@ namespace Render
     DrawLevelUniforms::CpuBufferType* drawLevelUniformCpuBuffer = nullptr;
     DescriptorSet* drawLevelDescriptorSet = nullptr;
 
-    DrawLevelCache drawLevelCache = DrawLevelCache(2000);
+    /* Caches level sprites/positions etc in a format that can be directly injected into GL VBOs. */
+    class DrawLevelCache
+    {
+    public:
+        void addSprite(uint32_t sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
+        {
+            const AtlasTextureLookupMap& lookupMap = atlasTexture->getLookupMap();
+            const AtlasTextureEntry& atlasEntry = lookupMap.at(sprite);
+
+            mSpritesToDraw.push_back(SpriteData{&atlasEntry, x, y, highlightColor});
+        }
+
+        void end()
+        {
+            // TODO: there's quite a decent performance increase available if we sort by texture.
+            // This is because it allows the batches to grow larger, so we have fewer state changes + draw calls.
+            // The disadvantage is we would need to use a z-buffer to keep sprites sorted properly, so it's disabled for now.
+            //    auto sortByTexture = [](const SpriteData& a, const SpriteData& b) { return a.atlasEntry->mTexture < b.atlasEntry->mTexture; };
+            //    std::sort(mSpritesToDraw.begin(), mSpritesToDraw.end(), sortByTexture);
+
+            for (const auto& spriteData : mSpritesToDraw)
+                batchDrawSprite(*spriteData.atlasEntry, spriteData.x, spriteData.y, spriteData.highlightColor);
+
+            mSpritesToDraw.clear();
+
+            draw();
+        }
+
+    private:
+        void batchDrawSprite(const AtlasTextureEntry& atlasEntry, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
+        {
+            if (atlasEntry.mTexture != mTexture)
+                draw();
+
+            mTexture = atlasEntry.mTexture;
+            debug_assert(mTexture);
+
+            SpriteVertexPerInstance vertexData = {};
+
+            vertexData.v_imageSize[0] = atlasEntry.mTrimmedWidth;
+            vertexData.v_imageSize[1] = atlasEntry.mTrimmedHeight;
+
+            vertexData.v_atlasOffset[0] = atlasEntry.mX;
+            vertexData.v_atlasOffset[1] = atlasEntry.mY;
+            vertexData.v_atlasOffset[2] = atlasEntry.mLayer;
+
+            vertexData.v_imageOffset[0] = x + atlasEntry.mTrimmedOffsetX;
+            vertexData.v_imageOffset[1] = y + atlasEntry.mTrimmedOffsetY;
+
+            if (auto c = highlightColor)
+            {
+                vertexData.v_hoverColor[0] = c->r;
+                vertexData.v_hoverColor[1] = c->g;
+                vertexData.v_hoverColor[2] = c->b;
+                vertexData.v_hoverColor[3] = 255;
+            }
+
+            mInstanceData.push_back(vertexData);
+        }
+
+        void draw()
+        {
+            if (mInstanceData.empty())
+                return;
+
+            auto vertexUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Vertex>();
+            vertexUniforms->screenSize[0] = WIDTH;
+            vertexUniforms->screenSize[1] = HEIGHT;
+
+            auto fragmentUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Fragment>();
+            fragmentUniforms->atlasSize[0] = mTexture->width();
+            fragmentUniforms->atlasSize[1] = mTexture->height();
+
+            drawLevelUniformBuffer->setData(drawLevelUniformCpuBuffer->data(), drawLevelUniformCpuBuffer->getSizeInBytes());
+
+            vertexArrayObject->getVertexBuffer(1)->setData(mInstanceData.data(), mInstanceData.size() * sizeof(SpriteVertexPerInstance));
+
+            drawLevelDescriptorSet->updateItems({
+                {2, mTexture},
+            });
+
+            Bindings bindings;
+            bindings.vao = vertexArrayObject;
+            bindings.pipeline = drawLevelPipeline;
+            bindings.descriptorSet = drawLevelDescriptorSet;
+
+            mainCommandQueue->cmdDrawInstances(0, 6, mInstanceData.size(), bindings);
+
+            mInstanceData.clear();
+            mTexture = nullptr;
+        }
+
+    private:
+        struct SpriteData
+        {
+            const AtlasTextureEntry* atlasEntry = nullptr;
+            int32_t x = 0;
+            int32_t y = 0;
+            std::optional<Cel::Colour> highlightColor;
+        };
+
+        std::vector<SpriteData> mSpritesToDraw;
+        std::vector<SpriteVertexPerInstance> mInstanceData;
+        Texture* mTexture = nullptr;
+    };
+
+    DrawLevelCache drawLevelCache;
     std::string windowTitle;
 
     void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
@@ -179,7 +242,6 @@ namespace Render
         drawLevelDescriptorSet->updateItems({
             {0, BufferSlice{drawLevelUniformBuffer, drawLevelUniformCpuBuffer->getMemberOffset<DrawLevelUniforms::Vertex>(), sizeof(DrawLevelUniforms::Vertex)}},
             {1, BufferSlice{drawLevelUniformBuffer, drawLevelUniformCpuBuffer->getMemberOffset<DrawLevelUniforms::Fragment>(), sizeof(DrawLevelUniforms::Fragment)}},
-            {2, &atlasTexture->getTextureArray()},
         });
 
         SpriteVertexMain baseVertices[] =
@@ -483,8 +545,6 @@ namespace Render
         return new SpriteGroup(std::move(vec));
     }
 
-    void deleteAllSprites() { atlasTexture->clear(*mainCommandQueue); }
-
     void draw()
     {
         mainCommandQueue->cmdPresent();
@@ -497,30 +557,6 @@ namespace Render
     {
         // Add to level cache, will be drawn in a batch later.
         drawLevelCache.addSprite(sprite, x, y, highlightColor);
-    }
-
-    static void drawCachedLevel()
-    {
-        auto vertexUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Vertex>();
-        vertexUniforms->screenSize[0] = WIDTH;
-        vertexUniforms->screenSize[1] = HEIGHT;
-
-        auto fragmentUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Fragment>();
-        fragmentUniforms->atlasSize[0] = atlasTexture->getTextureArray().width();
-        fragmentUniforms->atlasSize[1] = atlasTexture->getTextureArray().height();
-
-        drawLevelUniformBuffer->setData(drawLevelUniformCpuBuffer->data(), drawLevelUniformCpuBuffer->getSizeInBytes());
-
-        std::pair<void*, size_t> instanceData = drawLevelCache.getData();
-        vertexArrayObject->getVertexBuffer(1)->setData(instanceData.first, instanceData.second);
-
-        Bindings bindings;
-        bindings.vao = vertexArrayObject;
-        bindings.pipeline = drawLevelPipeline;
-        bindings.descriptorSet = drawLevelDescriptorSet;
-
-        // Draw the whole level in one batched operation.
-        mainCommandQueue->cmdDrawInstances(0, 6, drawLevelCache.instanceCount(), bindings);
     }
 
     void handleEvents()
@@ -942,11 +978,6 @@ namespace Render
             }
         });
 
-        drawCachedLevel();
-
-        // Clear cached level data after drawing.
-        drawLevelCache.clear();
-
-        //        GL_CHECK_ERROR();
+        drawLevelCache.end();
     }
 }

@@ -125,13 +125,13 @@ void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTe
         if (atlasEntry)
         {
             dev.descriptorSet->updateItems({
-                {2, &atlasTexture.getTextureArray()},
+                {2, atlasEntry->mTexture},
             });
 
             fragment->imageSize[0] = atlasEntry->mWidth;
             fragment->imageSize[1] = atlasEntry->mHeight;
-            fragment->atlasSize[0] = atlasTexture.getTextureArray().width();
-            fragment->atlasSize[1] = atlasTexture.getTextureArray().height();
+            fragment->atlasSize[0] = atlasEntry->mTexture->width();
+            fragment->atlasSize[1] = atlasEntry->mTexture->height();
             fragment->atlasOffset[0] = atlasEntry->mX;
             fragment->atlasOffset[1] = atlasEntry->mY;
             fragment->atlasOffset[2] = atlasEntry->mLayer;

@@ -120,22 +120,17 @@ namespace FARender
                     for (const auto& animationPair : animations)
                     {
                         const std::string& className = classPair.first;
-                        std::string classNameSpriteCode = classPair.first;
-                        std::string classSpriteCode = classPair.second;
+                        const std::string& classNameSpriteCode = classPair.first;
+                        const std::string& classSpriteCode = classPair.second;
 
                         const std::string& armorName = armorPair.first;
-                        std::string armorSpriteCode = armorPair.second;
+                        const std::string& armorSpriteCode = armorPair.second;
 
                         const std::string& weaponName = weaponPair.first;
                         std::string weaponSpriteCode = weaponPair.second;
 
                         const std::string& animationName = animationPair.first;
                         std::string animationSpriteCode = animationPair.second;
-
-                        // temporary hack
-                        classNameSpriteCode = "warrior";
-                        classSpriteCode = "w";
-                        armorSpriteCode = "l";
 
                         if (animationName == "dead")
                             weaponSpriteCode = "n"; // no weapons in death anims
@@ -156,7 +151,7 @@ namespace FARender
                                                              animationSpriteCode);
 
                         PlayerSpriteKey spriteKey{{{"class", className}, {"armor", armorName}, {"weapon", weaponName}, {"animation", animationName}}};
-                        SpriteDefinition definition{spritePath, true};
+                        SpriteDefinition definition{spritePath, true, "player"};
 
                         mPlayerSpriteDefinitions[spriteKey] = definition;
                         mSpritesToLoad.insert(definition);
@@ -177,6 +172,7 @@ namespace FARender
             {
                 SpriteDefinition definition = {};
                 definition.path = "virtual_diablo_tileset/bottom/" + std::to_string(i);
+                definition.category = "tileset_bottom";
                 definition.trim = true;
                 mTilesetBottoms[i] = definition;
                 mSpritesToLoad.insert(definition);
@@ -218,7 +214,7 @@ namespace FARender
         // Upload the sprites into the texture atlas
         for (auto& image : loadedImagesData.allImages)
         {
-            auto sprite = (Render::Sprite)(intptr_t)Render::atlasTexture->addTexture(image->image, false, image->trimmedData);
+            auto sprite = (Render::Sprite)(intptr_t)Render::atlasTexture->addTexture(image->image, false, image->trimmedData, image->category);
             loadedImagesData.imagesToSprites[image.get()] = sprite;
         }
         printf("done\n");
@@ -490,6 +486,7 @@ namespace FARender
             for (auto& image : finalImages)
             {
                 std::unique_ptr<FinalImageData> finalImageData = std::make_unique<FinalImageData>();
+                finalImageData->category = definition.category;
 
                 if (definition.trim)
                 {

@@ -28,6 +28,8 @@ namespace Render
         int32_t mTrimmedOffsetY = 0;
         int32_t mTrimmedWidth = 0;
         int32_t mTrimmedHeight = 0;
+
+        Render::Texture* mTexture = nullptr;
     };
 
     typedef std::map<size_t, AtlasTextureEntry> AtlasTextureLookupMap;
@@ -38,25 +40,33 @@ namespace Render
         explicit AtlasTexture(RenderInstance& instance, CommandQueue& commandQueue);
         ~AtlasTexture();
 
-        size_t addTexture(const Image& image, bool trim = true, std::optional<Image::TrimmedData> trimmedData = std::nullopt);
+        size_t addTexture(const Image& image, bool trim = true, std::optional<Image::TrimmedData> trimmedData = std::nullopt, std::string category = "default");
         const AtlasTextureLookupMap& getLookupMap() const { return mLookupMap; }
         void printUtilisation() const;
-        void clear(CommandQueue& commandQueue);
-
-        Texture& getTextureArray() { return *mTextureArray; }
 
     private:
         static constexpr int32_t PADDING = 1;
 
     private:
         RenderInstance& mInstance;
-        std::unique_ptr<Texture> mTextureArray;
-
-        size_t mEmptySpriteId = 0;
+        CommandQueue& mCommandQueue;
 
         AtlasTextureLookupMap mLookupMap;
         size_t mNextTextureId = 1;
 
-        std::vector<std::unique_ptr<RectPacker>> mRectPacker;
+        struct Layer
+        {
+            std::unique_ptr<Texture> texture;
+            std::unique_ptr<RectPacker> rectPacker;
+        };
+
+        struct Layers
+        {
+            size_t emptySpriteId = 0;
+            std::vector<Layer> layers;
+            void addLayer(RenderInstance& instance, CommandQueue& commandQueue);
+        };
+
+        std::unordered_map<std::string, Layers> mLayersByCategory;
     };
 }

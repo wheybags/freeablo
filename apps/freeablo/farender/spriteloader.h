@@ -23,8 +23,9 @@ namespace FARender
         {
             std::string path;
             bool trim = true;
+            std::string category = "default";
 
-            bool operator==(const SpriteDefinition& other) const { return path == other.path && trim == other.trim; }
+            bool operator==(const SpriteDefinition& other) const { return path == other.path && category == other.category && trim == other.trim; }
             struct Hash
             {
                 std::size_t operator()(const SpriteDefinition& def) const { return std::hash<std::string>{}(def.path); }
@@ -38,12 +39,14 @@ namespace FARender
             void save(FASaveGame::GameSaver& saver) const
             {
                 saver.save(path);
+                saver.save(category);
                 saver.save(trim);
             }
 
             void load(FASaveGame::GameLoader& loader)
             {
                 path = loader.load<std::string>();
+                category = loader.load<std::string>();
                 trim = loader.load<bool>();
             }
         };
@@ -113,39 +116,39 @@ namespace FARender
         {
             // Warning: don't put anything but SpriteDefinitions in here, we use pointer arithmetic to iterate them
 
-            SpriteDefinition blackTexture{Misc::getResourcesPath().str() + "/black.png", false};
-            SpriteDefinition textbox{"data/textbox.cel", false};
-            SpriteDefinition textboxWide{"data/textbox2.cel", false};
-            SpriteDefinition slider{"data/textslid.cel", false};
-            SpriteDefinition bottomMenu{"ctrlpan/panel8.cel", false};
-            SpriteDefinition bottomMenuButtons{"ctrlpan/panel8bu.cel", false};
-            SpriteDefinition bottomMenuBulbs{"ctrlpan/p8bulbs.cel", false};
-            SpriteDefinition spellIcons{"ctrlpan/spelicon.cel", false};
-            SpriteDefinition spellIconsSmall{"data/spelli2.cel", false};
-            SpriteDefinition inventoryBackground{"data/inv/inv.cel", false};
-            SpriteDefinition spellsBackground{"data/spellbk.cel", false};
-            SpriteDefinition spellsButtons{"data/spellbkb.cel", false};
-            SpriteDefinition characterBackground{"data/char.cel", false};
-            SpriteDefinition questsBackground{"data/quest.cel", false};
-            SpriteDefinition bigPentagramSpin{"data/pentspin.cel", false};
-            SpriteDefinition mediumPentagramSpin{"ui_art/focus.pcx&trans=0,255,0&vanim=30", false};
-            SpriteDefinition smallPentagramSpin{"data/pentspn2.cel", false};
-            SpriteDefinition goldSplitBackground{"ctrlpan/golddrop.cel", false};
-            SpriteDefinition mainMenuLogo{"ui_art/smlogo.pcx&trans=0,255,0&vanim=154", false};
-            SpriteDefinition pauseMenuLogo{"data/diabsmal.cel", false};
-            SpriteDefinition characterSelectPortraits{"ui_art/heros.pcx&vanim=76", false};
-            SpriteDefinition characterSelectBackground{"ui_art/selhero.pcx", false};
-            SpriteDefinition mainMenuBackground{"ui_art/mainmenu.pcx", false};
-            SpriteDefinition itemCursors{"data/inv/objcurs.cel", false};
-            SpriteDefinition smallTextFont{"ctrlpan/smaltext.cel&convertToSingleTexture", false};
-            SpriteDefinition bigTGoldFont{"data/bigtgold.cel&convertToSingleTexture", false};
-            SpriteDefinition fontGold16{"ui_art/font16g.pcx&trans=0,255,0&resize=256x256&tileSize=16x16", false};
-            SpriteDefinition fontGold24{"ui_art/font24g.pcx&trans=0,255,0&resize=384x416&tileSize=24x26", false};
-            SpriteDefinition fontGold30{"ui_art/font30g.pcx&trans=0,255,0&resize=512x496&tileSize=32x31", false};
-            SpriteDefinition fontGold42{"ui_art/font42g.pcx&trans=0,255,0&resize=640x672&tileSize=40x42", false};
-            SpriteDefinition fontSilver16{"ui_art/font16s.pcx&trans=0,255,0&resize=256x256&tileSize=16x16", false};
-            SpriteDefinition fontSilver24{"ui_art/font24s.pcx&trans=0,255,0&resize=384x416&tileSize=24x26", false};
-            SpriteDefinition fontSilver30{"ui_art/font30s.pcx&trans=0,255,0&resize=512x496&tileSize=32x31", false};
+            SpriteDefinition blackTexture{Misc::getResourcesPath().str() + "/black.png", false, "gui"};
+            SpriteDefinition textbox{"data/textbox.cel", false, "gui"};
+            SpriteDefinition textboxWide{"data/textbox2.cel", false, "gui"};
+            SpriteDefinition slider{"data/textslid.cel", false, "gui"};
+            SpriteDefinition bottomMenu{"ctrlpan/panel8.cel", false, "gui"};
+            SpriteDefinition bottomMenuButtons{"ctrlpan/panel8bu.cel", false, "gui"};
+            SpriteDefinition bottomMenuBulbs{"ctrlpan/p8bulbs.cel", false, "gui"};
+            SpriteDefinition spellIcons{"ctrlpan/spelicon.cel", false, "gui"};
+            SpriteDefinition spellIconsSmall{"data/spelli2.cel", false, "gui"};
+            SpriteDefinition inventoryBackground{"data/inv/inv.cel", false, "gui"};
+            SpriteDefinition spellsBackground{"data/spellbk.cel", false, "gui"};
+            SpriteDefinition spellsButtons{"data/spellbkb.cel", false, "gui"};
+            SpriteDefinition characterBackground{"data/char.cel", false, "gui"};
+            SpriteDefinition questsBackground{"data/quest.cel", false, "gui"};
+            SpriteDefinition bigPentagramSpin{"data/pentspin.cel", false, "gui"};
+            SpriteDefinition mediumPentagramSpin{"ui_art/focus.pcx&trans=0,255,0&vanim=30", false, "gui"};
+            SpriteDefinition smallPentagramSpin{"data/pentspn2.cel", false, "gui"};
+            SpriteDefinition goldSplitBackground{"ctrlpan/golddrop.cel", false, "gui"};
+            SpriteDefinition mainMenuLogo{"ui_art/smlogo.pcx&trans=0,255,0&vanim=154", false, "gui"};
+            SpriteDefinition pauseMenuLogo{"data/diabsmal.cel", false, "gui"};
+            SpriteDefinition characterSelectPortraits{"ui_art/heros.pcx&vanim=76", false, "gui"};
+            SpriteDefinition characterSelectBackground{"ui_art/selhero.pcx", false, "gui"};
+            SpriteDefinition mainMenuBackground{"ui_art/mainmenu.pcx", false, "gui"};
+            SpriteDefinition itemCursors{"data/inv/objcurs.cel", false, "gui"};
+            SpriteDefinition smallTextFont{"ctrlpan/smaltext.cel&convertToSingleTexture", false, "gui"};
+            SpriteDefinition bigTGoldFont{"data/bigtgold.cel&convertToSingleTexture", false, "gui"};
+            SpriteDefinition fontGold16{"ui_art/font16g.pcx&trans=0,255,0&resize=256x256&tileSize=16x16", false, "gui"};
+            SpriteDefinition fontGold24{"ui_art/font24g.pcx&trans=0,255,0&resize=384x416&tileSize=24x26", false, "gui"};
+            SpriteDefinition fontGold30{"ui_art/font30g.pcx&trans=0,255,0&resize=512x496&tileSize=32x31", false, "gui"};
+            SpriteDefinition fontGold42{"ui_art/font42g.pcx&trans=0,255,0&resize=640x672&tileSize=40x42", false, "gui"};
+            SpriteDefinition fontSilver16{"ui_art/font16s.pcx&trans=0,255,0&resize=256x256&tileSize=16x16", false, "gui"};
+            SpriteDefinition fontSilver24{"ui_art/font24s.pcx&trans=0,255,0&resize=384x416&tileSize=24x26", false, "gui"};
+            SpriteDefinition fontSilver30{"ui_art/font30s.pcx&trans=0,255,0&resize=512x496&tileSize=32x31", false, "gui"};
 
             SpriteDefinition end__;
         } mGuiSprites;
@@ -154,6 +157,7 @@ namespace FARender
         struct FinalImageData
         {
             Image image;
+            std::string category;
             std::optional<Image::TrimmedData> trimmedData;
         };
 
