@@ -172,7 +172,6 @@ namespace FARender
             {
                 SpriteDefinition definition = {};
                 definition.path = "virtual_diablo_tileset/bottom/" + std::to_string(i);
-                definition.category = "tileset_bottom";
                 definition.trim = true;
                 mTilesetBottoms[i] = definition;
                 mSpritesToLoad.insert(definition);

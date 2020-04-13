@@ -93,12 +93,18 @@ namespace Render
     {
         if (mSpec.scissor)
             glEnable(GL_SCISSOR_TEST);
+        if (mSpec.depthTest)
+        {
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS);
+        }
 
         glUseProgram(mShaderProgramId);
     }
     void PipelineOpenGL::unbind(std::optional<GLuint>, std::optional<GLuint>)
     {
         glDisable(GL_SCISSOR_TEST);
+        glDisable(GL_DEPTH_TEST);
         glUseProgram(0);
     }
 

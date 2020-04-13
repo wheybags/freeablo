@@ -5,6 +5,7 @@
 
 namespace Render
 {
+#pragma pack(push, 1)
     struct SpriteVertexMain
     {
         float vertex_position[3];
@@ -26,6 +27,7 @@ namespace Render
 
     struct SpriteVertexPerInstance
     {
+        float v_zValue;
         uint16_t v_imageSize[2];
         int16_t v_imageOffset[2];
         uint8_t v_hoverColor[4];
@@ -34,6 +36,7 @@ namespace Render
         static const VertexLayout& layout()
         {
             static VertexLayout layout{{
+                                           Format::R32F,
                                            Format::RG16U,
                                            Format::RG16I,
                                            Format::RGBA8UNorm,
@@ -67,4 +70,5 @@ namespace Render
             return layout;
         }
     };
+#pragma pack(pop)
 }

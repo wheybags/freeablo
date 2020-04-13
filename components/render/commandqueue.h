@@ -46,7 +46,7 @@ namespace Render
         virtual void cmdDrawIndexed(size_t firstIndex, size_t vertexCount, Bindings& bindings);
         virtual void cmdDrawInstances(size_t firstVertex, size_t vertexCount, size_t instanceCount, Bindings& bindings);
         void cmdScissor(ScissorRect scissorRect) { mScissor = scissorRect; }
-        virtual void cmdClearCurrentFramebuffer(Color color) = 0;
+        virtual void cmdClearCurrentFramebuffer(Color color, bool clearDepth) = 0;
 
         virtual void cmdPresent() = 0;
 

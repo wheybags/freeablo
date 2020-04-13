@@ -57,7 +57,6 @@ namespace Render
     void RenderInstanceOpenGL::setupGlobalState()
     {
         glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
 
         // For now, we will just force all pixel transfers to be tightly packed
         glPixelStorei(GL_PACK_ALIGNMENT, 1);

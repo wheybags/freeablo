@@ -14,6 +14,7 @@ namespace Render
         filesystem::path vertexShaderPath;
         filesystem::path fragmentShaderPath;
         bool scissor = false;
+        bool depthTest = false;
         // target framebuffer format
     };
 

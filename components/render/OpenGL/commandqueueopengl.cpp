@@ -87,10 +87,14 @@ namespace Render
         glDrawArraysInstanced(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
     }
 
-    void CommandQueueOpenGL::cmdClearCurrentFramebuffer(Color color)
+    void CommandQueueOpenGL::cmdClearCurrentFramebuffer(Color color, bool clearDepth)
     {
         glClearColor(color.r, color.g, color.b, color.a);
-        glClear(GL_COLOR_BUFFER_BIT);
+
+        if (clearDepth)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        else
+            glClear(GL_COLOR_BUFFER_BIT);
     }
 
     void CommandQueueOpenGL::cmdPresent() { SDL_GL_SwapWindow(&getInstance().mWindow); }

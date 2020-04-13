@@ -96,14 +96,15 @@ namespace Render
 
         void end()
         {
-            // TODO: there's quite a decent performance increase available if we sort by texture.
-            // This is because it allows the batches to grow larger, so we have fewer state changes + draw calls.
-            // The disadvantage is we would need to use a z-buffer to keep sprites sorted properly, so it's disabled for now.
-            //    auto sortByTexture = [](const SpriteData& a, const SpriteData& b) { return a.atlasEntry->mTexture < b.atlasEntry->mTexture; };
-            //    std::sort(mSpritesToDraw.begin(), mSpritesToDraw.end(), sortByTexture);
+            for (size_t i = 0; i < mSpritesToDraw.size(); i++)
+                mSpritesToDraw[i].zBufferValue = 1.0f - (i / float(mSpritesToDraw.size()));
+
+            // explicit z buffer values ensure the draws act like they were done in-order, so we're free to batch by texture as aggressively as possible
+            auto sortByTexture = [](const SpriteData& a, const SpriteData& b) { return a.atlasEntry->mTexture < b.atlasEntry->mTexture; };
+            std::sort(mSpritesToDraw.begin(), mSpritesToDraw.end(), sortByTexture);
 
             for (const auto& spriteData : mSpritesToDraw)
-                batchDrawSprite(*spriteData.atlasEntry, spriteData.x, spriteData.y, spriteData.highlightColor);
+                batchDrawSprite(*spriteData.atlasEntry, spriteData.x, spriteData.y, spriteData.highlightColor, spriteData.zBufferValue);
 
             mSpritesToDraw.clear();
 
@@ -111,7 +112,7 @@ namespace Render
         }
 
     private:
-        void batchDrawSprite(const AtlasTextureEntry& atlasEntry, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
+        void batchDrawSprite(const AtlasTextureEntry& atlasEntry, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor, float zBufferVal)
         {
             if (atlasEntry.mTexture != mTexture)
                 draw();
@@ -130,6 +131,8 @@ namespace Render
 
             vertexData.v_imageOffset[0] = x + atlasEntry.mTrimmedOffsetX;
             vertexData.v_imageOffset[1] = y + atlasEntry.mTrimmedOffsetY;
+
+            vertexData.v_zValue = zBufferVal;
 
             if (auto c = highlightColor)
             {
@@ -181,6 +184,7 @@ namespace Render
             int32_t x = 0;
             int32_t y = 0;
             std::optional<Cel::Colour> highlightColor;
+            float zBufferValue = 0;
         };
 
         std::vector<SpriteData> mSpritesToDraw;
@@ -219,6 +223,7 @@ namespace Render
         mainRenderInstance = renderInstance;
 
         PipelineSpec drawLevelPipelineSpec;
+        drawLevelPipelineSpec.depthTest = true;
         drawLevelPipelineSpec.vertexLayouts = {SpriteVertexMain::layout(), SpriteVertexPerInstance::layout()};
         drawLevelPipelineSpec.vertexShaderPath = Misc::getResourcesPath().str() + "/shaders/basic.vert";
         drawLevelPipelineSpec.fragmentShaderPath = Misc::getResourcesPath().str() + "/shaders/basic.frag";
@@ -716,7 +721,10 @@ namespace Render
         h = atlasEntry.mHeight;
     }
 
-    void clear(int r, int g, int b) { mainCommandQueue->cmdClearCurrentFramebuffer(Color(float(r) / 255.0f, float(g) / 255.0f, float(b) / 255.0f, 1.0f)); }
+    void clear(int r, int g, int b)
+    {
+        mainCommandQueue->cmdClearCurrentFramebuffer(Color(float(r) / 255.0f, float(g) / 255.0f, float(b) / 255.0f, 1.0f), true);
+    }
 
 #define BPP 4
 #define DEPTH 32

@@ -4,6 +4,7 @@ in vec2 uv;
 flat in vec2 imageSize;
 flat in vec4 hoverColor;
 flat in vec3 atlasOffset;
+flat in float f_zValue;
 
 layout(std140) uniform fragmentUniforms
 {
@@ -33,5 +34,7 @@ void main()
             }
         }
     }
-    frag_colour = c;//vec4(c.rgb, 0.4 * c.a);
+
+    frag_colour = c;
+    gl_FragDepth = mix(1.0, f_zValue, frag_colour.a);
 }
