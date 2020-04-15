@@ -89,9 +89,30 @@ int main(int argc, char** argv)
                         nfdresult_t result = NFD_SaveDialog("png", nullptr, &outPath);
                         if (result == NFD_OKAY)
                         {
-                            Render::SpriteGroup::toPng(selectedImage, outPath);
-                            free(outPath);
+                            Cel::CelFile cel(selectedImage);
+                            std::vector<Image> images = cel.decode();
+
+                            int32_t sumWidth = 0;
+                            int32_t maxHeight = 0;
+                            for (int32_t i = 0; i < int32_t(images.size()); i++)
+                            {
+                                sumWidth += images[i].width();
+                                if (images[i].height() > maxHeight)
+                                    maxHeight = images[i].height();
+                            }
+
+                            Image tmp(sumWidth, maxHeight);
+
+                            int32_t x = 0;
+                            for (int32_t i = 0; i < int32_t(images.size()); i++)
+                            {
+                                images[i].blitTo(tmp, x, 0);
+                                x += images[i].width();
+                            }
+
+                            Image::saveToPng(tmp, outPath);
                         }
+                        free(outPath);
                     }
 
                     if (nk_button_label(ctx, "save as gif"))
@@ -100,9 +121,10 @@ int main(int argc, char** argv)
                         nfdresult_t result = NFD_SaveDialog("gif", nullptr, &outPath);
                         if (result == NFD_OKAY)
                         {
-                            Render::SpriteGroup::toGif(selectedImage, outPath);
-                            free(outPath);
+                            Cel::CelDecoder cel(selectedImage);
+                            Image::saveToGif(cel.decode(), outPath);
                         }
+                        free(outPath);
                     }
 
                     auto msSinceLastFrame = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrame).count();

@@ -11,6 +11,7 @@
 #include <iostream>
 #include <misc/assert.h>
 #include <numeric>
+#include <render/cursor.h>
 #include <render/levelobjects.h>
 #include <render/renderinstance.h>
 #include <render/texture.h>
@@ -270,10 +271,12 @@ namespace FARender
 
     void Renderer::drawCursor(RenderState* State)
     {
-        Render::FACursor newCursor = mCurrentCursor;
-
         // Only need to update the cursor if it has changed.
-        if (!State->mCursorPath.empty() && (State->mCursorFrame != mCurrentCursorFrame))
+        if (State->mCursorPath.empty())
+        {
+            Render::Cursor::setDefaultCursor();
+        }
+        else if (State->mCursorFrame != mCurrentCursorFrame)
         {
             Cel::CelFile cel(State->mCursorPath);
             std::vector<Image> images = cel.decode();
@@ -287,14 +290,9 @@ namespace FARender
                 hot_x = mCursorSize.x / 2;
                 hot_y = mCursorSize.y / 2;
             }
-            newCursor = Render::createCursor(celFrame, hot_x, hot_y);
 
-            Render::drawCursor(newCursor);
-            if (mCurrentCursor != NULL)
-            {
-                Render::freeCursor(mCurrentCursor);
-            }
-            mCurrentCursor = newCursor;
+            mCurrentCursor = std::make_unique<Render::Cursor>(celFrame, hot_x, hot_y);
+            mCurrentCursor->activateCursor();
             mCurrentCursorFrame = State->mCursorFrame;
         }
     }

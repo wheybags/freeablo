@@ -4,6 +4,13 @@
 #include <faio/fafileobject.h>
 #include <misc/stringops.h>
 
+// clang-format off
+#include <misc/disablewarn.h>
+#include "../../extern/jo_gif/jo_gif.cpp"
+#include <misc/enablewarn.h>
+#include <misc/savePNG.h>
+// clang-format on
+
 void Image::blitTo(Image& other, int32_t srcOffsetX, int32_t srcOffsetY, int32_t srcW, int32_t srcH, int32_t destOffsetX, int32_t destOffsetY) const
 {
     release_assert(destOffsetX >= 0 && destOffsetY >= 0);
@@ -123,4 +130,43 @@ std::pair<Image, Image::TrimmedData> Image::trimTransparentEdges() const
     trimmedData.trimmedOffsetY = top;
 
     return {std::move(imageTmp), trimmedData};
+}
+
+void Image::saveToGif(std::vector<Image> images, const std::string& path)
+{
+    release_assert(images.size());
+
+    int32_t width = images[0].width();
+    int32_t height = images[0].height();
+
+    jo_gif_t gif = jo_gif_start(path.c_str(), width, height, 0, 256);
+
+    for (const auto& image : images)
+    {
+        const Image* useImage = &image;
+        Image tmp;
+
+        if (image.width() != width || image.height() != height)
+        {
+            tmp = Image(width, height);
+            image.blitTo(tmp, 0, 0, std::min(width, image.width()), std::min(height, image.height()), 0, 0);
+            useImage = &tmp;
+        }
+
+        auto dataPointer = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(useImage->mData.data()));
+        jo_gif_frame(&gif, dataPointer, 10, true, 0x00, 0xFF, 0x00);
+    }
+
+    jo_gif_end(&gif);
+}
+
+void Image::saveToPng(const Image& image, const std::string& path)
+{
+    int32_t pitch = sizeof(ByteColour) * image.width();
+    void* pixels = const_cast<void*>(reinterpret_cast<const void*>(image.mData.data()));
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(pixels, image.width(), image.height(), 32, pitch, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+
+    SDL_SavePNG(surface, path.c_str());
+
+    SDL_FreeSurface(surface);
 }

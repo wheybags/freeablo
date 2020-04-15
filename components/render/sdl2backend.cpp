@@ -5,11 +5,9 @@
 #include "render.h"
 #include "vertextypes.h"
 #include <SDL.h>
-#include <SDL_image.h>
 #include <cel/tilesetimage.h>
 #include <fa_nuklear.h>
 #include <faio/fafileobject.h>
-#include <iostream>
 #include <misc/assert.h>
 #include <misc/savePNG.h>
 #include <misc/stringops.h>
@@ -20,12 +18,6 @@
 #include <render/renderinstance.h>
 #include <render/texture.h>
 #include <render/vertexarrayobject.h>
-
-// clang-format off
-#include <misc/disablewarn.h>
-#include "../../extern/jo_gif/jo_gif.cpp"
-#include <misc/enablewarn.h>
-// clang-format on
 
 #if defined(WIN32) || defined(_WIN32)
 extern "C" {
@@ -272,8 +264,6 @@ namespace Render
         }
     }
 
-    void setWindowSize(const RenderSettings& settings) { SDL_SetWindowSize(screen, settings.windowWidth, settings.windowHeight); }
-
     const std::string& getWindowTitle() { return windowTitle; }
     void setWindowTitle(const std::string& title) { SDL_SetWindowTitle(screen, title.c_str()); }
 
@@ -298,13 +288,10 @@ namespace Render
         SDL_Quit();
     }
 
-    bool resized = false;
-
     void resize(size_t w, size_t h)
     {
         WIDTH = w;
         HEIGHT = h;
-        resized = true;
 
         renderInstance->onWindowResized(WIDTH, HEIGHT);
     }
@@ -314,70 +301,10 @@ namespace Render
         RenderSettings settings;
         settings.windowWidth = WIDTH;
         settings.windowHeight = HEIGHT;
-        // SDL_GetRendererOutputSize(renderer, &settings.windowWidth, &settings.windowHeight);
-        // SDL_GetWindowSize(screen, &settings.windowWidth, &settings.windowHeight);
         return settings;
     }
 
     void drawGui(NuklearFrameDump& dump) { nk_sdl_render_dump(dump, screen, *atlasTexture, *mainCommandQueue); }
-
-    std::string getImageExtension(const std::string& path)
-    {
-        size_t i;
-        for (i = path.length() - 1; i > 0; i--)
-        {
-            if (path[i] == '.')
-                break;
-        }
-
-        return path.substr(i + 1, path.length() - i);
-    }
-
-    void setpixel(SDL_Surface* s, int x, int y, Cel::Colour c);
-    SDL_Surface* createTransparentSurface(size_t width, size_t height);
-    void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame);
-
-    Image loadNonCelImageTrans(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB)
-    {
-        Image image = Image::loadFromFile(path);
-
-        if (hasTrans)
-        {
-            for (int x = 0; x < image.width(); x++)
-            {
-                for (int y = 0; y < image.height(); y++)
-                {
-                    Cel::Colour& px = image.get(x, y);
-                    if (px.r == transR && px.g == transG && px.b == transB)
-                        px.a = 0;
-                }
-            }
-        }
-
-        return image;
-    }
-
-    FACursor createCursor(const Cel::CelFrame& celFrame, int32_t hot_x, int32_t hot_y)
-    {
-        auto surface = createTransparentSurface(celFrame.width(), celFrame.height());
-        drawFrame(surface, 0, 0, celFrame);
-        auto cursor = SDL_CreateColorCursor(surface, hot_x, hot_y);
-        SDL_FreeSurface(surface);
-        return (FACursor)cursor;
-    }
-
-    void freeCursor(FACursor cursor) { SDL_FreeCursor((SDL_Cursor*)cursor); }
-
-    void drawCursor(FACursor cursor)
-    {
-        if (cursor == NULL)
-        {
-            cursor = (FACursor)SDL_GetDefaultCursor();
-        }
-
-        SDL_SetCursor((SDL_Cursor*)cursor);
-        SDL_ShowCursor(SDL_ENABLE);
-    }
 
     void draw()
     {
@@ -393,15 +320,6 @@ namespace Render
         drawLevelCache.addSprite(sprite, x, y, highlightColor);
     }
 
-    void handleEvents()
-    {
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            // do nothing, just clear the event queue to avoid render window hang up in ubuntu.
-        }
-    }
-
     void drawSprite(const Sprite& sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
     {
         drawSprite((uint32_t)(intptr_t)sprite, x, y, highlightColor);
@@ -415,19 +333,6 @@ namespace Render
         // centering spright at the center of tile by width and at the bottom of tile by height
         drawSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight, highlightColor);
     }
-
-    //    SpriteGroup::SpriteGroup(const std::string& path, bool trim)
-    //    {
-    //        Cel::CelFile cel(path);
-    //
-    //        for (int32_t i = 0; i < cel.numFrames(); i++)
-    //            mSprites.push_back((Render::Sprite)(intptr_t)getTextureHandleFromFrame(cel[i], trim));
-    //
-    //        mWidth = cel[0].width();
-    //        mHeight = cel[0].height();
-    //
-    //        mAnimLength = cel.animLength();
-    //    }
 
     SpriteGroup::SpriteGroup(std::vector<Sprite>&& sprites, int32_t animLength) : mSprites(std::move(sprites))
     {
@@ -445,93 +350,6 @@ namespace Render
         debug_assert(index < mSprites.size());
         return mSprites[index];
     }
-
-    void SpriteGroup::toPng(const std::string& celPath, const std::string& pngPath)
-    {
-        Cel::CelFile cel(celPath);
-        std::vector<Image> images = cel.decode();
-
-        int32_t numFrames = cel.numFrames();
-
-        if (numFrames == 0)
-            return;
-
-        int32_t sumWidth = 0;
-        int32_t maxHeight = 0;
-        for (int32_t i = 0; i < numFrames; i++)
-        {
-            sumWidth += images[i].width();
-            if (images[i].height() > maxHeight)
-                maxHeight = images[i].height();
-        }
-
-        if (sumWidth == 0)
-            return;
-
-        SDL_Surface* s = createTransparentSurface(sumWidth, maxHeight);
-        unsigned int x = 0;
-        unsigned int dx = 0;
-        for (int32_t i = 0; i < numFrames; i++)
-        {
-            drawFrame(s, x, 0, images[i]);
-            dx = images[i].width();
-            x += dx;
-        }
-
-        SDL_SavePNG(s, pngPath.c_str());
-
-        SDL_FreeSurface(s);
-    }
-
-    void SpriteGroup::toGif(const std::string& celPath, const std::string& gifPath)
-    {
-        Cel::CelFile cel(celPath);
-        std::vector<Image> images = cel.decode();
-
-        int32_t width = images[0].width();
-        int32_t height = images[0].height();
-
-        int32_t numFrames = cel.numFrames();
-
-        if (numFrames == 0)
-            return;
-
-        jo_gif_t gif = jo_gif_start(gifPath.c_str(), width, height, 0, 256);
-
-        for (int32_t i = 0; i < numFrames; i++)
-        {
-            SDL_Surface* s = createTransparentSurface(width, height);
-            drawFrame(s, 0, 0, images[i]);
-
-            uint8_t** gifImage = (uint8_t**)malloc(s->h * sizeof(uint8_t*));
-
-            for (int j = 0; j < s->h; j++)
-            {
-                gifImage[j] = (uint8_t*)(uint8_t**)s->pixels + j * s->pitch;
-            }
-
-            jo_gif_frame(&gif, *gifImage, 10, true, 0x00, 0xFF, 0x00);
-
-            free(gifImage);
-
-            SDL_FreeSurface(s);
-        }
-
-        jo_gif_end(&gif);
-    }
-
-    void SpriteGroup::destroy()
-    {
-        // Sprites can not currently be removed from atlas texture.
-        release_assert(false);
-
-        // for (size_t i = 0; i < mSprites.size(); i++)
-        // {
-        //     GLuint tex = (GLuint)(intptr_t)mSprites[i];
-        //     glDeleteTextures(1, &tex);
-        // }
-    }
-
     void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h)
     {
         auto& atlasEntry = atlasTexture->getLookupMap().at((size_t)(intptr_t)sprite);
@@ -542,79 +360,6 @@ namespace Render
     void clear(int r, int g, int b)
     {
         mainCommandQueue->cmdClearCurrentFramebuffer(Color(float(r) / 255.0f, float(g) / 255.0f, float(b) / 255.0f, 1.0f), true);
-    }
-
-#define BPP 4
-#define DEPTH 32
-
-    void clearTransparentSurface(SDL_Surface* s) { SDL_FillRect(s, NULL, SDL_MapRGBA(s->format, 0, 0, 0, 0)); }
-
-    SDL_Surface* createTransparentSurface(size_t width, size_t height)
-    {
-        SDL_Surface* s;
-
-// SDL y u do dis
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        s = SDL_CreateRGBSurface(0, width, height, DEPTH, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
-#else
-        s = SDL_CreateRGBSurface(0, width, height, DEPTH, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
-#endif
-
-        clearTransparentSurface(s);
-
-        return s;
-    }
-
-    void setpixel(SDL_Surface* surface, int x, int y, Cel::Colour c)
-    {
-        Uint32 pixel = SDL_MapRGBA(surface->format, c.r, c.g, c.b, c.a);
-
-        int bpp = surface->format->BytesPerPixel;
-        // Here p is the address to the pixel we want to set
-        Uint8* p = (Uint8*)surface->pixels + y * surface->pitch + x * bpp;
-
-        switch (bpp)
-        {
-            case 1:
-                *p = pixel;
-                break;
-
-            case 2:
-                *(Uint16*)p = pixel;
-                break;
-
-            case 3:
-                if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-                {
-                    p[0] = (pixel >> 16) & 0xff;
-                    p[1] = (pixel >> 8) & 0xff;
-                    p[2] = pixel & 0xff;
-                }
-                else
-                {
-                    p[0] = pixel & 0xff;
-                    p[1] = (pixel >> 8) & 0xff;
-                    p[2] = (pixel >> 16) & 0xff;
-                }
-                break;
-
-            case 4:
-                *(Uint32*)p = pixel;
-                break;
-        }
-    }
-
-    void drawFrame(SDL_Surface* s, int start_x, int start_y, const Cel::CelFrame& frame)
-    {
-        for (int32_t x = 0; x < frame.width(); x++)
-        {
-            for (int32_t y = 0; y < frame.height(); y++)
-            {
-                auto& c = frame.get(x, y);
-                if (c.a)
-                    setpixel(s, start_x + x, start_y + y, c);
-            }
-        }
     }
 
     // basic transform of isometric grid to normal, (0, 0) tile coordinate maps to (0, 0) pixel coordinates

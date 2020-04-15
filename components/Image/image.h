@@ -56,6 +56,8 @@ public:
     std::pair<Image, TrimmedData> trimTransparentEdges() const;
 
     static Image loadFromFile(const std::string& path);
+    static void saveToGif(const std::vector<Image> images, const std::string& path);
+    static void saveToPng(const Image& image, const std::string& path);
 
 public:
     Misc::Array2D<ByteColour> mData;

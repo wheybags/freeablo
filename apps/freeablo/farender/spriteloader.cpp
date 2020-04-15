@@ -258,6 +258,26 @@ namespace FARender
         }
     }
 
+    static Image loadNonCelImageTrans(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB)
+    {
+        Image image = Image::loadFromFile(path);
+
+        if (hasTrans)
+        {
+            for (int x = 0; x < image.width(); x++)
+            {
+                for (int y = 0; y < image.height(); y++)
+                {
+                    Cel::Colour& px = image.get(x, y);
+                    if (px.r == transR && px.g == transG && px.b == transB)
+                        px.a = 0;
+                }
+            }
+        }
+
+        return image;
+    }
+
     SpriteLoader::LoadedImagesData SpriteLoader::loadImagesIntoCpuMemory(const std::unordered_set<SpriteDefinition, SpriteDefinition::Hash>& spritesToLoad)
     {
         std::vector<std::unique_ptr<FinalImageData>> allImages;
@@ -376,7 +396,7 @@ namespace FARender
             }
             else if (vAnim != 0)
             {
-                Image original = Render::loadNonCelImageTrans(sourcePath, hasTrans, r, g, b);
+                Image original = loadNonCelImageTrans(sourcePath, hasTrans, r, g, b);
 
                 std::vector<Render::Sprite> vec;
 
@@ -402,7 +422,7 @@ namespace FARender
             }
             else if (resize)
             {
-                Image original = Render::loadNonCelImageTrans(sourcePath, hasTrans, r, g, b);
+                Image original = loadNonCelImageTrans(sourcePath, hasTrans, r, g, b);
 
                 Image tmp(newWidth, newHeight);
 
@@ -487,7 +507,7 @@ namespace FARender
                 else
                 {
                     animationLength = 1;
-                    finalImages.push_back(Render::loadNonCelImageTrans(sourcePath, hasTrans, r, g, b));
+                    finalImages.push_back(loadNonCelImageTrans(sourcePath, hasTrans, r, g, b));
                 }
             }
 

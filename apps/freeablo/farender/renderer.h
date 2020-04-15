@@ -10,6 +10,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <render/cursor.h>
 #include <render/render.h>
 #include <tuple>
 
@@ -122,7 +123,7 @@ namespace FARender
         size_t mNumRenderStates = 15;
         RenderState* mStates;
 
-        Render::FACursor mCurrentCursor = nullptr;
+        std::unique_ptr<Render::Cursor> mCurrentCursor = nullptr;
         uint32_t mCurrentCursorFrame = std::numeric_limits<uint32_t>::max();
         Misc::Point mCursorSize;
 
