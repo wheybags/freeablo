@@ -156,7 +156,7 @@ namespace FARender
     private:
         struct FinalImageData
         {
-            Image image;
+            std::unique_ptr<Image> image;
             std::string category;
             std::optional<Image::TrimmedData> trimmedData;
         };
@@ -170,7 +170,6 @@ namespace FARender
         struct LoadedImagesData
         {
             std::vector<std::unique_ptr<FinalImageData>> allImages;
-            std::unordered_map<FinalImageData*, Render::Sprite> imagesToSprites;
             std::unordered_map<SpriteDefinition, FinalImageDataFrames, SpriteDefinition::Hash> definitionToImageMap;
         };
 

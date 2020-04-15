@@ -80,23 +80,7 @@ namespace Render
     FACursor createCursor(const Cel::CelFrame& celFrame, int32_t hot_x = 0, int32_t hot_y = 0);
     void freeCursor(FACursor cursor);
     void drawCursor(FACursor cursor);
-    SpriteGroup* loadSprite(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB, bool trim);
-    SpriteGroup* loadVanimSprite(const std::string& path, size_t vAnim, bool hasTrans, size_t transR, size_t transG, size_t transB, bool trim);
-    SpriteGroup* loadResizedSprite(const std::string& path,
-                                   size_t width,
-                                   size_t height,
-                                   size_t tileWidth,
-                                   size_t tileHeight,
-                                   bool hasTrans,
-                                   size_t transR,
-                                   size_t transG,
-                                   size_t transB,
-                                   bool trim);
-    SpriteGroup* loadCelToSingleTexture(const std::string& path, bool trim);
-    SpriteGroup* loadSprite(const Image& image, bool trim);
-    SpriteGroup* loadNonCelSprite(const std::string& path, bool trim);
     Image loadNonCelImageTrans(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB);
-    Cel::Colour getPixel(const SDL_Surface* s, int x, int y);
 
     void draw();
 
@@ -119,8 +103,6 @@ namespace Render
     Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& fractionalPos);
 
     void clear(int r = 0, int g = 0, int b = 255);
-
-    uint32_t getTextureHandleFromFrame(const Image& frame, bool trim);
 
     extern RenderInstance* mainRenderInstance;
     extern std::unique_ptr<AtlasTexture> atlasTexture;

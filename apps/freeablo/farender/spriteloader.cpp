@@ -206,15 +206,31 @@ namespace FARender
         // Sort the images by size
         std::sort(loadedImagesData.allImages.begin(),
                   loadedImagesData.allImages.end(),
-                  [](const std::unique_ptr<FinalImageData>& a, const std::unique_ptr<FinalImageData>& b) { return a->image.height() > b->image.height(); });
+                  [](const std::unique_ptr<FinalImageData>& a, const std::unique_ptr<FinalImageData>& b) { return a->image->height() > b->image->height(); });
         printf("done\n");
 
+        std::unordered_map<const Image*, Render::Sprite> imagesToSprites;
+
         printf("Uploading sprites to texture atlas...\n");
-        // Upload the sprites into the texture atlas
-        for (auto& image : loadedImagesData.allImages)
         {
-            auto sprite = (Render::Sprite)(intptr_t)Render::atlasTexture->addTexture(image->image, false, image->trimmedData, image->category);
-            loadedImagesData.imagesToSprites[image.get()] = sprite;
+            std::unordered_map<std::string, std::vector<Render::AtlasTexture::LoadImageData>> imagesByCategory;
+
+            for (auto& image : loadedImagesData.allImages)
+                imagesByCategory[image->category].push_back(Render::AtlasTexture::LoadImageData{*image->image, image->trimmedData});
+
+            for (const auto& pair : imagesByCategory)
+            {
+                const std::string& category = pair.first;
+                const std::vector<Render::AtlasTexture::LoadImageData>& images = pair.second;
+
+                std::vector<size_t> ids = Render::atlasTexture->addCategorySprites(category, images);
+
+                for (size_t index = 0; index < ids.size(); index++)
+                {
+                    auto sprite = (Render::Sprite)(intptr_t)ids[index];
+                    imagesToSprites[&images[index].image] = sprite;
+                }
+            }
         }
         printf("done\n");
 
@@ -230,7 +246,7 @@ namespace FARender
 
             for (FinalImageData* frame : definitionFrames.frames)
             {
-                Render::Sprite sprite = loadedImagesData.imagesToSprites[frame];
+                Render::Sprite sprite = imagesToSprites[frame->image.get()];
                 finalSprites.push_back(sprite);
             }
 
@@ -245,7 +261,6 @@ namespace FARender
     SpriteLoader::LoadedImagesData SpriteLoader::loadImagesIntoCpuMemory(const std::unordered_set<SpriteDefinition, SpriteDefinition::Hash>& spritesToLoad)
     {
         std::vector<std::unique_ptr<FinalImageData>> allImages;
-        std::unordered_map<FinalImageData*, Render::Sprite> imagesToSprites;
         std::unordered_map<SpriteDefinition, FinalImageDataFrames, SpriteDefinition::Hash> definitionToImageMap;
 
         for (const auto& definition : spritesToLoad)
@@ -277,7 +292,7 @@ namespace FARender
             uint32_t newWidth = 0;
             uint32_t newHeight = 0;
             uint32_t r = 0, g = 0, b = 0;
-            int32_t celIndex;
+            int32_t celIndex = 0;
 
             for (uint32_t i = 1; i < components.size(); i++)
             {
@@ -358,9 +373,6 @@ namespace FARender
                 }
 
                 finalImages = Cel::loadTilesetImage(celPath, minPath, top);
-                //                auto* spriteGroup = new FASpriteGroup();
-                //                auto realSpriteGroup = std::unique_ptr<Render::SpriteGroup>(Render::loadTilesetSprite(celPath, minPath, true,
-                //                definition.trim)); spriteGroup->init(std::move(realSpriteGroup)); mLoadedSprites[definition] = spriteGroup;
             }
             else if (vAnim != 0)
             {
@@ -490,12 +502,12 @@ namespace FARender
                 if (definition.trim)
                 {
                     std::pair<Image, Image::TrimmedData> tmp = image.trimTransparentEdges();
-                    finalImageData->image = std::move(tmp.first);
+                    finalImageData->image = std::make_unique<Image>(std::move(tmp.first));
                     finalImageData->trimmedData = tmp.second;
                 }
                 else
                 {
-                    finalImageData->image = std::move(image);
+                    finalImageData->image = std::make_unique<Image>(std::move(image));
                 }
 
                 definitionFrames.frames.push_back(finalImageData.get());
@@ -503,6 +515,6 @@ namespace FARender
             }
         }
 
-        return LoadedImagesData{std::move(allImages), std::move(imagesToSprites), std::move(definitionToImageMap)};
+        return LoadedImagesData{std::move(allImages), std::move(definitionToImageMap)};
     }
 }

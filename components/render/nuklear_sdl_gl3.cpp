@@ -35,7 +35,7 @@ void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInsta
     dev.vertexArrayObject = renderInstance.createVertexArrayObject({0}, pipelineSpec.vertexLayouts, 1).release();
     dev.descriptorSet = renderInstance.createDescriptorSet(pipelineSpec.descriptorSetSpec).release();
 
-    dev.uniformCpuBuffer = new GuiUniforms::CpuBufferType(renderInstance.getUniformBufferOffsetAlignment());
+    dev.uniformCpuBuffer = new GuiUniforms::CpuBufferType(renderInstance.capabilities().uniformBufferOffsetAlignment);
     dev.uniformBuffer = renderInstance.createBuffer(dev.uniformCpuBuffer->getSizeInBytes()).release();
 }
 

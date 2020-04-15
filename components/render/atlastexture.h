@@ -40,14 +40,24 @@ namespace Render
         explicit AtlasTexture(RenderInstance& instance, CommandQueue& commandQueue);
         ~AtlasTexture();
 
-        size_t addTexture(const Image& image, bool trim = true, std::optional<Image::TrimmedData> trimmedData = std::nullopt, std::string category = "default");
+        struct LoadImageData
+        {
+            const Image& image;
+            std::optional<Image::TrimmedData> trimmedData;
+        };
+
+        std::vector<size_t> addCategorySprites(const std::string& category, const std::vector<LoadImageData>& images);
+
         const AtlasTextureLookupMap& getLookupMap() const { return mLookupMap; }
         void printUtilisation() const;
 
     private:
-        static constexpr int32_t PADDING = 1;
+        size_t addTexture(const Image& image, std::optional<Image::TrimmedData> trimmedData = std::nullopt, std::string category = "default");
 
     private:
+        static constexpr int32_t PADDING = 1;
+        static constexpr int32_t MINIMUM_ATLAS_SIZE = 1024;
+
         RenderInstance& mInstance;
         CommandQueue& mCommandQueue;
 
@@ -64,7 +74,7 @@ namespace Render
         {
             size_t emptySpriteId = 0;
             std::vector<Layer> layers;
-            void addLayer(RenderInstance& instance, CommandQueue& commandQueue);
+            void addLayer(RenderInstance& instance, CommandQueue& commandQueue, int32_t width, int32_t height);
         };
 
         std::unordered_map<std::string, Layers> mLayersByCategory;
