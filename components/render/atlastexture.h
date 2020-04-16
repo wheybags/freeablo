@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <misc/misc.h>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 

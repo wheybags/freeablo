@@ -67,6 +67,5 @@ namespace FAWorld
 
         int32_t mInventoryChangedCallCount = 0; // not serialised, only used to determine if inventory changed since we last calculated stats
         PlayerClass mPlayerClass = PlayerClass::warrior;
-        int32_t mUpdateSpritesLastLevelIndex = -1;
     };
 }

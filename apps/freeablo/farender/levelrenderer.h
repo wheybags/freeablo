@@ -22,7 +22,7 @@ namespace Render
     class Pipeline;
     class Buffer;
     class DescriptorSet;
-    class Tile;
+    struct Tile;
 
     typedef const AtlasTextureEntry* Sprite;
 }
