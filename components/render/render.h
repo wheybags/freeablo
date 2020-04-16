@@ -2,7 +2,6 @@
 #include "cel/pal.h"
 #include "levelobjects.h"
 #include "misc.h"
-#include "nuklear_sdl_gl3.h"
 #include <cel/celframe.h>
 #include <cstdint>
 #include <functional>
@@ -54,23 +53,15 @@ namespace Render
         bool fullscreen;
     };
 
-    struct NuklearGraphicsContext
-    {
-        std::unique_ptr<NuklearDevice> dev;
-        nk_font_atlas atlas = {};
-    };
-
-    void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx);
+    void init(const std::string& title, const RenderSettings& settings);
 
     const std::string& getWindowTitle();
     void setWindowTitle(const std::string& title);
 
-    void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics);
     void quit();
 
     void resize(size_t w, size_t h);
     RenderSettings getWindowSize();
-    void drawGui(NuklearFrameDump& dump);
 
     void draw();
 

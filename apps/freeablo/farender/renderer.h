@@ -51,7 +51,18 @@ namespace FARender
     class RenderState
     {
     public:
-        std::atomic_bool ready;
+        struct MoveableAtomicBool
+        {
+            std::atomic_bool val;
+
+            MoveableAtomicBool(bool val) : val(val) {}
+            MoveableAtomicBool(MoveableAtomicBool&& other) : val(other.val.load()) {}
+
+            void operator=(bool newVal) { val = newVal; }
+            operator bool() { return val; }
+        };
+
+        MoveableAtomicBool ready;
 
         FAWorld::Position mPos;
 
@@ -68,7 +79,8 @@ namespace FARender
         uint32_t mCursorFrame = 0;
         bool mCursorCentered = false;
 
-        explicit RenderState(Render::NuklearGraphicsContext& nuklearGraphicsData) : ready(true), nuklearData(*nuklearGraphicsData.dev) {}
+        explicit RenderState(NuklearDevice& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData) {}
+        RenderState(RenderState&& other) = default;
     };
 
     FASpriteGroup* getDefaultSprite();
@@ -91,7 +103,7 @@ namespace FARender
 
         Render::Tile getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos);
 
-        void drawCursor(RenderState* State);
+        void updateCursor(RenderState* State);
 
         bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
         Misc::Point cursorSize() const { return mCursorSize; }
@@ -120,8 +132,8 @@ namespace FARender
         Render::LevelObjects mLevelObjects;
         Render::LevelObjects mItems;
 
-        size_t mNumRenderStates = 15;
-        RenderState* mStates;
+        static constexpr size_t NUM_RENDER_STATES = 15;
+        std::vector<RenderState> mStates;
 
         std::unique_ptr<Render::Cursor> mCurrentCursor = nullptr;
         uint32_t mCurrentCursorFrame = std::numeric_limits<uint32_t>::max();
@@ -132,7 +144,7 @@ namespace FARender
         std::condition_variable mDoneCV;
 
         nk_context mNuklearContext = nk_context();
-        Render::NuklearGraphicsContext mNuklearGraphicsData = Render::NuklearGraphicsContext();
+        std::unique_ptr<NuklearDevice> mNuklearGraphicsData;
         std::unique_ptr<FASpriteGroup> mNuklearFontTexture;
 
         std::atomic<std::int64_t> mWidthHeightTmp;

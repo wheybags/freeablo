@@ -1,7 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <fa_nuklear.h>
-#include <render/nuklear_sdl_gl3.h>
+#include <nuklearmisc/nuklearframedump.h>
+#include <render/misc.h>
 #include <render/texture.h>
 
 namespace FARender

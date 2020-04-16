@@ -1,4 +1,5 @@
 #pragma once
+#include "nuklearframedump.h"
 #include <cstdint>
 #include <fa_nuklear.h>
 #include <input/inputmanager.h>
@@ -39,9 +40,9 @@ namespace NuklearMisc
 
     private:
         static void fontStashBegin(nk_font_atlas& atlas);
-        std::unique_ptr<GuiSprite> fontStashEnd(nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
+        static std::unique_ptr<GuiSprite> fontStashEnd(nk_context* ctx, NuklearDevice::InitData& initData);
 
-        Render::NuklearGraphicsContext mNuklearGraphicsContext;
+        std::unique_ptr<NuklearDevice> mNuklearGraphicsContext;
         std::unique_ptr<GuiSprite> mNuklearFontTexture;
 
         nk_context mCtx = {};

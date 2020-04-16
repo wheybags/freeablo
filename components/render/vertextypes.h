@@ -49,26 +49,5 @@ namespace Render
             return layout;
         }
     };
-
-    struct NuklearVertex
-    {
-        float position[2];
-        float uv[2];
-        uint8_t color[4];
-
-        static const VertexLayout& layout()
-        {
-            static VertexLayout layout{{
-                                           Format::RG32F,
-                                           Format::RG32F,
-                                           Format::RGBA8UNorm,
-                                       },
-                                       VertexInputRate::ByVertex};
-
-            debug_assert(layout.getSizeInBytes() == sizeof(NuklearVertex));
-
-            return layout;
-        }
-    };
 #pragma pack(pop)
 }

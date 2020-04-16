@@ -64,36 +64,26 @@ namespace NuklearMisc
               [this](int32_t x, int32_t y) { NuklearMisc::handleNuklearMouseWheelEvent(&mCtx, x, y); },
               [this](std::string inp) { NuklearMisc::handleNuklearTextInputEvent(&mCtx, inp); })
     {
+        Render::init(title, renderSettings);
+
         nk_init_default(&mCtx, nullptr);
-        mCtx.clip.copy = nullptr;  // nk_sdl_clipbard_copy;
-        mCtx.clip.paste = nullptr; // nk_sdl_clipbard_paste;
+        mCtx.clip.copy = nullptr;  // nk_sdl_clipboard_copy;
+        mCtx.clip.paste = nullptr; // nk_sdl_clipboard_paste;
         mCtx.clip.userdata = nk_handle_ptr(0);
 
-        Render::init(title, renderSettings, mNuklearGraphicsContext, &mCtx);
+        NuklearDevice::InitData initData;
 
-        // Load Cursor: if you uncomment cursor loading please hide the cursor
-        {
-            fontStashBegin(mNuklearGraphicsContext.atlas);
-            // struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);
-            // struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 16, 0);
-            // struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);
-            // struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
-            // struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
-            // struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
-            mNuklearFontTexture = fontStashEnd(mNuklearGraphicsContext.atlas, mNuklearGraphicsContext.dev->nullTexture);
-            mNuklearGraphicsContext.dev->fontTexture = mNuklearFontTexture->getNkImage().handle;
-            // nk_style_load_all_cursors(ctx, atlas->cursors);
-            // nk_style_set_font(ctx, &roboto->handle);
-        }
+        fontStashBegin(initData.atlas);
+        // struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);
+        mNuklearFontTexture = fontStashEnd(&mCtx, initData);
+        mNuklearGraphicsContext = std::make_unique<NuklearDevice>(*Render::mainRenderInstance, std::move(initData));
 
-        mNuklearData = std::make_unique<NuklearFrameDump>(*mNuklearGraphicsContext.dev);
+        mNuklearData = std::make_unique<NuklearFrameDump>(*mNuklearGraphicsContext);
     }
 
     StandaloneGuiHandler::~StandaloneGuiHandler()
     {
-        destroyNuklearGraphicsContext(mNuklearGraphicsContext);
         nk_free(&mCtx);
-
         Render::quit();
     }
 
@@ -103,11 +93,11 @@ namespace NuklearMisc
         nk_font_atlas_begin(&atlas);
     }
 
-    std::unique_ptr<GuiSprite> StandaloneGuiHandler::fontStashEnd(nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
+    std::unique_ptr<GuiSprite> StandaloneGuiHandler::fontStashEnd(nk_context* ctx, NuklearDevice::InitData& initData)
     {
         const void* imageData;
         int width, height;
-        imageData = nk_font_atlas_bake(&atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
+        imageData = nk_font_atlas_bake(&initData.atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
 
         std::unique_ptr<GuiSprite> sprite;
         {
@@ -122,10 +112,10 @@ namespace NuklearMisc
             sprite = std::make_unique<GuiSprite>(std::move(texture));
         }
 
-        nk_font_atlas_end(&atlas, sprite->getNkImage().handle, &nullTex);
+        nk_font_atlas_end(&initData.atlas, sprite->getNkImage().handle, &initData.nullTexture);
 
-        if (atlas.default_font)
-            nk_style_set_font(&mCtx, &atlas.default_font->handle);
+        if (initData.atlas.default_font)
+            nk_style_set_font(ctx, &initData.atlas.default_font->handle);
 
         return sprite;
     }
@@ -141,7 +131,7 @@ namespace NuklearMisc
         nk_clear(&mCtx);
 
         Render::clear();
-        Render::drawGui(*mNuklearData);
+        mNuklearData->render({Render::getWindowSize().windowWidth, Render::getWindowSize().windowHeight}, *Render::mainCommandQueue);
         Render::draw();
 
         return quit;

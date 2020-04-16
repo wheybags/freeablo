@@ -1,4 +1,3 @@
-#include "nuklear_sdl_gl3.h"
 #include "render.h"
 #include <SDL.h>
 #include <fa_nuklear.h>
@@ -40,7 +39,7 @@ namespace Render
 
     std::string windowTitle;
 
-    void init(const std::string& title, const RenderSettings& settings, NuklearGraphicsContext& nuklearGraphics, nk_context* nk_ctx)
+    void init(const std::string& title, const RenderSettings& settings)
     {
         WIDTH = settings.windowWidth;
         HEIGHT = settings.windowHeight;
@@ -70,22 +69,10 @@ namespace Render
         // Update screen with/height, as starting full screen window in
         // Windows does not trigger a SDL_WINDOWEVENT_RESIZED event.
         SDL_GetWindowSize(screen, &WIDTH, &HEIGHT);
-
-        if (nk_ctx)
-        {
-            nuklearGraphics = {};
-            nuklearGraphics.dev = std::make_unique<NuklearDevice>(*renderInstance);
-        }
     }
 
     const std::string& getWindowTitle() { return windowTitle; }
     void setWindowTitle(const std::string& title) { SDL_SetWindowTitle(screen, title.c_str()); }
-
-    void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics)
-    {
-        nk_font_atlas_clear(&nuklearGraphics.atlas);
-        nuklearGraphics.dev.reset();
-    }
 
     void quit()
     {
@@ -110,8 +97,6 @@ namespace Render
         settings.windowHeight = HEIGHT;
         return settings;
     }
-
-    void drawGui(NuklearFrameDump& dump) { dump.render({WIDTH, HEIGHT}, *mainCommandQueue); }
 
     void draw()
     {

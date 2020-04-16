@@ -249,8 +249,8 @@ namespace FAGui
                 break;
             }
         }
-        auto effectType = isHighlighted ? EffectType::highlighted : EffectType::none;
-        effectType = checkerboarded ? EffectType::checkerboarded : effectType;
+        auto effectType = isHighlighted ? GuiEffectType::highlighted : GuiEffectType::none;
+        effectType = checkerboarded ? GuiEffectType::checkerboarded : effectType;
         if (isHighlighted)
             mHoveredInventoryItemText = item.getFullDescription();
         ScopedApplyEffect effect(ctx, effectType);

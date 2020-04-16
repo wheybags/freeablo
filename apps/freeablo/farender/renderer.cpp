@@ -58,10 +58,10 @@ namespace FARender
         nk_font_atlas_begin(&atlas);
     }
 
-    std::unique_ptr<FASpriteGroup> nk_fa_font_stash_end(nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
+    std::unique_ptr<FASpriteGroup> nk_fa_font_stash_end(nk_context* ctx, NuklearDevice::InitData& initData)
     {
         int width, height;
-        const void* imageData = nk_font_atlas_bake(&atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
+        const void* imageData = nk_font_atlas_bake(&initData.atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
 
         std::unique_ptr<FASpriteGroup> sprite = std::make_unique<FASpriteGroup>();
         {
@@ -76,10 +76,10 @@ namespace FARender
             sprite->init(std::move(texture));
         }
 
-        nk_font_atlas_end(&atlas, sprite->getNkImage().handle, &nullTex);
+        nk_font_atlas_end(&initData.atlas, sprite->getNkImage().handle, &initData.nullTexture);
 
-        if (atlas.default_font)
-            nk_style_set_font(ctx, &atlas.default_font->handle);
+        if (initData.atlas.default_font)
+            nk_style_set_font(ctx, &initData.atlas.default_font->handle);
 
         return sprite;
     }
@@ -89,56 +89,40 @@ namespace FARender
     {
         release_assert(!mRenderer); // singleton, only one instance
 
-        // Render initialization.
-        {
-            Render::RenderSettings settings = {};
-            settings.windowWidth = windowWidth;
-            settings.windowHeight = windowHeight;
-            settings.fullscreen = fullscreen;
+        Render::RenderSettings settings = {};
+        settings.windowWidth = windowWidth;
+        settings.windowHeight = windowHeight;
+        settings.fullscreen = fullscreen;
 
+        Render::init("Freeablo", settings);
+
+        // setup gui
+        {
             nk_init_default(&mNuklearContext, nullptr);
             mNuklearContext.clip.copy = nullptr;  // nk_sdl_clipboard_copy;
             mNuklearContext.clip.paste = nullptr; // nk_sdl_clipboard_paste;
             mNuklearContext.clip.userdata = nk_handle_ptr(0);
 
-            Render::init("Freeablo", settings, mNuklearGraphicsData, &mNuklearContext);
+            NuklearDevice::InitData initData;
 
-            // Load Fonts: if none of these are loaded a default font will be used
-            // Load Cursor: if you uncomment cursor loading please hide the cursor
-            {
-                nk_fa_font_stash_begin(mNuklearGraphicsData.atlas);
-                // struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);
-                // struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 16, 0);
-                // struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);
-                // struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
-                // struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
-                // struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
-                mNuklearFontTexture = nk_fa_font_stash_end(&mNuklearContext, mNuklearGraphicsData.atlas, mNuklearGraphicsData.dev->nullTexture);
-                mNuklearGraphicsData.dev->fontTexture = mNuklearFontTexture->getNkImage().handle;
-                // nk_style_load_all_cursors(ctx, atlas->cursors);
-                // nk_style_set_font(ctx, &roboto->handle);
-            }
-
-            mStates = (RenderState*)malloc(sizeof(RenderState) * mNumRenderStates);
-
-            for (size_t i = 0; i < mNumRenderStates; ++i)
-                new (mStates + i) RenderState(mNuklearGraphicsData);
-
-            mRenderer = this;
-
-            mLevelRenderer = std::make_unique<LevelRenderer>();
+            nk_fa_font_stash_begin(initData.atlas);
+            // struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);
+            mNuklearFontTexture = nk_fa_font_stash_end(&mNuklearContext, initData);
+            mNuklearGraphicsData = std::make_unique<NuklearDevice>(*Render::mainRenderInstance, std::move(initData));
         }
+
+        mStates.reserve(NUM_RENDER_STATES);
+        for (size_t i = 0; i < NUM_RENDER_STATES; ++i)
+            mStates.emplace_back(*mNuklearGraphicsData);
+
+        mRenderer = this;
+
+        mLevelRenderer = std::make_unique<LevelRenderer>();
     }
 
     Renderer::~Renderer()
     {
         mRenderer = nullptr;
-
-        for (size_t i = 0; i < mNumRenderStates; ++i)
-            mStates[i].~RenderState();
-
-        free(mStates);
-        destroyNuklearGraphicsContext(mNuklearGraphicsData);
         nk_free(&mNuklearContext);
 
         Render::quit();
@@ -163,7 +147,7 @@ namespace FARender
 
     RenderState* Renderer::getFreeState()
     {
-        for (size_t i = 0; i < mNumRenderStates; i++)
+        for (size_t i = 0; i < mStates.size(); i++)
         {
             if (mStates[i].ready)
             {
@@ -253,10 +237,8 @@ namespace FARender
                                           state->mPos.getFractionalPos());
             }
 
-            Render::drawGui(state->nuklearData);
-            {
-                Renderer::drawCursor(state);
-            }
+            state->nuklearData.render({Render::getWindowSize().windowWidth, Render::getWindowSize().windowHeight}, *Render::mainCommandQueue);
+            Renderer::updateCursor(state);
         }
 
         Render::draw();
@@ -270,9 +252,8 @@ namespace FARender
         return true;
     }
 
-    void Renderer::drawCursor(RenderState* State)
+    void Renderer::updateCursor(RenderState* State)
     {
-        // Only need to update the cursor if it has changed.
         if (State->mCursorPath.empty())
         {
             Render::Cursor::setDefaultCursor();

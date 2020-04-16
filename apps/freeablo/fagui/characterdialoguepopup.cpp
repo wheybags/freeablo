@@ -106,7 +106,7 @@ namespace FAGui
         FARender::FASpriteGroup* blackTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.blackTexture);
         auto cbRect = nk_rect(dialogRectangle.x + 3, dialogRectangle.y + 3, dialogRectangle.w - 6, dialogRectangle.h - 6);
 
-        ScopedApplyEffect effect(ctx, EffectType::checkerboarded);
+        ScopedApplyEffect effect(ctx, GuiEffectType::checkerboarded);
         auto nkImage = nk_subimage_handle(blackTex->getNkImage().handle, blackTex->getWidth(), blackTex->getHeight(), cbRect);
         nk_draw_image(nk_window_get_canvas(ctx), cbRect, &nkImage, nk_rgb(0, 0, 0));
     }

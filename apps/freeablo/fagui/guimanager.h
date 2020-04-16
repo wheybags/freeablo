@@ -41,13 +41,6 @@ namespace FAGui
     class GuiManager;
     class MenuHandler;
 
-    enum class EffectType
-    {
-        none = 0,
-        highlighted,
-        checkerboarded,
-    };
-
     // move all this to better place since cursor state is also dependent on spells etc.
     extern std::string cursorPath;
     extern uint32_t cursorFrame;
@@ -78,8 +71,8 @@ namespace FAGui
     class ScopedApplyEffect
     {
     public:
-        ScopedApplyEffect(nk_context* ctx, EffectType type) : mCtx(ctx) { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(type))); }
-        ~ScopedApplyEffect() { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(EffectType::none))); }
+        ScopedApplyEffect(nk_context* ctx, GuiEffectType type) : mCtx(ctx) { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(type))); }
+        ~ScopedApplyEffect() { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(GuiEffectType::none))); }
 
         nk_context* mCtx;
     };

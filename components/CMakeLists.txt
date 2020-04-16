@@ -75,9 +75,7 @@ set(RenderFiles
     render/render.h
     render/levelobjects.h
     render/sdl2backend.cpp
-    render/nuklear_sdl_gl3.cpp
-    render/nuklear_sdl_gl3.h
-    render/misc.h
+        render/misc.h
     render/atlastexture.cpp
     render/atlastexture.h
     render/OpenGL/vertexarrayobjectopengl.cpp
@@ -176,7 +174,7 @@ add_library(NuklearMisc
     nuklearmisc/widgets.h
     nuklearmisc/standaloneguispritehandler.cpp
     nuklearmisc/standaloneguispritehandler.h
-)
+        nuklearmisc/nukleardevice.cpp nuklearmisc/nukleardevice.h nuklearmisc/nuklearbuffer.h nuklearmisc/nuklearframedump.cpp nuklearmisc/nuklearframedump.h nuklearmisc/nuklearvertex.h)
 set_target_properties(NuklearMisc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 target_link_libraries(NuklearMisc nuklear nativefiledialog Input Render)
 
