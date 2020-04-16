@@ -83,6 +83,6 @@ private:
     nk_buffer cmds; // draw commands temp storage
 };
 
-void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue);
+void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::CommandQueue& commandQueue);
 void nk_sdl_device_destroy(nk_gl_device& dev);
 void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance);

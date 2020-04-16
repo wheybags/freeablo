@@ -213,6 +213,8 @@ namespace FARender
 
         printf("Uploading sprites to texture atlas...\n");
         {
+            mAtlasTexture = std::make_unique<Render::AtlasTexture>(*Render::mainRenderInstance, *Render::mainCommandQueue);
+
             std::unordered_map<std::string, std::vector<Render::AtlasTexture::LoadImageData>> imagesByCategory;
 
             for (auto& image : loadedImagesData.allImages)
@@ -223,18 +225,15 @@ namespace FARender
                 const std::string& category = pair.first;
                 const std::vector<Render::AtlasTexture::LoadImageData>& images = pair.second;
 
-                std::vector<size_t> ids = Render::atlasTexture->addCategorySprites(category, images);
+                std::vector<NonNullConstPtr<Render::AtlasTextureEntry>> sprites = mAtlasTexture->addCategorySprites(category, images);
 
-                for (size_t index = 0; index < ids.size(); index++)
-                {
-                    auto sprite = (Render::Sprite)(intptr_t)ids[index];
-                    imagesToSprites[&images[index].image] = sprite;
-                }
+                for (size_t index = 0; index < sprites.size(); index++)
+                    imagesToSprites[&images[index].image] = sprites[index].get();
             }
         }
         printf("done\n");
 
-        Render::atlasTexture->printUtilisation();
+        mAtlasTexture->printUtilisation();
 
         // Rebuild the sprite groups into collections of frames (where each frame is a reference to the atlas)
         for (auto& pair : loadedImagesData.definitionToImageMap)

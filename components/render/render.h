@@ -16,7 +16,7 @@ struct SDL_Surface;
 
 namespace Render
 {
-    typedef void* Sprite;
+    typedef const AtlasTextureEntry* Sprite;
 }
 
 namespace Level
@@ -74,23 +74,8 @@ namespace Render
 
     void draw();
 
-    void drawSprite(const Sprite& sprite, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor = std::nullopt);
-
-    void spriteSize(const Sprite& sprite, int32_t& w, int32_t& h);
-
-    void drawLevel(const Level::Level& level,
-                   SpriteGroup* minTops,
-                   SpriteGroup* minBottoms,
-                   SpriteGroup* specialSprites,
-                   const std::map<int32_t, int32_t>& specialSpritesMap,
-                   LevelObjects& objs,
-                   LevelObjects& items,
-                   const Vec2Fix& fractionalPos);
-
-    Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& fractionalPos);
-
     void clear(int r = 0, int g = 0, int b = 255);
 
     extern RenderInstance* mainRenderInstance;
-    extern std::unique_ptr<AtlasTexture> atlasTexture;
+    extern CommandQueue* mainCommandQueue;
 }

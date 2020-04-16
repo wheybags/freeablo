@@ -49,7 +49,7 @@ void nk_sdl_device_destroy(nk_gl_device& dev)
     nk_buffer_free(&dev.cmds);
 }
 
-void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTexture& atlasTexture, Render::CommandQueue& commandQueue)
+void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::CommandQueue& commandQueue)
 {
     int width, height;
     int display_width, display_height;
@@ -77,8 +77,6 @@ void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTe
 
     nk_gl_device& dev = dump.getDevice();
 
-    const Render::AtlasTextureLookupMap& atlasLookupMap = atlasTexture.getLookupMap();
-
     // convert from command queue into draw list and draw to screen
     size_t offset = 0;
 
@@ -104,8 +102,7 @@ void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::AtlasTe
             uint32_t frameNum = nuklearTextureHandle->frameNumber;
 
             Render::SpriteGroup* spriteGroup = nuklearTextureHandle->spriteGroup;
-            Render::Sprite sprite = spriteGroup->operator[](frameNum);
-            atlasEntry = &atlasLookupMap.at((GLuint)(intptr_t)sprite);
+            atlasEntry = spriteGroup->operator[](frameNum);
         }
 
         auto effect = static_cast<FAGui::EffectType>(cmd.userdata.id);

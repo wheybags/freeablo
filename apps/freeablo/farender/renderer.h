@@ -27,8 +27,8 @@ namespace FAWorld
 namespace FARender
 {
     class CelFontInfo;
-
     class Renderer;
+    class LevelRenderer;
 
     class Tileset
     {
@@ -138,5 +138,7 @@ namespace FARender
         std::atomic<std::int64_t> mWidthHeightTmp;
         std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;
         std::map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
+
+        std::unique_ptr<LevelRenderer> mLevelRenderer;
     };
 }

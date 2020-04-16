@@ -1,4 +1,5 @@
 #pragma once
+#include "atlastexture.h"
 #include <string>
 #include <vector>
 
@@ -6,15 +7,24 @@ struct SDL_Surface;
 
 namespace Render
 {
-    typedef void* Sprite;
-    typedef SDL_Surface* FASurface;
+    typedef const AtlasTextureEntry* Sprite;
 
     class SpriteGroup
     {
     public:
-        explicit SpriteGroup(std::vector<Sprite>&& sprites, int32_t animLength = -1);
+        explicit SpriteGroup(std::vector<Sprite>&& sprites, int32_t animLength = -1) : mSprites(std::move(sprites))
+        {
+            if (animLength != -1)
+                mAnimLength = animLength;
+            else
+                mAnimLength = mSprites.size();
 
-        Sprite& operator[](size_t index);
+            debug_assert(!mSprites.empty());
+            mWidth = mSprites[0]->mWidth;
+            mHeight = mSprites[0]->mHeight;
+        }
+
+        Sprite& operator[](size_t index) { return mSprites.at(index); }
         size_t size() { return mSprites.size(); }
 
         size_t animLength() { return mAnimLength; }

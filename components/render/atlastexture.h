@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <misc/misc.h>
 #include <unordered_map>
 #include <vector>
 
@@ -19,6 +20,8 @@ namespace Render
     class AtlasTextureEntry
     {
     public:
+        AtlasTextureEntry(AtlasTextureEntry& other) = delete;
+
         int32_t mX = 0;
         int32_t mY = 0;
         int32_t mLayer = 0;
@@ -31,9 +34,11 @@ namespace Render
         int32_t mTrimmedHeight = 0;
 
         Render::Texture* mTexture = nullptr;
-    };
 
-    typedef std::map<size_t, AtlasTextureEntry> AtlasTextureLookupMap;
+    protected:
+        AtlasTextureEntry() = default;
+        friend class AtlasTexture;
+    };
 
     class AtlasTexture
     {
@@ -47,13 +52,11 @@ namespace Render
             std::optional<Image::TrimmedData> trimmedData;
         };
 
-        std::vector<size_t> addCategorySprites(const std::string& category, const std::vector<LoadImageData>& images);
-
-        const AtlasTextureLookupMap& getLookupMap() const { return mLookupMap; }
+        std::vector<NonNullConstPtr<AtlasTextureEntry>> addCategorySprites(const std::string& category, const std::vector<LoadImageData>& images);
         void printUtilisation() const;
 
     private:
-        size_t addTexture(const Image& image, std::optional<Image::TrimmedData> trimmedData = std::nullopt, std::string category = "default");
+        const AtlasTextureEntry& addTexture(const Image& image, std::optional<Image::TrimmedData> trimmedData = std::nullopt, std::string category = "default");
 
     private:
         static constexpr int32_t PADDING = 1;
@@ -62,8 +65,7 @@ namespace Render
         RenderInstance& mInstance;
         CommandQueue& mCommandQueue;
 
-        AtlasTextureLookupMap mLookupMap;
-        size_t mNextTextureId = 1;
+        std::vector<std::unique_ptr<AtlasTextureEntry>> mAtlasEntries;
 
         struct Layer
         {
@@ -73,7 +75,7 @@ namespace Render
 
         struct Layers
         {
-            size_t emptySpriteId = 0;
+            const AtlasTextureEntry* emptySpriteId = nullptr;
             std::vector<Layer> layers;
             void addLayer(RenderInstance& instance, CommandQueue& commandQueue, int32_t width, int32_t height);
         };

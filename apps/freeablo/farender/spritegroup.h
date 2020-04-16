@@ -16,17 +16,20 @@ namespace FARender
         void init(std::unique_ptr<Render::Texture>&& texture);
 
         bool isValid() const { return mRealSpriteGroup || mStandaloneTexture.get(); }
-        int32_t getAnimLength() const { return animLength; }
-        int32_t getWidth(int frame = 0) const { return width[frame]; }
-        int32_t getHeight(int frame = 0) const { return height[frame]; }
+
+        int32_t getAnimLength() const;
+        int32_t getWidth(int32_t frame = 0) const;
+        int32_t getHeight(int32_t frame = 0) const;
         struct nk_image getNkImage(int32_t frame = 0);
 
-        Render::SpriteGroup* getSpriteGroup() { return mRealSpriteGroup.get(); }
+        Render::SpriteGroup* getSpriteGroup()
+        {
+            debug_assert(mRealSpriteGroup);
+            return mRealSpriteGroup.get();
+        }
 
     private:
         int32_t animLength = 0;
-        std::vector<int32_t> width = {};
-        std::vector<int32_t> height = {};
 
         std::unique_ptr<Render::SpriteGroup> mRealSpriteGroup = nullptr;
         std::unique_ptr<Render::Texture> mStandaloneTexture;

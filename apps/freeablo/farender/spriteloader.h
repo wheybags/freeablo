@@ -178,5 +178,6 @@ namespace FARender
     private:
         std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> mSpritesToLoad;
         std::unordered_map<SpriteDefinition, FASpriteGroup*, SpriteDefinition::Hash> mLoadedSprites;
+        std::unique_ptr<Render::AtlasTexture> mAtlasTexture;
     };
 }

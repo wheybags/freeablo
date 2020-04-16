@@ -10,17 +10,6 @@ namespace FARender
 
         animLength = mRealSpriteGroup->animLength();
 
-        for (size_t i = 0; i < mRealSpriteGroup->size(); i++)
-        {
-            const Render::Sprite& sprite = mRealSpriteGroup->operator[](i);
-
-            int32_t w, h;
-            Render::spriteSize(sprite, w, h);
-
-            width.push_back(w);
-            height.push_back(h);
-        }
-
         frameHandles.resize(animLength);
         for (uint32_t i = 0; i < frameHandles.size(); i++)
         {
@@ -34,9 +23,6 @@ namespace FARender
         mStandaloneTexture = std::move(texture);
         animLength = 1;
 
-        width.push_back(mStandaloneTexture->width());
-        height.push_back(mStandaloneTexture->height());
-
         frameHandles.resize(1);
         frameHandles[0].texture = mStandaloneTexture.get();
         frameHandles[0].frameNumber = 0;
@@ -48,6 +34,29 @@ namespace FARender
         auto ret = nk_subimage_handle(
             nk_handle_ptr(&frameHandles[frame]), this->getWidth(frame), this->getHeight(frame), nk_rect(0, 0, this->getWidth(frame), this->getHeight(frame)));
         return ret;
+    }
+
+    int32_t FASpriteGroup::getAnimLength() const
+    {
+        if (mStandaloneTexture)
+            return 1;
+        return mRealSpriteGroup->animLength();
+    }
+
+    int32_t FASpriteGroup::getWidth(int32_t frame) const
+    {
+        if (mStandaloneTexture)
+            return mStandaloneTexture->width();
+
+        return mRealSpriteGroup->operator[](frame)->mWidth;
+    }
+
+    int32_t FASpriteGroup::getHeight(int32_t frame) const
+    {
+        if (mStandaloneTexture)
+            return mStandaloneTexture->height();
+
+        return mRealSpriteGroup->operator[](frame)->mHeight;
     }
 
     FASpriteGroup::~FASpriteGroup() = default;

@@ -5,10 +5,9 @@
 #include "cel/celdecoder.h"
 #include "cel/celfile.h"
 #include "fontinfo.h"
+#include "levelrenderer.h"
 #include <Image/image.h>
 #include <audio/fa_audio.h>
-#include <functional>
-#include <iostream>
 #include <misc/assert.h>
 #include <numeric>
 #include <render/cursor.h>
@@ -126,6 +125,8 @@ namespace FARender
                 new (mStates + i) RenderState(mNuklearGraphicsData);
 
             mRenderer = this;
+
+            mLevelRenderer = std::make_unique<LevelRenderer>();
         }
     }
 
@@ -178,7 +179,7 @@ namespace FARender
 
     Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getTileByScreenPos(x, y, screenPos.getFractionalPos());
+        return LevelRenderer::getTileByScreenPos(x, y, screenPos.getFractionalPos());
     }
 
     void Renderer::waitUntilDone()
@@ -242,14 +243,14 @@ namespace FARender
                 fill(*state->level, state->mObjects, mLevelObjects);
                 fill(*state->level, state->mItems, mItems);
 
-                Render::drawLevel(state->level->mLevel,
-                                  state->tileset.minTops->getSpriteGroup(),
-                                  state->tileset.minBottoms->getSpriteGroup(),
-                                  state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->getSpriteGroup() : nullptr,
-                                  state->tileset.mSpecialSpriteMap,
-                                  mLevelObjects,
-                                  mItems,
-                                  state->mPos.getFractionalPos());
+                mLevelRenderer->drawLevel(state->level->mLevel,
+                                          state->tileset.minTops->getSpriteGroup(),
+                                          state->tileset.minBottoms->getSpriteGroup(),
+                                          state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->getSpriteGroup() : nullptr,
+                                          state->tileset.mSpecialSpriteMap,
+                                          mLevelObjects,
+                                          mItems,
+                                          state->mPos.getFractionalPos());
             }
 
             Render::drawGui(state->nuklearData);

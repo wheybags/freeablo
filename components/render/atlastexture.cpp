@@ -17,7 +17,7 @@ namespace Render
 
     AtlasTexture::~AtlasTexture() = default;
 
-    std::vector<size_t> AtlasTexture::addCategorySprites(const std::string& category, const std::vector<LoadImageData>& images)
+    std::vector<NonNullConstPtr<AtlasTextureEntry>> AtlasTexture::addCategorySprites(const std::string& category, const std::vector<LoadImageData>& images)
     {
         Layers& categoryLayers = mLayersByCategory[category];
 
@@ -55,18 +55,18 @@ namespace Render
         }
 
         Image blankImage(1, 1);
-        categoryLayers.emptySpriteId = this->addTexture(blankImage, std::nullopt, category);
+        categoryLayers.emptySpriteId = &this->addTexture(blankImage, std::nullopt, category);
 
-        std::vector<size_t> ids;
+        std::vector<NonNullConstPtr<AtlasTextureEntry>> ids;
         ids.reserve(images.size());
 
         for (const auto& imageData : images)
-            ids.push_back(addTexture(imageData.image, imageData.trimmedData, category));
+            ids.push_back(&addTexture(imageData.image, imageData.trimmedData, category));
 
         return ids;
     }
 
-    size_t AtlasTexture::addTexture(const Image& image, std::optional<Image::TrimmedData> _trimmedData, std::string category)
+    const AtlasTextureEntry& AtlasTexture::addTexture(const Image& image, std::optional<Image::TrimmedData> _trimmedData, std::string category)
     {
         Layers& categoryLayers = mLayersByCategory.at(category);
 
@@ -81,7 +81,7 @@ namespace Render
         if (_trimmedData)
         {
             if (image.width() == 0 || image.height() == 0)
-                return categoryLayers.emptySpriteId;
+                return *categoryLayers.emptySpriteId;
 
             const Image::TrimmedData& trimmedData = _trimmedData.value();
 
@@ -122,21 +122,20 @@ namespace Render
         layer->texture->updateImageData(
             dataDestinationRect.x, dataDestinationRect.y, 0, useImage->width(), useImage->height(), reinterpret_cast<const uint8_t*>(useImage->mData.data()));
 
-        AtlasTextureEntry atlasEntry = {};
-        atlasEntry.mX = dataDestinationRect.x;
-        atlasEntry.mY = dataDestinationRect.y;
-        atlasEntry.mLayer = 0;
-        atlasEntry.mWidth = originalWidth;
-        atlasEntry.mHeight = originalHeight;
-        atlasEntry.mTrimmedOffsetX = trimmedOffsetX;
-        atlasEntry.mTrimmedOffsetY = trimmedOffsetY;
-        atlasEntry.mTrimmedWidth = useImage->width();
-        atlasEntry.mTrimmedHeight = useImage->height();
-        atlasEntry.mTexture = layer->texture.get();
+        auto atlasEntry = new AtlasTextureEntry();
+        atlasEntry->mX = dataDestinationRect.x;
+        atlasEntry->mY = dataDestinationRect.y;
+        atlasEntry->mLayer = 0;
+        atlasEntry->mWidth = originalWidth;
+        atlasEntry->mHeight = originalHeight;
+        atlasEntry->mTrimmedOffsetX = trimmedOffsetX;
+        atlasEntry->mTrimmedOffsetY = trimmedOffsetY;
+        atlasEntry->mTrimmedWidth = useImage->width();
+        atlasEntry->mTrimmedHeight = useImage->height();
+        atlasEntry->mTexture = layer->texture.get();
 
-        size_t id = mNextTextureId++;
-        mLookupMap[id] = atlasEntry;
-        return id;
+        mAtlasEntries.emplace_back(atlasEntry);
+        return *atlasEntry;
     }
 
     void AtlasTexture::printUtilisation() const
