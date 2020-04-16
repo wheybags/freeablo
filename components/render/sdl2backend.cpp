@@ -74,7 +74,7 @@ namespace Render
         if (nk_ctx)
         {
             nuklearGraphics = {};
-            nk_sdl_device_create(nuklearGraphics.dev, *renderInstance);
+            nuklearGraphics.dev = std::make_unique<NuklearDevice>(*renderInstance);
         }
     }
 
@@ -84,7 +84,7 @@ namespace Render
     void destroyNuklearGraphicsContext(NuklearGraphicsContext& nuklearGraphics)
     {
         nk_font_atlas_clear(&nuklearGraphics.atlas);
-        nk_sdl_device_destroy(nuklearGraphics.dev);
+        nuklearGraphics.dev.reset();
     }
 
     void quit()
@@ -111,7 +111,7 @@ namespace Render
         return settings;
     }
 
-    void drawGui(NuklearFrameDump& dump) { nk_sdl_render_dump(dump, screen, *mainCommandQueue); }
+    void drawGui(NuklearFrameDump& dump) { dump.render({WIDTH, HEIGHT}, *mainCommandQueue); }
 
     void draw()
     {

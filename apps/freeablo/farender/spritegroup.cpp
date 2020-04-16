@@ -12,10 +12,7 @@ namespace FARender
 
         frameHandles.resize(animLength);
         for (uint32_t i = 0; i < frameHandles.size(); i++)
-        {
-            frameHandles[i].spriteGroup = mRealSpriteGroup.get();
-            frameHandles[i].frameNumber = i;
-        }
+            frameHandles[i].spriteGroup = mRealSpriteGroup->operator[](i);
     }
 
     void FASpriteGroup::init(std::unique_ptr<Render::Texture>&& texture)
@@ -25,7 +22,6 @@ namespace FARender
 
         frameHandles.resize(1);
         frameHandles[0].texture = mStandaloneTexture.get();
-        frameHandles[0].frameNumber = 0;
     }
 
     struct nk_image FASpriteGroup::getNkImage(int32_t frame)

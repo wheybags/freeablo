@@ -46,7 +46,7 @@ namespace NuklearMisc
 
         nk_context mCtx = {};
         Input::InputManager mInput;
-        NuklearFrameDump mNuklearData;
+        std::unique_ptr<NuklearFrameDump> mNuklearData;
 
         friend class GuiSprite;
     };

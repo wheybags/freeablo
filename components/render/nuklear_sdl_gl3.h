@@ -19,10 +19,8 @@ namespace Render
 
 struct FANuklearTextureHandle
 {
-    Render::SpriteGroup* spriteGroup = nullptr;
+    const Render::AtlasTextureEntry* spriteGroup = nullptr;
     Render::Texture* texture = nullptr;
-
-    uint32_t frameNumber = 0;
 };
 
 namespace GuiUniforms
@@ -46,43 +44,43 @@ namespace GuiUniforms
     using CpuBufferType = Render::TypedAlignedCpuBuffer<Vertex, Fragment>;
 }
 
-struct nk_gl_device
+struct NuklearDevice
 {
-    nk_buffer cmds;
-    nk_draw_null_texture null;
-    Render::VertexArrayObject* vertexArrayObject = nullptr;
-    Render::Pipeline* pipeline = nullptr;
-    Render::DescriptorSet* descriptorSet = nullptr;
-    Render::Buffer* uniformBuffer = nullptr;
-    GuiUniforms::CpuBufferType* uniformCpuBuffer = nullptr;
-    nk_handle font_tex;
+    NuklearDevice(Render::RenderInstance& renderInstance);
+    ~NuklearDevice();
+
+    nk_buffer commands = {};
+    nk_draw_null_texture nullTexture = {};
+    nk_handle fontTexture = {};
+
+    std::unique_ptr<Render::Pipeline> pipeline;
+    std::unique_ptr<Render::VertexArrayObject> vertexArrayObject;
+    std::unique_ptr<Render::DescriptorSet> descriptorSet;
+    std::unique_ptr<GuiUniforms::CpuBufferType> uniformCpuBuffer;
+    std::unique_ptr<Render::Buffer> uniformBuffer;
 };
 
 class NuklearFrameDump
 {
 public:
-    NuklearFrameDump() {}
+    NuklearFrameDump() = delete;
     NuklearFrameDump(const NuklearFrameDump&) = delete;
 
-    NuklearFrameDump(nk_gl_device& dev);
+    NuklearFrameDump(NuklearDevice& dev);
     ~NuklearFrameDump();
 
-    void init(nk_gl_device& dev);
-
     void fill(nk_context* ctx);
-    nk_gl_device& getDevice();
+    void render(Vec2i screenResolution, Render::CommandQueue& commandQueue);
 
-    nk_buffer vbuf; // vertices
-    nk_buffer ebuf; // indices
-
-    std::vector<nk_draw_command> drawCommands;
+public:
+    NuklearDevice& mDevice;
 
 private:
-    nk_gl_device* dev = nullptr;
-    nk_convert_config config;
-    nk_buffer cmds; // draw commands temp storage
-};
+    nk_convert_config mConvertConfig = {};
 
-void nk_sdl_render_dump(NuklearFrameDump& dump, SDL_Window* win, Render::CommandQueue& commandQueue);
-void nk_sdl_device_destroy(nk_gl_device& dev);
-void nk_sdl_device_create(nk_gl_device& dev, Render::RenderInstance& renderInstance);
+    nk_buffer mVertexBuffer;
+    nk_buffer mIndexBuffer;
+
+    nk_buffer mCommandsTemp = {};
+    std::vector<nk_draw_command> mDrawCommands;
+};

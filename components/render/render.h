@@ -56,7 +56,7 @@ namespace Render
 
     struct NuklearGraphicsContext
     {
-        nk_gl_device dev = {};
+        std::unique_ptr<NuklearDevice> dev;
         nk_font_atlas atlas = {};
     };
 

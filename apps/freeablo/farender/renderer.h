@@ -68,7 +68,7 @@ namespace FARender
         uint32_t mCursorFrame = 0;
         bool mCursorCentered = false;
 
-        explicit RenderState(Render::NuklearGraphicsContext& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData.dev) {}
+        explicit RenderState(Render::NuklearGraphicsContext& nuklearGraphicsData) : ready(true), nuklearData(*nuklearGraphicsData.dev) {}
     };
 
     FASpriteGroup* getDefaultSprite();

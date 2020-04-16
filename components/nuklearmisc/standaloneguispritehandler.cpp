@@ -9,10 +9,7 @@ namespace NuklearMisc
     {
         mFrameIds.resize(mTextures.size());
         for (uint32_t i = 0; i < mTextures.size(); i++)
-        {
             mFrameIds[i].texture = mTextures[i].get();
-            mFrameIds[i].frameNumber = i;
-        }
     }
 
     GuiSprite::GuiSprite(std::unique_ptr<Render::Texture>&& texture) : GuiSprite(moveToVector(std::move(texture))) {}
@@ -83,13 +80,13 @@ namespace NuklearMisc
             // struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
             // struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
             // struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
-            mNuklearFontTexture = fontStashEnd(mNuklearGraphicsContext.atlas, mNuklearGraphicsContext.dev.null);
-            mNuklearGraphicsContext.dev.font_tex = mNuklearFontTexture->getNkImage().handle;
+            mNuklearFontTexture = fontStashEnd(mNuklearGraphicsContext.atlas, mNuklearGraphicsContext.dev->nullTexture);
+            mNuklearGraphicsContext.dev->fontTexture = mNuklearFontTexture->getNkImage().handle;
             // nk_style_load_all_cursors(ctx, atlas->cursors);
             // nk_style_set_font(ctx, &roboto->handle);
         }
 
-        mNuklearData.init(mNuklearGraphicsContext.dev);
+        mNuklearData = std::make_unique<NuklearFrameDump>(*mNuklearGraphicsContext.dev);
     }
 
     StandaloneGuiHandler::~StandaloneGuiHandler()
@@ -140,11 +137,11 @@ namespace NuklearMisc
         bool quit = mInput.processInput();
         nk_input_end(&mCtx);
 
-        mNuklearData.fill(&mCtx);
+        mNuklearData->fill(&mCtx);
         nk_clear(&mCtx);
 
         Render::clear();
-        Render::drawGui(mNuklearData);
+        Render::drawGui(*mNuklearData);
         Render::draw();
 
         return quit;

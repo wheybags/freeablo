@@ -113,8 +113,8 @@ namespace FARender
                 // struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
                 // struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
                 // struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
-                mNuklearFontTexture = nk_fa_font_stash_end(&mNuklearContext, mNuklearGraphicsData.atlas, mNuklearGraphicsData.dev.null);
-                mNuklearGraphicsData.dev.font_tex = mNuklearFontTexture->getNkImage().handle;
+                mNuklearFontTexture = nk_fa_font_stash_end(&mNuklearContext, mNuklearGraphicsData.atlas, mNuklearGraphicsData.dev->nullTexture);
+                mNuklearGraphicsData.dev->fontTexture = mNuklearFontTexture->getNkImage().handle;
                 // nk_style_load_all_cursors(ctx, atlas->cursors);
                 // nk_style_set_font(ctx, &roboto->handle);
             }
