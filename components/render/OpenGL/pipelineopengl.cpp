@@ -26,7 +26,7 @@ namespace Render
                 std::vector<GLchar> errorLog(maxLength);
                 glGetShaderInfoLog(shaderId, maxLength, &maxLength, errorLog.data());
 
-                message_and_abort_fmt("Shader compile error: %s\n", errorLog.data());
+                message_and_abort_fmt("Shader compile error in (%s): %s\n", path.str().c_str(), errorLog.data());
             }
 
             return shaderId;
@@ -51,7 +51,8 @@ namespace Render
             std::vector<GLchar> errorLog(maxLength);
             glGetProgramInfoLog(mShaderProgramId, maxLength, &maxLength, errorLog.data());
 
-            message_and_abort_fmt("Shader link error: %s\n", errorLog.data());
+            message_and_abort_fmt(
+                "Shader link error(%s + %s): %s\n", mSpec.vertexShaderPath.str().c_str(), mSpec.fragmentShaderPath.str().c_str(), errorLog.data());
         }
 
         uint32_t textureIndex = 0;

@@ -25,7 +25,6 @@ namespace Render
 
         int32_t mX = 0;
         int32_t mY = 0;
-        int32_t mLayer = 0;
         int32_t mWidth = 0;
         int32_t mHeight = 0;
 

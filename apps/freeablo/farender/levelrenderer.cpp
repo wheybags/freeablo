@@ -72,7 +72,6 @@ namespace FARender
 
         vertexData.v_atlasOffset[0] = atlasEntry.mX;
         vertexData.v_atlasOffset[1] = atlasEntry.mY;
-        vertexData.v_atlasOffset[2] = atlasEntry.mLayer;
 
         vertexData.v_imageOffset[0] = x + atlasEntry.mTrimmedOffsetX;
         vertexData.v_imageOffset[1] = y + atlasEntry.mTrimmedOffsetY;

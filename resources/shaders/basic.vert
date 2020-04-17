@@ -6,7 +6,7 @@ layout(location = 2) in float v_zValue;
 layout(location = 3) in vec2 v_imageSize;
 layout(location = 4) in vec2 v_imageOffset;
 layout(location = 5) in vec4 v_hoverColor;
-layout(location = 6) in vec3 v_atlasOffset;
+layout(location = 6) in vec2 v_atlasOffset;
 
 layout(std140) uniform vertexUniforms
 {
@@ -18,7 +18,7 @@ layout(std140) uniform vertexUniforms
 out vec2 uv;
 flat out vec2 imageSize;
 flat out vec4 hoverColor;
-flat out vec3 atlasOffset;
+flat out vec2 atlasOffset;
 flat out float f_zValue;
 
 void main()

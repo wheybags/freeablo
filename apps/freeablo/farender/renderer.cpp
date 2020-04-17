@@ -68,7 +68,6 @@ namespace FARender
             Render::BaseTextureInfo textureInfo;
             textureInfo.width = width;
             textureInfo.height = height;
-            textureInfo.forceTextureToBeATextureArray = true;
             textureInfo.format = Render::Format::RGBA8UNorm;
             std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
             texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData));

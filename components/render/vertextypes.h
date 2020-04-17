@@ -31,7 +31,7 @@ namespace Render
         uint16_t v_imageSize[2];
         int16_t v_imageOffset[2];
         uint8_t v_hoverColor[4];
-        uint16_t v_atlasOffset[3];
+        uint16_t v_atlasOffset[2];
 
         static const VertexLayout& layout()
         {
@@ -40,7 +40,7 @@ namespace Render
                                            Format::RG16U,
                                            Format::RG16I,
                                            Format::RGBA8UNorm,
-                                           Format::RGB16U,
+                                           Format::RG16U,
                                        },
                                        VertexInputRate::ByInstance};
 

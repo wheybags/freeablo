@@ -24,10 +24,10 @@ namespace GuiUniforms
         float hoverColor[4];
         float imageSize[2];
         float atlasSize[2];
-        float atlasOffset[4];
+        float atlasOffset[2];
         float checkerboarded;
 
-        float _pad[3];
+        float pad1;
     };
 
     using CpuBufferType = Render::TypedAlignedCpuBuffer<Vertex, Fragment>;

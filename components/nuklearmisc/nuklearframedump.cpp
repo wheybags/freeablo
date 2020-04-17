@@ -93,7 +93,6 @@ void NuklearFrameDump::render(Vec2i screenResolution, Render::CommandQueue& comm
             fragment->atlasSize[1] = atlasEntry->mTexture->height();
             fragment->atlasOffset[0] = atlasEntry->mX;
             fragment->atlasOffset[1] = atlasEntry->mY;
-            fragment->atlasOffset[2] = atlasEntry->mLayer;
         }
         else
         {
@@ -107,7 +106,6 @@ void NuklearFrameDump::render(Vec2i screenResolution, Render::CommandQueue& comm
             fragment->atlasSize[1] = nuklearTextureHandle->texture->height();
             fragment->atlasOffset[0] = 0;
             fragment->atlasOffset[1] = 0;
-            fragment->atlasOffset[2] = 0;
         }
 
         mDevice.uniformBuffer->setData(mDevice.uniformCpuBuffer->data(), mDevice.uniformCpuBuffer->getSizeInBytes());

@@ -125,7 +125,6 @@ namespace Render
         auto atlasEntry = new AtlasTextureEntry();
         atlasEntry->mX = dataDestinationRect.x;
         atlasEntry->mY = dataDestinationRect.y;
-        atlasEntry->mLayer = 0;
         atlasEntry->mWidth = originalWidth;
         atlasEntry->mHeight = originalHeight;
         atlasEntry->mTrimmedOffsetX = trimmedOffsetX;
@@ -173,7 +172,6 @@ namespace Render
             textureInfo.width = width;
             textureInfo.height = height;
             textureInfo.arrayLayers = 1;
-            textureInfo.forceTextureToBeATextureArray = true;
             textureInfo.format = Format::RGBA8UNorm;
             textureInfo.minFilter = Filter::Nearest;
             textureInfo.magFilter = Filter::Nearest;
