@@ -21,8 +21,6 @@ namespace Engine
         PLAY_SOUND,
         STOP_SOUND,
         RENDER_STATE,
-        PRELOAD_SPRITES,
-        CLEAR_SPRITES
     };
 
     struct Message
@@ -49,8 +47,6 @@ namespace Engine
         void stopSound();
         bool isPlayingSound() const;
         void sendRenderState(FARender::RenderState* state);
-        void sendSpritesForPreload(std::vector<uint32_t> sprites);
-        void clearSprites();
 
     private:
         void handleMessage(const Message& message);
@@ -59,7 +55,5 @@ namespace Engine
         rigtorp::SPSCQueue<Message> mQueue;
         FARender::RenderState* mRenderState;
         FAAudio::AudioManager mAudioManager;
-
-        std::vector<uint32_t> mSpritesToPreload;
     };
 }

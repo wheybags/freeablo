@@ -1,5 +1,6 @@
 #pragma once
 #include "../engine/inputobserverinterface.h"
+#include "../farender/spriteloader.h"
 #include "../faworld/spellenums.h"
 #include "dialogmanager.h"
 #include "textcolor.h"
@@ -40,13 +41,6 @@ namespace FAGui
     class GuiManager;
     class MenuHandler;
 
-    enum class EffectType
-    {
-        none = 0,
-        highlighted,
-        checkerboarded,
-    };
-
     // move all this to better place since cursor state is also dependent on spells etc.
     extern std::string cursorPath;
     extern uint32_t cursorFrame;
@@ -77,14 +71,14 @@ namespace FAGui
     class ScopedApplyEffect
     {
     public:
-        ScopedApplyEffect(nk_context* ctx, EffectType type) : mCtx(ctx) { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(type))); }
-        ~ScopedApplyEffect() { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(EffectType::none))); }
+        ScopedApplyEffect(nk_context* ctx, GuiEffectType type) : mCtx(ctx) { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(type))); }
+        ~ScopedApplyEffect() { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(GuiEffectType::none))); }
 
         nk_context* mCtx;
     };
 
     PanelPlacement panelPlacementByType(PanelType type);
-    const char* bgImgPath(PanelType type);
+    const FARender::SpriteLoader::SpriteDefinition& getBackgroundForPanel(PanelType type);
     const char* panelName(PanelType type);
 
     class ScrollBox;
@@ -94,8 +88,8 @@ namespace FAGui
         using self = GuiManager;
 
     public:
-        GuiManager(Engine::EngineMain& engine);
-        ~GuiManager();
+        explicit GuiManager(Engine::EngineMain& engine);
+        ~GuiManager() override;
 
         void update(bool inGame, bool paused, nk_context* ctx, const FAWorld::HoverStatus& hoverStatus);
 

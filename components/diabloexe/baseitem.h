@@ -23,6 +23,7 @@ namespace DiabloExe
         uint16_t unknown1;
 
         std::string name;
+        std::string idName;
         std::string shortName;
         uint32_t qualityLevel;
         uint32_t durability;
@@ -42,7 +43,6 @@ namespace DiabloExe
         uint32_t isUsable;
         uint32_t price;
         uint32_t unusedPrice;
-        int32_t id;
         int32_t invSizeX;
         int32_t invSizeY;
 

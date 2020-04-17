@@ -5,13 +5,8 @@
 
 namespace FARender
 {
-    AnimationPlayer::AnimationPlayer(FASaveGame::GameLoader& loader)
+    void AnimationPlayer::load(FASaveGame::GameLoader& loader)
     {
-        bool hasCurrentAnim = loader.load<bool>();
-
-        if (hasCurrentAnim)
-            mCurrentAnim = Renderer::get()->loadImage(loader.load<std::string>(), true);
-
         mPlayingAnimDuration = loader.load<FAWorld::Tick>();
         mPlayingAnimType = AnimationType(loader.load<uint8_t>());
         mTicksSinceAnimStarted = loader.load<FAWorld::Tick>();
@@ -21,34 +16,30 @@ namespace FARender
         mFrameSequence.reserve(frameSequenceSize);
         for (uint32_t i = 0; i < frameSequenceSize; i++)
             mFrameSequence.push_back(loader.load<int32_t>());
+
+        loader.addFunctionToRunAtEnd([this]() { release_assert(animationRestoredAfterSave); });
     }
 
     void AnimationPlayer::save(FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("AnimationPlayer", saver);
 
-        bool hasCurrentAnim = mCurrentAnim != nullptr;
-        saver.save(hasCurrentAnim);
-
-        if (hasCurrentAnim)
-        {
-            std::string spritePath = Renderer::get()->getPathForIndex(mCurrentAnim->getCacheIndex());
-            release_assert(spritePath.size());
-            saver.save(spritePath);
-        }
-
         saver.save(mPlayingAnimDuration);
         saver.save(uint8_t(mPlayingAnimType));
         saver.save(mTicksSinceAnimStarted);
 
-        uint32_t frameSequenceSize = mFrameSequence.size();
-        saver.save(frameSequenceSize);
+        {
+            Serial::ScopedCategorySaver frameSequenceCategory("FrameSequence", saver);
 
-        for (uint32_t i = 0; i < frameSequenceSize; i++)
-            saver.save(mFrameSequence[i]);
+            uint32_t frameSequenceSize = mFrameSequence.size();
+            saver.save(frameSequenceSize);
+
+            for (uint32_t i = 0; i < frameSequenceSize; i++)
+                saver.save(mFrameSequence[i]);
+        }
     }
 
-    std::pair<FARender::FASpriteGroup*, int32_t> AnimationPlayer::getCurrentFrame()
+    std::pair<FARender::FASpriteGroup*, int32_t> AnimationPlayer::getCurrentFrame() const
     {
         if (mCurrentAnim == nullptr)
             return std::make_pair<FARender::FASpriteGroup*, int32_t>(nullptr, 0);
@@ -65,8 +56,7 @@ namespace FARender
                 switch (mPlayingAnimType)
                 {
                     case AnimationType::Once:
-                        stopAnimation();
-                        return getCurrentFrame();
+                        return std::make_pair<FARender::FASpriteGroup*, int32_t>(nullptr, 0);
                     case AnimationType::FreezeAtEnd:
                         currentFrame = mCurrentAnim->getAnimLength() - 1;
                         break;
@@ -100,14 +90,35 @@ namespace FARender
         mCurrentAnim = anim;
         mPlayingAnimDuration = frameDuration;
         mPlayingAnimType = AnimationType::BySequence;
-        mFrameSequence = frameSequence;
+        mFrameSequence = std::move(frameSequence);
     }
 
-    void AnimationPlayer::replaceAnimation(FARender::FASpriteGroup* anim) { mCurrentAnim = anim; }
+    void AnimationPlayer::replaceAnimation(FARender::FASpriteGroup* anim)
+    {
+        if (anim)
+            release_assert(mPlayingAnimDuration);
+
+        mCurrentAnim = anim;
+    }
 
     void AnimationPlayer::stopAnimation() { playAnimation(nullptr, 0, AnimationType::Looped); }
 
-    void AnimationPlayer::update() { mTicksSinceAnimStarted++; }
+    void AnimationPlayer::update()
+    {
+        mTicksSinceAnimStarted++;
+
+        if (mCurrentAnim == nullptr)
+            return;
+
+        if (mPlayingAnimType == AnimationType::Once)
+        {
+            FixedPoint progress = FixedPoint(mTicksSinceAnimStarted) / FixedPoint(mPlayingAnimDuration);
+            int32_t currentFrame = int32_t(progress.intPart());
+
+            if (currentFrame >= mCurrentAnim->getAnimLength())
+                stopAnimation();
+        }
+    }
 
     int32_t AnimationPlayer::getAnimLength() const
     {

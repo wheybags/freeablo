@@ -5,7 +5,7 @@ namespace FAGui
     OgdenDialog::OgdenDialog(GuiManager& guiManager, FAWorld::Actor* actor)
         : CharacterDialoguePopup(guiManager, false, "sfx/towners/tavown36.wav"), mActor(actor)
     {
-        mActor->getBeforeDungeonTalkData().talkAudioPath = "sfx/towners/Tavown00.wav";
+        // mActor->getBeforeDungeonTalkData().talkAudioPath = "sfx/towners/Tavown00.wav";
         auto& gossipData = mActor->getGossipData();
         for (auto& gossip : gossipData)
         {
@@ -37,61 +37,61 @@ namespace FAGui
                 gossip.second.talkAudioPath = "sfx/towners/tavown43.wav";
         }
 
-        auto& questData = mActor->getQuestTalkData();
-        for (auto& quest : questData)
-        {
-            if (quest.first == "anvilOfFury")
-            {
-            }
-
-            else if (quest.first == "archbishopLazarus")
-            {
-            }
-
-            else if (quest.first == "blackMushroom")
-            {
-            }
-
-            else if (quest.first == "hallsOfTheBlind")
-            {
-            }
-
-            else if (quest.first == "lachdanan")
-            {
-            }
-
-            else if (quest.first == "ogdensSign")
-            {
-            }
-
-            else if (quest.first == "poisonedWaterSupply")
-            {
-            }
-
-            else if (quest.first == "theButcher")
-            {
-            }
-
-            else if (quest.first == "theChamberOfBone")
-            {
-            }
-
-            else if (quest.first == "theCurseOfKingLeoric")
-            {
-            }
-
-            else if (quest.first == "theMagicRock")
-            {
-            }
-
-            else if (quest.first == "valor")
-            {
-            }
-
-            else if (quest.first == "warlordOfBlood")
-            {
-            }
-        }
+        //        auto& questData = mActor->getQuestTalkData();
+        //        for (auto& quest : questData)
+        //        {
+        //            if (quest.first == "anvilOfFury")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "archbishopLazarus")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "blackMushroom")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "hallsOfTheBlind")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "lachdanan")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "ogdensSign")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "poisonedWaterSupply")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "theButcher")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "theChamberOfBone")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "theCurseOfKingLeoric")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "theMagicRock")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "valor")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "warlordOfBlood")
+        //            {
+        //            }
+        //        }
     }
 
     CharacterDialoguePopup::DialogData OgdenDialog::getDialogData()

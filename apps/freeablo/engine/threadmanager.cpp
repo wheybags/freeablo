@@ -6,10 +6,10 @@
 
 namespace Engine
 {
-    ThreadManager* ThreadManager::mThreadManager = NULL;
+    ThreadManager* ThreadManager::mThreadManager = nullptr;
     ThreadManager* ThreadManager::get() { return mThreadManager; }
 
-    ThreadManager::ThreadManager() : mQueue(100), mRenderState(NULL), mAudioManager(50, 100) { mThreadManager = this; }
+    ThreadManager::ThreadManager() : mQueue(100), mRenderState(nullptr), mAudioManager(50, 100) { mThreadManager = this; }
 
     void ThreadManager::run()
     {
@@ -22,8 +22,6 @@ namespace Engine
 
         while (true)
         {
-            mSpritesToPreload.clear();
-
             while (mQueue.front())
             {
                 handleMessage(*mQueue.front());
@@ -32,7 +30,7 @@ namespace Engine
 
             inputManager->poll();
 
-            if (!renderer->renderFrame(mRenderState, mSpritesToPreload))
+            if (!renderer->renderFrame(mRenderState))
                 break;
 
             auto now = std::chrono::system_clock::now();
@@ -51,13 +49,11 @@ namespace Engine
                 last = now;
             }
         }
-
-        renderer->cleanup();
     }
 
     void ThreadManager::playMusic(const std::string& path)
     {
-        Message message;
+        Message message = {};
         message.type = ThreadState::PLAY_MUSIC;
         message.data.musicPath = new std::string(path);
 
@@ -66,13 +62,13 @@ namespace Engine
 
     void ThreadManager::playSound(const std::string& path)
     {
-        if (path == "")
+        if (path.empty())
         {
             std::cerr << "Attempt to play invalid sound!" << std::endl;
             return;
         }
 
-        Message message;
+        Message message = {};
         message.type = ThreadState::PLAY_SOUND;
         message.data.soundPath = new std::string(path);
 
@@ -81,7 +77,7 @@ namespace Engine
 
     void ThreadManager::stopSound()
     {
-        Message message;
+        Message message = {};
         message.type = ThreadState::STOP_SOUND;
         mQueue.push(message);
     }
@@ -90,30 +86,10 @@ namespace Engine
 
     void ThreadManager::sendRenderState(FARender::RenderState* state)
     {
-        Message message;
+        Message message = {};
         message.type = ThreadState::RENDER_STATE;
         message.data.renderState = state;
 
-        mQueue.push(message);
-    }
-
-    void ThreadManager::sendSpritesForPreload(std::vector<uint32_t> sprites)
-    {
-        Message message;
-        message.type = ThreadState::PRELOAD_SPRITES;
-        message.data.preloadSpriteIds = new std::vector<uint32_t>(sprites);
-
-        mQueue.push(message);
-    }
-
-    void ThreadManager::clearSprites()
-    {
-        auto renderer = FARender::Renderer::get();
-        std::vector<uint32_t> sprites;
-        renderer->getAndClearSpritesNeedingPreloading(sprites);
-
-        Message message;
-        message.type = ThreadState::CLEAR_SPRITES;
         mQueue.push(message);
     }
 
@@ -147,25 +123,6 @@ namespace Engine
                     mRenderState->ready = true;
 
                 mRenderState = message.data.renderState;
-                break;
-            }
-            case ThreadState::PRELOAD_SPRITES:
-            {
-                mSpritesToPreload.insert(mSpritesToPreload.end(), message.data.preloadSpriteIds->begin(), message.data.preloadSpriteIds->end());
-                delete message.data.preloadSpriteIds;
-                break;
-            }
-
-            case ThreadState::CLEAR_SPRITES:
-            {
-                auto renderer = FARender::Renderer::get();
-                renderer->cleanup();
-                mSpritesToPreload.clear();
-                // Clear the current render state, and wait for the next one.
-                // This is to avoid reloading the old level sprites when switching levels.
-                if (mRenderState)
-                    mRenderState->ready = true;
-                mRenderState = nullptr;
                 break;
             }
         }

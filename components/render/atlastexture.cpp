@@ -1,7 +1,5 @@
 #include "atlastexture.h"
-#include "../../extern/RectangleBinPack/SkylineBinPack.h"
 #include "texture.h"
-#include <Image/image.h>
 #include <memory>
 #include <misc/assert.h>
 #include <render/commandqueue.h>
@@ -12,134 +10,176 @@
 
 namespace Render
 {
-    AtlasTexture::AtlasTexture(RenderInstance& instance, CommandQueue& commandQueue) : mInstance(instance)
+    AtlasTexture::AtlasTexture(RenderInstance& instance, CommandQueue& commandQueue) : mInstance(instance), mCommandQueue(commandQueue)
     {
-        // TODO: dynamic configuration of atlas size
-
-        static constexpr int32_t requiredTextureSize = 8192;
-        static constexpr int32_t requiredTextureLayers = 2;
-
-        BaseTextureInfo textureInfo{};
-        textureInfo.width = requiredTextureSize;
-        textureInfo.height = requiredTextureSize;
-        textureInfo.arrayLayers = requiredTextureLayers;
-        textureInfo.format = Format::RGBA8UNorm;
-        textureInfo.minFilter = Filter::Nearest;
-        textureInfo.magFilter = Filter::Nearest;
-
-        mTextureArray = mInstance.createTexture(textureInfo);
-
-        this->clear(commandQueue);
-
-        Image blankImage(2, 2);
-        this->mEmptySpriteId = this->addTexture(blankImage, false);
+        release_assert(mInstance.capabilities().maxTextureSize >= MINIMUM_ATLAS_SIZE);
     }
 
     AtlasTexture::~AtlasTexture() = default;
 
-    size_t AtlasTexture::addTexture(const Image& image, bool trim)
+    std::vector<NonNullConstPtr<AtlasTextureEntry>> AtlasTexture::addCategorySprites(const std::string& category, const std::vector<LoadImageData>& images)
     {
+        Layers& categoryLayers = mLayersByCategory[category];
+
+        int64_t requiredSize = 0;
+        for (const auto& imageData : images)
+            requiredSize += (imageData.image.width() + PADDING) * (imageData.image.height() + PADDING);
+
+        while (requiredSize > 0)
+        {
+            int32_t layerSize = mInstance.capabilities().maxTextureSize;
+            int64_t requiredSizePadded = requiredSize + (requiredSize / 100) * 2;
+
+            while (((layerSize / 2) * (layerSize / 2)) > requiredSizePadded)
+                layerSize = layerSize / 2;
+
+            requiredSize -= layerSize * layerSize;
+
+            int32_t layerWidth = layerSize;
+            int32_t layerHeight = layerSize;
+
+            // If we are about to create a layer where we're likely to waste a large chunk of it, just halve the height
+            if (requiredSize < 0 && layerSize != MINIMUM_ATLAS_SIZE)
+            {
+                int64_t unusedSpace = std::abs(requiredSize);
+                int64_t unusedSpacePadded = unusedSpace - (unusedSpace / 100) * 2;
+
+                if (unusedSpacePadded > (layerWidth * layerWidth) / 2)
+                    layerHeight = layerHeight / 2;
+            }
+
+            // Minimum size layers are added at need when we are actually uploading the data, no need to create it here.
+            // This means we shouldn't ever accidentally create a small layer at the end that we never use.
+            if (layerWidth != MINIMUM_ATLAS_SIZE || layerHeight != MINIMUM_ATLAS_SIZE)
+                categoryLayers.addLayer(mInstance, mCommandQueue, layerWidth, layerHeight);
+        }
+
+        Image blankImage(1, 1);
+        categoryLayers.emptySpriteId = &this->addTexture(blankImage, std::nullopt, category);
+
+        std::vector<NonNullConstPtr<AtlasTextureEntry>> ids;
+        ids.reserve(images.size());
+
+        for (const auto& imageData : images)
+            ids.push_back(&addTexture(imageData.image, imageData.trimmedData, category));
+
+        return ids;
+    }
+
+    const AtlasTextureEntry& AtlasTexture::addTexture(const Image& image, std::optional<Image::TrimmedData> _trimmedData, std::string category)
+    {
+        Layers& categoryLayers = mLayersByCategory.at(category);
+
         std::unique_ptr<Image> imageTmp;
 
         const Image* useImage = &image;
         int32_t trimmedOffsetX = 0;
         int32_t trimmedOffsetY = 0;
+        int32_t originalWidth = image.width();
+        int32_t originalHeight = image.height();
 
-        if (trim)
+        if (_trimmedData)
         {
-            bool isEmpty = true;
+            if (image.width() == 0 || image.height() == 0)
+                return *categoryLayers.emptySpriteId;
 
-            int32_t left = image.width() - 1;
-            int32_t right = 0;
-            int32_t top = image.height() - 1;
-            int32_t bottom = 0;
+            const Image::TrimmedData& trimmedData = _trimmedData.value();
 
-            for (int32_t y = 0; y < image.height(); y++)
-            {
-                for (int32_t x = 0; x < image.width(); x++)
-                {
-                    if (image.get(x, y).a != 0)
-                    {
-                        isEmpty = false;
-
-                        left = std::min(left, x);
-                        right = std::max(right, x);
-                        top = std::min(top, y);
-                        bottom = std::max(bottom, y);
-                    }
-                }
-            }
-
-            if (isEmpty)
-                return mEmptySpriteId;
-
-            imageTmp = std::make_unique<Image>(right - left + 1, bottom - top + 1);
-            image.blitTo(*imageTmp, left, top, imageTmp->width(), imageTmp->height(), 0, 0);
-
-            useImage = imageTmp.get();
-            trimmedOffsetX = left;
-            trimmedOffsetY = top;
+            trimmedOffsetX = trimmedData.trimmedOffsetX;
+            trimmedOffsetY = trimmedData.trimmedOffsetY;
+            originalWidth = trimmedData.originalWidth;
+            originalHeight = trimmedData.originalHeight;
         }
 
-        rbp::Rect dataDestinationRect = {};
-        int32_t layer = -1;
+        RectPacker::Rect dataDestinationRect = {};
+        Layer* layer = nullptr;
         {
             int32_t paddedWidth = useImage->width() + PADDING;
             int32_t paddedHeight = useImage->height() + PADDING;
 
-            release_assert(paddedWidth <= mTextureArray->width() + PADDING * 2 && paddedHeight <= mTextureArray->height() + PADDING * 2);
-
-            for (int32_t layerTmp = 0; layerTmp < mTextureArray->getInfo().arrayLayers; layerTmp++)
+            for (int32_t layerIndex = 0;; layerIndex++)
             {
-                rbp::Rect packedPos = mBinPacker[layerTmp]->Insert(paddedWidth, paddedHeight, rbp::SkylineBinPack::LevelMinWasteFit);
-                if (packedPos.height != 0)
+                if (layerIndex >= int32_t(categoryLayers.layers.size()))
+                {
+                    // If we have a huge texture that won't fit, we just make a dedicated layer for it, otherwise we add a new layer for general use
+                    if ((useImage->width() + PADDING * 2) >= MINIMUM_ATLAS_SIZE || (useImage->height() + PADDING * 2) >= MINIMUM_ATLAS_SIZE)
+                        categoryLayers.addLayer(mInstance, mCommandQueue, useImage->width() + PADDING * 2, useImage->height() + PADDING * 2);
+                    else
+                        categoryLayers.addLayer(mInstance, mCommandQueue, MINIMUM_ATLAS_SIZE, MINIMUM_ATLAS_SIZE);
+                }
+
+                layer = &categoryLayers.layers[layerIndex];
+
+                RectPacker::Rect packedPos{0, 0, paddedWidth, paddedHeight};
+                if (layer->rectPacker->addRect(packedPos))
                 {
                     dataDestinationRect = {packedPos.x + PADDING, packedPos.y + PADDING, useImage->width(), useImage->height()};
-                    layer = layerTmp;
                     break;
                 }
             }
-
-            release_assert(layer != -1);
         }
 
-        mTextureArray->updateImageData(dataDestinationRect.x,
-                                       dataDestinationRect.y,
-                                       layer,
-                                       useImage->width(),
-                                       useImage->height(),
-                                       reinterpret_cast<const uint8_t*>(useImage->mData.data()));
+        layer->texture->updateImageData(
+            dataDestinationRect.x, dataDestinationRect.y, 0, useImage->width(), useImage->height(), reinterpret_cast<const uint8_t*>(useImage->mData.data()));
 
-        AtlasTextureEntry atlasEntry = {};
-        atlasEntry.mX = dataDestinationRect.x;
-        atlasEntry.mY = dataDestinationRect.y;
-        atlasEntry.mLayer = layer;
-        atlasEntry.mWidth = image.width();
-        atlasEntry.mHeight = image.height();
-        atlasEntry.mTrimmedOffsetX = trimmedOffsetX;
-        atlasEntry.mTrimmedOffsetY = trimmedOffsetY;
-        atlasEntry.mTrimmedWidth = useImage->width();
-        atlasEntry.mTrimmedHeight = useImage->height();
+        auto atlasEntry = new AtlasTextureEntry();
+        atlasEntry->mX = dataDestinationRect.x;
+        atlasEntry->mY = dataDestinationRect.y;
+        atlasEntry->mWidth = originalWidth;
+        atlasEntry->mHeight = originalHeight;
+        atlasEntry->mTrimmedOffsetX = trimmedOffsetX;
+        atlasEntry->mTrimmedOffsetY = trimmedOffsetY;
+        atlasEntry->mTrimmedWidth = useImage->width();
+        atlasEntry->mTrimmedHeight = useImage->height();
+        atlasEntry->mTexture = layer->texture.get();
 
-        size_t id = mNextTextureId++;
-        mLookupMap[id] = atlasEntry;
-        return id;
+        mAtlasEntries.emplace_back(atlasEntry);
+        return *atlasEntry;
     }
 
-    float AtlasTexture::getOccupancy() const
+    void AtlasTexture::printUtilisation() const
     {
-        float summedOccupancy = 0;
-        for (auto& bp : mBinPacker)
-            summedOccupancy += bp->Occupancy();
-        return summedOccupancy / mBinPacker.size() * 100;
+        printf("Texture atlas utilisation by category:\n");
+
+        for (const auto& pair : mLayersByCategory)
+        {
+            printf("    %s:\n", pair.first.c_str());
+
+            const Layers& categoryLayer = pair.second;
+
+            float summedOccupancy = 0;
+            for (int32_t i = 0; i < int32_t(categoryLayer.layers.size()); i++)
+            {
+                const RectPacker& rectPacker = *categoryLayer.layers[i].rectPacker;
+                int32_t width = categoryLayer.layers[i].texture->width();
+                int32_t height = categoryLayer.layers[i].texture->height();
+                printf("        Layer %d (%dx%d) utilisation %.1f%%\n", i, width, height, rectPacker.utilisation() * 100.0f);
+                summedOccupancy += rectPacker.utilisation();
+            }
+
+            if (categoryLayer.layers.size() > 1)
+                printf("        All layers utilisation %.1f%%\n", (summedOccupancy / categoryLayer.layers.size()) * 100.0f);
+        }
     }
 
-    void AtlasTexture::clear(CommandQueue& commandQueue)
+    void AtlasTexture::Layers::addLayer(RenderInstance& instance, CommandQueue& commandQueue, int32_t width, int32_t height)
     {
-        mBinPacker.clear();
-        for (int32_t layer = 0; layer < mTextureArray->getInfo().arrayLayers; layer++)
-            mBinPacker.push_back(std::make_unique<rbp::SkylineBinPack>(mTextureArray->width() - PADDING * 2, mTextureArray->height() - PADDING * 2, false));
+        Layer newLayer;
+        newLayer.rectPacker = std::make_unique<RectPacker>(width - PADDING, height - PADDING);
 
-        commandQueue.cmdClearTexture(*mTextureArray, Colors::transparent);
+        {
+            BaseTextureInfo textureInfo{};
+            textureInfo.width = width;
+            textureInfo.height = height;
+            textureInfo.arrayLayers = 1;
+            textureInfo.format = Format::RGBA8UNorm;
+            textureInfo.minFilter = Filter::Nearest;
+            textureInfo.magFilter = Filter::Nearest;
+
+            newLayer.texture = instance.createTexture(textureInfo);
+            commandQueue.cmdClearTexture(*newLayer.texture, Colors::transparent);
+        }
+
+        layers.push_back(std::move(newLayer));
     }
 }

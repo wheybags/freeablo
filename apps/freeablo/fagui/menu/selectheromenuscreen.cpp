@@ -1,4 +1,5 @@
 #include "selectheromenuscreen.h"
+
 #include "../../engine/enginemain.h"
 #include "../../farender/animationplayer.h"
 #include "../../farender/renderer.h"
@@ -8,6 +9,7 @@
 #include "../nkhelpers.h"
 #include "diabloexe/characterstats.h"
 #include "startingmenuscreen.h"
+#include <memory>
 
 namespace FAGui
 {
@@ -25,14 +27,10 @@ namespace FAGui
     {
         auto renderer = FARender::Renderer::get();
         mSmLogo = menu.createSmLogo();
-        mFocus.reset(new FARender::AnimationPlayer());
-        mFocus->playAnimation(renderer->loadImage("ui_art/focus.pcx&trans=0,255,0&vanim=30", false),
+        mFocus = std::make_unique<FARender::AnimationPlayer>();
+        mFocus->playAnimation(renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.mediumPentagramSpin),
                               FAWorld::World::getTicksInPeriod("0.06"),
                               FARender::AnimationPlayer::AnimationType::Looped);
-        mFocus16.reset(new FARender::AnimationPlayer());
-        mFocus16->playAnimation(renderer->loadImage("ui_art/focus16.pcx&trans=0,255,0&vanim=20", false),
-                                FAWorld::World::getTicksInPeriod("0.06"),
-                                FARender::AnimationPlayer::AnimationType::Looped);
         setType(ContentType::chooseClass);
     }
 
@@ -199,7 +197,7 @@ namespace FAGui
         nk_layout_space_push(ctx, {26, 207, 180, 76});
         {
             auto renderer = FARender::Renderer::get();
-            auto heros_img = renderer->loadImage("ui_art/heros.pcx&vanim=76", false)
+            auto heros_img = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.characterSelectPortraits)
                                  ->getNkImage(mSelectedCharacterInfo ? static_cast<int>(mSelectedCharacterInfo->charClass) : 3);
             nk_image(ctx, heros_img);
         }
@@ -208,14 +206,15 @@ namespace FAGui
 
     void SelectHeroMenuScreen::update(nk_context* ctx)
     {
-        for (auto ptr : {mSmLogo.get(), mFocus.get(), mFocus16.get()})
-            ptr->update();
+        for (auto& animation : {mSmLogo.get(), mFocus.get()})
+            animation->update();
+
         Misc::ScopedSetter<float> setter(ctx->style.window.border, 0);
         auto renderer = FARender::Renderer::get();
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
-        auto bg = renderer->loadImage("ui_art/selhero.pcx", false)->getNkImage();
-        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(bg));
+        struct nk_image background = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.characterSelectBackground)->getNkImage();
+        nk_style_push_style_item(ctx, &ctx->style.window.fixed_background, nk_style_item_image(background));
         if (nk_begin(
                 ctx,
                 "selectHeroScreen",

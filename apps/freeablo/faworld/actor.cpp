@@ -1,8 +1,6 @@
 #include "actor.h"
-#include "../engine/enginemain.h"
 #include "../engine/threadmanager.h"
 #include "../fasavegame/gameloader.h"
-#include "actor/attackstate.h"
 #include "actor/basestate.h"
 #include "actorstats.h"
 #include "behaviour.h"
@@ -12,12 +10,9 @@
 #include "player.h"
 #include "spells.h"
 #include "world.h"
-#include <diabloexe/diabloexe.h>
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
 #include <fmt/format.h>
-#include <misc/misc.h>
-#include <random/random.h>
 
 namespace FAWorld
 {
@@ -53,36 +48,28 @@ namespace FAWorld
             mMissiles.end());
     }
 
-    Actor::Actor(World& world, const std::string& walkAnimPath, const std::string& idleAnimPath, const std::string& dieAnimPath) : mStats(*this), mWorld(world)
+    Actor::Actor(World& world) : mStats(*this), mWorld(world)
     {
         mStats.initialise(BaseStats());
-
         mFaction = Faction::heaven();
-        if (!dieAnimPath.empty())
-            mAnimation.setAnimationSprites(AnimState::dead, FARender::Renderer::get()->loadImage(dieAnimPath, true));
-        if (!walkAnimPath.empty())
-            mAnimation.setAnimationSprites(AnimState::walk, FARender::Renderer::get()->loadImage(walkAnimPath, true));
-        if (!idleAnimPath.empty())
-            mAnimation.setAnimationSprites(AnimState::idle, FARender::Renderer::get()->loadImage(idleAnimPath, true));
-
-        mActorStateMachine.reset(new StateMachine(this, new ActorState::BaseState()));
-
+        mActorStateMachine = std::make_unique<StateMachine>(this, new ActorState::BaseState());
         mId = mWorld.getNewId();
     }
 
-    Actor::Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe) : Actor(world, npc.celPath, npc.celPath)
+    Actor::Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe) : Actor(world)
     {
-        if (auto id = npc.animationSequenceId)
-            mAnimation.setIdleFrameSequence(exe.getTownerAnimation()[*id]);
+        if (npc.animationSequenceId)
+            mAnimation.setIdleFrameSequence(exe.getTownerAnimation()[*npc.animationSequenceId]);
 
         mMenuTalkData = npc.menuTalkData;
         mGossipData = npc.gossipData;
-        mQuestTalkData = npc.questTalkData;
-        mBeforeDungeonTalkData = npc.beforeDungeonTalkData;
+        // mQuestTalkData = npc.questTalkData;
         mNpcId = npc.id;
         mName = npc.name;
 
         mIsTowner = true;
+
+        this->restoreAnimationsForNpc();
     }
 
     Actor::Actor(World& world, FASaveGame::GameLoader& loader) : mMoveHandler(loader), mAnimation(loader), mStats(*this, loader), mWorld(world)
@@ -112,6 +99,13 @@ namespace FAWorld
             mMenuTalkData[key] = loader.load<std::string>();
         }
 
+        uint32_t gossipDataSize = loader.load<uint32_t>();
+        for (uint32_t i = 0; i < gossipDataSize; i++)
+        {
+            std::string key = loader.load<std::string>();
+            mGossipData[key].load(loader);
+        }
+
         mTarget.load(loader);
         mInventory.load(loader);
 
@@ -124,6 +118,9 @@ namespace FAWorld
             mMissiles.push_back(std::make_unique<Missile::Missile>(loader));
 
         mType = ActorType(loader.load<uint8_t>());
+
+        if (!mNpcId.empty())
+            this->restoreAnimationsForNpc();
     }
 
     void Actor::save(FASaveGame::GameSaver& saver) const
@@ -156,6 +153,13 @@ namespace FAWorld
         {
             saver.save(pair.first);
             saver.save(pair.second);
+        }
+
+        saver.save(uint32_t(mGossipData.size()));
+        for (const auto& pair : mGossipData)
+        {
+            saver.save(pair.first);
+            pair.second.save(saver);
         }
 
         mTarget.save(saver);
@@ -421,5 +425,12 @@ namespace FAWorld
     {
         auto missile = std::make_unique<Missile::Missile>(id, *this, targetPoint);
         mMissiles.push_back(std::move(missile));
+    }
+
+    void Actor::restoreAnimationsForNpc()
+    {
+        FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
+        mAnimation.setAnimationSprites(AnimState::idle, spriteLoader.getSprite(spriteLoader.mNpcIdleAnimations[mNpcId]));
+        mAnimation.markAnimationsRestoredAfterGameLoad();
     }
 }

@@ -5,15 +5,15 @@
 #include "cel/celdecoder.h"
 #include "cel/celfile.h"
 #include "fontinfo.h"
+#include "levelrenderer.h"
 #include <Image/image.h>
 #include <audio/fa_audio.h>
-#include <functional>
-#include <input/inputmanager.h>
-#include <iostream>
 #include <misc/assert.h>
-#include <misc/stringops.h>
 #include <numeric>
+#include <render/cursor.h>
 #include <render/levelobjects.h>
+#include <render/renderinstance.h>
+#include <render/texture.h>
 #include <thread>
 
 namespace FARender
@@ -24,32 +24,29 @@ namespace FARender
         return &defaultSprite;
     }
 
-    Renderer* Renderer::mRenderer = NULL;
+    Renderer* Renderer::mRenderer = nullptr;
 
-    std::unique_ptr<CelFontInfo> Renderer::generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData, int spacing)
+    std::unique_ptr<CelFontInfo> Renderer::generateCelFont(FASpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing)
     {
         std::unique_ptr<CelFontInfo> ret(new CelFontInfo());
-        auto mergedTex = mSpriteManager.get(texturePath + "&convertToSingleTexture", false);
-        ret->initByFontData(fontData, mergedTex->getWidth(), spacing);
+        ret->initByFontData(fontData, fontTexture->getWidth(), spacing);
         ret->nkFont.userdata.ptr = ret.get();
-        ret->nkFont.height = mergedTex->getHeight();
+        ret->nkFont.height = fontTexture->getHeight();
         ret->nkFont.width = &CelFontInfo::getWidth;
-        //        mSpriteManager.get(texturePath);
         ret->nkFont.query = &CelFontInfo::queryGlyph;
-        ret->nkFont.texture = mergedTex->getNkImage().handle;
+        ret->nkFont.texture = fontTexture->getNkImage().handle;
         return ret;
     }
 
-    std::unique_ptr<PcxFontInfo> Renderer::generateFont(const std::string& pcxPath, const std::string& binPath, const PcxFontInitData& fontInitData)
+    std::unique_ptr<PcxFontInfo> Renderer::generateFont(FASpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData)
     {
         std::unique_ptr<PcxFontInfo> ret(new PcxFontInfo());
-        auto tex = mSpriteManager.get(pcxPath, false);
         ret->init(binPath, fontInitData);
         ret->nkFont.userdata.ptr = ret.get();
         ret->nkFont.height = fontInitData.spacingY;
         ret->nkFont.width = &PcxFontInfo::getWidth;
         ret->nkFont.query = &PcxFontInfo::queryGlyph;
-        ret->nkFont.texture = tex->getNkImage().handle;
+        ret->nkFont.texture = fontTexture->getNkImage().handle;
         return ret;
     }
 
@@ -61,76 +58,70 @@ namespace FARender
         nk_font_atlas_begin(&atlas);
     }
 
-    nk_handle nk_fa_font_stash_end(SpriteManager& spriteManager, nk_context* ctx, nk_font_atlas& atlas, nk_draw_null_texture& nullTex)
+    std::unique_ptr<FASpriteGroup> nk_fa_font_stash_end(nk_context* ctx, NuklearDevice::InitData& initData)
     {
-        const void* image;
-        int w, h;
-        image = nk_font_atlas_bake(&atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
+        int width, height;
+        const void* imageData = nk_font_atlas_bake(&initData.atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
 
-        FASpriteGroup* sprite = spriteManager.getFromRaw(Image(w, h, reinterpret_cast<ByteColour*>(const_cast<void*>(image)), PointerDataType::Copy));
-        spriteManager.setImmortal(sprite->getCacheIndex(), true);
+        std::unique_ptr<FASpriteGroup> sprite = std::make_unique<FASpriteGroup>();
+        {
+            Render::BaseTextureInfo textureInfo;
+            textureInfo.width = width;
+            textureInfo.height = height;
+            textureInfo.format = Render::Format::RGBA8UNorm;
+            std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
+            texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData));
 
-        nk_handle handle = sprite->getNkImage().handle;
-        nk_font_atlas_end(&atlas, handle, &nullTex);
+            sprite->init(std::move(texture));
+        }
 
-        if (atlas.default_font)
-            nk_style_set_font(ctx, &atlas.default_font->handle);
+        nk_font_atlas_end(&initData.atlas, sprite->getNkImage().handle, &initData.nullTexture);
 
-        return handle;
+        if (initData.atlas.default_font)
+            nk_style_set_font(ctx, &initData.atlas.default_font->handle);
+
+        return sprite;
     }
 
-    Renderer::Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen) : mDone(false), mSpriteManager(1024), mWidthHeightTmp(0)
+    Renderer::Renderer(const DiabloExe::DiabloExe& exe, int32_t windowWidth, int32_t windowHeight, bool fullscreen)
+        : mSpriteLoader(exe), mDone(false), mWidthHeightTmp(0)
     {
         release_assert(!mRenderer); // singleton, only one instance
 
-        // Render initialization.
-        {
-            Render::RenderSettings settings;
-            settings.windowWidth = windowWidth;
-            settings.windowHeight = windowHeight;
-            settings.fullscreen = fullscreen;
+        Render::RenderSettings settings = {};
+        settings.windowWidth = windowWidth;
+        settings.windowHeight = windowHeight;
+        settings.fullscreen = fullscreen;
 
+        Render::init("Freeablo", settings);
+
+        // setup gui
+        {
             nk_init_default(&mNuklearContext, nullptr);
-            mNuklearContext.clip.copy = nullptr;  // nk_sdl_clipbard_copy;
-            mNuklearContext.clip.paste = nullptr; // nk_sdl_clipbard_paste;
+            mNuklearContext.clip.copy = nullptr;  // nk_sdl_clipboard_copy;
+            mNuklearContext.clip.paste = nullptr; // nk_sdl_clipboard_paste;
             mNuklearContext.clip.userdata = nk_handle_ptr(0);
 
-            Render::init("Freeablo", settings, mNuklearGraphicsData, &mNuklearContext);
+            NuklearDevice::InitData initData;
 
-            // Load Fonts: if none of these are loaded a default font will be used
-            // Load Cursor: if you uncomment cursor loading please hide the cursor
-            {
-                nk_fa_font_stash_begin(mNuklearGraphicsData.atlas);
-                // struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);
-                // struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 16, 0);
-                // struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);
-                // struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);
-                // struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);
-                // struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);
-                mNuklearGraphicsData.dev.font_tex =
-                    nk_fa_font_stash_end(mSpriteManager, &mNuklearContext, mNuklearGraphicsData.atlas, mNuklearGraphicsData.dev.null);
-                // nk_style_load_all_cursors(ctx, atlas->cursors);
-                // nk_style_set_font(ctx, &roboto->handle);
-            }
-
-            mStates = (RenderState*)malloc(sizeof(RenderState) * mNumRenderStates);
-
-            for (size_t i = 0; i < mNumRenderStates; ++i)
-                new (mStates + i) RenderState(mNuklearGraphicsData);
-
-            mRenderer = this;
+            nk_fa_font_stash_begin(initData.atlas);
+            // struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);
+            mNuklearFontTexture = nk_fa_font_stash_end(&mNuklearContext, initData);
+            mNuklearGraphicsData = std::make_unique<NuklearDevice>(*Render::mainRenderInstance, std::move(initData));
         }
+
+        mStates.reserve(NUM_RENDER_STATES);
+        for (size_t i = 0; i < NUM_RENDER_STATES; ++i)
+            mStates.emplace_back(*mNuklearGraphicsData);
+
+        mRenderer = this;
+
+        mLevelRenderer = std::make_unique<LevelRenderer>();
     }
 
     Renderer::~Renderer()
     {
-        mRenderer = NULL;
-
-        for (size_t i = 0; i < mNumRenderStates; ++i)
-            mStates[i].~RenderState();
-
-        free(mStates);
-        destroyNuklearGraphicsContext(mNuklearGraphicsData);
+        mRenderer = nullptr;
         nk_free(&mNuklearContext);
 
         Render::quit();
@@ -143,19 +134,19 @@ namespace FARender
         const Level::Level& level = gameLevel.mLevel;
 
         Tileset tileset;
-        tileset.minTops = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), true, true);
-        tileset.minBottoms = mSpriteManager.getTileset(level.getTileSetPath(), level.getMinPath(), false, true);
+        tileset.minTops = mSpriteLoader.getSprite(mSpriteLoader.mTilesetTops[level.getTilesetId()]);
+        tileset.minBottoms = mSpriteLoader.getSprite(mSpriteLoader.mTilesetBottoms[level.getTilesetId()]);
         // Special Cels may not exist for certain levels.
-        tileset.mSpecialSprites = NULL;
-        if (!level.getSpecialCelPath().empty())
-            tileset.mSpecialSprites = mSpriteManager.get(level.getSpecialCelPath(), true);
+        tileset.mSpecialSprites = nullptr;
+        if (mSpriteLoader.mTilesetSpecials.count(level.getTilesetId()) != 0)
+            tileset.mSpecialSprites = mSpriteLoader.getSprite(mSpriteLoader.mTilesetSpecials[level.getTilesetId()]);
         tileset.mSpecialSpriteMap = level.getSpecialCelMap();
         return tileset;
     }
 
     RenderState* Renderer::getFreeState()
     {
-        for (size_t i = 0; i < mNumRenderStates; i++)
+        for (size_t i = 0; i < mStates.size(); i++)
         {
             if (mStates[i].ready)
             {
@@ -164,18 +155,14 @@ namespace FARender
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 
     void Renderer::setCurrentState(RenderState* current) { Engine::ThreadManager::get()->sendRenderState(current); }
 
-    FASpriteGroup* Renderer::loadImage(const std::string& path, bool trim) { return mSpriteManager.get(path, trim); }
-
-    std::string Renderer::getPathForIndex(uint32_t index) { return mSpriteManager.getPathForIndex(index); }
-
     Render::Tile Renderer::getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos)
     {
-        return Render::getTileByScreenPos(x, y, screenPos.getFractionalPos());
+        return LevelRenderer::getTileByScreenPos(x, y, screenPos.getFractionalPos());
     }
 
     void Renderer::waitUntilDone()
@@ -206,7 +193,7 @@ namespace FARender
             auto& position = object.position;
 
             Render::LevelObject obj;
-            obj.spriteCacheIndex = object.spriteGroup->getCacheIndex();
+            obj.sprite = object.spriteGroup->getSpriteGroup();
             obj.spriteFrame = object.frame;
             obj.fractionalPos = position.getFractionalPos();
             obj.hoverColor = object.hoverColor;
@@ -218,7 +205,7 @@ namespace FARender
         }
     }
 
-    bool Renderer::renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload)
+    bool Renderer::renderFrame(RenderState* state)
     {
         if (mDone)
         {
@@ -232,9 +219,6 @@ namespace FARender
 
         Render::clear(0, 0, 0);
 
-        for (auto id : spritesToPreload)
-            mSpriteManager.get(id);
-
         if (state)
         {
             if (state->level)
@@ -242,21 +226,18 @@ namespace FARender
                 fill(*state->level, state->mObjects, mLevelObjects);
                 fill(*state->level, state->mItems, mItems);
 
-                Render::drawLevel(state->level->mLevel,
-                                  state->tileset.minTops->getCacheIndex(),
-                                  state->tileset.minBottoms->getCacheIndex(),
-                                  state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->getCacheIndex() : 0,
-                                  state->tileset.mSpecialSpriteMap,
-                                  &mSpriteManager,
-                                  mLevelObjects,
-                                  mItems,
-                                  state->mPos.getFractionalPos());
+                mLevelRenderer->drawLevel(state->level->mLevel,
+                                          state->tileset.minTops->getSpriteGroup(),
+                                          state->tileset.minBottoms->getSpriteGroup(),
+                                          state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->getSpriteGroup() : nullptr,
+                                          state->tileset.mSpecialSpriteMap,
+                                          mLevelObjects,
+                                          mItems,
+                                          state->mPos.getFractionalPos());
             }
 
-            Render::drawGui(state->nuklearData, &mSpriteManager);
-            {
-                Renderer::drawCursor(state);
-            }
+            state->nuklearData.render({Render::getWindowSize().windowWidth, Render::getWindowSize().windowHeight}, *Render::mainCommandQueue);
+            Renderer::updateCursor(state);
         }
 
         Render::draw();
@@ -270,15 +251,18 @@ namespace FARender
         return true;
     }
 
-    void Renderer::drawCursor(RenderState* State)
+    void Renderer::updateCursor(RenderState* State)
     {
-        Render::FACursor newCursor = mCurrentCursor;
-
-        // Only need to update the cursor if it has changed.
-        if (!State->mCursorPath.empty() && (State->mCursorFrame != mCurrentCursorFrame))
+        if (State->mCursorPath.empty())
+        {
+            Render::Cursor::setDefaultCursor();
+        }
+        else if (State->mCursorFrame != mCurrentCursorFrame)
         {
             Cel::CelFile cel(State->mCursorPath);
-            Cel::CelFrame& celFrame = cel[State->mCursorFrame];
+            std::vector<Image> images = cel.decode();
+
+            Cel::CelFrame& celFrame = images[State->mCursorFrame];
             mCursorSize = {celFrame.width(), celFrame.height()};
 
             int32_t hot_x = 0, hot_y = 0;
@@ -287,19 +271,12 @@ namespace FARender
                 hot_x = mCursorSize.x / 2;
                 hot_y = mCursorSize.y / 2;
             }
-            newCursor = Render::createCursor(celFrame, hot_x, hot_y);
 
-            Render::drawCursor(newCursor);
-            if (mCurrentCursor != NULL)
-            {
-                Render::freeCursor(mCurrentCursor);
-            }
-            mCurrentCursor = newCursor;
+            mCurrentCursor = std::make_unique<Render::Cursor>(celFrame, hot_x, hot_y);
+            mCurrentCursor->activateCursor();
             mCurrentCursorFrame = State->mCursorFrame;
         }
     }
-
-    void Renderer::cleanup() { mSpriteManager.clear(); }
 
     void Renderer::getWindowDimensions(int32_t& w, int32_t& h)
     {
@@ -312,8 +289,8 @@ namespace FARender
 
     void Renderer::loadFonts(const DiabloExe::DiabloExe& exe)
     {
-        mSmallTextFont = generateCelFont("ctrlpan/smaltext.cel", exe.getFontData("smaltext"), 1);
-        mBigTGoldFont = generateCelFont("data/bigtgold.cel", exe.getFontData("bigtgold"), 2);
+        mSmallTextFont = generateCelFont(mSpriteLoader.getSprite(mSpriteLoader.mGuiSprites.smallTextFont), exe.getFontData("smaltext"), 1);
+        mBigTGoldFont = generateCelFont(mSpriteLoader.getSprite(mSpriteLoader.mGuiSprites.bigTGoldFont), exe.getFontData("bigtgold"), 2);
 
         // Font textures are resized as they are very tall (some GPUs don't support textures larger than 8192x8192).
         // Resizing the font image also transposes the sub images (LayoutOrder vertical -> horizontal) in this case i.e.
@@ -326,20 +303,17 @@ namespace FARender
                                           {30, 512, 496, 32, 31, PcxFontInitData::LayoutOrder::horizontal},
                                           {42, 640, 672, 40, 42, PcxFontInitData::LayoutOrder::horizontal}};
 
-        for (auto& initData : fontInitData)
+        for (size_t i = 0; i < sizeof(fontInitData) / sizeof(*fontInitData); i++)
         {
+            const PcxFontInitData& initData = fontInitData[i];
             std::string prefix = "ui_art/font" + std::to_string(initData.fontSize);
-            std::stringstream postfix;
-            postfix << "&trans=0,255,0";
-            postfix << "&resize=" << initData.textureWidth << "x" << initData.textureHeight;
-            postfix << "&tileSize=" << initData.spacingX << "x" << initData.spacingY;
-            mGoldFont[initData.fontSize] = generateFont(prefix + "g.pcx" + postfix.str(), prefix + ".bin", initData);
+
+            mGoldFont[initData.fontSize] = generateFont(mSpriteLoader.getSprite(*((&mSpriteLoader.mGuiSprites.fontGold16) + i)), prefix + ".bin", initData);
             if (initData.fontSize != 42)
-                mSilverFont[initData.fontSize] = generateFont(prefix + "s.pcx" + postfix.str(), prefix + ".bin", initData);
+                mSilverFont[initData.fontSize] =
+                    generateFont(mSpriteLoader.getSprite(*((&mSpriteLoader.mGuiSprites.fontSilver16) + i)), prefix + ".bin", initData);
         }
     }
-
-    bool Renderer::getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites) { return mSpriteManager.getAndClearSpritesNeedingPreloading(sprites); }
 
     nk_user_font* Renderer::smallFont() const { return &mSmallTextFont->nkFont; }
 

@@ -9,7 +9,7 @@ namespace FAGui
     {
         auto renderer = FARender::Renderer::get();
 
-        auto boxTex = renderer->loadImage("data/textbox.cel", false);
+        FARender::FASpriteGroup* boxTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.textbox);
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
 

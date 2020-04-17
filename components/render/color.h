@@ -20,6 +20,9 @@ namespace Render
     {
         static constexpr Color white = Color(1, 1, 1, 1);
         static constexpr Color black = Color(0, 0, 0, 1);
+        static constexpr Color red = Color(1, 0, 0, 1);
+        static constexpr Color green = Color(0, 1, 0, 1);
+        static constexpr Color blue = Color(0, 0, 1, 1);
         static constexpr Color transparent = Color(0, 0, 0, 0);
     };
 }

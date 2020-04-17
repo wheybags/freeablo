@@ -17,8 +17,12 @@ namespace FAWorld::Missile
     public:
         virtual ~MissileGraphic();
 
-        MissileGraphic(std::string initialGraphicPath, std::string mainGraphicPath, std::optional<int32_t> singleFrame, Position position, GameLevel* level);
-        MissileGraphic(FASaveGame::GameLoader& loader);
+        MissileGraphic(FARender::SpriteLoader::SpriteDefinition initialGraphic,
+                       FARender::SpriteLoader::SpriteDefinition mainGraphic,
+                       std::optional<int32_t> singleFrame,
+                       Position position,
+                       GameLevel* level);
+        explicit MissileGraphic(FASaveGame::GameLoader& loader);
 
         virtual void save(FASaveGame::GameSaver& saver) const;
         virtual void update();
@@ -33,9 +37,11 @@ namespace FAWorld::Missile
         Position mCurPos;
 
     protected:
-        void playAnimation(std::string path, FARender::AnimationPlayer::AnimationType animationType);
+        void playAnimation(FARender::FASpriteGroup* spriteGroup, FARender::AnimationPlayer::AnimationType animationType);
 
-        std::string mMainGraphicPath;
+        FARender::SpriteLoader::SpriteDefinition mInitialGraphic;
+        FARender::SpriteLoader::SpriteDefinition mMainGraphic;
+
         std::optional<int32_t> mSingleFrame;
         GameLevel* mLevel;
         FARender::AnimationPlayer mAnimationPlayer;

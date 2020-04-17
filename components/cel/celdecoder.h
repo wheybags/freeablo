@@ -16,10 +16,11 @@ namespace Cel
     {
     public:
         explicit CelDecoder(std::string celPath);
-        void decode();
-        CelFrame& operator[](int32_t index);
+        std::vector<Image> decode();
         int32_t numFrames() const;
         int32_t animationLength() const;
+
+        static void loadConfigFiles();
 
     private:
         typedef std::vector<uint8_t> FrameBytes;
@@ -55,7 +56,6 @@ namespace Cel
 
     private:
         std::vector<FrameBytes> mFrames;
-        std::map<int32_t, CelFrame> mCache;
         std::string mCelPath;
         std::string mCelName;
         Pal mPal;
@@ -66,6 +66,7 @@ namespace Cel
         int mFrameHeight = 0;
         int mHeaderSize = 0;
         int32_t mAnimationLength = 0;
+
         static std::unique_ptr<Settings::Settings> mSettingsCel;
         static std::unique_ptr<Settings::Settings> mSettingsCl2;
     };

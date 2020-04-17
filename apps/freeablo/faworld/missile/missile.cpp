@@ -52,21 +52,14 @@ namespace FAWorld::Missile
         return missileDataTable.at((size_t)mMissileId);
     }
 
-    const DiabloExe::MissileGraphics& Missile::missileGraphics() const
+    const FARender::SpriteLoader::SpriteDefinition& Missile::getGraphic(int32_t i) const
     {
-        const auto& missileGraphicsTable = Engine::EngineMain::get()->exe().getMissileGraphicsTable();
-        return missileGraphicsTable.at((size_t)missileData().mMissileGraphicsId);
-    }
+        FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
 
-    std::string Missile::getGraphicsPath(int32_t i) const
-    {
-        release_assert(i >= 0 && i < missileGraphics().mNumAnimationFiles);
-        std::stringstream path;
-        path << "missiles/" << missileGraphics().mFilename;
-        if (missileGraphics().mNumAnimationFiles > 1)
-            path << i + 1;
-        path << ".cl2";
-        return path.str();
+        const std::vector<FARender::SpriteLoader::SpriteDefinition>& directions = spriteLoader.mMissileAnimations[missileData().mMissileGraphicsId];
+        release_assert(i >= 0 && i < int32_t(directions.size()));
+
+        return directions[i];
     }
 
     void Missile::playImpactSound()

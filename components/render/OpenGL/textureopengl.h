@@ -23,6 +23,7 @@ namespace Render
 
     private:
         GLenum getBindPoint() const;
+        bool isTextureArray() const { return mInfo.arrayLayers > 1 || mInfo.forceTextureToBeATextureArray; }
 
     private:
         GLuint mId = 0;

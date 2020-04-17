@@ -42,35 +42,35 @@ namespace Engine
         if (!mSettings.loadUserSettings())
             return;
 
+        Cel::CelDecoder::loadConfigFiles();
+
         auto resolutionWidth = mSettings.get<size_t>("Display", "resolutionWidth");
         auto resolutionHeight = mSettings.get<size_t>("Display", "resolutionHeight");
         const bool fullscreen = mSettings.get<bool>("Display", "fullscreen");
+
         auto pathEXE = mSettings.get<std::string>("Game", "PathEXE");
         if (pathEXE.empty())
             pathEXE = "Diablo.exe";
+        mExe = std::make_unique<DiabloExe::DiabloExe>(pathEXE);
+        if (!mExe->isLoaded())
+            return;
 
         Engine::ThreadManager threadManager;
-        FARender::Renderer renderer(resolutionWidth, resolutionHeight, fullscreen);
+        FARender::Renderer renderer(*mExe, resolutionWidth, resolutionHeight, fullscreen);
+        renderer.mSpriteLoader.load();
+
         mInputManager = std::make_shared<EngineInputManager>(renderer.getNuklearContext());
         mInputManager->registerKeyboardObserver(this);
-        std::thread mainThread([&] { this->runGameLoop(variables, pathEXE); });
+        std::thread mainThread([&] { this->runGameLoop(variables); });
         threadManager.run();
 
         mainThread.join();
     }
 
-    void EngineMain::runGameLoop(const cxxopts::ParseResult& variables, const std::string& pathEXE)
+    void EngineMain::runGameLoop(const cxxopts::ParseResult& variables)
     {
         FARender::Renderer& renderer = *FARender::Renderer::get();
-
         FAWorld::PlayerClass characterClass = FAWorld::playerClassFromString(variables["character"].as<std::string>());
-
-        mExe = std::make_unique<DiabloExe::DiabloExe>(pathEXE);
-        if (!mExe->isLoaded())
-        {
-            renderer.stop();
-            return;
-        }
 
         FAWorld::ItemFactory itemFactory(*mExe, Random::DummyRng::instance);
         mPlayerFactory = std::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
@@ -122,7 +122,7 @@ namespace Engine
         if (currentLevel != -1)
             mWorld->setLevel(currentLevel);
 
-        using clock = std::chrono::high_resolution_clock;
+        using clock = std::chrono::steady_clock;
 
         int32_t lastLevelIndex = -1;
 
@@ -197,10 +197,6 @@ namespace Engine
                 }
                 state->nuklearData.fill(ctx);
             }
-
-            std::vector<uint32_t> spritesToPreload;
-            if (renderer.getAndClearSpritesNeedingPreloading(spritesToPreload))
-                ThreadManager::get()->sendSpritesForPreload(spritesToPreload);
 
             nk_clear(ctx);
 

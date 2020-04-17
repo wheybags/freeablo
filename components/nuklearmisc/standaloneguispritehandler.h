@@ -1,9 +1,11 @@
 #pragma once
+#include "nuklearframedump.h"
+#include <cstdint>
 #include <fa_nuklear.h>
 #include <input/inputmanager.h>
 #include <map>
 #include <render/render.h>
-#include <stdint.h>
+#include <render/texture.h>
 #include <vector>
 
 namespace NuklearMisc
@@ -13,52 +15,39 @@ namespace NuklearMisc
     class GuiSprite
     {
     public:
-        GuiSprite(Render::SpriteGroup* sprite, uint32_t cacheIndex, StandaloneGuiHandler* handler);
+        explicit GuiSprite(const std::vector<Image>& images);
+        explicit GuiSprite(Image&& image);
+        explicit GuiSprite(std::vector<std::unique_ptr<Render::Texture>>&& textures);
+        explicit GuiSprite(std::unique_ptr<Render::Texture>&& texture);
         ~GuiSprite();
 
-        struct nk_image getNkImage(int32_t frame) { return nk_image_handle(nk_handle_ptr(&mFrameIds[frame])); }
-
-        Render::SpriteGroup* getSprite() { return mSprite; }
+        int32_t size() const { return int32_t(mFrameIds.size()); }
+        struct nk_image getNkImage(int32_t frame = 0);
 
     private:
-        Render::SpriteGroup* mSprite;
-        StandaloneGuiHandler* mHandler;
-        uint32_t mCacheIndex;
-
-        struct id
-        {
-            uint32_t cacheIndex;
-            uint32_t frameIndex;
-        };
-
-        std::vector<id> mFrameIds;
+        std::vector<std::unique_ptr<Render::Texture>> mTextures;
+        std::vector<FANuklearTextureHandle> mFrameIds;
     };
 
-    class StandaloneGuiHandler : private Render::SpriteCacheBase
+    class StandaloneGuiHandler
     {
     public:
         StandaloneGuiHandler(const std::string& title, const Render::RenderSettings& renderSettings);
         ~StandaloneGuiHandler();
 
-        GuiSprite* getSprite(Render::SpriteGroup* sprite);
         nk_context* getNuklearContext() { return &mCtx; }
         bool update();
 
     private:
         static void fontStashBegin(nk_font_atlas& atlas);
-        nk_handle fontStashEnd(nk_font_atlas& atlas, nk_draw_null_texture& nullTex);
+        static std::unique_ptr<GuiSprite> fontStashEnd(nk_context* ctx, NuklearDevice::InitData& initData);
 
-        Render::SpriteGroup* get(uint32_t key) override { return mSprites[key]->getSprite(); }
+        std::unique_ptr<NuklearDevice> mNuklearGraphicsContext;
+        std::unique_ptr<GuiSprite> mNuklearFontTexture;
 
-        virtual void setImmortal(uint32_t, bool) override {}
-
-        uint32_t mNextFrameId = 1;
-        std::map<uint32_t, GuiSprite*> mSprites;
-
-        Render::NuklearGraphicsContext mNuklearGraphicsContext;
-        nk_context mCtx;
+        nk_context mCtx = {};
         Input::InputManager mInput;
-        NuklearFrameDump mNuklearData;
+        std::unique_ptr<NuklearFrameDump> mNuklearData;
 
         friend class GuiSprite;
     };

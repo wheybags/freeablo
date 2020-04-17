@@ -47,54 +47,54 @@ namespace FAGui
                 gossip.second.talkAudioPath = "sfx/towners/witch49.wav";
         }
 
-        auto& questData = mActor->getQuestTalkData();
-        for (auto& quest : questData)
-        {
-            if (quest.first == "anvilOfFury")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "archbishopLazarus")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "blackMushroom")
-            {
-                quest.second.activation.talkAudioPath = "";
-                quest.second.returned[0].talkAudioPath = "";
-                quest.second.returned[1].talkAudioPath = "";
-                quest.second.returned[2].talkAudioPath = "";
-                quest.second.completion.talkAudioPath = "";
-            }
-
-            else if (quest.first == "hallsOfTheBlind")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "lachdanan")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "ogdensSign")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "poisonedWaterSupply")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "theButcher")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "theChamberOfBone")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "theCurseOfKingLeoric")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "theMagicRock")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "valor")
-                quest.second.info.talkAudioPath = "";
-
-            else if (quest.first == "warlordOfBlood")
-                quest.second.info.talkAudioPath = "";
-        }
+        //        auto& questData = mActor->getQuestTalkData();
+        //        for (auto& quest : questData)
+        //        {
+        //            if (quest.first == "anvilOfFury")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "archbishopLazarus")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "blackMushroom")
+        //            {
+        //                quest.second.activation.talkAudioPath = "";
+        //                quest.second.returned[0].talkAudioPath = "";
+        //                quest.second.returned[1].talkAudioPath = "";
+        //                quest.second.returned[2].talkAudioPath = "";
+        //                quest.second.completion.talkAudioPath = "";
+        //            }
+        //
+        //            else if (quest.first == "hallsOfTheBlind")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "lachdanan")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "ogdensSign")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "poisonedWaterSupply")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "theButcher")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "theChamberOfBone")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "theCurseOfKingLeoric")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "theMagicRock")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "valor")
+        //                quest.second.info.talkAudioPath = "";
+        //
+        //            else if (quest.first == "warlordOfBlood")
+        //                quest.second.info.talkAudioPath = "";
+        //        }
     }
 
     CharacterDialoguePopup::DialogData AdriaDialog::getDialogData()

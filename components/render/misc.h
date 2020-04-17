@@ -1,4 +1,5 @@
 #pragma once
+#include "atlastexture.h"
 #include <string>
 #include <vector>
 
@@ -6,37 +7,33 @@ struct SDL_Surface;
 
 namespace Render
 {
-    typedef void* Sprite;
-    typedef SDL_Surface* FASurface;
+    typedef const AtlasTextureEntry* Sprite;
 
     class SpriteGroup
     {
     public:
-        explicit SpriteGroup(const std::string& path, bool trim);
-        explicit SpriteGroup(std::vector<Sprite>&& sprites) : mSprites(std::move(sprites)), mAnimLength(sprites.size()) {}
-        static bool canDeleteIndividualSprites();
-        void destroy();
+        explicit SpriteGroup(std::vector<Sprite>&& sprites, int32_t animLength = -1) : mSprites(std::move(sprites))
+        {
+            if (animLength != -1)
+                mAnimLength = animLength;
+            else
+                mAnimLength = mSprites.size();
 
-        Sprite& operator[](size_t index);
+            debug_assert(!mSprites.empty());
+            mWidth = mSprites[0]->mWidth;
+            mHeight = mSprites[0]->mHeight;
+        }
+
+        Sprite& operator[](size_t index) { return mSprites.at(index); }
         size_t size() { return mSprites.size(); }
 
         size_t animLength() { return mAnimLength; }
         int32_t getWidth() const { return mWidth; }
         int32_t getHeight() const { return mHeight; }
 
-        static void toPng(const std::string& celPath, const std::string& pngPath);
-        static void toGif(const std::string& celPath, const std::string& gifPath);
-
     private:
         std::vector<Sprite> mSprites;
         int32_t mWidth = 0, mHeight = 0;
         size_t mAnimLength;
-    };
-
-    class SpriteCacheBase
-    {
-    public:
-        virtual SpriteGroup* get(uint32_t key) = 0;
-        virtual void setImmortal(uint32_t index, bool immortal) = 0;
     };
 }

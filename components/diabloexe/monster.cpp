@@ -114,6 +114,7 @@ namespace DiabloExe
            << "\tsecondAttackPlayback: " << secondAttackPlayback << "," << std::endl
 
            << "\tmonsterName : " << monsterName << "," << std::endl
+           << "\tidName : " << idName << "," << std::endl
 
            << "\tminDunLevel: " << (size_t)minDunLevel << "," << std::endl
            << "\tmaxDunLevel: " << (size_t)maxDunLevel << "," << std::endl

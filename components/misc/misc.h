@@ -130,3 +130,10 @@ template <typename Target, typename ListHead, typename... ListTails> constexpr s
     else
         return 1 + getTypeIndexInTemplateList<Target, ListTails...>();
 }
+
+template <typename T> std::vector<T> moveToVector(T&& item)
+{
+    std::vector<T> vec;
+    vec.push_back(std::forward<T>(item));
+    return vec;
+}

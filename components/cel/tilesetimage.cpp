@@ -4,12 +4,14 @@
 
 namespace Cel
 {
-    static void drawMinPillar(CelFrame& frame, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tilesetCel, bool top);
-    static void drawMinTile(CelFrame& frame, Cel::CelFile& tilesetCel, int x, int y, int16_t leftImageIndex, int16_t rightImageIndex);
+    static void drawMinPillar(CelFrame& frame, int x, int y, const std::vector<int16_t>& pillar, std::vector<Image>& tilesetCel, bool top);
+    static void drawMinTile(CelFrame& frame, std::vector<Image>& tilesetCel, int x, int y, int16_t leftImageIndex, int16_t rightImageIndex);
 
     std::vector<CelFrame> loadTilesetImage(const std::string& celPath, const std::string& minPath, bool top)
     {
-        CelFile tilesetCel(celPath);
+        CelFile tilesetCelDecoder(celPath);
+        std::vector<Image> tilesetCel = tilesetCelDecoder.decode();
+
         Level::Min min(minPath);
 
         std::vector<CelFrame> retval;
@@ -24,7 +26,7 @@ namespace Cel
         return retval;
     }
 
-    static void drawMinPillar(CelFrame& frame, int x, int y, const std::vector<int16_t>& pillar, Cel::CelFile& tilesetCel, bool top)
+    static void drawMinPillar(CelFrame& frame, int x, int y, const std::vector<int16_t>& pillar, std::vector<Image>& tilesetCel, bool top)
     {
         // compensate for maps using 5-row min files
         if (pillar.size() == 10)
@@ -56,7 +58,7 @@ namespace Cel
         }
     }
 
-    static void drawMinTile(CelFrame& frame, Cel::CelFile& tilesetCel, int x, int y, int16_t leftImageIndex, int16_t rightImageIndex)
+    static void drawMinTile(CelFrame& frame, std::vector<Image>& tilesetCel, int x, int y, int16_t leftImageIndex, int16_t rightImageIndex)
     {
         if (leftImageIndex != -1)
             tilesetCel[leftImageIndex].blitTo(frame, x, y);

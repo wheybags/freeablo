@@ -48,61 +48,61 @@ namespace FAGui
                 gossip.second.talkAudioPath = "sfx/towners/bsmith55.wav";
         }
 
-        auto& questData = mActor->getQuestTalkData();
-        for (auto& quest : questData)
-        {
-            if (quest.first == "anvilOfFury")
-            {
-            }
-
-            else if (quest.first == "archbishopLazarus")
-            {
-            }
-
-            else if (quest.first == "blackMushroom")
-            {
-            }
-
-            else if (quest.first == "hallsOfTheBlind")
-            {
-            }
-
-            else if (quest.first == "lachdanan")
-            {
-            }
-
-            else if (quest.first == "ogdensSign")
-            {
-            }
-
-            else if (quest.first == "poisonedWaterSupply")
-            {
-            }
-
-            else if (quest.first == "theButcher")
-            {
-            }
-
-            else if (quest.first == "theChamberOfBone")
-            {
-            }
-
-            else if (quest.first == "theCurseOfKingLeoric")
-            {
-            }
-
-            else if (quest.first == "theMagicRock")
-            {
-            }
-
-            else if (quest.first == "valor")
-            {
-            }
-
-            else if (quest.first == "warlordOfBlood")
-            {
-            }
-        }
+        //        auto& questData = mActor->getQuestTalkData();
+        //        for (auto& quest : questData)
+        //        {
+        //            if (quest.first == "anvilOfFury")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "archbishopLazarus")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "blackMushroom")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "hallsOfTheBlind")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "lachdanan")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "ogdensSign")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "poisonedWaterSupply")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "theButcher")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "theChamberOfBone")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "theCurseOfKingLeoric")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "theMagicRock")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "valor")
+        //            {
+        //            }
+        //
+        //            else if (quest.first == "warlordOfBlood")
+        //            {
+        //            }
+        //        }
     }
 
     CharacterDialoguePopup::DialogData GriswoldDialog::getDialogData()
