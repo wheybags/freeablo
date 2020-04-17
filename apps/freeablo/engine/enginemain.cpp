@@ -42,6 +42,8 @@ namespace Engine
         if (!mSettings.loadUserSettings())
             return;
 
+        Cel::CelDecoder::loadConfigFiles();
+
         auto resolutionWidth = mSettings.get<size_t>("Display", "resolutionWidth");
         auto resolutionHeight = mSettings.get<size_t>("Display", "resolutionHeight");
         const bool fullscreen = mSettings.get<bool>("Display", "fullscreen");
@@ -120,7 +122,7 @@ namespace Engine
         if (currentLevel != -1)
             mWorld->setLevel(currentLevel);
 
-        using clock = std::chrono::high_resolution_clock;
+        using clock = std::chrono::steady_clock;
 
         int32_t lastLevelIndex = -1;
 

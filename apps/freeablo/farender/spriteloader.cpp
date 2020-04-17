@@ -8,6 +8,7 @@
 #include <diabloexe/npc.h>
 #include <fmt/format.h>
 #include <misc/stringops.h>
+#include <thread>
 
 namespace FARender
 {
@@ -196,14 +197,60 @@ namespace FARender
 
     void SpriteLoader::load()
     {
-        printf("Decoding + trimming sprites...\n");
-        // Load and trim all the sprites
-        LoadedImagesData loadedImagesData = loadImagesIntoCpuMemory(mSpritesToLoad);
-        mSpritesToLoad.clear();
-        printf("done\n");
+        // Load images into cpu memory + trim
+        LoadedImagesData loadedImagesData;
+        {
+            auto start = std::chrono::steady_clock::now();
+
+            size_t numWorkers = std::max(std::thread::hardware_concurrency(), 1u);
+
+            printf("Decoding + trimming sprites with %d %s...\n", int(numWorkers), numWorkers > 1 ? "threads" : "thread");
+
+            if (numWorkers > 1)
+            {
+
+                size_t spritesToLoadTotal = mSpritesToLoad.size();
+
+                std::vector<std::thread> workers;
+                std::vector<LoadedImagesData> threadResults(numWorkers);
+
+                for (size_t i = 0; i < numWorkers; i++)
+                {
+                    std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> thisThreadImages;
+                    for (size_t j = 0; j < spritesToLoadTotal / numWorkers && !mSpritesToLoad.empty(); j++)
+                        thisThreadImages.emplace(mSpritesToLoad.extract(mSpritesToLoad.begin()).value());
+
+                    workers.emplace_back(
+                        [results(&threadResults[i]), thisThreadImages(std::move(thisThreadImages))] { *results = loadImagesIntoCpuMemory(thisThreadImages); });
+                }
+
+                for (auto& thread : workers)
+                    thread.join();
+
+                for (auto& result : threadResults)
+                {
+                    loadedImagesData.allImages.insert(
+                        loadedImagesData.allImages.end(), std::make_move_iterator(result.allImages.begin()), std::make_move_iterator(result.allImages.end()));
+
+                    while (!result.definitionToImageMap.empty())
+                        loadedImagesData.definitionToImageMap.insert(result.definitionToImageMap.extract(result.definitionToImageMap.begin()));
+                }
+            }
+            else
+            {
+                loadedImagesData = loadImagesIntoCpuMemory(mSpritesToLoad);
+            }
+
+            mSpritesToLoad.clear();
+
+            auto elapsed = std::chrono::steady_clock::now() - start;
+            int32_t milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+
+            float seconds = float(milliseconds) / 1000.0f;
+            printf("done in %.1f seconds\n", seconds);
+        }
 
         printf("Sorting sprites...\n");
-        // Sort the images by size
         std::sort(loadedImagesData.allImages.begin(),
                   loadedImagesData.allImages.end(),
                   [](const std::unique_ptr<FinalImageData>& a, const std::unique_ptr<FinalImageData>& b) { return a->image->height() > b->image->height(); });

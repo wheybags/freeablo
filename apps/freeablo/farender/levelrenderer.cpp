@@ -64,7 +64,6 @@ namespace FARender
             draw(drawLevelUniformCpuBuffer, drawLevelUniformBuffer, vertexArrayObject, drawLevelDescriptorSet, drawLevelPipeline);
 
         mTexture = atlasEntry.mTexture;
-        debug_assert(mTexture);
 
         Render::SpriteVertexPerInstance vertexData = {};
 

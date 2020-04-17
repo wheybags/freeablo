@@ -40,17 +40,7 @@ namespace Cel
 
     void CelDecoder::readConfiguration()
     {
-        static bool isConfigurationRead = false;
-
-        if (!isConfigurationRead)
-        {
-            mSettingsCel = std::make_unique<Settings::Settings>();
-            mSettingsCl2 = std::make_unique<Settings::Settings>();
-
-            mSettingsCel->loadFromFile(Misc::getResourcesPath().str() + "/cel.ini");
-            mSettingsCl2->loadFromFile(Misc::getResourcesPath().str() + "/cl2.ini");
-            isConfigurationRead = true;
-        }
+        release_assert(mSettingsCel && mSettingsCl2);
 
         Settings::Settings* settings = mSettingsCel.get();
         std::string celNameWithoutExtension = mCelName;
@@ -840,5 +830,14 @@ namespace Cel
 
         if (frameNumber == 0)
             mFrameWidth = 95;
+    }
+
+    void CelDecoder::loadConfigFiles()
+    {
+        mSettingsCel = std::make_unique<Settings::Settings>();
+        mSettingsCl2 = std::make_unique<Settings::Settings>();
+
+        mSettingsCel->loadFromFile(Misc::getResourcesPath().str() + "/cel.ini");
+        mSettingsCl2->loadFromFile(Misc::getResourcesPath().str() + "/cl2.ini");
     }
 }

@@ -20,6 +20,8 @@ namespace Cel
         int32_t numFrames() const;
         int32_t animationLength() const;
 
+        static void loadConfigFiles();
+
     private:
         typedef std::vector<uint8_t> FrameBytes;
         typedef const std::vector<uint8_t>& FrameBytesRef;
@@ -64,6 +66,7 @@ namespace Cel
         int mFrameHeight = 0;
         int mHeaderSize = 0;
         int32_t mAnimationLength = 0;
+
         static std::unique_ptr<Settings::Settings> mSettingsCel;
         static std::unique_ptr<Settings::Settings> mSettingsCl2;
     };

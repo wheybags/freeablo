@@ -18,6 +18,8 @@ int main(int argc, char** argv)
     if (argc > 2)
         message_and_abort_fmt("Usage: %s [filename]", argv[0]);
 
+    Cel::CelDecoder::loadConfigFiles();
+
     Render::RenderSettings renderSettings = {};
     renderSettings.windowWidth = 800;
     renderSettings.windowHeight = 600;
