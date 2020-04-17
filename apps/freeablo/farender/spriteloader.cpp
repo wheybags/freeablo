@@ -206,39 +206,58 @@ namespace FARender
 
             printf("Decoding + trimming sprites with %d %s...\n", int(numWorkers), numWorkers > 1 ? "threads" : "thread");
 
-            if (numWorkers > 1)
+            size_t spritesToLoadTotal = mSpritesToLoad.size();
+
+            std::vector<std::thread> workers;
+            std::vector<LoadedImagesData> threadResults(numWorkers);
+            std::vector<std::atomic_int> progressCounts(numWorkers);
+            std::condition_variable conditionVariable;
+
+            for (size_t i = 0; i < numWorkers; i++)
             {
+                std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> thisThreadImages;
+                for (size_t j = 0; j < size_t(ceil(double(spritesToLoadTotal) / numWorkers)) && !mSpritesToLoad.empty(); j++)
+                    thisThreadImages.emplace(mSpritesToLoad.extract(mSpritesToLoad.begin()).value());
 
-                size_t spritesToLoadTotal = mSpritesToLoad.size();
-
-                std::vector<std::thread> workers;
-                std::vector<LoadedImagesData> threadResults(numWorkers);
-
-                for (size_t i = 0; i < numWorkers; i++)
-                {
-                    std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> thisThreadImages;
-                    for (size_t j = 0; j < spritesToLoadTotal / numWorkers && !mSpritesToLoad.empty(); j++)
-                        thisThreadImages.emplace(mSpritesToLoad.extract(mSpritesToLoad.begin()).value());
-
-                    workers.emplace_back(
-                        [results(&threadResults[i]), thisThreadImages(std::move(thisThreadImages))] { *results = loadImagesIntoCpuMemory(thisThreadImages); });
-                }
-
-                for (auto& thread : workers)
-                    thread.join();
-
-                for (auto& result : threadResults)
-                {
-                    loadedImagesData.allImages.insert(
-                        loadedImagesData.allImages.end(), std::make_move_iterator(result.allImages.begin()), std::make_move_iterator(result.allImages.end()));
-
-                    while (!result.definitionToImageMap.empty())
-                        loadedImagesData.definitionToImageMap.insert(result.definitionToImageMap.extract(result.definitionToImageMap.begin()));
-                }
+                workers.emplace_back(
+                    [results(&threadResults[i]), thisThreadImages(std::move(thisThreadImages)), resultCounter(&progressCounts[i]), &conditionVariable] {
+                        *results = loadImagesIntoCpuMemory(thisThreadImages, *resultCounter);
+                        conditionVariable.notify_one();
+                    });
             }
-            else
+
+            release_assert(mSpritesToLoad.empty());
+
+            std::mutex mutex;
+            while (true)
             {
-                loadedImagesData = loadImagesIntoCpuMemory(mSpritesToLoad);
+                std::unique_lock lock(mutex);
+                conditionVariable.wait_for(lock, std::chrono::milliseconds(500));
+
+                size_t sum = 0;
+                for (const auto& item : progressCounts)
+                    sum += size_t(item);
+
+                if (sum == spritesToLoadTotal)
+                    break;
+
+                int32_t percentage = int32_t(floorf((float(sum) / spritesToLoadTotal) * 100));
+                percentage = std::min(percentage, 99);
+
+                Render::setWindowTitle(Render::getWindowTitle() + ", Loading Sprites: " + std::to_string(percentage) + "%");
+            }
+
+            // Just to be sure the threads are done
+            for (auto& thread : workers)
+                thread.join();
+
+            for (auto& result : threadResults)
+            {
+                loadedImagesData.allImages.insert(
+                    loadedImagesData.allImages.end(), std::make_move_iterator(result.allImages.begin()), std::make_move_iterator(result.allImages.end()));
+
+                while (!result.definitionToImageMap.empty())
+                    loadedImagesData.definitionToImageMap.insert(result.definitionToImageMap.extract(result.definitionToImageMap.begin()));
             }
 
             mSpritesToLoad.clear();
@@ -302,6 +321,8 @@ namespace FARender
             spriteGroup->init(std::move(newSprite));
             mLoadedSprites[definition] = spriteGroup;
         }
+
+        Render::setWindowTitle(Render::getWindowTitle());
     }
 
     static Image loadNonCelImageTrans(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB)
@@ -324,7 +345,8 @@ namespace FARender
         return image;
     }
 
-    SpriteLoader::LoadedImagesData SpriteLoader::loadImagesIntoCpuMemory(const std::unordered_set<SpriteDefinition, SpriteDefinition::Hash>& spritesToLoad)
+    SpriteLoader::LoadedImagesData SpriteLoader::loadImagesIntoCpuMemory(const std::unordered_set<SpriteDefinition, SpriteDefinition::Hash>& spritesToLoad,
+                                                                         std::atomic_int32_t& progress)
     {
         std::vector<std::unique_ptr<FinalImageData>> allImages;
         std::unordered_map<SpriteDefinition, FinalImageDataFrames, SpriteDefinition::Hash> definitionToImageMap;
@@ -344,7 +366,10 @@ namespace FARender
             };
 
             if (badCelNames.count(definition.path))
+            {
+                progress += 1;
                 continue;
+            }
 
             std::vector<std::string> components = Misc::StringUtils::split(definition.path, '&');
             std::string sourcePath = components[0];
@@ -579,6 +604,8 @@ namespace FARender
                 definitionFrames.frames.push_back(finalImageData.get());
                 allImages.emplace_back(std::move(finalImageData));
             }
+
+            progress += 1;
         }
 
         return LoadedImagesData{std::move(allImages), std::move(definitionToImageMap)};

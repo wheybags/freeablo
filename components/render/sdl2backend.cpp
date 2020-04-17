@@ -69,6 +69,9 @@ namespace Render
         // Update screen with/height, as starting full screen window in
         // Windows does not trigger a SDL_WINDOWEVENT_RESIZED event.
         SDL_GetWindowSize(screen, &WIDTH, &HEIGHT);
+
+        clear(0, 0, 0);
+        draw();
     }
 
     const std::string& getWindowTitle() { return windowTitle; }

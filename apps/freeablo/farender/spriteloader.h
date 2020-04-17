@@ -1,6 +1,7 @@
 #pragma once
 #include "../fasavegame/gameloader.h"
 #include "spritegroup.h"
+#include <atomic>
 #include <misc/misc.h>
 #include <string>
 #include <unordered_map>
@@ -173,7 +174,8 @@ namespace FARender
             std::unordered_map<SpriteDefinition, FinalImageDataFrames, SpriteDefinition::Hash> definitionToImageMap;
         };
 
-        static LoadedImagesData loadImagesIntoCpuMemory(const std::unordered_set<SpriteDefinition, SpriteDefinition::Hash>& spritesToLoad);
+        static LoadedImagesData loadImagesIntoCpuMemory(const std::unordered_set<SpriteDefinition, SpriteDefinition::Hash>& spritesToLoad,
+                                                        std::atomic_int32_t& progress);
 
     private:
         std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> mSpritesToLoad;
