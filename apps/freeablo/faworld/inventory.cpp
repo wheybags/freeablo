@@ -535,9 +535,15 @@ namespace FAWorld
             const Item& item = getItemAt(slot);
 
             if (Item::isItemARangedWeapon(item.getType()))
+            {
                 retval.rangedWeapon = EquippedInHandsItems::TypeData{item, slot.type};
+                retval.weapon = retval.rangedWeapon;
+            }
             else if (Item::isItemAMeleeWeapon(item.getType()))
+            {
                 retval.meleeWeapon = EquippedInHandsItems::TypeData{item, slot.type};
+                retval.weapon = retval.meleeWeapon;
+            }
             else if (item.getType() == ItemType::shield)
                 retval.shield = EquippedInHandsItems::TypeData{item, slot.type};
         }

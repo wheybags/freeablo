@@ -61,17 +61,18 @@ namespace DiabloExe
     {
         std::stringstream ss;
         ss << "{" << std::endl
-           << "\tid: " << +id << "," << std::endl
            << "\tdropRate: " << +dropRate << "," << std::endl
            << "\titemClass: " << +itemClass << "," << std::endl
            << "\tequipType: " << +equipType << "," << std::endl
            << "\tinvGraphicsId: " << +invGraphicsId << "," << std::endl
+           << "\tdropItemGraphicsPath: " << dropItemGraphicsPath << std::endl
            << "\ttype: " << +type << "," << std::endl
            << "\tuniqCode: " << +uniqueBaseItemId << "," << std::endl
            << "\tunknown0: " << +unknown0 << "," << std::endl
            << "\tunknown1: " << +unknown1 << "," << std::endl
 
            << "\tname: " << name << "," << std::endl
+           << "\titem_id: " << idName << "," << std::endl
            << "\tshortName: " << shortName << "," << std::endl
            << "\tqualityLevel: " << +qualityLevel << "," << std::endl
            << "\tdurability: " << +durability << "," << std::endl

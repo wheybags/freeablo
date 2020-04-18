@@ -75,9 +75,7 @@ set(RenderFiles
     render/render.h
     render/levelobjects.h
     render/sdl2backend.cpp
-    render/nuklear_sdl_gl3.cpp
-    render/nuklear_sdl_gl3.h
-    render/misc.h
+        render/misc.h
     render/atlastexture.cpp
     render/atlastexture.h
     render/OpenGL/vertexarrayobjectopengl.cpp
@@ -88,10 +86,6 @@ set(RenderFiles
     render/renderinstance.h
     render/vertexlayout.h
     render/vertexlayout.cpp
-    ../extern/RectangleBinPack/Rect.cpp
-    ../extern/RectangleBinPack/Rect.h
-    ../extern/RectangleBinPack/SkylineBinPack.cpp
-    ../extern/RectangleBinPack/SkylineBinPack.h
     render/buffer.h
     render/vertexarrayobject.h
     render/vertextypes.h
@@ -114,14 +108,16 @@ set(RenderFiles
     render/OpenGL/descriptorsetopengl.cpp
     render/OpenGL/descriptorsetopengl.h
     render/alignedcpubuffer.h
-    render/alignedcpubuffer.cpp)
+    render/alignedcpubuffer.cpp
+    render/rectpack.cpp
+    render/rectpack.h render/cursor.cpp render/cursor.h)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
     input/hotkey.cpp
-    input/hotkey.h 
+    input/hotkey.h
     input/inputmanager.h
     input/keys.h
     input/sdl2backend.cpp)
@@ -178,8 +174,12 @@ add_library(NuklearMisc
     nuklearmisc/widgets.h
     nuklearmisc/standaloneguispritehandler.cpp
     nuklearmisc/standaloneguispritehandler.h
-)
-
+    nuklearmisc/nukleardevice.cpp
+    nuklearmisc/nukleardevice.h
+    nuklearmisc/nuklearbuffer.h
+    nuklearmisc/nuklearframedump.cpp
+    nuklearmisc/nuklearframedump.h
+    nuklearmisc/nuklearvertex.h)
 set_target_properties(NuklearMisc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 target_link_libraries(NuklearMisc nuklear nativefiledialog Input Render)
 

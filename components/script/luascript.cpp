@@ -38,6 +38,6 @@ namespace Script
         }
     }
 
-    template <> float LuaScript::get<float>(const std::string &variable) = delete;
-    template <> double LuaScript::get<double>(const std::string &variable) = delete;
+    template <> float LuaScript::get<float>(const std::string& variable) = delete;
+    template <> double LuaScript::get<double>(const std::string& variable) = delete;
 }

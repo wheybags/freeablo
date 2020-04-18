@@ -55,7 +55,6 @@ namespace FAGui
     private:
         std::unique_ptr<FARender::AnimationPlayer> mSmLogo;
         std::unique_ptr<FARender::AnimationPlayer> mFocus;
-        std::unique_ptr<FARender::AnimationPlayer> mFocus16;
         ContentType mContentType = ContentType::chooseClass;
         std::optional<characterInfo> mSelectedCharacterInfo;
     };

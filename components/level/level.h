@@ -41,6 +41,7 @@ namespace Level
     {
     public:
         Level(Dun&& dun,
+              int32_t tilesetId,
               const std::string& tilPath,
               const std::string& minPath,
               const std::string& solPath,
@@ -53,9 +54,8 @@ namespace Level
               int32_t previous,
               int32_t next);
 
-        Level(Serial::Loader& loader);
-
-        Level() {}
+        explicit Level(Serial::Loader& loader);
+        Level() = default;
 
         void save(Serial::Saver& saver) const;
 
@@ -73,6 +73,7 @@ namespace Level
         const Misc::Point& upStairsPos() const;
         const Misc::Point& downStairsPos() const;
 
+        int32_t getTilesetId() const { return mTilesetId; }
         const std::string& getTileSetPath() const;
         const std::string& getSpecialCelPath() const;
         const std::map<int32_t, int32_t>& getSpecialCelMap() const;
@@ -81,7 +82,6 @@ namespace Level
         bool isStairs(int32_t, int32_t) const;
 
         int32_t getNextLevel() const { return mNext; }
-
         int32_t getPreviousLevel() const { return mPrevious; }
 
     private:
@@ -95,6 +95,7 @@ namespace Level
         InternalLocationData getInternalLocationData(const Misc::Point& point) const;
 
     private:
+        int32_t mTilesetId = 0;
         std::string mTilesetCelPath;               ///< path to cel file for level
         std::string mSpecialCelPath;               ///< path to special cel file for level (mostly used for arches / open doors).
         std::map<int32_t, int32_t> mSpecialCelMap; ///< Map from tileset frame number to special cel frame number
@@ -113,9 +114,8 @@ namespace Level
         Misc::Point mDownStairs;
 
         static std::vector<int16_t> mEmpty;
-        friend const MinPillar get(int32_t x, int32_t y, const Level& level);
 
-        int32_t mPrevious; ///< index of previous level
-        int32_t mNext;     ///< index of next level
+        int32_t mPrevious = 0; ///< index of previous level
+        int32_t mNext = 0;     ///< index of next level
     };
 }

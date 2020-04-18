@@ -42,6 +42,9 @@ namespace FAWorld
         const Item& item() const { return *mItem; }
 
     private:
+        void restoreSprites();
+
+    private:
         std::unique_ptr<Item> mItem;
         std::unique_ptr<FARender::AnimationPlayer> mAnimation;
         Misc::Point mTile;

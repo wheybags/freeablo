@@ -1,6 +1,7 @@
 #pragma once
 #include "talkdata.h"
 #include <faio/fafileobject.h>
+#include <map>
 #include <optional>
 #include <unordered_map>
 
@@ -16,8 +17,8 @@ namespace DiabloExe
         uint8_t y;
         size_t rotation;
         std::optional<int32_t> animationSequenceId;
-        std::unordered_map<std::string, std::string> menuTalkData;
-        std::unordered_map<std::string, TalkData> gossipData;
+        std::map<std::string, std::string> menuTalkData;
+        std::map<std::string, TalkData> gossipData;
         std::unordered_map<std::string, QuestTalkData> questTalkData;
         TalkData beforeDungeonTalkData;
 

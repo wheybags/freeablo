@@ -25,6 +25,7 @@ namespace FAWorld
         void commonInit();
         void spawnItem();
         ItemId randomItem();
+        void restoreAnimations();
 
     private:
         struct CalculateStatsCacheKey
@@ -40,6 +41,7 @@ namespace FAWorld
         };
         mutable CalculateStatsCacheKey mLastStatsKey = {}; // not serialised, only used to determine if we need to recalculate stats
 
+        std::string mMonsterId;
         bool mInitialised = false; // not serialised
     };
 }

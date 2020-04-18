@@ -18,6 +18,12 @@ namespace Render
     class Texture;
     struct BaseTextureInfo;
 
+    struct RenderCapabilities
+    {
+        int32_t maxTextureSize;
+        int32_t uniformBufferOffsetAlignment;
+    };
+
     class RenderInstance
     {
     public:
@@ -34,7 +40,8 @@ namespace Render
                                                                            size_t indexBufferSizeInElements) = 0;
         virtual std::unique_ptr<CommandQueue> createCommandQueue() = 0;
 
-        virtual size_t getUniformBufferOffsetAlignment() = 0;
+        const RenderCapabilities& capabilities() const { return mRenderCapabilities; }
+
         virtual void onWindowResized(int32_t width, int32_t height) = 0;
 
         enum class Type
@@ -45,5 +52,8 @@ namespace Render
 
     public:
         SDL_Window& mWindow;
+
+    protected:
+        RenderCapabilities mRenderCapabilities = {};
     };
 }

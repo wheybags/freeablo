@@ -2,16 +2,22 @@
 #include "../faworld/position.h"
 #include "diabloexe/diabloexe.h"
 #include "fontinfo.h"
-#include "spritemanager.h"
+#include "spriteloader.h"
 #include <atomic>
 #include <condition_variable>
+#include <cstddef>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <mutex>
+#include <render/cursor.h>
 #include <render/render.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <tuple>
+
+namespace DiabloExe
+{
+    class DiabloExe;
+}
 
 namespace FAWorld
 {
@@ -21,23 +27,23 @@ namespace FAWorld
 namespace FARender
 {
     class CelFontInfo;
-
     class Renderer;
+    class LevelRenderer;
 
     class Tileset
     {
     private:
-        FASpriteGroup* minTops;
-        FASpriteGroup* minBottoms;
-        FASpriteGroup* mSpecialSprites;
+        FASpriteGroup* minTops = nullptr;
+        FASpriteGroup* minBottoms = nullptr;
+        FASpriteGroup* mSpecialSprites = nullptr;
         std::map<int32_t, int32_t> mSpecialSpriteMap;
         friend class Renderer;
     };
 
     struct ObjectToRender
     {
-        FASpriteGroup* spriteGroup;
-        uint32_t frame;
+        FASpriteGroup* spriteGroup = nullptr;
+        uint32_t frame = 0;
         FAWorld::Position position;
         std::optional<Cel::Colour> hoverColor;
     };
@@ -45,7 +51,18 @@ namespace FARender
     class RenderState
     {
     public:
-        std::atomic_bool ready;
+        struct MoveableAtomicBool
+        {
+            std::atomic_bool val;
+
+            MoveableAtomicBool(bool val) : val(val) {}
+            MoveableAtomicBool(MoveableAtomicBool&& other) : val(other.val.load()) {}
+
+            void operator=(bool newVal) { val = newVal; }
+            operator bool() { return val; }
+        };
+
+        MoveableAtomicBool ready;
 
         FAWorld::Position mPos;
 
@@ -56,13 +73,14 @@ namespace FARender
 
         Tileset tileset;
 
-        FAWorld::GameLevel* level;
+        FAWorld::GameLevel* level{};
 
         std::string mCursorPath;
-        uint32_t mCursorFrame;
-        bool mCursorCentered;
+        uint32_t mCursorFrame = 0;
+        bool mCursorCentered = false;
 
-        RenderState(Render::NuklearGraphicsContext& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData.dev) {}
+        explicit RenderState(NuklearDevice& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData) {}
+        RenderState(RenderState&& other) = default;
     };
 
     FASpriteGroup* getDefaultSprite();
@@ -72,7 +90,7 @@ namespace FARender
     public:
         static Renderer* get();
 
-        Renderer(int32_t windowWidth, int32_t windowHeight, bool fullscreen);
+        Renderer(const DiabloExe::DiabloExe& exe, int32_t windowWidth, int32_t windowHeight, bool fullscreen);
         ~Renderer();
 
         void stop();
@@ -83,15 +101,11 @@ namespace FARender
         RenderState* getFreeState(); // ooh ah up de ra
         void setCurrentState(RenderState* current);
 
-        FASpriteGroup* loadImage(const std::string& path, bool trim);
-        std::string getPathForIndex(uint32_t index);
-
         Render::Tile getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos);
 
-        void drawCursor(RenderState* State);
+        void updateCursor(RenderState* State);
 
-        bool renderFrame(RenderState* state, const std::vector<uint32_t>& spritesToPreload); ///< To be called only by Engine::ThreadManager
-        void cleanup();                                                                      ///< To be called only by Engine::ThreadManager
+        bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
         Misc::Point cursorSize() const { return mCursorSize; }
 
         nk_context* getNuklearContext() { return &mNuklearContext; }
@@ -99,7 +113,6 @@ namespace FARender
         void getWindowDimensions(int32_t& w, int32_t& h);
         void loadFonts(const DiabloExe::DiabloExe& exe);
 
-        bool getAndClearSpritesNeedingPreloading(std::vector<uint32_t>& sprites);
         nk_user_font* smallFont() const;
         nk_user_font* bigTGoldFont() const;
         nk_user_font* goldFont(int height) const;
@@ -107,8 +120,11 @@ namespace FARender
         nk_user_font* consoleFont() const;
 
     private:
-        std::unique_ptr<CelFontInfo> generateCelFont(const std::string& texturePath, const DiabloExe::FontData& fontData, int spacing);
-        std::unique_ptr<PcxFontInfo> generateFont(const std::string& pcxPath, const std::string& binPath, const PcxFontInitData& fontInitData);
+        std::unique_ptr<CelFontInfo> generateCelFont(FASpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing);
+        std::unique_ptr<PcxFontInfo> generateFont(FASpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData);
+
+    public:
+        SpriteLoader mSpriteLoader;
 
     private:
         static Renderer* mRenderer; ///< Singleton instance
@@ -117,12 +133,11 @@ namespace FARender
         Render::LevelObjects mLevelObjects;
         Render::LevelObjects mItems;
 
-        size_t mNumRenderStates = 15;
-        RenderState* mStates;
+        static constexpr size_t NUM_RENDER_STATES = 15;
+        std::vector<RenderState> mStates;
 
-        SpriteManager mSpriteManager;
-        Render::FACursor mCurrentCursor = NULL;
-        uint32_t mCurrentCursorFrame = UINT32_MAX;
+        std::unique_ptr<Render::Cursor> mCurrentCursor = nullptr;
+        uint32_t mCurrentCursorFrame = std::numeric_limits<uint32_t>::max();
         Misc::Point mCursorSize;
 
         volatile bool mAlreadyExited = false;
@@ -130,11 +145,14 @@ namespace FARender
         std::condition_variable mDoneCV;
 
         nk_context mNuklearContext = nk_context();
-        Render::NuklearGraphicsContext mNuklearGraphicsData = Render::NuklearGraphicsContext();
+        std::unique_ptr<NuklearDevice> mNuklearGraphicsData;
+        std::unique_ptr<FASpriteGroup> mNuklearFontTexture;
 
         std::atomic<std::int64_t> mWidthHeightTmp;
         std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;
         struct nk_font* mConsoleFont;
         std::map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
+
+        std::unique_ptr<LevelRenderer> mLevelRenderer;
     };
 }

@@ -67,6 +67,7 @@ public:
     union
     {
         T x;
+        T w;
         T u;
         T start;
         T min;
@@ -75,6 +76,7 @@ public:
     union
     {
         T y;
+        T h;
         T v;
         T end;
         T max;

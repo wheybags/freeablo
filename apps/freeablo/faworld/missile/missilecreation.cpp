@@ -10,7 +10,8 @@ namespace FAWorld::Missile
         auto direction = (Vec2Fix(dest.x, dest.y) - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).getDirection();
         auto srcPos = Position(missile.mSrcPoint, direction);
         int32_t direction16 = static_cast<int32_t>(direction.getDirection16());
-        missile.mGraphics.push_back(std::make_unique<MissileGraphic>("", missile.getGraphicsPath(0), direction16, srcPos, level));
+        missile.mGraphics.push_back(
+            std::make_unique<MissileGraphic>(FARender::SpriteLoader::SpriteDefinition(), missile.getGraphic(0), direction16, srcPos, level));
     }
 
     void Missile::Creation::animated16Direction(Missile& missile, Misc::Point dest, GameLevel* level)
@@ -18,7 +19,8 @@ namespace FAWorld::Missile
         auto direction = (Vec2Fix(dest.x, dest.y) - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).getDirection();
         auto srcPos = Position(missile.mSrcPoint, direction);
         int32_t direction16 = static_cast<int32_t>(direction.getDirection16());
-        missile.mGraphics.push_back(std::make_unique<MissileGraphic>("", missile.getGraphicsPath(direction16), std::nullopt, srcPos, level));
+        missile.mGraphics.push_back(
+            std::make_unique<MissileGraphic>(FARender::SpriteLoader::SpriteDefinition(), missile.getGraphic(direction16), std::nullopt, srcPos, level));
     }
 
     void Missile::Creation::firewall(Missile& missile, Misc::Point dest, GameLevel* level)
@@ -34,7 +36,7 @@ namespace FAWorld::Missile
             for (int32_t i = 0; i < 6; i++)
             {
                 missile.mGraphics.push_back(
-                    std::make_unique<MissileGraphic>(missile.getGraphicsPath(0), missile.getGraphicsPath(1), std::nullopt, Position(point), level));
+                    std::make_unique<MissileGraphic>(missile.getGraphic(0), missile.getGraphic(1), std::nullopt, Position(point), level));
                 point = Misc::getNextPosByDir(point, dir);
             }
         }
@@ -42,7 +44,8 @@ namespace FAWorld::Missile
 
     void Missile::Creation::basicAnimated(Missile& missile, Misc::Point, GameLevel* level)
     {
-        missile.mGraphics.push_back(std::make_unique<MissileGraphic>("", missile.getGraphicsPath(0), std::nullopt, Position(missile.mSrcPoint), level));
+        missile.mGraphics.push_back(std::make_unique<MissileGraphic>(
+            FARender::SpriteLoader::SpriteDefinition(), missile.getGraphic(0), std::nullopt, Position(missile.mSrcPoint), level));
     }
 
     void Missile::Creation::townPortal(Missile& missile, Misc::Point, GameLevel* level)
@@ -53,8 +56,7 @@ namespace FAWorld::Missile
                 level->mMissileGraphics.begin(), level->mMissileGraphics.end(), [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
         };
         auto point = level->getFreeSpotNear(missile.mSrcPoint, std::numeric_limits<int32_t>::max(), noMissilesAtPoint);
-        missile.mGraphics.push_back(
-            std::make_unique<MissileGraphic>(missile.getGraphicsPath(0), missile.getGraphicsPath(1), std::nullopt, Position(point), level));
+        missile.mGraphics.push_back(std::make_unique<MissileGraphic>(missile.getGraphic(0), missile.getGraphic(1), std::nullopt, Position(point), level));
         // Add portal in town
         auto town = Engine::EngineMain::get()->mWorld->getLevel(0);
         static const Misc::Point townPortalPoint = Misc::Point(60, 80);
@@ -63,7 +65,6 @@ namespace FAWorld::Missile
                 town->mMissileGraphics.begin(), town->mMissileGraphics.end(), [&p](const MissileGraphic* g) { return p == g->mCurPos.current(); });
         };
         point = town->getFreeSpotNear(townPortalPoint, std::numeric_limits<int32_t>::max(), noMissilesAtTownPoint);
-        missile.mGraphics.push_back(
-            std::make_unique<MissileGraphic>(missile.getGraphicsPath(0), missile.getGraphicsPath(1), std::nullopt, Position(point), town));
+        missile.mGraphics.push_back(std::make_unique<MissileGraphic>(missile.getGraphic(0), missile.getGraphic(1), std::nullopt, Position(point), town));
     }
 }

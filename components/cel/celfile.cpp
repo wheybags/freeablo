@@ -10,5 +10,5 @@ namespace Cel
 
     int32_t CelFile::animLength() const { return mDecoder.animationLength(); }
 
-    CelFrame& CelFile::operator[](int32_t index) { return mDecoder[index]; }
+    std::vector<Image> CelFile::decode() { return mDecoder.decode(); }
 }

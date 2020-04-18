@@ -235,13 +235,17 @@ namespace FAWorld
         return ItemQuality::normal;
     }
 
-    Item::~Item() {}
+    Item::~Item() = default;
 
     std::string Item::getFlipSoundPath() const { return base().dropItemSoundPath; }
 
     std::string Item::getInvPlaceSoundPath() const { return base().invPlaceItemSoundPath; }
 
-    FARender::FASpriteGroup* Item::getFlipSpriteGroup() { return FARender::Renderer::get()->loadImage(base().dropItemGraphicsPath, true); }
+    FARender::FASpriteGroup* Item::getFlipSpriteGroup()
+    {
+        FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
+        return spriteLoader.getSprite(spriteLoader.mItemDrops[base().idName]);
+    }
 
     bool Item::isBeltEquippable() const { return getInvSize() == std::array<int32_t, 2>{1, 1} && isUsable() && getType() != ItemType::gold; }
 

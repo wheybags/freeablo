@@ -47,9 +47,16 @@ namespace Render
         if (major < 3 || (major == 3 && minor < 3))
             message_and_abort_fmt("ERROR: Minimum OpenGL version is 3.3. Your current version is %d.%d\n", major, minor);
 
-        GLint tmp = 0;
-        glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &tmp);
-        mUniformBufferOffsetAlignment = size_t(tmp);
+        // setup render capabilities struct
+        {
+            GLint uniformBufferOffsetAlignment = 0;
+            glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformBufferOffsetAlignment);
+
+            GLint maxTextureSize = 0;
+            glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+
+            mRenderCapabilities = {maxTextureSize, uniformBufferOffsetAlignment};
+        }
 
         setupGlobalState();
     }
@@ -57,7 +64,6 @@ namespace Render
     void RenderInstanceOpenGL::setupGlobalState()
     {
         glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
 
         // For now, we will just force all pixel transfers to be tightly packed
         glPixelStorei(GL_PACK_ALIGNMENT, 1);

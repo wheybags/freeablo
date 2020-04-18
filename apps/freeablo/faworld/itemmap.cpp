@@ -1,11 +1,10 @@
 #include "itemmap.h"
-#include "item.h"
-
 #include "../engine/threadmanager.h"
 #include "../farender/animationplayer.h"
-#include "../fasavegame/gameloader.h"
 #include "gamelevel.h"
+#include "item.h"
 #include "world.h"
+#include <memory>
 
 namespace FAWorld
 {
@@ -17,10 +16,13 @@ namespace FAWorld
 
     PlacedItemData::PlacedItemData(FASaveGame::GameLoader& loader)
     {
-        mItem.reset(new Item());
+        mItem = std::make_unique<Item>();
         mItem->load(loader);
-        mAnimation.reset(new FARender::AnimationPlayer(loader));
+        mAnimation = std::make_unique<FARender::AnimationPlayer>();
+        mAnimation->load(loader);
         mTile = Misc::Point(loader);
+
+        restoreSprites();
     }
 
     void PlacedItemData::save(FASaveGame::GameSaver& saver) const
@@ -35,6 +37,12 @@ namespace FAWorld
     std::pair<FARender::FASpriteGroup*, int32_t> PlacedItemData::getSpriteFrame() { return mAnimation->getCurrentFrame(); }
 
     bool PlacedItemData::onGround() { return mAnimation->getCurrentFrame().second == mItem->getFlipSpriteGroup()->getAnimLength() - 1; }
+
+    void PlacedItemData::restoreSprites()
+    {
+        mAnimation->replaceAnimation(mItem->getFlipSpriteGroup());
+        mAnimation->animationRestoredAfterSave = true;
+    }
 
     ItemMap::ItemMap(const GameLevel* level) : mWidth(level->width()), mHeight(level->height()), mLevel(level) {}
 

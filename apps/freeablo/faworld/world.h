@@ -67,7 +67,6 @@ namespace FAWorld
         Render::Tile getTileByScreenPos(Misc::Point screenPos);
         Actor* targetedActor(Misc::Point screenPosition);
         PlacedItemData* targetedItem(Misc::Point screenPosition);
-        void updateHover(const Misc::Point& mousePosition);
         void generateLevels();
         GameLevel* getCurrentLevel();
         int32_t getCurrentLevelIndex();

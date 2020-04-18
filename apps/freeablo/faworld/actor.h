@@ -42,7 +42,7 @@ namespace FAWorld
         static const std::string typeId;
         virtual const std::string& getTypeId() { return typeId; }
 
-        Actor(World& world, const std::string& walkAnimPath = "", const std::string& idleAnimPath = "", const std::string& dieAnimPath = "");
+        explicit Actor(World& world);
         Actor(World& world, const DiabloExe::Npc& npc, const DiabloExe::DiabloExe& exe);
         Actor(World& world, FASaveGame::GameLoader& loader);
         virtual ~Actor();
@@ -70,12 +70,10 @@ namespace FAWorld
         virtual void die();
         bool isDead() const;
         bool isEnemy(Actor* other) const;
-        const std::unordered_map<std::string, std::string>& getMenuTalkData() const { return mMenuTalkData; }
-        std::unordered_map<std::string, DiabloExe::TalkData>& getGossipData() { return mGossipData; }
-        const std::unordered_map<std::string, DiabloExe::TalkData>& getGossipData() const { return mGossipData; }
-        std::unordered_map<std::string, DiabloExe::QuestTalkData>& getQuestTalkData() { return mQuestTalkData; }
-        DiabloExe::TalkData& getBeforeDungeonTalkData() { return mBeforeDungeonTalkData; }
-        const DiabloExe::TalkData& getBeforeDungeonTalkData() const { return mBeforeDungeonTalkData; }
+        const std::map<std::string, std::string>& getMenuTalkData() const { return mMenuTalkData; }
+        std::map<std::string, DiabloExe::TalkData>& getGossipData() { return mGossipData; }
+        const std::map<std::string, DiabloExe::TalkData>& getGossipData() const { return mGossipData; }
+        // std::map<std::string, DiabloExe::QuestTalkData>& getQuestTalkData() { return mQuestTalkData; }
         const std::string& getNpcId() const { return mNpcId; }
         const std::string& getName() const { return mName; }
         const ActorStats& getStats() const { return mStats; }
@@ -99,6 +97,7 @@ namespace FAWorld
         void activateMissile(MissileId id, Misc::Point targetPoint);
         virtual void onEnemyKilled(Actor* enemy) { UNUSED_PARAM(enemy); };
         virtual DamageType getMeleeDamageType() const { return DamageType::Unarmed; }
+        void restoreAnimationsForNpc();
 
     public:
         MovementHandler mMoveHandler;
@@ -123,10 +122,10 @@ namespace FAWorld
         Faction mFaction;
         std::string mName; ///< Name as it appears in-game
         int32_t mId = -1;
-        std::unordered_map<std::string, std::string> mMenuTalkData;               ///< Lines of dialogue
-        std::unordered_map<std::string, DiabloExe::TalkData> mGossipData;         ///< Gossip dialogues
-        std::unordered_map<std::string, DiabloExe::QuestTalkData> mQuestTalkData; ///< Quest dialogues
-        DiabloExe::TalkData mBeforeDungeonTalkData;
+        std::map<std::string, std::string> mMenuTalkData;       ///< Lines of dialogue
+        std::map<std::string, DiabloExe::TalkData> mGossipData; ///< Gossip dialogues
+        // std::map<std::string, DiabloExe::QuestTalkData> mQuestTalkData; ///< Quest dialogues
+        // DiabloExe::TalkData mBeforeDungeonTalkData;
         bool mDeadLastTick = false;
         World& mWorld;
         std::vector<std::unique_ptr<Missile::Missile>> mMissiles;

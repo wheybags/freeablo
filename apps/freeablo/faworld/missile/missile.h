@@ -87,8 +87,7 @@ namespace FAWorld::Missile
         };
 
         const DiabloExe::MissileData& missileData() const;
-        const DiabloExe::MissileGraphics& missileGraphics() const;
-        std::string getGraphicsPath(int32_t i) const;
+        const FARender::SpriteLoader::SpriteDefinition& getGraphic(int32_t i) const;
         void playImpactSound();
 
         Actor* mCreator;

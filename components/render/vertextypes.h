@@ -5,6 +5,7 @@
 
 namespace Render
 {
+#pragma pack(push, 1)
     struct SpriteVertexMain
     {
         float vertex_position[3];
@@ -26,18 +27,20 @@ namespace Render
 
     struct SpriteVertexPerInstance
     {
+        float v_zValue;
         uint16_t v_imageSize[2];
         int16_t v_imageOffset[2];
         uint8_t v_hoverColor[4];
-        uint16_t v_atlasOffset[3];
+        uint16_t v_atlasOffset[2];
 
         static const VertexLayout& layout()
         {
             static VertexLayout layout{{
+                                           Format::R32F,
                                            Format::RG16U,
                                            Format::RG16I,
                                            Format::RGBA8UNorm,
-                                           Format::RGB16U,
+                                           Format::RG16U,
                                        },
                                        VertexInputRate::ByInstance};
 
@@ -46,25 +49,5 @@ namespace Render
             return layout;
         }
     };
-
-    struct NuklearVertex
-    {
-        float position[2];
-        float uv[2];
-        uint8_t color[4];
-
-        static const VertexLayout& layout()
-        {
-            static VertexLayout layout{{
-                                           Format::RG32F,
-                                           Format::RG32F,
-                                           Format::RGBA8UNorm,
-                                       },
-                                       VertexInputRate::ByVertex};
-
-            debug_assert(layout.getSizeInBytes() == sizeof(NuklearVertex));
-
-            return layout;
-        }
-    };
+#pragma pack(pop)
 }

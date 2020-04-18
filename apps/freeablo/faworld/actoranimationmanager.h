@@ -52,6 +52,8 @@ namespace FAWorld
         void setIdleFrameSequence(const std::vector<int32_t>& sequence);
         int32_t getCurrentAnimationLength() const;
 
+        void markAnimationsRestoredAfterGameLoad();
+
     private:
         FARender::AnimationPlayer mAnimationPlayer;
         AnimState mPlayingAnim = AnimState::none;

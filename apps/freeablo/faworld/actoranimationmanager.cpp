@@ -7,25 +7,12 @@ namespace FAWorld
 {
     ActorAnimationManager::ActorAnimationManager() { this->initAnimMaps(); }
 
-    ActorAnimationManager::ActorAnimationManager(FASaveGame::GameLoader& loader) : mAnimationPlayer(loader)
+    ActorAnimationManager::ActorAnimationManager(FASaveGame::GameLoader& loader)
     {
         this->initAnimMaps();
 
+        mAnimationPlayer.load(loader);
         mPlayingAnim = AnimState(loader.load<uint8_t>());
-
-        uint32_t numAnimations = loader.load<uint32_t>();
-        for (uint32_t i = 0; i < numAnimations; i++)
-        {
-            bool haveThisAnim = loader.load<bool>();
-
-            if (haveThisAnim)
-            {
-                AnimState type = AnimState(loader.load<uint8_t>());
-                std::string path = loader.load<std::string>();
-
-                mAnimations[size_t(type)] = FARender::Renderer::get()->loadImage(path, true);
-            }
-        }
 
         uint32_t numTimeMapEntries = loader.load<uint32_t>();
         for (uint32_t i = 0; i < numTimeMapEntries; i++)
@@ -52,22 +39,6 @@ namespace FAWorld
 
         mAnimationPlayer.save(saver);
         saver.save(uint8_t(mPlayingAnim));
-
-        saver.save(uint32_t(AnimState::ENUM_END)); // save the number of entries we're about to save
-        for (AnimState s = (AnimState)0; s < AnimState::ENUM_END; s = AnimState(size_t(s) + 1))
-        {
-            bool haveThisAnim = mAnimations[size_t(s)]->isValid();
-            saver.save(haveThisAnim);
-
-            if (haveThisAnim)
-            {
-                std::string animPath = FARender::Renderer::get()->getPathForIndex(mAnimations[size_t(s)]->getCacheIndex());
-                release_assert(animPath.size());
-
-                saver.save(uint8_t(s));
-                saver.save(animPath);
-            }
-        }
 
         saver.save(uint32_t(AnimState::ENUM_END));
         for (AnimState s = (AnimState)0; s < AnimState::ENUM_END; s = AnimState(size_t(s) + 1))
@@ -126,9 +97,7 @@ namespace FAWorld
 
     void ActorAnimationManager::setAnimationSprites(AnimState animation, FARender::FASpriteGroup* sprite)
     {
-        auto playingSprite = mAnimationPlayer.getCurrentFrame().first;
-
-        if (playingSprite == mAnimations[size_t(animation)])
+        if (mPlayingAnim == animation)
             mAnimationPlayer.replaceAnimation(sprite);
 
         mAnimations[size_t(animation)] = sprite;
@@ -137,7 +106,7 @@ namespace FAWorld
     void ActorAnimationManager::update()
     {
         mAnimationPlayer.update();
-        auto sprite = mAnimationPlayer.getCurrentFrame().first;
+        FARender::FASpriteGroup* sprite = mAnimationPlayer.getCurrentFrame().first;
 
         // loop idle animation if we're not doing anything else
         if (sprite == nullptr)
@@ -164,4 +133,6 @@ namespace FAWorld
     void ActorAnimationManager::setIdleFrameSequence(const std::vector<int32_t>& sequence) { mIdleFrameSequence = sequence; }
 
     int32_t ActorAnimationManager::getCurrentAnimationLength() const { return mAnimationPlayer.getAnimLength(); }
+
+    void ActorAnimationManager::markAnimationsRestoredAfterGameLoad() { mAnimationPlayer.animationRestoredAfterSave = true; }
 }
