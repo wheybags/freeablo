@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <render/OpenGL/commandqueueopengl.h>
 #include <render/OpenGL/descriptorsetopengl.h>
+#include <render/OpenGL/framebufferopengl.h>
 #include <render/OpenGL/pipelineopengl.h>
 #include <render/OpenGL/renderinstanceopengl.h>
 #include <render/OpenGL/textureopengl.h>
@@ -89,6 +90,11 @@ namespace Render
     std::unique_ptr<Texture> RenderInstanceOpenGL::createTexture(const BaseTextureInfo& info)
     {
         return std::unique_ptr<Texture>(new TextureOpenGL(*this, info));
+    }
+
+    std::unique_ptr<Framebuffer> RenderInstanceOpenGL::createFramebuffer(const FramebufferInfo& info)
+    {
+        return std::unique_ptr<Framebuffer>(new FramebufferOpenGL(info));
     }
 
     std::unique_ptr<Buffer> RenderInstanceOpenGL::createBuffer(size_t sizeInBytes) { return std::unique_ptr<Buffer>(new BufferOpenGL(sizeInBytes)); }

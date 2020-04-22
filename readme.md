@@ -19,16 +19,11 @@ Build the engine yourself (instructions below), or grab a prebuilt binary for yo
 Copy DIABDAT.MPQ and Diablo.exe from your diablo install into the folder with the freeablo executable. (NOTE: only version 1.09 of diablo is currently supported, so please patch to that version)
 
 # Controls
-
-Mouse to walk around, just like the original, and click on doors to open them.
-
-PgUp and PgDn keys will move up / down through dungeon levels.
-
-n will turn off collision (player will be able to walk through walls).
-
-q to quit
-
-esc to open pause menu
+- Mouse to walk around, just like the original, and click on doors to open them.
+- PgUp and PgDn keys will move up / down through dungeon levels.
+- ESC to open pause menu
+- F10 to toggle texture filtering
+- Scroll wheel to zoom
 
 The above will all be made configurable at some point.
 

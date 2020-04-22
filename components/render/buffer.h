@@ -24,5 +24,8 @@ namespace Render
         Buffer* buffer;
         size_t offset;
         size_t length;
+
+        BufferSlice(Buffer* buffer) : buffer(buffer), offset(0), length(buffer->getSizeInBytes()) {}
+        BufferSlice(Buffer* buffer, size_t offset, size_t length) : buffer(buffer), offset(offset), length(length) {}
     };
 }

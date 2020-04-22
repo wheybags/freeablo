@@ -17,11 +17,20 @@ namespace Render
     public:
         ScopedBindGL() = default;
         ScopedBindGL(ScopedBindGL&) = delete;
-        ScopedBindGL(ScopedBindGL&& other)
+        ScopedBindGL(ScopedBindGL&& other) { this->operator=(std::move(other)); }
+
+        void operator=(ScopedBindGL&& other)
         {
-            *this = other;
+            mResource = other.mResource;
+            mExtra1 = other.mExtra1;
+            mExtra2 = other.mExtra2;
+
             other.mResource = nullptr;
+            other.mExtra1 = std::nullopt;
+            other.mExtra2 = std::nullopt;
         }
+
+        void operator=(ScopedBindGL&) = delete;
 
         explicit ScopedBindGL(BindableGL& resource, std::optional<GLuint> extra1 = std::nullopt, std::optional<GLuint> extra2 = std::nullopt)
             : mResource(&resource), mExtra1(extra1), mExtra2(extra2)
@@ -38,9 +47,6 @@ namespace Render
             if (mResource)
                 mResource->unbind(mExtra1, mExtra2);
         }
-
-    private:
-        ScopedBindGL& operator=(const ScopedBindGL&) = default;
 
     private:
         BindableGL* mResource = nullptr;

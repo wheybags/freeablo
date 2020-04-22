@@ -37,6 +37,11 @@ namespace Render
         int32_t height() const { return mInfo.height; }
 
         virtual void updateImageData(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height, const uint8_t* rgba8UnormData) = 0;
+        virtual void setFilter(Filter minFilter, Filter magFilter)
+        {
+            mInfo.minFilter = minFilter;
+            mInfo.magFilter = magFilter;
+        }
 
     protected:
         RenderInstance& mInstance;

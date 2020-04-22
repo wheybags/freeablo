@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <render/OpenGL/commandqueueopengl.h>
 #include <render/OpenGL/descriptorsetopengl.h>
+#include <render/OpenGL/framebufferopengl.h>
 #include <render/OpenGL/pipelineopengl.h>
 #include <render/OpenGL/textureopengl.h>
 #include <render/OpenGL/vertexarrayobjectopengl.h>
@@ -12,9 +13,13 @@ namespace Render
         auto pipeline = safe_downcast<PipelineOpenGL*>(bindings.pipeline);
         auto vao = safe_downcast<VertexArrayObjectOpenGL*>(bindings.vao);
         auto descriptorSet = safe_downcast<DescriptorSetOpenGL*>(bindings.descriptorSet);
+        auto nonDefaultFramebuffer = safe_downcast<FramebufferOpenGL*>(bindings.nonDefaultFramebuffer);
 
         mBinders.emplace_back(vao);
         mBinders.emplace_back(pipeline);
+
+        if (nonDefaultFramebuffer)
+            mBinders.emplace_back(nonDefaultFramebuffer);
 
         for (uint32_t bindingIndex = 0; bindingIndex < bindings.descriptorSet->size(); bindingIndex++)
         {
@@ -87,8 +92,13 @@ namespace Render
         glDrawArraysInstanced(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
     }
 
-    void CommandQueueOpenGL::cmdClearCurrentFramebuffer(Color color, bool clearDepth)
+    void CommandQueueOpenGL::cmdClearFramebuffer(Color color, bool clearDepth, Framebuffer* nonDefaultFramebuffer)
     {
+        ScopedBindGL framebufferBind;
+
+        if (nonDefaultFramebuffer)
+            framebufferBind = ScopedBindGL(safe_downcast<FramebufferOpenGL*>(nonDefaultFramebuffer));
+
         glClearColor(color.r, color.g, color.b, color.a);
 
         if (clearDepth)

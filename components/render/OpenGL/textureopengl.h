@@ -16,6 +16,7 @@ namespace Render
         ~TextureOpenGL() override;
 
         void updateImageData(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height, const uint8_t* rgba8UnormData) override;
+        void setFilter(Filter minFilter, Filter magFilter) override;
 
     public:
         void bind(std::optional<GLuint> extra1, std::optional<GLuint> extra2) override;
@@ -29,5 +30,6 @@ namespace Render
         GLuint mId = 0;
 
         friend class CommandQueueOpenGL;
+        friend class FramebufferOpenGL;
     };
 }

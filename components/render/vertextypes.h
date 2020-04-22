@@ -6,15 +6,34 @@
 namespace Render
 {
 #pragma pack(push, 1)
+    struct BasicVertex
+    {
+        float vertex_position[2];
+        float vertex_uv[2];
+
+        static const VertexLayout& layout()
+        {
+            static VertexLayout layout{{
+                                           Format::RG32F,
+                                           Format::RG32F,
+                                       },
+                                       VertexInputRate::ByVertex};
+
+            debug_assert(layout.getSizeInBytes() == sizeof(BasicVertex));
+
+            return layout;
+        }
+    };
+
     struct SpriteVertexMain
     {
-        float vertex_position[3];
+        float vertex_position[2];
         float v_uv[2];
 
         static const VertexLayout& layout()
         {
             static VertexLayout layout{{
-                                           Format::RGB32F,
+                                           Format::RG32F,
                                            Format::RG32F,
                                        },
                                        VertexInputRate::ByVertex};
@@ -28,10 +47,10 @@ namespace Render
     struct SpriteVertexPerInstance
     {
         float v_zValue;
-        uint16_t v_imageSize[2];
-        int16_t v_imageOffset[2];
+        uint16_t v_spriteSizeInPixels[2];
+        int16_t v_destinationInPixels[2];
         uint8_t v_hoverColor[4];
-        uint16_t v_atlasOffset[2];
+        uint16_t v_atlasOffsetInPixels[2];
 
         static const VertexLayout& layout()
         {
