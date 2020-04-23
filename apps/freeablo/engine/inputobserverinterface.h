@@ -31,6 +31,7 @@ namespace Engine
         spellHotkeyF6,
         spellHotkeyF7,
         spellHotkeyF8,
+        toggleTextureFiltering,
 
         max,
     };
@@ -42,6 +43,7 @@ namespace Engine
         RIGHT_MOUSE_RELEASE,
         RIGHT_MOUSE_DOWN,
         MOUSE_MOVE,
+        MOUSE_WHEEL,
     };
 
     class KeyboardInputObserverInterface
@@ -56,7 +58,7 @@ namespace Engine
     class MouseInputObserverInterface
     {
     public:
-        virtual void notify(MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers) = 0;
+        virtual void notify(MouseInputAction action, Vec2i mousePosition, Vec2i mouseWheelDelta, bool mouseDown, const Input::KeyboardModifiers& modifiers) = 0;
         virtual ~MouseInputObserverInterface() = default;
     };
 }

@@ -11,12 +11,14 @@ namespace Render
     class Pipeline;
     class RenderInstance;
     class DescriptorSet;
+    class Framebuffer;
 
     struct Bindings
     {
         Pipeline* pipeline = nullptr;
         VertexArrayObject* vao = nullptr;
         DescriptorSet* descriptorSet = nullptr;
+        Framebuffer* nonDefaultFramebuffer = nullptr;
 
         void assertBindingsCorrect();
     };
@@ -46,7 +48,7 @@ namespace Render
         virtual void cmdDrawIndexed(size_t firstIndex, size_t vertexCount, Bindings& bindings);
         virtual void cmdDrawInstances(size_t firstVertex, size_t vertexCount, size_t instanceCount, Bindings& bindings);
         void cmdScissor(ScissorRect scissorRect) { mScissor = scissorRect; }
-        virtual void cmdClearCurrentFramebuffer(Color color, bool clearDepth) = 0;
+        virtual void cmdClearFramebuffer(Color color, bool clearDepth, Framebuffer* nonDefaultFramebuffer = nullptr) = 0;
 
         virtual void cmdPresent() = 0;
 

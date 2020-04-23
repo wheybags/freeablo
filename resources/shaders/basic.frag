@@ -1,40 +1,39 @@
 #version 330
 
-in vec2 uv;
-flat in vec2 imageSize;
-flat in vec4 hoverColor;
-flat in vec2 atlasOffset;
+in vec2 f_uvNorm;
 flat in float f_zValue;
+flat in vec2 f_spriteSizeInPixels;
+flat in vec4 f_hoverColor;
+flat in vec2 f_atlasOffsetInPixels;
 
 layout(std140) uniform fragmentUniforms
 {
-    vec2 atlasSize;
+    vec2 atlasSizeInPixels;
 
     vec2 pad1;
 };
 
 uniform sampler2D tex;
 
-out vec4 frag_colour;
-
 void main()
 {
-    vec4 c = texture(tex, (atlasOffset.xy + uv * imageSize) / atlasSize);
+    vec4 color = texture(tex, (f_atlasOffsetInPixels.xy + f_uvNorm * f_spriteSizeInPixels) / atlasSizeInPixels);
 
-    if (c.w == 0. && hoverColor.a > 0.)
+    if (color.w == 0 && f_hoverColor.a > 0)
     {
-        for (float i= -1.; i <= 1.; i++)
+        for (float y = -1; y <= 1; y++)
         {
-            for (float j= -1.; j <= 1.; j++)
+            for (float x = -1; x <= 1; x++)
             {
-                vec2 offset = vec2(i, j);
-                vec4 n = texture(tex, (atlasOffset.xy + offset + uv * imageSize) / atlasSize);
-                if (n.w > 0. && (n.x > 0. || n.y > 0. || n.z > 0.))
-                    c = hoverColor;
+                vec2 offset = vec2(x, y);
+                vec4 n = texture(tex, (f_atlasOffsetInPixels.xy + offset + f_uvNorm * f_spriteSizeInPixels) / atlasSizeInPixels);
+
+                if (n.a > 0 && (n.r > 0 || n.g > 0 || n.b > 0))
+                    color = f_hoverColor;
             }
         }
     }
 
-    frag_colour = c;
-    gl_FragDepth = mix(1.0, f_zValue, frag_colour.a);
+    gl_FragColor = color;
+    gl_FragDepth = mix(1.0, f_zValue, gl_FragColor.a);
 }

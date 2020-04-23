@@ -1,5 +1,6 @@
 #include "localinputhandler.h"
 #include "../fagui/guimanager.h"
+#include "../farender/levelrenderer.h"
 #include "../farender/renderer.h"
 #include "../faworld/player.h"
 #include "../faworld/playerbehaviour.h"
@@ -51,6 +52,12 @@ namespace Engine
                 return;
             }
 
+            case Engine::KeyboardInputAction::toggleTextureFiltering:
+            {
+                FARender::Renderer::get()->mLevelRenderer->toggleTextureFiltering();
+                return;
+            }
+
             default:
             {
                 return;
@@ -58,7 +65,8 @@ namespace Engine
         }
     }
 
-    void LocalInputHandler::notify(MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers)
+    void
+    LocalInputHandler::notify(MouseInputAction action, Vec2i mousePosition, Vec2i mouseWheelDelta, bool mouseDown, const Input::KeyboardModifiers& modifiers)
     {
         if (mBlockedFramesLeft > 0)
             return;
@@ -129,6 +137,12 @@ namespace Engine
                     return;
                 }
 
+                return;
+            }
+            case Engine::MouseInputAction::MOUSE_WHEEL:
+            {
+                int32_t scaleChange = mouseWheelDelta.y > 0 ? 1 : (mouseWheelDelta.y < 0 ? -1 : 0);
+                FARender::Renderer::get()->mLevelRenderer->adjustZoom(scaleChange);
                 return;
             }
 

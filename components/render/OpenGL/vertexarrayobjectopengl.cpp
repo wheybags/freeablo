@@ -102,6 +102,8 @@ namespace Render
                     normalized = GL_FALSE;
                     size = 2;
                     break;
+                case Format::Depth24Stencil8:
+                    invalid_enum(Format, element);
             }
 
             glVertexAttribPointer(locationIndex, size, type, normalized, layout.getSizeInBytes(), reinterpret_cast<void*>(offset));

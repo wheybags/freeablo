@@ -110,7 +110,7 @@ set(RenderFiles
     render/alignedcpubuffer.h
     render/alignedcpubuffer.cpp
     render/rectpack.cpp
-    render/rectpack.h render/cursor.cpp render/cursor.h)
+    render/rectpack.h render/cursor.cpp render/cursor.h render/framebuffer.h render/framebuffer.cpp render/OpenGL/framebufferopengl.cpp render/OpenGL/framebufferopengl.h)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
