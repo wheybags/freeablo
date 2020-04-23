@@ -1,6 +1,7 @@
 #include "levelrenderer.h"
 #include <level/level.h>
 #include <render/commandqueue.h>
+#include <render/framebuffer.h>
 #include <render/levelobjects.h>
 #include <render/pipeline.h>
 #include <render/render.h>
@@ -19,14 +20,15 @@ namespace FARender
         mSpritesToDraw.push_back(SpriteData{atlasEntry, x, y, highlightColor});
     }
 
-    void DrawLevelCache::end(DrawLevelUniforms::CpuBufferType* drawLevelUniformCpuBuffer,
-                             Render::Buffer* drawLevelUniformBuffer,
-                             Render::VertexArrayObject* vertexArrayObject,
-                             Render::DescriptorSet* drawLevelDescriptorSet,
-                             Render::Pipeline* drawLevelPipeline)
+    void DrawLevelCache::end(DrawLevelUniforms::CpuBufferType& drawLevelUniformCpuBuffer,
+                             Render::Buffer& drawLevelUniformBuffer,
+                             Render::VertexArrayObject& vertexArrayObject,
+                             Render::DescriptorSet& drawLevelDescriptorSet,
+                             Render::Pipeline& drawLevelPipeline,
+                             Render::Framebuffer* nonDefaultFramebuffer)
     {
         for (size_t i = 0; i < mSpritesToDraw.size(); i++)
-            mSpritesToDraw[i].zBufferValue = 1.0f - (i / float(mSpritesToDraw.size()));
+            mSpritesToDraw[i].zBufferValue = 1.0f - ((i + 1) / float(mSpritesToDraw.size() + 2));
 
         // explicit z buffer values ensure the draws act like they were done in-order, so we're free to batch by texture as aggressively as possible
         auto sortByTexture = [](const SpriteData& a, const SpriteData& b) { return a.atlasEntry->mTexture < b.atlasEntry->mTexture; };
@@ -42,11 +44,12 @@ namespace FARender
                             drawLevelUniformBuffer,
                             vertexArrayObject,
                             drawLevelDescriptorSet,
-                            drawLevelPipeline);
+                            drawLevelPipeline,
+                            nonDefaultFramebuffer);
 
         mSpritesToDraw.clear();
 
-        draw(drawLevelUniformCpuBuffer, drawLevelUniformBuffer, vertexArrayObject, drawLevelDescriptorSet, drawLevelPipeline);
+        draw(drawLevelUniformCpuBuffer, drawLevelUniformBuffer, vertexArrayObject, drawLevelDescriptorSet, drawLevelPipeline, nonDefaultFramebuffer);
     }
 
     void DrawLevelCache::batchDrawSprite(const Render::AtlasTextureEntry& atlasEntry,
@@ -54,27 +57,28 @@ namespace FARender
                                          int32_t y,
                                          std::optional<Cel::Colour> highlightColor,
                                          float zBufferVal,
-                                         DrawLevelUniforms::CpuBufferType* drawLevelUniformCpuBuffer,
-                                         Render::Buffer* drawLevelUniformBuffer,
-                                         Render::VertexArrayObject* vertexArrayObject,
-                                         Render::DescriptorSet* drawLevelDescriptorSet,
-                                         Render::Pipeline* drawLevelPipeline)
+                                         DrawLevelUniforms::CpuBufferType& drawLevelUniformCpuBuffer,
+                                         Render::Buffer& drawLevelUniformBuffer,
+                                         Render::VertexArrayObject& vertexArrayObject,
+                                         Render::DescriptorSet& drawLevelDescriptorSet,
+                                         Render::Pipeline& drawLevelPipeline,
+                                         Render::Framebuffer* nonDefaultFramebuffer)
     {
         if (atlasEntry.mTexture != mTexture)
-            draw(drawLevelUniformCpuBuffer, drawLevelUniformBuffer, vertexArrayObject, drawLevelDescriptorSet, drawLevelPipeline);
+            draw(drawLevelUniformCpuBuffer, drawLevelUniformBuffer, vertexArrayObject, drawLevelDescriptorSet, drawLevelPipeline, nonDefaultFramebuffer);
 
         mTexture = atlasEntry.mTexture;
 
         Render::SpriteVertexPerInstance vertexData = {};
 
-        vertexData.v_imageSize[0] = atlasEntry.mTrimmedWidth;
-        vertexData.v_imageSize[1] = atlasEntry.mTrimmedHeight;
+        vertexData.v_spriteSizeInPixels[0] = atlasEntry.mTrimmedWidth;
+        vertexData.v_spriteSizeInPixels[1] = atlasEntry.mTrimmedHeight;
 
-        vertexData.v_atlasOffset[0] = atlasEntry.mX;
-        vertexData.v_atlasOffset[1] = atlasEntry.mY;
+        vertexData.v_atlasOffsetInPixels[0] = atlasEntry.mX;
+        vertexData.v_atlasOffsetInPixels[1] = atlasEntry.mY;
 
-        vertexData.v_imageOffset[0] = x + atlasEntry.mTrimmedOffsetX;
-        vertexData.v_imageOffset[1] = y + atlasEntry.mTrimmedOffsetY;
+        vertexData.v_destinationInPixels[0] = x + atlasEntry.mTrimmedOffsetX;
+        vertexData.v_destinationInPixels[1] = y + atlasEntry.mTrimmedOffsetY;
 
         vertexData.v_zValue = zBufferVal;
 
@@ -89,35 +93,37 @@ namespace FARender
         mInstanceData.push_back(vertexData);
     }
 
-    void DrawLevelCache::draw(DrawLevelUniforms::CpuBufferType* drawLevelUniformCpuBuffer,
-                              Render::Buffer* drawLevelUniformBuffer,
-                              Render::VertexArrayObject* vertexArrayObject,
-                              Render::DescriptorSet* drawLevelDescriptorSet,
-                              Render::Pipeline* drawLevelPipeline)
+    void DrawLevelCache::draw(DrawLevelUniforms::CpuBufferType& drawLevelUniformCpuBuffer,
+                              Render::Buffer& drawLevelUniformBuffer,
+                              Render::VertexArrayObject& vertexArrayObject,
+                              Render::DescriptorSet& drawLevelDescriptorSet,
+                              Render::Pipeline& drawLevelPipeline,
+                              Render::Framebuffer* nonDefaultFramebuffer)
     {
         if (mInstanceData.empty())
             return;
 
-        auto vertexUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Vertex>();
-        vertexUniforms->screenSize[0] = getCurrentResolution().w;
-        vertexUniforms->screenSize[1] = getCurrentResolution().h;
+        auto vertexUniforms = drawLevelUniformCpuBuffer.getMemberPointer<DrawLevelUniforms::Vertex>();
+        vertexUniforms->screenSizeInPixels[0] = getCurrentResolution().w;
+        vertexUniforms->screenSizeInPixels[1] = getCurrentResolution().h;
 
-        auto fragmentUniforms = drawLevelUniformCpuBuffer->getMemberPointer<DrawLevelUniforms::Fragment>();
-        fragmentUniforms->atlasSize[0] = mTexture->width();
-        fragmentUniforms->atlasSize[1] = mTexture->height();
+        auto fragmentUniforms = drawLevelUniformCpuBuffer.getMemberPointer<DrawLevelUniforms::Fragment>();
+        fragmentUniforms->atlasSizeInPixels[0] = mTexture->width();
+        fragmentUniforms->atlasSizeInPixels[1] = mTexture->height();
 
-        drawLevelUniformBuffer->setData(drawLevelUniformCpuBuffer->data(), drawLevelUniformCpuBuffer->getSizeInBytes());
+        drawLevelUniformBuffer.setData(drawLevelUniformCpuBuffer.data(), drawLevelUniformCpuBuffer.getSizeInBytes());
 
-        vertexArrayObject->getVertexBuffer(1)->setData(mInstanceData.data(), mInstanceData.size() * sizeof(Render::SpriteVertexPerInstance));
+        vertexArrayObject.getVertexBuffer(1)->setData(mInstanceData.data(), mInstanceData.size() * sizeof(Render::SpriteVertexPerInstance));
 
-        drawLevelDescriptorSet->updateItems({
+        drawLevelDescriptorSet.updateItems({
             {2, mTexture},
         });
 
         Render::Bindings bindings;
-        bindings.vao = vertexArrayObject;
-        bindings.pipeline = drawLevelPipeline;
-        bindings.descriptorSet = drawLevelDescriptorSet;
+        bindings.vao = &vertexArrayObject;
+        bindings.pipeline = &drawLevelPipeline;
+        bindings.descriptorSet = &drawLevelDescriptorSet;
+        bindings.nonDefaultFramebuffer = nonDefaultFramebuffer;
 
         Render::mainCommandQueue->cmdDrawInstances(0, 6, mInstanceData.size(), bindings);
 
@@ -138,44 +144,44 @@ namespace FARender
     // basic transform of isometric grid to normal, (0, 0) tile coordinate maps to (0, 0) pixel coordinates
     // since eventually we're gonna shift coordinates to viewport center, it's better to keep transform itself
     // as simple as possible
-    template <typename T> static Vec2i tileTopPoint(Vec2<T> tile)
+    template <typename T> static Vec2<T> tileTopPoint(Vec2<T> tile, int32_t scale = 1)
     {
-        return Vec2i(Vec2<T>(T(tileWidth / 2) * (tile.x - tile.y), (tile.y + tile.x) * (tileHeight / 2)));
+        return Vec2<T>(T((tileWidth * scale) / 2) * (tile.x - tile.y), (tile.y + tile.x) * ((tileHeight * scale) / 2));
     }
 
     // this function simply does the reverse of the above function, could be found by solving linear equation system
     // it obviously uses the fact that tileWidth = tileHeight * 2
-    Render::Tile getTileFromScreenCoords(const Misc::Point& screenPos, const Misc::Point& toScreen)
+    Render::Tile getTileFromScreenCoords(Vec2i screenPos, Vec2i screenSpaceOffset, int32_t scale = 1)
     {
-        auto point = screenPos - toScreen;
-        auto x = std::div(2 * point.y + point.x, tileWidth); // division by 64 is pretty fast btw
-        auto y = std::div(2 * point.y - point.x, tileWidth);
+        Vec2i point = screenPos - screenSpaceOffset;
+        auto x = std::div(2 * point.y + point.x, tileWidth * scale);
+        auto y = std::div(2 * point.y - point.x, tileWidth * scale);
         return {x.quot, y.quot, x.rem > y.rem ? Render::TileHalf::right : Render::TileHalf::left};
     }
 
     void
     LevelRenderer::drawMovingSprite(Render::Sprite sprite, const Vec2Fix& fractionalPos, const Misc::Point& toScreen, std::optional<Cel::Colour> highlightColor)
     {
-        Vec2i point = tileTopPoint(fractionalPos);
+        Vec2i point = Vec2i(tileTopPoint(fractionalPos));
         Vec2i res = point + toScreen;
 
         drawAtTile(sprite, Vec2i(res), sprite->mWidth, sprite->mHeight, highlightColor);
     }
 
-    constexpr auto bottomMenuSize = 144; // TODO: pass it as a variable
-    static Misc::Point worldToScreenVector(const Vec2Fix& fractionalPos)
+    constexpr auto bottomMenuSize = 0; // 144; // TODO: pass it as a variable
+    static Misc::Point worldPositionToScreenSpace(const Vec2Fix& worldPosition, int32_t scale = 1)
     {
         // centering takes in accord bottom menu size to be consistent with original game centering
-        Vec2i point = tileTopPoint(fractionalPos);
+        Vec2i point = Vec2i(tileTopPoint(worldPosition, scale));
 
         Vec2i resolution = getCurrentResolution();
         return Misc::Point{resolution.w / 2, (resolution.h - bottomMenuSize) / 2} - point;
     }
 
-    Render::Tile LevelRenderer::getTileByScreenPos(size_t x, size_t y, const Vec2Fix& fractionalPos)
+    Render::Tile LevelRenderer::getTileByScreenPos(size_t x, size_t y, const Vec2Fix& worldPositionOffset)
     {
-        Misc::Point toScreen = worldToScreenVector(fractionalPos);
-        return getTileFromScreenCoords({static_cast<int32_t>(x), static_cast<int32_t>(y)}, toScreen);
+        Misc::Point screenSpaceOffset = worldPositionToScreenSpace(worldPositionOffset, mRenderScale);
+        return getTileFromScreenCoords({static_cast<int32_t>(x), static_cast<int32_t>(y)}, screenSpaceOffset, mRenderScale);
     }
 
     template <typename ProcessTileFunc> void drawObjectsByTiles(const Misc::Point& toScreen, ProcessTileFunc processTile)
@@ -185,7 +191,7 @@ namespace FARender
 
         Vec2i resolution = getCurrentResolution();
 
-        Misc::Point startingPoint = tileTopPoint(startingTile.pos) + toScreen;
+        Misc::Point startingPoint = Vec2i(tileTopPoint(startingTile.pos)) + toScreen;
         auto processLine = [&]() {
             Misc::Point point = startingPoint;
             Render::Tile tile = startingTile;
@@ -222,7 +228,7 @@ namespace FARender
                                   Render::LevelObjects& items,
                                   const Vec2Fix& fractionalPos)
     {
-        auto toScreen = worldToScreenVector(fractionalPos);
+        auto toScreen = worldPositionToScreenSpace(fractionalPos);
         auto isInvalidTile = [&](const Render::Tile& tile) {
             return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
         };
@@ -277,7 +283,33 @@ namespace FARender
             }
         });
 
-        mDrawLevelCache.end(drawLevelUniformCpuBuffer, drawLevelUniformBuffer, vertexArrayObject, drawLevelDescriptorSet, drawLevelPipeline);
+        if (levelDrawFramebuffer->getColorBuffer().width() != getCurrentResolution().w ||
+            levelDrawFramebuffer->getColorBuffer().height() != getCurrentResolution().h)
+            createNewLevelDrawFramebuffer();
+
+        Render::mainCommandQueue->cmdClearFramebuffer(Render::Colors::black, true, levelDrawFramebuffer.get());
+
+        mDrawLevelCache.end(
+            *drawLevelUniformCpuBuffer, *drawLevelUniformBuffer, *vertexArrayObject, *drawLevelDescriptorSet, *drawLevelPipeline, levelDrawFramebuffer.get());
+
+        Render::Bindings fullscreenBindings;
+        fullscreenBindings.pipeline = fullscreenPipeline.get();
+        fullscreenBindings.vao = fullscreenVao.get();
+        fullscreenBindings.descriptorSet = fullscreenDescriptorSet.get();
+
+        FullscreenUniforms::Vertex fullscreenSettings = {};
+        fullscreenSettings.scaleOrigin[0] = 0;
+        fullscreenSettings.scaleOrigin[1] = 0;
+        fullscreenSettings.scale = mRenderScale;
+        fullscreenUniformBuffer->setData(&fullscreenSettings, sizeof(FullscreenUniforms::Vertex));
+
+        Render::Texture& levelTexture = levelDrawFramebuffer->getColorBuffer();
+        if (mTextureFilter && levelTexture.getInfo().magFilter == Render::Filter::Nearest)
+            levelTexture.setFilter(levelTexture.getInfo().minFilter, Render::Filter::Linear);
+        else if (!mTextureFilter && levelTexture.getInfo().magFilter == Render::Filter::Linear)
+            levelTexture.setFilter(levelTexture.getInfo().minFilter, Render::Filter::Nearest);
+
+        Render::mainCommandQueue->cmdDraw(0, 6, fullscreenBindings);
     }
     LevelRenderer::LevelRenderer()
     {
@@ -292,31 +324,92 @@ namespace FARender
             {Render::DescriptorType::Texture, "tex"},
         }};
 
-        drawLevelPipeline = Render::mainRenderInstance->createPipeline(drawLevelPipelineSpec).release();
-        vertexArrayObject = Render::mainRenderInstance->createVertexArrayObject({0, 0}, drawLevelPipelineSpec.vertexLayouts, 0).release();
+        drawLevelPipeline = Render::mainRenderInstance->createPipeline(drawLevelPipelineSpec);
+        vertexArrayObject = Render::mainRenderInstance->createVertexArrayObject({0, 0}, drawLevelPipelineSpec.vertexLayouts, 0);
 
-        drawLevelUniformCpuBuffer = new DrawLevelUniforms::CpuBufferType(Render::mainRenderInstance->capabilities().uniformBufferOffsetAlignment);
+        drawLevelUniformCpuBuffer = std::make_unique<DrawLevelUniforms::CpuBufferType>(Render::mainRenderInstance->capabilities().uniformBufferOffsetAlignment);
 
-        drawLevelUniformBuffer = Render::mainRenderInstance->createBuffer(drawLevelUniformCpuBuffer->getSizeInBytes()).release();
-        drawLevelDescriptorSet = Render::mainRenderInstance->createDescriptorSet(drawLevelPipelineSpec.descriptorSetSpec).release();
+        drawLevelUniformBuffer = Render::mainRenderInstance->createBuffer(drawLevelUniformCpuBuffer->getSizeInBytes());
+        drawLevelDescriptorSet = Render::mainRenderInstance->createDescriptorSet(drawLevelPipelineSpec.descriptorSetSpec);
 
         // clang-format off
         drawLevelDescriptorSet->updateItems(
         {
-            {0, Render::BufferSlice{drawLevelUniformBuffer, drawLevelUniformCpuBuffer->getMemberOffset<DrawLevelUniforms::Vertex>(), sizeof(DrawLevelUniforms::Vertex)}},
-            {1, Render::BufferSlice{drawLevelUniformBuffer, drawLevelUniformCpuBuffer->getMemberOffset<DrawLevelUniforms::Fragment>(), sizeof(DrawLevelUniforms::Fragment)}},
+            {0, Render::BufferSlice{drawLevelUniformBuffer.get(), drawLevelUniformCpuBuffer->getMemberOffset<DrawLevelUniforms::Vertex>(), sizeof(DrawLevelUniforms::Vertex)}},
+            {1, Render::BufferSlice{drawLevelUniformBuffer.get(), drawLevelUniformCpuBuffer->getMemberOffset<DrawLevelUniforms::Fragment>(), sizeof(DrawLevelUniforms::Fragment)}},
         });
 
         Render::SpriteVertexMain baseVertices[] =
         {
-            {{0, 0, 0},  {0, 0}},
-            {{1, 0, 0},  {1, 0}},
-            {{1, 1, 0},  {1, 1}},
-            {{0, 0, 0},  {0, 0}},
-            {{1, 1, 0},  {1, 1}},
-            {{0, 1, 0},  {0, 1}}
+            {{0, 0},  {0, 0}},
+            {{1, 0},  {1, 0}},
+            {{1, 1},  {1, 1}},
+            {{0, 0},  {0, 0}},
+            {{1, 1},  {1, 1}},
+            {{0, 1},  {0, 1}}
         };
         // clang-format on
         vertexArrayObject->getVertexBuffer(0)->setData(baseVertices, sizeof(baseVertices));
+
+        {
+            // clang-format off
+            Render::BasicVertex topLeft  {{-1, -1}, {0, 0}};
+            Render::BasicVertex topRight {{ 1, -1}, {1, 0}};
+            Render::BasicVertex botLeft  {{-1,  1}, {0, 1}};
+            Render::BasicVertex botRight {{ 1,  1}, {1, 1}};
+
+            Render::BasicVertex fullscreenVertices[] =
+            {
+                topLeft, topRight, botLeft,
+                topRight, botRight, botLeft,
+            };
+            // clang-format on
+
+            Render::PipelineSpec fullscreenPipelineSpec;
+            fullscreenPipelineSpec.vertexLayouts = {Render::BasicVertex::layout()};
+            fullscreenPipelineSpec.vertexShaderPath = Misc::getResourcesPath().str() + "/shaders/fullscreen.vert";
+            fullscreenPipelineSpec.fragmentShaderPath = Misc::getResourcesPath().str() + "/shaders/fullscreen.frag";
+            fullscreenPipelineSpec.descriptorSetSpec = {{
+                {Render::DescriptorType::UniformBuffer, "vertexUniforms"},
+                {Render::DescriptorType::Texture, "tex"},
+            }};
+
+            fullscreenPipeline = Render::mainRenderInstance->createPipeline(fullscreenPipelineSpec);
+            fullscreenVao = Render::mainRenderInstance->createVertexArrayObject({sizeof(fullscreenVertices)}, fullscreenPipelineSpec.vertexLayouts, 0);
+            fullscreenUniformBuffer = Render::mainRenderInstance->createBuffer(sizeof(FullscreenUniforms::Vertex));
+            fullscreenDescriptorSet = Render::mainRenderInstance->createDescriptorSet(fullscreenPipelineSpec.descriptorSetSpec);
+
+            fullscreenVao->getVertexBuffer(0)->setData(fullscreenVertices, sizeof(baseVertices));
+            fullscreenDescriptorSet->updateItems({{0, this->fullscreenUniformBuffer.get()}});
+        }
+
+        createNewLevelDrawFramebuffer();
     }
+
+    void LevelRenderer::createNewLevelDrawFramebuffer()
+    {
+        Render::BaseTextureInfo textureInfo;
+        textureInfo.width = getCurrentResolution().w;
+        textureInfo.height = getCurrentResolution().h;
+        textureInfo.minFilter = Render::Filter::Linear;
+        textureInfo.magFilter = Render::Filter::Nearest;
+
+        if (levelDrawFramebuffer)
+            textureInfo.magFilter = levelDrawFramebuffer->getColorBuffer().getInfo().magFilter;
+
+        textureInfo.format = Render::Format::RGBA8UNorm;
+        std::unique_ptr<Render::Texture> colorBuffer = Render::mainRenderInstance->createTexture(textureInfo);
+
+        textureInfo.format = Render::Format::Depth24Stencil8;
+        std::unique_ptr<Render::Texture> depthStencilBuffer = Render::mainRenderInstance->createTexture(textureInfo);
+
+        Render::FramebufferInfo framebufferInfo;
+        framebufferInfo.colorBuffer = colorBuffer.release();
+        framebufferInfo.depthStencilBuffer = depthStencilBuffer.release();
+        levelDrawFramebuffer = Render::mainRenderInstance->createFramebuffer(framebufferInfo);
+
+        fullscreenDescriptorSet->updateItems({{1, &levelDrawFramebuffer->getColorBuffer()}});
+    }
+
+    LevelRenderer::~LevelRenderer() = default;
 }

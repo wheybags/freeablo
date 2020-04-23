@@ -1,5 +1,6 @@
 #pragma once
 #include <Image/image.h>
+#include <atomic>
 #include <cstdint>
 #include <map>
 #include <misc/simplevec2.h>
@@ -22,6 +23,7 @@ namespace Render
     class Pipeline;
     class Buffer;
     class DescriptorSet;
+    class Framebuffer;
     struct Tile;
 
     typedef const AtlasTextureEntry* Sprite;
@@ -33,14 +35,14 @@ namespace FARender
     {
         struct Vertex
         {
-            float screenSize[2];
+            float screenSizeInPixels[2];
 
             float pad1[2];
         };
 
         struct Fragment
         {
-            float atlasSize[2];
+            float atlasSizeInPixels[2];
 
             float pad2[2];
         };
@@ -48,15 +50,27 @@ namespace FARender
         using CpuBufferType = Render::TypedAlignedCpuBuffer<Vertex, Fragment>;
     }
 
+    namespace FullscreenUniforms
+    {
+        struct Vertex
+        {
+            float scaleOrigin[2];
+            float scale;
+
+            float pad1;
+        };
+    }
+
     class DrawLevelCache
     {
     public:
         void addSprite(Render::Sprite atlasEntry, int32_t x, int32_t y, std::optional<ByteColour> highlightColor);
-        void end(DrawLevelUniforms::CpuBufferType* drawLevelUniformCpuBuffer,
-                 Render::Buffer* drawLevelUniformBuffer,
-                 Render::VertexArrayObject* vertexArrayObject,
-                 Render::DescriptorSet* drawLevelDescriptorSet,
-                 Render::Pipeline* drawLevelPipeline);
+        void end(DrawLevelUniforms::CpuBufferType& drawLevelUniformCpuBuffer,
+                 Render::Buffer& drawLevelUniformBuffer,
+                 Render::VertexArrayObject& vertexArrayObject,
+                 Render::DescriptorSet& drawLevelDescriptorSet,
+                 Render::Pipeline& drawLevelPipeline,
+                 Render::Framebuffer* nonDefaultFramebuffer);
 
     private:
         void batchDrawSprite(const Render::AtlasTextureEntry& atlasEntry,
@@ -64,16 +78,18 @@ namespace FARender
                              int32_t y,
                              std::optional<ByteColour> highlightColor,
                              float zBufferVal,
-                             DrawLevelUniforms::CpuBufferType* drawLevelUniformCpuBuffer,
-                             Render::Buffer* drawLevelUniformBuffer,
-                             Render::VertexArrayObject* vertexArrayObject,
-                             Render::DescriptorSet* drawLevelDescriptorSet,
-                             Render::Pipeline* drawLevelPipeline);
-        void draw(DrawLevelUniforms::CpuBufferType* drawLevelUniformCpuBuffer,
-                  Render::Buffer* drawLevelUniformBuffer,
-                  Render::VertexArrayObject* vertexArrayObject,
-                  Render::DescriptorSet* drawLevelDescriptorSet,
-                  Render::Pipeline* drawLevelPipeline);
+                             DrawLevelUniforms::CpuBufferType& drawLevelUniformCpuBuffer,
+                             Render::Buffer& drawLevelUniformBuffer,
+                             Render::VertexArrayObject& vertexArrayObject,
+                             Render::DescriptorSet& drawLevelDescriptorSet,
+                             Render::Pipeline& drawLevelPipeline,
+                             Render::Framebuffer* nonDefaultFramebuffer);
+        void draw(DrawLevelUniforms::CpuBufferType& drawLevelUniformCpuBuffer,
+                  Render::Buffer& drawLevelUniformBuffer,
+                  Render::VertexArrayObject& vertexArrayObject,
+                  Render::DescriptorSet& drawLevelDescriptorSet,
+                  Render::Pipeline& drawLevelPipeline,
+                  Render::Framebuffer* nonDefaultFramebuffer);
 
     private:
         struct SpriteData
@@ -94,6 +110,7 @@ namespace FARender
     {
     public:
         LevelRenderer();
+        ~LevelRenderer();
 
         void drawLevel(const Level::Level& level,
                        Render::SpriteGroup* minTops,
@@ -104,21 +121,37 @@ namespace FARender
                        Render::LevelObjects& items,
                        const Vec2Fix& fractionalPos);
 
-        static Render::Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& fractionalPos);
+        Render::Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& worldPositionOffset);
+
+        void toggleTextureFiltering() { mTextureFilter = !mTextureFilter; }
+        void adjustZoom(int32_t delta) { mRenderScale = std::clamp(mRenderScale + delta, 1, 5); }
 
     private:
+        void createNewLevelDrawFramebuffer();
+
         void drawAtTile(Render::Sprite sprite, const Misc::Point& tileTop, int spriteW, int spriteH, std::optional<ByteColour> highlightColor = std::nullopt);
         void drawMovingSprite(Render::Sprite sprite,
                               const Vec2Fix& fractionalPos,
                               const Misc::Point& toScreen,
                               std::optional<Cel::Colour> highlightColor = std::nullopt);
 
+    private:
         DrawLevelCache mDrawLevelCache;
 
-        Render::VertexArrayObject* vertexArrayObject = nullptr;
-        Render::Pipeline* drawLevelPipeline = nullptr;
-        Render::Buffer* drawLevelUniformBuffer = nullptr;
-        DrawLevelUniforms::CpuBufferType* drawLevelUniformCpuBuffer = nullptr;
-        Render::DescriptorSet* drawLevelDescriptorSet = nullptr;
+        std::unique_ptr<Render::VertexArrayObject> vertexArrayObject;
+        std::unique_ptr<Render::Pipeline> drawLevelPipeline;
+        std::unique_ptr<Render::Buffer> drawLevelUniformBuffer;
+        std::unique_ptr<DrawLevelUniforms::CpuBufferType> drawLevelUniformCpuBuffer;
+        std::unique_ptr<Render::DescriptorSet> drawLevelDescriptorSet;
+
+        std::unique_ptr<Render::Framebuffer> levelDrawFramebuffer;
+
+        std::unique_ptr<Render::Pipeline> fullscreenPipeline;
+        std::unique_ptr<Render::VertexArrayObject> fullscreenVao;
+        std::unique_ptr<Render::Buffer> fullscreenUniformBuffer;
+        std::unique_ptr<Render::DescriptorSet> fullscreenDescriptorSet;
+
+        std::atomic_bool mTextureFilter = false;
+        std::atomic_int mRenderScale = 2;
     };
 }

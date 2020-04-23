@@ -17,6 +17,7 @@ namespace Render
         RGBA16I,
         RGB16I,
         RG16I,
+        Depth24Stencil8,
     };
 
     size_t formatSize(Format format);

@@ -5,6 +5,8 @@ namespace Render
 {
     TextureOpenGL::TextureOpenGL(RenderInstanceOpenGL& instance, const BaseTextureInfo& info) : super(instance, info)
     {
+        release_assert(!(isTextureArray() && mInfo.format == Format::Depth24Stencil8));
+
         glGenTextures(1, &mId);
 
         GLint internalFormat = 0;
@@ -38,6 +40,11 @@ namespace Render
                 format = GL_RED;
                 type = GL_FLOAT;
                 break;
+            case Format::Depth24Stencil8:
+                internalFormat = GL_DEPTH24_STENCIL8;
+                format = GL_DEPTH_STENCIL;
+                type = GL_UNSIGNED_INT_24_8;
+                break;
             case Format::RGBA16U:
             case Format::RGB16U:
             case Format::RG16U:
@@ -56,6 +63,9 @@ namespace Render
 
         glTexParameteri(getBindPoint(), GL_TEXTURE_MIN_FILTER, mInfo.minFilter == Filter::Nearest ? GL_NEAREST : GL_LINEAR);
         glTexParameteri(getBindPoint(), GL_TEXTURE_MAG_FILTER, mInfo.magFilter == Filter::Nearest ? GL_NEAREST : GL_LINEAR);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     }
 
     TextureOpenGL::~TextureOpenGL() { glDeleteTextures(1, &mId); }
@@ -68,6 +78,15 @@ namespace Render
             glTexSubImage3D(getBindPoint(), 0, x, y, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, rgba8UnormData);
         else
             glTexSubImage2D(getBindPoint(), 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, rgba8UnormData);
+    }
+
+    void TextureOpenGL::setFilter(Filter minFilter, Filter magFilter)
+    {
+        super::setFilter(minFilter, magFilter);
+
+        ScopedBindGL thisBind(this);
+        glTexParameteri(getBindPoint(), GL_TEXTURE_MIN_FILTER, mInfo.minFilter == Filter::Nearest ? GL_NEAREST : GL_LINEAR);
+        glTexParameteri(getBindPoint(), GL_TEXTURE_MAG_FILTER, mInfo.magFilter == Filter::Nearest ? GL_NEAREST : GL_LINEAR);
     }
 
     void TextureOpenGL::unbind(std::optional<GLuint> extra1, std::optional<GLuint>)

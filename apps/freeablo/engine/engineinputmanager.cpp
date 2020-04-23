@@ -9,13 +9,14 @@ namespace Engine
 {
     namespace ph = std::placeholders;
 
+    // TODO: replace this callback mess (wouldn't a simple interface do?)
     EngineInputManager::EngineInputManager(nk_context* nk_ctx)
         : mNkCtx(nk_ctx), mInput(std::bind(&EngineInputManager::keyPress, this, ph::_1),
                                  std::bind(&EngineInputManager::keyRelease, this, ph::_1),
                                  std::bind(&EngineInputManager::mouseClick, this, ph::_1, ph::_2, ph::_3, ph::_4),
                                  std::bind(&EngineInputManager::mouseRelease, this, ph::_1, ph::_2, ph::_3),
                                  std::bind(&EngineInputManager::mouseMove, this, ph::_1, ph::_2, ph::_3, ph::_4),
-                                 nullptr,
+                                 std::bind(&EngineInputManager::mouseWheel, this, ph::_1, ph::_2),
                                  std::bind(&EngineInputManager::textInput, this, ph::_1))
     {
         for (int action = 0; action < static_cast<int>(KeyboardInputAction::max); action++)
@@ -39,11 +40,12 @@ namespace Engine
         }
     }
 
-    void EngineInputManager::notifyMouseObservers(MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers)
+    void EngineInputManager::notifyMouseObservers(
+        MouseInputAction action, Vec2i mousePosition, Vec2i wheelDelta, bool mouseDown, const Input::KeyboardModifiers& modifiers)
     {
         for (auto observer : mMouseObservers)
         {
-            observer->notify(action, mousePosition, mouseDown, modifiers);
+            observer->notify(action, mousePosition, wheelDelta, mouseDown, modifiers);
         }
     }
 
@@ -149,13 +151,13 @@ namespace Engine
         {
             mMouseDown = false;
             if (!nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
-                notifyMouseObservers(MouseInputAction::MOUSE_RELEASE, mMousePosition, mMouseDown, mKbMods);
+                notifyMouseObservers(MouseInputAction::MOUSE_RELEASE, mMousePosition, {}, mMouseDown, mKbMods);
         }
         if (key == Input::Key::KEY_RIGHT_MOUSE && mRightMouseDown)
         {
             mRightMouseDown = false;
             if (!nk_item_is_any_active(mNkCtx) && !mGuiManager->isModalDlgShown())
-                notifyMouseObservers(MouseInputAction::RIGHT_MOUSE_RELEASE, mMousePosition, mRightMouseDown, mKbMods);
+                notifyMouseObservers(MouseInputAction::RIGHT_MOUSE_RELEASE, mMousePosition, {}, mRightMouseDown, mKbMods);
         }
     }
 
@@ -166,7 +168,15 @@ namespace Engine
         mMousePosition = Misc::Point{x, y};
 
         if (!nk_item_is_any_active(mNkCtx))
-            notifyMouseObservers(MouseInputAction::MOUSE_MOVE, mMousePosition, mMouseDown, mKbMods);
+            notifyMouseObservers(MouseInputAction::MOUSE_MOVE, mMousePosition, {}, mMouseDown, mKbMods);
+    }
+
+    void EngineInputManager::mouseWheel(int32_t x, int32_t y)
+    {
+        NuklearMisc::handleNuklearMouseWheelEvent(mNkCtx, x, y);
+
+        if (!nk_item_is_any_active(mNkCtx))
+            notifyMouseObservers(MouseInputAction::MOUSE_WHEEL, mMousePosition, {x, y}, mMouseDown, mKbMods);
     }
 
     std::string EngineInputManager::keyboardActionToString(KeyboardInputAction action) const
@@ -211,6 +221,8 @@ namespace Engine
                 return "SpellHotkeyF7";
             case KeyboardInputAction::spellHotkeyF8:
                 return "SpellHotkeyF8";
+            case KeyboardInputAction::toggleTextureFiltering:
+                return "ToggleTextureFiltering";
 
             case KeyboardInputAction::max:
                 break;
@@ -234,11 +246,11 @@ namespace Engine
         nk_input_end(mNkCtx);
 
         if (mMouseDown && mClick)
-            notifyMouseObservers(MouseInputAction::MOUSE_DOWN, mMousePosition, mMouseDown, mKbMods);
+            notifyMouseObservers(MouseInputAction::MOUSE_DOWN, mMousePosition, {}, mMouseDown, mKbMods);
         mClick = false;
 
         if (mRightMouseDown && mRightClick)
-            notifyMouseObservers(MouseInputAction::RIGHT_MOUSE_DOWN, mMousePosition, mRightMouseDown, mKbMods);
+            notifyMouseObservers(MouseInputAction::RIGHT_MOUSE_DOWN, mMousePosition, {}, mRightMouseDown, mKbMods);
         mRightClick = false;
     }
 }

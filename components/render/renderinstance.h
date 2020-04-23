@@ -17,6 +17,8 @@ namespace Render
     class CommandQueue;
     class Texture;
     struct BaseTextureInfo;
+    class Framebuffer;
+    struct FramebufferInfo;
 
     struct RenderCapabilities
     {
@@ -34,6 +36,7 @@ namespace Render
         virtual std::unique_ptr<DescriptorSet> createDescriptorSet(DescriptorSetSpec spec) = 0;
         virtual std::unique_ptr<Pipeline> createPipeline(const PipelineSpec& spec) = 0;
         virtual std::unique_ptr<Texture> createTexture(const BaseTextureInfo& info) = 0;
+        virtual std::unique_ptr<Framebuffer> createFramebuffer(const FramebufferInfo& info) = 0;
         virtual std::unique_ptr<Buffer> createBuffer(size_t sizeInBytes) = 0;
         virtual std::unique_ptr<VertexArrayObject> createVertexArrayObject(std::vector<size_t> bufferSizeCounts,
                                                                            std::vector<NonNullConstPtr<VertexLayout>> bindings,

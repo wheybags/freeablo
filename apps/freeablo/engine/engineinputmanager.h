@@ -50,9 +50,10 @@ namespace Engine
         void mouseClick(int32_t x, int32_t y, Input::Key key, bool isDoubleClick);
         void mouseRelease(int32_t, int32_t, Input::Key key);
         void mouseMove(int32_t x, int32_t y, int32_t xrel, int32_t yrel);
+        void mouseWheel(int32_t x, int32_t y);
         std::string keyboardActionToString(KeyboardInputAction action) const;
         void notifyKeyboardObservers(KeyboardInputAction action);
-        void notifyMouseObservers(MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers);
+        void notifyMouseObservers(MouseInputAction action, Vec2i mousePosition, Vec2i wheelDelta, bool mouseDown, const Input::KeyboardModifiers& modifiers);
 
         nk_context* mNkCtx = nullptr;
         Input::InputManager mInput;

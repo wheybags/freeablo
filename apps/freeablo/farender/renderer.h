@@ -125,6 +125,7 @@ namespace FARender
 
     public:
         SpriteLoader mSpriteLoader;
+        std::unique_ptr<LevelRenderer> mLevelRenderer;
 
     private:
         static Renderer* mRenderer; ///< Singleton instance
@@ -152,7 +153,5 @@ namespace FARender
         std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;
         struct nk_font* mConsoleFont;
         std::map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
-
-        std::unique_ptr<LevelRenderer> mLevelRenderer;
     };
 }

@@ -29,6 +29,8 @@ namespace Render
                 return 2 * 3;
             case Format::RG16I:
                 return 2 * 2;
+            case Format::Depth24Stencil8:
+                break;
         }
 
         invalid_enum(Format, format);

@@ -20,7 +20,8 @@ namespace Engine
         virtual ~LocalInputHandler() = default;
 
         virtual void notify(KeyboardInputAction action) override;
-        virtual void notify(MouseInputAction action, Misc::Point mousePosition, bool mouseDown, const Input::KeyboardModifiers& modifiers) override;
+        virtual void
+        notify(MouseInputAction action, Vec2i mousePosition, Vec2i mouseWheelDelta, bool mouseDown, const Input::KeyboardModifiers& modifiers) override;
 
         void addInput(const FAWorld::PlayerInput& input);
         std::vector<FAWorld::PlayerInput> getAndClearInputs();
