@@ -1,11 +1,11 @@
-#include "spritegroup.h"
-#include <render/render.h>
+#include <fa_nuklear.h>
+#include <misc/assert.h>
+#include <render/spritegroup.h>
 #include <render/texture.h>
-#include <render/texturereference.h>
 
-namespace FARender
+namespace Render
 {
-    FASpriteGroup::FASpriteGroup(std::vector<const Render::TextureReference*>&& spriteReferences, std::optional<int32_t> animationLength)
+    SpriteGroup::SpriteGroup(std::vector<const Render::TextureReference*>&& spriteReferences, std::optional<int32_t> animationLength)
         : frameHandles(std::move(spriteReferences)), mOwnsFrameHandles(false)
     {
         if (animationLength)
@@ -14,7 +14,7 @@ namespace FARender
             animLength = frameHandles.size();
     }
 
-    FASpriteGroup::FASpriteGroup(std::unique_ptr<Render::Texture>&& texture)
+    SpriteGroup::SpriteGroup(std::unique_ptr<Render::Texture>&& texture)
     {
         mStandaloneTexture = std::move(texture);
         animLength = 1;
@@ -23,9 +23,9 @@ namespace FARender
         frameHandles.push_back(new Render::TextureReference(mStandaloneTexture.get()));
     }
 
-    FASpriteGroup::~FASpriteGroup() = default;
+    SpriteGroup::~SpriteGroup() = default;
 
-    struct nk_image FASpriteGroup::getNkImage(int32_t frame)
+    struct nk_image SpriteGroup::getNkImage(int32_t frame)
     {
         release_assert(frame >= 0 && frame < (int32_t)frameHandles.size());
 
@@ -36,7 +36,7 @@ namespace FARender
         return ret;
     }
 
-    int32_t FASpriteGroup::getWidth(int32_t frame) const { return frameHandles[frame]->mWidth; }
+    int32_t SpriteGroup::getWidth(int32_t frame) const { return frameHandles[frame]->mWidth; }
 
-    int32_t FASpriteGroup::getHeight(int32_t frame) const { return frameHandles[frame]->mHeight; }
+    int32_t SpriteGroup::getHeight(int32_t frame) const { return frameHandles[frame]->mHeight; }
 }

@@ -1,8 +1,8 @@
 #pragma once
 #include "../engine/inputobserverinterface.h"
-#include "../farender/spritegroup.h"
 #include "textcolor.h"
 #include <array>
+#include <fa_nuklear.h>
 #include <functional>
 #include <memory>
 #include <optional>

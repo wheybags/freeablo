@@ -241,7 +241,7 @@ namespace FAWorld
 
     std::string Item::getInvPlaceSoundPath() const { return base().invPlaceItemSoundPath; }
 
-    FARender::FASpriteGroup* Item::getFlipSpriteGroup()
+    Render::SpriteGroup* Item::getFlipSpriteGroup()
     {
         FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
         return spriteLoader.getSprite(spriteLoader.mItemDrops[base().idName]);

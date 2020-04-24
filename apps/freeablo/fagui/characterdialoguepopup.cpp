@@ -4,6 +4,7 @@
 #include "guimanager.h"
 #include "talkdialoguepopup.h"
 #include <random/random.h>
+#include <render/spritegroup.h>
 
 namespace FAGui
 {
@@ -17,7 +18,7 @@ namespace FAGui
     {
         auto renderer = FARender::Renderer::get();
 
-        FARender::FASpriteGroup* boxTex =
+        Render::SpriteGroup* boxTex =
             renderer->mSpriteLoader.getSprite(this->mWide ? renderer->mSpriteLoader.mGuiSprites.textbox : renderer->mSpriteLoader.mGuiSprites.textboxWide);
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
@@ -60,7 +61,7 @@ namespace FAGui
 
                                                      // TODO: the "cursor" of the scrollbar is still the default nuklear look, which should change
 
-                                                     FARender::FASpriteGroup* sliderImg =
+                                                     Render::SpriteGroup* sliderImg =
                                                          renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.slider);
 
                                                      // TODO: this image should repeat, not stretch
@@ -103,7 +104,7 @@ namespace FAGui
 
     void CharacterDialoguePopup::drawBackgroundCheckerboard(FARender::Renderer* renderer, struct nk_context* ctx, struct nk_rect dialogRectangle)
     {
-        FARender::FASpriteGroup* blackTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.blackTexture);
+        Render::SpriteGroup* blackTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.blackTexture);
         auto cbRect = nk_rect(dialogRectangle.x + 3, dialogRectangle.y + 3, dialogRectangle.w - 6, dialogRectangle.h - 6);
 
         ScopedApplyEffect effect(ctx, GuiEffectType::checkerboarded);

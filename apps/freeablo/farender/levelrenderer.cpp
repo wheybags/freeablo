@@ -1,11 +1,11 @@
 #include "levelrenderer.h"
-#include "spritegroup.h"
 #include <level/level.h>
 #include <render/commandqueue.h>
 #include <render/framebuffer.h>
 #include <render/pipeline.h>
 #include <render/render.h>
 #include <render/renderinstance.h>
+#include <render/spritegroup.h>
 #include <render/texture.h>
 #include <render/vertexarrayobject.h>
 #include <render/vertextypes.h>
@@ -223,9 +223,9 @@ namespace FARender
     }
 
     void LevelRenderer::drawLevel(const Level::Level& level,
-                                  FASpriteGroup* minTops,
-                                  FASpriteGroup* minBottoms,
-                                  FASpriteGroup* specialSprites,
+                                  Render::SpriteGroup* minTops,
+                                  Render::SpriteGroup* minBottoms,
+                                  Render::SpriteGroup* specialSprites,
                                   const std::map<int32_t, int32_t>& specialSpritesMap,
                                   LevelObjects& objs,
                                   LevelObjects& items,

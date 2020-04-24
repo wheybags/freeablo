@@ -5,15 +5,14 @@
 #include <optional>
 #include <vector>
 
+namespace Render
+{
+    class SpriteGroup;
+}
+
 namespace FARender
 {
     class AnimationPlayer;
-    class FASpriteGroup;
-}
-
-namespace Render
-{
-    class FASpriteGroup;
 }
 
 namespace FASaveGame
@@ -36,7 +35,7 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver) const;
 
         void update();
-        std::pair<FARender::FASpriteGroup*, int32_t> getSpriteFrame();
+        std::pair<Render::SpriteGroup*, int32_t> getSpriteFrame();
         Misc::Point getTile() const { return mTile; }
         bool onGround();
         const Item& item() const { return *mItem; }

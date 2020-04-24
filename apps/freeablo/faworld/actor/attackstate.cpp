@@ -2,6 +2,7 @@
 #include "../../fasavegame/gameloader.h"
 #include "../actor.h"
 #include "../spells.h"
+#include <render/spritegroup.h>
 
 namespace FAWorld
 {

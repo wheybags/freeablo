@@ -27,7 +27,7 @@ namespace FAWorld::Missile
         virtual void save(FASaveGame::GameSaver& saver) const;
         virtual void update();
 
-        std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame();
+        std::pair<Render::SpriteGroup*, int32_t> getCurrentFrame();
         void stop();
         bool isComplete() const { return mComplete; }
         Tick getTicksSinceStarted() const { return mTicksSinceStarted; }
@@ -37,7 +37,7 @@ namespace FAWorld::Missile
         Position mCurPos;
 
     protected:
-        void playAnimation(FARender::FASpriteGroup* spriteGroup, FARender::AnimationPlayer::AnimationType animationType);
+        void playAnimation(Render::SpriteGroup* spriteGroup, FARender::AnimationPlayer::AnimationType animationType);
 
         FARender::SpriteLoader::SpriteDefinition mInitialGraphic;
         FARender::SpriteLoader::SpriteDefinition mMainGraphic;

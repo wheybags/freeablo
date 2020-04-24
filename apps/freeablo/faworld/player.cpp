@@ -17,6 +17,7 @@
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <random/random.h>
+#include <render/spritegroup.h>
 #include <string>
 
 namespace FAWorld

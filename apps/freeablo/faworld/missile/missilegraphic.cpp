@@ -19,12 +19,12 @@ namespace FAWorld::Missile
         FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
         if (!mInitialGraphic.empty())
         {
-            FARender::FASpriteGroup* sprite = spriteLoader.getSprite(mInitialGraphic);
+            Render::SpriteGroup* sprite = spriteLoader.getSprite(mInitialGraphic);
             playAnimation(sprite, FARender::AnimationPlayer::AnimationType::Once);
         }
         else if (!mMainGraphic.empty())
         {
-            FARender::FASpriteGroup* sprite = spriteLoader.getSprite(mMainGraphic);
+            Render::SpriteGroup* sprite = spriteLoader.getSprite(mMainGraphic);
             playAnimation(sprite, FARender::AnimationPlayer::AnimationType::Looped);
         }
     }
@@ -100,7 +100,7 @@ namespace FAWorld::Missile
         }
     }
 
-    std::pair<FARender::FASpriteGroup*, int32_t> MissileGraphic::getCurrentFrame()
+    std::pair<Render::SpriteGroup*, int32_t> MissileGraphic::getCurrentFrame()
     {
         auto frame = mAnimationPlayer.getCurrentFrame();
         // Some animations just use a single offset frame.
@@ -123,7 +123,7 @@ namespace FAWorld::Missile
         mLevel->mMissileGraphics.insert(this);
     }
 
-    void MissileGraphic::playAnimation(FARender::FASpriteGroup* spriteGroup, FARender::AnimationPlayer::AnimationType animationType)
+    void MissileGraphic::playAnimation(Render::SpriteGroup* spriteGroup, FARender::AnimationPlayer::AnimationType animationType)
     {
         debug_assert(spriteGroup);
         mAnimationPlayer.playAnimation(spriteGroup, World::getTicksInPeriod("0.06"), animationType);

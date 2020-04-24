@@ -7,15 +7,15 @@
 #include <diabloexe/uniqueitem.h>
 #include <vector>
 
+namespace Render
+{
+    class SpriteGroup;
+}
+
 namespace FASaveGame
 {
     class GameSaver;
     class GameLoader;
-}
-
-namespace FARender
-{
-    class FASpriteGroup;
 }
 
 namespace DiabloExe
@@ -69,7 +69,7 @@ namespace FAWorld
         bool isEmpty() const { return mEmpty; }
         std::string getFlipSoundPath() const;
         std::string getInvPlaceSoundPath() const;
-        FARender::FASpriteGroup* getFlipSpriteGroup();
+        Render::SpriteGroup* getFlipSpriteGroup();
         bool isBeltEquippable() const;
         int32_t getMaxCount() const;
         std::array<int32_t, 2> getInvSize() const;

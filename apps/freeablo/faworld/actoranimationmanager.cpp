@@ -69,7 +69,7 @@ namespace FAWorld
         }
     }
 
-    std::pair<FARender::FASpriteGroup*, int32_t> ActorAnimationManager::getCurrentRealFrame() { return mAnimationPlayer.getCurrentFrame(); }
+    std::pair<Render::SpriteGroup*, int32_t> ActorAnimationManager::getCurrentRealFrame() { return mAnimationPlayer.getCurrentFrame(); }
 
     void ActorAnimationManager::interruptAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type)
     {
@@ -95,7 +95,7 @@ namespace FAWorld
         mAnimationPlayer.playAnimation(mAnimations[size_t(animation)], mAnimTimeMap[size_t(animation)], frameSequence);
     }
 
-    void ActorAnimationManager::setAnimationSprites(AnimState animation, FARender::FASpriteGroup* sprite)
+    void ActorAnimationManager::setAnimationSprites(AnimState animation, Render::SpriteGroup* sprite)
     {
         if (mPlayingAnim == animation)
             mAnimationPlayer.replaceAnimation(sprite);
@@ -106,7 +106,7 @@ namespace FAWorld
     void ActorAnimationManager::update()
     {
         mAnimationPlayer.update();
-        FARender::FASpriteGroup* sprite = mAnimationPlayer.getCurrentFrame().first;
+        Render::SpriteGroup* sprite = mAnimationPlayer.getCurrentFrame().first;
 
         // loop idle animation if we're not doing anything else
         if (sprite == nullptr)

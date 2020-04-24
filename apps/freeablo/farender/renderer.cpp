@@ -12,6 +12,7 @@
 #include <numeric>
 #include <render/cursor.h>
 #include <render/renderinstance.h>
+#include <render/spritegroup.h>
 #include <render/texture.h>
 #include <thread>
 
@@ -19,7 +20,7 @@ namespace FARender
 {
     Renderer* Renderer::mRenderer = nullptr;
 
-    std::unique_ptr<CelFontInfo> Renderer::generateCelFont(FASpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing)
+    std::unique_ptr<CelFontInfo> Renderer::generateCelFont(Render::SpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing)
     {
         std::unique_ptr<CelFontInfo> ret(new CelFontInfo());
         ret->initByFontData(fontData, fontTexture->getWidth(), spacing);
@@ -31,7 +32,7 @@ namespace FARender
         return ret;
     }
 
-    std::unique_ptr<PcxFontInfo> Renderer::generateFont(FASpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData)
+    std::unique_ptr<PcxFontInfo> Renderer::generateFont(Render::SpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData)
     {
         std::unique_ptr<PcxFontInfo> ret(new PcxFontInfo());
         ret->init(binPath, fontInitData);
@@ -51,12 +52,12 @@ namespace FARender
         nk_font_atlas_begin(&atlas);
     }
 
-    std::unique_ptr<FASpriteGroup> nk_fa_font_stash_end(nk_context* ctx, NuklearDevice::InitData& initData)
+    std::unique_ptr<Render::SpriteGroup> nk_fa_font_stash_end(nk_context* ctx, NuklearDevice::InitData& initData)
     {
         int width, height;
         const void* imageData = nk_font_atlas_bake(&initData.atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
 
-        std::unique_ptr<FASpriteGroup> sprite;
+        std::unique_ptr<Render::SpriteGroup> sprite;
         {
             Render::BaseTextureInfo textureInfo;
             textureInfo.width = width;
@@ -65,7 +66,7 @@ namespace FARender
             std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
             texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData));
 
-            sprite = std::make_unique<FASpriteGroup>(std::move(texture));
+            sprite = std::make_unique<Render::SpriteGroup>(std::move(texture));
         }
 
         nk_font_atlas_end(&initData.atlas, sprite->getNkImage().handle, &initData.nullTexture);

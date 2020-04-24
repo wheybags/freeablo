@@ -24,6 +24,7 @@
 #include <memory>
 #include <misc/misc.h>
 #include <misc/stringops.h>
+#include <render/spritegroup.h>
 #include <serial/textstream.h>
 #include <string>
 
@@ -333,7 +334,7 @@ namespace FAGui
                 int32_t screenW, screenH;
                 auto renderer = FARender::Renderer::get();
                 renderer->getWindowDimensions(screenW, screenH);
-                FARender::FASpriteGroup* img = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.goldSplitBackground);
+                Render::SpriteGroup* img = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.goldSplitBackground);
                 double leftTopX = 31.0, leftTopY = 42.0;
                 nk_layout_space_push(ctx, nk_rect(leftTopX, leftTopY, img->getWidth(), img->getHeight()));
                 nk_image(ctx, img->getNkImage());
@@ -431,8 +432,8 @@ namespace FAGui
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
 
             FARender::Renderer* renderer = FARender::Renderer::get();
-            FARender::FASpriteGroup* selectedTabButtons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellsButtons);
-            FARender::FASpriteGroup* icons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIconsSmall);
+            Render::SpriteGroup* selectedTabButtons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellsButtons);
+            Render::SpriteGroup* icons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIconsSmall);
 
             int32_t buttonWidth = selectedTabButtons->getWidth();
             int32_t buttonHeight = selectedTabButtons->getHeight();
@@ -535,10 +536,10 @@ namespace FAGui
         // The bottom menu is made of two sprites: panel8.cel, which is the background,
         // and panel8bu.cel, which contains overlays for each button. It's pretty primitive,
         // the buttons are baked into the background image.
-        FARender::FASpriteGroup* bottomMenuTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenu);
-        FARender::FASpriteGroup* bottomMenuButtonsTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenuButtons);
-        FARender::FASpriteGroup* healthAndManaEmptyBulbs = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenuBulbs);
-        FARender::FASpriteGroup* spellIcons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIcons);
+        Render::SpriteGroup* bottomMenuTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenu);
+        Render::SpriteGroup* bottomMenuButtonsTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenuButtons);
+        Render::SpriteGroup* healthAndManaEmptyBulbs = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenuBulbs);
+        Render::SpriteGroup* spellIcons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIcons);
 
         int32_t bulbWidth = healthAndManaEmptyBulbs->getWidth();
         int32_t bulbHeight = healthAndManaEmptyBulbs->getHeight();
@@ -716,7 +717,7 @@ namespace FAGui
             return;
 
         FARender::Renderer* renderer = FARender::Renderer::get();
-        FARender::FASpriteGroup* spellIcons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIcons);
+        Render::SpriteGroup* spellIcons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIcons);
         int32_t iconWidth = spellIcons->getWidth();
         int32_t iconHeight = spellIcons->getHeight();
 

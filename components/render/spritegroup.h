@@ -1,19 +1,18 @@
 #pragma once
-#include <cstdint>
-#include <fa_nuklear.h>
-#include <nuklearmisc/nuklearframedump.h>
-#include <render/texture.h>
+#include <memory>
+#include <optional>
+#include <render/texturereference.h>
+#include <vector>
 
-namespace FARender
+namespace Render
 {
-    class Renderer;
-    class FASpriteGroup
+    class SpriteGroup
     {
     public:
-        FASpriteGroup(std::vector<const Render::TextureReference*>&& spriteReferences, std::optional<int32_t> animationLength);
-        FASpriteGroup(std::unique_ptr<Render::Texture>&& texture);
+        SpriteGroup(std::vector<const Render::TextureReference*>&& spriteReferences, std::optional<int32_t> animationLength);
+        SpriteGroup(std::unique_ptr<Render::Texture>&& texture);
 
-        ~FASpriteGroup();
+        ~SpriteGroup();
 
         size_t size() { return frameHandles.size(); }
         int32_t getAnimLength() const { return animLength; }

@@ -23,12 +23,11 @@ namespace Render
     class DescriptorSet;
     class Framebuffer;
     struct Tile;
+    class SpriteGroup;
 }
 
 namespace FARender
 {
-    class FASpriteGroup;
-
     namespace DrawLevelUniforms
     {
         struct Vertex
@@ -107,7 +106,7 @@ namespace FARender
     struct LevelObject
     {
         bool valid = false;
-        FASpriteGroup* sprite = nullptr;
+        Render::SpriteGroup* sprite = nullptr;
         int32_t spriteFrame = 0;
         Vec2Fix fractionalPos;
         std::optional<ByteColour> hoverColor;
@@ -122,9 +121,9 @@ namespace FARender
         ~LevelRenderer();
 
         void drawLevel(const Level::Level& level,
-                       FASpriteGroup* minTops,
-                       FASpriteGroup* minBottoms,
-                       FASpriteGroup* specialSprites,
+                       Render::SpriteGroup* minTops,
+                       Render::SpriteGroup* minBottoms,
+                       Render::SpriteGroup* specialSprites,
                        const std::map<int32_t, int32_t>& specialSpritesMap,
                        LevelObjects& objs,
                        LevelObjects& items,

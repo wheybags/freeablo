@@ -8,6 +8,7 @@
 #include <diabloexe/npc.h>
 #include <fmt/format.h>
 #include <misc/stringops.h>
+#include <render/spritegroup.h>
 #include <thread>
 
 namespace FARender
@@ -183,7 +184,7 @@ namespace FARender
             mSpritesToLoad.insert(*guiSpriteIt);
     }
 
-    FASpriteGroup* SpriteLoader::getSprite(const SpriteDefinition& definition, GetSpriteFailAction fail)
+    Render::SpriteGroup* SpriteLoader::getSprite(const SpriteDefinition& definition, GetSpriteFailAction fail)
     {
         if (fail == GetSpriteFailAction::Error)
             return mLoadedSprites.at(definition);
@@ -315,7 +316,7 @@ namespace FARender
                 finalSprites.push_back(sprite);
             }
 
-            auto* spriteGroup = new FASpriteGroup(std::move(finalSprites), definitionFrames.animationLength);
+            auto* spriteGroup = new Render::SpriteGroup(std::move(finalSprites), definitionFrames.animationLength);
             mLoadedSprites[definition] = spriteGroup;
         }
 

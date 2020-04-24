@@ -1,6 +1,5 @@
 #pragma once
 #include "../fasavegame/gameloader.h"
-#include "spritegroup.h"
 #include <Image/image.h>
 #include <atomic>
 #include <misc/misc.h>
@@ -16,6 +15,7 @@ namespace DiabloExe
 namespace Render
 {
     class AtlasTexture;
+    class SpriteGroup;
 }
 
 namespace FARender
@@ -63,7 +63,7 @@ namespace FARender
             Error,
             ReturnNull,
         };
-        FASpriteGroup* getSprite(const SpriteDefinition& definition, GetSpriteFailAction fail = GetSpriteFailAction::Error);
+        Render::SpriteGroup* getSprite(const SpriteDefinition& definition, GetSpriteFailAction fail = GetSpriteFailAction::Error);
 
         // TODO: monster sprite definitions are here for now, this stuff will all be moved somewhere more appropriate when we have a modding layer
         struct MonsterSpriteDefinition
@@ -185,7 +185,7 @@ namespace FARender
 
     private:
         std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> mSpritesToLoad;
-        std::unordered_map<SpriteDefinition, FASpriteGroup*, SpriteDefinition::Hash> mLoadedSprites;
+        std::unordered_map<SpriteDefinition, Render::SpriteGroup*, SpriteDefinition::Hash> mLoadedSprites;
         std::unique_ptr<Render::AtlasTexture> mAtlasTexture;
     };
 }
