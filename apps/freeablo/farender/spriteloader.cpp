@@ -275,7 +275,7 @@ namespace FARender
                   [](const std::unique_ptr<FinalImageData>& a, const std::unique_ptr<FinalImageData>& b) { return a->image->height() > b->image->height(); });
         printf("done\n");
 
-        std::unordered_map<const Image*, Render::Sprite> imagesToSprites;
+        std::unordered_map<const Image*, const Render::TextureReference*> imagesToSprites;
 
         printf("Uploading sprites to texture atlas...\n");
         {
@@ -307,17 +307,15 @@ namespace FARender
             const SpriteDefinition& definition = pair.first;
             FinalImageDataFrames& definitionFrames = pair.second;
 
-            std::vector<Render::Sprite> finalSprites;
+            std::vector<const Render::TextureReference*> finalSprites;
 
             for (FinalImageData* frame : definitionFrames.frames)
             {
-                Render::Sprite sprite = imagesToSprites[frame->image.get()];
+                const Render::TextureReference* sprite = imagesToSprites[frame->image.get()];
                 finalSprites.push_back(sprite);
             }
 
-            auto newSprite = std::make_unique<Render::SpriteGroup>(std::move(finalSprites), definitionFrames.animationLength);
-
-            auto* spriteGroup = new FASpriteGroup(std::move(newSprite));
+            auto* spriteGroup = new FASpriteGroup(std::move(finalSprites), definitionFrames.animationLength);
             mLoadedSprites[definition] = spriteGroup;
         }
 
@@ -468,7 +466,7 @@ namespace FARender
             {
                 Image original = loadNonCelImageTrans(sourcePath, hasTrans, r, g, b);
 
-                std::vector<Render::Sprite> vec;
+                std::vector<const Render::TextureReference*> vec;
 
                 for (size_t srcY = 0; srcY < (size_t)original.height() - 1; srcY += vAnim)
                 {

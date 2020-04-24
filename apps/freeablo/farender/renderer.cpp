@@ -11,7 +11,6 @@
 #include <misc/assert.h>
 #include <numeric>
 #include <render/cursor.h>
-#include <render/levelobjects.h>
 #include <render/renderinstance.h>
 #include <render/texture.h>
 #include <thread>
@@ -172,10 +171,10 @@ namespace FARender
         int64_t int64;
     };
 
-    static void fill(const FAWorld::GameLevel& level, const std::vector<ObjectToRender> src, Render::LevelObjects& dst)
+    static void fill(const FAWorld::GameLevel& level, const std::vector<ObjectToRender> src, LevelObjects& dst)
     {
         if (dst.width() != level.width() || dst.height() != level.height())
-            dst = Render::LevelObjects(level.width(), level.height());
+            dst = LevelObjects(level.width(), level.height());
 
         for (int32_t x = 0; x < dst.width(); x++)
             for (int32_t y = 0; y < dst.height(); y++)
@@ -186,8 +185,8 @@ namespace FARender
             auto& object = src[i];
             auto& position = object.position;
 
-            Render::LevelObject obj;
-            obj.sprite = object.spriteGroup->getSpriteGroup();
+            LevelObject obj;
+            obj.sprite = object.spriteGroup;
             obj.spriteFrame = object.frame;
             obj.fractionalPos = position.getFractionalPos();
             obj.hoverColor = object.hoverColor;
@@ -221,9 +220,9 @@ namespace FARender
                 fill(*state->level, state->mItems, mItems);
 
                 mLevelRenderer->drawLevel(state->level->mLevel,
-                                          state->tileset.minTops->getSpriteGroup(),
-                                          state->tileset.minBottoms->getSpriteGroup(),
-                                          state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->getSpriteGroup() : nullptr,
+                                          state->tileset.minTops,
+                                          state->tileset.minBottoms,
+                                          state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites : nullptr,
                                           state->tileset.mSpecialSpriteMap,
                                           mLevelObjects,
                                           mItems,

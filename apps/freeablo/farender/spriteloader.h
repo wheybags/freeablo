@@ -1,6 +1,7 @@
 #pragma once
 #include "../fasavegame/gameloader.h"
 #include "spritegroup.h"
+#include <Image/image.h>
 #include <atomic>
 #include <misc/misc.h>
 #include <string>
@@ -10,6 +11,11 @@
 namespace DiabloExe
 {
     class DiabloExe;
+}
+
+namespace Render
+{
+    class AtlasTexture;
 }
 
 namespace FARender

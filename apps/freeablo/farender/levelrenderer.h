@@ -6,7 +6,6 @@
 #include <misc/simplevec2.h>
 #include <render/alignedcpubuffer.h>
 #include <render/atlastexture.h>
-#include <render/levelobjects.h>
 #include <render/vertextypes.h>
 
 namespace Level
@@ -16,7 +15,6 @@ namespace Level
 
 namespace Render
 {
-    class SpriteGroup;
     class TextureReference;
     class Texture;
     class VertexArrayObject;
@@ -25,12 +23,12 @@ namespace Render
     class DescriptorSet;
     class Framebuffer;
     struct Tile;
-
-    typedef const TextureReference* Sprite;
 }
 
 namespace FARender
 {
+    class FASpriteGroup;
+
     namespace DrawLevelUniforms
     {
         struct Vertex
@@ -64,7 +62,7 @@ namespace FARender
     class DrawLevelCache
     {
     public:
-        void addSprite(Render::Sprite atlasEntry, int32_t x, int32_t y, std::optional<ByteColour> highlightColor);
+        void addSprite(const Render::TextureReference* atlasEntry, int32_t x, int32_t y, std::optional<ByteColour> highlightColor);
         void end(DrawLevelUniforms::CpuBufferType& drawLevelUniformCpuBuffer,
                  Render::Buffer& drawLevelUniformBuffer,
                  Render::VertexArrayObject& vertexArrayObject,
@@ -106,6 +104,17 @@ namespace FARender
         Render::Texture* mTexture = nullptr;
     };
 
+    struct LevelObject
+    {
+        bool valid = false;
+        FASpriteGroup* sprite = nullptr;
+        int32_t spriteFrame = 0;
+        Vec2Fix fractionalPos;
+        std::optional<ByteColour> hoverColor;
+    };
+
+    typedef Misc::Array2D<std::vector<LevelObject>> LevelObjects; // TODO: get a custom small vector class + use it here
+
     class LevelRenderer
     {
     public:
@@ -113,12 +122,12 @@ namespace FARender
         ~LevelRenderer();
 
         void drawLevel(const Level::Level& level,
-                       Render::SpriteGroup* minTops,
-                       Render::SpriteGroup* minBottoms,
-                       Render::SpriteGroup* specialSprites,
+                       FASpriteGroup* minTops,
+                       FASpriteGroup* minBottoms,
+                       FASpriteGroup* specialSprites,
                        const std::map<int32_t, int32_t>& specialSpritesMap,
-                       Render::LevelObjects& objs,
-                       Render::LevelObjects& items,
+                       LevelObjects& objs,
+                       LevelObjects& items,
                        const Vec2Fix& fractionalPos);
 
         Render::Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& worldPositionOffset);
@@ -129,11 +138,15 @@ namespace FARender
     private:
         void createNewLevelDrawFramebuffer();
 
-        void drawAtTile(Render::Sprite sprite, const Misc::Point& tileTop, int spriteW, int spriteH, std::optional<ByteColour> highlightColor = std::nullopt);
-        void drawMovingSprite(Render::Sprite sprite,
+        void drawAtTile(const Render::TextureReference* sprite,
+                        const Misc::Point& tileTop,
+                        int spriteW,
+                        int spriteH,
+                        std::optional<ByteColour> highlightColor = std::nullopt);
+        void drawMovingSprite(const Render::TextureReference* sprite,
                               const Vec2Fix& fractionalPos,
                               const Misc::Point& toScreen,
-                              std::optional<Cel::Colour> highlightColor = std::nullopt);
+                              std::optional<ByteColour> highlightColor = std::nullopt);
 
     private:
         DrawLevelCache mDrawLevelCache;

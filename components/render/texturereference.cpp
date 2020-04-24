@@ -8,8 +8,5 @@ namespace Render
     {
     }
 
-    bool TextureReference::isTrimmed() const
-    {
-        return mTrimmedWidth != mWidth || mTrimmedHeight != mHeight;
-    }
+    bool TextureReference::isTrimmed() const { return mTrimmedWidth != mWidth || mTrimmedHeight != mHeight; }
 }

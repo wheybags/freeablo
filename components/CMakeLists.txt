@@ -73,10 +73,8 @@ set_target_properties(Random PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 set(RenderFiles
     render/render.h
-    render/levelobjects.h
     render/sdl2backend.cpp
-        render/misc.h
-    render/atlastexture.cpp
+        render/atlastexture.cpp
     render/atlastexture.h
     render/OpenGL/vertexarrayobjectopengl.cpp
     render/OpenGL/vertexarrayobjectopengl.h

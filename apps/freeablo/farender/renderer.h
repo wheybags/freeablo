@@ -2,6 +2,7 @@
 #include "../faworld/position.h"
 #include "diabloexe/diabloexe.h"
 #include "fontinfo.h"
+#include "levelrenderer.h"
 #include "spriteloader.h"
 #include <atomic>
 #include <condition_variable>
@@ -45,7 +46,7 @@ namespace FARender
         FASpriteGroup* spriteGroup = nullptr;
         uint32_t frame = 0;
         FAWorld::Position position;
-        std::optional<Cel::Colour> hoverColor;
+        std::optional<ByteColour> hoverColor;
     };
 
     class RenderState
@@ -128,8 +129,8 @@ namespace FARender
         static Renderer* mRenderer; ///< Singleton instance
 
         std::atomic_bool mDone;
-        Render::LevelObjects mLevelObjects;
-        Render::LevelObjects mItems;
+        LevelObjects mLevelObjects;
+        LevelObjects mItems;
 
         static constexpr size_t NUM_RENDER_STATES = 15;
         std::vector<RenderState> mStates;

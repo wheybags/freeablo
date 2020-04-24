@@ -1,11 +1,13 @@
 #pragma once
 #include "nuklearframedump.h"
+#include <Image/image.h>
 #include <cstdint>
 #include <fa_nuklear.h>
 #include <input/inputmanager.h>
 #include <map>
 #include <render/render.h>
 #include <render/texture.h>
+#include <render/texturereference.h>
 #include <vector>
 
 namespace NuklearMisc

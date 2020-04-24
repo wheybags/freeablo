@@ -1,30 +1,12 @@
 #pragma once
-#include "cel/pal.h"
-#include "levelobjects.h"
-#include "misc.h"
-#include <cel/celframe.h>
 #include <cstdint>
-#include <functional>
-#include <map>
-#include <optional>
-#include <string>
-#include <utility>
-#include <vector>
-
-struct SDL_Surface;
+#include <misc/simplevec2.h>
 
 namespace Render
 {
-    typedef const TextureReference* Sprite;
-}
+    class RenderInstance;
+    class CommandQueue;
 
-namespace Level
-{
-    class Level;
-}
-
-namespace Render
-{
     extern int32_t WIDTH;
     extern int32_t HEIGHT;
 
