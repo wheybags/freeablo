@@ -33,11 +33,12 @@ namespace Render
         std::vector<NonNullConstPtr<TextureReference>> addCategorySprites(const std::string& category, const std::vector<LoadImageData>& images);
         void printUtilisation() const;
 
+        static constexpr int32_t PADDING = 2;
+
     private:
         const TextureReference& addTexture(const Image& image, std::optional<Image::TrimmedData> trimmedData = std::nullopt, std::string category = "default");
 
     private:
-        static constexpr int32_t PADDING = 1;
         static constexpr int32_t MINIMUM_ATLAS_SIZE = 1024;
 
         RenderInstance& mInstance;

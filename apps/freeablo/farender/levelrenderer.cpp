@@ -84,6 +84,15 @@ namespace FARender
 
         if (auto c = highlightColor)
         {
+            // This forces a buffer around the texture being drawn so we can fit the outline.
+            int32_t pad = Render::AtlasTexture::PADDING - 1;
+            vertexData.v_spriteSizeInPixels[0] += pad * 2;
+            vertexData.v_spriteSizeInPixels[1] += pad * 2;
+            vertexData.v_atlasOffsetInPixels[0] -= pad;
+            vertexData.v_atlasOffsetInPixels[1] -= pad;
+            vertexData.v_destinationInPixels[0] -= pad;
+            vertexData.v_destinationInPixels[1] -= pad;
+
             vertexData.v_hoverColor[0] = c->r;
             vertexData.v_hoverColor[1] = c->g;
             vertexData.v_hoverColor[2] = c->b;
