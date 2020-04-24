@@ -17,7 +17,7 @@ namespace Render
 
     AtlasTexture::~AtlasTexture() = default;
 
-    std::vector<NonNullConstPtr<AtlasTextureEntry>> AtlasTexture::addCategorySprites(const std::string& category, const std::vector<LoadImageData>& images)
+    std::vector<NonNullConstPtr<TextureReference>> AtlasTexture::addCategorySprites(const std::string& category, const std::vector<LoadImageData>& images)
     {
         Layers& categoryLayers = mLayersByCategory[category];
 
@@ -57,7 +57,7 @@ namespace Render
         Image blankImage(1, 1);
         categoryLayers.emptySpriteId = &this->addTexture(blankImage, std::nullopt, category);
 
-        std::vector<NonNullConstPtr<AtlasTextureEntry>> ids;
+        std::vector<NonNullConstPtr<TextureReference>> ids;
         ids.reserve(images.size());
 
         for (const auto& imageData : images)
@@ -66,7 +66,7 @@ namespace Render
         return ids;
     }
 
-    const AtlasTextureEntry& AtlasTexture::addTexture(const Image& image, std::optional<Image::TrimmedData> _trimmedData, std::string category)
+    const TextureReference& AtlasTexture::addTexture(const Image& image, std::optional<Image::TrimmedData> _trimmedData, std::string category)
     {
         Layers& categoryLayers = mLayersByCategory.at(category);
 
@@ -122,7 +122,7 @@ namespace Render
         layer->texture->updateImageData(
             dataDestinationRect.x, dataDestinationRect.y, 0, useImage->width(), useImage->height(), reinterpret_cast<const uint8_t*>(useImage->mData.data()));
 
-        auto atlasEntry = new AtlasTextureEntry();
+        TextureReference* atlasEntry = new TextureReference(TextureReference::Tag{});
         atlasEntry->mX = dataDestinationRect.x;
         atlasEntry->mY = dataDestinationRect.y;
         atlasEntry->mWidth = originalWidth;

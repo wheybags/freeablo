@@ -52,7 +52,7 @@ namespace FARender
         draw(drawLevelUniformCpuBuffer, drawLevelUniformBuffer, vertexArrayObject, drawLevelDescriptorSet, drawLevelPipeline, nonDefaultFramebuffer);
     }
 
-    void DrawLevelCache::batchDrawSprite(const Render::AtlasTextureEntry& atlasEntry,
+    void DrawLevelCache::batchDrawSprite(const Render::TextureReference& atlasEntry,
                                          int32_t x,
                                          int32_t y,
                                          std::optional<Cel::Colour> highlightColor,

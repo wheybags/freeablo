@@ -35,6 +35,6 @@ namespace FARender
         std::unique_ptr<Render::SpriteGroup> mRealSpriteGroup = nullptr;
         std::unique_ptr<Render::Texture> mStandaloneTexture;
 
-        std::vector<FANuklearTextureHandle> frameHandles;
+        std::vector<Render::TextureReference> frameHandles;
     };
 }

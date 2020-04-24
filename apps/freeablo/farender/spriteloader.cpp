@@ -291,7 +291,7 @@ namespace FARender
                 const std::string& category = pair.first;
                 const std::vector<Render::AtlasTexture::LoadImageData>& images = pair.second;
 
-                std::vector<NonNullConstPtr<Render::AtlasTextureEntry>> sprites = mAtlasTexture->addCategorySprites(category, images);
+                std::vector<NonNullConstPtr<Render::TextureReference>> sprites = mAtlasTexture->addCategorySprites(category, images);
 
                 for (size_t index = 0; index < sprites.size(); index++)
                     imagesToSprites[&images[index].image] = sprites[index].get();

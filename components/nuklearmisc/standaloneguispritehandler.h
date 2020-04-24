@@ -26,7 +26,7 @@ namespace NuklearMisc
 
     private:
         std::vector<std::unique_ptr<Render::Texture>> mTextures;
-        std::vector<FANuklearTextureHandle> mFrameIds;
+        std::vector<Render::TextureReference> mFrameIds;
     };
 
     class StandaloneGuiHandler

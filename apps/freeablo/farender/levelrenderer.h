@@ -17,7 +17,7 @@ namespace Level
 namespace Render
 {
     class SpriteGroup;
-    class AtlasTextureEntry;
+    class TextureReference;
     class Texture;
     class VertexArrayObject;
     class Pipeline;
@@ -26,7 +26,7 @@ namespace Render
     class Framebuffer;
     struct Tile;
 
-    typedef const AtlasTextureEntry* Sprite;
+    typedef const TextureReference* Sprite;
 }
 
 namespace FARender
@@ -73,7 +73,7 @@ namespace FARender
                  Render::Framebuffer* nonDefaultFramebuffer);
 
     private:
-        void batchDrawSprite(const Render::AtlasTextureEntry& atlasEntry,
+        void batchDrawSprite(const Render::TextureReference& atlasEntry,
                              int32_t x,
                              int32_t y,
                              std::optional<ByteColour> highlightColor,
@@ -94,7 +94,7 @@ namespace FARender
     private:
         struct SpriteData
         {
-            const Render::AtlasTextureEntry* atlasEntry = nullptr;
+            const Render::TextureReference* atlasEntry = nullptr;
             int32_t x = 0;
             int32_t y = 0;
             std::optional<ByteColour> highlightColor;

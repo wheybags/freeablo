@@ -15,7 +15,7 @@ struct SDL_Surface;
 
 namespace Render
 {
-    typedef const AtlasTextureEntry* Sprite;
+    typedef const TextureReference* Sprite;
 }
 
 namespace Level

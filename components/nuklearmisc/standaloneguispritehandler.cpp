@@ -7,9 +7,9 @@ namespace NuklearMisc
 {
     GuiSprite::GuiSprite(std::vector<std::unique_ptr<Render::Texture>>&& textures) : mTextures(std::move(textures))
     {
-        mFrameIds.resize(mTextures.size());
+        mFrameIds.reserve(mTextures.size());
         for (uint32_t i = 0; i < mTextures.size(); i++)
-            mFrameIds[i].texture = mTextures[i].get();
+            mFrameIds.emplace_back(mTextures[i].get());
     }
 
     GuiSprite::GuiSprite(std::unique_ptr<Render::Texture>&& texture) : GuiSprite(moveToVector(std::move(texture))) {}
