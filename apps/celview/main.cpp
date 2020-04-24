@@ -10,6 +10,7 @@
 #include <nuklearmisc/standaloneguispritehandler.h>
 #include <nuklearmisc/widgets.h>
 #include <render/render.h>
+#include <render/spritegroup.h>
 
 int main(int argc, char** argv)
 {
@@ -39,9 +40,9 @@ int main(int argc, char** argv)
     std::vector<std::string> celFiles;
 
     std::string selectedImage;
-    std::unique_ptr<NuklearMisc::GuiSprite> image;
+    std::unique_ptr<Render::SpriteGroup> image;
 
-    std::unique_ptr<NuklearMisc::GuiSprite> nextImage;
+    std::unique_ptr<Render::SpriteGroup> nextImage;
 
     int animate = false;
     int32_t frame = 0;
@@ -55,7 +56,7 @@ int main(int argc, char** argv)
         auto now = std::chrono::high_resolution_clock::now();
 
         if (nextImage)
-            image = std::unique_ptr<NuklearMisc::GuiSprite>(nextImage.release());
+            image = std::unique_ptr<Render::SpriteGroup>(nextImage.release());
 
         renderSettings = Render::getWindowSize();
 
@@ -136,7 +137,7 @@ int main(int argc, char** argv)
                         frame++;
                     }
 
-                    if (frame >= (int32_t)image->size())
+                    if (frame >= image->size())
                         frame = 0;
 
                     int32_t w = image->getNkImage(frame).w;
@@ -193,7 +194,7 @@ int main(int argc, char** argv)
                             frame = 0;
 
                             Cel::CelFile cel(selectedImage);
-                            nextImage = std::make_unique<NuklearMisc::GuiSprite>(cel.decode());
+                            nextImage = std::make_unique<Render::SpriteGroup>(cel.decode());
                         }
                     }
                 }
@@ -213,7 +214,7 @@ int main(int argc, char** argv)
                         frame = 0;
 
                         Cel::CelFile cel(selectedImage);
-                        nextImage = std::make_unique<NuklearMisc::GuiSprite>(cel.decode());
+                        nextImage = std::make_unique<Render::SpriteGroup>(cel.decode());
                     }
                 }
 

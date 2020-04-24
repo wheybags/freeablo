@@ -100,7 +100,7 @@ namespace FAWorld
         int32_t SpellAttackState::getAttackFrame(Actor& actor) const
         {
             // Initiate spell on the last frame.
-            return actor.mAnimation.getAnimationSprites(getAnimation())->getAnimLength() - 1;
+            return actor.mAnimation.getAnimationSprites(getAnimation())->getAnimationLength() - 1;
         }
     }
 }

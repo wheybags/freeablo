@@ -244,8 +244,8 @@ namespace FARender
                 return;
             }
 
-            size_t index = level.get(tile.pos).index();
-            if (index < minBottoms->size())
+            int32_t index = level.get(tile.pos).index();
+            if (index >= 0 && index < minBottoms->size())
                 drawAtTile(minBottoms->getFrame(index), topLeft, tileWidth, staticObjectHeight); // all static objects have the same sprite size
         });
 
@@ -254,8 +254,8 @@ namespace FARender
             if (isInvalidTile(tile))
                 return;
 
-            size_t index = level.get(tile.pos).index();
-            if (index < minTops->size())
+            int32_t index = level.get(tile.pos).index();
+            if (index >= 0 && index < minTops->size())
             {
                 drawAtTile(minTops->getFrame(index), topLeft, tileWidth, staticObjectHeight);
 

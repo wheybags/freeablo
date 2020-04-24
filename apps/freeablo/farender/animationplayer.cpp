@@ -52,17 +52,17 @@ namespace FARender
         {
             currentFrame = int32_t(progress.intPart());
 
-            if (currentFrame >= int32_t(mCurrentAnim->getAnimLength()))
+            if (currentFrame >= int32_t(mCurrentAnim->getAnimationLength()))
             {
                 switch (mPlayingAnimType)
                 {
                     case AnimationType::Once:
                         return std::make_pair<Render::SpriteGroup*, int32_t>(nullptr, 0);
                     case AnimationType::FreezeAtEnd:
-                        currentFrame = mCurrentAnim->getAnimLength() - 1;
+                        currentFrame = mCurrentAnim->getAnimationLength() - 1;
                         break;
                     case AnimationType::Looped:
-                        currentFrame = currentFrame % mCurrentAnim->getAnimLength();
+                        currentFrame = currentFrame % mCurrentAnim->getAnimationLength();
                         break;
                     case AnimationType::BySequence:
                     // handled below
@@ -116,7 +116,7 @@ namespace FARender
             FixedPoint progress = FixedPoint(mTicksSinceAnimStarted) / FixedPoint(mPlayingAnimDuration);
             int32_t currentFrame = int32_t(progress.intPart());
 
-            if (currentFrame >= mCurrentAnim->getAnimLength())
+            if (currentFrame >= mCurrentAnim->getAnimationLength())
                 stopAnimation();
         }
     }
@@ -125,7 +125,7 @@ namespace FARender
     {
         if (!mCurrentAnim)
             return -1;
-        return mCurrentAnim->getAnimLength();
+        return mCurrentAnim->getAnimationLength();
     }
 
     struct nk_image AnimationPlayer::getCurrentNkImage()

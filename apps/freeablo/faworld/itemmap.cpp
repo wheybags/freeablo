@@ -37,7 +37,7 @@ namespace FAWorld
 
     std::pair<Render::SpriteGroup*, int32_t> PlacedItemData::getSpriteFrame() { return mAnimation->getCurrentFrame(); }
 
-    bool PlacedItemData::onGround() { return mAnimation->getCurrentFrame().second == mItem->getFlipSpriteGroup()->getAnimLength() - 1; }
+    bool PlacedItemData::onGround() { return mAnimation->getCurrentFrame().second == mItem->getFlipSpriteGroup()->getAnimationLength() - 1; }
 
     void PlacedItemData::restoreSprites()
     {

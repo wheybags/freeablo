@@ -6,6 +6,7 @@
 #include <misc/misc.h>
 #include <nuklearmisc/standaloneguispritehandler.h>
 #include <nuklearmisc/widgets.h>
+#include <render/spritegroup.h>
 
 int main(int, char** argv)
 {
@@ -25,12 +26,12 @@ int main(int, char** argv)
 
         FAIO::init("");
 
-        std::unique_ptr<NuklearMisc::GuiSprite> banner =
-            std::make_unique<NuklearMisc::GuiSprite>(Image::loadFromFile(Misc::getResourcesPath().str() + "/launcher/banner.png"));
-        std::unique_ptr<NuklearMisc::GuiSprite> graphicsHeader =
-            std::make_unique<NuklearMisc::GuiSprite>(Image::loadFromFile(Misc::getResourcesPath().str() + "/launcher/graphics.png"));
-        std::unique_ptr<NuklearMisc::GuiSprite> playHeader =
-            std::make_unique<NuklearMisc::GuiSprite>(Image::loadFromFile(Misc::getResourcesPath().str() + "/launcher/play.png"));
+        std::unique_ptr<Render::SpriteGroup> banner =
+            std::make_unique<Render::SpriteGroup>(Image::loadFromFile(Misc::getResourcesPath().str() + "/launcher/banner.png"));
+        std::unique_ptr<Render::SpriteGroup> graphicsHeader =
+            std::make_unique<Render::SpriteGroup>(Image::loadFromFile(Misc::getResourcesPath().str() + "/launcher/graphics.png"));
+        std::unique_ptr<Render::SpriteGroup> playHeader =
+            std::make_unique<Render::SpriteGroup>(Image::loadFromFile(Misc::getResourcesPath().str() + "/launcher/play.png"));
 
         int32_t bannerW = banner->getNkImage(0).w;
         int32_t bannerH = banner->getNkImage(0).h;
