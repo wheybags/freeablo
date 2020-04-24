@@ -317,8 +317,7 @@ namespace FARender
 
             auto newSprite = std::make_unique<Render::SpriteGroup>(std::move(finalSprites), definitionFrames.animationLength);
 
-            auto* spriteGroup = new FASpriteGroup();
-            spriteGroup->init(std::move(newSprite));
+            auto* spriteGroup = new FASpriteGroup(std::move(newSprite));
             mLoadedSprites[definition] = spriteGroup;
         }
 

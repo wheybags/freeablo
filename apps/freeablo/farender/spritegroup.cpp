@@ -4,7 +4,7 @@
 
 namespace FARender
 {
-    void FASpriteGroup::init(std::unique_ptr<Render::SpriteGroup>&& realSpriteGroup)
+    FASpriteGroup::FASpriteGroup(std::unique_ptr<Render::SpriteGroup>&& realSpriteGroup)
     {
         mRealSpriteGroup = std::move(realSpriteGroup);
 
@@ -15,7 +15,7 @@ namespace FARender
             frameHandles[i].spriteGroup = mRealSpriteGroup->operator[](i);
     }
 
-    void FASpriteGroup::init(std::unique_ptr<Render::Texture>&& texture)
+    FASpriteGroup::FASpriteGroup(std::unique_ptr<Render::Texture>&& texture)
     {
         mStandaloneTexture = std::move(texture);
         animLength = 1;
@@ -23,6 +23,8 @@ namespace FARender
         frameHandles.resize(1);
         frameHandles[0].texture = mStandaloneTexture.get();
     }
+
+    FASpriteGroup::~FASpriteGroup() = default;
 
     struct nk_image FASpriteGroup::getNkImage(int32_t frame)
     {
@@ -54,6 +56,4 @@ namespace FARender
 
         return mRealSpriteGroup->operator[](frame)->mHeight;
     }
-
-    FASpriteGroup::~FASpriteGroup() = default;
 }

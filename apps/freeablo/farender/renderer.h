@@ -83,8 +83,6 @@ namespace FARender
         RenderState(RenderState&& other) = default;
     };
 
-    FASpriteGroup* getDefaultSprite();
-
     class Renderer
     {
     public:

@@ -11,10 +11,10 @@ namespace FARender
     class FASpriteGroup
     {
     public:
-        ~FASpriteGroup();
+        FASpriteGroup(std::unique_ptr<Render::SpriteGroup>&& realSpriteGroup);
+        FASpriteGroup(std::unique_ptr<Render::Texture>&& texture);
 
-        void init(std::unique_ptr<Render::SpriteGroup>&& realSpriteGroup);
-        void init(std::unique_ptr<Render::Texture>&& texture);
+        ~FASpriteGroup();
 
         bool isValid() const { return mRealSpriteGroup || mStandaloneTexture.get(); }
 

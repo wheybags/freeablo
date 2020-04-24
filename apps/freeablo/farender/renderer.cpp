@@ -18,12 +18,6 @@
 
 namespace FARender
 {
-    FASpriteGroup* getDefaultSprite()
-    {
-        static FASpriteGroup defaultSprite;
-        return &defaultSprite;
-    }
-
     Renderer* Renderer::mRenderer = nullptr;
 
     std::unique_ptr<CelFontInfo> Renderer::generateCelFont(FASpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing)
@@ -63,7 +57,7 @@ namespace FARender
         int width, height;
         const void* imageData = nk_font_atlas_bake(&initData.atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
 
-        std::unique_ptr<FASpriteGroup> sprite = std::make_unique<FASpriteGroup>();
+        std::unique_ptr<FASpriteGroup> sprite;
         {
             Render::BaseTextureInfo textureInfo;
             textureInfo.width = width;
@@ -72,7 +66,7 @@ namespace FARender
             std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
             texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData));
 
-            sprite->init(std::move(texture));
+            sprite = std::make_unique<FASpriteGroup>(std::move(texture));
         }
 
         nk_font_atlas_end(&initData.atlas, sprite->getNkImage().handle, &initData.nullTexture);
