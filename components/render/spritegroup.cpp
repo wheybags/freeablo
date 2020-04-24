@@ -38,7 +38,7 @@ namespace Render
             textureInfo.height = image.height();
             textureInfo.format = Render::Format::RGBA8UNorm;
             std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
-            texture->updateImageData(0, 0, 0, image.width(), image.height(), reinterpret_cast<const uint8_t*>(image.mData.data()));
+            texture->updateImageData(0, 0, 0, image.width(), image.height(), reinterpret_cast<const uint8_t*>(image.mData.data()), image.width());
             retval.emplace_back(texture.release());
         }
 

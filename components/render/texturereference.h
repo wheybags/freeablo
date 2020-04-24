@@ -10,7 +10,6 @@ namespace Render
     {
     public:
         explicit TextureReference(Render::Texture* standaloneTexture);
-        TextureReference(TextureReference&& other) = default;
         TextureReference(TextureReference& other) = delete;
         TextureReference() = delete;
 

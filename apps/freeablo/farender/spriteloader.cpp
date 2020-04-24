@@ -273,7 +273,12 @@ namespace FARender
         printf("Sorting sprites...\n");
         std::sort(loadedImagesData.allImages.begin(),
                   loadedImagesData.allImages.end(),
-                  [](const std::unique_ptr<FinalImageData>& a, const std::unique_ptr<FinalImageData>& b) { return a->image->height() > b->image->height(); });
+                  [](const std::unique_ptr<FinalImageData>& a, const std::unique_ptr<FinalImageData>& b) {
+                      int32_t aHeight = a->trimmedData ? a->trimmedData->trimmedHeight : a->image->height();
+                      int32_t bHeight = b->trimmedData ? b->trimmedData->trimmedHeight : b->image->height();
+
+                      return aHeight > bHeight;
+                  });
         printf("done\n");
 
         std::unordered_map<const Image*, const Render::TextureReference*> imagesToSprites;
@@ -586,18 +591,11 @@ namespace FARender
             for (auto& image : finalImages)
             {
                 std::unique_ptr<FinalImageData> finalImageData = std::make_unique<FinalImageData>();
-                finalImageData->category = definition.category;
-
                 if (definition.trim)
-                {
-                    std::pair<Image, Image::TrimmedData> tmp = image.trimTransparentEdges();
-                    finalImageData->image = std::make_unique<Image>(std::move(tmp.first));
-                    finalImageData->trimmedData = tmp.second;
-                }
-                else
-                {
-                    finalImageData->image = std::make_unique<Image>(std::move(image));
-                }
+                    finalImageData->trimmedData = image.calculateTrimTransparentEdges();
+
+                finalImageData->category = definition.category;
+                finalImageData->image = std::make_unique<Image>(std::move(image));
 
                 definitionFrames.frames.push_back(finalImageData.get());
                 allImages.emplace_back(std::move(finalImageData));

@@ -15,7 +15,7 @@ namespace Render
         TextureOpenGL(RenderInstanceOpenGL& instance, const BaseTextureInfo& info);
         ~TextureOpenGL() override;
 
-        void updateImageData(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height, const uint8_t* rgba8UnormData) override;
+        void updateImageData(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height, const uint8_t* rgba8UnormData, int32_t pitchInPixels) override;
         void setFilter(Filter minFilter, Filter magFilter) override;
 
     public:

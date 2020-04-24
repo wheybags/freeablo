@@ -1,5 +1,4 @@
 #pragma once
-
 #include <misc/array2d.h>
 #include <string>
 
@@ -49,11 +48,12 @@ public:
     {
         int32_t trimmedOffsetX = 0;
         int32_t trimmedOffsetY = 0;
-        int32_t originalWidth = 0;
-        int32_t originalHeight = 0;
+        int32_t trimmedWidth = 0;
+        int32_t trimmedHeight = 0;
     };
 
-    std::pair<Image, TrimmedData> trimTransparentEdges() const;
+    // calculates a trimmed rectangle that excludes transparent pixels around the edge of the image
+    TrimmedData calculateTrimTransparentEdges() const;
 
     static Image loadFromFile(const std::string& path);
     static void saveToGif(const std::vector<Image> images, const std::string& path);

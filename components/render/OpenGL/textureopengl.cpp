@@ -70,9 +70,12 @@ namespace Render
 
     TextureOpenGL::~TextureOpenGL() { glDeleteTextures(1, &mId); }
 
-    void TextureOpenGL::updateImageData(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height, const uint8_t* rgba8UnormData)
+    void
+    TextureOpenGL::updateImageData(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height, const uint8_t* rgba8UnormData, int32_t pitchInPixels)
     {
         ScopedBindGL thisBind(this);
+
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, pitchInPixels);
 
         if (isTextureArray())
             glTexSubImage3D(getBindPoint(), 0, x, y, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, rgba8UnormData);

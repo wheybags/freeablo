@@ -64,7 +64,7 @@ namespace FARender
             textureInfo.height = height;
             textureInfo.format = Render::Format::RGBA8UNorm;
             std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
-            texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData));
+            texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData), texture->width());
 
             sprite = std::make_unique<Render::SpriteGroup>(std::move(texture));
         }

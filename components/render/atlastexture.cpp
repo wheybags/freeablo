@@ -23,7 +23,12 @@ namespace Render
 
         int64_t requiredSize = 0;
         for (const auto& imageData : images)
-            requiredSize += (imageData.image.width() + PADDING) * (imageData.image.height() + PADDING);
+        {
+            int32_t requiredWidth = imageData.trimmedData ? imageData.trimmedData->trimmedWidth : imageData.image.width();
+            int32_t requiredHeight = imageData.trimmedData ? imageData.trimmedData->trimmedHeight : imageData.image.height();
+
+            requiredSize += (requiredWidth + PADDING) * (requiredHeight + PADDING);
+        }
 
         while (requiredSize > 0)
         {
@@ -66,44 +71,39 @@ namespace Render
         return ids;
     }
 
-    const TextureReference& AtlasTexture::addTexture(const Image& image, std::optional<Image::TrimmedData> _trimmedData, std::string category)
+    const TextureReference& AtlasTexture::addTexture(const Image& image, std::optional<Image::TrimmedData> trimmedData, std::string category)
     {
         Layers& categoryLayers = mLayersByCategory.at(category);
 
-        std::unique_ptr<Image> imageTmp;
-
-        const Image* useImage = &image;
         int32_t trimmedOffsetX = 0;
         int32_t trimmedOffsetY = 0;
-        int32_t originalWidth = image.width();
-        int32_t originalHeight = image.height();
+        int32_t trimmedWidth = image.width();
+        int32_t trimmedHeight = image.height();
 
-        if (_trimmedData)
+        if (trimmedData)
         {
-            if (image.width() == 0 || image.height() == 0)
-                return *categoryLayers.emptySpriteId;
-
-            const Image::TrimmedData& trimmedData = _trimmedData.value();
-
-            trimmedOffsetX = trimmedData.trimmedOffsetX;
-            trimmedOffsetY = trimmedData.trimmedOffsetY;
-            originalWidth = trimmedData.originalWidth;
-            originalHeight = trimmedData.originalHeight;
+            trimmedOffsetX = trimmedData->trimmedOffsetX;
+            trimmedOffsetY = trimmedData->trimmedOffsetY;
+            trimmedWidth = trimmedData->trimmedWidth;
+            trimmedHeight = trimmedData->trimmedHeight;
         }
+
+        if (trimmedWidth == 0 && trimmedHeight == 0)
+            return *categoryLayers.emptySpriteId;
 
         RectPacker::Rect dataDestinationRect = {};
         Layer* layer = nullptr;
         {
-            int32_t paddedWidth = useImage->width() + PADDING;
-            int32_t paddedHeight = useImage->height() + PADDING;
+            int32_t paddedWidth = trimmedWidth + PADDING;
+            int32_t paddedHeight = trimmedHeight + PADDING;
 
             for (int32_t layerIndex = 0;; layerIndex++)
             {
                 if (layerIndex >= int32_t(categoryLayers.layers.size()))
                 {
                     // If we have a huge texture that won't fit, we just make a dedicated layer for it, otherwise we add a new layer for general use
-                    if ((useImage->width() + PADDING * 2) >= MINIMUM_ATLAS_SIZE || (useImage->height() + PADDING * 2) >= MINIMUM_ATLAS_SIZE)
-                        categoryLayers.addLayer(mInstance, mCommandQueue, useImage->width() + PADDING * 2, useImage->height() + PADDING * 2);
+                    if ((trimmedWidth + PADDING * 2) >= MINIMUM_ATLAS_SIZE || (trimmedHeight + PADDING * 2) >= MINIMUM_ATLAS_SIZE)
+                        categoryLayers.addLayer(mInstance, mCommandQueue, trimmedWidth + PADDING * 2, trimmedHeight + PADDING * 2);
                     else
                         categoryLayers.addLayer(mInstance, mCommandQueue, MINIMUM_ATLAS_SIZE, MINIMUM_ATLAS_SIZE);
                 }
@@ -113,24 +113,24 @@ namespace Render
                 RectPacker::Rect packedPos{0, 0, paddedWidth, paddedHeight};
                 if (layer->rectPacker->addRect(packedPos))
                 {
-                    dataDestinationRect = {packedPos.x + PADDING, packedPos.y + PADDING, useImage->width(), useImage->height()};
+                    dataDestinationRect = {packedPos.x + PADDING, packedPos.y + PADDING, trimmedWidth, trimmedHeight};
                     break;
                 }
             }
         }
 
-        layer->texture->updateImageData(
-            dataDestinationRect.x, dataDestinationRect.y, 0, useImage->width(), useImage->height(), reinterpret_cast<const uint8_t*>(useImage->mData.data()));
+        const uint8_t* firstPixel = reinterpret_cast<const uint8_t*>(&image.get(trimmedOffsetX, trimmedOffsetY));
+        layer->texture->updateImageData(dataDestinationRect.x, dataDestinationRect.y, 0, trimmedWidth, trimmedHeight, firstPixel, image.width());
 
         TextureReference* atlasEntry = new TextureReference(TextureReference::Tag{});
         atlasEntry->mX = dataDestinationRect.x;
         atlasEntry->mY = dataDestinationRect.y;
-        atlasEntry->mWidth = originalWidth;
-        atlasEntry->mHeight = originalHeight;
+        atlasEntry->mWidth = image.width();
+        atlasEntry->mHeight = image.height();
         atlasEntry->mTrimmedOffsetX = trimmedOffsetX;
         atlasEntry->mTrimmedOffsetY = trimmedOffsetY;
-        atlasEntry->mTrimmedWidth = useImage->width();
-        atlasEntry->mTrimmedHeight = useImage->height();
+        atlasEntry->mTrimmedWidth = trimmedWidth;
+        atlasEntry->mTrimmedHeight = trimmedHeight;
         atlasEntry->mTexture = layer->texture.get();
 
         mAtlasEntries.emplace_back(atlasEntry);
