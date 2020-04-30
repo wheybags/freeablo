@@ -95,6 +95,14 @@ bool path::is_file() const
 #endif
 }
 
+bool path::operator<(const path& other) const
+{
+    if (m_absolute != other.m_absolute || m_type != other.m_type)
+        throw std::runtime_error("path::operator<(): expected paths of the same absoluteness + type");
+
+    return m_path < other.m_path;
+}
+
 bool path::remove_file() const
 {
 #if !defined(_WIN32)

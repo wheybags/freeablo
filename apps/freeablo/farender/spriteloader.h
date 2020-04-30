@@ -27,9 +27,6 @@ namespace FARender
         explicit SpriteLoader(const DiabloExe::DiabloExe& exe);
         void load();
 
-        void saveToCache(const filesystem::path& atlasDirectory) const;
-        void loadFromCache(const filesystem::path& atlasDirectory);
-
         struct SpriteDefinition
         {
             std::string path;
@@ -197,11 +194,18 @@ namespace FARender
         static LoadedImagesData loadImagesIntoCpuMemory(const std::unordered_set<SpriteDefinition, SpriteDefinition::Hash>& spritesToLoad,
                                                         std::atomic_int32_t& progress);
 
+        void saveToCache(const filesystem::path& atlasDirectory) const;
+        void loadFromCache(const filesystem::path& atlasDirectory);
+
+        typedef std::array<uint8_t, 16> SpriteDefinitionsHash;
+        static SpriteDefinitionsHash hashSpriteDefinitions(const std::vector<SpriteDefinition>& definitions);
+
     private:
         std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> mSpritesToLoad;
         std::unordered_map<SpriteDefinition, std::unique_ptr<Render::SpriteGroup>, SpriteDefinition::Hash> mLoadedSprites;
         std::unique_ptr<Render::AtlasTexture> mAtlasTexture;
 
         const filesystem::path mAtlasDirectory = Misc::getResourcesPath() / "cache" / "atlas";
+        static constexpr int32_t ATLAS_CACHE_VERSION = 1;
     };
 }

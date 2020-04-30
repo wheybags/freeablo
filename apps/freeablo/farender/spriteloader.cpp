@@ -11,6 +11,7 @@
 #include <render/spritegroup.h>
 #include <serial/textstream.h>
 #include <thread>
+#include <misc/md5.h>
 
 namespace FARender
 {
@@ -199,6 +200,26 @@ namespace FARender
 
     void SpriteLoader::load()
     {
+        // TODO: This is a temporary hack, once we have a proper data loader, we just won't specify these
+        static std::unordered_set<std::string> badCelNames{
+            "Monsters\\Golem\\Golemh.CL2",
+            "Monsters\\Worm\\Wormh.CL2",
+            "Monsters\\Unrav\\Unravw.CL2",
+            "Monsters\\Golem\\Golemn.CL2",
+            "Monsters\\Worm\\Wormd.CL2",
+            "Monsters\\Worm\\Wormw.CL2",
+            "Monsters\\Worm\\Wormn.CL2",
+            "Monsters\\Worm\\Worma.CL2",
+        };
+
+        for (auto it = mSpritesToLoad.begin(); it != mSpritesToLoad.end();)
+        {
+            if (badCelNames.count(it->path))
+                it = mSpritesToLoad.erase(it);
+            else
+                ++it;
+        }
+
         Render::setWindowTitle(Render::getWindowTitle() + ", trying to load sprites from cache...");
 
         bool loadedFromCache = false;
@@ -358,14 +379,21 @@ namespace FARender
         mAtlasTexture->saveTexturesToCache(atlasDirectory);
 
         std::vector<SpriteDefinition> allSpriteDefinitions;
+        {
+            for (const auto& pair : mLoadedSprites)
+                allSpriteDefinitions.push_back(pair.first);
 
-        for (const auto& pair : mLoadedSprites)
-            allSpriteDefinitions.push_back(pair.first);
-
-        std::sort(allSpriteDefinitions.begin(), allSpriteDefinitions.end());
+            std::sort(allSpriteDefinitions.begin(), allSpriteDefinitions.end());
+        }
 
         Serial::TextWriteStream stream;
         Serial::Saver saver(stream);
+
+        saver.save(ATLAS_CACHE_VERSION);
+
+        SpriteDefinitionsHash definitionsHash = hashSpriteDefinitions(allSpriteDefinitions);
+        for (const auto& byte : definitionsHash)
+            saver.save(byte);
 
         saver.save(uint32_t(allSpriteDefinitions.size()));
 
@@ -427,9 +455,6 @@ namespace FARender
         if (!atlasDirectory.exists())
             throw std::runtime_error("no cache to load");
 
-        mAtlasTexture = std::make_unique<Render::AtlasTexture>(*Render::mainRenderInstance, *Render::mainCommandQueue);
-        mAtlasTexture->loadTexturesFromCache(atlasDirectory);
-
         std::string data;
         {
             if (!filesystem::exists(atlasDirectory / "data.txt"))
@@ -446,6 +471,33 @@ namespace FARender
 
         Serial::TextReadStream stream(data);
         Serial::Loader loader(stream);
+
+        int32_t cachedVersion = loader.load<int32_t>();
+
+        if (cachedVersion != ATLAS_CACHE_VERSION)
+            throw std::runtime_error("wrong atlas cache version");
+
+        SpriteDefinitionsHash spritesToLoadDefinitionsHash;
+        {
+            std::vector<SpriteDefinition> allSpriteDefinitions;
+
+            for (const auto& definition : mSpritesToLoad)
+                allSpriteDefinitions.push_back(definition);
+
+            std::sort(allSpriteDefinitions.begin(), allSpriteDefinitions.end());
+
+            spritesToLoadDefinitionsHash = hashSpriteDefinitions(allSpriteDefinitions);
+        }
+
+        SpriteDefinitionsHash cachedSpriteDefinitionsHash;
+        for (auto& byte : cachedSpriteDefinitionsHash)
+            byte = loader.load<uint8_t>();
+
+        if (cachedSpriteDefinitionsHash != spritesToLoadDefinitionsHash)
+            throw std::runtime_error("sprite definitions have changed");
+
+        mAtlasTexture = std::make_unique<Render::AtlasTexture>(*Render::mainRenderInstance, *Render::mainCommandQueue);
+        mAtlasTexture->loadTexturesFromCache(atlasDirectory);
 
         uint32_t definitionCount = loader.load<uint32_t>();
         std::vector<std::unique_ptr<Render::TextureReference>> allAtlasEntries;
@@ -475,6 +527,10 @@ namespace FARender
                 frame->mTrimmedHeight = loader.load<int32_t>();
 
                 int32_t textureIndex = loader.load<int32_t>();
+
+                if (int32_t(layers.size()) < textureIndex)
+                    throw std::runtime_error("missing layer");
+
                 frame->mTexture = layers[textureIndex].texture.get();
 
                 frames.push_back(frame.get());
@@ -488,6 +544,27 @@ namespace FARender
 
         // for debugging
         // saveToCache(Misc::getResourcesPath() / "cache" / "atlas_resaved");
+    }
+
+    SpriteLoader::SpriteDefinitionsHash SpriteLoader::hashSpriteDefinitions(const std::vector<SpriteDefinition>& definitions)
+    {
+        Serial::TextWriteStream stream;
+        Serial::Saver saver(stream);
+
+        saver.save(uint32_t(definitions.size()));
+        for (const auto& definition : definitions)
+            definition.save(saver);
+
+        std::pair<uint8_t*, size_t> data = stream.getData();
+
+        Misc::md5_state_t state;
+        SpriteDefinitionsHash digest;
+
+        Misc::md5_init(&state);
+        Misc::md5_append(&state, reinterpret_cast<Misc::md5_byte_t*>(data.first), int(data.second));
+        Misc::md5_finish(&state, reinterpret_cast<Misc::md5_byte_t*>(digest.data()));
+
+        return digest;
     }
 
     static Image loadNonCelImageTrans(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB)
@@ -518,24 +595,6 @@ namespace FARender
 
         for (const auto& definition : spritesToLoad)
         {
-            // TODO: This is a temporary hack, once we have a proper data loader, we just won't specify these
-            static std::unordered_set<std::string> badCelNames{
-                "Monsters\\Golem\\Golemh.CL2",
-                "Monsters\\Worm\\Wormh.CL2",
-                "Monsters\\Unrav\\Unravw.CL2",
-                "Monsters\\Golem\\Golemn.CL2",
-                "Monsters\\Worm\\Wormd.CL2",
-                "Monsters\\Worm\\Wormw.CL2",
-                "Monsters\\Worm\\Wormn.CL2",
-                "Monsters\\Worm\\Worma.CL2",
-            };
-
-            if (badCelNames.count(definition.path))
-            {
-                progress += 1;
-                continue;
-            }
-
             std::vector<std::string> components = Misc::StringUtils::split(definition.path, '&');
             std::string sourcePath = components[0];
 

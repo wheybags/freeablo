@@ -121,6 +121,8 @@ public:
         return result;
     }
 
+    bool operator<(const path& other) const;
+
     std::string str(path_type type = native_path) const {
         std::ostringstream oss;
 

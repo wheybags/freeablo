@@ -224,14 +224,32 @@ namespace Render
             Layers categoryLayers;
 
             std::string category = categoryEntry.path().filename();
+
+            std::vector<filesystem::path> sortedFilesToLoad;
             for (auto& imageEntry : filesystem::directory_iterator(categoryEntry.path()))
             {
                 if (Misc::StringUtils::getFileExtension(imageEntry.path().filename()) != "dmp")
                     continue;
+                sortedFilesToLoad.emplace_back(imageEntry.path());
+            }
+            std::sort(sortedFilesToLoad.begin(), sortedFilesToLoad.end());
 
+            for (int32_t i = 0; i < int32_t(sortedFilesToLoad.size()); i++)
+            {
+                std::ostringstream ss;
+                ss << std::setfill('0') << std::setw(2) << i;
+
+                std::string filename = ss.str() + ".dmp";
+
+                if (sortedFilesToLoad[i].filename() != filename)
+                    throw std::runtime_error("missing layer");
+            }
+
+            for (auto& path : sortedFilesToLoad)
+            {
                 Image image;
                 {
-                    FILE* f = fopen(imageEntry.path().str().c_str(), "rb");
+                    FILE* f = fopen(path.str().c_str(), "rb");
 
                     int32_t sizes[] = {0, 0};
                     fread(sizes, sizeof(int32_t), 2, f);
