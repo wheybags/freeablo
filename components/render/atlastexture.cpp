@@ -1,7 +1,9 @@
 #include "atlastexture.h"
 #include "texture.h"
+#include <filesystem/path.h>
 #include <memory>
 #include <misc/assert.h>
+#include <misc/stringops.h>
 #include <render/commandqueue.h>
 #include <render/renderinstance.h>
 
@@ -16,6 +18,21 @@ namespace Render
     }
 
     AtlasTexture::~AtlasTexture() = default;
+
+    AtlasTexture::SpriteLoadResultMap AtlasTexture::loadSprites(const SpriteLoadInputMap& allSpriteData)
+    {
+        SpriteLoadResultMap result;
+
+        for (const auto& pair : allSpriteData)
+        {
+            const std::string& category = pair.first;
+            const std::vector<Render::AtlasTexture::LoadImageData>& images = pair.second;
+
+            result[category] = addCategorySprites(category, images);
+        }
+
+        return result;
+    }
 
     std::vector<NonNullConstPtr<TextureReference>> AtlasTexture::addCategorySprites(const std::string& category, const std::vector<LoadImageData>& images)
     {
@@ -159,6 +176,95 @@ namespace Render
 
             if (categoryLayer.layers.size() > 1)
                 printf("        All layers utilisation %.1f%%\n", (summedOccupancy / categoryLayer.layers.size()) * 100.0f);
+        }
+    }
+
+    void AtlasTexture::saveTexturesToCache(const filesystem::path& atlasPath) const
+    {
+        for (const auto& pair : mLayersByCategory)
+        {
+            const std::string& category = pair.first;
+            const Layers& layers = pair.second;
+
+            filesystem::path destinationFolder = atlasPath / category;
+            if (!filesystem::exists(destinationFolder))
+                release_assert(filesystem::create_directories(destinationFolder));
+
+            for (size_t i = 0; i < layers.layers.size(); i++)
+            {
+                Render::Texture& texture = *layers.layers[i].texture;
+                Image image(texture.width(), texture.height());
+
+                texture.readImageData(reinterpret_cast<uint8_t*>(image.mData.data()));
+
+                std::ostringstream ss;
+                ss << std::setfill('0') << std::setw(2) << i;
+
+                FILE* f = fopen((destinationFolder / (ss.str() + ".dmp")).str().c_str(), "wb");
+
+                int32_t sizes[] = {image.width(), image.height()};
+                fwrite(sizes, sizeof(int32_t), 2, f);
+                fwrite(image.mData.data(), 1, image.width() * image.height() * 4, f);
+
+                fclose(f);
+
+                // for debugging
+                // Image::saveToPng(image, (destinationFolder / (ss.str() + ".png")).str());
+            }
+        }
+    }
+
+    void AtlasTexture::loadTexturesFromCache(const filesystem::path& atlasPath)
+    {
+        for (auto& categoryEntry : filesystem::directory_iterator(atlasPath))
+        {
+            if (!categoryEntry.path().is_directory())
+                continue;
+
+            Layers categoryLayers;
+
+            std::string category = categoryEntry.path().filename();
+            for (auto& imageEntry : filesystem::directory_iterator(categoryEntry.path()))
+            {
+                if (Misc::StringUtils::getFileExtension(imageEntry.path().filename()) != "dmp")
+                    continue;
+
+                Image image;
+                {
+                    FILE* f = fopen(imageEntry.path().str().c_str(), "rb");
+
+                    int32_t sizes[] = {0, 0};
+                    fread(sizes, sizeof(int32_t), 2, f);
+
+                    if (sizes[0] < 0 || sizes[0] > mInstance.capabilities().maxTextureSize || sizes[1] < 0 ||
+                        sizes[1] > mInstance.capabilities().maxTextureSize)
+                        throw std::runtime_error("Texture is too large");
+
+                    image = Image(sizes[0], sizes[1]);
+                    fread(image.mData.data(), 1, image.width() * image.height() * 4, f);
+
+                    fclose(f);
+                }
+
+                Layer newLayer;
+                {
+                    BaseTextureInfo textureInfo{};
+                    textureInfo.width = image.width();
+                    textureInfo.height = image.height();
+                    textureInfo.arrayLayers = 1;
+                    textureInfo.format = Format::RGBA8UNorm;
+                    textureInfo.minFilter = Filter::Nearest;
+                    textureInfo.magFilter = Filter::Nearest;
+
+                    newLayer.texture = mInstance.createTexture(textureInfo);
+                }
+
+                newLayer.texture->updateImageData(0, 0, 0, image.width(), image.height(), reinterpret_cast<const uint8_t*>(image.mData.data()), image.width());
+
+                categoryLayers.layers.push_back(std::move(newLayer));
+            }
+
+            mLayersByCategory[category] = std::move(categoryLayers);
         }
     }
 

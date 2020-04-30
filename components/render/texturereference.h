@@ -1,6 +1,11 @@
 #pragma once
 #include <cstdint>
 
+namespace FARender
+{
+    class SpriteLoader;
+}
+
 namespace Render
 {
     class Texture;
@@ -41,5 +46,6 @@ namespace Render
         };
         TextureReference(Tag) {}
         friend class AtlasTexture;
+        friend class FARender::SpriteLoader;
     };
 }

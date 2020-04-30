@@ -16,6 +16,8 @@ namespace Render
         ~TextureOpenGL() override;
 
         void updateImageData(int32_t x, int32_t y, int32_t layer, int32_t width, int32_t height, const uint8_t* rgba8UnormData, int32_t pitchInPixels) override;
+        void readImageData(uint8_t* rgba8UnormDestination) override;
+
         void setFilter(Filter minFilter, Filter magFilter) override;
 
     public:

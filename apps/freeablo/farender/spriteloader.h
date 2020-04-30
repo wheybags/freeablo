@@ -3,10 +3,10 @@
 #include <Image/image.h>
 #include <atomic>
 #include <misc/misc.h>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <optional>
 
 namespace DiabloExe
 {
@@ -27,13 +27,26 @@ namespace FARender
         explicit SpriteLoader(const DiabloExe::DiabloExe& exe);
         void load();
 
+        void saveToCache(const filesystem::path& atlasDirectory) const;
+        void loadFromCache(const filesystem::path& atlasDirectory);
+
         struct SpriteDefinition
         {
             std::string path;
             bool trim = true;
             std::string category = "default";
 
-            bool operator==(const SpriteDefinition& other) const { return path == other.path && category == other.category && trim == other.trim; }
+            bool operator==(const SpriteDefinition& other) const { return path == other.path && trim == other.trim && category == other.category; }
+
+            bool operator<(const SpriteDefinition& other) const
+            {
+                if (path != other.path)
+                    return path < other.path;
+                if (trim != other.trim)
+                    return trim < other.trim;
+                return category < other.category;
+            }
+
             struct Hash
             {
                 std::size_t operator()(const SpriteDefinition& def) const { return std::hash<std::string>{}(def.path); }
@@ -44,14 +57,14 @@ namespace FARender
 
             // TODO: these really shouldn't be saved / loaded, we are just using it as a temporary workaround until
             // a proper mod-based asset loading pipeline is built
-            void save(FASaveGame::GameSaver& saver) const
+            void save(Serial::Saver& saver) const
             {
                 saver.save(path);
                 saver.save(category);
                 saver.save(trim);
             }
 
-            void load(FASaveGame::GameLoader& loader)
+            void load(Serial::Loader& loader)
             {
                 path = loader.load<std::string>();
                 category = loader.load<std::string>();
@@ -186,7 +199,9 @@ namespace FARender
 
     private:
         std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> mSpritesToLoad;
-        std::unordered_map<SpriteDefinition, Render::SpriteGroup*, SpriteDefinition::Hash> mLoadedSprites;
+        std::unordered_map<SpriteDefinition, std::unique_ptr<Render::SpriteGroup>, SpriteDefinition::Hash> mLoadedSprites;
         std::unique_ptr<Render::AtlasTexture> mAtlasTexture;
+
+        const filesystem::path mAtlasDirectory = Misc::getResourcesPath() / "cache" / "atlas";
     };
 }

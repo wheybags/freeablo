@@ -19,6 +19,8 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cstring>
+#include <memory>
+#include <cassert>
 
 NAMESPACE_BEGIN(filesystem)
 
@@ -241,16 +243,40 @@ bool create_directory(const path& p);
 
 bool create_directories(const path& p);
 
-inline bool remove(const path& path)
-{
-    return path.remove_file();
-}
+inline bool remove(const path& path) { return path.remove_file(); }
+bool remove_all(const path& path);
 
-inline bool exists(const path& path)
-{
-    return path.exists();
-}
+inline bool exists(const path& path) { return path.exists(); }
 
 bool copy_file(const path& source, const path& destination);
+
+class PathIteratorHelper;
+
+struct directory_entry
+{
+    const class path& path() const { return mPath; }
+    operator const class path &() const { return mPath; }
+    class path mPath;
+};
+
+class directory_iterator
+{
+public:
+    directory_iterator(const path& path);
+    directory_iterator() = default;
+    ~directory_iterator();
+
+    const directory_entry& operator*() const { return mEntry; }
+    const directory_entry* operator->() const { return &mEntry; }
+    directory_iterator& operator++();
+    bool operator!=(const directory_iterator& other) const { return mHelper != other.mHelper || mEntry.mPath != other.mEntry.mPath; }
+
+private:
+    std::shared_ptr<PathIteratorHelper> mHelper;
+    directory_entry mEntry;
+};
+
+directory_iterator begin(directory_iterator iter);
+directory_iterator end(const directory_iterator&);
 
 NAMESPACE_END(filesystem)

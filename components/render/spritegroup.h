@@ -22,12 +22,12 @@ namespace Render
 
         ~SpriteGroup();
 
-        int32_t size() { return int32_t(mTextureReferences.size()); }
+        int32_t size() const { return int32_t(mTextureReferences.size()); }
         int32_t getAnimationLength() const { return animationLength; }
         int32_t getWidth(int32_t frame = 0) const;
         int32_t getHeight(int32_t frame = 0) const;
 
-        const Render::TextureReference* getFrame(int32_t frame);
+        const Render::TextureReference* getFrame(int32_t frame) const;
         struct nk_image getNkImage(int32_t frame = 0);
 
     private:

@@ -83,6 +83,14 @@ namespace Render
             glTexSubImage2D(getBindPoint(), 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, rgba8UnormData);
     }
 
+    void TextureOpenGL::readImageData(uint8_t* rgba8UnormDestination)
+    {
+        release_assert(mInfo.format == Format::RGBA8UNorm);
+
+        ScopedBindGL thisBind(this);
+        glGetTexImage(getBindPoint(), 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba8UnormDestination);
+    }
+
     void TextureOpenGL::setFilter(Filter minFilter, Filter magFilter)
     {
         super::setFilter(minFilter, magFilter);

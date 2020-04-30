@@ -56,7 +56,7 @@ namespace Render
                 delete handle;
     }
 
-    const Render::TextureReference* SpriteGroup::getFrame(int32_t frame)
+    const Render::TextureReference* SpriteGroup::getFrame(int32_t frame) const
     {
         release_assert(frame >= 0 && frame < (int32_t)mTextureReferences.size());
         return mTextureReferences[frame];

@@ -9,6 +9,7 @@
 #include <fmt/format.h>
 #include <misc/stringops.h>
 #include <render/spritegroup.h>
+#include <serial/textstream.h>
 #include <thread>
 
 namespace FARender
@@ -187,17 +188,35 @@ namespace FARender
     Render::SpriteGroup* SpriteLoader::getSprite(const SpriteDefinition& definition, GetSpriteFailAction fail)
     {
         if (fail == GetSpriteFailAction::Error)
-            return mLoadedSprites.at(definition);
+            return mLoadedSprites.at(definition).get();
 
         auto it = mLoadedSprites.find(definition);
         if (it == mLoadedSprites.end())
             return nullptr;
 
-        return it->second;
+        return it->second.get();
     }
 
     void SpriteLoader::load()
     {
+        Render::setWindowTitle(Render::getWindowTitle() + ", trying to load sprites from cache...");
+
+        bool loadedFromCache = false;
+        try
+        {
+            loadFromCache(mAtlasDirectory);
+            loadedFromCache = true;
+        }
+        catch (std::runtime_error&)
+        {
+        }
+
+        if (loadedFromCache)
+        {
+            mSpritesToLoad.clear();
+            return;
+        }
+
         // Load images into cpu memory + trim
         LoadedImagesData loadedImagesData;
         {
@@ -287,17 +306,18 @@ namespace FARender
         {
             mAtlasTexture = std::make_unique<Render::AtlasTexture>(*Render::mainRenderInstance, *Render::mainCommandQueue);
 
-            std::unordered_map<std::string, std::vector<Render::AtlasTexture::LoadImageData>> imagesByCategory;
+            Render::AtlasTexture::SpriteLoadInputMap imagesByCategory;
 
             for (auto& image : loadedImagesData.allImages)
                 imagesByCategory[image->category].push_back(Render::AtlasTexture::LoadImageData{*image->image, image->trimmedData});
 
-            for (const auto& pair : imagesByCategory)
+            Render::AtlasTexture::SpriteLoadResultMap loadedSpritesByCategory = mAtlasTexture->loadSprites(imagesByCategory);
+
+            for (const auto& pair : loadedSpritesByCategory)
             {
                 const std::string& category = pair.first;
-                const std::vector<Render::AtlasTexture::LoadImageData>& images = pair.second;
-
-                std::vector<NonNullConstPtr<Render::TextureReference>> sprites = mAtlasTexture->addCategorySprites(category, images);
+                const std::vector<Render::AtlasTexture::LoadImageData>& images = imagesByCategory[category];
+                const std::vector<NonNullConstPtr<Render::TextureReference>>& sprites = pair.second;
 
                 for (size_t index = 0; index < sprites.size(); index++)
                     imagesToSprites[&images[index].image] = sprites[index].get();
@@ -321,11 +341,153 @@ namespace FARender
                 finalSprites.push_back(sprite);
             }
 
-            auto* spriteGroup = new Render::SpriteGroup(std::move(finalSprites), definitionFrames.animationLength);
-            mLoadedSprites[definition] = spriteGroup;
+            mLoadedSprites[definition] = std::make_unique<Render::SpriteGroup>(std::move(finalSprites), definitionFrames.animationLength);
         }
 
+        saveToCache(mAtlasDirectory);
+
         Render::setWindowTitle(Render::getWindowTitle());
+    }
+
+    void SpriteLoader::saveToCache(const filesystem::path& atlasDirectory) const
+    {
+        if (atlasDirectory.exists())
+            release_assert(filesystem::remove_all(atlasDirectory));
+        filesystem::create_directories(atlasDirectory);
+
+        mAtlasTexture->saveTexturesToCache(atlasDirectory);
+
+        std::vector<SpriteDefinition> allSpriteDefinitions;
+
+        for (const auto& pair : mLoadedSprites)
+            allSpriteDefinitions.push_back(pair.first);
+
+        std::sort(allSpriteDefinitions.begin(), allSpriteDefinitions.end());
+
+        Serial::TextWriteStream stream;
+        Serial::Saver saver(stream);
+
+        saver.save(uint32_t(allSpriteDefinitions.size()));
+
+        for (const auto& definition : allSpriteDefinitions)
+        {
+            Serial::ScopedCategory definitionCat("DEF", saver);
+
+            definition.save(saver);
+
+            const Render::SpriteGroup* sprite = mLoadedSprites.at(definition).get();
+
+            saver.save(sprite->getAnimationLength());
+            saver.save(sprite->size());
+
+            for (int32_t i = 0; i < sprite->size(); i++)
+            {
+                Serial::ScopedCategory frameCat("Frame_" + std::to_string(i), saver);
+
+                const Render::TextureReference* frame = sprite->getFrame(i);
+
+                saver.save(frame->mX);
+                saver.save(frame->mY);
+                saver.save(frame->mWidth);
+                saver.save(frame->mHeight);
+                saver.save(frame->mTrimmedOffsetX);
+                saver.save(frame->mTrimmedOffsetY);
+                saver.save(frame->mTrimmedWidth);
+                saver.save(frame->mTrimmedHeight);
+
+                int32_t textureIndex = -1;
+                {
+                    const std::vector<Render::AtlasTexture::Layer>& layers = mAtlasTexture->getLayersByCategory().at(definition.category).layers;
+
+                    for (int32_t j = 0; j < int32_t(layers.size()); j++)
+                    {
+                        if (frame->mTexture == layers[j].texture.get())
+                        {
+                            textureIndex = j;
+                            break;
+                        }
+                    }
+
+                    release_assert(textureIndex != -1);
+                }
+
+                saver.save(textureIndex);
+            }
+        }
+
+        std::pair<const uint8_t*, size_t> data = stream.getData();
+
+        FILE* f = fopen((atlasDirectory / "data.txt").str().c_str(), "wb");
+        fwrite(data.first, 1, data.second, f);
+        fclose(f);
+    }
+
+    void SpriteLoader::loadFromCache(const filesystem::path& atlasDirectory)
+    {
+        if (!atlasDirectory.exists())
+            throw std::runtime_error("no cache to load");
+
+        mAtlasTexture = std::make_unique<Render::AtlasTexture>(*Render::mainRenderInstance, *Render::mainCommandQueue);
+        mAtlasTexture->loadTexturesFromCache(atlasDirectory);
+
+        std::string data;
+        {
+            if (!filesystem::exists(atlasDirectory / "data.txt"))
+                throw std::runtime_error("missing data.txt");
+
+            FILE* f = fopen((atlasDirectory / "data.txt").str().c_str(), "rb");
+            fseek(f, 0, SEEK_END);
+            size_t size = ftell(f);
+            fseek(f, 0, SEEK_SET);
+            data.resize(size);
+            fread(data.data(), 1, size, f);
+            fclose(f);
+        }
+
+        Serial::TextReadStream stream(data);
+        Serial::Loader loader(stream);
+
+        uint32_t definitionCount = loader.load<uint32_t>();
+        std::vector<std::unique_ptr<Render::TextureReference>> allAtlasEntries;
+
+        for (uint32_t definitionIndex = 0; definitionIndex < definitionCount; definitionIndex++)
+        {
+            SpriteDefinition definition;
+            definition.load(loader);
+
+            int32_t animationLength = loader.load<int32_t>();
+            int32_t spriteSize = loader.load<int32_t>();
+
+            std::vector<const Render::TextureReference*> frames;
+            const std::vector<Render::AtlasTexture::Layer>& layers = mAtlasTexture->getLayersByCategory().at(definition.category).layers;
+
+            for (int32_t frameIndex = 0; frameIndex < spriteSize; frameIndex++)
+            {
+                auto frame = std::unique_ptr<Render::TextureReference>(new Render::TextureReference(Render::TextureReference::Tag{}));
+
+                frame->mX = loader.load<int32_t>();
+                frame->mY = loader.load<int32_t>();
+                frame->mWidth = loader.load<int32_t>();
+                frame->mHeight = loader.load<int32_t>();
+                frame->mTrimmedOffsetX = loader.load<int32_t>();
+                frame->mTrimmedOffsetY = loader.load<int32_t>();
+                frame->mTrimmedWidth = loader.load<int32_t>();
+                frame->mTrimmedHeight = loader.load<int32_t>();
+
+                int32_t textureIndex = loader.load<int32_t>();
+                frame->mTexture = layers[textureIndex].texture.get();
+
+                frames.push_back(frame.get());
+                allAtlasEntries.push_back(std::move(frame));
+            }
+
+            mLoadedSprites[definition] = std::make_unique<Render::SpriteGroup>(std::move(frames), animationLength);
+        }
+
+        mAtlasTexture->replaceTextureEntries(std::move(allAtlasEntries));
+
+        // for debugging
+        // saveToCache(Misc::getResourcesPath() / "cache" / "atlas_resaved");
     }
 
     static Image loadNonCelImageTrans(const std::string& path, bool hasTrans, size_t transR, size_t transG, size_t transB)
