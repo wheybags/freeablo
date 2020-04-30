@@ -1,8 +1,9 @@
 #pragma once
 #include "../fasavegame/gameloader.h"
-#include "spritegroup.h"
+#include <Image/image.h>
 #include <atomic>
 #include <misc/misc.h>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -10,6 +11,12 @@
 namespace DiabloExe
 {
     class DiabloExe;
+}
+
+namespace Render
+{
+    class AtlasTexture;
+    class SpriteGroup;
 }
 
 namespace FARender
@@ -26,7 +33,17 @@ namespace FARender
             bool trim = true;
             std::string category = "default";
 
-            bool operator==(const SpriteDefinition& other) const { return path == other.path && category == other.category && trim == other.trim; }
+            bool operator==(const SpriteDefinition& other) const { return path == other.path && trim == other.trim && category == other.category; }
+
+            bool operator<(const SpriteDefinition& other) const
+            {
+                if (path != other.path)
+                    return path < other.path;
+                if (trim != other.trim)
+                    return trim < other.trim;
+                return category < other.category;
+            }
+
             struct Hash
             {
                 std::size_t operator()(const SpriteDefinition& def) const { return std::hash<std::string>{}(def.path); }
@@ -37,14 +54,14 @@ namespace FARender
 
             // TODO: these really shouldn't be saved / loaded, we are just using it as a temporary workaround until
             // a proper mod-based asset loading pipeline is built
-            void save(FASaveGame::GameSaver& saver) const
+            void save(Serial::Saver& saver) const
             {
                 saver.save(path);
                 saver.save(category);
                 saver.save(trim);
             }
 
-            void load(FASaveGame::GameLoader& loader)
+            void load(Serial::Loader& loader)
             {
                 path = loader.load<std::string>();
                 category = loader.load<std::string>();
@@ -57,7 +74,7 @@ namespace FARender
             Error,
             ReturnNull,
         };
-        FASpriteGroup* getSprite(const SpriteDefinition& definition, GetSpriteFailAction fail = GetSpriteFailAction::Error);
+        Render::SpriteGroup* getSprite(const SpriteDefinition& definition, GetSpriteFailAction fail = GetSpriteFailAction::Error);
 
         // TODO: monster sprite definitions are here for now, this stuff will all be moved somewhere more appropriate when we have a modding layer
         struct MonsterSpriteDefinition
@@ -177,9 +194,18 @@ namespace FARender
         static LoadedImagesData loadImagesIntoCpuMemory(const std::unordered_set<SpriteDefinition, SpriteDefinition::Hash>& spritesToLoad,
                                                         std::atomic_int32_t& progress);
 
+        void saveToCache(const filesystem::path& atlasDirectory) const;
+        void loadFromCache(const filesystem::path& atlasDirectory);
+
+        typedef std::array<uint8_t, 16> SpriteDefinitionsHash;
+        static SpriteDefinitionsHash hashSpriteDefinitions(const std::vector<SpriteDefinition>& definitions);
+
     private:
         std::unordered_set<SpriteDefinition, SpriteDefinition::Hash> mSpritesToLoad;
-        std::unordered_map<SpriteDefinition, FASpriteGroup*, SpriteDefinition::Hash> mLoadedSprites;
+        std::unordered_map<SpriteDefinition, std::unique_ptr<Render::SpriteGroup>, SpriteDefinition::Hash> mLoadedSprites;
         std::unique_ptr<Render::AtlasTexture> mAtlasTexture;
+
+        const filesystem::path mAtlasDirectory = Misc::getResourcesPath() / "cache" / "atlas";
+        static constexpr int32_t ATLAS_CACHE_VERSION = 1;
     };
 }

@@ -91,7 +91,7 @@ Image Image::loadFromFile(const std::string& path)
     return image;
 }
 
-std::pair<Image, Image::TrimmedData> Image::trimTransparentEdges() const
+Image::TrimmedData Image::calculateTrimTransparentEdges() const
 {
     bool isEmpty = true;
 
@@ -116,20 +116,16 @@ std::pair<Image, Image::TrimmedData> Image::trimTransparentEdges() const
         }
     }
 
-    Image::TrimmedData trimmedData;
-    trimmedData.originalWidth = width();
-    trimmedData.originalHeight = height();
-
     if (isEmpty)
-        return {Image(), trimmedData};
+        return TrimmedData();
 
-    Image imageTmp(right - left + 1, bottom - top + 1);
-    blitTo(imageTmp, left, top, imageTmp.width(), imageTmp.height(), 0, 0);
-
+    TrimmedData trimmedData;
+    trimmedData.trimmedWidth = right - left + 1;
+    trimmedData.trimmedHeight = bottom - top + 1;
     trimmedData.trimmedOffsetX = left;
     trimmedData.trimmedOffsetY = top;
 
-    return {std::move(imageTmp), trimmedData};
+    return trimmedData;
 }
 
 void Image::saveToGif(std::vector<Image> images, const std::string& path)

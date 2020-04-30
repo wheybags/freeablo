@@ -8,14 +8,9 @@
 #include <fa_nuklear.h>
 #include <functional>
 #include <memory>
+#include <nuklearmisc/nuklearframedump.h>
 #include <queue>
 #include <string>
-
-struct nk_context;
-typedef uint32_t nk_flags;
-struct nk_rect;
-struct nk_vec2;
-struct nk_image;
 
 namespace Engine
 {
@@ -71,10 +66,10 @@ namespace FAGui
     class ScopedApplyEffect
     {
     public:
-        ScopedApplyEffect(nk_context* ctx, GuiEffectType type) : mCtx(ctx) { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(type))); }
+        ScopedApplyEffect(::nk_context* ctx, GuiEffectType type) : mCtx(ctx) { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(type))); }
         ~ScopedApplyEffect() { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(GuiEffectType::none))); }
 
-        nk_context* mCtx;
+        ::nk_context* mCtx;
     };
 
     PanelPlacement panelPlacementByType(PanelType type);

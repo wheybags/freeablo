@@ -2,6 +2,7 @@
 #include "../faworld/position.h"
 #include "diabloexe/diabloexe.h"
 #include "fontinfo.h"
+#include "levelrenderer.h"
 #include "spriteloader.h"
 #include <atomic>
 #include <condition_variable>
@@ -10,6 +11,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <nuklearmisc/nuklearframedump.h>
 #include <render/cursor.h>
 #include <render/render.h>
 #include <tuple>
@@ -33,19 +35,19 @@ namespace FARender
     class Tileset
     {
     private:
-        FASpriteGroup* minTops = nullptr;
-        FASpriteGroup* minBottoms = nullptr;
-        FASpriteGroup* mSpecialSprites = nullptr;
+        Render::SpriteGroup* minTops = nullptr;
+        Render::SpriteGroup* minBottoms = nullptr;
+        Render::SpriteGroup* mSpecialSprites = nullptr;
         std::map<int32_t, int32_t> mSpecialSpriteMap;
         friend class Renderer;
     };
 
     struct ObjectToRender
     {
-        FASpriteGroup* spriteGroup = nullptr;
+        Render::SpriteGroup* spriteGroup = nullptr;
         uint32_t frame = 0;
         FAWorld::Position position;
-        std::optional<Cel::Colour> hoverColor;
+        std::optional<ByteColour> hoverColor;
     };
 
     class RenderState
@@ -83,8 +85,6 @@ namespace FARender
         RenderState(RenderState&& other) = default;
     };
 
-    FASpriteGroup* getDefaultSprite();
-
     class Renderer
     {
     public:
@@ -119,8 +119,8 @@ namespace FARender
         nk_user_font* silverFont(int height) const;
 
     private:
-        std::unique_ptr<CelFontInfo> generateCelFont(FASpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing);
-        std::unique_ptr<PcxFontInfo> generateFont(FASpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData);
+        std::unique_ptr<CelFontInfo> generateCelFont(Render::SpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing);
+        std::unique_ptr<PcxFontInfo> generateFont(Render::SpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData);
 
     public:
         SpriteLoader mSpriteLoader;
@@ -130,8 +130,8 @@ namespace FARender
         static Renderer* mRenderer; ///< Singleton instance
 
         std::atomic_bool mDone;
-        Render::LevelObjects mLevelObjects;
-        Render::LevelObjects mItems;
+        LevelObjects mLevelObjects;
+        LevelObjects mItems;
 
         static constexpr size_t NUM_RENDER_STATES = 15;
         std::vector<RenderState> mStates;
@@ -146,7 +146,7 @@ namespace FARender
 
         nk_context mNuklearContext = nk_context();
         std::unique_ptr<NuklearDevice> mNuklearGraphicsData;
-        std::unique_ptr<FASpriteGroup> mNuklearFontTexture;
+        std::unique_ptr<Render::SpriteGroup> mNuklearFontTexture;
 
         std::atomic<std::int64_t> mWidthHeightTmp;
         std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;

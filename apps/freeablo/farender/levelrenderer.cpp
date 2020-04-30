@@ -2,10 +2,10 @@
 #include <level/level.h>
 #include <render/commandqueue.h>
 #include <render/framebuffer.h>
-#include <render/levelobjects.h>
 #include <render/pipeline.h>
 #include <render/render.h>
 #include <render/renderinstance.h>
+#include <render/spritegroup.h>
 #include <render/texture.h>
 #include <render/vertexarrayobject.h>
 #include <render/vertextypes.h>
@@ -15,7 +15,7 @@ namespace FARender
 {
     static Vec2i getCurrentResolution() { return {Render::getWindowSize().windowWidth, Render::getWindowSize().windowHeight}; }
 
-    void DrawLevelCache::addSprite(Render::Sprite atlasEntry, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
+    void DrawLevelCache::addSprite(const Render::TextureReference* atlasEntry, int32_t x, int32_t y, std::optional<ByteColour> highlightColor)
     {
         mSpritesToDraw.push_back(SpriteData{atlasEntry, x, y, highlightColor});
     }
@@ -52,10 +52,10 @@ namespace FARender
         draw(drawLevelUniformCpuBuffer, drawLevelUniformBuffer, vertexArrayObject, drawLevelDescriptorSet, drawLevelPipeline, nonDefaultFramebuffer);
     }
 
-    void DrawLevelCache::batchDrawSprite(const Render::AtlasTextureEntry& atlasEntry,
+    void DrawLevelCache::batchDrawSprite(const Render::TextureReference& atlasEntry,
                                          int32_t x,
                                          int32_t y,
-                                         std::optional<Cel::Colour> highlightColor,
+                                         std::optional<ByteColour> highlightColor,
                                          float zBufferVal,
                                          DrawLevelUniforms::CpuBufferType& drawLevelUniformCpuBuffer,
                                          Render::Buffer& drawLevelUniformBuffer,
@@ -84,6 +84,15 @@ namespace FARender
 
         if (auto c = highlightColor)
         {
+            // This forces a buffer around the texture being drawn so we can fit the outline.
+            int32_t pad = Render::AtlasTexture::PADDING - 1;
+            vertexData.v_spriteSizeInPixels[0] += pad * 2;
+            vertexData.v_spriteSizeInPixels[1] += pad * 2;
+            vertexData.v_atlasOffsetInPixels[0] -= pad;
+            vertexData.v_atlasOffsetInPixels[1] -= pad;
+            vertexData.v_destinationInPixels[0] -= pad;
+            vertexData.v_destinationInPixels[1] -= pad;
+
             vertexData.v_hoverColor[0] = c->r;
             vertexData.v_hoverColor[1] = c->g;
             vertexData.v_hoverColor[2] = c->b;
@@ -135,7 +144,8 @@ namespace FARender
     constexpr auto tileWidth = tileHeight * 2;
     constexpr auto staticObjectHeight = 256;
 
-    void LevelRenderer::drawAtTile(Render::Sprite sprite, const Misc::Point& tileTop, int spriteW, int spriteH, std::optional<Cel::Colour> highlightColor)
+    void LevelRenderer::drawAtTile(
+        const Render::TextureReference* sprite, const Misc::Point& tileTop, int spriteW, int spriteH, std::optional<ByteColour> highlightColor)
     {
         // centering sprite at the center of tile by width and at the bottom of tile by height
         mDrawLevelCache.addSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight, highlightColor);
@@ -159,8 +169,10 @@ namespace FARender
         return {x.quot, y.quot, x.rem > y.rem ? Render::TileHalf::right : Render::TileHalf::left};
     }
 
-    void
-    LevelRenderer::drawMovingSprite(Render::Sprite sprite, const Vec2Fix& fractionalPos, const Misc::Point& toScreen, std::optional<Cel::Colour> highlightColor)
+    void LevelRenderer::drawMovingSprite(const Render::TextureReference* sprite,
+                                         const Vec2Fix& fractionalPos,
+                                         const Misc::Point& toScreen,
+                                         std::optional<ByteColour> highlightColor)
     {
         Vec2i point = Vec2i(tileTopPoint(fractionalPos));
         Vec2i res = point + toScreen;
@@ -224,8 +236,8 @@ namespace FARender
                                   Render::SpriteGroup* minBottoms,
                                   Render::SpriteGroup* specialSprites,
                                   const std::map<int32_t, int32_t>& specialSpritesMap,
-                                  Render::LevelObjects& objs,
-                                  Render::LevelObjects& items,
+                                  LevelObjects& objs,
+                                  LevelObjects& items,
                                   const Vec2Fix& fractionalPos)
     {
         auto toScreen = worldPositionToScreenSpace(fractionalPos);
@@ -237,13 +249,13 @@ namespace FARender
         drawObjectsByTiles(toScreen, [&](const Render::Tile& tile, const Misc::Point& topLeft) {
             if (isInvalidTile(tile))
             {
-                drawAtTile((*minBottoms)[0], topLeft, tileWidth, staticObjectHeight);
+                drawAtTile(minBottoms->getFrame(0), topLeft, tileWidth, staticObjectHeight);
                 return;
             }
 
-            size_t index = level.get(tile.pos).index();
-            if (index < minBottoms->size())
-                drawAtTile((*minBottoms)[index], topLeft, tileWidth, staticObjectHeight); // all static objects have the same sprite size
+            int32_t index = level.get(tile.pos).index();
+            if (index >= 0 && index < minBottoms->size())
+                drawAtTile(minBottoms->getFrame(index), topLeft, tileWidth, staticObjectHeight); // all static objects have the same sprite size
         });
 
         // drawing above the ground and moving object
@@ -251,16 +263,16 @@ namespace FARender
             if (isInvalidTile(tile))
                 return;
 
-            size_t index = level.get(tile.pos).index();
-            if (index < minTops->size())
+            int32_t index = level.get(tile.pos).index();
+            if (index >= 0 && index < minTops->size())
             {
-                drawAtTile((*minTops)[index], topLeft, tileWidth, staticObjectHeight);
+                drawAtTile(minTops->getFrame(index), topLeft, tileWidth, staticObjectHeight);
 
                 // Add special sprites (arches / open door frames) if required.
                 if (specialSpritesMap.count(index))
                 {
                     int32_t specialSpriteIndex = specialSpritesMap.at(index);
-                    Render::Sprite& sprite = (*specialSprites)[specialSpriteIndex];
+                    const Render::TextureReference* sprite = specialSprites->getFrame(specialSpriteIndex);
                     drawAtTile(sprite, topLeft, sprite->mWidth, sprite->mHeight);
                 }
             }
@@ -268,7 +280,7 @@ namespace FARender
             auto& itemsForTile = items.get(tile.pos.x, tile.pos.y);
             for (auto& item : itemsForTile)
             {
-                const Render::Sprite& sprite = item.sprite->operator[](item.spriteFrame);
+                const Render::TextureReference* sprite = item.sprite->getFrame(item.spriteFrame);
                 drawAtTile(sprite, topLeft, sprite->mWidth, sprite->mHeight, item.hoverColor);
             }
 
@@ -277,7 +289,7 @@ namespace FARender
             {
                 if (obj.valid)
                 {
-                    const Render::Sprite& sprite = obj.sprite->operator[](obj.spriteFrame);
+                    const Render::TextureReference* sprite = obj.sprite->getFrame(obj.spriteFrame);
                     drawMovingSprite(sprite, obj.fractionalPos, toScreen, obj.hoverColor);
                 }
             }

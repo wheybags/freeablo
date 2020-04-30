@@ -1,4 +1,5 @@
 #include "mouseandclickmenu.h"
+#include <render/spritegroup.h>
 
 namespace FAGui
 {
@@ -23,7 +24,7 @@ namespace FAGui
         ctx->style.button.active = ctx->style.button.normal;
 
         auto renderer = FARender::Renderer::get();
-        FARender::FASpriteGroup* pentagram = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.smallPentagramSpin);
+        Render::SpriteGroup* pentagram = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.smallPentagramSpin);
         nk_layout_row_template_begin(ctx, lineHeight);
         {
             nk_layout_row_template_push_static(ctx, pentagram->getWidth());

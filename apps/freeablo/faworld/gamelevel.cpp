@@ -7,6 +7,7 @@
 #include "world.h"
 #include <diabloexe/diabloexe.h>
 #include <misc/assert.h>
+#include <render/spritegroup.h>
 
 namespace FAWorld
 {
@@ -246,7 +247,7 @@ namespace FAWorld
         {
             auto tmp = mActors[i]->mAnimation.getCurrentRealFrame();
 
-            FARender::FASpriteGroup* sprite = tmp.first;
+            Render::SpriteGroup* sprite = tmp.first;
             int32_t frame = tmp.second;
             std::optional<Cel::Colour> hoverColor;
             if (mActors[i]->getId() == hoverStatus.hoveredActorId)
@@ -255,7 +256,7 @@ namespace FAWorld
 
             if (sprite)
             {
-                frame += static_cast<int32_t>(mActors[i]->getPos().getDirection().getDirection8()) * sprite->getAnimLength();
+                frame += static_cast<int32_t>(mActors[i]->getPos().getDirection().getDirection8()) * sprite->getAnimationLength();
                 state->mObjects.push_back({sprite, static_cast<uint32_t>(frame), mActors[i]->getPos(), hoverColor});
             }
         }

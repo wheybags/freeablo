@@ -6,6 +6,7 @@
 #include "../nkhelpers.h"
 #include "multiplayermenu.h"
 #include "selectheromenuscreen.h"
+#include <render/spritegroup.h>
 
 namespace FAGui
 {

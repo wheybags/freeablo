@@ -5,6 +5,7 @@ CMakeLists.txt.user
 html/
 resources/settings-user.ini
 resources/celview.ini
+resources/cache
 *.o
 *.make
 *CMakeFiles*

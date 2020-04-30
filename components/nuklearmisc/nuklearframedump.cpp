@@ -78,35 +78,19 @@ void NuklearFrameDump::render(Vec2i screenResolution, Render::CommandQueue& comm
         fragment->hoverColor[3] = effect == GuiEffectType::highlighted ? 1.0f : 0.0f;
         fragment->checkerboarded = effect == GuiEffectType::checkerboarded ? 1.0f : 0.0f;
 
-        auto* nuklearTextureHandle = reinterpret_cast<FANuklearTextureHandle*>(cmd.texture.ptr);
-        const Render::AtlasTextureEntry* atlasEntry = nuklearTextureHandle->spriteGroup;
+        const Render::TextureReference* atlasEntry = reinterpret_cast<const Render::TextureReference*>(cmd.texture.ptr);
+        debug_assert(!atlasEntry->isTrimmed());
 
-        if (atlasEntry)
-        {
-            mDevice.descriptorSet->updateItems({
-                {2, atlasEntry->mTexture},
-            });
+        mDevice.descriptorSet->updateItems({
+            {2, atlasEntry->mTexture},
+        });
 
-            fragment->imageSize[0] = atlasEntry->mWidth;
-            fragment->imageSize[1] = atlasEntry->mHeight;
-            fragment->atlasSize[0] = atlasEntry->mTexture->width();
-            fragment->atlasSize[1] = atlasEntry->mTexture->height();
-            fragment->atlasOffset[0] = atlasEntry->mX;
-            fragment->atlasOffset[1] = atlasEntry->mY;
-        }
-        else
-        {
-            mDevice.descriptorSet->updateItems({
-                {2, nuklearTextureHandle->texture},
-            });
-
-            fragment->imageSize[0] = nuklearTextureHandle->texture->width();
-            fragment->imageSize[1] = nuklearTextureHandle->texture->height();
-            fragment->atlasSize[0] = nuklearTextureHandle->texture->width();
-            fragment->atlasSize[1] = nuklearTextureHandle->texture->height();
-            fragment->atlasOffset[0] = 0;
-            fragment->atlasOffset[1] = 0;
-        }
+        fragment->imageSize[0] = atlasEntry->mWidth;
+        fragment->imageSize[1] = atlasEntry->mHeight;
+        fragment->atlasSize[0] = atlasEntry->mTexture->width();
+        fragment->atlasSize[1] = atlasEntry->mTexture->height();
+        fragment->atlasOffset[0] = atlasEntry->mX;
+        fragment->atlasOffset[1] = atlasEntry->mY;
 
         mDevice.uniformBuffer->setData(mDevice.uniformCpuBuffer->data(), mDevice.uniformCpuBuffer->getSizeInBytes());
 

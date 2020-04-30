@@ -1,33 +1,23 @@
 #pragma once
 #include "nuklearframedump.h"
+#include <Image/image.h>
 #include <cstdint>
 #include <fa_nuklear.h>
 #include <input/inputmanager.h>
 #include <map>
 #include <render/render.h>
 #include <render/texture.h>
+#include <render/texturereference.h>
 #include <vector>
+
+namespace Render
+{
+    class SpriteGroup;
+}
 
 namespace NuklearMisc
 {
     class StandaloneGuiHandler;
-
-    class GuiSprite
-    {
-    public:
-        explicit GuiSprite(const std::vector<Image>& images);
-        explicit GuiSprite(Image&& image);
-        explicit GuiSprite(std::vector<std::unique_ptr<Render::Texture>>&& textures);
-        explicit GuiSprite(std::unique_ptr<Render::Texture>&& texture);
-        ~GuiSprite();
-
-        int32_t size() const { return int32_t(mFrameIds.size()); }
-        struct nk_image getNkImage(int32_t frame = 0);
-
-    private:
-        std::vector<std::unique_ptr<Render::Texture>> mTextures;
-        std::vector<FANuklearTextureHandle> mFrameIds;
-    };
 
     class StandaloneGuiHandler
     {
@@ -40,15 +30,13 @@ namespace NuklearMisc
 
     private:
         static void fontStashBegin(nk_font_atlas& atlas);
-        static std::unique_ptr<GuiSprite> fontStashEnd(nk_context* ctx, NuklearDevice::InitData& initData);
+        static std::unique_ptr<Render::SpriteGroup> fontStashEnd(nk_context* ctx, NuklearDevice::InitData& initData);
 
         std::unique_ptr<NuklearDevice> mNuklearGraphicsContext;
-        std::unique_ptr<GuiSprite> mNuklearFontTexture;
+        std::unique_ptr<Render::SpriteGroup> mNuklearFontTexture;
 
         nk_context mCtx = {};
         Input::InputManager mInput;
         std::unique_ptr<NuklearFrameDump> mNuklearData;
-
-        friend class GuiSprite;
     };
 }

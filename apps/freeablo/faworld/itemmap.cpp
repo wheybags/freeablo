@@ -5,6 +5,7 @@
 #include "item.h"
 #include "world.h"
 #include <memory>
+#include <render/spritegroup.h>
 
 namespace FAWorld
 {
@@ -34,9 +35,9 @@ namespace FAWorld
 
     void PlacedItemData::update() { mAnimation->update(); }
 
-    std::pair<FARender::FASpriteGroup*, int32_t> PlacedItemData::getSpriteFrame() { return mAnimation->getCurrentFrame(); }
+    std::pair<Render::SpriteGroup*, int32_t> PlacedItemData::getSpriteFrame() { return mAnimation->getCurrentFrame(); }
 
-    bool PlacedItemData::onGround() { return mAnimation->getCurrentFrame().second == mItem->getFlipSpriteGroup()->getAnimLength() - 1; }
+    bool PlacedItemData::onGround() { return mAnimation->getCurrentFrame().second == mItem->getFlipSpriteGroup()->getAnimationLength() - 1; }
 
     void PlacedItemData::restoreSprites()
     {

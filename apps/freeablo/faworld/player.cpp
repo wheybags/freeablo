@@ -17,6 +17,7 @@
 #include <misc/assert.h>
 #include <misc/stringops.h>
 #include <random/random.h>
+#include <render/spritegroup.h>
 #include <string>
 
 namespace FAWorld
@@ -449,7 +450,7 @@ namespace FAWorld
 
         // TODO: Is this actually correct? It seems kind of odd, but it is what is listed in Jarulf's guide
         // https://wheybags.gitlab.io/jarulfs-guide/#player-timing-information
-        mMeleeHitFrame = mAnimation.getAnimationSprites(AnimState::attack)->getAnimLength() - 1;
+        mMeleeHitFrame = mAnimation.getAnimationSprites(AnimState::attack)->getAnimationLength() - 1;
     }
 
     bool Player::dropItem(const Misc::Point& clickedPoint)

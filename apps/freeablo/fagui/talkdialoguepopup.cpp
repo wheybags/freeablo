@@ -1,5 +1,6 @@
 #include "talkdialoguepopup.h"
 #include "guimanager.h"
+#include <render/spritegroup.h>
 
 namespace FAGui
 {
@@ -9,7 +10,7 @@ namespace FAGui
     {
         auto renderer = FARender::Renderer::get();
 
-        FARender::FASpriteGroup* boxTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.textbox);
+        Render::SpriteGroup* boxTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.textbox);
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
 

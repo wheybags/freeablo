@@ -1,58 +1,11 @@
 #include "standaloneguispritehandler.h"
 #include "inputfwd.h"
 #include <render/renderinstance.h>
+#include <render/spritegroup.h>
 #include <render/texture.h>
 
 namespace NuklearMisc
 {
-    GuiSprite::GuiSprite(std::vector<std::unique_ptr<Render::Texture>>&& textures) : mTextures(std::move(textures))
-    {
-        mFrameIds.resize(mTextures.size());
-        for (uint32_t i = 0; i < mTextures.size(); i++)
-            mFrameIds[i].texture = mTextures[i].get();
-    }
-
-    GuiSprite::GuiSprite(std::unique_ptr<Render::Texture>&& texture) : GuiSprite(moveToVector(std::move(texture))) {}
-
-    static std::vector<std::unique_ptr<Render::Texture>> imagesToTextures(const std::vector<Image>& images)
-    {
-        std::vector<std::unique_ptr<Render::Texture>> retval;
-        retval.reserve(images.size());
-
-        for (const auto& image : images)
-        {
-            Render::BaseTextureInfo textureInfo;
-            textureInfo.width = image.width();
-            textureInfo.height = image.height();
-            textureInfo.format = Render::Format::RGBA8UNorm;
-            std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
-            texture->updateImageData(0, 0, 0, image.width(), image.height(), reinterpret_cast<const uint8_t*>(image.mData.data()));
-            retval.emplace_back(texture.release());
-        }
-
-        return retval;
-    }
-
-    GuiSprite::GuiSprite(const std::vector<Image>& images) : GuiSprite(imagesToTextures(images)) {}
-
-    GuiSprite::GuiSprite(Image&& image) : GuiSprite(moveToVector(std::move(image))) {}
-
-    struct nk_image GuiSprite::getNkImage(int32_t frame)
-    {
-        struct nk_image image = nk_image_handle(nk_handle_ptr(&mFrameIds[frame]));
-
-        image.w = mTextures[frame]->width();
-        image.h = mTextures[frame]->height();
-        image.region[0] = 0;
-        image.region[1] = 1;
-        image.region[2] = image.w;
-        image.region[3] = image.h;
-
-        return image;
-    }
-
-    GuiSprite::~GuiSprite() = default;
-
     StandaloneGuiHandler::StandaloneGuiHandler(const std::string& title, const Render::RenderSettings& renderSettings)
         : mInput(
               [this](Input::Key key) { NuklearMisc::handleNuklearKeyboardEvent(&mCtx, true, key, mInput.getModifiers()); },
@@ -92,22 +45,22 @@ namespace NuklearMisc
         nk_font_atlas_begin(&atlas);
     }
 
-    std::unique_ptr<GuiSprite> StandaloneGuiHandler::fontStashEnd(nk_context* ctx, NuklearDevice::InitData& initData)
+    std::unique_ptr<Render::SpriteGroup> StandaloneGuiHandler::fontStashEnd(nk_context* ctx, NuklearDevice::InitData& initData)
     {
         const void* imageData;
         int width, height;
         imageData = nk_font_atlas_bake(&initData.atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
 
-        std::unique_ptr<GuiSprite> sprite;
+        std::unique_ptr<Render::SpriteGroup> sprite;
         {
             Render::BaseTextureInfo textureInfo;
             textureInfo.width = width;
             textureInfo.height = height;
             textureInfo.format = Render::Format::RGBA8UNorm;
             std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
-            texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData));
+            texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData), texture->width());
 
-            sprite = std::make_unique<GuiSprite>(std::move(texture));
+            sprite = std::make_unique<Render::SpriteGroup>(std::move(texture));
         }
 
         nk_font_atlas_end(&initData.atlas, sprite->getNkImage().handle, &initData.nullTexture);

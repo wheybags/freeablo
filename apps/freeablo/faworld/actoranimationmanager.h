@@ -39,14 +39,14 @@ namespace FAWorld
         AnimState getCurrentAnimation() const { return mPlayingAnim; }
         AnimState getInterruptedAnimation() const { return mInterruptedAnimationState; }
 
-        std::pair<FARender::FASpriteGroup*, int32_t> getCurrentRealFrame();
+        std::pair<Render::SpriteGroup*, int32_t> getCurrentRealFrame();
 
         void playAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type);
         void playAnimation(AnimState animation, std::vector<int32_t> frameSequence);
         void interruptAnimation(AnimState animation, FARender::AnimationPlayer::AnimationType type);
 
-        void setAnimationSprites(AnimState animation, FARender::FASpriteGroup* sprite);
-        const FARender::FASpriteGroup* getAnimationSprites(AnimState type) const { return mAnimations[size_t(type)]; }
+        void setAnimationSprites(AnimState animation, Render::SpriteGroup* sprite);
+        const Render::SpriteGroup* getAnimationSprites(AnimState type) const { return mAnimations[size_t(type)]; }
 
         void update();
         void setIdleFrameSequence(const std::vector<int32_t>& sequence);
@@ -60,8 +60,8 @@ namespace FAWorld
 
         // TODO: some template class for an array of T with EnumType::ENUM_END size array, to eliminate the casting used
         // for accessing these two arrays (call it EnumMap or something)
-        FARender::FASpriteGroup* mAnimations[size_t(AnimState::ENUM_END)] = {}; ///< "map" from AnimState to animation
-        Tick mAnimTimeMap[size_t(AnimState::ENUM_END)] = {};                    ///< "map" from AnimState to Tick
+        Render::SpriteGroup* mAnimations[size_t(AnimState::ENUM_END)] = {}; ///< "map" from AnimState to animation
+        Tick mAnimTimeMap[size_t(AnimState::ENUM_END)] = {};                ///< "map" from AnimState to Tick
 
         std::vector<int32_t> mIdleFrameSequence;
 
