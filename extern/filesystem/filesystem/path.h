@@ -276,6 +276,8 @@ public:
 private:
     std::shared_ptr<PathIteratorHelper> mHelper;
     directory_entry mEntry;
+
+    friend class PathIteratorHelper;
 };
 
 directory_iterator begin(directory_iterator iter);

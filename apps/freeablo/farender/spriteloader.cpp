@@ -7,11 +7,11 @@
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
 #include <fmt/format.h>
+#include <misc/md5.h>
 #include <misc/stringops.h>
 #include <render/spritegroup.h>
 #include <serial/textstream.h>
 #include <thread>
-#include <misc/md5.h>
 
 namespace FARender
 {
@@ -365,6 +365,7 @@ namespace FARender
             mLoadedSprites[definition] = std::make_unique<Render::SpriteGroup>(std::move(finalSprites), definitionFrames.animationLength);
         }
 
+        Render::setWindowTitle(Render::getWindowTitle() + ", saving sprite cache...");
         saveToCache(mAtlasDirectory);
 
         Render::setWindowTitle(Render::getWindowTitle());

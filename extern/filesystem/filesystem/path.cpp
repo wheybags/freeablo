@@ -204,7 +204,20 @@ bool create_directories(const path& p)
 bool remove_all(const path& path)
 {
 #if defined(_WIN32)
+    std::wstring doubleNullTerminatedPath = path.wstr() + L"\0";
 
+    SHFILEOPSTRUCTW file_op = {
+        NULL,
+        FO_DELETE,
+        doubleNullTerminatedPath.c_str(),
+        L"",
+        FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT,
+        false,
+        0,
+        L""
+    };
+
+    return SHFileOperationW(&file_op) == 0;
 #else
     auto unlinkCallback = [](const char *path, const struct stat*, int, struct FTW*)
     {
@@ -259,15 +272,33 @@ public:
     PathIteratorHelper(const path& path) : mBasePath(path)
     {
 #if defined(_WIN32)
+        static const std::wstring allFilesMask(L"\\*");
+
+        mFindFileHandle = FindFirstFileExW((path.wstr() + allFilesMask).c_str(), FindExInfoBasic, &mFindData, FindExSearchNameMatch, nullptr, 0);
 #else
         mDir = opendir(path.str().c_str());
         errno = 0;
 #endif
     }
 
+    void init(directory_iterator& it)
+    {
+#if defined(_WIN32)
+
+        if (wcscmp(L"..", mFindData.cFileName) == 0 || wcscmp(L".", mFindData.cFileName) == 0)
+            it.operator++();
+        else
+            it.mEntry = {mBasePath / mFindData.cFileName};
+#else
+        it.operator++();
+#endif
+    }
+
     ~PathIteratorHelper()
     {
 #if defined(_WIN32)
+        if (mFindFileHandle != INVALID_HANDLE_VALUE)
+            FindClose(mFindFileHandle);
 #else
         if (mDir)
             closedir(mDir);
@@ -277,12 +308,15 @@ public:
     bool valid()
     {
 #if defined(_WIN32)
+        return mFindFileHandle != INVALID_HANDLE_VALUE;
 #else
         return mDir;
 #endif
     }
 
 #if defined(_WIN32)
+    HANDLE mFindFileHandle = INVALID_HANDLE_VALUE;
+    WIN32_FIND_DATAW mFindData = {};
 #else
     DIR* mDir = nullptr;
 #endif
@@ -297,7 +331,7 @@ directory_iterator::directory_iterator(const path& path)
     if (!mHelper->valid())
         *this = end(*this);
 
-    this->operator++();
+    mHelper->init(*this);
 }
 
 directory_iterator::~directory_iterator() = default;
@@ -305,10 +339,23 @@ directory_iterator::~directory_iterator() = default;
 directory_iterator& directory_iterator::operator++()
 {
     bool done = true;
-#if defined(_WIN32)
-#else
     if (mHelper)
     {
+#if defined(_WIN32)
+        while (true)
+        {
+            if (FindNextFileW(mHelper->mFindFileHandle, &mHelper->mFindData) != FALSE)
+            {
+                if (wcscmp(L"..", mHelper->mFindData.cFileName) == 0 || wcscmp(L".", mHelper->mFindData.cFileName) == 0)
+                    continue;
+
+                mEntry = {mHelper->mBasePath / mHelper->mFindData.cFileName};
+                done = false;
+            }
+
+            break;
+        }
+#else
         while (true)
         {
             if (struct dirent* ent = readdir(mHelper->mDir))
@@ -322,9 +369,8 @@ directory_iterator& directory_iterator::operator++()
 
             break;
         }
-    }
-
 #endif
+    }
 
     if (done)
         *this = end(*this);
