@@ -7,6 +7,7 @@
 - Added game zoom with scroll wheel
 - Fixed bug where player would stop moving if you clicked and held your mouse without wiggling it
 - Fixed bug where game would crash if you pressed certain keys while on main menu
+- Fixed bug where the player would walk at the target after firing an arrow
 
 ## v0.4 [6 Mar 2020]
 

@@ -91,7 +91,7 @@ namespace FAWorld
             }
             case PlayerInput::Type::DragOverTile:
             {
-                if (input.mData.dataDragOverTile.isStart || !mPlayer->hasTarget())
+                if (!mPlayer->isAttacking && (input.mData.dataDragOverTile.isStart || !mPlayer->hasTarget()))
                 {
                     mPlayer->mTarget.clear();
                     mPlayer->mMoveHandler.setDestination({input.mData.dataDragOverTile.x, input.mData.dataDragOverTile.y});
