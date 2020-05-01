@@ -1,4 +1,5 @@
 #pragma once
+#include <cstring>
 #include <misc/array2d.h>
 #include <string>
 
