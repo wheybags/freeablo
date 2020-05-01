@@ -2,14 +2,20 @@
 #include <SDL_image.h>
 #include <cstring>
 #include <faio/fafileobject.h>
+#include <misc/savePNG.h>
 #include <misc/stringops.h>
 
 // clang-format off
 #include <misc/disablewarn.h>
 #include "../../extern/jo_gif/jo_gif.cpp"
 #include <misc/enablewarn.h>
-#include <misc/savePNG.h>
 // clang-format on
+
+Image::Image(int32_t x, int32_t y) : mData(x, y, Misc::Array2D<ByteColour>::InitType::Uninitialised)
+{
+    void* dataPtr = mData.data();
+    memset(dataPtr, 0, x * y * sizeof(ByteColour));
+}
 
 void Image::blitTo(Image& other, int32_t srcOffsetX, int32_t srcOffsetY, int32_t srcW, int32_t srcH, int32_t destOffsetX, int32_t destOffsetY) const
 {
