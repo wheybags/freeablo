@@ -44,6 +44,7 @@ namespace FAWorld
         struct DragOverTileData
         {
             int32_t x, y;
+            bool isStart;
 
             void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);

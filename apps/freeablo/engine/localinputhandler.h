@@ -4,6 +4,7 @@
 #include "../faworld/playerinput.h"
 #include "inputobserverinterface.h"
 #include "misc/misc.h"
+#include <input/inputmanager.h>
 #include <vector>
 
 namespace FAWorld
@@ -38,7 +39,10 @@ namespace Engine
         std::vector<FAWorld::PlayerInput> mInputs;
         int32_t mBlockedFramesLeft = 0;
         bool mUnblockInput = true;
-
         FAWorld::HoverStatus mHoverStatus;
+        Vec2i mLastMousePosition;
+        bool mLeftMouseDown = false;
+        Input::KeyboardModifiers mLastModifiers;
+        bool mIsDroppingItem = false;
     };
 }
