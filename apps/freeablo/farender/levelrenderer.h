@@ -168,6 +168,7 @@ namespace FARender
 
         std::atomic_bool mTextureFilter = false;
         std::atomic_int mRenderScale = 2;
+        std::atomic_bool mDrawGrid = true;
         std::unique_ptr<Render::DebugRenderer> mDebugRenderer;
     };
 }

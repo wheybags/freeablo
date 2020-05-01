@@ -253,7 +253,7 @@ namespace FARender
             return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
         };
 
-        // drawing on the ground objects
+        // draw the ground diamonds
         drawObjectsByTiles(toScreen, [&](const Render::Tile& tile, const Misc::Point& topLeft) {
             if (isInvalidTile(tile))
             {
@@ -266,7 +266,56 @@ namespace FARender
                 drawAtTile(minBottoms->getFrame(index), topLeft, tileWidth, staticObjectHeight); // all static objects have the same sprite size
         });
 
-        // drawing above the ground and moving object
+        if (mDrawGrid)
+        {
+
+            mDrawLevelCache.end(*drawLevelUniformCpuBuffer,
+                                *drawLevelUniformBuffer,
+                                *vertexArrayObject,
+                                *drawLevelDescriptorSet,
+                                *drawLevelPipeline,
+                                levelDrawFramebuffer.get());
+
+            Render::mainCommandQueue->cmdClearFramebuffer(std::nullopt, true, levelDrawFramebuffer.get());
+
+            // Lines from northwest to southeast
+            {
+                Render::Tile startTile = getTileFromScreenCoords({-getCurrentResolution().w, -tileHeight}, toScreen);
+                Misc::Point startingPoint = Vec2i(tileTopPoint(startTile.pos)) + toScreen;
+
+                for (int32_t x = 0; x < getCurrentResolution().w / tileWidth * 2; x++)
+                {
+                    Vec2f top = Vec2f(startingPoint) + Vec2f(0.5, 0.5);
+
+                    Vec2f oneTileOffset(tileWidth, tileHeight);
+                    Vec2f bottom = top + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
+
+                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), Render::Color(0, 1, 0, 0.3), top, bottom, 1);
+
+                    startingPoint.x += tileWidth;
+                }
+            }
+
+            // Lines from southwest to northeast
+            {
+                Render::Tile startTile = getTileFromScreenCoords({-tileWidth, 0}, toScreen);
+                Misc::Point startingPoint = Vec2i(tileTopPoint(startTile.pos)) + toScreen;
+
+                for (int32_t y = 0; y < getCurrentResolution().h / tileHeight * 2; y++)
+                {
+                    Vec2f bottom = Vec2f(startingPoint) + Vec2f(0.5, 0.5);
+
+                    Vec2f oneTileOffset(tileWidth, -tileHeight);
+                    Vec2f top = bottom + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
+
+                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), Render::Color(0, 1, 0, 0.3), top, bottom, 1);
+
+                    startingPoint.y += tileHeight;
+                }
+            }
+        }
+
+        // draw above ground objects (walls, players, town buildings etc)
         drawObjectsByTiles(toScreen, [&](const Render::Tile& tile, const Misc::Point& topLeft) {
             if (isInvalidTile(tile))
                 return;

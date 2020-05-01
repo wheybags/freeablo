@@ -51,4 +51,39 @@ namespace Render
 
         commandQueue.cmdDraw(0, sizeof(vertices) / sizeof(*vertices), bindings);
     }
+
+    void DebugRenderer::drawLine(CommandQueue& commandQueue, Framebuffer* nonDefaultFramebuffer, const Color& color, Vec2f a, Vec2f b, float thickness)
+    {
+        float screenW = float(WIDTH);
+        float screenH = float(HEIGHT);
+
+        // clang-format off
+        Vec2f aToB = b - a;
+        float angleRadians = atan2(aToB.y, aToB.x);
+        float rotated = angleRadians + 0.5f * M_PI;
+
+        Vec2f off = Vec2f(cosf(rotated), sinf(rotated)) * thickness / 2.0f;
+        Vec2f offNeg = Vec2f(-off.x, -off.y);
+
+        DebugVertex topLeft =     {{(b.x+offNeg.x) / screenW, (b.y+offNeg.y) / screenH}, {color.r, color.g, color.b, color.a}};
+        DebugVertex topRight =    {{(b.x+off.x)    / screenW, (b.y+off.y)    / screenH}, {color.r, color.g, color.b, color.a}};
+        DebugVertex bottomLeft =  {{(a.x+offNeg.x) / screenW, (a.y+offNeg.y) / screenH}, {color.r, color.g, color.b, color.a}};
+        DebugVertex bottomRight = {{(a.x+off.x)    / screenW, (a.y+off.y)    / screenH}, {color.r, color.g, color.b, color.a}};
+
+        DebugVertex vertices[]
+        {
+            topLeft, topRight, bottomLeft,
+            topRight, bottomRight, bottomLeft
+        };
+        // clang-format on
+
+        mVao->getVertexBuffer(0)->setData(vertices, sizeof(vertices));
+
+        Bindings bindings;
+        bindings.pipeline = mPipeline.get();
+        bindings.vao = mVao.get();
+        bindings.nonDefaultFramebuffer = nonDefaultFramebuffer;
+
+        commandQueue.cmdDraw(0, sizeof(vertices) / sizeof(*vertices), bindings);
+    }
 }
