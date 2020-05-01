@@ -74,12 +74,14 @@ namespace FAWorld
     {
         saver.save(x);
         saver.save(y);
+        saver.save(isStart);
     }
 
     void PlayerInput::DragOverTileData::load(Serial::Loader& loader)
     {
         x = loader.load<int32_t>();
         y = loader.load<int32_t>();
+        isStart = loader.load<int32_t>();
     }
 
     void PlayerInput::TargetActorData::save(Serial::Saver& saver) const { saver.save(actorId); }

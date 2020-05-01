@@ -91,8 +91,11 @@ namespace FAWorld
             }
             case PlayerInput::Type::DragOverTile:
             {
-                mPlayer->mTarget.clear();
-                mPlayer->mMoveHandler.setDestination({input.mData.dataDragOverTile.x, input.mData.dataDragOverTile.y});
+                if (input.mData.dataDragOverTile.isStart || !mPlayer->hasTarget())
+                {
+                    mPlayer->mTarget.clear();
+                    mPlayer->mMoveHandler.setDestination({input.mData.dataDragOverTile.x, input.mData.dataDragOverTile.y});
+                }
                 return;
             }
             case PlayerInput::Type::TargetActor:

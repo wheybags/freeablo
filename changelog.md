@@ -5,6 +5,7 @@
 - Added town portal spell
 - Refactored rendering, FPS greatly improved and there should be no stuttering now
 - Added game zoom with scroll wheel
+- Fixed bug where player would stop moving if you clicked and held your mouse without wiggling it
 
 
 ## v0.4 [6 Mar 2020]
