@@ -18,7 +18,9 @@ namespace Engine
         //        if (mWorld.mGuiManager->isModalDlgShown())
         //            return;
 
-        auto player = mWorld.getCurrentPlayer();
+        FAWorld::Player* player = mWorld.getCurrentPlayer();
+        if (!player)
+            return;
 
         switch (action)
         {
