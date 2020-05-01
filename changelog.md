@@ -3,6 +3,9 @@
 ## v0.5 [?? ??? ????] 
 
 - Added town portal spell
+- Refactored rendering, FPS greatly improved and there should be no stuttering now
+- Added game zoom with scroll wheel
+
 
 ## v0.4 [6 Mar 2020]
 
