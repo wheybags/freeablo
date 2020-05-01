@@ -21,6 +21,9 @@ namespace Render
         if (nonDefaultFramebuffer)
             mBinders.emplace_back(nonDefaultFramebuffer);
 
+        if (!bindings.descriptorSet)
+            return;
+
         for (uint32_t bindingIndex = 0; bindingIndex < bindings.descriptorSet->size(); bindingIndex++)
         {
             const DescriptorSet::Item& item = descriptorSet->getItem(bindingIndex);

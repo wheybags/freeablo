@@ -196,6 +196,7 @@ namespace Engine
                     state->mCursorCentered = false;
                 }
                 state->nuklearData.fill(ctx);
+                state->debugData = std::move(renderer.mTmpDebugRenderData);
             }
 
             nk_clear(ctx);

@@ -227,7 +227,8 @@ namespace FARender
                                           state->tileset.mSpecialSpriteMap,
                                           mLevelObjects,
                                           mItems,
-                                          state->mPos.getFractionalPos());
+                                          state->mPos.getFractionalPos(),
+                                          state->debugData);
             }
 
             state->nuklearData.render({Render::getWindowSize().windowWidth, Render::getWindowSize().windowHeight}, *Render::mainCommandQueue);

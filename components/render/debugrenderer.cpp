@@ -1,0 +1,54 @@
+#include <render/color.h>
+#include <render/commandqueue.h>
+#include <render/debugrenderer.h>
+#include <render/pipeline.h>
+#include <render/render.h>
+#include <render/renderinstance.h>
+#include <render/vertexarrayobject.h>
+#include <render/vertextypes.h>
+
+namespace Render
+{
+    DebugRenderer::DebugRenderer(RenderInstance& renderInstance) : mInstance(renderInstance)
+    {
+        Render::PipelineSpec debugPipelineSpec;
+        debugPipelineSpec.vertexLayouts = {Render::DebugVertex::layout()};
+        debugPipelineSpec.vertexShaderPath = Misc::getResourcesPath().str() + "/shaders/debug.vert";
+        debugPipelineSpec.fragmentShaderPath = Misc::getResourcesPath().str() + "/shaders/debug.frag";
+        debugPipelineSpec.descriptorSetSpec = {};
+
+        mPipeline = mInstance.createPipeline(debugPipelineSpec);
+        mVao = mInstance.createVertexArrayObject({0}, debugPipelineSpec.vertexLayouts, 0);
+    }
+
+    DebugRenderer::~DebugRenderer() = default;
+
+    void
+    DebugRenderer::drawRectangle(CommandQueue& commandQueue, Framebuffer* nonDefaultFramebuffer, const Color& color, int32_t x, int32_t y, int32_t w, int32_t h)
+    {
+        float screenW = float(WIDTH);
+        float screenH = float(HEIGHT);
+
+        // clang-format off
+        DebugVertex topLeft =     {{x     / screenW, y     / screenH}, {color.r, color.g, color.b, color.a}};
+        DebugVertex topRight =    {{(x+w) / screenW, y     / screenH}, {color.r, color.g, color.b, color.a}};
+        DebugVertex bottomLeft =  {{x     / screenW, (y+h) / screenH}, {color.r, color.g, color.b, color.a}};
+        DebugVertex bottomRight = {{(x+w) / screenW, (y+h) / screenH}, {color.r, color.g, color.b, color.a}};
+
+        DebugVertex vertices[]
+        {
+            topLeft, topRight, bottomLeft,
+            topRight, bottomRight, bottomLeft
+        };
+        // clang-format on
+
+        mVao->getVertexBuffer(0)->setData(vertices, sizeof(vertices));
+
+        Bindings bindings;
+        bindings.pipeline = mPipeline.get();
+        bindings.vao = mVao.get();
+        bindings.nonDefaultFramebuffer = nonDefaultFramebuffer;
+
+        commandQueue.cmdDraw(0, sizeof(vertices) / sizeof(*vertices), bindings);
+    }
+}

@@ -1,5 +1,6 @@
 #pragma once
 #include "../faworld/position.h"
+#include "debugrenderdata.h"
 #include "diabloexe/diabloexe.h"
 #include "fontinfo.h"
 #include "levelrenderer.h"
@@ -80,6 +81,7 @@ namespace FARender
         std::string mCursorPath;
         uint32_t mCursorFrame = 0;
         bool mCursorCentered = false;
+        DebugRenderData debugData;
 
         explicit RenderState(NuklearDevice& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData) {}
         RenderState(RenderState&& other) = default;
@@ -125,6 +127,7 @@ namespace FARender
     public:
         SpriteLoader mSpriteLoader;
         std::unique_ptr<LevelRenderer> mLevelRenderer;
+        DebugRenderData mTmpDebugRenderData;
 
     private:
         static Renderer* mRenderer; ///< Singleton instance

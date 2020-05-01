@@ -1,4 +1,5 @@
 #pragma once
+#include "debugrenderdata.h"
 #include <Image/image.h>
 #include <atomic>
 #include <cstdint>
@@ -24,6 +25,7 @@ namespace Render
     class Framebuffer;
     struct Tile;
     class SpriteGroup;
+    class DebugRenderer;
 }
 
 namespace FARender
@@ -127,7 +129,8 @@ namespace FARender
                        const std::map<int32_t, int32_t>& specialSpritesMap,
                        LevelObjects& objs,
                        LevelObjects& items,
-                       const Vec2Fix& fractionalPos);
+                       const Vec2Fix& fractionalPos,
+                       const DebugRenderData& debugData);
 
         Render::Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& worldPositionOffset);
 
@@ -165,5 +168,6 @@ namespace FARender
 
         std::atomic_bool mTextureFilter = false;
         std::atomic_int mRenderScale = 2;
+        std::unique_ptr<Render::DebugRenderer> mDebugRenderer;
     };
 }

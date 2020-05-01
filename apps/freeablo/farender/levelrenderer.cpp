@@ -1,6 +1,7 @@
 #include "levelrenderer.h"
 #include <level/level.h>
 #include <render/commandqueue.h>
+#include <render/debugrenderer.h>
 #include <render/framebuffer.h>
 #include <render/pipeline.h>
 #include <render/render.h>
@@ -238,9 +239,16 @@ namespace FARender
                                   const std::map<int32_t, int32_t>& specialSpritesMap,
                                   LevelObjects& objs,
                                   LevelObjects& items,
-                                  const Vec2Fix& fractionalPos)
+                                  const Vec2Fix& fractionalPos,
+                                  const DebugRenderData& debugData)
     {
-        auto toScreen = worldPositionToScreenSpace(fractionalPos);
+        if (levelDrawFramebuffer->getColorBuffer().width() != getCurrentResolution().w ||
+            levelDrawFramebuffer->getColorBuffer().height() != getCurrentResolution().h)
+            createNewLevelDrawFramebuffer();
+
+        Render::mainCommandQueue->cmdClearFramebuffer(Render::Colors::black, true, levelDrawFramebuffer.get());
+
+        Vec2i toScreen = worldPositionToScreenSpace(fractionalPos);
         auto isInvalidTile = [&](const Render::Tile& tile) {
             return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
         };
@@ -295,14 +303,24 @@ namespace FARender
             }
         });
 
-        if (levelDrawFramebuffer->getColorBuffer().width() != getCurrentResolution().w ||
-            levelDrawFramebuffer->getColorBuffer().height() != getCurrentResolution().h)
-            createNewLevelDrawFramebuffer();
-
-        Render::mainCommandQueue->cmdClearFramebuffer(Render::Colors::black, true, levelDrawFramebuffer.get());
-
         mDrawLevelCache.end(
             *drawLevelUniformCpuBuffer, *drawLevelUniformBuffer, *vertexArrayObject, *drawLevelDescriptorSet, *drawLevelPipeline, levelDrawFramebuffer.get());
+
+        for (const auto& item : debugData)
+        {
+            if (std::holds_alternative<RectData>(item))
+            {
+                const RectData& rectData = std::get<RectData>(item);
+                Misc::Point rectPoint = Vec2i(tileTopPoint(rectData.worldPosition)) + toScreen;
+                mDebugRenderer->drawRectangle(*Render::mainCommandQueue,
+                                              levelDrawFramebuffer.get(),
+                                              Render::Colors::green,
+                                              rectPoint.x,
+                                              rectPoint.y,
+                                              int32_t(rectData.w * tileWidth),
+                                              int32_t(rectData.h * tileHeight));
+            }
+        }
 
         Render::Bindings fullscreenBindings;
         fullscreenBindings.pipeline = fullscreenPipeline.get();
@@ -325,6 +343,8 @@ namespace FARender
     }
     LevelRenderer::LevelRenderer()
     {
+        mDebugRenderer = std::make_unique<Render::DebugRenderer>(*Render::mainRenderInstance);
+
         Render::PipelineSpec drawLevelPipelineSpec;
         drawLevelPipelineSpec.depthTest = true;
         drawLevelPipelineSpec.vertexLayouts = {Render::SpriteVertexMain::layout(), Render::SpriteVertexPerInstance::layout()};
