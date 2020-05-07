@@ -6,7 +6,10 @@
 
 namespace FAWorld
 {
-    Position::Position(Misc::Point point, Misc::Direction direction) : mCurrent(point), mFractionalPos(Vec2Fix(point)), mDirection(direction) {}
+    Position::Position(Misc::Point point, Misc::Direction direction)
+        : mCurrent(point), mFractionalPos(Vec2Fix(point) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"))), mDirection(direction)
+    {
+    }
 
     Position::Position(FASaveGame::GameLoader& loader)
     {
@@ -33,7 +36,8 @@ namespace FAWorld
             Vec2Fix vectorToDest;
             if (mMovementType == MovementType::GridLocked)
             {
-                vectorToDest = Vec2Fix(next()) - mFractionalPos;
+                Vec2Fix fractionalNext = Vec2Fix(next()) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+                vectorToDest = fractionalNext - mFractionalPos;
             }
             else
             {
@@ -56,9 +60,8 @@ namespace FAWorld
                 FixedPoint vectorToDestMagnitudeSquared = vectorToDest.magnitudeSquared();
                 if (movement.magnitudeSquared() >= vectorToDestMagnitudeSquared)
                 {
-                    Misc::Point nextPositon = next();
-                    mCurrent = nextPositon;
-                    mFractionalPos = Vec2Fix(nextPositon);
+                    mCurrent = next();
+                    mFractionalPos = Vec2Fix(mCurrent) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
                     stopMoving();
 
                     return moveDistance - vectorToDestMagnitudeSquared.sqrt();

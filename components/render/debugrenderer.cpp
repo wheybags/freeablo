@@ -7,6 +7,9 @@
 #include <render/vertexarrayobject.h>
 #include <render/vertextypes.h>
 
+#define _USE_MATH_DEFINES
+#include "math.h"
+
 namespace Render
 {
     DebugRenderer::DebugRenderer(RenderInstance& renderInstance) : mInstance(renderInstance)

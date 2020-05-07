@@ -145,11 +145,21 @@ namespace FARender
     constexpr auto tileWidth = tileHeight * 2;
     constexpr auto staticObjectHeight = 256;
 
-    void LevelRenderer::drawAtTile(
-        const Render::TextureReference* sprite, const Misc::Point& tileTop, int spriteW, int spriteH, std::optional<ByteColour> highlightColor)
+    // For a given isometric tile, tileScreenPosition will be the point marked
+    // with an X in the diagram below, at the top left of the bounding box of
+    // the tile.
+    //
+    // X-----.
+    // |  .     .
+    // .           .
+    //    .     .
+    //       .
+    //
+    void
+    LevelRenderer::drawTilesetSprite(const Render::TextureReference* sprite, const Misc::Point& tileScreenPosition, std::optional<ByteColour> highlightColor)
     {
         // centering sprite at the center of tile by width and at the bottom of tile by height
-        mDrawLevelCache.addSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight, highlightColor);
+        mDrawLevelCache.addSprite(sprite, tileScreenPosition.x - sprite->mWidth / 2, tileScreenPosition.y - sprite->mHeight + tileHeight, highlightColor);
     }
 
     // basic transform of isometric grid to normal, (0, 0) tile coordinate maps to (0, 0) pixel coordinates
@@ -170,15 +180,15 @@ namespace FARender
         return {x.quot, y.quot, x.rem > y.rem ? Render::TileHalf::right : Render::TileHalf::left};
     }
 
-    void LevelRenderer::drawMovingSprite(const Render::TextureReference* sprite,
-                                         const Vec2Fix& fractionalPos,
-                                         const Misc::Point& toScreen,
-                                         std::optional<ByteColour> highlightColor)
+    void LevelRenderer::drawAtWorldPosition(const Render::TextureReference* sprite,
+                                            const Vec2Fix& fractionalPos,
+                                            const Misc::Point& toScreen,
+                                            std::optional<ByteColour> highlightColor)
     {
         Vec2i point = Vec2i(tileTopPoint(fractionalPos));
         Vec2i res = point + toScreen;
 
-        drawAtTile(sprite, Vec2i(res), sprite->mWidth, sprite->mHeight, highlightColor);
+        mDrawLevelCache.addSprite(sprite, res.x - sprite->mWidth / 2, res.y - sprite->mHeight + (tileHeight / 2), highlightColor);
     }
 
     constexpr auto bottomMenuSize = 0; // 144; // TODO: pass it as a variable
@@ -257,13 +267,13 @@ namespace FARender
         drawObjectsByTiles(toScreen, [&](const Render::Tile& tile, const Misc::Point& topLeft) {
             if (isInvalidTile(tile))
             {
-                drawAtTile(minBottoms->getFrame(0), topLeft, tileWidth, staticObjectHeight);
+                drawTilesetSprite(minBottoms->getFrame(0), topLeft);
                 return;
             }
 
             int32_t index = level.get(tile.pos).index();
             if (index >= 0 && index < minBottoms->size())
-                drawAtTile(minBottoms->getFrame(index), topLeft, tileWidth, staticObjectHeight); // all static objects have the same sprite size
+                drawTilesetSprite(minBottoms->getFrame(index), topLeft); // all static objects have the same sprite size
         });
 
         if (mDrawGrid)
@@ -278,6 +288,8 @@ namespace FARender
 
             Render::mainCommandQueue->cmdClearFramebuffer(std::nullopt, true, levelDrawFramebuffer.get());
 
+            Render::Color gridColor(0.0f, 1.0f, 0.0f, 0.3f);
+
             // Lines from northwest to southeast
             {
                 Render::Tile startTile = getTileFromScreenCoords({-getCurrentResolution().w, -tileHeight}, toScreen);
@@ -290,7 +302,7 @@ namespace FARender
                     Vec2f oneTileOffset(tileWidth, tileHeight);
                     Vec2f bottom = top + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
 
-                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), Render::Color(0, 1, 0, 0.3), top, bottom, 1);
+                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, 1.0f);
 
                     startingPoint.x += tileWidth;
                 }
@@ -308,7 +320,7 @@ namespace FARender
                     Vec2f oneTileOffset(tileWidth, -tileHeight);
                     Vec2f top = bottom + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
 
-                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), Render::Color(0, 1, 0, 0.3), top, bottom, 1);
+                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, 1.0f);
 
                     startingPoint.y += tileHeight;
                 }
@@ -323,31 +335,32 @@ namespace FARender
             int32_t index = level.get(tile.pos).index();
             if (index >= 0 && index < minTops->size())
             {
-                drawAtTile(minTops->getFrame(index), topLeft, tileWidth, staticObjectHeight);
+                drawTilesetSprite(minTops->getFrame(index), topLeft);
 
                 // Add special sprites (arches / open door frames) if required.
                 if (specialSpritesMap.count(index))
                 {
                     int32_t specialSpriteIndex = specialSpritesMap.at(index);
                     const Render::TextureReference* sprite = specialSprites->getFrame(specialSpriteIndex);
-                    drawAtTile(sprite, topLeft, sprite->mWidth, sprite->mHeight);
+                    drawTilesetSprite(sprite, topLeft);
                 }
             }
 
-            auto& itemsForTile = items.get(tile.pos.x, tile.pos.y);
-            for (auto& item : itemsForTile)
+            const std::vector<LevelObject>& itemsForTile = items.get(tile.pos.x, tile.pos.y);
+            for (const auto& item : itemsForTile)
             {
                 const Render::TextureReference* sprite = item.sprite->getFrame(item.spriteFrame);
-                drawAtTile(sprite, topLeft, sprite->mWidth, sprite->mHeight, item.hoverColor);
+                Vec2Fix position = Vec2Fix(tile.pos) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+                drawAtWorldPosition(sprite, position, toScreen, item.hoverColor);
             }
 
-            auto& objsForTile = objs.get(tile.pos.x, tile.pos.y);
+            const std::vector<LevelObject>& objsForTile = objs.get(tile.pos.x, tile.pos.y);
             for (auto& obj : objsForTile)
             {
                 if (obj.valid)
                 {
                     const Render::TextureReference* sprite = obj.sprite->getFrame(obj.spriteFrame);
-                    drawMovingSprite(sprite, obj.fractionalPos, toScreen, obj.hoverColor);
+                    drawAtWorldPosition(sprite, obj.fractionalPos, toScreen, obj.hoverColor);
                 }
             }
         });
@@ -363,11 +376,25 @@ namespace FARender
                 Misc::Point rectPoint = Vec2i(tileTopPoint(rectData.worldPosition)) + toScreen;
                 mDebugRenderer->drawRectangle(*Render::mainCommandQueue,
                                               levelDrawFramebuffer.get(),
-                                              Render::Colors::green,
+                                              rectData.color,
                                               rectPoint.x,
                                               rectPoint.y,
                                               int32_t(rectData.w * tileWidth),
                                               int32_t(rectData.h * tileHeight));
+            }
+            if (std::holds_alternative<PointData>(item))
+            {
+                const PointData& pointData = std::get<PointData>(item);
+                Misc::Point point = Vec2i(tileTopPoint(pointData.worldPosition)) + toScreen;
+
+                // TODO: this should proooobably be a circle, not a rect but it's fine for now
+                mDebugRenderer->drawRectangle(*Render::mainCommandQueue,
+                                              levelDrawFramebuffer.get(),
+                                              pointData.color,
+                                              point.x - pointData.radiusInPixels,
+                                              point.y - pointData.radiusInPixels,
+                                              pointData.radiusInPixels * 2,
+                                              pointData.radiusInPixels * 2);
             }
         }
 

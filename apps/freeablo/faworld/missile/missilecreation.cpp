@@ -7,8 +7,8 @@ namespace FAWorld::Missile
 {
     void Missile::Creation::singleFrame16Direction(Missile& missile, Misc::Point dest, GameLevel* level)
     {
-        auto direction = (Vec2Fix(dest.x, dest.y) - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).getDirection();
-        auto srcPos = Position(missile.mSrcPoint, direction);
+        Misc::Direction direction = (Vec2Fix(dest.x, dest.y) - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).getDirection();
+        Position srcPos(missile.mSrcPoint, direction);
         int32_t direction16 = static_cast<int32_t>(direction.getDirection16());
         missile.mGraphics.push_back(
             std::make_unique<MissileGraphic>(FARender::SpriteLoader::SpriteDefinition(), missile.getGraphic(0), direction16, srcPos, level));

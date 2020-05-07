@@ -21,9 +21,11 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver) const;
 
         FixedPoint update(FixedPoint moveDistance);
+
         Misc::Point current() const; ///< where we are coming from
+        Misc::Point next() const;    ///< where we are going to
+
         bool isNear(const Position& other) const;
-        Misc::Point next() const; ///< where we are going to
 
         Misc::Direction getDirection() const { return mDirection; }
         void setDirection(Misc::Direction mDirection);

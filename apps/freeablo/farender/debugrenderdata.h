@@ -12,8 +12,15 @@ struct RectData
     Render::Color color;
 };
 
+struct PointData
+{
+    Vec2Fix worldPosition;
+    Render::Color color;
+    int32_t radiusInPixels;
+};
+
 namespace FARender
 {
-    using DebugRenderItem = std::variant<RectData>;
+    using DebugRenderItem = std::variant<RectData, PointData>;
     using DebugRenderData = std::vector<DebugRenderItem>;
 }

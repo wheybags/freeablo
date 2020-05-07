@@ -140,15 +140,13 @@ namespace FARender
     private:
         void createNewLevelDrawFramebuffer();
 
-        void drawAtTile(const Render::TextureReference* sprite,
-                        const Misc::Point& tileTop,
-                        int spriteW,
-                        int spriteH,
-                        std::optional<ByteColour> highlightColor = std::nullopt);
-        void drawMovingSprite(const Render::TextureReference* sprite,
-                              const Vec2Fix& fractionalPos,
-                              const Misc::Point& toScreen,
-                              std::optional<ByteColour> highlightColor = std::nullopt);
+        void drawTilesetSprite(const Render::TextureReference* sprite,
+                               const Misc::Point& tileScreenPosition,
+                               std::optional<ByteColour> highlightColor = std::nullopt);
+        void drawAtWorldPosition(const Render::TextureReference* sprite,
+                                 const Vec2Fix& fractionalPos,
+                                 const Misc::Point& toScreen,
+                                 std::optional<ByteColour> highlightColor = std::nullopt);
 
     private:
         DrawLevelCache mDrawLevelCache;
