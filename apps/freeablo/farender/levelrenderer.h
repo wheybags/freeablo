@@ -1,4 +1,5 @@
 #pragma once
+#include "debugrenderdata.h"
 #include <Image/image.h>
 #include <atomic>
 #include <cstdint>
@@ -24,6 +25,7 @@ namespace Render
     class Framebuffer;
     struct Tile;
     class SpriteGroup;
+    class DebugRenderer;
 }
 
 namespace FARender
@@ -127,25 +129,25 @@ namespace FARender
                        const std::map<int32_t, int32_t>& specialSpritesMap,
                        LevelObjects& objs,
                        LevelObjects& items,
-                       const Vec2Fix& fractionalPos);
+                       const Vec2Fix& fractionalPos,
+                       const DebugRenderData& debugData);
 
         Render::Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& worldPositionOffset);
 
         void toggleTextureFiltering() { mTextureFilter = !mTextureFilter; }
+        void toggleGrid() { mDrawGrid = !mDrawGrid; }
         void adjustZoom(int32_t delta) { mRenderScale = std::clamp(mRenderScale + delta, 1, 5); }
 
     private:
         void createNewLevelDrawFramebuffer();
 
-        void drawAtTile(const Render::TextureReference* sprite,
-                        const Misc::Point& tileTop,
-                        int spriteW,
-                        int spriteH,
-                        std::optional<ByteColour> highlightColor = std::nullopt);
-        void drawMovingSprite(const Render::TextureReference* sprite,
-                              const Vec2Fix& fractionalPos,
-                              const Misc::Point& toScreen,
-                              std::optional<ByteColour> highlightColor = std::nullopt);
+        void drawTilesetSprite(const Render::TextureReference* sprite,
+                               const Misc::Point& tileScreenPosition,
+                               std::optional<ByteColour> highlightColor = std::nullopt);
+        void drawAtWorldPosition(const Render::TextureReference* sprite,
+                                 const Vec2Fix& fractionalPos,
+                                 const Misc::Point& toScreen,
+                                 std::optional<ByteColour> highlightColor = std::nullopt);
 
     private:
         DrawLevelCache mDrawLevelCache;
@@ -165,5 +167,7 @@ namespace FARender
 
         std::atomic_bool mTextureFilter = false;
         std::atomic_int mRenderScale = 2;
+        std::atomic_bool mDrawGrid = false;
+        std::unique_ptr<Render::DebugRenderer> mDebugRenderer;
     };
 }

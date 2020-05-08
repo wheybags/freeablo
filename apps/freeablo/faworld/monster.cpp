@@ -81,13 +81,13 @@ namespace FAWorld
         release_assert(dungeonLevel);
 
         if (dungeonLevel->getLevelIndex() >= 16)
-            stats.toHitMeleeMinMaxCap.min = 30;
+            stats.toHitMinMaxCap.min = 30;
         else if (dungeonLevel->getLevelIndex() >= 15)
-            stats.toHitMeleeMinMaxCap.min = 25;
+            stats.toHitMinMaxCap.min = 25;
         else if (dungeonLevel->getLevelIndex() >= 14)
-            stats.toHitMeleeMinMaxCap.min = 20;
+            stats.toHitMinMaxCap.min = 20;
         else
-            stats.toHitMeleeMinMaxCap.min = 15;
+            stats.toHitMinMaxCap.min = 15;
 
         stats.meleeDamageBonusRange = IntRange(monsterProperties.minDamage, monsterProperties.maxDamage);
         stats.hitRecoveryDamageThreshold = actorStats.mLevel + 3; // https://wheybags.gitlab.io/jarulfs-guide/#monster-timing-information

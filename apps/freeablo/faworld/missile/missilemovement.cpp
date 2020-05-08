@@ -12,6 +12,9 @@ namespace FAWorld::Missile
 
     void Missile::Movement::linear(Missile& missile, MissileGraphic& graphic, FixedPoint speed, FixedPoint maxRange)
     {
+        if (Missile::DEBUG_MISSILES)
+            speed = speed / 30;
+
         graphic.mCurPos.setFreeMovement();
         graphic.mCurPos.update(speed / FixedPoint(World::ticksPerSecond));
 

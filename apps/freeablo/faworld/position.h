@@ -16,14 +16,17 @@ namespace FAWorld
     {
     public:
         explicit Position(Misc::Point point = Misc::Point::zero(), Misc::Direction direction = Misc::Direction(Misc::Direction8::south));
+        explicit Position(Vec2Fix position, Misc::Direction direction = Misc::Direction(Misc::Direction8::south));
 
         Position(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) const;
 
         FixedPoint update(FixedPoint moveDistance);
+
         Misc::Point current() const; ///< where we are coming from
+        Misc::Point next() const;    ///< where we are going to
+
         bool isNear(const Position& other) const;
-        Misc::Point next() const; ///< where we are going to
 
         Misc::Direction getDirection() const { return mDirection; }
         void setDirection(Misc::Direction mDirection);

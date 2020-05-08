@@ -14,7 +14,7 @@ namespace FAWorld::Missile
         switch (missileId)
         {
             case MissileId::arrow:
-                return Attributes(Creation::singleFrame16Direction, Movement::linear(30, 15), ActorEngagement::damageEnemyAndStop, ttlIgnore);
+                return Attributes(Creation::singleFrame16Direction, Movement::linear(30, 15), ActorEngagement::arrowEngagement, ttlIgnore);
             case MissileId::firebolt:
                 return Attributes(Creation::animated16Direction, Movement::linear(15, 15), ActorEngagement::damageEnemyAndStop, ttlIgnore);
             case MissileId::farrow:
@@ -23,7 +23,10 @@ namespace FAWorld::Missile
             case MissileId::firewall:
             case MissileId::firewalla:
             case MissileId::firewallc:
-                return Attributes(Creation::firewall, Movement::stationary, ActorEngagement::damageEnemy, World::getTicksInPeriod(8));
+                return Attributes(Creation::firewall,
+                                  Movement::stationary,
+                                  [](Missile& missile, MissileGraphic& graphic, Actor& actor) { ActorEngagement::damageEnemy(missile, graphic, actor, 10); },
+                                  0);
             case MissileId::manashield:
                 return Attributes(Creation::basicAnimated, Movement::hoverOverCreator, ActorEngagement::none, World::getTicksInPeriod(8));
             case MissileId::town:

@@ -51,6 +51,9 @@ namespace FAWorld
         int32_t base = 0;
         int32_t bonus = 0;
 
+        void save(FASaveGame::GameSaver& saver) const;
+        void load(FASaveGame::GameLoader& loader);
+
         int32_t getCombined() const { return base + bonus; }
     };
 
@@ -61,9 +64,9 @@ namespace FAWorld
         int32_t maxMana = 0;
         int32_t armorClass = 0;
         ToHitChance toHitMelee;
-        IntRange toHitMeleeMinMaxCap = {0, 100};
         ToHitChance toHitRanged;
         ToHitChance toHitMagic;
+        IntRange toHitMinMaxCap = {0, 100};
         int32_t meleeDamage = 0;
         int32_t rangedDamage = 0;
         IntRange meleeDamageBonusRange = {0, 0};

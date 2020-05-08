@@ -74,7 +74,7 @@ set_target_properties(Random PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 set(RenderFiles
     render/render.h
     render/sdl2backend.cpp
-        render/atlastexture.cpp
+    render/atlastexture.cpp
     render/atlastexture.h
     render/OpenGL/vertexarrayobjectopengl.cpp
     render/OpenGL/vertexarrayobjectopengl.h
@@ -108,7 +108,19 @@ set(RenderFiles
     render/alignedcpubuffer.h
     render/alignedcpubuffer.cpp
     render/rectpack.cpp
-    render/rectpack.h render/cursor.cpp render/cursor.h render/framebuffer.h render/framebuffer.cpp render/OpenGL/framebufferopengl.cpp render/OpenGL/framebufferopengl.h render/texturereference.cpp render/texturereference.h render/spritegroup.cpp render/spritegroup.h)
+    render/rectpack.h
+    render/cursor.cpp
+    render/cursor.h
+    render/framebuffer.h
+    render/framebuffer.cpp
+    render/OpenGL/framebufferopengl.cpp
+    render/OpenGL/framebufferopengl.h
+    render/texturereference.cpp
+    render/texturereference.h
+    render/spritegroup.cpp
+    render/spritegroup.h
+    render/debugrenderer.cpp
+    render/debugrenderer.h)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
