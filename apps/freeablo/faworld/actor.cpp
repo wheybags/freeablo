@@ -363,8 +363,8 @@ namespace FAWorld
         const LiveActorStats& stats = mStats.getCalculatedStats();
         int32_t toHit = stats.toHitMelee.getCombined();
         toHit -= enemy->getStats().getCalculatedStats().armorClass;
-        toHit = Misc::clamp(toHit, stats.toHitMeleeMinMaxCap.min, stats.toHitMeleeMinMaxCap.max);
-        int32_t roll = mWorld.mRng->randomInRange(0, 99); // TODO: should this be (1,100) instead of (0, 99)?
+        toHit = Misc::clamp(toHit, stats.toHitMinMaxCap.min, stats.toHitMinMaxCap.max);
+        int32_t roll = mWorld.mRng->randomInRange(0, 99);
 
 #ifdef DEBUG_MELEE_COMBAT
         printf("%s melee attacks %s - ", mName.c_str(), enemy->mName.c_str());

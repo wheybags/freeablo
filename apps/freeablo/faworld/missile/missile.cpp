@@ -14,6 +14,12 @@ namespace FAWorld::Missile
 
         if (!missileData().mSoundEffect.empty())
             Engine::ThreadManager::get()->playSound(missileData().mSoundEffect);
+
+        const LiveActorStats& stats = creator.mStats.getCalculatedStats();
+        mToHitRanged = stats.toHitRanged;
+        mToHitMinMaxCap = stats.toHitMinMaxCap;
+        mRangedDamage = stats.rangedDamage;
+        mRangedDamageBonusRange = stats.rangedDamageBonusRange;
     }
 
     Missile::Missile(FASaveGame::GameLoader& loader) : mMissileId(static_cast<MissileId>(loader.load<int32_t>())), mAttr(Attributes::fromId(mMissileId))
@@ -29,6 +35,11 @@ namespace FAWorld::Missile
         mGraphics.reserve(graphicsSize);
         for (uint32_t i = 0; i < graphicsSize; i++)
             mGraphics.push_back(std::make_unique<MissileGraphic>(loader));
+
+        mToHitRanged.load(loader);
+        mToHitMinMaxCap = IntRange(loader);
+        mRangedDamage = loader.load<int32_t>();
+        mRangedDamageBonusRange = IntRange(loader);
     }
 
     void Missile::save(FASaveGame::GameSaver& saver) const
@@ -44,6 +55,11 @@ namespace FAWorld::Missile
         saver.save(static_cast<uint32_t>(mGraphics.size()));
         for (auto& graphic : mGraphics)
             graphic->save(saver);
+
+        mToHitRanged.save(saver);
+        mToHitMinMaxCap.save(saver);
+        saver.save(mRangedDamage);
+        mRangedDamageBonusRange.save(saver);
     }
 
     const DiabloExe::MissileData& Missile::missileData() const

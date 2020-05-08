@@ -1,6 +1,7 @@
 #pragma once
 #include "missileenums.h"
 #include "missilegraphic.h"
+#include <faworld/actorstats.h>
 #include <functional>
 #include <misc/misc.h>
 #include <vector>
@@ -70,8 +71,9 @@ namespace FAWorld::Missile
             typedef std::function<void(Missile& missile, MissileGraphic& graphic, Actor& actor)> Method;
 
             static void none(Missile& missile, MissileGraphic& graphic, Actor& actor);
-            static void damageEnemy(Missile& missile, MissileGraphic& graphic, Actor& actor);
+            static void damageEnemy(Missile& missile, MissileGraphic&, Actor& actor, int32_t damage);
             static void damageEnemyAndStop(Missile& missile, MissileGraphic& graphic, Actor& actor);
+            static void arrowEngagement(Missile& missile, MissileGraphic& graphic, Actor& actor);
             static void townPortal(Missile& missile, MissileGraphic& graphic, Actor& actor);
         };
 
@@ -98,5 +100,12 @@ namespace FAWorld::Missile
         Missile::Attributes mAttr;
         std::vector<std::unique_ptr<MissileGraphic>> mGraphics;
         bool mComplete = false;
+
+        // These fields are stored at missile creation, to make sure your damage and to-hit are calculated
+        // based on your gear / stats when you fired the arrow, not when it hits.
+        ToHitChance mToHitRanged;
+        IntRange mToHitMinMaxCap;
+        int32_t mRangedDamage = 0;
+        IntRange mRangedDamageBonusRange;
     };
 }
