@@ -29,7 +29,8 @@ namespace FAWorld::Missile
 
         if (missile.mCreator->canIAttack(&actor))
         {
-            int32_t distanceSquared = int32_t((graphic.mCurPos.getFractionalPos() - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).magnitudeSquared().floor());
+            int32_t distanceSquared =
+                int32_t((graphic.mCurPos.getFractionalPos() - Vec2Fix(missile.mSrcPoint.x, missile.mSrcPoint.y)).magnitudeSquared().floor());
 
             int32_t toHit = missile.mToHitRanged.getCombined();
             toHit -= distanceSquared / 2;

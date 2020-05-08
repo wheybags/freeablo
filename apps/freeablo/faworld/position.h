@@ -16,6 +16,7 @@ namespace FAWorld
     {
     public:
         explicit Position(Misc::Point point = Misc::Point::zero(), Misc::Direction direction = Misc::Direction(Misc::Direction8::south));
+        explicit Position(Vec2Fix position, Misc::Direction direction = Misc::Direction(Misc::Direction8::south));
 
         Position(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) const;

@@ -11,6 +11,8 @@ namespace FAWorld
     {
     }
 
+    Position::Position(Vec2Fix point, Misc::Direction direction) : mCurrent(point), mFractionalPos(point), mDirection(direction) {}
+
     Position::Position(FASaveGame::GameLoader& loader)
     {
         mDirection = Misc::Direction(loader);

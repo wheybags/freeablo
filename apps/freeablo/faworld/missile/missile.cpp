@@ -7,8 +7,8 @@
 
 namespace FAWorld::Missile
 {
-    Missile::Missile(MissileId missileId, Actor& creator, Misc::Point dest)
-        : mCreator(&creator), mMissileId(missileId), mSrcPoint(creator.getPos().current()), mAttr(Attributes::fromId(missileId))
+    Missile::Missile(MissileId missileId, Actor& creator, Vec2Fix dest)
+        : mCreator(&creator), mMissileId(missileId), mSrcPoint(creator.getPos().getFractionalPos()), mAttr(Attributes::fromId(missileId))
     {
         mAttr.mCreation(*this, dest, creator.getLevel());
 
@@ -28,7 +28,7 @@ namespace FAWorld::Missile
         auto world = loader.currentlyLoadingWorld;
         loader.addFunctionToRunAtEnd([this, world, creatorId]() { mCreator = world->getActorById(creatorId); });
 
-        mSrcPoint = Misc::Point(loader);
+        mSrcPoint = Vec2Fix(loader);
         mComplete = loader.load<bool>();
 
         auto graphicsSize = loader.load<uint32_t>();

@@ -423,7 +423,7 @@ namespace FAWorld
 
     void Actor::activateMissile(MissileId id, Misc::Point targetPoint)
     {
-        auto missile = std::make_unique<Missile::Missile>(id, *this, targetPoint);
+        auto missile = std::make_unique<Missile::Missile>(id, *this, Vec2Fix(targetPoint) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5")));
         mMissiles.push_back(std::move(missile));
     }
 

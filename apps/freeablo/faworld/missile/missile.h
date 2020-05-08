@@ -24,7 +24,7 @@ namespace FAWorld::Missile
     public:
         virtual ~Missile() = default;
 
-        Missile(MissileId missileId, Actor& creator, Misc::Point dest);
+        Missile(MissileId missileId, Actor& creator, Vec2Fix dest);
         Missile(FASaveGame::GameLoader& loader);
 
         virtual void save(FASaveGame::GameSaver& saver) const;
@@ -41,13 +41,13 @@ namespace FAWorld::Missile
         {
         public:
             Creation() = delete;
-            typedef std::function<void(Missile& missile, Misc::Point dest, GameLevel* level)> Method;
+            typedef std::function<void(Missile& missile, Vec2Fix dest, GameLevel* level)> Method;
 
-            static void singleFrame16Direction(Missile& missile, Misc::Point dest, GameLevel* level);
-            static void animated16Direction(Missile& missile, Misc::Point dest, GameLevel* level);
-            static void firewall(Missile& missile, Misc::Point dest, GameLevel* level);
-            static void basicAnimated(Missile& missile, Misc::Point dest, GameLevel* level);
-            static void townPortal(Missile& missile, Misc::Point dest, GameLevel* level);
+            static void singleFrame16Direction(Missile& missile, Vec2Fix dest, GameLevel* level);
+            static void animated16Direction(Missile& missile, Vec2Fix dest, GameLevel* level);
+            static void firewall(Missile& missile, Vec2Fix dest, GameLevel* level);
+            static void basicAnimated(Missile& missile, Vec2Fix dest, GameLevel* level);
+            static void townPortal(Missile& missile, Vec2Fix dest, GameLevel* level);
         };
 
         class Movement
@@ -96,7 +96,7 @@ namespace FAWorld::Missile
 
         Actor* mCreator;
         MissileId mMissileId;
-        Misc::Point mSrcPoint;
+        Vec2Fix mSrcPoint;
         Missile::Attributes mAttr;
         std::vector<std::unique_ptr<MissileGraphic>> mGraphics;
         bool mComplete = false;
