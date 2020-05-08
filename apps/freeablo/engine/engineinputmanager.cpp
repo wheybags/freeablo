@@ -223,6 +223,8 @@ namespace Engine
                 return "SpellHotkeyF8";
             case KeyboardInputAction::toggleTextureFiltering:
                 return "ToggleTextureFiltering";
+            case KeyboardInputAction::toggleDrawGrid:
+                return "ToggleDrawGrid";
 
             case KeyboardInputAction::max:
                 break;

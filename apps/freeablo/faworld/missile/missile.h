@@ -33,7 +33,7 @@ namespace FAWorld::Missile
         MissileId getMissileId() const { return mMissileId; }
         const std::vector<std::unique_ptr<MissileGraphic>>& getGraphics() const { return mGraphics; }
 
-        static constexpr bool DEBUG_MISSILES = true;
+        static constexpr bool DEBUG_MISSILES = false;
 
     protected:
         // Static inner classes for missile attribute composition.

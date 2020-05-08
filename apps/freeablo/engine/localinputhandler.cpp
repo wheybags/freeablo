@@ -60,6 +60,12 @@ namespace Engine
                 return;
             }
 
+            case Engine::KeyboardInputAction::toggleDrawGrid:
+            {
+                FARender::Renderer::get()->mLevelRenderer->toggleGrid();
+                return;
+            }
+
             default:
             {
                 return;

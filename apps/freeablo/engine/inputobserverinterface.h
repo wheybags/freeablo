@@ -32,6 +32,7 @@ namespace Engine
         spellHotkeyF7,
         spellHotkeyF8,
         toggleTextureFiltering,
+        toggleDrawGrid,
 
         max,
     };

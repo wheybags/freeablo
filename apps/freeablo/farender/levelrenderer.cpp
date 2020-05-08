@@ -278,7 +278,6 @@ namespace FARender
 
         if (mDrawGrid)
         {
-
             mDrawLevelCache.end(*drawLevelUniformCpuBuffer,
                                 *drawLevelUniformBuffer,
                                 *vertexArrayObject,
@@ -288,21 +287,23 @@ namespace FARender
 
             Render::mainCommandQueue->cmdClearFramebuffer(std::nullopt, true, levelDrawFramebuffer.get());
 
-            Render::Color gridColor(0.0f, 1.0f, 0.0f, 0.3f);
+            Render::Color gridColor(1.0f, 1.0f, 1.0f, 0.8f);
 
             // Lines from northwest to southeast
             {
                 Render::Tile startTile = getTileFromScreenCoords({-getCurrentResolution().w, -tileHeight}, toScreen);
                 Misc::Point startingPoint = Vec2i(tileTopPoint(startTile.pos)) + toScreen;
 
-                for (int32_t x = 0; x < getCurrentResolution().w / tileWidth * 2; x++)
+                for (int32_t i = 0; i < getCurrentResolution().w / tileWidth * 2; i++)
                 {
                     Vec2f top = Vec2f(startingPoint) + Vec2f(0.5, 0.5);
 
                     Vec2f oneTileOffset(tileWidth, tileHeight);
                     Vec2f bottom = top + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
 
-                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, 1.0f);
+                    int32_t realY = startTile.pos.y - i;
+                    float thickness = std::abs(realY) % 10 == 0 ? 3.0f : 1.0f;
+                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, thickness);
 
                     startingPoint.x += tileWidth;
                 }
@@ -313,14 +314,16 @@ namespace FARender
                 Render::Tile startTile = getTileFromScreenCoords({-tileWidth, 0}, toScreen);
                 Misc::Point startingPoint = Vec2i(tileTopPoint(startTile.pos)) + toScreen;
 
-                for (int32_t y = 0; y < getCurrentResolution().h / tileHeight * 2; y++)
+                for (int32_t i = 0; i < getCurrentResolution().h / tileHeight * 2; i++)
                 {
                     Vec2f bottom = Vec2f(startingPoint) + Vec2f(0.5, 0.5);
 
                     Vec2f oneTileOffset(tileWidth, -tileHeight);
                     Vec2f top = bottom + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
 
-                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, 1.0f);
+                    int32_t realX = startTile.pos.x + i;
+                    float thickness = std::abs(realX) % 10 == 0 ? 3.0f : 1.0f;
+                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, thickness);
 
                     startingPoint.y += tileHeight;
                 }

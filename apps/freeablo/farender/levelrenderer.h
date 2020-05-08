@@ -135,6 +135,7 @@ namespace FARender
         Render::Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& worldPositionOffset);
 
         void toggleTextureFiltering() { mTextureFilter = !mTextureFilter; }
+        void toggleGrid() { mDrawGrid = !mDrawGrid; }
         void adjustZoom(int32_t delta) { mRenderScale = std::clamp(mRenderScale + delta, 1, 5); }
 
     private:
@@ -166,7 +167,7 @@ namespace FARender
 
         std::atomic_bool mTextureFilter = false;
         std::atomic_int mRenderScale = 2;
-        std::atomic_bool mDrawGrid = true;
+        std::atomic_bool mDrawGrid = false;
         std::unique_ptr<Render::DebugRenderer> mDebugRenderer;
     };
 }
