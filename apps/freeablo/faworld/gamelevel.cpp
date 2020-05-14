@@ -68,10 +68,6 @@ namespace FAWorld
 
     int32_t GameLevel::height() const { return mLevel.height(); }
 
-    const Misc::Point GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
-
-    const Misc::Point GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
-
     bool GameLevel::isDoor(const Misc::Point& point) const { return mLevel.isDoor(point); }
     bool GameLevel::activateDoor(const Misc::Point& point)
     {

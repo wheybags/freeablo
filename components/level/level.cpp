@@ -12,8 +12,8 @@ namespace Level
                  const std::string& tileSetPath,
                  const std::string& specialCelPath,
                  const std::map<int32_t, int32_t>& specialCelMap,
-                 const Misc::Point& downStairs,
-                 const Misc::Point& upStairs,
+                 const LevelTransitionArea& downStairs,
+                 const LevelTransitionArea& upStairs,
                  std::map<int32_t, int32_t> doorMap,
                  int32_t previous,
                  int32_t next)
@@ -42,15 +42,8 @@ namespace Level
             mDoorMap[key] = loader.load<int32_t>();
         }
 
-        int32_t first, second;
-
-        first = loader.load<int32_t>();
-        second = loader.load<int32_t>();
-        mUpStairs = {first, second};
-
-        first = loader.load<int32_t>();
-        second = loader.load<int32_t>();
-        mDownStairs = {first, second};
+        mUpStairs.load(loader);
+        mDownStairs.load(loader);
 
         mPrevious = loader.load<int32_t>();
         mNext = loader.load<int32_t>();
@@ -85,27 +78,14 @@ namespace Level
             saver.save(entry.second);
         }
 
-        saver.save(mUpStairs.x);
-        saver.save(mUpStairs.y);
-
-        saver.save(mDownStairs.x);
-        saver.save(mDownStairs.y);
+        mUpStairs.save(saver);
+        mDownStairs.save(saver);
 
         saver.save(mPrevious);
         saver.save(mNext);
     }
 
     std::vector<int16_t> Level::mEmpty(16);
-
-    bool Level::isStairs(int32_t x, int32_t y) const
-    {
-        if (mDownStairs.x == x && mDownStairs.y == y)
-            return true;
-        if (mUpStairs.x == x && mUpStairs.y == y)
-            return true;
-
-        return false;
-    }
 
     Level::InternalLocationData Level::getInternalLocationData(const Misc::Point& point) const
     {
@@ -212,25 +192,9 @@ namespace Level
         return false;
     }
 
-    int32_t Level::minSize() const { return mMin.size(); }
-
-    const MinPillar Level::minPillar(int32_t i) const { return MinPillar(mMin[i], mSol.passable(i), i); }
-
     int32_t Level::width() const { return mDun.width() * 2; }
 
     int32_t Level::height() const { return mDun.height() * 2; }
-
-    const Misc::Point& Level::upStairsPos() const { return mUpStairs; }
-
-    const Misc::Point& Level::downStairsPos() const { return mDownStairs; }
-
-    const std::string& Level::getTileSetPath() const { return mTilesetCelPath; }
-
-    const std::string& Level::getSpecialCelPath() const { return mSpecialCelPath; }
-
-    const std::map<int32_t, int32_t>& Level::getSpecialCelMap() const { return mSpecialCelMap; }
-
-    const std::string& Level::getMinPath() const { return mMinPath; }
 
     MinPillar::MinPillar(const std::vector<int16_t>& data, bool passable, int32_t index) : mData(data), mPassable(passable), mIndex(index) {}
 
@@ -241,4 +205,23 @@ namespace Level
     bool MinPillar::passable() const { return mPassable; }
 
     int32_t MinPillar::index() const { return mIndex; }
+
+    void LevelTransitionArea::save(Serial::Saver& saver) const
+    {
+        offset.save(saver);
+        dimensions.save(saver);
+        playerSpawnOffset.save(saver);
+    }
+
+    void LevelTransitionArea::load(Serial::Loader& loader)
+    {
+        offset = Vec2i(loader);
+        dimensions = IntRange(loader);
+        playerSpawnOffset = Vec2i(loader);
+    }
+
+    bool LevelTransitionArea::pointIsInside(Vec2i point) const
+    {
+        return point.x >= offset.x && point.x <= offset.x + dimensions.w && point.y >= offset.y && point.y <= offset.y + dimensions.h;
+    }
 }

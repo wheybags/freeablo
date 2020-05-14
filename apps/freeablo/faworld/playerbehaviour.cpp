@@ -128,21 +128,8 @@ namespace FAWorld
                 else
                     nextLevelIndex = mPlayer->getLevel()->getNextLevel();
 
-                GameLevel* level = mPlayer->getWorld()->getLevel(nextLevelIndex);
-
-                if (level)
-                {
-                    if (mPlayer == mPlayer->getWorld()->getCurrentPlayer())
-                    {
-                        // Clear atlas texture
-                        //                        Engine::ThreadManager::get()->clearSprites();
-                    }
-
-                    if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
-                        mPlayer->teleport(level, Position(level->getFreeSpotNear(level->downStairsPos())));
-                    else
-                        mPlayer->teleport(level, Position(level->getFreeSpotNear(level->upStairsPos())));
-                }
+                if (GameLevel* level = mPlayer->getWorld()->getLevel(nextLevelIndex))
+                    mPlayer->moveToLevel(level, input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Down);
 
                 return;
             }

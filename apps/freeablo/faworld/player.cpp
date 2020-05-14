@@ -605,4 +605,23 @@ namespace FAWorld
         }
         return SpellId::null;
     }
+
+    void Player::moveToLevel(GameLevel* level, bool placeAtUpStairs)
+    {
+        Level::LevelTransitionArea targetArea;
+
+        if (placeAtUpStairs)
+            targetArea = level->upStairsArea();
+        else
+            targetArea = level->downStairsArea();
+
+        const std::function<bool(const Misc::Point& point)> avoidStairs = [&](const Misc::Point& point) {
+            return true; //! targetArea.pointIsInside(point);
+            return true; //! targetArea.pointIsInside(point);
+        };
+
+        Vec2i targetPoint = level->getFreeSpotNear(targetArea.offset + targetArea.playerSpawnOffset, std::numeric_limits<int32_t>::max(), avoidStairs);
+
+        teleport(level, Position(targetPoint));
+    }
 }

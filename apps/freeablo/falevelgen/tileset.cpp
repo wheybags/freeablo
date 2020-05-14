@@ -13,6 +13,40 @@ namespace FALevelGen
         Settings::Settings settings;
         settings.loadFromFile(path);
 
+        upStairsData = Level::Dun(3, 3);
+        upStairsData.get(0, 0) = settings.get<int32_t>("Basic", "upStairs1");
+        upStairsData.get(1, 0) = settings.get<int32_t>("Basic", "upStairs2");
+        upStairsData.get(2, 0) = settings.get<int32_t>("Basic", "upStairs3");
+
+        upStairsData.get(0, 1) = settings.get<int32_t>("Basic", "upStairs4");
+        upStairsData.get(1, 1) = settings.get<int32_t>("Basic", "upStairs5");
+        upStairsData.get(2, 1) = settings.get<int32_t>("Basic", "upStairs6");
+
+        upStairsData.get(0, 2) = settings.get<int32_t>("Basic", "upStairs7");
+        upStairsData.get(1, 2) = settings.get<int32_t>("Basic", "upStairs8");
+        upStairsData.get(2, 2) = settings.get<int32_t>("Basic", "upStairs9");
+
+        upStairsOnWall = settings.get<bool>("Basic", "upStairsOnWall");
+        upStairsXOffset = settings.get<int32_t>("Basic", "upStairsXOffset");
+        upStairsYOffset = settings.get<int32_t>("Basic", "upStairsYOffset");
+
+        downStairsData = Level::Dun(3, 3);
+        downStairsData.get(0, 0) = settings.get<int32_t>("Basic", "downStairs1");
+        downStairsData.get(1, 0) = settings.get<int32_t>("Basic", "downStairs2");
+        downStairsData.get(2, 0) = settings.get<int32_t>("Basic", "downStairs3");
+
+        downStairsData.get(0, 1) = settings.get<int32_t>("Basic", "downStairs4");
+        downStairsData.get(1, 1) = settings.get<int32_t>("Basic", "downStairs5");
+        downStairsData.get(2, 1) = settings.get<int32_t>("Basic", "downStairs6");
+
+        downStairsData.get(0, 2) = settings.get<int32_t>("Basic", "downStairs7");
+        downStairsData.get(1, 2) = settings.get<int32_t>("Basic", "downStairs8");
+        downStairsData.get(2, 2) = settings.get<int32_t>("Basic", "downStairs9");
+
+        downStairsOnWall = settings.get<bool>("Basic", "downStairsOnWall");
+        downStairsXOffset = settings.get<int32_t>("Basic", "downStairsXOffset");
+        downStairsYOffset = settings.get<int32_t>("Basic", "downStairsYOffset");
+
         xWall = settings.get<int32_t>("Basic", "xWall");
         fillTile(xWall, settings, "XWall");
 
@@ -114,38 +148,6 @@ namespace FALevelGen
         fillTile(joinBottomCorner, settings, "JoinBottomCorner");
         joinYBottomCorner = settings.get<int32_t>("Basic", "joinYBottomCorner");
         fillTile(joinYBottomCorner, settings, "JoinYBottomCorner");
-
-        upStairsOnWall = settings.get<bool>("Basic", "upStairsOnWall");
-        upStairs1 = settings.get<int32_t>("Basic", "upStairs1");
-        upStairs2 = settings.get<int32_t>("Basic", "upStairs2");
-        upStairs3 = settings.get<int32_t>("Basic", "upStairs3");
-
-        upStairs4 = settings.get<int32_t>("Basic", "upStairs4");
-        upStairs5 = settings.get<int32_t>("Basic", "upStairs5");
-        upStairs6 = settings.get<int32_t>("Basic", "upStairs6");
-
-        upStairs7 = settings.get<int32_t>("Basic", "upStairs7");
-        upStairs8 = settings.get<int32_t>("Basic", "upStairs8");
-        upStairs9 = settings.get<int32_t>("Basic", "upStairs9");
-
-        upStairsXOffset = settings.get<int32_t>("Basic", "upStairsXOffset");
-        upStairsYOffset = settings.get<int32_t>("Basic", "upStairsYOffset");
-
-        downStairsOnWall = settings.get<bool>("Basic", "downStairsOnWall");
-        downStairs1 = settings.get<int32_t>("Basic", "downStairs1");
-        downStairs2 = settings.get<int32_t>("Basic", "downStairs2");
-        downStairs3 = settings.get<int32_t>("Basic", "downStairs3");
-
-        downStairs4 = settings.get<int32_t>("Basic", "downStairs4");
-        downStairs5 = settings.get<int32_t>("Basic", "downStairs5");
-        downStairs6 = settings.get<int32_t>("Basic", "downStairs6");
-
-        downStairs7 = settings.get<int32_t>("Basic", "downStairs7");
-        downStairs8 = settings.get<int32_t>("Basic", "downStairs8");
-        downStairs9 = settings.get<int32_t>("Basic", "downStairs9");
-
-        downStairsXOffset = settings.get<int32_t>("Basic", "downStairsXOffset");
-        downStairsYOffset = settings.get<int32_t>("Basic", "downStairsYOffset");
 
         loadDoorMap(settings);
     }
@@ -260,49 +262,6 @@ namespace FALevelGen
                 return xDoor;
             case TileSetEnum::yDoor:
                 return yDoor;
-
-            case TileSetEnum::upStairs1:
-                return upStairs1;
-            case TileSetEnum::upStairs2:
-                return upStairs2;
-            case TileSetEnum::upStairs3:
-                return upStairs3;
-
-            case TileSetEnum::upStairs4:
-                return upStairs4;
-            case TileSetEnum::upStairs5:
-                return upStairs5;
-            case TileSetEnum::upStairs6:
-                return upStairs6;
-
-            case TileSetEnum::upStairs7:
-                return upStairs7;
-            case TileSetEnum::upStairs8:
-                return upStairs8;
-            case TileSetEnum::upStairs9:
-                return upStairs9;
-
-            case TileSetEnum::downStairs1:
-                return downStairs1;
-            case TileSetEnum::downStairs2:
-                return downStairs2;
-            case TileSetEnum::downStairs3:
-                return downStairs3;
-
-            case TileSetEnum::downStairs4:
-                return downStairs4;
-            case TileSetEnum::downStairs5:
-                return downStairs5;
-            case TileSetEnum::downStairs6:
-                return downStairs6;
-
-            case TileSetEnum::downStairs7:
-                return downStairs7;
-            case TileSetEnum::downStairs8:
-                return downStairs8;
-            case TileSetEnum::downStairs9:
-                return downStairs9;
-
             case TileSetEnum::insideXWall:
                 return insideXWall;
             case TileSetEnum::insideXWallEnd:

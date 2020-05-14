@@ -302,7 +302,7 @@ namespace FARender
                     Vec2f bottom = top + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
 
                     int32_t realY = startTile.pos.y - i;
-                    float thickness = std::abs(realY) % 10 == 0 ? 3.0f : 1.0f;
+                    float thickness = std::abs(realY) % 2 == 0 ? 3.0f : 1.0f;
                     mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, thickness);
 
                     startingPoint.x += tileWidth;
@@ -322,7 +322,7 @@ namespace FARender
                     Vec2f top = bottom + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
 
                     int32_t realX = startTile.pos.x + i;
-                    float thickness = std::abs(realX) % 10 == 0 ? 3.0f : 1.0f;
+                    float thickness = std::abs(realX) % 2 == 0 ? 3.0f : 1.0f;
                     mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, thickness);
 
                     startingPoint.y += tileHeight;

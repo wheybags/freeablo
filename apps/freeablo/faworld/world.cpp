@@ -199,8 +199,8 @@ namespace FAWorld
                                    "levels/towndata/town.cel",
                                    "levels/towndata/towns.cel",
                                    specialCelMap,
-                                   Misc::Point(25u, 29u),
-                                   Misc::Point(75u, 68u),
+                                   Level::LevelTransitionArea{{25, 29}, {1, 1}, {0, 1}},
+                                   Level::LevelTransitionArea{{75, 68}, {0, 0}, {0, 0}},
                                    std::map<int32_t, int32_t>(),
                                    static_cast<int32_t>(-1),
                                    1);
@@ -229,13 +229,8 @@ namespace FAWorld
         if (levelNum >= int32_t(mLevels.size()) || levelNum < 0 || (mCurrentPlayer->getLevel() && mCurrentPlayer->getLevel()->getLevelIndex() == levelNum))
             return;
 
-        // Clear atlas texture
-        // Engine::ThreadManager::get()->clearSprites();
-
-        auto level = getLevel(levelNum);
-
-        auto pos = upStairsPos ? level->upStairsPos() : level->downStairsPos();
-        mCurrentPlayer->teleport(level, FAWorld::Position(pos));
+        GameLevel* level = getLevel(levelNum);
+        mCurrentPlayer->moveToLevel(level, upStairsPos);
     }
 
     void World::playLevelMusic(size_t level)
@@ -325,7 +320,7 @@ namespace FAWorld
                     registerPlayer(newPlayer);
                     FAWorld::GameLevel* level = getLevel(0);
 
-                    newPlayer->teleport(level, FAWorld::Position(level->getFreeSpotNear(level->upStairsPos())));
+                    newPlayer->moveToLevel(level, true);
                     Engine::EngineMain::get()->mMultiplayer->registerNewPlayer(newPlayer, input.mData.dataPlayerJoined.peerId);
 
                     break;

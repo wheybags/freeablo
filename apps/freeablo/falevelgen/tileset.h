@@ -1,4 +1,5 @@
 #pragma once
+#include <level/dun.h>
 #include <map>
 #include <settings/settings.h>
 #include <stdlib.h>
@@ -64,30 +65,6 @@ namespace FALevelGen
         joinBottomCorner,
         joinYBottomCorner,
 
-        upStairs1,
-        upStairs2,
-        upStairs3,
-
-        upStairs4,
-        upStairs5,
-        upStairs6,
-
-        upStairs7,
-        upStairs8,
-        upStairs9,
-
-        downStairs1,
-        downStairs2,
-        downStairs3,
-
-        downStairs4,
-        downStairs5,
-        downStairs6,
-
-        downStairs7,
-        downStairs8,
-        downStairs9,
-
         // these two just used internally in levelgen.cpp, not loaded from a file like the rest
         upStairs,
         downStairs
@@ -128,35 +105,13 @@ namespace FALevelGen
         int32_t xDoor = 0;
         int32_t yDoor = 0;
 
+        Level::Dun upStairsData;
         bool upStairsOnWall = false;
-        int32_t upStairs1 = 0;
-        int32_t upStairs2 = 0;
-        int32_t upStairs3 = 0;
-
-        int32_t upStairs4 = 0;
-        int32_t upStairs5 = 0;
-        int32_t upStairs6 = 0;
-
-        int32_t upStairs7 = 0;
-        int32_t upStairs8 = 0;
-        int32_t upStairs9 = 0;
-
         int32_t upStairsXOffset = 0;
         int32_t upStairsYOffset = 0;
 
         bool downStairsOnWall = false;
-        int32_t downStairs1 = 0;
-        int32_t downStairs2 = 0;
-        int32_t downStairs3 = 0;
-
-        int32_t downStairs4 = 0;
-        int32_t downStairs5 = 0;
-        int32_t downStairs6 = 0;
-
-        int32_t downStairs7 = 0;
-        int32_t downStairs8 = 0;
-        int32_t downStairs9 = 0;
-
+        Level::Dun downStairsData;
         int32_t downStairsXOffset = 0;
         int32_t downStairsYOffset = 0;
 
