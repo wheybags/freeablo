@@ -4,10 +4,10 @@
 
 namespace Cel
 {
-    static void drawMinPillar(CelFrame& frame, int x, int y, const std::vector<int16_t>& pillar, std::vector<Image>& tilesetCel, bool top);
+    static void drawMinPillar(CelFrame& frame, int x, int y, const std::vector<int16_t>& pillar, std::vector<Image>& tilesetCel, TilesetImagePart part);
     static void drawMinTile(CelFrame& frame, std::vector<Image>& tilesetCel, int x, int y, int16_t leftImageIndex, int16_t rightImageIndex);
 
-    std::vector<CelFrame> loadTilesetImage(const std::string& celPath, const std::string& minPath, bool top)
+    std::vector<CelFrame> loadTilesetImage(const std::string& celPath, const std::string& minPath, TilesetImagePart part)
     {
         CelFile tilesetCelDecoder(celPath);
         std::vector<Image> tilesetCel = tilesetCelDecoder.decode();
@@ -19,14 +19,14 @@ namespace Cel
         for (size_t i = 0; i < min.size() - 1; i++)
         {
             CelFrame frame(64, 256);
-            drawMinPillar(frame, 0, 0, min[i], tilesetCel, top);
+            drawMinPillar(frame, 0, 0, min[i], tilesetCel, part);
             retval.emplace_back(std::move(frame));
         }
 
         return retval;
     }
 
-    static void drawMinPillar(CelFrame& frame, int x, int y, const std::vector<int16_t>& pillar, std::vector<Image>& tilesetCel, bool top)
+    static void drawMinPillar(CelFrame& frame, int x, int y, const std::vector<int16_t>& pillar, std::vector<Image>& tilesetCel, TilesetImagePart part)
     {
         // compensate for maps using 5-row min files
         if (pillar.size() == 10)
@@ -34,16 +34,20 @@ namespace Cel
 
         int32_t i, limit;
 
-        if (top)
+        switch (part)
         {
-            i = 0;
-            limit = int32_t(pillar.size()) - 2;
-        }
-        else
-        {
-            i = int32_t(pillar.size()) - 2;
-            limit = int32_t(pillar.size());
-            y += i * 16;
+            case TilesetImagePart::Top:
+                i = 0;
+                limit = int32_t(pillar.size()) - 2;
+                break;
+            case TilesetImagePart::Bottom:
+                i = int32_t(pillar.size()) - 2;
+                limit = int32_t(pillar.size());
+                y += i * 16;
+                break;
+            case TilesetImagePart::Whole:
+                i = 0;
+                limit = int32_t(pillar.size());
         }
 
         // Each iteration draw one row of the min

@@ -676,7 +676,7 @@ namespace FARender
                 std::vector<std::string> tilesetComponents = Misc::StringUtils::split(definition.path, '/');
                 release_assert(tilesetComponents.size() == 3);
 
-                bool top = tilesetComponents[1] == "top";
+                Cel::TilesetImagePart imagePart = tilesetComponents[1] == "top" ? Cel::TilesetImagePart::Top : Cel::TilesetImagePart::Bottom;
                 int32_t i = std::stoi(tilesetComponents[2]);
 
                 std::string celPath = fmt::format("levels/l{}data/l{}.cel", i, i);
@@ -688,7 +688,7 @@ namespace FARender
                     minPath = "levels/towndata/town.min";
                 }
 
-                finalImages = Cel::loadTilesetImage(celPath, minPath, top);
+                finalImages = Cel::loadTilesetImage(celPath, minPath, imagePart);
             }
             else if (vAnim != 0)
             {
