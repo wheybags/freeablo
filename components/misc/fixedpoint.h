@@ -18,6 +18,9 @@ public:
 
     constexpr FixedPoint(const char* input)
     {
+        if (!input)
+            throw std::runtime_error("null ptr");
+
         class Helpers
         {
         public:
@@ -214,6 +217,8 @@ public:
     static FixedPoint atan2_degrees(FixedPoint y, FixedPoint x);
     static FixedPoint sin_degrees(FixedPoint deg);
     static FixedPoint cos_degrees(FixedPoint deg);
+    static int64_t floor(FixedPoint f) { return f.floor(); }
+    static int32_t floor32(FixedPoint f) { return int32_t(f.floor()); }
 
     static FixedPoint invalid() { return FixedPoint::fromRawValue(std::numeric_limits<uint64_t>::max()); }
     bool isInvalid() const { return *this == invalid(); }

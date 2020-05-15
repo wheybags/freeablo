@@ -117,6 +117,29 @@ namespace FAWorld
 
         for (auto& p : mItemMap->mItems)
             p.second.update();
+
+        for (const Level::LevelTransitionArea& transition : {upStairsArea(), downStairsArea()})
+        {
+            for (int32_t y = transition.offset.y; y < transition.offset.y + transition.dimensions.h; y++)
+            {
+                for (int32_t x = transition.offset.x; x < transition.offset.x + transition.dimensions.w; x++)
+                {
+                    Render::Color highlightColor = Render::Colors::green;
+
+                    if (transition.triggerMask.get(x - transition.offset.x, y - transition.offset.y))
+                        highlightColor = Render::Colors::red;
+
+                    highlightColor.a = 0.1;
+                    FARender::Renderer::get()->mTmpDebugRenderData.push_back(TileData{{x, y}, highlightColor});
+                }
+            }
+
+            Vec2Fix centre = Vec2Fix(transition.offset + transition.playerSpawnOffset) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+            FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{centre, Render::Colors::red, 2});
+
+            centre = Vec2Fix(transition.offset + transition.exitOffset) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+            FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{centre, Render::Colors::green, 2});
+        }
     }
 
     void GameLevel::insertActor(Actor* actor)

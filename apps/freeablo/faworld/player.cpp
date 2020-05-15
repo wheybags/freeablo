@@ -608,13 +608,7 @@ namespace FAWorld
 
     void Player::moveToLevel(GameLevel* level, bool placeAtUpStairs)
     {
-        Level::LevelTransitionArea targetArea;
-
-        if (placeAtUpStairs)
-            targetArea = level->upStairsArea();
-        else
-            targetArea = level->downStairsArea();
-
+        const Level::LevelTransitionArea& targetArea = placeAtUpStairs ? level->upStairsArea() : level->downStairsArea();
         Vec2i targetPoint = level->getFreeSpotNear(targetArea.offset + targetArea.playerSpawnOffset, std::numeric_limits<int32_t>::max());
         teleport(level, Position(targetPoint));
     }

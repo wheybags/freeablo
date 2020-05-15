@@ -206,6 +206,20 @@ namespace Level
 
     int32_t MinPillar::index() const { return mIndex; }
 
+    LevelTransitionArea::LevelTransitionArea(const LevelTransitionArea& other)
+    {
+        this->offset = other.offset;
+        this->dimensions = other.dimensions;
+        this->playerSpawnOffset = other.playerSpawnOffset;
+        this->exitOffset = other.exitOffset;
+        other.triggerMask.memcpyTo(this->triggerMask);
+    }
+
+    LevelTransitionArea::LevelTransitionArea(Vec2i offset, IntRange dimensions, Vec2i playerSpawnOffset, Vec2i exitOffset)
+        : offset(offset), dimensions(dimensions), playerSpawnOffset(playerSpawnOffset), exitOffset(exitOffset), triggerMask(dimensions.w, dimensions.h)
+    {
+    }
+
     void LevelTransitionArea::save(Serial::Saver& saver) const
     {
         offset.save(saver);

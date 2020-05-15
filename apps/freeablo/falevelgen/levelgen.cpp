@@ -580,7 +580,7 @@ namespace FALevelGen
 
     bool placeUpStairs(Level::Dun& level, const TileSet& tileset, const std::vector<Room>& rooms)
     {
-        if (tileset.upStairsOnWall)
+        if (tileset.upStairsData.onWall)
         {
             for (int32_t i = 0; i < (int32_t)rooms.size(); i++)
             {
@@ -631,7 +631,7 @@ namespace FALevelGen
 
     bool placeDownStairs(Level::Dun& level, const TileSet& tileset, const std::vector<Room>& rooms)
     {
-        if (tileset.downStairsOnWall)
+        if (tileset.downStairsData.onWall)
         {
             for (int32_t i = 0; i < (int32_t)rooms.size(); i++)
             {
@@ -1104,24 +1104,24 @@ namespace FALevelGen
                 level.get(x, y) = tileset.getRandomTile(rng, level.get(x, y));
         }
 
-        // Misc::Array2D<int32_t> upStairsDunIndexes(3, 3, &tileset.upStairs1, PointerDataType::NonOwningReference);
-        // Misc::Array2D<int32_t> downStairsDunIndexes(3, 3, &tileset.downStairs1, PointerDataType::NonOwningReference);
-
-        auto setupTransitionArea = [&level](Vec2i stairsDunPosition, const Level::Dun& areaDunIndexes) {
-            Vec2i transitionDunSize(areaDunIndexes.width(), areaDunIndexes.height());
+        auto setupTransitionArea = [&level](Vec2i stairsDunPosition, const StairsData& stairsData) {
+            Vec2i transitionDunSize(stairsData.tiles.width(), stairsData.tiles.height());
 
             // transitionArea holds positions in the "min tile" space, not dun tiles, hence the * 2
             Level::LevelTransitionArea transitionArea;
             transitionArea.offset = (stairsDunPosition - transitionDunSize / 2) * 2;
             transitionArea.dimensions = transitionDunSize * 2;
+            transitionArea.playerSpawnOffset = stairsData.spawnOffset;
+            transitionArea.exitOffset = stairsData.exitOffset;
+            stairsData.triggerMask.memcpyTo(transitionArea.triggerMask);
 
-            for (int32_t dataY = 0; dataY < areaDunIndexes.height(); dataY++)
+            for (int32_t dataY = 0; dataY < stairsData.tiles.height(); dataY++)
             {
-                for (int32_t dataX = 0; dataX < areaDunIndexes.width(); dataX++)
+                for (int32_t dataX = 0; dataX < stairsData.tiles.width(); dataX++)
                 {
-                    int32_t mapX = stairsDunPosition.x - areaDunIndexes.width() / 2 + dataX;
-                    int32_t mapY = stairsDunPosition.y - areaDunIndexes.height() / 2 + dataY;
-                    level.get(mapX, mapY) = areaDunIndexes.get(dataX, dataY);
+                    int32_t mapX = stairsDunPosition.x - stairsData.tiles.width() / 2 + dataX;
+                    int32_t mapY = stairsDunPosition.y - stairsData.tiles.height() / 2 + dataY;
+                    level.get(mapX, mapY) = stairsData.tiles.get(dataX, dataY);
                 }
             }
 
@@ -1129,10 +1129,7 @@ namespace FALevelGen
         };
 
         Level::LevelTransitionArea upStairsArea = setupTransitionArea(upStairsPoint, tileset.upStairsData);
-        upStairsArea.playerSpawnOffset = {tileset.upStairsXOffset, tileset.upStairsYOffset};
-
         Level::LevelTransitionArea downStairsArea = setupTransitionArea(downStairsPoint, tileset.downStairsData);
-        downStairsArea.playerSpawnOffset = {tileset.downStairsXOffset, tileset.downStairsYOffset};
 
         // Map from tileset frame number to special cel frame number.
         // Special cel images are mostly used for arches / open doors.

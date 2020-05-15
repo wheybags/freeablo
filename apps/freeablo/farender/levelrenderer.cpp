@@ -385,6 +385,18 @@ namespace FARender
                                               int32_t(rectData.w * tileWidth),
                                               int32_t(rectData.h * tileHeight));
             }
+            if (std::holds_alternative<TileData>(item))
+            {
+                const TileData& tileData = std::get<TileData>(item);
+
+                Vec2f quad[4];
+                quad[0] = tileTopPoint(Vec2f(tileData.worldPosition)) + Vec2f(toScreen);
+                quad[1] = quad[0] + Vec2f(tileWidth / 2, tileHeight / 2);
+                quad[2] = quad[0] + Vec2f(0, tileHeight);
+                quad[3] = quad[0] + Vec2f(-tileWidth / 2, tileHeight / 2);
+
+                mDebugRenderer->drawQuad(*Render::mainCommandQueue, levelDrawFramebuffer.get(), tileData.color, quad);
+            }
             if (std::holds_alternative<PointData>(item))
             {
                 const PointData& pointData = std::get<PointData>(item);

@@ -12,6 +12,11 @@ namespace Random
     class Rng;
 }
 
+namespace tinyxml2
+{
+    class XMLDocument;
+}
+
 namespace FALevelGen
 {
     enum class TileSetEnum : int32_t
@@ -70,6 +75,19 @@ namespace FALevelGen
         downStairs
     };
 
+    class StairsData
+    {
+    public:
+        StairsData() = default;
+        StairsData(const tinyxml2::XMLDocument& tmxXml);
+
+        Level::Dun tiles;
+        Misc::Array2D<uint8_t> triggerMask;
+        Vec2i spawnOffset;
+        Vec2i exitOffset;
+        bool onWall = false;
+    };
+
     class TileSet
     {
     public:
@@ -105,15 +123,8 @@ namespace FALevelGen
         int32_t xDoor = 0;
         int32_t yDoor = 0;
 
-        Level::Dun upStairsData;
-        bool upStairsOnWall = false;
-        int32_t upStairsXOffset = 0;
-        int32_t upStairsYOffset = 0;
-
-        bool downStairsOnWall = false;
-        Level::Dun downStairsData;
-        int32_t downStairsXOffset = 0;
-        int32_t downStairsYOffset = 0;
+        StairsData upStairsData;
+        StairsData downStairsData;
 
         int32_t insideXWall = 0;
         int32_t insideXWallEnd = 0;

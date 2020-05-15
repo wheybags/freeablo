@@ -55,6 +55,34 @@ namespace Render
         commandQueue.cmdDraw(0, sizeof(vertices) / sizeof(*vertices), bindings);
     }
 
+    void DebugRenderer::drawQuad(CommandQueue& commandQueue, Framebuffer* nonDefaultFramebuffer, const Color& color, Vec2f* quad)
+    {
+        float screenW = float(WIDTH);
+        float screenH = float(HEIGHT);
+
+        // clang-format off
+        DebugVertex a = {{quad[0].x / screenW, quad[0].y / screenH}, {color.r, color.g, color.b, color.a}};
+        DebugVertex b = {{quad[1].x / screenW, quad[1].y / screenH}, {color.r, color.g, color.b, color.a}};
+        DebugVertex c = {{quad[2].x / screenW, quad[2].y / screenH}, {color.r, color.g, color.b, color.a}};
+        DebugVertex d = {{quad[3].x / screenW, quad[3].y / screenH}, {color.r, color.g, color.b, color.a}};
+
+        DebugVertex vertices[]
+        {
+            a, b, c,
+            c, d, a
+        };
+        // clang-format on
+
+        mVao->getVertexBuffer(0)->setData(vertices, sizeof(vertices));
+
+        Bindings bindings;
+        bindings.pipeline = mPipeline.get();
+        bindings.vao = mVao.get();
+        bindings.nonDefaultFramebuffer = nonDefaultFramebuffer;
+
+        commandQueue.cmdDraw(0, sizeof(vertices) / sizeof(*vertices), bindings);
+    }
+
     void DebugRenderer::drawLine(CommandQueue& commandQueue, Framebuffer* nonDefaultFramebuffer, const Color& color, Vec2f a, Vec2f b, float thickness)
     {
         float screenW = float(WIDTH);

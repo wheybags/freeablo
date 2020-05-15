@@ -38,14 +38,21 @@ namespace Level
 
     struct LevelTransitionArea
     {
-        Vec2i offset = Vec2i::invalid();
-        IntRange dimensions;
-        Vec2i playerSpawnOffset; // relative to overall offset
+        LevelTransitionArea() = default;
+        LevelTransitionArea(LevelTransitionArea&&) = default;
+        LevelTransitionArea(const LevelTransitionArea& other);
+        LevelTransitionArea(Vec2i offset, IntRange dimensions, Vec2i playerSpawnOffset, Vec2i exitOffset);
 
         void save(Serial::Saver& saver) const;
         void load(Serial::Loader& loader);
 
         bool pointIsInside(Vec2i point) const;
+
+        Vec2i offset = Vec2i::invalid();
+        IntRange dimensions;
+        Vec2i playerSpawnOffset; // relative to overall offset
+        Vec2i exitOffset;
+        Misc::Array2D<uint8_t> triggerMask; // true for tiles which trigger level change, false otherwise
     };
 
     class Level

@@ -1,6 +1,7 @@
 #include "misc.h"
 #include <iostream>
 #include <misc/assert.h>
+#include <tinyxml2.h>
 
 #ifndef _WIN32
 #include <sstream>
@@ -86,4 +87,19 @@ namespace Misc
     }
 
     void saveArgv0(const char* _argv0) { argv0 = _argv0; }
+}
+
+const tinyxml2::XMLElement*
+getFirstChildWithTypeAndAttribute(const tinyxml2::XMLElement* parent, const std::string& type, const std::string& attrName, const std::string& attrVal)
+{
+    const tinyxml2::XMLElement* current = parent->FirstChildElement(type.c_str());
+    while (current)
+    {
+        if (std::string(current->Attribute(attrName.c_str())) == attrVal)
+            return current;
+
+        current = current->NextSiblingElement(type.c_str());
+    }
+
+    return nullptr;
 }

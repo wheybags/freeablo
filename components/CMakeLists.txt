@@ -26,7 +26,7 @@ add_library(Levels
     level/sol.h
     level/baseitemmanager.h
     level/baseproperty.h)
-target_link_libraries(Levels FAIO DiabloExe Serial)
+target_link_libraries(Levels FAIO DiabloExe Serial tinyxml2)
 set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Misc
@@ -58,7 +58,7 @@ add_library(Misc
     misc/averager.cpp
     misc/averager.h
 )
-target_link_libraries(Misc PUBLIC Settings png SDL2 Serial Filesystem)
+target_link_libraries(Misc PUBLIC Settings png SDL2 Serial Filesystem tinyxml2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 

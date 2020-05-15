@@ -29,8 +29,6 @@ void dumpTiles(filesystem::path tilesetDir)
         constexpr auto staticObjectHeight = 256;
 
         std::vector<Image> tilImages;
-        tilImages.emplace_back(tileWidth * 2, staticObjectHeight + tileHeight); // add in an empty tile as zero
-
         for (size_t i = 0; i < til.size(); i++)
         {
             Image image(tileWidth * 2, staticObjectHeight + tileHeight);
@@ -69,7 +67,7 @@ void dumpTiles(filesystem::path tilesetDir)
                 std::string filename;
                 {
                     std::ostringstream ss;
-                    ss << std::setfill('0') << std::setw(4) << frame;
+                    ss << std::setfill('0') << std::setw(4) << (frame + 1);
                     filename = (ss.str() + ".png");
                 }
 

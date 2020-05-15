@@ -23,5 +23,6 @@ add_subdirectory(SDL_image)
 add_subdirectory(StormLib)
 add_subdirectory(gtest)
 add_subdirectory(glad)
+add_subdirectory(tinyxml2)
 
 unset(MESSAGE_QUIET)

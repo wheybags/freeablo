@@ -155,6 +155,11 @@ namespace Misc
             s.erase(std::find_if(s.rbegin(), s.rend(), [chars](int ch) { return chars.find(ch) == std::string::npos; }).base(), s.end());
         }
 
+        static void lstrip(std::string& s, const std::string chars = " \t\n\v\f\r")
+        {
+            s.erase(s.begin(), std::find_if(s.begin(), s.end(), [chars](int ch) { return chars.find(ch) == std::string::npos; }));
+        }
+
         static std::string readAsString(const std::string& path)
         {
             FAIO::FAFileObject f(path);
@@ -180,6 +185,18 @@ namespace Misc
             std::string extension = std::string(path.substr(i + 1, path.length() - i));
             std::transform(extension.begin(), extension.end(), extension.begin(), [](char c) { return std::tolower(c); });
             return extension;
+        }
+
+        static std::string getFileNameNoExtension(std::string_view filename)
+        {
+            size_t i;
+            for (i = filename.length() - 1; i > 0; i--)
+            {
+                if (filename[i] == '.')
+                    break;
+            }
+
+            return std::string(filename.substr(0, i));
         }
     };
 }
