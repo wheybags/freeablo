@@ -17,18 +17,40 @@ Image::Image(int32_t x, int32_t y) : mData(x, y, Misc::Array2D<ByteColour>::Init
     memset(dataPtr, 0, x * y * sizeof(ByteColour));
 }
 
-void Image::blitTo(Image& other, int32_t srcOffsetX, int32_t srcOffsetY, int32_t srcW, int32_t srcH, int32_t destOffsetX, int32_t destOffsetY) const
+void Image::blitTo(Image& other,
+                   int32_t srcOffsetX,
+                   int32_t srcOffsetY,
+                   int32_t srcW,
+                   int32_t srcH,
+                   int32_t destOffsetX,
+                   int32_t destOffsetY,
+                   bool overwriteWithTransparent) const
 {
     release_assert(destOffsetX >= 0 && destOffsetY >= 0);
     release_assert(destOffsetX + srcW <= other.width() && destOffsetY + srcH <= other.height());
     release_assert(srcOffsetX + srcW <= this->width() && srcOffsetY + srcH <= this->height());
 
-    for (int32_t y = 0; y < srcH; y++)
+    if (overwriteWithTransparent)
     {
-        const ByteColour* src = &this->get(srcOffsetX, y + srcOffsetY);
-        ByteColour* dest = &other.get(destOffsetX, y + destOffsetY);
+        for (int32_t y = 0; y < srcH; y++)
+        {
+            const ByteColour* src = &this->get(srcOffsetX, y + srcOffsetY);
+            ByteColour* dest = &other.get(destOffsetX, y + destOffsetY);
 
-        memcpy(dest, src, sizeof(ByteColour) * srcW);
+            memcpy(dest, src, sizeof(ByteColour) * srcW);
+        }
+    }
+    else
+    {
+        for (int32_t y = 0; y < srcH; y++)
+        {
+            for (int32_t x = 0; x < srcW; x++)
+            {
+                const ByteColour& sourcePixel = this->get(srcOffsetX + x, srcOffsetY + y);
+                if (sourcePixel.a)
+                    other.get(destOffsetX + x, destOffsetY + y) = sourcePixel;
+            }
+        }
     }
 }
 
@@ -151,7 +173,7 @@ void Image::saveToGif(std::vector<Image> images, const std::string& path)
         if (image.width() != width || image.height() != height)
         {
             tmp = Image(width, height);
-            image.blitTo(tmp, 0, 0, std::min(width, image.width()), std::min(height, image.height()), 0, 0);
+            image.blitTo(tmp, 0, 0, std::min(width, image.width()), std::min(height, image.height()), 0, 0, true);
             useImage = &tmp;
         }
 
