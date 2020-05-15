@@ -29,6 +29,8 @@ void dumpTiles(filesystem::path tilesetDir)
         constexpr auto staticObjectHeight = 256;
 
         std::vector<Image> tilImages;
+        tilImages.emplace_back(tileWidth * 2, staticObjectHeight + tileHeight); // add in an empty tile as zero
+
         for (size_t i = 0; i < til.size(); i++)
         {
             Image image(tileWidth * 2, staticObjectHeight + tileHeight);
@@ -45,26 +47,50 @@ void dumpTiles(filesystem::path tilesetDir)
             tilImages.emplace_back(std::move(image));
         }
 
-        // save til tiles
+        // save til tiles + Tiled editor tileset file
         {
-            filesystem::path levelOutputDir = tilesetDir / "min_tiles" / std::to_string(tilesetLevel);
+            filesystem::path levelOutputDir = tilesetDir / "til_tiles" / std::to_string(tilesetLevel);
 
             if (levelOutputDir.exists())
                 filesystem::remove_all(levelOutputDir);
             filesystem::create_directories(levelOutputDir);
 
+            FILE* tsxFile = fopen((levelOutputDir / ("diablo_l" + std::to_string(tilesetLevel) + "_tileset.tsx")).str().c_str(), "wb");
+
+            std::string tsxHeader =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                "<tileset version=\"1.2\" tiledversion=\"1.3.4\" name=\"diablo_l{}\" tilewidth=\"128\" tileheight=\"288\" tilecount=\"{}\" columns=\"0\">\n"
+                " <grid orientation=\"isometric\" width=\"128\" height=\"64\"/>\n";
+            tsxHeader = fmt::format(tsxHeader, tilesetLevel, tilImages.size());
+            fputs(tsxHeader.c_str(), tsxFile);
+
             for (size_t frame = 0; frame < tilImages.size(); frame++)
             {
-                std::ostringstream ss;
-                ss << std::setfill('0') << std::setw(4) << (frame + 1);
-                Image::saveToPng(tilImages[frame], (levelOutputDir / (ss.str() + ".png")).str());
+                std::string filename;
+                {
+                    std::ostringstream ss;
+                    ss << std::setfill('0') << std::setw(4) << frame;
+                    filename = (ss.str() + ".png");
+                }
+
+                std::string tsxLine = " <tile id=\"{}\">\n"
+                                      "  <image width=\"128\" height=\"288\" source=\"./{}\"/>\n"
+                                      " </tile>\n";
+                tsxLine = fmt::format(tsxLine, frame, filename);
+                fputs(tsxLine.c_str(), tsxFile);
+
+                Image::saveToPng(tilImages[frame], (levelOutputDir / filename).str());
             }
+
+            fputs("</tileset>\n", tsxFile);
+
+            fclose(tsxFile);
         }
 
         // save min tiles
         {
             std::vector<Image> images = Cel::loadTilesetImage(celPath, minPath, Cel::TilesetImagePart::Whole);
-            filesystem::path levelOutputDir = tilesetDir / "til_tiles" / std::to_string(tilesetLevel);
+            filesystem::path levelOutputDir = tilesetDir / "min_tiles" / std::to_string(tilesetLevel);
 
             if (levelOutputDir.exists())
                 filesystem::remove_all(levelOutputDir);
