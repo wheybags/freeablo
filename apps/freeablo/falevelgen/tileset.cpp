@@ -40,6 +40,9 @@ namespace FALevelGen
 
         const tinyxml2::XMLElement* exitNode = getFirstChildWithTypeAndAttribute(spawnPointsLayer, "object", "name", "exit");
         exitOffset = Vec2i(tmxObjectPosToTile(exitNode));
+
+        const tinyxml2::XMLElement* propertiesElement = mapElement->FirstChildElement("properties");
+        onWall = getFirstChildWithTypeAndAttribute(propertiesElement, "property", "name", "onWall")->BoolAttribute("value");
     }
 
     TileSet::TileSet(const std::string& _path)
@@ -53,13 +56,13 @@ namespace FALevelGen
         std::string baseName = Misc::StringUtils::getFileNameNoExtension(path.filename());
 
         filesystem::path upStairsPath = basePath / (baseName + "_stairs_up.tmx");
+        filesystem::path downStairsPath = basePath / (baseName + "_stairs_down.tmx");
 
         if (upStairsPath.exists())
         {
             tinyxml2::XMLDocument upStairsDoc;
             upStairsDoc.LoadFile(upStairsPath.str().c_str());
             upStairsData = StairsData(upStairsDoc);
-            upStairsData.onWall = settings.get<bool>("Basic", "upStairsOnWall");
         }
         else
         {
@@ -81,23 +84,31 @@ namespace FALevelGen
             upStairsData.tiles.get(2, 2) = settings.get<int32_t>("Basic", "upStairs9");
         }
 
-        // downStairsData = Level::Dun(3, 3);
-        downStairsData.tiles = Level::Dun(3, 3);
-        downStairsData.triggerMask = {6, 6};
-        downStairsData.tiles.get(0, 0) = settings.get<int32_t>("Basic", "downStairs1");
-        downStairsData.tiles.get(1, 0) = settings.get<int32_t>("Basic", "downStairs2");
-        downStairsData.tiles.get(2, 0) = settings.get<int32_t>("Basic", "downStairs3");
+        if (downStairsPath.exists())
+        {
+            tinyxml2::XMLDocument downStairsDoc;
+            downStairsDoc.LoadFile(downStairsPath.str().c_str());
+            downStairsData = StairsData(downStairsDoc);
+        }
+        else
+        {
+            downStairsData.tiles = Level::Dun(3, 3);
+            downStairsData.triggerMask = {6, 6};
+            downStairsData.tiles.get(0, 0) = settings.get<int32_t>("Basic", "downStairs1");
+            downStairsData.tiles.get(1, 0) = settings.get<int32_t>("Basic", "downStairs2");
+            downStairsData.tiles.get(2, 0) = settings.get<int32_t>("Basic", "downStairs3");
 
-        downStairsData.tiles.get(0, 1) = settings.get<int32_t>("Basic", "downStairs4");
-        downStairsData.tiles.get(1, 1) = settings.get<int32_t>("Basic", "downStairs5");
-        downStairsData.tiles.get(2, 1) = settings.get<int32_t>("Basic", "downStairs6");
+            downStairsData.tiles.get(0, 1) = settings.get<int32_t>("Basic", "downStairs4");
+            downStairsData.tiles.get(1, 1) = settings.get<int32_t>("Basic", "downStairs5");
+            downStairsData.tiles.get(2, 1) = settings.get<int32_t>("Basic", "downStairs6");
 
-        downStairsData.tiles.get(0, 2) = settings.get<int32_t>("Basic", "downStairs7");
-        downStairsData.tiles.get(1, 2) = settings.get<int32_t>("Basic", "downStairs8");
-        downStairsData.tiles.get(2, 2) = settings.get<int32_t>("Basic", "downStairs9");
+            downStairsData.tiles.get(0, 2) = settings.get<int32_t>("Basic", "downStairs7");
+            downStairsData.tiles.get(1, 2) = settings.get<int32_t>("Basic", "downStairs8");
+            downStairsData.tiles.get(2, 2) = settings.get<int32_t>("Basic", "downStairs9");
 
-        downStairsData.onWall = settings.get<bool>("Basic", "downStairsOnWall");
-        downStairsData.spawnOffset = {settings.get<int32_t>("Basic", "downStairsXOffset"), settings.get<int32_t>("Basic", "downStairsYOffset")};
+            downStairsData.onWall = settings.get<bool>("Basic", "downStairsOnWall");
+            downStairsData.spawnOffset = {settings.get<int32_t>("Basic", "downStairsXOffset"), settings.get<int32_t>("Basic", "downStairsYOffset")};
+        }
 
         xWall = settings.get<int32_t>("Basic", "xWall");
         fillTile(xWall, settings, "XWall");

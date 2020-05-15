@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.3.4" orientation="isometric" renderorder="right-down" width="2" height="2" tilewidth="128" tileheight="64" infinite="0" nextlayerid="4" nextobjectid="11">
+ <properties>
+  <property name="onWall" type="bool" value="false"/>
+ </properties>
+ <tileset firstgid="1" source="../../../diablo_data_files/tileset_images/til_tiles/2/diablo_l2_tileset.tsx"/>
+ <layer id="1" name="tiles" width="2" height="2">
+  <data encoding="csv">
+48,71,
+50,78
+</data>
+ </layer>
+ <objectgroup id="2" name="triggerMask">
+  <object id="1" x="55.1421" y="54.0646">
+   <point/>
+  </object>
+  <object id="2" x="80.7492" y="81.6978">
+   <point/>
+  </object>
+  <object id="3" x="71.394" y="57.8089">
+   <point/>
+  </object>
+  <object id="4" x="76.2647" y="121.797">
+   <point/>
+  </object>
+  <object id="5" x="58.3109" y="78.0014">
+   <point/>
+  </object>
+  <object id="8" x="116.725" y="118.06">
+   <point/>
+  </object>
+  <object id="9" x="119.981" y="72.5825">
+   <point/>
+  </object>
+  <object id="10" x="118.994" y="53.4445">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="3" name="spawnPoints" visible="0">
+  <object id="6" name="exit" x="82.2289" y="119.715">
+   <point/>
+  </object>
+  <object id="7" name="enter" x="11.5295" y="119.147">
+   <point/>
+  </object>
+ </objectgroup>
+</map>
