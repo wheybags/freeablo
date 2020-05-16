@@ -41,13 +41,14 @@ namespace Level
         LevelTransitionArea() = default;
         LevelTransitionArea(LevelTransitionArea&&) = default;
         LevelTransitionArea(const LevelTransitionArea& other);
-        LevelTransitionArea(Vec2i offset, IntRange dimensions, Vec2i playerSpawnOffset, Vec2i exitOffset);
+        LevelTransitionArea(int32_t targetLevelIndex, Vec2i offset, IntRange dimensions, Vec2i playerSpawnOffset, Vec2i exitOffset);
 
         void save(Serial::Saver& saver) const;
         void load(Serial::Loader& loader);
 
         bool pointIsInside(Vec2i point) const;
 
+        int32_t targetLevelIndex = -1;
         Vec2i offset = Vec2i::invalid();
         IntRange dimensions;
         Vec2i playerSpawnOffset; // relative to overall offset
@@ -68,9 +69,7 @@ namespace Level
               const std::map<int32_t, int32_t>& specialCelMap,
               const LevelTransitionArea& upStairs,
               const LevelTransitionArea& downStairs,
-              std::map<int32_t, int32_t> doorMap,
-              int32_t previous,
-              int32_t next);
+              std::map<int32_t, int32_t> doorMap);
 
         explicit Level(Serial::Loader& loader);
         Level() = default;
@@ -91,8 +90,8 @@ namespace Level
         int32_t getTilesetId() const { return mTilesetId; }
         const std::map<int32_t, int32_t>& getSpecialCelMap() const { return mSpecialCelMap; }
 
-        int32_t getNextLevel() const { return mNext; }
-        int32_t getPreviousLevel() const { return mPrevious; }
+        int32_t getNextLevel() const { return mDownStairs.targetLevelIndex; }
+        int32_t getPreviousLevel() const { return mUpStairs.targetLevelIndex; }
 
     private:
         struct InternalLocationData
@@ -124,8 +123,5 @@ namespace Level
         LevelTransitionArea mDownStairs;
 
         static std::vector<int16_t> mEmpty;
-
-        int32_t mPrevious = 0; ///< index of previous level
-        int32_t mNext = 0;     ///< index of next level
     };
 }

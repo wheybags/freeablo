@@ -44,6 +44,7 @@ namespace FAWorld
         virtual DamageType getMeleeDamageType() const override;
 
     private:
+        void handleTargetingLevelTransitions();
         bool canTalkTo(Actor* actor);
         void onEnemyKilled(Actor* enemy) override;
         void addExperience(Actor& enemy);

@@ -199,11 +199,9 @@ namespace FAWorld
                                    "levels/towndata/town.cel",
                                    "levels/towndata/towns.cel",
                                    specialCelMap,
-                                   Level::LevelTransitionArea{{25, 29}, {1, 1}, {0, 1}, {0, 0}},
-                                   Level::LevelTransitionArea{{75, 68}, {0, 0}, {0, 0}, {0, 0}},
-                                   std::map<int32_t, int32_t>(),
-                                   static_cast<int32_t>(-1),
-                                   1);
+                                   Level::LevelTransitionArea{-1, {75, 68}, {0, 0}, {0, 0}, {0, 0}},
+                                   Level::LevelTransitionArea{1, {25, 29}, {1, 1}, {0, 1}, {0, 0}},
+                                   std::map<int32_t, int32_t>());
 
         auto townLevel = new GameLevel(*this, std::move(townLevelBase), 0);
         mLevels[0] = townLevel;

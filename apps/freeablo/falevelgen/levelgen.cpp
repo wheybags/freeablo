@@ -1129,7 +1129,9 @@ namespace FALevelGen
         };
 
         Level::LevelTransitionArea upStairsArea = setupTransitionArea(upStairsPoint, tileset.upStairsData);
+        upStairsArea.targetLevelIndex = previous;
         Level::LevelTransitionArea downStairsArea = setupTransitionArea(downStairsPoint, tileset.downStairsData);
+        downStairsArea.targetLevelIndex = next;
 
         // Map from tileset frame number to special cel frame number.
         // Special cel images are mostly used for arches / open doors.
@@ -1194,19 +1196,8 @@ namespace FALevelGen
         ss << "levels/l" << levelNum << "data/l" << levelNum << ".sol";
         std::string solPath = ss.str();
 
-        Level::Level levelBase(std::move(level),
-                               levelNum,
-                               tilPath,
-                               minPath,
-                               solPath,
-                               celPath,
-                               specialCelPath,
-                               specialCelMap,
-                               downStairsArea,
-                               upStairsArea,
-                               tileset.getDoorMap(),
-                               previous,
-                               next);
+        Level::Level levelBase(
+            std::move(level), levelNum, tilPath, minPath, solPath, celPath, specialCelPath, specialCelMap, upStairsArea, downStairsArea, tileset.getDoorMap());
         auto retval = new FAWorld::GameLevel(world, std::move(levelBase), dLvl);
 
         placeMonsters(rng, *retval, exe, dLvl);

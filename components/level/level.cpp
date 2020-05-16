@@ -12,14 +12,12 @@ namespace Level
                  const std::string& tileSetPath,
                  const std::string& specialCelPath,
                  const std::map<int32_t, int32_t>& specialCelMap,
-                 const LevelTransitionArea& downStairs,
                  const LevelTransitionArea& upStairs,
-                 std::map<int32_t, int32_t> doorMap,
-                 int32_t previous,
-                 int32_t next)
+                 const LevelTransitionArea& downStairs,
+                 std::map<int32_t, int32_t> doorMap)
         : mTilesetId(tilesetId), mTilesetCelPath(tileSetPath), mSpecialCelPath(specialCelPath), mSpecialCelMap(specialCelMap), mTilPath(tilPath),
           mMinPath(minPath), mSolPath(solPath), mDun(std::move(dun)), mTil(mTilPath), mMin(mMinPath), mSol(mSolPath), mDoorMap(doorMap), mUpStairs(upStairs),
-          mDownStairs(downStairs), mPrevious(previous), mNext(next)
+          mDownStairs(downStairs)
     {
     }
 
@@ -44,9 +42,6 @@ namespace Level
 
         mUpStairs.load(loader);
         mDownStairs.load(loader);
-
-        mPrevious = loader.load<int32_t>();
-        mNext = loader.load<int32_t>();
     }
 
     void Level::save(Serial::Saver& saver) const
@@ -80,9 +75,6 @@ namespace Level
 
         mUpStairs.save(saver);
         mDownStairs.save(saver);
-
-        saver.save(mPrevious);
-        saver.save(mNext);
     }
 
     std::vector<int16_t> Level::mEmpty(16);
@@ -208,6 +200,7 @@ namespace Level
 
     LevelTransitionArea::LevelTransitionArea(const LevelTransitionArea& other)
     {
+        this->targetLevelIndex = other.targetLevelIndex;
         this->offset = other.offset;
         this->dimensions = other.dimensions;
         this->playerSpawnOffset = other.playerSpawnOffset;
@@ -215,23 +208,46 @@ namespace Level
         other.triggerMask.memcpyTo(this->triggerMask);
     }
 
-    LevelTransitionArea::LevelTransitionArea(Vec2i offset, IntRange dimensions, Vec2i playerSpawnOffset, Vec2i exitOffset)
-        : offset(offset), dimensions(dimensions), playerSpawnOffset(playerSpawnOffset), exitOffset(exitOffset), triggerMask(dimensions.w, dimensions.h)
+    LevelTransitionArea::LevelTransitionArea(int32_t targetLevelIndex, Vec2i offset, IntRange dimensions, Vec2i playerSpawnOffset, Vec2i exitOffset)
+        : targetLevelIndex(targetLevelIndex), offset(offset), dimensions(dimensions), playerSpawnOffset(playerSpawnOffset), exitOffset(exitOffset),
+          triggerMask(dimensions.w, dimensions.h)
     {
     }
 
     void LevelTransitionArea::save(Serial::Saver& saver) const
     {
+        saver.save(targetLevelIndex);
         offset.save(saver);
         dimensions.save(saver);
         playerSpawnOffset.save(saver);
+        exitOffset.save(saver);
+
+        int32_t size = triggerMask.width() * triggerMask.height();
+        saver.save(size);
+        for (bool val : triggerMask)
+            saver.save(val);
+        saver.save(triggerMask.width());
+        saver.save(triggerMask.height());
     }
 
     void LevelTransitionArea::load(Serial::Loader& loader)
     {
+        targetLevelIndex = loader.load<int32_t>();
         offset = Vec2i(loader);
         dimensions = IntRange(loader);
         playerSpawnOffset = Vec2i(loader);
+        exitOffset = Vec2i(loader);
+
+        int32_t size = loader.load<int32_t>();
+        std::vector<uint8_t> tmp;
+        tmp.reserve(size);
+        for (int32_t i = 0; i < size; i++)
+            tmp.push_back(loader.load<bool>());
+
+        int32_t width = loader.load<int32_t>();
+        int32_t height = loader.load<int32_t>();
+
+        triggerMask = Misc::Array2D<uint8_t>(width, height, std::move(tmp));
     }
 
     bool LevelTransitionArea::pointIsInside(Vec2i point) const
