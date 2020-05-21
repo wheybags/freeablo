@@ -46,6 +46,12 @@ namespace Level
         int32_t height = mapElement->IntAttribute("height", -1);
         release_assert(width > 0 && height > 0);
 
+        const tinyxml2::XMLElement* tilsetElement = mapElement->FirstChildElement("tileset");
+        release_assert(tilsetElement->IntAttribute("firstgid", -1) == 1);
+
+        // Only allow one tileset
+        release_assert(tilsetElement->NextSiblingElement("tileset") == nullptr);
+
         const tinyxml2::XMLElement* tilesLayer = getFirstChildWithTypeAndAttribute(mapElement, "layer", "name", "tiles");
         const tinyxml2::XMLElement* dataElement = tilesLayer->FirstChildElement("data");
         release_assert(std::string(dataElement->Attribute("encoding")) == "csv");
