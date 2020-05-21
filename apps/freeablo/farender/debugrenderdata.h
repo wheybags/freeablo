@@ -12,6 +12,12 @@ struct RectData
     Render::Color color;
 };
 
+struct TileData
+{
+    Vec2i worldPosition;
+    Render::Color color;
+};
+
 struct PointData
 {
     Vec2Fix worldPosition;
@@ -21,6 +27,6 @@ struct PointData
 
 namespace FARender
 {
-    using DebugRenderItem = std::variant<RectData, PointData>;
+    using DebugRenderItem = std::variant<RectData, TileData, PointData>;
     using DebugRenderData = std::vector<DebugRenderItem>;
 }

@@ -137,3 +137,11 @@ template <typename T> std::vector<T> moveToVector(T&& item)
     vec.push_back(std::forward<T>(item));
     return vec;
 }
+
+namespace tinyxml2
+{
+    class XMLElement;
+}
+
+const tinyxml2::XMLElement*
+getFirstChildWithTypeAndAttribute(const tinyxml2::XMLElement* parent, const std::string& type, const std::string& attrName, const std::string& attrVal);

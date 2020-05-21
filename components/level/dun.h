@@ -11,6 +11,11 @@ namespace Serial
     class Saver;
 }
 
+namespace tinyxml2
+{
+    class XMLDocument;
+}
+
 namespace Level
 {
     class Dun
@@ -19,6 +24,7 @@ namespace Level
     public:
         Dun(const std::string&);
         Dun(Serial::Loader& loader);
+        Dun(const tinyxml2::XMLDocument& xml);
         Dun();
         Dun(int32_t width, int32_t height);
 

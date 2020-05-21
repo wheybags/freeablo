@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.3.4" orientation="isometric" renderorder="right-down" width="3" height="3" tilewidth="128" tileheight="64" infinite="0" nextlayerid="4" nextobjectid="24">
+ <properties>
+  <property name="onWall" type="bool" value="false"/>
+ </properties>
+ <tileset firstgid="1" source="../../../diablo_data_files/tileset_images/til_tiles/4/diablo_l4_tileset.tsx"/>
+ <layer id="1" name="tiles" width="3" height="3">
+  <data encoding="csv">
+6,45,41,
+44,43,40,
+46,42,39
+</data>
+ </layer>
+ <objectgroup id="2" name="triggerMask">
+  <object id="1" x="9.27023" y="56.1362">
+   <point/>
+  </object>
+  <object id="2" x="58.6517" y="59.2057">
+   <point/>
+  </object>
+  <object id="3" x="9.83685" y="76.3549">
+   <point/>
+  </object>
+  <object id="4" x="59.593" y="12.5926">
+   <point/>
+  </object>
+  <object id="5" x="13.0309" y="13.978">
+   <point/>
+  </object>
+  <object id="8" x="59.1141" y="78.9947">
+   <point/>
+  </object>
+  <object id="9" x="70.9144" y="70.7458">
+   <point/>
+  </object>
+  <object id="10" x="68.9414" y="55.3565">
+   <point/>
+  </object>
+  <object id="11" x="71.2104" y="6.52519">
+   <point/>
+  </object>
+  <object id="12" x="119.154" y="54.4687">
+   <point/>
+  </object>
+  <object id="14" x="118.759" y="117.999">
+   <point/>
+  </object>
+  <object id="15" x="122.113" y="72.4228">
+   <point/>
+  </object>
+  <object id="16" x="68.2509" y="120.761">
+   <point/>
+  </object>
+  <object id="17" x="53.8122" y="137.388">
+   <point/>
+  </object>
+  <object id="18" x="7.17807" y="119.2">
+   <point/>
+  </object>
+  <object id="19" x="70.6005" y="134.59">
+   <point/>
+  </object>
+  <object id="20" x="118.284" y="133.074">
+   <point/>
+  </object>
+  <object id="21" x="133.79" y="119.434">
+   <point/>
+  </object>
+  <object id="22" x="132.624" y="69.7683">
+   <point/>
+  </object>
+  <object id="23" x="55.4444" y="120.833">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="3" name="spawnPoints">
+  <object id="6" name="exit" x="140.62" y="122.128">
+   <point/>
+  </object>
+  <object id="7" name="enter" x="204.926" y="120.573">
+   <point/>
+  </object>
+ </objectgroup>
+</map>

@@ -3,6 +3,7 @@
 #include "engine/threadmanager.h"
 #include "faworld/actor.h"
 #include "missile.h"
+#include <engine/debugsettings.h>
 #include <utility>
 
 namespace FAWorld::Missile
@@ -86,7 +87,7 @@ namespace FAWorld::Missile
 
     void MissileGraphic::update()
     {
-        if (Missile::DEBUG_MISSILES)
+        if (DebugSettings::DebugMissiles)
         {
             Vec2Fix currentTileCentre = Vec2Fix(mCurPos.current()) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
             FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{currentTileCentre, Render::Colors::green, 5});

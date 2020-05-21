@@ -6,6 +6,7 @@
 #include "missile/missile.h"
 #include "world.h"
 #include <diabloexe/diabloexe.h>
+#include <engine/debugsettings.h>
 #include <misc/assert.h>
 #include <render/spritegroup.h>
 
@@ -68,10 +69,6 @@ namespace FAWorld
 
     int32_t GameLevel::height() const { return mLevel.height(); }
 
-    const Misc::Point GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
-
-    const Misc::Point GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
-
     bool GameLevel::isDoor(const Misc::Point& point) const { return mLevel.isDoor(point); }
     bool GameLevel::activateDoor(const Misc::Point& point)
     {
@@ -121,6 +118,32 @@ namespace FAWorld
 
         for (auto& p : mItemMap->mItems)
             p.second.update();
+
+        if (DebugSettings::DebugLevelTransitions)
+        {
+            for (const Level::LevelTransitionArea& transition : {upStairsArea(), downStairsArea()})
+            {
+                for (int32_t y = transition.offset.y; y < transition.offset.y + transition.dimensions.h; y++)
+                {
+                    for (int32_t x = transition.offset.x; x < transition.offset.x + transition.dimensions.w; x++)
+                    {
+                        Render::Color highlightColor = Render::Colors::green;
+
+                        if (transition.triggerMask.get(x - transition.offset.x, y - transition.offset.y))
+                            highlightColor = Render::Colors::red;
+
+                        highlightColor.a = 0.1f;
+                        FARender::Renderer::get()->mTmpDebugRenderData.push_back(TileData{{x, y}, highlightColor});
+                    }
+                }
+
+                Vec2Fix centre = Vec2Fix(transition.offset + transition.playerSpawnOffset) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+                FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{centre, Render::Colors::red, 2});
+
+                centre = Vec2Fix(transition.offset + transition.exitOffset) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+                FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{centre, Render::Colors::green, 2});
+            }
+        }
     }
 
     void GameLevel::insertActor(Actor* actor)

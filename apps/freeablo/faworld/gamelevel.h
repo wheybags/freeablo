@@ -64,9 +64,8 @@ namespace FAWorld
 
         int32_t height() const;
 
-        const Misc::Point upStairsPos() const;
-
-        const Misc::Point downStairsPos() const;
+        const Level::LevelTransitionArea& upStairsArea() const { return mLevel.upStairsArea(); }
+        const Level::LevelTransitionArea& downStairsArea() const { return mLevel.downStairsArea(); }
 
         bool isDoor(const Misc::Point& point) const;
         bool activateDoor(const Misc::Point& point);

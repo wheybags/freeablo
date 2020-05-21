@@ -488,8 +488,33 @@ namespace FAWorld
         return true;
     }
 
+    void Player::handleTargetingLevelTransitions()
+    {
+        for (const auto* transition : {&getLevel()->upStairsArea(), &getLevel()->downStairsArea()})
+        {
+            Vec2i exitPoint = transition->offset + transition->exitOffset;
+
+            // If the player is targeting anywhere near the exit, target the exit
+            for (int32_t y = 0; y < transition->triggerMask.height(); y++)
+            {
+                for (int32_t x = 0; x < transition->triggerMask.width(); x++)
+                {
+                    if (transition->triggerMask.get(x, y) && mMoveHandler.getDestination() == transition->offset + Vec2i(x, y))
+                        mMoveHandler.setDestination(exitPoint);
+                }
+            }
+
+            if (getPos().current() == exitPoint && mMoveHandler.getDestination() == exitPoint)
+            {
+                if (GameLevel* level = getWorld()->getLevel(transition->targetLevelIndex))
+                    moveToLevel(level, transition == &getLevel()->downStairsArea());
+            }
+        }
+    }
+
     void Player::update(bool noclip)
     {
+        handleTargetingLevelTransitions();
         Actor::update(noclip);
 
         // handle talking to npcs
@@ -604,5 +629,12 @@ namespace FAWorld
                 invalid_enum(PlayerClass, mPlayerClass);
         }
         return SpellId::null;
+    }
+
+    void Player::moveToLevel(GameLevel* level, bool placeAtUpStairs)
+    {
+        const Level::LevelTransitionArea& targetArea = placeAtUpStairs ? level->upStairsArea() : level->downStairsArea();
+        Vec2i targetPoint = level->getFreeSpotNear(targetArea.offset + targetArea.playerSpawnOffset, std::numeric_limits<int32_t>::max());
+        teleport(level, Position(targetPoint));
     }
 }

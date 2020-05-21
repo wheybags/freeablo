@@ -302,7 +302,7 @@ namespace FARender
                     Vec2f bottom = top + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
 
                     int32_t realY = startTile.pos.y - i;
-                    float thickness = std::abs(realY) % 10 == 0 ? 3.0f : 1.0f;
+                    float thickness = std::abs(realY) % 2 == 0 ? 3.0f : 1.0f;
                     mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, thickness);
 
                     startingPoint.x += tileWidth;
@@ -322,7 +322,7 @@ namespace FARender
                     Vec2f top = bottom + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
 
                     int32_t realX = startTile.pos.x + i;
-                    float thickness = std::abs(realX) % 10 == 0 ? 3.0f : 1.0f;
+                    float thickness = std::abs(realX) % 2 == 0 ? 3.0f : 1.0f;
                     mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, thickness);
 
                     startingPoint.y += tileHeight;
@@ -384,6 +384,18 @@ namespace FARender
                                               rectPoint.y,
                                               int32_t(rectData.w * tileWidth),
                                               int32_t(rectData.h * tileHeight));
+            }
+            if (std::holds_alternative<TileData>(item))
+            {
+                const TileData& tileData = std::get<TileData>(item);
+
+                Vec2f quad[4];
+                quad[0] = tileTopPoint(Vec2f(tileData.worldPosition)) + Vec2f(toScreen);
+                quad[1] = quad[0] + Vec2f(tileWidth / 2, tileHeight / 2);
+                quad[2] = quad[0] + Vec2f(0, tileHeight);
+                quad[3] = quad[0] + Vec2f(-tileWidth / 2, tileHeight / 2);
+
+                mDebugRenderer->drawQuad(*Render::mainCommandQueue, levelDrawFramebuffer.get(), tileData.color, quad);
             }
             if (std::holds_alternative<PointData>(item))
             {

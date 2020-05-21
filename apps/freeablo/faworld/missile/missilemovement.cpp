@@ -1,5 +1,6 @@
 #include "faworld/actor.h"
 #include "missile.h"
+#include <engine/debugsettings.h>
 
 namespace FAWorld::Missile
 {
@@ -12,7 +13,7 @@ namespace FAWorld::Missile
 
     void Missile::Movement::linear(Missile& missile, MissileGraphic& graphic, FixedPoint speed, FixedPoint maxRange)
     {
-        if (Missile::DEBUG_MISSILES)
+        if (DebugSettings::DebugMissiles)
             speed = speed / 30;
 
         graphic.mCurPos.setFreeMovement();

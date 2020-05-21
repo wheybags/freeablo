@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <misc/assert.h>
 #include <vector>
@@ -104,6 +105,14 @@ namespace Misc
             other.mHeight = 0;
 
             return *this;
+        }
+
+        void memcpyTo(Array2D& other) const
+        {
+            static_assert(std::is_trivially_constructible<T>::value, "probably not a good idea to memcpy complex types");
+            other.resize(width(), height());
+
+            memcpy(other.data(), data(), mWidth * mHeight);
         }
 
         bool pointIsValid(int32_t x, int32_t y) const { return (x >= 0 && x < mWidth && y >= 0 && y < mHeight); }

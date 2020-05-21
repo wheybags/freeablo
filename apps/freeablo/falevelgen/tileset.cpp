@@ -1,17 +1,72 @@
 #include "tileset.h"
-#include <algorithm>
 #include <faio/faio.h>
 #include <misc/assert.h>
+#include <misc/misc.h>
+#include <misc/stringops.h>
 #include <random/random.h>
 #include <settings/settings.h>
-#include <sstream>
+#include <tinyxml2.h>
 
 namespace FALevelGen
 {
-    TileSet::TileSet(const std::string& path)
+    StairsData::StairsData(const tinyxml2::XMLDocument& tmxXml) : tiles(tmxXml), triggerMask(tiles.width() * 2, tiles.height() * 2)
     {
+        auto tmxObjectPosToTile = [](const tinyxml2::XMLElement* tmxObject) {
+            FixedPoint tmxX(tmxObject->Attribute("x"));
+            FixedPoint tmxY(tmxObject->Attribute("y"));
+
+            FixedPoint x = ((tmxX / 64) * 2);
+            FixedPoint y = ((tmxY / 64) * 2);
+
+            return Vec2Fix(x, y);
+        };
+
+        const tinyxml2::XMLElement* mapElement = tmxXml.FirstChildElement("map");
+        const tinyxml2::XMLElement* maskObjectLayer = getFirstChildWithTypeAndAttribute(mapElement, "objectgroup", "name", "triggerMask");
+
+        const tinyxml2::XMLElement* current = maskObjectLayer->FirstChildElement();
+        while (current)
+        {
+            Vec2i point = Vec2i(tmxObjectPosToTile(current));
+            triggerMask.get(point.x, point.y) = true;
+
+            current = current->NextSiblingElement();
+        }
+
+        const tinyxml2::XMLElement* spawnPointsLayer = getFirstChildWithTypeAndAttribute(mapElement, "objectgroup", "name", "spawnPoints");
+
+        const tinyxml2::XMLElement* enterNode = getFirstChildWithTypeAndAttribute(spawnPointsLayer, "object", "name", "enter");
+        spawnOffset = Vec2i(tmxObjectPosToTile(enterNode));
+
+        const tinyxml2::XMLElement* exitNode = getFirstChildWithTypeAndAttribute(spawnPointsLayer, "object", "name", "exit");
+        exitOffset = Vec2i(tmxObjectPosToTile(exitNode));
+
+        const tinyxml2::XMLElement* propertiesElement = mapElement->FirstChildElement("properties");
+        onWall = getFirstChildWithTypeAndAttribute(propertiesElement, "property", "name", "onWall")->BoolAttribute("value");
+    }
+
+    TileSet::TileSet(const std::string& _path)
+    {
+        filesystem::path path(_path);
+
         Settings::Settings settings;
-        settings.loadFromFile(path);
+        settings.loadFromFile(path.str());
+
+        filesystem::path basePath = path.parent_path();
+        std::string baseName = Misc::StringUtils::getFileNameNoExtension(path.filename());
+
+        auto loadStairsData = [](StairsData& data, const filesystem::path& tmxPath) {
+            release_assert(tmxPath.exists());
+            tinyxml2::XMLDocument tmxXml;
+            tmxXml.LoadFile(tmxPath.str().c_str());
+            data = StairsData(tmxXml);
+
+            // TODO: this is a limitation because of a bad implementation detail in the level generator, it should be removed
+            release_assert(data.tiles.width() <= 3 && data.tiles.height() <= 3);
+        };
+
+        loadStairsData(upStairsData, basePath / (baseName + "_stairs_up.tmx"));
+        loadStairsData(downStairsData, basePath / (baseName + "_stairs_down.tmx"));
 
         xWall = settings.get<int32_t>("Basic", "xWall");
         fillTile(xWall, settings, "XWall");
@@ -114,38 +169,6 @@ namespace FALevelGen
         fillTile(joinBottomCorner, settings, "JoinBottomCorner");
         joinYBottomCorner = settings.get<int32_t>("Basic", "joinYBottomCorner");
         fillTile(joinYBottomCorner, settings, "JoinYBottomCorner");
-
-        upStairsOnWall = settings.get<bool>("Basic", "upStairsOnWall");
-        upStairs1 = settings.get<int32_t>("Basic", "upStairs1");
-        upStairs2 = settings.get<int32_t>("Basic", "upStairs2");
-        upStairs3 = settings.get<int32_t>("Basic", "upStairs3");
-
-        upStairs4 = settings.get<int32_t>("Basic", "upStairs4");
-        upStairs5 = settings.get<int32_t>("Basic", "upStairs5");
-        upStairs6 = settings.get<int32_t>("Basic", "upStairs6");
-
-        upStairs7 = settings.get<int32_t>("Basic", "upStairs7");
-        upStairs8 = settings.get<int32_t>("Basic", "upStairs8");
-        upStairs9 = settings.get<int32_t>("Basic", "upStairs9");
-
-        upStairsXOffset = settings.get<int32_t>("Basic", "upStairsXOffset");
-        upStairsYOffset = settings.get<int32_t>("Basic", "upStairsYOffset");
-
-        downStairsOnWall = settings.get<bool>("Basic", "downStairsOnWall");
-        downStairs1 = settings.get<int32_t>("Basic", "downStairs1");
-        downStairs2 = settings.get<int32_t>("Basic", "downStairs2");
-        downStairs3 = settings.get<int32_t>("Basic", "downStairs3");
-
-        downStairs4 = settings.get<int32_t>("Basic", "downStairs4");
-        downStairs5 = settings.get<int32_t>("Basic", "downStairs5");
-        downStairs6 = settings.get<int32_t>("Basic", "downStairs6");
-
-        downStairs7 = settings.get<int32_t>("Basic", "downStairs7");
-        downStairs8 = settings.get<int32_t>("Basic", "downStairs8");
-        downStairs9 = settings.get<int32_t>("Basic", "downStairs9");
-
-        downStairsXOffset = settings.get<int32_t>("Basic", "downStairsXOffset");
-        downStairsYOffset = settings.get<int32_t>("Basic", "downStairsYOffset");
 
         loadDoorMap(settings);
     }
@@ -260,49 +283,6 @@ namespace FALevelGen
                 return xDoor;
             case TileSetEnum::yDoor:
                 return yDoor;
-
-            case TileSetEnum::upStairs1:
-                return upStairs1;
-            case TileSetEnum::upStairs2:
-                return upStairs2;
-            case TileSetEnum::upStairs3:
-                return upStairs3;
-
-            case TileSetEnum::upStairs4:
-                return upStairs4;
-            case TileSetEnum::upStairs5:
-                return upStairs5;
-            case TileSetEnum::upStairs6:
-                return upStairs6;
-
-            case TileSetEnum::upStairs7:
-                return upStairs7;
-            case TileSetEnum::upStairs8:
-                return upStairs8;
-            case TileSetEnum::upStairs9:
-                return upStairs9;
-
-            case TileSetEnum::downStairs1:
-                return downStairs1;
-            case TileSetEnum::downStairs2:
-                return downStairs2;
-            case TileSetEnum::downStairs3:
-                return downStairs3;
-
-            case TileSetEnum::downStairs4:
-                return downStairs4;
-            case TileSetEnum::downStairs5:
-                return downStairs5;
-            case TileSetEnum::downStairs6:
-                return downStairs6;
-
-            case TileSetEnum::downStairs7:
-                return downStairs7;
-            case TileSetEnum::downStairs8:
-                return downStairs8;
-            case TileSetEnum::downStairs9:
-                return downStairs9;
-
             case TileSetEnum::insideXWall:
                 return insideXWall;
             case TileSetEnum::insideXWallEnd:
