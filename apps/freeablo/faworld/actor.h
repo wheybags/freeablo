@@ -65,6 +65,7 @@ namespace FAWorld
         virtual void update(bool noclip);
         void takeDamage(int32_t amount, Actor* attacker, DamageType type);
         void heal();
+        void heal(int32_t toHeal);
         void restoreMana();
         void stopMoving(std::optional<Misc::Direction> direction = std::nullopt);
         virtual void die();

@@ -1,4 +1,6 @@
 #include "pepindialog.h"
+#include "../../engine/threadmanager.h"
+#include "../../faworld/player.h"
 
 namespace FAGui
 {
@@ -6,6 +8,7 @@ namespace FAGui
         : CharacterDialoguePopup(guiManager, false, "sfx/towners/Healer37.wav"), mActor(actor)
     {
         auto& gossipData = mActor->getGossipData();
+
         for (auto& gossip : gossipData)
         {
             if (gossip.first == "general1")
@@ -99,7 +102,9 @@ namespace FAGui
     CharacterDialoguePopup::DialogData PepinDialog::getDialogData()
     {
         DialogData retval;
+
         auto& td = mActor->getMenuTalkData();
+        FAWorld::Player* player = mActor->getWorld()->getCurrentPlayer();
 
         retval.introduction = {{td.at("introductionHeader1"), TextColor::golden, false}, {td.at("introductionHeader2"), TextColor::golden, false}};
 
@@ -109,7 +114,14 @@ namespace FAGui
             openTalkDialog(mActor);
             return CharacterDialoguePopup::UpdateResult::DoNothing;
         });
-        retval.addMenuOption({{td.at("heal")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
+        retval.addMenuOption({{td.at("heal")}}, [player]() {
+            if (player->getStats().getHp().current < player->getStats().getHp().max)
+            {
+                player->heal();
+                Engine::ThreadManager::get()->playSound("sfx/misc/cast8.wav");
+            }
+            return CharacterDialoguePopup::UpdateResult::DoNothing;
+        });
         retval.addMenuOption({{td.at("buy")}}, []() { return CharacterDialoguePopup::UpdateResult::DoNothing; });
         retval.addMenuOption({{td.at("quit")}}, []() { return CharacterDialoguePopup::UpdateResult::PopDialog; });
 
