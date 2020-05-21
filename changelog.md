@@ -2,6 +2,8 @@
 
 ## v0.5 [?? ??? ????] 
 
+- Added healing at Pepin
+- Added ability to move through levels by clicking on stairs
 - Added town portal spell
 - Refactored rendering, FPS greatly improved and there should be no stuttering now
 - Added game zoom with scroll wheel
