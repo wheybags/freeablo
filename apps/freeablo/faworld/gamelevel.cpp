@@ -129,7 +129,7 @@ namespace FAWorld
                     if (transition.triggerMask.get(x - transition.offset.x, y - transition.offset.y))
                         highlightColor = Render::Colors::red;
 
-                    highlightColor.a = 0.1;
+                    highlightColor.a = 0.1f;
                     FARender::Renderer::get()->mTmpDebugRenderData.push_back(TileData{{x, y}, highlightColor});
                 }
             }

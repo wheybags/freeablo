@@ -32,7 +32,8 @@ namespace Cel
         if (pillar.size() == 10)
             y += 3 * 32;
 
-        int32_t i, limit;
+        int32_t i = 0;
+        int32_t limit = 0;
 
         switch (part)
         {
