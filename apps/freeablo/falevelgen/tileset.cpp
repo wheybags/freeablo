@@ -55,60 +55,18 @@ namespace FALevelGen
         filesystem::path basePath = path.parent_path();
         std::string baseName = Misc::StringUtils::getFileNameNoExtension(path.filename());
 
-        filesystem::path upStairsPath = basePath / (baseName + "_stairs_up.tmx");
-        filesystem::path downStairsPath = basePath / (baseName + "_stairs_down.tmx");
+        auto loadStairsData = [](StairsData& data, const filesystem::path& tmxPath) {
+            release_assert(tmxPath.exists());
+            tinyxml2::XMLDocument tmxXml;
+            tmxXml.LoadFile(tmxPath.str().c_str());
+            data = StairsData(tmxXml);
 
-        if (upStairsPath.exists())
-        {
-            tinyxml2::XMLDocument upStairsDoc;
-            upStairsDoc.LoadFile(upStairsPath.str().c_str());
-            upStairsData = StairsData(upStairsDoc);
-        }
-        else
-        {
-            upStairsData.onWall = settings.get<bool>("Basic", "upStairsOnWall");
-            // upStairsData.spawnOffset = {settings.get<int32_t>("Basic", "upStairsXOffset"), settings.get<int32_t>("Basic", "upStairsYOffset")};
+            // TODO: this is a limitation because of a bad implementation detail in the level generator, it should be removed
+            release_assert(data.tiles.width() <= 3 && data.tiles.height() <= 3);
+        };
 
-            upStairsData.tiles = Level::Dun(3, 3);
-            upStairsData.triggerMask = {6, 6};
-            upStairsData.tiles.get(0, 0) = settings.get<int32_t>("Basic", "upStairs1");
-            upStairsData.tiles.get(1, 0) = settings.get<int32_t>("Basic", "upStairs2");
-            upStairsData.tiles.get(2, 0) = settings.get<int32_t>("Basic", "upStairs3");
-
-            upStairsData.tiles.get(0, 1) = settings.get<int32_t>("Basic", "upStairs4");
-            upStairsData.tiles.get(1, 1) = settings.get<int32_t>("Basic", "upStairs5");
-            upStairsData.tiles.get(2, 1) = settings.get<int32_t>("Basic", "upStairs6");
-
-            upStairsData.tiles.get(0, 2) = settings.get<int32_t>("Basic", "upStairs7");
-            upStairsData.tiles.get(1, 2) = settings.get<int32_t>("Basic", "upStairs8");
-            upStairsData.tiles.get(2, 2) = settings.get<int32_t>("Basic", "upStairs9");
-        }
-
-        if (downStairsPath.exists())
-        {
-            tinyxml2::XMLDocument downStairsDoc;
-            downStairsDoc.LoadFile(downStairsPath.str().c_str());
-            downStairsData = StairsData(downStairsDoc);
-        }
-        else
-        {
-            downStairsData.tiles = Level::Dun(3, 3);
-            downStairsData.triggerMask = {6, 6};
-            downStairsData.tiles.get(0, 0) = settings.get<int32_t>("Basic", "downStairs1");
-            downStairsData.tiles.get(1, 0) = settings.get<int32_t>("Basic", "downStairs2");
-            downStairsData.tiles.get(2, 0) = settings.get<int32_t>("Basic", "downStairs3");
-
-            downStairsData.tiles.get(0, 1) = settings.get<int32_t>("Basic", "downStairs4");
-            downStairsData.tiles.get(1, 1) = settings.get<int32_t>("Basic", "downStairs5");
-            downStairsData.tiles.get(2, 1) = settings.get<int32_t>("Basic", "downStairs6");
-
-            downStairsData.tiles.get(0, 2) = settings.get<int32_t>("Basic", "downStairs7");
-            downStairsData.tiles.get(1, 2) = settings.get<int32_t>("Basic", "downStairs8");
-            downStairsData.tiles.get(2, 2) = settings.get<int32_t>("Basic", "downStairs9");
-
-            downStairsData.onWall = settings.get<bool>("Basic", "downStairsOnWall");
-            downStairsData.spawnOffset = {settings.get<int32_t>("Basic", "downStairsXOffset"), settings.get<int32_t>("Basic", "downStairsYOffset")};
-        }
+        loadStairsData(upStairsData, basePath / (baseName + "_stairs_up.tmx"));
+        loadStairsData(downStairsData, basePath / (baseName + "_stairs_down.tmx"));
 
         xWall = settings.get<int32_t>("Basic", "xWall");
         fillTile(xWall, settings, "XWall");
