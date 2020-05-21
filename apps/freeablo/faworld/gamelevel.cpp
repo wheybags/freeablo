@@ -6,6 +6,7 @@
 #include "missile/missile.h"
 #include "world.h"
 #include <diabloexe/diabloexe.h>
+#include <engine/debugsettings.h>
 #include <misc/assert.h>
 #include <render/spritegroup.h>
 
@@ -118,27 +119,30 @@ namespace FAWorld
         for (auto& p : mItemMap->mItems)
             p.second.update();
 
-        for (const Level::LevelTransitionArea& transition : {upStairsArea(), downStairsArea()})
+        if (DebugSettings::DebugLevelTransitions)
         {
-            for (int32_t y = transition.offset.y; y < transition.offset.y + transition.dimensions.h; y++)
+            for (const Level::LevelTransitionArea& transition : {upStairsArea(), downStairsArea()})
             {
-                for (int32_t x = transition.offset.x; x < transition.offset.x + transition.dimensions.w; x++)
+                for (int32_t y = transition.offset.y; y < transition.offset.y + transition.dimensions.h; y++)
                 {
-                    Render::Color highlightColor = Render::Colors::green;
+                    for (int32_t x = transition.offset.x; x < transition.offset.x + transition.dimensions.w; x++)
+                    {
+                        Render::Color highlightColor = Render::Colors::green;
 
-                    if (transition.triggerMask.get(x - transition.offset.x, y - transition.offset.y))
-                        highlightColor = Render::Colors::red;
+                        if (transition.triggerMask.get(x - transition.offset.x, y - transition.offset.y))
+                            highlightColor = Render::Colors::red;
 
-                    highlightColor.a = 0.1f;
-                    FARender::Renderer::get()->mTmpDebugRenderData.push_back(TileData{{x, y}, highlightColor});
+                        highlightColor.a = 0.1f;
+                        FARender::Renderer::get()->mTmpDebugRenderData.push_back(TileData{{x, y}, highlightColor});
+                    }
                 }
+
+                Vec2Fix centre = Vec2Fix(transition.offset + transition.playerSpawnOffset) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+                FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{centre, Render::Colors::red, 2});
+
+                centre = Vec2Fix(transition.offset + transition.exitOffset) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+                FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{centre, Render::Colors::green, 2});
             }
-
-            Vec2Fix centre = Vec2Fix(transition.offset + transition.playerSpawnOffset) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
-            FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{centre, Render::Colors::red, 2});
-
-            centre = Vec2Fix(transition.offset + transition.exitOffset) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
-            FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{centre, Render::Colors::green, 2});
         }
     }
 
