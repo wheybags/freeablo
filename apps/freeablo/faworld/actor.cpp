@@ -223,7 +223,7 @@ namespace FAWorld
     }
 
     void Actor::heal() { mStats.getHp().current = mStats.getHp().max; }
-    void Actor::heal(int32_t toHeal) { mStats.getHp().current += toHeal;}
+    void Actor::heal(int32_t toHeal) { mStats.getHp().add(toHeal); }
 
     void Actor::restoreMana() { mStats.getMana().current = mStats.getMana().max; }
 
