@@ -32,8 +32,9 @@ namespace FAWorld
 
     namespace ItemFilter
     {
-        std::function<bool(const DiabloExe::BaseItem& item)> maxQLvl(int32_t value);
-        std::function<bool(const DiabloExe::BaseItem& item)> sellableGriswoldBasic();
+        using Callback = std::function<bool(const DiabloExe::BaseItem& item)>;
+        Callback maxQLvl(int32_t value);
+        Callback sellableGriswoldBasic();
     }
 
     class ItemFactory
@@ -42,22 +43,7 @@ namespace FAWorld
         explicit ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng);
         Item generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
         Item generateUniqueItem(UniqueItemId id) const;
-        template <typename... FilterTypes> ItemId randomItemId(const FilterTypes&... filters) const
-        {
-            static std::vector<ItemId> pool;
-            pool.clear();
-            for (auto id : enum_range<ItemId>())
-            {
-                const DiabloExe::BaseItem& info = getInfo(id);
-                bool filteredOut = false;
-                static_cast<void>(std::initializer_list<int>{(filteredOut = filteredOut || !filters(info), 0)...});
-                if (filteredOut)
-                    continue;
-                for (int32_t i = 0; i < static_cast<int32_t>(info.dropRate); ++i)
-                    pool.push_back(id);
-            }
-            return pool[mRng.randomInRange(0, pool.size() - 1)];
-        }
+        ItemId randomItemId(const ItemFilter::Callback& filter) const;
 
     private:
         const DiabloExe::BaseItem& getInfo(ItemId id) const;

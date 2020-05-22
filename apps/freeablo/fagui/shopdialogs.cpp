@@ -62,7 +62,7 @@ namespace FAGui
         {
             auto addItem = [&](FAWorld::EquipTarget target) {
                 const FAWorld::Item& item = inventory.getItemAt(target);
-                if (!item.isEmpty() && item.mIsReal && mFilter(item) && item.getType() != FAWorld::ItemType::gold)
+                if (!item.isEmpty() && item.mIsReal && mFilter(item) && item.getType() != ItemType::gold)
                     sellableItems.push_back(target);
             };
 

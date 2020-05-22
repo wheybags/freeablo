@@ -25,26 +25,7 @@ namespace DiabloExe
 
 namespace FAWorld
 {
-    enum class ItemEffectType;
-    enum class ItemType;
-    enum class ItemEquipType;
-    enum class ItemClass;
-    enum class ItemCode;
-    enum class ItemMiscId;
-    enum class ItemQuality;
-
-    class EquipTarget;
-    constexpr int indestructibleItemDurability = 255;
-
-    class ItemEffect
-    {
-    public:
-        ItemEffectType type;
-        int min;
-        int max;
-    };
-
-    class CharacterInventory;
+    constexpr int32_t indestructibleItemDurability = 255;
 
     class Item
     {
@@ -61,15 +42,13 @@ namespace FAWorld
         std::string getFullDescription() const;
         std::vector<FAGui::MenuEntry> descriptionForMerchants() const;
 
-        void setUniqueId(uint32_t mUniqueId);
-        uint32_t getUniqueId() const;
-        bool operator==(const Item rhs) const;
-        std::pair<uint8_t, uint8_t> getInvCoords() const;
+        bool operator==(const Item&) = delete;
+
         std::pair<uint8_t, uint8_t> getCornerCoords() const;
         bool isEmpty() const { return mEmpty; }
         std::string getFlipSoundPath() const;
         std::string getInvPlaceSoundPath() const;
-        Render::SpriteGroup* getFlipSpriteGroup();
+        Render::SpriteGroup* getFlipSpriteGroup() const;
         bool isBeltEquippable() const;
         int32_t getMaxCount() const;
         std::array<int32_t, 2> getInvSize() const;
@@ -81,9 +60,7 @@ namespace FAWorld
         int32_t getRequiredStrength() const;
         int32_t getRequiredMagic() const;
         int32_t getRequiredDexterity() const;
-        uint32_t getSpecialEffect() const;
         ItemMiscId getMiscId() const;
-        uint32_t getSpellCode() const;
         bool isUsable() const;
         int32_t getPrice() const;
         ItemType getType() const;
@@ -104,22 +81,16 @@ namespace FAWorld
         const DiabloExe::BaseItem& base() const;
 
         // private:
-        static Cel::CelFile* mObjcurs;
-        DiabloExe::Affix mAffix;
-
-        ItemId mBaseId;
-        int32_t mMaxDurability;
-        int32_t mCurrentDurability;
-        int32_t mArmorClass;
+        ItemId mBaseId = ItemId::COUNT;
+        int32_t mMaxDurability = 0;
+        int32_t mCurrentDurability = 0;
+        int32_t mArmorClass = 0;
 
         // TODO: these should be handled by inventory class, not item class
         int32_t mCornerX = -1;
         int32_t mCornerY = -1;
 
         bool mEmpty = true;
-        bool mIsIdentified;
-
-        int32_t mUniqueId = 0;
 
         // private:
         int32_t mMaxCharges = 0;
@@ -132,9 +103,5 @@ namespace FAWorld
         static bool isItemAMeleeWeapon(ItemType type);
         static bool isItemARangedWeapon(ItemType type);
         static bool isItemAWeapon(ItemType type) { return isItemAMeleeWeapon(type) || isItemARangedWeapon(type); }
-
-        friend class CharacterInventory;
-        friend class ItemFactory;
-        friend class PlayerFactory;
     };
 }

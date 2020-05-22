@@ -362,11 +362,11 @@ namespace DiabloExe
             usedIds.insert(idName);
             tmp.idName = idName;
 
-            auto dropGraphicsId = itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId];
+            size_t dropGraphicsId = itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId];
             tmp.dropItemGraphicsPath = "items/" + mItemDropGraphicsFilename[dropGraphicsId] + ".cel";
             tmp.dropItemSoundPath = mSoundFilename[mItemGraphicsIdToDropSfxId[dropGraphicsId]];
             tmp.invPlaceItemSoundPath = mSoundFilename[mItemGraphicsIdToInvPlaceSfxId[dropGraphicsId]];
-            auto& s = objCursFrameSizes[tmp.invGraphicsId + 11];
+            const std::array<int32_t, 2>& s = objCursFrameSizes[tmp.invGraphicsId + 11];
             if (i == 0)
             {
                 tmp.invSizeX = 1;

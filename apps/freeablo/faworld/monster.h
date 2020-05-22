@@ -24,7 +24,6 @@ namespace FAWorld
     private:
         void commonInit();
         void spawnItem();
-        ItemId randomItem();
         void restoreAnimations();
 
     private:

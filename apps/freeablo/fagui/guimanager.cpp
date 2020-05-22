@@ -183,7 +183,7 @@ namespace FAGui
 
         switch (item.getType())
         {
-            case FAWorld::ItemType::gold:
+            case ItemType::gold:
             {
                 mGoldSplitTarget = &item;
                 mGoldSplitCnt = 0;
@@ -207,7 +207,7 @@ namespace FAGui
             return;
         if (!item.mIsReal)
         {
-            if (item.getEquipLoc() == FAWorld::ItemEquipType::twoHanded && target.type == FAWorld::EquipTargetType::rightHand)
+            if (item.getEquipLoc() == ItemEquipType::twoHanded && target.type == FAWorld::EquipTargetType::rightHand)
             {
                 checkerboarded = true;
                 highlight = ItemHighlightInfo::notHighlighed;

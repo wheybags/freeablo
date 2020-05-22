@@ -130,6 +130,6 @@ namespace FAGui
     bool AdriaDialog::adriaSellFilter(const FAWorld::Item& item)
     {
         // TODO: add check for quest items
-        return item.getType() == FAWorld::ItemType::misc || item.getType() == FAWorld::ItemType::staff;
+        return item.getType() == ItemType::misc || item.getType() == ItemType::staff;
     }
 }

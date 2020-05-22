@@ -14,7 +14,6 @@ namespace FAWorld
     void Item::save(FASaveGame::GameSaver& saver) const
     {
         saver.save(mIsReal);
-        saver.save(mUniqueId);
         saver.save(mCount);
 
         saver.save(mArmorClass);
@@ -156,14 +155,14 @@ namespace FAWorld
                 target += ",  ";
             target += new_part;
         };
-        ret.push_back({getName(), true});
+        ret.emplace_back(getName(), true);
         {
             // first line - affixes + charges
             std::string str;
             if (mMaxCharges > 0)
                 append(str, chargesStr());
             if (!str.empty())
-                ret.push_back({std::move(str), FAGui::TextColor::white, false});
+                ret.emplace_back(std::move(str), FAGui::TextColor::white, false);
         }
         {
             std::string str;
@@ -174,10 +173,10 @@ namespace FAWorld
             auto reqs = requirementsStr();
             append(str, reqs.empty() ? "No Required Attributes" : reqs);
             if (!str.empty())
-                ret.push_back({std::move(str), false});
+                ret.emplace_back(std::move(str), false);
         }
         {
-            ret.push_back({"Price: " + std::to_string(this->getPrice()), FAGui::TextColor::white, false});
+            ret.emplace_back("Price: " + std::to_string(this->getPrice()), FAGui::TextColor::white, false);
         }
         while (ret.size() < 4)
             ret.emplace_back();
@@ -190,7 +189,6 @@ namespace FAWorld
             return {0, 0};
         return {base().invSizeX, base().invSizeY};
     }
-    std::pair<uint8_t, uint8_t> Item::getInvCoords() const { return {mInvX, mInvY}; }
     std::pair<uint8_t, uint8_t> Item::getCornerCoords() const { return {mCornerX, mCornerY}; }
     int32_t Item::getInvVolume() const
     {
@@ -203,7 +201,6 @@ namespace FAWorld
     void Item::load(FASaveGame::GameLoader& loader)
     {
         mIsReal = loader.load<bool>();
-        mUniqueId = loader.load<int32_t>();
         mCount = loader.load<int32_t>();
 
         mArmorClass = loader.load<int32_t>();
@@ -241,7 +238,7 @@ namespace FAWorld
 
     std::string Item::getInvPlaceSoundPath() const { return base().invPlaceItemSoundPath; }
 
-    Render::SpriteGroup* Item::getFlipSpriteGroup()
+    Render::SpriteGroup* Item::getFlipSpriteGroup() const
     {
         FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
         return spriteLoader.getSprite(spriteLoader.mItemDrops[base().idName]);
@@ -260,35 +257,31 @@ namespace FAWorld
     int32_t Item::getRequiredMagic() const { return base().requiredMagic; }
     int32_t Item::getRequiredDexterity() const { return base().requiredDexterity; }
 
-    uint32_t Item::getSpecialEffect() const { return base().specialEffectFlags; }
-
-    ItemMiscId Item::getMiscId() const { return static_cast<ItemMiscId>(base().miscId); }
-
-    uint32_t Item::getSpellCode() const { return base().spellId; }
+    ItemMiscId Item::getMiscId() const { return base().miscId; }
 
     bool Item::isUsable() const { return base().isUsable; }
 
-    int32_t Item::getPrice() const { return static_cast<int32_t>(base().price); }
+    int32_t Item::getPrice() const { return base().price; }
 
     ItemType Item::getType() const
     {
         if (isEmpty())
             return ItemType::none;
-        return static_cast<ItemType>(base().type);
+        return base().type;
     }
 
     ItemEquipType Item::getEquipLoc() const
     {
         if (isEmpty())
             return ItemEquipType::none;
-        return static_cast<ItemEquipType>(base().equipType);
+        return base().equipType;
     }
 
     ItemClass Item::getClass() const
     {
         if (isEmpty())
             return ItemClass::none;
-        return static_cast<ItemClass>(base().itemClass);
+        return base().itemClass;
     }
     uint32_t Item::getGraphicValue() const
     {
@@ -318,10 +311,4 @@ namespace FAWorld
 
         return {};
     }
-
-    void Item::setUniqueId(uint32_t mUniqueId) { this->mUniqueId = mUniqueId; }
-
-    uint32_t Item::getUniqueId() const { return this->mUniqueId; }
-
-    bool Item::operator==(const Item rhs) const { return this->mUniqueId == rhs.mUniqueId; }
 }
