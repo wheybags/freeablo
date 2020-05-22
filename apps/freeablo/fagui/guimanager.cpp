@@ -11,6 +11,7 @@
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/spells.h"
 #include "../faworld/world.h"
+#include "../faworld/potion.h"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
 #include "menu/multiplayerconnecting.h"
@@ -196,38 +197,52 @@ namespace FAGui
                 {
                     case FAWorld::ItemMiscId::potionOfHealing:
                     {
-                        /*bonus · maxlife/8 to bonus · 3·maxlife/8 from Jarulf's guide
-                          Type Warrior Rogue Sorcerer
-                          Healing 2.0 1.5 1.0 
-                          Mana 1.0 1.5 2.0 
-                        */
-                        int32_t bonus = 1.0;
-                        switch (mPlayer->getClass())
-                        {
-                            case FAWorld::PlayerClass::warrior: {
-                                bonus = 2.0;
-                                break;
-                            }
-                            case FAWorld::PlayerClass::rogue: {
-                                bonus = 1.5;
-                                break;
-                            }
-                            case FAWorld::PlayerClass::sorceror: {
-                                bonus = 1.0;
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-
-                        int32_t minRange = (bonus * mPlayer->getStats().getHp().max)/8;
-                        int32_t maxRange = minRange * 3;
-                        int32_t toHeal = mPlayer->getWorld()->mRng->randomInRange(minRange, maxRange);
-                        mPlayer->heal(toHeal);
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.restoreHp(mPlayer);
                         Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
                         mPlayer->mInventory.remove(target);
                         break;
                     }
+                    case FAWorld::ItemMiscId::potionOfFullHealing:
+                    {
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.restoreHpFull(mPlayer);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
+                    }
+                    case FAWorld::ItemMiscId::potionOfMana:
+                    {
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.restoreMana(mPlayer);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
+                    }
+                    case FAWorld::ItemMiscId::potionOfFullMana: {
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.restoreManaFull(mPlayer);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
+                    }
+                    case FAWorld::ItemMiscId::potionOfRejuvenation: {
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.restoreHp(mPlayer);
+                        potion.restoreMana(mPlayer);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
+                    }
+                    case FAWorld::ItemMiscId::potionOfFullRejuvenation: {
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.restoreHpFull(mPlayer);
+                        potion.restoreManaFull(mPlayer);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
+                    }
+                    
                 }
             }
             default:

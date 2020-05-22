@@ -226,6 +226,7 @@ namespace FAWorld
     void Actor::heal(int32_t toHeal) { mStats.getHp().add(toHeal); }
 
     void Actor::restoreMana() { mStats.getMana().current = mStats.getMana().max; }
+    void Actor::restoreMana(int32_t toRestore) { mStats.getMana().add(toRestore); }
 
     void Actor::stopMoving(std::optional<Misc::Direction> direction) { mMoveHandler.stopMoving(*this, direction); }
 
