@@ -6,15 +6,18 @@
 namespace DiabloExe
 {
 
-    BaseItem::BaseItem() = default;
+    ExeItem::ExeItem() = default;
 
-    BaseItem::BaseItem(FAIO::FAFileObject& exe, size_t codeOffset)
+    ExeItem::ExeItem(FAIO::FAFileObject& exe, size_t codeOffset)
     {
         dropRate = exe.read32();
 
         itemClass = ItemClass(exe.read8());
         equipType = ItemEquipType(exe.read8());
         exe.read16();
+
+        if (int32_t(equipType) == 7)
+            equipType = ItemEquipType::none;
 
         invGraphicsId = exe.read32();
 
@@ -50,7 +53,7 @@ namespace DiabloExe
             shortName = std::string();
     }
 
-    std::string BaseItem::dump() const
+    std::string ExeItem::dump() const
     {
         std::stringstream ss;
         ss << "{" << std::endl

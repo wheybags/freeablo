@@ -71,7 +71,7 @@ namespace FAWorld
         return str;
     }
 
-    const DiabloExe::BaseItem& Item::base() const { return Engine::EngineMain::get()->exe().getBaseItems()[static_cast<int32_t>(mBaseId)]; }
+    const DiabloExe::ExeItem& Item::base() const { return Engine::EngineMain::get()->exe().getBaseItems()[static_cast<int32_t>(mBaseId)]; }
 
     bool Item::isItemAMeleeWeapon(ItemType type)
     {

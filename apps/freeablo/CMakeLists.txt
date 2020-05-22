@@ -167,7 +167,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
 target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input Random Image enet cxxopts fmt::fmt)
 target_include_directories(freeablo_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(freeablo main.cpp)
+add_executable(freeablo main.cpp faworld/item/itembase.cpp faworld/item/itembase.h faworld/item/itembaseholder.cpp faworld/item/itembaseholder.h faworld/item/equipmentitembase.cpp faworld/item/equipmentitembase.h faworld/item/miscitembase.cpp faworld/item/miscitembase.h faworld/item/item.cpp faworld/item/item.h faworld/item/equipmentitem.cpp faworld/item/equipmentitem.h faworld/item/miscitem.cpp faworld/item/miscitem.h)
 target_link_libraries(freeablo freeablo_lib)
 
 set_target_properties(freeablo_lib PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

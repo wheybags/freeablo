@@ -32,7 +32,7 @@ namespace FAWorld
 
     namespace ItemFilter
     {
-        using Callback = std::function<bool(const DiabloExe::BaseItem& item)>;
+        using Callback = std::function<bool(const DiabloExe::ExeItem& item)>;
         Callback maxQLvl(int32_t value);
         Callback sellableGriswoldBasic();
     }
@@ -46,7 +46,7 @@ namespace FAWorld
         ItemId randomItemId(const ItemFilter::Callback& filter) const;
 
     private:
-        const DiabloExe::BaseItem& getInfo(ItemId id) const;
+        const DiabloExe::ExeItem& getInfo(ItemId id) const;
         // TODO: replace this with something more decent
         mutable std::unique_ptr<Cel::CelFile> mObjcursCel;
         std::map<int32_t, ItemId> mUniqueBaseItemIdToItemId;

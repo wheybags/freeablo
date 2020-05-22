@@ -25,16 +25,13 @@ enum class ItemType
 
 enum class ItemEquipType
 {
-    none,
-    oneHanded,
-    twoHanded,
-    chest,
-    head,
-    ring,
-    amulet,
-    unequippable,
-    belt,
-    invalid,
+    none = 0,
+    oneHanded = 1,
+    twoHanded = 2,
+    chest = 3,
+    head = 4,
+    ring = 5,
+    amulet = 6,
 };
 
 enum class ItemClass
@@ -75,7 +72,7 @@ enum class ItemMiscId
 
 namespace DiabloExe
 {
-    class BaseItem
+    class ExeItem
     {
     public:
         uint32_t dropRate = 0;
@@ -116,10 +113,10 @@ namespace DiabloExe
         std::string invPlaceItemSoundPath;
 
         std::string dump() const;
-        BaseItem();
+        ExeItem();
 
     private:
-        BaseItem(FAIO::FAFileObject& exe, size_t codeOffset);
+        ExeItem(FAIO::FAFileObject& exe, size_t codeOffset);
         friend class DiabloExe;
     };
 }

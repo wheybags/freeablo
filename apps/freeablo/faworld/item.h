@@ -78,7 +78,7 @@ namespace FAWorld
         std::string damageOrArmorStr() const;
         std::string durabilityStr() const;
         std::string requirementsStr() const;
-        const DiabloExe::BaseItem& base() const;
+        const DiabloExe::ExeItem& base() const;
 
         // private:
         ItemId mBaseId = ItemId::COUNT;

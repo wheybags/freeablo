@@ -14,7 +14,7 @@ namespace FAWorld
         for (auto& item : griswoldBasicItems)
         {
             ItemId itemId = mItemFactory.randomItemId(
-                [ilvl](const DiabloExe::BaseItem& item) { return ItemFilter::maxQLvl(ilvl)(item) || ItemFilter::sellableGriswoldBasic()(item); });
+                [ilvl](const DiabloExe::ExeItem& item) { return ItemFilter::maxQLvl(ilvl)(item) || ItemFilter::sellableGriswoldBasic()(item); });
 
             item.item = mItemFactory.generateBaseItem(itemId);
             item.storeId = mNextItemId;

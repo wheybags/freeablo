@@ -8,12 +8,12 @@ namespace FAWorld
 {
     ItemFilter::Callback ItemFilter::maxQLvl(int32_t value)
     {
-        return [value](const DiabloExe::BaseItem& item) { return static_cast<int32_t>(item.qualityLevel) <= value; };
+        return [value](const DiabloExe::ExeItem& item) { return static_cast<int32_t>(item.qualityLevel) <= value; };
     }
 
     ItemFilter::Callback ItemFilter::sellableGriswoldBasic()
     {
-        return [](const DiabloExe::BaseItem& item) {
+        return [](const DiabloExe::ExeItem& item) {
             static const auto excludedTypes = {ItemType::misc, ItemType::gold, ItemType::staff, ItemType::ring, ItemType::amulet};
             return std::count(excludedTypes.begin(), excludedTypes.end(), static_cast<ItemType>(item.type)) == 0;
         };
@@ -55,7 +55,7 @@ namespace FAWorld
         pool.clear();
         for (auto id : enum_range<ItemId>())
         {
-            const DiabloExe::BaseItem& info = getInfo(id);
+            const DiabloExe::ExeItem& info = getInfo(id);
             if (filter(info))
                 continue;
             for (int32_t i = 0; i < static_cast<int32_t>(info.dropRate); ++i)
@@ -64,5 +64,5 @@ namespace FAWorld
         return pool[mRng.randomInRange(0, pool.size() - 1)];
     }
 
-    const DiabloExe::BaseItem& ItemFactory::getInfo(ItemId id) const { return mExe.getBaseItems().at(static_cast<int>(id)); }
+    const DiabloExe::ExeItem& ItemFactory::getInfo(ItemId id) const { return mExe.getBaseItems().at(static_cast<int>(id)); }
 }
