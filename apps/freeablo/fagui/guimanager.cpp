@@ -1,4 +1,5 @@
 #include "guimanager.h"
+#include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
 #include "../engine/localinputhandler.h"
 #include "../farender/renderer.h"
@@ -26,6 +27,7 @@
 #include <misc/stringops.h>
 #include <render/spritegroup.h>
 #include <serial/textstream.h>
+#include <random/random.h>
 #include <string>
 
 static nk_style_button dummyStyle = []() {
@@ -180,7 +182,6 @@ namespace FAGui
             return;
 
         mGoldSplitTarget = nullptr;
-
         switch (item.getType())
         {
             case FAWorld::ItemType::gold:
@@ -188,6 +189,46 @@ namespace FAGui
                 mGoldSplitTarget = &item;
                 mGoldSplitCnt = 0;
                 break;
+            }
+            case FAWorld::ItemType::misc:
+            {
+                switch (item.getMiscId())
+                {
+                    case FAWorld::ItemMiscId::potionOfHealing:
+                    {
+                        /*bonus · maxlife/8 to bonus · 3·maxlife/8 from Jarulf's guide
+                          Type Warrior Rogue Sorcerer
+                          Healing 2.0 1.5 1.0 
+                          Mana 1.0 1.5 2.0 
+                        */
+                        int32_t bonus = 1.0;
+                        switch (mPlayer->getClass())
+                        {
+                            case FAWorld::PlayerClass::warrior: {
+                                bonus = 2.0;
+                                break;
+                            }
+                            case FAWorld::PlayerClass::rogue: {
+                                bonus = 1.5;
+                                break;
+                            }
+                            case FAWorld::PlayerClass::sorceror: {
+                                bonus = 1.0;
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+
+                        int32_t minRange = (bonus * mPlayer->getStats().getHp().max)/8;
+                        int32_t maxRange = minRange * 3;
+                        int32_t toHeal = mPlayer->getWorld()->mRng->randomInRange(minRange, maxRange);
+                        mPlayer->heal(toHeal);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
+                    }
+                }
             }
             default:
                 break;
