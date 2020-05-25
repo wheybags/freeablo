@@ -253,21 +253,19 @@ namespace FAGui
                         mPlayer->mInventory.remove(target);
                         break;
                     }
-                    case FAWorld::ItemMiscId::elixirOfMagic:
-                    {
+                    case FAWorld::ItemMiscId::elixirOfMagic: {
                         FAWorld::Potion potion = FAWorld::Potion();
                         potion.increaseMagic(mPlayer, 1);
                         Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
                         mPlayer->mInventory.remove(target);
                         break;
                     }
-                    case FAWorld::ItemMiscId::elixirOfVitality:
-                    {
-                         FAWorld::Potion potion = FAWorld::Potion();
-                         potion.increaseVitality(mPlayer, 1);
-                         Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                         mPlayer->mInventory.remove(target);
-                         break;
+                    case FAWorld::ItemMiscId::elixirOfVitality: {
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.increaseVitality(mPlayer, 1);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
                     }
                     case FAWorld::ItemMiscId::elixirOfStrength: {
                         FAWorld::Potion potion = FAWorld::Potion();
@@ -286,6 +284,8 @@ namespace FAGui
                         mPlayer->mInventory.remove(target);
                         break;
                     }
+                    case FAWorld::ItemMiscId::none:
+                        break;
                 }
             }
             default:
