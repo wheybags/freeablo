@@ -68,4 +68,12 @@ namespace FAWorld
     };
 
     void Potion::restoreManaFull(Player* player) { player->restoreMana(); }
+
+    void Potion::increaseStrength(Player* player, int32_t delta) { player->addStrength(delta); };
+
+    void Potion::increaseMagic(Player* player, int32_t delta) { player->addMagic(delta); };
+
+    void Potion::increaseDexterity(Player* player, int32_t delta) { player->addDexterity(delta); };
+
+    void Potion::increaseVitality(Player* player, int32_t delta) { player->addVitality(delta); };
 }

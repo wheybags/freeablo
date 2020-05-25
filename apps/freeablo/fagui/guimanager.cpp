@@ -219,14 +219,16 @@ namespace FAGui
                         mPlayer->mInventory.remove(target);
                         break;
                     }
-                    case FAWorld::ItemMiscId::potionOfFullMana: {
+                    case FAWorld::ItemMiscId::potionOfFullMana:
+                    {
                         FAWorld::Potion potion = FAWorld::Potion();
                         potion.restoreManaFull(mPlayer);
                         Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
                         mPlayer->mInventory.remove(target);
                         break;
                     }
-                    case FAWorld::ItemMiscId::potionOfRejuvenation: {
+                    case FAWorld::ItemMiscId::potionOfRejuvenation:
+                    {
                         FAWorld::Potion potion = FAWorld::Potion();
                         potion.restoreHp(mPlayer);
                         potion.restoreMana(mPlayer);
@@ -234,7 +236,8 @@ namespace FAGui
                         mPlayer->mInventory.remove(target);
                         break;
                     }
-                    case FAWorld::ItemMiscId::potionOfFullRejuvenation: {
+                    case FAWorld::ItemMiscId::potionOfFullRejuvenation:
+                    {
                         FAWorld::Potion potion = FAWorld::Potion();
                         potion.restoreHpFull(mPlayer);
                         potion.restoreManaFull(mPlayer);
@@ -242,7 +245,47 @@ namespace FAGui
                         mPlayer->mInventory.remove(target);
                         break;
                     }
-                    
+                    case FAWorld::ItemMiscId::elixirOfDexterity:
+                    {
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.increaseDexterity(mPlayer, 1);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
+                    }
+                    case FAWorld::ItemMiscId::elixirOfMagic:
+                    {
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.increaseMagic(mPlayer, 1);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
+                    }
+                    case FAWorld::ItemMiscId::elixirOfVitality:
+                    {
+                         FAWorld::Potion potion = FAWorld::Potion();
+                         potion.increaseVitality(mPlayer, 1);
+                         Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                         mPlayer->mInventory.remove(target);
+                         break;
+                    }
+                    case FAWorld::ItemMiscId::elixirOfStrength: {
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.increaseStrength(mPlayer, 1);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
+                    }
+                    case FAWorld::ItemMiscId::spectralElixir: {
+                        FAWorld::Potion potion = FAWorld::Potion();
+                        potion.increaseStrength(mPlayer, 3);
+                        potion.increaseVitality(mPlayer, 3);
+                        potion.increaseMagic(mPlayer, 3);
+                        potion.increaseDexterity(mPlayer, 3);
+                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
+                        mPlayer->mInventory.remove(target);
+                        break;
+                    }
                 }
             }
             default:

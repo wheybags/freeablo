@@ -16,11 +16,11 @@ namespace FAWorld
         void restoreHpFull(Player* player);
         void restoreManaFull(Player* player);
 
-        /* for later elixer implimentation
-        void increaseStr(Player* player);
-        void increaseMagic(Player* player);
-        void increaseDex(Player* player);
-        void increaseVit(Player* player);
-        */
+        //exliers
+        void increaseStrength(Player* player, int32_t delta);
+        void increaseMagic(Player* player, int32_t delta);
+        void increaseDexterity(Player* player, int32_t delta);
+        void increaseVitality(Player* player, int32_t delta);
+        
     };
 }
