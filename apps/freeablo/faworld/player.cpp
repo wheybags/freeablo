@@ -35,19 +35,24 @@ namespace FAWorld
                 mStats.baseStats.maxMagic = 50;
                 mStats.baseStats.maxDexterity = 60;
                 mStats.baseStats.maxVitality = 100;
+                break;
             }
             case PlayerClass::rogue: {
                 mStats.baseStats.maxStrength = 50;
                 mStats.baseStats.maxMagic = 70;
                 mStats.baseStats.maxDexterity = 250;
                 mStats.baseStats.maxVitality = 80;
+                break;
             }
             case PlayerClass::sorceror: {
                 mStats.baseStats.maxStrength = 45;
                 mStats.baseStats.maxMagic = 250;
                 mStats.baseStats.maxDexterity = 85;
                 mStats.baseStats.maxVitality = 80;
+                break;
             }
+            case PlayerClass::none:
+                break;
         }
 
         mFaction = Faction::heaven();
@@ -595,28 +600,28 @@ namespace FAWorld
         {
             mStats.baseStats.strength += delta;
         }
-    };
+    }
     void Player::addMagic(int32_t delta)
     {
         if (mStats.baseStats.magic < mStats.baseStats.maxMagic)
         {
             mStats.baseStats.magic += delta;
         }
-    };
+    }
     void Player::addDexterity(int32_t delta)
     {
         if (mStats.baseStats.dexterity < mStats.baseStats.maxDexterity)
         {
             mStats.baseStats.dexterity += delta;
         }
-    };
+    }
     void Player::addVitality(int32_t delta)
     {
         if (mStats.baseStats.vitality < mStats.baseStats.maxVitality)
         {
             mStats.baseStats.vitality += delta;
         }
-    };
+    }
 
     BaseStats Player::initialiseActorStats(const DiabloExe::CharacterStats& from)
     {
