@@ -35,18 +35,21 @@ namespace FAWorld
                 mStats.baseStats.maxMagic = 50;
                 mStats.baseStats.maxDexterity = 60;
                 mStats.baseStats.maxVitality = 100;
+                break;
             }
             case PlayerClass::rogue: {
                 mStats.baseStats.maxStrength = 50;
                 mStats.baseStats.maxMagic = 70;
                 mStats.baseStats.maxDexterity = 250;
                 mStats.baseStats.maxVitality = 80;
+                break;
             }
             case PlayerClass::sorceror: {
                 mStats.baseStats.maxStrength = 45;
                 mStats.baseStats.maxMagic = 250;
                 mStats.baseStats.maxDexterity = 85;
                 mStats.baseStats.maxVitality = 80;
+                break;
             }
         }
 
