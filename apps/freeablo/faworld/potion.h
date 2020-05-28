@@ -5,12 +5,9 @@
 namespace FAWorld
 {
     // Class Potion for all potion functions
-    class Potion
+    static class Potion
     {
     public:
-        Potion();
-        ~Potion();
-
         void restoreHp(Player* player);
         void restoreMana(Player* player);
         void restoreHpFull(Player* player);

@@ -2,36 +2,35 @@
 #include "item.h"
 #include "player.h"
 #include <random/random.h>
+#include <string>
 
 namespace FAWorld
 {
-    Potion::Potion(){};
-    Potion::~Potion(){};
-
+    //https:// wheybags.gitlab.io/jarulfs-guide/#potions-and-elixirs
+    //Used for the formulas
     void Potion::restoreHp(Player* player)
     {
-        double bonus = 1.0;
-        // bonus came from Jarulf's guide
+        std::string bonus = "1.0";
+
         switch (player->getClass())
         {
             case FAWorld::PlayerClass::warrior: {
-                bonus = 2.0;
+                bonus = "2.0";
                 break;
             }
             case FAWorld::PlayerClass::rogue: {
-                bonus = 1.5;
+                bonus = "1.5f";
                 break;
             }
             case FAWorld::PlayerClass::sorceror: {
-                bonus = 1.0;
+                bonus = "1.0f";
                 break;
             }
             default:
                 break;
         }
 
-        // potion formula from jarulf's guide
-        int32_t min = (bonus * player->getStats().getHp().max) / 8;
+        int32_t min = (int32_t)(FixedPoint(bonus.c_str()) * FixedPoint(player->getStats().getHp().max)/ FixedPoint(8)).floor();
         int32_t max = min * 3;
         int32_t toHeal = player->getWorld()->mRng->randomInRange(min, max);
         player->heal(toHeal);
@@ -41,27 +40,27 @@ namespace FAWorld
 
     void Potion::restoreMana(Player* player)
     {
-        double bonus = 1.0;
-        // bonus came from Jarulf's guide
+        std::string bonus = "1.0";
+
         switch (player->getClass())
         {
             case FAWorld::PlayerClass::warrior: {
-                bonus = 1.0;
+                bonus = "2.0";
                 break;
             }
             case FAWorld::PlayerClass::rogue: {
-                bonus = 1.5;
+                bonus = "1.5f";
                 break;
             }
             case FAWorld::PlayerClass::sorceror: {
-                bonus = 2.0;
+                bonus = "1.0f";
                 break;
             }
             default:
                 break;
         }
-        // potion formula from jarulf's guide
-        int32_t min = (bonus * player->getStats().getHp().max) / 8;
+
+        int32_t min = (int32_t)(FixedPoint(bonus.c_str()) * FixedPoint(player->getStats().getHp().max) / FixedPoint(8)).floor();
         int32_t max = min * 3;
         player->getWorld()->mRng->randomInRange(min, max);
         player->restoreMana();

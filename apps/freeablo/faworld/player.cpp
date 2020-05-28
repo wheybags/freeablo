@@ -30,6 +30,7 @@ namespace FAWorld
         mStats.mLevelXpCounts = charStats.mNextLevelExp;
         switch (mPlayerClass)
         {
+            //https://wheybags.gitlab.io/jarulfs-guide/#maximum-stats for max base stats numbers
             case PlayerClass::warrior: {
                 mStats.baseStats.maxStrength = 250;
                 mStats.baseStats.maxMagic = 50;
@@ -598,28 +599,28 @@ namespace FAWorld
     {
         if (mStats.baseStats.strength < mStats.baseStats.maxStrength)
         {
-            mStats.baseStats.strength += delta;
+            mStats.baseStats.strength = std::min(mStats.baseStats.strength + delta, mStats.baseStats.maxStrength);
         }
     }
     void Player::addMagic(int32_t delta)
     {
         if (mStats.baseStats.magic < mStats.baseStats.maxMagic)
         {
-            mStats.baseStats.magic += delta;
+            mStats.baseStats.magic = std::min(mStats.baseStats.magic + delta, mStats.baseStats.maxMagic);
         }
     }
     void Player::addDexterity(int32_t delta)
     {
         if (mStats.baseStats.dexterity < mStats.baseStats.maxDexterity)
         {
-            mStats.baseStats.dexterity += delta;
+            mStats.baseStats.dexterity = std::min(mStats.baseStats.dexterity + delta, mStats.baseStats.maxDexterity);
         }
     }
     void Player::addVitality(int32_t delta)
     {
         if (mStats.baseStats.vitality < mStats.baseStats.maxVitality)
         {
-            mStats.baseStats.vitality += delta;
+            mStats.baseStats.vitality = std::min(mStats.baseStats.vitality + delta, mStats.baseStats.maxVitality);
         }
     }
 
