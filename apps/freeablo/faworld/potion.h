@@ -5,19 +5,19 @@
 namespace FAWorld
 {
     // Class Potion for all potion functions
-    static class Potion
+    class Potion
     {
     public:
-        void restoreHp(Player* player);
-        void restoreMana(Player* player);
-        void restoreHpFull(Player* player);
-        void restoreManaFull(Player* player);
+        static void restoreHp(Player* player);
+        static void restoreMana(Player* player);
+        static void restoreHpFull(Player* player);
+        static void restoreManaFull(Player* player);
 
         //exliers
-        void increaseStrength(Player* player, int32_t delta);
-        void increaseMagic(Player* player, int32_t delta);
-        void increaseDexterity(Player* player, int32_t delta);
-        void increaseVitality(Player* player, int32_t delta);
+        static void increaseStrength(Player* player, int32_t delta);
+        static void increaseMagic(Player* player, int32_t delta);
+        static void increaseDexterity(Player* player, int32_t delta);
+        static void increaseVitality(Player* player, int32_t delta);
         
     };
 }
