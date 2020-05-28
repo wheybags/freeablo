@@ -295,6 +295,8 @@ namespace FAGui
                         break;
                     case FAWorld::ItemMiscId::unique:
                         break;
+                    case FAWorld::ItemMiscId::invalid:
+                        break;
                     case FAWorld::ItemMiscId::none:
                         break;
                 }
