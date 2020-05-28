@@ -308,8 +308,6 @@ namespace FAGui
                         break;
                     case FAWorld::ItemMiscId::none:
                         break;
-                    case FAWorld::ItemMiscId::none:
-                        break;
                 }
             }
             default:
