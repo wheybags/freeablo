@@ -253,28 +253,32 @@ namespace FAGui
                         mPlayer->mInventory.remove(target);
                         break;
                     }
-                    case FAWorld::ItemMiscId::elixirOfMagic: {
+                    case FAWorld::ItemMiscId::elixirOfMagic: 
+                    {
                         FAWorld::Potion potion = FAWorld::Potion();
                         potion.increaseMagic(mPlayer, 1);
                         Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
                         mPlayer->mInventory.remove(target);
                         break;
                     }
-                    case FAWorld::ItemMiscId::elixirOfVitality: {
+                    case FAWorld::ItemMiscId::elixirOfVitality: 
+                    {
                         FAWorld::Potion potion = FAWorld::Potion();
                         potion.increaseVitality(mPlayer, 1);
                         Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
                         mPlayer->mInventory.remove(target);
                         break;
                     }
-                    case FAWorld::ItemMiscId::elixirOfStrength: {
+                    case FAWorld::ItemMiscId::elixirOfStrength: 
+                    {
                         FAWorld::Potion potion = FAWorld::Potion();
                         potion.increaseStrength(mPlayer, 1);
                         Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
                         mPlayer->mInventory.remove(target);
                         break;
                     }
-                    case FAWorld::ItemMiscId::spectralElixir: {
+                    case FAWorld::ItemMiscId::spectralElixir: 
+                    {
                         FAWorld::Potion potion = FAWorld::Potion();
                         potion.increaseStrength(mPlayer, 3);
                         potion.increaseVitality(mPlayer, 3);
@@ -284,6 +288,26 @@ namespace FAGui
                         mPlayer->mInventory.remove(target);
                         break;
                     }
+                    case FAWorld::ItemMiscId::amulet:
+                        break;
+                    case FAWorld::ItemMiscId::book:
+                        break;
+                    case FAWorld::ItemMiscId::ear:
+                        break;
+                    case FAWorld::ItemMiscId::mapOfTheStars:
+                        break;
+                    case FAWorld::ItemMiscId::ring:
+                        break;
+                    case FAWorld::ItemMiscId::scroll:
+                        break;
+                    case FAWorld::ItemMiscId::scrollWithTarget:
+                        break;
+                    case FAWorld::ItemMiscId::staff:
+                        break;
+                    case FAWorld::ItemMiscId::unique:
+                        break;
+                    case FAWorld::ItemMiscId::none:
+                        break;
                     case FAWorld::ItemMiscId::none:
                         break;
                 }
