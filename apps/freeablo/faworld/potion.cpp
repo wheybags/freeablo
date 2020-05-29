@@ -10,7 +10,7 @@ namespace FAWorld
     void Potion::restoreHp(Player* player)
     {
             case FAWorld::PlayerClass::warrior: {
-                bonus = FixedPoint("2.0");
+                bonus = FixedPoint(2);
                 break;
             }
             case FAWorld::PlayerClass::rogue: {
@@ -18,7 +18,7 @@ namespace FAWorld
                 break;
             }
             case FAWorld::PlayerClass::sorceror: {
-                bonus = FixedPoint("1.0");
+                bonus = FixedPoint(1);
                 break;
             }
             default:
@@ -40,7 +40,7 @@ namespace FAWorld
         switch (player->getClass())
         {
             case FAWorld::PlayerClass::warrior: {
-                bonus = FixedPoint("1.0");
+                bonus = FixedPoint(1);
                 break;
             }
             case FAWorld::PlayerClass::rogue: {
@@ -48,7 +48,7 @@ namespace FAWorld
                 break;
             }
             case FAWorld::PlayerClass::sorceror: {
-                bonus = FixedPoint("2.0");
+                bonus = FixedPoint(2);
                 break;
             }
             default:
