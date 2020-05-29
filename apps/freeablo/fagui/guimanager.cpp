@@ -21,6 +21,7 @@
 #include <cstdio>
 #include <faworld/item/equipmentitem.h>
 #include <faworld/item/equipmentitembase.h>
+#include <faworld/item/golditem.h>
 #include <fmt/format.h>
 #include <iostream>
 #include <memory>
@@ -178,23 +179,11 @@ namespace FAGui
     void GuiManager::triggerItem(const FAWorld::EquipTarget& target)
     {
         const FAWorld::Item2* item = mPlayer->mInventory.getItemAt(target);
-        // ITEMGOLD
-        //        if (!item.isUsable())
-        //            return;
-        //
-        //        mGoldSplitTarget = nullptr;
-        //
-        //        switch (item.getType())
-        //        {
-        //            case ItemType::gold:
-        //            {
-        //                mGoldSplitTarget = &item;
-        //                mGoldSplitCnt = 0;
-        //                break;
-        //            }
-        //            default:
-        //                break;
-        //        }
+        if (item->getAsGoldItem())
+        {
+            mGoldSplitTarget = target;
+            mGoldSplitCnt = 0;
+        }
     }
 
     void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight, bool checkerboarded)
@@ -336,30 +325,40 @@ namespace FAGui
 
             if (mGoldSplitTarget)
             {
-                int32_t screenW = 0, screenH = 0;
-                FARender::Renderer* renderer = FARender::Renderer::get();
-                renderer->getWindowDimensions(screenW, screenH);
-                Render::SpriteGroup* img = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.goldSplitBackground);
-                float leftTopX = 31.0, leftTopY = 42.0;
-                nk_layout_space_push(ctx, nk_rect(leftTopX, leftTopY, img->getWidth(), img->getHeight()));
-                nk_image(ctx, img->getNkImage());
-                float spacing = 28.0;
-                auto doTextLine = [&](const char* text, double y) {
-                    nk_layout_space_push(ctx, nk_rect(leftTopX + spacing, y, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
-                    smallText(ctx, text, TextColor::golden, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_TOP);
-                };
-                doTextLine(fmt::format("You have {} gold", mGoldSplitTarget->mCount).c_str(), 76.0);
-                doTextLine(fmt::format("{}.  How many do", (mGoldSplitTarget->mCount > 1 ? "pieces" : "piece")).c_str(), 92.0);
-                doTextLine("you want to remove?", 110.0);
+                const Item2* goldSplitTargetItem = mPlayer->mInventory.getItemAt(*mGoldSplitTarget);
+                const GoldItem* goldItem = goldSplitTargetItem->getAsGoldItem();
+                if (!goldItem)
                 {
-                    auto offset = 6;
-                    nk_layout_space_push(ctx, nk_rect(leftTopX + spacing + offset, 129.0, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
-                    auto text = mGoldSplitCnt ? std::to_string(mGoldSplitCnt) : "";
-                    smallText(ctx, text.c_str(), TextColor::white, NK_TEXT_ALIGN_LEFT | NK_TEXT_ALIGN_TOP);
-                    auto width = smallTextWidth(text.c_str());
-                    auto spr = mSmallPentagram->getCurrentFrame().first;
-                    nk_layout_space_push(ctx, nk_rect(leftTopX + spacing + offset + width, 129.0, spr->getWidth(), spr->getHeight()));
-                    nk_image(ctx, mSmallPentagram->getCurrentNkImage());
+                    mGoldSplitTarget = std::nullopt;
+                }
+                else
+                {
+                    int32_t screenW = 0, screenH = 0;
+                    FARender::Renderer* renderer = FARender::Renderer::get();
+                    renderer->getWindowDimensions(screenW, screenH);
+                    Render::SpriteGroup* img = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.goldSplitBackground);
+                    float leftTopX = 31.0, leftTopY = 42.0;
+                    nk_layout_space_push(ctx, nk_rect(leftTopX, leftTopY, img->getWidth(), img->getHeight()));
+                    nk_image(ctx, img->getNkImage());
+                    float spacing = 28.0;
+                    auto doTextLine = [&](const char* text, double y) {
+                        nk_layout_space_push(ctx, nk_rect(leftTopX + spacing, y, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
+                        smallText(ctx, text, TextColor::golden, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_TOP);
+                    };
+
+                    doTextLine(fmt::format("You have {} gold", goldItem->getCount()).c_str(), 76.0);
+                    doTextLine(fmt::format("{}.  How many do", (goldItem->getCount() > 1 ? "pieces" : "piece")).c_str(), 92.0);
+                    doTextLine("you want to remove?", 110.0);
+                    {
+                        auto offset = 6;
+                        nk_layout_space_push(ctx, nk_rect(leftTopX + spacing + offset, 129.0, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
+                        auto text = mGoldSplitCnt ? std::to_string(mGoldSplitCnt) : "";
+                        smallText(ctx, text.c_str(), TextColor::white, NK_TEXT_ALIGN_LEFT | NK_TEXT_ALIGN_TOP);
+                        auto width = smallTextWidth(text.c_str());
+                        auto spr = mSmallPentagram->getCurrentFrame().first;
+                        nk_layout_space_push(ctx, nk_rect(leftTopX + spacing + offset + width, 129.0, spr->getWidth(), spr->getHeight()));
+                        nk_image(ctx, mSmallPentagram->getCurrentNkImage());
+                    }
                 }
             }
             nk_layout_space_end(ctx);
@@ -969,7 +968,7 @@ namespace FAGui
                 break;
             case Engine::KeyboardInputAction::reject:
                 if (mGoldSplitTarget)
-                    mGoldSplitTarget = nullptr;
+                    mGoldSplitTarget = std::nullopt;
                 break;
             case Engine::KeyboardInputAction::accept:
                 if (mGoldSplitTarget)
@@ -977,12 +976,12 @@ namespace FAGui
                     if (mGoldSplitCnt > 0)
                     {
                         FAWorld::PlayerInput input(
-                            FAWorld::PlayerInput::SplitGoldStackIntoCursorData{mGoldSplitTarget->mInvX, mGoldSplitTarget->mInvY, mGoldSplitCnt},
+                            FAWorld::PlayerInput::SplitGoldStackIntoCursorData{mGoldSplitTarget->posX, mGoldSplitTarget->posY, mGoldSplitCnt},
                             mPlayer->getId());
                         Engine::EngineMain::get()->getLocalInputHandler()->addInput(input);
                     }
 
-                    mGoldSplitTarget = nullptr;
+                    mGoldSplitTarget = std::nullopt;
                 }
                 break;
             case Engine::KeyboardInputAction::spellHotkeyF5:
@@ -1011,11 +1010,19 @@ namespace FAGui
     {
         if (mGoldSplitTarget && !key.has_modifiers())
         {
+            const FAWorld::Item2* goldSplitTargetItem = mPlayer->mInventory.getItemAt(*mGoldSplitTarget);
+            const FAWorld::GoldItem* goldItem = goldSplitTargetItem->getAsGoldItem();
+            if (!goldItem)
+            {
+                mGoldSplitTarget = std::nullopt;
+                return;
+            }
+
             if (key.key >= '0' && key.key <= '9')
             {
-                int digit = key.key - '0';
-                auto newCnt = mGoldSplitCnt * 10 + digit;
-                if (newCnt <= mGoldSplitTarget->mCount)
+                int32_t digit = key.key - '0';
+                int32_t newCnt = mGoldSplitCnt * 10 + digit;
+                if (newCnt <= goldItem->getCount())
                     mGoldSplitCnt = newCnt;
             }
             else if (key.key == '\b')
@@ -1054,7 +1061,7 @@ namespace FAGui
         mCurLeftPanel = FAGui::PanelType::none;
         mCurRightPanel = FAGui::PanelType::none;
         mShowSpellSelectionMenu = false;
-        mGoldSplitTarget = nullptr;
+        mGoldSplitTarget = std::nullopt;
     }
 
     void GuiManager::togglePanel(PanelType type)
@@ -1065,9 +1072,8 @@ namespace FAGui
         else
             curPanel = type;
         if (mCurRightPanel != PanelType::inventory)
-            mGoldSplitTarget = nullptr;
+            mGoldSplitTarget = std::nullopt;
     }
 
     std::string cursorPath = "data/inv/objcurs.cel";
-    uint32_t cursorFrame = 0;
 }

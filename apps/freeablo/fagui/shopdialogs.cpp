@@ -109,11 +109,7 @@ namespace FAGui
 
         const int32_t price = invItem->getPrice();
 
-        std::unique_ptr<FAWorld::Item2> goldItem = mGuiManager.mDialogManager.mWorld.getItemFactory().generateBaseItem(FAWorld::ItemId::gold);
-        // ITEMGOLD
-        // goldItem.mCount = price - invItem.getInvVolume() * goldItem.getMaxCount();
-
-        if (!mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(*goldItem))
+        if (!mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.canFitGold(price))
         {
             this->mGuiManager.mDialogManager.pushDialog(new MessagePopup(this->mGuiManager, "You do not have enough room in inventory"));
             return;

@@ -1,5 +1,6 @@
 #include "itembaseholder.h"
 #include "equipmentitembase.h"
+#include "golditembase.h"
 #include "usableitembase.h"
 #include <diabloexe/diabloexe.h>
 #include <faworld/item/item.h>
@@ -11,7 +12,9 @@ namespace FAWorld
     {
         for (const auto& item : exe.getBaseItems())
         {
-            if (item.equipType != ItemEquipType::none)
+            if (item.idName == "gold")
+                mAllItemBases[item.idName] = std::unique_ptr<ItemBase>(new GoldItemBase(item));
+            else if (item.equipType != ItemEquipType::none)
                 mAllItemBases[item.idName] = std::unique_ptr<ItemBase>(new EquipmentItemBase(item));
             else if (item.isUsable)
                 mAllItemBases[item.idName] = std::unique_ptr<ItemBase>(new UsableItemBase(item));

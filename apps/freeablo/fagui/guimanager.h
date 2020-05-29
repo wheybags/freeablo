@@ -6,6 +6,7 @@
 #include "textcolor.h"
 #include <chrono>
 #include <fa_nuklear.h>
+#include <faworld/equiptarget.h>
 #include <functional>
 #include <memory>
 #include <nuklearmisc/nuklearframedump.h>
@@ -174,7 +175,7 @@ namespace FAGui
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::unique_ptr<FARender::AnimationPlayer> mSmallPentagram;
         std::unique_ptr<MenuHandler> mMenuHandler;
-        const FAWorld::Item* mGoldSplitTarget = nullptr;
+        std::optional<FAWorld::EquipTarget> mGoldSplitTarget;
         int mGoldSplitCnt = 0;
         int mCurSpellbookTab = 0;
         bool mShowSpellSelectionMenu = false;

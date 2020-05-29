@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <engine/enginemain.h>
+#include <faworld/item/golditem.h>
+#include <faworld/item/golditembase.h>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -79,23 +81,6 @@ namespace FAWorld
 
     bool BasicInventory::canFitItem(const Item2& item) const
     {
-        // ITEMGOLD
-        //        if (item.getBase()->mType == ItemType::gold)
-        //        {
-        //            const auto maxGoldPerSlot = item.getMaxCount();
-        //            int32_t capacity = 0;
-        //
-        //            for (const auto& slot : mInventoryBox)
-        //            {
-        //                if (slot.isEmpty())
-        //                    capacity += maxGoldPerSlot;
-        //                else if (slot.getType() == ItemType::gold)
-        //                    capacity += maxGoldPerSlot - slot.mCount;
-        //            }
-        //
-        //            return item.mCount <= capacity;
-        //        }
-
         Vec2i itemSize = item.getBase()->mSize;
         if (mTreatAllItemsAs1by1)
             itemSize = Vec2i(1, 1);
@@ -128,11 +113,6 @@ namespace FAWorld
 
     bool BasicInventory::autoPlaceItem(std::unique_ptr<Item2>& item, PlacementCheckOrder order)
     {
-        // ITEMGOLD
-        // if (item.getType() == ItemType::gold)
-        //    if (fillExistingGoldItems(item))
-        //        return true;
-
         if (order == PlacementCheckOrder::Automatic)
         {
             order = PlacementCheckOrder::FromLeftTop;
@@ -398,6 +378,17 @@ namespace FAWorld
             }
         }
 
+        if (GoldItem* goldItem = item->getAsGoldItem())
+        {
+            int32_t count = goldItem->getCount();
+            count = placeGold(count, Engine::EngineMain::get()->mWorld->getItemFactory());
+
+            if (count)
+                release_assert(goldItem->trySetCount(count));
+            else
+                item.reset();
+        }
+
         return mMainInventory.autoPlaceItem(item, order);
     }
 
@@ -531,11 +522,6 @@ namespace FAWorld
         std::unique_ptr<Item2> tmp = mCursorHeld.remove(0, 0);
         inv.swapItem(tmp, slot.posX, slot.posY);
 
-        // when removing a two handed item, make sure we remove it from both hands
-        // if ((slot.type == EquipTargetType::leftHand || slot.type == EquipTargetType::rightHand) && tmp->getBase()->getEquipType() ==
-        // ItemEquipType::twoHanded)
-        //    getInvMutable(slot.type == EquipTargetType::leftHand ? EquipTargetType::rightHand : EquipTargetType::leftHand).remove(0, 0);
-
         setCursorHeld(std::move(tmp));
     }
 
@@ -606,110 +592,148 @@ namespace FAWorld
         return retval;
     }
 
-    // ITEMGOLD
-
     int32_t CharacterInventory::placeGold(int32_t quantity, const ItemFactory& itemFactory)
     {
-        //        if (quantity == 0)
-        //            return 0;
-        //
-        //        // first part - filling existing gold piles
-        //        for (const auto& item : mMainInventory)
-        //        {
-        //            if (item.item->getBase()->mType != ItemType::gold)
-        //                continue;
-        //            int32_t room = item.getMaxCount() - item.mCount;
-        //            if (room > 0)
-        //            {
-        //                auto toPlace = std::min(quantity, room);
-        //
-        //                Item copy(item);
-        //                copy.mCount += toPlace;
-        //                int32_t x = item.mInvX;
-        //                int32_t y = item.mInvY;
-        //
-        //                release_assert(!mMainInventory.remove(x, y).isEmpty());
-        //                release_assert(mMainInventory.placeItem(copy, x, y).succeeded());
-        //
-        //                quantity -= toPlace;
-        //                if (quantity == 0)
-        //                    return 0;
-        //            }
-        //        }
-        //        // second part - filling the empty slots with gold
-        //        for (int32_t x = 0; x != mMainInventory.width(); x++)
-        //        {
-        //            for (int32_t y = 0; y != mMainInventory.height(); x++)
-        //            {
-        //                if (mMainInventory.getItem(x, y).isEmpty())
-        //                {
-        //                    auto item = itemFactory.generateBaseItem(ItemId::gold);
-        //                    auto toPlace = std::min(quantity, item.getMaxCount());
-        //                    item.mCount = toPlace;
-        //                    mMainInventory.placeItem(item, x, y);
-        //                    quantity -= toPlace;
-        //                    if (quantity == 0)
-        //                        return 0;
-        //                }
-        //            }
-        //        }
+        if (quantity == 0)
+            return 0;
+
+        // first part - filling existing gold piles
+        for (const auto& item : mMainInventory)
+        {
+            GoldItem* goldItem = item.item->getAsGoldItem();
+            if (!goldItem)
+                continue;
+
+            int32_t room = goldItem->getBase()->mMaxCount - goldItem->getCount();
+            if (room > 0)
+            {
+                int32_t toPlace = std::min(quantity, room);
+                release_assert(goldItem->trySetCount(goldItem->getCount() + toPlace));
+
+                quantity -= toPlace;
+                if (quantity == 0)
+                    return 0;
+            }
+        }
+        // second part - filling the empty slots with gold
+        for (int32_t x = 0; x != mMainInventory.width(); x++)
+        {
+            for (int32_t y = 0; y != mMainInventory.height(); x++)
+            {
+                if (!mMainInventory.getItem(x, y))
+                {
+                    std::unique_ptr<Item2> newItem = itemFactory.generateBaseItem(ItemId::gold);
+                    GoldItem* goldItem = newItem->getAsGoldItem();
+
+                    int32_t toPlace = std::min(quantity, goldItem->getBase()->mMaxCount);
+                    release_assert(goldItem->trySetCount(toPlace));
+                    release_assert(mMainInventory.placeItem(newItem, x, y).succeeded());
+
+                    quantity -= toPlace;
+                    if (quantity == 0)
+                        return 0;
+                }
+            }
+        }
 
         return quantity;
     }
 
+    bool CharacterInventory::canFitGold(int32_t quantity) const
+    {
+        if (quantity == 0)
+            return true;
+
+        // first part - filling existing gold piles
+        for (const auto& item : mMainInventory)
+        {
+            GoldItem* goldItem = item.item->getAsGoldItem();
+            if (!goldItem)
+                continue;
+
+            int32_t room = goldItem->getBase()->mMaxCount - goldItem->getCount();
+            quantity -= room;
+            if (quantity <= 0)
+                return true;
+        }
+
+        const GoldItemBase* goldItemBase =
+            safe_downcast<const GoldItemBase*>(Engine::EngineMain::get()->mWorld->getItemFactory().getItemBaseHolder().get("gold"));
+
+        // second part - filling the empty slots with gold
+        for (int32_t x = 0; x != mMainInventory.width(); x++)
+        {
+            for (int32_t y = 0; y != mMainInventory.height(); x++)
+            {
+                if (!mMainInventory.getItem(x, y))
+                {
+                    quantity -= goldItemBase->mMaxCount;
+                    if (quantity <= 0)
+                        return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     void CharacterInventory::takeOutGold(int32_t quantity)
     {
-        //        for (const Item& item : mMainInventory)
-        //        {
-        //            if (item.getType() != ItemType::gold)
-        //                continue;
-        //
-        //            Item copy = item;
-        //            auto toTake = std::min(quantity, copy.mCount);
-        //            copy.mCount -= toTake;
-        //            quantity -= toTake;
-        //
-        //            int32_t x = item.mInvX;
-        //            int32_t y = item.mInvY;
-        //
-        //            mMainInventory.remove(x, y);
-        //            if (copy.mCount > 0)
-        //            {
-        //                PlaceItemResult result = mMainInventory.placeItem(copy, x, y);
-        //                release_assert(result.succeeded());
-        //            }
-        //
-        //            if (quantity == 0)
-        //                return;
-        //        }
+        for (const auto& item : mMainInventory)
+        {
+            GoldItem* goldItem = item.item->getAsGoldItem();
+            if (!goldItem)
+                continue;
+
+            int32_t toTake = std::min(quantity, goldItem->getCount());
+            int32_t newPileCount = goldItem->getCount() - toTake;
+
+            release_assert(newPileCount >= 0);
+
+            if (newPileCount == 0)
+                mMainInventory.remove(item.position.x, item.position.y);
+            else
+                release_assert(goldItem->trySetCount(newPileCount));
+
+            quantity -= toTake;
+            if (quantity == 0)
+                return;
+        }
 
         message_and_abort("Not enough gold");
     }
 
     void CharacterInventory::splitGoldIntoCursor(int32_t x, int32_t y, int32_t amountToTransferToCursor, const ItemFactory& itemFactory)
     {
-        //        Item goldFromInventoryItem = mMainInventory.remove(x, y);
-        //        release_assert(goldFromInventoryItem.mBaseId == ItemId::gold);
-        //
-        //        amountToTransferToCursor = std::min(goldFromInventoryItem.mCount, amountToTransferToCursor);
-        //        goldFromInventoryItem.mCount -= amountToTransferToCursor;
-        //
-        //        Item cursorGold = itemFactory.generateBaseItem(ItemId::gold);
-        //        cursorGold.mCount = amountToTransferToCursor;
-        //
-        //        setCursorHeld(cursorGold);
-        //        if (goldFromInventoryItem.mCount > 0)
-        //            mMainInventory.placeItem(goldFromInventoryItem, x, y);
+        std::unique_ptr<Item2> goldFromInventory = mMainInventory.remove(x, y);
+        GoldItem* goldFromInventoryGoldItem = goldFromInventory->getAsGoldItem();
+        release_assert(goldFromInventoryGoldItem);
+
+        amountToTransferToCursor = std::min(goldFromInventoryGoldItem->getCount(), amountToTransferToCursor);
+        int32_t newPileAmount = goldFromInventoryGoldItem->getCount() - amountToTransferToCursor;
+
+        release_assert(newPileAmount >= 0);
+
+        if (newPileAmount > 0)
+        {
+            release_assert(goldFromInventoryGoldItem->trySetCount(newPileAmount));
+            mMainInventory.placeItem(goldFromInventory, x, y);
+        }
+
+        std::unique_ptr<Item2> cursorGold = itemFactory.generateBaseItem(ItemId::gold);
+        release_assert(cursorGold->getAsGoldItem()->trySetCount(amountToTransferToCursor));
+
+        setCursorHeld(std::move(cursorGold));
     }
 
     int32_t CharacterInventory::getTotalGold() const
     {
         int32_t total = 0;
-        //        for (const Item2* item : mMainInventory)
-        //        {
-        //            if (item.getType() == ItemType::gold)
-        //                total += item.mCount;
-        //        }
+        for (const auto& slot : mMainInventory)
+        {
+            if (slot.item->getAsGoldItem())
+                total += slot.item->getAsGoldItem()->getCount();
+        }
         return total;
     }
 }

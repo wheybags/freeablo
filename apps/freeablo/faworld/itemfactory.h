@@ -55,6 +55,8 @@ namespace FAWorld
         void saveItem(const Item2& item, FASaveGame::GameSaver& saver) const;
         std::unique_ptr<Item2> loadItem(FASaveGame::GameLoader& loader) const;
 
+        const ItemBaseHolder& getItemBaseHolder() const { return mItemBaseHolder; }
+
     private:
         const DiabloExe::ExeItem& getInfo(ItemId id) const;
 

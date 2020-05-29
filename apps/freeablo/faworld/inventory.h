@@ -173,6 +173,7 @@ namespace FAWorld
 
         /// Places gold, combining piles up to max pile amount. If total quantity can't fit, returns the remainder
         int32_t placeGold(int32_t quantity, const ItemFactory& itemFactory);
+        bool canFitGold(int32_t quantity) const;
         void takeOutGold(int32_t quantity);
         void splitGoldIntoCursor(int32_t x, int32_t y, int32_t amountToTransferToCursor, const ItemFactory& itemFactory);
         int32_t getTotalGold() const;

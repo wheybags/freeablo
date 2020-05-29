@@ -15,6 +15,7 @@ namespace FAWorld
 {
     class EquipmentItem;
     class UsableItem;
+    class GoldItem;
 
     class ItemBase;
 
@@ -30,9 +31,10 @@ namespace FAWorld
 
         virtual EquipmentItem* getAsEquipmentItem() { return nullptr; }
         const EquipmentItem* getAsEquipmentItem() const { return const_cast<Item2*>(this)->getAsEquipmentItem(); }
-
         virtual UsableItem* getAsUsableItem() { return nullptr; }
         const UsableItem* getAsMiscItem() const { return const_cast<Item2*>(this)->getAsUsableItem(); }
+        virtual GoldItem* getAsGoldItem() { return nullptr; }
+        const GoldItem* getAsGoldItem() const { return const_cast<Item2*>(this)->getAsGoldItem(); }
 
         int32_t getPrice() const;
         virtual std::string getFullDescription() const;
