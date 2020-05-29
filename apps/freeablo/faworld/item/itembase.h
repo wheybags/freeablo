@@ -1,27 +1,34 @@
 #pragma once
 #include <diabloexe/baseitem.h>
+#include <memory>
 #include <misc/simplevec2.h>
+#include <render/spritegroup.h>
 
 namespace FAWorld
 {
+    class Item2;
+
     class ItemBase
     {
-    protected:
-        explicit ItemBase(const DiabloExe::ExeItem& exeItem);
-
     public:
+        explicit ItemBase(const DiabloExe::ExeItem& exeItem);
         virtual ~ItemBase() = default;
+
+        virtual std::unique_ptr<Item2> createItem() const;
+        virtual ItemEquipType getEquipType() const { return ItemEquipType::none; }
 
     public:
         std::string mId;
         ItemType mType = ItemType::none;
+        ItemClass mClass = ItemClass::none;
 
         std::string mName;
         std::string mShortName;
 
         Vec2i mSize;
+        int32_t mPrice = 0;
 
-        std::string mDropItemGraphicsPath;
+        Render::SpriteGroup* mDropItemAnimation = nullptr;
         int32_t mInventoryGraphicsId = -1;
 
         std::string mDropItemSoundPath;

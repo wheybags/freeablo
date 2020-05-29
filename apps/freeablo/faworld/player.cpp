@@ -7,6 +7,8 @@
 #include "actorstats.h"
 #include "diabloexe/characterstats.h"
 #include "equiptarget.h"
+#include "item/equipmentitem.h"
+#include "item/equipmentitembase.h"
 #include "itemenums.h"
 #include "itemmap.h"
 #include "missile/missile.h"
@@ -41,7 +43,7 @@ namespace FAWorld
         mMoveHandler.mSpeedTilesPerSecond = FixedPoint(1) / FixedPoint("0.4"); // https://wheybags.gitlab.io/jarulfs-guide/#player-timing-information
         mName = "Player";
         mWorld.registerPlayer(this);
-        mInventory.mInventoryChanged = [this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
+        mInventory.mInventoryChanged = [this](EquipTargetType inventoryType, const Item2* removed, const Item2* added) {
             (void)removed;
 
             mInventoryChangedCallCount++;
@@ -60,7 +62,7 @@ namespace FAWorld
                     break;
             }
 
-            if (!added.isEmpty() && mPlayerInitialised && this == mWorld.getCurrentPlayer())
+            if (added && mPlayerInitialised && this == mWorld.getCurrentPlayer())
             {
                 // Play inventory place/grab sound.
                 switch (inventoryType)
@@ -69,7 +71,7 @@ namespace FAWorld
                         Engine::ThreadManager::get()->playSound("sfx/items/invgrab.wav");
                         break;
                     default:
-                        std::string soundPath = added.getInvPlaceSoundPath();
+                        std::string soundPath = added->getBase()->mInventoryPlaceItemSoundPath;
                         Engine::ThreadManager::get()->playSound(soundPath);
                         break;
                 }
@@ -136,7 +138,7 @@ namespace FAWorld
                 // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
                 if (handItems.meleeWeapon)
                 {
-                    switch (handItems.meleeWeapon->item->getType())
+                    switch (handItems.meleeWeapon->item->getBase()->mType)
                     {
                         case ItemType::sword:
                         case ItemType::mace:
@@ -149,7 +151,7 @@ namespace FAWorld
                             stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
                             break;
                         default:
-                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getBase()->mType);
                     }
                 }
                 else
@@ -185,7 +187,7 @@ namespace FAWorld
                 // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
                 if (handItems.meleeWeapon)
                 {
-                    switch (handItems.meleeWeapon->item->getType())
+                    switch (handItems.meleeWeapon->item->getBase()->mType)
                     {
                         case ItemType::sword:
                         case ItemType::mace:
@@ -198,7 +200,7 @@ namespace FAWorld
                             stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
                             break;
                         default:
-                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getBase()->mType);
                     }
                 }
                 else
@@ -232,7 +234,7 @@ namespace FAWorld
                 // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
                 if (handItems.meleeWeapon)
                 {
-                    switch (handItems.meleeWeapon->item->getType())
+                    switch (handItems.meleeWeapon->item->getBase()->mType)
                     {
                         case ItemType::sword:
                         case ItemType::mace:
@@ -245,7 +247,7 @@ namespace FAWorld
                             stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.6"));
                             break;
                         default:
-                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getBase()->mType);
                     }
                 }
                 else if (handItems.shield)
@@ -281,10 +283,10 @@ namespace FAWorld
         stats.meleeDamageBonusRange = itemStats.meleeDamageBonusRange;
 
         // https://wheybags.gitlab.io/jarulfs-guide/#damage-done
-        if (!Item::isItemAWeapon(mInventory.getLeftHand().getType()) && !Item::isItemAWeapon(mInventory.getRightHand().getType()))
+        if (!handItems.weapon)
         {
             // TODOHELLFIRE: monks get a bonus here
-            if (mInventory.getLeftHand().getType() == ItemType::shield || mInventory.getRightHand().getType() == ItemType::shield)
+            if (handItems.shield)
                 stats.meleeDamageBonusRange = IntRange(1, 3);
             else
                 stats.meleeDamageBonusRange = IntRange(1, 1);
@@ -296,19 +298,21 @@ namespace FAWorld
 
     DamageType Player::getMeleeDamageType() const
     {
-        const Item& left = mInventory.getLeftHand();
-        const Item& right = mInventory.getRightHand();
+        EquippedInHandsItems handsItems = mInventory.getItemsInHands();
 
-        if (left.getType() == ItemType::mace || right.getType() == ItemType::mace)
-            return DamageType::Club;
-        if (left.getType() == ItemType::sword || right.getType() == ItemType::sword)
-            return DamageType::Sword;
-        if (left.getType() == ItemType::axe || right.getType() == ItemType::axe)
-            return DamageType::Axe;
-        if (left.getType() == ItemType::bow || right.getType() == ItemType::bow)
-            return DamageType::Bow;
-        if (left.getType() == ItemType::staff || right.getType() == ItemType::staff)
-            return DamageType::Staff;
+        if (handsItems.weapon)
+        {
+            if (handsItems.weapon->item->getBase()->mType == ItemType::mace)
+                return DamageType::Club;
+            if (handsItems.weapon->item->getBase()->mType == ItemType::sword)
+                return DamageType::Sword;
+            if (handsItems.weapon->item->getBase()->mType == ItemType::axe)
+                return DamageType::Axe;
+            if (handsItems.weapon->item->getBase()->mType == ItemType::bow)
+                return DamageType::Bow;
+            if (handsItems.weapon->item->getBase()->mType == ItemType::staff)
+                return DamageType::Staff;
+        }
 
         return DamageType::Unarmed;
     }
@@ -358,13 +362,13 @@ namespace FAWorld
 
         std::string armor;
         {
-            if (mInventory.getBody().isEmpty())
+            if (!mInventory.getBody())
             {
                 armor = "none";
             }
             else
             {
-                switch (mInventory.getBody().getType())
+                switch (mInventory.getBody()->getBase()->mType)
                 {
                     case ItemType::heavyArmor:
                         armor = "heavy";
@@ -379,7 +383,7 @@ namespace FAWorld
                         break;
 
                     default:
-                        invalid_enum(ItemType, mInventory.getBody().getType());
+                        invalid_enum(ItemType, mInventory.getBody()->getBase()->mType);
                 }
             }
         }
@@ -392,7 +396,7 @@ namespace FAWorld
                 weapon = "none";
             else
             {
-                switch (handsItems.weapon.value().item->getType())
+                switch (handsItems.weapon.value().item->getBase()->mType)
                 {
                     case ItemType::sword:
                         weapon = "sword";
@@ -410,10 +414,10 @@ namespace FAWorld
                         weapon = "bow";
                         break;
                     default:
-                        invalid_enum(ItemType, handsItems.weapon.value().item->getType());
+                        invalid_enum(ItemType, handsItems.weapon.value().item->getBase()->mType);
                 }
 
-                if (handsItems.weapon.value().item->getEquipLoc() == ItemEquipType::twoHanded)
+                if (handsItems.weapon.value().item->getBase()->getEquipType() == ItemEquipType::twoHanded)
                     weapon = weapon + "-2h";
                 else
                     weapon = weapon + "-1h";
@@ -423,7 +427,7 @@ namespace FAWorld
                 weapon = weapon + "-shield";
         }
 
-        auto renderer = FARender::Renderer::get();
+        FARender::Renderer* renderer = FARender::Renderer::get();
         if (!renderer) // TODO: some sort of headless mode for tests
             return;
 
@@ -458,17 +462,15 @@ namespace FAWorld
 
     bool Player::dropItem(const Misc::Point& clickedPoint)
     {
-        auto cursorItem = mInventory.getCursorHeld();
-        auto initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getDirection();
-        auto curPos = getPos().current();
-        auto direction = (curPos == clickedPoint) ? Misc::Direction(Misc::Direction8::none) : initialDir;
+        Misc::Direction initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getDirection();
+        Vec2i curPos = getPos().current();
+        Misc::Direction direction = (curPos == clickedPoint) ? Misc::Direction(Misc::Direction8::none) : initialDir;
 
-        if (getLevel()->dropItemClosestEmptyTile(cursorItem, *this, curPos, direction))
-        {
-            mInventory.setCursorHeld({});
-            return true;
-        }
-        return false;
+        std::unique_ptr<Item2> tmp = mInventory.remove(MakeEquipTarget<EquipTargetType::cursor>());
+        bool retval = getLevel()->dropItemClosestEmptyTile(tmp, *this, curPos, direction);
+        mInventory.setCursorHeld(std::move(tmp));
+
+        return retval;
     }
 
     bool Player::canTalkTo(Actor* actor)

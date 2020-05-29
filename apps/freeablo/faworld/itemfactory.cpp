@@ -2,6 +2,8 @@
 #include "diabloexe/diabloexe.h"
 #include "item.h"
 #include "itemenums.h"
+#include <engine/enginemain.h>
+#include <fasavegame/gameloader.h>
 #include <random/random.h>
 
 namespace FAWorld
@@ -19,34 +21,30 @@ namespace FAWorld
         };
     }
 
-    ItemFactory::ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng) : mExe(exe), mRng(rng)
+    ItemFactory::ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng) : mItemBaseHolder(exe), mExe(exe), mRng(rng)
     {
         for (int i = 0; i < static_cast<int>(mExe.getBaseItems().size()); ++i)
             mUniqueBaseItemIdToItemId[mExe.getBaseItems()[i].uniqueBaseItemId] = static_cast<ItemId>(i);
     }
 
-    Item ItemFactory::generateBaseItem(ItemId id, const BaseItemGenOptions& /*options*/) const
+    std::unique_ptr<Item2> ItemFactory::generateBaseItem(ItemId id, const BaseItemGenOptions& /*options*/) const
     {
-        Item res;
-        res.mEmpty = false;
-        res.mIsReal = true;
-        res.mInvX = 0;
-        res.mInvY = 0;
-        res.mBaseId = id;
-        auto info = getInfo(id);
-        res.mMaxDurability = res.mCurrentDurability = info.durability;
-        res.mArmorClass = mRng.randomInRange(info.minArmorClass, info.maxArmorClass);
-        return res;
-    }
+        const std::string& lookup = Engine::EngineMain::get()->exe().getBaseItems()[int32_t(id)].idName;
+        std::unique_ptr<Item2> newItem = mItemBaseHolder.createItem(lookup);
+        newItem->init();
 
-    Item ItemFactory::generateUniqueItem(UniqueItemId id) const
-    {
-        const DiabloExe::UniqueItem& info = mExe.getUniqueItems()[static_cast<int32_t>(id)];
-        auto it = mUniqueBaseItemIdToItemId.find(info.mUniqueBaseItemId);
-        if (it == mUniqueBaseItemIdToItemId.end())
-            return {};
-        ItemId baseItemId = it->second;
-        return generateBaseItem(baseItemId);
+        return newItem;
+
+        //        Item res;
+        //        res.mEmpty = false;
+        //        res.mIsReal = true;
+        //        res.mInvX = 0;
+        //        res.mInvY = 0;
+        //        res.mBaseId = id;
+        //        auto info = getInfo(id);
+        //        res.mMaxDurability = res.mCurrentDurability = info.durability;
+        //        res.mArmorClass = mRng.randomInRange(info.minArmorClass, info.maxArmorClass);
+        //        return res;
     }
 
     ItemId ItemFactory::randomItemId(const ItemFilter::Callback& filter) const
@@ -65,4 +63,20 @@ namespace FAWorld
     }
 
     const DiabloExe::ExeItem& ItemFactory::getInfo(ItemId id) const { return mExe.getBaseItems().at(static_cast<int>(id)); }
+
+    void ItemFactory::saveItem(const Item2& item, FASaveGame::GameSaver& saver) const
+    {
+        Serial::ScopedCategorySaver cat("Item", saver);
+
+        saver.save(item.getBase()->mId);
+        item.save(saver);
+    }
+
+    std::unique_ptr<Item2> ItemFactory::loadItem(FASaveGame::GameLoader& loader) const
+    {
+        std::string baseId = loader.load<std::string>();
+        std::unique_ptr<Item2> newItem = mItemBaseHolder.createItem(baseId);
+        newItem->load(loader);
+        return newItem;
+    }
 }

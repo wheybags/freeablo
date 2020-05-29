@@ -1,6 +1,7 @@
 #pragma once
 #include "item.h"
 #include <cstdint>
+#include <faworld/item/item.h>
 #include <vector>
 
 namespace Random
@@ -20,7 +21,7 @@ namespace FAWorld
 
     struct StoreItem
     {
-        Item item;
+        std::unique_ptr<Item2> item;
         uint32_t storeId = 0;
     };
 

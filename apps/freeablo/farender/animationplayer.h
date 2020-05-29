@@ -1,6 +1,7 @@
 #pragma once
 #include "../faworld/world.h"
 #include "renderer.h"
+#include <fa_nuklear.h>
 
 namespace FASaveGame
 {

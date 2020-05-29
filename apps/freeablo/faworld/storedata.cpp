@@ -1,6 +1,7 @@
 #include "storedata.h"
 #include "../fasavegame/gameloader.h"
 #include "itemfactory.h"
+#include <engine/enginemain.h>
 #include <random/random.h>
 
 namespace FAWorld
@@ -22,7 +23,7 @@ namespace FAWorld
         }
 
         std::sort(griswoldBasicItems.begin(), griswoldBasicItems.end(), [](const StoreItem& lhs, const StoreItem& rhs) {
-            return lhs.item.baseId() < rhs.item.baseId();
+            return lhs.item->getBase()->mId < rhs.item->getBase()->mId;
         });
     }
 
@@ -32,7 +33,7 @@ namespace FAWorld
         for (auto& item : griswoldBasicItems)
         {
             saver.save(item.storeId);
-            item.item.save(saver);
+            Engine::EngineMain::get()->mWorld->getItemFactory().saveItem(*item.item, saver);
         }
 
         saver.save(mNextItemId);
@@ -48,7 +49,7 @@ namespace FAWorld
         for (uint32_t i = 0; i < size; i++)
         {
             griswoldBasicItems[i].storeId = loader.load<uint32_t>();
-            griswoldBasicItems[i].item.load(loader);
+            griswoldBasicItems[i].item = Engine::EngineMain::get()->mWorld->getItemFactory().loadItem(loader);
         }
 
         mNextItemId = loader.load<uint32_t>();

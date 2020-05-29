@@ -72,8 +72,6 @@ namespace Engine
         FARender::Renderer& renderer = *FARender::Renderer::get();
         FAWorld::PlayerClass characterClass = FAWorld::playerClassFromString(variables["character"].as<std::string>());
 
-        FAWorld::ItemFactory itemFactory(*mExe, Random::DummyRng::instance);
-        mPlayerFactory = std::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
         renderer.loadFonts(*mExe);
 
         FAWorld::Player* player = nullptr;
@@ -84,6 +82,7 @@ namespace Engine
             seed = variables["seed"].as<uint32_t>();
 
         mWorld = std::make_unique<FAWorld::World>(*mExe, seed);
+        mPlayerFactory = std::make_unique<FAWorld::PlayerFactory>(*mExe, mWorld->getItemFactory());
 
         mLocalInputHandler = std::make_unique<LocalInputHandler>(*mWorld);
         mInputManager->registerMouseObserver(mLocalInputHandler.get());
@@ -185,10 +184,10 @@ namespace Engine
 
                 if (!mPaused && mWorld->getCurrentPlayer())
                 {
-                    auto item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld();
-                    state->mCursorFrame = item.getGraphicValue();
+                    const FAWorld::Item2* item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld();
+                    state->mCursorFrame = item ? item->getBase()->mInventoryGraphicsId : 0;
                     // When items are held, their sprites are centered around the cursor (rather then top left).
-                    state->mCursorCentered = !item.isEmpty();
+                    state->mCursorCentered = item != nullptr;
                 }
                 else
                 {

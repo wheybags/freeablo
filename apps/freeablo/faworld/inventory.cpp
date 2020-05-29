@@ -4,13 +4,19 @@
 #include "../faworld/actorstats.h"
 #include "actorstats.h"
 #include "equiptarget.h"
+#include "item/equipmentitem.h"
+#include "item/equipmentitembase.h"
+#include "item/itembase.h"
+#include "item/usableitem.h"
+#include "item/usableitembase.h"
 #include "itemenums.h"
 #include "itemfactory.h"
 #include "player.h"
 #include <algorithm>
+#include <cstdint>
+#include <engine/enginemain.h>
 #include <iostream>
 #include <sstream>
-#include <stdint.h>
 #include <string>
 
 namespace FAWorld
@@ -21,23 +27,26 @@ namespace FAWorld
         for (int32_t y = 0; y < mInventoryBox.height(); y++)
         {
             for (int32_t x = 0; x < mInventoryBox.width(); x++)
-            {
-                mInventoryBox.get(x, y).mInvX = x;
-                mInventoryBox.get(x, y).mInvY = y;
-            }
+                mInventoryBox.get(x, y).position = {x, y};
         }
     }
 
     void BasicInventory::save(FASaveGame::GameSaver& saver) const
     {
+        Serial::ScopedCategorySaver cat("BasicInventory", saver);
+
         saver.save(mInventoryBox.width());
         saver.save(mInventoryBox.height());
 
-        for (int32_t y = 0; y < mInventoryBox.height(); y++)
+        for (const auto& box : *this)
         {
-            for (int32_t x = 0; x < mInventoryBox.width(); x++)
-                mInventoryBox.get(x, y).save(saver);
+            debug_assert(box.item && box.isReal && box.topLeft == box.position);
+
+            saver.save(true);
+            box.position.save(saver);
+            Engine::EngineMain::get()->mWorld->getItemFactory().saveItem(*box.item, saver);
         }
+        saver.save(false);
 
         saver.save(mTreatAllItemsAs1by1);
     }
@@ -47,38 +56,49 @@ namespace FAWorld
         int32_t width = loader.load<int32_t>();
         int32_t height = loader.load<int32_t>();
 
-        mInventoryBox = Misc::Array2D<Item>(width, height);
-
+        mInventoryBox = Misc::Array2D<BasicInventoryBox>(width, height);
         for (int32_t y = 0; y < mInventoryBox.height(); y++)
         {
             for (int32_t x = 0; x < mInventoryBox.width(); x++)
-                mInventoryBox.get(x, y).load(loader);
+                mInventoryBox.get(x, y).position = {x, y};
+        }
+
+        while (loader.load<bool>())
+        {
+            Vec2i position(loader);
+
+            std::unique_ptr<Item2> item = Engine::EngineMain::get()->mWorld->getItemFactory().loadItem(loader);
+            PlaceItemResult result = placeItem(item, position.x, position.y);
+
+            if (!result.succeeded())
+                printf("Couldn't fit loaded item %s", item->getBase()->mId.c_str());
         }
 
         mTreatAllItemsAs1by1 = loader.load<bool>();
     }
 
-    bool BasicInventory::canFitItem(const Item& item) const
+    bool BasicInventory::canFitItem(const Item2& item) const
     {
-        if (item.getType() == ItemType::gold)
-        {
-            const auto maxGoldPerSlot = item.getMaxCount();
-            int32_t capacity = 0;
+        // ITEMGOLD
+        //        if (item.getBase()->mType == ItemType::gold)
+        //        {
+        //            const auto maxGoldPerSlot = item.getMaxCount();
+        //            int32_t capacity = 0;
+        //
+        //            for (const auto& slot : mInventoryBox)
+        //            {
+        //                if (slot.isEmpty())
+        //                    capacity += maxGoldPerSlot;
+        //                else if (slot.getType() == ItemType::gold)
+        //                    capacity += maxGoldPerSlot - slot.mCount;
+        //            }
+        //
+        //            return item.mCount <= capacity;
+        //        }
 
-            for (const auto& slot : mInventoryBox)
-            {
-                if (slot.isEmpty())
-                    capacity += maxGoldPerSlot;
-                else if (slot.getType() == ItemType::gold)
-                    capacity += maxGoldPerSlot - slot.mCount;
-            }
-
-            return item.mCount <= capacity;
-        }
-
-        Misc::Point itemSize{item.getInvSize()[0], item.getInvSize()[1]};
+        Vec2i itemSize = item.getBase()->mSize;
         if (mTreatAllItemsAs1by1)
-            itemSize = Misc::Point{1, 1};
+            itemSize = Vec2i(1, 1);
 
         for (int32_t y = 0; y < mInventoryBox.height() - itemSize.y; y++)
         {
@@ -90,9 +110,7 @@ namespace FAWorld
                 {
                     for (int32_t xx = x; xx < x + itemSize.x; xx++)
                     {
-                        auto& cell = mInventoryBox.get(xx, yy);
-
-                        if (!cell.isEmpty())
+                        if (mInventoryBox.get(xx, yy).item)
                         {
                             success = false;
                             break;
@@ -108,8 +126,9 @@ namespace FAWorld
         return false;
     }
 
-    bool BasicInventory::autoPlaceItem(Item& item, PlacementCheckOrder order)
+    bool BasicInventory::autoPlaceItem(std::unique_ptr<Item2>& item, PlacementCheckOrder order)
     {
+        // ITEMGOLD
         // if (item.getType() == ItemType::gold)
         //    if (fillExistingGoldItems(item))
         //        return true;
@@ -117,12 +136,11 @@ namespace FAWorld
         if (order == PlacementCheckOrder::Automatic)
         {
             order = PlacementCheckOrder::FromLeftTop;
-            using sizeType = std::array<int32_t, 2>;
-            if (item.getInvSize() == sizeType{1, 1})
+            if (item->getBase()->mSize == Vec2i{1, 1})
                 order = PlacementCheckOrder::FromLeftBottom;
-            else if (item.getInvSize() == sizeType{2, 2})
+            else if (item->getBase()->mSize == Vec2i{2, 2})
                 order = PlacementCheckOrder::SpecialFor2x2;
-            else if (item.getInvSize() == sizeType{1, 2})
+            else if (item->getBase()->mSize == Vec2i{1, 2})
                 order = PlacementCheckOrder::SpecialFor1x2;
         }
 
@@ -177,11 +195,11 @@ namespace FAWorld
         return false;
     }
 
-    PlaceItemResult BasicInventory::placeItem(const Item& item, int32_t x, int32_t y)
+    PlaceItemResult BasicInventory::placeItem(std::unique_ptr<Item2>& item, int32_t x, int32_t y)
     {
-        Misc::Point itemSize{item.getInvSize()[0], item.getInvSize()[1]};
+        Vec2i itemSize = item->getBase()->mSize;
         if (mTreatAllItemsAs1by1)
-            itemSize = Misc::Point{1, 1};
+            itemSize = Vec2i(1, 1);
 
         // Shift item slot to the closest available that will fit the item.
         // This removes the need for "out of bounds" placement and gives a more intuitive feel
@@ -191,52 +209,52 @@ namespace FAWorld
         x = std::min(x, mInventoryBox.width() - itemSize.x);
         y = std::min(y, mInventoryBox.height() - itemSize.y);
 
-        std::set<Item*> blockingItems;
+        std::set<BasicInventoryBox*> blockingItems;
 
         for (int32_t yy = y; yy < y + itemSize.y; yy++)
         {
             for (int32_t xx = x; xx < x + itemSize.x; xx++)
             {
-                auto& cell = mInventoryBox.get(xx, yy);
+                BasicInventoryBox& cell = mInventoryBox.get(xx, yy);
 
-                if (!cell.isEmpty())
+                if (cell.item)
                 {
-                    auto& topLeftItemCell = mInventoryBox.get(cell.mCornerX, cell.mCornerY);
+                    BasicInventoryBox& topLeftItemCell = mInventoryBox.get(cell.topLeft.x, cell.topLeft.y);
                     blockingItems.insert(&topLeftItemCell);
                 }
             }
         }
 
-        if (blockingItems.size() > 0)
+        if (!blockingItems.empty())
             return PlaceItemResult{PlaceItemResult::Type::BlockedByItems, blockingItems};
 
+        Item2* itemReleased = item.release();
         for (int32_t yy = y; yy < y + itemSize.y; yy++)
         {
             for (int32_t xx = x; xx < x + itemSize.x; xx++)
             {
-                auto& cell = mInventoryBox.get(xx, yy);
+                BasicInventoryBox& cell = mInventoryBox.get(xx, yy);
 
-                cell = item;
-                cell.mIsReal = false;
-                cell.mCornerX = x;
-                cell.mCornerY = y;
-                cell.mInvX = xx;
-                cell.mInvY = yy;
+                cell.topLeft = {x, y};
+                cell.item = itemReleased;
+                cell.isReal = false;
             }
         }
 
-        mInventoryBox.get(x, y).mIsReal = true;
-        mInventoryChanged(Item(), item);
+        mInventoryBox.get(x, y).isReal = true;
+
+        if (mInventoryChanged)
+            mInventoryChanged(nullptr, itemReleased);
 
         return PlaceItemResult{PlaceItemResult::Type::Success, {}};
     }
 
-    bool BasicInventory::swapItem(Item& item, int32_t x, int32_t y)
+    bool BasicInventory::swapItem(std::unique_ptr<Item2>& item, int32_t x, int32_t y)
     {
-        if (item.isEmpty())
+        if (!item)
         {
             item = remove(x, y);
-            return item.isEmpty();
+            return item == nullptr;
         }
 
         PlaceItemResult result = placeItem(item, x, y);
@@ -245,16 +263,15 @@ namespace FAWorld
         {
             case PlaceItemResult::Type::Success:
             {
-                item = {};
                 return true;
             }
             case PlaceItemResult::Type::BlockedByItems:
             {
                 if (result.blockingItems.size() == 1)
                 {
-                    auto tmp = item;
-                    auto removeFrom = (*result.blockingItems.begin())->getCornerCoords();
-                    item = remove(removeFrom.first, removeFrom.second);
+                    std::unique_ptr<Item2> tmp = std::move(item);
+                    Vec2i removeFrom = (*result.blockingItems.begin())->topLeft;
+                    item = remove(removeFrom.x, removeFrom.y);
                     auto finalPlaceResult = placeItem(tmp, x, y);
                     release_assert(finalPlaceResult.succeeded());
                     return true;
@@ -271,24 +288,30 @@ namespace FAWorld
         invalid_enum(PlaceItemResult, result.type);
     }
 
-    Item BasicInventory::remove(int32_t x, int32_t y)
+    std::unique_ptr<Item2> BasicInventory::remove(int32_t x, int32_t y)
     {
-        Item result = getItem(x, y);
+        BasicInventoryBox result = mInventoryBox.get(x, y);
 
-        if (result.isEmpty())
-            return {};
+        if (!result.item)
+            return nullptr;
 
-        Misc::Point itemSize{result.getInvSize()[0], result.getInvSize()[1]};
+        Vec2i itemSize = result.item->getBase()->mSize;
         if (mTreatAllItemsAs1by1)
-            itemSize = Misc::Point{1, 1};
+            itemSize = Vec2i(1, 1);
 
-        for (int yLocal = result.getCornerCoords().second; yLocal < result.getCornerCoords().second + itemSize.y; ++yLocal)
-            for (int xLocal = result.getCornerCoords().first; xLocal < result.getCornerCoords().first + itemSize.x; ++xLocal)
-                mInventoryBox.get(xLocal, yLocal) = {};
+        for (int32_t yLocal = result.topLeft.y; yLocal < result.topLeft.y + itemSize.y; ++yLocal)
+            for (int32_t xLocal = result.topLeft.x; xLocal < result.topLeft.x + itemSize.x; ++xLocal)
+            {
+                BasicInventoryBox& box = mInventoryBox.get(xLocal, yLocal);
+                box.item = nullptr;
+                box.isReal = false;
+                box.topLeft = Vec2i::invalid();
+            }
 
-        mInventoryChanged(result, Item());
+        if (mInventoryChanged)
+            mInventoryChanged(result.item, nullptr);
 
-        return result;
+        return std::unique_ptr<Item2>(result.item);
     }
 
     struct ExchangeResult
@@ -296,9 +319,9 @@ namespace FAWorld
         std::set<EquipTarget> NeedsToBeReplaced;
         std::set<EquipTarget> NeedsToBeReturned; // used only for equipping 2-handed weapon while wearing 1h weapon + shield
         std::optional<EquipTarget> newTarget;    // sometimes target changes during exchange
-        ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg = {},
-                       std::set<EquipTarget> NeedsToBeReturnedArg = {},
-                       const std::optional<EquipTarget>& newTargetArg = {});
+        explicit ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg = {},
+                                std::set<EquipTarget> NeedsToBeReturnedArg = {},
+                                const std::optional<EquipTarget>& newTargetArg = {});
     };
 
     ExchangeResult::ExchangeResult(std::set<EquipTarget> NeedsToBeReplacedArg,
@@ -313,7 +336,10 @@ namespace FAWorld
         for (const auto& pair : mInventoryTypes)
         {
             EquipTargetType type = pair.first;
-            pair.second.mInventoryChanged = [this, type](Item const& removed, Item const& added) { mInventoryChanged(type, removed, added); };
+            pair.second.mInventoryChanged = [this, type](const Item2* removed, const Item2* added) {
+                if (mInventoryChanged)
+                    mInventoryChanged(type, removed, added);
+            };
         }
     }
 
@@ -345,39 +371,37 @@ namespace FAWorld
         mCursorHeld.load(loader);
     }
 
-    bool CharacterInventory::autoPlaceItem(const Item& item)
-    {
-        Item tmp = item;
-        return autoPlaceItem(tmp);
-    }
+    bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item2>&& item) { return autoPlaceItem(item, PlacementCheckOrder::Automatic); }
 
-    bool CharacterInventory::autoPlaceItem(Item& item, PlacementCheckOrder order)
+    bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item2>& item, PlacementCheckOrder order)
     {
         // auto-placing in belt
-        if (item.isBeltEquippable() && mBelt.autoPlaceItem(item, order))
+        if (item->getAsUsableItem() && item->getAsUsableItem()->getBase()->isBeltEquippable() && mBelt.autoPlaceItem(item, order))
             return true;
 
-        // auto-equipping two handed weapons
-        const Item& leftHand = mLeftHand.getItem(0, 0);
-        const Item& rightHand = mRightHand.getItem(0, 0);
-        if (item.getEquipLoc() == ItemEquipType::twoHanded && leftHand.isEmpty() && rightHand.isEmpty())
+        if (EquipmentItem* equipmentItem = item->getAsEquipmentItem())
         {
-            release_assert(mLeftHand.autoPlaceItem(item));
-            release_assert(mRightHand.autoPlaceItem(item));
-            return true;
-        }
+            // auto-equipping two handed weapons
+            const Item2* leftHand = mLeftHand.getItem(0, 0);
+            const Item2* rightHand = mRightHand.getItem(0, 0);
+            if (equipmentItem->getBase()->mEquipSlot == ItemEquipType::twoHanded && !leftHand && !rightHand)
+            {
+                release_assert(mLeftHand.autoPlaceItem(item));
+                return true;
+            }
 
-        // auto equip one handed weapons
-        if (item.getEquipLoc() == ItemEquipType::oneHanded && item.getClass() == ItemClass::weapon && leftHand.isEmpty())
-        {
-            mLeftHand.autoPlaceItem(item);
-            return true;
+            // auto equip one handed weapons
+            if (equipmentItem->getBase()->mEquipSlot == ItemEquipType::oneHanded && equipmentItem->getBase()->mClass == ItemClass::weapon && !leftHand)
+            {
+                mLeftHand.autoPlaceItem(item);
+                return true;
+            }
         }
 
         return mMainInventory.autoPlaceItem(item, order);
     }
 
-    bool CharacterInventory::forcePlaceItem(const Item& item, const EquipTarget& target)
+    bool CharacterInventory::forcePlaceItem(std::unique_ptr<Item2>& item, const EquipTarget& target)
     {
         BasicInventory& inv = getInvMutable(target.type);
         PlaceItemResult result = inv.placeItem(item, target.posX, target.posY);
@@ -392,8 +416,8 @@ namespace FAWorld
 
             case PlaceItemResult::Type::BlockedByItems:
             {
-                for (const Item* block : result.blockingItems)
-                    inv.remove(block->getCornerCoords().first, block->getCornerCoords().second);
+                for (const BasicInventoryBox* block : result.blockingItems)
+                    inv.remove(block->topLeft.x, block->topLeft.y);
 
                 result = inv.placeItem(item, target.posX, target.posY);
                 release_assert(result.succeeded());
@@ -404,14 +428,15 @@ namespace FAWorld
         invalid_enum(PlaceItemResult, result.type);
     }
 
-    const Item& CharacterInventory::getItemAt(const EquipTarget& target) const { return getInv(target.type).getItem(target.posX, target.posY); }
+    const Item2* CharacterInventory::getItemAt(const EquipTarget& target) const { return getInv(target.type).getItem(target.posX, target.posY); }
 
-    Item CharacterInventory::remove(const EquipTarget& target) { return getInvMutable(target.type).remove(target.posX, target.posY); }
+    std::unique_ptr<Item2> CharacterInventory::remove(const EquipTarget& target) { return getInvMutable(target.type).remove(target.posX, target.posY); }
 
-    void CharacterInventory::setCursorHeld(const Item& item)
+    void CharacterInventory::setCursorHeld(std::unique_ptr<Item2>&& item)
     {
         mCursorHeld.remove(0, 0);
-        mCursorHeld.placeItem(item, 0, 0).succeeded();
+        if (item)
+            release_assert(mCursorHeld.placeItem(item, 0, 0).succeeded());
     }
 
     const BasicInventory& CharacterInventory::getInv(EquipTargetType type) const { return mInventoryTypes.at(type); }
@@ -420,9 +445,9 @@ namespace FAWorld
 
     void CharacterInventory::slotClicked(const EquipTarget& slot)
     {
-        const Item& cursor = getCursorHeld();
+        const Item2* cursorItem = getCursorHeld();
 
-        if (!cursor.isEmpty())
+        if (cursorItem)
         {
             bool ok = true;
 
@@ -431,28 +456,24 @@ namespace FAWorld
                 case EquipTargetType::inventory:
                     break;
                 case EquipTargetType::belt:
-                    ok = cursor.isBeltEquippable();
+                    ok = cursorItem->getAsMiscItem() && cursorItem->getAsMiscItem()->getBase()->isBeltEquippable();
                     break;
                 case EquipTargetType::head:
-                    ok = cursor.getEquipLoc() == ItemEquipType::head;
+                    ok = cursorItem->getBase()->getEquipType() == ItemEquipType::head;
                     break;
                 case EquipTargetType::body:
-                    ok = cursor.getEquipLoc() == ItemEquipType::chest;
+                    ok = cursorItem->getBase()->getEquipType() == ItemEquipType::chest;
                     break;
                 case EquipTargetType::leftRing:
                 case EquipTargetType::rightRing:
-                    ok = cursor.getEquipLoc() == ItemEquipType::ring;
+                    ok = cursorItem->getBase()->getEquipType() == ItemEquipType::ring;
                     break;
                 case EquipTargetType::leftHand:
-                    ok = (cursor.getEquipLoc() == ItemEquipType::oneHanded && cursor.getClass() == ItemClass::weapon) ||
-                         cursor.getEquipLoc() == ItemEquipType::twoHanded;
-                    break;
                 case EquipTargetType::rightHand:
-                    ok = (cursor.getEquipLoc() == ItemEquipType::oneHanded && cursor.getClass() == ItemClass::armor) ||
-                         cursor.getEquipLoc() == ItemEquipType::twoHanded;
+                    ok = cursorItem->getBase()->getEquipType() == ItemEquipType::oneHanded || cursorItem->getBase()->getEquipType() == ItemEquipType::twoHanded;
                     break;
                 case EquipTargetType::amulet:
-                    ok = cursor.getEquipLoc() == ItemEquipType::amulet;
+                    ok = cursorItem->getBase()->getEquipType() == ItemEquipType::amulet;
                     break;
                 default:
                     invalid_enum(EquipTargetType, slot.type);
@@ -461,22 +482,44 @@ namespace FAWorld
             if (!ok)
                 return;
 
-            // Handle equipping two handed weapons.
-            // We simply place the weapon in both hand slots.
-            if (cursor.getEquipLoc() == ItemEquipType::twoHanded && (slot.type == EquipTargetType::leftHand || slot.type == EquipTargetType::rightHand))
+            // Handle weapons and shields.
+            // Weapons always go in left hand, shields always in right.
+            // 2 handed weapons need both hands free.
+            if (slot.type == EquipTargetType::leftHand || slot.type == EquipTargetType::rightHand)
             {
-                if (getRightHand().isEmpty() || getLeftHand().isEmpty() || getLeftHand().getEquipLoc() == ItemEquipType::twoHanded)
+                if (cursorItem->getBase()->getEquipType() == ItemEquipType::twoHanded)
                 {
-                    Item removed;
-                    if (!getRightHand().isEmpty())
-                        removed = mRightHand.remove(0, 0);
-                    if (!getLeftHand().isEmpty())
+                    if (!getRightHand() || !getLeftHand() || getLeftHand()->getBase()->getEquipType() == ItemEquipType::twoHanded)
+                    {
+                        std::unique_ptr<Item2> removed;
+                        if (getRightHand())
+                            removed = mRightHand.remove(0, 0);
+                        if (getLeftHand())
+                            removed = mLeftHand.remove(0, 0);
+
+                        std::unique_ptr<Item2> cursorOld = mCursorHeld.remove(0, 0);
+                        release_assert(mLeftHand.placeItem(cursorOld, 0, 0).succeeded());
+                        setCursorHeld(std::move(removed));
+                    }
+                }
+                else if (cursorItem->getBase()->getEquipType() == ItemEquipType::oneHanded)
+                {
+                    std::unique_ptr<Item2> removed;
+                    if (getLeftHand() && getLeftHand()->getBase()->getEquipType() == ItemEquipType::twoHanded)
                         removed = mLeftHand.remove(0, 0);
+                    else if (cursorItem->getBase()->mClass == ItemClass::weapon)
+                        removed = mLeftHand.remove(0, 0);
+                    else if (cursorItem->getBase()->mType == ItemType::shield)
+                        removed = mRightHand.remove(0, 0);
 
-                    mLeftHand.placeItem(getCursorHeld(), 0, 0);
-                    mRightHand.placeItem(getCursorHeld(), 0, 0);
+                    std::unique_ptr<Item2> cursorOld = mCursorHeld.remove(0, 0);
 
-                    setCursorHeld(removed);
+                    if (cursorItem->getBase()->mClass == ItemClass::weapon)
+                        release_assert(mLeftHand.placeItem(cursorOld, 0, 0).succeeded());
+                    else if (cursorItem->getBase()->mType == ItemType::shield)
+                        release_assert(mRightHand.placeItem(cursorOld, 0, 0).succeeded());
+
+                    setCursorHeld(std::move(removed));
                 }
 
                 return;
@@ -485,14 +528,15 @@ namespace FAWorld
 
         BasicInventory& inv = getInvMutable(slot.type);
 
-        Item tmp = mCursorHeld.getItem(0, 0);
+        std::unique_ptr<Item2> tmp = mCursorHeld.remove(0, 0);
         inv.swapItem(tmp, slot.posX, slot.posY);
 
         // when removing a two handed item, make sure we remove it from both hands
-        if ((slot.type == EquipTargetType::leftHand || slot.type == EquipTargetType::rightHand) && tmp.getEquipLoc() == ItemEquipType::twoHanded)
-            getInvMutable(slot.type == EquipTargetType::leftHand ? EquipTargetType::rightHand : EquipTargetType::leftHand).remove(0, 0);
+        // if ((slot.type == EquipTargetType::leftHand || slot.type == EquipTargetType::rightHand) && tmp->getBase()->getEquipType() ==
+        // ItemEquipType::twoHanded)
+        //    getInvMutable(slot.type == EquipTargetType::leftHand ? EquipTargetType::rightHand : EquipTargetType::leftHand).remove(0, 0);
 
-        setCursorHeld(tmp);
+        setCursorHeld(std::move(tmp));
     }
 
     void CharacterInventory::calculateItemBonuses(ItemStats& stats) const
@@ -500,11 +544,14 @@ namespace FAWorld
         EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
         for (auto& slot : hands)
         {
-            const Item& item = getItemAt(slot);
-            if (Item::isItemAMeleeWeapon(item.getType()))
-                stats.meleeDamageBonusRange += {item.getMinAttackDamage(), item.getMaxAttackDamage()};
-            else if (Item::isItemARangedWeapon(item.getType()))
-                stats.rangedDamageBonusRange += {item.getMinAttackDamage(), item.getMaxAttackDamage()};
+            const EquipmentItem* item = getItemAt(slot) ? getItemAt(slot)->getAsEquipmentItem() : nullptr;
+            if (!item)
+                continue;
+
+            if (Item::isItemAMeleeWeapon(item->getBase()->mType))
+                stats.meleeDamageBonusRange += item->getBase()->mDamageBonusRange;
+            else if (Item::isItemARangedWeapon(item->getBase()->mType))
+                stats.rangedDamageBonusRange += item->getBase()->mDamageBonusRange;
 
             // TODO: other stats
         }
@@ -515,15 +562,19 @@ namespace FAWorld
         EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
         for (auto& slot : hands)
         {
-            const Item& item = getItemAt(slot);
-            if (Item::isItemARangedWeapon(item.getType()))
+            const Item2* item = getItemAt(slot);
+            if (item && Item::isItemARangedWeapon(item->getBase()->mType))
                 return true;
         }
 
         return false;
     }
 
-    bool CharacterInventory::isShieldEquipped() const { return getLeftHand().getType() == ItemType::shield || getRightHand().getType() == ItemType::shield; }
+    bool CharacterInventory::isShieldEquipped() const
+    {
+        return (getLeftHand() && getLeftHand()->getBase()->mType == ItemType::shield) ||
+               (getRightHand() && getRightHand()->getBase()->mType == ItemType::shield);
+    }
 
     EquippedInHandsItems CharacterInventory::getItemsInHands() const
     {
@@ -532,127 +583,133 @@ namespace FAWorld
         EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
         for (auto& slot : hands)
         {
-            const Item& item = getItemAt(slot);
+            const Item2* item = getItemAt(slot);
+            if (!item)
+                continue;
 
-            if (Item::isItemARangedWeapon(item.getType()))
+            if (Item::isItemARangedWeapon(item->getBase()->mType))
             {
-                retval.rangedWeapon = EquippedInHandsItems::TypeData{item, slot.type};
+                retval.rangedWeapon = EquippedInHandsItems::TypeData{item->getAsEquipmentItem(), slot.type};
                 retval.weapon = retval.rangedWeapon;
             }
-            else if (Item::isItemAMeleeWeapon(item.getType()))
+            else if (Item::isItemAMeleeWeapon(item->getBase()->mType))
             {
-                retval.meleeWeapon = EquippedInHandsItems::TypeData{item, slot.type};
+                retval.meleeWeapon = EquippedInHandsItems::TypeData{item->getAsEquipmentItem(), slot.type};
                 retval.weapon = retval.meleeWeapon;
             }
-            else if (item.getType() == ItemType::shield)
-                retval.shield = EquippedInHandsItems::TypeData{item, slot.type};
+            else if (item->getBase()->mType == ItemType::shield)
+            {
+                retval.shield = EquippedInHandsItems::TypeData{item->getAsEquipmentItem(), slot.type};
+            }
         }
 
         return retval;
     }
 
+    // ITEMGOLD
+
     int32_t CharacterInventory::placeGold(int32_t quantity, const ItemFactory& itemFactory)
     {
-        if (quantity == 0)
-            return 0;
-
-        // first part - filling existing gold piles
-        for (auto& item : mMainInventory)
-        {
-            if (item.getType() != ItemType::gold)
-                continue;
-            int room = item.getMaxCount() - item.mCount;
-            if (room > 0)
-            {
-                auto toPlace = std::min(quantity, room);
-
-                Item copy(item);
-                copy.mCount += toPlace;
-                int32_t x = item.mInvX;
-                int32_t y = item.mInvY;
-
-                release_assert(!mMainInventory.remove(x, y).isEmpty());
-                release_assert(mMainInventory.placeItem(copy, x, y).succeeded());
-
-                quantity -= toPlace;
-                if (quantity == 0)
-                    return 0;
-            }
-        }
-        // second part - filling the empty slots with gold
-        for (int32_t x = 0; x != mMainInventory.width(); x++)
-        {
-            for (int32_t y = 0; y != mMainInventory.height(); x++)
-            {
-                if (mMainInventory.getItem(x, y).isEmpty())
-                {
-                    auto item = itemFactory.generateBaseItem(ItemId::gold);
-                    auto toPlace = std::min(quantity, item.getMaxCount());
-                    item.mCount = toPlace;
-                    mMainInventory.placeItem(item, x, y);
-                    quantity -= toPlace;
-                    if (quantity == 0)
-                        return 0;
-                }
-            }
-        }
+        //        if (quantity == 0)
+        //            return 0;
+        //
+        //        // first part - filling existing gold piles
+        //        for (const auto& item : mMainInventory)
+        //        {
+        //            if (item.item->getBase()->mType != ItemType::gold)
+        //                continue;
+        //            int32_t room = item.getMaxCount() - item.mCount;
+        //            if (room > 0)
+        //            {
+        //                auto toPlace = std::min(quantity, room);
+        //
+        //                Item copy(item);
+        //                copy.mCount += toPlace;
+        //                int32_t x = item.mInvX;
+        //                int32_t y = item.mInvY;
+        //
+        //                release_assert(!mMainInventory.remove(x, y).isEmpty());
+        //                release_assert(mMainInventory.placeItem(copy, x, y).succeeded());
+        //
+        //                quantity -= toPlace;
+        //                if (quantity == 0)
+        //                    return 0;
+        //            }
+        //        }
+        //        // second part - filling the empty slots with gold
+        //        for (int32_t x = 0; x != mMainInventory.width(); x++)
+        //        {
+        //            for (int32_t y = 0; y != mMainInventory.height(); x++)
+        //            {
+        //                if (mMainInventory.getItem(x, y).isEmpty())
+        //                {
+        //                    auto item = itemFactory.generateBaseItem(ItemId::gold);
+        //                    auto toPlace = std::min(quantity, item.getMaxCount());
+        //                    item.mCount = toPlace;
+        //                    mMainInventory.placeItem(item, x, y);
+        //                    quantity -= toPlace;
+        //                    if (quantity == 0)
+        //                        return 0;
+        //                }
+        //            }
+        //        }
 
         return quantity;
     }
 
     void CharacterInventory::takeOutGold(int32_t quantity)
     {
-        for (const Item& item : mMainInventory)
-        {
-            if (item.getType() != ItemType::gold)
-                continue;
-
-            Item copy = item;
-            auto toTake = std::min(quantity, copy.mCount);
-            copy.mCount -= toTake;
-            quantity -= toTake;
-
-            int32_t x = item.mInvX;
-            int32_t y = item.mInvY;
-
-            mMainInventory.remove(x, y);
-            if (copy.mCount > 0)
-            {
-                PlaceItemResult result = mMainInventory.placeItem(copy, x, y);
-                release_assert(result.succeeded());
-            }
-
-            if (quantity == 0)
-                return;
-        }
+        //        for (const Item& item : mMainInventory)
+        //        {
+        //            if (item.getType() != ItemType::gold)
+        //                continue;
+        //
+        //            Item copy = item;
+        //            auto toTake = std::min(quantity, copy.mCount);
+        //            copy.mCount -= toTake;
+        //            quantity -= toTake;
+        //
+        //            int32_t x = item.mInvX;
+        //            int32_t y = item.mInvY;
+        //
+        //            mMainInventory.remove(x, y);
+        //            if (copy.mCount > 0)
+        //            {
+        //                PlaceItemResult result = mMainInventory.placeItem(copy, x, y);
+        //                release_assert(result.succeeded());
+        //            }
+        //
+        //            if (quantity == 0)
+        //                return;
+        //        }
 
         message_and_abort("Not enough gold");
     }
 
     void CharacterInventory::splitGoldIntoCursor(int32_t x, int32_t y, int32_t amountToTransferToCursor, const ItemFactory& itemFactory)
     {
-        Item goldFromInventoryItem = mMainInventory.remove(x, y);
-        release_assert(goldFromInventoryItem.mBaseId == ItemId::gold);
-
-        amountToTransferToCursor = std::min(goldFromInventoryItem.mCount, amountToTransferToCursor);
-        goldFromInventoryItem.mCount -= amountToTransferToCursor;
-
-        Item cursorGold = itemFactory.generateBaseItem(ItemId::gold);
-        cursorGold.mCount = amountToTransferToCursor;
-
-        setCursorHeld(cursorGold);
-        if (goldFromInventoryItem.mCount > 0)
-            mMainInventory.placeItem(goldFromInventoryItem, x, y);
+        //        Item goldFromInventoryItem = mMainInventory.remove(x, y);
+        //        release_assert(goldFromInventoryItem.mBaseId == ItemId::gold);
+        //
+        //        amountToTransferToCursor = std::min(goldFromInventoryItem.mCount, amountToTransferToCursor);
+        //        goldFromInventoryItem.mCount -= amountToTransferToCursor;
+        //
+        //        Item cursorGold = itemFactory.generateBaseItem(ItemId::gold);
+        //        cursorGold.mCount = amountToTransferToCursor;
+        //
+        //        setCursorHeld(cursorGold);
+        //        if (goldFromInventoryItem.mCount > 0)
+        //            mMainInventory.placeItem(goldFromInventoryItem, x, y);
     }
 
     int32_t CharacterInventory::getTotalGold() const
     {
         int32_t total = 0;
-        for (const Item& item : mMainInventory)
-        {
-            if (item.getType() == ItemType::gold)
-                total += item.mCount;
-        }
+        //        for (const Item2* item : mMainInventory)
+        //        {
+        //            if (item.getType() == ItemType::gold)
+        //                total += item.mCount;
+        //        }
         return total;
     }
 }

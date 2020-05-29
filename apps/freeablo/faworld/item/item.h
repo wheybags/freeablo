@@ -1,23 +1,42 @@
 #pragma once
+#include <cstdint>
+#include <fagui/menuentry.h>
+#include <misc/misc.h>
+#include <string>
+#include <vector>
+
+namespace FASaveGame
+{
+    class GameSaver;
+    class GameLoader;
+}
 
 namespace FAWorld
 {
     class EquipmentItem;
-    class MiscItem;
+    class UsableItem;
 
     class ItemBase;
 
     class Item2
     {
-    protected:
+    public:
         explicit Item2(const ItemBase* base) : mBase(base) {}
 
-    public:
+        virtual void init() {}
+
+        virtual void save(FASaveGame::GameSaver& saver) const { UNUSED_PARAM(saver); }
+        virtual void load(FASaveGame::GameLoader& loader) { UNUSED_PARAM(loader); }
+
         virtual EquipmentItem* getAsEquipmentItem() { return nullptr; }
         const EquipmentItem* getAsEquipmentItem() const { return const_cast<Item2*>(this)->getAsEquipmentItem(); }
 
-        virtual MiscItem* getAsMiscItem() { return nullptr; }
-        const MiscItem* getAsMiscItem() const { return const_cast<Item2*>(this)->getAsMiscItem(); }
+        virtual UsableItem* getAsUsableItem() { return nullptr; }
+        const UsableItem* getAsMiscItem() const { return const_cast<Item2*>(this)->getAsUsableItem(); }
+
+        int32_t getPrice() const;
+        virtual std::string getFullDescription() const;
+        virtual std::vector<FAGui::MenuEntry> descriptionForMerchants() const;
 
         const ItemBase* getBase() const { return mBase; }
 

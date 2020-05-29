@@ -146,7 +146,7 @@ namespace FAGui
             }
         };
 
-        void item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highligh);
+        void item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight, bool checkerboarded);
         void inventoryPanel(nk_context* ctx);
         void fillTextField(nk_context* ctx, float x, float y, float width, const char* text, TextColor color = TextColor::white);
         void characterPanel(nk_context* ctx);

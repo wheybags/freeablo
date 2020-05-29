@@ -321,14 +321,14 @@ namespace FAWorld
         release_assert(false && "tried to remove actor that isn't in level");
     }
 
-    bool GameLevel::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, Misc::Point tile) { return mItemMap->dropItem(move(item), actor, tile); }
+    bool GameLevel::dropItem(std::unique_ptr<Item2>& item, const Actor& actor, Misc::Point tile) { return mItemMap->dropItem(item, actor, tile); }
 
-    bool GameLevel::dropItemClosestEmptyTile(Item& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction)
+    bool GameLevel::dropItemClosestEmptyTile(std::unique_ptr<Item2>& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction)
     {
         auto tryDrop = [&](Misc::Point pos) {
             bool res = false;
             if (isPassable(pos, &actor) && !mItemMap->getItemAt(pos))
-                res = dropItem(std::unique_ptr<Item>{new Item(item)}, actor, pos);
+                res = dropItem(item, actor, pos);
             return res;
         };
 

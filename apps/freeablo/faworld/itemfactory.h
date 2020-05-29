@@ -2,6 +2,8 @@
 #include "diabloexe/baseitem.h"
 #include "itemenums.h"
 #include "misc/enum_range.h"
+#include <faworld/item/item.h>
+#include <faworld/item/itembaseholder.h>
 #include <functional>
 #include <map>
 #include <memory>
@@ -16,6 +18,12 @@ namespace DiabloExe
 namespace Cel
 {
     class CelFile;
+}
+
+namespace FASaveGame
+{
+    class GameSaver;
+    class GameLoader;
 }
 
 namespace FAWorld
@@ -41,14 +49,16 @@ namespace FAWorld
     {
     public:
         explicit ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng);
-        Item generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
-        Item generateUniqueItem(UniqueItemId id) const;
+        std::unique_ptr<Item2> generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
         ItemId randomItemId(const ItemFilter::Callback& filter) const;
+
+        void saveItem(const Item2& item, FASaveGame::GameSaver& saver) const;
+        std::unique_ptr<Item2> loadItem(FASaveGame::GameLoader& loader) const;
 
     private:
         const DiabloExe::ExeItem& getInfo(ItemId id) const;
-        // TODO: replace this with something more decent
-        mutable std::unique_ptr<Cel::CelFile> mObjcursCel;
+
+        ItemBaseHolder mItemBaseHolder;
         std::map<int32_t, ItemId> mUniqueBaseItemIdToItemId;
         const DiabloExe::DiabloExe& mExe;
         Random::Rng& mRng;

@@ -246,24 +246,23 @@ namespace FAWorld
     void Actor::pickupItem(Target::ItemTarget target)
     {
         ItemMap& itemMap = getLevel()->getItemMap();
-        std::unique_ptr<Item> item = itemMap.takeItemAt(target.itemLocation);
+        std::unique_ptr<Item2> item = itemMap.takeItemAt(target.itemLocation);
 
         if (!item)
             return;
 
-        auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, target.itemLocation); };
+        auto dropBack = [&]() { itemMap.dropItem(item, *this, target.itemLocation); };
         switch (target.action)
         {
             case Target::ItemTarget::ActionType::autoEquip:
-                if (!mInventory.autoPlaceItem(*item))
+                if (!mInventory.autoPlaceItem(item))
                     dropBack();
                 break;
             case Target::ItemTarget::ActionType::toCursor:
-                auto cursorItem = mInventory.getCursorHeld();
-                if (!cursorItem.isEmpty())
+                if (mInventory.getCursorHeld())
                     return dropBack();
 
-                mInventory.setCursorHeld(*item);
+                mInventory.setCursorHeld(std::move(item));
                 break;
         }
     }

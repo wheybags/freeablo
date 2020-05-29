@@ -18,7 +18,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     farender/spriteloader.h
     farender/debugrenderdata.h
 
-        faworld/actor/basestate.cpp
+    faworld/actor/basestate.cpp
     faworld/actor/basestate.h
     faworld/actor/attackstate.cpp
     faworld/actor/attackstate.h
@@ -84,6 +84,20 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/world.h
     faworld/enums.h
     faworld/enums.cpp
+    faworld/item/itembase.cpp
+    faworld/item/itembase.h
+    faworld/item/itembaseholder.cpp
+    faworld/item/itembaseholder.h
+    faworld/item/equipmentitembase.cpp
+    faworld/item/equipmentitembase.h
+    faworld/item/usableitembase.cpp
+    faworld/item/usableitembase.h
+    faworld/item/item.cpp
+    faworld/item/item.h
+    faworld/item/equipmentitem.cpp
+    faworld/item/equipmentitem.h
+    faworld/item/usableitem.cpp
+    faworld/item/usableitem.h
 
     fagui/textcolor.h
     fagui/textcolor.cpp
@@ -167,7 +181,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
 target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input Random Image enet cxxopts fmt::fmt)
 target_include_directories(freeablo_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(freeablo main.cpp faworld/item/itembase.cpp faworld/item/itembase.h faworld/item/itembaseholder.cpp faworld/item/itembaseholder.h faworld/item/equipmentitembase.cpp faworld/item/equipmentitembase.h faworld/item/miscitembase.cpp faworld/item/miscitembase.h faworld/item/item.cpp faworld/item/item.h faworld/item/equipmentitem.cpp faworld/item/equipmentitem.h faworld/item/miscitem.cpp faworld/item/miscitem.h)
+add_executable(freeablo main.cpp)
 target_link_libraries(freeablo freeablo_lib)
 
 set_target_properties(freeablo_lib PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

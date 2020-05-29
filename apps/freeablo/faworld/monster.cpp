@@ -3,6 +3,7 @@
 #include "actor.h"
 #include "diabloexe/monster.h"
 #include "itemfactory.h"
+#include <engine/enginemain.h>
 #include <memory>
 #include <misc/stringops.h>
 
@@ -114,7 +115,7 @@ namespace FAWorld
         else
             itemId = mWorld.getItemFactory().randomItemId(ItemFilter::maxQLvl(mStats.mLevel));
 
-        Item item = mWorld.getItemFactory().generateBaseItem(itemId);
+        std::unique_ptr<Item2> item = mWorld.getItemFactory().generateBaseItem(itemId);
         getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction(Misc::Direction8::none));
     }
 

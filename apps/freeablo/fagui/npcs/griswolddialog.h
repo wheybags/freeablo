@@ -15,7 +15,7 @@ namespace FAGui
         void openBuyDialog();
         void openSellDialog();
 
-        static bool griswoldSellFilter(const FAWorld::Item& item);
+        static bool griswoldSellFilter(const FAWorld::Item2* item);
 
         FAWorld::Actor* mActor = nullptr;
     };

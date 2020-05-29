@@ -95,25 +95,25 @@ namespace Engine
 
                 auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
 
-                auto cursorItem = player->mInventory.getCursorHeld();
-                auto clickedActor = mWorld.targetedActor(mousePosition);
-                if (modifiers.shift && cursorItem.isEmpty())
+                const FAWorld::Item2* cursorItem = player->mInventory.getCursorHeld();
+                const FAWorld::Actor* clickedActor = mWorld.targetedActor(mousePosition);
+                if (modifiers.shift && !cursorItem)
                 {
                     mInputs.emplace_back(FAWorld::PlayerInput::ForceAttackData{clickedTile.pos}, player->getId());
                 }
-                else if (clickedActor && cursorItem.isEmpty())
+                else if (clickedActor && !cursorItem)
                 {
                     mInputs.emplace_back(FAWorld::PlayerInput::TargetActorData{clickedActor->getId()}, player->getId());
                 }
-                else if (auto item = mWorld.targetedItem(mousePosition))
+                else if (const FAWorld::PlacedItemData* item = mWorld.targetedItem(mousePosition))
                 {
                     auto type = EngineMain::get()->mGuiManager->isInventoryShown() ? FAWorld::Target::ItemTarget::ActionType::toCursor
                                                                                    : FAWorld::Target::ItemTarget::ActionType::autoEquip;
                     mInputs.emplace_back(FAWorld::PlayerInput::TargetItemOnFloorData{item->getTile(), type}, player->getId());
                 }
-                else if (player->getLevel()->isDoor(clickedTile.pos) || !cursorItem.isEmpty())
+                else if (player->getLevel()->isDoor(clickedTile.pos) || cursorItem)
                 {
-                    if (!cursorItem.isEmpty())
+                    if (cursorItem)
                         mIsDroppingItem = true;
                     mInputs.emplace_back(FAWorld::PlayerInput::TargetTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
                 }
@@ -133,7 +133,7 @@ namespace Engine
             case Engine::MouseInputAction::RIGHT_MOUSE_DOWN:
             {
                 auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
-                if (player->mInventory.getCursorHeld().isEmpty())
+                if (!player->mInventory.getCursorHeld())
                     mInputs.emplace_back(FAWorld::PlayerInput::CastSpellData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
                 else
                     mInputs.emplace_back(FAWorld::PlayerInput::TargetTileData{clickedTile.pos.x, clickedTile.pos.y}, player->getId());
