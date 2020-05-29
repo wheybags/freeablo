@@ -9,27 +9,23 @@ namespace FAWorld
     //Used for the formulas
     void Potion::restoreHp(Player* player)
     {
-        std::string bonus = "1.0";
-
-        switch (player->getClass())
-        {
             case FAWorld::PlayerClass::warrior: {
-                bonus = "2.0";
+                bonus = FixedPoint("2.0");
                 break;
             }
             case FAWorld::PlayerClass::rogue: {
-                bonus = "1.5f";
+                bonus = FixedPoint("1.5");
                 break;
             }
             case FAWorld::PlayerClass::sorceror: {
-                bonus = "1.0f";
+                bonus = FixedPoint("1.0");
                 break;
             }
             default:
                 break;
         }
 
-        int32_t min = (int32_t)(FixedPoint(bonus.c_str()) * FixedPoint(player->getStats().getHp().max)/ FixedPoint(8)).floor();
+        int32_t min = (int32_t)(bonus * FixedPoint(player->getStats().getHp().max)/ FixedPoint(8)).floor();
         int32_t max = min * 3;
         int32_t toHeal = player->getWorld()->mRng->randomInRange(min, max);
         player->heal(toHeal);
@@ -39,27 +35,27 @@ namespace FAWorld
 
     void Potion::restoreMana(Player* player)
     {
-        std::string bonus = "1.0";
+        FixedPoint bonus;
 
         switch (player->getClass())
         {
             case FAWorld::PlayerClass::warrior: {
-                bonus = "2.0";
+                bonus = FixedPoint("1.0");
                 break;
             }
             case FAWorld::PlayerClass::rogue: {
-                bonus = "1.5f";
+                bonus = FixedPoint("1.5");
                 break;
             }
             case FAWorld::PlayerClass::sorceror: {
-                bonus = "1.0f";
+                bonus = FixedPoint("2.0");
                 break;
             }
             default:
                 break;
         }
 
-        int32_t min = (int32_t)(FixedPoint(bonus.c_str()) * FixedPoint(player->getStats().getHp().max) / FixedPoint(8)).floor();
+        int32_t min = (int32_t)(bonus * FixedPoint(player->getStats().getHp().max) / FixedPoint(8)).floor();
         int32_t max = min * 3;
         player->getWorld()->mRng->randomInRange(min, max);
         player->restoreMana();
