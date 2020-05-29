@@ -54,7 +54,7 @@ namespace FAWorld
         for (auto id : enum_range<ItemId>())
         {
             const DiabloExe::ExeItem& info = getInfo(id);
-            if (filter(info))
+            if (!filter(info))
                 continue;
             for (int32_t i = 0; i < static_cast<int32_t>(info.dropRate); ++i)
                 pool.push_back(id);
