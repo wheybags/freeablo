@@ -78,7 +78,7 @@ namespace FAWorld
                     return;
                 }
 
-                const Item2* cursorItem = mPlayer->mInventory.getCursorHeld();
+                const Item* cursorItem = mPlayer->mInventory.getCursorHeld();
                 if (cursorItem)
                 {
                     mPlayer->dropItem(clickedPoint);
@@ -192,7 +192,7 @@ namespace FAWorld
             {
                 int32_t price = 0;
                 {
-                    const Item2* item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
+                    const Item* item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
 
                     // TODO: validate sell filter here
                     if (!item || item->getBase()->mType == ItemType::gold)

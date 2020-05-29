@@ -15,7 +15,7 @@ namespace FAWorld
     public:
         explicit ItemBaseHolder(const DiabloExe::DiabloExe& exe);
 
-        std::unique_ptr<Item2> createItem(const std::string& baseTypeId) const;
+        std::unique_ptr<Item> createItem(const std::string& baseTypeId) const;
         const ItemBase* get(const std::string& key) const { return mAllItemBases.at(key).get(); }
 
     private:

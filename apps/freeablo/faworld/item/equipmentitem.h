@@ -5,9 +5,9 @@ namespace FAWorld
 {
     class EquipmentItemBase;
 
-    class EquipmentItem final : public Item2
+    class EquipmentItem final : public Item
     {
-        using super = Item2;
+        using super = Item;
 
     public:
         explicit EquipmentItem(const EquipmentItemBase* base);

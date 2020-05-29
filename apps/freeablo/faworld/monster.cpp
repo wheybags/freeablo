@@ -115,7 +115,7 @@ namespace FAWorld
         else
             itemId = mWorld.getItemFactory().randomItemId(ItemFilter::maxQLvl(mStats.mLevel));
 
-        std::unique_ptr<Item2> item = mWorld.getItemFactory().generateBaseItem(itemId);
+        std::unique_ptr<Item> item = mWorld.getItemFactory().generateBaseItem(itemId);
         getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction(Misc::Direction8::none));
     }
 

@@ -43,7 +43,7 @@ namespace FAWorld
         mMoveHandler.mSpeedTilesPerSecond = FixedPoint(1) / FixedPoint("0.4"); // https://wheybags.gitlab.io/jarulfs-guide/#player-timing-information
         mName = "Player";
         mWorld.registerPlayer(this);
-        mInventory.mInventoryChanged = [this](EquipTargetType inventoryType, const Item2* removed, const Item2* added) {
+        mInventory.mInventoryChanged = [this](EquipTargetType inventoryType, const Item* removed, const Item* added) {
             (void)removed;
 
             mInventoryChangedCallCount++;
@@ -466,7 +466,7 @@ namespace FAWorld
         Vec2i curPos = getPos().current();
         Misc::Direction direction = (curPos == clickedPoint) ? Misc::Direction(Misc::Direction8::none) : initialDir;
 
-        std::unique_ptr<Item2> tmp = mInventory.remove(MakeEquipTarget<EquipTargetType::cursor>());
+        std::unique_ptr<Item> tmp = mInventory.remove(MakeEquipTarget<EquipTargetType::cursor>());
         bool retval = getLevel()->dropItemClosestEmptyTile(tmp, *this, curPos, direction);
         mInventory.setCursorHeld(std::move(tmp));
 

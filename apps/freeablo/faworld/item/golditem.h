@@ -5,9 +5,9 @@ namespace FAWorld
 {
     class GoldItemBase;
 
-    class GoldItem final : public Item2
+    class GoldItem final : public Item
     {
-        using super = Item2;
+        using super = Item;
 
     public:
         explicit GoldItem(const GoldItemBase* base);

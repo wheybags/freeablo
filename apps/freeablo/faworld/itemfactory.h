@@ -49,11 +49,11 @@ namespace FAWorld
     {
     public:
         explicit ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng);
-        std::unique_ptr<Item2> generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
+        std::unique_ptr<Item> generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
         ItemId randomItemId(const ItemFilter::Callback& filter) const;
 
-        void saveItem(const Item2& item, FASaveGame::GameSaver& saver) const;
-        std::unique_ptr<Item2> loadItem(FASaveGame::GameLoader& loader) const;
+        void saveItem(const Item& item, FASaveGame::GameSaver& saver) const;
+        std::unique_ptr<Item> loadItem(FASaveGame::GameLoader& loader) const;
 
         const ItemBaseHolder& getItemBaseHolder() const { return mItemBaseHolder; }
 

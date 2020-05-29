@@ -48,7 +48,7 @@ namespace FAGui
 
     void ConfirmTransactionPopup::addAction(std::function<CharacterDialoguePopup::UpdateResult()> act) { mAction = act; }
 
-    ShopSellDialog::ShopSellDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::function<bool(const FAWorld::Item2* item)> filter)
+    ShopSellDialog::ShopSellDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::function<bool(const FAWorld::Item* item)> filter)
         : CharacterDialoguePopup(guiManager, true), mFilter(filter), mShopkeeper(shopkeeper)
     {
     }
@@ -62,7 +62,7 @@ namespace FAGui
         std::vector<FAWorld::EquipTarget> sellableItems;
         {
             auto addItem = [&](FAWorld::EquipTarget target) {
-                const FAWorld::Item2* item = inventory.getItemAt(target);
+                const FAWorld::Item* item = inventory.getItemAt(target);
                 if (item && mFilter(item) && item->getBase()->mType != ItemType::gold)
                     sellableItems.push_back(target);
             };
@@ -103,7 +103,7 @@ namespace FAGui
     void ShopSellDialog::sellItem(const FAWorld::EquipTarget& item, ConfirmTransactionPopup* confirmPopup)
     {
         FAWorld::CharacterInventory& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
-        const FAWorld::Item2* invItem = inventory.getItemAt(item);
+        const FAWorld::Item* invItem = inventory.getItemAt(item);
         debug_assert(invItem);
 
         const int32_t price = invItem->getPrice();

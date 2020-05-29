@@ -20,7 +20,7 @@ namespace FAWorld
 
     struct StoreItem
     {
-        std::unique_ptr<Item2> item;
+        std::unique_ptr<Item> item;
         uint32_t storeId = 0;
     };
 

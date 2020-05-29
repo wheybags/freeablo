@@ -178,7 +178,7 @@ namespace FAGui
 
     void GuiManager::triggerItem(const FAWorld::EquipTarget& target)
     {
-        const FAWorld::Item2* item = mPlayer->mInventory.getItemAt(target);
+        const FAWorld::Item* item = mPlayer->mInventory.getItemAt(target);
         if (item->getAsGoldItem())
         {
             mGoldSplitTarget = target;
@@ -193,7 +193,7 @@ namespace FAGui
         if (inv.getCursorHeld())
             highlight = ItemHighlightInfo::notHighlighed;
 
-        const Item2* item = inv.getItemAt(target);
+        const Item* item = inv.getItemAt(target);
         if (!item)
             return;
 
@@ -300,7 +300,7 @@ namespace FAGui
                 // Adjust for cursor offset when items are held.
                 // When items are held, their sprites are centered around the cursor (rather then top left).
                 struct nk_vec2 cursorOffset = nk_vec2(0, 0);
-                if (const Item2* item = mPlayer->mInventory.getCursorHeld())
+                if (const Item* item = mPlayer->mInventory.getCursorHeld())
                 {
                     Vec2i invSize = item->getBase()->mSize;
                     cursorOffset = {(1.0f - invSize.w) * cellSize / 2, (1.0f - invSize.h) * cellSize / 2};
@@ -325,7 +325,7 @@ namespace FAGui
 
             if (mGoldSplitTarget)
             {
-                const Item2* goldSplitTargetItem = mPlayer->mInventory.getItemAt(*mGoldSplitTarget);
+                const Item* goldSplitTargetItem = mPlayer->mInventory.getItemAt(*mGoldSplitTarget);
                 const GoldItem* goldItem = goldSplitTargetItem->getAsGoldItem();
                 if (!goldItem)
                 {
@@ -1010,7 +1010,7 @@ namespace FAGui
     {
         if (mGoldSplitTarget && !key.has_modifiers())
         {
-            const FAWorld::Item2* goldSplitTargetItem = mPlayer->mInventory.getItemAt(*mGoldSplitTarget);
+            const FAWorld::Item* goldSplitTargetItem = mPlayer->mInventory.getItemAt(*mGoldSplitTarget);
             const FAWorld::GoldItem* goldItem = goldSplitTargetItem->getAsGoldItem();
             if (!goldItem)
             {

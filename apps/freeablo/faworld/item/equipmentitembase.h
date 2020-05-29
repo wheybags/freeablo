@@ -12,7 +12,7 @@ namespace FAWorld
     public:
         explicit EquipmentItemBase(const DiabloExe::ExeItem& exeItem);
 
-        std::unique_ptr<Item2> createItem() const override;
+        std::unique_ptr<Item> createItem() const override;
 
         ItemEquipType getEquipType() const override { return mEquipSlot; }
         bool usableByPlayer(const Player& player) const;

@@ -23,5 +23,5 @@ namespace FAWorld
         }
     }
 
-    std::unique_ptr<Item2> ItemBaseHolder::createItem(const std::string& baseTypeId) const { return mAllItemBases.at(baseTypeId)->createItem(); }
+    std::unique_ptr<Item> ItemBaseHolder::createItem(const std::string& baseTypeId) const { return mAllItemBases.at(baseTypeId)->createItem(); }
 }

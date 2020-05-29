@@ -10,7 +10,7 @@ namespace FAWorld
     public:
         explicit GoldItemBase(const DiabloExe::ExeItem& exeItem);
 
-        std::unique_ptr<Item2> createItem() const override;
+        std::unique_ptr<Item> createItem() const override;
 
     public:
         int32_t mMaxCount = 5000;

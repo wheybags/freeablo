@@ -69,7 +69,7 @@ namespace FAWorld
         {
             Vec2i position(loader);
 
-            std::unique_ptr<Item2> item = Engine::EngineMain::get()->mWorld->getItemFactory().loadItem(loader);
+            std::unique_ptr<Item> item = Engine::EngineMain::get()->mWorld->getItemFactory().loadItem(loader);
             PlaceItemResult result = placeItem(item, position.x, position.y);
 
             if (!result.succeeded())
@@ -79,7 +79,7 @@ namespace FAWorld
         mTreatAllItemsAs1by1 = loader.load<bool>();
     }
 
-    bool BasicInventory::canFitItem(const Item2& item) const
+    bool BasicInventory::canFitItem(const Item& item) const
     {
         Vec2i itemSize = item.getBase()->mSize;
         if (mTreatAllItemsAs1by1)
@@ -111,7 +111,7 @@ namespace FAWorld
         return false;
     }
 
-    bool BasicInventory::autoPlaceItem(std::unique_ptr<Item2>& item)
+    bool BasicInventory::autoPlaceItem(std::unique_ptr<Item>& item)
     {
         // TODO: the original game had some fancier methods of trying to fit specific size items
         // There used to be an implementation of this here, but it was buggy so I removed it,
@@ -125,7 +125,7 @@ namespace FAWorld
         return false;
     }
 
-    PlaceItemResult BasicInventory::placeItem(std::unique_ptr<Item2>& item, int32_t x, int32_t y)
+    PlaceItemResult BasicInventory::placeItem(std::unique_ptr<Item>& item, int32_t x, int32_t y)
     {
         Vec2i itemSize = item->getBase()->mSize;
         if (mTreatAllItemsAs1by1)
@@ -153,7 +153,7 @@ namespace FAWorld
         if (!blockingItems.empty())
             return PlaceItemResult{PlaceItemResult::Type::BlockedByItems, blockingItems};
 
-        Item2* itemReleased = item.release();
+        Item* itemReleased = item.release();
         for (int32_t yy = y; yy < y + itemSize.y; yy++)
         {
             for (int32_t xx = x; xx < x + itemSize.x; xx++)
@@ -174,7 +174,7 @@ namespace FAWorld
         return PlaceItemResult{PlaceItemResult::Type::Success, {}};
     }
 
-    bool BasicInventory::swapItem(std::unique_ptr<Item2>& item, int32_t x, int32_t y)
+    bool BasicInventory::swapItem(std::unique_ptr<Item>& item, int32_t x, int32_t y)
     {
         if (!item)
         {
@@ -194,7 +194,7 @@ namespace FAWorld
             {
                 if (result.blockingItems.size() == 1)
                 {
-                    std::unique_ptr<Item2> tmp = std::move(item);
+                    std::unique_ptr<Item> tmp = std::move(item);
                     Vec2i removeFrom = (*result.blockingItems.begin())->topLeft;
                     item = remove(removeFrom.x, removeFrom.y);
                     auto finalPlaceResult = placeItem(tmp, x, y);
@@ -213,7 +213,7 @@ namespace FAWorld
         invalid_enum(PlaceItemResult, result.type);
     }
 
-    std::unique_ptr<Item2> BasicInventory::remove(int32_t x, int32_t y)
+    std::unique_ptr<Item> BasicInventory::remove(int32_t x, int32_t y)
     {
         BasicInventoryBox result = mInventoryBox.get(x, y);
 
@@ -236,7 +236,7 @@ namespace FAWorld
         if (mInventoryChanged)
             mInventoryChanged(result.item, nullptr);
 
-        return std::unique_ptr<Item2>(result.item);
+        return std::unique_ptr<Item>(result.item);
     }
 
     struct ExchangeResult
@@ -261,7 +261,7 @@ namespace FAWorld
         for (const auto& pair : mInventoryTypes)
         {
             EquipTargetType type = pair.first;
-            pair.second.mInventoryChanged = [this, type](const Item2* removed, const Item2* added) {
+            pair.second.mInventoryChanged = [this, type](const Item* removed, const Item* added) {
                 if (mInventoryChanged)
                     mInventoryChanged(type, removed, added);
             };
@@ -296,9 +296,9 @@ namespace FAWorld
         mCursorHeld.load(loader);
     }
 
-    bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item2>&& item) { return autoPlaceItem(item); }
+    bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item>&& item) { return autoPlaceItem(item); }
 
-    bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item2>& item)
+    bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item>& item)
     {
         // auto-placing in belt
         if (item->getAsUsableItem() && item->getAsUsableItem()->getBase()->isBeltEquippable() && mBelt.autoPlaceItem(item))
@@ -307,8 +307,8 @@ namespace FAWorld
         if (EquipmentItem* equipmentItem = item->getAsEquipmentItem())
         {
             // auto-equipping two handed weapons
-            const Item2* leftHand = mLeftHand.getItem(0, 0);
-            const Item2* rightHand = mRightHand.getItem(0, 0);
+            const Item* leftHand = mLeftHand.getItem(0, 0);
+            const Item* rightHand = mRightHand.getItem(0, 0);
             if (equipmentItem->getBase()->mEquipSlot == ItemEquipType::twoHanded && !leftHand && !rightHand)
             {
                 release_assert(mLeftHand.autoPlaceItem(item));
@@ -337,7 +337,7 @@ namespace FAWorld
         return mMainInventory.autoPlaceItem(item);
     }
 
-    bool CharacterInventory::forcePlaceItem(std::unique_ptr<Item2>& item, const EquipTarget& target)
+    bool CharacterInventory::forcePlaceItem(std::unique_ptr<Item>& item, const EquipTarget& target)
     {
         BasicInventory& inv = getInvMutable(target.type);
         PlaceItemResult result = inv.placeItem(item, target.posX, target.posY);
@@ -364,11 +364,11 @@ namespace FAWorld
         invalid_enum(PlaceItemResult, result.type);
     }
 
-    const Item2* CharacterInventory::getItemAt(const EquipTarget& target) const { return getInv(target.type).getItem(target.posX, target.posY); }
+    const Item* CharacterInventory::getItemAt(const EquipTarget& target) const { return getInv(target.type).getItem(target.posX, target.posY); }
 
-    std::unique_ptr<Item2> CharacterInventory::remove(const EquipTarget& target) { return getInvMutable(target.type).remove(target.posX, target.posY); }
+    std::unique_ptr<Item> CharacterInventory::remove(const EquipTarget& target) { return getInvMutable(target.type).remove(target.posX, target.posY); }
 
-    void CharacterInventory::setCursorHeld(std::unique_ptr<Item2>&& item)
+    void CharacterInventory::setCursorHeld(std::unique_ptr<Item>&& item)
     {
         mCursorHeld.remove(0, 0);
         if (item)
@@ -381,7 +381,7 @@ namespace FAWorld
 
     void CharacterInventory::slotClicked(const EquipTarget& slot)
     {
-        const Item2* cursorItem = getCursorHeld();
+        const Item* cursorItem = getCursorHeld();
 
         if (cursorItem)
         {
@@ -427,20 +427,20 @@ namespace FAWorld
                 {
                     if (!getRightHand() || !getLeftHand() || getLeftHand()->getBase()->getEquipType() == ItemEquipType::twoHanded)
                     {
-                        std::unique_ptr<Item2> removed;
+                        std::unique_ptr<Item> removed;
                         if (getRightHand())
                             removed = mRightHand.remove(0, 0);
                         if (getLeftHand())
                             removed = mLeftHand.remove(0, 0);
 
-                        std::unique_ptr<Item2> cursorOld = mCursorHeld.remove(0, 0);
+                        std::unique_ptr<Item> cursorOld = mCursorHeld.remove(0, 0);
                         release_assert(mLeftHand.placeItem(cursorOld, 0, 0).succeeded());
                         setCursorHeld(std::move(removed));
                     }
                 }
                 else if (cursorItem->getBase()->getEquipType() == ItemEquipType::oneHanded)
                 {
-                    std::unique_ptr<Item2> removed;
+                    std::unique_ptr<Item> removed;
                     if (getLeftHand() && getLeftHand()->getBase()->getEquipType() == ItemEquipType::twoHanded)
                         removed = mLeftHand.remove(0, 0);
                     else if (cursorItem->getBase()->mClass == ItemClass::weapon)
@@ -448,7 +448,7 @@ namespace FAWorld
                     else if (cursorItem->getBase()->mType == ItemType::shield)
                         removed = mRightHand.remove(0, 0);
 
-                    std::unique_ptr<Item2> cursorOld = mCursorHeld.remove(0, 0);
+                    std::unique_ptr<Item> cursorOld = mCursorHeld.remove(0, 0);
 
                     if (cursorItem->getBase()->mClass == ItemClass::weapon)
                         release_assert(mLeftHand.placeItem(cursorOld, 0, 0).succeeded());
@@ -464,7 +464,7 @@ namespace FAWorld
 
         BasicInventory& inv = getInvMutable(slot.type);
 
-        std::unique_ptr<Item2> tmp = mCursorHeld.remove(0, 0);
+        std::unique_ptr<Item> tmp = mCursorHeld.remove(0, 0);
         inv.swapItem(tmp, slot.posX, slot.posY);
 
         setCursorHeld(std::move(tmp));
@@ -499,7 +499,7 @@ namespace FAWorld
         EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
         for (auto& slot : hands)
         {
-            const Item2* item = getItemAt(slot);
+            const Item* item = getItemAt(slot);
             if (!item || !item->getAsEquipmentItem())
                 continue;
 
@@ -554,7 +554,7 @@ namespace FAWorld
             {
                 if (!mMainInventory.getItem(x, y))
                 {
-                    std::unique_ptr<Item2> newItem = itemFactory.generateBaseItem(ItemId::gold);
+                    std::unique_ptr<Item> newItem = itemFactory.generateBaseItem(ItemId::gold);
                     GoldItem* goldItem = newItem->getAsGoldItem();
 
                     int32_t toPlace = std::min(quantity, goldItem->getBase()->mMaxCount);
@@ -637,7 +637,7 @@ namespace FAWorld
 
     void CharacterInventory::splitGoldIntoCursor(int32_t x, int32_t y, int32_t amountToTransferToCursor, const ItemFactory& itemFactory)
     {
-        std::unique_ptr<Item2> goldFromInventory = mMainInventory.remove(x, y);
+        std::unique_ptr<Item> goldFromInventory = mMainInventory.remove(x, y);
         GoldItem* goldFromInventoryGoldItem = goldFromInventory->getAsGoldItem();
         release_assert(goldFromInventoryGoldItem);
 
@@ -652,7 +652,7 @@ namespace FAWorld
             mMainInventory.placeItem(goldFromInventory, x, y);
         }
 
-        std::unique_ptr<Item2> cursorGold = itemFactory.generateBaseItem(ItemId::gold);
+        std::unique_ptr<Item> cursorGold = itemFactory.generateBaseItem(ItemId::gold);
         release_assert(cursorGold->getAsGoldItem()->trySetCount(amountToTransferToCursor));
 
         setCursorHeld(std::move(cursorGold));

@@ -7,5 +7,5 @@ namespace FAWorld
 
     bool UsableItemBase::isBeltEquippable() const { return mSize == Vec2i(1, 1); }
 
-    std::unique_ptr<Item2> UsableItemBase::createItem() const { return std::unique_ptr<Item2>(new UsableItem(this)); }
+    std::unique_ptr<Item> UsableItemBase::createItem() const { return std::unique_ptr<Item>(new UsableItem(this)); }
 }

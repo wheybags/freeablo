@@ -246,7 +246,7 @@ namespace FAWorld
     void Actor::pickupItem(Target::ItemTarget target)
     {
         ItemMap& itemMap = getLevel()->getItemMap();
-        std::unique_ptr<Item2> item = itemMap.takeItemAt(target.itemLocation);
+        std::unique_ptr<Item> item = itemMap.takeItemAt(target.itemLocation);
 
         if (!item)
             return;

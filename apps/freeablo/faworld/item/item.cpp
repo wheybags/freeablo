@@ -3,11 +3,11 @@
 
 namespace FAWorld
 {
-    int32_t Item2::getPrice() const { return getBase()->mPrice; }
+    int32_t Item::getPrice() const { return getBase()->mPrice; }
 
-    std::string Item2::getFullDescription() const { return getBase()->mName; }
+    std::string Item::getFullDescription() const { return getBase()->mName; }
 
-    std::vector<FAGui::MenuEntry> Item2::descriptionForMerchants() const
+    std::vector<FAGui::MenuEntry> Item::descriptionForMerchants() const
     {
         std::vector<FAGui::MenuEntry> description;
 

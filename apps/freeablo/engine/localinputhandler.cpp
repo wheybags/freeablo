@@ -95,7 +95,7 @@ namespace Engine
 
                 auto clickedTile = FARender::Renderer::get()->getTileByScreenPos(mousePosition.x, mousePosition.y, player->getPos());
 
-                const FAWorld::Item2* cursorItem = player->mInventory.getCursorHeld();
+                const FAWorld::Item* cursorItem = player->mInventory.getCursorHeld();
                 const FAWorld::Actor* clickedActor = mWorld.targetedActor(mousePosition);
                 if (modifiers.shift && !cursorItem)
                 {

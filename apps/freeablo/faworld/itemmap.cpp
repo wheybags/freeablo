@@ -10,7 +10,7 @@
 
 namespace FAWorld
 {
-    PlacedItemData::PlacedItemData(std::unique_ptr<Item2>&& itemArg, Misc::Point tile)
+    PlacedItemData::PlacedItemData(std::unique_ptr<Item>&& itemArg, Misc::Point tile)
         : mItem(std::move(itemArg)), mAnimation(new FARender::AnimationPlayer()), mTile(tile)
     {
         mAnimation->playAnimation(mItem->getBase()->mDropItemAnimation, World::getTicksInPeriod("0.05"), FARender::AnimationPlayer::AnimationType::FreezeAtEnd);
@@ -70,7 +70,7 @@ namespace FAWorld
 
     ItemMap::~ItemMap() {}
 
-    bool ItemMap::dropItem(std::unique_ptr<Item2>& item, const Actor& actor, Misc::Point tile)
+    bool ItemMap::dropItem(std::unique_ptr<Item>& item, const Actor& actor, Misc::Point tile)
     {
         if (!mLevel->isPassable(tile, &actor))
             return false;
@@ -96,7 +96,7 @@ namespace FAWorld
         return &it->second;
     }
 
-    std::unique_ptr<Item2> ItemMap::takeItemAt(Misc::Point tile)
+    std::unique_ptr<Item> ItemMap::takeItemAt(Misc::Point tile)
     {
         auto it = mItems.find(tile);
         if (it == mItems.end())
@@ -105,7 +105,7 @@ namespace FAWorld
         if (!it->second.onGround())
             return nullptr;
 
-        std::unique_ptr<Item2> item = std::move(it->second.mItem);
+        std::unique_ptr<Item> item = std::move(it->second.mItem);
         mItems.erase(it);
         return item;
     }

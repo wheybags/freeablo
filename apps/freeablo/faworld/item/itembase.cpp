@@ -13,5 +13,5 @@ namespace FAWorld
         mDropItemAnimation = spriteLoader.getSprite(spriteLoader.mItemDrops[mId]);
     }
 
-    std::unique_ptr<Item2> ItemBase::createItem() const { return std::make_unique<Item2>(this); }
+    std::unique_ptr<Item> ItemBase::createItem() const { return std::make_unique<Item>(this); }
 }

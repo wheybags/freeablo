@@ -13,7 +13,7 @@ namespace FAGui
         virtual DialogData getDialogData() override;
 
         void openSellDialog();
-        static bool adriaSellFilter(const FAWorld::Item2* item);
+        static bool adriaSellFilter(const FAWorld::Item* item);
 
         FAWorld::Actor* mActor = nullptr;
     };

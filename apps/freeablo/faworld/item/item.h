@@ -19,11 +19,11 @@ namespace FAWorld
 
     class ItemBase;
 
-    class Item2
+    class Item
     {
     public:
-        explicit Item2(const ItemBase* base) : mBase(base) {}
-        virtual ~Item2() = default;
+        explicit Item(const ItemBase* base) : mBase(base) {}
+        virtual ~Item() = default;
 
         virtual void init() {}
 
@@ -31,11 +31,11 @@ namespace FAWorld
         virtual void load(FASaveGame::GameLoader& loader) { UNUSED_PARAM(loader); }
 
         virtual EquipmentItem* getAsEquipmentItem() { return nullptr; }
-        const EquipmentItem* getAsEquipmentItem() const { return const_cast<Item2*>(this)->getAsEquipmentItem(); }
+        const EquipmentItem* getAsEquipmentItem() const { return const_cast<Item*>(this)->getAsEquipmentItem(); }
         virtual UsableItem* getAsUsableItem() { return nullptr; }
-        const UsableItem* getAsMiscItem() const { return const_cast<Item2*>(this)->getAsUsableItem(); }
+        const UsableItem* getAsMiscItem() const { return const_cast<Item*>(this)->getAsUsableItem(); }
         virtual GoldItem* getAsGoldItem() { return nullptr; }
-        const GoldItem* getAsGoldItem() const { return const_cast<Item2*>(this)->getAsGoldItem(); }
+        const GoldItem* getAsGoldItem() const { return const_cast<Item*>(this)->getAsGoldItem(); }
 
         int32_t getPrice() const;
         virtual std::string getFullDescription() const;

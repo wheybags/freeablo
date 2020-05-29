@@ -17,5 +17,5 @@ namespace FAWorld
         return stats.strength >= mRequiredStrength && stats.dexterity >= mRequiredDexterity && stats.magic >= mRequiredMagic;
     }
 
-    std::unique_ptr<Item2> EquipmentItemBase::createItem() const { return std::unique_ptr<Item2>(new EquipmentItem(this)); }
+    std::unique_ptr<Item> EquipmentItemBase::createItem() const { return std::unique_ptr<Item>(new EquipmentItem(this)); }
 }

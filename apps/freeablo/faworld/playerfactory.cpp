@@ -85,7 +85,7 @@ namespace FAWorld
     void PlayerFactory::addWarriorItems(Player* player) const
     {
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortSword));
-        std::unique_ptr<Item2> buckler = mItemFactory.generateBaseItem(ItemId::buckler);
+        std::unique_ptr<Item> buckler = mItemFactory.generateBaseItem(ItemId::buckler);
         player->mInventory.forcePlaceItem(buckler, MakeEquipTarget<EquipTargetType::rightHand>());
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::club));
         player->mInventory.placeGold(100, mItemFactory);

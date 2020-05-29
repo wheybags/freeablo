@@ -183,7 +183,7 @@ namespace Engine
 
                 if (!mPaused && mWorld->getCurrentPlayer())
                 {
-                    const FAWorld::Item2* item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld();
+                    const FAWorld::Item* item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld();
                     state->mCursorFrame = item ? item->getBase()->mInventoryGraphicsId : 0;
                     // When items are held, their sprites are centered around the cursor (rather then top left).
                     state->mCursorCentered = item != nullptr;

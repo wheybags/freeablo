@@ -146,7 +146,7 @@ namespace FAGui
         mGuiManager.mDialogManager.pushDialog(dialog);
     }
 
-    bool GriswoldDialog::griswoldSellFilter(const FAWorld::Item2* item)
+    bool GriswoldDialog::griswoldSellFilter(const FAWorld::Item* item)
     {
         // TODO: add check for quest items
         return item->getBase()->mType != ItemType::misc && item->getBase()->mType != ItemType::staff;

@@ -5,9 +5,9 @@ namespace FAWorld
 {
     class UsableItemBase;
 
-    class UsableItem final : public Item2
+    class UsableItem final : public Item
     {
-        using super = Item2;
+        using super = Item;
 
     public:
         explicit UsableItem(const UsableItemBase* base);

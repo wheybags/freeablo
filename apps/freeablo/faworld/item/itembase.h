@@ -6,7 +6,7 @@
 
 namespace FAWorld
 {
-    class Item2;
+    class Item;
 
     class ItemBase
     {
@@ -14,7 +14,7 @@ namespace FAWorld
         explicit ItemBase(const DiabloExe::ExeItem& exeItem);
         virtual ~ItemBase() = default;
 
-        virtual std::unique_ptr<Item2> createItem() const;
+        virtual std::unique_ptr<Item> createItem() const;
         virtual ItemEquipType getEquipType() const { return ItemEquipType::none; }
 
     public:

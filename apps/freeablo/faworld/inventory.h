@@ -19,7 +19,7 @@ namespace FAWorld
     {
         Vec2i topLeft = Vec2i::invalid();
         Vec2i position = Vec2i::invalid();
-        Item2* item = nullptr;
+        Item* item = nullptr;
         bool isReal = false;
     };
 
@@ -66,17 +66,17 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver) const;
         void load(FASaveGame::GameLoader& loader);
 
-        bool canFitItem(const Item2& item) const;
-        bool autoPlaceItem(std::unique_ptr<Item2>& item);
-        PlaceItemResult placeItem(std::unique_ptr<Item2>& item, int32_t x, int32_t y);
+        bool canFitItem(const Item& item) const;
+        bool autoPlaceItem(std::unique_ptr<Item>& item);
+        PlaceItemResult placeItem(std::unique_ptr<Item>& item, int32_t x, int32_t y);
 
         /// attempts to place item at x,y, swapping the item pointer with whatever is in the way.
         /// Fails if there is more than one item in the way, or location would be out of bounds.
         /// returns boolean success or failure. Item can be empty.
-        bool swapItem(std::unique_ptr<Item2>& item, int32_t x, int32_t y);
+        bool swapItem(std::unique_ptr<Item>& item, int32_t x, int32_t y);
 
-        const Item2* getItem(int32_t x, int32_t y) const { return mInventoryBox.get(x, y).item; }
-        std::unique_ptr<Item2> remove(int32_t x, int32_t y);
+        const Item* getItem(int32_t x, int32_t y) const { return mInventoryBox.get(x, y).item; }
+        std::unique_ptr<Item> remove(int32_t x, int32_t y);
 
         int32_t width() const { return mInventoryBox.width(); }
         int32_t height() const { return mInventoryBox.height(); }
@@ -119,7 +119,7 @@ namespace FAWorld
         const_iterator begin() const { return const_iterator(this, mInventoryBox.begin()); }
         const_iterator end() const { return const_iterator(this, mInventoryBox.end()); }
 
-        std::function<void(const Item2* removed, const Item2* added)> mInventoryChanged;
+        std::function<void(const Item* removed, const Item* added)> mInventoryChanged;
 
     private:
         Misc::Array2D<BasicInventoryBox> mInventoryBox;
@@ -134,27 +134,27 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver) const;
         void load(FASaveGame::GameLoader& loader);
 
-        bool autoPlaceItem(std::unique_ptr<Item2>&& item);
-        bool autoPlaceItem(std::unique_ptr<Item2>& item);
-        bool forcePlaceItem(std::unique_ptr<Item2>& item, const EquipTarget& target); /// no checks except bounds, just overwrites whatever is there
-        const Item2* getItemAt(const EquipTarget& target) const;
-        std::unique_ptr<Item2> remove(const EquipTarget& target);
+        bool autoPlaceItem(std::unique_ptr<Item>&& item);
+        bool autoPlaceItem(std::unique_ptr<Item>& item);
+        bool forcePlaceItem(std::unique_ptr<Item>& item, const EquipTarget& target); /// no checks except bounds, just overwrites whatever is there
+        const Item* getItemAt(const EquipTarget& target) const;
+        std::unique_ptr<Item> remove(const EquipTarget& target);
 
-        void setCursorHeld(std::unique_ptr<Item2>&& item);
+        void setCursorHeld(std::unique_ptr<Item>&& item);
 
         void calculateItemBonuses(ItemStats& stats) const;
         bool isRangedWeaponEquipped() const;
         bool isShieldEquipped() const;
         EquippedInHandsItems getItemsInHands() const;
 
-        const Item2* getHead() const { return mHead.getItem(0, 0); }
-        const Item2* getBody() const { return mBody.getItem(0, 0); }
-        const Item2* getLeftRing() const { return mLeftRing.getItem(0, 0); }
-        const Item2* getRightRing() const { return mRightRing.getItem(0, 0); }
-        const Item2* getAmulet() const { return mAmulet.getItem(0, 0); }
-        const Item2* getLeftHand() const { return mLeftHand.getItem(0, 0); }
-        const Item2* getRightHand() const { return mRightHand.getItem(0, 0); }
-        const Item2* getCursorHeld() const { return mCursorHeld.getItem(0, 0); }
+        const Item* getHead() const { return mHead.getItem(0, 0); }
+        const Item* getBody() const { return mBody.getItem(0, 0); }
+        const Item* getLeftRing() const { return mLeftRing.getItem(0, 0); }
+        const Item* getRightRing() const { return mRightRing.getItem(0, 0); }
+        const Item* getAmulet() const { return mAmulet.getItem(0, 0); }
+        const Item* getLeftHand() const { return mLeftHand.getItem(0, 0); }
+        const Item* getRightHand() const { return mRightHand.getItem(0, 0); }
+        const Item* getCursorHeld() const { return mCursorHeld.getItem(0, 0); }
 
         const BasicInventory& getInv(EquipTargetType type) const;
 
@@ -172,7 +172,7 @@ namespace FAWorld
 
     public:
         // This is not serialised - it should be reconnected by other means
-        std::function<void(EquipTargetType inventoryType, const Item2* removed, const Item2* added)> mInventoryChanged;
+        std::function<void(EquipTargetType inventoryType, const Item* removed, const Item* added)> mInventoryChanged;
 
     private:
         static constexpr int32_t inventoryWidth = 10;

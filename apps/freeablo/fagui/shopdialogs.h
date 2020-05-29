@@ -47,7 +47,7 @@ namespace FAGui
     class ShopSellDialog : public CharacterDialoguePopup
     {
     public:
-        ShopSellDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::function<bool(const FAWorld::Item2* item)> filter);
+        ShopSellDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::function<bool(const FAWorld::Item* item)> filter);
 
     protected:
         virtual DialogData getDialogData() override;
@@ -56,7 +56,7 @@ namespace FAGui
         void sellItem(const FAWorld::EquipTarget& item, ConfirmTransactionPopup* confirmPopup);
 
     private:
-        std::function<bool(const FAWorld::Item2* item)> mFilter;
+        std::function<bool(const FAWorld::Item* item)> mFilter;
         const FAWorld::Actor& mShopkeeper;
     };
 

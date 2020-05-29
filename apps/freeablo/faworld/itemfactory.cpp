@@ -26,10 +26,10 @@ namespace FAWorld
             mUniqueBaseItemIdToItemId[mExe.getBaseItems()[i].uniqueBaseItemId] = static_cast<ItemId>(i);
     }
 
-    std::unique_ptr<Item2> ItemFactory::generateBaseItem(ItemId id, const BaseItemGenOptions& /*options*/) const
+    std::unique_ptr<Item> ItemFactory::generateBaseItem(ItemId id, const BaseItemGenOptions& /*options*/) const
     {
         const std::string& lookup = Engine::EngineMain::get()->exe().getBaseItems()[int32_t(id)].idName;
-        std::unique_ptr<Item2> newItem = mItemBaseHolder.createItem(lookup);
+        std::unique_ptr<Item> newItem = mItemBaseHolder.createItem(lookup);
         newItem->init();
 
         return newItem;
@@ -63,7 +63,7 @@ namespace FAWorld
 
     const DiabloExe::ExeItem& ItemFactory::getInfo(ItemId id) const { return mExe.getBaseItems().at(static_cast<int>(id)); }
 
-    void ItemFactory::saveItem(const Item2& item, FASaveGame::GameSaver& saver) const
+    void ItemFactory::saveItem(const Item& item, FASaveGame::GameSaver& saver) const
     {
         Serial::ScopedCategorySaver cat("Item", saver);
 
@@ -71,10 +71,10 @@ namespace FAWorld
         item.save(saver);
     }
 
-    std::unique_ptr<Item2> ItemFactory::loadItem(FASaveGame::GameLoader& loader) const
+    std::unique_ptr<Item> ItemFactory::loadItem(FASaveGame::GameLoader& loader) const
     {
         std::string baseId = loader.load<std::string>();
-        std::unique_ptr<Item2> newItem = mItemBaseHolder.createItem(baseId);
+        std::unique_ptr<Item> newItem = mItemBaseHolder.createItem(baseId);
         newItem->load(loader);
         return newItem;
     }
