@@ -13,6 +13,7 @@
 #include "net/client.h"
 #include "net/server.h"
 #include "threadmanager.h"
+#include <cel/celdecoder.h>
 #include <cxxopts.hpp>
 #include <enet/enet.h>
 #include <functional>
@@ -34,8 +35,6 @@ namespace Engine
     }
 
     EngineMain::~EngineMain() { singletonInstance = nullptr; }
-
-    EngineInputManager& EngineMain::inputManager() { return *mInputManager; }
 
     void EngineMain::run(const cxxopts::ParseResult& variables)
     {

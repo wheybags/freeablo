@@ -1,6 +1,5 @@
 #pragma once
 #include "actor.h"
-#include "item.h"
 
 namespace FAWorld
 {

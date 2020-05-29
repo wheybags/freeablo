@@ -2,7 +2,6 @@
 #include "../engine/threadmanager.h"
 #include "../farender/animationplayer.h"
 #include "gamelevel.h"
-#include "item.h"
 #include "item/itembase.h"
 #include "world.h"
 #include <engine/enginemain.h>

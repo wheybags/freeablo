@@ -20,6 +20,9 @@ namespace FAWorld
         EquipmentItem* getAsEquipmentItem() override { return this; }
         const EquipmentItemBase* getBase() const;
 
+        bool isMeleeWeapon() const;
+        bool isRangedWeapon() const;
+
         std::string getFullDescription() const override;
 
     public:

@@ -45,8 +45,6 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/hoverstate.h
     faworld/inventory.cpp
     faworld/inventory.h
-    faworld/item.cpp
-    faworld/item.h
     faworld/itemenums.cpp
     faworld/itemenums.h
     faworld/itemfactory.cpp

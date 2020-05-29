@@ -1,18 +1,17 @@
 #pragma once
 #include "equiptarget.h"
-#include "item.h"
+#include <cstdint>
 #include <faworld/item/item.h>
+#include <map>
 #include <misc/array2d.h>
 #include <misc/misc.h>
 #include <optional>
 #include <set>
-#include <stdint.h>
 
 namespace FAWorld
 {
     class EquipTarget;
     class Actor;
-    struct ExchangeResult;
     class ItemFactory;
     struct ItemStats;
 

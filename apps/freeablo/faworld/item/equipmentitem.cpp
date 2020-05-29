@@ -39,4 +39,7 @@ namespace FAWorld
 
         return description;
     }
+
+    bool EquipmentItem::isMeleeWeapon() const { return getBase()->mClass == ItemClass::weapon && getBase()->mType != ItemType::bow; }
+    bool EquipmentItem::isRangedWeapon() const { return getBase()->mType == ItemType::bow; }
 }

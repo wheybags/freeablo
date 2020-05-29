@@ -1,6 +1,5 @@
 #include "itemfactory.h"
 #include "diabloexe/diabloexe.h"
-#include "item.h"
 #include "itemenums.h"
 #include <engine/enginemain.h>
 #include <fasavegame/gameloader.h>

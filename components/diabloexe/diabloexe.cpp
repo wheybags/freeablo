@@ -1,18 +1,18 @@
 #include "diabloexe.h"
-#include "../../apps/freeablo/faworld/item.h"
 #include "baseitem.h"
 #include "characterstats.h"
 #include "monster.h"
 #include "npc.h"
 #include "settings/settings.h"
 #include "talkdata.h"
+#include <cstdint>
+#include <diabloexe/affix.h>
+#include <diabloexe/uniqueitem.h>
 #include <iomanip>
 #include <iostream>
 #include <misc/md5.h>
 #include <misc/misc.h>
 #include <misc/stringops.h>
-#include <sstream>
-#include <stdint.h>
 #include <unordered_set>
 
 namespace DiabloExe

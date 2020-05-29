@@ -479,33 +479,18 @@ namespace FAWorld
             if (!item)
                 continue;
 
-            if (Item::isItemAMeleeWeapon(item->getBase()->mType))
+            if (item->isMeleeWeapon())
                 stats.meleeDamageBonusRange += item->getBase()->mDamageBonusRange;
-            else if (Item::isItemARangedWeapon(item->getBase()->mType))
+            else if (item->isRangedWeapon())
                 stats.rangedDamageBonusRange += item->getBase()->mDamageBonusRange;
 
             // TODO: other stats
         }
     }
 
-    bool CharacterInventory::isRangedWeaponEquipped() const
-    {
-        EquipTarget hands[] = {MakeEquipTarget<EquipTargetType::leftHand>(), MakeEquipTarget<EquipTargetType::rightHand>()};
-        for (auto& slot : hands)
-        {
-            const Item2* item = getItemAt(slot);
-            if (item && Item::isItemARangedWeapon(item->getBase()->mType))
-                return true;
-        }
+    bool CharacterInventory::isRangedWeaponEquipped() const { return getItemsInHands().rangedWeapon.has_value(); }
 
-        return false;
-    }
-
-    bool CharacterInventory::isShieldEquipped() const
-    {
-        return (getLeftHand() && getLeftHand()->getBase()->mType == ItemType::shield) ||
-               (getRightHand() && getRightHand()->getBase()->mType == ItemType::shield);
-    }
+    bool CharacterInventory::isShieldEquipped() const { return getItemsInHands().shield.has_value(); }
 
     EquippedInHandsItems CharacterInventory::getItemsInHands() const
     {
@@ -515,22 +500,24 @@ namespace FAWorld
         for (auto& slot : hands)
         {
             const Item2* item = getItemAt(slot);
-            if (!item)
+            if (!item || !item->getAsEquipmentItem())
                 continue;
 
-            if (Item::isItemARangedWeapon(item->getBase()->mType))
+            const EquipmentItem* equipmentItem = item->getAsEquipmentItem();
+
+            if (equipmentItem->isRangedWeapon())
             {
-                retval.rangedWeapon = EquippedInHandsItems::TypeData{item->getAsEquipmentItem(), slot.type};
+                retval.rangedWeapon = EquippedInHandsItems::TypeData{equipmentItem, slot.type};
                 retval.weapon = retval.rangedWeapon;
             }
-            else if (Item::isItemAMeleeWeapon(item->getBase()->mType))
+            else if (equipmentItem->isMeleeWeapon())
             {
-                retval.meleeWeapon = EquippedInHandsItems::TypeData{item->getAsEquipmentItem(), slot.type};
+                retval.meleeWeapon = EquippedInHandsItems::TypeData{equipmentItem, slot.type};
                 retval.weapon = retval.meleeWeapon;
             }
             else if (item->getBase()->mType == ItemType::shield)
             {
-                retval.shield = EquippedInHandsItems::TypeData{item->getAsEquipmentItem(), slot.type};
+                retval.shield = EquippedInHandsItems::TypeData{equipmentItem, slot.type};
             }
         }
 

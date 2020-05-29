@@ -257,9 +257,9 @@ namespace FAWorld
         return it->second;
     }
 
-    static Cel::Colour friendHoverColor() { return {180, 110, 110, true}; }
-    static Cel::Colour enemyHoverColor() { return {164, 46, 46, true}; }
-    static Cel::Colour itemHoverColor() { return {185, 170, 119, true}; }
+    static ByteColour friendHoverColor() { return {180, 110, 110, true}; }
+    static ByteColour enemyHoverColor() { return {164, 46, 46, true}; }
+    static ByteColour itemHoverColor() { return {185, 170, 119, true}; }
 
     void GameLevel::fillRenderState(FARender::RenderState* state, Actor* displayedActor, const HoverStatus& hoverStatus)
     {
@@ -272,7 +272,7 @@ namespace FAWorld
 
             Render::SpriteGroup* sprite = tmp.first;
             int32_t frame = tmp.second;
-            std::optional<Cel::Colour> hoverColor;
+            std::optional<ByteColour> hoverColor;
             if (mActors[i]->getId() == hoverStatus.hoveredActorId)
                 hoverColor = mActors[i]->isEnemy(displayedActor) ? enemyHoverColor() : friendHoverColor();
             // offset the sprite for the current direction of the actor

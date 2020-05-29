@@ -1,7 +1,6 @@
 #include "shopdialogs.h"
 #include "../engine/enginemain.h"
 #include "../engine/localinputhandler.h"
-#include "../faworld/item.h"
 #include "../faworld/player.h"
 #include "../faworld/storedata.h"
 #include "guimanager.h"

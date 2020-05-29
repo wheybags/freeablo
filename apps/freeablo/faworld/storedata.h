@@ -1,5 +1,4 @@
 #pragma once
-#include "item.h"
 #include <cstdint>
 #include <faworld/item/item.h>
 #include <vector>
