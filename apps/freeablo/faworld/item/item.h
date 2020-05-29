@@ -23,6 +23,7 @@ namespace FAWorld
     {
     public:
         explicit Item2(const ItemBase* base) : mBase(base) {}
+        virtual ~Item2() = default;
 
         virtual void init() {}
 
