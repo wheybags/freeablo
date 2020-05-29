@@ -111,67 +111,17 @@ namespace FAWorld
         return false;
     }
 
-    bool BasicInventory::autoPlaceItem(std::unique_ptr<Item2>& item, PlacementCheckOrder order)
+    bool BasicInventory::autoPlaceItem(std::unique_ptr<Item2>& item)
     {
-        if (order == PlacementCheckOrder::Automatic)
-        {
-            order = PlacementCheckOrder::FromLeftTop;
-            if (item->getBase()->mSize == Vec2i{1, 1})
-                order = PlacementCheckOrder::FromLeftBottom;
-            else if (item->getBase()->mSize == Vec2i{2, 2})
-                order = PlacementCheckOrder::SpecialFor2x2;
-            else if (item->getBase()->mSize == Vec2i{1, 2})
-                order = PlacementCheckOrder::SpecialFor1x2;
-        }
+        // TODO: the original game had some fancier methods of trying to fit specific size items
+        // There used to be an implementation of this here, but it was buggy so I removed it,
+        // as I didn't want to spend time debugging it.
 
-        switch (order)
-        {
-            case PlacementCheckOrder::FromLeftBottom:
-                for (int32_t y = mInventoryBox.height() - 1; y != -1; y--)
-                    for (int32_t x = 0; x != mInventoryBox.width(); x++)
-                        if (placeItem(item, x, y).succeeded())
-                            return true;
-                break;
-            case PlacementCheckOrder::FromLeftTop:
-                for (int32_t y = 0; y != mInventoryBox.height(); y++)
-                    for (int32_t x = 0; x != mInventoryBox.width(); x++)
-                        if (placeItem(item, x, y).succeeded())
-                            return true;
-                break;
-            case PlacementCheckOrder::FromRightBottom:
-                for (int32_t y = mInventoryBox.height() - 1; y != -1; y--)
-                    for (int32_t x = mInventoryBox.width() - 1; x != -1; x--)
-                        if (placeItem(item, x, y).succeeded())
-                            return true;
-                break;
-            case PlacementCheckOrder::SpecialFor1x2:
-                for (int32_t y = mInventoryBox.height() - 2; y != -1; y -= 2)
-                    for (int32_t x = mInventoryBox.width() - 1; x != -1; x--)
-                        if (placeItem(item, x, y).succeeded())
-                            return true;
-                for (int32_t y = mInventoryBox.height() - 3; y != -1; y -= 2)
-                    for (int32_t x = mInventoryBox.width() - 1; x != -1; x--)
-                        if (placeItem(item, x, y).succeeded())
-                            return true;
-                break;
-            case PlacementCheckOrder::SpecialFor2x2:
-                // this way lies madness
-                for (int32_t x = mInventoryBox.width() - 2; x != -1; x -= 2)
-                    for (int32_t y = 0; y != mInventoryBox.height(); x += 2)
-                        if (placeItem(item, x, y).succeeded())
-                            return true;
-                for (int32_t y = mInventoryBox.height() - 2; y != -1; y -= 2)
-                    for (int32_t x = 1; x != mInventoryBox.width(); x += 2)
-                        if (placeItem(item, x, y).succeeded())
-                            return true;
-                for (int32_t y = 1; y != mInventoryBox.height(); y += 2)
-                    for (int32_t x = 0; x != mInventoryBox.width(); x++)
-                        if (placeItem(item, x, y).succeeded())
-                            return true;
-                break;
-            default:
-                invalid_enum(PlacementCheckOrder, order);
-        }
+        for (int32_t y = 0; y != mInventoryBox.height(); y++)
+            for (int32_t x = 0; x != mInventoryBox.width(); x++)
+                if (placeItem(item, x, y).succeeded())
+                    return true;
+
         return false;
     }
 
@@ -181,13 +131,8 @@ namespace FAWorld
         if (mTreatAllItemsAs1by1)
             itemSize = Vec2i(1, 1);
 
-        // Shift item slot to the closest available that will fit the item.
-        // This removes the need for "out of bounds" placement and gives a more intuitive feel
-        // when placing an item near the edge of the inventory.
-        x = std::max(x, 0);
-        y = std::max(y, 0);
-        x = std::min(x, mInventoryBox.width() - itemSize.x);
-        y = std::min(y, mInventoryBox.height() - itemSize.y);
+        if (x < 0 || x + itemSize.w > mInventoryBox.width() || y < 0 || y + itemSize.h > mInventoryBox.height())
+            return PlaceItemResult{PlaceItemResult::Type::OutOfBounds, {}};
 
         std::set<BasicInventoryBox*> blockingItems;
 
@@ -351,12 +296,12 @@ namespace FAWorld
         mCursorHeld.load(loader);
     }
 
-    bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item2>&& item) { return autoPlaceItem(item, PlacementCheckOrder::Automatic); }
+    bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item2>&& item) { return autoPlaceItem(item); }
 
-    bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item2>& item, PlacementCheckOrder order)
+    bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item2>& item)
     {
         // auto-placing in belt
-        if (item->getAsUsableItem() && item->getAsUsableItem()->getBase()->isBeltEquippable() && mBelt.autoPlaceItem(item, order))
+        if (item->getAsUsableItem() && item->getAsUsableItem()->getBase()->isBeltEquippable() && mBelt.autoPlaceItem(item))
             return true;
 
         if (EquipmentItem* equipmentItem = item->getAsEquipmentItem())
@@ -389,7 +334,7 @@ namespace FAWorld
                 item.reset();
         }
 
-        return mMainInventory.autoPlaceItem(item, order);
+        return mMainInventory.autoPlaceItem(item);
     }
 
     bool CharacterInventory::forcePlaceItem(std::unique_ptr<Item2>& item, const EquipTarget& target)

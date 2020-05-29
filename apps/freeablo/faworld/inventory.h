@@ -16,16 +16,6 @@ namespace FAWorld
     class ItemFactory;
     struct ItemStats;
 
-    enum class PlacementCheckOrder
-    {
-        FromLeftBottom,  // for 1x1 items
-        FromLeftTop,     // for 1x3, 2x3 items, returning shield
-        FromRightBottom, // for new piles of gold
-        SpecialFor1x2,
-        SpecialFor2x2,
-        Automatic
-    };
-
     struct BasicInventoryBox
     {
         Vec2i topLeft = Vec2i::invalid();
@@ -78,7 +68,7 @@ namespace FAWorld
         void load(FASaveGame::GameLoader& loader);
 
         bool canFitItem(const Item2& item) const;
-        bool autoPlaceItem(std::unique_ptr<Item2>& item, PlacementCheckOrder order = PlacementCheckOrder::Automatic);
+        bool autoPlaceItem(std::unique_ptr<Item2>& item);
         PlaceItemResult placeItem(std::unique_ptr<Item2>& item, int32_t x, int32_t y);
 
         /// attempts to place item at x,y, swapping the item pointer with whatever is in the way.
@@ -146,7 +136,7 @@ namespace FAWorld
         void load(FASaveGame::GameLoader& loader);
 
         bool autoPlaceItem(std::unique_ptr<Item2>&& item);
-        bool autoPlaceItem(std::unique_ptr<Item2>& item, PlacementCheckOrder order = PlacementCheckOrder::Automatic);
+        bool autoPlaceItem(std::unique_ptr<Item2>& item);
         bool forcePlaceItem(std::unique_ptr<Item2>& item, const EquipTarget& target); /// no checks except bounds, just overwrites whatever is there
         const Item2* getItemAt(const EquipTarget& target) const;
         std::unique_ptr<Item2> remove(const EquipTarget& target);
