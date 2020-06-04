@@ -21,6 +21,15 @@ namespace FAWorld
             else
                 mAllItemBases[item.idName] = std::make_unique<ItemBase>(item);
         }
+
+        int32_t goldItemCount = 0;
+        for (const auto& pair : mAllItemBases)
+        {
+            if (dynamic_cast<GoldItemBase*>(pair.second.get()))
+                goldItemCount++;
+        }
+
+        release_assert(goldItemCount == 1);
     }
 
     std::unique_ptr<Item> ItemBaseHolder::createItem(const std::string& baseTypeId) const { return mAllItemBases.at(baseTypeId)->createItem(); }

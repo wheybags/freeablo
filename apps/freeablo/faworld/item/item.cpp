@@ -39,4 +39,8 @@ namespace FAWorld
 
         return description;
     }
+
+    const Render::TextureReference* Item::getInventoryIcon() const { return getBase()->mInventoryIcon; }
+
+    const Render::Cursor* Item::getInventoryIconCursor() const { return getBase()->mInventoryIconCursor.get(); }
 }

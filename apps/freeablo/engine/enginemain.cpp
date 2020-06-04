@@ -169,30 +169,23 @@ namespace Engine
             {
                 if (mWorld->getCurrentPlayer())
                 {
-                    auto level = mWorld->getCurrentLevel();
-                    state->mPos = mWorld->getCurrentPlayer()->getPos();
+                    FAWorld::GameLevel* level = mWorld->getCurrentLevel();
                     if (level != nullptr)
                         state->tileset = renderer.getTileset(*level);
+                    state->mPos = mWorld->getCurrentPlayer()->getPos();
                     state->level = level;
                     mWorld->fillRenderState(state, mLocalInputHandler->getHoverStatus());
                 }
                 else
                     state->level = nullptr;
 
-                state->mCursorPath = FAGui::cursorPath;
-
+                state->currentCursor = renderer.mDefaultCursor.get();
                 if (!mPaused && mWorld->getCurrentPlayer())
                 {
-                    const FAWorld::Item* item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld();
-                    state->mCursorFrame = item ? item->getBase()->mInventoryGraphicsId : 0;
-                    // When items are held, their sprites are centered around the cursor (rather then top left).
-                    state->mCursorCentered = item != nullptr;
+                    if (const FAWorld::Item* item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld())
+                        state->currentCursor = item->getInventoryIconCursor();
                 }
-                else
-                {
-                    state->mCursorFrame = 0;
-                    state->mCursorCentered = false;
-                }
+
                 state->nuklearData.fill(ctx);
                 state->debugData = std::move(renderer.mTmpDebugRenderData);
             }

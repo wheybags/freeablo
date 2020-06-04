@@ -2,8 +2,14 @@
 #include <cstdint>
 #include <fagui/menuentry.h>
 #include <misc/misc.h>
+#include <render/texturereference.h>
 #include <string>
 #include <vector>
+
+namespace Render
+{
+    class Cursor;
+}
 
 namespace FASaveGame
 {
@@ -40,7 +46,8 @@ namespace FAWorld
         int32_t getPrice() const;
         virtual std::string getFullDescription() const;
         virtual std::vector<FAGui::MenuEntry> descriptionForMerchants() const;
-
+        virtual const Render::TextureReference* getInventoryIcon() const;
+        virtual const Render::Cursor* getInventoryIconCursor() const;
         const ItemBase* getBase() const { return mBase; }
 
     protected:

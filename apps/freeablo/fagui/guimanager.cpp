@@ -188,22 +188,17 @@ namespace FAGui
 
     void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight, bool checkerboarded)
     {
-        auto& inv = mPlayer->mInventory;
-        using namespace FAWorld;
+        FAWorld::CharacterInventory& inv = mPlayer->mInventory;
         if (inv.getCursorHeld())
             highlight = ItemHighlightInfo::notHighlighed;
 
-        const Item* item = inv.getItemAt(target);
+        const FAWorld::Item* item = inv.getItemAt(target);
         if (!item)
             return;
 
-        FARender::Renderer* renderer = FARender::Renderer::get();
-
-        int32_t frame = item->getBase()->mInventoryGraphicsId;
-        Render::SpriteGroup* sprite = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.itemCursors);
-        struct nk_image img = sprite->getNkImage(frame);
-        int32_t w = sprite->getWidth(frame);
-        int32_t h = sprite->getHeight(frame);
+        struct nk_image itemIcon = item->getInventoryIcon()->getNkImage();
+        int32_t w = itemIcon.w;
+        int32_t h = itemIcon.h;
         bool isHighlighted = (highlight == ItemHighlightInfo::highlited);
 
         switch (placement.type)
@@ -233,7 +228,7 @@ namespace FAGui
         if (isHighlighted)
             mHoveredInventoryItemText = item->getFullDescription();
         ScopedApplyEffect effect(ctx, effectType);
-        nk_image(ctx, img);
+        nk_image(ctx, itemIcon);
         if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && !mPlayer->mInventory.getCursorHeld())
             triggerItem(target);
     }
@@ -1074,6 +1069,4 @@ namespace FAGui
         if (mCurRightPanel != PanelType::inventory)
             mGoldSplitTarget = std::nullopt;
     }
-
-    std::string cursorPath = "data/inv/objcurs.cel";
 }

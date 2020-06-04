@@ -37,10 +37,6 @@ namespace FAGui
     class GuiManager;
     class MenuHandler;
 
-    // move all this to better place since cursor state is also dependent on spells etc.
-    extern std::string cursorPath;
-    extern uint32_t cursorFrame;
-
     enum class PanelType
     {
         none,

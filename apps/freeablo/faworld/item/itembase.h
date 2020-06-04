@@ -4,6 +4,11 @@
 #include <misc/simplevec2.h>
 #include <render/spritegroup.h>
 
+namespace Render
+{
+    class Cursor;
+}
+
 namespace FAWorld
 {
     class Item;
@@ -12,7 +17,7 @@ namespace FAWorld
     {
     public:
         explicit ItemBase(const DiabloExe::ExeItem& exeItem);
-        virtual ~ItemBase() = default;
+        virtual ~ItemBase();
 
         virtual std::unique_ptr<Item> createItem() const;
         virtual ItemEquipType getEquipType() const { return ItemEquipType::none; }
@@ -29,7 +34,8 @@ namespace FAWorld
         int32_t mPrice = 0;
 
         Render::SpriteGroup* mDropItemAnimation = nullptr;
-        int32_t mInventoryGraphicsId = -1;
+        const Render::TextureReference* mInventoryIcon = nullptr;
+        std::unique_ptr<Render::Cursor> mInventoryIconCursor;
 
         std::string mDropItemSoundPath;
         std::string mInventoryPlaceItemSoundPath;

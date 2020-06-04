@@ -24,6 +24,9 @@ namespace FAWorld
         int32_t getCount() const { return mCount; }
         bool trySetCount(int32_t newCount);
 
+        const Render::TextureReference* getInventoryIcon() const override;
+        const Render::Cursor* getInventoryIconCursor() const override;
+
     private:
         int32_t mCount = 1;
     };
