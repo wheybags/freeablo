@@ -1,18 +1,18 @@
 #include "diabloexe.h"
-#include "../../apps/freeablo/faworld/item.h"
 #include "baseitem.h"
 #include "characterstats.h"
 #include "monster.h"
 #include "npc.h"
 #include "settings/settings.h"
 #include "talkdata.h"
+#include <cstdint>
+#include <diabloexe/affix.h>
+#include <diabloexe/uniqueitem.h>
 #include <iomanip>
 #include <iostream>
 #include <misc/md5.h>
 #include <misc/misc.h>
 #include <misc/stringops.h>
-#include <sstream>
-#include <stdint.h>
 #include <unordered_set>
 
 namespace DiabloExe
@@ -342,7 +342,7 @@ namespace DiabloExe
         for (size_t i = 0; i < count; i++)
         {
             exe.FAfseek(itemOffset + 76 * i, SEEK_SET);
-            BaseItem tmp(exe, codeOffset);
+            ExeItem tmp(exe, codeOffset);
 
             if (tmp.name.empty())
                 continue;
@@ -362,11 +362,11 @@ namespace DiabloExe
             usedIds.insert(idName);
             tmp.idName = idName;
 
-            auto dropGraphicsId = itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId];
+            size_t dropGraphicsId = itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId];
             tmp.dropItemGraphicsPath = "items/" + mItemDropGraphicsFilename[dropGraphicsId] + ".cel";
             tmp.dropItemSoundPath = mSoundFilename[mItemGraphicsIdToDropSfxId[dropGraphicsId]];
             tmp.invPlaceItemSoundPath = mSoundFilename[mItemGraphicsIdToInvPlaceSfxId[dropGraphicsId]];
-            auto& s = objCursFrameSizes[tmp.invGraphicsId + 11];
+            const std::array<int32_t, 2>& s = objCursFrameSizes[tmp.invGraphicsId + 11];
             if (i == 0)
             {
                 tmp.invSizeX = 1;
@@ -665,35 +665,35 @@ namespace DiabloExe
     {
         std::stringstream ss;
 
-        ss << "Monsters: " << mMonsters.size() << std::endl;
-        for (std::map<std::string, Monster>::const_iterator it = mMonsters.begin(); it != mMonsters.end(); ++it)
-        {
-            ss << it->second.dump();
-        }
-
-        ss << "Npcs: " << mNpcs.size() << std::endl;
-        for (std::map<std::string, Npc>::const_iterator it = mNpcs.begin(); it != mNpcs.end(); ++it)
-        {
-            ss << it->first << std::endl << it->second.dump();
-        }
-
-        ss << "Character Stats: " << mCharacters.size() << std::endl
-           << "Warrior" << std::endl
-           << mCharacters.at("Warrior").dump() << "Rogue" << std::endl
-           << mCharacters.at("Rogue").dump() << "Sorceror" << std::endl
-           << mCharacters.at("Sorceror").dump();
+        //        ss << "Monsters: " << mMonsters.size() << std::endl;
+        //        for (std::map<std::string, Monster>::const_iterator it = mMonsters.begin(); it != mMonsters.end(); ++it)
+        //        {
+        //            ss << it->second.dump();
+        //        }
+        //
+        //        ss << "Npcs: " << mNpcs.size() << std::endl;
+        //        for (std::map<std::string, Npc>::const_iterator it = mNpcs.begin(); it != mNpcs.end(); ++it)
+        //        {
+        //            ss << it->first << std::endl << it->second.dump();
+        //        }
+        //
+        //        ss << "Character Stats: " << mCharacters.size() << std::endl
+        //           << "Warrior" << std::endl
+        //           << mCharacters.at("Warrior").dump() << "Rogue" << std::endl
+        //           << mCharacters.at("Rogue").dump() << "Sorceror" << std::endl
+        //           << mCharacters.at("Sorceror").dump();
 
         ss << "Base Items: " << mBaseItems.size() << std::endl;
         for (auto& baseItem : mBaseItems)
             ss << baseItem.dump();
 
-        ss << "Unique Items: " << mUniqueItems.size() << std::endl;
-        for (auto& uniqueItem : mUniqueItems)
-            ss << uniqueItem.dump();
-
-        ss << "Affixes: " << mAffixes.size() << std::endl;
-        for (auto& affix : mAffixes)
-            ss << affix.dump();
+        //        ss << "Unique Items: " << mUniqueItems.size() << std::endl;
+        //        for (auto& uniqueItem : mUniqueItems)
+        //            ss << uniqueItem.dump();
+        //
+        //        ss << "Affixes: " << mAffixes.size() << std::endl;
+        //        for (auto& affix : mAffixes)
+        //            ss << affix.dump();
 
         return ss.str();
     }

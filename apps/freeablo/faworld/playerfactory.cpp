@@ -59,8 +59,8 @@ namespace FAWorld
             player->mInventory.placeGold(1000, mItemFactory);
 
             hasSlots = false;
-            for (const Item& slot : inv)
-                if (slot.isEmpty())
+            for (const BasicInventoryBox& slot : inv)
+                if (!slot.item)
                     hasSlots = true;
         }
     }
@@ -76,8 +76,8 @@ namespace FAWorld
             player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
 
             hasSlots = false;
-            for (const Item& slot : inv)
-                if (slot.isEmpty())
+            for (const BasicInventoryBox& slot : inv)
+                if (!slot.item)
                     hasSlots = true;
         }
     }
@@ -85,7 +85,8 @@ namespace FAWorld
     void PlayerFactory::addWarriorItems(Player* player) const
     {
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortSword));
-        player->mInventory.forcePlaceItem(mItemFactory.generateBaseItem(ItemId::buckler), MakeEquipTarget<EquipTargetType::rightHand>());
+        std::unique_ptr<Item> buckler = mItemFactory.generateBaseItem(ItemId::buckler);
+        player->mInventory.forcePlaceItem(buckler, MakeEquipTarget<EquipTargetType::rightHand>());
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::club));
         player->mInventory.placeGold(100, mItemFactory);
 
@@ -106,7 +107,7 @@ namespace FAWorld
     {
         {
             auto item = mItemFactory.generateBaseItem(ItemId::shortStaffOfChargedBolt);
-            item.mMaxCharges = item.mCurrentCharges = 40;
+            // item.mMaxCharges = item.mCurrentCharges = 40;
             player->mInventory.autoPlaceItem(item);
         }
         player->mInventory.placeGold(100, mItemFactory);

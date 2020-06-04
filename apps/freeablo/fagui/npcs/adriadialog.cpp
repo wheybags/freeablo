@@ -1,4 +1,5 @@
 #include "adriadialog.h"
+#include "../../faworld/item/itembase.h"
 #include "../guimanager.h"
 #include "../shopdialogs.h"
 
@@ -127,9 +128,9 @@ namespace FAGui
         mGuiManager.mDialogManager.pushDialog(dialog);
     }
 
-    bool AdriaDialog::adriaSellFilter(const FAWorld::Item& item)
+    bool AdriaDialog::adriaSellFilter(const FAWorld::Item* item)
     {
         // TODO: add check for quest items
-        return item.getType() == FAWorld::ItemType::misc || item.getType() == FAWorld::ItemType::staff;
+        return item->getBase()->mType == ItemType::misc || item->getBase()->mType == ItemType::staff;
     }
 }

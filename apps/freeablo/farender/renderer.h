@@ -54,6 +54,9 @@ namespace FARender
     class RenderState
     {
     public:
+        explicit RenderState(NuklearDevice& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData) {}
+        RenderState(RenderState&& other) = default;
+
         struct MoveableAtomicBool
         {
             std::atomic_bool val;
@@ -68,23 +71,13 @@ namespace FARender
         MoveableAtomicBool ready;
 
         FAWorld::Position mPos;
-
         std::vector<ObjectToRender> mItems;
         std::vector<ObjectToRender> mObjects;
-
         NuklearFrameDump nuklearData;
-
         Tileset tileset;
-
-        FAWorld::GameLevel* level{};
-
-        std::string mCursorPath;
-        uint32_t mCursorFrame = 0;
-        bool mCursorCentered = false;
+        FAWorld::GameLevel* level = nullptr;
+        const Render::Cursor* currentCursor = nullptr;
         DebugRenderData debugData;
-
-        explicit RenderState(NuklearDevice& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData) {}
-        RenderState(RenderState&& other) = default;
     };
 
     class Renderer
@@ -105,10 +98,9 @@ namespace FARender
 
         Render::Tile getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos);
 
-        void updateCursor(RenderState* State);
+        void updateCursor(const Render::Cursor* cursor);
 
         bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
-        Misc::Point cursorSize() const { return mCursorSize; }
 
         nk_context* getNuklearContext() { return &mNuklearContext; }
 
@@ -128,6 +120,7 @@ namespace FARender
         SpriteLoader mSpriteLoader;
         std::unique_ptr<LevelRenderer> mLevelRenderer;
         DebugRenderData mTmpDebugRenderData;
+        std::unique_ptr<Render::Cursor> mDefaultCursor;
 
     private:
         static Renderer* mRenderer; ///< Singleton instance
@@ -139,9 +132,7 @@ namespace FARender
         static constexpr size_t NUM_RENDER_STATES = 15;
         std::vector<RenderState> mStates;
 
-        std::unique_ptr<Render::Cursor> mCurrentCursor = nullptr;
-        uint32_t mCurrentCursorFrame = std::numeric_limits<uint32_t>::max();
-        Misc::Point mCursorSize;
+        const Render::Cursor* mCurrentCursor = nullptr;
 
         volatile bool mAlreadyExited = false;
         std::mutex mDoneMutex;

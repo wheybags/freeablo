@@ -257,9 +257,9 @@ namespace FAWorld
         return it->second;
     }
 
-    static Cel::Colour friendHoverColor() { return {180, 110, 110, true}; }
-    static Cel::Colour enemyHoverColor() { return {164, 46, 46, true}; }
-    static Cel::Colour itemHoverColor() { return {185, 170, 119, true}; }
+    static ByteColour friendHoverColor() { return {180, 110, 110, true}; }
+    static ByteColour enemyHoverColor() { return {164, 46, 46, true}; }
+    static ByteColour itemHoverColor() { return {185, 170, 119, true}; }
 
     void GameLevel::fillRenderState(FARender::RenderState* state, Actor* displayedActor, const HoverStatus& hoverStatus)
     {
@@ -272,7 +272,7 @@ namespace FAWorld
 
             Render::SpriteGroup* sprite = tmp.first;
             int32_t frame = tmp.second;
-            std::optional<Cel::Colour> hoverColor;
+            std::optional<ByteColour> hoverColor;
             if (mActors[i]->getId() == hoverStatus.hoveredActorId)
                 hoverColor = mActors[i]->isEnemy(displayedActor) ? enemyHoverColor() : friendHoverColor();
             // offset the sprite for the current direction of the actor
@@ -321,14 +321,14 @@ namespace FAWorld
         release_assert(false && "tried to remove actor that isn't in level");
     }
 
-    bool GameLevel::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, Misc::Point tile) { return mItemMap->dropItem(move(item), actor, tile); }
+    bool GameLevel::dropItem(std::unique_ptr<Item>& item, const Actor& actor, Misc::Point tile) { return mItemMap->dropItem(item, actor, tile); }
 
-    bool GameLevel::dropItemClosestEmptyTile(Item& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction)
+    bool GameLevel::dropItemClosestEmptyTile(std::unique_ptr<Item>& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction)
     {
         auto tryDrop = [&](Misc::Point pos) {
             bool res = false;
             if (isPassable(pos, &actor) && !mItemMap->getItemAt(pos))
-                res = dropItem(std::unique_ptr<Item>{new Item(item)}, actor, pos);
+                res = dropItem(item, actor, pos);
             return res;
         };
 

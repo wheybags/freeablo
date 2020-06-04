@@ -2,6 +2,8 @@
 #include "diabloexe/baseitem.h"
 #include "itemenums.h"
 #include "misc/enum_range.h"
+#include <faworld/item/item.h>
+#include <faworld/item/itembaseholder.h>
 #include <functional>
 #include <map>
 #include <memory>
@@ -18,6 +20,12 @@ namespace Cel
     class CelFile;
 }
 
+namespace FASaveGame
+{
+    class GameSaver;
+    class GameLoader;
+}
+
 namespace FAWorld
 {
     class Item;
@@ -32,37 +40,27 @@ namespace FAWorld
 
     namespace ItemFilter
     {
-        std::function<bool(const DiabloExe::BaseItem& item)> maxQLvl(int32_t value);
-        std::function<bool(const DiabloExe::BaseItem& item)> sellableGriswoldBasic();
+        using Callback = std::function<bool(const DiabloExe::ExeItem& item)>;
+        Callback maxQLvl(int32_t value);
+        Callback sellableGriswoldBasic();
     }
 
     class ItemFactory
     {
     public:
         explicit ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng);
-        Item generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
-        Item generateUniqueItem(UniqueItemId id) const;
-        template <typename... FilterTypes> ItemId randomItemId(const FilterTypes&... filters) const
-        {
-            static std::vector<ItemId> pool;
-            pool.clear();
-            for (auto id : enum_range<ItemId>())
-            {
-                const DiabloExe::BaseItem& info = getInfo(id);
-                bool filteredOut = false;
-                static_cast<void>(std::initializer_list<int>{(filteredOut = filteredOut || !filters(info), 0)...});
-                if (filteredOut)
-                    continue;
-                for (int32_t i = 0; i < static_cast<int32_t>(info.dropRate); ++i)
-                    pool.push_back(id);
-            }
-            return pool[mRng.randomInRange(0, pool.size() - 1)];
-        }
+        std::unique_ptr<Item> generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
+        ItemId randomItemId(const ItemFilter::Callback& filter) const;
+
+        void saveItem(const Item& item, FASaveGame::GameSaver& saver) const;
+        std::unique_ptr<Item> loadItem(FASaveGame::GameLoader& loader) const;
+
+        const ItemBaseHolder& getItemBaseHolder() const { return mItemBaseHolder; }
 
     private:
-        const DiabloExe::BaseItem& getInfo(ItemId id) const;
-        // TODO: replace this with something more decent
-        mutable std::unique_ptr<Cel::CelFile> mObjcursCel;
+        const DiabloExe::ExeItem& getInfo(ItemId id) const;
+
+        ItemBaseHolder mItemBaseHolder;
         std::map<int32_t, ItemId> mUniqueBaseItemIdToItemId;
         const DiabloExe::DiabloExe& mExe;
         Random::Rng& mRng;

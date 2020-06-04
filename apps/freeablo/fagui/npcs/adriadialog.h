@@ -1,6 +1,5 @@
 #pragma once
 #include "../../faworld/actor.h"
-#include "../../faworld/item.h"
 #include "../characterdialoguepopup.h"
 
 namespace FAGui
@@ -14,7 +13,7 @@ namespace FAGui
         virtual DialogData getDialogData() override;
 
         void openSellDialog();
-        static bool adriaSellFilter(const FAWorld::Item& item);
+        static bool adriaSellFilter(const FAWorld::Item* item);
 
         FAWorld::Actor* mActor = nullptr;
     };

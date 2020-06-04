@@ -1,10 +1,11 @@
 #include "shopdialogs.h"
 #include "../engine/enginemain.h"
 #include "../engine/localinputhandler.h"
-#include "../faworld/item.h"
 #include "../faworld/player.h"
 #include "../faworld/storedata.h"
 #include "guimanager.h"
+#include <faworld/item/equipmentitem.h>
+#include <faworld/item/equipmentitembase.h>
 #include <fmt/format.h>
 
 namespace FAGui
@@ -47,7 +48,7 @@ namespace FAGui
 
     void ConfirmTransactionPopup::addAction(std::function<CharacterDialoguePopup::UpdateResult()> act) { mAction = act; }
 
-    ShopSellDialog::ShopSellDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::function<bool(const FAWorld::Item& item)> filter)
+    ShopSellDialog::ShopSellDialog(GuiManager& guiManager, const FAWorld::Actor& shopkeeper, std::function<bool(const FAWorld::Item* item)> filter)
         : CharacterDialoguePopup(guiManager, true), mFilter(filter), mShopkeeper(shopkeeper)
     {
     }
@@ -61,15 +62,17 @@ namespace FAGui
         std::vector<FAWorld::EquipTarget> sellableItems;
         {
             auto addItem = [&](FAWorld::EquipTarget target) {
-                const FAWorld::Item& item = inventory.getItemAt(target);
-                if (!item.isEmpty() && item.mIsReal && mFilter(item) && item.getType() != FAWorld::ItemType::gold)
+                const FAWorld::Item* item = inventory.getItemAt(target);
+                if (item && mFilter(item) && item->getBase()->mType != ItemType::gold)
                     sellableItems.push_back(target);
             };
 
-            for (const FAWorld::Item& item : mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::inventory))
-                addItem(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(item.mInvX, item.mInvY));
-            for (const FAWorld::Item& item : mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::belt))
-                addItem(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(item.mInvX));
+            for (const FAWorld::BasicInventoryBox& item :
+                 mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::inventory))
+                addItem(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::inventory>(item.topLeft.x, item.topLeft.y));
+            for (const FAWorld::BasicInventoryBox& item :
+                 mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::belt))
+                addItem(FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(item.topLeft.x));
         }
 
         int32_t totalGold = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getTotalGold();
@@ -83,10 +86,10 @@ namespace FAGui
 
         for (FAWorld::EquipTarget& item : sellableItems)
         {
-            const auto& desc = inventory.getItemAt(item).descriptionForMerchants();
+            std::vector<FAGui::MenuEntry> description = inventory.getItemAt(item)->descriptionForMerchants();
             ConfirmTransactionPopup::Transaction transaction = ConfirmTransactionPopup::Transaction::sell;
-            ConfirmTransactionPopup* confirmPopup = new ConfirmTransactionPopup(this->mGuiManager, intro, desc, transaction);
-            retval.addMenuOption(desc, [this, item, confirmPopup]() {
+            ConfirmTransactionPopup* confirmPopup = new ConfirmTransactionPopup(this->mGuiManager, intro, description, transaction);
+            retval.addMenuOption(description, [this, item, confirmPopup]() {
                 this->sellItem(item, confirmPopup);
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
@@ -99,14 +102,13 @@ namespace FAGui
 
     void ShopSellDialog::sellItem(const FAWorld::EquipTarget& item, ConfirmTransactionPopup* confirmPopup)
     {
-        auto& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
-        auto& invItem = inventory.getItemAt(item);
-        const auto price = invItem.getPrice();
+        FAWorld::CharacterInventory& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
+        const FAWorld::Item* invItem = inventory.getItemAt(item);
+        debug_assert(invItem);
 
-        auto goldItem = mGuiManager.mDialogManager.mWorld.getItemFactory().generateBaseItem(FAWorld::ItemId::gold);
-        goldItem.mCount = price - invItem.getInvVolume() * goldItem.getMaxCount();
+        const int32_t price = invItem->getPrice();
 
-        if (!mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(goldItem))
+        if (!mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory.canFitGold(price))
         {
             this->mGuiManager.mDialogManager.pushDialog(new MessagePopup(this->mGuiManager, "You do not have enough room in inventory"));
             return;
@@ -133,9 +135,8 @@ namespace FAGui
     {
         DialogData retval;
 
-        auto currPlayer = mGuiManager.mDialogManager.mWorld.getCurrentPlayer();
-        auto& playerStats = currPlayer->getStats().getCalculatedStats();
-        auto& inventory = currPlayer->mInventory;
+        FAWorld::Player* currPlayer = mGuiManager.mDialogManager.mWorld.getCurrentPlayer();
+        FAWorld::CharacterInventory& inventory = currPlayer->mInventory;
 
         retval.introduction = {
             {fmt::format("{}           Your gold : {}", inventory.getTotalGold(), "I have these items for sale :"), TextColor::golden, false}};
@@ -144,20 +145,21 @@ namespace FAGui
         for (size_t i = 0; i < mItems.size(); i++)
         {
             FAWorld::StoreItem& item = mItems[i];
-            auto description = item.item.descriptionForMerchants();
-            for (auto& desc : description)
-            {
+            std::vector<FAGui::MenuEntry> description = item.item->descriptionForMerchants();
 
-                if ((item.item.getRequiredDexterity() > playerStats.baseStats.dexterity) || (item.item.getRequiredMagic() > playerStats.baseStats.magic) ||
-                    (item.item.getRequiredStrength() > playerStats.baseStats.strength))
+            if (FAWorld::EquipmentItem* equipmentItem = item.item->getAsEquipmentItem())
+            {
+                if (!equipmentItem->getBase()->usableByPlayer(*currPlayer))
                 {
-                    desc.textColor = TextColor::red;
+                    for (auto& section : description)
+                        section.textColor = TextColor::red;
                 }
             }
 
-            retval.addMenuOption(item.item.descriptionForMerchants(), [this, i, &item, &intro]() {
+            retval.addMenuOption(item.item->descriptionForMerchants(), [this, i, &item, &intro]() {
                 ConfirmTransactionPopup::Transaction transaction = ConfirmTransactionPopup::Transaction::buy;
-                ConfirmTransactionPopup* confirmPopup = new ConfirmTransactionPopup(this->mGuiManager, intro, item.item.descriptionForMerchants(), transaction);
+                ConfirmTransactionPopup* confirmPopup =
+                    new ConfirmTransactionPopup(this->mGuiManager, intro, item.item->descriptionForMerchants(), transaction);
                 this->buyItem(i, confirmPopup);
                 return CharacterDialoguePopup::UpdateResult::DoNothing;
             });
@@ -173,13 +175,13 @@ namespace FAGui
         FAWorld::StoreItem& item = mItems[index];
 
         auto& inventory = mGuiManager.mDialogManager.mWorld.getCurrentPlayer()->mInventory;
-        if (inventory.getTotalGold() < item.item.getPrice())
+        if (inventory.getTotalGold() < item.item->getPrice())
         {
             this->mGuiManager.mDialogManager.pushDialog(new MessagePopup(this->mGuiManager, "You do not have enough gold"));
             return;
         }
 
-        if (!inventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(item.item))
+        if (!inventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(*item.item))
         {
             this->mGuiManager.mDialogManager.pushDialog(new MessagePopup(this->mGuiManager, "You do not have enough room in inventory"));
             return;

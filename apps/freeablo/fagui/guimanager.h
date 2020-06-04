@@ -6,6 +6,7 @@
 #include "textcolor.h"
 #include <chrono>
 #include <fa_nuklear.h>
+#include <faworld/equiptarget.h>
 #include <functional>
 #include <memory>
 #include <nuklearmisc/nuklearframedump.h>
@@ -35,10 +36,6 @@ namespace FAGui
 {
     class GuiManager;
     class MenuHandler;
-
-    // move all this to better place since cursor state is also dependent on spells etc.
-    extern std::string cursorPath;
-    extern uint32_t cursorFrame;
 
     enum class PanelType
     {
@@ -146,7 +143,7 @@ namespace FAGui
             }
         };
 
-        void item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highligh);
+        void item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight, bool checkerboarded);
         void inventoryPanel(nk_context* ctx);
         void fillTextField(nk_context* ctx, float x, float y, float width, const char* text, TextColor color = TextColor::white);
         void characterPanel(nk_context* ctx);
@@ -174,7 +171,7 @@ namespace FAGui
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::unique_ptr<FARender::AnimationPlayer> mSmallPentagram;
         std::unique_ptr<MenuHandler> mMenuHandler;
-        const FAWorld::Item* mGoldSplitTarget = nullptr;
+        std::optional<FAWorld::EquipTarget> mGoldSplitTarget;
         int mGoldSplitCnt = 0;
         int mCurSpellbookTab = 0;
         bool mShowSpellSelectionMenu = false;

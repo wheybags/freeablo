@@ -4,6 +4,7 @@
 #include "equiptarget.h"
 #include "fasavegame/gameloader.h"
 #include "input/inputmanager.h"
+#include "item/itembase.h"
 #include "player.h"
 #include "storedata.h"
 #include <algorithm>
@@ -77,8 +78,8 @@ namespace FAWorld
                     return;
                 }
 
-                auto cursorItem = mPlayer->mInventory.getCursorHeld();
-                if (!cursorItem.isEmpty())
+                const Item* cursorItem = mPlayer->mInventory.getCursorHeld();
+                if (cursorItem)
                 {
                     mPlayer->dropItem(clickedPoint);
                 }
@@ -174,11 +175,11 @@ namespace FAWorld
                 if (item == items.end())
                     return;
 
-                int32_t price = item->item.getPrice();
+                int32_t price = item->item->getPrice();
                 if (mPlayer->mInventory.getTotalGold() < price)
                     return;
 
-                if (!mPlayer->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(item->item))
+                if (!mPlayer->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(*item->item))
                     return;
 
                 mPlayer->mInventory.takeOutGold(price);
@@ -191,16 +192,16 @@ namespace FAWorld
             {
                 int32_t price = 0;
                 {
-                    const Item& item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
+                    const Item* item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
 
                     // TODO: validate sell filter here
-                    if (item.isEmpty() || !item.mIsReal || item.baseId() == ItemId::gold)
+                    if (!item || item->getBase()->mType == ItemType::gold)
                         return;
 
-                    price = item.getPrice();
+                    price = item->getPrice();
                 }
 
-                release_assert(!mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation).isEmpty());
+                release_assert(mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation));
                 mPlayer->mInventory.placeGold(price, mPlayer->getWorld()->getItemFactory());
 
                 return;

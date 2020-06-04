@@ -111,6 +111,9 @@ namespace FARender
         mRenderer = this;
 
         mLevelRenderer = std::make_unique<LevelRenderer>();
+
+        std::vector<Image> itemCursorImages = Cel::CelDecoder(mSpriteLoader.mGuiSprites.itemCursors.path).decode();
+        mDefaultCursor = std::make_unique<Render::Cursor>(itemCursorImages[0], 0, 0);
     }
 
     Renderer::~Renderer()
@@ -232,7 +235,7 @@ namespace FARender
             }
 
             state->nuklearData.render({Render::getWindowSize().windowWidth, Render::getWindowSize().windowHeight}, *Render::mainCommandQueue);
-            Renderer::updateCursor(state);
+            Renderer::updateCursor(state->currentCursor);
         }
 
         Render::draw();
@@ -246,31 +249,14 @@ namespace FARender
         return true;
     }
 
-    void Renderer::updateCursor(RenderState* State)
+    void Renderer::updateCursor(const Render::Cursor* cursor)
     {
-        if (State->mCursorPath.empty())
-        {
+        if (!cursor)
             Render::Cursor::setDefaultCursor();
-        }
-        else if (State->mCursorFrame != mCurrentCursorFrame)
-        {
-            Cel::CelFile cel(State->mCursorPath);
-            std::vector<Image> images = cel.decode();
+        else if (cursor != mCurrentCursor)
+            cursor->activateCursor();
 
-            Cel::CelFrame& celFrame = images[State->mCursorFrame];
-            mCursorSize = {celFrame.width(), celFrame.height()};
-
-            int32_t hot_x = 0, hot_y = 0;
-            if (State->mCursorCentered)
-            {
-                hot_x = mCursorSize.x / 2;
-                hot_y = mCursorSize.y / 2;
-            }
-
-            mCurrentCursor = std::make_unique<Render::Cursor>(celFrame, hot_x, hot_y);
-            mCurrentCursor->activateCursor();
-            mCurrentCursorFrame = State->mCursorFrame;
-        }
+        mCurrentCursor = cursor;
     }
 
     void Renderer::getWindowDimensions(int32_t& w, int32_t& h)
