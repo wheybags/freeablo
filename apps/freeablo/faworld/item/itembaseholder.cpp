@@ -29,7 +29,7 @@ namespace FAWorld
                 goldItemCount++;
         }
 
-        release_assert(goldItemCount == 1);
+        release_assert(goldItemCount <= 1);
     }
 
     std::unique_ptr<Item> ItemBaseHolder::createItem(const std::string& baseTypeId) const { return mAllItemBases.at(baseTypeId)->createItem(); }
