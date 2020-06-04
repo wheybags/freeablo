@@ -2,6 +2,7 @@
 #include "equiptarget.h"
 #include <cstdint>
 #include <faworld/item/item.h>
+#include <functional>
 #include <map>
 #include <misc/array2d.h>
 #include <misc/misc.h>
