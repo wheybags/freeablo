@@ -147,8 +147,8 @@ add_library(DiabloExe
     diabloexe/uniqueitem.h
     diabloexe/characterstats.h
     diabloexe/characterstats.cpp
-    diabloexe/affix.cpp
-    diabloexe/affix.h
+    diabloexe/exemagicitemeffect.cpp
+    diabloexe/exemagicitemeffect.h
     diabloexe/talkdata.h)
 target_link_libraries(DiabloExe Misc FAIO)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
