@@ -1,14 +1,103 @@
 #include "exemagicitemeffect.h"
+#include <misc/assert.h>
 #include <sstream>
 #include <string>
+
+std::string exeMagicEffectTypeToString(ExeMagicEffectType type)
+{
+#define GENERATE(X)                                                                                                                                            \
+    case ExeMagicEffectType::X:                                                                                                                                \
+        return #X;
+
+    switch (type)
+    {
+        GENERATE(PlusToHit)
+        GENERATE(MinusToHit)
+        GENERATE(PlusDamagePercent)
+        GENERATE(MinusDamagePercent)
+        GENERATE(PlusToHitAndDamagePercent)
+        GENERATE(MinusToHitAndDamagePercent)
+        GENERATE(PlusArmorPercent)
+        GENERATE(MinusArmorPercent)
+        GENERATE(PlusResistFire)
+        GENERATE(PlusResistLightning)
+        GENERATE(PlusResistMagic)
+        GENERATE(PlusResistAll)
+        GENERATE(PlusSpellLevels)
+        GENERATE(PlusCharges)
+        GENERATE(PlusDamageFire)
+        GENERATE(PlusDamageLightning)
+        GENERATE(PlusStrength)
+        GENERATE(MinusStrength)
+        GENERATE(PlusMagic)
+        GENERATE(MinusMagic)
+        GENERATE(PlusDexterity)
+        GENERATE(MinusDexterity)
+        GENERATE(PlusVitality)
+        GENERATE(MinusVitality)
+        GENERATE(PlusAllAttributes)
+        GENERATE(MinusAllAttributes)
+        GENERATE(PlusDamageTaken)
+        GENERATE(MinusDamageTaken)
+        GENERATE(PlusLife)
+        GENERATE(MinusLife)
+        GENERATE(PlusMana)
+        GENERATE(MinusMana)
+        GENERATE(PlusDurabilityPercent)
+        GENERATE(CurseDurabilityPercent)
+        GENERATE(Indestructible)
+        GENERATE(PlusLightPercent)
+        GENERATE(CurseLightPercent)
+        GENERATE(MultipleArrows)
+        GENERATE(PlusFireArrowDamage)
+        GENERATE(PlusLightningArrowDamage)
+        GENERATE(UniqueIcon)
+        GENERATE(Deal1To3DamageToAttackers)
+        GENERATE(ZeroMana)
+        GENERATE(UserCantHeal)
+        GENERATE(AbsorbHalfTrapDamage)
+        GENERATE(Knockback)
+        GENERATE(HitMonsterCantHeal)
+        GENERATE(StealMana)
+        GENERATE(StealLife)
+        GENERATE(DamageArmor)
+        GENERATE(FastAttack)
+        GENERATE(FastHitRecovery)
+        GENERATE(FastBlock)
+        GENERATE(PlusDamage)
+        GENERATE(RandomSpeedArrows)
+        GENERATE(SetItemDamage)
+        GENERATE(SetDurability)
+        GENERATE(NoStrengthRequirement)
+        GENERATE(SetCharges)
+        GENERATE(FastAttack2)
+        GENERATE(OneHanded)
+        GENERATE(Plus200PercentOnDemons)
+        GENERATE(AllResistancesZero)
+        GENERATE(ConstantlyLoseLife)
+        GENERATE(LifeSteal)
+        GENERATE(Infravision)
+        GENERATE(SetArmor)
+        GENERATE(AddArmorToLife)
+        GENERATE(Add10PercentOfManaToArmor)
+        GENERATE(PlusLevelDependentResistFire)
+        GENERATE(MinusArmor)
+    }
+
+    invalid_enum(ExeMagicEffectType, type);
+
+#undef GENERATE
+}
 
 namespace DiabloExe
 {
     ExeMagicItemEffect::ExeMagicItemEffect(FAIO::FAFileObject& exe, size_t codeOffset)
     {
+        // https://web.archive.org/web/20151015004713/http://www.thedark5.com/info/mod/mod1.html
+
         uint32_t nameTemp = exe.read32();
 
-        mEffect = exe.read32();
+        mEffect = ExeMagicEffectType(exe.read32());
         mMinEffect = exe.read32();
         mMaxEffect = exe.read32();
         mQualLevel = exe.read32();
@@ -21,7 +110,7 @@ namespace DiabloExe
         mGoldMultiplier = exe.read32();
 
         mName = exe.readCStringFromWin32Binary(nameTemp, codeOffset);
-        mEffectType = (!mName.empty() && std::isupper(mName[0])) ? MagicalEffectType::Prefix : MagicalEffectType::Suffix;
+        mIsPrefix = !mName.empty() && std::isupper(mName[0]);
     }
 
     std::string ExeMagicItemEffect::dump() const
@@ -53,8 +142,9 @@ namespace DiabloExe
         ss.str("");
         ss << "{" << std::endl
            << "\tmName: " << mName << std::endl
-           << "\tmEffectType: " << (mEffectType == MagicalEffectType::Prefix ? "Prefix" : "Suffix") << std::endl
-           << "\tmEffect: " << mEffect << ", " << std::endl
+           << "\tmIdName: " << mIdName << std::endl
+           << "\tmEffectType: " << (mIsPrefix ? "Prefix" : "Suffix") << std::endl
+           << "\tmEffect: " << exeMagicEffectTypeToString(mEffect) << ", " << std::endl
            << "\tmMinEffect: " << mMinEffect << "," << std::endl
            << "\tmMaxEffect: " << mMaxEffect << "," << std::endl
            << "\tmQualLevel: " << mQualLevel << "," << std::endl

@@ -315,6 +315,32 @@ namespace DiabloExe
         }
     }
 
+    class SimpleIdGenerator
+    {
+    public:
+        std::string generateIdFromName(const std::string_view name)
+        {
+            std::string idBase(name);
+            Misc::StringUtils::toLower(idBase);
+            Misc::StringUtils::replace(idBase, " ", "_");
+            Misc::StringUtils::replace(idBase, "-", "_");
+            idBase.erase(std::remove(idBase.begin(), idBase.end(), '\''), idBase.end());
+
+            std::string idName = idBase;
+            for (int32_t j = 1; usedIds.count(idName); j++)
+            {
+                idName = idBase + "_" + std::to_string(j);
+                Misc::StringUtils::replace(idName, "__", "_");
+            }
+
+            usedIds.insert(idName);
+            return idName;
+        }
+
+    private:
+        std::unordered_set<std::string> usedIds;
+    };
+
     void DiabloExe::loadBaseItems(FAIO::FAFileObject& exe, size_t codeOffset)
     {
         size_t itemOffset = mSettings->get<size_t>("BaseItems", "itemOffset");
@@ -337,7 +363,7 @@ namespace DiabloExe
             el[1] = exe.read32();
         constexpr auto invCellSize = 28;
 
-        std::unordered_set<std::string> usedIds;
+        SimpleIdGenerator idGenerator;
 
         for (size_t i = 0; i < count; i++)
         {
@@ -347,20 +373,7 @@ namespace DiabloExe
             if (tmp.name.empty())
                 continue;
 
-            std::string idBase = tmp.name;
-            Misc::StringUtils::toLower(idBase);
-            Misc::StringUtils::replace(idBase, " ", "_");
-            Misc::StringUtils::replace(idBase, "-", "_");
-
-            std::string idName = idBase;
-            for (int32_t j = 1; usedIds.count(idName); j++)
-            {
-                idName = idBase + "_" + std::to_string(j);
-                Misc::StringUtils::replace(idName, "__", "_");
-            }
-
-            usedIds.insert(idName);
-            tmp.idName = idName;
+            tmp.idName = idGenerator.generateIdFromName(tmp.name);
 
             size_t dropGraphicsId = itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId];
             tmp.dropItemGraphicsPath = "items/" + mItemDropGraphicsFilename[dropGraphicsId] + ".cel";
@@ -404,6 +417,8 @@ namespace DiabloExe
         size_t offset = mSettings->get<size_t>("MagicItemEffect", "magicItemEffectOffset");
         size_t count = mSettings->get<size_t>("MagicItemEffect", "count");
 
+        SimpleIdGenerator idGenerator;
+
         for (size_t i = 0; i < count; i++)
         {
             exe.FAfseek(offset + 48 * i, SEEK_SET);
@@ -412,6 +427,8 @@ namespace DiabloExe
                 continue;
             if (tmp.mName.empty())
                 continue;
+
+            tmp.mIdName = idGenerator.generateIdFromName((tmp.mIsPrefix ? "prefix_" : "suffix_") + tmp.mName);
             mMagicItemEffects.push_back(tmp);
         }
     }

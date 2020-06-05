@@ -590,7 +590,7 @@ namespace FAWorld
         }
 
         const GoldItemBase* goldItemBase =
-            safe_downcast<const GoldItemBase*>(Engine::EngineMain::get()->mWorld->getItemFactory().getItemBaseHolder().get("gold"));
+            safe_downcast<const GoldItemBase*>(Engine::EngineMain::get()->mWorld->getItemFactory().getItemBaseHolder().getItemBase("gold"));
 
         // second part - filling the empty slots with gold
         for (int32_t x = 0; x != mMainInventory.width(); x++)

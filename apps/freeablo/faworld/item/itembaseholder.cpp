@@ -3,6 +3,7 @@
 #include "golditembase.h"
 #include "usableitembase.h"
 #include <diabloexe/diabloexe.h>
+#include <diabloexe/exemagicitemeffect.h>
 #include <faworld/item/item.h>
 #include <memory>
 
@@ -30,6 +31,9 @@ namespace FAWorld
         }
 
         release_assert(goldItemCount <= 1);
+
+        for (const auto& prefixOrSuffix : exe.getMagicItemEffects())
+            mAllItemPrefixSuffixBases[prefixOrSuffix.mIdName] = std::make_unique<ItemPrefixOrSuffixBase>(prefixOrSuffix);
     }
 
     std::unique_ptr<Item> ItemBaseHolder::createItem(const std::string& baseTypeId) const { return mAllItemBases.at(baseTypeId)->createItem(); }

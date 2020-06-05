@@ -1,5 +1,7 @@
 #include "equipmentitem.h"
 #include "equipmentitembase.h"
+#include "itemprefixorsuffix.h"
+#include "itemprefixorsuffixbase.h"
 #include <fasavegame/gameloader.h>
 #include <fmt/format.h>
 #include <misc/misc.h>
@@ -25,7 +27,14 @@ namespace FAWorld
 
     std::string EquipmentItem::getFullDescription() const
     {
-        std::string description = super::getFullDescription();
+        std::string description;
+        if (mPrefix)
+            description += mPrefix->getBase()->mName + " ";
+
+        description += getBase()->mName;
+
+        if (mSuffix)
+            description += " of " + mSuffix->getBase()->mName;
 
         if (getBase()->mClass == ItemClass::weapon)
             description += fmt::format("\ndamage: {} - {}", getBase()->mDamageBonusRange.start, getBase()->mDamageBonusRange.end);
@@ -34,7 +43,7 @@ namespace FAWorld
 
         // TODO: durability
         // TODO: charges
-        // TODO: prefix / suffix
+        // TODO: magic effects
         // TODO: requirements
 
         return description;
