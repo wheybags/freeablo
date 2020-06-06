@@ -11,7 +11,6 @@
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/spells.h"
 #include "../faworld/world.h"
-#include "../faworld/potion.h"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
 #include "menu/multiplayerconnecting.h"
@@ -185,125 +184,16 @@ namespace FAGui
         mGoldSplitTarget = nullptr;
         switch (item.getType())
         {
-            case FAWorld::ItemType::gold:
-            {
+            case FAWorld::ItemType::gold: {
                 mGoldSplitTarget = &item;
                 mGoldSplitCnt = 0;
                 break;
             }
-            case FAWorld::ItemType::misc: {
-                switch (item.getMiscId())
-                {
-                    case FAWorld::ItemMiscId::potionOfHealing:
-                    {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.restoreHp(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfFullHealing:
-                    {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.restoreHpFull(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfMana:
-                    {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.restoreMana(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfFullMana:
-                    {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.restoreManaFull(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfRejuvenation:
-                    {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.restoreHp(mPlayer);
-                        potion.restoreMana(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfFullRejuvenation:
-                    {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.restoreHpFull(mPlayer);
-                        potion.restoreManaFull(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfDexterity:
-                    {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.increaseDexterity(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfMagic: {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.increaseMagic(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfVitality: {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.increaseVitality(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfStrength: {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.increaseStrength(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::spectralElixir: {
-                        FAWorld::Potion potion = FAWorld::Potion();
-                        potion.increaseStrength(mPlayer, 3);
-                        potion.increaseVitality(mPlayer, 3);
-                        potion.increaseMagic(mPlayer, 3);
-                        potion.increaseDexterity(mPlayer, 3);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::amulet:
-                        break;
-                    case FAWorld::ItemMiscId::book:
-                        break;
-                    case FAWorld::ItemMiscId::ear:
-                        break;
-                    case FAWorld::ItemMiscId::mapOfTheStars:
-                        break;
-                    case FAWorld::ItemMiscId::ring:
-                        break;
-                    case FAWorld::ItemMiscId::scroll:
-                        break;
-                    case FAWorld::ItemMiscId::scrollWithTarget:
-                        break;
-                    case FAWorld::ItemMiscId::staff:
-                        break;
-                    case FAWorld::ItemMiscId::unique:
-                        break;
-                    case FAWorld::ItemMiscId::none:
-                        break;
-                }
+            case FAWorld::ItemType::misc:
+            {
+                FAWorld::PlayerInput::UseItemData input{target};
+                Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
+                break;
             }
             default:
                 break;
@@ -1003,6 +893,7 @@ namespace FAGui
             characterPanel(ctx);
             bottomMenu(ctx, hoverStatus);
             spellSelectionMenu(ctx);
+
 
             mDialogManager.update(ctx);
         }
