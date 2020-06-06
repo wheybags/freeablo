@@ -5,6 +5,7 @@
 #include "fasavegame/gameloader.h"
 #include "input/inputmanager.h"
 #include "player.h"
+#include "potion.h"
 #include "storedata.h"
 #include <algorithm>
 #include <engine/threadmanager.h>
