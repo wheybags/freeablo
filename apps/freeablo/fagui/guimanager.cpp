@@ -196,6 +196,9 @@ namespace FAGui
                 Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
                 break;
             }
+            default:
+                break;
+        }
     }
 
     void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight)
