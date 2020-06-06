@@ -22,6 +22,7 @@
     MACRO(PlayerLeft)                                                                                                                                          \
     MACRO(BuyItem)                                                                                                                                             \
     MACRO(SellItem)
+    MACRO(UseItem)
 
 namespace Serial
 {
@@ -153,6 +154,12 @@ namespace FAWorld
             FAWorld::EquipTarget itemLocation;
             int32_t shopkeeperId;
 
+            void save(Serial::Saver& saver) const;
+            void load(Serial::Loader& loader);
+        };
+        struct UseItemData
+        {
+            FAWorld::EquipTarget target;
             void save(Serial::Saver& saver) const;
             void load(Serial::Loader& loader);
         };
