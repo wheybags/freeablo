@@ -11,7 +11,6 @@
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/spells.h"
 #include "../faworld/world.h"
-#include "../faworld/potion.h"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
 #include "menu/multiplayerconnecting.h"
@@ -193,117 +192,10 @@ namespace FAGui
             }
             case FAWorld::ItemType::misc:
             {
-                switch (item.getMiscId())
-                {
-                    case FAWorld::ItemMiscId::potionOfHealing:
-                    {
-                        FAWorld::Potion::restoreHp(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfFullHealing:
-                    {
-                        FAWorld::Potion::restoreHpFull(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfMana:
-                    {
-                        FAWorld::Potion::restoreMana(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfFullMana:
-                    {
-                        FAWorld::Potion::restoreManaFull(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfRejuvenation:
-                    {
-                        FAWorld::Potion::restoreHp(mPlayer);
-                        FAWorld::Potion::restoreMana(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfFullRejuvenation:
-                    {
-                        FAWorld::Potion::restoreHpFull(mPlayer);
-                        FAWorld::Potion::restoreManaFull(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfDexterity:
-                    {
-                        FAWorld::Potion::increaseDexterity(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfMagic:
-                    {
-                        FAWorld::Potion::increaseMagic(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfVitality:
-                    {
-                        FAWorld::Potion::increaseVitality(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfStrength:
-                    {
-                        FAWorld::Potion::increaseStrength(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::spectralElixir:
-                    {
-                        FAWorld::Potion::increaseStrength(mPlayer, 3);
-                        FAWorld::Potion::increaseVitality(mPlayer, 3);
-                        FAWorld::Potion::increaseMagic(mPlayer, 3);
-                        FAWorld::Potion::increaseDexterity(mPlayer, 3);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::amulet:
-                        break;
-                    case FAWorld::ItemMiscId::book:
-                        break;
-                    case FAWorld::ItemMiscId::ear:
-                        break;
-                    case FAWorld::ItemMiscId::mapOfTheStars:
-                        break;
-                    case FAWorld::ItemMiscId::ring:
-                        break;
-                    case FAWorld::ItemMiscId::scroll:
-                        break;
-                    case FAWorld::ItemMiscId::scrollWithTarget:
-                        break;
-                    case FAWorld::ItemMiscId::staff:
-                        break;
-                    case FAWorld::ItemMiscId::unique:
-                        break;
-                    case FAWorld::ItemMiscId::invalid:
-                        break;
-                    case FAWorld::ItemMiscId::none:
-                        break;
-                }
-            }
-            default:
+                FAWorld::PlayerInput::UseItemData input{target};
+                Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
                 break;
-        }
+            }
     }
 
     void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight)
