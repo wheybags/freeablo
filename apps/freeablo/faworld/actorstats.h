@@ -29,6 +29,11 @@ namespace FAWorld
         int32_t dexterity = 0;
         int32_t vitality = 0;
 
+        int32_t maxStrength = 0;
+        int32_t maxMagic = 0;
+        int32_t maxDexterity = 0;
+        int32_t maxVitality = 0;
+
         bool operator==(const BaseStats& other)
         {
             return strength == other.strength && magic == other.magic && dexterity == other.dexterity && vitality == other.vitality;

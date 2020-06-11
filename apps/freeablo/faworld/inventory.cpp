@@ -392,7 +392,7 @@ namespace FAWorld
                 case EquipTargetType::inventory:
                     break;
                 case EquipTargetType::belt:
-                    ok = cursorItem->getAsMiscItem() && cursorItem->getAsMiscItem()->getBase()->isBeltEquippable();
+                    ok = cursorItem->getAsUsableItem() && cursorItem->getAsUsableItem()->getBase()->isBeltEquippable();
                     break;
                 case EquipTargetType::head:
                     ok = cursorItem->getBase()->getEquipType() == ItemEquipType::head;

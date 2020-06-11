@@ -5,7 +5,9 @@
 #include "fasavegame/gameloader.h"
 #include "input/inputmanager.h"
 #include "item/itembase.h"
+#include "item/usableitem.h"
 #include "player.h"
+#include "potion.h"
 #include "storedata.h"
 #include <algorithm>
 #include <engine/threadmanager.h>
@@ -203,6 +205,17 @@ namespace FAWorld
 
                 release_assert(mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation));
                 mPlayer->mInventory.placeGold(price, mPlayer->getWorld()->getItemFactory());
+
+                return;
+            }
+            case PlayerInput::Type::UseItem:
+            {
+                if (mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target) &&
+                    mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target)->getAsUsableItem())
+                {
+                    std::unique_ptr<Item> item = mPlayer->mInventory.remove(input.mData.dataUseItem.target);
+                    item->getAsUsableItem()->applyEffect(*mPlayer);
+                }
 
                 return;
             }

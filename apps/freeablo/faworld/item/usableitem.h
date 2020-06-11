@@ -4,6 +4,7 @@
 namespace FAWorld
 {
     class UsableItemBase;
+    class Player;
 
     class UsableItem final : public Item
     {
@@ -16,6 +17,8 @@ namespace FAWorld
         void load(FASaveGame::GameLoader& loader) override { super::load(loader); }
 
         UsableItem* getAsUsableItem() override { return this; }
+
+        void applyEffect(Player& user);
 
         const UsableItemBase* getBase() const;
     };

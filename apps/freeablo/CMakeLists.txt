@@ -74,6 +74,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/playerinput.h
     faworld/position.cpp
     faworld/position.h
+    faworld/potion.cpp
+    faworld/potion.h
     faworld/storedata.cpp
     faworld/storedata.h
     faworld/target.cpp
