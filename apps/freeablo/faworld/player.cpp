@@ -407,15 +407,15 @@ namespace FAWorld
                 switch (mInventory.getBody()->getBase()->mType)
                 {
                     case ItemType::heavyArmor:
-                        armor = "heavy";
+                        armor = "heavy-armor";
                         break;
 
                     case ItemType::mediumArmor:
-                        armor = "medium";
+                        armor = "medium-armor";
                         break;
 
                     case ItemType::lightArmor:
-                        armor = "light";
+                        armor = "light-armor";
                         break;
 
                     default:
@@ -469,7 +469,7 @@ namespace FAWorld
 
         auto getAnimation = [&](const std::string& animation) {
             FARender::SpriteLoader::PlayerSpriteKey spriteLookupKey({{"animation", animation}, {"class", classCode}, {"armor", armor}, {"weapon", weapon}});
-            return renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mPlayerSpriteDefinitions[spriteLookupKey]);
+            return renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mPlayerSpriteDefinitions.at(spriteLookupKey));
         };
 
         mAnimation.setAnimationSprites(AnimState::dead, getAnimation("dead"));
