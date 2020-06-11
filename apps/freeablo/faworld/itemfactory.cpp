@@ -3,20 +3,22 @@
 #include "itemenums.h"
 #include <engine/enginemain.h>
 #include <fasavegame/gameloader.h>
+#include <faworld/item/equipmentitem.h>
+#include <faworld/item/itemprefixorsuffix.h>
 #include <random/random.h>
 
 namespace FAWorld
 {
     ItemFilter::Callback ItemFilter::maxQLvl(int32_t value)
     {
-        return [value](const DiabloExe::ExeItem& item) { return static_cast<int32_t>(item.qualityLevel) <= value; };
+        return [value](const ItemBase& base) { return base.mQualityLevel <= value; };
     }
 
     ItemFilter::Callback ItemFilter::sellableGriswoldBasic()
     {
-        return [](const DiabloExe::ExeItem& item) {
+        return [](const ItemBase& base) {
             static const auto excludedTypes = {ItemType::misc, ItemType::gold, ItemType::staff, ItemType::ring, ItemType::amulet};
-            return std::count(excludedTypes.begin(), excludedTypes.end(), static_cast<ItemType>(item.type)) == 0;
+            return std::count(excludedTypes.begin(), excludedTypes.end(), base.mType) == 0;
         };
     }
 
@@ -46,19 +48,85 @@ namespace FAWorld
         //        return res;
     }
 
-    ItemId ItemFactory::randomItemId(const ItemFilter::Callback& filter) const
+    const ItemBase* ItemFactory::randomItemBase(const ItemFilter::Callback& filter) const
     {
-        static std::vector<ItemId> pool;
+        static std::vector<const ItemBase*> pool;
         pool.clear();
-        for (auto id : enum_range<ItemId>())
+        for (const auto& pair : mItemBaseHolder.getAllItemBases())
         {
-            const DiabloExe::ExeItem& info = getInfo(id);
-            if (!filter(info))
+            const ItemBase* base = pair.second.get();
+            if (!filter(*base))
                 continue;
-            for (int32_t i = 0; i < static_cast<int32_t>(info.dropRate); ++i)
-                pool.push_back(id);
+
+            for (int32_t i = 0; i < base->mDropRate; ++i)
+                pool.push_back(base);
         }
-        return pool[mRng.randomInRange(0, pool.size() - 1)];
+
+        if (!pool.empty())
+            return pool[mRng.randomInRange(0, pool.size() - 1)];
+
+        return nullptr;
+    }
+
+    const ItemPrefixOrSuffixBase* ItemFactory::randomPrefixOrSuffixBase(const std::function<bool(const ItemPrefixOrSuffixBase&)>& filter) const
+    {
+        std::vector<const ItemPrefixOrSuffixBase*> pool;
+
+        for (const auto& pair : mItemBaseHolder.getAllItemPrefixSuffixBases())
+        {
+            const ItemPrefixOrSuffixBase* base = pair.second.get();
+
+            if (filter(*base))
+            {
+                for (int32_t i = 0; i < base->mDropRate; i++)
+                    pool.push_back(base);
+            }
+        }
+
+        if (!pool.empty())
+            return pool[mRng.randomInRange(0, pool.size() - 1)];
+
+        return nullptr;
+    }
+
+    void ItemFactory::applyRandomEnchantment(EquipmentItem& item, int32_t minLevel, int32_t maxLevel) const
+    {
+        bool prefix = mRng.randomInRange(0, 4) == 0;
+        bool suffix = mRng.randomInRange(0, 3) != 0;
+
+        if (!prefix and !suffix)
+        {
+            if (mRng.randomInRange(0, 2) == 1)
+                suffix = true;
+            else
+                prefix = true;
+        }
+
+        if (prefix)
+        {
+            const ItemPrefixOrSuffixBase* prefixBase = randomPrefixOrSuffixBase([&](const ItemPrefixOrSuffixBase& base) {
+                return base.mIsPrefix && base.canBeAppliedTo(item) && base.mQuality >= minLevel && base.mQuality <= maxLevel;
+            });
+
+            if (prefixBase)
+            {
+                item.mPrefix = prefixBase->create();
+                item.mPrefix->init();
+            }
+        }
+
+        if (suffix)
+        {
+            const ItemPrefixOrSuffixBase* suffixBase = randomPrefixOrSuffixBase([&](const ItemPrefixOrSuffixBase& base) {
+                return !base.mIsPrefix && base.canBeAppliedTo(item) && base.mQuality >= minLevel && base.mQuality <= maxLevel;
+            });
+
+            if (suffixBase)
+            {
+                item.mSuffix = suffixBase->create();
+                item.mSuffix->init();
+            }
+        }
     }
 
     const DiabloExe::ExeItem& ItemFactory::getInfo(ItemId id) const { return mExe.getBaseItems().at(static_cast<int>(id)); }

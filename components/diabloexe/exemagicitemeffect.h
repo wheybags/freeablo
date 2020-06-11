@@ -2,18 +2,8 @@
 #include <cstdint>
 #include <faio/fafileobject.h>
 #include <map>
+#include <misc/commonenums.h>
 #include <string>
-
-enum class MagicalItemType
-{
-    None = 0x0,
-    Jewelery = 0x1,
-    Bow = 0x10,
-    Staff = 0x100,
-    OtherWeapons = 0x1000,
-    Shield = 0x10000,
-    Armor = 0x100000,
-};
 
 enum class ExeMagicEffectType
 {
@@ -111,7 +101,7 @@ namespace DiabloExe
         int32_t mMinEffect = 0;
         int32_t mMaxEffect = 0;
         int32_t mQualLevel = 0;
-        MagicalItemType mTargetTypeBitmask = MagicalItemType::None;
+        MagicalItemTargetBitmask mTargetTypesBitmask = MagicalItemTargetBitmask::None;
 
         enum class CompatibilityBitMask
         {

@@ -14,10 +14,11 @@ namespace FAWorld
         griswoldBasicItems.resize(count);
         for (auto& item : griswoldBasicItems)
         {
-            ItemId itemId = mItemFactory.randomItemId(
-                [ilvl](const DiabloExe::ExeItem& item) { return ItemFilter::maxQLvl(ilvl)(item) || ItemFilter::sellableGriswoldBasic()(item); });
+            const ItemBase* itemBase = mItemFactory.randomItemBase(
+                [ilvl](const ItemBase& base) { return ItemFilter::maxQLvl(ilvl)(base) || ItemFilter::sellableGriswoldBasic()(base); });
 
-            item.item = mItemFactory.generateBaseItem(itemId);
+            item.item = itemBase->createItem();
+            item.item->init();
             item.storeId = mNextItemId;
             mNextItemId++;
         }

@@ -1,6 +1,8 @@
 #include "playerfactory.h"
 #include "diabloexe/characterstats.h"
 #include "equiptarget.h"
+#include "item/equipmentitem.h"
+#include "item/itemprefixorsuffix.h"
 #include "itemenums.h"
 #include "itemfactory.h"
 #include "player.h"
@@ -86,6 +88,9 @@ namespace FAWorld
     {
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortSword));
         std::unique_ptr<Item> buckler = mItemFactory.generateBaseItem(ItemId::buckler);
+
+        buckler->getAsEquipmentItem()->mPrefix = mItemFactory.getItemBaseHolder().getItemPrefixOrSuffixBase("prefix_tin")->create();
+
         player->mInventory.forcePlaceItem(buckler, MakeEquipTarget<EquipTargetType::rightHand>());
         player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::club));
         player->mInventory.placeGold(100, mItemFactory);

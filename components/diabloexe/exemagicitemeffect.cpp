@@ -101,7 +101,7 @@ namespace DiabloExe
         mMinEffect = exe.read32();
         mMaxEffect = exe.read32();
         mQualLevel = exe.read32();
-        mTargetTypeBitmask = MagicalItemType(exe.read32());
+        mTargetTypesBitmask = MagicalItemTargetBitmask(exe.read32());
         mCompatibilityBitmask = CompatibilityBitMask(exe.read32());
         mDoubleProbabilityForPrefixes = bool(exe.read32());
         mNotCursed = bool(exe.read32());
@@ -119,17 +119,17 @@ namespace DiabloExe
 
         std::string targetTypeBitmaskString;
         {
-            if (int32_t(mTargetTypeBitmask) & int32_t(MagicalItemType::Jewelery))
+            if (int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::Jewelery))
                 ss << "Jewelery | ";
-            if (int32_t(mTargetTypeBitmask) & int32_t(MagicalItemType::Bow))
+            if (int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::Bow))
                 ss << "Bow | ";
-            if (int32_t(mTargetTypeBitmask) & int32_t(MagicalItemType::Staff))
+            if (int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::Staff))
                 ss << "Staff | ";
-            if (int32_t(mTargetTypeBitmask) & int32_t(MagicalItemType::OtherWeapons))
+            if (int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::OtherWeapons))
                 ss << "OtherWeapons | ";
-            if (int32_t(mTargetTypeBitmask) & int32_t(MagicalItemType::Shield))
+            if (int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::Shield))
                 ss << "Shield | ";
-            if (int32_t(mTargetTypeBitmask) & int32_t(MagicalItemType::Armor))
+            if (int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::Armor))
                 ss << "Armor | ";
 
             targetTypeBitmaskString = ss.str();

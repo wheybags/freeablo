@@ -40,7 +40,7 @@ namespace FAWorld
 
     namespace ItemFilter
     {
-        using Callback = std::function<bool(const DiabloExe::ExeItem& item)>;
+        using Callback = std::function<bool(const ItemBase& base)>;
         Callback maxQLvl(int32_t value);
         Callback sellableGriswoldBasic();
     }
@@ -50,7 +50,9 @@ namespace FAWorld
     public:
         explicit ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng);
         std::unique_ptr<Item> generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
-        ItemId randomItemId(const ItemFilter::Callback& filter) const;
+        const ItemBase* randomItemBase(const ItemFilter::Callback& filter) const;
+        const ItemPrefixOrSuffixBase* randomPrefixOrSuffixBase(const std::function<bool(const ItemPrefixOrSuffixBase&)>& filter) const;
+        void applyRandomEnchantment(EquipmentItem& item, int32_t minLevel, int32_t maxLevel) const;
 
         void saveItem(const Item& item, FASaveGame::GameSaver& saver) const;
         std::unique_ptr<Item> loadItem(FASaveGame::GameLoader& loader) const;

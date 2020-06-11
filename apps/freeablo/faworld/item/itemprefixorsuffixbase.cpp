@@ -1,4 +1,6 @@
 #include "itemprefixorsuffixbase.h"
+#include "equipmentitem.h"
+#include "equipmentitembase.h"
 #include "itemprefixorsuffix.h"
 #include <diabloexe/exemagicitemeffect.h>
 #include <faworld/magiceffects/simplebuffdebuffeffectbase.h>
@@ -6,7 +8,8 @@
 namespace FAWorld
 {
     ItemPrefixOrSuffixBase::ItemPrefixOrSuffixBase(const DiabloExe::ExeMagicItemEffect& exeEffect)
-        : mName(exeEffect.mName), mCursed(!exeEffect.mNotCursed), mIsPrefix(exeEffect.mIsPrefix)
+        : mName(exeEffect.mName), mCursed(!exeEffect.mNotCursed), mIsPrefix(exeEffect.mIsPrefix), mQuality(exeEffect.mQualLevel),
+          mTargetTypesBitmask(exeEffect.mTargetTypesBitmask), mDropRate(exeEffect.mDoubleProbabilityForPrefixes ? 2 : 1)
     {
         switch (exeEffect.mEffect)
         {
@@ -92,4 +95,41 @@ namespace FAWorld
     ItemPrefixOrSuffixBase::~ItemPrefixOrSuffixBase() = default;
 
     std::unique_ptr<ItemPrefixOrSuffix> ItemPrefixOrSuffixBase::create() const { return std::make_unique<ItemPrefixOrSuffix>(this); }
+
+    bool ItemPrefixOrSuffixBase::canBeAppliedTo(const EquipmentItem& item) const
+    {
+        switch (item.getBase()->mType)
+        {
+            case ItemType::sword:
+            case ItemType::axe:
+            case ItemType::mace:
+                return int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::OtherWeapons);
+
+            case ItemType::bow:
+                return int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::Bow);
+
+            case ItemType::staff:
+                return int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::Staff);
+
+            case ItemType::shield:
+                return int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::Shield);
+
+            case ItemType::lightArmor:
+            case ItemType::helm:
+            case ItemType::mediumArmor:
+            case ItemType::heavyArmor:
+                return int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::Armor);
+
+            case ItemType::ring:
+            case ItemType::amulet:
+                return int32_t(mTargetTypesBitmask) & int32_t(MagicalItemTargetBitmask::Jewelery);
+
+            case ItemType::gold:
+            case ItemType::none:
+            case ItemType::misc:
+                return false;
+        }
+
+        invalid_enum(ItemEffectType, item.getBase()->mType);
+    }
 }

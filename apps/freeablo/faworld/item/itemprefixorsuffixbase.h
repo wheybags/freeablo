@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <misc/commonenums.h>
 #include <string>
 #include <vector>
 
@@ -12,6 +13,7 @@ namespace FAWorld
 {
     class MagicEffectBase;
     class ItemPrefixOrSuffix;
+    class EquipmentItem;
 
     class ItemPrefixOrSuffixBase
     {
@@ -20,11 +22,15 @@ namespace FAWorld
         ~ItemPrefixOrSuffixBase();
 
         std::unique_ptr<ItemPrefixOrSuffix> create() const;
+        bool canBeAppliedTo(const EquipmentItem& item) const;
 
     public:
         std::string mName;
         bool mCursed = false;
         bool mIsPrefix = false;
+        int32_t mQuality = 0;
+        MagicalItemTargetBitmask mTargetTypesBitmask = MagicalItemTargetBitmask::None;
+        int32_t mDropRate = 1;
 
         std::vector<std::unique_ptr<MagicEffectBase>> mEffects;
     };

@@ -4,6 +4,8 @@
 #include "diabloexe/monster.h"
 #include "itemfactory.h"
 #include <engine/enginemain.h>
+#include <faworld/item/equipmentitem.h>
+#include <faworld/item/itemprefixorsuffix.h>
 #include <memory>
 #include <misc/stringops.h>
 
@@ -104,18 +106,32 @@ namespace FAWorld
 
     void Monster::spawnItem()
     {
-        // TODO: Spawn magic, unique and special/quest items.
+        // TODO: Spawn unique and special/quest items.
 
         if (mWorld.mRng->randomInRange(0, 99) > 40)
             return;
 
-        ItemId itemId;
+        const ItemBase* itemBase;
         if (mWorld.mRng->randomInRange(0, 99) > 25)
-            itemId = ItemId::gold;
+            itemBase = mWorld.getItemFactory().getItemBaseHolder().getItemBase("gold");
         else
-            itemId = mWorld.getItemFactory().randomItemId(ItemFilter::maxQLvl(mStats.mLevel));
+            itemBase = mWorld.getItemFactory().randomItemBase(ItemFilter::maxQLvl(mStats.mLevel));
 
-        std::unique_ptr<Item> item = mWorld.getItemFactory().generateBaseItem(itemId);
+        std::unique_ptr<Item> item = itemBase->createItem();
+        item->init();
+
+        if (EquipmentItem* equipmentItem = item->getAsEquipmentItem())
+        {
+            bool magical = mWorld.mRng->randomInRange(0, 100) <= 10 || mWorld.mRng->randomInRange(0, 100) <= mStats.mLevel;
+            if (magical)
+            {
+                int32_t maxLevel = mStats.mLevel;
+                int32_t minLevel = maxLevel / 2;
+
+                mWorld.getItemFactory().applyRandomEnchantment(*equipmentItem, minLevel, maxLevel);
+            }
+        }
+
         getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction(Misc::Direction8::none));
     }
 

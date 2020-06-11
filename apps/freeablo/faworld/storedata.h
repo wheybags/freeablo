@@ -33,7 +33,7 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver) const;
         void load(FASaveGame::GameLoader& loader);
 
-        void regenerateGriswoldBasicItems(int32_t ilvl, Random::Rng& rng);
+        void regenerateGriswoldBasicItems(int32_t base, Random::Rng& rng);
 
     public:
         std::vector<StoreItem> griswoldBasicItems;
