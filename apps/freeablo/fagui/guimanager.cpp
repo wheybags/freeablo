@@ -1,6 +1,7 @@
 #include "guimanager.h"
 #include "../engine/enginemain.h"
 #include "../engine/localinputhandler.h"
+#include "../engine/threadmanager.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "../faworld/actorstats.h"
@@ -27,6 +28,7 @@
 #include <memory>
 #include <misc/misc.h>
 #include <misc/stringops.h>
+#include <random/random.h>
 #include <render/spritegroup.h>
 #include <serial/textstream.h>
 #include <string>
@@ -183,6 +185,11 @@ namespace FAGui
         {
             mGoldSplitTarget = target;
             mGoldSplitCnt = 0;
+        }
+        if (item->getAsUsableItem())
+        {
+            FAWorld::PlayerInput::UseItemData input{target};
+            Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
         }
     }
 

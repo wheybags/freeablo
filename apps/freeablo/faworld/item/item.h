@@ -39,7 +39,7 @@ namespace FAWorld
         virtual EquipmentItem* getAsEquipmentItem() { return nullptr; }
         const EquipmentItem* getAsEquipmentItem() const { return const_cast<Item*>(this)->getAsEquipmentItem(); }
         virtual UsableItem* getAsUsableItem() { return nullptr; }
-        const UsableItem* getAsMiscItem() const { return const_cast<Item*>(this)->getAsUsableItem(); }
+        const UsableItem* getAsUsableItem() const { return const_cast<Item*>(this)->getAsUsableItem(); }
         virtual GoldItem* getAsGoldItem() { return nullptr; }
         const GoldItem* getAsGoldItem() const { return const_cast<Item*>(this)->getAsGoldItem(); }
 
