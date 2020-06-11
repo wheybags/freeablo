@@ -113,6 +113,8 @@ namespace FAWorld
         const DiabloExe::DiabloExe& mDiabloExe; // TODO: something better than this
         std::unique_ptr<Random::Rng> mRng;
 
+        bool mLoading = false; // not serialised, for obvious reasons
+
     private:
         std::unique_ptr<Random::Rng> mLevelRng;
         std::map<int32_t, GameLevel*> mLevels;

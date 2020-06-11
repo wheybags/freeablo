@@ -47,6 +47,7 @@ namespace FAWorld
             new (this) World(tmp, 0U);
         }
 
+        mLoading = true;
         loader.currentlyLoadingWorld = this;
 
         mRng->load(loader);
@@ -73,6 +74,7 @@ namespace FAWorld
 
         loader.runFunctionsToRunAtEnd();
 
+        mLoading = false;
         loader.currentlyLoadingWorld = nullptr;
     }
 
