@@ -5,22 +5,25 @@
 
 namespace FAWorld
 {
-    //https:// wheybags.gitlab.io/jarulfs-guide/#potions-and-elixirs
-    //Used for the formulas
+    // https:// wheybags.gitlab.io/jarulfs-guide/#potions-and-elixirs
+    // Used for the formulas
     void Potion::restoreHp(Player* player)
     {
         FixedPoint bonus;
         switch (player->getClass())
         {
-            case FAWorld::PlayerClass::warrior: {
+            case FAWorld::PlayerClass::warrior:
+            {
                 bonus = FixedPoint(2);
                 break;
             }
-            case FAWorld::PlayerClass::rogue: {
+            case FAWorld::PlayerClass::rogue:
+            {
                 bonus = FixedPoint("1.5");
                 break;
             }
-            case FAWorld::PlayerClass::sorceror: {
+            case FAWorld::PlayerClass::sorceror:
+            {
                 bonus = FixedPoint(1);
                 break;
             }
@@ -28,7 +31,7 @@ namespace FAWorld
                 break;
         }
 
-        int32_t min = (int32_t)(bonus * FixedPoint(player->getStats().getHp().max)/ FixedPoint(8)).floor();
+        int32_t min = (int32_t)(bonus * FixedPoint(player->getStats().getHp().max) / FixedPoint(8)).floor();
         int32_t max = min * 3;
         int32_t toHeal = player->getWorld()->mRng->randomInRange(min, max);
         player->heal(toHeal);
@@ -42,15 +45,18 @@ namespace FAWorld
 
         switch (player->getClass())
         {
-            case FAWorld::PlayerClass::warrior: {
+            case FAWorld::PlayerClass::warrior:
+            {
                 bonus = FixedPoint(1);
                 break;
             }
-            case FAWorld::PlayerClass::rogue: {
+            case FAWorld::PlayerClass::rogue:
+            {
                 bonus = FixedPoint("1.5");
                 break;
             }
-            case FAWorld::PlayerClass::sorceror: {
+            case FAWorld::PlayerClass::sorceror:
+            {
                 bonus = FixedPoint(2);
                 break;
             }

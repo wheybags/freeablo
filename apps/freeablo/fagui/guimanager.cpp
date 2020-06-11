@@ -1,7 +1,7 @@
 #include "guimanager.h"
-#include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
 #include "../engine/localinputhandler.h"
+#include "../engine/threadmanager.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "../faworld/actorstats.h"
@@ -25,9 +25,9 @@
 #include <memory>
 #include <misc/misc.h>
 #include <misc/stringops.h>
+#include <random/random.h>
 #include <render/spritegroup.h>
 #include <serial/textstream.h>
-#include <random/random.h>
 #include <string>
 
 static nk_style_button dummyStyle = []() {

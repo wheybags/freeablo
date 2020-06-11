@@ -298,7 +298,7 @@ namespace FAWorld
                         break;
                 }
                 return;
-            }           
+            }
             case PlayerInput::Type::PlayerJoined:
             case PlayerInput::Type::PlayerLeft:
             {
