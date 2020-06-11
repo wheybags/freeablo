@@ -12,7 +12,8 @@ namespace FAWorld
         explicit MagicEffect(const MagicEffectBase* base);
         virtual void init(){};
 
-        virtual void apply(MagicStatModifiers& modifiers) { UNUSED_PARAM(modifiers); }
+        virtual void apply(MagicStatModifiers& modifiers) const { UNUSED_PARAM(modifiers); }
+        virtual std::string getFullDescription() const;
 
         const MagicEffectBase* getBase() const { return mBase; }
 

@@ -1,4 +1,5 @@
 #pragma once
+#include <faworld/actorstats.h>
 #include <memory>
 #include <vector>
 
@@ -15,6 +16,8 @@ namespace FAWorld
         ~ItemPrefixOrSuffix();
 
         const ItemPrefixOrSuffixBase* getBase() { return mBase; }
+        std::string getFullDescription() const;
+        void apply(MagicStatModifiers& modifiers) const;
 
     private:
         const ItemPrefixOrSuffixBase* mBase = nullptr;

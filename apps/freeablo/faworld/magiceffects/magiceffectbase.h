@@ -23,5 +23,6 @@ namespace FAWorld
     public:
         int32_t mParameter1 = 0;
         int32_t mParameter2 = 0;
+        std::string mDescriptionFormatString;
     };
 }

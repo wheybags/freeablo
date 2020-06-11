@@ -1,6 +1,7 @@
 #include "simplebuffdebuffeffect.h"
 #include "simplebuffdebuffeffectbase.h"
 #include <faworld/actorstats.h>
+#include <fmt/format.h>
 #include <misc/misc.h>
 
 namespace FAWorld
@@ -12,7 +13,7 @@ namespace FAWorld
         mValue = getBase()->mParameter2; // TODO: this should be randomised
     }
 
-    void SimpleBuffDebuffEffect::apply(MagicStatModifiers& modifiers)
+    void SimpleBuffDebuffEffect::apply(MagicStatModifiers& modifiers) const
     {
         switch (getBase()->mAttribute)
         {
@@ -48,4 +49,6 @@ namespace FAWorld
     }
 
     const SimpleBuffDebuffEffectBase* SimpleBuffDebuffEffect::getBase() const { return safe_downcast<const SimpleBuffDebuffEffectBase*>(mBase); }
+
+    std::string SimpleBuffDebuffEffect::getFullDescription() const { return fmt::format(getBase()->mDescriptionFormatString, mValue); }
 }

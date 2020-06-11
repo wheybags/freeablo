@@ -13,7 +13,8 @@ namespace FAWorld
         explicit SimpleBuffDebuffEffect(const SimpleBuffDebuffEffectBase* base);
         void init() override;
 
-        void apply(MagicStatModifiers& modifiers) override;
+        void apply(MagicStatModifiers& modifiers) const override;
+        std::string getFullDescription() const override;
 
         const SimpleBuffDebuffEffectBase* getBase() const;
 

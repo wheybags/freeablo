@@ -36,14 +36,20 @@ namespace FAWorld
         if (mSuffix)
             description += " of " + mSuffix->getBase()->mName;
 
+        description += "\n";
+
         if (getBase()->mClass == ItemClass::weapon)
-            description += fmt::format("\ndamage: {} - {}", getBase()->mDamageBonusRange.start, getBase()->mDamageBonusRange.end);
+            description += fmt::format("damage: {} - {}\n", getBase()->mDamageBonusRange.start, getBase()->mDamageBonusRange.end);
         else
-            description += fmt::format("\narmor: {}", mArmorClass);
+            description += fmt::format("armor: {}\n", mArmorClass);
+
+        if (mPrefix)
+            description += mPrefix->getFullDescription();
+        if (mSuffix)
+            description += mSuffix->getFullDescription();
 
         // TODO: durability
         // TODO: charges
-        // TODO: magic effects
         // TODO: requirements
 
         return description;

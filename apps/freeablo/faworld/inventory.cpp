@@ -7,6 +7,7 @@
 #include "item/equipmentitem.h"
 #include "item/equipmentitembase.h"
 #include "item/itembase.h"
+#include "item/itemprefixorsuffix.h"
 #include "item/usableitem.h"
 #include "item/usableitembase.h"
 #include "itemenums.h"
@@ -485,6 +486,26 @@ namespace FAWorld
                 stats.rangedDamageBonusRange += item->getBase()->mDamageBonusRange;
 
             // TODO: other stats
+        }
+
+        EquipTarget allEquipmentSlots[] = {MakeEquipTarget<EquipTargetType::head>(),
+                                           MakeEquipTarget<EquipTargetType::body>(),
+                                           MakeEquipTarget<EquipTargetType::leftRing>(),
+                                           MakeEquipTarget<EquipTargetType::rightRing>(),
+                                           MakeEquipTarget<EquipTargetType::leftHand>(),
+                                           MakeEquipTarget<EquipTargetType::rightHand>(),
+                                           MakeEquipTarget<EquipTargetType::amulet>()};
+
+        for (const auto& slot : allEquipmentSlots)
+        {
+            const EquipmentItem* item = getItemAt(slot) ? getItemAt(slot)->getAsEquipmentItem() : nullptr;
+            if (item)
+            {
+                if (item->mPrefix)
+                    item->mPrefix->apply(stats.magicStatModifiers);
+                if (item->mSuffix)
+                    item->mSuffix->apply(stats.magicStatModifiers);
+            }
         }
     }
 
