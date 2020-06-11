@@ -13,11 +13,10 @@ namespace FAWorld
         static void restoreHpFull(Player* player);
         static void restoreManaFull(Player* player);
 
-        //exliers
+        // elixirs
         static void increaseStrength(Player* player, int32_t delta);
         static void increaseMagic(Player* player, int32_t delta);
         static void increaseDexterity(Player* player, int32_t delta);
         static void increaseVitality(Player* player, int32_t delta);
-        
     };
 }

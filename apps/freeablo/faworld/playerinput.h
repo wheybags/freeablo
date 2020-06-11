@@ -21,7 +21,7 @@
     MACRO(PlayerJoined)                                                                                                                                        \
     MACRO(PlayerLeft)                                                                                                                                          \
     MACRO(BuyItem)                                                                                                                                             \
-    MACRO(SellItem)
+    MACRO(SellItem)                                                                                                                                            \
     MACRO(UseItem)
 
 namespace Serial

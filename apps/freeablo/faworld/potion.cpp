@@ -9,6 +9,9 @@ namespace FAWorld
     //Used for the formulas
     void Potion::restoreHp(Player* player)
     {
+        FixedPoint bonus;
+        switch (player->getClass())
+        {
             case FAWorld::PlayerClass::warrior: {
                 bonus = FixedPoint(2);
                 break;
@@ -29,7 +32,7 @@ namespace FAWorld
         int32_t max = min * 3;
         int32_t toHeal = player->getWorld()->mRng->randomInRange(min, max);
         player->heal(toHeal);
-    };
+    }
 
     void Potion::restoreHpFull(Player* player) { player->heal(); }
 
@@ -59,15 +62,15 @@ namespace FAWorld
         int32_t max = min * 3;
         player->getWorld()->mRng->randomInRange(min, max);
         player->restoreMana();
-    };
+    }
 
     void Potion::restoreManaFull(Player* player) { player->restoreMana(); }
 
-    void Potion::increaseStrength(Player* player, int32_t delta) { player->addStrength(delta); };
+    void Potion::increaseStrength(Player* player, int32_t delta) { player->addStrength(delta); }
 
-    void Potion::increaseMagic(Player* player, int32_t delta) { player->addMagic(delta); };
+    void Potion::increaseMagic(Player* player, int32_t delta) { player->addMagic(delta); }
 
-    void Potion::increaseDexterity(Player* player, int32_t delta) { player->addDexterity(delta); };
+    void Potion::increaseDexterity(Player* player, int32_t delta) { player->addDexterity(delta); }
 
-    void Potion::increaseVitality(Player* player, int32_t delta) { player->addVitality(delta); };
+    void Potion::increaseVitality(Player* player, int32_t delta) { player->addVitality(delta); }
 }
