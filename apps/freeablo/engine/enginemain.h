@@ -34,7 +34,6 @@ namespace Engine
     public:
         EngineMain();
         ~EngineMain() override;
-        EngineInputManager& inputManager();
         void run(const cxxopts::ParseResult& variables);
         void stop();
         void togglePause();

@@ -6,23 +6,24 @@
 namespace DiabloExe
 {
 
-    BaseItem::BaseItem() {}
+    ExeItem::ExeItem() = default;
 
-    BaseItem::BaseItem(FAIO::FAFileObject& exe, size_t codeOffset)
+    ExeItem::ExeItem(FAIO::FAFileObject& exe, size_t codeOffset)
     {
         dropRate = exe.read32();
 
-        itemClass = exe.read8();
-        equipType = exe.read8();
+        itemClass = ItemClass(exe.read8());
+        equipType = ItemEquipType(exe.read8());
+        exe.read16();
 
-        unknown0 = exe.read16();
+        if (int32_t(equipType) == 7)
+            equipType = ItemEquipType::none;
 
         invGraphicsId = exe.read32();
 
-        type = exe.read8();
+        type = ItemType(exe.read8());
         uniqueBaseItemId = exe.read8();
-
-        unknown1 = exe.read16();
+        exe.read16();
 
         uint32_t tempName = exe.read32();
         uint32_t tempSecondName = exe.read32();
@@ -36,40 +37,33 @@ namespace DiabloExe
         requiredStrength = exe.read8();
         requiredMagic = exe.read8();
         requiredDexterity = exe.read8();
-        unused = exe.read8();
+        exe.read8();
 
         specialEffectFlags = exe.read32();
-        miscId = exe.read32();
+        miscId = ItemMiscId(exe.read32());
         spellId = exe.read32();
         isUsable = exe.read32();
-        price = exe.read32();
-        unusedPrice = exe.read32();
+        price = int32_t(exe.read32());
+        unusedPrice = int32_t(exe.read32());
 
         name = exe.readCStringFromWin32Binary(tempName, codeOffset);
         if (tempSecondName)
-        {
             shortName = exe.readCStringFromWin32Binary(tempSecondName, codeOffset);
-        }
         else
-        {
-
             shortName = std::string();
-        }
     }
 
-    std::string BaseItem::dump() const
+    std::string ExeItem::dump() const
     {
         std::stringstream ss;
         ss << "{" << std::endl
            << "\tdropRate: " << +dropRate << "," << std::endl
-           << "\titemClass: " << +itemClass << "," << std::endl
-           << "\tequipType: " << +equipType << "," << std::endl
+           << "\titemClass: " << int(itemClass) << "," << std::endl
+           << "\tequipType: " << int(equipType) << "," << std::endl
            << "\tinvGraphicsId: " << +invGraphicsId << "," << std::endl
            << "\tdropItemGraphicsPath: " << dropItemGraphicsPath << std::endl
-           << "\ttype: " << +type << "," << std::endl
+           << "\ttype: " << int(type) << "," << std::endl
            << "\tuniqCode: " << +uniqueBaseItemId << "," << std::endl
-           << "\tunknown0: " << +unknown0 << "," << std::endl
-           << "\tunknown1: " << +unknown1 << "," << std::endl
 
            << "\tname: " << name << "," << std::endl
            << "\titem_id: " << idName << "," << std::endl
@@ -87,7 +81,7 @@ namespace DiabloExe
 
            << "\tspecialEffect : " << +specialEffectFlags << "," << std::endl
 
-           << "\tmagicCode: " << +miscId << "," << std::endl
+           << "\tmagicCode: " << int(miscId) << "," << std::endl
 
            << "\tspellCode: " << +spellId << "," << std::endl
            << "\tisUsable: " << +isUsable << "," << std::endl

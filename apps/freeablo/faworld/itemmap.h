@@ -1,4 +1,5 @@
 #pragma once
+#include <faworld/item/item.h>
 #include <map>
 #include <memory>
 #include <misc/simplevec2.h>
@@ -30,8 +31,8 @@ namespace FAWorld
     class PlacedItemData
     {
     public:
-        PlacedItemData(std::unique_ptr<Item> itemArg, Misc::Point tile);
-        PlacedItemData(FASaveGame::GameLoader& loader);
+        PlacedItemData(std::unique_ptr<Item>&& itemArg, Misc::Point tile);
+        explicit PlacedItemData(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) const;
 
         void update();
@@ -61,7 +62,7 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver) const;
 
         ~ItemMap();
-        bool dropItem(std::unique_ptr<FAWorld::Item>&& item, const Actor& actor, Misc::Point tile);
+        bool dropItem(std::unique_ptr<FAWorld::Item>& item, const Actor& actor, Misc::Point tile);
         PlacedItemData* getItemAt(Misc::Point pos);
         std::unique_ptr<FAWorld::Item> takeItemAt(Misc::Point tile);
 

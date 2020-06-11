@@ -4,6 +4,8 @@
 #include "equiptarget.h"
 #include "fasavegame/gameloader.h"
 #include "input/inputmanager.h"
+#include "item/itembase.h"
+#include "item/usableitem.h"
 #include "player.h"
 #include "potion.h"
 #include "storedata.h"
@@ -78,8 +80,8 @@ namespace FAWorld
                     return;
                 }
 
-                auto cursorItem = mPlayer->mInventory.getCursorHeld();
-                if (!cursorItem.isEmpty())
+                const Item* cursorItem = mPlayer->mInventory.getCursorHeld();
+                if (cursorItem)
                 {
                     mPlayer->dropItem(clickedPoint);
                 }
@@ -175,11 +177,11 @@ namespace FAWorld
                 if (item == items.end())
                     return;
 
-                int32_t price = item->item.getPrice();
+                int32_t price = item->item->getPrice();
                 if (mPlayer->mInventory.getTotalGold() < price)
                     return;
 
-                if (!mPlayer->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(item->item))
+                if (!mPlayer->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(*item->item))
                     return;
 
                 mPlayer->mInventory.takeOutGold(price);
@@ -192,111 +194,29 @@ namespace FAWorld
             {
                 int32_t price = 0;
                 {
-                    const Item& item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
+                    const Item* item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
 
                     // TODO: validate sell filter here
-                    if (item.isEmpty() || !item.mIsReal || item.baseId() == ItemId::gold)
+                    if (!item || item->getBase()->mType == ItemType::gold)
                         return;
 
-                    price = item.getPrice();
+                    price = item->getPrice();
                 }
 
-                release_assert(!mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation).isEmpty());
+                release_assert(mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation));
                 mPlayer->mInventory.placeGold(price, mPlayer->getWorld()->getItemFactory());
 
                 return;
             }
             case PlayerInput::Type::UseItem:
             {
-                auto& item = mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target);
-
-                switch (item.getMiscId())
+                if (mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target) &&
+                    mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target)->getAsUsableItem())
                 {
-                    case FAWorld::ItemMiscId::potionOfHealing:
-                    {
-                        FAWorld::Potion::restoreHp(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfFullHealing:
-                    {
-                        FAWorld::Potion::restoreHpFull(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfMana:
-                    {
-                        FAWorld::Potion::restoreMana(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfFullMana:
-                    {
-                        FAWorld::Potion::restoreManaFull(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfRejuvenation:
-                    {
-                        FAWorld::Potion::restoreHp(mPlayer);
-                        FAWorld::Potion::restoreMana(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::potionOfFullRejuvenation:
-                    {
-                        FAWorld::Potion::restoreHpFull(mPlayer);
-                        FAWorld::Potion::restoreManaFull(mPlayer);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfDexterity:
-                    {
-                        FAWorld::Potion::increaseDexterity(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfMagic:
-                    {
-                        FAWorld::Potion::increaseMagic(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfVitality:
-                    {
-                        FAWorld::Potion::increaseVitality(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::elixirOfStrength:
-                    {
-                        FAWorld::Potion::increaseStrength(mPlayer, 1);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    case FAWorld::ItemMiscId::spectralElixir:
-                    {
-                        FAWorld::Potion::increaseStrength(mPlayer, 3);
-                        FAWorld::Potion::increaseVitality(mPlayer, 3);
-                        FAWorld::Potion::increaseMagic(mPlayer, 3);
-                        FAWorld::Potion::increaseDexterity(mPlayer, 3);
-                        Engine::ThreadManager::get()->playSound("sfx/items/invpot.wav");
-                        mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                        break;
-                    }
-                    default:
-                        break;
+                    std::unique_ptr<Item> item = mPlayer->mInventory.remove(input.mData.dataUseItem.target);
+                    item->getAsUsableItem()->applyEffect(*mPlayer);
                 }
+
                 return;
             }
             case PlayerInput::Type::PlayerJoined:

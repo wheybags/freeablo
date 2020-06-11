@@ -13,6 +13,7 @@
 #include "net/client.h"
 #include "net/server.h"
 #include "threadmanager.h"
+#include <cel/celdecoder.h>
 #include <cxxopts.hpp>
 #include <enet/enet.h>
 #include <functional>
@@ -34,8 +35,6 @@ namespace Engine
     }
 
     EngineMain::~EngineMain() { singletonInstance = nullptr; }
-
-    EngineInputManager& EngineMain::inputManager() { return *mInputManager; }
 
     void EngineMain::run(const cxxopts::ParseResult& variables)
     {
@@ -72,8 +71,6 @@ namespace Engine
         FARender::Renderer& renderer = *FARender::Renderer::get();
         FAWorld::PlayerClass characterClass = FAWorld::playerClassFromString(variables["character"].as<std::string>());
 
-        FAWorld::ItemFactory itemFactory(*mExe, Random::DummyRng::instance);
-        mPlayerFactory = std::make_unique<FAWorld::PlayerFactory>(*mExe, itemFactory);
         renderer.loadFonts(*mExe);
 
         FAWorld::Player* player = nullptr;
@@ -84,6 +81,7 @@ namespace Engine
             seed = variables["seed"].as<uint32_t>();
 
         mWorld = std::make_unique<FAWorld::World>(*mExe, seed);
+        mPlayerFactory = std::make_unique<FAWorld::PlayerFactory>(*mExe, mWorld->getItemFactory());
 
         mLocalInputHandler = std::make_unique<LocalInputHandler>(*mWorld);
         mInputManager->registerMouseObserver(mLocalInputHandler.get());
@@ -171,30 +169,23 @@ namespace Engine
             {
                 if (mWorld->getCurrentPlayer())
                 {
-                    auto level = mWorld->getCurrentLevel();
-                    state->mPos = mWorld->getCurrentPlayer()->getPos();
+                    FAWorld::GameLevel* level = mWorld->getCurrentLevel();
                     if (level != nullptr)
                         state->tileset = renderer.getTileset(*level);
+                    state->mPos = mWorld->getCurrentPlayer()->getPos();
                     state->level = level;
                     mWorld->fillRenderState(state, mLocalInputHandler->getHoverStatus());
                 }
                 else
                     state->level = nullptr;
 
-                state->mCursorPath = FAGui::cursorPath;
-
+                state->currentCursor = renderer.mDefaultCursor.get();
                 if (!mPaused && mWorld->getCurrentPlayer())
                 {
-                    auto item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld();
-                    state->mCursorFrame = item.getGraphicValue();
-                    // When items are held, their sprites are centered around the cursor (rather then top left).
-                    state->mCursorCentered = !item.isEmpty();
+                    if (const FAWorld::Item* item = mWorld->getCurrentPlayer()->mInventory.getCursorHeld())
+                        state->currentCursor = item->getInventoryIconCursor();
                 }
-                else
-                {
-                    state->mCursorFrame = 0;
-                    state->mCursorCentered = false;
-                }
+
                 state->nuklearData.fill(ctx);
                 state->debugData = std::move(renderer.mTmpDebugRenderData);
             }

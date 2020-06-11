@@ -41,7 +41,7 @@ namespace FAGui
 
                 if (isActive)
                 {
-                    auto pentFrame = mBigPentagram->getCurrentFrame();
+                    std::pair<Render::SpriteGroup*, int32_t> pentFrame = mBigPentagram->getCurrentFrame();
                     nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::left, valign_t::center));
                     nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
                     nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::right, valign_t::center));
