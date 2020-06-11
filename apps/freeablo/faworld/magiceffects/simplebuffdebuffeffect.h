@@ -11,6 +11,7 @@ namespace FAWorld
 
     public:
         explicit SimpleBuffDebuffEffect(const SimpleBuffDebuffEffectBase* base);
+        ~SimpleBuffDebuffEffect() override = default;
         void init() override;
 
         void apply(MagicStatModifiers& modifiers) const override;

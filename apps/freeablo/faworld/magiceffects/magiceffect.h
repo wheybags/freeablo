@@ -10,6 +10,7 @@ namespace FAWorld
     {
     public:
         explicit MagicEffect(const MagicEffectBase* base);
+        virtual ~MagicEffect() = default;
         virtual void init(){};
 
         virtual void apply(MagicStatModifiers& modifiers) const { UNUSED_PARAM(modifiers); }

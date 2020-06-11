@@ -94,7 +94,7 @@ namespace FAWorld
         bool prefix = mRng.randomInRange(0, 4) == 0;
         bool suffix = mRng.randomInRange(0, 3) != 0;
 
-        if (!prefix and !suffix)
+        if (!prefix && !suffix)
         {
             if (mRng.randomInRange(0, 2) == 1)
                 suffix = true;
