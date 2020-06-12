@@ -194,6 +194,17 @@ namespace FAWorld
 
                 return;
             }
+            case PlayerInput::Type::UseItem:
+            {
+                if (mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target) &&
+                    mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target)->getAsUsableItem())
+                {
+                    std::unique_ptr<Item> item = mPlayer->mInventory.remove(input.mData.dataUseItem.target);
+                    item->getAsUsableItem()->applyEffect(*mPlayer);
+                }
+
+                return;
+            }
             case PlayerInput::Type::PlayerJoined:
             case PlayerInput::Type::PlayerLeft:
             {

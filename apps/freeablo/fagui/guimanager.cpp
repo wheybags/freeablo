@@ -1,5 +1,4 @@
 #include "guimanager.h"
-#include "../engine/threadmanager.h"
 #include "../engine/enginemain.h"
 #include "../engine/localinputhandler.h"
 #include "../engine/threadmanager.h"
@@ -32,7 +31,6 @@
 #include <random/random.h>
 #include <render/spritegroup.h>
 #include <serial/textstream.h>
-#include <random/random.h>
 #include <string>
 
 static nk_style_button dummyStyle = []() {
@@ -182,22 +180,16 @@ namespace FAGui
 
     void GuiManager::triggerItem(const FAWorld::EquipTarget& target)
     {
-        auto& item = mPlayer->mInventory.getItemAt(target);
-        if (!item.isUsable())
-            return;
-
-        mGoldSplitTarget = nullptr;
-
-        switch (item.getType())
+        const FAWorld::Item* item = mPlayer->mInventory.getItemAt(target);
+        if (item->getAsGoldItem())
         {
-            case FAWorld::ItemType::gold:
-            {
-                mGoldSplitTarget = &item;
-                mGoldSplitCnt = 0;
-                break;
-            }
-            default:
-                break;
+            mGoldSplitTarget = target;
+            mGoldSplitCnt = 0;
+        }
+        if (item->getAsUsableItem())
+        {
+            FAWorld::PlayerInput::UseItemData input{target};
+            Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
         }
     }
 
@@ -902,7 +894,6 @@ namespace FAGui
             characterPanel(ctx);
             bottomMenu(ctx, hoverStatus);
             spellSelectionMenu(ctx);
-
 
             mDialogManager.update(ctx);
         }
