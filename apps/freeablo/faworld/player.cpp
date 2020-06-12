@@ -30,36 +30,6 @@ namespace FAWorld
     {
         mStats.initialise(initialiseActorStats(charStats));
         mStats.mLevelXpCounts = charStats.mNextLevelExp;
-        switch (mPlayerClass)
-        {
-            // https://wheybags.gitlab.io/jarulfs-guide/#maximum-stats for max base stats numbers
-            case PlayerClass::warrior:
-            {
-                mStats.baseStats.maxStrength = 250;
-                mStats.baseStats.maxMagic = 50;
-                mStats.baseStats.maxDexterity = 60;
-                mStats.baseStats.maxVitality = 100;
-                break;
-            }
-            case PlayerClass::rogue:
-            {
-                mStats.baseStats.maxStrength = 50;
-                mStats.baseStats.maxMagic = 70;
-                mStats.baseStats.maxDexterity = 250;
-                mStats.baseStats.maxVitality = 80;
-                break;
-            }
-            case PlayerClass::sorceror:
-            {
-                mStats.baseStats.maxStrength = 45;
-                mStats.baseStats.maxMagic = 250;
-                mStats.baseStats.maxDexterity = 85;
-                mStats.baseStats.maxVitality = 80;
-                break;
-            }
-            case PlayerClass::none:
-                break;
-        }
 
         mFaction = Faction::heaven();
         mMoveHandler.mPathRateLimit = World::getTicksInPeriod("0.1"); // allow players to repath much more often than other actors
@@ -599,11 +569,6 @@ namespace FAWorld
         heal();
         restoreMana();
     }
-
-    void Player::addStrength(int32_t delta) { mStats.baseStats.strength = std::min(mStats.baseStats.strength + delta, mStats.baseStats.maxStrength); }
-    void Player::addMagic(int32_t delta) { mStats.baseStats.magic = std::min(mStats.baseStats.magic + delta, mStats.baseStats.maxMagic); }
-    void Player::addDexterity(int32_t delta) { mStats.baseStats.dexterity = std::min(mStats.baseStats.dexterity + delta, mStats.baseStats.maxDexterity); }
-    void Player::addVitality(int32_t delta) { mStats.baseStats.vitality = std::min(mStats.baseStats.vitality + delta, mStats.baseStats.maxVitality); }
 
     BaseStats Player::initialiseActorStats(const DiabloExe::CharacterStats& from)
     {

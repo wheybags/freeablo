@@ -70,8 +70,7 @@ namespace FAWorld
     {
         switch (input.mType)
         {
-            case PlayerInput::Type::TargetTile:
-            {
+            case PlayerInput::Type::TargetTile: {
                 auto clickedPoint = Misc::Point(input.mData.dataTargetTile.x, input.mData.dataTargetTile.y);
 
                 if (mPlayer->getLevel()->isDoor(clickedPoint))
@@ -92,8 +91,7 @@ namespace FAWorld
                 }
                 return;
             }
-            case PlayerInput::Type::DragOverTile:
-            {
+            case PlayerInput::Type::DragOverTile: {
                 if (!mPlayer->isAttacking && (input.mData.dataDragOverTile.isStart || !mPlayer->hasTarget()))
                 {
                     mPlayer->mTarget.clear();
@@ -101,30 +99,25 @@ namespace FAWorld
                 }
                 return;
             }
-            case PlayerInput::Type::TargetActor:
-            {
+            case PlayerInput::Type::TargetActor: {
                 mPlayer->mTarget = mPlayer->getWorld()->getActorById(input.mData.dataTargetActor.actorId);
                 return;
             }
-            case PlayerInput::Type::TargetItemOnFloor:
-            {
+            case PlayerInput::Type::TargetItemOnFloor: {
                 mPlayer->mTarget = Target::ItemTarget{input.mData.dataTargetItemOnFloor.type, input.mData.dataTargetItemOnFloor.position};
                 return;
             }
-            case PlayerInput::Type::ForceAttack:
-            {
+            case PlayerInput::Type::ForceAttack: {
                 if (!mPlayer->getLevel()->isTown())
                     mPlayer->forceAttack(input.mData.dataForceAttack.pos);
                 return;
             }
-            case PlayerInput::Type::CastSpell:
-            {
+            case PlayerInput::Type::CastSpell: {
                 auto clickedPoint = Misc::Point(input.mData.dataCastSpell.x, input.mData.dataCastSpell.y);
                 mPlayer->castSpell(mActiveSpell, clickedPoint);
                 return;
             }
-            case PlayerInput::Type::ChangeLevel:
-            {
+            case PlayerInput::Type::ChangeLevel: {
                 int32_t nextLevelIndex;
                 if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
                     nextLevelIndex = mPlayer->getLevel()->getPreviousLevel();
@@ -136,26 +129,22 @@ namespace FAWorld
 
                 return;
             }
-            case PlayerInput::Type::InventorySlotClicked:
-            {
+            case PlayerInput::Type::InventorySlotClicked: {
                 mPlayer->mInventory.slotClicked(input.mData.dataInventorySlotClicked.slot);
                 return;
             }
-            case PlayerInput::Type::SplitGoldStackIntoCursor:
-            {
+            case PlayerInput::Type::SplitGoldStackIntoCursor: {
                 mPlayer->mInventory.splitGoldIntoCursor(input.mData.dataSplitGoldStackIntoCursor.invX,
                                                         input.mData.dataSplitGoldStackIntoCursor.invY,
                                                         input.mData.dataSplitGoldStackIntoCursor.splitCount,
                                                         mPlayer->getWorld()->getItemFactory());
                 return;
             }
-            case PlayerInput::Type::SetActiveSpell:
-            {
+            case PlayerInput::Type::SetActiveSpell: {
                 mActiveSpell = input.mData.dataSetActiveSpell.spell;
                 return;
             }
-            case PlayerInput::Type::ConfigureSpellHotkey:
-            {
+            case PlayerInput::Type::ConfigureSpellHotkey: {
                 for (auto& hk : mSpellHotkey)
                 {
                     if (hk == input.mData.dataConfigureSpellHotkey.spell)
@@ -164,13 +153,11 @@ namespace FAWorld
                 mSpellHotkey[input.mData.dataConfigureSpellHotkey.hotkey] = input.mData.dataConfigureSpellHotkey.spell;
                 return;
             }
-            case PlayerInput::Type::SpellHotkey:
-            {
+            case PlayerInput::Type::SpellHotkey: {
                 mActiveSpell = mSpellHotkey[input.mData.dataSpellHotkey.hotkey];
                 return;
             }
-            case PlayerInput::Type::BuyItem:
-            {
+            case PlayerInput::Type::BuyItem: {
                 auto& items = mPlayer->getWorld()->getStoreData().griswoldBasicItems;
                 auto item = std::find_if(items.begin(), items.end(), [&](StoreItem& item) { return item.storeId == input.mData.dataBuyItem.itemId; });
 
@@ -190,8 +177,7 @@ namespace FAWorld
 
                 return;
             }
-            case PlayerInput::Type::SellItem:
-            {
+            case PlayerInput::Type::SellItem: {
                 int32_t price = 0;
                 {
                     const Item* item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
@@ -205,17 +191,6 @@ namespace FAWorld
 
                 release_assert(mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation));
                 mPlayer->mInventory.placeGold(price, mPlayer->getWorld()->getItemFactory());
-
-                return;
-            }
-            case PlayerInput::Type::UseItem:
-            {
-                if (mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target) &&
-                    mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target)->getAsUsableItem())
-                {
-                    std::unique_ptr<Item> item = mPlayer->mInventory.remove(input.mData.dataUseItem.target);
-                    item->getAsUsableItem()->applyEffect(*mPlayer);
-                }
 
                 return;
             }

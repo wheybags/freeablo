@@ -186,10 +186,6 @@ namespace FAWorld
         shopkeeperId = loader.load<int32_t>();
     }
 
-    void PlayerInput::UseItemData::save(Serial::Saver& saver) const { target.save(saver); }
-
-    void PlayerInput::UseItemData::load(Serial::Loader& loader) { target.load(loader); }
-
     void PlayerInput::removeUnnecessaryInputs(std::vector<PlayerInput>& inputs)
     {
         // This should remove all but the last of each input type, per player.
