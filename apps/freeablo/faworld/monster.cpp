@@ -122,7 +122,7 @@ namespace FAWorld
 
         if (EquipmentItem* equipmentItem = item->getAsEquipmentItem())
         {
-            bool magical = mWorld.mRng->randomInRange(0, 100) <= 10 || mWorld.mRng->randomInRange(0, 100) <= mStats.mLevel;
+            bool magical = mWorld.mRng->randomInRange(0, 99) <= 10 || mWorld.mRng->randomInRange(0, 99) <= mStats.mLevel;
             if (magical)
             {
                 int32_t maxLevel = mStats.mLevel;

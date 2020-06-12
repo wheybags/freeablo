@@ -91,12 +91,12 @@ namespace FAWorld
 
     void ItemFactory::applyRandomEnchantment(EquipmentItem& item, int32_t minLevel, int32_t maxLevel) const
     {
-        bool prefix = mRng.randomInRange(0, 4) == 0;
-        bool suffix = mRng.randomInRange(0, 3) != 0;
+        bool prefix = mRng.randomInRange(0, 3) == 0;
+        bool suffix = mRng.randomInRange(0, 2) != 0;
 
         if (!prefix && !suffix)
         {
-            if (mRng.randomInRange(0, 2) == 1)
+            if (mRng.randomInRange(0, 1) == 1)
                 suffix = true;
             else
                 prefix = true;
