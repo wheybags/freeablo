@@ -14,8 +14,10 @@ namespace FAWorld
         griswoldBasicItems.resize(count);
         for (auto& item : griswoldBasicItems)
         {
-            const ItemBase* itemBase = mItemFactory.randomItemBase(
-                [ilvl](const ItemBase& base) { return ItemFilter::maxQLvl(ilvl)(base) || ItemFilter::sellableGriswoldBasic()(base); });
+            const ItemBase* itemBase = mItemFactory.randomItemBase([&](const ItemBase& base) {
+                static const auto excludedTypes = {ItemType::misc, ItemType::gold, ItemType::staff, ItemType::ring, ItemType::amulet};
+                return base.mQualityLevel <= ilvl && std::count(excludedTypes.begin(), excludedTypes.end(), base.mType) == 0;
+            });
 
             item.item = itemBase->createItem();
             item.item->init();

@@ -8,5 +8,5 @@ namespace DebugSettings
     bool EnemiesFrozen = false;
     bool PlayersInvuln = false;
     bool DisableMusic = false;
-    EnemyDropsType enemyDropsType = EnemyDropsType::Normal;
+    ItemGenerationType itemGenerationType = ItemGenerationType::Normal;
 }

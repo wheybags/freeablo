@@ -18,20 +18,20 @@ namespace FASaveGame
 
 namespace FAWorld
 {
-    namespace ItemFilter
-    {
-        using Callback = std::function<bool(const ItemBase& base)>;
-        Callback maxQLvl(int32_t value);
-        Callback sellableGriswoldBasic();
-    }
+    using ItemFilter = std::function<bool(const ItemBase& base)>;
+    using ItemPrefixOrSuffixFilter = std::function<bool(const ItemPrefixOrSuffixBase&)>;
 
     class ItemFactory
     {
     public:
         explicit ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng);
+
         std::unique_ptr<Item> generateBaseItem(const std::string& id) const;
-        const ItemBase* randomItemBase(const ItemFilter::Callback& filter) const;
-        const ItemPrefixOrSuffixBase* randomPrefixOrSuffixBase(const std::function<bool(const ItemPrefixOrSuffixBase&)>& filter) const;
+        std::unique_ptr<Item> generateRandomItem(int32_t itemLevel) const;
+        std::unique_ptr<Item> generateRandomItem(int32_t itemLevel, const ItemFilter& filter) const;
+
+        const ItemBase* randomItemBase(const ItemFilter& filter) const;
+        const ItemPrefixOrSuffixBase* randomPrefixOrSuffixBase(const ItemPrefixOrSuffixFilter& filter) const;
         void applyRandomEnchantment(EquipmentItem& item, int32_t minLevel, int32_t maxLevel) const;
 
         void saveItem(const Item& item, FASaveGame::GameSaver& saver) const;
@@ -41,7 +41,6 @@ namespace FAWorld
 
     private:
         ItemBaseHolder mItemBaseHolder;
-        const DiabloExe::DiabloExe& mExe;
         Random::Rng& mRng;
     };
 }

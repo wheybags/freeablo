@@ -5,6 +5,13 @@
 
 namespace FAWorld
 {
+    enum class Difficulty
+    {
+        Normal,
+        Nightmare,
+        Hell,
+    };
+
     enum class ActorType : uint8_t
     {
         // Undead, Demon and Animal set up to match the values from Diablo

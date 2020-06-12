@@ -1,5 +1,6 @@
 #include "itemfactory.h"
 #include "diabloexe/diabloexe.h"
+#include <engine/debugsettings.h>
 #include <engine/enginemain.h>
 #include <fasavegame/gameloader.h>
 #include <faworld/item/equipmentitem.h>
@@ -8,20 +9,7 @@
 
 namespace FAWorld
 {
-    ItemFilter::Callback ItemFilter::maxQLvl(int32_t value)
-    {
-        return [value](const ItemBase& base) { return base.mQualityLevel <= value; };
-    }
-
-    ItemFilter::Callback ItemFilter::sellableGriswoldBasic()
-    {
-        return [](const ItemBase& base) {
-            static const auto excludedTypes = {ItemType::misc, ItemType::gold, ItemType::staff, ItemType::ring, ItemType::amulet};
-            return std::count(excludedTypes.begin(), excludedTypes.end(), base.mType) == 0;
-        };
-    }
-
-    ItemFactory::ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng) : mItemBaseHolder(exe), mExe(exe), mRng(rng) {}
+    ItemFactory::ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng) : mItemBaseHolder(exe), mRng(rng) {}
 
     std::unique_ptr<Item> ItemFactory::generateBaseItem(const std::string& id) const
     {
@@ -30,7 +18,45 @@ namespace FAWorld
         return newItem;
     }
 
-    const ItemBase* ItemFactory::randomItemBase(const ItemFilter::Callback& filter) const
+    std::unique_ptr<Item> ItemFactory::generateRandomItem(int32_t itemLevel) const
+    {
+        return generateRandomItem(itemLevel, [](const ItemBase&) { return true; });
+    }
+
+    std::unique_ptr<Item> ItemFactory::generateRandomItem(int32_t itemLevel, const ItemFilter& filter) const
+    {
+        const ItemBase* itemBase = randomItemBase([&](const ItemBase& base) {
+            bool ok = filter(base) && base.mQualityLevel <= itemLevel;
+
+            if (DebugSettings::itemGenerationType != DebugSettings::ItemGenerationType::Normal)
+                ok = ok && base.getEquipType() != ItemEquipType::none;
+
+            return ok;
+        });
+
+        release_assert(itemBase);
+
+        std::unique_ptr<Item> item = itemBase->createItem();
+        item->init();
+
+        if (EquipmentItem* equipmentItem = item->getAsEquipmentItem())
+        {
+            bool magical = DebugSettings::itemGenerationType == DebugSettings::ItemGenerationType::AlwaysMagical || mRng.randomInRange(0, 99) <= 10 ||
+                           mRng.randomInRange(0, 99) <= itemLevel;
+
+            if (magical)
+            {
+                int32_t maxLevel = itemLevel;
+                int32_t minLevel = maxLevel / 2;
+
+                applyRandomEnchantment(*equipmentItem, minLevel, maxLevel);
+            }
+        }
+
+        return item;
+    }
+
+    const ItemBase* ItemFactory::randomItemBase(const ItemFilter& filter) const
     {
         static std::vector<const ItemBase*> pool;
         pool.clear();
@@ -50,7 +76,7 @@ namespace FAWorld
         return nullptr;
     }
 
-    const ItemPrefixOrSuffixBase* ItemFactory::randomPrefixOrSuffixBase(const std::function<bool(const ItemPrefixOrSuffixBase&)>& filter) const
+    const ItemPrefixOrSuffixBase* ItemFactory::randomPrefixOrSuffixBase(const ItemPrefixOrSuffixFilter& filter) const
     {
         std::vector<const ItemPrefixOrSuffixBase*> pool;
 

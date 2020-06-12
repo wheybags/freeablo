@@ -9,11 +9,11 @@ namespace DebugSettings
     extern bool PlayersInvuln;
     extern bool DisableMusic;
 
-    enum class EnemyDropsType
+    enum class ItemGenerationType
     {
         Normal,
         AlwaysMagical,
     };
 
-    extern EnemyDropsType enemyDropsType;
+    extern ItemGenerationType itemGenerationType;
 }

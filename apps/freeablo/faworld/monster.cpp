@@ -6,6 +6,8 @@
 #include <engine/debugsettings.h>
 #include <engine/enginemain.h>
 #include <faworld/item/equipmentitem.h>
+#include <faworld/item/golditem.h>
+#include <faworld/item/golditembase.h>
 #include <faworld/item/itemprefixorsuffix.h>
 #include <memory>
 #include <misc/stringops.h>
@@ -109,43 +111,40 @@ namespace FAWorld
     {
         // TODO: Spawn unique and special/quest items, set gold drop amount
 
-        if (DebugSettings::enemyDropsType == DebugSettings::EnemyDropsType::Normal && mWorld.mRng->randomInRange(0, 99) > 40)
+        if (DebugSettings::itemGenerationType == DebugSettings::ItemGenerationType::Normal && mWorld.mRng->randomInRange(0, 99) > 40)
             return;
 
-        const ItemBase* itemBase = nullptr;
-        if (DebugSettings::enemyDropsType == DebugSettings::EnemyDropsType::Normal && mWorld.mRng->randomInRange(0, 99) > 25)
+        std::unique_ptr<Item> item;
+        if (DebugSettings::itemGenerationType == DebugSettings::ItemGenerationType::Normal && mWorld.mRng->randomInRange(0, 99) > 25)
         {
-            itemBase = mWorld.getItemFactory().getItemBaseHolder().getItemBase("gold");
+            item = mWorld.getItemFactory().generateBaseItem("gold");
+
+            // https://wheybags.gitlab.io/jarulfs-guide/#item-properties
+            int32_t difficultyFactor = 0;
+
+            Difficulty difficulty = Difficulty::Normal;
+            switch (difficulty)
+            {
+                case Difficulty::Normal:
+                    difficultyFactor = 0;
+                    break;
+                case Difficulty::Nightmare:
+                    difficultyFactor = 16;
+                    break;
+                case Difficulty::Hell:
+                    difficultyFactor = 32;
+                    break;
+            }
+
+            // TODO: there should be some special case here for hell and crypt levels, see Jarulf's guide link above
+            int32_t baseAmount = difficultyFactor + getLevel()->getLevelIndex();
+            int32_t goldCount = mWorld.mRng->randomInRange(5 * baseAmount, 15 * baseAmount - 1);
+
+            release_assert(item->getAsGoldItem()->trySetCount(std::min(goldCount, item->getAsGoldItem()->getBase()->mMaxCount)));
         }
         else
         {
-            itemBase = mWorld.getItemFactory().randomItemBase([&](const ItemBase& base) {
-                bool ok = ItemFilter::maxQLvl(mStats.mLevel)(base);
-                if (DebugSettings::enemyDropsType != DebugSettings::EnemyDropsType::Normal)
-                    ok = base.getEquipType() != ItemEquipType::none;
-
-                return ok;
-            });
-        }
-
-        if (!itemBase)
-            return;
-
-        std::unique_ptr<Item> item = itemBase->createItem();
-        item->init();
-
-        if (EquipmentItem* equipmentItem = item->getAsEquipmentItem())
-        {
-            bool magical = DebugSettings::enemyDropsType == DebugSettings::EnemyDropsType::AlwaysMagical || mWorld.mRng->randomInRange(0, 99) <= 10 ||
-                           mWorld.mRng->randomInRange(0, 99) <= mStats.mLevel;
-
-            if (magical)
-            {
-                int32_t maxLevel = mStats.mLevel;
-                int32_t minLevel = maxLevel / 2;
-
-                mWorld.getItemFactory().applyRandomEnchantment(*equipmentItem, minLevel, maxLevel);
-            }
+            item = mWorld.getItemFactory().generateRandomItem(mStats.mLevel);
         }
 
         getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction(Misc::Direction8::none));
