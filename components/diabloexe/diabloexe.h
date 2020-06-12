@@ -15,7 +15,7 @@ namespace DiabloExe
 {
     class Monster;
     class Npc;
-    class BaseItem;
+    class ExeItem;
     class CharacterStats;
     class UniqueItem;
     class Affix;
@@ -108,7 +108,7 @@ namespace DiabloExe
 
         uint32_t swapEndian(uint32_t arg);
         const FontData& getFontData(const char* fontName) const;
-        const std::vector<BaseItem>& getBaseItems() const { return mBaseItems; }
+        const std::vector<ExeItem>& getBaseItems() const { return mBaseItems; }
         const std::vector<UniqueItem>& getUniqueItems() const { return mUniqueItems; }
         const std::vector<Affix>& getAffixes() const { return mAffixes; }
         const std::map<uint8_t, MissileGraphics>& getMissileGraphicsTable() const { return mMissileGraphicsTable; }
@@ -146,7 +146,7 @@ namespace DiabloExe
         std::map<std::string, Monster> mMonsters;
         std::map<std::string, Npc> mNpcs;
         std::map<std::string, CharacterStats> mCharacters;
-        std::vector<BaseItem> mBaseItems;
+        std::vector<ExeItem> mBaseItems;
         std::vector<UniqueItem> mUniqueItems;
         std::vector<Affix> mAffixes;
         std::vector<std::vector<int32_t>> mTownerAnimation;

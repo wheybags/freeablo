@@ -67,7 +67,7 @@ namespace FAWorld
         void heal();
         void heal(int32_t toHeal);
         void restoreMana();
-        void restoreMana(int32_t toRestore); 
+        void restoreMana(int32_t toRestore);
         void stopMoving(std::optional<Misc::Direction> direction = std::nullopt);
         virtual void die();
         bool isDead() const;

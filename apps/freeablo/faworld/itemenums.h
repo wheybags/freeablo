@@ -3,49 +3,6 @@
 
 namespace FAWorld
 {
-    enum class ItemEquipType
-    {
-        none,
-        oneHanded,
-        twoHanded,
-        chest,
-        head,
-        ring,
-        amulet,
-        unequipable,
-        belt,
-        invalid,
-    };
-
-    enum class ItemType
-    {
-        misc = 0,
-        sword,
-        axe,
-        bow,
-        mace,
-        shield,
-        lightArmor,
-        helm,
-        mediumArmor,
-        heavyArmor,
-        staff,
-        gold,
-        ring,
-        amulet,
-        none = -1,
-    };
-
-    enum class ItemClass
-    {
-        none = 0,
-        weapon,
-        armor,
-        jewelryAndConsumable,
-        gold,
-        quest,
-    };
-
     // TODO: synchronize names with:
     // https://github.com/sanctuary/notes/blob/72a0772e0d187d29117c4ddd6e6265cafc774a50/enums.h#L128
     enum class ItemEffectType
@@ -132,32 +89,6 @@ namespace FAWorld
         DecArmourClass
     };
 
-    enum class ItemMiscId
-    {
-        none = 0,
-        potionOfFullHealing = 2,
-        potionOfHealing = 3,
-        potionOfMana = 6,
-        potionOfFullMana = 7,
-        elixirOfStrength = 10,
-        elixirOfMagic = 11,
-        elixirOfDexterity = 12,
-        elixirOfVitality = 13,
-        potionOfRejuvenation = 18,
-        potionOfFullRejuvenation = 19,
-        scroll = 21,
-        scrollWithTarget = 22,
-        staff = 23,
-        book = 24,
-        ring = 25,
-        amulet = 26,
-        unique = 27,
-        mapOfTheStars = 42,
-        ear = 43,
-        spectralElixir = 44,
-        invalid = -1,
-    };
-
     enum class ItemQuality
     {
         normal = 0,
@@ -177,7 +108,7 @@ namespace FAWorld
         theUndeadCrown,
         empyreanBand,
         magicRock,
-        opticAmulet,
+        opticAmulet, // 10
         ringOfTruth,
         tavernSign,
         harlequinCrest,
@@ -187,7 +118,7 @@ namespace FAWorld
         blackMushroom,
         brain,
         fungalTome,
-        spectralElixir,
+        spectralElixir, // 20
         bloodStone,
         mapOfTheStars,
         heart,
@@ -197,7 +128,7 @@ namespace FAWorld
         scrollOfTownPortal,
         arkainesValor,
         potionOfFullHealing,
-        potionOfFullMana,
+        potionOfFullMana, // 30
         griswoldsEdge,
         lightforge,
         staffOfLazarus,
@@ -207,7 +138,7 @@ namespace FAWorld
         baseFullHelm,
         baseCrown,
         baseGreatHelm,
-        baseCape,
+        baseCape, // 40
         baseRags,
         baseCloak,
         baseRobe,
@@ -217,7 +148,7 @@ namespace FAWorld
         baseStuddedLeatherArmor,
         baseRingMail,
         baseChainMail,
-        baseScaleMail,
+        baseScaleMail, // 50
         baseBreastPlate,
         baseSplintMail,
         basePlateMail,
@@ -227,7 +158,7 @@ namespace FAWorld
         baseBuckler,
         baseSmallShield,
         baseLargeShield,
-        baseKiteShield,
+        baseKiteShield, // 60
         baseTowerShield,
         baseGothicShield,
         basePotionOfHealing,
@@ -237,7 +168,7 @@ namespace FAWorld
         basePotionOfRejuvenation,
         basePotionOfFullRejuvenation,
         baseElixirOfStrength,
-        baseElixirOfMagic,
+        baseElixirOfMagic, // 70
         baseElixirOfDexterity,
         baseElixirOfVitality,
         baseScrollOfHealing,
@@ -247,7 +178,7 @@ namespace FAWorld
         baseScrollOfFireWall,
         baseScrollOfInferno,
         baseScrollOfTownPortal,
-        baseScrollOfFlash,
+        baseScrollOfFlash, // 80
         baseScrollOfInfravision,
         baseScrollOfPhasing,
         baseScrollOfManaShield,
@@ -257,7 +188,7 @@ namespace FAWorld
         baseScrollOfChainLightning,
         baseScrollOfGuardian,
         baseNonItem,
-        baseScrollOfNova,
+        baseScrollOfNova, // 90
         baseScrollOfGolem,
         baseScrollOfNone,
         baseScrollOfTeleport,
@@ -267,7 +198,7 @@ namespace FAWorld
         baseBookQlvl14,
         baseBookQlvl20,
         baseDagger,
-        baseShortSword,
+        baseShortSword, // 100
         baseFalchion,
         baseScimitar,
         baseClaymore,
@@ -277,7 +208,7 @@ namespace FAWorld
         baseBroadSword,
         baseBastardSword,
         baseTwoHandedSword,
-        baseGreatSword,
+        baseGreatSword, // 110
         baseSmallAxe,
         baseAxe,
         baseLargeAxe,

@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 
+struct nk_image;
+
 namespace FARender
 {
     class SpriteLoader;
@@ -17,6 +19,7 @@ namespace Render
         explicit TextureReference(Render::Texture* standaloneTexture);
         TextureReference(TextureReference& other) = delete;
         TextureReference() = delete;
+        struct nk_image getNkImage() const;
 
         bool isTrimmed() const;
 
@@ -44,7 +47,7 @@ namespace Render
         struct Tag
         {
         };
-        TextureReference(Tag) {}
+        explicit TextureReference(Tag) {}
         friend class AtlasTexture;
         friend class FARender::SpriteLoader;
     };

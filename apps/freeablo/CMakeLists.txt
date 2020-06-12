@@ -18,7 +18,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     farender/spriteloader.h
     farender/debugrenderdata.h
 
-        faworld/actor/basestate.cpp
+    faworld/actor/basestate.cpp
     faworld/actor/basestate.h
     faworld/actor/attackstate.cpp
     faworld/actor/attackstate.h
@@ -45,8 +45,6 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/hoverstate.h
     faworld/inventory.cpp
     faworld/inventory.h
-    faworld/item.cpp
-    faworld/item.h
     faworld/itemenums.cpp
     faworld/itemenums.h
     faworld/itemfactory.cpp
@@ -86,6 +84,20 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     faworld/world.h
     faworld/enums.h
     faworld/enums.cpp
+    faworld/item/itembase.cpp
+    faworld/item/itembase.h
+    faworld/item/itembaseholder.cpp
+    faworld/item/itembaseholder.h
+    faworld/item/equipmentitembase.cpp
+    faworld/item/equipmentitembase.h
+    faworld/item/usableitembase.cpp
+    faworld/item/usableitembase.h
+    faworld/item/item.cpp
+    faworld/item/item.h
+    faworld/item/equipmentitem.cpp
+    faworld/item/equipmentitem.h
+    faworld/item/usableitem.cpp
+    faworld/item/usableitem.h
 
     fagui/textcolor.h
     fagui/textcolor.cpp
@@ -164,7 +176,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fasavegame/objectidmapper.h
     fasavegame/objectidmapper.cpp
     fasavegame/gameloader.h
-    fasavegame/gameloader.cpp farender/levelrenderer.cpp farender/levelrenderer.h engine/debugsettings.h engine/debugsettings.cpp)
+    fasavegame/gameloader.cpp farender/levelrenderer.cpp farender/levelrenderer.h engine/debugsettings.h engine/debugsettings.cpp faworld/item/golditembase.cpp faworld/item/golditembase.h faworld/item/golditem.cpp faworld/item/golditem.h)
 
 target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input Random Image enet cxxopts fmt::fmt)
 target_include_directories(freeablo_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

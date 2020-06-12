@@ -1,5 +1,4 @@
 #pragma once
-#include "item.h"
 #include "player.h"
 
 namespace FAWorld
@@ -8,16 +7,15 @@ namespace FAWorld
     class Potion
     {
     public:
-        static void restoreHp(Player* player);
-        static void restoreMana(Player* player);
-        static void restoreHpFull(Player* player);
-        static void restoreManaFull(Player* player);
+        static void restoreHp(Player& player);
+        static void restoreMana(Player& player);
+        static void restoreHpFull(Player& player);
+        static void restoreManaFull(Player& player);
 
-        //exliers
-        static void increaseStrength(Player* player, int32_t delta);
-        static void increaseMagic(Player* player, int32_t delta);
-        static void increaseDexterity(Player* player, int32_t delta);
-        static void increaseVitality(Player* player, int32_t delta);
-        
+        // elixirs
+        static void increaseStrength(Player& player, int32_t delta);
+        static void increaseMagic(Player& player, int32_t delta);
+        static void increaseDexterity(Player& player, int32_t delta);
+        static void increaseVitality(Player& player, int32_t delta);
     };
 }

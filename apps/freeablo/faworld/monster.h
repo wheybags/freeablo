@@ -1,6 +1,5 @@
 #pragma once
 #include "actor.h"
-#include "item.h"
 
 namespace FAWorld
 {
@@ -24,7 +23,6 @@ namespace FAWorld
     private:
         void commonInit();
         void spawnItem();
-        ItemId randomItem();
         void restoreAnimations();
 
     private:

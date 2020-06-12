@@ -65,12 +65,7 @@ namespace Render
     struct nk_image SpriteGroup::getNkImage(int32_t frame)
     {
         release_assert(frame >= 0 && frame < (int32_t)mTextureReferences.size());
-
-        auto ret = nk_subimage_handle(nk_handle_ptr((void*)mTextureReferences[frame]),
-                                      this->getWidth(frame),
-                                      this->getHeight(frame),
-                                      nk_rect(0, 0, this->getWidth(frame), this->getHeight(frame)));
-        return ret;
+        return mTextureReferences[frame]->getNkImage();
     }
 
     int32_t SpriteGroup::getWidth(int32_t frame) const { return mTextureReferences[frame]->mWidth; }

@@ -13,7 +13,7 @@ namespace Render
         Cursor(const Image& image, int32_t hotX, int32_t hotY);
         ~Cursor();
 
-        void activateCursor();
+        void activateCursor() const;
         static void setDefaultCursor();
 
     private:

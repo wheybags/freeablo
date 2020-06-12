@@ -3,6 +3,7 @@
 #include "actor.h"
 #include "diabloexe/monster.h"
 #include "itemfactory.h"
+#include <engine/enginemain.h>
 #include <memory>
 #include <misc/stringops.h>
 
@@ -104,24 +105,18 @@ namespace FAWorld
     void Monster::spawnItem()
     {
         // TODO: Spawn magic, unique and special/quest items.
-        ItemId itemId = randomItem();
-        if (itemId < ItemId::COUNT)
-        {
-            Item item = mWorld.getItemFactory().generateBaseItem(itemId);
-            getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction(Misc::Direction8::none));
-        }
-    }
 
-    ItemId Monster::randomItem()
-    {
         if (mWorld.mRng->randomInRange(0, 99) > 40)
-            // No drop.
-            return ItemId::COUNT;
+            return;
 
+        ItemId itemId;
         if (mWorld.mRng->randomInRange(0, 99) > 25)
-            return ItemId::gold;
+            itemId = ItemId::gold;
+        else
+            itemId = mWorld.getItemFactory().randomItemId(ItemFilter::maxQLvl(mStats.mLevel));
 
-        return mWorld.getItemFactory().randomItemId(ItemFilter::maxQLvl(mStats.mLevel));
+        std::unique_ptr<Item> item = mWorld.getItemFactory().generateBaseItem(itemId);
+        getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction(Misc::Direction8::none));
     }
 
     void Monster::restoreAnimations()

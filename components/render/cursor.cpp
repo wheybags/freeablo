@@ -17,6 +17,6 @@ namespace Render
 
     Cursor::~Cursor() { SDL_FreeCursor(mSdlCursor); }
 
-    void Cursor::activateCursor() { SDL_SetCursor(mSdlCursor); }
+    void Cursor::activateCursor() const { SDL_SetCursor(mSdlCursor); }
     void Cursor::setDefaultCursor() { SDL_SetCursor(SDL_GetDefaultCursor()); }
 }
