@@ -114,6 +114,8 @@ namespace FAWorld
 
     bool BasicInventory::autoPlaceItem(std::unique_ptr<Item>& item)
     {
+        release_assert(item);
+
         // TODO: the original game had some fancier methods of trying to fit specific size items
         // There used to be an implementation of this here, but it was buggy so I removed it,
         // as I didn't want to spend time debugging it.
@@ -301,6 +303,8 @@ namespace FAWorld
 
     bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item>& item)
     {
+        release_assert(item);
+
         // auto-placing in belt
         if (item->getAsUsableItem() && item->getAsUsableItem()->getBase()->isBeltEquippable() && mBelt.autoPlaceItem(item))
             return true;
@@ -330,9 +334,14 @@ namespace FAWorld
             count = placeGold(count, Engine::EngineMain::get()->mWorld->getItemFactory());
 
             if (count)
+            {
                 release_assert(goldItem->trySetCount(count));
+            }
             else
+            {
                 item.reset();
+                return true;
+            }
         }
 
         return mMainInventory.autoPlaceItem(item);
