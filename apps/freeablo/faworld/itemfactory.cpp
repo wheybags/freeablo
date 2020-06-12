@@ -18,17 +18,20 @@ namespace FAWorld
         return newItem;
     }
 
-    std::unique_ptr<Item> ItemFactory::generateRandomItem(int32_t itemLevel) const
+    std::unique_ptr<Item> ItemFactory::generateRandomItem(int32_t itemLevel, ItemGenerationType generationType) const
     {
-        return generateRandomItem(itemLevel, [](const ItemBase&) { return true; });
+        return generateRandomItem(itemLevel, generationType, [](const ItemBase&) { return true; });
     }
 
-    std::unique_ptr<Item> ItemFactory::generateRandomItem(int32_t itemLevel, const ItemFilter& filter) const
+    std::unique_ptr<Item> ItemFactory::generateRandomItem(int32_t itemLevel, ItemGenerationType generationType, const ItemFilter& filter) const
     {
+        if (DebugSettings::itemGenerationType == DebugSettings::ItemGenerationType::AlwaysMagical)
+            generationType = ItemGenerationType::AlwaysMagical;
+
         const ItemBase* itemBase = randomItemBase([&](const ItemBase& base) {
             bool ok = filter(base) && base.mQualityLevel <= itemLevel;
 
-            if (DebugSettings::itemGenerationType != DebugSettings::ItemGenerationType::Normal)
+            if (generationType != ItemGenerationType::Normal)
                 ok = ok && base.getEquipType() != ItemEquipType::none;
 
             return ok;
@@ -41,8 +44,7 @@ namespace FAWorld
 
         if (EquipmentItem* equipmentItem = item->getAsEquipmentItem())
         {
-            bool magical = DebugSettings::itemGenerationType == DebugSettings::ItemGenerationType::AlwaysMagical || mRng.randomInRange(0, 99) <= 10 ||
-                           mRng.randomInRange(0, 99) <= itemLevel;
+            bool magical = generationType == ItemGenerationType::AlwaysMagical || mRng.randomInRange(0, 99) <= 10 || mRng.randomInRange(0, 99) <= itemLevel;
 
             if (magical)
             {

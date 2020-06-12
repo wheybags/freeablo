@@ -144,7 +144,7 @@ namespace FAWorld
         }
         else
         {
-            item = mWorld.getItemFactory().generateRandomItem(mStats.mLevel);
+            item = mWorld.getItemFactory().generateRandomItem(mStats.mLevel, ItemFactory::ItemGenerationType::Normal);
         }
 
         getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction(Misc::Direction8::none));

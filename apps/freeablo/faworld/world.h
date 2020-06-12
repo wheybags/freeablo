@@ -74,7 +74,7 @@ namespace FAWorld
         void setLevel(int32_t levelNum, bool upStairsPos = true);
         GameLevel* getLevel(size_t level);
         void insertLevel(size_t level, GameLevel* gameLevel);
-        void regenerateStoreItems();
+        void generateStoreItems();
 
         Actor* getActorAt(const Misc::Point& point);
 

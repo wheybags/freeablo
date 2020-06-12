@@ -27,8 +27,15 @@ namespace FAWorld
         explicit ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng);
 
         std::unique_ptr<Item> generateBaseItem(const std::string& id) const;
-        std::unique_ptr<Item> generateRandomItem(int32_t itemLevel) const;
-        std::unique_ptr<Item> generateRandomItem(int32_t itemLevel, const ItemFilter& filter) const;
+
+        enum class ItemGenerationType
+        {
+            Normal,
+            OnlyBaseItems,
+            AlwaysMagical,
+        };
+        std::unique_ptr<Item> generateRandomItem(int32_t itemLevel, ItemGenerationType generationType) const;
+        std::unique_ptr<Item> generateRandomItem(int32_t itemLevel, ItemGenerationType generationType, const ItemFilter& filter) const;
 
         const ItemBase* randomItemBase(const ItemFilter& filter) const;
         const ItemPrefixOrSuffixBase* randomPrefixOrSuffixBase(const ItemPrefixOrSuffixFilter& filter) const;

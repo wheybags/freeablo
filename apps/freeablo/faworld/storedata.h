@@ -24,7 +24,7 @@ namespace FAWorld
         uint32_t storeId = 0;
     };
 
-    /// class for storing and regenerating items sold in various stores
+    /// class for storing items sold in various stores
     class StoreData
     {
     public:
@@ -33,7 +33,7 @@ namespace FAWorld
         void save(FASaveGame::GameSaver& saver) const;
         void load(FASaveGame::GameLoader& loader);
 
-        void regenerateGriswoldBasicItems(int32_t base, Random::Rng& rng);
+        void generateGriswoldBasicItems(int32_t itemLevel, Random::Rng& rng);
 
     public:
         std::vector<StoreItem> griswoldBasicItems;

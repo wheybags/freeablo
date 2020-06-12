@@ -33,10 +33,10 @@ namespace FAWorld
         this->setupObjectIdMappers();
 
         if (mDiabloExe.isLoaded())
-            regenerateStoreItems();
+            generateStoreItems();
     }
 
-    void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/, *mRng.get()); }
+    void World::generateStoreItems() { mStoreData->generateGriswoldBasicItems(10 /*placeholder*/, *mRng.get()); }
 
     void World::load(FASaveGame::GameLoader& loader)
     {
