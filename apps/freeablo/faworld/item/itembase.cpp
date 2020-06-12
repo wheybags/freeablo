@@ -1,7 +1,8 @@
 #include "itembase.h"
-#include "../../farender/renderer.h"
 #include "item.h"
 #include <cel/celdecoder.h>
+#include <diabloexe/baseitem.h>
+#include <farender/renderer.h>
 
 namespace FAWorld
 {

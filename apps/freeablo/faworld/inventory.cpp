@@ -2,7 +2,6 @@
 #include "../fagui/guimanager.h"
 #include "../fasavegame/gameloader.h"
 #include "../faworld/actorstats.h"
-#include "actorstats.h"
 #include "equiptarget.h"
 #include "item/equipmentitem.h"
 #include "item/equipmentitembase.h"
@@ -10,7 +9,6 @@
 #include "item/itemprefixorsuffix.h"
 #include "item/usableitem.h"
 #include "item/usableitembase.h"
-#include "itemenums.h"
 #include "itemfactory.h"
 #include "player.h"
 #include <algorithm>
@@ -18,8 +16,6 @@
 #include <engine/enginemain.h>
 #include <faworld/item/golditem.h>
 #include <faworld/item/golditembase.h>
-#include <iostream>
-#include <sstream>
 #include <string>
 
 namespace FAWorld
@@ -584,7 +580,7 @@ namespace FAWorld
             {
                 if (!mMainInventory.getItem(x, y))
                 {
-                    std::unique_ptr<Item> newItem = itemFactory.generateBaseItem(ItemId::gold);
+                    std::unique_ptr<Item> newItem = itemFactory.generateBaseItem("gold");
                     GoldItem* goldItem = newItem->getAsGoldItem();
 
                     int32_t toPlace = std::min(quantity, goldItem->getBase()->mMaxCount);
@@ -682,7 +678,7 @@ namespace FAWorld
             mMainInventory.placeItem(goldFromInventory, x, y);
         }
 
-        std::unique_ptr<Item> cursorGold = itemFactory.generateBaseItem(ItemId::gold);
+        std::unique_ptr<Item> cursorGold = itemFactory.generateBaseItem("gold");
         release_assert(cursorGold->getAsGoldItem()->trySetCount(amountToTransferToCursor));
 
         setCursorHeld(std::move(cursorGold));

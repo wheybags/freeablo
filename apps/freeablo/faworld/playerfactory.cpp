@@ -3,7 +3,6 @@
 #include "equiptarget.h"
 #include "item/equipmentitem.h"
 #include "item/itemprefixorsuffix.h"
-#include "itemenums.h"
 #include "itemfactory.h"
 #include "player.h"
 
@@ -38,18 +37,6 @@ namespace FAWorld
         return player;
     }
 
-    void PlayerFactory::loadTestingKit(Player* player) const
-    {
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::buckler));
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortBow));
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseRingQlvl5));
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseRingQlvl5));
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseAmuletQlvl8));
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseHelm));
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseRags));
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::baseDagger));
-    }
-
     void PlayerFactory::fillWithGold(Player* player) const
     {
         // function for testing
@@ -75,7 +62,7 @@ namespace FAWorld
         bool hasSlots = true;
         while (hasSlots)
         {
-            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
+            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem("potion_of_healing"));
 
             hasSlots = false;
             for (const BasicInventoryBox& slot : inv)
@@ -86,35 +73,35 @@ namespace FAWorld
 
     void PlayerFactory::addWarriorItems(Player* player) const
     {
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortSword));
-        std::unique_ptr<Item> buckler = mItemFactory.generateBaseItem(ItemId::buckler);
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem("short_sword"));
+        std::unique_ptr<Item> buckler = mItemFactory.generateBaseItem("buckler");
         player->mInventory.forcePlaceItem(buckler, MakeEquipTarget<EquipTargetType::rightHand>());
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::club));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem("club"));
         player->mInventory.placeGold(100, mItemFactory);
 
         for (int32_t i = 0; i < 2; ++i)
-            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
+            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem("potion_of_healing"));
     }
 
     void PlayerFactory::addRogueItems(Player* player) const
     {
-        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::shortBow));
+        player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem("short_bow"));
         player->mInventory.placeGold(100, mItemFactory);
 
         for (int32_t i = 0; i < 2; ++i)
-            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
+            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem("potion_of_healing"));
     }
 
     void PlayerFactory::addSorcerorItems(Player* player) const
     {
         {
-            auto item = mItemFactory.generateBaseItem(ItemId::shortStaffOfChargedBolt);
+            auto item = mItemFactory.generateBaseItem("short_staff_of_charged_bolt");
             // item.mMaxCharges = item.mCurrentCharges = 40;
             player->mInventory.autoPlaceItem(item);
         }
         player->mInventory.placeGold(100, mItemFactory);
 
         for (int32_t i = 0; i < 2; ++i)
-            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem(ItemId::potionOfHealing));
+            player->mInventory.autoPlaceItem(mItemFactory.generateBaseItem("potion_of_healing"));
     }
 }

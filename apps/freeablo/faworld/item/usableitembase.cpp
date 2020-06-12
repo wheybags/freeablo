@@ -1,4 +1,5 @@
 #include "usableitembase.h"
+#include <diabloexe/baseitem.h>
 #include <faworld/item/usableitem.h>
 #include <faworld/potion.h>
 

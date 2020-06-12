@@ -1,4 +1,5 @@
 #include "equipmentitembase.h"
+#include <diabloexe/baseitem.h>
 #include <faworld/item/equipmentitem.h>
 #include <faworld/player.h>
 

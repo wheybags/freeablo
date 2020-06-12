@@ -1,12 +1,17 @@
 #pragma once
-#include <diabloexe/baseitem.h>
 #include <memory>
+#include <misc/commonenums.h>
 #include <misc/simplevec2.h>
 #include <render/spritegroup.h>
 
 namespace Render
 {
     class Cursor;
+}
+
+namespace DiabloExe
+{
+    class ExeItem;
 }
 
 namespace FAWorld

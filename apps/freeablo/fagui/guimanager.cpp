@@ -6,7 +6,6 @@
 #include "../fasavegame/gameloader.h"
 #include "../faworld/actorstats.h"
 #include "../faworld/equiptarget.h"
-#include "../faworld/itemenums.h"
 #include "../faworld/player.h"
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/spells.h"

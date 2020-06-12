@@ -2,6 +2,7 @@
 #include "equipmentitembase.h"
 #include "golditembase.h"
 #include "usableitembase.h"
+#include <diabloexe/baseitem.h>
 #include <diabloexe/diabloexe.h>
 #include <diabloexe/exemagicitemeffect.h>
 #include <faworld/item/item.h>

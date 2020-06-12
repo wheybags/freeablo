@@ -3,23 +3,18 @@
 #include "../engine/threadmanager.h"
 #include "../fagui/dialogmanager.h"
 #include "../fagui/guimanager.h"
-#include "../fasavegame/gameloader.h"
 #include "actorstats.h"
 #include "diabloexe/characterstats.h"
 #include "equiptarget.h"
 #include "item/equipmentitem.h"
 #include "item/equipmentitembase.h"
-#include "itemenums.h"
-#include "itemmap.h"
 #include "missile/missile.h"
 #include "playerbehaviour.h"
 #include "spells.h"
 #include "world.h"
 #include <engine/debugsettings.h>
-#include <fmt/format.h>
 #include <misc/assert.h>
 #include <misc/stringops.h>
-#include <random/random.h>
 #include <render/spritegroup.h>
 #include <string>
 

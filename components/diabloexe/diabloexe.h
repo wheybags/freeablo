@@ -1,5 +1,4 @@
 #pragma once
-#include "../../apps/freeablo/faworld/itemenums.h"
 #include <array>
 #include <faio/fafileobject.h>
 #include <map>
