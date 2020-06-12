@@ -25,6 +25,8 @@ namespace FAWorld
         bool canBeAppliedTo(const EquipmentItem& item) const;
 
     public:
+        std::string mId;
+
         std::string mName;
         bool mCursed = false;
         bool mIsPrefix = false;

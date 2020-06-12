@@ -1,5 +1,6 @@
 #include "simplebuffdebuffeffect.h"
 #include "simplebuffdebuffeffectbase.h"
+#include <fasavegame/gameloader.h>
 #include <faworld/actorstats.h>
 #include <fmt/format.h>
 #include <misc/misc.h>
@@ -11,6 +12,18 @@ namespace FAWorld
     void SimpleBuffDebuffEffect::init()
     {
         mValue = getBase()->mParameter2; // TODO: this should be randomised
+    }
+
+    void SimpleBuffDebuffEffect::save(FASaveGame::GameSaver& saver) const
+    {
+        super::save(saver);
+        saver.save(mValue);
+    }
+
+    void SimpleBuffDebuffEffect::load(FASaveGame::GameLoader& loader)
+    {
+        super::load(loader);
+        mValue = loader.load<int32_t>();
     }
 
     void SimpleBuffDebuffEffect::apply(MagicStatModifiers& modifiers) const

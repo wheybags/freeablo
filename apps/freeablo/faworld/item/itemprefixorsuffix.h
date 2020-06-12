@@ -15,6 +15,9 @@ namespace FAWorld
         void init();
         ~ItemPrefixOrSuffix();
 
+        void save(FASaveGame::GameSaver& saver) const;
+        void load(FASaveGame::GameLoader& loader);
+
         const ItemPrefixOrSuffixBase* getBase() { return mBase; }
         std::string getFullDescription() const;
         void apply(MagicStatModifiers& modifiers) const;

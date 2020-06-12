@@ -14,6 +14,9 @@ namespace FAWorld
         ~SimpleBuffDebuffEffect() override = default;
         void init() override;
 
+        void save(FASaveGame::GameSaver& saver) const override;
+        void load(FASaveGame::GameLoader& loader) override;
+
         void apply(MagicStatModifiers& modifiers) const override;
         std::string getFullDescription() const override;
 

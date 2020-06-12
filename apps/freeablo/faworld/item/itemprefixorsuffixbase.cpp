@@ -8,7 +8,7 @@
 namespace FAWorld
 {
     ItemPrefixOrSuffixBase::ItemPrefixOrSuffixBase(const DiabloExe::ExeMagicItemEffect& exeEffect)
-        : mName(exeEffect.mName), mCursed(!exeEffect.mNotCursed), mIsPrefix(exeEffect.mIsPrefix), mQuality(exeEffect.mQualLevel),
+        : mId(exeEffect.mIdName), mName(exeEffect.mName), mCursed(!exeEffect.mNotCursed), mIsPrefix(exeEffect.mIsPrefix), mQuality(exeEffect.mQualLevel),
           mTargetTypesBitmask(exeEffect.mTargetTypesBitmask), mDropRate(exeEffect.mDoubleProbabilityForPrefixes ? 2 : 1)
     {
         switch (exeEffect.mEffect)

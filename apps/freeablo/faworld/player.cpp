@@ -15,6 +15,7 @@
 #include "playerbehaviour.h"
 #include "spells.h"
 #include "world.h"
+#include <engine/debugsettings.h>
 #include <fmt/format.h>
 #include <misc/assert.h>
 #include <misc/stringops.h>
@@ -109,6 +110,9 @@ namespace FAWorld
         };
 
         updateSprites();
+
+        if (DebugSettings::PlayersInvuln)
+            mInvuln = true;
     }
 
     void Player::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const

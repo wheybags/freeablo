@@ -1,21 +1,20 @@
 #include "itemprefixorsuffix.h"
 #include "itemprefixorsuffixbase.h"
+#include <fasavegame/gameloader.h>
 #include <faworld/magiceffects/magiceffect.h>
 #include <faworld/magiceffects/magiceffectbase.h>
-#include <fmt/format.h>
 
 namespace FAWorld
 {
-    ItemPrefixOrSuffix::ItemPrefixOrSuffix(const ItemPrefixOrSuffixBase* base) : mBase(base)
-    {
-        for (const auto& effectBase : mBase->mEffects)
-            mEffects.push_back(effectBase->create());
-    }
+    ItemPrefixOrSuffix::ItemPrefixOrSuffix(const ItemPrefixOrSuffixBase* base) : mBase(base) {}
 
     void ItemPrefixOrSuffix::init()
     {
-        for (auto& effect : mEffects)
-            effect->init();
+        for (const auto& effectBase : getBase()->mEffects)
+        {
+            mEffects.emplace_back(effectBase->create());
+            mEffects.back()->init();
+        }
     }
 
     std::string ItemPrefixOrSuffix::getFullDescription() const
@@ -31,6 +30,25 @@ namespace FAWorld
     {
         for (const auto& effect : mEffects)
             effect->apply(modifiers);
+    }
+
+    void ItemPrefixOrSuffix::save(FASaveGame::GameSaver& saver) const
+    {
+        for (const auto& effect : mEffects)
+            effect->save(saver);
+    }
+
+    void ItemPrefixOrSuffix::load(FASaveGame::GameLoader& loader)
+    {
+        // TODO: deal with changing effects here, once we add mod support
+
+        mEffects.reserve(getBase()->mEffects.size());
+        for (const auto& effectBase : getBase()->mEffects)
+        {
+            std::unique_ptr<MagicEffect> effect = effectBase->create();
+            effect->load(loader);
+            mEffects.emplace_back(std::move(effect));
+        }
     }
 
     ItemPrefixOrSuffix::~ItemPrefixOrSuffix() = default;

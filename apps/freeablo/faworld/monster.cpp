@@ -3,6 +3,7 @@
 #include "actor.h"
 #include "diabloexe/monster.h"
 #include "itemfactory.h"
+#include <engine/debugsettings.h>
 #include <engine/enginemain.h>
 #include <faworld/item/equipmentitem.h>
 #include <faworld/item/itemprefixorsuffix.h>
@@ -106,23 +107,38 @@ namespace FAWorld
 
     void Monster::spawnItem()
     {
-        // TODO: Spawn unique and special/quest items.
+        // TODO: Spawn unique and special/quest items, set gold drop amount
 
-        if (mWorld.mRng->randomInRange(0, 99) > 40)
+        if (DebugSettings::enemyDropsType == DebugSettings::EnemyDropsType::Normal && mWorld.mRng->randomInRange(0, 99) > 40)
             return;
 
-        const ItemBase* itemBase;
-        if (mWorld.mRng->randomInRange(0, 99) > 25)
+        const ItemBase* itemBase = nullptr;
+        if (DebugSettings::enemyDropsType == DebugSettings::EnemyDropsType::Normal && mWorld.mRng->randomInRange(0, 99) > 25)
+        {
             itemBase = mWorld.getItemFactory().getItemBaseHolder().getItemBase("gold");
+        }
         else
-            itemBase = mWorld.getItemFactory().randomItemBase(ItemFilter::maxQLvl(mStats.mLevel));
+        {
+            itemBase = mWorld.getItemFactory().randomItemBase([&](const ItemBase& base) {
+                bool ok = ItemFilter::maxQLvl(mStats.mLevel)(base);
+                if (DebugSettings::enemyDropsType != DebugSettings::EnemyDropsType::Normal)
+                    ok = base.getEquipType() != ItemEquipType::none;
+
+                return ok;
+            });
+        }
+
+        if (!itemBase)
+            return;
 
         std::unique_ptr<Item> item = itemBase->createItem();
         item->init();
 
         if (EquipmentItem* equipmentItem = item->getAsEquipmentItem())
         {
-            bool magical = mWorld.mRng->randomInRange(0, 99) <= 10 || mWorld.mRng->randomInRange(0, 99) <= mStats.mLevel;
+            bool magical = DebugSettings::enemyDropsType == DebugSettings::EnemyDropsType::AlwaysMagical || mWorld.mRng->randomInRange(0, 99) <= 10 ||
+                           mWorld.mRng->randomInRange(0, 99) <= mStats.mLevel;
+
             if (magical)
             {
                 int32_t maxLevel = mStats.mLevel;
