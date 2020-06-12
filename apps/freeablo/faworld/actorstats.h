@@ -40,13 +40,20 @@ namespace FAWorld
         }
     };
 
-    struct ItemStats
+    struct MagicStatModifiers
     {
         BaseStats baseStats;
         int32_t maxLife = 0;
         int32_t maxMana = 0;
         int32_t armorClass = 0;
         int32_t toHit = 0;
+        int32_t meleeDamageBonus = 0;
+        int32_t rangedDamageBonus = 0;
+    };
+
+    struct ItemStats
+    {
+        MagicStatModifiers magicStatModifiers;
         IntRange meleeDamageBonusRange = {0, 0};
         IntRange rangedDamageBonusRange = {0, 0};
     };

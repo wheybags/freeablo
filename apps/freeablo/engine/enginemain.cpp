@@ -98,8 +98,6 @@ namespace Engine
                 mMultiplayer = std::make_unique<Server>(*mWorld, *mLocalInputHandler);
 
                 player = mPlayerFactory->create(*mWorld, characterClass);
-                if (variables["invuln"].as<std::string>() == "on")
-                    player->mInvuln = true;
             }
         }
         else

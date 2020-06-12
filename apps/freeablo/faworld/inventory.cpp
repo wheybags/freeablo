@@ -2,14 +2,13 @@
 #include "../fagui/guimanager.h"
 #include "../fasavegame/gameloader.h"
 #include "../faworld/actorstats.h"
-#include "actorstats.h"
 #include "equiptarget.h"
 #include "item/equipmentitem.h"
 #include "item/equipmentitembase.h"
 #include "item/itembase.h"
+#include "item/itemprefixorsuffix.h"
 #include "item/usableitem.h"
 #include "item/usableitembase.h"
-#include "itemenums.h"
 #include "itemfactory.h"
 #include "player.h"
 #include <algorithm>
@@ -17,8 +16,6 @@
 #include <engine/enginemain.h>
 #include <faworld/item/golditem.h>
 #include <faworld/item/golditembase.h>
-#include <iostream>
-#include <sstream>
 #include <string>
 
 namespace FAWorld
@@ -113,6 +110,8 @@ namespace FAWorld
 
     bool BasicInventory::autoPlaceItem(std::unique_ptr<Item>& item)
     {
+        release_assert(item);
+
         // TODO: the original game had some fancier methods of trying to fit specific size items
         // There used to be an implementation of this here, but it was buggy so I removed it,
         // as I didn't want to spend time debugging it.
@@ -300,6 +299,8 @@ namespace FAWorld
 
     bool CharacterInventory::autoPlaceItem(std::unique_ptr<Item>& item)
     {
+        release_assert(item);
+
         // auto-placing in belt
         if (item->getAsUsableItem() && item->getAsUsableItem()->getBase()->isBeltEquippable() && mBelt.autoPlaceItem(item))
             return true;
@@ -329,9 +330,14 @@ namespace FAWorld
             count = placeGold(count, Engine::EngineMain::get()->mWorld->getItemFactory());
 
             if (count)
+            {
                 release_assert(goldItem->trySetCount(count));
+            }
             else
+            {
                 item.reset();
+                return true;
+            }
         }
 
         return mMainInventory.autoPlaceItem(item);
@@ -486,6 +492,26 @@ namespace FAWorld
 
             // TODO: other stats
         }
+
+        EquipTarget allEquipmentSlots[] = {MakeEquipTarget<EquipTargetType::head>(),
+                                           MakeEquipTarget<EquipTargetType::body>(),
+                                           MakeEquipTarget<EquipTargetType::leftRing>(),
+                                           MakeEquipTarget<EquipTargetType::rightRing>(),
+                                           MakeEquipTarget<EquipTargetType::leftHand>(),
+                                           MakeEquipTarget<EquipTargetType::rightHand>(),
+                                           MakeEquipTarget<EquipTargetType::amulet>()};
+
+        for (const auto& slot : allEquipmentSlots)
+        {
+            const EquipmentItem* item = getItemAt(slot) ? getItemAt(slot)->getAsEquipmentItem() : nullptr;
+            if (item)
+            {
+                if (item->mPrefix)
+                    item->mPrefix->apply(stats.magicStatModifiers);
+                if (item->mSuffix)
+                    item->mSuffix->apply(stats.magicStatModifiers);
+            }
+        }
     }
 
     bool CharacterInventory::isRangedWeaponEquipped() const { return getItemsInHands().rangedWeapon.has_value(); }
@@ -554,7 +580,7 @@ namespace FAWorld
             {
                 if (!mMainInventory.getItem(x, y))
                 {
-                    std::unique_ptr<Item> newItem = itemFactory.generateBaseItem(ItemId::gold);
+                    std::unique_ptr<Item> newItem = itemFactory.generateBaseItem("gold");
                     GoldItem* goldItem = newItem->getAsGoldItem();
 
                     int32_t toPlace = std::min(quantity, goldItem->getBase()->mMaxCount);
@@ -590,7 +616,7 @@ namespace FAWorld
         }
 
         const GoldItemBase* goldItemBase =
-            safe_downcast<const GoldItemBase*>(Engine::EngineMain::get()->mWorld->getItemFactory().getItemBaseHolder().get("gold"));
+            safe_downcast<const GoldItemBase*>(Engine::EngineMain::get()->mWorld->getItemFactory().getItemBaseHolder().getItemBase("gold"));
 
         // second part - filling the empty slots with gold
         for (int32_t x = 0; x != mMainInventory.width(); x++)
@@ -652,7 +678,7 @@ namespace FAWorld
             mMainInventory.placeItem(goldFromInventory, x, y);
         }
 
-        std::unique_ptr<Item> cursorGold = itemFactory.generateBaseItem(ItemId::gold);
+        std::unique_ptr<Item> cursorGold = itemFactory.generateBaseItem("gold");
         release_assert(cursorGold->getAsGoldItem()->trySetCount(amountToTransferToCursor));
 
         setCursorHeld(std::move(cursorGold));

@@ -74,7 +74,7 @@ namespace FAWorld
         void setLevel(int32_t levelNum, bool upStairsPos = true);
         GameLevel* getLevel(size_t level);
         void insertLevel(size_t level, GameLevel* gameLevel);
-        void regenerateStoreItems();
+        void generateStoreItems();
 
         Actor* getActorAt(const Misc::Point& point);
 
@@ -112,6 +112,8 @@ namespace FAWorld
 
         const DiabloExe::DiabloExe& mDiabloExe; // TODO: something better than this
         std::unique_ptr<Random::Rng> mRng;
+
+        bool mLoading = false; // not serialised, for obvious reasons
 
     private:
         std::unique_ptr<Random::Rng> mLevelRng;

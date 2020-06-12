@@ -1,5 +1,6 @@
 #include "faworld/player.h"
 #include "missile.h"
+#include <engine/debugsettings.h>
 #include <random/random.h>
 
 namespace FAWorld::Missile
@@ -38,7 +39,7 @@ namespace FAWorld::Missile
             toHit = Misc::clamp(toHit, missile.mToHitMinMaxCap.min, missile.mToHitMinMaxCap.max);
             int32_t roll = world->mRng->randomInRange(0, 99);
 
-            if (roll < toHit)
+            if (roll < toHit || DebugSettings::Instakill)
             {
                 int32_t damage = missile.mRangedDamage;
                 damage += world->mRng->randomInRange(missile.mRangedDamageBonusRange.start, missile.mRangedDamageBonusRange.end);

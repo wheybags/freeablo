@@ -3,22 +3,18 @@
 #include "../engine/threadmanager.h"
 #include "../fagui/dialogmanager.h"
 #include "../fagui/guimanager.h"
-#include "../fasavegame/gameloader.h"
 #include "actorstats.h"
 #include "diabloexe/characterstats.h"
 #include "equiptarget.h"
 #include "item/equipmentitem.h"
 #include "item/equipmentitembase.h"
-#include "itemenums.h"
-#include "itemmap.h"
 #include "missile/missile.h"
 #include "playerbehaviour.h"
 #include "spells.h"
 #include "world.h"
-#include <fmt/format.h>
+#include <engine/debugsettings.h>
 #include <misc/assert.h>
 #include <misc/stringops.h>
-#include <random/random.h>
 #include <render/spritegroup.h>
 #include <string>
 
@@ -109,6 +105,9 @@ namespace FAWorld
         };
 
         updateSprites();
+
+        if (DebugSettings::PlayersInvuln)
+            mInvuln = true;
     }
 
     void Player::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
@@ -130,10 +129,10 @@ namespace FAWorld
         ItemStats itemStats;
         mInventory.calculateItemBonuses(itemStats);
 
-        stats.baseStats.strength = charStats.strength + itemStats.baseStats.strength;
-        stats.baseStats.magic = charStats.magic + itemStats.baseStats.magic;
-        stats.baseStats.dexterity = charStats.dexterity + itemStats.baseStats.dexterity;
-        stats.baseStats.vitality = charStats.vitality + itemStats.baseStats.vitality;
+        stats.baseStats.strength = charStats.strength + itemStats.magicStatModifiers.baseStats.strength;
+        stats.baseStats.magic = charStats.magic + itemStats.magicStatModifiers.baseStats.magic;
+        stats.baseStats.dexterity = charStats.dexterity + itemStats.magicStatModifiers.baseStats.dexterity;
+        stats.baseStats.vitality = charStats.vitality + itemStats.magicStatModifiers.baseStats.vitality;
 
         stats.toHitMelee.bonus = 0;
         stats.toHitRanged.bonus = 0;
@@ -149,13 +148,15 @@ namespace FAWorld
         {
             case PlayerClass::warrior:
             {
-                stats.maxLife = (int32_t)(FixedPoint(2) * FixedPoint(charStats.vitality) + FixedPoint(2) * FixedPoint(itemStats.baseStats.vitality) +
-                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 18)
-                                    .floor();
+                stats.maxLife =
+                    (int32_t)(FixedPoint(2) * FixedPoint(charStats.vitality) + FixedPoint(2) * FixedPoint(itemStats.magicStatModifiers.baseStats.vitality) +
+                              FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxLife) + 18)
+                        .floor();
 
-                stats.maxMana = (int32_t)(FixedPoint(1) * FixedPoint(charStats.magic) + FixedPoint(1) * FixedPoint(itemStats.baseStats.magic) +
-                                          FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) - 1)
-                                    .floor();
+                stats.maxMana =
+                    (int32_t)(FixedPoint(1) * FixedPoint(charStats.magic) + FixedPoint(1) * FixedPoint(itemStats.magicStatModifiers.baseStats.magic) +
+                              FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxMana) - 1)
+                        .floor();
 
                 stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(100)).floor();
                 stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(200)).floor();
@@ -198,13 +199,15 @@ namespace FAWorld
             }
             case PlayerClass::rogue:
             {
-                stats.maxLife = (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint("1.5") * FixedPoint(itemStats.baseStats.vitality) +
-                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 23)
-                                    .floor();
+                stats.maxLife =
+                    (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint("1.5") * FixedPoint(itemStats.magicStatModifiers.baseStats.vitality) +
+                              FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxLife) + 23)
+                        .floor();
 
-                stats.maxMana = (int32_t)(FixedPoint(1) * FixedPoint(charStats.magic) + FixedPoint("1.5") * FixedPoint(itemStats.baseStats.magic) +
-                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) + 5)
-                                    .floor();
+                stats.maxMana =
+                    (int32_t)(FixedPoint(1) * FixedPoint(charStats.magic) + FixedPoint("1.5") * FixedPoint(itemStats.magicStatModifiers.baseStats.magic) +
+                              FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxMana) + 5)
+                        .floor();
 
                 stats.meleeDamage =
                     (int32_t)(((FixedPoint(charStats.strength) + FixedPoint(charStats.dexterity)) * actorStats.mLevel) / FixedPoint(100)).floor();
@@ -247,13 +250,15 @@ namespace FAWorld
             }
             case PlayerClass::sorceror:
             {
-                stats.maxLife = (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint(1) * FixedPoint(itemStats.baseStats.vitality) +
-                                          FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
-                                    .floor();
+                stats.maxLife =
+                    (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint(1) * FixedPoint(itemStats.magicStatModifiers.baseStats.vitality) +
+                              FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxLife) + 9)
+                        .floor();
 
-                stats.maxMana = (int32_t)(FixedPoint(2) * FixedPoint(charStats.magic) + FixedPoint(2) * FixedPoint(itemStats.baseStats.magic) +
-                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) - 2)
-                                    .floor();
+                stats.maxMana =
+                    (int32_t)(FixedPoint(2) * FixedPoint(charStats.magic) + FixedPoint(2) * FixedPoint(itemStats.magicStatModifiers.baseStats.magic) +
+                              FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxMana) - 2)
+                        .floor();
 
                 stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(100)).floor();
                 stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(200)).floor();
@@ -304,9 +309,9 @@ namespace FAWorld
         stats.toHitRanged.bonus += actorStats.mLevel;
 
         // TODOHELLFIRE: Add in bonuses for barbarians and monks here, see https://wheybags.gitlab.io/jarulfs-guide/#monster-versus-player
-        stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / FixedPoint(5) + itemStats.armorClass).floor();
-        stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / FixedPoint(2) + itemStats.toHit).floor();
-        stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.toHit).floor();
+        stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / FixedPoint(5) + itemStats.magicStatModifiers.armorClass).floor();
+        stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / FixedPoint(2) + itemStats.magicStatModifiers.toHit).floor();
+        stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.magicStatModifiers.toHit).floor();
         stats.toHitMagic.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.magic)).floor();
         stats.toHitMinMaxCap = {5, 95};
 
@@ -401,15 +406,15 @@ namespace FAWorld
                 switch (mInventory.getBody()->getBase()->mType)
                 {
                     case ItemType::heavyArmor:
-                        armor = "heavy";
+                        armor = "heavy-armor";
                         break;
 
                     case ItemType::mediumArmor:
-                        armor = "medium";
+                        armor = "medium-armor";
                         break;
 
                     case ItemType::lightArmor:
-                        armor = "light";
+                        armor = "light-armor";
                         break;
 
                     default:
@@ -463,7 +468,7 @@ namespace FAWorld
 
         auto getAnimation = [&](const std::string& animation) {
             FARender::SpriteLoader::PlayerSpriteKey spriteLookupKey({{"animation", animation}, {"class", classCode}, {"armor", armor}, {"weapon", weapon}});
-            return renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mPlayerSpriteDefinitions[spriteLookupKey]);
+            return renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mPlayerSpriteDefinitions.at(spriteLookupKey));
         };
 
         mAnimation.setAnimationSprites(AnimState::dead, getAnimation("dead"));

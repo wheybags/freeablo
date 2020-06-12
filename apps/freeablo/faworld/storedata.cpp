@@ -8,16 +8,18 @@ namespace FAWorld
 {
     StoreData::StoreData(const ItemFactory& itemFactory) : mItemFactory(itemFactory) {}
 
-    void StoreData::regenerateGriswoldBasicItems(int32_t ilvl, Random::Rng& rng)
+    void StoreData::generateGriswoldBasicItems(int32_t itemLevel, Random::Rng& rng)
     {
         int32_t count = rng.randomInRange(10, 20);
         griswoldBasicItems.resize(count);
-        for (auto& item : griswoldBasicItems)
+        for (StoreItem& item : griswoldBasicItems)
         {
-            ItemId itemId = mItemFactory.randomItemId(
-                [ilvl](const DiabloExe::ExeItem& item) { return ItemFilter::maxQLvl(ilvl)(item) || ItemFilter::sellableGriswoldBasic()(item); });
+            item.item = mItemFactory.generateRandomItem(itemLevel, ItemFactory::ItemGenerationType::OnlyBaseItems, [&](const ItemBase& base) {
+                static const auto excludedTypes = {ItemType::misc, ItemType::gold, ItemType::staff, ItemType::ring, ItemType::amulet};
+                return std::count(excludedTypes.begin(), excludedTypes.end(), base.mType) == 0;
+            });
 
-            item.item = mItemFactory.generateBaseItem(itemId);
+            item.item->init();
             item.storeId = mNextItemId;
             mNextItemId++;
         }

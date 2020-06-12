@@ -4,6 +4,7 @@
 namespace FAWorld
 {
     class EquipmentItemBase;
+    class ItemPrefixOrSuffix;
 
     class EquipmentItem final : public Item
     {
@@ -27,5 +28,7 @@ namespace FAWorld
 
     public:
         int32_t mArmorClass = 0;
+        std::unique_ptr<ItemPrefixOrSuffix> mPrefix;
+        std::unique_ptr<ItemPrefixOrSuffix> mSuffix;
     };
 }

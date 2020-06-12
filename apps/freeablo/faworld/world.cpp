@@ -33,10 +33,10 @@ namespace FAWorld
         this->setupObjectIdMappers();
 
         if (mDiabloExe.isLoaded())
-            regenerateStoreItems();
+            generateStoreItems();
     }
 
-    void World::regenerateStoreItems() { mStoreData->regenerateGriswoldBasicItems(10 /*placeholder*/, *mRng.get()); }
+    void World::generateStoreItems() { mStoreData->generateGriswoldBasicItems(10 /*placeholder*/, *mRng.get()); }
 
     void World::load(FASaveGame::GameLoader& loader)
     {
@@ -47,6 +47,7 @@ namespace FAWorld
             new (this) World(tmp, 0U);
         }
 
+        mLoading = true;
         loader.currentlyLoadingWorld = this;
 
         mRng->load(loader);
@@ -73,6 +74,7 @@ namespace FAWorld
 
         loader.runFunctionsToRunAtEnd();
 
+        mLoading = false;
         loader.currentlyLoadingWorld = nullptr;
     }
 

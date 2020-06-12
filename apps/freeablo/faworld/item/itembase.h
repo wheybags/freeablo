@@ -1,12 +1,17 @@
 #pragma once
-#include <diabloexe/baseitem.h>
 #include <memory>
+#include <misc/commonenums.h>
 #include <misc/simplevec2.h>
 #include <render/spritegroup.h>
 
 namespace Render
 {
     class Cursor;
+}
+
+namespace DiabloExe
+{
+    class ExeItem;
 }
 
 namespace FAWorld
@@ -32,6 +37,8 @@ namespace FAWorld
 
         Vec2i mSize;
         int32_t mPrice = 0;
+        int32_t mQualityLevel = 0;
+        int32_t mDropRate = 0;
 
         Render::SpriteGroup* mDropItemAnimation = nullptr;
         const Render::TextureReference* mInventoryIcon = nullptr;

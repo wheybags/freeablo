@@ -1,23 +1,13 @@
 #pragma once
-#include "diabloexe/baseitem.h"
-#include "itemenums.h"
-#include "misc/enum_range.h"
 #include <faworld/item/item.h>
 #include <faworld/item/itembaseholder.h>
 #include <functional>
-#include <map>
 #include <memory>
 #include <random/random.h>
-#include <vector>
 
 namespace DiabloExe
 {
     class DiabloExe;
-}
-
-namespace Cel
-{
-    class CelFile;
 }
 
 namespace FASaveGame
@@ -28,29 +18,28 @@ namespace FASaveGame
 
 namespace FAWorld
 {
-    class Item;
-    enum class ItemId;
-    enum class UniqueItemId;
-
-    class BaseItemGenOptions
-    {
-    public:
-        using thisType = BaseItemGenOptions;
-    };
-
-    namespace ItemFilter
-    {
-        using Callback = std::function<bool(const DiabloExe::ExeItem& item)>;
-        Callback maxQLvl(int32_t value);
-        Callback sellableGriswoldBasic();
-    }
+    using ItemFilter = std::function<bool(const ItemBase& base)>;
+    using ItemPrefixOrSuffixFilter = std::function<bool(const ItemPrefixOrSuffixBase&)>;
 
     class ItemFactory
     {
     public:
         explicit ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng);
-        std::unique_ptr<Item> generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
-        ItemId randomItemId(const ItemFilter::Callback& filter) const;
+
+        std::unique_ptr<Item> generateBaseItem(const std::string& id) const;
+
+        enum class ItemGenerationType
+        {
+            Normal,
+            OnlyBaseItems,
+            AlwaysMagical,
+        };
+        std::unique_ptr<Item> generateRandomItem(int32_t itemLevel, ItemGenerationType generationType) const;
+        std::unique_ptr<Item> generateRandomItem(int32_t itemLevel, ItemGenerationType generationType, const ItemFilter& filter) const;
+
+        const ItemBase* randomItemBase(const ItemFilter& filter) const;
+        const ItemPrefixOrSuffixBase* randomPrefixOrSuffixBase(const ItemPrefixOrSuffixFilter& filter) const;
+        void applyRandomEnchantment(EquipmentItem& item, int32_t minLevel, int32_t maxLevel) const;
 
         void saveItem(const Item& item, FASaveGame::GameSaver& saver) const;
         std::unique_ptr<Item> loadItem(FASaveGame::GameLoader& loader) const;
@@ -58,11 +47,7 @@ namespace FAWorld
         const ItemBaseHolder& getItemBaseHolder() const { return mItemBaseHolder; }
 
     private:
-        const DiabloExe::ExeItem& getInfo(ItemId id) const;
-
         ItemBaseHolder mItemBaseHolder;
-        std::map<int32_t, ItemId> mUniqueBaseItemIdToItemId;
-        const DiabloExe::DiabloExe& mExe;
         Random::Rng& mRng;
     };
 }

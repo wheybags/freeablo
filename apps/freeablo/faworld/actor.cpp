@@ -12,6 +12,7 @@
 #include "world.h"
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
+#include <engine/debugsettings.h>
 #include <fmt/format.h>
 
 namespace FAWorld
@@ -180,6 +181,12 @@ namespace FAWorld
     {
         if (mInvuln)
             return;
+
+        if (DebugSettings::Instakill)
+        {
+            die();
+            return;
+        }
 
         // https://wheybags.gitlab.io/jarulfs-guide/#getting-hit
         int32_t blockChance = getStats().getCalculatedStats().blockChance;
@@ -371,7 +378,7 @@ namespace FAWorld
         printf("%s melee attacks %s - ", mName.c_str(), enemy->mName.c_str());
 #endif
 
-        if (roll < toHit)
+        if (roll < toHit || DebugSettings::Instakill)
         {
             int32_t damage = stats.meleeDamage;
             damage += mWorld.mRng->randomInRange(stats.meleeDamageBonusRange.start, stats.meleeDamageBonusRange.end);

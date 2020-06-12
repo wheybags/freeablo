@@ -3,7 +3,12 @@
 #include "actor.h"
 #include "diabloexe/monster.h"
 #include "itemfactory.h"
+#include <engine/debugsettings.h>
 #include <engine/enginemain.h>
+#include <faworld/item/equipmentitem.h>
+#include <faworld/item/golditem.h>
+#include <faworld/item/golditembase.h>
+#include <faworld/item/itemprefixorsuffix.h>
 #include <memory>
 #include <misc/stringops.h>
 
@@ -104,18 +109,44 @@ namespace FAWorld
 
     void Monster::spawnItem()
     {
-        // TODO: Spawn magic, unique and special/quest items.
+        // TODO: Spawn unique and special/quest items, set gold drop amount
 
-        if (mWorld.mRng->randomInRange(0, 99) > 40)
+        if (DebugSettings::itemGenerationType == DebugSettings::ItemGenerationType::Normal && mWorld.mRng->randomInRange(0, 99) > 40)
             return;
 
-        ItemId itemId;
-        if (mWorld.mRng->randomInRange(0, 99) > 25)
-            itemId = ItemId::gold;
-        else
-            itemId = mWorld.getItemFactory().randomItemId(ItemFilter::maxQLvl(mStats.mLevel));
+        std::unique_ptr<Item> item;
+        if (DebugSettings::itemGenerationType == DebugSettings::ItemGenerationType::Normal && mWorld.mRng->randomInRange(0, 99) > 25)
+        {
+            item = mWorld.getItemFactory().generateBaseItem("gold");
 
-        std::unique_ptr<Item> item = mWorld.getItemFactory().generateBaseItem(itemId);
+            // https://wheybags.gitlab.io/jarulfs-guide/#item-properties
+            int32_t difficultyFactor = 0;
+
+            Difficulty difficulty = Difficulty::Normal;
+            switch (difficulty)
+            {
+                case Difficulty::Normal:
+                    difficultyFactor = 0;
+                    break;
+                case Difficulty::Nightmare:
+                    difficultyFactor = 16;
+                    break;
+                case Difficulty::Hell:
+                    difficultyFactor = 32;
+                    break;
+            }
+
+            // TODO: there should be some special case here for hell and crypt levels, see Jarulf's guide link above
+            int32_t baseAmount = difficultyFactor + getLevel()->getLevelIndex();
+            int32_t goldCount = mWorld.mRng->randomInRange(5 * baseAmount, 15 * baseAmount - 1);
+
+            release_assert(item->getAsGoldItem()->trySetCount(std::min(goldCount, item->getAsGoldItem()->getBase()->mMaxCount)));
+        }
+        else
+        {
+            item = mWorld.getItemFactory().generateRandomItem(mStats.mLevel, ItemFactory::ItemGenerationType::Normal);
+        }
+
         getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction(Misc::Direction8::none));
     }
 

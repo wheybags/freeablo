@@ -1,14 +1,15 @@
 #include "itembase.h"
-#include "../../farender/renderer.h"
 #include "item.h"
 #include <cel/celdecoder.h>
+#include <diabloexe/baseitem.h>
+#include <farender/renderer.h>
 
 namespace FAWorld
 {
     ItemBase::ItemBase(const DiabloExe::ExeItem& exeItem)
         : mId(exeItem.idName), mType(exeItem.type), mClass(exeItem.itemClass), mName(exeItem.name), mShortName(exeItem.shortName),
-          mSize(exeItem.invSizeX, exeItem.invSizeY), mPrice(exeItem.price), mDropItemSoundPath(exeItem.dropItemSoundPath),
-          mInventoryPlaceItemSoundPath(exeItem.invPlaceItemSoundPath)
+          mSize(exeItem.invSizeX, exeItem.invSizeY), mPrice(exeItem.price), mQualityLevel(exeItem.qualityLevel), mDropRate(exeItem.dropRate),
+          mDropItemSoundPath(exeItem.dropItemSoundPath), mInventoryPlaceItemSoundPath(exeItem.invPlaceItemSoundPath)
     {
         FARender::SpriteLoader& spriteLoader = FARender::Renderer::get()->mSpriteLoader;
         mDropItemAnimation = spriteLoader.getSprite(spriteLoader.mItemDrops[mId]);

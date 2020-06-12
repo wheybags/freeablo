@@ -16,7 +16,6 @@ bool parseOptions(int argc, char** argv, cxxopts::ParseResult& variables)
         // -1 represents the main menu
         ("l,level", "Level number to load (0-16)", cxxopts::value<int32_t>()->default_value("-1"))(
             "c,character", "Choose Warrior, Rogue or Sorceror", cxxopts::value<std::string>()->default_value("Warrior"))(
-            "invuln", "on or off", cxxopts::value<std::string>()->default_value("off"))(
             "connect", "Ip Address or hostname to connect to", cxxopts::value<std::string>()->default_value(""))(
             "seed", "Seed for level generation", cxxopts::value<uint32_t>()->default_value("0"));
 
