@@ -111,6 +111,7 @@ namespace FARender
         nk_user_font* bigTGoldFont() const;
         nk_user_font* goldFont(int height) const;
         nk_user_font* silverFont(int height) const;
+        nk_user_font* consoleFont() const;
 
     private:
         std::unique_ptr<CelFontInfo> generateCelFont(Render::SpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing);
@@ -144,6 +145,7 @@ namespace FARender
 
         std::atomic<std::int64_t> mWidthHeightTmp;
         std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;
+        struct nk_font* mConsoleFont;
         std::map<int, std::unique_ptr<PcxFontInfo>> mGoldFont, mSilverFont;
     };
 }

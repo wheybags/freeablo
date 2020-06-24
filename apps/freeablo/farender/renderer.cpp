@@ -99,6 +99,7 @@ namespace FARender
             NuklearDevice::InitData initData;
 
             nk_fa_font_stash_begin(initData.atlas);
+            mConsoleFont = nk_font_atlas_add_from_file(&initData.atlas, "resources/fonts/FreeMono/FreeMonoBold.ttf", 14, 0);
             // struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);
             mNuklearFontTexture = nk_fa_font_stash_end(&mNuklearContext, initData);
             mNuklearGraphicsData = std::make_unique<NuklearDevice>(*Render::mainRenderInstance, std::move(initData));
@@ -303,4 +304,6 @@ namespace FARender
     nk_user_font* Renderer::goldFont(int height) const { return &mGoldFont.at(height)->nkFont; }
 
     nk_user_font* Renderer::silverFont(int height) const { return &mSilverFont.at(height)->nkFont; }
+
+    nk_user_font* Renderer::consoleFont() const { return &mConsoleFont->handle; }
 }

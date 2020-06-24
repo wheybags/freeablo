@@ -13,13 +13,16 @@
 #ifndef NDEBUG
 #define _USE_MATH_DEFINES
 #include "math.h"
+#include <iostream>
 #endif
 
 constexpr int64_t FixedPoint::scalingFactorPowerOf10;
 constexpr int64_t FixedPoint::scalingFactor;
+constexpr int64_t FixedPoint::maxStringLength;
 
 FixedPoint FixedPoint::PI("3.14159265359");
 FixedPoint FixedPoint::epsilon = fromRawValue(1);
+FixedPoint FixedPoint::LN10("2.302585092994046");
 
 static inline int64_t i64abs(int64_t i)
 {
@@ -65,6 +68,81 @@ static inline int64_t muldiv(int64_t n1, int64_t n2, int64_t d)
 }
 
 FixedPoint::FixedPoint(int64_t integerValue) { *this = fromRawValue(integerValue * FixedPoint::scalingFactor); }
+
+static FixedPoint pow(FixedPoint x, size_t k)
+{
+    FixedPoint ret("1.0");
+
+    while (k > 0)
+    {
+        if ((k % 2) == 1)
+            ret *= x;
+
+        k >>= 1;
+        x *= x;
+    }
+
+    return ret;
+}
+
+std::optional<FixedPoint> FixedPoint::tryParseFromString(const char* str, char mode)
+{
+    std::stringstream ss;
+
+    if (mode == 'i')
+        ss << str;
+
+    else if (mode == 'x')
+    {
+        const std::string aux(str);
+        if (size_t pos = aux.find('.'); pos != std::string::npos)
+        {
+            const std::string beforePoint = aux.substr(0, pos);
+            const std::string afterPoint = aux.substr(pos + 1);
+            ss << strtol(beforePoint.c_str(), nullptr, 16) << ".";
+            auto hexToInt = [](char c) -> FixedPoint {
+                if (c >= '0' && c <= '9')
+                    return c - '0';
+                else if (c >= 'A' && c <= 'F')
+                    return c - 'A' + 10;
+                else if (c >= 'a' && c <= 'f')
+                    return c - 'a' + 10;
+                return 0;
+            };
+
+            FixedPoint fp("0.0");
+            int64_t exp = 1;
+            for (char c : afterPoint)
+                fp += hexToInt(c) / pow("16", exp++);
+
+            ss << fp.str().substr(2);
+        }
+
+        else
+            ss << strtol(aux.c_str(), nullptr, 16);
+    }
+
+    else
+    {
+#ifndef NDEBUG
+        std::cerr << "Invalid mode '" << mode << "'\n";
+#endif
+        return std::nullopt;
+    }
+
+    try
+    {
+        return FixedPoint(ss.str().c_str());
+    }
+
+    catch (std::runtime_error& err)
+    {
+#ifndef NDEBUG
+        std::cerr << "FixedPoint error: " << err.what() << "\n";
+#endif
+        return std::nullopt;
+    }
+}
 
 void FixedPoint::save(Serial::Saver& saver) const { saver.save(mVal); }
 
@@ -294,6 +372,8 @@ FixedPoint FixedPoint::sin(FixedPoint rad)
 }
 
 FixedPoint FixedPoint::cos(FixedPoint rad) { return sin(rad + PI / 2); }
+FixedPoint FixedPoint::tan(FixedPoint rad) { return sin(rad) / cos(rad); }
+
 FixedPoint FixedPoint::atan2_degrees(FixedPoint y, FixedPoint x)
 {
     static const FixedPoint radToDeg = FixedPoint(180) / PI;
@@ -305,3 +385,68 @@ FixedPoint FixedPoint::sin_degrees(FixedPoint deg)
     return sin(deg * degToRad);
 }
 FixedPoint FixedPoint::cos_degrees(FixedPoint deg) { return sin_degrees(deg + 90); }
+FixedPoint FixedPoint::tan_degrees(FixedPoint deg) { return sin_degrees(deg) / cos_degrees(deg); }
+
+FixedPoint FixedPoint::ln(FixedPoint x)
+{
+    int64_t n = 1;
+    if (x >= 1)
+        while ((x / 10).floor() > 10)
+        {
+            x /= 10;
+            ++n;
+        }
+    else if (x > 0)
+        while ((x * 10).intPart() < 1)
+        {
+            x *= 10;
+            --n;
+        }
+    else
+        return FixedPoint("0");
+
+    FixedPoint y = (x - 1) / (x + 1);
+
+    FixedPoint acc = 0;
+    constexpr size_t iterationLimit = 50;
+
+    for (uint64_t i = 0; i < iterationLimit; ++i)
+    {
+        uint64_t k = 2 * i + 1;
+        FixedPoint num = pow(y, k);
+        acc += num / k;
+    }
+
+    FixedPoint result = LN10 * (n - 1) + acc * 2;
+
+#ifndef NDEBUG
+    result.mDebugVal = log(x.mDebugVal);
+#endif
+
+    return result;
+}
+
+static constexpr uint64_t factorial(uint64_t x)
+{
+    uint64_t ret = 1;
+    while (x > 1)
+        ret *= x--;
+
+    return ret;
+}
+
+FixedPoint FixedPoint::exp(FixedPoint x)
+{
+    FixedPoint result("1");
+    result += x;
+
+    constexpr size_t iterationLimit = 20;
+    for (size_t i = 2; i < iterationLimit; ++i)
+        result += pow(x, i) / factorial(i);
+
+#ifndef NDEBUG
+    result.mDebugVal = ::exp(x.mDebugVal);
+#endif
+
+    return result;
+}

@@ -1,6 +1,7 @@
 #include "random.h"
 #include <locale>
 #include <misc/assert.h>
+#include <random>
 #include <serial/loader.h>
 #include <sstream>
 
@@ -28,6 +29,12 @@ namespace Random
 
         std::string rngStr = ss.str();
         saver.save(rngStr);
+    }
+
+    void RngMersenneTwister::setSeed(uint64_t s1, uint64_t s2)
+    {
+        std::seed_seq s{s1, s2};
+        mRng.seed(s);
     }
 
     // This should generate random numbers weighted towards min, ie, if you were to generate a bunch of samples

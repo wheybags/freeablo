@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdint>
 #include <misc/assert.h>
+#include <optional>
 #include <stdexcept>
 #include <string>
 
@@ -154,6 +155,8 @@ public:
 #endif
     }
 
+    static std::optional<FixedPoint> tryParseFromString(const char* str, char mode = 'i');
+
     int64_t rawValue() const { return mVal; }
 
     int64_t intPart() const;
@@ -214,9 +217,15 @@ public:
     static FixedPoint atan2(FixedPoint y, FixedPoint x);
     static FixedPoint sin(FixedPoint rad);
     static FixedPoint cos(FixedPoint rad);
+    static FixedPoint tan(FixedPoint rad);
     static FixedPoint atan2_degrees(FixedPoint y, FixedPoint x);
     static FixedPoint sin_degrees(FixedPoint deg);
     static FixedPoint cos_degrees(FixedPoint deg);
+    static FixedPoint tan_degrees(FixedPoint deg);
+
+    static FixedPoint ln(FixedPoint x);
+    static FixedPoint exp(FixedPoint x);
+
     static int64_t floor(FixedPoint f) { return f.floor(); }
     static int32_t floor32(FixedPoint f) { return int32_t(f.floor()); }
 
@@ -234,9 +243,17 @@ public:
     // So, eg with scale 1000, 1.23 would have value 1230.
     static constexpr int64_t scalingFactor = 1000000000;
 
-private:
+    // Max string length for use in format functions.
+    // Primarily for use in Lua.
+    // Calculated using this formula:
+    // ceil(log10(INT64_MAX / FixedPoint::scalingFactor)) + FixedPoint::scalingFactorPowerOf10 + 2
+    static constexpr int64_t maxStringLength = 21;
+
     static FixedPoint PI;
+
+private:
     static FixedPoint epsilon;
+    static FixedPoint LN10;
 
     int64_t mVal = 0;
 
