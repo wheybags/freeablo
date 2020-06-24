@@ -1,55 +1,157 @@
 #include "itemfactory.h"
 #include "diabloexe/diabloexe.h"
-#include "item.h"
-#include "itemenums.h"
+#include <engine/debugsettings.h>
+#include <engine/enginemain.h>
+#include <fasavegame/gameloader.h>
+#include <faworld/item/equipmentitem.h>
+#include <faworld/item/itemprefixorsuffix.h>
 #include <random/random.h>
 
 namespace FAWorld
 {
-    std::function<bool(const DiabloExe::BaseItem& item)> ItemFilter::maxQLvl(int32_t value)
+    ItemFactory::ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng) : mItemBaseHolder(exe), mRng(rng) {}
+
+    std::unique_ptr<Item> ItemFactory::generateBaseItem(const std::string& id) const
     {
-        return [value](const DiabloExe::BaseItem& item) { return static_cast<int32_t>(item.qualityLevel) <= value; };
+        std::unique_ptr<Item> newItem = mItemBaseHolder.createItem(id);
+        newItem->init();
+        return newItem;
     }
 
-    std::function<bool(const DiabloExe::BaseItem& item)> ItemFilter::sellableGriswoldBasic()
+    std::unique_ptr<Item> ItemFactory::generateRandomItem(int32_t itemLevel, ItemGenerationType generationType) const
     {
-        return [](const DiabloExe::BaseItem& item) {
-            static const auto excludedTypes = {ItemType::misc, ItemType::gold, ItemType::staff, ItemType::ring, ItemType::amulet};
-            return std::count(excludedTypes.begin(), excludedTypes.end(), static_cast<ItemType>(item.type)) == 0;
-        };
+        return generateRandomItem(itemLevel, generationType, [](const ItemBase&) { return true; });
     }
 
-    ItemFactory::ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng) : mExe(exe), mRng(rng)
+    std::unique_ptr<Item> ItemFactory::generateRandomItem(int32_t itemLevel, ItemGenerationType generationType, const ItemFilter& filter) const
     {
-        for (int i = 0; i < static_cast<int>(mExe.getBaseItems().size()); ++i)
-            mUniqueBaseItemIdToItemId[mExe.getBaseItems()[i].uniqueBaseItemId] = static_cast<ItemId>(i);
+        if (DebugSettings::itemGenerationType == DebugSettings::ItemGenerationType::AlwaysMagical)
+            generationType = ItemGenerationType::AlwaysMagical;
+
+        const ItemBase* itemBase = randomItemBase([&](const ItemBase& base) {
+            bool ok = filter(base) && base.mQualityLevel <= itemLevel;
+
+            if (generationType != ItemGenerationType::Normal)
+                ok = ok && base.getEquipType() != ItemEquipType::none;
+
+            return ok;
+        });
+
+        release_assert(itemBase);
+
+        std::unique_ptr<Item> item = itemBase->createItem();
+        item->init();
+
+        if (EquipmentItem* equipmentItem = item->getAsEquipmentItem())
+        {
+            bool magical = generationType == ItemGenerationType::AlwaysMagical || mRng.randomInRange(0, 99) <= 10 || mRng.randomInRange(0, 99) <= itemLevel;
+
+            if (magical)
+            {
+                int32_t maxLevel = itemLevel;
+                int32_t minLevel = maxLevel / 2;
+
+                applyRandomEnchantment(*equipmentItem, minLevel, maxLevel);
+            }
+        }
+
+        return item;
     }
 
-    Item ItemFactory::generateBaseItem(ItemId id, const BaseItemGenOptions& /*options*/) const
+    const ItemBase* ItemFactory::randomItemBase(const ItemFilter& filter) const
     {
-        Item res;
-        res.mIsIdentified = true;
-        res.mEmpty = false;
-        res.mIsReal = true;
-        res.mInvX = 0;
-        res.mInvY = 0;
-        res.mBaseId = id;
-        auto info = getInfo(id);
-        res.mMaxDurability = res.mCurrentDurability = info.durability;
-        res.mArmorClass = mRng.randomInRange(info.minArmorClass, info.maxArmorClass);
-        return res;
+        static std::vector<const ItemBase*> pool;
+        pool.clear();
+        for (const auto& pair : mItemBaseHolder.getAllItemBases())
+        {
+            const ItemBase* base = pair.second.get();
+            if (!filter(*base))
+                continue;
+
+            for (int32_t i = 0; i < base->mDropRate; ++i)
+                pool.push_back(base);
+        }
+
+        if (!pool.empty())
+            return pool[mRng.randomInRange(0, pool.size() - 1)];
+
+        return nullptr;
     }
 
-    Item ItemFactory::generateUniqueItem(UniqueItemId id) const
+    const ItemPrefixOrSuffixBase* ItemFactory::randomPrefixOrSuffixBase(const ItemPrefixOrSuffixFilter& filter) const
     {
-        auto& info = mExe.getUniqueItems()[static_cast<int32_t>(id)];
-        auto it = mUniqueBaseItemIdToItemId.find(info.mUniqueBaseItemId);
-        if (it == mUniqueBaseItemIdToItemId.end())
-            return {};
-        auto baseItemId = it->second;
-        auto res = generateBaseItem(baseItemId);
-        return res;
+        std::vector<const ItemPrefixOrSuffixBase*> pool;
+
+        for (const auto& pair : mItemBaseHolder.getAllItemPrefixSuffixBases())
+        {
+            const ItemPrefixOrSuffixBase* base = pair.second.get();
+
+            if (filter(*base))
+            {
+                for (int32_t i = 0; i < base->mDropRate; i++)
+                    pool.push_back(base);
+            }
+        }
+
+        if (!pool.empty())
+            return pool[mRng.randomInRange(0, pool.size() - 1)];
+
+        return nullptr;
     }
 
-    const DiabloExe::BaseItem& ItemFactory::getInfo(ItemId id) const { return mExe.getBaseItems().at(static_cast<int>(id)); }
+    void ItemFactory::applyRandomEnchantment(EquipmentItem& item, int32_t minLevel, int32_t maxLevel) const
+    {
+        bool prefix = mRng.randomInRange(0, 3) == 0;
+        bool suffix = mRng.randomInRange(0, 2) != 0;
+
+        if (!prefix && !suffix)
+        {
+            if (mRng.randomInRange(0, 1) == 1)
+                suffix = true;
+            else
+                prefix = true;
+        }
+
+        if (prefix)
+        {
+            const ItemPrefixOrSuffixBase* prefixBase = randomPrefixOrSuffixBase([&](const ItemPrefixOrSuffixBase& base) {
+                return base.mIsPrefix && base.canBeAppliedTo(item) && base.mQuality >= minLevel && base.mQuality <= maxLevel;
+            });
+
+            if (prefixBase)
+            {
+                item.mPrefix = prefixBase->create();
+                item.mPrefix->init();
+            }
+        }
+
+        if (suffix)
+        {
+            const ItemPrefixOrSuffixBase* suffixBase = randomPrefixOrSuffixBase([&](const ItemPrefixOrSuffixBase& base) {
+                return !base.mIsPrefix && base.canBeAppliedTo(item) && base.mQuality >= minLevel && base.mQuality <= maxLevel;
+            });
+
+            if (suffixBase)
+            {
+                item.mSuffix = suffixBase->create();
+                item.mSuffix->init();
+            }
+        }
+    }
+
+    void ItemFactory::saveItem(const Item& item, FASaveGame::GameSaver& saver) const
+    {
+        Serial::ScopedCategorySaver cat("Item", saver);
+
+        saver.save(item.getBase()->mId);
+        item.save(saver);
+    }
+
+    std::unique_ptr<Item> ItemFactory::loadItem(FASaveGame::GameLoader& loader) const
+    {
+        std::string baseId = loader.load<std::string>();
+        std::unique_ptr<Item> newItem = mItemBaseHolder.createItem(baseId);
+        newItem->load(loader);
+        return newItem;
+    }
 }

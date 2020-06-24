@@ -12,14 +12,12 @@ namespace Level
                  const std::string& tileSetPath,
                  const std::string& specialCelPath,
                  const std::map<int32_t, int32_t>& specialCelMap,
-                 const Misc::Point& downStairs,
-                 const Misc::Point& upStairs,
-                 std::map<int32_t, int32_t> doorMap,
-                 int32_t previous,
-                 int32_t next)
+                 const LevelTransitionArea& upStairs,
+                 const LevelTransitionArea& downStairs,
+                 std::map<int32_t, int32_t> doorMap)
         : mTilesetId(tilesetId), mTilesetCelPath(tileSetPath), mSpecialCelPath(specialCelPath), mSpecialCelMap(specialCelMap), mTilPath(tilPath),
           mMinPath(minPath), mSolPath(solPath), mDun(std::move(dun)), mTil(mTilPath), mMin(mMinPath), mSol(mSolPath), mDoorMap(doorMap), mUpStairs(upStairs),
-          mDownStairs(downStairs), mPrevious(previous), mNext(next)
+          mDownStairs(downStairs)
     {
     }
 
@@ -42,18 +40,8 @@ namespace Level
             mDoorMap[key] = loader.load<int32_t>();
         }
 
-        int32_t first, second;
-
-        first = loader.load<int32_t>();
-        second = loader.load<int32_t>();
-        mUpStairs = {first, second};
-
-        first = loader.load<int32_t>();
-        second = loader.load<int32_t>();
-        mDownStairs = {first, second};
-
-        mPrevious = loader.load<int32_t>();
-        mNext = loader.load<int32_t>();
+        mUpStairs.load(loader);
+        mDownStairs.load(loader);
     }
 
     void Level::save(Serial::Saver& saver) const
@@ -85,27 +73,11 @@ namespace Level
             saver.save(entry.second);
         }
 
-        saver.save(mUpStairs.x);
-        saver.save(mUpStairs.y);
-
-        saver.save(mDownStairs.x);
-        saver.save(mDownStairs.y);
-
-        saver.save(mPrevious);
-        saver.save(mNext);
+        mUpStairs.save(saver);
+        mDownStairs.save(saver);
     }
 
     std::vector<int16_t> Level::mEmpty(16);
-
-    bool Level::isStairs(int32_t x, int32_t y) const
-    {
-        if (mDownStairs.x == x && mDownStairs.y == y)
-            return true;
-        if (mUpStairs.x == x && mUpStairs.y == y)
-            return true;
-
-        return false;
-    }
 
     Level::InternalLocationData Level::getInternalLocationData(const Misc::Point& point) const
     {
@@ -212,25 +184,9 @@ namespace Level
         return false;
     }
 
-    int32_t Level::minSize() const { return mMin.size(); }
-
-    const MinPillar Level::minPillar(int32_t i) const { return MinPillar(mMin[i], mSol.passable(i), i); }
-
     int32_t Level::width() const { return mDun.width() * 2; }
 
     int32_t Level::height() const { return mDun.height() * 2; }
-
-    const Misc::Point& Level::upStairsPos() const { return mUpStairs; }
-
-    const Misc::Point& Level::downStairsPos() const { return mDownStairs; }
-
-    const std::string& Level::getTileSetPath() const { return mTilesetCelPath; }
-
-    const std::string& Level::getSpecialCelPath() const { return mSpecialCelPath; }
-
-    const std::map<int32_t, int32_t>& Level::getSpecialCelMap() const { return mSpecialCelMap; }
-
-    const std::string& Level::getMinPath() const { return mMinPath; }
 
     MinPillar::MinPillar(const std::vector<int16_t>& data, bool passable, int32_t index) : mData(data), mPassable(passable), mIndex(index) {}
 
@@ -241,4 +197,61 @@ namespace Level
     bool MinPillar::passable() const { return mPassable; }
 
     int32_t MinPillar::index() const { return mIndex; }
+
+    LevelTransitionArea::LevelTransitionArea(const LevelTransitionArea& other)
+    {
+        this->targetLevelIndex = other.targetLevelIndex;
+        this->offset = other.offset;
+        this->dimensions = other.dimensions;
+        this->playerSpawnOffset = other.playerSpawnOffset;
+        this->exitOffset = other.exitOffset;
+        other.triggerMask.memcpyTo(this->triggerMask);
+    }
+
+    LevelTransitionArea::LevelTransitionArea(int32_t targetLevelIndex, Vec2i offset, IntRange dimensions, Vec2i playerSpawnOffset, Vec2i exitOffset)
+        : targetLevelIndex(targetLevelIndex), offset(offset), dimensions(dimensions), playerSpawnOffset(playerSpawnOffset), exitOffset(exitOffset),
+          triggerMask(dimensions.w, dimensions.h)
+    {
+    }
+
+    void LevelTransitionArea::save(Serial::Saver& saver) const
+    {
+        saver.save(targetLevelIndex);
+        offset.save(saver);
+        dimensions.save(saver);
+        playerSpawnOffset.save(saver);
+        exitOffset.save(saver);
+
+        int32_t size = triggerMask.width() * triggerMask.height();
+        saver.save(size);
+        for (bool val : triggerMask)
+            saver.save(val);
+        saver.save(triggerMask.width());
+        saver.save(triggerMask.height());
+    }
+
+    void LevelTransitionArea::load(Serial::Loader& loader)
+    {
+        targetLevelIndex = loader.load<int32_t>();
+        offset = Vec2i(loader);
+        dimensions = IntRange(loader);
+        playerSpawnOffset = Vec2i(loader);
+        exitOffset = Vec2i(loader);
+
+        int32_t size = loader.load<int32_t>();
+        std::vector<uint8_t> tmp;
+        tmp.reserve(size);
+        for (int32_t i = 0; i < size; i++)
+            tmp.push_back(loader.load<bool>());
+
+        int32_t width = loader.load<int32_t>();
+        int32_t height = loader.load<int32_t>();
+
+        triggerMask = Misc::Array2D<uint8_t>(width, height, std::move(tmp));
+    }
+
+    bool LevelTransitionArea::pointIsInside(Vec2i point) const
+    {
+        return point.x >= offset.x && point.x <= offset.x + dimensions.w && point.y >= offset.y && point.y <= offset.y + dimensions.h;
+    }
 }

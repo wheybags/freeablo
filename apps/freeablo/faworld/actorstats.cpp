@@ -84,4 +84,16 @@ namespace FAWorld
         dexterity = loader.load<int32_t>();
         vitality = loader.load<int32_t>();
     }
+
+    void ToHitChance::save(FASaveGame::GameSaver& saver) const
+    {
+        saver.save(base);
+        saver.save(bonus);
+    }
+
+    void ToHitChance::load(FASaveGame::GameLoader& loader)
+    {
+        base = loader.load<int32_t>();
+        bonus = loader.load<int32_t>();
+    }
 }

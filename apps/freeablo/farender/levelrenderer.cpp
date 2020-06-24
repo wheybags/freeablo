@@ -1,11 +1,12 @@
 #include "levelrenderer.h"
 #include <level/level.h>
 #include <render/commandqueue.h>
+#include <render/debugrenderer.h>
 #include <render/framebuffer.h>
-#include <render/levelobjects.h>
 #include <render/pipeline.h>
 #include <render/render.h>
 #include <render/renderinstance.h>
+#include <render/spritegroup.h>
 #include <render/texture.h>
 #include <render/vertexarrayobject.h>
 #include <render/vertextypes.h>
@@ -15,7 +16,7 @@ namespace FARender
 {
     static Vec2i getCurrentResolution() { return {Render::getWindowSize().windowWidth, Render::getWindowSize().windowHeight}; }
 
-    void DrawLevelCache::addSprite(Render::Sprite atlasEntry, int32_t x, int32_t y, std::optional<Cel::Colour> highlightColor)
+    void DrawLevelCache::addSprite(const Render::TextureReference* atlasEntry, int32_t x, int32_t y, std::optional<ByteColour> highlightColor)
     {
         mSpritesToDraw.push_back(SpriteData{atlasEntry, x, y, highlightColor});
     }
@@ -52,10 +53,10 @@ namespace FARender
         draw(drawLevelUniformCpuBuffer, drawLevelUniformBuffer, vertexArrayObject, drawLevelDescriptorSet, drawLevelPipeline, nonDefaultFramebuffer);
     }
 
-    void DrawLevelCache::batchDrawSprite(const Render::AtlasTextureEntry& atlasEntry,
+    void DrawLevelCache::batchDrawSprite(const Render::TextureReference& atlasEntry,
                                          int32_t x,
                                          int32_t y,
-                                         std::optional<Cel::Colour> highlightColor,
+                                         std::optional<ByteColour> highlightColor,
                                          float zBufferVal,
                                          DrawLevelUniforms::CpuBufferType& drawLevelUniformCpuBuffer,
                                          Render::Buffer& drawLevelUniformBuffer,
@@ -84,6 +85,15 @@ namespace FARender
 
         if (auto c = highlightColor)
         {
+            // This forces a buffer around the texture being drawn so we can fit the outline.
+            int32_t pad = Render::AtlasTexture::PADDING - 1;
+            vertexData.v_spriteSizeInPixels[0] += pad * 2;
+            vertexData.v_spriteSizeInPixels[1] += pad * 2;
+            vertexData.v_atlasOffsetInPixels[0] -= pad;
+            vertexData.v_atlasOffsetInPixels[1] -= pad;
+            vertexData.v_destinationInPixels[0] -= pad;
+            vertexData.v_destinationInPixels[1] -= pad;
+
             vertexData.v_hoverColor[0] = c->r;
             vertexData.v_hoverColor[1] = c->g;
             vertexData.v_hoverColor[2] = c->b;
@@ -135,10 +145,21 @@ namespace FARender
     constexpr auto tileWidth = tileHeight * 2;
     constexpr auto staticObjectHeight = 256;
 
-    void LevelRenderer::drawAtTile(Render::Sprite sprite, const Misc::Point& tileTop, int spriteW, int spriteH, std::optional<Cel::Colour> highlightColor)
+    // For a given isometric tile, tileScreenPosition will be the point marked
+    // with an X in the diagram below, at the top left of the bounding box of
+    // the tile.
+    //
+    // X-----.
+    // |  .     .
+    // .           .
+    //    .     .
+    //       .
+    //
+    void
+    LevelRenderer::drawTilesetSprite(const Render::TextureReference* sprite, const Misc::Point& tileScreenPosition, std::optional<ByteColour> highlightColor)
     {
         // centering sprite at the center of tile by width and at the bottom of tile by height
-        mDrawLevelCache.addSprite(sprite, tileTop.x - spriteW / 2, tileTop.y - spriteH + tileHeight, highlightColor);
+        mDrawLevelCache.addSprite(sprite, tileScreenPosition.x - sprite->mWidth / 2, tileScreenPosition.y - sprite->mHeight + tileHeight, highlightColor);
     }
 
     // basic transform of isometric grid to normal, (0, 0) tile coordinate maps to (0, 0) pixel coordinates
@@ -159,13 +180,15 @@ namespace FARender
         return {x.quot, y.quot, x.rem > y.rem ? Render::TileHalf::right : Render::TileHalf::left};
     }
 
-    void
-    LevelRenderer::drawMovingSprite(Render::Sprite sprite, const Vec2Fix& fractionalPos, const Misc::Point& toScreen, std::optional<Cel::Colour> highlightColor)
+    void LevelRenderer::drawAtWorldPosition(const Render::TextureReference* sprite,
+                                            const Vec2Fix& fractionalPos,
+                                            const Misc::Point& toScreen,
+                                            std::optional<ByteColour> highlightColor)
     {
         Vec2i point = Vec2i(tileTopPoint(fractionalPos));
         Vec2i res = point + toScreen;
 
-        drawAtTile(sprite, Vec2i(res), sprite->mWidth, sprite->mHeight, highlightColor);
+        mDrawLevelCache.addSprite(sprite, res.x - sprite->mWidth / 2, res.y - sprite->mHeight + (tileHeight / 2), highlightColor);
     }
 
     constexpr auto bottomMenuSize = 0; // 144; // TODO: pass it as a variable
@@ -224,73 +247,171 @@ namespace FARender
                                   Render::SpriteGroup* minBottoms,
                                   Render::SpriteGroup* specialSprites,
                                   const std::map<int32_t, int32_t>& specialSpritesMap,
-                                  Render::LevelObjects& objs,
-                                  Render::LevelObjects& items,
-                                  const Vec2Fix& fractionalPos)
+                                  LevelObjects& objs,
+                                  LevelObjects& items,
+                                  const Vec2Fix& fractionalPos,
+                                  const DebugRenderData& debugData)
     {
-        auto toScreen = worldPositionToScreenSpace(fractionalPos);
-        auto isInvalidTile = [&](const Render::Tile& tile) {
-            return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
-        };
-
-        // drawing on the ground objects
-        drawObjectsByTiles(toScreen, [&](const Render::Tile& tile, const Misc::Point& topLeft) {
-            if (isInvalidTile(tile))
-            {
-                drawAtTile((*minBottoms)[0], topLeft, tileWidth, staticObjectHeight);
-                return;
-            }
-
-            size_t index = level.get(tile.pos).index();
-            if (index < minBottoms->size())
-                drawAtTile((*minBottoms)[index], topLeft, tileWidth, staticObjectHeight); // all static objects have the same sprite size
-        });
-
-        // drawing above the ground and moving object
-        drawObjectsByTiles(toScreen, [&](const Render::Tile& tile, const Misc::Point& topLeft) {
-            if (isInvalidTile(tile))
-                return;
-
-            size_t index = level.get(tile.pos).index();
-            if (index < minTops->size())
-            {
-                drawAtTile((*minTops)[index], topLeft, tileWidth, staticObjectHeight);
-
-                // Add special sprites (arches / open door frames) if required.
-                if (specialSpritesMap.count(index))
-                {
-                    int32_t specialSpriteIndex = specialSpritesMap.at(index);
-                    Render::Sprite& sprite = (*specialSprites)[specialSpriteIndex];
-                    drawAtTile(sprite, topLeft, sprite->mWidth, sprite->mHeight);
-                }
-            }
-
-            auto& itemsForTile = items.get(tile.pos.x, tile.pos.y);
-            for (auto& item : itemsForTile)
-            {
-                const Render::Sprite& sprite = item.sprite->operator[](item.spriteFrame);
-                drawAtTile(sprite, topLeft, sprite->mWidth, sprite->mHeight, item.hoverColor);
-            }
-
-            auto& objsForTile = objs.get(tile.pos.x, tile.pos.y);
-            for (auto& obj : objsForTile)
-            {
-                if (obj.valid)
-                {
-                    const Render::Sprite& sprite = obj.sprite->operator[](obj.spriteFrame);
-                    drawMovingSprite(sprite, obj.fractionalPos, toScreen, obj.hoverColor);
-                }
-            }
-        });
-
         if (levelDrawFramebuffer->getColorBuffer().width() != getCurrentResolution().w ||
             levelDrawFramebuffer->getColorBuffer().height() != getCurrentResolution().h)
             createNewLevelDrawFramebuffer();
 
         Render::mainCommandQueue->cmdClearFramebuffer(Render::Colors::black, true, levelDrawFramebuffer.get());
 
+        Vec2i toScreen = worldPositionToScreenSpace(fractionalPos);
+        auto isInvalidTile = [&](const Render::Tile& tile) {
+            return tile.pos.x < 0 || tile.pos.y < 0 || tile.pos.x >= static_cast<int32_t>(level.width()) || tile.pos.y >= static_cast<int32_t>(level.height());
+        };
+
+        // draw the ground diamonds
+        drawObjectsByTiles(toScreen, [&](const Render::Tile& tile, const Misc::Point& topLeft) {
+            if (isInvalidTile(tile))
+            {
+                drawTilesetSprite(minBottoms->getFrame(0), topLeft);
+                return;
+            }
+
+            int32_t index = level.get(tile.pos).index();
+            if (index >= 0 && index < minBottoms->size())
+                drawTilesetSprite(minBottoms->getFrame(index), topLeft); // all static objects have the same sprite size
+        });
+
+        if (mDrawGrid)
+        {
+            mDrawLevelCache.end(*drawLevelUniformCpuBuffer,
+                                *drawLevelUniformBuffer,
+                                *vertexArrayObject,
+                                *drawLevelDescriptorSet,
+                                *drawLevelPipeline,
+                                levelDrawFramebuffer.get());
+
+            Render::mainCommandQueue->cmdClearFramebuffer(std::nullopt, true, levelDrawFramebuffer.get());
+
+            Render::Color gridColor(1.0f, 1.0f, 1.0f, 0.8f);
+
+            // Lines from northwest to southeast
+            {
+                Render::Tile startTile = getTileFromScreenCoords({-getCurrentResolution().w, -tileHeight}, toScreen);
+                Misc::Point startingPoint = Vec2i(tileTopPoint(startTile.pos)) + toScreen;
+
+                for (int32_t i = 0; i < getCurrentResolution().w / tileWidth * 2; i++)
+                {
+                    Vec2f top = Vec2f(startingPoint) + Vec2f(0.5, 0.5);
+
+                    Vec2f oneTileOffset(tileWidth, tileHeight);
+                    Vec2f bottom = top + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
+
+                    int32_t realY = startTile.pos.y - i;
+                    float thickness = std::abs(realY) % 2 == 0 ? 3.0f : 1.0f;
+                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, thickness);
+
+                    startingPoint.x += tileWidth;
+                }
+            }
+
+            // Lines from southwest to northeast
+            {
+                Render::Tile startTile = getTileFromScreenCoords({-tileWidth, 0}, toScreen);
+                Misc::Point startingPoint = Vec2i(tileTopPoint(startTile.pos)) + toScreen;
+
+                for (int32_t i = 0; i < getCurrentResolution().h / tileHeight * 2; i++)
+                {
+                    Vec2f bottom = Vec2f(startingPoint) + Vec2f(0.5, 0.5);
+
+                    Vec2f oneTileOffset(tileWidth, -tileHeight);
+                    Vec2f top = bottom + oneTileOffset * (getCurrentResolution().h / tileHeight + 2);
+
+                    int32_t realX = startTile.pos.x + i;
+                    float thickness = std::abs(realX) % 2 == 0 ? 3.0f : 1.0f;
+                    mDebugRenderer->drawLine(*Render::mainCommandQueue, levelDrawFramebuffer.get(), gridColor, top, bottom, thickness);
+
+                    startingPoint.y += tileHeight;
+                }
+            }
+        }
+
+        // draw above ground objects (walls, players, town buildings etc)
+        drawObjectsByTiles(toScreen, [&](const Render::Tile& tile, const Misc::Point& topLeft) {
+            if (isInvalidTile(tile))
+                return;
+
+            int32_t index = level.get(tile.pos).index();
+            if (index >= 0 && index < minTops->size())
+            {
+                drawTilesetSprite(minTops->getFrame(index), topLeft);
+
+                // Add special sprites (arches / open door frames) if required.
+                if (specialSpritesMap.count(index))
+                {
+                    int32_t specialSpriteIndex = specialSpritesMap.at(index);
+                    const Render::TextureReference* sprite = specialSprites->getFrame(specialSpriteIndex);
+                    drawTilesetSprite(sprite, topLeft);
+                }
+            }
+
+            const std::vector<LevelObject>& itemsForTile = items.get(tile.pos.x, tile.pos.y);
+            for (const auto& item : itemsForTile)
+            {
+                const Render::TextureReference* sprite = item.sprite->getFrame(item.spriteFrame);
+                Vec2Fix position = Vec2Fix(tile.pos) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+                drawAtWorldPosition(sprite, position, toScreen, item.hoverColor);
+            }
+
+            const std::vector<LevelObject>& objsForTile = objs.get(tile.pos.x, tile.pos.y);
+            for (auto& obj : objsForTile)
+            {
+                if (obj.valid)
+                {
+                    const Render::TextureReference* sprite = obj.sprite->getFrame(obj.spriteFrame);
+                    drawAtWorldPosition(sprite, obj.fractionalPos, toScreen, obj.hoverColor);
+                }
+            }
+        });
+
         mDrawLevelCache.end(
             *drawLevelUniformCpuBuffer, *drawLevelUniformBuffer, *vertexArrayObject, *drawLevelDescriptorSet, *drawLevelPipeline, levelDrawFramebuffer.get());
+
+        for (const auto& item : debugData)
+        {
+            if (std::holds_alternative<RectData>(item))
+            {
+                const RectData& rectData = std::get<RectData>(item);
+                Misc::Point rectPoint = Vec2i(tileTopPoint(rectData.worldPosition)) + toScreen;
+                mDebugRenderer->drawRectangle(*Render::mainCommandQueue,
+                                              levelDrawFramebuffer.get(),
+                                              rectData.color,
+                                              rectPoint.x,
+                                              rectPoint.y,
+                                              int32_t(rectData.w * tileWidth),
+                                              int32_t(rectData.h * tileHeight));
+            }
+            if (std::holds_alternative<TileData>(item))
+            {
+                const TileData& tileData = std::get<TileData>(item);
+
+                Vec2f quad[4];
+                quad[0] = tileTopPoint(Vec2f(tileData.worldPosition)) + Vec2f(toScreen);
+                quad[1] = quad[0] + Vec2f(tileWidth / 2, tileHeight / 2);
+                quad[2] = quad[0] + Vec2f(0, tileHeight);
+                quad[3] = quad[0] + Vec2f(-tileWidth / 2, tileHeight / 2);
+
+                mDebugRenderer->drawQuad(*Render::mainCommandQueue, levelDrawFramebuffer.get(), tileData.color, quad);
+            }
+            if (std::holds_alternative<PointData>(item))
+            {
+                const PointData& pointData = std::get<PointData>(item);
+                Misc::Point point = Vec2i(tileTopPoint(pointData.worldPosition)) + toScreen;
+
+                // TODO: this should proooobably be a circle, not a rect but it's fine for now
+                mDebugRenderer->drawRectangle(*Render::mainCommandQueue,
+                                              levelDrawFramebuffer.get(),
+                                              pointData.color,
+                                              point.x - pointData.radiusInPixels,
+                                              point.y - pointData.radiusInPixels,
+                                              pointData.radiusInPixels * 2,
+                                              pointData.radiusInPixels * 2);
+            }
+        }
 
         Render::Bindings fullscreenBindings;
         fullscreenBindings.pipeline = fullscreenPipeline.get();
@@ -313,6 +434,8 @@ namespace FARender
     }
     LevelRenderer::LevelRenderer()
     {
+        mDebugRenderer = std::make_unique<Render::DebugRenderer>(*Render::mainRenderInstance);
+
         Render::PipelineSpec drawLevelPipelineSpec;
         drawLevelPipelineSpec.depthTest = true;
         drawLevelPipelineSpec.vertexLayouts = {Render::SpriteVertexMain::layout(), Render::SpriteVertexPerInstance::layout()};

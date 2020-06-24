@@ -21,6 +21,9 @@ namespace Render
         if (nonDefaultFramebuffer)
             mBinders.emplace_back(nonDefaultFramebuffer);
 
+        if (!bindings.descriptorSet)
+            return;
+
         for (uint32_t bindingIndex = 0; bindingIndex < bindings.descriptorSet->size(); bindingIndex++)
         {
             const DescriptorSet::Item& item = descriptorSet->getItem(bindingIndex);
@@ -92,19 +95,24 @@ namespace Render
         glDrawArraysInstanced(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
     }
 
-    void CommandQueueOpenGL::cmdClearFramebuffer(Color color, bool clearDepth, Framebuffer* nonDefaultFramebuffer)
+    void CommandQueueOpenGL::cmdClearFramebuffer(std::optional<Color> color, bool clearDepth, Framebuffer* nonDefaultFramebuffer)
     {
         ScopedBindGL framebufferBind;
 
         if (nonDefaultFramebuffer)
             framebufferBind = ScopedBindGL(safe_downcast<FramebufferOpenGL*>(nonDefaultFramebuffer));
 
-        glClearColor(color.r, color.g, color.b, color.a);
+        if (color)
+            glClearColor(color->r, color->g, color->b, color->a);
+
+        GLbitfield clearFlags = 0;
 
         if (clearDepth)
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        else
-            glClear(GL_COLOR_BUFFER_BIT);
+            clearFlags |= GL_DEPTH_BUFFER_BIT;
+        if (color)
+            clearFlags |= GL_COLOR_BUFFER_BIT;
+
+        glClear(clearFlags);
     }
 
     void CommandQueueOpenGL::cmdPresent() { SDL_GL_SwapWindow(&getInstance().mWindow); }

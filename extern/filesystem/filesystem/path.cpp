@@ -6,6 +6,8 @@
 #else
 # include <unistd.h>
 # include <fcntl.h>
+# include <dirent.h>
+# include <ftw.h>
 #endif
 #include <sys/stat.h>
 
@@ -45,7 +47,9 @@ bool path::exists() const
     return GetFileAttributesW(wstr().c_str()) != INVALID_FILE_ATTRIBUTES;
 #else
     struct stat sb;
-    return stat(str().c_str(), &sb) == 0;
+    int err = stat(str().c_str(), &sb) == 0;
+    errno = 0;
+    return err;
 #endif
 }
 
@@ -89,6 +93,14 @@ bool path::is_file() const
         return false;
     return S_ISREG(sb.st_mode);
 #endif
+}
+
+bool path::operator<(const path& other) const
+{
+    if (m_absolute != other.m_absolute || m_type != other.m_type)
+        throw std::runtime_error("path::operator<(): expected paths of the same absoluteness + type");
+
+    return m_path < other.m_path;
 }
 
 bool path::remove_file() const
@@ -178,20 +190,41 @@ bool create_directories(const path& p)
 #if defined(_WIN32)
     return SHCreateDirectory(nullptr, p.make_absolute().wstr().c_str()) == ERROR_SUCCESS;
 #else
-    if (create_directory(p.str().c_str()))
-        return true;
 
     if (p.empty())
         return false;
 
-    if (errno == ENOENT)
+    if (!exists(p.parent_path()))
+        create_directories(p.parent_path());
+
+    return create_directory(p);
+#endif
+}
+
+bool remove_all(const path& path)
+{
+#if defined(_WIN32)
+    std::wstring doubleNullTerminatedPath = path.wstr() + L"\0";
+
+    SHFILEOPSTRUCTW file_op = {
+        NULL,
+        FO_DELETE,
+        doubleNullTerminatedPath.c_str(),
+        L"",
+        FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT,
+        false,
+        0,
+        L""
+    };
+
+    return SHFileOperationW(&file_op) == 0;
+#else
+    auto unlinkCallback = [](const char *path, const struct stat*, int, struct FTW*)
     {
-        if (create_directory(p.parent_path()))
-            return mkdir(p.str().c_str(), S_IRWXU) == 0;
-        else
-            return false;
-    }
-    return false;
+        return ::remove(path);
+    };
+
+    return nftw(path.str().c_str(), unlinkCallback, 64, FTW_DEPTH | FTW_PHYS) == 0;
 #endif
 }
 
@@ -233,4 +266,119 @@ done:
 #endif
 }
 
-NAMESPACE_END(fielsystem)
+class PathIteratorHelper
+{
+public:
+    PathIteratorHelper(const path& path) : mBasePath(path)
+    {
+#if defined(_WIN32)
+        static const std::wstring allFilesMask(L"\\*");
+
+        mFindFileHandle = FindFirstFileExW((path.wstr() + allFilesMask).c_str(), FindExInfoBasic, &mFindData, FindExSearchNameMatch, nullptr, 0);
+#else
+        mDir = opendir(path.str().c_str());
+        errno = 0;
+#endif
+    }
+
+    void init(directory_iterator& it)
+    {
+#if defined(_WIN32)
+
+        if (wcscmp(L"..", mFindData.cFileName) == 0 || wcscmp(L".", mFindData.cFileName) == 0)
+            it.operator++();
+        else
+            it.mEntry = {mBasePath / mFindData.cFileName};
+#else
+        it.operator++();
+#endif
+    }
+
+    ~PathIteratorHelper()
+    {
+#if defined(_WIN32)
+        if (mFindFileHandle != INVALID_HANDLE_VALUE)
+            FindClose(mFindFileHandle);
+#else
+        if (mDir)
+            closedir(mDir);
+#endif
+    }
+
+    bool valid()
+    {
+#if defined(_WIN32)
+        return mFindFileHandle != INVALID_HANDLE_VALUE;
+#else
+        return mDir;
+#endif
+    }
+
+#if defined(_WIN32)
+    HANDLE mFindFileHandle = INVALID_HANDLE_VALUE;
+    WIN32_FIND_DATAW mFindData = {};
+#else
+    DIR* mDir = nullptr;
+#endif
+
+    path mBasePath;
+};
+
+directory_iterator::directory_iterator(const path& path)
+{
+    mHelper = std::make_shared<PathIteratorHelper>(path);
+
+    if (!mHelper->valid())
+        *this = end(*this);
+
+    mHelper->init(*this);
+}
+
+directory_iterator::~directory_iterator() = default;
+
+directory_iterator& directory_iterator::operator++()
+{
+    bool done = true;
+    if (mHelper)
+    {
+#if defined(_WIN32)
+        while (true)
+        {
+            if (FindNextFileW(mHelper->mFindFileHandle, &mHelper->mFindData) != FALSE)
+            {
+                if (wcscmp(L"..", mHelper->mFindData.cFileName) == 0 || wcscmp(L".", mHelper->mFindData.cFileName) == 0)
+                    continue;
+
+                mEntry = {mHelper->mBasePath / mHelper->mFindData.cFileName};
+                done = false;
+            }
+
+            break;
+        }
+#else
+        while (true)
+        {
+            if (struct dirent* ent = readdir(mHelper->mDir))
+            {
+                if (strcmp("..", ent->d_name) == 0 || strcmp(".", ent->d_name) == 0)
+                    continue;
+
+                mEntry = {mHelper->mBasePath / ent->d_name};
+                done = false;
+            }
+
+            break;
+        }
+#endif
+    }
+
+    if (done)
+        *this = end(*this);
+
+    return *this;
+}
+
+directory_iterator begin(directory_iterator iter) { return iter; }
+directory_iterator end(const directory_iterator&) { return directory_iterator(); }
+
+NAMESPACE_END(filesystem)

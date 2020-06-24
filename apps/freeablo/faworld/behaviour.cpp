@@ -3,6 +3,7 @@
 #include "actor.h"
 #include "player.h"
 #include <cstdlib>
+#include <engine/debugsettings.h>
 #include <iostream>
 #include <misc/assert.h>
 #include <random/random.h>
@@ -51,7 +52,7 @@ namespace FAWorld
 
     void BasicMonsterBehaviour::update()
     {
-        if (mActor->mTarget.getType() != Target::Type::None)
+        if (mActor->mTarget.getType() != Target::Type::None || DebugSettings::EnemiesFrozen)
             return;
 
         mTicksSinceLastAction++;

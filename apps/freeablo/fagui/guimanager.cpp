@@ -1,11 +1,11 @@
 #include "guimanager.h"
 #include "../engine/enginemain.h"
 #include "../engine/localinputhandler.h"
+#include "../engine/threadmanager.h"
 #include "../farender/renderer.h"
 #include "../fasavegame/gameloader.h"
 #include "../faworld/actorstats.h"
 #include "../faworld/equiptarget.h"
-#include "../faworld/itemenums.h"
 #include "../faworld/player.h"
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/spells.h"
@@ -20,11 +20,16 @@
 #include "nkhelpers.h"
 #include <cstdint>
 #include <cstdio>
+#include <faworld/item/equipmentitem.h>
+#include <faworld/item/equipmentitembase.h>
+#include <faworld/item/golditem.h>
 #include <fmt/format.h>
 #include <iostream>
 #include <memory>
 #include <misc/misc.h>
 #include <misc/stringops.h>
+#include <random/random.h>
+#include <render/spritegroup.h>
 #include <script/luascript.h>
 #include <serial/textstream.h>
 #include <string>
@@ -156,7 +161,7 @@ namespace FAGui
             return;
         auto renderer = FARender::Renderer::get();
         const auto bgImg = getBackgroundForPanel(panelType);
-        FARender::FASpriteGroup* invTex = nullptr;
+        Render::SpriteGroup* invTex = nullptr;
         if (bgImg)
         {
             invTex = renderer->mSpriteLoader.getSprite(*bgImg);
@@ -198,54 +203,32 @@ namespace FAGui
 
     void GuiManager::triggerItem(const FAWorld::EquipTarget& target)
     {
-        auto& item = mPlayer->mInventory.getItemAt(target);
-        if (!item.isUsable())
-            return;
-
-        mGoldSplitTarget = nullptr;
-
-        switch (item.getType())
+        const FAWorld::Item* item = mPlayer->mInventory.getItemAt(target);
+        if (item->getAsGoldItem())
         {
-            case FAWorld::ItemType::gold:
-            {
-                mGoldSplitTarget = &item;
-                mGoldSplitCnt = 0;
-                break;
-            }
-            default:
-                break;
+            mGoldSplitTarget = target;
+            mGoldSplitCnt = 0;
+        }
+        if (item->getAsUsableItem())
+        {
+            FAWorld::PlayerInput::UseItemData input{target};
+            Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
         }
     }
 
-    void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight)
+    void GuiManager::item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight, bool checkerboarded)
     {
-        auto& inv = mPlayer->mInventory;
-        using namespace FAWorld;
-        if (!inv.getCursorHeld().isEmpty())
+        FAWorld::CharacterInventory& inv = mPlayer->mInventory;
+        if (inv.getCursorHeld())
             highlight = ItemHighlightInfo::notHighlighed;
-        bool checkerboarded = false;
 
-        auto& item = inv.getItemAt(target);
-        if (item.isEmpty())
+        const FAWorld::Item* item = inv.getItemAt(target);
+        if (!item)
             return;
-        if (!item.mIsReal)
-        {
-            if (item.getEquipLoc() == FAWorld::ItemEquipType::twoHanded && target.type == FAWorld::EquipTargetType::rightHand)
-            {
-                checkerboarded = true;
-                highlight = ItemHighlightInfo::notHighlighed;
-            }
-            else
-                return;
-        }
 
-        auto renderer = FARender::Renderer::get();
-
-        auto frame = item.getGraphicValue();
-        auto sprite = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.itemCursors);
-        auto img = sprite->getNkImage(frame);
-        auto w = sprite->getWidth(frame);
-        auto h = sprite->getHeight(frame);
+        struct nk_image itemIcon = item->getInventoryIcon()->getNkImage();
+        int32_t w = itemIcon.w;
+        int32_t h = itemIcon.h;
         bool isHighlighted = (highlight == ItemHighlightInfo::highlited);
 
         switch (placement.type)
@@ -260,15 +243,12 @@ namespace FAGui
             {
                 struct nk_vec2 point = placement.data.vec2;
 
-                if (item.mIsReal)
+                nk_layout_space_push(ctx, nk_rect(point.x, point.y, w, h));
+                if (highlight == ItemHighlightInfo::highlightIfHover)
                 {
-                    nk_layout_space_push(ctx, nk_rect(point.x, point.y, w, h));
-                    if (highlight == ItemHighlightInfo::highlightIfHover)
-                    {
-                        nk_button_label_styled(ctx, &dummyStyle, "");
-                        if (isLastWidgetHovered(ctx))
-                            isHighlighted = true;
-                    }
+                    nk_button_label_styled(ctx, &dummyStyle, "");
+                    if (isLastWidgetHovered(ctx))
+                        isHighlighted = true;
                 }
                 break;
             }
@@ -276,10 +256,10 @@ namespace FAGui
         auto effectType = isHighlighted ? GuiEffectType::highlighted : GuiEffectType::none;
         effectType = checkerboarded ? GuiEffectType::checkerboarded : effectType;
         if (isHighlighted)
-            mHoveredInventoryItemText = item.getFullDescription();
+            mHoveredInventoryItemText = item->getFullDescription();
         ScopedApplyEffect effect(ctx, effectType);
-        nk_image(ctx, img);
-        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && mPlayer->mInventory.getCursorHeld().isEmpty())
+        nk_image(ctx, itemIcon);
+        if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_RIGHT) && !mPlayer->mInventory.getCursorHeld())
             triggerItem(target);
     }
 
@@ -299,22 +279,38 @@ namespace FAGui
             FAWorld::CharacterInventory& inv = mPlayer->mInventory;
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
             {
-                for (auto& p : slotRectangles)
+                for (auto& pair : slotRectangles)
                 {
-                    nk_layout_space_push(ctx, p.second);
+                    EquipTarget target = pair.first;
+                    struct nk_rect area = pair.second;
+                    bool checkerboarded = false;
+
+                    // Show two-handed weapons in both hands
+                    if (target.type == EquipTargetType::rightHand)
+                    {
+                        EquippedInHandsItems handsItems = inv.getItemsInHands();
+                        if (handsItems.weapon && handsItems.weapon->item->getBase()->getEquipType() == ItemEquipType::twoHanded)
+                        {
+                            target = MakeEquipTarget<FAWorld::EquipTargetType::leftHand>();
+                            checkerboarded = true;
+                        }
+                    }
+
+                    nk_layout_space_push(ctx, area);
                     nk_button_label_styled(ctx, &dummyStyle, "");
                     if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT))
                     {
-                        FAWorld::PlayerInput::InventorySlotClickedData input{p.first};
+                        FAWorld::PlayerInput::InventorySlotClickedData input{target};
                         Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
                     }
                     auto highlight = ItemHighlightInfo::notHighlighed;
                     if (isLastWidgetHovered(ctx))
                         highlight = ItemHighlightInfo::highlited;
 
-                    item(ctx, p.first, p.second, highlight);
+                    item(ctx, target, area, highlight, checkerboarded);
                 }
             }
+
             constexpr float cellSize = 29;
             auto invTopLeft = nk_vec2(17, 222);
 
@@ -328,12 +324,11 @@ namespace FAGui
             {
                 // Adjust for cursor offset when items are held.
                 // When items are held, their sprites are centered around the cursor (rather then top left).
-                auto cursorOffset = nk_vec2(0, 0);
-                auto item = mPlayer->mInventory.getCursorHeld();
-                if (!item.isEmpty())
+                struct nk_vec2 cursorOffset = nk_vec2(0, 0);
+                if (const Item* item = mPlayer->mInventory.getCursorHeld())
                 {
-                    auto invSize = item.getInvSize();
-                    cursorOffset = {(1 - invSize[0]) * cellSize / 2, (1 - invSize[1]) * cellSize / 2};
+                    Vec2i invSize = item->getBase()->mSize;
+                    cursorOffset = {(1.0f - invSize.w) * cellSize / 2, (1.0f - invSize.h) * cellSize / 2};
                 }
                 Misc::Point clickedPoint{int32_t(std::floor((ctx->input.mouse.pos.x - invTopLeft.x - ctx->current->bounds.x + cursorOffset.x) / cellSize)),
                                          int32_t(std::floor((ctx->input.mouse.pos.y - invTopLeft.y - ctx->current->bounds.y + cursorOffset.y) / cellSize))};
@@ -343,41 +338,52 @@ namespace FAGui
                 Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
             }
 
-            for (int32_t row = 0; row != mainInventory.height(); row++)
+            for (const auto& fullSlot : inv.getInv(FAWorld::EquipTargetType::inventory))
             {
-                for (int32_t col = 0; col != mainInventory.width(); col++)
-                {
-                    auto cell_top_left = nk_vec2(invTopLeft.x + col * cellSize, invTopLeft.y + row * cellSize);
-                    item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::inventory>(col, row), cell_top_left, ItemHighlightInfo::highlightIfHover);
-                }
+                auto cell_top_left = nk_vec2(invTopLeft.x + fullSlot.topLeft.x * cellSize, invTopLeft.y + fullSlot.topLeft.y * cellSize);
+                item(ctx,
+                     MakeEquipTarget<FAWorld::EquipTargetType::inventory>(fullSlot.topLeft.x, fullSlot.topLeft.y),
+                     cell_top_left,
+                     ItemHighlightInfo::highlightIfHover,
+                     false);
             }
 
             if (mGoldSplitTarget)
             {
-                int32_t screenW, screenH;
-                auto renderer = FARender::Renderer::get();
-                renderer->getWindowDimensions(screenW, screenH);
-                FARender::FASpriteGroup* img = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.goldSplitBackground);
-                double leftTopX = 31.0, leftTopY = 42.0;
-                nk_layout_space_push(ctx, nk_rect(leftTopX, leftTopY, img->getWidth(), img->getHeight()));
-                nk_image(ctx, img->getNkImage());
-                auto spacing = 28.0;
-                auto doTextLine = [&](const char* text, double y) {
-                    nk_layout_space_push(ctx, nk_rect(leftTopX + spacing, y, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
-                    smallText(ctx, text, TextColor::golden, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_TOP);
-                };
-                doTextLine(fmt::format("You have {} gold", mGoldSplitTarget->mCount).c_str(), 76.0);
-                doTextLine(fmt::format("{}.  How many do", (mGoldSplitTarget->mCount > 1 ? "pieces" : "piece")).c_str(), 92.0);
-                doTextLine("you want to remove?", 110.0);
+                const Item* goldSplitTargetItem = mPlayer->mInventory.getItemAt(*mGoldSplitTarget);
+                const GoldItem* goldItem = goldSplitTargetItem->getAsGoldItem();
+                if (!goldItem)
                 {
-                    auto offset = 6;
-                    nk_layout_space_push(ctx, nk_rect(leftTopX + spacing + offset, 129.0, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
-                    auto text = mGoldSplitCnt ? std::to_string(mGoldSplitCnt) : "";
-                    smallText(ctx, text.c_str(), TextColor::white, NK_TEXT_ALIGN_LEFT | NK_TEXT_ALIGN_TOP);
-                    auto width = smallTextWidth(text.c_str());
-                    auto spr = mSmallPentagram->getCurrentFrame().first;
-                    nk_layout_space_push(ctx, nk_rect(leftTopX + spacing + offset + width, 129.0, spr->getWidth(), spr->getHeight()));
-                    nk_image(ctx, mSmallPentagram->getCurrentNkImage());
+                    mGoldSplitTarget = std::nullopt;
+                }
+                else
+                {
+                    int32_t screenW = 0, screenH = 0;
+                    FARender::Renderer* renderer = FARender::Renderer::get();
+                    renderer->getWindowDimensions(screenW, screenH);
+                    Render::SpriteGroup* img = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.goldSplitBackground);
+                    float leftTopX = 31.0, leftTopY = 42.0;
+                    nk_layout_space_push(ctx, nk_rect(leftTopX, leftTopY, img->getWidth(), img->getHeight()));
+                    nk_image(ctx, img->getNkImage());
+                    float spacing = 28.0;
+                    auto doTextLine = [&](const char* text, double y) {
+                        nk_layout_space_push(ctx, nk_rect(leftTopX + spacing, y, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
+                        smallText(ctx, text, TextColor::golden, NK_TEXT_ALIGN_CENTERED | NK_TEXT_ALIGN_TOP);
+                    };
+
+                    doTextLine(fmt::format("You have {} gold", goldItem->getCount()).c_str(), 76.0);
+                    doTextLine(fmt::format("{}.  How many do", (goldItem->getCount() > 1 ? "pieces" : "piece")).c_str(), 92.0);
+                    doTextLine("you want to remove?", 110.0);
+                    {
+                        auto offset = 6;
+                        nk_layout_space_push(ctx, nk_rect(leftTopX + spacing + offset, 129.0, img->getWidth() - 2 * spacing, renderer->smallFont()->height));
+                        auto text = mGoldSplitCnt ? std::to_string(mGoldSplitCnt) : "";
+                        smallText(ctx, text.c_str(), TextColor::white, NK_TEXT_ALIGN_LEFT | NK_TEXT_ALIGN_TOP);
+                        auto width = smallTextWidth(text.c_str());
+                        auto spr = mSmallPentagram->getCurrentFrame().first;
+                        nk_layout_space_push(ctx, nk_rect(leftTopX + spacing + offset + width, 129.0, spr->getWidth(), spr->getHeight()));
+                        nk_image(ctx, mSmallPentagram->getCurrentNkImage());
+                    }
                 }
             }
             nk_layout_space_end(ctx);
@@ -455,8 +461,8 @@ namespace FAGui
             nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
 
             FARender::Renderer* renderer = FARender::Renderer::get();
-            FARender::FASpriteGroup* selectedTabButtons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellsButtons);
-            FARender::FASpriteGroup* icons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIconsSmall);
+            Render::SpriteGroup* selectedTabButtons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellsButtons);
+            Render::SpriteGroup* icons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIconsSmall);
 
             int32_t buttonWidth = selectedTabButtons->getWidth();
             int32_t buttonHeight = selectedTabButtons->getHeight();
@@ -563,10 +569,12 @@ namespace FAGui
 
     void GuiManager::belt(nk_context* ctx)
     {
-        auto beltTopLeft = nk_vec2(205, 21);
-        auto beltWidth = 232.0f, beltHeight = 29.0f, cellSize = 29.0f;
+        struct nk_vec2 beltTopLeft = nk_vec2(205, 21);
+        float beltWidth = 232.0f, beltHeight = 29.0f, cellSize = 29.0f;
+
         nk_layout_space_push(ctx, nk_recta(beltTopLeft, {beltWidth, beltHeight}));
-        auto& inv = mPlayer->mInventory;
+        FAWorld::CharacterInventory& inv = mPlayer->mInventory;
+
         if (nk_widget_is_mouse_click_down_inactive(ctx, NK_BUTTON_LEFT) && !mGoldSplitTarget)
         {
             FAWorld::PlayerInput::InventorySlotClickedData input{FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(
@@ -574,11 +582,10 @@ namespace FAGui
             Engine::EngineMain::get()->getLocalInputHandler()->addInput(FAWorld::PlayerInput(input, mPlayer->getId()));
         }
 
-        using namespace FAWorld;
-        for (int32_t num = 0; num != inv.getInv(FAWorld::EquipTargetType::belt).width(); num++)
+        for (const auto& fullSlot : inv.getInv(FAWorld::EquipTargetType::belt))
         {
-            auto cell_top_left = nk_vec2(beltTopLeft.x + num * cellSize, beltTopLeft.y);
-            item(ctx, MakeEquipTarget<FAWorld::EquipTargetType::belt>(num), cell_top_left, ItemHighlightInfo::highlightIfHover);
+            auto cell_top_left = nk_vec2(beltTopLeft.x + fullSlot.topLeft.x * cellSize, beltTopLeft.y);
+            item(ctx, FAWorld::MakeEquipTarget<FAWorld::EquipTargetType::belt>(fullSlot.topLeft.x), cell_top_left, ItemHighlightInfo::highlightIfHover, false);
         }
         nk_layout_space_end(ctx);
     }
@@ -590,10 +597,10 @@ namespace FAGui
         // The bottom menu is made of two sprites: panel8.cel, which is the background,
         // and panel8bu.cel, which contains overlays for each button. It's pretty primitive,
         // the buttons are baked into the background image.
-        FARender::FASpriteGroup* bottomMenuTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenu);
-        FARender::FASpriteGroup* bottomMenuButtonsTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenuButtons);
-        FARender::FASpriteGroup* healthAndManaEmptyBulbs = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenuBulbs);
-        FARender::FASpriteGroup* spellIcons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIcons);
+        Render::SpriteGroup* bottomMenuTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenu);
+        Render::SpriteGroup* bottomMenuButtonsTex = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenuButtons);
+        Render::SpriteGroup* healthAndManaEmptyBulbs = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.bottomMenuBulbs);
+        Render::SpriteGroup* spellIcons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIcons);
 
         int32_t bulbWidth = healthAndManaEmptyBulbs->getWidth();
         int32_t bulbHeight = healthAndManaEmptyBulbs->getHeight();
@@ -771,7 +778,7 @@ namespace FAGui
             return;
 
         FARender::Renderer* renderer = FARender::Renderer::get();
-        FARender::FASpriteGroup* spellIcons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIcons);
+        Render::SpriteGroup* spellIcons = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.spellIcons);
         int32_t iconWidth = spellIcons->getWidth();
         int32_t iconHeight = spellIcons->getHeight();
 
@@ -1023,7 +1030,7 @@ namespace FAGui
                 break;
             case Engine::KeyboardInputAction::reject:
                 if (mGoldSplitTarget)
-                    mGoldSplitTarget = nullptr;
+                    mGoldSplitTarget = std::nullopt;
                 break;
             case Engine::KeyboardInputAction::accept:
                 if (mGoldSplitTarget)
@@ -1031,12 +1038,12 @@ namespace FAGui
                     if (mGoldSplitCnt > 0)
                     {
                         FAWorld::PlayerInput input(
-                            FAWorld::PlayerInput::SplitGoldStackIntoCursorData{mGoldSplitTarget->mInvX, mGoldSplitTarget->mInvY, mGoldSplitCnt},
+                            FAWorld::PlayerInput::SplitGoldStackIntoCursorData{mGoldSplitTarget->posX, mGoldSplitTarget->posY, mGoldSplitCnt},
                             mPlayer->getId());
                         Engine::EngineMain::get()->getLocalInputHandler()->addInput(input);
                     }
 
-                    mGoldSplitTarget = nullptr;
+                    mGoldSplitTarget = std::nullopt;
                 }
                 break;
             case Engine::KeyboardInputAction::spellHotkeyF5:
@@ -1065,11 +1072,19 @@ namespace FAGui
     {
         if (mGoldSplitTarget && !key.has_modifiers())
         {
+            const FAWorld::Item* goldSplitTargetItem = mPlayer->mInventory.getItemAt(*mGoldSplitTarget);
+            const FAWorld::GoldItem* goldItem = goldSplitTargetItem->getAsGoldItem();
+            if (!goldItem)
+            {
+                mGoldSplitTarget = std::nullopt;
+                return;
+            }
+
             if (key.key >= '0' && key.key <= '9')
             {
-                int digit = key.key - '0';
-                auto newCnt = mGoldSplitCnt * 10 + digit;
-                if (newCnt <= mGoldSplitTarget->mCount)
+                int32_t digit = key.key - '0';
+                int32_t newCnt = mGoldSplitCnt * 10 + digit;
+                if (newCnt <= goldItem->getCount())
                     mGoldSplitCnt = newCnt;
             }
             else if (key.key == '\b')
@@ -1108,7 +1123,7 @@ namespace FAGui
         mCurLeftPanel = FAGui::PanelType::none;
         mCurRightPanel = FAGui::PanelType::none;
         mShowSpellSelectionMenu = false;
-        mGoldSplitTarget = nullptr;
+        mGoldSplitTarget = std::nullopt;
     }
 
     void GuiManager::togglePanel(PanelType type)
@@ -1119,9 +1134,6 @@ namespace FAGui
         else
             curPanel = type;
         if (mCurRightPanel != PanelType::inventory)
-            mGoldSplitTarget = nullptr;
+            mGoldSplitTarget = std::nullopt;
     }
-
-    std::string cursorPath = "data/inv/objcurs.cel";
-    uint32_t cursorFrame = 0;
 }

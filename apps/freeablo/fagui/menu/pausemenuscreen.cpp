@@ -8,10 +8,10 @@
 #include "../nkhelpers.h"
 #include "serial/textstream.h"
 #include <cstring>
+#include <render/spritegroup.h>
 
 namespace FAGui
 {
-
     PauseMenuScreen::PauseMenuScreen(MenuHandler& menu) : Parent(menu)
     {
         auto renderer = FARender::Renderer::get();
@@ -41,7 +41,7 @@ namespace FAGui
 
                 if (isActive)
                 {
-                    auto pentFrame = mBigPentagram->getCurrentFrame();
+                    std::pair<Render::SpriteGroup*, int32_t> pentFrame = mBigPentagram->getCurrentFrame();
                     nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::left, valign_t::center));
                     nk_image(ctx, pentFrame.first->getNkImage(pentFrame.second));
                     nk_layout_space_push(ctx, alignRect(pentRect, rect, halign_t::right, valign_t::center));
@@ -99,7 +99,7 @@ namespace FAGui
 
         nk_layout_space_begin(ctx, NK_STATIC, 0.0f, INT_MAX);
         {
-            FARender::FASpriteGroup* img = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.pauseMenuLogo);
+            Render::SpriteGroup* img = renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mGuiSprites.pauseMenuLogo);
             int32_t screenW, screenH;
             renderer->getWindowDimensions(screenW, screenH);
             constexpr int itemHeight = 45;

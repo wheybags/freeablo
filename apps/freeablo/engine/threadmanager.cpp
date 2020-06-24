@@ -1,5 +1,6 @@
 #include "threadmanager.h"
 #include "../farender/renderer.h"
+#include "debugsettings.h"
 #include <chrono>
 #include <input/inputmanager.h>
 #include <iostream>
@@ -53,6 +54,9 @@ namespace Engine
 
     void ThreadManager::playMusic(const std::string& path)
     {
+        if (DebugSettings::DisableMusic)
+            return;
+
         Message message = {};
         message.type = ThreadState::PLAY_MUSIC;
         message.data.musicPath = new std::string(path);

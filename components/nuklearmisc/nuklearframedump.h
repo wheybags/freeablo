@@ -5,15 +5,9 @@
 namespace Render
 {
     class CommandQueue;
-    class AtlasTextureEntry;
+    class TextureReference;
     class Texture;
 }
-
-struct FANuklearTextureHandle
-{
-    const Render::AtlasTextureEntry* spriteGroup = nullptr;
-    Render::Texture* texture = nullptr;
-};
 
 enum class GuiEffectType
 {

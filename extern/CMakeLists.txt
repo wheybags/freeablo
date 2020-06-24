@@ -25,5 +25,6 @@ add_subdirectory(gtest)
 add_subdirectory(lua)
 add_subdirectory(LuaBridge)
 add_subdirectory(glad)
+add_subdirectory(tinyxml2)
 
 unset(MESSAGE_QUIET)

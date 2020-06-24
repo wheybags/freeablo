@@ -3,20 +3,19 @@
 #include "../engine/threadmanager.h"
 #include "../fagui/dialogmanager.h"
 #include "../fagui/guimanager.h"
-#include "../fasavegame/gameloader.h"
 #include "actorstats.h"
 #include "diabloexe/characterstats.h"
 #include "equiptarget.h"
-#include "itemenums.h"
-#include "itemmap.h"
+#include "item/equipmentitem.h"
+#include "item/equipmentitembase.h"
 #include "missile/missile.h"
 #include "playerbehaviour.h"
 #include "spells.h"
 #include "world.h"
-#include <fmt/format.h>
+#include <engine/debugsettings.h>
 #include <misc/assert.h>
 #include <misc/stringops.h>
-#include <random/random.h>
+#include <render/spritegroup.h>
 #include <string>
 
 namespace FAWorld
@@ -27,6 +26,36 @@ namespace FAWorld
     {
         mStats.initialise(initialiseActorStats(charStats));
         mStats.mLevelXpCounts = charStats.mNextLevelExp;
+        switch (mPlayerClass)
+        {
+            // https://wheybags.gitlab.io/jarulfs-guide/#maximum-stats for max base stats numbers
+            case PlayerClass::warrior:
+            {
+                mStats.baseStats.maxStrength = 250;
+                mStats.baseStats.maxMagic = 50;
+                mStats.baseStats.maxDexterity = 60;
+                mStats.baseStats.maxVitality = 100;
+                break;
+            }
+            case PlayerClass::rogue:
+            {
+                mStats.baseStats.maxStrength = 50;
+                mStats.baseStats.maxMagic = 70;
+                mStats.baseStats.maxDexterity = 250;
+                mStats.baseStats.maxVitality = 80;
+                break;
+            }
+            case PlayerClass::sorceror:
+            {
+                mStats.baseStats.maxStrength = 45;
+                mStats.baseStats.maxMagic = 250;
+                mStats.baseStats.maxDexterity = 85;
+                mStats.baseStats.maxVitality = 80;
+                break;
+            }
+            case PlayerClass::none:
+                break;
+        }
 
         mFaction = Faction::heaven();
         mMoveHandler.mPathRateLimit = World::getTicksInPeriod("0.1"); // allow players to repath much more often than other actors
@@ -40,7 +69,7 @@ namespace FAWorld
         mMoveHandler.mSpeedTilesPerSecond = FixedPoint(1) / FixedPoint("0.4"); // https://wheybags.gitlab.io/jarulfs-guide/#player-timing-information
         mName = "Player";
         mWorld.registerPlayer(this);
-        mInventory.mInventoryChanged = [this](EquipTargetType inventoryType, Item const& removed, Item const& added) {
+        mInventory.mInventoryChanged = [this](EquipTargetType inventoryType, const Item* removed, const Item* added) {
             (void)removed;
 
             mInventoryChangedCallCount++;
@@ -59,7 +88,7 @@ namespace FAWorld
                     break;
             }
 
-            if (!added.isEmpty() && mPlayerInitialised && this == mWorld.getCurrentPlayer())
+            if (added && mPlayerInitialised && this == mWorld.getCurrentPlayer())
             {
                 // Play inventory place/grab sound.
                 switch (inventoryType)
@@ -68,7 +97,7 @@ namespace FAWorld
                         Engine::ThreadManager::get()->playSound("sfx/items/invgrab.wav");
                         break;
                     default:
-                        std::string soundPath = added.getInvPlaceSoundPath();
+                        std::string soundPath = added->getBase()->mInventoryPlaceItemSoundPath;
                         Engine::ThreadManager::get()->playSound(soundPath);
                         break;
                 }
@@ -76,6 +105,9 @@ namespace FAWorld
         };
 
         updateSprites();
+
+        if (DebugSettings::PlayersInvuln)
+            mInvuln = true;
     }
 
     void Player::calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const
@@ -97,10 +129,10 @@ namespace FAWorld
         ItemStats itemStats;
         mInventory.calculateItemBonuses(itemStats);
 
-        stats.baseStats.strength = charStats.strength + itemStats.baseStats.strength;
-        stats.baseStats.magic = charStats.magic + itemStats.baseStats.magic;
-        stats.baseStats.dexterity = charStats.dexterity + itemStats.baseStats.dexterity;
-        stats.baseStats.vitality = charStats.vitality + itemStats.baseStats.vitality;
+        stats.baseStats.strength = charStats.strength + itemStats.magicStatModifiers.baseStats.strength;
+        stats.baseStats.magic = charStats.magic + itemStats.magicStatModifiers.baseStats.magic;
+        stats.baseStats.dexterity = charStats.dexterity + itemStats.magicStatModifiers.baseStats.dexterity;
+        stats.baseStats.vitality = charStats.vitality + itemStats.magicStatModifiers.baseStats.vitality;
 
         stats.toHitMelee.bonus = 0;
         stats.toHitRanged.bonus = 0;
@@ -116,13 +148,15 @@ namespace FAWorld
         {
             case PlayerClass::warrior:
             {
-                stats.maxLife = (int32_t)(FixedPoint(2) * FixedPoint(charStats.vitality) + FixedPoint(2) * FixedPoint(itemStats.baseStats.vitality) +
-                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 18)
-                                    .floor();
+                stats.maxLife =
+                    (int32_t)(FixedPoint(2) * FixedPoint(charStats.vitality) + FixedPoint(2) * FixedPoint(itemStats.magicStatModifiers.baseStats.vitality) +
+                              FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxLife) + 18)
+                        .floor();
 
-                stats.maxMana = (int32_t)(FixedPoint(1) * FixedPoint(charStats.magic) + FixedPoint(1) * FixedPoint(itemStats.baseStats.magic) +
-                                          FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) - 1)
-                                    .floor();
+                stats.maxMana =
+                    (int32_t)(FixedPoint(1) * FixedPoint(charStats.magic) + FixedPoint(1) * FixedPoint(itemStats.magicStatModifiers.baseStats.magic) +
+                              FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxMana) - 1)
+                        .floor();
 
                 stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(100)).floor();
                 stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(200)).floor();
@@ -135,7 +169,7 @@ namespace FAWorld
                 // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
                 if (handItems.meleeWeapon)
                 {
-                    switch (handItems.meleeWeapon->item->getType())
+                    switch (handItems.meleeWeapon->item->getBase()->mType)
                     {
                         case ItemType::sword:
                         case ItemType::mace:
@@ -148,7 +182,7 @@ namespace FAWorld
                             stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
                             break;
                         default:
-                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getBase()->mType);
                     }
                 }
                 else
@@ -165,13 +199,15 @@ namespace FAWorld
             }
             case PlayerClass::rogue:
             {
-                stats.maxLife = (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint("1.5") * FixedPoint(itemStats.baseStats.vitality) +
-                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 23)
-                                    .floor();
+                stats.maxLife =
+                    (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint("1.5") * FixedPoint(itemStats.magicStatModifiers.baseStats.vitality) +
+                              FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxLife) + 23)
+                        .floor();
 
-                stats.maxMana = (int32_t)(FixedPoint(1) * FixedPoint(charStats.magic) + FixedPoint("1.5") * FixedPoint(itemStats.baseStats.magic) +
-                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) + 5)
-                                    .floor();
+                stats.maxMana =
+                    (int32_t)(FixedPoint(1) * FixedPoint(charStats.magic) + FixedPoint("1.5") * FixedPoint(itemStats.magicStatModifiers.baseStats.magic) +
+                              FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxMana) + 5)
+                        .floor();
 
                 stats.meleeDamage =
                     (int32_t)(((FixedPoint(charStats.strength) + FixedPoint(charStats.dexterity)) * actorStats.mLevel) / FixedPoint(100)).floor();
@@ -184,7 +220,7 @@ namespace FAWorld
                 // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
                 if (handItems.meleeWeapon)
                 {
-                    switch (handItems.meleeWeapon->item->getType())
+                    switch (handItems.meleeWeapon->item->getBase()->mType)
                     {
                         case ItemType::sword:
                         case ItemType::mace:
@@ -197,7 +233,7 @@ namespace FAWorld
                             stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.55"));
                             break;
                         default:
-                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getBase()->mType);
                     }
                 }
                 else
@@ -214,13 +250,15 @@ namespace FAWorld
             }
             case PlayerClass::sorceror:
             {
-                stats.maxLife = (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint(1) * FixedPoint(itemStats.baseStats.vitality) +
-                                          FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxLife) + 9)
-                                    .floor();
+                stats.maxLife =
+                    (int32_t)(FixedPoint(1) * FixedPoint(charStats.vitality) + FixedPoint(1) * FixedPoint(itemStats.magicStatModifiers.baseStats.vitality) +
+                              FixedPoint(1) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxLife) + 9)
+                        .floor();
 
-                stats.maxMana = (int32_t)(FixedPoint(2) * FixedPoint(charStats.magic) + FixedPoint(2) * FixedPoint(itemStats.baseStats.magic) +
-                                          FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.maxMana) - 2)
-                                    .floor();
+                stats.maxMana =
+                    (int32_t)(FixedPoint(2) * FixedPoint(charStats.magic) + FixedPoint(2) * FixedPoint(itemStats.magicStatModifiers.baseStats.magic) +
+                              FixedPoint(2) * FixedPoint(actorStats.mLevel) + FixedPoint(itemStats.magicStatModifiers.maxMana) - 2)
+                        .floor();
 
                 stats.meleeDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(100)).floor();
                 stats.rangedDamage = (int32_t)((FixedPoint(charStats.strength) * actorStats.mLevel) / FixedPoint(200)).floor();
@@ -231,7 +269,7 @@ namespace FAWorld
                 // https://wheybags.gitlab.io/jarulfs-guide/#weapon-speed
                 if (handItems.meleeWeapon)
                 {
-                    switch (handItems.meleeWeapon->item->getType())
+                    switch (handItems.meleeWeapon->item->getBase()->mType)
                     {
                         case ItemType::sword:
                         case ItemType::mace:
@@ -244,7 +282,7 @@ namespace FAWorld
                             stats.meleeAttackSpeedInTicks = World::getTicksInPeriod(FixedPoint("0.6"));
                             break;
                         default:
-                            invalid_enum(ItemType, handItems.meleeWeapon->item->getType());
+                            invalid_enum(ItemType, handItems.meleeWeapon->item->getBase()->mType);
                     }
                 }
                 else if (handItems.shield)
@@ -267,20 +305,23 @@ namespace FAWorld
                 invalid_enum(PlayerClass, mPlayerClass);
         }
 
+        stats.toHitMelee.bonus += actorStats.mLevel;
+        stats.toHitRanged.bonus += actorStats.mLevel;
+
         // TODOHELLFIRE: Add in bonuses for barbarians and monks here, see https://wheybags.gitlab.io/jarulfs-guide/#monster-versus-player
-        stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / FixedPoint(5) + itemStats.armorClass).floor();
-        stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / FixedPoint(2) + itemStats.toHit).floor();
-        stats.toHitMeleeMinMaxCap = {5, 95};
-        stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.toHit).floor();
+        stats.armorClass = (int32_t)(FixedPoint(stats.baseStats.dexterity) / FixedPoint(5) + itemStats.magicStatModifiers.armorClass).floor();
+        stats.toHitMelee.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) / FixedPoint(2) + itemStats.magicStatModifiers.toHit).floor();
+        stats.toHitRanged.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.dexterity) + itemStats.magicStatModifiers.toHit).floor();
         stats.toHitMagic.base = (int32_t)(FixedPoint(50) + FixedPoint(stats.baseStats.magic)).floor();
+        stats.toHitMinMaxCap = {5, 95};
 
         stats.meleeDamageBonusRange = itemStats.meleeDamageBonusRange;
 
         // https://wheybags.gitlab.io/jarulfs-guide/#damage-done
-        if (!Item::isItemAWeapon(mInventory.getLeftHand().getType()) && !Item::isItemAWeapon(mInventory.getRightHand().getType()))
+        if (!handItems.weapon)
         {
             // TODOHELLFIRE: monks get a bonus here
-            if (mInventory.getLeftHand().getType() == ItemType::shield || mInventory.getRightHand().getType() == ItemType::shield)
+            if (handItems.shield)
                 stats.meleeDamageBonusRange = IntRange(1, 3);
             else
                 stats.meleeDamageBonusRange = IntRange(1, 1);
@@ -292,19 +333,21 @@ namespace FAWorld
 
     DamageType Player::getMeleeDamageType() const
     {
-        const Item& left = mInventory.getLeftHand();
-        const Item& right = mInventory.getRightHand();
+        EquippedInHandsItems handsItems = mInventory.getItemsInHands();
 
-        if (left.getType() == ItemType::mace || right.getType() == ItemType::mace)
-            return DamageType::Club;
-        if (left.getType() == ItemType::sword || right.getType() == ItemType::sword)
-            return DamageType::Sword;
-        if (left.getType() == ItemType::axe || right.getType() == ItemType::axe)
-            return DamageType::Axe;
-        if (left.getType() == ItemType::bow || right.getType() == ItemType::bow)
-            return DamageType::Bow;
-        if (left.getType() == ItemType::staff || right.getType() == ItemType::staff)
-            return DamageType::Staff;
+        if (handsItems.weapon)
+        {
+            if (handsItems.weapon->item->getBase()->mType == ItemType::mace)
+                return DamageType::Club;
+            if (handsItems.weapon->item->getBase()->mType == ItemType::sword)
+                return DamageType::Sword;
+            if (handsItems.weapon->item->getBase()->mType == ItemType::axe)
+                return DamageType::Axe;
+            if (handsItems.weapon->item->getBase()->mType == ItemType::bow)
+                return DamageType::Bow;
+            if (handsItems.weapon->item->getBase()->mType == ItemType::staff)
+                return DamageType::Staff;
+        }
 
         return DamageType::Unarmed;
     }
@@ -354,28 +397,28 @@ namespace FAWorld
 
         std::string armor;
         {
-            if (mInventory.getBody().isEmpty())
+            if (!mInventory.getBody())
             {
                 armor = "none";
             }
             else
             {
-                switch (mInventory.getBody().getType())
+                switch (mInventory.getBody()->getBase()->mType)
                 {
                     case ItemType::heavyArmor:
-                        armor = "heavy";
+                        armor = "heavy-armor";
                         break;
 
                     case ItemType::mediumArmor:
-                        armor = "medium";
+                        armor = "medium-armor";
                         break;
 
                     case ItemType::lightArmor:
-                        armor = "light";
+                        armor = "light-armor";
                         break;
 
                     default:
-                        invalid_enum(ItemType, mInventory.getBody().getType());
+                        invalid_enum(ItemType, mInventory.getBody()->getBase()->mType);
                 }
             }
         }
@@ -388,7 +431,7 @@ namespace FAWorld
                 weapon = "none";
             else
             {
-                switch (handsItems.weapon.value().item->getType())
+                switch (handsItems.weapon.value().item->getBase()->mType)
                 {
                     case ItemType::sword:
                         weapon = "sword";
@@ -406,10 +449,10 @@ namespace FAWorld
                         weapon = "bow";
                         break;
                     default:
-                        invalid_enum(ItemType, handsItems.weapon.value().item->getType());
+                        invalid_enum(ItemType, handsItems.weapon.value().item->getBase()->mType);
                 }
 
-                if (handsItems.weapon.value().item->getEquipLoc() == ItemEquipType::twoHanded)
+                if (handsItems.weapon.value().item->getBase()->getEquipType() == ItemEquipType::twoHanded)
                     weapon = weapon + "-2h";
                 else
                     weapon = weapon + "-1h";
@@ -419,13 +462,13 @@ namespace FAWorld
                 weapon = weapon + "-shield";
         }
 
-        auto renderer = FARender::Renderer::get();
+        FARender::Renderer* renderer = FARender::Renderer::get();
         if (!renderer) // TODO: some sort of headless mode for tests
             return;
 
         auto getAnimation = [&](const std::string& animation) {
             FARender::SpriteLoader::PlayerSpriteKey spriteLookupKey({{"animation", animation}, {"class", classCode}, {"armor", armor}, {"weapon", weapon}});
-            return renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mPlayerSpriteDefinitions[spriteLookupKey]);
+            return renderer->mSpriteLoader.getSprite(renderer->mSpriteLoader.mPlayerSpriteDefinitions.at(spriteLookupKey));
         };
 
         mAnimation.setAnimationSprites(AnimState::dead, getAnimation("dead"));
@@ -449,22 +492,20 @@ namespace FAWorld
 
         // TODO: Is this actually correct? It seems kind of odd, but it is what is listed in Jarulf's guide
         // https://wheybags.gitlab.io/jarulfs-guide/#player-timing-information
-        mMeleeHitFrame = mAnimation.getAnimationSprites(AnimState::attack)->getAnimLength() - 1;
+        mMeleeHitFrame = mAnimation.getAnimationSprites(AnimState::attack)->getAnimationLength() - 1;
     }
 
     bool Player::dropItem(const Misc::Point& clickedPoint)
     {
-        auto cursorItem = mInventory.getCursorHeld();
-        auto initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getDirection();
-        auto curPos = getPos().current();
-        auto direction = (curPos == clickedPoint) ? Misc::Direction(Misc::Direction8::none) : initialDir;
+        Misc::Direction initialDir = (Vec2Fix(clickedPoint.x, clickedPoint.y) - Vec2Fix(getPos().current().x, getPos().current().y)).getDirection();
+        Vec2i curPos = getPos().current();
+        Misc::Direction direction = (curPos == clickedPoint) ? Misc::Direction(Misc::Direction8::none) : initialDir;
 
-        if (getLevel()->dropItemClosestEmptyTile(cursorItem, *this, curPos, direction))
-        {
-            mInventory.setCursorHeld({});
-            return true;
-        }
-        return false;
+        std::unique_ptr<Item> tmp = mInventory.remove(MakeEquipTarget<EquipTargetType::cursor>());
+        bool retval = getLevel()->dropItemClosestEmptyTile(tmp, *this, curPos, direction);
+        mInventory.setCursorHeld(std::move(tmp));
+
+        return retval;
     }
 
     bool Player::canTalkTo(Actor* actor)
@@ -484,8 +525,33 @@ namespace FAWorld
         return true;
     }
 
+    void Player::handleTargetingLevelTransitions()
+    {
+        for (const auto* transition : {&getLevel()->upStairsArea(), &getLevel()->downStairsArea()})
+        {
+            Vec2i exitPoint = transition->offset + transition->exitOffset;
+
+            // If the player is targeting anywhere near the exit, target the exit
+            for (int32_t y = 0; y < transition->triggerMask.height(); y++)
+            {
+                for (int32_t x = 0; x < transition->triggerMask.width(); x++)
+                {
+                    if (transition->triggerMask.get(x, y) && mMoveHandler.getDestination() == transition->offset + Vec2i(x, y))
+                        mMoveHandler.setDestination(exitPoint);
+                }
+            }
+
+            if (getPos().current() == exitPoint && mMoveHandler.getDestination() == exitPoint)
+            {
+                if (GameLevel* level = getWorld()->getLevel(transition->targetLevelIndex))
+                    moveToLevel(level, transition == &getLevel()->downStairsArea());
+            }
+        }
+    }
+
     void Player::update(bool noclip)
     {
+        handleTargetingLevelTransitions();
         Actor::update(noclip);
 
         // handle talking to npcs
@@ -538,6 +604,11 @@ namespace FAWorld
         heal();
         restoreMana();
     }
+
+    void Player::addStrength(int32_t delta) { mStats.baseStats.strength = std::min(mStats.baseStats.strength + delta, mStats.baseStats.maxStrength); }
+    void Player::addMagic(int32_t delta) { mStats.baseStats.magic = std::min(mStats.baseStats.magic + delta, mStats.baseStats.maxMagic); }
+    void Player::addDexterity(int32_t delta) { mStats.baseStats.dexterity = std::min(mStats.baseStats.dexterity + delta, mStats.baseStats.maxDexterity); }
+    void Player::addVitality(int32_t delta) { mStats.baseStats.vitality = std::min(mStats.baseStats.vitality + delta, mStats.baseStats.maxVitality); }
 
     BaseStats Player::initialiseActorStats(const DiabloExe::CharacterStats& from)
     {
@@ -600,5 +671,12 @@ namespace FAWorld
                 invalid_enum(PlayerClass, mPlayerClass);
         }
         return SpellId::null;
+    }
+
+    void Player::moveToLevel(GameLevel* level, bool placeAtUpStairs)
+    {
+        const Level::LevelTransitionArea& targetArea = placeAtUpStairs ? level->upStairsArea() : level->downStairsArea();
+        Vec2i targetPoint = level->getFreeSpotNear(targetArea.offset + targetArea.playerSpawnOffset, std::numeric_limits<int32_t>::max());
+        teleport(level, Position(targetPoint));
     }
 }

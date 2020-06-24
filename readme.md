@@ -23,6 +23,7 @@ Copy DIABDAT.MPQ and Diablo.exe from your diablo install into the folder with th
 - PgUp and PgDn keys will move up / down through dungeon levels.
 - ESC to open pause menu
 - F10 to toggle texture filtering
+- F11 to toggle debug grid
 - Scroll wheel to zoom
 
 The above will all be made configurable at some point.

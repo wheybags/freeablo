@@ -58,4 +58,11 @@ namespace FAIO
     uint8_t read8(FAFile* file);
     std::string readCString(FAFile* file, size_t ptr);
     std::string readCStringFromWin32Binary(FAFile* file, size_t ptr, size_t offset);
+
+    class ScopedInitFAIO
+    {
+    public:
+        ScopedInitFAIO(const std::string pathMPQ = "DIABDAT.MPQ", const std::string listFile = "") { init(pathMPQ, listFile); }
+        ~ScopedInitFAIO() { quit(); }
+    };
 }

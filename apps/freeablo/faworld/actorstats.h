@@ -29,19 +29,31 @@ namespace FAWorld
         int32_t dexterity = 0;
         int32_t vitality = 0;
 
+        int32_t maxStrength = 0;
+        int32_t maxMagic = 0;
+        int32_t maxDexterity = 0;
+        int32_t maxVitality = 0;
+
         bool operator==(const BaseStats& other)
         {
             return strength == other.strength && magic == other.magic && dexterity == other.dexterity && vitality == other.vitality;
         }
     };
 
-    struct ItemStats
+    struct MagicStatModifiers
     {
         BaseStats baseStats;
         int32_t maxLife = 0;
         int32_t maxMana = 0;
         int32_t armorClass = 0;
         int32_t toHit = 0;
+        int32_t meleeDamageBonus = 0;
+        int32_t rangedDamageBonus = 0;
+    };
+
+    struct ItemStats
+    {
+        MagicStatModifiers magicStatModifiers;
         IntRange meleeDamageBonusRange = {0, 0};
         IntRange rangedDamageBonusRange = {0, 0};
     };
@@ -50,6 +62,9 @@ namespace FAWorld
     {
         int32_t base = 0;
         int32_t bonus = 0;
+
+        void save(FASaveGame::GameSaver& saver) const;
+        void load(FASaveGame::GameLoader& loader);
 
         int32_t getCombined() const { return base + bonus; }
     };
@@ -61,9 +76,9 @@ namespace FAWorld
         int32_t maxMana = 0;
         int32_t armorClass = 0;
         ToHitChance toHitMelee;
-        IntRange toHitMeleeMinMaxCap = {0, 100};
         ToHitChance toHitRanged;
         ToHitChance toHitMagic;
+        IntRange toHitMinMaxCap = {0, 100};
         int32_t meleeDamage = 0;
         int32_t rangedDamage = 0;
         IntRange meleeDamageBonusRange = {0, 0};

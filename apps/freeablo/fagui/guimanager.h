@@ -6,16 +6,12 @@
 #include "textcolor.h"
 #include <chrono>
 #include <fa_nuklear.h>
+#include <faworld/equiptarget.h>
 #include <functional>
 #include <memory>
+#include <nuklearmisc/nuklearframedump.h>
 #include <queue>
 #include <string>
-
-struct nk_context;
-typedef uint32_t nk_flags;
-struct nk_rect;
-struct nk_vec2;
-struct nk_image;
 
 namespace Engine
 {
@@ -40,10 +36,6 @@ namespace FAGui
 {
     class GuiManager;
     class MenuHandler;
-
-    // move all this to better place since cursor state is also dependent on spells etc.
-    extern std::string cursorPath;
-    extern uint32_t cursorFrame;
 
     enum class PanelType
     {
@@ -72,10 +64,10 @@ namespace FAGui
     class ScopedApplyEffect
     {
     public:
-        ScopedApplyEffect(nk_context* ctx, GuiEffectType type) : mCtx(ctx) { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(type))); }
+        ScopedApplyEffect(::nk_context* ctx, GuiEffectType type) : mCtx(ctx) { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(type))); }
         ~ScopedApplyEffect() { nk_set_user_data(mCtx, nk_handle_id(static_cast<int>(GuiEffectType::none))); }
 
-        nk_context* mCtx;
+        ::nk_context* mCtx;
     };
 
     PanelPlacement panelPlacementByType(PanelType type);
@@ -152,7 +144,7 @@ namespace FAGui
             }
         };
 
-        void item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highligh);
+        void item(nk_context* ctx, FAWorld::EquipTarget target, RectOrVec2 placement, ItemHighlightInfo highlight, bool checkerboarded);
         void inventoryPanel(nk_context* ctx);
         void fillTextField(nk_context* ctx, float x, float y, float width, const char* text, TextColor color = TextColor::white);
         void characterPanel(nk_context* ctx);
@@ -181,7 +173,7 @@ namespace FAGui
         PanelType mCurRightPanel = PanelType::none, mCurLeftPanel = PanelType::none;
         std::unique_ptr<FARender::AnimationPlayer> mSmallPentagram;
         std::unique_ptr<MenuHandler> mMenuHandler;
-        const FAWorld::Item* mGoldSplitTarget = nullptr;
+        std::optional<FAWorld::EquipTarget> mGoldSplitTarget;
         int mGoldSplitCnt = 0;
         int mCurSpellbookTab = 0;
         bool mShowSpellSelectionMenu = false;

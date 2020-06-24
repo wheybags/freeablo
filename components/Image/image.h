@@ -1,5 +1,4 @@
 #pragma once
-
 #include <misc/array2d.h>
 #include <string>
 
@@ -23,7 +22,7 @@ public:
     typedef typename Misc::Array2D<ByteColour>::const_iterator const_iterator;
 
     Image() = default;
-    Image(int32_t x, int32_t y) : mData(x, y) {}
+    Image(int32_t x, int32_t y);
     Image(int32_t width, int32_t height, std::vector<ByteColour>&& data) : mData(width, height, std::move(data)) {}
     Image(int32_t width, int32_t height, ByteColour* data, PointerDataType dataOwnership) : mData(width, height, data, dataOwnership) {}
     Image(const Image&) = delete;
@@ -31,7 +30,6 @@ public:
     Image& operator=(Image&&) = default;
 
     const ByteColour& get(int32_t x, int32_t y) const { return mData.get(x, y); }
-
     ByteColour& get(int32_t x, int32_t y) { return mData.get(x, y); }
 
     iterator begin() { return mData.begin(); }
@@ -42,18 +40,29 @@ public:
     int32_t width() const { return mData.width(); }
     int32_t height() const { return mData.height(); }
 
-    void blitTo(Image& other, int32_t srcOffsetX, int32_t srcOffsetY, int32_t srcW, int32_t srcH, int32_t destOffsetX, int32_t destOffsetY) const;
-    void blitTo(Image& other, int32_t destOffsetX, int32_t destOffsetY) const { blitTo(other, 0, 0, this->width(), this->height(), destOffsetX, destOffsetY); }
+    void blitTo(Image& other,
+                int32_t srcOffsetX,
+                int32_t srcOffsetY,
+                int32_t srcW,
+                int32_t srcH,
+                int32_t destOffsetX,
+                int32_t destOffsetY,
+                bool overwriteWithTransparent) const;
+    void blitTo(Image& other, int32_t destOffsetX, int32_t destOffsetY) const
+    {
+        blitTo(other, 0, 0, this->width(), this->height(), destOffsetX, destOffsetY, true);
+    }
 
     struct TrimmedData
     {
         int32_t trimmedOffsetX = 0;
         int32_t trimmedOffsetY = 0;
-        int32_t originalWidth = 0;
-        int32_t originalHeight = 0;
+        int32_t trimmedWidth = 0;
+        int32_t trimmedHeight = 0;
     };
 
-    std::pair<Image, TrimmedData> trimTransparentEdges() const;
+    // calculates a trimmed rectangle that excludes transparent pixels around the edge of the image
+    TrimmedData calculateTrimTransparentEdges() const;
 
     static Image loadFromFile(const std::string& path);
     static void saveToGif(const std::vector<Image> images, const std::string& path);

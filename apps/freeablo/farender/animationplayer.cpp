@@ -2,6 +2,7 @@
 #include "../fasavegame/gameloader.h"
 #include <misc/assert.h>
 #include <misc/fixedpoint.h>
+#include <render/spritegroup.h>
 
 namespace FARender
 {
@@ -39,10 +40,10 @@ namespace FARender
         }
     }
 
-    std::pair<FARender::FASpriteGroup*, int32_t> AnimationPlayer::getCurrentFrame() const
+    std::pair<Render::SpriteGroup*, int32_t> AnimationPlayer::getCurrentFrame() const
     {
         if (mCurrentAnim == nullptr)
-            return std::make_pair<FARender::FASpriteGroup*, int32_t>(nullptr, 0);
+            return std::make_pair<Render::SpriteGroup*, int32_t>(nullptr, 0);
 
         int32_t currentFrame;
         FixedPoint progress = FixedPoint(mTicksSinceAnimStarted) / FixedPoint(mPlayingAnimDuration);
@@ -51,17 +52,17 @@ namespace FARender
         {
             currentFrame = int32_t(progress.intPart());
 
-            if (currentFrame >= int32_t(mCurrentAnim->getAnimLength()))
+            if (currentFrame >= int32_t(mCurrentAnim->getAnimationLength()))
             {
                 switch (mPlayingAnimType)
                 {
                     case AnimationType::Once:
-                        return std::make_pair<FARender::FASpriteGroup*, int32_t>(nullptr, 0);
+                        return std::make_pair<Render::SpriteGroup*, int32_t>(nullptr, 0);
                     case AnimationType::FreezeAtEnd:
-                        currentFrame = mCurrentAnim->getAnimLength() - 1;
+                        currentFrame = mCurrentAnim->getAnimationLength() - 1;
                         break;
                     case AnimationType::Looped:
-                        currentFrame = currentFrame % mCurrentAnim->getAnimLength();
+                        currentFrame = currentFrame % mCurrentAnim->getAnimationLength();
                         break;
                     case AnimationType::BySequence:
                     // handled below
@@ -76,7 +77,7 @@ namespace FARender
         return std::make_pair(mCurrentAnim, currentFrame);
     }
 
-    void AnimationPlayer::playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationPlayer::AnimationType type, int32_t startFrame)
+    void AnimationPlayer::playAnimation(Render::SpriteGroup* anim, FAWorld::Tick frameDuration, AnimationPlayer::AnimationType type, int32_t startFrame)
     {
         mCurrentAnim = anim;
         mPlayingAnimDuration = frameDuration;
@@ -85,7 +86,7 @@ namespace FARender
         mTicksSinceAnimStarted = frameDuration * startFrame;
     }
 
-    void AnimationPlayer::playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int32_t> frameSequence)
+    void AnimationPlayer::playAnimation(Render::SpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int32_t> frameSequence)
     {
         mCurrentAnim = anim;
         mPlayingAnimDuration = frameDuration;
@@ -93,7 +94,7 @@ namespace FARender
         mFrameSequence = std::move(frameSequence);
     }
 
-    void AnimationPlayer::replaceAnimation(FARender::FASpriteGroup* anim)
+    void AnimationPlayer::replaceAnimation(Render::SpriteGroup* anim)
     {
         if (anim)
             release_assert(mPlayingAnimDuration);
@@ -115,7 +116,7 @@ namespace FARender
             FixedPoint progress = FixedPoint(mTicksSinceAnimStarted) / FixedPoint(mPlayingAnimDuration);
             int32_t currentFrame = int32_t(progress.intPart());
 
-            if (currentFrame >= mCurrentAnim->getAnimLength())
+            if (currentFrame >= mCurrentAnim->getAnimationLength())
                 stopAnimation();
         }
     }
@@ -124,7 +125,7 @@ namespace FARender
     {
         if (!mCurrentAnim)
             return -1;
-        return mCurrentAnim->getAnimLength();
+        return mCurrentAnim->getAnimationLength();
     }
 
     struct nk_image AnimationPlayer::getCurrentNkImage()

@@ -2,7 +2,19 @@
 
 ## v0.5 [?? ??? ????] 
 
+- Added magic item generation (but only some effects actually work so far)
+- Added accurate simulation of arrow damage
+- Added game zoom with scroll wheel
+- Added healing at Pepin
+- Added healing and other potions
+- Added ability to move through levels by clicking on stairs
 - Added town portal spell
+- Added debug grid that can be toggled with F11
+- Refactored rendering, FPS greatly improved and there should be no stuttering now
+- Fixed bug where arrows would miss stationary targets depending on the relative positions of shooter and target
+- Fixed bug where player would stop moving if you clicked and held your mouse without wiggling it
+- Fixed bug where game would crash if you pressed certain keys while on main menu
+- Fixed bug where the player would walk at the target after firing an arrow
 
 ## v0.4 [6 Mar 2020]
 

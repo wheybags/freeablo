@@ -1,18 +1,18 @@
 #include "diabloexe.h"
-#include "../../apps/freeablo/faworld/item.h"
 #include "baseitem.h"
 #include "characterstats.h"
 #include "monster.h"
 #include "npc.h"
 #include "settings/settings.h"
 #include "talkdata.h"
+#include <cstdint>
+#include <diabloexe/exemagicitemeffect.h>
+#include <diabloexe/uniqueitem.h>
 #include <iomanip>
 #include <iostream>
 #include <misc/md5.h>
 #include <misc/misc.h>
 #include <misc/stringops.h>
-#include <sstream>
-#include <stdint.h>
 #include <unordered_set>
 
 namespace DiabloExe
@@ -66,7 +66,7 @@ namespace DiabloExe
         loadSoundFilenames(exe, codeOffset);
         loadBaseItems(exe, codeOffset);
         loadUniqueItems(exe, codeOffset);
-        loadAffixes(exe, codeOffset);
+        loadMagicItemEffects(exe, codeOffset);
         loadMissileGraphicsTable(exe, codeOffset);
         loadMissileDataTable(exe);
         loadSpellsTable(exe, codeOffset);
@@ -315,6 +315,32 @@ namespace DiabloExe
         }
     }
 
+    class SimpleIdGenerator
+    {
+    public:
+        std::string generateIdFromName(const std::string_view name)
+        {
+            std::string idBase(name);
+            Misc::StringUtils::toLower(idBase);
+            Misc::StringUtils::replace(idBase, " ", "_");
+            Misc::StringUtils::replace(idBase, "-", "_");
+            idBase.erase(std::remove(idBase.begin(), idBase.end(), '\''), idBase.end());
+
+            std::string idName = idBase;
+            for (int32_t j = 1; usedIds.count(idName); j++)
+            {
+                idName = idBase + "_" + std::to_string(j);
+                Misc::StringUtils::replace(idName, "__", "_");
+            }
+
+            usedIds.insert(idName);
+            return idName;
+        }
+
+    private:
+        std::unordered_set<std::string> usedIds;
+    };
+
     void DiabloExe::loadBaseItems(FAIO::FAFileObject& exe, size_t codeOffset)
     {
         size_t itemOffset = mSettings->get<size_t>("BaseItems", "itemOffset");
@@ -337,36 +363,23 @@ namespace DiabloExe
             el[1] = exe.read32();
         constexpr auto invCellSize = 28;
 
-        std::unordered_set<std::string> usedIds;
+        SimpleIdGenerator idGenerator;
 
         for (size_t i = 0; i < count; i++)
         {
             exe.FAfseek(itemOffset + 76 * i, SEEK_SET);
-            BaseItem tmp(exe, codeOffset);
+            ExeItem tmp(exe, codeOffset);
 
             if (tmp.name.empty())
                 continue;
 
-            std::string idBase = tmp.name;
-            Misc::StringUtils::toLower(idBase);
-            Misc::StringUtils::replace(idBase, " ", "_");
-            Misc::StringUtils::replace(idBase, "-", "_");
+            tmp.idName = idGenerator.generateIdFromName(tmp.name);
 
-            std::string idName = idBase;
-            for (int32_t j = 1; usedIds.count(idName); j++)
-            {
-                idName = idBase + "_" + std::to_string(j);
-                Misc::StringUtils::replace(idName, "__", "_");
-            }
-
-            usedIds.insert(idName);
-            tmp.idName = idName;
-
-            auto dropGraphicsId = itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId];
+            size_t dropGraphicsId = itemGraphicsIdToDropGraphicsId[tmp.invGraphicsId];
             tmp.dropItemGraphicsPath = "items/" + mItemDropGraphicsFilename[dropGraphicsId] + ".cel";
             tmp.dropItemSoundPath = mSoundFilename[mItemGraphicsIdToDropSfxId[dropGraphicsId]];
             tmp.invPlaceItemSoundPath = mSoundFilename[mItemGraphicsIdToInvPlaceSfxId[dropGraphicsId]];
-            auto& s = objCursFrameSizes[tmp.invGraphicsId + 11];
+            const std::array<int32_t, 2>& s = objCursFrameSizes[tmp.invGraphicsId + 11];
             if (i == 0)
             {
                 tmp.invSizeX = 1;
@@ -399,20 +412,24 @@ namespace DiabloExe
         }
     }
 
-    void DiabloExe::loadAffixes(FAIO::FAFileObject& exe, size_t codeOffset)
+    void DiabloExe::loadMagicItemEffects(FAIO::FAFileObject& exe, size_t codeOffset)
     {
-        size_t affixOffset = mSettings->get<size_t>("Affix", "affixOffset");
-        size_t count = mSettings->get<size_t>("Affix", "count");
+        size_t offset = mSettings->get<size_t>("MagicItemEffect", "magicItemEffectOffset");
+        size_t count = mSettings->get<size_t>("MagicItemEffect", "count");
+
+        SimpleIdGenerator idGenerator;
 
         for (size_t i = 0; i < count; i++)
         {
-            exe.FAfseek(affixOffset + 48 * i, SEEK_SET);
-            Affix tmp(exe, codeOffset);
+            exe.FAfseek(offset + 48 * i, SEEK_SET);
+            ExeMagicItemEffect tmp(exe, codeOffset);
             if (Misc::StringUtils::containsNonPrint(tmp.mName))
                 continue;
             if (tmp.mName.empty())
                 continue;
-            mAffixes.push_back(tmp);
+
+            tmp.mIdName = idGenerator.generateIdFromName((tmp.mIsPrefix ? "prefix_" : "suffix_") + tmp.mName);
+            mMagicItemEffects.push_back(tmp);
         }
     }
 
@@ -666,15 +683,15 @@ namespace DiabloExe
         std::stringstream ss;
 
         ss << "Monsters: " << mMonsters.size() << std::endl;
-        for (std::map<std::string, Monster>::const_iterator it = mMonsters.begin(); it != mMonsters.end(); ++it)
+        for (const auto& mMonster : mMonsters)
         {
-            ss << it->second.dump();
+            ss << mMonster.second.dump();
         }
 
         ss << "Npcs: " << mNpcs.size() << std::endl;
-        for (std::map<std::string, Npc>::const_iterator it = mNpcs.begin(); it != mNpcs.end(); ++it)
+        for (const auto& mNpc : mNpcs)
         {
-            ss << it->first << std::endl << it->second.dump();
+            ss << mNpc.first << std::endl << mNpc.second.dump();
         }
 
         ss << "Character Stats: " << mCharacters.size() << std::endl
@@ -684,19 +701,19 @@ namespace DiabloExe
            << mCharacters.at("Sorceror").dump();
 
         ss << "Base Items: " << mBaseItems.size() << std::endl;
-        for (auto& baseItem : mBaseItems)
+        for (const auto& baseItem : mBaseItems)
             ss << baseItem.dump();
 
         ss << "Unique Items: " << mUniqueItems.size() << std::endl;
-        for (auto& uniqueItem : mUniqueItems)
+        for (const auto& uniqueItem : mUniqueItems)
             ss << uniqueItem.dump();
 
-        ss << "Affixes: " << mAffixes.size() << std::endl;
-        for (auto& affix : mAffixes)
-            ss << affix.dump();
+        ss << "Magic Item Effects: " << mMagicItemEffects.size() << std::endl;
+        for (const auto& effect : mMagicItemEffects)
+            ss << effect.dump();
 
         return ss.str();
     }
 
-    bool DiabloExe::isLoaded() const { return !mMonsters.empty() && !mNpcs.empty() && !mBaseItems.empty() && !mAffixes.empty(); }
+    bool DiabloExe::isLoaded() const { return !mMonsters.empty() && !mNpcs.empty() && !mBaseItems.empty() && !mMagicItemEffects.empty(); }
 }

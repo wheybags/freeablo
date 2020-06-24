@@ -74,12 +74,14 @@ namespace FAWorld
     {
         saver.save(x);
         saver.save(y);
+        saver.save(isStart);
     }
 
     void PlayerInput::DragOverTileData::load(Serial::Loader& loader)
     {
         x = loader.load<int32_t>();
         y = loader.load<int32_t>();
+        isStart = loader.load<int32_t>();
     }
 
     void PlayerInput::TargetActorData::save(Serial::Saver& saver) const { saver.save(actorId); }
@@ -183,6 +185,10 @@ namespace FAWorld
         itemLocation.load(loader);
         shopkeeperId = loader.load<int32_t>();
     }
+
+    void PlayerInput::UseItemData::save(Serial::Saver& saver) const { target.save(saver); }
+
+    void PlayerInput::UseItemData::load(Serial::Loader& loader) { target.load(loader); }
 
     void PlayerInput::removeUnnecessaryInputs(std::vector<PlayerInput>& inputs)
     {

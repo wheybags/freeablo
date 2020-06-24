@@ -1,6 +1,7 @@
 #pragma once
 #include "hoverstate.h"
 #include "itemmap.h" // TODO: remove, only included for the Tile type
+#include <faworld/item/item.h>
 #include <functional>
 #include <level/level.h>
 #include <misc/stdhashes.h>
@@ -64,9 +65,8 @@ namespace FAWorld
 
         int32_t height() const;
 
-        const Misc::Point upStairsPos() const;
-
-        const Misc::Point downStairsPos() const;
+        const Level::LevelTransitionArea& upStairsArea() const { return mLevel.upStairsArea(); }
+        const Level::LevelTransitionArea& downStairsArea() const { return mLevel.downStairsArea(); }
 
         bool isDoor(const Misc::Point& point) const;
         bool activateDoor(const Misc::Point& point);
@@ -102,8 +102,8 @@ namespace FAWorld
 
         int32_t getLevelIndex() const { return mLevelIndex; }
 
-        bool dropItem(std::unique_ptr<Item>&& item, const Actor& actor, Misc::Point tile);
-        bool dropItemClosestEmptyTile(Item& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction);
+        bool dropItem(std::unique_ptr<Item>& item, const Actor& actor, Misc::Point tile);
+        bool dropItemClosestEmptyTile(std::unique_ptr<Item>& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction);
 
         Actor* getActorById(int32_t id);
 

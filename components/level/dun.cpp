@@ -1,9 +1,10 @@
 #include "dun.h"
-#include <iostream>
-#include <stdio.h>
-
 #include <faio/fafileobject.h>
+#include <iostream>
+#include <misc/stringops.h>
 #include <serial/loader.h>
+#include <stdio.h>
+#include <tinyxml2.h>
 
 namespace Level
 {
@@ -36,6 +37,47 @@ namespace Level
         int32_t height = loader.load<int32_t>();
 
         mBlocks = Misc::Array2D<int32_t>(width, height, std::move(tmp));
+    }
+
+    Dun::Dun(const tinyxml2::XMLDocument& xml)
+    {
+        const tinyxml2::XMLElement* mapElement = xml.FirstChildElement("map");
+        int32_t width = mapElement->IntAttribute("width", -1);
+        int32_t height = mapElement->IntAttribute("height", -1);
+        release_assert(width > 0 && height > 0);
+
+        const tinyxml2::XMLElement* tilsetElement = mapElement->FirstChildElement("tileset");
+        release_assert(tilsetElement->IntAttribute("firstgid", -1) == 1);
+
+        // Only allow one tileset
+        release_assert(tilsetElement->NextSiblingElement("tileset") == nullptr);
+
+        const tinyxml2::XMLElement* tilesLayer = getFirstChildWithTypeAndAttribute(mapElement, "layer", "name", "tiles");
+        const tinyxml2::XMLElement* dataElement = tilesLayer->FirstChildElement("data");
+        release_assert(std::string(dataElement->Attribute("encoding")) == "csv");
+
+        std::string csvData = dataElement->GetText();
+
+        std::vector<std::string> numbers = Misc::StringUtils::split(csvData, ',', Misc::StringUtils::SplitEmptyBehavior::StripEmpties);
+        release_assert(numbers.size() == size_t(width * height));
+
+        std::vector<int32_t> data;
+        data.reserve(numbers.size());
+
+        for (std::string& str : numbers)
+        {
+            Misc::StringUtils::lstrip(str);
+            Misc::StringUtils::rstrip(str);
+            release_assert(!str.empty());
+
+            char* end = nullptr;
+            int32_t val = int32_t(strtol(str.data(), &end, 10));
+            release_assert(end == str.data() + str.size());
+
+            data.push_back(val);
+        }
+
+        mBlocks = Misc::Array2D<int32_t>(width, height, std::move(data));
     }
 
     Dun::Dun(int32_t width, int32_t height) { resize(width, height); }

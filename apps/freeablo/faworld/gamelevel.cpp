@@ -6,7 +6,9 @@
 #include "missile/missile.h"
 #include "world.h"
 #include <diabloexe/diabloexe.h>
+#include <engine/debugsettings.h>
 #include <misc/assert.h>
+#include <render/spritegroup.h>
 
 namespace FAWorld
 {
@@ -67,10 +69,6 @@ namespace FAWorld
 
     int32_t GameLevel::height() const { return mLevel.height(); }
 
-    const Misc::Point GameLevel::upStairsPos() const { return mLevel.upStairsPos(); }
-
-    const Misc::Point GameLevel::downStairsPos() const { return mLevel.downStairsPos(); }
-
     bool GameLevel::isDoor(const Misc::Point& point) const { return mLevel.isDoor(point); }
     bool GameLevel::activateDoor(const Misc::Point& point)
     {
@@ -120,6 +118,32 @@ namespace FAWorld
 
         for (auto& p : mItemMap->mItems)
             p.second.update();
+
+        if (DebugSettings::DebugLevelTransitions)
+        {
+            for (const Level::LevelTransitionArea& transition : {upStairsArea(), downStairsArea()})
+            {
+                for (int32_t y = transition.offset.y; y < transition.offset.y + transition.dimensions.h; y++)
+                {
+                    for (int32_t x = transition.offset.x; x < transition.offset.x + transition.dimensions.w; x++)
+                    {
+                        Render::Color highlightColor = Render::Colors::green;
+
+                        if (transition.triggerMask.get(x - transition.offset.x, y - transition.offset.y))
+                            highlightColor = Render::Colors::red;
+
+                        highlightColor.a = 0.1f;
+                        FARender::Renderer::get()->mTmpDebugRenderData.push_back(TileData{{x, y}, highlightColor});
+                    }
+                }
+
+                Vec2Fix centre = Vec2Fix(transition.offset + transition.playerSpawnOffset) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+                FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{centre, Render::Colors::red, 2});
+
+                centre = Vec2Fix(transition.offset + transition.exitOffset) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5"));
+                FARender::Renderer::get()->mTmpDebugRenderData.push_back(PointData{centre, Render::Colors::green, 2});
+            }
+        }
     }
 
     void GameLevel::insertActor(Actor* actor)
@@ -145,7 +169,7 @@ namespace FAWorld
         Actor* blocking = nullptr;
         if (mActorMap2D.count(actor->getPos().current()))
             blocking = mActorMap2D[actor->getPos().current()];
-        debug_assert(blocking == actor || blocking == nullptr || blocking->isDead());
+        debug_assert(blocking == actor || blocking == nullptr || (blocking->getWorld()->mLoading || blocking->isDead()));
 
         mActorMap2D[actor->getPos().current()] = actor;
 
@@ -153,7 +177,7 @@ namespace FAWorld
         {
             if (mActorMap2D.count(actor->getPos().next()))
                 blocking = mActorMap2D[actor->getPos().next()];
-            debug_assert(blocking == actor || blocking == nullptr || blocking->isDead());
+            debug_assert(blocking == actor || blocking == nullptr || (blocking->getWorld()->mLoading || blocking->isDead()));
 
             mActorMap2D[actor->getPos().next()] = actor;
         }
@@ -233,9 +257,9 @@ namespace FAWorld
         return it->second;
     }
 
-    static Cel::Colour friendHoverColor() { return {180, 110, 110, true}; }
-    static Cel::Colour enemyHoverColor() { return {164, 46, 46, true}; }
-    static Cel::Colour itemHoverColor() { return {185, 170, 119, true}; }
+    static ByteColour friendHoverColor() { return {180, 110, 110, true}; }
+    static ByteColour enemyHoverColor() { return {164, 46, 46, true}; }
+    static ByteColour itemHoverColor() { return {185, 170, 119, true}; }
 
     void GameLevel::fillRenderState(FARender::RenderState* state, Actor* displayedActor, const HoverStatus& hoverStatus)
     {
@@ -246,16 +270,16 @@ namespace FAWorld
         {
             auto tmp = mActors[i]->mAnimation.getCurrentRealFrame();
 
-            FARender::FASpriteGroup* sprite = tmp.first;
+            Render::SpriteGroup* sprite = tmp.first;
             int32_t frame = tmp.second;
-            std::optional<Cel::Colour> hoverColor;
+            std::optional<ByteColour> hoverColor;
             if (mActors[i]->getId() == hoverStatus.hoveredActorId)
                 hoverColor = mActors[i]->isEnemy(displayedActor) ? enemyHoverColor() : friendHoverColor();
             // offset the sprite for the current direction of the actor
 
             if (sprite)
             {
-                frame += static_cast<int32_t>(mActors[i]->getPos().getDirection().getDirection8()) * sprite->getAnimLength();
+                frame += static_cast<int32_t>(mActors[i]->getPos().getDirection().getDirection8()) * sprite->getAnimationLength();
                 state->mObjects.push_back({sprite, static_cast<uint32_t>(frame), mActors[i]->getPos(), hoverColor});
             }
         }
@@ -297,14 +321,14 @@ namespace FAWorld
         release_assert(false && "tried to remove actor that isn't in level");
     }
 
-    bool GameLevel::dropItem(std::unique_ptr<Item>&& item, const Actor& actor, Misc::Point tile) { return mItemMap->dropItem(move(item), actor, tile); }
+    bool GameLevel::dropItem(std::unique_ptr<Item>& item, const Actor& actor, Misc::Point tile) { return mItemMap->dropItem(item, actor, tile); }
 
-    bool GameLevel::dropItemClosestEmptyTile(Item& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction)
+    bool GameLevel::dropItemClosestEmptyTile(std::unique_ptr<Item>& item, const Actor& actor, const Misc::Point& position, Misc::Direction direction)
     {
         auto tryDrop = [&](Misc::Point pos) {
             bool res = false;
             if (isPassable(pos, &actor) && !mItemMap->getItemAt(pos))
-                res = dropItem(std::unique_ptr<Item>{new Item(item)}, actor, pos);
+                res = dropItem(item, actor, pos);
             return res;
         };
 

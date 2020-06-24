@@ -25,6 +25,25 @@ namespace Render
         }
     };
 
+    struct DebugVertex
+    {
+        float vertex_position[2];
+        float vertex_color[4];
+
+        static const VertexLayout& layout()
+        {
+            static VertexLayout layout{{
+                                           Format::RG32F,
+                                           Format::RGBA32F,
+                                       },
+                                       VertexInputRate::ByVertex};
+
+            debug_assert(layout.getSizeInBytes() == sizeof(DebugVertex));
+
+            return layout;
+        }
+    };
+
     struct SpriteVertexMain
     {
         float vertex_position[2];

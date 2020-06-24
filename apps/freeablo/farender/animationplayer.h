@@ -1,6 +1,7 @@
 #pragma once
 #include "../faworld/world.h"
 #include "renderer.h"
+#include <fa_nuklear.h>
 
 namespace FASaveGame
 {
@@ -27,11 +28,11 @@ namespace FARender
         void load(FASaveGame::GameLoader& loader);
         void save(FASaveGame::GameSaver& saver) const;
 
-        std::pair<FARender::FASpriteGroup*, int32_t> getCurrentFrame() const;
+        std::pair<Render::SpriteGroup*, int32_t> getCurrentFrame() const;
         AnimationType getCurrentAnimationType() { return mPlayingAnimType; }
 
-        void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, AnimationType type, int32_t startFrame = 0);
-        void playAnimation(FARender::FASpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int32_t> frameSequence);
+        void playAnimation(Render::SpriteGroup* anim, FAWorld::Tick frameDuration, AnimationType type, int32_t startFrame = 0);
+        void playAnimation(Render::SpriteGroup* anim, FAWorld::Tick frameDuration, std::vector<int32_t> frameSequence);
 
         void stopAnimation();
         bool isPlaying() { return mCurrentAnim != nullptr; }
@@ -41,7 +42,7 @@ namespace FARender
         //! The difference from playAnimation is that it will not start at the start of the new animation,
         //! but at whatever point the animation running before it was at, ie it "replaces" instead of
         //! playing a new animation
-        void replaceAnimation(FARender::FASpriteGroup* anim);
+        void replaceAnimation(Render::SpriteGroup* anim);
 
         void update();
         int32_t getAnimLength() const;
@@ -52,7 +53,7 @@ namespace FARender
         bool animationRestoredAfterSave = false;
 
     private:
-        FARender::FASpriteGroup* mCurrentAnim = nullptr;
+        Render::SpriteGroup* mCurrentAnim = nullptr;
 
         FAWorld::Tick mPlayingAnimDuration = 0;
         AnimationType mPlayingAnimType = AnimationType::Once;

@@ -11,22 +11,16 @@
 #include <misc/assert.h>
 #include <numeric>
 #include <render/cursor.h>
-#include <render/levelobjects.h>
 #include <render/renderinstance.h>
+#include <render/spritegroup.h>
 #include <render/texture.h>
 #include <thread>
 
 namespace FARender
 {
-    FASpriteGroup* getDefaultSprite()
-    {
-        static FASpriteGroup defaultSprite;
-        return &defaultSprite;
-    }
-
     Renderer* Renderer::mRenderer = nullptr;
 
-    std::unique_ptr<CelFontInfo> Renderer::generateCelFont(FASpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing)
+    std::unique_ptr<CelFontInfo> Renderer::generateCelFont(Render::SpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing)
     {
         std::unique_ptr<CelFontInfo> ret(new CelFontInfo());
         ret->initByFontData(fontData, fontTexture->getWidth(), spacing);
@@ -38,7 +32,7 @@ namespace FARender
         return ret;
     }
 
-    std::unique_ptr<PcxFontInfo> Renderer::generateFont(FASpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData)
+    std::unique_ptr<PcxFontInfo> Renderer::generateFont(Render::SpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData)
     {
         std::unique_ptr<PcxFontInfo> ret(new PcxFontInfo());
         ret->init(binPath, fontInitData);
@@ -58,21 +52,21 @@ namespace FARender
         nk_font_atlas_begin(&atlas);
     }
 
-    std::unique_ptr<FASpriteGroup> nk_fa_font_stash_end(nk_context* ctx, NuklearDevice::InitData& initData)
+    std::unique_ptr<Render::SpriteGroup> nk_fa_font_stash_end(nk_context* ctx, NuklearDevice::InitData& initData)
     {
         int width, height;
         const void* imageData = nk_font_atlas_bake(&initData.atlas, &width, &height, NK_FONT_ATLAS_RGBA32);
 
-        std::unique_ptr<FASpriteGroup> sprite = std::make_unique<FASpriteGroup>();
+        std::unique_ptr<Render::SpriteGroup> sprite;
         {
             Render::BaseTextureInfo textureInfo;
             textureInfo.width = width;
             textureInfo.height = height;
             textureInfo.format = Render::Format::RGBA8UNorm;
             std::unique_ptr<Render::Texture> texture = Render::mainRenderInstance->createTexture(textureInfo);
-            texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData));
+            texture->updateImageData(0, 0, 0, texture->width(), texture->height(), reinterpret_cast<const uint8_t*>(imageData), texture->width());
 
-            sprite->init(std::move(texture));
+            sprite = std::make_unique<Render::SpriteGroup>(std::move(texture));
         }
 
         nk_font_atlas_end(&initData.atlas, sprite->getNkImage().handle, &initData.nullTexture);
@@ -118,6 +112,9 @@ namespace FARender
         mRenderer = this;
 
         mLevelRenderer = std::make_unique<LevelRenderer>();
+
+        std::vector<Image> itemCursorImages = Cel::CelDecoder(mSpriteLoader.mGuiSprites.itemCursors.path).decode();
+        mDefaultCursor = std::make_unique<Render::Cursor>(itemCursorImages[0], 0, 0);
     }
 
     Renderer::~Renderer()
@@ -179,10 +176,10 @@ namespace FARender
         int64_t int64;
     };
 
-    static void fill(const FAWorld::GameLevel& level, const std::vector<ObjectToRender> src, Render::LevelObjects& dst)
+    static void fill(const FAWorld::GameLevel& level, const std::vector<ObjectToRender> src, LevelObjects& dst)
     {
         if (dst.width() != level.width() || dst.height() != level.height())
-            dst = Render::LevelObjects(level.width(), level.height());
+            dst = LevelObjects(level.width(), level.height());
 
         for (int32_t x = 0; x < dst.width(); x++)
             for (int32_t y = 0; y < dst.height(); y++)
@@ -193,8 +190,8 @@ namespace FARender
             auto& object = src[i];
             auto& position = object.position;
 
-            Render::LevelObject obj;
-            obj.sprite = object.spriteGroup->getSpriteGroup();
+            LevelObject obj;
+            obj.sprite = object.spriteGroup;
             obj.spriteFrame = object.frame;
             obj.fractionalPos = position.getFractionalPos();
             obj.hoverColor = object.hoverColor;
@@ -228,17 +225,18 @@ namespace FARender
                 fill(*state->level, state->mItems, mItems);
 
                 mLevelRenderer->drawLevel(state->level->mLevel,
-                                          state->tileset.minTops->getSpriteGroup(),
-                                          state->tileset.minBottoms->getSpriteGroup(),
-                                          state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites->getSpriteGroup() : nullptr,
+                                          state->tileset.minTops,
+                                          state->tileset.minBottoms,
+                                          state->tileset.mSpecialSprites ? state->tileset.mSpecialSprites : nullptr,
                                           state->tileset.mSpecialSpriteMap,
                                           mLevelObjects,
                                           mItems,
-                                          state->mPos.getFractionalPos());
+                                          state->mPos.getFractionalPos(),
+                                          state->debugData);
             }
 
             state->nuklearData.render({Render::getWindowSize().windowWidth, Render::getWindowSize().windowHeight}, *Render::mainCommandQueue);
-            Renderer::updateCursor(state);
+            Renderer::updateCursor(state->currentCursor);
         }
 
         Render::draw();
@@ -252,31 +250,14 @@ namespace FARender
         return true;
     }
 
-    void Renderer::updateCursor(RenderState* State)
+    void Renderer::updateCursor(const Render::Cursor* cursor)
     {
-        if (State->mCursorPath.empty())
-        {
+        if (!cursor)
             Render::Cursor::setDefaultCursor();
-        }
-        else if (State->mCursorFrame != mCurrentCursorFrame)
-        {
-            Cel::CelFile cel(State->mCursorPath);
-            std::vector<Image> images = cel.decode();
+        else if (cursor != mCurrentCursor)
+            cursor->activateCursor();
 
-            Cel::CelFrame& celFrame = images[State->mCursorFrame];
-            mCursorSize = {celFrame.width(), celFrame.height()};
-
-            int32_t hot_x = 0, hot_y = 0;
-            if (State->mCursorCentered)
-            {
-                hot_x = mCursorSize.x / 2;
-                hot_y = mCursorSize.y / 2;
-            }
-
-            mCurrentCursor = std::make_unique<Render::Cursor>(celFrame, hot_x, hot_y);
-            mCurrentCursor->activateCursor();
-            mCurrentCursorFrame = State->mCursorFrame;
-        }
+        mCurrentCursor = cursor;
     }
 
     void Renderer::getWindowDimensions(int32_t& w, int32_t& h)

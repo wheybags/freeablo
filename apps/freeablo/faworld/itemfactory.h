@@ -1,70 +1,53 @@
 #pragma once
-#include "diabloexe/baseitem.h"
-#include "itemenums.h"
-#include "misc/enum_range.h"
+#include <faworld/item/item.h>
+#include <faworld/item/itembaseholder.h>
 #include <functional>
-#include <map>
 #include <memory>
 #include <random/random.h>
-#include <vector>
 
 namespace DiabloExe
 {
     class DiabloExe;
 }
 
-namespace Cel
+namespace FASaveGame
 {
-    class CelFile;
+    class GameSaver;
+    class GameLoader;
 }
 
 namespace FAWorld
 {
-    class Item;
-    enum class ItemId;
-    enum class UniqueItemId;
-
-    class BaseItemGenOptions
-    {
-    public:
-        using thisType = BaseItemGenOptions;
-    };
-
-    namespace ItemFilter
-    {
-        std::function<bool(const DiabloExe::BaseItem& item)> maxQLvl(int32_t value);
-        std::function<bool(const DiabloExe::BaseItem& item)> sellableGriswoldBasic();
-    }
+    using ItemFilter = std::function<bool(const ItemBase& base)>;
+    using ItemPrefixOrSuffixFilter = std::function<bool(const ItemPrefixOrSuffixBase&)>;
 
     class ItemFactory
     {
     public:
         explicit ItemFactory(const DiabloExe::DiabloExe& exe, Random::Rng& rng);
-        Item generateBaseItem(ItemId id, const BaseItemGenOptions& options = {}) const;
-        Item generateUniqueItem(UniqueItemId id) const;
-        template <typename... FilterTypes> ItemId randomItemId(const FilterTypes&... filters) const
+
+        std::unique_ptr<Item> generateBaseItem(const std::string& id) const;
+
+        enum class ItemGenerationType
         {
-            static std::vector<ItemId> pool;
-            pool.clear();
-            for (auto id : enum_range<ItemId>())
-            {
-                const DiabloExe::BaseItem& info = getInfo(id);
-                bool filteredOut = false;
-                static_cast<void>(std::initializer_list<int>{(filteredOut = filteredOut || !filters(info), 0)...});
-                if (filteredOut)
-                    continue;
-                for (int32_t i = 0; i < static_cast<int32_t>(info.dropRate); ++i)
-                    pool.push_back(id);
-            }
-            return pool[mRng.randomInRange(0, pool.size() - 1)];
-        }
+            Normal,
+            OnlyBaseItems,
+            AlwaysMagical,
+        };
+        std::unique_ptr<Item> generateRandomItem(int32_t itemLevel, ItemGenerationType generationType) const;
+        std::unique_ptr<Item> generateRandomItem(int32_t itemLevel, ItemGenerationType generationType, const ItemFilter& filter) const;
+
+        const ItemBase* randomItemBase(const ItemFilter& filter) const;
+        const ItemPrefixOrSuffixBase* randomPrefixOrSuffixBase(const ItemPrefixOrSuffixFilter& filter) const;
+        void applyRandomEnchantment(EquipmentItem& item, int32_t minLevel, int32_t maxLevel) const;
+
+        void saveItem(const Item& item, FASaveGame::GameSaver& saver) const;
+        std::unique_ptr<Item> loadItem(FASaveGame::GameLoader& loader) const;
+
+        const ItemBaseHolder& getItemBaseHolder() const { return mItemBaseHolder; }
 
     private:
-        const DiabloExe::BaseItem& getInfo(ItemId id) const;
-        // TODO: replace this with something more decent
-        mutable std::unique_ptr<Cel::CelFile> mObjcursCel;
-        std::map<int32_t, ItemId> mUniqueBaseItemIdToItemId;
-        const DiabloExe::DiabloExe& mExe;
+        ItemBaseHolder mItemBaseHolder;
         Random::Rng& mRng;
     };
 }

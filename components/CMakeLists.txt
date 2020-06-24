@@ -26,7 +26,7 @@ add_library(Levels
     level/sol.h
     level/baseitemmanager.h
     level/baseproperty.h)
-target_link_libraries(Levels FAIO DiabloExe Serial)
+target_link_libraries(Levels FAIO DiabloExe Serial tinyxml2)
 set_target_properties(Levels PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Misc
@@ -58,7 +58,7 @@ add_library(Misc
     misc/averager.cpp
     misc/averager.h
 )
-target_link_libraries(Misc PUBLIC Settings png SDL2 Serial Filesystem)
+target_link_libraries(Misc PUBLIC Settings png SDL2 Serial Filesystem tinyxml2)
 SET_TARGET_PROPERTIES(Misc PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Misc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
@@ -73,9 +73,7 @@ set_target_properties(Random PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 set(RenderFiles
     render/render.h
-    render/levelobjects.h
     render/sdl2backend.cpp
-        render/misc.h
     render/atlastexture.cpp
     render/atlastexture.h
     render/OpenGL/vertexarrayobjectopengl.cpp
@@ -110,7 +108,19 @@ set(RenderFiles
     render/alignedcpubuffer.h
     render/alignedcpubuffer.cpp
     render/rectpack.cpp
-    render/rectpack.h render/cursor.cpp render/cursor.h render/framebuffer.h render/framebuffer.cpp render/OpenGL/framebufferopengl.cpp render/OpenGL/framebufferopengl.h)
+    render/rectpack.h
+    render/cursor.cpp
+    render/cursor.h
+    render/framebuffer.h
+    render/framebuffer.cpp
+    render/OpenGL/framebufferopengl.cpp
+    render/OpenGL/framebufferopengl.h
+    render/texturereference.cpp
+    render/texturereference.h
+    render/spritegroup.cpp
+    render/spritegroup.h
+    render/debugrenderer.cpp
+    render/debugrenderer.h)
 add_library(Render ${RenderFiles})
 target_link_libraries(Render PUBLIC Cel Levels nuklear SDL2 SDL_image glad)
 set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
@@ -137,8 +147,8 @@ add_library(DiabloExe
     diabloexe/uniqueitem.h
     diabloexe/characterstats.h
     diabloexe/characterstats.cpp
-    diabloexe/affix.cpp
-    diabloexe/affix.h
+    diabloexe/exemagicitemeffect.cpp
+    diabloexe/exemagicitemeffect.h
     diabloexe/talkdata.h)
 target_link_libraries(DiabloExe Misc FAIO)
 set_target_properties(DiabloExe PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")

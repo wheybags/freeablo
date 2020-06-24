@@ -1,5 +1,4 @@
 #include "selectheromenuscreen.h"
-
 #include "../../engine/enginemain.h"
 #include "../../farender/animationplayer.h"
 #include "../../farender/renderer.h"
@@ -10,6 +9,7 @@
 #include "diabloexe/characterstats.h"
 #include "startingmenuscreen.h"
 #include <memory>
+#include <render/spritegroup.h>
 
 namespace FAGui
 {

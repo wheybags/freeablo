@@ -3,6 +3,12 @@
 #include "actor.h"
 #include "diabloexe/monster.h"
 #include "itemfactory.h"
+#include <engine/debugsettings.h>
+#include <engine/enginemain.h>
+#include <faworld/item/equipmentitem.h>
+#include <faworld/item/golditem.h>
+#include <faworld/item/golditembase.h>
+#include <faworld/item/itemprefixorsuffix.h>
 #include <memory>
 #include <misc/stringops.h>
 
@@ -81,13 +87,13 @@ namespace FAWorld
         release_assert(dungeonLevel);
 
         if (dungeonLevel->getLevelIndex() >= 16)
-            stats.toHitMeleeMinMaxCap.min = 30;
+            stats.toHitMinMaxCap.min = 30;
         else if (dungeonLevel->getLevelIndex() >= 15)
-            stats.toHitMeleeMinMaxCap.min = 25;
+            stats.toHitMinMaxCap.min = 25;
         else if (dungeonLevel->getLevelIndex() >= 14)
-            stats.toHitMeleeMinMaxCap.min = 20;
+            stats.toHitMinMaxCap.min = 20;
         else
-            stats.toHitMeleeMinMaxCap.min = 15;
+            stats.toHitMinMaxCap.min = 15;
 
         stats.meleeDamageBonusRange = IntRange(monsterProperties.minDamage, monsterProperties.maxDamage);
         stats.hitRecoveryDamageThreshold = actorStats.mLevel + 3; // https://wheybags.gitlab.io/jarulfs-guide/#monster-timing-information
@@ -103,25 +109,45 @@ namespace FAWorld
 
     void Monster::spawnItem()
     {
-        // TODO: Spawn magic, unique and special/quest items.
-        ItemId itemId = randomItem();
-        if (itemId < ItemId::COUNT)
+        // TODO: Spawn unique and special/quest items, set gold drop amount
+
+        if (DebugSettings::itemGenerationType == DebugSettings::ItemGenerationType::Normal && mWorld.mRng->randomInRange(0, 99) > 40)
+            return;
+
+        std::unique_ptr<Item> item;
+        if (DebugSettings::itemGenerationType == DebugSettings::ItemGenerationType::Normal && mWorld.mRng->randomInRange(0, 99) > 25)
         {
-            Item item = mWorld.getItemFactory().generateBaseItem(itemId);
-            getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction(Misc::Direction8::none));
+            item = mWorld.getItemFactory().generateBaseItem("gold");
+
+            // https://wheybags.gitlab.io/jarulfs-guide/#item-properties
+            int32_t difficultyFactor = 0;
+
+            Difficulty difficulty = Difficulty::Normal;
+            switch (difficulty)
+            {
+                case Difficulty::Normal:
+                    difficultyFactor = 0;
+                    break;
+                case Difficulty::Nightmare:
+                    difficultyFactor = 16;
+                    break;
+                case Difficulty::Hell:
+                    difficultyFactor = 32;
+                    break;
+            }
+
+            // TODO: there should be some special case here for hell and crypt levels, see Jarulf's guide link above
+            int32_t baseAmount = difficultyFactor + getLevel()->getLevelIndex();
+            int32_t goldCount = mWorld.mRng->randomInRange(5 * baseAmount, 15 * baseAmount - 1);
+
+            release_assert(item->getAsGoldItem()->trySetCount(std::min(goldCount, item->getAsGoldItem()->getBase()->mMaxCount)));
         }
-    }
+        else
+        {
+            item = mWorld.getItemFactory().generateRandomItem(mStats.mLevel, ItemFactory::ItemGenerationType::Normal);
+        }
 
-    ItemId Monster::randomItem()
-    {
-        if (mWorld.mRng->randomInRange(0, 99) > 40)
-            // No drop.
-            return ItemId::COUNT;
-
-        if (mWorld.mRng->randomInRange(0, 99) > 25)
-            return ItemId::gold;
-
-        return mWorld.getItemFactory().randomItemId(ItemFilter::maxQLvl(mStats.mLevel));
+        getLevel()->dropItemClosestEmptyTile(item, *this, getPos().current(), Misc::Direction(Misc::Direction8::none));
     }
 
     void Monster::restoreAnimations()

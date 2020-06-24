@@ -12,6 +12,7 @@
 #include "world.h"
 #include <diabloexe/monster.h>
 #include <diabloexe/npc.h>
+#include <engine/debugsettings.h>
 #include <fmt/format.h>
 
 namespace FAWorld
@@ -181,6 +182,12 @@ namespace FAWorld
         if (mInvuln)
             return;
 
+        if (DebugSettings::Instakill)
+        {
+            die();
+            return;
+        }
+
         // https://wheybags.gitlab.io/jarulfs-guide/#getting-hit
         int32_t blockChance = getStats().getCalculatedStats().blockChance;
         blockChance += 2 * (getStats().mLevel - attacker->getStats().mLevel);
@@ -223,8 +230,10 @@ namespace FAWorld
     }
 
     void Actor::heal() { mStats.getHp().current = mStats.getHp().max; }
+    void Actor::heal(int32_t toHeal) { mStats.getHp().add(toHeal); }
 
     void Actor::restoreMana() { mStats.getMana().current = mStats.getMana().max; }
+    void Actor::restoreMana(int32_t toRestore) { mStats.getMana().add(toRestore); }
 
     void Actor::stopMoving(std::optional<Misc::Direction> direction) { mMoveHandler.stopMoving(*this, direction); }
 
@@ -250,19 +259,18 @@ namespace FAWorld
         if (!item)
             return;
 
-        auto dropBack = [&]() { itemMap.dropItem(std::move(item), *this, target.itemLocation); };
+        auto dropBack = [&]() { itemMap.dropItem(item, *this, target.itemLocation); };
         switch (target.action)
         {
             case Target::ItemTarget::ActionType::autoEquip:
-                if (!mInventory.autoPlaceItem(*item))
+                if (!mInventory.autoPlaceItem(item))
                     dropBack();
                 break;
             case Target::ItemTarget::ActionType::toCursor:
-                auto cursorItem = mInventory.getCursorHeld();
-                if (!cursorItem.isEmpty())
+                if (mInventory.getCursorHeld())
                     return dropBack();
 
-                mInventory.setCursorHeld(*item);
+                mInventory.setCursorHeld(std::move(item));
                 break;
         }
     }
@@ -363,14 +371,14 @@ namespace FAWorld
         const LiveActorStats& stats = mStats.getCalculatedStats();
         int32_t toHit = stats.toHitMelee.getCombined();
         toHit -= enemy->getStats().getCalculatedStats().armorClass;
-        toHit = Misc::clamp(toHit, stats.toHitMeleeMinMaxCap.min, stats.toHitMeleeMinMaxCap.max);
-        int32_t roll = mWorld.mRng->randomInRange(0, 99); // TODO: should this be (1,100) instead of (0, 99)?
+        toHit = Misc::clamp(toHit, stats.toHitMinMaxCap.min, stats.toHitMinMaxCap.max);
+        int32_t roll = mWorld.mRng->randomInRange(0, 99);
 
 #ifdef DEBUG_MELEE_COMBAT
         printf("%s melee attacks %s - ", mName.c_str(), enemy->mName.c_str());
 #endif
 
-        if (roll < toHit)
+        if (roll < toHit || DebugSettings::Instakill)
         {
             int32_t damage = stats.meleeDamage;
             damage += mWorld.mRng->randomInRange(stats.meleeDamageBonusRange.start, stats.meleeDamageBonusRange.end);
@@ -423,7 +431,7 @@ namespace FAWorld
 
     void Actor::activateMissile(MissileId id, Misc::Point targetPoint)
     {
-        auto missile = std::make_unique<Missile::Missile>(id, *this, targetPoint);
+        auto missile = std::make_unique<Missile::Missile>(id, *this, Vec2Fix(targetPoint) + Vec2Fix(FixedPoint("0.5"), FixedPoint("0.5")));
         mMissiles.push_back(std::move(missile));
     }
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "debugrenderdata.h"
 #include <Image/image.h>
 #include <atomic>
 #include <cstdint>
@@ -6,7 +7,6 @@
 #include <misc/simplevec2.h>
 #include <render/alignedcpubuffer.h>
 #include <render/atlastexture.h>
-#include <render/levelobjects.h>
 #include <render/vertextypes.h>
 
 namespace Level
@@ -16,8 +16,7 @@ namespace Level
 
 namespace Render
 {
-    class SpriteGroup;
-    class AtlasTextureEntry;
+    class TextureReference;
     class Texture;
     class VertexArrayObject;
     class Pipeline;
@@ -25,8 +24,8 @@ namespace Render
     class DescriptorSet;
     class Framebuffer;
     struct Tile;
-
-    typedef const AtlasTextureEntry* Sprite;
+    class SpriteGroup;
+    class DebugRenderer;
 }
 
 namespace FARender
@@ -64,7 +63,7 @@ namespace FARender
     class DrawLevelCache
     {
     public:
-        void addSprite(Render::Sprite atlasEntry, int32_t x, int32_t y, std::optional<ByteColour> highlightColor);
+        void addSprite(const Render::TextureReference* atlasEntry, int32_t x, int32_t y, std::optional<ByteColour> highlightColor);
         void end(DrawLevelUniforms::CpuBufferType& drawLevelUniformCpuBuffer,
                  Render::Buffer& drawLevelUniformBuffer,
                  Render::VertexArrayObject& vertexArrayObject,
@@ -73,7 +72,7 @@ namespace FARender
                  Render::Framebuffer* nonDefaultFramebuffer);
 
     private:
-        void batchDrawSprite(const Render::AtlasTextureEntry& atlasEntry,
+        void batchDrawSprite(const Render::TextureReference& atlasEntry,
                              int32_t x,
                              int32_t y,
                              std::optional<ByteColour> highlightColor,
@@ -94,7 +93,7 @@ namespace FARender
     private:
         struct SpriteData
         {
-            const Render::AtlasTextureEntry* atlasEntry = nullptr;
+            const Render::TextureReference* atlasEntry = nullptr;
             int32_t x = 0;
             int32_t y = 0;
             std::optional<ByteColour> highlightColor;
@@ -105,6 +104,17 @@ namespace FARender
         std::vector<Render::SpriteVertexPerInstance> mInstanceData;
         Render::Texture* mTexture = nullptr;
     };
+
+    struct LevelObject
+    {
+        bool valid = false;
+        Render::SpriteGroup* sprite = nullptr;
+        int32_t spriteFrame = 0;
+        Vec2Fix fractionalPos;
+        std::optional<ByteColour> hoverColor;
+    };
+
+    typedef Misc::Array2D<std::vector<LevelObject>> LevelObjects; // TODO: get a custom small vector class + use it here
 
     class LevelRenderer
     {
@@ -117,23 +127,27 @@ namespace FARender
                        Render::SpriteGroup* minBottoms,
                        Render::SpriteGroup* specialSprites,
                        const std::map<int32_t, int32_t>& specialSpritesMap,
-                       Render::LevelObjects& objs,
-                       Render::LevelObjects& items,
-                       const Vec2Fix& fractionalPos);
+                       LevelObjects& objs,
+                       LevelObjects& items,
+                       const Vec2Fix& fractionalPos,
+                       const DebugRenderData& debugData);
 
         Render::Tile getTileByScreenPos(size_t x, size_t y, const Vec2Fix& worldPositionOffset);
 
         void toggleTextureFiltering() { mTextureFilter = !mTextureFilter; }
+        void toggleGrid() { mDrawGrid = !mDrawGrid; }
         void adjustZoom(int32_t delta) { mRenderScale = std::clamp(mRenderScale + delta, 1, 5); }
 
     private:
         void createNewLevelDrawFramebuffer();
 
-        void drawAtTile(Render::Sprite sprite, const Misc::Point& tileTop, int spriteW, int spriteH, std::optional<ByteColour> highlightColor = std::nullopt);
-        void drawMovingSprite(Render::Sprite sprite,
-                              const Vec2Fix& fractionalPos,
-                              const Misc::Point& toScreen,
-                              std::optional<Cel::Colour> highlightColor = std::nullopt);
+        void drawTilesetSprite(const Render::TextureReference* sprite,
+                               const Misc::Point& tileScreenPosition,
+                               std::optional<ByteColour> highlightColor = std::nullopt);
+        void drawAtWorldPosition(const Render::TextureReference* sprite,
+                                 const Vec2Fix& fractionalPos,
+                                 const Misc::Point& toScreen,
+                                 std::optional<ByteColour> highlightColor = std::nullopt);
 
     private:
         DrawLevelCache mDrawLevelCache;
@@ -153,5 +167,7 @@ namespace FARender
 
         std::atomic_bool mTextureFilter = false;
         std::atomic_int mRenderScale = 2;
+        std::atomic_bool mDrawGrid = false;
+        std::unique_ptr<Render::DebugRenderer> mDebugRenderer;
     };
 }

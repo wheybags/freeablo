@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <misc/assert.h>
 #include <vector>
@@ -31,7 +32,25 @@ namespace Misc
             mData = mDataVector->data();
         }
 
-        Array2D(int32_t width, int32_t height) : Array2D(width, height, std::vector<T>(width * height)) {}
+        enum class InitType
+        {
+            Uninitialised,
+            DefaultConstructed
+        };
+        Array2D(int32_t width, int32_t height, InitType initType = InitType::DefaultConstructed) : mWidth(width), mHeight(height)
+        {
+            if (initType == InitType::Uninitialised)
+            {
+                mData = reinterpret_cast<T*>(malloc(sizeof(T) * width * height));
+                mUseDelete = false;
+            }
+            else
+            {
+                mDataVector = std::make_unique<std::vector<T>>(width * height);
+                mData = mDataVector->data();
+            }
+        }
+
         Array2D(int32_t width, int32_t height, T* data, PointerDataType dataOwnership) : mWidth(width), mHeight(height)
         {
             switch (dataOwnership)
@@ -64,7 +83,11 @@ namespace Misc
             if (mOwnsExternalPointer)
             {
                 debug_assert(!mDataVector);
-                delete[] mData;
+
+                if (mUseDelete)
+                    delete[] mData;
+                else
+                    free(mData);
             }
         }
 
@@ -82,6 +105,14 @@ namespace Misc
             other.mHeight = 0;
 
             return *this;
+        }
+
+        void memcpyTo(Array2D& other) const
+        {
+            static_assert(std::is_trivially_constructible<T>::value, "probably not a good idea to memcpy complex types");
+            other.resize(width(), height());
+
+            memcpy(other.data(), data(), mWidth * mHeight);
         }
 
         bool pointIsValid(int32_t x, int32_t y) const { return (x >= 0 && x < mWidth && y >= 0 && y < mHeight); }
@@ -135,6 +166,7 @@ namespace Misc
         std::unique_ptr<std::vector<T>> mDataVector;
 
         T* mData = nullptr;
+        bool mUseDelete = false;
         bool mOwnsExternalPointer = false;
     };
 }

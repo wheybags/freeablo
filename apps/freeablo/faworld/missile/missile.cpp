@@ -7,13 +7,19 @@
 
 namespace FAWorld::Missile
 {
-    Missile::Missile(MissileId missileId, Actor& creator, Misc::Point dest)
-        : mCreator(&creator), mMissileId(missileId), mSrcPoint(creator.getPos().current()), mAttr(Attributes::fromId(missileId))
+    Missile::Missile(MissileId missileId, Actor& creator, Vec2Fix dest)
+        : mCreator(&creator), mMissileId(missileId), mSrcPoint(creator.getPos().getFractionalPos()), mAttr(Attributes::fromId(missileId))
     {
         mAttr.mCreation(*this, dest, creator.getLevel());
 
         if (!missileData().mSoundEffect.empty())
             Engine::ThreadManager::get()->playSound(missileData().mSoundEffect);
+
+        const LiveActorStats& stats = creator.mStats.getCalculatedStats();
+        mToHitRanged = stats.toHitRanged;
+        mToHitMinMaxCap = stats.toHitMinMaxCap;
+        mRangedDamage = stats.rangedDamage;
+        mRangedDamageBonusRange = stats.rangedDamageBonusRange;
     }
 
     Missile::Missile(FASaveGame::GameLoader& loader) : mMissileId(static_cast<MissileId>(loader.load<int32_t>())), mAttr(Attributes::fromId(mMissileId))
@@ -22,13 +28,18 @@ namespace FAWorld::Missile
         auto world = loader.currentlyLoadingWorld;
         loader.addFunctionToRunAtEnd([this, world, creatorId]() { mCreator = world->getActorById(creatorId); });
 
-        mSrcPoint = Misc::Point(loader);
+        mSrcPoint = Vec2Fix(loader);
         mComplete = loader.load<bool>();
 
         auto graphicsSize = loader.load<uint32_t>();
         mGraphics.reserve(graphicsSize);
         for (uint32_t i = 0; i < graphicsSize; i++)
             mGraphics.push_back(std::make_unique<MissileGraphic>(loader));
+
+        mToHitRanged.load(loader);
+        mToHitMinMaxCap = IntRange(loader);
+        mRangedDamage = loader.load<int32_t>();
+        mRangedDamageBonusRange = IntRange(loader);
     }
 
     void Missile::save(FASaveGame::GameSaver& saver) const
@@ -44,6 +55,11 @@ namespace FAWorld::Missile
         saver.save(static_cast<uint32_t>(mGraphics.size()));
         for (auto& graphic : mGraphics)
             graphic->save(saver);
+
+        mToHitRanged.save(saver);
+        mToHitMinMaxCap.save(saver);
+        saver.save(mRangedDamage);
+        mRangedDamageBonusRange.save(saver);
     }
 
     const DiabloExe::MissileData& Missile::missileData() const

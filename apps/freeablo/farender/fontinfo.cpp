@@ -2,7 +2,6 @@
 #include "cel/celdecoder.h"
 #include "diabloexe/diabloexe.h"
 #include "faio/fafileobject.h"
-#include "render/levelobjects.h"
 #include <numeric>
 
 namespace FARender

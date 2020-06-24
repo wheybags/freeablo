@@ -35,6 +35,13 @@ namespace FAWorld
 
         virtual void calculateStats(LiveActorStats& stats, const ActorStats& actorStats) const override;
 
+        void addStrength(int32_t delta);
+        void addMagic(int32_t delta);
+        void addDexterity(int32_t delta);
+        void addVitality(int32_t delta);
+
+        void moveToLevel(GameLevel* level, bool placeAtUpStairs);
+
         // This isn't serialised as it must be set before saving can occur.
         bool mPlayerInitialised = false;
 
@@ -42,6 +49,7 @@ namespace FAWorld
         virtual DamageType getMeleeDamageType() const override;
 
     private:
+        void handleTargetingLevelTransitions();
         bool canTalkTo(Actor* actor);
         void onEnemyKilled(Actor* enemy) override;
         void addExperience(Actor& enemy);

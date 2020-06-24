@@ -4,7 +4,10 @@
 #include "equiptarget.h"
 #include "fasavegame/gameloader.h"
 #include "input/inputmanager.h"
+#include "item/itembase.h"
+#include "item/usableitem.h"
 #include "player.h"
+#include "potion.h"
 #include "storedata.h"
 #include <algorithm>
 #include <engine/threadmanager.h>
@@ -77,8 +80,8 @@ namespace FAWorld
                     return;
                 }
 
-                auto cursorItem = mPlayer->mInventory.getCursorHeld();
-                if (!cursorItem.isEmpty())
+                const Item* cursorItem = mPlayer->mInventory.getCursorHeld();
+                if (cursorItem)
                 {
                     mPlayer->dropItem(clickedPoint);
                 }
@@ -91,8 +94,11 @@ namespace FAWorld
             }
             case PlayerInput::Type::DragOverTile:
             {
-                mPlayer->mTarget.clear();
-                mPlayer->mMoveHandler.setDestination({input.mData.dataDragOverTile.x, input.mData.dataDragOverTile.y});
+                if (!mPlayer->isAttacking && (input.mData.dataDragOverTile.isStart || !mPlayer->hasTarget()))
+                {
+                    mPlayer->mTarget.clear();
+                    mPlayer->mMoveHandler.setDestination({input.mData.dataDragOverTile.x, input.mData.dataDragOverTile.y});
+                }
                 return;
             }
             case PlayerInput::Type::TargetActor:
@@ -125,21 +131,8 @@ namespace FAWorld
                 else
                     nextLevelIndex = mPlayer->getLevel()->getNextLevel();
 
-                GameLevel* level = mPlayer->getWorld()->getLevel(nextLevelIndex);
-
-                if (level)
-                {
-                    if (mPlayer == mPlayer->getWorld()->getCurrentPlayer())
-                    {
-                        // Clear atlas texture
-                        //                        Engine::ThreadManager::get()->clearSprites();
-                    }
-
-                    if (input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Up)
-                        mPlayer->teleport(level, Position(level->getFreeSpotNear(level->downStairsPos())));
-                    else
-                        mPlayer->teleport(level, Position(level->getFreeSpotNear(level->upStairsPos())));
-                }
+                if (GameLevel* level = mPlayer->getWorld()->getLevel(nextLevelIndex))
+                    mPlayer->moveToLevel(level, input.mData.dataChangeLevel.direction == PlayerInput::ChangeLevelData::Direction::Down);
 
                 return;
             }
@@ -184,11 +177,11 @@ namespace FAWorld
                 if (item == items.end())
                     return;
 
-                int32_t price = item->item.getPrice();
+                int32_t price = item->item->getPrice();
                 if (mPlayer->mInventory.getTotalGold() < price)
                     return;
 
-                if (!mPlayer->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(item->item))
+                if (!mPlayer->mInventory.getInv(FAWorld::EquipTargetType::inventory).canFitItem(*item->item))
                     return;
 
                 mPlayer->mInventory.takeOutGold(price);
@@ -201,17 +194,28 @@ namespace FAWorld
             {
                 int32_t price = 0;
                 {
-                    const Item& item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
+                    const Item* item = mPlayer->mInventory.getItemAt(input.mData.dataSellItem.itemLocation);
 
                     // TODO: validate sell filter here
-                    if (item.isEmpty() || !item.mIsReal || item.baseId() == ItemId::gold)
+                    if (!item || item->getBase()->mType == ItemType::gold)
                         return;
 
-                    price = item.getPrice();
+                    price = item->getPrice();
                 }
 
-                release_assert(!mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation).isEmpty());
+                release_assert(mPlayer->mInventory.remove(input.mData.dataSellItem.itemLocation));
                 mPlayer->mInventory.placeGold(price, mPlayer->getWorld()->getItemFactory());
+
+                return;
+            }
+            case PlayerInput::Type::UseItem:
+            {
+                if (mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target) &&
+                    mPlayer->mInventory.getItemAt(input.mData.dataUseItem.target)->getAsUsableItem())
+                {
+                    std::unique_ptr<Item> item = mPlayer->mInventory.remove(input.mData.dataUseItem.target);
+                    item->getAsUsableItem()->applyEffect(*mPlayer);
+                }
 
                 return;
             }

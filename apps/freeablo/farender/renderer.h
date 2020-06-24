@@ -1,7 +1,9 @@
 #pragma once
 #include "../faworld/position.h"
+#include "debugrenderdata.h"
 #include "diabloexe/diabloexe.h"
 #include "fontinfo.h"
+#include "levelrenderer.h"
 #include "spriteloader.h"
 #include <atomic>
 #include <condition_variable>
@@ -10,6 +12,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <nuklearmisc/nuklearframedump.h>
 #include <render/cursor.h>
 #include <render/render.h>
 #include <tuple>
@@ -33,24 +36,27 @@ namespace FARender
     class Tileset
     {
     private:
-        FASpriteGroup* minTops = nullptr;
-        FASpriteGroup* minBottoms = nullptr;
-        FASpriteGroup* mSpecialSprites = nullptr;
+        Render::SpriteGroup* minTops = nullptr;
+        Render::SpriteGroup* minBottoms = nullptr;
+        Render::SpriteGroup* mSpecialSprites = nullptr;
         std::map<int32_t, int32_t> mSpecialSpriteMap;
         friend class Renderer;
     };
 
     struct ObjectToRender
     {
-        FASpriteGroup* spriteGroup = nullptr;
+        Render::SpriteGroup* spriteGroup = nullptr;
         uint32_t frame = 0;
         FAWorld::Position position;
-        std::optional<Cel::Colour> hoverColor;
+        std::optional<ByteColour> hoverColor;
     };
 
     class RenderState
     {
     public:
+        explicit RenderState(NuklearDevice& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData) {}
+        RenderState(RenderState&& other) = default;
+
         struct MoveableAtomicBool
         {
             std::atomic_bool val;
@@ -65,25 +71,14 @@ namespace FARender
         MoveableAtomicBool ready;
 
         FAWorld::Position mPos;
-
         std::vector<ObjectToRender> mItems;
         std::vector<ObjectToRender> mObjects;
-
         NuklearFrameDump nuklearData;
-
         Tileset tileset;
-
-        FAWorld::GameLevel* level{};
-
-        std::string mCursorPath;
-        uint32_t mCursorFrame = 0;
-        bool mCursorCentered = false;
-
-        explicit RenderState(NuklearDevice& nuklearGraphicsData) : ready(true), nuklearData(nuklearGraphicsData) {}
-        RenderState(RenderState&& other) = default;
+        FAWorld::GameLevel* level = nullptr;
+        const Render::Cursor* currentCursor = nullptr;
+        DebugRenderData debugData;
     };
-
-    FASpriteGroup* getDefaultSprite();
 
     class Renderer
     {
@@ -103,10 +98,9 @@ namespace FARender
 
         Render::Tile getTileByScreenPos(size_t x, size_t y, const FAWorld::Position& screenPos);
 
-        void updateCursor(RenderState* State);
+        void updateCursor(const Render::Cursor* cursor);
 
         bool renderFrame(RenderState* state); ///< To be called only by Engine::ThreadManager
-        Misc::Point cursorSize() const { return mCursorSize; }
 
         nk_context* getNuklearContext() { return &mNuklearContext; }
 
@@ -120,26 +114,26 @@ namespace FARender
         nk_user_font* consoleFont() const;
 
     private:
-        std::unique_ptr<CelFontInfo> generateCelFont(FASpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing);
-        std::unique_ptr<PcxFontInfo> generateFont(FASpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData);
+        std::unique_ptr<CelFontInfo> generateCelFont(Render::SpriteGroup* fontTexture, const DiabloExe::FontData& fontData, int spacing);
+        std::unique_ptr<PcxFontInfo> generateFont(Render::SpriteGroup* fontTexture, const std::string& binPath, const PcxFontInitData& fontInitData);
 
     public:
         SpriteLoader mSpriteLoader;
         std::unique_ptr<LevelRenderer> mLevelRenderer;
+        DebugRenderData mTmpDebugRenderData;
+        std::unique_ptr<Render::Cursor> mDefaultCursor;
 
     private:
         static Renderer* mRenderer; ///< Singleton instance
 
         std::atomic_bool mDone;
-        Render::LevelObjects mLevelObjects;
-        Render::LevelObjects mItems;
+        LevelObjects mLevelObjects;
+        LevelObjects mItems;
 
         static constexpr size_t NUM_RENDER_STATES = 15;
         std::vector<RenderState> mStates;
 
-        std::unique_ptr<Render::Cursor> mCurrentCursor = nullptr;
-        uint32_t mCurrentCursorFrame = std::numeric_limits<uint32_t>::max();
-        Misc::Point mCursorSize;
+        const Render::Cursor* mCurrentCursor = nullptr;
 
         volatile bool mAlreadyExited = false;
         std::mutex mDoneMutex;
@@ -147,7 +141,7 @@ namespace FARender
 
         nk_context mNuklearContext = nk_context();
         std::unique_ptr<NuklearDevice> mNuklearGraphicsData;
-        std::unique_ptr<FASpriteGroup> mNuklearFontTexture;
+        std::unique_ptr<Render::SpriteGroup> mNuklearFontTexture;
 
         std::atomic<std::int64_t> mWidthHeightTmp;
         std::unique_ptr<CelFontInfo> mSmallTextFont, mBigTGoldFont;

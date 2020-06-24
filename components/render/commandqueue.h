@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <misc/assert.h>
+#include <optional>
 
 namespace Render
 {
@@ -48,7 +49,7 @@ namespace Render
         virtual void cmdDrawIndexed(size_t firstIndex, size_t vertexCount, Bindings& bindings);
         virtual void cmdDrawInstances(size_t firstVertex, size_t vertexCount, size_t instanceCount, Bindings& bindings);
         void cmdScissor(ScissorRect scissorRect) { mScissor = scissorRect; }
-        virtual void cmdClearFramebuffer(Color color, bool clearDepth, Framebuffer* nonDefaultFramebuffer = nullptr) = 0;
+        virtual void cmdClearFramebuffer(std::optional<Color> color, bool clearDepth, Framebuffer* nonDefaultFramebuffer = nullptr) = 0;
 
         virtual void cmdPresent() = 0;
 

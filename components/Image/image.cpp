@@ -2,27 +2,55 @@
 #include <SDL_image.h>
 #include <cstring>
 #include <faio/fafileobject.h>
+#include <misc/savePNG.h>
 #include <misc/stringops.h>
 
 // clang-format off
 #include <misc/disablewarn.h>
 #include "../../extern/jo_gif/jo_gif.cpp"
 #include <misc/enablewarn.h>
-#include <misc/savePNG.h>
 // clang-format on
 
-void Image::blitTo(Image& other, int32_t srcOffsetX, int32_t srcOffsetY, int32_t srcW, int32_t srcH, int32_t destOffsetX, int32_t destOffsetY) const
+Image::Image(int32_t x, int32_t y) : mData(x, y, Misc::Array2D<ByteColour>::InitType::Uninitialised)
+{
+    void* dataPtr = mData.data();
+    memset(dataPtr, 0, x * y * sizeof(ByteColour));
+}
+
+void Image::blitTo(Image& other,
+                   int32_t srcOffsetX,
+                   int32_t srcOffsetY,
+                   int32_t srcW,
+                   int32_t srcH,
+                   int32_t destOffsetX,
+                   int32_t destOffsetY,
+                   bool overwriteWithTransparent) const
 {
     release_assert(destOffsetX >= 0 && destOffsetY >= 0);
     release_assert(destOffsetX + srcW <= other.width() && destOffsetY + srcH <= other.height());
     release_assert(srcOffsetX + srcW <= this->width() && srcOffsetY + srcH <= this->height());
 
-    for (int32_t y = 0; y < srcH; y++)
+    if (overwriteWithTransparent)
     {
-        const ByteColour* src = &this->get(srcOffsetX, y + srcOffsetY);
-        ByteColour* dest = &other.get(destOffsetX, y + destOffsetY);
+        for (int32_t y = 0; y < srcH; y++)
+        {
+            const ByteColour* src = &this->get(srcOffsetX, y + srcOffsetY);
+            ByteColour* dest = &other.get(destOffsetX, y + destOffsetY);
 
-        memcpy(dest, src, sizeof(ByteColour) * srcW);
+            memcpy(dest, src, sizeof(ByteColour) * srcW);
+        }
+    }
+    else
+    {
+        for (int32_t y = 0; y < srcH; y++)
+        {
+            for (int32_t x = 0; x < srcW; x++)
+            {
+                const ByteColour& sourcePixel = this->get(srcOffsetX + x, srcOffsetY + y);
+                if (sourcePixel.a)
+                    other.get(destOffsetX + x, destOffsetY + y) = sourcePixel;
+            }
+        }
     }
 }
 
@@ -91,7 +119,7 @@ Image Image::loadFromFile(const std::string& path)
     return image;
 }
 
-std::pair<Image, Image::TrimmedData> Image::trimTransparentEdges() const
+Image::TrimmedData Image::calculateTrimTransparentEdges() const
 {
     bool isEmpty = true;
 
@@ -116,20 +144,16 @@ std::pair<Image, Image::TrimmedData> Image::trimTransparentEdges() const
         }
     }
 
-    Image::TrimmedData trimmedData;
-    trimmedData.originalWidth = width();
-    trimmedData.originalHeight = height();
-
     if (isEmpty)
-        return {Image(), trimmedData};
+        return TrimmedData();
 
-    Image imageTmp(right - left + 1, bottom - top + 1);
-    blitTo(imageTmp, left, top, imageTmp.width(), imageTmp.height(), 0, 0);
-
+    TrimmedData trimmedData;
+    trimmedData.trimmedWidth = right - left + 1;
+    trimmedData.trimmedHeight = bottom - top + 1;
     trimmedData.trimmedOffsetX = left;
     trimmedData.trimmedOffsetY = top;
 
-    return {std::move(imageTmp), trimmedData};
+    return trimmedData;
 }
 
 void Image::saveToGif(std::vector<Image> images, const std::string& path)
@@ -149,7 +173,7 @@ void Image::saveToGif(std::vector<Image> images, const std::string& path)
         if (image.width() != width || image.height() != height)
         {
             tmp = Image(width, height);
-            image.blitTo(tmp, 0, 0, std::min(width, image.width()), std::min(height, image.height()), 0, 0);
+            image.blitTo(tmp, 0, 0, std::min(width, image.width()), std::min(height, image.height()), 0, 0, true);
             useImage = &tmp;
         }
 
