@@ -1,6 +1,7 @@
 #pragma once
 #include "fa_nuklear.h"
 #include <array>
+#include <string>
 
 namespace DiabloExe
 {
