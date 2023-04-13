@@ -1,3 +1,14 @@
+# Project is Archived
+It was fun, but I'm archiving the project. More info here: https://github.com/wheybags/freeablo/issues/507
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
 [![Join the chat at https://gitter.im/freeablo/Lobby](https://badges.gitter.im/freeablo/Lobby.svg)](https://gitter.im/freeablo/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/wheybags/freeablo.svg?branch=master)](https://travis-ci.org/wheybags/freeablo) [![Build status](https://ci.appveyor.com/api/projects/status/g0jl334givrw5b0d/branch/master?svg=true)](https://ci.appveyor.com/project/wheybags/freeablo/branch/master)
 
 
