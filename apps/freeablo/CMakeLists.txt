@@ -148,6 +148,8 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fagui/npcs/pepindialog.h
     fagui/npcs/wirtdialog.cpp
     fagui/npcs/wirtdialog.h
+    fagui/console/console.cpp
+    fagui/console/console.h
 
     engine/threadmanager.h
     engine/threadmanager.cpp
@@ -176,7 +178,7 @@ add_library(freeablo_lib # split into a library so I can link to it from tests
     fasavegame/gameloader.h
     fasavegame/gameloader.cpp farender/levelrenderer.cpp farender/levelrenderer.h engine/debugsettings.h engine/debugsettings.cpp faworld/item/golditembase.cpp faworld/item/golditembase.h faworld/item/golditem.cpp faworld/item/golditem.h faworld/magiceffects/magiceffectbase.cpp faworld/magiceffects/magiceffectbase.h faworld/item/itemprefixorsuffixbase.cpp faworld/item/itemprefixorsuffixbase.h faworld/magiceffects/magiceffect.cpp faworld/magiceffects/magiceffect.h faworld/magiceffects/simplebuffdebuffeffect.cpp faworld/magiceffects/simplebuffdebuffeffect.h faworld/magiceffects/simplebuffdebuffeffectbase.cpp faworld/magiceffects/simplebuffdebuffeffectbase.h faworld/item/itemprefixorsuffix.cpp faworld/item/itemprefixorsuffix.h)
 
-target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input Random Image enet cxxopts fmt::fmt)
+target_link_libraries(freeablo_lib PUBLIC NuklearMisc Render Audio Serial Input Random Image enet cxxopts fmt::fmt Script)
 target_include_directories(freeablo_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(freeablo main.cpp)

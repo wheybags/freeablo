@@ -10,6 +10,7 @@
 #include "../faworld/playerbehaviour.h"
 #include "../faworld/spells.h"
 #include "../faworld/world.h"
+#include "console/console.h"
 #include "dialogmanager.h"
 #include "fa_nuklear.h"
 #include "menu/multiplayerconnecting.h"
@@ -29,6 +30,7 @@
 #include <misc/stringops.h>
 #include <random/random.h>
 #include <render/spritegroup.h>
+#include <script/luascript.h>
 #include <serial/textstream.h>
 #include <string>
 
@@ -57,24 +59,28 @@ namespace FAGui
                 return PanelPlacement::left;
             case PanelType::quests:
                 return PanelPlacement::left;
+            case PanelType::console:
+                return PanelPlacement::right;
         }
         return PanelPlacement::none;
     }
 
-    const FARender::SpriteLoader::SpriteDefinition& getBackgroundForPanel(PanelType type)
+    const FARender::SpriteLoader::SpriteDefinition* getBackgroundForPanel(PanelType type)
     {
         switch (type)
         {
             case PanelType::none:
                 invalid_enum(PanelType, type);
+            case PanelType::console:
+                return nullptr;
             case PanelType::inventory:
-                return FARender::Renderer::get()->mSpriteLoader.mGuiSprites.inventoryBackground;
+                return &FARender::Renderer::get()->mSpriteLoader.mGuiSprites.inventoryBackground;
             case PanelType::spells:
-                return FARender::Renderer::get()->mSpriteLoader.mGuiSprites.spellsBackground;
+                return &FARender::Renderer::get()->mSpriteLoader.mGuiSprites.spellsBackground;
             case PanelType::character:
-                return FARender::Renderer::get()->mSpriteLoader.mGuiSprites.characterBackground;
+                return &FARender::Renderer::get()->mSpriteLoader.mGuiSprites.characterBackground;
             case PanelType::quests:
-                return FARender::Renderer::get()->mSpriteLoader.mGuiSprites.questsBackground;
+                return &FARender::Renderer::get()->mSpriteLoader.mGuiSprites.questsBackground;
         }
 
         invalid_enum(PanelType, type);
@@ -94,6 +100,8 @@ namespace FAGui
                 return "character";
             case PanelType::quests:
                 return "quests";
+            case PanelType::console:
+                return "console";
         }
         return "";
     }
@@ -143,7 +151,7 @@ namespace FAGui
             anim->update();
     }
 
-    void GuiManager::drawPanel(nk_context* ctx, PanelType panelType, std::function<void(void)> op)
+    void GuiManager::drawPanel(nk_context* ctx, PanelType panelType, std::function<void(void)> op, int32_t panelW, int32_t panelH)
     {
         PanelPlacement placement = panelPlacementByType(panelType);
         bool shown = *getPanelAtLocation(placement) == panelType;
@@ -152,7 +160,15 @@ namespace FAGui
         if (!shown)
             return;
         auto renderer = FARender::Renderer::get();
-        auto invTex = renderer->mSpriteLoader.getSprite(getBackgroundForPanel(panelType));
+        const auto bgImg = getBackgroundForPanel(panelType);
+        Render::SpriteGroup* invTex = nullptr;
+        if (bgImg)
+        {
+            invTex = renderer->mSpriteLoader.getSprite(*bgImg);
+            panelW = invTex->getWidth();
+            panelH = invTex->getHeight();
+        }
+
         int32_t screenW, screenH;
         renderer->getWindowDimensions(screenW, screenH);
         struct nk_rect dims = nk_rect(
@@ -165,16 +181,24 @@ namespace FAGui
                     case PanelPlacement::left:
                         return 0;
                     case PanelPlacement::right:
-                        return screenW - invTex->getWidth();
+                        return screenW - panelW;
                 }
                 return 0;
             }(),
-            (screenH - 125 - invTex->getHeight()) / 2,
-            invTex->getWidth(),
-            invTex->getHeight());
+            (screenH - 125 - panelH) / 2,
+            panelW,
+            panelH);
         nk_flags flags = NK_WINDOW_NO_SCROLLBAR | NK_WINDOW_BACKGROUND;
 
-        nk_fa_begin_image_window(ctx, panelName(panelType), dims, flags, invTex->getNkImage(), op, false);
+        if (invTex)
+        {
+            nk_fa_begin_image_window(ctx, panelName(panelType), dims, flags, invTex->getNkImage(), op, false);
+        }
+
+        else
+        {
+            nk_fa_begin_window(ctx, panelName(panelType), dims, flags, op, false);
+        }
     }
 
     void GuiManager::triggerItem(const FAWorld::EquipTarget& target)
@@ -510,6 +534,37 @@ namespace FAGui
             }
             nk_layout_space_end(ctx);
         });
+    }
+
+    void GuiManager::consolePanel(nk_context* ctx)
+    {
+        auto c = Console::getInstance();
+        drawPanel(ctx,
+                  PanelType::console,
+                  [&]() {
+                      nk_layout_space_begin(ctx, NK_STATIC, 0, INT_MAX);
+                      nk_layout_space_push(ctx, nk_rect(5, 5, 490, 250));
+                      auto consoleFont = FARender::Renderer::get()->consoleFont();
+                      nk_style_push_font(ctx, consoleFont);
+                      nk_style_push_color(ctx, &ctx->style.text.color, getNkColor(TextColor::white));
+                      nk_edit_string(ctx, NK_EDIT_BOX, c->getBufferPtr(), c->getBufferLen(), c->getBuffer().length(), nk_filter_default);
+                      const int32_t height = consoleFont->height + 10;
+                      nk_layout_space_push(ctx, nk_rect(5, 270, 490, height));
+                      nk_flags active =
+                          nk_edit_string(ctx, NK_EDIT_FIELD | NK_EDIT_SIG_ENTER, c->getInput(), c->getInputLen(), c->getInputSize(), nk_filter_ascii);
+
+                      if (active & NK_EDIT_COMMITED)
+                      {
+                          c->inputCommited();
+                      }
+
+                      nk_style_pop_color(ctx);
+                      nk_style_pop_font(ctx);
+                      nk_layout_space_end(ctx);
+                      c->appendStdOut();
+                  },
+                  500,
+                  300);
     }
 
     void GuiManager::belt(nk_context* ctx)
@@ -891,6 +946,7 @@ namespace FAGui
             spellsPanel(ctx);
             questsPanel(ctx);
             characterPanel(ctx);
+            consolePanel(ctx);
             bottomMenu(ctx, hoverStatus);
             spellSelectionMenu(ctx);
 
@@ -901,7 +957,7 @@ namespace FAGui
             mMenuHandler->update(ctx);
         }
 
-        if (isModalDlgShown() || mMenuHandler->isActive())
+        if (isModalDlgShown() || mMenuHandler->isActive() || *getPanelAtLocation(PanelPlacement::right) == PanelType::console)
             Engine::EngineMain::get()->getLocalInputHandler()->blockInput();
         else
             Engine::EngineMain::get()->getLocalInputHandler()->unblockInput();
@@ -932,7 +988,7 @@ namespace FAGui
 
         // Can't use hotkeys when dialogs are open.
         // TODO: mGoldSplitTarget might be better as a standard dialog if possible?
-        if (mGoldSplitTarget || mDialogManager.hasDialog())
+        if (mGoldSplitTarget || mDialogManager.hasDialog() || *getPanelAtLocation(PanelPlacement::right) == PanelType::console)
             return false;
 
         return true;
@@ -961,6 +1017,11 @@ namespace FAGui
                 if (!hotkeysEnabled())
                     return;
                 togglePanel(PanelType::spells);
+                break;
+            case Engine::KeyboardInputAction::toggleConsole:
+                if (!hotkeysEnabled())
+                    return;
+                togglePanel(PanelType::console);
                 break;
             case Engine::KeyboardInputAction::toggleSpellSelection:
                 if (!hotkeysEnabled())

@@ -127,7 +127,7 @@ set_target_properties(Render PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Input
     input/hotkey.cpp
-    input/hotkey.h 
+    input/hotkey.h
     input/inputmanager.h
     input/keys.h
     input/sdl2backend.cpp)
@@ -184,9 +184,21 @@ add_library(NuklearMisc
     nuklearmisc/widgets.h
     nuklearmisc/standaloneguispritehandler.cpp
     nuklearmisc/standaloneguispritehandler.h
-        nuklearmisc/nukleardevice.cpp nuklearmisc/nukleardevice.h nuklearmisc/nuklearbuffer.h nuklearmisc/nuklearframedump.cpp nuklearmisc/nuklearframedump.h nuklearmisc/nuklearvertex.h)
+    nuklearmisc/nukleardevice.cpp
+    nuklearmisc/nukleardevice.h
+    nuklearmisc/nuklearbuffer.h
+    nuklearmisc/nuklearframedump.cpp
+    nuklearmisc/nuklearframedump.h
+    nuklearmisc/nuklearvertex.h)
 set_target_properties(NuklearMisc PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 target_link_libraries(NuklearMisc nuklear nativefiledialog Input Render)
+
+add_library(Script
+  script/luascript.cpp
+  script/luascript.h
+)
+target_link_libraries(Script lua LuaBridge Misc)
+set_target_properties(Script PROPERTIES COMPILE_FLAGS "${FA_COMPILER_FLAGS}")
 
 add_library(Image
         Image/image.h
